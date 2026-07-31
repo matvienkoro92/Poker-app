@@ -905,6 +905,15 @@ body.home-friend-news-modal-open {
   overflow: hidden;
 }
 
+[data-sng-home-banner] {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+[data-sng-home-banner][data-sng-home-banner-ready="1"] {
+  opacity: 1;
+}
+
 @media (max-width: 520px) {
   .home-friend-news-modal {
     align-items: stretch;

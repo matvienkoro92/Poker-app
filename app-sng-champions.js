@@ -1993,9 +1993,21 @@
     var normalizedHomeTitle = String(state.title || "").trim();
     var teamKnockoutTitle = state.status !== "draft" && /^1(?:ый|й)\s+командный\s+снг[-\s]?нокаут\s+баттл\s+два\s+туза$/i.test(normalizedHomeTitle);
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
-      banner.src = teamKnockoutTitle
+      var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=3"
         : "./assets/home-sng-champions-click-banner.webp?v=2";
+      banner.removeAttribute("data-sng-home-banner-ready");
+      function revealCurrentBanner() {
+        if (banner.getAttribute("src") !== nextSrc) return;
+        banner.setAttribute("data-sng-home-banner-ready", "1");
+      }
+      banner.onload = revealCurrentBanner;
+      banner.onerror = revealCurrentBanner;
+      if (banner.getAttribute("src") !== nextSrc) banner.setAttribute("src", nextSrc);
+      if (banner.complete) {
+        if (typeof banner.decode === "function") banner.decode().then(revealCurrentBanner).catch(revealCurrentBanner);
+        else revealCurrentBanner();
+      }
     });
     var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-sng-open], #sngChampionsOpen"));
     if (!buttons.length) return;

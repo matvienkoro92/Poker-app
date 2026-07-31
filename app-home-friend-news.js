@@ -456,6 +456,21 @@
     return normalized.replace(/[\uFE0E\uFE0F]/g, "").replace(/\s+/g, "");
   }
 
+  function nicknameMatchKeys(value) {
+    var exact = matchKey(value);
+    if (!exact) return [];
+    var relaxed = exact.replace(/[!！?？.,:;"'`~()\[\]{}<>«»]+$/g, "");
+    return relaxed && relaxed !== exact && relaxed.length >= 3 ? [exact, relaxed] : [exact];
+  }
+
+  function clubProfileForNick(value) {
+    var keys = nicknameMatchKeys(value);
+    for (var i = 0; i < keys.length; i += 1) {
+      if (clubProfileByNick[keys[i]]) return clubProfileByNick[keys[i]];
+    }
+    return null;
+  }
+
   function friendRatingNickCandidates(friend) {
     var seen = {};
     return [
@@ -650,12 +665,13 @@
     var byNick = {};
     (friends || []).forEach(function (friend) {
       friendRatingNickCandidates(friend).forEach(function (nick) {
-        var key = matchKey(nick);
-        if (key && !byNick[key]) byNick[key] = friend;
+        nicknameMatchKeys(nick).forEach(function (key) {
+          if (key && !byNick[key]) byNick[key] = friend;
+        });
       });
     });
     return (Array.isArray(snapshots && snapshots.__recentEvents) ? snapshots.__recentEvents : []).map(function (row) {
-      var friend = byNick[String(row && row.nickKey || "")];
+      var friend = nicknameMatchKeys(row && (row.nick || row.nickKey)).map(function (key) { return byNick[key]; }).find(Boolean);
       if (!friend) return null;
       var reward = Number(row && row.reward) || 0;
       var place = Number(row && row.place) || 0;
@@ -692,13 +708,14 @@
     var byNick = {};
     (friends || []).forEach(function (friend) {
       friendRatingNickCandidates(friend).forEach(function (nick) {
-        var key = matchKey(nick);
-        if (key && !byNick[key]) byNick[key] = friend;
+        nicknameMatchKeys(nick).forEach(function (key) {
+          if (key && !byNick[key]) byNick[key] = friend;
+        });
       });
     });
     var out = [];
     (Array.isArray(snapshots && snapshots.__recentEvents) ? snapshots.__recentEvents : []).forEach(function (row) {
-      var friend = byNick[String(row && row.nickKey || "")];
+      var friend = nicknameMatchKeys(row && (row.nick || row.nickKey)).map(function (key) { return byNick[key]; }).find(Boolean);
       if (!friend) return;
       var reward = Number(row && row.reward) || 0;
       var place = Number(row && row.place) || 0;
@@ -1240,15 +1257,21 @@
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
-    var avatar = String(row && row.actorAvatar || "").trim();
+    var linkedClubProfile = newsModalMode === "club" ? clubProfileForNick(row && row.actorNick) : null;
+    // In club news only an exact, public nickname mapping may open a profile.
+    // Snapshot actor ids can be stale, synthetic, or belong to another player.
+    var eventPlayerId = newsModalMode === "club"
+      ? String(linkedClubProfile && linkedClubProfile.id || "")
+      : String(row && row.actorId || "");
+    var avatar = String(linkedClubProfile && linkedClubProfile.avatar || row && row.actorAvatar || "").trim();
     var visual = avatar
       ? '<img class="home-friend-news__avatar" src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
       : eventIconSvg(row.type);
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
       : "";
-    var playerAttrs = !ticker && row && row.actorId
-      ? ' data-home-news-player-id="' + esc(row.actorId) + '"' +
+    var playerAttrs = !ticker && eventPlayerId
+      ? ' data-home-news-player-id="' + esc(eventPlayerId) + '"' +
         ' data-home-news-player-name="' + esc(row.actorNick || "Игрок") + '"' +
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
         ' role="button" tabindex="0"'
@@ -1605,7 +1628,7 @@
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerId) {
           var playerName = playerCard.getAttribute("data-home-news-player-name") || "Игрок";
-          var linkedProfile = clubProfileByNick[matchKey(playerName)];
+          var linkedProfile = clubProfileForNick(playerName);
           // Club event snapshots can contain a stale or mismatched actor id.
           // The visible poker nickname is the authoritative identity here.
           if (newsModalMode === "club" && linkedProfile && linkedProfile.id) {
@@ -1817,12 +1840,15 @@
     var sourceRows = clubNewsStaticRows();
     var allPlayers = Array.isArray(players) ? players.slice() : [];
     var knownNicks = {};
-    allPlayers.forEach(function (row) { knownNicks[matchKey(row && row.pokerPlusNickname)] = true; });
+    allPlayers.forEach(function (row) {
+      nicknameMatchKeys(row && row.pokerPlusNickname).forEach(function (key) { knownNicks[key] = true; });
+    });
     sourceRows.forEach(function (row) {
       var nick = String(row && row.nick || "").trim();
       var key = matchKey(nick);
-      if (!key || knownNicks[key]) return;
-      knownNicks[key] = true;
+      var aliases = nicknameMatchKeys(nick);
+      if (!key || aliases.some(function (alias) { return knownNicks[alias]; })) return;
+      aliases.forEach(function (alias) { knownNicks[alias] = true; });
       allPlayers.push({
         userId: "rating:" + key,
         pokerPlusNickname: nick,
@@ -1873,7 +1899,7 @@
     var tournamentDay = clubTournamentDayKey();
     var dailyRangeQuery = tournamentDay ? "&from=" + encodeURIComponent(tournamentDay) + "&to=" + encodeURIComponent(tournamentDay) : "";
     var request = Promise.all([
-      cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels", 5 * 60 * 1000, { cache: "default" })
+      cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels-v2", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [], failed: true }; }),
       cachedFetchJson(
         base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100" + dailyRangeQuery,
@@ -1888,16 +1914,24 @@
       }
       var players = (results[0] && Array.isArray(results[0].levelRows) ? results[0].levelRows : []).map(function (row) {
         return Object.assign({}, row, {
-          userId: row && (row.userId || row.accountId || row.dtId) || "",
+          userId: row && (row.profileId || row.userId || row.accountId || row.dtId) || "",
           pokerPlusNickname: row && (row.pokerPlusNickname || row.ratingNick || row.nickname || row.nick) || "",
           pokerPlusName: row && (row.pokerPlusName || row.name || row.displayName) || "",
         });
       });
       clubProfileByNick = {};
+      var ambiguousClubProfileNicks = {};
       players.forEach(function (row) {
-        var key = matchKey(row && row.pokerPlusNickname);
-        if (!key) return;
-        clubProfileByNick[key] = { id: friendId(row), avatar: friendAvatar(row) || clubNewsFallbackAvatar(key) };
+        var profile = { id: friendId(row), avatar: friendAvatar(row) || clubNewsFallbackAvatar(row && row.pokerPlusNickname) };
+        nicknameMatchKeys(row && row.pokerPlusNickname).forEach(function (key) {
+          if (!key || ambiguousClubProfileNicks[key]) return;
+          if (clubProfileByNick[key] && clubProfileByNick[key].id !== profile.id) {
+            delete clubProfileByNick[key];
+            ambiguousClubProfileNicks[key] = true;
+            return;
+          }
+          clubProfileByNick[key] = profile;
+        });
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var nextClubEvents = stableClubEvents(buildClubEventsFromRows(players, winners), preservedClubEvents);
