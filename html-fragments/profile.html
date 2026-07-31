@@ -35,9 +35,21 @@
                   </div>
                   <div class="chat-user-modal__title-block">
                     <div class="chat-user-modal__title-row">
-                      <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
                       <button type="button" class="profile-hero-card__edit-name profile-public-showcase__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
+                      <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
                       <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
+                      <div class="profile-public-showcase__title-preferences">
+                        <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
+                          <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
+                          <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
+                          <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
+                        </div>
+                        <div class="profile-hero-specialty" id="profileHeroSpecialty" role="group" aria-label="Специализация игрока">
+                          <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyMttBtn" data-profile-specialty="mtt" aria-pressed="false">МТТ</button>
+                          <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyCashBtn" data-profile-specialty="cash" aria-pressed="false">Кеш</button>
+                          <span class="profile-hero-specialty__feedback" id="profileSpecialtyFeedback" aria-live="polite"></span>
+                        </div>
+                      </div>
                     </div>
                     <div class="profile-public-showcase__details-row" id="profilePublicDetailsRow">
                       <span class="profile-public-showcase__specialty-badge" id="profilePublicSpecialtyBadge" hidden></span>
@@ -48,16 +60,6 @@
                 </div>
                 <div class="profile-public-showcase__self-actions" aria-label="Настройки своего профиля">
                     <div class="profile-public-showcase__identity-controls">
-                      <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
-                        <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
-                        <button type="button" class="profile-hero-gender__btn" data-profile-gender="female" aria-pressed="false">Ж</button>
-                        <span class="profile-hero-gender__feedback" id="profileHeroGenderFeedback" aria-live="polite"></span>
-                      </div>
-                      <div class="profile-hero-specialty" id="profileHeroSpecialty" role="group" aria-label="Специализация игрока">
-                        <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyMttBtn" data-profile-specialty="mtt" aria-pressed="false">МТТ</button>
-                        <button type="button" class="profile-hero-specialty__btn" id="profileSpecialtyCashBtn" data-profile-specialty="cash" aria-pressed="false">Кеш</button>
-                        <span class="profile-hero-specialty__feedback" id="profileSpecialtyFeedback" aria-live="polite"></span>
-                      </div>
                       <label class="profile-hero-birth" id="profileHeroBirthDate" aria-label="Дата рождения">
                         <span class="profile-hero-birth__label">ДР</span>
                         <input type="date" class="profile-hero-birth__input" id="profileBirthDateInput" min="1965-01-01" max="2010-12-31" aria-label="Дата рождения" />
@@ -119,6 +121,7 @@
                 </div>
               </div>
             </section>
+            <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
             <section class="profile-own-wall" id="profileOwnWall" data-profile-club-panel aria-labelledby="profileOwnWallTitle">
               <div class="chat-user-modal__news-heading">
                 <span id="profileOwnWallTitle">Стена</span>
@@ -128,6 +131,7 @@
                 <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-profile-wall-tab="tournaments">Турниры</button>
                 <button type="button" class="chat-user-modal__wall-tab" data-profile-wall-tab="personal">Личные записи <span id="profileOwnWallPersonalCount">(…)</span></button>
               </div>
+              <div class="chat-user-modal__news-list profile-own-wall__list" id="profileOwnWallList"></div>
               <form class="chat-user-modal__wall-composer" id="profileOwnWallComposer" hidden>
                 <textarea id="profileOwnWallText" maxlength="1500" rows="3" placeholder="Напишите что-нибудь на своей стене…"></textarea>
                 <input type="file" id="profileOwnWallImageInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
@@ -137,9 +141,7 @@
                   <button type="submit">Опубликовать</button>
                 </div>
               </form>
-              <div class="chat-user-modal__news-list profile-own-wall__list" id="profileOwnWallList"></div>
             </section>
-            <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
             <section class="profile-friends profile-friends--loading" id="profileFriendsPanel" data-profile-friends-panel aria-label="Друзья" aria-busy="true">
               <div class="profile-friends__head">
                 <span class="profile-friends__icon" aria-hidden="true">

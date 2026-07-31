@@ -778,6 +778,7 @@
       if (!displaced) return;
       rise.text += "; " + displaced.actorNick + " спустился на " +
         (displaced._ratingNewPlace ? displaced._ratingNewPlace + "-е место" : "позицию ниже топ-10");
+      rise.affectedActorNicks = [rise.actorNick, displaced.actorNick].filter(Boolean);
       rise.id += ":displaced:" + displaced.actorId + ":" + displaced._ratingOldPlace + ":" + displaced._ratingNewPlace;
       displaced._ratingPaired = true;
     });
@@ -796,6 +797,31 @@
     }).slice(0, MAX_EVENTS);
     writeJson(eventsKey, saved);
     return saved;
+  }
+
+  function clubTop10RatingEventsForFriends(friends) {
+    var friendNickKeys = {};
+    (friends || []).forEach(function (friend) {
+      friendRatingNickCandidates(friend).forEach(function (nick) {
+        nicknameMatchKeys(nick).forEach(function (key) {
+          if (key) friendNickKeys[key] = true;
+        });
+      });
+    });
+    return (Array.isArray(clubEvents) ? clubEvents : []).filter(function (row) {
+      if (!row || row.type !== "rating" || String(row.text || "").indexOf("топ-10") === -1) return false;
+      var actorNicks = Array.isArray(row.affectedActorNicks) && row.affectedActorNicks.length
+        ? row.affectedActorNicks
+        : [row.actorNick];
+      var directlyAffected = actorNicks.some(function (nick) {
+        return nicknameMatchKeys(nick).some(function (key) { return !!friendNickKeys[key]; });
+      });
+      if (directlyAffected) return true;
+      var textKey = matchKey(row.text);
+      return Object.keys(friendNickKeys).some(function (key) {
+        return key.length >= 3 && textKey.indexOf(key) !== -1;
+      });
+    });
   }
 
   function collectTournamentEvents(friends, snapshots) {
@@ -1386,7 +1412,8 @@
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
       : "";
     var canResolveClubPlayer = newsModalMode === "club" && !!String(row && row.actorNick || "").trim();
-    var playerAttrs = !ticker && (eventPlayerId || canResolveClubPlayer)
+    var canOpenProfile = !ticker && !!(eventPlayerId || canResolveClubPlayer);
+    var playerAttrs = canOpenProfile
       ? ' data-home-news-player-id="' + esc(eventPlayerId) + '"' +
         ' data-home-news-player-name="' + esc(row.actorNick || "Игрок") + '"' +
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
@@ -1402,7 +1429,9 @@
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(row.text) : "<strong>" + eventTextHtml(row.text) + "</strong>" +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
-        "<small>" + esc(timeLabel) + "</small>" + eventFeedbackHtml(row)) +
+        "<small>" + esc(timeLabel) + "</small>" +
+        (canOpenProfile ? '<span class="home-friend-news-modal__profile-cue">Открыть профиль <b aria-hidden="true">›</b></span>' : "") +
+        eventFeedbackHtml(row)) +
       "</span></span>";
   }
 
@@ -1539,7 +1568,7 @@
     }
     var snapshot = Array.isArray(rows) ? rows.slice() : [];
     list.innerHTML = snapshot[0] && snapshot[0].id === "empty"
-      ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
+      ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : modalEventsHtml(snapshot);
   }
 
@@ -1590,6 +1619,9 @@
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
     loadActiveModalFeedback(events);
+    // Refresh on every open so a friend's newly published wall post appears
+    // immediately instead of waiting for the five-minute background update.
+    load();
   }
 
   function openClubModal() {
@@ -1971,6 +2003,7 @@
       var nextEvents = attachFriendAvatars(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         personalPostEvents(friends, results[7] && results[7].posts),
+        clubTop10RatingEventsForFriends(friends),
         collectTournamentEvents(friends, tournamentSnapshots),
         recentTournamentEvents(friends, tournamentSnapshots),
         winnerEvents(friends, winners),

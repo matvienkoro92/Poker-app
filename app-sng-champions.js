@@ -2009,6 +2009,9 @@
         else revealCurrentBanner();
       }
     });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-completed]"), function (badge) {
+      badge.hidden = !(teamKnockoutTitle && state.status === "completed");
+    });
     var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-sng-open], #sngChampionsOpen"));
     if (!buttons.length) return;
     var approved = (state.counts && state.counts.approved) || 0;

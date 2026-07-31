@@ -524,6 +524,23 @@ if (chatUserModalEl) {
     };
     return icons[type] || icons.achievement;
   }
+  function chatUserModalWallAvatarUrl() {
+    try {
+      if (chatUserModalRatingNick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
+        var art = window.pokerGetSummerRatingPlayerArt(chatUserModalRatingNick);
+        if (art && art.src) return String(art.src);
+      }
+    } catch (eChatUserWallRatingAvatar) {}
+    try {
+      if (modalRatingArtImg &&
+          !modalRatingArtImg.classList.contains("chat-user-modal__rating-art-img--avatar-fallback") &&
+          !modalRatingArtImg.classList.contains("chat-user-modal__rating-art-img--default-hero")) {
+        var artSrc = String(modalRatingArtImg.currentSrc || modalRatingArtImg.src || "").trim();
+        if (artSrc) return artSrc;
+      }
+    } catch (eChatUserWallCurrentArt) {}
+    return String(chatUserModalHeroAvatarUrl || "").trim();
+  }
   function chatUserModalNewsItem(row) {
     var type = String(row && row.type || "achievement");
     var rowId = String(row && row.id || "");
@@ -576,6 +593,7 @@ if (chatUserModalEl) {
             replyQuote + '<p>' + escapeHtml(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
         }).join("")
       : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
+    var wallAvatar = type === "personal" ? chatUserModalWallAvatarUrl() : "";
     var wallControls = type === "personal" && chatUserModalWallCanManage
       ? '<span class="chat-user-modal__wall-controls">' +
           '<button type="button" data-wall-edit="' + escapeHtml(row.postId || "") + '">Редактировать</button>' +
@@ -589,8 +607,8 @@ if (chatUserModalEl) {
       : "";
     return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) +
       '" data-profile-event-id="' + escapeHtml(rowId) + '"' + playerStyle + ">" +
-      '<span class="chat-user-modal__news-icon' + (type === "personal" && chatUserModalHeroAvatarUrl ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
-        (type === "personal" && chatUserModalHeroAvatarUrl ? '<img src="' + escapeHtml(chatUserModalHeroAvatarUrl) + '" alt="">' : chatUserModalNewsIcon(type)) + "</span>" +
+      '<span class="chat-user-modal__news-icon' + (wallAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
+        (wallAvatar ? '<img src="' + escapeHtml(wallAvatar) + '" alt="">' : chatUserModalNewsIcon(type)) + "</span>" +
       '<span class="chat-user-modal__news-copy">' + pinBadge + '<strong>' + escapeHtml(row && row.text || "") + "</strong>" +
         (row && row.image ? '<img class="chat-user-modal__wall-image" src="' + escapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (row && row.editedAt ? '<small class="chat-user-modal__wall-edited">изменено</small>' : "") + wallControls +
@@ -669,6 +687,9 @@ if (chatUserModalEl) {
     return chatUserModalWallTab === "personal" ? chatUserModalWallRows() : chatUserModalNewsRows;
   }
   function syncChatUserModalWallTabs() {
+    document.querySelectorAll("[data-chat-user-wall-personal-count]").forEach(function (count) {
+      count.textContent = "(" + chatUserModalWallPosts.length + ")";
+    });
     document.querySelectorAll("[data-wall-tab]").forEach(function (button) {
       var active = button.getAttribute("data-wall-tab") === chatUserModalWallTab;
       button.classList.toggle("chat-user-modal__wall-tab--active", active);

@@ -561,6 +561,35 @@ html[data-theme="gold"] body[data-view="home"] {
   font-size: 11px;
 }
 
+.home-friend-news-modal__profile-cue {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  margin-top: 7px;
+  padding: 0 9px;
+  align-items: center;
+  gap: 5px;
+  color: var(--friend-news-accent);
+  background: rgba(var(--friend-news-rgb), 0.14);
+  border: 1px solid rgba(var(--friend-news-rgb), 0.42);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(var(--friend-news-rgb), 0.12);
+}
+
+.home-friend-news-modal__profile-cue b {
+  font-size: 18px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.home-friend-news-modal__item[data-home-news-player-id]:active .home-friend-news-modal__profile-cue {
+  background: rgba(var(--friend-news-rgb), 0.25);
+}
+
 .home-friend-news-modal__copy .chat-user-modal__news-actions {
   width: 100%;
   margin-top: 9px;
@@ -2938,6 +2967,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 }
 
 .app.app--view-home .home-sng-champions-image-link {
+  position: relative !important;
   display: block !important;
   aspect-ratio: 3 / 1 !important;
   height: auto !important;
@@ -2948,6 +2978,29 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   outline: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+.app.app--view-home .home-sng-champions-action__completed-badge {
+  position: absolute;
+  z-index: 4;
+  top: clamp(10px, 2.4vw, 22px);
+  right: clamp(10px, 2.4vw, 22px);
+  padding: clamp(6px, 1.5vw, 11px) clamp(12px, 2.8vw, 24px);
+  border: 2px solid #ffe5a0;
+  border-radius: 999px;
+  color: #2b1200;
+  background: linear-gradient(180deg, #fff0a5 0%, #ffad24 55%, #e76500 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.52), 0 0 22px rgba(255, 139, 18, 0.55);
+  font-size: clamp(11px, 2.8vw, 22px);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 0 rgba(255, 245, 195, 0.65);
+  transform: rotate(2deg);
+}
+
+.app.app--view-home .home-sng-champions-action__completed-badge[hidden] {
+  display: none !important;
 }
 
 .app.app--view-home .home-sng-champions-image-link img {

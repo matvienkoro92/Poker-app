@@ -120,7 +120,7 @@
             </div>
             <div class="chat-user-modal__wall-tabs" role="tablist" aria-label="Разделы стены">
               <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-wall-tab="tournaments">Турниры</button>
-              <button type="button" class="chat-user-modal__wall-tab" data-wall-tab="personal">Личные записи</button>
+              <button type="button" class="chat-user-modal__wall-tab" data-wall-tab="personal">Личные записи <span data-chat-user-wall-personal-count>(…)</span></button>
             </div>
             <form class="chat-user-modal__wall-composer" id="chatUserModalWallComposer" hidden>
               <textarea id="chatUserModalWallText" maxlength="1500" rows="3" placeholder="Напишите что-нибудь на своей стене…"></textarea>
@@ -138,7 +138,7 @@
               </header>
               <div class="chat-user-modal__wall-tabs chat-user-modal__wall-tabs--dialog" role="tablist" aria-label="Разделы стены">
                 <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-wall-tab="tournaments">Турниры</button>
-                <button type="button" class="chat-user-modal__wall-tab" data-wall-tab="personal">Личные записи</button>
+                <button type="button" class="chat-user-modal__wall-tab" data-wall-tab="personal">Личные записи <span data-chat-user-wall-personal-count>(…)</span></button>
               </div>
               <div class="chat-user-modal__news-full-list" id="chatUserModalNewsFullList"></div>
             </section>

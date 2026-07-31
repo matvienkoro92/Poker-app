@@ -3056,6 +3056,13 @@ body.profile-avatar-choice-open {
     url("./assets/chat-profile-hero-bg-21.webp") 54% 54% / cover no-repeat;
 }
 
+/* Do not reuse the profile scene pseudo-element as the loading spinner. */
+.view[data-view="profile"] .profile-public-showcase--loading .profile-public-showcase__hero.chat-user-modal__hero::before {
+  display: none;
+  animation: none;
+  background: none;
+}
+
 .view[data-view="profile"] .profile-public-showcase__hero.chat-user-modal__hero > * {
   position: relative;
   z-index: 1;
@@ -4262,6 +4269,84 @@ body.profile-avatar-choice-open {
     gap: 5px !important;
     width: auto !important;
   }
+}
+
+/* Put the compact identity choices beside the name; keep birth date and city
+   together on the row below. */
+.view[data-view="profile"] .profile-public-showcase__title-preferences {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.view[data-view="profile"] .profile-public-showcase__title-preferences .profile-hero-gender {
+  margin: 0 !important;
+}
+
+@media (min-width: 701px) and (max-width: 1000px) {
+  .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+    grid-template-rows: auto auto !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__self-actions {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    justify-self: start !important;
+    justify-items: start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: -8px !important;
+    transform: none !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
+    flex: 0 0 auto !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__self-actions #profileHeroCity.profile-hero-city {
+    flex: 0 1 300px !important;
+    width: min(300px, 100%) !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+
+/* Compact tournament winnings summary above the wall. */
+.view[data-view="profile"] .profile-achievements-showcase__rating-total {
+  margin: 16px 0 10px !important;
+}
+
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab {
+  grid-template-columns: clamp(54px, 8vw, 76px) minmax(0, 1fr) !important;
+  min-height: clamp(82px, 12vw, 112px) !important;
+  gap: clamp(10px, 2vw, 18px) !important;
+  padding: clamp(10px, 1.8vw, 16px) clamp(12px, 2.2vw, 20px) !important;
+  border-radius: clamp(15px, 2.2vw, 20px) !important;
+}
+
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab::after {
+  font-size: clamp(40px, 7vw, 58px) !important;
+}
+
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-main {
+  font-size: clamp(15px, 2.5vw, 22px) !important;
+  line-height: 1.05 !important;
+}
+
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-sum {
+  margin-top: 5px !important;
+  font-size: clamp(28px, 5.4vw, 46px) !important;
+}
+
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab-more {
+  padding-bottom: 3px !important;
+  font-size: clamp(13px, 2.2vw, 18px) !important;
 }
 
 /* Override the legacy full-width scene after the responsive cascade. */
