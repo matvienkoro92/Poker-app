@@ -1187,19 +1187,22 @@
         ? '<blockquote class="home-news-comment-quote"><strong>' + esc(comment.replyTo.fromName || "Игрок") +
           '</strong><span>' + esc(String(comment.replyTo.text || "").slice(0, 160)) + "</span></blockquote>"
         : "";
-      return '<div class="chat-user-modal__news-comment" data-home-comment-id="' + esc(comment.id || "") + '">' +
+      return '<div class="chat-user-modal__news-comment' + (comment.pending ? " chat-user-modal__news-comment--pending" : "") +
+        '" data-home-comment-id="' + esc(comment.id || "") + '">' +
         '<button type="button" class="chat-user-modal__news-comment-author" data-home-news-comment-author' +
           ' data-user-id="' + esc(profileId) + '" data-user-name="' + esc(name) +
           '" data-user-avatar="' + esc(avatar) + '">' +
           (avatar ? '<img src="' + esc(avatar) + '" alt="">' :
             '<span aria-hidden="true">' + esc((name || "И").charAt(0).toUpperCase()) + "</span>") +
           "<strong>" + esc(name) + "</strong></button>" +
-        (comment.isMine ? '<button type="button" class="chat-user-modal__news-comment-delete" data-home-comment-delete="' +
+        (comment.isMine && !comment.pending ? '<button type="button" class="chat-user-modal__news-comment-delete" data-home-comment-delete="' +
           esc(comment.id || "") + '" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>' : "") +
         replyQuote + "<p>" + esc(comment.text || "") +
+        (comment.pending ? '<small class="home-news-comment-pending-label">Отправка…</small>' : "") +
         '<span class="chat-user-modal__comment-reactions">' + commentReactionHtml +
+          (comment.pending ? "" :
           '<button type="button" class="home-news-comment-reply-btn" data-home-comment-reply="' + esc(comment.id || "") +
-          '" aria-label="Ответить на комментарий">↩ Ответить</button>' +
+          '" aria-label="Ответить на комментарий">↩ Ответить</button>') +
         "</span></div>";
     }).join("") : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     var replyPreview = activeReply
@@ -1668,8 +1671,34 @@
         if (!eventId || !text) return;
         var submit = form.querySelector('button[type="submit"]');
         if (submit) submit.disabled = true;
+        var previousFeedback = eventFeedback[eventId] || {};
+        var previousReply = eventCommentReplies[eventId] || null;
         var payload = { action: "comment", eventId: eventId, text: text };
-        if (eventCommentReplies[eventId]) payload.replyTo = { id: eventCommentReplies[eventId].id };
+        if (previousReply) payload.replyTo = { id: previousReply.id };
+        var optimisticComment = {
+          id: "pending:" + Date.now().toString(36),
+          author: "Вы",
+          text: text,
+          at: new Date().toISOString(),
+          isMine: true,
+          pending: true,
+        };
+        if (previousReply) {
+          optimisticComment.replyTo = {
+            id: previousReply.id,
+            fromName: previousReply.fromName,
+            text: previousReply.text,
+          };
+        }
+        var previousComments = Array.isArray(previousFeedback.comments) ? previousFeedback.comments : [];
+        eventFeedback[eventId] = Object.assign({}, previousFeedback, {
+          comments: previousComments.concat([optimisticComment]),
+          commentCount: previousComments.length + 1,
+        });
+        eventCommentsOpen[eventId] = true;
+        delete eventCommentReplies[eventId];
+        delete eventCommentDrafts[eventId];
+        renderModalList(activeModalEvents());
         feedbackRequest(payload).then(function (data) {
           eventFeedback[eventId] = data.feedback || {};
           eventCommentsOpen[eventId] = true;
@@ -1677,7 +1706,10 @@
           delete eventCommentDrafts[eventId];
           renderModalList(activeModalEvents());
         }).catch(function (error) {
-          if (submit) submit.disabled = false;
+          eventFeedback[eventId] = previousFeedback;
+          eventCommentDrafts[eventId] = text;
+          if (previousReply) eventCommentReplies[eventId] = previousReply;
+          renderModalList(activeModalEvents());
           if (typeof alertText === "function") alertText(error.message || "Не удалось отправить комментарий");
         });
       });

@@ -709,10 +709,10 @@ if (chatUserModalEl) {
       });
     });
   }
-  function loadChatUserModalWall(seq) {
+  function loadChatUserModalWall(seq, targetUserId) {
     return chatUserModalWallRequest({
       action: "list",
-      targetUserId: chatUserModalUserId,
+      targetUserId: targetUserId || chatUserModalUserId,
     }).then(function (data) {
       if (seq !== chatUserModalNewsSeq) return;
       chatUserModalWallPosts = Array.isArray(data.posts) ? data.posts : [];
@@ -758,7 +758,7 @@ if (chatUserModalEl) {
   function loadChatUserModalNews(identity) {
     var seq = ++chatUserModalNewsSeq;
     showChatUserModalNewsLoading();
-    loadChatUserModalWall(seq);
+    loadChatUserModalWall(seq, identity && (identity.accountId || identity.userId));
     if (typeof window.pokerGetPlayerNews !== "function") {
       renderChatUserModalWall();
       return;
@@ -3137,6 +3137,9 @@ if (chatUserModalEl) {
       modalBirthAdmin.removeAttribute("data-target-user-id");
       modalBirthAdmin.removeAttribute("data-open-user-id");
     }
+    // Open the prepared profile shell immediately. Network data, wall rows and
+    // rating artwork continue loading inside it instead of blocking navigation.
+    revealChatUserModal(openSeq);
     var initialBlockPromise = openingSelfProfile ? Promise.resolve(false) : refreshChatUserModalBlockState(id);
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")
@@ -3168,6 +3171,7 @@ if (chatUserModalEl) {
               syncChatUserModalRatingTab(freshRatingNick);
               loadChatUserModalNews({
                 userId: id,
+                accountId: data && (data.accountId || data.dtId || data.userId),
                 ratingNick: freshRatingNick,
                 displayName: userName,
                 p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),
@@ -3210,6 +3214,7 @@ if (chatUserModalEl) {
         syncChatUserModalRatingTab(ratingNick);
         loadChatUserModalNews({
           userId: id,
+          accountId: data && (data.accountId || data.dtId || data.userId),
           ratingNick: ratingNick,
           displayName: userName,
           p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),
@@ -3277,9 +3282,7 @@ if (chatUserModalEl) {
         if (typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(null);
       });
     Promise.resolve(initialBlockPromise).catch(function () {});
-    profilePromise.catch(function () {}).then(function () {
-      revealChatUserModal(openSeq);
-    });
+    profilePromise.catch(function () {});
   }
   window.openChatUserModalById = openChatUserModalById;
   if (modalBackdrop) modalBackdrop.addEventListener("click", closeChatUserModal);

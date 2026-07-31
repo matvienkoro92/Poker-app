@@ -360,6 +360,18 @@ html[data-theme="gold"] body[data-view="home"] {
   animation: home-news-profile-loading-spin 0.75s linear infinite;
 }
 
+.chat-user-modal__news-comment--pending {
+  opacity: 0.72;
+}
+
+.home-news-comment-pending-label {
+  display: block;
+  margin-top: 7px;
+  color: #8fa4bc;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 @keyframes home-news-profile-loading-spin {
   to { transform: rotate(360deg); }
 }
@@ -671,11 +683,51 @@ html[data-theme="gold"] body[data-view="home"] {
   box-sizing: border-box;
 }
 
+.home-friend-news-modal .chat-user-modal__news-comments-list {
+  gap: 4px;
+}
+
+.home-friend-news-modal .chat-user-modal__news-comment {
+  padding: 6px 8px;
+  border-radius: 9px;
+}
+
+.home-friend-news-modal .chat-user-modal__news-comment-author {
+  min-height: 26px;
+  gap: 6px;
+}
+
+.home-friend-news-modal .chat-user-modal__news-comment-author img,
+.home-friend-news-modal .chat-user-modal__news-comment-author > span {
+  width: 25px;
+  height: 25px;
+  flex-basis: 25px;
+}
+
+.home-friend-news-modal .chat-user-modal__news-comment p {
+  margin: 2px 30px 0 31px;
+  line-height: 1.25;
+}
+
+.home-friend-news-modal .chat-user-modal__comment-reactions {
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.home-friend-news-modal .chat-user-modal__news-comment-delete {
+  top: 7px;
+  right: 7px;
+  width: 27px;
+  height: 27px;
+  font-size: 20px;
+  line-height: 24px;
+}
+
 .home-news-comment-quote {
   display: grid;
   gap: 2px;
-  margin: 7px 0 2px 38px;
-  padding: 6px 9px;
+  margin: 4px 0 2px 31px;
+  padding: 4px 7px;
   border-left: 3px solid var(--friend-news-accent);
   border-radius: 7px;
   background: rgba(7, 13, 22, 0.56);
@@ -696,9 +748,9 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .home-friend-news-modal .home-news-comment-reply-btn {
-  min-height: 26px;
-  margin-left: 4px;
-  padding: 0 8px;
+  min-height: 22px;
+  margin-left: 2px;
+  padding: 0 6px;
   border: 0;
   border-radius: 8px;
   background: transparent;
