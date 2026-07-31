@@ -33,11 +33,18 @@
     { accent: "#7fa9ff", rgb: "127, 169, 255" },
   ];
 
+  function isUndatedTournamentSnapshotEvent(row) {
+    var id = String(row && row.id || "");
+    return /^achievement:(?:bigWins50|bigWins100|firstPlaces|top10Finishes|seasonCups|raffleWins|luckyMonths|millionaire):/.test(id) ||
+      /^rating:league[12]:/.test(id);
+  }
+
   function readRenderedEventsCache() {
     try {
       var rows = JSON.parse(sessionStorage.getItem(RENDERED_EVENTS_CACHE_KEY) || "[]");
       return (Array.isArray(rows) ? rows : []).filter(function (row) {
-        return row && row.id && (row.type === "birthday" || isRecentEvent(row.at));
+        return row && row.id && !isUndatedTournamentSnapshotEvent(row) &&
+          (row.type === "birthday" || isRecentEvent(row.at));
       }).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
@@ -66,7 +73,8 @@
       var stored = JSON.parse(sessionStorage.getItem(PLAYER_EVENTS_CACHE_PREFIX + key) || "null");
       if (!stored || !Array.isArray(stored.rows)) return [];
       return stored.rows.filter(function (row) {
-        return row && row.id && (row.type === "birthday" || isRecentEvent(row.at));
+        return row && row.id && !isUndatedTournamentSnapshotEvent(row) &&
+          (row.type === "birthday" || isRecentEvent(row.at));
       }).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
@@ -383,68 +391,18 @@
   }
 
   function collectTournamentEvents(friends, snapshots) {
-    var previous = readJson(TOURNAMENT_SNAPSHOTS_KEY, null);
     var next = {};
-    var savedEvents = readJson(GENERATED_EVENTS_KEY, []).filter(function (row) {
-      return String(row && row.id || "").indexOf("achievement:totalReward:") !== 0;
-    });
     (friends || []).forEach(function (friend) {
       var id = friendId(friend);
       var current = friendSnapshot(friend, snapshots);
       if (!id || !current) return;
       next[id] = current;
-      var before = previous && previous[id];
-      if (!before) return;
-      [
-        { key: "bigWins50", title: "оформил новый занос 50–99К" },
-        { key: "bigWins100", title: "оформил новый занос от 100К" },
-        { key: "firstPlaces", title: "одержал новую победу в турнире" },
-        { key: "top10Finishes", title: "получил новую ачивку «Топ-10 рейтинга»" },
-        { key: "seasonCups", title: "получил новый сезонный кубок" },
-        { key: "raffleWins", title: "продвинулся в ачивке «Золотой билет»" },
-        { key: "luckyMonths", title: "получил новую ачивку «Счастливчик месяца»" },
-      ].forEach(function (metric) {
-        if (!Object.prototype.hasOwnProperty.call(before, metric.key)) return;
-        var delta = Number(current[metric.key]) - Number(before[metric.key]);
-        if (delta <= 0) return;
-        savedEvents.unshift({
-          id: "achievement:" + metric.key + ":" + id + ":" + Number(current[metric.key]),
-          type: "achievement",
-          icon: "◆",
-          text: friendName(friend) + " " + metric.title + (delta > 1 ? " (+" + delta + ")" : ""),
-          at: new Date().toISOString(),
-          target: "winter-rating",
-        });
-      });
-      var oldMillionaireTier = Number(before.millionaireTier) || 0;
-      var newMillionaireTier = Number(current.millionaireTier) || 0;
-      if (Object.prototype.hasOwnProperty.call(before, "millionaireTier") && newMillionaireTier > oldMillionaireTier) {
-        savedEvents.unshift({
-          id: "achievement:millionaire:" + id + ":" + newMillionaireTier,
-          type: "achievement",
-          icon: "◆",
-          text: friendName(friend) + " открыл " + newMillionaireTier + " уровень ачивки «Миллионер клуба»",
-          at: new Date().toISOString(),
-          target: "winter-rating",
-        });
-      }
-      [1, 2].forEach(function (league) {
-        var key = league === 1 ? "league1Place" : "league2Place";
-        var oldPlace = Number(before[key]) || 0;
-        var newPlace = Number(current[key]) || 0;
-        if (!oldPlace || !newPlace || newPlace >= oldPlace) return;
-        savedEvents.unshift({
-          id: "rating:league" + league + ":" + id + ":" + newPlace,
-          type: "rating",
-          icon: "▲",
-          text: friendName(friend) + " поднялся в Лиге " + league + ": " + oldPlace + " → " + newPlace + " место",
-          at: new Date().toISOString(),
-          target: "winter-rating",
-        });
-      });
     });
     writeJson(TOURNAMENT_SNAPSHOTS_KEY, next);
-    return saveGeneratedEvents(savedEvents);
+    return saveGeneratedEvents(readJson(GENERATED_EVENTS_KEY, []).filter(function (row) {
+      return !isUndatedTournamentSnapshotEvent(row) &&
+        String(row && row.id || "").indexOf("achievement:totalReward:") !== 0;
+    }));
   }
 
   function recentTournamentEvents(friends, snapshots) {
