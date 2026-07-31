@@ -73,7 +73,7 @@ html[data-theme="gold"] body[data-view="home"] {
   overflow: hidden;
   color: #e8eef8;
   background:
-    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.18), rgba(var(--friend-news-rgb), 0.08) 54%, rgba(var(--friend-news-rgb), 0.035)),
+    linear-gradient(rgba(var(--friend-news-rgb), 0.18), rgba(var(--friend-news-rgb), 0.18)),
     #151c26;
   border: 1px solid rgba(var(--friend-news-rgb), 0.34);
   border-radius: 15px;
@@ -362,7 +362,7 @@ html[data-theme="gold"] body[data-view="home"] {
   padding: 9px 6px;
   border-bottom: 1px solid rgba(142, 160, 184, 0.12);
   background:
-    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.18), rgba(var(--friend-news-rgb), 0.08) 54%, rgba(var(--friend-news-rgb), 0.035)),
+    linear-gradient(rgba(var(--friend-news-rgb), 0.18), rgba(var(--friend-news-rgb), 0.18)),
     #151c26;
   box-shadow: inset 3px 0 0 rgba(var(--friend-news-rgb), 0.66);
 }
