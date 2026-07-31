@@ -26,7 +26,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v1:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v2";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v3";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
@@ -78,7 +78,7 @@
     try {
       var rows = JSON.parse(sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]");
       return (Array.isArray(rows) ? rows : []).filter(function (row) {
-        return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isPreviousCalendarDay(row.at);
+        return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isCurrentClubEvent(row);
       }).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
@@ -233,9 +233,9 @@
     var homeShortcuts = document.querySelector(".home-daily-shortcuts");
     if (homeShortcuts && !el("homeClubNews")) {
       homeShortcuts.insertAdjacentHTML("afterend",
-        '<section class="home-friend-news home-club-news" id="homeClubNews" aria-label="Новости клуба за вчера">' +
+        '<section class="home-friend-news home-club-news" id="homeClubNews" aria-label="Новости клуба">' +
           '<button type="button" class="home-friend-news__ticker home-club-news__ticker" id="homeClubNewsOpen">' +
-            '<span class="home-friend-news__label">Новости клуба · вчера</span>' +
+            '<span class="home-friend-news__label">Новости клуба · итоги</span>' +
             '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeClubNewsTrack" aria-live="polite"></span></span>' +
             '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
           "</button>" +
@@ -443,6 +443,28 @@
     var now = new Date();
     var previous = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
     return eventDayKey(date) === eventDayKey(previous);
+  }
+
+  function clubTournamentDayKey() {
+    var data = window.POKER_CLUB_NEWS_DATA || {};
+    var match = String(data.latestDate || "").match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    return match ? match[3] + "-" + match[2] + "-" + match[1] : "";
+  }
+
+  function isDailyClubEvent(row) {
+    return String(row && row.id || "").indexOf("daily:") === 0;
+  }
+
+  function isCurrentClubEvent(row) {
+    if (!row || !row.at) return false;
+    if (isDailyClubEvent(row)) return isPreviousCalendarDay(row.at);
+    var tournamentDay = clubTournamentDayKey();
+    return tournamentDay ? eventDayKey(row.at) === tournamentDay : isRecentEvent(row.at);
+  }
+
+  function compareClubEvents(a, b) {
+    var sourceOrder = Number(isDailyClubEvent(a)) - Number(isDailyClubEvent(b));
+    return sourceOrder || eventTime(b && b.at) - eventTime(a && a.at);
   }
 
   function eventDateLabel(value, includeYear) {
@@ -1253,8 +1275,8 @@
     var title = el("homeFriendNewsModalTitle");
     var eyebrow = el("homeFriendNewsModalEyebrow");
     var modal = el("homeFriendNewsModal");
-    if (title) title.textContent = newsModalMode === "club" ? "Новости клуба за вчера" : "Новости друзей";
-    if (eyebrow) eyebrow.textContent = newsModalMode === "club" ? "Клуб · события дня" : "Друзья и клуб";
+    if (title) title.textContent = newsModalMode === "club" ? "Новости клуба" : "Новости друзей";
+    if (eyebrow) eyebrow.textContent = newsModalMode === "club" ? "Клуб · итоги игровых дней" : "Друзья и клуб";
     if (modal) modal.classList.toggle("home-friend-news-modal--club", newsModalMode === "club");
   }
 
@@ -1624,30 +1646,22 @@
       ),
       allPlayers
     ).filter(function (row) {
-      return row && isPreviousCalendarDay(row.at);
-    }).sort(function (a, b) {
-      var aDaily = String(a && a.id || "").indexOf("daily:") === 0 ? 1 : 0;
-      var bDaily = String(b && b.id || "").indexOf("daily:") === 0 ? 1 : 0;
-      return aDaily - bDaily || eventTime(b && b.at) - eventTime(a && a.at);
-    }).filter(function (row, index, rows) {
+      return isCurrentClubEvent(row);
+    }).sort(compareClubEvents).filter(function (row, index, rows) {
       return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
     }).slice(0, MAX_EVENTS);
   }
 
   function stableClubEvents(nextRows, previousRows) {
     var rows = (Array.isArray(nextRows) ? nextRows : []).filter(function (row) {
-      return row && isPreviousCalendarDay(row.at);
+      return isCurrentClubEvent(row);
     });
     (Array.isArray(previousRows) ? previousRows : []).forEach(function (row) {
-      if (!row || String(row.id || "").indexOf("daily:") !== 0 || !isPreviousCalendarDay(row.at)) return;
+      if (!isDailyClubEvent(row) || !isCurrentClubEvent(row)) return;
       if (/\b50\s*(?:₽|р\.?|руб)/i.test(String(row.text || ""))) return;
       if (!rows.some(function (candidate) { return candidate && candidate.id === row.id; })) rows.push(row);
     });
-    return rows.sort(function (a, b) {
-      var aDaily = String(a && a.id || "").indexOf("daily:") === 0 ? 1 : 0;
-      var bDaily = String(b && b.id || "").indexOf("daily:") === 0 ? 1 : 0;
-      return aDaily - bDaily || eventTime(b && b.at) - eventTime(a && a.at);
-    }).slice(0, MAX_EVENTS);
+    return rows.sort(compareClubEvents).slice(0, MAX_EVENTS);
   }
 
   function loadClubNews(force) {

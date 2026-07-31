@@ -4192,23 +4192,23 @@ body.profile-avatar-choice-open {
   }
 
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
-    font-size: 24px !important;
+    font-size: 12px !important;
     line-height: 1.05 !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__details-row {
     justify-content: flex-start !important;
-    gap: 4px !important;
+    gap: 2px !important;
     width: 100% !important;
-    margin-top: 4px !important;
+    margin-top: 2px !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__specialty-badge,
   .view[data-view="profile"] .profile-public-showcase__age-badge,
   .view[data-view="profile"] .profile-public-showcase__city-badge {
-    min-height: 22px !important;
-    padding: 2px 8px !important;
-    font-size: 11px !important;
+    min-height: 11px !important;
+    padding: 1px 4px !important;
+    font-size: 6px !important;
     line-height: 1 !important;
   }
 
