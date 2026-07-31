@@ -494,6 +494,39 @@ html[data-theme="gold"] body[data-view="home"] {
   text-align: center;
 }
 
+.home-friend-news-modal__loading {
+  display: grid;
+  min-height: 240px;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px;
+  color: #eef5ff;
+  text-align: center;
+}
+
+.home-friend-news-modal__loading > span {
+  width: 42px;
+  height: 42px;
+  border: 4px solid rgba(111, 216, 255, 0.18);
+  border-top-color: #6fd8ff;
+  border-radius: 50%;
+  animation: home-friend-news-loading-spin 0.8s linear infinite;
+}
+
+.home-friend-news-modal__loading strong {
+  font-size: 17px;
+}
+
+.home-friend-news-modal__loading small {
+  color: #91a1b8;
+  font-size: 13px;
+}
+
+@keyframes home-friend-news-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
 .home-friend-news-modal__empty > span {
   margin-bottom: 12px;
   color: #71d954;

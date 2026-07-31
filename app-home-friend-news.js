@@ -17,6 +17,8 @@
   var clubActiveIndex = 0;
   var eventFeedback = {};
   var eventCommentsOpen = {};
+  var friendNewsLoading = true;
+  var friendNewsLoaded = false;
   var lastFriendsSignature = "";
   var lastLoadAt = 0;
   var loadSequence = 0;
@@ -288,7 +290,8 @@
       if (!linked) return friend;
       return Object.assign({}, friend, {
         p21Id: linked.p21Id || linked.poker21Id || linked.pokerPlusUserId || friend.p21Id || "",
-        pokerPlusNickname: linked.pokerPlusNickname || linked.nickname || friend.pokerPlusNickname || "",
+        pokerPlusNickname: linked.pokerPlusNickname || linked.ratingNick || linked.ratingNickname ||
+          linked.nickname || linked.nick || friend.pokerPlusNickname || "",
         pokerPlusName: linked.name || linked.pokerPlusName || "",
       });
     });
@@ -304,6 +307,10 @@
     var seen = {};
     return [
       friend && friend.pokerPlusNickname,
+      friend && friend.ratingNick,
+      friend && friend.ratingNickname,
+      friend && friend.nickname,
+      friend && friend.nick,
       friend && friend.pokerPlusName,
       friend && friend.contactName,
       friend && friend.chatDisplayName,
@@ -968,6 +975,12 @@
   function renderModalList(rows) {
     var list = el("homeFriendNewsList");
     if (!list) return;
+    if (friendNewsLoading && !friendNewsLoaded) {
+      list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
+        '<span aria-hidden="true"></span><strong>Загружаем новости всех друзей…</strong>' +
+        '<small>Собираем результаты и достижения игроков</small></div>';
+      return;
+    }
     var snapshot = Array.isArray(rows) ? rows.slice() : [];
     list.innerHTML = snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
@@ -1126,6 +1139,8 @@
       : "";
     if (signature && signature === lastFriendsSignature && Date.now() - lastLoadAt < 30000) return;
     var requestSequence = ++loadSequence;
+    friendNewsLoading = true;
+    if (!friendNewsLoaded && el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(events);
     if (signature) lastFriendsSignature = signature;
     lastLoadAt = Date.now();
     var suffix = authSuffix();
@@ -1137,6 +1152,8 @@
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
       if (!friends.length) {
+        friendNewsLoading = false;
+        friendNewsLoaded = true;
         if (!events.length || events[0].id === "empty") {
           events = [];
           render();
@@ -1192,9 +1209,16 @@
         .filter(function (row, index, rows) {
           return rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
         }).slice(0, MAX_EVENTS);
+      friendNewsLoading = false;
+      friendNewsLoaded = true;
       writeRenderedEventsCache(events);
       render();
-    }).catch(function () {});
+    }).catch(function () {
+      if (requestSequence !== loadSequence) return;
+      friendNewsLoading = false;
+      friendNewsLoaded = true;
+      if (el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(events);
+    });
   }
 
   function loadClubNews() {
@@ -1246,14 +1270,13 @@
     mountWhenProfileReady();
     loadClubNews();
     window.addEventListener("poker-profile-friends-ready", function (event) {
-      var supplied = event && event.detail && Array.isArray(event.detail.friends)
-        ? event.detail.friends
-        : null;
-      load(supplied);
+      load();
     });
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";
       lastLoadAt = 0;
+      friendNewsLoading = true;
+      friendNewsLoaded = false;
       events = [];
       try { sessionStorage.removeItem(RENDERED_EVENTS_CACHE_KEY); } catch (error) {}
       render();
