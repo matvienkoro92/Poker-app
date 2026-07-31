@@ -410,6 +410,12 @@
     return eventDayKey(date) === eventDayKey(previous);
   }
 
+  function previousCalendarDayStamp() {
+    var now = new Date();
+    var previous = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    return previous.getFullYear() * 10000 + (previous.getMonth() + 1) * 100 + previous.getDate();
+  }
+
   function eventDateLabel(value, includeYear) {
     var time = new Date(value || 0).getTime();
     if (!time) return "";
@@ -1411,7 +1417,8 @@
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       return clubTournamentSnapshotsReady().then(function (snapshots) {
-        var sourceReady = Number(snapshots && snapshots.__sourceRowCount) > 0;
+        var sourceReady = Number(snapshots && snapshots.__sourceRowCount) > 0 &&
+          Number(snapshots && snapshots.__latestSourceDateStamp) >= previousCalendarDayStamp();
         var knownNicks = {};
         players.forEach(function (row) { knownNicks[matchKey(row && row.pokerPlusNickname)] = true; });
         (snapshots && snapshots.__recentEvents || []).forEach(function (row) {

@@ -1524,6 +1524,9 @@ function pokerGetClubNewsTournamentSnapshotsReady() {
     }).filter(Boolean);
     var snapshots = pokerGetFriendNewsTournamentSnapshots(nicks);
     snapshots.__sourceRowCount = allRows.length;
+    snapshots.__latestSourceDateStamp = allRows.reduce(function (latest, row) {
+      return Math.max(latest, winterRatingDateKeyToStamp(String(row && row.date || "")));
+    }, 0);
     return snapshots;
   });
 }
