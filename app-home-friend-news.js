@@ -1044,9 +1044,9 @@
     var displayRows = clubEvents;
     if (!displayRows.length) {
       displayRows = [{
-        id: clubNewsLoading && !clubNewsLoaded ? "club-loading" : "club-empty",
+        id: clubNewsLoading ? "club-loading" : "club-empty",
         type: "empty",
-        text: clubNewsLoading && !clubNewsLoaded ? "Загружаем новости клуба…" : "За вчера новостей клуба нет",
+        text: clubNewsLoading ? "Загружаем новости клуба…" : "За вчера новостей клуба нет",
         at: "",
       }];
     }
@@ -1390,7 +1390,50 @@
     }, Math.min(4000, 350 * Math.pow(1.45, clubNewsRetryCount - 1)));
   }
 
+  function clubNewsStaticRows() {
+    var data = window.POKER_CLUB_NEWS_DATA;
+    return data && Array.isArray(data.rows) ? data.rows : [];
+  }
+
+  function buildClubEventsFromRows(players, winners) {
+    var sourceRows = clubNewsStaticRows();
+    var allPlayers = Array.isArray(players) ? players.slice() : [];
+    var knownNicks = {};
+    allPlayers.forEach(function (row) { knownNicks[matchKey(row && row.pokerPlusNickname)] = true; });
+    sourceRows.forEach(function (row) {
+      var nick = String(row && row.nick || "").trim();
+      var key = matchKey(nick);
+      if (!key || knownNicks[key]) return;
+      knownNicks[key] = true;
+      allPlayers.push({ userId: "rating:" + key, pokerPlusNickname: nick, pokerPlusName: nick });
+    });
+    var snapshots = { __recentEvents: sourceRows };
+    return attachFriendAvatars(
+      recentTournamentEvents(allPlayers, snapshots).concat(
+        recentTournamentAchievementEvents(allPlayers, snapshots),
+        winnerEvents(allPlayers, Array.isArray(winners) ? winners : [])
+      ),
+      allPlayers
+    ).filter(function (row) {
+      return isPreviousCalendarDay(row && row.at);
+    }).sort(function (a, b) {
+      return eventTime(b && b.at) - eventTime(a && a.at);
+    }).filter(function (row, index, rows) {
+      return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
+    }).slice(0, MAX_EVENTS);
+  }
+
   function loadClubNews(force) {
+    var immediateEvents = buildClubEventsFromRows([], []);
+    if (immediateEvents.length) {
+      clubEvents = immediateEvents;
+      clubNewsLoading = false;
+      clubNewsLoaded = true;
+      clubNewsRetryCount = 0;
+      writeClubEventsCache(clubEvents);
+      renderClubNews();
+      if (newsModalMode === "club") renderModalList(clubEvents);
+    }
     var base = apiBase();
     if (!base) {
       clubNewsLoading = false;
@@ -1416,31 +1459,13 @@
         });
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
-      return clubTournamentSnapshotsReady().then(function (snapshots) {
-        var sourceReady = Number(snapshots && snapshots.__sourceRowCount) > 0 &&
-          Number(snapshots && snapshots.__latestSourceDateStamp) >= previousCalendarDayStamp();
-        var knownNicks = {};
-        players.forEach(function (row) { knownNicks[matchKey(row && row.pokerPlusNickname)] = true; });
-        (snapshots && snapshots.__recentEvents || []).forEach(function (row) {
-          var nick = String(row && row.nick || "").trim();
-          var key = matchKey(nick);
-          if (!key || knownNicks[key]) return;
-          knownNicks[key] = true;
-          players.push({ userId: "rating:" + key, pokerPlusNickname: nick, pokerPlusName: nick });
-        });
-        var nextClubEvents = attachFriendAvatars(
-          recentTournamentEvents(players, snapshots || {}).concat(
-            recentTournamentAchievementEvents(players, snapshots || {}),
-            winnerEvents(players, winners)
-          ),
-          players
-        ).filter(function (row) {
-          return isPreviousCalendarDay(row && row.at);
-        }).sort(function (a, b) {
-          return eventTime(b && b.at) - eventTime(a && a.at);
-        }).filter(function (row, index, rows) {
-          return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
-        }).slice(0, MAX_EVENTS);
+      var nextClubEvents = buildClubEventsFromRows(players, winners);
+      var data = window.POKER_CLUB_NEWS_DATA || {};
+      var latestParts = String(data.latestDate || "").split(".");
+      var latestStamp = latestParts.length === 3
+        ? Number(latestParts[2]) * 10000 + Number(latestParts[1]) * 100 + Number(latestParts[0])
+        : 0;
+      var sourceReady = latestStamp >= previousCalendarDayStamp();
         if (nextClubEvents.length) {
           clubEvents = nextClubEvents;
           clubNewsLoaded = true;
@@ -1453,7 +1478,6 @@
         clubNewsLoading = !sourceReady;
         renderClubNews();
         if (!sourceReady) scheduleClubNewsRetry();
-      });
     }).catch(function () {
       clubNewsLoading = true;
       renderClubNews();

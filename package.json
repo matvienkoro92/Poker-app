@@ -8,7 +8,7 @@
     "web-push": "^3.6.7"
   },
   "scripts": {
-    "build": "node scripts/generate-rating-player-totals.js && node scripts/copy-to-public.js",
+    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/copy-to-public.js",
     "rating:totals": "node scripts/generate-rating-player-totals.js",
     "build:season-archive": "node scripts/copy-season-archive.js",
     "smoke": "node scripts/smoke-checks.js",
