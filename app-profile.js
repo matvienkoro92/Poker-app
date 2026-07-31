@@ -37,7 +37,7 @@ function setProfileTab(tab) {
   if (activeTab === "club") setTimeout(refreshProfileOwnWall, 0);
 }
 
-var profileOwnWallState = { tab: "tournaments", tournaments: [], posts: [], accountId: "", loading: false, submitting: false, image: "" };
+var profileOwnWallState = { tab: "tournaments", tournaments: [], posts: [], accountId: "", loading: false, reloadAfterLoad: false, submitting: false, image: "" };
 
 function profileOwnWallRequest(payload) {
   var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -70,6 +70,26 @@ function profileOwnWallRows() {
   return profileOwnWallState.tournaments;
 }
 
+function profileOwnWallPersonalAvatarUrl() {
+  var nick = String(profilePublicShowcaseLatestRatingNick || "").trim();
+  try {
+    if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
+      var art = window.pokerGetSummerRatingPlayerArt(nick);
+      if (art && art.src) return String(art.src);
+    }
+  } catch (eOwnWallRatingAvatar) {}
+  try {
+    var artImg = document.getElementById("profilePublicRatingArtImg");
+    if (artImg &&
+        !artImg.classList.contains("chat-user-modal__rating-art-img--avatar-fallback") &&
+        !artImg.classList.contains("chat-user-modal__rating-art-img--default-hero")) {
+      var artSrc = String(artImg.currentSrc || artImg.src || "").trim();
+      if (artSrc) return artSrc;
+    }
+  } catch (eOwnWallCurrentArtAvatar) {}
+  return profilePublicCardAvatarUrl();
+}
+
 function renderProfileOwnWall() {
   var root = document.getElementById("profileOwnWall");
   var list = document.getElementById("profileOwnWallList");
@@ -91,7 +111,7 @@ function renderProfileOwnWall() {
     return;
   }
   list.innerHTML = rows.map(function (row) {
-    var ownAvatar = row.personal ? profilePublicCardAvatarUrl() : "";
+    var ownAvatar = row.personal ? profileOwnWallPersonalAvatarUrl() : "";
     var controls = row.personal
       ? '<span class="chat-user-modal__wall-controls"><button type="button" data-profile-wall-edit="' + profileEscapeHtml(row.id) + '">Редактировать</button>' +
         '<button type="button" data-profile-wall-pin="' + profileEscapeHtml(row.id) + '">' + (row.pinned ? "Открепить" : "Закрепить") + "</button></span>"
@@ -107,18 +127,41 @@ function renderProfileOwnWall() {
   }).join("");
 }
 
-function refreshProfileOwnWall() {
+function refreshProfileOwnWall(force) {
   var root = document.getElementById("profileOwnWall");
-  if (!root || profileOwnWallState.loading || typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+  if (!root || typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) return;
+  if (profileOwnWallState.loading) {
+    if (force) profileOwnWallState.reloadAfterLoad = true;
+    return;
+  }
   profileOwnWallState.loading = true;
+  profileOwnWallState.reloadAfterLoad = false;
+  var data = profilePublicShowcaseData && typeof profilePublicShowcaseData === "object" ? profilePublicShowcaseData : {};
   var identity = {
-    userId: profilePublicCardMemberIdFromAuth() || profilePublicCardFallbackDtId(),
-    ratingNick: profilePublicShowcaseLatestRatingNick || profilePublicCardDisplayName(),
-    name: profilePublicCardDisplayName(),
+    userId: data.userId || data.memberId || data.accountId || data.dtId || profilePublicCardMemberIdFromAuth() || profilePublicCardFallbackDtId(),
+    accountId: data.accountId || data.userId || "",
+    p21Id: data.p21Id || data.poker21Id || data.pokerPlusUserId || "",
+    pokerPlusNickname: data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || profilePublicShowcaseLatestRatingNick || "",
+    ratingNick: data.pokerPlusNickname || data.poker21Nickname || data.ratingNick || profilePublicShowcaseLatestRatingNick || profilePublicCardDisplayName(),
+    displayName: profilePublicCardDisplayName(),
+    profileBirthDate: data.profileBirthDate || data.birthDate || "",
     avatarUrl: profilePublicCardAvatarUrl(),
   };
+  if (typeof window.pokerReadCachedPlayerNews === "function") {
+    var cachedRows = window.pokerReadCachedPlayerNews(identity);
+    if (Array.isArray(cachedRows) && cachedRows.length) {
+      profileOwnWallState.tournaments = cachedRows;
+      renderProfileOwnWall();
+    }
+  }
   var tournamentPromise = typeof window.pokerGetPlayerNews === "function"
-    ? Promise.resolve(window.pokerGetPlayerNews(identity))
+    ? Promise.resolve(window.pokerGetPlayerNews(identity, {
+        onUpdate: function (rows) {
+          if (!Array.isArray(rows) || !rows.length) return;
+          profileOwnWallState.tournaments = rows;
+          renderProfileOwnWall();
+        },
+      }))
     : Promise.resolve([]);
   Promise.all([
     profileOwnWallRequest({ action: "list", targetUserId: identity.userId }),
@@ -126,12 +169,16 @@ function refreshProfileOwnWall() {
   ]).then(function (results) {
     profileOwnWallState.posts = Array.isArray(results[0].posts) ? results[0].posts : [];
     profileOwnWallState.accountId = String(results[0].accountId || "");
-    profileOwnWallState.tournaments = Array.isArray(results[1]) ? results[1] : [];
+    if (Array.isArray(results[1]) && results[1].length) profileOwnWallState.tournaments = results[1];
     renderProfileOwnWall();
   }).catch(function () {
     renderProfileOwnWall();
   }).finally(function () {
     profileOwnWallState.loading = false;
+    if (profileOwnWallState.reloadAfterLoad) {
+      profileOwnWallState.reloadAfterLoad = false;
+      refreshProfileOwnWall(true);
+    }
   });
 }
 
@@ -753,6 +800,7 @@ function profilePublicShowcaseSyncArt(nick, opts) {
       if (seq !== profilePublicShowcaseArtSeq) return;
       artImg.hidden = false;
       artImg.style.display = "";
+      if (profileOwnWallState.tab === "personal") renderProfileOwnWall();
     };
     artImg.onerror = function () {
       if (seq !== profilePublicShowcaseArtSeq) return;
@@ -928,6 +976,7 @@ function refreshProfilePublicShowcase(profileData) {
   }
   profilePublicShowcaseSyncKnownArt(profilePublicShowcaseData);
   profilePublicShowcaseApplyStatus(profilePublicShowcaseStatusFromData(data));
+  if (profileData && typeof profileData === "object") refreshProfileOwnWall(true);
 }
 
 function loadProfilePublicShowcaseInitial() {
