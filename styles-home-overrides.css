@@ -55,6 +55,18 @@ html[data-theme="gold"] body[data-view="home"] {
   margin: 0 0 12px;
 }
 
+.app.app--view-home .home-club-news {
+  width: min(100%, calc(100vw - 8px));
+  max-width: 100%;
+  margin: 10px auto 12px;
+}
+
+.app.app--view-home .home-club-news__ticker {
+  min-height: 72px;
+  border-color: rgba(var(--friend-news-rgb), 0.42);
+  border-radius: 18px;
+}
+
 .home-friend-news[hidden],
 .home-friend-news-modal[hidden] {
   display: none !important;

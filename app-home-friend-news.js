@@ -10,8 +10,11 @@
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
   var ROTATE_MS = 4600;
   var rotateTimer = null;
+  var clubRotateTimer = null;
   var events = [];
+  var clubEvents = [];
   var activeIndex = 0;
+  var clubActiveIndex = 0;
   var eventFeedback = {};
   var eventCommentsOpen = {};
   var lastFriendsSignature = "";
@@ -147,7 +150,38 @@
     try { return typeof getApiBase === "function" ? getApiBase() : ""; } catch (error) { return ""; }
   }
 
+  function openNewsPlayerProfile(id, name, avatar) {
+    id = String(id || "").trim();
+    if (!id) return;
+    if (typeof window.pokerOpenChatUserModalSafe === "function") {
+      window.pokerOpenChatUserModalSafe(id, name || "Игрок", avatar || "");
+      return;
+    }
+    if (typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true) {
+      window.openChatUserModalById(id, name || "Игрок", avatar || "");
+      return;
+    }
+    if (typeof window.pokerEnsureScriptDomains === "function") {
+      Promise.resolve(window.pokerEnsureScriptDomains(["chat"])).then(function () {
+        if (typeof window.openChatUserModalById === "function") {
+          window.openChatUserModalById(id, name || "Игрок", avatar || "");
+        }
+      }).catch(function () {});
+    }
+  }
+
   function ensureDom() {
+    var homeShortcuts = document.querySelector(".home-daily-shortcuts");
+    if (homeShortcuts && !el("homeClubNews")) {
+      homeShortcuts.insertAdjacentHTML("afterend",
+        '<section class="home-friend-news home-club-news" id="homeClubNews" aria-label="Новости клуба за вчера">' +
+          '<button type="button" class="home-friend-news__ticker home-club-news__ticker" id="homeClubNewsOpen">' +
+            '<span class="home-friend-news__label">Новости клуба · вчера</span>' +
+            '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeClubNewsTrack" aria-live="polite"></span></span>' +
+            '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
+          "</button>" +
+        "</section>");
+    }
     var friendsPanel = el("profileFriendsPanel");
     if (friendsPanel && !el("homeFriendNews")) {
       friendsPanel.insertAdjacentHTML("beforebegin",
@@ -305,6 +339,14 @@
   function isRecentEvent(value) {
     var time = eventTime(value);
     return !!time && time <= Date.now() + 86400000 && Date.now() - time <= RECENT_EVENT_MS;
+  }
+
+  function isPreviousCalendarDay(value) {
+    var date = new Date(value || 0);
+    if (!Number.isFinite(date.getTime())) return false;
+    var now = new Date();
+    var previous = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    return eventDayKey(date) === eventDayKey(previous);
   }
 
   function eventDateLabel(value, includeYear) {
@@ -861,6 +903,48 @@
     rotateTimer = setInterval(function () { showIndex(activeIndex + 1, true); }, ROTATE_MS);
   }
 
+  function showClubIndex(index, animate) {
+    var track = el("homeClubNewsTrack");
+    var ticker = el("homeClubNewsOpen");
+    if (!track || !clubEvents.length) return;
+    clubActiveIndex = (index + clubEvents.length) % clubEvents.length;
+    var active = clubEvents[clubActiveIndex] || {};
+    if (ticker) {
+      ticker.setAttribute("data-news-type", String(active.type || "empty"));
+      if (active.playerAccent && active.playerRgb) {
+        ticker.style.setProperty("--friend-news-accent", active.playerAccent);
+        ticker.style.setProperty("--friend-news-rgb", active.playerRgb);
+      } else {
+        ticker.style.removeProperty("--friend-news-accent");
+        ticker.style.removeProperty("--friend-news-rgb");
+      }
+    }
+    if (!animate) track.classList.add("home-friend-news__track--instant");
+    track.style.transform = "translateY(-" + (clubActiveIndex * 100) + "%)";
+    if (!animate) requestAnimationFrame(function () { track.classList.remove("home-friend-news__track--instant"); });
+  }
+
+  function renderClubNews() {
+    var root = el("homeClubNews");
+    var track = el("homeClubNewsTrack");
+    if (!root || !track) return;
+    if (!clubEvents.length) {
+      clubEvents = [{
+        id: "club-empty",
+        type: "empty",
+        text: "За вчера новостей клуба нет",
+        at: "",
+      }];
+    }
+    root.hidden = false;
+    track.innerHTML = clubEvents.map(function (row) { return eventHtml(row, true); }).join("");
+    showClubIndex(0, false);
+    clearInterval(clubRotateTimer);
+    if (clubEvents.length > 1) {
+      clubRotateTimer = setInterval(function () { showClubIndex(clubActiveIndex + 1, true); }, ROTATE_MS);
+    }
+  }
+
   function render() {
     var root = el("homeFriendNews");
     var track = el("homeFriendNewsTrack");
@@ -915,10 +999,22 @@
 
   function bind() {
     var open = el("homeFriendNewsOpen");
+    var clubOpen = el("homeClubNewsOpen");
     var modal = el("homeFriendNewsModal");
     if (open && open.dataset.friendNewsBound !== "1") {
       open.dataset.friendNewsBound = "1";
       open.addEventListener("click", openModal);
+    }
+    if (clubOpen && clubOpen.dataset.clubNewsBound !== "1") {
+      clubOpen.dataset.clubNewsBound = "1";
+      clubOpen.addEventListener("click", function () {
+        var row = clubEvents[clubActiveIndex] || {};
+        if (row.actorId) {
+          openNewsPlayerProfile(row.actorId, row.actorNick || "Игрок", row.actorAvatar || "");
+          return;
+        }
+        if (row.target && typeof setView === "function") setView(row.target);
+      });
     }
     if (modal && modal.dataset.friendNewsBound !== "1") {
       modal.dataset.friendNewsBound = "1";
@@ -1101,9 +1197,54 @@
     }).catch(function () {});
   }
 
+  function loadClubNews() {
+    var base = apiBase();
+    if (!base) {
+      renderClubNews();
+      return;
+    }
+    var suffix = authSuffix();
+    var joiner = suffix ? "&" : "?";
+    Promise.all([
+      cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels", 5 * 60 * 1000, { cache: "default" })
+        .catch(function () { return { levelRows: [] }; }),
+      cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100", "club-news-daily:" + suffix, 60 * 1000, { cache: "default" })
+        .catch(function () { return { winners: [] }; }),
+    ]).then(function (results) {
+      var players = (results[0] && Array.isArray(results[0].levelRows) ? results[0].levelRows : []).map(function (row) {
+        return Object.assign({}, row, {
+          userId: row && (row.userId || row.accountId || row.dtId) || "",
+          pokerPlusNickname: row && (row.pokerPlusNickname || row.ratingNick || row.nickname || row.nick) || "",
+          pokerPlusName: row && (row.pokerPlusName || row.name || row.displayName) || "",
+        });
+      });
+      var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
+      return tournamentSnapshotsReady(players).then(function (snapshots) {
+        clubEvents = attachFriendAvatars(
+          recentTournamentEvents(players, snapshots || {}).concat(
+            recentTournamentAchievementEvents(players, snapshots || {}),
+            winnerEvents(players, winners)
+          ),
+          players
+        ).filter(function (row) {
+          return isPreviousCalendarDay(row && row.at);
+        }).sort(function (a, b) {
+          return eventTime(b && b.at) - eventTime(a && a.at);
+        }).filter(function (row, index, rows) {
+          return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
+        }).slice(0, MAX_EVENTS);
+        renderClubNews();
+      });
+    }).catch(function () {
+      clubEvents = [];
+      renderClubNews();
+    });
+  }
+
   function init() {
     events = readRenderedEventsCache();
     mountWhenProfileReady();
+    loadClubNews();
     window.addEventListener("poker-profile-friends-ready", function (event) {
       var supplied = event && event.detail && Array.isArray(event.detail.friends)
         ? event.detail.friends
@@ -1117,9 +1258,13 @@
       try { sessionStorage.removeItem(RENDERED_EVENTS_CACHE_KEY); } catch (error) {}
       render();
       load();
+      loadClubNews();
     });
     load();
-    setInterval(function () { load(); }, 5 * 60 * 1000);
+    setInterval(function () {
+      load();
+      loadClubNews();
+    }, 5 * 60 * 1000);
   }
 
   window.pokerReadCachedPlayerNews = readPlayerNewsCache;
