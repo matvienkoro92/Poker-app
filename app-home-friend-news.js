@@ -17,6 +17,7 @@
   var loadSequence = 0;
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
+  var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v1:";
   var PLAYER_NEWS_COLORS = [
     { accent: "#65c7ff", rgb: "101, 199, 255" },
     { accent: "#68e2ad", rgb: "104, 226, 173" },
@@ -46,6 +47,38 @@
       sessionStorage.setItem(RENDERED_EVENTS_CACHE_KEY, JSON.stringify(
         (Array.isArray(rows) ? rows : []).filter(function (row) { return row && row.id !== "empty"; }).slice(0, MAX_EVENTS)
       ));
+    } catch (error) {}
+  }
+
+  function playerNewsCacheKey(identity) {
+    var player = identity && typeof identity === "object" ? identity : {};
+    var id = String(player.userId || player.accountId || player.id || "").trim();
+    var nick = String(player.pokerPlusNickname || player.ratingNick || player.nick || player.name || "").replace(/^@+/, "").trim();
+    return id || matchKey(nick);
+  }
+
+  function readPlayerNewsCache(identity) {
+    var key = playerNewsCacheKey(identity);
+    if (!key) return [];
+    try {
+      var stored = JSON.parse(sessionStorage.getItem(PLAYER_EVENTS_CACHE_PREFIX + key) || "null");
+      if (!stored || !Array.isArray(stored.rows)) return [];
+      return stored.rows.filter(function (row) {
+        return row && row.id && (row.type === "birthday" || isRecentEvent(row.at));
+      }).slice(0, MAX_EVENTS);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writePlayerNewsCache(identity, rows) {
+    var key = playerNewsCacheKey(identity);
+    if (!key) return;
+    try {
+      sessionStorage.setItem(PLAYER_EVENTS_CACHE_PREFIX + key, JSON.stringify({
+        at: Date.now(),
+        rows: (Array.isArray(rows) ? rows : []).slice(0, MAX_EVENTS),
+      }));
     } catch (error) {}
   }
 
@@ -223,6 +256,33 @@
     return normalized.replace(/[\uFE0E\uFE0F]/g, "").replace(/\s+/g, "");
   }
 
+  function friendRatingNickCandidates(friend) {
+    var seen = {};
+    return [
+      friend && friend.pokerPlusNickname,
+      friend && friend.pokerPlusName,
+      friend && friend.contactName,
+      friend && friend.chatDisplayName,
+      friend && friend.userName,
+    ].map(function (value) {
+      return String(value || "").replace(/^@+/, "").trim();
+    }).filter(function (value) {
+      var key = matchKey(value);
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  }
+
+  function friendSnapshot(friend, snapshots) {
+    var candidates = friendRatingNickCandidates(friend);
+    for (var i = 0; i < candidates.length; i += 1) {
+      var snapshot = snapshots && snapshots[matchKey(candidates[i])];
+      if (snapshot) return snapshot;
+    }
+    return null;
+  }
+
   function eventTime(value) {
     var time = new Date(value || 0).getTime();
     return Number.isFinite(time) ? time : 0;
@@ -328,8 +388,7 @@
     });
     (friends || []).forEach(function (friend) {
       var id = friendId(friend);
-      var nickKey = matchKey(friend && friend.pokerPlusNickname);
-      var current = nickKey && snapshots && snapshots[nickKey];
+      var current = friendSnapshot(friend, snapshots);
       if (!id || !current) return;
       next[id] = current;
       var before = previous && previous[id];
@@ -389,8 +448,10 @@
   function recentTournamentEvents(friends, snapshots) {
     var byNick = {};
     (friends || []).forEach(function (friend) {
-      var key = matchKey(friend && friend.pokerPlusNickname);
-      if (key && !byNick[key]) byNick[key] = friend;
+      friendRatingNickCandidates(friend).forEach(function (nick) {
+        var key = matchKey(nick);
+        if (key && !byNick[key]) byNick[key] = friend;
+      });
     });
     return (Array.isArray(snapshots && snapshots.__recentEvents) ? snapshots.__recentEvents : []).map(function (row) {
       var friend = byNick[String(row && row.nickKey || "")];
@@ -425,8 +486,10 @@
   function recentTournamentAchievementEvents(friends, snapshots) {
     var byNick = {};
     (friends || []).forEach(function (friend) {
-      var key = matchKey(friend && friend.pokerPlusNickname);
-      if (key && !byNick[key]) byNick[key] = friend;
+      friendRatingNickCandidates(friend).forEach(function (nick) {
+        var key = matchKey(nick);
+        if (key && !byNick[key]) byNick[key] = friend;
+      });
     });
     var out = [];
     (Array.isArray(snapshots && snapshots.__recentEvents) ? snapshots.__recentEvents : []).forEach(function (row) {
@@ -469,9 +532,16 @@
   }
 
   function tournamentSnapshotsReady(friends) {
-    var nicks = (friends || []).map(function (friend) {
-      return String(friend && friend.pokerPlusNickname || "").trim();
-    }).filter(Boolean);
+    var seen = {};
+    var nicks = [];
+    (friends || []).forEach(function (friend) {
+      friendRatingNickCandidates(friend).forEach(function (nick) {
+        var key = matchKey(nick);
+        if (!key || seen[key]) return;
+        seen[key] = true;
+        nicks.push(nick);
+      });
+    });
     if (!nicks.length) return Promise.resolve({});
     function read() {
       return typeof window.pokerGetFriendNewsTournamentSnapshotsReady === "function"
@@ -883,7 +953,8 @@
       }
       return Promise.all([
         Promise.resolve(friendsPayload),
-        cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" }),
+        cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" })
+          .catch(function () { return { winners: [] }; }),
         cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
         cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice", 5 * 60 * 1000, { cache: "default" })
@@ -955,7 +1026,10 @@
     setInterval(function () { load(); }, 5 * 60 * 1000);
   }
 
-  window.pokerGetPlayerNews = function (identity) {
+  window.pokerReadCachedPlayerNews = readPlayerNewsCache;
+
+  window.pokerGetPlayerNews = function (identity, options) {
+    options = options || {};
     var player = identity && typeof identity === "object" ? identity : {};
     var id = String(player.userId || player.accountId || player.id || "").trim();
     var nick = String(player.pokerPlusNickname || player.ratingNick || player.nick || player.name || "").replace(/^@+/, "").trim();
@@ -975,20 +1049,39 @@
     };
     var emptyRows = Promise.resolve({ rows: [] });
     var emptyWinners = Promise.resolve({ winners: [] });
+    var snapshotsPromise = tournamentSnapshotsReady([pseudoFriend]);
+    var dailyPromise = base
+      ? cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "player-daily:" + playerCacheKey + ":" + suffix, 60 * 1000, { cache: "default" })
+        .catch(function () { return { winners: [] }; })
+      : emptyWinners;
+    var sngPromise = base
+      ? cachedFetchJson(base + "/api/sng-champions?mode=achievements", "player-sng", 5 * 60 * 1000, { cache: "default" })
+        .catch(function () { return { rows: [] }; })
+      : emptyRows;
+    var choicePromise = base
+      ? cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "player-choice", 5 * 60 * 1000, { cache: "default" })
+        .catch(function () { return { rows: [] }; })
+      : emptyRows;
+    snapshotsPromise.then(function (snapshots) {
+      if (typeof options.onUpdate !== "function") return;
+      var quickRows = attachFriendAvatars(
+        recentTournamentEvents([pseudoFriend], snapshots || {}).concat(
+          recentTournamentAchievementEvents([pseudoFriend], snapshots || {}),
+          birthdayEvents([pseudoFriend]),
+          readPlayerNewsCache(identity)
+        ),
+        [pseudoFriend]
+      ).sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
+        .filter(function (row, index, rows) {
+          return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
+        }).slice(0, MAX_EVENTS);
+      if (quickRows.length) options.onUpdate(quickRows);
+    }).catch(function () {});
     return Promise.all([
-      tournamentSnapshotsReady([pseudoFriend]),
-      base
-        ? cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "player-daily:" + playerCacheKey + ":" + suffix, 60 * 1000, { cache: "default" })
-          .catch(function () { return { winners: [] }; })
-        : emptyWinners,
-      base
-        ? cachedFetchJson(base + "/api/sng-champions?mode=achievements", "player-sng", 5 * 60 * 1000, { cache: "default" })
-          .catch(function () { return { rows: [] }; })
-        : emptyRows,
-      base
-        ? cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "player-choice", 5 * 60 * 1000, { cache: "default" })
-          .catch(function () { return { rows: [] }; })
-        : emptyRows,
+      snapshotsPromise,
+      dailyPromise,
+      sngPromise,
+      choicePromise,
     ]).then(function (results) {
       var snapshots = results[0] || {};
       var history = recentTournamentEvents([pseudoFriend], snapshots);
@@ -1012,12 +1105,14 @@
           matchKey(text.slice(0, nick.length)) === matchKey(nick) &&
           (!text.charAt(nick.length) || /\s/.test(text.charAt(nick.length)));
       });
-      return attachFriendAvatars(history.concat(tournamentAchievements, daily, achievements, birthdays, cached), [pseudoFriend])
+      var rows = attachFriendAvatars(history.concat(tournamentAchievements, daily, achievements, birthdays, cached), [pseudoFriend])
         .sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
         .filter(function (row, index, rows) {
           return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
         })
         .slice(0, MAX_EVENTS);
+      writePlayerNewsCache(identity, rows);
+      return rows;
     }).catch(function () { return []; });
   };
 

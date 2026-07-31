@@ -540,10 +540,10 @@ if (chatUserModalEl) {
       '" data-profile-event-id="' + escapeHtml(rowId) + '"' + playerStyle + ">" +
       '<span class="chat-user-modal__news-icon" aria-hidden="true">' + chatUserModalNewsIcon(type) + "</span>" +
       '<span class="chat-user-modal__news-copy"><strong>' + escapeHtml(row && row.text || "") + "</strong>" +
-        '<span class="chat-user-modal__news-actions">' + reactionButtons +
+        '<span class="chat-user-modal__news-actions"><span class="chat-user-modal__news-actions-label">Реакция</span>' + reactionButtons +
           '<button type="button" class="chat-user-modal__news-comment-toggle' +
             (chatUserModalNewsCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
-            '" data-profile-event-comments aria-label="Открыть комментарии">💬' +
+            '" data-profile-event-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
             (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") + "</button>" +
         "</span>" +
         '<span class="chat-user-modal__news-comments"' + (chatUserModalNewsCommentsOpen[rowId] ? "" : " hidden") + ">" +
@@ -573,6 +573,34 @@ if (chatUserModalEl) {
         group.rows.map(chatUserModalNewsItem).join("") + "</div></section>";
     }).join("");
   }
+  function chatUserModalNewsSkeleton() {
+    return '<div class="chat-user-modal__news-loading" role="status" aria-label="Загрузка событий">' +
+      '<span class="chat-user-modal__news-loading-label">Загрузка…</span>' +
+      [0, 1, 2].map(function () {
+        return '<span class="chat-user-modal__news-skeleton">' +
+          '<i class="chat-user-modal__news-skeleton-icon"></i>' +
+          '<i class="chat-user-modal__news-skeleton-copy"><b></b><b></b></i>' +
+        "</span>";
+      }).join("") +
+    "</div>";
+  }
+  function showChatUserModalNewsLoading() {
+    if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsSkeleton();
+    if (modalNewsCount) modalNewsCount.textContent = "Загрузка…";
+    if (modalNewsAll) modalNewsAll.hidden = true;
+    if (modalNews) modalNews.hidden = false;
+  }
+  function applyChatUserModalNewsRows(rows, seq) {
+    if (seq !== chatUserModalNewsSeq) return false;
+    var nextRows = Array.isArray(rows) ? rows : [];
+    if (!nextRows.length) return false;
+    chatUserModalNewsRows = nextRows;
+    if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows.slice(0, 5));
+    if (modalNewsCount) modalNewsCount.textContent = chatUserModalNewsRows.length + " событий";
+    if (modalNewsAll) modalNewsAll.hidden = false;
+    if (modalNews) modalNews.hidden = false;
+    return true;
+  }
   function resetChatUserModalNews() {
     chatUserModalNewsSeq += 1;
     chatUserModalNewsRows = [];
@@ -584,21 +612,25 @@ if (chatUserModalEl) {
   }
   function loadChatUserModalNews(identity) {
     var seq = ++chatUserModalNewsSeq;
+    showChatUserModalNewsLoading();
     if (typeof window.pokerGetPlayerNews !== "function") {
       if (modalNews) modalNews.hidden = true;
       return;
     }
-    Promise.resolve(window.pokerGetPlayerNews(identity)).then(function (rows) {
+    var cachedRows = typeof window.pokerReadCachedPlayerNews === "function"
+      ? window.pokerReadCachedPlayerNews(identity)
+      : [];
+    applyChatUserModalNewsRows(cachedRows, seq);
+    Promise.resolve(window.pokerGetPlayerNews(identity, {
+      onUpdate: function (rows) {
+        applyChatUserModalNewsRows(rows, seq);
+      },
+    })).then(function (rows) {
       if (seq !== chatUserModalNewsSeq) return;
-      chatUserModalNewsRows = Array.isArray(rows) ? rows : [];
-      if (!chatUserModalNewsRows.length) {
+      if (!applyChatUserModalNewsRows(rows, seq)) {
         if (modalNews) modalNews.hidden = true;
         return;
       }
-      if (modalNewsList) modalNewsList.innerHTML = chatUserModalNewsGroups(chatUserModalNewsRows.slice(0, 5));
-      if (modalNewsCount) modalNewsCount.textContent = chatUserModalNewsRows.length + " событий";
-      if (modalNewsAll) modalNewsAll.hidden = false;
-      if (modalNews) modalNews.hidden = false;
       loadChatUserModalNewsFeedback();
     }).catch(function () {
       if (seq === chatUserModalNewsSeq && modalNews) modalNews.hidden = true;
