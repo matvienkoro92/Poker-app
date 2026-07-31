@@ -673,7 +673,17 @@ if (chatUserModalEl) {
     var rows = chatUserModalActiveRows();
     var content = rows.length ? chatUserModalNewsGroups(rows) : chatUserModalWallEmpty();
     if (modalNewsList) modalNewsList.innerHTML = rows.length > 5 ? chatUserModalNewsGroups(rows.slice(0, 5)) : content;
-    if (modalNewsCount) modalNewsCount.textContent = rows.length + (chatUserModalWallTab === "personal" ? " записей" : " событий");
+    if (modalNewsCount) {
+      var wallCount = rows.length;
+      var wallCountMod10 = wallCount % 10;
+      var wallCountMod100 = wallCount % 100;
+      var wallCountWord = wallCountMod10 === 1 && wallCountMod100 !== 11
+        ? "запись"
+        : wallCountMod10 >= 2 && wallCountMod10 <= 4 && (wallCountMod100 < 12 || wallCountMod100 > 14)
+          ? "записи"
+          : "записей";
+      modalNewsCount.textContent = wallCount + (chatUserModalWallTab === "personal" ? " " + wallCountWord : " событий");
+    }
     if (modalNewsAll) modalNewsAll.hidden = !rows.length;
     if (modalNews) modalNews.hidden = false;
     if (modalNewsDialog && !modalNewsDialog.hidden && modalNewsFullList) modalNewsFullList.innerHTML = content;

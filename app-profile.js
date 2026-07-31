@@ -156,7 +156,17 @@ function renderProfileOwnWall() {
     button.setAttribute("aria-selected", active ? "true" : "false");
   });
   if (composer) composer.hidden = profileOwnWallState.tab !== "personal";
-  if (count) count.textContent = rows.length + (profileOwnWallState.tab === "personal" ? " записей" : " событий");
+  if (count) {
+    var wallCount = rows.length;
+    var wallCountMod10 = wallCount % 10;
+    var wallCountMod100 = wallCount % 100;
+    var wallCountWord = wallCountMod10 === 1 && wallCountMod100 !== 11
+      ? "запись"
+      : wallCountMod10 >= 2 && wallCountMod10 <= 4 && (wallCountMod100 < 12 || wallCountMod100 > 14)
+        ? "записи"
+        : "записей";
+    count.textContent = wallCount + (profileOwnWallState.tab === "personal" ? " " + wallCountWord : " событий");
+  }
   if (!rows.length) {
     list.innerHTML = '<div class="chat-user-modal__wall-empty"><strong>' +
       (profileOwnWallState.tab === "personal" ? "На стене пока пусто" : "Турнирных событий пока нет") +
