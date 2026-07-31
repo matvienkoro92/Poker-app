@@ -7,6 +7,7 @@
   var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v6";
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
+  var HOME_NEWS_REACTIONS = ["❤️", "🔥", "👍", "👏", "😂", "😮", "😢", "😡"];
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
   var ROTATE_MS = 4600;
   var rotateTimer = null;
@@ -19,6 +20,7 @@
   var eventCommentsOpen = {};
   var eventCommentReplies = {};
   var eventCommentDrafts = {};
+  var eventCommentSubmitting = {};
   var newsModalMode = "friends";
   var friendNewsLoading = true;
   var friendNewsLoaded = false;
@@ -35,6 +37,7 @@
   var clubNewsRetryTimer = 0;
   var clubNewsRetryCount = 0;
   var clubProfileByNick = {};
+  var clubProfileLookupPromises = {};
   var homeNewsLongPressTimer = 0;
   var homeNewsLongPressTriggered = false;
   var newsProfileReturnState = null;
@@ -469,6 +472,37 @@
       if (clubProfileByNick[keys[i]]) return clubProfileByNick[keys[i]];
     }
     return null;
+  }
+
+  function resolveClubProfileForNick(value) {
+    var nick = String(value || "").replace(/^@+/, "").trim();
+    var key = matchKey(nick);
+    var known = clubProfileForNick(nick);
+    if (known && known.id) return Promise.resolve(known);
+    if (!nick || !key) return Promise.resolve(null);
+    if (clubProfileLookupPromises[key]) return clubProfileLookupPromises[key];
+    var base = apiBase();
+    if (!base) return Promise.resolve(null);
+    var suffix = authSuffix();
+    var url = base + "/api/users" + suffix + (suffix ? "&" : "?") + "ratingNick=" + encodeURIComponent(nick);
+    clubProfileLookupPromises[key] = fetch(url, { cache: "no-store" }).then(function (response) {
+      if (!response.ok) return null;
+      return response.json();
+    }).then(function (data) {
+      var id = String(data && (data.userId || data.chatUserId) || "").trim();
+      if (!id) return null;
+      var profile = { id: id, avatar: "" };
+      nicknameMatchKeys(nick).forEach(function (alias) {
+        if (alias) clubProfileByNick[alias] = profile;
+      });
+      return profile;
+    }).catch(function () {
+      return null;
+    }).then(function (profile) {
+      delete clubProfileLookupPromises[key];
+      return profile;
+    });
+    return clubProfileLookupPromises[key];
   }
 
   function friendRatingNickCandidates(friend) {
@@ -1131,7 +1165,7 @@
     var picker = document.createElement("div");
     picker.className = "profile-reaction-picker";
     picker.innerHTML = '<div class="profile-reaction-picker__panel" role="dialog" aria-label="Выберите реакцию">' +
-      ["❤️", "🔥", "👏"].map(function (emoji) {
+      HOME_NEWS_REACTIONS.map(function (emoji) {
         return '<button type="button" data-picker-reaction="' + esc(emoji) + '">' + esc(emoji) + "</button>";
       }).join("") + "</div>";
     document.body.appendChild(picker);
@@ -1149,10 +1183,10 @@
   window.pokerOpenProfileReactionPicker = openReactionPicker;
 
   function eventFeedbackHtml(row) {
-    var rowId = String(row && row.id || "");
+    var rowId = feedbackEventId(row);
     var feedback = eventFeedback[rowId] || {};
     var reactions = feedback.reactions || {};
-    var reactionButtons = ["❤️", "🔥", "👏"].map(function (emoji) {
+    var reactionButtons = HOME_NEWS_REACTIONS.map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);
       if (!count) return "";
       return '<button type="button" class="chat-user-modal__news-reaction' +
@@ -1165,17 +1199,12 @@
     }) : [];
     var activeReply = eventCommentReplies[rowId] || null;
     var draft = String(eventCommentDrafts[rowId] || "");
-    var clubKindHtml = newsModalMode === "club"
-      ? '<span class="home-friend-news-modal__kind home-friend-news-modal__kind--' +
-        (String(rowId).indexOf("daily:") === 0 ? "daily" : "mtt") + '">' +
-        (String(rowId).indexOf("daily:") === 0 ? '<span aria-hidden="true">🎰</span> КРУТКА ДНЯ' : '<span aria-hidden="true">🏆</span> ВЫИГРЫШ В МТТ') + "</span>"
-      : "";
     var commentsHtml = comments.length ? comments.map(function (comment) {
       var name = String(comment.author || "Игрок");
       var avatar = String(comment.authorAvatar || "");
       var profileId = String(comment.authorProfileId || comment.memberId || "");
       var commentReactions = comment.reactions || {};
-      var commentReactionHtml = ["❤️", "🔥", "👏"].map(function (emoji) {
+      var commentReactionHtml = HOME_NEWS_REACTIONS.map(function (emoji) {
         var count = Math.max(0, Number(commentReactions[emoji]) || 0);
         if (!count) return "";
         return '<button type="button" class="chat-user-modal__comment-reaction' +
@@ -1217,16 +1246,16 @@
       reactionButtons +
       '<button type="button" class="chat-user-modal__news-comment-toggle' +
         (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
-        '" data-home-news-comments>💬 <b>Комментировать</b>' +
+        '" data-home-news-comments aria-label="Открыть комментарии">💬' +
         (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
-      "</button>" + clubKindHtml + "</span>" +
+      "</button></span>" +
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
           replyPreview +
           '<span class="home-news-comment-input-wrap"><button type="button" class="home-news-comment-emoji-btn" data-home-comment-emoji-toggle aria-label="Выбрать смайл">☺</button>' +
           '<input type="text" maxlength="500" value="' + esc(draft) + '" placeholder="Написать комментарий…" aria-label="Комментарий к событию">' + emojiPicker + "</span>" +
-          '<button type="submit">Отправить</button>' +
+          '<button type="submit"' + (eventCommentSubmitting[rowId] ? ' class="is-sending" disabled aria-busy="true">Отправка…' : '>Отправить') + '</button>' +
       "</form></span>";
   }
 
@@ -1273,7 +1302,8 @@
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
       : "";
-    var playerAttrs = !ticker && eventPlayerId
+    var canResolveClubPlayer = newsModalMode === "club" && !!String(row && row.actorNick || "").trim();
+    var playerAttrs = !ticker && (eventPlayerId || canResolveClubPlayer)
       ? ' data-home-news-player-id="' + esc(eventPlayerId) + '"' +
         ' data-home-news-player-name="' + esc(row.actorNick || "Игрок") + '"' +
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
@@ -1281,8 +1311,8 @@
       : "";
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
-      '" data-home-news-target="' + esc(row.target || "") + '"' +
-      (ticker ? "" : ' data-home-news-event-id="' + esc(row.id || "") + '"') + playerAttrs + playerStyle + ">" +
+      '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
+      (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
@@ -1434,6 +1464,20 @@
     return newsModalMode === "club" ? clubEvents : events;
   }
 
+  function feedbackEventId(row) {
+    var ownId = String(row && row.id || "");
+    if (newsModalMode !== "friends" || !row || !clubEvents.length) return ownId;
+    var rowText = String(row.text || "").trim();
+    var rowActor = matchKey(row.actorNick);
+    var rowTime = eventTime(row.at);
+    var linked = clubEvents.find(function (candidate) {
+      if (!candidate || String(candidate.text || "").trim() !== rowText) return false;
+      if (rowActor && matchKey(candidate.actorNick) !== rowActor) return false;
+      return eventTime(candidate.at) === rowTime;
+    });
+    return String(linked && linked.id || ownId);
+  }
+
   function syncNewsModalHeading() {
     var title = el("homeFriendNewsModalTitle");
     var eyebrow = el("homeFriendNewsModalEyebrow");
@@ -1444,7 +1488,7 @@
   }
 
   function loadActiveModalFeedback(rows) {
-    var ids = (Array.isArray(rows) ? rows : []).map(function (row) { return String(row && row.id || ""); })
+    var ids = (Array.isArray(rows) ? rows : []).map(feedbackEventId)
       .filter(function (id) { return id && id !== "empty" && id !== "club-empty"; });
     if (!ids.length) return;
     feedbackRequest({ action: "list", eventIds: ids }).then(function (data) {
@@ -1629,7 +1673,7 @@
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
-        if (playerId) {
+        if (playerCard) {
           var playerName = playerCard.getAttribute("data-home-news-player-name") || "Игрок";
           var linkedProfile = clubProfileForNick(playerName);
           // Club event snapshots can contain a stale or mismatched actor id.
@@ -1639,11 +1683,26 @@
           } else if (String(playerId).indexOf("rating:") === 0 && linkedProfile) {
             playerId = linkedProfile.id || playerId;
           }
-          handoffNewsModalToPlayer(
-            playerId,
-            playerName,
-            linkedProfile && linkedProfile.avatar || playerCard.getAttribute("data-home-news-player-avatar") || ""
-          );
+          if (newsModalMode === "club" && (!linkedProfile || !linkedProfile.id)) {
+            setNewsProfileLoading(true, playerName);
+            resolveClubProfileForNick(playerName).then(function (resolvedProfile) {
+              if (!resolvedProfile || !resolvedProfile.id) {
+                setNewsProfileLoading(false);
+                if (typeof alertText === "function") alertText("Профиль игрока «" + playerName + "» пока не найден");
+                return;
+              }
+              handoffNewsModalToPlayer(resolvedProfile.id, playerName,
+                resolvedProfile.avatar || playerCard.getAttribute("data-home-news-player-avatar") || "");
+            });
+            return;
+          }
+          if (playerId) {
+            handoffNewsModalToPlayer(
+              playerId,
+              playerName,
+              linkedProfile && linkedProfile.avatar || playerCard.getAttribute("data-home-news-player-avatar") || ""
+            );
+          }
           return;
         }
         var target = event.target.closest("[data-home-news-target]");
@@ -1670,7 +1729,13 @@
         var text = String(input && input.value || "").trim();
         if (!eventId || !text) return;
         var submit = form.querySelector('button[type="submit"]');
-        if (submit) submit.disabled = true;
+        eventCommentSubmitting[eventId] = true;
+        if (submit) {
+          submit.disabled = true;
+          submit.classList.add("is-sending");
+          submit.setAttribute("aria-busy", "true");
+          submit.textContent = "Отправка…";
+        }
         var previousFeedback = eventFeedback[eventId] || {};
         var previousReply = eventCommentReplies[eventId] || null;
         var payload = { action: "comment", eventId: eventId, text: text };
@@ -1700,12 +1765,14 @@
         delete eventCommentDrafts[eventId];
         renderModalList(activeModalEvents());
         feedbackRequest(payload).then(function (data) {
+          delete eventCommentSubmitting[eventId];
           eventFeedback[eventId] = data.feedback || {};
           eventCommentsOpen[eventId] = true;
           delete eventCommentReplies[eventId];
           delete eventCommentDrafts[eventId];
           renderModalList(activeModalEvents());
         }).catch(function (error) {
+          delete eventCommentSubmitting[eventId];
           eventFeedback[eventId] = previousFeedback;
           eventCommentDrafts[eventId] = text;
           if (previousReply) eventCommentReplies[eventId] = previousReply;
@@ -1952,10 +2019,12 @@
         });
       });
       clubProfileByNick = {};
+      clubProfileLookupPromises = {};
       var ambiguousClubProfileNicks = {};
       players.forEach(function (row) {
         var profile = { id: friendId(row), avatar: friendAvatar(row) || clubNewsFallbackAvatar(row && row.pokerPlusNickname) };
-        nicknameMatchKeys(row && row.pokerPlusNickname).forEach(function (key) {
+        friendRatingNickCandidates(row).forEach(function (nickname) {
+          nicknameMatchKeys(nickname).forEach(function (key) {
           if (!key || ambiguousClubProfileNicks[key]) return;
           if (clubProfileByNick[key] && clubProfileByNick[key].id !== profile.id) {
             delete clubProfileByNick[key];
@@ -1963,6 +2032,7 @@
             return;
           }
           clubProfileByNick[key] = profile;
+          });
         });
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];

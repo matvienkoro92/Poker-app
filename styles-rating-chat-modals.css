@@ -3674,24 +3674,24 @@
   backdrop-filter: blur(3px);
 }
 .profile-reaction-picker__panel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 48px);
+  gap: 8px;
+  padding: 12px;
   border: 1px solid rgba(139, 215, 255, 0.52);
-  border-radius: 999px;
+  border-radius: 28px;
   background: rgba(7, 14, 25, 0.98);
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.52), 0 0 22px rgba(56, 189, 248, 0.18);
 }
 .profile-reaction-picker__panel button {
   display: grid;
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   place-items: center;
   border: 1px solid rgba(255, 214, 120, 0.32);
   border-radius: 50%;
   background: rgba(15, 23, 42, 0.94);
-  font-size: 27px;
+  font-size: 25px;
   transition: transform 0.14s ease, background 0.14s ease;
 }
 .profile-reaction-picker__panel button:hover,
@@ -3866,6 +3866,29 @@
   font: inherit;
   font-size: 12px;
   font-weight: 950;
+}
+.chat-user-modal__news-comment-form button.is-sending {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: wait;
+  background: linear-gradient(180deg, #e3b957, #b87919);
+  color: rgba(23, 16, 8, 0.82);
+  box-shadow: inset 0 0 0 2px rgba(255, 240, 188, 0.5);
+}
+.chat-user-modal__news-comment-form button.is-sending::before {
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 2px solid rgba(23, 16, 8, 0.28);
+  border-top-color: #171008;
+  border-radius: 50%;
+  content: "";
+  animation: profile-comment-submit-spin 0.7s linear infinite;
+}
+@keyframes profile-comment-submit-spin {
+  to { transform: rotate(360deg); }
 }
 .chat-user-modal__news-all {
   width: calc(100% - 28px);

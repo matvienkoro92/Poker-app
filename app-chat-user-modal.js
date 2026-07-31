@@ -8,6 +8,7 @@ function initChatUserModals(opts) {
   if (existingChatUserModal) existingChatUserModal.dataset.chatUserModalBound = "1";
   var base = opts.base || (typeof getApiBase === "function" ? getApiBase() : "");
   var tg = opts.tg || (window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null);
+  var CHAT_NEWS_REACTIONS = ["❤️", "🔥", "👍", "👏", "😂", "😮", "😢", "😡"];
   var escapeHtml = typeof opts.escapeHtml === "function"
     ? opts.escapeHtml
     : function (s) {
@@ -531,7 +532,7 @@ if (chatUserModalEl) {
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--player-news-accent:' + escapeHtml(row.playerAccent) + ';--player-news-rgb:' + escapeHtml(row.playerRgb) + '"'
       : "";
-    var reactionButtons = ["❤️", "🔥", "👏"].map(function (emoji) {
+    var reactionButtons = CHAT_NEWS_REACTIONS.map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);
       if (!count) return "";
       return '<button type="button" class="chat-user-modal__news-reaction' +
@@ -548,7 +549,7 @@ if (chatUserModalEl) {
           var authorAvatar = String(comment.authorAvatar || "");
           var authorProfileId = String(comment.authorProfileId || comment.memberId || "");
           var commentReactions = comment.reactions || {};
-          var commentReactionHtml = ["❤️", "🔥", "👏"].map(function (emoji) {
+          var commentReactionHtml = CHAT_NEWS_REACTIONS.map(function (emoji) {
             var count = Math.max(0, Number(commentReactions[emoji]) || 0);
             if (!count) return "";
             return '<button type="button" class="chat-user-modal__comment-reaction' +
@@ -964,12 +965,22 @@ if (chatUserModalEl) {
     var text = String(input && input.value || "").trim();
     if (!eventId || !text) return;
     var submit = form.querySelector("button");
-    if (submit) submit.disabled = true;
+    if (submit) {
+      submit.disabled = true;
+      submit.classList.add("is-sending");
+      submit.setAttribute("aria-busy", "true");
+      submit.textContent = "Отправка…";
+    }
     chatUserModalFeedbackRequest({ action: "comment", eventId: eventId, text: text }).then(function (data) {
       chatUserModalNewsCommentsOpen[eventId] = true;
       updateChatUserModalNewsFeedback(eventId, data.feedback);
     }).catch(function (error) {
-      if (submit) submit.disabled = false;
+      if (submit) {
+        submit.disabled = false;
+        submit.classList.remove("is-sending");
+        submit.removeAttribute("aria-busy");
+        submit.textContent = "Отправить";
+      }
       if (typeof alertText === "function") alertText(error.message || "Не удалось отправить комментарий");
     });
   }
