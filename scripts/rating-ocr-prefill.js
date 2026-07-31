@@ -28,10 +28,13 @@ especially trophy places that macOS Vision sometimes misses.`);
 }
 
 function numberFromText(text) {
-  const cleaned = String(text || "")
+  const raw = String(text || "").trim();
+  const normalized = /^[+-]?\d{1,3},\d{3}$/.test(raw)
+    ? raw.replace(",", "")
+    : raw.replace(",", ".");
+  const cleaned = normalized
     .replace(/\s+/g, "")
     .replace(/[OoОо]/g, "0")
-    .replace(",", ".")
     .replace(/[^\d.-]/g, "");
   if (!cleaned) return null;
   const n = Number(cleaned);
@@ -41,6 +44,17 @@ function numberFromText(text) {
 function integerFromText(text) {
   const n = numberFromText(text);
   return n == null || !Number.isInteger(n) ? null : n;
+}
+
+function buyinFromText(text) {
+  const thousands = String(text || "").match(/(\d+(?:[.,]\d+)?)\s*K\b/i);
+  if (thousands) {
+    const value = numberFromText(thousands[1]);
+    return value == null ? null : value * 1000;
+  }
+  const value = numberFromText(text);
+  if (value == null) return null;
+  return value;
 }
 
 function isDateTime(text) {
@@ -61,7 +75,7 @@ function normalizeName(raw) {
 }
 
 function playerIdFromText(text) {
-  const match = String(text || "").match(/ID[:\s]?(\d{5,8})/i);
+  const match = String(text || "").match(/ID\s*:?\s*(\d{5,8})/i);
   return match ? match[1] : "";
 }
 
@@ -115,13 +129,13 @@ function looksLikePlayerName(token) {
 }
 
 function isRewardToken(token) {
-  if (token.x < 0.66) return false;
+  if (token.x < 0.66 || token.x > 0.91) return false;
   const n = numberFromText(token.text);
   return n != null && Math.abs(n) < 1000000;
 }
 
 function isPlaceToken(token) {
-  if (token.x < 0.52 || token.x > 0.63) return false;
+  if (token.x < 0.49 || token.x > 0.63) return false;
   const n = integerFromText(token.text);
   return n != null && n >= 0 && n <= 200;
 }
@@ -200,7 +214,7 @@ function parseBlueResultCard(file, tokens) {
   const rankToken = tokens.find((token) => /(?:Ранг|Rank)\s*(\d{1,3})\s*\/\s*\d+/i.test(token.text));
   if (!rankToken) return null;
   const rankMatch = rankToken.text.match(/(?:Ранг|Rank)\s*(\d{1,3})\s*\/\s*\d+/i);
-  const idToken = tokens.find((token) => /ID[:\s]?\d{5,8}/i.test(token.text));
+  const idToken = tokens.find((token) => /ID\s*:?\s*\d{5,8}/i.test(token.text));
   const playerId = idToken ? playerIdFromText(idToken.text) : "";
   const idCenter = idToken ? idToken.y + idToken.height / 2 : 0.44;
   const nameToken = chooseClosest(tokens, looksLikePlayerName, idCenter + 0.025, 0.05);
@@ -272,7 +286,7 @@ async function parseOcrFile(file) {
       : "??:??";
 
   const titleTokens = tokens
-    .filter((token) => token.y >= 0.690 && token.y <= 0.720 && token.x < 0.56)
+    .filter((token) => token.y >= 0.705 && token.y <= 0.735 && token.x < 0.56)
     .filter((token) => !/^(MTT|7MAX|MTT-NLH)$/i.test(token.text))
     .sort((a, b) => a.x - b.x);
   let title = normalizeName(titleTokens.map((token) => token.text).join(" ") || "TODO");
@@ -280,14 +294,19 @@ async function parseOcrFile(file) {
 
   const feeToken = chooseClosest(
     tokens,
-    (token) => token.x > 0.17 && token.x < 0.30 && numberFromText(token.text) != null,
-    0.648,
-    0.035
+    (token) => token.x > 0.10 && token.x < 0.30 && /K\b/i.test(token.text) && buyinFromText(token.text) != null,
+    0.665,
+    0.025
+  ) || chooseClosest(
+    tokens,
+    (token) => token.x > 0.10 && token.x < 0.30 && !/%/.test(token.text) && buyinFromText(token.text) != null,
+    0.665,
+    0.025
   );
-  const buyin = feeToken ? numberFromText(feeToken.text) : 0;
+  const buyin = feeToken ? buyinFromText(feeToken.text) : 0;
   if (title === "TODO" && time === "21:00" && buyin === 200) title = "OK🎰";
   const ids = tokens
-    .filter((token) => /(?:^|[^a-z])ID[:\s]?\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
+    .filter((token) => /(?:^|[^a-z])ID\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
 
   const rows = await Promise.all(ids.map(async (idToken, index) => {
@@ -380,6 +399,8 @@ function formatDraft(tournaments) {
 const cliArgs = process.argv.slice(2);
 const cacheArg = cliArgs.find((arg) => arg.startsWith("--cache-dir="));
 const cacheDir = cacheArg ? path.resolve(ROOT, cacheArg.slice("--cache-dir=".length)) : "";
+const ocrJsonArg = cliArgs.find((arg) => arg.startsWith("--ocr-json="));
+const ocrJsonFile = ocrJsonArg ? path.resolve(ROOT, ocrJsonArg.slice("--ocr-json=".length)) : "";
 const refreshCache = cliArgs.includes("--refresh-cache");
 const imagePaths = cliArgs.filter((arg) => !arg.startsWith("--"));
 if (!imagePaths.length || imagePaths.includes("--help") || imagePaths.includes("-h")) usage(imagePaths.length ? 0 : 1);
@@ -390,13 +411,37 @@ function sha256(file) {
 
 const cachedBySource = new Map();
 const misses = [];
+if (ocrJsonFile) {
+  let supplied;
+  try {
+    supplied = JSON.parse(fs.readFileSync(ocrJsonFile, "utf8"));
+  } catch (err) {
+    console.error(`Cannot read supplied OCR JSON: ${ocrJsonFile}`);
+    process.exit(1);
+  }
+  if (!Array.isArray(supplied)) {
+    console.error(`Supplied OCR JSON must contain an array: ${ocrJsonFile}`);
+    process.exit(1);
+  }
+  supplied.forEach((item) => {
+    if (!item || !item.source || !Array.isArray(item.tokens) || !item.tokens.length) return;
+    cachedBySource.set(path.resolve(item.source), { ...item, source: path.resolve(item.source) });
+  });
+}
 imagePaths.forEach((source) => {
   const hash = sha256(source);
   const cacheFile = cacheDir ? path.join(cacheDir, `${hash}.json`) : "";
-  if (!refreshCache && cacheFile && fs.existsSync(cacheFile)) {
+  const absoluteSource = path.resolve(source);
+  if (cachedBySource.has(absoluteSource)) {
+    cachedBySource.set(source, { ...cachedBySource.get(absoluteSource), source });
+  } else if (!refreshCache && cacheFile && fs.existsSync(cacheFile)) {
     const cached = JSON.parse(fs.readFileSync(cacheFile, "utf8"));
-    cached.source = source;
-    cachedBySource.set(source, cached);
+    if (Array.isArray(cached.tokens) && cached.tokens.length) {
+      cached.source = source;
+      cachedBySource.set(source, cached);
+    } else {
+      misses.push({ source, hash, cacheFile });
+    }
   } else {
     misses.push({ source, hash, cacheFile });
   }
@@ -432,11 +477,12 @@ if (misses.length) {
   }
   fresh.forEach((item) => {
     const match = misses.find((candidate) => candidate.source === item.source);
-    if (match && cacheDir) {
+    const hasTokens = Array.isArray(item.tokens) && item.tokens.length;
+    if (match && cacheDir && hasTokens) {
       fs.mkdirSync(cacheDir, { recursive: true });
       fs.writeFileSync(match.cacheFile, JSON.stringify(item));
     }
-    cachedBySource.set(item.source, item);
+    if (hasTokens) cachedBySource.set(item.source, item);
   });
 }
 const parsed = imagePaths.map((source) => cachedBySource.get(source)).filter(Boolean);

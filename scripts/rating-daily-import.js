@@ -24,7 +24,8 @@ Options:
   --dry-run        OCR and import preview without writing files
   --allow-unknown  Import even when a positive player ID is absent from the nickname map
   --force          Process files even if their hashes already exist in import history
-  --refresh-ocr    Ignore cached OCR and recognize source images again`);
+  --refresh-ocr    Ignore cached OCR and recognize source images again
+  --ocr-json=FILE  Use JSON produced directly by rating-vision-ocr.swift`);
   process.exit(code);
 }
 
@@ -74,6 +75,7 @@ const dryRun = argv.includes("--dry-run");
 const allowUnknown = argv.includes("--allow-unknown");
 const force = argv.includes("--force");
 const refreshOcr = argv.includes("--refresh-ocr");
+const ocrJsonArg = argv.find((arg) => arg.startsWith("--ocr-json="));
 const inputs = argv.filter((arg) => !arg.startsWith("--"));
 if (!inputs.length) usage(1);
 
@@ -100,6 +102,7 @@ try {
 
   const ocrArgs = [OCR, `--cache-dir=${OCR_CACHE_DIR}`];
   if (refreshOcr) ocrArgs.push("--refresh-cache");
+  if (ocrJsonArg) ocrArgs.push(ocrJsonArg);
   ocrArgs.push(...pending.map((item) => item.file));
   const ocr = run(process.execPath, ocrArgs);
   const draft = ocr.stdout;
