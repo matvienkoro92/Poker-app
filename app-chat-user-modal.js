@@ -554,6 +554,10 @@ if (chatUserModalEl) {
               '" data-profile-comment-reaction="' + escapeHtml(emoji) + '" data-comment-id="' + escapeHtml(comment.id || "") + '">' +
               escapeHtml(emoji) + (count ? '<span data-profile-comment-reaction-users="' + escapeHtml(emoji) + '">' + count + "</span>" : "") + "</button>";
           }).join("");
+          var replyQuote = comment.replyTo
+            ? '<blockquote class="home-news-comment-quote"><strong>' + escapeHtml(comment.replyTo.fromName || "Игрок") +
+              '</strong><span>' + escapeHtml(String(comment.replyTo.text || "").slice(0, 160)) + "</span></blockquote>"
+            : "";
           return '<div class="chat-user-modal__news-comment" data-profile-comment-id="' + escapeHtml(comment.id || "") + '">' +
             '<button type="button" class="chat-user-modal__news-comment-author" data-profile-event-author' +
               ' data-user-id="' + escapeHtml(authorProfileId) + '"' +
@@ -566,7 +570,7 @@ if (chatUserModalEl) {
             '</button>' +
             (comment.isMine ? '<button type="button" class="chat-user-modal__news-comment-delete" data-profile-comment-delete="' +
               escapeHtml(comment.id || "") + '" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>' : "") +
-            '<p>' + escapeHtml(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
+            replyQuote + '<p>' + escapeHtml(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
         }).join("")
       : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
     var wallControls = type === "personal" && chatUserModalWallCanManage

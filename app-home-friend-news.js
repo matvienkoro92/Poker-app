@@ -17,6 +17,8 @@
   var clubActiveIndex = 0;
   var eventFeedback = {};
   var eventCommentsOpen = {};
+  var eventCommentReplies = {};
+  var eventCommentDrafts = {};
   var newsModalMode = "friends";
   var friendNewsLoading = true;
   var friendNewsLoaded = false;
@@ -26,7 +28,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v1";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v1:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v3";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v4";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
@@ -46,6 +48,11 @@
     { accent: "#d9e56b", rgb: "217, 229, 107" },
     { accent: "#f080d8", rgb: "240, 128, 216" },
     { accent: "#7fa9ff", rgb: "127, 169, 255" },
+  ];
+  var HOME_COMMENT_EMOJIS = [
+    "😀", "😂", "😍", "😎", "🤔", "😢", "😡", "🥳",
+    "👍", "👎", "👏", "🙏", "💪", "🤝", "🔥", "❤️",
+    "🎉", "🏆", "💰", "🎯", "♠️", "♥️", "♦️", "♣️",
   ];
 
   function isUndatedTournamentSnapshotEvent(row) {
@@ -440,6 +447,20 @@
     return Math.max(0, Math.round(Number(value) || 0)).toLocaleString("ru-RU") + " ₽";
   }
 
+  function eventTextHtml(value) {
+    var text = String(value == null ? "" : value);
+    var pattern = /\d(?:[\d\s\u00a0\u202f]*\d)?\s*₽/g;
+    var html = "";
+    var cursor = 0;
+    var match;
+    while ((match = pattern.exec(text))) {
+      html += esc(text.slice(cursor, match.index));
+      html += '<span class="home-friend-news__amount">' + esc(match[0]) + "</span>";
+      cursor = match.index + match[0].length;
+    }
+    return html + esc(text.slice(cursor));
+  }
+
   function isRecentEvent(value) {
     var time = eventTime(value);
     return !!time && time <= Date.now() + 86400000 && Date.now() - time <= RECENT_EVENT_MS;
@@ -598,8 +619,9 @@
       if (!action) return null;
       var detail = String(row && row.tournament || "").trim();
       var displayName = String(row && row.nick || "").trim() || friendName(friend);
+      var stableActorKey = "rating:" + (matchKey(displayName) || matchKey(friendName(friend)));
       return {
-        id: "history:tournament:" + friendId(friend) + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
+        id: "history:tournament:" + stableActorKey + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
         type: place === 1 || reward >= 50000 ? "achievement" : "rating",
         icon: place === 1 ? "◆" : "▲",
         text: displayName + " " + action + (detail ? " · " + detail : ""),
@@ -627,8 +649,9 @@
       if (!friend) return;
       var reward = Number(row && row.reward) || 0;
       var place = Number(row && row.place) || 0;
-      var baseId = friendId(friend) + ":" + String(row && (row.dateLabel || row.date)) + ":" + place + ":" + reward;
       var name = String(row && row.nick || "").trim() || friendName(friend);
+      var stableActorKey = "rating:" + (matchKey(name) || matchKey(friendName(friend)));
+      var baseId = stableActorKey + ":" + String(row && (row.dateLabel || row.date)) + ":" + place + ":" + reward;
       var shared = {
         type: "achievement",
         icon: "◆",
@@ -1063,10 +1086,12 @@
         (count ? '<span data-home-news-reaction-users="' + esc(emoji) + '" title="Кто поставил">' + count + "</span>" : "") + "</button>";
     }).join("");
     var comments = Array.isArray(feedback.comments) ? feedback.comments : [];
+    var activeReply = eventCommentReplies[rowId] || null;
+    var draft = String(eventCommentDrafts[rowId] || "");
     var clubKindHtml = newsModalMode === "club"
       ? '<span class="home-friend-news-modal__kind home-friend-news-modal__kind--' +
         (String(rowId).indexOf("daily:") === 0 ? "daily" : "mtt") + '">' +
-        (String(rowId).indexOf("daily:") === 0 ? "КРУТКА ДНЯ" : "ВЫИГРЫШ В МТТ") + "</span>"
+        (String(rowId).indexOf("daily:") === 0 ? "КРУТКА ДНЯ" : '<span aria-hidden="true">🏆</span> ВЫИГРЫШ В МТТ') + "</span>"
       : "";
     var commentsHtml = comments.length ? comments.map(function (comment) {
       var name = String(comment.author || "Игрок");
@@ -1081,6 +1106,10 @@
           '" data-home-comment-reaction="' + esc(emoji) + '" data-comment-id="' + esc(comment.id || "") + '">' +
           esc(emoji) + (count ? '<span data-home-comment-reaction-users="' + esc(emoji) + '">' + count + "</span>" : "") + "</button>";
       }).join("");
+      var replyQuote = comment.replyTo
+        ? '<blockquote class="home-news-comment-quote"><strong>' + esc(comment.replyTo.fromName || "Игрок") +
+          '</strong><span>' + esc(String(comment.replyTo.text || "").slice(0, 160)) + "</span></blockquote>"
+        : "";
       return '<div class="chat-user-modal__news-comment" data-home-comment-id="' + esc(comment.id || "") + '">' +
         '<button type="button" class="chat-user-modal__news-comment-author" data-home-news-comment-author' +
           ' data-user-id="' + esc(profileId) + '" data-user-name="' + esc(name) +
@@ -1090,8 +1119,20 @@
           "<strong>" + esc(name) + "</strong></button>" +
         (comment.isMine ? '<button type="button" class="chat-user-modal__news-comment-delete" data-home-comment-delete="' +
           esc(comment.id || "") + '" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>' : "") +
-        "<p>" + esc(comment.text || "") + '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml + "</span></div>";
+        replyQuote + "<p>" + esc(comment.text || "") +
+        '<span class="chat-user-modal__comment-reactions">' + commentReactionHtml +
+          '<button type="button" class="home-news-comment-reply-btn" data-home-comment-reply="' + esc(comment.id || "") +
+          '" aria-label="Ответить на комментарий">↩ Ответить</button>' +
+        "</span></div>";
     }).join("") : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
+    var replyPreview = activeReply
+      ? '<span class="home-news-reply-preview"><span><strong>Ответ на ' + esc(activeReply.fromName || "Игрок") +
+        '</strong><small>' + esc(String(activeReply.text || "").slice(0, 100)) +
+        '</small></span><button type="button" data-home-comment-reply-cancel aria-label="Отменить ответ">×</button></span>'
+      : "";
+    var emojiPicker = '<span class="home-news-emoji-picker" hidden>' + HOME_COMMENT_EMOJIS.map(function (emoji) {
+      return '<button type="button" data-home-comment-emoji="' + esc(emoji) + '" aria-label="Вставить ' + esc(emoji) + '">' + esc(emoji) + "</button>";
+    }).join("") + "</span>";
     return '<span class="chat-user-modal__news-actions">' +
       reactionButtons +
       '<button type="button" class="chat-user-modal__news-comment-toggle' +
@@ -1102,9 +1143,37 @@
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
-          '<input type="text" maxlength="500" placeholder="Написать комментарий…" aria-label="Комментарий к событию">' +
+          replyPreview +
+          '<span class="home-news-comment-input-wrap"><button type="button" class="home-news-comment-emoji-btn" data-home-comment-emoji-toggle aria-label="Выбрать смайл">☺</button>' +
+          '<input type="text" maxlength="500" value="' + esc(draft) + '" placeholder="Написать комментарий…" aria-label="Комментарий к событию">' + emojiPicker + "</span>" +
           '<button type="submit">Отправить</button>' +
-        "</form></span>";
+      "</form></span>";
+  }
+
+  function focusHomeNewsCommentInput(eventId) {
+    window.setTimeout(function () {
+      Array.prototype.some.call(document.querySelectorAll("[data-home-news-comment-form]"), function (form) {
+        var item = form.closest("[data-home-news-event-id]");
+        if (!item || item.getAttribute("data-home-news-event-id") !== String(eventId || "")) return false;
+        var input = form.querySelector("input");
+        if (input) {
+          input.focus();
+          input.selectionStart = input.selectionEnd = input.value.length;
+        }
+        return true;
+      });
+    }, 0);
+  }
+
+  function insertHomeNewsCommentEmoji(input, emoji) {
+    if (!input) return;
+    var text = String(input.value || "");
+    var start = typeof input.selectionStart === "number" ? input.selectionStart : text.length;
+    var end = typeof input.selectionEnd === "number" ? input.selectionEnd : start;
+    input.value = (text.slice(0, start) + emoji + text.slice(end)).slice(0, 500);
+    input.selectionStart = input.selectionEnd = Math.min(start + emoji.length, input.value.length);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
   }
 
   function eventHtml(row, ticker) {
@@ -1132,7 +1201,7 @@
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
-      (ticker ? esc(row.text) : "<strong>" + esc(row.text) + "</strong>" +
+      (ticker ? eventTextHtml(row.text) : "<strong>" + eventTextHtml(row.text) + "</strong>" +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         "<small>" + esc(timeLabel) + "</small>" + eventFeedbackHtml(row)) +
       "</span></span>";
@@ -1387,6 +1456,50 @@
         }
         var item = event.target.closest("[data-home-news-event-id]");
         var eventId = item && item.getAttribute("data-home-news-event-id");
+        var replyButton = event.target.closest("[data-home-comment-reply]");
+        if (eventId && replyButton) {
+          var replyId = replyButton.getAttribute("data-home-comment-reply");
+          var replyComment = ((eventFeedback[eventId] || {}).comments || []).find(function (row) {
+            return String(row && row.id || "") === String(replyId || "");
+          });
+          if (replyComment) {
+            eventCommentReplies[eventId] = {
+              id: String(replyComment.id || ""),
+              fromName: String(replyComment.author || "Игрок"),
+              text: String(replyComment.text || "").slice(0, 160),
+            };
+            eventCommentsOpen[eventId] = true;
+            renderModalList(activeModalEvents());
+            focusHomeNewsCommentInput(eventId);
+          }
+          return;
+        }
+        if (eventId && event.target.closest("[data-home-comment-reply-cancel]")) {
+          delete eventCommentReplies[eventId];
+          renderModalList(activeModalEvents());
+          focusHomeNewsCommentInput(eventId);
+          return;
+        }
+        var emojiToggle = event.target.closest("[data-home-comment-emoji-toggle]");
+        if (eventId && emojiToggle) {
+          var emojiForm = emojiToggle.closest("[data-home-news-comment-form]");
+          var emojiPicker = emojiForm && emojiForm.querySelector(".home-news-emoji-picker");
+          document.querySelectorAll(".home-news-emoji-picker").forEach(function (picker) {
+            if (picker !== emojiPicker) picker.hidden = true;
+          });
+          if (emojiPicker) emojiPicker.hidden = !emojiPicker.hidden;
+          var emojiInput = emojiForm && emojiForm.querySelector("input");
+          if (emojiInput) emojiInput.focus();
+          return;
+        }
+        var emojiChoice = event.target.closest("[data-home-comment-emoji]");
+        if (eventId && emojiChoice) {
+          var choiceForm = emojiChoice.closest("[data-home-news-comment-form]");
+          insertHomeNewsCommentEmoji(choiceForm && choiceForm.querySelector("input"), emojiChoice.getAttribute("data-home-comment-emoji") || "");
+          var choicePicker = choiceForm && choiceForm.querySelector(".home-news-emoji-picker");
+          if (choicePicker) choicePicker.hidden = true;
+          return;
+        }
         var deleteComment = event.target.closest("[data-home-comment-delete]");
         if (eventId && deleteComment) {
           var deleteCommentId = deleteComment.getAttribute("data-home-comment-delete");
@@ -1454,6 +1567,13 @@
           setView(view);
         }
       });
+      modal.addEventListener("input", function (event) {
+        var form = event.target.closest("[data-home-news-comment-form]");
+        if (!form || event.target.tagName !== "INPUT") return;
+        var item = form.closest("[data-home-news-event-id]");
+        var eventId = item && item.getAttribute("data-home-news-event-id");
+        if (eventId) eventCommentDrafts[eventId] = String(event.target.value || "").slice(0, 500);
+      });
       modal.addEventListener("submit", function (event) {
         var form = event.target.closest("[data-home-news-comment-form]");
         if (!form) return;
@@ -1463,11 +1583,15 @@
         var input = form.querySelector("input");
         var text = String(input && input.value || "").trim();
         if (!eventId || !text) return;
-        var submit = form.querySelector("button");
+        var submit = form.querySelector('button[type="submit"]');
         if (submit) submit.disabled = true;
-        feedbackRequest({ action: "comment", eventId: eventId, text: text }).then(function (data) {
+        var payload = { action: "comment", eventId: eventId, text: text };
+        if (eventCommentReplies[eventId]) payload.replyTo = { id: eventCommentReplies[eventId].id };
+        feedbackRequest(payload).then(function (data) {
           eventFeedback[eventId] = data.feedback || {};
           eventCommentsOpen[eventId] = true;
+          delete eventCommentReplies[eventId];
+          delete eventCommentDrafts[eventId];
           renderModalList(activeModalEvents());
         }).catch(function (error) {
           if (submit) submit.disabled = false;
