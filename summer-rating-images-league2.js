@@ -334,5 +334,9 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-30-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-30-07-2026-league2-chetverg-mko-18h.jpg",
     "rating-compressed-preview/rating-30-07-2026-league2-ok-21h.jpg"
+  ],
+  "31.07.2026": [
+    "rating-compressed-preview/rating-31-07-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-31-07-2026-league2-ok-21h.jpg"
   ]
 };

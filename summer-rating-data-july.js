@@ -5789,5 +5789,230 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       ]
     }
   ],
-  "31.07.2026": []
+  "31.07.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 3359.0000000000005,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Bali Yana🌴🆕20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 3,
+          "reward": 2154,
+          "points": 90
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 690,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 7,
+          "reward": 2345,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 7540,
+          "points": 110
+        },
+        {
+          "nick": "Whenstarzz",
+          "place": 4,
+          "reward": 1900,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 3,
+          "reward": 4419,
+          "points": 90
+        },
+        {
+          "nick": "Em13!!",
+          "place": 10,
+          "reward": 2272,
+          "points": 0
+        },
+        {
+          "nick": "ВасильевВлад...",
+          "place": 4,
+          "reward": 1260,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Annie",
+          "place": 2,
+          "reward": 1940,
+          "points": 110
+        },
+        {
+          "nick": "Prushnik",
+          "place": 4,
+          "reward": 1110,
+          "points": 70
+        },
+        {
+          "nick": "WildBoar",
+          "place": 6,
+          "reward": 730,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "NLH Bounty 400K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 6,
+          "reward": 13915,
+          "points": 50
+        },
+        {
+          "nick": "Proxor",
+          "place": 41,
+          "reward": 2492,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 37,
+          "reward": 1818,
+          "points": 0
+        },
+        {
+          "nick": "Coonie Lee",
+          "place": 35,
+          "reward": 1368,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "мистерFox",
+          "place": 6,
+          "reward": 8953.91,
+          "points": 50
+        },
+        {
+          "nick": "MORPEH",
+          "place": 19,
+          "reward": 1346.09,
+          "points": 0
+        },
+        {
+          "nick": "Naparnik",
+          "place": 20,
+          "reward": 1005.47,
+          "points": 0
+        },
+        {
+          "nick": "Whenstarzz",
+          "place": 17,
+          "reward": 350,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 14,
+          "reward": 310.94,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MissClick",
+          "place": 3,
+          "reward": 3600,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 4518.46,
+          "points": 135
+        },
+        {
+          "nick": "мистерFox",
+          "place": 2,
+          "reward": 4463.42,
+          "points": 110
+        }
+      ]
+    }
+  ]
 };

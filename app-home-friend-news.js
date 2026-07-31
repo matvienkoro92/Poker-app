@@ -87,7 +87,8 @@
 
   function readClubEventsCache() {
     try {
-      var rows = JSON.parse(sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]");
+      var stored = localStorage.getItem(CLUB_EVENTS_CACHE_KEY) || sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]";
+      var rows = JSON.parse(stored);
       return (Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isCurrentClubEvent(row);
       }).slice(0, MAX_EVENTS);
@@ -98,7 +99,7 @@
 
   function writeClubEventsCache(rows) {
     try {
-      sessionStorage.setItem(CLUB_EVENTS_CACHE_KEY, JSON.stringify(
+      localStorage.setItem(CLUB_EVENTS_CACHE_KEY, JSON.stringify(
         (Array.isArray(rows) ? rows : []).filter(function (row) {
           return row && row.id !== "club-empty" && row.id !== "club-loading";
         }).slice(0, MAX_EVENTS)
@@ -2061,6 +2062,13 @@
   function init() {
     events = readRenderedEventsCache();
     clubEvents = readClubEventsCache();
+    // The generated tournament feed is already on the page. Use it for the
+    // first paint instead of holding the ticker behind two network requests.
+    // Remote data still replaces this snapshot with real profiles and daily
+    // poker winners as soon as both requests finish.
+    if (!clubEvents.length && clubNewsStaticRows().length) {
+      clubEvents = buildClubEventsFromRows([], []);
+    }
     clubNewsLoaded = clubEvents.length > 0;
     mountWhenProfileReady();
     loadClubNews();
