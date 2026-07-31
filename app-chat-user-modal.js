@@ -567,8 +567,10 @@ if (chatUserModalEl) {
       : "";
     return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) +
       '" data-profile-event-id="' + escapeHtml(rowId) + '"' + playerStyle + ">" +
-      '<span class="chat-user-modal__news-icon" aria-hidden="true">' + chatUserModalNewsIcon(type) + "</span>" +
+      '<span class="chat-user-modal__news-icon' + (type === "personal" && chatUserModalHeroAvatarUrl ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
+        (type === "personal" && chatUserModalHeroAvatarUrl ? '<img src="' + escapeHtml(chatUserModalHeroAvatarUrl) + '" alt="">' : chatUserModalNewsIcon(type)) + "</span>" +
       '<span class="chat-user-modal__news-copy">' + pinBadge + '<strong>' + escapeHtml(row && row.text || "") + "</strong>" +
+        (row && row.image ? '<img class="chat-user-modal__wall-image" src="' + escapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (row && row.editedAt ? '<small class="chat-user-modal__wall-edited">изменено</small>' : "") + wallControls +
         '<span class="chat-user-modal__news-actions"><span class="chat-user-modal__news-actions-label">Реакция</span>' + reactionButtons +
           '<button type="button" class="chat-user-modal__news-comment-toggle' +
@@ -627,6 +629,7 @@ if (chatUserModalEl) {
         postId: String(post.id || ""),
         type: "personal",
         text: String(post.text || ""),
+        image: String(post.image || ""),
         at: post.createdAt,
         editedAt: post.editedAt,
         pinned: !!post.pinned,

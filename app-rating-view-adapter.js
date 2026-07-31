@@ -1513,8 +1513,21 @@ function pokerGetFriendNewsTournamentSnapshotsReady(nicks) {
   });
 }
 
+function pokerGetClubNewsTournamentSnapshotsReady() {
+  var ready = typeof window.pokerEnsureScriptDomains === "function"
+    ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).catch(function () { return false; })
+    : Promise.resolve(false);
+  return ready.then(function () {
+    var nicks = pokerRatingAchievementAllTournamentRows().map(function (row) {
+      return row && row.nick;
+    }).filter(Boolean);
+    return pokerGetFriendNewsTournamentSnapshots(nicks);
+  });
+}
+
 window.pokerGetFriendNewsTournamentSnapshots = pokerGetFriendNewsTournamentSnapshots;
 window.pokerGetFriendNewsTournamentSnapshotsReady = pokerGetFriendNewsTournamentSnapshotsReady;
+window.pokerGetClubNewsTournamentSnapshotsReady = pokerGetClubNewsTournamentSnapshotsReady;
 
 function applyWinterRatingPlayerModalFilterAndRender(modal) {
   var fullSummary = modal._winterPlayerModalFullSummary;

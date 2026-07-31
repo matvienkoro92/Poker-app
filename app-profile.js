@@ -37,7 +37,7 @@ function setProfileTab(tab) {
   if (activeTab === "club") setTimeout(refreshProfileOwnWall, 0);
 }
 
-var profileOwnWallState = { tab: "tournaments", tournaments: [], posts: [], accountId: "", loading: false };
+var profileOwnWallState = { tab: "tournaments", tournaments: [], posts: [], accountId: "", loading: false, submitting: false, image: "" };
 
 function profileOwnWallRequest(payload) {
   var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -64,7 +64,7 @@ function profileOwnWallDate(value) {
 function profileOwnWallRows() {
   if (profileOwnWallState.tab === "personal") {
     return profileOwnWallState.posts.map(function (post) {
-      return { id: post.id, text: post.text, at: post.createdAt, pinned: !!post.pinned, editedAt: post.editedAt, personal: true };
+      return { id: post.id, text: post.text, image: post.image, at: post.createdAt, pinned: !!post.pinned, editedAt: post.editedAt, personal: true };
     });
   }
   return profileOwnWallState.tournaments;
@@ -91,14 +91,17 @@ function renderProfileOwnWall() {
     return;
   }
   list.innerHTML = rows.map(function (row) {
+    var ownAvatar = row.personal ? profilePublicCardAvatarUrl() : "";
     var controls = row.personal
       ? '<span class="chat-user-modal__wall-controls"><button type="button" data-profile-wall-edit="' + profileEscapeHtml(row.id) + '">Редактировать</button>' +
         '<button type="button" data-profile-wall-pin="' + profileEscapeHtml(row.id) + '">' + (row.pinned ? "Открепить" : "Закрепить") + "</button></span>"
       : "";
     return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
-      '<span class="chat-user-modal__news-icon" aria-hidden="true">' + (row.personal ? "✎" : "♠") + "</span>" +
+      '<span class="chat-user-modal__news-icon' + (ownAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
+        (ownAvatar ? '<img src="' + profileEscapeHtml(ownAvatar) + '" alt="">' : (row.personal ? "✎" : "♠")) + "</span>" +
       '<span class="chat-user-modal__news-copy">' + (row.pinned ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>' : "") +
-        "<strong>" + profileEscapeHtml(row.text || "") + "</strong>" +
+        (row.text ? "<strong>" + profileEscapeHtml(row.text) + "</strong>" : "") +
+        (row.image ? '<img class="chat-user-modal__wall-image" src="' + profileEscapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         '<small class="profile-own-wall__date">' + profileEscapeHtml(profileOwnWallDate(row.at)) + (row.editedAt ? " · изменено" : "") + "</small>" + controls +
       "</span></article>";
   }).join("");
@@ -132,11 +135,103 @@ function refreshProfileOwnWall() {
   });
 }
 
+function showProfileOwnWallError(error) {
+  var message = error && error.message ? error.message : "Не удалось опубликовать запись";
+  if (typeof alertText === "function") {
+    alertText(message);
+    return;
+  }
+  try {
+    if (typeof tg !== "undefined" && tg && typeof tg.showToast === "function") tg.showToast(message);
+  } catch (eProfileWallToast) {}
+}
+
+function submitProfileOwnWall(event) {
+  if (event) event.preventDefault();
+  if (profileOwnWallState.submitting) return;
+  var composer = event && event.target && event.target.id === "profileOwnWallComposer"
+    ? event.target
+    : document.getElementById("profileOwnWallComposer");
+  var input = composer ? composer.querySelector("#profileOwnWallText") : document.getElementById("profileOwnWallText");
+  var text = String(input && input.value || "").trim();
+  if (!text && !profileOwnWallState.image) return;
+  var submitButton = composer && composer.querySelector('button[type="submit"]');
+  profileOwnWallState.submitting = true;
+  if (submitButton) submitButton.disabled = true;
+  profileOwnWallRequest({ action: "create", text: text, image: profileOwnWallState.image }).then(function (data) {
+    profileOwnWallState.posts = Array.isArray(data.posts) ? data.posts : [];
+    profileOwnWallState.tab = "personal";
+    if (input) input.value = "";
+    profileOwnWallState.image = "";
+    renderProfileOwnWallImagePreview();
+    renderProfileOwnWall();
+  }).catch(function (error) {
+    showProfileOwnWallError(error);
+  }).finally(function () {
+    profileOwnWallState.submitting = false;
+    if (submitButton) submitButton.disabled = false;
+  });
+}
+
+function renderProfileOwnWallImagePreview() {
+  var preview = document.getElementById("profileOwnWallImagePreview");
+  if (!preview) return;
+  preview.hidden = !profileOwnWallState.image;
+  preview.innerHTML = profileOwnWallState.image
+    ? '<img src="' + profileEscapeHtml(profileOwnWallState.image) + '" alt="Выбранное фото"><button type="button" data-profile-wall-image-remove aria-label="Убрать фото">×</button>'
+    : "";
+}
+
+function resizeProfileOwnWallImage(file) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = function () {
+      var image = new Image();
+      image.onerror = reject;
+      image.onload = function () {
+        var scale = Math.min(1, 1200 / Math.max(image.width, image.height));
+        var canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+        var quality = 0.86;
+        var result = canvas.toDataURL("image/jpeg", quality);
+        while (result.length > 440000 && quality > 0.5) {
+          quality -= 0.08;
+          result = canvas.toDataURL("image/jpeg", quality);
+        }
+        if (result.length > 450000) return reject(new Error("Фото слишком большое"));
+        resolve(result);
+      };
+      image.src = String(reader.result || "");
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+if (!window.__profileOwnWallSubmitBound) {
+  window.__profileOwnWallSubmitBound = true;
+  document.addEventListener("submit", function (event) {
+    if (event.target && event.target.id === "profileOwnWallComposer") submitProfileOwnWall(event);
+  }, true);
+}
+
 function initProfileOwnWall() {
   var root = document.getElementById("profileOwnWall");
   if (!root || root.dataset.bound === "1") return;
   root.dataset.bound = "1";
   root.addEventListener("click", function (event) {
+    if (event.target.closest("#profileOwnWallImageButton")) {
+      var fileInput = document.getElementById("profileOwnWallImageInput");
+      if (fileInput) fileInput.click();
+      return;
+    }
+    if (event.target.closest("[data-profile-wall-image-remove]")) {
+      profileOwnWallState.image = "";
+      renderProfileOwnWallImagePreview();
+      return;
+    }
     var tab = event.target.closest("[data-profile-wall-tab]");
     if (tab) {
       profileOwnWallState.tab = tab.getAttribute("data-profile-wall-tab") === "personal" ? "personal" : "tournaments";
@@ -159,17 +254,15 @@ function initProfileOwnWall() {
       renderProfileOwnWall();
     });
   });
-  var composer = document.getElementById("profileOwnWallComposer");
-  if (composer) composer.addEventListener("submit", function (event) {
-    event.preventDefault();
-    var input = document.getElementById("profileOwnWallText");
-    var text = String(input && input.value || "").trim();
-    if (!text) return;
-    profileOwnWallRequest({ action: "create", text: text }).then(function (data) {
-      profileOwnWallState.posts = data.posts || [];
-      if (input) input.value = "";
-      renderProfileOwnWall();
-    });
+  var imageInput = document.getElementById("profileOwnWallImageInput");
+  if (imageInput) imageInput.addEventListener("change", function () {
+    var file = imageInput.files && imageInput.files[0];
+    imageInput.value = "";
+    if (!file || !/^image\//i.test(file.type || "")) return;
+    resizeProfileOwnWallImage(file).then(function (image) {
+      profileOwnWallState.image = image;
+      renderProfileOwnWallImagePreview();
+    }).catch(showProfileOwnWallError);
   });
   refreshProfileOwnWall();
 }
@@ -246,7 +339,12 @@ function profilePublicCardMemberIdFromAuth() {
     var auth = window.__pokerTelegramAuth;
     var user = auth && auth.user ? auth.user : null;
     if (!user || !(auth.status === "verified" || auth.status === "dev_skip")) return "";
-    if (user.memberId != null && String(user.memberId).trim()) return String(user.memberId).trim();
+    if (user.memberId != null && String(user.memberId).trim()) {
+      var memberId = String(user.memberId).trim();
+      if (memberId.indexOf("tg_") === 0 || memberId.indexOf("vk_") === 0 || memberId.indexOf("ID") === 0) return memberId;
+      if (/^\d+$/.test(memberId)) return (user.is_vk || user.vk ? "vk_" : "tg_") + memberId;
+      return memberId;
+    }
     if (user.id == null || String(user.id).trim() === "") return "";
     var raw = String(user.id).trim();
     if (raw.indexOf("tg_") === 0 || raw.indexOf("vk_") === 0 || raw.indexOf("ID") === 0) return raw;

@@ -17,6 +17,7 @@
   var clubActiveIndex = 0;
   var eventFeedback = {};
   var eventCommentsOpen = {};
+  var newsModalMode = "friends";
   var friendNewsLoading = true;
   var friendNewsLoaded = false;
   var lastFriendsSignature = "";
@@ -142,6 +143,7 @@
 
   function authSuffix() {
     try {
+      if (typeof pokerApiAuthQuery === "function") return pokerApiAuthQuery("?");
       if (typeof authQuerySafe === "function") return authQuerySafe();
       if (typeof getAuthQuery === "function") return getAuthQuery();
     } catch (error) {}
@@ -226,7 +228,7 @@
         '<div class="home-friend-news-modal" id="homeFriendNewsModal" hidden>' +
           '<button type="button" class="home-friend-news-modal__backdrop" data-home-friend-news-close aria-label="Закрыть новости"></button>' +
           '<section class="home-friend-news-modal__panel" role="dialog" aria-modal="true" aria-labelledby="homeFriendNewsModalTitle">' +
-            '<header class="home-friend-news-modal__header"><div><span>Друзья и клуб</span>' +
+            '<header class="home-friend-news-modal__header"><div><span id="homeFriendNewsModalEyebrow">Друзья и клуб</span>' +
               '<h2 id="homeFriendNewsModalTitle">Новости друзей</h2></div>' +
               '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
             '</header><div class="home-friend-news-modal__list" id="homeFriendNewsList"></div>' +
@@ -594,6 +596,21 @@
     return Promise.resolve({});
   }
 
+  function clubTournamentSnapshotsReady() {
+    function read() {
+      return typeof window.pokerGetClubNewsTournamentSnapshotsReady === "function"
+        ? window.pokerGetClubNewsTournamentSnapshotsReady()
+        : Promise.resolve({});
+    }
+    if (typeof window.pokerGetClubNewsTournamentSnapshotsReady === "function") return read();
+    if (typeof window.pokerEnsureScriptDomains === "function") {
+      return Promise.resolve(window.pokerEnsureScriptDomains([
+        "rating-common", "rating-winter", "rating-spring", "rating-summer",
+      ])).then(read).catch(function () { return {}; });
+    }
+    return Promise.resolve({});
+  }
+
   function applyRaffleSnapshots(friends, snapshots, raffles) {
     var candidates = (friends || []).map(function (friend) {
       return {
@@ -803,12 +820,14 @@
       var accountId = String(post && post.accountId || "").trim();
       var friend = byId[accountId];
       var text = String(post && post.text || "").trim();
-      if (!friend || !text || !isRecentEvent(post.createdAt)) return null;
+      var image = String(post && post.image || "").trim();
+      if (!friend || (!text && !image) || !isRecentEvent(post.createdAt)) return null;
       return {
         id: "wall:" + accountId + ":" + String(post.id || ""),
         type: "personal",
         icon: "✎",
-        text: friendName(friend) + " написал: " + text,
+        text: friendName(friend) + (text ? " написал: " + text : " опубликовал фото"),
+        image: image,
         at: post.createdAt,
         actorId: friendId(friend) || accountId,
         actorNick: friendName(friend),
@@ -910,7 +929,9 @@
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
-      (ticker ? esc(row.text) : "<strong>" + esc(row.text) + "</strong><small>" + esc(timeLabel) + "</small>" + eventFeedbackHtml(row)) +
+      (ticker ? esc(row.text) : "<strong>" + esc(row.text) + "</strong>" +
+        (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
+        "<small>" + esc(timeLabel) + "</small>" + eventFeedbackHtml(row)) +
       "</span></span>";
   }
 
@@ -1019,7 +1040,7 @@
       }];
     }
     track.innerHTML = events.map(function (row) { return eventHtml(row, true); }).join("");
-    renderModalList(events);
+    renderModalList(activeModalEvents());
     showIndex(0, false);
     startRotation();
   }
@@ -1027,7 +1048,8 @@
   function renderModalList(rows) {
     var list = el("homeFriendNewsList");
     if (!list) return;
-    if (friendNewsLoading && !friendNewsLoaded) {
+    var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
+    if (friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
       list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
         '<span aria-hidden="true"></span><strong>Загружаем новости всех друзей…</strong>' +
         '<small>Собираем результаты и достижения игроков</small></div>';
@@ -1039,20 +1061,48 @@
       : modalEventsHtml(snapshot);
   }
 
+  function activeModalEvents() {
+    return newsModalMode === "club" ? clubEvents : events;
+  }
+
+  function syncNewsModalHeading() {
+    var title = el("homeFriendNewsModalTitle");
+    var eyebrow = el("homeFriendNewsModalEyebrow");
+    if (title) title.textContent = newsModalMode === "club" ? "Новости клуба за вчера" : "Новости друзей";
+    if (eyebrow) eyebrow.textContent = newsModalMode === "club" ? "Клуб · события дня" : "Друзья и клуб";
+  }
+
+  function loadActiveModalFeedback(rows) {
+    var ids = (Array.isArray(rows) ? rows : []).map(function (row) { return String(row && row.id || ""); })
+      .filter(function (id) { return id && id !== "empty" && id !== "club-empty"; });
+    if (!ids.length) return;
+    feedbackRequest({ action: "list", eventIds: ids }).then(function (data) {
+      Object.assign(eventFeedback, data.feedback || {});
+      var modal = el("homeFriendNewsModal");
+      if (modal && !modal.hidden) renderModalList(activeModalEvents());
+    }).catch(function () {});
+  }
+
   function openModal() {
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
-    renderModalList(events);
+    newsModalMode = "friends";
+    syncNewsModalHeading();
+    renderModalList(activeModalEvents());
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
-    var ids = events.map(function (row) { return String(row && row.id || ""); })
-      .filter(function (id) { return id && id !== "empty"; });
-    if (ids.length) {
-      feedbackRequest({ action: "list", eventIds: ids }).then(function (data) {
-        eventFeedback = data.feedback || {};
-        if (!modal.hidden) renderModalList(events);
-      }).catch(function () {});
-    }
+    loadActiveModalFeedback(events);
+  }
+
+  function openClubModal() {
+    var modal = el("homeFriendNewsModal");
+    if (!modal) return;
+    newsModalMode = "club";
+    syncNewsModalHeading();
+    renderModalList(clubEvents);
+    modal.hidden = false;
+    document.body.classList.add("home-friend-news-modal-open");
+    loadActiveModalFeedback(clubEvents);
   }
 
   function closeModal() {
@@ -1072,14 +1122,7 @@
     }
     if (clubOpen && clubOpen.dataset.clubNewsBound !== "1") {
       clubOpen.dataset.clubNewsBound = "1";
-      clubOpen.addEventListener("click", function () {
-        var row = clubEvents[clubActiveIndex] || {};
-        if (row.actorId) {
-          openNewsPlayerProfile(row.actorId, row.actorNick || "Игрок", row.actorAvatar || "");
-          return;
-        }
-        if (row.target && typeof setView === "function") setView(row.target);
-      });
+      clubOpen.addEventListener("click", openClubModal);
     }
     if (modal && modal.dataset.friendNewsBound !== "1") {
       modal.dataset.friendNewsBound = "1";
@@ -1107,7 +1150,7 @@
           feedbackRequest({ action: "reaction", eventId: eventId, emoji: reaction.getAttribute("data-home-news-reaction") })
             .then(function (data) {
               eventFeedback[eventId] = data.feedback || {};
-              renderModalList(events);
+              renderModalList(activeModalEvents());
             }).catch(function (error) {
               if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
             });
@@ -1115,7 +1158,7 @@
         }
         if (eventId && event.target.closest("[data-home-news-comments]")) {
           eventCommentsOpen[eventId] = !eventCommentsOpen[eventId];
-          renderModalList(events);
+          renderModalList(activeModalEvents());
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
@@ -1150,7 +1193,7 @@
         feedbackRequest({ action: "comment", eventId: eventId, text: text }).then(function (data) {
           eventFeedback[eventId] = data.feedback || {};
           eventCommentsOpen[eventId] = true;
-          renderModalList(events);
+          renderModalList(activeModalEvents());
         }).catch(function (error) {
           if (submit) submit.disabled = false;
           if (typeof alertText === "function") alertText(error.message || "Не удалось отправить комментарий");
@@ -1194,21 +1237,27 @@
     if (signature && signature === lastFriendsSignature && Date.now() - lastLoadAt < 30000) return;
     var requestSequence = ++loadSequence;
     friendNewsLoading = true;
-    if (!friendNewsLoaded && el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(events);
+    if (!friendNewsLoaded && el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(activeModalEvents());
     if (signature) lastFriendsSignature = signature;
     lastLoadAt = Date.now();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
     var friendsPromise = suppliedFriends
       ? Promise.resolve({ ok: true, friends: suppliedFriends })
-      : fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) { return response.json(); });
+      : fetch(base + "/api/friends" + suffix, { cache: "no-store" }).then(function (response) {
+          if (!response.ok) throw new Error("friends_http_" + response.status);
+          return response.json();
+        }).then(function (payload) {
+          if (!payload || payload.ok !== true || !Array.isArray(payload.friends)) throw new Error("friends_invalid");
+          return payload;
+        });
     friendsPromise.then(function (friendsPayload) {
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
       if (!friends.length) {
         friendNewsLoading = false;
         friendNewsLoaded = true;
-        if (!events.length || events[0].id === "empty") {
+        if (!events.some(function (row) { return row && row.id !== "empty"; })) {
           events = [];
           render();
         }
@@ -1233,8 +1282,13 @@
           body: JSON.stringify(typeof pokerApiAuthJsonBody === "function"
             ? pokerApiAuthJsonBody({ action: "friend-feed" })
             : { action: "friend-feed" }),
-        }).then(function (response) { return response.json(); })
-          .catch(function () { return { posts: [] }; }),
+        }).then(function (response) {
+          if (!response.ok) throw new Error("friend_feed_http_" + response.status);
+          return response.json();
+        }).then(function (payload) {
+          if (!payload || payload.ok !== true || !Array.isArray(payload.posts)) throw new Error("friend_feed_invalid");
+          return payload;
+        }).catch(function () { return { posts: [], failed: true }; }),
       ]);
     }).then(function (results) {
       if (!results || requestSequence !== loadSequence) return;
@@ -1250,7 +1304,7 @@
         results[4] || {},
         results[5] && Array.isArray(results[5].raffles) ? results[5].raffles : []
       );
-      events = attachFriendAvatars(collectLevelEvents(friends).concat(
+      var nextEvents = attachFriendAvatars(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         personalPostEvents(friends, results[7] && results[7].posts),
         collectTournamentEvents(friends, tournamentSnapshots),
@@ -1272,6 +1326,8 @@
         .filter(function (row, index, rows) {
           return rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
         }).slice(0, MAX_EVENTS);
+      var previousEvents = events.filter(function (row) { return row && row.id !== "empty" && isRecentEvent(row.at); });
+      events = nextEvents.length ? nextEvents : previousEvents;
       friendNewsLoading = false;
       friendNewsLoaded = true;
       writeRenderedEventsCache(events);
@@ -1280,7 +1336,7 @@
       if (requestSequence !== loadSequence) return;
       friendNewsLoading = false;
       friendNewsLoaded = true;
-      if (el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(events);
+      if (el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(activeModalEvents());
     });
   }
 
@@ -1306,7 +1362,16 @@
         });
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
-      return tournamentSnapshotsReady(players).then(function (snapshots) {
+      return clubTournamentSnapshotsReady().then(function (snapshots) {
+        var knownNicks = {};
+        players.forEach(function (row) { knownNicks[matchKey(row && row.pokerPlusNickname)] = true; });
+        (snapshots && snapshots.__recentEvents || []).forEach(function (row) {
+          var nick = String(row && row.nick || "").trim();
+          var key = matchKey(nick);
+          if (!key || knownNicks[key]) return;
+          knownNicks[key] = true;
+          players.push({ userId: "rating:" + key, pokerPlusNickname: nick, pokerPlusName: nick });
+        });
         clubEvents = attachFriendAvatars(
           recentTournamentEvents(players, snapshots || {}).concat(
             recentTournamentAchievementEvents(players, snapshots || {}),
@@ -1333,7 +1398,10 @@
     mountWhenProfileReady();
     loadClubNews();
     window.addEventListener("poker-profile-friends-ready", function (event) {
-      load();
+      var readyFriends = event && event.detail && Array.isArray(event.detail.friends)
+        ? event.detail.friends
+        : null;
+      load(readyFriends);
     });
     window.addEventListener("poker-auth-changed", function () {
       lastFriendsSignature = "";

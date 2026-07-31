@@ -130,7 +130,12 @@
               </div>
               <form class="chat-user-modal__wall-composer" id="profileOwnWallComposer" hidden>
                 <textarea id="profileOwnWallText" maxlength="1500" rows="3" placeholder="Напишите что-нибудь на своей стене…"></textarea>
-                <div><button type="submit">Опубликовать</button></div>
+                <input type="file" id="profileOwnWallImageInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+                <div class="profile-own-wall__image-preview" id="profileOwnWallImagePreview" hidden></div>
+                <div class="profile-own-wall__composer-actions">
+                  <button type="button" class="profile-own-wall__attach" id="profileOwnWallImageButton">📷 Прикрепить фото</button>
+                  <button type="submit">Опубликовать</button>
+                </div>
               </form>
               <div class="chat-user-modal__news-list profile-own-wall__list" id="profileOwnWallList"></div>
             </section>
