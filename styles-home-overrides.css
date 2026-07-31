@@ -73,7 +73,7 @@ html[data-theme="gold"] body[data-view="home"] {
   overflow: hidden;
   color: #e8eef8;
   background:
-    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.16), rgba(var(--friend-news-rgb), 0.045) 54%, transparent 88%),
+    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.18), rgba(var(--friend-news-rgb), 0.08) 54%, rgba(var(--friend-news-rgb), 0.035)),
     #151c26;
   border: 1px solid rgba(var(--friend-news-rgb), 0.34);
   border-radius: 15px;
@@ -362,8 +362,18 @@ html[data-theme="gold"] body[data-view="home"] {
   padding: 9px 6px;
   border-bottom: 1px solid rgba(142, 160, 184, 0.12);
   background:
-    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.11), rgba(var(--friend-news-rgb), 0.025) 42%, transparent 76%);
+    linear-gradient(90deg, rgba(var(--friend-news-rgb), 0.18), rgba(var(--friend-news-rgb), 0.08) 54%, rgba(var(--friend-news-rgb), 0.035)),
+    #151c26;
   box-shadow: inset 3px 0 0 rgba(var(--friend-news-rgb), 0.66);
+}
+
+.home-friend-news-modal__item[data-home-news-player-id] {
+  cursor: pointer;
+}
+
+.home-friend-news-modal__item[data-home-news-player-id]:focus-visible {
+  outline: 2px solid var(--friend-news-accent);
+  outline-offset: -2px;
 }
 
 .home-friend-news-modal__icon {

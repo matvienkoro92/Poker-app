@@ -837,10 +837,16 @@
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
       : "";
+    var playerAttrs = !ticker && row && row.actorId
+      ? ' data-home-news-player-id="' + esc(row.actorId) + '"' +
+        ' data-home-news-player-name="' + esc(row.actorNick || "Игрок") + '"' +
+        ' data-home-news-player-avatar="' + esc(avatar) + '"' +
+        ' role="button" tabindex="0"'
+      : "";
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       '" data-home-news-target="' + esc(row.target || "") + '"' +
-      (ticker ? "" : ' data-home-news-event-id="' + esc(row.id || "") + '"') + playerStyle + ">" +
+      (ticker ? "" : ' data-home-news-event-id="' + esc(row.id || "") + '"') + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
@@ -991,6 +997,17 @@
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+        var playerCard = event.target.closest("[data-home-news-player-id]");
+        var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
+        if (playerId && typeof window.openChatUserModalById === "function") {
+          closeModal();
+          window.openChatUserModalById(
+            playerId,
+            playerCard.getAttribute("data-home-news-player-name") || "Игрок",
+            playerCard.getAttribute("data-home-news-player-avatar") || ""
+          );
+          return;
+        }
         var target = event.target.closest("[data-home-news-target]");
         var view = target && target.getAttribute("data-home-news-target");
         if (view && typeof setView === "function") {
@@ -1017,6 +1034,14 @@
           if (submit) submit.disabled = false;
           if (typeof alertText === "function") alertText(error.message || "Не удалось отправить комментарий");
         });
+      });
+      modal.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+        var playerCard = event.target.closest("[data-home-news-player-id]");
+        if (!playerCard) return;
+        event.preventDefault();
+        playerCard.click();
       });
     }
   }
