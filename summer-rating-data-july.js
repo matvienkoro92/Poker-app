@@ -6846,6 +6846,20 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 90
         }
       ]
+    },
+    {
+      "time": "09:00",
+      "name": "KG PLO6 / 2$",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Panica",
+          "place": 4,
+          "reward": 2055,
+          "points": 70
+        }
+      ]
     }
   ],
   "30.07.2026": [
