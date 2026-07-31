@@ -3,7 +3,7 @@ var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-150k-
 var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-300k.webp";
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-100k.webp";
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-170k.webp";
-var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-saturday-10-tickets-entry-1.webp";
+var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE;
 var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-pko-progressive-300k.webp";
 var HOME_TOURNAMENT_MONTH_KNOCKOUT_1M_BANNER_FILE = "home-tournament-month-knockout-1m-2026-07-19.webp";
 
@@ -63,11 +63,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Фриролл",
-    buyin: "1₽ · R:200₽ / A:400₽",
-    guarantee: "10 билетов по 10 000₽ каждый",
+    name: "Нокаут",
+    buyin: "5 000₽",
+    guarantee: "300 000₽",
     banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Фриролл субботы — вход 1 ₽, ребай 200 ₽, аддон 400 ₽, 10 билетов по 10 000 ₽ каждый",
+    bannerAlt: "Poker21 Нокаут субботы — вход 5 000 ₽, гарантия 300 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   }

@@ -147,8 +147,10 @@ function renderProfileOwnWall() {
   var root = document.getElementById("profileOwnWall");
   var list = document.getElementById("profileOwnWallList");
   var count = document.getElementById("profileOwnWallCount");
+  var personalCount = document.getElementById("profileOwnWallPersonalCount");
   var composer = document.getElementById("profileOwnWallComposer");
   if (!root || !list) return;
+  if (personalCount) personalCount.textContent = "(" + profileOwnWallState.posts.length + ")";
   var rows = profileOwnWallRows();
   root.querySelectorAll("[data-profile-wall-tab]").forEach(function (button) {
     var active = button.getAttribute("data-profile-wall-tab") === profileOwnWallState.tab;
