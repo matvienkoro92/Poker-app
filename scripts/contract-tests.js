@@ -1202,6 +1202,16 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.body.statsSummary.raffles.pending, true, "CRM core defers the slow raffle archive scan");
   assert.deepStrictEqual(r.body.players, [], "CRM core response omits the heavy player collection");
   assert.strictEqual(r.body.playersPending, true, "CRM core response tells the client to load players on demand");
+  const raffleSummaryRequest = req("GET", { pwaSession: s.admin, mode: "raffle-summary" });
+  raffleSummaryRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&menuAccessToken=" + encodeURIComponent(menuAccessToken) + "&mode=raffle-summary";
+  r = await call(crm, raffleSummaryRequest);
+  assert.strictEqual(r.statusCode, 200, "CRM loads the selected-period raffle summary on demand");
+  assert.strictEqual(r.body.raffles.uniqueParticipants, 9, "raffle summary reads external participant storage");
+  assert.strictEqual(r.body.raffles.uniqueWinners, 2, "raffle summary includes unique winners");
+  assert.strictEqual(r.body.raffles.recipientsPending, true, "raffle summary defers recipient details until the modal opens");
+  const raffleStatsDayKey = require(path.join(root, "lib", "player-crm-utils")).mskDateKeyFromMs(Date.parse(raffleNow));
+  assert.strictEqual(redis.kv.get("poker_app:raffle_stats_index:v1:ready"), "1", "raffle summary completes the historical date index");
+  assert.ok(redis.s("poker_app:raffle_stats_day:" + raffleStatsDayKey).has(raffleId), "historical raffle is indexed under its CRM business day");
   const calculationsAccessToken = signAccessToken("calculations", "tg_388008256", BOT_TOKEN);
   const calculationRafflesRequest = req("GET", { pwaSession: s.admin, mode: "raffles" });
   calculationRafflesRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +

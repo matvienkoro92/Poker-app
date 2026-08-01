@@ -2849,7 +2849,7 @@
     if (state.raffleStatsLoading && state.raffleStatsRequestKey === requestKey) return Promise.resolve(false);
     state.raffleStatsLoading = true;
     state.raffleStatsRequestKey = requestKey;
-    return fetch(base + "/api/player-crm" + crmQuery({ mode: "raffles" }), { cache: "no-store" })
+    return fetch(base + "/api/player-crm" + crmQuery({ mode: "raffle-summary" }), { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
         var currentRange = selectedPeriodRange();
@@ -2968,8 +2968,9 @@
         renderAll();
         loadDailyPokerStats();
         loadCrmWeekReport();
-        loadSelectedPeriodRaffles();
-        loadPeriodComparison();
+        // Do not make two archive scans compete on a cold serverless instance.
+        // Current-period totals are visible first; comparison follows afterward.
+        loadSelectedPeriodRaffles().then(function () { loadPeriodComparison(); });
         return true;
       });
   }
