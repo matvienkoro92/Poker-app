@@ -1304,9 +1304,10 @@
     var players = Array.isArray(state.players) ? state.players : [];
     var botCount = players.filter(function (player) { return !!((player.channels || {}).bot); }).length;
     var pushCount = players.filter(function (player) { return !!((player.channels || {}).push); }).length;
+    var audienceReady = state.playersScope === "broadcast" && !state.heavyLoading;
     var labels = {
-      bot: "Рассылка в бот · " + intFmt(botCount),
-      push: "Push · " + intFmt(pushCount)
+      bot: "Рассылка в бот · " + (audienceReady ? intFmt(botCount) : "…"),
+      push: "Push · " + (audienceReady ? intFmt(pushCount) : "…")
     };
     Array.prototype.forEach.call(document.querySelectorAll("[data-crm-broadcast-channel]"), function (button) {
       var value = button.getAttribute("data-crm-broadcast-channel") || "bot";
@@ -2567,13 +2568,13 @@
         var returnKind = user.kind === "cash" ? "Кеш" : "Билет";
         return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__raffle-return\">" +
           "<b class=\"player-crm__raffle-recipient-number\">" + esc(index + 1) + "</b>" +
+          "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b>" +
           "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
           "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
           "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
           "<span>Розыгрыш <b>" + esc(user.raffleTitle || user.raffleId || "—") + "</b></span>" +
           "<span class=\"player-crm__raffle-return-kind\">" + esc(returnKind) + " <b>" + esc(user.reason || "Возврат") + "</b></span>" +
-          "<span>Дата <b>" + esc(dateTime(user.returnedAt) || "—") + "</b></span>" +
-          "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b></article>";
+          "<span>Дата <b>" + esc(dateTime(user.returnedAt) || "—") + "</b></span></article>";
       }).join("") + "</div>" : "<div class=\"player-crm__timeline-item\">За выбранный период возвратов нет.</div>";
       bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + tabsHtml + returnsHtml + "</div>";
       return;
@@ -2705,6 +2706,7 @@
     if (state.heavyLoading) return Promise.resolve(false);
     state.heavyLoading = true;
     state.heavyLoadingScope = scope || "heavy";
+    if (scope === "broadcast") updateBroadcastChannelCounts();
     renderStats();
     renderAnalytics();
     var base = getApiBaseSafe();
@@ -4678,6 +4680,7 @@
         if (batchNumber) batchNumber.value = "1";
         state.tab = "broadcast";
         syncTabs();
+        if (state.playersScope !== "broadcast") loadCrmHeavyData("broadcast");
         updateBroadcastAudience();
         return;
       }
