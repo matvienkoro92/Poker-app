@@ -37,6 +37,8 @@
     rafflesModalTab: "issued",
     raffleRecipientsLoading: false,
     raffleRecipientsRequestKey: "",
+    raffleStatsLoading: false,
+    raffleStatsRequestKey: "",
     raffleRecipientsSort: "tickets",
     blockedUsers: [],
     blockedSearch: "",
@@ -2567,7 +2569,6 @@
         var pokerName = user.pokerPlusNickname || "—";
         var returnKind = user.kind === "cash" ? "Кеш" : "Билет";
         return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__raffle-return\">" +
-          "<b class=\"player-crm__raffle-recipient-number\">" + esc(index + 1) + "</b>" +
           "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b>" +
           "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
           "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
@@ -2833,6 +2834,34 @@
       });
   }
 
+  function loadSelectedPeriodRaffles() {
+    var base = getApiBaseSafe();
+    if (!base) return Promise.resolve(false);
+    var range = selectedPeriodRange();
+    var requestKey = range && range.from && range.to ? range.from + ":" + range.to : "all";
+    if (state.raffleStatsLoading && state.raffleStatsRequestKey === requestKey) return Promise.resolve(false);
+    state.raffleStatsLoading = true;
+    state.raffleStatsRequestKey = requestKey;
+    return fetch(base + "/api/player-crm" + crmQuery({ mode: "raffles" }), { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        var currentRange = selectedPeriodRange();
+        var currentKey = currentRange && currentRange.from && currentRange.to ? currentRange.from + ":" + currentRange.to : "all";
+        if (state.raffleStatsRequestKey !== requestKey || currentKey !== requestKey || !data || data.ok === false || !data.raffles) return;
+        if (!state.statsSummary || typeof state.statsSummary !== "object") state.statsSummary = {};
+        state.statsSummary.raffles = data.raffles;
+      })
+      .catch(function () {})
+      .then(function () {
+        if (state.raffleStatsRequestKey !== requestKey) return false;
+        state.raffleStatsLoading = false;
+        renderStats();
+        renderWeekReport();
+        if (state.rafflesModalOpen) renderRafflesModal();
+        return true;
+      });
+  }
+
   function loadCrmData(scope) {
     if (scope === "chart" && state.loaded) return loadCrmHeavyData(scope);
     if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 95000) {
@@ -2932,6 +2961,7 @@
         renderAll();
         loadDailyPokerStats();
         loadCrmWeekReport();
+        loadSelectedPeriodRaffles();
         loadPeriodComparison();
         return true;
       });

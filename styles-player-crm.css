@@ -3492,7 +3492,7 @@ button.player-crm__stat:focus-visible,
   color: #9ae678;
 }
 .player-crm__raffle-return {
-  grid-template-columns: 24px minmax(90px, 0.75fr) minmax(80px, 1fr) minmax(105px, 1fr) minmax(135px, 1.25fr) minmax(150px, 1.35fr) minmax(105px, 0.9fr) minmax(110px, 0.9fr);
+  grid-template-columns: minmax(90px, 0.75fr) minmax(80px, 1fr) minmax(105px, 1fr) minmax(135px, 1.25fr) minmax(150px, 1.35fr) minmax(105px, 0.9fr) minmax(110px, 0.9fr);
 }
 .player-crm__daily-return {
   grid-template-columns: 24px minmax(80px, 1fr) minmax(110px, 1fr) minmax(145px, 1.35fr) minmax(150px, 1.3fr) minmax(120px, 1fr) minmax(90px, 0.8fr);
@@ -3600,7 +3600,7 @@ button.player-crm__stat:focus-visible,
     padding: 7px 6px;
   }
   .player-crm__raffle-return {
-    grid-template-columns: 16px minmax(58px, 0.7fr) minmax(58px, 0.9fr) minmax(70px, 1fr) minmax(82px, 1.15fr) minmax(90px, 1.25fr) minmax(65px, 0.8fr) minmax(72px, 0.85fr);
+    grid-template-columns: minmax(58px, 0.7fr) minmax(58px, 0.9fr) minmax(70px, 1fr) minmax(82px, 1.15fr) minmax(90px, 1.25fr) minmax(65px, 0.8fr) minmax(72px, 0.85fr);
   }
   .player-crm__daily-return {
     grid-template-columns: 16px minmax(58px, 0.9fr) minmax(72px, 1fr) minmax(85px, 1.15fr) minmax(95px, 1.2fr) minmax(80px, 1fr) minmax(58px, 0.7fr);

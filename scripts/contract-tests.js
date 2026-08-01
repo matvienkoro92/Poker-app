@@ -1199,8 +1199,7 @@ async function testCrmAppUserBlock(redis) {
   r = await call(crm, coreRequest);
   assert.strictEqual(r.statusCode, 200, "CRM loads blocked list");
   assert.ok((r.body.blockedUsers || []).some((row) => row && row.reason === "contract block"), "CRM exposes blocked users list");
-  assert.strictEqual(r.body.statsSummary.raffles.uniqueParticipants, 9, "CRM reads unique raffle participants from external participant storage");
-  assert.strictEqual(r.body.statsSummary.raffles.uniqueWinners, 2, "CRM keeps the unique raffle winner count from stored winners");
+  assert.strictEqual(r.body.statsSummary.raffles.pending, true, "CRM core defers the slow raffle archive scan");
   assert.deepStrictEqual(r.body.players, [], "CRM core response omits the heavy player collection");
   assert.strictEqual(r.body.playersPending, true, "CRM core response tells the client to load players on demand");
   const calculationsAccessToken = signAccessToken("calculations", "tg_388008256", BOT_TOKEN);
