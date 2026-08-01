@@ -7,6 +7,8 @@
   var RATING_RISE_EVENTS_KEY = "poker_home_friend_rating_rise_events_v1";
   var CLUB_RATING_SNAPSHOTS_KEY = "poker_home_club_rating_snapshots_v1";
   var CLUB_RATING_RISE_EVENTS_KEY = "poker_home_club_rating_rise_events_v1";
+  var CLUB_LEVELS_KEY = "poker_home_club_levels_v1";
+  var CLUB_LEVEL_EVENTS_KEY = "poker_home_club_level_events_v1";
   var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v6";
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
@@ -454,6 +456,7 @@
         pokerPlusNickname: linked.pokerPlusNickname || linked.ratingNick || linked.ratingNickname ||
           linked.nickname || linked.nick || friend.pokerPlusNickname || "",
         pokerPlusName: linked.name || linked.pokerPlusName || "",
+        statusLevel: linked.statusLevel || linked.level || friend.statusLevel || friend.level || 0,
       });
     });
   }
@@ -667,16 +670,23 @@
     var next = {};
     (friends || []).forEach(function (friend) {
       var id = friendId(friend);
-      var level = Math.max(0, Number(friend && friend.statusLevel) || 0);
+      var level = Math.max(0, Number(friend && (friend.statusLevel || friend.level)) || 0);
       if (!id || !level) return;
       next[id] = level;
-      if (previous[id] && level > Number(previous[id])) {
+      var oldLevel = Math.max(0, Number(previous[id]) || 0);
+      if (oldLevel && level !== oldLevel) {
+        var rose = level > oldLevel;
         savedEvents.unshift({
-          id: "level:" + id + ":" + level,
+          id: "level:" + id + ":" + oldLevel + ":" + level,
           type: "level",
-          icon: "♠",
-          text: friendName(friend) + " поднялся на " + level + " уровень",
+          icon: rose ? "▲" : "▼",
+          text: rose
+            ? friendName(friend) + " повысил уровень с " + oldLevel + " до " + level
+            : friendName(friend) + " понизил уровень с " + oldLevel + " до " + level,
           at: new Date().toISOString(),
+          actorId: id,
+          actorNick: friendName(friend),
+          actorAvatar: friendAvatar(friend),
         });
       }
     });
@@ -685,6 +695,43 @@
       return row && isRecentEvent(row.at) && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
     }).slice(0, MAX_EVENTS);
     writeJson(LEVEL_EVENTS_KEY, savedEvents);
+    return savedEvents;
+  }
+
+  function collectClubLevelEvents(players) {
+    var previous = readJson(CLUB_LEVELS_KEY, {});
+    var savedEvents = readJson(CLUB_LEVEL_EVENTS_KEY, []);
+    var next = {};
+    var tournamentDay = clubTournamentDayKey();
+    var changedAt = tournamentDay ? tournamentDay + "T23:55:00" : new Date().toISOString();
+    (players || []).forEach(function (player) {
+      var id = friendId(player);
+      var level = Math.max(0, Number(player && (player.statusLevel || player.level)) || 0);
+      if (!id || !level) return;
+      next[id] = level;
+      var oldLevel = Math.max(0, Number(previous[id]) || 0);
+      if (!oldLevel || oldLevel === level) return;
+      var rose = level > oldLevel;
+      savedEvents.unshift({
+        id: "club-level:" + id + ":" + oldLevel + ":" + level + ":" + eventDayKey(changedAt),
+        type: "level",
+        icon: rose ? "▲" : "▼",
+        text: rose
+          ? friendName(player) + " повысил уровень с " + oldLevel + " до " + level
+          : friendName(player) + " понизил уровень с " + oldLevel + " до " + level,
+        at: changedAt,
+        actorId: id,
+        actorNick: friendName(player),
+        actorAvatar: friendAvatar(player),
+      });
+    });
+    writeJson(CLUB_LEVELS_KEY, next);
+    savedEvents = savedEvents.filter(function (row, index, rows) {
+      return row && isCurrentClubEvent(row) && rows.findIndex(function (candidate) {
+        return candidate && candidate.id === row.id;
+      }) === index;
+    }).slice(0, MAX_EVENTS);
+    writeJson(CLUB_LEVEL_EVENTS_KEY, savedEvents);
     return savedEvents;
   }
 
@@ -773,6 +820,10 @@
         } else if (oldPlace && newPlace && newPlace < oldPlace) {
           changeText = actorNick + " поднялся в рейтинге Лиги " + league +
             " с " + oldPlace + "-го на " + newPlace + "-е место";
+        } else if (oldPlace && newPlace && newPlace > oldPlace) {
+          changeText = actorNick + " спустился в рейтинге Лиги " + league +
+            " с " + oldPlace + "-го на " + newPlace + "-е место";
+          changeIcon = "▼";
         }
         if (!changeText) return;
         created.push({
@@ -2180,7 +2231,11 @@
         });
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
-      var nextClubEvents = stableClubEvents(buildClubEventsFromRows(players, winners), preservedClubEvents);
+      var clubLevelEvents = attachFriendAvatars(collectClubLevelEvents(players), players);
+      var nextClubEvents = stableClubEvents(
+        buildClubEventsFromRows(players, winners).concat(clubLevelEvents),
+        preservedClubEvents
+      );
       // Publish one complete snapshot only after both remote sources settle.
       // This prevents static tournament rows from flashing first and daily
       // poker events from jumping into the list a moment later.
@@ -2257,6 +2312,31 @@
 
   window.pokerReadCachedPlayerNews = readPlayerNewsCache;
 
+  function playerProgressEvents(id, nick) {
+    var nickKey = matchKey(nick);
+    return [
+      LEVEL_EVENTS_KEY,
+      CLUB_LEVEL_EVENTS_KEY,
+      RATING_RISE_EVENTS_KEY,
+      CLUB_RATING_RISE_EVENTS_KEY,
+    ].reduce(function (rows, key) {
+      return rows.concat(readJson(key, []));
+    }, []).filter(function (row, index, rows) {
+      if (!row || !isRecentEvent(row.at)) return false;
+      var matches = !!id && String(row.actorId || "").trim() === id;
+      if (!matches && nickKey) matches = matchKey(row.actorNick) === nickKey;
+      if (!matches && nickKey && Array.isArray(row.affectedActorNicks)) {
+        matches = row.affectedActorNicks.some(function (value) { return matchKey(value) === nickKey; });
+      }
+      if (!matches && nickKey) {
+        var text = String(row.text || "").trim();
+        matches = matchKey(text.slice(0, nick.length)) === nickKey &&
+          (!text.charAt(nick.length) || /\s/.test(text.charAt(nick.length)));
+      }
+      return matches && rows.findIndex(function (candidate) { return candidate && candidate.id === row.id; }) === index;
+    });
+  }
+
   window.pokerGetPlayerNews = function (identity, options) {
     options = options || {};
     var player = identity && typeof identity === "object" ? identity : {};
@@ -2296,6 +2376,7 @@
       var quickRows = attachFriendAvatars(
         recentTournamentEvents([pseudoFriend], snapshots || {}).concat(
           birthdayEvents([pseudoFriend]),
+          playerProgressEvents(id, nick),
           readPlayerNewsCache(identity)
         ),
         [pseudoFriend]
@@ -2323,6 +2404,7 @@
         results[3] && Array.isArray(results[3].rows) ? results[3].rows : []
       );
       var birthdays = birthdayEvents([pseudoFriend]);
+      var progress = playerProgressEvents(id, nick);
       var cached = readRenderedEventsCache().filter(function (row) {
         if (!row || row.id === "empty") return false;
         if (id && String(row.actorId || "").trim() === id) return true;
@@ -2332,7 +2414,7 @@
           matchKey(text.slice(0, nick.length)) === matchKey(nick) &&
           (!text.charAt(nick.length) || /\s/.test(text.charAt(nick.length)));
       });
-      var rows = attachFriendAvatars(history.concat(daily, achievements, birthdays, cached), [pseudoFriend])
+      var rows = attachFriendAvatars(history.concat(daily, achievements, birthdays, progress, cached), [pseudoFriend])
         .sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
         .filter(function (row, index, rows) {
           return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;

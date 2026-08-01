@@ -1137,6 +1137,14 @@
 .profile-find-friend__player {
   touch-action: pan-x pan-y pinch-zoom;
 }
+
+/* The generic button rule above allows only vertical gestures. These more
+   specific selectors keep a swipe started on a player card horizontal. */
+.profile-find-friend .profile-find-friend__players,
+.profile-find-friend .profile-find-friend__player,
+.profile-find-friend .profile-find-friend__player * {
+  touch-action: pan-x pan-y pinch-zoom;
+}
 .profile-friends--unread {
   border-color: rgba(248, 113, 113, 0.58);
   box-shadow:

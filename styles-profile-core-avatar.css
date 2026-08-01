@@ -4423,3 +4423,26 @@ body.profile-avatar-choice-open {
     min-width: 120px !important;
   }
 }
+
+/* Final desktop placement: the editor sits directly under the public badges. */
+@media (min-width: 701px) {
+  .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 2px !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__self-actions {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: start !important;
+    justify-items: start !important;
+    width: min(100%, 620px) !important;
+    margin-top: -4px !important;
+    transform: none !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
+    justify-content: flex-start !important;
+  }
+}
