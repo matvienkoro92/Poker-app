@@ -2564,19 +2564,26 @@
       "<button type=\"button\" role=\"tab\" data-crm-raffles-tab=\"issued\" aria-selected=\"" + (raffleTab === "issued" ? "true" : "false") + "\" class=\"" + (raffleTab === "issued" ? "is-active" : "") + "\">Выдачи <b>" + esc(intFmt(recipients.length)) + "</b></button>" +
       "<button type=\"button\" role=\"tab\" data-crm-raffles-tab=\"returns\" aria-selected=\"" + (raffleTab === "returns" ? "true" : "false") + "\" class=\"" + (raffleTab === "returns" ? "is-active" : "") + "\">Возвраты <b>" + esc(intFmt(raffleStats && raffleStats.returnCount || 0)) + "</b></button></div>";
     if (raffleTab === "returns") {
-      var returnsHtml = returns.length ? "<div class=\"player-crm__daily-winners-list\">" + returns.map(function (user, index) {
-        var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
-        var pokerName = user.pokerPlusNickname || "—";
-        var returnKind = user.kind === "cash" ? "Кеш" : "Билет";
-        return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__raffle-return\">" +
-          "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b>" +
-          "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
-          "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
-          "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
-          "<span>Розыгрыш <b>" + esc(user.raffleTitle || user.raffleId || "—") + "</b></span>" +
-          "<span class=\"player-crm__raffle-return-kind\">" + esc(returnKind) + " <b>" + esc(user.reason || "Возврат") + "</b></span>" +
-          "<span>Дата <b>" + esc(dateTime(user.returnedAt) || "—") + "</b></span></article>";
-      }).join("") + "</div>" : "<div class=\"player-crm__timeline-item\">За выбранный период возвратов нет.</div>";
+      function raffleReturnsGroupHtml(title, groupReturns) {
+        var groupTotal = groupReturns.reduce(function (sum, user) { return sum + Number(user && user.amount || 0); }, 0);
+        var rowsHtml = groupReturns.map(function (user) {
+          var telegram = user.telegramUsername ? "@" + String(user.telegramUsername).replace(/^@+/, "") : "—";
+          var pokerName = user.pokerPlusNickname || "—";
+          return "<article class=\"player-crm__daily-winner player-crm__raffle-recipient player-crm__raffle-return\">" +
+            "<b class=\"player-crm__raffle-recipient-total\">+" + esc(money(user.amount || 0)) + "</b>" +
+            "<strong class=\"player-crm__raffle-recipient-name\">" + esc(user.name || pokerName) + "</strong>" +
+            "<span>Telegram <b>" + esc(telegram) + "</b></span>" +
+            "<span>Poker21 <b>" + esc(pokerName) + (user.pokerPlusUserId ? " · " + esc(user.pokerPlusUserId) : "") + "</b></span>" +
+            "<span>Розыгрыш <b>" + esc(user.raffleTitle || user.raffleId || "—") + "</b></span>" +
+            "<span class=\"player-crm__raffle-return-kind\">" + esc(title) + " <b>" + esc(user.reason || "Возврат") + "</b></span>" +
+            "<span>Дата <b>" + esc(dateTime(user.returnedAt) || "—") + "</b></span></article>";
+        }).join("");
+        return "<section class=\"player-crm__raffle-return-group\"><div class=\"player-crm__raffle-return-group-head\"><strong>" + esc(title) + "</strong><span>" + esc(intFmt(groupReturns.length)) + " · +" + esc(money(groupTotal)) + "</span></div>" +
+          (rowsHtml ? "<div class=\"player-crm__daily-winners-list\">" + rowsHtml + "</div>" : "<div class=\"player-crm__raffle-return-group-empty\">Возвратов нет</div>") + "</section>";
+      }
+      var cashReturns = returns.filter(function (user) { return user && user.kind === "cash"; });
+      var mttReturns = returns.filter(function (user) { return !user || user.kind !== "cash"; });
+      var returnsHtml = returns.length ? "<div class=\"player-crm__raffle-return-groups\">" + raffleReturnsGroupHtml("Кеш", cashReturns) + raffleReturnsGroupHtml("МТТ", mttReturns) + "</div>" : "<div class=\"player-crm__timeline-item\">За выбранный период возвратов нет.</div>";
       bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" + tabsHtml + returnsHtml + "</div>";
       return;
     }

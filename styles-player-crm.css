@@ -3491,6 +3491,35 @@ button.player-crm__stat:focus-visible,
   background: rgba(94, 167, 61, 0.2);
   color: #9ae678;
 }
+.player-crm__raffle-return-groups {
+  display: grid;
+  gap: 16px;
+}
+.player-crm__raffle-return-group {
+  display: grid;
+  gap: 8px;
+}
+.player-crm__raffle-return-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid rgba(130, 207, 97, 0.28);
+}
+.player-crm__raffle-return-group-head strong {
+  color: #9ae678;
+  font-size: 13px;
+}
+.player-crm__raffle-return-group-head span,
+.player-crm__raffle-return-group-empty {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.player-crm__raffle-return-group-empty {
+  padding: 8px 4px;
+}
 .player-crm__raffle-return {
   grid-template-columns: minmax(90px, 0.75fr) minmax(80px, 1fr) minmax(105px, 1fr) minmax(135px, 1.25fr) minmax(150px, 1.35fr) minmax(105px, 0.9fr) minmax(110px, 0.9fr);
 }
