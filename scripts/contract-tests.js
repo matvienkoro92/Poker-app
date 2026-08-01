@@ -1213,6 +1213,12 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(redis.kv.get("poker_app:raffle_stats_index:v1:ready"), "1", "raffle summary completes the historical date index");
   assert.ok(redis.s("poker_app:raffle_stats_day:" + raffleStatsDayKey).has(raffleId), "historical raffle is indexed under its CRM business day");
   const calculationsAccessToken = signAccessToken("calculations", "tg_388008256", BOT_TOKEN);
+  const calculationSummaryRequest = req("GET", { pwaSession: s.admin, mode: "raffle-summary" });
+  calculationSummaryRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
+    "&menuAccessToken=" + encodeURIComponent(calculationsAccessToken) + "&mode=raffle-summary";
+  r = await call(crm, calculationSummaryRequest);
+  assert.strictEqual(r.statusCode, 200, "calculations access token loads the lightweight raffle summary");
+  assert.strictEqual(r.body.raffles.uniqueParticipants, 9, "calculations raffle summary includes indexed participants");
   const calculationRafflesRequest = req("GET", { pwaSession: s.admin, mode: "raffles" });
   calculationRafflesRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
     "&menuAccessToken=" + encodeURIComponent(calculationsAccessToken) + "&mode=raffles";
