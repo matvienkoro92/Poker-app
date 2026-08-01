@@ -3081,6 +3081,7 @@ if (chatUserModalEl) {
       return;
     }
     var openOptions = options && typeof options === "object" ? options : {};
+    var deferReveal = openOptions.deferReveal === true;
     var fallbackStatusLevel = openOptions.level != null && openOptions.level !== "" ? String(openOptions.level).trim() : "";
     var fallbackRatingNick = openOptions.ratingNick != null ? String(openOptions.ratingNick).trim() : "";
     var openingSelfProfile = openOptions.selfProfile === true || chatUserModalIsSelf(id);
@@ -3169,9 +3170,9 @@ if (chatUserModalEl) {
       modalBirthAdmin.removeAttribute("data-target-user-id");
       modalBirthAdmin.removeAttribute("data-open-user-id");
     }
-    // Open the prepared profile shell immediately. Network data, wall rows and
-    // rating artwork continue loading inside it instead of blocking navigation.
-    revealChatUserModal(openSeq);
+    // News keeps its compact loading screen visible until the profile data and
+    // main artwork are ready. Other entry points retain the immediate shell.
+    if (!deferReveal) revealChatUserModal(openSeq);
     var initialBlockPromise = openingSelfProfile ? Promise.resolve(false) : refreshChatUserModalBlockState(id);
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")
@@ -3314,7 +3315,11 @@ if (chatUserModalEl) {
         if (typeof updateChatUserModalRespectButtons === "function") updateChatUserModalRespectButtons(null);
       });
     Promise.resolve(initialBlockPromise).catch(function () {});
-    profilePromise.catch(function () {});
+    profilePromise.then(function () {
+      if (deferReveal) revealChatUserModal(openSeq);
+    }, function () {
+      if (deferReveal) revealChatUserModal(openSeq);
+    });
   }
   window.openChatUserModalById = openChatUserModalById;
   if (modalBackdrop) modalBackdrop.addEventListener("click", closeChatUserModal);

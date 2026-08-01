@@ -92,9 +92,9 @@
     try {
       var stored = localStorage.getItem(CLUB_EVENTS_CACHE_KEY) || sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]";
       var rows = JSON.parse(stored);
-      return (Array.isArray(rows) ? rows : []).filter(function (row) {
+      return distributeDailyClubEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isCurrentClubEvent(row);
-      }).slice(0, MAX_EVENTS);
+      })).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
     }
@@ -210,18 +210,19 @@
   function openNewsPlayerProfile(id, name, avatar) {
     id = String(id || "").trim();
     if (!id) return false;
+    var openOptions = { deferReveal: true };
     if (typeof window.pokerOpenChatUserModalSafe === "function") {
-      window.pokerOpenChatUserModalSafe(id, name || "Игрок", avatar || "");
+      window.pokerOpenChatUserModalSafe(id, name || "Игрок", avatar || "", openOptions);
       return true;
     }
     if (typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true) {
-      window.openChatUserModalById(id, name || "Игрок", avatar || "");
+      window.openChatUserModalById(id, name || "Игрок", avatar || "", openOptions);
       return true;
     }
     if (typeof window.pokerEnsureScriptDomains === "function") {
       Promise.resolve(window.pokerEnsureScriptDomains(["chat"])).then(function () {
         if (typeof window.openChatUserModalById === "function") {
-          window.openChatUserModalById(id, name || "Игрок", avatar || "");
+          window.openChatUserModalById(id, name || "Игрок", avatar || "", openOptions);
         }
       }).catch(function () {});
       return true;
@@ -599,6 +600,37 @@
     var timeOrder = eventTime(b && b.at) - eventTime(a && a.at);
     var amountOrder = Math.max(0, Number(b && b.prizeAmount) || 0) - Math.max(0, Number(a && a.prizeAmount) || 0);
     return timeOrder || amountOrder;
+  }
+
+  function distributeDailyClubEvents(rows) {
+    var sorted = (Array.isArray(rows) ? rows : []).slice().sort(compareClubEvents).filter(function (row, index, list) {
+      return row && list.findIndex(function (candidate) { return candidate && candidate.id === row.id; }) === index;
+    });
+    var regular = sorted.filter(function (row) { return !isDailyClubEvent(row); });
+    var daily = sorted.filter(isDailyClubEvent);
+    if (!daily.length) return regular;
+    // A spin result must never lead the feed or sit next to another spin result.
+    // Until there is a regular club event to separate it, keep it out of the feed.
+    if (!regular.length) return [];
+    daily = daily.slice(0, regular.length);
+    var spread = [];
+    var regularIndex = 0;
+    daily.forEach(function (row, index) {
+      var target = Math.max(
+        regularIndex + 1,
+        Math.round(((index + 1) * regular.length) / (daily.length + 1))
+      );
+      while (regularIndex < target && regularIndex < regular.length) {
+        spread.push(regular[regularIndex]);
+        regularIndex += 1;
+      }
+      spread.push(row);
+    });
+    while (regularIndex < regular.length) {
+      spread.push(regular[regularIndex]);
+      regularIndex += 1;
+    }
+    return spread;
   }
 
   function eventDateLabel(value, includeYear) {
@@ -2071,16 +2103,14 @@
       });
     });
     var snapshots = { __recentEvents: sourceRows };
-    return attachFriendAvatars(
+    return distributeDailyClubEvents(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : [])
       ),
       allPlayers
     ).filter(function (row) {
       return isCurrentClubEvent(row);
-    }).sort(compareClubEvents).filter(function (row, index, rows) {
-      return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
-    }).slice(0, MAX_EVENTS);
+    })).slice(0, MAX_EVENTS);
   }
 
   function stableClubEvents(nextRows, previousRows) {
@@ -2092,9 +2122,7 @@
       if (/\b50\s*(?:₽|р\.?|руб)/i.test(String(row.text || ""))) return;
       if (!rows.some(function (candidate) { return candidate && candidate.id === row.id; })) rows.push(row);
     });
-    return rows.sort(compareClubEvents).filter(function (row, index, list) {
-      return row && list.findIndex(function (candidate) { return candidate && candidate.id === row.id; }) === index;
-    }).slice(0, MAX_EVENTS);
+    return distributeDailyClubEvents(rows).slice(0, MAX_EVENTS);
   }
 
   function loadClubNews(force) {
