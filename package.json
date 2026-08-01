@@ -8,7 +8,7 @@
     "web-push": "^3.6.7"
   },
   "scripts": {
-    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/copy-to-public.js",
+    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/generate-rating-thumbnails.js && node scripts/copy-to-public.js",
     "rating:totals": "node scripts/generate-rating-player-totals.js",
     "build:season-archive": "node scripts/copy-season-archive.js",
     "smoke": "node scripts/smoke-checks.js",
@@ -36,6 +36,7 @@
     "rating:import:summer": "node scripts/rating-entry-helper.js import --season=summer --target-kb=30",
     "rating:validate": "node scripts/rating-entry-helper.js validate",
     "rating:validate:strict": "node scripts/rating-entry-helper.js validate --strict",
+    "rating:thumbnails": "node scripts/generate-rating-thumbnails.js",
     "avatars:assign-missing": "node scripts/assign-random-preset-avatars.js",
     "avatars:assign-missing:apply": "node scripts/assign-random-preset-avatars.js --apply",
     "bump:pwa-version": "node scripts/bump-pwa-login-version.js",

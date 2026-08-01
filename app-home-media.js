@@ -17,6 +17,13 @@ function getAssetUrl(relativePath) {
   }
 }
 
+function getRatingThumbnailUrl(relativePath) {
+  var clean = String(relativePath || "").replace(/^\.?\/?assets\//, "").split("?")[0];
+  var dot = clean.lastIndexOf(".");
+  var thumbnailPath = "rating-thumbnails/" + (dot > clean.lastIndexOf("/") ? clean.slice(0, dot) : clean) + ".avif";
+  return getAssetUrl(thumbnailPath);
+}
+
 // Лайтбокс: одиночные фото + галереи (МТТ 6 скринов, ученики тренера, сетка отзывов) со стрелками и ←/→
 function initImageLightbox() {
   var lightbox = document.getElementById("imageLightbox");

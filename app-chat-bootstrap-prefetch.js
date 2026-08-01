@@ -7,24 +7,8 @@ function initChatBootstrapPrefetchRuntime(opts) {
     try {
       if (typeof opts.pokerHydrateChatSnapshotsFromDisk === "function") opts.pokerHydrateChatSnapshotsFromDisk();
     } catch (eHydW) {}
-    var cache = opts.personalMessagesCache || {};
-    var idx = 0;
-    for (var pk in cache) {
-      if (!Object.prototype.hasOwnProperty.call(cache, pk)) continue;
-      if (idx >= 20) break;
-      var pid = String(pk);
-      if (!pid) continue;
-      var activePeer = opts.chatWithUserId;
-      if (activePeer && typeof opts.peerChatIdsEqual === "function" && opts.peerChatIdsEqual(activePeer, pid)) continue;
-      (function (idWarm, delayMs) {
-        setTimeout(function () {
-          try {
-            if (typeof opts.prefetchPersonalMessages === "function") opts.prefetchPersonalMessages(idWarm);
-          } catch (ePf) {}
-        }, delayMs);
-      })(pid, idx * 40);
-      idx++;
-    }
+    /* Disk snapshots are enough for instant paint. Network history is fetched only
+       when a user opens a dialog, preventing a 20-thread media prefetch wave. */
   }
 
   function chatSummaryNumber(value) {

@@ -2895,15 +2895,26 @@ function initWinterRating() {
   }
   function fillScreensForDate(container, dStr, leagueNum) {
     if (!container) return;
+    if (container.getAttribute("data-rating-screens-filled") === "1") return;
     var files = leagueNum != null
       ? (getSpringRatingImagesByLeague(leagueNum)[dStr] || [])
       : (getRatingImages()[dStr] || []);
     if (!files || !files.length) return;
     var cacheV = "v=19";
     container.innerHTML = files.map(function (f, i) {
-      return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\" data-rating-image-file=\"" + escapeHtml(f) + "\"><img src=\"" + getAssetUrl(f) + "?" + cacheV + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" /></div>";
+      var fullSrc = getAssetUrl(f) + "?" + cacheV;
+      var thumbSrc = typeof getRatingThumbnailUrl === "function" ? getRatingThumbnailUrl(f) + "?v=1" : fullSrc;
+      return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\" data-rating-image-file=\"" + escapeHtml(f) + "\"><img src=\"" + thumbSrc + "\" data-rating-full-src=\"" + fullSrc + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" decoding=\"async\" /></div>";
     }).join("");
+    container.setAttribute("data-rating-screens-filled", "1");
     container.querySelectorAll(".winter-rating__screenshot").forEach(function (cell, idx) {
+      var previewImg = cell.querySelector("img");
+      if (previewImg) {
+        previewImg.addEventListener("error", function ratingThumbnailFallback() {
+          var full = previewImg.getAttribute("data-rating-full-src");
+          if (full && previewImg.src !== full) previewImg.src = full;
+        }, { once: true });
+      }
       var openLightbox = function (e) {
         if (e) e.preventDefault();
         var siblings = container.querySelectorAll(".winter-rating__screenshot");
@@ -2911,7 +2922,7 @@ function initWinterRating() {
           directItems: Array.prototype.map.call(siblings, function (item) {
             var img = item.querySelector("img");
             return {
-              src: img ? (img.currentSrc || img.src || "") : "",
+              src: img ? (img.getAttribute("data-rating-full-src") || img.currentSrc || img.src || "") : "",
               alt: img ? (img.alt || "") : "",
             };
           }),
@@ -2995,7 +3006,7 @@ function initWinterRating() {
       } else {
         var data = getRatingByDate()[dateStr];
         if (data && data.length && tableWrap && !tableWrap.innerHTML) tableWrap.innerHTML = renderWinterRatingTable(data);
-        if (screensContainer) fillScreensForDate(screensContainer, dateStr);
+        /* Screens are filled only when this date is opened. */
       }
       var shareWrap = panel.querySelector(".winter-rating__date-share");
       if (!shareWrap) {

@@ -25,7 +25,8 @@ var CHAT_HIDDEN_IDLE_MS = 60000;
 var CHAT_HOME_SUMMARY_VISIBLE_IDLE_MS = 300000;
 var CHAT_HOME_SUMMARY_HIDDEN_IDLE_MS = 1800000;
 var CHAT_ACTIVITY_BURST_WINDOW_MS = 15000;
-var CHAT_LONG_POLL_TIMEOUT_MS = 18000;
+/* One held request is cheaper than reconnecting every ~18s; stay below the 60s serverless ceiling. */
+var CHAT_LONG_POLL_TIMEOUT_MS = 45000;
 var chatBurstUntilByScope = { general: 0, personal: 0, contacts: 0 };
 var chatLastPollAt = { general: 0, personal: 0, contacts: 0, homeSummary: 0, admins: 0, presence: 0 };
 var chatLongPollTimers = { general: 0, personal: 0, contacts: 0, updates: 0 };

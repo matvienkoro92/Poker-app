@@ -3,9 +3,9 @@
   "budgetsMiB": {
     "startupEager": 0.75,
     "coreAndLazyAssets": 30,
-    "currentSeason": 20,
-    "archiveSeasons": 42,
-    "publicBuild": 95,
+    "currentSeason": 25,
+    "archiveSeasons": 43,
+    "publicBuild": 105,
     "individualFile": 2
   },
   "seasonRouting": {

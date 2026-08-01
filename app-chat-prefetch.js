@@ -1,9 +1,10 @@
 var personalPrefetchInFlight = {};
 var PERSONAL_PREFETCH_TTL_MS = 90000;
-var PERSONAL_PREFETCH_BATCH = 12;
+var PERSONAL_PREFETCH_BATCH = 3;
 /** Не запускать волну prefetch слишком часто: ответы лёгкие, но mode=contacts дергается фоном. */
 var PERSONAL_PREFETCH_COOLDOWN_MS = 45000;
 var personalPrefetchLastBulkAt = 0;
+var personalUnreadPreviewWarm = [];
 
 function pokerChatPrefetchPeerIdsEqual(a, b) {
   try {
@@ -55,14 +56,21 @@ function prefetchTopPersonalDialogs(contacts) {
   var nowPf = Date.now();
   if (personalPrefetchLastBulkAt && nowPf - personalPrefetchLastBulkAt < PERSONAL_PREFETCH_COOLDOWN_MS) return;
   personalPrefetchLastBulkAt = nowPf;
+  /* Contacts already carry the lightweight last-message preview. Keep at most three
+     unread previews warm; do not download message history or its media in advance. */
   var picked = [];
   for (var i = 0; i < contacts.length && picked.length < PERSONAL_PREFETCH_BATCH; i++) {
-    var id = contacts[i] && contacts[i].id ? String(contacts[i].id) : "";
+    var contact = contacts[i];
+    var id = contact && contact.id ? String(contact.id) : "";
     if (!id) continue;
+    if (!(Number(contact.unreadCount || 0) > 0)) continue;
     if (chatWithUserId && peerChatIdsEqual(chatWithUserId, id)) continue;
-    picked.push(id);
+    picked.push({
+      id: id,
+      unreadCount: Math.max(0, Number(contact.unreadCount || 0)),
+      lastMessagePreview: String(contact.lastMessagePreview || "").slice(0, 180),
+      lastMessageTime: contact.lastMessageTime || "",
+    });
   }
-  picked.forEach(function (id, idx) {
-    setTimeout(function () { prefetchPersonalMessages(id); }, idx * 70);
-  });
+  personalUnreadPreviewWarm = picked;
 }
