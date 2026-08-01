@@ -35,7 +35,7 @@ const TOURNAMENT_DAY_BY_MSK_WEEKDAY = {
   3: { name: "Турнир Стольник", buyin: 100 },
   4: { name: "Мистери", buyin: 300 },
   5: { name: "Нокаут Прогрессив", buyin: 500 },
-  6: { name: "Фриролл", buyin: 0 },
+  6: { name: "Субботний турнир", buyin: 350 },
 };
 
 const TOURNAMENT_DAY_BY_MSK_DATE = {
