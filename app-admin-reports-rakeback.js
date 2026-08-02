@@ -13,6 +13,7 @@
   var MOSCOW_UTC_OFFSET_MS = 3 * 60 * 60 * 1000;
   var RAKEBACK_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_DAY_CUTOFF_MS = 6 * 60 * 60 * 1000;
+  var canPermanentlyDeleteTemplateRows = function () { return false; };
 
   function readRakebackTemplateSpoilerOpen() {
     return false;
@@ -832,7 +833,7 @@
     if (editBtn) editBtn.hidden = true;
     if (addBtn) addBtn.hidden = true;
     if (removeBtn) {
-      removeBtn.hidden = !canPermanentlyDelete();
+      removeBtn.hidden = !canPermanentlyDeleteTemplateRows();
       removeBtn.disabled = !!busy;
       removeBtn.setAttribute("title", "Удалить шаблон навсегда");
       removeBtn.setAttribute("aria-label", "Удалить шаблон навсегда");
@@ -995,6 +996,7 @@
     var canPermanentlyDelete = typeof config.canPermanentlyDelete === "function"
       ? config.canPermanentlyDelete
       : function () { return false; };
+    canPermanentlyDeleteTemplateRows = canPermanentlyDelete;
     var templatesLoaded = config.templatesLoaded === true || hasAnyTemplateIds(templates);
     var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
     var templatesLoading = false;
