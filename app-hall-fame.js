@@ -329,8 +329,19 @@ function hallFishAchievementStartParam(key) {
 }
 
 function hallFishAchievementShareUrl(key) {
-  if (typeof buildMiniAppStartLink !== "function") return "";
-  return buildMiniAppStartLink(hallFishAchievementStartParam(key));
+  var start = hallFishAchievementStartParam(key);
+  if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(start);
+  var appUrl = typeof getAppBaseUrlForLinks === "function"
+    ? String(getAppBaseUrlForLinks() || "").trim().replace(/\/+$/, "")
+    : "";
+  if (!appUrl) {
+    var app = document.getElementById("app");
+    appUrl = String((app && app.getAttribute("data-telegram-app-url")) || "").trim().replace(/\/+$/, "");
+  }
+  if (!appUrl) return "";
+  var separator = appUrl.indexOf("?") >= 0 ? "&" : "?";
+  var needsSlash = separator === "?" && /^https?:\/\/[^/?#]+$/i.test(appUrl);
+  return appUrl + (needsSlash ? "/" : "") + separator + "startapp=" + encodeURIComponent(start);
 }
 
 function hallFishAchievementKeyFromStartParam(startParam) {
@@ -2927,6 +2938,7 @@ function initHallFishRatingModal() {
     e.stopPropagation();
     hallFishActiveDayHeroMonth = String(month.getAttribute("data-hall-fish-day-hero-month") || "all").trim() || "all";
     if (hallFishAchievementRowsCache) hallFishSetAchievementState("", hallFishAchievementRowsCache);
+    else openHallFishAchievementTab();
   });
   document.addEventListener("click", function (e) {
     var shareBtn = e.target && e.target.closest ? e.target.closest("[data-hall-fish-achievement-share][data-hall-fish-achievement-action]") : null;
