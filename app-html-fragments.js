@@ -707,6 +707,15 @@
     );
   }
 
+  function canPermanentlyDeleteAdminReportRakebackRows() {
+    return adminReportShellIdentityMatches(
+      getAdminReportShellUsers(),
+      ["1897001087"],
+      [],
+      []
+    );
+  }
+
   function setAdminReportShellTab(name) {
     var modal = document.getElementById("adminReportModal");
     if (!modal) return "form";
@@ -973,6 +982,7 @@
       templatesLoaded: hasAdminReportRakebackShellTemplates(),
       templatesMayExist: true,
       loadTemplates: loadAdminReportRakebackShellTemplates,
+      canPermanentlyDelete: canPermanentlyDeleteAdminReportRakebackRows,
       templatesOpen: window.__adminReportRakebackTemplateOpenRequested === true,
       activeRoom: getAdminReportRakebackShellActiveRoom(),
     });
