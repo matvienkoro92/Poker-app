@@ -590,6 +590,13 @@ html[data-theme="gold"] body[data-view="home"] {
   line-height: 1.15;
 }
 
+.home-friend-news-modal__day-hero {
+  color: #ffe0a3;
+  font-size: 0.72em;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .home-friend-news-modal__event-lines,
 .chat-user-modal__news-event-lines {
   display: grid;

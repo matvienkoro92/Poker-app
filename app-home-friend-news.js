@@ -1538,7 +1538,7 @@
     input.focus();
   }
 
-  function eventHtml(row, ticker) {
+  function eventHtml(row, ticker, isDayHero) {
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
@@ -1564,7 +1564,8 @@
         ' role="button" tabindex="0"'
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
-      ? '<span class="home-friend-news-modal__player-title">' + esc(row.newsTitle) + '</span>' +
+      ? '<span class="home-friend-news-modal__player-title">' + esc(row.newsTitle) +
+        (isDayHero ? '<span class="home-friend-news-modal__day-hero"> · Герой дня</span>' : "") + '</span>' +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"
@@ -1603,11 +1604,16 @@
       var mod10 = count % 10;
       var mod100 = count % 100;
       var countWord = mod10 === 1 && mod100 !== 11 ? "запись" : (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "записи" : "записей");
+      var dayHero = group.rows.filter(function (row) {
+        return Math.max(0, Number(row && row.prizeAmount) || 0) > 0;
+      }).sort(function (a, b) {
+        return (Number(b && b.prizeAmount) || 0) - (Number(a && a.prizeAmount) || 0);
+      })[0];
       return '<section class="home-friend-news-modal__day-group">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
         '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
         '<div class="home-friend-news-modal__day-events">' +
-          group.rows.map(function (row) { return eventHtml(row, false); }).join("") +
+          group.rows.map(function (row) { return eventHtml(row, false, row === dayHero); }).join("") +
         "</div>" +
       "</section>";
     }).join("");
@@ -1853,6 +1859,21 @@
     }
     if (modal && modal.dataset.friendNewsBound !== "1") {
       modal.dataset.friendNewsBound = "1";
+      modal.addEventListener("contextmenu", function (event) {
+        var item = event.target.closest("[data-home-news-event-id]");
+        if (!item || event.target.closest("input, textarea")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        clearTimeout(homeNewsLongPressTimer);
+        homeNewsLongPressTriggered = true;
+        window.setTimeout(function () { homeNewsLongPressTriggered = false; }, 400);
+        var comment = event.target.closest("[data-home-comment-id]");
+        var eventId = item.getAttribute("data-home-news-event-id");
+        var commentId = comment && comment.getAttribute("data-home-comment-id");
+        openReactionPicker(function (emoji) {
+          sendOptimisticReaction(eventId, emoji, commentId);
+        });
+      });
       modal.addEventListener("pointerdown", function (event) {
         var item = event.target.closest("[data-home-news-event-id]");
         var comment = event.target.closest("[data-home-comment-id]");
