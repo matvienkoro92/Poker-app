@@ -125,10 +125,10 @@
     try {
       var stored = JSON.parse(sessionStorage.getItem(PLAYER_EVENTS_CACHE_PREFIX + key) || "null");
       if (!stored || !Array.isArray(stored.rows)) return [];
-      return stored.rows.filter(function (row) {
+      return mergeRelatedPlayerEvents(stored.rows.filter(function (row) {
         return row && row.id && !isUndatedTournamentSnapshotEvent(row) &&
           (row.type === "birthday" || isRecentEvent(row.at));
-      }).slice(0, MAX_EVENTS);
+      })).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
     }
@@ -329,7 +329,12 @@
           '<section class="home-friend-news-modal__panel" role="dialog" aria-modal="true" aria-labelledby="homeFriendNewsModalTitle">' +
             '<header class="home-friend-news-modal__header"><div><span id="homeFriendNewsModalEyebrow">Друзья и клуб</span>' +
               '<h2 id="homeFriendNewsModalTitle">Новости друзей</h2></div>' +
-              '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
+              '<div class="home-friend-news-modal__header-actions">' +
+                '<button type="button" class="home-friend-news-modal__copy" id="homeClubNewsCopyLink" aria-label="Копировать ссылку на новости клуба" title="Копировать ссылку" hidden>' +
+                  '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
+                '</button>' +
+                '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
+              '</div>' +
             '</header><div class="home-friend-news-modal__list" id="homeFriendNewsList"></div>' +
             '<div class="home-news-profile-loading" id="homeNewsProfileLoading" hidden role="status" aria-live="polite">' +
               '<span class="home-news-profile-loading__spinner" aria-hidden="true"></span>' +
@@ -654,6 +659,42 @@
     return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
   }
 
+  function eventActorKey(row) {
+    var actor = matchKey(row && row.actorNick);
+    if (actor) return actor;
+    return String(row && row.actorId || "").trim().toLowerCase();
+  }
+
+  function mergeRelatedPlayerEvents(rows) {
+    var source = (Array.isArray(rows) ? rows : []).filter(Boolean);
+    var consumed = {};
+    source.forEach(function (extra, extraIndex) {
+      if (extra._eventKind !== "rating-change" && String(extra.id || "").indexOf("rating-change:") !== 0 && extra.type !== "level") return;
+      var actorKey = eventActorKey(extra);
+      var dayKey = eventDayKey(extra.at);
+      if (!actorKey || dayKey === "unknown") return;
+      var tournament = source.map(function (row, index) { return { row: row, index: index }; }).filter(function (item) {
+        return item.row && (item.row._eventKind === "tournament" || String(item.row.id || "").indexOf("history:tournament:") === 0) &&
+          eventActorKey(item.row) === actorKey && eventDayKey(item.row.at) === dayKey;
+      }).sort(function (a, b) {
+        return (Number(b.row.prizeAmount) || 0) - (Number(a.row.prizeAmount) || 0);
+      })[0];
+      if (!tournament) return;
+      var prefix = String(extra.actorNick || "").trim();
+      var detail = String(extra.text || "").trim();
+      if (prefix && matchKey(detail.slice(0, prefix.length)) === matchKey(prefix)) {
+        detail = detail.slice(prefix.length).trim();
+      }
+      if (!detail) return;
+      detail = detail.charAt(0).toUpperCase() + detail.slice(1);
+      tournament.row.text = String(tournament.row.text || "").replace(/[.\s]+$/, "") + ". И " +
+        detail.charAt(0).toLowerCase() + detail.slice(1) + ".";
+      tournament.row.id += ":with:" + String(extra.id || extraIndex);
+      consumed[extraIndex] = true;
+    });
+    return source.filter(function (row, index) { return !consumed[index]; });
+  }
+
   function relativeTime(value) {
     var time = new Date(value || 0).getTime();
     if (!time) return "";
@@ -839,6 +880,7 @@
           _ratingOldPlace: oldPlace,
           _ratingNewPlace: newPlace,
           _ratingDirection: newPlace && (!oldPlace || newPlace < oldPlace) ? "up" : "down",
+          _eventKind: "rating-change",
         });
       });
     });
@@ -934,15 +976,7 @@
       if (!friend) return null;
       var reward = Number(row && row.reward) || 0;
       var place = Number(row && row.place) || 0;
-      var action = place === 1
-        ? "одержал победу" + (reward > 0 ? " — " + formatRub(reward) : "")
-        : reward >= 100000
-          ? "оформил занос от 100К — " + formatRub(reward)
-          : reward >= 50000
-            ? "оформил занос 50–99К — " + formatRub(reward)
-            : reward > 0
-              ? "получил " + formatRub(reward) + " призовых"
-              : "";
+      var action = reward > 0 ? "выиграл " + formatRub(reward) : "";
       if (!action) return null;
       var detail = String(row && row.tournament || "").trim();
       var displayName = String(row && row.nick || "").trim() || friendName(friend);
@@ -968,8 +1002,11 @@
         id: "history:tournament:" + stableActorKey + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
         type: place === 1 || reward >= 50000 ? "achievement" : "rating",
         icon: place === 1 ? "◆" : "▲",
-        text: displayName + " " + action + (detail ? " · " + detail : "") +
-          (achievementParts.length ? " · " + achievementParts.join(" · ") : ""),
+        text: displayName + (place > 0 ? " занял " + place + "-е место" : " получил приз") +
+          (detail ? " в турнире " + detail : "") + (action ? " и " + action : "") + "." +
+          (achievementParts.length ? " " + achievementParts.map(function (part) {
+            return part.charAt(0).toUpperCase() + part.slice(1) + ".";
+          }).join(" ") : ""),
         prizeAmount: reward,
         at: row.date,
         target: "winter-rating",
@@ -977,6 +1014,7 @@
         // Keep the snapshot nickname authoritative. The matched profile row
         // may be stale and must not silently change which player opens.
         actorNick: displayName,
+        _eventKind: "tournament",
       };
     }).filter(Boolean).slice(0, MAX_EVENTS);
   }
@@ -1677,9 +1715,39 @@
     var title = el("homeFriendNewsModalTitle");
     var eyebrow = el("homeFriendNewsModalEyebrow");
     var modal = el("homeFriendNewsModal");
+    var copy = el("homeClubNewsCopyLink");
     if (title) title.textContent = newsModalMode === "club" ? "Новости клуба" : "Новости друзей";
     if (eyebrow) eyebrow.textContent = newsModalMode === "club" ? "Клуб · итоги игровых дней" : "Друзья и клуб";
     if (modal) modal.classList.toggle("home-friend-news-modal--club", newsModalMode === "club");
+    if (copy) copy.hidden = newsModalMode !== "club";
+  }
+
+  function copyClubNewsLink() {
+    var link = typeof buildMiniAppStartLink === "function"
+      ? buildMiniAppStartLink("club_news")
+      : window.location.origin + window.location.pathname + "?startapp=club_news";
+    function notify(copied) {
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      var message = copied ? "Ссылка на новости клуба скопирована" : "Не удалось скопировать ссылку: " + link;
+      if (tg && tg.showToast && copied) tg.showToast(message);
+      else if (tg && tg.showAlert) tg.showAlert(message);
+      else window.alert(message);
+    }
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      navigator.clipboard.writeText(link).then(function () { notify(true); }).catch(function () { notify(false); });
+      return;
+    }
+    var input = document.createElement("textarea");
+    input.value = link;
+    input.setAttribute("readonly", "");
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.select();
+    var copied = false;
+    try { copied = document.execCommand("copy"); } catch (error) {}
+    input.remove();
+    notify(copied);
   }
 
   function loadActiveModalFeedback(rows) {
@@ -1718,6 +1786,7 @@
     document.body.classList.add("home-friend-news-modal-open");
     loadActiveModalFeedback(clubEvents);
   }
+  window.pokerOpenClubNewsModal = openClubModal;
 
   function closeModal() {
     var modal = el("homeFriendNewsModal");
@@ -1729,6 +1798,7 @@
   function bind() {
     var open = el("homeFriendNewsOpen");
     var clubOpen = el("homeClubNewsOpen");
+    var clubCopy = el("homeClubNewsCopyLink");
     var modal = el("homeFriendNewsModal");
     if (open && open.dataset.friendNewsBound !== "1") {
       open.dataset.friendNewsBound = "1";
@@ -1737,6 +1807,10 @@
     if (clubOpen && clubOpen.dataset.clubNewsBound !== "1") {
       clubOpen.dataset.clubNewsBound = "1";
       clubOpen.addEventListener("click", openClubModal);
+    }
+    if (clubCopy && clubCopy.dataset.clubNewsCopyBound !== "1") {
+      clubCopy.dataset.clubNewsCopyBound = "1";
+      clubCopy.addEventListener("click", copyClubNewsLink);
     }
     if (modal && modal.dataset.friendNewsBound !== "1") {
       modal.dataset.friendNewsBound = "1";
@@ -2083,7 +2157,7 @@
         results[4] || {},
         results[5] && Array.isArray(results[5].raffles) ? results[5].raffles : []
       );
-      var nextEvents = attachFriendAvatars(collectLevelEvents(friends).concat(
+      var nextEvents = attachFriendAvatars(mergeRelatedPlayerEvents(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         personalPostEvents(friends, results[7] && results[7].posts),
         clubTop10RatingEventsForFriends(friends),
@@ -2092,7 +2166,7 @@
         winnerEvents(friends, winners),
         birthdayEvents(friends),
         achievementEvents(friends, sngRows, choiceRows)
-      ), friends)
+      )), friends)
         .sort(function (a, b) {
           var aBirthday = a.type === "birthday" ? Number(a.upcomingDays) : null;
           var bBirthday = b.type === "birthday" ? Number(b.upcomingDays) : null;
@@ -2173,7 +2247,7 @@
       if (/\b50\s*(?:₽|р\.?|руб)/i.test(String(row.text || ""))) return;
       if (!rows.some(function (candidate) { return candidate && candidate.id === row.id; })) rows.push(row);
     });
-    return distributeDailyClubEvents(rows).slice(0, MAX_EVENTS);
+    return distributeDailyClubEvents(mergeRelatedPlayerEvents(rows)).slice(0, MAX_EVENTS);
   }
 
   function loadClubNews(force) {
@@ -2374,11 +2448,11 @@
     snapshotsPromise.then(function (snapshots) {
       if (typeof options.onUpdate !== "function") return;
       var quickRows = attachFriendAvatars(
-        recentTournamentEvents([pseudoFriend], snapshots || {}).concat(
+        mergeRelatedPlayerEvents(recentTournamentEvents([pseudoFriend], snapshots || {}).concat(
           birthdayEvents([pseudoFriend]),
           playerProgressEvents(id, nick),
           readPlayerNewsCache(identity)
-        ),
+        )),
         [pseudoFriend]
       ).sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
         .filter(function (row, index, rows) {
@@ -2414,7 +2488,7 @@
           matchKey(text.slice(0, nick.length)) === matchKey(nick) &&
           (!text.charAt(nick.length) || /\s/.test(text.charAt(nick.length)));
       });
-      var rows = attachFriendAvatars(history.concat(daily, achievements, birthdays, progress, cached), [pseudoFriend])
+      var rows = attachFriendAvatars(mergeRelatedPlayerEvents(history.concat(daily, achievements, birthdays, progress, cached)), [pseudoFriend])
         .sort(function (a, b) { return eventTime(b && b.at) - eventTime(a && a.at); })
         .filter(function (row, index, rows) {
           return row && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;

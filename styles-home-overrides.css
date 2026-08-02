@@ -316,6 +316,38 @@ html[data-theme="gold"] body[data-view="home"] {
   font-size: 26px;
 }
 
+.home-friend-news-modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-friend-news-modal__copy {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  color: #ffe0a3;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(220, 166, 65, 0.42);
+  border-radius: 10px;
+}
+
+.home-friend-news-modal__copy[hidden] {
+  display: none;
+}
+
+.home-friend-news-modal__copy svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .home-friend-news-modal__list {
   padding: 8px 14px max(18px, env(safe-area-inset-bottom));
   overflow: auto;

@@ -80,6 +80,15 @@ function pokerInitHomeDeepLinks(opts) {
       }, 300);
       return;
     }
+    if (startParam === "club_news") {
+      if (typeof setView === "function") setView("home");
+      retryDeepLinkAction(function () {
+        if (typeof window.pokerOpenClubNewsModal !== "function") return false;
+        window.pokerOpenClubNewsModal();
+        return true;
+      }, 40);
+      return;
+    }
     if (startParam === "winter_rating") {
       setTimeout(function () {
         if (typeof setView === "function") setView("winter-rating");
