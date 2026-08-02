@@ -96,11 +96,17 @@ function profileOwnWallRowHtml(row) {
     ? '<span class="chat-user-modal__wall-controls"><button type="button" data-profile-wall-edit="' + profileEscapeHtml(row.id) + '">Редактировать</button>' +
       '<button type="button" data-profile-wall-pin="' + profileEscapeHtml(row.id) + '">' + (row.pinned ? "Открепить" : "Закрепить") + "</button></span>"
     : "";
+  var structuredNews = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
+    ? '<span class="chat-user-modal__news-player-title">' + profileEscapeHtml(row.newsTitle) + '</span>' +
+      '<span class="chat-user-modal__news-event-lines">' + row.newsLines.map(function (line) {
+        return "<strong>" + profileEscapeHtml(line) + "</strong>";
+      }).join("") + "</span>"
+    : (row.text ? "<strong>" + profileEscapeHtml(row.text) + "</strong>" : "");
   return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
     '<span class="chat-user-modal__news-icon' + (ownAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
       (ownAvatar ? '<img src="' + profileEscapeHtml(ownAvatar) + '" alt="">' : (row.personal ? "✎" : "♠")) + "</span>" +
     '<span class="chat-user-modal__news-copy">' + (row.pinned ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>' : "") +
-      (row.text ? "<strong>" + profileEscapeHtml(row.text) + "</strong>" : "") +
+      structuredNews +
       (row.image ? '<img class="chat-user-modal__wall-image" src="' + profileEscapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
       '<small class="profile-own-wall__date">' + profileEscapeHtml(profileOwnWallDate(row.at)) + (row.editedAt ? " · изменено" : "") + "</small>" + controls +
     "</span></article>";

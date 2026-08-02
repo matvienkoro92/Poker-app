@@ -73,10 +73,10 @@
   function readRenderedEventsCache() {
     try {
       var rows = JSON.parse(sessionStorage.getItem(RENDERED_EVENTS_CACHE_KEY) || "[]");
-      return (Array.isArray(rows) ? rows : []).filter(function (row) {
+      return mergeRelatedPlayerEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && !isUndatedTournamentSnapshotEvent(row) &&
           (row.type === "birthday" || isRecentEvent(row.at));
-      }).slice(0, MAX_EVENTS);
+      })).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
     }
@@ -94,9 +94,9 @@
     try {
       var stored = localStorage.getItem(CLUB_EVENTS_CACHE_KEY) || sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]";
       var rows = JSON.parse(stored);
-      return distributeDailyClubEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
+      return distributeDailyClubEvents(mergeRelatedPlayerEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isCurrentClubEvent(row);
-      })).slice(0, MAX_EVENTS);
+      }))).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
     }
@@ -665,9 +665,28 @@
     return String(row && row.actorId || "").trim().toLowerCase();
   }
 
+  function ensureStructuredPlayerEvent(row) {
+    if (!row || !row.actorNick) return row;
+    if (!row.newsTitle) row.newsTitle = String(row.actorNick).trim();
+    if (!Array.isArray(row.newsLines) || !row.newsLines.length) {
+      var text = String(row.text || "").trim();
+      var title = String(row.newsTitle || "").trim();
+      if (title && matchKey(text.slice(0, title.length)) === matchKey(title)) text = text.slice(title.length).trim();
+      row.newsLines = text.split(/\.\s+(?:И\s+)?/).map(function (line) {
+        return line.replace(/[.\s]+$/, "").trim();
+      }).filter(Boolean);
+    }
+    return row;
+  }
+
   function mergeRelatedPlayerEvents(rows) {
     var source = (Array.isArray(rows) ? rows : []).filter(Boolean);
     var consumed = {};
+    source.forEach(function (row) {
+      if (row && (row._eventKind === "tournament" || String(row.id || "").indexOf("history:tournament:") === 0)) {
+        ensureStructuredPlayerEvent(row);
+      }
+    });
     source.forEach(function (extra, extraIndex) {
       if (extra._eventKind !== "rating-change" && String(extra.id || "").indexOf("rating-change:") !== 0 && extra.type !== "level") return;
       var actorKey = eventActorKey(extra);
@@ -680,6 +699,7 @@
         return (Number(b.row.prizeAmount) || 0) - (Number(a.row.prizeAmount) || 0);
       })[0];
       if (!tournament) return;
+      ensureStructuredPlayerEvent(tournament.row);
       var prefix = String(extra.actorNick || "").trim();
       var detail = String(extra.text || "").trim();
       if (prefix && matchKey(detail.slice(0, prefix.length)) === matchKey(prefix)) {
@@ -687,8 +707,8 @@
       }
       if (!detail) return;
       detail = detail.charAt(0).toUpperCase() + detail.slice(1);
-      tournament.row.text = String(tournament.row.text || "").replace(/[.\s]+$/, "") + ". И " +
-        detail.charAt(0).toLowerCase() + detail.slice(1) + ".";
+      tournament.row.newsLines.push(detail.replace(/[.\s]+$/, ""));
+      tournament.row.text = tournament.row.newsTitle + " " + tournament.row.newsLines.join(". ") + ".";
       tournament.row.id += ":with:" + String(extra.id || extraIndex);
       consumed[extraIndex] = true;
     });
@@ -998,15 +1018,18 @@
         achievementParts.push("продвинулся в ачивке «Занос от 50 до 100к»: " +
           Math.max(1, Number(row && row.bigWins50Count) || 1));
       }
+      var newsLines = [(place > 0 ? "Занял " + place + "-е место" : "Получил приз") +
+        (detail ? " в турнире " + detail : "") + (action ? " и " + action : "")];
+      achievementParts.forEach(function (part) {
+        newsLines.push(part.charAt(0).toUpperCase() + part.slice(1));
+      });
       return {
         id: "history:tournament:" + stableActorKey + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
         type: place === 1 || reward >= 50000 ? "achievement" : "rating",
         icon: place === 1 ? "◆" : "▲",
-        text: displayName + (place > 0 ? " занял " + place + "-е место" : " получил приз") +
-          (detail ? " в турнире " + detail : "") + (action ? " и " + action : "") + "." +
-          (achievementParts.length ? " " + achievementParts.map(function (part) {
-            return part.charAt(0).toUpperCase() + part.slice(1) + ".";
-          }).join(" ") : ""),
+        text: displayName + " " + newsLines.join(". ") + ".",
+        newsTitle: displayName,
+        newsLines: newsLines,
         prizeAmount: reward,
         at: row.date,
         target: "winter-rating",
@@ -1540,6 +1563,12 @@
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
         ' role="button" tabindex="0"'
       : "";
+    var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
+      ? '<span class="home-friend-news-modal__player-title">' + esc(row.newsTitle) + '</span>' +
+        '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
+          return "<strong>" + eventTextHtml(line) + "</strong>";
+        }).join("") + "</span>"
+      : "<strong>" + eventTextHtml(row.text) + "</strong>";
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
@@ -1548,7 +1577,7 @@
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
-      (ticker ? eventTextHtml(row.text) : "<strong>" + eventTextHtml(row.text) + "</strong>" +
+      (ticker ? eventTextHtml(row.text) : structuredText +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         "<small>" + esc(timeLabel) + "</small>" +
         (canOpenProfile ? '<span class="home-friend-news-modal__profile-cue">Открыть профиль <b aria-hidden="true">›</b></span>' : "") +

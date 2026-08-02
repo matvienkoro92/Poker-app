@@ -605,11 +605,17 @@ if (chatUserModalEl) {
     var pinBadge = type === "personal" && row.pinned
       ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>'
       : "";
+    var structuredNews = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
+      ? '<span class="chat-user-modal__news-player-title">' + escapeHtml(row.newsTitle) + '</span>' +
+        '<span class="chat-user-modal__news-event-lines">' + row.newsLines.map(function (line) {
+          return "<strong>" + escapeHtml(line) + "</strong>";
+        }).join("") + "</span>"
+      : "<strong>" + escapeHtml(row && row.text || "") + "</strong>";
     return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + escapeHtml(type) +
       '" data-profile-event-id="' + escapeHtml(rowId) + '"' + playerStyle + ">" +
       '<span class="chat-user-modal__news-icon' + (wallAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
         (wallAvatar ? '<img src="' + escapeHtml(wallAvatar) + '" alt="">' : chatUserModalNewsIcon(type)) + "</span>" +
-      '<span class="chat-user-modal__news-copy">' + pinBadge + '<strong>' + escapeHtml(row && row.text || "") + "</strong>" +
+      '<span class="chat-user-modal__news-copy">' + pinBadge + structuredNews +
         (row && row.image ? '<img class="chat-user-modal__wall-image" src="' + escapeHtml(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (row && row.editedAt ? '<small class="chat-user-modal__wall-edited">изменено</small>' : "") + wallControls +
         '<span class="chat-user-modal__news-actions">' + reactionButtons +
