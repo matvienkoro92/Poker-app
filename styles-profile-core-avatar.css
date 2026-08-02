@@ -4439,10 +4439,18 @@ body.profile-avatar-choice-open {
     justify-items: start !important;
     width: min(100%, 620px) !important;
     margin-top: -92px !important;
-    transform: translateX(-96px) !important;
+    transform: translate(-96px, -48px) !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
     justify-content: flex-start !important;
+  }
+}
+
+/* Guaranteed visual lift: grid negative margins can be absorbed while sizing
+   the second row, but transform always moves the rendered controls. */
+@media (max-width: 700px) {
+  .view[data-view="profile"] .profile-public-showcase__self-actions {
+    transform: translateY(-48px) !important;
   }
 }

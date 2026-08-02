@@ -5292,7 +5292,7 @@ html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague2Pedesta
   --summer-rating-mobile-lower-podium-height: 164px;
   --summer-rating-mobile-lower-podium-table-gap: 7px;
   --summer-rating-mobile-lower-podium-players-y: -69px;
-  --summer-rating-mobile-lower-podium-label-y: 116px;
+  --summer-rating-mobile-lower-podium-label-y: 110px;
   --summer-rating-mobile-lower-podium-hitbox-y: 54px;
   --summer-rating-mobile-lower-podium-hitbox-height: 98px;
   height: var(--summer-rating-mobile-lower-podium-height);
@@ -5332,7 +5332,7 @@ html #app .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hit
   html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague1PedestalWrap,
   html #app .winter-rating.spring-rating.summer-rating #winterRatingLeague2PedestalWrap {
     --summer-rating-mobile-lower-podium-players-y: -85px;
-    --summer-rating-mobile-lower-podium-label-y: 104px;
+    --summer-rating-mobile-lower-podium-label-y: 98px;
   }
 
   html #app .winter-rating.spring-rating.summer-rating
@@ -5350,7 +5350,7 @@ html #app .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hit
   }
 
   html #app .winter-rating.spring-rating.summer-rating .winter-rating__table-wrap--league {
-    transform: translateY(-30px);
+    transform: translateY(-68px);
   }
 }
 
