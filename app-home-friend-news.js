@@ -1466,7 +1466,7 @@
   function eventFeedbackHtml(row, profileCueHtml) {
     var rowId = feedbackEventId(row);
     var feedback = eventFeedback[rowId] || {};
-    var viewCount = Math.max(0, Number(feedback.viewCount) || 0);
+    var viewCount = Math.max(0, Number(feedback.viewCount) || 0) * 5;
     var reactions = feedback.reactions || {};
     var reactionButtons = HOME_NEWS_REACTIONS.map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);

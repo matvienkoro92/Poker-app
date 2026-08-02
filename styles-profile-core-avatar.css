@@ -4438,7 +4438,7 @@ body.profile-avatar-choice-open {
     justify-self: start !important;
     justify-items: start !important;
     width: min(100%, 620px) !important;
-    margin-top: -44px !important;
+    margin-top: -92px !important;
     transform: translateX(-96px) !important;
   }
 
