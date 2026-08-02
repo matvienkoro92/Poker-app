@@ -1273,6 +1273,40 @@
   border-radius: 14px;
   background: rgba(2, 6, 23, 0.22);
 }
+.hall-fish-day-hero-months {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  padding: 2px 1px 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.hall-fish-day-hero-months::-webkit-scrollbar {
+  display: none;
+}
+.hall-fish-day-hero-month {
+  appearance: none;
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 1px solid rgba(248, 217, 138, 0.3);
+  border-radius: 999px;
+  color: rgba(255, 237, 213, 0.72);
+  background: rgba(2, 6, 23, 0.68);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.hall-fish-day-hero-month--active,
+.hall-fish-day-hero-month[aria-selected="true"] {
+  border-color: #ffe7a3;
+  color: #241500;
+  background: linear-gradient(180deg, #ffe9a3, #e9a92f);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.28);
+}
 .hall-fish-achievement-section__title {
   margin: 0 0 7px;
   color: #fde68a;

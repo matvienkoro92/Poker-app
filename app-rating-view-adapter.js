@@ -407,6 +407,11 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "prushnik": { src: "./assets/summer-rating-player-prushnik.webp", place: 9, league: 1 },
   "evgen1722": { src: "./assets/summer-rating-player-evgen1722.webp", place: 10, league: 1 },
   "хер вам)))))": { src: "./assets/summer-rating-player-khervam.webp", place: 10, league: 1 },
+  "frankl": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
+  "andrushamorf": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
+  "4ezzi": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
+  "morf": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
+  "морф": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
   "alenast": { src: "./assets/summer-rating-league2-player-alena.webp", place: 1, league: 2 },
   "shkarubo": { src: "./assets/summer-rating-league2-player-shkarubo.webp", place: 2, league: 2 },
   "sarmat1305": { src: "./assets/summer-rating-league2-player-sarmat.webp", place: 3, league: 2 },
@@ -424,6 +429,8 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "ksuha🐊": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
   "ksuha🦖": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
   "ksuha🐉": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
+  "zagrebnagreb": { src: "./assets/summer-rating-league2-player-zagrebnagreb.webp", place: 10, league: 2 },
+  "zagrebrnagreb": { src: "./assets/summer-rating-league2-player-zagrebnagreb.webp", place: 10, league: 2 },
 };
 
 function getSummerRatingPlayerArtKey(nick) {
@@ -1329,26 +1336,32 @@ function pokerGetTournamentAchievementStats(nick) {
     else if (reward >= 50000) bigWins50.push(row);
   });
 
-  var heroDays = {};
-  allRows.forEach(function (row) {
-    if (!row || !row.nick || winterRatingDateKeyToStamp(row.date) < 20260801) return;
-    var reward = Math.max(0, Number(row.reward) || 0);
-    if (!reward) return;
-    var nickKey = normalizeWinterNick(row.nick);
-    if (!nickKey) return;
-    var day = heroDays[row.date] || (heroDays[row.date] = {});
-    var total = day[nickKey] || (day[nickKey] = { nick: row.nick, reward: 0 });
-    total.reward += reward;
-  });
-  Object.keys(heroDays).forEach(function (date) {
-    var hero = Object.keys(heroDays[date]).map(function (key) { return heroDays[date][key]; }).sort(function (a, b) {
-      return (Number(b.reward) || 0) - (Number(a.reward) || 0) ||
-        String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
-    })[0];
-    if (hero && winterRatingSamePlayer(hero.nick, normalizedNick)) {
-      dayHeroes.push({ date: date, reward: hero.reward });
-    }
-  });
+  var indexedHeroes = window.POKER_CLUB_NEWS_DATA && window.POKER_CLUB_NEWS_DATA.dayHeroes;
+  if (indexedHeroes && typeof indexedHeroes === "object") {
+    Object.keys(indexedHeroes).forEach(function (date) {
+      var hero = indexedHeroes[date];
+      if (winterRatingDateKeyToStamp(date) < 20260101 || !hero || !winterRatingSamePlayer(hero.nick, normalizedNick)) return;
+      dayHeroes.push({ date: date, reward: Number(hero.reward) || 0, tournament: hero.tournament || "" });
+    });
+  } else {
+    var heroDays = {};
+    allRows.forEach(function (row) {
+      if (!row || !row.nick || winterRatingDateKeyToStamp(row.date) < 20260101) return;
+      var reward = Math.max(0, Number(row.reward) || 0);
+      if (!reward) return;
+      var nickKey = normalizeWinterNick(row.nick);
+      if (!nickKey) return;
+      var day = heroDays[row.date] || (heroDays[row.date] = {});
+      var bestWin = day[nickKey];
+      if (!bestWin || reward > bestWin.reward) day[nickKey] = { nick: row.nick, reward: reward, tournament: row.tournamentLabel || "" };
+    });
+    Object.keys(heroDays).forEach(function (date) {
+      var hero = Object.keys(heroDays[date]).map(function (key) { return heroDays[date][key]; }).sort(function (a, b) {
+        return (Number(b.reward) || 0) - (Number(a.reward) || 0) || String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
+      })[0];
+      if (hero && winterRatingSamePlayer(hero.nick, normalizedNick)) dayHeroes.push({ date: date, reward: hero.reward, tournament: hero.tournament || "" });
+    });
+  }
 
   var byMonth = {};
   allRows.forEach(function (row) {
@@ -2015,6 +2028,7 @@ function getSummerRatingInitialAssetUrls() {
     "./assets/summer-rating-player-prushnik.webp",
     "./assets/summer-rating-player-evgen1722.webp",
     "./assets/summer-rating-player-khervam.webp",
+    "./assets/summer-rating-player-morf.webp",
     "./assets/summer-rating-league2-player-alena.webp",
     "./assets/summer-rating-league2-player-shkarubo.webp",
     "./assets/summer-rating-league2-player-sarmat.webp",
@@ -2026,7 +2040,8 @@ function getSummerRatingInitialAssetUrls() {
     "./assets/summer-rating-league2-player-mr-fox.webp",
     "./assets/summer-rating-league2-player-babyshark.webp",
     "./assets/summer-rating-league2-player-aspirin.webp",
-    "./assets/summer-rating-league2-player-ksyukha.webp"
+    "./assets/summer-rating-league2-player-ksyukha.webp",
+    "./assets/summer-rating-league2-player-zagrebnagreb.webp"
   ];
 }
 
