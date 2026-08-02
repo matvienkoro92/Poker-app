@@ -939,7 +939,7 @@
         return aExact - bExact || a._ratingOldPlace - b._ratingOldPlace;
       })[0];
       if (!displaced) return;
-      rise.text += "; " + displaced.actorNick + " спустился на " +
+      rise.text += ", сместив " + displaced.actorNick + " на " +
         (displaced._ratingNewPlace ? displaced._ratingNewPlace + "-е место" : "позицию ниже топ-10");
       rise.affectedActorNicks = [rise.actorNick, displaced.actorNick].filter(Boolean);
       rise.id += ":displaced:" + displaced.actorId + ":" + displaced._ratingOldPlace + ":" + displaced._ratingNewPlace;
@@ -955,7 +955,16 @@
       return true;
     });
     writeJson(snapshotKey, next);
-    var saved = created.concat(readJson(eventsKey, [])).filter(function (row, index, rows) {
+    var previousEvents = readJson(eventsKey, []).map(function (row) {
+      if (row && String(row.id || "").indexOf(":displaced:") !== -1) {
+        row.text = String(row.text || "").replace(
+          /;\s+(.+?)\s+спустился на\s+(.+)$/,
+          ", сместив $1 на $2"
+        );
+      }
+      return row;
+    });
+    var saved = created.concat(previousEvents).filter(function (row, index, rows) {
       return row && isRecentEvent(row.at) && rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
     }).slice(0, MAX_EVENTS);
     writeJson(eventsKey, saved);
@@ -1457,6 +1466,7 @@
   function eventFeedbackHtml(row, profileCueHtml) {
     var rowId = feedbackEventId(row);
     var feedback = eventFeedback[rowId] || {};
+    var viewCount = Math.max(0, Number(feedback.viewCount) || 0);
     var reactions = feedback.reactions || {};
     var reactionButtons = HOME_NEWS_REACTIONS.map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);
@@ -1520,7 +1530,11 @@
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
-        "</button></span>" + (profileCueHtml || "") + "</span>" +
+        "</button></span>" +
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") +
+          '<span class="home-friend-news-modal__views" title="Просмотры" aria-label="Просмотров: ' + viewCount + '">' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>' +
+            '<span>' + viewCount + "</span></span></span></span>" +
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -1820,7 +1834,7 @@
     var ids = (Array.isArray(rows) ? rows : []).map(feedbackEventId)
       .filter(function (id) { return id && id !== "empty" && id !== "club-empty"; });
     if (!ids.length) return;
-    feedbackRequest({ action: "list", eventIds: ids }).then(function (data) {
+    feedbackRequest({ action: "view", eventIds: ids }).then(function (data) {
       Object.assign(eventFeedback, data.feedback || {});
       var modal = el("homeFriendNewsModal");
       if (modal && !modal.hidden) renderModalList(activeModalEvents());

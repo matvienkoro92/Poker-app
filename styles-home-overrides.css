@@ -703,6 +703,34 @@ html[data-theme="gold"] body[data-view="home"] {
   font-weight: 900;
 }
 
+.home-friend-news-modal__action-meta {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.home-friend-news-modal__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #7f8b9b;
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.home-friend-news-modal__views svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 @media (max-width: 520px) {
   .home-friend-news-modal__action-row {
     gap: 5px;
