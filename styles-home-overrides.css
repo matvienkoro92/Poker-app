@@ -637,6 +637,7 @@ html[data-theme="gold"] body[data-view="home"] {
   font-weight: 950;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
   box-shadow: 0 4px 12px rgba(var(--friend-news-rgb), 0.12);
 }
 
@@ -673,6 +674,38 @@ html[data-theme="gold"] body[data-view="home"] {
 .home-friend-news-modal__action-row .chat-user-modal__news-comment-toggle b {
   font-size: 10px;
   font-weight: 900;
+}
+
+@media (max-width: 520px) {
+  .home-friend-news-modal__action-row {
+    gap: 5px;
+  }
+
+  .home-friend-news-modal__profile-cue {
+    min-height: 22px;
+    padding-inline: 7px;
+    gap: 3px;
+    flex: 0 0 auto;
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .home-friend-news-modal__profile-cue b {
+    font-size: 15px;
+  }
+
+  .home-friend-news-modal__action-row .chat-user-modal__news-actions {
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .home-friend-news-modal__action-row .chat-user-modal__news-comment-toggle {
+    padding-inline: 7px;
+  }
+
+  .home-friend-news-modal__action-row .chat-user-modal__news-comment-toggle b {
+    font-size: 9px;
+  }
 }
 
 .home-friend-news-modal__kind {

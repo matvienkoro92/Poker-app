@@ -1299,6 +1299,7 @@ function pokerGetTournamentAchievementStats(nick) {
       totalReward: 0,
       bigWins50: [],
       bigWins100: [],
+      dayHeroes: [],
       monthlyChampions: [],
       viceMonthlyChampions: [],
       rows: [],
@@ -1318,6 +1319,7 @@ function pokerGetTournamentAchievementStats(nick) {
   var topWin = 0;
   var bigWins50 = [];
   var bigWins100 = [];
+  var dayHeroes = [];
   playerRows.forEach(function (row) {
     var reward = Number(row.reward) || 0;
     if (Number(row.place) === 1) firstPlaces += 1;
@@ -1325,6 +1327,27 @@ function pokerGetTournamentAchievementStats(nick) {
     if (reward > topWin) topWin = reward;
     if (reward >= 100000) bigWins100.push(row);
     else if (reward >= 50000) bigWins50.push(row);
+  });
+
+  var heroDays = {};
+  allRows.forEach(function (row) {
+    if (!row || !row.nick || winterRatingDateKeyToStamp(row.date) < 20260801) return;
+    var reward = Math.max(0, Number(row.reward) || 0);
+    if (!reward) return;
+    var nickKey = normalizeWinterNick(row.nick);
+    if (!nickKey) return;
+    var day = heroDays[row.date] || (heroDays[row.date] = {});
+    var total = day[nickKey] || (day[nickKey] = { nick: row.nick, reward: 0 });
+    total.reward += reward;
+  });
+  Object.keys(heroDays).forEach(function (date) {
+    var hero = Object.keys(heroDays[date]).map(function (key) { return heroDays[date][key]; }).sort(function (a, b) {
+      return (Number(b.reward) || 0) - (Number(a.reward) || 0) ||
+        String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
+    })[0];
+    if (hero && winterRatingSamePlayer(hero.nick, normalizedNick)) {
+      dayHeroes.push({ date: date, reward: hero.reward });
+    }
   });
 
   var byMonth = {};
@@ -1379,6 +1402,7 @@ function pokerGetTournamentAchievementStats(nick) {
     totalReward: totalReward,
     bigWins50: bigWins50.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
     bigWins100: bigWins100.sort(function (a, b) { return (Number(b.reward) || 0) - (Number(a.reward) || 0); }),
+    dayHeroes: dayHeroes.sort(function (a, b) { return winterRatingDateKeyToStamp(b.date) - winterRatingDateKeyToStamp(a.date); }),
     monthlyChampions: monthlyChampions,
     viceMonthlyChampions: viceMonthlyChampions,
     rows: playerRows,

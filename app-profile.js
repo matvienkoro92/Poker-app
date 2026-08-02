@@ -1126,7 +1126,7 @@ function initProfilePublicShowcase() {
 
 var profileAchievementsShowcaseSeq = 0;
 var profileAchievementsShowcasePromise = null;
-var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v1";
+var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v2";
 var PROFILE_ACHIEVEMENTS_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function profileAchievementsCacheKey(data) {

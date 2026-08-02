@@ -2401,6 +2401,7 @@ if (chatUserModalEl) {
     }
     var tournamentStats = metrics.tournaments || {};
     var tournamentKingWins = tournamentStats && tournamentStats.firstPlaces || 0;
+    var dayHeroRows = chatUserModalBestWinRows(tournamentStats && tournamentStats.dayHeroes, 1000);
     var manualAchievements = chatUserModalManualAchievements(ratingNick);
     var offlineWins = chatUserModalOfflineTournamentWins(ratingNick);
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
@@ -2450,6 +2451,22 @@ if (chatUserModalEl) {
         infoImage: "./assets/chat-profile-achievement-sng-champion-card.webp",
       });
     var winsHtml =
+      chatUserModalAchievementCardHtml("★", "Герой дня", dayHeroRows.slice(0, 3), {
+        tier: {
+          value: dayHeroRows.length,
+          tiers: [
+            { value: 1, label: "1 раз" },
+            { value: 5, label: "5 раз" },
+            { value: 15, label: "15 раз" },
+            { value: 30, label: "30 раз" },
+            { value: 100, label: "100 раз" },
+          ],
+          unit: "раз",
+          lockedLabel: "Нет",
+        },
+        progressRows: dayHeroRows,
+        info: "Игрок с максимальной суммой турнирных выигрышей за день среди всего клуба. Считается с 1 августа 2026 года.",
+      }) +
       chatUserModalAchievementCardHtml("♛", "Король турниров", [], {
         tier: {
           value: tournamentKingWins,
