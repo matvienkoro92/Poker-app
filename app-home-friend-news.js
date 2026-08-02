@@ -674,13 +674,22 @@
     return String(row && row.actorId || "").trim().toLowerCase();
   }
 
+  function playerNewsDisplayTitle(nick) {
+    var value = String(nick || "").trim();
+    return matchKey(value) === matchKey("Рыбнадзор") ? value + " (Мужначас)" : value;
+  }
+
   function ensureStructuredPlayerEvent(row) {
     if (!row || !row.actorNick) return row;
-    if (!row.newsTitle) row.newsTitle = String(row.actorNick).trim();
+    if (!row.newsTitle || matchKey(row.newsTitle) === matchKey(row.actorNick)) {
+      row.newsTitle = playerNewsDisplayTitle(row.actorNick);
+    }
     if (!Array.isArray(row.newsLines) || !row.newsLines.length) {
       var text = String(row.text || "").trim();
       var title = String(row.newsTitle || "").trim();
-      if (title && matchKey(text.slice(0, title.length)) === matchKey(title)) text = text.slice(title.length).trim();
+      var actorTitle = String(row.actorNick || "").trim();
+      if (actorTitle && matchKey(text.slice(0, actorTitle.length)) === matchKey(actorTitle)) text = text.slice(actorTitle.length).trim();
+      else if (title && matchKey(text.slice(0, title.length)) === matchKey(title)) text = text.slice(title.length).trim();
       row.newsLines = text.split(/\.\s+(?:И\s+)?/).map(function (line) {
         return line.replace(/[.\s]+$/, "").trim();
       }).filter(Boolean);
@@ -1009,6 +1018,7 @@
       if (!action) return null;
       var detail = String(row && row.tournament || "").trim();
       var displayName = String(row && row.nick || "").trim() || friendName(friend);
+      var displayTitle = playerNewsDisplayTitle(displayName);
       var stableActorKey = "rating:" + (matchKey(displayName) || matchKey(friendName(friend)));
       var achievementParts = [];
       if (place === 1) {
@@ -1036,8 +1046,8 @@
         id: "history:tournament:" + stableActorKey + ":" + String(row.dateLabel || row.date) + ":" + place + ":" + reward + ":" + detail,
         type: place === 1 || reward >= 50000 ? "achievement" : "rating",
         icon: place === 1 ? "◆" : "▲",
-        text: displayName + " " + newsLines.join(". ") + ".",
-        newsTitle: displayName,
+        text: displayTitle + " " + newsLines.join(". ") + ".",
+        newsTitle: displayTitle,
         newsLines: newsLines,
         prizeAmount: reward,
         at: row.date,
@@ -1574,7 +1584,7 @@
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title">' + esc(row.newsTitle) +
-        (isDayHero ? '<span class="home-friend-news-modal__day-hero"> · Герой дня</span>' : "") + '</span>' +
+        (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"

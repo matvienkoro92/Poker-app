@@ -591,9 +591,22 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 .home-friend-news-modal__day-hero {
-  color: #ffe0a3;
-  font-size: 0.72em;
-  font-weight: 900;
+  display: inline-flex;
+  min-height: 19px;
+  margin-left: 7px;
+  padding: 0 7px;
+  align-items: center;
+  vertical-align: 2px;
+  color: #281700;
+  background: linear-gradient(180deg, #ffe69a, #e7a92f);
+  border: 1px solid #fff0b2;
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(255, 190, 55, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  font-size: 0.58em;
+  font-weight: 1000;
+  letter-spacing: 0.055em;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 245, 198, 0.58);
   white-space: nowrap;
 }
 
@@ -605,7 +618,21 @@ html[data-theme="gold"] body[data-view="home"] {
 
 .home-friend-news-modal__event-lines > strong,
 .chat-user-modal__news-event-lines > strong {
+  position: relative;
   display: block;
+  padding-left: 15px;
+}
+
+.home-friend-news-modal__event-lines > strong::before,
+.chat-user-modal__news-event-lines > strong::before {
+  position: absolute;
+  top: 0.48em;
+  left: 1px;
+  color: var(--friend-news-accent, var(--player-news-accent, #f4d58d));
+  content: "◆";
+  font-size: 0.48em;
+  line-height: 1;
+  text-shadow: 0 0 7px currentColor;
 }
 
 .home-friend-news__amount {
