@@ -322,7 +322,7 @@ html[data-theme="gold"] body[data-view="home"] {
   gap: 8px;
 }
 
-.home-friend-news-modal__copy {
+.home-friend-news-modal__copy-link {
   display: grid;
   width: 32px;
   height: 32px;
@@ -334,11 +334,11 @@ html[data-theme="gold"] body[data-view="home"] {
   border-radius: 10px;
 }
 
-.home-friend-news-modal__copy[hidden] {
+.home-friend-news-modal__copy-link[hidden] {
   display: none;
 }
 
-.home-friend-news-modal__copy svg {
+.home-friend-news-modal__copy-link svg {
   width: 16px;
   height: 16px;
   fill: none;

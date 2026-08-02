@@ -330,7 +330,7 @@
             '<header class="home-friend-news-modal__header"><div><span id="homeFriendNewsModalEyebrow">Друзья и клуб</span>' +
               '<h2 id="homeFriendNewsModalTitle">Новости друзей</h2></div>' +
               '<div class="home-friend-news-modal__header-actions">' +
-                '<button type="button" class="home-friend-news-modal__copy" id="homeClubNewsCopyLink" aria-label="Копировать ссылку на новости клуба" title="Копировать ссылку" hidden>' +
+                '<button type="button" class="home-friend-news-modal__copy-link" id="homeClubNewsCopyLink" aria-label="Копировать ссылку на новости клуба" title="Копировать ссылку" hidden>' +
                   '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
                 '</button>' +
                 '<button type="button" class="home-friend-news-modal__close" data-home-friend-news-close aria-label="Закрыть">×</button>' +
