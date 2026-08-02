@@ -974,7 +974,7 @@ function profilePublicShowcaseApplyStatus(status) {
   levelText.innerHTML =
     '<span class="chat-user-modal__level-num">' +
     profileEscapeHtml(String(level)) +
-    '</span><span class="chat-user-modal__level-rest">из 100</span>';
+    '</span><span class="chat-user-modal__level-rest">/ 100</span>';
   levelText.hidden = false;
   if (xp) {
     var points = Number(status.points);

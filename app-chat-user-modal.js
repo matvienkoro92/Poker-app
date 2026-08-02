@@ -3149,7 +3149,7 @@ if (chatUserModalEl) {
         modalLevelText.classList.remove("chat-user-modal__level-text--unlinked");
         modalLevelText.innerHTML = '<span class="chat-user-modal__level-num">' +
           escapeHtml(rawLevel) +
-          '</span><span class="chat-user-modal__level-rest">из 100</span>';
+          '</span><span class="chat-user-modal__level-rest">/ 100</span>';
       } else {
         modalLevelText.classList.add("chat-user-modal__level-text--unlinked");
         modalLevelText.textContent = "Привяжите аккаунт";

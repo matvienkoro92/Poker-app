@@ -4453,20 +4453,21 @@ body.profile-avatar-choice-open {
 @media (min-width: 701px) and (max-width: 1100px) {
   .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
     position: relative !important;
-    min-height: 188px !important;
+    min-height: 220px !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__self-actions {
     position: absolute !important;
-    top: 128px !important;
-    left: clamp(204px, 22vw, 220px) !important;
-    right: 18px !important;
+    top: 170px !important;
+    left: 220px !important;
+    right: auto !important;
     bottom: auto !important;
-    width: auto !important;
-    max-width: none !important;
+    width: min(calc(100% - 238px), 630px) !important;
+    max-width: 630px !important;
     margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
+    zoom: 1 !important;
     z-index: 8 !important;
   }
 

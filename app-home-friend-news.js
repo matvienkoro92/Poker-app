@@ -696,6 +696,13 @@
         return line.replace(/[.\s]+$/, "").trim();
       }).filter(Boolean);
     }
+    var seenLines = {};
+    row.newsLines = row.newsLines.filter(function (line) {
+      var key = matchKey(String(line || "").replace(/[.\s]+$/, ""));
+      if (!key || seenLines[key]) return false;
+      seenLines[key] = true;
+      return true;
+    });
     return row;
   }
 
@@ -727,7 +734,12 @@
       }
       if (!detail) return;
       detail = detail.charAt(0).toUpperCase() + detail.slice(1);
-      tournament.row.newsLines.push(detail.replace(/[.\s]+$/, ""));
+      detail = detail.replace(/[.\s]+$/, "");
+      var detailKey = matchKey(detail);
+      var alreadyIncluded = tournament.row.newsLines.some(function (line) {
+        return matchKey(String(line || "").replace(/[.\s]+$/, "")) === detailKey;
+      });
+      if (!alreadyIncluded) tournament.row.newsLines.push(detail);
       tournament.row.text = tournament.row.newsTitle + " " + tournament.row.newsLines.join(". ") + ".";
       tournament.row.id += ":with:" + String(extra.id || extraIndex);
       consumed[extraIndex] = true;

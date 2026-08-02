@@ -730,6 +730,10 @@
   align-items: center;
   gap: 8px;
 }
+.chat-user-modal__status-scale + .chat-user-modal__status-xp {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
 .chat-user-modal__status-card {
   display: none;
 }

@@ -79,7 +79,6 @@
               <div class="chat-user-modal__p21" id="chatUserModalP21"></div>
               <div class="chat-user-modal__level">
                 <img src="./assets/profile-status-fish-level-01.png" alt="" class="chat-user-modal__level-fish" id="chatUserModalLevelFish" hidden loading="lazy" decoding="async" />
-                <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — из 55</p>
                 <div class="chat-user-modal__respect-control">
                   <button type="button" class="chat-user-modal__respect" id="chatUserModalRespectOpenVoters" aria-label="Кто поднял или уменьшил уважение от игроков">
                     Уважение от игроков <span id="chatUserModalRespectVal" class="chat-user-modal__respect-val">—</span>
@@ -93,12 +92,13 @@
               </div>
               <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
                 <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Текущий уровень</h4>
-                <p class="chat-user-modal__status-xp" id="chatUserModalStatusXp" hidden></p>
+                <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — / 100</p>
                 <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
                   <span class="chat-user-modal__status-card">2</span>
                   <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
                   <span class="chat-user-modal__status-card">3</span>
                 </div>
+                <p class="chat-user-modal__status-xp" id="chatUserModalStatusXp" hidden></p>
               </section>
             </div>
           </div>
