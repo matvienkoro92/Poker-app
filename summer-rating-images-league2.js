@@ -388,4 +388,15 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-01-08-2026-league2-subbota-5-biletov-18h.jpg",
     "rating-compressed-preview/rating-01-08-2026-league2-ok-21h.jpg"
   ]
+,
+  "02.08.2026": [
+    "rating-compressed-preview/rating-02-08-2026-league2-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-subbota-5-biletov-17h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-turnir-mesyaca-18h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-hok-19h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-nlh-knockout-220k-21h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-hr-5000-200k-2159h.jpg",
+    "rating-compressed-preview/rating-02-08-2026-league2-energetiktournament-22h.jpg"
+  ]
 };
