@@ -1360,6 +1360,9 @@
   }
 
   function feedbackRequest(payload) {
+    payload = Object.assign({}, payload || {}, {
+      scope: newsModalMode === "club" ? "club" : "friends",
+    });
     var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(payload) : payload;
     return fetch(apiBase() + "/api/profile-event-feedback", {
       method: "POST",
@@ -1856,7 +1859,6 @@
   }
 
   function openClubModal() {
-    if (!clubEvents.length) loadClubNews(true);
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     newsModalMode = "club";
@@ -1864,7 +1866,9 @@
     renderModalList(clubEvents);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
-    loadActiveModalFeedback(clubEvents);
+    Promise.resolve(loadClubNews(true)).then(function () {
+      if (newsModalMode === "club" && !modal.hidden) loadActiveModalFeedback(clubEvents);
+    });
   }
   window.pokerOpenClubNewsModal = openClubModal;
 
@@ -2346,7 +2350,6 @@
   }
 
   function loadClubNews(force) {
-    var preservedClubEvents = clubEvents.slice();
     var base = apiBase();
     if (!base) {
       clubNewsLoading = true;
@@ -2400,10 +2403,9 @@
         });
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
-      var clubLevelEvents = attachFriendAvatars(collectClubLevelEvents(players), players);
       var nextClubEvents = stableClubEvents(
-        buildClubEventsFromRows(players, winners).concat(clubLevelEvents),
-        preservedClubEvents
+        buildClubEventsFromRows(players, winners),
+        []
       );
       // Publish one complete snapshot only after both remote sources settle.
       // This prevents static tournament rows from flashing first and daily
@@ -2415,22 +2417,6 @@
       writeClubEventsCache(clubEvents);
       renderClubNews();
       if (newsModalMode === "club") renderModalList(clubEvents);
-      clubTournamentSnapshotsReady().then(function (snapshots) {
-        var ratingRiseEvents = collectRatingRiseEvents(
-          players,
-          snapshots || {},
-          CLUB_RATING_SNAPSHOTS_KEY,
-          CLUB_RATING_RISE_EVENTS_KEY
-        );
-        if (!ratingRiseEvents.length) return;
-        clubEvents = stableClubEvents(
-          clubEvents.concat(attachFriendAvatars(ratingRiseEvents, players)),
-          clubEvents
-        );
-        writeClubEventsCache(clubEvents);
-        renderClubNews();
-        if (newsModalMode === "club") renderModalList(clubEvents);
-      }).catch(function () {});
     }).catch(function () {
       clubNewsLoading = true;
       renderClubNews();
