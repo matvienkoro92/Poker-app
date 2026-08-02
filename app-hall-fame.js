@@ -1377,6 +1377,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
   var allRows = typeof pokerRatingAchievementAllTournamentRows === "function" ? pokerRatingAchievementAllTournamentRows() : [];
   var byNick = {};
   var byMonth = {};
+  var byDay = {};
   var metaByNick = hallFishLevelRowsByNick(levelRows);
   function entry(nick) {
     var key = hallFishNormalizeNick(nick);
@@ -1397,6 +1398,8 @@ function hallFishAggregateTournamentAchievements(levelRows) {
         big100: 0,
         big100Best: 0,
         firstPlaces: 0,
+        dayHero: 0,
+        dayHeroReward: 0,
         monthChampion: 0,
         monthChampionBest: 0,
         viceChampion: 0,
@@ -1404,6 +1407,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
         big50Rows: [],
         big100Rows: [],
         firstPlaceRows: [],
+        dayHeroRows: [],
         monthChampionRows: [],
         viceChampionRows: [],
       };
@@ -1428,6 +1432,12 @@ function hallFishAggregateTournamentAchievements(levelRows) {
       item.firstPlaces += 1;
       item.firstPlaceRows.push(row);
     }
+    if (reward > 0 && hallFishDateStamp(row && row.date) >= 20260801) {
+      var dayKey = String((row && row.date) || "").trim();
+      if (!byDay[dayKey]) byDay[dayKey] = {};
+      if (!byDay[dayKey][item.key]) byDay[dayKey][item.key] = { key: item.key, nick: item.nick, reward: 0 };
+      byDay[dayKey][item.key].reward += reward;
+    }
     var parts = String((row && row.date) || "").split(".");
     if (parts.length === 3) {
       var monthKey = parts[1] + "." + parts[2];
@@ -1435,6 +1445,18 @@ function hallFishAggregateTournamentAchievements(levelRows) {
       if (!byMonth[monthKey][item.key]) byMonth[monthKey][item.key] = { key: item.key, reward: 0 };
       byMonth[monthKey][item.key].reward += reward;
     }
+  });
+  Object.keys(byDay).forEach(function (dayKey) {
+    var hero = Object.keys(byDay[dayKey]).map(function (key) { return byDay[dayKey][key]; })
+      .sort(function (a, b) {
+        return (Number(b.reward) || 0) - (Number(a.reward) || 0) ||
+          String(a.nick || "").localeCompare(String(b.nick || ""), "ru");
+      })[0];
+    var item = hero && byNick[hero.key];
+    if (!item) return;
+    item.dayHero += 1;
+    item.dayHeroReward += Number(hero.reward) || 0;
+    item.dayHeroRows.push({ date: dayKey, reward: Number(hero.reward) || 0 });
   });
   Object.keys(byMonth).forEach(function (monthKey) {
     var monthRows = Object.keys(byMonth[monthKey]).map(function (key) { return byMonth[monthKey][key]; })
@@ -1498,6 +1520,16 @@ function hallFishAggregateTournamentAchievements(levelRows) {
       };
     });
   }
+  function dayHeroDetails(rows) {
+    return (Array.isArray(rows) ? rows : []).slice().sort(function (a, b) {
+      return hallFishDateStamp(b && b.date) - hallFishDateStamp(a && a.date);
+    }).map(function (row) {
+      return {
+        title: String((row && row.date) || "День"),
+        meta: "Выигрыш за день · " + hallFishFormatRub(row && row.reward),
+      };
+    });
+  }
   return {
     big50: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший выигрыш " + hallFishFormatRub(row.big50Best) : "", detailRows: tournamentDetails(row.big50Rows) });
@@ -1507,6 +1539,9 @@ function hallFishAggregateTournamentAchievements(levelRows) {
     })),
     king: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.firstPlaces, tie: row.big100Best || row.big50Best, valueText: row.firstPlaces + " побед", extraText: "1 место в турнирах", detailRows: tournamentDetails(row.firstPlaceRows) });
+    })),
+    dayHero: hallFishRowsWithRank(list.map(function (row) {
+      return Object.assign({}, row, { value: row.dayHero, tie: row.dayHeroReward, valueText: row.dayHero + " раз", extraText: "с 1 августа 2026", detailRows: dayHeroDetails(row.dayHeroRows) });
     })),
     monthChampion: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.monthChampion, tie: row.monthChampionBest, valueText: row.monthChampion + " раз", extraText: "топ-1 месяца по заносам", detailRows: monthChampionDetails(row.monthChampionRows) });
@@ -1642,6 +1677,7 @@ function hallFishAchievementSpecs(data) {
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
+    { key: "dayHero", title: "Герой дня", sectionTitle: "Герой дня", description: "Игрок с максимальной суммой турнирных выигрышей за день среди всего клуба. Считается с 1 августа 2026 года.", rows: data && data.dayHero },
     { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
     { key: "viceChampion", title: "Вице-чемп", sectionTitle: "Вице-чемпион месяца", description: "Начисляется игроку, который занял топ-2 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.viceChampion },
     { key: "clubChoice", title: "Народный герой", sectionTitle: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
