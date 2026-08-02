@@ -659,6 +659,15 @@
     return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
   }
 
+  function clubDayHero(value) {
+    var date = new Date(value || 0);
+    if (!Number.isFinite(date.getTime())) return null;
+    var label = String(date.getDate()).padStart(2, "0") + "." +
+      String(date.getMonth() + 1).padStart(2, "0") + "." + date.getFullYear();
+    var data = window.POKER_CLUB_NEWS_DATA || {};
+    return data.dayHeroes && data.dayHeroes[label] || null;
+  }
+
   function eventActorKey(row) {
     var actor = matchKey(row && row.actorNick);
     if (actor) return actor;
@@ -1604,8 +1613,10 @@
       var mod10 = count % 10;
       var mod100 = count % 100;
       var countWord = mod10 === 1 && mod100 !== 11 ? "запись" : (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "записи" : "записей");
+      var clubHero = clubDayHero(group.at);
       var dayHero = group.rows.filter(function (row) {
-        return Math.max(0, Number(row && row.prizeAmount) || 0) > 0;
+        return clubHero && matchKey(row && row.actorNick) === matchKey(clubHero.nick) &&
+          Math.max(0, Number(row && row.prizeAmount) || 0) > 0;
       }).sort(function (a, b) {
         return (Number(b && b.prizeAmount) || 0) - (Number(a && a.prizeAmount) || 0);
       })[0];

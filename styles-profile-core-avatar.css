@@ -4438,8 +4438,8 @@ body.profile-avatar-choice-open {
     justify-self: start !important;
     justify-items: start !important;
     width: min(100%, 620px) !important;
-    margin-top: -18px !important;
-    transform: translateX(-48px) !important;
+    margin-top: -44px !important;
+    transform: translateX(-96px) !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
