@@ -2570,6 +2570,7 @@ if (chatUserModalEl) {
           value: metrics.friends != null ? metrics.friends : 0,
           tiers: [
             { value: 1, label: "1 друг" },
+            { value: 5, label: "5 друзей" },
             { value: 10, label: "10 друзей" },
             { value: 25, label: "25 друзей" },
             { value: 50, label: "50 друзей" },
@@ -2588,6 +2589,7 @@ if (chatUserModalEl) {
             { value: 10, label: "10 приглашенных" },
             { value: 25, label: "25 приглашенных" },
             { value: 50, label: "50 приглашенных" },
+            { value: 100, label: "100 приглашенных" },
           ],
           unit: "приглашенных",
           lockedLabel: metrics.referrals == null ? "Только в своем профиле" : "Нет приглашенных",

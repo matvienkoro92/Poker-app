@@ -2515,6 +2515,7 @@ function hallFishCloseModal() {
   var modal = document.getElementById("hallFishRatingModal");
   if (modal) modal.hidden = true;
   if (document.body) document.body.classList.remove("player-crm-dialog-modal-open");
+  document.dispatchEvent(new CustomEvent("poker:hall-fish-close"));
 }
 
 function hallFishLoadRows() {
@@ -2729,7 +2730,11 @@ function openHallFishAchievementTab() {
       if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить топы по ачивкам. Попробуйте ещё раз позже.</div>';
     });
 }
-window.openHallFishAchievementsModal = openHallFishAchievementTab;
+window.openHallFishAchievementsModal = function (achievementKey) {
+  var key = String(achievementKey || "").trim();
+  if (key) hallFishActiveAchievementTab = key;
+  openHallFishAchievementTab();
+};
 
 function hallFishShareAchievementTop(key, text) {
   var url = hallFishAchievementShareUrl(key);

@@ -46,6 +46,8 @@
   var homeNewsLongPressTimer = 0;
   var homeNewsLongPressTriggered = false;
   var newsProfileReturnState = null;
+  var returnToClubNewsAfterAchievements = false;
+  var returnToClubNewsScrollTop = 0;
   var PLAYER_NEWS_COLORS = [
     { accent: "#65c7ff", rgb: "101, 199, 255" },
     { accent: "#68e2ad", rgb: "104, 226, 173" },
@@ -1762,6 +1764,7 @@
           '<strong>НАГРАДА 15 000 ₽</strong>' +
           '<span><b>Больше всех «Героев дня» в августе</b>' +
           '<small>Чтобы получить «Героя дня», выиграйте больше всех за день в одном турнире.</small></span>' +
+          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть &gt;&gt;</button>' +
         '</aside>'
       : "";
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
@@ -1950,6 +1953,33 @@
           closeModal();
           return;
         }
+        var achievementsOpen = event.target.closest("[data-home-news-achievements-open]");
+        if (achievementsOpen) {
+          event.preventDefault();
+          var list = el("homeFriendNewsList");
+          returnToClubNewsAfterAchievements = true;
+          returnToClubNewsScrollTop = list ? list.scrollTop : 0;
+          closeModal();
+          var openAchievements = function () {
+            if (typeof window.openHallFishAchievementsModal !== "function") return false;
+            window.openHallFishAchievementsModal("dayHero");
+            return true;
+          };
+          if (!openAchievements() && typeof window.pokerEnsureScriptDomains === "function") {
+            Promise.resolve(window.pokerEnsureScriptDomains(["hall"])).then(function () {
+              if (openAchievements()) return;
+              returnToClubNewsAfterAchievements = false;
+              openClubModal();
+            }).catch(function () {
+              returnToClubNewsAfterAchievements = false;
+              openClubModal();
+            });
+          } else if (typeof window.openHallFishAchievementsModal !== "function") {
+            returnToClubNewsAfterAchievements = false;
+            openClubModal();
+          }
+          return;
+        }
         var author = event.target.closest("[data-home-news-comment-author]");
         if (author) {
           var authorId = author.getAttribute("data-user-id");
@@ -2089,6 +2119,17 @@
           closeModal();
           setView(view);
         }
+      });
+      document.addEventListener("poker:hall-fish-close", function () {
+        if (!returnToClubNewsAfterAchievements) return;
+        returnToClubNewsAfterAchievements = false;
+        var newsModal = el("homeFriendNewsModal");
+        var list = el("homeFriendNewsList");
+        newsModalMode = "club";
+        syncNewsModalHeading();
+        if (newsModal) newsModal.hidden = false;
+        document.body.classList.add("home-friend-news-modal-open");
+        if (list) list.scrollTop = returnToClubNewsScrollTop;
       });
       modal.addEventListener("input", function (event) {
         var form = event.target.closest("[data-home-news-comment-form]");

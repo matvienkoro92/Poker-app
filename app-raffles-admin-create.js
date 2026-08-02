@@ -333,44 +333,66 @@ function initRafflesAdminCreateRuntime(opts) {
     var placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.textContent = "— Выберите турнир —";
-    var tournamentDayGroup = document.createElement("optgroup");
-    tournamentDayGroup.label = "Турнир дня";
+    var eveningGroup = document.createElement("optgroup");
+    eveningGroup.label = "Турниры вечера";
+    var monthGroup = document.createElement("optgroup");
+    monthGroup.label = "Турниры месяца";
     var group = document.createElement("optgroup");
     group.label = "Остальные турниры отчётных суток";
-    items.forEach(function (item) {
+    function appendScheduleOption(target, item, scopeLabel, highlighted) {
       var hour = String(Math.max(0, Number(item.hour) || 0)).padStart(2, "0");
       var minute = String(Math.max(0, Number(item.minute) || 0)).padStart(2, "0");
       var time = hour + ":" + minute;
-      var scope = item.date
-        ? item.date.split("-").reverse().slice(0, 2).join(".")
-        : item.repeat === "weekly"
-          ? dayLabels[dow]
-          : "";
       var buyin = raffleScheduleBuyinValue(item.buyin);
       var guarantee = String(item.guarantee || "").trim();
-      var isTournamentDay = String(item.category || "").trim().toLowerCase() === "турнир дня";
       var option = document.createElement("option");
       option.value = String(buyin);
       option.setAttribute("data-price", String(buyin));
       option.setAttribute("data-name", String(item.name || item.category || "Турнир") + " (" + time + ")");
-      if (isTournamentDay) {
+      if (highlighted) {
         option.setAttribute("data-tournament-day", "1");
         option.style.color = "#22c55e";
         option.style.backgroundColor = "#052e16";
         option.style.fontWeight = "900";
       }
-      option.textContent = time + " · " + (isTournamentDay ? "🟢 ТУРНИР ДНЯ · " : "") +
+      option.textContent = time + " · " + (highlighted ? "🟢 " : "") +
         String(item.name || item.category || "Турнир") +
-        (scope ? " (" + scope + ")" : "") +
+        (scopeLabel ? " (" + scopeLabel + ")" : "") +
         " — вход " + (buyin > 0 ? buyin.toLocaleString("ru-RU") + "₽" : "бесплатно") +
         (guarantee ? " · призы: " + guarantee : "");
-      (isTournamentDay ? tournamentDayGroup : group).appendChild(option);
+      target.appendChild(option);
+    }
+    schedule.filter(function (item) {
+      var category = String(item && item.category || "").trim().toLowerCase();
+      return item && item.repeat === "weekly" && (category === "турнир дня" || category === "турнир недели");
+    }).slice().sort(function (a, b) {
+      return Number(a.dow) - Number(b.dow) || Number(a.hour) - Number(b.hour);
+    }).forEach(function (item) {
+      appendScheduleOption(eveningGroup, item, dayLabels[Number(item.dow)] || "", Number(item.dow) === dow);
+    });
+    schedule.filter(function (item) {
+      return item && String(item.category || "").trim().toLowerCase() === "турнир месяца";
+    }).slice().sort(function (a, b) {
+      return String(b.date || "").localeCompare(String(a.date || ""));
+    }).forEach(function (item) {
+      appendScheduleOption(monthGroup, item, item.date ? item.date.split("-").reverse().slice(0, 2).join(".") : "", item.date === dateKey);
+    });
+    items.forEach(function (item) {
+      var category = String(item.category || "").trim().toLowerCase();
+      if (category === "турнир дня" || category === "турнир недели" || category === "турнир месяца") return;
+      var scope = item.date
+        ? item.date.split("-").reverse().slice(0, 2).join(".")
+        : item.repeat === "weekly"
+          ? dayLabels[dow]
+          : "";
+      appendScheduleOption(group, item, scope, false);
     });
     var custom = document.createElement("option");
     custom.value = "custom";
     custom.textContent = "Свой вариант (ввести вручную)";
     select.replaceChildren(placeholder);
-    if (tournamentDayGroup.children.length) select.appendChild(tournamentDayGroup);
+    if (eveningGroup.children.length) select.appendChild(eveningGroup);
+    if (monthGroup.children.length) select.appendChild(monthGroup);
     if (group.children.length) select.appendChild(group);
     select.appendChild(custom);
   }
