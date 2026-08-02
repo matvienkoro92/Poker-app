@@ -500,6 +500,11 @@ function summerRatingPlayerArtStageSize(key) {
     case "prushnik": return "14.5%";
     case "evgen1722": return "14.1%";
     case "хер вам)))))": return "11.5%";
+    case "frankl":
+    case "andrushamorf":
+    case "4ezzi":
+    case "morf":
+    case "морф": return "17.2%";
     case "shkarubo": return "16.3%";
     case "sarmat1305": return "13.0%";
     case "палач": return "15.84%";
@@ -516,6 +521,8 @@ function summerRatingPlayerArtStageSize(key) {
     case "ksuha🐊":
     case "ksuha🦖":
     case "ksuha🐉": return "9.4%";
+    case "zagrebnagreb":
+    case "zagrebrnagreb": return "19.5%";
     default: return "";
   }
 }
