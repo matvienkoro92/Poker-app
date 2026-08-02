@@ -304,7 +304,7 @@
       homeShortcuts.insertAdjacentHTML("afterend",
         '<section class="home-friend-news home-club-news" id="homeClubNews" aria-label="Новости клуба">' +
           '<button type="button" class="home-friend-news__ticker home-club-news__ticker" id="homeClubNewsOpen">' +
-            '<span class="home-friend-news__label">Новости клуба · итоги</span>' +
+            '<span class="home-friend-news__label" id="homeClubNewsLabel">Новости клуба</span>' +
             '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeClubNewsTrack" aria-live="polite"></span></span>' +
             '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
           "</button>" +
@@ -1435,7 +1435,7 @@
   }
   window.pokerOpenProfileReactionPicker = openReactionPicker;
 
-  function eventFeedbackHtml(row) {
+  function eventFeedbackHtml(row, profileCueHtml) {
     var rowId = feedbackEventId(row);
     var feedback = eventFeedback[rowId] || {};
     var reactions = feedback.reactions || {};
@@ -1495,13 +1495,13 @@
     var emojiPicker = '<span class="home-news-emoji-picker" hidden>' + HOME_COMMENT_EMOJIS.map(function (emoji) {
       return '<button type="button" data-home-comment-emoji="' + esc(emoji) + '" aria-label="Вставить ' + esc(emoji) + '">' + esc(emoji) + "</button>";
     }).join("") + "</span>";
-    return '<span class="chat-user-modal__news-actions">' +
-      reactionButtons +
-      '<button type="button" class="chat-user-modal__news-comment-toggle' +
-        (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
-        '" data-home-news-comments aria-label="Открыть комментарии">💬' +
-        (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
-      "</button></span>" +
+    return '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
+        reactionButtons +
+        '<button type="button" class="chat-user-modal__news-comment-toggle' +
+          (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
+          '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
+          (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
+        "</button></span>" + (profileCueHtml || "") + "</span>" +
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -1569,6 +1569,9 @@
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"
       : "<strong>" + eventTextHtml(row.text) + "</strong>";
+    var profileCue = canOpenProfile
+      ? '<span class="home-friend-news-modal__profile-cue">Открыть профиль <b aria-hidden="true">›</b></span>'
+      : "";
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
@@ -1580,8 +1583,7 @@
       (ticker ? eventTextHtml(row.text) : structuredText +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         "<small>" + esc(timeLabel) + "</small>" +
-        (canOpenProfile ? '<span class="home-friend-news-modal__profile-cue">Открыть профиль <b aria-hidden="true">›</b></span>' : "") +
-        eventFeedbackHtml(row)) +
+        eventFeedbackHtml(row, profileCue)) +
       "</span></span>";
   }
 
@@ -1603,9 +1605,10 @@
       var countWord = mod10 === 1 && mod100 !== 11 ? "запись" : (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? "записи" : "записей");
       return '<section class="home-friend-news-modal__day-group">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
+        '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
         '<div class="home-friend-news-modal__day-events">' +
           group.rows.map(function (row) { return eventHtml(row, false); }).join("") +
-        '</div><div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
+        "</div>" +
       "</section>";
     }).join("");
   }
@@ -1661,6 +1664,7 @@
   function renderClubNews() {
     var root = el("homeClubNews");
     var track = el("homeClubNewsTrack");
+    var label = el("homeClubNewsLabel");
     if (!root || !track) return;
     var displayRows = clubEvents;
     if (!displayRows.length) {
@@ -1670,6 +1674,12 @@
         text: clubNewsLoading ? "Загрузка новостей клуба…" : "За последний игровой день новостей клуба нет",
         at: "",
       }];
+    }
+    if (label) {
+      var labelDate = displayRows.map(function (row) { return row && row.at; }).find(function (value) {
+        return eventTime(value) > 0;
+      });
+      label.textContent = "Новости клуба" + (labelDate ? " · " + eventDateLabel(labelDate, false) : "");
     }
     root.hidden = false;
     track.innerHTML = displayRows.map(function (row) { return eventHtml(row, true); }).join("");
