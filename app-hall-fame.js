@@ -488,7 +488,7 @@ var hallFishCurrentIdsPromise = null;
 var hallFishProfileLoadingObserver = null;
 var hallFishProfileLoadingTimer = null;
 var hallFishActiveTab = "levels";
-var hallFishActiveAchievementTab = "big50";
+var hallFishActiveAchievementTab = "dayHero";
 var hallFishActiveDayHeroMonth = "all";
 var hallFishLevelSearchQuery = "";
 var hallFishLevelCurrentIds = [];
@@ -1709,10 +1709,10 @@ function hallFishReferralsRows(data) {
 
 function hallFishAchievementSpecs(data) {
   return [
+    { key: "dayHero", title: "Герой дня (15 000р)", sectionTitle: "Герой дня", description: "Игрок с самым крупным единичным турнирным заносом за день среди всего клуба. Считается с 1 января 2026 года. При равенстве выше игрок с большей суммой победных заносов.", awardText: "Награду 15 000 ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» в августе.", rows: data && data.dayHero },
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
-    { key: "dayHero", title: "Герой дня", sectionTitle: "Герой дня", description: "Игрок с самым крупным единичным турнирным заносом за день среди всего клуба. Считается с 1 января 2026 года. При равенстве выше игрок с большей суммой победных заносов.", awardText: "Награду 10 000 ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» в августе.", rows: data && data.dayHero },
     { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
     { key: "viceChampion", title: "Вице-чемп", sectionTitle: "Вице-чемпион месяца", description: "Начисляется игроку, который занял топ-2 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.viceChampion },
     { key: "clubChoice", title: "Народный герой", sectionTitle: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
@@ -1737,7 +1737,7 @@ function hallFishAchievementSectionHtml(title, rows, description, key, awardText
   return '<section class="hall-fish-achievement-section">' +
     '<h4 class="hall-fish-achievement-section__title">' + hallFishEsc(title) + '</h4>' +
     (description ? '<p class="hall-fish-achievement-section__description">' + hallFishEsc(description) + '</p>' : '') +
-    (awardText ? '<p class="hall-fish-achievement-section__award"><strong>НАГРАДА 10 000 ₽</strong><span>' + hallFishEsc(awardText.replace(/^Награду 10 000 ₽\s*/i, "")) + '</span></p>' : '') +
+    (awardText ? '<p class="hall-fish-achievement-section__award"><strong>НАГРАДА 15 000 ₽</strong><span>' + hallFishEsc(awardText.replace(/^Награду 15 000 ₽\s*/i, "")) + '</span></p>' : '') +
     (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list">' + list.map(function (row) {
       var userId = String(row.accountId || "").trim();
       var name = row.nick || "Игрок";
@@ -1791,7 +1791,7 @@ function hallFishRenderAchievementRows(data) {
   var specs = hallFishAchievementSpecs(data);
   var active = specs.some(function (spec) { return spec.key === hallFishActiveAchievementTab; })
     ? hallFishActiveAchievementTab
-    : "big50";
+    : "dayHero";
   hallFishActiveAchievementTab = active;
   var activeSpec = specs.filter(function (spec) { return spec.key === active; })[0] || specs[0];
   var monthFilter = "";
@@ -2927,7 +2927,7 @@ function initHallFishRatingModal() {
     if (!tab) return;
     e.preventDefault();
     e.stopPropagation();
-    hallFishActiveAchievementTab = String(tab.getAttribute("data-hall-fish-achievement-tab") || "big50").trim() || "big50";
+    hallFishActiveAchievementTab = String(tab.getAttribute("data-hall-fish-achievement-tab") || "dayHero").trim() || "dayHero";
     if (hallFishAchievementRowsCache) hallFishSetAchievementState("", hallFishAchievementRowsCache);
     else openHallFishAchievementTab();
   });

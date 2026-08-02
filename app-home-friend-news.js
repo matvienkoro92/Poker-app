@@ -1757,9 +1757,16 @@
   function renderModalList(rows) {
     var list = el("homeFriendNewsList");
     if (!list) return;
+    var achievementPromo = newsModalMode === "club"
+      ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
+          '<strong>НАГРАДА 15 000 ₽</strong>' +
+          '<span><b>Больше всех «Героев дня» в августе</b>' +
+          '<small>Чтобы получить «Героя дня», выиграйте больше всех за день в одном турнире.</small></span>' +
+        '</aside>'
+      : "";
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
     if (newsModalMode === "club" && clubNewsLoading && !hasRealRows) {
-      list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
+      list.innerHTML = achievementPromo + '<div class="home-friend-news-modal__loading" role="status">' +
         '<span aria-hidden="true"></span><strong>Загружаем новости клуба…</strong>' +
         '<small>Собираем все события за вчера</small></div>';
       return;
@@ -1771,9 +1778,9 @@
       return;
     }
     var snapshot = Array.isArray(rows) ? rows.slice() : [];
-    list.innerHTML = snapshot[0] && snapshot[0].id === "empty"
+    list.innerHTML = achievementPromo + (snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
-      : modalEventsHtml(snapshot);
+      : modalEventsHtml(snapshot));
   }
 
   function activeModalEvents() {

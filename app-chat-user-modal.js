@@ -2126,6 +2126,7 @@ if (chatUserModalEl) {
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
     if (key.indexOf("топ10") >= 0) return { mod: "top10", label: "ТОП-10<br>РЕЙТИНГА", img: "./assets/chat-profile-achievement-top10.webp" };
+    if (key.indexOf("герой дня") >= 0) return { mod: "cup", label: "ГЕРОЙ<br>ДНЯ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0) return { mod: "big-win", label: "ЗАНОС<br>ОТ 50<br>ДО 100К", img: "./assets/chat-profile-achievement-50k.webp" };
     if (key.indexOf("занос") >= 0 && key.indexOf("100") >= 0) return { mod: "big-win-plus", label: "ЗАНОС<br>ОТ 100К", img: "./assets/chat-profile-achievement-100k.webp" };
     if (key.indexOf("больш") >= 0 && key.indexOf("занос") >= 0) return { mod: "big-win", label: "БОЛЬШОЙ<br>ЗАНОС", img: "./assets/chat-profile-achievement-top-win.webp" };
@@ -2289,8 +2290,11 @@ if (chatUserModalEl) {
     );
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
     var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
+    var badge = String(options.badge || "").trim();
+    var achievementValue = Math.max(0, parseInt(tier ? tier.value : rows.length, 10) || 0);
     var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
       ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
+      ' data-chat-achievement-value="' + escapeHtml(achievementValue) + '"' +
       ' data-chat-achievement-state="' + escapeHtml(chatUserModalEncodeData(isLocked ? "Пока не открыто" : "Открыто")) + '"' +
       ' data-chat-achievement-rule="' + escapeHtml(chatUserModalEncodeData(info.rule)) + '"' +
       ' data-chat-achievement-progress="' + escapeHtml(chatUserModalEncodeData(info.progress)) + '"' +
@@ -2305,6 +2309,7 @@ if (chatUserModalEl) {
       (isLocked ? " chat-user-modal__achievement--locked" : "") + '"' + attrs + ">" +
       '<span class="chat-user-modal__achievement-title">' + meta.label + "</span>" +
       '<span class="chat-user-modal__achievement-icon" aria-hidden="true"><img src="' + escapeHtml(meta.img) + '" alt="" loading="lazy" decoding="async" /></span>' +
+      (badge ? '<span class="chat-user-modal__achievement-badge">' + escapeHtml(badge) + "</span>" : "") +
       '<span class="chat-user-modal__achievement-main">' +
         '<span class="chat-user-modal__achievement-details">' + details + "</span>" +
       "</span>" +
@@ -2454,6 +2459,7 @@ if (chatUserModalEl) {
       });
     var winsHtml =
       chatUserModalAchievementCardHtml("★", "Герой дня", dayHeroRows.slice(0, 3), {
+        badge: "15к в августе",
         tier: {
           value: dayHeroRows.length,
           tiers: [
@@ -2763,15 +2769,80 @@ if (chatUserModalEl) {
         parts && parts[3],
         parts && parts[4],
       ];
+      var achievementsHtml = chatUserModalAchievementsHtml(results, ratingNick, parts && parts[5]);
+      if (options.isSelfProfile === true) chatUserModalSyncAchievementNotifications(achievementsHtml);
       return {
         totalRewardHtml: chatUserModalRatingTotalHtml(ratingNick),
-        achievementsHtml: chatUserModalAchievementsHtml(results, ratingNick, parts && parts[5]),
+        achievementsHtml: achievementsHtml,
         ranksHtml: chatUserModalRatingRanksHtml(results, ratingNick),
         results: results,
         metrics: parts && parts[5],
       };
     });
   };
+
+  function chatUserModalAchievementNotificationRows(html) {
+    if (!html || typeof document === "undefined") return [];
+    var wrap = document.createElement("div");
+    wrap.innerHTML = html;
+    return Array.prototype.slice.call(wrap.querySelectorAll("[data-chat-achievement-title][data-chat-achievement-value]")).map(function (card) {
+      var title = chatUserModalDecodeData(card.getAttribute("data-chat-achievement-title"));
+      var value = Math.max(0, parseInt(card.getAttribute("data-chat-achievement-value"), 10) || 0);
+      return {
+        key: String(title || "").trim().toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 80),
+        title: String(title || "").trim().slice(0, 80),
+        value: value,
+      };
+    }).filter(function (row) { return !!row.key && !!row.title; });
+  }
+
+  function chatUserModalShowAchievementNotification(row) {
+    if (!row || !row.title || typeof document === "undefined") return;
+    var previous = document.querySelector(".achievement-earned-toast");
+    if (previous) previous.remove();
+    var toast = document.createElement("aside");
+    toast.className = "achievement-earned-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "assertive");
+    toast.innerHTML =
+      '<span class="achievement-earned-toast__icon" aria-hidden="true">🏆</span>' +
+      '<span class="achievement-earned-toast__copy"><strong>Новая ачивка: ' + escapeHtml(row.title) + '</strong>' +
+      '<small>' + escapeHtml(row.message || "Достижение добавлено в ваш профиль") + '</small></span>' +
+      '<a class="achievement-earned-toast__action" href="./?startapp=profile">Посмотреть</a>' +
+      '<button type="button" class="achievement-earned-toast__close" aria-label="Закрыть">×</button>';
+    document.body.appendChild(toast);
+    var close = toast.querySelector(".achievement-earned-toast__close");
+    if (close) close.addEventListener("click", function () { toast.remove(); });
+    requestAnimationFrame(function () { toast.classList.add("achievement-earned-toast--visible"); });
+    setTimeout(function () {
+      if (!toast.isConnected) return;
+      toast.classList.remove("achievement-earned-toast--visible");
+      setTimeout(function () { toast.remove(); }, 240);
+    }, 10000);
+  }
+
+  function chatUserModalSyncAchievementNotifications(html) {
+    var rows = chatUserModalAchievementNotificationRows(html);
+    if (!rows.length || typeof fetch !== "function") return;
+    var base = (typeof API_BASE !== "undefined" ? API_BASE : "") || "";
+    var body = typeof pokerApiAuthJsonBody === "function"
+      ? pokerApiAuthJsonBody({ achievements: rows })
+      : { achievements: rows };
+    fetch(base.replace(/\/$/, "") + "/api/achievement-notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    }).then(function (response) {
+      if (!response.ok) throw new Error("achievement-notifications-" + response.status);
+      return response.json();
+    }).then(function (data) {
+      var fresh = data && Array.isArray(data.newAchievements) ? data.newAchievements : [];
+      fresh.forEach(function (row, index) {
+        setTimeout(function () { chatUserModalShowAchievementNotification(row); }, index * 10500);
+      });
+    }).catch(function () {});
+  }
   function syncChatUserModalRatingRanks(nick) {
     chatUserModalRanksSeq += 1;
     var seq = chatUserModalRanksSeq;

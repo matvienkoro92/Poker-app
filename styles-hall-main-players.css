@@ -1251,8 +1251,8 @@
   outline: none;
 }
 .hall-fish-achievement-tab[data-hall-fish-achievement-tab="dayHero"] {
-  font-size: clamp(9px, 1.1vw, 11px);
-  letter-spacing: -0.025em;
+  font-size: clamp(10px, 1.25vw, 12px);
+  letter-spacing: -0.04em;
 }
 .hall-fish-achievement-tab--active,
 .hall-fish-achievement-tab[aria-selected="true"] {
@@ -1884,8 +1884,8 @@
     letter-spacing: -0.025em;
   }
   .hall-fish-achievement-tab[data-hall-fish-achievement-tab="dayHero"] {
-    font-size: clamp(7.6px, 2.1vw, 8.5px);
-    letter-spacing: -0.04em;
+    font-size: clamp(8.6px, 2.45vw, 10px);
+    letter-spacing: -0.055em;
   }
   .hall-fish-achievement-tabs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
