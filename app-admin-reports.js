@@ -340,6 +340,7 @@ function initAdminReportModal() {
       templatesLoaded: hasRakebackTemplateData(),
       templatesMayExist: true,
       loadTemplates: loadRakebackStaticTemplateData,
+      canPermanentlyDelete: canManageAllRakebackRows,
       activeRoom: activeRakebackRoom,
     });
     window.__adminReportRakebackShellModule = module;

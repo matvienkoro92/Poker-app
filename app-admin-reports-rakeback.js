@@ -831,7 +831,12 @@
     }
     if (editBtn) editBtn.hidden = true;
     if (addBtn) addBtn.hidden = true;
-    if (removeBtn) removeBtn.hidden = true;
+    if (removeBtn) {
+      removeBtn.hidden = !canPermanentlyDelete();
+      removeBtn.disabled = !!busy;
+      removeBtn.setAttribute("title", "Удалить шаблон навсегда");
+      removeBtn.setAttribute("aria-label", "Удалить шаблон навсегда");
+    }
     if (colorBtn) {
       colorBtn.hidden = false;
       colorBtn.disabled = !!busy;
@@ -987,6 +992,9 @@
     var totalsClose = config.totalsClose || config.rakebackTotalsClose || document.getElementById("adminReportRakebackTotalsClose");
     var totalsBackdrop = config.totalsBackdrop || config.rakebackTotalsBackdrop || document.getElementById("adminReportRakebackTotalsBackdrop");
     var templates = normalizeTemplateMap(config.templates || {});
+    var canPermanentlyDelete = typeof config.canPermanentlyDelete === "function"
+      ? config.canPermanentlyDelete
+      : function () { return false; };
     var templatesLoaded = config.templatesLoaded === true || hasAnyTemplateIds(templates);
     var templatesMayExist = config.templatesMayExist !== false || templatesLoaded;
     var templatesLoading = false;
@@ -1000,6 +1008,7 @@
     var activePeriod = "current_week";
     var activeQuickFilter = "all";
     var sharedAudit = [];
+    var permanentlyDeletedTemplates = {};
     var pendingDelete = null;
     var rakebackPlayerNicknames = {};
     var rakebackPlayerNicknameRequestKey = "";
@@ -1346,9 +1355,18 @@
       return (Array.isArray(ids) ? ids : []).map(function (id) {
         return String(id || "").trim();
       }).filter(function (id) {
-        if (!id || seen[id]) return false;
+        var deletedKey = getTemplateDefaultKey(room, id);
+        if (!id || seen[id] || permanentlyDeletedTemplates[deletedKey]) return false;
         seen[id] = true;
         return true;
+      });
+    }
+
+    function rememberServerDeletedTemplates(items) {
+      (Array.isArray(items) ? items : []).forEach(function (item) {
+        var room = normalizeRoom(item && item.room || "P21");
+        var playerId = String(item && (item.playerId || item.id) || "").trim();
+        if (playerId) permanentlyDeletedTemplates[getTemplateDefaultKey(room, playerId)] = true;
       });
     }
 
@@ -2336,12 +2354,14 @@
         saveSharedDraftNow(true, {
           upsertGroupIds: [item.groupId],
           deleteRowKeys: item.serverKey ? [item.serverKey] : [],
+          permanentlyDeleteRows: canPermanentlyDelete() ? (item.rows || []) : [],
           auditAction: "delete",
           auditDeletedCount: 1,
         });
       } else {
         saveSharedDraftNow(true, {
           deleteGroupIds: [item.groupId],
+          permanentlyDeleteRows: canPermanentlyDelete() ? (item.rows || []) : [],
           auditAction: "delete",
           auditDeletedCount: Math.max(1, Array.isArray(item.rows) ? item.rows.length : 1),
         });
@@ -2714,6 +2734,12 @@
         allowAccountedRakebackOverwrite: archiveMode,
         rakebackRows: getRowsForSave(localRows, patchMode ? patch : null),
       };
+      if (patch && patch.permanentlyDeleteTemplates && patch.permanentlyDeleteTemplates.length) {
+        payload.permanentlyDeleteTemplates = patch.permanentlyDeleteTemplates;
+      }
+      if (patch && patch.permanentlyDeleteRows && patch.permanentlyDeleteRows.length) {
+        payload.permanentlyDeleteRows = patch.permanentlyDeleteRows;
+      }
       if (patchMode) {
         payload.rakebackPatch = true;
         payload.deleteRakebackGroupIds = patch.deleteGroupIds || [];
@@ -2731,6 +2757,7 @@
         body: JSON.stringify(buildAuthBody(payload)),
       }).then(function (data) {
         if (data && data.ok && data.rakebackDraft) {
+          rememberServerDeletedTemplates(data.rakebackDraft.deletedTemplates);
           var serverRows = filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows));
           var currentLocalRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           if (archiveMode) {
@@ -2801,6 +2828,7 @@
       else if (markBusy) syncControls();
       return requestJson(base + "/api/admin-report-shifts" + q).then(function (data) {
         var draft = data && data.ok ? data.rakebackDraft : null;
+        rememberServerDeletedTemplates(draft && draft.deletedTemplates);
         var responseUpdatedAt = draft && draft.updatedAt ? String(draft.updatedAt) : "";
         var currentUpdatedAtMs = sharedUpdatedAt ? Date.parse(sharedUpdatedAt) : 0;
         var responseUpdatedAtMs = responseUpdatedAt ? Date.parse(responseUpdatedAt) : 0;
@@ -3823,6 +3851,43 @@
           if (!removeBtn) return;
           event.preventDefault();
           var row = removeBtn.closest("[data-rakeback-shared-row]");
+          var templateRow = removeBtn.closest("[data-rakeback-template-row]");
+          if (templateRow) {
+            var templateDraft = getTemplateRowDraft(templateRow);
+            if (!templateDraft || !templateDraft.playerId) return;
+            if (typeof window !== "undefined" && typeof window.confirm === "function" &&
+              !window.confirm("Удалить пустой шаблон для ID " + templateDraft.playerId + " навсегда?")) return;
+            clearTemplateDefaultTimer(templateDraft.room, templateDraft.playerId);
+            var deletedTemplateKey = getTemplateDefaultKey(templateDraft.room, templateDraft.playerId);
+            var previousTemplateIds = (templates[templateDraft.room] || []).slice();
+            var previousSharedRows = sharedRows.slice();
+            permanentlyDeletedTemplates[deletedTemplateKey] = true;
+            templates[templateDraft.room] = (templates[templateDraft.room] || []).filter(function (id) {
+              return String(id || "").trim().toLowerCase() !== templateDraft.playerId.toLowerCase();
+            });
+            var existingTemplateDefault = getTemplateDefaultRow(templateDraft.room, templateDraft.playerId);
+            sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
+              return !(isCarryForwardTemplateRow(item) && normalizeRoom(item.room) === templateDraft.room &&
+                String(item.playerId || item.id || "").trim().toLowerCase() === templateDraft.playerId.toLowerCase());
+            });
+            render();
+            saveSharedDraftNow(true, {
+              deleteGroupIds: existingTemplateDefault && existingTemplateDefault.groupId ? [existingTemplateDefault.groupId] : [],
+              deleteRowKeys: [getEmptyGroupTemplateServerKey(templateDraft.room, templateDraft.playerId)],
+              permanentlyDeleteTemplates: [{ room: templateDraft.room, playerId: templateDraft.playerId }],
+              auditAction: "delete",
+              auditDeletedCount: 1,
+            }).then(function (ok) {
+              if (!ok) {
+                delete permanentlyDeletedTemplates[deletedTemplateKey];
+                templates[templateDraft.room] = previousTemplateIds;
+                sharedRows = previousSharedRows;
+                render();
+              }
+              setStatus(ok ? "Шаблон удалён навсегда" : "Не удалось удалить шаблон", !ok);
+            });
+            return;
+          }
           if (!row) return;
           var groupId = row.getAttribute("data-rakeback-group") || "";
           var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
