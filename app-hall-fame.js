@@ -1701,7 +1701,7 @@ function hallFishAchievementSpecs(data) {
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
-    { key: "dayHero", title: "Герой дня", sectionTitle: "Герой дня", description: "Игрок с самым крупным единичным турнирным заносом за день среди всего клуба. Считается с 1 января 2026 года. При равенстве выше игрок с большей суммой победных заносов.", rows: data && data.dayHero },
+    { key: "dayHero", title: "Награда 10к", sectionTitle: "Герой дня", description: "Игрок с самым крупным единичным турнирным заносом за день среди всего клуба. Считается с 1 января 2026 года. При равенстве выше игрок с большей суммой победных заносов.", awardText: "Награду 10 000 ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» за календарный месяц.", rows: data && data.dayHero },
     { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
     { key: "viceChampion", title: "Вице-чемп", sectionTitle: "Вице-чемпион месяца", description: "Начисляется игроку, который занял топ-2 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.viceChampion },
     { key: "clubChoice", title: "Народный герой", sectionTitle: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
@@ -1721,11 +1721,12 @@ function hallFishAchievementShareHtml(key, title) {
   '</div>';
 }
 
-function hallFishAchievementSectionHtml(title, rows, description, key) {
+function hallFishAchievementSectionHtml(title, rows, description, key, awardText) {
   var list = Array.isArray(rows) ? rows : [];
   return '<section class="hall-fish-achievement-section">' +
     '<h4 class="hall-fish-achievement-section__title">' + hallFishEsc(title) + '</h4>' +
     (description ? '<p class="hall-fish-achievement-section__description">' + hallFishEsc(description) + '</p>' : '') +
+    (awardText ? '<p class="hall-fish-achievement-section__award"><strong>НАГРАДА 10 000 ₽</strong><span>' + hallFishEsc(awardText.replace(/^Награду 10 000 ₽\s*/i, "")) + '</span></p>' : '') +
     (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list">' + list.map(function (row) {
       var userId = String(row.accountId || "").trim();
       var name = row.nick || "Игрок";
@@ -1806,7 +1807,7 @@ function hallFishRenderAchievementRows(data) {
     '</div>' +
     '</div>' +
     monthFilter +
-    hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description, activeSpec.key) +
+    hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description, activeSpec.key, activeSpec.awardText) +
   '</div>';
 }
 

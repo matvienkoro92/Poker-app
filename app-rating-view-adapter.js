@@ -1042,8 +1042,8 @@ function syncWinterRatingPlayerMonthOptions(monthSelect, summary) {
   var keys = Object.keys(months).sort(function (a, b) {
     var ap = a.split(".");
     var bp = b.split(".");
-    return ((parseInt(ap[1], 10) || 0) * 12 + (parseInt(ap[0], 10) || 0)) -
-      ((parseInt(bp[1], 10) || 0) * 12 + (parseInt(bp[0], 10) || 0));
+    return ((parseInt(bp[1], 10) || 0) * 12 + (parseInt(bp[0], 10) || 0)) -
+      ((parseInt(ap[1], 10) || 0) * 12 + (parseInt(ap[0], 10) || 0));
   });
   var html = '<option value="all">Турниры за все время</option>';
   keys.forEach(function (key) {
