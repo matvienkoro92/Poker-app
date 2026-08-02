@@ -538,10 +538,10 @@ function upsertDateBlock(text, dateStr, block, existingDates) {
     if (!next) throw new Error(`Cannot locate insertion point before ${nextDate}`);
     return text.slice(0, next.start) + block + ",\n" + text.slice(next.start);
   }
-  const objectEnd = text.lastIndexOf("\n};");
+  const objectEnd = text.lastIndexOf("};");
   if (objectEnd < 0) throw new Error("Cannot locate object end");
   const prefix = sorted.length ? ",\n" : "\n";
-  return text.slice(0, objectEnd) + prefix + block + text.slice(objectEnd);
+  return text.slice(0, objectEnd) + prefix + block + "\n" + text.slice(objectEnd);
 }
 
 function sameTournament(a, b) {

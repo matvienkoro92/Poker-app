@@ -380,4 +380,12 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-31-07-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-31-07-2026-league2-ok-21h.jpg"
   ]
+,
+  "01.08.2026": [
+    "rating-compressed-preview/rating-01-08-2026-league2-magic-bounty-50k-11h.jpg",
+    "rating-compressed-preview/rating-01-08-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-01-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-01-08-2026-league2-subbota-5-biletov-18h.jpg",
+    "rating-compressed-preview/rating-01-08-2026-league2-ok-21h.jpg"
+  ]
 };
