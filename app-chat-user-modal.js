@@ -499,6 +499,8 @@ if (chatUserModalEl) {
     chatUserModalOpenSeq += 1;
     closeChatUserModalNews();
     closeChatUserSuperpowerModal();
+    chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
+    chatUserModalEl.removeAttribute("aria-busy");
     chatUserModalEl.setAttribute("aria-hidden", "true");
     chatUserModalEl.classList.remove("chat-user-modal--open");
     document.dispatchEvent(new CustomEvent("poker:chat-user-modal-close"));
@@ -3193,6 +3195,13 @@ if (chatUserModalEl) {
       modalBirthAdmin.removeAttribute("data-target-user-id");
       modalBirthAdmin.removeAttribute("data-open-user-id");
     }
+    if (!openingSelfProfile && !deferReveal) {
+      chatUserModalEl.classList.add("chat-user-modal--profile-loading");
+      chatUserModalEl.setAttribute("aria-busy", "true");
+    } else {
+      chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
+      chatUserModalEl.removeAttribute("aria-busy");
+    }
     // News keeps its compact loading screen visible until the profile data and
     // main artwork are ready. Other entry points retain the immediate shell.
     if (!deferReveal) revealChatUserModal(openSeq);
@@ -3339,8 +3348,16 @@ if (chatUserModalEl) {
       });
     Promise.resolve(initialBlockPromise).catch(function () {});
     profilePromise.then(function () {
+      if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
+        chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
+        chatUserModalEl.removeAttribute("aria-busy");
+      }
       if (deferReveal) revealChatUserModal(openSeq);
     }, function () {
+      if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
+        chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
+        chatUserModalEl.removeAttribute("aria-busy");
+      }
       if (deferReveal) revealChatUserModal(openSeq);
     });
   }
