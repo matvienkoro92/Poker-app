@@ -9881,7 +9881,7 @@ body.club-choice-vote-open {
 .sng-champions-modal__completed-team-player { position:absolute; bottom:0; display:block; width:auto; height:100%; margin:0; }
 .sng-champions-modal__completed-team-player:first-child { right:1%; z-index:2; }
 .sng-champions-modal__completed-team-player:last-child { left:1%; z-index:1; }
-.sng-champions-modal__completed-team-player img { display:block; width:auto; max-width:none; height:100%; object-fit:contain; -webkit-mask-image:radial-gradient(circle at 18% 87%,transparent 0 12%,#000 12.6%); mask-image:radial-gradient(circle at 18% 87%,transparent 0 12%,#000 12.6%); transform:none; filter:drop-shadow(0 14px 18px rgba(0,0,0,.54)) drop-shadow(0 0 18px rgba(255,171,42,.22)); }
+.sng-champions-modal__completed-team-player img { display:block; width:auto; max-width:none; height:100%; object-fit:contain; transform:none; filter:drop-shadow(0 14px 18px rgba(0,0,0,.54)) drop-shadow(0 0 18px rgba(255,171,42,.22)); }
 .sng-champions-modal__completed-team-player:first-child img,
 .sng-champions-modal__completed-team-player:last-child img { transform:none; }
 .sng-champions-modal__completed-team-player b { align-self:center; color:#ffe49d; font-size:44px; }

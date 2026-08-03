@@ -4873,3 +4873,20 @@ body.profile-avatar-choice-open {
     height: 26px !important;
   }
 }
+
+/* Final identity-row lock: legacy city rules assign it to grid row 4 on small
+   screens. Keep birth date and city in the same row at every compact width. */
+@media (max-width: 700px) {
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-hero-birth {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__details-row #profileHeroCity.profile-hero-city {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    clear: none !important;
+    margin: 0 !important;
+  }
+}

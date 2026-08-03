@@ -4911,7 +4911,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   font-size: clamp(5.9px, 1.65vw, 7.3px);
 }
 
-.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick,
+.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick {
   top: 18px;
   font-size: clamp(7.08px, 1.98vw, 8.76px);
 }
@@ -4937,36 +4938,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   background: none !important;
 }
 
-.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
-  --summer-top3-art-center-x: calc(50% + 3px);
-  --summer-top3-art-center-y: calc(26% + 22px);
-  --summer-top3-art-center-size: 20%;
-  --summer-top3-art-left-y: calc(44% + 40px);
-  --summer-top3-art-left-size: 20%;
-  --summer-top3-art-right-size: 20%;
-}
-
 @media (min-width: 700px) {
-  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
+  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     --summer-top3-art-center-size: 35.65%;
     --summer-top3-art-left-size: 26.35%;
     --summer-top3-art-right-size: 26.35%;
   }
-
-  .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
-    --summer-top3-art-center-size: 23%;
-    --summer-top3-art-left-size: 17%;
-    --summer-top3-art-right-size: 17%;
-  }
-}
-
-.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(1) .spring-rating-top3__nick,
-.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(3) .spring-rating-top3__nick {
-  top: 33px;
-}
-
-.winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__card:nth-child(2) .spring-rating-top3__nick {
-  top: 11px;
 }
 
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__podium::before,

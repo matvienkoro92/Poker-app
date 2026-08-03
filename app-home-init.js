@@ -164,6 +164,79 @@
   });
 })();
 
+(function initHeaderHomeShareActions() {
+  var menu = document.getElementById("headerMoreMenu");
+  var radioButton = document.getElementById("radioToggle");
+  if (menu && radioButton && !document.getElementById("headerInviteFriendBtn")) {
+    radioButton.insertAdjacentHTML("beforebegin",
+      '<button type="button" class="header-menu-action header-menu-action--invite-friend" id="headerInviteFriendBtn" title="Позвать друга" aria-label="Поделиться ссылкой на главную клуба" role="menuitem" data-header-menu-close>' +
+        '<span class="header-menu-action__icon" aria-hidden="true">✈️</span>' +
+        '<span class="header-menu-action__body"><span class="header-menu-action__title">Позвать друга</span><span class="header-menu-action__hint">Отправить сообщение со ссылкой</span></span>' +
+      '</button>' +
+      '<button type="button" class="header-menu-action header-menu-action--copy-home" id="headerCopyHomeLinkBtn" title="Скопировать ссылку" aria-label="Скопировать ссылку на главную клуба" role="menuitem">' +
+        '<span class="header-menu-action__icon" aria-hidden="true">📋</span>' +
+        '<span class="header-menu-action__body"><span class="header-menu-action__title" data-header-copy-home-label>Скопировать ссылку</span><span class="header-menu-action__hint">Ссылка на главную</span></span>' +
+      '</button>');
+  }
+  var shareButton = document.getElementById("headerInviteFriendBtn");
+  var copyButton = document.getElementById("headerCopyHomeLinkBtn");
+  if (!shareButton && !copyButton) return;
+
+  function homeLink() {
+    if (typeof getAppBaseUrlForLinks === "function") {
+      var appBase = String(getAppBaseUrlForLinks() || "").trim();
+      if (appBase) return appBase;
+    }
+    try {
+      return String(window.location.origin || "") + "/";
+    } catch (eLocation) {
+      return "https://t.me/Poker_dvatuza_bot/DvaTuza";
+    }
+  }
+
+  function notify(message) {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg && typeof tg.showToast === "function") tg.showToast(message);
+  }
+
+  if (shareButton) shareButton.addEventListener("click", function () {
+    var link = homeLink();
+    var text = "Присоединяйся к покерному клубу «Два туза»!";
+    var payload = { title: "Покерный клуб «Два туза»", text: text, url: link };
+    var nativeShare = typeof pokerTryPwaWebShare === "function"
+      ? pokerTryPwaWebShare(payload)
+      : Promise.resolve(false);
+    nativeShare.then(function (shared) {
+      if (shared) return;
+      var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function"
+        ? pokerBuildTelegramShareUrlDialog(link, text)
+        : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text);
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+      else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+      else window.open(shareUrl, "_blank", "noopener,noreferrer");
+    });
+  });
+
+  if (copyButton) copyButton.addEventListener("click", function () {
+    var label = copyButton.querySelector("[data-header-copy-home-label]");
+    var copy = typeof pokerCopyTextToClipboard === "function"
+      ? pokerCopyTextToClipboard(homeLink())
+      : Promise.resolve(false);
+    copy.then(function (copied) {
+      if (label) label.textContent = copied ? "✓ Ссылка скопирована" : "Не удалось скопировать";
+      copyButton.classList.toggle("is-copied", !!copied);
+      copyButton.setAttribute("aria-label", copied ? "Ссылка на главную скопирована" : "Не удалось скопировать ссылку");
+      if (copied) notify("Ссылка скопирована");
+      window.setTimeout(function () {
+        if (label) label.textContent = "Скопировать ссылку";
+        copyButton.classList.remove("is-copied");
+        copyButton.setAttribute("aria-label", "Скопировать ссылку на главную клуба");
+      }, 2200);
+    });
+  });
+})();
+
 (function installHeaderPoker21GuestReset() {
   function applyGuestHeaderPoker21Status() {
     var headerStatus = document.getElementById("headerPokerStatus");

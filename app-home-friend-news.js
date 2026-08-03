@@ -48,6 +48,8 @@
   var clubNewsRetryCount = 0;
   var clubProfileByNick = {};
   var clubProfileLookupPromises = {};
+  var friendProfileByNick = {};
+  var friendProfileById = {};
   var homeNewsLongPressTimer = 0;
   var homeNewsLongPressTriggered = false;
   var newsProfileReturnState = null;
@@ -1681,12 +1683,17 @@
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
     var linkedClubProfile = newsModalMode === "club" ? clubProfileForNick(row && row.actorNick) : null;
+    var friendProfileKey = matchKey(row && row.actorNick);
+    var linkedFriendProfile = newsModalMode === "friends"
+      ? (friendProfileById[String(row && row.actorId || "").trim()] || friendProfileByNick[friendProfileKey] || null)
+      : null;
+    var linkedProfile = linkedClubProfile || linkedFriendProfile;
     // In club news only an exact, public nickname mapping may open a profile.
     // Snapshot actor ids can be stale, synthetic, or belong to another player.
     var eventPlayerId = newsModalMode === "club"
       ? String(linkedClubProfile && linkedClubProfile.id || "")
       : String(row && row.actorId || "");
-    var avatar = String(linkedClubProfile && linkedClubProfile.avatar || row && row.actorAvatar || "").trim();
+    var avatar = String(linkedProfile && linkedProfile.avatar || row && row.actorAvatar || "").trim();
     var visual = avatar
       ? '<img class="home-friend-news__avatar" src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
       : eventIconSvg(row.type);
@@ -1695,6 +1702,20 @@
       : "";
     var canResolveClubPlayer = newsModalMode === "club" && !!String(row && row.actorNick || "").trim();
     var canOpenProfile = !ticker && !!(eventPlayerId || canResolveClubPlayer);
+    var profileLevel = Math.max(0, Number(linkedProfile && linkedProfile.level) || 0);
+    var profileRatingPlace = Math.max(0, Number(linkedProfile && linkedProfile.ratingPlace) || 0);
+    var profileRatingLeague = Math.max(0, Number(linkedProfile && linkedProfile.ratingLeague) || 0);
+    var profileMetaParts = [];
+    if (profileLevel) profileMetaParts.push("Уровень " + profileLevel);
+    if (profileRatingPlace && profileRatingLeague) {
+      profileMetaParts.push("Лига " + profileRatingLeague + " · " + profileRatingPlace + "-е место");
+    }
+    var profileMetaHtml = !ticker && profileMetaParts.length
+      ? '<span class="home-friend-news-modal__player-meta">' + esc(profileMetaParts.join(" · ")) + '</span>'
+      : "";
+    var poker21LinkedHtml = !ticker && linkedProfile && linkedProfile.poker21Linked
+      ? '<span class="home-friend-news-modal__poker21-linked" title="Poker21 привязан" aria-label="Poker21 привязан">✓</span>'
+      : "";
     var playerAttrs = canOpenProfile
       ? ' data-home-news-player-id="' + esc(eventPlayerId) + '"' +
         ' data-home-news-player-name="' + esc(row.actorNick || "Игрок") + '"' +
@@ -1702,8 +1723,9 @@
         ' role="button" tabindex="0"'
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
-      ? '<span class="home-friend-news-modal__player-title">' + esc(row.newsTitle) +
-        (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
+      ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
+        (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + poker21LinkedHtml + '</span>' +
+        profileMetaHtml +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"
@@ -2497,6 +2519,28 @@
         results[4] || {},
         results[5] && Array.isArray(results[5].raffles) ? results[5].raffles : []
       );
+      friendProfileByNick = {};
+      friendProfileById = {};
+      friends.forEach(function (friend) {
+        var snapshot = friendSnapshot(friend, tournamentSnapshots);
+        var league1Place = Math.max(0, Number(snapshot && snapshot.league1Place) || 0);
+        var league2Place = Math.max(0, Number(snapshot && snapshot.league2Place) || 0);
+        var ratingLeague = league1Place && (!league2Place || league1Place <= league2Place) ? 1 : (league2Place ? 2 : 0);
+        var profile = {
+          id: friendId(friend),
+          avatar: friendAvatar(friend),
+          poker21Linked: !!String(friend && (friend.p21Id || friend.poker21Id || friend.pokerPlusUserId) || "").trim(),
+          level: Math.max(0, Number(friend && (friend.statusLevel || friend.level)) || 0),
+          ratingLeague: ratingLeague,
+          ratingPlace: ratingLeague === 1 ? league1Place : (ratingLeague === 2 ? league2Place : 0),
+        };
+        if (profile.id) friendProfileById[profile.id] = profile;
+        friendRatingNickCandidates(friend).forEach(function (nick) {
+          nicknameMatchKeys(nick).forEach(function (key) {
+            if (key && !friendProfileByNick[key]) friendProfileByNick[key] = profile;
+          });
+        });
+      });
       var nextEvents = attachFriendAvatars(mergeRelatedPlayerEvents(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         personalPostEvents(friends, results[7] && results[7].posts),
@@ -2767,7 +2811,18 @@
       clubProfileLookupPromises = {};
       var ambiguousClubProfileNicks = {};
       players.forEach(function (row) {
-        var profile = { id: friendId(row), avatar: friendAvatar(row) || clubNewsFallbackAvatar(row && row.pokerPlusNickname) };
+        var snapshot = friendSnapshot(row, results[2]);
+        var league1Place = Math.max(0, Number(snapshot && snapshot.league1Place) || 0);
+        var league2Place = Math.max(0, Number(snapshot && snapshot.league2Place) || 0);
+        var ratingLeague = league1Place && (!league2Place || league1Place <= league2Place) ? 1 : (league2Place ? 2 : 0);
+        var profile = {
+          id: friendId(row),
+          avatar: friendAvatar(row) || clubNewsFallbackAvatar(row && row.pokerPlusNickname),
+          poker21Linked: !!String(row && (row.p21Id || row.poker21Id || row.pokerPlusUserId) || "").trim(),
+          level: Math.max(0, Number(row && (row.statusLevel || row.level)) || 0),
+          ratingLeague: ratingLeague,
+          ratingPlace: ratingLeague === 1 ? league1Place : (ratingLeague === 2 ? league2Place : 0),
+        };
         friendRatingNickCandidates(row).forEach(function (nickname) {
           nicknameMatchKeys(nickname).forEach(function (key) {
           if (!key || ambiguousClubProfileNicks[key]) return;
