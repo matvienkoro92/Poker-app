@@ -416,8 +416,11 @@
     var runexExchipTotal = crmReportNumber(report.botCryptoDep) + exchip;
     var anyaVisible = anyaSalary ? row("Аня ЗП", anyaSalary) : "";
     var raffleStats = state.statsSummary && state.statsSummary.raffles;
+    var raffleNetAmount = raffleStats && raffleStats.available !== false
+      ? crmReportNumber(raffleStats.issuedPrizeAmount) - crmReportNumber(raffleStats.returnedAmount)
+      : 0;
     var raffleRows = raffleStats && raffleStats.available !== false
-      ? row("Розыгрыши итого", raffleStats.issuedPrizeAmount, "", true) +
+      ? row("Розыгрыши итого", raffleNetAmount, "", true) +
         row("— Билеты", raffleStats.issuedTicketAmount, "player-crm__week-report-row--subdetail", true) +
         row("— Кеш", raffleStats.issuedCashAmount, "player-crm__week-report-row--subdetail", true) +
         returnRow("— Возврат", raffleStats.returnedAmount)
@@ -429,7 +432,8 @@
       ? ""
       : (function () {
           var managerTotals = crmDailyPokerDebitsByManager(state.dailyPokerStats);
-          return row("Крутка дня списано", dailyPokerDebited, "", true) +
+          var dailyPokerNet = dailyPokerDebited - crmReportNumber(state.dailyPokerStats.bonusBalanceReturned);
+          return row("Крутка дня списано", dailyPokerNet, "", true) +
             row("— Аня", managerTotals.anya, "player-crm__week-report-row--subdetail", true) +
             row("— Вика", managerTotals.vika, "player-crm__week-report-row--subdetail", true) +
             returnRow("— Возврат", state.dailyPokerStats.bonusBalanceReturned);
@@ -544,7 +548,9 @@
     var raffleIssuedTotal = 0;
     if (raffleStats && raffleStats.available !== false) {
       raffleIssuedTotal = crmReportNumber(raffleStats.issuedPrizeAmount);
-      lines.push("Розыгрыши итого: " + crmReportMoney(raffleStats.issuedPrizeAmount));
+      lines.push("Розыгрыши итого: " + crmReportMoney(
+        crmReportNumber(raffleStats.issuedPrizeAmount) - crmReportNumber(raffleStats.returnedAmount)
+      ));
       lines.push("— Билеты: " + crmReportMoney(raffleStats.issuedTicketAmount));
       lines.push("— Кеш: " + crmReportMoney(raffleStats.issuedCashAmount));
       lines.push("— Возврат: +" + crmReportMoney(raffleStats.returnedAmount));
@@ -552,7 +558,10 @@
     var dailyPokerDebited = 0;
     if (state.dailyPokerStats && state.dailyPokerStats.bonusBalanceDebited != null) {
       dailyPokerDebited = crmReportNumber(state.dailyPokerStats.bonusBalanceDebited);
-      lines.push("Крутка дня списано: " + crmReportMoney(state.dailyPokerStats.bonusBalanceDebited));
+      lines.push("Крутка дня списано: " + crmReportMoney(
+        crmReportNumber(state.dailyPokerStats.bonusBalanceDebited) -
+        crmReportNumber(state.dailyPokerStats.bonusBalanceReturned)
+      ));
       var dailyPokerManagerTotals = crmDailyPokerDebitsByManager(state.dailyPokerStats);
       lines.push("— Аня: " + crmReportMoney(dailyPokerManagerTotals.anya));
       lines.push("— Вика: " + crmReportMoney(dailyPokerManagerTotals.vika));
