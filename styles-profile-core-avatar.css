@@ -3048,7 +3048,7 @@ body.profile-avatar-choice-open {
   }
 
   .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
-    position: static !important;
+    position: relative !important;
     display: grid !important;
     grid-template-columns: 170px minmax(0, 1fr) !important;
     align-items: start !important;
@@ -3096,6 +3096,157 @@ body.profile-avatar-choice-open {
     gap: 10px !important;
     width: 100% !important;
     margin: 0 !important;
+  }
+}
+
+/* Definitive identity-row placement. This must remain the final profile rule. */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+    grid-template-rows: auto auto !important;
+    row-gap: 12px !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block {
+    display: contents !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row {
+    position: absolute !important;
+    top: 92px !important;
+    left: 0 !important;
+    right: 0 !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row > .profile-public-showcase__age-badge,
+  .view[data-view="profile"] .profile-public-showcase__details-row > .profile-public-showcase__city-badge {
+    display: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-public-showcase__identity-controls {
+    display: grid !important;
+    grid-template-columns: 196px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-hero-birth,
+  .view[data-view="profile"] .profile-public-showcase__details-row #profileHeroCity.profile-hero-city {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    margin: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__self-actions {
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Identity row: specialty, birth date and city are one real grid row.
+   Keep this last so legacy offsets/transforms cannot pull the editors apart. */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+    grid-template-rows: auto auto !important;
+    row-gap: 12px !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block {
+    display: contents !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__details-row {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__details-row > .profile-public-showcase__age-badge,
+  .view[data-view="profile"] .profile-public-showcase__details-row > .profile-public-showcase__city-badge {
+    display: none !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-public-showcase__identity-controls {
+    display: grid !important;
+    grid-template-columns: 196px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-hero-birth,
+  .view[data-view="profile"] .profile-public-showcase__details-row #profileHeroCity.profile-hero-city {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    margin: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__self-actions {
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
   }
 }
 
@@ -4583,7 +4734,7 @@ body.profile-avatar-choice-open {
     overflow: visible !important;
   }
   .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
-    position: static !important;
+    position: relative !important;
     display: grid !important;
     grid-template-columns: 170px minmax(0, 1fr) !important;
     align-items: start !important;
@@ -4605,26 +4756,75 @@ body.profile-avatar-choice-open {
     margin: 0 !important;
     transform: none !important;
   }
+  .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {
+    grid-template-rows: auto auto !important;
+    row-gap: 12px !important;
+  }
   .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-block {
-    min-width: 0 !important;
-    margin: 4px 0 0 !important;
+    display: contents !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    margin: 0 !important;
     transform: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: translateY(-90px) !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row > .profile-public-showcase__age-badge,
+  .view[data-view="profile"] .profile-public-showcase__details-row > .profile-public-showcase__city-badge {
+    display: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-public-showcase__identity-controls {
+    display: grid !important;
+    grid-template-columns: 196px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  .view[data-view="profile"] .profile-public-showcase__details-row .profile-hero-birth,
+  .view[data-view="profile"] .profile-public-showcase__details-row #profileHeroCity.profile-hero-city {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    margin: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
   }
   .view[data-view="profile"] .profile-public-showcase__self-actions {
     position: static !important;
     display: block !important;
-    width: calc(100% - 194px) !important;
-    max-width: none !important;
-    margin: 14px 0 0 194px !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
-    zoom: 1 !important;
-  }
-  .view[data-view="profile"] .profile-public-showcase__self-actions .profile-public-showcase__identity-controls {
-    display: grid !important;
-    grid-template-columns: 196px minmax(0, 1fr) !important;
-    gap: 10px !important;
-    width: 100% !important;
-    margin: 0 !important;
+    overflow: hidden !important;
   }
 }

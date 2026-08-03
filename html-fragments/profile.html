@@ -55,23 +55,23 @@
                       <span class="profile-public-showcase__specialty-badge" id="profilePublicSpecialtyBadge" hidden></span>
                       <span class="profile-public-showcase__age-badge" id="profilePublicAgeBadge" hidden></span>
                       <span class="profile-public-showcase__city-badge" id="profilePublicCityBadge" hidden></span>
+                      <div class="profile-public-showcase__identity-controls">
+                        <label class="profile-hero-birth" id="profileHeroBirthDate" aria-label="Дата рождения">
+                          <span class="profile-hero-birth__label">ДР</span>
+                          <input type="date" class="profile-hero-birth__input" id="profileBirthDateInput" min="1965-01-01" max="2010-12-31" aria-label="Дата рождения" />
+                          <button type="button" class="profile-hero-birth__save" id="profileBirthDateSaveBtn" aria-label="Сохранить дату рождения">✓</button>
+                          <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
+                        </label>
+                        <label class="profile-hero-city" id="profileHeroCity" aria-label="Город">
+                          <input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
+                          <button type="button" class="profile-hero-city__save" id="profileCitySaveBtn" aria-label="Сохранить город">✓</button>
+                          <span class="profile-hero-city__feedback" id="profileCityFeedback" aria-live="polite"></span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="profile-public-showcase__self-actions" aria-label="Настройки своего профиля">
-                    <div class="profile-public-showcase__identity-controls">
-                      <label class="profile-hero-birth" id="profileHeroBirthDate" aria-label="Дата рождения">
-                        <span class="profile-hero-birth__label">ДР</span>
-                        <input type="date" class="profile-hero-birth__input" id="profileBirthDateInput" min="1965-01-01" max="2010-12-31" aria-label="Дата рождения" />
-                        <button type="button" class="profile-hero-birth__save" id="profileBirthDateSaveBtn" aria-label="Сохранить дату рождения">✓</button>
-                        <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
-                      </label>
-                      <label class="profile-hero-city" id="profileHeroCity" aria-label="Город">
-                        <input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
-                        <button type="button" class="profile-hero-city__save" id="profileCitySaveBtn" aria-label="Сохранить город">✓</button>
-                        <span class="profile-hero-city__feedback" id="profileCityFeedback" aria-live="polite"></span>
-                      </label>
-                    </div>
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
                 </div>

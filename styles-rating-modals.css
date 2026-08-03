@@ -212,13 +212,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.winter-rating-player-modal__overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
+  margin: -8px 0 16px;
+  min-width: 0;
+}
 .winter-rating-player-modal__art {
   position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   min-height: 124px;
-  margin: -8px 0 12px;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
   overflow: hidden;
   border: 1px solid rgba(212, 175, 55, 0.28);
   border-radius: 12px;
@@ -244,8 +254,8 @@
   z-index: 1;
   display: block;
   width: auto;
-  max-width: min(72%, 220px);
-  max-height: 156px;
+  max-width: min(90%, 220px);
+  max-height: 174px;
   object-fit: contain;
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
 }
@@ -385,13 +395,13 @@
 }
 .winter-rating-player-modal__table th:first-child,
 .winter-rating-player-modal__table td:first-child {
-  min-width: 5.5rem;
+  min-width: 0;
 }
 .winter-rating-player-modal__table th:nth-last-child(1),
 .winter-rating-player-modal__table tbody td:nth-last-child(1),
 .winter-rating-player-modal__table tfoot td:nth-last-child(1) {
   text-align: right;
-  min-width: 6.5rem;
+  min-width: 0;
 }
 .winter-rating-player-modal__table .winter-rating-player-modal__tr--month-start td {
   border-top: 2px solid var(--border-subtle);
@@ -421,12 +431,16 @@
   color: var(--text-muted);
 }
 .winter-rating-player-modal__summary {
-  margin-top: 8px;
-  margin-bottom: 16px;
-  padding: 12px;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 10px;
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   background: var(--card-bg);
+}
+.winter-rating-player-modal__art[hidden] + .winter-rating-player-modal__summary {
+  grid-column: 1 / -1;
 }
 .winter-rating-player-modal__table-label {
   margin: 0 0 8px;
@@ -436,11 +450,11 @@
 .winter-rating-player-modal__summary-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: clamp(11px, 2.6vw, 14px);
   color: var(--text);
 }
 .winter-rating-player-modal__summary-table td {
-  padding: 6px 10px 6px 0;
+  padding: 6px 4px 6px 0;
   vertical-align: top;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -453,7 +467,7 @@
 .winter-rating-player-modal__summary-value {
   text-align: right;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
 }
 .winter-rating-player-modal__summary-total-row .winter-rating-player-modal__summary-label {
   font-weight: 600;
@@ -597,28 +611,28 @@
   font-size: 12px;
   vertical-align: top;
 }
-/* «Турниры за все время»: название турнира — 6ch в одну строку (без переноса), обрезка … */
+/* «Турниры за все время»: свободное место таблицы отдаём названию турнира. */
 .winter-rating-player-modal--all-time .winter-rating-player-modal__td-tournament {
-  min-width: 6ch;
-  max-width: 6ch;
-  width: 6ch;
+  min-width: 0;
+  max-width: none;
+  width: auto;
   box-sizing: border-box;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
-  overflow-wrap: normal;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .winter-rating-player-modal--all-time .winter-rating-player-modal__th-tournament {
-  min-width: 6ch;
-  max-width: 7.5ch;
-  width: 7.5ch;
+  min-width: 0;
+  max-width: none;
+  width: auto;
   box-sizing: border-box;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
-  overflow-wrap: normal;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 /* Модалка игрока в стиле газеты (при открытии из «Заносов недели») */
 .winter-rating-player-modal--gazette .winter-rating-player-modal__inner {

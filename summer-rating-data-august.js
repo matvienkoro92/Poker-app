@@ -198,7 +198,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "18:00",
       "name": "Турнир Месяца",
       "buyin": 3000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "VICTORINOX",

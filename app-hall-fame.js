@@ -188,6 +188,7 @@ function showHallOfFamePanel(section, opts) {
     scheduleHallTop2026ViewerLoginUpdate();
     initHallTop2026Quotes();
     initHallTop2026PlaqueSync();
+    initHallTop2026ProfileRows();
   }
 
   function applyHallFameScroll() {
@@ -480,6 +481,7 @@ var hallFishRatingRowsPromise = null;
 var hallFishAchievementRowsCache = null;
 var hallFishAchievementRowsPromise = null;
 var hallFishBirthdayRowsCache = null;
+var hallFishBirthdayRenderedRows = null;
 var hallFishBirthdayRowsPromise = null;
 var hallFishCalendarEventsCache = null;
 var hallFishCalendarEventsPromise = null;
@@ -2324,6 +2326,108 @@ function hallFishEnsureProfileModalReady() {
     .catch(function () { return hallFishEnsureProfileModal(); });
 }
 
+var hallTop2026ProfileLookupCache = {};
+
+function hallTop2026ProfileFromLevelRows(nick, rows) {
+  var key = hallFishNormalizeNick(nick).toLocaleLowerCase("ru-RU");
+  var match = (Array.isArray(rows) ? rows : []).find(function (row) {
+    return [row && row.name, row && row.pokerPlusNickname].some(function (name) {
+      return hallFishNormalizeNick(name).toLocaleLowerCase("ru-RU") === key;
+    });
+  });
+  var userId = String(match && match.accountId || "").trim();
+  if (!userId) return null;
+  return {
+    userId: userId,
+    name: String(match.name || match.pokerPlusNickname || nick).trim() || nick,
+  };
+}
+
+function hallTop2026FindProfileByNick(nick) {
+  var cleanNick = String(nick || "").replace(/^@+/, "").trim();
+  var cacheKey = cleanNick.toLocaleLowerCase("ru-RU");
+  if (!cleanNick) return Promise.resolve(null);
+  if (hallTop2026ProfileLookupCache[cacheKey]) return hallTop2026ProfileLookupCache[cacheKey];
+  hallTop2026ProfileLookupCache[cacheKey] = hallFishLoadRows().catch(function () {
+    return hallFishRatingRowsCache || hallFishReadRowsSessionCache() || [];
+  }).then(function (rows) {
+    var knownProfile = hallTop2026ProfileFromLevelRows(cleanNick, rows);
+    if (knownProfile) return knownProfile;
+    var base = hallFishGetApiBase();
+    if (!base || typeof fetch !== "function") return null;
+    var auth = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("&") : "";
+    return hallFishFetch(
+      base + "/api/users?ratingNick=" + encodeURIComponent(cleanNick) + auth,
+      { cache: "no-store" }
+    ).then(function (response) {
+      if (!response.ok) return null;
+      return response.json();
+    }).then(function (data) {
+      var userId = String(data && (data.userId || data.chatUserId || data.dtId || data.id) || "").trim();
+      if (!userId) return null;
+      return {
+        userId: userId,
+        name: String(data.name || data.displayName || cleanNick).trim() || cleanNick,
+      };
+    });
+  }).catch(function () {
+    return null;
+  }).then(function (profile) {
+    if (!profile) delete hallTop2026ProfileLookupCache[cacheKey];
+    return profile;
+  });
+  return hallTop2026ProfileLookupCache[cacheKey];
+}
+
+function hallTop2026OpenProfileRow(row) {
+  var nickEl = row && row.querySelector(".winter-rating__single-top-nick");
+  var nick = String(nickEl && nickEl.textContent || "").trim();
+  if (!nick || row.getAttribute("data-hall-profile-loading") === "1") return;
+  row.setAttribute("data-hall-profile-loading", "1");
+  row.setAttribute("aria-busy", "true");
+  Promise.all([hallTop2026FindProfileByNick(nick), hallFishEnsureProfileModalReady()]).then(function (parts) {
+    var profile = parts[0];
+    if (!profile || !parts[1] || typeof window.openChatUserModalById !== "function") return;
+    window.openChatUserModalById(profile.userId, profile.name || nick, null, { ratingNick: nick });
+  }).finally(function () {
+    row.removeAttribute("data-hall-profile-loading");
+    row.removeAttribute("aria-busy");
+  });
+}
+
+function initHallTop2026ProfileRows() {
+  var list = document.getElementById("hallFameSingleTopList");
+  if (!list || list.getAttribute("data-hall-profile-bound") === "1") return;
+  function markStaticRowsInteractive() {
+    Array.prototype.forEach.call(list.querySelectorAll(".winter-rating__single-top-item"), function (row) {
+      if (row.querySelector("button")) return;
+      row.setAttribute("tabindex", "0");
+      row.setAttribute("role", "button");
+      var nickEl = row.querySelector(".winter-rating__single-top-nick");
+      if (nickEl) row.setAttribute("aria-label", "Открыть профиль " + String(nickEl.textContent || "Игрок").trim());
+    });
+  }
+  list.setAttribute("data-hall-profile-bound", "1");
+  list.addEventListener("click", function (event) {
+    var row = event.target && event.target.closest ? event.target.closest(".winter-rating__single-top-item") : null;
+    if (!row || !list.contains(row)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    hallTop2026OpenProfileRow(row);
+  }, true);
+  list.addEventListener("keydown", function (event) {
+    var row = event.target && event.target.closest ? event.target.closest(".winter-rating__single-top-item") : null;
+    if (!row || !list.contains(row) || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    hallTop2026OpenProfileRow(row);
+  }, true);
+  markStaticRowsInteractive();
+  if (typeof MutationObserver === "function") {
+    new MutationObserver(markStaticRowsInteractive).observe(list, { childList: true, subtree: true });
+  }
+}
+
 function hallFishPrefetchProfile(userId) {
   var id = String(userId || "").trim();
   if (!id || hallFishPrefetchedProfiles[id]) return;
@@ -2393,6 +2497,9 @@ function hallFishSetBirthdaysState(message, rows, events) {
   var body = document.getElementById("hallFishRatingBody");
   hallFishSetSubtitle(subtitle);
   hallFishUpdateTabs("birthdays");
+  if (Array.isArray(rows) && (hallFishBirthdayRows(rows).length || !hallFishBirthdayRenderedRows)) {
+    hallFishBirthdayRenderedRows = rows;
+  }
   if (myRank) myRank.hidden = true;
   if (body) body.innerHTML = rows ? hallFishRenderBirthdays(rows, events || hallFishCalendarEventsCache || []) : hallFishRenderBirthdaysSkeleton();
   modal.hidden = false;
@@ -2415,7 +2522,7 @@ function hallFishMoveCalendarMonth(delta) {
   var d = parseInt(delta, 10);
   if (!d) return;
   hallFishCalendarMonthOffset += d;
-  hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
+  hallFishSetBirthdaysState("", hallFishBirthdayRenderedRows || hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
 }
 
 function hallFishSetUpcomingFilter(filter) {
@@ -2425,7 +2532,7 @@ function hallFishSetUpcomingFilter(filter) {
   var anchorViewportOffset = anchor && body ? anchor.offsetTop - body.scrollTop : null;
   hallFishUpcomingFilter = next === "birthdays" || next === "club" ? next : "all";
   hallFishUpcomingExpanded = false;
-  hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
+  hallFishSetBirthdaysState("", hallFishBirthdayRenderedRows || hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
   body = document.getElementById("hallFishRatingBody");
   anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
   if (body && anchor && anchorViewportOffset !== null) body.scrollTop = Math.max(0, anchor.offsetTop - anchorViewportOffset);
@@ -2436,7 +2543,7 @@ function hallFishToggleUpcomingExpanded() {
   var anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
   var anchorViewportOffset = anchor && body ? anchor.offsetTop - body.scrollTop : null;
   hallFishUpcomingExpanded = !hallFishUpcomingExpanded;
-  hallFishSetBirthdaysState("", hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
+  hallFishSetBirthdaysState("", hallFishBirthdayRenderedRows || hallFishBirthdayRowsCache || hallFishReadBirthdaysSessionCache() || [], hallFishCalendarEventsCache || hallFishReadCalendarEventsLocal());
   body = document.getElementById("hallFishRatingBody");
   anchor = body ? body.querySelector(".hall-fish-birthday-next") : null;
   if (body && anchor && anchorViewportOffset !== null) body.scrollTop = Math.max(0, anchor.offsetTop - anchorViewportOffset);

@@ -598,6 +598,10 @@
     return match ? match[3] + "-" + match[2] + "-" + match[1] : "";
   }
 
+  function clubTodayDayKey() {
+    return eventDayKey(new Date());
+  }
+
   function isDailyClubEvent(row) {
     return String(row && row.id || "").indexOf("daily:") === 0;
   }
@@ -605,6 +609,7 @@
   function isCurrentClubEvent(row) {
     if (!row || !row.at) return false;
     var tournamentDay = clubTournamentDayKey();
+    if (row.type === "birthday" && eventDayKey(row.at) === clubTodayDayKey()) return true;
     if (isDailyClubEvent(row)) {
       return tournamentDay ? eventDayKey(row.at) === tournamentDay : isPreviousCalendarDay(row.at);
     }
@@ -2553,10 +2558,16 @@
     var snapshots = { __recentEvents: sourceRows };
     var ratingChanges = Array.isArray(tournamentSnapshots && tournamentSnapshots.__ratingChanges)
       ? tournamentSnapshots.__ratingChanges : [];
+    var tournamentDay = clubTournamentDayKey();
+    var todayDay = clubTodayDayKey();
+    var birthdays = clubBirthdayEvents(allPlayers, tournamentDay);
+    if (todayDay && todayDay !== tournamentDay) {
+      birthdays = birthdays.concat(clubBirthdayEvents(allPlayers, todayDay));
+    }
     return distributeDailyClubEvents(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
-        clubBirthdayEvents(allPlayers, clubTournamentDayKey()),
+        birthdays,
         ratingChanges
       ),
       allPlayers
