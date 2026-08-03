@@ -505,7 +505,10 @@
     if (!base) return Promise.resolve(null);
     var suffix = authSuffix();
     var url = base + "/api/users" + suffix + (suffix ? "&" : "?") + "ratingNick=" + encodeURIComponent(nick);
-    clubProfileLookupPromises[key] = fetch(url, { cache: "no-store" }).then(function (response) {
+    var lookupFetch = typeof pokerFetchWithTimeout === "function"
+      ? pokerFetchWithTimeout(url, { cache: "no-store" }, 5000)
+      : fetch(url, { cache: "no-store" });
+    clubProfileLookupPromises[key] = lookupFetch.then(function (response) {
       if (!response.ok) return null;
       return response.json();
     }).then(function (data) {
@@ -1283,8 +1286,17 @@
     var seen = {};
     return (players || []).map(function (player) {
       var birth = String(player && (player.profileBirthDate || player.birthDate) || "").trim();
-      var match = birth.match(/^\d{4}-(\d{2})-(\d{2})$/);
-      if (!match || match[1] + "-" + match[2] !== monthDay) return null;
+      var match = birth.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!match || match[2] + "-" + match[3] !== monthDay) return null;
+      var age = year - Number(match[1]);
+      var ageLastTwo = age % 100;
+      var ageLast = age % 10;
+      var ageWord = ageLastTwo >= 11 && ageLastTwo <= 14
+        ? "лет"
+        : ageLast === 1 ? "год" : ageLast >= 2 && ageLast <= 4 ? "года" : "лет";
+      var birthdayLine = age > 0 && age <= 100
+        ? "День рождения · Исполнилось " + age + " " + ageWord
+        : "День рождения";
       var actorId = friendId(player);
       var name = friendName(player);
       var key = actorId || matchKey(name);
@@ -1300,7 +1312,7 @@
         actorNick: name,
         actorAvatar: friendAvatar(player),
         newsTitle: name,
-        newsLines: ["День рождения"],
+        newsLines: [birthdayLine],
         _eventKind: "birthday",
       };
     }).filter(Boolean);

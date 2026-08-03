@@ -412,10 +412,14 @@ function hallFameCopyDone(ok) {
 function hallFameCopyUrlToClipboard(url) {
   if (!url) {
     hallFameCopyDone(false);
-    return;
+    return Promise.resolve(false);
   }
-  pokerCopyTextToClipboard(url).then(function (copied) {
+  return pokerCopyTextToClipboard(url).then(function (copied) {
     hallFameCopyDone(copied);
+    return copied;
+  }, function () {
+    hallFameCopyDone(false);
+    return false;
   });
 }
 
@@ -3064,7 +3068,25 @@ function initHallFishRatingModal() {
       hallFishShareAchievementTop(key, text);
       return;
     }
-    hallFameCopyUrlToClipboard(hallFishAchievementShareUrl(key));
+    var defaultLabel = shareBtn.dataset.copyDefaultLabel || shareBtn.textContent || "Скопировать";
+    shareBtn.dataset.copyDefaultLabel = defaultLabel;
+    window.clearTimeout(shareBtn._hallCopyResetTimer);
+    shareBtn.disabled = true;
+    shareBtn.classList.add("is-copying");
+    shareBtn.textContent = "Копируем…";
+    hallFameCopyUrlToClipboard(hallFishAchievementShareUrl(key)).then(function (copied) {
+      shareBtn.classList.remove("is-copying");
+      shareBtn.classList.toggle("is-copied", copied);
+      shareBtn.classList.toggle("is-copy-failed", !copied);
+      shareBtn.textContent = copied ? "✓ Ссылка скопирована" : "Не удалось скопировать";
+      shareBtn.setAttribute("aria-label", shareBtn.textContent);
+      shareBtn._hallCopyResetTimer = window.setTimeout(function () {
+        shareBtn.disabled = false;
+        shareBtn.classList.remove("is-copied", "is-copy-failed");
+        shareBtn.textContent = defaultLabel;
+        shareBtn.setAttribute("aria-label", "Скопировать ссылку: " + text);
+      }, 2200);
+    });
   });
   document.addEventListener("click", function (e) {
     var filterBtn = e.target && e.target.closest ? e.target.closest("[data-hall-fish-upcoming-filter]") : null;

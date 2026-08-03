@@ -1427,6 +1427,21 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 8px 16px rgba(0, 0, 0, 0.2);
 }
+.hall-fish-achievement-share__btn--copy.is-copying {
+  opacity: 0.82;
+  transform: translateY(1px) scale(0.99);
+}
+.hall-fish-achievement-share__btn--copy.is-copied {
+  color: #07150b;
+  border-color: #9df7b5;
+  background: linear-gradient(180deg, #bdf9ca 0%, #56d981 52%, #24a958 100%);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.16), 0 8px 20px rgba(34, 197, 94, 0.28);
+}
+.hall-fish-achievement-share__btn--copy.is-copy-failed {
+  color: #fff1f1;
+  border-color: rgba(248, 113, 113, 0.72);
+  background: linear-gradient(180deg, #7f1d1d, #450a0a);
+}
 .hall-fish-achievement-share__btn:hover,
 .hall-fish-achievement-share__btn:focus-visible {
   transform: translateY(-1px);

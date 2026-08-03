@@ -3284,7 +3284,23 @@ if (chatUserModalEl) {
     }
     // News keeps its compact loading screen visible until the profile data and
     // main artwork are ready. Other entry points retain the immediate shell.
-    if (!deferReveal) revealChatUserModal(openSeq);
+    var deferredRevealTimer = 0;
+    var deferredRevealDone = false;
+    function revealDeferredProfile() {
+      if (!deferReveal || deferredRevealDone) return;
+      deferredRevealDone = true;
+      revealChatUserModal(openSeq);
+    }
+    if (!deferReveal) {
+      revealChatUserModal(openSeq);
+    } else {
+      deferredRevealTimer = window.setTimeout(function () {
+        if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
+        chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
+        chatUserModalEl.removeAttribute("aria-busy");
+        revealDeferredProfile();
+      }, 3500);
+    }
     var initialBlockPromise = openingSelfProfile ? Promise.resolve(false) : refreshChatUserModalBlockState(id);
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")
@@ -3430,17 +3446,19 @@ if (chatUserModalEl) {
       });
     Promise.resolve(initialBlockPromise).catch(function () {});
     profilePromise.then(function () {
+      window.clearTimeout(deferredRevealTimer);
       if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
         chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
         chatUserModalEl.removeAttribute("aria-busy");
       }
-      if (deferReveal) revealChatUserModal(openSeq);
+      revealDeferredProfile();
     }, function () {
+      window.clearTimeout(deferredRevealTimer);
       if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
         chatUserModalEl.classList.remove("chat-user-modal--profile-loading");
         chatUserModalEl.removeAttribute("aria-busy");
       }
-      if (deferReveal) revealChatUserModal(openSeq);
+      revealDeferredProfile();
     });
   }
   window.openChatUserModalById = openChatUserModalById;

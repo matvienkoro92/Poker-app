@@ -545,7 +545,13 @@ function pokerBuildTelegramShareUrlDialog(link, textOpt) {
 /** Copy text with a textarea fallback for older Telegram/PWA webviews. */
 function pokerCopyTextToClipboard(text) {
   var value = text != null ? String(text) : "";
-  if (!value) return Promise.resolve(false);
+  function reportCopyResult(copied) {
+    try {
+      document.dispatchEvent(new CustomEvent("poker:copy-result", { detail: { copied: !!copied } }));
+    } catch (eCopyEvent) {}
+    return !!copied;
+  }
+  if (!value) return Promise.resolve(reportCopyResult(false));
   function fallbackCopy() {
     return new Promise(function (resolve) {
       var textarea = null;
@@ -577,10 +583,72 @@ function pokerCopyTextToClipboard(text) {
   if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
     return navigator.clipboard.writeText(value).then(function () {
       return true;
-    }).catch(fallbackCopy);
+    }).catch(fallbackCopy).then(reportCopyResult);
   }
-  return fallbackCopy();
+  return fallbackCopy().then(reportCopyResult);
 }
+
+(function initPokerCopyButtonFeedback() {
+  if (window.__pokerCopyButtonFeedbackBound) return;
+  window.__pokerCopyButtonFeedbackBound = true;
+  var activeButton = null;
+  var activeAt = 0;
+  var resetTimer = 0;
+
+  function isCopyButton(button) {
+    if (!button) return false;
+    var signature = [
+      button.textContent,
+      button.getAttribute("aria-label"),
+      button.getAttribute("title"),
+      button.className,
+      Array.prototype.map.call(button.attributes || [], function (attr) { return attr.name; }).join(" "),
+    ].join(" ").toLowerCase();
+    return signature.indexOf("скопир") !== -1 || /(?:^|[\s_-])copy(?:$|[\s_-])/.test(signature);
+  }
+
+  function restore(button) {
+    if (!button) return;
+    button.classList.remove("poker-copy-feedback--pending", "poker-copy-feedback--success", "poker-copy-feedback--error");
+    if (button.dataset.pokerCopyFeedbackText === "1") button.textContent = button.dataset.pokerCopyFeedbackLabel || "Скопировать";
+    if (button.dataset.pokerCopyFeedbackAria) button.setAttribute("aria-label", button.dataset.pokerCopyFeedbackAria);
+    delete button.dataset.pokerCopyFeedbackText;
+    delete button.dataset.pokerCopyFeedbackLabel;
+    delete button.dataset.pokerCopyFeedbackAria;
+  }
+
+  document.addEventListener("click", function (event) {
+    var button = event.target && event.target.closest ? event.target.closest("button, [role='button']") : null;
+    if (!isCopyButton(button)) return;
+    window.clearTimeout(resetTimer);
+    if (activeButton && activeButton !== button) restore(activeButton);
+    activeButton = button;
+    activeAt = Date.now();
+    button.dataset.pokerCopyFeedbackLabel = String(button.textContent || "").trim();
+    button.dataset.pokerCopyFeedbackAria = button.getAttribute("aria-label") || "";
+    button.classList.remove("poker-copy-feedback--success", "poker-copy-feedback--error");
+    button.classList.add("poker-copy-feedback--pending");
+  }, true);
+
+  document.addEventListener("poker:copy-result", function (event) {
+    var button = activeButton;
+    if (!button || Date.now() - activeAt > 6000) return;
+    var copied = !!(event.detail && event.detail.copied);
+    button.classList.remove("poker-copy-feedback--pending");
+    button.classList.toggle("poker-copy-feedback--success", copied);
+    button.classList.toggle("poker-copy-feedback--error", !copied);
+    var label = String(button.dataset.pokerCopyFeedbackLabel || "").trim();
+    if (label && label.length <= 32 && /скопир/i.test(label)) {
+      button.dataset.pokerCopyFeedbackText = "1";
+      button.textContent = copied ? "✓ Ссылка скопирована" : "Не удалось скопировать";
+    }
+    button.setAttribute("aria-label", copied ? "Ссылка скопирована" : "Не удалось скопировать");
+    resetTimer = window.setTimeout(function () {
+      restore(button);
+      if (activeButton === button) activeButton = null;
+    }, 2200);
+  });
+})();
 
 /** PWA: сессия после входа через Telegram Login Widget (возврат в это же приложение) */
 var POKER_PWA_TG_SESSION_KEY = "poker_pwa_tg_session";
