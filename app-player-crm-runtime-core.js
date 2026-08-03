@@ -3070,6 +3070,10 @@
     var rate = total > 0 ? Math.round(delivered / total * 1000) / 10 : 0;
     var log = Array.isArray(progress.deliveryLog) ? progress.deliveryLog : [];
     var failedRows = log.filter(function (entry) { return entry && entry.status !== "delivered"; });
+    var purgedBlockedIds = Array.isArray(progress.purgedBlockedIds) ? progress.purgedBlockedIds.map(String) : [];
+    var blockedRows = failedRows.filter(function (entry) {
+      return entry && entry.reason === "user_blocked" && purgedBlockedIds.indexOf(String(entry.userId || "")) === -1;
+    });
     var problemsHtml = failedRows.length
       ? "<details class=\"player-crm__broadcast-report-problems\" open><summary>Кому не дошло: " + esc(intFmt(failedRows.length)) + "</summary><div>" +
         failedRows.slice(0, 300).map(function (entry) {
@@ -3092,6 +3096,9 @@
       "<p class=\"player-crm__broadcast-report-note\">«Доставлено» означает, что push-сервис Apple/Google или Telegram принял отправку. Открытия появятся в истории после нажатий пользователей.</p>" +
       (progress.progressId || progress.jobId
         ? "<button type=\"button\" class=\"player-crm__ghost-btn player-crm__broadcast-report-refresh\" data-crm-refresh-broadcast-report>Обновить открытия</button>"
+        : "") +
+      (blockedRows.length && (progress.progressId || progress.jobId)
+        ? "<button type=\"button\" class=\"player-crm__danger-btn player-crm__broadcast-report-refresh\" data-crm-purge-blocked-subscribers>Удалить отписавшихся: " + esc(intFmt(blockedRows.length)) + "</button>"
         : "") +
       problemsHtml +
     "</section>";
@@ -3247,6 +3254,39 @@
       }
       state.lastBroadcastProgress = nextProgress;
       renderBroadcastProgressResult(formatBroadcastProgress(nextProgress, nextProgress.total), nextProgress, false);
+    });
+  }
+
+  function purgeBlockedBroadcastSubscribers(button) {
+    var progress = state.lastBroadcastProgress || {};
+    var progressId = String(progress.progressId || progress.jobId || state.broadcastProgressId || "").trim();
+    var blockedCount = (Array.isArray(progress.deliveryLog) ? progress.deliveryLog : []).filter(function (row) {
+      return row && row.status !== "delivered" && row.reason === "user_blocked";
+    }).length;
+    var base = getApiBaseSafe();
+    if (!base || !progressId) {
+      setBroadcastResult("Не найден ID завершённой рассылки.");
+      return;
+    }
+    if (window.confirm && !window.confirm("Удалить из будущих рассылок " + intFmt(blockedCount) + " пользователей, которые заблокировали бота?")) return;
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Удаляем…";
+    }
+    fetch(base + "/api/player-crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(postBodySafe({ action: "purge_blocked_campaign_subscribers", progressId: progressId })),
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data || !data.ok) throw new Error(data && data.error || "Не удалось удалить отписавшихся.");
+      if (data.progress) state.lastBroadcastProgress = data.progress;
+      renderBroadcastProgressResult("Удалено из будущих рассылок: " + intFmt(data.removed || 0) + ".", data.progress || progress, false);
+    }).catch(function (error) {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Удалить отписавшихся: " + intFmt(blockedCount);
+      }
+      setBroadcastResult(error && error.message ? error.message : "Не удалось удалить отписавшихся.");
     });
   }
 
@@ -4747,6 +4787,11 @@
       }
       if (e.target.closest("[data-crm-refresh-broadcast-report]")) {
         refreshBroadcastFinalReport();
+        return;
+      }
+      var purgeBlockedSubscribers = e.target.closest("[data-crm-purge-blocked-subscribers]");
+      if (purgeBlockedSubscribers) {
+        purgeBlockedBroadcastSubscribers(purgeBlockedSubscribers);
         return;
       }
       if (e.target.closest("[data-crm-pause-job]")) {
