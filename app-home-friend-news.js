@@ -746,7 +746,12 @@
       });
       if (!alreadyIncluded) tournament.row.newsLines.push(detail);
       tournament.row.text = tournament.row.newsTitle + " " + tournament.row.newsLines.join(". ") + ".";
-      tournament.row.id += ":with:" + String(extra.id || extraIndex);
+      // Feedback is keyed by the tournament event id. Keep it stable when
+      // rating or level details are merged into the visible card.
+      var legacyFeedbackId = String(tournament.row._feedbackLegacyTail || tournament.row.id || "") +
+        ":with:" + String(extra.id || extraIndex);
+      tournament.row._feedbackLegacyTail = legacyFeedbackId;
+      tournament.row._feedbackLegacyIds = (tournament.row._feedbackLegacyIds || []).concat(legacyFeedbackId);
       consumed[extraIndex] = true;
     });
     return source.filter(function (row, index) { return !consumed[index]; });
@@ -1265,6 +1270,37 @@
     }).filter(Boolean);
   }
 
+  function clubBirthdayEvents(players, dayKey) {
+    var parts = String(dayKey || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!parts) return [];
+    var year = Number(parts[1]);
+    var monthDay = parts[2] + "-" + parts[3];
+    var seen = {};
+    return (players || []).map(function (player) {
+      var birth = String(player && (player.profileBirthDate || player.birthDate) || "").trim();
+      var match = birth.match(/^\d{4}-(\d{2})-(\d{2})$/);
+      if (!match || match[1] + "-" + match[2] !== monthDay) return null;
+      var actorId = friendId(player);
+      var name = friendName(player);
+      var key = actorId || matchKey(name);
+      if (!key || seen[key]) return null;
+      seen[key] = true;
+      return {
+        id: "birthday:club:" + key + ":" + year,
+        type: "birthday",
+        icon: "♥",
+        text: "У " + name + " день рождения",
+        at: dayKey + "T12:00:00+07:00",
+        actorId: actorId,
+        actorNick: name,
+        actorAvatar: friendAvatar(player),
+        newsTitle: name,
+        newsLines: ["День рождения"],
+        _eventKind: "birthday",
+      };
+    }).filter(Boolean);
+  }
+
   function achievementEvents(friends, sngRows, choiceRows) {
     var friendKeys = [];
     (friends || []).forEach(function (friend) {
@@ -1349,6 +1385,14 @@
     return (Array.isArray(posts) ? posts : []).map(function (post) {
       var accountId = String(post && post.accountId || "").trim();
       var friend = byId[accountId];
+      if (!friend && post && post.isMine) {
+        friend = {
+          accountId: accountId,
+          userId: accountId,
+          pokerPlusNickname: typeof profilePublicCardDisplayName === "function" ? profilePublicCardDisplayName() : "Вы",
+          avatarUrl: typeof profilePublicCardAvatarUrl === "function" ? profilePublicCardAvatarUrl() : "",
+        };
+      }
       var text = String(post && post.text || "").trim();
       var image = String(post && post.image || "").trim();
       if (!friend || (!text && !image) || !isRecentEvent(post.createdAt)) return null;
@@ -1611,7 +1655,7 @@
       if (tournamentMatch) tournament = String(tournamentMatch[1] || "").trim();
     }
     if (!amount || !actor || !tournament) return String(row && row.text || "");
-    return "+" + formatRub(amount) + " " + actor + " выиграл в турнире " + tournament +
+    return "+" + formatRub(amount) + " " + actor + " выиграл в " + tournament +
       (place ? " за " + place + "-е место" : "");
   }
 
@@ -1910,11 +1954,33 @@
   }
 
   function loadActiveModalFeedback(rows) {
-    var ids = (Array.isArray(rows) ? rows : []).map(feedbackEventId)
+    var sourceRows = Array.isArray(rows) ? rows : [];
+    var ids = sourceRows.reduce(function (all, row) {
+      return all.concat(feedbackEventId(row), Array.isArray(row && row._feedbackLegacyIds) ? row._feedbackLegacyIds : []);
+    }, [])
       .filter(function (id) { return id && id !== "empty" && id !== "club-empty"; });
     if (!ids.length) return;
     feedbackRequest({ action: "view", eventIds: ids }).then(function (data) {
       Object.assign(eventFeedback, data.feedback || {});
+      sourceRows.forEach(function (row) {
+        var currentId = feedbackEventId(row);
+        var current = eventFeedback[currentId] || {};
+        var currentActivity = (Number(current.commentCount) || 0) + Object.keys(current.reactions || {}).reduce(function (sum, emoji) {
+          return sum + (Number(current.reactions[emoji]) || 0);
+        }, 0);
+        if (currentActivity) return;
+        (Array.isArray(row && row._feedbackLegacyIds) ? row._feedbackLegacyIds : []).some(function (legacyId) {
+          var legacy = eventFeedback[legacyId] || {};
+          var legacyActivity = (Number(legacy.commentCount) || 0) + Object.keys(legacy.reactions || {}).reduce(function (sum, emoji) {
+            return sum + (Number(legacy.reactions[emoji]) || 0);
+          }, 0);
+          if (!legacyActivity) return false;
+          eventFeedback[currentId] = Object.assign({}, legacy, {
+            viewCount: Math.max(Number(current.viewCount) || 0, Number(legacy.viewCount) || 0),
+          });
+          return true;
+        });
+      });
       var modal = el("homeFriendNewsModal");
       if (modal && !modal.hidden) renderModalList(activeModalEvents());
     }).catch(function () {});
@@ -2373,15 +2439,6 @@
     friendsPromise.then(function (friendsPayload) {
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
-      if (!friends.length) {
-        friendNewsLoading = false;
-        friendNewsLoaded = true;
-        if (!events.some(function (row) { return row && row.id !== "empty"; })) {
-          events = [];
-          render();
-        }
-        return null;
-      }
       return Promise.all([
         Promise.resolve(friendsPayload),
         cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" })
@@ -2499,6 +2556,7 @@
     return distributeDailyClubEvents(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
+        clubBirthdayEvents(allPlayers, clubTournamentDayKey()),
         ratingChanges
       ),
       allPlayers

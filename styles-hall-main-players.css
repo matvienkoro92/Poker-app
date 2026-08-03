@@ -373,13 +373,14 @@
 }
 .hall-fish-modal__panel {
   position: relative;
-  width: min(720px, calc(100vw - 20px));
-  max-height: min(760px, calc(100dvh - 72px));
-  margin: max(54px, calc(env(safe-area-inset-top, 0px) + 18px)) auto 18px;
+  width: 100%;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(248, 217, 138, 0.42);
-  border-radius: 18px;
+  border: 0;
+  border-radius: 0;
   background:
     radial-gradient(circle at 90% 0%, rgba(56, 189, 248, 0.16), transparent 28%),
     linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
@@ -426,7 +427,7 @@
 }
 .hall-fish-modal__close {
   position: absolute;
-  top: 8px;
+  top: max(8px, env(safe-area-inset-top, 0px));
   right: 8px;
   z-index: 3;
   width: 42px;
@@ -443,7 +444,7 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
-  padding: 12px 58px 14px 12px;
+  padding: max(12px, env(safe-area-inset-top, 0px)) 58px 14px 12px;
   border-bottom: 1px solid rgba(251, 191, 36, 0.2);
   background:
     linear-gradient(180deg, rgba(15, 23, 42, 0.36), rgba(2, 6, 23, 0.12));
@@ -630,7 +631,7 @@
   min-height: 0;
   overflow: auto;
   overflow-x: hidden;
-  padding: 10px;
+  padding: 10px 10px max(10px, env(safe-area-inset-bottom, 0px));
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
