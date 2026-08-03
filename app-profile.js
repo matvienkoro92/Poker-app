@@ -268,6 +268,22 @@ function showProfileOwnWallError(error) {
   } catch (eProfileWallToast) {}
 }
 
+function profileOwnWallKeepComposerInPlace(composer, render) {
+  if (!composer || typeof render !== "function") {
+    if (typeof render === "function") render();
+    return;
+  }
+  var beforeTop = composer.getBoundingClientRect().top;
+  render();
+  var restore = function () {
+    if (!composer.isConnected) return;
+    var offset = composer.getBoundingClientRect().top - beforeTop;
+    if (Math.abs(offset) > 0.5) window.scrollBy(0, offset);
+  };
+  restore();
+  requestAnimationFrame(restore);
+}
+
 function submitProfileOwnWall(event) {
   if (event) event.preventDefault();
   if (profileOwnWallState.submitting) return;
@@ -293,7 +309,7 @@ function submitProfileOwnWall(event) {
     if (clubShare) clubShare.checked = true;
     profileOwnWallState.image = "";
     renderProfileOwnWallImagePreview();
-    renderProfileOwnWall();
+    profileOwnWallKeepComposerInPlace(composer, renderProfileOwnWall);
   }).catch(function (error) {
     showProfileOwnWallError(error);
   }).finally(function () {

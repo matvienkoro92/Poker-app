@@ -41,6 +41,9 @@
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
+  var clubNewsUpdatedAt = 0;
+  var clubWallLoadPromise = null;
+  var clubWallLoading = false;
   var clubNewsRetryTimer = 0;
   var clubNewsRetryCount = 0;
   var clubProfileByNick = {};
@@ -1809,10 +1812,20 @@
         '</aside>'
       : "";
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
-    if (newsModalMode === "club" && clubNewsLoading && !hasRealRows) {
-      list.innerHTML = achievementPromo + '<div class="home-friend-news-modal__loading" role="status">' +
-        '<span aria-hidden="true"></span><strong>Загружаем новости клуба…</strong>' +
-        '<small>Собираем все события за вчера</small></div>';
+    var activeClubLoading = newsModalMode === "club" && !hasRealRows &&
+      (clubNewsTab === "wall" ? clubWallLoading : clubNewsLoading);
+    if (activeClubLoading) {
+      var skeletonAt = clubEvents[0] && clubEvents[0].at ||
+        (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
+      list.innerHTML = achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
+        '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(skeletonAt, true)) + '</span></div>' +
+        '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
+          '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
+            (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
+          '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
+            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' +
+        '<div class="home-friend-news-modal__skeleton" role="status" aria-label="Загружаем записи">' +
+          '<span></span><span></span><span></span></div></section>';
       return;
     }
     if (friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
@@ -1924,13 +1937,17 @@
   function openClubModal() {
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
+    if (!clubEvents.length && clubNewsStaticRows().length) {
+      clubEvents = buildClubEventsFromRows([], []);
+      clubNewsLoaded = clubEvents.length > 0;
+    }
     newsModalMode = "club";
     clubNewsTab = "wins";
     syncNewsModalHeading();
     renderModalList(clubEvents);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
-    Promise.resolve(loadClubNews(true)).then(function () {
+    Promise.resolve(loadClubNews()).then(function () {
       if (newsModalMode === "club" && !modal.hidden) loadActiveModalFeedback(clubEvents);
     });
   }
@@ -2010,8 +2027,12 @@
         var clubTab = event.target.closest("[data-club-news-tab]");
         if (clubTab) {
           clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "wall" ? "wall" : "wins";
-          renderModalList(activeModalEvents());
-          loadActiveModalFeedback(activeModalEvents());
+          if (clubNewsTab === "wall") {
+            loadClubWallNews(true);
+          } else {
+            renderModalList(clubEvents);
+            loadActiveModalFeedback(clubEvents);
+          }
           return;
         }
         if (event.target.closest("[data-club-news-write]")) {
@@ -2498,7 +2519,9 @@
         accountIds.push(id);
       });
     });
-    var dayStart = tournamentDay ? new Date(tournamentDay + "T00:00:00+07:00") : null;
+    // Club news follows the reporting day: 06:00 MSK through 06:00 MSK,
+    // so early-morning wall posts still belong to the displayed game day.
+    var dayStart = tournamentDay ? new Date(tournamentDay + "T06:00:00+03:00") : null;
     var dayEnd = dayStart && Number.isFinite(dayStart.getTime()) ? new Date(dayStart.getTime() + 86400000) : null;
     var payload = {
       action: "club-feed",
@@ -2536,6 +2559,43 @@
     });
   }
 
+  function loadClubWallNews(force) {
+    if (clubWallLoadPromise) return clubWallLoadPromise;
+    var base = apiBase();
+    if (!base) return Promise.resolve();
+    clubWallLoading = true;
+    if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
+    var request = cachedFetchJson(
+      base + "/api/player-crm?publicLevels=1",
+      "club-wall-public-levels-v1",
+      force ? 0 : 5 * 60 * 1000,
+      { cache: force ? "no-store" : "default" }
+    ).then(function (data) {
+      var players = (data && Array.isArray(data.levelRows) ? data.levelRows : []).map(function (row) {
+        return Object.assign({}, row, {
+          userId: row && (row.profileId || row.userId || row.accountId || row.dtId) || "",
+          pokerPlusNickname: row && (row.pokerPlusNickname || row.ratingNick || row.nickname || row.nick) || "",
+          pokerPlusName: row && (row.pokerPlusName || row.name || row.displayName) || "",
+        });
+      });
+      return loadClubWallEvents(players, clubTournamentDayKey());
+    }).then(function (rows) {
+      clubWallEvents = Array.isArray(rows) ? rows : [];
+      if (newsModalMode === "club" && clubNewsTab === "wall") {
+        renderModalList(clubWallEvents);
+        loadActiveModalFeedback(clubWallEvents);
+      }
+    }).catch(function () {
+      if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
+    }).finally(function () {
+      clubWallLoading = false;
+      if (clubWallLoadPromise === request) clubWallLoadPromise = null;
+      if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
+    });
+    clubWallLoadPromise = request;
+    return request;
+  }
+
   function stableClubEvents(nextRows, previousRows) {
     var rows = (Array.isArray(nextRows) ? nextRows : []).filter(function (row) {
       return isCurrentClubEvent(row);
@@ -2557,7 +2617,14 @@
       return;
     }
     if (clubNewsLoadPromise) return clubNewsLoadPromise;
-    clubNewsLoading = true;
+    if (!force && clubNewsLoaded && clubNewsUpdatedAt && Date.now() - clubNewsUpdatedAt < 60 * 1000) {
+      return Promise.resolve();
+    }
+    if (!clubEvents.length && clubNewsStaticRows().length) {
+      clubEvents = buildClubEventsFromRows([], []);
+      clubNewsLoaded = clubEvents.length > 0;
+    }
+    clubNewsLoading = !clubEvents.length;
     renderClubNews();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
@@ -2613,6 +2680,7 @@
         clubWallEvents = wallEvents;
         clubNewsLoaded = true;
         clubNewsLoading = false;
+        clubNewsUpdatedAt = Date.now();
         clubNewsRetryCount = 0;
         writeClubEventsCache(clubEvents);
         renderClubNews();
