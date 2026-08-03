@@ -351,7 +351,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "10:00",
       "name": "DV Turbo 500 🏆 50K",
       "buyin": 10000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "Рыбнадзор",
@@ -365,7 +365,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "14:00",
       "name": "Bounty 200 🥊 40K GTD",
       "buyin": 10000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "cap888881",
@@ -411,7 +411,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "18:00",
       "name": "Турнир Понедельника",
       "buyin": 500,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "Proxor",
@@ -449,7 +449,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "18:00",
       "name": "Monday 🏆 200K GTD",
       "buyin": 7500,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "pryanik2la",
@@ -475,7 +475,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "19:00",
       "name": "HOK 🥊",
       "buyin": 1000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "ПокерМанки",
@@ -501,7 +501,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "20:00",
       "name": "Rebuy Evening",
       "buyin": 800,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "MissClick",

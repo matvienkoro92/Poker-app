@@ -10862,6 +10862,56 @@ html body[data-view] #app .bonus-game-back {
     overflow-wrap: anywhere;
   }
 }
+
+/* Keep all five tournament bonuses together above the tournament cards. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--upper,
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--upper.home-tournament-bonuses__grid--has-bubble {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--upper
+  .home-tournament-bonus {
+  min-width: 0;
+  padding-inline: 6px;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses__grid--upper
+  .home-tournament-bonus__amount {
+  font-size: clamp(11px, 2vw, 18px);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses__grid--upper {
+    gap: 4px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses__grid--upper
+    .home-tournament-bonus {
+    min-height: 62px;
+    padding: 8px 2px 7px;
+    border-radius: 9px;
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses__grid--upper
+    .home-tournament-bonus__amount {
+    font-size: clamp(9px, 2.7vw, 12px);
+  }
+
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses__grid--upper
+    .home-tournament-bonus__label {
+    font-size: clamp(6px, 1.85vw, 8px);
+    line-height: 1.05;
+  }
+}
 button.poker-copy-feedback--pending,
 [role="button"].poker-copy-feedback--pending {
   opacity: 0.82 !important;

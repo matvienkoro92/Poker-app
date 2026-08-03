@@ -330,11 +330,13 @@ window.pokerInitDailyPredictionModal = function () {
 })();
 
 // Подстраницы раздела «Скачать»
-const downloadPages = document.querySelectorAll(".download-page[data-download-page]");
 const downloadAppButtons = document.querySelectorAll("[data-download-app]");
 const downloadBackButtons = document.querySelectorAll("[data-download-back]");
 
 function setDownloadPage(pageName) {
+  // The download section is injected as an HTML fragment after this script can
+  // initialize, so a module-level NodeList may be permanently empty.
+  const downloadPages = document.querySelectorAll(".download-page[data-download-page]");
   downloadPages.forEach(function (page) {
     if (page.dataset.downloadPage === pageName) {
       page.classList.add("download-page--active");

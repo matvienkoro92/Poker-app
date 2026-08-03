@@ -330,8 +330,11 @@ function parseArgs(argv) {
     append: false,
     build: true,
     check: true,
-    targetKb: 30,
-    width: 520,
+    // Full-size rating screenshots are opened in the lightbox. Keep enough
+    // resolution for small nicknames and prize amounts to remain readable;
+    // the separate 150px AVIF files are used for lightweight grid previews.
+    targetKb: 180,
+    width: 1080,
     season: ""
   };
   argv.forEach((arg) => {

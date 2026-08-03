@@ -39,6 +39,7 @@
     raffleRecipientsRequestKey: "",
     raffleStatsLoading: false,
     raffleStatsRequestKey: "",
+    raffleStatsByPeriod: {},
     raffleRecipientsSort: "tickets",
     blockedUsers: [],
     blockedSearch: "",
@@ -2669,6 +2670,19 @@
     renderAnalytics();
   }
 
+  function preserveRaffleStatsForSelectedPeriod() {
+    if (!state.statsSummary || typeof state.statsSummary !== "object") return;
+    var range = selectedPeriodRange();
+    var key = range && range.from && range.to ? range.from + ":" + range.to : "all";
+    var incoming = state.statsSummary.raffles;
+    if (incoming && incoming.available !== false) {
+      state.raffleStatsByPeriod[key] = incoming;
+      return;
+    }
+    var cached = state.raffleStatsByPeriod[key];
+    if (cached && cached.available !== false) state.statsSummary.raffles = cached;
+  }
+
   function applyCrmData(data, heavyOnly) {
     if (!data || !data.ok || !Array.isArray(data.players) || data.source === "redis-error" || data.source === "no-redis") return false;
     if (!heavyOnly) {
@@ -2681,6 +2695,7 @@
       state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
       state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : [];
       state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : null;
+      preserveRaffleStatsForSelectedPeriod();
       state.crmWarnings = Array.isArray(data.crmWarnings) ? data.crmWarnings.slice() : [];
       state.permissions = data.permissions || null;
       state.pushConfigured = data.pushConfigured === true;
@@ -2695,6 +2710,7 @@
       state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : state.campaigns;
       state.sourceAnalytics = Array.isArray(data.sourceAnalytics) ? data.sourceAnalytics : state.sourceAnalytics;
       state.statsSummary = data.statsSummary && typeof data.statsSummary === "object" ? data.statsSummary : state.statsSummary;
+      preserveRaffleStatsForSelectedPeriod();
       state.crmWarnings = Array.isArray(data.crmWarnings) ? data.crmWarnings.slice() : state.crmWarnings;
       state.permissions = data.permissions || state.permissions;
       state.pushConfigured = data.pushConfigured === true || state.pushConfigured === true;
@@ -2866,6 +2882,7 @@
         if (state.raffleStatsRequestKey !== requestKey || currentKey !== requestKey || !data || data.ok === false || !data.raffles) return;
         if (!state.statsSummary || typeof state.statsSummary !== "object") state.statsSummary = {};
         state.statsSummary.raffles = data.raffles;
+        if (data.raffles.available !== false) state.raffleStatsByPeriod[requestKey] = data.raffles;
       })
       .catch(function () {})
       .then(function () {

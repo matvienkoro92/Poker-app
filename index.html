@@ -867,7 +867,17 @@
                     <span class="home-tournament-bonus__amount">10 000 ₽</span>
                     <span class="home-tournament-bonus__label">за роял</span>
                   </button>
+                  <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus="league1" data-home-tournament-league-top="1" aria-label="Актуальный топ-10 Лиги 1">
+                    <span class="home-tournament-bonus__amount">500-1500 ₽</span>
+                    <span class="home-tournament-bonus__label">за нокаут топ10 Лиги1</span>
+                  </button>
+                  <button type="button" class="home-tournament-bonus home-tournament-bonus--bubble-buyin home-tournament-bonus--info" data-home-tournament-bubble-bonus="1" aria-label="Условия бонуса бабблу" hidden>
+                    <span class="home-tournament-bonus__amount" id="homeTournamentBubbleBuyinAmount">500 ₽</span>
+                    <span class="home-tournament-bonus__label" id="homeTournamentBubbleBuyinLabel">бабблу</span>
+                  </button>
                 </div>
+                <p class="home-tournament-bonuses__hint">Нажмите на бонус чтобы узнать условие выдачи</p>
+                <p class="home-tournament-bonuses__note">Для тех, у кого от 1500 ₽ комиссии на прошлой или на этой неделе</p>
               </div>
               <span class="home-tournament-flow" aria-hidden="true">
                 <svg class="home-tournament-flow__svg" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
@@ -982,20 +992,6 @@
                   <span class="home-tournament-raffle-bonus__timer-wrap">через <span id="homeTournamentRaffleBonusTimer">—</span></span>
                 </span>
               </button>
-              <div class="home-tournament-bonuses home-tournament-bonuses--lower" aria-label="Дополнительные бонусы к турниру">
-                <div class="home-tournament-bonuses__grid home-tournament-bonuses__grid--lower" role="list">
-                  <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus="league1" data-home-tournament-league-top="1" aria-label="Актуальный топ-10 Лиги 1">
-                    <span class="home-tournament-bonus__amount">500-1500 ₽</span>
-                    <span class="home-tournament-bonus__label">за нокаут топ10 Лиги1</span>
-                  </button>
-                  <button type="button" class="home-tournament-bonus home-tournament-bonus--bubble-buyin home-tournament-bonus--info" data-home-tournament-bubble-bonus="1" aria-label="Условия бонуса бабблу" hidden>
-                    <span class="home-tournament-bonus__amount" id="homeTournamentBubbleBuyinAmount">500 ₽</span>
-                    <span class="home-tournament-bonus__label" id="homeTournamentBubbleBuyinLabel">бабблу</span>
-                  </button>
-                </div>
-                <p class="home-tournament-bonuses__hint">Нажмите на бонус чтобы узнать условие выдачи</p>
-                <p class="home-tournament-bonuses__note">Для тех, у кого от 1500 ₽ комиссии на прошлой или на этой неделе</p>
-              </div>
             </div>
             <h2 class="home-club-achievements-title">Достижения клуба</h2>
             <a href="#" class="home-club-hero-banner" data-view-target="hall-of-fame" aria-label="Герой клуба: Эмиль Ахмедов, победа года">

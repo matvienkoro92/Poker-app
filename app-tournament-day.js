@@ -800,7 +800,7 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
 
 function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   var bonusEl = document.querySelector(".home-tournament-bonus--bubble-buyin");
-  var gridEl = document.querySelector(".home-tournament-bonuses__grid--lower");
+  var gridEl = bonusEl && bonusEl.closest ? bonusEl.closest(".home-tournament-bonuses__grid") : null;
   var amountEl = document.getElementById("homeTournamentBubbleBuyinAmount");
   var labelEl = document.getElementById("homeTournamentBubbleBuyinLabel");
   if (!amountEl || !labelEl) return;

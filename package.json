@@ -37,6 +37,7 @@
     "rating:validate": "node scripts/rating-entry-helper.js validate",
     "rating:validate:strict": "node scripts/rating-entry-helper.js validate --strict",
     "rating:thumbnails": "node scripts/generate-rating-thumbnails.js",
+    "rating:optimize:summer": "node scripts/optimize-summer-rating-lightbox.js",
     "avatars:assign-missing": "node scripts/assign-random-preset-avatars.js",
     "avatars:assign-missing:apply": "node scripts/assign-random-preset-avatars.js --apply",
     "bump:pwa-version": "node scripts/bump-pwa-login-version.js",

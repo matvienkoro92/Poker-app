@@ -580,6 +580,22 @@ function pokerRemoveLocalFriendFromChatContacts(targetUserId) {
 function pokerApplyChatContactsUnreadState(data, opts) {
   opts = opts || {};
   if (!data || !Array.isArray(data.contacts)) return 0;
+  // A contacts response can race the request that marks the currently open
+  // thread as read. Never let that stale response restore its unread badge.
+  try {
+    var activeReadPeer = typeof chatWithUserId !== "undefined" ? chatWithUserId : null;
+    var activeConversationVisible = !!(
+      activeReadPeer &&
+      typeof convView !== "undefined" &&
+      convView &&
+      !convView.classList.contains("chat-conv-view--hidden")
+    );
+    if (activeConversationVisible) {
+      data.contacts.forEach(function (contact) {
+        if (contact && peerChatIdsEqual(contact.id, activeReadPeer)) contact.unreadCount = 0;
+      });
+    }
+  } catch (eActiveUnreadReset) {}
   var fromFilterOnly = !!opts.fromFilterOnly;
   try {
     if (!fromFilterOnly && typeof pokerApiHasCredential === "function" && pokerApiHasCredential()) {

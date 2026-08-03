@@ -1055,6 +1055,7 @@ function initRafflesCompletedRuntime(opts) {
         outcomeButton.setAttribute("data-winner-slot-id", winnerSlotId);
         outcomeButton.setAttribute("aria-label", outcome === "minus" ? "Ничего не забрал" : "Забрал сумму");
         outcomeButton.disabled = true;
+        outcomeButton.hidden = true;
         outcomeButton.addEventListener("click", function (event) {
           if (event.__raffleFollowupHandled || outcomeButton.disabled) return;
           event.stopPropagation();
@@ -1088,7 +1089,12 @@ function initRafflesCompletedRuntime(opts) {
           });
       })
       .then(function (data) {
-        optimisticOutcomeButtons.forEach(function (item) { item.disabled = false; });
+        // Show the outcome controls only once they are ready for interaction.
+        // Previously they appeared disabled while the seat request was saving.
+        optimisticOutcomeButtons.forEach(function (item) {
+          item.disabled = false;
+          item.hidden = false;
+        });
         if (data && data.currentWeekIssueTotals) {
           setRaffleCurrentWeekIssueTotals(data.currentWeekIssueTotals);
         }
