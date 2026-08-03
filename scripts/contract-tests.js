@@ -169,6 +169,12 @@ class MemoryRedis {
     const cmd = String(command[0] || "").toUpperCase();
     const key = command[1] != null ? String(command[1]) : "";
     if (cmd === "GET") return this.result(this.kv.has(key) ? this.kv.get(key) : null);
+    if (cmd === "MGET") {
+      return this.result(command.slice(1).map((item) => {
+        const itemKey = String(item);
+        return this.kv.has(itemKey) ? this.kv.get(itemKey) : null;
+      }));
+    }
     if (cmd === "SET") {
       const opts = command.slice(3).map((item) => String(item || "").toUpperCase());
       if (opts.includes("NX") && this.kv.has(key)) return this.result(null);
