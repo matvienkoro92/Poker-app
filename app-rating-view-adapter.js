@@ -2932,7 +2932,7 @@ function initWinterRating() {
         directItems: Array.prototype.map.call(siblings, function (item) {
           var img = item.querySelector("img");
           return {
-            src: img ? (img.currentSrc || img.src || "") : "",
+            src: img ? (img.getAttribute("data-rating-full-src") || img.currentSrc || img.src || "") : "",
             alt: img ? (img.alt || "") : "",
           };
         }),
@@ -3454,7 +3454,10 @@ function initWinterRating() {
             openWinterRatingLightbox(dStr, idx, leagueNum, {
               directItems: Array.prototype.map.call(siblings, function (item) {
                 var img = item.querySelector("img");
-                return { src: img ? (img.currentSrc || img.src || "") : "", alt: img ? (img.alt || "") : "" };
+                return {
+                  src: img ? (img.getAttribute("data-rating-full-src") || img.currentSrc || img.src || "") : "",
+                  alt: img ? (img.alt || "") : "",
+                };
               }),
             });
           };
