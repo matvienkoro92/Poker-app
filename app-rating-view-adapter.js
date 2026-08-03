@@ -393,8 +393,8 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "aza32": { src: "./assets/sng-finalist-aza.webp" },
   "аза": { src: "./assets/sng-finalist-aza.webp" },
   "аза32": { src: "./assets/sng-finalist-aza.webp" },
-  "waaar": { src: "./assets/summer-rating-player-pokermanki.webp?v=3.547", place: 1, league: 1 },
-  "покерманки": { src: "./assets/summer-rating-player-waaar.webp", place: 2, league: 1 },
+  "waaar": { src: "./assets/summer-rating-player-waaar.webp", place: 1, league: 1 },
+  "покерманки": { src: "./assets/summer-rating-player-pokermanki.webp?v=3.547", place: 2, league: 1 },
   "coo1er91": { src: "./assets/summer-rating-player-cooler.webp", place: 3, league: 1 },
   "em13!!": { src: "./assets/summer-rating-player-emil.webp", place: 4, league: 1 },
   "winifly": { src: "./assets/summer-rating-player-winifly.webp", place: 5, league: 1 },
@@ -473,8 +473,8 @@ function summerRatingTop3ArtSizeStyle(slotName, nick) {
   // Top-3 podium art is rendered through inline CSS variables; CSS background fallbacks below do not control these sizes.
   var size = "";
   if (art.league === 1) {
-    if (art.key === "waaar" && slotName === "left") size = "38.1%";
-    else if (art.key === "покерманки" && slotName === "center") size = "22.4%";
+    if (art.key === "waaar" && slotName === "left") size = "22.4%";
+    else if (art.key === "покерманки" && slotName === "center") size = "38.1%";
     else if (art.key === "coo1er91" && slotName === "right") size = "22.4%";
     else if (art.key === "em13!!" && slotName === "right") size = "19.55%";
   } else if (art.league === 2) {
@@ -487,8 +487,8 @@ function summerRatingTop3ArtSizeStyle(slotName, nick) {
 
 function summerRatingPlayerArtStageSize(key) {
   switch (key) {
-    case "waaar": return "17.9%";
-    case "покерманки": return "14.7%";
+    case "waaar": return "14.7%";
+    case "покерманки": return "17.9%";
     case "coo1er91": return "14.0%";
     case "em13!!": return "12.9%";
     case "winifly": return "13.9%";

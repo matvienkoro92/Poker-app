@@ -980,7 +980,7 @@
     } catch (eHeroArt) {
       src = "";
     }
-    if (isWaaarNick(key)) src = "./assets/summer-rating-player-pokermanki.webp?v=3.547";
+    if (isWaaarNick(key)) src = "./assets/summer-rating-player-waaar.webp";
     if (key === "em13!!" || key === "em13") src = "./assets/summer-rating-player-emil.webp";
     if (!src) return renderPlayerAvatar(candidate, id);
     return '<span class="club-choice-vote-modal__hero-art" aria-hidden="true">' +

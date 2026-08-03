@@ -360,9 +360,10 @@
   }
 
   function friendName(row) {
-    return String(row && (row.pokerPlusNickname || row.pokerPlusName || row.contactName || row.chatDisplayName || row.userName) || "Ваш друг")
+    var name = String(row && (row.pokerPlusNickname || row.pokerPlusName || row.contactName || row.chatDisplayName || row.userName) || "Ваш друг")
       .replace(/^@+/, "")
       .trim();
+    return matchKey(name) === "романдий" ? "ПокерМанки" : name;
   }
 
   function friendPokerIdentity(row) {
@@ -485,7 +486,10 @@
     var exact = matchKey(value);
     if (!exact) return [];
     var relaxed = exact.replace(/[!！?？.,:;"'`~()\[\]{}<>«»]+$/g, "");
-    return relaxed && relaxed !== exact && relaxed.length >= 3 ? [exact, relaxed] : [exact];
+    var keys = relaxed && relaxed !== exact && relaxed.length >= 3 ? [exact, relaxed] : [exact];
+    if (exact === "романдий" && keys.indexOf("покерманки") === -1) keys.push("покерманки");
+    if (exact === "покерманки" && keys.indexOf("романдий") === -1) keys.push("романдий");
+    return keys;
   }
 
   function clubProfileForNick(value) {
@@ -1425,6 +1429,9 @@
         actorId: friendId(friend) || accountId,
         actorNick: friendName(friend),
         actorAvatar: friendAvatar(friend),
+        newsTitle: friendName(friend),
+        newsLines: [text || "Опубликовал фото"],
+        _eventKind: "wall",
       };
     }).filter(Boolean);
   }
@@ -1553,7 +1560,9 @@
   function eventFeedbackHtml(row, profileCueHtml) {
     var rowId = feedbackEventId(row);
     var feedback = eventFeedback[rowId] || {};
-    var viewCount = Math.max(0, Number(feedback.viewCount) || 0) * 5;
+    // An opened card already has at least the current viewer. Before the async
+    // feedback response arrives, do not flash a misleading zero.
+    var viewCount = Math.max(1, Number(feedback.viewCount) || 0) * 5;
     var reactions = feedback.reactions || {};
     var reactionButtons = HOME_NEWS_REACTIONS.map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);
@@ -1724,7 +1733,7 @@
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
-        (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + poker21LinkedHtml + '</span>' +
+        poker21LinkedHtml + (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
         profileMetaHtml +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";

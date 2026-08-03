@@ -4446,6 +4446,35 @@ body.profile-avatar-choice-open {
   }
 }
 
+/* Final name-row lock: keep Poker21 verification immediately after the name.
+   Identity preferences consume the remaining space on the right. */
+.view[data-view="profile"] .profile-public-showcase__verified-name {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title-row {
+  justify-content: flex-start !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__title {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  margin-right: 0 !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase .chat-user-modal__verified {
+  flex: 0 0 24px !important;
+  margin: 0 !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase__title-preferences {
+  margin-left: auto !important;
+}
+
 /* Final wider-card alignment, after all legacy responsive overrides. */
 @media (min-width: 701px) {
   .view[data-view="profile"] .profile-public-showcase__header.chat-user-modal__header {

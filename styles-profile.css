@@ -1,6 +1,26 @@
 /* Profile CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-profile-core-avatar.css?v=4.003");
+@import url("./styles-profile-core-avatar.css?v=4.004");
 @import url("./styles-profile-poker21.css?v=3.153");
 @import url("./styles-profile-status-social.css?v=3.899");
 @import url("./styles-profile-adjacent-tools.css?v=3.392");
 @import url("./styles-profile-modals-tail.css?v=3.600");
+
+/* Desktop profile header: specialization on top, gender directly below. */
+@media (min-width: 701px) {
+  .view[data-view="profile"] .profile-public-showcase__title-preferences {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    margin-left: auto !important;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__title-preferences .profile-hero-specialty {
+    order: 1;
+  }
+
+  .view[data-view="profile"] .profile-public-showcase__title-preferences .profile-hero-gender {
+    order: 2;
+  }
+}

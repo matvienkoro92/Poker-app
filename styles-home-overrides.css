@@ -755,7 +755,6 @@ html[data-theme="gold"] body[data-view="home"] {
   width: 20px;
   height: 20px;
   flex: 0 0 20px;
-  margin-left: auto;
   place-items: center;
   border: 1px solid rgba(134, 239, 172, 0.82);
   border-radius: 50%;
