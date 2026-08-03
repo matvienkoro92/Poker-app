@@ -345,4 +345,171 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "03.08.2026": [
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500 🏆 50K",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 6,
+          "reward": 2832,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 🥊 40K GTD",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cap888881",
+          "place": 1,
+          "reward": 16930,
+          "points": 135
+        },
+        {
+          "nick": "nikola233",
+          "place": 24,
+          "reward": 318,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 9,
+          "reward": 75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "OK 🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Киса",
+          "place": 1,
+          "reward": 13488.62,
+          "points": 135
+        },
+        {
+          "nick": "Бабник",
+          "place": 9,
+          "reward": 370.31,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Proxor",
+          "place": 1,
+          "reward": 41910,
+          "points": 135
+        },
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 19920,
+          "points": 90
+        },
+        {
+          "nick": "WiNifly",
+          "place": 5,
+          "reward": 6320,
+          "points": 60
+        },
+        {
+          "nick": "Zeus",
+          "place": 10,
+          "reward": 4190,
+          "points": 0
+        },
+        {
+          "nick": "petroochoo",
+          "place": 15,
+          "reward": 1100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Monday 🏆 200K GTD",
+      "buyin": 7500,
+      "league": 2,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 5,
+          "reward": 14986.000000000002,
+          "points": 60
+        },
+        {
+          "nick": "Em13!!",
+          "place": 10,
+          "reward": 2228,
+          "points": 0
+        },
+        {
+          "nick": "WhiskeyClub",
+          "place": 16,
+          "reward": 1550,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "HOK 🥊",
+      "buyin": 1000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 19748.44,
+          "points": 135
+        },
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 12760.94,
+          "points": 110
+        },
+        {
+          "nick": "Smile😎😊😺",
+          "place": 6,
+          "reward": 2918.75,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 2,
+      "players": [
+        {
+          "nick": "MissClick",
+          "place": 3,
+          "reward": 5200,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };

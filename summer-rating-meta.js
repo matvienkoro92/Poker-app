@@ -1,1 +1,1 @@
-var SUMMER_RATING_UPDATED = "обновлено 2 августа";
+var SUMMER_RATING_UPDATED = "обновлено 3 августа";

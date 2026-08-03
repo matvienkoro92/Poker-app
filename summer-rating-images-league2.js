@@ -399,4 +399,14 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-02-08-2026-league2-hr-5000-200k-2159h.jpg",
     "rating-compressed-preview/rating-02-08-2026-league2-energetiktournament-22h.jpg"
   ]
+,
+  "03.08.2026": [
+    "rating-compressed-preview/rating-03-08-2026-league2-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-03-08-2026-league2-bounty-200-40k-gtd-14h.jpg",
+    "rating-compressed-preview/rating-03-08-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-03-08-2026-league2-turnir-ponedelnika-18h.jpg",
+    "rating-compressed-preview/rating-03-08-2026-league2-monday-200k-gtd-18h.jpg",
+    "rating-compressed-preview/rating-03-08-2026-league2-hok-19h.jpg",
+    "rating-compressed-preview/rating-03-08-2026-league2-rebuy-evening-20h.jpg"
+  ]
 };

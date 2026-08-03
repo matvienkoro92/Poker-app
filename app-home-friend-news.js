@@ -1571,9 +1571,6 @@
   function eventFeedbackHtml(row, profileCueHtml) {
     var rowId = feedbackEventId(row);
     var feedback = eventFeedback[rowId] || {};
-    // An opened card already has at least the current viewer. Before the async
-    // feedback response arrives, do not flash a misleading zero.
-    var viewCount = Math.max(1, Number(feedback.viewCount) || 0) * 5;
     var reactions = feedback.reactions || {};
     var reactionButtons = HOME_NEWS_REACTIONS.map(function (emoji) {
       var count = Math.max(0, Number(reactions[emoji]) || 0);
@@ -1638,10 +1635,7 @@
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button></span>" +
-        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") +
-          '<span class="home-friend-news-modal__views" title="Просмотры" aria-label="Просмотров: ' + viewCount + '">' +
-            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>' +
-            '<span>' + viewCount + "</span></span></span></span>" +
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span></span>" +
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
