@@ -19,6 +19,8 @@
   var clubRotateTimer = null;
   var events = [];
   var clubEvents = [];
+  var clubWallEvents = [];
+  var clubNewsTab = "wins";
   var activeIndex = 0;
   var clubActiveIndex = 0;
   var eventFeedback = {};
@@ -1073,6 +1075,8 @@
         newsTitle: displayTitle,
         newsLines: newsLines,
         prizeAmount: reward,
+        tournamentName: detail,
+        tournamentPlace: place,
         at: row.date,
         target: "winter-rating",
         actorId: friendId(friend),
@@ -1588,7 +1592,27 @@
     input.focus();
   }
 
-  function eventHtml(row, ticker, isDayHero) {
+  function clubTickerText(row) {
+    var amount = Math.max(0, Number(row && row.prizeAmount) || 0);
+    var actor = String(row && (row.newsTitle || row.actorNick) || "").trim();
+    var tournament = String(row && row.tournamentName || "").trim();
+    var place = Math.max(0, Number(row && row.tournamentPlace) || 0);
+    var lines = Array.isArray(row && row.newsLines) ? row.newsLines : [];
+    var source = lines.join(". ") || String(row && row.text || "");
+    if (!place) {
+      var placeMatch = source.match(/Занял\s+(\d+)-е\s+место/i);
+      if (placeMatch) place = Math.max(0, Number(placeMatch[1]) || 0);
+    }
+    if (!tournament) {
+      var tournamentMatch = source.match(/в\s+турнире\s+(.+?)(?:\s+и\s+выиграл|[.]|$)/i);
+      if (tournamentMatch) tournament = String(tournamentMatch[1] || "").trim();
+    }
+    if (!amount || !actor || !tournament) return String(row && row.text || "");
+    return "+" + formatRub(amount) + " " + actor + " выиграл в турнире " + tournament +
+      (place ? " за " + place + "-е место" : "");
+  }
+
+  function eventHtml(row, ticker, isDayHero, clubTicker) {
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
@@ -1631,7 +1655,7 @@
       ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
-      (ticker ? eventTextHtml(row.text) : structuredText +
+      (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) : structuredText +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         "<small>" + esc(timeLabel) + "</small>" +
         eventFeedbackHtml(row, profileCue)) +
@@ -1663,6 +1687,11 @@
       })[0];
       return '<section class="home-friend-news-modal__day-group">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
+        (newsModalMode === "club" ? '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
+          '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
+            (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
+          '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
+            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' : "") +
         '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
         '<div class="home-friend-news-modal__day-events">' +
           group.rows.map(function (row) { return eventHtml(row, false, row === dayHero); }).join("") +
@@ -1740,7 +1769,7 @@
       label.textContent = "Новости клуба" + (labelDate ? " · " + eventDateLabel(labelDate, false) : "");
     }
     root.hidden = false;
-    track.innerHTML = displayRows.map(function (row) { return eventHtml(row, true); }).join("");
+    track.innerHTML = displayRows.map(function (row) { return eventHtml(row, true, false, true); }).join("");
     showClubIndex(0, false);
     clearInterval(clubRotateTimer);
     if (displayRows.length > 1) {
@@ -1793,13 +1822,25 @@
       return;
     }
     var snapshot = Array.isArray(rows) ? rows.slice() : [];
-    list.innerHTML = achievementPromo + (snapshot[0] && snapshot[0].id === "empty"
+    var wallInvite = newsModalMode === "club" && clubNewsTab === "wall"
+      ? '<div class="home-friend-news-modal__wall-invite">Добавьте запись у себя на стене, чтобы она отобразилась в новостях клуба. ' +
+          '<button type="button" data-club-news-write>Написать</button></div>' : "";
+    var emptyClubWall = newsModalMode === "club" && clubNewsTab === "wall" && !snapshot.length;
+    var emptyClubWallHtml = emptyClubWall
+      ? '<section class="home-friend-news-modal__day-group"><div class="home-friend-news-modal__date"><span>' +
+          esc(eventDateLabel(clubEvents[0] && clubEvents[0].at, true)) + '</span></div>' +
+          '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
+            '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab">Выигрыши</button>' +
+            '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab home-friend-news-modal__club-tab--active">Записи игроков</button></div>' +
+          '<div class="home-friend-news-modal__empty"><span aria-hidden="true">✎</span><strong>Записей за этот день пока нет</strong></div></section>'
+      : "";
+    list.innerHTML = achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
-      : modalEventsHtml(snapshot));
+      : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite;
   }
 
   function activeModalEvents() {
-    return newsModalMode === "club" ? clubEvents : events;
+    return newsModalMode === "club" ? (clubNewsTab === "wall" ? clubWallEvents : clubEvents) : events;
   }
 
   function feedbackEventId(row) {
@@ -1884,6 +1925,7 @@
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     newsModalMode = "club";
+    clubNewsTab = "wins";
     syncNewsModalHeading();
     renderModalList(clubEvents);
     modal.hidden = false;
@@ -1965,15 +2007,56 @@
           closeModal();
           return;
         }
+        var clubTab = event.target.closest("[data-club-news-tab]");
+        if (clubTab) {
+          clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "wall" ? "wall" : "wins";
+          renderModalList(activeModalEvents());
+          loadActiveModalFeedback(activeModalEvents());
+          return;
+        }
+        if (event.target.closest("[data-club-news-write]")) {
+          closeModal();
+          var profileNav = document.querySelector('.bottom-nav__item[data-view-target="profile"]');
+          if (profileNav) profileNav.click();
+          else if (typeof setView === "function") setView("profile");
+          window.setTimeout(function () {
+            var attempts = 0;
+            var openOwnWall = function () {
+              var personalTab = document.querySelector('[data-profile-wall-tab="personal"]');
+              var wall = document.getElementById("profileOwnWall");
+              if (personalTab && wall) {
+                personalTab.click();
+                if (wall.scrollIntoView) wall.scrollIntoView({ behavior: "smooth", block: "start" });
+                return;
+              }
+              attempts += 1;
+              if (attempts < 12) window.setTimeout(openOwnWall, 150);
+            };
+            openOwnWall();
+          }, 100);
+          return;
+        }
         var achievementsOpen = event.target.closest("[data-home-news-achievements-open]");
         if (achievementsOpen) {
           event.preventDefault();
+          if (achievementsOpen.disabled) return;
           var list = el("homeFriendNewsList");
           returnToClubNewsAfterAchievements = true;
           returnToClubNewsScrollTop = list ? list.scrollTop : 0;
-          closeModal();
+          achievementsOpen.disabled = true;
+          achievementsOpen.classList.add("is-loading");
+          achievementsOpen.setAttribute("aria-busy", "true");
+          achievementsOpen.textContent = "Загрузка…";
+          var resetAchievementsButton = function () {
+            achievementsOpen.disabled = false;
+            achievementsOpen.classList.remove("is-loading");
+            achievementsOpen.removeAttribute("aria-busy");
+            achievementsOpen.textContent = "Смотреть >>";
+          };
           var openAchievements = function () {
             if (typeof window.openHallFishAchievementsModal !== "function") return false;
+            resetAchievementsButton();
+            closeModal();
             window.openHallFishAchievementsModal("dayHero");
             return true;
           };
@@ -1981,13 +2064,16 @@
             Promise.resolve(window.pokerEnsureScriptDomains(["hall"])).then(function () {
               if (openAchievements()) return;
               returnToClubNewsAfterAchievements = false;
+              resetAchievementsButton();
               openClubModal();
             }).catch(function () {
               returnToClubNewsAfterAchievements = false;
+              resetAchievementsButton();
               openClubModal();
             });
           } else if (typeof window.openHallFishAchievementsModal !== "function") {
             returnToClubNewsAfterAchievements = false;
+            resetAchievementsButton();
             openClubModal();
           }
           return;
@@ -2366,7 +2452,7 @@
     return data && Array.isArray(data.rows) ? data.rows : [];
   }
 
-  function buildClubEventsFromRows(players, winners) {
+  function buildClubEventsFromRows(players, winners, tournamentSnapshots) {
     var sourceRows = clubNewsStaticRows();
     var allPlayers = Array.isArray(players) ? players.slice() : [];
     var knownNicks = {};
@@ -2387,14 +2473,67 @@
       });
     });
     var snapshots = { __recentEvents: sourceRows };
+    var ratingChanges = Array.isArray(tournamentSnapshots && tournamentSnapshots.__ratingChanges)
+      ? tournamentSnapshots.__ratingChanges : [];
     return distributeDailyClubEvents(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
-        winnerEvents(allPlayers, Array.isArray(winners) ? winners : [])
+        winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
+        ratingChanges
       ),
       allPlayers
     ).filter(function (row) {
       return isCurrentClubEvent(row);
     })).slice(0, MAX_EVENTS);
+  }
+
+  function loadClubWallEvents(players, tournamentDay) {
+    var base = apiBase();
+    var byAccount = {};
+    var accountIds = [];
+    (players || []).forEach(function (player) {
+      [player && player.accountId, player && player.dtId, player && player.userId].forEach(function (id) {
+        id = String(id || "").trim();
+        if (!id || byAccount[id]) return;
+        byAccount[id] = player;
+        accountIds.push(id);
+      });
+    });
+    var dayStart = tournamentDay ? new Date(tournamentDay + "T00:00:00+07:00") : null;
+    var dayEnd = dayStart && Number.isFinite(dayStart.getTime()) ? new Date(dayStart.getTime() + 86400000) : null;
+    var payload = {
+      action: "club-feed",
+      accountIds: accountIds,
+      from: dayStart && Number.isFinite(dayStart.getTime()) ? dayStart.toISOString() : "",
+      to: dayEnd ? dayEnd.toISOString() : "",
+    };
+    return fetch(base + "/api/profile-wall", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(payload) : payload),
+    }).then(function (response) {
+      if (!response.ok) throw new Error("club_wall_http_" + response.status);
+      return response.json();
+    }).then(function (data) {
+      return (data && Array.isArray(data.posts) ? data.posts : []).map(function (post) {
+        var accountId = String(post && post.accountId || "");
+        var player = byAccount[accountId] || {};
+        var name = friendName(player);
+        return {
+          id: "wall:" + accountId + ":" + String(post.id || ""),
+          type: "personal",
+          icon: "✎",
+          text: String(post.text || ""),
+          image: String(post.image || ""),
+          at: post.createdAt,
+          actorId: friendId(player) || accountId,
+          actorNick: name,
+          actorAvatar: friendAvatar(player),
+          newsTitle: name,
+          newsLines: [String(post.text || "")].filter(Boolean),
+          _eventKind: "wall",
+        };
+      }).filter(function (row) { return row.text || row.image; });
+    });
   }
 
   function stableClubEvents(nextRows, previousRows) {
@@ -2434,6 +2573,7 @@
         { cache: "default" }
       )
         .catch(function () { return { winners: [], failed: true }; }),
+      clubTournamentSnapshotsReady().catch(function () { return {}; }),
     ]).then(function (results) {
       if ((results[0] && results[0].failed) || (results[1] && results[1].failed)) {
         throw new Error("club news source unavailable");
@@ -2464,19 +2604,20 @@
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var nextClubEvents = stableClubEvents(
-        buildClubEventsFromRows(players, winners),
+        buildClubEventsFromRows(players, winners, results[2]),
         []
       );
-      // Publish one complete snapshot only after both remote sources settle.
-      // This prevents static tournament rows from flashing first and daily
-      // poker events from jumping into the list a moment later.
-      clubEvents = nextClubEvents;
-      clubNewsLoaded = true;
-      clubNewsLoading = false;
-      clubNewsRetryCount = 0;
-      writeClubEventsCache(clubEvents);
-      renderClubNews();
-      if (newsModalMode === "club") renderModalList(clubEvents);
+      return loadClubWallEvents(players, tournamentDay).catch(function () { return []; }).then(function (wallEvents) {
+        // Publish one complete snapshot only after all club sources settle.
+        clubEvents = nextClubEvents;
+        clubWallEvents = wallEvents;
+        clubNewsLoaded = true;
+        clubNewsLoading = false;
+        clubNewsRetryCount = 0;
+        writeClubEventsCache(clubEvents);
+        renderClubNews();
+        if (newsModalMode === "club") renderModalList(activeModalEvents());
+      });
     }).catch(function () {
       clubNewsLoading = true;
       renderClubNews();

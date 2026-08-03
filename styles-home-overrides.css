@@ -419,6 +419,26 @@ html[data-theme="gold"] body[data-view="home"] {
   outline: 2px solid rgba(255, 236, 164, 0.72);
   outline-offset: 2px;
 }
+.home-friend-news-modal__achievement-promo-action.is-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: wait;
+  opacity: 0.9;
+}
+.home-friend-news-modal__achievement-promo-action.is-loading::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border: 2px solid rgba(43, 21, 0, 0.28);
+  border-top-color: #2b1500;
+  border-radius: 50%;
+  animation: home-news-achievement-loading 0.7s linear infinite;
+}
+@keyframes home-news-achievement-loading {
+  to { transform: rotate(360deg); }
+}
 @media (max-width: 560px) {
   .home-friend-news-modal__achievement-promo {
     grid-template-columns: minmax(0, 1fr);
@@ -552,6 +572,56 @@ html[data-theme="gold"] body[data-view="home"] {
 .home-friend-news-modal__day-count strong {
   color: #ffe0a3;
   font-weight: 950;
+}
+
+.home-friend-news-modal__club-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 10px;
+}
+
+.home-friend-news-modal__club-tab {
+  min-height: 46px;
+  border: 1px solid rgba(201, 151, 54, 0.55);
+  border-radius: 16px;
+  background: #090e16;
+  color: #e9dcc2;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.home-friend-news-modal__club-tab--active {
+  border-color: #ffd267;
+  background: linear-gradient(180deg, #ffd66f, #e9910c);
+  color: #211506;
+  box-shadow: 0 0 18px rgba(255, 180, 42, 0.3), inset 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.home-friend-news-modal__wall-invite {
+  margin: 18px 0 4px;
+  padding: 15px 18px;
+  border: 1px solid rgba(201, 151, 54, 0.42);
+  border-radius: 16px;
+  background: rgba(8, 13, 21, 0.8);
+  color: #b9c3d2;
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.home-friend-news-modal__wall-invite button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #ffd56e;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .home-friend-news-modal--club .home-friend-news-modal__day-events {
@@ -3231,8 +3301,8 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 .app.app--view-home .home-sng-champions-action__completed-badge {
   position: absolute;
   z-index: 4;
-  left: 50%;
-  right: auto;
+  left: auto;
+  right: clamp(8px, 1.5vw, 14px);
   bottom: clamp(8px, 1.6vw, 15px);
   padding: clamp(5px, 1.1vw, 8px) clamp(12px, 2.4vw, 21px);
   border: 2px solid #ffe5a0;
@@ -3245,7 +3315,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   line-height: 1;
   letter-spacing: 0.06em;
   text-shadow: 0 1px 0 rgba(255, 245, 195, 0.65);
-  transform: translateX(-50%);
+  transform: none;
 }
 
 .app.app--view-home .home-sng-champions-action__completed-badge[hidden] {

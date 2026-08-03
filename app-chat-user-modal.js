@@ -739,10 +739,14 @@ if (chatUserModalEl) {
       });
     });
   }
-  function loadChatUserModalWall(seq, targetUserId) {
+  function loadChatUserModalWall(seq, identity) {
+    var wallIdentity = identity && typeof identity === "object" ? identity : { userId: identity };
+    var targetAccountId = String(wallIdentity.accountId || wallIdentity.dtId || "").trim();
+    var targetUserId = String(wallIdentity.chatUserId || wallIdentity.userId || chatUserModalUserId || "").trim();
     return chatUserModalWallRequest({
       action: "list",
-      targetUserId: targetUserId || chatUserModalUserId,
+      targetAccountId: targetAccountId,
+      targetUserId: targetUserId,
     }).then(function (data) {
       if (seq !== chatUserModalNewsSeq) return;
       chatUserModalWallPosts = Array.isArray(data.posts) ? data.posts : [];
@@ -788,7 +792,7 @@ if (chatUserModalEl) {
   function loadChatUserModalNews(identity) {
     var seq = ++chatUserModalNewsSeq;
     showChatUserModalNewsLoading();
-    loadChatUserModalWall(seq, identity && (identity.accountId || identity.userId));
+    loadChatUserModalWall(seq, identity);
     if (typeof window.pokerGetPlayerNews !== "function") {
       renderChatUserModalWall();
       return;
@@ -967,6 +971,7 @@ if (chatUserModalEl) {
     if (event.target === modalWallComposer) {
       event.preventDefault();
       var wallText = String(modalWallText && modalWallText.value || "").trim();
+      var wallClubShare = modalWallComposer.querySelector("#chatUserModalWallClubShare");
       if (!wallText) return;
       var publishButton = modalWallComposer.querySelector("button[type=submit]");
       if (publishButton) publishButton.disabled = true;
@@ -974,9 +979,11 @@ if (chatUserModalEl) {
         action: "create",
         targetUserId: chatUserModalUserId,
         text: wallText,
+        shareToClub: !!(wallClubShare && wallClubShare.checked),
       }).then(function (data) {
         chatUserModalWallPosts = data.posts || [];
         if (modalWallText) modalWallText.value = "";
+        if (wallClubShare) wallClubShare.checked = true;
         if (publishButton) publishButton.disabled = false;
         renderChatUserModalWall();
       }).catch(function (error) {
@@ -3310,6 +3317,7 @@ if (chatUserModalEl) {
               loadChatUserModalNews({
                 userId: id,
                 accountId: data && (data.accountId || data.dtId || data.userId),
+                chatUserId: data && data.chatUserId,
                 ratingNick: freshRatingNick,
                 displayName: userName,
                 p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),
@@ -3353,6 +3361,7 @@ if (chatUserModalEl) {
         loadChatUserModalNews({
           userId: id,
           accountId: data && (data.accountId || data.dtId || data.userId),
+          chatUserId: data && data.chatUserId,
           ratingNick: ratingNick,
           displayName: userName,
           p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),

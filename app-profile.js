@@ -276,14 +276,21 @@ function submitProfileOwnWall(event) {
     : document.getElementById("profileOwnWallComposer");
   var input = composer ? composer.querySelector("#profileOwnWallText") : document.getElementById("profileOwnWallText");
   var text = String(input && input.value || "").trim();
+  var clubShare = composer && composer.querySelector("#profileOwnWallClubShare");
   if (!text && !profileOwnWallState.image) return;
   var submitButton = composer && composer.querySelector('button[type="submit"]');
   profileOwnWallState.submitting = true;
   if (submitButton) submitButton.disabled = true;
-  profileOwnWallRequest({ action: "create", text: text, image: profileOwnWallState.image }).then(function (data) {
+  profileOwnWallRequest({
+    action: "create",
+    text: text,
+    image: profileOwnWallState.image,
+    shareToClub: !!(clubShare && clubShare.checked),
+  }).then(function (data) {
     profileOwnWallState.posts = Array.isArray(data.posts) ? data.posts : [];
     profileOwnWallState.tab = "personal";
     if (input) input.value = "";
+    if (clubShare) clubShare.checked = true;
     profileOwnWallState.image = "";
     renderProfileOwnWallImagePreview();
     renderProfileOwnWall();

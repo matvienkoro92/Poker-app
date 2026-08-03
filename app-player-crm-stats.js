@@ -383,7 +383,7 @@ function initPlayerCrmStatsRuntime(deps) {
         ["Уникальных победителей", raffleStatsAvailable ? intFmt(raffleStats.uniqueWinners) : "—"],
         ["Выиграно и выдано", raffleStatsAvailable ? money(raffleStats.issuedPrizeAmount) : "—", null, "highlight"],
         ["Кеш", raffleStatsAvailable ? money(raffleStats.issuedCashAmount) : "—"],
-        ["Возврат", raffleStatsAvailable ? ((Number(raffleStats.returnedAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedAmount || 0) : "—", null, "positive"],
+        ["Возврат", raffleStatsAvailable ? ((Number(raffleStats.returnedCashAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedCashAmount || 0) : "—", null, "positive"],
         ["Билеты", raffleStatsAvailable ? money(raffleStats.issuedTicketAmount) : "—"],
         ["Возврат билеты", raffleStatsAvailable ? ((Number(raffleStats.returnedTicketAmount) || 0) > 0 ? "+" : "") + money(raffleStats.returnedTicketAmount || 0) : "—", null, "positive"],
       ].concat(raffleStatsAvailable ? [

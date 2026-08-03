@@ -1564,6 +1564,9 @@ function pokerGetClubNewsTournamentSnapshotsReady() {
     ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).catch(function () { return false; })
     : Promise.resolve(false);
   return ready.then(function () {
+    function clubNewsRatingNickKey(nick) {
+      return String(normalizeWinterNick(nick) || "").trim().toLowerCase().replace(/\s+/g, "");
+    }
     var allRows = pokerRatingAchievementAllTournamentRows();
     var nicks = allRows.map(function (row) {
       return row && row.nick;
@@ -1573,6 +1576,58 @@ function pokerGetClubNewsTournamentSnapshotsReady() {
     snapshots.__latestSourceDateStamp = allRows.reduce(function (latest, row) {
       return Math.max(latest, winterRatingDateKeyToStamp(String(row && row.date || "")));
     }, 0);
+    var latestStamp = snapshots.__latestSourceDateStamp;
+    var latestDate = allRows.map(function (row) { return String(row && row.date || ""); }).find(function (date) {
+      return winterRatingDateKeyToStamp(date) === latestStamp;
+    }) || "";
+    var latestNickKeys = {};
+    allRows.forEach(function (row) {
+      if (String(row && row.date || "") !== latestDate) return;
+      var key = clubNewsRatingNickKey(row && row.nick);
+      if (key) latestNickKeys[key] = String(row.nick || "").trim();
+    });
+    snapshots.__ratingChanges = [];
+    [1, 2].forEach(function (leagueNum) {
+      var currentRows = getTournamentRatingOverallByLeagueForSeason("summer", leagueNum);
+      var tournaments = getTournamentRatingTournamentsBySeason("summer");
+      var removedLatest = tournaments[latestDate];
+      if (!latestDate || !removedLatest) return;
+      delete tournaments[latestDate];
+      var previousRows = getTournamentRatingOverallByLeagueForSeason("summer", leagueNum);
+      tournaments[latestDate] = removedLatest;
+      var previousPlaces = {};
+      previousRows.forEach(function (row, index) { previousPlaces[clubNewsRatingNickKey(row && row.nick)] = index + 1; });
+      var currentPlaces = {};
+      currentRows.forEach(function (row, index) { currentPlaces[clubNewsRatingNickKey(row && row.nick)] = index + 1; });
+      currentRows.forEach(function (row, index) {
+        var key = clubNewsRatingNickKey(row && row.nick);
+        if (!latestNickKeys[key]) return;
+        var oldPlace = Number(previousPlaces[key]) || 0;
+        var newPlace = index + 1;
+        if (!oldPlace || oldPlace === newPlace) return;
+        var rose = newPlace < oldPlace;
+        var displacedRow = rose ? previousRows[newPlace - 1] : null;
+        var displacedKey = clubNewsRatingNickKey(displacedRow && displacedRow.nick);
+        var displacedNewPlace = Number(currentPlaces[displacedKey]) || 0;
+        var displacedText = rose && displacedKey && displacedKey !== key
+          ? ", сместив " + String(displacedRow.nick || "игрока") + " с " + newPlace + "-го" +
+            (displacedNewPlace ? " на " + displacedNewPlace + "-е место" : " ниже")
+          : "";
+        snapshots.__ratingChanges.push({
+          id: "rating-change:rating:" + key + ":league" + leagueNum + ":" + oldPlace + ":" + newPlace + ":" + latestDate,
+          type: "rating",
+          icon: rose ? "▲" : "▼",
+          text: latestNickKeys[key] + (rose ? " поднялся" : " спустился") + " в рейтинге Лиги " + leagueNum +
+            " с " + oldPlace + "-го на " + newPlace + "-е место" + displacedText,
+          at: latestDate.split(".").reverse().join("-") + "T23:55:00",
+          actorId: "rating:" + key,
+          actorNick: latestNickKeys[key],
+          affectedActorNicks: displacedRow && displacedRow.nick
+            ? [latestNickKeys[key], String(displacedRow.nick)] : [latestNickKeys[key]],
+          _eventKind: "rating-change",
+        });
+      });
+    });
     return snapshots;
   });
 }

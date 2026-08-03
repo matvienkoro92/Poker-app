@@ -4104,6 +4104,24 @@
 .chat-user-modal__wall-composer textarea:focus {
   border-color: #64e8b2;
 }
+.profile-own-wall__club-share {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+  color: #e8dcc3;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  cursor: pointer;
+}
+.profile-own-wall__club-share input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #f2a51c;
+  cursor: pointer;
+}
 .chat-user-modal__wall-composer > div {
   display: flex;
   justify-content: flex-end;

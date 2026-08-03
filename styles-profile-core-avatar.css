@@ -4453,13 +4453,13 @@ body.profile-avatar-choice-open {
 @media (min-width: 701px) and (max-width: 1100px) {
   .view[data-view="profile"] .profile-public-showcase__top.chat-user-modal__top {
     position: relative !important;
-    min-height: 220px !important;
+    min-height: 280px !important;
   }
 
   .view[data-view="profile"] .profile-public-showcase__self-actions {
     position: absolute !important;
-    top: 170px !important;
-    left: 220px !important;
+    top: 230px !important;
+    left: 94px !important;
     right: auto !important;
     bottom: auto !important;
     width: min(calc(100% - 238px), 630px) !important;
