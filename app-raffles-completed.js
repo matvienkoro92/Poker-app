@@ -231,10 +231,22 @@ function initRafflesCompletedRuntime(opts) {
 
   function requestRaffleTimerRefresh(refreshKey) {
     var key = String(refreshKey || "");
-    if (key && raffleCompletedTimerRefreshMarks[key]) return;
+    var retryUntilSettled = /:expired$/.test(key);
+    if (!retryUntilSettled && key && raffleCompletedTimerRefreshMarks[key]) return;
     var now = Date.now();
+    var retryState = retryUntilSettled && key && raffleCompletedTimerRefreshMarks[key];
+    if (retryState && typeof retryState === "object" && now < retryState.nextAt) return;
     if (now < raffleCompletedTimerRefreshAfter) return;
-    if (key) raffleCompletedTimerRefreshMarks[key] = true;
+    // Milestone refreshes only need to run once. An expired deadline must keep
+    // polling: the first request can race the server-side reroll lock or fail
+    // while the stale winner card is still displayed.
+    if (retryUntilSettled && key) {
+      var attempts = retryState && typeof retryState === "object" ? (parseInt(retryState.attempts, 10) || 0) + 1 : 1;
+      var retryDelayMs = Math.min(30000, 7000 * Math.pow(2, Math.min(attempts - 1, 3)));
+      raffleCompletedTimerRefreshMarks[key] = { attempts: attempts, nextAt: now + retryDelayMs };
+    } else if (key) {
+      raffleCompletedTimerRefreshMarks[key] = true;
+    }
     raffleCompletedTimerRefreshAfter = now + 7000;
     setTimeout(function () {
       if (typeof clearRafflesCache === "function") clearRafflesCache();
@@ -283,8 +295,16 @@ function initRafflesCompletedRuntime(opts) {
       el.textContent = label + ": " + (expired ? "0 сек." : raffleReadyCountdownText(deadlineMs));
       el.classList.toggle("raffle-ready-timer--expired", expired);
       if (expired) {
+        var winnerRow = el.closest ? el.closest(".raffle-winner-row") : null;
+        var readyBtn = winnerRow && winnerRow.querySelector ? winnerRow.querySelector(".raffle-winner-ready-btn") : null;
+        if (readyBtn && !readyBtn.classList.contains("raffle-winner-ready-btn--active")) {
+          readyBtn.disabled = true;
+          readyBtn.setAttribute("aria-disabled", "true");
+          readyBtn.textContent = "Время вышло";
+        }
         var refreshKeyBase = el.getAttribute("data-raffle-ready-refresh-key") || raw;
-        requestRaffleTimerRefresh(refreshKeyBase + ":expired");
+        var timerVisible = typeof el.getClientRects !== "function" || el.getClientRects().length > 0;
+        if (!document.hidden && timerVisible) requestRaffleTimerRefresh(refreshKeyBase + ":expired");
       } else {
         refreshRaffleTimerAtMilestones(el, now, deadlineMs);
       }
