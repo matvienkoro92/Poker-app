@@ -2535,6 +2535,29 @@
     return data && Array.isArray(data.rows) ? data.rows : [];
   }
 
+  function clubNewsStaticBirthdayEvents(dayKey) {
+    var data = window.POKER_CLUB_NEWS_DATA;
+    var year = String(dayKey || "").slice(0, 4);
+    return (data && Array.isArray(data.birthdays) ? data.birthdays : []).map(function (row) {
+      var nick = String(row && row.nick || "").trim();
+      var key = matchKey(nick);
+      if (!key || String(row && row.date || "") !== dayKey) return null;
+      return {
+        id: "birthday:club:" + key + ":" + year,
+        type: "birthday",
+        icon: "♥",
+        text: "У " + nick + " день рождения",
+        at: dayKey + "T12:00:00+07:00",
+        actorId: "",
+        actorNick: nick,
+        actorAvatar: clubNewsFallbackAvatar(nick),
+        newsTitle: nick,
+        newsLines: ["День рождения"],
+        _eventKind: "birthday",
+      };
+    }).filter(Boolean);
+  }
+
   function buildClubEventsFromRows(players, winners, tournamentSnapshots) {
     var sourceRows = clubNewsStaticRows();
     var allPlayers = Array.isArray(players) ? players.slice() : [];
@@ -2564,6 +2587,13 @@
     if (todayDay && todayDay !== tournamentDay) {
       birthdays = birthdays.concat(clubBirthdayEvents(allPlayers, todayDay));
     }
+    clubNewsStaticBirthdayEvents(todayDay).forEach(function (row) {
+      var key = matchKey(row && row.actorNick);
+      var alreadyLoaded = birthdays.some(function (birthday) {
+        return matchKey(birthday && birthday.actorNick) === key;
+      });
+      if (!alreadyLoaded) birthdays.push(row);
+    });
     return distributeDailyClubEvents(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
