@@ -34,6 +34,8 @@
   var lastFriendsSignature = "";
   var lastLoadAt = 0;
   var loadSequence = 0;
+  var friendNewsLoadPromise = null;
+  var remoteFetchInFlight = {};
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v2";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v2:";
@@ -162,7 +164,8 @@
         return Promise.resolve(stored.data);
       }
     } catch (error) {}
-    return fetch(url, requestOptions || {}).then(function (response) {
+    if (remoteFetchInFlight[cacheKey]) return remoteFetchInFlight[cacheKey];
+    var request = fetch(url, requestOptions || {}).then(function (response) {
       return response.json();
     }).then(function (data) {
       try {
@@ -170,6 +173,14 @@
       } catch (error) {}
       return data;
     });
+    remoteFetchInFlight[cacheKey] = request.then(function (data) {
+      delete remoteFetchInFlight[cacheKey];
+      return data;
+    }, function (error) {
+      delete remoteFetchInFlight[cacheKey];
+      throw error;
+    });
+    return remoteFetchInFlight[cacheKey];
   }
 
   function el(id) {
@@ -2467,7 +2478,10 @@
     var signature = suppliedFriends
       ? (suppliedFriends.map(friendId).filter(Boolean).sort().join("|") || "__empty__")
       : "";
-    if (signature && signature === lastFriendsSignature && Date.now() - lastLoadAt < 30000) return;
+    if (friendNewsLoadPromise) return friendNewsLoadPromise;
+    if (Date.now() - lastLoadAt < 30000 && (!signature || signature === lastFriendsSignature)) {
+      return Promise.resolve();
+    }
     var requestSequence = ++loadSequence;
     friendNewsLoading = true;
     if (!friendNewsLoaded && el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(activeModalEvents());
@@ -2484,7 +2498,7 @@
           if (!payload || payload.ok !== true || !Array.isArray(payload.friends)) throw new Error("friends_invalid");
           return payload;
         });
-    friendsPromise.then(function (friendsPayload) {
+    var request = friendsPromise.then(function (friendsPayload) {
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
       return Promise.all([
@@ -2584,6 +2598,15 @@
       friendNewsLoaded = true;
       if (el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden) renderModalList(activeModalEvents());
     });
+    friendNewsLoadPromise = request.then(function (result) {
+      if (friendNewsLoadPromise === guardedRequest) friendNewsLoadPromise = null;
+      return result;
+    }, function (error) {
+      if (friendNewsLoadPromise === guardedRequest) friendNewsLoadPromise = null;
+      throw error;
+    });
+    var guardedRequest = friendNewsLoadPromise;
+    return guardedRequest;
   }
 
   function scheduleClubNewsRetry() {
@@ -2904,9 +2927,10 @@
     });
     load();
     setInterval(function () {
+      if (typeof document !== "undefined" && document.hidden) return;
       load();
       loadClubNews();
-    }, 5 * 60 * 1000);
+    }, 15 * 60 * 1000);
   }
 
   window.pokerReadCachedPlayerNews = readPlayerNewsCache;
