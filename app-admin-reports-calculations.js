@@ -244,6 +244,12 @@
           call(callbacks.editFiguresDraft);
         });
       }
+      var figuresRefreshBtn = document.getElementById("adminReportFiguresRefreshBtn");
+      if (figuresRefreshBtn) {
+        figuresRefreshBtn.addEventListener("click", function () {
+          call(callbacks.loadReports, true);
+        });
+      }
     }
 
     function open() {

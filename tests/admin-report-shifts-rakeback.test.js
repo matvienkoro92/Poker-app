@@ -19,6 +19,25 @@ test("period report filtering returns only reports inside the requested month", 
   assert.equal(_test.filterReportsByDateRange(reports, "bad", "2026-07-31"), null);
 });
 
+test("calculation date ranges use the 06:00 MSK business-day boundary", () => {
+  const range = _test.calculationDateRangeMs("2026-07-27", "2026-08-02");
+  assert.equal(new Date(range.fromMs).toISOString(), "2026-07-27T03:00:00.000Z");
+  assert.equal(new Date(range.toMs).toISOString(), "2026-08-03T02:59:59.999Z");
+});
+
+test("Poker21 period rake uses the latest saved row in each group", () => {
+  const inside = Date.parse("2026-07-28T12:00:00.000Z");
+  const rows = [
+    { groupId: "a", room: "P21", kind: "base", rake: 1000, saved: true, entryAddedAt: inside },
+    { groupId: "a", room: "P21", kind: "addon", rake: 1400, saved: true, entryAddedAt: inside + 1000 },
+    { groupId: "b", room: "P21", kind: "base", rake: 700, saved: true, entryAddedAt: inside + 2000 },
+    { groupId: "draft", room: "P21", kind: "base", rake: 900, saved: false, entryAddedAt: inside },
+    { groupId: "x", room: "X", kind: "base", rake: 500, saved: true, entryAddedAt: inside },
+  ];
+  const range = _test.calculationDateRangeMs("2026-07-27", "2026-08-02");
+  assert.equal(_test.rakebackRoomRakeForRange(rows, "P21", range.fromMs, range.toMs), 2100);
+});
+
 test("server collects every saved unreported rakeback row for the report author and date", () => {
   const sundayEntryAt = Date.parse("2026-07-12T15:00:00.000Z");
   const draft = {

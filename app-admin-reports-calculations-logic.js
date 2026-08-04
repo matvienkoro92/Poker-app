@@ -199,6 +199,11 @@
         if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleTickets);
         if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleCash);
         if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
+        if (calculationWeekStatsAvailability.raffles === false) {
+          if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = "Ошибка";
+          if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = "Ошибка";
+        }
+        if (calculationWeekStatsAvailability.dailyPoker === false && figuresDailyPokerEl) figuresDailyPokerEl.textContent = "Ошибка";
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
         var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
@@ -235,6 +240,11 @@
         if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = formatReportNegativeDisplay(figuresExpensesTotal);
         if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = formatReportRubleNumber(figuresBackingReturn);
         if (figuresRemainderEl) figuresRemainderEl.textContent = formatReportRubleNumber(figuresRemainder);
+        if (calculationWeekStatsAvailability.raffles === false || calculationWeekStatsAvailability.dailyPoker === false) {
+          if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = "—";
+          if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = "—";
+          if (figuresRemainderEl) figuresRemainderEl.textContent = "—";
+        }
         if (figuresRemainderEl && figuresRemainderEl.parentElement) {
           figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--negative", figuresRemainder < 0);
           figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--positive", figuresRemainder >= 0);
@@ -319,6 +329,22 @@
           updatedTotals.rakeback = currentAmount;
           setCalculationTotalsText(updatedTotals);
         }).catch(function () {});
+      }
+
+      function syncCalculationPeriodLabels(week) {
+        var label = week && week.label ? String(week.label) : "выбранный период";
+        if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = label;
+        var rakebackLabel = document.getElementById("adminReportFiguresRakebackLabel");
+        if (rakebackLabel) rakebackLabel.textContent = "РБ в CRM · " + label;
+      }
+
+      function resetCalculationPeriodDisplay(week) {
+        syncCalculationPeriodLabels(week);
+        calculationWeekStatsAvailability = { raffles: null, dailyPoker: null };
+        calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
+        var poker21RakeInput = figuresRakeInputs && figuresRakeInputs[0];
+        if (poker21RakeInput) poker21RakeInput.value = "";
+        setCalculationTotalsText({ deposit: 0, bonuses: 0, previousRakeback: 0, rakeback: 0, sentRakeback: 0, cashout: 0, botExchipCashout: 0, anyaSalary: 0 });
       }
 
       function sumCalculationReports(items, week, alreadyScopedToWeek) {
@@ -538,6 +564,7 @@
         var dailyPokerUrl = base.replace(/\/$/, "") + "/api/promo/daily-poker/winners" + q;
         dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "limit", "1");
         dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "summary", "1");
+        dailyPokerUrl = appendCalculationQueryParam(dailyPokerUrl, "balanceSummary", "1");
         if (from && to) {
           raffleUrl = appendCalculationQueryParam(raffleUrl, "from", from);
           raffleUrl = appendCalculationQueryParam(raffleUrl, "to", to);
@@ -595,7 +622,7 @@
           });
       }
 
-      function fetchCalculationSummary(base, q, scope, week) {
+      function fetchCalculationSummary(base, q, scope, week, forceRefresh) {
         var businessDateShiftMs = -3 * 60 * 60 * 1000;
         var from = String(week && week.from || "") || (week && !week.all ? new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
@@ -607,6 +634,7 @@
         // report payload has already rendered.
         url = appendCalculationQueryParam(url, "includeDailyPoker", "0");
         url = appendCalculationQueryParam(url, "scope", scope);
+        if (forceRefresh) url = appendCalculationQueryParam(url, "refresh", "1");
         if (from && to) {
           url = appendCalculationQueryParam(url, "from", from);
           url = appendCalculationQueryParam(url, "to", to);
@@ -621,22 +649,30 @@
       function applyCalculationSummaryStats(data) {
         var raffleStats = data && data.raffles;
         var dailyPokerStats = data && data.dailyPoker;
-        calculationWeekStatsAvailability = {
-          raffles: raffleStats ? true : null,
-          dailyPoker: dailyPokerStats ? true : null,
-        };
-        calculationWeekStatsTotals = {
-          raffles: Number(raffleStats && raffleStats.issuedPrizeAmount) || 0,
-          raffleTickets: Number(raffleStats && raffleStats.issuedTicketAmount) || 0,
-          raffleCash: Number(raffleStats && raffleStats.issuedCashAmount) || 0,
-          dailyPoker: Number(dailyPokerStats && dailyPokerStats.bonusBalanceDebited) || 0,
-          raffleTicketsReturn: Math.max(0,
-            (Number(raffleStats && raffleStats.returnedTicketAmount) || 0) -
-            (Number(raffleStats && raffleStats.manualReturnedTicketAmount) || 0)
-          ),
-          raffleCashReturn: Number(raffleStats && (raffleStats.returnedCashAmount != null ? raffleStats.returnedCashAmount : raffleStats.returnedAmount)) || 0,
-          dailyPokerReturn: Number(dailyPokerStats && dailyPokerStats.bonusBalanceReturned) || 0,
-        };
+        if (raffleStats || dailyPokerStats) {
+          calculationWeekStatsAvailability = {
+            raffles: raffleStats ? true : calculationWeekStatsAvailability.raffles,
+            dailyPoker: dailyPokerStats ? true : calculationWeekStatsAvailability.dailyPoker,
+          };
+          calculationWeekStatsTotals = {
+            raffles: raffleStats ? Number(raffleStats.issuedPrizeAmount) || 0 : calculationWeekStatsTotals.raffles,
+            raffleTickets: raffleStats ? Number(raffleStats.issuedTicketAmount) || 0 : calculationWeekStatsTotals.raffleTickets,
+            raffleCash: raffleStats ? Number(raffleStats.issuedCashAmount) || 0 : calculationWeekStatsTotals.raffleCash,
+            dailyPoker: dailyPokerStats ? Number(dailyPokerStats.bonusBalanceDebited) || 0 : calculationWeekStatsTotals.dailyPoker,
+            raffleTicketsReturn: raffleStats ? Math.max(0,
+              (Number(raffleStats.returnedTicketAmount) || 0) -
+              (Number(raffleStats.manualReturnedTicketAmount) || 0)
+            ) : calculationWeekStatsTotals.raffleTicketsReturn,
+            raffleCashReturn: raffleStats ? Number(raffleStats.returnedCashAmount != null ? raffleStats.returnedCashAmount : raffleStats.returnedAmount) || 0 : calculationWeekStatsTotals.raffleCashReturn,
+            dailyPokerReturn: dailyPokerStats ? Number(dailyPokerStats.bonusBalanceReturned) || 0 : calculationWeekStatsTotals.dailyPokerReturn,
+          };
+        }
+        var poker21Rake = data && data.poker21Rake != null ? Number(data.poker21Rake) : NaN;
+        var poker21RakeInput = figuresRakeInputs && figuresRakeInputs[0];
+        if (poker21RakeInput && Number.isFinite(poker21Rake)) {
+          poker21RakeInput.value = formatReportInputNumber(poker21Rake);
+          poker21RakeInput.setAttribute("data-auto-rake", "poker21");
+        }
         updateFiguresTotals({ syncExtras: false });
       }
 
@@ -680,11 +716,11 @@
           });
       }
 
-      function loadCalculationsReports() {
+      function loadCalculationsReports(forceRefresh) {
         if (!canViewCalculationsReports()) return;
         var reportsRequestSeq = ++calculationReportsRequestSeq;
         var week = getCalculationWeekMeta();
-        if (calculationsWeekLabelEl) calculationsWeekLabelEl.textContent = week.label;
+        resetCalculationPeriodDisplay(week);
         var useAllReports = !!(week && week.key && week.key !== "current_week");
         var periodCacheKey = week && [week.key, week.from, week.to].join(":");
         var cachedPeriodReports = useAllReports && periodCacheKey && calculationPeriodReportsCache
@@ -693,7 +729,7 @@
         var currentCache = useAllReports && Array.isArray(cachedPeriodReports)
           ? cachedPeriodReports
           : (Array.isArray(calculationReportsCache) ? calculationReportsCache : []);
-        setCalculationTotalsWithCurrentRakeback(currentCache.length ? sumCalculationReports(currentCache, week, !useAllReports) : {}, week);
+        if (currentCache.length) setCalculationTotalsWithCurrentRakeback(sumCalculationReports(currentCache, week, !useAllReports), week);
         renderCalculationArchive(calculationArchiveReportsCache);
         var base = typeof getApiBase === "function" ? getApiBase() : "";
         if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
@@ -715,8 +751,8 @@
         calculationArchiveRequestBase = base;
         calculationArchiveRequestQuery = q;
         bindCalculationArchiveDeferredLoader();
-        if (useAllReports && Array.isArray(cachedPeriodReports)) {
-          fetchCalculationSummary(base, q, "all", week).then(function (data) {
+        if (!forceRefresh && useAllReports && Array.isArray(cachedPeriodReports)) {
+          fetchCalculationSummary(base, q, "all", week, forceRefresh).then(function (data) {
             if (reportsRequestSeq !== calculationReportsRequestSeq) return;
             applyCalculationSummaryStats(data);
             loadCalculationWeekStats(base, q, week);
@@ -726,7 +762,7 @@
           });
           return;
         }
-        fetchCalculationSummary(base, q, useAllReports ? "all" : "currentWeek", week)
+        fetchCalculationSummary(base, q, useAllReports ? "all" : "currentWeek", week, forceRefresh)
           .catch(function () {
             if (reportsRequestSeq !== calculationReportsRequestSeq) return null;
             return fetchCalculationReports(base, q, useAllReports ? "all" : "currentWeek");
@@ -1051,7 +1087,7 @@
         var rake = Array.isArray(draft.rake) ? draft.rake : [];
         if (figuresRakeInputs && figuresRakeInputs.length) {
           figuresRakeInputs.forEach(function (input, index) {
-            if (input) input.value = rake[index] != null ? rake[index] : "";
+            if (input && input.getAttribute("data-auto-rake") !== "poker21") input.value = rake[index] != null ? rake[index] : "";
           });
         }
         if (figuresRomanPaidInput) figuresRomanPaidInput.value = draft.romanPaid != null ? draft.romanPaid : "";
