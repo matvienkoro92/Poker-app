@@ -1323,6 +1323,16 @@ function closeProfileMonthStory() {
 
 function profileMonthStoryRowsHtml(rows, range, hero) {
   var list = Array.isArray(rows) ? rows : [];
+  var dayGroups = [];
+  list.forEach(function (row) {
+    var key = profileMonthStoryEventDateKey(row && row.at);
+    var group = dayGroups.find(function (candidate) { return candidate.key === key; });
+    if (!group) {
+      group = { key: key, at: row && row.at, rows: [] };
+      dayGroups.push(group);
+    }
+    group.rows.push(row);
+  });
   var heroData = hero && typeof hero === "object" ? hero : {};
   var heroImage = String(heroData.image || "./assets/daily-poker-monkey.webp").trim();
   var heroName = String(heroData.name || profilePublicCardDisplayName() || "Игрок").trim();
@@ -1331,21 +1341,30 @@ function profileMonthStoryRowsHtml(rows, range, hero) {
   var achievements = list.filter(function (row) {
     return row && (row.type === "achievement" || (Array.isArray(row.newsLines) && row.newsLines.length > 1));
   }).length;
-  var cards = list.map(function (row, index) {
-    var dateMs = new Date(row && row.at || "").getTime();
+  var cards = dayGroups.map(function (group, index) {
+    var dateMs = new Date(group.at || "").getTime();
     var date = Number.isFinite(dateMs)
       ? new Date(dateMs).toLocaleDateString("ru-RU", { day: "numeric", month: "long", timeZone: "Europe/Moscow" })
       : "";
-    var lines = Array.isArray(row && row.newsLines) && row.newsLines.length
-      ? row.newsLines
-      : [String(row && row.text || "Достижение")];
-    var icon = Number(row && row.tournamentPlace) === 1 ? "🏆" : row && row.type === "achievement" ? "◆" : row && row.type === "birthday" ? "♥" : "✦";
+    var lines = [];
+    group.rows.forEach(function (row) {
+      var rowLines = Array.isArray(row && row.newsLines) && row.newsLines.length
+        ? row.newsLines
+        : [String(row && row.text || "Достижение")];
+      rowLines.forEach(function (line) { if (String(line || "").trim()) lines.push(line); });
+    });
+    var groupPrize = group.rows.reduce(function (sum, row) { return sum + (Number(row && row.prizeAmount) || 0); }, 0);
+    var icon = group.rows.some(function (row) { return Number(row && row.tournamentPlace) === 1; })
+      ? "🏆"
+      : group.rows.some(function (row) { return row && row.type === "achievement"; })
+        ? "◆"
+        : group.rows.some(function (row) { return row && row.type === "birthday"; }) ? "♥" : "✦";
     return '<article class="profile-month-story__event" style="--story-index:' + index + '">' +
       '<span class="profile-month-story__event-icon" aria-hidden="true">' + icon + '</span>' +
       '<div><time>' + profileEscapeHtml(date) + '</time>' +
         '<h3>' + profileEscapeHtml(lines[0]) + '</h3>' +
         lines.slice(1).map(function (line) { return '<p>' + profileEscapeHtml(line) + '</p>'; }).join("") +
-        (Number(row && row.prizeAmount) > 0 ? '<strong>' + profileEscapeHtml(profileMonthStoryMoney(row.prizeAmount)) + '</strong>' : '') +
+        (groupPrize > 0 ? '<strong>' + profileEscapeHtml(profileMonthStoryMoney(groupPrize)) + '</strong>' : '') +
       '</div>' +
     '</article>';
   }).join("");
@@ -1357,7 +1376,7 @@ function profileMonthStoryRowsHtml(rows, range, hero) {
       '<div><small>Главный герой</small><strong>' + profileEscapeHtml(heroName) + '</strong><span>Каждое событие — ещё один шаг по вашему пути</span></div>' +
     '</div>' +
     '<div class="profile-month-story__summary">' +
-      '<div><strong>' + list.length + '</strong><span>событий</span></div>' +
+      '<div><strong>' + dayGroups.length + '</strong><span>дней с событиями</span></div>' +
       '<div><strong>' + victories + '</strong><span>побед</span></div>' +
       '<div><strong>' + achievements + '</strong><span>достижений</span></div>' +
       '<div><strong>' + profileEscapeHtml(profileMonthStoryMoney(prizeTotal)) + '</strong><span>призовые</span></div>' +
