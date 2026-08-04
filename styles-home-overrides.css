@@ -1873,6 +1873,66 @@ html[data-theme="gold"] body[data-view="home"] #app.app.app--view-home .card:has
   height: 54px;
   border-radius: 15px;
 }
+
+/* Admin header: logo first, then the four work shortcuts in normal flow. */
+.app.app--view-home .card__header.card__header--admin-shortcuts .logo__text {
+  display: none !important;
+}
+
+.app.app--view-home .card__header.card__header--admin-shortcuts .logo.logo--welcome {
+  flex: 0 0 auto;
+  width: 46px;
+  margin-right: 2px;
+}
+
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-crm-shortcut,
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-crm-shortcut.header-crm-shortcut--compact,
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-admin-shortcuts,
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-admin-shortcuts.header-admin-shortcuts--with-crm {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  flex: 0 0 auto;
+  transform: none !important;
+}
+
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-crm-shortcut:hover {
+  transform: scale(1.04) !important;
+}
+
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-crm-shortcut:active {
+  transform: scale(0.96) !important;
+}
+
+.app.app--view-home .card__header.card__header--admin-shortcuts > .header-admin-shortcuts {
+  gap: 5px;
+}
+
+.app.app--view-home .card__header.card__header--admin-shortcuts .header-actions {
+  min-width: 0;
+  margin-left: auto;
+}
+
+@media (max-width: 520px) {
+  .app.app--view-home .card__header.card__header--admin-shortcuts {
+    gap: 4px;
+  }
+
+  .app.app--view-home .card__header.card__header--admin-shortcuts .logo.logo--welcome {
+    width: 40px;
+    margin-right: 0;
+  }
+
+  .app.app--view-home .card__header.card__header--admin-shortcuts .logo__image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .app.app--view-home .card__header.card__header--admin-shortcuts > .header-admin-shortcuts {
+    gap: 4px;
+  }
+}
 @media (max-width: 520px) {
   .app.app--view-home .card__header > .header-crm-shortcut.header-crm-shortcut--compact {
     left: calc(50% - 66px);

@@ -442,6 +442,11 @@
   grid-column: 1 / -1;
 }
 
+.header-more-menu .header-menu-action--invite-friend,
+.header-more-menu .header-menu-action--referrals {
+  grid-column: auto !important;
+}
+
 .header-more-menu .header-menu-action--gazette,
 .header-more-menu .header-menu-action--radio {
   grid-column: auto;

@@ -165,19 +165,6 @@
 })();
 
 (function initHeaderHomeShareActions() {
-  var menu = document.getElementById("headerMoreMenu");
-  var radioButton = document.getElementById("radioToggle");
-  if (menu && radioButton && !document.getElementById("headerInviteFriendBtn")) {
-    radioButton.insertAdjacentHTML("beforebegin",
-      '<button type="button" class="header-menu-action header-menu-action--invite-friend" id="headerInviteFriendBtn" title="Позвать друга" aria-label="Поделиться ссылкой на главную клуба" role="menuitem" data-header-menu-close>' +
-        '<span class="header-menu-action__icon" aria-hidden="true">✈️</span>' +
-        '<span class="header-menu-action__body"><span class="header-menu-action__title">Позвать друга</span><span class="header-menu-action__hint">Отправить сообщение со ссылкой</span></span>' +
-      '</button>' +
-      '<button type="button" class="header-menu-action header-menu-action--copy-home" id="headerCopyHomeLinkBtn" title="Скопировать ссылку" aria-label="Скопировать ссылку на главную клуба" role="menuitem">' +
-        '<span class="header-menu-action__icon" aria-hidden="true">📋</span>' +
-        '<span class="header-menu-action__body"><span class="header-menu-action__title" data-header-copy-home-label>Скопировать ссылку</span><span class="header-menu-action__hint">Ссылка на главную</span></span>' +
-      '</button>');
-  }
   var shareButton = document.getElementById("headerInviteFriendBtn");
   var copyButton = document.getElementById("headerCopyHomeLinkBtn");
   if (!shareButton && !copyButton) return;

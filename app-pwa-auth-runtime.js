@@ -846,8 +846,9 @@
       "radioToggle",
       "clubCharterOpenBtn"
     ];
-    var loggedInItems = ["clubReferralsOpenBtn"].concat(adminItems, ["adminBonusBalancesHeaderBtn", "[data-gazette-open='1']", "radioToggle", "clubCharterOpenBtn", "siteHomeAuthBtn"]);
-    appendHeaderMenuItems(menu, isLogout ? loggedInItems : ["siteHomeAuthBtn", "clubReferralsOpenBtn"].concat(adminItems, bottomItems));
+    var inviteItems = ["headerInviteFriendBtn", "clubReferralsOpenBtn", "headerCopyHomeLinkBtn"];
+    var loggedInItems = inviteItems.concat(adminItems, ["adminBonusBalancesHeaderBtn", "[data-gazette-open='1']", "radioToggle", "clubCharterOpenBtn", "siteHomeAuthBtn"]);
+    appendHeaderMenuItems(menu, isLogout ? loggedInItems : ["siteHomeAuthBtn"].concat(inviteItems, adminItems, bottomItems));
   }
 
   function closeHeaderMoreMenuFromAction(btn) {
