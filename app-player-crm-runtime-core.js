@@ -4626,6 +4626,35 @@
     if (!root || root.dataset.crmBound === "1") return;
     root.dataset.crmBound = "1";
     root.addEventListener("click", function (e) {
+      var periodButton = e.target.closest("[data-crm-period-tab]");
+      if (periodButton) {
+        state.period = periodButton.getAttribute("data-crm-period-tab") || "all";
+        if (state.period === "custom") setDefaultDates();
+        state.showAllPlayers = false;
+        syncPeriodInputs();
+        if (state.tab !== "calculations") loadCrmData("data");
+        if (state.period === "custom") {
+          window.requestAnimationFrame(function () {
+            var rangeButton = document.getElementById("playerCrmDateRangeBtn");
+            if (rangeButton && rangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("stats");
+          });
+        }
+        return;
+      }
+      var chartPeriodButton = e.target.closest("[data-crm-chart-period-tab]");
+      if (chartPeriodButton) {
+        state.chartPeriod = chartPeriodButton.getAttribute("data-crm-chart-period-tab") || "current_week";
+        if (state.chartPeriod === "custom") setDefaultChartDates();
+        syncPeriodInputs();
+        loadCrmData("chart");
+        if (state.chartPeriod === "custom") {
+          window.requestAnimationFrame(function () {
+            var chartRangeButton = document.getElementById("playerCrmChartDateRangeBtn");
+            if (chartRangeButton && chartRangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("chart");
+          });
+        }
+        return;
+      }
       var tab = e.target.closest("[data-crm-tab]");
       if (tab) {
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
@@ -5026,35 +5055,6 @@
         renderBlockedList();
       });
     }
-    document.querySelectorAll("[data-crm-period-tab]").forEach(function (periodButton) {
-      periodButton.addEventListener("click", function () {
-        state.period = periodButton.getAttribute("data-crm-period-tab") || "all";
-        if (state.period === "custom") setDefaultDates();
-        state.showAllPlayers = false;
-        syncPeriodInputs();
-        if (state.tab !== "calculations") loadCrmData("data");
-        if (state.period === "custom") {
-          window.requestAnimationFrame(function () {
-            var rangeButton = document.getElementById("playerCrmDateRangeBtn");
-            if (rangeButton && rangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("stats");
-          });
-        }
-      });
-    });
-    document.querySelectorAll("[data-crm-chart-period-tab]").forEach(function (periodButton) {
-      periodButton.addEventListener("click", function () {
-        state.chartPeriod = periodButton.getAttribute("data-crm-chart-period-tab") || "current_week";
-        if (state.chartPeriod === "custom") setDefaultChartDates();
-        syncPeriodInputs();
-        loadCrmData("chart");
-        if (state.chartPeriod === "custom") {
-          window.requestAnimationFrame(function () {
-            var rangeButton = document.getElementById("playerCrmChartDateRangeBtn");
-            if (rangeButton && rangeButton.getAttribute("aria-expanded") !== "true") toggleCrmDateRangePicker("chart");
-          });
-        }
-      });
-    });
     var dateFrom = document.getElementById("playerCrmDateFrom");
     if (dateFrom) dateFrom.addEventListener("change", function () {
       state.dateFrom = dateFrom.value || "";
