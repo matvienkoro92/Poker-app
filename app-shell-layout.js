@@ -16,7 +16,13 @@ function pokerApplyAppTopPadding() {
   }
   try {
     var twMini = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    if (twMini && twMini.initData && String(twMini.initData).trim() !== "") {
+    var twPlatform = String(twMini && twMini.platform || "").trim().toLowerCase();
+    var hasTelegramContext = !!(twMini && (
+      (twMini.initData && String(twMini.initData).trim() !== "") ||
+      (twMini.initDataUnsafe && (twMini.initDataUnsafe.user || twMini.initDataUnsafe.start_param)) ||
+      (twPlatform && twPlatform !== "unknown")
+    ));
+    if (hasTelegramContext) {
       root.classList.add("app--telegram-miniapp");
     } else {
       root.classList.remove("app--telegram-miniapp");
@@ -605,6 +611,8 @@ if (tg) {
     ["contentSafeAreaChanged", "safeAreaChanged"].forEach(function (ev) {
       try {
         tg.onEvent(ev, function () {
+          if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+          if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
           if (typeof pokerSyncBottomNavTelegramInset === "function") pokerSyncBottomNavTelegramInset();
           if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
         });

@@ -6,7 +6,7 @@
   var adminReportShellScriptPromises = Object.create(null);
   var adminReportSentShellModule = null;
   var adminReportRakebackShellModule = null;
-  var FRAGMENT_CACHE_PREFIX = "poker_html_fragment_v8:";
+  var FRAGMENT_CACHE_PREFIX = "poker_html_fragment_v9:";
   var FRAGMENT_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
   var INLINE_GLOBAL_MODAL_IDS = [
     "partnershipModal"

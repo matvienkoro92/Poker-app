@@ -1219,8 +1219,8 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.body.raffles.uniqueWinners, 2, "raffle summary includes unique winners");
   assert.strictEqual(r.body.raffles.recipientsPending, true, "raffle summary defers recipient details until the modal opens");
   const raffleStatsDayKey = require(path.join(root, "lib", "player-crm-utils")).mskDateKeyFromMs(Date.parse(raffleNow));
-  assert.strictEqual(redis.kv.get("poker_app:raffle_stats_index:v1:ready"), "1", "raffle summary completes the historical date index");
-  assert.ok(redis.s("poker_app:raffle_stats_day:" + raffleStatsDayKey).has(raffleId), "historical raffle is indexed under its CRM business day");
+  assert.strictEqual(redis.kv.get("poker_app:raffle_stats_index:v2:ready"), "1", "raffle summary completes the historical date index");
+  assert.ok(redis.s("poker_app:raffle_stats_day:v2:" + raffleStatsDayKey).has(raffleId), "historical raffle is indexed under its CRM business day");
   const calculationsAccessToken = signAccessToken("calculations", "tg_388008256", BOT_TOKEN);
   const calculationSummaryRequest = req("GET", { pwaSession: s.admin, mode: "raffle-summary" });
   calculationSummaryRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
@@ -1228,6 +1228,34 @@ async function testCrmAppUserBlock(redis) {
   r = await call(crm, calculationSummaryRequest);
   assert.strictEqual(r.statusCode, 200, "calculations access token loads the lightweight raffle summary");
   assert.strictEqual(r.body.raffles.uniqueParticipants, 9, "calculations raffle summary includes indexed participants");
+  const issuedInPeriodRaffleId = "contract_raffle_issued_in_selected_period";
+  const issuedDay = raffleStatsDayKey;
+  redis.l("poker_app:raffle_ids").push(issuedInPeriodRaffleId);
+  redis.kv.set("poker_app:raffle:" + issuedInPeriodRaffleId, JSON.stringify({
+    id: issuedInPeriodRaffleId,
+    status: "drawn",
+    title: "Турнирный билет",
+    createdAt: "2026-01-01T12:00:00.000Z",
+    drawnAt: "2026-01-01T12:00:00.000Z",
+    groups: [{ prize: "5 000 ₽" }],
+    winners: [{
+      accountId: "ID100001",
+      groupIndex: 0,
+      winnerStatus: "ok",
+      winnerStatusAt: raffleNow,
+      winnerCashoutStatus: "plus",
+      winnerCashoutAmount: 1200,
+      winnerCashoutAt: raffleNow,
+    }],
+  }));
+  redis.s("poker_app:raffle_stats_day:v2:" + issuedDay).add(issuedInPeriodRaffleId);
+  const issuedPeriodRequest = req("GET", { pwaSession: s.admin, mode: "raffle-summary", from: issuedDay, to: issuedDay });
+  issuedPeriodRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
+    "&menuAccessToken=" + encodeURIComponent(calculationsAccessToken) + "&mode=raffle-summary&from=" + issuedDay + "&to=" + issuedDay;
+  r = await call(crm, issuedPeriodRequest);
+  assert.strictEqual(r.statusCode, 200, "selected-period raffle summary loads issued prizes");
+  assert.strictEqual(r.body.raffles.issuedTicketAmount, 5000, "selected period uses prize issue date even when the raffle was drawn earlier");
+  assert.strictEqual(r.body.raffles.returnedTicketAmount, 1200, "selected period uses ticket return date even when the raffle was drawn earlier");
   const calculationRafflesRequest = req("GET", { pwaSession: s.admin, mode: "raffles" });
   calculationRafflesRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
     "&menuAccessToken=" + encodeURIComponent(calculationsAccessToken) + "&mode=raffles";

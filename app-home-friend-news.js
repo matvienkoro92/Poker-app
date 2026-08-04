@@ -711,6 +711,43 @@
     return matchKey(value) === matchKey("Рыбнадзор") ? value + " (Мужначас)" : value;
   }
 
+  function collapseDailyRatingChangeLines(lines) {
+    var source = Array.isArray(lines) ? lines.slice() : [];
+    var groups = {};
+    source.forEach(function (line, index) {
+      var match = String(line || "").trim().match(
+        /^(?:Поднялся|Спустился) в рейтинге Лиги ([12]) с (\d+)-го на (\d+)-е место$/i
+      );
+      if (!match) return;
+      var league = match[1];
+      if (!groups[league]) groups[league] = [];
+      groups[league].push({ index: index, from: Number(match[2]), to: Number(match[3]) });
+    });
+    Object.keys(groups).forEach(function (league) {
+      var changes = groups[league];
+      if (changes.length < 2) return;
+      var fromPlaces = {};
+      var toPlaces = {};
+      changes.forEach(function (change) {
+        fromPlaces[change.from] = true;
+        toPlaces[change.to] = true;
+      });
+      var start = changes.map(function (change) { return change.from; }).find(function (place) {
+        return !toPlaces[place];
+      });
+      var end = changes.map(function (change) { return change.to; }).find(function (place) {
+        return !fromPlaces[place];
+      });
+      var firstIndex = changes.reduce(function (min, change) { return Math.min(min, change.index); }, source.length);
+      changes.forEach(function (change) { source[change.index] = null; });
+      // A closed chain (for example 91→48→91) did not change the final place.
+      if (!start || !end || start === end) return;
+      source[firstIndex] = (end < start ? "Поднялся" : "Спустился") +
+        " в рейтинге Лиги " + league + " с " + start + "-го на " + end + "-е место";
+    });
+    return source.filter(Boolean);
+  }
+
   function ensureStructuredPlayerEvent(row) {
     if (!row || !row.actorNick) return row;
     if (!row.newsTitle || matchKey(row.newsTitle) === matchKey(row.actorNick)) {
@@ -733,6 +770,7 @@
       seenLines[key] = true;
       return true;
     });
+    row.newsLines = collapseDailyRatingChangeLines(row.newsLines);
     return row;
   }
 
@@ -770,6 +808,7 @@
         return matchKey(String(line || "").replace(/[.\s]+$/, "")) === detailKey;
       });
       if (!alreadyIncluded) tournament.row.newsLines.push(detail);
+      tournament.row.newsLines = collapseDailyRatingChangeLines(tournament.row.newsLines);
       tournament.row.text = tournament.row.newsTitle + " " + tournament.row.newsLines.join(". ") + ".";
       // Feedback is keyed by the tournament event id. Keep it stable when
       // rating or level details are merged into the visible card.

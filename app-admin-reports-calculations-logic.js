@@ -196,15 +196,9 @@
         var figuresRafflesTicketsEl = document.getElementById("adminReportFiguresRafflesTickets");
         var figuresRafflesCashEl = document.getElementById("adminReportFiguresRafflesCash");
         var figuresDailyPokerEl = document.getElementById("adminReportFiguresDailyPoker");
-        if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = calculationWeekStatsAvailability.raffles === false
-          ? "—"
-          : formatReportNegativeDisplay(calculationWeekStatsTotals.raffleTickets);
-        if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = calculationWeekStatsAvailability.raffles === false
-          ? "—"
-          : formatReportNegativeDisplay(calculationWeekStatsTotals.raffleCash);
-        if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = calculationWeekStatsAvailability.dailyPoker === false
-          ? "—"
-          : formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
+        if (figuresRafflesTicketsEl) figuresRafflesTicketsEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleTickets);
+        if (figuresRafflesCashEl) figuresRafflesCashEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.raffleCash);
+        if (figuresDailyPokerEl) figuresDailyPokerEl.textContent = formatReportNegativeDisplay(calculationWeekStatsTotals.dailyPoker);
         if (figuresPreviousRakebackEl) figuresPreviousRakebackEl.textContent = formatReportNegativeDisplay(totals.previousRakeback);
         if (figuresSalaryEl) figuresSalaryEl.textContent = formatReportNegativeDisplay(totals.anyaSalary);
         var figuresBackingReturnInput = document.getElementById("adminReportFiguresBackingReturn");
@@ -223,10 +217,7 @@
               : kind === "raffleCash"
                 ? calculationWeekStatsTotals.raffleCashReturn
                 : calculationWeekStatsTotals.dailyPokerReturn;
-            var available = kind === "dailyPoker"
-              ? calculationWeekStatsAvailability.dailyPoker
-              : calculationWeekStatsAvailability.raffles;
-            output.textContent = available === false ? "Авто: —" : "Авто: " + formatReportRubleNumber(base);
+            output.textContent = "Авто: " + formatReportRubleNumber(base);
           });
         }
         var figuresExpensesTotal =
@@ -241,15 +232,12 @@
         var figuresExpensesTotalEl = document.getElementById("adminReportFiguresExpensesTotal");
         var figuresReturnsTotalEl = document.getElementById("adminReportFiguresReturnsTotal");
         var figuresRemainderEl = document.getElementById("adminReportFiguresRemainder");
-        var calculationStatsComplete =
-          calculationWeekStatsAvailability.raffles !== false &&
-          calculationWeekStatsAvailability.dailyPoker !== false;
-        if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = calculationStatsComplete ? formatReportNegativeDisplay(figuresExpensesTotal) : "—";
-        if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = calculationStatsComplete ? formatReportRubleNumber(figuresBackingReturn) : "—";
-        if (figuresRemainderEl) figuresRemainderEl.textContent = calculationStatsComplete ? formatReportRubleNumber(figuresRemainder) : "—";
+        if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = formatReportNegativeDisplay(figuresExpensesTotal);
+        if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = formatReportRubleNumber(figuresBackingReturn);
+        if (figuresRemainderEl) figuresRemainderEl.textContent = formatReportRubleNumber(figuresRemainder);
         if (figuresRemainderEl && figuresRemainderEl.parentElement) {
-          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--negative", calculationStatsComplete && figuresRemainder < 0);
-          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--positive", calculationStatsComplete && figuresRemainder >= 0);
+          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--negative", figuresRemainder < 0);
+          figuresRemainderEl.parentElement.classList.toggle("admin-report-calculations__field--positive", figuresRemainder >= 0);
         }
         var approxAgentsRake = getFiguresExtraRakeTotal();
         var approxIssuedRake = getIssuedRakebackReportRakeTotal();
@@ -289,7 +277,7 @@
             getFiguresExtraAmountTotal() +
             figuresBackingReturn +
             (includeApproxRakeback ? approxRakeback : 0);
-          figuresGrandTotalEl.textContent = calculationStatsComplete ? formatReportRubleNumber(grand) : "—";
+          figuresGrandTotalEl.textContent = formatReportRubleNumber(grand);
         }
         updateCalculationGrandTotal();
       }
