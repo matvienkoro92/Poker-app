@@ -2735,6 +2735,14 @@
     renderAnalytics();
   }
 
+  function requestCrmReauthorization() {
+    try { sessionStorage.removeItem("poker_admin_menu_access_crm"); } catch (eStorage) {}
+    window.setTimeout(function () {
+      var opener = document.querySelector('[data-crm-open="player-crm"], #adminCrmBtn');
+      if (opener && typeof opener.click === "function") opener.click();
+    }, 0);
+  }
+
   function preserveRaffleStatsForSelectedPeriod() {
     if (!state.statsSummary || typeof state.statsSummary !== "object") return;
     var range = selectedPeriodRange();
@@ -3057,6 +3065,12 @@
         if (applyCrmData(data, false)) {
           shouldLoadHeavy = data && data.heavyPending === true;
         } else {
+          if (data && data.__status === 403) {
+            state.source = "forbidden";
+            state.crmError = "Доступ к CRM истёк. Введите пароль ещё раз — выбранный период сохранён.";
+            requestCrmReauthorization();
+            return;
+          }
           state.players = [];
           state.blockedUsers = [];
           state.registeredAccounts = [];
