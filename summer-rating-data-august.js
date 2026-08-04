@@ -169,7 +169,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
     {
       "time": "02:00",
       "name": "Deep Night 15k",
-      "buyin": 10000,
+      "buyin": 100,
       "league": 2,
       "players": [
         {
@@ -236,7 +236,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "19:00",
       "name": "HOK🥊",
       "buyin": 1000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "Proxor",
@@ -293,7 +293,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
     {
       "time": "21:00",
       "name": "NLH KNOCKOUT 220k",
-      "buyin": 20000,
+      "buyin": 200,
       "league": 2,
       "players": [
         {
@@ -307,7 +307,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
     {
       "time": "21:59",
       "name": "HR 5000€ 200K",
-      "buyin": 25000,
+      "buyin": 250,
       "league": 2,
       "players": [
         {

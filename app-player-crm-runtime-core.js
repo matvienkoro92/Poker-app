@@ -4,6 +4,7 @@
     loaded: false,
     loading: false,
     heavyLoading: false,
+    heavyError: "",
     playersPending: false,
     playersScope: "summary",
     heavyLoadingScope: "",
@@ -22,6 +23,11 @@
     playersPage: 0,
     playersTotal: 0,
     playersHasMore: false,
+    broadcastPlayers: [],
+    broadcastAudienceLoadedAt: 0,
+    broadcastAudiencePeriodKey: "",
+    statsAuxiliaryLoadedKey: "",
+    statsAuxiliaryLoading: false,
     dailyPokerStats: null,
     dailyPokerStatsLoading: false,
     dailyPokerStatsRangeKey: "",
@@ -633,7 +639,7 @@
     state.weekReportPendingReload = false;
     renderCrmWeekReport();
     var query = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=all", { cache: "no-store" })
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=crmWeek", { cache: "no-store" })
       .then(function (response) {
         if (!response.ok) throw new Error("period report " + response.status);
         return response.json();
@@ -751,12 +757,12 @@
         ? Math.max(0, Number(currentTotals[totalKey]) || 0)
         : segmentPlayers(seg.key).length;
       var cls = "player-crm__chip" + (state.filter === seg.key ? " player-crm__chip--active" : "");
-      return "<button type=\"button\" class=\"" + cls + "\" data-crm-filter=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + count + "</button>";
+      return "<button type=\"button\" class=\"" + cls + "\" data-crm-filter=\"" + esc(seg.key) + "\" aria-pressed=\"" + (state.filter === seg.key ? "true" : "false") + "\">" + esc(seg.label) + " · " + count + "</button>";
     }).join("");
     var blockedCount = Array.isArray(state.blockedUsers) ? state.blockedUsers.length : 0;
     var blockedCls = "player-crm__chip" + (state.filter === "blocked" ? " player-crm__chip--active" : "");
     el.innerHTML = segmentChips +
-      "<button type=\"button\" class=\"" + blockedCls + "\" data-crm-filter=\"blocked\">Заблокированные · " + blockedCount + "</button>";
+      "<button type=\"button\" class=\"" + blockedCls + "\" data-crm-filter=\"blocked\" aria-pressed=\"" + (state.filter === "blocked" ? "true" : "false") + "\">Заблокированные · " + blockedCount + "</button>";
   }
 
   function renderList() {
@@ -764,6 +770,17 @@
     if (!el) return;
     if (state.filter === "blocked") {
       el.innerHTML = blockedRowsHtml(state.search);
+      return;
+    }
+    if (state.heavyLoading && state.heavyLoadingScope === "players" && state.playersPage < 1) {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\" role=\"status\">Загружаем игроков…</div>";
+      return;
+    }
+    if (state.heavyError && !state.players.length) {
+      el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\" role=\"alert\">" +
+        "<span>" + esc(state.heavyError) + "</span>" +
+        "<button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-retry-players>Повторить</button>" +
+      "</div>";
       return;
     }
     var items = filteredPlayers().sort(sortForWork);
@@ -809,6 +826,9 @@
         ].join(" ").toLowerCase().indexOf(q) !== -1;
       });
     }
+    rows.sort(function (a, b) {
+      return (Date.parse(b && b.createdAt || "") || 0) - (Date.parse(a && a.createdAt || "") || 0);
+    });
     if (!rows.length) return "<div class=\"player-crm__timeline-item\">Заблокированных игроков пока нет.</div>";
     return rows.map(function (row) {
       var player = row.player || {};
@@ -851,6 +871,9 @@
         ].join(" ").toLowerCase().indexOf(q) !== -1;
       });
     }
+    rows.sort(function (a, b) {
+      return (Date.parse(b && b.createdAt || "") || 0) - (Date.parse(a && a.createdAt || "") || 0);
+    });
     if (summary) summary.textContent = intFmt(rows.length) + " из " + intFmt((state.blockedUsers || []).length);
     if (!rows.length) {
       el.innerHTML = "<div class=\"player-crm__timeline-item\">Заблокированных игроков пока нет.</div>";
@@ -1296,12 +1319,34 @@
     }).join("");
   }
 
+  function broadcastAudiencePeriodKey() {
+    var range = selectedPeriodRange();
+    return range && range.from && range.to ? range.from + ":" + range.to : "all";
+  }
+
+  function broadcastSegmentPlayers(key) {
+    var seg = segmentByKey(key);
+    return (Array.isArray(state.broadcastPlayers) ? state.broadcastPlayers : []).filter(function (player) {
+      return !seg || seg.match(player);
+    });
+  }
+
+  function loadBroadcastAudience(force) {
+    var key = broadcastAudiencePeriodKey();
+    var fresh = state.broadcastAudienceLoadedAt && Date.now() - state.broadcastAudienceLoadedAt < 120000;
+    if (!force && fresh && state.broadcastAudiencePeriodKey === key) {
+      renderBroadcastOptions();
+      return Promise.resolve(true);
+    }
+    return loadCrmHeavyData("broadcast");
+  }
+
   function renderBroadcastOptions() {
     var sel = document.getElementById("playerCrmBroadcastSegment");
     if (sel) {
       var prev = sel.value || state.filter || "has_bot";
       sel.innerHTML = segments.map(function (seg) {
-        var count = segmentPlayers(seg.key).length;
+        var count = broadcastSegmentPlayers(seg.key).length;
         return "<option value=\"" + esc(seg.key) + "\">" + esc(seg.label) + " · " + esc(intFmt(count)) + "</option>";
       }).join("");
       sel.value = segmentByKey(prev).key;
@@ -1313,10 +1358,10 @@
   function updateBroadcastChannelCounts() {
     var sel = document.getElementById("playerCrmBroadcastChannel");
     if (!sel) return;
-    var players = Array.isArray(state.players) ? state.players : [];
+    var players = Array.isArray(state.broadcastPlayers) ? state.broadcastPlayers : [];
     var botCount = players.filter(function (player) { return !!((player.channels || {}).bot); }).length;
     var pushCount = players.filter(function (player) { return !!((player.channels || {}).push); }).length;
-    var audienceReady = state.playersScope === "broadcast" && !state.heavyLoading;
+    var audienceReady = !!state.broadcastAudienceLoadedAt && !state.heavyLoading;
     var labels = {
       bot: "Рассылка в бот · " + (audienceReady ? intFmt(botCount) : "…"),
       push: "Push · " + (audienceReady ? intFmt(pushCount) : "…")
@@ -1345,7 +1390,7 @@
     var el = document.getElementById("playerCrmBroadcastAudience");
     var channelEl = document.getElementById("playerCrmBroadcastChannel");
     var channel = channelEl ? channelEl.value : "bot";
-    var basePlayers = (Array.isArray(state.players) ? state.players : []).filter(function (player) {
+    var basePlayers = (Array.isArray(state.broadcastPlayers) ? state.broadcastPlayers : []).filter(function (player) {
       var channels = player.channels || {};
       if (channel === "push") return !!channels.push;
       if (channel === "bot_push") return !!channels.bot || !!channels.push;
@@ -2187,6 +2232,55 @@
     renderCrmLinkDetailsModal();
   }
 
+  function renderActiveTab() {
+    syncTabCounts();
+    syncTabs();
+    if (state.tab === "players") {
+      renderChips();
+      renderList();
+      renderDetail();
+      return;
+    }
+    if (state.tab === "blocked") {
+      renderBlockedList();
+      renderChips();
+      return;
+    }
+    if (state.tab === "broadcast") {
+      renderBroadcastOptions();
+      renderCampaigns();
+      renderBroadcastLinkTargetOptions();
+      return;
+    }
+    if (state.tab === "registrations") {
+      renderRegistrations();
+      return;
+    }
+    if (state.tab === "pokerplus") {
+      renderPokerPlusAccounts();
+      return;
+    }
+    if (state.tab === "segments") {
+      renderSegments();
+      return;
+    }
+    if (state.tab === "links") {
+      renderCrmLinkTargetOptions();
+      renderCrmTrackingLinks();
+      return;
+    }
+    if (state.tab === "calculations") {
+      openCrmCalculations();
+      return;
+    }
+    if (state.tab === "stats") {
+      renderStats();
+      renderAnalytics();
+      renderCrmWeekReport();
+      syncPeriodInputs();
+    }
+  }
+
   function syncTabCounts() {
   }
 
@@ -2228,7 +2322,6 @@
     if (!host) return;
     if (host.querySelector("[data-admin-report-panel='calculations']")) {
       if (typeof window.pokerMountAdminReportCalculations === "function") window.pokerMountAdminReportCalculations(host);
-      loadCrmCalculationSummary();
       return;
     }
     host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаю расчёты…</div>";
@@ -2245,7 +2338,6 @@
       .then(function () {
         if (typeof window.pokerInitAdminReportModal === "function") window.pokerInitAdminReportModal();
         if (typeof window.pokerMountAdminReportCalculations === "function" && window.pokerMountAdminReportCalculations(host)) {
-          loadCrmCalculationSummary();
           return;
         }
         host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">Расчёты недоступны для этого аккаунта.</div>";
@@ -2253,34 +2345,6 @@
       .catch(function () {
         host.innerHTML = "<div class=\"player-crm__notice player-crm__notice--error\">Не удалось загрузить расчёты. Попробуйте открыть вкладку ещё раз.</div>";
       });
-  }
-
-  function loadCrmCalculationSummary() {
-    var base = getApiBaseSafe();
-    var range = selectedPeriodRange();
-    if (!base || !range || !range.from || !range.to) return;
-    var params = {
-      calculationSummary: "1",
-      includeRaffles: "0",
-      includeDailyPoker: "0",
-      scope: state.period === "current_week" ? "currentWeek" : "all",
-      from: range.from,
-      to: range.to,
-    };
-    fetch(base + "/api/admin-report-shifts" + crmQuery(params), { cache: "no-store" })
-      .then(function (response) {
-        if (!response.ok) throw new Error("calculation summary " + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        if (state.tab !== "calculations") return;
-        var activeRange = selectedPeriodRange();
-        if (!activeRange || activeRange.from !== range.from || activeRange.to !== range.to) return;
-        if (typeof window.pokerApplyAdminReportCalculationSummary === "function") {
-          window.pokerApplyAdminReportCalculationSummary(data);
-        }
-      })
-      .catch(function () {});
   }
 
   function adoptPendingShellTab() {
@@ -2739,6 +2803,7 @@
     if (state.heavyLoading) return Promise.resolve(false);
     state.heavyLoading = true;
     state.heavyLoadingScope = scope || "heavy";
+    if (scope === "players") state.heavyError = "";
     if (scope === "broadcast") updateBroadcastChannelCounts();
     renderStats();
     renderAnalytics();
@@ -2753,11 +2818,19 @@
       : scope === "broadcast"
         ? "send"
         : "players";
-    var heavyUrl = base + "/api/player-crm" + crmQuery({ mode: heavyMode });
+    var heavyUrl = base + "/api/player-crm" + crmQuery({
+      mode: heavyMode,
+      segment: heavyMode === "players" ? (options.segment || state.filter) : ""
+    });
     if (heavyMode === "players") {
       heavyUrl += "&page=" + encodeURIComponent(options.page || 1) + "&limit=100";
     }
-    return fetch(heavyUrl)
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timeoutId = controller ? setTimeout(function () {
+      try { controller.abort(); } catch (eAbort) {}
+    }, 30000) : null;
+    renderList();
+    return fetch(heavyUrl, controller ? { signal: controller.signal } : undefined)
       .then(function (r) {
         return r.json().then(function (data) {
           data = data || {};
@@ -2767,6 +2840,9 @@
         });
       })
       .then(function (data) {
+        if (!data || !data.__httpOk || data.ok === false) {
+          throw new Error(data && data.error || "Сервер не вернул список игроков.");
+        }
         if (scope === "chart") {
           if (data && data.ok && data.chartAnalytics) {
             state.chartAnalytics = data.chartAnalytics;
@@ -2779,6 +2855,10 @@
               }
             }
           }
+        } else if (scope === "broadcast" && data && data.ok && Array.isArray(data.players)) {
+          state.broadcastPlayers = data.players;
+          state.broadcastAudienceLoadedAt = Date.now();
+          state.broadcastAudiencePeriodKey = broadcastAudiencePeriodKey();
         } else if (data && data.ok && Array.isArray(data.players)) {
           var previousPlayers = options.append ? state.players.slice() : [];
           applyCrmData(data, true);
@@ -2792,14 +2872,21 @@
           state.playersPage = Number(data.playersPage || options.page || 1);
           state.playersTotal = Number(data.playersTotal || state.players.length);
           state.playersHasMore = data.playersHasMore === true;
-          state.playersScope = scope === "broadcast" ? "broadcast" : "players";
+          state.playersScope = "players";
         }
       })
-      .catch(function () {})
+      .catch(function (error) {
+        if (scope === "players") {
+          state.heavyError = error && error.name === "AbortError"
+            ? "Игроки загружаются слишком долго. Попробуйте ещё раз."
+            : (error && error.message || "Не удалось загрузить игроков. Проверьте соединение и повторите попытку.");
+        }
+      })
       .then(function () {
+        if (timeoutId) clearTimeout(timeoutId);
         state.heavyLoading = false;
         state.heavyLoadingScope = "";
-        renderAll();
+        renderActiveTab();
         return true;
       });
   }
@@ -2842,57 +2929,68 @@
     };
   }
 
-  function loadPeriodComparison() {
-    var range = comparisonRange();
-    state.periodComparison = range ? { label: range.label, range: range, metrics: null } : null;
-    if (!range) return;
-    var base = getApiBaseSafe();
-    if (!base) return;
-    var requestKey = range.from + ":" + range.to;
-    state.periodComparisonRequestKey = requestKey;
-    state.periodComparisonLoading = true;
-    var q = authQuerySafe();
-    var sep = q.indexOf("?") >= 0 ? "&" : "?";
-    fetch(base + "/api/player-crm" + q + sep + "mode=comparison&from=" + encodeURIComponent(range.from) + "&to=" + encodeURIComponent(range.to), { cache: "no-store" })
-      .then(function (response) { return response.json(); })
-      .then(function (data) {
-        if (state.periodComparisonRequestKey === requestKey && data && data.ok !== false && data.comparison && state.periodComparison) state.periodComparison.metrics = data.comparison;
+  function selectedStatsAuxiliaryKey() {
+    var range = selectedPeriodRange();
+    return range && range.from && range.to ? range.from + ":" + range.to : "all";
+  }
+
+  function loadStatsAuxiliary(force) {
+    var key = selectedStatsAuxiliaryKey();
+    if (!force && state.statsAuxiliaryLoadedKey === key) return;
+    if (state.statsAuxiliaryLoading) return;
+    state.statsAuxiliaryLoading = true;
+    loadDailyPokerStats(!!force);
+    loadCrmWeekReport(!!force);
+    loadDashboardPeriodSummary()
+      .then(function () {
+        state.statsAuxiliaryLoadedKey = key;
       })
       .catch(function () {})
       .then(function () {
-        if (state.periodComparisonRequestKey !== requestKey) return;
-        state.periodComparisonLoading = false;
-        renderStats();
+        state.statsAuxiliaryLoading = false;
       });
   }
 
-  function loadSelectedPeriodRaffles() {
+  function loadDashboardPeriodSummary() {
     var base = getApiBaseSafe();
     if (!base) return Promise.resolve(false);
-    var range = selectedPeriodRange();
-    var requestKey = range && range.from && range.to ? range.from + ":" + range.to : "all";
-    if (state.raffleStatsLoading && state.raffleStatsRequestKey === requestKey) return Promise.resolve(false);
+    var current = selectedPeriodRange();
+    var previous = comparisonRange();
     state.raffleStatsLoading = true;
-    state.raffleStatsRequestKey = requestKey;
-    return fetch(base + "/api/player-crm" + crmQuery({ mode: "raffle-summary" }), { cache: "no-store" })
+    state.periodComparisonLoading = !!previous;
+    state.periodComparison = previous ? { label: previous.label, range: previous, metrics: null } : null;
+    var url = base + "/api/player-crm" + crmQuery({ mode: "dashboard-summary" });
+    if (previous) url += "&compareFrom=" + encodeURIComponent(previous.from) + "&compareTo=" + encodeURIComponent(previous.to);
+    return fetch(url, { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) {
-        var currentRange = selectedPeriodRange();
-        var currentKey = currentRange && currentRange.from && currentRange.to ? currentRange.from + ":" + currentRange.to : "all";
-        if (state.raffleStatsRequestKey !== requestKey || currentKey !== requestKey || !data || data.ok === false || !data.raffles) return;
+        if (!data || data.ok === false) return false;
         if (!state.statsSummary || typeof state.statsSummary !== "object") state.statsSummary = {};
-        state.statsSummary.raffles = data.raffles;
-        if (data.raffles.available !== false) state.raffleStatsByPeriod[requestKey] = data.raffles;
-      })
-      .catch(function () {})
-      .then(function () {
-        if (state.raffleStatsRequestKey !== requestKey) return false;
-        state.raffleStatsLoading = false;
-        renderStats();
-        renderWeekReport();
-        if (state.rafflesModalOpen) renderRafflesModal();
+        if (data.raffles) state.statsSummary.raffles = data.raffles;
+        if (data.comparison && state.periodComparison) state.periodComparison.metrics = data.comparison;
         return true;
+      })
+      .catch(function () { return false; })
+      .then(function (ok) {
+        state.raffleStatsLoading = false;
+        state.periodComparisonLoading = false;
+        renderStats();
+        renderCrmWeekReport();
+        return ok;
       });
+  }
+
+  function loadActiveTabData() {
+    if (state.tab === "stats") {
+      loadStatsAuxiliary(false);
+      return;
+    }
+    if (state.tab === "players" && state.playersPage < 1) {
+      loadCrmHeavyData("players", { page: 1, segment: state.filter });
+      return;
+    }
+    if (state.tab === "broadcast") loadBroadcastAudience(false);
+    if (state.tab === "links" && !state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
   }
 
   function loadCrmData(scope) {
@@ -2991,12 +3089,8 @@
         state.loadStartedAt = 0;
         state.loadingScope = "";
         state.loaded = true;
-        renderAll();
-        loadDailyPokerStats();
-        loadCrmWeekReport();
-        // Do not make two archive scans compete on a cold serverless instance.
-        // Current-period totals are visible first; comparison follows afterward.
-        loadSelectedPeriodRaffles().then(function () { loadPeriodComparison(); });
+        renderActiveTab();
+        loadActiveTabData();
         return true;
       });
   }
@@ -3049,7 +3143,7 @@
 
   function broadcastReportPlayerLabel(userId) {
     var id = String(userId || "").trim();
-    var player = (Array.isArray(state.players) ? state.players : []).find(function (row) {
+    var player = (Array.isArray(state.broadcastPlayers) ? state.broadcastPlayers : []).find(function (row) {
       if (!row) return false;
       return [row.id, row.accountId, row.dtId, playerBroadcastId(row)]
         .concat(Array.isArray(row.telegramIds) ? row.telegramIds : [])
@@ -4104,6 +4198,10 @@
       q += sep + "mode=" + encodeURIComponent(extra.mode);
       sep = "&";
     }
+    if (extra.segment) {
+      q += sep + "segment=" + encodeURIComponent(extra.segment);
+      sep = "&";
+    }
     if (state.period === "custom") {
       setDefaultDates();
       q += sep + "from=" + encodeURIComponent(state.dateFrom) + "&to=" + encodeURIComponent(state.dateTo);
@@ -4458,6 +4556,7 @@
       filteredPokerPlusAccounts: filteredPokerPlusAccounts,
       dateOnly: dateOnly,
       segmentPlayers: segmentPlayers,
+      broadcastSegmentPlayers: broadcastSegmentPlayers,
       segments: segments
     })
     : {};
@@ -4473,16 +4572,16 @@
       var tab = e.target.closest("[data-crm-tab]");
       if (tab) {
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
-        syncTabs();
+        renderActiveTab();
         if (state.tab === "players" && state.playersScope !== "players") loadCrmHeavyData("players", { page: 1 });
         if (state.tab === "blocked") loadCrmBlockedData();
-        if (state.tab === "broadcast" && state.playersScope !== "broadcast") loadCrmHeavyData("broadcast");
+        if (state.tab === "stats") loadStatsAuxiliary(false);
+        if (state.tab === "broadcast") loadBroadcastAudience(false);
         if (state.tab === "links") {
           renderCrmLinkTargetOptions();
           if (!state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
           else renderCrmTrackingLinks();
         }
-        if (state.tab === "calculations") openCrmCalculations();
         if (state.tab === "blocked") renderBlockedList();
         return;
       }
@@ -4549,9 +4648,20 @@
       if (filter) {
         state.filter = filter.getAttribute("data-crm-filter") || "all";
         if (state.filter === "blocked") loadCrmBlockedData();
+        else {
+          state.players = [];
+          state.playersPage = 0;
+          state.playersHasMore = false;
+          loadCrmHeavyData("players", { page: 1, segment: state.filter });
+        }
         state.selectedId = "";
         state.showAllPlayers = false;
-        renderAll();
+        renderActiveTab();
+        return;
+      }
+      if (e.target.closest("[data-crm-retry-players]")) {
+        state.playersPage = 0;
+        loadCrmHeavyData("players", { page: 1, segment: state.filter });
         return;
       }
       var player = e.target.closest("[data-crm-player]");
@@ -4581,8 +4691,11 @@
         state.tab = "players";
         state.selectedId = "";
         state.showAllPlayers = false;
-        if (state.playersScope !== "players") loadCrmHeavyData("players");
-        renderAll();
+        state.players = [];
+        state.playersPage = 0;
+        state.playersHasMore = false;
+        loadCrmHeavyData("players", { page: 1, segment: state.filter });
+        renderActiveTab();
         return;
       }
       if (e.target && e.target.id === "playerCrmShowAllBtn") {
@@ -4784,7 +4897,7 @@
         if (batchNumber) batchNumber.value = "1";
         state.tab = "broadcast";
         syncTabs();
-        if (state.playersScope !== "broadcast") loadCrmHeavyData("broadcast");
+        loadBroadcastAudience(false);
         updateBroadcastAudience();
         return;
       }
@@ -4859,7 +4972,6 @@
         if (state.period === "custom") setDefaultDates();
         state.showAllPlayers = false;
         syncPeriodInputs();
-        if (state.tab === "calculations") loadCrmCalculationSummary();
         if (state.tab !== "calculations") loadCrmData("data");
         if (state.period === "custom") {
           window.requestAnimationFrame(function () {
@@ -4890,7 +5002,7 @@
       normalizeDateRange("from");
       state.showAllPlayers = false;
       syncPeriodInputs();
-      loadCrmData("data");
+      if (state.tab !== "calculations") loadCrmData("data");
     });
     var dateTo = document.getElementById("playerCrmDateTo");
     if (dateTo) dateTo.addEventListener("change", function () {
@@ -4899,7 +5011,7 @@
       normalizeDateRange("to");
       state.showAllPlayers = false;
       syncPeriodInputs();
-      loadCrmData("data");
+      if (state.tab !== "calculations") loadCrmData("data");
     });
     var chartPeriod = document.getElementById("playerCrmChartPeriodSelect");
     if (chartPeriod) {
@@ -5123,8 +5235,7 @@
     if (!state.loaded) loadCrmData();
     else {
       renderAll();
-      renderCrmWeekReport();
-      loadCrmWeekReport();
+      loadActiveTabData();
     }
   }
 

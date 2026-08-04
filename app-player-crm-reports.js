@@ -17,6 +17,7 @@ function initPlayerCrmReportsRuntime(deps) {
   var filteredPokerPlusAccounts = deps.filteredPokerPlusAccounts || function () { return []; };
   var dateOnly = deps.dateOnly || function (value) { return String(value || "").slice(0, 10); };
   var segmentPlayers = deps.segmentPlayers || function () { return []; };
+  var broadcastSegmentPlayers = deps.broadcastSegmentPlayers || segmentPlayers;
   var segments = deps.segments || [];
 
   function channelLabel(channel) {
@@ -153,7 +154,7 @@ function initPlayerCrmReportsRuntime(deps) {
     var textEl = document.getElementById("playerCrmBroadcastText");
     var segment = segEl ? segEl.value : state.filter;
     var channel = channelEl ? channelEl.value : "bot";
-    var players = segmentPlayers(segment);
+    var players = broadcastSegmentPlayers(segment);
     return [
       "Дашборд · Рассылка",
       "Группа: " + (segmentByKey(segment).label || segment),

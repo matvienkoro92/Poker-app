@@ -16,6 +16,47 @@ html[data-theme="gold"] body[data-view="home"] {
 }
 
 /* Актуальный СНГ: баннер и живая строка параметров турнира. */
+#app.app .card .card__content > .view--active > .home-android-download {
+  display: none;
+  width: clamp(156px, 25%, 220px) !important;
+  min-height: 30px;
+  margin: 2px auto 8px !important;
+  padding: 5px 11px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 139, 22, 0.76);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(255, 153, 31, 0.18), rgba(30, 18, 5, 0.9));
+  color: #ffd582;
+  box-shadow: inset 0 0 0 1px rgba(255, 221, 153, 0.06), 0 0 12px rgba(255, 112, 0, 0.12);
+  font-size: clamp(10px, 2.6vw, 12px);
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app.app .card .card__content > .view--active > .home-android-download:not([hidden]) {
+  display: flex;
+}
+
+.home-android-download__icon {
+  flex: 0 0 15px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.home-android-download:hover,
+.home-android-download:focus-visible {
+  border-color: #ffb64e;
+  color: #ffe4aa;
+  outline: none;
+}
+
 .home-daily-deal-hero {
   margin-bottom: 54px;
 }

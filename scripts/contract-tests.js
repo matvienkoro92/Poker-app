@@ -1152,6 +1152,9 @@ async function testCrmAppUserBlock(redis) {
   redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
   redis.h("poker_app:visitor_usernames").set("tg_1001", "player");
   redis.h("poker_app:pokerplus_user_ids").set("ID100001", "4430");
+  redis.h("poker_app:pokerplus_user_ids").set("ID199991", "4430");
+  redis.h("poker_app:pokerplus_bound_at").set("ID100001", String(Date.parse("2026-07-27T04:00:00.000Z")));
+  redis.h("poker_app:pokerplus_bound_at").set("ID199991", String(Date.parse("2026-07-27T04:30:00.000Z")));
   redis.s("poker_app:visitors").add("tg_1001");
   redis.h("poker_app:visitor_dt_ids").set("tg_1002", "ID100002");
   redis.h("poker_app:id_to_user").set("ID100002", "tg_1002");
@@ -1242,6 +1245,12 @@ async function testCrmAppUserBlock(redis) {
     (r.body.players || []).some((row) => row && row.accountId === "ID100002" && row.channels && row.channels.bot && !row.pokerPlusUserId),
     "CRM player list also includes bot subscribers without Poker21",
   );
+  const poker21PlayersRequest = req("GET", { pwaSession: s.admin, mode: "players", segment: "has_poker21" });
+  poker21PlayersRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&menuAccessToken=" + encodeURIComponent(menuAccessToken) + "&mode=players&segment=has_poker21";
+  r = await call(crm, poker21PlayersRequest);
+  const poker21Rows4430 = (r.body.players || []).filter((row) => row && row.pokerPlusUserId === "4430");
+  assert.strictEqual(poker21Rows4430.length, 1, "CRM Poker21 segment removes duplicate Poker21 IDs before pagination");
+  assert.strictEqual(poker21Rows4430[0].accountId, "ID199991", "CRM Poker21 segment keeps the most recently linked duplicate");
 
   r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "blocked globally" }));
   assert.strictEqual(r.statusCode, 403, "globally blocked user cannot use chat");

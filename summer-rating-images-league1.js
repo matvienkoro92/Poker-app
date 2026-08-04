@@ -577,6 +577,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-01-08-2026-league1-night-magic-80k-23h.avif"
   ]
 ,
+  "02.08.2026": [
+    "rating-compressed-preview/rating-02-08-2026-league2-turnir-mesyaca-18h.avif",
+    "rating-compressed-preview/rating-02-08-2026-league2-hok-19h.avif"
+  ]
+,
   "03.08.2026": [
     "rating-compressed-preview/rating-03-08-2026-league1-dv-turbo-500-50k-10h.jpg",
     "rating-compressed-preview/rating-03-08-2026-league1-bounty-200-40k-gtd-14h.jpg",

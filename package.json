@@ -4,11 +4,16 @@
   "private": true,
   "description": "Poker21 poker club Telegram Mini App and PWA.",
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@vercel/blob": "^2.3.3",
     "web-push": "^3.6.7"
   },
   "scripts": {
     "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/generate-rating-thumbnails.js && node scripts/copy-to-public.js",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:apk:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "android:apk:release": "npm run android:sync && cd android && ./gradlew assembleRelease",
     "rating:totals": "node scripts/generate-rating-player-totals.js",
     "build:season-archive": "node scripts/copy-season-archive.js",
     "smoke": "node scripts/smoke-checks.js",
@@ -44,6 +49,8 @@
     "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.0",
     "sharp": "^0.34.5"
   }
 }

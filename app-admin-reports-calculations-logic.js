@@ -540,7 +540,7 @@
         var from = String(week && week.from || "") || (week && !week.all ? new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var raffleUrl = base.replace(/\/$/, "") + "/api/player-crm" + q;
-        raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffles");
+        raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffle-summary");
         var calculationsAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
           ? window.pokerAdminMenuAccessToken("calculations")
           : "";

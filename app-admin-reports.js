@@ -250,6 +250,7 @@ function initAdminReportModal() {
   var cashHistoryPage = 1;
   var calculationClubDataLoading = false;
   var calculationClubDataLoadedAt = 0;
+  var calculationClubDataObserver = null;
   var rakebackModuleLoadPromise = null;
   var REPORT_DAY_MS = 24 * 60 * 60 * 1000;
   var REPORT_WEEK_MS = 7 * REPORT_DAY_MS;
@@ -706,7 +707,7 @@ function initAdminReportModal() {
   }
 
   function openCalculationsReports() {
-    loadCalculationClubData(false);
+    scheduleCalculationClubDataLoad();
     if (calculationsModule && window.AdminReportCalculationsLogic) {
       calculationsModule.open();
       return;
@@ -723,6 +724,24 @@ function initAdminReportModal() {
         hydrateCalculationsDraftOnce();
         loadCalculationsReports();
       });
+  }
+
+  function scheduleCalculationClubDataLoad() {
+    if (!calculationsClubDataRootEl || calculationsClubDataRootEl.hidden) return;
+    if (calculationClubDataLoadedAt && Date.now() - calculationClubDataLoadedAt < CALCULATION_CLUB_DATA_CACHE_TTL_MS) return;
+    if (calculationClubDataLoading || calculationClubDataObserver) return;
+    if (typeof IntersectionObserver !== "function") {
+      loadCalculationClubData(false);
+      return;
+    }
+    calculationClubDataObserver = new IntersectionObserver(function (entries) {
+      var visible = entries.some(function (entry) { return !!(entry && entry.isIntersecting); });
+      if (!visible) return;
+      calculationClubDataObserver.disconnect();
+      calculationClubDataObserver = null;
+      loadCalculationClubData(false);
+    }, { rootMargin: "240px 0px" });
+    calculationClubDataObserver.observe(calculationsClubDataRootEl);
   }
 
   function setCalculationClubDataStatus(text, tone) {
@@ -4967,7 +4986,6 @@ var adminReportStartupModuleLoadPromise = null;
 var ADMIN_REPORT_STARTUP_MODULE_SCRIPTS = [
   "app-admin-reports-tabs.js",
   "app-admin-reports-form.js",
-  "app-admin-reports-sent.js",
   "app-admin-broadcast-reports.js",
 ];
 var ADMIN_REPORT_MODULE_SCRIPTS = [

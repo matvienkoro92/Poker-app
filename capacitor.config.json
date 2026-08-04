@@ -1,0 +1,14 @@
+{
+  "appId": "club.twoaces.app",
+  "appName": "Два туза",
+  "webDir": "android-shell",
+  "server": {
+    "url": "https://poker-app-ebon.vercel.app",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#030407",
+    "allowMixedContent": false
+  }
+}

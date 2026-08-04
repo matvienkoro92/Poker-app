@@ -280,6 +280,16 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
   }
 
   function sortForWork(a, b) {
+    var dateField = state.filter === "has_bot"
+      ? "botSubscribedAt"
+      : state.filter === "has_poker21"
+        ? "pokerPlusLinkedAt"
+        : state.filter === "has_push"
+          ? "pushSubscribedAt"
+          : "registeredAt";
+    var aDate = Date.parse(a && (a[dateField] || (dateField === "registeredAt" ? a.firstSeenAt : "")) || "") || 0;
+    var bDate = Date.parse(b && (b[dateField] || (dateField === "registeredAt" ? b.firstSeenAt : "")) || "") || 0;
+    if (aDate !== bDate) return bDate - aDate;
     function score(p) {
       var s = 0;
       if (!(p.channels && (p.channels.bot || p.channels.push))) s += 35;
@@ -288,7 +298,7 @@ function initPlayerCrmPeriodSegmentsRuntime(deps) {
       s -= Math.min(20, p.lastReplyDays || 0);
       return s;
     }
-    return score(b) - score(a);
+    return score(b) - score(a) || String(a && a.id || "").localeCompare(String(b && b.id || ""));
   }
 
 

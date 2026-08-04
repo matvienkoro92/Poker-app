@@ -587,6 +587,9 @@
   }
 
   function updateTimer() {
+    if (typeof document !== "undefined" && (
+      document.hidden || !document.querySelector('[data-view="daily-poker"].view--active')
+    )) return;
     var status = dailyPokerState.status || {};
     if (!dailyPokerState.status) {
       var resultEl = $("dailyPokerResult");

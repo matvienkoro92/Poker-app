@@ -623,3 +623,9 @@ document.addEventListener("click", function (e) {
     if (tg && tg.showAlert) tg.showAlert("Задачи ещё загружаются. Обновите страницу."); else alert("Задачи ещё загружаются. Обновите страницу.");
   }
 }, true);
+(function initAndroidApkDownload() {
+  var link = document.querySelector(".home-android-download");
+  if (!link) return;
+  var isNativeShell = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
+  if (!isNativeShell) link.hidden = false;
+})();

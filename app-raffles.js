@@ -1954,7 +1954,12 @@ function initRaffles() {
 
   function ensureRafflesActiveChooserTimer() {
     if (rafflesActiveChooserTimerInterval) return;
-    rafflesActiveChooserTimerInterval = setInterval(updateRafflesActiveChooserTimers, 1000);
+    rafflesActiveChooserTimerInterval = setInterval(function () {
+      if (typeof document !== "undefined" && (
+        document.hidden || !document.querySelector('[data-view="raffles"].view--active')
+      )) return;
+      updateRafflesActiveChooserTimers();
+    }, 1000);
   }
 
   function stopRafflesActiveChooserTimer() {

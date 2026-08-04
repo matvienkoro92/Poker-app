@@ -2812,7 +2812,7 @@
     var tournamentDay = clubTournamentDayKey();
     var dailyRangeQuery = tournamentDay ? "&from=" + encodeURIComponent(tournamentDay) + "&to=" + encodeURIComponent(tournamentDay) : "";
     var request = Promise.all([
-      cachedFetchJson(base + "/api/player-crm?publicLevels=1", "club-news-public-levels-v2", 5 * 60 * 1000, { cache: "default" })
+      cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [], failed: true }; }),
       cachedFetchJson(
         base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100" + dailyRangeQuery,
@@ -2919,10 +2919,11 @@
       load();
       loadClubNews();
     });
-    load();
     setInterval(function () {
       if (typeof document !== "undefined" && document.hidden) return;
-      load();
+      // The friends feed is hidden until the user opens it. Do not wake five
+      // unrelated achievement APIs in the background before that first open.
+      if (friendNewsLoaded || (el("homeFriendNewsModal") && !el("homeFriendNewsModal").hidden && newsModalMode === "friends")) load();
       loadClubNews();
     }, 15 * 60 * 1000);
   }

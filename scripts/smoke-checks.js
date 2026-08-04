@@ -2716,7 +2716,7 @@ add("Hidden cashout manager photos do not preload on home", () =>
 );
 
 add("Public build stays under the mobile asset budget", () => {
-  const publicBytes = dirSizeBytes(path.join(root, "public"));
+  const publicBytes = dirSizeBytes(path.join(root, "public")) - dirSizeBytes(path.join(root, "public", "downloads"));
   const budgets = JSON.parse(read("asset-budgets.json")).budgetsMiB;
   const budgetBytes = Number(budgets.publicBuild) * 1024 * 1024;
   return publicBytes > 0 && publicBytes <= budgetBytes;
@@ -2730,6 +2730,7 @@ add("Individual shipped assets stay under the mobile file budget", () => {
   function walk(dir) {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (dir === publicDir && entry.name === "downloads") continue;
       const p = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(p);
       else largest = Math.max(largest, fs.statSync(p).size);

@@ -392,8 +392,6 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
   "02.08.2026": [
     "rating-compressed-preview/rating-02-08-2026-league2-deep-night-15k-02h.avif",
     "rating-compressed-preview/rating-02-08-2026-league2-subbota-5-biletov-17h.avif",
-    "rating-compressed-preview/rating-02-08-2026-league2-turnir-mesyaca-18h.avif",
-    "rating-compressed-preview/rating-02-08-2026-league2-hok-19h.avif",
     "rating-compressed-preview/rating-02-08-2026-league2-ok-21h.avif",
     "rating-compressed-preview/rating-02-08-2026-league2-nlh-knockout-220k-21h.avif",
     "rating-compressed-preview/rating-02-08-2026-league2-hr-5000-200k-2159h.avif",

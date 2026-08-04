@@ -1995,10 +1995,23 @@ button.player-crm__stat:focus-visible,
 }
 #playerCrmFilterChips .player-crm__chip {
   min-width: 0;
-  padding: 0 6px;
+  min-height: 44px;
+  padding: 6px 8px;
   font-size: clamp(9px, 1.25vw, 12px);
-  line-height: 1.1;
-  white-space: nowrap;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+#playerCrmFilterChips .player-crm__chip--active {
+  border-color: rgba(251, 191, 36, 0.9);
+  background:
+    linear-gradient(180deg, rgba(255, 231, 160, 0.98), rgba(217, 158, 58, 0.94)),
+    #d99e3a;
+  color: #0b1220;
+  box-shadow:
+    0 0 0 1px rgba(255, 240, 214, 0.2),
+    0 8px 18px rgba(251, 191, 36, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
 }
 .player-crm__list {
   display: grid;
