@@ -2521,6 +2521,309 @@ body.profile-avatar-choice-open {
   color: #ffbd39;
   font-size: clamp(20px, 4.2vw, 30px);
 }
+
+/* Profile monthly story — the profile reward banner is intentionally split
+   into two equal actions only on the full self-profile view. */
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 2vw, 18px);
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  align-content: end;
+  min-width: 0;
+  padding: clamp(18px, 3vw, 28px);
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes::after {
+  position: absolute;
+  top: clamp(14px, 2.5vw, 24px);
+  right: clamp(14px, 2.5vw, 24px);
+  grid-column: auto;
+  grid-row: auto;
+  font-size: clamp(48px, 8vw, 78px);
+  opacity: 0.96;
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-main,
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-more {
+  grid-column: 1;
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-main {
+  padding-right: clamp(62px, 10vw, 108px);
+  font-size: clamp(17px, 3vw, 27px);
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-sum {
+  margin-top: 9px;
+  padding-right: 0;
+  font-size: clamp(34px, 6.8vw, 64px);
+}
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-more {
+  margin-top: 14px;
+  font-size: clamp(15px, 2.6vw, 24px);
+}
+.profile-month-story-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  align-items: start;
+  min-width: 0;
+  min-height: 230px;
+  padding: clamp(18px, 3vw, 28px);
+  overflow: hidden;
+  border: 1px solid rgba(99, 230, 198, 0.8);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 78% 28%, rgba(255, 210, 92, 0.24), transparent 28%),
+    linear-gradient(150deg, rgba(12, 42, 49, 0.98), rgba(5, 13, 27, 0.99) 62%, rgba(29, 19, 4, 0.96));
+  color: #f8fafc;
+  text-align: left;
+  box-shadow: inset 0 0 0 1px rgba(202, 255, 240, 0.06), 0 0 24px rgba(46, 211, 170, 0.12);
+  cursor: pointer;
+}
+.profile-month-story-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("./assets/profile-month-story-bg.webp") 74% 15% / 122% auto no-repeat;
+  opacity: 0.3;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.profile-month-story-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 23px;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.1) 45%, transparent 62%);
+  transform: translateX(-100%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+}
+.profile-month-story-card:hover::after { transform: translateX(100%); }
+.profile-month-story-card > span { position: relative; z-index: 1; }
+.profile-month-story-card__eyebrow {
+  color: #73ebcb;
+  font-size: clamp(13px, 2.2vw, 20px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.profile-month-story-card__title {
+  max-width: 72%;
+  margin-top: 5px;
+  color: #fff1bd;
+  font-size: clamp(25px, 4.7vw, 43px);
+  font-weight: 950;
+  line-height: 0.98;
+}
+.profile-month-story-card__art {
+  position: absolute !important;
+  top: 42%;
+  right: 10%;
+  color: #ffd66e;
+  font-size: clamp(48px, 8vw, 82px);
+  text-shadow: 0 0 25px rgba(255, 200, 61, 0.6);
+  transform: translateY(-50%);
+}
+.profile-month-story-card__more {
+  align-self: end;
+  color: #f9ddb0;
+  font-size: clamp(14px, 2.4vw, 21px);
+  font-weight: 850;
+}
+.profile-month-story-card__more b { color: #73ebcb; font-size: 1.35em; }
+
+body.profile-month-story-open { overflow: hidden; }
+.profile-month-story[hidden] { display: none !important; }
+.profile-month-story {
+  position: fixed;
+  z-index: 10090;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.profile-month-story__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(1, 5, 12, 0.84);
+  backdrop-filter: blur(12px);
+}
+.profile-month-story__panel {
+  position: relative;
+  width: min(680px, 100%);
+  height: min(940px, 100dvh);
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(232, 183, 79, 0.52);
+  border-radius: clamp(0px, 3vw, 30px);
+  background: #07101d;
+  color: #f8fafc;
+  box-shadow: 0 30px 90px rgba(0,0,0,.72), inset 0 0 0 1px rgba(255,255,255,.03);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 183, 79, 0.5) transparent;
+}
+.profile-month-story__scenery {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(2,8,17,.1), rgba(2,8,17,.5) 32%, rgba(2,8,17,.82) 72%, #07101d),
+    url("./assets/profile-month-story-bg.webp") top center / 100% auto no-repeat;
+  pointer-events: none;
+}
+.profile-month-story__header,
+.profile-month-story__content { position: relative; z-index: 1; }
+.profile-month-story__header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px clamp(18px, 4vw, 30px);
+  background: linear-gradient(180deg, rgba(3,9,19,.95), rgba(3,9,19,.7), transparent);
+  backdrop-filter: blur(8px);
+}
+.profile-month-story__header span {
+  color: #73ebcb;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.profile-month-story__header h2 { margin: 2px 0 0; color: #fff0bd; font-size: clamp(27px, 6vw, 42px); line-height: 1; }
+.profile-month-story__header button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255,230,167,.32);
+  border-radius: 50%;
+  background: rgba(2,8,17,.76);
+  color: #ffe7ab;
+  font-size: 30px;
+}
+.profile-month-story__content { padding: clamp(70px, 15vw, 130px) clamp(16px, 4vw, 30px) 40px; }
+.profile-month-story__intro { max-width: 440px; margin: 0 auto; text-align: center; text-shadow: 0 3px 14px rgba(0,0,0,.8); }
+.profile-month-story__intro span { color: #73ebcb; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.profile-month-story__intro h3 { margin: 10px 0 0; color: #fff1c4; font-size: clamp(26px, 6vw, 42px); line-height: 1.02; }
+.profile-month-story__hero {
+  display: grid;
+  grid-template-columns: clamp(88px, 22vw, 132px) 1fr;
+  align-items: center;
+  gap: 18px;
+  margin: 28px auto 18px;
+  padding: 14px 18px;
+  border: 1px solid rgba(255,218,122,.36);
+  border-radius: 24px;
+  background: linear-gradient(125deg, rgba(6,18,31,.92), rgba(40,27,7,.8));
+  box-shadow: 0 18px 46px rgba(0,0,0,.34), inset 0 1px rgba(255,255,255,.08);
+}
+.profile-month-story__hero-aura {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,224,133,.52), rgba(255,181,49,.12) 52%, transparent 72%);
+  filter: drop-shadow(0 8px 15px rgba(0,0,0,.42));
+}
+.profile-month-story__hero-aura::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(255,216,112,.38);
+  border-radius: 50%;
+  animation: profile-story-hero-pulse 2.6s ease-in-out infinite;
+}
+.profile-month-story__hero-aura img { width: 100%; height: 100%; object-fit: cover; border: 3px solid rgba(255,220,130,.72); border-radius: 50%; }
+.profile-month-story__hero--character { grid-template-columns: clamp(110px, 27vw, 166px) 1fr; }
+.profile-month-story__hero--character .profile-month-story__hero-aura {
+  aspect-ratio: .82;
+  margin: -28px 0 -14px;
+  border-radius: 38% 38% 48% 48%;
+  background: radial-gradient(ellipse at 50% 58%, rgba(255,224,133,.48), rgba(255,181,49,.1) 55%, transparent 74%);
+}
+.profile-month-story__hero--character .profile-month-story__hero-aura::after { inset: 12% 4% 2%; border-radius: 50%; }
+.profile-month-story__hero--character .profile-month-story__hero-aura img {
+  object-fit: contain;
+  object-position: center bottom;
+  border: 0;
+  border-radius: 0;
+  filter: drop-shadow(0 10px 13px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(255,201,73,.25));
+}
+.profile-month-story__hero small { display: block; color: #73ebcb; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
+.profile-month-story__hero strong { display: block; margin-top: 3px; color: #fff1bf; font-size: clamp(21px, 5vw, 31px); line-height: 1; }
+.profile-month-story__hero span { display: block; margin-top: 7px; color: #aebdd1; font-size: 13px; line-height: 1.25; }
+@keyframes profile-story-hero-pulse { 50% { transform: scale(1.07); opacity: .45; } }
+.profile-month-story__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 26px;
+}
+.profile-month-story__summary > div {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(117,235,203,.2);
+  border-radius: 18px;
+  background: rgba(5,16,29,.82);
+  backdrop-filter: blur(7px);
+}
+.profile-month-story__summary strong { display: block; overflow-wrap: anywhere; color: #ffd87c; font-size: clamp(22px, 5vw, 34px); line-height: 1; }
+.profile-month-story__summary span { display: block; margin-top: 5px; color: #9fb0c5; font-size: 12px; text-transform: uppercase; }
+.profile-month-story__timeline { position: relative; display: grid; gap: 12px; }
+.profile-month-story__timeline::before { content: ""; position: absolute; top: 0; bottom: 0; left: 25px; width: 1px; background: linear-gradient(#ffe08b, #73ebcb, transparent); opacity: .45; }
+.profile-month-story__event {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid rgba(255,220,128,.18);
+  border-radius: 20px;
+  background: linear-gradient(115deg, rgba(5,15,28,.94), rgba(16,27,40,.88));
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
+  animation: profile-story-event-in .5s both;
+  animation-delay: min(calc(var(--story-index) * 45ms), 500ms);
+}
+@keyframes profile-story-event-in { from { opacity: 0; transform: translateY(14px); } }
+.profile-month-story__event-icon { position: relative; z-index: 1; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255,221,132,.38); border-radius: 50%; background: #0b1725; color: #ffd875; }
+.profile-month-story__event time { color: #73ebcb; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.profile-month-story__event h3 { margin: 4px 0 0; color: #f4f7fb; font-size: clamp(15px, 3.6vw, 20px); line-height: 1.18; }
+.profile-month-story__event p { margin: 6px 0 0; color: #aebbd0; font-size: 13px; line-height: 1.3; }
+.profile-month-story__event strong { display: inline-block; margin-top: 8px; color: #ffd879; font-size: 18px; }
+.profile-month-story__final,
+.profile-month-story__empty { margin-top: 24px; padding: 26px 18px; text-align: center; }
+.profile-month-story__final span,
+.profile-month-story__empty > span { display: block; color: #ffd875; font-size: 38px; }
+.profile-month-story__final strong { display: block; margin-top: 8px; color: #fff0bd; font-size: 21px; }
+.profile-month-story__empty h3 { margin: 8px 0; color: #fff0bd; font-size: 24px; }
+.profile-month-story__empty p { margin: 0; color: #9eacc0; }
+.profile-month-story__loading { display: grid; justify-items: center; gap: 10px; padding: 130px 20px; text-align: center; }
+.profile-month-story__loading > span { width: 46px; height: 46px; border: 4px solid rgba(115,235,203,.18); border-top-color: #73ebcb; border-radius: 50%; animation: profile-story-spin .8s linear infinite; }
+.profile-month-story__loading strong { color: #fff0bd; font-size: 23px; }
+.profile-month-story__loading small { color: #9eadc1; }
+@keyframes profile-story-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 620px) {
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions { gap: 8px; }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes,
+  .profile-month-story-card { min-height: 190px; border-radius: 18px; padding: 14px; }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-main { padding-right: 34px; font-size: 15px; }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes .chat-user-modal__rating-tab-sum { font-size: clamp(28px, 7vw, 40px); overflow-wrap: anywhere; }
+  .view[data-view="profile"] .profile-achievements-showcase__rating-total .profile-rating-actions__prizes::after { top: 10px; right: 10px; font-size: 38px; }
+  .profile-month-story-card__title { max-width: 88%; font-size: clamp(21px, 5.6vw, 29px); }
+  .profile-month-story-card__art { top: 48%; right: 8%; font-size: 42px; }
+  .profile-month-story-card__more { font-size: 12px; }
+  .profile-month-story__panel { border-width: 0; border-radius: 0; }
+  .profile-month-story__content { padding-top: 74px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-month-story__event,
+  .profile-month-story__hero-aura::after,
+  .profile-month-story__loading > span { animation: none; }
+}
 .view[data-view="profile"] .profile-public-showcase--loading .profile-public-showcase__hero.chat-user-modal__hero {
   grid-template-columns: minmax(150px, 0.88fr) minmax(0, 1fr);
   min-height: clamp(270px, 42vw, 360px);

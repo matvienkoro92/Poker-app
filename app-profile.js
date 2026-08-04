@@ -1191,11 +1191,42 @@ function applyProfileAchievementsResult(result) {
   var achievements = document.getElementById("profileAchievementsList");
   var ranks = document.getElementById("profileSeasonRanks");
   if (!showcase || !achievements || !ranks || !result) return false;
-  if (total) total.innerHTML = result.totalRewardHtml || renderProfileRatingTotalState("empty");
+  if (total) total.innerHTML = result.totalRewardHtml
+    ? renderProfileRatingTotalCards(profileRatingTotalTextFromHtml(result.totalRewardHtml))
+    : renderProfileRatingTotalState("empty");
   achievements.innerHTML = result.achievementsHtml || "";
   ranks.innerHTML = result.ranksHtml || "";
   showcase.hidden = false;
   return true;
+}
+
+function profileRatingTotalTextFromHtml(html) {
+  if (!html || typeof document === "undefined") return "";
+  var wrap = document.createElement("div");
+  wrap.innerHTML = String(html);
+  var sum = wrap.querySelector(".chat-user-modal__rating-tab-sum");
+  return String(sum && sum.textContent || "").trim();
+}
+
+function renderProfileRatingTotalCards(text) {
+  var safeText = profileEscapeHtml(String(text || "").trim());
+  return (
+    '<div class="chat-user-modal__rating-tabs profile-rating-actions">' +
+      '<button type="button" class="chat-user-modal__rating-tab profile-rating-actions__prizes" data-profile-rating-total="1" aria-label="Призовые в турнирах ' +
+        safeText + '. Подробнее">' +
+        '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' +
+          safeText +
+        '</span></span>' +
+        '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
+      '</button>' +
+      '<button type="button" class="profile-month-story-card" data-profile-month-story aria-label="Ваша история за прошлый месяц">' +
+        '<span class="profile-month-story-card__eyebrow">Ваша история</span>' +
+        '<span class="profile-month-story-card__title">За прошлый месяц</span>' +
+        '<span class="profile-month-story-card__art" aria-hidden="true">✦</span>' +
+        '<span class="profile-month-story-card__more">Смотреть историю <b aria-hidden="true">›</b></span>' +
+      '</button>' +
+    '</div>'
+  );
 }
 
 function renderProfileRatingTotalState(state) {
@@ -1222,17 +1253,147 @@ function renderProfileFastRatingTotal(ratingNick) {
   var reward = Number(getFastTotal(ratingNick)) || 0;
   if (reward <= 0) return false;
   var text = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(reward) + " ₽";
-  total.innerHTML =
-    '<div class="chat-user-modal__rating-tabs">' +
-      '<button type="button" class="chat-user-modal__rating-tab" data-profile-rating-total="1" aria-label="Призовые в турнирах ' +
-        profileEscapeHtml(text) + '. Подробнее">' +
-        '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' +
-          profileEscapeHtml(text) +
-        '</span></span>' +
-        '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
-      '</button>' +
-    '</div>';
+  total.innerHTML = renderProfileRatingTotalCards(text);
   return true;
+}
+
+function profilePreviousMonthRange() {
+  var nowMsk = new Date(Date.now() + 3 * 60 * 60 * 1000);
+  var year = nowMsk.getUTCFullYear();
+  var month = nowMsk.getUTCMonth();
+  var start = new Date(Date.UTC(year, month - 1, 1));
+  var end = new Date(Date.UTC(year, month, 0));
+  function key(date) { return date.toISOString().slice(0, 10); }
+  var label = start.toLocaleDateString("ru-RU", { month: "long", year: "numeric", timeZone: "UTC" });
+  return { from: key(start), to: key(end), label: label.charAt(0).toUpperCase() + label.slice(1) };
+}
+
+function profileMonthStoryEventDateKey(value) {
+  var ms = new Date(value || "").getTime();
+  return Number.isFinite(ms) ? new Date(ms + 3 * 60 * 60 * 1000).toISOString().slice(0, 10) : "";
+}
+
+function profileMonthStoryMoney(value) {
+  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.max(0, Number(value) || 0)) + " ₽";
+}
+
+function profileMonthStoryHero() {
+  var artImg = document.getElementById("profilePublicRatingArtImg");
+  var artSrc = artImg ? String(artImg.currentSrc || artImg.src || "").trim() : "";
+  var isPersonalCharacter = !!artSrc &&
+    !artImg.classList.contains("chat-user-modal__rating-art-img--avatar-fallback") &&
+    !artImg.classList.contains("chat-user-modal__rating-art-img--default-hero");
+  return {
+    image: isPersonalCharacter ? artSrc : (profilePublicCardAvatarUrl() || artSrc || "./assets/daily-poker-monkey.webp"),
+    character: isPersonalCharacter,
+    name: profilePublicCardDisplayName(),
+  };
+}
+
+function ensureProfileMonthStoryModal() {
+  var existing = document.getElementById("profileMonthStoryModal");
+  if (existing) return existing;
+  var modal = document.createElement("div");
+  modal.id = "profileMonthStoryModal";
+  modal.className = "profile-month-story";
+  modal.hidden = true;
+  modal.innerHTML =
+    '<button type="button" class="profile-month-story__backdrop" data-profile-month-story-close aria-label="Закрыть историю"></button>' +
+    '<section class="profile-month-story__panel" role="dialog" aria-modal="true" aria-labelledby="profileMonthStoryTitle">' +
+      '<div class="profile-month-story__scenery" aria-hidden="true"></div>' +
+      '<header class="profile-month-story__header">' +
+        '<div><span>Месяц в Poker21</span><h2 id="profileMonthStoryTitle">Ваша история</h2></div>' +
+        '<button type="button" data-profile-month-story-close aria-label="Закрыть">×</button>' +
+      '</header>' +
+      '<div class="profile-month-story__content" data-profile-month-story-content></div>' +
+    '</section>';
+  modal.addEventListener("click", function (event) {
+    if (event.target && event.target.closest("[data-profile-month-story-close]")) closeProfileMonthStory();
+  });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function closeProfileMonthStory() {
+  var modal = document.getElementById("profileMonthStoryModal");
+  if (!modal) return;
+  modal.hidden = true;
+  document.body.classList.remove("profile-month-story-open");
+}
+
+function profileMonthStoryRowsHtml(rows, range, hero) {
+  var list = Array.isArray(rows) ? rows : [];
+  var heroData = hero && typeof hero === "object" ? hero : {};
+  var heroImage = String(heroData.image || "./assets/daily-poker-monkey.webp").trim();
+  var heroName = String(heroData.name || profilePublicCardDisplayName() || "Игрок").trim();
+  var prizeTotal = list.reduce(function (sum, row) { return sum + (Number(row && row.prizeAmount) || 0); }, 0);
+  var victories = list.filter(function (row) { return Number(row && row.tournamentPlace) === 1; }).length;
+  var achievements = list.filter(function (row) {
+    return row && (row.type === "achievement" || (Array.isArray(row.newsLines) && row.newsLines.length > 1));
+  }).length;
+  var cards = list.map(function (row, index) {
+    var dateMs = new Date(row && row.at || "").getTime();
+    var date = Number.isFinite(dateMs)
+      ? new Date(dateMs).toLocaleDateString("ru-RU", { day: "numeric", month: "long", timeZone: "Europe/Moscow" })
+      : "";
+    var lines = Array.isArray(row && row.newsLines) && row.newsLines.length
+      ? row.newsLines
+      : [String(row && row.text || "Достижение")];
+    var icon = Number(row && row.tournamentPlace) === 1 ? "🏆" : row && row.type === "achievement" ? "◆" : row && row.type === "birthday" ? "♥" : "✦";
+    return '<article class="profile-month-story__event" style="--story-index:' + index + '">' +
+      '<span class="profile-month-story__event-icon" aria-hidden="true">' + icon + '</span>' +
+      '<div><time>' + profileEscapeHtml(date) + '</time>' +
+        '<h3>' + profileEscapeHtml(lines[0]) + '</h3>' +
+        lines.slice(1).map(function (line) { return '<p>' + profileEscapeHtml(line) + '</p>'; }).join("") +
+        (Number(row && row.prizeAmount) > 0 ? '<strong>' + profileEscapeHtml(profileMonthStoryMoney(row.prizeAmount)) + '</strong>' : '') +
+      '</div>' +
+    '</article>';
+  }).join("");
+  var empty = '<div class="profile-month-story__empty"><span>✦</span><h3>История только начинается</h3><p>За этот месяц событий пока не найдено.</p></div>';
+  return '<section class="profile-month-story__intro"><span>' + profileEscapeHtml(range.label) + '</span>' +
+      '<h3>' + (list.length ? 'Вот какой путь вы проделали' : 'Спокойный месяц перед новым рывком') + '</h3></section>' +
+    '<div class="profile-month-story__hero' + (heroData.character ? ' profile-month-story__hero--character' : '') + '">' +
+      '<div class="profile-month-story__hero-aura"><img src="' + profileEscapeHtml(heroImage) + '" alt=""></div>' +
+      '<div><small>Главный герой</small><strong>' + profileEscapeHtml(heroName) + '</strong><span>Каждое событие — ещё один шаг по вашему пути</span></div>' +
+    '</div>' +
+    '<div class="profile-month-story__summary">' +
+      '<div><strong>' + list.length + '</strong><span>событий</span></div>' +
+      '<div><strong>' + victories + '</strong><span>побед</span></div>' +
+      '<div><strong>' + achievements + '</strong><span>достижений</span></div>' +
+      '<div><strong>' + profileEscapeHtml(profileMonthStoryMoney(prizeTotal)) + '</strong><span>призовые</span></div>' +
+    '</div>' +
+    '<div class="profile-month-story__timeline">' + (cards || empty) + '</div>' +
+    (list.length ? '<footer class="profile-month-story__final"><span>♠</span><strong>Это ваша история. Продолжение — за вами.</strong></footer>' : '');
+}
+
+function openProfileMonthStory() {
+  var modal = ensureProfileMonthStoryModal();
+  var content = modal.querySelector("[data-profile-month-story-content]");
+  var range = profilePreviousMonthRange();
+  modal.hidden = false;
+  document.body.classList.add("profile-month-story-open");
+  content.innerHTML = '<div class="profile-month-story__loading"><span></span><strong>Собираем вашу историю…</strong><small>' + profileEscapeHtml(range.label) + '</small></div>';
+  var data = pokerProfileUserInfoCache || {};
+  var identity = {
+    userId: profileAchievementUserIdFromData(data),
+    accountId: String(data.accountId || data.dtId || ""),
+    pokerPlusNickname: profileAchievementRatingNickFromData(data),
+    p21Id: String(data.p21Id || data.poker21Id || data.pokerPlusUserId || ""),
+    avatarUrl: profilePublicCardAvatarUrl() || String(data.avatarUrl || data.avatar || "") || "./assets/daily-poker-monkey.webp",
+  };
+  var request = typeof window.pokerGetPlayerNews === "function"
+    ? window.pokerGetPlayerNews(identity)
+    : Promise.resolve(typeof window.pokerReadCachedPlayerNews === "function" ? window.pokerReadCachedPlayerNews(identity) : []);
+  Promise.resolve(request).then(function (rows) {
+    if (modal.hidden) return;
+    var monthly = (Array.isArray(rows) ? rows : []).filter(function (row) {
+      var key = profileMonthStoryEventDateKey(row && row.at);
+      return key && key >= range.from && key <= range.to;
+    }).sort(function (a, b) { return new Date(a && a.at || 0).getTime() - new Date(b && b.at || 0).getTime(); });
+    content.innerHTML = profileMonthStoryRowsHtml(monthly, range, profileMonthStoryHero());
+  }).catch(function () {
+    if (!modal.hidden) content.innerHTML = profileMonthStoryRowsHtml([], range, profileMonthStoryHero());
+  });
 }
 
 function profileAchievementRatingNickFromData(data) {
@@ -1474,6 +1635,11 @@ function initProfileAchievementsShowcase() {
       if (card && showcase.contains(card) && typeof window.pokerOpenChatAchievementInfoModal === "function") {
         event.preventDefault();
         window.pokerOpenChatAchievementInfoModal(card);
+        return;
+      }
+      var monthStoryBtn = event && event.target ? event.target.closest("[data-profile-month-story]") : null;
+      if (monthStoryBtn) {
+        openProfileMonthStory();
         return;
       }
       var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;
