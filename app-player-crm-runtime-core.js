@@ -28,6 +28,7 @@
     broadcastAudiencePeriodKey: "",
     statsAuxiliaryLoadedKey: "",
     statsAuxiliaryLoading: false,
+    statsManualRefreshAt: 0,
     dailyPokerStats: null,
     dailyPokerStatsLoading: false,
     dailyPokerStatsRangeKey: "",
@@ -4586,6 +4587,9 @@
         return;
       }
       if (e.target.closest("[data-crm-refresh-stats]")) {
+        var refreshNow = Date.now();
+        if (state.statsManualRefreshAt && refreshNow - state.statsManualRefreshAt < 30000) return;
+        state.statsManualRefreshAt = refreshNow;
         loadDailyPokerStats(true);
         loadCrmWeekReport(true);
         loadCrmData("all");
