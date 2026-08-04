@@ -5228,3 +5228,16 @@ body.profile-month-story-open { overflow: hidden; }
     margin: 0 !important;
   }
 }
+
+/* Keep the public identity row focused on age and city. The specialty remains
+   editable beside the player name, but is not repeated as a public badge. */
+.view[data-view="profile"] .profile-public-showcase__specialty-badge {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .view[data-view="profile"] .profile-public-showcase__details-row {
+    margin-top: 0 !important;
+    transform: translateY(-8px) !important;
+  }
+}
