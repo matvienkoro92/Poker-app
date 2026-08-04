@@ -1927,8 +1927,9 @@
     }
     if (friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
       list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
-        '<span aria-hidden="true"></span><strong>Загружаем новости всех друзей…</strong>' +
-        '<small>Собираем результаты и достижения игроков</small></div>';
+        '<span aria-hidden="true"></span><strong>' +
+          (newsModalMode === "club" ? "Загружаем новости клуба…" : "Загружаем новости всех друзей…") +
+        '</strong><small>Собираем результаты и достижения игроков</small></div>';
       return;
     }
     var snapshot = Array.isArray(rows) ? rows.slice() : [];
@@ -2866,18 +2867,31 @@
         buildClubEventsFromRows(players, winners, results[2]),
         []
       );
-      return loadClubWallEvents(players, tournamentDay).catch(function () { return []; }).then(function (wallEvents) {
-        // Publish one complete snapshot only after all club sources settle.
-        clubEvents = nextClubEvents;
-        clubWallEvents = wallEvents;
-        clubNewsLoaded = true;
-        clubNewsLoading = false;
-        clubNewsUpdatedAt = Date.now();
-        clubNewsRetryCount = 0;
-        writeClubEventsCache(clubEvents);
-        renderClubNews();
-        if (newsModalMode === "club") renderModalList(activeModalEvents());
-      });
+      // Wins are the default tab and must not wait for the optional wall feed.
+      // Publish the core club news as soon as its two primary sources settle;
+      // wall posts continue loading independently in the background.
+      clubEvents = nextClubEvents;
+      clubNewsLoaded = true;
+      clubNewsLoading = false;
+      clubNewsUpdatedAt = Date.now();
+      clubNewsRetryCount = 0;
+      writeClubEventsCache(clubEvents);
+      renderClubNews();
+      if (newsModalMode === "club") renderModalList(activeModalEvents());
+
+      if (!clubWallLoadPromise) {
+        var wallRequest = loadClubWallEvents(players, tournamentDay).then(function (wallEvents) {
+          clubWallEvents = Array.isArray(wallEvents) ? wallEvents : [];
+        }).catch(function () {
+          return [];
+        }).finally(function () {
+          clubWallLoading = false;
+          if (clubWallLoadPromise === wallRequest) clubWallLoadPromise = null;
+          if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
+        });
+        clubWallLoading = true;
+        clubWallLoadPromise = wallRequest;
+      }
     }).catch(function () {
       clubNewsLoading = true;
       renderClubNews();
