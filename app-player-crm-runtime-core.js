@@ -124,6 +124,36 @@
     lastBroadcastProgress: null,
   };
 
+  var CRM_PERIOD_STORAGE_KEY = "poker_player_crm_period_v1";
+
+  function restoreCrmPeriodSelection() {
+    try {
+      var stored = JSON.parse(localStorage.getItem(CRM_PERIOD_STORAGE_KEY) || "null");
+      if (!stored || typeof stored !== "object") return;
+      var period = String(stored.period || "").slice(0, 40);
+      var from = String(stored.dateFrom || "");
+      var to = String(stored.dateTo || "");
+      if (period === "custom") {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return;
+        state.dateFrom = from;
+        state.dateTo = to;
+      }
+      if (period) state.period = period;
+    } catch (e) {}
+  }
+
+  function persistCrmPeriodSelection() {
+    try {
+      localStorage.setItem(CRM_PERIOD_STORAGE_KEY, JSON.stringify({
+        period: state.period,
+        dateFrom: state.dateFrom,
+        dateTo: state.dateTo,
+      }));
+    } catch (e) {}
+  }
+
+  restoreCrmPeriodSelection();
+
   var esc = pokerPlayerCrmEsc;
   var money = pokerPlayerCrmMoney;
   var pct = pokerPlayerCrmPct;
@@ -4476,6 +4506,7 @@
   }
 
   function syncPeriodInputs() {
+    persistCrmPeriodSelection();
     var from = document.getElementById("playerCrmDateFrom");
     var to = document.getElementById("playerCrmDateTo");
     var periodName = document.getElementById("playerCrmPeriodName");
