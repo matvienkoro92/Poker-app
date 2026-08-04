@@ -615,4 +615,10 @@ document.addEventListener("click", function (e) {
   if (!link) return;
   var isNativeShell = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
   if (!isNativeShell) link.hidden = false;
+  link.addEventListener("click", function (e) {
+    var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (!tg || typeof tg.openLink !== "function") return;
+    e.preventDefault();
+    tg.openLink(link.href, { try_instant_view: false });
+  });
 })();
