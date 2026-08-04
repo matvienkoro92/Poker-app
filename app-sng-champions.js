@@ -1994,15 +1994,23 @@
     var teamKnockoutTitle = state.status !== "draft" && /^1(?:ый|й)\s+командный\s+снг[-\s]?нокаут\s+баттл\s+два\s+туза$/i.test(normalizedHomeTitle);
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       var nextSrc = teamKnockoutTitle
-        ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=3"
-        : "./assets/home-sng-champions-click-banner.webp?v=2";
+        ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
+        : "./assets/home-sng-champions-click-banner.webp?v=4";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
         banner.setAttribute("data-sng-home-banner-ready", "1");
       }
       banner.onload = revealCurrentBanner;
-      banner.onerror = revealCurrentBanner;
+      banner.onerror = function () {
+        var fallbackSrc = nextSrc.replace(/\.webp(?=\?|$)/, ".png");
+        if (banner.getAttribute("data-sng-banner-fallback") !== "1" && fallbackSrc !== nextSrc) {
+          banner.setAttribute("data-sng-banner-fallback", "1");
+          banner.src = fallbackSrc;
+          return;
+        }
+        revealCurrentBanner();
+      };
       if (banner.getAttribute("src") !== nextSrc) banner.setAttribute("src", nextSrc);
       if (banner.complete) {
         if (typeof banner.decode === "function") banner.decode().then(revealCurrentBanner).catch(revealCurrentBanner);

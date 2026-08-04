@@ -223,9 +223,15 @@ function bindHomeTournamentImageRecovery(img) {
   img.dataset.homeTournamentRecoveryBound = "1";
   img.addEventListener("load", function () {
     img.removeAttribute("data-home-tournament-retry-src");
+    img.removeAttribute("data-home-tournament-fallback-used");
   });
   img.addEventListener("error", function () {
     var expected = img.getAttribute("data-home-tournament-banner-src") || "";
+    if (/\.webp(?:\?|$)/i.test(expected) && img.getAttribute("data-home-tournament-fallback-used") !== "1") {
+      img.setAttribute("data-home-tournament-fallback-used", "1");
+      img.src = expected.replace(/\.webp(?=\?|$)/i, ".jpg");
+      return;
+    }
     if (!expected || img.getAttribute("data-home-tournament-retry-src") === expected) return;
     img.setAttribute("data-home-tournament-retry-src", expected);
     img.src = expected + (expected.indexOf("?") === -1 ? "?" : "&") + "retry=1";
