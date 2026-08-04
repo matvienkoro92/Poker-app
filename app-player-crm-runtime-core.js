@@ -644,8 +644,11 @@
     var reportScope = range && currentWeekRange &&
       range.from >= currentWeekRange.from && range.to <= currentWeekRange.to
       ? "crmWeek"
-      : "all";
-    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=" + reportScope, { cache: "no-store" })
+      : (range ? "period" : "all");
+    var reportRangeQuery = reportScope === "period"
+      ? "&from=" + encodeURIComponent(range.from) + "&to=" + encodeURIComponent(range.to)
+      : "";
+    fetch(base.replace(/\/$/, "") + "/api/admin-report-shifts" + query + "&scope=" + reportScope + reportRangeQuery, { cache: "no-store" })
       .then(function (response) {
         if (!response.ok) throw new Error("period report " + response.status);
         return response.json();

@@ -4,6 +4,21 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { _test } = require("../lib/api-handlers/admin-report-shifts");
 
+test("period report filtering returns only reports inside the requested month", () => {
+  const reports = [
+    { id: "june", date: "30.06.2026" },
+    { id: "july-start", date: "01.07.2026" },
+    { id: "july-end", date: "31/07/2026" },
+    { id: "august", createdAt: "2026-08-01T12:00:00.000Z" },
+  ];
+
+  assert.deepEqual(
+    _test.filterReportsByDateRange(reports, "2026-07-01", "2026-07-31").map((report) => report.id),
+    ["july-start", "july-end"]
+  );
+  assert.equal(_test.filterReportsByDateRange(reports, "bad", "2026-07-31"), null);
+});
+
 test("server collects every saved unreported rakeback row for the report author and date", () => {
   const sundayEntryAt = Date.parse("2026-07-12T15:00:00.000Z");
   const draft = {
