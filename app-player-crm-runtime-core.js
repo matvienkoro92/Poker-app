@@ -2961,6 +2961,9 @@
     state.periodComparisonLoading = !!previous;
     state.periodComparison = previous ? { label: previous.label, range: previous, metrics: null } : null;
     var url = base + "/api/player-crm" + crmQuery({ mode: "dashboard-summary" });
+    if (current && current.from && current.to) {
+      url += "&from=" + encodeURIComponent(current.from) + "&to=" + encodeURIComponent(current.to);
+    }
     if (previous) url += "&compareFrom=" + encodeURIComponent(previous.from) + "&compareTo=" + encodeURIComponent(previous.to);
     return fetch(url, { cache: "no-store" })
       .then(function (response) { return response.json(); })
