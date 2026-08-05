@@ -10930,3 +10930,19 @@ button.poker-copy-feedback--error,
   border-color: rgba(248, 113, 113, 0.72) !important;
   background: linear-gradient(180deg, #7f1d1d, #450a0a) !important;
 }
+
+/* Header club menu: keep its own scrollport fully above the fixed bottom tabbar. */
+.header-more-menu,
+.app.app--view-home .header-more-menu,
+#app:has(.view--active[data-view="daily-poker"]) .header-more-menu,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu {
+  max-height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - var(--app-bottom-tabbar-pad, 105px) - 96px
+  ) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-bottom: 12px;
+}
