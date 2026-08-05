@@ -341,7 +341,7 @@
     }
     var host = document.getElementById("globalModalsFragmentHost");
     if (!host) return window.pokerEnsureGlobalModalsHtml();
-    var src = "./html-fragments/global-modals-admin.html";
+    var src = "./html-fragments/global-modals-admin.html?v=3.864";
     if (!loading[src]) {
       loading[src] = fetchFragmentText(src, "admin modal HTML fragment")
         .then(function (html) {

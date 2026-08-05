@@ -1564,6 +1564,8 @@
   var CRM_LINK_TARGETS = [
     { key: "home", label: "Главная", view: "home", startapp: "home" },
     { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
+    { key: "club-guestbook-reviews", label: "Отзывы", view: "home", startapp: "club_guestbook_reviews" },
+    { key: "club-guestbook-complaints", label: "Книга жалоб", view: "home", startapp: "club_guestbook_complaints" },
     { key: "daily-poker", label: "Раздача дня", view: "daily-poker", startapp: "daily_poker" },
     { key: "daily-prediction", label: "Прогноз дня", view: "home", startapp: "daily_prediction" },
     { key: "private-cash", label: "Приватный кеш", view: "home", startapp: "private_cash" },
