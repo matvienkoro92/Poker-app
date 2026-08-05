@@ -1769,6 +1769,7 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__tabs button.is-active { color: #251400; background: linear-gradient(180deg, #ffe9a4, #e9ae42); border-color: #ffd879; }
 .club-guestbook__copy { align-self: flex-end; min-height: 34px; margin: 0 18px 7px; padding: 0 11px; color: #e6bd6d; background: rgba(229, 179, 74, 0.08); border: 1px solid rgba(229, 179, 74, 0.32); border-radius: 10px; font-size: 11px; font-weight: 850; }
 .club-guestbook__copy:active { background: rgba(229, 179, 74, 0.17); transform: translateY(1px); }
+.club-guestbook__scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .club-guestbook__review-invite { margin: 8px 22px 2px; color: #f4d38f; font-size: 14px; font-weight: 800; line-height: 1.45; }
 .club-guestbook__review-invite[hidden] { display: none !important; }
 .club-guestbook__composer { margin: 6px 18px 12px; padding: 12px; background: rgba(255,255,255,.045); border: 1px solid rgba(229,179,74,.22); border-radius: 17px; }
@@ -1781,7 +1782,7 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__binding-gate { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #d8dee8; font-size: 12px; line-height: 1.35; }
 .club-guestbook__binding-gate button { flex: 0 0 auto; min-height: 36px; padding: 0 14px; color: #251400; background: linear-gradient(180deg, #ffe28a, #e9ad3f); border: 0; border-radius: 10px; font-weight: 900; }
 .club-guestbook__binding-gate--compact { margin-top: 10px; padding: 10px; background: rgba(229,179,74,.07); border: 1px solid rgba(229,179,74,.2); border-radius: 12px; }
-.club-guestbook__feed { flex: 1; overflow: auto; padding: 0 18px 24px; }
+.club-guestbook__feed { padding: 0 18px 24px; }
 .club-guestbook__post { margin-bottom: 12px; padding: 15px; background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; }
 .club-guestbook__post > header { display: flex; align-items: flex-start; gap: 10px; }
 .club-guestbook__author { appearance: none; display: flex; align-items: center; flex: 1 1 auto; min-width: 0; padding: 0 !important; color: inherit; background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; text-align: left; cursor: pointer; }

@@ -307,9 +307,11 @@ function initHomeClubInfoModals() {
           '<header class="club-guestbook__header"><div><small>КЛУБ «ДВА ТУЗА»</small><h2 id="clubGuestbookTitle">Книга отзывов и жалоб</h2></div><button type="button" data-guestbook-close aria-label="Закрыть">×</button></header>' +
           '<div class="club-guestbook__tabs" role="tablist"><button type="button" data-guestbook-tab="review" class="is-active">Отзывы</button><button type="button" data-guestbook-tab="complaint">Жалобы</button></div>' +
           '<button type="button" class="club-guestbook__copy" id="clubGuestbookCopy" data-guestbook-copy>⧉ <span>Скопировать ссылку на отзывы</span></button>' +
-          '<p class="club-guestbook__review-invite" id="clubGuestbookReviewInvite">Оставьте, пожалуйста, большой и правдивый отзыв, особенно если вы давно с нами.</p>' +
-          '<form class="club-guestbook__composer" id="clubGuestbookForm"><textarea maxlength="1500" rows="3" id="clubGuestbookText" placeholder="Напишите отзыв о клубе…"></textarea><div><span id="clubGuestbookGate"></span><button type="submit">Опубликовать</button></div></form>' +
-          '<div class="club-guestbook__feed" id="clubGuestbookFeed"></div>' +
+          '<div class="club-guestbook__scroll">' +
+            '<p class="club-guestbook__review-invite" id="clubGuestbookReviewInvite">Оставьте, пожалуйста, большой и правдивый отзыв, особенно если вы давно с нами.</p>' +
+            '<form class="club-guestbook__composer" id="clubGuestbookForm"><textarea maxlength="1500" rows="3" id="clubGuestbookText" placeholder="Напишите отзыв о клубе…"></textarea><div><span id="clubGuestbookGate"></span><button type="submit">Опубликовать</button></div></form>' +
+            '<div class="club-guestbook__feed" id="clubGuestbookFeed"></div>' +
+          '</div>' +
         '</section></div>');
     var root = document.getElementById("clubGuestbook");
     var feed = document.getElementById("clubGuestbookFeed");
