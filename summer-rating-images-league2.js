@@ -401,4 +401,21 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
   "03.08.2026": [
     "rating-compressed-preview/rating-03-08-2026-league2-ok-17h.jpg"
   ]
+,
+  "04.08.2026": [
+    "rating-compressed-preview/rating-04-08-2026-league2-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-dv-bounty-100k-13h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-plo4-20k-16h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-ok-17h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-turnir-vtornika-18h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-bounty-magic-50k-18h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-nok-19h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-hr-5000-200k-20h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-nlh-knockout-220k-21h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league2-night-magic-80ko-23h.jpg"
+  ]
 };
