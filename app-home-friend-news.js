@@ -76,6 +76,18 @@
     "🎉", "🏆", "💰", "🎯", "♠️", "♥️", "♦️", "♣️",
   ];
 
+  document.addEventListener("error", function (event) {
+    var image = event && event.target;
+    if (!image || !image.matches || !image.matches(".home-friend-news__avatar")) return;
+    var fallback = String(image.getAttribute("data-news-image-fallback") || "").trim();
+    image.removeAttribute("data-news-image-fallback");
+    if (fallback && fallback !== image.getAttribute("src")) {
+      image.src = fallback;
+      return;
+    }
+    image.hidden = true;
+  }, true);
+
   function isUndatedTournamentSnapshotEvent(row) {
     var id = String(row && row.id || "");
     return /^achievement:(?:bigWins50|bigWins100|firstPlaces|top10Finishes|seasonCups|raffleWins|luckyMonths|millionaire):/.test(id) ||
@@ -490,12 +502,12 @@
     }
     if (slug === "waaar") {
       if (variantIndex === 1) return "./assets/summer-rating-player-waaar.webp";
-      if (variantIndex >= 2) return "./assets/club-news-personal/waaar-news-cutout-v3.webp?v=1";
+      if (variantIndex >= 2) return "./assets/club-news-personal/waaar-news-cutout-v3.webp?v=2";
     }
     if (slug === "evgen1722" && variantIndex >= 1) {
       return "./assets/summer-rating-player-evgen1722.webp";
     }
-    return slug ? "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=1" : "";
+    return slug ? "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=2" : "";
   }
 
   function playerNewsColor(value) {
@@ -1838,8 +1850,14 @@
       ? clubNewsPersonalArt(row && row.actorNick)
       : (newsModalMode === "club" ? clubNewsCardArt(row && row.actorNick, artOccurrence) : "");
     var visualUrl = personalArt || avatar;
+    var visualFallbackUrl = personalArt
+      ? (clubNewsPersonalArt(row && row.actorNick) || avatar)
+      : "";
+    if (visualFallbackUrl === visualUrl) visualFallbackUrl = avatar && avatar !== visualUrl ? avatar : "";
     var visual = visualUrl
-      ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '" alt="" loading="lazy" decoding="async">'
+      ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '"' +
+        (visualFallbackUrl ? ' data-news-image-fallback="' + esc(visualFallbackUrl) + '"' : '') +
+        ' alt="" loading="lazy" decoding="async">'
       : eventIconSvg(row.type);
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'

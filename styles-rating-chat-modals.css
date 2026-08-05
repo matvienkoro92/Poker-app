@@ -2432,6 +2432,7 @@
 }
 .chat-user-modal__close {
   position: absolute;
+  z-index: 20;
   top: 10px;
   right: 10px;
   width: 42px;

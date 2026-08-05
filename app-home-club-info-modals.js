@@ -292,6 +292,7 @@ function initHomeClubInfoModals() {
     var ratingSnapshots = {};
     var canPost = false;
     var loading = false;
+    var profileReturnState = null;
     function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
     function apiBase() { return typeof getApiBase === "function" ? getApiBase() : ""; }
     function authBody(body) { return typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(body) : body; }
@@ -401,6 +402,45 @@ function initHomeClubInfoModals() {
     }
     function open() { root.hidden = false; document.body.classList.add("club-guestbook-open"); load(); }
     function close() { root.hidden = true; document.body.classList.remove("club-guestbook-open"); }
+    function restoreAfterProfile() {
+      document.removeEventListener("poker:chat-user-modal-close", restoreAfterProfile);
+      var state = profileReturnState;
+      profileReturnState = null;
+      if (!state) return;
+      activeTab = state.activeTab === "complaint" ? "complaint" : "review";
+      root.querySelectorAll("[data-guestbook-tab]").forEach(function (button) {
+        button.classList.toggle("is-active", button.getAttribute("data-guestbook-tab") === activeTab);
+      });
+      root.hidden = false;
+      document.body.classList.add("club-guestbook-open");
+      render();
+      window.requestAnimationFrame(function () { feed.scrollTop = Number(state.scrollTop) || 0; });
+    }
+    function openAuthorProfile(profileId, profileName, profileAvatar) {
+      profileReturnState = { activeTab: activeTab, scrollTop: feed.scrollTop };
+      document.removeEventListener("poker:chat-user-modal-close", restoreAfterProfile);
+      document.addEventListener("poker:chat-user-modal-close", restoreAfterProfile);
+      close();
+      var opened = null;
+      if (typeof window.pokerOpenChatUserModalSafe === "function") {
+        opened = window.pokerOpenChatUserModalSafe(profileId, profileName, profileAvatar);
+      } else if (typeof window.openChatUserModalById === "function") {
+        window.openChatUserModalById(profileId, profileName, profileAvatar);
+        opened = true;
+      } else if (typeof window.pokerEnsureScriptDomains === "function") {
+        opened = Promise.resolve(window.pokerEnsureScriptDomains(["chat"])).then(function () {
+          if (typeof window.openChatUserModalById !== "function") return false;
+          window.openChatUserModalById(profileId, profileName, profileAvatar);
+          return true;
+        });
+      }
+      if (!opened) return restoreAfterProfile();
+      if (opened && typeof opened.then === "function") {
+        Promise.resolve(opened).then(function (ok) {
+          if (ok === false) restoreAfterProfile();
+        }).catch(restoreAfterProfile);
+      }
+    }
     openBtn.addEventListener("click", open);
     root.addEventListener("click", function (event) {
       if (event.target.closest("[data-guestbook-close]")) return close();
@@ -409,12 +449,9 @@ function initHomeClubInfoModals() {
       if (profile) {
         var profileId = profile.getAttribute("data-guestbook-profile");
         if (!profileId) return;
-        close();
         var profileName = profile.getAttribute("data-profile-name") || "Игрок";
         var profileAvatar = profile.getAttribute("data-profile-avatar") || "";
-        if (typeof window.pokerOpenChatUserModalSafe === "function") window.pokerOpenChatUserModalSafe(profileId, profileName, profileAvatar);
-        else if (typeof window.openChatUserModalById === "function") window.openChatUserModalById(profileId, profileName, profileAvatar);
-        else if (typeof window.pokerEnsureScriptDomains === "function") Promise.resolve(window.pokerEnsureScriptDomains(["chat"])).then(function () { if (typeof window.openChatUserModalById === "function") window.openChatUserModalById(profileId, profileName, profileAvatar); });
+        openAuthorProfile(profileId, profileName, profileAvatar);
         return;
       }
       var tab = event.target.closest("[data-guestbook-tab]");
