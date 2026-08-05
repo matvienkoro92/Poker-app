@@ -523,7 +523,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Em13!!",
           "place": 1,
-          "reward": 599.59,
+          "reward": 59959,
           "points": 135
         }
       ]
@@ -557,7 +557,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Evgen1722",
           "place": 1,
-          "reward": 472.35,
+          "reward": 47235,
           "points": 135
         }
       ]
@@ -585,7 +585,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "хер вам)))))",
           "place": 3,
-          "reward": 15.65,
+          "reward": 1565,
           "points": 90
         }
       ]
@@ -599,7 +599,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "cap888881",
           "place": 2,
-          "reward": 44.24,
+          "reward": 4424,
           "points": 110
         }
       ]
@@ -677,7 +677,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Waaarr",
           "place": 2,
-          "reward": 546.43,
+          "reward": 54643,
           "points": 110
         }
       ]
@@ -743,13 +743,13 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Evgen1722",
           "place": 5,
-          "reward": 225.63,
+          "reward": 22563,
           "points": 60
         },
         {
           "nick": "Em13!!",
           "place": 6,
-          "reward": 107.61,
+          "reward": 10761,
           "points": 50
         }
       ]
@@ -763,13 +763,13 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "АршакМкртчян",
           "place": 4,
-          "reward": 93.62,
+          "reward": 9362,
           "points": 70
         },
         {
           "nick": "Luck_is_Suck",
           "place": 33,
-          "reward": 26,
+          "reward": 2600,
           "points": 0
         }
       ]
@@ -783,7 +783,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Em13!!",
           "place": 2,
-          "reward": 529.07,
+          "reward": 52907,
           "points": 110
         }
       ]

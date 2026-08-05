@@ -743,6 +743,50 @@ async function prepareScreens(tournaments, opts) {
   return { byLeagueDate, compressed };
 }
 
+async function detectBlueInterface(source) {
+  let sharp;
+  try {
+    sharp = require("sharp");
+  } catch (err) {
+    throw new Error("sharp is required for blue screenshot verification. Run npm install first.");
+  }
+  const { data, info } = await sharp(source, { limitInputPixels: false })
+    .resize({ width: 120, withoutEnlargement: true })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let blue = 0;
+  let red = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    if (Math.max(r, g, b) < 24) continue;
+    if (b > 42 && b > r * 1.22 && b > g * 1.08) blue++;
+    if (r > 42 && r > b * 1.22 && r > g * 1.08) red++;
+  }
+  const pixels = Math.max(1, data.length / info.channels);
+  return blue / pixels >= 0.025 && blue > red * 1.15;
+}
+
+async function verifySourceMultipliers(tournaments, detectBlue = detectBlueInterface) {
+  const failures = [];
+  for (let index = 0; index < tournaments.length; index++) {
+    const tournament = tournaments[index];
+    const sources = [];
+    (tournament.sources || []).forEach((file) => sources.push(expandHome(file)));
+    (tournament.screens || []).forEach((file) => {
+      sources.push(looksLikeLocalSource(file) ? expandHome(file) : path.join(ASSETS_DIR, file));
+    });
+    for (const source of sources.filter((file) => file && fs.existsSync(file))) {
+      if (await detectBlue(source) && Number(tournament.multiplier) !== 100) {
+        failures.push(`tournament ${index + 1} (${tournament.date} ${tournament.time} ${tournament.name}): blue screenshot ${path.basename(source)} requires blue: yes or multiplier: 100`);
+      }
+    }
+  }
+  if (failures.length) throw new Error(`Blue screenshot multiplier verification failed:\n- ${failures.join("\n- ")}`);
+}
+
 function runChecked(command, args) {
   const result = spawnSync(command, args, { cwd: ROOT, stdio: "inherit", shell: false });
   if (result.status !== 0) {
@@ -762,6 +806,8 @@ async function importRatingInput() {
     warnings.forEach((w) => console.error(`- ${w}`));
     if (!opts.dryRun) process.exitCode = 2;
   }
+
+  await verifySourceMultipliers(tournaments);
 
   const prepared = await prepareScreens(tournaments, opts);
   const byDate = {};
@@ -928,11 +974,15 @@ function validateData() {
   process.exit(2);
 }
 
-const cmd = process.argv[2];
-if (cmd === "snippet") printSnippet();
-else if (cmd === "import") importRatingInput().catch((err) => {
-  console.error(err && err.stack ? err.stack : err);
-  process.exit(1);
-});
-else if (cmd === "validate") validateData();
-else usage(cmd ? 1 : 0);
+if (require.main === module) {
+  const cmd = process.argv[2];
+  if (cmd === "snippet") printSnippet();
+  else if (cmd === "import") importRatingInput().catch((err) => {
+    console.error(err && err.stack ? err.stack : err);
+    process.exit(1);
+  });
+  else if (cmd === "validate") validateData();
+  else usage(cmd ? 1 : 0);
+}
+
+module.exports = { detectBlueInterface, parseSnippetInput, verifySourceMultipliers };
