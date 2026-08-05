@@ -304,6 +304,7 @@ function initHomeClubInfoModals() {
         '<section class="club-guestbook__panel" role="dialog" aria-modal="true" aria-labelledby="clubGuestbookTitle">' +
           '<header class="club-guestbook__header"><div><small>КЛУБ «ДВА ТУЗА»</small><h2 id="clubGuestbookTitle">Книга отзывов и жалоб</h2></div><button type="button" data-guestbook-close aria-label="Закрыть">×</button></header>' +
           '<div class="club-guestbook__tabs" role="tablist"><button type="button" data-guestbook-tab="review" class="is-active">Отзывы</button><button type="button" data-guestbook-tab="complaint">Жалобы</button></div>' +
+          '<button type="button" class="club-guestbook__copy" id="clubGuestbookCopy" data-guestbook-copy>⧉ <span>Скопировать ссылку на отзывы</span></button>' +
           '<form class="club-guestbook__composer" id="clubGuestbookForm"><textarea maxlength="1500" rows="3" id="clubGuestbookText" placeholder="Напишите отзыв о клубе…"></textarea><div><span id="clubGuestbookGate"></span><button type="submit">Опубликовать</button></div></form>' +
           '<div class="club-guestbook__feed" id="clubGuestbookFeed"></div>' +
         '</section></div>');
@@ -312,6 +313,7 @@ function initHomeClubInfoModals() {
     var form = document.getElementById("clubGuestbookForm");
     var input = document.getElementById("clubGuestbookText");
     var gate = document.getElementById("clubGuestbookGate");
+    var copyBtn = document.getElementById("clubGuestbookCopy");
     var reactions = ["❤️", "🔥", "👍", "👏"];
     function dateLabel(value) { try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch (e) { return ""; } }
     function eventId(post) { return "club-guestbook:" + String(post.id || ""); }
@@ -325,6 +327,10 @@ function initHomeClubInfoModals() {
     function render() {
       var rows = posts.filter(function (post) { return post.type === activeTab; });
       input.placeholder = activeTab === "complaint" ? "Опишите жалобу или проблему…" : "Напишите отзыв о клубе…";
+      if (copyBtn) {
+        var copyLabel = copyBtn.querySelector("span");
+        if (copyLabel) copyLabel.textContent = activeTab === "complaint" ? "Скопировать ссылку на жалобы" : "Скопировать ссылку на отзывы";
+      }
       gate.textContent = canPost ? "Публикация от привязанного ника" : "Для публикации привяжите Poker21";
       input.disabled = !canPost;
       form.querySelector('button[type="submit"]').disabled = !canPost || loading;
@@ -350,6 +356,20 @@ function initHomeClubInfoModals() {
       if (event.target.closest("[data-guestbook-close]")) return close();
       var tab = event.target.closest("[data-guestbook-tab]");
       if (tab) { activeTab = tab.getAttribute("data-guestbook-tab") === "complaint" ? "complaint" : "review"; root.querySelectorAll("[data-guestbook-tab]").forEach(function (button) { button.classList.toggle("is-active", button === tab); }); render(); return; }
+      var copy = event.target.closest("[data-guestbook-copy]");
+      if (copy) {
+        var startParam = activeTab === "complaint" ? "club_guestbook_complaints" : "club_guestbook_reviews";
+        var link = typeof buildMiniAppStartLink === "function"
+          ? buildMiniAppStartLink(startParam)
+          : window.location.origin + window.location.pathname + "?startapp=" + startParam;
+        var result = typeof pokerCopyTextToClipboard === "function" ? pokerCopyTextToClipboard(link) : Promise.resolve(false);
+        Promise.resolve(result).then(function (ok) {
+          var label = copy.querySelector("span");
+          if (label) label.textContent = ok ? "Ссылка скопирована" : "Не удалось скопировать";
+          window.setTimeout(render, 1600);
+        });
+        return;
+      }
       var reaction = event.target.closest("[data-guestbook-reaction]");
       if (reaction) { var post = posts.find(function (row) { return String(row.id) === reaction.getAttribute("data-guestbook-reaction"); }); if (!post) return; request("/api/profile-event-feedback", { action: "reaction", eventId: eventId(post), emoji: reaction.getAttribute("data-emoji"), scope: "club" }).then(function (data) { feedback[eventId(post)] = data.feedback; render(); }); }
     });

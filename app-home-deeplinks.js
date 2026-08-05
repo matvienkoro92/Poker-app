@@ -89,6 +89,19 @@ function pokerInitHomeDeepLinks(opts) {
       }, 40);
       return;
     }
+    if (startParam === "club_guestbook_reviews" || startParam === "club_guestbook_complaints") {
+      if (typeof setView === "function") setView("home");
+      retryDeepLinkAction(function () {
+        var openGuestbook = document.getElementById("clubGuestbookOpenBtn");
+        if (!openGuestbook) return false;
+        openGuestbook.click();
+        var tabName = startParam === "club_guestbook_complaints" ? "complaint" : "review";
+        var tab = document.querySelector('[data-guestbook-tab="' + tabName + '"]');
+        if (tab) tab.click();
+        return true;
+      }, 40);
+      return;
+    }
     if (startParam === "winter_rating") {
       setTimeout(function () {
         if (typeof setView === "function") setView("winter-rating");
