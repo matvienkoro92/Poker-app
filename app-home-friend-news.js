@@ -421,6 +421,38 @@
     return avatars[hash % avatars.length];
   }
 
+  var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "porquinho": "./assets/sng-finalist-porquinho.webp", "поркиньо": "./assets/sng-finalist-porquinho.webp", "поркиньё": "./assets/sng-finalist-porquinho.webp",
+    "штукатур": "./assets/sng-finalist-shtukatur.webp", "shtukatur": "./assets/sng-finalist-shtukatur.webp",
+    "hakas": "./assets/sng-finalist-hakas.webp", "хакас": "./assets/sng-finalist-hakas.webp",
+    "aza": "./assets/sng-finalist-aza.webp", "aza32": "./assets/sng-finalist-aza.webp", "аза": "./assets/sng-finalist-aza.webp", "аза32": "./assets/sng-finalist-aza.webp",
+    "waaar": "./assets/summer-rating-player-waaar.webp", "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
+    "coo1er91": "./assets/summer-rating-player-cooler.webp", "em13!!": "./assets/summer-rating-player-emil.webp",
+    "winifly": "./assets/summer-rating-player-winifly.webp", "missclick": "./assets/summer-rating-player-missclick.webp",
+    "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp", "nikola233": "./assets/summer-rating-player-nikola233.webp",
+    "milkyway77": "./assets/summer-rating-player-milkyway.webp", "пряник": "./assets/summer-rating-player-pryanik.webp",
+    "pryanik2la": "./assets/summer-rating-player-pryanik.webp", "prushnik": "./assets/summer-rating-player-prushnik.webp",
+    "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp",
+    "frankl": "./assets/summer-rating-player-morf.webp", "andrushamorf": "./assets/summer-rating-player-morf.webp", "4ezzi": "./assets/summer-rating-player-morf.webp", "morf": "./assets/summer-rating-player-morf.webp", "морф": "./assets/summer-rating-player-morf.webp",
+    "alenast": "./assets/summer-rating-league2-player-alena.webp", "shkarubo": "./assets/summer-rating-league2-player-shkarubo.webp",
+    "sarmat1305": "./assets/summer-rating-league2-player-sarmat.webp", "палач": "./assets/summer-rating-league2-player-palach.webp",
+    "nakurikota": "./assets/summer-rating-league2-player-nakurikota.webp", "накурикота": "./assets/summer-rating-league2-player-nakurikota.webp",
+    "wildboar": "./assets/summer-rating-league2-player-wildboar.webp", "бабник": "./assets/summer-rating-league2-player-babnik.webp",
+    "виктор": "./assets/summer-rating-league2-player-viktor.webp", "мистерfox": "./assets/summer-rating-league2-player-mr-fox.webp",
+    "babyshark": "./assets/summer-rating-league2-player-babyshark.webp", "аспирин": "./assets/summer-rating-league2-player-aspirin.webp",
+    "ksuha": "./assets/summer-rating-league2-player-ksyukha.webp", "ksuha🐍": "./assets/summer-rating-league2-player-ksyukha.webp",
+    "ksuha🐊": "./assets/summer-rating-league2-player-ksyukha.webp", "ksuha🦖": "./assets/summer-rating-league2-player-ksyukha.webp", "ksuha🐉": "./assets/summer-rating-league2-player-ksyukha.webp",
+    "zagrebnagreb": "./assets/summer-rating-league2-player-zagrebnagreb.webp", "zagrebrnagreb": "./assets/summer-rating-league2-player-zagrebnagreb.webp"
+  };
+
+  function clubNewsPersonalArt(nick) {
+    if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
+      var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
+      if (sharedArt && sharedArt.src) return String(sharedArt.src);
+    }
+    return CLUB_NEWS_PERSONAL_ART_BY_NICK[matchKey(nick)] || "";
+  }
+
   function playerNewsColor(value) {
     var source = matchKey(value) || "player";
     var hash = 0;
@@ -1747,8 +1779,10 @@
       ? String(linkedClubProfile && linkedClubProfile.id || "")
       : String(row && row.actorId || "");
     var avatar = String(linkedProfile && linkedProfile.avatar || row && row.actorAvatar || "").trim();
-    var visual = avatar
-      ? '<img class="home-friend-news__avatar" src="' + esc(avatar) + '" alt="" loading="lazy" decoding="async">'
+    var personalArt = clubTicker ? clubNewsPersonalArt(row && row.actorNick) : "";
+    var visualUrl = personalArt || avatar;
+    var visual = visualUrl
+      ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '" alt="" loading="lazy" decoding="async">'
       : eventIconSvg(row.type);
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
@@ -1791,7 +1825,7 @@
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
       (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
-      ' home-friend-news--' + esc(row.type) + (avatar ? " home-friend-news__event-icon--avatar" : "") +
+      ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) : structuredText +

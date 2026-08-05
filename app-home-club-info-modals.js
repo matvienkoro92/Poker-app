@@ -283,5 +283,85 @@ function initHomeClubInfoModals() {
     });
   })();
 
+  (function initClubGuestbook() {
+    var openBtn = document.getElementById("clubGuestbookOpenBtn");
+    if (!openBtn) return;
+    var activeTab = "review";
+    var posts = [];
+    var feedback = {};
+    var canPost = false;
+    var loading = false;
+    function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+    function apiBase() { return typeof getApiBase === "function" ? getApiBase() : ""; }
+    function authBody(body) { return typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody(body) : body; }
+    function request(path, body) {
+      return fetch(apiBase() + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(authBody(body)) })
+        .then(function (response) { return response.json().then(function (data) { if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка загрузки"); return data; }); });
+    }
+    document.body.insertAdjacentHTML("beforeend",
+      '<div class="club-guestbook" id="clubGuestbook" hidden>' +
+        '<button type="button" class="club-guestbook__backdrop" data-guestbook-close aria-label="Закрыть"></button>' +
+        '<section class="club-guestbook__panel" role="dialog" aria-modal="true" aria-labelledby="clubGuestbookTitle">' +
+          '<header class="club-guestbook__header"><div><small>КЛУБ «ДВА ТУЗА»</small><h2 id="clubGuestbookTitle">Книга отзывов и жалоб</h2></div><button type="button" data-guestbook-close aria-label="Закрыть">×</button></header>' +
+          '<div class="club-guestbook__tabs" role="tablist"><button type="button" data-guestbook-tab="review" class="is-active">Отзывы</button><button type="button" data-guestbook-tab="complaint">Жалобы</button></div>' +
+          '<form class="club-guestbook__composer" id="clubGuestbookForm"><textarea maxlength="1500" rows="3" id="clubGuestbookText" placeholder="Напишите отзыв о клубе…"></textarea><div><span id="clubGuestbookGate"></span><button type="submit">Опубликовать</button></div></form>' +
+          '<div class="club-guestbook__feed" id="clubGuestbookFeed"></div>' +
+        '</section></div>');
+    var root = document.getElementById("clubGuestbook");
+    var feed = document.getElementById("clubGuestbookFeed");
+    var form = document.getElementById("clubGuestbookForm");
+    var input = document.getElementById("clubGuestbookText");
+    var gate = document.getElementById("clubGuestbookGate");
+    var reactions = ["❤️", "🔥", "👍", "👏"];
+    function dateLabel(value) { try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch (e) { return ""; } }
+    function eventId(post) { return "club-guestbook:" + String(post.id || ""); }
+    function avatarHtml(url, name, cls) { return url ? '<img class="' + cls + '" src="' + esc(url) + '" alt="">' : '<span class="' + cls + '">' + esc(String(name || "И").charAt(0).toUpperCase()) + '</span>'; }
+    function commentsHtml(post, info) {
+      var comments = Array.isArray(info.comments) ? info.comments : [];
+      return '<div class="club-guestbook__comments">' + comments.map(function (comment) {
+        return '<div class="club-guestbook__comment">' + avatarHtml(comment.authorAvatar, comment.author, "club-guestbook__comment-avatar") + '<div><b>' + esc(comment.author || "Игрок") + '</b><p>' + esc(comment.text) + '</p></div></div>';
+      }).join("") + '<form class="club-guestbook__comment-form" data-guestbook-comment="' + esc(post.id) + '"><input maxlength="500" placeholder="Написать комментарий…"><button type="submit">Отправить</button></form></div>';
+    }
+    function render() {
+      var rows = posts.filter(function (post) { return post.type === activeTab; });
+      input.placeholder = activeTab === "complaint" ? "Опишите жалобу или проблему…" : "Напишите отзыв о клубе…";
+      gate.textContent = canPost ? "Публикация от привязанного ника" : "Для публикации привяжите Poker21";
+      input.disabled = !canPost;
+      form.querySelector('button[type="submit"]').disabled = !canPost || loading;
+      feed.innerHTML = rows.length ? rows.map(function (post) {
+        var info = feedback[eventId(post)] || {};
+        var buttons = reactions.map(function (emoji) { var count = Number(info.reactions && info.reactions[emoji]) || 0; return '<button type="button" class="club-guestbook__reaction' + (info.myReaction === emoji ? ' is-mine' : '') + '" data-guestbook-reaction="' + esc(post.id) + '" data-emoji="' + emoji + '">' + emoji + (count ? '<span>' + count + '</span>' : '') + '</button>'; }).join("");
+        return '<article class="club-guestbook__post"><header>' + avatarHtml(post.authorAvatar, post.authorName, "club-guestbook__avatar") + '<div><strong>' + esc(post.authorName || "Игрок") + '</strong><small>' + esc(dateLabel(post.createdAt)) + '</small></div><span class="club-guestbook__kind">' + (post.type === "complaint" ? "Жалоба" : "Отзыв") + '</span></header><p class="club-guestbook__text">' + esc(post.text) + '</p><div class="club-guestbook__reactions">' + buttons + '<span>💬 ' + (Number(info.commentCount) || 0) + '</span></div>' + commentsHtml(post, info) + '</article>';
+      }).join("") : '<div class="club-guestbook__empty">' + (loading ? "Загрузка…" : (activeTab === "complaint" ? "Жалоб пока нет" : "Отзывов пока нет")) + '</div>';
+    }
+    function loadFeedback() {
+      var ids = posts.map(eventId);
+      if (!ids.length) { feedback = {}; render(); return Promise.resolve(); }
+      return request("/api/profile-event-feedback", { action: "list", eventIds: ids, scope: "club" }).then(function (data) { feedback = data.feedback || {}; render(); }).catch(function () { feedback = {}; render(); });
+    }
+    function load() {
+      loading = true; render();
+      return request("/api/club-guestbook", { action: "list" }).then(function (data) { posts = data.posts || []; canPost = data.canPost === true; return loadFeedback(); }).catch(function (error) { feed.innerHTML = '<div class="club-guestbook__empty">' + esc(error.message) + '</div>'; }).finally(function () { loading = false; render(); });
+    }
+    function open() { root.hidden = false; document.body.classList.add("club-guestbook-open"); load(); }
+    function close() { root.hidden = true; document.body.classList.remove("club-guestbook-open"); }
+    openBtn.addEventListener("click", open);
+    root.addEventListener("click", function (event) {
+      if (event.target.closest("[data-guestbook-close]")) return close();
+      var tab = event.target.closest("[data-guestbook-tab]");
+      if (tab) { activeTab = tab.getAttribute("data-guestbook-tab") === "complaint" ? "complaint" : "review"; root.querySelectorAll("[data-guestbook-tab]").forEach(function (button) { button.classList.toggle("is-active", button === tab); }); render(); return; }
+      var reaction = event.target.closest("[data-guestbook-reaction]");
+      if (reaction) { var post = posts.find(function (row) { return String(row.id) === reaction.getAttribute("data-guestbook-reaction"); }); if (!post) return; request("/api/profile-event-feedback", { action: "reaction", eventId: eventId(post), emoji: reaction.getAttribute("data-emoji"), scope: "club" }).then(function (data) { feedback[eventId(post)] = data.feedback; render(); }); }
+    });
+    root.addEventListener("submit", function (event) {
+      var commentForm = event.target.closest("[data-guestbook-comment]");
+      if (!commentForm) return;
+      event.preventDefault(); var field = commentForm.querySelector("input"); var post = posts.find(function (row) { return String(row.id) === commentForm.getAttribute("data-guestbook-comment"); }); if (!post || !field.value.trim()) return;
+      request("/api/profile-event-feedback", { action: "comment", eventId: eventId(post), text: field.value, scope: "club" }).then(function (data) { field.value = ""; feedback[eventId(post)] = data.feedback; render(); });
+    });
+    form.addEventListener("submit", function (event) { event.preventDefault(); var text = input.value.trim(); if (!text || !canPost || loading) return; loading = true; render(); request("/api/club-guestbook", { action: "create", type: activeTab, text: text }).then(function (data) { posts = data.posts || []; input.value = ""; return loadFeedback(); }).catch(function (error) { gate.textContent = error.message; }).finally(function () { loading = false; render(); }); });
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape" && !root.hidden) close(); });
+  })();
+
 
 }

@@ -76,6 +76,7 @@ const handlers = {
   "gazette-article-comments": () => require(path.join(handlersDir, "gazette-article-comments.js")),
   "profile-event-feedback": () => require(path.join(handlersDir, "profile-event-feedback.js")),
   "profile-wall": () => require(path.join(handlersDir, "profile-wall.js")),
+  "club-guestbook": () => require(path.join(handlersDir, "club-guestbook.js")),
   "gazette-editor-planner": () => require(path.join(handlersDir, "gazette-editor-planner.js")),
   "rating-subscribe": () => require(path.join(handlersDir, "rating-subscribe.js")),
   "raffle-subscribe": () => require(path.join(handlersDir, "raffle-subscribe.js")),
