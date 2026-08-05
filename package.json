@@ -26,7 +26,7 @@
     "test:keyboard-dock": "node scripts/chat-keyboard-dock-math-tests.js",
     "check:syntax": "node scripts/check-js-syntax.js",
     "check:handlers": "node scripts/check-js-syntax.js",
-    "check:calculations": "node --test tests/admin-report-shifts-rakeback.test.js && node scripts/calculation-redis-health-check.js",
+    "check:calculations": "node --test tests/admin-report-shifts-rakeback.test.js tests/raffle-calculation-summary.test.js && node scripts/calculation-redis-health-check.js",
     "check:calculations:redis": "node scripts/calculation-redis-health-check.js",
     "test:contracts": "node scripts/contract-tests.js",
     "redis:audit": "node scripts/redis-schema-audit.js",
