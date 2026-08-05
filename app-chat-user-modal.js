@@ -1939,6 +1939,36 @@ if (chatUserModalEl) {
       })
       .catch(function () { return null; });
   }
+  function getChatUserModalGuestbookReviewReady(profileData, userId) {
+    if (!base || typeof fetch !== "function") return Promise.resolve(false);
+    var targetIds = [
+      userId,
+      profileData && profileData.userId,
+      profileData && profileData.accountId,
+      profileData && profileData.dtId,
+      profileData && profileData.chatUserId,
+      profileData && profileData.memberId,
+    ].map(function (value) { return String(value || "").trim(); }).filter(Boolean);
+    if (!targetIds.length) return Promise.resolve(false);
+    var body = { action: "list" };
+    if (typeof pokerApiAuthJsonBody === "function") body = pokerApiAuthJsonBody(body);
+    return fetch(base + "/api/club-guestbook", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (!data || !data.ok || !Array.isArray(data.posts)) return false;
+        return data.posts.some(function (post) {
+          if (!post || post.type !== "review") return false;
+          return [post.authorProfileId, post.authorId].some(function (value) {
+            var id = String(value || "").trim();
+            return !!id && targetIds.indexOf(id) >= 0;
+          });
+        });
+      }).catch(function () { return false; });
+  }
   function getChatUserModalRaffleWinCountReady(ratingNick, profileData, userId) {
     var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
     if (!targetKeys.length && !String(ratingNick || "").trim()) return Promise.resolve(0);
@@ -2090,6 +2120,7 @@ if (chatUserModalEl) {
         respect: null,
         friends: null,
         referrals: null,
+        guestbookReview: false,
         privateCash2040Played: privateCash2040Played,
         isClubAdmin: true,
         isSelfProfile: !!isSelfProfile,
@@ -2101,6 +2132,7 @@ if (chatUserModalEl) {
       getChatUserModalRespectScoreReady(userId, isSelfProfile),
       getChatUserModalFriendsCountReady(userId, isSelfProfile),
       getChatUserModalReferralsCountReady(isSelfProfile),
+      getChatUserModalGuestbookReviewReady(profileData, userId),
     ]).then(function (parts) {
       return {
         tournaments: parts && parts[0] || null,
@@ -2108,6 +2140,7 @@ if (chatUserModalEl) {
         respect: parts && parts[2] != null ? parts[2] : null,
         friends: parts && parts[3] != null ? parts[3] : null,
         referrals: parts && parts[4] != null ? parts[4] : null,
+        guestbookReview: !!(parts && parts[5]),
         privateCash2040Played: privateCash2040Played,
         isClubAdmin: false,
         isSelfProfile: !!isSelfProfile,
@@ -2116,6 +2149,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("оставил отзыв") >= 0) return { mod: "club-review", label: "ОСТАВИЛ<br>ОТЗЫВ", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-card.webp" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
@@ -2161,6 +2195,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementRule(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("оставил отзыв") >= 0) return "Опубликуйте отзыв о клубе в книге отзывов и жалоб. Достижение выдается один раз и не имеет уровней.";
     if (key.indexOf("снг") >= 0) return "Даётся гранд-финалистам турнира СНГ Лига Чемпионов Два Туза: 1 место получает статус чемпиона СНГ сезона, 2 место — финалиста.";
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return "Ручная клубная ачивка за победу в живом оффлайн-турнире. Записи добавляются администратором клуба.";
@@ -2192,6 +2227,13 @@ if (chatUserModalEl) {
   function chatUserModalAchievementInfoFrom(title, rows, options, tier) {
     var progress = [];
     var levels = [];
+    if (options && options.hideProgress === true) {
+      return {
+        rule: options.info || chatUserModalAchievementRule(title),
+        progress: "",
+        levels: "",
+      };
+    }
     if (tier && options && options.tier) {
       var tierOptions = options.tier;
       var unit = tierOptions.unit || "";
@@ -2558,6 +2600,11 @@ if (chatUserModalEl) {
     var socialHtml =
       manualHtml +
       heroHtml +
+      chatUserModalAchievementCardHtml("✎", "Оставил отзыв", metrics.guestbookReview ? [{ label: "Отзыв опубликован" }] : [], {
+        placeholder: "Оставьте отзыв о клубе",
+        info: "Опубликуйте отзыв о клубе в книге отзывов и жалоб. Достижение выдается один раз и не имеет уровней.",
+        hideProgress: true,
+      }) +
       chatUserModalAchievementCardHtml("★", "Любимец клуба", [], {
         tier: {
           value: metrics.respect != null ? metrics.respect : 0,
