@@ -99,6 +99,8 @@ function initProfilePokerPlus() {
   var pokerPlusProfileLinked = false;
   var pokerPlusProfileLoading = false;
   var pokerPlusAutoRefreshPromise = null;
+  var pokerPlusActiveLoadPromise = null;
+  var pokerPlusActiveLoadRefresh = false;
   var pokerPlusAccountId = "";
   var pokerPlusPostTimeoutCheckSeq = 0;
   var pokerPlusLastSyncedAt = 0;
@@ -1772,6 +1774,12 @@ function initProfilePokerPlus() {
 
   function loadProfile(refresh, options) {
     options = options || {};
+    if (pokerPlusActiveLoadPromise) {
+      if (!refresh || pokerPlusActiveLoadRefresh) return pokerPlusActiveLoadPromise;
+      return Promise.resolve(pokerPlusActiveLoadPromise)
+        .catch(function () {})
+        .then(function () { return loadProfile(true, options); });
+    }
     var silentRefresh = !!options.silent;
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
@@ -1801,7 +1809,7 @@ function initProfilePokerPlus() {
         body.ciphertext = refreshCiphertext;
       }
     }
-    return pokerPlusRunFinally(
+    var loadPromise = pokerPlusRunFinally(
       pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-player", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1888,6 +1896,14 @@ function initProfilePokerPlus() {
         setProfileStatusLoading(false);
       }
     );
+    var trackedLoadPromise = pokerPlusRunFinally(loadPromise, function () {
+      if (pokerPlusActiveLoadPromise !== trackedLoadPromise) return;
+      pokerPlusActiveLoadPromise = null;
+      pokerPlusActiveLoadRefresh = false;
+    });
+    pokerPlusActiveLoadRefresh = !!refresh;
+    pokerPlusActiveLoadPromise = trackedLoadPromise;
+    return trackedLoadPromise;
   }
 
   function maybeAutoRefreshPokerPlus() {
@@ -2071,7 +2087,9 @@ function initProfilePokerPlus() {
   }
   if (statusRefreshBtn && statusRefreshBtn.dataset.bound !== "1") {
     statusRefreshBtn.dataset.bound = "1";
-    statusRefreshBtn.addEventListener("click", refreshPokerPlusFromButton);
+    statusRefreshBtn.addEventListener("click", function () {
+      refreshBtn.click();
+    });
   }
   if (unbindBtn.dataset.bound !== "1") {
     unbindBtn.dataset.bound = "1";
