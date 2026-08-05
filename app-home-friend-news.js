@@ -445,12 +445,56 @@
     "zagrebnagreb": "./assets/summer-rating-league2-player-zagrebnagreb.webp", "zagrebrnagreb": "./assets/summer-rating-league2-player-zagrebnagreb.webp"
   };
 
+  var CLUB_NEWS_CARD_ART_BY_NICK = {
+    "porquinho": "porquinho", "поркиньо": "porquinho", "поркиньё": "porquinho",
+    "штукатур": "shtukatur", "shtukatur": "shtukatur",
+    "hakas": "hakas", "хакас": "hakas",
+    "aza": "aza", "aza32": "aza", "аза": "aza", "аза32": "aza",
+    "waaar": "waaar", "waaarr": "waaar", "покерманки": "pokermanki", "pokermanki": "pokermanki",
+    "coo1er91": "cooler", "necoo1er91": "cooler", "em13!!": "emil",
+    "winifly": "winifly", "missclick": "missclick",
+    "рыбнадзор": "rybnadzor", "nikola233": "nikola233",
+    "milkyway77": "milkyway", "пряник": "pryanik", "pryanik2la": "pryanik",
+    "prushnik": "prushnik", "evgen1722": "evgen1722", "хер вам)))))": "khervam",
+    "frankl": "morf", "andrushamorf": "morf", "4ezzi": "morf", "morf": "morf", "морф": "morf",
+    "alenast": "alena", "shkarubo": "shkarubo", "sarmat1305": "sarmat", "палач": "palach",
+    "nakurikota": "nakurikota", "накурикота": "nakurikota", "wildboar": "wildboar",
+    "бабник": "babnik", "виктор": "viktor", "мистерfox": "mrfox",
+    "babyshark": "babyshark", "аспирин": "aspirin",
+    "ksuha": "ksyukha", "ksuha🐍": "ksyukha", "ksuha🐊": "ksyukha",
+    "ksuha🦖": "ksyukha", "ksuha🐉": "ksyukha",
+    "zagrebnagreb": "zagrebnagreb", "zagrebrnagreb": "zagrebnagreb"
+  };
+
   function clubNewsPersonalArt(nick) {
     if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
       var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
       if (sharedArt && sharedArt.src) return String(sharedArt.src);
     }
     return CLUB_NEWS_PERSONAL_ART_BY_NICK[matchKey(nick)] || "";
+  }
+
+  function clubNewsCardArt(nick, occurrence) {
+    var slug = CLUB_NEWS_CARD_ART_BY_NICK[matchKey(nick)] || "";
+    var variantIndex = Math.max(0, Number(occurrence) || 0);
+    if (slug === "emil") {
+      if (variantIndex === 1) return "./assets/summer-rating-player-emil.webp";
+      if (variantIndex >= 2) return "./assets/club-news-personal/emil-news-cutout-v3.webp";
+      return "./assets/club-news-personal/emil-news-cutout-v2.webp";
+    }
+    if (slug === "pokermanki") {
+      if (variantIndex === 1) return "./assets/summer-rating-player-pokermanki.webp?v=3.547";
+      if (variantIndex >= 2) return "./assets/club-news-personal/pokermanki-news-cutout-v4.webp";
+      return "./assets/club-news-personal/pokermanki-news-cutout-v2.webp";
+    }
+    if (slug === "waaar") {
+      if (variantIndex === 1) return "./assets/summer-rating-player-waaar.webp";
+      if (variantIndex >= 2) return "./assets/club-news-personal/waaar-news-cutout-v3.webp";
+    }
+    if (slug === "evgen1722" && variantIndex >= 1) {
+      return "./assets/summer-rating-player-evgen1722.webp";
+    }
+    return slug ? "./assets/club-news-personal/" + slug + "-news-cutout.webp" : "";
   }
 
   function playerNewsColor(value) {
@@ -624,8 +668,10 @@
     var cursor = 0;
     var match;
     while ((match = pattern.exec(text))) {
-      html += esc(text.slice(cursor, match.index));
-      html += '<span class="home-friend-news__amount">' + esc(match[0]) + "</span>";
+      var beforeAmount = text.slice(cursor, match.index);
+      var hasSign = /[+−-]\s*$/.test(beforeAmount);
+      html += esc(beforeAmount);
+      html += '<span class="home-friend-news__amount">' + (hasSign ? "" : "+") + esc(match[0]) + "</span>";
       cursor = match.index + match[0].length;
     }
     return html + esc(text.slice(cursor));
@@ -1763,7 +1809,7 @@
       (place ? " за " + place + "-е место" : "");
   }
 
-  function eventHtml(row, ticker, isDayHero, clubTicker) {
+  function eventHtml(row, ticker, isDayHero, clubTicker, artOccurrence) {
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
@@ -1779,7 +1825,9 @@
       ? String(linkedClubProfile && linkedClubProfile.id || "")
       : String(row && row.actorId || "");
     var avatar = String(linkedProfile && linkedProfile.avatar || row && row.actorAvatar || "").trim();
-    var personalArt = clubTicker ? clubNewsPersonalArt(row && row.actorNick) : "";
+    var personalArt = clubTicker
+      ? clubNewsPersonalArt(row && row.actorNick)
+      : (newsModalMode === "club" ? clubNewsCardArt(row && row.actorNick, artOccurrence) : "");
     var visualUrl = personalArt || avatar;
     var visual = visualUrl
       ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '" alt="" loading="lazy" decoding="async">'
@@ -1803,6 +1851,10 @@
     var poker21LinkedHtml = !ticker && linkedProfile && linkedProfile.poker21Linked
       ? '<span class="home-friend-news-modal__poker21-linked" title="Poker21 привязан" aria-label="Poker21 привязан">✓</span>'
       : "";
+    var titleAmount = Math.max(0, Number(row && row.prizeAmount) || 0);
+    var titleAmountHtml = !ticker && newsModalMode === "club" && titleAmount > 0
+      ? '<span class="home-friend-news-modal__title-amount">+' + esc(formatRub(titleAmount)) + '</span>'
+      : "";
     var playerAttrs = canOpenProfile
       ? ' data-home-news-player-id="' + esc(eventPlayerId) + '"' +
         ' data-home-news-player-name="' + esc(row.actorNick || "Игрок") + '"' +
@@ -1811,7 +1863,7 @@
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
-        poker21LinkedHtml + (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
+        poker21LinkedHtml + titleAmountHtml + (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
         profileMetaHtml +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";
@@ -1858,6 +1910,13 @@
       }).sort(function (a, b) {
         return (Number(b && b.prizeAmount) || 0) - (Number(a && a.prizeAmount) || 0);
       })[0];
+      var artOccurrenceBySlug = {};
+      var dayEventsHtml = group.rows.map(function (row) {
+        var artSlug = CLUB_NEWS_CARD_ART_BY_NICK[matchKey(row && row.actorNick)] || "";
+        var artOccurrence = artSlug ? (artOccurrenceBySlug[artSlug] || 0) : 0;
+        if (artSlug) artOccurrenceBySlug[artSlug] = artOccurrence + 1;
+        return eventHtml(row, false, row === dayHero, false, artOccurrence);
+      }).join("");
       return '<section class="home-friend-news-modal__day-group">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
         (newsModalMode === "club" ? '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
@@ -1867,7 +1926,7 @@
             (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' : "") +
         '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
         '<div class="home-friend-news-modal__day-events">' +
-          group.rows.map(function (row) { return eventHtml(row, false, row === dayHero); }).join("") +
+          dayEventsHtml +
         "</div>" +
       "</section>";
     }).join("");
