@@ -532,7 +532,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "12:00",
       "name": "DV Rebuy",
       "buyin": 800,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "Пряник",
@@ -686,7 +686,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "19:00",
       "name": "НОК",
       "buyin": 1000,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "ПокерМанки",
@@ -718,7 +718,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "20:00",
       "name": "Rebuy Evening",
       "buyin": 800,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "ПокерМанки",

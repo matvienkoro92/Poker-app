@@ -283,7 +283,7 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "time": "20:00",
       "name": "Tournament PLO6",
       "buyin": 800,
-      "league": 2,
+      "league": 1,
       "players": [
         {
           "nick": "tatarin_1",

@@ -114,8 +114,8 @@ function normalizePlayerNick(playerId, ocrNick) {
 
 function inferLeague(buyin) {
   const amount = Number(buyin);
-  if (Number.isFinite(amount) && amount >= 100) return amount >= 500 ? 1 : 2;
-  return 1;
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return amount >= 500 ? 1 : 2;
 }
 
 function looksLikePlayerName(token) {
@@ -372,7 +372,7 @@ function formatDraft(tournaments) {
   return tournaments.map((tournament) => {
     const comments = [];
     if (tournament.time.includes("?") || tournament.date.includes("?")) comments.push("# TODO: проверить дату/время");
-    if (!tournament.buyin) comments.push("# TODO: проверить buyin");
+    if (!tournament.buyin) comments.push("# TODO: проверить buyin и лигу");
     const lines = [
       ...comments,
       `date: ${tournament.date}`,

@@ -6,6 +6,7 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-01-07-2026-league1-dv-turbo-500-80k-10h.avif",
     "rating-compressed-preview/rating-01-07-2026-league1-dv-rebuy-12h.avif",
     "rating-compressed-preview/rating-01-07-2026-league1-dv-plo5-30k-12h.avif",
+    "rating-compressed-preview/rating-01-07-2026-league1-tournament-plo6-20h.avif",
     "rating-compressed-preview/rating-01-07-2026-league1-new-hot-pko-15h.avif",
     "rating-compressed-preview/rating-01-07-2026-league1-big-boss-18h.avif",
     "rating-compressed-preview/rating-01-07-2026-league1-one-million-gtd-18h.avif",
@@ -578,8 +579,8 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
   ]
 ,
   "02.08.2026": [
-    "rating-compressed-preview/rating-02-08-2026-league2-turnir-mesyaca-18h.avif",
-    "rating-compressed-preview/rating-02-08-2026-league2-hok-19h.avif"
+    "rating-compressed-preview/rating-02-08-2026-league1-turnir-mesyaca-18h.avif",
+    "rating-compressed-preview/rating-02-08-2026-league1-hok-19h.avif"
   ]
 ,
   "03.08.2026": [
@@ -589,5 +590,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-03-08-2026-league1-monday-200k-gtd-18h.jpg",
     "rating-compressed-preview/rating-03-08-2026-league1-hok-19h.jpg",
     "rating-compressed-preview/rating-03-08-2026-league1-rebuy-evening-20h.jpg"
+  ]
+,
+  "04.08.2026": [
+    "rating-compressed-preview/rating-04-08-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league1-nok-19h.jpg",
+    "rating-compressed-preview/rating-04-08-2026-league1-rebuy-evening-20h.jpg"
   ]
 };
