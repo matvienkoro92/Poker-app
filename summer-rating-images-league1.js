@@ -475,7 +475,8 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-21-07-2026-league1-dv-turbo-500-50k-10h.avif",
     "rating-compressed-preview/rating-21-07-2026-league1-dv-bounty-100k-13h.avif",
     "rating-compressed-preview/rating-21-07-2026-league1-new-hot-pko-2-3-15h.avif",
-    "rating-compressed-preview/rating-21-07-2026-league1-bounty-magic-50k-18h.avif"
+    "rating-compressed-preview/rating-21-07-2026-league1-bounty-magic-50k-18h.avif",
+    "rating-compressed-preview/rating-21-07-2026-league1-bounty-magic-50k-18h.jpg"
   ],
   "22.07.2026": [
     "rating-compressed-preview/rating-22-07-2026-league1-dv-rebuy-12h.avif",

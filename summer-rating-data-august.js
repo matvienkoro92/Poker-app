@@ -510,9 +510,28 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
           "points": 90
         }
       ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ПСИХ",
+          "place": 2,
+          "reward": 3787.5,
+          "points": 110
+        },
+        {
+          "nick": "GazMays",
+          "place": 5,
+          "reward": 532.5,
+          "points": 60
+        }
+      ]
     }
-  ]
-,
+  ],
   "04.08.2026": [
     {
       "time": "00:00",

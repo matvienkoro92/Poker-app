@@ -4880,6 +4880,12 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "league": 1,
       "players": [
         {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 166830,
+          "points": 135
+        },
+        {
           "nick": "АршакМкртчян",
           "place": 21,
           "reward": 1090,

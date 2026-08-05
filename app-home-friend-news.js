@@ -40,12 +40,14 @@
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v2";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v2:";
   var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v9";
+  var CLUB_WALL_EVENTS_CACHE_KEY = "poker_home_club_wall_rendered_v1";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
   var clubNewsUpdatedAt = 0;
   var clubWallLoadPromise = null;
   var clubWallLoading = false;
+  var clubWallUpdatedAt = 0;
   var clubNewsRetryTimer = 0;
   var clubNewsRetryCount = 0;
   var clubProfileByNick = {};
@@ -133,6 +135,28 @@
           return row && row.id !== "club-empty" && row.id !== "club-loading";
         }).slice(0, MAX_EVENTS)
       ));
+    } catch (error) {}
+  }
+
+  function readClubWallEventsCache() {
+    try {
+      var stored = JSON.parse(sessionStorage.getItem(CLUB_WALL_EVENTS_CACHE_KEY) || "null");
+      if (!stored || !Array.isArray(stored.rows)) return [];
+      clubWallUpdatedAt = Math.max(0, Number(stored.at) || 0);
+      return stored.rows.filter(function (row) {
+        return row && row.id && isRecentEvent(row.at);
+      }).slice(0, MAX_EVENTS);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeClubWallEventsCache(rows) {
+    try {
+      sessionStorage.setItem(CLUB_WALL_EVENTS_CACHE_KEY, JSON.stringify({
+        at: Date.now(),
+        rows: (Array.isArray(rows) ? rows : []).slice(0, MAX_EVENTS),
+      }));
     } catch (error) {}
   }
 
@@ -856,6 +880,16 @@
     return source.filter(Boolean);
   }
 
+  function normalizeTournamentNewsLine(line) {
+    var text = String(line || "").trim();
+    if (/(?:Занял\s+)?\d+-е\s+место.*\bтурнире\b/i.test(text)) {
+      text = text
+        .replace(/^Занял\s+/i, "")
+        .replace(/\s+и\s+выиграл\s+/i, ", выигрыш ");
+    }
+    return text.replace(/^Продвинулся в ачивке\s+/i, "+1 ачивка ");
+  }
+
   function ensureStructuredPlayerEvent(row) {
     if (!row || !row.actorNick) return row;
     if (!row.newsTitle || matchKey(row.newsTitle) === matchKey(row.actorNick)) {
@@ -872,7 +906,7 @@
       }).filter(Boolean);
     }
     var seenLines = {};
-    row.newsLines = row.newsLines.filter(function (line) {
+    row.newsLines = row.newsLines.map(normalizeTournamentNewsLine).filter(function (line) {
       var key = matchKey(String(line || "").replace(/[.\s]+$/, ""));
       if (!key || seenLines[key]) return false;
       seenLines[key] = true;
@@ -1219,7 +1253,7 @@
       if (!friend) return null;
       var reward = Number(row && row.reward) || 0;
       var place = Number(row && row.place) || 0;
-      var action = reward > 0 ? "выиграл " + formatRub(reward) : "";
+      var action = reward > 0 ? "выигрыш " + formatRub(reward) : "";
       if (!action) return null;
       var detail = String(row && row.tournament || "").trim();
       var displayName = String(row && row.nick || "").trim() || friendName(friend);
@@ -1233,17 +1267,17 @@
           : victoryCount % 10 >= 2 && victoryCount % 10 <= 4 && (victoryCount % 100 < 12 || victoryCount % 100 > 14)
             ? "победы"
             : "побед";
-        achievementParts.push("продвинулся в ачивке «Король турниров»: " + victoryCount + " " + victoryWord);
+        achievementParts.push("+1 ачивка «Король турниров»: " + victoryCount + " " + victoryWord);
       }
       if (reward >= 100000) {
-        achievementParts.push("продвинулся в ачивке «Занос от 100к»: " +
+        achievementParts.push("+1 ачивка «Занос от 100к»: " +
           Math.max(1, Number(row && row.bigWins100Count) || 1));
       } else if (reward >= 50000) {
-        achievementParts.push("продвинулся в ачивке «Занос от 50 до 100к»: " +
+        achievementParts.push("+1 ачивка «Занос от 50 до 100к»: " +
           Math.max(1, Number(row && row.bigWins50Count) || 1));
       }
-      var newsLines = [(place > 0 ? "Занял " + place + "-е место" : "Получил приз") +
-        (detail ? " в турнире " + detail : "") + (action ? " и " + action : "")];
+      var newsLines = [(place > 0 ? place + "-е место" : "Приз") +
+        (detail ? " в турнире " + detail : "") + (action ? ", " + action : "")];
       achievementParts.forEach(function (part) {
         newsLines.push(part.charAt(0).toUpperCase() + part.slice(1));
       });
@@ -1776,13 +1810,14 @@
       return '<button type="button" data-home-comment-emoji="' + esc(emoji) + '" aria-label="Вставить ' + esc(emoji) + '">' + esc(emoji) + "</button>";
     }).join("") + "</span>";
     return '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
-        reactionButtons +
+        reactionButtons + '</span>' +
+        '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
-        "</button></span>" +
-        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span></span>" +
+        "</button>" +
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span></span></span>" +
       '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -1827,11 +1862,11 @@
     var lines = Array.isArray(row && row.newsLines) ? row.newsLines : [];
     var source = lines.join(". ") || String(row && row.text || "");
     if (!place) {
-      var placeMatch = source.match(/Занял\s+(\d+)-е\s+место/i);
+      var placeMatch = source.match(/(?:Занял\s+)?(\d+)-е\s+место/i);
       if (placeMatch) place = Math.max(0, Number(placeMatch[1]) || 0);
     }
     if (!tournament) {
-      var tournamentMatch = source.match(/в\s+турнире\s+(.+?)(?:\s+и\s+выиграл|[.]|$)/i);
+      var tournamentMatch = source.match(/в\s+турнире\s+(.+?)(?:\s+и\s+выиграл|,\s*выигрыш|[.]|$)/i);
       if (tournamentMatch) tournament = String(tournamentMatch[1] || "").trim();
     }
     if (!amount || !actor || !tournament) return String(row && row.text || "");
@@ -2077,10 +2112,10 @@
     if (!list) return;
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
-          '<strong>НАГРАДА 15 000 ₽</strong>' +
-          '<span><b>Больше всех «Героев дня» в августе</b>' +
-          '<small>Чтобы получить «Героя дня», выиграйте больше всех за день в одном турнире.</small></span>' +
-          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть &gt;&gt;</button>' +
+          '<strong>15 000 ₽</strong>' +
+          '<span><b>«Герой дня» · август</b>' +
+          '<small>Награда лидеру месяца</small></span>' +
+          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть</button>' +
         '</aside>'
       : "";
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
@@ -2323,7 +2358,9 @@
         if (clubTab) {
           clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "wall" ? "wall" : "wins";
           if (clubNewsTab === "wall") {
-            loadClubWallNews(true);
+            renderModalList(clubWallEvents);
+            loadActiveModalFeedback(clubWallEvents);
+            loadClubWallNews(false);
           } else {
             renderModalList(clubEvents);
             loadActiveModalFeedback(clubEvents);
@@ -2367,7 +2404,7 @@
             achievementsOpen.disabled = false;
             achievementsOpen.classList.remove("is-loading");
             achievementsOpen.removeAttribute("aria-busy");
-            achievementsOpen.textContent = "Смотреть >>";
+            achievementsOpen.textContent = "Смотреть";
           };
           var openAchievements = function () {
             if (typeof window.openHallFishAchievementsModal !== "function") return false;
@@ -2869,12 +2906,12 @@
     var byAccount = {};
     var accountIds = [];
     (players || []).forEach(function (player) {
-      [player && player.accountId, player && player.dtId, player && player.userId].forEach(function (id) {
-        id = String(id || "").trim();
-        if (!id || byAccount[id]) return;
-        byAccount[id] = player;
-        accountIds.push(id);
-      });
+      var aliases = [player && player.dtId, player && player.accountId, player && player.userId]
+        .map(function (id) { return String(id || "").trim(); })
+        .filter(Boolean);
+      aliases.forEach(function (id) { if (!byAccount[id]) byAccount[id] = player; });
+      var canonicalId = aliases[0] || "";
+      if (canonicalId && accountIds.indexOf(canonicalId) === -1) accountIds.push(canonicalId);
     });
     // Club news follows the reporting day: 06:00 MSK through 06:00 MSK,
     // so early-morning wall posts still belong to the displayed game day.
@@ -2883,6 +2920,7 @@
     var payload = {
       action: "club-feed",
       accountIds: accountIds,
+      accountIdsAreCanonical: true,
       from: dayStart && Number.isFinite(dayStart.getTime()) ? dayStart.toISOString() : "",
       to: dayEnd ? dayEnd.toISOString() : "",
     };
@@ -2920,11 +2958,15 @@
     if (clubWallLoadPromise) return clubWallLoadPromise;
     var base = apiBase();
     if (!base) return Promise.resolve();
+    if (!force && clubWallUpdatedAt && Date.now() - clubWallUpdatedAt < 60 * 1000) {
+      if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
+      return Promise.resolve();
+    }
     clubWallLoading = true;
     if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
     var request = cachedFetchJson(
       base + "/api/player-crm?publicLevels=1",
-      "club-wall-public-levels-v1",
+      "public-levels",
       force ? 0 : 5 * 60 * 1000,
       { cache: force ? "no-store" : "default" }
     ).then(function (data) {
@@ -2938,6 +2980,8 @@
       return loadClubWallEvents(players, clubTournamentDayKey());
     }).then(function (rows) {
       clubWallEvents = Array.isArray(rows) ? rows : [];
+      clubWallUpdatedAt = Date.now();
+      writeClubWallEventsCache(clubWallEvents);
       if (newsModalMode === "club" && clubNewsTab === "wall") {
         renderModalList(clubWallEvents);
         loadActiveModalFeedback(clubWallEvents);
@@ -3058,6 +3102,8 @@
       if (!clubWallLoadPromise) {
         var wallRequest = loadClubWallEvents(players, tournamentDay).then(function (wallEvents) {
           clubWallEvents = Array.isArray(wallEvents) ? wallEvents : [];
+          clubWallUpdatedAt = Date.now();
+          writeClubWallEventsCache(clubWallEvents);
         }).catch(function () {
           return [];
         }).finally(function () {
@@ -3082,6 +3128,7 @@
   function init() {
     events = readRenderedEventsCache();
     clubEvents = readClubEventsCache();
+    clubWallEvents = readClubWallEventsCache();
     // The generated tournament feed is already on the page. Use it for the
     // first paint instead of holding the ticker behind two network requests.
     // Remote data still replaces this snapshot with real profiles and daily
