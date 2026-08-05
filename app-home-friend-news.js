@@ -519,6 +519,13 @@
     return PLAYER_NEWS_COLORS[hash % PLAYER_NEWS_COLORS.length];
   }
 
+  window.pokerGetClubNewsPersonalArt = function (nick) {
+    return clubNewsPersonalArt(nick);
+  };
+  window.pokerGetClubNewsPlayerColor = function (nick) {
+    return playerNewsColor(nick);
+  };
+
   function attachFriendAvatars(rows, friends) {
     var candidates = (friends || []).map(function (friend) {
       return {

@@ -320,6 +320,24 @@ function initHomeClubInfoModals() {
     function dateLabel(value) { try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch (e) { return ""; } }
     function eventId(post) { return "club-guestbook:" + String(post.id || ""); }
     function avatarHtml(url, name, cls) { return url ? '<img class="' + cls + '" src="' + esc(url) + '" alt="">' : '<span class="' + cls + '">' + esc(String(name || "И").charAt(0).toUpperCase()) + '</span>'; }
+    function authorAccent(name) {
+      if (typeof window.pokerGetClubNewsPlayerColor === "function") return window.pokerGetClubNewsPlayerColor(name);
+      var colors = ["#65c7ff", "#68e2ad", "#ffbf59", "#ff829f", "#aa92ff", "#f080d8"];
+      var source = String(name || "player").toLowerCase();
+      var hash = 0;
+      for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+      return { accent: colors[hash % colors.length] };
+    }
+    function authorAvatarHtml(post) {
+      var profileAvatar = String(post.authorAvatar || "").trim();
+      var personalArt = typeof window.pokerGetClubNewsPersonalArt === "function"
+        ? String(window.pokerGetClubNewsPersonalArt(post.authorName) || "").trim()
+        : "";
+      var url = personalArt || profileAvatar;
+      if (!url) return avatarHtml("", post.authorName, "club-guestbook__avatar");
+      return '<img class="club-guestbook__avatar' + (personalArt ? ' club-guestbook__avatar--personal-art' : '') + '" src="' + esc(url) + '"' +
+        (personalArt && profileAvatar ? ' data-guestbook-avatar-fallback="' + esc(profileAvatar) + '"' : '') + ' alt="">';
+    }
     function ratingSnapshotForNick(value) {
       var exact = String(value || "").replace(/^@+/, "").trim().toLowerCase();
       try { exact = exact.normalize("NFKC"); } catch (error) {}
@@ -350,10 +368,11 @@ function initHomeClubInfoModals() {
     }
     function authorButtonHtml(post) {
       var profileId = String(post.authorProfileId || post.authorId || "");
-      return '<button type="button" class="club-guestbook__author" data-guestbook-profile="' + esc(profileId) + '" data-profile-name="' + esc(post.authorName || "Игрок") + '" data-profile-avatar="' + esc(post.authorAvatar || "") + '"' + (profileId ? "" : " disabled") + '>' +
-        avatarHtml(post.authorAvatar, post.authorName, "club-guestbook__avatar") + '<span><strong>' + esc(post.authorName || "Игрок") + '</strong>' +
+      var accent = authorAccent(post.authorName);
+      return '<button type="button" class="club-guestbook__author" style="--guestbook-author-accent:' + esc(accent && accent.accent || "#65c7ff") + '" data-guestbook-profile="' + esc(profileId) + '" data-profile-name="' + esc(post.authorName || "Игрок") + '" data-profile-avatar="' + esc(post.authorAvatar || "") + '"' + (profileId ? "" : " disabled") + '>' +
+        authorAvatarHtml(post) + '<span class="club-guestbook__author-copy"><span class="club-guestbook__author-name"><strong>' + esc(post.authorName || "Игрок") + '</strong>' +
         (post.authorVerified ? '<i class="club-guestbook__verified" title="Poker21 привязан" aria-label="Poker21 привязан">✓</i>' : "") +
-        authorMetaHtml(post) + '<small>' + esc(dateLabel(post.createdAt)) + '</small></span></button>';
+        '</span>' + authorMetaHtml(post) + '<small>' + esc(dateLabel(post.createdAt)) + '</small></span></button>';
     }
     function commentsHtml(post, info) {
       var comments = Array.isArray(info.comments) ? info.comments : [];
@@ -473,6 +492,14 @@ function initHomeClubInfoModals() {
       var reaction = event.target.closest("[data-guestbook-reaction]");
       if (reaction) { var post = posts.find(function (row) { return String(row.id) === reaction.getAttribute("data-guestbook-reaction"); }); if (!post) return; request("/api/profile-event-feedback", { action: "reaction", eventId: eventId(post), emoji: reaction.getAttribute("data-emoji"), scope: "club" }).then(function (data) { feedback[eventId(post)] = data.feedback; render(); }); }
     });
+    root.addEventListener("error", function (event) {
+      var image = event && event.target;
+      if (!image || !image.matches || !image.matches(".club-guestbook__avatar")) return;
+      var fallback = String(image.getAttribute("data-guestbook-avatar-fallback") || "").trim();
+      image.removeAttribute("data-guestbook-avatar-fallback");
+      image.classList.remove("club-guestbook__avatar--personal-art");
+      if (fallback && fallback !== image.getAttribute("src")) image.src = fallback;
+    }, true);
     root.addEventListener("submit", function (event) {
       var commentForm = event.target.closest("[data-guestbook-comment]");
       if (!commentForm) return;

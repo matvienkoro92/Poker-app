@@ -838,6 +838,26 @@
       ]
     },
     {
+      "name": "pokerGetClubNewsPersonalArt",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-club-info-modals.js"
+      ]
+    },
+    {
+      "name": "pokerGetClubNewsPlayerColor",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-club-info-modals.js"
+      ]
+    },
+    {
       "name": "initHomeVpnProxyModal",
       "domain": "home",
       "exportedBy": [
