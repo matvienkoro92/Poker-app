@@ -1573,7 +1573,6 @@
     { key: "club-charter", label: "Устав клуба", view: "home", startapp: "club_charter" },
     { key: "club-choice-vote", label: "Голосование клуба", view: "home", startapp: "club_choice_vote" },
     { key: "vpn-proxy", label: "VPN и прокси", view: "home", startapp: "vpn_proxy" },
-    { key: "vpn-proxy-proxy", label: "Прокси", view: "home", startapp: "vpn_proxy_proxy" },
     { key: "chat", label: "Чат", view: "chat", startapp: "club_chat" },
     { key: "gazette", label: "Газета", view: "home", startapp: "gazette" },
     { key: "video-lessons", label: "Видеоуроки", view: "video-lessons", startapp: "video_lessons" },

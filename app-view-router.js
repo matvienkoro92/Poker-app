@@ -1095,7 +1095,9 @@ function setView(viewName, navOpts) {
     }
   }
   if (viewName === "home") {
-    initPokerShowsPlayer();
+    // Profile extras are lazy-loaded and may not exist yet when a direct
+    // startapp link returns to the home view during the initial bootstrap.
+    if (typeof initPokerShowsPlayer === "function") initPokerShowsPlayer();
     if (typeof updateTournamentDayBlock === "function") updateTournamentDayBlock();
     try {
       var runHomeChatSummary = function () {

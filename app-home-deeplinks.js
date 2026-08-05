@@ -59,6 +59,35 @@ function pokerInitHomeDeepLinks(opts) {
     };
     run();
   }
+  function ensureHomeViewForDeepLink() {
+    var currentView = document.body && document.body.getAttribute("data-view");
+    if (!currentView || currentView === "home") return;
+    try {
+      if (typeof setView === "function") setView("home");
+    } catch (eSetHomeView) {}
+  }
+  function ensureHomeModalDependencies(domains) {
+    var pending = [];
+    try {
+      if (typeof window.pokerEnsureGlobalModalsHtml === "function") {
+        pending.push(window.pokerEnsureGlobalModalsHtml());
+      }
+    } catch (eGlobalModals) {}
+    try {
+      if (domains && domains.length && typeof window.pokerEnsureLazyDomains === "function") {
+        pending.push(window.pokerEnsureLazyDomains(domains, { styles: true, scripts: true }));
+      }
+    } catch (eLazyDomains) {}
+    return Promise.all(pending.map(function (item) {
+      return Promise.resolve(item).catch(function () { return false; });
+    }));
+  }
+  function openHomeModalDeepLink(action, domains) {
+    ensureHomeViewForDeepLink();
+    ensureHomeModalDependencies(domains).then(function () {
+      retryDeepLinkAction(action, 40);
+    });
+  }
   /**
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
@@ -75,13 +104,16 @@ function pokerInitHomeDeepLinks(opts) {
     if (startParam === "news" || startParam.indexOf("news_") === 0) {
       var articleNum = startParam === "news" ? undefined : parseInt(startParam.replace("news_", ""), 10);
       if (startParam !== "news" && (Number.isNaN(articleNum) || articleNum < 0)) articleNum = undefined;
-      setTimeout(function () {
-        if (typeof openGazette === "function") openGazette("news", articleNum);
-      }, 300);
+      openHomeModalDeepLink(function () {
+        var openNews = typeof window.openGazette === "function" ? window.openGazette : openGazette;
+        if (typeof openNews !== "function") return false;
+        openNews("news", articleNum);
+        return true;
+      });
       return;
     }
     if (startParam === "club_news") {
-      if (typeof setView === "function") setView("home");
+      ensureHomeViewForDeepLink();
       retryDeepLinkAction(function () {
         if (typeof window.pokerOpenClubNewsModal !== "function") return false;
         window.pokerOpenClubNewsModal();
@@ -90,7 +122,7 @@ function pokerInitHomeDeepLinks(opts) {
       return;
     }
     if (startParam === "club_guestbook_reviews" || startParam === "club_guestbook_complaints") {
-      if (typeof setView === "function") setView("home");
+      ensureHomeViewForDeepLink();
       retryDeepLinkAction(function () {
         var openGuestbook = document.getElementById("clubGuestbookOpenBtn");
         if (!openGuestbook) return false;
@@ -229,11 +261,10 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "daily_prediction") {
       setTimeout(function () {
-        if (typeof setView === "function") setView("home");
-        setTimeout(function () { retryDeepLinkAction(function () {
+        openHomeModalDeepLink(function () {
           if (typeof openDailyPredictionModal !== "function") return false;
           openDailyPredictionModal(); return true;
-        }); }, 250);
+        }, ["learning"]);
       }, 0);
       return;
     }
@@ -315,8 +346,7 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "club_charter") {
       setTimeout(function () {
-        if (typeof setView === "function") setView("home");
-        retryDeepLinkAction(function () {
+        openHomeModalDeepLink(function () {
           if (typeof window.openClubCharterModal !== "function") return false;
           window.openClubCharterModal(); return true;
         });
@@ -378,8 +408,7 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "vpn_proxy" || startParam === "vpn_proxy_vpn") {
       setTimeout(function () {
-        if (typeof setView === "function") setView("home");
-        retryDeepLinkAction(function () {
+        openHomeModalDeepLink(function () {
           if (typeof window.openVpnProxyModal !== "function") return false;
           window.openVpnProxyModal({ tab: "vpn" }); return true;
         });
@@ -388,8 +417,7 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "vpn_proxy_proxy" || startParam === "vpn_proxy_tab_proxy") {
       setTimeout(function () {
-        if (typeof setView === "function") setView("home");
-        retryDeepLinkAction(function () {
+        openHomeModalDeepLink(function () {
           if (typeof window.openVpnProxyModal !== "function") return false;
           window.openVpnProxyModal({ tab: "proxy" }); return true;
         });
@@ -398,11 +426,10 @@ function pokerInitHomeDeepLinks(opts) {
     }
     if (startParam === "gazette") {
       setTimeout(function () {
-        if (typeof setView === "function") setView("home");
-        setTimeout(function () { retryDeepLinkAction(function () {
+        openHomeModalDeepLink(function () {
           if (typeof window.openGazette !== "function") return false;
           window.openGazette(); return true;
-        }); }, 250);
+        });
       }, 0);
       return;
     }
@@ -460,6 +487,7 @@ function pokerInitHomeDeepLinks(opts) {
       return;
     }
     var simpleViewByStartApp = {
+      home: "home",
       schedule: "schedule",
       download: "download",
       equilator: "equilator",
@@ -978,7 +1006,19 @@ function pokerInitHomeDeepLinks(opts) {
   var deepLinkParam = (startParam && String(startParam).trim()) || qStartApp;
   var hadDeepLinkAtInit = !!deepLinkParam;
   if (deepLinkParam) {
-    pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
+    var applyInitialDeepLink = function () {
+      pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
+    };
+    // This initializer can run while the shell-ready bootstrap is still
+    // attaching home modal handlers. Queueing the route in the next task
+    // prevents a present button from producing a false-positive click before
+    // its handler is attached, and gives late home globals time to register.
+    var queueInitialDeepLink = function () { setTimeout(applyInitialDeepLink, 0); };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", queueInitialDeepLink, { once: true });
+    } else {
+      queueInitialDeepLink();
+    }
   }
   if (isTelegramWebApp()) {
     setTimeout(function () {
