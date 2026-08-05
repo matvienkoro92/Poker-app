@@ -307,6 +307,7 @@ function initHomeClubInfoModals() {
           '<header class="club-guestbook__header"><div><small>КЛУБ «ДВА ТУЗА»</small><h2 id="clubGuestbookTitle">Книга отзывов и жалоб</h2></div><button type="button" data-guestbook-close aria-label="Закрыть">×</button></header>' +
           '<div class="club-guestbook__tabs" role="tablist"><button type="button" data-guestbook-tab="review" class="is-active">Отзывы</button><button type="button" data-guestbook-tab="complaint">Жалобы</button></div>' +
           '<button type="button" class="club-guestbook__copy" id="clubGuestbookCopy" data-guestbook-copy>⧉ <span>Скопировать ссылку на отзывы</span></button>' +
+          '<p class="club-guestbook__review-invite" id="clubGuestbookReviewInvite">Оставьте, пожалуйста, большой и правдивый отзыв, особенно если вы давно с нами.</p>' +
           '<form class="club-guestbook__composer" id="clubGuestbookForm"><textarea maxlength="1500" rows="3" id="clubGuestbookText" placeholder="Напишите отзыв о клубе…"></textarea><div><span id="clubGuestbookGate"></span><button type="submit">Опубликовать</button></div></form>' +
           '<div class="club-guestbook__feed" id="clubGuestbookFeed"></div>' +
         '</section></div>');
@@ -316,6 +317,7 @@ function initHomeClubInfoModals() {
     var input = document.getElementById("clubGuestbookText");
     var gate = document.getElementById("clubGuestbookGate");
     var copyBtn = document.getElementById("clubGuestbookCopy");
+    var reviewInvite = document.getElementById("clubGuestbookReviewInvite");
     var reactions = ["❤️", "🔥", "👍", "👏"];
     function dateLabel(value) { try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch (e) { return ""; } }
     function eventId(post) { return "club-guestbook:" + String(post.id || ""); }
@@ -383,6 +385,7 @@ function initHomeClubInfoModals() {
     function render() {
       var rows = posts.filter(function (post) { return post.type === activeTab; });
       input.placeholder = activeTab === "complaint" ? "Опишите жалобу или проблему…" : "Напишите отзыв о клубе…";
+      if (reviewInvite) reviewInvite.hidden = activeTab === "complaint";
       if (copyBtn) {
         var copyLabel = copyBtn.querySelector("span");
         if (copyLabel) copyLabel.textContent = activeTab === "complaint" ? "Скопировать ссылку на жалобы" : "Скопировать ссылку на отзывы";

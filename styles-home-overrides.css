@@ -1769,6 +1769,8 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__tabs button.is-active { color: #251400; background: linear-gradient(180deg, #ffe9a4, #e9ae42); border-color: #ffd879; }
 .club-guestbook__copy { align-self: flex-end; min-height: 34px; margin: 0 18px 7px; padding: 0 11px; color: #e6bd6d; background: rgba(229, 179, 74, 0.08); border: 1px solid rgba(229, 179, 74, 0.32); border-radius: 10px; font-size: 11px; font-weight: 850; }
 .club-guestbook__copy:active { background: rgba(229, 179, 74, 0.17); transform: translateY(1px); }
+.club-guestbook__review-invite { margin: 8px 22px 2px; color: #f4d38f; font-size: 14px; font-weight: 800; line-height: 1.45; }
+.club-guestbook__review-invite[hidden] { display: none !important; }
 .club-guestbook__composer { margin: 6px 18px 12px; padding: 12px; background: rgba(255,255,255,.045); border: 1px solid rgba(229,179,74,.22); border-radius: 17px; }
 .club-guestbook__composer textarea { display: block; width: 100%; min-height: 76px; resize: vertical; color: #f8f4ec; background: transparent; border: 0; outline: 0; font: inherit; line-height: 1.45; }
 .club-guestbook__composer > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -1814,6 +1816,7 @@ body.club-guestbook-open { overflow: hidden; }
   .club-guestbook__header { padding-top: max(18px, env(safe-area-inset-top)); }
   .club-guestbook__composer, .club-guestbook__tabs { margin-inline: 12px; padding-inline: 10px; }
   .club-guestbook__copy { margin-inline: 12px; }
+  .club-guestbook__review-invite { margin-inline: 16px; }
   .club-guestbook__feed { padding-inline: 12px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 }
 
