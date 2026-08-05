@@ -666,6 +666,97 @@ function pokerEnsureRafflesAfterShell() {
 
 var pokerPendingViewNavigationSeq = 0;
 var pokerPendingViewNavigation = null;
+var pokerSectionLoadingOverlayTimer = null;
+var pokerSectionLoadingOverlayShownAt = 0;
+
+var POKER_SECTION_LOADING_LABELS = {
+  "profile": "Загружаем профиль",
+  "chat": "Загружаем чаты",
+  "winter-rating": "Загружаем рейтинг",
+  "spring-rating": "Загружаем рейтинг",
+  "summer-rating": "Загружаем рейтинг",
+  "raffles": "Загружаем розыгрыши",
+  "daily-poker": "Загружаем раздачу дня",
+  "learn-play-hub": "Загружаем обучение",
+  "bonus-game": "Загружаем бонусную игру",
+  "cooler-game": "Загружаем игру",
+  "plasterer-game": "Загружаем игру",
+  "poker-tasks": "Загружаем задания клуба",
+  "hall-of-fame": "Загружаем зал славы",
+  "schedule": "Загружаем расписание",
+  "download": "Загружаем раздел",
+  "streams": "Загружаем трансляции",
+  "cashout": "Загружаем депозит",
+  "transfers": "Загружаем переводы",
+  "video-lessons": "Загружаем видеоуроки",
+  "equilator": "Загружаем эквилятор",
+  "player-crm": "Загружаем игроков",
+  "admin-bonuses": "Загружаем бонусы"
+};
+
+function pokerSectionLoadingLabel(viewName) {
+  return POKER_SECTION_LOADING_LABELS[String(viewName || "")] || "Загружаем раздел";
+}
+
+function pokerShowSectionLoadingOverlay(viewName) {
+  if (document.getElementById("appBootOverlay")) return;
+  var overlay = document.getElementById("pokerSectionLoadingOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "pokerSectionLoadingOverlay";
+    overlay.className = "app-boot-overlay app-boot-overlay--section";
+    overlay.setAttribute("role", "status");
+    overlay.setAttribute("aria-live", "polite");
+    overlay.setAttribute("aria-busy", "true");
+    overlay.innerHTML =
+      '<div class="app-boot-overlay__panel">' +
+        '<img src="./assets/app-boot-poker21-plus-chip.webp?v=1" alt="" class="app-boot-overlay__logo" width="132" height="132" decoding="async" aria-hidden="true" />' +
+        '<div class="app-boot-overlay__conn-title" data-poker-section-loader-title></div>' +
+        '<div class="app-boot-overlay__progress" aria-hidden="true"><span class="app-boot-overlay__progress-bar"></span></div>' +
+        '<p class="app-boot-overlay__text">Подготавливаем раздел…</p>' +
+      '</div>';
+    (document.body || document.documentElement).appendChild(overlay);
+  }
+  if (pokerSectionLoadingOverlayTimer) {
+    clearTimeout(pokerSectionLoadingOverlayTimer);
+    pokerSectionLoadingOverlayTimer = null;
+  }
+  overlay.classList.remove("app-boot-overlay--hidden", "app-boot-overlay--finishing");
+  overlay.setAttribute("data-loading-view", String(viewName || ""));
+  overlay.setAttribute("aria-hidden", "false");
+  overlay.setAttribute("aria-busy", "true");
+  var title = overlay.querySelector("[data-poker-section-loader-title]");
+  if (title) title.textContent = pokerSectionLoadingLabel(viewName);
+  var progress = overlay.querySelector(".app-boot-overlay__progress-bar");
+  if (progress) {
+    progress.style.animation = "none";
+    void progress.offsetWidth;
+    progress.style.removeProperty("animation");
+  }
+  pokerSectionLoadingOverlayShownAt = Date.now();
+}
+
+function pokerHideSectionLoadingOverlay(viewName, immediate) {
+  var overlay = document.getElementById("pokerSectionLoadingOverlay");
+  if (!overlay) return;
+  var loadingView = overlay.getAttribute("data-loading-view") || "";
+  if (viewName && loadingView && loadingView !== String(viewName)) return;
+  var wait = immediate ? 0 : Math.max(0, 520 - (Date.now() - pokerSectionLoadingOverlayShownAt));
+  if (pokerSectionLoadingOverlayTimer) clearTimeout(pokerSectionLoadingOverlayTimer);
+  pokerSectionLoadingOverlayTimer = setTimeout(function () {
+    pokerSectionLoadingOverlayTimer = null;
+    var current = document.getElementById("pokerSectionLoadingOverlay");
+    if (!current) return;
+    current.classList.add("app-boot-overlay--finishing");
+    var status = current.querySelector(".app-boot-overlay__text");
+    if (status) status.textContent = "Готово";
+    setTimeout(function () {
+      current.classList.add("app-boot-overlay--hidden");
+      current.setAttribute("aria-hidden", "true");
+      current.setAttribute("aria-busy", "false");
+    }, 180);
+  }, wait);
+}
 
 function pokerShowViewLoadingShell(viewName) {
   var body = document.body;
@@ -691,6 +782,7 @@ function pokerShowViewLoadingShell(viewName) {
       window.pokerEnsureViewLoadingSkeleton(viewName);
     }
   } catch (ePendingSkeleton) {}
+  pokerShowSectionLoadingOverlay(viewName);
 }
 
 function pokerClearViewLoadingShell(viewName) {
@@ -703,6 +795,7 @@ function pokerClearViewLoadingShell(viewName) {
       window.pokerClearViewLoadingSkeleton(viewName);
     }
   } catch (eClearPendingSkeleton) {}
+  pokerHideSectionLoadingOverlay(viewName, false);
 }
 
 function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
@@ -761,6 +854,7 @@ function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
       document.body.classList.remove("poker-view-section-loading");
       document.body.classList.add("poker-view-section-load-error");
     }
+    pokerHideSectionLoadingOverlay(viewName, true);
     var activeSkeleton = document.querySelector('.view--active[data-view="' + String(viewName || "").replace(/"/g, '\\"') + '"] .poker-section-skeleton__title');
     if (activeSkeleton) activeSkeleton.textContent = "Не удалось загрузить. Нажмите раздел ещё раз";
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
