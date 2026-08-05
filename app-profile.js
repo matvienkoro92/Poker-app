@@ -932,6 +932,50 @@ function profilePublicShowcaseSyncKnownArt(data) {
   }
 }
 
+var profileReviewInviteState = { loading: false, loaded: false, linked: false, hasReview: false };
+
+function profileReviewInviteRender() {
+  var invite = document.getElementById("profileReviewInvite");
+  if (!invite) return;
+  invite.hidden = !(profileReviewInviteState.loaded && profileReviewInviteState.linked && !profileReviewInviteState.hasReview);
+}
+
+function profileReviewInviteSync(linked, force) {
+  var wasLinked = profileReviewInviteState.linked;
+  profileReviewInviteState.linked = linked === true;
+  if (!profileReviewInviteState.linked) {
+    profileReviewInviteState.loaded = true;
+    profileReviewInviteState.hasReview = false;
+    profileReviewInviteRender();
+    return;
+  }
+  if (!wasLinked) profileReviewInviteState.loaded = false;
+  if (profileReviewInviteState.loading || (profileReviewInviteState.loaded && !force)) {
+    profileReviewInviteRender();
+    return;
+  }
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody({ action: "list" }) : { action: "list" };
+  profileReviewInviteState.loading = true;
+  fetch(base + "/api/club-guestbook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(function (response) {
+    return response.json().then(function (data) {
+      if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка");
+      profileReviewInviteState.loaded = true;
+      profileReviewInviteState.linked = data.canPost === true;
+      profileReviewInviteState.hasReview = data.hasReview === true;
+    });
+  }).catch(function () {
+    profileReviewInviteState.loaded = false;
+  }).finally(function () {
+    profileReviewInviteState.loading = false;
+    profileReviewInviteRender();
+  });
+}
+
 function profilePublicShowcaseApplyStatus(status) {
   profilePublicShowcaseStatus = status || null;
   var section = document.getElementById("profilePublicStatusSection");
@@ -956,6 +1000,7 @@ function profilePublicShowcaseApplyStatus(status) {
     pointsBtn.textContent = "Как получить уровень";
   }
   if (!status || status.level == null) {
+    profileReviewInviteSync(false);
     if (section) section.hidden = true;
     if (xp) {
       xp.textContent = "";
@@ -971,6 +1016,7 @@ function profilePublicShowcaseApplyStatus(status) {
     levelText.hidden = false;
     return;
   }
+  profileReviewInviteSync(true);
   if (section) section.hidden = false;
   levelText.classList.remove("chat-user-modal__level-text--unlinked");
   levelText.removeAttribute("aria-label");
@@ -1102,6 +1148,17 @@ function loadProfilePublicShowcaseInitial() {
 function initProfilePublicShowcase() {
   initProfileHeroGenderControl();
   loadProfilePublicShowcaseInitial();
+  var reviewInviteBtn = document.getElementById("profileReviewInviteBtn");
+  if (reviewInviteBtn && reviewInviteBtn.dataset.profileReviewInviteBound !== "1") {
+    reviewInviteBtn.dataset.profileReviewInviteBound = "1";
+    reviewInviteBtn.addEventListener("click", function () {
+      if (typeof window.pokerOpenClubGuestbook === "function") window.pokerOpenClubGuestbook("review");
+      else {
+        var openButton = document.getElementById("clubGuestbookOpenBtn");
+        if (openButton) openButton.click();
+      }
+    });
+  }
   var avatar = document.getElementById("profileAvatar");
   if (avatar && avatar.dataset.profilePublicShowcaseBound !== "1") {
     avatar.dataset.profilePublicShowcaseBound = "1";
@@ -1143,6 +1200,11 @@ function initProfilePublicShowcase() {
         profilePublicShowcaseData.pokerPlusNickname = profilePublicShowcaseLatestRatingNick;
         profilePublicShowcaseSyncArt(profilePublicShowcaseLatestRatingNick);
       }
+    });
+    window.addEventListener("poker-club-guestbook-review-created", function () {
+      profileReviewInviteState.loaded = true;
+      profileReviewInviteState.hasReview = true;
+      profileReviewInviteRender();
     });
   }
 }

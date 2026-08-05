@@ -2351,6 +2351,14 @@ body.profile-avatar-choice-open {
   min-width: 0;
   padding: 0;
 }
+.view[data-view="profile"] .profile-review-invite { order: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 7px 10px; width: 100%; padding: 12px; border: 1px solid rgba(255, 196, 74, .58); border-radius: 16px; background: linear-gradient(135deg, rgba(84, 48, 5, .96), rgba(25, 18, 8, .96)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 8px 28px rgba(238, 166, 39, .15); color: #fff4d2; }
+.view[data-view="profile"] .profile-review-invite[hidden] { display: none !important; }
+.profile-review-invite__icon { grid-row: 1 / span 2; align-self: start; font-size: 25px; line-height: 1; }
+.profile-review-invite__copy { display: grid; gap: 3px; min-width: 0; line-height: 1.25; }
+.profile-review-invite__copy strong { color: #ffd76f; font-size: 14px; font-weight: 1000; }
+.profile-review-invite__copy > span { color: #f5e7c6; font-size: 11px; font-weight: 700; }
+.profile-review-invite__button { grid-column: 1 / -1; width: 100%; min-height: 38px; border: 1px solid #ffe39b; border-radius: 11px; background: linear-gradient(180deg, #ffd971, #efa928); color: #2a1700; font-size: 13px; font-weight: 1000; cursor: pointer; }
+.profile-review-invite__button:hover, .profile-review-invite__button:focus-visible { filter: brightness(1.08); }
 .view[data-view="profile"] .profile-public-showcase .chat-user-modal__status {
   order: 1;
   display: grid;

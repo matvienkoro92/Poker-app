@@ -2149,7 +2149,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
-    if (key.indexOf("оставил отзыв") >= 0) return { mod: "club-review", label: "ОСТАВИЛ<br>ОТЗЫВ", img: "./assets/chat-profile-achievement-ambassador.webp" };
+    if (key.indexOf("оставил отзыв") >= 0) return { mod: "club-review", label: "ОСТАВИЛ<br>ОТЗЫВ", img: "./assets/chat-profile-achievement-club-review-v2.webp?v=1" };
     if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-card.webp" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
@@ -2162,7 +2162,7 @@ if (chatUserModalEl) {
     if (key.indexOf("чемпион месяца") >= 0) return { mod: "month-champion", label: "ЧЕМПИОН<br>МЕСЯЦА", img: "./assets/chat-profile-achievement-month-champion.webp" };
     if (key.indexOf("золот") >= 0) return { mod: "gold-ticket", label: "ЗОЛОТОЙ<br>БИЛЕТ", img: "./assets/home-menu-icon-raffle-tickets.webp" };
     if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return { mod: "private-cash", label: "КЛУБНЫЙ<br>КЕШ<br>20/40", img: "./assets/home-club-choice-private-cash-glow.webp" };
-    if (key.indexOf("любим") >= 0) return { mod: "favorite", label: "ЛЮБИМЕЦ<br>КЛУБА", img: "./assets/home-menu-icon-level-fish.png" };
+    if (key.indexOf("уважаем") >= 0 || key.indexOf("любим") >= 0) return { mod: "favorite", label: "УВАЖАЕМЫЙ<br>ЧЕЛОВЕК", img: "./assets/home-menu-icon-level-fish.png" };
     if (key.indexOf("команд") >= 0) return { mod: "team-player", label: "КОМАНДНЫЙ<br>ИГРОК", img: "./assets/chat-profile-achievement-team-friends-v2.webp" };
     if (key.indexOf("амбассад") >= 0) return { mod: "ambassador", label: "АМБАССАДОР", img: "./assets/chat-profile-achievement-ambassador.webp" };
     if (key.indexOf("пухом") >= 0) return { mod: "puhomet", label: "ПУХОМЕТ", img: "./assets/chat-profile-achievement-puhomet.webp" };
@@ -2210,7 +2210,7 @@ if (chatUserModalEl) {
     if (key.indexOf("чемпион месяца") >= 0) return "Дается за топ-1 месяца по сумме призовых. Считается только общая сумма выигрышей игрока за месяц.";
     if (key.indexOf("золот") >= 0) return "Считаются победы игрока в розыгрышах клуба. У достижения есть уровни по количеству выигранных розыгрышей.";
     if (key.indexOf("приват") >= 0 && key.indexOf("кеш") >= 0) return "Считаются сыгранные сессии приватного клубного кеша 20/40. Результаты будут попадать из блока результатов в разделе «Приватный кеш». Уровни: 1, 5, 15, 30, 50 и 100 сессий.";
-    if (key.indexOf("любим") >= 0) return "Считается уважение от игроков. У достижения есть уровни по набранной репутации.";
+    if (key.indexOf("уважаем") >= 0 || key.indexOf("любим") >= 0) return "Считается уважение от игроков. У достижения есть уровни по набранной репутации.";
     if (key.indexOf("команд") >= 0) return "Считаются принятые друзья в профиле игрока. У достижения есть уровни по размеру покерного круга.";
     if (key.indexOf("амбассад") >= 0) return "Считаются приглашенные игроки по реферальной системе клуба. У достижения есть уровни по количеству приглашенных.";
     if (key.indexOf("весн") >= 0) return "Дается за топ-3 место в весеннем рейтинге клуба. В карточке показывается место и лига.";
@@ -2538,17 +2538,17 @@ if (chatUserModalEl) {
           lockedLabel: "Нет побед",
         },
       }) +
-      chatUserModalAchievementCardHtml("🏆", "Победа в оффлайн турнире", offlineWins, {
-        placeholder: "Нет оффлайн побед",
-        progressRows: offlineWins,
+      chatUserModalAchievementCardHtml("₽", "Занос от 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 3), {
+        placeholder: "100к+",
+        progressRows: chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 1000),
       }) +
       chatUserModalAchievementCardHtml("₽", "Занос от 50 до 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 3), {
         placeholder: "50к-99к",
         progressRows: chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins50, 1000),
       }) +
-      chatUserModalAchievementCardHtml("₽", "Занос от 100к", chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 3), {
-        placeholder: "100к+",
-        progressRows: chatUserModalBestWinRows(tournamentStats && tournamentStats.bigWins100, 1000),
+      chatUserModalAchievementCardHtml("🏆", "Победа в оффлайн турнире", offlineWins, {
+        placeholder: "Нет оффлайн побед",
+        progressRows: offlineWins,
       }) +
       chatUserModalAchievementCardHtml("₽", "Миллионер клуба", [], {
         tier: {
@@ -2571,7 +2571,6 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("★", "Вице-чемпион месяца", viceMonthChampionRows, {
         placeholder: "Нет месяца",
       }) +
-      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       chatUserModalAchievementCardHtml("₽", "Топ занос клуба 2026", topWins) +
       chatUserModalAchievementCardHtml("10", "Топ10", top10);
     var goldTicketHtml = chatUserModalAchievementCardHtml("🎟", "Золотой билет", [], {
@@ -2598,6 +2597,7 @@ if (chatUserModalEl) {
       });
     }).join("");
     var socialHtml =
+      chatUserModalAchievementCardHtml("★", "Легенда", legends) +
       manualHtml +
       heroHtml +
       chatUserModalAchievementCardHtml("✎", "Оставил отзыв", metrics.guestbookReview ? [{ label: "Отзыв опубликован" }] : [], {
@@ -2605,7 +2605,7 @@ if (chatUserModalEl) {
         info: "Опубликуйте отзыв о клубе в книге отзывов и жалоб. Достижение выдается один раз и не имеет уровней.",
         hideProgress: true,
       }) +
-      chatUserModalAchievementCardHtml("★", "Любимец клуба", [], {
+      chatUserModalAchievementCardHtml("★", "Уважаемый человек", [], {
         tier: {
           value: metrics.respect != null ? metrics.respect : 0,
           tiers: [

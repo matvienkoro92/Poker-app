@@ -1819,6 +1819,10 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__post header > div { display: grid; min-width: 0; }
 .club-guestbook__post header small { color: #8f9bad; }
 .club-guestbook__kind { margin-left: auto; padding: 5px 8px; color: #e9bd68; background: rgba(229,179,74,.1); border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.club-guestbook__delete { flex: 0 0 auto; min-height: 28px; padding: 4px 8px; color: #ff9b9b; background: rgba(190,45,55,.12); border: 1px solid rgba(255,99,107,.38); border-radius: 9px; font-size: 10px; font-weight: 900; }
+.club-guestbook__delete:hover, .club-guestbook__delete:focus-visible { color: #fff; background: rgba(213,50,61,.34); border-color: rgba(255,126,132,.72); }
+.club-guestbook__delete:disabled { opacity: .45; }
+.club-guestbook__delete--post { margin-left: 2px; }
 .club-guestbook__text { margin: 13px 2px; color: #eef1f6; line-height: 1.5; white-space: pre-wrap; }
 .club-guestbook__reactions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .club-guestbook__reaction { min-height: 32px; padding: 4px 9px; color: #e7ebf2; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 999px; }
@@ -1827,6 +1831,15 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__reactions > span { margin-left: auto; color: #8995a7; font-size: 12px; }
 .club-guestbook__comments { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.08); }
 .club-guestbook__comment { display: flex; gap: 8px; margin: 8px 0; }
+.club-guestbook__comment-body { flex: 1 1 auto; min-width: 0; }
+.club-guestbook__author--comment { width: 100%; }
+.club-guestbook__author--comment .club-guestbook__avatar { width: 42px; height: 42px; border-width: 1px; font-size: 13px; box-shadow: 0 0 12px color-mix(in srgb, var(--guestbook-author-accent, #dcae53) 18%, transparent); }
+.club-guestbook__author--comment .club-guestbook__author-copy { margin-left: 9px; }
+.club-guestbook__author--comment strong { font-size: 15px; }
+.club-guestbook__author--comment .club-guestbook__verified { width: 17px; height: 17px; margin-left: 5px; font-size: 11px; }
+.club-guestbook__author--comment .club-guestbook__author-meta { margin-top: 2px; font-size: 10px; }
+.club-guestbook__author--comment small { margin-top: 1px; font-size: 9px; }
+.club-guestbook__delete--comment { align-self: flex-start; margin-left: auto; }
 .club-guestbook__comment-avatar { width: 29px; height: 29px; border-width: 1px; font-size: 11px; box-shadow: none; }
 .club-guestbook__comment b { font-size: 12px; }
 .club-guestbook__comment p { margin: 2px 0 0; color: #cbd2de; font-size: 12px; line-height: 1.4; }
@@ -4610,4 +4623,41 @@ body .home-friend-news-modal--club .home-friend-news-modal__icon .home-friend-ne
   filter: saturate(1.02) contrast(1.04);
   transform: translate(-50%, -50%);
   transform-origin: center;
+}
+
+/* Keep reactions and navigation controls on separate rows in day news cards. */
+body .home-friend-news-modal .home-friend-news-modal__action-row,
+body .home-friend-news-modal--club .home-friend-news-modal__action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 9px;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__action-row {
+  width: 145%;
+  max-width: none;
+  margin-left: -45%;
+}
+body .home-friend-news-modal .home-friend-news-modal__action-row > .chat-user-modal__news-actions {
+  grid-row: 1;
+  width: 100%;
+  min-width: 0;
+}
+body .home-friend-news-modal .home-friend-news-modal__action-controls {
+  grid-row: 2;
+  width: 100%;
+  justify-content: space-between;
+  gap: 10px;
+}
+body .home-friend-news-modal .home-friend-news-modal__action-controls .chat-user-modal__news-comment-toggle,
+body .home-friend-news-modal .home-friend-news-modal__action-controls .home-friend-news-modal__action-meta {
+  flex: 1 1 0;
+  min-width: 0;
+}
+body .home-friend-news-modal .home-friend-news-modal__action-controls .chat-user-modal__news-comment-toggle,
+body .home-friend-news-modal .home-friend-news-modal__profile-cue {
+  width: 100%;
+  min-height: 34px;
+  justify-content: center;
+  margin: 0;
 }

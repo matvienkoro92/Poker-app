@@ -6499,10 +6499,108 @@ async function testChatCoreInvariants() {
   assert.strictEqual(located.fromIndex, true, "thread locate uses index when present");
 }
 
+async function testGuestbookAdminDelete(redis) {
+  const guestbook = loadHandler("club-guestbook");
+  const feedback = loadHandler("profile-event-feedback");
+  const s = sessions();
+  const postsKey = "poker_app:club_guestbook:v1";
+  const postId = "contract-review-delete";
+  const eventId = "club-guestbook:" + postId;
+  const eventHash = crypto.createHash("sha256").update(eventId).digest("hex").slice(0, 32);
+  const commentsKey = "poker_app:profile_event_comments:" + eventHash;
+  const reactionsKey = "poker_app:profile_event_reactions:" + eventHash;
+  const viewsKey = "poker_app:profile_event_views:" + eventHash;
+  const commentId = "contract-comment-delete";
+  const commentReactionsKey = "poker_app:profile_comment_reactions:" +
+    crypto.createHash("sha256").update(eventId + ":" + commentId).digest("hex").slice(0, 32);
+  const post = {
+    id: postId,
+    type: "review",
+    text: "Contract review",
+    authorId: "ID999999",
+    authorName: "Player",
+    createdAt: new Date().toISOString(),
+  };
+  const comment = JSON.stringify({
+    id: commentId,
+    memberId: "ID888888",
+    author: "Another player",
+    text: "Contract comment",
+    at: new Date().toISOString(),
+  });
+
+  redis.kv.set(postsKey, JSON.stringify([post]));
+  redis.l(commentsKey).push(comment);
+  redis.h(reactionsKey).set("ID777777", "👍");
+  redis.h(viewsKey).set("ID777777", new Date().toISOString());
+  redis.h(commentReactionsKey).set("ID777777", "❤️");
+  redis.h("poker_app:id_to_user").set("ID888888", "1002");
+  redis.h("poker_app:pokerplus_profiles").set("ID888888", JSON.stringify({ nickname: "Comment Player", totalCounter: { fee: 12000 } }));
+  redis.h("poker_app:pokerplus_user_ids").set("ID888888", "415678");
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100001", "4430");
+
+  let r = await call(feedback, req("POST", {}, {
+    pwaSession: s.user,
+    action: "list",
+    eventIds: [eventId],
+    scope: "club",
+  }));
+  const enrichedComment = r.body.feedback[eventId].comments[0];
+  assert.strictEqual(enrichedComment.authorProfileId, "1002", "guestbook comment exposes a clickable profile id");
+  assert.strictEqual(enrichedComment.author, "Comment Player", "guestbook comment uses the Poker21 nickname");
+  assert.strictEqual(enrichedComment.authorPoker21Id, "415678", "guestbook comment exposes the Poker21 id");
+  assert.ok(enrichedComment.authorLevel > 0, "guestbook comment exposes the calculated level");
+  assert.strictEqual(enrichedComment.authorVerified, true, "guestbook comment marks a linked Poker21 profile");
+
+  r = await call(guestbook, req("POST", {}, { pwaSession: s.user, action: "list" }));
+  assert.strictEqual(r.body.canPost, true, "linked user is eligible for the profile review invite");
+  assert.strictEqual(r.body.hasReview, false, "linked user without a review is reported for the profile invite");
+  redis.kv.set(postsKey, JSON.stringify([Object.assign({}, post, { authorId: "ID100001" })]));
+  r = await call(guestbook, req("POST", {}, { pwaSession: s.user, action: "list" }));
+  assert.strictEqual(r.body.hasReview, true, "own review hides the profile invite");
+  redis.kv.set(postsKey, JSON.stringify([post]));
+
+  r = await call(guestbook, req("POST", {}, { pwaSession: s.user, action: "delete", postId }));
+  assert.strictEqual(r.statusCode, 403, "guestbook post delete is admin-only");
+  assert.strictEqual(JSON.parse(redis.kv.get(postsKey)).length, 1, "failed post delete keeps the post");
+
+  r = await call(feedback, req("POST", {}, {
+    pwaSession: s.user,
+    action: "delete-comment",
+    eventId,
+    commentId,
+  }));
+  assert.strictEqual(r.statusCode, 403, "ordinary user cannot delete another player's guestbook comment");
+  assert.strictEqual(redis.l(commentsKey).length, 1, "failed comment delete keeps the comment");
+
+  r = await call(feedback, req("POST", {}, {
+    pwaSession: s.admin,
+    action: "delete-comment",
+    eventId,
+    commentId,
+  }));
+  assert.strictEqual(r.statusCode, 200, "admin can delete another player's guestbook comment");
+  assert.strictEqual(redis.l(commentsKey).length, 0, "admin comment delete removes the comment");
+  assert.strictEqual(redis.hash.has(commentReactionsKey), false, "admin comment delete removes its reactions");
+
+  redis.l(commentsKey).push(comment);
+  redis.h(commentReactionsKey).set("ID777777", "❤️");
+  r = await call(guestbook, req("POST", {}, { pwaSession: s.admin, action: "delete", postId }));
+  assert.strictEqual(r.statusCode, 200, "admin can delete a guestbook post");
+  assert.strictEqual(JSON.parse(redis.kv.get(postsKey)).length, 0, "admin post delete removes the post");
+  assert.strictEqual(redis.lists.has(commentsKey), false, "admin post delete removes comments");
+  assert.strictEqual(redis.hash.has(reactionsKey), false, "admin post delete removes reactions");
+  assert.strictEqual(redis.hash.has(viewsKey), false, "admin post delete removes views");
+  assert.strictEqual(redis.hash.has(commentReactionsKey), false, "admin post delete removes comment reactions");
+}
+
 async function main() {
   const tests = [
     ["chat core invariants", testChatCoreInvariants],
     ["auth required and admin-only", testAuthAndAdmin],
+    ["guestbook admin delete", testGuestbookAdminDelete],
     ["private cash random seat assignment", testPrivateCashRandomSeatAssignment],
     ["chat send/edit/delete", testChatSendEditDelete],
     ["crm app user block", testCrmAppUserBlock],

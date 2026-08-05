@@ -512,28 +512,31 @@
   }
 
   function clubNewsCardArt(nick, occurrence) {
-    var stableArt = clubNewsPersonalArt(nick);
-    if (stableArt) return stableArt;
     var slug = CLUB_NEWS_CARD_ART_BY_NICK[matchKey(nick)] || "";
     var variantIndex = Math.max(0, Number(occurrence) || 0);
     if (slug === "emil") {
-      if (variantIndex === 1) return "./assets/summer-rating-player-emil.webp";
-      if (variantIndex >= 2) return "./assets/club-news-personal/emil-news-cutout-v3.webp";
-      return "./assets/club-news-personal/emil-news-cutout-v2.webp";
+      return [
+        "./assets/club-news-personal/emil-news-cutout.webp?v=3",
+        "./assets/club-news-personal/emil-news-cutout-v2.webp?v=3",
+        "./assets/club-news-personal/emil-news-cutout-v3.webp?v=3",
+      ][variantIndex % 3];
     }
     if (slug === "pokermanki") {
-      if (variantIndex === 1) return "./assets/summer-rating-player-pokermanki.webp?v=3.547";
-      if (variantIndex >= 2) return "./assets/club-news-personal/pokermanki-news-cutout-v4.webp";
-      return "./assets/club-news-personal/pokermanki-news-cutout-v2.webp";
+      return [
+        "./assets/club-news-personal/pokermanki-news-cutout.webp?v=3",
+        "./assets/club-news-personal/pokermanki-news-cutout-v2.webp?v=3",
+        "./assets/club-news-personal/pokermanki-news-cutout-v3.webp?v=3",
+        "./assets/club-news-personal/pokermanki-news-cutout-v4.webp?v=3",
+      ][variantIndex % 4];
     }
     if (slug === "waaar") {
-      if (variantIndex === 1) return "./assets/summer-rating-player-waaar.webp";
-      if (variantIndex >= 2) return "./assets/club-news-personal/waaar-news-cutout-v3.webp?v=2";
+      return [
+        "./assets/club-news-personal/waaar-news-cutout.webp?v=3",
+        "./assets/club-news-personal/waaar-news-cutout-v3.webp?v=3",
+      ][variantIndex % 2];
     }
-    if (slug === "evgen1722" && variantIndex >= 1) {
-      return "./assets/summer-rating-player-evgen1722.webp";
-    }
-    return slug ? "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=2" : "";
+    if (slug) return "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=3";
+    return clubNewsPersonalArt(nick);
   }
 
   function playerNewsColor(value) {

@@ -291,6 +291,7 @@ function initHomeClubInfoModals() {
     var feedback = {};
     var ratingSnapshots = {};
     var canPost = false;
+    var isAdmin = false;
     var loading = false;
     var profileReturnState = null;
     function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -320,7 +321,9 @@ function initHomeClubInfoModals() {
     var gate = document.getElementById("clubGuestbookGate");
     var copyBtn = document.getElementById("clubGuestbookCopy");
     var reviewInvite = document.getElementById("clubGuestbookReviewInvite");
-    var reactions = ["❤️", "🔥", "👍", "👏"];
+    var reactions = ["❤️", "🔥", "👍", "👏", "😂", "😮", "😢", "😡"];
+    var reactionLongPressTimer = 0;
+    var reactionLongPressTriggered = false;
     function dateLabel(value) { try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch (e) { return ""; } }
     function eventId(post) { return "club-guestbook:" + String(post.id || ""); }
     function avatarHtml(url, name, cls) { return url ? '<img class="' + cls + '" src="' + esc(url) + '" alt="">' : '<span class="' + cls + '">' + esc(String(name || "И").charAt(0).toUpperCase()) + '</span>'; }
@@ -370,10 +373,10 @@ function initHomeClubInfoModals() {
       if (league && place) parts.push("Лига " + league + " · " + place + "-е место");
       return parts.length ? '<span class="club-guestbook__author-meta">' + esc(parts.join(" · ")) + '</span>' : "";
     }
-    function authorButtonHtml(post) {
+    function authorButtonHtml(post, compact) {
       var profileId = String(post.authorProfileId || post.authorId || "");
       var accent = authorAccent(post.authorName);
-      return '<button type="button" class="club-guestbook__author" style="--guestbook-author-accent:' + esc(accent && accent.accent || "#65c7ff") + '" data-guestbook-profile="' + esc(profileId) + '" data-profile-name="' + esc(post.authorName || "Игрок") + '" data-profile-avatar="' + esc(post.authorAvatar || "") + '"' + (profileId ? "" : " disabled") + '>' +
+      return '<button type="button" class="club-guestbook__author' + (compact ? ' club-guestbook__author--comment' : '') + '" style="--guestbook-author-accent:' + esc(accent && accent.accent || "#65c7ff") + '" data-guestbook-profile="' + esc(profileId) + '" data-profile-name="' + esc(post.authorName || "Игрок") + '" data-profile-avatar="' + esc(post.authorAvatar || "") + '"' + (profileId ? "" : " disabled") + '>' +
         authorAvatarHtml(post) + '<span class="club-guestbook__author-copy"><span class="club-guestbook__author-name"><strong>' + esc(post.authorName || "Игрок") + '</strong>' +
         (post.authorVerified ? '<i class="club-guestbook__verified" title="Poker21 привязан" aria-label="Poker21 привязан">✓</i>' : "") +
         '</span>' + authorMetaHtml(post) + '<small>' + esc(dateLabel(post.createdAt)) + '</small></span></button>';
@@ -381,8 +384,47 @@ function initHomeClubInfoModals() {
     function commentsHtml(post, info) {
       var comments = Array.isArray(info.comments) ? info.comments : [];
       return '<div class="club-guestbook__comments">' + comments.map(function (comment) {
-        return '<div class="club-guestbook__comment">' + avatarHtml(comment.authorAvatar, comment.author, "club-guestbook__comment-avatar") + '<div><b>' + esc(comment.author || "Игрок") + '</b><p>' + esc(comment.text) + '</p></div></div>';
+        var deleteButton = isAdmin
+          ? '<button type="button" class="club-guestbook__delete club-guestbook__delete--comment" data-guestbook-delete-comment="' + esc(comment.id) + '" data-post-id="' + esc(post.id) + '" aria-label="Удалить комментарий">Удалить</button>'
+          : '';
+        var commentAuthor = {
+          authorId: comment.memberId,
+          authorProfileId: comment.authorProfileId,
+          authorName: comment.author,
+          authorAvatar: comment.authorAvatar,
+          authorPoker21Id: comment.authorPoker21Id,
+          authorLevel: comment.authorLevel,
+          authorVerified: comment.authorVerified,
+          createdAt: comment.at
+        };
+        return '<div class="club-guestbook__comment"><div class="club-guestbook__comment-body">' + authorButtonHtml(commentAuthor, true) + '<p>' + esc(comment.text) + '</p></div>' + deleteButton + '</div>';
       }).join("") + (canPost ? '<form class="club-guestbook__comment-form" data-guestbook-comment="' + esc(post.id) + '"><input maxlength="500" placeholder="Написать комментарий…"><button type="submit">Отправить</button></form>' : bindingGateHtml(true)) + '</div>';
+    }
+    function confirmDelete(message) {
+      return new Promise(function (resolve) {
+        var telegram = typeof tg !== "undefined" ? tg : (window.Telegram && window.Telegram.WebApp);
+        if (telegram && typeof telegram.showConfirm === "function") {
+          try { telegram.showConfirm(message, function (ok) { resolve(ok === true); }); return; }
+          catch (error) {}
+        }
+        resolve(typeof window.confirm !== "function" || window.confirm(message));
+      });
+    }
+    function sendReaction(post, emoji) {
+      if (!post || !emoji) return;
+      request("/api/profile-event-feedback", { action: "reaction", eventId: eventId(post), emoji: emoji, scope: "club" }).then(function (data) {
+        feedback[eventId(post)] = data.feedback;
+        render();
+      });
+    }
+    function openReactionPicker(post) {
+      if (!post) return;
+      if (typeof window.pokerOpenProfileReactionPicker === "function") {
+        window.pokerOpenProfileReactionPicker(function (emoji) { sendReaction(post, emoji); });
+        return;
+      }
+      var emoji = window.prompt("Выберите реакцию: " + reactions.join(" "));
+      if (reactions.indexOf(String(emoji || "").trim()) !== -1) sendReaction(post, String(emoji).trim());
     }
     function render() {
       var rows = posts.filter(function (post) { return post.type === activeTab; });
@@ -401,8 +443,15 @@ function initHomeClubInfoModals() {
       if (!canPost) form.insertAdjacentHTML("beforeend", bindingGateHtml(false));
       feed.innerHTML = rows.length ? rows.map(function (post) {
         var info = feedback[eventId(post)] || {};
-        var buttons = reactions.map(function (emoji) { var count = Number(info.reactions && info.reactions[emoji]) || 0; return '<button type="button" class="club-guestbook__reaction' + (info.myReaction === emoji ? ' is-mine' : '') + '" data-guestbook-reaction="' + esc(post.id) + '" data-emoji="' + emoji + '">' + emoji + (count ? '<span>' + count + '</span>' : '') + '</button>'; }).join("");
-        return '<article class="club-guestbook__post"><header>' + authorButtonHtml(post) + '<span class="club-guestbook__kind">' + (post.type === "complaint" ? "Жалоба" : "Отзыв") + '</span></header><p class="club-guestbook__text">' + esc(post.text) + '</p><div class="club-guestbook__reactions">' + buttons + '<span>💬 ' + (Number(info.commentCount) || 0) + '</span></div>' + commentsHtml(post, info) + '</article>';
+        var buttons = reactions.map(function (emoji) {
+          var count = Number(info.reactions && info.reactions[emoji]) || 0;
+          if (!count) return '';
+          return '<button type="button" class="chat-user-modal__news-reaction' + (info.myReaction === emoji ? ' chat-user-modal__news-reaction--mine' : '') + '" data-guestbook-reaction="' + esc(post.id) + '" data-emoji="' + emoji + '">' + emoji + '<span data-guestbook-reaction-users="' + emoji + '" title="Кто поставил">' + count + '</span></button>';
+        }).join("");
+        var deletePostButton = isAdmin
+          ? '<button type="button" class="club-guestbook__delete club-guestbook__delete--post" data-guestbook-delete-post="' + esc(post.id) + '" aria-label="Удалить ' + (post.type === "complaint" ? "жалобу" : "отзыв") + '">Удалить</button>'
+          : '';
+        return '<article class="club-guestbook__post" data-guestbook-post="' + esc(post.id) + '"><header>' + authorButtonHtml(post) + '<span class="club-guestbook__kind">' + (post.type === "complaint" ? "Жалоба" : "Отзыв") + '</span>' + deletePostButton + '</header><p class="club-guestbook__text">' + esc(post.text) + '</p><div class="club-guestbook__reactions chat-user-modal__news-actions">' + buttons + '<span>💬 ' + (Number(info.commentCount) || 0) + '</span></div>' + commentsHtml(post, info) + '</article>';
       }).join("") : '<div class="club-guestbook__empty">' + (loading ? "Загрузка…" : (activeTab === "complaint" ? "Жалоб пока нет" : "Отзывов пока нет")) + '</div>';
     }
     function loadFeedback() {
@@ -422,9 +471,16 @@ function initHomeClubInfoModals() {
         : (typeof window.pokerEnsureScriptDomains === "function"
             ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(readRatings)
             : Promise.resolve({}));
-      return Promise.all([request("/api/club-guestbook", { action: "list" }), ratingsReady.catch(function () { return {}; })]).then(function (results) { posts = results[0].posts || []; canPost = results[0].canPost === true; ratingSnapshots = results[1] || {}; return loadFeedback(); }).catch(function (error) { feed.innerHTML = '<div class="club-guestbook__empty">' + esc(error.message) + '</div>'; }).finally(function () { loading = false; render(); });
+      return Promise.all([request("/api/club-guestbook", { action: "list" }), ratingsReady.catch(function () { return {}; })]).then(function (results) { posts = results[0].posts || []; canPost = results[0].canPost === true; isAdmin = results[0].isAdmin === true; ratingSnapshots = results[1] || {}; return loadFeedback(); }).catch(function (error) { feed.innerHTML = '<div class="club-guestbook__empty">' + esc(error.message) + '</div>'; }).finally(function () { loading = false; render(); });
     }
     function open() { root.hidden = false; document.body.classList.add("club-guestbook-open"); load(); }
+    window.pokerOpenClubGuestbook = function (tab) {
+      activeTab = tab === "complaint" ? "complaint" : "review";
+      root.querySelectorAll("[data-guestbook-tab]").forEach(function (button) {
+        button.classList.toggle("is-active", button.getAttribute("data-guestbook-tab") === activeTab);
+      });
+      open();
+    };
     function close() { root.hidden = true; document.body.classList.remove("club-guestbook-open"); }
     function restoreAfterProfile() {
       document.removeEventListener("poker:chat-user-modal-close", restoreAfterProfile);
@@ -467,8 +523,46 @@ function initHomeClubInfoModals() {
     }
     openBtn.addEventListener("click", open);
     root.addEventListener("click", function (event) {
+      if (reactionLongPressTriggered) {
+        reactionLongPressTriggered = false;
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (event.target.closest("[data-guestbook-close]")) return close();
       if (event.target.closest("[data-guestbook-bind]")) { openPoker21Binding(); return; }
+      var deletePost = event.target.closest("[data-guestbook-delete-post]");
+      if (deletePost) {
+        var postId = deletePost.getAttribute("data-guestbook-delete-post") || "";
+        var post = posts.find(function (row) { return String(row.id) === postId; });
+        if (!post) return;
+        confirmDelete("Удалить " + (post.type === "complaint" ? "жалобу" : "отзыв") + " и все комментарии к записи? Отменить это действие нельзя.").then(function (confirmed) {
+          if (!confirmed) return;
+          deletePost.disabled = true;
+          request("/api/club-guestbook", { action: "delete", postId: postId }).then(function (data) {
+            posts = data.posts || posts.filter(function (row) { return String(row.id) !== postId; });
+            delete feedback[eventId(post)];
+            render();
+          }).catch(function (error) { window.alert(error.message); }).finally(function () { deletePost.disabled = false; });
+        });
+        return;
+      }
+      var deleteComment = event.target.closest("[data-guestbook-delete-comment]");
+      if (deleteComment) {
+        var commentPostId = deleteComment.getAttribute("data-post-id") || "";
+        var commentId = deleteComment.getAttribute("data-guestbook-delete-comment") || "";
+        var commentPost = posts.find(function (row) { return String(row.id) === commentPostId; });
+        if (!commentPost || !commentId) return;
+        confirmDelete("Удалить этот комментарий? Отменить это действие нельзя.").then(function (confirmed) {
+          if (!confirmed) return;
+          deleteComment.disabled = true;
+          request("/api/profile-event-feedback", { action: "delete-comment", eventId: eventId(commentPost), commentId: commentId, scope: "club" }).then(function (data) {
+            feedback[eventId(commentPost)] = data.feedback;
+            render();
+          }).catch(function (error) { window.alert(error.message); }).finally(function () { deleteComment.disabled = false; });
+        });
+        return;
+      }
       var profile = event.target.closest("[data-guestbook-profile]");
       if (profile) {
         var profileId = profile.getAttribute("data-guestbook-profile");
@@ -495,7 +589,37 @@ function initHomeClubInfoModals() {
         return;
       }
       var reaction = event.target.closest("[data-guestbook-reaction]");
-      if (reaction) { var post = posts.find(function (row) { return String(row.id) === reaction.getAttribute("data-guestbook-reaction"); }); if (!post) return; request("/api/profile-event-feedback", { action: "reaction", eventId: eventId(post), emoji: reaction.getAttribute("data-emoji"), scope: "club" }).then(function (data) { feedback[eventId(post)] = data.feedback; render(); }); }
+      if (reaction) {
+        var post = posts.find(function (row) { return String(row.id) === reaction.getAttribute("data-guestbook-reaction"); });
+        if (!post) return;
+        var usersTrigger = event.target.closest("[data-guestbook-reaction-users]");
+        if (usersTrigger && typeof window.pokerShowProfileReactionUsers === "function") {
+          window.pokerShowProfileReactionUsers(feedback[eventId(post)] || {}, usersTrigger.getAttribute("data-guestbook-reaction-users"));
+          return;
+        }
+        sendReaction(post, reaction.getAttribute("data-emoji"));
+      }
+    });
+    root.addEventListener("contextmenu", function (event) {
+      var card = event.target.closest("[data-guestbook-post]");
+      if (!card || event.target.closest("button, input, textarea, form, .club-guestbook__comments")) return;
+      event.preventDefault();
+      var post = posts.find(function (row) { return String(row.id) === card.getAttribute("data-guestbook-post"); });
+      openReactionPicker(post);
+    });
+    root.addEventListener("pointerdown", function (event) {
+      var card = event.target.closest("[data-guestbook-post]");
+      if (!card || event.target.closest("button, input, textarea, form, .club-guestbook__comments")) return;
+      window.clearTimeout(reactionLongPressTimer);
+      reactionLongPressTriggered = false;
+      reactionLongPressTimer = window.setTimeout(function () {
+        reactionLongPressTriggered = true;
+        var post = posts.find(function (row) { return String(row.id) === card.getAttribute("data-guestbook-post"); });
+        openReactionPicker(post);
+      }, 280);
+    });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
+      root.addEventListener(type, function () { window.clearTimeout(reactionLongPressTimer); });
     });
     root.addEventListener("error", function (event) {
       var image = event && event.target;
@@ -511,7 +635,7 @@ function initHomeClubInfoModals() {
       event.preventDefault(); var field = commentForm.querySelector("input"); var post = posts.find(function (row) { return String(row.id) === commentForm.getAttribute("data-guestbook-comment"); }); if (!post || !field.value.trim()) return;
       request("/api/profile-event-feedback", { action: "comment", eventId: eventId(post), text: field.value, scope: "club" }).then(function (data) { field.value = ""; feedback[eventId(post)] = data.feedback; render(); });
     });
-    form.addEventListener("submit", function (event) { event.preventDefault(); var text = input.value.trim(); if (!text || !canPost || loading) return; loading = true; render(); request("/api/club-guestbook", { action: "create", type: activeTab, text: text }).then(function (data) { posts = data.posts || []; input.value = ""; return loadFeedback(); }).catch(function (error) { gate.textContent = error.message; }).finally(function () { loading = false; render(); }); });
+    form.addEventListener("submit", function (event) { event.preventDefault(); var text = input.value.trim(); if (!text || !canPost || loading) return; loading = true; render(); request("/api/club-guestbook", { action: "create", type: activeTab, text: text }).then(function (data) { posts = data.posts || []; input.value = ""; if (activeTab === "review") window.dispatchEvent(new CustomEvent("poker-club-guestbook-review-created")); return loadFeedback(); }).catch(function (error) { gate.textContent = error.message; }).finally(function () { loading = false; render(); }); });
     document.addEventListener("keydown", function (event) { if (event.key === "Escape" && !root.hidden) close(); });
   })();
 
