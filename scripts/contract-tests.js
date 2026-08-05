@@ -4617,6 +4617,48 @@ async function testDailyPokerWinners(redis) {
   assert.strictEqual(adminWinners.body.winners[0].displayName, "Leader Poker21 Name", "daily poker admin winners keeps Poker21 public name");
   assert.strictEqual(adminWinners.body.winners[0].telegramUsername, "leader", "daily poker admin winners exposes Telegram username");
   assert.strictEqual(adminWinners.body.winners[0].telegramDisplayName, "Leader Display", "daily poker admin winners exposes Telegram display");
+
+  const calculationLedgerRows = [
+    { id: "calc_daily_week_1", user_id: "ID100002", amount: 700, direction: "debit", operation_type: "admin_debit", created_at: meta.gameDate + "T12:00:00.000Z" },
+    { id: "calc_daily_week_2", user_id: "ID100003", amount: 300, direction: "debit", operation_type: "admin_debit", created_at: weekDate + "T12:00:00.000Z" },
+    { id: "calc_daily_prev_month", user_id: "ID100002", amount: 400, direction: "debit", operation_type: "admin_debit", created_at: previousMonthDate + "T12:00:00.000Z" },
+  ];
+  calculationLedgerRows.forEach((entry) => {
+    redis.kv.set("poker_app:bonus_ledger:" + entry.id, JSON.stringify(entry));
+    redis.l("poker_app:bonus_ledger_all").push(entry.id);
+  });
+  redis.kv.set("poker_app:bonus_ledger_version", "calculation-contract-1");
+  redis.h("poker_app:bonus_issue_reviews").set("calc_daily_week_1", JSON.stringify({ status: "plus", amount: 120 }));
+  redis.h("poker_app:bonus_issue_reviews").set("calc_daily_prev_month", JSON.stringify({ status: "plus", amount: 50 }));
+
+  const weekBalanceSummary = await call(promo, req("GET", {
+    path: "daily-poker/winners",
+    pwaSession: s.admin,
+    summary: "1",
+    balanceSummary: "1",
+    from: currentWeekStart,
+    to: meta.gameDate,
+    balanceFrom: currentWeekStart,
+    balanceTo: meta.gameDate,
+  }));
+  assert.strictEqual(weekBalanceSummary.statusCode, 200, "calculation daily-poker week summary succeeds");
+  assert.strictEqual(weekBalanceSummary.body.bonusBalanceDebited, 1000, "calculation daily-poker week summary uses ledger debits");
+  assert.strictEqual(weekBalanceSummary.body.bonusBalanceReturned, 120, "calculation daily-poker week summary uses verified returns");
+  assert.strictEqual(weekBalanceSummary.body.spinStats, undefined, "calculation summary does not scan or return game statistics");
+
+  const monthBalanceSummary = await call(promo, req("GET", {
+    path: "daily-poker/winners",
+    pwaSession: s.admin,
+    summary: "1",
+    balanceSummary: "1",
+    from: previousMonthStart,
+    to: previousMonthDate,
+    balanceFrom: previousMonthStart,
+    balanceTo: previousMonthDate,
+  }));
+  assert.strictEqual(monthBalanceSummary.statusCode, 200, "calculation daily-poker month summary succeeds");
+  assert.strictEqual(monthBalanceSummary.body.bonusBalanceDebited, 400, "calculation daily-poker month summary uses the selected month only");
+  assert.strictEqual(monthBalanceSummary.body.bonusBalanceReturned, 50, "calculation daily-poker month summary keeps month returns separate");
 }
 
 async function testPokerPlusKeyBindFallbackMatrix(redis) {
