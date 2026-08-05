@@ -5229,10 +5229,17 @@ body.profile-month-story-open { overflow: hidden; }
   }
 }
 
-/* Keep the public identity row focused on age and city. The specialty remains
-   editable beside the player name, but is not repeated as a public badge. */
+/* The public badge strip is removed. Birth date and city now occupy that row. */
 .view[data-view="profile"] .profile-public-showcase__specialty-badge {
   display: none !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase__details-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.view[data-view="profile"] .profile-public-showcase__details-row .profile-public-showcase__identity-controls {
+  grid-column: 1 / -1 !important;
 }
 
 @media (max-width: 700px) {

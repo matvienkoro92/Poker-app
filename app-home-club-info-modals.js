@@ -289,6 +289,7 @@ function initHomeClubInfoModals() {
     var activeTab = "review";
     var posts = [];
     var feedback = {};
+    var ratingSnapshots = {};
     var canPost = false;
     var loading = false;
     function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -318,11 +319,46 @@ function initHomeClubInfoModals() {
     function dateLabel(value) { try { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); } catch (e) { return ""; } }
     function eventId(post) { return "club-guestbook:" + String(post.id || ""); }
     function avatarHtml(url, name, cls) { return url ? '<img class="' + cls + '" src="' + esc(url) + '" alt="">' : '<span class="' + cls + '">' + esc(String(name || "И").charAt(0).toUpperCase()) + '</span>'; }
+    function ratingSnapshotForNick(value) {
+      var exact = String(value || "").replace(/^@+/, "").trim().toLowerCase();
+      try { exact = exact.normalize("NFKC"); } catch (error) {}
+      exact = exact.replace(/[\uFE0E\uFE0F]/g, "").replace(/\s+/g, "");
+      var relaxed = exact.replace(/[!！?？.,:;"'`~()\[\]{}<>«»]+$/g, "");
+      return ratingSnapshots[exact] || ratingSnapshots[relaxed] || null;
+    }
+    function bindingGateHtml(compact) {
+      return '<div class="club-guestbook__binding-gate' + (compact ? ' club-guestbook__binding-gate--compact' : '') + '"><span>Привяжите аккаунт Poker21, чтобы оставлять ' + (compact ? 'комментарии' : 'отзывы и жалобы') + '.</span><button type="button" data-guestbook-bind>Привязать Poker21</button></div>';
+    }
+    function openPoker21Binding() {
+      close();
+      var nav = document.querySelector('.bottom-nav__item[data-view-target="profile"]');
+      if (nav) nav.click();
+      window.setTimeout(function () { if (typeof setProfileTab === "function") setProfileTab("poker21"); }, 0);
+    }
+    function authorMetaHtml(post) {
+      var snapshot = ratingSnapshotForNick(post.authorName);
+      var league1Place = Math.max(0, Number(snapshot && snapshot.league1Place) || 0);
+      var league2Place = Math.max(0, Number(snapshot && snapshot.league2Place) || 0);
+      var league = league1Place && (!league2Place || league1Place <= league2Place) ? 1 : (league2Place ? 2 : 0);
+      var place = league === 1 ? league1Place : (league === 2 ? league2Place : 0);
+      var parts = [];
+      if (post.authorPoker21Id) parts.push("ID " + String(post.authorPoker21Id));
+      if (post.authorLevel) parts.push("Уровень " + Math.max(0, Number(post.authorLevel) || 0));
+      if (league && place) parts.push("Лига " + league + " · " + place + "-е место");
+      return parts.length ? '<span class="club-guestbook__author-meta">' + esc(parts.join(" · ")) + '</span>' : "";
+    }
+    function authorButtonHtml(post) {
+      var profileId = String(post.authorProfileId || post.authorId || "");
+      return '<button type="button" class="club-guestbook__author" data-guestbook-profile="' + esc(profileId) + '" data-profile-name="' + esc(post.authorName || "Игрок") + '" data-profile-avatar="' + esc(post.authorAvatar || "") + '"' + (profileId ? "" : " disabled") + '>' +
+        avatarHtml(post.authorAvatar, post.authorName, "club-guestbook__avatar") + '<span><strong>' + esc(post.authorName || "Игрок") + '</strong>' +
+        (post.authorVerified ? '<i class="club-guestbook__verified" title="Poker21 привязан" aria-label="Poker21 привязан">✓</i>' : "") +
+        authorMetaHtml(post) + '<small>' + esc(dateLabel(post.createdAt)) + '</small></span></button>';
+    }
     function commentsHtml(post, info) {
       var comments = Array.isArray(info.comments) ? info.comments : [];
       return '<div class="club-guestbook__comments">' + comments.map(function (comment) {
         return '<div class="club-guestbook__comment">' + avatarHtml(comment.authorAvatar, comment.author, "club-guestbook__comment-avatar") + '<div><b>' + esc(comment.author || "Игрок") + '</b><p>' + esc(comment.text) + '</p></div></div>';
-      }).join("") + '<form class="club-guestbook__comment-form" data-guestbook-comment="' + esc(post.id) + '"><input maxlength="500" placeholder="Написать комментарий…"><button type="submit">Отправить</button></form></div>';
+      }).join("") + (canPost ? '<form class="club-guestbook__comment-form" data-guestbook-comment="' + esc(post.id) + '"><input maxlength="500" placeholder="Написать комментарий…"><button type="submit">Отправить</button></form>' : bindingGateHtml(true)) + '</div>';
     }
     function render() {
       var rows = posts.filter(function (post) { return post.type === activeTab; });
@@ -331,13 +367,17 @@ function initHomeClubInfoModals() {
         var copyLabel = copyBtn.querySelector("span");
         if (copyLabel) copyLabel.textContent = activeTab === "complaint" ? "Скопировать ссылку на жалобы" : "Скопировать ссылку на отзывы";
       }
-      gate.textContent = canPost ? "Публикация от привязанного ника" : "Для публикации привяжите Poker21";
+      gate.textContent = canPost ? "Публикация от привязанного аккаунта Poker21" : "";
       input.disabled = !canPost;
       form.querySelector('button[type="submit"]').disabled = !canPost || loading;
+      form.classList.toggle("club-guestbook__composer--locked", !canPost);
+      var oldGate = form.querySelector(".club-guestbook__binding-gate");
+      if (oldGate) oldGate.remove();
+      if (!canPost) form.insertAdjacentHTML("beforeend", bindingGateHtml(false));
       feed.innerHTML = rows.length ? rows.map(function (post) {
         var info = feedback[eventId(post)] || {};
         var buttons = reactions.map(function (emoji) { var count = Number(info.reactions && info.reactions[emoji]) || 0; return '<button type="button" class="club-guestbook__reaction' + (info.myReaction === emoji ? ' is-mine' : '') + '" data-guestbook-reaction="' + esc(post.id) + '" data-emoji="' + emoji + '">' + emoji + (count ? '<span>' + count + '</span>' : '') + '</button>'; }).join("");
-        return '<article class="club-guestbook__post"><header>' + avatarHtml(post.authorAvatar, post.authorName, "club-guestbook__avatar") + '<div><strong>' + esc(post.authorName || "Игрок") + '</strong><small>' + esc(dateLabel(post.createdAt)) + '</small></div><span class="club-guestbook__kind">' + (post.type === "complaint" ? "Жалоба" : "Отзыв") + '</span></header><p class="club-guestbook__text">' + esc(post.text) + '</p><div class="club-guestbook__reactions">' + buttons + '<span>💬 ' + (Number(info.commentCount) || 0) + '</span></div>' + commentsHtml(post, info) + '</article>';
+        return '<article class="club-guestbook__post"><header>' + authorButtonHtml(post) + '<span class="club-guestbook__kind">' + (post.type === "complaint" ? "Жалоба" : "Отзыв") + '</span></header><p class="club-guestbook__text">' + esc(post.text) + '</p><div class="club-guestbook__reactions">' + buttons + '<span>💬 ' + (Number(info.commentCount) || 0) + '</span></div>' + commentsHtml(post, info) + '</article>';
       }).join("") : '<div class="club-guestbook__empty">' + (loading ? "Загрузка…" : (activeTab === "complaint" ? "Жалоб пока нет" : "Отзывов пока нет")) + '</div>';
     }
     function loadFeedback() {
@@ -347,13 +387,36 @@ function initHomeClubInfoModals() {
     }
     function load() {
       loading = true; render();
-      return request("/api/club-guestbook", { action: "list" }).then(function (data) { posts = data.posts || []; canPost = data.canPost === true; return loadFeedback(); }).catch(function (error) { feed.innerHTML = '<div class="club-guestbook__empty">' + esc(error.message) + '</div>'; }).finally(function () { loading = false; render(); });
+      function readRatings() {
+        return typeof window.pokerGetClubNewsTournamentSnapshotsReady === "function"
+          ? window.pokerGetClubNewsTournamentSnapshotsReady()
+          : Promise.resolve({});
+      }
+      var ratingsReady = typeof window.pokerGetClubNewsTournamentSnapshotsReady === "function"
+        ? readRatings()
+        : (typeof window.pokerEnsureScriptDomains === "function"
+            ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(readRatings)
+            : Promise.resolve({}));
+      return Promise.all([request("/api/club-guestbook", { action: "list" }), ratingsReady.catch(function () { return {}; })]).then(function (results) { posts = results[0].posts || []; canPost = results[0].canPost === true; ratingSnapshots = results[1] || {}; return loadFeedback(); }).catch(function (error) { feed.innerHTML = '<div class="club-guestbook__empty">' + esc(error.message) + '</div>'; }).finally(function () { loading = false; render(); });
     }
     function open() { root.hidden = false; document.body.classList.add("club-guestbook-open"); load(); }
     function close() { root.hidden = true; document.body.classList.remove("club-guestbook-open"); }
     openBtn.addEventListener("click", open);
     root.addEventListener("click", function (event) {
       if (event.target.closest("[data-guestbook-close]")) return close();
+      if (event.target.closest("[data-guestbook-bind]")) { openPoker21Binding(); return; }
+      var profile = event.target.closest("[data-guestbook-profile]");
+      if (profile) {
+        var profileId = profile.getAttribute("data-guestbook-profile");
+        if (!profileId) return;
+        close();
+        var profileName = profile.getAttribute("data-profile-name") || "Игрок";
+        var profileAvatar = profile.getAttribute("data-profile-avatar") || "";
+        if (typeof window.pokerOpenChatUserModalSafe === "function") window.pokerOpenChatUserModalSafe(profileId, profileName, profileAvatar);
+        else if (typeof window.openChatUserModalById === "function") window.openChatUserModalById(profileId, profileName, profileAvatar);
+        else if (typeof window.pokerEnsureScriptDomains === "function") Promise.resolve(window.pokerEnsureScriptDomains(["chat"])).then(function () { if (typeof window.openChatUserModalById === "function") window.openChatUserModalById(profileId, profileName, profileAvatar); });
+        return;
+      }
       var tab = event.target.closest("[data-guestbook-tab]");
       if (tab) { activeTab = tab.getAttribute("data-guestbook-tab") === "complaint" ? "complaint" : "review"; root.querySelectorAll("[data-guestbook-tab]").forEach(function (button) { button.classList.toggle("is-active", button === tab); }); render(); return; }
       var copy = event.target.closest("[data-guestbook-copy]");

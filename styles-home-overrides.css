@@ -1775,9 +1775,19 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__composer span { color: #909bad; font-size: 11px; }
 .club-guestbook__composer button, .club-guestbook__comment-form button { min-height: 36px; padding: 0 14px; color: #251400; background: #edbd5d; border: 0; border-radius: 10px; font-weight: 900; }
 .club-guestbook__composer button:disabled { opacity: .42; }
+.club-guestbook__composer--locked textarea, .club-guestbook__composer--locked > div:not(.club-guestbook__binding-gate) { display: none; }
+.club-guestbook__binding-gate { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #d8dee8; font-size: 12px; line-height: 1.35; }
+.club-guestbook__binding-gate button { flex: 0 0 auto; min-height: 36px; padding: 0 14px; color: #251400; background: linear-gradient(180deg, #ffe28a, #e9ad3f); border: 0; border-radius: 10px; font-weight: 900; }
+.club-guestbook__binding-gate--compact { margin-top: 10px; padding: 10px; background: rgba(229,179,74,.07); border: 1px solid rgba(229,179,74,.2); border-radius: 12px; }
 .club-guestbook__feed { flex: 1; overflow: auto; padding: 0 18px 24px; }
 .club-guestbook__post { margin-bottom: 12px; padding: 15px; background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025)); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; }
 .club-guestbook__post > header { display: flex; align-items: center; gap: 10px; }
+.club-guestbook__author { display: flex; align-items: center; min-width: 0; padding: 0; color: inherit; background: none; border: 0; text-align: left; cursor: pointer; }
+.club-guestbook__author > span { display: grid; grid-template-columns: auto auto 1fr; align-items: center; min-width: 0; margin-left: 10px; }
+.club-guestbook__author strong { grid-column: 1; }
+.club-guestbook__verified { grid-column: 2; display: grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; color: #062c1e; background: linear-gradient(145deg, #7effc4, #28c982); border: 1px solid #a5ffda; border-radius: 50%; font-size: 12px; font-style: normal; font-weight: 1000; box-shadow: 0 0 10px rgba(48, 226, 145, .32); }
+.club-guestbook__author-meta { grid-column: 1 / -1; margin-top: 2px; color: #aeb8c8; font-size: 11px; font-weight: 700; }
+.club-guestbook__author small { grid-column: 1 / -1; }
 .club-guestbook__avatar, .club-guestbook__comment-avatar { flex: 0 0 auto; width: 44px; height: 44px; object-fit: cover; border: 2px solid #dcae53; border-radius: 50%; background: #292e38; display: grid; place-items: center; font-weight: 900; }
 .club-guestbook__post header > div { display: grid; min-width: 0; }
 .club-guestbook__post header strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

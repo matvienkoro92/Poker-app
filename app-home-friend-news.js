@@ -49,6 +49,7 @@
   var clubNewsRetryTimer = 0;
   var clubNewsRetryCount = 0;
   var clubProfileByNick = {};
+  var clubRatingSnapshotsByNick = {};
   var clubProfileLookupPromises = {};
   var friendProfileByNick = {};
   var friendProfileById = {};
@@ -489,12 +490,12 @@
     }
     if (slug === "waaar") {
       if (variantIndex === 1) return "./assets/summer-rating-player-waaar.webp";
-      if (variantIndex >= 2) return "./assets/club-news-personal/waaar-news-cutout-v3.webp";
+      if (variantIndex >= 2) return "./assets/club-news-personal/waaar-news-cutout-v3.webp?v=1";
     }
     if (slug === "evgen1722" && variantIndex >= 1) {
       return "./assets/summer-rating-player-evgen1722.webp";
     }
-    return slug ? "./assets/club-news-personal/" + slug + "-news-cutout.webp" : "";
+    return slug ? "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=1" : "";
   }
 
   function playerNewsColor(value) {
@@ -648,6 +649,14 @@
     for (var i = 0; i < candidates.length; i += 1) {
       var snapshot = snapshots && snapshots[matchKey(candidates[i])];
       if (snapshot) return snapshot;
+    }
+    return null;
+  }
+
+  function clubRatingSnapshotForNick(value) {
+    var keys = nicknameMatchKeys(value);
+    for (var i = 0; i < keys.length; i += 1) {
+      if (clubRatingSnapshotsByNick[keys[i]]) return clubRatingSnapshotsByNick[keys[i]];
     }
     return null;
   }
@@ -1838,8 +1847,15 @@
     var canResolveClubPlayer = newsModalMode === "club" && !!String(row && row.actorNick || "").trim();
     var canOpenProfile = !ticker && !!(eventPlayerId || canResolveClubPlayer);
     var profileLevel = Math.max(0, Number(linkedProfile && linkedProfile.level) || 0);
-    var profileRatingPlace = Math.max(0, Number(linkedProfile && linkedProfile.ratingPlace) || 0);
-    var profileRatingLeague = Math.max(0, Number(linkedProfile && linkedProfile.ratingLeague) || 0);
+    var ratingSnapshot = newsModalMode === "club" ? clubRatingSnapshotForNick(row && row.actorNick) : null;
+    var snapshotLeague1Place = Math.max(0, Number(ratingSnapshot && ratingSnapshot.league1Place) || 0);
+    var snapshotLeague2Place = Math.max(0, Number(ratingSnapshot && ratingSnapshot.league2Place) || 0);
+    var snapshotRatingLeague = snapshotLeague1Place && (!snapshotLeague2Place || snapshotLeague1Place <= snapshotLeague2Place)
+      ? 1
+      : (snapshotLeague2Place ? 2 : 0);
+    var snapshotRatingPlace = snapshotRatingLeague === 1 ? snapshotLeague1Place : (snapshotRatingLeague === 2 ? snapshotLeague2Place : 0);
+    var profileRatingPlace = Math.max(0, Number(linkedProfile && linkedProfile.ratingPlace) || snapshotRatingPlace || 0);
+    var profileRatingLeague = Math.max(0, Number(linkedProfile && linkedProfile.ratingLeague) || snapshotRatingLeague || 0);
     var profileMetaParts = [];
     if (profileLevel) profileMetaParts.push("Уровень " + profileLevel);
     if (profileRatingPlace && profileRatingLeague) {
@@ -2967,6 +2983,7 @@
         });
       });
       clubProfileByNick = {};
+      clubRatingSnapshotsByNick = results[2] || {};
       clubProfileLookupPromises = {};
       var ambiguousClubProfileNicks = {};
       players.forEach(function (row) {

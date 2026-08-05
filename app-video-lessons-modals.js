@@ -257,7 +257,6 @@ function initVideoLessonsReviewsModal() {
   var closeNodes = modal.querySelectorAll("[data-video-lessons-reviews-close]");
   var lastFocus = null;
   var VL_REVIEWS_COACH_SLUG = "nikolay_fishkopcheny";
-  var LOCAL_REVIEWS_KEY = "poker_app_video_lesson_reviews_local_v1_" + VL_REVIEWS_COACH_SLUG;
   var reviewsFeedIsAdmin = false;
   function isOpen() {
     return modal.getAttribute("aria-hidden") === "false";
@@ -283,44 +282,6 @@ function initVideoLessonsReviewsModal() {
     } catch (eFmt) {
       return "";
     }
-  }
-  function loadLocalReviews() {
-    try {
-      var raw = localStorage.getItem(LOCAL_REVIEWS_KEY);
-      var arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch (eLoc) {
-      return [];
-    }
-  }
-  function saveLocalReview(text) {
-    var list = loadLocalReviews();
-    list.unshift({
-      id: "l_" + Date.now(),
-      text: text,
-      at: Date.now(),
-      author: "Вы",
-    });
-    try {
-      localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(list.slice(0, 50)));
-    } catch (eSave) {}
-  }
-  function mergeReviews(server, local) {
-    var seen = {};
-    var out = [];
-    function add(r) {
-      if (!r || typeof r !== "object") return;
-      var k = r.id || String(r.at || 0) + "_" + String(r.text || "").slice(0, 48);
-      if (seen[k]) return;
-      seen[k] = true;
-      out.push(r);
-    }
-    (server || []).forEach(add);
-    (local || []).forEach(add);
-    out.sort(function (a, b) {
-      return (b.at || 0) - (a.at || 0);
-    });
-    return out;
   }
   function renderReviews(items, canDeleteServer) {
     if (!feed) return;
@@ -365,10 +326,9 @@ function initVideoLessonsReviewsModal() {
       feed.innerHTML = '<p class="video-lessons__reviews-feed-loading">Загрузка…</p>';
     }
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    var local = loadLocalReviews();
     if (!base) {
       reviewsFeedIsAdmin = false;
-      renderReviews(local, false);
+      if (feed) feed.innerHTML = '<p class="video-lessons__reviews-feed-empty">Не удалось загрузить отзывы.</p>';
       return;
     }
     var q =
@@ -387,15 +347,15 @@ function initVideoLessonsReviewsModal() {
           if (reviewsFeedIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
             window.pokerMarkAdminAccess("video-lesson-reviews");
           }
-          renderReviews(mergeReviews(res.data.reviews, local), reviewsFeedIsAdmin);
+          renderReviews(res.data.reviews, reviewsFeedIsAdmin);
         } else {
           reviewsFeedIsAdmin = false;
-          renderReviews(local, false);
+          if (feed) feed.innerHTML = '<p class="video-lessons__reviews-feed-empty">Не удалось загрузить отзывы.</p>';
         }
       })
       .catch(function () {
         reviewsFeedIsAdmin = false;
-        renderReviews(local, false);
+        if (feed) feed.innerHTML = '<p class="video-lessons__reviews-feed-empty">Не удалось загрузить отзывы.</p>';
       });
   }
   if (feed && feed.getAttribute("data-vl-review-delete-bound") !== "1") {
@@ -541,33 +501,24 @@ function initVideoLessonsReviewsModal() {
             if (res.status === 401 || res.status === 400) {
               return;
             }
-            saveLocalReview(text);
-            if (textarea) textarea.value = "";
             if (statusEl) {
               statusEl.textContent =
                 res.status === 503
-                  ? "Сервер временно недоступен — отзыв сохранён на этом устройстве."
-                  : "Отзыв сохранён на этом устройстве.";
+                  ? "Сервер временно недоступен — отзыв не отправлен."
+                  : "Не удалось отправить отзыв.";
             }
-            refreshReviews();
           })
           .catch(function () {
             doneSubmitting();
-            saveLocalReview(text);
-            if (textarea) textarea.value = "";
-            if (statusEl) statusEl.textContent = "Сеть недоступна — отзыв сохранён локально.";
-            refreshReviews();
+            if (statusEl) statusEl.textContent = "Сеть недоступна — отзыв не отправлен.";
           });
       } else {
-        saveLocalReview(text);
-        if (textarea) textarea.value = "";
         if (statusEl) {
           statusEl.textContent = initData
-            ? "Отзыв сохранён на этом устройстве."
-            : "Отзыв сохранён на этом устройстве. Откройте в Telegram, чтобы поделиться им с другими учениками.";
+            ? "Сервер временно недоступен — отзыв не отправлен."
+            : "Войдите в аккаунт, чтобы оставить отзыв.";
         }
         doneSubmitting();
-        refreshReviews();
       }
     });
   }
