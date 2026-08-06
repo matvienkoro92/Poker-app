@@ -4646,9 +4646,9 @@ body .home-friend-news-modal--club .home-friend-news-modal__action-row {
   gap: 9px;
 }
 body .home-friend-news-modal--club .home-friend-news-modal__action-row {
-  width: 145%;
-  max-width: none;
-  margin-left: -45%;
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
 }
 body .home-friend-news-modal .home-friend-news-modal__action-row > .chat-user-modal__news-actions {
   grid-row: 1;

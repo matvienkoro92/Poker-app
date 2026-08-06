@@ -1206,6 +1206,11 @@ function initProfilePublicShowcase() {
       profileReviewInviteState.hasReview = true;
       profileReviewInviteRender();
     });
+    window.addEventListener("poker-club-guestbook-review-state", function (event) {
+      profileReviewInviteState.loaded = true;
+      profileReviewInviteState.hasReview = !!(event && event.detail && event.detail.hasReview);
+      profileReviewInviteRender();
+    });
   }
 }
 
