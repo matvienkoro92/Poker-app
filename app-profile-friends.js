@@ -485,7 +485,6 @@ function initProfileFriends() {
   function fetchDefaultFriendsData() {
     if (defaultFriendsFetchPromise) return defaultFriendsFetchPromise;
     var base = getApiBase();
-    if (!base) return Promise.reject(new Error("api_base_missing"));
     var viewer = profileFriendsViewerAccountId();
     var query = "?publicDefaults=1" + (viewer ? "&viewerAccountId=" + encodeURIComponent(viewer) : "");
     defaultFriendsFetchPromise = fetchFriendsJson(base + "/api/friends" + query, 5000)
@@ -532,7 +531,6 @@ function initProfileFriends() {
   function fetchFriendsData() {
     if (friendsFetchPromise) return friendsFetchPromise;
     var base = getApiBase();
-    if (!base) return Promise.reject(new Error("api_base_missing"));
     var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     friendsFetchPromise = fetchFriendsJson(base + "/api/friends" + fq, 9000)
       .then(function (data) {
@@ -555,7 +553,6 @@ function initProfileFriends() {
   function fetchFriendsPreviewData() {
     if (friendsPreviewFetchPromise) return friendsPreviewFetchPromise;
     var base = getApiBase();
-    if (!base) return Promise.reject(new Error("api_base_missing"));
     var fq = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=";
     friendsPreviewFetchPromise = fetchFriendsJson(base + "/api/friends" + fq + "&preview=1", 6000)
       .then(function (data) {
@@ -1600,7 +1597,7 @@ function initProfileFriends() {
 
   function postFriendAction(targetUserId, action, button) {
     var base = getApiBase();
-    if (!base || !targetUserId) return;
+    if (!targetUserId) return;
     if (button) button.disabled = true;
     fetch(base + "/api/friends", {
       method: "POST",
@@ -1625,7 +1622,7 @@ function initProfileFriends() {
 
   function deleteFriend(targetUserId, kind, button) {
     var base = getApiBase();
-    if (!base || !targetUserId) return;
+    if (!targetUserId) return;
     var text = "Убрать этого человека из друзей?";
     var confirmed = typeof window.confirm === "function" ? window.confirm(text) : true;
     if (!confirmed) return;
@@ -1768,8 +1765,6 @@ function initProfileFriends() {
 
   function loadFriends(options) {
     options = options || {};
-    var base = getApiBase();
-    if (!base) return;
     var hasCachedData = !!(friendsDataCache && friendsDataCache.ok);
     if (!hasCachedData) {
       friendsDataCache = readStableFriendsData();
@@ -1800,8 +1795,6 @@ function initProfileFriends() {
   }
 
   function loadFriendsPreview() {
-    var base = getApiBase();
-    if (!base) return;
     var requestStartedAt = Date.now();
     if (!profileFriendsHasCredential()) {
       if (!friendsDataCache) friendsDataCache = readStableFriendsData();
@@ -1875,8 +1868,6 @@ function initProfileFriends() {
   if (backdrop) backdrop.addEventListener("click", closeFriendsModal);
   if (closeBtn) closeBtn.addEventListener("click", closeFriendsModal);
   btn.addEventListener("click", function () {
-    var base = getApiBase();
-    if (!base) return;
     if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
       alertText("Войдите в приложение (Telegram или PWA).");
       return;

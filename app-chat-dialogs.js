@@ -228,7 +228,7 @@ window.pokerApplyLocalOutgoingFriendRequest = pokerApplyLocalOutgoingFriendReque
 
 function pokerRefreshFriendsCountFromApi() {
   var base = typeof getApiBase === "function" ? getApiBase() : "";
-  if (!base || (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential())) {
+  if (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
     pokerUpdateFriendsCountLabels(null);
     return;
   }

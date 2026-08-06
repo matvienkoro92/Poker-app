@@ -1895,7 +1895,7 @@ if (chatUserModalEl) {
   }
   function getChatUserModalRespectScoreReady(userId, isSelfProfile) {
     var uid = String(userId || chatUserModalUserId || "").trim();
-    if (!base || typeof fetch !== "function") return Promise.resolve(null);
+    if (typeof fetch !== "function") return Promise.resolve(null);
     if (!uid && !isSelfProfile) return Promise.resolve(null);
     var url = "";
     if (isSelfProfile) {

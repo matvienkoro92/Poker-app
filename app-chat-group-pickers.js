@@ -121,7 +121,7 @@ function pokerBuildGroupModalContactList() {
  */
 window.__pokerFetchFriendsForGroupPick = function (done) {
   var base = typeof getApiBase === "function" ? getApiBase() : "";
-  if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+  if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
     if (typeof done === "function") done();
     return;
   }
