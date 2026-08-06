@@ -121,13 +121,13 @@ function pokerInitHomeDeepLinks(opts) {
       }, 40);
       return;
     }
-    if (startParam === "club_guestbook_reviews" || startParam === "club_guestbook_complaints") {
+    if (startParam === "club_guestbook_reviews" || startParam === "club_guestbook_complaints" || startParam === "club_guestbook_suggestions") {
       ensureHomeViewForDeepLink();
       retryDeepLinkAction(function () {
         var openGuestbook = document.getElementById("clubGuestbookOpenBtn");
         if (!openGuestbook) return false;
         openGuestbook.click();
-        var tabName = startParam === "club_guestbook_complaints" ? "complaint" : "review";
+        var tabName = startParam === "club_guestbook_complaints" ? "complaint" : (startParam === "club_guestbook_suggestions" ? "suggestion" : "review");
         var tab = document.querySelector('[data-guestbook-tab="' + tabName + '"]');
         if (tab) tab.click();
         return true;

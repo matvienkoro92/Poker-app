@@ -1786,7 +1786,7 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__header small { color: #d8ad55; font-size: 10px; font-weight: 900; letter-spacing: .16em; }
 .club-guestbook__header h2 { margin: 3px 0 0; font-size: clamp(20px, 5vw, 28px); }
 .club-guestbook__header > button { width: 38px; height: 38px; color: #fff; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 50%; font-size: 25px; }
-.club-guestbook__tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 18px 8px; }
+.club-guestbook__tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 14px 18px 8px; }
 .club-guestbook__tabs button { min-height: 43px; color: #aeb7c8; background: #171c26; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; font-weight: 900; }
 .club-guestbook__tabs button.is-active { color: #251400; background: linear-gradient(180deg, #ffe9a4, #e9ae42); border-color: #ffd879; }
 .club-guestbook__copy { align-self: flex-end; min-height: 34px; margin: 0 18px 7px; padding: 0 11px; color: #e6bd6d; background: rgba(229, 179, 74, 0.08); border: 1px solid rgba(229, 179, 74, 0.32); border-radius: 10px; font-size: 11px; font-weight: 850; }
@@ -1795,11 +1795,12 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__review-invite { margin: 8px 22px 2px; color: #f4d38f; font-size: 14px; font-weight: 800; line-height: 1.45; }
 .club-guestbook__review-invite[hidden] { display: none !important; }
 .club-guestbook__composer { margin: 6px 18px 12px; padding: 12px; background: rgba(255,255,255,.045); border: 1px solid rgba(229,179,74,.22); border-radius: 17px; }
-.club-guestbook__composer textarea { display: block; width: 100%; min-height: 76px; resize: vertical; color: #f8f4ec; background: transparent; border: 0; outline: 0; font: inherit; line-height: 1.45; }
+.club-guestbook__composer textarea { display: block; width: 100%; min-height: 76px; padding-left: 38px; resize: vertical; color: #f8f4ec; background: transparent; border: 0; outline: 0; font: inherit; line-height: 1.45; }
 .club-guestbook__composer > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .club-guestbook__composer span { color: #909bad; font-size: 11px; }
 .club-guestbook__composer button, .club-guestbook__comment-form button { min-height: 36px; padding: 0 14px; color: #251400; background: #edbd5d; border: 0; border-radius: 10px; font-weight: 900; }
 .club-guestbook__composer button:disabled { opacity: .42; }
+.club-guestbook__comment-form button:disabled { opacity: .55; cursor: wait; }
 .club-guestbook__composer--locked textarea, .club-guestbook__composer--locked > div:not(.club-guestbook__binding-gate) { display: none; }
 .club-guestbook__binding-gate { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #d8dee8; font-size: 12px; line-height: 1.35; }
 .club-guestbook__binding-gate button { flex: 0 0 auto; min-height: 36px; padding: 0 14px; color: #251400; background: linear-gradient(180deg, #ffe28a, #e9ad3f); border: 0; border-radius: 10px; font-weight: 900; }
@@ -1844,13 +1845,24 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__comment b { font-size: 12px; }
 .club-guestbook__comment p { margin: 2px 0 0; color: #cbd2de; font-size: 12px; line-height: 1.4; }
 .club-guestbook__comment-form { display: flex; gap: 7px; margin-top: 10px; }
-.club-guestbook__comment-form input { min-width: 0; flex: 1; min-height: 37px; padding: 0 11px; color: #fff; background: #10151d; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; }
+.club-guestbook__input-wrap { position: relative; display: flex; flex: 1 1 auto; min-width: 0; }
+.club-guestbook__input-wrap--post { display: block; }
+.club-guestbook__comment-form input { width: 100%; min-width: 0; min-height: 37px; padding: 0 11px 0 43px; color: #fff; background: #10151d; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; }
+.club-guestbook__composer .club-guestbook__emoji-toggle, .club-guestbook__comment-form .club-guestbook__emoji-toggle { position: absolute; z-index: 2; top: 3px; left: 4px; width: 32px; min-height: 32px; padding: 0; color: #aebbd0; background: transparent; border: 0; border-radius: 50%; font-size: 22px; line-height: 1; cursor: pointer; }
+.club-guestbook__composer .club-guestbook__emoji-toggle:hover, .club-guestbook__composer .club-guestbook__emoji-toggle:focus-visible, .club-guestbook__comment-form .club-guestbook__emoji-toggle:hover, .club-guestbook__comment-form .club-guestbook__emoji-toggle:focus-visible { color: #ffe0a3; background: rgba(148,163,184,.15); }
+.club-guestbook__emoji-picker { position: absolute; z-index: 20; left: 0; bottom: calc(100% + 7px); display: grid; grid-template-columns: repeat(8, 34px); gap: 3px; max-width: min(286px, calc(100vw - 54px)); max-height: 150px; padding: 8px; overflow-y: auto; border: 1px solid rgba(148,163,184,.35); border-radius: 12px; background: rgba(15,23,42,.97); box-shadow: 0 12px 30px rgba(0,0,0,.46); backdrop-filter: blur(10px); }
+.club-guestbook__input-wrap--post .club-guestbook__emoji-picker { bottom: auto; top: 39px; }
+.club-guestbook__emoji-picker[hidden] { display: none; }
+.club-guestbook__composer .club-guestbook__emoji-picker > button, .club-guestbook__comment-form .club-guestbook__emoji-picker > button { display: grid; width: 34px; min-height: 34px; padding: 0; place-items: center; color: inherit; background: transparent; border: 0; border-radius: 7px; font-size: 21px; line-height: 1; cursor: pointer; }
+.club-guestbook__composer .club-guestbook__emoji-picker > button:hover, .club-guestbook__composer .club-guestbook__emoji-picker > button:focus-visible, .club-guestbook__comment-form .club-guestbook__emoji-picker > button:hover, .club-guestbook__comment-form .club-guestbook__emoji-picker > button:focus-visible { background: rgba(148,163,184,.2); }
 .club-guestbook__empty { padding: 42px 12px; color: #8e99aa; text-align: center; }
 @media (max-width: 520px) {
   .club-guestbook { padding: 0; place-items: stretch; }
   .club-guestbook__panel { width: 100%; max-height: 100dvh; border-radius: 0; }
   .club-guestbook__header { padding-top: max(18px, env(safe-area-inset-top)); }
   .club-guestbook__composer, .club-guestbook__tabs { margin-inline: 12px; padding-inline: 10px; }
+  .club-guestbook__tabs { gap: 5px; }
+  .club-guestbook__tabs button { min-height: 40px; padding-inline: 5px; font-size: 12px; }
   .club-guestbook__copy { margin-inline: 12px; }
   .club-guestbook__review-invite { margin-inline: 16px; }
   .club-guestbook__feed { padding-inline: 12px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
