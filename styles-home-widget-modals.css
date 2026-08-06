@@ -5866,7 +5866,7 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .club-choice-vote-modal__player strong,
-.club-choice-vote-modal__player small {
+.club-choice-vote-modal__player small:not(.club-choice-vote-modal__achievement-card) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5877,7 +5877,7 @@ button.sng-champions-modal__singles-duel-player {
   font-size: 18px;
 }
 
-.club-choice-vote-modal__player small {
+.club-choice-vote-modal__player small:not(.club-choice-vote-modal__achievement-card) {
   display: -webkit-box;
   color: rgba(255, 239, 201, 0.78);
   font-size: 16px;
@@ -6225,7 +6225,7 @@ button.sng-champions-modal__singles-duel-player {
   align-items: center;
   justify-content: center;
   min-height: 126px;
-  overflow: hidden;
+  overflow: visible;
   padding: 14px 12px;
   border: 1px solid rgba(255, 164, 39, 0.92);
   border-radius: 16px;
@@ -6244,17 +6244,18 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .club-choice-vote-modal__achievement-card-text {
-  display: -webkit-box;
+  display: block;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
   color: rgba(236, 220, 192, 0.92);
   font-weight: inherit;
   text-shadow:
     0 1px 0 rgba(0, 0, 0, 0.78),
     0 0 7px rgba(255, 140, 24, 0.16);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
+  -webkit-box-orient: initial;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 
 .club-choice-vote-modal__winner-desc.club-choice-vote-modal__achievement-card {
@@ -6718,7 +6719,8 @@ body.club-choice-vote-open {
 
   .club-choice-vote-modal__achievement-card-text {
     width: 100%;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
   }
 
   .club-choice-vote-modal__duel-question {
@@ -6863,7 +6865,7 @@ body.club-choice-vote-open {
     line-height: 1.08;
   }
 
-  .club-choice-vote-modal__player small {
+  .club-choice-vote-modal__player small:not(.club-choice-vote-modal__achievement-card) {
     display: -webkit-box;
     font-size: 13px;
     line-height: 1.14;
