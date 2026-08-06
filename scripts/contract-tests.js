@@ -35,7 +35,7 @@ function contractMoscowStartOnOrBefore(date, time) {
   return start;
 }
 
-async function testRaffleCurrentWeekReturnsCalculation() {
+async function testRaffleCurrentWeekReturnsCalculation(redis) {
   const raffles = loadHandler("raffles");
   const {
     currentMoscowWeekRange,
@@ -60,7 +60,7 @@ async function testRaffleCurrentWeekReturnsCalculation() {
     groupIndex: 0,
     winnerSeatStatus: "not_seated",
     winnerSeatStatusAt: "2026-07-27T10:42:06.930Z",
-  }, range), 500, "return belongs to the raffle date, not the later status-edit date");
+  }, range), 0, "return follows the status-edit date and stays out of an earlier week");
 
   assert.strictEqual(currentWeekRaffleWinnerReturnAmount(raffle, {
     groupIndex: 1,
@@ -84,7 +84,7 @@ async function testRaffleCurrentWeekReturnsCalculation() {
     groupIndex: 1,
     winnerSeatStatus: "not_seated",
     winnerSeatStatusAt: "2026-07-20T14:00:00.000Z",
-  }, range), 0, "return before the Moscow week is excluded");
+  }, range), 1000, "a return added this week is included even when the raffle was drawn earlier");
 
   const totals = currentWeekRaffleIssueTotalsFromRaffles([{
     prizeKind: "tournament_ticket",
@@ -120,6 +120,54 @@ async function testRaffleCurrentWeekReturnsCalculation() {
   assert.deepStrictEqual(totals.ticket, { issued: 1500, returned: 3635 }, "issued rerolls remain part of the weekly totals");
   assert.deepStrictEqual(totals.cash, { issued: 0, returned: 0 }, "returns stay grouped by the source raffle type");
   assert.strictEqual(totals.returnCount, 3, "issued reroll return is included in the count");
+
+  const cashTotals = currentWeekRaffleIssueTotalsFromRaffles([{
+    prizeKind: "cash",
+    drawnAt: "2026-07-19T20:59:59.999Z",
+    groups: raffle.groups,
+    winners: [{
+      groupIndex: 1,
+      winnerStatus: "ok",
+      winnerStatusAt: "2026-07-19T21:00:00.000Z",
+      winnerSeatStatus: "seated",
+      winnerCashoutStatus: "plus",
+      winnerCashoutAmount: 2500,
+      winnerCashoutAt: "2026-07-23T12:00:00.000Z",
+    }],
+  }], new Date("2026-07-25T12:00:00.000Z"));
+  assert.deepStrictEqual(cashTotals.cash, { issued: 0, returned: 2500 }, "cashout amount is added to the week when the admin entered it");
+
+  const liveRange = currentMoscowWeekRange(new Date());
+  const weekCacheKey = "poker_app:raffles_week_issue_totals:v2:" + new Date(liveRange.startMs).toISOString();
+  const followupRaffleId = "contract-followup-cache";
+  redis.kv.set(weekCacheKey, JSON.stringify({ ticket: { issued: 0, returned: 0 }, cash: { issued: 0, returned: 0 } }));
+  redis.kv.set("poker_app:raffle:" + followupRaffleId, JSON.stringify({
+    id: followupRaffleId,
+    status: "completed",
+    prizeKind: "cash",
+    drawnAt: new Date(liveRange.startMs - 86400000).toISOString(),
+    groups: [{ prize: "Кеш 2500 ₽" }],
+    winners: [{
+      userId: "tg_1001",
+      groupIndex: 0,
+      winnerStatus: "ok",
+      winnerReadySlotId: "initial_0",
+      winnerSeatStatus: "seated",
+    }],
+  }));
+  const followupResponse = await call(raffles, req("POST", {}, {
+    pwaSession: sessions().admin,
+    action: "setWinnerFollowup",
+    raffleId: followupRaffleId,
+    winnerUserId: "tg_1001",
+    winnerSlotId: "initial_0",
+    kind: "outcome",
+    value: "plus",
+    amount: 2500,
+  }));
+  assert.strictEqual(followupResponse.statusCode, 200, "cashout follow-up saves successfully");
+  assert.strictEqual(followupResponse.body && followupResponse.body.ok, true, "cashout follow-up returns success");
+  assert.strictEqual(redis.kv.has(weekCacheKey), false, "cashout follow-up invalidates the weekly totals cache: " + JSON.stringify([...redis.kv.keys()].filter((key) => key.includes("week_issue"))));
 }
 
 process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";

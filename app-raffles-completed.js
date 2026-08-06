@@ -660,10 +660,10 @@ function initRafflesCompletedRuntime(opts) {
           totals[kind].issued += prizeAmount;
         }
         if (String(winner && winner.winnerSeatStatus || "") === "not_seated" &&
-            raffleDateIsInRange(raffleDate, range)) {
+            raffleDateIsInRange(winner && winner.winnerSeatStatusAt || raffleDate, range)) {
           totals[kind].returned += prizeAmount;
         } else if (String(winner && winner.winnerCashoutStatus || "") === "plus" &&
-            raffleDateIsInRange(raffleDate, range)) {
+            raffleDateIsInRange(winner && winner.winnerCashoutAt || raffleDate, range)) {
           totals[kind].returned += Math.max(0, Number(winner && winner.winnerCashoutAmount) || 0);
         }
       });
