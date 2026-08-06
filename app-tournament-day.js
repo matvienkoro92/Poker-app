@@ -1165,11 +1165,11 @@ function loadHomeTournamentRaffleBonus(force) {
   } catch (eCache) {}
   if (cached) {
     homeTournamentRaffleBonusLoadedAt = now;
+    if (typeof updateRaffleBadge === "function") updateRaffleBadge(cached.activeRaffles || cached.raffles || []);
     setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(cached.activeRaffles || cached.raffles || []));
     return;
   }
   var base = typeof getApiBase === "function" ? getApiBase() : "";
-  if (!base) return;
   var q = typeof pokerRafflesApiQueryLeading === "function"
     ? pokerRafflesApiQueryLeading()
     : (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?initData=");
@@ -1187,12 +1187,15 @@ function loadHomeTournamentRaffleBonus(force) {
           window._rafflesCache = window._rafflesCache || {};
           window._rafflesCache.homeBonus = { data: data, time: Date.now() };
         } catch (eSetCache) {}
+        if (typeof updateRaffleBadge === "function") updateRaffleBadge(data.activeRaffles || data.raffles || []);
         setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(data.activeRaffles || data.raffles || []));
       } else {
+        if (typeof updateRaffleBadge === "function") updateRaffleBadge([]);
         hideHomeTournamentRaffleBonus();
       }
     })
     .catch(function () {
+      if (typeof updateRaffleBadge === "function") updateRaffleBadge([]);
       hideHomeTournamentRaffleBonus();
     })
     .finally(function () {

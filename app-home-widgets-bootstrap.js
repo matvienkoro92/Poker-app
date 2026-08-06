@@ -63,7 +63,7 @@
     try {
       base = typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
     } catch (eBase) {}
-    if (!base || typeof fetch !== "function") return;
+    if (typeof fetch !== "function") return;
     fetch(base + "/api/club-choice-vote?summary=1&_t=" + Date.now(), { cache: "no-store" })
       .then(function (response) { return response.json(); })
       .then(function (data) { if (data && data.ok) renderClubChoiceRoundBadge(data); })

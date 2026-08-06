@@ -414,7 +414,7 @@
       return Promise.resolve(homePlaqueState);
     }
     if (homeSummaryInFlight) return homeSummaryInFlight;
-    homeSummaryInFlight = fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&summary=1", { cache: "default" })
+    homeSummaryInFlight = fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&summary=1&_t=" + Date.now(), { cache: "no-store" })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data && data.ok) {

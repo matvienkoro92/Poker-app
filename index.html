@@ -1239,33 +1239,6 @@
                   />
                 </a>
               </div>
-              <script>
-                (function () {
-                  try {
-                    var b = document.getElementById("raffleActiveBadge");
-                    var amount = document.getElementById("raffleActiveAmountBadge");
-                    if (b && localStorage.getItem("poker_raffle_active_badge") === "1") {
-                      var count = parseInt(localStorage.getItem("poker_raffle_active_badge_count") || "1", 10);
-                      if (!isFinite(count) || count < 1) count = 1;
-                      b.textContent = String(Math.min(count, 99));
-                      b.classList.remove("feature__badge--hidden");
-                      b.setAttribute("aria-hidden", "false");
-                      b.setAttribute("aria-label", "Активных розыгрышей: " + count);
-                      if (amount) {
-                        var sum = localStorage.getItem("poker_raffle_active_badge_sum") || "";
-                        if (sum) {
-                          amount.textContent = "Идут на " + sum;
-                          amount.classList.remove("raffle-active-amount-badge--hidden");
-                          amount.setAttribute("aria-hidden", "false");
-                          var fullSum = localStorage.getItem("poker_raffle_active_badge_full_sum") || sum;
-                          amount.setAttribute("aria-label", "Активные розыгрыши идут на " + fullSum);
-                          amount.setAttribute("title", "Идут на " + fullSum);
-                        }
-                      }
-                    }
-                  } catch (e) {}
-                })();
-              </script>
             </div>
             <div class="features features--home-rating-on-border features--home-hidden">
               <div class="features-row features-row--full features-row--spring-promo-stack">
@@ -1893,8 +1866,8 @@
     <script defer src="./app-home-planner-runtime.js?v=3.858"></script>
     <script defer src="./app-home-planner.js?v=3.858"></script>
     <script defer src="./app-home-tasks.js?v=3.858"></script>
-    <script defer src="./app-tournament-day.js?v=3.862"></script>
-    <script defer src="./app-home-widgets-bootstrap.js?v=3.859"></script>
+    <script defer src="./app-tournament-day.js?v=3.863"></script>
+    <script defer src="./app-home-widgets-bootstrap.js?v=3.860"></script>
     <script defer src="./app-home-deeplinks.js?v=3.991"></script>
     <script defer src="./app-home-club-info-modals.js?v=3.875"></script>
     <script defer src="./app-home-vpn-proxy-modal.js?v=3.858"></script>
@@ -2010,7 +1983,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-share.js?v=3.858"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons-modals.js?v=3.859"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js?v=3.858"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-club-choice" src="./app-club-choice-vote.js?v=3.861"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-club-choice" src="./app-club-choice-vote.js?v=3.862"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-private-cash" src="./app-private-cash.js?v=3.858"></script>
     <script defer src="./app-sng-champions.js?v=3.863"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=3.858"></script>
