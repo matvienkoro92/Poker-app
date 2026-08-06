@@ -1865,7 +1865,7 @@
     font-size: 11px;
   }
   .hall-fish-modal__close {
-    top: 7px;
+    top: calc(var(--tg-ui-top-clearance, max(0px, env(safe-area-inset-top, 0px))) + 7px);
     right: 7px;
     width: 34px;
     height: 34px;
@@ -1874,7 +1874,7 @@
   }
   .hall-fish-modal__tabs {
     gap: 6px;
-    padding: 9px 48px 11px 9px;
+    padding: calc(var(--tg-ui-top-clearance, max(0px, env(safe-area-inset-top, 0px))) + 9px) 48px 11px 9px;
   }
   .hall-fish-modal__tab {
     min-height: 36px;
