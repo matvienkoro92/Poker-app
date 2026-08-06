@@ -808,4 +808,231 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "05.08.2026": [
+    {
+      "time": "06:00",
+      "name": "Tai 7 🌊 1/2 KO🎯15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 1,
+          "reward": 3972.9999999999995,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty🥊 50k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Proxor",
+          "place": 2,
+          "reward": 7178,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏇 Bounty 🥊 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 5,
+          "reward": 6038,
+          "points": 60
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 17,
+          "reward": 687,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 3,
+          "reward": 1764,
+          "points": 90
+        },
+        {
+          "nick": "Em13!!",
+          "place": 6,
+          "reward": 236,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "GhooSt",
+          "place": 2,
+          "reward": 8020,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 1600,
+          "points": 70
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 3,
+          "reward": 1570,
+          "points": 90
+        },
+        {
+          "nick": "мистерFox",
+          "place": 6,
+          "reward": 480,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "💥Big Boss 💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Proxor",
+          "place": 1,
+          "reward": 93820.32,
+          "points": 135
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 68507.81,
+          "points": 110
+        },
+        {
+          "nick": "Em13",
+          "place": 5,
+          "reward": 21375,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ДжекПотный",
+          "place": 3,
+          "reward": 110,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 4900,
+          "points": 90
+        },
+        {
+          "nick": "WiNifly",
+          "place": 5,
+          "reward": 2700,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Porquinho",
+          "place": 2,
+          "reward": 6381.25,
+          "points": 110
+        },
+        {
+          "nick": "cadillac",
+          "place": 5,
+          "reward": 1155,
+          "points": 60
+        },
+        {
+          "nick": "GazMays",
+          "place": 13,
+          "reward": 230,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "мистерFox",
+          "place": 1,
+          "reward": 6610,
+          "points": 135
+        },
+        {
+          "nick": "Юрий_77",
+          "place": 4,
+          "reward": 2430,
+          "points": 70
+        },
+        {
+          "nick": "WiNifly",
+          "place": 5,
+          "reward": 1270,
+          "points": 60
+        },
+        {
+          "nick": "WSOPли",
+          "place": 7,
+          "reward": 1150,
+          "points": 40
+        },
+        {
+          "nick": "Киса",
+          "place": 3,
+          "reward": 530,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };
