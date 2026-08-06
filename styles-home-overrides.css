@@ -824,6 +824,10 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
   color: #211506 !important;
   box-shadow: 0 0 18px rgba(255, 180, 42, 0.3), inset 0 1px rgba(255, 255, 255, 0.6) !important;
 }
+.home-friend-news-modal__day-tabs { display: flex; justify-content: center; gap: 7px; margin: 8px 0 2px; }
+.home-friend-news-modal__day-tab { min-width: 92px; min-height: 30px; padding: 4px 14px; color: #aeb8ca; background: rgba(11,16,24,.78); border: 1px solid rgba(229,179,74,.28); border-radius: 999px; font-size: 11px; font-weight: 900; }
+.home-friend-news-modal__day-tab--active { color: #241400; background: linear-gradient(180deg, #ffe292, #edb447); border-color: #ffdc7a; box-shadow: 0 4px 14px rgba(237,180,71,.2); }
+.home-friend-news-modal__day-tab:disabled { opacity: .38; }
 
 .home-friend-news-modal__wall-invite {
   margin: 18px 0 4px;
@@ -4596,7 +4600,7 @@ body .home-friend-news-modal--club .home-friend-news-modal__icon .home-friend-ne
     contrast(1.04)
     drop-shadow(0 7px 6px rgba(0, 0, 0, 0.78))
     drop-shadow(0 0 7px rgba(var(--friend-news-rgb), 0.25));
-  transform: scale(1.02);
+  transform: scale(0.96);
   transform-origin: center bottom;
 }
 
@@ -4672,4 +4676,64 @@ body .home-friend-news-modal .home-friend-news-modal__profile-cue {
   min-height: 34px;
   justify-content: center;
   margin: 0;
+}
+
+/* Premium Hero of the Day plaque. */
+body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__player-title {
+  padding-right: 82px;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__day-hero {
+  position: absolute;
+  z-index: 6;
+  top: 8px;
+  right: 8px;
+  left: auto;
+  display: flex;
+  width: 70px;
+  min-width: 70px;
+  height: 66px;
+  min-height: 66px;
+  margin: 0;
+  padding: 7px 6px 6px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff0bc;
+  border: 1px solid #f8c45d;
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 224, 132, .36), transparent 43%),
+    linear-gradient(145deg, #3c270c 0%, #171006 56%, #5b3510 100%);
+  box-shadow:
+    0 0 0 2px rgba(93, 52, 8, .88),
+    0 0 0 3px rgba(255, 203, 91, .34),
+    0 9px 22px rgba(0, 0, 0, .48),
+    0 0 22px rgba(245, 174, 44, .28),
+    inset 0 1px 0 rgba(255, 245, 202, .5);
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1.08;
+  letter-spacing: .07em;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+  white-space: normal;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__day-hero::before {
+  margin: 0 0 4px;
+  color: #ffd96f;
+  content: "♛";
+  font-size: 24px;
+  line-height: .9;
+  filter: drop-shadow(0 0 7px rgba(255, 193, 52, .68));
+}
+body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__day-hero::after {
+  position: absolute;
+  top: -24px;
+  left: -34px;
+  width: 26px;
+  height: 118px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  transform: rotate(28deg);
 }

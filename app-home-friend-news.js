@@ -21,6 +21,7 @@
   var clubEvents = [];
   var clubWallEvents = [];
   var clubNewsTab = "wins";
+  var clubWinsDayTab = "latest";
   var activeIndex = 0;
   var clubActiveIndex = 0;
   var eventFeedback = {};
@@ -39,7 +40,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v2";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v2:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v9";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v10";
   var CLUB_WALL_EVENTS_CACHE_KEY = "poker_home_club_wall_rendered_v1";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
@@ -516,18 +517,18 @@
     var variantIndex = Math.max(0, Number(occurrence) || 0);
     if (slug === "emil") {
       return [
-        "./assets/club-news-personal/emil-news-cutout.webp?v=3",
         "./assets/club-news-personal/emil-news-cutout-v2.webp?v=3",
         "./assets/club-news-personal/emil-news-cutout-v3.webp?v=3",
-      ][variantIndex % 3];
+      ][variantIndex % 2];
     }
     if (slug === "pokermanki") {
       return [
-        "./assets/club-news-personal/pokermanki-news-cutout.webp?v=3",
         "./assets/club-news-personal/pokermanki-news-cutout-v2.webp?v=3",
-        "./assets/club-news-personal/pokermanki-news-cutout-v3.webp?v=3",
         "./assets/club-news-personal/pokermanki-news-cutout-v4.webp?v=3",
-      ][variantIndex % 4];
+      ][variantIndex % 2];
+    }
+    if (slug === "cooler") {
+      return "./assets/club-news-personal/cooler-news-cutout.webp?v=4";
     }
     if (slug === "waaar") {
       return [
@@ -757,6 +758,45 @@
     return eventDayKey(new Date());
   }
 
+  function clubAvailableWinDayKeys(rows) {
+    var available = [...new Set((Array.isArray(rows) ? rows : []).map(function (row) {
+      return row && row.at ? eventDayKey(row.at) : "";
+    }).filter(function (key) { return key && key !== "unknown"; }))];
+    var now = new Date();
+    var yesterday = eventDayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+    var dayBefore = eventDayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2));
+    if (available.indexOf(yesterday) !== -1) {
+      return [yesterday].concat(available.indexOf(dayBefore) !== -1 ? [dayBefore] : []);
+    }
+    return available.indexOf(dayBefore) !== -1 ? [dayBefore] : [];
+  }
+
+  function clubWinsEventsForTab(rows) {
+    var source = Array.isArray(rows) ? rows : [];
+    var keys = clubAvailableWinDayKeys(source);
+    var selectedKey = clubWinsDayTab === "previous" ? keys[1] : keys[0];
+    if (!selectedKey) selectedKey = keys[0] || "";
+    return selectedKey ? source.filter(function (row) { return eventDayKey(row && row.at) === selectedKey; }) : [];
+  }
+
+  function clubStaticWinDayKeys() {
+    var data = window.POKER_CLUB_NEWS_DATA || {};
+    return clubAvailableWinDayKeys((Array.isArray(data.rows) ? data.rows : []).map(function (row) {
+      return { at: row && row.date };
+    }));
+  }
+
+  function clubWinsDayTabsHtml() {
+    if (newsModalMode !== "club" || clubNewsTab !== "wins") return "";
+    var keys = clubAvailableWinDayKeys(clubEvents);
+    return '<div class="home-friend-news-modal__day-tabs" role="tablist" aria-label="День выигрышей">' +
+      '<button type="button" data-club-wins-day="latest" class="home-friend-news-modal__day-tab' +
+        (clubWinsDayTab === "latest" ? ' home-friend-news-modal__day-tab--active' : '') + '">Вчера</button>' +
+      '<button type="button" data-club-wins-day="previous" class="home-friend-news-modal__day-tab' +
+        (clubWinsDayTab === "previous" ? ' home-friend-news-modal__day-tab--active' : '') + '"' +
+        (keys.length < 2 ? ' disabled' : '') + '>Позавчера</button></div>';
+  }
+
   function isDailyClubEvent(row) {
     return String(row && row.id || "").indexOf("daily:") === 0;
   }
@@ -764,11 +804,13 @@
   function isCurrentClubEvent(row) {
     if (!row || !row.at) return false;
     var tournamentDay = clubTournamentDayKey();
-    if (row.type === "birthday" && eventDayKey(row.at) === clubTodayDayKey()) return true;
+    var rowDay = eventDayKey(row.at);
+    var visibleWinDays = clubStaticWinDayKeys();
+    if (row.type === "birthday" && (rowDay === clubTodayDayKey() || visibleWinDays.indexOf(rowDay) !== -1)) return true;
     if (isDailyClubEvent(row)) {
-      return tournamentDay ? eventDayKey(row.at) === tournamentDay : isPreviousCalendarDay(row.at);
+      return tournamentDay ? visibleWinDays.indexOf(rowDay) !== -1 : isPreviousCalendarDay(row.at);
     }
-    return tournamentDay ? eventDayKey(row.at) === tournamentDay : isRecentEvent(row.at);
+    return tournamentDay ? visibleWinDays.indexOf(rowDay) !== -1 : isRecentEvent(row.at);
   }
 
   function compareClubEvents(a, b) {
@@ -1900,6 +1942,7 @@
     var visualFallbackUrl = personalArt
       ? (clubNewsPersonalArt(row && row.actorNick) || avatar)
       : "";
+    if (personalArt.indexOf("/cooler-news-cutout.webp") !== -1) visualFallbackUrl = avatar;
     if (visualFallbackUrl === visualUrl) visualFallbackUrl = avatar && avatar !== visualUrl ? avatar : "";
     var visual = visualUrl
       ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '"' +
@@ -2004,7 +2047,7 @@
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
             (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
           '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
-            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' : "") +
+            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' + clubWinsDayTabsHtml() : "") +
         '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
         '<div class="home-friend-news-modal__day-events">' +
           dayEventsHtml +
@@ -2066,7 +2109,8 @@
     var track = el("homeClubNewsTrack");
     var label = el("homeClubNewsLabel");
     if (!root || !track) return;
-    var displayRows = clubEvents;
+    var latestDayKey = clubAvailableWinDayKeys(clubEvents)[0] || "";
+    var displayRows = latestDayKey ? clubEvents.filter(function (row) { return eventDayKey(row && row.at) === latestDayKey; }) : clubEvents;
     if (!displayRows.length) {
       displayRows = [{
         id: clubNewsLoading ? "club-loading" : "club-empty",
@@ -2133,7 +2177,7 @@
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
             (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
           '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
-            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' +
+            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' + clubWinsDayTabsHtml() +
         '<div class="home-friend-news-modal__skeleton" role="status" aria-label="Загружаем записи">' +
           '<span></span><span></span><span></span></div></section>';
       return;
@@ -2164,7 +2208,7 @@
   }
 
   function activeModalEvents() {
-    return newsModalMode === "club" ? (clubNewsTab === "wall" ? clubWallEvents : clubEvents) : events;
+    return newsModalMode === "club" ? (clubNewsTab === "wall" ? clubWallEvents : clubWinsEventsForTab(clubEvents)) : events;
   }
 
   function feedbackEventId(row) {
@@ -2365,9 +2409,18 @@
             loadActiveModalFeedback(clubWallEvents);
             loadClubWallNews(false);
           } else {
-            renderModalList(clubEvents);
-            loadActiveModalFeedback(clubEvents);
+            var activeWins = clubWinsEventsForTab(clubEvents);
+            renderModalList(activeWins);
+            loadActiveModalFeedback(activeWins);
           }
+          return;
+        }
+        var winsDayTab = event.target.closest("[data-club-wins-day]");
+        if (winsDayTab && !winsDayTab.disabled) {
+          clubWinsDayTab = winsDayTab.getAttribute("data-club-wins-day") === "previous" ? "previous" : "latest";
+          var dayRows = clubWinsEventsForTab(clubEvents);
+          renderModalList(dayRows);
+          loadActiveModalFeedback(dayRows);
           return;
         }
         if (event.target.closest("[data-club-news-write]")) {

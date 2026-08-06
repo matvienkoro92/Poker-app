@@ -91,7 +91,8 @@ dated.forEach((row) => {
   delete row.stamp;
 });
 const latest = dated.length ? dated[dated.length - 1].dateLabel : "";
-const rows = dated.filter((row) => row.dateLabel === latest);
+const recentDates = [...new Set(dated.map((row) => row.dateLabel).filter(Boolean))].slice(-2);
+const rows = dated.filter((row) => recentDates.includes(row.dateLabel));
 const dailyBestWins = Object.create(null);
 dated.forEach((row) => {
   if (!row.dateLabel || !row.nickKey || row.reward <= 0) return;
