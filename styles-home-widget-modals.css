@@ -6510,6 +6510,36 @@ body.club-choice-vote-open {
   overflow: hidden;
 }
 
+/* On phones the club vote uses the same full-screen shell as club news. */
+@media (max-width: 520px) {
+  .club-choice-vote-modal:not(.club-choice-vote-modal--embedded) {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .club-choice-vote-modal:not(.club-choice-vote-modal--embedded) .club-choice-vote-modal__panel {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .club-choice-vote-modal:not(.club-choice-vote-modal--embedded) .club-choice-vote-modal__head {
+    padding-top: max(18px, env(safe-area-inset-top));
+  }
+
+  .club-choice-vote-modal:not(.club-choice-vote-modal--embedded) .club-choice-vote-modal__body {
+    flex: 1 1 auto;
+    overscroll-behavior: contain;
+  }
+
+  .club-choice-vote-modal:not(.club-choice-vote-modal--embedded) .club-choice-vote-modal__footer {
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 720px) {
   .club-choice-vote-modal {
     align-items: stretch;
