@@ -668,6 +668,7 @@ var pokerPendingViewNavigationSeq = 0;
 var pokerPendingViewNavigation = null;
 var pokerSectionLoadingOverlayTimer = null;
 var pokerSectionLoadingOverlayShownAt = 0;
+var pokerSectionLoadingReadyWaitSeq = 0;
 
 var POKER_SECTION_LOADING_LABELS = {
   "profile": "Загружаем профиль",
@@ -758,6 +759,70 @@ function pokerHideSectionLoadingOverlay(viewName, immediate) {
   }, wait);
 }
 
+function pokerViewInitialContentReady(viewName) {
+  var view = document.querySelector('.view--active[data-view="' + String(viewName || "").replace(/"/g, '\\"') + '"]');
+  if (!view) return false;
+  if (view.querySelector("[data-poker-fragment-skeleton]")) return false;
+  if (viewName === "chat") {
+    var contacts = view.querySelector("#chatContacts");
+    if (!contacts) return false;
+    if (contacts.querySelector(".chat-empty--skeleton")) return false;
+  }
+  if (viewName === "raffles" && view.querySelector(".raffles-shell-skeleton")) return false;
+  if (
+    (viewName === "winter-rating" || viewName === "spring-rating" || viewName === "summer-rating") &&
+    view.querySelector(".summer-rating-initial-loader:not([hidden])")
+  ) return false;
+  return true;
+}
+
+function pokerHideSectionLoadingOverlayWhenReady(viewName) {
+  var overlay = document.getElementById("pokerSectionLoadingOverlay");
+  if (!overlay) return;
+  var waitSeq = ++pokerSectionLoadingReadyWaitSeq;
+  var startedAt = Date.now();
+  var observer = null;
+  var pollTimer = null;
+  var finished = false;
+
+  function cleanup() {
+    if (observer) observer.disconnect();
+    if (pollTimer) clearTimeout(pollTimer);
+  }
+  function finish() {
+    if (finished || waitSeq !== pokerSectionLoadingReadyWaitSeq) return;
+    finished = true;
+    cleanup();
+    var raf = window.requestAnimationFrame || function (fn) { setTimeout(fn, 16); };
+    raf(function () {
+      raf(function () {
+        if (waitSeq !== pokerSectionLoadingReadyWaitSeq) return;
+        pokerHideSectionLoadingOverlay(viewName, false);
+      });
+    });
+  }
+  function check() {
+    if (finished || waitSeq !== pokerSectionLoadingReadyWaitSeq) return;
+    var current = document.getElementById("pokerSectionLoadingOverlay");
+    if (!current || current.getAttribute("data-loading-view") !== String(viewName || "")) {
+      cleanup();
+      return;
+    }
+    if (pokerViewInitialContentReady(viewName) || Date.now() - startedAt >= 15000) {
+      finish();
+      return;
+    }
+    pollTimer = setTimeout(check, 120);
+  }
+
+  if (typeof MutationObserver !== "undefined") {
+    observer = new MutationObserver(check);
+    var activeView = document.querySelector('.view--active[data-view="' + String(viewName || "").replace(/"/g, '\\"') + '"]');
+    if (activeView) observer.observe(activeView, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden", "aria-busy"] });
+  }
+  check();
+}
+
 function pokerShowViewLoadingShell(viewName) {
   var body = document.body;
   if (body) {
@@ -795,7 +860,7 @@ function pokerClearViewLoadingShell(viewName) {
       window.pokerClearViewLoadingSkeleton(viewName);
     }
   } catch (eClearPendingSkeleton) {}
-  pokerHideSectionLoadingOverlay(viewName, false);
+  pokerHideSectionLoadingOverlayWhenReady(viewName);
 }
 
 function pokerBeginProgressiveViewNavigation(viewName, navOpts) {

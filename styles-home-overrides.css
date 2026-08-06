@@ -4532,7 +4532,7 @@ body .home-friend-news-modal--club .home-friend-news-modal__player-title {
   padding-right: 0;
 }
 
-body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__player-title {
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__player-title {
   padding-right: 52px;
 }
 
@@ -4756,5 +4756,44 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .ho
     width: 18px;
     height: 18px;
     flex-basis: 18px;
+  }
+}
+
+/* Keep the Hero of the Day marker over the portrait, leaving the headline row
+   exclusively for the player name, linked status, and prize amount. */
+body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__player-title {
+  width: 100%;
+  max-width: 100%;
+  padding-right: 0;
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__day-hero {
+  position: absolute;
+  z-index: 6;
+  top: 8px;
+  right: auto;
+  left: calc(16.5% - 35px);
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__player-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__title-amount {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__player-title {
+    gap: 5px;
+    font-size: clamp(14px, 3.55vw, 17px);
+    letter-spacing: -0.04em;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__title-amount {
+    flex: 0 0 auto;
+    font-size: 1em;
   }
 }

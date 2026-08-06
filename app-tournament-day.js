@@ -1464,13 +1464,13 @@ function initHomeTournamentLeagueTopModal() {
 }
 
 function initHomeTournamentLeagueTopButtons() {
-  var buttons = document.querySelectorAll("[data-home-tournament-league-top]");
-  buttons.forEach(function (btn) {
-    if (btn.__homeTournamentLeagueTopButtonBound) return;
-    btn.__homeTournamentLeagueTopButtonBound = true;
-    btn.addEventListener("click", function () {
-      openHomeTournamentLeagueTopModal(btn.getAttribute("data-home-tournament-league-top"));
-    });
+  if (window.__homeTournamentLeagueTopButtonsBound) return;
+  window.__homeTournamentLeagueTopButtonsBound = true;
+  document.addEventListener("click", function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest("[data-home-tournament-league-top]") : null;
+    if (!btn) return;
+    e.preventDefault();
+    openHomeTournamentLeagueTopModal(btn.getAttribute("data-home-tournament-league-top"));
   });
 }
 
