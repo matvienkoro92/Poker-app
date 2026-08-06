@@ -4691,17 +4691,17 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .ho
   display: flex;
   width: 70px;
   min-width: 70px;
-  height: 66px;
-  min-height: 66px;
+  height: 33px;
+  min-height: 33px;
   margin: 0;
-  padding: 7px 6px 6px;
+  padding: 4px 6px;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
   color: #fff0bc;
   border: 1px solid #f8c45d;
-  border-radius: 17px;
+  border-radius: 11px;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 224, 132, .36), transparent 43%),
     linear-gradient(145deg, #3c270c 0%, #171006 56%, #5b3510 100%);
@@ -4720,12 +4720,8 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .ho
   white-space: normal;
 }
 body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__day-hero::before {
-  margin: 0 0 4px;
-  color: #ffd96f;
-  content: "♛";
-  font-size: 24px;
-  line-height: .9;
-  filter: drop-shadow(0 0 7px rgba(255, 193, 52, .68));
+  display: none;
+  content: none;
 }
 body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__day-hero::after {
   position: absolute;
@@ -4736,4 +4732,29 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .ho
   content: "";
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
   transform: rotate(28deg);
+}
+
+@media (max-width: 600px) {
+  body .home-friend-news-modal--club .home-friend-news-modal__player-title {
+    width: 100%;
+    max-width: 100%;
+    gap: 4px;
+    font-size: clamp(13px, 3.2vw, 16px);
+    letter-spacing: -0.035em;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__player-name {
+    flex: 1 1 auto;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__title-amount {
+    flex: 0 1 auto;
+    font-size: 0.96em;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__poker21-linked {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+  }
 }

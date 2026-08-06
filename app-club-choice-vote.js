@@ -460,17 +460,40 @@
     return "Открыть голосование";
   }
 
+  function homePlaqueRoundBadgeText(data) {
+    if (!data || data.status !== "active") return "";
+    var round = currentRound(data);
+    if (!round) return "";
+    var index = parseInt(round.index, 10);
+    var stage = String(round.side || "") === "final" || index >= 3
+      ? "ФИНАЛ"
+      : index === 2
+        ? "1/2"
+        : "1/4";
+    return (data.paused === true ? "ПАУЗА " : "ИДЁТ ") + stage;
+  }
+
   function updateHomePlaque() {
     var plaque = document.getElementById("clubChoiceVoteOpen");
     if (!plaque) return;
     var data = homePlaqueState || state;
     var subtext = plaque.querySelector(".home-club-choice-plaque__subtext");
     var count = plaque.querySelector(".home-club-choice-plaque__count");
+    var roundBadge = plaque.querySelector("[data-club-choice-round-badge]");
     var completed = !!(data && data.status === "completed");
     if (subtext) subtext.textContent = homePlaqueText(data);
     if (count) {
       count.hidden = completed;
       count.setAttribute("aria-hidden", completed ? "true" : "false");
+    }
+    if (roundBadge) {
+      var roundBadgeText = homePlaqueRoundBadgeText(data);
+      roundBadge.textContent = roundBadgeText;
+      roundBadge.hidden = !roundBadgeText;
+      roundBadge.setAttribute("aria-hidden", roundBadgeText ? "false" : "true");
+      plaque.setAttribute("aria-label", roundBadgeText
+        ? "Открыть народное голосование. " + roundBadgeText.toLowerCase()
+        : "Открыть народное голосование");
     }
     var round = data && data.status === "active" ? currentRound(data) : null;
     var end = Date.parse(round && round.endsAt || "");

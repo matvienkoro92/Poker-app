@@ -714,7 +714,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
           "points": 110
         },
         {
-          "nick": "NeCoo1er91",
+          "nick": "Coo1er91",
           "place": 3,
           "reward": 6175,
           "points": 90

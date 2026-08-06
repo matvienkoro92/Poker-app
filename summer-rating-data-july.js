@@ -3306,7 +3306,7 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 110
         },
         {
-          "nick": "NeCoo1er91",
+          "nick": "Coo1er91",
           "place": 3,
           "reward": 4100,
           "points": 90
@@ -3340,7 +3340,7 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "league": 1,
       "players": [
         {
-          "nick": "NeCoo1er91",
+          "nick": "Coo1er91",
           "place": 3,
           "reward": 18600,
           "points": 90
@@ -6182,7 +6182,7 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
       "league": 1,
       "players": [
         {
-          "nick": "NeCoo1er91",
+          "nick": "Coo1er91",
           "place": 6,
           "reward": 20800,
           "points": 50
@@ -6550,7 +6550,7 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
           "points": 135
         },
         {
-          "nick": "NeCoo1er91",
+          "nick": "Coo1er91",
           "place": 5,
           "reward": 3890.62,
           "points": 60

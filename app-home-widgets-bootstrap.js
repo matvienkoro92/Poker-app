@@ -28,6 +28,48 @@
 
   var loadingByDomain = Object.create(null);
 
+  function clubChoiceRoundBadgeText(data) {
+    if (!data || data.status !== "active") return "";
+    var currentId = String(data.currentRoundId || "");
+    var round = (data.rounds || []).filter(function (item) {
+      return item && String(item.id || "") === currentId;
+    })[0] || null;
+    if (!round) return "";
+    var index = parseInt(round.index, 10);
+    var stage = String(round.side || "") === "final" || index >= 3
+      ? "ФИНАЛ"
+      : index === 2
+        ? "1/2"
+        : "1/4";
+    return (data.paused === true ? "ПАУЗА " : "ИДЁТ ") + stage;
+  }
+
+  function renderClubChoiceRoundBadge(data) {
+    var trigger = document.getElementById("clubChoiceVoteOpen");
+    if (!trigger) return;
+    var badge = trigger.querySelector("[data-club-choice-round-badge]");
+    if (!badge) return;
+    var text = clubChoiceRoundBadgeText(data);
+    badge.textContent = text;
+    badge.hidden = !text;
+    badge.setAttribute("aria-hidden", text ? "false" : "true");
+    trigger.setAttribute("aria-label", text
+      ? "Открыть народное голосование. " + text.toLowerCase()
+      : "Открыть народное голосование");
+  }
+
+  function refreshClubChoiceRoundBadge() {
+    var base = "";
+    try {
+      base = typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
+    } catch (eBase) {}
+    if (!base || typeof fetch !== "function") return;
+    fetch(base + "/api/club-choice-vote?summary=1&_t=" + Date.now(), { cache: "no-store" })
+      .then(function (response) { return response.json(); })
+      .then(function (data) { if (data && data.ok) renderClubChoiceRoundBadge(data); })
+      .catch(function () {});
+  }
+
   function setBusy(trigger, active, config) {
     if (!trigger || !trigger.setAttribute) return;
     if (active) {
@@ -212,6 +254,9 @@
       window[config.opener] = config.stub;
     }
   });
+
+  refreshClubChoiceRoundBadge();
+  window.setInterval(refreshClubChoiceRoundBadge, 45000);
 
   document.addEventListener("click", onWidgetClick, true);
   document.addEventListener("click", closeHallFishSkeleton);

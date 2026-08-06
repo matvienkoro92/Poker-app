@@ -219,6 +219,12 @@ function testPrizeMessages() {
   const bonusMessage = promoInternals.prizeTextForHand("flush", rewardForHandRank("flush", {}), null);
   assert.ok(bonusMessage.includes("Бонус начислен на ваш баланс выше"), "bonus reward explains the credited balance");
 
+  const bonusAndStreakMessage = promoInternals.prizeTextForHand("straight", rewardForHandRank("straight", {}), {
+    ticketAmount: 300,
+  });
+  assert.ok(bonusAndStreakMessage.includes("+50 бонусов"), "combined reward explains the hand bonus");
+  assert.ok(bonusAndStreakMessage.includes("Дополнительно за 7 дней без билета начислен билет 300 ₽"), "combined reward explains the streak ticket");
+
   const extraAttemptMessage = promoInternals.prizeTextForHand("three_of_a_kind", rewardForHandRank("three_of_a_kind", {}), null);
   assert.ok(!extraAttemptMessage.includes("Бонус начислен"), "extra attempt without balance credit does not mention credited bonus");
 }
