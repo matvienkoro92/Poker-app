@@ -1802,6 +1802,7 @@ body.club-guestbook-open { overflow: hidden; }
 .club-guestbook__composer textarea { display: block; width: 100%; min-height: 76px; padding-left: 38px; resize: vertical; color: #f8f4ec; background: transparent; border: 0; outline: 0; font: inherit; line-height: 1.45; }
 .club-guestbook__composer > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .club-guestbook__composer span { color: #909bad; font-size: 11px; }
+.club-guestbook__composer #clubGuestbookGate.is-error { color: #ff9b9b; }
 .club-guestbook__composer button, .club-guestbook__comment-form button { min-height: 36px; padding: 0 14px; color: #251400; background: #edbd5d; border: 0; border-radius: 10px; font-weight: 900; }
 .club-guestbook__composer button:disabled { opacity: .42; }
 .club-guestbook__comment-form button:disabled { opacity: .55; cursor: wait; }

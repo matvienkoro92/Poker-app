@@ -293,6 +293,9 @@ function initHomeClubInfoModals() {
     var canPost = false;
     var isAdmin = false;
     var loading = false;
+    var postSubmitting = false;
+    var composerMessage = "";
+    var composerMessageIsError = false;
     var commentSubmitting = {};
     var commentRequestIds = {};
     var profileReturnState = null;
@@ -321,6 +324,7 @@ function initHomeClubInfoModals() {
     var form = document.getElementById("clubGuestbookForm");
     var input = document.getElementById("clubGuestbookText");
     var gate = document.getElementById("clubGuestbookGate");
+    var postSubmitButton = form.querySelector('button[type="submit"]');
     var copyBtn = document.getElementById("clubGuestbookCopy");
     var reviewInvite = document.getElementById("clubGuestbookReviewInvite");
     var reactions = ["❤️", "🔥", "👍", "👏", "😂", "😮", "😢", "😡"];
@@ -472,9 +476,14 @@ function initHomeClubInfoModals() {
         var copyLabel = copyBtn.querySelector("span");
         if (copyLabel) copyLabel.textContent = "Скопировать ссылку на " + tabLabel(activeTab);
       }
-      gate.textContent = canPost ? "Публикация от привязанного аккаунта Poker21" : "";
+      gate.textContent = composerMessage || (canPost ? "Публикация от привязанного аккаунта Poker21" : "");
+      gate.classList.toggle("is-error", composerMessageIsError);
+      gate.setAttribute("role", "status");
+      gate.setAttribute("aria-live", "polite");
       input.disabled = !canPost;
-      form.querySelector('button[type="submit"]').disabled = !canPost || loading;
+      postSubmitButton.disabled = !canPost || loading || postSubmitting;
+      postSubmitButton.textContent = postSubmitting ? "Отправка…" : "Опубликовать";
+      postSubmitButton.setAttribute("aria-busy", postSubmitting ? "true" : "false");
       form.classList.toggle("club-guestbook__composer--locked", !canPost);
       var oldGate = form.querySelector(".club-guestbook__binding-gate");
       if (oldGate) oldGate.remove();
@@ -716,7 +725,32 @@ function initHomeClubInfoModals() {
         window.alert(error.message || "Не удалось отправить комментарий");
       });
     });
-    form.addEventListener("submit", function (event) { event.preventDefault(); var text = input.value.trim(); if (!text || !canPost || loading) return; loading = true; render(); request("/api/club-guestbook", { action: "create", type: activeTab, text: text }).then(function (data) { posts = data.posts || []; input.value = ""; window.dispatchEvent(new CustomEvent("poker-club-guestbook-review-state", { detail: { hasReview: data.hasReview === true } })); if (activeTab === "review") window.dispatchEvent(new CustomEvent("poker-club-guestbook-review-created")); return loadFeedback(); }).catch(function (error) { gate.textContent = error.message; }).finally(function () { loading = false; render(); }); });
+    function submitPost(event) {
+      if (event) event.preventDefault();
+      var text = input.value.trim();
+      if (!text || !canPost || loading || postSubmitting) return;
+      var submittedTab = activeTab;
+      postSubmitting = true;
+      composerMessage = "Отправляем…";
+      composerMessageIsError = false;
+      render();
+      request("/api/club-guestbook", { action: "create", type: submittedTab, text: text }).then(function (data) {
+        posts = data.posts || [];
+        input.value = "";
+        composerMessage = postKind(submittedTab) + " опубликовано";
+        window.dispatchEvent(new CustomEvent("poker-club-guestbook-review-state", { detail: { hasReview: data.hasReview === true } }));
+        if (submittedTab === "review") window.dispatchEvent(new CustomEvent("poker-club-guestbook-review-created"));
+        return loadFeedback();
+      }).catch(function (error) {
+        composerMessage = error.message || "Не удалось отправить. Попробуйте ещё раз";
+        composerMessageIsError = true;
+      }).finally(function () {
+        postSubmitting = false;
+        render();
+      });
+    }
+    form.addEventListener("submit", submitPost);
+    postSubmitButton.addEventListener("click", submitPost);
     document.addEventListener("keydown", function (event) { if (event.key === "Escape" && !root.hidden) close(); });
   })();
 
