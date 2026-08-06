@@ -6643,7 +6643,7 @@ body.club-choice-vote-open {
   }
 
   .club-choice-vote-modal__duel-card {
-    padding: 14px 12px 12px;
+    padding: 14px 4px 12px;
     border-radius: 16px;
   }
 
@@ -6653,11 +6653,11 @@ body.club-choice-vote-open {
   }
 
   .club-choice-vote-modal__duel-player--left {
-    padding-right: 2px;
+    padding-right: 1px;
   }
 
   .club-choice-vote-modal__duel-player--right {
-    padding-left: 2px;
+    padding-left: 1px;
   }
 
   .club-choice-vote-modal__duel-player--left .club-choice-vote-modal__duel-profile,
@@ -6669,7 +6669,7 @@ body.club-choice-vote-open {
   .club-choice-vote-modal__duel-player--left .club-choice-vote-modal__duel-votes,
   .club-choice-vote-modal__duel-player--right .club-choice-vote-modal__duel-desc,
   .club-choice-vote-modal__duel-player--right .club-choice-vote-modal__duel-votes {
-    width: min(100%, 188px);
+    width: 100%;
   }
 
   .club-choice-vote-modal__duel-profile {
@@ -6710,7 +6710,7 @@ body.club-choice-vote-open {
   .club-choice-vote-modal__player small.club-choice-vote-modal__achievement-card,
   .club-choice-vote-modal__duel-desc.club-choice-vote-modal__achievement-card {
     min-height: 104px;
-    padding: 12px 8px;
+    padding: 12px 4px;
     border-radius: 13px;
     font-size: 12px;
     font-weight: 850;
