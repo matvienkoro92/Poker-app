@@ -682,6 +682,21 @@
     '</small>';
   }
 
+  function duelAchievement(candidate, displayNick) {
+    if (String(displayNick || "").trim().toLocaleLowerCase("ru") === "em13!!") {
+      return {
+        title: "Охотник за головами",
+        description: "15 попаданий в топ-3, из них 7 побед за месяц. 24 и 25 июля дважды подряд выиграл S.Bounty. Всего за месяц получил 464 463 ₽."
+      };
+    }
+    var description = String(candidate && candidate.description || "").trim();
+    var titled = description.match(/^\s*[«\"]\s*([^»\"]+?)\s*[»\"]\s*[.\-—:]?\s*(.*)$/s);
+    return {
+      title: titled ? titled[1].trim() : "",
+      description: titled ? titled[2].trim() : description
+    };
+  }
+
   function renderDuelPlayer(match, candidates, id, side) {
     var candidate = candidates[id] || {};
     var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
@@ -690,6 +705,7 @@
     var active = match.myVote === id;
     var winner = match.winnerId === id;
     var eliminated = candidateLostMatch(match, id);
+    var achievement = duelAchievement(candidate, displayNick);
     return '<div class="club-choice-vote-modal__duel-player club-choice-vote-modal__duel-player--' + escapeHtml(side) +
       (active ? " club-choice-vote-modal__duel-player--active" : "") +
       (winner ? " club-choice-vote-modal__duel-player--winner" : "") +
@@ -699,9 +715,10 @@
           (eliminated ? renderEliminatedStamp() : "") +
           '<strong>' + escapeHtml(displayNick) + '</strong>' +
           '<span class="club-choice-vote-modal__duel-avatar">' + renderPlayerAvatar(candidate, id) + '</span>' +
+          (achievement.title ? '<span class="club-choice-vote-modal__duel-achievement-title">' + escapeHtml(achievement.title) + '</span>' : '') +
           (active ? '<span class="club-choice-vote-modal__selected-badge">Вы выбрали</span>' : '') +
         '</button>' +
-        renderAchievementCard("club-choice-vote-modal__duel-desc", candidate.description) +
+        renderAchievementCard("club-choice-vote-modal__duel-desc", achievement.description) +
         '<em class="club-choice-vote-modal__duel-votes">' + String(votes) + ' ' + voteWord(votes) + '</em>' +
       '</div>';
   }

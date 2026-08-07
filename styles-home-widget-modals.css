@@ -6172,6 +6172,22 @@ button.sng-champions-modal__singles-duel-player {
   transform-origin: center center;
 }
 
+.club-choice-vote-modal__duel-achievement-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 248px);
+  min-height: 2.3em;
+  color: #ffd991;
+  font-size: 16px;
+  font-weight: 950;
+  line-height: 1.12;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.78), 0 0 10px rgba(255, 151, 24, 0.22);
+}
+
 .club-choice-vote-modal__duel-vs {
   position: relative;
   z-index: 4;
@@ -6248,6 +6264,7 @@ button.sng-champions-modal__singles-duel-player {
   width: 100%;
   max-width: 100%;
   overflow: visible;
+  overflow-wrap: anywhere;
   color: rgba(236, 220, 192, 0.92);
   font-weight: inherit;
   text-shadow:
@@ -6716,6 +6733,14 @@ body.club-choice-vote-open {
     height: min(34vw, 126px);
   }
 
+  .club-choice-vote-modal__duel-achievement-title {
+    width: 100%;
+    min-height: 2.45em;
+    padding: 0 2px;
+    font-size: 13px;
+    line-height: 1.1;
+  }
+
   .club-choice-vote-modal__duel-vs {
     width: 82px;
     height: 82px;
@@ -6740,6 +6765,7 @@ body.club-choice-vote-open {
   .club-choice-vote-modal__player small.club-choice-vote-modal__achievement-card,
   .club-choice-vote-modal__duel-desc.club-choice-vote-modal__achievement-card {
     min-height: 104px;
+    height: auto;
     padding: 12px 4px;
     border-radius: 13px;
     font-size: 12px;
