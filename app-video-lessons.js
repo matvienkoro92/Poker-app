@@ -69,7 +69,7 @@ document.addEventListener("click", function (e) {
     if (typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function") {
       window.pokerOpenUnifiedPlayerProfileByRatingNick(coachNick, { season: "summer" });
     } else if (typeof window.pokerOpenChatUserModalSafe === "function") {
-      window.pokerOpenChatUserModalSafe("371998", coachNick, "./assets/club-news-personal/fishkopcheny-coach-card.png");
+      window.pokerOpenChatUserModalSafe("371998", coachNick, "./assets/club-news-personal/fishkopcheny-coach-card.png?v=2");
     }
     return;
   }
