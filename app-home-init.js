@@ -467,7 +467,23 @@ function pokerHomeRaffleParsePrizeValue(prizeStr) {
 }
 
 function pokerHomeRaffleTotalPrize(raffle) {
-  if (!raffle || !Array.isArray(raffle.groups)) return 0;
+  if (!raffle) return 0;
+  var trainingText = [
+    raffle.title,
+    raffle.cardTitle,
+    raffle.card_title,
+    raffle.cardSubtitle,
+    raffle.card_subtitle,
+  ].concat((Array.isArray(raffle.groups) ? raffle.groups : []).map(function (group) {
+    return group && group.prize;
+  })).join(" ").toLowerCase();
+  if (
+    trainingText.indexOf("трениров") !== -1 &&
+    (trainingText.indexOf("никола") !== -1 || trainingText.indexOf("fishkopcheny") !== -1)
+  ) {
+    return 5000;
+  }
+  if (!Array.isArray(raffle.groups)) return 0;
   return raffle.groups.reduce(function (sum, g) {
     var count = Math.max(0, parseInt(g && g.count, 10) || 0);
     var nominal = pokerHomeRaffleParsePrizeValue(g && g.prize);
@@ -580,8 +596,6 @@ function hydrateRaffleBadgeFromStorage() {
     if (typeof localStorage === "undefined") return;
     var active = localStorage.getItem("poker_raffle_active_badge");
     if (active !== "1") return;
-    var updatedAt = Number(localStorage.getItem("poker_raffle_active_badge_updated_at")) || 0;
-    if (updatedAt && Date.now() - updatedAt > 30 * 60 * 1000) return;
     var count = Math.max(1, Number(localStorage.getItem("poker_raffle_active_badge_count")) || 1);
     var fullSum = String(localStorage.getItem("poker_raffle_active_badge_full_sum") || "");
     var totalRub = Number(fullSum.replace(/[^\d]/g, "")) || 0;
@@ -590,7 +604,7 @@ function hydrateRaffleBadgeFromStorage() {
 }
 
 var raffleBadgeHomeFetchPromise = null;
-var RAFFLE_BADGE_HOME_TTL_MS = 30 * 60 * 1000;
+var RAFFLE_BADGE_HOME_TTL_MS = 60 * 1000;
 
 function fetchRaffleBadge() {
   var force = arguments.length > 0 && arguments[0] && arguments[0].force === true;
@@ -602,7 +616,6 @@ function fetchRaffleBadge() {
         ? cached.data.activeRaffles
         : (cached.data.activeRaffle ? [cached.data.activeRaffle] : []);
       updateRaffleBadge(cachedList);
-      return;
     }
   } catch (eCachedBadge) {}
   if (!force && raffleBadgeHomeFetchPromise) return raffleBadgeHomeFetchPromise;

@@ -13485,3 +13485,23 @@ body[data-view="raffles"] .raffles-active-chooser__training-lesson:focus-visible
     radial-gradient(circle at 50% 0%, rgba(255, 235, 168, 0.34), transparent 64%),
     linear-gradient(180deg, #7c470f 0%, #382008 100%);
 }
+
+body[data-view="raffles"] .raffles-active-chooser__item
+  .raffles-active-chooser__fact--result-time
+  .raffles-active-chooser__fact-value {
+  padding-inline: 3px !important;
+  font-size: clamp(11px, 6.4cqw, 17px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.025em !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+}
+
+body[data-view="raffles"] .raffles-active-chooser__item--training
+  .raffles-active-chooser__facts
+  .raffles-active-chooser__fact--participants {
+  border-radius: 18px !important;
+  overflow: hidden !important;
+}

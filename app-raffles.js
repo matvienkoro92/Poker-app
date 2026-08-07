@@ -1444,7 +1444,7 @@ function initRaffles() {
   function activeRaffleDetailPillLabels(raffle) {
     var labels = [];
     if (activeRaffleIsTrainingCard(raffle)) {
-      return ["Персональная тренировка · 1 час · 5 000 ₽"];
+      return ["Персональная тренировка"];
     }
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
@@ -1622,7 +1622,7 @@ function initRaffles() {
       '<span class="raffles-active-chooser__fact-icon" aria-hidden="true">◴</span>' +
       '<span class="raffles-active-chooser__fact-label">Итоги</span>' +
       '<span class="raffles-active-chooser__fact-value">' +
-      escapeHtml(text.replace(/^Итоги\s+в\s+/i, "")) +
+      escapeHtml(text.replace(/^Итоги\s+/i, "")) +
       "</span>" +
       "</span>"
     );
