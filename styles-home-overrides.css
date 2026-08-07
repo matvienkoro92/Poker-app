@@ -4786,6 +4786,39 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-frien
   white-space: nowrap;
 }
 
+/* Keep character art in the event row while expanded comments use a separate,
+   full-width row below it. */
+body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item--comments-open {
+  display: grid;
+  grid-template-columns: 33% minmax(0, 67%);
+  align-items: stretch;
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open .home-friend-news-modal__icon {
+  position: relative;
+  inset: auto;
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open .home-friend-news-modal__copy {
+  grid-column: 2;
+  grid-row: 1;
+  width: auto;
+  margin-left: 0;
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open > .chat-user-modal__news-comments {
+  position: relative;
+  z-index: 3;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+  margin-top: 8px;
+}
+
 @media (max-width: 600px) {
   body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__player-title {
     gap: 5px;

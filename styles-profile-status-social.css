@@ -1168,6 +1168,20 @@
 .profile-friends__btn--unread {
   position: relative;
 }
+.profile-tabs__btn--friends-unread::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(5, 11, 18, 0.96);
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18), 0 0 12px rgba(239, 68, 68, 0.72);
+  pointer-events: none;
+  z-index: 2;
+}
 .profile-friends::before,
 .profile-friends::after {
   content: "";

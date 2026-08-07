@@ -1855,7 +1855,8 @@
     var emojiPicker = '<span class="home-news-emoji-picker" hidden>' + HOME_COMMENT_EMOJIS.map(function (emoji) {
       return '<button type="button" data-home-comment-emoji="' + esc(emoji) + '" aria-label="Вставить ' + esc(emoji) + '">' + esc(emoji) + "</button>";
     }).join("") + "</span>";
-    return '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
+    return {
+      actions: '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
         reactionButtons + '</span>' +
         '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
@@ -1863,15 +1864,16 @@
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
-        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span></span></span>" +
-      '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span></span></span>",
+      comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
           replyPreview +
           '<span class="home-news-comment-input-wrap"><button type="button" class="home-news-comment-emoji-btn" data-home-comment-emoji-toggle aria-label="Выбрать смайл">☺</button>' +
           '<input type="text" maxlength="500" value="' + esc(draft) + '" placeholder="Написать комментарий…" aria-label="Комментарий к событию">' + emojiPicker + "</span>" +
           '<button type="submit"' + (eventCommentSubmitting[rowId] ? ' class="is-sending" disabled aria-busy="true">Отправка…' : '>Отправить') + '</button>' +
-      "</form></span>";
+      "</form></span>",
+    };
   }
 
   function focusHomeNewsCommentInput(eventId) {
@@ -1997,8 +1999,11 @@
     var profileCue = canOpenProfile
       ? '<span class="home-friend-news-modal__profile-cue">Открыть профиль <b aria-hidden="true">›</b></span>'
       : "";
+    var feedbackParts = ticker ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
+    var feedbackId = ticker ? "" : feedbackEventId(row);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
+      (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
       (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
@@ -2008,8 +2013,8 @@
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) : structuredText +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         "<small>" + esc(timeLabel) + "</small>" +
-        eventFeedbackHtml(row, profileCue)) +
-      "</span></span>";
+        feedbackParts.actions) +
+      "</span>" + feedbackParts.comments + "</span>";
   }
 
   function modalEventsHtml(rows) {

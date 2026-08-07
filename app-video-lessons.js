@@ -62,6 +62,17 @@ window.loadVideoLessonNative = function loadVideoLessonNative(videoEl, playerWra
 };
 
 document.addEventListener("click", function (e) {
+  var coachProfile = e.target && e.target.closest ? e.target.closest("[data-video-coach-profile]") : null;
+  if (coachProfile) {
+    e.preventDefault();
+    var coachNick = coachProfile.getAttribute("data-video-coach-profile") || "FishKopcheny";
+    if (typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function") {
+      window.pokerOpenUnifiedPlayerProfileByRatingNick(coachNick, { season: "summer" });
+    } else if (typeof window.pokerOpenChatUserModalSafe === "function") {
+      window.pokerOpenChatUserModalSafe("371998", coachNick, "./assets/club-news-personal/fishkopcheny-coach-card.png");
+    }
+    return;
+  }
   var trainingBtn = e.target && e.target.closest ? e.target.closest(".learn-play-hub__training-btn, .video-lessons__training-link") : null;
   if (trainingBtn && trainingBtn.closest(".video-lessons--guest-lock")) {
     e.preventDefault();
@@ -197,6 +208,29 @@ function initVideoLessons() {
 
   var list = document.getElementById("videoLessonsList");
   if (list) {
+    list.querySelectorAll(".video-lessons__card").forEach(function (card) {
+      var item = card.querySelector(".video-lessons__item");
+      var video = card.querySelector(".video-lessons__video");
+      if (!item || !video) return;
+      var duration = item.querySelector(".video-lessons__duration");
+      if (!duration) {
+        duration = document.createElement("span");
+        duration.className = "video-lessons__duration";
+        duration.textContent = "Время: загрузка…";
+        item.insertBefore(duration, item.querySelector(".video-lessons__chevron"));
+      }
+      if (!video._pokerDurationBound) {
+        video._pokerDurationBound = true;
+        video.addEventListener("loadedmetadata", function () {
+          if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+          var totalSeconds = Math.round(video.duration);
+          var hours = Math.floor(totalSeconds / 3600);
+          var minutes = Math.floor((totalSeconds % 3600) / 60);
+          var seconds = totalSeconds % 60;
+          duration.textContent = "Время: " + (hours ? hours + ":" + String(minutes).padStart(2, "0") : minutes) + ":" + String(seconds).padStart(2, "0");
+        });
+      }
+    });
     if (guestLessonsLocked) {
       list.querySelectorAll(".video-lessons__video").forEach(function (v) {
         try {

@@ -1,4 +1,4 @@
 /* styles-rating-learning-games.css entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-rating-learning.css");
+@import url("./styles-rating-learning.css?v=3.860");
 @import url("./styles-rating-games.css");
 @import url("./styles-rating-learning-games-responsive.css");

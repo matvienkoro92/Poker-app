@@ -4,7 +4,7 @@ function initVideoLessonsHeroShare() {
     return typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("video_lessons") : "";
   }
   var shareInviteText =
-    "Привет, 15 бесплатных видео-уроков от тренера клуба Два туза по этой ссылке";
+    "Привет! Видеокурс тренера клуба «Два туза»: 1 урок бесплатно, ещё 17 уроков — одним пакетом за 3 000 ₽:";
   var copyBtn = document.getElementById("videoLessonsCopyLinkBtn");
   if (copyBtn && copyBtn.getAttribute("data-share-bound") !== "1") {
     copyBtn.setAttribute("data-share-bound", "1");
@@ -59,7 +59,7 @@ function initVideoLessonsHeroShare() {
   function learnPlayHubSectionLink() {
     return typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink("learn_play_hub") : "";
   }
-  var shareInviteText = "Бесплатные материалы «Научиться играть» в приложении клуба «Два туза»:";
+  var shareInviteText = "Видеокурс «Научиться играть» в приложении клуба «Два туза»: 1 урок бесплатно, ещё 17 уроков за 3 000 ₽:";
   var copyBtn = document.getElementById("learnPlayHubCopyLinkBtn");
   if (copyBtn && copyBtn.getAttribute("data-share-bound") !== "1") {
     copyBtn.setAttribute("data-share-bound", "1");

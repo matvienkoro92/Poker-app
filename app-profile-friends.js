@@ -125,6 +125,11 @@ function pokerApplyFriendsUnreadIndicators(unread) {
   try {
     var panel = document.getElementById("profileFriendsPanel");
     if (panel) panel.classList.toggle("profile-friends--unread", active);
+    var tab = document.getElementById("profileFriendsTabBtn");
+    if (tab) {
+      tab.classList.toggle("profile-tabs__btn--friends-unread", active);
+      tab.setAttribute("data-friends-unread", active ? "1" : "0");
+    }
     var btn = document.getElementById("profileFriendsBtn");
     if (btn) {
       btn.classList.toggle("profile-friends__btn--unread", active);

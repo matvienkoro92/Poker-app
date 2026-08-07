@@ -52,7 +52,7 @@ function initTrackingLinksAdminModal() {
     "view:raffles": "Экран: розыгрыши",
     "view:streams": "Экран: стримы",
     "view:equilator": "Экран: эквилятор",
-    "view:video-lessons": "Экран: 15 бесплатных видеоуроков (тренер Николай FishKopcheny)",
+    "view:video-lessons": "Экран: видеокурс — 1 урок бесплатно, 17 уроков за 3 000 ₽ (тренер Николай FishKopcheny)",
     "deep:vl_reviews_nikolay": "Deep link: отзывы о тренере Николае FishKopcheny",
     "view:poker-tasks": "Экран: задачи",
     "view:bonus-game": "Экран: бонус-игра",

@@ -1,4 +1,4 @@
-          <!-- Видео-уроки (15 уроков по темам) -->
+          <!-- Видеокурс: 1 бесплатный урок + 17 уроков в платном пакете -->
           <div class="view" data-view="video-lessons">
             <div class="video-lessons__top-bar" role="toolbar" aria-label="Навигация и ссылка на раздел">
               <button type="button" class="bonus-game-back" data-view-target="learn-play-hub" aria-label="Назад">←</button>
@@ -24,7 +24,7 @@
                 />
               </picture>
               <h1 class="title video-lessons__hero-title">
-                15 бесплатных видеоуроков от практикующего игрока и тренера Николая
+                Видеокурс от практикующего игрока и тренера Николая: 1 урок бесплатно, ещё 17 — в полном пакете
                 <span class="video-lessons__hero-coach-cluster">
                   <span class="video-lessons__hero-coach-surname">FishKopcheny</span>
                   <span class="video-lessons__hero-coach-actions">
@@ -52,10 +52,32 @@
                 </span>
               </h1>
             </div>
-            <p class="video-lessons__intro">Нажмите на урок — видео воспроизводится в приложении (iPhone, Android, Telegram). Если не загрузилось, откройте ссылку на Яндекс.Диск под плеером. <strong>Прокрутите список вниз</strong> — все темы ниже; в конце — дополнительные бонусные уроки.</p>
+            <section class="video-lessons__coach-profile" aria-labelledby="videoLessonsCoachProfileTitle">
+              <div class="video-lessons__coach-profile-art" aria-hidden="true">
+                <img src="./assets/club-news-personal/fishkopcheny-coach-card.png" width="640" height="960" alt="" decoding="async" />
+              </div>
+              <div class="video-lessons__coach-profile-copy">
+                <span class="video-lessons__coach-profile-kicker">Автор курса · практикующий тренер</span>
+                <h2 id="videoLessonsCoachProfileTitle">Николай FishKopcheny</h2>
+                <p>Практикующий игрок и тренер клуба. Обучает на реальных турнирных ситуациях и регулярно подтверждает подход результатами за столами.</p>
+                <ul class="video-lessons__coach-profile-stats" aria-label="Турнирные достижения Николая">
+                  <li><strong>7</strong><span>побед в турнирах</span></li>
+                  <li><strong>18</strong><span>попаданий в топ-3</span></li>
+                  <li><strong>26</strong><span>попаданий в призы</span></li>
+                  <li><strong>1&nbsp;050&nbsp;492&nbsp;₽</strong><span>призовых в рейтинге</span></li>
+                </ul>
+                <div class="video-lessons__coach-profile-wins">
+                  <span>🏆 Турнир Месяца — 262&nbsp;250&nbsp;₽</span>
+                  <span>🏆 Big Boss — 256&nbsp;909&nbsp;₽</span>
+                </div>
+                <button type="button" class="video-lessons__coach-profile-btn" data-video-coach-profile="FishKopcheny">Открыть профиль Николая</button>
+              </div>
+            </section>
+            <p class="video-lessons__intro">Первый урок можно посмотреть бесплатно прямо в приложении. Полный пакет включает ещё <strong>17 уроков</strong>, в том числе 3 бонусных, и стоит <strong>3&nbsp;000&nbsp;₽</strong>. Длительность каждого доступного урока указана в его карточке.</p>
             <div class="video-lessons__list" id="videoLessonsList">
               <div class="video-lessons__free-cta" role="note">
-                <span class="video-lessons__free-cta-text">Смотрите Бесплатно Уроки Николая</span>
+                <span class="video-lessons__free-cta-kicker">Бесплатный урок</span>
+                <span class="video-lessons__free-cta-text">1. Префлоп-диапазоны</span>
                 <span class="video-lessons__free-cta-arrow" aria-hidden="true">↓</span>
               </div>
               <div class="video-lessons__card video-lessons__card--open">
@@ -88,6 +110,15 @@
                   </div>
                 </div>
               </div>
+              <section class="video-lessons__course-offer" aria-labelledby="videoLessonsCourseOfferTitle">
+                <span class="video-lessons__course-offer-lock" aria-hidden="true">🔒</span>
+                <div class="video-lessons__course-offer-copy">
+                  <span class="video-lessons__course-offer-kicker">Полный платный пакет</span>
+                  <h2 id="videoLessonsCourseOfferTitle">17 закрытых уроков за 3&nbsp;000&nbsp;₽</h2>
+                  <p>14 уроков по программе + 3 бонусных урока. После покупки откроется весь оставшийся курс.</p>
+                </div>
+                <a href="https://t.me/Roman1787443?text=Здравствуйте%2C%20хочу%20купить%20полный%20пакет%20из%2017%20видеоуроков%20за%203000%20рублей" class="learn-play-hub__training-btn video-lessons__course-offer-btn" target="_blank" rel="noopener noreferrer">Купить все 17 уроков — 3&nbsp;000&nbsp;₽</a>
+              </section>
               <div class="video-lessons__card">
                 <button type="button" class="video-lessons__item" data-video-url="https://disk.yandex.ru/i/TurgMWNdlC_UVQ" data-lesson-num="2" aria-expanded="false">
                   <span class="video-lessons__num">2</span>
