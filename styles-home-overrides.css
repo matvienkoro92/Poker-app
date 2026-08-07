@@ -4769,8 +4769,8 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .ho
   }
 }
 
-/* Keep the Hero of the Day marker over the portrait, leaving the headline row
-   exclusively for the player name, linked status, and prize amount. */
+/* Keep the Hero of the Day marker in the portrait's lower-left corner, leaving
+   the face and headline row unobstructed. */
 body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__player-title {
   width: 100%;
   max-width: 100%;
@@ -4780,9 +4780,10 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .ho
 body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__day-hero {
   position: absolute;
   z-index: 6;
-  top: 8px;
-  right: auto;
-  left: calc(16.5% - 35px);
+  top: auto !important;
+  right: auto !important;
+  bottom: 10px !important;
+  left: 10px !important;
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__day-hero) .home-friend-news-modal__player-name {
@@ -4798,10 +4799,10 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-frien
 /* Keep character art in the event row while expanded comments use a separate,
    full-width row below it. */
 body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item--comments-open {
-  display: grid;
-  grid-template-columns: 33% minmax(0, 67%);
-  grid-template-rows: auto auto;
-  align-items: start;
+  display: grid !important;
+  grid-template-columns: 33% minmax(0, 67%) !important;
+  grid-template-rows: auto auto !important;
+  align-items: start !important;
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open .home-friend-news-modal__icon {
@@ -4823,10 +4824,10 @@ body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open .home-friend-news-modal__copy {
-  grid-column: 2;
-  grid-row: 1;
-  width: auto;
-  margin-left: 0;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: auto !important;
+  margin-left: 0 !important;
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open > .chat-user-modal__news-comments {
@@ -4837,6 +4838,16 @@ body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open 
   width: 100%;
   margin-top: 8px;
   min-height: 0;
+}
+
+body .home-friend-news-modal--club
+  .home-friend-news-modal__day-events
+  .home-friend-news-modal__item--comments-open:has(.home-friend-news-modal__day-hero)
+  .home-friend-news-modal__day-hero {
+  top: auto !important;
+  right: auto !important;
+  bottom: 10px !important;
+  left: 10px !important;
 }
 
 @media (max-width: 600px) {
