@@ -1995,7 +1995,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
-        : "./assets/home-sng-champions-click-banner-v2.webp?v=1";
+        : "./assets/home-sng-champions-click-banner-v3.webp?v=1";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
