@@ -1063,6 +1063,7 @@
                 '<dl class="sng-champions-modal__tournament-facts">' +
                   '<div><dt><i>●</i>Вход</dt><dd>' + escapeHtml(item.buyIn || "1000р") + '</dd></div>' +
                   '<div><dt><i>★</i>1 место</dt><dd>' + escapeHtml(item.prize1 || "50 000р") + '</dd></div>' +
+                  '<div><dt><i>★</i>2 место</dt><dd>' + escapeHtml(item.prize2 || "7 000р") + '</dd></div>' +
                   '<div><dt><i>♧</i>Сетка лузеров</dt><dd>' + (item.loserBracket ? 'Да' : 'Нет') + '</dd></div>' +
                   (item.knockoutEnabled ? '<div><dt><i>KO</i>Нокаут</dt><dd>Да</dd></div>' : '') +
                 '</dl>' +
