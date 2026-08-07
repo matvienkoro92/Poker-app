@@ -2592,8 +2592,33 @@
           return;
         }
         if (eventId && event.target.closest("[data-home-news-comments]")) {
+          var commentsList = el("homeFriendNewsList");
+          var commentsCard = event.target.closest("[data-home-news-event-id]");
+          var savedScrollTop = commentsList ? commentsList.scrollTop : 0;
+          var savedCardTop = commentsCard && commentsList
+            ? commentsCard.getBoundingClientRect().top - commentsList.getBoundingClientRect().top
+            : 0;
           eventCommentsOpen[eventId] = !eventCommentsOpen[eventId];
           renderModalList(activeModalEvents());
+          function restoreCommentsAnchor() {
+            var restoredList = el("homeFriendNewsList");
+            if (!restoredList) return;
+            restoredList.scrollTop = savedScrollTop;
+            var restoredCard = Array.prototype.find.call(
+              restoredList.querySelectorAll("[data-home-news-event-id]"),
+              function (item) {
+                return item.getAttribute("data-home-news-event-id") === String(eventId);
+              }
+            );
+            if (!restoredCard || !commentsCard) return;
+            var currentTop = restoredCard.getBoundingClientRect().top - restoredList.getBoundingClientRect().top;
+            restoredList.scrollTop += currentTop - savedCardTop;
+          }
+          restoreCommentsAnchor();
+          window.requestAnimationFrame(function () {
+            restoreCommentsAnchor();
+            window.requestAnimationFrame(restoreCommentsAnchor);
+          });
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;

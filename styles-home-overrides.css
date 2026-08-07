@@ -665,15 +665,24 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
 }
 @media (max-width: 560px) {
   .home-friend-news-modal__achievement-promo {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 8px;
-    padding: 13px 14px;
+    padding: 10px 12px;
   }
   .home-friend-news-modal__achievement-promo > strong {
-    white-space: normal;
+    font-size: clamp(15px, 4.6vw, 19px);
+    white-space: nowrap;
+  }
+  .home-friend-news-modal__achievement-promo b {
+    font-size: clamp(11px, 3.35vw, 13px);
+  }
+  .home-friend-news-modal__achievement-promo small {
+    font-size: clamp(8px, 2.65vw, 10px);
   }
   .home-friend-news-modal__achievement-promo-action {
-    justify-self: start;
+    justify-self: end;
+    min-height: 32px;
+    padding-inline: 11px;
   }
 }
 
@@ -4791,7 +4800,8 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-frien
 body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item--comments-open {
   display: grid;
   grid-template-columns: 33% minmax(0, 67%);
-  align-items: stretch;
+  grid-template-rows: auto auto;
+  align-items: start;
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open .home-friend-news-modal__icon {
@@ -4799,8 +4809,17 @@ body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open 
   inset: auto;
   grid-column: 1;
   grid-row: 1;
+  align-self: stretch;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 0;
+  contain: size;
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open
+  .home-friend-news-modal__icon .home-friend-news__avatar {
+  min-height: 0;
+  max-height: 100%;
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open .home-friend-news-modal__copy {
@@ -4817,6 +4836,7 @@ body .home-friend-news-modal--club .home-friend-news-modal__item--comments-open 
   grid-row: 2;
   width: 100%;
   margin-top: 8px;
+  min-height: 0;
 }
 
 @media (max-width: 600px) {
