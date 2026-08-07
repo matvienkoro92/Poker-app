@@ -2184,7 +2184,7 @@
           '<span></span><span></span><span></span></div></section>';
       return;
     }
-    if (friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
+    if (newsModalMode === "friends" && friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
       list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
         '<span aria-hidden="true"></span><strong>' +
           (newsModalMode === "club" ? "Загружаем новости клуба…" : "Загружаем новости всех друзей…") +
@@ -2323,7 +2323,7 @@
     newsModalMode = "club";
     clubNewsTab = "wins";
     syncNewsModalHeading();
-    renderModalList(clubEvents);
+    renderModalList(activeModalEvents());
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
     Promise.resolve(loadClubNews()).then(function () {
