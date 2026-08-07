@@ -19,6 +19,7 @@
   var clubRotateTimer = null;
   var events = [];
   var clubEvents = [];
+  var clubTickerEvents = [];
   var clubWallEvents = [];
   var clubNewsTab = "wins";
   var clubWinsDayTab = "latest";
@@ -2086,9 +2087,9 @@
   function showClubIndex(index, animate) {
     var track = el("homeClubNewsTrack");
     var ticker = el("homeClubNewsOpen");
-    if (!track || !clubEvents.length) return;
-    clubActiveIndex = (index + clubEvents.length) % clubEvents.length;
-    var active = clubEvents[clubActiveIndex] || {};
+    if (!track || !clubTickerEvents.length) return;
+    clubActiveIndex = (index + clubTickerEvents.length) % clubTickerEvents.length;
+    var active = clubTickerEvents[clubActiveIndex] || {};
     if (ticker) {
       ticker.setAttribute("data-news-type", String(active.type || "empty"));
       if (active.playerAccent && active.playerRgb) {
@@ -2119,6 +2120,7 @@
         at: "",
       }];
     }
+    clubTickerEvents = displayRows;
     if (label) {
       var labelDate = displayRows.map(function (row) { return row && row.at; }).find(function (value) {
         return eventTime(value) > 0;
