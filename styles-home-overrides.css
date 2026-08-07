@@ -835,8 +835,15 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
 }
 .home-friend-news-modal__day-tabs { display: flex; justify-content: center; gap: 7px; margin: 8px 0 2px; }
 .home-friend-news-modal__day-tab { min-width: 92px; min-height: 30px; padding: 4px 14px; color: #aeb8ca; background: rgba(11,16,24,.78); border: 1px solid rgba(229,179,74,.28); border-radius: 999px; font-size: 11px; font-weight: 900; }
+.home-friend-news-modal__day-tab--heroes { min-width: 118px; }
 .home-friend-news-modal__day-tab--active { color: #241400; background: linear-gradient(180deg, #ffe292, #edb447); border-color: #ffdc7a; box-shadow: 0 4px 14px rgba(237,180,71,.2); }
 .home-friend-news-modal__day-tab:disabled { opacity: .38; }
+
+@media (max-width: 520px) {
+  .home-friend-news-modal__day-tabs { gap: 4px; }
+  .home-friend-news-modal__day-tab,
+  .home-friend-news-modal__day-tab--heroes { min-width: 0; padding-inline: 8px; flex: 1 1 0; font-size: 9px; }
+}
 
 .home-friend-news-modal__wall-invite {
   margin: 18px 0 4px;
@@ -4603,7 +4610,7 @@ body .home-friend-news-modal--club .home-friend-news-modal__icon .home-friend-ne
   max-width: none;
   margin: 0;
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center center;
   mix-blend-mode: normal;
   filter:
     saturate(1.06)
@@ -4611,7 +4618,7 @@ body .home-friend-news-modal--club .home-friend-news-modal__icon .home-friend-ne
     drop-shadow(0 7px 6px rgba(0, 0, 0, 0.78))
     drop-shadow(0 0 7px rgba(var(--friend-news-rgb), 0.25));
   transform: scale(0.96);
-  transform-origin: center bottom;
+  transform-origin: center center;
 }
 
 body .home-friend-news-modal--club .home-friend-news-modal__copy {

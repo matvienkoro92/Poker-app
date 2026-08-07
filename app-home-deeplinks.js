@@ -134,6 +134,18 @@ function pokerInitHomeDeepLinks(opts) {
       }, 40);
       return;
     }
+    if (startParam === "profile_friends") {
+      setTimeout(function () {
+        if (typeof setView === "function") setView("profile");
+        retryDeepLinkAction(function () {
+          var friendsButton = document.getElementById("profileFriendsBtn");
+          if (!friendsButton) return false;
+          friendsButton.click();
+          return true;
+        }, 40);
+      }, 0);
+      return;
+    }
     if (startParam === "winter_rating") {
       setTimeout(function () {
         if (typeof setView === "function") setView("winter-rating");

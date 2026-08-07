@@ -2826,7 +2826,7 @@ if (chatUserModalEl) {
         parts && parts[4],
       ];
       var achievementsHtml = chatUserModalAchievementsHtml(results, ratingNick, parts && parts[5]);
-      if (options.isSelfProfile === true) chatUserModalSyncAchievementNotifications(achievementsHtml);
+      if (options.isSelfProfile === true) chatUserModalSyncAchievementNotifications(achievementsHtml, places[0]);
       return {
         totalRewardHtml: chatUserModalRatingTotalHtml(ratingNick),
         achievementsHtml: achievementsHtml,
@@ -2899,13 +2899,19 @@ if (chatUserModalEl) {
     }, 10000);
   }
 
-  function chatUserModalSyncAchievementNotifications(html) {
+  function chatUserModalSyncAchievementNotifications(html, ratingPlaces) {
     var rows = chatUserModalAchievementNotificationRows(html);
     if (!rows.length || typeof fetch !== "function") return;
+    var currentRatingPlaces = (Array.isArray(ratingPlaces) ? ratingPlaces : []).map(function (row) {
+      return {
+        league: Math.max(0, parseInt(row && row.league, 10) || 0),
+        place: Math.max(0, parseInt(row && row.place, 10) || 0),
+      };
+    }).filter(function (row) { return (row.league === 1 || row.league === 2) && row.place > 0; });
     var base = (typeof API_BASE !== "undefined" ? API_BASE : "") || "";
     var body = typeof pokerApiAuthJsonBody === "function"
-      ? pokerApiAuthJsonBody({ achievements: rows })
-      : { achievements: rows };
+      ? pokerApiAuthJsonBody({ achievements: rows, ratingPlaces: currentRatingPlaces })
+      : { achievements: rows, ratingPlaces: currentRatingPlaces };
     fetch(base.replace(/\/$/, "") + "/api/achievement-notifications", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -3732,7 +3732,7 @@ button.sng-champions-modal__singles-duel-player {
 
 .sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
   /* Team cards need room for the team name and both member names. */
-  --sng-map-row-height: 151px;
+  --sng-map-row-height: 132px;
   --sng-map-row-gap: 8px;
   grid-template-columns:
     152px
@@ -3746,7 +3746,7 @@ button.sng-champions-modal__singles-duel-player {
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded.sng-champions-modal__bracket-map-wrap--winners .sng-champions-modal__bracket-map {
-  --sng-map-row-height: 164px;
+  --sng-map-row-height: 144px;
   --sng-map-row-gap: 8px;
   grid-template-columns:
     220px

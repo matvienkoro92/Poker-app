@@ -1715,10 +1715,11 @@
     var baseMatchCount = Math.max.apply(null, rounds.map(function (round) {
       return Array.isArray(round && round.matches) ? round.matches.length : 0;
     }).concat([1]));
-    var isTournamentMap = /\bsng-champions-modal__bracket-map-wrap--(?:winners|losers)\b/.test(options.extraClass || "");
-    var connectorRowStep = isTournamentMap
-      ? (bracketMapExpanded ? 148 : 135)
-      : (bracketMapExpanded ? 47 : 46);
+    var connectorRowStep = kind === "winners"
+      ? (bracketMapExpanded ? 152 : 140)
+      : kind === "losers"
+        ? (bracketMapExpanded ? 136 : 128)
+        : (bracketMapExpanded ? 47 : 46);
     return '<section class="sng-champions-modal__bracket-map-wrap' + expandedClass + fitClass + (isPreview ? " sng-champions-modal__bracket-map-wrap--preview" : "") + extraClass + '" aria-label="Миниатюрная сетка всего турнира">' +
       '<div class="sng-champions-modal__bracket-map-head">' +
         '<strong>' + escapeHtml(title) + '</strong>' +

@@ -1775,12 +1775,15 @@ function initProfileFriends() {
       friendsDataCache = readStableFriendsData();
       hasCachedData = !!(friendsDataCache && friendsDataCache.ok);
     }
-    var displayedCachedData = !!(options.preferCache && hasCachedData);
+    var cachedHasRows = hasCachedData && ["friends", "incoming", "outgoing", "notices"].some(function (key) {
+      return Array.isArray(friendsDataCache[key]) && friendsDataCache[key].length > 0;
+    });
+    var displayedCachedData = !!(options.preferCache && cachedHasRows);
     if (displayedCachedData) {
       renderFriendsData(friendsDataCache);
       try { pokerMarkFriendsSeen(friendsDataCache); } catch (eSeenCachedFriends) {}
     } else {
-      listEl.innerHTML = '<p class="friends-list-modal__loading">Загрузка...</p>';
+      listEl.innerHTML = '<p class="friends-list-modal__loading">Загружаем друзей…</p>';
     }
     fetchFriendsData()
       .then(function (data) {
