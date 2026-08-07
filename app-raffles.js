@@ -1073,8 +1073,14 @@ function initRaffles() {
     if (!raffle || !raffle.endDate) return "";
     var end = new Date(raffle.endDate);
     if (isNaN(end.getTime())) return "";
+    var weekday = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
+    var moscowWeekdayIndex = parseInt(end.toLocaleDateString("en-US", {
+      timeZone: "Europe/Moscow",
+      weekday: "short",
+    }).replace(/^Sun$/, "0").replace(/^Mon$/, "1").replace(/^Tue$/, "2").replace(/^Wed$/, "3").replace(/^Thu$/, "4").replace(/^Fri$/, "5").replace(/^Sat$/, "6"), 10);
+    if (!isFinite(moscowWeekdayIndex)) moscowWeekdayIndex = end.getDay();
     return (
-      "Итоги в " +
+      "Итоги в " + weekday[moscowWeekdayIndex] + ", " +
       end.toLocaleTimeString("ru-RU", {
         timeZone: "Europe/Moscow",
         hour: "2-digit",
@@ -1097,18 +1103,25 @@ function initRaffles() {
       var end = new Date(raffle.endDate);
       if (!isNaN(end.getTime())) dates.push(end);
     }
-    var times = [];
+    var dateTimes = [];
+    var weekday = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
     dates.forEach(function (date) {
       var time = date.toLocaleTimeString("ru-RU", {
         timeZone: "Europe/Moscow",
         hour: "2-digit",
         minute: "2-digit",
       });
-      if (times.indexOf(time) === -1) times.push(time);
+      var weekdayIndex = parseInt(date.toLocaleDateString("en-US", {
+        timeZone: "Europe/Moscow",
+        weekday: "short",
+      }).replace(/^Sun$/, "0").replace(/^Mon$/, "1").replace(/^Tue$/, "2").replace(/^Wed$/, "3").replace(/^Thu$/, "4").replace(/^Fri$/, "5").replace(/^Sat$/, "6"), 10);
+      if (!isFinite(weekdayIndex)) weekdayIndex = date.getDay();
+      var dateTime = weekday[weekdayIndex] + ", " + time;
+      if (dateTimes.indexOf(dateTime) === -1) dateTimes.push(dateTime);
     });
-    if (!times.length) return "";
-    return "Итоги в " + times.map(function (time, index) {
-      return (index > 0 ? "в " : "") + time;
+    if (!dateTimes.length) return "";
+    return "Итоги в " + dateTimes.map(function (dateTime, index) {
+      return (index > 0 ? "в " : "") + dateTime;
     }).join(" и ") + " МСК";
   }
 
@@ -1272,6 +1285,22 @@ function initRaffles() {
     return cardTheme === "knockout_ticket";
   }
 
+  function activeRaffleIsTrainingCard(raffle) {
+    if (typeof pokerRafflesIsTrainingPrize === "function") return pokerRafflesIsTrainingPrize(raffle);
+    if (!raffle) return false;
+    var text = [
+      raffle.title,
+      raffle.cardTitle,
+      raffle.card_title,
+      raffle.cardSubtitle,
+      raffle.card_subtitle,
+    ].concat((Array.isArray(raffle.groups) ? raffle.groups : []).map(function (group) {
+      return group && group.prize;
+    })).join(" ").toLowerCase();
+    return text.indexOf("трениров") !== -1 &&
+      (text.indexOf("никола") !== -1 || text.indexOf("fishkopcheny") !== -1);
+  }
+
   function activeRaffleRubText(amount) {
     return formatRaffleSum(amount).replace(/\s*₽/g, "р");
   }
@@ -1414,6 +1443,9 @@ function initRaffles() {
 
   function activeRaffleDetailPillLabels(raffle) {
     var labels = [];
+    if (activeRaffleIsTrainingCard(raffle)) {
+      return ["Персональная тренировка · 1 час · 5 000 ₽"];
+    }
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     var knockoutCard = activeRaffleIsKnockoutTicketCard(raffle);
@@ -1681,6 +1713,7 @@ function initRaffles() {
   }
 
   function activeRaffleMainTitleText(raffle) {
+    if (activeRaffleIsTrainingCard(raffle)) return "Тренировка у Николая FishKopcheny стоимостью 5 000 ₽";
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     if (isCashPrize) {
       var detailedCashTitle = activeRaffleCashMainTitleText(raffle).replace(/\s+/g, " ").trim();
@@ -1716,6 +1749,7 @@ function initRaffles() {
   }
 
   function activeRaffleSubtitleText(raffle) {
+    if (activeRaffleIsTrainingCard(raffle)) return "Персональное занятие с практикующим тренером";
     var isCashPrize = typeof pokerRafflesIsCashPrize === "function" && pokerRafflesIsCashPrize(raffle);
     var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
     if (isCashPrize && hasResultBatches) return "";
@@ -1739,7 +1773,10 @@ function initRaffles() {
     if (subtitleText && titleText && subtitleText.toLowerCase() === titleText.toLowerCase()) {
       subtitleText = "";
     }
-    var titleHtml = escapeHtml(titleText);
+    var trainingCard = activeRaffleIsTrainingCard(raffle);
+    var titleHtml = trainingCard
+      ? '<button type="button" class="raffles-active-chooser__training-profile" data-raffle-training-profile="FishKopcheny"><span class="raffles-active-chooser__training-profile-copy"><span>Тренировка у</span><strong>Николая FishKopcheny</strong><small>Стоимость — 5 000 ₽</small></span></button>'
+      : escapeHtml(titleText);
     var titleClass = "raffles-active-chooser__main-title";
     var cashMatch = titleText.match(/^(.+?)\s+(по\s+.+?\s+на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i) ||
       titleText.match(/^(.+?)\s+(на\s+кеш(?:\s+\d+\s*\/\s*\d+)?)$/i);
@@ -1856,12 +1893,15 @@ function initRaffles() {
   function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize, topPillsHtml) {
     var amount = Math.max(0, parseInt(totalPrize || getRaffleTotalPrize(raffle), 10) || 0);
     var shareLink = activeRaffleSpecificShareLink(id);
+    var trainingCard = activeRaffleIsTrainingCard(raffle);
     return (
       '<span class="raffles-active-chooser__prize-panel">' +
       (topPillsHtml || "") +
-      '<span class="raffles-active-chooser__prize-kicker">Призовой фонд</span>' +
+      '<span class="raffles-active-chooser__prize-kicker">' + (trainingCard ? "Приз" : "Призовой фонд") + "</span>" +
       '<span class="raffles-active-chooser__prize-amount">' +
-      escapeHtml(amount > 0 ? formatRaffleSum(amount) : "Приз") +
+      (trainingCard
+        ? '<span class="raffles-active-chooser__training-prize"><strong>1 час</strong><span>с Николаем</span><small>Стоимость 5 000 ₽</small></span>'
+        : escapeHtml(amount > 0 ? formatRaffleSum(amount) : "Приз")) +
       "</span>" +
       activeRaffleJoinCtaHtml(raffle, id, endDate) +
       '<button type="button" class="raffles-active-chooser__prize-info-btn" data-raffle-active-info-id="' +
@@ -2335,6 +2375,7 @@ function initRaffles() {
         var totalPrize = getRaffleTotalPrize(raffle);
         var cardTheme = String(raffle && (raffle.cardTheme || raffle.card_theme) || "").trim().toLowerCase();
         var knockoutCard = activeRaffleIsKnockoutTicketCard(raffle);
+        var trainingCard = activeRaffleIsTrainingCard(raffle);
         var participantCount = activeRaffleParticipantsCount(raffle);
         var participantWord = activeRaffleParticipantWord(participantCount);
         var resultsTimeText = activeRaffleResultsTimeText(raffle);
@@ -2387,14 +2428,18 @@ function initRaffles() {
           totalPrize,
           prizeTopPillsHtml
         );
-        var ticketRegistrationWarning = !isCashPrize
+        var ticketRegistrationWarning = !isCashPrize && !trainingCard
           ? '<div class="raffles-ticket-registration-warning" role="note"><span><strong>Важно:</strong> если вы уже зарегистрированы в турнире, не участвуйте в розыгрыше билета на него. Второй билет выдать невозможно — не забирайте возможность у игроков, у которых билета ещё нет.</span><button type="button" class="raffles-ticket-registration-warning__rules" data-raffles-help-open>Все правила</button></div>'
+          : "";
+        var trainingLessonCta = trainingCard
+          ? '<button type="button" class="raffles-active-chooser__training-lesson" data-raffle-training-lessons><span>Бесплатный видео-урок от Николая</span><strong aria-hidden="true">›</strong></button>'
           : "";
         return (
           '<div class="raffles-active-chooser__item' +
           (selected ? " raffles-active-chooser__item--active" : "") +
           (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
           (cardTheme === "knockout_ticket" ? " raffles-active-chooser__item--knockout" : "") +
+          (trainingCard ? " raffles-active-chooser__item--training" : "") +
           '" role="button" tabindex="0" data-raffle-active-id="' +
           escapeHtml(id) +
           '" aria-selected="' +
@@ -2412,6 +2457,7 @@ function initRaffles() {
           "</span>" +
           prizePanelHtml +
           "</span>" +
+          trainingLessonCta +
           '<button type="button" class="raffles-active-chooser__info-toggle' +
           (infoOpen ? " raffles-active-chooser__info-toggle--open" : "") +
           '" data-raffle-active-info-id="' +
@@ -2435,6 +2481,24 @@ function initRaffles() {
   if (rafflesActiveChooser && rafflesActiveChooser.dataset.bound !== "1") {
     rafflesActiveChooser.dataset.bound = "1";
     rafflesActiveChooser.addEventListener("click", function (e) {
+      var trainingLessons = e.target && e.target.closest ? e.target.closest("[data-raffle-training-lessons]") : null;
+      if (trainingLessons && rafflesActiveChooser.contains(trainingLessons)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof setView === "function") setView("video-lessons");
+        return;
+      }
+      var trainingProfile = e.target && e.target.closest ? e.target.closest("[data-raffle-training-profile]") : null;
+      if (trainingProfile && rafflesActiveChooser.contains(trainingProfile)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function") {
+          window.pokerOpenUnifiedPlayerProfileByRatingNick("FishKopcheny", { season: "summer" });
+        } else if (typeof window.pokerOpenChatUserModalSafe === "function") {
+          window.pokerOpenChatUserModalSafe("371998", "FishKopcheny", "./assets/club-news-personal/fishkopcheny-coach-card.png");
+        }
+        return;
+      }
       var helpBtn = e.target && e.target.closest ? e.target.closest("[data-raffles-help-open]") : null;
       if (helpBtn && rafflesActiveChooser.contains(helpBtn)) {
         e.preventDefault();

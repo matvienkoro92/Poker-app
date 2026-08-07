@@ -251,6 +251,10 @@
   font-size: 14px;
   color: var(--text-muted);
 }
+body[data-view="learn-play-hub"] #app.app > .card {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
 .learn-play-hub__buttons {
   display: flex;
   flex-direction: column;

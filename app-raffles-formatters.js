@@ -301,7 +301,11 @@ function pokerRafflesParsePrizeValue(prizeStr) {
 }
 
 function pokerRafflesGetTotalPrize(raffle) {
-  if (!raffle || !raffle.groups) return 0;
+  if (!raffle) return 0;
+  // A one-hour personal session with Nikolay is a non-cash prize valued at 5,000 ₽.
+  // Keep that value in active/completed raffle totals even though the award is a service.
+  if (pokerRafflesIsTrainingPrize(raffle)) return 5000;
+  if (!raffle.groups) return 0;
   return raffle.groups.reduce(function (sum, g) {
     var count = Math.max(0, parseInt(g.count, 10) || 0);
     var nominal = pokerRafflesParsePrizeValue(g.prize);
@@ -357,8 +361,26 @@ function pokerRafflesIsGenericTitleForHeading(s) {
   return t.indexOf("розыгрыш") !== -1 && (t.indexOf("беккинг") !== -1 || t.indexOf("билет") !== -1);
 }
 
+function pokerRafflesIsTrainingPrize(raffle) {
+  if (!raffle) return false;
+  var text = [
+    raffle.title,
+    raffle.cardTitle,
+    raffle.card_title,
+    raffle.cardSubtitle,
+    raffle.card_subtitle,
+  ].concat((Array.isArray(raffle.groups) ? raffle.groups : []).map(function (group) {
+    return group && group.prize;
+  })).join(" ").toLowerCase();
+  return text.indexOf("трениров") !== -1 &&
+    (text.indexOf("никола") !== -1 || text.indexOf("fishkopcheny") !== -1);
+}
+
 function pokerRafflesBuildActiveCardHeading(raffle) {
   if (!raffle) return "";
+  if (pokerRafflesIsTrainingPrize(raffle)) {
+    return "Тренировка у Николая FishKopcheny стоимостью 5 000 ₽. Персональное занятие продолжительностью 1 час.";
+  }
   var groups = Array.isArray(raffle.groups) ? raffle.groups : [];
   var totalTickets = Math.max(0, parseInt(raffle.totalWinners, 10) || 0);
   if (!totalTickets && groups.length) {
