@@ -1568,11 +1568,13 @@
 }
 .achievement-earned-toast__action {
   padding: 7px 10px;
-  color: #2b1600;
+  color: #2b1600 !important;
   border-radius: 999px;
   background: linear-gradient(180deg, #ffe18a, #f5a72f);
   font-size: 10px;
   font-weight: 1000;
+  -webkit-text-fill-color: #2b1600 !important;
+  text-shadow: none;
   text-decoration: none;
   white-space: nowrap;
 }

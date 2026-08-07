@@ -2864,9 +2864,31 @@ if (chatUserModalEl) {
       '<span class="achievement-earned-toast__icon" aria-hidden="true">🏆</span>' +
       '<span class="achievement-earned-toast__copy"><strong>Новая ачивка: ' + escapeHtml(row.title) + '</strong>' +
       '<small>' + escapeHtml(row.message || "Достижение добавлено в ваш профиль") + '</small></span>' +
-      '<a class="achievement-earned-toast__action" href="./?startapp=profile">Посмотреть</a>' +
+      '<button type="button" class="achievement-earned-toast__action">Посмотреть</button>' +
       '<button type="button" class="achievement-earned-toast__close" aria-label="Закрыть">×</button>';
     document.body.appendChild(toast);
+    var action = toast.querySelector(".achievement-earned-toast__action");
+    if (action) action.addEventListener("click", function () {
+      toast.remove();
+      var profileNav = document.querySelector('[data-view-target="profile"]');
+      if (profileNav) profileNav.click();
+      else if (typeof setView === "function") setView("profile");
+      var attempts = 0;
+      var openAchievements = function () {
+        if (typeof setProfileTab === "function") {
+          setProfileTab("achievements");
+          return;
+        }
+        var tab = document.querySelector('[data-profile-tab="achievements"]');
+        if (tab) {
+          tab.click();
+          return;
+        }
+        attempts += 1;
+        if (attempts < 20) setTimeout(openAchievements, 100);
+      };
+      openAchievements();
+    });
     var close = toast.querySelector(".achievement-earned-toast__close");
     if (close) close.addEventListener("click", function () { toast.remove(); });
     requestAnimationFrame(function () { toast.classList.add("achievement-earned-toast--visible"); });
