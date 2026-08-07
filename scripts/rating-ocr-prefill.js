@@ -305,6 +305,17 @@ async function parseOcrFile(file) {
   );
   const buyin = feeToken ? buyinFromText(feeToken.text) : 0;
   if (title === "TODO" && time === "21:00" && buyin === 200) title = "OK🎰";
+  if (title === "TODO") {
+    const poker21TitleByTimeAndBuyin = {
+      "12:00|800": "DV Rebuy",
+      "17:00|300": "МОК🎰",
+      "18:00|300": "Четверг МКО",
+      "19:00|1000": "НОК🥊",
+      "20:00|800": "Rebuy Evening",
+      "22:00|200": "EnergetikTournament"
+    };
+    title = poker21TitleByTimeAndBuyin[`${time}|${buyin}`] || title;
+  }
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])ID\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
@@ -339,7 +350,7 @@ async function parseOcrFile(file) {
       const token = chooseClosest(tokens, isPlaceToken, nextCenter + 0.018, 0.045);
       return token ? integerFromText(token.text) : null;
     }).find((value) => value != null);
-    if (trophyPlace == null && place == null && index === 0 && nextKnownPlace === 2) {
+    if (trophyPlace == null && place == null && index === 0 && (nextKnownPlace === 2 || (blue && reward > 0))) {
       place = 1;
       needsPlaceCheck = false;
     }

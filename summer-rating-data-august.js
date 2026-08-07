@@ -1035,4 +1035,191 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "06.08.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 12000,
+          "points": 135
+        },
+        {
+          "nick": "мистерFox",
+          "place": 3,
+          "reward": 3600,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WildBoar",
+          "place": 1,
+          "reward": 14170,
+          "points": 135
+        },
+        {
+          "nick": "Zeus",
+          "place": 2,
+          "reward": 2770,
+          "points": 110
+        },
+        {
+          "nick": "мистерFox",
+          "place": 4,
+          "reward": 1230,
+          "points": 70
+        },
+        {
+          "nick": "Виктор",
+          "place": 6,
+          "reward": 810,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Четверг МКО",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "MissClick",
+          "place": 1,
+          "reward": 16480,
+          "points": 135
+        },
+        {
+          "nick": "topor32",
+          "place": 14,
+          "reward": 4880,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 3,
+          "reward": 4040,
+          "points": 90
+        },
+        {
+          "nick": "kriak",
+          "place": 4,
+          "reward": 2840,
+          "points": 70
+        },
+        {
+          "nick": "VORONEZH",
+          "place": 5,
+          "reward": 1590,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "НОК🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 26157.83,
+          "points": 135
+        },
+        {
+          "nick": "Proxor",
+          "place": 5,
+          "reward": 6784.37,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 2,
+          "reward": 7820,
+          "points": 110
+        },
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 4100,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "FridaKahlo",
+          "place": 2,
+          "reward": 2777.5,
+          "points": 110
+        },
+        {
+          "nick": "Бабник",
+          "place": 3,
+          "reward": 2105,
+          "points": 90
+        },
+        {
+          "nick": "Player746595",
+          "place": 5,
+          "reward": 1187.5,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k...",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 1,
+          "reward": 42853,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 6530,
+          "points": 135
+        }
+      ]
+    }
+  ]
 };

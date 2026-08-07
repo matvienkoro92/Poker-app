@@ -607,4 +607,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-05-08-2026-league1-big-boss-18h.jpg",
     "rating-compressed-preview/rating-05-08-2026-league1-rebuy-evening-20h.jpg"
   ]
+,
+  "06.08.2026": [
+    "rating-compressed-preview/rating-06-08-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-06-08-2026-league1-nok-19h.jpg",
+    "rating-compressed-preview/rating-06-08-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-06-08-2026-league1-nlh-knockout-220k-21h.jpg"
+  ]
 };
