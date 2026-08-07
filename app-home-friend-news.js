@@ -41,7 +41,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v2";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v2:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v11";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v12";
   var CLUB_WALL_EVENTS_CACHE_KEY = "poker_home_club_wall_rendered_v1";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
@@ -461,9 +461,9 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
-    "proxor": "./assets/club-news-personal/proxor-personal.png?v=1",
-    "luck_is_suck": "./assets/club-news-personal/luck-is-suck-personal.png?v=1",
-    "luckissuck": "./assets/club-news-personal/luck-is-suck-personal.png?v=1",
+    "proxor": "./assets/club-news-personal/proxor-personal-cutout.png?v=2",
+    "luck_is_suck": "./assets/club-news-personal/luck-is-suck-personal-cutout.png?v=2",
+    "luckissuck": "./assets/club-news-personal/luck-is-suck-personal-cutout.png?v=2",
     "paparabotaet": "./assets/club-news-personal/paparabotaet-personal.png?v=1",
     "porquinho": "./assets/sng-finalist-porquinho.webp", "поркиньо": "./assets/sng-finalist-porquinho.webp", "поркиньё": "./assets/sng-finalist-porquinho.webp",
     "штукатур": "./assets/sng-finalist-shtukatur.webp", "shtukatur": "./assets/sng-finalist-shtukatur.webp",
