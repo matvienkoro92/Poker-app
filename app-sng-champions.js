@@ -1024,7 +1024,7 @@
     var createForm = data.isAdmin && tournamentCreateFormOpen
       ? '<form class="sng-champions-modal__create-tournament" data-sng-create-tournament-form>' +
           '<h3>Новый турнир</h3>' +
-          '<label class="sng-champions-modal__create-wide"><span>Название</span><input type="text" name="title" maxlength="80" required value="1ый СНГ-баттл Лига чемпионов Два туза"></label>' +
+          '<label class="sng-champions-modal__create-wide"><span>Название</span><input type="text" name="title" maxlength="80" required value="2й СНГ-баттл Лига чемпионов Два туза"></label>' +
           '<label class="sng-champions-modal__create-wide"><span>Описание</span><textarea name="description" maxlength="1000" rows="6" placeholder="Условия и важные детали турнира"></textarea></label>' +
           '<label><span>Формат</span><select name="tournamentType"><option value="solo">Одиночный</option><option value="team">Командный · по 2 игрока</option></select></label>' +
           '<label><span>Вход</span><input type="text" name="buyIn" maxlength="80" required value="1000р"></label>' +
@@ -1053,7 +1053,7 @@
           ? renderCompletedTournamentOption(item)
           : '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
               '<span class="sng-champions-modal__tournament-art" aria-hidden="true"><img src="./assets/sng-tournament-card-art-v4.webp?v=1" alt="" loading="lazy" decoding="async"></span>' +
-              '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
+              '<span class="sng-champions-modal__tournament-content"><strong class="sng-champions-modal__tournament-title">' + escapeHtml(item.title) + (item.tournamentType === 'team' ? ' · Командный' : ' · Одиночный') + (item.isTest ? ' <em class="sng-champions-modal__test-badge">ТЕСТ</em>' : '') + '</strong>' +
                 '<span class="sng-champions-modal__tournament-live"><i></i>' + escapeHtml(item.activeStage ? 'Сейчас идёт: ' + item.activeStage : statusLabel(item.status)) +
                   (item.activePairs && item.activePairs.length
                     ? '<b class="sng-champions-modal__tournament-pairs">' + item.activePairs.map(function (pair) { return escapeHtml(pair.left) + ' — ' + escapeHtml(pair.right); }).join(' · ') + '</b>'
@@ -1995,7 +1995,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
-        : "./assets/home-sng-champions-click-banner.webp?v=4";
+        : "./assets/home-sng-champions-click-banner-v2.webp?v=1";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
@@ -2033,7 +2033,7 @@
       if (title && state.title) {
         var normalizedTitle = String(state.title).trim();
         if (/^1(?:ый|й)\s+снг[-\s]?баттл\s+лига\s+чемпионов\s+два\s+туза$/i.test(normalizedTitle)) {
-          title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title home-club-choice-plaque__dynamic-title--battle"><span><b class="home-club-choice-plaque__ordinal-one">1</b>ый СНГ-баттл</span><span>Лига чемпионов</span><span>Два туза</span></span>';
+          title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title home-club-choice-plaque__dynamic-title--battle"><span><b class="home-club-choice-plaque__ordinal-one">2</b>й СНГ-баттл</span><span>Лига чемпионов</span><span>Два туза</span></span>';
         } else {
           title.innerHTML = '<span class="home-club-choice-plaque__dynamic-title">' + escapeHtml(normalizedTitle).replace(/^1/, '<b class="home-club-choice-plaque__ordinal-one">1</b>') + '</span>';
         }

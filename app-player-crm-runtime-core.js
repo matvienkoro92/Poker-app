@@ -26,6 +26,7 @@
     broadcastPlayers: [],
     broadcastAudienceLoadedAt: 0,
     broadcastAudiencePeriodKey: "",
+    broadcastAudiencePrefetchPromise: null,
     statsAuxiliaryLoadedKey: "",
     statsAuxiliaryLoading: false,
     statsManualRefreshAt: 0,
@@ -125,6 +126,8 @@
   };
 
   var CRM_PERIOD_STORAGE_KEY = "poker_player_crm_period_v1";
+  var CRM_BROADCAST_AUDIENCE_CACHE_KEY = "poker_player_crm_broadcast_audience_v1";
+  var CRM_BROADCAST_AUDIENCE_CACHE_MS = 15 * 60 * 1000;
 
   function restoreCrmPeriodSelection() {
     try {
@@ -148,6 +151,29 @@
         period: state.period,
         dateFrom: state.dateFrom,
         dateTo: state.dateTo,
+      }));
+    } catch (e) {}
+  }
+
+  function readBroadcastAudienceCache(periodKeyValue) {
+    try {
+      var entry = JSON.parse(sessionStorage.getItem(CRM_BROADCAST_AUDIENCE_CACHE_KEY) || "null");
+      if (!entry || !Array.isArray(entry.players)) return null;
+      if (String(entry.periodKey || "") !== String(periodKeyValue || "")) return null;
+      if (Date.now() - Number(entry.savedAt || 0) > CRM_BROADCAST_AUDIENCE_CACHE_MS) return null;
+      return entry;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeBroadcastAudienceCache() {
+    try {
+      if (!state.broadcastAudienceLoadedAt || !Array.isArray(state.broadcastPlayers)) return;
+      sessionStorage.setItem(CRM_BROADCAST_AUDIENCE_CACHE_KEY, JSON.stringify({
+        savedAt: state.broadcastAudienceLoadedAt,
+        periodKey: state.broadcastAudiencePeriodKey,
+        players: state.broadcastPlayers,
       }));
     } catch (e) {}
   }
@@ -1372,10 +1398,25 @@
 
   function loadBroadcastAudience(force) {
     var key = broadcastAudiencePeriodKey();
-    var fresh = state.broadcastAudienceLoadedAt && Date.now() - state.broadcastAudienceLoadedAt < 120000;
+    if (!force && !state.broadcastAudienceLoadedAt) {
+      var cached = readBroadcastAudienceCache(key);
+      if (cached) {
+        state.broadcastPlayers = cached.players;
+        state.broadcastAudienceLoadedAt = Number(cached.savedAt) || Date.now();
+        state.broadcastAudiencePeriodKey = key;
+      }
+    }
+    var fresh = state.broadcastAudienceLoadedAt &&
+      Date.now() - state.broadcastAudienceLoadedAt < CRM_BROADCAST_AUDIENCE_CACHE_MS;
     if (!force && fresh && state.broadcastAudiencePeriodKey === key) {
       renderBroadcastOptions();
       return Promise.resolve(true);
+    }
+    if (!force && state.broadcastAudiencePrefetchPromise) {
+      return state.broadcastAudiencePrefetchPromise.then(function () {
+        renderBroadcastOptions();
+        return true;
+      });
     }
     return loadCrmHeavyData("broadcast");
   }
@@ -2908,6 +2949,7 @@
           state.broadcastPlayers = data.players;
           state.broadcastAudienceLoadedAt = Date.now();
           state.broadcastAudiencePeriodKey = broadcastAudiencePeriodKey();
+          writeBroadcastAudienceCache();
         } else if (data && data.ok && Array.isArray(data.players)) {
           var previousPlayers = options.append ? state.players.slice() : [];
           applyCrmData(data, true);
@@ -3045,6 +3087,46 @@
     if (state.tab === "links" && !state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
   }
 
+  function prefetchBroadcastAudience() {
+    if (state.crmError || state.broadcastAudienceLoadedAt || state.broadcastAudiencePrefetchPromise) return;
+    var key = broadcastAudiencePeriodKey();
+    var cached = readBroadcastAudienceCache(key);
+    if (cached) {
+      state.broadcastPlayers = cached.players;
+      state.broadcastAudienceLoadedAt = Number(cached.savedAt) || Date.now();
+      state.broadcastAudiencePeriodKey = key;
+      return;
+    }
+    var base = getApiBaseSafe();
+    if (!base) return;
+    state.broadcastAudiencePrefetchPromise = fetch(base + "/api/player-crm" + crmQuery({ mode: "send" }), { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("broadcast-prefetch");
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data || data.ok === false || !Array.isArray(data.players)) throw new Error("broadcast-prefetch");
+        state.broadcastPlayers = data.players;
+        state.broadcastAudienceLoadedAt = Date.now();
+        state.broadcastAudiencePeriodKey = key;
+        writeBroadcastAudienceCache();
+        if (state.tab === "broadcast") renderBroadcastOptions();
+      })
+      .catch(function () {})
+      .then(function () {
+        state.broadcastAudiencePrefetchPromise = null;
+      });
+  }
+
+  function scheduleBroadcastAudiencePrefetch() {
+    var run = function () { prefetchBroadcastAudience(); };
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(run, { timeout: 1200 });
+    } else {
+      window.setTimeout(run, 250);
+    }
+  }
+
   function loadCrmData(scope) {
     if (scope === "chart" && state.loaded) return loadCrmHeavyData(scope);
     if (state.loading && state.loadStartedAt && Date.now() - state.loadStartedAt > 95000) {
@@ -3149,6 +3231,7 @@
         state.loaded = true;
         renderActiveTab();
         loadActiveTabData();
+        if (state.tab !== "broadcast") scheduleBroadcastAudiencePrefetch();
         return true;
       });
   }
@@ -4022,12 +4105,38 @@
     runBroadcast("prepare_campaign");
   }
 
+  function runBroadcastWithFreshAudience(options) {
+    var freshnessMs = 2 * 60 * 1000;
+    var isFresh = state.broadcastAudienceLoadedAt &&
+      Date.now() - state.broadcastAudienceLoadedAt < freshnessMs &&
+      state.broadcastAudiencePeriodKey === broadcastAudiencePeriodKey();
+    if (isFresh) {
+      runBroadcast("send_campaign", options);
+      return;
+    }
+    setBroadcastResult("Обновляем список получателей перед отправкой…");
+    var pending = state.broadcastAudiencePrefetchPromise || loadBroadcastAudience(true);
+    Promise.resolve(pending).then(function () {
+      var ready = state.broadcastAudienceLoadedAt &&
+        Date.now() - state.broadcastAudienceLoadedAt < freshnessMs &&
+        state.broadcastAudiencePeriodKey === broadcastAudiencePeriodKey();
+      if (!ready) {
+        setBroadcastResult("Не удалось обновить получателей. Рассылка не отправлена — попробуй ещё раз.");
+        return;
+      }
+      renderBroadcastOptions();
+      runBroadcast("send_campaign", options);
+    }).catch(function () {
+      setBroadcastResult("Не удалось обновить получателей. Рассылка не отправлена — попробуй ещё раз.");
+    });
+  }
+
   function sendBroadcastNow() {
-    runBroadcast("send_campaign");
+    runBroadcastWithFreshAudience();
   }
 
   function sendBroadcastAllBatches() {
-    runBroadcast("send_campaign", { allBatches: true });
+    runBroadcastWithFreshAudience({ allBatches: true });
   }
 
   function sendBroadcastTest() {
