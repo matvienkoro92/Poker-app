@@ -1,4 +1,4 @@
 /* styles-chat-after.css entrypoint. Keep imports in this order: the legacy cascade depends on it. */
 @import url("./styles-chat-after-shell.css");
 @import url("./styles-chat-after-modals.css");
-@import url("./styles-chat-after-responsive.css");
+@import url("./styles-chat-after-responsive.css?v=3.862");

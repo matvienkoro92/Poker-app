@@ -283,6 +283,25 @@ function initVideoLessonsReviewsModal() {
       return "";
     }
   }
+  function reviewAvatarHtml(review, authorName) {
+    var profileAvatar = String(review.authorAvatar || "").trim();
+    var personalArt = typeof window.pokerGetClubNewsPersonalArt === "function"
+      ? String(window.pokerGetClubNewsPersonalArt(authorName) || "").trim()
+      : "";
+    var avatar = personalArt || profileAvatar;
+    if (avatar) {
+      return '<img class="video-lessons__reviews-feed-avatar' + (personalArt ? ' video-lessons__reviews-feed-avatar--personal-art' : '') + '" src="' +
+        escapeHtml(avatar) + '"' + (personalArt && profileAvatar ? ' data-vl-review-avatar-fallback="' + escapeHtml(profileAvatar) + '"' : '') + ' alt="">';
+    }
+    return '<span class="video-lessons__reviews-feed-avatar video-lessons__reviews-feed-avatar--fallback">' +
+      escapeHtml(String(authorName || "У").charAt(0).toUpperCase()) + "</span>";
+  }
+  function reviewAuthorMeta(review) {
+    var parts = [];
+    if (review.authorPoker21Id) parts.push("ID " + String(review.authorPoker21Id));
+    if (review.authorLevel) parts.push("Уровень " + Math.max(0, Number(review.authorLevel) || 0));
+    return parts.join(" · ");
+  }
   function renderReviews(items, canDeleteServer) {
     if (!feed) return;
     if (!items.length) {
@@ -294,7 +313,10 @@ function initVideoLessonsReviewsModal() {
     feed.innerHTML = items
       .map(function (r) {
         var text = escapeHtml(r.text || "");
-        var author = escapeHtml(r.author || "Ученик");
+        var authorName = String(r.authorName || r.author || "Ученик");
+        var author = escapeHtml(authorName);
+        var profileId = String(r.authorProfileId || r.authorId || "").trim();
+        var authorMeta = reviewAuthorMeta(r);
         var dateStr = formatReviewDate(r.at);
         var meta = dateStr
           ? '<time class="video-lessons__reviews-feed-time">' + escapeHtml(dateStr) + "</time>"
@@ -309,9 +331,12 @@ function initVideoLessonsReviewsModal() {
         return (
           '<article class="video-lessons__reviews-feed-item" data-vl-review-id="' +
           escapeHtml(rid || "") +
-          '"><header class="video-lessons__reviews-feed-item-head"><span class="video-lessons__reviews-feed-author">' +
-          author +
-          "</span>" +
+          '"><header class="video-lessons__reviews-feed-item-head"><button type="button" class="video-lessons__reviews-feed-profile" data-vl-review-profile="' +
+          escapeHtml(profileId) + '" data-vl-review-profile-name="' + author + '" data-vl-review-profile-avatar="' + escapeHtml(r.authorAvatar || "") + '"' +
+          (profileId ? "" : " disabled") + ">" + reviewAvatarHtml(r, authorName) +
+          '<span class="video-lessons__reviews-feed-author-copy"><span class="video-lessons__reviews-feed-author">' + author +
+          (r.authorVerified ? '<i class="video-lessons__reviews-feed-verified" title="Poker21 привязан" aria-label="Poker21 привязан">✓</i>' : "") +
+          "</span>" + (authorMeta ? "<small>" + escapeHtml(authorMeta) + "</small>" : "") + "</span></button>" +
           meta +
           delBtn +
           '</header><p class="video-lessons__reviews-feed-text">' +
@@ -320,6 +345,27 @@ function initVideoLessonsReviewsModal() {
         );
       })
       .join("");
+  }
+  if (feed && feed.getAttribute("data-review-profile-bound") !== "1") {
+    feed.setAttribute("data-review-profile-bound", "1");
+    feed.addEventListener("click", function (event) {
+      var profile = event.target && event.target.closest ? event.target.closest("[data-vl-review-profile]") : null;
+      if (!profile || profile.disabled) return;
+      var profileId = profile.getAttribute("data-vl-review-profile") || "";
+      if (!profileId || typeof window.pokerOpenChatUserModalSafe !== "function") return;
+      window.pokerOpenChatUserModalSafe(
+        profileId,
+        profile.getAttribute("data-vl-review-profile-name") || "Игрок",
+        profile.getAttribute("data-vl-review-profile-avatar") || ""
+      );
+    });
+    feed.addEventListener("error", function (event) {
+      var image = event.target && event.target.closest ? event.target.closest("img[data-vl-review-avatar-fallback]") : null;
+      if (!image) return;
+      var fallback = image.getAttribute("data-vl-review-avatar-fallback") || "";
+      image.removeAttribute("data-vl-review-avatar-fallback");
+      if (fallback) image.src = fallback;
+    }, true);
   }
   function refreshReviews() {
     if (feed) {
