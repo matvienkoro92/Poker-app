@@ -683,10 +683,17 @@
   }
 
   function duelAchievement(candidate, displayNick) {
-    if (String(displayNick || "").trim().toLocaleLowerCase("ru") === "em13!!") {
+    var normalizedNick = String(displayNick || "").trim().toLocaleLowerCase("ru");
+    if (normalizedNick === "покерманки") {
+      return {
+        title: "Чемпионская стабильность",
+        description: "Рекорд июля: 39 топ-3, из которых 37 — в Лиге 1. Все 14 побед — в Лиге 1. 18 июля выиграл два турнира в один день, включая Big Boss на 101 784 ₽. За месяц получил — 593 685 ₽."
+      };
+    }
+    if (normalizedNick === "em13!!") {
       return {
         title: "Охотник за головами",
-        description: "15 попаданий в топ-3, из них 7 побед за месяц. 24 и 25 июля дважды подряд выиграл S.Bounty. Всего за месяц получил 464 463 ₽."
+        description: "Третий результат июля по победам: 7 первых мест и 15 топ-3. 24 и 25 июля дважды подряд выиграл один и тот же S.Bounty. Всего получил за месяц 464 463 ₽."
       };
     }
     var description = String(candidate && candidate.description || "").trim();
@@ -756,6 +763,7 @@
         var candidate = candidates[id] || {};
         var displayNick = clubChoiceDisplayNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || "Игрок") || "Игрок";
         var ratingNick = clubChoiceRatingNick(candidate.ratingNick || candidate.rating_nick || candidate.nick || displayNick);
+        var achievement = duelAchievement(candidate, displayNick);
         var votes = matchVoteCount(match, id);
         var active = match.myVote === id;
         var winner = match.winnerId === id;
@@ -770,7 +778,7 @@
               '<span class="club-choice-vote-modal__player-copy"><strong>' + escapeHtml(displayNick) + '</strong></span>' +
               renderPlayerAvatar(candidate, id) +
               (active ? '<span class="club-choice-vote-modal__selected-badge">Вы выбрали</span>' : '') +
-              renderAchievementCard("club-choice-vote-modal__player-desc", candidate.description) +
+              renderAchievementCard("club-choice-vote-modal__player-desc", achievement.description) +
             '</div>' +
             '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(displayNick) + '" title="Голосовать"' +
               (canVote ? "" : " disabled") + '>' +
