@@ -1048,7 +1048,8 @@
       rows.map(function (item) {
         var applicationCount = Number(item.approved || 0) + Number(item.pending || 0);
         var canDeleteTournament = applicationCount <= 1;
-        var signupAvailable = item.status === "open" && Number(item.approved || 0) < Number(item.capacity || 32);
+        var alreadyRegistered = ["pending", "balance_requested", "approved"].indexOf(String(item.myEntryStatus || "")) !== -1;
+        var signupAvailable = !alreadyRegistered && item.status === "open" && Number(item.approved || 0) < Number(item.capacity || 32);
         var tournamentOptionHtml = item.status === "completed" && item.winnerName
           ? renderCompletedTournamentOption(item)
           : '<button type="button" class="sng-champions-modal__tournament-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
@@ -1070,10 +1071,9 @@
         return '<article class="sng-champions-modal__tournament-option-wrap' + (item.id === data.tournamentId ? ' is-active' : '') + '">' +
           (data.isAdmin && canDeleteTournament && item.status !== "bracket" && item.status !== "completed" ? '<button type="button" class="sng-champions-modal__tournament-delete" data-sng-delete-tournament="' + escapeHtml(item.id) + '" data-sng-delete-title="' + escapeHtml(item.title) + '" aria-label="Удалить турнир ' + escapeHtml(item.title) + '">×</button>' : '') +
           tournamentOptionHtml +
-          '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--watch" data-sng-tournament="' + escapeHtml(item.id) + '"><span>Смотреть</span></button>' +
           (signupAvailable
             ? '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--signup" data-sng-tournament-signup="' + escapeHtml(item.id) + '"><span>Записаться</span></button>'
-            : '') + '</article>';
+            : '<button type="button" class="sng-champions-modal__participants-toggle sng-champions-modal__participants-toggle--watch" data-sng-tournament="' + escapeHtml(item.id) + '"><span>Смотреть</span></button>') + '</article>';
       }).join('') +
       '</div>' + createForm + '</section>';
   }
