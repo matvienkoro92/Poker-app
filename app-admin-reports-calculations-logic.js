@@ -1033,20 +1033,33 @@
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
         return Promise.resolve().then(function () {
           var authenticatedPayload = buildAuthBody(payload);
-          return fetchDraft(base.replace(/\/$/, "") + (useCrmEndpoint ? "/api/player-crm" : "/api/admin-report-shifts"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(authenticatedPayload),
-            cache: "no-store",
-          }, 15000);
-        }).then(function (response) {
-          if (!response) throw new Error("Сервер не ответил");
-          return response.json().catch(function () { return {}; }).then(function (data) {
-            if (!response.ok || !data || data.ok !== true) {
-              throw new Error(data && data.error || "Не удалось сохранить расчёты");
-            }
-            return data;
-          });
+          var endpointPaths = useCrmEndpoint
+            ? ["/api/player-crm", "/api/admin-report-shifts"]
+            : ["/api/admin-report-shifts"];
+          var lastError = null;
+          function attempt(index) {
+            if (index >= endpointPaths.length) return Promise.reject(lastError || new Error("Не удалось сохранить расчёты"));
+            return fetchDraft(base.replace(/\/$/, "") + endpointPaths[index], {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(authenticatedPayload),
+              cache: "no-store",
+            }, 15000).then(function (response) {
+              if (!response) throw new Error("Сервер не ответил");
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                if (!response.ok || !data || data.ok !== true) {
+                  var error = new Error(data && data.error || ("Ошибка сохранения: " + response.status));
+                  error.status = response.status;
+                  throw error;
+                }
+                return data;
+              });
+            }).catch(function (error) {
+              lastError = error;
+              return attempt(index + 1);
+            });
+          }
+          return attempt(0);
         });
       }
 

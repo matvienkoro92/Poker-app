@@ -3339,6 +3339,7 @@ function initAdminReportModal() {
       figuresSaveBtn: figuresSaveBtn,
       figuresEditBtn: figuresEditBtn,
       figuresSaveStatusEl: figuresSaveStatusEl,
+      figuresDateInput: figuresDateInput,
       figuresRomanPaidInput: figuresRomanPaidInput,
       figuresWinLossInput: figuresWinLossInput,
       figuresAgentsPaidInput: figuresAgentsPaidInput,
@@ -4160,8 +4161,14 @@ function initAdminReportModal() {
       });
     });
   }
-  if (!calculationsModule && figuresSaveBtn) figuresSaveBtn.addEventListener("click", saveFiguresDraft);
-  if (!calculationsModule && figuresEditBtn) figuresEditBtn.addEventListener("click", editFiguresDraft);
+  if (!calculationsModule && figuresSaveBtn && figuresSaveBtn.dataset.calculationSaveBound !== "1") {
+    figuresSaveBtn.dataset.calculationSaveBound = "1";
+    figuresSaveBtn.addEventListener("click", saveFiguresDraft);
+  }
+  if (!calculationsModule && figuresEditBtn && figuresEditBtn.dataset.calculationEditBound !== "1") {
+    figuresEditBtn.dataset.calculationEditBound = "1";
+    figuresEditBtn.addEventListener("click", editFiguresDraft);
+  }
   if (!formModule && addExtraBtn && modal) {
     addExtraBtn.addEventListener("click", function () {
       var tbody = document.getElementById("adminReportTableBody");

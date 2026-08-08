@@ -254,7 +254,8 @@
         call(callbacks.editDraft, btn ? btn.getAttribute("data-admin-report-calc-edit") || "cash" : "cash");
       });
 
-      if (elements.figuresSaveBtn) {
+      if (elements.figuresSaveBtn && elements.figuresSaveBtn.dataset.calculationSaveBound !== "1") {
+        elements.figuresSaveBtn.dataset.calculationSaveBound = "1";
         elements.figuresSaveBtn.addEventListener("click", function () {
           if (elements.figuresSaveBtn.disabled) return;
           elements.figuresSaveBtn.disabled = true;
@@ -265,7 +266,9 @@
             elements.figuresSaveBtn.disabled = false;
             var saveStatus = document.getElementById("adminReportFiguresSaveStatus");
             if (saveStatus) {
-              saveStatus.textContent = "Не удалось сохранить — повторите";
+              saveStatus.textContent = saveError && saveError.message
+                ? String(saveError.message)
+                : "Не удалось сохранить — повторите";
               saveStatus.setAttribute("data-tone", "error");
             }
             return;
@@ -286,7 +289,8 @@
         });
       }
 
-      if (elements.figuresEditBtn) {
+      if (elements.figuresEditBtn && elements.figuresEditBtn.dataset.calculationEditBound !== "1") {
+        elements.figuresEditBtn.dataset.calculationEditBound = "1";
         elements.figuresEditBtn.addEventListener("click", function () {
           call(callbacks.editFiguresDraft);
         });
