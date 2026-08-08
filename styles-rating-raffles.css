@@ -13320,7 +13320,7 @@ body[data-view="raffles"] .raffles-active-chooser__item--training .raffles-activ
   padding-right: clamp(116px, 31%, 188px) !important;
   background:
     linear-gradient(90deg, rgba(3, 6, 10, 0) 0%, rgba(3, 6, 10, 0.08) 52%, rgba(3, 6, 10, 0.58) 100%),
-    url("./assets/club-news-personal/fishkopcheny-coach-card.png?v=2") right 8px bottom / auto 96% no-repeat !important;
+    url("./assets/club-news-personal/fishkopcheny-coach-card.webp?v=3") right 8px bottom / auto 96% no-repeat !important;
 }
 
 body[data-view="raffles"] .raffles-active-chooser__training-profile {

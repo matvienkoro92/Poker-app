@@ -96,6 +96,26 @@
       ]
     },
     {
+      "name": "pokerOpenAdminReportShellModal",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
+      "name": "pokerOpenAdminReportCalculationsTab",
+      "domain": "adminReports",
+      "exportedBy": [
+        "app-html-fragments.js"
+      ],
+      "consumedBy": [
+        "app-html-fragments.js"
+      ]
+    },
+    {
       "name": "pokerEnsureVisitorsAdminAccess",
       "domain": "admin",
       "exportedBy": [
@@ -2126,7 +2146,7 @@
       "name": "pokerApplyAdminReportCalculationSummary",
       "domain": "adminReports",
       "exportedBy": ["app-admin-reports.js"],
-      "consumedBy": ["app-player-crm-runtime-core.js"]
+      "consumedBy": ["app-admin-reports.js"]
     },
     {
       "name": "pokerMountClubChoiceVoteInline",
@@ -2181,6 +2201,72 @@
       "domain": "adminMenuAccess",
       "exportedBy": ["app-admin-menu-password.js"],
       "consumedBy": ["app-player-crm-runtime-core.js"]
+    },
+    {
+      "name": "__pokerCopyButtonFeedbackBound",
+      "domain": "authUi",
+      "exportedBy": ["app-auth.js"],
+      "consumedBy": ["app-auth.js"]
+    },
+    {
+      "name": "pokerOpenClubGuestbook",
+      "domain": "clubGuestbook",
+      "exportedBy": ["app-home-club-info-modals.js"],
+      "consumedBy": ["app-home-club-info-modals.js", "app-profile.js"]
+    },
+    {
+      "name": "pokerShowProfileReactionUsers",
+      "domain": "profileReactions",
+      "exportedBy": ["app-home-friend-news.js"],
+      "consumedBy": ["app-home-friend-news.js", "app-home-club-info-modals.js", "app-chat-user-modal.js"]
+    },
+    {
+      "name": "pokerOpenProfileReactionPicker",
+      "domain": "profileReactions",
+      "exportedBy": ["app-home-friend-news.js"],
+      "consumedBy": ["app-home-friend-news.js", "app-home-club-info-modals.js", "app-chat-user-modal.js"]
+    },
+    {
+      "name": "pokerOpenClubNewsModal",
+      "domain": "clubNews",
+      "exportedBy": ["app-home-friend-news.js"],
+      "consumedBy": ["app-home-friend-news.js", "app-home-deeplinks.js"]
+    },
+    {
+      "name": "pokerReadCachedPlayerNews",
+      "domain": "clubNews",
+      "exportedBy": ["app-home-friend-news.js"],
+      "consumedBy": ["app-home-friend-news.js", "app-profile.js", "app-chat-user-modal.js"]
+    },
+    {
+      "name": "_rafflesCache",
+      "domain": "rafflesCache",
+      "exportedBy": ["app-home-init.js"],
+      "consumedBy": ["app-home-init.js", "app-tournament-day.js", "app-raffles.js", "app-chat-user-modal.js"]
+    },
+    {
+      "name": "__profileOwnWallSubmitBound",
+      "domain": "profileWall",
+      "exportedBy": ["app-profile.js"],
+      "consumedBy": ["app-profile.js"]
+    },
+    {
+      "name": "pokerGetClubNewsTournamentSnapshotsReady",
+      "domain": "clubNews",
+      "exportedBy": ["app-rating-view-adapter.js"],
+      "consumedBy": ["app-rating-view-adapter.js", "app-home-club-info-modals.js", "app-home-friend-news.js"]
+    },
+    {
+      "name": "__homeTournamentLeagueTopButtonsBound",
+      "domain": "tournamentHome",
+      "exportedBy": ["app-tournament-day.js"],
+      "consumedBy": ["app-tournament-day.js"]
+    },
+    {
+      "name": "POKER_CLUB_NEWS_DATA",
+      "domain": "clubNewsData",
+      "exportedBy": ["club-news-data.js"],
+      "consumedBy": ["club-news-data.js", "app-rating-view-adapter.js", "app-home-friend-news.js", "app-hall-fame.js"]
     }
   ]
 }

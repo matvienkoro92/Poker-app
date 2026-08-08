@@ -1040,7 +1040,7 @@ function initRafflesCompletedRuntime(opts) {
       weekReturnsBadge.textContent = "Возвраты недели: считаю…";
     }
     if (activeClass) btn.classList.add(activeClass);
-    if (kind === "seat" && value === "seated") btn.textContent = "✓ Сел";
+    if (kind === "seat") btn.textContent = "Сохраняю…";
     var optimisticOutcomeButtons = [];
     if (kind === "seat" && value === "seated" && group && !group.querySelector('[data-raffle-winner-followup="outcome"]')) {
       ["minus", "plus"].forEach(function (outcome) {
@@ -1071,6 +1071,7 @@ function initRafflesCompletedRuntime(opts) {
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      cache: "no-store",
       body: JSON.stringify(pokerGuestOrAuthedPostBody({
         action: "setWinnerFollowup",
         raffleId: rid,
@@ -2175,15 +2176,6 @@ function initRafflesCompletedRuntime(opts) {
     if (raffleWinnerLeadersModalBackdrop) raffleWinnerLeadersModalBackdrop.addEventListener("click", closeRaffleWinnerLeadersModal);
 
   if (rafflesCompleted) {
-    if (document.documentElement.dataset.raffleFollowupCaptureBound !== "1") {
-      document.documentElement.dataset.raffleFollowupCaptureBound = "1";
-      document.addEventListener("click", function (e) {
-        var followupBtn = e.target && e.target.closest ? e.target.closest("[data-raffle-winner-followup]") : null;
-        if (!followupBtn || !rafflesIsAdmin || followupBtn.disabled) return;
-        e.__raffleFollowupHandled = true;
-        setRaffleWinnerFollowup(followupBtn);
-      }, true);
-    }
     rafflesCompleted.addEventListener("click", function (e) {
       var groupTab = e.target.closest("[data-raffle-winner-tab]");
       if (groupTab) {
@@ -2227,7 +2219,7 @@ function initRafflesCompletedRuntime(opts) {
       }
       var followupBtn = e.target.closest("[data-raffle-winner-followup]");
       if (followupBtn && rafflesIsAdmin) {
-        if (e.__raffleFollowupHandled) return;
+        if (followupBtn.disabled) return;
         if (!base || !pokerApiHasCredential()) {
           if (tg && tg.showAlert) tg.showAlert("Откройте приложение в Telegram.");
           return;

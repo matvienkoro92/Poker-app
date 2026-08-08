@@ -21,6 +21,6 @@ test("blue: yes enables x100 multiplier verification", async () => {
 
 test("interface detector distinguishes saved blue and red rating screenshots", async () => {
   const assets = path.resolve(__dirname, "../assets/rating-compressed-preview");
-  assert.equal(await detectBlueInterface(path.join(assets, "rating-04-08-2026-league2-s-bounty-2-3-120k-00h.jpg")), true);
-  assert.equal(await detectBlueInterface(path.join(assets, "rating-04-08-2026-league2-rebuy-evening-20h.jpg")), false);
+  assert.equal(await detectBlueInterface(path.join(assets, "rating-04-08-2026-league2-s-bounty-2-3-120k-00h.avif")), true);
+  assert.equal(await detectBlueInterface(path.join(assets, "rating-04-08-2026-league2-tournament-rebuy-14h.avif")), false);
 });

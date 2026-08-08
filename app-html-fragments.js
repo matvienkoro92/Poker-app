@@ -1033,6 +1033,15 @@
     });
   }
   window.pokerOpenAdminReportRakebackShell = openAdminReportRakebackShell;
+  window.pokerOpenAdminReportCalculationsTab = function () {
+    if (!canViewAdminReportCalculationsShell()) return false;
+    var activeName = setAdminReportShellTab("calculations");
+    if (activeName !== "calculations") return false;
+    if (typeof window.pokerRefreshAdminReportCalculations === "function") {
+      window.pokerRefreshAdminReportCalculations();
+    }
+    return true;
+  };
 
   function closeAdminReportShellModal() {
     var modal = document.getElementById("adminReportModal");
@@ -1057,6 +1066,15 @@
       if (!tab || !modal.contains(tab)) return;
       var name = tab.getAttribute("data-admin-report-tab") || "form";
       var fullReportOpener = window.pokerOpenAdminReportModal;
+      if (typeof fullReportOpener === "function" && name === "calculations" && canViewAdminReportCalculationsShell()) {
+        e.preventDefault();
+        e.stopPropagation();
+        setAdminReportShellTab(name);
+        if (typeof window.pokerRefreshAdminReportCalculations === "function") {
+          window.pokerRefreshAdminReportCalculations();
+        }
+        return;
+      }
       if (typeof fullReportOpener === "function" && name !== "rakeback") return;
       if (name === "sent" && !canViewAdminReportSentShell()) return;
       if (name === "calculations" && !canViewAdminReportCalculationsShell()) return;
@@ -1100,6 +1118,8 @@
       });
   }
 
+  window.pokerOpenAdminReportShellModal = openAdminReportShellModal;
+
   function finishTargetPrewarm(target) {
     if (isAdminBroadcastReportsButtonTarget(target)) {
       return loadAdminReportShellScript("app-admin-broadcast-reports.js")
@@ -1131,7 +1151,8 @@
       target.closest &&
       target.closest("#adminReportBtn") &&
       target.dataset &&
-      target.dataset.adminReportBound === "1"
+      target.dataset.adminReportBound === "1" &&
+      typeof window.pokerOpenAdminReportModal === "function"
     );
   }
 
@@ -1242,13 +1263,13 @@
       if (e.__pokerLazyRedispatched) return;
       var target = e.target ? findGlobalModalClickTarget(e.target) : null;
       if (!target) return;
-      if (isAdminReportTargetReady(target)) return;
       var hasGlobalModalsHost = !!document.getElementById("globalModalsFragmentHost");
       var needsLazyScripts = false;
       try {
         needsLazyScripts = typeof window.pokerHasGlobalModalScriptsForTarget === "function" && window.pokerHasGlobalModalScriptsForTarget(target);
       } catch (eModalScriptNeed) {}
-      if (!hasGlobalModalsHost && !needsLazyScripts) return;
+      var hasAdminReportShell = isAdminReportButtonTarget(target) && !!document.getElementById("adminReportModal");
+      if (!hasGlobalModalsHost && !needsLazyScripts && !hasAdminReportShell) return;
       var originalTarget = e.target;
       e.preventDefault();
       e.stopPropagation();

@@ -18,6 +18,7 @@
   };
 
   var VIEW_DOMAINS = {
+    "home": ["home-updates", "tournament"],
     "chat": ["chat"],
     "winter-rating": ["rating-common", "rating-winter"],
     "spring-rating": ["rating-common", "rating-spring"],

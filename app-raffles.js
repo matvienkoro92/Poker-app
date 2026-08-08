@@ -2495,7 +2495,7 @@ function initRaffles() {
         if (typeof window.pokerOpenUnifiedPlayerProfileByRatingNick === "function") {
           window.pokerOpenUnifiedPlayerProfileByRatingNick("FishKopcheny", { season: "summer" });
         } else if (typeof window.pokerOpenChatUserModalSafe === "function") {
-          window.pokerOpenChatUserModalSafe("371998", "FishKopcheny", "./assets/club-news-personal/fishkopcheny-coach-card.png?v=2");
+          window.pokerOpenChatUserModalSafe("371998", "FishKopcheny", "./assets/club-news-personal/fishkopcheny-coach-card.webp?v=3");
         }
         return;
       }

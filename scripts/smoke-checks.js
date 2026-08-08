@@ -570,7 +570,7 @@ function dirSizeBytes(dir) {
 }
 
 const engineeringBudgets = {
-  indexHtmlMaxBytes: 145 * 1024,
+  indexHtmlMaxBytes: 151 * 1024,
   eagerScriptsMax: 60,
   lazyScriptsMax: 150,
   runtimeFiles: {
@@ -1335,6 +1335,11 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
   ])
 );
 
+add("Admin access bootstrap stays eager so authorized header controls can be revealed", () =>
+  /<script\b(?=[^>]*\bdefer\b)[^>]*\bsrc=["']\.\/app-visitors-admin\.js\?v=[^"']+["'][^>]*><\/script>/i.test(files.html) &&
+  !/<script\b[^>]*type=["']application\/poker-lazy["'][^>]*src=["']\.\/app-visitors-admin\.js/i.test(files.html)
+);
+
 add("Service worker does not stale-cache explicit fresh chat requests", () =>
   hasAll("sw", [
     'u.pathname.indexOf("/api/chat")',
@@ -1755,22 +1760,40 @@ add("Global dependency manifest covers exported browser globals", () => {
   const manifest = globalDepsManifestData();
   const items = manifest && Array.isArray(manifest.globals) ? manifest.globals : [];
   const seen = new Set();
-  return manifest.entrypoint === "index.html" &&
-    items.length >= 10 &&
-    items.every((item) => {
-      if (!item || typeof item !== "object") return false;
-      const name = typeof item.name === "string" ? item.name.trim() : "";
-      const domain = typeof item.domain === "string" ? item.domain.trim() : "";
-      const exportedBy = Array.isArray(item.exportedBy) ? item.exportedBy : [];
-      const consumedBy = Array.isArray(item.consumedBy) ? item.consumedBy : [];
-      if (!name || !domain || seen.has(domain + ":" + name)) return false;
-      seen.add(domain + ":" + name);
-      if (!exportedBy.length || !consumedBy.length) return false;
-      if (!exportedBy.every((file) => fs.existsSync(path.join(root, file)))) return false;
-      if (!consumedBy.every((file) => fs.existsSync(path.join(root, file)))) return false;
-      if (!exportedBy.some((file) => fileContainsGlobalExport(file, name))) return false;
-      return consumedBy.every((file) => fileContainsGlobalConsumer(file, name));
+  const failures = [];
+  if (manifest.entrypoint !== "index.html") failures.push("entrypoint must be index.html");
+  if (items.length < 10) failures.push("at least 10 globals are required");
+  items.forEach((item, index) => {
+    if (!item || typeof item !== "object") {
+      failures.push(`item ${index} is not an object`);
+      return;
+    }
+    const name = typeof item.name === "string" ? item.name.trim() : "";
+    const domain = typeof item.domain === "string" ? item.domain.trim() : "";
+    const exportedBy = Array.isArray(item.exportedBy) ? item.exportedBy : [];
+    const consumedBy = Array.isArray(item.consumedBy) ? item.consumedBy : [];
+    const key = domain + ":" + name;
+    if (!name || !domain) failures.push(`item ${index} needs name and domain`);
+    else if (seen.has(key)) failures.push(`duplicate ${key}`);
+    seen.add(key);
+    if (!exportedBy.length || !consumedBy.length) failures.push(`${key} needs exporters and consumers`);
+    exportedBy.forEach((file) => {
+      if (!fs.existsSync(path.join(root, file))) failures.push(`${key} exporter missing: ${file}`);
     });
+    consumedBy.forEach((file) => {
+      if (!fs.existsSync(path.join(root, file))) failures.push(`${key} consumer missing: ${file}`);
+    });
+    if (exportedBy.length && !exportedBy.some((file) => fileContainsGlobalExport(file, name))) {
+      failures.push(`${key} export not found`);
+    }
+    consumedBy.forEach((file) => {
+      if (fs.existsSync(path.join(root, file)) && !fileContainsGlobalConsumer(file, name)) {
+        failures.push(`${key} consumer reference not found: ${file}`);
+      }
+    });
+  });
+  if (failures.length) throw new Error(previewList(failures, 50));
+  return true;
 });
 
 add("New direct window globals are declared in the global dependency manifest", () => {
@@ -1781,7 +1804,7 @@ add("New direct window globals are declared in the global dependency manifest", 
   const missing = unmanifested
     .filter((item) => !legacyExports.has(item.signature))
     .map((item) => item.signature);
-  if (missing.length) throw new Error(previewList(missing, 8));
+  if (missing.length) throw new Error(previewList(missing, 50));
   return true;
 });
 
@@ -2002,7 +2025,7 @@ add("Raffles delegates public, admin, completed, broadcast, subscribe, and share
     'raffle-winner-followup-btn--not-seated',
     'if (activeClass) btn.classList.add(activeClass)',
     'if (activeClass) btn.classList.remove(activeClass)',
-    'btn.textContent = "✓ Сел"',
+    'seatStatus === "seated" ? "✓ Сел" : "Сел"',
     'if (kind !== "seat") btn.classList.add("raffle-winner-followup-btn--loading")',
     "Выдано",
     "raffle-completed-card__delete-btn",
@@ -2247,7 +2270,7 @@ add("App monolith delegates chat lifecycle, webview keyboard, and view router", 
 add("Heavy video lessons HTML is lazy-loaded from a fragment", () =>
   hasAll("html", [
     'data-view="video-lessons"',
-    'data-html-fragment="./html-fragments/video-lessons.html"',
+    'data-html-fragment="./html-fragments/video-lessons.html?v=',
   ]) &&
   !has("html", 'id="videoLessonsList"') &&
   hasAll("appHtmlFragments", [

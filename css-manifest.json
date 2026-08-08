@@ -86,7 +86,8 @@
       "styles-home-widget-modals.css",
       "styles-home-planner.css",
       "styles-home-rating-promo.css",
-      "styles-home-rating-promo-late.css"
+      "styles-home-rating-promo-late.css",
+      "styles-home-club-choice-badge.css"
     ],
     "tournament": [
       "styles-tournament.css",

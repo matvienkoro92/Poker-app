@@ -3863,6 +3863,19 @@ function initAdminReportModal() {
     return false;
   };
   window.pokerPreloadAdminSentReports = prefetchSentReportsSoon;
+  if (document.documentElement && document.documentElement.dataset.adminReportCalculationsTabBound !== "1") {
+    document.documentElement.dataset.adminReportCalculationsTabBound = "1";
+    document.addEventListener("click", function (event) {
+      var tab = event.target && event.target.closest ? event.target.closest("[data-admin-report-tab='calculations']") : null;
+      if (!tab || !canViewCalculationsReports()) return;
+      var currentModal = tab.closest ? tab.closest("#adminReportModal") : null;
+      if (!currentModal || currentModal.getAttribute("aria-hidden") === "true") return;
+      event.preventDefault();
+      event.stopPropagation();
+      setActiveTab("calculations");
+      openCalculationsReports();
+    }, true);
+  }
   btn.addEventListener("click", function (e) {
     if (openModal() === false) {
       if (e && typeof e.preventDefault === "function") e.preventDefault();

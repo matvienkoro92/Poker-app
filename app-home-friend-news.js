@@ -59,6 +59,11 @@
   var friendProfileById = {};
   var homeNewsLongPressTimer = 0;
   var homeNewsLongPressTriggered = false;
+  var homeNewsLongPressPointerId = null;
+  var homeNewsLongPressStartX = 0;
+  var homeNewsLongPressStartY = 0;
+  var homeNewsLongPressMoved = false;
+  var homeNewsLastScrollAt = 0;
   var newsProfileReturnState = null;
   var returnToClubNewsAfterAchievements = false;
   var returnToClubNewsScrollTop = 0;
@@ -461,10 +466,10 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
-    "proxor": "./assets/club-news-personal/proxor-personal-cutout.png?v=2",
-    "luck_is_suck": "./assets/club-news-personal/luck-is-suck-personal-cutout.png?v=2",
-    "luckissuck": "./assets/club-news-personal/luck-is-suck-personal-cutout.png?v=2",
-    "paparabotaet": "./assets/club-news-personal/paparabotaet-personal-cutout-v2.png?v=1",
+    "proxor": "./assets/club-news-personal/proxor-personal-cutout.webp?v=3",
+    "luck_is_suck": "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3",
+    "luckissuck": "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3",
+    "paparabotaet": "./assets/club-news-personal/paparabotaet-personal-cutout-v2.webp?v=2",
     "porquinho": "./assets/sng-finalist-porquinho.webp", "поркиньо": "./assets/sng-finalist-porquinho.webp", "поркиньё": "./assets/sng-finalist-porquinho.webp",
     "штукатур": "./assets/sng-finalist-shtukatur.webp", "shtukatur": "./assets/sng-finalist-shtukatur.webp",
     "hakas": "./assets/sng-finalist-hakas.webp", "хакас": "./assets/sng-finalist-hakas.webp",
@@ -2432,6 +2437,10 @@
         event.preventDefault();
         event.stopPropagation();
         clearTimeout(homeNewsLongPressTimer);
+        // Mobile browsers may emit contextmenu after a hold that has already
+        // turned into scrolling. In that case suppress the native menu but do
+        // not open the reaction picker.
+        if (homeNewsLongPressMoved || Date.now() - homeNewsLastScrollAt < 450) return;
         homeNewsLongPressTriggered = true;
         window.setTimeout(function () { homeNewsLongPressTriggered = false; }, 400);
         var comment = event.target.closest("[data-home-comment-id]");
@@ -2448,17 +2457,38 @@
         if (!comment && event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
         clearTimeout(homeNewsLongPressTimer);
         homeNewsLongPressTriggered = false;
+        homeNewsLongPressPointerId = event.pointerId;
+        homeNewsLongPressStartX = event.clientX;
+        homeNewsLongPressStartY = event.clientY;
+        homeNewsLongPressMoved = false;
         var eventId = item.getAttribute("data-home-news-event-id");
         var commentId = comment && comment.getAttribute("data-home-comment-id");
         homeNewsLongPressTimer = window.setTimeout(function () {
+          if (homeNewsLongPressMoved) return;
           homeNewsLongPressTriggered = true;
           openReactionPicker(function (emoji) {
             sendOptimisticReaction(eventId, emoji, commentId);
           });
-        }, 280);
+        }, 550);
       });
+      modal.addEventListener("pointermove", function (event) {
+        if (homeNewsLongPressPointerId !== event.pointerId || homeNewsLongPressMoved) return;
+        var dx = event.clientX - homeNewsLongPressStartX;
+        var dy = event.clientY - homeNewsLongPressStartY;
+        if ((dx * dx) + (dy * dy) < 100) return;
+        homeNewsLongPressMoved = true;
+        clearTimeout(homeNewsLongPressTimer);
+      }, { passive: true });
+      modal.addEventListener("scroll", function () {
+        homeNewsLastScrollAt = Date.now();
+        homeNewsLongPressMoved = true;
+        clearTimeout(homeNewsLongPressTimer);
+      }, true);
       ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
-        modal.addEventListener(type, function () { clearTimeout(homeNewsLongPressTimer); });
+        modal.addEventListener(type, function (event) {
+          clearTimeout(homeNewsLongPressTimer);
+          if (homeNewsLongPressPointerId === event.pointerId) homeNewsLongPressPointerId = null;
+        });
       });
       modal.addEventListener("click", function (event) {
         if (homeNewsLongPressTriggered) {

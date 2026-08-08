@@ -1,5 +1,22 @@
 # Asset Audit
 
+## 2026-08-08
+
+Optimized production delivery:
+
+- Rating lightbox JPEG previews referenced by the spring/summer maps are converted to AVIF at quality 45 without resizing. The reproducible command is `npm run rating:optimize:previews`.
+- `xpoker-join-example.png` remains as an editable source master; the download fragment ships the 1000 px WebP derivative instead (about 64 KB instead of 1.6 MB).
+- The current SNG home banners ship only WebP. Their multi-megabyte PNG source masters are no longer production fallbacks.
+- Four large club-news/profile PNG masters now have WebP delivery variants. The source masters stay in `assets/` for future editing, but are not copied to `public/` while unreferenced.
+- Added `npm run assets:report` to show current/core/archive and startup-eager byte totals.
+- The report also measures the home entrypoint's gzip transfer estimate, raw JavaScript parse input,
+  raw CSS parse input, and request count. These budgets are enforced by `npm run release:check`.
+- Rating thumbnails are copied only when referenced; the production build no longer includes the
+  complete optional archive thumbnail directory.
+- Home SNG banners use 900px responsive WebP variants on mobile while preserving the full-size source.
+
+The current-season budget is 28 MiB because it now covers the complete June-August season, including both tiny list thumbnails and on-demand lightbox images. This does not represent startup traffic.
+
 ## 2026-04-29
 
 Removed:

@@ -378,6 +378,9 @@
   border: 1px solid transparent;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .friends-list-modal__btn:disabled {
   opacity: 0.55;
@@ -467,7 +470,7 @@
   }
   .friends-list-modal__btn,
   .friends-list-modal__status {
-    min-height: 38px;
+    min-height: 46px;
     white-space: normal;
     text-align: center;
   }

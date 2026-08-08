@@ -195,11 +195,6 @@ for (const dir of dirsToCopy) {
 
 if (fs.existsSync(assetDir)) {
   copyReferencedAssets();
-  const ratingThumbsSrc = path.join(assetDir, 'rating-thumbnails');
-  if (fs.existsSync(ratingThumbsSrc)) {
-    copyDirRecursive(ratingThumbsSrc, path.join(publicDir, 'assets', 'rating-thumbnails'));
-    console.log('Copied rating thumbnails');
-  }
 }
 
 console.log('Build output is in public/');

@@ -615,6 +615,10 @@ function initProfileFriends() {
       };
     };
     var remember = function (event) {
+      if (event && event.target && event.target.closest && event.target.closest(".friends-list-modal__item-actions button")) {
+        start = null;
+        return;
+      }
       var point = readPoint(event);
       start = {
         x: point.x,
@@ -1593,27 +1597,36 @@ function initProfileFriends() {
     });
   }
 
-  function afterMutate() {
+  function afterMutate(options) {
+    options = options || {};
     if (typeof window.__pokerReloadChatContacts === "function") window.__pokerReloadChatContacts();
     if (typeof window.chatRefresh === "function") window.chatRefresh();
     if (typeof pokerRefreshFriendsCountFromApi === "function") pokerRefreshFriendsCountFromApi();
-    loadFriends();
+    loadFriends({
+      keepContent: options.keepContent === true,
+      preserveListScroll: options.preserveListScroll === true,
+      listScrollTop: options.listScrollTop,
+    });
   }
 
   function postFriendAction(targetUserId, action, button) {
     var base = getApiBase();
     if (!targetUserId) return;
+    var listScrollTopBeforeAction = listEl ? listEl.scrollTop : 0;
     if (button) button.disabled = true;
     fetch(base + "/api/friends", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      cache: "no-store",
       body: JSON.stringify(pokerApiAuthJsonBody({ targetUserId: targetUserId, action: action })),
     })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d && d.ok) {
+          var changedItem = button && button.closest ? button.closest(".friends-list-modal__item") : null;
+          if (changedItem && (action === "accept" || action === "reject" || action === "cancel")) changedItem.remove();
           alertText(action === "accept" ? "Заявка принята" : action === "cancel" ? "Заявка отменена" : "Заявка отклонена");
-          afterMutate();
+          afterMutate({ keepContent: true, preserveListScroll: true, listScrollTop: listScrollTopBeforeAction });
         } else {
           if (button) button.disabled = false;
           alertText((d && d.error) || "Ошибка");
@@ -1628,6 +1641,7 @@ function initProfileFriends() {
   function deleteFriend(targetUserId, kind, button) {
     var base = getApiBase();
     if (!targetUserId) return;
+    var listScrollTopBeforeDelete = listEl ? listEl.scrollTop : 0;
     var text = "Убрать этого человека из друзей?";
     var confirmed = typeof window.confirm === "function" ? window.confirm(text) : true;
     if (!confirmed) return;
@@ -1640,10 +1654,12 @@ function initProfileFriends() {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d && d.ok) {
+          var deletedItem = button && button.closest ? button.closest(".friends-list-modal__item") : null;
+          if (deletedItem) deletedItem.remove();
           if (typeof pokerRemoveLocalFriendFromChatContacts === "function") {
             pokerRemoveLocalFriendFromChatContacts(targetUserId);
           }
-          afterMutate();
+          afterMutate({ keepContent: true, preserveListScroll: true, listScrollTop: listScrollTopBeforeDelete });
         } else {
           if (button) button.disabled = false;
           alertText((d && d.error) || "Ошибка");
@@ -1770,6 +1786,15 @@ function initProfileFriends() {
 
   function loadFriends(options) {
     options = options || {};
+    var preservedListScrollTop = options.preserveListScroll
+      ? Math.max(0, Number(options.listScrollTop != null ? options.listScrollTop : listEl.scrollTop) || 0)
+      : null;
+    function restoreFriendsListScroll() {
+      if (preservedListScrollTop == null || !listEl) return;
+      listEl.scrollTop = preservedListScrollTop;
+      var raf = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 16); };
+      raf(function () { if (listEl) listEl.scrollTop = preservedListScrollTop; });
+    }
     var hasCachedData = !!(friendsDataCache && friendsDataCache.ok);
     if (!hasCachedData) {
       friendsDataCache = readStableFriendsData();
@@ -1782,7 +1807,7 @@ function initProfileFriends() {
     if (displayedCachedData) {
       renderFriendsData(friendsDataCache);
       try { pokerMarkFriendsSeen(friendsDataCache); } catch (eSeenCachedFriends) {}
-    } else {
+    } else if (!options.keepContent) {
       listEl.innerHTML = '<p class="friends-list-modal__loading">Загружаем друзей…</p>';
     }
     fetchFriendsData()
@@ -1795,6 +1820,7 @@ function initProfileFriends() {
           return;
         }
         renderFriendsData(data);
+        restoreFriendsListScroll();
         try { pokerMarkFriendsSeen(data); } catch (eSeenFriends) {}
       })
       .catch(function () {

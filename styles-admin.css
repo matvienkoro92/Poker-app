@@ -516,7 +516,11 @@
   box-sizing: border-box;
 }
 #adminReportModal .admin-report-date:empty {
-  display: none;
+  display: block;
+  min-height: 48px;
+}
+#adminReportModal .share-stats-admin-modal__close::after {
+  inset: 0;
 }
 #app:has(#adminReportModal[aria-hidden="false"]) ~ .bottom-nav,
 html.admin-report-modal-open .bottom-nav,

@@ -1998,21 +1998,18 @@
       var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
         : "./assets/home-sng-champions-click-banner-v4.webp?v=1";
+      var nextMobileSrc = teamKnockoutTitle
+        ? "./assets/home-sng-champions-click-banner-team-knockout-mobile.webp?v=1"
+        : "./assets/home-sng-champions-click-banner-v4-mobile.webp?v=1";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
         banner.setAttribute("data-sng-home-banner-ready", "1");
       }
       banner.onload = revealCurrentBanner;
-      banner.onerror = function () {
-        var fallbackSrc = nextSrc.replace(/\.webp(?=\?|$)/, ".png");
-        if (banner.getAttribute("data-sng-banner-fallback") !== "1" && fallbackSrc !== nextSrc) {
-          banner.setAttribute("data-sng-banner-fallback", "1");
-          banner.src = fallbackSrc;
-          return;
-        }
-        revealCurrentBanner();
-      };
+      banner.onerror = revealCurrentBanner;
+      banner.setAttribute("srcset", nextMobileSrc + " 900w, " + nextSrc + " 2172w");
+      banner.setAttribute("sizes", "(max-width: 900px) 100vw, 1086px");
       if (banner.getAttribute("src") !== nextSrc) banner.setAttribute("src", nextSrc);
       if (banner.complete) {
         if (typeof banner.decode === "function") banner.decode().then(revealCurrentBanner).catch(revealCurrentBanner);

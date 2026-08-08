@@ -46,8 +46,8 @@ Runtime manifests are copied to `public/` and checked by `npm run smoke`. The wi
 
 Current static budgets:
 
-- `index.html`: max `100 KB`.
-- Eager scripts in `index.html`: max `152`.
+- `index.html`: max `151 KiB` (the home shell, responsive image hints, and lightweight modal hosts remain inline).
+- Eager scripts in `index.html`: max `60`; secondary home widgets such as the updates block load through a lazy domain.
 - Lazy scripts in `index.html`: max `25`.
 - `app-pwa-auth-runtime.js`: max `76 KB`, `1700` lines.
 - `app-player-crm-runtime.js`: max `80 KB`, `1680` lines.

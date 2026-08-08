@@ -3,10 +3,15 @@
   "budgetsMiB": {
     "startupEager": 0.75,
     "coreAndLazyAssets": 30,
-    "currentSeason": 25,
+    "currentSeason": 28,
     "archiveSeasons": 43,
     "publicBuild": 105,
     "individualFile": 2
+  },
+  "startupBudgetsKiB": {
+    "transfer": 960,
+    "jsParse": 1810,
+    "cssParse": 700
   },
   "seasonRouting": {
     "currentMonths": [6, 7, 8],

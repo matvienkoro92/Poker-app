@@ -2,8 +2,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px);
-  margin: 33px calc(-1 * var(--card-padding-x, 16px) + 3px) 8px;
+  width: 100%;
+  margin: 33px 0 8px;
   color: #e8ad54;
   font-size: clamp(8.4px, 2.38vw, 11.2px);
   font-weight: 900;

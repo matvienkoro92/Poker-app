@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 # Git hook intentionally does not bump app versions automatically.
 # Run npm run bump:pwa-version manually only when a release needs a cache-bust.
-exit 0
+set -euo pipefail
+
+npm run release:check
