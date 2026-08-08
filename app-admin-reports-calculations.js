@@ -240,7 +240,12 @@
 
       if (elements.figuresSaveBtn) {
         elements.figuresSaveBtn.addEventListener("click", function () {
-          call(callbacks.saveFiguresDraft);
+          if (elements.figuresSaveBtn.disabled) return;
+          elements.figuresSaveBtn.disabled = true;
+          var saveResult = call(callbacks.saveFiguresDraft);
+          Promise.resolve(saveResult).finally(function () {
+            elements.figuresSaveBtn.disabled = false;
+          });
         });
       }
 
@@ -252,7 +257,12 @@
       var figuresRefreshBtn = document.getElementById("adminReportFiguresRefreshBtn");
       if (figuresRefreshBtn) {
         figuresRefreshBtn.addEventListener("click", function () {
-          call(callbacks.loadReports, true);
+          if (figuresRefreshBtn.disabled) return;
+          figuresRefreshBtn.disabled = true;
+          var refreshResult = call(callbacks.loadReports, true);
+          Promise.resolve(refreshResult).finally(function () {
+            figuresRefreshBtn.disabled = false;
+          });
         });
       }
     }

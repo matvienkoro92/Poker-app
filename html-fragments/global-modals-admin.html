@@ -469,8 +469,8 @@
                       <input type="hidden" id="adminReportFiguresDate" />
                     </div>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
-                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить рейк и расходы" aria-label="Сохранить рейк и расходы">✓</button>
-                      <button type="button" class="admin-report-calculations__action" id="adminReportFiguresRefreshBtn" title="Обновить все данные за выбранный период" aria-label="Обновить все данные за выбранный период">↻</button>
+                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--text admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить рейк, расходы и возвраты" aria-label="Сохранить рейк, расходы и возвраты">Сохранить</button>
+                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--text" id="adminReportFiguresRefreshBtn" title="Заново загрузить все данные за выбранный период" aria-label="Заново загрузить все данные за выбранный период">Обновить</button>
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" id="adminReportFiguresEditBtn" title="Редактировать рейк и расходы" aria-label="Редактировать рейк и расходы" hidden>✎</button>
                       <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
                     </div>
@@ -544,10 +544,12 @@
                     <span>Расхождение: <output id="adminReportFiguresRakebackDifference">0</output></span>
                   </small>
                 </div>
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative">
-                  <span>Бонусы</span>
-                  <output id="adminReportFiguresBonuses">0</output>
-                </div>
+                <section class="admin-report-calculations__bonus-group" aria-label="Бонусы и возвраты">
+                  <div class="admin-report-calculations__bonus-group-title">Бонусы и возвраты</div>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--negative">
+                    <span>Бонусы</span>
+                    <output id="adminReportFiguresBonuses">0</output>
+                  </div>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>Розыгрыши билеты</span>
                   <output id="adminReportFiguresRafflesTickets">0</output>
@@ -575,6 +577,11 @@
                   <output class="admin-report-calculations__return-auto" data-admin-report-figures-return-auto="dailyPoker">Авто: 0</output>
                   <input type="number" inputmode="decimal" enterkeyhint="done" class="admin-report-calculations__input admin-report-calculations__input--adjustment" id="adminReportFiguresBackingReturn" data-admin-report-figures-return placeholder="+/− 0" aria-label="Поправка возврата крутки дня: можно прибавить или вычесть" />
                 </label>
+                  <div class="admin-report-calculations__field admin-report-calculations__field--bonus-total">
+                    <span>Итого</span>
+                    <output id="adminReportFiguresBonusesTotal">0</output>
+                  </div>
+                </section>
                 <div class="admin-report-calculations__field admin-report-calculations__field--negative">
                   <span>РБ прошлая</span>
                   <output id="adminReportFiguresPreviousRakeback">0</output>

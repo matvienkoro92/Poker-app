@@ -665,6 +665,16 @@ body.admin-report-modal-open .bottom-nav {
   font-weight: 900;
   cursor: pointer;
 }
+.admin-report-calculations__action--text {
+  width: auto;
+  min-width: 30px;
+  padding: 0 9px;
+  font-size: 11px;
+}
+.admin-report-calculations__action:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
 .admin-report-calculations__action:hover {
   background: rgba(246, 211, 145, 0.12);
 }
@@ -903,6 +913,38 @@ body.admin-report-modal-open .bottom-nav {
   grid-template-columns: minmax(0, 1fr) minmax(108px, 0.42fr);
   min-height: 38px;
   padding: 4px 8px;
+}
+.admin-report-calculations__bonus-group {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin: 5px 0;
+  padding: 7px;
+  border: 1px solid rgba(250, 204, 21, 0.46);
+  border-radius: 10px;
+  background: rgba(250, 204, 21, 0.055);
+}
+.admin-report-calculations__bonus-group-title {
+  padding: 1px 3px 3px;
+  color: #fde68a;
+  font-size: 13px;
+  font-weight: 950;
+}
+#adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 38px;
+  margin: 0;
+  padding: 4px 8px;
+}
+#adminReportCalcFigures .admin-report-calculations__field--bonus-total {
+  border-color: rgba(250, 204, 21, 0.62);
+  background: rgba(250, 204, 21, 0.16);
+  color: #fde68a;
+  font-weight: 950;
+}
+#adminReportCalcFigures .admin-report-calculations__field--bonus-total output {
+  color: #fde047;
 }
 #adminReportCalcRakeCard #adminReportCalcFigures > label.admin-report-calculations__field {
   min-height: 38px;

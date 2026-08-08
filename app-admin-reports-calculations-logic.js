@@ -218,6 +218,17 @@
         var raffleCashReturn = parseReportNumber(calculationWeekStatsTotals.raffleCashReturn) + parseReportNumber(figuresRafflesCashReturnInput ? figuresRafflesCashReturnInput.value : "");
         var dailyPokerReturn = parseReportNumber(calculationWeekStatsTotals.dailyPokerReturn) + parseReportNumber(figuresBackingReturnInput ? figuresBackingReturnInput.value : "");
         var figuresBackingReturn = raffleTicketsReturn + raffleCashReturn + dailyPokerReturn;
+        var figuresBonusesTotalEl = document.getElementById("adminReportFiguresBonusesTotal");
+        var figuresBonusesExpenses =
+          Math.abs(parseReportNumber(totals.bonuses)) +
+          Math.abs(parseReportNumber(calculationWeekStatsTotals.raffles)) +
+          Math.abs(parseReportNumber(calculationWeekStatsTotals.dailyPoker));
+        var figuresBonusesNet = figuresBonusesExpenses - figuresBackingReturn;
+        if (figuresBonusesTotalEl) {
+          figuresBonusesTotalEl.textContent = figuresBonusesNet < 0
+            ? "+" + formatReportRubleNumber(Math.abs(figuresBonusesNet))
+            : formatReportNegativeDisplay(figuresBonusesNet);
+        }
         var returnOutputs = document.querySelectorAll("[data-admin-report-figures-return-auto]");
         if (returnOutputs && returnOutputs.length) {
           returnOutputs.forEach(function (output) {
@@ -253,6 +264,7 @@
         if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = formatReportRubleNumber(figuresBackingReturn);
         if (figuresRemainderEl) figuresRemainderEl.textContent = formatReportRubleNumber(figuresRemainder);
         if (calculationWeekStatsAvailability.raffles !== true || calculationWeekStatsAvailability.dailyPoker !== true) {
+          if (figuresBonusesTotalEl) figuresBonusesTotalEl.textContent = "—";
           if (figuresExpensesTotalEl) figuresExpensesTotalEl.textContent = "—";
           if (figuresReturnsTotalEl) figuresReturnsTotalEl.textContent = "—";
           if (figuresRemainderEl) figuresRemainderEl.textContent = "—";
@@ -903,14 +915,19 @@
         }
       }
 
-      function setFiguresStatus(text) {
+      function setFiguresStatus(text, tone) {
         if (!figuresSaveStatusEl) return;
         figuresSaveStatusEl.textContent = text || "";
+        if (tone) figuresSaveStatusEl.setAttribute("data-tone", tone);
+        else figuresSaveStatusEl.removeAttribute("data-tone");
         if (figuresStatusTimer) clearTimeout(figuresStatusTimer);
         if (text) {
           figuresStatusTimer = setTimeout(function () {
-            if (figuresSaveStatusEl) figuresSaveStatusEl.textContent = "";
-          }, 1800);
+            if (figuresSaveStatusEl && figuresSaveStatusEl.textContent === text) {
+              figuresSaveStatusEl.textContent = "";
+              figuresSaveStatusEl.removeAttribute("data-tone");
+            }
+          }, tone === "error" ? 5000 : 3000);
         }
       }
 
@@ -1236,13 +1253,13 @@
         } catch (e) {
           setFiguresStatus("Локально не сохранено");
         }
-        setFiguresStatus("Сохраняю…");
-        saveServerCalculationDraft(draft, "figures").then(function () {
+        setFiguresStatus("Сохраняю…", "loading");
+        return saveServerCalculationDraft(draft, "figures").then(function () {
           if (getCalculationDraftKey() !== expectedDraftKey) return;
           setFiguresLocked(true);
           setFiguresStatus("Сохранено");
         }).catch(function () {
-          setFiguresStatus("Не удалось сохранить на сервере");
+          setFiguresStatus("Не удалось сохранить — повторите", "error");
         });
       }
 
