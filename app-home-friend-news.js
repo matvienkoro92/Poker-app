@@ -2435,7 +2435,10 @@
     }
     var item = modal.querySelector('[data-home-news-share-token="' + token + '"]');
     if (!item) return;
-    window.pokerPendingClubNewsEventToken = "";
+    // The modal first renders cached/static rows and then replaces them with the
+    // fresh feed. Keep the target until that refresh settles, otherwise the
+    // second render puts the user back at the top of the section.
+    if (!clubNewsLoadPromise) window.pokerPendingClubNewsEventToken = "";
     item.classList.add("home-friend-news-modal__item--linked");
     if (item.scrollIntoView) item.scrollIntoView({ behavior: "smooth", block: "center" });
     window.setTimeout(function () { item.classList.remove("home-friend-news-modal__item--linked"); }, 2600);
@@ -3490,6 +3493,9 @@
       scheduleClubNewsRetry();
     }).finally(function () {
       if (clubNewsLoadPromise === request) clubNewsLoadPromise = null;
+      if (newsModalMode === "club" && window.pokerPendingClubNewsEventToken) {
+        window.setTimeout(focusPendingClubNewsEvent, 0);
+      }
     });
     clubNewsLoadPromise = request;
     return request;

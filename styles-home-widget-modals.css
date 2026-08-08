@@ -843,7 +843,7 @@
 }
 
 .club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock {
-  padding-bottom: max(92px, calc(92px + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: 12px;
 }
 
 .club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock + .club-choice-vote-modal__footer {
@@ -1346,20 +1346,18 @@
 }
 
 .sng-champions-modal__join-dock {
-  position: absolute;
-  z-index: 1002;
-  right: 18px;
-  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
-  left: 18px;
+  position: sticky;
+  z-index: 4;
+  bottom: 0;
   display: grid;
-  width: auto;
-  margin: 0;
-  padding: 10px;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 11px;
   box-sizing: border-box;
-  border: 1px solid rgba(255, 184, 70, 0.3);
+  border: 1px solid rgba(255, 201, 88, 0.58);
   border-radius: 16px;
-  background: rgba(3, 7, 14, 0.94);
-  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.42);
+  background: linear-gradient(180deg, rgba(30, 20, 5, 0.98), rgba(3, 7, 14, 0.98));
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.52), 0 0 22px rgba(255, 162, 24, 0.18);
   backdrop-filter: blur(12px);
   pointer-events: auto;
 }
@@ -1400,9 +1398,6 @@
 
 @media (max-width: 620px) {
   .sng-champions-modal__join-dock {
-    right: 12px;
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
-    left: 12px;
     padding: 8px;
     border-radius: 14px;
   }
@@ -1410,6 +1405,21 @@
 
 .sng-champions-modal__join-dock .sng-champions-modal__main-action {
   pointer-events: auto;
+}
+
+.sng-champions-modal__join-dock .sng-champions-modal__main-action--wide:not(:disabled) {
+  min-height: 58px;
+  color: #271000;
+  border: 2px solid #fff1a8;
+  background: linear-gradient(180deg, #fff8c7 0%, #ffd84e 30%, #ff9d00 70%, #ff7100 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+    0 0 18px rgba(255, 196, 45, 0.72),
+    0 0 36px rgba(255, 119, 0, 0.42);
+  font-size: 18px;
+  letter-spacing: 0.025em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.66);
+  filter: saturate(1.18) brightness(1.08);
 }
 
 .sng-champions-modal__main-action--confirmed,
