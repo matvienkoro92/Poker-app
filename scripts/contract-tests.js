@@ -841,6 +841,24 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(reportAccessRes.body.allowed, true, "report admin access probe confirms access");
   reportAccessRes = await call(reportHandler, req("GET", { pwaSession: nonBonusAdminToken, access: "1" }));
   assert.strictEqual(reportAccessRes.statusCode, 403, "ordinary user report access probe is denied");
+  const calculationMenuToken = require(path.join(root, "lib", "admin-menu-access-token"))
+    .signAccessToken("calculations", "mail_ID000004", BOT_TOKEN);
+  let protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: nonBonusAdminToken,
+    menuAccessToken: calculationMenuToken,
+    action: "calculation_draft_save",
+    weekStart: "1785121200001",
+    calculationDraftGroup: "figures",
+    calculationDraft: { rake: ["123"] },
+  }));
+  assert.strictEqual(protectedCalculationDraftRes.statusCode, 200, "calculations menu token can save its protected draft");
+  protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: nonBonusAdminToken,
+    menuAccessToken: calculationMenuToken,
+    action: "delete",
+    id: "forbidden-report",
+  }));
+  assert.strictEqual(protectedCalculationDraftRes.statusCode, 403, "calculations menu token cannot mutate admin reports");
   const calculationWeekStart = "1785121200000";
   let calculationDraftRes = await call(reportHandler, req("POST", {}, {
     pwaSession: roman1ReportToken,

@@ -1310,9 +1310,9 @@
     function openRakebackTotalsModal() {
       if (!totalsModal) return;
       renderRakebackTotalsModal();
-      // Keep the totals dialog outside the rakeback tab panel. The calculations
-      // tab hides sibling panels, which otherwise makes this dialog invisible.
-      if (modal && totalsModal.parentNode !== modal) modal.appendChild(totalsModal);
+      // Calculations can be mounted outside #adminReportModal (inside CRM).
+      // Portal the dialog to body so no hidden parent can suppress it.
+      if (document.body && totalsModal.parentNode !== document.body) document.body.appendChild(totalsModal);
       totalsModal.hidden = false;
       if (grandTotalBtn) grandTotalBtn.setAttribute("aria-expanded", "true");
     }

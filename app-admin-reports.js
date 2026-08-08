@@ -164,8 +164,7 @@ function initAdminReportModal() {
     if (periodButton && typeof periodButton.click === "function") periodButton.click();
   }
   window.pokerOpenAdminReportRakebackPlayers = function (trigger) {
-    var modalIsOpen = modal && modal.getAttribute("aria-hidden") !== "true" && !modal.hidden;
-    if (trigger && modalIsOpen && modal.contains(trigger)) {
+    if (trigger && trigger.matches && trigger.matches("[data-admin-report-open-rakeback]")) {
       return Promise.resolve(openLazyRakebackModule()).then(function (module) {
         syncRakebackPeriodFromCalculations();
         if (module && typeof module.openTotals === "function") module.openTotals();
@@ -195,17 +194,17 @@ function initAdminReportModal() {
       window.pokerOpenAdminReportRakebackPlayers(figuresRakebackLink);
     });
   }
-  if (modal && modal.dataset.rakebackOverlayDelegatedBound !== "1") {
-    modal.dataset.rakebackOverlayDelegatedBound = "1";
-    modal.addEventListener("click", function (event) {
+  if (document.documentElement && document.documentElement.dataset.rakebackTotalsDelegatedBound !== "1") {
+    document.documentElement.dataset.rakebackTotalsDelegatedBound = "1";
+    document.addEventListener("click", function (event) {
       var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
-      if (!trigger || !modal.contains(trigger)) return;
+      if (!trigger) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       var totalsDialog = document.getElementById("adminReportRakebackTotalsModal");
       var totalsList = document.getElementById("adminReportRakebackTotalsList");
       if (totalsDialog) {
-        if (totalsDialog.parentNode !== modal) modal.appendChild(totalsDialog);
+        if (document.body && totalsDialog.parentNode !== document.body) document.body.appendChild(totalsDialog);
         if (totalsList && !String(totalsList.innerHTML || "").trim()) {
           totalsList.innerHTML = '<div class="admin-report-rakeback-totals-modal__section-title">Загружаем итоги…</div>';
         }

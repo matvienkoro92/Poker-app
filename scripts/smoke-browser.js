@@ -492,6 +492,11 @@ async function checkAdminRakeback(browser) {
   await idInput.click();
   await idInput.fill("12345");
   await page.evaluate(() => {
+    const host = document.createElement("div");
+    host.id = "smokeCrmCalculationsHost";
+    document.body.appendChild(host);
+    const calculationsPanel = document.querySelector('[data-admin-report-panel="calculations"]');
+    if (calculationsPanel) host.appendChild(calculationsPanel);
     document.querySelectorAll("#adminReportModal [data-admin-report-panel]").forEach((panel) => {
       panel.classList.toggle("admin-report-panel--active", panel.getAttribute("data-admin-report-panel") === "calculations");
     });
@@ -500,7 +505,7 @@ async function checkAdminRakeback(browser) {
   await page.waitForFunction(() => {
     const totals = document.getElementById("adminReportRakebackTotalsModal");
     const modal = document.getElementById("adminReportModal");
-    return !!totals && !totals.hidden && totals.parentNode === modal;
+    return !!totals && !totals.hidden && totals.parentNode === document.body && !modal.contains(document.querySelector("[data-admin-report-open-rakeback]"));
   }, null, { timeout: 7000 });
   const state = await page.evaluate(() => {
     const row = document.querySelector("#adminReportRakebackTableBody [data-rakeback-shared-row]");
@@ -530,14 +535,15 @@ async function checkAdminRakeback(browser) {
       separatorDateBackground: separatorDateStyle?.backgroundColor || "",
       separatorHeaderInline: !!(separatorDateRect && separatorWeekdayRect && Math.abs(separatorDateRect.top - separatorWeekdayRect.top) <= 2),
       calculationTotalsOpen: !document.getElementById("adminReportRakebackTotalsModal")?.hidden,
-      calculationTotalsPortaled: document.getElementById("adminReportRakebackTotalsModal")?.parentNode === document.getElementById("adminReportModal"),
+      calculationTotalsPortaled: document.getElementById("adminReportRakebackTotalsModal")?.parentNode === document.body,
+      calculationTriggerOutsideModal: !document.getElementById("adminReportModal")?.contains(document.querySelector("[data-admin-report-open-rakeback]")),
     };
   });
   await page.close();
   if (state.dateInputs !== 0 || state.dateType !== "hidden" || state.badgePointer !== "none" || state.idValue !== "12345") {
     throw new Error("admin rakeback smoke failed: " + JSON.stringify(state));
   }
-  if (!state.calculationTotalsOpen || !state.calculationTotalsPortaled) {
+  if (!state.calculationTotalsOpen || !state.calculationTotalsPortaled || !state.calculationTriggerOutsideModal) {
     throw new Error("calculation rakeback totals click failed: " + JSON.stringify(state));
   }
   if (!state.separatorDateText || !state.separatorWeekdayText || !state.separatorStackDisplay.includes("grid") || state.separatorDateBorderTop !== "0px" || (state.separatorDateBackground !== "rgba(0, 0, 0, 0)" && state.separatorDateBackground !== "transparent")) {

@@ -1018,6 +1018,10 @@
           action: action,
           weekStart: String(calculationRangeStart != null ? calculationRangeStart : ""),
         };
+        var calculationsAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
+          ? window.pokerAdminMenuAccessToken("calculations")
+          : "";
+        if (calculationsAccessToken) payload.menuAccessToken = calculationsAccessToken;
         if (draft) payload.calculationDraft = draft;
         if (group) payload.calculationDraftGroup = String(group);
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
@@ -1030,9 +1034,11 @@
             cache: "no-store",
           }, 15000);
         }).then(function (response) {
-          if (!response || !response.ok) throw new Error("calculation draft sync failed");
-          return response.json().then(function (data) {
-            if (!data || data.ok !== true) throw new Error(data && data.error || "calculation draft sync failed");
+          if (!response) throw new Error("Сервер не ответил");
+          return response.json().catch(function () { return {}; }).then(function (data) {
+            if (!response.ok || !data || data.ok !== true) {
+              throw new Error(data && data.error || "Не удалось сохранить расчёты");
+            }
             return data;
           });
         });
@@ -1272,9 +1278,11 @@
           if (getCalculationDraftKey() !== expectedDraftKey) return;
           setFiguresLocked(true);
           setFiguresStatus("Сохранено");
-        }).catch(function () {
+        }).catch(function (error) {
           if (saveSeq !== figuresSaveRequestSeq) return;
-          setFiguresStatus("Не удалось сохранить — повторите", "error");
+          var message = error && error.message ? String(error.message) : "Не удалось сохранить — повторите";
+          if (message === "calculation draft save timeout") message = "Сервер долго не отвечает — повторите";
+          setFiguresStatus(message, "error");
         });
       }
 
