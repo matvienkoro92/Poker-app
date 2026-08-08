@@ -255,11 +255,9 @@
             <button type="button" class="player-crm__send-section-btn" data-crm-links-refresh>Обновить</button>
           </div>
           <div class="player-crm__links">
-            <div class="player-crm__links-tabs" role="tablist" aria-label="Тип ссылок">
-              <button type="button" class="player-crm__links-tab player-crm__links-tab--active" data-crm-links-tab="own" role="tab" aria-selected="true">Свои</button>
-              <button type="button" class="player-crm__links-tab" data-crm-links-tab="broadcasts" role="tab" aria-selected="false">Рассылки</button>
-            </div>
-            <div class="player-crm__links-builder" id="playerCrmLinksBuilder">
+            <details class="player-crm__links-builder" id="playerCrmLinksBuilder">
+              <summary class="player-crm__links-builder-summary"><span>Создать ссылку</span><span aria-hidden="true">⌄</span></summary>
+              <div class="player-crm__links-builder-body">
               <div class="player-crm__form-grid player-crm__links-form-grid">
                 <label>
                   <span>Название</span>
@@ -307,6 +305,11 @@
                 <button type="button" class="player-crm__ghost-btn" id="playerCrmClearLinkFormBtn">Очистить</button>
               </div>
               <div class="player-crm__send-result player-crm__links-result" id="playerCrmLinksResult" aria-live="polite"></div>
+              </div>
+            </details>
+            <div class="player-crm__links-tabs" role="tablist" aria-label="Тип ссылок">
+              <button type="button" class="player-crm__links-tab player-crm__links-tab--active" data-crm-links-tab="own" role="tab" aria-selected="true">Свои</button>
+              <button type="button" class="player-crm__links-tab" data-crm-links-tab="broadcasts" role="tab" aria-selected="false">Рассылки</button>
             </div>
             <div class="player-crm__links-list" id="playerCrmLinksList"></div>
           </div>

@@ -496,7 +496,11 @@ async function checkAdminRakeback(browser) {
     host.id = "smokeCrmCalculationsHost";
     document.body.appendChild(host);
     const calculationsPanel = document.querySelector('[data-admin-report-panel="calculations"]');
-    if (calculationsPanel) host.appendChild(calculationsPanel);
+    if (calculationsPanel) {
+      host.appendChild(calculationsPanel);
+      calculationsPanel.hidden = false;
+      calculationsPanel.classList.add("admin-report-panel--active");
+    }
     document.querySelectorAll("#adminReportModal [data-admin-report-panel]").forEach((panel) => {
       panel.classList.toggle("admin-report-panel--active", panel.getAttribute("data-admin-report-panel") === "calculations");
     });
@@ -504,8 +508,7 @@ async function checkAdminRakeback(browser) {
   await page.evaluate(() => document.querySelector("[data-admin-report-open-rakeback]")?.click());
   await page.waitForFunction(() => {
     const totals = document.getElementById("adminReportRakebackTotalsModal");
-    const modal = document.getElementById("adminReportModal");
-    return !!totals && !totals.hidden && totals.parentNode === document.body && !modal.contains(document.querySelector("[data-admin-report-open-rakeback]"));
+    return !!totals && !totals.hidden && totals.parentNode === document.body;
   }, null, { timeout: 7000 });
   const state = await page.evaluate(() => {
     const row = document.querySelector("#adminReportRakebackTableBody [data-rakeback-shared-row]");
@@ -537,13 +540,21 @@ async function checkAdminRakeback(browser) {
       calculationTotalsOpen: !document.getElementById("adminReportRakebackTotalsModal")?.hidden,
       calculationTotalsPortaled: document.getElementById("adminReportRakebackTotalsModal")?.parentNode === document.body,
       calculationTriggerOutsideModal: !document.getElementById("adminReportModal")?.contains(document.querySelector("[data-admin-report-open-rakeback]")),
+      calculationTotalsZIndex: getComputedStyle(document.getElementById("adminReportRakebackTotalsModal")).zIndex,
+      calculationTotalsOnTop: (function () {
+        var box = document.querySelector("#adminReportRakebackTotalsModal .admin-report-rakeback-totals-modal__box");
+        if (!box) return false;
+        var rect = box.getBoundingClientRect();
+        var top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + Math.min(24, rect.height / 2));
+        return !!(top && top.closest("#adminReportRakebackTotalsModal"));
+      })(),
     };
   });
   await page.close();
   if (state.dateInputs !== 0 || state.dateType !== "hidden" || state.badgePointer !== "none" || state.idValue !== "12345") {
     throw new Error("admin rakeback smoke failed: " + JSON.stringify(state));
   }
-  if (!state.calculationTotalsOpen || !state.calculationTotalsPortaled || !state.calculationTriggerOutsideModal) {
+  if (!state.calculationTotalsOpen || !state.calculationTotalsPortaled || !state.calculationTotalsOnTop || Number(state.calculationTotalsZIndex) < 2147483000) {
     throw new Error("calculation rakeback totals click failed: " + JSON.stringify(state));
   }
   if (!state.separatorDateText || !state.separatorWeekdayText || !state.separatorStackDisplay.includes("grid") || state.separatorDateBorderTop !== "0px" || (state.separatorDateBackground !== "rgba(0, 0, 0, 0)" && state.separatorDateBackground !== "transparent")) {

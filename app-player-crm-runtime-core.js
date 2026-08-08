@@ -2156,7 +2156,7 @@
       return;
     }
     el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__links-table\"><thead><tr>" +
-      "<th>Название</th><th>Раздел</th><th>Клики</th><th>Уник.</th><th>Активн.</th><th>Событий</th><th>Действия</th><th>Ссылка</th>" +
+      "<th>Название</th><th>Раздел</th><th title=\"По убыванию\">Клики ↓</th><th>Уник.</th><th>Активн.</th><th>Событий</th><th>Действия</th><th class=\"player-crm__links-url-cell\">Ссылка</th>" +
       "</tr></thead><tbody>" + links.map(function (link) {
         var url = crmLinkUrl(link);
         return "<tr>" +
@@ -2167,7 +2167,7 @@
           "<td>" + esc(intFmt(crmLinkMetric(link, "activeVisitors"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "actionEvents"))) + "</td>" +
           "<td><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button></span></td>" +
-          "<td><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\" title=\"Скопировать ссылку\">" + esc(url || "—") + "</button></td>" +
+          "<td class=\"player-crm__links-url-cell\"><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\" title=\"Скопировать ссылку\">" + esc(url || "—") + "</button></td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";
   }

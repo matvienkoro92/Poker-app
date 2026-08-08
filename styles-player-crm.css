@@ -3291,10 +3291,38 @@ button.player-crm__stat:focus-visible,
 .player-crm__links-builder {
   min-width: 0;
   max-width: 100%;
-  padding: 12px;
+  padding: 0;
+  overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.35);
+}
+.player-crm__links-builder-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 9px 12px;
+  color: var(--accent);
+  font-weight: 900;
+  cursor: pointer;
+  list-style: none;
+}
+.player-crm__links-builder-summary::-webkit-details-marker {
+  display: none;
+}
+.player-crm__links-builder-summary span:last-child {
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+.player-crm__links-builder[open] .player-crm__links-builder-summary span:last-child {
+  transform: rotate(180deg);
+}
+.player-crm__links-builder-body {
+  padding: 4px 12px 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
 }
 .player-crm__links-form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3332,13 +3360,16 @@ button.player-crm__stat:focus-visible,
   padding-right: 5px;
   text-align: center;
 }
-.player-crm__links-table th:last-child,
-.player-crm__links-table td:last-child {
+.player-crm__links-table .player-crm__links-url-cell {
+  width: 1%;
   padding-right: 2px;
+  text-align: right;
 }
 .player-crm__links-url-btn {
   display: block;
-  max-width: 360px;
+  width: max-content;
+  max-width: 280px;
+  margin-left: auto;
   overflow: hidden;
   padding: 0;
   border: 0;
@@ -3346,7 +3377,7 @@ button.player-crm__stat:focus-visible,
   color: var(--accent);
   font: inherit;
   font-weight: 800;
-  text-align: left;
+  text-align: right;
   text-overflow: ellipsis;
   text-decoration: underline;
   text-decoration-color: rgba(199, 163, 106, 0.55);
