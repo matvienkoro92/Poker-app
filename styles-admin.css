@@ -838,6 +838,19 @@ body.admin-report-modal-open .bottom-nav {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 5px;
   min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(246, 211, 145, 0.3);
+  border-radius: 11px;
+  background: rgba(246, 211, 145, 0.045);
+}
+.admin-report-calculations__rake-summary::before {
+  content: "Итоги";
+  grid-column: 1 / -1;
+  padding: 0 3px 3px;
+  color: #ffe0a0;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.02em;
 }
 #adminReportCalcRakeCard .admin-report-calculations__rake-summary > .admin-report-calculations__field--rake-grand,
 #adminReportCalcRakeCard .admin-report-calculations__rake-summary > .admin-report-calculations__field--remainder {
@@ -1039,7 +1052,9 @@ body.admin-report-modal-open .bottom-nav {
   display: grid;
   gap: 5px;
   min-width: 0;
-  margin-top: 2px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(246, 211, 145, 0.26);
 }
 .admin-report-calculations__figures-lower > .admin-report-calculations__field,
 .admin-report-calculations__figures-lower > .admin-report-calculations__add,
@@ -1447,27 +1462,27 @@ body.admin-report-modal-open .bottom-nav {
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--extra,
 #adminReportCalcRakeCard .admin-report-calculations__field--extra.admin-report-calculations__field--visual-minus {
-  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.34fr) minmax(92px, 0.42fr);
-  grid-template-rows: 30px 30px;
+  grid-template-columns: minmax(76px, 1fr) minmax(72px, 0.65fr) minmax(48px, 0.34fr) minmax(84px, 0.72fr);
+  grid-template-rows: 32px;
   gap: 5px;
-  min-height: 70px;
+  min-height: 42px;
   padding: 5px;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-name] {
-  grid-column: 1 / -1;
+  grid-column: 1;
   grid-row: 1;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-rake] {
-  grid-column: 1;
-  grid-row: 2;
+  grid-column: 2;
+  grid-row: 1;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-percent] {
-  grid-column: 2;
-  grid-row: 2;
+  grid-column: 3;
+  grid-row: 1;
 }
 #adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-amount] {
-  grid-column: 3;
-  grid-row: 2;
+  grid-column: 4;
+  grid-row: 1;
 }
 .admin-report-calculations__field--visual-minus .admin-report-calculations__input {
   padding-left: 16px;
@@ -1487,8 +1502,8 @@ body.admin-report-modal-open .bottom-nav {
   pointer-events: none;
 }
 .admin-report-calculations__field--extra.admin-report-calculations__field--visual-minus::after {
-  grid-column: 3;
-  grid-row: 2;
+  grid-column: 4;
+  grid-row: 1;
 }
 .admin-report-calculations__field--agents-heading {
   grid-template-columns: minmax(0, 1fr);
