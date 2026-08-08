@@ -127,6 +127,7 @@
     trackingLinksLoading: false,
     trackingLinksError: "",
     trackingLinksRequestSeq: 0,
+    trackingLinksTab: "own",
     linkDetailsId: "",
     linkDetailsVisitors: [],
     linkDetailsVisitorsLoading: false,
@@ -2117,9 +2118,29 @@
     renderCrmLinkTargetOptions();
     var el = document.getElementById("playerCrmLinksList");
     var summary = document.getElementById("playerCrmLinksSummary");
+    var builder = document.getElementById("playerCrmLinksBuilder");
     if (!el) return;
-    var links = Array.isArray(state.trackingLinks) ? state.trackingLinks : [];
-    if (summary) summary.textContent = links.length ? intFmt(links.length) + " ссылок" : "Создание и эффективность лидов";
+    var activeTab = state.trackingLinksTab === "broadcasts" ? "broadcasts" : "own";
+    document.querySelectorAll("[data-crm-links-tab]").forEach(function (tab) {
+      var active = tab.getAttribute("data-crm-links-tab") === activeTab;
+      tab.classList.toggle("player-crm__links-tab--active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    if (builder) builder.hidden = activeTab !== "own";
+    var allLinks = Array.isArray(state.trackingLinks) ? state.trackingLinks.slice() : [];
+    var links = allLinks.filter(function (link) {
+      var params = crmLinkParams(link);
+      var isBroadcast = params.created_from === "crm_broadcast" || /^CRM\s+crm_/i.test(String(link && link.label || ""));
+      return activeTab === "broadcasts" ? isBroadcast : !isBroadcast;
+    });
+    links.sort(function (a, b) {
+      var clicksDifference = crmLinkMetric(b, "totalClicks") - crmLinkMetric(a, "totalClicks");
+      if (clicksDifference) return clicksDifference;
+      return (Date.parse(b && b.createdAt || "") || 0) - (Date.parse(a && a.createdAt || "") || 0);
+    });
+    if (summary) summary.textContent = activeTab === "broadcasts"
+      ? intFmt(links.length) + " ссылок из рассылок"
+      : intFmt(links.length) + " своих ссылок";
     if (state.trackingLinksLoading) {
       el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаем ссылки…</div>";
       return;
@@ -2129,7 +2150,9 @@
       return;
     }
     if (!links.length) {
-      el.innerHTML = "<div class=\"player-crm__notice\">Пока нет ссылок. Создай первую и выбери раздел, куда должен приходить лид.</div>";
+      el.innerHTML = '<div class="player-crm__notice">' + (activeTab === "broadcasts"
+        ? "В рассылках пока нет ссылок."
+        : "Пока нет своих ссылок. Создай первую и выбери раздел, куда должен приходить лид.") + "</div>";
       return;
     }
     el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__links-table\"><thead><tr>" +
@@ -5030,6 +5053,12 @@
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
       if (linksRefresh) {
         loadCrmTrackingLinks();
+        return;
+      }
+      var linksTab = e.target.closest("[data-crm-links-tab]");
+      if (linksTab) {
+        state.trackingLinksTab = linksTab.getAttribute("data-crm-links-tab") === "broadcasts" ? "broadcasts" : "own";
+        renderCrmTrackingLinks();
         return;
       }
       if (e.target && e.target.id === "playerCrmCreateLinkBtn") {

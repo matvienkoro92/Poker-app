@@ -255,7 +255,11 @@
             <button type="button" class="player-crm__send-section-btn" data-crm-links-refresh>Обновить</button>
           </div>
           <div class="player-crm__links">
-            <div class="player-crm__links-builder">
+            <div class="player-crm__links-tabs" role="tablist" aria-label="Тип ссылок">
+              <button type="button" class="player-crm__links-tab player-crm__links-tab--active" data-crm-links-tab="own" role="tab" aria-selected="true">Свои</button>
+              <button type="button" class="player-crm__links-tab" data-crm-links-tab="broadcasts" role="tab" aria-selected="false">Рассылки</button>
+            </div>
+            <div class="player-crm__links-builder" id="playerCrmLinksBuilder">
               <div class="player-crm__form-grid player-crm__links-form-grid">
                 <label>
                   <span>Название</span>

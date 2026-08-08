@@ -3262,6 +3262,32 @@ button.player-crm__stat:focus-visible,
   min-width: 0;
   max-width: 100%;
 }
+.player-crm__links-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 9px;
+  background: rgba(15, 23, 42, 0.32);
+}
+.player-crm__links-tab {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 7px;
+  background: rgba(2, 6, 23, 0.35);
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.player-crm__links-tab--active {
+  border-color: rgba(245, 190, 74, 0.9);
+  background: linear-gradient(180deg, #f8d77f, #d9a943);
+  color: #111827;
+  box-shadow: inset 0 0 0 1px rgba(255, 242, 184, 0.7);
+}
 .player-crm__links-builder {
   min-width: 0;
   max-width: 100%;
