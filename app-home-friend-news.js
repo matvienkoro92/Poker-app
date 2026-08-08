@@ -41,7 +41,7 @@
   var REMOTE_CACHE_PREFIX = "poker_home_friend_news_remote_v1:";
   var RENDERED_EVENTS_CACHE_KEY = "poker_home_friend_news_rendered_v2";
   var PLAYER_EVENTS_CACHE_PREFIX = "poker_player_news_rendered_v2:";
-  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v12";
+  var CLUB_EVENTS_CACHE_KEY = "poker_home_club_news_rendered_v14";
   var CLUB_WALL_EVENTS_CACHE_KEY = "poker_home_club_wall_rendered_v1";
   var clubNewsLoading = true;
   var clubNewsLoaded = false;
@@ -127,9 +127,9 @@
     try {
       var stored = localStorage.getItem(CLUB_EVENTS_CACHE_KEY) || sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]";
       var rows = JSON.parse(stored);
-      return distributeDailyClubEvents(mergeRelatedPlayerEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
+      return arrangeClubWinEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isCurrentClubEvent(row);
-      }))).slice(0, MAX_EVENTS);
+      })).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
     }
@@ -466,6 +466,7 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "smile😎😊😺": "./assets/club-news-personal/smile-news-cutout.webp?v=4",
     "proxor": "./assets/club-news-personal/proxor-personal-cutout.webp?v=3",
     "luck_is_suck": "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3",
     "luckissuck": "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3",
@@ -494,6 +495,7 @@
   };
 
   var CLUB_NEWS_CARD_ART_BY_NICK = {
+    "smile😎😊😺": "smile",
     "porquinho": "porquinho", "поркиньо": "porquinho", "поркиньё": "porquinho",
     "штукатур": "shtukatur", "shtukatur": "shtukatur",
     "hakas": "hakas", "хакас": "hakas",
@@ -546,6 +548,7 @@
         "./assets/club-news-personal/waaar-news-cutout-v3.webp?v=3",
       ][variantIndex % 2];
     }
+    if (slug === "smile") return "./assets/club-news-personal/smile-news-cutout.webp?v=4";
     if (slug) return "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=3";
     return clubNewsPersonalArt(nick);
   }
@@ -917,6 +920,98 @@
       regularIndex += 1;
     }
     return spread;
+  }
+
+  function ratingChangePlaces(row) {
+    var oldPlace = Math.max(0, Number(row && row._ratingOldPlace) || 0);
+    var newPlace = Math.max(0, Number(row && row._ratingNewPlace) || 0);
+    if (oldPlace && newPlace) return { oldPlace: oldPlace, newPlace: newPlace };
+    var match = String(row && row.id || "").match(/:league\d+:(\d+):(\d+)(?::|$)/);
+    return match ? { oldPlace: Number(match[1]) || 0, newPlace: Number(match[2]) || 0 } : null;
+  }
+
+  function isBelowTop10RatingChange(row) {
+    if (!row || row.type !== "rating" || String(row._eventKind || "") !== "rating-change") return false;
+    var places = ratingChangePlaces(row);
+    return !!places && places.oldPlace > 10 && places.newPlace > 10;
+  }
+
+  function isStandaloneRatingDrop(row) {
+    if (!row || row.type !== "rating" || String(row._eventKind || "") !== "rating-change") return false;
+    var places = ratingChangePlaces(row);
+    return !!places && places.oldPlace > 0 && places.newPlace > places.oldPlace;
+  }
+
+  function isClubWinEvent(row) {
+    return !!row && (row._eventKind === "tournament" || isDailyClubEvent(row) || Number(row.prizeAmount) > 0);
+  }
+
+  function distributeBelowTop10RatingEvents(rows) {
+    var source = Array.isArray(rows) ? rows : [];
+    var ratingRows = source.filter(isBelowTop10RatingChange);
+    if (!ratingRows.length) return source;
+    var regular = source.filter(function (row) { return !isBelowTop10RatingChange(row); });
+    var winCount = regular.filter(isClubWinEvent).length;
+    // These secondary rating movements belong inside the wins feed, not in a
+    // leading block. Keep one win between them whenever the feed has room.
+    if (winCount < 2) return source;
+    var firstSlot = Math.min(3, winCount);
+    var lastSlot = Math.max(firstSlot, winCount - 1);
+    var buckets = {};
+    ratingRows.forEach(function (row, index) {
+      var slot = Math.min(lastSlot, Math.max(firstSlot,
+        firstSlot - 1 + Math.round(((index + 1) * Math.max(0, winCount - firstSlot)) / (ratingRows.length + 1))));
+      if (!buckets[slot]) buckets[slot] = [];
+      buckets[slot].push(row);
+    });
+    var spread = [];
+    var seenWins = 0;
+    regular.forEach(function (row) {
+      spread.push(row);
+      if (!isClubWinEvent(row)) return;
+      seenWins += 1;
+      if (buckets[seenWins]) spread = spread.concat(buckets[seenWins]);
+    });
+    return spread;
+  }
+
+  function pinLeadingClubWins(rows) {
+    var source = Array.isArray(rows) ? rows : [];
+    var days = [];
+    source.forEach(function (row) {
+      var day = eventDayKey(row && row.at);
+      var group = days.find(function (item) { return item.day === day; });
+      if (!group) {
+        group = { day: day, rows: [] };
+        days.push(group);
+      }
+      group.rows.push(row);
+    });
+    return days.reduce(function (result, group) {
+      var hero = clubDayHero(group.rows[0] && group.rows[0].at);
+      var heroRow = hero ? group.rows.filter(function (row) {
+        return isClubWinEvent(row) && matchKey(row && row.actorNick) === matchKey(hero.nick);
+      }).sort(function (a, b) {
+        return (Number(b && b.prizeAmount) || 0) - (Number(a && a.prizeAmount) || 0);
+      })[0] : null;
+      var leadingWins = group.rows.filter(function (row) {
+        return row !== heroRow && isClubWinEvent(row);
+      }).slice(0, 2);
+      [heroRow].concat(leadingWins).forEach(function (row) {
+        if (row) result.push(row);
+      });
+      group.rows.forEach(function (row) {
+        if (row !== heroRow && leadingWins.indexOf(row) === -1) result.push(row);
+      });
+      return result;
+    }, []);
+  }
+
+  function arrangeClubWinEvents(rows) {
+    var merged = mergeRelatedPlayerEvents(Array.isArray(rows) ? rows : []).filter(function (row) {
+      return !isStandaloneRatingDrop(row);
+    });
+    return distributeBelowTop10RatingEvents(pinLeadingClubWins(distributeDailyClubEvents(merged)));
   }
 
   function eventDateLabel(value, includeYear) {
@@ -3071,7 +3166,7 @@
       });
       if (!alreadyLoaded) birthdays.push(row);
     });
-    return distributeDailyClubEvents(attachFriendAvatars(
+    return arrangeClubWinEvents(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
         birthdays,
@@ -3188,7 +3283,7 @@
       if (/\b50\s*(?:₽|р\.?|руб)/i.test(String(row.text || ""))) return;
       if (!rows.some(function (candidate) { return candidate && candidate.id === row.id; })) rows.push(row);
     });
-    return distributeDailyClubEvents(mergeRelatedPlayerEvents(rows)).slice(0, MAX_EVENTS);
+    return arrangeClubWinEvents(rows).slice(0, MAX_EVENTS);
   }
 
   function loadClubNews(force) {

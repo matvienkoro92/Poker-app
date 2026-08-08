@@ -1610,7 +1610,9 @@ function pokerGetClubNewsTournamentSnapshotsReady() {
         var displacedRow = rose ? previousRows[newPlace - 1] : null;
         var displacedKey = clubNewsRatingNickKey(displacedRow && displacedRow.nick);
         var displacedNewPlace = Number(currentPlaces[displacedKey]) || 0;
-        var displacedText = rose && displacedKey && displacedKey !== key
+        var didDisplace = rose && displacedKey && displacedKey !== key &&
+          (!displacedNewPlace || displacedNewPlace > newPlace);
+        var displacedText = didDisplace
           ? ", сместив " + String(displacedRow.nick || "игрока") + " с " + newPlace + "-го" +
             (displacedNewPlace ? " на " + displacedNewPlace + "-е место" : " ниже")
           : "";
@@ -1623,8 +1625,11 @@ function pokerGetClubNewsTournamentSnapshotsReady() {
           at: latestDate.split(".").reverse().join("-") + "T23:55:00",
           actorId: "rating:" + key,
           actorNick: latestNickKeys[key],
-          affectedActorNicks: displacedRow && displacedRow.nick
+          affectedActorNicks: didDisplace && displacedRow && displacedRow.nick
             ? [latestNickKeys[key], String(displacedRow.nick)] : [latestNickKeys[key]],
+          _ratingLeague: leagueNum,
+          _ratingOldPlace: oldPlace,
+          _ratingNewPlace: newPlace,
           _eventKind: "rating-change",
         });
       });
