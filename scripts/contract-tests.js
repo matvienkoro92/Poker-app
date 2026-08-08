@@ -6334,6 +6334,15 @@ async function testTrackingLinksFlow() {
   assert.strictEqual(r.body.visitors[0].visitorId, "visitor_1", "tracking visitors list sanitizes visitor id");
   assert.strictEqual(r.body.visitors[0].activity.total, 1, "tracking visitors list includes activity total");
   assert.strictEqual(r.body.visitors[0].activity.counts["home:open"], 1, "tracking visitors list includes action count");
+
+  r = await call(trackingLinks, req("DELETE", {}, { pwaSession: s.admin, id: slug }));
+  assert.strictEqual(r.statusCode, 200, "tracking link delete succeeds");
+  assert.strictEqual(r.body.deleted, slug, "tracking link delete returns removed slug");
+  r = await call(trackingLinks, req("GET", { pwaSession: s.admin }));
+  assert.strictEqual(r.statusCode, 200, "tracking links list succeeds after delete");
+  assert.strictEqual(r.body.links.length, 0, "deleted tracking link disappears from list");
+  r = await call(trackingHit, req("POST", {}, { ref: "ref_" + slug, visitor_id: "visitor#2" }));
+  assert.strictEqual(r.body.recorded, false, "deleted tracking link no longer records clicks");
 }
 
 async function testRatingGazetteNotifications(redis) {

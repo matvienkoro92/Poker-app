@@ -1750,6 +1750,15 @@
     return CRM_LINK_TARGETS[0];
   }
 
+  function crmLinkKnownTargetByKey(key) {
+    key = String(key || "").trim();
+    if (!key) return null;
+    for (var i = 0; i < CRM_LINK_TARGETS.length; i++) {
+      if (CRM_LINK_TARGETS[i].key === key || CRM_LINK_TARGETS[i].startapp === key || CRM_LINK_TARGETS[i].view === key) return CRM_LINK_TARGETS[i];
+    }
+    return null;
+  }
+
   function renderCrmLinkTargetOptions() {
     var sel = document.getElementById("playerCrmLinkTarget");
     if (!sel || sel.dataset.crmLinkTargetsReady === "1") return;
@@ -2106,7 +2115,28 @@
 
   function crmLinkTargetLabel(link) {
     var params = crmLinkParams(link);
-    return params.target_label || crmLinkTargetByKey(params.target_section || params.target_startapp || params.target_view).label;
+    var destination = String(params.target_section || params.target_startapp || params.target_view || "").trim();
+    var knownTarget = crmLinkKnownTargetByKey(destination);
+    if (knownTarget) return knownTarget.label;
+    if (/^r_[a-z0-9_-]+$/i.test(destination) || /raffle|raffles|розыгрыш/i.test(destination)) return "Розыгрыши";
+    if (params.target_url) {
+      try {
+        var parsed = new URL(String(params.target_url), window.location.href);
+        var startapp = String(parsed.searchParams.get("startapp") || "").trim();
+        knownTarget = crmLinkKnownTargetByKey(startapp);
+        if (knownTarget) return knownTarget.label;
+        if (/^r_[a-z0-9_-]+$/i.test(startapp) || /raffle|raffles|розыгрыш/i.test(startapp)) return "Розыгрыши";
+        if (parsed.origin !== window.location.origin) return "Внешняя ссылка";
+      } catch (e) {}
+    }
+    if (params.created_from !== "crm_broadcast" && params.target_label) return params.target_label;
+    return destination || "Главная";
+  }
+
+  function crmLinkButtonText(link) {
+    var params = crmLinkParams(link);
+    if (params.button_text) return params.button_text;
+    return params.created_from === "crm_broadcast" ? (params.target_label || "—") : "—";
   }
 
   function crmLinkUrl(link) {
@@ -2126,7 +2156,7 @@
       tab.classList.toggle("player-crm__links-tab--active", active);
       tab.setAttribute("aria-selected", active ? "true" : "false");
     });
-    if (builder) builder.hidden = activeTab !== "own";
+    if (builder) builder.hidden = false;
     var allLinks = Array.isArray(state.trackingLinks) ? state.trackingLinks.slice() : [];
     var links = allLinks.filter(function (link) {
       var params = crmLinkParams(link);
@@ -2166,7 +2196,7 @@
           "<td>" + esc(intFmt(crmLinkMetric(link, "uniqueClicks"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "activeVisitors"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "actionEvents"))) + "</td>" +
-          "<td><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button></span></td>" +
+          "<td><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button><button type=\"button\" class=\"player-crm__danger-btn\" data-crm-link-delete=\"" + esc(link.id || "") + "\">Удалить</button></span></td>" +
           "<td class=\"player-crm__links-url-cell\"><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\" title=\"Скопировать ссылку\">" + esc(url || "—") + "</button></td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";
@@ -2242,6 +2272,29 @@
       });
   }
 
+  function deleteCrmTrackingLink(id) {
+    id = String(id || "").trim();
+    if (!id) return;
+    var link = (state.trackingLinks || []).find(function (row) { return String(row && row.id || "") === id; });
+    var title = link ? crmLinkTitle(link) : ("ref_" + id);
+    if (!window.confirm("Удалить ссылку «" + title + "» и всю её статистику?")) return;
+    var base = getApiBaseSafe();
+    fetch(base + "/api/tracking-links", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(postBodySafe({ id: id })),
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Не удалось удалить ссылку");
+        state.trackingLinks = (state.trackingLinks || []).filter(function (row) { return String(row && row.id || "") !== id; });
+        renderCrmTrackingLinks();
+        setCrmLinksResult("Ссылка удалена.", false);
+      });
+    }).catch(function (error) {
+      setCrmLinksResult(error && error.message ? error.message : "Не удалось удалить ссылку.", true);
+    });
+  }
+
   function trackingActionLabel(action) {
     action = String(action || "");
     if (action.indexOf("view:") === 0) return "Экран: " + action.slice(5);
@@ -2282,6 +2335,7 @@
       ["Название", crmLinkTitle(link)],
       ["Ref", "ref_" + state.linkDetailsId],
       ["Раздел", crmLinkTargetLabel(link)],
+      ["Текст кнопки", crmLinkButtonText(link)],
       ["Ссылка", url],
       ["Создана", link.createdAt || "—"],
       ["Источник", params.utm_source || "—"],
@@ -5072,6 +5126,11 @@
       var linkCopy = e.target.closest("[data-crm-link-copy]");
       if (linkCopy) {
         copyCrmLinkText(linkCopy.getAttribute("data-crm-link-copy") || "");
+        return;
+      }
+      var linkDelete = e.target.closest("[data-crm-link-delete]");
+      if (linkDelete) {
+        deleteCrmTrackingLink(linkDelete.getAttribute("data-crm-link-delete") || "");
         return;
       }
       var linkDetails = e.target.closest("[data-crm-link-details]");

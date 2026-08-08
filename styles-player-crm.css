@@ -3282,10 +3282,11 @@ button.player-crm__stat:focus-visible,
   font-weight: 800;
   cursor: pointer;
 }
-.player-crm__links-tab--active {
-  border-color: rgba(245, 190, 74, 0.9);
-  background: linear-gradient(180deg, #f8d77f, #d9a943);
-  color: #111827;
+.player-crm__links-tab.player-crm__links-tab--active,
+.player-crm__links-tab[aria-selected="true"] {
+  border-color: rgba(255, 211, 104, 0.98) !important;
+  background: linear-gradient(180deg, #ffe18c, #dda93e) !important;
+  color: #111827 !important;
   box-shadow: inset 0 0 0 1px rgba(255, 242, 184, 0.7);
 }
 .player-crm__links-builder {
