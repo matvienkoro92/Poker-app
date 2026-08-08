@@ -1,10 +1,10 @@
-var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-monday-mystery-bounty-170k.webp";
-var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-tuesday-tractor-150k-r300-a500.webp";
-var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-wednesday-knockout-300k.webp";
-var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-thursday-mystery-100k.webp";
-var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-friday-knockout-progressive-170k.webp";
-var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE;
-var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-sunday-pko-progressive-300k.webp";
+var HOME_TOURNAMENT_MONDAY_BANNER_FILE = "home-tournament-card-monday-9x10.webp";
+var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-card-tuesday-9x10.webp";
+var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-card-wednesday-9x10.webp";
+var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-card-thursday-9x10.webp";
+var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-card-friday-9x10.webp";
+var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-card-saturday-9x10.webp";
+var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-card-sunday-9x10.webp";
 var HOME_TOURNAMENT_MONTH_KNOCKOUT_1M_BANNER_FILE = "home-tournament-month-knockout-1m-2026-07-19.webp";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
@@ -63,11 +63,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Субботний турнир",
-    buyin: "350₽ · R:350₽ / A:350₽",
-    guarantee: "5 билетов по 10 000₽ каждый",
+    name: "Нокаут",
+    buyin: "5 000₽",
+    guarantee: "250 000₽",
     banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Субботний турнир — вход, ребай и аддон по 350 ₽, 5 билетов по 10 000 ₽",
+    bannerAlt: "Poker21 Нокаут субботы — вход 5 000 ₽, призовые 250 000 ₽",
     bannerWidth: 640,
     bannerHeight: 915
   }
@@ -199,7 +199,7 @@ var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1000 ₽", 1: "1000 ₽", 2: "1000 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "1000 ₽" };
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 };
-var HOME_TOURNAMENT_BANNER_VERSION = "2026071401";
+var HOME_TOURNAMENT_BANNER_VERSION = "2026080802";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 
 function getHomeTournamentBannerUrl(file) {
@@ -718,8 +718,22 @@ function initHomeTournamentNotifyControls() {
 function renderHomeTournamentWeekList(activeWeekday) {
   var el = document.getElementById("homeTournamentWeekList");
   if (!el) return;
-  el.innerHTML = "";
-  HOME_TOURNAMENT_WEEK_ORDER.forEach(function (dow) {
+  var signature = HOME_TOURNAMENT_WEEK_ORDER.map(function (dow) {
+    var entry = pokerGetHomeTournamentItem(dow, new Date()) || {};
+    return [dow, entry.name, entry.buyin, entry.guarantee, entry.banner].join("|");
+  }).join(";");
+
+  function selectTournament(dow) {
+    var selected = pokerGetHomeTournamentItem(dow, new Date()) || {};
+    if (selected.banner) preloadHomeTournamentBanner(selected.banner, "high");
+    window._homeTournamentSelectedWeekday = dow;
+    updateTournamentDayBlock();
+  }
+
+  if (el.dataset.carouselSignature !== signature) {
+    el.innerHTML = "";
+    el.dataset.carouselSignature = signature;
+    HOME_TOURNAMENT_WEEK_ORDER.forEach(function (dow) {
     var item = pokerGetHomeTournamentItem(dow, new Date()) || {};
     var row = document.createElement("button");
     row.type = "button";
@@ -735,6 +749,20 @@ function renderHomeTournamentWeekList(activeWeekday) {
     var day = document.createElement("span");
     day.className = "home-tournament-week-row__day";
     day.textContent = HOME_TOURNAMENT_WEEK_DAY_LABELS[dow];
+
+    var posterWrap = document.createElement("span");
+    posterWrap.className = "home-tournament-week-row__poster-wrap";
+    if (item.banner) {
+      var poster = document.createElement("img");
+      poster.className = "home-tournament-week-row__poster";
+      poster.src = getHomeTournamentBannerUrl(item.banner);
+      poster.alt = "";
+      poster.width = Number(item.bannerWidth) || 640;
+      poster.height = Number(item.bannerHeight) || 915;
+      poster.loading = dow === activeWeekday ? "eager" : "lazy";
+      poster.decoding = "async";
+      posterWrap.appendChild(poster);
+    }
 
     var main = document.createElement("span");
     main.className = "home-tournament-week-row__main";
@@ -759,6 +787,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
     main.appendChild(name);
     main.appendChild(meta);
 
+    row.appendChild(posterWrap);
     row.appendChild(day);
     row.appendChild(main);
     row.addEventListener("pointerenter", function () {
@@ -768,24 +797,82 @@ function renderHomeTournamentWeekList(activeWeekday) {
       if (item.banner) preloadHomeTournamentBanner(item.banner, "high");
     });
     row.addEventListener("click", function () {
-      if (item.banner) preloadHomeTournamentBanner(item.banner, "high");
-      window._homeTournamentSelectedWeekday = dow;
-      updateTournamentDayBlock();
+      selectTournament(dow);
     });
     el.appendChild(row);
+    });
+
+    [
+      ["prev", "‹", "Предыдущий турнир"],
+      ["next", "›", "Следующий турнир"]
+    ].forEach(function (control) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "home-tournament-week-nav home-tournament-week-nav--" + control[0];
+      button.textContent = control[1];
+      button.setAttribute("aria-label", control[2]);
+      button.addEventListener("click", function () {
+        var selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(Number(window._homeTournamentSelectedWeekday));
+        if (selectedIndex < 0) selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(activeWeekday);
+        var delta = control[0] === "next" ? 1 : -1;
+        var nextIndex = (selectedIndex + delta + HOME_TOURNAMENT_WEEK_ORDER.length) % HOME_TOURNAMENT_WEEK_ORDER.length;
+        selectTournament(HOME_TOURNAMENT_WEEK_ORDER[nextIndex]);
+      });
+      el.appendChild(button);
+    });
+
+    var swipeStartX = null;
+    el.addEventListener("pointerdown", function (event) {
+      swipeStartX = event.clientX;
+    });
+    el.addEventListener("pointerup", function (event) {
+      if (swipeStartX === null) return;
+      var deltaX = event.clientX - swipeStartX;
+      swipeStartX = null;
+      if (Math.abs(deltaX) < 42) return;
+      var selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(Number(window._homeTournamentSelectedWeekday));
+      if (selectedIndex < 0) selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(activeWeekday);
+      var direction = deltaX < 0 ? 1 : -1;
+      selectTournament(HOME_TOURNAMENT_WEEK_ORDER[(selectedIndex + direction + HOME_TOURNAMENT_WEEK_ORDER.length) % HOME_TOURNAMENT_WEEK_ORDER.length]);
+    });
+    el.addEventListener("pointercancel", function () { swipeStartX = null; });
+    el.addEventListener("keydown", function (event) {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      var selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(Number(window._homeTournamentSelectedWeekday));
+      if (selectedIndex < 0) selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(activeWeekday);
+      var direction = event.key === "ArrowRight" ? 1 : -1;
+      selectTournament(HOME_TOURNAMENT_WEEK_ORDER[(selectedIndex + direction + HOME_TOURNAMENT_WEEK_ORDER.length) % HOME_TOURNAMENT_WEEK_ORDER.length]);
+    });
+  }
+
+  var activeIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(Number(activeWeekday));
+  el.querySelectorAll(".home-tournament-week-row").forEach(function (row, index) {
+    var offset = index - activeIndex;
+    if (offset > 3) offset -= HOME_TOURNAMENT_WEEK_ORDER.length;
+    if (offset < -3) offset += HOME_TOURNAMENT_WEEK_ORDER.length;
+    var isActive = offset === 0;
+    row.style.setProperty("--carousel-offset", offset);
+    row.style.setProperty("--carousel-distance", Math.abs(offset));
+    row.classList.toggle("home-tournament-week-row--active", isActive);
+    row.classList.toggle("home-tournament-week-row--far", Math.abs(offset) > 2);
+    row.setAttribute("aria-pressed", isActive ? "true" : "false");
+    row.setAttribute("aria-hidden", Math.abs(offset) > 2 ? "true" : "false");
+    row.tabIndex = Math.abs(offset) > 2 ? -1 : 0;
   });
 }
 
 function syncHomeTournamentBonusAvailability(activeWeekday) {
   var bonusSections = document.querySelectorAll(".home-tournament-bonuses");
-  var isFreeroll = Number(activeWeekday) === 6;
   bonusSections.forEach(function (bonusesSection) {
-    bonusesSection.hidden = isFreeroll;
-    bonusesSection.style.display = isFreeroll ? "none" : "";
-    bonusesSection.setAttribute("aria-hidden", isFreeroll ? "true" : "false");
+    bonusesSection.hidden = false;
+    bonusesSection.style.removeProperty("display");
+    bonusesSection.setAttribute("aria-hidden", "false");
   });
-  var league2Active = activeWeekday === 2;
-  var leagueNum = league2Active ? 2 : 1;
+  var tournament = pokerGetHomeTournamentItem(Number(activeWeekday), new Date()) || {};
+  var buyinMatch = String(tournament.buyin || "").replace(/[\s\u00a0]/g, "").match(/\d+/);
+  var recognizedBuyin = buyinMatch ? Number(buyinMatch[0]) : NaN;
+  var leagueNum = Number.isFinite(recognizedBuyin) && recognizedBuyin >= 500 ? 1 : 2;
   var bonuses = document.querySelectorAll(".home-tournament-bonus[data-home-tournament-bonus]");
   bonuses.forEach(function (bonus) {
     var kind = bonus.getAttribute("data-home-tournament-bonus");
@@ -1085,7 +1172,10 @@ function chooseHomeTournamentRaffleBonus(activeRaffles) {
   var candidates = rows.filter(function (raffle) {
     if (!raffle || raffle.status !== "active") return false;
     if (homeTournamentRaffleBonusIsCash(raffle)) return false;
+    var raffleText = homeTournamentRaffleBonusText(raffle).toLowerCase();
+    if (raffleText.indexOf("трениров") !== -1 || raffleText.indexOf("training") !== -1) return false;
     if (homeTournamentRaffleBonusTicketCount(raffle) <= 0) return false;
+    if (homeTournamentRaffleBonusScore(raffle) < 10) return false;
     if (!raffle.endDate) return false;
     var end = new Date(raffle.endDate).getTime();
     return isFinite(end) && end > now;
