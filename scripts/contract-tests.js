@@ -1280,6 +1280,25 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.statusCode, 200, "CRM owner can block app user");
   assert.strictEqual(r.body.blocked, true, "CRM block response marks blocked");
 
+  r = await call(crm, req("POST", {}, {
+    pwaSession: s.admin,
+    menuAccessToken,
+    action: "calculation_draft_save",
+    weekStart: "1785121200999",
+    calculationDraftGroup: "figures",
+    calculationDraft: { rake: ["777"], raffleTicketsReturn: "50" },
+  }));
+  assert.strictEqual(r.statusCode, 200, "CRM calculations save through the CRM endpoint");
+  assert.deepStrictEqual(r.body.calculationDraft.draft.rake, ["777"], "CRM endpoint persists calculation figures");
+  r = await call(crm, req("POST", {}, {
+    pwaSession: s.admin,
+    menuAccessToken,
+    action: "calculation_draft_load",
+    weekStart: "1785121200999",
+  }));
+  assert.strictEqual(r.statusCode, 200, "CRM calculations load through the CRM endpoint");
+  assert.strictEqual(r.body.calculationDraft.draft.raffleTicketsReturn, "50", "CRM endpoint returns the saved draft");
+
   const coreRequest = req("GET", { pwaSession: s.admin, mode: "core" });
   coreRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) + "&menuAccessToken=" + encodeURIComponent(menuAccessToken) + "&mode=core";
   r = await call(crm, coreRequest);

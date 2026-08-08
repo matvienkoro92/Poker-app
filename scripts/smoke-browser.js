@@ -504,8 +504,13 @@ async function checkAdminRakeback(browser) {
     document.querySelectorAll("#adminReportModal [data-admin-report-panel]").forEach((panel) => {
       panel.classList.toggle("admin-report-panel--active", panel.getAttribute("data-admin-report-panel") === "calculations");
     });
+    const adminModal = document.getElementById("adminReportModal");
+    if (adminModal) {
+      adminModal.setAttribute("aria-hidden", "true");
+      adminModal.classList.remove("share-stats-admin-modal--open");
+    }
   });
-  await page.evaluate(() => document.querySelector("[data-admin-report-open-rakeback]")?.click());
+  await page.locator("[data-admin-report-open-rakeback]").click({ timeout: 5000 });
   await page.waitForFunction(() => {
     const totals = document.getElementById("adminReportRakebackTotalsModal");
     return !!totals && !totals.hidden && totals.parentNode === document.body;

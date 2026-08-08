@@ -148,6 +148,27 @@ function initAdminReportModal() {
     return true;
   }
   window.pokerOpenAdminReportRakebackOverlay = openRakebackOverlay;
+  function openRakebackTotalsInPlace() {
+    var totalsDialog = document.getElementById("adminReportRakebackTotalsModal");
+    var totalsList = document.getElementById("adminReportRakebackTotalsList");
+    if (totalsDialog) {
+      if (document.body && totalsDialog.parentNode !== document.body) document.body.appendChild(totalsDialog);
+      if (totalsList && !String(totalsList.innerHTML || "").trim()) {
+        totalsList.innerHTML = '<div class="admin-report-rakeback-totals-modal__section-title">Загружаем итоги…</div>';
+      }
+      totalsDialog.hidden = false;
+    }
+    var module = ensureLazyRakebackModule();
+    if (module && typeof module.openTotals === "function") {
+      module.openTotals();
+      return Promise.resolve(true);
+    }
+    return loadAdminReportScript("app-admin-reports-rakeback.js").then(function () {
+      var loadedModule = ensureLazyRakebackModule();
+      if (loadedModule && typeof loadedModule.openTotals === "function") loadedModule.openTotals();
+      return !!loadedModule;
+    }).catch(function () { return false; });
+  }
   function syncRakebackPeriodFromCalculations() {
     var range = window.__pokerAdminCalculationRange;
     if (!range || typeof range !== "object") return;
@@ -165,13 +186,8 @@ function initAdminReportModal() {
   }
   window.pokerOpenAdminReportRakebackPlayers = function (trigger) {
     if (trigger && trigger.matches && trigger.matches("[data-admin-report-open-rakeback]")) {
-      return Promise.resolve(openLazyRakebackModule()).then(function (module) {
+      return openRakebackTotalsInPlace().then(function () {
         syncRakebackPeriodFromCalculations();
-        if (module && typeof module.openTotals === "function") module.openTotals();
-        else {
-          openRakebackOverlay();
-          if (rakebackGrandTotalBtn && typeof rakebackGrandTotalBtn.click === "function") rakebackGrandTotalBtn.click();
-        }
         return true;
       });
     }

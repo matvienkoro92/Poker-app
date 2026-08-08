@@ -279,9 +279,6 @@
       var rakebackTrigger = (elements.root || document).querySelector("[data-admin-report-open-rakeback]");
       if (rakebackTrigger && rakebackTrigger.dataset.calculationRakebackBound !== "1") {
         rakebackTrigger.dataset.calculationRakebackBound = "1";
-        // Open on pointerdown as well: the calculations panel is portaled into
-        // CRM and document-level click guards can otherwise consume the click.
-        rakebackTrigger.addEventListener("pointerdown", openRakebackTotalsFromCalculations);
         rakebackTrigger.addEventListener("click", openRakebackTotalsFromCalculations);
         rakebackTrigger.addEventListener("keydown", function (event) {
           if (event.key !== "Enter" && event.key !== " ") return;

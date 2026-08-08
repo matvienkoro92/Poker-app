@@ -1021,16 +1021,19 @@
         var calculationsAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
           ? window.pokerAdminMenuAccessToken("calculations")
           : "";
-        if (!calculationsAccessToken && typeof window.pokerAdminMenuAccessToken === "function") {
-          calculationsAccessToken = window.pokerAdminMenuAccessToken("crm");
-        }
+        var crmAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
+          ? window.pokerAdminMenuAccessToken("crm")
+          : "";
+        var crmHost = document.getElementById("playerCrmCalculationsHost");
+        var useCrmEndpoint = !!(crmAccessToken && crmHost && calculationsRoot && crmHost.contains(calculationsRoot));
+        if (!calculationsAccessToken) calculationsAccessToken = crmAccessToken;
         if (calculationsAccessToken) payload.menuAccessToken = calculationsAccessToken;
         if (draft) payload.calculationDraft = draft;
         if (group) payload.calculationDraftGroup = String(group);
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
         return Promise.resolve().then(function () {
           var authenticatedPayload = buildAuthBody(payload);
-          return fetchDraft(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
+          return fetchDraft(base.replace(/\/$/, "") + (useCrmEndpoint ? "/api/player-crm" : "/api/admin-report-shifts"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(authenticatedPayload),
