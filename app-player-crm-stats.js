@@ -17,7 +17,7 @@ function initPlayerCrmStatsRuntime(deps) {
     var currentEl = document.getElementById("playerCrmCurrentStats");
     var trackingNoticeEl = document.getElementById("playerCrmTrackingNotice");
     if (!el) return null;
-    if (state.loading && state.loadingScope !== "chart") {
+    if (state.loading && state.loadingScope !== "chart" && !state.statsSummary) {
       if (currentEl) currentEl.innerHTML = "";
       if (trackingNoticeEl) trackingNoticeEl.innerHTML = "";
       el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";

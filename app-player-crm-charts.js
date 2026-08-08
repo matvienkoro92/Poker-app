@@ -12,7 +12,7 @@ function initPlayerCrmChartsRuntime(deps) {
   function renderAnalytics() {
     var el = document.getElementById("playerCrmAnalytics");
     if (!el) return;
-    if ((state.loading && state.loadingScope !== "data") || (state.heavyLoading && (state.heavyLoadingScope === "chart" || !state.chartAnalytics))) {
+    if ((state.loading && state.loadingScope !== "data" && !state.chartAnalytics) || (state.heavyLoading && (state.heavyLoadingScope === "chart" || !state.chartAnalytics))) {
       el.innerHTML = "<div class=\"player-crm__notice player-crm__notice--loading\">Загрузка данных…</div>";
       return;
     }

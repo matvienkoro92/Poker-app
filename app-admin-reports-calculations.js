@@ -125,7 +125,12 @@
       if (modal && modal.dataset.calculationsRakebackOverlayBound !== "1") {
         modal.dataset.calculationsRakebackOverlayBound = "1";
         function openRakebackOverlay(trigger) {
-          if (!trigger || !modal.contains(trigger)) return false;
+          if (!trigger) return false;
+          if (typeof window.pokerOpenAdminReportRakebackPlayers === "function") {
+            window.pokerOpenAdminReportRakebackPlayers(trigger);
+            return true;
+          }
+          if (!modal.contains(trigger)) return false;
           var panel = modal.querySelector('[data-admin-report-panel="rakeback"]');
           if (panel) {
             panel.classList.add("admin-report-panel--rakeback-overlay");

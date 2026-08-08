@@ -148,12 +148,41 @@ function initAdminReportModal() {
     return true;
   }
   window.pokerOpenAdminReportRakebackOverlay = openRakebackOverlay;
+  function syncRakebackPeriodFromCalculations() {
+    var range = window.__pokerAdminCalculationRange;
+    if (!range || typeof range !== "object") return;
+    var key = String(range.key || (range.all ? "all" : "custom"));
+    var allowed = ["today", "yesterday", "current_week", "last_week", "current_month", "last_month", "all", "custom"];
+    if (allowed.indexOf(key) === -1) key = range.from && range.to ? "custom" : "current_week";
+    if (key === "custom") {
+      var fromInput = document.getElementById("adminReportRakebackDateFrom");
+      var toInput = document.getElementById("adminReportRakebackDateTo");
+      if (fromInput && range.from) fromInput.value = String(range.from);
+      if (toInput && range.to) toInput.value = String(range.to);
+    }
+    var periodButton = modal && modal.querySelector('[data-rakeback-period="' + key + '"]');
+    if (periodButton && typeof periodButton.click === "function") periodButton.click();
+  }
+  window.pokerOpenAdminReportRakebackPlayers = function (trigger) {
+    var modalIsOpen = modal && modal.getAttribute("aria-hidden") !== "true" && !modal.hidden;
+    if (trigger && modalIsOpen && modal.contains(trigger)) return openRakebackOverlay();
+    if (typeof openModal === "function" && openModal() === false) return false;
+    setActiveTab("rakeback");
+    return Promise.resolve(openLazyRakebackModule()).then(function () {
+      syncRakebackPeriodFromCalculations();
+      return true;
+    });
+  };
   if (figuresRakebackLink && figuresRakebackLink.dataset.rakebackOverlayBound !== "1") {
     figuresRakebackLink.dataset.rakebackOverlayBound = "1";
+    figuresRakebackLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      window.pokerOpenAdminReportRakebackPlayers(figuresRakebackLink);
+    });
     figuresRakebackLink.addEventListener("keydown", function (event) {
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
-      openRakebackOverlay();
+      window.pokerOpenAdminReportRakebackPlayers(figuresRakebackLink);
     });
   }
   if (modal && modal.dataset.rakebackOverlayDelegatedBound !== "1") {
