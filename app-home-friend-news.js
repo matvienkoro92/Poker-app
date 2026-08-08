@@ -1960,6 +1960,7 @@
 
   function eventFeedbackHtml(row, profileCueHtml) {
     var rowId = feedbackEventId(row);
+    var shareToken = clubNewsEventShareToken(rowId);
     var feedback = eventFeedback[rowId] || {};
     var reactions = feedback.reactions || {};
     var reactionButtons = HOME_NEWS_REACTIONS.map(function (emoji) {
@@ -2027,7 +2028,13 @@
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
-        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span></span></span>",
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>" +
+        (newsModalMode === "club" && shareToken
+          ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-copy-event="' + esc(shareToken) +
+            '" aria-label="Скопировать ссылку на новость" title="Скопировать ссылку">' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
+            '</button>'
+          : "") + "</span></span>",
       comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -2164,11 +2171,13 @@
       : "";
     var feedbackParts = ticker ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var feedbackId = ticker ? "" : feedbackEventId(row);
+    var shareToken = ticker || newsModalMode !== "club" ? "" : clubNewsEventShareToken(feedbackId);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
-      (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') + playerAttrs + playerStyle + ">" +
+      (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') +
+      (shareToken ? ' data-home-news-share-token="' + esc(shareToken) + '"' : "") + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
@@ -2211,13 +2220,13 @@
         return eventHtml(row, false, row === dayHero, false, artOccurrence);
       }).join("");
       return '<section class="home-friend-news-modal__day-group">' +
-        '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
         (newsModalMode === "club" && groupIndex === 0 ? '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
             (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
           '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
             (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' + clubWinsDayTabsHtml() : "") +
         '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
+        '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
         '<div class="home-friend-news-modal__day-events">' +
           dayEventsHtml +
         "</div>" +
@@ -2375,6 +2384,7 @@
     list.innerHTML = achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite;
+    window.setTimeout(focusPendingClubNewsEvent, 0);
   }
 
   function activeModalEvents() {
@@ -2393,6 +2403,82 @@
       return eventTime(candidate.at) === rowTime;
     });
     return String(linked && linked.id || ownId);
+  }
+
+  function clubNewsEventShareToken(value) {
+    var source = String(value || "");
+    if (!source) return "";
+    var hash = 2166136261;
+    for (var i = 0; i < source.length; i += 1) {
+      hash ^= source.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+  }
+
+  function focusPendingClubNewsEvent() {
+    var token = String(window.pokerPendingClubNewsEventToken || "").trim().toLowerCase();
+    var modal = el("homeFriendNewsModal");
+    if (!token || newsModalMode !== "club" || !modal || modal.hidden) return;
+    var target = clubEvents.find(function (row) {
+      return clubNewsEventShareToken(String(row && row.id || "")) === token;
+    });
+    if (target && clubNewsTab === "wins") {
+      var dayKeys = clubAvailableWinDayKeys(clubEvents);
+      var targetDay = eventDayKey(target.at);
+      var requestedDay = dayKeys[1] === targetDay ? "previous" : "latest";
+      if (clubWinsDayTab !== requestedDay) {
+        clubWinsDayTab = requestedDay;
+        renderModalList(clubWinsEventsForTab(clubEvents));
+        return;
+      }
+    }
+    var item = modal.querySelector('[data-home-news-share-token="' + token + '"]');
+    if (!item) return;
+    window.pokerPendingClubNewsEventToken = "";
+    item.classList.add("home-friend-news-modal__item--linked");
+    if (item.scrollIntoView) item.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(function () { item.classList.remove("home-friend-news-modal__item--linked"); }, 2600);
+  }
+
+  function copyClubNewsEventLink(button) {
+    var token = String(button && button.getAttribute("data-home-news-copy-event") || "").trim();
+    if (!token) return;
+    var startParam = "club_news_" + token;
+    var link = typeof buildMiniAppStartLink === "function"
+      ? buildMiniAppStartLink(startParam)
+      : window.location.origin + window.location.pathname + "?startapp=" + encodeURIComponent(startParam);
+    function showResult(copied) {
+      if (!copied) {
+        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg && tg.showAlert) tg.showAlert("Не удалось скопировать ссылку: " + link);
+        else window.alert("Не удалось скопировать ссылку: " + link);
+        return;
+      }
+      button.classList.add("home-friend-news-modal__event-copy--copied");
+      button.setAttribute("aria-label", "Скопировано");
+      button.setAttribute("title", "Скопировано");
+      window.setTimeout(function () {
+        button.classList.remove("home-friend-news-modal__event-copy--copied");
+        button.setAttribute("aria-label", "Скопировать ссылку на новость");
+        button.setAttribute("title", "Скопировать ссылку");
+      }, 1800);
+    }
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      navigator.clipboard.writeText(link).then(function () { showResult(true); }).catch(function () { showResult(false); });
+      return;
+    }
+    var input = document.createElement("textarea");
+    input.value = link;
+    input.setAttribute("readonly", "");
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.select();
+    var copied = false;
+    try { copied = document.execCommand("copy"); } catch (error) {}
+    input.remove();
+    showResult(copied);
   }
 
   function syncNewsModalHeading() {
@@ -2594,6 +2680,13 @@
         }
         if (event.target.closest("[data-home-friend-news-close]")) {
           closeModal();
+          return;
+        }
+        var eventCopyButton = event.target.closest("[data-home-news-copy-event]");
+        if (eventCopyButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          copyClubNewsEventLink(eventCopyButton);
           return;
         }
         var clubTab = event.target.closest("[data-club-news-tab]");

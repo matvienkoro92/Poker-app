@@ -4695,6 +4695,97 @@ body .home-friend-news-modal .home-friend-news-modal__profile-cue {
   margin: 0;
 }
 
+body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 38px;
+  gap: 9px;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__action-controls .chat-user-modal__news-comment-toggle,
+body .home-friend-news-modal--club .home-friend-news-modal__action-controls .home-friend-news-modal__action-meta {
+  width: 100%;
+  min-width: 0;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy {
+  position: relative;
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  place-items: center;
+  color: #f7deb0;
+  border: 1px solid rgba(232, 184, 88, .58);
+  border-radius: 11px;
+  background: linear-gradient(155deg, rgba(52, 43, 25, .96), rgba(10, 14, 20, .98));
+  box-shadow: inset 0 1px 0 rgba(255, 239, 191, .16), 0 5px 13px rgba(0, 0, 0, .3);
+  cursor: pointer;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy:active {
+  transform: translateY(1px);
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy--copied {
+  color: #082017;
+  border-color: #66e3ad;
+  background: linear-gradient(145deg, #75e8b7, #3fbf8b);
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy--copied svg {
+  display: none;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy--copied::before {
+  content: "✓";
+  font-size: 21px;
+  font-weight: 1000;
+  line-height: 1;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__event-copy--copied::after {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  bottom: calc(100% + 7px);
+  content: "Скопировано";
+  padding: 5px 8px;
+  color: #dfffee;
+  border: 1px solid rgba(102, 227, 173, .62);
+  border-radius: 8px;
+  background: rgba(7, 31, 23, .97);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .4);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__item--linked {
+  animation: club-news-linked-pulse 1.15s ease-in-out 2;
+}
+@keyframes club-news-linked-pulse {
+  50% { box-shadow: 0 0 0 3px rgba(255, 215, 105, .78), 0 0 30px rgba(255, 190, 65, .38); }
+}
+
+@media (max-width: 480px) {
+  body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px;
+    gap: 7px;
+  }
+  body .home-friend-news-modal--club .home-friend-news-modal__event-copy {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 10px;
+  }
+}
+
 /* Premium Hero of the Day plaque. */
 body .home-friend-news-modal--club .home-friend-news-modal__item:first-child .home-friend-news-modal__player-title {
   padding-right: 82px;
