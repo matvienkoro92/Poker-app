@@ -3859,7 +3859,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 
 .app.app--view-home .home-club-actions-block {
   --home-sng-champions-row: auto !important;
-  grid-template-rows: auto var(--home-club-choice-row) !important;
+  grid-template-rows: auto !important;
 }
 
 .app.app--view-home .home-club-choice-actions[hidden] {
@@ -5240,7 +5240,7 @@ body .home-friend-news-modal--club
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus {
-  margin-top: 8px !important;
+  margin-top: 10px !important;
   border: 0;
   border-radius: 0;
   box-shadow: none;
