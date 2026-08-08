@@ -3962,6 +3962,7 @@
           return getCurrentWeekSavedTotals();
         });
       },
+      openTotals: openRakebackTotalsModal,
       render: render,
       saveSharedDraft: saveSharedDraftNow,
       setArchiveMode: setArchiveMode,

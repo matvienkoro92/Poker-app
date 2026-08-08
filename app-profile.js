@@ -1216,6 +1216,9 @@ function initProfilePublicShowcase() {
 
 var profileAchievementsShowcaseSeq = 0;
 var profileAchievementsShowcasePromise = null;
+var profileAchievementsRetryTimer = null;
+var profileAchievementsRetryCount = 0;
+var PROFILE_ACHIEVEMENTS_RETRY_MAX = 2;
 var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v2";
 var PROFILE_ACHIEVEMENTS_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
@@ -1653,6 +1656,7 @@ function refreshProfileAchievementsShowcase(profileData) {
     ? Promise.resolve(profileData)
     : (typeof loadCurrentProfileUserInfo === "function" ? loadCurrentProfileUserInfo() : Promise.resolve(null));
   var resolvedProfileData = profileData && profileData.ok ? profileData : null;
+  var fastRatingRendered = false;
   var cachedData = profileData && profileData.ok ? profileData : pokerProfileUserInfoCache;
   var cachedResult = readProfileAchievementsCache(cachedData);
   if (cachedResult) applyProfileAchievementsResult(cachedResult);
@@ -1661,7 +1665,7 @@ function refreshProfileAchievementsShowcase(profileData) {
     .then(function (data) {
       if (seq !== profileAchievementsShowcaseSeq) return false;
       resolvedProfileData = data && data.ok ? data : resolvedProfileData;
-      renderProfileFastRatingTotal(profileAchievementRatingNickFromData(data));
+      fastRatingRendered = renderProfileFastRatingTotal(profileAchievementRatingNickFromData(data));
       if (!cachedResult) {
         cachedResult = readProfileAchievementsCache(data);
         if (cachedResult) applyProfileAchievementsResult(cachedResult);
@@ -1680,12 +1684,19 @@ function refreshProfileAchievementsShowcase(profileData) {
       if (seq !== profileAchievementsShowcaseSeq || !result) return false;
       writeProfileAchievementsCache(resolvedProfileData || pokerProfileUserInfoCache, result);
       applyProfileAchievementsResult(result);
+      profileAchievementsRetryCount = 0;
+      if (profileAchievementsRetryTimer) {
+        clearTimeout(profileAchievementsRetryTimer);
+        profileAchievementsRetryTimer = null;
+      }
       return true;
     })
     .catch(function () {
       if (seq !== profileAchievementsShowcaseSeq) return false;
       if (cachedResult) return true;
-      if (total) total.innerHTML = renderProfileRatingTotalState("error");
+      if (!fastRatingRendered && total) total.innerHTML = renderProfileRatingTotalState(
+        profileAchievementsRetryCount < PROFILE_ACHIEVEMENTS_RETRY_MAX ? "loading" : "error"
+      );
       achievements.innerHTML =
         '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
           "Идет загрузка достижений..." +
@@ -1694,6 +1705,13 @@ function refreshProfileAchievementsShowcase(profileData) {
         '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
           "Идет загрузка истории сезонов..." +
         "</div>";
+      if (profileAchievementsRetryCount < PROFILE_ACHIEVEMENTS_RETRY_MAX && !profileAchievementsRetryTimer) {
+        profileAchievementsRetryCount += 1;
+        profileAchievementsRetryTimer = setTimeout(function () {
+          profileAchievementsRetryTimer = null;
+          refreshProfileAchievementsShowcase(resolvedProfileData || profileData);
+        }, profileAchievementsRetryCount === 1 ? 1200 : 3000);
+      }
       return false;
     })
     .finally(function () {

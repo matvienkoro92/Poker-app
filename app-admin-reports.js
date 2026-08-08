@@ -165,7 +165,15 @@ function initAdminReportModal() {
   }
   window.pokerOpenAdminReportRakebackPlayers = function (trigger) {
     var modalIsOpen = modal && modal.getAttribute("aria-hidden") !== "true" && !modal.hidden;
-    if (trigger && modalIsOpen && modal.contains(trigger)) return openRakebackOverlay();
+    if (trigger && modalIsOpen && modal.contains(trigger)) {
+      if (!openRakebackOverlay()) return false;
+      return Promise.resolve(openLazyRakebackModule()).then(function (module) {
+        syncRakebackPeriodFromCalculations();
+        if (module && typeof module.openTotals === "function") module.openTotals();
+        else if (rakebackGrandTotalBtn && typeof rakebackGrandTotalBtn.click === "function") rakebackGrandTotalBtn.click();
+        return true;
+      });
+    }
     if (typeof openModal === "function" && openModal() === false) return false;
     setActiveTab("rakeback");
     return Promise.resolve(openLazyRakebackModule()).then(function () {

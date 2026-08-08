@@ -111,7 +111,37 @@ function initProfilePokerPlus() {
   var pokerPlusStatsActivePeriod = "week";
   var POKERPLUS_LOCAL_CIPHERTEXT_KEY = "poker_profile_pokerplus_ciphertext";
   var POKERPLUS_AUTO_REFRESH_AT_KEY = "poker_profile_pokerplus_auto_refresh_at";
+  var POKERPLUS_PROFILE_SESSION_CACHE_KEY = "poker_profile_pokerplus_last_linked_v1";
+  var POKERPLUS_PROFILE_SESSION_CACHE_MAX_AGE = 30 * 60 * 1000;
   var pokerPlusRatingRetryTimer = null;
+
+  function readPokerPlusProfileSessionCache() {
+    try {
+      if (typeof sessionStorage === "undefined") return null;
+      var cached = JSON.parse(sessionStorage.getItem(POKERPLUS_PROFILE_SESSION_CACHE_KEY) || "null");
+      if (!cached || !cached.profile || Date.now() - Number(cached.ts || 0) > POKERPLUS_PROFILE_SESSION_CACHE_MAX_AGE) return null;
+      return cached;
+    } catch (ePokerPlusProfileCacheRead) {
+      return null;
+    }
+  }
+
+  function writePokerPlusProfileSessionCache(profile, accountId) {
+    try {
+      if (!profile || typeof profile !== "object" || typeof sessionStorage === "undefined") return;
+      sessionStorage.setItem(POKERPLUS_PROFILE_SESSION_CACHE_KEY, JSON.stringify({
+        ts: Date.now(),
+        accountId: String(accountId || "").trim(),
+        profile: profile,
+      }));
+    } catch (ePokerPlusProfileCacheWrite) {}
+  }
+
+  function clearPokerPlusProfileSessionCache() {
+    try {
+      if (typeof sessionStorage !== "undefined") sessionStorage.removeItem(POKERPLUS_PROFILE_SESSION_CACHE_KEY);
+    } catch (ePokerPlusProfileCacheClear) {}
+  }
 
   function setFeedback(text, tone) {
     if (!feedback) return;
@@ -1662,6 +1692,7 @@ function initProfilePokerPlus() {
     unbindBtn.disabled = !state.isVerified || !!state.isGuest;
     input.disabled = !state.isVerified || !!state.isGuest;
     if (!state.isVerified || state.isGuest) {
+      clearPokerPlusProfileSessionCache();
       setFeedback("", false);
       renderProfile(null, false);
     }
@@ -1791,7 +1822,7 @@ function initProfilePokerPlus() {
       setProfileStatusLoading(false);
       if (section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
       if (state.isVerified && !state.isGuest) {
-        renderProfile(null, false);
+        if (!pokerPlusProfileLinked) renderProfile(null, false);
         if (!base) setFeedback("Сервер профиля недоступен. Попробуйте обновить страницу.", "warn");
         else if (!pokerPlusAuthBodyHasCredential(body)) setFeedback(pokerPlusMissingAuthMessage(), "warn");
       }
@@ -1821,7 +1852,7 @@ function initProfilePokerPlus() {
         .then(function (data) {
           if (!data || !data.ok) {
             if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
-            if (!refresh && !silentRefresh) renderProfile(null, false);
+            if (!refresh && !silentRefresh && !pokerPlusProfileLinked) setPokerPlusInitialLoading(false);
             setProfileStatusLoading(false);
             if (!silentRefresh && data && data.error) {
               setFeedback(refresh ? "Не удалось обновить Poker21: " + data.error + " Старые данные оставили." : data.error, true);
@@ -1829,6 +1860,8 @@ function initProfilePokerPlus() {
             return { refreshStatus: "failed" };
           }
           if (data && data.accountId) pokerPlusAccountId = String(data.accountId || "").trim();
+          if (data && data.linked && data.profile) writePokerPlusProfileSessionCache(data.profile, pokerPlusAccountId);
+          else if (data && data.ok && data.linked === false) clearPokerPlusProfileSessionCache();
           if (refreshCiphertext && data && data.linked) savePokerPlusLocalCiphertext(pokerPlusAccountId, refreshCiphertext);
           if (refresh && pokerPlusProfileLinked && (!data.linked || !data.profile)) {
             setProfileStatusLoading(false);
@@ -1889,7 +1922,7 @@ function initProfilePokerPlus() {
           } else {
             if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
             if (!silentRefresh) {
-              if (!refresh) renderProfile(null, false);
+              if (!refresh) setPokerPlusInitialLoading(false);
               else setProfileStatusLoading(false);
               setFeedback(refresh ? "Не удалось обновить Poker21: сервер обновления не ответил. Старые данные показаны ниже." : "Poker21 не ответил. Проверьте сеть и попробуйте открыть профиль ещё раз.", true);
               if (!refresh) renderPokerPlusStatsFallbackIfVisible();
@@ -1976,6 +2009,7 @@ function initProfilePokerPlus() {
           }
           pokerPlusPostTimeoutCheckSeq += 1;
           pokerPlusAccountId = data && data.accountId ? String(data.accountId || "").trim() : pokerPlusAccountId;
+          writePokerPlusProfileSessionCache(data.profile, pokerPlusAccountId);
           savePokerPlusLocalCiphertext(pokerPlusAccountId, ciphertext);
           var statsPending = pokerPlusProfileHasOnlyZeroStats(data.profile);
           renderProfile(statsPending ? pokerPlusProfileWithoutStats(data.profile) : data.profile, true);
@@ -2043,6 +2077,7 @@ function initProfilePokerPlus() {
           }
           pokerPlusPostTimeoutCheckSeq += 1;
           clearPokerPlusLocalCiphertext(pokerPlusAccountId || (data && data.accountId));
+          clearPokerPlusProfileSessionCache();
           pokerPlusAccountId = "";
           renderProfile(null, false);
           notifyPokerPlusStatusChange(false, null);
@@ -2190,17 +2225,24 @@ function initProfilePokerPlus() {
   var profileRoot = document.getElementById("profileView");
   var activeProfileTab = profileRoot && profileRoot.dataset ? profileRoot.dataset.profileActiveTab : "";
   if (initialState.isVerified && !initialState.isGuest && section.dataset.profilePokerPlusLoaded !== "1") {
+    var cachedPokerPlusProfile = readPokerPlusProfileSessionCache();
+    if (cachedPokerPlusProfile) {
+      pokerPlusAccountId = String(cachedPokerPlusProfile.accountId || "").trim();
+      renderProfile(cachedPokerPlusProfile.profile, true);
+      notifyPokerPlusStatusChange(true, cachedPokerPlusProfile.profile);
+    }
     section.dataset.profilePokerPlusLoaded = "1";
     var showInitialPokerPlusLoading = activeProfileTab === "poker21" && !section.classList.contains("profile-pokerplus-card--linked");
     var initialPokerPlusLoadingTimer = null;
     if (showInitialPokerPlusLoading) {
       setPokerPlusInitialLoading(true);
       initialPokerPlusLoadingTimer = setTimeout(function () {
+        if (pokerPlusProfileLinked) return;
         if (!section.classList.contains("profile-pokerplus-card--loading")) return;
-        renderProfile(null, false);
+        setPokerPlusInitialLoading(false);
         setProfileStatusLoading(false);
         section.dataset.profilePokerPlusLoaded = "";
-        setFeedback("Poker21 не ответил. Показали форму привязки; попробуйте открыть вкладку ещё раз или вставьте ключ из Poker21.", "warn");
+        setFeedback("Poker21 пока не ответил. Попробуйте открыть вкладку ещё раз.", "warn");
       }, 11000);
     }
     try {
