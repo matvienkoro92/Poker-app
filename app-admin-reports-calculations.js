@@ -259,8 +259,26 @@
         figuresRefreshBtn.addEventListener("click", function () {
           if (figuresRefreshBtn.disabled) return;
           figuresRefreshBtn.disabled = true;
+          var refreshStatus = document.getElementById("adminReportFiguresSaveStatus");
+          if (refreshStatus) {
+            refreshStatus.textContent = "Обновляем…";
+            refreshStatus.setAttribute("data-tone", "loading");
+          }
           var refreshResult = call(callbacks.loadReports, true);
-          Promise.resolve(refreshResult).finally(function () {
+          var refreshTimeout = new Promise(function (_, reject) {
+            setTimeout(function () { reject(new Error("calculation refresh timeout")); }, 30000);
+          });
+          Promise.race([Promise.resolve(refreshResult), refreshTimeout]).then(function () {
+            if (refreshStatus) {
+              refreshStatus.textContent = "Обновлено";
+              refreshStatus.removeAttribute("data-tone");
+            }
+          }).catch(function () {
+            if (refreshStatus) {
+              refreshStatus.textContent = "Не удалось обновить";
+              refreshStatus.setAttribute("data-tone", "error");
+            }
+          }).finally(function () {
             figuresRefreshBtn.disabled = false;
           });
         });

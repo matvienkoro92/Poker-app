@@ -54,6 +54,10 @@
             <span class="player-crm__period-range" id="playerCrmPeriodRange">—</span>
             <button type="button" class="player-crm__selected-period-refresh" data-crm-refresh-stats>Обновить данные</button>
           </div>
+          <div class="player-crm__period-loading" id="playerCrmPeriodLoading" role="status" aria-live="polite" hidden>
+            <span class="player-crm__period-loading-spinner" aria-hidden="true"></span>
+            <span>Загружаем данные выбранного периода…</span>
+          </div>
 
           <div class="player-crm__current-stats" id="playerCrmCurrentStats"></div>
           <div class="player-crm__tracking-notice" id="playerCrmTrackingNotice"></div>

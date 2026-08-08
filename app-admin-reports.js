@@ -202,6 +202,15 @@ function initAdminReportModal() {
       if (!trigger || !modal.contains(trigger)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      var totalsDialog = document.getElementById("adminReportRakebackTotalsModal");
+      var totalsList = document.getElementById("adminReportRakebackTotalsList");
+      if (totalsDialog) {
+        if (totalsDialog.parentNode !== modal) modal.appendChild(totalsDialog);
+        if (totalsList && !String(totalsList.innerHTML || "").trim()) {
+          totalsList.innerHTML = '<div class="admin-report-rakeback-totals-modal__section-title">Загружаем итоги…</div>';
+        }
+        totalsDialog.hidden = false;
+      }
       window.pokerOpenAdminReportRakebackPlayers(trigger);
     }, true);
   }

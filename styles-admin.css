@@ -994,14 +994,33 @@ body.admin-report-modal-open .bottom-nav {
   overflow-wrap: anywhere;
 }
 #adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field--return {
-  grid-template-columns: minmax(52px, 1fr) minmax(62px, 0.55fr) minmax(70px, 0.48fr);
+  grid-template-columns: minmax(0, 1fr) minmax(92px, 0.48fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 1px;
+}
+#adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field--return > span:first-child {
+  grid-column: 1;
+  grid-row: 1;
 }
 #adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__return-auto {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
   min-width: 0;
   max-width: 100%;
-  font-size: clamp(9px, 1vw, 12px);
+  margin-left: 0;
+  font-size: clamp(10px, 1.05vw, 12px);
   white-space: normal;
   overflow-wrap: anywhere;
+}
+#adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field--return .admin-report-calculations__input--adjustment {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 100%;
+  min-width: 0;
 }
 #adminReportCalcRakeCard #adminReportCalcFigures > label.admin-report-calculations__field {
   min-height: 38px;
@@ -1396,6 +1415,10 @@ body.admin-report-modal-open .bottom-nav {
   background: rgba(248, 113, 113, 0.1);
 }
 .admin-report-calculations__field--link {
+  width: 100%;
+  appearance: none;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
 }

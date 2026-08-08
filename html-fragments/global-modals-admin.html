@@ -469,8 +469,8 @@
                       <input type="hidden" id="adminReportFiguresDate" />
                     </div>
                     <div class="admin-report-calculations__toolbar admin-report-calculations__toolbar--inline">
-                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--text admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить рейк, расходы и возвраты" aria-label="Сохранить рейк, расходы и возвраты">Сохранить</button>
-                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--text" id="adminReportFiguresRefreshBtn" title="Заново загрузить все данные за выбранный период" aria-label="Заново загрузить все данные за выбранный период">Обновить</button>
+                      <button type="button" class="admin-report-calculations__action admin-report-calculations__action--save" id="adminReportFiguresSaveBtn" title="Сохранить рейк, расходы и возвраты" aria-label="Сохранить рейк, расходы и возвраты">✓</button>
+                      <button type="button" class="admin-report-calculations__action" id="adminReportFiguresRefreshBtn" title="Заново загрузить все данные за выбранный период" aria-label="Заново загрузить все данные за выбранный период">↻</button>
                       <button type="button" class="admin-report-calculations__action admin-report-calculations__action--edit" id="adminReportFiguresEditBtn" title="Редактировать рейк и расходы" aria-label="Редактировать рейк и расходы" hidden>✎</button>
                       <span class="admin-report-calculations__status" id="adminReportFiguresSaveStatus"></span>
                     </div>
@@ -536,14 +536,14 @@
                 </section>
               </div>
               <section class="admin-report-calculations__figures" id="adminReportCalcFigures">
-                <div class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--link" data-admin-report-open-rakeback role="button" tabindex="0" aria-label="Открыть итоги рейкбека по клубам и датам">
+                <button type="button" class="admin-report-calculations__field admin-report-calculations__field--negative admin-report-calculations__field--link" data-admin-report-open-rakeback aria-label="Открыть итоги рейкбека по клубам и датам">
                   <span id="adminReportFiguresRakebackLabel">РБ в CRM · выбранный период</span>
                   <output id="adminReportFiguresRakeback">0</output>
                   <small class="admin-report-calculations__reconciliation">
                     <span>В отчётах: <output id="adminReportFiguresRakebackSent">0</output></span>
                     <span>Расхождение: <output id="adminReportFiguresRakebackDifference">0</output></span>
                   </small>
-                </div>
+                </button>
                 <details class="admin-report-calculations__bonus-group">
                   <summary class="admin-report-calculations__bonus-group-summary">
                     <span>Бонусы и возвраты</span>

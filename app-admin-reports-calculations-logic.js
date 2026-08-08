@@ -10,6 +10,7 @@
       var calculationPeriodRequestSeq = 0;
       var calculationReportsRequestSeq = 0;
       var calculationDraftRequestSeq = 0;
+      var figuresSaveRequestSeq = 0;
       var calculationDisplayedPeriodKey = "";
       var calculationInitialLoadRetryTimer = null;
       var calculationInitialLoadRetryCount = 0;
@@ -1027,7 +1028,10 @@
           cache: "no-store",
         }, 15000).then(function (response) {
           if (!response || !response.ok) throw new Error("calculation draft sync failed");
-          return response.json();
+          return response.json().then(function (data) {
+            if (!data || data.ok !== true) throw new Error(data && data.error || "calculation draft sync failed");
+            return data;
+          });
         });
       }
 
@@ -1244,6 +1248,7 @@
       }
 
       function saveFiguresDraft() {
+        var saveSeq = ++figuresSaveRequestSeq;
         var draft = collectCalculationsDraft();
         var expectedDraftKey = getCalculationDraftKey();
         try {
@@ -1254,11 +1259,18 @@
           setFiguresStatus("Локально не сохранено");
         }
         setFiguresStatus("Сохраняю…", "loading");
-        return saveServerCalculationDraft(draft, "figures").then(function () {
+        var timeoutPromise = new Promise(function (_, reject) {
+          setTimeout(function () {
+            reject(new Error("calculation draft save timeout"));
+          }, 12000);
+        });
+        return Promise.race([saveServerCalculationDraft(draft, "figures"), timeoutPromise]).then(function () {
+          if (saveSeq !== figuresSaveRequestSeq) return;
           if (getCalculationDraftKey() !== expectedDraftKey) return;
           setFiguresLocked(true);
           setFiguresStatus("Сохранено");
         }).catch(function () {
+          if (saveSeq !== figuresSaveRequestSeq) return;
           setFiguresStatus("Не удалось сохранить — повторите", "error");
         });
       }

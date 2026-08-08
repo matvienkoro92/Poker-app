@@ -16,6 +16,12 @@ function initPlayerCrmStatsRuntime(deps) {
     var el = document.getElementById("playerCrmStats");
     var currentEl = document.getElementById("playerCrmCurrentStats");
     var trackingNoticeEl = document.getElementById("playerCrmTrackingNotice");
+    var loadingEl = document.getElementById("playerCrmPeriodLoading");
+    var crmRoot = document.getElementById("playerCrmView");
+    var periodLoading = !!(state.loading && state.loadingScope !== "chart");
+    if (loadingEl) loadingEl.hidden = !periodLoading;
+    if (crmRoot) crmRoot.classList.toggle("player-crm--period-loading", periodLoading);
+    if (el) el.setAttribute("aria-busy", periodLoading ? "true" : "false");
     if (!el) return null;
     if (state.loading && state.loadingScope !== "chart" && !state.statsSummary) {
       if (currentEl) currentEl.innerHTML = "";
