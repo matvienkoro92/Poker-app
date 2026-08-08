@@ -78,140 +78,140 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-13-07-2026-league2-new-plo5-300-19h.avif"
   ],
   "01.06.2026": [
-    "rating-compressed-preview/rating-01-06-2026-league2-dv-plo5-30k-12h.jpg",
-    "rating-compressed-preview/rating-01-06-2026-league2-bounty-200-50k-gtd-14h.jpg",
-    "rating-compressed-preview/rating-01-06-2026-league2-tournament-plo6-20h.jpg"
+    "rating-compressed-preview/rating-01-06-2026-league2-dv-plo5-30k-12h.avif",
+    "rating-compressed-preview/rating-01-06-2026-league2-bounty-200-50k-gtd-14h.avif",
+    "rating-compressed-preview/rating-01-06-2026-league2-tournament-plo6-20h.avif"
   ],
   "02.06.2026": [
-    "rating-compressed-preview/rating-02-06-2026-league2-micro-200-50k-gtd-14h.jpg",
-    "rating-compressed-preview/rating-02-06-2026-league2-tournir-vtornika-18h.jpg",
-    "rating-compressed-preview/rating-02-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-02-06-2026-league2-micro-200-50k-gtd-14h.avif",
+    "rating-compressed-preview/rating-02-06-2026-league2-tournir-vtornika-18h.avif",
+    "rating-compressed-preview/rating-02-06-2026-league2-energetik-22h.avif"
   ],
   "03.06.2026": [
-    "rating-compressed-preview/rating-03-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-03-06-2026-league2-dv-plo5-30k-12h.jpg",
-    "rating-compressed-preview/rating-03-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-03-06-2026-league2-tournir-sredy-18h.jpg",
+    "rating-compressed-preview/rating-03-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-03-06-2026-league2-dv-plo5-30k-12h.avif",
+    "rating-compressed-preview/rating-03-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-03-06-2026-league2-tournir-sredy-18h.avif",
     "rating-compressed-preview/rating-03-06-2026-league2-hyper-turbo-300-20h.avif",
-    "rating-compressed-preview/rating-03-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-03-06-2026-league2-energetik-22h.avif"
   ],
   "04.06.2026": [
     "rating-compressed-preview/rating-04-06-2026-league2-deep-night-15k-02h.avif",
-    "rating-compressed-preview/rating-04-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-04-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-04-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-04-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-04-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-04-06-2026-league2-energetik-22h.avif"
   ],
   "05.06.2026": [
-    "rating-compressed-preview/rating-05-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-05-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-05-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-05-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-05-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-05-06-2026-league2-energetik-22h.avif"
   ],
   "06.06.2026": [
     "rating-compressed-preview/rating-06-06-2026-league2-dv-plo5-30k-12h.avif",
-    "rating-compressed-preview/rating-06-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-06-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-06-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-06-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-06-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-06-06-2026-league2-energetik-22h.avif"
   ],
   "07.06.2026": [
-    "rating-compressed-preview/rating-07-06-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-07-06-2026-league2-tournament-rebuy-14h.avif",
     "rating-compressed-preview/rating-07-06-2026-league2-plo4-20k-16h.avif",
-    "rating-compressed-preview/rating-07-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-07-06-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-07-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-07-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-07-06-2026-league2-tournament-plo6-20h.avif",
+    "rating-compressed-preview/rating-07-06-2026-league2-energetik-22h.avif"
   ],
   "08.06.2026": [
-    "rating-compressed-preview/rating-08-06-2026-league2-kg-plo6-09h.jpg",
-    "rating-compressed-preview/rating-08-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-08-06-2026-league2-plo5-300-19h.jpg",
-    "rating-compressed-preview/rating-08-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-08-06-2026-league2-kg-plo6-09h.avif",
+    "rating-compressed-preview/rating-08-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-08-06-2026-league2-plo5-300-19h.avif",
+    "rating-compressed-preview/rating-08-06-2026-league2-energetik-22h.avif"
   ],
   "09.06.2026": [
-    "rating-compressed-preview/rating-09-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-09-06-2026-league2-kg-plo6-09h.jpg",
-    "rating-compressed-preview/rating-09-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-09-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-09-06-2026-league2-turnir-vtornika-18h.jpg",
-    "rating-compressed-preview/rating-09-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-09-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-09-06-2026-league2-kg-plo6-09h.avif",
+    "rating-compressed-preview/rating-09-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-09-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-09-06-2026-league2-turnir-vtornika-18h.avif",
+    "rating-compressed-preview/rating-09-06-2026-league2-energetik-22h.avif"
   ],
   "10.06.2026": [
-    "rating-compressed-preview/rating-10-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-10-06-2026-league2-kg-plo6-09h.jpg",
-    "rating-compressed-preview/rating-10-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-10-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-10-06-2026-league2-tournir-sredy-18h.jpg",
-    "rating-compressed-preview/rating-10-06-2026-league2-plo5-300-19h.jpg",
-    "rating-compressed-preview/rating-10-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-10-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-10-06-2026-league2-kg-plo6-09h.avif",
+    "rating-compressed-preview/rating-10-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-10-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-10-06-2026-league2-tournir-sredy-18h.avif",
+    "rating-compressed-preview/rating-10-06-2026-league2-plo5-300-19h.avif",
+    "rating-compressed-preview/rating-10-06-2026-league2-energetik-22h.avif"
   ],
   "11.06.2026": [
-    "rating-compressed-preview/rating-11-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-11-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-11-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-11-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-11-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-11-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-11-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-11-06-2026-league2-energetik-22h.avif"
   ],
   "12.06.2026": [
-    "rating-compressed-preview/rating-12-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-12-06-2026-league2-bounty-200-50k-gtd-14h.jpg",
-    "rating-compressed-preview/rating-12-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-12-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-12-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-12-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-12-06-2026-league2-bounty-200-50k-gtd-14h.avif",
+    "rating-compressed-preview/rating-12-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-12-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-12-06-2026-league2-energetik-22h.avif"
   ],
   "13.06.2026": [
-    "rating-compressed-preview/rating-13-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-13-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-13-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-13-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-13-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-13-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-13-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-13-06-2026-league2-energetik-22h.avif"
   ],
   "14.06.2026": [
-    "rating-compressed-preview/rating-14-06-2026-league2-magic-bounty-50k-11h.jpg",
-    "rating-compressed-preview/rating-14-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-14-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-14-06-2026-league2-tournament-plo6-20h.jpg"
+    "rating-compressed-preview/rating-14-06-2026-league2-magic-bounty-50k-11h.avif",
+    "rating-compressed-preview/rating-14-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-14-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-14-06-2026-league2-tournament-plo6-20h.avif"
   ],
   "15.06.2026": [
-    "rating-compressed-preview/rating-15-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-15-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-15-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-15-06-2026-league2-energetik-22h.avif"
   ],
   "16.06.2026": [
-    "rating-compressed-preview/rating-16-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-16-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-16-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-16-06-2026-league2-turnir-vtornika-18h.jpg",
-    "rating-compressed-preview/rating-16-06-2026-league2-hyper-turbo-300-20h.jpg",
-    "rating-compressed-preview/rating-16-06-2026-league2-tournament-plo6-20h.jpg"
+    "rating-compressed-preview/rating-16-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-16-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-16-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-16-06-2026-league2-turnir-vtornika-18h.avif",
+    "rating-compressed-preview/rating-16-06-2026-league2-hyper-turbo-300-20h.avif",
+    "rating-compressed-preview/rating-16-06-2026-league2-tournament-plo6-20h.avif"
   ],
   "17.06.2026": [
-    "rating-compressed-preview/rating-17-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-17-06-2026-league2-bounty-200-50k-gtd-14h.jpg",
-    "rating-compressed-preview/rating-17-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-17-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-17-06-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-17-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-17-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-17-06-2026-league2-bounty-200-50k-gtd-14h.avif",
+    "rating-compressed-preview/rating-17-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-17-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-17-06-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-17-06-2026-league2-energetik-22h.avif"
   ],
   "18.06.2026": [
-    "rating-compressed-preview/rating-18-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-18-06-2026-league2-mok-17h.jpg"
+    "rating-compressed-preview/rating-18-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-18-06-2026-league2-mok-17h.avif"
   ],
   "19.06.2026": [
-    "rating-compressed-preview/rating-19-06-2026-league2-kg-plo6-09h.jpg",
-    "rating-compressed-preview/rating-19-06-2026-league2-bounty-200-50k-gtd-14h.jpg",
-    "rating-compressed-preview/rating-19-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-19-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-19-06-2026-league2-tournament-plo6-20h.jpg"
+    "rating-compressed-preview/rating-19-06-2026-league2-kg-plo6-09h.avif",
+    "rating-compressed-preview/rating-19-06-2026-league2-bounty-200-50k-gtd-14h.avif",
+    "rating-compressed-preview/rating-19-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-19-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-19-06-2026-league2-tournament-plo6-20h.avif"
   ],
   "20.06.2026": [
-    "rating-compressed-preview/rating-20-06-2026-league2-magic-bounty-50k-11h.jpg",
-    "rating-compressed-preview/rating-20-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-20-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-20-06-2026-league2-tournament-plo6-20h.jpg"
+    "rating-compressed-preview/rating-20-06-2026-league2-magic-bounty-50k-11h.avif",
+    "rating-compressed-preview/rating-20-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-20-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-20-06-2026-league2-tournament-plo6-20h.avif"
   ],
   "21.06.2026": [
-    "rating-compressed-preview/rating-21-06-2026-league2-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-21-06-2026-league2-magic-bounty-50k-11h.jpg",
-    "rating-compressed-preview/rating-21-06-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-21-06-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-21-06-2026-league2-ok-17h.jpg",
-    "rating-compressed-preview/rating-21-06-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-21-06-2026-league2-energetik-22h.jpg"
+    "rating-compressed-preview/rating-21-06-2026-league2-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-21-06-2026-league2-magic-bounty-50k-11h.avif",
+    "rating-compressed-preview/rating-21-06-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-21-06-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-21-06-2026-league2-ok-17h.avif",
+    "rating-compressed-preview/rating-21-06-2026-league2-tournament-plo6-20h.avif",
+    "rating-compressed-preview/rating-21-06-2026-league2-energetik-22h.avif"
   ],
   "22.06.2026": [
     "rating-compressed-preview/rating-22-06-2026-league2-ok-17h.avif",
@@ -398,34 +398,38 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
   ]
 ,
   "03.08.2026": [
-    "rating-compressed-preview/rating-03-08-2026-league2-ok-17h.jpg",
-    "rating-compressed-preview/rating-03-08-2026-league2-ok-21h.jpg"
+    "rating-compressed-preview/rating-03-08-2026-league2-bounty-200-40k-gtd-14h.avif",
+    "rating-compressed-preview/rating-03-08-2026-league2-ok-17h.avif",
+    "rating-compressed-preview/rating-03-08-2026-league2-ok-21h.avif"
   ],
   "04.08.2026": [
-    "rating-compressed-preview/rating-04-08-2026-league2-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-dv-bounty-100k-13h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-tournament-rebuy-14h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-ok-17h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-turnir-vtornika-18h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-bounty-magic-50k-18h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-hr-5000-200k-20h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-nlh-knockout-220k-21h.jpg",
-    "rating-compressed-preview/rating-04-08-2026-league2-night-magic-80ko-23h.jpg"
+    "rating-compressed-preview/rating-04-08-2026-league2-tournament-rebuy-14h.avif",
+    "rating-compressed-preview/rating-04-08-2026-league2-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-04-08-2026-league2-ok-17h.avif",
+    "rating-compressed-preview/rating-04-08-2026-league2-turnir-vtornika-18h.avif"
   ]
 ,
   "05.08.2026": [
-    "rating-compressed-preview/rating-05-08-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-05-08-2026-league2-tournament-plo6-20h.jpg",
-    "rating-compressed-preview/rating-05-08-2026-league2-ok-21h.jpg",
-    "rating-compressed-preview/rating-05-08-2026-league2-energetiktournament-22h.jpg"
+    "rating-compressed-preview/rating-05-08-2026-league2-magic-bounty-e-50k-11h.avif",
+    "rating-compressed-preview/rating-05-08-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-05-08-2026-league2-tournament-plo6-20h.avif",
+    "rating-compressed-preview/rating-05-08-2026-league2-ok-21h.avif",
+    "rating-compressed-preview/rating-05-08-2026-league2-energetiktournament-22h.avif"
   ]
 ,
   "06.08.2026": [
-    "rating-compressed-preview/rating-06-08-2026-league2-mok-17h.jpg",
-    "rating-compressed-preview/rating-06-08-2026-league2-chetverg-mko-18h.jpg",
-    "rating-compressed-preview/rating-06-08-2026-league2-ok-21h.jpg",
-    "rating-compressed-preview/rating-06-08-2026-league2-energetiktournament-22h.jpg"
+    "rating-compressed-preview/rating-06-08-2026-league2-mok-17h.avif",
+    "rating-compressed-preview/rating-06-08-2026-league2-chetverg-mko-18h.avif",
+    "rating-compressed-preview/rating-06-08-2026-league2-ok-21h.avif",
+    "rating-compressed-preview/rating-06-08-2026-league2-energetiktournament-22h.avif"
+  ]
+,
+  "07.08.2026": [
+    "rating-compressed-preview/rating-07-08-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-07-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-07-08-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-07-08-2026-league2-bounty-200-40k-gt-14h.jpg",
+    "rating-compressed-preview/rating-07-08-2026-league2-plo5-300-19h.jpg",
+    "rating-compressed-preview/rating-07-08-2026-league2-hyper-turbo-300-20h.jpg"
   ]
 };
