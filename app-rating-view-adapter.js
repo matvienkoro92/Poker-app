@@ -460,6 +460,20 @@ function summerRatingPlayerArtCssUrl(nick) {
   return 'url("' + String(art.src).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '")';
 }
 
+function summerRatingTableAvatarStyle(nick) {
+  var art = pokerGetSummerRatingPlayerArt(nick);
+  if (!art || !art.src) return "background-image:none;";
+  var size = "165% auto";
+  var position = "50% 8%";
+  if (art.key === "alenast") size = "155% auto";
+  else if (art.key === "shkarubo") {
+    size = "230% auto";
+    position = "67% 10%";
+  } else if (art.key === "sarmat1305") size = "170% auto";
+  else if (art.key === "babyshark") size = "175% auto";
+  return "background-image:" + summerRatingPlayerArtCssUrl(nick) + ";background-position:" + position + ";background-size:" + size + ";";
+}
+
 function summerRatingLowerArtSizeStyle(place, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art) return "";
@@ -2626,7 +2640,7 @@ function initWinterRating() {
         var nickInner = nickEsc;
         if (seasonConfig.key === "summer") {
           nickInner = "<span class=\"summer-rating-table-player summer-rating-table-player--place-" + place + "\">" +
-            (place <= 10 ? "<span class=\"summer-rating-table-avatar summer-rating-table-avatar--place-" + place + "\" aria-hidden=\"true\"></span>" : "") +
+            (place <= 10 ? "<span class=\"summer-rating-table-avatar summer-rating-table-avatar--place-" + place + "\" style=\"" + summerRatingTableAvatarStyle(nickStr) + "\" aria-hidden=\"true\"></span>" : "") +
             "<span class=\"summer-rating-table-name\">" + nickEsc + "</span></span>";
         }
         var prizeCell = "";
