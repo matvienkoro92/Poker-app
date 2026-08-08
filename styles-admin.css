@@ -1445,6 +1445,30 @@ body.admin-report-modal-open .bottom-nav {
 .admin-report-calculations__field--extra.admin-report-calculations__field--visual-minus {
   grid-template-columns: minmax(118px, 1fr) minmax(82px, 0.34fr) minmax(58px, 0.22fr) minmax(92px, 0.36fr);
 }
+#adminReportCalcRakeCard .admin-report-calculations__field--extra,
+#adminReportCalcRakeCard .admin-report-calculations__field--extra.admin-report-calculations__field--visual-minus {
+  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.34fr) minmax(92px, 0.42fr);
+  grid-template-rows: 30px 30px;
+  gap: 5px;
+  min-height: 70px;
+  padding: 5px;
+}
+#adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-name] {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+#adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-rake] {
+  grid-column: 1;
+  grid-row: 2;
+}
+#adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-percent] {
+  grid-column: 2;
+  grid-row: 2;
+}
+#adminReportCalcRakeCard .admin-report-calculations__field--extra [data-admin-report-figures-extra-amount] {
+  grid-column: 3;
+  grid-row: 2;
+}
 .admin-report-calculations__field--visual-minus .admin-report-calculations__input {
   padding-left: 16px;
   color: #ffb3b3;
@@ -1463,8 +1487,8 @@ body.admin-report-modal-open .bottom-nav {
   pointer-events: none;
 }
 .admin-report-calculations__field--extra.admin-report-calculations__field--visual-minus::after {
-  grid-column: 4;
-  grid-row: 1;
+  grid-column: 3;
+  grid-row: 2;
 }
 .admin-report-calculations__field--agents-heading {
   grid-template-columns: minmax(0, 1fr);
