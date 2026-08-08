@@ -553,8 +553,11 @@
         var businessDateShiftMs = -3 * 60 * 60 * 1000;
         var from = String(week && week.from || "") || (week && !week.all ? new Date(week.start + businessDateShiftMs).toISOString().slice(0, 10) : "");
         var to = String(week && week.to || "") || (week && !week.all ? new Date(week.end + businessDateShiftMs).toISOString().slice(0, 10) : "");
-        var raffleUrl = base.replace(/\/$/, "") + "/api/player-crm" + q;
-        raffleUrl = appendCalculationQueryParam(raffleUrl, "mode", "raffle-summary");
+        // Use the report API for the compact raffle totals. It shares the same
+        // admin authorization as this screen and returns ticket/cash issues and
+        // their automatic returns without loading the full CRM population.
+        var raffleUrl = base.replace(/\/$/, "") + "/api/admin-report-shifts" + q;
+        raffleUrl = appendCalculationQueryParam(raffleUrl, "raffleSummary", "1");
         var calculationsAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
           ? window.pokerAdminMenuAccessToken("calculations")
           : "";
