@@ -1021,6 +1021,9 @@
         var calculationsAccessToken = typeof window.pokerAdminMenuAccessToken === "function"
           ? window.pokerAdminMenuAccessToken("calculations")
           : "";
+        if (!calculationsAccessToken && typeof window.pokerAdminMenuAccessToken === "function") {
+          calculationsAccessToken = window.pokerAdminMenuAccessToken("crm");
+        }
         if (calculationsAccessToken) payload.menuAccessToken = calculationsAccessToken;
         if (draft) payload.calculationDraft = draft;
         if (group) payload.calculationDraftGroup = String(group);

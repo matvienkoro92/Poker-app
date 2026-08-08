@@ -38,6 +38,22 @@
       if (label) label.textContent = formatDateLabel(input && input.value);
     }
 
+    function openRakebackTotalsFromCalculations(event) {
+      if (event) event.preventDefault();
+      var dialog = document.getElementById("adminReportRakebackTotalsModal");
+      var list = document.getElementById("adminReportRakebackTotalsList");
+      if (dialog) {
+        if (document.body && dialog.parentNode !== document.body) document.body.appendChild(dialog);
+        if (list && !String(list.innerHTML || "").trim()) {
+          list.innerHTML = '<div class="admin-report-rakeback-totals-modal__section-title">Загружаем итоги…</div>';
+        }
+        dialog.hidden = false;
+      }
+      if (typeof window.pokerOpenAdminReportRakebackPlayers === "function") {
+        Promise.resolve(window.pokerOpenAdminReportRakebackPlayers(event && event.currentTarget)).catch(function () {});
+      }
+    }
+
     function renderDateCalendar() {
       var calendar = document.getElementById("adminReportFiguresDateCalendar");
       var input = document.getElementById("adminReportFiguresDate");
@@ -258,6 +274,12 @@
             elements.figuresSaveBtn.disabled = false;
           });
         });
+      }
+
+      var rakebackTrigger = (elements.root || document).querySelector("[data-admin-report-open-rakeback]");
+      if (rakebackTrigger && rakebackTrigger.dataset.calculationRakebackBound !== "1") {
+        rakebackTrigger.dataset.calculationRakebackBound = "1";
+        rakebackTrigger.addEventListener("click", openRakebackTotalsFromCalculations);
       }
 
       if (elements.figuresEditBtn) {

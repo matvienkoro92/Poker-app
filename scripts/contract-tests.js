@@ -852,6 +852,17 @@ async function testAuthAndAdmin(redis) {
     calculationDraft: { rake: ["123"] },
   }));
   assert.strictEqual(protectedCalculationDraftRes.statusCode, 200, "calculations menu token can save its protected draft");
+  const crmMenuToken = require(path.join(root, "lib", "admin-menu-access-token"))
+    .signAccessToken("crm", "mail_ID000004", BOT_TOKEN);
+  protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
+    pwaSession: nonBonusAdminToken,
+    menuAccessToken: crmMenuToken,
+    action: "calculation_draft_save",
+    weekStart: "1785121200002",
+    calculationDraftGroup: "figures",
+    calculationDraft: { rake: ["456"] },
+  }));
+  assert.strictEqual(protectedCalculationDraftRes.statusCode, 200, "CRM menu token can save the calculations draft mounted in CRM");
   protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
     pwaSession: nonBonusAdminToken,
     menuAccessToken: calculationMenuToken,

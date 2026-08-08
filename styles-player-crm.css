@@ -3281,7 +3281,34 @@ button.player-crm__stat:focus-visible,
   max-width: 100%;
 }
 .player-crm__links-table {
-  min-width: 1040px;
+  min-width: 860px;
+  table-layout: auto;
+}
+.player-crm__links-table th,
+.player-crm__links-table td {
+  height: auto;
+  padding: 5px 6px;
+  line-height: 1.2;
+}
+.player-crm__links-table th:first-child,
+.player-crm__links-table td:first-child {
+  padding-left: 2px;
+}
+.player-crm__links-table th:nth-child(2),
+.player-crm__links-table td:nth-child(2) {
+  width: 1%;
+  max-width: 190px;
+}
+.player-crm__links-table th:nth-child(n+3):nth-child(-n+6),
+.player-crm__links-table td:nth-child(n+3):nth-child(-n+6) {
+  width: 1%;
+  padding-left: 5px;
+  padding-right: 5px;
+  text-align: center;
+}
+.player-crm__links-table th:last-child,
+.player-crm__links-table td:last-child {
+  padding-right: 2px;
 }
 .player-crm__links-url-btn {
   display: block;
@@ -3302,13 +3329,13 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__links-action-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 .player-crm__links-action-row .player-crm__ghost-btn,
 .player-crm__links-action-row .player-crm__primary-btn {
-  min-height: 34px;
-  padding: 7px 10px;
+  min-height: 30px;
+  padding: 5px 8px;
   font-size: 12px;
 }
 .player-crm__link-detail-grid {
