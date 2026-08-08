@@ -1021,12 +1021,15 @@
         if (draft) payload.calculationDraft = draft;
         if (group) payload.calculationDraftGroup = String(group);
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
-        return fetchDraft(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(buildAuthBody(payload)),
-          cache: "no-store",
-        }, 15000).then(function (response) {
+        return Promise.resolve().then(function () {
+          var authenticatedPayload = buildAuthBody(payload);
+          return fetchDraft(base.replace(/\/$/, "") + "/api/admin-report-shifts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(authenticatedPayload),
+            cache: "no-store",
+          }, 15000);
+        }).then(function (response) {
           if (!response || !response.ok) throw new Error("calculation draft sync failed");
           return response.json().then(function (data) {
             if (!data || data.ok !== true) throw new Error(data && data.error || "calculation draft sync failed");

@@ -242,7 +242,18 @@
         elements.figuresSaveBtn.addEventListener("click", function () {
           if (elements.figuresSaveBtn.disabled) return;
           elements.figuresSaveBtn.disabled = true;
-          var saveResult = call(callbacks.saveFiguresDraft);
+          var saveResult;
+          try {
+            saveResult = call(callbacks.saveFiguresDraft);
+          } catch (saveError) {
+            elements.figuresSaveBtn.disabled = false;
+            var saveStatus = document.getElementById("adminReportFiguresSaveStatus");
+            if (saveStatus) {
+              saveStatus.textContent = "Не удалось сохранить — повторите";
+              saveStatus.setAttribute("data-tone", "error");
+            }
+            return;
+          }
           Promise.resolve(saveResult).finally(function () {
             elements.figuresSaveBtn.disabled = false;
           });
@@ -287,6 +298,9 @@
 
     function open() {
       bind();
+      if (elements.figuresSaveBtn) elements.figuresSaveBtn.disabled = false;
+      var figuresRefreshBtn = document.getElementById("adminReportFiguresRefreshBtn");
+      if (figuresRefreshBtn) figuresRefreshBtn.disabled = false;
       call(callbacks.hydrateDraftOnce);
       call(callbacks.loadReports);
     }
