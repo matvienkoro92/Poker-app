@@ -915,20 +915,70 @@ body.admin-report-modal-open .bottom-nav {
   padding: 4px 8px;
 }
 .admin-report-calculations__bonus-group {
-  display: grid;
-  gap: 5px;
   min-width: 0;
   margin: 5px 0;
-  padding: 7px;
   border: 1px solid rgba(250, 204, 21, 0.46);
   border-radius: 10px;
   background: rgba(250, 204, 21, 0.055);
+  overflow: hidden;
 }
-.admin-report-calculations__bonus-group-title {
-  padding: 1px 3px 3px;
+.admin-report-calculations__bonus-group-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px 11px;
   color: #fde68a;
   font-size: 13px;
   font-weight: 950;
+  cursor: pointer;
+  list-style: none;
+}
+.admin-report-calculations__bonus-group-summary::-webkit-details-marker {
+  display: none;
+}
+.admin-report-calculations__bonus-group-summary::before {
+  content: "›";
+  grid-column: 1;
+  grid-row: 1;
+  width: 12px;
+  transform: translateX(-2px);
+  transition: transform 0.16s ease;
+}
+.admin-report-calculations__bonus-group-summary > span:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  padding-left: 13px;
+}
+.admin-report-calculations__bonus-group[open] .admin-report-calculations__bonus-group-summary::before {
+  transform: translateX(-2px) rotate(90deg);
+}
+.admin-report-calculations__bonus-group-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.admin-report-calculations__bonus-group-total small {
+  color: #d6bd82;
+  font-size: 10px;
+}
+.admin-report-calculations__bonus-group-total output {
+  min-width: 0;
+  max-width: 100%;
+  color: #fde047;
+  font-size: clamp(12px, 1.35vw, 17px);
+  overflow-wrap: anywhere;
+}
+.admin-report-calculations__bonus-group-details {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 0 7px 7px;
 }
 #adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field {
   box-sizing: border-box;
@@ -937,14 +987,21 @@ body.admin-report-modal-open .bottom-nav {
   margin: 0;
   padding: 4px 8px;
 }
-#adminReportCalcFigures .admin-report-calculations__field--bonus-total {
-  border-color: rgba(250, 204, 21, 0.62);
-  background: rgba(250, 204, 21, 0.16);
-  color: #fde68a;
-  font-weight: 950;
+#adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field output {
+  min-width: 0;
+  max-width: 100%;
+  font-size: clamp(11px, 1.25vw, 16px);
+  overflow-wrap: anywhere;
 }
-#adminReportCalcFigures .admin-report-calculations__field--bonus-total output {
-  color: #fde047;
+#adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__field--return {
+  grid-template-columns: minmax(52px, 1fr) minmax(62px, 0.55fr) minmax(70px, 0.48fr);
+}
+#adminReportCalcFigures .admin-report-calculations__bonus-group .admin-report-calculations__return-auto {
+  min-width: 0;
+  max-width: 100%;
+  font-size: clamp(9px, 1vw, 12px);
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 #adminReportCalcRakeCard #adminReportCalcFigures > label.admin-report-calculations__field {
   min-height: 38px;

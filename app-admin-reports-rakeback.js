@@ -1310,6 +1310,9 @@
     function openRakebackTotalsModal() {
       if (!totalsModal) return;
       renderRakebackTotalsModal();
+      // Keep the totals dialog outside the rakeback tab panel. The calculations
+      // tab hides sibling panels, which otherwise makes this dialog invisible.
+      if (modal && totalsModal.parentNode !== modal) modal.appendChild(totalsModal);
       totalsModal.hidden = false;
       if (grandTotalBtn) grandTotalBtn.setAttribute("aria-expanded", "true");
     }

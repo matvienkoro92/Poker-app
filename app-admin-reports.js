@@ -166,11 +166,13 @@ function initAdminReportModal() {
   window.pokerOpenAdminReportRakebackPlayers = function (trigger) {
     var modalIsOpen = modal && modal.getAttribute("aria-hidden") !== "true" && !modal.hidden;
     if (trigger && modalIsOpen && modal.contains(trigger)) {
-      if (!openRakebackOverlay()) return false;
       return Promise.resolve(openLazyRakebackModule()).then(function (module) {
         syncRakebackPeriodFromCalculations();
         if (module && typeof module.openTotals === "function") module.openTotals();
-        else if (rakebackGrandTotalBtn && typeof rakebackGrandTotalBtn.click === "function") rakebackGrandTotalBtn.click();
+        else {
+          openRakebackOverlay();
+          if (rakebackGrandTotalBtn && typeof rakebackGrandTotalBtn.click === "function") rakebackGrandTotalBtn.click();
+        }
         return true;
       });
     }
@@ -199,7 +201,8 @@ function initAdminReportModal() {
       var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
       if (!trigger || !modal.contains(trigger)) return;
       event.preventDefault();
-      openRakebackOverlay();
+      event.stopImmediatePropagation();
+      window.pokerOpenAdminReportRakebackPlayers(trigger);
     }, true);
   }
   if (rakebackOverlayClose && rakebackOverlayClose.dataset.bound !== "1") {

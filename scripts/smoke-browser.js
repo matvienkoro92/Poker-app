@@ -491,6 +491,17 @@ async function checkAdminRakeback(browser) {
   const idInput = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row] [data-rakeback-player-id]").first();
   await idInput.click();
   await idInput.fill("12345");
+  await page.evaluate(() => {
+    document.querySelectorAll("#adminReportModal [data-admin-report-panel]").forEach((panel) => {
+      panel.classList.toggle("admin-report-panel--active", panel.getAttribute("data-admin-report-panel") === "calculations");
+    });
+  });
+  await page.evaluate(() => document.querySelector("[data-admin-report-open-rakeback]")?.click());
+  await page.waitForFunction(() => {
+    const totals = document.getElementById("adminReportRakebackTotalsModal");
+    const modal = document.getElementById("adminReportModal");
+    return !!totals && !totals.hidden && totals.parentNode === modal;
+  }, null, { timeout: 7000 });
   const state = await page.evaluate(() => {
     const row = document.querySelector("#adminReportRakebackTableBody [data-rakeback-shared-row]");
     const dateInput = row?.querySelector("[data-rakeback-entry-date]");
@@ -518,11 +529,16 @@ async function checkAdminRakeback(browser) {
       separatorDateBorderTop: separatorDateStyle?.borderTopWidth || "",
       separatorDateBackground: separatorDateStyle?.backgroundColor || "",
       separatorHeaderInline: !!(separatorDateRect && separatorWeekdayRect && Math.abs(separatorDateRect.top - separatorWeekdayRect.top) <= 2),
+      calculationTotalsOpen: !document.getElementById("adminReportRakebackTotalsModal")?.hidden,
+      calculationTotalsPortaled: document.getElementById("adminReportRakebackTotalsModal")?.parentNode === document.getElementById("adminReportModal"),
     };
   });
   await page.close();
   if (state.dateInputs !== 0 || state.dateType !== "hidden" || state.badgePointer !== "none" || state.idValue !== "12345") {
     throw new Error("admin rakeback smoke failed: " + JSON.stringify(state));
+  }
+  if (!state.calculationTotalsOpen || !state.calculationTotalsPortaled) {
+    throw new Error("calculation rakeback totals click failed: " + JSON.stringify(state));
   }
   if (!state.separatorDateText || !state.separatorWeekdayText || !state.separatorStackDisplay.includes("grid") || state.separatorDateBorderTop !== "0px" || (state.separatorDateBackground !== "rgba(0, 0, 0, 0)" && state.separatorDateBackground !== "transparent")) {
     throw new Error("admin rakeback date separator smoke failed: " + JSON.stringify(state));
