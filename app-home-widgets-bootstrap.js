@@ -53,6 +53,7 @@
     badge.textContent = text;
     badge.hidden = !text;
     badge.setAttribute("aria-hidden", text ? "false" : "true");
+    trigger.classList.toggle("home-mini-icon-item--vote-active", data.status === "active" && data.paused !== true);
     trigger.setAttribute("aria-label", text
       ? "Открыть народное голосование. " + text.toLowerCase()
       : "Открыть народное голосование");

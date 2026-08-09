@@ -481,6 +481,7 @@
     var count = plaque.querySelector(".home-club-choice-plaque__count");
     var roundBadge = plaque.querySelector("[data-club-choice-round-badge]");
     var completed = !!(data && data.status === "completed");
+    plaque.classList.toggle("home-mini-icon-item--vote-active", !!(data && data.status === "active" && data.paused !== true));
     if (subtext) subtext.textContent = homePlaqueText(data);
     if (count) {
       count.hidden = completed;
