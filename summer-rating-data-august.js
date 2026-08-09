@@ -1553,4 +1553,203 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "08.08.2026": [
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 3,
+          "reward": 1460,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "НОК🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "kriak",
+          "place": 5,
+          "reward": 5850,
+          "points": 60
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 4,
+          "reward": 225,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "💥Big Boss💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MissClick",
+          "place": 3,
+          "reward": 15459.37,
+          "points": 90
+        },
+        {
+          "nick": "Em13",
+          "place": 15,
+          "reward": 1187.5,
+          "points": 0
+        },
+        {
+          "nick": "Пряник",
+          "place": 7,
+          "reward": 968.75,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 2,
+          "reward": 4800,
+          "points": 110
+        },
+        {
+          "nick": "мистерFox",
+          "place": 4,
+          "reward": 370,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 18100,
+          "points": 135
+        },
+        {
+          "nick": "Пряник",
+          "place": 2,
+          "reward": 9580,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🍀LUCKY 555🍀 GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 4,
+          "reward": 44565,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 6234,
+          "points": 90
+        },
+        {
+          "nick": "Smile😎😊😺",
+          "place": 2,
+          "reward": 5590,
+          "points": 110
+        },
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 3129,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🕺 Bounty 🥊 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 3,
+          "reward": 9945,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 6,
+          "reward": 3452,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 🌊 1/2 KO 🎯15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 42,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 20781,
+          "points": 110
+        }
+      ]
+    }
+  ]
 };
