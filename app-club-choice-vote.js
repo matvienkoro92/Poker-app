@@ -750,8 +750,8 @@
           '</div>' +
           '<p class="club-choice-vote-modal__duel-question">Кого выбираешь ты?</p>' +
           '<div class="club-choice-vote-modal__duel-actions" aria-label="Голосование в паре">' +
-            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="Голосовать за ' + escapeHtml(leftNick) + '"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">' + (match.myVote === leftId ? "✓" : "👍") + '</span><strong>' + escapeHtml((match.myVote === leftId ? "Выбрано: " : "") + leftNick) + '</strong></button>' +
-            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="Голосовать за ' + escapeHtml(rightNick) + '"' + (canVote ? "" : " disabled") + '><strong>' + escapeHtml((match.myVote === rightId ? "Выбрано: " : "") + rightNick) + '</strong><span aria-hidden="true">' + (match.myVote === rightId ? "✓" : "👍") + '</span></button>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--left' + (match.myVote === leftId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(leftId) + '" aria-label="' + escapeHtml(match.myVote === leftId ? "Отменить голос за " + leftNick : "Голосовать за " + leftNick) + '"' + (canVote ? "" : " disabled") + '><span aria-hidden="true">' + (match.myVote === leftId ? "✓" : "👍") + '</span><strong>' + escapeHtml((match.myVote === leftId ? "Выбрано: " : "") + leftNick) + '</strong></button>' +
+            '<button type="button" class="club-choice-vote-modal__duel-vote club-choice-vote-modal__duel-vote--right' + (match.myVote === rightId ? " club-choice-vote-modal__duel-vote--selected" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(rightId) + '" aria-label="' + escapeHtml(match.myVote === rightId ? "Отменить голос за " + rightNick : "Голосовать за " + rightNick) + '"' + (canVote ? "" : " disabled") + '><strong>' + escapeHtml((match.myVote === rightId ? "Выбрано: " : "") + rightNick) + '</strong><span aria-hidden="true">' + (match.myVote === rightId ? "✓" : "👍") + '</span></button>' +
           '</div>' +
         '</div>' +
         renderVoters(match, candidates) +
@@ -780,7 +780,7 @@
               (active ? '<span class="club-choice-vote-modal__selected-badge">Вы выбрали</span>' : '') +
               renderAchievementCard("club-choice-vote-modal__player-desc", achievement.description) +
             '</div>' +
-            '<button type="button" class="club-choice-vote-modal__vote-chip" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="Голосовать за ' + escapeHtml(displayNick) + '" title="Голосовать"' +
+            '<button type="button" class="club-choice-vote-modal__vote-chip' + (active ? " club-choice-vote-modal__vote-chip--active" : "") + '" data-club-choice-vote="' + escapeHtml(match.id) + '" data-club-choice-candidate="' + escapeHtml(id) + '" aria-label="' + escapeHtml(active ? "Отменить голос за " + displayNick : "Голосовать за " + displayNick) + '" title="' + (active ? "Отменить голос" : "Голосовать") + '"' +
               (canVote ? "" : " disabled") + '>' +
               '<span>' + escapeHtml(active ? "✓ Выбрано" : "Голосовать") + '</span>' +
               '<em>' + String(votes) + '</em>' +
@@ -1389,7 +1389,8 @@
       if (vote.disabled) return;
       setVoteButtonLoading(vote, true);
       postAction({
-        action: "vote",
+        action: vote.classList.contains("club-choice-vote-modal__duel-vote--selected") ||
+          vote.classList.contains("club-choice-vote-modal__vote-chip--active") ? "unvote" : "vote",
         matchId: vote.getAttribute("data-club-choice-vote") || "",
         candidateId: vote.getAttribute("data-club-choice-candidate") || "",
       }, { quiet: true, preserveScroll: true }).then(function () {
