@@ -493,7 +493,12 @@ function summerRatingTop3ArtSizeStyle(slotName, nick) {
     else if (art.key === "coo1er91" && slotName === "right") size = "22.4%";
     else if (art.key === "em13!!" && slotName === "right") size = "19.55%";
   } else if (art.league === 2) {
-    if (slotName === "center") size = "38.1%";
+    // League 2 source canvases for AlenaSt and misterFox are much taller than
+    // League 1 art, so matching width percentages makes them look oversized.
+    // These per-player widths match the displayed character heights in League 1.
+    if (art.key === "мистерfox" && slotName === "center") size = "23.1%";
+    else if (art.key === "alenast" && slotName === "left") size = "14.5%";
+    else if (slotName === "center") size = "38.1%";
     else if (slotName === "left") size = "22.4%";
     else if (slotName === "right") size = "19.55%";
   }
