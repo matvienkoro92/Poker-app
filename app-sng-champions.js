@@ -566,6 +566,7 @@
     "pryanik2la": "./assets/summer-rating-player-pryanik.webp",
     "prushnik": "./assets/summer-rating-player-prushnik.webp",
     "evgen1722": "./assets/summer-rating-player-evgen1722.webp",
+    "kriak": "./assets/summer-rating-player-kriak.webp",
     "хер вам)))))": "./assets/summer-rating-player-khervam.webp",
     "alenast": "./assets/summer-rating-league2-player-alena.webp",
     "shkarubo": "./assets/summer-rating-league2-player-shkarubo.webp",

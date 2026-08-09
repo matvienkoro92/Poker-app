@@ -481,7 +481,7 @@
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp", "nikola233": "./assets/summer-rating-player-nikola233.webp",
     "milkyway77": "./assets/summer-rating-player-milkyway.webp", "пряник": "./assets/summer-rating-player-pryanik.webp",
     "pryanik2la": "./assets/summer-rating-player-pryanik.webp", "prushnik": "./assets/summer-rating-player-prushnik.webp",
-    "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp",
+    "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp", "kriak": "./assets/summer-rating-player-kriak.webp",
     "frankl": "./assets/summer-rating-player-morf.webp", "andrushamorf": "./assets/summer-rating-player-morf.webp", "4ezzi": "./assets/summer-rating-player-morf.webp", "morf": "./assets/summer-rating-player-morf.webp", "морф": "./assets/summer-rating-player-morf.webp",
     "alenast": "./assets/summer-rating-league2-player-alena.webp", "shkarubo": "./assets/summer-rating-league2-player-shkarubo.webp",
     "sarmat1305": "./assets/summer-rating-league2-player-sarmat.webp", "палач": "./assets/summer-rating-league2-player-palach.webp",
