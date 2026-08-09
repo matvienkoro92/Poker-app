@@ -138,7 +138,7 @@ async function testRaffleCurrentWeekReturnsCalculation(redis) {
   assert.deepStrictEqual(cashTotals.cash, { issued: 0, returned: 2500 }, "cashout amount is added to the week when the admin entered it");
 
   const liveRange = currentMoscowWeekRange(new Date());
-  const weekCacheKey = "poker_app:raffles_week_issue_totals:v2:" + new Date(liveRange.startMs).toISOString();
+  const weekCacheKey = "poker_app:raffles_week_issue_totals:v3:" + new Date(liveRange.startMs).toISOString();
   const followupRaffleId = "contract-followup-cache";
   redis.kv.set(weekCacheKey, JSON.stringify({ ticket: { issued: 0, returned: 0 }, cash: { issued: 0, returned: 0 } }));
   redis.kv.set("poker_app:raffle:" + followupRaffleId, JSON.stringify({
@@ -168,6 +168,7 @@ async function testRaffleCurrentWeekReturnsCalculation(redis) {
   assert.strictEqual(followupResponse.statusCode, 200, "cashout follow-up saves successfully");
   assert.strictEqual(followupResponse.body && followupResponse.body.ok, true, "cashout follow-up returns success");
   assert.strictEqual(redis.kv.has(weekCacheKey), false, "cashout follow-up invalidates the weekly totals cache: " + JSON.stringify([...redis.kv.keys()].filter((key) => key.includes("week_issue"))));
+  assert.strictEqual(redis.kv.get(weekCacheKey + ":generation"), "1", "cashout follow-up advances the weekly totals cache generation");
 }
 
 process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";

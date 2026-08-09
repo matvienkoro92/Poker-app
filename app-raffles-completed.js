@@ -19,6 +19,7 @@ function initRafflesCompletedRuntime(opts) {
     var raffleCompletedTimerRefreshAfter = 0;
     var raffleCompletedTimerRefreshMarks = {};
     var raffleCompletedActiveWinnerTabs = {};
+    var raffleCompletedActiveRecentKey = "";
     var raffleCurrentWeekReturns = null;
     var raffleCurrentWeekIssueTotalsServer = null;
 
@@ -1916,6 +1917,7 @@ function initRafflesCompletedRuntime(opts) {
       var recentRoot = recentTab.closest("[data-raffles-recent-tabs]");
       var recentIndex = recentTab.getAttribute("data-raffles-recent-tab") || "0";
       if (recentRoot) {
+        raffleCompletedActiveRecentKey = recentTab.getAttribute("data-raffles-recent-key") || "";
         recentRoot.querySelectorAll("[data-raffles-recent-tab]").forEach(function (tab) {
           var active = tab === recentTab;
           tab.classList.toggle("raffles-recent-tab--active", active);
@@ -2065,21 +2067,28 @@ function initRafflesCompletedRuntime(opts) {
     var recent = Array.isArray(items) ? items.slice(0, 2) : [];
     if (!recent.length) return "";
     if (recent.length === 1) return buildCompletedRaffleCardHtml(recent[0]);
+    var recentKeys = recent.map(function (raffle) {
+      return [raffle && raffle.id, raffle && raffle.completedNumber, raffle && (raffle.completedAt || raffle.endDate)]
+        .map(function (value) { return String(value || "").trim(); })
+        .join("|");
+    });
+    var activeIndex = recentKeys.indexOf(raffleCompletedActiveRecentKey);
+    if (activeIndex < 0) activeIndex = 0;
     var tabs = recent.map(function (raffle, index) {
       var kind = raffleRecentCompletedKindLabel(raffle);
       var time = raffleRecentCompletedResultTime(raffle);
       var yesterday = raffleRecentCompletedWasYesterday(raffle);
-      var active = index === 0;
+      var active = index === activeIndex;
       return "<button type=\"button\" class=\"raffles-recent-tab" +
         (active ? " raffles-recent-tab--active" : "") +
         "\" role=\"tab\" aria-selected=\"" + (active ? "true" : "false") +
-        "\" data-raffles-recent-tab=\"" + index + "\">" +
+        "\" data-raffles-recent-tab=\"" + index + "\" data-raffles-recent-key=\"" + escapeHtml(recentKeys[index]) + "\">" +
         "<strong>" + escapeHtml(kind) + "</strong>" +
         (time ? "<span>" + escapeHtml(time + (yesterday ? " (вчера)" : "")) + "</span>" : "") +
         "</button>";
     }).join("");
     var panels = recent.map(function (raffle, index) {
-      var active = index === 0;
+      var active = index === activeIndex;
       return "<div class=\"raffles-recent-panel" + (active ? " raffles-recent-panel--active" : "") +
         "\" role=\"tabpanel\" data-raffles-recent-panel=\"" + index + "\"" +
         (active ? "" : " hidden") + ">" +
