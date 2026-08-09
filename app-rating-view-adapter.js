@@ -458,7 +458,7 @@ window.pokerGetSummerRatingPlayerArt = pokerGetSummerRatingPlayerArt;
 function summerRatingPlayerArtCssUrl(nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
   if (!art || !art.src) return "none";
-  return 'url("' + String(art.src).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '")';
+  return "url('" + String(art.src).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "')";
 }
 
 function summerRatingTableAvatarStyle(nick) {
@@ -493,9 +493,9 @@ function summerRatingTop3ArtSizeStyle(slotName, nick) {
     else if (art.key === "coo1er91" && slotName === "right") size = "22.4%";
     else if (art.key === "em13!!" && slotName === "right") size = "19.55%";
   } else if (art.league === 2) {
-    if (slotName === "center") size = "22.4%";
-    else if (slotName === "left") size = "38.1%";
-    else if (slotName === "right") size = "22.4%";
+    if (slotName === "center") size = "38.1%";
+    else if (slotName === "left") size = "22.4%";
+    else if (slotName === "right") size = "19.55%";
   }
   return size ? "--summer-top3-art-" + slotName + "-size:" + size + ";" : "";
 }
@@ -855,12 +855,27 @@ function pokerOpenUnifiedPlayerProfileByRatingNick(nick, options) {
         return true;
       }
       function openUnified() {
-        if (typeof window.openChatUserModalById !== "function") return openRatingFallback();
+        var userId = String(data.userId || data.chatUserId || data.dtId || data.id || "").trim();
+        if (!userId) return openRatingFallback();
         var displayName = data.chatDisplayName || data.contactName || data.pokerPlusNickname || data.userName || nick;
-        window.openChatUserModalById(data.userId, displayName, null);
-        return true;
+        var openOptions = { deferReveal: true, ratingNick: nick };
+        if (typeof window.pokerOpenChatUserModalSafe === "function") {
+          return Promise.resolve(window.pokerOpenChatUserModalSafe(userId, displayName, "", openOptions))
+            .then(function (opened) { return opened ? true : openRatingFallback(); });
+        }
+        if (
+          typeof window.openChatUserModalById === "function" &&
+          window.openChatUserModalById.__pokerFallback !== true
+        ) {
+          window.openChatUserModalById(userId, displayName, "", openOptions);
+          return true;
+        }
+        return openRatingFallback();
       }
-      if (typeof window.openChatUserModalById === "function") return openUnified();
+      if (
+        typeof window.pokerOpenChatUserModalSafe === "function" ||
+        (typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true)
+      ) return openUnified();
       if (typeof window.pokerEnsureGlobalModalsHtml === "function" || typeof window.pokerEnsureScriptDomains === "function") {
         var modalPromise = typeof window.pokerEnsureGlobalModalsHtml === "function"
           ? Promise.resolve(window.pokerEnsureGlobalModalsHtml())

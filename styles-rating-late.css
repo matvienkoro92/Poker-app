@@ -5204,15 +5204,12 @@ html #app .winter-rating.spring-rating.summer-rating
 
 html #app .winter-rating.spring-rating.summer-rating
   #springRatingTop3PodiumLeague2.spring-rating-top3--league {
-  --summer-top3-art-center-x: calc(50% + 3px);
-  --summer-top3-art-center-y: calc(26% + 25px);
+  --summer-top3-art-center-x: 50%;
+  --summer-top3-art-center-y: calc(26% + 22px);
   --summer-top3-art-left-x: calc(11% - 3px);
   --summer-top3-art-left-y: calc(44% + 44px);
   --summer-top3-art-right-x: calc(89% - 9px);
   --summer-top3-art-right-y: calc(50% + 35px);
-  --summer-top3-art-center-size: 23%;
-  --summer-top3-art-left-size: 17%;
-  --summer-top3-art-right-size: 17%;
 }
 
 html #app .winter-rating.spring-rating.summer-rating
