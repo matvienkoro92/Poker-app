@@ -529,6 +529,10 @@ function pokerResetPlayerCrmForcedVisibility() {
 function pokerClosePlayerCrmStandalone() {
   playerCrmOpenToken += 1;
   window.__pokerPlayerCrmStandaloneOpen = false;
+  var rakebackTotalsModal = document.getElementById("adminReportRakebackTotalsModal");
+  if (rakebackTotalsModal) rakebackTotalsModal.hidden = true;
+  var rakebackTotalsTrigger = document.getElementById("adminReportRakebackGrandTotalBtn");
+  if (rakebackTotalsTrigger) rakebackTotalsTrigger.setAttribute("aria-expanded", "false");
   if (document.documentElement) document.documentElement.classList.remove("player-crm-standalone-open");
   if (document.body) document.body.classList.remove("player-crm-standalone-open");
   pokerResetPlayerCrmForcedVisibility();

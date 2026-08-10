@@ -2957,6 +2957,8 @@ add("CRM calculation summary survives delayed lazy module loading", () =>
     "applyPendingCalculationSummary",
     "schedulePendingCalculationSummaryApply",
     "ensureCalculationsModuleLoaded()",
+    'loadAdminReportScript("app-admin-reports-legacy.js")',
+    "window.AdminReportCalculationsLogic && window.AdminReportLegacy",
     'callCalculationsLogic("applyCalculationSummaryPayload", [payload]) === true',
   ])
 );

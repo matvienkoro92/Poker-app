@@ -753,9 +753,12 @@ function initAdminReportModal() {
   }
 
   function ensureCalculationsModuleLoaded() {
-    if (calculationsModule && window.AdminReportCalculationsLogic) return Promise.resolve(calculationsModule);
+    if (calculationsModule && window.AdminReportCalculationsLogic && window.AdminReportLegacy) {
+      return Promise.resolve(calculationsModule);
+    }
     if (calculationsModuleLoadPromise) return calculationsModuleLoadPromise;
     calculationsModuleLoadPromise = Promise.all([
+      loadAdminReportScript("app-admin-reports-legacy.js"),
       loadAdminReportScript("app-admin-reports-calculations-logic.js"),
       loadAdminReportScript("app-admin-reports-calculations.js"),
     ])

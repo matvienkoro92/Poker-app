@@ -2026,7 +2026,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   inset: 0;
   /* The calculations panel is also mounted inside the CRM dashboard, whose
      full-screen shell sits above ordinary admin-panel layers. */
-  z-index: 2147483000;
+  z-index: 2147483646;
   display: flex;
   align-items: center;
   justify-content: center;
