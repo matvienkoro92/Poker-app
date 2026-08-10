@@ -480,7 +480,7 @@
     "winifly": "./assets/summer-rating-player-winifly.webp", "missclick": "./assets/summer-rating-player-missclick.webp?v=2",
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp", "nikola233": "./assets/summer-rating-player-nikola233.webp",
     "milkyway77": "./assets/summer-rating-player-milkyway.webp", "пряник": "./assets/summer-rating-player-pryanik.webp",
-    "бардюр": "./assets/club-news-personal/bardur-news-cutout.webp?v=1",
+    "бардюр": "./assets/club-news-personal/bardur-news-cutout.webp?v=2",
     "pryanik2la": "./assets/summer-rating-player-pryanik.webp", "prushnik": "./assets/summer-rating-player-prushnik.webp",
     "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp", "kriak": "./assets/summer-rating-player-kriak.webp",
     "frankl": "./assets/summer-rating-player-morf.webp", "andrushamorf": "./assets/summer-rating-player-morf.webp", "4ezzi": "./assets/summer-rating-player-morf.webp", "morf": "./assets/summer-rating-player-morf.webp", "морф": "./assets/summer-rating-player-morf.webp",
