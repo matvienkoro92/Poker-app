@@ -1009,7 +1009,10 @@
 
       function requestServerCalculationDraft(action, draft, group) {
         var base = typeof getAdminReportApiBase === "function" ? getAdminReportApiBase() : "";
-        if (!base || typeof buildAuthBody !== "function") {
+        if (!base && window.location && window.location.origin && window.location.origin !== "null") {
+          base = window.location.origin;
+        }
+        if (typeof buildAuthBody !== "function" || typeof fetch !== "function") {
           return Promise.reject(new Error("calculation draft sync unavailable"));
         }
         var calculationRangeMeta = getCalculationWeekMeta();

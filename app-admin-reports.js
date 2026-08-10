@@ -3097,7 +3097,12 @@ function initAdminReportModal() {
   }
 
   function getCalculationDraftKey() {
-    return callLegacyModule("getCalculationDraftKey", arguments);
+    var legacyKey = callLegacyModule("getCalculationDraftKey", arguments);
+    if (legacyKey) return legacyKey;
+    var week = getCalculationWeekMeta();
+    return "poker_admin_report_calculations_draft:" + String(
+      week && week.draftKey != null ? week.draftKey : (week && week.start != null ? week.start : "current")
+    );
   }
 
   function getRakebackDraftKey() {
@@ -3133,11 +3138,18 @@ function initAdminReportModal() {
   }
 
   function getAdminReportApiBase() {
-    return callLegacyModule("getAdminReportApiBase", arguments);
+    var legacyBase = callLegacyModule("getAdminReportApiBase", arguments);
+    if (legacyBase) return legacyBase;
+    return typeof getApiBase === "function" ? getApiBase() : "";
   }
 
   function buildAuthBody() {
-    return callLegacyModule("buildAuthBody", arguments);
+    var payload = arguments[0];
+    var legacyBody = callLegacyModule("buildAuthBody", arguments);
+    if (legacyBody !== undefined) return legacyBody;
+    return typeof pokerGuestOrAuthedPostBody === "function"
+      ? pokerGuestOrAuthedPostBody(payload)
+      : payload;
   }
 
   function saveLocalRakebackDraftRows() {

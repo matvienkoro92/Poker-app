@@ -790,7 +790,10 @@
     var keys = clubAvailableWinDayKeys(source);
     var selectedKey = clubWinsDayTab === "previous" ? keys[1] : keys[0];
     if (!selectedKey) selectedKey = keys[0] || "";
-    return selectedKey ? source.filter(function (row) { return eventDayKey(row && row.at) === selectedKey; }) : [];
+    return source.filter(function (row) {
+      if (String(row && row._eventKind || "") === "club-choice") return clubWinsDayTab === "latest";
+      return !!selectedKey && eventDayKey(row && row.at) === selectedKey;
+    });
   }
 
   function clubCurrentHeroMonth() {
@@ -875,6 +878,7 @@
 
   function isCurrentClubEvent(row) {
     if (!row || !row.at) return false;
+    if (String(row._eventKind || "") === "club-choice") return isRecentEvent(row.at);
     var tournamentDay = clubTournamentDayKey();
     var rowDay = eventDayKey(row.at);
     var visibleWinDays = clubStaticWinDayKeys();
@@ -3226,7 +3230,55 @@
     }).filter(Boolean);
   }
 
-  function buildClubEventsFromRows(players, winners, tournamentSnapshots) {
+  function clubChoiceNewsEvents(players, choiceRows) {
+    var playerRows = Array.isArray(players) ? players : [];
+    return (Array.isArray(choiceRows) ? choiceRows : []).reduce(function (events, period) {
+      var month = String(period && (period.month || period.monthKey || period.period) || "").trim();
+      var completedAt = String(period && (period.completedAt || period.updatedAt) || "").trim();
+      var eventAt = completedAt || (month ? month + "-01T12:00:00+03:00" : "");
+      if (!isRecentEvent(eventAt)) return events;
+      var winners = Array.isArray(period && period.winners) ? period.winners
+        : Array.isArray(period && period.top) ? period.top
+          : Array.isArray(period && period.players) ? period.players : [];
+      winners.forEach(function (winner, index) {
+        var place = Math.max(0, Number(winner && winner.place) || (index + 1));
+        var nick = String(winner && (winner.nick || winner.name) || "").trim();
+        if (place !== 1 || !nick) return;
+        var nickKeys = nicknameMatchKeys(nick);
+        var player = playerRows.find(function (candidate) {
+          return friendRatingNickCandidates(candidate).some(function (candidateNick) {
+            return nicknameMatchKeys(candidateNick).some(function (key) { return nickKeys.indexOf(key) !== -1; });
+          });
+        }) || {};
+        var monthDate = month && /^\d{4}-\d{2}$/.test(month) ? new Date(month + "-01T12:00:00+03:00") : null;
+        var monthLabel = monthDate && Number.isFinite(monthDate.getTime())
+          ? monthDate.toLocaleDateString("ru-RU", { month: "long" }) : "месяца";
+        var votes = Math.max(0, Number(winner && winner.votes) || 0);
+        var color = playerNewsColor(nick);
+        events.push({
+          id: "achievement:choice:club:" + (month || eventAt) + ":" + matchKey(nick),
+          type: "achievement",
+          icon: "◆",
+          text: nick + " — Народный герой клуба за " + monthLabel,
+          at: eventAt,
+          actorId: friendId(player),
+          actorNick: nick,
+          actorAvatar: friendAvatar(player) || clubNewsFallbackAvatar(nick),
+          newsTitle: nick,
+          newsLines: [
+            "Народный герой клуба · " + monthLabel,
+            votes ? votes + " голосов" : "Победитель клубного голосования",
+          ],
+          playerAccent: color.accent,
+          playerRgb: color.rgb,
+          _eventKind: "club-choice",
+        });
+      });
+      return events;
+    }, []);
+  }
+
+  function buildClubEventsFromRows(players, winners, tournamentSnapshots, choiceRows) {
     var sourceRows = clubNewsStaticRows();
     var allPlayers = Array.isArray(players) ? players.slice() : [];
     var knownNicks = {};
@@ -3266,7 +3318,8 @@
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
         birthdays,
-        ratingChanges
+        ratingChanges,
+        clubChoiceNewsEvents(allPlayers, choiceRows)
       ),
       allPlayers
     ).filter(function (row) {
@@ -3415,6 +3468,8 @@
       )
         .catch(function () { return { winners: [], failed: true }; }),
       clubTournamentSnapshotsReady().catch(function () { return {}; }),
+      cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "club-choice-news", 5 * 60 * 1000, { cache: "default" })
+        .catch(function () { return { rows: [] }; }),
     ]).then(function (results) {
       if ((results[0] && results[0].failed) || (results[1] && results[1].failed)) {
         throw new Error("club news source unavailable");
@@ -3457,7 +3512,12 @@
       });
       var winners = results[1] && Array.isArray(results[1].winners) ? results[1].winners : [];
       var nextClubEvents = stableClubEvents(
-        buildClubEventsFromRows(players, winners, results[2]),
+        buildClubEventsFromRows(
+          players,
+          winners,
+          results[2],
+          results[3] && Array.isArray(results[3].rows) ? results[3].rows : []
+        ),
         []
       );
       // Wins are the default tab and must not wait for the optional wall feed.
