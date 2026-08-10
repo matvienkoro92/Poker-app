@@ -5776,27 +5776,27 @@ html body #app.app.app--view-home
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(1) {
   background-image: url("./assets/home-bonus-button-four-kind.webp");
-  background-size: 164% 238%;
+  background-size: 164% auto;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(2) {
   background-image: url("./assets/home-bonus-button-straight-flush.webp");
-  background-size: 142% 183%;
+  background-size: 142% auto;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(3) {
   background-image: url("./assets/home-bonus-button-royal-flush.webp");
-  background-size: 151% 209%;
+  background-size: 151% auto;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(4) {
   background-image: url("./assets/home-bonus-button-league.webp");
-  background-size: 156% 303%;
+  background-size: 156% auto;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(5) {
   background-image: url("./assets/home-bonus-button-bubble.webp");
-  background-size: 130% 205%;
+  background-size: 130% auto;
 }
 
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus::before,

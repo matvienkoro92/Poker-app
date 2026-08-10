@@ -477,9 +477,10 @@
     "aza": "./assets/sng-finalist-aza.webp", "aza32": "./assets/sng-finalist-aza.webp", "аза": "./assets/sng-finalist-aza.webp", "аза32": "./assets/sng-finalist-aza.webp",
     "waaar": "./assets/summer-rating-player-waaar.webp", "waaarr": "./assets/summer-rating-player-waaar.webp", "waaaar": "./assets/summer-rating-player-waaar.webp", "waaaarr": "./assets/summer-rating-player-waaar.webp", "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
     "coo1er91": "./assets/summer-rating-player-cooler.webp", "necoo1er91": "./assets/summer-rating-player-cooler.webp", "em13!!": "./assets/summer-rating-player-emil.webp",
-    "winifly": "./assets/summer-rating-player-winifly.webp", "missclick": "./assets/summer-rating-player-missclick.webp",
+    "winifly": "./assets/summer-rating-player-winifly.webp", "missclick": "./assets/summer-rating-player-missclick.webp?v=2",
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp", "nikola233": "./assets/summer-rating-player-nikola233.webp",
     "milkyway77": "./assets/summer-rating-player-milkyway.webp", "пряник": "./assets/summer-rating-player-pryanik.webp",
+    "бардюр": "./assets/club-news-personal/bardur-news-cutout.webp?v=1",
     "pryanik2la": "./assets/summer-rating-player-pryanik.webp", "prushnik": "./assets/summer-rating-player-prushnik.webp",
     "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp", "kriak": "./assets/summer-rating-player-kriak.webp",
     "frankl": "./assets/summer-rating-player-morf.webp", "andrushamorf": "./assets/summer-rating-player-morf.webp", "4ezzi": "./assets/summer-rating-player-morf.webp", "morf": "./assets/summer-rating-player-morf.webp", "морф": "./assets/summer-rating-player-morf.webp",
@@ -505,6 +506,7 @@
     "winifly": "winifly", "missclick": "missclick",
     "рыбнадзор": "rybnadzor", "nikola233": "nikola233",
     "milkyway77": "milkyway", "пряник": "pryanik", "pryanik2la": "pryanik",
+    "бардюр": "bardur",
     "prushnik": "prushnik", "evgen1722": "evgen1722", "хер вам)))))": "khervam",
     "frankl": "morf", "andrushamorf": "morf", "4ezzi": "morf", "morf": "morf", "морф": "morf",
     "alenast": "alena", "shkarubo": "shkarubo", "sarmat1305": "sarmat", "палач": "palach",
@@ -1103,6 +1105,10 @@
     return text.replace(/^Продвинулся в ачивке\s+/i, "+1 ачивка ");
   }
 
+  function isRatingDropText(value) {
+    return /(?:^|\s)(?:спустил(?:ся|ась)|покинул(?:а)?)\s+(?:в\s+)?(?:топ-10\s+)?рейтинга?\b/i.test(String(value || ""));
+  }
+
   function ensureStructuredPlayerEvent(row) {
     if (!row || !row.actorNick) return row;
     if (!row.newsTitle || matchKey(row.newsTitle) === matchKey(row.actorNick)) {
@@ -1120,6 +1126,7 @@
     }
     var seenLines = {};
     row.newsLines = row.newsLines.map(normalizeTournamentNewsLine).filter(function (line) {
+      if (isRatingDropText(line)) return false;
       var key = matchKey(String(line || "").replace(/[.\s]+$/, ""));
       if (!key || seenLines[key]) return false;
       seenLines[key] = true;
@@ -1130,7 +1137,11 @@
   }
 
   function mergeRelatedPlayerEvents(rows) {
-    var source = (Array.isArray(rows) ? rows : []).filter(Boolean);
+    var source = (Array.isArray(rows) ? rows : []).filter(function (row) {
+      if (!row) return false;
+      var isRatingChange = row._eventKind === "rating-change" || String(row.id || "").indexOf("rating-change:") === 0;
+      return !(isRatingChange && (row._ratingDirection === "down" || isRatingDropText(row.text)));
+    });
     var consumed = {};
     source.forEach(function (row) {
       if (row && (row._eventKind === "tournament" || String(row.id || "").indexOf("history:tournament:") === 0)) {
@@ -1347,7 +1358,7 @@
             " с " + oldPlace + "-го на " + newPlace + "-е место";
           changeIcon = "▼";
         }
-        if (!changeText) return;
+      if (!changeText || changeIcon === "▼") return;
         created.push({
           id: "rating-change:" + id + ":league" + league + ":" + oldPlace + ":" + newPlace,
           type: "rating",
@@ -3232,8 +3243,14 @@
 
   function clubChoiceNewsEvents(players, choiceRows) {
     var playerRows = Array.isArray(players) ? players : [];
-    return (Array.isArray(choiceRows) ? choiceRows : []).reduce(function (events, period) {
+    var periods = Array.isArray(choiceRows) ? choiceRows : [];
+    var latestMonth = periods.reduce(function (latest, period) {
+      var value = String(period && (period.month || period.monthKey || period.period) || "").trim();
+      return /^\d{4}-\d{2}$/.test(value) && value > latest ? value : latest;
+    }, "");
+    return periods.reduce(function (events, period) {
       var month = String(period && (period.month || period.monthKey || period.period) || "").trim();
+      if (latestMonth && month !== latestMonth) return events;
       var completedAt = String(period && (period.completedAt || period.updatedAt) || "").trim();
       var eventAt = completedAt || (month ? month + "-01T12:00:00+03:00" : "");
       if (!isRecentEvent(eventAt)) return events;

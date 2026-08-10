@@ -556,7 +556,7 @@
     "coo1er91": "./assets/summer-rating-player-cooler.webp",
     "em13!!": "./assets/summer-rating-player-emil.webp",
     "winifly": "./assets/summer-rating-player-winifly.webp",
-    "missclick": "./assets/summer-rating-player-missclick.webp",
+    "missclick": "./assets/summer-rating-player-missclick.webp?v=2",
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp",
     "мужначас": "./assets/summer-rating-player-rybnadzor.webp",
     "муж на час": "./assets/summer-rating-player-rybnadzor.webp",
