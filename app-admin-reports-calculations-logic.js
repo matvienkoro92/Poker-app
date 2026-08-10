@@ -379,7 +379,10 @@
         calculationWeekStatsAvailability = { raffles: null, dailyPoker: null };
         calculationWeekStatsTotals = { raffles: 0, raffleTickets: 0, raffleCash: 0, dailyPoker: 0, raffleTicketsReturn: 0, raffleCashReturn: 0, dailyPokerReturn: 0 };
         var poker21RakeInput = figuresRakeInputs && figuresRakeInputs[0];
-        if (poker21RakeInput) poker21RakeInput.value = "";
+        if (poker21RakeInput) {
+          poker21RakeInput.value = "";
+          poker21RakeInput.removeAttribute("data-manual-rake");
+        }
         setCalculationTotalsText({ deposit: 0, bonuses: 0, previousRakeback: 0, rakeback: 0, sentRakeback: 0, cashout: 0, botExchipCashout: 0, anyaSalary: 0 });
       }
 
@@ -714,7 +717,7 @@
         }
         var poker21Rake = data && data.poker21Rake != null ? Number(data.poker21Rake) : NaN;
         var poker21RakeInput = figuresRakeInputs && figuresRakeInputs[0];
-        if (poker21RakeInput && Number.isFinite(poker21Rake)) {
+        if (poker21RakeInput && Number.isFinite(poker21Rake) && poker21RakeInput.getAttribute("data-manual-rake") !== "1") {
           poker21RakeInput.value = formatReportInputNumber(poker21Rake);
           poker21RakeInput.setAttribute("data-auto-rake", "poker21");
         }
@@ -1121,6 +1124,7 @@
           cash: valuesFrom(calculationsCashInputs),
           roomWinLoss: valuesFrom(calculationsWinLossInputs),
           rake: valuesFrom(figuresRakeInputs),
+          manualPoker21Rake: !!(figuresRakeInputs && figuresRakeInputs[0] && figuresRakeInputs[0].getAttribute("data-manual-rake") === "1"),
           romanPaid: figuresRomanPaidInput ? figuresRomanPaidInput.value : "",
           winLoss: figuresWinLossInput ? figuresWinLossInput.value : "",
           agentsPaid: figuresAgentsPaidInput ? figuresAgentsPaidInput.value : "",
@@ -1171,7 +1175,17 @@
         var rake = Array.isArray(draft.rake) ? draft.rake : [];
         if (figuresRakeInputs && figuresRakeInputs.length) {
           figuresRakeInputs.forEach(function (input, index) {
-            if (input && input.getAttribute("data-auto-rake") !== "poker21") input.value = rake[index] != null ? rake[index] : "";
+            if (!input) return;
+            if (index === 0 && input.getAttribute("data-auto-rake") === "poker21") {
+              if (draft.manualPoker21Rake === true) {
+                input.value = rake[index] != null ? rake[index] : "";
+                input.setAttribute("data-manual-rake", "1");
+              } else {
+                input.removeAttribute("data-manual-rake");
+              }
+              return;
+            }
+            input.value = rake[index] != null ? rake[index] : "";
           });
         }
         if (figuresRomanPaidInput) figuresRomanPaidInput.value = draft.romanPaid != null ? draft.romanPaid : "";

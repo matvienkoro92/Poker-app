@@ -195,7 +195,11 @@
         call(callbacks.updateGrandTotal);
       });
 
-      bindList(elements.rakeInputs, "input", function () {
+      bindList(elements.rakeInputs, "input", function (event) {
+        var input = event && event.currentTarget;
+        if (input && input.getAttribute("data-auto-rake") === "poker21") {
+          input.setAttribute("data-manual-rake", "1");
+        }
         call(callbacks.scheduleFiguresTotals, { syncExtras: false });
       });
       bindList(elements.rakeInputs, "change", function () {
@@ -299,6 +303,8 @@
       if (figuresRefreshBtn) {
         figuresRefreshBtn.addEventListener("click", function () {
           if (figuresRefreshBtn.disabled) return;
+          var poker21RakeInput = elements.rakeInputs && elements.rakeInputs[0];
+          if (poker21RakeInput) poker21RakeInput.removeAttribute("data-manual-rake");
           figuresRefreshBtn.disabled = true;
           var refreshStatus = document.getElementById("adminReportFiguresSaveStatus");
           if (refreshStatus) {

@@ -5751,3 +5751,78 @@ html body #app.app.app--view-home
     font-size: clamp(6px, 1.85vw, 9px);
   }
 }
+
+/* Final supplied glass-button artwork. Each source has different outer
+   whitespace, so the per-card crop normalizes the visible button size. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses--upper
+  .home-tournament-bonus,
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses--upper
+  .home-tournament-bonus:nth-child(n + 4),
+.app.app--view-home .tournament-day-home-dual--tournament-focus
+  .home-tournament-bonuses--upper
+  .home-tournament-bonus--bubble-buyin {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 2.18 / 1;
+  padding: 8px 4px 7px;
+  border: 0;
+  border-radius: 24%;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: none;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(1) {
+  background-image: url("./assets/home-bonus-button-four-kind.webp");
+  background-size: 164% 238%;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(2) {
+  background-image: url("./assets/home-bonus-button-straight-flush.webp");
+  background-size: 142% 183%;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(3) {
+  background-image: url("./assets/home-bonus-button-royal-flush.webp");
+  background-size: 151% 209%;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(4) {
+  background-image: url("./assets/home-bonus-button-league.webp");
+  background-size: 156% 303%;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus:nth-child(5) {
+  background-image: url("./assets/home-bonus-button-bubble.webp");
+  background-size: 130% 205%;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus::before,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus::after {
+  display: none;
+}
+
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus--info:hover,
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--upper .home-tournament-bonus--info:focus-visible {
+  border: 0;
+  box-shadow: none;
+  filter: brightness(1.08) saturate(1.08);
+  transform: translateY(-2px) scale(1.015);
+}
+
+@container (max-width: 760px) {
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses--upper
+    .home-tournament-bonus,
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses--upper
+    .home-tournament-bonus:nth-child(n + 4),
+  .app.app--view-home .tournament-day-home-dual--tournament-focus
+    .home-tournament-bonuses--upper
+    .home-tournament-bonus--bubble-buyin {
+    padding: 4px 2px 3px;
+    border: 0;
+  }
+}
