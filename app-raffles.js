@@ -1900,7 +1900,7 @@ function initRaffles() {
       '<span class="raffles-active-chooser__prize-kicker">' + (trainingCard ? "Приз" : "Призовой фонд") + "</span>" +
       '<span class="raffles-active-chooser__prize-amount">' +
       (trainingCard
-        ? '<span class="raffles-active-chooser__training-prize"><strong>1 час</strong><span>с Николаем</span><small>Стоимость 5 000 ₽</small></span>'
+        ? '<span class="raffles-active-chooser__training-prize"><strong>Тренировка</strong><span>с Николаем</span><small>Стоимость 5 000 ₽</small></span>'
         : escapeHtml(amount > 0 ? formatRaffleSum(amount) : "Приз")) +
       "</span>" +
       activeRaffleJoinCtaHtml(raffle, id, endDate) +
