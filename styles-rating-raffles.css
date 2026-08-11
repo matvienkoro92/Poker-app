@@ -13415,9 +13415,18 @@ body[data-view="raffles"] .raffles-active-chooser__training-prize small {
 
 @media (max-width: 600px) {
   body[data-view="raffles"] .raffles-active-chooser__item--training .raffles-active-chooser__content {
-    padding-right: 96px !important;
+    /* The content already occupies only 58% of the card at this width. Keeping
+       the desktop art gutter here left roughly 100px for copy and broke words
+       into near-vertical columns. Let the portrait sit behind the lower copy. */
+    padding-right: 0 !important;
     background-position: right -7px bottom !important;
-    background-size: auto 90% !important;
+    background-size: auto 78% !important;
+  }
+
+  body[data-view="raffles"] .raffles-active-chooser__item--training .raffles-active-chooser__training-profile,
+  body[data-view="raffles"] .raffles-active-chooser__item--training .raffles-active-chooser__training-profile small {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
   }
 }
 
