@@ -2045,4 +2045,305 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "10.08.2026": [
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WildBoar",
+          "place": 1,
+          "reward": 5351.57,
+          "points": 135
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 2725,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 9,
+          "reward": 272.5,
+          "points": 0
+        },
+        {
+          "nick": "roma1233",
+          "place": 30,
+          "reward": 47.5,
+          "points": 0
+        },
+        {
+          "nick": "time2bass",
+          "place": 10,
+          "reward": 16.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 2800,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "НОК🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ICEGG",
+          "place": 1,
+          "reward": 28717.19,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PONOCHKA",
+          "place": 2,
+          "reward": 29740,
+          "points": 110
+        },
+        {
+          "nick": "NeCoo1er91",
+          "place": 5,
+          "reward": 9430,
+          "points": 60
+        },
+        {
+          "nick": "Sobyanin",
+          "place": 16,
+          "reward": 590,
+          "points": 0
+        },
+        {
+          "nick": "Tryapa12",
+          "place": 20,
+          "reward": 590,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Nikolay54rus",
+          "place": 5,
+          "reward": 840,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Киса",
+          "place": 1,
+          "reward": 3630,
+          "points": 135
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 2030,
+          "points": 110
+        },
+        {
+          "nick": "ДжекПотный",
+          "place": 3,
+          "reward": 1240,
+          "points": 90
+        },
+        {
+          "nick": "Бабник",
+          "place": 4,
+          "reward": 900,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "NeCoo1er91",
+          "place": 2,
+          "reward": 10160,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 500 120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "XP4227858",
+          "place": 6,
+          "reward": 18481,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "NEW PLO5 300",
+      "buyin": 10000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 8,
+          "reward": 674,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Monday 200K",
+      "buyin": 7500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 3,
+          "reward": 19925,
+          "points": 90
+        },
+        {
+          "nick": "Em13!!",
+          "place": 18,
+          "reward": 1467,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 21,
+          "reward": 1336,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 25835.000000000004,
+          "points": 135
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 5,
+          "reward": 4034.0000000000005,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Magic Bounty 50K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 7,
+          "reward": 4367,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Bali Yana 20K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 2,
+          "reward": 4634,
+          "points": 110
+        },
+        {
+          "nick": "MillioneONE77",
+          "place": 10,
+          "reward": 1462,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 5,
+          "reward": 780,
+          "points": 60
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 7,
+          "reward": 509.99999999999994,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "06:00",
+      "name": "Tai 7 1/2 KO 15K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 2,
+          "reward": 1970,
+          "points": 110
+        },
+        {
+          "nick": "MillioneONE77",
+          "place": 0,
+          "reward": 175,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
