@@ -793,10 +793,18 @@
     var keys = clubAvailableWinDayKeys(source);
     var selectedKey = clubWinsDayTab === "previous" ? keys[1] : keys[0];
     if (!selectedKey) selectedKey = keys[0] || "";
-    return source.filter(function (row) {
+    var selectedRows = source.filter(function (row) {
       if (String(row && row._eventKind || "") === "club-choice") return clubWinsDayTab === "latest";
       return !!selectedKey && eventDayKey(row && row.at) === selectedKey;
     });
+    if (clubWinsDayTab !== "latest") return selectedRows;
+    var todayKey = clubTodayDayKey();
+    var todayBirthdays = source.filter(function (row) {
+      return row && row.type === "birthday" && eventDayKey(row.at) === todayKey;
+    });
+    return todayBirthdays.concat(selectedRows.filter(function (row) {
+      return todayBirthdays.indexOf(row) === -1;
+    }));
   }
 
   function clubCurrentHeroMonth() {
@@ -885,7 +893,9 @@
     var tournamentDay = clubTournamentDayKey();
     var rowDay = eventDayKey(row.at);
     var visibleWinDays = clubStaticWinDayKeys();
-    if (row.type === "birthday" && (rowDay === clubTodayDayKey() || visibleWinDays.indexOf(rowDay) !== -1)) return true;
+    // Birthday congratulations are useful only on the birthday itself. They
+    // get a dedicated "today" group and must not become yesterday's news.
+    if (row.type === "birthday") return rowDay === clubTodayDayKey();
     if (isDailyClubEvent(row)) {
       return tournamentDay ? visibleWinDays.indexOf(rowDay) !== -1 : isPreviousCalendarDay(row.at);
     }
@@ -2304,7 +2314,16 @@
     var label = el("homeClubNewsLabel");
     if (!root || !track) return;
     var latestDayKey = clubAvailableWinDayKeys(clubEvents)[0] || "";
-    var displayRows = latestDayKey ? clubEvents.filter(function (row) { return eventDayKey(row && row.at) === latestDayKey; }) : clubEvents;
+    var todayKey = clubTodayDayKey();
+    var todayBirthdays = clubEvents.filter(function (row) {
+      return row && row.type === "birthday" && eventDayKey(row.at) === todayKey;
+    });
+    var latestRows = latestDayKey ? clubEvents.filter(function (row) {
+      return eventDayKey(row && row.at) === latestDayKey;
+    }) : clubEvents.filter(function (row) {
+      return todayBirthdays.indexOf(row) === -1;
+    });
+    var displayRows = todayBirthdays.concat(latestRows);
     if (!displayRows.length) {
       displayRows = [{
         id: clubNewsLoading ? "club-loading" : "club-empty",
@@ -3319,12 +3338,10 @@
     var snapshots = { __recentEvents: sourceRows };
     var ratingChanges = Array.isArray(tournamentSnapshots && tournamentSnapshots.__ratingChanges)
       ? tournamentSnapshots.__ratingChanges : [];
-    var tournamentDay = clubTournamentDayKey();
     var todayDay = clubTodayDayKey();
-    var birthdays = clubBirthdayEvents(allPlayers, tournamentDay);
-    if (todayDay && todayDay !== tournamentDay) {
-      birthdays = birthdays.concat(clubBirthdayEvents(allPlayers, todayDay));
-    }
+    // Unlike tournament results, birthdays are not tied to the reporting day:
+    // only people whose birthday is today should appear in the news feed.
+    var birthdays = clubBirthdayEvents(allPlayers, todayDay);
     clubNewsStaticBirthdayEvents(todayDay).forEach(function (row) {
       var key = matchKey(row && row.actorNick);
       var alreadyLoaded = birthdays.some(function (birthday) {
