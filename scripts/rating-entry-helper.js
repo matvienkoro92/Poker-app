@@ -125,7 +125,7 @@ function pointsForPlayer(player) {
 }
 
 function newTournament(date, defaults) {
-  return {
+  const tournament = {
     date,
     time: "",
     name: "",
@@ -137,6 +137,10 @@ function newTournament(date, defaults) {
     slug: "",
     players: []
   };
+  // A multiplier describes exactly one screenshot/tournament block. Do not let
+  // `blue: yes` leak into the following red screenshots.
+  defaults.multiplier = 1;
+  return tournament;
 }
 
 function parseSnippetInput(text) {
@@ -188,16 +192,18 @@ function parseSnippetInput(text) {
       }
       if (key === "multiplier" || key === "множитель") {
         const multiplier = parseNumber(value, "multiplier", warnings, lineNo);
-        defaults.multiplier = multiplier === 1000 ? 100 : (multiplier || 1);
-        if (current && !current.players.length) current.multiplier = defaults.multiplier;
+        const normalizedMultiplier = multiplier === 1000 ? 100 : (multiplier || 1);
+        if (current && !current.players.length) current.multiplier = normalizedMultiplier;
+        else defaults.multiplier = normalizedMultiplier;
         if (multiplier === 1000) warnings.push(`line ${lineNo}: multiplier 1000 normalized to 100`);
-        if (![1, 100].includes(defaults.multiplier)) warnings.push(`line ${lineNo}: unusual multiplier "${value}"`);
+        if (![1, 100].includes(normalizedMultiplier)) warnings.push(`line ${lineNo}: unusual multiplier "${value}"`);
         return;
       }
       if (key === "blue" || key === "синий" || key === "синяя") {
         const isBlue = /^(1|yes|true|да|y)$/i.test(value);
-        defaults.multiplier = isBlue ? 100 : 1;
-        if (current && !current.players.length) current.multiplier = defaults.multiplier;
+        const multiplier = isBlue ? 100 : 1;
+        if (current && !current.players.length) current.multiplier = multiplier;
+        else defaults.multiplier = multiplier;
         return;
       }
       if (key === "time" || key === "время") {
@@ -779,8 +785,11 @@ async function verifySourceMultipliers(tournaments, detectBlue = detectBlueInter
       sources.push(looksLikeLocalSource(file) ? expandHome(file) : path.join(ASSETS_DIR, file));
     });
     for (const source of sources.filter((file) => file && fs.existsSync(file))) {
-      if (await detectBlue(source) && Number(tournament.multiplier) !== 100) {
+      const isBlue = await detectBlue(source);
+      if (isBlue && Number(tournament.multiplier) !== 100) {
         failures.push(`tournament ${index + 1} (${tournament.date} ${tournament.time} ${tournament.name}): blue screenshot ${path.basename(source)} requires blue: yes or multiplier: 100`);
+      } else if (!isBlue && Number(tournament.multiplier) === 100) {
+        failures.push(`tournament ${index + 1} (${tournament.date} ${tournament.time} ${tournament.name}): red screenshot ${path.basename(source)} cannot use multiplier: 100`);
       }
     }
   }
