@@ -667,4 +667,15 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-10-08-2026-league1-bali-yana-20k-08h.jpg",
     "rating-compressed-preview/rating-10-08-2026-league1-tai-7-1-2-ko-15k-06h.jpg"
   ]
+,
+  "11.08.2026": [
+    "rating-compressed-preview/rating-11-08-2026-league1-bali-yana-20k-08h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-dv-plo5-30k-12h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-plo4-20k-16h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-bounty-magic-50k-18h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-nok-19h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-11-08-2026-league1-hr-5000-200k-20h.jpg"
+  ]
 };
