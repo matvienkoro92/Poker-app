@@ -1534,7 +1534,10 @@
         actorNick: displayName,
         _eventKind: "tournament",
       };
-    }).filter(Boolean).slice(0, MAX_EVENTS);
+    // Do not cap the two-day static history here: the rows are chronological,
+    // so an early slice drops late tournaments from the latest day (including
+    // its day hero). The final arranged feed is capped after day selection.
+    }).filter(Boolean);
   }
 
   function tournamentSnapshotsReady(friends) {
