@@ -5514,6 +5514,66 @@ html body #app.app.app--view-home
   }
 }
 
+/* Club-news cards keep their artwork/content split, but the footer needs the
+   whole card width on phones. It otherwise inherits the 69% copy column and
+   the two labelled controls collide with each other and the copy button. */
+@media (max-width: 480px) {
+  body .home-friend-news-modal--club .home-friend-news-modal__action-row {
+    width: 145%;
+    max-width: none;
+    margin-left: -45%;
+    gap: 6px;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px;
+    gap: 6px;
+  }
+
+  body .home-friend-news-modal--club
+    .home-friend-news-modal__action-controls
+    .chat-user-modal__news-comment-toggle,
+  body .home-friend-news-modal--club .home-friend-news-modal__profile-cue {
+    min-height: 32px;
+    padding-inline: 5px;
+    gap: 3px;
+    font-size: 7px;
+    letter-spacing: 0;
+  }
+
+  body .home-friend-news-modal--club
+    .home-friend-news-modal__action-row
+    .chat-user-modal__news-comment-toggle b {
+    font-size: 8px;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__profile-cue b {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr) 32px;
+    gap: 4px;
+  }
+
+  body .home-friend-news-modal--club
+    .home-friend-news-modal__action-controls
+    .chat-user-modal__news-comment-toggle,
+  body .home-friend-news-modal--club .home-friend-news-modal__profile-cue {
+    min-height: 30px;
+    padding-inline: 3px;
+  }
+
+  body .home-friend-news-modal--club .home-friend-news-modal__event-copy {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+}
+
 /* Glossy tournament-bonus gems from the approved home-screen art direction. */
 .app.app--view-home .tournament-day-home-dual--tournament-focus
   .home-tournament-bonuses--upper {
