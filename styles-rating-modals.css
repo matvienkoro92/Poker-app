@@ -214,7 +214,7 @@
 }
 .winter-rating-player-modal__overview {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   align-items: stretch;
   gap: 10px;
   margin: -8px 0 16px;
@@ -467,7 +467,7 @@
 .winter-rating-player-modal__summary-value {
   text-align: right;
   font-weight: 500;
-  white-space: normal;
+  white-space: nowrap;
 }
 .winter-rating-player-modal__summary-total-row .winter-rating-player-modal__summary-label {
   font-weight: 600;
