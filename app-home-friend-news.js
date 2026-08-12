@@ -552,6 +552,7 @@
     }
     if (slug === "smile") return "./assets/club-news-personal/smile-news-cutout.webp?v=4";
     if (slug === "bardur") return "./assets/club-news-personal/bardur-news-cutout.webp?v=4";
+    if (slug === "babnik") return "./assets/club-news-personal/babnik-news-cutout-rose.webp?v=1";
     if (slug) return "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=3";
     return clubNewsPersonalArt(nick);
   }
