@@ -2371,7 +2371,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Waaar",
           "place": 4,
-          "reward": 330000,
+          "reward": 3300,
           "points": 70
         }
       ]
@@ -2399,25 +2399,25 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "GhooSt",
           "place": 2,
-          "reward": 290000,
+          "reward": 2900,
           "points": 110
         },
         {
           "nick": "DemonDen",
           "place": 3,
-          "reward": 167500,
+          "reward": 1675,
           "points": 90
         },
         {
           "nick": "мистерFox",
           "place": 4,
-          "reward": 28000,
+          "reward": 280,
           "points": 70
         },
         {
           "nick": "Player746595",
           "place": 5,
-          "reward": 84000,
+          "reward": 840,
           "points": 60
         }
       ]
@@ -2445,19 +2445,19 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Nikolay54rus",
           "place": 2,
-          "reward": 441000,
+          "reward": 4410,
           "points": 110
         },
         {
           "nick": "Annie",
           "place": 4,
-          "reward": 76250,
+          "reward": 762.5,
           "points": 70
         },
         {
           "nick": "Zeus",
           "place": 6,
-          "reward": 1000,
+          "reward": 10,
           "points": 50
         }
       ]
@@ -2471,25 +2471,25 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "WiNifly",
           "place": 5,
-          "reward": 740000,
+          "reward": 7400,
           "points": 60
         },
         {
           "nick": "Yanky",
           "place": 8,
-          "reward": 220000,
+          "reward": 2200,
           "points": 30
         },
         {
           "nick": "Ферапонт",
           "place": 18,
-          "reward": 30000,
+          "reward": 300,
           "points": 0
         },
         {
           "nick": "n1kk1ex",
           "place": 20,
-          "reward": 130000,
+          "reward": 1300,
           "points": 0
         }
       ]
@@ -2535,31 +2535,31 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "ПокерМанки",
           "place": 1,
-          "reward": 3056721,
+          "reward": 30567.21,
           "points": 135
         },
         {
           "nick": "ICEGG",
           "place": 2,
-          "reward": 1868281.0000000002,
+          "reward": 18682.81,
           "points": 110
         },
         {
           "nick": "Бабник",
           "place": 4,
-          "reward": 810937,
+          "reward": 8109.37,
           "points": 70
         },
         {
           "nick": "Twisted-fate_08",
           "place": 5,
-          "reward": 672187,
+          "reward": 6721.87,
           "points": 60
         },
         {
           "nick": "NeCooler91",
           "place": 6,
-          "reward": 94375,
+          "reward": 943.75,
           "points": 50
         }
       ]
@@ -2573,13 +2573,13 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Waaar",
           "place": 2,
-          "reward": 720000,
+          "reward": 7200,
           "points": 110
         },
         {
           "nick": "ПокерМанки",
           "place": 3,
-          "reward": 370000,
+          "reward": 3700,
           "points": 90
         }
       ]
@@ -2613,31 +2613,31 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
         {
           "nick": "Zeus",
           "place": 1,
-          "reward": 815174,
+          "reward": 8151.74,
           "points": 135
         },
         {
           "nick": "__JD__",
           "place": 4,
-          "reward": 87187,
+          "reward": 871.87,
           "points": 70
         },
         {
           "nick": "Папач",
           "place": 7,
-          "reward": 375,
+          "reward": 3.75,
           "points": 40
         },
         {
           "nick": "AlenaSt",
           "place": 9,
-          "reward": 6750,
+          "reward": 67.5,
           "points": 0
         },
         {
           "nick": "Юрий_77",
           "place": 19,
-          "reward": 17187,
+          "reward": 171.87,
           "points": 0
         }
       ]
