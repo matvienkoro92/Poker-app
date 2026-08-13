@@ -2643,4 +2643,243 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "12.08.2026": [
+    {
+      "time": "02:00",
+      "name": "*+ Deep Night 15k *+",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "XP4227858",
+          "place": 2,
+          "reward": 4505,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Damir86rus",
+          "place": 4,
+          "reward": 960,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 €* 40K GTD",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 1,
+          "reward": 12991,
+          "points": 135
+        },
+        {
+          "nick": "nagibator",
+          "place": 14,
+          "reward": 249.00000000000003,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 : € 20K",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "bagura",
+          "place": 1,
+          "reward": 7145,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WildBoar",
+          "place": 6,
+          "reward": 160,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "💥Big Boss 💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 32437.5,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "FREEROLL 500K dR",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ded Den",
+          "place": 7,
+          "reward": 12525,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 790,
+          "points": 110
+        },
+        {
+          "nick": "zagrebnagreb",
+          "place": 3,
+          "reward": 407.5,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 10000,
+          "points": 110
+        },
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 5600,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "HR 5000€* 200K",
+      "buyin": 25000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 25663,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 6809.63,
+          "points": 135
+        },
+        {
+          "nick": "Stepchik",
+          "place": 2,
+          "reward": 3271.25,
+          "points": 110
+        },
+        {
+          "nick": "DeNMeN",
+          "place": 3,
+          "reward": 2888.36,
+          "points": 90
+        },
+        {
+          "nick": "GhooSt",
+          "place": 5,
+          "reward": 352.5,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 3,
+          "reward": 7347,
+          "points": 90
+        },
+        {
+          "nick": "odna.pluha",
+          "place": 17,
+          "reward": 3116,
+          "points": 0
+        },
+        {
+          "nick": "Smile😎😊😺",
+          "place": 35,
+          "reward": 1600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "DemonDen",
+          "place": 2,
+          "reward": 4200,
+          "points": 110
+        },
+        {
+          "nick": "ДжекПотный",
+          "place": 4,
+          "reward": 1400,
+          "points": 70
+        }
+      ]
+    }
+  ]
 };

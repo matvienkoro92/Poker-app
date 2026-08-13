@@ -821,6 +821,27 @@
     return months[clubCurrentHeroMonth().month - 1] || "месяца";
   }
 
+  function clubCurrentMonthHeroLeaderNick() {
+    var data = window.POKER_CLUB_NEWS_DATA || {};
+    var heroes = data.dayHeroes && typeof data.dayHeroes === "object" ? data.dayHeroes : {};
+    var month = clubCurrentHeroMonth();
+    var leaders = {};
+    Object.keys(heroes).forEach(function (label) {
+      var match = String(label).match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+      var hero = heroes[label];
+      if (!match || Number(match[2]) !== month.month || Number(match[3]) !== month.year || !hero) return;
+      var nick = String(hero.nick || "").trim();
+      var key = matchKey(nick);
+      if (!key) return;
+      if (!leaders[key]) leaders[key] = { nick: nick, wins: 0, reward: 0 };
+      leaders[key].wins += 1;
+      leaders[key].reward += Math.max(0, Number(hero.reward) || 0);
+    });
+    return Object.keys(leaders).map(function (key) { return leaders[key]; }).sort(function (left, right) {
+      return right.wins - left.wins || right.reward - left.reward || left.nick.localeCompare(right.nick, "ru");
+    })[0]?.nick || "";
+  }
+
   function clubCurrentMonthHeroEvents(rows) {
     var data = window.POKER_CLUB_NEWS_DATA || {};
     var heroes = data.dayHeroes && typeof data.dayHeroes === "object" ? data.dayHeroes : {};
@@ -2375,11 +2396,12 @@
   function renderModalList(rows) {
     var list = el("homeFriendNewsList");
     if (!list) return;
+    var heroLeaderNick = clubCurrentMonthHeroLeaderNick();
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
           '<strong>15 000 ₽</strong>' +
-          '<span><b>«Герой дня» · август</b>' +
-          '<small>Награда лидеру месяца</small></span>' +
+          '<span><b>«Герой дня» · ' + esc(clubHeroMonthLabel()) + '</b>' +
+          '<small>' + (heroLeaderNick ? 'Лидирует: ' + esc(heroLeaderNick) : 'Награда лидеру месяца') + '</small></span>' +
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть</button>' +
         '</aside>'
       : "";
