@@ -3046,10 +3046,7 @@ function initWinterRating() {
     var cacheV = "v=19";
     container.innerHTML = files.map(function (f, i) {
       var fullSrc = getAssetUrl(f) + "?" + cacheV;
-      // The production build only publishes assets referenced by static data.
-      // Thumbnail URLs are assembled dynamically and are therefore not present
-      // in that build; requesting them leaves broken tiles on fast cached pages.
-      var thumbSrc = fullSrc;
+      var thumbSrc = typeof getRatingThumbnailUrl === "function" ? getRatingThumbnailUrl(f) + "?v=1" : fullSrc;
       return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\" data-rating-image-file=\"" + escapeHtml(f) + "\"><img src=\"" + thumbSrc + "\" data-rating-full-src=\"" + fullSrc + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" decoding=\"async\" /></div>";
     }).join("");
     container.setAttribute("data-rating-screens-filled", "1");
