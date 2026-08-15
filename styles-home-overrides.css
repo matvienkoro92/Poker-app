@@ -5514,29 +5514,28 @@ html body #app.app.app--view-home
   }
 }
 
-/* Club-news cards keep their artwork/content split, but the footer needs the
-   whole card width on phones. It otherwise inherits the 69% copy column and
-   the two labelled controls collide with each other and the copy button. */
+/* Keep club-news controls inside the text column on phones. */
 @media (max-width: 480px) {
   body .home-friend-news-modal--club .home-friend-news-modal__action-row {
-    width: 145%;
-    max-width: none;
-    margin-left: -45%;
-    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    gap: 5px;
   }
 
   body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px;
-    gap: 6px;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) 32px;
+    gap: 5px;
   }
 
   body .home-friend-news-modal--club
     .home-friend-news-modal__action-controls
     .chat-user-modal__news-comment-toggle,
   body .home-friend-news-modal--club .home-friend-news-modal__profile-cue {
-    min-height: 32px;
-    padding-inline: 5px;
+    min-height: 30px;
+    padding-inline: 4px;
     gap: 3px;
+    overflow: hidden;
     font-size: 7px;
     letter-spacing: 0;
   }

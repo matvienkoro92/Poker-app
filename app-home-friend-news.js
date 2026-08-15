@@ -2076,7 +2076,7 @@
         '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
-          '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Комментировать</b>' +
+          '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Коммент</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
         '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>" +
@@ -2218,7 +2218,7 @@
         }).join("") + "</span>"
       : "<strong>" + eventTextHtml(row.text) + "</strong>";
     var profileCue = canOpenProfile
-      ? '<span class="home-friend-news-modal__profile-cue">Открыть профиль <b aria-hidden="true">›</b></span>'
+      ? '<span class="home-friend-news-modal__profile-cue">Профиль <b aria-hidden="true">›</b></span>'
       : "";
     var feedbackParts = ticker ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var feedbackId = ticker ? "" : feedbackEventId(row);
