@@ -687,4 +687,24 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-12-08-2026-league1-hr-5000-200k-20h.jpg",
     "rating-compressed-preview/rating-12-08-2026-league1-nlh-knockout-220k-21h.jpg"
   ]
+,
+  "13.08.2026": [
+    "rating-compressed-preview/rating-13-08-2026-league1-nok-19h.jpg",
+    "rating-compressed-preview/rating-13-08-2026-league1-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-13-08-2026-league1-bali-yana-20k-08h.jpg",
+    "rating-compressed-preview/rating-13-08-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-13-08-2026-league1-magic-500-120k-22h.jpg",
+    "rating-compressed-preview/rating-13-08-2026-league1-night-magic-80k-23h.jpg"
+  ],
+  "14.08.2026": [
+    "rating-compressed-preview/rating-14-08-2026-league1-pyatnica-progressiv-18h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-nok-19h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-rebuy-evening-20h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-bali-yana-20k-08h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-mini-fenix-60k-16h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-shr-1-mln-gtd-18h.jpg",
+    "rating-compressed-preview/rating-14-08-2026-league1-nlh-knockout-220k-21h.jpg"
+  ]
 };
