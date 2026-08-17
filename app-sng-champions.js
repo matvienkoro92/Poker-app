@@ -1256,17 +1256,8 @@
   }
 
   function formatReadyCountdown(match, data) {
-    if (!match || !match.readyDeadlineAt || match.winnerId) return "";
-    if (match.playingAt) return "Играют";
-    var end = Date.parse(match.readyDeadlineAt);
-    var base = Date.now();
-    if (!isFinite(end)) return "";
-    var diff = Math.max(0, end - (isFinite(base) ? base : Date.now()));
-    var hours = Math.floor(diff / 3600000);
-    var mins = Math.floor((diff % 3600000) / 60000);
-    if (diff <= 0) return "Таймер истек";
-    if (hours >= 1) return "До готовности: " + String(hours) + "ч " + String(mins).padStart(2, "0") + "м";
-    return "До готовности: " + String(mins || 1) + "м";
+    if (!match || match.winnerId) return "";
+    return match.playingAt ? "Играют" : "";
   }
 
   function renderReadyAction(match, players, data) {
