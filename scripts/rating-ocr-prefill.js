@@ -70,6 +70,7 @@ function normalizeName(raw) {
   if (/Big\s*Boss/i.test(name)) return "💥Big Boss 💥";
   if (/^Фризаут/i.test(name)) return "Фризаут 💸";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
+  if (/^PL0?4\s+[РP]KO/i.test(name)) return "PLO4 PKO 🥊 20K";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
   return name;
 }
@@ -311,6 +312,8 @@ async function parseOcrFile(file) {
       "17:00|300": "МОК🎰",
       "18:00|300": "Четверг МКО",
       "19:00|1000": "НОК🥊",
+      "14:00|100": "Tournament Rebuy",
+      "20:00|100": "Tournament PLO6",
       "20:00|800": "Rebuy Evening",
       "22:00|200": "EnergetikTournament"
     };
