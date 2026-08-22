@@ -386,7 +386,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
     {
       "time": "14:00",
       "name": "Micro 200 50K GTD",
-      "buyin": 10000,
+      "buyin": 200,
       "league": 2,
       "players": [
         {

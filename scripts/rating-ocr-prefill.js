@@ -119,6 +119,13 @@ function inferLeague(buyin) {
   return amount >= 500 ? 1 : 2;
 }
 
+function effectiveTournamentBuyin(title, detectedBuyin) {
+  if (/\bMicro\s*200\b/i.test(title)) return 200;
+  if (/\bBounty\s*200\b/i.test(title)) return 200;
+  if (/\bHyper\s*Turbo\s*300\b/i.test(title)) return 300;
+  return detectedBuyin;
+}
+
 function looksLikePlayerName(token) {
   const text = token.text.trim();
   if (!text || text.length < 2) return false;
@@ -304,12 +311,14 @@ async function parseOcrFile(file) {
     0.665,
     0.025
   );
-  const buyin = feeToken ? buyinFromText(feeToken.text) : 0;
+  let buyin = feeToken ? buyinFromText(feeToken.text) : 0;
+  buyin = effectiveTournamentBuyin(title, buyin);
   if (title === "TODO" && time === "21:00" && buyin === 200) title = "OK🎰";
   if (title === "TODO") {
     const poker21TitleByTimeAndBuyin = {
       "12:00|800": "DV Rebuy",
       "17:00|300": "МОК🎰",
+      "18:00|500": "Пятница Прогрессив",
       "18:00|300": "Четверг МКО",
       "19:00|1000": "НОК🥊",
       "14:00|100": "Tournament Rebuy",

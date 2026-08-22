@@ -4337,8 +4337,8 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
     {
       "time": "14:00",
       "name": "Micro 200 40K GTD",
-      "buyin": 10000,
-      "league": 1,
+      "buyin": 200,
+      "league": 2,
       "players": [
         {
           "nick": "Andrey75ru",
@@ -4456,7 +4456,7 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       "time": "20:00",
       "name": "💎Hyper Turbo 300💎",
       "buyin": 12000,
-      "league": 1,
+      "league": 2,
       "players": [
         {
           "nick": "odna.pluha",
@@ -4534,6 +4534,241 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
           "nick": "Em13!!",
           "place": 21,
           "reward": 458,
+          "points": 0
+        }
+      ]
+    }
+  ]
+,
+  "21.08.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 1,
+          "reward": 45253,
+          "points": 135
+        },
+        {
+          "nick": "odna.pluha",
+          "place": 21,
+          "reward": 300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Bali Yana🌴🆕20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "SPARTAK<©>",
+          "place": 3,
+          "reward": 2949,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 5800,
+          "points": 110
+        },
+        {
+          "nick": "FrankL",
+          "place": 3,
+          "reward": 3600,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 1,
+          "reward": 3060,
+          "points": 135
+        },
+        {
+          "nick": "DemonDen",
+          "place": 2,
+          "reward": 2040,
+          "points": 110
+        },
+        {
+          "nick": "Киса",
+          "place": 4,
+          "reward": 720,
+          "points": 70
+        },
+        {
+          "nick": "WildBoar",
+          "place": 5,
+          "reward": 620,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 2,
+          "reward": 10531,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 12050,
+          "points": 135
+        },
+        {
+          "nick": "DiMon80",
+          "place": 6,
+          "reward": 900,
+          "points": 50
+        },
+        {
+          "nick": "fomichga",
+          "place": 5,
+          "reward": 450,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AliySvin",
+          "place": 2,
+          "reward": 25314.8,
+          "points": 110
+        },
+        {
+          "nick": "Waaar",
+          "place": 6,
+          "reward": 4607.81,
+          "points": 50
+        },
+        {
+          "nick": "DeNMeN",
+          "place": 19,
+          "reward": 1678.12,
+          "points": 0
+        },
+        {
+          "nick": "Штукатур",
+          "place": 17,
+          "reward": 574.6,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 3160,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "💎Hyper Turbo 300💎",
+      "buyin": 12000,
+      "league": 2,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 5,
+          "reward": 3869,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Мегалодон",
+          "place": 2,
+          "reward": 3094.69,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 6,
+          "reward": 900,
+          "points": 50
+        },
+        {
+          "nick": "WildBoar",
+          "place": 5,
+          "reward": 515,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯 500🎯120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ферапонт",
+          "place": 7,
+          "reward": 14688,
+          "points": 40
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 22,
+          "reward": 449,
           "points": 0
         }
       ]

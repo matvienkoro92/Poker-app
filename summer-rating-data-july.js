@@ -3260,7 +3260,7 @@ var SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE = {
     {
       "time": "14:00",
       "name": "Micro 200 40K GTD",
-      "buyin": 10000,
+      "buyin": 200,
       "league": 2,
       "players": [
         {
