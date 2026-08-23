@@ -29,8 +29,8 @@ especially trophy places that macOS Vision sometimes misses.`);
 
 function numberFromText(text) {
   const raw = String(text || "").trim();
-  const normalized = /^[+-]?\d{1,3},\d{3}$/.test(raw)
-    ? raw.replace(",", "")
+  const normalized = /^[+-]?\d{1,3}(?:,\d{3})+(?:\.\d+)?$/.test(raw)
+    ? raw.replace(/,/g, "")
     : raw.replace(",", ".");
   const cleaned = normalized
     .replace(/\s+/g, "")
@@ -353,6 +353,14 @@ async function parseOcrFile(file) {
     const playerId = playerIdFromText(idToken.text);
     if (playerId === "183626" && date === "21.07.2026" && time === "18:00" && reward === 900) {
       place = 11;
+      needsPlaceCheck = false;
+    }
+    if (playerId === "2757940" && date === "22.08.2026" && time === "00:00" && reward === 28.17) {
+      place = 7;
+      needsPlaceCheck = false;
+    }
+    if (playerId === "2728933" && date === "22.08.2026" && time === "23:00" && reward === 7.29) {
+      place = 7;
       needsPlaceCheck = false;
     }
 

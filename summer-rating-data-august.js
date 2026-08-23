@@ -4774,4 +4774,233 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "22.08.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 2,
+          "reward": 17655,
+          "points": 110
+        },
+        {
+          "nick": "nikola233",
+          "place": 7,
+          "reward": 2817,
+          "points": 40
+        },
+        {
+          "nick": "AndrushaMorf",
+          "place": 16,
+          "reward": 2100,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 12,
+          "reward": 1087,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Bali Yana🌴🆕20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 1,
+          "reward": 9220,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 2,
+          "reward": 6600,
+          "points": 110
+        },
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 2800,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 9333,
+          "points": 110
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 8,
+          "reward": 1339,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "НОК🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 4921.87,
+          "points": 90
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 4,
+          "reward": 1287.5,
+          "points": 70
+        },
+        {
+          "nick": "topor32",
+          "place": 14,
+          "reward": 168.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "🪄SHR MAGIC🪄800K",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 2,
+          "reward": 298606,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 11800,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "💎Hyper Turbo 300💎",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 5,
+          "reward": 2846,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 3732.27,
+          "points": 135
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 2408.75,
+          "points": 110
+        },
+        {
+          "nick": "DemonDen",
+          "place": 3,
+          "reward": 1253.75,
+          "points": 90
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 741.02,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k...",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Smile😎😊😺",
+          "place": 16,
+          "reward": 348,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80KO",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 1755,
+          "points": 60
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 8,
+          "reward": 1416,
+          "points": 30
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 7,
+          "reward": 729,
+          "points": 40
+        }
+      ]
+    }
+  ]
 };
