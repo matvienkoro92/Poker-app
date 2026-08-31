@@ -535,4 +535,11 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-22-08-2026-league2-v-hyper-turbo-300-v-20h.jpg",
     "rating-compressed-preview/rating-22-08-2026-league2-ok-21h.jpg"
   ]
+,
+  "30.08.2026": [
+    "rating-compressed-preview/rating-30-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-30-08-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-30-08-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-30-08-2026-league2-energetiktournament-22h.jpg"
+  ]
 };

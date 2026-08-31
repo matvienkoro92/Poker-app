@@ -318,6 +318,7 @@ async function parseOcrFile(file) {
     const poker21TitleByTimeAndBuyin = {
       "12:00|800": "DV Rebuy",
       "17:00|300": "МОК🎰",
+      "18:00|3000": "Турнир Месяца",
       "18:00|500": "Пятница Прогрессив",
       "18:00|300": "Четверг МКО",
       "19:00|1000": "НОК🥊",
@@ -328,6 +329,8 @@ async function parseOcrFile(file) {
     };
     title = poker21TitleByTimeAndBuyin[`${time}|${buyin}`] || title;
   }
+  if (date === "30.08.2026" && time === "18:00" && buyin === 20000) title = "🥊GRAND KNOCKOUT🥊";
+  if (date === "30.08.2026" && time === "21:59" && buyin === 10000) title = "Magic 🎯500🎯120K";
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])ID\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
@@ -361,6 +364,10 @@ async function parseOcrFile(file) {
     }
     if (playerId === "2728933" && date === "22.08.2026" && time === "23:00" && reward === 7.29) {
       place = 7;
+      needsPlaceCheck = false;
+    }
+    if (playerId === "3399185" && date === "30.08.2026" && time === "08:00" && reward === 2.1) {
+      place = 0;
       needsPlaceCheck = false;
     }
 

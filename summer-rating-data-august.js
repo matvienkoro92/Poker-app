@@ -5003,4 +5003,239 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "30.08.2026": [
+    {
+      "time": "08:00",
+      "name": "Bali Yana 20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 2,
+          "reward": 1488,
+          "points": 110
+        },
+        {
+          "nick": "Ферапонт",
+          "place": 0,
+          "reward": 210,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 14840,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 4,
+          "reward": 1782.19,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Месяца",
+      "buyin": 3000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "BOTEZGAMBIT",
+          "place": 1,
+          "reward": 277000,
+          "points": 135
+        },
+        {
+          "nick": "Слон_Мудр",
+          "place": 3,
+          "reward": 90000,
+          "points": 90
+        },
+        {
+          "nick": "Замотаю",
+          "place": 6,
+          "reward": 50000,
+          "points": 50
+        },
+        {
+          "nick": "Galardo",
+          "place": 13,
+          "reward": 14000,
+          "points": 0
+        },
+        {
+          "nick": "time2bass",
+          "place": 17,
+          "reward": 13000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ded Den",
+          "place": 6,
+          "reward": 40761,
+          "points": 50
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 17,
+          "reward": 18070,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "НОК🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Киса",
+          "place": 2,
+          "reward": 9656.24,
+          "points": 110
+        },
+        {
+          "nick": "МужНаЧас",
+          "place": 3,
+          "reward": 6337.49,
+          "points": 90
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 2393.75,
+          "points": 70
+        },
+        {
+          "nick": "Пряник",
+          "place": 9,
+          "reward": 62.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "zagrebnagreb",
+          "place": 1,
+          "reward": 5957.5,
+          "points": 135
+        },
+        {
+          "nick": "ДжекПотный",
+          "place": 2,
+          "reward": 420,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 2,
+          "reward": 6600,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 5015.94,
+          "points": 135
+        },
+        {
+          "nick": "roma1233",
+          "place": 3,
+          "reward": 1395,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "21:59",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 1,
+          "reward": 48263,
+          "points": 135
+        },
+        {
+          "nick": "Бабник",
+          "place": 3,
+          "reward": 21353,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ферапонт",
+          "place": 2,
+          "reward": 5200,
+          "points": 110
+        },
+        {
+          "nick": "time2bass",
+          "place": 3,
+          "reward": 3200,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };
