@@ -5238,4 +5238,107 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
       ]
     }
   ]
+,
+  "31.08.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 3,
+          "reward": 5000,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 7388,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "EvgenDerby",
+          "place": 6,
+          "reward": 1319.05,
+          "points": 50
+        },
+        {
+          "nick": "__JD__",
+          "place": 4,
+          "reward": 820,
+          "points": 70
+        },
+        {
+          "nick": "DemonDen",
+          "place": 11,
+          "reward": 149.06,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Smile😎😊😺",
+          "place": 7,
+          "reward": 8650,
+          "points": 40
+        },
+        {
+          "nick": "IRIHKA",
+          "place": 4,
+          "reward": 5300,
+          "points": 70
+        },
+        {
+          "nick": "<Amaliya>",
+          "place": 9,
+          "reward": 300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "НОК🥊",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Smile😎😊😺",
+          "place": 5,
+          "reward": 2962.5,
+          "points": 60
+        },
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 2350,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };
