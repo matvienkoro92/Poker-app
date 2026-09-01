@@ -832,6 +832,12 @@
       if (!match || Number(match[2]) !== month.month || Number(match[3]) !== month.year || !hero) return;
       var nick = String(hero.nick || "").trim();
       var key = matchKey(nick);
+      // Poker21 reports the same player with a varying number of "a"/"r" letters.
+      // Count all Waaar/Waaarr variants as one hero and show the club display name.
+      if (/^wa+r+$/i.test(key)) {
+        key = "ваар";
+        nick = "Ваар";
+      }
       if (!key) return;
       if (!leaders[key]) leaders[key] = { nick: nick, wins: 0, reward: 0 };
       leaders[key].wins += 1;
@@ -2349,6 +2355,7 @@
       return todayBirthdays.indexOf(row) === -1;
     });
     var displayRows = todayBirthdays.concat(latestRows);
+    if (clubNewsLoading && !clubNewsLoaded) displayRows = [];
     if (!displayRows.length) {
       displayRows = [{
         id: clubNewsLoading ? "club-loading" : "club-empty",
@@ -2396,6 +2403,13 @@
   function renderModalList(rows) {
     var list = el("homeFriendNewsList");
     if (!list) return;
+    var pinnedLeaderboardBanner = newsModalMode === "club"
+      ? '<aside class="home-friend-news-modal__pinned-banner" aria-label="Победители МТТ Лидерборда Poker21">' +
+          '<img src="./assets/club-news-art/mtt-leaderboard-winners-roman.png?v=1" ' +
+            'alt="Победители МТТ Лидерборда на Poker21: ПокерМанки — 250 000 рублей, Ваар — 150 000 рублей, Кулер — 100 000 рублей" ' +
+            'width="2172" height="724" loading="eager" decoding="async">' +
+        '</aside>'
+      : "";
     var heroLeaderNick = clubCurrentMonthHeroLeaderNick();
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
@@ -2406,12 +2420,12 @@
         '</aside>'
       : "";
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
-    var activeClubLoading = newsModalMode === "club" && !hasRealRows &&
-      (clubNewsTab === "wall" ? clubWallLoading : clubNewsLoading);
+    var activeClubLoading = newsModalMode === "club" &&
+      (clubNewsTab === "wall" ? (clubWallLoading && !hasRealRows) : (clubNewsLoading && !clubNewsLoaded));
     if (activeClubLoading) {
       var skeletonAt = clubEvents[0] && clubEvents[0].at ||
         (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
-      list.innerHTML = achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
+      list.innerHTML = pinnedLeaderboardBanner + achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(skeletonAt, true)) + '</span></div>' +
         '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
@@ -2442,7 +2456,7 @@
             '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab home-friend-news-modal__club-tab--active">Записи игроков</button></div>' +
           '<div class="home-friend-news-modal__empty"><span aria-hidden="true">✎</span><strong>Записей за этот день пока нет</strong></div></section>'
       : "";
-    list.innerHTML = achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
+    list.innerHTML = pinnedLeaderboardBanner + achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite;
     window.setTimeout(focusPendingClubNewsEvent, 0);
@@ -3510,9 +3524,8 @@
     }
     if (!clubEvents.length && clubNewsStaticRows().length) {
       clubEvents = buildClubEventsFromRows([], []);
-      clubNewsLoaded = clubEvents.length > 0;
     }
-    clubNewsLoading = !clubEvents.length;
+    clubNewsLoading = !clubNewsLoaded;
     renderClubNews();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
@@ -3633,7 +3646,9 @@
     if (!clubEvents.length && clubNewsStaticRows().length) {
       clubEvents = buildClubEventsFromRows([], []);
     }
-    clubNewsLoaded = clubEvents.length > 0;
+    // Cached/generated rows are only a first-paint snapshot. Keep the modal in
+    // its loading state until the current feed has been fetched successfully.
+    clubNewsLoaded = false;
     mountWhenProfileReady();
     loadClubNews();
     window.addEventListener("poker-profile-friends-ready", function (event) {

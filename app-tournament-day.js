@@ -1907,6 +1907,46 @@ window.openHomeFreerollsListModal = openHomeFreerollsListModal;
   });
 })();
 
+function openPlayerStickersModal() {
+  var ensure =
+    typeof window.pokerEnsureGlobalModalsHtml === "function"
+      ? window.pokerEnsureGlobalModalsHtml()
+      : Promise.resolve(true);
+  ensure.catch(function () { return true; }).then(function () {
+    var modal = document.getElementById("playerStickersModal");
+    if (!modal) return;
+    modal.classList.remove("player-stickers-modal--hidden");
+    modal.setAttribute("aria-hidden", "false");
+  });
+}
+
+function closePlayerStickersModal() {
+  var modal = document.getElementById("playerStickersModal");
+  if (!modal) return;
+  modal.classList.add("player-stickers-modal--hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+(function initPlayerStickersShortcut() {
+  document.addEventListener("click", function (e) {
+    var openTrigger = e.target && e.target.closest ? e.target.closest("[data-player-stickers-open]") : null;
+    if (openTrigger) {
+      e.preventDefault();
+      openPlayerStickersModal();
+      return;
+    }
+    var closeTrigger = e.target && e.target.closest ? e.target.closest("[data-player-stickers-close]") : null;
+    if (closeTrigger) {
+      e.preventDefault();
+      closePlayerStickersModal();
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    var modal = document.getElementById("playerStickersModal");
+    if (e.key === "Escape" && modal && modal.getAttribute("aria-hidden") === "false") closePlayerStickersModal();
+  });
+})();
+
 function updateTournamentDayBlock() {
   try {
     initHomeFreerollModal();

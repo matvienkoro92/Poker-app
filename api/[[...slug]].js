@@ -25,6 +25,7 @@ const handlers = {
   "pokerplus-maintenance": () => require(path.join(handlersDir, "pokerplus-maintenance.js")),
   "pokerplus-club-league-data": () => require(path.join(handlersDir, "pokerplus-club-league-data.js")),
   "pokerplus-chip-logs": () => require(path.join(handlersDir, "pokerplus-chip-logs.js")),
+  "pokerplus-chips": () => require(path.join(handlersDir, "pokerplus-chips.js")),
   "player-crm": () => require(path.join(handlersDir, "player-crm.js")),
   "player-crm-push-event": () => require(path.join(handlersDir, "player-crm-push-event.js")),
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),

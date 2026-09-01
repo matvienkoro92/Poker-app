@@ -393,7 +393,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament" href="./styles-tournament.css?v=4.001" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament" href="./styles-home-overrides.css?v=4.001" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament" href="./styles-home-overrides.css?v=4.005" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.001" />
@@ -930,10 +930,10 @@
                 <img class="home-mini-icon__hero home-mini-icon__hero--raffles" src="./assets/home-menu-icon-raffle-tickets.webp?v=3.701" alt="" width="408" height="354" loading="lazy" decoding="async" aria-hidden="true" />
                 <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
               </a>
-              <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--freerolls" data-home-freerolls-open="1" title="Фрироллы" aria-label="Ближайшие фрироллы">
+              <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--player-stickers" data-player-stickers-open="1" title="Стики с игроками" aria-label="Открыть стикеры с игроками клуба">
                 <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-menu-stage-bg.webp?v=3.701" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
-                <img class="home-mini-icon__hero home-mini-icon__hero--freerolls" src="./assets/home-menu-icon-freeroll-cup.webp?v=3.701" alt="" width="398" height="404" loading="lazy" decoding="async" aria-hidden="true" />
-                <span class="home-mini-icon__label" id="homeMiniFreerollsLabel">Фрироллы</span>
+                <img class="home-mini-icon__hero home-mini-icon__hero--player-stickers" src="./assets/stickers/league1/pokermanki-derzhi-fishku.png?v=1" alt="" width="1254" height="1254" loading="lazy" decoding="async" aria-hidden="true" />
+                <span class="home-mini-icon__label">Стики с игроками</span>
               </a>
               <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 15 000 рублей">
                 <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 15 000 ₽</span>
@@ -1168,6 +1168,29 @@
                 <span></span>
               </div>
             </section>
+            <div class="player-stickers-modal player-stickers-modal--hidden" id="playerStickersModal" aria-hidden="true">
+              <button type="button" class="player-stickers-modal__backdrop" data-player-stickers-close="1" aria-label="Закрыть набор стикеров"></button>
+              <div class="player-stickers-modal__panel" role="dialog" aria-modal="true" aria-labelledby="playerStickersModalTitle">
+                <button type="button" class="player-stickers-modal__close" data-player-stickers-close="1" aria-label="Закрыть">×</button>
+                <p class="player-stickers-modal__eyebrow">СТИКЕРПАК ДВА ТУЗА</p>
+                <h3 class="player-stickers-modal__title" id="playerStickersModalTitle">Стики с игроками</h3>
+                <div class="player-stickers-modal__grid" aria-label="Набор стикеров с игроками клуба">
+                  <img src="./assets/stickers/league1/pokermanki-derzhi-fishku.png?v=1" alt="ПокерМанки — Держи фишку" />
+                  <img src="./assets/stickers/league1/em13-kubok-moy.png?v=1" alt="Em13 — Кубок мой" />
+                  <img src="./assets/stickers/league1/waaar-v-boy.png?v=1" alt="Waaar — В бой" />
+                  <img src="./assets/stickers/league1/nikola233-igraem-do-konca.png?v=1" alt="Nikola233 — Играем до конца" />
+                  <img src="./assets/stickers/league1/pryanik-sladkiy-zanos.png?v=1" alt="Пряник — Сладкий занос" />
+                  <img src="./assets/stickers/league1/evgen1722-tuz-v-rukave.png?v=1" alt="Evgen1722 — Туз в рукаве" />
+                  <img src="./assets/stickers/league1/winifly-lechu-za-bankom.png?v=1" alt="WiNifly — Лечу за банком" />
+                  <img src="./assets/stickers/league1/rybnadzor-ryba-poymana.png?v=1" alt="Рыбнадзор — Рыба поймана" />
+                  <img src="./assets/stickers/league1/missclick-ne-dumayu.png?v=1" alt="MissClick — Не думаю" />
+                  <img src="./assets/stickers/league1/cooler-ohladi-tilt.png?v=1" alt="Cooler — Охлади тильт" />
+                  <img src="./assets/stickers/league2/palach-prigovor-all-in.png?v=1" alt="Палач — Приговор: олл-ин" />
+                  <img src="./assets/stickers/league1/pokermanki-pora-na-vzlet.png?v=1" alt="ПокерМанки — Пора на взлёт" />
+                </div>
+                <a class="player-stickers-modal__cta" href="https://t.me/addstickers/dva_tu1" target="_blank" rel="noopener noreferrer">Добавить стикеры</a>
+              </div>
+            </div>
             <div class="home-tournament-notify-modal home-tournament-notify-modal--hidden" id="homeTournamentNotifyModal" aria-hidden="true">
               <button type="button" class="home-tournament-notify-modal__backdrop" data-home-tournament-notify-close aria-label="Закрыть выбор турниров"></button>
               <div class="home-tournament-notify-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="homeTournamentNotifyModalTitle">
@@ -1866,7 +1889,7 @@
     <script defer src="./app-home-planner-runtime.js?v=4.001"></script>
     <script defer src="./app-home-planner.js?v=4.001"></script>
     <script defer src="./app-home-tasks.js?v=4.001"></script>
-    <script defer src="./app-tournament-day.js?v=4.001"></script>
+    <script defer src="./app-tournament-day.js?v=4.004"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=4.001"></script>
     <script defer src="./app-home-deeplinks.js?v=4.001"></script>
     <script defer src="./app-home-club-info-modals.js?v=4.001"></script>
@@ -1874,7 +1897,7 @@
     <script defer src="./app-home-gazette-comments.js?v=4.001"></script>
     <script defer src="./app-home-gazette-tasks.js?v=4.001"></script>
     <script defer src="./club-news-data.js?v=4.001"></script>
-    <script defer src="./app-home-friend-news.js?v=4.001"></script>
+    <script defer src="./app-home-friend-news.js?v=4.004"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-core.js?v=4.001"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=4.001"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./app-rating-summer-season.js?v=4.001"></script>

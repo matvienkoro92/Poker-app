@@ -586,6 +586,31 @@ Normalized chip log item:
 
 The route does not accept arbitrary `user_app_id` from the client. It uses the stored value from the user's Poker21 bind so one user cannot request another user's chip records.
 
+## Server-side Chip Operations
+
+The admin-only backend route `POST /api/pokerplus-chips` supports the expanded
+Poker21 operator API. It is not callable by ordinary players.
+
+- `action: "change"` calls `changeGroupMemberChips` with `userId` and a non-zero
+  `chips` delta plus a deterministic 20-digit `orderId`. Positive values credit
+  chips and negative values debit chips.
+- `action: "agentTransfer"` calls `agentSendChipsToPlayer` with `agentId`,
+  `userId`, and a positive `chips` amount.
+- `GET /api/pokerplus-chips?action=agentBalance&agentId=...` calls
+  `getAgentBalances`. `POKERPLUS_AGENT_ID` supplies the default agent ID.
+
+Every money-changing POST requires an `Idempotency-Key` header or
+`idempotencyKey` body field. The server stores the operation fingerprint and
+audit result in Redis before returning success. A repeated completed request
+returns the saved operation; reuse for different parameters is rejected. An
+operation left in `processing` state must be reconciled against Poker21 chip
+order status before retrying.
+
+Poker21 now provides upstream idempotency for direct balance changes. The
+20-digit order ID is derived from our idempotency key, and
+`action: "orderStatus"` calls `getChangeChipsOrderStatus` to reconcile an
+ambiguous request before any retry.
+
 ## PWA Profile Loading Notes
 
 The normal PWA profile screen also shows non-PokerPlus data such as email, Telegram username, respect score, display name, internal account ID, and manually entered Poker21 ID.

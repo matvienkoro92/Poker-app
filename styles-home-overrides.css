@@ -576,6 +576,33 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
   padding: 8px 14px max(18px, env(safe-area-inset-bottom));
   overflow: auto;
 }
+
+.home-friend-news-modal__pinned-banner {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0 0 12px;
+  overflow: hidden;
+  border: 1px solid rgba(222, 161, 74, 0.72);
+  border-radius: 16px;
+  background: #21150d;
+  box-shadow: 0 9px 24px rgba(26, 13, 4, 0.28), inset 0 0 0 1px rgba(255, 222, 161, 0.1);
+}
+
+.home-friend-news-modal__pinned-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+}
+
+@media (max-width: 520px) {
+  .home-friend-news-modal__pinned-banner {
+    margin-bottom: 9px;
+    border-radius: 12px;
+  }
+}
 .home-friend-news-modal__achievement-promo {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -2712,6 +2739,135 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 .app.app--view-home .home-daily-shortcuts.home-mini-icons .home-mini-icon-item {
   width: 100% !important;
   min-width: 0 !important;
+}
+
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--player-stickers {
+  top: 0 !important;
+  width: 86% !important;
+  height: 72% !important;
+  object-fit: contain !important;
+}
+
+.player-stickers-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: start center;
+  padding: calc(env(safe-area-inset-top, 0px) + 92px) 14px calc(env(safe-area-inset-bottom, 0px) + 82px);
+  box-sizing: border-box;
+}
+
+.player-stickers-modal--hidden {
+  display: none;
+}
+
+.player-stickers-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.player-stickers-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  height: min(calc(100dvh - 174px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)), 880px);
+  max-height: none;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  padding: 22px 16px 18px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 132, 12, 0.86);
+  border-radius: 24px;
+  color: #fff4dc;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 126, 0, 0.2), transparent 32%), #080706;
+  box-shadow: 0 0 34px rgba(255, 103, 0, 0.38), inset 0 0 28px rgba(255, 120, 0, 0.08);
+}
+
+.player-stickers-modal__close {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 177, 78, 0.55);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  font: 700 27px/34px system-ui, sans-serif;
+}
+
+.player-stickers-modal__eyebrow,
+.player-stickers-modal__title {
+  margin: 0;
+  text-align: center;
+}
+
+.player-stickers-modal__eyebrow {
+  color: #ff9f2d;
+  font: 800 11px/1.2 system-ui, sans-serif;
+  letter-spacing: 0.14em;
+}
+
+.player-stickers-modal__title {
+  margin-top: 4px;
+  font: 900 clamp(23px, 6vw, 34px)/1.05 system-ui, sans-serif;
+}
+
+.player-stickers-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid rgba(255, 143, 32, 0.28);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.player-stickers-modal__grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 12px;
+  background: radial-gradient(circle, rgba(255, 132, 20, 0.1), transparent 68%);
+}
+
+.player-stickers-modal__cta {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+  padding: 0 22px;
+  border-radius: 15px;
+  color: #17100a;
+  background: linear-gradient(180deg, #ffc05b, #ff7a00);
+  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.32);
+  font: 900 17px/1 system-ui, sans-serif;
+  text-decoration: none;
+}
+
+@media (max-width: 520px) {
+  .player-stickers-modal__panel {
+    padding: 20px 10px 12px;
+    border-radius: 20px;
+  }
+
+  .player-stickers-modal__grid {
+    gap: 4px;
+    padding: 5px;
+  }
 }
 
 .app.app--view-home .home-club-choice-actions {
