@@ -11,6 +11,7 @@ const sources = [
   "summer-rating-data-june.js",
   "summer-rating-data-july.js",
   "summer-rating-data-august.js",
+  "summer-rating-data-september.js",
 ];
 const birthdays = [
   { date: "2026-08-03", nick: "Baldendi" },
@@ -38,6 +39,7 @@ const maps = [
   context.SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE,
   context.SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE,
   context.SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE,
+  context.SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE,
 ];
 const dated = [];
 maps.forEach((map) => {

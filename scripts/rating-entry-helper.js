@@ -14,6 +14,7 @@ const DATA_FILES = [
   "summer-rating-data-june.js",
   "summer-rating-data-july.js",
   "summer-rating-data-august.js",
+  "summer-rating-data-september.js",
   "summer-rating-data.js",
   "spring-rating-images-league1.js",
   "spring-rating-images-league2.js",
@@ -32,7 +33,8 @@ const MONTH_FILES = {
   "05": { file: "spring-rating-data-may.js", varName: "SPRING_RATING_TOURNAMENTS_MAY_BY_DATE", season: "spring" },
   "06": { file: "summer-rating-data-june.js", varName: "SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE", season: "summer" },
   "07": { file: "summer-rating-data-july.js", varName: "SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE", season: "summer" },
-  "08": { file: "summer-rating-data-august.js", varName: "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE", season: "summer" }
+  "08": { file: "summer-rating-data-august.js", varName: "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE", season: "summer" },
+  "09": { file: "summer-rating-data-september.js", varName: "SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE", season: "summer" }
 };
 MONTH_FILES["03"].season = "spring";
 MONTH_FILES["04"].season = "spring";
@@ -386,7 +388,8 @@ function monthNameRu(month) {
     "05": "мая",
     "06": "июня",
     "07": "июля",
-    "08": "августа"
+    "08": "августа",
+    "09": "сентября"
   }[String(month).padStart(2, "0")] || "";
 }
 

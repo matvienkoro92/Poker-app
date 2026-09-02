@@ -795,4 +795,10 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-31-08-2026-league1-turnir-ponedelnika-18h.jpg",
     "rating-compressed-preview/rating-31-08-2026-league1-nok-19h.jpg"
   ]
+,
+  "01.09.2026": [
+    "rating-compressed-preview/rating-01-09-2026-league1-hr-5000-200k-20h.jpg",
+    "rating-compressed-preview/rating-01-09-2026-league1-magic-500-120k-22h.jpg",
+    "rating-compressed-preview/rating-01-09-2026-league1-night-magic-80k-23h.jpg"
+  ]
 };

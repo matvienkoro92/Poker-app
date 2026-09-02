@@ -14,7 +14,8 @@ const PLAYER_ID_MAP = require(path.join(ROOT, "rating-player-id-map.json"));
 const RATING_DATA_FILES = [
   "summer-rating-data-june.js",
   "summer-rating-data-july.js",
-  "summer-rating-data-august.js"
+  "summer-rating-data-august.js",
+  "summer-rating-data-september.js"
 ].map((file) => path.join(ROOT, file));
 
 function usage(exitCode) {
@@ -332,6 +333,10 @@ async function parseOcrFile(file) {
   if (date === "30.08.2026" && time === "18:00" && buyin === 20000) title = "🥊GRAND KNOCKOUT🥊";
   if (date === "30.08.2026" && time === "21:59" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";
+  if (date === "01.09.2026" && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (date === "01.09.2026" && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
+  if (date === "01.09.2026" && time === "22:00" && buyin === 10000) title = "Magic 🎯500🎯120K";
+  if (date === "01.09.2026" && time === "23:00" && buyin === 20000) title = "Night magic 80K🌒";
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])ID\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
