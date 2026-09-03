@@ -29,6 +29,14 @@
     return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
   }
 
+  function betTime(value) {
+    var date = new Date(value || "");
+    if (!Number.isFinite(date.getTime())) return "";
+    try {
+      return date.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    } catch (error) { return ""; }
+  }
+
   function eveningTournaments() {
     if (typeof window.pokerGetEveningTournamentOptions !== "function") return [];
     var rows = window.pokerGetEveningTournamentOptions();
@@ -88,15 +96,25 @@
     return modal;
   }
 
-  function participantHtml(entry, index) {
+  function participantHtml(entry, index, data) {
     var avatar = entry.avatar
       ? '<img src="' + esc(entry.avatar) + '" alt="" loading="lazy" decoding="async">'
       : '<span>' + esc(String(entry.name || "И").slice(0, 1).toUpperCase()) + '</span>';
+    var level = entry.level == null ? "" : String(Math.max(0, Math.floor(Number(entry.level) || 0)));
+    var city = String(entry.profileCity || "").trim();
+    var poker21Id = data && data.isAdmin ? String(entry.poker21Id || "").trim() : "";
+    var joined = betTime(entry.joinedAt);
+    var status = entry.winner ? "Победитель · забрал банк" : entry.mine ? "Ваша ставка принята" : "Ставка принята";
     return '<article class="sng-champions-modal__entry tournament-bet-modal__entry' + (entry.mine ? ' tournament-bet-modal__entry--mine' : '') + (entry.winner ? ' tournament-bet-modal__entry--winner' : '') + '">' +
       '<span class="tournament-bet-modal__place">' + (index + 1) + '</span>' +
-      '<span class="sng-champions-modal__entry-avatar tournament-bet-modal__avatar">' + avatar + '</span>' +
-      '<div class="sng-champions-modal__entry-main"><strong class="sng-champions-modal__entry-name">' + esc(entry.name || "Игрок") + '</strong>' +
-        '<span class="sng-champions-modal__entry-status">' + (entry.winner ? "Победитель · забрал банк" : entry.mine ? "Ваша ставка принята" : "Сделал ставку на себя") + '</span></div>' +
+      '<span class="sng-champions-modal__entry-avatar tournament-bet-modal__avatar">' + avatar + (level ? '<em>' + esc(level) + '</em>' : '') + '</span>' +
+      '<div class="sng-champions-modal__entry-main tournament-bet-modal__entry-main">' +
+        '<strong class="sng-champions-modal__entry-name">' + esc(entry.name || "Игрок") + '</strong>' +
+        '<span class="sng-champions-modal__entry-status">✓ ' + esc(status) + '</span>' +
+        (poker21Id ? '<span class="sng-champions-modal__entry-poker21"><small>ID Poker21</small><strong>' + esc(poker21Id) + '</strong></span>' : '') +
+        ((level || city) ? '<small class="sng-champions-modal__entry-meta">' + (level ? '<span>Уровень ' + esc(level) + '</span>' : '') + (city ? '<span>' + esc(city) + '</span>' : '') + '</small>' : '') +
+        '<span class="tournament-bet-modal__entry-stake"><small>Ставка' + (joined ? ' · ' + esc(joined) : '') + '</small><strong>' + rub(entry.stake || data.stakePrice) + '</strong></span>' +
+      '</div>' +
     '</article>';
   }
 
@@ -150,7 +168,7 @@
         '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p>' + action +
       '</section>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
-        (entries.length ? entries.map(participantHtml).join("") : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
+        (entries.length ? entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
       '</section>' + adminHtml(data);
     updateHomeButton(data);
   }

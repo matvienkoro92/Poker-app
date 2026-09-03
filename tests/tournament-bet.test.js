@@ -38,6 +38,38 @@ test("tournament bet keeps the selected evening tournament and safe banner", fun
   assert.equal(state.tournamentId, "weekly-5");
   assert.equal(state.tournamentBanner, "home-tournament-card-friday-9x10.webp");
   assert.equal(state.title, "Нокаут Прогрессив");
+  assert.equal(state.entries.length, 0);
+});
+
+test("tournament bet participant exposes the SNG-style player data", function () {
+  const state = tournamentBet.publicState({
+    id: "tb_players",
+    status: "open",
+    startingBank: 10000,
+    stakePrice: 500,
+    entries: [{
+      accountId: "ID1",
+      poker21Id: "777",
+      name: "ПокерМанки",
+      avatar: "./assets/avatar-monkey.jpg",
+      level: 70,
+      profileCity: "Москва",
+      stake: 500,
+      joinedAt: "2026-09-03T17:00:00.000Z",
+    }],
+  }, { isAdmin: true, accountId: "ID1" });
+  assert.deepEqual(state.entries[0], {
+    accountId: "ID1",
+    poker21Id: "777",
+    name: "ПокерМанки",
+    avatar: "./assets/avatar-monkey.jpg",
+    level: 70,
+    profileCity: "Москва",
+    stake: 500,
+    joinedAt: "2026-09-03T17:00:00.000Z",
+    mine: true,
+    winner: false,
+  });
 });
 
 test("home widget loader can open the tournament bet modal", function () {
@@ -76,4 +108,7 @@ test("bet action is a separate visible offer below the tournament banner", funct
   assert.match(css, /\.tournament-bet-modal__hero--banner\s*\{[^}]*border:\s*0\s*!important/s);
   assert.match(client, /id="tournamentBetTitle">Ставка на себя<\/h2>/);
   assert.match(client, /Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк\./);
+  assert.match(client, /ID Poker21/);
+  assert.match(client, /tournament-bet-modal__entry-stake/);
+  assert.match(css, /Participant cards mirror the data-rich SNG battle list/);
 });
