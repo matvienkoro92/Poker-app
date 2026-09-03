@@ -160,7 +160,7 @@
   function createBetHtml(data) {
     var tournaments = stakeTournaments();
     return '<form class="tournament-bet-modal__player-create" data-tournament-bet-player-create>' +
-      '<h3>Создать ставку</h3><p>Выберите турнир, в котором хотите поставить на себя</p>' +
+      '<h3>Создать персональную ставку</h3><p>Выберите турнир, в котором хотите поставить на себя</p>' +
       '<label><span>Турнир</span><select name="tournamentId" required><option value="">Выберите турнир</option>' + tournaments.map(function (item) {
         return '<option value="' + esc(item.id) + '">' + esc(item.day + ' · ' + item.time + ' · ' + item.name + ' · вход ' + item.buyinLabel) + '</option>';
       }).join("") + '</select></label>' +
