@@ -274,3 +274,12 @@ test("personal bet tab lists offers before the creation form with accept and dec
   assert.match(client, /data-tournament-bet-personal-decline/);
   assert.match(server, /createdByPlayer: !!item\.createdByPlayer, joined:/);
 });
+
+test("every tournament bet can be copied, shared and opened by deep link", function () {
+  const client = fs.readFileSync(path.join(__dirname, "..", "app-tournament-bet.js"), "utf8");
+  assert.match(client, /data-tournament-bet-copy>Скопировать ссылку/);
+  assert.match(client, /data-tournament-bet-share>Поделиться/);
+  assert.match(client, /"tournament_bet_" \+ String\(id \|\| ""\)/);
+  assert.match(client, /\^tournament_bet_\(tb_/);
+  assert.match(client, /if \(deepLinkEventId\) open\(\)/);
+});

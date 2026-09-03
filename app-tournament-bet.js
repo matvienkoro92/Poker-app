@@ -10,7 +10,15 @@
   var refreshTimer = 0;
   var activeTab = "event";
   var selectedEventId = "";
+  var deepLinkEventId = "";
   try { window.localStorage.removeItem("pokerTournamentBetEventId"); } catch (error) {}
+
+  try {
+    var startParams = new URLSearchParams(window.location.search || "");
+    var startValue = typeof pokerStartAppQueryFromUrlSearchParams === "function" ? pokerStartAppQueryFromUrlSearchParams(startParams) : startParams.get("startapp") || "";
+    var startMatch = String(startValue || "").match(/^tournament_bet_(tb_[a-z0-9_:-]+)$/i);
+    if (startMatch) { deepLinkEventId = startMatch[1]; selectedEventId = deepLinkEventId; }
+  } catch (error) {}
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -89,6 +97,40 @@
     var tg = window.Telegram && window.Telegram.WebApp;
     if (tg && typeof tg.showAlert === "function") tg.showAlert(String(message || "Ошибка"));
     else window.alert(String(message || "Ошибка"));
+  }
+
+  function eventShareLink(id) {
+    var startParam = "tournament_bet_" + String(id || "");
+    if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(startParam);
+    if (typeof pokerBuildWebsiteStartLink === "function") {
+      var webLink = pokerBuildWebsiteStartLink(startParam);
+      if (webLink) return webLink;
+    }
+    var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : String(window.location.origin || "") + String(window.location.pathname || "/");
+    base = String(base || "").replace(/\?.*$/, "").replace(/\/+$/, "");
+    return base + "/?startapp=" + encodeURIComponent(startParam);
+  }
+
+  function copyEventLink(id) {
+    var link = eventShareLink(id);
+    var copied = typeof pokerCopyTextToClipboard === "function" ? pokerCopyTextToClipboard(link) : navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(link).then(function () { return true; }).catch(function () { return false; }) : Promise.resolve(false);
+    Promise.resolve(copied).then(function (ok) { showAlert(ok ? "Ссылка на ставку скопирована." : "Скопируйте ссылку: " + link); });
+  }
+
+  function shareEvent(data) {
+    var link = eventShareLink(data && data.id);
+    var textValue = "Ставка на себя в турнире «" + String(data && data.title || "Турнир") + "» · " + rub(data && data.stakePrice);
+    if (typeof pokerTryPwaWebShare === "function") {
+      pokerTryPwaWebShare({ title: "Ставка на себя", text: textValue + "\n" + link, url: link }).then(function (ok) { if (!ok) openTelegramEventShare(link, textValue); });
+    } else openTelegramEventShare(link, textValue);
+  }
+
+  function openTelegramEventShare(link, textValue) {
+    var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, textValue) : "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(textValue);
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(shareUrl);
+    else if (tg && typeof tg.openLink === "function") tg.openLink(shareUrl);
+    else window.open(shareUrl, "_blank", "noopener,noreferrer");
   }
 
   function setStatus(message, tone) {
@@ -213,6 +255,7 @@
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
         '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p><div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' + action +
       '</div><figure class="tournament-bet-modal__feature-art"><img src="./assets/tournament-bet-self-hero-v2.jpg" alt="" width="511" height="768" loading="eager" decoding="async"></figure></section>' +
+      '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
         (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
       '</section>' + adminHtml(data);
@@ -275,6 +318,7 @@
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
         var activeField = modal && document.activeElement && modal.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
         state = data;
+        if (deepLinkEventId && data && data.id === deepLinkEventId) { activeTab = data.createdByPlayer ? "create" : "event"; deepLinkEventId = ""; }
         if (!(silent && (activeTab === "create" || activeField))) render();
         else updateHomeButton(data);
         return data;
@@ -353,6 +397,8 @@
     var personalDecline = event.target.closest("[data-tournament-bet-personal-decline]");
     if (personalDecline) { declinePersonalEvent(personalDecline.getAttribute("data-tournament-bet-personal-decline") || ""); render(); return; }
     if (event.target.closest("[data-tournament-bet-personal-back]")) { selectedEventId = ""; activeTab = "create"; load(false); return; }
+    if (event.target.closest("[data-tournament-bet-copy]")) { if (state && state.id) copyEventLink(state.id); return; }
+    if (event.target.closest("[data-tournament-bet-share]")) { if (state && state.id) shareEvent(state); return; }
     var actionEl = event.target.closest("[data-tournament-bet-action]");
     if (!actionEl) return;
     var action = actionEl.getAttribute("data-tournament-bet-action");
@@ -440,7 +486,8 @@
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape" && modal && !modal.hidden) close();
   });
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { load(true); }, { once: true });
-  else load(true);
+  function initialLoad() { if (deepLinkEventId) open(); else load(true); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialLoad, { once: true });
+  else initialLoad();
   window.openTournamentBetModal = open;
 })();
