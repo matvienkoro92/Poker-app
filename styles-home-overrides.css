@@ -4044,9 +4044,10 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 }
 
 .app.app--view-home .home-mini-icon__hero--tournament-bet {
-  width: 58%;
-  height: 58%;
+  width: 70%;
+  height: 70%;
   object-fit: contain;
+  transform: translateY(-4%);
   filter: drop-shadow(0 0 9px rgba(255, 179, 34, 0.75));
 }
 
