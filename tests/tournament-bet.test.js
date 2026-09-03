@@ -121,6 +121,7 @@ test("tournament bet hydrates the level from the same cached Poker21 profile as 
   const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
   assert.match(server, /PROFILE_HASH_KEY/);
   assert.match(server, /pokerProfileStatusFromCachedProfile\(profile, \{ pokerPlusLinked: true \}\)/);
+  assert.match(server, /\[entry\.poker21Id, entry\.accountId, entry\.memberId\]/);
 });
 
 test("bettor rating aggregates participation, wins, stakes, prizes and net result", function () {
