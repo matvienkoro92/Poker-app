@@ -164,7 +164,7 @@
       '<label><span>Турнир</span><select name="tournamentId" required><option value="">Выберите турнир</option>' + tournaments.map(function (item) {
         return '<option value="' + esc(item.id) + '">' + esc(item.day + ' · ' + item.time + ' · ' + item.name + ' · вход ' + item.buyinLabel) + '</option>';
       }).join("") + '</select></label>' +
-      '<label><span>Цена вашей ставки</span><input name="stakePrice" type="number" min="1" step="1" inputmode="numeric" placeholder="500" required></label>' +
+      '<label><span>Цена вашей ставки</span><input name="stakePrice" type="text" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off" placeholder="500" required></label>' +
       '<small>Стартового банка нет. Банк начнётся с вашей ставки и будет расти с каждой новой ставкой участника.</small>' +
       '<button type="submit"' + (data && data.id && data.status !== "settled" && data.entries && data.entries.length ? ' disabled' : '') + '>Создать и поставить на себя</button>' +
     '</form>';
@@ -242,7 +242,8 @@
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
         state = data;
-        render();
+        if (!(silent && activeTab === "create")) render();
+        else updateHomeButton(data);
         return data;
       });
     }).catch(function (error) {

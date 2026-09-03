@@ -183,6 +183,8 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(client, /data-tournament-bet-tab="create"/);
   assert.match(client, /Выберите турнир, в котором хотите поставить на себя/);
   assert.match(client, /action: "create_player"/);
+  assert.match(client, /type="text" inputmode="numeric" pattern="\[0-9 \]\*"/);
+  assert.match(client, /silent && activeTab === "create"/);
   assert.match(server, /action === "create_player"/);
   assert.match(server, /startingBank: 0/);
   assert.match(server, /createdByPlayer: true/);
