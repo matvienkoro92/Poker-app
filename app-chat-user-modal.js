@@ -1475,9 +1475,10 @@ if (chatUserModalEl) {
     if (leaderboardWin) {
       rows.push({
         title: "Лидерборд Poker21",
+        group: "wins",
         rows: [{ label: leaderboardWin.place + " место · " + leaderboardWin.reward.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽" }],
         info: "Ачивка за попадание в топ-3 лидерборда Poker21.",
-        image: "./assets/home-mtt-leaderboard-winners.webp?v=1",
+        image: "./assets/chat-profile-achievement-poker21-leaderboard-v2.jpg",
       });
     }
     if (chatUserModalSameRatingNick("Coo1er91", ratingNick) || chatUserModalSameRatingNick("Кулер", ratingNick)) {
@@ -2187,7 +2188,7 @@ if (chatUserModalEl) {
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.webp" };
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-offline-win.webp" };
     if (key.indexOf("ставк") >= 0 && key.indexOf("себя") >= 0) return { mod: "self-bet-win", label: "ПОБЕДИТЕЛЬ<br>СТАВКИ<br>НА СЕБЯ", img: "./assets/tournament-bet-self-hero-v2.jpg" };
-    if (key.indexOf("лидерборд") >= 0 && key.indexOf("poker21") >= 0) return { mod: "poker21-leaderboard", label: "ЛИДЕРБОРД<br>POKER21<br>ТОП-3", img: "./assets/home-mtt-leaderboard-winners.webp?v=1" };
+    if (key.indexOf("лидерборд") >= 0 && key.indexOf("poker21") >= 0) return { mod: "poker21-leaderboard", label: "ЛИДЕРБОРД<br>POKER21<br>ТОП-3", img: "./assets/chat-profile-achievement-poker21-leaderboard-v2.jpg" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
@@ -2494,6 +2495,9 @@ if (chatUserModalEl) {
     var tournamentKingWins = tournamentStats && tournamentStats.firstPlaces || 0;
     var dayHeroRows = chatUserModalBestWinRows(tournamentStats && tournamentStats.dayHeroes, 1000);
     var manualAchievements = chatUserModalManualAchievements(ratingNick);
+    var manualWinsHtml = manualAchievements.filter(function (item) { return item.group === "wins"; }).map(function (item) {
+      return chatUserModalAchievementCardHtml("★", item.title, item.rows, { info: item.info, image: item.image });
+    }).join("");
     var offlineWins = chatUserModalOfflineTournamentWins(ratingNick);
     if (!String(ratingNick || "").trim() && !luckyMonth.length && !clubChoice.length && !metrics.isSelfProfile) {
       return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml()) +
@@ -2542,6 +2546,7 @@ if (chatUserModalEl) {
         infoImage: "./assets/chat-profile-achievement-sng-champion-card.webp",
       });
     var winsHtml =
+      manualWinsHtml +
       chatUserModalAchievementCardHtml("♠", "Победитель ставки на себя", [], {
         image: "./assets/tournament-bet-self-hero-v2.jpg",
         tier: {
@@ -2641,7 +2646,7 @@ if (chatUserModalEl) {
     var heroHtml = chatUserModalAchievementCardHtml("◆", "Народный герой", clubChoice, {
       placeholder: "Топ-1 месяца",
     });
-    var manualHtml = manualAchievements.map(function (item) {
+    var manualHtml = manualAchievements.filter(function (item) { return item.group !== "wins"; }).map(function (item) {
       return chatUserModalAchievementCardHtml("★", item.title, item.rows, {
         info: item.info,
         image: item.image,
