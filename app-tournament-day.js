@@ -230,6 +230,29 @@ function pokerGetEveningTournamentOptions(now) {
 
 window.pokerGetEveningTournamentOptions = pokerGetEveningTournamentOptions;
 
+function pokerGetStakeTournamentOptions() {
+  var dayLabels = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
+  return (Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE) ? POKER_FULL_TOURNAMENT_SCHEDULE : []).filter(function (item) {
+    var buyin = Number(String(item && item.buyin || "").replace(/[^\d]/g, "")) || 0;
+    return buyin >= 300;
+  }).map(function (item, index) {
+    var buyin = Number(String(item.buyin || "").replace(/[^\d]/g, "")) || 0;
+    var time = String(Number(item.hour) || 0).padStart(2, "0") + ":" + String(Number(item.minute) || 0).padStart(2, "0");
+    var day = item.repeat === "daily" ? "ЕЖЕДНЕВНО" : item.date ? String(item.date) : dayLabels[Number(item.dow)] || "ПО РАСПИСАНИЮ";
+    return {
+      id: "schedule-" + index + "-" + String(item.name || "tournament").toLowerCase().replace(/[^a-zа-яё0-9]+/gi, "-").replace(/^-|-$/g, ""),
+      name: String(item.name || item.category || "Турнир"),
+      category: String(item.category || "Турнир"),
+      day: day,
+      time: time,
+      buyin: buyin,
+      buyinLabel: String(item.buyin || buyin + "₽"),
+      guarantee: String(item.guarantee || ""),
+    };
+  });
+}
+window.pokerGetStakeTournamentOptions = pokerGetStakeTournamentOptions;
+
 function setHomeTournamentImagePriority(img, priority) {
   if (!img) return;
   try {

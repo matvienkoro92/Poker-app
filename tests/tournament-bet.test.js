@@ -167,3 +167,19 @@ test("tournament bet has a separate bettor rating tab with full stats", function
   assert.match(client, /Винрейт/);
   assert.match(css, /\.tournament-bet-modal__rating-row/);
 });
+
+test("players can create a zero-starting-bank bet from tournaments costing at least 300 rubles", function () {
+  const root = path.join(__dirname, "..");
+  const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
+  const schedule = fs.readFileSync(path.join(root, "app-tournament-day.js"), "utf8");
+  const server = fs.readFileSync(path.join(root, "lib/api-handlers/tournament-bet.js"), "utf8");
+  assert.match(schedule, /function pokerGetStakeTournamentOptions/);
+  assert.match(schedule, /buyin >= 300/);
+  assert.match(client, /data-tournament-bet-tab="create"/);
+  assert.match(client, /Выберите турнир, в котором хотите поставить на себя/);
+  assert.match(client, /action: "create_player"/);
+  assert.match(server, /action === "create_player"/);
+  assert.match(server, /startingBank: 0/);
+  assert.match(server, /createdByPlayer: true/);
+  assert.match(client, /tournament-bet-modal__tournament-label/);
+});

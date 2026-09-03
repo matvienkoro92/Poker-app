@@ -16,7 +16,7 @@
   top: 0;
   z-index: 5;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 6px;
   border: 1px solid rgba(210, 155, 70, 0.35);
@@ -93,6 +93,38 @@
 .tournament-bet-modal__rating-empty { color: #a99c84; text-align: center; }
 .tournament-bet-modal__rating-empty strong { color: #ffdda0; font-size: 22px; }
 
+.tournament-bet-modal__player-create {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgba(205, 126, 31, 0.42);
+  border-radius: 20px;
+  background: radial-gradient(circle at 50% 0, rgba(255, 166, 48, 0.13), transparent 40%), #0d0e14;
+}
+
+.tournament-bet-modal__player-create h3 { margin: 0; color: #ffe1a5; font-size: 26px; }
+.tournament-bet-modal__player-create > p { margin: -8px 0 0; color: #fff0cf; font-size: 17px; font-weight: 800; }
+.tournament-bet-modal__player-create label { display: grid; gap: 7px; color: #cdbb94; font-size: 13px; font-weight: 900; }
+.tournament-bet-modal__player-create select,
+.tournament-bet-modal__player-create input { width: 100%; min-height: 54px; padding: 10px 13px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 13px; color: #fff1ce; background: #070910; font: 800 15px/1.2 inherit; }
+.tournament-bet-modal__player-create > small { color: #9f927b; line-height: 1.35; }
+.tournament-bet-modal__player-create > button { min-height: 58px; border: 2px solid #ffe08a; border-radius: 15px; color: #281400; background: linear-gradient(180deg, #ffe995, #ffae24 54%, #ee6900); font: 950 17px/1.15 inherit; }
+.tournament-bet-modal__player-create > button:disabled { opacity: 0.45; }
+
+.tournament-bet-modal__tournament-label {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid rgba(255, 183, 53, 0.46);
+  border-radius: 18px;
+  text-align: center;
+  background: radial-gradient(circle at 50% 0, rgba(255, 158, 25, 0.2), transparent 60%), #0c0c11;
+}
+.tournament-bet-modal__tournament-label small { color: #a99b81; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+.tournament-bet-modal__tournament-label strong { color: #ffe1a5; font-size: clamp(23px, 5vw, 34px); }
+.tournament-bet-modal__tournament-label span { color: #cdbb94; font-weight: 800; }
+
 @media (max-width: 700px) {
   .tournament-bet-modal__rating { padding: 10px; }
   .tournament-bet-modal__rating-row { grid-template-columns: 20px 50px minmax(0, 1fr); gap: 8px; padding: 9px 7px; }
@@ -101,6 +133,7 @@
   .tournament-bet-modal__rating-row dl { grid-column: 2 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .tournament-bet-modal__rating-row dd { font-size: 11px; }
   .tournament-bet-modal__tabs button { font-size: 12px; }
+  .tournament-bet-modal__player-create { padding: 14px; }
 }
 
 .tournament-bet-modal__participants-grid {
