@@ -83,6 +83,14 @@
 .tournament-bet-modal__event-picker { display: grid; gap: 6px; color: #cdbb94; font-size: 12px; font-weight: 900; }
 .tournament-bet-modal__event-picker select { width: 100%; min-height: 48px; padding: 9px 12px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 13px; color: #fff1ce; background: #070910; font: 800 14px/1.2 inherit; }
 
+.tournament-bet-modal__personal-events { display: grid; gap: 10px; padding: 16px; border: 1px solid rgba(205, 126, 31, 0.34); border-radius: 20px; background: #0d0e14; }
+.tournament-bet-modal__personal-events h3 { margin: 0; color: #ffdda0; font-size: 21px; }
+.tournament-bet-modal__personal-events > div { display: grid; gap: 8px; }
+.tournament-bet-modal__personal-events button { display: grid; gap: 4px; width: 100%; padding: 13px 14px; border: 1px solid rgba(213, 153, 67, 0.48); border-radius: 14px; color: #fff1ce; text-align: left; background: linear-gradient(135deg, rgba(40, 27, 17, 0.96), rgba(6, 9, 15, 0.98)); }
+.tournament-bet-modal__personal-events button strong { font-size: 16px; }
+.tournament-bet-modal__personal-events button span { color: #b9aa8d; font-size: 12px; font-weight: 800; }
+.tournament-bet-modal__personal-back { justify-self: start; padding: 9px 12px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 12px; color: #ffe0a4; background: #0d0e14; font-weight: 900; }
+
 .tournament-bet-modal__rating,
 .tournament-bet-modal__rating-empty {
   padding: 18px;

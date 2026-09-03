@@ -254,3 +254,13 @@ test("parallel personal bets use independent server locks", function () {
   assert.match(server, /action === "create_player" \? "create:" \+ accountId/);
   assert.match(server, /releaseLock\(lockToken, lockScope\)/);
 });
+
+test("personal bets stay in the create tab and never replace the main event", function () {
+  const client = fs.readFileSync(path.join(__dirname, "..", "app-tournament-bet.js"), "utf8");
+  const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
+  assert.match(client, /data-tournament-bet-personal-event/);
+  assert.match(client, /if \(activeTab === "event"\) \{ selectedEventId = ""; load\(false\); \}/);
+  assert.match(client, /if \(result\) \{ activeTab = "create"; render\(\); \}/);
+  assert.doesNotMatch(client, /localStorage\.setItem\("pokerTournamentBetEventId"/);
+  assert.match(server, /: mainState \|\| null;/);
+});

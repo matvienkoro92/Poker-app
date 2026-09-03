@@ -10,7 +10,7 @@
   var refreshTimer = 0;
   var activeTab = "event";
   var selectedEventId = "";
-  try { selectedEventId = window.localStorage.getItem("pokerTournamentBetEventId") || ""; } catch (error) {}
+  try { window.localStorage.removeItem("pokerTournamentBetEventId"); } catch (error) {}
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -168,6 +168,10 @@
 
   function createBetHtml(data) {
     var tournaments = stakeTournaments();
+    var personalEvents = Array.isArray(data && data.events) ? data.events.filter(function (item) { return item && item.createdByPlayer; }) : [];
+    var personalList = personalEvents.length ? '<section class="tournament-bet-modal__personal-events"><h3>Персональные ставки</h3><div>' + personalEvents.map(function (item) {
+      return '<button type="button" data-tournament-bet-personal-event="' + esc(item.id) + '"><strong>' + esc(item.title || "Турнир") + '</strong><span>Ставка ' + rub(item.stakePrice) + ' · банк ' + rub(item.bank) + ' · участников ' + esc(item.participantsCount || 0) + '</span></button>';
+    }).join("") + '</div></section>' : "";
     return '<form class="tournament-bet-modal__player-create" data-tournament-bet-player-create>' +
       '<h3>Создать персональную ставку</h3><p>Выберите турнир, в котором хотите поставить на себя</p>' +
       '<label><span>Турнир</span><select name="tournamentId" required><option value="">Выберите турнир</option>' + tournaments.map(function (item) {
@@ -177,7 +181,29 @@
       '<small>Стартового банка нет. Банк начнётся с вашей ставки и будет расти с каждой новой ставкой участника.</small>' +
       '<div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' +
       '<button type="submit">Создать и поставить на себя</button>' +
-    '</form>';
+    '</form>' + personalList;
+  }
+
+  function eventHtml(data) {
+    var joined = !!data.myEntry;
+    var action = data.status === "open"
+      ? joined
+        ? '<button type="button" class="tournament-bet-modal__bet tournament-bet-modal__bet--done" disabled>✓ Ваша ставка принята</button>'
+        : '<button type="button" class="tournament-bet-modal__bet" data-tournament-bet-action="bet">Сделать ставку на себя · ' + rub(data.stakePrice) + '</button>'
+      : data.status === "settled"
+        ? '<div class="tournament-bet-modal__closed">Событие завершено</div>'
+        : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
+    var entries = Array.isArray(data.entries) ? data.entries : [];
+    var back = data.createdByPlayer ? '<button type="button" class="tournament-bet-modal__personal-back" data-tournament-bet-personal-back>← Все персональные ставки</button>' : "";
+    return back + '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
+        '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
+        '<h4>Сделай ставку на себя</h4>' +
+        '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
+        '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p><div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' + action +
+      '</div><figure class="tournament-bet-modal__feature-art"><img src="./assets/tournament-bet-self-hero-v2.jpg" alt="" width="511" height="768" loading="eager" decoding="async"></figure></section>' +
+      '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
+        (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
+      '</section>' + adminHtml(data);
   }
 
   function adminHtml(data) {
@@ -215,29 +241,8 @@
       updateHomeButton(data);
       return;
     }
-    var joined = !!data.myEntry;
-    var action = data.status === "open"
-      ? joined
-        ? '<button type="button" class="tournament-bet-modal__bet tournament-bet-modal__bet--done" disabled>✓ Ваша ставка принята</button>'
-        : '<button type="button" class="tournament-bet-modal__bet" data-tournament-bet-action="bet">Сделать ставку на себя · ' + rub(data.stakePrice) + '</button>'
-      : data.status === "settled"
-        ? '<div class="tournament-bet-modal__closed">Событие завершено</div>'
-        : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
-    var entries = Array.isArray(data.entries) ? data.entries : [];
-    var eventPicker = Array.isArray(data.events) && data.events.length > 1 ? '<label class="tournament-bet-modal__event-picker"><span>Открытая ставка</span><select data-tournament-bet-event>' + data.events.map(function (item) {
-      return '<option value="' + esc(item.id) + '"' + (item.id === data.id ? ' selected' : '') + '>' + esc(item.title + ' · ' + rub(item.stakePrice) + ' · банк ' + rub(item.bank)) + '</option>';
-    }).join("") + '</select></label>' : "";
-    var eventHtml =
-      eventPicker + '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
-        '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
-        '<h4>Сделай ставку на себя</h4>' +
-        '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
-        '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p><div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' + action +
-      '</div><figure class="tournament-bet-modal__feature-art"><img src="./assets/tournament-bet-self-hero-v2.jpg" alt="" width="511" height="768" loading="eager" decoding="async"></figure></section>' +
-      '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
-        (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
-      '</section>' + adminHtml(data);
-    bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : eventHtml) + '</div>';
+    var panel = activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? (data.createdByPlayer ? eventHtml(data) : createBetHtml(data)) : eventHtml(data);
+    bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + panel + '</div>';
     updateHomeButton(data);
   }
 
@@ -281,9 +286,10 @@
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось выполнить действие");
         state = data;
-        if (data && data.id) {
+        if (data && data.id && payload.action === "create_player") {
           selectedEventId = data.id;
-          try { window.localStorage.setItem("pokerTournamentBetEventId", selectedEventId); } catch (error) {}
+        } else if (payload.action === "create") {
+          selectedEventId = "";
         }
         setStatus("Готово", "success");
         render();
@@ -316,7 +322,15 @@
   function onClick(event) {
     if (event.target.closest("[data-tournament-bet-close]")) { close(); return; }
     var tabEl = event.target.closest("[data-tournament-bet-tab]");
-    if (tabEl) { var requestedTab = tabEl.getAttribute("data-tournament-bet-tab"); activeTab = requestedTab === "rating" || requestedTab === "create" ? requestedTab : "event"; render(); return; }
+    if (tabEl) {
+      var requestedTab = tabEl.getAttribute("data-tournament-bet-tab");
+      activeTab = requestedTab === "rating" || requestedTab === "create" ? requestedTab : "event";
+      if (activeTab === "event") { selectedEventId = ""; load(false); } else if (activeTab === "create" && state && state.createdByPlayer) render(); else render();
+      return;
+    }
+    var personalEvent = event.target.closest("[data-tournament-bet-personal-event]");
+    if (personalEvent) { selectedEventId = personalEvent.getAttribute("data-tournament-bet-personal-event") || ""; activeTab = "create"; load(false); return; }
+    if (event.target.closest("[data-tournament-bet-personal-back]")) { selectedEventId = ""; activeTab = "create"; load(false); return; }
     var actionEl = event.target.closest("[data-tournament-bet-action]");
     if (!actionEl) return;
     var action = actionEl.getAttribute("data-tournament-bet-action");
@@ -332,7 +346,6 @@
     var eventSelect = event.target.closest("[data-tournament-bet-event]");
     if (eventSelect) {
       selectedEventId = String(eventSelect.value || "");
-      try { window.localStorage.setItem("pokerTournamentBetEventId", selectedEventId); } catch (error) {}
       load(false);
       return;
     }
@@ -360,7 +373,7 @@
       if (!window.confirm("Списать " + rub(stakePrice) + " с Poker21 и создать ставку на турнир «" + tournament.name + "»?")) return;
       post({ action: "create_player", tournamentId: tournament.id, tournamentTitle: tournament.name, tournamentBuyin: tournament.buyin,
         tournamentBuyinLabel: tournament.buyinLabel, tournamentGuarantee: tournament.guarantee, stakePrice: stakePrice }, "Создаю ставку и проверяю баланс…").then(function (result) {
-        if (result) { activeTab = "event"; render(); }
+        if (result) { activeTab = "create"; render(); }
       });
       return;
     }
