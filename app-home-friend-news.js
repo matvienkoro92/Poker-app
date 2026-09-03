@@ -2355,8 +2355,11 @@
       return todayBirthdays.indexOf(row) === -1;
     });
     var displayRows = todayBirthdays.concat(latestRows);
-    if (clubNewsLoading && !clubNewsLoaded) displayRows = [];
-    var showLoading = clubNewsLoading && !clubNewsLoaded;
+    // Keep the generated/cached rows visible while the live sources refresh.
+    // The network requests finish at different times, so hiding an already
+    // usable first item behind the global loading state makes the ticker feel
+    // much slower than it really is.
+    var showLoading = clubNewsLoading && !clubNewsLoaded && !displayRows.length;
     if (!displayRows.length) {
       displayRows = [{
         id: showLoading ? "club-loading" : "club-empty",
@@ -2429,7 +2432,9 @@
       : "";
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
     var activeClubLoading = newsModalMode === "club" &&
-      (clubNewsTab === "wall" ? (clubWallLoading && !hasRealRows) : (clubNewsLoading && !clubNewsLoaded));
+      (clubNewsTab === "wall"
+        ? (clubWallLoading && !hasRealRows)
+        : (clubNewsLoading && !clubNewsLoaded && !hasRealRows));
     if (activeClubLoading) {
       var skeletonAt = clubEvents[0] && clubEvents[0].at ||
         (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
@@ -3654,8 +3659,8 @@
     if (!clubEvents.length && clubNewsStaticRows().length) {
       clubEvents = buildClubEventsFromRows([], []);
     }
-    // Cached/generated rows are only a first-paint snapshot. Keep the modal in
-    // its loading state until the current feed has been fetched successfully.
+    // Cached/generated rows are the progressive first paint. The live refresh
+    // can replace and extend them without blanking the ticker or the modal.
     clubNewsLoaded = false;
     mountWhenProfileReady();
     loadClubNews();

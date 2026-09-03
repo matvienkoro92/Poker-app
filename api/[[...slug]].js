@@ -46,6 +46,7 @@ const handlers = {
   "achievement-notifications": () => require(path.join(handlersDir, "achievement-notifications.js")),
   "club-choice-vote": () => require(path.join(handlersDir, "club-choice-vote.js")),
   "sng-champions": () => require(path.join(handlersDir, "sng-champions.js")),
+  "tournament-bet": () => require(path.join(handlersDir, "tournament-bet.js")),
   transfers: () => require(path.join(handlersDir, "transfers.js")),
   "club-calendar-events": () => require(path.join(handlersDir, "club-calendar-events.js")),
   "private-cash": () => require(path.join(handlersDir, "private-cash.js")),

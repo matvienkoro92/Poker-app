@@ -125,6 +125,7 @@
     ],
     "tournament": [
       "app-tournament-day.js",
+      "app-tournament-bet.js",
       "app-hall-fame.js"
     ],
     "profile": [
