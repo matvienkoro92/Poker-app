@@ -129,18 +129,8 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
   grid-column: 1;
   grid-row: 1 / 3;
   height: 90px;
-  -webkit-mask-image:
-    radial-gradient(circle 45px at 44px 45px, #000 97%, transparent 100%),
-    linear-gradient(#000, #000);
-  -webkit-mask-position: 0 0, 96px 25px;
-  -webkit-mask-size: 90px 90px, calc(100% - 96px) calc(100% - 25px);
-  -webkit-mask-repeat: no-repeat;
-  mask-image:
-    radial-gradient(circle 45px at 44px 45px, #000 97%, transparent 100%),
-    linear-gradient(#000, #000);
-  mask-position: 0 0, 96px 25px;
-  mask-size: 90px 90px, calc(100% - 96px) calc(100% - 25px);
-  mask-repeat: no-repeat;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 .app.app--view-home .home-club-news__ticker .home-friend-news__track {
