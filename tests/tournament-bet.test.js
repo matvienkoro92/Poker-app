@@ -18,6 +18,28 @@ test("tournament bet bank is starting bank plus every confirmed stake", function
   assert.equal(tournamentBet.bankFor({ startingBank: 10000, stakePrice: 500, entries: [{}, {}, {}] }), 11500);
 });
 
+test("tournament bet keeps the selected evening tournament and safe banner", function () {
+  assert.equal(tournamentBet.assetFile("home-tournament-card-friday-9x10.webp"), "home-tournament-card-friday-9x10.webp");
+  assert.equal(tournamentBet.assetFile("https://example.com/banner.webp"), "");
+  const state = tournamentBet.publicState({
+    id: "tb_1",
+    status: "open",
+    title: "Нокаут Прогрессив",
+    tournamentId: "weekly-5",
+    tournamentBanner: "home-tournament-card-friday-9x10.webp",
+    tournamentBannerWidth: 640,
+    tournamentBannerHeight: 915,
+    tournamentBuyin: "500₽",
+    tournamentGuarantee: "170 000₽",
+    startingBank: 10000,
+    stakePrice: 500,
+    entries: [],
+  }, {});
+  assert.equal(state.tournamentId, "weekly-5");
+  assert.equal(state.tournamentBanner, "home-tournament-card-friday-9x10.webp");
+  assert.equal(state.title, "Нокаут Прогрессив");
+});
+
 test("home widget loader can open the tournament bet modal", function () {
   const root = path.join(__dirname, "..");
   const bootstrap = fs.readFileSync(path.join(root, "app-home-widgets-bootstrap.js"), "utf8");
@@ -31,4 +53,13 @@ test("tournament bet client is eager so a stale widget bootstrap cannot swallow 
   const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
   assert.match(html, /<script defer src="\.\/app-tournament-bet\.js\?v=[^"]+"><\/script>/);
   assert.doesNotMatch(html, /type="application\/poker-lazy"[^>]+src="\.\/app-tournament-bet\.js/);
+});
+
+test("tournament bet create form selects an evening tournament and renders its banner", function () {
+  const root = path.join(__dirname, "..");
+  const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
+  const schedule = fs.readFileSync(path.join(root, "app-tournament-day.js"), "utf8");
+  assert.match(schedule, /window\.pokerGetEveningTournamentOptions\s*=\s*pokerGetEveningTournamentOptions/);
+  assert.match(client, /name="tournamentId" data-tournament-bet-tournament/);
+  assert.match(client, /tournamentBannerHtml\(data, false\)/);
 });

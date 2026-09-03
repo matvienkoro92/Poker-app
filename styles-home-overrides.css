@@ -4288,6 +4288,43 @@ body.tournament-bet-modal-open {
   text-wrap: balance;
 }
 
+.tournament-bet-modal__hero h4 {
+  position: relative;
+  margin: -7px auto 17px;
+  color: #f4e6c9;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.tournament-bet-modal__tournament-banner {
+  position: relative;
+  width: min(100%, 310px);
+  margin: 0 auto 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 190, 75, 0.62);
+  border-radius: 18px;
+  background: #080a0f;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.48), 0 0 22px rgba(255, 139, 16, 0.16);
+}
+
+.tournament-bet-modal__tournament-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 330px;
+  object-fit: cover;
+}
+
+.tournament-bet-modal__tournament-banner--preview {
+  width: min(100%, 190px);
+  margin-bottom: 4px;
+  border-radius: 13px;
+}
+
+.tournament-bet-modal__tournament-banner--preview img {
+  max-height: 215px;
+}
+
 .tournament-bet-modal__bank {
   position: relative;
   display: grid;

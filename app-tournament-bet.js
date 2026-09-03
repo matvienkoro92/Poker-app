@@ -29,6 +29,30 @@
     return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
   }
 
+  function eveningTournaments() {
+    if (typeof window.pokerGetEveningTournamentOptions !== "function") return [];
+    var rows = window.pokerGetEveningTournamentOptions();
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  function tournamentBannerUrl(file) {
+    var clean = String(file || "").trim();
+    if (!clean) return "";
+    if (typeof getHomeTournamentBannerUrl === "function") return getHomeTournamentBannerUrl(clean);
+    return "./assets/" + encodeURIComponent(clean);
+  }
+
+  function tournamentBannerHtml(data, preview) {
+    var file = String(data && (data.tournamentBanner || data.banner) || "").trim();
+    var src = data && data.bannerUrl || tournamentBannerUrl(file);
+    if (!src) return "";
+    var name = String(data && (data.tournamentBannerAlt || data.bannerAlt || data.title || data.name) || "Турнир вечера");
+    var width = Math.max(1, Number(data && (data.tournamentBannerWidth || data.bannerWidth)) || 640);
+    var height = Math.max(1, Number(data && (data.tournamentBannerHeight || data.bannerHeight)) || 915);
+    return '<figure class="tournament-bet-modal__tournament-banner' + (preview ? ' tournament-bet-modal__tournament-banner--preview' : '') + '">' +
+      '<img src="' + esc(src) + '" alt="' + esc(name) + '" width="' + width + '" height="' + height + '" loading="eager" decoding="async"></figure>';
+  }
+
   function showAlert(message) {
     var tg = window.Telegram && window.Telegram.WebApp;
     if (tg && typeof tg.showAlert === "function") tg.showAlert(String(message || "Ошибка"));
@@ -79,8 +103,15 @@
   function adminHtml(data) {
     if (!data.isAdmin) return "";
     if (!data.id || data.status === "settled" || (data.status !== "open" && !(data.entries && data.entries.length))) {
+      var tournaments = eveningTournaments();
+      var first = tournaments[0] || null;
       return '<form class="tournament-bet-modal__admin" data-tournament-bet-create>' +
-        '<h3>Создать событие</h3><label><span>Название</span><input name="title" maxlength="80" value="Турнир вечера"></label>' +
+        '<h3>Создать событие</h3><label><span>Турнир вечера</span><select name="tournamentId" data-tournament-bet-tournament required>' +
+          '<option value="">Выберите турнир</option>' + tournaments.map(function (item, index) {
+            return '<option value="' + esc(item.id) + '"' + (index === 0 ? ' selected' : '') + '>' +
+              esc(item.day + " · " + item.name + (item.buyin ? " · " + item.buyin : "")) + '</option>';
+          }).join("") + '</select></label>' +
+        '<div data-tournament-bet-banner-preview>' + tournamentBannerHtml(first, true) + '</div>' +
         '<label><span>Стартовый банк</span><input name="startingBank" type="number" min="1" step="1" placeholder="10000" required></label>' +
         '<label><span>Цена ставки</span><input name="stakePrice" type="number" min="1" step="1" placeholder="500" required></label>' +
         '<button type="submit">Создать и открыть ставки</button></form>';
@@ -111,8 +142,9 @@
         : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
     var entries = Array.isArray(data.entries) ? data.entries : [];
     bodyEl.innerHTML =
-      '<section class="tournament-bet-modal__hero"><span class="tournament-bet-modal__suit" aria-hidden="true">♠</span>' +
-        '<p>Турнир вечера</p><h3>Сделай ставку на себя в турнире</h3>' +
+      '<section class="tournament-bet-modal__hero"><span class="tournament-bet-modal__suit" aria-hidden="true">♠</span>' + tournamentBannerHtml(data, false) +
+        '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
+        '<h4>Сделай ставку на себя в турнире</h4>' +
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
         '<p class="tournament-bet-modal__lead">Пройди дальше всех в турнире и забери весь банк.</p>' + action +
       '</section>' +
@@ -199,13 +231,33 @@
     }
   }
 
+  function onChange(event) {
+    var select = event.target.closest("[data-tournament-bet-tournament]");
+    if (!select) return;
+    var form = select.closest("[data-tournament-bet-create]");
+    var preview = form && form.querySelector("[data-tournament-bet-banner-preview]");
+    var selected = eveningTournaments().find(function (item) { return String(item.id) === String(select.value); });
+    if (preview) preview.innerHTML = tournamentBannerHtml(selected, true);
+  }
+
   function onSubmit(event) {
     var create = event.target.closest("[data-tournament-bet-create]");
     if (create) {
       event.preventDefault();
+      var selected = eveningTournaments().find(function (item) {
+        return String(item.id) === String(create.elements.tournamentId.value);
+      });
+      if (!selected) { showAlert("Выберите турнир вечера"); return; }
       post({
         action: "create",
-        title: create.elements.title.value,
+        tournamentId: selected.id,
+        tournamentTitle: selected.name,
+        tournamentBanner: selected.banner,
+        tournamentBannerAlt: selected.bannerAlt,
+        tournamentBannerWidth: selected.bannerWidth,
+        tournamentBannerHeight: selected.bannerHeight,
+        tournamentBuyin: selected.buyin,
+        tournamentGuarantee: selected.guarantee,
         startingBank: create.elements.startingBank.value,
         stakePrice: create.elements.stakePrice.value,
       }, "Создаю событие…");
@@ -226,6 +278,7 @@
     event.preventDefault();
     open();
   });
+  document.addEventListener("change", onChange);
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape" && modal && !modal.hidden) close();
   });

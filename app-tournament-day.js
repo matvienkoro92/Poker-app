@@ -208,6 +208,28 @@ function getHomeTournamentBannerUrl(file) {
   return base + (base.indexOf("?") === -1 ? "?v=" : "&v=") + HOME_TOURNAMENT_BANNER_VERSION;
 }
 
+function pokerGetEveningTournamentOptions(now) {
+  var current = now || new Date();
+  return HOME_TOURNAMENT_WEEK_ORDER.map(function (dow) {
+    var item = pokerGetHomeTournamentItem(dow, current) || {};
+    return {
+      id: "weekly-" + dow,
+      weekday: dow,
+      day: HOME_TOURNAMENT_WEEK_DAY_LABELS[dow],
+      name: item.name || "Турнир вечера",
+      buyin: item.buyin || "",
+      guarantee: item.guarantee || "",
+      banner: item.banner || "",
+      bannerUrl: getHomeTournamentBannerUrl(item.banner || ""),
+      bannerAlt: item.bannerAlt || item.name || "Турнир вечера",
+      bannerWidth: Number(item.bannerWidth) || 640,
+      bannerHeight: Number(item.bannerHeight) || 915
+    };
+  });
+}
+
+window.pokerGetEveningTournamentOptions = pokerGetEveningTournamentOptions;
+
 function setHomeTournamentImagePriority(img, priority) {
   if (!img) return;
   try {

@@ -2269,6 +2269,12 @@
       "consumedBy": ["club-news-data.js", "app-rating-view-adapter.js", "app-home-friend-news.js", "app-hall-fame.js"]
     },
     {
+      "name": "pokerGetEveningTournamentOptions",
+      "domain": "tournamentHome",
+      "exportedBy": ["app-tournament-day.js"],
+      "consumedBy": ["app-tournament-bet.js"]
+    },
+    {
       "name": "openTournamentBetModal",
       "domain": "tournament",
       "exportedBy": ["app-tournament-bet.js"],
