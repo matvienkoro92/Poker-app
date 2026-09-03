@@ -168,6 +168,7 @@ test("tournament bet has a separate bettor rating tab with full stats", function
   assert.match(client, /Результат/);
   assert.match(client, /Винрейт/);
   assert.match(css, /\.tournament-bet-modal__rating-row/);
+  assert.match(css, /\.tournament-bet-modal__rating-avatar \.sng-champions-modal__entry-avatar-img\s*\{[^}]*position:\s*static\s*!important[^}]*max-width:\s*100%\s*!important[^}]*transform:\s*none\s*!important/s);
 });
 
 test("players can create a zero-starting-bank bet from tournaments costing at least 300 rubles", function () {

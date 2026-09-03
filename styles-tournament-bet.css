@@ -80,7 +80,53 @@
 
 .tournament-bet-modal__rating-row--mine { border-color: rgba(107, 232, 174, 0.56); }
 .tournament-bet-modal__rating-place { color: #ffcb63; font-size: 21px; text-align: center; }
-.tournament-bet-modal__rating-avatar { width: 60px !important; height: 60px !important; }
+.tournament-bet-modal__rating-avatar {
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  overflow: hidden !important;
+  border: 2px solid rgba(201, 145, 65, 0.72) !important;
+  border-radius: 50% !important;
+  background: #080b11 !important;
+}
+.tournament-bet-modal__rating-avatar .sng-champions-modal__entry-avatar-media {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+}
+.tournament-bet-modal__rating-avatar .sng-champions-modal__entry-avatar-img {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transform: none !important;
+}
+.tournament-bet-modal__rating-avatar > em {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2;
+  min-width: 20px !important;
+  min-height: 18px !important;
+  padding: 0 4px !important;
+  border-radius: 9px !important;
+  color: #201100 !important;
+  background: #ffc34d !important;
+  font-size: 9px !important;
+  font-style: normal !important;
+  font-weight: 1000 !important;
+  transform: none !important;
+}
 .tournament-bet-modal__rating-player { min-width: 0; }
 .tournament-bet-modal__rating-player > strong { display: block; overflow: hidden; color: #fff1ce; font-size: 17px; text-overflow: ellipsis; white-space: nowrap; }
 .tournament-bet-modal__rating-player > small { color: #a89b83; }
@@ -128,7 +174,7 @@
 @media (max-width: 700px) {
   .tournament-bet-modal__rating { padding: 10px; }
   .tournament-bet-modal__rating-row { grid-template-columns: 20px 50px minmax(0, 1fr); gap: 8px; padding: 9px 7px; }
-  .tournament-bet-modal__rating-avatar { width: 48px !important; height: 48px !important; }
+  .tournament-bet-modal__rating-avatar { width: 48px !important; height: 48px !important; min-width: 48px !important; }
   .tournament-bet-modal__rating-player > strong { font-size: 14px; }
   .tournament-bet-modal__rating-row dl { grid-column: 2 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .tournament-bet-modal__rating-row dd { font-size: 11px; }
