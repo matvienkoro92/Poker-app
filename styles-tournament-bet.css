@@ -2,7 +2,16 @@
 .tournament-bet-modal__hero--banner {
   display: grid !important;
   place-items: center !important;
-  padding: 14px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tournament-bet-modal__hero--banner > .tournament-bet-modal__suit {
+  display: none !important;
 }
 
 .tournament-bet-modal__hero--banner .tournament-bet-modal__tournament-banner {
