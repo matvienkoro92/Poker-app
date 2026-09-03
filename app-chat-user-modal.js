@@ -1464,6 +1464,22 @@ if (chatUserModalEl) {
   function chatUserModalManualAchievements(ratingNick) {
     if (!String(ratingNick || "").trim()) return [];
     var rows = [];
+    var poker21LeaderboardWinners = [
+      { aliases: ["ПокерМанки", "Манки"], place: 1, reward: 250000 },
+      { aliases: ["Waaarr", "Waaarrr", "Waaar", "Ваар"], place: 2, reward: 150000 },
+      { aliases: ["Coo1er91", "NeCoo1er91", "Кулер"], place: 3, reward: 100000 },
+    ];
+    var leaderboardWin = poker21LeaderboardWinners.find(function (winner) {
+      return winner.aliases.some(function (alias) { return chatUserModalSameRatingNick(alias, ratingNick); });
+    });
+    if (leaderboardWin) {
+      rows.push({
+        title: "Лидерборд Poker21",
+        rows: [{ label: leaderboardWin.place + " место · " + leaderboardWin.reward.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽" }],
+        info: "Ачивка за попадание в топ-3 лидерборда Poker21.",
+        image: "./assets/home-mtt-leaderboard-winners.webp?v=1",
+      });
+    }
     if (chatUserModalSameRatingNick("Coo1er91", ratingNick) || chatUserModalSameRatingNick("Кулер", ratingNick)) {
       rows.push({
         title: "Пухомет",
@@ -2171,6 +2187,7 @@ if (chatUserModalEl) {
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.webp" };
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-offline-win.webp" };
     if (key.indexOf("ставк") >= 0 && key.indexOf("себя") >= 0) return { mod: "self-bet-win", label: "ПОБЕДИТЕЛЬ<br>СТАВКИ<br>НА СЕБЯ", img: "./assets/tournament-bet-self-hero-v2.jpg" };
+    if (key.indexOf("лидерборд") >= 0 && key.indexOf("poker21") >= 0) return { mod: "poker21-leaderboard", label: "ЛИДЕРБОРД<br>POKER21<br>ТОП-3", img: "./assets/home-mtt-leaderboard-winners.webp?v=1" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
@@ -2216,6 +2233,7 @@ if (chatUserModalEl) {
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return "Ручная клубная ачивка за победу в живом оффлайн-турнире. Записи добавляются администратором клуба.";
     if (key.indexOf("ставк") >= 0 && key.indexOf("себя") >= 0) return "За каждую победу среди участников события «Ставка на себя» начисляется одна ачивка. Победа засчитывается после выбора победителя и выплаты банка.";
+    if (key.indexOf("лидерборд") >= 0 && key.indexOf("poker21") >= 0) return "Даётся игрокам, занявшим 1, 2 или 3 место в итоговом лидерборде Poker21. В карточке показываются место и полученная награда.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
     if (key.indexOf("король") >= 0) return "Считаются первые места в турнирах из общей рейтинговой истории: зима, весна и лето. Уровни: 1, 15, 50, 100 и 250 побед.";
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";

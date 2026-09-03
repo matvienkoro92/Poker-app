@@ -201,3 +201,12 @@ test("every settled self-bet win contributes to a profile achievement", function
   assert.match(profile, /value: metrics\.selfBetWins \|\| 0/);
   assert.match(profile, /За каждую победу среди участников события/);
 });
+
+test("latest Poker21 leaderboard top three receive profile achievements", function () {
+  const profile = fs.readFileSync(path.join(__dirname, "..", "app-chat-user-modal.js"), "utf8");
+  assert.match(profile, /title: "Лидерборд Poker21"/);
+  assert.match(profile, /\["ПокерМанки", "Манки"\], place: 1, reward: 250000/);
+  assert.match(profile, /\["Waaarr", "Waaarrr", "Waaar", "Ваар"\], place: 2, reward: 150000/);
+  assert.match(profile, /\["Coo1er91", "NeCoo1er91", "Кулер"\], place: 3, reward: 100000/);
+  assert.match(profile, /Ачивка за попадание в топ-3 лидерборда Poker21/);
+});
