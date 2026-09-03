@@ -190,3 +190,14 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(server, /createdByPlayer: true/);
   assert.match(client, /tournament-bet-modal__feature/);
 });
+
+test("every settled self-bet win contributes to a profile achievement", function () {
+  const root = path.join(__dirname, "..");
+  const server = fs.readFileSync(path.join(root, "lib/api-handlers/tournament-bet.js"), "utf8");
+  const profile = fs.readFileSync(path.join(root, "app-chat-user-modal.js"), "utf8");
+  assert.match(server, /mode === "achievements"/);
+  assert.match(profile, /\/api\/tournament-bet\?mode=achievements/);
+  assert.match(profile, /Победитель ставки на себя/);
+  assert.match(profile, /value: metrics\.selfBetWins \|\| 0/);
+  assert.match(profile, /За каждую победу среди участников события/);
+});

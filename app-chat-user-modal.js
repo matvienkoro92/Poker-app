@@ -2110,6 +2110,18 @@ if (chatUserModalEl) {
     if (modalRatingTabs && chatUserModalHideCompetitiveStats) modalRatingTabs.hidden = true;
     if (modalRatingRanks && chatUserModalHideCompetitiveStats) modalRatingRanks.hidden = true;
   }
+  function getChatUserModalSelfBetWinsReady(ratingNick, profileData, userId) {
+    var base = typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
+    var targetKeys = chatUserModalRaffleTargetKeys(ratingNick, profileData, userId);
+    return fetch(base + "/api/tournament-bet?mode=achievements", { cache: "default" }).then(function (response) {
+      if (!response.ok) throw new Error("self bet achievements unavailable");
+      return response.json();
+    }).then(function (data) {
+      var rows = data && Array.isArray(data.rows) ? data.rows : [];
+      var row = rows.find(function (item) { return chatUserModalRaffleRowsMatch(item, targetKeys, ratingNick); });
+      return Math.max(0, Number(row && row.wins) || 0);
+    }).catch(function () { return 0; });
+  }
   function getChatUserModalAchievementMetricsReady(ratingNick, profileData, userId, isSelfProfile) {
     var isClubAdmin = chatUserModalIsClubAdminUser(ratingNick, profileData, userId);
     var privateCash2040Played = chatUserModalPrivateCash2040PlayedCount(ratingNick, profileData, userId);
@@ -2122,6 +2134,7 @@ if (chatUserModalEl) {
         referrals: null,
         guestbookReview: false,
         privateCash2040Played: privateCash2040Played,
+        selfBetWins: 0,
         isClubAdmin: true,
         isSelfProfile: !!isSelfProfile,
       });
@@ -2133,6 +2146,7 @@ if (chatUserModalEl) {
       getChatUserModalFriendsCountReady(userId, isSelfProfile),
       getChatUserModalReferralsCountReady(isSelfProfile),
       getChatUserModalGuestbookReviewReady(profileData, userId),
+      getChatUserModalSelfBetWinsReady(ratingNick, profileData, userId),
     ]).then(function (parts) {
       return {
         tournaments: parts && parts[0] || null,
@@ -2142,6 +2156,7 @@ if (chatUserModalEl) {
         referrals: parts && parts[4] != null ? parts[4] : null,
         guestbookReview: !!(parts && parts[5]),
         privateCash2040Played: privateCash2040Played,
+        selfBetWins: parts && parts[6] != null ? parts[6] : 0,
         isClubAdmin: false,
         isSelfProfile: !!isSelfProfile,
       };
@@ -2155,6 +2170,7 @@ if (chatUserModalEl) {
     if (key.indexOf("народ") >= 0 || key.indexOf("выбор клуба") >= 0) return { mod: "club-choice", label: "НАРОДНЫЙ<br>ГЕРОЙ", img: "./assets/home-hall-of-fame-medal.png" };
     if (key.indexOf("счастлив") >= 0) return { mod: "lucky-month", label: "СЧАСТЛИВЧИК<br>МЕСЯЦА", img: "./assets/home-menu-icon-raffle-tickets.webp" };
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return { mod: "offline-win", label: "ОФФЛАЙН<br>ПОБЕДА", img: "./assets/chat-profile-achievement-offline-win.webp" };
+    if (key.indexOf("ставк") >= 0 && key.indexOf("себя") >= 0) return { mod: "self-bet-win", label: "ПОБЕДИТЕЛЬ<br>СТАВКИ<br>НА СЕБЯ", img: "./assets/tournament-bet-self-hero-v2.jpg" };
     if (key.indexOf("первый") >= 0) return { mod: "first-win", label: "ПЕРВЫЙ<br>ЗАНОС", img: "./assets/tournament-day-trophy.png" };
     if (key.indexOf("король") >= 0) return { mod: "tournament-king", label: "КОРОЛЬ<br>ТУРНИРОВ", img: "./assets/chat-profile-achievement-cup.webp" };
     if (key.indexOf("миллион") >= 0) return { mod: "millionaire", label: "МИЛЛИОНЕР<br>КЛУБА", img: "./assets/chat-profile-achievement-top-win.webp" };
@@ -2199,6 +2215,7 @@ if (chatUserModalEl) {
     if (key.indexOf("снг") >= 0) return "Даётся гранд-финалистам турнира СНГ Лига Чемпионов Два Туза: 1 место получает статус чемпиона СНГ сезона, 2 место — финалиста.";
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
     if (key.indexOf("оффлайн") >= 0 || key.indexOf("offline") >= 0) return "Ручная клубная ачивка за победу в живом оффлайн-турнире. Записи добавляются администратором клуба.";
+    if (key.indexOf("ставк") >= 0 && key.indexOf("себя") >= 0) return "За каждую победу среди участников события «Ставка на себя» начисляется одна ачивка. Победа засчитывается после выбора победителя и выплаты банка.";
     if (key.indexOf("первый") >= 0) return "Открывается за первую победу в клубном турнире. Считается 1 место в турнирах, которые попали в рейтинговую историю клуба.";
     if (key.indexOf("король") >= 0) return "Считаются первые места в турнирах из общей рейтинговой истории: зима, весна и лето. Уровни: 1, 15, 50, 100 и 250 побед.";
     if (key.indexOf("занос") >= 0 && key.indexOf("50") >= 0 && key.indexOf("100") >= 0) return "Открывается за разовый призовой выигрыш от 50 000 ₽ до 99 999 ₽ в одном турнире.";
@@ -2507,6 +2524,22 @@ if (chatUserModalEl) {
         infoImage: "./assets/chat-profile-achievement-sng-champion-card.webp",
       });
     var winsHtml =
+      chatUserModalAchievementCardHtml("♠", "Победитель ставки на себя", [], {
+        image: "./assets/tournament-bet-self-hero-v2.jpg",
+        tier: {
+          value: metrics.selfBetWins || 0,
+          tiers: [
+            { value: 1, label: "1 победа" },
+            { value: 5, label: "5 побед" },
+            { value: 10, label: "10 побед" },
+            { value: 25, label: "25 побед" },
+            { value: 50, label: "50 побед" },
+            { value: 100, label: "100 побед" },
+          ],
+          unit: "побед",
+          lockedLabel: "Нет побед",
+        },
+      }) +
       chatUserModalAchievementCardHtml("★", "Герой дня", dayHeroRows.slice(0, 3), {
         badge: "15к в августе",
         tier: {
