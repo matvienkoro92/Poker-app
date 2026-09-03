@@ -178,6 +178,8 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   const server = fs.readFileSync(path.join(root, "lib/api-handlers/tournament-bet.js"), "utf8");
   assert.match(schedule, /function pokerGetStakeTournamentOptions/);
   assert.match(schedule, /buyin >= 300/);
+  assert.match(schedule, /category\.indexOf\("сателлит"\) >= 0/);
+  assert.match(schedule, /!isSatellite/);
   assert.match(client, /data-tournament-bet-tab="create"/);
   assert.match(client, /Выберите турнир, в котором хотите поставить на себя/);
   assert.match(client, /action: "create_player"/);

@@ -234,7 +234,10 @@ function pokerGetStakeTournamentOptions() {
   var dayLabels = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
   return (Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE) ? POKER_FULL_TOURNAMENT_SCHEDULE : []).filter(function (item) {
     var buyin = Number(String(item && item.buyin || "").replace(/[^\d]/g, "")) || 0;
-    return buyin >= 300;
+    var category = String(item && item.category || "").trim().toLowerCase();
+    var name = String(item && item.name || "").trim().toLowerCase();
+    var isSatellite = category.indexOf("сателлит") >= 0 || /(^|[\s·—-])(?:сат|sat)(?=$|[\s·—-]|\d)/i.test(name);
+    return buyin >= 300 && !isSatellite;
   }).map(function (item, index) {
     var buyin = Number(String(item.buyin || "").replace(/[^\d]/g, "")) || 0;
     var time = String(Number(item.hour) || 0).padStart(2, "0") + ":" + String(Number(item.minute) || 0).padStart(2, "0");
