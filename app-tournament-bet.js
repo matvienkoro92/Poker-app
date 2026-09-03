@@ -9,6 +9,8 @@
   var loading = false;
   var refreshTimer = 0;
   var activeTab = "event";
+  var selectedEventId = "";
+  try { selectedEventId = window.localStorage.getItem("pokerTournamentBetEventId") || ""; } catch (error) {}
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -166,7 +168,7 @@
       }).join("") + '</select></label>' +
       '<label><span>Цена вашей ставки</span><input name="stakePrice" type="text" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off" placeholder="500" required></label>' +
       '<small>Стартового банка нет. Банк начнётся с вашей ставки и будет расти с каждой новой ставкой участника.</small>' +
-      '<button type="submit"' + (data && data.id && data.status !== "settled" && data.entries && data.entries.length ? ' disabled' : '') + '>Создать и поставить на себя</button>' +
+      '<button type="submit">Создать и поставить на себя</button>' +
     '</form>';
   }
 
@@ -213,8 +215,11 @@
         ? '<div class="tournament-bet-modal__closed">Событие завершено</div>'
         : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
     var entries = Array.isArray(data.entries) ? data.entries : [];
+    var eventPicker = Array.isArray(data.events) && data.events.length > 1 ? '<label class="tournament-bet-modal__event-picker"><span>Открытая ставка</span><select data-tournament-bet-event>' + data.events.map(function (item) {
+      return '<option value="' + esc(item.id) + '"' + (item.id === data.id ? ' selected' : '') + '>' + esc(item.title + ' · ' + rub(item.stakePrice) + ' · банк ' + rub(item.bank)) + '</option>';
+    }).join("") + '</select></label>' : "";
     var eventHtml =
-      '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
+      eventPicker + '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
         '<h4>Сделай ставку на себя</h4>' +
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
@@ -238,7 +243,8 @@
     if (loading) return Promise.resolve(state);
     loading = true;
     if (!silent && bodyEl) bodyEl.innerHTML = '<div class="club-choice-vote-modal__loading">Идёт загрузка…</div>';
-    return fetch(baseUrl() + API_PATH + authQuery("?"), { cache: "no-store" }).then(function (response) {
+    var eventQuery = selectedEventId ? "eventId=" + encodeURIComponent(selectedEventId) + "&" : "";
+    return fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery), { cache: "no-store" }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
         state = data;
@@ -256,6 +262,7 @@
     if (loading) return Promise.resolve(null);
     loading = true;
     setStatus(pendingText || "Сохраняю…", "loading");
+    if (state && state.id && payload.action !== "create" && payload.action !== "create_player" && !payload.eventId) payload.eventId = state.id;
     return fetch(baseUrl() + API_PATH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -264,6 +271,10 @@
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось выполнить действие");
         state = data;
+        if (data && data.id) {
+          selectedEventId = data.id;
+          try { window.localStorage.setItem("pokerTournamentBetEventId", selectedEventId); } catch (error) {}
+        }
         setStatus("Готово", "success");
         render();
         return data;
@@ -308,6 +319,13 @@
   }
 
   function onChange(event) {
+    var eventSelect = event.target.closest("[data-tournament-bet-event]");
+    if (eventSelect) {
+      selectedEventId = String(eventSelect.value || "");
+      try { window.localStorage.setItem("pokerTournamentBetEventId", selectedEventId); } catch (error) {}
+      load(false);
+      return;
+    }
     var select = event.target.closest("[data-tournament-bet-tournament]");
     if (!select) return;
     var form = select.closest("[data-tournament-bet-create]");

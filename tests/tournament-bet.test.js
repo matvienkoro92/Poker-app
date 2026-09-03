@@ -193,6 +193,10 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(server, /startingBank: 0/);
   assert.match(server, /createdByPlayer: true/);
   assert.match(client, /tournament-bet-modal__feature/);
+  assert.match(server, /PERSONAL_EVENTS_KEY/);
+  assert.match(server, /savePersonalState\(state\)/);
+  assert.match(client, /data-tournament-bet-event/);
+  assert.doesNotMatch(client, /data\.id && data\.status !== "settled"[^\n]+disabled/);
 });
 
 test("every settled self-bet win contributes to a profile achievement", function () {

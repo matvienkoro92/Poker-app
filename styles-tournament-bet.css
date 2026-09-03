@@ -47,6 +47,9 @@
   gap: 18px;
 }
 
+.tournament-bet-modal__event-picker { display: grid; gap: 6px; color: #cdbb94; font-size: 12px; font-weight: 900; }
+.tournament-bet-modal__event-picker select { width: 100%; min-height: 48px; padding: 9px 12px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 13px; color: #fff1ce; background: #070910; font: 800 14px/1.2 inherit; }
+
 .tournament-bet-modal__rating,
 .tournament-bet-modal__rating-empty {
   padding: 18px;
