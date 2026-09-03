@@ -381,7 +381,7 @@
         document.head.appendChild(preload);
       })();
     </script>
-    <link rel="stylesheet" href="./styles.css?v=4.004" />
+    <link rel="stylesheet" href="./styles.css?v=4.005" />
     <link rel="stylesheet" href="./styles-tournament-bet.css?v=1.015" />
     <link rel="stylesheet" href="./styles-home-club-choice-badge.css?v=4.001" />
     <link rel="stylesheet" href="./styles-home-achievements.css?v=4.001" />
@@ -409,6 +409,37 @@
           radial-gradient(ellipse at 88% 6%, rgba(214, 163, 84, 0.045), transparent 36%),
           linear-gradient(150deg, #030407 0%, #070b12 46%, #020307 100%) !important;
         background-color: #030407 !important;
+      }
+      /* Keep the asynchronously inserted club-news ticker compact from its first frame. */
+      .app.app--view-home .home-club-news {
+        width: 100%;
+        min-height: 0;
+        margin: 10px auto 12px;
+      }
+      .app.app--view-home .home-club-news__ticker {
+        box-sizing: border-box;
+        display: grid;
+        width: 100%;
+        height: 112px;
+        min-height: 112px;
+        max-height: 112px;
+        padding: 10px 34px 10px 10px;
+        overflow: hidden;
+      }
+      .app.app--view-home .home-club-news__ticker .home-friend-news__viewport {
+        display: block;
+        width: 100%;
+        height: 90px;
+        min-height: 0;
+        max-height: 90px;
+        overflow: hidden;
+      }
+      .app.app--view-home .home-club-news__ticker .home-friend-news__track {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 90px;
+        overflow: hidden;
       }
       [data-theme="dark"] .app.app--view-home {
         background: radial-gradient(circle at top, #0f172a 0, #071126 48%, #020617 100%) !important;

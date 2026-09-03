@@ -283,3 +283,11 @@ test("every tournament bet can be copied, shared and opened by deep link", funct
   assert.match(client, /\^tournament_bet_\(tb_/);
   assert.match(client, /if \(deepLinkEventId\) open\(\)/);
 });
+
+test("club news has compact synchronous first-paint geometry", function () {
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const css = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
+  assert.match(html, /\.app\.app--view-home \.home-club-news__ticker \{[\s\S]*?height: 112px;[\s\S]*?max-height: 112px;/);
+  assert.match(html, /\.home-club-news__ticker \.home-friend-news__viewport \{[\s\S]*?height: 90px;[\s\S]*?max-height: 90px;/);
+  assert.match(css, /\.home-club-news__ticker \{[\s\S]*?height: 112px;[\s\S]*?max-height: 112px;/);
+});
