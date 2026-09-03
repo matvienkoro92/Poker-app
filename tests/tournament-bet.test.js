@@ -75,4 +75,5 @@ test("bet action is a separate visible offer below the tournament banner", funct
   assert.match(css, /\.tournament-bet-modal__offer \.tournament-bet-modal__bet/);
   assert.match(css, /\.tournament-bet-modal__hero--banner\s*\{[^}]*border:\s*0\s*!important/s);
   assert.match(client, /id="tournamentBetTitle">Ставка на себя<\/h2>/);
+  assert.match(client, /Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк\./);
 });
