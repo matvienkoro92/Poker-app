@@ -111,4 +111,14 @@ test("bet action is a separate visible offer below the tournament banner", funct
   assert.match(client, /ID Poker21/);
   assert.match(client, /tournament-bet-modal__entry-stake/);
   assert.match(css, /Participant cards mirror the data-rich SNG battle list/);
+  assert.match(client, /pokerGetSummerRatingPlayerArt/);
+  assert.match(client, /tournament-bet-modal__participants-grid/);
+  assert.match(css, /\.tournament-bet-modal__participants-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,/s);
+  assert.match(client, /sng-champions-modal__entry-avatar-img--art/);
+});
+
+test("tournament bet hydrates the level from the same cached Poker21 profile as SNG", function () {
+  const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
+  assert.match(server, /PROFILE_HASH_KEY/);
+  assert.match(server, /pokerProfileStatusFromCachedProfile\(profile, \{ pokerPlusLinked: true \}\)/);
 });

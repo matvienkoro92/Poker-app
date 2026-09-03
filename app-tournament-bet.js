@@ -97,8 +97,14 @@
   }
 
   function participantHtml(entry, index, data) {
-    var avatar = entry.avatar
-      ? '<img src="' + esc(entry.avatar) + '" alt="" loading="lazy" decoding="async">'
+    var art = "";
+    if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
+      var sharedArt = window.pokerGetSummerRatingPlayerArt(entry && entry.name);
+      if (sharedArt && sharedArt.src) art = String(sharedArt.src);
+    }
+    var avatarSrc = art || entry.avatar || "";
+    var avatar = avatarSrc
+      ? '<span class="sng-champions-modal__entry-avatar-media"><img class="sng-champions-modal__entry-avatar-img' + (art ? ' sng-champions-modal__entry-avatar-img--art' : '') + '" src="' + esc(avatarSrc) + '" alt="" loading="lazy" decoding="async"></span>'
       : '<span>' + esc(String(entry.name || "И").slice(0, 1).toUpperCase()) + '</span>';
     var level = entry.level == null ? "" : String(Math.max(0, Math.floor(Number(entry.level) || 0)));
     var city = String(entry.profileCity || "").trim();
@@ -168,7 +174,7 @@
         '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p>' + action +
       '</section>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
-        (entries.length ? entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
+        (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
       '</section>' + adminHtml(data);
     updateHomeButton(data);
   }
