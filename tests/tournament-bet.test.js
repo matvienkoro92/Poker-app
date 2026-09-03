@@ -236,3 +236,12 @@ test("admin can change the starting bank of any active bet", function () {
   assert.match(server, /state\.startingBank = money\(body\.startingBank\)/);
   assert.match(server, /saveSelectedState\(state\)/);
 });
+
+test("Poker21 balance errors render visibly directly above the bet button", function () {
+  const root = path.join(__dirname, "..");
+  const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles-tournament-bet.css"), "utf8");
+  assert.match(client, /data-tournament-bet-inline-status/);
+  assert.match(client, /inline\.dataset\.tone = tone/);
+  assert.match(css, /\.tournament-bet-modal__inline-status\[data-tone="error"\]/);
+});

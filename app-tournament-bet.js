@@ -82,9 +82,16 @@
   }
 
   function setStatus(message, tone) {
+    var value = String(message || "");
+    var inline = modal && modal.querySelector("[data-tournament-bet-inline-status]");
+    if (inline) {
+      inline.textContent = value;
+      inline.dataset.tone = tone || "";
+      inline.hidden = !value;
+    }
     if (!statusEl) return;
-    statusEl.textContent = String(message || "");
-    statusEl.dataset.tone = tone || "";
+    statusEl.textContent = inline ? "" : value;
+    statusEl.dataset.tone = inline ? "" : tone || "";
   }
 
   function ensureModal() {
@@ -168,6 +175,7 @@
       }).join("") + '</select></label>' +
       '<label><span>Цена вашей ставки</span><input name="stakePrice" type="text" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off" placeholder="500" required></label>' +
       '<small>Стартового банка нет. Банк начнётся с вашей ставки и будет расти с каждой новой ставкой участника.</small>' +
+      '<div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' +
       '<button type="submit">Создать и поставить на себя</button>' +
     '</form>';
   }
@@ -224,7 +232,7 @@
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
         '<h4>Сделай ставку на себя</h4>' +
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
-        '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p>' + action +
+        '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p><div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' + action +
       '</div><figure class="tournament-bet-modal__feature-art"><img src="./assets/tournament-bet-self-hero-v2.jpg" alt="" width="511" height="768" loading="eager" decoding="async"></figure></section>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
         (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +

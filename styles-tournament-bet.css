@@ -47,6 +47,39 @@
   gap: 18px;
 }
 
+.tournament-bet-modal__inline-status {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 190, 75, 0.58);
+  border-radius: 12px;
+  color: #ffe5ac;
+  background: rgba(86, 48, 9, 0.72);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: 0 0 18px rgba(255, 153, 31, 0.14);
+}
+
+.tournament-bet-modal__inline-status[hidden],
+.tournament-bet-modal__inline-status:empty { display: none !important; }
+
+.tournament-bet-modal__inline-status[data-tone="error"] {
+  border-color: #ff704f;
+  color: #fff2df;
+  background: linear-gradient(135deg, rgba(117, 24, 12, 0.96), rgba(62, 14, 9, 0.96));
+  box-shadow: 0 0 22px rgba(255, 75, 37, 0.28), inset 0 0 0 1px rgba(255, 202, 154, 0.08);
+}
+
+.tournament-bet-modal__inline-status[data-tone="loading"] {
+  animation: tournament-bet-status-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes tournament-bet-status-pulse {
+  to { filter: brightness(1.22); }
+}
+
 .tournament-bet-modal__event-picker { display: grid; gap: 6px; color: #cdbb94; font-size: 12px; font-weight: 900; }
 .tournament-bet-modal__event-picker select { width: 100%; min-height: 48px; padding: 9px 12px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 13px; color: #fff1ce; background: #070910; font: 800 14px/1.2 inherit; }
 
