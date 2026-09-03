@@ -545,7 +545,8 @@
   margin: 0 !important;
 }
 
-.tournament-bet-modal__offer .tournament-bet-modal__bet {
+.tournament-bet-modal__offer .tournament-bet-modal__bet,
+.tournament-bet-modal__sticky-action .tournament-bet-modal__bet {
   display: block !important;
   width: 100% !important;
   min-height: 58px !important;
@@ -560,11 +561,35 @@
 }
 
 .tournament-bet-modal__offer .tournament-bet-modal__bet--done,
-.tournament-bet-modal__offer .tournament-bet-modal__bet:disabled {
+.tournament-bet-modal__offer .tournament-bet-modal__bet:disabled,
+.tournament-bet-modal__sticky-action .tournament-bet-modal__bet--done,
+.tournament-bet-modal__sticky-action .tournament-bet-modal__bet:disabled {
   color: #aef5d3 !important;
   border-color: rgba(107, 232, 174, 0.55) !important;
   background: rgba(20, 93, 65, 0.42) !important;
   box-shadow: none !important;
+}
+
+.tournament-bet-modal__sticky-action {
+  position: sticky;
+  z-index: 8;
+  bottom: -1px;
+  display: grid;
+  gap: 8px;
+  margin: 0 -4px -4px;
+  padding: 10px 4px calc(4px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(5, 7, 11, 0), rgba(5, 7, 11, 0.97) 22%, #05070b 100%);
+}
+
+.tournament-bet-modal__sticky-action .tournament-bet-modal__closed {
+  min-height: 48px;
+  padding: 13px;
+  border: 1px solid rgba(213, 153, 67, 0.42);
+  border-radius: 14px;
+  color: #c9b997;
+  text-align: center;
+  background: #101117;
+  font-weight: 900;
 }
 
 @media (max-width: 520px) {
@@ -574,7 +599,8 @@
   .tournament-bet-modal__feature .tournament-bet-modal__offer h4 { font-size: 13px !important; }
   .tournament-bet-modal__feature .tournament-bet-modal__bank strong { font-size: clamp(30px, 10vw, 48px) !important; }
   .tournament-bet-modal__feature .tournament-bet-modal__lead { font-size: 11px !important; line-height: 1.25 !important; }
-  .tournament-bet-modal__feature .tournament-bet-modal__bet { min-height: 46px !important; padding: 8px !important; font-size: 12px !important; }
+  .tournament-bet-modal__feature .tournament-bet-modal__bet,
+  .tournament-bet-modal__sticky-action .tournament-bet-modal__bet { min-height: 46px !important; padding: 8px !important; font-size: 12px !important; }
   .tournament-bet-modal__feature-art img { min-height: 320px; object-position: 60% 50%; }
 
   .tournament-bet-modal__hero--banner .tournament-bet-modal__tournament-banner {

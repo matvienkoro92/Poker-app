@@ -291,3 +291,11 @@ test("club news has compact synchronous first-paint geometry", function () {
   assert.match(html, /\.home-club-news__ticker \.home-friend-news__viewport \{[\s\S]*?height: 90px;[\s\S]*?max-height: 90px;/);
   assert.match(css, /\.home-club-news__ticker \{[\s\S]*?height: 112px;[\s\S]*?max-height: 112px;/);
 });
+
+test("main bet action stays pinned to the bottom of the section", function () {
+  const client = fs.readFileSync(path.join(__dirname, "..", "app-tournament-bet.js"), "utf8");
+  const css = fs.readFileSync(path.join(__dirname, "..", "styles-tournament-bet.css"), "utf8");
+  assert.match(client, /tournament-bet-modal__sticky-action/);
+  assert.match(client, /sticky-action"><div class="tournament-bet-modal__inline-status"/);
+  assert.match(css, /\.tournament-bet-modal__sticky-action \{[\s\S]*?position: sticky;[\s\S]*?bottom: -1px;/);
+});
