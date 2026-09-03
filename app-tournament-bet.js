@@ -75,7 +75,7 @@
       '<section class="club-choice-vote-modal__panel tournament-bet-modal__panel" role="dialog" aria-modal="true" aria-labelledby="tournamentBetTitle">' +
         '<header class="club-choice-vote-modal__head tournament-bet-modal__head"><div>' +
           '<p class="club-choice-vote-modal__eyebrow">Турнир вечера</p>' +
-          '<h2 class="club-choice-vote-modal__title" id="tournamentBetTitle">Ставка на турнир</h2>' +
+          '<h2 class="club-choice-vote-modal__title" id="tournamentBetTitle">Ставка на себя</h2>' +
         '</div><button type="button" class="club-choice-vote-modal__close" data-tournament-bet-close aria-label="Закрыть">×</button></header>' +
         '<div class="club-choice-vote-modal__status" data-tournament-bet-status role="status" aria-live="polite"></div>' +
         '<div class="club-choice-vote-modal__body tournament-bet-modal__body" data-tournament-bet-body></div>' +
