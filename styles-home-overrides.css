@@ -4036,6 +4036,31 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   display: none !important;
 }
 
+.app.app--view-home .home-leaderboard-winners-banner {
+  grid-column: 1 / -1;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(222, 161, 74, 0.72);
+  border-radius: 18px;
+  background: #21150d;
+  box-shadow: 0 10px 26px rgba(26, 13, 4, 0.4), inset 0 0 0 1px rgba(255, 222, 161, 0.1);
+}
+
+.app.app--view-home .home-leaderboard-winners-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+}
+
+@media (max-width: 520px) {
+  .app.app--view-home .home-leaderboard-winners-banner {
+    border-radius: 14px;
+  }
+}
+
 /* Tournament self-bet replaces the large sticker shortcut. */
 .app.app--view-home .home-mini-icon-item--tournament-bet {
   position: relative;

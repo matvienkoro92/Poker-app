@@ -2414,13 +2414,6 @@
   function renderModalList(rows) {
     var list = el("homeFriendNewsList");
     if (!list) return;
-    var pinnedLeaderboardBanner = newsModalMode === "club"
-      ? '<aside class="home-friend-news-modal__pinned-banner" aria-label="Победители МТТ Лидерборда Poker21">' +
-          '<img src="./assets/club-news-art/mtt-leaderboard-winners-roman.png?v=1" ' +
-            'alt="Победители МТТ Лидерборда на Poker21: ПокерМанки — 250 000 рублей, Ваар — 150 000 рублей, Кулер — 100 000 рублей" ' +
-            'width="2172" height="724" loading="eager" decoding="async">' +
-        '</aside>'
-      : "";
     var heroLeaderNick = clubCurrentMonthHeroLeaderNick();
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
@@ -2438,7 +2431,7 @@
     if (activeClubLoading) {
       var skeletonAt = clubEvents[0] && clubEvents[0].at ||
         (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
-      list.innerHTML = pinnedLeaderboardBanner + achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
+      list.innerHTML = achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(skeletonAt, true)) + '</span></div>' +
         '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
@@ -2469,7 +2462,7 @@
             '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab home-friend-news-modal__club-tab--active">Записи игроков</button></div>' +
           '<div class="home-friend-news-modal__empty"><span aria-hidden="true">✎</span><strong>Записей за этот день пока нет</strong></div></section>'
       : "";
-    list.innerHTML = pinnedLeaderboardBanner + achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
+    list.innerHTML = achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite;
     window.setTimeout(focusPendingClubNewsEvent, 0);
