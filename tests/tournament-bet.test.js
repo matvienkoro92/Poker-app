@@ -264,3 +264,13 @@ test("personal bets stay in the create tab and never replace the main event", fu
   assert.doesNotMatch(client, /localStorage\.setItem\("pokerTournamentBetEventId"/);
   assert.match(server, /: mainState \|\| null;/);
 });
+
+test("personal bet tab lists offers before the creation form with accept and decline actions", function () {
+  const client = fs.readFileSync(path.join(__dirname, "..", "app-tournament-bet.js"), "utf8");
+  const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
+  assert.match(client, />Личная ставка<\/button>/);
+  assert.match(client, /return personalList \+ '<form/);
+  assert.match(client, /data-tournament-bet-personal-accept/);
+  assert.match(client, /data-tournament-bet-personal-decline/);
+  assert.match(server, /createdByPlayer: !!item\.createdByPlayer, joined:/);
+});

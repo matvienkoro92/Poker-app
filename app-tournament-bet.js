@@ -57,6 +57,16 @@
     return Array.isArray(rows) ? rows : [];
   }
 
+  function declinedPersonalEvents() {
+    try { return JSON.parse(window.localStorage.getItem("pokerTournamentBetDeclined") || "[]"); } catch (error) { return []; }
+  }
+
+  function declinePersonalEvent(id) {
+    var rows = declinedPersonalEvents().filter(Boolean);
+    if (rows.indexOf(id) < 0) rows.push(id);
+    try { window.localStorage.setItem("pokerTournamentBetDeclined", JSON.stringify(rows.slice(-100))); } catch (error) {}
+  }
+
   function tournamentBannerUrl(file) {
     var clean = String(file || "").trim();
     if (!clean) return "";
@@ -168,11 +178,13 @@
 
   function createBetHtml(data) {
     var tournaments = stakeTournaments();
-    var personalEvents = Array.isArray(data && data.events) ? data.events.filter(function (item) { return item && item.createdByPlayer; }) : [];
+    var declined = declinedPersonalEvents();
+    var personalEvents = Array.isArray(data && data.events) ? data.events.filter(function (item) { return item && item.createdByPlayer && declined.indexOf(item.id) < 0; }) : [];
     var personalList = personalEvents.length ? '<section class="tournament-bet-modal__personal-events"><h3>Персональные ставки</h3><div>' + personalEvents.map(function (item) {
-      return '<button type="button" data-tournament-bet-personal-event="' + esc(item.id) + '"><strong>' + esc(item.title || "Турнир") + '</strong><span>Ставка ' + rub(item.stakePrice) + ' · банк ' + rub(item.bank) + ' · участников ' + esc(item.participantsCount || 0) + '</span></button>';
+      var accept = item.joined ? '<button type="button" disabled>✓ Ставка принята</button>' : '<button type="button" data-tournament-bet-personal-accept="' + esc(item.id) + '" data-stake-price="' + esc(item.stakePrice) + '">Принять</button>';
+      return '<article><button type="button" class="tournament-bet-modal__personal-open" data-tournament-bet-personal-event="' + esc(item.id) + '"><strong>' + esc(item.title || "Турнир") + '</strong><span>Ставка ' + rub(item.stakePrice) + ' · банк ' + rub(item.bank) + ' · участников ' + esc(item.participantsCount || 0) + '</span></button><div>' + accept + '<button type="button" data-tournament-bet-personal-decline="' + esc(item.id) + '">Отклонить</button></div></article>';
     }).join("") + '</div></section>' : "";
-    return '<form class="tournament-bet-modal__player-create" data-tournament-bet-player-create>' +
+    return personalList + '<form class="tournament-bet-modal__player-create" data-tournament-bet-player-create>' +
       '<h3>Создать персональную ставку</h3><p>Выберите турнир, в котором хотите поставить на себя</p>' +
       '<label><span>Турнир</span><select name="tournamentId" required><option value="">Выберите турнир</option>' + tournaments.map(function (item) {
         return '<option value="' + esc(item.id) + '">' + esc(item.day + ' · ' + item.time + ' · ' + item.name + ' · вход ' + item.buyinLabel) + '</option>';
@@ -181,7 +193,7 @@
       '<small>Стартового банка нет. Банк начнётся с вашей ставки и будет расти с каждой новой ставкой участника.</small>' +
       '<div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' +
       '<button type="submit">Создать и поставить на себя</button>' +
-    '</form>' + personalList;
+    '</form>';
   }
 
   function eventHtml(data) {
@@ -234,7 +246,7 @@
   function render() {
     ensureModal();
     var data = state || { active: false, entries: [] };
-    var tabs = '<nav class="tournament-bet-modal__tabs" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="create" class="' + (activeTab === "create" ? 'is-active' : '') + '">Создать ставку</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button></nav>';
+    var tabs = '<nav class="tournament-bet-modal__tabs" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="create" class="' + (activeTab === "create" ? 'is-active' : '') + '">Личная ставка</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button></nav>';
     if (!data.id) {
       var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section>' + adminHtml(data);
       bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + '</div>';
@@ -330,6 +342,16 @@
     }
     var personalEvent = event.target.closest("[data-tournament-bet-personal-event]");
     if (personalEvent) { selectedEventId = personalEvent.getAttribute("data-tournament-bet-personal-event") || ""; activeTab = "create"; load(false); return; }
+    var personalAccept = event.target.closest("[data-tournament-bet-personal-accept]");
+    if (personalAccept) {
+      var acceptId = personalAccept.getAttribute("data-tournament-bet-personal-accept") || "";
+      var acceptPrice = personalAccept.getAttribute("data-stake-price") || "";
+      if (!acceptId || !window.confirm("Списать " + rub(acceptPrice) + " с баланса Poker21 и принять ставку?")) return;
+      post({ action: "bet", eventId: acceptId }, "Проверяю баланс и принимаю ставку…").then(function (result) { if (result) { selectedEventId = ""; activeTab = "create"; load(false); } });
+      return;
+    }
+    var personalDecline = event.target.closest("[data-tournament-bet-personal-decline]");
+    if (personalDecline) { declinePersonalEvent(personalDecline.getAttribute("data-tournament-bet-personal-decline") || ""); render(); return; }
     if (event.target.closest("[data-tournament-bet-personal-back]")) { selectedEventId = ""; activeTab = "create"; load(false); return; }
     var actionEl = event.target.closest("[data-tournament-bet-action]");
     if (!actionEl) return;

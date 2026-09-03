@@ -86,9 +86,14 @@
 .tournament-bet-modal__personal-events { display: grid; gap: 10px; padding: 16px; border: 1px solid rgba(205, 126, 31, 0.34); border-radius: 20px; background: #0d0e14; }
 .tournament-bet-modal__personal-events h3 { margin: 0; color: #ffdda0; font-size: 21px; }
 .tournament-bet-modal__personal-events > div { display: grid; gap: 8px; }
-.tournament-bet-modal__personal-events button { display: grid; gap: 4px; width: 100%; padding: 13px 14px; border: 1px solid rgba(213, 153, 67, 0.48); border-radius: 14px; color: #fff1ce; text-align: left; background: linear-gradient(135deg, rgba(40, 27, 17, 0.96), rgba(6, 9, 15, 0.98)); }
-.tournament-bet-modal__personal-events button strong { font-size: 16px; }
-.tournament-bet-modal__personal-events button span { color: #b9aa8d; font-size: 12px; font-weight: 800; }
+.tournament-bet-modal__personal-events article { display: grid; gap: 9px; padding: 12px; border: 1px solid rgba(213, 153, 67, 0.48); border-radius: 14px; background: linear-gradient(135deg, rgba(40, 27, 17, 0.96), rgba(6, 9, 15, 0.98)); }
+.tournament-bet-modal__personal-open { display: grid; gap: 4px; padding: 0; border: 0; color: #fff1ce; text-align: left; background: transparent; }
+.tournament-bet-modal__personal-open strong { font-size: 16px; }
+.tournament-bet-modal__personal-open span { color: #b9aa8d; font-size: 12px; font-weight: 800; }
+.tournament-bet-modal__personal-events article > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tournament-bet-modal__personal-events article > div button { min-height: 40px; padding: 8px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 11px; color: #ffe4ad; background: #151016; font-weight: 900; }
+.tournament-bet-modal__personal-events article > div button:first-child { color: #241400; border-color: #ffe096; background: linear-gradient(180deg, #ffe39a, #e9a738); }
+.tournament-bet-modal__personal-events article > div button:disabled { color: #9eebc9; border-color: rgba(76, 195, 143, 0.5); background: rgba(20, 93, 65, 0.35); }
 .tournament-bet-modal__personal-back { justify-self: start; padding: 9px 12px; border: 1px solid rgba(213, 153, 67, 0.5); border-radius: 12px; color: #ffe0a4; background: #0d0e14; font-weight: 900; }
 
 .tournament-bet-modal__rating,
