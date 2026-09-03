@@ -245,3 +245,12 @@ test("Poker21 balance errors render visibly directly above the bet button", func
   assert.match(client, /inline\.dataset\.tone = tone/);
   assert.match(css, /\.tournament-bet-modal__inline-status\[data-tone="error"\]/);
 });
+
+test("parallel personal bets use independent server locks", function () {
+  assert.equal(tournamentBet.scopedLockKey("tb_one"), "poker_app:tournament_bet:lock:tb_one");
+  assert.equal(tournamentBet.scopedLockKey("tb_two"), "poker_app:tournament_bet:lock:tb_two");
+  assert.notEqual(tournamentBet.scopedLockKey("tb_one"), tournamentBet.scopedLockKey("tb_two"));
+  const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
+  assert.match(server, /action === "create_player" \? "create:" \+ accountId/);
+  assert.match(server, /releaseLock\(lockToken, lockScope\)/);
+});
