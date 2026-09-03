@@ -2356,11 +2356,12 @@
     });
     var displayRows = todayBirthdays.concat(latestRows);
     if (clubNewsLoading && !clubNewsLoaded) displayRows = [];
+    var showLoading = clubNewsLoading && !clubNewsLoaded;
     if (!displayRows.length) {
       displayRows = [{
-        id: clubNewsLoading ? "club-loading" : "club-empty",
+        id: showLoading ? "club-loading" : "club-empty",
         type: "empty",
-        text: clubNewsLoading ? "Загрузка новостей клуба…" : "За последний игровой день новостей клуба нет",
+        text: showLoading ? "Загрузка новостей клуба…" : "За последний игровой день новостей клуба нет",
         at: "",
       }];
     }
@@ -2372,7 +2373,14 @@
       label.textContent = "Новости клуба" + (labelDate ? " · " + eventDateLabel(labelDate, false) : "");
     }
     root.hidden = false;
-    track.innerHTML = displayRows.map(function (row) { return eventHtml(row, true, false, true); }).join("");
+    root.classList.toggle("home-club-news--loading", showLoading);
+    if (showLoading) {
+      track.innerHTML = '<span class="home-club-news__loading" role="status" aria-live="polite">' +
+        '<span class="home-club-news__loading-spinner" aria-hidden="true"></span>' +
+        '<span>Загрузка новостей клуба…</span></span>';
+    } else {
+      track.innerHTML = displayRows.map(function (row) { return eventHtml(row, true, false, true); }).join("");
+    }
     showClubIndex(0, false);
     clearInterval(clubRotateTimer);
     if (displayRows.length > 1) {

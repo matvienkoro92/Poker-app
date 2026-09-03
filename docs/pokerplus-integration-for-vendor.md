@@ -591,6 +591,17 @@ The route does not accept arbitrary `user_app_id` from the client. It uses the s
 The admin-only backend route `POST /api/pokerplus-chips` supports the expanded
 Poker21 operator API. It is not callable by ordinary players.
 
+`POKERPLUS_GROUP_ID` is mandatory for money operations. Before changing chips,
+the backend calls `getPlayerGroupData` and rejects the request unless the
+returned member belongs to that exact group. Production for «Два туза» uses
+group `758417`. `POKERPLUS_CHIPS_MAX_ABS` controls the maximum absolute amount
+of a single operation (default `1000`).
+
+Operator calls use separate `POKERPLUS_OPERATOR_MERCHANT_ID` and
+`POKERPLUS_OPERATOR_SECRET_KEY` variables and a separate cached token. The
+existing `POKERPLUS_MERCHANT_ID` / `POKERPLUS_SECRET_KEY` pair remains dedicated
+to Mini App profile binding and read APIs.
+
 - `action: "change"` calls `changeGroupMemberChips` with `userId` and a non-zero
   `chips` delta plus a deterministic 20-digit `orderId`. Positive values credit
   chips and negative values debit chips.
@@ -610,6 +621,44 @@ Poker21 now provides upstream idempotency for direct balance changes. The
 20-digit order ID is derived from our idempotency key, and
 `action: "orderStatus"` calls `getChangeChipsOrderStatus` to reconcile an
 ambiguous request before any retry.
+
+## Payment webhook contract
+
+`POST /api/pokerplus-payment-webhook` accepts a normalized, server-to-server
+payment event. The JSON body contains `event: "payment.succeeded"`, a stable
+provider `paymentId`, numeric `poker21UserId`, `amountRub`, and `currency: "RUB"`.
+The sender signs the exact JSON bytes with HMAC-SHA256 using
+`POKERPLUS_PAYMENT_WEBHOOK_SECRET` and sends the hex digest in
+`X-Poker21-Payment-Signature`.
+
+The immutable idempotency key is `payment:<paymentId>`. Repeated or concurrent
+delivery cannot create a second operation. If Poker21 succeeded but our HTTP
+response or Redis completion write was lost, the next delivery queries
+`getChangeChipsOrderStatus` for the original 20-digit order ID and records the
+existing success instead of sending another credit. Pending, failed, non-RUB,
+invalid, over-limit, wrongly signed, and wrong-club events are rejected before
+the balance change.
+
+## Cash raffle payouts
+
+When `RAFFLE_POKER21_AUTO_PAYOUT_ENABLED=true`, the admin's green «Выдано»
+action for a regular cash raffle credits the winner through the same protected
+Poker21 operation service before saving the issued status. The immutable key is
+`raffle:<raffleId>:winner:<winnerReadySlotId>:cash-prize`, so retries and double
+clicks cannot pay twice. The winner must have a numeric Poker21 ID, the prize
+text must contain an unambiguous ruble amount, the player must belong to group
+`758417`, and the amount must fit the global `1000` limit. Private-cash reserve
+prizes are excluded because their fulfillment is a seat reservation rather
+than a balance credit. A completed Poker21 payout cannot be unchecked or
+changed to «Отказано» from the raffle UI.
+
+The payout decision is fail-closed and uses only the explicitly stored
+`prizeKind: "cash"`. Titles and prize text are never used to turn an ambiguous
+or `tournament_ticket` raffle into a financial operation. Legacy raffles with
+no explicit kind require manual classification before automatic payout.
+For an explicitly typed cash raffle only, a plain numeric group prize such as
+`"300"` is accepted as 300 rubles; this compact-form fallback is never applied
+to ticket or ambiguous raffles.
 
 ## PWA Profile Loading Notes
 

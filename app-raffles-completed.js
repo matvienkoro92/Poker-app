@@ -370,6 +370,10 @@ function initRafflesCompletedRuntime(opts) {
       : readyExpired
         ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--missed\">Не успел</span>"
         : (isAdmin ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--pending\">Не готов</span>" : "");
+    var poker21PayoutBadge = String(w && w.poker21PayoutStatus || "") === "completed"
+      ? "<span class=\"raffle-winner-ready-badge raffle-winner-ready-badge--issued\">Poker21 +" +
+        escapeHtml(Math.max(0, Number(w.poker21PayoutAmount) || 0).toLocaleString("ru-RU")) + " ₽</span>"
+      : "";
     var privateCashAction = isMyWin && privateCashRegistered
       ? "<span class=\"raffle-winner-private-cash-state\"><span>Заявка в резерв приватного кеша отправлена</span><button type=\"button\" class=\"raffle-winner-private-cash-btn\" data-raffle-private-cash-open=\"1\">Перейти в раздел</button></span>"
       : "";
@@ -465,7 +469,7 @@ function initRafflesCompletedRuntime(opts) {
         )
       : "";
     var readyTimerLine = readyTimer ? '<span class="raffle-winner-row__ready-timer-line">' + readyTimer + "</span>" : "";
-    var metaItems = readyBadge;
+    var metaItems = readyBadge + poker21PayoutBadge;
     var profileMeta = metaItems ? "<span class=\"raffle-winner-row__meta\">" + metaItems + "</span>" : "";
     var identityClass = "raffle-winner-row__identity" + (isAdmin ? " raffle-winner-row__identity--admin" : "");
     var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"" + identityClass + "\">" + profileOpen + (adminLevelLine || tgOpen) + readyTimerLine + "</span></span>";
@@ -1154,6 +1158,8 @@ function initRafflesCompletedRuntime(opts) {
           return;
         } else if (tg && tg.showAlert) {
           tg.showAlert((data && data.error) || "Не удалось обновить статус победителя.");
+        } else {
+          window.alert((data && data.error) || "Не удалось обновить статус победителя.");
         }
         if (!(data && data.ok)) raffleWinnerStatusSetButtonPending(btn, false);
         if (onDone) onDone(!!(data && data.ok));

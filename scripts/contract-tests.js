@@ -2373,7 +2373,7 @@ async function testRaffleWinnerReadyPrivateCashReserve(redis) {
     totalWinners: 1,
     groups: [{ prize: "Резерв на приватный кеш", count: 1 }],
     endDate: new Date(Date.now() + 3600_000).toISOString(),
-    title: "Розыгрыш на приватный кеш",
+    title: "Розыгрыш на приватный кеш 20/40",
     prizeKind: "cash",
     prizeAction: "private_cash",
   }));
@@ -2382,7 +2382,7 @@ async function testRaffleWinnerReadyPrivateCashReserve(redis) {
 
   const raffle = {
     id: "contract_raffle_private_cash_ready",
-    title: "Розыгрыш на приватный кеш",
+    title: "Розыгрыш на приватный кеш 20/40",
     prizeKind: "cash",
     prizeAction: "private_cash",
     totalWinners: 1,
@@ -2433,11 +2433,16 @@ async function testRaffleWinnerReadyPrivateCashReserve(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can issue private cash raffle prize");
   assert.strictEqual(r.body.raffle.winners[0].winnerStatus, "ok", "admin green check issues private cash raffle prize");
-  for (let i = 0; i < 8 && !sentMessages.some((msg) => String(msg.body.text || "").includes("Приз начислен")); i += 1) {
+  for (let i = 0; i < 8 && !sentMessages.some((msg) => String(msg.body.text || "").includes("начислен на ваш ID")); i += 1) {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
   assert.ok(
-    sentMessages.some((msg) => String(msg.body.chat_id) === "1001" && String(msg.body.text || "").includes("Приз начислен")),
+    sentMessages.some((msg) => {
+      const text = String(msg.body.text || "");
+      return String(msg.body.chat_id) === "1001" &&
+        text.includes("начислен на ваш ID: P21-1001") &&
+        text.includes("Это беккинг-байин на конкретный стол Бонус гейм 20/40");
+    }),
     "private cash raffle winner receives normal prize issued notification after admin green check",
   );
 }
@@ -2645,6 +2650,7 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
   const raffle = {
     id: "contract_raffle_prize_notify",
     title: "Prize notification raffle",
+    prizeKind: "tournament_ticket",
     totalWinners: 1,
     groups: [{ prize: "Беккинг-билет 1 000 ₽", count: 1 }],
     endDate: new Date(Date.now() - 3600_000).toISOString(),
@@ -2680,9 +2686,10 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
   const winnerMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
   assert.ok(winnerMessage, "winner receives prize issued bot message");
   const text = String(winnerMessage.body.text || "");
-  assert.ok(text.includes("Приз начислен"), "message says prize is credited");
+  assert.ok(text.includes("Ваш ID: 799755 зарегистрирован в турнир «Prize notification raffle»"), "ticket message includes tournament title and Poker21 id");
   assert.ok(text.includes("799755"), "message includes Poker21 id");
-  assert.ok(text.includes("Вас ждут в игре"), "message invites winner to the game");
+  assert.ok(text.includes("сообщите менеджеру о списание беккинга"), "ticket message explains backing settlement");
+  assert.ok(text.includes("иначе бан в розыгрышах"), "ticket message includes the raffle ban warning");
 
   r = await call(raffles, req("POST", {}, {
     pwaSession: s.admin,

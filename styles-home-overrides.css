@@ -2834,6 +2834,12 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   background: rgba(255, 255, 255, 0.035);
 }
 
+.player-stickers-modal__item {
+  min-width: 0;
+  margin: 0;
+  text-align: center;
+}
+
 .player-stickers-modal__grid img {
   display: block;
   width: 100%;
@@ -2841,6 +2847,14 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
   object-fit: contain;
   border-radius: 12px;
   background: radial-gradient(circle, rgba(255, 132, 20, 0.1), transparent 68%);
+}
+
+.player-stickers-modal__item figcaption {
+  min-height: 2.4em;
+  margin-top: 3px;
+  color: #ffe1ad;
+  font: 700 clamp(10px, 2.7vw, 13px)/1.2 system-ui, sans-serif;
+  overflow-wrap: anywhere;
 }
 
 .player-stickers-modal__cta {

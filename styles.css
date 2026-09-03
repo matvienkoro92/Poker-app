@@ -10960,3 +10960,54 @@ button.poker-copy-feedback--error,
   -webkit-overflow-scrolling: touch;
   scroll-padding-bottom: 12px;
 }
+/* Critical first-paint guard for the asynchronously loaded club-news styles. */
+.home-club-news {
+  display: block;
+  width: 100%;
+  min-height: 0;
+}
+
+.home-club-news[hidden] {
+  display: none !important;
+}
+
+.home-club-news__ticker {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 72px;
+  overflow: hidden;
+}
+
+.home-club-news__ticker .home-friend-news__viewport,
+.home-club-news__ticker .home-friend-news__track {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.home-club-news__loading {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #d9b567;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.home-club-news__loading-spinner {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  box-sizing: border-box;
+  border: 2px solid rgba(217, 181, 103, 0.28);
+  border-top-color: #f2c970;
+  border-radius: 50%;
+  animation: home-club-news-loading-spin 0.8s linear infinite;
+}
+
+@keyframes home-club-news-loading-spin {
+  to { transform: rotate(360deg); }
+}

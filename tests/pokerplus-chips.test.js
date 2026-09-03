@@ -2,10 +2,13 @@
 
 const assert = require("node:assert/strict");
 const test = require("node:test");
+const chipsHandler = require("../lib/api-handlers/pokerplus-chips");
 
 function loadPokerPlusWithFetch(responses) {
   process.env.POKERPLUS_MERCHANT_ID = "merchant-test";
   process.env.POKERPLUS_SECRET_KEY = "secret-test";
+  process.env.POKERPLUS_OPERATOR_MERCHANT_ID = "operator-merchant-test";
+  process.env.POKERPLUS_OPERATOR_SECRET_KEY = "operator-secret-test";
   delete require.cache[require.resolve("../lib/pokerplus")];
   const calls = [];
   global.fetch = async function (url, options) {
@@ -69,4 +72,39 @@ test("getAgentBalances normalizes the documented balance response", async (t) =>
     chips: 36480192,
     points: 248900,
   });
+});
+
+test("getGroupMemberData returns the player's merchant-club context", async (t) => {
+  const previousFetch = global.fetch;
+  t.after(() => { global.fetch = previousFetch; });
+  const fixture = loadPokerPlusWithFetch([
+    { status: 1, data: { token: "token-test" } },
+    { status: 1, data: { data: [{ Id: "208238", Nike: "ПокерМанки", group_id: "758417", Role: "Manager", gold: "486214.6000" }] } },
+  ]);
+
+  const result = await fixture.api.getGroupMemberData({ userId: "208238" });
+  assert.deepEqual(result, {
+    userId: "208238",
+    nickname: "ПокерМанки",
+    groupId: "758417",
+    role: "Manager",
+    balance: 486214.6,
+  });
+  assert.equal(fixture.calls[1].url.endsWith("/getPlayerGroupData"), true);
+});
+
+test("Poker21 reconciliation accepts only the exact successful operation", () => {
+  const pending = { userId: "208238", chips: "100" };
+  assert.equal(chipsHandler.samePoker21Order({ status: 1, userId: "208238", chips: 100 }, pending), true);
+  assert.equal(chipsHandler.samePoker21Order({ status: 1, userId: "208238", chips: 101 }, pending), false);
+  assert.equal(chipsHandler.samePoker21Order({ status: 1, userId: "999999", chips: 100 }, pending), false);
+  assert.equal(chipsHandler.samePoker21Order({ status: 0, userId: "208238", chips: 100 }, pending), false);
+});
+
+test("the same payment key always derives the same 20-digit Poker21 order ID", () => {
+  const first = chipsHandler.poker21OrderId("payment:pay_123456");
+  const second = chipsHandler.poker21OrderId("payment:pay_123456");
+  assert.match(first, /^\d{20}$/);
+  assert.equal(first, second);
+  assert.notEqual(first, chipsHandler.poker21OrderId("payment:pay_123457"));
 });
