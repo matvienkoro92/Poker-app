@@ -213,15 +213,13 @@
         ? '<div class="tournament-bet-modal__closed">Событие завершено</div>'
         : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
     var entries = Array.isArray(data.entries) ? data.entries : [];
-    var tournamentHeading = data.tournamentBanner ? '<section class="tournament-bet-modal__hero tournament-bet-modal__hero--banner"><span class="tournament-bet-modal__suit" aria-hidden="true">♠</span>' + tournamentBannerHtml(data, false) + '</section>' : '<section class="tournament-bet-modal__tournament-label"><small>Выбранный турнир</small><strong>' + esc(data.title || "Турнир") + '</strong><span>' + esc([data.tournamentBuyin, data.tournamentGuarantee].filter(Boolean).join(" · ")) + '</span></section>';
     var eventHtml =
-      tournamentHeading +
-      '<section class="tournament-bet-modal__offer">' +
+      '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
         '<h4>Сделай ставку на себя</h4>' +
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
         '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p>' + action +
-      '</section>' +
+      '</div><figure class="tournament-bet-modal__feature-art"><img src="./assets/tournament-bet-self-hero-v2.jpg" alt="" width="511" height="768" loading="eager" decoding="async"></figure></section>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
         (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
       '</section>' + adminHtml(data);

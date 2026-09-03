@@ -87,25 +87,26 @@ test("tournament bet client is eager so a stale widget bootstrap cannot swallow 
   assert.doesNotMatch(html, /type="application\/poker-lazy"[^>]+src="\.\/app-tournament-bet\.js/);
 });
 
-test("tournament bet create form selects an evening tournament and renders its banner", function () {
+test("tournament bet admin create form selects an evening tournament and previews its banner", function () {
   const root = path.join(__dirname, "..");
   const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
   const schedule = fs.readFileSync(path.join(root, "app-tournament-day.js"), "utf8");
   assert.match(schedule, /window\.pokerGetEveningTournamentOptions\s*=\s*pokerGetEveningTournamentOptions/);
   assert.match(client, /name="tournamentId" data-tournament-bet-tournament/);
-  assert.match(client, /tournamentBannerHtml\(data, false\)/);
+  assert.match(client, /tournamentBannerHtml\(first, true\)/);
 });
 
-test("bet action is a separate visible offer below the tournament banner", function () {
+test("bet action is a single horizontal half-text half-art card", function () {
   const root = path.join(__dirname, "..");
   const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const css = fs.readFileSync(path.join(root, "styles-tournament-bet.css"), "utf8");
-  assert.match(client, /tournament-bet-modal__hero--banner/);
   assert.match(client, /tournament-bet-modal__offer/);
+  assert.match(client, /tournament-bet-modal__feature-art/);
+  assert.match(client, /tournament-bet-self-hero-v2\.jpg/);
   assert.match(html, /<link rel="stylesheet" href="\.\/styles-tournament-bet\.css\?v=[^"]+"/);
   assert.match(css, /\.tournament-bet-modal__offer \.tournament-bet-modal__bet/);
-  assert.match(css, /\.tournament-bet-modal__hero--banner\s*\{[^}]*border:\s*0\s*!important/s);
+  assert.match(css, /\.tournament-bet-modal__feature\s*\{[^}]*grid-template-columns:\s*repeat\(2,/s);
   assert.match(client, /id="tournamentBetTitle">Ставка на себя<\/h2>/);
   assert.match(client, /Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк\./);
   assert.match(client, /ID Poker21/);
@@ -182,5 +183,5 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(server, /action === "create_player"/);
   assert.match(server, /startingBank: 0/);
   assert.match(server, /createdByPlayer: true/);
-  assert.match(client, /tournament-bet-modal__tournament-label/);
+  assert.match(client, /tournament-bet-modal__feature/);
 });
