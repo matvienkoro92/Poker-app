@@ -231,4 +231,5 @@
   });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { load(true); }, { once: true });
   else load(true);
+  window.openTournamentBetModal = open;
 })();

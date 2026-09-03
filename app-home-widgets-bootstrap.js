@@ -12,6 +12,11 @@
       domain: "home-widget-sng",
       opener: "openSngChampionsModal",
     },
+    tournamentBet: {
+      selector: "[data-tournament-bet-open]",
+      domain: "tournament",
+      opener: "openTournamentBetModal",
+    },
     clubChoiceVote: {
       selector: "#clubChoiceVoteOpen",
       domain: "home-widget-club-choice",
@@ -268,6 +273,7 @@
   window.pokerOpenHomeWidgetModal = function (name) {
     if (name === "private-cash") return openWidget("privateCash", null);
     if (name === "sng-champions") return openWidget("sngChampions", null);
+    if (name === "tournament-bet") return openWidget("tournamentBet", null);
     if (name === "club-choice-vote") return openWidget("clubChoiceVote", null);
     if (name === "hall-fish" || name === "players") return openWidget("hallFishPlayers", null);
     return Promise.resolve(false);

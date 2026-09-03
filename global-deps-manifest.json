@@ -2267,6 +2267,12 @@
       "domain": "clubNewsData",
       "exportedBy": ["club-news-data.js"],
       "consumedBy": ["club-news-data.js", "app-rating-view-adapter.js", "app-home-friend-news.js", "app-hall-fame.js"]
+    },
+    {
+      "name": "openTournamentBetModal",
+      "domain": "tournament",
+      "exportedBy": ["app-tournament-bet.js"],
+      "consumedBy": ["app-home-widgets-bootstrap.js", "app-tournament-bet.js"]
     }
   ]
 }
