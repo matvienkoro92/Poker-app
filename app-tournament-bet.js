@@ -189,11 +189,12 @@
         '<button type="submit">Создать и открыть ставки</button></form>';
     }
     var closeButton = data.status === "open" ? '<button type="button" data-tournament-bet-action="close">Закрыть приём ставок</button>' : "";
+    var startingBankForm = data.status !== "settled" ? '<form data-tournament-bet-starting-bank><label><span>Стартовый банк</span><input name="startingBank" type="text" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off" value="' + esc(data.startingBank || 0) + '" required></label><button type="submit">Изменить стартовый банк</button></form>' : "";
     var settle = data.entries && data.entries.length && data.status !== "settled"
       ? '<form data-tournament-bet-settle><label><span>Кто прошёл дальше всех</span><select name="winnerAccountId" required><option value="">Выберите победителя</option>' + data.entries.map(function (entry) {
           return '<option value="' + esc(entry.accountId) + '">' + esc(entry.name) + '</option>';
         }).join("") + '</select></label><button type="submit">Начислить победителю весь банк</button></form>' : "";
-    return '<section class="tournament-bet-modal__admin"><h3>Управление событием</h3>' + closeButton + settle + '</section>';
+    return '<section class="tournament-bet-modal__admin"><h3>Управление событием</h3>' + startingBankForm + closeButton + settle + '</section>';
   }
 
   function render() {
@@ -247,8 +248,9 @@
     return fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery), { cache: "no-store" }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
+        var activeField = modal && document.activeElement && modal.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
         state = data;
-        if (!(silent && activeTab === "create")) render();
+        if (!(silent && (activeTab === "create" || activeField))) render();
         else updateHomeButton(data);
         return data;
       });
@@ -335,6 +337,12 @@
   }
 
   function onSubmit(event) {
+    var startingBank = event.target.closest("[data-tournament-bet-starting-bank]");
+    if (startingBank) {
+      event.preventDefault();
+      post({ action: "update_starting_bank", startingBank: startingBank.elements.startingBank.value }, "Обновляю стартовый банк…");
+      return;
+    }
     var playerCreate = event.target.closest("[data-tournament-bet-player-create]");
     if (playerCreate) {
       event.preventDefault();

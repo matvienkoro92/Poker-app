@@ -188,7 +188,7 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(client, /<h3>Создать персональную ставку<\/h3>/);
   assert.match(client, /action: "create_player"/);
   assert.match(client, /type="text" inputmode="numeric" pattern="\[0-9 \]\*"/);
-  assert.match(client, /silent && activeTab === "create"/);
+  assert.match(client, /silent && \(activeTab === "create" \|\| activeField\)/);
   assert.match(server, /action === "create_player"/);
   assert.match(server, /startingBank: 0/);
   assert.match(server, /createdByPlayer: true/);
@@ -217,4 +217,17 @@ test("latest Poker21 leaderboard top three receive profile achievements", functi
   assert.match(profile, /\["Waaarr", "Waaarrr", "Waaar", "Ваар"\], place: 2, reward: 150000/);
   assert.match(profile, /\["Coo1er91", "NeCoo1er91", "Кулер"\], place: 3, reward: 100000/);
   assert.match(profile, /Ачивка за попадание в топ-3 лидерборда Poker21/);
+});
+
+test("admin can change the starting bank of any active bet", function () {
+  const root = path.join(__dirname, "..");
+  const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
+  const server = fs.readFileSync(path.join(root, "lib/api-handlers/tournament-bet.js"), "utf8");
+  assert.match(client, /data-tournament-bet-starting-bank/);
+  assert.match(client, /Изменить стартовый банк/);
+  assert.match(client, /action: "update_starting_bank"/);
+  assert.match(server, /action === "update_starting_bank"/);
+  assert.match(server, /if \(!auth\.isAdmin\)/);
+  assert.match(server, /state\.startingBank = money\(body\.startingBank\)/);
+  assert.match(server, /saveSelectedState\(state\)/);
 });
