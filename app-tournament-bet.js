@@ -142,11 +142,12 @@
         : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
     var entries = Array.isArray(data.entries) ? data.entries : [];
     bodyEl.innerHTML =
-      '<section class="tournament-bet-modal__hero"><span class="tournament-bet-modal__suit" aria-hidden="true">♠</span>' + tournamentBannerHtml(data, false) +
+      '<section class="tournament-bet-modal__hero tournament-bet-modal__hero--banner"><span class="tournament-bet-modal__suit" aria-hidden="true">♠</span>' + tournamentBannerHtml(data, false) + '</section>' +
+      '<section class="tournament-bet-modal__offer">' +
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
-        '<h4>Сделай ставку на себя в турнире</h4>' +
+        '<h4>Сделай ставку на себя</h4>' +
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
-        '<p class="tournament-bet-modal__lead">Пройди дальше всех в турнире и забери весь банк.</p>' + action +
+        '<p class="tournament-bet-modal__lead">Пройди дальше всех в турнире и забери весь банк. Ставка спишется с баланса Poker21.</p>' + action +
       '</section>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
         (entries.length ? entries.map(participantHtml).join("") : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +

@@ -63,3 +63,14 @@ test("tournament bet create form selects an evening tournament and renders its b
   assert.match(client, /name="tournamentId" data-tournament-bet-tournament/);
   assert.match(client, /tournamentBannerHtml\(data, false\)/);
 });
+
+test("bet action is a separate visible offer below the tournament banner", function () {
+  const root = path.join(__dirname, "..");
+  const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
+  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles-tournament-bet.css"), "utf8");
+  assert.match(client, /tournament-bet-modal__hero--banner/);
+  assert.match(client, /tournament-bet-modal__offer/);
+  assert.match(html, /<link rel="stylesheet" href="\.\/styles-tournament-bet\.css\?v=[^"]+"/);
+  assert.match(css, /\.tournament-bet-modal__offer \.tournament-bet-modal__bet/);
+});
