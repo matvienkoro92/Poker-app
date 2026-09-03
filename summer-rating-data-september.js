@@ -118,4 +118,109 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "02.09.2026": [
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 5,
+          "reward": 6011,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200🥊 40K GTD",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 6,
+          "reward": 2181,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 3,
+          "reward": 3540,
+          "points": 90
+        },
+        {
+          "nick": "Smile😎😊😺",
+          "place": 0,
+          "reward": 990,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 12532.5,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Юрий_77",
+          "place": 1,
+          "reward": 4352.5,
+          "points": 135
+        },
+        {
+          "nick": "ДжекПотный",
+          "place": 4,
+          "reward": 302.5,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WSOPли",
+          "place": 3,
+          "reward": 1102.5,
+          "points": 90
+        },
+        {
+          "nick": "cadillac",
+          "place": 5,
+          "reward": 436.25,
+          "points": 60
+        }
+      ]
+    }
+  ]
 };

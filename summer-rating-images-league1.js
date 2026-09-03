@@ -801,4 +801,9 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-01-09-2026-league1-magic-500-120k-22h.jpg",
     "rating-compressed-preview/rating-01-09-2026-league1-night-magic-80k-23h.jpg"
   ]
+,
+  "02.09.2026": [
+    "rating-compressed-preview/rating-02-09-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-compressed-preview/rating-02-09-2026-league1-new-hot-pko-2-3-15h.jpg"
+  ]
 };

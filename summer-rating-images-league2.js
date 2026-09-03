@@ -553,4 +553,11 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-01-09-2026-league2-turnir-vtornika-18h.jpg",
     "rating-compressed-preview/rating-01-09-2026-league2-energetiktournament-22h.jpg"
   ]
+,
+  "02.09.2026": [
+    "rating-compressed-preview/rating-02-09-2026-league2-bounty-200-40k-gtd-14h.jpg",
+    "rating-compressed-preview/rating-02-09-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-02-09-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-02-09-2026-league2-ok-21h.jpg"
+  ]
 };

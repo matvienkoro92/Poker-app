@@ -337,6 +337,8 @@ async function parseOcrFile(file) {
   if (date === "01.09.2026" && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
   if (date === "01.09.2026" && time === "22:00" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "01.09.2026" && time === "23:00" && buyin === 20000) title = "Night magic 80K🌒";
+  if (date === "02.09.2026" && time === "13:00" && buyin === 10000) title = "DV 🏃 Bounty 🥊 100K";
+  if (date === "02.09.2026" && time === "14:00" && buyin === 200) title = "Bounty 200🥊 40K GTD";
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])ID\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
@@ -378,6 +380,10 @@ async function parseOcrFile(file) {
     }
     if (playerId === "720664" && date === "31.08.2026" && time === "18:00" && reward === 300) {
       place = 9;
+      needsPlaceCheck = false;
+    }
+    if (playerId === "3800754" && date === "02.09.2026" && time === "15:00" && reward === 9.9) {
+      place = 0;
       needsPlaceCheck = false;
     }
 

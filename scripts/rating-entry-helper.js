@@ -636,6 +636,7 @@ function replaceExact(fileName, pattern, replacement, opts) {
 
 function updateSummerMeta(latestDate, opts) {
   const p = dateParts(latestDate);
+  if (p.month === "09") return null;
   const month = monthNameRu(p.month);
   if (!month) return null;
   const shortValue = `${Number(p.day)} ${month}`;
