@@ -238,6 +238,19 @@ function pokerGetStakeTournamentOptions() {
     var name = String(item && item.name || "").trim().toLowerCase();
     var isSatellite = category.indexOf("сателлит") >= 0 || /(^|[\s·—-])(?:сат|sat)(?=$|[\s·—-]|\d)/i.test(name);
     return buyin >= 300 && !isSatellite;
+  }).sort(function (a, b) {
+    function dayOrder(item) {
+      if (item && item.repeat === "daily") return 0;
+      if (item && item.date) return 8;
+      var dow = Number(item && item.dow);
+      return dow === 0 ? 7 : dow >= 1 && dow <= 6 ? dow : 8;
+    }
+    var orderDiff = dayOrder(a) - dayOrder(b);
+    if (orderDiff) return orderDiff;
+    if (a && b && a.date && b.date && a.date !== b.date) return String(a.date).localeCompare(String(b.date));
+    return (Number(a && a.hour) || 0) - (Number(b && b.hour) || 0) ||
+      (Number(a && a.minute) || 0) - (Number(b && b.minute) || 0) ||
+      String(a && a.name || "").localeCompare(String(b && b.name || ""), "ru");
   }).map(function (item, index) {
     var buyin = Number(String(item.buyin || "").replace(/[^\d]/g, "")) || 0;
     var time = String(Number(item.hour) || 0).padStart(2, "0") + ":" + String(Number(item.minute) || 0).padStart(2, "0");

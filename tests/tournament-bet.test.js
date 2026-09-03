@@ -180,6 +180,9 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(schedule, /buyin >= 300/);
   assert.match(schedule, /category\.indexOf\("сателлит"\) >= 0/);
   assert.match(schedule, /!isSatellite/);
+  assert.match(schedule, /if \(item && item\.repeat === "daily"\) return 0/);
+  assert.match(schedule, /return dow === 0 \? 7 : dow >= 1 && dow <= 6 \? dow : 8/);
+  assert.match(schedule, /dayOrder\(a\) - dayOrder\(b\)/);
   assert.match(client, /data-tournament-bet-tab="create"/);
   assert.match(client, /Выберите турнир, в котором хотите поставить на себя/);
   assert.match(client, /action: "create_player"/);
