@@ -122,3 +122,48 @@ test("tournament bet hydrates the level from the same cached Poker21 profile as 
   assert.match(server, /PROFILE_HASH_KEY/);
   assert.match(server, /pokerProfileStatusFromCachedProfile\(profile, \{ pokerPlusLinked: true \}\)/);
 });
+
+test("bettor rating aggregates participation, wins, stakes, prizes and net result", function () {
+  const settled = {
+    id: "old", status: "settled", startingBank: 10000, stakePrice: 500,
+    winnerAccountId: "A", winnerPaidAmount: 11000,
+    entries: [
+      { accountId: "A", name: "Альфа", stake: 500 },
+      { accountId: "B", name: "Бета", stake: 500 },
+    ],
+  };
+  const current = {
+    id: "new", status: "open", startingBank: 10000, stakePrice: 500,
+    entries: [{ accountId: "A", name: "Альфа", stake: 500 }],
+  };
+  const rating = tournamentBet.ratingFor([settled], current, { accountId: "A" });
+  assert.equal(rating[0].name, "Альфа");
+  assert.equal(rating[0].participations, 2);
+  assert.equal(rating[0].wins, 1);
+  assert.equal(rating[0].totalStaked, 1000);
+  assert.equal(rating[0].totalWon, 11000);
+  assert.equal(rating[0].net, 10000);
+  assert.equal(rating[0].winRate, 50);
+  assert.equal(rating[0].mine, true);
+});
+
+test("bettor rating does not count the current settled event twice", function () {
+  const event = { id: "same", status: "settled", stakePrice: 500, winnerAccountId: "A", winnerPaidAmount: 1500, entries: [{ accountId: "A", name: "Альфа", stake: 500 }] };
+  const rating = tournamentBet.ratingFor([event], event, {});
+  assert.equal(rating[0].participations, 1);
+  assert.equal(rating[0].wins, 1);
+});
+
+test("tournament bet has a separate bettor rating tab with full stats", function () {
+  const root = path.join(__dirname, "..");
+  const client = fs.readFileSync(path.join(root, "app-tournament-bet.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles-tournament-bet.css"), "utf8");
+  assert.match(client, /data-tournament-bet-tab="rating"/);
+  assert.match(client, /Рейтинг ставочников/);
+  assert.match(client, /Участий/);
+  assert.match(client, /Внесено/);
+  assert.match(client, /Выиграно/);
+  assert.match(client, /Результат/);
+  assert.match(client, /Винрейт/);
+  assert.match(css, /\.tournament-bet-modal__rating-row/);
+});

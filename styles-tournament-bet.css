@@ -11,6 +11,98 @@
 }
 
 /* Participant cards mirror the data-rich SNG battle list. */
+.tournament-bet-modal__tabs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(210, 155, 70, 0.35);
+  border-radius: 16px;
+  background: rgba(5, 8, 14, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.tournament-bet-modal__tabs button {
+  min-height: 46px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #a99c84;
+  background: transparent;
+  font: 900 14px/1.1 inherit;
+}
+
+.tournament-bet-modal__tabs button.is-active {
+  color: #241400;
+  border-color: #ffe096;
+  background: linear-gradient(180deg, #ffe39a, #e9a738);
+  box-shadow: 0 5px 16px rgba(225, 141, 27, 0.25);
+}
+
+.tournament-bet-modal__tab-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.tournament-bet-modal__rating,
+.tournament-bet-modal__rating-empty {
+  padding: 18px;
+  border: 1px solid rgba(205, 126, 31, 0.34);
+  border-radius: 20px;
+  background: #0d0e14;
+}
+
+.tournament-bet-modal__rating > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: #ffdda0;
+}
+
+.tournament-bet-modal__rating > header h3 { margin: 0; font-size: 22px; }
+.tournament-bet-modal__rating > header span { display: grid; place-items: center; min-width: 36px; height: 36px; border-radius: 50%; color: #211100; background: #ffc34d; font-weight: 1000; }
+.tournament-bet-modal__rating-list { display: grid; gap: 9px; }
+
+.tournament-bet-modal__rating-row {
+  display: grid;
+  grid-template-columns: 28px 64px minmax(110px, 0.75fr) minmax(300px, 1.8fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(205, 126, 31, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(29, 23, 17, 0.95), rgba(5, 9, 15, 0.98));
+}
+
+.tournament-bet-modal__rating-row--mine { border-color: rgba(107, 232, 174, 0.56); }
+.tournament-bet-modal__rating-place { color: #ffcb63; font-size: 21px; text-align: center; }
+.tournament-bet-modal__rating-avatar { width: 60px !important; height: 60px !important; }
+.tournament-bet-modal__rating-player { min-width: 0; }
+.tournament-bet-modal__rating-player > strong { display: block; overflow: hidden; color: #fff1ce; font-size: 17px; text-overflow: ellipsis; white-space: nowrap; }
+.tournament-bet-modal__rating-player > small { color: #a89b83; }
+.tournament-bet-modal__rating-row dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.tournament-bet-modal__rating-row dl div { min-width: 0; }
+.tournament-bet-modal__rating-row dt { color: #8f8574; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+.tournament-bet-modal__rating-row dd { margin: 2px 0 0; overflow: hidden; color: #f4dfb0; font-size: 13px; font-weight: 950; text-overflow: ellipsis; white-space: nowrap; }
+.tournament-bet-modal__rating-row dd.is-positive { color: #8ee36a; }
+.tournament-bet-modal__rating-row dd.is-negative { color: #ff866f; }
+.tournament-bet-modal__rating-empty { color: #a99c84; text-align: center; }
+.tournament-bet-modal__rating-empty strong { color: #ffdda0; font-size: 22px; }
+
+@media (max-width: 700px) {
+  .tournament-bet-modal__rating { padding: 10px; }
+  .tournament-bet-modal__rating-row { grid-template-columns: 20px 50px minmax(0, 1fr); gap: 8px; padding: 9px 7px; }
+  .tournament-bet-modal__rating-avatar { width: 48px !important; height: 48px !important; }
+  .tournament-bet-modal__rating-player > strong { font-size: 14px; }
+  .tournament-bet-modal__rating-row dl { grid-column: 2 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tournament-bet-modal__rating-row dd { font-size: 11px; }
+  .tournament-bet-modal__tabs button { font-size: 12px; }
+}
+
 .tournament-bet-modal__participants-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;

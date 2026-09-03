@@ -8,6 +8,7 @@
   var state = null;
   var loading = false;
   var refreshTimer = 0;
+  var activeTab = "event";
 
   function baseUrl() {
     return typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
@@ -27,6 +28,11 @@
 
   function rub(value) {
     return Math.max(0, Math.floor(Number(value) || 0)).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
+  }
+
+  function signedRub(value) {
+    var amount = Math.trunc(Number(value) || 0);
+    return (amount > 0 ? "+" : amount < 0 ? "−" : "") + Math.abs(amount).toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽";
   }
 
   function betTime(value) {
@@ -124,6 +130,27 @@
     '</article>';
   }
 
+  function ratingHtml(data) {
+    var rows = Array.isArray(data.rating) ? data.rating : [];
+    if (!rows.length) return '<section class="tournament-bet-modal__rating-empty"><strong>Рейтинг пока пуст</strong><p>Статистика появится после первой ставки.</p></section>';
+    return '<section class="tournament-bet-modal__rating"><header><h3>Рейтинг ставочников</h3><span>' + rows.length + '</span></header><div class="tournament-bet-modal__rating-list">' + rows.map(function (entry) {
+      var art = "";
+      if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
+        var sharedArt = window.pokerGetSummerRatingPlayerArt(entry.name);
+        if (sharedArt && sharedArt.src) art = String(sharedArt.src);
+      }
+      var src = art || entry.avatar || "";
+      var avatar = src ? '<span class="sng-champions-modal__entry-avatar-media"><img class="sng-champions-modal__entry-avatar-img' + (art ? ' sng-champions-modal__entry-avatar-img--art' : '') + '" src="' + esc(src) + '" alt="" loading="lazy" decoding="async"></span>' : '<b>' + esc(String(entry.name || "И").slice(0, 1).toUpperCase()) + '</b>';
+      var level = entry.level == null ? "" : '<em>' + esc(Math.max(0, Math.floor(Number(entry.level) || 0))) + '</em>';
+      return '<article class="tournament-bet-modal__rating-row' + (entry.mine ? ' tournament-bet-modal__rating-row--mine' : '') + '">' +
+        '<strong class="tournament-bet-modal__rating-place">' + esc(entry.place) + '</strong>' +
+        '<span class="sng-champions-modal__entry-avatar tournament-bet-modal__rating-avatar">' + avatar + level + '</span>' +
+        '<div class="tournament-bet-modal__rating-player"><strong>' + esc(entry.name || "Игрок") + '</strong><small>' + esc(entry.profileCity || "Участник клуба") + '</small></div>' +
+        '<dl><div><dt>Участий</dt><dd>' + esc(entry.participations) + '</dd></div><div><dt>Побед</dt><dd>' + esc(entry.wins) + '</dd></div><div><dt>Внесено</dt><dd>' + rub(entry.totalStaked) + '</dd></div><div><dt>Выиграно</dt><dd>' + rub(entry.totalWon) + '</dd></div><div><dt>Результат</dt><dd class="' + (entry.net >= 0 ? 'is-positive' : 'is-negative') + '">' + signedRub(entry.net) + '</dd></div><div><dt>Винрейт</dt><dd>' + esc(entry.winRate) + '%</dd></div></dl>' +
+      '</article>';
+    }).join("") + '</div></section>';
+  }
+
   function adminHtml(data) {
     if (!data.isAdmin) return "";
     if (!data.id || data.status === "settled" || (data.status !== "open" && !(data.entries && data.entries.length))) {
@@ -151,8 +178,10 @@
   function render() {
     ensureModal();
     var data = state || { active: false, entries: [] };
+    var tabs = '<nav class="tournament-bet-modal__tabs" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг ставочников</button></nav>';
     if (!data.id) {
-      bodyEl.innerHTML = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section>' + adminHtml(data);
+      var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section>' + adminHtml(data);
+      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "rating" ? ratingHtml(data) : emptyEvent) + '</div>';
       updateHomeButton(data);
       return;
     }
@@ -165,7 +194,7 @@
         ? '<div class="tournament-bet-modal__closed">Событие завершено</div>'
         : '<div class="tournament-bet-modal__closed">Приём ставок закрыт</div>';
     var entries = Array.isArray(data.entries) ? data.entries : [];
-    bodyEl.innerHTML =
+    var eventHtml =
       '<section class="tournament-bet-modal__hero tournament-bet-modal__hero--banner"><span class="tournament-bet-modal__suit" aria-hidden="true">♠</span>' + tournamentBannerHtml(data, false) + '</section>' +
       '<section class="tournament-bet-modal__offer">' +
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
@@ -176,6 +205,7 @@
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
         (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
       '</section>' + adminHtml(data);
+    bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "rating" ? ratingHtml(data) : eventHtml) + '</div>';
     updateHomeButton(data);
   }
 
@@ -245,6 +275,8 @@
 
   function onClick(event) {
     if (event.target.closest("[data-tournament-bet-close]")) { close(); return; }
+    var tabEl = event.target.closest("[data-tournament-bet-tab]");
+    if (tabEl) { activeTab = tabEl.getAttribute("data-tournament-bet-tab") === "rating" ? "rating" : "event"; render(); return; }
     var actionEl = event.target.closest("[data-tournament-bet-action]");
     if (!actionEl) return;
     var action = actionEl.getAttribute("data-tournament-bet-action");
