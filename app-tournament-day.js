@@ -212,8 +212,10 @@ function pokerGetEveningTournamentOptions(now) {
   var current = now || new Date();
   return HOME_TOURNAMENT_WEEK_ORDER.map(function (dow) {
     var item = pokerGetHomeTournamentItem(dow, current) || {};
+    var scheduled = POKER_FULL_TOURNAMENT_SCHEDULE.find(function (row) { return row.name === item.name && Number(row.dow) === dow; });
     return {
       id: "weekly-" + dow,
+      time: item.time || (scheduled ? String(scheduled.hour).padStart(2, "0") + ":" + String(scheduled.minute || 0).padStart(2, "0") + " МСК" : ""),
       weekday: dow,
       day: HOME_TOURNAMENT_WEEK_DAY_LABELS[dow],
       name: item.name || "Турнир вечера",

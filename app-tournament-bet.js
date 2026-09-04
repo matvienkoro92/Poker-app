@@ -239,6 +239,15 @@
   }
 
   function eventHtml(data) {
+    var tournament = eveningTournaments().concat(stakeTournaments()).find(function (item) {
+      return String(item.id) === String(data.tournamentId) && item.name === data.title;
+    }) || {};
+    var startTime = data.tournamentTime || tournament.time || "";
+    if (startTime && !/МСК/i.test(startTime)) startTime += " МСК";
+    var details = [["Гарантия", data.tournamentGuarantee || tournament.guarantee || "Уточняется"],
+      ["Старт", startTime || "Уточняется"],
+      ["Вход", data.tournamentBuyin || tournament.buyinLabel || tournament.buyin || "Уточняется"],
+      ["Сумма ставки", rub(data.stakePrice)]];
     var joined = !!data.myEntry;
     var action = data.status === "open"
       ? joined
@@ -251,6 +260,9 @@
     var back = data.createdByPlayer ? '<button type="button" class="tournament-bet-modal__personal-back" data-tournament-bet-personal-back>← Все персональные ставки</button>' : "";
     return back + '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
+        '<dl class="tournament-bet-modal__details">' + details.map(function (item) {
+          return '<div><dt>' + esc(item[0]) + '</dt><dd>' + esc(item[1]) + '</dd></div>';
+        }).join("") + '</dl>' +
         '<h4>Сделай ставку на себя</h4>' +
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
         '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p>' +
@@ -441,7 +453,7 @@
       if (!tournament) { showAlert("Выберите турнир"); return; }
       if (!window.confirm("Списать " + rub(stakePrice) + " с Poker21 и создать ставку на турнир «" + tournament.name + "»?")) return;
       post({ action: "create_player", tournamentId: tournament.id, tournamentTitle: tournament.name, tournamentBuyin: tournament.buyin,
-        tournamentBuyinLabel: tournament.buyinLabel, tournamentGuarantee: tournament.guarantee, stakePrice: stakePrice }, "Создаю ставку и проверяю баланс…").then(function (result) {
+        tournamentBuyinLabel: tournament.buyinLabel, tournamentGuarantee: tournament.guarantee, tournamentTime: tournament.time, stakePrice: stakePrice }, "Создаю ставку и проверяю баланс…").then(function (result) {
         if (result) { activeTab = "create"; render(); }
       });
       return;
@@ -463,6 +475,7 @@
         tournamentBannerHeight: selected.bannerHeight,
         tournamentBuyin: selected.buyin,
         tournamentGuarantee: selected.guarantee,
+        tournamentTime: selected.time,
         startingBank: create.elements.startingBank.value,
         stakePrice: create.elements.stakePrice.value,
       }, "Создаю событие…");

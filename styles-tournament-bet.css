@@ -612,3 +612,31 @@
     max-height: 290px !important;
   }
 }
+
+/* Tournament terms stay visible beside the bank on every screen size. */
+.tournament-bet-modal__feature {
+  height: auto;
+  min-height: 500px;
+}
+.tournament-bet-modal__details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 8px;
+  width: 100%;
+  margin: 4px 0;
+}
+.tournament-bet-modal__details div { min-width: 0; }
+.tournament-bet-modal__details dt { color: #c5b896; font-size: 11px; }
+.tournament-bet-modal__details dd {
+  margin: 3px 0 0;
+  color: #ffe2a6;
+  font-size: 15px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .tournament-bet-modal__feature { min-height: 360px; }
+  .tournament-bet-modal__details { gap: 7px 5px; }
+  .tournament-bet-modal__details dt { font-size: 10px; }
+  .tournament-bet-modal__details dd { font-size: 12px; }
+}
