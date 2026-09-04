@@ -330,6 +330,10 @@ async function parseOcrFile(file) {
     };
     title = poker21TitleByTimeAndBuyin[`${time}|${buyin}`] || title;
   }
+  if (date === "23.08.2026" && time === "18:00" && buyin === 2000) title = "Воскресный турнир 🏆";
+  if (date === "23.08.2026" && time === "00:00" && buyin === 20000) title = "S.Bounty 2/3 🥊 120k";
+  if (date === "23.08.2026" && time === "02:00" && buyin === 10000) title = "✨Deep Night 15k ✨";
+  if (date === "23.08.2026" && time === "16:00" && buyin === 10000) title = "MINI FENIX🐦‍🔥60K";
   if (date === "30.08.2026" && time === "18:00" && buyin === 20000) title = "🥊GRAND KNOCKOUT🥊";
   if (date === "30.08.2026" && time === "21:59" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";

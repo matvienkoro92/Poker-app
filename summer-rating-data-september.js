@@ -223,4 +223,93 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "03.09.2026": [
+    {
+      "time": "11:00",
+      "name": "Magic Bounty e* 50k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "_JD_",
+          "place": 3,
+          "reward": 6431,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 13215,
+          "points": 135
+        },
+        {
+          "nick": "WSOPли",
+          "place": 5,
+          "reward": 310,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Четверг МКО",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Замотаю",
+          "place": 3,
+          "reward": 18720,
+          "points": 90
+        },
+        {
+          "nick": "SantaClauS",
+          "place": 4,
+          "reward": 13040,
+          "points": 70
+        },
+        {
+          "nick": "kriak",
+          "place": 7,
+          "reward": 745,
+          "points": 40
+        },
+        {
+          "nick": "нежданчик",
+          "place": 10,
+          "reward": 660,
+          "points": 0
+        },
+        {
+          "nick": "ДжекПотный",
+          "place": 15,
+          "reward": 200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 5716.57,
+          "points": 135
+        }
+      ]
+    }
+  ]
 };

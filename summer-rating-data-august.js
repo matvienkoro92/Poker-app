@@ -5004,6 +5004,178 @@ var SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE = {
     }
   ]
 ,
+  "23.08.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 3,
+          "reward": 6120,
+          "points": 90
+        },
+        {
+          "nick": "Em13!!",
+          "place": 10,
+          "reward": 2962,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Smile😎😊😺",
+          "place": 2,
+          "reward": 3029,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 4400,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "MINI FENIX🐦‍🔥60K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nikola233",
+          "place": 2,
+          "reward": 11600,
+          "points": 110
+        },
+        {
+          "nick": "odna.pluha",
+          "place": 5,
+          "reward": 3800,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 8957.5,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресный турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FishKopcheny",
+          "place": 1,
+          "reward": 96456.26,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 2800,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WildBoar",
+          "place": 2,
+          "reward": 2416.09,
+          "points": 110
+        },
+        {
+          "nick": "cadillac",
+          "place": 4,
+          "reward": 580,
+          "points": 70
+        },
+        {
+          "nick": "Бабник",
+          "place": 9,
+          "reward": 113.44,
+          "points": 0
+        },
+        {
+          "nick": "Виталька",
+          "place": 7,
+          "reward": 12.5,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k...",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Surgut",
+          "place": 17,
+          "reward": 1995,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 1,
+          "reward": 6600,
+          "points": 135
+        }
+      ]
+    }
+  ],
   "30.08.2026": [
     {
       "time": "08:00",
