@@ -7,6 +7,7 @@
   var statusEl = null;
   var state = null;
   var loading = false;
+  var subscribed = false;
   var refreshTimer = 0;
   var activeTab = "event";
   var selectedEventId = "";
@@ -238,6 +239,11 @@
     '</form>';
   }
 
+  function subscriptionButtonHtml() {
+    return '<button type="button" data-tournament-bet-subscribe aria-pressed="' + subscribed + '">' +
+      (subscribed ? 'Отписаться от раздела' : 'Подписаться на раздел') + '</button>';
+  }
+
   function eventHtml(data) {
     var tournament = eveningTournaments().concat(stakeTournaments()).find(function (item) {
       return String(item.id) === String(data.tournamentId) && item.name === data.title;
@@ -268,7 +274,7 @@
         '<div class="tournament-bet-modal__bank"><span>Банк сейчас</span><strong>' + rub(data.bank) + '</strong></div>' +
         '<p class="tournament-bet-modal__lead">Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк.</p>' +
       '</div><figure class="tournament-bet-modal__feature-art"><img src="./assets/tournament-bet-self-hero-v2.jpg" alt="" width="511" height="768" loading="eager" decoding="async"></figure></section>' +
-      '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div>' +
+      '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button>' + subscriptionButtonHtml() + '</div>' +
       '<section class="tournament-bet-modal__participants"><header><h3>Участники</h3><span>' + entries.length + '</span></header>' +
         (entries.length ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' : '<p class="tournament-bet-modal__participants-empty">Пока никто не сделал ставку. Будьте первым.</p>') +
       '</section>' + adminHtml(data) +
@@ -305,7 +311,7 @@
     var data = state || { active: false, entries: [] };
     var tabs = '<nav class="tournament-bet-modal__tabs" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="create" class="' + (activeTab === "create" ? 'is-active' : '') + '">Личная ставка</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button></nav>';
     if (!data.id) {
-      var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section>' + adminHtml(data);
+      var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section><div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data);
       bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + '</div>';
       updateHomeButton(data);
       return;
@@ -331,6 +337,7 @@
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
         var activeField = modal && document.activeElement && modal.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
+        if (typeof data.subscribed === "boolean") subscribed = data.subscribed;
         state = data;
         if (deepLinkEventId && data && data.id === deepLinkEventId) { activeTab = data.createdByPlayer ? "create" : "event"; deepLinkEventId = ""; }
         if (!(silent && (activeTab === "create" || activeField))) render();
@@ -355,6 +362,12 @@
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось выполнить действие");
+        if (payload.action === "subscribe" || payload.action === "unsubscribe") {
+          subscribed = data.subscribed === true;
+          render();
+          setStatus(subscribed ? "Подписка включена. Новые события будут приходить в бот." : "Подписка отключена.", "success");
+          return data;
+        }
         state = data;
         if (data && data.id && payload.action === "create_player") {
           selectedEventId = data.id;
@@ -390,6 +403,10 @@
   }
 
   function onClick(event) {
+    if (event.target.closest("[data-tournament-bet-subscribe]")) {
+      post({ action: subscribed ? "unsubscribe" : "subscribe" }, "Сохраняю подписку…");
+      return;
+    }
     if (event.target.closest("[data-tournament-bet-close]")) { close(); return; }
     var tabEl = event.target.closest("[data-tournament-bet-tab]");
     if (tabEl) {
