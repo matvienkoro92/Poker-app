@@ -1696,6 +1696,7 @@
   var CRM_LINK_TARGETS = [
     { key: "home", label: "Главная", view: "home", startapp: "home" },
     { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
+    { key: "tournament-bet", label: "Ставка на себя", view: "home", startapp: "tournament_bet" },
     { key: "club-guestbook-reviews", label: "Отзывы", view: "home", startapp: "club_guestbook_reviews" },
     { key: "club-guestbook-complaints", label: "Книга жалоб", view: "home", startapp: "club_guestbook_complaints" },
     { key: "club-guestbook-suggestions", label: "Предложения", view: "home", startapp: "club_guestbook_suggestions" },

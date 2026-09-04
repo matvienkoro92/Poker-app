@@ -12,11 +12,13 @@
   var activeTab = "event";
   var selectedEventId = "";
   var deepLinkEventId = "";
+  var deepLinkSection = false;
   try { window.localStorage.removeItem("pokerTournamentBetEventId"); } catch (error) {}
 
   try {
     var startParams = new URLSearchParams(window.location.search || "");
     var startValue = typeof pokerStartAppQueryFromUrlSearchParams === "function" ? pokerStartAppQueryFromUrlSearchParams(startParams) : startParams.get("startapp") || "";
+    deepLinkSection = String(startValue || "").toLowerCase() === "tournament_bet";
     var startMatch = String(startValue || "").match(/^tournament_bet_(tb_[a-z0-9_:-]+)$/i);
     if (startMatch) { deepLinkEventId = startMatch[1]; selectedEventId = deepLinkEventId; }
   } catch (error) {}
@@ -518,7 +520,7 @@
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape" && modal && !modal.hidden) close();
   });
-  function initialLoad() { if (deepLinkEventId) open(); else load(true); }
+  function initialLoad() { if (deepLinkEventId || deepLinkSection) open(); else load(true); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialLoad, { once: true });
   else initialLoad();
   window.openTournamentBetModal = open;
