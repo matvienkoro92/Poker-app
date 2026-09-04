@@ -260,6 +260,7 @@
     var back = data.createdByPlayer ? '<button type="button" class="tournament-bet-modal__personal-back" data-tournament-bet-personal-back>← Все персональные ставки</button>' : "";
     return back + '<section class="tournament-bet-modal__feature"><div class="tournament-bet-modal__offer">' +
         '<p>Турнир вечера</p><h3>' + esc(data.title || "Турнир вечера") + '</h3>' +
+        (/^magic\s+mko$/i.test(String(data.title || "").trim()) ? '<p class="tournament-bet-modal__subtitle">ПЯТНИЦА 18:00 мск</p>' : '') +
         '<dl class="tournament-bet-modal__details">' + details.map(function (item) {
           return '<div><dt>' + esc(item[0]) + '</dt><dd>' + esc(item[1]) + '</dd></div>';
         }).join("") + '</dl>' +
