@@ -6562,3 +6562,55 @@ html body #app.app.app--view-home
 .home-tournament-bet-link__arrow { color: #ffd47a; font-size: 26px; }
 .home-tournament-bet-link:hover { border-color: #ffd47a; }
 .home-tournament-bet-link:focus-visible { outline: 2px solid #ffd47a; outline-offset: 3px; }
+
+/* Three roomy shortcuts, with the daily deal as the brighter focal point. */
+.app.app--view-home .home-daily-shortcuts.home-mini-icons {
+  --home-shortcuts-icons-row: clamp(102px, 27vw, 142px);
+  padding: 0;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  filter: brightness(0.8);
+}
+.app.app--view-home .home-daily-shortcuts.home-mini-icons::before,
+.app.app--view-home .home-daily-shortcuts.home-mini-icons::after {
+  display: none;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item {
+  container-type: inline-size;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__label {
+  bottom: 8px;
+  max-width: calc(100% - 10px);
+  font-size: clamp(10px, 10cqi, 16px);
+  line-height: 1.15;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--chat {
+  top: 7%;
+  width: 86%;
+  height: 59%;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--raffles {
+  top: 5%;
+  width: 82%;
+  height: 62%;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--levels {
+  top: 3%;
+  width: 76%;
+  height: 67%;
+}
+.app.app--view-home .home-daily-shortcuts .raffle-active-amount-badge {
+  bottom: 29%;
+  font-size: clamp(8px, 8.4cqi, 12px);
+}
+.app.app--view-home .home-daily-deal-hero {
+  filter: brightness(1.2);
+  background:
+    radial-gradient(ellipse at 78% 32%, rgba(205, 132, 40, 0.32), transparent 48%),
+    radial-gradient(ellipse at 67% 90%, rgba(173, 73, 9, 0.3), transparent 55%),
+    linear-gradient(115deg, #090807 22%, #21170e 70%, #100c08);
+}
