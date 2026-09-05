@@ -55,8 +55,10 @@
     else window.alert(String(text || "Ошибка"));
   }
 
-  function setStatus(text) {
-    if (statusEl) statusEl.textContent = String(text || "");
+  function setStatus(text, kind) {
+    if (!statusEl) return;
+    statusEl.textContent = String(text || "");
+    statusEl.classList.toggle("club-choice-vote-modal__status--error", kind === "error");
   }
 
   function sngLink() {
@@ -293,8 +295,14 @@
         });
       })
       .catch(function (error) {
-        setStatus("");
-        showAlert(error && error.name === "AbortError" ? "Сервер не успел подтвердить действие. Повторите попытку: уже проведённая оплата не спишется повторно." : (error.message || "Ошибка"));
+        var message = error && error.name === "AbortError"
+          ? "Сервер не успел подтвердить действие. Повторите попытку: уже проведённая оплата не спишется повторно."
+          : (error.message || "Ошибка");
+        setStatus(message, "error");
+        if (statusEl && typeof statusEl.scrollIntoView === "function") {
+          statusEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+        return null;
       })
       .finally(function () {
         if (timeoutId) window.clearTimeout(timeoutId);
