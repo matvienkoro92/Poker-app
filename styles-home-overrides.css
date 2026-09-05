@@ -6649,3 +6649,5 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--chat {
   filter: saturate(1.15) brightness(1.28) drop-shadow(0 0 9px rgba(255, 215, 155, 0.32));
 }
+
+.app.app--view-home .home-club-actions-block[hidden] { display: none !important; }
