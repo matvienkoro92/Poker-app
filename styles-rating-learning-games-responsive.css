@@ -1,9 +1,7 @@
 /* Rating CSS: responsive learning/game overrides.
  * Extracted from styles-rating-learning-games.css; keep import order in styles-rating-learning-games.css stable. */
 
-  margin-top: 16px;
-}
-.poker-tasks__mode-btn {
+  .poker-tasks__mode-btn {
   display: flex;
   flex-direction: column;
   align-items: flex-start;

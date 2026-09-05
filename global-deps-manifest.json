@@ -2073,212 +2073,428 @@
     {
       "name": "__pokerClickSoundMuted",
       "domain": "clickSound",
-      "exportedBy": ["app-click-sound.js"],
-      "consumedBy": ["app-click-sound.js"]
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js"
+      ]
     },
     {
       "name": "playPokerDailyDealSound",
       "domain": "clickSound",
-      "exportedBy": ["app-click-sound.js"],
-      "consumedBy": ["app-click-sound.js", "app-raffles-completed.js", "app-sng-champions.js"]
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-raffles-completed.js",
+        "app-sng-champions.js"
+      ]
     },
     {
       "name": "playDailyPokerDealSound",
       "domain": "dailyPoker",
-      "exportedBy": ["app-daily-poker.js"],
-      "consumedBy": ["app-click-sound.js", "app-daily-poker.js"]
+      "exportedBy": [
+        "app-daily-poker.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-daily-poker.js"
+      ]
     },
     {
       "name": "playPokerSubscribeSound",
       "domain": "clickSound",
-      "exportedBy": ["app-click-sound.js"],
-      "consumedBy": ["app-click-sound.js", "app-daily-poker.js", "app-home-gazette-tasks.js", "app-home-tasks.js", "app-private-cash.js", "app-raffles-subscribe.js", "app-tournament-day.js"]
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-daily-poker.js",
+        "app-home-gazette-tasks.js",
+        "app-home-tasks.js",
+        "app-private-cash.js",
+        "app-raffles-subscribe.js",
+        "app-tournament-day.js"
+      ]
     },
     {
       "name": "pokerIsClickSoundMuted",
       "domain": "clickSound",
-      "exportedBy": ["app-click-sound.js"],
-      "consumedBy": ["app-click-sound.js", "app-profile-user-info.js"]
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-profile-user-info.js"
+      ]
     },
     {
       "name": "pokerSetClickSoundMuted",
       "domain": "clickSound",
-      "exportedBy": ["app-click-sound.js"],
-      "consumedBy": ["app-click-sound.js", "app-profile-user-info.js"]
+      "exportedBy": [
+        "app-click-sound.js"
+      ],
+      "consumedBy": [
+        "app-click-sound.js",
+        "app-profile-user-info.js"
+      ]
     },
     {
       "name": "__pendingHallFishAchievementTab",
       "domain": "hallDeepLinks",
-      "exportedBy": ["app-home-deeplinks.js", "app-lazy-loader.js"],
-      "consumedBy": ["app-hall-fame.js", "app-home-deeplinks.js", "app-lazy-loader.js"]
+      "exportedBy": [
+        "app-home-deeplinks.js",
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-hall-fame.js",
+        "app-home-deeplinks.js",
+        "app-lazy-loader.js"
+      ]
     },
     {
       "name": "__pokerTransfersVisualViewportRestoreBound",
       "domain": "transfers",
-      "exportedBy": ["app-transfers.js"],
-      "consumedBy": ["app-transfers.js"]
+      "exportedBy": [
+        "app-transfers.js"
+      ],
+      "consumedBy": [
+        "app-transfers.js"
+      ]
     },
     {
       "name": "__pokerAdminReportAccessVerified",
       "domain": "adminReports",
-      "exportedBy": ["app-visitors-admin.js"],
-      "consumedBy": ["app-admin-reports.js", "app-visitors-admin.js"]
+      "exportedBy": [
+        "app-visitors-admin.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js",
+        "app-visitors-admin.js"
+      ]
     },
     {
       "name": "pokerOpenAdminReportRakebackOverlay",
       "domain": "adminReports",
-      "exportedBy": ["app-admin-reports.js"],
-      "consumedBy": ["app-admin-reports-calculations.js", "app-admin-reports.js"]
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports-calculations.js",
+        "app-admin-reports.js"
+      ]
     },
     {
       "name": "pokerMountAdminReportCalculations",
       "domain": "adminReports",
-      "exportedBy": ["app-admin-reports.js"],
-      "consumedBy": ["app-admin-reports.js", "app-player-crm-runtime-core.js"]
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js",
+        "app-player-crm-runtime-core.js"
+      ]
     },
     {
       "name": "pokerRefreshAdminReportCalculations",
       "domain": "adminReports",
-      "exportedBy": ["app-admin-reports.js"],
-      "consumedBy": ["app-admin-reports.js", "app-player-crm-runtime-core.js"]
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js",
+        "app-player-crm-runtime-core.js"
+      ]
     },
     {
       "name": "pokerApplyAdminReportCalculationSummary",
       "domain": "adminReports",
-      "exportedBy": ["app-admin-reports.js"],
-      "consumedBy": ["app-admin-reports.js"]
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports.js"
+      ]
     },
     {
       "name": "pokerMountClubChoiceVoteInline",
       "domain": "clubChoice",
-      "exportedBy": ["app-club-choice-vote.js"],
-      "consumedBy": ["app-club-choice-vote.js", "app-hall-fame.js"]
+      "exportedBy": [
+        "app-club-choice-vote.js"
+      ],
+      "consumedBy": [
+        "app-club-choice-vote.js",
+        "app-hall-fame.js"
+      ]
     },
     {
       "name": "pokerUnmountClubChoiceVoteInline",
       "domain": "clubChoice",
-      "exportedBy": ["app-club-choice-vote.js"],
-      "consumedBy": ["app-club-choice-vote.js", "app-hall-fame.js"]
+      "exportedBy": [
+        "app-club-choice-vote.js"
+      ],
+      "consumedBy": [
+        "app-club-choice-vote.js",
+        "app-hall-fame.js"
+      ]
     },
     {
       "name": "__pokerAdminCalculationRange",
       "domain": "adminReports",
-      "exportedBy": ["app-player-crm-runtime-core.js"],
-      "consumedBy": ["app-admin-reports-legacy.js", "app-admin-reports.js", "app-player-crm-runtime-core.js"]
+      "exportedBy": [
+        "app-player-crm-runtime-core.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports-legacy.js",
+        "app-admin-reports.js",
+        "app-player-crm-runtime-core.js"
+      ]
     },
     {
       "name": "__pokerRafflesOpenCompletedTab",
       "domain": "raffles",
-      "exportedBy": ["app-raffles.js", "app-visitors-admin.js"],
-      "consumedBy": ["app-raffles.js", "app-visitors-admin.js"]
+      "exportedBy": [
+        "app-raffles.js",
+        "app-visitors-admin.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js",
+        "app-visitors-admin.js"
+      ]
     },
     {
       "name": "__pokerRafflesOpenActiveTab",
       "domain": "raffles",
-      "exportedBy": ["app-visitors-admin.js"],
-      "consumedBy": ["app-raffles.js", "app-visitors-admin.js"]
+      "exportedBy": [
+        "app-visitors-admin.js"
+      ],
+      "consumedBy": [
+        "app-raffles.js",
+        "app-visitors-admin.js"
+      ]
     },
     {
       "name": "POKER_ARCHIVE_ASSET_BASE_URL",
       "domain": "assetRuntime",
-      "exportedBy": ["asset-runtime-config.js"],
-      "consumedBy": ["app-home-media.js"]
+      "exportedBy": [
+        "asset-runtime-config.js"
+      ],
+      "consumedBy": [
+        "app-home-media.js"
+      ]
     },
     {
       "name": "pokerGetRatingPlayerTotalRewardFast",
       "domain": "ratingPlayerTotals",
-      "exportedBy": ["rating-player-totals.js"],
-      "consumedBy": ["app-profile.js"]
+      "exportedBy": [
+        "rating-player-totals.js"
+      ],
+      "consumedBy": [
+        "app-profile.js"
+      ]
     },
     {
       "name": "pokerHasAdminMenuAccess",
       "domain": "adminMenuAccess",
-      "exportedBy": ["app-admin-menu-password.js"],
-      "consumedBy": ["app-view-router.js"]
+      "exportedBy": [
+        "app-admin-menu-password.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
     },
     {
       "name": "pokerAdminMenuAccessToken",
       "domain": "adminMenuAccess",
-      "exportedBy": ["app-admin-menu-password.js"],
-      "consumedBy": ["app-player-crm-runtime-core.js"]
+      "exportedBy": [
+        "app-admin-menu-password.js"
+      ],
+      "consumedBy": [
+        "app-player-crm-runtime-core.js"
+      ]
     },
     {
       "name": "__pokerCopyButtonFeedbackBound",
       "domain": "authUi",
-      "exportedBy": ["app-auth.js"],
-      "consumedBy": ["app-auth.js"]
+      "exportedBy": [
+        "app-auth.js"
+      ],
+      "consumedBy": [
+        "app-auth.js"
+      ]
     },
     {
       "name": "pokerOpenClubGuestbook",
       "domain": "clubGuestbook",
-      "exportedBy": ["app-home-club-info-modals.js"],
-      "consumedBy": ["app-home-club-info-modals.js", "app-profile.js"]
+      "exportedBy": [
+        "app-home-club-info-modals.js"
+      ],
+      "consumedBy": [
+        "app-home-club-info-modals.js",
+        "app-profile.js"
+      ]
     },
     {
       "name": "pokerShowProfileReactionUsers",
       "domain": "profileReactions",
-      "exportedBy": ["app-home-friend-news.js"],
-      "consumedBy": ["app-home-friend-news.js", "app-home-club-info-modals.js", "app-chat-user-modal.js"]
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-friend-news.js",
+        "app-home-club-info-modals.js",
+        "app-chat-user-modal.js"
+      ]
     },
     {
       "name": "pokerOpenProfileReactionPicker",
       "domain": "profileReactions",
-      "exportedBy": ["app-home-friend-news.js"],
-      "consumedBy": ["app-home-friend-news.js", "app-home-club-info-modals.js", "app-chat-user-modal.js"]
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-friend-news.js",
+        "app-home-club-info-modals.js",
+        "app-chat-user-modal.js"
+      ]
     },
     {
       "name": "pokerOpenClubNewsModal",
       "domain": "clubNews",
-      "exportedBy": ["app-home-friend-news.js"],
-      "consumedBy": ["app-home-friend-news.js", "app-home-deeplinks.js"]
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-friend-news.js",
+        "app-home-deeplinks.js"
+      ]
     },
     {
       "name": "pokerReadCachedPlayerNews",
       "domain": "clubNews",
-      "exportedBy": ["app-home-friend-news.js"],
-      "consumedBy": ["app-home-friend-news.js", "app-profile.js", "app-chat-user-modal.js"]
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-friend-news.js",
+        "app-profile.js",
+        "app-chat-user-modal.js"
+      ]
     },
     {
       "name": "_rafflesCache",
       "domain": "rafflesCache",
-      "exportedBy": ["app-home-init.js"],
-      "consumedBy": ["app-home-init.js", "app-tournament-day.js", "app-raffles.js", "app-chat-user-modal.js"]
+      "exportedBy": [
+        "app-home-init.js"
+      ],
+      "consumedBy": [
+        "app-home-init.js",
+        "app-tournament-day.js",
+        "app-raffles.js",
+        "app-chat-user-modal.js"
+      ]
     },
     {
       "name": "__profileOwnWallSubmitBound",
       "domain": "profileWall",
-      "exportedBy": ["app-profile.js"],
-      "consumedBy": ["app-profile.js"]
+      "exportedBy": [
+        "app-profile.js"
+      ],
+      "consumedBy": [
+        "app-profile.js"
+      ]
     },
     {
       "name": "pokerGetClubNewsTournamentSnapshotsReady",
       "domain": "clubNews",
-      "exportedBy": ["app-rating-view-adapter.js"],
-      "consumedBy": ["app-rating-view-adapter.js", "app-home-club-info-modals.js", "app-home-friend-news.js"]
+      "exportedBy": [
+        "app-rating-view-adapter.js"
+      ],
+      "consumedBy": [
+        "app-rating-view-adapter.js",
+        "app-home-club-info-modals.js",
+        "app-home-friend-news.js"
+      ]
     },
     {
       "name": "__homeTournamentLeagueTopButtonsBound",
       "domain": "tournamentHome",
-      "exportedBy": ["app-tournament-day.js"],
-      "consumedBy": ["app-tournament-day.js"]
+      "exportedBy": [
+        "app-tournament-day.js"
+      ],
+      "consumedBy": [
+        "app-tournament-day.js"
+      ]
     },
     {
       "name": "POKER_CLUB_NEWS_DATA",
       "domain": "clubNewsData",
-      "exportedBy": ["club-news-data.js"],
-      "consumedBy": ["club-news-data.js", "app-rating-view-adapter.js", "app-home-friend-news.js", "app-hall-fame.js"]
+      "exportedBy": [
+        "club-news-data.js"
+      ],
+      "consumedBy": [
+        "club-news-data.js",
+        "app-rating-view-adapter.js",
+        "app-home-friend-news.js",
+        "app-hall-fame.js"
+      ]
     },
     {
       "name": "pokerGetEveningTournamentOptions",
       "domain": "tournamentHome",
-      "exportedBy": ["app-tournament-day.js"],
-      "consumedBy": ["app-tournament-bet.js"]
+      "exportedBy": [
+        "app-tournament-day.js"
+      ],
+      "consumedBy": [
+        "app-tournament-bet.js"
+      ]
     },
     {
       "name": "openTournamentBetModal",
       "domain": "tournament",
-      "exportedBy": ["app-tournament-bet.js"],
-      "consumedBy": ["app-home-widgets-bootstrap.js", "app-tournament-bet.js"]
+      "exportedBy": [
+        "app-tournament-bet.js"
+      ],
+      "consumedBy": [
+        "app-home-widgets-bootstrap.js",
+        "app-tournament-bet.js"
+      ]
+    },
+    {
+      "name": "pokerOpenAdminReportRakebackPlayers",
+      "domain": "admin",
+      "exportedBy": [
+        "app-admin-reports.js"
+      ],
+      "consumedBy": [
+        "app-admin-reports-calculations.js",
+        "app-admin-reports.js"
+      ]
+    },
+    {
+      "name": "pokerPendingClubNewsEventToken",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-deeplinks.js",
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-deeplinks.js",
+        "app-home-friend-news.js"
+      ]
+    },
+    {
+      "name": "pokerGetStakeTournamentOptions",
+      "domain": "tournament",
+      "exportedBy": [
+        "app-tournament-day.js"
+      ],
+      "consumedBy": [
+        "app-tournament-day.js",
+        "app-tournament-bet.js"
+      ]
     }
   ]
 }

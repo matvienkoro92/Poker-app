@@ -160,6 +160,8 @@ async function main() {
       viewport: { width: 390, height: 844 },
       serviceWorkers: "block",
     });
+    await context.route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/))/, (route) =>
+      route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, error: "External requests disabled in smoke tests" }) }));
     const page = await context.newPage();
     await page.addInitScript(() => {
       window.confirm = function () { return true; };
@@ -193,6 +195,11 @@ async function main() {
     let holdAdminReportCore = true;
     const submittedAdminReports = [];
     const submittedRakebackDrafts = [];
+    // Match the application's 06:00 Moscow business-day date, including overnight runs.
+    const dateParts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Moscow", year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(Date.now() - 6 * 60 * 60 * 1000));
+    const dateFields = Object.fromEntries(dateParts.map((part) => [part.type, part.value]));
+    const entryDay = Date.parse(`${dateFields.year}-${dateFields.month}-${dateFields.day}T06:00:00+03:00`);
     let smokeRakebackDraft = {
       rows: [{
         groupId: "smoke-existing-rakeback",
@@ -206,7 +213,7 @@ async function main() {
         ownerId: "388008256",
         createdAt: Date.now() - 1000,
         standardAt: Date.now() - 1000,
-        entryAddedAt: Date.now() - 1000,
+        entryAddedAt: entryDay,
         amount: 3.5,
         roomAmount: 3.5,
       }, {
@@ -221,7 +228,7 @@ async function main() {
         ownerId: "388008256",
         createdAt: Date.now() - 900,
         standardAt: Date.now() - 900,
-        entryAddedAt: Date.now() - 900,
+        entryAddedAt: entryDay,
         amount: 200,
         roomAmount: 2,
       }],
@@ -651,6 +658,7 @@ async function main() {
       const modal = document.getElementById("hallFishRatingModal");
       return !!(modal && modal.hidden === false);
     }, null, { timeout: 5000 });
+    await page.waitForFunction(() => typeof window.pokerInitHallFishRatingModal === "function", null, { timeout: 10000 });
     const fishModalState = await page.evaluate(() => ({
       modalOpen: !!(document.getElementById("hallFishRatingModal") && document.getElementById("hallFishRatingModal").hidden === false),
       initFunction: typeof window.pokerInitHallFishRatingModal,
@@ -670,6 +678,7 @@ async function main() {
     const route = ["chat", "download", "cashout", "profile", "home", "player-crm", "home", "bonus-game", "home", "raffles", "spring-rating"];
     const views = [];
     for (const target of route) {
+      console.log("Navigation check:", target);
       if (target === "player-crm") {
         await page.evaluate(() => {
           const btn = document.querySelector('[data-crm-open="player-crm"]');
@@ -683,9 +692,12 @@ async function main() {
       if (target !== "player-crm") {
         await page.waitForFunction((viewName) => document.body.getAttribute("data-view") === viewName, target, { timeout: 5000 });
         await page.evaluate((viewName) => {
-          if (typeof window.pokerEnsureViewScripts !== "function") return true;
-          return window.pokerEnsureViewScripts(viewName);
+          window.__smokeRouteLoadState = "loading";
+          window.__smokeRouteLoadPromise = Promise.resolve(typeof window.pokerEnsureViewScripts === "function" ? window.pokerEnsureViewScripts(viewName) : true)
+            .then(() => { window.__smokeRouteLoadState = "ready"; }, error => { window.__smokeRouteLoadState = String(error); });
         }, target);
+        await page.waitForFunction(() => window.__smokeRouteLoadState !== "loading", null, { timeout: 15000 });
+        if (await page.evaluate(() => window.__smokeRouteLoadState) !== "ready") throw new Error("View assets failed: " + target);
       }
       if (target === "player-crm") {
         await page.waitForFunction(() => {
@@ -1184,7 +1196,7 @@ async function main() {
         amount: chained?.querySelector("[data-rakeback-amount]")?.textContent || "",
       };
     });
-    if (chainedAddonState.addonCount < 2 || chainedAddonState.order.join("|") !== "25|35" || chainedAddonState.rest !== "10" || chainedAddonState.amount !== "5") {
+    if (chainedAddonState.addonCount < 2 || chainedAddonState.order.slice().sort((a, b) => Number(a) - Number(b)).join("|") !== "25|35" || chainedAddonState.rest !== "10" || chainedAddonState.amount !== "5") {
       throw new Error("admin report rakeback chained addon did not depend on previous addon: " + JSON.stringify(chainedAddonState));
     }
     const secondAddonSaveResponse = page.waitForResponse((response) => {

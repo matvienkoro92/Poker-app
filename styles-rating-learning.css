@@ -7,6 +7,7 @@
 /* Rating, raffle and tournament result interfaces.
  * Extracted from styles.css; keep import order in styles.css stable. */
 
+.video-lessons__coach-students-subtabs:has(.video-lessons__coach-student-tab:nth-child(5)) .video-lessons__coach-student-tab {
   font-size: 8px;
   padding: 6px 2px;
   letter-spacing: 0;
@@ -793,3 +794,7 @@ body[data-view="video-lessons"] #app.app .card .card__content > .view--active[da
 .video-lessons__desc {
   margin: 0 0 10px;
   padding: 0;
+font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

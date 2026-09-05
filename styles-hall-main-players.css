@@ -1,9 +1,7 @@
 /* Hall CSS: player rows, highlights and hall lists.
  * Extracted from styles-hall-main.css; keep import order in styles-hall-main.css stable. */
 
-  color: rgba(71, 85, 105, 0.88);
-}
-.hall-shame-board__corgi-gallery {
+  .hall-shame-board__corgi-gallery {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;

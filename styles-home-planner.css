@@ -842,3 +842,13 @@ textarea.roman-task-planner__input {
   border-color: rgba(44, 24, 16, 0.08);
 }
 .roman-task-planner__section-head {
+list-style: none;
+  margin: 0;
+  padding: 10px 4px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  color: var(--muted, #94a3b8);
+}

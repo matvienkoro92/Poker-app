@@ -621,202 +621,202 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
   ]
 ,
   "07.08.2026": [
-    "rating-compressed-preview/rating-07-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-tai-7-1-2-ko-15k-06h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-dv-turbo-500-50k-10h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-dv-bounty-100k-13h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-pyatnica-progressiv-18h.jpg",
-    "rating-compressed-preview/rating-07-08-2026-league1-rebuy-evening-20h.jpg"
+    "rating-compressed-preview/rating-07-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-tai-7-1-2-ko-15k-06h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-dv-turbo-500-50k-10h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-dv-bounty-100k-13h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-pyatnica-progressiv-18h.avif",
+    "rating-compressed-preview/rating-07-08-2026-league1-rebuy-evening-20h.avif"
   ]
 ,
   "08.08.2026": [
-    "rating-compressed-preview/rating-08-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-big-boss-18h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-lucky-555-gtd-18h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-dv-bounty-100k-13h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-dv-turbo-500-50k-10h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-tai-7-1-2-ko-15k-06h.jpg",
-    "rating-compressed-preview/rating-08-08-2026-league1-s-bounty-2-3-120k-00h.jpg"
+    "rating-compressed-preview/rating-08-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-big-boss-18h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-lucky-555-gtd-18h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-dv-bounty-100k-13h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-dv-turbo-500-50k-10h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-tai-7-1-2-ko-15k-06h.avif",
+    "rating-compressed-preview/rating-08-08-2026-league1-s-bounty-2-3-120k-00h.avif"
   ]
 ,
   "09.08.2026": [
-    "rating-compressed-preview/rating-09-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-dv-turbo-500-50k-10h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-dv-main-800k-13h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-voskresnyj-turnir-18h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-main-2-mln-gtd-18h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-09-08-2026-league1-rebuy-evening-20h.jpg"
+    "rating-compressed-preview/rating-09-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-dv-turbo-500-50k-10h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-dv-main-800k-13h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-voskresnyj-turnir-18h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-main-2-mln-gtd-18h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-09-08-2026-league1-rebuy-evening-20h.avif"
   ]
 ,
   "10.08.2026": [
-    "rating-compressed-preview/rating-10-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-turnir-ponedelnika-18h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-magic-500-120k-22h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-monday-200k-18h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-magic-bounty-50k-11h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-10-08-2026-league1-tai-7-1-2-ko-15k-06h.jpg"
+    "rating-compressed-preview/rating-10-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-turnir-ponedelnika-18h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-magic-500-120k-22h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-monday-200k-18h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-magic-bounty-50k-11h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-10-08-2026-league1-tai-7-1-2-ko-15k-06h.avif"
   ]
 ,
   "11.08.2026": [
-    "rating-compressed-preview/rating-11-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-dv-plo5-30k-12h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-plo4-20k-16h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-bounty-magic-50k-18h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-11-08-2026-league1-hr-5000-200k-20h.jpg"
+    "rating-compressed-preview/rating-11-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-dv-plo5-30k-12h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-plo4-20k-16h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-bounty-magic-50k-18h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-11-08-2026-league1-hr-5000-200k-20h.avif"
   ]
 ,
   "12.08.2026": [
-    "rating-compressed-preview/rating-12-08-2026-league1-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-12-08-2026-league1-big-boss-18h.jpg",
-    "rating-compressed-preview/rating-12-08-2026-league1-freeroll-500k-dr-18h.jpg",
-    "rating-compressed-preview/rating-12-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-12-08-2026-league1-hr-5000-200k-20h.jpg",
-    "rating-compressed-preview/rating-12-08-2026-league1-nlh-knockout-220k-21h.jpg"
+    "rating-compressed-preview/rating-12-08-2026-league1-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-12-08-2026-league1-big-boss-18h.avif",
+    "rating-compressed-preview/rating-12-08-2026-league1-freeroll-500k-dr-18h.avif",
+    "rating-compressed-preview/rating-12-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-12-08-2026-league1-hr-5000-200k-20h.avif",
+    "rating-compressed-preview/rating-12-08-2026-league1-nlh-knockout-220k-21h.avif"
   ]
 ,
   "13.08.2026": [
-    "rating-compressed-preview/rating-13-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-13-08-2026-league1-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-13-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-13-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-13-08-2026-league1-magic-500-120k-22h.jpg",
-    "rating-compressed-preview/rating-13-08-2026-league1-night-magic-80k-23h.jpg"
+    "rating-compressed-preview/rating-13-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-13-08-2026-league1-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-13-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-13-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-13-08-2026-league1-magic-500-120k-22h.avif",
+    "rating-compressed-preview/rating-13-08-2026-league1-night-magic-80k-23h.avif"
   ],
   "14.08.2026": [
-    "rating-compressed-preview/rating-14-08-2026-league1-pyatnica-progressiv-18h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-mini-fenix-60k-16h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-shr-1-mln-gtd-18h.jpg",
-    "rating-compressed-preview/rating-14-08-2026-league1-nlh-knockout-220k-21h.jpg"
+    "rating-compressed-preview/rating-14-08-2026-league1-pyatnica-progressiv-18h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-mini-fenix-60k-16h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-shr-1-mln-gtd-18h.avif",
+    "rating-compressed-preview/rating-14-08-2026-league1-nlh-knockout-220k-21h.avif"
   ]
 ,
   "15.08.2026": [
-    "rating-compressed-preview/rating-15-08-2026-league1-dv-turbo-500-50k-10h.jpg",
-    "rating-compressed-preview/rating-15-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-15-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-15-08-2026-league1-big-boss-18h.jpg",
-    "rating-compressed-preview/rating-15-08-2026-league1-nok-19h.jpg"
+    "rating-compressed-preview/rating-15-08-2026-league1-dv-turbo-500-50k-10h.avif",
+    "rating-compressed-preview/rating-15-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-15-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-15-08-2026-league1-big-boss-18h.avif",
+    "rating-compressed-preview/rating-15-08-2026-league1-nok-19h.avif"
   ]
 ,
   "16.08.2026": [
-    "rating-compressed-preview/rating-16-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-16-08-2026-league1-magic-bounty-50k-11h.jpg",
-    "rating-compressed-preview/rating-16-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-16-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-16-08-2026-league1-nlh-knockout-220k-21h.jpg",
-    "rating-compressed-preview/rating-16-08-2026-league1-magic-500-120k-2159h.jpg",
-    "rating-compressed-preview/rating-16-08-2026-league1-fantastic-boss-18h.jpg"
+    "rating-compressed-preview/rating-16-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-16-08-2026-league1-magic-bounty-50k-11h.avif",
+    "rating-compressed-preview/rating-16-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-16-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-16-08-2026-league1-nlh-knockout-220k-21h.avif",
+    "rating-compressed-preview/rating-16-08-2026-league1-magic-500-120k-2159h.avif",
+    "rating-compressed-preview/rating-16-08-2026-league1-fantastic-boss-18h.avif"
   ],
   "17.08.2026": [
-    "rating-compressed-preview/rating-17-08-2026-league1-tai-7-1-2-ko-15k-06h.jpg",
-    "rating-compressed-preview/rating-17-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-17-08-2026-league1-dv-plo5-30k-12h.jpg",
-    "rating-compressed-preview/rating-17-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-17-08-2026-league1-turnir-ponedelnika-18h.jpg",
-    "rating-compressed-preview/rating-17-08-2026-league1-night-magic-80ko-23h.jpg"
+    "rating-compressed-preview/rating-17-08-2026-league1-tai-7-1-2-ko-15k-06h.avif",
+    "rating-compressed-preview/rating-17-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-17-08-2026-league1-dv-plo5-30k-12h.avif",
+    "rating-compressed-preview/rating-17-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-17-08-2026-league1-turnir-ponedelnika-18h.avif",
+    "rating-compressed-preview/rating-17-08-2026-league1-night-magic-80ko-23h.avif"
   ]
 ,
   "18.08.2026": [
-    "rating-compressed-preview/rating-18-08-2026-league1-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-mini-fenix-60k-16h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-bounty-magic-50k-18h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-18-08-2026-league1-rebuy-evening-20h.jpg"
+    "rating-compressed-preview/rating-18-08-2026-league1-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-mini-fenix-60k-16h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-bounty-magic-50k-18h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-18-08-2026-league1-rebuy-evening-20h.avif"
   ]
 ,
   "19.08.2026": [
-    "rating-compressed-preview/rating-19-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-19-08-2026-league1-bounty-200-40k-gt-14h.jpg",
-    "rating-compressed-preview/rating-19-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-19-08-2026-league1-plo4-pko-20k-19h.jpg"
+    "rating-compressed-preview/rating-19-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-19-08-2026-league1-bounty-200-40k-gt-14h.avif",
+    "rating-compressed-preview/rating-19-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-19-08-2026-league1-plo4-pko-20k-19h.avif"
   ],
   "20.08.2026": [
-    "rating-compressed-preview/rating-20-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-20-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-20-08-2026-league1-magic-o-500-120k-22h.jpg"
+    "rating-compressed-preview/rating-20-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-20-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-20-08-2026-league1-magic-o-500-120k-22h.avif"
   ]
 ,
   "21.08.2026": [
-    "rating-compressed-preview/rating-21-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-21-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-21-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-21-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-21-08-2026-league1-pyatnica-progressiv-18h.jpg",
-    "rating-compressed-preview/rating-21-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-21-08-2026-league1-magic-o-500-120k-22h.jpg"
+    "rating-compressed-preview/rating-21-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-21-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-21-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-21-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-21-08-2026-league1-pyatnica-progressiv-18h.avif",
+    "rating-compressed-preview/rating-21-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-21-08-2026-league1-magic-o-500-120k-22h.avif"
   ]
 ,
   "22.08.2026": [
-    "rating-compressed-preview/rating-22-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-shr-magic-800k-19h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-nlh-knockout-220k-21h.jpg",
-    "rating-compressed-preview/rating-22-08-2026-league1-night-magic-80ko-23h.jpg"
+    "rating-compressed-preview/rating-22-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-shr-magic-800k-19h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-nlh-knockout-220k-21h.avif",
+    "rating-compressed-preview/rating-22-08-2026-league1-night-magic-80ko-23h.avif"
   ]
 ,
   "23.08.2026": [
-    "rating-compressed-preview/rating-23-08-2026-league1-s-bounty-2-3-120k-00h.jpg",
-    "rating-compressed-preview/rating-23-08-2026-league1-deep-night-15k-02h.jpg",
-    "rating-compressed-preview/rating-23-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-23-08-2026-league1-mini-fenix-60k-16h.jpg",
-    "rating-compressed-preview/rating-23-08-2026-league1-voskresnyj-turnir-18h.jpg",
-    "rating-compressed-preview/rating-23-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-23-08-2026-league1-nlh-knockout-220k-21h.jpg"
+    "rating-compressed-preview/rating-23-08-2026-league1-s-bounty-2-3-120k-00h.avif",
+    "rating-compressed-preview/rating-23-08-2026-league1-deep-night-15k-02h.avif",
+    "rating-compressed-preview/rating-23-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-23-08-2026-league1-mini-fenix-60k-16h.avif",
+    "rating-compressed-preview/rating-23-08-2026-league1-voskresnyj-turnir-18h.avif",
+    "rating-compressed-preview/rating-23-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-23-08-2026-league1-nlh-knockout-220k-21h.avif"
   ],
   "30.08.2026": [
-    "rating-compressed-preview/rating-30-08-2026-league1-bali-yana-20k-08h.jpg",
-    "rating-compressed-preview/rating-30-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-30-08-2026-league1-turnir-mesyaca-18h.jpg",
-    "rating-compressed-preview/rating-30-08-2026-league1-grand-knockout-18h.jpg",
-    "rating-compressed-preview/rating-30-08-2026-league1-nok-19h.jpg",
-    "rating-compressed-preview/rating-30-08-2026-league1-rebuy-evening-20h.jpg",
-    "rating-compressed-preview/rating-30-08-2026-league1-magic-500-120k-2159h.jpg"
+    "rating-compressed-preview/rating-30-08-2026-league1-bali-yana-20k-08h.avif",
+    "rating-compressed-preview/rating-30-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-30-08-2026-league1-turnir-mesyaca-18h.avif",
+    "rating-compressed-preview/rating-30-08-2026-league1-grand-knockout-18h.avif",
+    "rating-compressed-preview/rating-30-08-2026-league1-nok-19h.avif",
+    "rating-compressed-preview/rating-30-08-2026-league1-rebuy-evening-20h.avif",
+    "rating-compressed-preview/rating-30-08-2026-league1-magic-500-120k-2159h.avif"
   ]
 ,
   "31.08.2026": [
-    "rating-compressed-preview/rating-31-08-2026-league1-dv-rebuy-12h.jpg",
-    "rating-compressed-preview/rating-31-08-2026-league1-new-hot-pko-2-3-15h.jpg",
-    "rating-compressed-preview/rating-31-08-2026-league1-turnir-ponedelnika-18h.jpg",
-    "rating-compressed-preview/rating-31-08-2026-league1-nok-19h.jpg"
+    "rating-compressed-preview/rating-31-08-2026-league1-dv-rebuy-12h.avif",
+    "rating-compressed-preview/rating-31-08-2026-league1-new-hot-pko-2-3-15h.avif",
+    "rating-compressed-preview/rating-31-08-2026-league1-turnir-ponedelnika-18h.avif",
+    "rating-compressed-preview/rating-31-08-2026-league1-nok-19h.avif"
   ]
 ,
   "01.09.2026": [
-    "rating-compressed-preview/rating-01-09-2026-league1-hr-5000-200k-20h.jpg",
-    "rating-compressed-preview/rating-01-09-2026-league1-magic-500-120k-22h.jpg",
-    "rating-compressed-preview/rating-01-09-2026-league1-night-magic-80k-23h.jpg"
+    "rating-compressed-preview/rating-01-09-2026-league1-hr-5000-200k-20h.avif",
+    "rating-compressed-preview/rating-01-09-2026-league1-magic-500-120k-22h.avif",
+    "rating-compressed-preview/rating-01-09-2026-league1-night-magic-80k-23h.avif"
   ]
 ,
   "02.09.2026": [
-    "rating-compressed-preview/rating-02-09-2026-league1-dv-bounty-100k-13h.jpg",
-    "rating-compressed-preview/rating-02-09-2026-league1-new-hot-pko-2-3-15h.jpg"
+    "rating-compressed-preview/rating-02-09-2026-league1-dv-bounty-100k-13h.avif",
+    "rating-compressed-preview/rating-02-09-2026-league1-new-hot-pko-2-3-15h.avif"
   ]
 ,
   "03.09.2026": [
-    "rating-compressed-preview/rating-03-09-2026-league1-magic-bounty-e-50k-11h.jpg"
+    "rating-compressed-preview/rating-03-09-2026-league1-magic-bounty-e-50k-11h.avif"
   ]
 };

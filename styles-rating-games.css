@@ -1,11 +1,7 @@
 /* Rating CSS: game cards, tools and play surfaces.
  * Extracted from styles-rating-learning-games.css; keep import order in styles-rating-learning-games.css stable. */
 
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-/* Описание внутри раскрытого блока (не в строке заголовка) */
+  /* Описание внутри раскрытого блока (не в строке заголовка) */
 .video-lessons__player-inner .video-lessons__desc {
   margin: 0 0 12px;
   padding: 0 4px;
@@ -561,3 +557,5 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+margin-top: 16px;
+}

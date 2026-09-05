@@ -652,3 +652,6 @@
   .tournament-bet-modal__share { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tournament-bet-modal__share [data-tournament-bet-subscribe] { grid-column: 1 / -1; }
 }
+
+/* Keep this modal visible regardless of when shared widget styles arrive. */
+.club-choice-vote-modal.tournament-bet-modal:not([hidden]) { display: flex; z-index: 100000; padding: 0; }

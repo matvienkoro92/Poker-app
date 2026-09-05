@@ -648,7 +648,9 @@
     } catch (e) {}
   }
 
+  var pendingOperations = {};
   function submitOperation() {
+    if (adminBonusesState.operationSubmitting) return;
     var userId = adminBonusesState.selectedUserId;
     var operation = adminBonusesState.operation;
     var amountEl = $("adminBonusesOperationAmount");
@@ -684,23 +686,38 @@
     var base = apiBase();
     var endpoint = operation === "debit" ? "bonus-debit" : "bonus-credit";
     if (message) message.textContent = "Сохраняем…";
+    var payload = { amount: amount, comment: commentEl && commentEl.value, tournament: tournament };
+    var pendingKey = "poker_bonus_pending:" + userId + ":" + endpoint;
+    var signature = JSON.stringify(payload);
+    var pending = pendingOperations[pendingKey] || null;
+    try { pending = JSON.parse(sessionStorage.getItem(pendingKey)) || pending; } catch (e) {}
+    if (!pending || pending.signature !== signature) {
+      pending = { signature: signature, id: crypto.randomUUID() };
+      pendingOperations[pendingKey] = pending;
+      try { sessionStorage.setItem(pendingKey, JSON.stringify(pending)); } catch (e) {}
+    }
+    payload.operationId = pending.id;
+    adminBonusesState.operationSubmitting = true;
     fetch(authUrl("users/" + userId + "/" + endpoint), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(authBody({ amount: amount, comment: commentEl && commentEl.value, tournament: tournament })),
+      body: JSON.stringify(authBody(payload)),
     })
       .then(readJson)
       .then(function (data) {
         if (!data || !data.ok) throw new Error(data && data.error ? data.error : "Операция не выполнена");
         if (message) message.textContent = "Готово. Новый баланс: " + data.bonusBalance;
+        delete pendingOperations[pendingKey];
+        try { sessionStorage.removeItem(pendingKey); } catch (e) {}
         showOperationSuccess(operation, userId, amount, tournament, data.bonusBalance);
         loadList();
         loadHistory(userId);
         adminBonusesState.issuesLoaded = false;
         if (operation === "debit") loadIssues(true);
-        setTimeout(closeOperation, 650);
+        setTimeout(function () { closeOperation(); adminBonusesState.operationSubmitting = false; }, 650);
       })
       .catch(function (err) {
+        adminBonusesState.operationSubmitting = false;
         if (message) message.textContent = err && err.message ? err.message : POKER_NET_ERR;
       });
   }

@@ -1,7 +1,7 @@
 /* Chat CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-chat-prelude.css");
-@import url("./styles-chat-messages.css");
-@import url("./styles-chat-composer-media.css");
-@import url("./styles-chat-dialogs-groups.css");
-@import url("./styles-chat-threads-contacts.css");
-@import url("./styles-chat-after.css?v=3.863");
+@import url("./styles-chat-prelude.css?v=4.002");
+@import url("./styles-chat-messages.css?v=4.002");
+@import url("./styles-chat-composer-media.css?v=4.002");
+@import url("./styles-chat-dialogs-groups.css?v=4.002");
+@import url("./styles-chat-threads-contacts.css?v=4.002");
+@import url("./styles-chat-after.css?v=4.002");

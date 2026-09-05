@@ -3,7 +3,7 @@
   "budgetsMiB": {
     "startupEager": 0.75,
     "coreAndLazyAssets": 30,
-    "currentSeason": 28,
+    "currentSeason": 36,
     "archiveSeasons": 43,
     "publicBuild": 105,
     "individualFile": 2
@@ -11,11 +11,25 @@
   "startupBudgetsKiB": {
     "transfer": 960,
     "jsParse": 1810,
-    "cssParse": 700
+    "cssParse": 760
   },
   "seasonRouting": {
-    "currentMonths": [6, 7, 8],
-    "archiveMonths": [1, 2, 3, 4, 5],
-    "archiveScriptDomains": ["rating-spring", "rating-winter"]
+    "currentMonths": [
+      6,
+      7,
+      8,
+      9
+    ],
+    "archiveMonths": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "archiveScriptDomains": [
+      "rating-spring",
+      "rating-winter"
+    ]
   }
 }

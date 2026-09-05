@@ -1,9 +1,7 @@
 /* Rating CSS: late responsive and cross-rating overrides.
  * Extracted from styles-rating-tables-modals.css; keep import order in styles-rating-tables-modals.css stable. */
 
-  background: rgba(251, 191, 36, 0.28);
-}
-.spring-rating-info-modal__title {
+  .spring-rating-info-modal__title {
   margin: 0 36px 6px 0;
   font-size: 18px;
   font-weight: 700;

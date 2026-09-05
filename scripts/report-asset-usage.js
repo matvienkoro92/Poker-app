@@ -44,7 +44,8 @@ const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 function localFileFromUrl(url) {
   const rel = String(url || "").replace(/^\.\//, "").split(/[?#]/)[0];
   if (!rel || rel.includes("..") || /^(?:https?:)?\/\//i.test(rel)) return "";
-  const file = path.join(root, rel);
+  const built = path.join(root, "public", rel);
+  const file = fs.existsSync(built) ? built : path.join(root, rel);
   return file.startsWith(root + path.sep) && fs.existsSync(file) ? file : "";
 }
 
@@ -53,7 +54,7 @@ function collectCssGraph(entryFile, seen) {
   seen.add(entryFile);
   const text = fs.readFileSync(entryFile, "utf8");
   const files = [entryFile];
-  for (const match of text.matchAll(/@import\s+url\(["']?([^"')]+\.css[^"')]*)/gi)) {
+  for (const match of text.matchAll(/@import\s*(?:url\(\s*)?["']([^"')]+\.css[^"')]*)/gi)) {
     const imported = localFileFromUrl(match[1]);
     files.push(...collectCssGraph(imported, seen));
   }

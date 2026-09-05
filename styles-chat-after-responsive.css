@@ -1,12 +1,7 @@
 /* Chat after CSS: responsive overrides and late chat fixes.
  * Extracted from styles-chat-after.css; keep import order in styles-chat-after.css stable. */
 
-  background: none !important;
-  box-shadow: none !important;
-  border-radius: 0;
-  margin: 0;
-}
-.games-apps-grid .feature__icon-emoji,
+  .games-apps-grid .feature__icon-emoji,
 .home-partnership-row .feature__icon-emoji {
   font-size: 20px;
   line-height: 1;

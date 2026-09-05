@@ -130,20 +130,24 @@ changedFiles.forEach((file) => {
 });
 collectHtmlVersionedResources(html).forEach((resource) => versionTargets.add(resource));
 let stylesChanged = versionTargets.has("styles.css");
-if (fs.existsSync(stylesPath)) {
-  let styles = fs.readFileSync(stylesPath, "utf8");
-  collectCssImportResources(styles).forEach((resource) => versionTargets.add(resource));
-  Array.from(versionTargets).forEach((resource) => {
-    if (resource === "styles.css" || !resource.endsWith(".css")) return;
-    const result = bumpCssImport(styles, resource, next);
-    styles = result.text;
-    if (result.changed) stylesChanged = true;
-  });
-  if (stylesChanged) {
-    fs.writeFileSync(stylesPath, styles, "utf8");
-    versionTargets.add("styles.css");
+// Every imported stylesheet needs its own URL version: changing the parent URL
+// does not invalidate a nested browser HTTP cache entry.
+for (const name of fs.readdirSync(root).filter(name => name.endsWith(".css"))) {
+  const file = path.join(root, name);
+  let styles = fs.readFileSync(file, "utf8");
+  for (const resource of collectCssImportResources(styles)) {
+    styles = bumpCssImport(styles, resource, next).text;
   }
+  fs.writeFileSync(file, styles, "utf8");
 }
+const swPath = path.join(root, "sw.js");
+let sw = fs.readFileSync(swPath, "utf8");
+const cache = sw.match(/var POKER_STATIC_CACHE = "poker-static-v(\d+)"/);
+if (!cache) throw new Error("Missing static service worker cache version");
+sw = sw.replace(cache[0], `var POKER_STATIC_CACHE = "poker-static-v${Number(cache[1]) + 1}"`)
+  .replace(/(var POKER_STATIC_OLD_CACHES = \[)/, `$1"poker-static-v${cache[1]}", `)
+  .replace(/var POKER_SW_BUILD = "[^"]+"/, `var POKER_SW_BUILD = "${next}"`);
+fs.writeFileSync(swPath, sw, "utf8");
 versionTargets.forEach((resource) => {
   const result = bumpHtmlRef(out, resource, next);
   out = result.text;

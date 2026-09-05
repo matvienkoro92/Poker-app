@@ -1,4 +1,4 @@
 /* styles-chat-threads-contacts.css entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-chat-threads.css");
-@import url("./styles-chat-contacts.css");
-@import url("./styles-chat-threads-contacts-responsive.css");
+@import url("./styles-chat-threads.css?v=4.002");
+@import url("./styles-chat-contacts.css?v=4.002");
+@import url("./styles-chat-threads-contacts-responsive.css?v=4.002");

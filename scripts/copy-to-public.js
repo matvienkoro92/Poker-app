@@ -84,6 +84,11 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
+// Remove obsolete generated code from earlier builds; assets are managed below.
+for (const name of fs.readdirSync(publicDir)) {
+  if (/^(?:app.*\.js|styles.*\.css)$/.test(name) && !toCopy.includes(name)) fs.unlinkSync(path.join(publicDir, name));
+}
+
 for (const file of toCopy) {
   const src = path.join(root, file);
   if (!fs.existsSync(src)) {

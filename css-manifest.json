@@ -92,7 +92,8 @@
     "tournament": [
       "styles-tournament.css",
       "styles-hall-tournament-day.css",
-      "styles-home-overrides.css"
+      "styles-home-overrides.css",
+      "styles-tournament-bet.css"
     ],
     "chat": [
       "styles-chat.css",

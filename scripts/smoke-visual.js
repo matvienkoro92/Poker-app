@@ -154,6 +154,8 @@ async function main() {
     if (executablePath) launchOptions.executablePath = executablePath;
     browser = await chromium.launch(launchOptions);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    await page.context().route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/))/, (route) =>
+      route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, error: "External requests disabled in smoke tests" }) }));
     const errors = [];
     page.on("pageerror", (err) => errors.push(String((err && err.message) || err)));
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });

@@ -5,6 +5,15 @@ const assert = require("assert");
 const crypto = require("crypto");
 const path = require("path");
 
+// Fixed by default; run CONTRACT_TEST_NOW at calendar boundaries to verify overlap.
+const RealDate = Date;
+const contractNow = Date.parse(process.env.CONTRACT_TEST_NOW || "2026-09-05T12:00:00.000Z");
+if (!Number.isFinite(contractNow)) throw new Error("Invalid CONTRACT_TEST_NOW");
+global.Date = class extends RealDate {
+  constructor(...args) { super(...(args.length ? args : [contractNow])); }
+  static now() { return contractNow; }
+};
+
 const root = path.join(__dirname, "..");
 const BOT_TOKEN = "contract-test-bot-token";
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
@@ -260,6 +269,25 @@ class MemoryRedis {
       const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
       const keys = command.slice(3, 3 + keyCount).map(String);
       const args = command.slice(3 + keyCount).map(String);
+      if (String(command[1]).includes("auth-rate-limit-v1")) {
+        const count = Number(this.kv.get(keys[0]) || 0) + 1;
+        this.kv.set(keys[0], String(count));
+        return this.result([count, Number(args[0])]);
+      }
+      if (String(command[1]).includes("guarded-write-v1")) {
+        const commands = JSON.parse(args[0]);
+        const locks = JSON.parse(args[1]);
+        const balances = JSON.parse(args[2]);
+        const guards = JSON.parse(args[5] || "[]");
+        if (guards.some(g => String((g.field ? this.h(g.key).get(g.field) : this.kv.get(g.key)) || "") !== g.value)) return { error: "value_changed" };
+        if (locks.some((lock) => this.kv.get(lock.key) !== lock.value)) return { error: "lock_expired" };
+        if (balances.some((balance) => Number(this.h(balance.key).get(balance.userId) || 0) !== Number(balance.value))) return { error: "balance_changed" };
+        if (args[3] && !this.kv.has(args[3])) {
+          this.kv.set(args[3], String([...this.h(args[4]).values()].reduce((sum, value) => sum + Number(value), 0)));
+        }
+        for (const nested of commands) this.exec(nested);
+        return this.result(1);
+      }
       if (
         /redis\.call\(['"]get['"]/.test(String(command[1] || "")) &&
         /redis\.call\(['"]del['"]/.test(String(command[1] || "")) &&
@@ -306,6 +334,14 @@ class MemoryRedis {
       const out = [];
       for (const [field, value] of this.h(key).entries()) out.push(field, value);
       return this.result(out);
+    }
+    if (cmd === "SCAN") {
+      const cursor = Number(command[1]);
+      const prefix = String(command[command.indexOf("MATCH") + 1]).replace(/\*$/, "");
+      const count = Number(command[command.indexOf("COUNT") + 1]);
+      const keys = [...new Set([...this.kv.keys(), ...this.hash.keys(), ...this.lists.keys(), ...this.sets.keys(), ...this.zsets.keys()])].filter(k => k.startsWith(prefix));
+      const page = keys.slice(cursor, cursor + count);
+      return this.result([cursor + count >= keys.length ? "0" : String(cursor + count), page]);
     }
     if (cmd === "HSCAN") {
       const cursor = Math.max(0, parseInt(command[2], 10) || 0);
@@ -734,8 +770,8 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(apiAuth.isAdminEmail("other@example.com"), false, "unknown email is not admin");
   assert.strictEqual(
     apiAuth.isAdminIdentity({ id: 0, pwaUsername: "roman1_matvienko", adminAccess: false }, "mail_ID000001"),
-    true,
-    "admin username grants API admin identity",
+    false,
+    "username alone cannot grant API admin identity",
   );
   assert.strictEqual(
     apiAuth.isAdminIdentity({ id: 0, pwaUsername: "player", adminAccess: false }, "mail_ID000002"),
@@ -802,13 +838,13 @@ async function testAuthAndAdmin(redis) {
   let manualBonusRes = await call(adminHandler, req("POST", { path: "users/ID123456/bonus-credit" }, {
     pwaSession: bonusAdminToken,
     amount: 120,
-    comment: "contract credit",
+    comment: "contract credit", operationId: "contract_credit_0001",
   }));
   assert.strictEqual(manualBonusRes.statusCode, 200, "bonus admin can credit a user");
   manualBonusRes = await call(adminHandler, req("POST", { path: "users/ID123456/bonus-debit" }, {
     pwaSession: bonusAdminToken,
     amount: 45,
-    comment: "contract debit",
+    comment: "contract debit", operationId: "contract_debit_0001",
     tournament: {
       id: "weekly-6|18|0|Фриролл",
       title: "Фриролл",
@@ -822,20 +858,20 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(bonusIssuesRes.statusCode, 200, "bonus admin can open issued bonuses journal");
   assert.strictEqual(bonusIssuesRes.body.operations[0].tournamentTitle, "Фриролл", "issued bonuses journal returns tournament metadata");
   bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: bonusAdminToken }));
-  assert.strictEqual(bonusRes.body.bonusTotals.totalDebited, 45, "bonus admin API returns total debited points");
+  assert.strictEqual(bonusRes.body.bonusTotals.totalDebited, 50, "bonus admin API returns total debited points");
   bonusRes = await call(adminHandler, req("GET", { path: "bonus-balances", pwaSession: nonBonusAdminToken }));
   assert.strictEqual(bonusRes.statusCode, 403, "ordinary user cannot open bonus admin API");
   const reportAccess = require(path.join(root, "lib", "admin-report-access"));
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 388008256, telegramUsername: "roman1787443" }, "tg_388008256"), true, "roman1787443 can access admin reports");
   assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 2144406710, telegramUsername: "" }, "tg_2144406710"), true, "anna can access admin reports");
-  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, pwaUsername: "roman1_matvienko" }, "mail_ID000001"), true, "roman1 can access admin reports by username");
-  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, telegramUsername: "player", pwaUsername: "roman1_matvienko" }, "mail_ID000001"), true, "roman1 pwa username grants admin reports even with another telegram username field");
+  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, pwaUsername: "roman1_matvienko" }, "mail_ID000001"), false, "username alone cannot grant report access");
+  assert.strictEqual(reportAccess.isAdminReportIdentity({ id: 0, telegramUsername: "player", pwaUsername: "roman1_matvienko" }, "mail_ID000001"), false, "a PWA username cannot grant report access");
   assert.strictEqual(reportAccess.isAdminReportEmail("matvienkoro92@gmail.com"), true, "roman1 can access admin reports by email");
   const reportToken = pwa.signPwaSession({ id: 2144406710, username: "anna", adminReportAccess: true }, BOT_TOKEN);
   assert.strictEqual(pwa.verifyPwaSessionToken(reportToken, BOT_TOKEN).adminReportAccess, true, "pwa session carries admin report access");
 
   const reportHandler = loadHandler("admin-report-shifts");
-  const roman1ReportToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "roman1_matvienko" }, BOT_TOKEN);
+  const roman1ReportToken = pwa.signPwaSession({ id: 0, memberId: "mail_ID000001", username: "roman1_matvienko", email: "matvienkoro92@gmail.com" }, BOT_TOKEN);
   const roman178ReportToken = pwa.signPwaSession({ id: 388008256, memberId: "tg_388008256", username: "roman1787443" }, BOT_TOKEN);
   let reportAccessRes = await call(reportHandler, req("GET", { pwaSession: roman1ReportToken, access: "1" }));
   assert.strictEqual(reportAccessRes.statusCode, 200, "report admin access probe succeeds");
@@ -4746,8 +4782,9 @@ async function testDailyPokerWinners(redis) {
     balanceTo: meta.gameDate,
   }));
   assert.strictEqual(weekBalanceSummary.statusCode, 200, "calculation daily-poker week summary succeeds");
-  assert.strictEqual(weekBalanceSummary.body.bonusBalanceDebited, 1000, "calculation daily-poker week summary uses ledger debits");
-  assert.strictEqual(weekBalanceSummary.body.bonusBalanceReturned, 120, "calculation daily-poker week summary uses verified returns");
+  const previousMonthInWeek = previousMonthDate >= currentWeekStart && previousMonthDate <= meta.gameDate;
+  assert.strictEqual(weekBalanceSummary.body.bonusBalanceDebited, 1000 + (previousMonthInWeek ? 400 : 0), "calculation daily-poker week summary uses ledger debits");
+  assert.strictEqual(weekBalanceSummary.body.bonusBalanceReturned, 120 + (previousMonthInWeek ? 50 : 0), "calculation daily-poker week summary uses verified returns");
   assert.strictEqual(weekBalanceSummary.body.spinStats, undefined, "calculation summary does not scan or return game statistics");
 
   const monthBalanceSummary = await call(promo, req("GET", {
@@ -4761,7 +4798,7 @@ async function testDailyPokerWinners(redis) {
     balanceTo: previousMonthDate,
   }));
   assert.strictEqual(monthBalanceSummary.statusCode, 200, "calculation daily-poker month summary succeeds");
-  assert.strictEqual(monthBalanceSummary.body.bonusBalanceDebited, 400, "calculation daily-poker month summary uses the selected month only");
+  assert.strictEqual(monthBalanceSummary.body.bonusBalanceDebited, 400 + (weekDate >= previousMonthStart && weekDate <= previousMonthDate ? 300 : 0), "calculation daily-poker month summary uses the selected month only");
   assert.strictEqual(monthBalanceSummary.body.bonusBalanceReturned, 50, "calculation daily-poker month summary keeps month returns separate");
 }
 
@@ -5542,7 +5579,7 @@ async function testPokerPlusChipLogsAdminLinkedMailFallback(redis) {
 
   try {
     const { signPwaSession } = require(path.join(root, "lib", "poker-pwa-session"));
-    const adminToken = signPwaSession({ id: 0, memberId: "mail_ID000003", username: "roman1787443" }, BOT_TOKEN);
+    const adminToken = signPwaSession({ id: 0, memberId: "mail_ID000003", username: "roman1787443", email: "matvienkoro92@gmail.com" }, BOT_TOKEN);
     const handler = loadHandler("pokerplus-chip-logs");
     const r = await call(handler, req("POST", {}, { pwaSession: adminToken, all: true, pageSize: 200 }));
     assert.strictEqual(r.statusCode, 200, "admin chip logs can use linked mail as cashier fallback");

@@ -592,13 +592,17 @@
     if (!row || row.getAttribute("data-rakeback-kind") !== "addon") return 0;
     var groupId = row.getAttribute("data-rakeback-group") || "";
     var rows = row.parentNode ? Array.prototype.slice.call(row.parentNode.querySelectorAll("[data-rakeback-shared-row]")) : [];
+    function time(item) {
+      return normalizeTimeValue(item.getAttribute("data-rakeback-standard-at") || item.getAttribute("data-rakeback-created-at") || item.getAttribute("data-rakeback-entry-added-at"));
+    }
+    rows.sort(function (a, b) { return time(a) - time(b); });
     var previousRake = 0;
     for (var i = 0; i < rows.length; i++) {
       var current = rows[i];
       if (current === row) break;
       if ((current.getAttribute("data-rakeback-group") || "") !== groupId) continue;
       var rakeInput = current.querySelector("[data-rakeback-rake]");
-      previousRake = parseNumber(rakeInput ? rakeInput.value : "");
+      if (rakeInput && String(rakeInput.value || "").trim()) previousRake = parseNumber(rakeInput.value);
     }
     return previousRake;
   }
@@ -2401,7 +2405,6 @@
     function collectRows(options) {
       options = options || {};
       if (!body) return sharedRows.slice();
-      var previousRakeByGroup = {};
       return Array.prototype.slice.call(body.querySelectorAll("[data-rakeback-shared-row]")).map(function (row) {
         applySharedRowDateInput(row);
         var roomSelect = row.querySelector("[data-rakeback-room]");
@@ -2415,13 +2418,12 @@
         var percent = parseNumber(percentInput ? percentInput.value : "");
         var groupId = row.getAttribute("data-rakeback-group") || "";
         var kind = row.getAttribute("data-rakeback-kind") === "addon" ? "addon" : "base";
-        var previousRake = kind === "addon" ? parseNumber(previousRakeByGroup[groupId]) : 0;
+        var previousRake = kind === "addon" ? getSharedDomPreviousRake(row) : 0;
         var rakeDelta = kind === "addon" ? (hasRakeInputValue ? rake - previousRake : 0) : rake;
         var roomAmount = rakeDelta * percent / 100;
         if (discountInput && discountInput.checked) roomAmount *= 0.85;
         roomAmount = normalizeRakebackRoomAmount(room, roomAmount);
         var amount = getReportAmount(room, roomAmount);
-        if (kind !== "addon" || hasRakeInputValue) previousRakeByGroup[groupId] = rake;
         var reportedAt = row.getAttribute("data-rakeback-reported-at") || "";
         var reportId = row.getAttribute("data-rakeback-report-id") || "";
         var accounted = row.getAttribute("data-rakeback-accounted") === "1" || !!reportedAt || !!reportId;

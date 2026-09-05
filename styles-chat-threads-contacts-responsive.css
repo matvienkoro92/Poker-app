@@ -1,10 +1,7 @@
 /* Chat CSS: responsive and late thread/contact overrides.
  * Extracted from styles-chat-threads-contacts.css; keep import order in styles-chat-threads-contacts.css stable. */
 
-  line-height: 0;
-  color: inherit;
-}
-.chat-general-header .chat-general-invite-friend-btn__icon svg {
+  .chat-general-header .chat-general-invite-friend-btn__icon svg {
   width: 16px;
   height: 16px;
 }

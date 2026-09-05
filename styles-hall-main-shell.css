@@ -1463,3 +1463,5 @@
   text-align: center;
 }
 [data-theme="light"] .hall-shame-board__corgi-gallery-title {
+color: rgba(71, 85, 105, 0.88);
+}

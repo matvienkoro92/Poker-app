@@ -10,8 +10,8 @@
     "web-push": "^3.6.7"
   },
   "scripts": {
-    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/generate-rating-thumbnails.js && node scripts/copy-to-public.js",
-    "build:static": "node scripts/copy-to-public.js",
+    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/generate-rating-thumbnails.js && node scripts/generate-sticker-previews.js && node scripts/copy-to-public.js && node scripts/minify-public.js",
+    "build:static": "node scripts/generate-sticker-previews.js && node scripts/copy-to-public.js && node scripts/minify-public.js",
     "android:sync": "npm run build && npx cap sync android",
     "android:apk:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
     "android:apk:release": "npm run android:sync && cd android && ./gradlew assembleRelease",
@@ -22,11 +22,11 @@
     "smoke:nav": "node scripts/smoke-navigation.js",
     "smoke:visual": "node scripts/smoke-visual.js",
     "smoke:chat": "node scripts/smoke-chat-flows.js",
-    "release:check": "npm run build:static && npm run check:syntax && npm run smoke && npm run assets:report && npm run test:contracts && node --test tests/*.test.js && SMOKE_NAV_ADMIN_DEEP=1 npm run smoke:nav && npm run smoke:visual",
+    "release:check": "npm run build:static && npm run check:syntax && npm run smoke && npm run assets:report && npm run test:contracts && node --test tests/*.test.js && SMOKE_NAV_ADMIN_DEEP=1 npm run smoke:nav && npm run smoke:visual && npm run test:pwa-update",
     "test:daily-poker": "node scripts/daily-poker-tests.js",
     "test:analytics": "node scripts/analytics-tracking-tests.js",
     "test:keyboard-dock": "node scripts/chat-keyboard-dock-math-tests.js",
-    "check:syntax": "node scripts/check-js-syntax.js",
+    "check:syntax": "node scripts/check-js-syntax.js && node scripts/check-css-syntax.js",
     "check:handlers": "node scripts/check-js-syntax.js",
     "check:calculations": "node --test tests/admin-report-shifts-rakeback.test.js tests/raffle-calculation-summary.test.js && node scripts/calculation-redis-health-check.js",
     "check:calculations:redis": "node scripts/calculation-redis-health-check.js",
@@ -52,11 +52,26 @@
     "avatars:assign-missing": "node scripts/assign-random-preset-avatars.js",
     "avatars:assign-missing:apply": "node scripts/assign-random-preset-avatars.js --apply",
     "bump:pwa-version": "node scripts/bump-pwa-login-version.js",
-    "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js"
+    "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js",
+    "test:redis": "node scripts/test-redis-integrity.js",
+    "measure:mobile": "node scripts/measure-mobile-startup.js",
+    "check:build-tools": "node scripts/check-build-tools.js",
+    "test:pwa-update": "node scripts/test-pwa-update.js"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.0",
-    "sharp": "^0.34.5"
+    "esbuild": "0.28.2",
+    "playwright": "1.62.1",
+    "sharp": "^0.35.4"
+  },
+  "overrides": {
+    "@capacitor/assets": {
+      "sharp": "$sharp",
+      "tar": "^7.5.22"
+    },
+    "xcode": {
+      "uuid": "^11.1.1"
+    }
   }
 }

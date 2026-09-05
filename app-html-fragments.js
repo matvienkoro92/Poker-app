@@ -384,7 +384,17 @@
     }
   })();
 
+  (function loadCurrentViewStyles() {
+    function run() {
+      if (typeof window.pokerEnsureViewStyles !== "function") return;
+      Promise.resolve(window.pokerEnsureViewStyles(document.body.getAttribute("data-view") || "home")).catch(function () {});
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run, { once: true });
+    else run();
+  })();
+
   (function pokerProgressivelyHydrateViews() {
+    if (window.__pokerAllowProgressiveViewHydration !== true) return;
     var primaryStructureQueue = [
       { view: "profile" },
       { view: "summer-rating", html: "winter-rating" },

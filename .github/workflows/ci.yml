@@ -16,17 +16,26 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install
         run: npm ci
+
+      - name: Build tool compatibility
+        run: npm run check:build-tools
 
       - name: Build
         run: npm run build
 
       - name: Install Playwright Chromium
         run: npx playwright install chromium
+
+      - name: Redis integration checks
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y redis-server
+          npm run test:redis
 
       - name: Release gate
         run: npm run release:check

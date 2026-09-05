@@ -1,9 +1,9 @@
 /* Profile CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-profile-core-avatar.css?v=4.008");
-@import url("./styles-profile-poker21.css?v=3.153");
-@import url("./styles-profile-status-social.css?v=3.900");
-@import url("./styles-profile-adjacent-tools.css?v=3.392");
-@import url("./styles-profile-modals-tail.css?v=3.600");
+@import url("./styles-profile-core-avatar.css?v=4.002");
+@import url("./styles-profile-poker21.css?v=4.002");
+@import url("./styles-profile-status-social.css?v=4.002");
+@import url("./styles-profile-adjacent-tools.css?v=4.002");
+@import url("./styles-profile-modals-tail.css?v=4.002");
 
 /* Desktop profile header: specialization on top, gender directly below. */
 @media (min-width: 701px) {

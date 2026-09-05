@@ -104,7 +104,7 @@ test("bet action is a single horizontal half-text half-art card", function () {
   assert.match(client, /tournament-bet-modal__offer/);
   assert.match(client, /tournament-bet-modal__feature-art/);
   assert.match(client, /tournament-bet-self-hero-v2\.jpg/);
-  assert.match(html, /<link rel="stylesheet" href="\.\/styles-tournament-bet\.css\?v=[^"]+"/);
+  assert.match(html, /<link type="application\/poker-lazy-style" data-poker-lazy-domain="tournament-bet" href="\.\/styles-tournament-bet\.css\?v=[^"]+"/);
   assert.match(css, /\.tournament-bet-modal__offer \.tournament-bet-modal__bet/);
   assert.match(css, /\.tournament-bet-modal__feature\s*\{[^}]*grid-template-columns:\s*repeat\(2,/s);
   assert.match(client, /id="tournamentBetTitle">Ставка на себя<\/h2>/);
@@ -281,7 +281,17 @@ test("every tournament bet can be copied, shared and opened by deep link", funct
   assert.match(client, /data-tournament-bet-share>Поделиться/);
   assert.match(client, /"tournament_bet_" \+ String\(id \|\| ""\)/);
   assert.match(client, /\^tournament_bet_\(tb_/);
-  assert.match(client, /if \(deepLinkEventId\) open\(\)/);
+  const initialLoad = client.match(/function initialLoad\(\) \{[^\n]+\}/);
+  assert.ok(initialLoad, "startup routing is present");
+  const vm = require("node:vm");
+  for (const [eventId, section, expected] of [["tb_123", false, "open"], ["", true, "open"], ["", false, "summary"]]) {
+    const calls = [];
+    vm.runInNewContext(initialLoad[0] + "; initialLoad();", {
+      deepLinkEventId: eventId, deepLinkSection: section,
+      open: () => calls.push("open"), load: (summary) => calls.push(summary ? "summary" : "full"),
+    });
+    assert.deepEqual(calls, [expected]);
+  }
 });
 
 test("club news has compact synchronous first-paint geometry", function () {

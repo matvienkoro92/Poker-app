@@ -113,6 +113,7 @@ module.exports = async function handler(req, res) {
     return;
   }
   try {
+    if (await require("../lib/session-revocation").rejectRevokedSessions(req, res)) return;
     const fn = handlers[segment]();
     const handlerFn = typeof fn === "function" ? fn : fn.default || fn;
     await handlerFn(req, res);

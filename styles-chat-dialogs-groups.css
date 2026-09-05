@@ -1,4 +1,4 @@
 /* styles-chat-dialogs-groups.css entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-chat-dialogs-list.css");
-@import url("./styles-chat-groups.css");
-@import url("./styles-chat-dialogs-groups-responsive.css");
+@import url("./styles-chat-dialogs-list.css?v=4.002");
+@import url("./styles-chat-groups.css?v=4.002");
+@import url("./styles-chat-dialogs-groups-responsive.css?v=4.002");

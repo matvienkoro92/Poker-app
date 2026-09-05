@@ -83,7 +83,9 @@ async function main() {
     for (const [before, after] of replacements) source = source.split(before).join(after);
     fs.writeFileSync(filePath, source);
   }
-  for (const item of converted) fs.unlinkSync(path.join(root, "assets", item.relative));
+  if (!process.argv.includes("--keep-originals")) {
+    for (const item of converted) fs.unlinkSync(path.join(root, "assets", item.relative));
+  }
 
   const before = converted.reduce((sum, item) => sum + item.before, 0);
   const after = converted.reduce((sum, item) => sum + item.after, 0);

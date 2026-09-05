@@ -874,3 +874,6 @@ html.app-view-home .feature--rating-spring-promo:hover,
     margin-right: 4px;
   }
   .feature--rating-spring-promo .feature__cup--right {
+margin-left: 4px;
+  }
+}

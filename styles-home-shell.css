@@ -4,11 +4,7 @@
 /* Home header, welcome actions, charter and gazette surfaces.
  * Extracted from styles.css; keep import order in styles.css stable. */
 
-  min-width: 120px;
-  right: 0;
-  left: auto;
-}
-.header-greeting-wrap {
+  .header-greeting-wrap {
   display: flex;
   flex-direction: row;
   align-items: flex-end;

@@ -4943,8 +4943,6 @@ function initAdminReportModal() {
       readRakebackDeletedRows: readRakebackDeletedRows,
       clearStaleRakebackLocalDraftAfterTemplateReset: clearStaleRakebackLocalDraftAfterTemplateReset,
       getRakebackDeletedTemplateMap: getRakebackDeletedTemplateMap,
-      getAdminReportApiBase: getAdminReportApiBase,
-      buildAuthBody: buildAuthBody,
       saveLocalRakebackDraftRows: saveLocalRakebackDraftRows,
       rememberDeletedRakebackTemplates: rememberDeletedRakebackTemplates,
       saveRakebackDraftRowsNow: saveRakebackDraftRowsNow,

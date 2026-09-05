@@ -388,13 +388,16 @@
   }
 
   function open() {
-    ensureModal();
-    modal.hidden = false;
-    document.body.classList.add("tournament-bet-modal-open");
-    setStatus("");
-    load(false);
-    clearInterval(refreshTimer);
-    refreshTimer = window.setInterval(function () { if (modal && !modal.hidden) load(true); }, 15000);
+    var styles = typeof window.pokerEnsureStyleDomains === "function" ? window.pokerEnsureStyleDomains(["tournament", "tournament-bet"]) : null;
+    return Promise.resolve(styles).then(function () {
+      ensureModal();
+      modal.hidden = false;
+      document.body.classList.add("tournament-bet-modal-open");
+      setStatus("");
+      load(false);
+      clearInterval(refreshTimer);
+      refreshTimer = window.setInterval(function () { if (modal && !modal.hidden) load(true); }, 15000);
+    }).catch(function () { setStatus("Не удалось открыть турнир. Попробуйте ещё раз."); });
   }
 
   function close() {

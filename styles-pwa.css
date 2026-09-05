@@ -935,3 +935,7 @@ body.pwa-auth-gated #app {
 .chat-switcher-btn--header .chat-switcher-btn__arrow { font-size: 9px; }
 .chat-switcher-btn--header .chat-switcher-btn__dot { width: 5px; height: 5px; }
 .chat-switcher-wrap--header .chat-switcher-dropdown {
+min-width: 120px;
+  right: 0;
+  left: auto;
+}

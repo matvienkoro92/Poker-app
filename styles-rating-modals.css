@@ -1,7 +1,6 @@
 /* Rating CSS: player, date and info modal surfaces.
  * Extracted from styles-rating-tables-modals.css; keep import order in styles-rating-tables-modals.css stable. */
 
-}
 [data-theme="light"] .winter-rating__spring-league-share-wrap .winter-rating__share-btn.winter-rating__share-btn--copy-icon {
   box-shadow: 0 4px 14px rgba(251, 191, 36, 0.4);
 }
@@ -1043,3 +1042,5 @@
   padding: 0;
 }
 .spring-rating-info-modal__close:hover {
+background: rgba(251, 191, 36, 0.28);
+}

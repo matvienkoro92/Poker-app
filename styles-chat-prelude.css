@@ -4,17 +4,7 @@
 /* Chat lists, messages, composers, contacts and chat interaction surfaces.
  * Extracted from styles.css; keep import order in styles.css stable. */
 
-  list-style: none;
-  margin: 0;
-  padding: 10px 4px 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.85;
-  color: var(--muted, #94a3b8);
-}
-.roman-task-planner__section-head:first-child {
+  .roman-task-planner__section-head:first-child {
   padding-top: 4px;
 }
 [data-theme="light"] .roman-task-planner__section-head {

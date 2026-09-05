@@ -173,12 +173,7 @@
             openPanel.removeAttribute("aria-modal");
           }
         }, true);
-        modal.addEventListener("keydown", function (event) {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          var trigger = event.target && event.target.closest ? event.target.closest("[data-admin-report-open-rakeback]") : null;
-          if (!openRakebackOverlay(trigger)) return;
-          event.preventDefault();
-        });
+
       }
 
       bindList(elements.cashInputs, "input", function () {
@@ -280,16 +275,6 @@
           Promise.resolve(saveResult).finally(function () {
             elements.figuresSaveBtn.disabled = false;
           });
-        });
-      }
-
-      var rakebackTrigger = (elements.root || document).querySelector("[data-admin-report-open-rakeback]");
-      if (rakebackTrigger && rakebackTrigger.dataset.calculationRakebackBound !== "1") {
-        rakebackTrigger.dataset.calculationRakebackBound = "1";
-        rakebackTrigger.addEventListener("click", openRakebackTotalsFromCalculations);
-        rakebackTrigger.addEventListener("keydown", function (event) {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          openRakebackTotalsFromCalculations(event);
         });
       }
 

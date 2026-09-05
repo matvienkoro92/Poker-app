@@ -2987,8 +2987,7 @@ add("CRM automatic week totals have no destructive save action", () =>
 add("CRM calculations rakeback link has one keyboard-accessible handler", () =>
   hasAll("globalModalsAdminFragment", [
     "data-admin-report-open-rakeback",
-    'role="button"',
-    'tabindex="0"',
+    '<button type="button" class="admin-report-calculations__field',
   ]) &&
   !files.globalModalsAdminFragment.includes("onclick=") &&
   hasAll("appAdminReportsCalculationsLogic", [
@@ -2996,8 +2995,8 @@ add("CRM calculations rakeback link has one keyboard-accessible handler", () =>
   ]) &&
   hasAll("appAdminReportsCalculations", [
     "function openRakebackOverlay(trigger)",
-    'event.key !== "Enter" && event.key !== " "',
-  ])
+  ]) &&
+  !files.appAdminReportsCalculations.includes('rakebackTrigger.addEventListener')
 );
 
 add("CRM statistics never reuse failed or stale period details", () =>

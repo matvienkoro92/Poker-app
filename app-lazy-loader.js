@@ -24,7 +24,7 @@
     "spring-rating": ["rating-common", "rating-spring"],
     "summer-rating": ["rating-common", "rating-summer"],
     "raffles": ["raffles"],
-    "daily-poker": ["learning"],
+    "daily-poker": ["learning", "home-widget-sng"],
     "learn-play-hub": ["learning"],
     "bonus-game": ["learning"],
     "cooler-game": ["learning"],
@@ -386,15 +386,7 @@
     window.__pokerLikelyViewAssetsPrewarmed = true;
     prewarmProfileFriendsPreview();
     prefetchProfileAchievementScripts();
-    var idle = window.requestIdleCallback || function (cb) {
-      return setTimeout(cb, 900);
-    };
-    idle(function () {
-      if (document.hidden) return;
-      if (shouldSkipIntentPrewarm()) return;
-      var ready = ensureDomainsMaybeAsync(["learning", "profile", "rating-common"], { styles: true, scripts: false });
-      if (ready && typeof ready.catch === "function") ready.catch(function () {});
-    }, { timeout: 2500 });
+    // Styles are warmed by pointer/focus/touch intent, not speculatively at startup.
   };
   window.addEventListener("poker-telegram-auth", function () {
     profileFriendsPreviewPrewarmPromise = null;

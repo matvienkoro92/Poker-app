@@ -1,11 +1,7 @@
 /* Chat CSS: responsive dialog/group overrides.
  * Extracted from styles-chat-dialogs-groups.css; keep import order in styles-chat-dialogs-groups.css stable. */
 
-  margin-right: auto;
-  box-sizing: border-box;
-  text-align: left;
-}
-.chat-group-info-modal__title-edit-label {
+  .chat-group-info-modal__title-edit-label {
   margin-top: 8px;
 }
 .chat-group-info-modal__desc-note {
