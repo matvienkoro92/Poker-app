@@ -6,6 +6,7 @@
   var modal = null;
   var bodyEl = null;
   var statusEl = null;
+  var joinActionError = "";
   var state = null;
   var loading = false;
   var homeSummaryInFlight = null;
@@ -271,6 +272,7 @@
     var timeoutId = controller ? window.setTimeout(function () {
       controller.abort();
     }, timeoutMs) : null;
+    if (payload && payload.action === "join") joinActionError = "";
     setStatus(options.status || "Идет загрузка...");
     return fetch(baseUrl() + API_PATH, {
       method: "POST",
@@ -286,6 +288,7 @@
             pokerTrackAnalyticsEvent("sng_joined", { name: String(sngEventId), event_id: "evt_sng_" + String(sngEventId).replace(/[^a-zA-Z0-9_-]/g, "_") + "_" + (typeof getInstallationId === "function" ? getInstallationId() : "") });
           }
           state = data;
+          if (payload && payload.action === "join") joinActionError = "";
           activeTournamentId = data.tournamentId || activeTournamentId;
           rememberStateRevision(data);
           render();
@@ -298,9 +301,16 @@
         var message = error && error.name === "AbortError"
           ? "Сервер не успел подтвердить действие. Повторите попытку: уже проведённая оплата не спишется повторно."
           : (error.message || "Ошибка");
-        setStatus(message, "error");
-        if (statusEl && typeof statusEl.scrollIntoView === "function") {
-          statusEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        if (payload && payload.action === "join") {
+          joinActionError = message;
+          setStatus("");
+          render();
+          var joinError = bodyEl && bodyEl.querySelector("[data-sng-join-error]");
+          if (joinError && typeof joinError.scrollIntoView === "function") {
+            joinError.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          }
+        } else {
+          setStatus(message, "error");
         }
         return null;
       })
@@ -1106,13 +1116,16 @@
 
   function renderUserAction(data) {
     var mine = data.myEntry;
+    var joinError = joinActionError
+      ? '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected sng-champions-modal__join-error" data-sng-join-error role="alert">' + escapeHtml(joinActionError) + '</div>'
+      : "";
     if (data.status === "open" && !mine) {
-      return '<div class="sng-champions-modal__join-dock">' +
+      return joinError + '<div class="sng-champions-modal__join-dock">' +
         '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Записаться · 1 000 ₽</button>' +
       '</div>';
     }
     if (data.status === "open" && mine && mine.status === "rejected") {
-      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Запись отменена. Вы можете записаться снова за 1 000 ₽.</div>' +
+      return joinError + '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Запись отменена. Вы можете записаться снова за 1 000 ₽.</div>' +
         '<div class="sng-champions-modal__join-dock">' +
           '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Записаться · 1 000 ₽</button>' +
         '</div>';
@@ -1123,7 +1136,7 @@
           '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide sng-champions-modal__main-action--confirmed" disabled>✓ Ваша заявка подтверждена</button>' +
         '</div>';
       }
-      return '<div class="sng-champions-modal__notice">Подтвердите запись: с баланса Poker21 будет списано 1 000 ₽.</div>' +
+      return joinError + '<div class="sng-champions-modal__notice">Подтвердите запись: с баланса Poker21 будет списано 1 000 ₽.</div>' +
         '<div class="sng-champions-modal__join-dock">' +
           '<button type="button" class="sng-champions-modal__main-action" data-sng-action="join">Записаться · 1 000 ₽</button>' +
         '</div>';

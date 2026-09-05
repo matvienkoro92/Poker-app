@@ -1528,6 +1528,10 @@
   background: rgba(110, 24, 13, 0.34);
 }
 
+.sng-champions-modal__join-error {
+  margin: 8px 0 10px;
+}
+
 .sng-champions-modal__entries {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
