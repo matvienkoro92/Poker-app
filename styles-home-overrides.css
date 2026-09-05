@@ -2702,7 +2702,7 @@ html[data-theme="neon"] .app.app--view-home .header-more-menu .theme-toggle .the
 
 .app.app--view-home .home-daily-shortcuts.home-mini-icons {
   display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   grid-template-rows: var(--home-shortcuts-icons-row) !important;
   align-items: stretch !important;
   justify-items: stretch !important;
@@ -6538,3 +6538,27 @@ html body #app.app.app--view-home
     border: 0;
   }
 }
+
+/* Secondary entry beside the evening tournament section. */
+.home-tournament-bet-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border: 1px solid rgba(255, 166, 40, 0.6);
+  border-radius: 16px;
+  background: linear-gradient(110deg, #251707, #100e0b);
+  color: #fff0ce;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.home-tournament-bet-link img { width: 48px; height: 48px; object-fit: contain; flex-shrink: 0; }
+.home-tournament-bet-link__title { flex: 1; min-width: 0; font-size: 14px; font-weight: 800; }
+.home-tournament-bet-link__bank { color: #ffd47a; font-size: 12px; font-weight: 700; }
+.home-tournament-bet-link__arrow { color: #ffd47a; font-size: 26px; }
+.home-tournament-bet-link:hover { border-color: #ffd47a; }
+.home-tournament-bet-link:focus-visible { outline: 2px solid #ffd47a; outline-offset: 3px; }

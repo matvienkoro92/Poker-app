@@ -394,7 +394,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament" href="./styles-tournament.css?v=4.001" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament" href="./styles-home-overrides.css?v=4.011" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.012" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.001" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.001" />
@@ -962,13 +962,7 @@
                 <img class="home-mini-icon__hero home-mini-icon__hero--raffles" src="./assets/home-menu-icon-raffle-tickets.webp?v=3.701" alt="" width="408" height="354" loading="lazy" decoding="async" aria-hidden="true" />
                 <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
               </a>
-              <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--tournament-bet" data-tournament-bet-open title="Ставка на турнир" aria-label="Открыть ставку на турнир">
-                <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-menu-stage-bg.webp?v=3.701" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
-                <img class="home-mini-icon__hero home-mini-icon__hero--tournament-bet" src="./assets/home-menu-icon-tournament-bet-chip-v1.webp?v=2" alt="" width="320" height="320" loading="lazy" decoding="async" aria-hidden="true" />
-                <span class="home-mini-icon__label">Ставка на турнир</span>
-                <small class="home-mini-icon__sub" data-tournament-bet-home-bank>Скоро</small>
-              </button>
-              <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 15 000 рублей">
+                  <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 15 000 рублей">
                 <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 15 000 ₽</span>
                 <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-menu-stage-bg.webp?v=3.701" alt="" width="640" height="640" loading="lazy" decoding="async" aria-hidden="true" />
                 <img class="home-mini-icon__hero home-mini-icon__hero--levels" src="./assets/home-menu-icon-achievements-monkey.webp?v=1" alt="" width="512" height="512" loading="lazy" decoding="async" aria-hidden="true" />
@@ -989,7 +983,13 @@
                 </button>
               </div>
             </div>
-            <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
+            <button type="button" class="home-tournament-bet-link" data-tournament-bet-open aria-label="Открыть ставку на турнир">
+          <img src="./assets/home-menu-icon-tournament-bet-chip-v1.webp?v=2" alt="" width="56" height="56" loading="lazy" decoding="async" />
+          <span class="home-tournament-bet-link__title">Ставка на турнир</span>
+          <small class="home-tournament-bet-link__bank" data-tournament-bet-home-bank>Скоро</small>
+          <span class="home-tournament-bet-link__arrow" aria-hidden="true">›</span>
+        </button>
+        <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
               <h2 class="home-tournament-section-title">Турниры вечера в 18 МСК</h2>
               <div class="home-tournament-bonuses home-tournament-bonuses--upper" aria-label="Бонусы за комбинации">
                 <div class="home-tournament-bonuses__grid home-tournament-bonuses__grid--upper" role="list">
