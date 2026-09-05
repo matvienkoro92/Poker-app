@@ -3314,7 +3314,7 @@ function initRaffles() {
             "<button type=\"button\" class=\"profile-exit-btn\" data-poker-login-action=\"1\">Войти в аккаунт</button>";
           raffleEmpty.classList.add("raffle-empty--login");
         } else {
-          raffleEmpty.textContent = "Ошибка загрузки. Проверьте сеть или перезайдите.";
+          raffleEmpty.innerHTML = '<span>Не удалось загрузить розыгрыши.</span><button type="button" class="profile-exit-btn" data-raffles-list-retry>Повторить загрузку</button>';
           raffleEmpty.classList.remove("raffle-empty--login");
         }
         raffleEmpty.classList.remove("raffle-empty--hidden");
@@ -3364,7 +3364,21 @@ function initRaffles() {
             return r.json().catch(function () { return null; });
           }).catch(function () { return null; })
         : Promise.resolve(null);
-      Promise.all([fetch(url), pendingCompletedFetch])
+      var prefetch = window.__pokerRafflesPrefetch;
+      var canUsePrefetch = useActiveScope && !loadOptions.skipCache && !loadOptions.deadlineRefresh &&
+        !bypassActiveScopeCache && prefetch && prefetch.key === base + qLead && Date.now() - prefetch.at < 30000;
+      var listRequest;
+      if (canUsePrefetch) {
+        window.__pokerRafflesPrefetch = null;
+        listRequest = prefetch.promise.then(function (response) { return response || fetch(url); });
+      } else {
+        listRequest = fetch(url);
+      }
+      var requestTimer;
+      var requestDeadline = new Promise(function (_, reject) {
+        requestTimer = setTimeout(function () { reject(new Error("raffles_timeout")); }, 15000);
+      });
+      Promise.race([Promise.all([listRequest, pendingCompletedFetch]), requestDeadline])
         .then(function (responses) {
           var r = responses[0];
           var pendingData = responses[1];
@@ -3398,13 +3412,27 @@ function initRaffles() {
           }
           if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
           applyRafflesData(data, switchToCompleted);
+          if (data.viewerDetailsDeferred) {
+            fetch(base + "/api/raffles" + qLead + "&scope=viewer-details")
+              .then(function (response) { return response.ok ? response.json() : null; })
+              .then(function (details) {
+                if (loadSeq !== rafflesLoadSeq || !details || !details.ok) return;
+                data.subscriptionGate = details.subscriptionGate;
+                data.currentWeekIssueTotals = details.currentWeekIssueTotals;
+                rafflesSubscriptionGate = details.subscriptionGate || null;
+                if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
+                  rafflesCompletedRuntime.setCurrentWeekIssueTotals(details.currentWeekIssueTotals || null);
+                }
+                if (currentRaffleData) renderRaffle(currentRaffleData);
+              }).catch(function () {});
+          }
         })
         .catch(function () {
           if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
           if (loadOptions.includeArchive) rafflesArchiveLoading = false;
           if (loadSeq !== rafflesLoadSeq) return;
           if (loadOptions.includeArchive || !cacheUsable) showRafflesError();
-        });
+        }).finally(function () { clearTimeout(requestTimer); });
     }
 
     if (qLead.indexOf("guestDeviceId=") !== -1) {
@@ -3907,6 +3935,11 @@ function initRaffles() {
   if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });
   if (rafflesTabActive) rafflesTabActive.addEventListener("click", function () { setRafflesTab("active"); });
   if (rafflesTabCompleted) rafflesTabCompleted.addEventListener("click", function () { setRafflesTab("completed"); });
+  if (raffleEmpty) raffleEmpty.addEventListener("click", function (event) {
+    if (event.target && event.target.closest && event.target.closest("[data-raffles-list-retry]")) {
+      loadRaffles(false, { skipCache: true });
+    }
+  });
   if (rafflesTabLeaders) rafflesTabLeaders.addEventListener("click", function () { setRafflesTab("leaders"); });
   if (rafflesCompleted && rafflesCompleted.dataset.archiveDeferredBound !== "1") {
     rafflesCompleted.dataset.archiveDeferredBound = "1";

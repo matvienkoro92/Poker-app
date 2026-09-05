@@ -375,7 +375,26 @@
   window.pokerEnsureLazyDomains = function (domains, opts) {
     return ensureDomainsMaybeAsync(domains, opts || { styles: true, scripts: true });
   };
+  function prefetchRafflesData() {
+    if (typeof getApiBase !== "function" || typeof pokerRafflesApiQueryLeading !== "function") return;
+    var base = getApiBase();
+    var query = pokerRafflesApiQueryLeading();
+    if (!base || query === "?initData=" || /localhost|127\.0\.0\.1/.test(base)) return;
+    var key = base + query;
+    var previous = window.__pokerRafflesPrefetch;
+    if (previous && previous.key === key && Date.now() - previous.at < 30000) return;
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 15000);
+    var entry = { key: key, at: Date.now() };
+    entry.promise = fetch(base + "/api/raffles" + query + "&scope=active&_t=" + entry.at, { signal: controller.signal })
+      .then(function (response) { return response.ok ? response : null; })
+      .catch(function () { return null; })
+      .finally(function () { clearTimeout(timer); });
+    window.__pokerRafflesPrefetch = entry;
+  }
+
   window.pokerEnsureViewScripts = function (viewName) {
+    if (String(viewName) === "raffles") prefetchRafflesData();
     return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || [], { styles: true, scripts: true });
   };
   window.pokerEnsureViewStyles = function (viewName) {
