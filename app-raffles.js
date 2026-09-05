@@ -3270,13 +3270,15 @@ function initRaffles() {
     }
 
     function showRafflesLoading() {
+      if (rafflesRoot && rafflesRoot.dataset.resultsLoaded === "1") return;
+      if (rafflesRoot) rafflesRoot.classList.add("raffles--initial-loading");
       if (loadOptions.keepCurrentOnLoading) {
         if (raffleEnd) raffleEnd.textContent = "Подводим итоги…";
         return;
       }
       setRaffleActiveActionsVisible(false);
       if (raffleEmpty) {
-        raffleEmpty.innerHTML = "<span class=\"raffle-loading__spinner\" aria-hidden=\"true\"></span><span class=\"raffle-loading__text\">Подождите, Розыгрыш загружается</span>";
+        raffleEmpty.innerHTML = '<span class="raffles-loading-status" role="status"><span class="raffle-loading__spinner" aria-hidden="true"></span>Загружаем розыгрыши…</span><span class="raffles-card-skeleton" aria-hidden="true"><span class="raffles-card-skeleton__art"></span><span class="raffles-card-skeleton__line"></span><span class="raffles-card-skeleton__line raffles-card-skeleton__line--short"></span><span class="raffles-card-skeleton__button"></span></span>';
         raffleEmpty.classList.remove("raffle-empty--login");
         raffleEmpty.classList.remove("raffle-empty--hidden");
       }
@@ -3294,6 +3296,7 @@ function initRaffles() {
     }
 
     function showRafflesError(data) {
+      if (rafflesRoot) rafflesRoot.classList.remove("raffles--initial-loading");
       if (loadOptions.includeArchive && rafflesCompleted) {
         rafflesCompleted.insertAdjacentHTML("afterbegin", '<button type="button" class="raffles-archive-retry" data-raffles-list-retry>Не удалось загрузить завершённые розыгрыши. Повторить</button>');
         return;
@@ -3417,6 +3420,10 @@ function initRaffles() {
 
   function applyRafflesData(data, switchToCompleted) {
         if (!data || !data.ok) return;
+        if (rafflesRoot) {
+          rafflesRoot.classList.remove("raffles--initial-loading");
+          rafflesRoot.dataset.resultsLoaded = "1";
+        }
         rafflesViewerPokerPlusStatusLevel = Math.max(
           0,
           parseInt(data.viewerPokerPlusStatusLevel, 10) || 0

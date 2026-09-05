@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { transform } = require("esbuild");
+const vm = require("node:vm");
 const output = path.join(__dirname, "..", "public");
 async function main() {
   let before = 0, after = 0;
@@ -10,12 +11,21 @@ async function main() {
     if (!/^(?:app.*\.js|styles.*\.css)$/.test(name)) continue;
     const file = path.join(output, name);
     const source = fs.readFileSync(file, "utf8");
+    // esbuild can duplicate block functions inside legacy `with` scopes.
+    // Keep those scripts intact and validate the actual executable output.
+    if (name.endsWith(".js") && /\bwith\s*\(/.test(source)) {
+      new vm.Script(source, { filename: name });
+      before += Buffer.byteLength(source);
+      after += Buffer.byteLength(source);
+      continue;
+    }
     const result = await transform(source, {
       loader: name.endsWith(".css") ? "css" : "js",
       minifyWhitespace: true, minifyIdentifiers: false, minifySyntax: false,
       legalComments: "inline", sourcefile: name,
     });
     if (result.warnings.length) throw new Error(name + ": " + result.warnings.map(w => w.text).join("; "));
+    if (name.endsWith(".js")) new vm.Script(result.code, { filename: name });
     const inputBytes = Buffer.byteLength(source);
     const outputBytes = Buffer.byteLength(result.code);
     before += inputBytes;

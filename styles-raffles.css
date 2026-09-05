@@ -1,2 +1,24 @@
 /* Raffles CSS entrypoint. */
 @import url("./styles-rating-raffles.css?v=4.002");
+
+/* First-load placeholders; refreshed results remain visible. */
+.raffles--initial-loading .raffles-hero dd,
+.raffles--initial-loading .raffles-tab__meta {
+  color: transparent !important;
+  text-shadow: none !important;
+  border-radius: 8px;
+  background: linear-gradient(100deg, #51452e 20%, #93805b 45%, #51452e 70%);
+  background-size: 240% 100%;
+  animation: raffle-skeleton-shimmer 1.6s ease-in-out infinite;
+}
+.raffles-loading-status { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; margin-bottom: 16px; }
+.raffles-card-skeleton { display: grid; grid-template-columns: 32% 1fr; gap: 14px; padding: 20px; min-height: 210px; width: 100%; border: 1px solid #79623b; border-radius: 20px; background: #11151d; }
+.raffles-card-skeleton > span { display: block; border-radius: 10px; background: linear-gradient(100deg, #252a33 20%, #41434a 45%, #252a33 70%); background-size: 240% 100%; animation: raffle-skeleton-shimmer 1.6s ease-in-out infinite; }
+.raffles-card-skeleton__art { grid-row: span 3; }
+.raffles-card-skeleton__line { height: 24px; }
+.raffles-card-skeleton__line--short { width: 65%; }
+.raffles-card-skeleton__button { height: 46px; align-self: end; }
+@keyframes raffle-skeleton-shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .raffles-card-skeleton > span, .raffles--initial-loading .raffles-hero dd, .raffles--initial-loading .raffles-tab__meta { animation: none; }
+}
