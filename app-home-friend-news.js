@@ -3519,6 +3519,18 @@
     return arrangeClubWinEvents(rows).slice(0, MAX_EVENTS);
   }
 
+  function publishClubNewsProgressively(tasks, publish) {
+    var results = [{ levelRows: [] }, { winners: [] }, {}, { rows: [] }];
+    var remaining = tasks.length;
+    return Promise.all(tasks.map(function (task, index) {
+      return Promise.resolve(task).catch(function () { return { failed: true }; }).then(function (result) {
+        results[index] = result || {};
+        remaining -= 1;
+        publish(results.slice(), remaining === 0);
+      });
+    }));
+  }
+
   function loadClubNews(force) {
     var base = apiBase();
     if (!base) {
@@ -3540,7 +3552,7 @@
     var joiner = suffix ? "&" : "?";
     var tournamentDay = clubTournamentDayKey();
     var dailyRangeQuery = tournamentDay ? "&from=" + encodeURIComponent(tournamentDay) + "&to=" + encodeURIComponent(tournamentDay) : "";
-    var request = Promise.all([
+    var request = publishClubNewsProgressively([
       cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [], failed: true }; }),
       cachedFetchJson(
@@ -3553,10 +3565,7 @@
       clubTournamentSnapshotsReady().catch(function () { return {}; }),
       cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "club-choice-news", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { rows: [] }; }),
-    ]).then(function (results) {
-      if ((results[0] && results[0].failed) || (results[1] && results[1].failed)) {
-        throw new Error("club news source unavailable");
-      }
+    ], function (results, complete) {
       var players = (results[0] && Array.isArray(results[0].levelRows) ? results[0].levelRows : []).map(function (row) {
         return Object.assign({}, row, {
           userId: row && (row.profileId || row.userId || row.accountId || row.dtId) || "",
@@ -3606,16 +3615,16 @@
       // Wins are the default tab and must not wait for the optional wall feed.
       // Publish the core club news as soon as its two primary sources settle;
       // wall posts continue loading independently in the background.
-      clubEvents = nextClubEvents;
-      clubNewsLoaded = true;
+      if (nextClubEvents.length) clubEvents = nextClubEvents;
+      clubNewsLoaded = clubEvents.length > 0 || complete;
       clubNewsLoading = false;
-      clubNewsUpdatedAt = Date.now();
+      if (complete && !results.some(function (result) { return result && result.failed; })) clubNewsUpdatedAt = Date.now();
       clubNewsRetryCount = 0;
       writeClubEventsCache(clubEvents);
       renderClubNews();
       if (newsModalMode === "club") renderModalList(activeModalEvents());
 
-      if (!clubWallLoadPromise) {
+      if (complete && !clubWallLoadPromise) {
         var wallRequest = loadClubWallEvents(players, tournamentDay).then(function (wallEvents) {
           clubWallEvents = Array.isArray(wallEvents) ? wallEvents : [];
           clubWallUpdatedAt = Date.now();
