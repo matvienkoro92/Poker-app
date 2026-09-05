@@ -681,3 +681,25 @@
 .tournament-bet-modal__closed-event[open] .tournament-bet-modal__result-toggle { border-bottom: 1px solid #685331; padding-bottom: 12px; }
 .tournament-bet-modal__closed-event > .tournament-bet-modal__participants-grid,
 .tournament-bet-modal__closed-event > .tournament-bet-modal__share { margin: 0 16px 16px; }
+
+.tournament-bet-modal__closed-event summary.tournament-bet-modal__result-with-art {
+  position: relative;
+  isolation: isolate;
+  padding-right: 36%;
+}
+.tournament-bet-modal__result-art {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 36%;
+  height: 94%;
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+  z-index: -1;
+  filter: drop-shadow(0 0 18px rgba(218, 162, 58, 0.18));
+}
+.tournament-bet-modal__result-with-art .tournament-bet-modal__result-amounts { gap: 12px; }
+@media (max-width: 380px) {
+  .tournament-bet-modal__result-with-art .tournament-bet-modal__result-amounts strong { font-size: 20px; }
+}

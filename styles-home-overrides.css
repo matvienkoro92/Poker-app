@@ -93,7 +93,7 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
 .app.app--view-home .home-club-news {
   width: min(100%, calc(100vw - 8px));
   max-width: 100%;
-  margin: 10px auto 12px;
+  margin: 20px auto 12px;
 }
 
 .app.app--view-home .home-club-news__ticker {
@@ -6636,4 +6636,16 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts .raffle-active-amount-badge {
   box-shadow: 0 0 0 1px rgba(255, 235, 173, 0.45), 0 3px 8px rgba(0, 0, 0, 0.5);
   text-shadow: none;
+}
+
+/* Lift the silver chat tile without restoring its orange glow. */
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item:has(.home-mini-icon__hero--chat) {
+  filter: brightness(1.25);
+  box-shadow: 0 0 0 1px rgba(211, 224, 240, 0.38), 0 0 14px rgba(175, 201, 231, 0.12) !important;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item:has(.home-mini-icon__hero--chat) .home-mini-icon__image--stage {
+  filter: grayscale(1) brightness(1.1) contrast(0.94);
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--chat {
+  filter: saturate(0.65) brightness(1.18) drop-shadow(0 0 9px rgba(220, 232, 250, 0.32));
 }

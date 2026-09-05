@@ -249,10 +249,14 @@
   function closedEventHtml(data) {
     var entries = Array.isArray(data.entries) ? data.entries : [];
     var winner = entries.find(function (entry) { return entry.winner; });
+    var winnerArt = winner && typeof window.pokerGetSummerRatingPlayerArt === "function" ? window.pokerGetSummerRatingPlayerArt(winner.name) : null;
+    var winnerArtSrc = winnerArt && winnerArt.src || "";
+    if (!winnerArtSrc && winner && /^(frankl|andrushamorf|4ezzi)$/i.test(String(winner.name || "").trim())) winnerArtSrc = "./assets/summer-rating-player-morf.webp";
     var settled = data.status === "settled";
     var expanded = bodyEl && bodyEl.querySelector(".tournament-bet-modal__closed-event[open]");
     var payout = data.winnerPaidAmount == null ? data.bank : data.winnerPaidAmount;
-    return '<details class="tournament-bet-modal__closed-event"' + (expanded ? ' open' : '') + '><summary>' +
+    return '<details class="tournament-bet-modal__closed-event"' + (expanded ? ' open' : '') + '><summary' + (winnerArtSrc ? ' class="tournament-bet-modal__result-with-art"' : '') + '>' +
+      (winnerArtSrc ? '<img class="tournament-bet-modal__result-art" src="' + esc(winnerArtSrc) + '" alt="" loading="lazy" decoding="async">' : '') +
       '<span class="tournament-bet-modal__result-status">' + (settled ? 'Событие завершено' : 'Приём ставок закрыт') + '</span>' +
       '<strong class="tournament-bet-modal__result-title">' + esc(data.title || "Ласт-лонгер") + '</strong>' +
       (winner ? '<span class="tournament-bet-modal__result-winner">🏆 ' + esc(winner.name || "Игрок") + '</span>' +
@@ -344,7 +348,11 @@
   function updateHomeButton(data) {
     var amount = document.querySelector("[data-tournament-bet-home-bank]");
     var button = document.querySelector("[data-tournament-bet-open]");
-    if (amount) amount.textContent = data && data.id ? "Банк " + rub(data.bank) : "Скоро";
+    if (amount) {
+      var hasActiveBank = !!(data && data.id && data.status === "open");
+      amount.hidden = !hasActiveBank;
+      amount.textContent = hasActiveBank ? "Банк " + rub(data.bank) : "";
+    }
     if (button) button.classList.toggle("home-mini-icon-item--vote-active", !!(data && data.status === "open"));
   }
 
