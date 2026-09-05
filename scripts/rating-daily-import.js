@@ -54,6 +54,7 @@ function readHistory() {
 }
 
 function run(command, args, options = {}) {
+  const started = performance.now();
   const result = spawnSync(command, args, {
     cwd: ROOT,
     encoding: "utf8",
@@ -66,6 +67,7 @@ function run(command, args, options = {}) {
     if (result.stderr) process.stderr.write(result.stderr);
     throw new Error(`${path.basename(command)} exited with code ${result.status}`);
   }
+  console.error(`Timing: ${path.basename(args[0] || command)} ${((performance.now() - started) / 1000).toFixed(1)}s`);
   return result;
 }
 
@@ -125,11 +127,14 @@ try {
 
   if (!dryRun) {
     const importedAt = new Date().toISOString();
-    const dateMatch = draft.match(/^date:\s*(\d{2}\.\d{2}\.\d{4})/m);
+    const datesBySource = new Map(draft.trim().split(/\n\s*\n/).map((block) => [
+      block.match(/^source:\s*(.+)$/m)?.[1]?.trim(),
+      block.match(/^date:\s*(\d{2}\.\d{2}\.\d{4})/m)?.[1]
+    ]));
     pending.forEach((item) => {
       history.files[item.hash] = {
         source: path.basename(item.file),
-        date: dateMatch ? dateMatch[1] : "",
+        date: datesBySource.get(item.file) || "",
         importedAt
       };
     });

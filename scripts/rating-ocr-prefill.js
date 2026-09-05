@@ -164,32 +164,34 @@ function chooseClosest(tokens, predicate, targetY, maxDistance) {
   return best;
 }
 
+const trophyImages = new Map();
 async function detectTrophyPlace(source, visionCenterY) {
-  const image = sharp(source, { limitInputPixels: false });
-  const meta = await image.metadata();
-  const width = meta.width || 0;
-  const height = meta.height || 0;
+  if (!trophyImages.has(source)) {
+    trophyImages.set(source, sharp(source, { limitInputPixels: false })
+      .toColourspace("srgb").removeAlpha().raw().toBuffer({ resolveWithObject: true }));
+  }
+  const { data, info } = await trophyImages.get(source);
+  const width = info.width;
+  const height = info.height;
   if (!width || !height) return null;
   const left = Math.max(0, Math.round(width * 0.52));
   const cropWidth = Math.min(width - left, Math.round(width * 0.13));
   const centerY = Math.round((1 - visionCenterY) * height);
   const cropHeight = Math.round(height * 0.056);
   const top = Math.max(0, Math.min(height - cropHeight, centerY - Math.round(cropHeight / 2)));
-  const { data } = await image
-    .extract({ left, top, width: cropWidth, height: cropHeight })
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
   let gold = 0;
   let silver = 0;
   let bronze = 0;
-  for (let i = 0; i < data.length; i += 3) {
+  for (let y = top; y < top + cropHeight; y++) {
+  for (let x = left; x < left + cropWidth; x++) {
+    const i = (y * width + x) * info.channels;
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
     if (r > 115 && g > 75 && g < 180 && b < 100 && r > g * 1.1) gold++;
     if (r > 55 && g > 55 && b > 55 && Math.max(r, g, b) - Math.min(r, g, b) < 25) silver++;
     if (r > 75 && g > 45 && g < 115 && b > 35 && b < 105 && r > g * 1.1) bronze++;
+  }
   }
   const area = cropWidth * cropHeight;
   if (gold > area * 0.12) return 1;
@@ -431,6 +433,7 @@ function formatDraft(tournaments) {
     const comments = [];
     if (tournament.time.includes("?") || tournament.date.includes("?")) comments.push("# TODO: проверить дату/время");
     if (!tournament.buyin) comments.push("# TODO: проверить buyin и лигу");
+    if (!tournament.name || tournament.name === "TODO") comments.push("# TODO: проверить название турнира");
     const lines = [
       ...comments,
       `date: ${tournament.date}`,
@@ -544,7 +547,10 @@ if (misses.length) {
   });
 }
 const parsed = imagePaths.map((source) => cachedBySource.get(source)).filter(Boolean);
-if (cacheDir) process.stderr.write(`OCR cache: ${parsed.length - misses.length} hit(s), ${misses.length} miss(es).\n`);
+if (cacheDir) process.stderr.write(`OCR cache: ${imagePaths.length - misses.length} hit(s), ${misses.length} miss(es).\n`);
+if (parsed.length !== imagePaths.length) {
+  throw new Error("Incomplete OCR: missing screenshots. Retry with system OCR permission; nothing will be imported.");
+}
 
 async function main() {
   const tournaments = (await Promise.all(parsed.map(parseOcrFile))).sort((a, b) => {
