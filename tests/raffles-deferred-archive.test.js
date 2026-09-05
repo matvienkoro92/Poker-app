@@ -28,3 +28,23 @@ test('refreshing recent raffles preserves the loading archive and expanded state
   archive.result = ['September'];
   assert.deepEqual(attached.result, ['September']);
 });
+
+test('opening completed requests results even when the recent cache is empty', () => {
+  const source = fs.readFileSync(require('node:path').join(__dirname, '../app-raffles.js'), 'utf8');
+  const start = source.indexOf('  function setRafflesTab(tab)');
+  const end = source.indexOf('  if (rafflesTabCreate)', source.indexOf('\n  }', start));
+  let requests = 0;
+  const context = {
+    rafflesIsAdmin: false, rafflesCurrentTab: 'active', rafflesArchiveLoaded: false,
+    rafflesLastCompleted: [], window: {},
+    getRafflesScrollY: () => 0, getRafflesTabsViewportTop: () => 0,
+    closeRafflesActiveInfoModal() {}, renderDeferredCompletedArchivePanel() {},
+    restoreRafflesTabScroll() {}, requestCompletedArchiveLoad: () => requests++
+  };
+  for (const name of ['rafflesTabCreate','rafflesTabActive','rafflesTabCompleted','rafflesTabLeaders','rafflesPanelCreate','rafflesPanelActive','rafflesPanelCompleted','rafflesPanelLeaders','raffleWinnerLeadersEmpty']) context[name] = null;
+  vm.createContext(context);
+  vm.runInContext(source.slice(start,end),context);
+  context.setRafflesTab('completed');
+  assert.equal(context.rafflesCurrentTab,'completed');
+  assert.equal(requests,1);
+});

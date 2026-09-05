@@ -3294,6 +3294,10 @@ function initRaffles() {
     }
 
     function showRafflesError(data) {
+      if (loadOptions.includeArchive && rafflesCompleted) {
+        rafflesCompleted.insertAdjacentHTML("afterbegin", '<button type="button" class="raffles-archive-retry" data-raffles-list-retry>Не удалось загрузить завершённые розыгрыши. Повторить</button>');
+        return;
+      }
       if (loadOptions.keepCurrentOnLoading) {
         if (raffleEnd) raffleEnd.textContent = "Не удалось обновить итоги. Обновите раздел.";
         return;
@@ -3386,7 +3390,7 @@ function initRaffles() {
           if (loadOptions.includeArchive) rafflesArchiveLoading = false;
           if (loadSeq !== rafflesLoadSeq) return;
           if (!data || !data.ok) {
-            if (!cacheUsable) showRafflesError(data);
+            if (loadOptions.includeArchive || !cacheUsable) showRafflesError(data);
             return;
           }
           if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
@@ -3396,7 +3400,7 @@ function initRaffles() {
           if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
           if (loadOptions.includeArchive) rafflesArchiveLoading = false;
           if (loadSeq !== rafflesLoadSeq) return;
-          if (!cacheUsable) showRafflesError();
+          if (loadOptions.includeArchive || !cacheUsable) showRafflesError();
         });
     }
 
@@ -3884,8 +3888,8 @@ function initRaffles() {
           raffleWinnerLeadersEmpty.textContent = "Загружаем статистику победителей…";
           raffleWinnerLeadersEmpty.classList.remove("raffle-empty--hidden");
         }
-        requestCompletedArchiveLoad();
       }
+      requestCompletedArchiveLoad();
       if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
       return;
     }
@@ -3900,6 +3904,12 @@ function initRaffles() {
   if (rafflesCompleted && rafflesCompleted.dataset.archiveDeferredBound !== "1") {
     rafflesCompleted.dataset.archiveDeferredBound = "1";
     rafflesCompleted.addEventListener("click", function (e) {
+      var retry = e.target && e.target.closest ? e.target.closest("[data-raffles-list-retry]") : null;
+      if (retry) {
+        retry.remove();
+        requestCompletedArchiveLoad();
+        return;
+      }
       if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.handleDeferredArchiveClick === "function" &&
           rafflesCompletedRuntime.handleDeferredArchiveClick(e)) return;
       var summary = e && e.target && e.target.closest ? e.target.closest("summary") : null;
