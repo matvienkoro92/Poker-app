@@ -3120,8 +3120,9 @@
 
   function mountWhenProfileReady() {
     ensureDom();
+    // Club news lives on home and must be interactive before the lazy profile mounts.
+    bind();
     if (el("homeFriendNews")) {
-      bind();
       render();
       return;
     }
