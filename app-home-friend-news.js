@@ -466,6 +466,7 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "gucci💱": "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1",
     "smile😎😊😺": "./assets/club-news-personal/smile-news-cutout.webp?v=4",
     "proxor": "./assets/club-news-personal/proxor-personal-cutout.webp?v=3",
     "luck_is_suck": "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3",

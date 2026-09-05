@@ -382,6 +382,7 @@ function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
 }
 
 var SUMMER_RATING_PLAYER_ART_BY_NICK = {
+  "gucci💱": { src: "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1" },
   "porquinho": { src: "./assets/sng-finalist-porquinho.webp" },
   "поркиньо": { src: "./assets/sng-finalist-porquinho.webp" },
   "поркиньё": { src: "./assets/sng-finalist-porquinho.webp" },

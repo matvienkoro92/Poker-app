@@ -294,7 +294,7 @@
       })
       .catch(function (error) {
         setStatus("");
-        showAlert(error && error.name === "AbortError" ? "Заявка не отправилась: сервер не ответил. Попробуйте еще раз." : (error.message || "Ошибка"));
+        showAlert(error && error.name === "AbortError" ? "Сервер не успел подтвердить действие. Повторите попытку: уже проведённая оплата не спишется повторно." : (error.message || "Ошибка"));
       })
       .finally(function () {
         if (timeoutId) window.clearTimeout(timeoutId);
@@ -540,6 +540,7 @@
   }
 
   var SNG_PLAYER_ART_BY_NICK = {
+    "gucci💱": "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1",
     "porquinho": "./assets/sng-finalist-porquinho.webp",
     "поркиньо": "./assets/sng-finalist-porquinho.webp",
     "поркиньё": "./assets/sng-finalist-porquinho.webp",
@@ -593,6 +594,7 @@
   }
 
   function sngPlayerArt(entry) {
+    if (entry && String(entry.accountId || "") === "ID604155") return "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1";
     var nick = entry && (entry.pokerPlusNickname || entry.displayName);
     if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
       var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
@@ -1098,13 +1100,13 @@
     var mine = data.myEntry;
     if (data.status === "open" && !mine) {
       return '<div class="sng-champions-modal__join-dock">' +
-        '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Записаться</button>' +
+        '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Записаться · 1 000 ₽</button>' +
       '</div>';
     }
     if (data.status === "open" && mine && mine.status === "rejected") {
-      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Ваша заявка отклонена. Пополните баланс на 1000р и подайте заявку еще раз.</div>' +
+      return '<div class="sng-champions-modal__notice sng-champions-modal__notice--rejected">Запись отменена. Вы можете записаться снова за 1 000 ₽.</div>' +
         '<div class="sng-champions-modal__join-dock">' +
-          '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Подать заявку еще раз</button>' +
+          '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide" data-sng-action="join">Записаться · 1 000 ₽</button>' +
         '</div>';
     }
     if (data.status === "open" && mine && mine.status !== "rejected") {
@@ -1113,16 +1115,10 @@
           '<button type="button" class="sng-champions-modal__main-action sng-champions-modal__main-action--wide sng-champions-modal__main-action--confirmed" disabled>✓ Ваша заявка подтверждена</button>' +
         '</div>';
       }
-      if (mine.status === "balance_requested") {
-        return '<div class="sng-champions-modal__notice sng-champions-modal__notice--balance">Админ запросил пополнить баланс.</div>' +
-          '<div class="sng-champions-modal__join-dock sng-champions-modal__join-dock--actions">' +
-            '<button type="button" class="sng-champions-modal__main-action" data-sng-action="balancePaid"' + (mine.balancePaidAt ? ' disabled' : '') + '>' + (mine.balancePaidAt ? 'Сообщено администратору' : 'Я пополнил') + '</button>' +
-            '<button type="button" class="sng-champions-modal__secondary-action sng-champions-modal__secondary-action--cancel" data-sng-action="cancel">Отменить запись</button>' +
-          '</div>';
-      }
-      return '<div class="sng-champions-modal__join-dock">' +
-        '<button type="button" class="sng-champions-modal__secondary-action sng-champions-modal__secondary-action--cancel" data-sng-action="cancel">Отменить запись</button>' +
-      '</div>';
+      return '<div class="sng-champions-modal__notice">Подтвердите запись: с баланса Poker21 будет списано 1 000 ₽.</div>' +
+        '<div class="sng-champions-modal__join-dock">' +
+          '<button type="button" class="sng-champions-modal__main-action" data-sng-action="join">Записаться · 1 000 ₽</button>' +
+        '</div>';
     }
     if (mine && mine.status === "approved") {
       return '<div class="sng-champions-modal__join-dock">' +
@@ -1178,9 +1174,8 @@
       adminPoker21Id = '<span class="sng-champions-modal__entry-poker21"><small>ID Poker21</small><strong>' + escapeHtml(poker21Id || "—") + '</strong></span>';
     }
     if (data.isAdmin && data.status === "open") {
-      if (entry.status !== "approved") {
+      if (entry.status !== "approved" && entry.entryPaid) {
         adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>';
-        adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--balance" data-sng-request-balance="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "balance_requested" ? " disabled" : "") + '><span aria-hidden="true">₽</span><strong>Пополнить баланс</strong></button>';
       }
       adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--reject" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '><span aria-hidden="true">×</span><strong>Отклонить</strong></button>';
     }
@@ -1989,10 +1984,10 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
-        : "./assets/home-sng-champions-click-banner-v4.webp?v=1";
+        : "./assets/home-sng-champions-battle-3.webp?v=1";
       var nextMobileSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout-mobile.webp?v=1"
-        : "./assets/home-sng-champions-click-banner-v4-mobile.webp?v=1";
+        : "./assets/home-sng-champions-battle-3-mobile.webp?v=1";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
@@ -2216,13 +2211,7 @@
       }
       return;
     }
-    var requestBalance = event.target && event.target.closest ? event.target.closest("[data-sng-request-balance]") : null;
-    if (requestBalance) {
-      setButtonLoading(requestBalance, true);
-      postAction({ action: "requestBalance", accountId: requestBalance.getAttribute("data-sng-request-balance") || "" }, { status: "Запрашиваю пополнение баланса...", success: "Запрос на пополнение отправлен" })
-        .finally(function () { setButtonLoading(requestBalance, false); });
-      return;
-    }
+
     var reject = event.target && event.target.closest ? event.target.closest("[data-sng-reject]") : null;
     if (reject) {
       setButtonLoading(reject, true);
@@ -2516,7 +2505,7 @@
     setButtonLoading(action, true);
     postAction(readSettingsPayload(name), {
       status: "Идет загрузка...",
-      success: name === "join" ? "Заявка отправлена" : name === "balancePaid" ? "Администратору отправлено сообщение" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары " + (state && state.tournamentType === "team" ? "1/8" : "первого раунда") + " разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
+      success: name === "join" ? "Вы записаны! Списано 1 000 ₽" : name === "balancePaid" ? "Администратору отправлено сообщение" : name === "formPairs" ? "Пары сформированы" : name === "broadcastRoundOnePairs" ? "Пары " + (state && state.tournamentType === "team" ? "1/8" : "первого раунда") + " разосланы" : name === "updateSettings" ? "Изменения сохранены" : "",
     }).finally(function () {
       setButtonLoading(action, false);
     });
