@@ -24,7 +24,7 @@
     "spring-rating": ["rating-common", "rating-spring"],
     "summer-rating": ["rating-common", "rating-summer"],
     "raffles": ["raffles"],
-    "daily-poker": ["learning", "home-widget-sng"],
+    "daily-poker": ["daily-poker"],
     "learn-play-hub": ["learning"],
     "bonus-game": ["learning"],
     "cooler-game": ["learning"],

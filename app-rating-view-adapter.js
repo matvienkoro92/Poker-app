@@ -2151,29 +2151,43 @@ function getSummerRatingInitialAssetUrls() {
 }
 
 function preloadSummerRatingImage(src) {
-  return new Promise(function (resolve) {
-    if (!src || typeof Image === "undefined") {
-      resolve(false);
-      return;
-    }
-    var done = false;
-    var img = new Image();
-    var finish = function (ok) {
-      if (done) return;
-      done = true;
-      resolve(!!ok);
-    };
-    img.onload = function () { finish(true); };
-    img.onerror = function () { finish(false); };
-    setTimeout(function () { finish(false); }, 4500);
-    img.src = src;
-  });
+  if (!src || typeof Image === "undefined") return Promise.resolve(false);
+  function attempt(remaining) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      var done = false;
+      var timer = setTimeout(function () { finish(false); }, 8000);
+      function finish(ok) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        img.onload = img.onerror = null;
+        resolve(ok);
+      }
+      img.onload = function () { finish(true); };
+      img.onerror = function () { finish(false); };
+      img.src = src;
+    }).then(function (ok) {
+      if (ok || !remaining) return ok;
+      // Refresh the original URL so CSS backgrounds benefit from the retry too.
+      var controller = new AbortController();
+      var retryTimer = setTimeout(function () { controller.abort(); }, 8000);
+      return fetch(src, { cache: "reload", signal: controller.signal }).then(function (response) {
+        if (!response.ok) throw new Error("Rating image unavailable");
+        return response.blob();
+      }).then(function () { return attempt(remaining - 1); }).catch(function () { return false; }).finally(function () { clearTimeout(retryTimer); });
+    });
+  }
+  return attempt(1);
 }
 
 function waitForSummerRatingInitialAssets() {
   try {
     if (window.__pokerSummerRatingInitialAssetsPromise) return window.__pokerSummerRatingInitialAssetsPromise;
-    window.__pokerSummerRatingInitialAssetsPromise = Promise.all(getSummerRatingInitialAssetUrls().map(preloadSummerRatingImage));
+    window.__pokerSummerRatingInitialAssetsPromise = Promise.all(getSummerRatingInitialAssetUrls().map(preloadSummerRatingImage)).then(function (results) {
+      if (results.some(function (ok) { return !ok; })) window.__pokerSummerRatingInitialAssetsPromise = null;
+      return results;
+    });
     return window.__pokerSummerRatingInitialAssetsPromise;
   } catch (e) {
     return Promise.resolve([]);
