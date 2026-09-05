@@ -12,6 +12,8 @@ test("leaderboard winners are pinned in club news and absent from home", functio
   assert.doesNotMatch(html, /class="home-leaderboard-winners-banner"/);
   assert.doesNotMatch(html, /home-mtt-leaderboard-winners\.webp/);
   assert.match(news, /home-mtt-leaderboard-winners\.webp/);
-  assert.doesNotMatch(html, /id="sngChampionsOpen"/);
+  assert.match(html, /id="sngChampionsOpen"/);
+  assert.ok(html.indexOf('id="sngChampionsOpen"') < html.indexOf('class="home-tournament-bet-link"'));
+  assert.match(html, /data-sng-home-cta data-sng-open/);
   assert.match(news, /home-friend-news-modal__pinned-banner/);
 });
