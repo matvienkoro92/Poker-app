@@ -195,11 +195,47 @@ function pokerSwIsPublicApiRequest(url) {
   return false;
 }
 
+// Navigation must settle even when the network never returns the document.
+function pokerSwNavigationFallback() {
+  return new Response(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f172a"><title>Два туза — загрузка</title><style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;background:#0f172a;color:#fff3d6;font:17px/1.5 system-ui,sans-serif;text-align:center}main{max-width:420px}h1{font-size:26px;line-height:1.2}p{color:#c4cbd8}button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:15px 24px;background:#ffd477;color:#201505;cursor:pointer}button:focus-visible{outline:3px solid white;outline-offset:4px}
+  </style></head><body><main><h1>Не удалось загрузить клуб</h1><p>Соединение прервалось или сервер долго отвечает. Проверьте интернет и попробуйте ещё раз.</p><button type="button" onclick="location.reload()">Повторить загрузку</button></main></body></html>`, {
+    status: 503,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
+  });
+}
+
+function pokerSwNavigation(request) {
+  var controller = new AbortController();
+  var timer;
+  var timeout = new Promise(function (resolve) {
+    timer = setTimeout(function () {
+      resolve(pokerSwNavigationFallback());
+      controller.abort();
+    }, 3000);
+  });
+  var network = fetch(request, { signal: controller.signal }).then(function (response) {
+    if (!response.ok) return pokerSwNavigationFallback();
+    // Include a stalled response body in the timeout, not only its headers.
+    return response.clone().text().then(function (body) {
+      return body.trim() ? response : pokerSwNavigationFallback();
+    });
+  }).catch(function () { return pokerSwNavigationFallback(); });
+  return Promise.race([network, timeout]).then(function (response) {
+    clearTimeout(timer);
+    return response;
+  });
+}
+
 self.addEventListener("fetch", function (event) {
   if (event.request.method !== "GET") return;
   try {
     var u = new URL(event.request.url);
     if (u.origin !== self.location.origin) return;
+    if (event.request.mode === "navigate") {
+      event.respondWith(pokerSwNavigation(event.request));
+      return;
+    }
     /* Бинарные ответы прокси картинок: stale-while-revalidate как у JSON чата даёт залипание битого кэша в PWA. */
     if (u.pathname.indexOf("/api/chat-image") === 0) return;
     /* fetch(..., { cache: "no-store" }) — не отдаём устаревший Cache Storage: иначе после тапа по пушу
