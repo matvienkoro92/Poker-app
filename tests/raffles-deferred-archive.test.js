@@ -48,3 +48,10 @@ test('opening completed requests results even when the recent cache is empty', (
   assert.equal(context.rafflesCurrentTab,'completed');
   assert.equal(requests,1);
 });
+
+test('reopening completed refreshes recent rerolls even after archive was loaded', () => {
+  const source = fs.readFileSync(require('node:path').join(__dirname, '../app-raffles.js'), 'utf8');
+  const start = source.indexOf('  function setRafflesTab(tab)');
+  const end = source.indexOf('  if (rafflesTabCreate)', source.indexOf('\n  }', start));
+  assert.match(source.slice(start, end), /isCompleted && tabChanged[\s\S]*skipCache:\s*true[\s\S]*keepCurrentOnLoading:\s*true/);
+});

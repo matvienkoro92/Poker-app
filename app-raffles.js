@@ -3930,6 +3930,16 @@ function initRaffles() {
     }
     if ((isCompleted || isLeaders) && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
     if (isCompleted) schedulePendingCompletedRaffleFocus();
+    if (isCompleted && tabChanged) {
+      // The archive can stay cached, but recent winners keep changing while
+      // ready windows and rerolls are being settled. Refresh that small list
+      // whenever the completed tab is opened.
+      loadRaffles({
+        skipCache: true,
+        keepCurrentOnLoading: true,
+        switchToCompleted: true
+      });
+    }
     if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
   }
   if (rafflesTabCreate) rafflesTabCreate.addEventListener("click", function () { setRafflesTab("create"); });
