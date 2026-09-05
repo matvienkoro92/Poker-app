@@ -655,3 +655,29 @@
 
 /* Keep this modal visible regardless of when shared widget styles arrive. */
 .club-choice-vote-modal.tournament-bet-modal:not([hidden]) { display: flex; z-index: 100000; padding: 0; }
+
+.tournament-bet-modal__closed-event {
+  border: 1px solid rgba(239, 188, 88, 0.5);
+  border-radius: 20px;
+  background: radial-gradient(ellipse at top right, #49341b, transparent 70%), #101116;
+  overflow: hidden;
+}
+.tournament-bet-modal__closed-event summary {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  cursor: pointer;
+  list-style: none;
+}
+.tournament-bet-modal__closed-event summary::-webkit-details-marker { display: none; }
+.tournament-bet-modal__closed-event summary:focus-visible { outline: 2px solid #ffd477; outline-offset: -4px; }
+.tournament-bet-modal__result-status { color: #c5b897; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.tournament-bet-modal__result-title { font-size: clamp(20px, 5vw, 28px); color: #fff3d6; }
+.tournament-bet-modal__result-winner { font-size: 20px; font-weight: 800; color: #ffda83; overflow-wrap: anywhere; }
+.tournament-bet-modal__result-amounts { display: flex; flex-wrap: wrap; gap: 16px 32px; color: #c5b897; }
+.tournament-bet-modal__result-amounts > span { display: grid; gap: 4px; }
+.tournament-bet-modal__result-amounts strong { font-size: 23px; color: #ffda83; }
+.tournament-bet-modal__result-toggle, .tournament-bet-modal__result-pending { color: #d0c4aa; font-size: 13px; }
+.tournament-bet-modal__closed-event[open] .tournament-bet-modal__result-toggle { border-bottom: 1px solid #685331; padding-bottom: 12px; }
+.tournament-bet-modal__closed-event > .tournament-bet-modal__participants-grid,
+.tournament-bet-modal__closed-event > .tournament-bet-modal__share { margin: 0 16px 16px; }

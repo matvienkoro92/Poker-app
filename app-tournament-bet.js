@@ -246,7 +246,26 @@
       (subscribed ? 'Отписаться от раздела' : 'Подписаться на раздел') + '</button>';
   }
 
+  function closedEventHtml(data) {
+    var entries = Array.isArray(data.entries) ? data.entries : [];
+    var winner = entries.find(function (entry) { return entry.winner; });
+    var settled = data.status === "settled";
+    var expanded = bodyEl && bodyEl.querySelector(".tournament-bet-modal__closed-event[open]");
+    var payout = data.winnerPaidAmount == null ? data.bank : data.winnerPaidAmount;
+    return '<details class="tournament-bet-modal__closed-event"' + (expanded ? ' open' : '') + '><summary>' +
+      '<span class="tournament-bet-modal__result-status">' + (settled ? 'Событие завершено' : 'Приём ставок закрыт') + '</span>' +
+      '<strong class="tournament-bet-modal__result-title">' + esc(data.title || "Ласт-лонгер") + '</strong>' +
+      (winner ? '<span class="tournament-bet-modal__result-winner">🏆 ' + esc(winner.name || "Игрок") + '</span>' +
+        '<span class="tournament-bet-modal__result-amounts"><span>Поставил <strong>' + rub(winner.stake || data.stakePrice) + '</strong></span><span>Забрал <strong>' + rub(payout) + '</strong></span></span>' :
+        '<span class="tournament-bet-modal__result-pending">' + (settled ? 'Победитель не указан' : 'Ожидаем результат турнира') + '</span>') +
+      '<span class="tournament-bet-modal__result-toggle">Участники: ' + entries.length + ' · Подробнее <span aria-hidden="true">⌄</span></span></summary>' +
+      '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' +
+      '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div></details>' +
+      '<div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data);
+  }
+
   function eventHtml(data) {
+    if (data.status === "settled" || data.status === "closed") return closedEventHtml(data);
     var tournament = eveningTournaments().concat(stakeTournaments()).find(function (item) {
       return String(item.id) === String(data.tournamentId) && item.name === data.title;
     }) || {};
@@ -254,8 +273,7 @@
     if (startTime && !/МСК/i.test(startTime)) startTime += " МСК";
     var details = [["Гарантия", data.tournamentGuarantee || tournament.guarantee || "Уточняется"],
       ["Старт", startTime || "Уточняется"],
-      ["Вход", data.tournamentBuyin || tournament.buyinLabel || tournament.buyin || "Уточняется"],
-      ["Сумма ставки", rub(data.stakePrice)]];
+      ["Вход", data.tournamentBuyin || tournament.buyinLabel || tournament.buyin || "Уточняется"]];
     var joined = !!data.myEntry;
     var action = data.status === "open"
       ? joined
