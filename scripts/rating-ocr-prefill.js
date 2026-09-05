@@ -77,7 +77,7 @@ function normalizeName(raw) {
 }
 
 function playerIdFromText(text) {
-  const match = String(text || "").match(/ID\s*:?\s*(\d{5,8})/i);
+  const match = String(text || "").match(/(?:ID|D)\s*:?\s*(\d{5,8})/i);
   return match ? match[1] : "";
 }
 
@@ -344,7 +344,7 @@ async function parseOcrFile(file) {
   if (date === "02.09.2026" && time === "13:00" && buyin === 10000) title = "DV 🏃 Bounty 🥊 100K";
   if (date === "02.09.2026" && time === "14:00" && buyin === 200) title = "Bounty 200🥊 40K GTD";
   const ids = tokens
-    .filter((token) => /(?:^|[^a-z])ID\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.53 && token.y > 0.12)
+    .filter((token) => /(?:^|[^a-z])(?:ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
 
   const rows = await Promise.all(ids.map(async (idToken, index) => {

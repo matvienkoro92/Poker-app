@@ -312,4 +312,111 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "04.09.2026": [
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 3950,
+          "points": 110
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 5,
+          "reward": 1320,
+          "points": 60
+        },
+        {
+          "nick": "kingofclowns",
+          "place": 3,
+          "reward": 720,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 42829.62,
+          "points": 135
+        },
+        {
+          "nick": "IRIHKA",
+          "place": 3,
+          "reward": 11273.75,
+          "points": 90
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 6,
+          "reward": 4081.89,
+          "points": 50
+        },
+        {
+          "nick": "Виталька",
+          "place": 7,
+          "reward": 3377.81,
+          "points": 40
+        },
+        {
+          "nick": "ПаПа_МоЖеТ",
+          "place": 20,
+          "reward": 1371.87,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 4200,
+          "points": 110
+        },
+        {
+          "nick": "Baldendi",
+          "place": 3,
+          "reward": 2200,
+          "points": 90
+        },
+        {
+          "nick": "fomichga",
+          "place": 4,
+          "reward": 1600,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80KO",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "comotd",
+          "place": 3,
+          "reward": 11950,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };

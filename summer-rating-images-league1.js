@@ -819,4 +819,9 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
   "03.09.2026": [
     "rating-compressed-preview/rating-03-09-2026-league1-magic-bounty-e-50k-11h.avif"
   ]
+,
+  "04.09.2026": [
+    "rating-compressed-preview/rating-04-09-2026-league1-pyatnica-progressiv-18h.jpg",
+    "rating-compressed-preview/rating-04-09-2026-league1-night-magic-80ko-23h.jpg"
+  ]
 };
