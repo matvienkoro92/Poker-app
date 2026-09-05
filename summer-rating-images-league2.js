@@ -541,6 +541,40 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-23-08-2026-league2-ok-21h.avif",
     "rating-compressed-preview/rating-23-08-2026-league2-energetiktournament-22h.avif"
   ],
+  "24.08.2026": [
+    "rating-compressed-preview/rating-24-08-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-24-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-24-08-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-24-08-2026-league2-ok-21h.jpg",
+    "rating-compressed-preview/rating-24-08-2026-league2-energetiktournament-22h.jpg"
+  ],
+  "25.08.2026": [
+    "rating-compressed-preview/rating-25-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-25-08-2026-league2-chetverg-mko-18h.jpg",
+    "rating-compressed-preview/rating-25-08-2026-league2-hyper-turbo-300-20h.jpg",
+    "rating-compressed-preview/rating-25-08-2026-league2-energetiktournament-22h.jpg"
+  ],
+  "26.08.2026": [
+    "rating-compressed-preview/rating-26-08-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-26-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-26-08-2026-league2-hyper-turbo-300-20h.jpg",
+    "rating-compressed-preview/rating-26-08-2026-league2-ok-21h.jpg"
+  ],
+  "27.08.2026": [
+    "rating-compressed-preview/rating-27-08-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-27-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-27-08-2026-league2-chetverg-mko-18h.jpg",
+    "rating-compressed-preview/rating-27-08-2026-league2-ok-21h.jpg"
+  ],
+  "28.08.2026": [
+    "rating-compressed-preview/rating-28-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-28-08-2026-league2-tournament-plo6-20h.jpg",
+    "rating-compressed-preview/rating-28-08-2026-league2-hyper-turbo-300-20h.jpg"
+  ],
+  "29.08.2026": [
+    "rating-compressed-preview/rating-29-08-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-29-08-2026-league2-ok-21h.jpg"
+  ],
   "30.08.2026": [
     "rating-compressed-preview/rating-30-08-2026-league2-mok-17h.avif",
     "rating-compressed-preview/rating-30-08-2026-league2-tournament-plo6-20h.avif",

@@ -71,7 +71,20 @@ function normalizeName(raw) {
   if (/Big\s*Boss/i.test(name)) return "💥Big Boss 💥";
   if (/^Фризаут/i.test(name)) return "Фризаут 💸";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
-  if (/^PL0?4\s+[РP]KO/i.test(name)) return "PLO4 PKO 🥊 20K";
+  if (/^DV\s+Turbo\s+500/i.test(name)) return "DV Turbo 500🏆 50K";
+  if (/^DV\s*2?\s*PLO5/i.test(name)) return "DV🏃 PLO5 🥊 30k🥊";
+  if (/^DV\b.*Bounty.*100k/i.test(name)) return "DV 🏃 Bounty 🥊 100k";
+  if (/^Bali\s+Yana/i.test(name)) return "Bali Yana🌴🆕20k";
+  if (/^MINI\s+FENIX/i.test(name)) return "MINI FENIX🐦‍🔥60K";
+  if (/^BOUNTY\s+MAGIC/i.test(name)) return "BOUNTY MAGIC 🥊 50K";
+  if (/^Magic\s+Bounty/i.test(name)) return "Magic Bounty🥊 50k";
+  if (/^S\.Bounty\s+2\/3/i.test(name)) return "S.Bounty 2/3 🥊 120k";
+  if (/Casino\s+Series\s+Pack/i.test(name)) return "✈️ Casino Series Pack";
+  if (/Hyper\s+Turbo\s+300/i.test(name)) return "Hyper Turbo 300";
+  if (/^NLH\s+KNOCKOUT\s+220k/i.test(name)) return "NLH KNOCKOUT 220k";
+  if (/^Night\s+magic\s+80K/i.test(name)) return "Night magic 80K 🌘";
+  if (/^PL[O0]?4\s+[РP]KO/i.test(name)) return "PLO4 PKO 🥊 20K";
+  if (/^PLO5\s*-\s*[РP]KO/i.test(name)) return "PLO5 - PKO 🥊 200k 🏆";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
   return name;
 }
@@ -138,7 +151,7 @@ function looksLikePlayerName(token) {
 }
 
 function isRewardToken(token) {
-  if (token.x < 0.66 || token.x > 0.91) return false;
+  if (token.x < 0.64 || token.x > 0.91) return false;
   const n = numberFromText(token.text);
   return n != null && Math.abs(n) < 1000000;
 }
@@ -283,7 +296,7 @@ async function parseOcrFile(file) {
   const dateOnlyToken = dateMatch ? null : tokens.find((token) => /(\d{2})\/(\d{2})/.test(token.text));
   const dateOnlyMatch = dateOnlyToken ? String(dateOnlyToken.text).match(/(\d{2})\/(\d{2})/) : null;
   const separateTimeToken = dateOnlyToken
-    ? chooseClosest(tokens, (token) => /^:?\d{1,2}:\d{2}$/.test(token.text), dateOnlyToken.y, 0.025)
+    ? chooseClosest(tokens, (token) => /^[•·:]?\d{1,2}:\d{2}$/.test(token.text), dateOnlyToken.y, 0.025)
     : null;
   const date = dateMatch
     ? `${dateMatch[2]}.${dateMatch[1]}.2026`
@@ -293,11 +306,11 @@ async function parseOcrFile(file) {
   const time = dateMatch
     ? dateMatch[3].padStart(5, "0")
     : separateTimeToken
-      ? separateTimeToken.text.replace(/^:/, "").padStart(5, "0")
+      ? separateTimeToken.text.replace(/^[•·:]/, "").padStart(5, "0")
       : "??:??";
 
   const titleTokens = tokens
-    .filter((token) => token.y >= 0.705 && token.y <= 0.735 && token.x < 0.56)
+    .filter((token) => token.y >= 0.700 && token.y <= 0.735 && token.x < 0.56)
     .filter((token) => !/^(MTT|7MAX|MTT-NLH)$/i.test(token.text))
     .sort((a, b) => a.x - b.x);
   let title = normalizeName(titleTokens.map((token) => token.text).join(" ") || "TODO");
@@ -390,6 +403,14 @@ async function parseOcrFile(file) {
     }
     if (playerId === "3800754" && date === "02.09.2026" && time === "15:00" && reward === 9.9) {
       place = 0;
+      needsPlaceCheck = false;
+    }
+    if (playerId === "4127179" && date === "25.08.2026" && time === "21:00" && reward === 3.5) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
+    if (playerId === "508911" && date === "29.08.2026" && time === "19:00" && reward === 1018.75) {
+      place = 11;
       needsPlaceCheck = false;
     }
 
