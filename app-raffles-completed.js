@@ -2036,6 +2036,20 @@ function initRafflesCompletedRuntime(opts) {
   function raffleRecentCompletedResultTime(raffle) {
     var batchTime = String(raffle && raffle.resultBatchTime || "").trim();
     if (batchTime) return batchTime;
+    var completedBatches = Array.isArray(raffle && raffle.resultBatches)
+      ? raffle.resultBatches.filter(function (batch) {
+          return batch && (batch.drawnAt || (Array.isArray(batch.winnerSlots) && batch.winnerSlots.length));
+        })
+      : [];
+    if (completedBatches.length) {
+      var latestBatch = completedBatches.reduce(function (latest, batch) {
+        var latestAt = Date.parse(latest && (latest.drawnAt || latest.endDate) || "") || 0;
+        var batchAt = Date.parse(batch.drawnAt || batch.endDate || "") || 0;
+        return batchAt >= latestAt ? batch : latest;
+      }, completedBatches[0]);
+      var latestBatchTime = String(latestBatch && latestBatch.time || "").trim();
+      if (latestBatchTime) return latestBatchTime;
+    }
     var completed = raffleCompletedDate(raffle);
     if (!completed) return "";
     try {
