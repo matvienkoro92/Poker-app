@@ -2967,8 +2967,12 @@ function initRaffles() {
     if (!rafflesCompleted || rafflesArchiveLoaded) return;
     var recent = Array.isArray(recentCompleted) ? recentCompleted.slice(0, 2) : [];
     if (recent.length) {
+      // Keep the same archive node: pending requests and expanded months belong to it.
+      var existingArchive = rafflesCompleted.querySelector("[data-raffles-archive-deferred='1']");
       renderCompletedRafflesPanel(recent);
-      if (rafflesCompleted.insertAdjacentHTML) {
+      if (existingArchive) {
+        rafflesCompleted.appendChild(existingArchive);
+      } else if (rafflesCompleted.insertAdjacentHTML) {
         rafflesCompleted.insertAdjacentHTML("beforeend", deferredCompletedArchiveHtml());
       }
       return;
