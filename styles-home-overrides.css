@@ -6638,14 +6638,14 @@ html body #app.app.app--view-home
   text-shadow: none;
 }
 
-/* Lift the silver chat tile without restoring its orange glow. */
+/* Brighter, softly colored chat tile. */
 .app.app--view-home .home-daily-shortcuts .home-mini-icon-item:has(.home-mini-icon__hero--chat) {
   filter: brightness(1.25);
   box-shadow: 0 0 0 1px rgba(211, 224, 240, 0.38), 0 0 14px rgba(175, 201, 231, 0.12) !important;
 }
 .app.app--view-home .home-daily-shortcuts .home-mini-icon-item:has(.home-mini-icon__hero--chat) .home-mini-icon__image--stage {
-  filter: grayscale(1) brightness(1.1) contrast(0.94);
+  filter: saturate(0.75) brightness(1.2) contrast(0.94);
 }
 .app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--chat {
-  filter: saturate(0.65) brightness(1.18) drop-shadow(0 0 9px rgba(220, 232, 250, 0.32));
+  filter: saturate(1.15) brightness(1.28) drop-shadow(0 0 9px rgba(255, 215, 155, 0.32));
 }

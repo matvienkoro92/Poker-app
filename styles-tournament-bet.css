@@ -690,11 +690,12 @@
 .tournament-bet-modal__result-art {
   position: absolute;
   right: 0;
-  bottom: 0;
-  width: 36%;
-  height: 94%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44%;
+  height: 110%;
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center;
   pointer-events: none;
   z-index: -1;
   filter: drop-shadow(0 0 18px rgba(218, 162, 58, 0.18));
