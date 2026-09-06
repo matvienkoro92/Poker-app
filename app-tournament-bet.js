@@ -348,11 +348,15 @@
   function updateHomeButton(data) {
     var amount = document.querySelector("[data-tournament-bet-home-bank]");
     var button = document.querySelector("[data-tournament-bet-open]");
+    var hasEvent = !!(data && data.id);
     if (amount) {
-      var hasActiveBank = !!(data && data.id && data.status === "open");
-      amount.hidden = !hasActiveBank;
-      amount.textContent = hasActiveBank ? "Банк " + rub(data.bank) : "";
+      amount.hidden = false;
+      amount.textContent = hasEvent ? rub(data.bank) : "—";
     }
+    var players = document.querySelector("[data-tournament-bet-home-players]");
+    var stake = document.querySelector("[data-tournament-bet-home-stake]");
+    if (players) players.textContent = hasEvent ? String(data.participantsCount || 0) : "—";
+    if (stake) stake.textContent = hasEvent ? rub(data.stakePrice) : "—";
     if (button) button.classList.toggle("home-mini-icon-item--vote-active", !!(data && data.status === "open"));
   }
 

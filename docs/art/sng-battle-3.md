@@ -11,3 +11,11 @@ Banner prompt: New 3:1 promotional banner on a light, sunlit ivory-marble arena 
 The artwork changes the promotion only; it does not create a tournament or alter registrations, stakes, results or payouts.
 
 Approved card correction: Gucci holds a spade ace and a heart ace; all other visible cards show patterned backs. User approved exec-72f123e3-9fc5-413d-a13e-9f4d0ab7ae41.png and explicitly requested no further changes.
+
+
+2026-09-06 banner replacement: user-supplied dark gold banner, edited with built-in image_gen (precise-object-edit).
+Prompt: Remove only the bottom panel icons, labels, numbers, separators and yellow signup button; leave the black gradient panel and gold border. Preserve the three monkeys, background, Russian heading and tagline, composition and colors exactly. No new text or icons.
+The empty lower panel is cropped off for web delivery; the existing live HTML participants, prize, entry and signup controls are rendered directly below the artwork.
+Assets: `assets/home-sng-champions-battle-3-v2.webp` (2172 px), `assets/home-sng-champions-battle-3-v2-mobile.webp` (900 px).
+
+Follow-up edit with built-in image_gen: remove only “Собери стек.” and “Покажи характер.” below the title; fill seamlessly with the dark background, preserving all other artwork. Removed generated white padding and exported both existing v2 assets with cache version 2.

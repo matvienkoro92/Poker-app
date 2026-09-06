@@ -6651,3 +6651,56 @@ html body #app.app.app--view-home
 }
 
 .app.app--view-home .home-club-actions-block[hidden] { display: none !important; }
+
+/* The third battle artwork ends above the live tournament controls. */
+.app.app--view-home .home-sng-champions-image-link:has(img[src*="battle-3-v2"]),
+.app.app--view-home .home-sng-champions-image-link img[src*="battle-3-v2"],
+.sng-inline-feature__image:has(img[src*="battle-3-v2"]),
+.sng-inline-feature__image img[src*="battle-3-v2"] {
+  aspect-ratio: 2123 / 524 !important;
+  height: auto !important;
+}
+
+/* Last-longer artwork with real event values and the existing modal action. */
+.home-tournament-bet-link {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: #090807;
+}
+.home-tournament-bet-link img.home-tournament-bet-link__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2083 / 540;
+}
+.home-tournament-bet-link__bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.2fr);
+  min-height: 64px;
+  border-top: 1px solid #be7e35;
+  background: linear-gradient(180deg, #302013, #100c09);
+}
+.home-tournament-bet-link__stat {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 3px;
+  border-right: 1px solid #77512e;
+}
+.home-tournament-bet-link__stat small { color: #d6aa68; font-size: clamp(9px, 1.9vw, 12px); }
+.home-tournament-bet-link__stat strong { color: #fff0c9; font-size: clamp(12px, 2.7vw, 18px); }
+.home-tournament-bet-link__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 7px;
+  border: 1px solid #ffb374;
+  border-radius: 12px;
+  background: linear-gradient(#da401c, #7c1008);
+  color: #fff4e4;
+  font-size: clamp(11px, 2.5vw, 18px);
+  font-weight: 800;
+}
