@@ -14,32 +14,29 @@ test("third SNG banner and participant confirmation are used in notifications", 
 const vm = require("node:vm");
 const source = fs.readFileSync(require.resolve("../lib/api-handlers/sng-champions"), "utf8");
 const imageHelper = source.slice(source.indexOf("async function sngApplicationImage("), source.indexOf("async function notifySngApplication("));
-async function applicationImage(avatars, fail = false) {
-  const context = {
-    getPokerPlusBoundAccountIds: async () => ({ p21: ["linked"] }),
-    getAvatars: async () => { if (fail) throw new Error("offline"); return avatars; },
-    sngBannerUrl: () => "https://example.com/sng.webp",
-    console: { warn() {} },
-  };
+const { sngPlayerArt, artByNick } = require("../lib/sng-player-art");
+async function applicationImage(entry) {
+  const context = { sngPlayerArt, URL, sngBannerUrl: () => "https://example.com/assets/sng.webp" };
   vm.runInNewContext(imageHelper, context);
-  return context.sngApplicationImage({ accountId: "account", memberId: "tg_12345", pokerPlusUserId: "p21" }, {});
+  return context.sngApplicationImage(entry, {});
 }
 
-test("SNG application uses the saved personal avatar", async () => {
-  const result = await applicationImage({ account: "data:image/jpeg;base64,YQ==" });
-  assert.equal(result.imageDataUrl, "data:image/jpeg;base64,YQ==");
-  assert.equal(result.imageUrl, undefined);
+test("SNG registration uses PokerManki character instead of profile photo", async () => {
+  const result = await applicationImage({ pokerPlusNickname: "ПокерМанки", avatar: "data:image/jpeg;base64,YQ==" });
+  assert.equal(result.imageUrl, "https://example.com/assets/summer-rating-player-pokermanki.webp?v=3.547");
 });
 
-test("SNG application finds personal avatar on a linked account ahead of a preset", async () => {
-  const result = await applicationImage({ account: "./assets/avatar-tiger.jpg", linked: "data:image/png;base64,YQ==" });
-  assert.equal(result.imageDataUrl, "data:image/png;base64,YQ==");
+test("SNG registration falls back to banner even if an unknown player has a profile photo", async () => {
+  const result = await applicationImage({ displayName: "Unknown player", avatar: "data:image/jpeg;base64,YQ==" });
+  assert.equal(result.imageUrl, "https://example.com/assets/sng.webp");
 });
 
-test("SNG application retains banner for missing avatars, presets and lookup failure", async () => {
-  for (const [avatars, fail] of [[{}, false], [{ account: "./assets/avatar-tiger.jpg" }, false], [{}, true]]) {
-    const result = await applicationImage(avatars, fail);
-    assert.equal(result.imageUrl, "https://example.com/sng.webp");
-    assert.equal(result.imageDataUrl, undefined);
+test("SNG characters match the rating catalog", () => {
+  const client = fs.readFileSync(require.resolve("../app-rating-view-adapter.js"), "utf8");
+  const literal = client.match(/var SUMMER_RATING_PLAYER_ART_BY_NICK = (\{[\s\S]*?\n\});/)[1];
+  const catalog = vm.runInNewContext("(" + literal + ")");
+  assert.deepEqual(JSON.parse(JSON.stringify(artByNick)), JSON.parse(JSON.stringify(catalog)));
+  for (const art of Object.values(artByNick)) {
+    assert.ok(fs.existsSync(require("node:path").join(__dirname, "..", art.src.split("?")[0])));
   }
 });
