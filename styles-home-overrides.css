@@ -6810,3 +6810,12 @@ html body #app.app.app--view-home
   font-weight: 400 !important;
   text-shadow: none !important;
 }
+
+/* Hide both the CSS outline and the thin gold edge baked into the artwork. */
+.app.app--view-home .home-tournament-bet-link {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.home-tournament-bet-link img.home-tournament-bet-link__art {
+  transform: scale(1.035);
+}
