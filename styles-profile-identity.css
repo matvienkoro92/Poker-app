@@ -456,7 +456,7 @@
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) {
   display: grid !important; grid-template-columns: 34px minmax(0,1fr) 28px !important;
   grid-template-rows: auto auto !important; gap: 2px 10px !important;
-  height: 70px !important; min-height: 70px !important;
+  height: 62px !important; min-height: 62px !important;
   padding: 10px 14px !important; border-radius: 14px !important;
   border-color: #51452e !important; align-items: center !important;
 }
@@ -479,12 +479,12 @@
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name > span:first-child { font-size: 18px; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences { grid-row: 3; gap: 6px !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences button { font-size: 12px !important; min-height: 30px !important; height:30px !important; padding:0 6px !important; min-width:0 !important; }
-.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) { grid-template-columns: 20px minmax(0,1fr) !important; padding:8px !important; gap:2px 5px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) { grid-template-columns: 18px minmax(0,1fr) 24px !important; padding:8px !important; gap:2px 5px !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row input { font-size: 12px !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-hero-birth__label, .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-label { font-size: 10px !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-icon { font-size:20px; }
-.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row button { grid-column: 2 !important; grid-row:3 !important; justify-self:end; }
-.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity):has(button:not([hidden])) { height: 92px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row button { grid-column: 3 !important; grid-row:1 !important; justify-self:end; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity):has(button:not([hidden])) { height: 62px !important; }
 }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row .profile-hero-birth { grid-column: 1 !important; grid-row: 1 !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row #profileHeroCity { grid-column: 2 !important; grid-row: 1 !important; }
@@ -500,7 +500,28 @@
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name br::after { content: " "; }
 @media (max-width: 700px) {
   .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) {
-    height: 92px !important; align-self: stretch !important;
+    height: 62px !important; align-self: stretch !important;
   }
   .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name br { display: initial; }
+}
+
+/* Compact details: two closely spaced lines, no separate save-button row. */
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) {
+  grid-template-rows: 18px 24px !important;
+  align-content: center !important;
+  row-gap: 1px !important;
+  padding-block: 8px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row input {
+  line-height: 24px !important;
+}
+@media (max-width: 700px) {
+  .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row input {
+    grid-column: 2 / -1 !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row button {
+    width: 22px !important;
+    height: 22px !important;
+    align-self: center !important;
+  }
 }
