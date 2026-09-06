@@ -228,14 +228,16 @@
       return Promise.resolve(state);
     }
     if (homeSummaryInFlight) return homeSummaryInFlight;
-    homeSummaryInFlight = fetch(
-      baseUrl() + API_PATH + apiAuthQuery("?") + "&summary=1&_t=" + now,
-      { cache: "no-store" }
-    )
-      .then(function (res) { return res.json(); })
+    var preloaded = !force && window.__pokerSngHomeSummaryPromise;
+    window.__pokerSngHomeSummaryPromise = null;
+    homeSummaryInFlight = (preloaded || fetch(
+      baseUrl() + API_PATH + "?summary=1" + (force ? "&_t=" + now : ""),
+      { cache: force ? "reload" : "default" }
+    ).then(function (res) { return res.json(); }))
       .then(function (data) {
         if (data && data.ok) {
           homeSummaryLoadedAt = Date.now();
+          try { window.sessionStorage.setItem("pokerSngHomeSummary:v1", JSON.stringify({ at: homeSummaryLoadedAt, data: data })); } catch (error) {}
         }
         return data;
       })
@@ -2617,6 +2619,13 @@
   }
 
   function bind() {
+    try {
+      var cachedHome = JSON.parse(window.sessionStorage.getItem("pokerSngHomeSummary:v1") || "null");
+      if (!state && cachedHome && cachedHome.data && cachedHome.data.ok && Date.now() - cachedHome.at < 5 * 60 * 1000) {
+        state = cachedHome.data;
+        updateHomePlaque();
+      }
+    } catch (error) {}
     if (!document.documentElement.dataset.sngChampionsOpenBound) {
       document.documentElement.dataset.sngChampionsOpenBound = "1";
       document.addEventListener("click", function (event) {

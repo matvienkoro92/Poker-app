@@ -261,6 +261,11 @@
     }
   });
 
+  if (!window.__pokerSngHomeSummaryPromise) {
+    var sngBase = typeof getApiBase === "function" ? String(getApiBase() || "").replace(/\/$/, "") : "";
+    window.__pokerSngHomeSummaryPromise = fetch(sngBase + "/api/sng-champions?summary=1", { cache: "default" })
+      .then(function (response) { return response.json(); }).catch(function () { return null; });
+  }
   refreshClubChoiceRoundBadge();
   window.setInterval(refreshClubChoiceRoundBadge, 45000);
 

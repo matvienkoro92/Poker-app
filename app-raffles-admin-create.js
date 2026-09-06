@@ -502,7 +502,7 @@ function initRafflesAdminCreateRuntime(opts) {
     if (raffleDailyStartWrap) raffleDailyStartWrap.classList.toggle("raffle-create-form__daily-time--hidden", !enabled);
     if (raffleDailyStartTime) {
       raffleDailyStartTime.disabled = !enabled;
-      if (enabled) raffleDailyStartTime.value = "20:16";
+      if (enabled) raffleDailyStartTime.value = "17:31";
     }
     if (enabled && raffleAccessLevel && getRaffleCreateAccessLevel() < 1) {
       raffleAccessLevel.value = "1";
@@ -1092,7 +1092,7 @@ function initRafflesAdminCreateRuntime(opts) {
         if (tg && tg.showAlert) tg.showAlert("Ежедневный розыгрыш сейчас доступен только на кеш.");
         return;
       }
-      var dailyStartTime = dailyEnabled ? "20:16" : "";
+      var dailyStartTime = dailyEnabled ? "17:31" : "";
       if (dailyEnabled && !dailyStartTime) {
         if (tg && tg.showAlert) tg.showAlert("Укажите время ежедневного старта");
         return;

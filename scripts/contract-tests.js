@@ -17,7 +17,7 @@ global.Date = class extends RealDate {
 const root = path.join(__dirname, "..");
 const BOT_TOKEN = "contract-test-bot-token";
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
-const DAILY_CASH_START_TIME = "20:16";
+const DAILY_CASH_START_TIME = "17:31";
 const DAILY_CASH_DURATION_MS = (23 * 60 + 59) * 60 * 1000;
 const DAILY_CASH_SERIES_ID = "raffle_daily_cash_20_40_20_15";
 
@@ -4052,7 +4052,7 @@ async function testRaffleDailyRecurring(redis) {
   assert.strictEqual(r.body.raffle.recurrence.template.accessLevel, 10, "daily cash template defaults to level 10+ access");
   assert.strictEqual(r.body.raffle.recurrence.startTime, DAILY_CASH_START_TIME, "cash daily start time is canonical");
   assert.strictEqual(r.body.raffle.recurrence.seriesId, DAILY_CASH_SERIES_ID, "cash daily uses one canonical series");
-  assert.strictEqual(r.body.raffle.recurrence.durationMs, DAILY_CASH_DURATION_MS, "cash daily lasts until 20:15 next day");
+  assert.strictEqual(r.body.raffle.recurrence.durationMs, DAILY_CASH_DURATION_MS, "cash daily lasts until 17:30 next day");
   assert.strictEqual(
     r.body.raffle.endDate,
     new Date(new Date(r.body.raffle.createdAt).getTime() + DAILY_CASH_DURATION_MS).toISOString(),
