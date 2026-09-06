@@ -6838,3 +6838,48 @@ html body #app.app.app--view-home
 .app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-image-link img {
   transform: scale(1.06);
 }
+
+
+/* A compact entry into last-longer, grouped with the evening tournaments. */
+.app.app--view-home .home-last-longer {
+  order: 15;
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(203, 147, 72, .38);
+  border-radius: 12px;
+  background: linear-gradient(110deg, #241b10, #100f0c);
+  color: #ffe5ad;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  animation: none;
+}
+.home-last-longer__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+.home-last-longer__schedule { color: #c6b28e; font-size: 12px; }
+.home-last-longer__arrow { margin-left: auto; font-size: 24px; line-height: 20px; }
+.home-last-longer__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: #c6b28e;
+  font-size: 11px;
+  line-height: 16px;
+}
+.home-last-longer__details > span { white-space: nowrap; }
+.home-last-longer__details strong { color: #fff0c9; font-weight: 700; }
+.app.app--view-home .home-last-longer:hover { border-color: #cb9348; }
+.app.app--view-home .home-last-longer:focus-visible { outline: 2px solid #ffd47a; outline-offset: 3px; }

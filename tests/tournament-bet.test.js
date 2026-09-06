@@ -145,7 +145,8 @@ test("bettor rating aggregates participation, wins, stakes, prizes and net resul
   assert.equal(rating[0].totalStaked, 1000);
   assert.equal(rating[0].totalWon, 11000);
   assert.equal(rating[0].net, 10000);
-  assert.equal(rating[0].winRate, 50);
+  assert.equal(rating[0].winRate, 1100);
+  assert.equal(rating[1].winRate, 0);
   assert.equal(rating[0].mine, true);
 });
 
@@ -308,4 +309,13 @@ test("main bet action stays pinned to the bottom of the section", function () {
   assert.match(client, /tournament-bet-modal__sticky-action/);
   assert.match(client, /sticky-action"><div class="tournament-bet-modal__inline-status"/);
   assert.match(css, /\.tournament-bet-modal__sticky-action \{[\s\S]*?position: sticky;[\s\S]*?bottom: -1px;/);
+});
+
+
+test("bettor win rate measures payouts as a percentage of stakes", function () {
+  for (const [stake, payout, expected] of [[1000, 11500, 1150], [500, 6500, 1300], [500, 500, 100], [300, 500, 166.7], [0, 500, 0]]) {
+    const event = { id: "percentage", status: "settled", stakePrice: stake, winnerAccountId: "A", winnerPaidAmount: payout, entries: [{ accountId: "A", stake }] };
+    const rating = tournamentBet.ratingFor([event], null, {});
+    assert.equal(rating[0].winRate, expected);
+  }
 });
