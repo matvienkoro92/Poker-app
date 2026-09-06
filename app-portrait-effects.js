@@ -4,6 +4,12 @@
   var records = new Map();
   function sync(img) {
     if (!img.parentElement) return;
+    var source = img.getAttribute('src') || '';
+    // Cached profiles may still resolve the previous, non-layered portrait.
+    if (/summer-rating-player-pokermanki-v2\.webp/.test(source)) {
+      img.src = './assets/summer-rating-player-pokermanki-v3.webp?v=1';
+      return;
+    }
     var record = records.get(img);
     var active = /pokermanki/.test(img.getAttribute('src') || '') && !img.hidden;
     if (!record && active) {
@@ -44,12 +50,12 @@
   }
   new MutationObserver(function (changes) {
     changes.forEach(function (change) {
-      if (change.type === 'attributes' && change.target.matches(selector)) sync(change.target);
+      if (change.type === 'attributes' && !change.target.closest('.pokermanki-rocket-effects')) scan(change.target);
       if (change.type === 'childList') change.addedNodes.forEach(scan);
     });
     records.forEach(function (record, img) {
       if (!img.isConnected) { record.resize.disconnect(); record.layer.remove(); records.delete(img); }
     });
-  }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['src', 'hidden', 'class'] });
+  }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['src', 'hidden', 'class', 'style'] });
   scan(document.documentElement);
 })();

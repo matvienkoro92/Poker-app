@@ -4407,6 +4407,7 @@
   .chat-user-modal__rating-art-img.pokermanki-layered-body,
   .winter-rating-player-modal__art-img.pokermanki-layered-body {
     animation: none;
+    -webkit-mask: url('./assets/pokermanki-animation-body-mask.svg') center bottom / contain no-repeat;
     mask: url('./assets/pokermanki-animation-body-mask.svg') center bottom / contain no-repeat;
   }
   .pokermanki-rocket-effects--layered .pokermanki-character-head {
@@ -4419,6 +4420,7 @@
   .pokermanki-character-eyelids {
     left: 36.2%; top: 28.1%; width: 44.76%; height: 14.6%;
     background: url('./assets/pokermanki-animation-eyelids.webp') center / 100% 100% no-repeat;
+    -webkit-mask-image: radial-gradient(ellipse, #000 45%, transparent 75%);
     mask-image: radial-gradient(ellipse, #000 45%, transparent 75%);
     opacity: 0;
     animation: pokermanki-blink 6.4s linear infinite;
