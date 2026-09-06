@@ -5458,3 +5458,22 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs .winter-rating__spring-league-copy-feedback {
   top: calc(100% + 20px);
 }
+
+/* Keep summer totals below the right-hand controls, in the compact month style. */
+.winter-rating.spring-rating.summer-rating #summerRatingMonthSummaries {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 120px 0 18px;
+  clear: both;
+}
+#summerRatingMonthSummaries .summer-rating-season-total {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  color: #ddcba9;
+  background: #0c1525;
+  border-radius: 10px;
+  font-size: 14px;
+}
+#summerRatingMonthSummaries .summer-rating-season-total strong { color: #ffc64b; white-space: nowrap; }
+#summerRatingMonthSummaries .summer-rating-month { margin-top: 8px; border-radius: 10px; background: #0c1525; }
+#summerRatingMonthSummaries .summer-rating-month > summary { padding: 10px 14px; font-size: 14px; font-weight: 600; }

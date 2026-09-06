@@ -3675,7 +3675,17 @@ function initWinterRating() {
           upperMonths.parentNode.insertBefore(summerMonthsHost, upperMonths);
         }
         upperMonths.style.setProperty("display", "none", "important");
-        summerMonthsHost.innerHTML = summerMonths.map(function (month) {
+        var summerTotalReward = 0;
+        Object.keys(summerTournaments).forEach(function (date) {
+          if (!/\.(06|07|08)\.2026$/.test(date)) return;
+          (summerTournaments[date] || []).forEach(function (tournament) {
+            (tournament.players || []).forEach(function (player) {
+              summerTotalReward += Math.max(0, Number(player.reward) || 0);
+            });
+          });
+        });
+        summerMonthsHost.innerHTML = '<p class="summer-rating-season-total">Всего призовых за лето: <strong>' +
+          formatRewardRound(summerTotalReward) + ' ₽</strong></p>' + summerMonths.map(function (month) {
           return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
             summerSummaryHtml([month], "Итоги месяца") + '</details>';
         }).join("");
