@@ -2311,3 +2311,152 @@
   font-size: clamp(15px, 3.2vw, 21px) !important;
   line-height: 1.18 !important;
 }
+
+/* Premium leaderboard: sculpted medals and black/gold poker materials. */
+.hall-fish-modal__panel--levels {
+  background: linear-gradient(#050a1040, #050a1008), url('./assets/leaderboard-poker-bg-v3.webp') center bottom / cover;
+}
+.hall-fish-modal__panel--levels .hall-fish-level-list { padding-bottom: 0; gap: 7px; }
+.hall-fish-modal__panel--levels .hall-fish-level-search { background: #070d14ed; }
+.hall-fish-level-row--premium {
+  grid-template-columns: 46px 74px minmax(0, 1fr) 85px;
+  min-height: 94px;
+  padding: 10px 12px;
+  gap: 12px;
+  border: 1px solid #53616e99;
+  border-radius: 13px;
+  background: linear-gradient(105deg, #111a21f5, #050b10ed 68%);
+  box-shadow: inset 0 1px 1px #c3def011, 0 3px 9px #0005;
+}
+.hall-fish-level-row--premium .hall-fish-level-row__media {
+  width: 74px; height: 74px;
+  border: 2px solid #e4b04d;
+  background: radial-gradient(ellipse at 50% 100%, #5f390f55, #03070c 70%);
+  box-shadow: inset 0 0 0 2px #ffe6a530, 0 0 0 1px #765320, 0 0 12px #ffa72144;
+}
+.hall-fish-level-row--premium .hall-fish-level-row__rank { text-align: center; font-size: 26px; color: #b8bbc0; }
+.hall-fish-level-row--premium .hall-fish-level-row__name { font-size: 19px; font-weight: 900; }
+.hall-fish-level-row--premium .hall-fish-level-row__level { font-size: 24px; color: #ffe48f; }
+.hall-fish-level-row--premium .hall-fish-level-row__tg { font-weight: 500; color: #abc7e5; margin-top: 5px; }
+.hall-fish-level-row--premium .hall-fish-level-row__meta { color: #abc7e5; font-weight: 600; margin-top: 4px; }
+.hall-fish-level-row--podium { --medal: #ffc943; border-color: var(--medal); background: radial-gradient(ellipse at 14% 10%, #79501866, transparent 60%), linear-gradient(105deg, #19150ff5, #050b10ed 75%); box-shadow: inset 0 1px #fff2b033, 0 0 12px #f5b72c25; }
+.hall-fish-level-row--place-2 { --medal: #aabac9; background: radial-gradient(ellipse at 14% 10%, #64738244, transparent 60%), linear-gradient(105deg, #12191ef5, #050b10ed 75%); box-shadow: inset 0 1px #e8f3ff33; }
+.hall-fish-level-row--place-3 { --medal: #c78b60; background: radial-gradient(ellipse at 14% 10%, #83512744, transparent 60%), linear-gradient(105deg, #20160ff5, #050b10ed 75%); box-shadow: inset 0 1px #ffcf9833; }
+.hall-fish-level-row--podium .hall-fish-level-row__media { border-color: #ffe29c; box-shadow: inset 0 0 0 1px #ffd979, 0 0 0 2px #ae6d19, 0 0 14px #ffb52266; }
+.hall-fish-level-row--podium .hall-fish-level-row__rank { display: block; width: 46px; height: 70px; background: url('./assets/leaderboard-medals-v3.webp') 0 center / 300% 100% no-repeat; font-size: 0; padding: 0; color: transparent; }
+.hall-fish-level-row--place-2 .hall-fish-level-row__rank { background-position: 50% center; }
+.hall-fish-level-row--place-3 .hall-fish-level-row__rank { background-position: 100% center; }
+.hall-fish-level-row__crown { display: none; }
+.hall-fish-level-row__leader { display: inline-block; margin: 5px 0 2px; padding: 3px 8px; border: 1px solid #b99037; border-radius: 10px; color: #ffdc7d; font-size: 11px; background: #3f2a0c80; }
+.hall-fish-modal__panel--levels .hall-fish-level-sticky-mine { margin-top: 0; padding-top: 12px; background: linear-gradient(#080b1000, #080b10dd 25%); }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky,
+.hall-fish-level-row--premium.hall-fish-level-row--sticky:hover,
+.hall-fish-level-row--premium.hall-fish-level-row--sticky:focus-visible {
+  min-height: 80px;
+  background: radial-gradient(ellipse at 15% 0%, #c0841b99, transparent 65%), linear-gradient(110deg, #4c300bf5, #221807f5 70%, #5d3d0ded);
+  border: 2px solid #ffd578;
+  color: #fff0c5;
+  box-shadow: inset 0 1px 3px #fff5b688, inset 0 0 14px #efae2030, 0 0 13px #ffb91f66;
+}
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__name,
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__level { color: #ffe8a2; text-shadow: none; }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__tg,
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__meta { color: #d9c49f; }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__rank { background: none; color: #ffe8a2; height: auto; font-size: 24px; }
+.hall-fish-level-row--premium:focus-visible { outline: 2px solid #fff0bc; outline-offset: 2px; }
+@media (max-width: 600px) {
+  .hall-fish-level-row--premium { grid-template-columns: 34px 60px minmax(0, 1fr) 65px; gap: 8px; padding: 9px 8px; min-height: 80px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__media { width: 60px; height: 60px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__name { font-size: 16px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__level { font-size: 19px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__tg { display: none; }
+  .hall-fish-level-row--premium .hall-fish-level-row__meta { font-size: 11px; }
+  .hall-fish-level-row--podium .hall-fish-level-row__rank { width: 34px; height: 58px; }
+}
+@media (max-width: 360px) {
+  .hall-fish-level-row--premium { grid-template-columns: 28px 48px minmax(0, 1fr) 55px; gap: 6px; padding-inline: 6px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__media { width: 48px; height: 48px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__name { font-size: 14px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__level { font-size: 17px; }
+  .hall-fish-level-row--podium .hall-fish-level-row__rank { width: 28px; height: 48px; }
+}
+.hall-fish-modal__panel--levels .hall-fish-modal__tabs { background: #050c12d9; }
+.hall-fish-modal__panel--levels .hall-fish-level-search { box-shadow: none; }
+.hall-fish-modal__panel--levels .hall-fish-modal__tab--active { box-shadow: inset 0 1px 2px #fff8dccc, 0 0 15px #ffb82266; }
+/* Reference composition: aligned identity and XP columns. */
+.hall-fish-level-row--premium { grid-template-columns: 52px 82px minmax(0, 1fr) 130px; min-height: 112px; }
+.hall-fish-level-row--premium .hall-fish-level-row__media { width: 82px; height: 82px; }
+.hall-fish-level-row--premium .hall-fish-level-row__headline { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.hall-fish-level-row--premium .hall-fish-level-row__score { display: flex; flex-direction: column; align-items: stretch; gap: 7px; min-width: 0; }
+.hall-fish-level-row--premium .hall-fish-level-row__level { display: block; font-size: 29px; }
+.hall-fish-level-row--premium .hall-fish-level-row__level small { font-size: .65em; }
+.hall-fish-level-row__xp-track { display: block; height: 9px; border-radius: 8px; background: #222c37; box-shadow: inset 0 1px 2px #0009, 0 0 0 1px #74818d66; overflow: hidden; }
+.hall-fish-level-row__xp-track > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(#ffe799, #e9b332); box-shadow: 0 0 7px #f9c74455; }
+.hall-fish-level-row__xp-label { color: #bcc1c7; font-size: 11px; font-weight: 500; text-align: right; white-space: nowrap; }
+.hall-fish-level-row__you { padding: 4px 7px; border: 1px solid #ffe4a3; border-radius: 8px; background: linear-gradient(#ffda63,#e4a024); color: #211704; font-weight: 900; font-size: 13px; box-shadow: 0 0 9px #ffd75955; }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky::before { content: none; }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky { min-height: 94px; }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__media { width: 68px; height: 68px; }
+.hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__meta { display: none; }
+.hall-fish-level-row--podium:not(.hall-fish-level-row--sticky) .hall-fish-level-row__rank { width: 52px; height: 86px; background-image: url('./assets/leaderboard-medals-v3.webp'); clip-path: none; mix-blend-mode: screen; }
+@media (max-width: 600px) {
+  .hall-fish-level-row--premium { grid-template-columns: 34px 62px minmax(0, 1fr) 78px; gap: 8px; min-height: 78px; padding: 8px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__media { width: 62px; height: 62px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__level { font-size: 24px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__tg { display: block; font-size: 10px; margin-top: 5px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__meta { font-size: 10px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__headline { gap: 3px 6px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__leader { font-size: 9px; padding: 3px 6px; margin: 0; }
+  .hall-fish-level-row--premium .hall-fish-level-row__score { gap: 6px; }
+  .hall-fish-level-row__xp-label { font-size: 9px; }
+  .hall-fish-level-row__xp-track { height: 7px; }
+  .hall-fish-level-row--podium:not(.hall-fish-level-row--sticky) .hall-fish-level-row__rank { width: 34px; height: 62px; }
+  .hall-fish-level-row--premium.hall-fish-level-row--sticky { grid-template-columns: 26px 52px minmax(0, 1fr) 86px; min-height: 70px; }
+  .hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__media { width: 52px; height: 52px; }
+  .hall-fish-level-row__you { font-size: 10px; padding: 3px 5px; }
+}
+@media (max-width: 380px) {
+  .hall-fish-level-row--premium { grid-template-columns: 26px 48px minmax(0, 1fr) 62px; gap: 6px; padding-inline: 6px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__media { width: 48px; height: 48px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__name { font-size: 14px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__level { font-size: 20px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__tg { display: none; }
+  .hall-fish-level-row--podium:not(.hall-fish-level-row--sticky) .hall-fish-level-row__rank { width: 26px; height: 50px; }
+  .hall-fish-level-row--premium.hall-fish-level-row--sticky { grid-template-columns: 22px 44px minmax(0, 1fr) 62px; }
+  .hall-fish-level-row--premium.hall-fish-level-row--sticky .hall-fish-level-row__media { width: 44px; height: 44px; }
+}
+@media (min-width: 381px) and (max-width: 600px) {
+  .hall-fish-level-row--premium { grid-template-columns: 42px 64px minmax(0, 1fr) 76px; gap: 10px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__media { width: 64px; height: 64px; }
+  .hall-fish-level-row--premium .hall-fish-level-row__level { font-size: 22px; }
+  .hall-fish-level-row--podium:not(.hall-fish-level-row--sticky) .hall-fish-level-row__rank { width: 42px; height: 72px; }
+  .hall-fish-level-row--premium:not(.hall-fish-level-row--podium):not(.hall-fish-level-row--sticky) { min-height: 64px; padding-block: 6px; }
+  .hall-fish-level-row--premium:not(.hall-fish-level-row--podium):not(.hall-fish-level-row--sticky) .hall-fish-level-row__media { width: 54px; height: 54px; justify-self: center; }
+  .hall-fish-modal__panel--levels .hall-fish-level-search__field { min-height: 32px; border-radius: 10px; }
+  .hall-fish-modal__panel--levels .hall-fish-level-search__field input { height: 30px; font-size: 13px; }
+  .hall-fish-modal__panel--levels .hall-fish-level-search { padding-block: 6px; margin-bottom: 10px; }
+}
+.hall-fish-level-row--premium .hall-fish-level-row__meta::before { content: "⌖"; display: inline-block; margin-right: 5px; color: #abc7e5; }
+@media (min-width: 381px) and (max-width: 600px) {
+  .hall-fish-level-row--podium:not(.hall-fish-level-row--sticky) .hall-fish-level-row__rank { height: 62px; }
+  .hall-fish-level-row--premium:not(.hall-fish-level-row--podium):not(.hall-fish-level-row--sticky) { padding-block: 4px; }
+  .hall-fish-modal__panel--levels .hall-fish-level-list { gap: 5px; }
+}
+.hall-fish-level-row--podium .hall-fish-level-row__media { box-shadow: inset 0 0 0 1px #ffd97966, 0 0 0 1px #ae6d19, 0 0 14px #ffb52277; }
+@media (min-width: 381px) and (max-width: 600px) {
+  .hall-fish-level-row--premium { column-gap: 12px; }
+  .hall-fish-modal__panel--levels .hall-fish-modal__body { padding-inline: 12px; }
+}
+.hall-fish-level-row--premium.hall-fish-level-row--place-1:not(.hall-fish-level-row--sticky)::after {
+  content: "";
+  position: absolute;
+  right: 15%;
+  top: 0;
+  width: 28%;
+  height: 100%;
+  background: url('./assets/leaderboard-dragon-v3.webp') center / cover no-repeat;
+  mix-blend-mode: screen;
+  opacity: .38;
+  pointer-events: none;
+}
+.hall-fish-level-row--premium > span { position: relative; z-index: 1; }

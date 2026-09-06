@@ -11,13 +11,13 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Ouninpohja",
           "place": 3,
           "reward": 540,
-          "points": 90
+          "points": 0
         },
         {
           "nick": "__JD__",
           "place": 5,
           "reward": 290,
-          "points": 60
+          "points": 0
         }
       ]
     },
@@ -31,7 +31,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "IIIIII",
           "place": 4,
           "reward": 1550,
-          "points": 70
+          "points": 0
         }
       ]
     },
@@ -45,7 +45,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Бабник",
           "place": 4,
           "reward": 7960,
-          "points": 70
+          "points": 0
         },
         {
           "nick": "Sobyanin",
@@ -65,7 +65,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Бардюр",
           "place": 4,
           "reward": 30345.999999999996,
-          "points": 70
+          "points": 0
         }
       ]
     },
@@ -79,7 +79,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Shkarubo",
           "place": 2,
           "reward": 4200,
-          "points": 110
+          "points": 0
         }
       ]
     },
@@ -93,7 +93,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "_JD_",
           "place": 4,
           "reward": 4788,
-          "points": 70
+          "points": 0
         },
         {
           "nick": "АршакМкртчян",
@@ -113,7 +113,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Em13!!",
           "place": 2,
           "reward": 54149,
-          "points": 110
+          "points": 0
         }
       ]
     }
@@ -130,7 +130,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Бардюр",
           "place": 5,
           "reward": 6011,
-          "points": 60
+          "points": 0
         }
       ]
     },
@@ -144,7 +144,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Бабник",
           "place": 6,
           "reward": 2181,
-          "points": 50
+          "points": 0
         }
       ]
     },
@@ -158,7 +158,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Бардюр",
           "place": 3,
           "reward": 3540,
-          "points": 90
+          "points": 0
         },
         {
           "nick": "Smile😎😊😺",
@@ -178,7 +178,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "AlenaSt",
           "place": 1,
           "reward": 12532.5,
-          "points": 135
+          "points": 0
         }
       ]
     },
@@ -192,13 +192,13 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Юрий_77",
           "place": 1,
           "reward": 4352.5,
-          "points": 135
+          "points": 0
         },
         {
           "nick": "ДжекПотный",
           "place": 4,
           "reward": 302.5,
-          "points": 70
+          "points": 0
         }
       ]
     },
@@ -212,13 +212,13 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "WSOPли",
           "place": 3,
           "reward": 1102.5,
-          "points": 90
+          "points": 0
         },
         {
           "nick": "cadillac",
           "place": 5,
           "reward": 436.25,
-          "points": 60
+          "points": 0
         }
       ]
     }
@@ -235,7 +235,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "_JD_",
           "place": 3,
           "reward": 6431,
-          "points": 90
+          "points": 0
         }
       ]
     },
@@ -249,13 +249,13 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Ksuha🐉",
           "place": 1,
           "reward": 13215,
-          "points": 135
+          "points": 0
         },
         {
           "nick": "WSOPли",
           "place": 5,
           "reward": 310,
-          "points": 60
+          "points": 0
         }
       ]
     },
@@ -269,19 +269,19 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Замотаю",
           "place": 3,
           "reward": 18720,
-          "points": 90
+          "points": 0
         },
         {
           "nick": "SantaClauS",
           "place": 4,
           "reward": 13040,
-          "points": 70
+          "points": 0
         },
         {
           "nick": "kriak",
           "place": 7,
           "reward": 745,
-          "points": 40
+          "points": 0
         },
         {
           "nick": "нежданчик",
@@ -307,7 +307,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Ksuha🐉",
           "place": 1,
           "reward": 5716.57,
-          "points": 135
+          "points": 0
         }
       ]
     }
@@ -324,19 +324,19 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "AlenaSt",
           "place": 2,
           "reward": 3950,
-          "points": 110
+          "points": 0
         },
         {
           "nick": "CD_u_Dymau",
           "place": 5,
           "reward": 1320,
-          "points": 60
+          "points": 0
         },
         {
           "nick": "kingofclowns",
           "place": 3,
           "reward": 720,
-          "points": 90
+          "points": 0
         }
       ]
     },
@@ -350,25 +350,25 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "FrankL",
           "place": 1,
           "reward": 42829.62,
-          "points": 135
+          "points": 0
         },
         {
           "nick": "IRIHKA",
           "place": 3,
           "reward": 11273.75,
-          "points": 90
+          "points": 0
         },
         {
           "nick": "AlenaSt",
           "place": 6,
           "reward": 4081.89,
-          "points": 50
+          "points": 0
         },
         {
           "nick": "Виталька",
           "place": 7,
           "reward": 3377.81,
-          "points": 40
+          "points": 0
         },
         {
           "nick": "ПаПа_МоЖеТ",
@@ -388,19 +388,19 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "Shkarubo",
           "place": 2,
           "reward": 4200,
-          "points": 110
+          "points": 0
         },
         {
           "nick": "Baldendi",
           "place": 3,
           "reward": 2200,
-          "points": 90
+          "points": 0
         },
         {
           "nick": "fomichga",
           "place": 4,
           "reward": 1600,
-          "points": 70
+          "points": 0
         }
       ]
     },
@@ -414,7 +414,7 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "comotd",
           "place": 3,
           "reward": 11950,
-          "points": 90
+          "points": 0
         }
       ]
     }

@@ -460,7 +460,7 @@ function toStoredTournament(t) {
         nick: String(p.nick || ""),
         place: Number(p.place) || 0,
         reward,
-        points: pointsForPlayer({ place: Number(p.place) || 0, reward })
+        points: /\.09\.2026$/.test(String(t.date || "")) ? 0 : pointsForPlayer({ place: Number(p.place) || 0, reward })
       };
     })
   };

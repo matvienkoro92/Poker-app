@@ -889,6 +889,8 @@ function hallFishRowsFromCrmData(data) {
           profileCity: String((row && (row.profileCity || row.city)) || "").trim(),
           avatarUrl: String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim(),
           level: Number(row && row.level) || 0,
+          levelXp: row && row.levelXp != null ? Number(row.levelXp) : null,
+          levelXpTarget: row && row.levelXpTarget != null ? Number(row.levelXpTarget) : null,
           fee: Number(row && row.fee) || 0,
         };
       })
@@ -914,6 +916,8 @@ function hallFishRowsFromCrmData(data) {
         profileCity: String((row && (row.profileCity || row.city)) || "").trim(),
         avatarUrl: String((row && (row.avatarUrl || row.avatar || row.photoUrl || row.photo_url)) || "").trim(),
         level: level,
+        levelXp: row && row.levelXp != null ? Number(row.levelXp) : null,
+        levelXpTarget: row && row.levelXpTarget != null ? Number(row.levelXpTarget) : null,
         fee: Number(row && row.fee) || 0,
       };
     })
@@ -1091,16 +1095,24 @@ function hallFishLevelRowHtml(row, rank, extraClass) {
   var telegram = String(row && row.telegram || "").trim();
   var sub = [p21Id ? "ID Poker21: " + p21Id : "", telegram].filter(Boolean).join(" · ");
   var image = hallFishLevelPlayerImage(row);
-  var age = hallFishLevelAgeText(row && row.profileBirthDate);
   var city = String((row && (row.profileCity || row.city)) || "").trim();
-  var meta = [age, city].filter(Boolean).join(" · ");
-  return '<button type="button" class="hall-fish-level-row hall-fish-level-row--player' + (extraClass ? " " + hallFishEsc(extraClass) : "") + '" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
-    '<span class="hall-fish-level-row__rank">' + hallFishEsc(rank) + '</span>' +
+  var meta = city;
+  var levelDesign = !(extraClass && /sng|achievement/.test(extraClass));
+  var podiumClass = levelDesign && rank >= 1 && rank <= 3 ? " hall-fish-level-row--podium hall-fish-level-row--place-" + rank : "";
+  var sticky = !!(extraClass && extraClass.indexOf("--sticky") !== -1);
+  if (sticky) sub = [p21Id ? "ID " + p21Id : "", city].filter(Boolean).join(" · ");
+  var xp = row && row.levelXp;
+  var xpTarget = row && row.levelXpTarget;
+  var hasXp = levelDesign && xp != null && xpTarget != null && isFinite(xp) && isFinite(xpTarget) && xp >= 0 && xpTarget > 0;
+  var xpHtml = hasXp ? '<span class="hall-fish-level-row__xp-track" role="meter" aria-label="Опыт до следующего уровня" aria-valuemin="0" aria-valuemax="' + xpTarget + '" aria-valuenow="' + Math.min(xp, xpTarget) + '"><span style="width:' + Math.min(100, 100 * xp / xpTarget) + '%"></span></span><span class="hall-fish-level-row__xp-label">' + Math.floor(xp).toLocaleString("ru-RU") + ' / ' + Math.floor(xpTarget).toLocaleString("ru-RU") + '</span>' : '';
+  return '<button type="button" class="hall-fish-level-row hall-fish-level-row--player' + (extraClass ? " " + hallFishEsc(extraClass) : "") + (levelDesign ? " hall-fish-level-row--premium" : "") + podiumClass + '" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
+    '<span class="hall-fish-level-row__rank">' + (podiumClass ? '<span class="hall-fish-level-row__crown" aria-hidden="true">♛</span>' : '') + hallFishEsc(rank) + '</span>' +
     '<span class="hall-fish-level-row__media hall-fish-level-row__media--' + hallFishEsc(image.kind) + '"><img src="' + hallFishEsc(image.src) + '" alt="" loading="lazy" decoding="async"></span>' +
-    '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
+    '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__headline">' + (sticky ? '<span class="hall-fish-level-row__you">Вы</span>' : '') + '<span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
+    (rank === 1 && levelDesign && !sticky ? '<span class="hall-fish-level-row__leader">♛ Лидер клуба</span>' : '') + '</span>' +
     (sub ? '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span>' : '') +
     (meta ? '<span class="hall-fish-level-row__meta">' + hallFishEsc(meta) + '</span>' : '') + '</span>' +
-    '<span class="hall-fish-level-row__level">' + hallFishEsc(row && row.level) + ' ур.</span>' +
+    '<span class="hall-fish-level-row__score"><span class="hall-fish-level-row__level">' + hallFishEsc(row && row.level) + ' <small>ур.</small></span>' + xpHtml + '</span>' +
   '</button>';
 }
 
@@ -1751,7 +1763,9 @@ function hallFishAchievementSectionHtml(title, rows, description, key, awardText
       var image = hallFishLevelPlayerImage(row);
       var age = hallFishLevelAgeText(row && row.profileBirthDate);
       var city = String((row && (row.profileCity || row.city)) || "").trim();
-      var meta = [age, city].filter(Boolean).join(" · ");
+      var meta = city;
+  var levelDesign = !(extraClass && /sng|achievement/.test(extraClass));
+  var podiumClass = levelDesign && rank >= 1 && rank <= 3 ? " hall-fish-level-row--podium hall-fish-level-row--place-" + rank : "";
       var story = String(row.description || "").trim();
       var details = Array.isArray(row.detailRows) ? row.detailRows : [];
       var attrs = userId

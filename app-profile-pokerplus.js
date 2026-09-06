@@ -2100,27 +2100,35 @@ function initProfilePokerPlus() {
     bindBtn.dataset.bound = "1";
     bindBtn.addEventListener("click", bindPokerPlus);
   }
+  var pokerPlusButtonRefreshPromise = null;
+  var pokerPlusButtonResetTimer = null;
   function refreshPokerPlusFromButton() {
+    if (pokerPlusButtonRefreshPromise) return pokerPlusButtonRefreshPromise;
+    if (pokerPlusButtonResetTimer) clearTimeout(pokerPlusButtonResetTimer);
     setFeedback("Обновляем данные Poker21...", false);
     setPokerPlusRefreshButtonsState("loading");
     setPokerPlusRefreshButtonsDisabled(true);
-    try {
-      Promise.resolve(loadProfile(true))
-        .catch(function () { return { refreshStatus: "failed" }; })
+    var refreshStatus = "failed";
+    pokerPlusButtonRefreshPromise = pokerPlusRunFinally(
+      Promise.resolve().then(function () { return loadProfile(true); })
         .then(function (result) {
-          var refreshStatus = result && result.refreshStatus ? result.refreshStatus : "failed";
-          setPokerPlusRefreshButtonsState(refreshStatus);
-          setPokerPlusRefreshButtonsDisabled(false);
-          setTimeout(function () {
-            setPokerPlusRefreshButtonsState("");
-            setPokerPlusRefreshButtonText(!!pokerPlusProfileLinked);
-          }, refreshStatus === "done" ? 1200 : 2200);
-        });
-    } catch (eRefreshLoad) {
-      setPokerPlusRefreshButtonsState("");
-      setPokerPlusRefreshButtonText(!!pokerPlusProfileLinked);
-      setPokerPlusRefreshButtonsDisabled(false);
-    }
+          refreshStatus = result && result.refreshStatus ? result.refreshStatus : "failed";
+        })
+        .catch(function () {
+          setFeedback("Не удалось обновить Poker21. Попробуйте ещё раз.", true);
+        }),
+      function () {
+        pokerPlusButtonRefreshPromise = null;
+        setPokerPlusRefreshButtonsDisabled(false);
+        setPokerPlusRefreshButtonsState(refreshStatus);
+        pokerPlusButtonResetTimer = setTimeout(function () {
+          pokerPlusButtonResetTimer = null;
+          setPokerPlusRefreshButtonsState("");
+          setPokerPlusRefreshButtonText(!!pokerPlusProfileLinked);
+        }, refreshStatus === "done" ? 1200 : 2200);
+      }
+    );
+    return pokerPlusButtonRefreshPromise;
   }
   if (refreshBtn.dataset.bound !== "1") {
     refreshBtn.dataset.bound = "1";
@@ -2128,9 +2136,7 @@ function initProfilePokerPlus() {
   }
   if (statusRefreshBtn && statusRefreshBtn.dataset.bound !== "1") {
     statusRefreshBtn.dataset.bound = "1";
-    statusRefreshBtn.addEventListener("click", function () {
-      refreshBtn.click();
-    });
+    statusRefreshBtn.addEventListener("click", refreshPokerPlusFromButton);
   }
   if (unbindBtn.dataset.bound !== "1") {
     unbindBtn.dataset.bound = "1";

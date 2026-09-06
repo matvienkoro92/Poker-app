@@ -1106,6 +1106,11 @@ function getWinterRatingPlayerSummary(nick, options) {
   } else {
     tournamentsByDate = getRatingTournamentsByDate();
   }
+  // September is prize history only; it is not part of a seasonal leaderboard.
+  var historyTournaments = {};
+  mergeWinterRatingDateMap(historyTournaments, tournamentsByDate);
+  mergeWinterRatingDateMap(historyTournaments, typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {});
+  tournamentsByDate = historyTournaments;
   var byDate = getRatingByDate();
   if (isSeasonal && typeof WINTER_RATING_BY_DATE !== "undefined") {
     var mergedByDate = {};
