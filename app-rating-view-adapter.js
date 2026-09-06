@@ -1,3 +1,40 @@
+function summerRatingSeasonStats(tournamentsByDate) {
+  var totals = Object.create(null);
+  var wins = [];
+  var result = { total: 0, mid: 0, high: 0, topPlayers: [], topWins: [] };
+  Object.keys(tournamentsByDate || {}).sort().forEach(function (date) {
+    if (!/\.(06|07|08)\.2026$/.test(date)) return;
+    (tournamentsByDate[date] || []).forEach(function (tournament) {
+      (tournament.players || []).forEach(function (player) {
+        var reward = Number(player && player.reward);
+        if (!Number.isFinite(reward) || reward <= 0) return;
+        var nick = typeof normalizeWinterNick === "function" ? normalizeWinterNick(player.nick) : String(player.nick || "").trim();
+        var key = nick.toLowerCase();
+        if (!totals[key]) totals[key] = { nick: nick, reward: 0 };
+        totals[key].reward += reward;
+        result.total += reward;
+        if (reward >= 100000) result.high++;
+        else if (reward >= 50000) result.mid++;
+        wins.push({ nick: nick, reward: reward, date: date, tournament: tournament.name || "" });
+      });
+    });
+  });
+  function byReward(a, b) { return b.reward - a.reward || a.nick.localeCompare(b.nick, "ru"); }
+  result.topPlayers = Object.keys(totals).map(function (key) { return totals[key]; }).sort(byReward).slice(0, 10);
+  result.topWins = wins.sort(byReward).slice(0, 10);
+  return result;
+}
+
+function summerRatingSeasonStatsHtml(stats) {
+  function table(title, rows, single) {
+    return '<section class="summer-rating-season-top"><h3>' + title + '</h3><table><thead><tr><th scope="col">№</th><th scope="col">Игрок</th><th scope="col">Призовые</th></tr></thead><tbody>' + rows.map(function (row, index) {
+      return '<tr><td>' + (index + 1) + '</td><td>' + escapeHtmlRating(row.nick) + (single ? '<small>' + escapeHtmlRating(row.date + ' · ' + row.tournament) + '</small>' : '') + '</td><td>' + formatRewardRound(row.reward) + ' ₽</td></tr>';
+    }).join('') + '</tbody></table></section>';
+  }
+  return '<div class="summer-rating-season-counts"><span>Заносов 50–99 тыс. ₽: <strong>' + stats.mid + '</strong></span><span>Заносов 100 тыс. ₽ и выше: <strong>' + stats.high + '</strong></span></div>' +
+    '<div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых за лето', stats.topPlayers, false) + table('Топ-10 разовых заносов за лето', stats.topWins, true) + '</div>';
+}
+
 // Rating view adapter: shared spring/winter DOM, tables, lightbox, and player modal.
 
 var winterRatingLightboxDirectItems = null;
@@ -3675,17 +3712,9 @@ function initWinterRating() {
           upperMonths.parentNode.insertBefore(summerMonthsHost, upperMonths);
         }
         upperMonths.style.setProperty("display", "none", "important");
-        var summerTotalReward = 0;
-        Object.keys(summerTournaments).forEach(function (date) {
-          if (!/\.(06|07|08)\.2026$/.test(date)) return;
-          (summerTournaments[date] || []).forEach(function (tournament) {
-            (tournament.players || []).forEach(function (player) {
-              summerTotalReward += Math.max(0, Number(player.reward) || 0);
-            });
-          });
-        });
+        var summerStats = summerRatingSeasonStats(summerTournaments);
         summerMonthsHost.innerHTML = '<p class="summer-rating-season-total">Всего призовых за лето: <strong>' +
-          formatRewardRound(summerTotalReward) + ' ₽</strong></p>' + summerMonths.map(function (month) {
+          formatRewardRound(summerStats.total) + ' ₽</strong></p>' + summerRatingSeasonStatsHtml(summerStats) + summerMonths.map(function (month) {
           return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
             summerSummaryHtml([month], "Итоги месяца") + '</details>';
         }).join("");

@@ -5477,3 +5477,17 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 #summerRatingMonthSummaries .summer-rating-season-total strong { color: #ffc64b; white-space: nowrap; }
 #summerRatingMonthSummaries .summer-rating-month { margin-top: 8px; border-radius: 10px; background: #0c1525; }
 #summerRatingMonthSummaries .summer-rating-month > summary { padding: 10px 14px; font-size: 14px; font-weight: 600; }
+
+.summer-rating-season-counts { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 12px 0 20px; padding: 16px; border-radius: 14px; background: #0b1524; color: #e8d7b4; }
+.summer-rating-season-counts strong { color: #ffc64b; }
+.summer-rating-season-tops { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+.summer-rating-season-top { min-width: 0; padding: 16px; border: 1px solid #6d5c37; border-radius: 16px; background: #0b1524; color: #ffebc4; }
+.summer-rating-season-top h3 { margin: 0 0 14px; font-size: 17px; }
+.summer-rating-season-top table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.summer-rating-season-top th, .summer-rating-season-top td { padding: 9px 4px; text-align: left; border-bottom: 1px solid #ffffff16; }
+.summer-rating-season-top th { color: #cabb9d; font-size: 12px; }
+.summer-rating-season-top td:nth-child(2) { overflow-wrap: anywhere; }
+.summer-rating-season-top td:last-child, .summer-rating-season-top th:last-child { text-align: right; white-space: nowrap; }
+.summer-rating-season-top td:last-child { color: #ffc64b; font-weight: 700; }
+.summer-rating-season-top small { display: block; margin-top: 4px; color: #cabb9d; font-size: 11px; }
+@media (max-width: 700px) { .summer-rating-season-tops { grid-template-columns: 1fr; } }
