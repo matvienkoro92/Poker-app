@@ -878,4 +878,14 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-04-09-2026-league1-pyatnica-progressiv-18h.jpg",
     "rating-compressed-preview/rating-04-09-2026-league1-night-magic-80ko-23h.jpg"
   ]
+,
+  "05.09.2026": [
+    "rating-compressed-preview/rating-05-09-2026-league1-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-05-09-2026-league1-dv-plo5-30k-12h.jpg",
+    "rating-compressed-preview/rating-05-09-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-05-09-2026-league1-big-boss-18h.jpg",
+    "rating-compressed-preview/rating-05-09-2026-league1-lucky-555-gtd-18h.jpg",
+    "rating-compressed-preview/rating-05-09-2026-league1-nlh-knockout-220k-21h.jpg",
+    "rating-compressed-preview/rating-05-09-2026-league1-night-magic-80k-23h.jpg"
+  ]
 };

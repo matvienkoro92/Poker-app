@@ -419,4 +419,133 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "05.09.2026": [
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 4,
+          "reward": 1554,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV🏃 PLO5 🥊 30k🥊",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 3,
+          "reward": 4079.9999999999995,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 6870,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Замотаю",
+          "place": 2,
+          "reward": 2410,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "💥Big Boss 💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Аспирин",
+          "place": 3,
+          "reward": 3675,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🍀LUCKY 555🍀 GTD",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 74588,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ДжекПотный",
+          "place": 2,
+          "reward": 470,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 5,
+          "reward": 11762,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K 🌘",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "CCCP",
+          "place": 6,
+          "reward": 1835.0000000000002,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

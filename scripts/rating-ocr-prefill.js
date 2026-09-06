@@ -83,6 +83,8 @@ function normalizeName(raw) {
   if (/Hyper\s+Turbo\s+300/i.test(name)) return "Hyper Turbo 300";
   if (/^NLH\s+KNOCKOUT\s+220k/i.test(name)) return "NLH KNOCKOUT 220k";
   if (/^Night\s+magic\s+80K/i.test(name)) return "Night magic 80K 🌘";
+  if (/Deep\s+Night\s+15k/i.test(name)) return "✨Deep Night 15k ✨";
+  if (/LUCKY\s+555/i.test(name)) return "🍀LUCKY 555🍀 GTD";
   if (/^PL[O0]?4\s+[РP]KO/i.test(name)) return "PLO4 PKO 🥊 20K";
   if (/^PLO5\s*-\s*[РP]KO/i.test(name)) return "PLO5 - PKO 🥊 200k 🏆";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
