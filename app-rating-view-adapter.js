@@ -3666,25 +3666,27 @@ function initWinterRating() {
           '<div><dt>Заносов 100к+</dt><dd>' + high + '</dd></div>' +
           '<div><dt>Заносов 50–100к</dt><dd>' + mid + '</dd></div></dl></section>';
       }
-      calendarWrap.innerHTML = summerSummaryHtml(summerMonths, "Итоги лета 2026") + summerMonths.map(function (month) {
-        var monthIndex = availableMonths.findIndex(function (entry) { return entry.year === 2026 && entry.month === month; });
-        return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
-          summerSummaryHtml([month], "Итоги месяца") +
-          (monthIndex >= 0 ? renderCalendarMonth(monthIndex, true) : '<p>Нет результатов</p>') + '</details>';
-      }).join("");
-      calendarWrap.querySelectorAll(".winter-rating__calendar-cell--day").forEach(function (btn) {
-        btn.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          var dateStr = btn.getAttribute("data-rating-date");
-          var item = datesContainer.querySelector('.winter-rating__date-item[data-rating-date="' + dateStr + '"]');
-          var panel = item && item.querySelector(".winter-rating__date-panel");
-          if (panel) openDateModal(dateStr, panel);
-        });
-      });
+      var upperMonths = document.getElementById("springRatingViewTotals");
+      if (upperMonths) {
+        var summerMonthsHost = document.getElementById("summerRatingMonthSummaries");
+        if (!summerMonthsHost) {
+          summerMonthsHost = document.createElement("div");
+          summerMonthsHost.id = "summerRatingMonthSummaries";
+          upperMonths.parentNode.insertBefore(summerMonthsHost, upperMonths);
+        }
+        upperMonths.style.setProperty("display", "none", "important");
+        summerMonthsHost.innerHTML = summerMonths.map(function (month) {
+          return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
+            summerSummaryHtml([month], "Итоги месяца") + '</details>';
+        }).join("");
+      }
     } else {
-      renderCalendarMonth(calendarWrap._calendarMonthIndex);
+      var previousSummerMonths = document.getElementById("summerRatingMonthSummaries");
+      if (previousSummerMonths) previousSummerMonths.remove();
+      var restoredMonths = document.getElementById("springRatingViewTotals");
+      if (restoredMonths) restoredMonths.style.removeProperty("display");
     }
+    renderCalendarMonth(calendarWrap._calendarMonthIndex);
     if ((!dateModal || !dateModalBody) && typeof window.pokerEnsureGlobalModalsHtml === "function") {
       Promise.resolve(window.pokerEnsureGlobalModalsHtml()).then(function () {
         refreshDateModalRefs();
