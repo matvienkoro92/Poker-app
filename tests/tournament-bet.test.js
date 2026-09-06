@@ -188,7 +188,7 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(client, /<h3>Создать персональную ставку<\/h3>/);
   assert.match(client, /action: "create_player"/);
   assert.match(client, /type="text" inputmode="numeric" pattern="\[0-9 \]\*"/);
-  assert.match(client, /silent && \(activeTab === "create" \|\| activeField\)/);
+  assert.match(client, /silent && \(activeTab === "create" \|\| activeField \|\| adminForm\)/);
   assert.match(server, /action === "create_player"/);
   assert.match(server, /startingBank: 0/);
   assert.match(server, /createdByPlayer: true/);

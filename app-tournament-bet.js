@@ -7,6 +7,7 @@
   var statusEl = null;
   var state = null;
   var loading = false;
+  var loadPromise = null;
   var subscribed = false;
   var refreshTimer = 0;
   var activeTab = "event";
@@ -319,6 +320,7 @@
         '<div data-tournament-bet-banner-preview>' + tournamentBannerHtml(first, true) + '</div>' +
         '<label><span>Стартовый банк</span><input name="startingBank" type="number" min="1" step="1" placeholder="10000" required></label>' +
         '<label><span>Цена ставки</span><input name="stakePrice" type="number" min="1" step="1" placeholder="500" required></label>' +
+        '<div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' +
         '<button type="submit">Создать и открыть ставки</button></form>';
     }
     var closeButton = data.status === "open" ? '<button type="button" data-tournament-bet-action="close">Закрыть приём ставок</button>' : "";
@@ -365,24 +367,30 @@
     loading = true;
     if (!silent && bodyEl) bodyEl.innerHTML = '<div class="club-choice-vote-modal__loading">Идёт загрузка…</div>';
     var eventQuery = selectedEventId ? "eventId=" + encodeURIComponent(selectedEventId) + "&" : "";
-    return fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery), { cache: "no-store" }).then(function (response) {
+    loadPromise = fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery), { cache: "no-store" }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
         var activeField = modal && document.activeElement && modal.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
         if (typeof data.subscribed === "boolean") subscribed = data.subscribed;
         state = data;
         if (deepLinkEventId && data && data.id === deepLinkEventId) { activeTab = data.createdByPlayer ? "create" : "event"; deepLinkEventId = ""; }
-        if (!(silent && (activeTab === "create" || activeField))) render();
+        var adminForm = bodyEl && bodyEl.querySelector("form");
+        if (!(silent && (activeTab === "create" || activeField || adminForm))) render();
         else updateHomeButton(data);
         return data;
       });
     }).catch(function (error) {
       if (!silent) setStatus(error.message, "error");
       return null;
-    }).finally(function () { loading = false; });
+    }).finally(function () { loading = false; loadPromise = null; });
+    return loadPromise;
   }
 
   function post(payload, pendingText) {
+    if (loadPromise) {
+      setStatus(pendingText || "Сохраняю…", "loading");
+      return loadPromise.then(function () { return post(payload, pendingText); });
+    }
     if (loading) return Promise.resolve(null);
     loading = true;
     setStatus(pendingText || "Сохраняю…", "loading");
