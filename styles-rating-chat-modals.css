@@ -4341,3 +4341,28 @@
     font-size: 14px;
   }
 }
+
+/* Subtle motion for PokerManki's transparent rocket portrait. */
+.chat-user-modal__rating-art-img[src*="pokermanki"],
+.winter-rating-player-modal__art-img[src*="pokermanki"] {
+  transform-origin: 50% 96%;
+  animation: pokermanki-portrait-idle 5.6s ease-in-out infinite;
+}
+@keyframes pokermanki-portrait-idle {
+  0%, 100% {
+    translate: 0 0;
+    rotate: -0.2deg;
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 3px rgba(255, 158, 38, 0.12));
+  }
+  50% {
+    translate: 0 -3px;
+    rotate: 0.2deg;
+    filter: drop-shadow(0 7px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 7px rgba(255, 158, 38, 0.3));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-user-modal__rating-art-img[src*="pokermanki"],
+  .winter-rating-player-modal__art-img[src*="pokermanki"] {
+    animation: none;
+  }
+}
