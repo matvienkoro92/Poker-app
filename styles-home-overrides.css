@@ -6724,8 +6724,9 @@ html body #app.app.app--view-home
   margin: -1% -1% 0;
 }
 .home-tournament-bet-link img.home-tournament-bet-link__art {
-  aspect-ratio: 2.85 / 1;
-  object-fit: fill;
+  aspect-ratio: auto;
+  height: auto;
+  object-fit: contain;
 }
 .app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action__bar,
 .home-tournament-bet-link__bar {
@@ -6763,4 +6764,49 @@ html body #app.app.app--view-home
 .app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) {
   border: 1px solid #cb9348 !important;
   border-radius: clamp(14px, 3vw, 26px) !important;
+}
+
+/* Keep the overlay compact within the banner's natural proportions. */
+.home-tournament-bet-link__bar {
+  height: clamp(32px, 7cqw, 74px) !important;
+}
+.home-tournament-bet-link__stat { gap: 2px; }
+@media (max-width: 480px) {
+  .home-tournament-bet-link__stat small { font-size: 8px; }
+  .home-tournament-bet-link__stat strong { font-size: 11px; }
+  .home-tournament-bet-link__cta { font-size: 10px; margin: 1px 3px; }
+}
+
+/* Both promotions share the same content edges; SNG needs no second shell. */
+.app.app--view-home .home-club-actions-block:has(.home-sng-champions-feature) {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 8px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+.app.app--view-home .home-club-actions-block:has(.home-sng-champions-feature)::before,
+.app.app--view-home .home-club-actions-block:has(.home-sng-champions-feature)::after {
+  display: none !important;
+}
+.app.app--view-home .home-sng-champions-feature,
+.app.app--view-home .home-tournament-bet-link {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) {
+  display: block !important;
+  grid-template-rows: none !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+.app.app--view-home .home-sng-champions-feature .home-sng-champions-action__cta {
+  font-weight: 400 !important;
+  text-shadow: none !important;
 }
