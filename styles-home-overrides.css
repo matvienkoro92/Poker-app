@@ -6704,3 +6704,63 @@ html body #app.app.app--view-home
   font-size: clamp(11px, 2.5vw, 18px);
   font-weight: 800;
 }
+
+/* Live controls belong inside the artwork's shared gold frame. */
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]),
+.home-tournament-bet-link {
+  position: relative;
+  container-type: inline-size;
+  border: 1px solid #cb9348;
+  border-radius: clamp(14px, 3vw, 26px);
+  overflow: hidden;
+  background: #080807;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) {
+  display: block;
+  aspect-ratio: 2.85 / 1;
+  grid-template-rows: none;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action {
+  margin: -1% -1% 0;
+}
+.home-tournament-bet-link img.home-tournament-bet-link__art {
+  aspect-ratio: 2.85 / 1;
+  object-fit: fill;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action__bar,
+.home-tournament-bet-link__bar {
+  position: absolute !important;
+  inset: auto 1.2% 2.5% !important;
+  height: clamp(44px, 8.5cqw, 92px) !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(12, 9, 5, 0.5), rgba(6, 6, 6, 0.94)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.25fr) !important;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action__stat,
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action__cta-wrap,
+.home-tournament-bet-link__stat {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 4px 2px !important;
+  box-sizing: border-box;
+  border-color: rgba(203, 147, 72, 0.35) !important;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action__cta-wrap {
+  border: 0 !important;
+  overflow: visible !important;
+}
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-action__cta {
+  inset: 3px !important;
+  border-radius: 12px !important;
+  border: 1px solid #ffe4a1 !important;
+  background: linear-gradient(#ffdc78, #da8b19) !important;
+  color: #211300 !important;
+  animation: none !important;
+}
+.home-tournament-bet-link__cta { margin: 3px; }
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) {
+  border: 1px solid #cb9348 !important;
+  border-radius: clamp(14px, 3vw, 26px) !important;
+}
