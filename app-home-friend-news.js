@@ -2421,7 +2421,7 @@
     var heroLeaderNick = clubCurrentMonthHeroLeaderNick();
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
-          '<strong>15 000 ₽</strong>' +
+          '<strong>' + (clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
           '<span><b>«Герой дня» · ' + esc(clubHeroMonthLabel()) + '</b>' +
           '<small>' + (heroLeaderNick ? 'Лидирует: ' + esc(heroLeaderNick) : 'Награда лидеру месяца') + '</small></span>' +
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть</button>' +
