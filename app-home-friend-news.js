@@ -2846,22 +2846,17 @@
             window.openHallFishAchievementsModal("dayHero");
             return true;
           };
-          if (!openAchievements() && typeof window.pokerEnsureScriptDomains === "function") {
-            Promise.resolve(window.pokerEnsureScriptDomains(["hall"])).then(function () {
-              if (openAchievements()) return;
-              returnToClubNewsAfterAchievements = false;
-              resetAchievementsButton();
-              openClubModal();
-            }).catch(function () {
-              returnToClubNewsAfterAchievements = false;
-              resetAchievementsButton();
-              openClubModal();
-            });
-          } else if (typeof window.openHallFishAchievementsModal !== "function") {
+          Promise.all([
+            typeof window.pokerEnsureStyleDomains === "function" ? window.pokerEnsureStyleDomains(["hall"]) : Promise.resolve(),
+            typeof window.pokerEnsureScriptDomains === "function" ? window.pokerEnsureScriptDomains(["hall"]) : Promise.resolve(),
+          ]).then(function () {
+            if (openAchievements()) return;
             returnToClubNewsAfterAchievements = false;
             resetAchievementsButton();
-            openClubModal();
-          }
+          }).catch(function () {
+            returnToClubNewsAfterAchievements = false;
+            resetAchievementsButton();
+          });
           return;
         }
         var author = event.target.closest("[data-home-news-comment-author]");

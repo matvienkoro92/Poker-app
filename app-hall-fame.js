@@ -1779,8 +1779,6 @@ function hallFishAchievementSectionHtml(title, rows, description, key, awardText
       var age = hallFishLevelAgeText(row && row.profileBirthDate);
       var city = String((row && (row.profileCity || row.city)) || "").trim();
       var meta = city;
-  var levelDesign = !(extraClass && /sng|achievement/.test(extraClass));
-  var podiumClass = levelDesign && rank >= 1 && rank <= 3 ? " hall-fish-level-row--podium hall-fish-level-row--place-" + rank : "";
       var story = String(row.description || "").trim();
       var details = Array.isArray(row.detailRows) ? row.detailRows : [];
       var attrs = userId
@@ -2988,31 +2986,35 @@ function hallFishEditPlayerBirthday(accountId, playerName, currentValue) {
     });
 }
 
+var hallFishLevelOpenSequence = 0;
 function openHallFishRatingModal() {
   if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-players");
+  var sequence = ++hallFishLevelOpenSequence;
+  var currentIds = hallFishReadLocalCurrentIds();
+  var visibleRows = hallFishRatingRowsCache || hallFishReadRowsSessionCache();
   hallFishLevelSearchQuery = "";
-  hallFishSetModalState("Загрузка…");
-  Promise.all([
-    hallFishEnsureLevelPlayerArtData().catch(function () { return false; }),
-    hallFishLoadRows(),
-    hallFishLoadCurrentIds().catch(function () { return hallFishReadLocalCurrentIds(); }),
-  ])
-    .then(function (result) {
-      var rows = Array.isArray(result[1]) ? result[1] : [];
-      hallFishSetModalState("", rows, Array.isArray(result[2]) ? result[2] : []);
-    })
-    .catch(function () {
-      var body = document.getElementById("hallFishRatingBody");
-      var subtitle = document.getElementById("hallFishRatingSubtitle");
-      var myRank = document.getElementById("hallFishRatingMyRank");
-      hallFishSetSubtitle(subtitle);
-      hallFishUpdateTabs("levels");
-      if (myRank) {
-        myRank.hidden = false;
-        myRank.textContent = "Ваш рейтинг —/—";
-      }
-      if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Попробуйте ещё раз позже.</div>';
-    });
+  hallFishSetModalState(visibleRows ? "" : "Загрузка…", visibleRows || undefined, currentIds);
+  function stillVisible() {
+    var modal = document.getElementById("hallFishRatingModal");
+    return sequence === hallFishLevelOpenSequence && modal && !modal.hidden && hallFishActiveTab === "levels";
+  }
+  hallFishEnsureLevelPlayerArtData().then(function () {
+    if (visibleRows && stillVisible()) hallFishRefreshVisibleRows(hallFishRatingRowsCache || visibleRows);
+  }).catch(function () {});
+  hallFishLoadCurrentIds().then(function (ids) {
+    currentIds = Array.isArray(ids) ? ids : currentIds;
+    if (!stillVisible()) return;
+    hallFishLevelCurrentIds = currentIds.slice();
+    if (visibleRows) hallFishRefreshVisibleRows(hallFishRatingRowsCache || visibleRows);
+  }).catch(function () {});
+  return hallFishLoadRows().then(function (rows) {
+    visibleRows = Array.isArray(rows) ? rows : [];
+    if (stillVisible()) hallFishSetModalState("", visibleRows, currentIds);
+  }).catch(function () {
+    if (!stillVisible() || visibleRows) return;
+    var body = document.getElementById("hallFishRatingBody");
+    if (body) body.innerHTML = '<div class="hall-fish-modal__notice">Не удалось загрузить уровни. Попробуйте ещё раз позже.</div>';
+  });
 }
 window.openHallFishRatingModal = openHallFishRatingModal;
 

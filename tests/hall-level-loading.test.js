@@ -1,0 +1,7 @@
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const source=fs.readFileSync(require.resolve('../app-hall-fame.js'),'utf8');
+const code=source.slice(source.indexOf('var hallFishLevelOpenSequence'),source.indexOf('window.openHallFishRatingModal ='));
+function setup(cached){const calls=[];const modal={hidden:false};const c={window:{},document:{getElementById:()=>modal},hallFishActiveTab:'levels',hallFishRatingRowsCache:cached,hallFishReadRowsSessionCache:()=>null,hallFishReadLocalCurrentIds:()=>[],hallFishSetModalState:(m,r)=>calls.push(r),hallFishEnsureLevelPlayerArtData:()=>new Promise(()=>{}),hallFishLoadCurrentIds:()=>new Promise(()=>{}),hallFishLoadRows:()=>Promise.resolve([{nick:'Игрок',level:71}]),hallFishRefreshVisibleRows:()=>{}};vm.createContext(c);vm.runInContext(code,c);return{c,calls,modal};}
+test('levels render without waiting for art or account lookup',async()=>{const h=setup(null);await h.c.openHallFishRatingModal();assert.equal(h.calls.at(-1)[0].level,71);});
+test('cached rows display synchronously',async()=>{const rows=[{nick:'Cached'}],h=setup(rows);const done=h.c.openHallFishRatingModal();assert.equal(h.calls[0],rows);await done;});
+test('late player data does not replace another tab',async()=>{const h=setup(null);const done=h.c.openHallFishRatingModal();h.c.hallFishActiveTab='achievements';await done;assert.equal(h.calls.length,1);});
