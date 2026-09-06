@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, "..");
   await fs.mkdir(path.join(root, "public/assets/sng-notifications"), { recursive: true });
   for (const art of sources) {
     const input = art.includes("summer-rating-player-pokermanki-v2") ? "assets/sng-pokermanki-white.png" : art.split("?")[0];
-    await sharp(path.join(root, input)).resize({ width: 1000, height: 1200, fit: "contain", background: "#ffffff" })
+    await sharp(path.join(root, input)).resize({ width: 1000, height: 1000, fit: "contain", background: "#ffffff" })
       .flatten({ background: "#ffffff" }).jpeg({ quality: 92 })
       .toFile(path.join(root, "public", notificationArtPath(art)));
   }
