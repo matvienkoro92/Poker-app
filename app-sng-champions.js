@@ -2005,10 +2005,10 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
-        : "./assets/home-sng-champions-battle-3-v2.webp?v=2";
+        : "./assets/home-sng-champions-battle-3-v2.webp?v=3";
       var nextMobileSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout-mobile.webp?v=1"
-        : "./assets/home-sng-champions-battle-3-v2-mobile.webp?v=2";
+        : "./assets/home-sng-champions-battle-3-v2-mobile.webp?v=3";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
