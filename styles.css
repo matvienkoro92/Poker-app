@@ -4498,6 +4498,37 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 0 22px rgba(255, 118, 0, 0.36);
 }
 
+.app.app--view-home .home-summer-rating-spoiler {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.app.app--view-home .home-summer-rating-spoiler > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.app.app--view-home .home-summer-rating-spoiler > summary::-webkit-details-marker {
+  display: none;
+}
+
+.app.app--view-home .home-summer-rating-spoiler__arrow {
+  position: absolute;
+  right: 12px;
+  z-index: 3;
+  color: #1d1004;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app.app--view-home .home-summer-rating-spoiler[open] .home-summer-rating-spoiler__arrow {
+  transform: rotate(180deg);
+}
+
+.app.app--view-home .home-summer-rating-spoiler__content {
+  padding-top: 10px;
+}
+
 .app.app--view-home .home-compact-link--spring-strip {
   display: flex;
   flex-direction: row;

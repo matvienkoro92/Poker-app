@@ -5339,7 +5339,7 @@ html #app .winter-rating.spring-rating.summer-rating .summer-rating-pedestal-hit
 
   body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text {
     max-width: 100%;
-    transform: translateX(-40px);
+    transform: none;
   }
 
   body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text::before {
@@ -5350,6 +5350,23 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
     font-size: clamp(12px, 3.8vw, 14px);
   }
 }
+
+.summer-rating-summary {
+  padding: 14px;
+  border: 1px solid rgba(255, 198, 75, 0.35);
+  border-radius: 14px;
+  background: rgba(12, 15, 20, 0.92);
+  color: #ffe9bd;
+}
+
+.summer-rating-summary h3 { margin: 0 0 12px; font-size: 16px; }
+.summer-rating-summary dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.summer-rating-summary dt { font-size: 12px; color: #d1c3a4; }
+.summer-rating-summary dd { margin: 4px 0 0; font-size: 18px; font-weight: 800; color: #ffc64b; overflow-wrap: anywhere; }
+.summer-rating-month { margin-top: 10px; border: 1px solid rgba(255, 198, 75, 0.35); border-radius: 14px; background: rgba(12, 15, 20, 0.92); }
+.summer-rating-month > summary { padding: 14px; color: #ffe9bd; font-weight: 800; cursor: pointer; }
+.summer-rating-month > summary:focus-visible { outline: 2px solid #ffc64b; outline-offset: -3px; border-radius: 14px; }
+.summer-rating-month .summer-rating-summary { margin: 0 8px 10px; }
 
 /* Compact summer secondary actions with a section-aware copy-link button. */
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tabs {
@@ -5366,6 +5383,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
   min-height: 27px;
   height: 27px;
   padding-inline: 12px;
+}
+
+.winter-rating.spring-rating.summer-rating .winter-rating__spring-main-tab[data-spring-main-league="top"]:not(.winter-rating__spring-main-tab--active) {
+  color: #fff0b8;
+  background: radial-gradient(ellipse at center, rgba(255, 190, 55, 0.24), rgba(255, 166, 24, 0.06));
+  box-shadow: inset 0 0 0 1px rgba(255, 211, 108, 0.55), inset 0 0 12px rgba(255, 187, 48, 0.2), 0 0 10px rgba(255, 184, 43, 0.42);
+  text-shadow: 0 0 5px rgba(255, 220, 128, 0.95), 0 0 12px rgba(255, 174, 32, 0.8);
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-action-tabs {
