@@ -23,7 +23,7 @@ async function applicationImage(entry) {
 
 test("SNG registration uses PokerManki character instead of profile photo", async () => {
   const result = await applicationImage({ pokerPlusNickname: "ПокерМанки", avatar: "data:image/jpeg;base64,YQ==" });
-  assert.equal(result.imageUrl, "https://example.com/assets/summer-rating-player-pokermanki.webp?v=3.547");
+  assert.equal(result.imageUrl, "https://example.com/assets/summer-rating-player-pokermanki-v2.webp?v=1");
 });
 
 test("SNG registration falls back to banner even if an unknown player has a profile photo", async () => {

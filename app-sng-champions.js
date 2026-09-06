@@ -571,7 +571,7 @@
     "аза": "./assets/sng-finalist-aza.webp",
     "аза32": "./assets/sng-finalist-aza.webp",
     "waaar": "./assets/summer-rating-player-waaar.webp",
-    "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
+    "покерманки": "./assets/summer-rating-player-pokermanki-v2.webp?v=1",
     "coo1er91": "./assets/summer-rating-player-cooler.webp",
     "em13!!": "./assets/summer-rating-player-emil.webp",
     "winifly": "./assets/summer-rating-player-winifly.webp",

@@ -476,7 +476,7 @@
     "штукатур": "./assets/sng-finalist-shtukatur.webp", "shtukatur": "./assets/sng-finalist-shtukatur.webp",
     "hakas": "./assets/sng-finalist-hakas.webp", "хакас": "./assets/sng-finalist-hakas.webp",
     "aza": "./assets/sng-finalist-aza.webp", "aza32": "./assets/sng-finalist-aza.webp", "аза": "./assets/sng-finalist-aza.webp", "аза32": "./assets/sng-finalist-aza.webp",
-    "waaar": "./assets/summer-rating-player-waaar.webp", "waaarr": "./assets/summer-rating-player-waaar.webp", "waaaar": "./assets/summer-rating-player-waaar.webp", "waaaarr": "./assets/summer-rating-player-waaar.webp", "покерманки": "./assets/summer-rating-player-pokermanki.webp?v=3.547",
+    "waaar": "./assets/summer-rating-player-waaar.webp", "waaarr": "./assets/summer-rating-player-waaar.webp", "waaaar": "./assets/summer-rating-player-waaar.webp", "waaaarr": "./assets/summer-rating-player-waaar.webp", "покерманки": "./assets/summer-rating-player-pokermanki-v2.webp?v=1",
     "coo1er91": "./assets/summer-rating-player-cooler.webp", "necoo1er91": "./assets/summer-rating-player-cooler.webp", "em13!!": "./assets/summer-rating-player-emil.webp",
     "winifly": "./assets/summer-rating-player-winifly.webp", "missclick": "./assets/summer-rating-player-missclick.webp?v=2",
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp", "nikola233": "./assets/summer-rating-player-nikola233.webp",
