@@ -10,8 +10,8 @@
     "web-push": "^3.6.7"
   },
   "scripts": {
-    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/generate-rating-thumbnails.js && node scripts/generate-sticker-previews.js && node scripts/copy-to-public.js && node scripts/minify-public.js",
-    "build:static": "node scripts/generate-sticker-previews.js && node scripts/copy-to-public.js && node scripts/minify-public.js",
+    "build": "node scripts/generate-rating-player-totals.js && node scripts/generate-club-news-data.js && node scripts/generate-rating-thumbnails.js && node scripts/generate-sticker-previews.js && node scripts/copy-to-public.js && node scripts/generate-sng-notification-art.js && node scripts/minify-public.js",
+    "build:static": "node scripts/generate-sticker-previews.js && node scripts/copy-to-public.js && node scripts/generate-sng-notification-art.js && node scripts/minify-public.js",
     "android:sync": "npm run build && npx cap sync android",
     "android:apk:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
     "android:apk:release": "npm run android:sync && cd android && ./gradlew assembleRelease",
