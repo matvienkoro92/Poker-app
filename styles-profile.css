@@ -5,6 +5,8 @@
 @import url("./styles-profile-adjacent-tools.css?v=4.002");
 @import url("./styles-profile-modals-tail.css?v=4.002");
 
+@import url("./styles-profile-identity.css?v=4.002");
+
 /* Desktop profile header: specialization on top, gender directly below. */
 @media (min-width: 701px) {
   .view[data-view="profile"] .profile-public-showcase__title-preferences {

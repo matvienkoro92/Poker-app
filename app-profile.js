@@ -989,7 +989,9 @@ function profilePublicShowcaseApplyStatus(status) {
   var currentCard = document.getElementById("profilePublicStatusCardCurrent");
   var nextCard = document.getElementById("profilePublicStatusCardNext");
   if (!scale || !levelText) return;
-  if (actions) actions.hidden = false;
+  if (actions) actions.hidden = !!(status && status.level != null);
+  var pointsHome = status && status.level != null ? document.getElementById("profileStatusXpRow") : actions;
+  if (pointsBtn && pointsHome && pointsBtn.parentNode !== pointsHome) pointsHome.appendChild(pointsBtn);
   if (refreshBtn) {
     refreshBtn.hidden = false;
     if (!String(refreshBtn.textContent || "").trim()) refreshBtn.textContent = "Обновить";
