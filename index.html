@@ -390,8 +390,8 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.020" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.021" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.002" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.022" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.022" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="transfers" href="./styles-transfers.css?v=4.002" />
@@ -989,6 +989,15 @@
         </div>
         <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
           <h2 class="home-tournament-section-title">Турниры вечера в 18 МСК</h2>
+        <button type="button" class="home-tournament-bet-link" data-tournament-bet-open aria-label="Ласт-лонгер. Ставка на себя в турнире">
+          <img class="home-tournament-bet-link__art" src="./assets/home-last-longer-sunday.webp?v=2" srcset="./assets/home-last-longer-sunday-mobile.webp?v=2 900w, ./assets/home-last-longer-sunday.webp?v=2 2123w" sizes="(max-width: 900px) 100vw, 1086px" alt="Ласт-лонгер. Ставка на себя в турнире" width="2123" height="550" loading="lazy" decoding="async" />
+          <span class="home-tournament-bet-link__bar">
+            <span class="home-tournament-bet-link__stat"><small>Участники</small><strong data-tournament-bet-home-players>—</strong></span>
+            <span class="home-tournament-bet-link__stat"><small>Банк</small><strong data-tournament-bet-home-bank>—</strong></span>
+            <span class="home-tournament-bet-link__stat"><small>Ставка</small><strong data-tournament-bet-home-stake>—</strong></span>
+            <span class="home-tournament-bet-link__cta">Сделать ставку</span>
+          </span>
+        </button>
           <div class="home-tournament-bonuses home-tournament-bonuses--upper" aria-label="Бонусы за комбинации">
             <div class="home-tournament-bonuses__grid home-tournament-bonuses__grid--upper" role="list">
               <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus-info="four-kind" aria-label="Условия бонуса за каре">
@@ -1142,15 +1151,6 @@
             aria-hidden="true"
           />
         </a>
-        <button type="button" class="home-tournament-bet-link" data-tournament-bet-open aria-label="Ласт-лонгер. Ставка на себя в турнире">
-          <img class="home-tournament-bet-link__art" src="./assets/home-last-longer-sunday.webp?v=2" srcset="./assets/home-last-longer-sunday-mobile.webp?v=2 900w, ./assets/home-last-longer-sunday.webp?v=2 2123w" sizes="(max-width: 900px) 100vw, 1086px" alt="Ласт-лонгер. Ставка на себя в турнире" width="2123" height="550" loading="lazy" decoding="async" />
-          <span class="home-tournament-bet-link__bar">
-            <span class="home-tournament-bet-link__stat"><small>Участники</small><strong data-tournament-bet-home-players>—</strong></span>
-            <span class="home-tournament-bet-link__stat"><small>Банк</small><strong data-tournament-bet-home-bank>—</strong></span>
-            <span class="home-tournament-bet-link__stat"><small>Ставка</small><strong data-tournament-bet-home-stake>—</strong></span>
-            <span class="home-tournament-bet-link__cta">Сделать ставку</span>
-          </span>
-        </button>
         <div class="home-compact-links" aria-label="Рейтинг и зал славы клуба">
           <details class="home-summer-rating-spoiler">
             <summary class="home-compact-link home-compact-link--rating home-compact-link--spring-strip">
@@ -1634,7 +1634,7 @@
           <div class="view" data-view="hall-of-fame" data-html-fragment="./html-fragments/hall-of-fame.html?v=3.687" data-html-fragment-view="hall-of-fame"></div>
           <div class="view" data-view="cashout" data-html-fragment="./html-fragments/cashout.html?v=3.002" data-html-fragment-view="cashout"></div>
           <div class="view" data-view="transfers" data-html-fragment="./html-fragments/transfers.html?v=3.010" data-html-fragment-view="transfers"></div>
-          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=3.921" data-html-fragment-view="profile"></div>
+          <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=4.022" data-html-fragment-view="profile"></div>
           <div class="view" data-view="admin-bonuses" data-html-fragment="./html-fragments/admin-bonuses.html?v=3.728" data-html-fragment-view="admin-bonuses"></div>
           <div class="view" data-view="player-crm" id="playerCrmView" data-html-fragment="./html-fragments/player-crm.html?v=3.013" data-html-fragment-view="player-crm"></div>
 
@@ -1967,7 +1967,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-attachments.js?v=4.002"></script>
     <script defer src="./app-profile-hero.js?v=4.002"></script>
     <script defer src="./app-profile-user-info.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-pokerplus.js?v=4.002"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-pokerplus.js?v=4.022"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-email-auth.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-friends.js?v=4.002"></script>
     <script defer src="./app-profile-avatar-cache.js?v=4.002"></script>

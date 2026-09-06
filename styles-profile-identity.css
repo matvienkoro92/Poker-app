@@ -349,3 +349,158 @@
   min-width: 0;
   align-items: center;
 }
+
+/* Keep every identity row on the same left edge, including on phones. */
+@media (max-width: 700px) {
+  .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__header {
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase :is(.chat-user-modal__avatar-wrap, .chat-user-modal__avatar) {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__title-block {
+    display: grid !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    gap: 10px !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__title-row {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__details-row {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__identity-controls {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__details-row :is(.profile-hero-birth, #profileHeroCity) {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+}
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__avatar-wrap {
+  align-self: center !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__verified-name {
+  flex: 1 1 0 !important;
+  max-width: none !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__details-row {
+  align-self: start !important;
+}
+
+/* Reference-inspired identity header. */
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__top {
+  padding: 22px !important;
+  background: radial-gradient(ellipse at 4% 10%, rgba(235,169,37,.12), transparent 40%) !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__header {
+  grid-template-columns: 150px minmax(0,1fr) !important;
+  grid-template-rows: auto auto !important;
+  gap: 16px 24px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__avatar-wrap, .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__avatar {
+  width: 150px !important; height: 150px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__avatar-wrap {
+  grid-row: 1 !important; align-self: center !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__avatar {
+  border: 3px solid #ffdc7d !important;
+  box-shadow: 0 0 20px rgba(255,185,49,.3) !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__title-block { display: contents !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__title-row {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  grid-column: 2 !important; grid-row: 1 !important;
+  gap: 24px 14px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__verified-name { grid-column: 1; max-width: none !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__title { font-size: clamp(22px,3.6vw,36px) !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  grid-column: 2; grid-row: 1; width: auto !important; height: auto !important;
+  min-height: 56px !important; padding: 10px 14px !important;
+  border: 1px solid #9c783b !important; border-radius: 12px !important;
+  background: linear-gradient(130deg,#211c13,#090c10) !important;
+  font-size: 13px !important; text-align: left; color: #b9bac1 !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name > span:first-child { color: #ffd06a; font-size: 28px; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences {
+  grid-column: 1 / -1; grid-row: 2;
+  display: grid !important; grid-template-columns: 1fr 1fr !important;
+  width: 100% !important; gap: 10px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences :is(.profile-hero-gender,.profile-hero-specialty) {
+  display: flex !important; width: 100% !important; box-sizing: border-box;
+  padding: 2px !important; border-radius: 12px !important;
+  border-color: #564729 !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences button {
+  flex: 1; min-height: 38px !important; height: 38px !important;
+  font-size: 15px !important; border-radius: 9px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences button[aria-pressed="true"] {
+  background: linear-gradient(#ffcf59,#f5a91b) !important;
+  box-shadow: inset 0 1px 3px #fff3ba, 0 0 10px #b47a192e !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row { grid-column: 1 / -1 !important; grid-row: 2 !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__identity-controls { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) {
+  display: grid !important; grid-template-columns: 34px minmax(0,1fr) 28px !important;
+  grid-template-rows: auto auto !important; gap: 2px 10px !important;
+  height: 70px !important; min-height: 70px !important;
+  padding: 10px 14px !important; border-radius: 14px !important;
+  border-color: #51452e !important; align-items: center !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-icon { grid-column: 1; grid-row: 1 / 3; color: #ffca63; font-size: 30px; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-hero-birth__label, .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-label {
+  grid-column: 2; grid-row: 1; font-size: 12px !important; color: #92949e !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row input {
+  grid-column: 2 !important; grid-row: 2 !important; width: 100% !important;
+  height: 25px !important; font-size: 17px !important; color: #ffe6a5 !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row button { grid-column: 3 !important; grid-row: 1 / 3 !important; }
+@media (max-width:700px) {
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__top { padding: 14px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__header { grid-template-columns: 82px minmax(0,1fr) !important; gap: 14px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__avatar-wrap, .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__avatar { width: 82px !important; height: 82px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .chat-user-modal__title-row { grid-template-columns: minmax(0,1fr) !important; gap: 8px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name { grid-column: 1; grid-row: 2; min-height: 30px !important; padding: 4px 8px !important; font-size: 11px !important; justify-self: start; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name br { display: none; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name > span:first-child { font-size: 18px; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences { grid-row: 3; gap: 6px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__title-preferences button { font-size: 12px !important; min-height: 30px !important; height:30px !important; padding:0 6px !important; min-width:0 !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) { grid-template-columns: 20px minmax(0,1fr) !important; padding:8px !important; gap:2px 5px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row input { font-size: 12px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-hero-birth__label, .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-label { font-size: 10px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-icon { font-size:20px; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row button { grid-column: 2 !important; grid-row:3 !important; justify-self:end; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity):has(button:not([hidden])) { height: 92px !important; }
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row .profile-hero-birth { grid-column: 1 !important; grid-row: 1 !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row #profileHeroCity { grid-column: 2 !important; grid-row: 1 !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-icon svg { width: 100%; max-width: 28px; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profileHeroGender,
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profileHeroSpecialty {
+  width: 100% !important; max-width: none !important; min-width: 0 !important;
+  display: flex !important; justify-self: stretch !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-hero-birth__label {
+  text-transform: none !important; font-weight: 500 !important; letter-spacing: 0 !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name br::after { content: " "; }
+@media (max-width: 700px) {
+  .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity) {
+    height: 92px !important; align-self: stretch !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__edit-name br { display: initial; }
+}

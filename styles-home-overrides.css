@@ -6838,3 +6838,10 @@ html body #app.app.app--view-home
 .app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2"]) .home-sng-champions-image-link img {
   transform: scale(1.06);
 }
+
+/* Place last-longer after the tournament carousel and before combination bonuses. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bet-link {
+  order: 25;
+  grid-column: 1 / -1;
+  margin: 12px 0 !important;
+}

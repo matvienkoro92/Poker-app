@@ -505,6 +505,17 @@ function initProfilePokerPlus() {
     else if (state === "pending") text = pokerPlusLocale() === "en" ? "Checking..." : "Проверяем...";
     else if (state === "failed") text = pokerPlusLocale() === "en" ? "Not updated" : "Не обновлено";
     var statusFeedback = document.getElementById("profileStatusRefreshFeedback");
+    if (!statusFeedback && statusRefreshBtn) {
+      var statusTitleRow = statusRefreshBtn.closest(".profile-status__title-row");
+      if (statusTitleRow) {
+        statusFeedback = document.createElement("p");
+        statusFeedback.id = "profileStatusRefreshFeedback";
+        statusFeedback.className = "profile-status__refresh-feedback";
+        statusFeedback.setAttribute("role", "status");
+        statusFeedback.setAttribute("aria-live", "polite");
+        statusTitleRow.insertAdjacentElement("afterend", statusFeedback);
+      }
+    }
     if (statusFeedback) {
       statusFeedback.textContent = text;
       statusFeedback.hidden = !text;

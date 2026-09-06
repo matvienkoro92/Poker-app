@@ -26,7 +26,7 @@
               <button type="button" class="profile-tabs__btn" id="profileAchievementsTabBtn" data-profile-tab="achievements" role="tab" aria-selected="false">Достижения</button>
               <button type="button" class="profile-tabs__btn" id="profilePoker21TabBtn" data-profile-tab="poker21" role="tab" aria-selected="false">Профиль Poker21</button>
             </div>
-            <section class="profile-public-showcase profile-public-showcase--loading" id="profilePublicShowcase" data-profile-club-panel aria-label="Публичная карточка игрока">
+            <section class="profile-public-showcase profile-public-showcase--loading profile-public-showcase--reference" id="profilePublicShowcase" data-profile-club-panel aria-label="Публичная карточка игрока">
               <div class="chat-user-modal__top profile-public-showcase__top">
                 <div class="chat-user-modal__header profile-public-showcase__header">
                   <div class="chat-user-modal__avatar-wrap">
@@ -35,7 +35,7 @@
                   </div>
                   <div class="chat-user-modal__title-block">
                     <div class="chat-user-modal__title-row">
-                      <button type="button" class="profile-hero-card__edit-name profile-public-showcase__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать имя">✎</button>
+                      <button type="button" class="profile-hero-card__edit-name profile-public-showcase__edit-name" id="profileNameEditBtn" aria-label="Редактировать имя" title="Редактировать профиль"><span aria-hidden="true">✎</span><span>Редактировать<br>профиль</span></button>
                       <span class="profile-public-showcase__verified-name">
                         <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
                         <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
@@ -56,13 +56,13 @@
                     <div class="profile-public-showcase__details-row" id="profilePublicDetailsRow">
                       <div class="profile-public-showcase__identity-controls">
                         <label class="profile-hero-birth" id="profileHeroBirthDate" aria-label="Дата рождения">
-                          <span class="profile-hero-birth__label">ДР</span>
+                          <span class="profile-identity-field-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 2v6m10-6v6M3 11h18M7 15h2m6 0h2m-10 3h2"/></svg></span><span class="profile-hero-birth__label">Дата рождения</span>
                           <input type="date" class="profile-hero-birth__input" id="profileBirthDateInput" min="1965-01-01" max="2010-12-31" aria-label="Дата рождения" />
                           <button type="button" class="profile-hero-birth__save" id="profileBirthDateSaveBtn" aria-label="Сохранить дату рождения">✓</button>
                           <span class="profile-hero-birth__feedback" id="profileBirthDateFeedback" aria-live="polite"></span>
                         </label>
                         <label class="profile-hero-city" id="profileHeroCity" aria-label="Город">
-                          <input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
+                          <span class="profile-identity-field-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8c0 6 8 13 8 13s8-7 8-13a8 8 0 0 0-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg></span><span class="profile-identity-field-label">Город</span><input type="text" class="profile-hero-city__input" id="profileCityInput" maxlength="80" placeholder="Ваш город" autocomplete="address-level2" />
                           <button type="button" class="profile-hero-city__save" id="profileCitySaveBtn" aria-label="Сохранить город">✓</button>
                           <span class="profile-hero-city__feedback" id="profileCityFeedback" aria-live="polite"></span>
                         </label>
