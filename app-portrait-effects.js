@@ -57,5 +57,21 @@
       if (!img.isConnected) { record.resize.disconnect(); record.layer.remove(); records.delete(img); }
     });
   }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['src', 'hidden', 'class', 'style'] });
+  // An installed iOS PWA can return from suspension without DOM mutations.
+  // Re-measure its portraits and resume animations when the page is shown again.
+  function resume() {
+    if (document.hidden) return;
+    requestAnimationFrame(function () {
+      scan(document.documentElement);
+      records.forEach(function (record) {
+        if (record.layer.hidden || !record.layer.getAnimations) return;
+        record.layer.getAnimations({ subtree: true }).forEach(function (animation) {
+          if (animation.playState === 'paused') animation.play();
+        });
+      });
+    });
+  }
+  window.addEventListener('pageshow', resume);
+  document.addEventListener('visibilitychange', resume);
   scan(document.documentElement);
 })();
