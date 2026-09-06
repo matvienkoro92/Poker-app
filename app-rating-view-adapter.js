@@ -32,7 +32,7 @@ function summerRatingSeasonStatsHtml(stats) {
     }).join('') + '</tbody></table></section>';
   }
   return '<div class="summer-rating-season-counts"><span>Заносов 50–99 тыс. ₽: <strong>' + stats.mid + '</strong></span><span>Заносов 100 тыс. ₽ и выше: <strong>' + stats.high + '</strong></span></div>' +
-    '<div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых за лето', stats.topPlayers, false) + table('Топ-10 разовых заносов за лето', stats.topWins, true) + '</div>';
+    '<details class="summer-rating-month summer-rating-season-spoiler"><summary>Лето</summary><div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых', stats.topPlayers, false) + table('Топ-10 разовых заносов', stats.topWins, true) + '</div></details>';
 }
 
 // Rating view adapter: shared spring/winter DOM, tables, lightbox, and player modal.

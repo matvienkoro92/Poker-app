@@ -5490,4 +5490,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .summer-rating-season-top td:last-child, .summer-rating-season-top th:last-child { text-align: right; white-space: nowrap; }
 .summer-rating-season-top td:last-child { color: #ffc64b; font-weight: 700; }
 .summer-rating-season-top small { display: block; margin-top: 4px; color: #cabb9d; font-size: 11px; }
-@media (max-width: 700px) { .summer-rating-season-tops { grid-template-columns: 1fr; } }
+ .summer-rating-season-spoiler .summer-rating-season-tops { margin: 0; padding: 8px; }
+@media (max-width: 700px) {
+  .summer-rating-season-spoiler .summer-rating-season-tops { gap: 6px; padding: 6px; }
+  .summer-rating-season-top { padding: 7px; border-radius: 10px; }
+  .summer-rating-season-top h3 { font-size: 12px; margin-bottom: 8px; }
+  .summer-rating-season-top table { font-size: 10px; table-layout: fixed; }
+  .summer-rating-season-top th, .summer-rating-season-top td { padding: 7px 2px; }
+  .summer-rating-season-top th { font-size: 9px; }
+  .summer-rating-season-top th:first-child { width: 14px; }
+  .summer-rating-season-top th:last-child { width: 62px; }
+  .summer-rating-season-top small { font-size: 9px; }
+}
