@@ -4424,13 +4424,6 @@
     opacity: 0;
     animation: pokermanki-blink 4.8s linear infinite;
   }
-@media (prefers-reduced-motion: reduce) {
-  .pokermanki-rocket-effects--layered .pokermanki-character-head { animation: none; }
-  .pokermanki-rocket-sparks { animation: none; opacity: 0; }
-  .pokermanki-rocket-flame { animation: pokermanki-soft-glow 3s ease-in-out infinite alternate; }
-  .pokermanki-rocket-shine { animation: pokermanki-soft-glow 4s ease-in-out infinite alternate; background-position: 50% 0; }
-}
-@keyframes pokermanki-soft-glow { from { opacity: .2; } to { opacity: .65; } }
 @keyframes pokermanki-head-look {
   0%, 100% { transform: rotate(-2deg); }
   40%, 55% { transform: rotate(3.5deg); }

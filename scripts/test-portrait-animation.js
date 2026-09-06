@@ -27,12 +27,18 @@ const fs=require('fs'),assert=require('assert/strict');
  assert(await head.isVisible());
  await p.emulateMedia({reducedMotion:'reduce'});
  assert(await head.isVisible());
- assert.equal(await head.evaluate(e=>getComputedStyle(e).animationName),'none');
+ assert.equal(await head.evaluate(e=>getComputedStyle(e).animationName),'pokermanki-head-look');
+ const reducedTransform = await head.evaluate(e=>getComputedStyle(e).transform);
+ await p.waitForTimeout(800);
+ assert.notEqual(await head.evaluate(e=>getComputedStyle(e).transform), reducedTransform);
  assert(await p.locator('.pokermanki-rocket-flame').isVisible());
- assert.equal(await p.locator('.pokermanki-rocket-flame').evaluate(e=>getComputedStyle(e).animationName),'pokermanki-soft-glow');
+ assert.equal(await p.locator('.pokermanki-rocket-flame').evaluate(e=>getComputedStyle(e).animationName),'pokermanki-thrust');
  assert.equal(await p.locator('.pokermanki-character-eyelids').evaluate(e=>e.getAnimations()[0].playState),'running');
+ for (const [selector, name] of [['.pokermanki-rocket-sparks', 'pokermanki-sparks'], ['.pokermanki-rocket-shine', 'pokermanki-shine']]) {
+   assert.equal(await p.locator(selector).evaluate(e=>getComputedStyle(e).animationName),name);
+ }
  await p.emulateMedia({reducedMotion:'no-preference'});
  assert(await head.isVisible());
- console.log('PASS WebKit iPhone: head moves, resumes on pageshow, survives profile hide/reopen, keeps blinking/glow without head motion in reduced-motion mode.');
+ console.log('PASS WebKit iPhone: head moves, resumes on pageshow, survives profile hide/reopen, plays all five effects in both motion preference modes.');
  } finally { await b.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
