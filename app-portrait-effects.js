@@ -10,7 +10,7 @@
       var layer = document.createElement('span');
       layer.className = 'pokermanki-rocket-effects';
       layer.setAttribute('aria-hidden', 'true');
-      layer.innerHTML = '<i class="pokermanki-rocket-flame"></i><i class="pokermanki-rocket-sparks"></i><i class="pokermanki-rocket-shine"></i>';
+      layer.innerHTML = '<i class="pokermanki-character-head"><i class="pokermanki-character-eyelids"></i></i><i class="pokermanki-rocket-flame"></i><i class="pokermanki-rocket-sparks"></i><i class="pokermanki-rocket-shine"></i>';
       img.parentElement.appendChild(layer);
       record = { layer: layer };
       records.set(img, record);
@@ -21,6 +21,9 @@
       resize.observe(img.parentElement);
     }
     if (!record) return;
+    var layered = active && /summer-rating-player-pokermanki-v3/.test(img.getAttribute('src') || '');
+    record.layer.classList.toggle('pokermanki-rocket-effects--layered', layered);
+    if (img.classList.contains('pokermanki-layered-body') !== layered) img.classList.toggle('pokermanki-layered-body', layered);
     var rect = img.getBoundingClientRect();
     record.layer.hidden = !active || !rect.width || !rect.height || !img.naturalWidth;
     if (record.layer.hidden) return;

@@ -4400,3 +4400,36 @@
 @keyframes pokermanki-sparks { 0%, 15% { opacity: 0; transform: translateY(0); } 25% { opacity: .8; } 85%, 100% { opacity: 0; transform: translateY(-35px); } }
 @keyframes pokermanki-shine { 0%, 65% { background-position: -200% 0; opacity: 0; } 72% { opacity: .7; } 90%, 100% { background-position: 200% 0; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .pokermanki-rocket-effects { display: none; } }
+
+/* Independently animated head and eyelids; torso and rocket stay still. */
+.pokermanki-character-head { display: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .chat-user-modal__rating-art-img.pokermanki-layered-body,
+  .winter-rating-player-modal__art-img.pokermanki-layered-body {
+    animation: none;
+    mask: url('./assets/pokermanki-animation-body-mask.svg') center bottom / contain no-repeat;
+  }
+  .pokermanki-rocket-effects--layered .pokermanki-character-head {
+    display: block !important;
+    left: 25.3456%; top: 10.6%; width: 24.1935%; height: 18.5%;
+    background: url('./assets/pokermanki-animation-head.webp') center / 100% 100% no-repeat;
+    transform-origin: 52% 96%;
+    animation: pokermanki-head-look 8s ease-in-out infinite;
+  }
+  .pokermanki-character-eyelids {
+    left: 36.2%; top: 28.1%; width: 44.76%; height: 14.6%;
+    background: url('./assets/pokermanki-animation-eyelids.webp') center / 100% 100% no-repeat;
+    mask-image: radial-gradient(ellipse, #000 45%, transparent 75%);
+    opacity: 0;
+    animation: pokermanki-blink 6.4s linear infinite;
+  }
+}
+@keyframes pokermanki-head-look {
+  0%, 20%, 100% { transform: rotate(0deg); }
+  42%, 60% { transform: rotate(1.4deg) skewX(-1deg); }
+  80% { transform: rotate(-.5deg); }
+}
+@keyframes pokermanki-blink {
+  0%, 38%, 42%, 75%, 79%, 100% { opacity: 0; }
+  39%, 41%, 76%, 78% { opacity: 1; }
+}
