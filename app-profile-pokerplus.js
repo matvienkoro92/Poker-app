@@ -500,10 +500,16 @@ function initProfilePokerPlus() {
   function setPokerPlusRefreshButtonsState(state) {
     var buttons = [refreshBtn, statusRefreshBtn].filter(Boolean);
     var text = "";
-    if (state === "loading") text = pokerPlusLocale() === "en" ? "Refreshing..." : "Обновляем...";
+    if (state === "loading") text = pokerPlusLocale() === "en" ? "Updating status..." : "Обновляем статус…";
     else if (state === "done") text = pokerPlusLocale() === "en" ? "Updated" : "Обновлено";
     else if (state === "pending") text = pokerPlusLocale() === "en" ? "Checking..." : "Проверяем...";
     else if (state === "failed") text = pokerPlusLocale() === "en" ? "Not updated" : "Не обновлено";
+    var statusFeedback = document.getElementById("profileStatusRefreshFeedback");
+    if (statusFeedback) {
+      statusFeedback.textContent = text;
+      statusFeedback.hidden = !text;
+      statusFeedback.dataset.state = state;
+    }
     buttons.forEach(function (btn) {
       btn.classList.toggle("profile-status__refresh-btn--loading", state === "loading");
       btn.classList.toggle("profile-status__refresh-btn--done", state === "done");
@@ -2125,7 +2131,7 @@ function initProfilePokerPlus() {
           pokerPlusButtonResetTimer = null;
           setPokerPlusRefreshButtonsState("");
           setPokerPlusRefreshButtonText(!!pokerPlusProfileLinked);
-        }, refreshStatus === "done" ? 1200 : 2200);
+        }, refreshStatus === "done" ? 3500 : 5000);
       }
     );
     return pokerPlusButtonRefreshPromise;

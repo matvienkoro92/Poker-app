@@ -5370,3 +5370,31 @@ body.profile-month-story-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .view[data-view="profile"] .profile-status__title-row #profileStatusRefreshBtn::before { animation: none; }
 }
+
+/* Keep refresh progress visible beside the compact status controls. */
+.view[data-view="profile"] .profile-public-showcase .profile-status__refresh-feedback {
+  margin: 0;
+  color: #ffda75;
+  font-size: clamp(12px, 2.6vw, 16px);
+  line-height: 1.3;
+}
+.view[data-view="profile"] .profile-status__refresh-feedback[hidden] { display: none; }
+.view[data-view="profile"] .profile-status__refresh-feedback[data-state="done"] { color: #83dfa5; }
+.view[data-view="profile"] .profile-status__refresh-feedback[data-state="failed"] { color: #ffb09b; }
+.view[data-view="profile"] .profile-status__title-row #profileStatusRefreshBtn.profile-status__refresh-btn--loading::before {
+  animation: profile-status-refresh-spin 1s linear infinite;
+}
+.view[data-view="profile"] .profile-status__title-row #profileStatusRefreshBtn.profile-status__refresh-btn--done::before {
+  content: "✓";
+  color: #83dfa5;
+  text-shadow: 0 0 10px rgba(131, 223, 165, .4);
+  animation: none;
+}
+@keyframes profile-status-refresh-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view[data-view="profile"] .profile-status__title-row #profileStatusRefreshBtn.profile-status__refresh-btn--loading::before {
+    animation: none;
+  }
+}

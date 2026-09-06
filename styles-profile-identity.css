@@ -259,3 +259,93 @@
     grid-row: 2 !important;
   }
 }
+
+/* One player card connects identity and level without a nested header panel. */
+.view[data-view="profile"] #profilePublicShowcase {
+  --profile-card-inset: 20px;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(235, 191, 105, .20) !important;
+  border-radius: 24px !important;
+  background: radial-gradient(ellipse at 0 0, rgba(204, 143, 42, .08), transparent 48%), #080c12 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 239, 205, .04) !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__top {
+  margin: 0 !important;
+  padding: var(--profile-card-inset) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 12px var(--profile-card-inset) var(--profile-card-inset) !important;
+  box-sizing: border-box;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__title-block {
+  gap: 10px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__edit-name {
+  flex-basis: 26px !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  font-size: 17px !important;
+  background: transparent !important;
+}
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__avatar-wrap::after {
+  width: 25px !important;
+  height: 25px !important;
+  font-size: 14px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25) !important;
+}
+.view[data-view="profile"] #profilePublicShowcase #profileStatusRefreshBtn::before {
+  font-size: 24px;
+  text-shadow: 0 0 5px rgba(255, 203, 81, .65), 0 0 9px rgba(247, 165, 29, .25);
+  animation-name: profile-status-soft-glow;
+}
+.view[data-view="profile"] #profilePublicShowcase #profileStatusRefreshBtn.profile-status__refresh-btn--loading::before {
+  animation: profile-status-refresh-spin 1s linear infinite;
+}
+.view[data-view="profile"] #profilePublicShowcase #profileStatusRefreshBtn.profile-status__refresh-btn--done::before {
+  animation: none;
+  text-shadow: 0 0 6px rgba(131, 223, 165, .25);
+}
+@keyframes profile-status-soft-glow {
+  to { filter: brightness(1.15); }
+}
+@media (max-width: 700px) {
+  .view[data-view="profile"] #profilePublicShowcase {
+    --profile-card-inset: 14px;
+    border-radius: 20px !important;
+  }
+  .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__header {
+    gap: 10px 14px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view[data-view="profile"] #profilePublicShowcase #profileStatusRefreshBtn::before {
+    animation: none !important;
+  }
+}
+
+/* Let full player names wrap instead of disappearing behind an ellipsis. */
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__title {
+  min-width: 0 !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  display: block;
+}
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__verified-name {
+  min-width: 0;
+  align-items: center;
+}
