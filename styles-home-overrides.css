@@ -6697,7 +6697,7 @@ html body #app.app.app--view-home
   justify-content: center;
   gap: 5px;
   margin: 7px;
-  border: 1px solid #ffb374;
+  border: 0;
   border-radius: 12px;
   background: linear-gradient(#da401c, #7c1008);
   color: #fff4e4;
