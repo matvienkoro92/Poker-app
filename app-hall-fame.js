@@ -1253,6 +1253,15 @@ function hallFishRenderRows(rows, currentIds) {
 
 var HALL_FISH_SNG_GROUPS = [
   {
+    title: "2-й одиночный СНГ-баттл",
+    subtitle: "26 августа 2026 · Гранд-финал: FrankL — FishKopcheny, 3:2",
+    finalists: [
+      { name: "FrankL", accountId: "ID627084", aliases: ["frankl"], winner: true },
+      { name: "FishKopcheny", accountId: "ID709362", aliases: ["fishkopcheny"], finalist: true },
+      { name: "GUCCI💱", accountId: "ID604155", aliases: ["gucci💱"], finalist: true },
+    ],
+  },
+  {
     title: "1-й командный СНГ-баттл",
     subtitle: "Финалисты командного турнира",
     finalists: [
@@ -1274,6 +1283,9 @@ var HALL_FISH_SNG_GROUPS = [
 
 function hallFishFindSngFinalistRow(rows, finalist) {
   return (Array.isArray(rows) ? rows : []).find(function (row) {
+    if (finalist.accountId && row.accountId) {
+      return String(row.accountId).toUpperCase() === finalist.accountId;
+    }
     var text = hallFishLevelSearchText(row);
     return finalist.aliases.some(function (alias) {
       var key = String(alias || "").toLowerCase();
