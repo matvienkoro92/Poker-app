@@ -1820,8 +1820,17 @@ function hallFishDayHeroMonthFilterHtml(data) {
     }).join("") + '</div>';
 }
 
+function hallFishAchievementTrophyHtml(spec) {
+  var art = { dayHero: "day-hero", king: "king", monthChampion: "month", big50: "big50", big100: "big100", clubChoice: "choice", sngChampion: "sng" }[spec.key];
+  if (!art) return '<span class="hall-fish-trophy-fallback">' + hallFishEsc(spec.title) + '</span>';
+  return '<img class="hall-fish-trophy-art" src="./assets/achievement-trophy-' + art + '-v1.webp" width="420" height="420" alt="' + hallFishEsc(spec.title) + '" decoding="async">' +
+    (spec.key === "dayHero" ? '<span class="hall-fish-trophy-prize" aria-hidden="true">' + (hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all" ? "25 000" : "15 000") + ' ₽</span>' : '');
+}
+
 function hallFishRenderAchievementRows(data) {
   var specs = hallFishAchievementSpecs(data);
+  var trophyOrder = ["dayHero", "king", "monthChampion", "big50", "big100", "clubChoice", "sngChampion", "viceChampion"];
+  specs.sort(function (a, b) { return trophyOrder.indexOf(a.key) - trophyOrder.indexOf(b.key); });
   var active = specs.some(function (spec) { return spec.key === hallFishActiveAchievementTab; })
     ? hallFishActiveAchievementTab
     : "dayHero";
@@ -1840,13 +1849,13 @@ function hallFishRenderAchievementRows(data) {
   return '<div class="hall-fish-achievements">' +
     '<div class="hall-fish-achievement-tabs-shell" aria-label="Фильтры топов по ачивкам">' +
       '<div class="hall-fish-achievement-tabs-shell__head">' +
-        '<span class="hall-fish-achievement-tabs-shell__eyebrow">Топы по ачивкам</span>' +
+        '<span class="hall-fish-achievement-tabs-shell__eyebrow">Награды клуба</span>' +
         '<span class="hall-fish-achievement-tabs-shell__hint">выберите достижение</span>' +
       '</div>' +
-    '<div class="hall-fish-achievement-tabs" role="tablist" aria-label="Топы по ачивкам">' +
+    '<div class="hall-fish-achievement-tabs hall-fish-achievement-tabs--trophies" role="tablist" aria-label="Топы по ачивкам">' +
       specs.map(function (spec) {
         var isActive = spec.key === active;
-        return '<button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" role="tab" aria-selected="' + (isActive ? "true" : "false") + '">' + hallFishEsc(spec.title) + '</button>';
+        return '<button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" role="tab" aria-selected="' + (isActive ? "true" : "false") + '">' + hallFishAchievementTrophyHtml(spec) + '</button>';
       }).join("") +
     '</div>' +
     '</div>' +

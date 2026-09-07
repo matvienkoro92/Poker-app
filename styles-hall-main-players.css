@@ -2460,3 +2460,36 @@
   pointer-events: none;
 }
 .hall-fish-level-row--premium > span { position: relative; z-index: 1; }
+
+/* Trophy cabinet using supplied artwork, with existing achievement actions. */
+.hall-fish-achievement-tabs-shell:has(.hall-fish-achievement-tabs--trophies) { padding: 14px 10px 10px; background: transparent; border: 0; box-shadow: none; }
+.hall-fish-achievement-tabs-shell:has(.hall-fish-achievement-tabs--trophies)::before,
+.hall-fish-achievement-tabs-shell:has(.hall-fish-achievement-tabs--trophies)::after { display: none; }
+.hall-fish-achievement-tabs-shell__eyebrow { color: #ffe09a; font-size: clamp(16px, 2.5vw, 23px); text-transform: uppercase; }
+.hall-fish-achievement-tabs.hall-fish-achievement-tabs--trophies {
+  display: flex; gap: 0; overflow-x: auto; padding: 16px 10px 12px; border: 1px solid #b88a35; border-radius: 20px;
+  background: repeating-linear-gradient(90deg, transparent 0 13%, #d8aa5033 13.1%, transparent 13.4%), linear-gradient(180deg,#543615,#17120c 12%,#0b0b0b 82%,#916023 96%,#23170c);
+  box-shadow: inset 0 0 0 5px #17130c, inset 0 0 0 6px #c6994566, inset 0 10px 20px #ffc45825;
+  scrollbar-width: thin; scrollbar-color: #a67a32 #17120c; scroll-snap-type: x proximity;
+}
+.hall-fish-achievement-tabs--trophies .hall-fish-achievement-tab {
+  position: relative; flex: 0 0 14.285%; min-width: 98px; padding: 0; border: 0; border-radius: 8px;
+  background: radial-gradient(ellipse at 50% 0,#ffe29f40,transparent 65%); box-shadow: none; transform: none; scroll-snap-align: start; white-space: normal;
+}
+.hall-fish-achievement-tabs--trophies .hall-fish-achievement-tab--active { background: radial-gradient(ellipse at 50% 40%,#ffcf6670,transparent 70%); box-shadow: inset 0 -2px #ffd56b; }
+.hall-fish-trophy-art { display: block; width: 100%; height: auto; filter: brightness(.85); }
+.hall-fish-achievement-tab--active .hall-fish-trophy-art { filter: brightness(1.12) drop-shadow(0 0 7px #ffcc5566); }
+.hall-fish-achievement-tabs--trophies .hall-fish-achievement-tab:focus-visible { outline: 2px solid #ffe09a; outline-offset: -2px; }
+.hall-fish-trophy-prize { position: absolute; left: 27%; width: 44%; top: 77%; height: 7.8%; display: grid; place-items: center; background: linear-gradient(#ffe58b,#f3ba3b); border-radius: 8px; color: #160e00; font-size: clamp(8px,1.4vw,15px); font-weight: 950; line-height: 1; text-shadow: none; }
+.hall-fish-trophy-fallback { display: grid; place-items: center; height: 100%; min-height: 90px; padding: 10px; color: #f5d99a; font-size: 12px; }
+.hall-fish-achievement-section { border-radius: 18px; padding: 16px; }
+.hall-fish-achievement-section__title { font-size: clamp(19px,2.7vw,27px); }
+.hall-fish-achievement-section__description { padding: 14px; font-size: 14px; line-height: 1.45; }
+.hall-fish-achievement-section__award { padding: 15px; line-height: 1.4; }
+.hall-fish-achievement-list .hall-fish-level-row { border: 1px solid #9b783d88; border-radius: 16px; background: linear-gradient(120deg,#111923,#080d14); }
+@media (max-width:480px) {
+ .hall-fish-achievement-tabs--trophies .hall-fish-achievement-tab { flex-basis: 29%; min-width: 100px; }
+ .hall-fish-trophy-prize { font-size: 9px; }
+ .hall-fish-achievement-section { padding: 10px; }
+ .hall-fish-achievement-section__description { font-size: 12px; padding: 10px; }
+}

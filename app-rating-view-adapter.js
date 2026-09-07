@@ -1,11 +1,15 @@
 function summerRatingSeasonStats(tournamentsByDate) {
   var totals = Object.create(null);
   var wins = [];
-  var result = { total: 0, mid: 0, high: 0, topPlayers: [], topWins: [] };
+  var participants = Object.create(null);
+  var result = { participants: 0, paidPlaces: 0, tournaments: 0, winningPlayers: 0, total: 0, mid: 0, high: 0, topPlayers: [], topWins: [] };
   Object.keys(tournamentsByDate || {}).sort().forEach(function (date) {
     if (!/\.(06|07|08)\.2026$/.test(date)) return;
     (tournamentsByDate[date] || []).forEach(function (tournament) {
+      result.tournaments++;
       (tournament.players || []).forEach(function (player) {
+        var participantNick = typeof normalizeWinterNick === "function" ? normalizeWinterNick(player && player.nick) : String(player && player.nick || "").trim();
+        if (participantNick) participants[participantNick.toLowerCase()] = true;
         var reward = Number(player && player.reward);
         if (!Number.isFinite(reward) || reward <= 0) return;
         var nick = typeof normalizeWinterNick === "function" ? normalizeWinterNick(player.nick) : String(player.nick || "").trim();
@@ -13,6 +17,7 @@ function summerRatingSeasonStats(tournamentsByDate) {
         if (!totals[key]) totals[key] = { nick: nick, reward: 0 };
         totals[key].reward += reward;
         result.total += reward;
+        result.paidPlaces++;
         if (reward >= 100000) result.high++;
         else if (reward >= 50000) result.mid++;
         wins.push({ nick: nick, reward: reward, date: date, tournament: tournament.name || "" });
@@ -22,20 +27,25 @@ function summerRatingSeasonStats(tournamentsByDate) {
   function byReward(a, b) { return b.reward - a.reward || a.nick.localeCompare(b.nick, "ru"); }
   result.topPlayers = Object.keys(totals).map(function (key) { return totals[key]; }).sort(byReward).slice(0, 10);
   result.topWins = wins.sort(byReward).slice(0, 10);
+  result.participants = Object.keys(participants).length;
+  result.winningPlayers = Object.keys(totals).length;
   return result;
 }
 
 function summerRatingSeasonStatsHtml(stats) {
   function table(title, rows, single) {
-    return '<section class="summer-rating-season-top"><h3>' + title + '</h3><table><thead><tr><th scope="col">№</th><th scope="col">Игрок</th><th scope="col">Призовые</th></tr></thead><tbody>' + rows.map(function (row, index) {
-      return '<tr><td>' + (index + 1) + '</td><td>' + escapeHtmlRating(row.nick) + (single ? '<small>' + escapeHtmlRating(row.date + ' · ' + row.tournament) + '</small>' : '') + '</td><td>' + formatRewardRound(row.reward) + ' ₽</td></tr>';
+    return '<section class="summer-rating-season-top"><h3><span aria-hidden="true">' + (single ? '♢' : '🏆') + '</span>' + title + '</h3><table><thead><tr><th scope="col">№</th><th scope="col">Игрок</th><th scope="col">Призовые</th></tr></thead><tbody>' + rows.map(function (row, index) {
+      return '<tr><td><span class="summer-result-rank summer-result-rank--' + (index + 1) + '">' + (index + 1) + '</span></td><td>' + escapeHtmlRating(row.nick) + (single ? '<small>' + escapeHtmlRating(row.date + ' · ' + row.tournament) + '</small>' : '') + '</td><td>' + formatRewardRound(row.reward) + ' ₽</td></tr>';
     }).join('') + '</tbody></table></section>';
   }
-  return '<details class="summer-rating-month summer-rating-season-spoiler"><summary>' +
-    '<span class="summer-rating-season-heading"><span>Лето <small>2026</small></span><span class="summer-rating-season-toggle" aria-hidden="true">⌄</span></span>' +
-    '<span class="summer-rating-season-total"><span>Всего призовых за лето</span><strong>' + formatRewardRound(stats.total) + ' ₽</strong></span>' +
-    '<span class="summer-rating-season-counts"><span><strong>' + stats.mid + '</strong><span>заносов 50–99 тыс. ₽</span></span><span><strong>' + stats.high + '</strong><span>заносов от 100 тыс. ₽</span></span></span>' +
-    '</summary><div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых', stats.topPlayers, false) + table('Топ-10 разовых заносов', stats.topWins, true) + '</div></details>';
+  function metric(icon, value, title, caption) {
+    return '<div class="summer-result-metric"><span class="summer-result-metric__icon" aria-hidden="true">' + icon + '</span><span><strong>' + formatRewardRound(value || 0) + '</strong><span>' + title + '</span><small>' + caption + '</small></span></div>';
+  }
+  return '<section class="summer-results-dashboard" aria-label="Итоги лета 2026">' +
+    '<header class="summer-results-hero"><div class="summer-results-hero__art" aria-hidden="true"></div><div class="summer-results-hero__copy"><h2>Итоги Лета 2026</h2><p class="summer-results-hero__motto">БОЛЬШЕ ИГРЫ. БОЛЬШЕ ПОБЕД.</p><div class="summer-results-hero__total"><span>Всего призовых за лето</span><strong>' + formatRewardRound(stats.total) + ' ₽</strong></div></div><div class="summer-results-hero__note" aria-hidden="true">Лето<br>играет<br>в наших!<span>♔</span></div></header>' +
+    '<div class="summer-results-counts"><div><span class="summer-result-metric__icon" aria-hidden="true">♠</span><span><strong>' + stats.mid + '</strong> заносов<small>50–99 тыс. ₽</small></span></div><div><span class="summer-result-metric__icon" aria-hidden="true">♦</span><span><strong>' + stats.high + '</strong> заносов<small>от 100 тыс. ₽</small></span></div></div>' +
+    '<div class="summer-results-metrics">' + metric('♟', stats.participants, 'Участников', 'в данных рейтинга') + metric('●', stats.paidPlaces, 'Призовых мест', 'в турнирах') + metric('🏆', stats.tournaments, 'Турниров', 'в зачёте рейтинга') + metric('★', stats.winningPlayers, 'Игроков', 'с заносами') + '</div>' +
+    '<div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых', stats.topPlayers, false) + table('Топ-10 разовых заносов', stats.topWins, true) + '</div></section>';
 }
 
 // Rating view adapter: shared spring/winter DOM, tables, lightbox, and player modal.

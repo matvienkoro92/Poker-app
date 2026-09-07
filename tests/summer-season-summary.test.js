@@ -14,6 +14,10 @@ test('summer totals combine players, retain separate wins and respect thresholds
   };
   const stats = ctx.summerRatingSeasonStats(data);
   assert.equal(stats.total, 499998);
+  assert.equal(stats.participants, 4);
+  assert.equal(stats.winningPlayers, 3);
+  assert.equal(stats.paidPlaces, 5);
+  assert.equal(stats.tournaments, 2);
   assert.equal(stats.mid, 2);
   assert.equal(stats.high, 2);
   assert.equal(stats.topPlayers[0].reward, 350000);
