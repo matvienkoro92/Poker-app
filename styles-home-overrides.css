@@ -7470,7 +7470,7 @@ html body #app.app.app--view-home
   aspect-ratio: 1.6 / 1 !important;
 }
 .app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy {
-  width: min(40%, 330px) !important;
+  width: min(36%, 330px) !important;
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -7535,7 +7535,7 @@ html body #app.app.app--view-home
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
   mix-blend-mode: normal;
   mask-image: none;
-  clip-path: polygon(9% 6%, 94% 6%, 97% 9%, 97% 86%, 99% 88%, 99% 93%, 94% 95%, 6% 95%, 3% 93%, 3% 88%, 9% 86%);
+  clip-path: none;
 }
 
 /* Animated Poker21 figures on chip podiums. */
@@ -7834,9 +7834,11 @@ html body #app.app.app--view-home
 
 /* Readable shortcut names and a distinct live raffle counter. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
-  color: #4cda87 !important;
+  color: #000 !important;
+  background: #4cda87 !important;
+  border-radius: 4px;
   font-weight: 900 !important;
-  text-shadow: 0 1px 2px #000, 0 0 6px #29b96a55 !important;
+  text-shadow: none !important;
   filter: none;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures #raffleActiveBadge {
@@ -7951,4 +7953,33 @@ html body #app.app.app--view-home
   font-size: clamp(11px, 1.5vw, 14px);
   line-height: 1.4;
   text-align: center;
+}
+
+/* The artwork already carries depth and lighting; keep its face in one plane. */
+.home-last-longer-dock__chip {
+  transform: none;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .55));
+}
+.home-last-longer-dock__chip::before {
+  content: none;
+}
+.home-last-longer-dock__chip img {
+  animation: none;
+  transform: none;
+}
+.home-last-longer-dock__face {
+  inset: 17%;
+  gap: calc(var(--ll-chip) * .035);
+  background: radial-gradient(circle at 40% 25%, #202019, #090b09 75%);
+}
+.home-last-longer-dock__title {
+  width: 100%;
+  font-size: calc(var(--ll-chip) * .115);
+  line-height: 1.12;
+  letter-spacing: .015em;
+  text-align: center;
+  text-shadow: none;
+}
+.home-last-longer-dock__spade {
+  font-size: calc(var(--ll-chip) * .11);
 }
