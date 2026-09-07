@@ -6965,3 +6965,26 @@ html body #app.app.app--view-home
 @media (prefers-reduced-motion: reduce) {
   .home-last-longer-dock__chip img { animation: none; }
 }
+
+/* Tilt the whole chip, with a shaded edge behind its rotating face. */
+.home-last-longer-dock__chip {
+  transform: perspective(600px) rotateY(-19deg) rotateX(8deg) rotateZ(-9deg);
+  transform-origin: 50% 55%;
+  isolation: isolate;
+  filter: drop-shadow(5px 8px 6px rgba(0, 0, 0, .65));
+}
+.home-last-longer-dock__chip::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 3%;
+  border: 1px solid #b78b36;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from -12deg, #32120b 0deg 24deg, #121516 24deg 54deg, #806126 54deg 60deg);
+  transform: translate(5px, 3px);
+  box-shadow: 1px 0 #8f672a, 2px 1px #342617, 3px 2px #161613, inset -4px -2px 5px #0009;
+}
+.home-last-longer-dock__face {
+  background: radial-gradient(ellipse at 28% 15%, #363124 0%, #171811 38%, #060807 78%);
+  box-shadow: inset 1px 2px 3px #f7d37830, inset -2px -3px 4px #000c, inset 0 0 0 2px #080907;
+}
