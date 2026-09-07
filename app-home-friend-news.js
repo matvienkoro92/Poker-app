@@ -798,7 +798,7 @@
     var selectedKey = clubWinsDayTab === "previous" ? keys[1] : keys[0];
     if (!selectedKey) selectedKey = keys[0] || "";
     var selectedRows = source.filter(function (row) {
-      if (String(row && row._eventKind || "") === "club-choice") return clubWinsDayTab === "latest";
+      if (String(row && row._eventKind || "") === "club-choice" && !isUnpinnedAugustClubChoice(row)) return clubWinsDayTab === "latest";
       return !!selectedKey && eventDayKey(row && row.at) === selectedKey;
     });
     if (clubWinsDayTab !== "latest") return selectedRows;
@@ -918,9 +918,14 @@
     return String(row && row.id || "").indexOf("daily:") === 0;
   }
 
+  // August winner remains in history, but is no longer pinned to current news.
+  function isUnpinnedAugustClubChoice(row) {
+    return String(row && row.id || "").indexOf("achievement:choice:club:2026-08:") === 0;
+  }
+
   function isCurrentClubEvent(row) {
     if (!row || !row.at) return false;
-    if (String(row._eventKind || "") === "club-choice") return isRecentEvent(row.at);
+    if (String(row._eventKind || "") === "club-choice" && !isUnpinnedAugustClubChoice(row)) return isRecentEvent(row.at);
     var tournamentDay = clubTournamentDayKey();
     var rowDay = eventDayKey(row.at);
     var visibleWinDays = clubStaticWinDayKeys();
