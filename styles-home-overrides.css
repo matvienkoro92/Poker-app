@@ -7628,14 +7628,7 @@ html body #app.app.app--view-home
   filter: drop-shadow(0 0 5px #08bfff);
   animation: shortcut-plane-fly 4.5s ease-in-out infinite;
 }
-.home-mini-icon-item--raffles .home-shortcut-motion i {
-  width: 7%; aspect-ratio: 1; background: #fff0a1;
-  clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
-  animation: shortcut-gift-spark 3.6s ease-in-out infinite;
-}
-.home-mini-icon-item--raffles .home-shortcut-motion i:nth-child(1) { left: 24%; top: 35%; }
-.home-mini-icon-item--raffles .home-shortcut-motion i:nth-child(2) { left: 70%; top: 42%; animation-delay: -.8s; }
-.home-mini-icon-item--raffles .home-shortcut-motion i:nth-child(3) { left: 59%; top: 30%; animation-delay: -1.6s; }
+.home-mini-icon-item--raffles .home-shortcut-motion { display: none; }
 .home-mini-icon-item--levels .home-shortcut-motion { clip-path: ellipse(11% 2.3% at 52% 25.5%); }
 .home-mini-icon-item--levels .home-shortcut-motion i:first-child {
   top: 21%; left: 34%; width: 6%; height: 10%;
@@ -7647,11 +7640,6 @@ html body #app.app.app--view-home
   25% { opacity: 1; }
   50% { opacity: 0; transform: translate(95%, -110%) scale(1.15); }
   100% { opacity: 0; transform: translate(95%, -110%) scale(1.15); }
-}
-@keyframes shortcut-gift-spark {
-  0%, 15%, 70%, 100% { opacity: 0; transform: scale(.2) rotate(0); }
-  38% { opacity: 1; transform: scale(1.25) rotate(40deg); }
-  60% { opacity: 0; transform: translateY(-70%) scale(.5) rotate(80deg); }
 }
 @keyframes shortcut-glasses-glint {
   0%, 20% { opacity: 0; transform: translateX(0) skewX(-20deg); }
@@ -7714,6 +7702,14 @@ html body #app.app.app--view-home
 }
 
 /* Explicit mask properties for iOS WebKit expression layers. */
+.app.app--view-home .home-daily-shortcuts--figures #raffleActiveAmountBadge {
+  background: linear-gradient(180deg, #95f5b4 0%, #4cda87 48%, #29b96a 100%) !important;
+  color: #07341d !important;
+  border-color: #9df8b9 !important;
+  box-shadow: inset 0 1px 0 #d5ffe2, 0 0 0 1px #197646, 0 3px 8px #0008 !important;
+  text-shadow: none !important;
+}
+
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after {
   -webkit-mask-image: radial-gradient(ellipse 13% 7% at 50% 26%, #000 75%, transparent 100%);
   -webkit-mask-repeat: no-repeat;
