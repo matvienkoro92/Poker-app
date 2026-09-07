@@ -7248,13 +7248,13 @@ html body #app.app.app--view-home
 
 /* A shallow edge and restrained tilt keep the chip face readable. */
 .home-last-longer-dock__chip {
-  transform: perspective(700px) rotateY(12deg) rotateX(4deg) rotateZ(4deg);
+  transform: perspective(700px) rotateY(-14deg);
   filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, .55));
 }
 .home-last-longer-dock__chip::before {
-  transform: translate(-2px, 1px);
+  transform: translate(4px, 0);
   border-color: #806025;
-  box-shadow: -1px 1px #423016, inset 2px -1px 3px #0009;
+  box-shadow: 2px 0 #423016, 3px 0 #17140e, inset -2px 0 3px #0009;
 }
 .home-last-longer-dock__face {
   background: radial-gradient(ellipse at 35% 20%, #1d1c15, #080a08 75%);
@@ -7264,7 +7264,7 @@ html body #app.app.app--view-home
 .home-last-longer-dock__title {
   font-size: calc(var(--ll-chip) * .126);
   line-height: 1.06;
-  letter-spacing: -.025em;
+  letter-spacing: 0;
   text-shadow: 0 1px 1px #000;
 }
 .app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock--unannounced {
