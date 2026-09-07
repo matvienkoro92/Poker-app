@@ -128,6 +128,9 @@ function initRafflesBroadcastRuntime(opts) {
       return "";
     }
     function raffleBroadcastShortSummary(raffle) {
+      if (typeof pokerRafflesIsTrainingPrize === "function" && pokerRafflesIsTrainingPrize(raffle)) {
+        return "Тренировка у Николая FishKopcheny стоимостью 5 000 ₽";
+      }
       var groups = raffle && Array.isArray(raffle.groups) ? raffle.groups : [];
       var count = Math.max(0, parseInt(raffle && raffle.totalWinners, 10) || 0);
       if (!count) {
