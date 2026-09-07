@@ -16,13 +16,17 @@
   top: 0;
   z-index: 5;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   padding: 6px;
   border: 1px solid rgba(210, 155, 70, 0.35);
   border-radius: 16px;
   background: rgba(5, 8, 14, 0.94);
   backdrop-filter: blur(12px);
+}
+
+.tournament-bet-modal__tabs--admin {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .tournament-bet-modal__tabs button {
@@ -245,9 +249,10 @@
 .tournament-bet-modal__participants .tournament-bet-modal__entry {
   position: relative;
   display: grid !important;
-  grid-template-columns: 72px minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-content: start;
   align-items: center !important;
-  gap: 0 10px !important;
+  gap: 18px !important;
   min-height: 142px !important;
   margin-top: 0 !important;
   padding: 12px 10px !important;
@@ -275,6 +280,7 @@
 
 .tournament-bet-modal__participants .tournament-bet-modal__avatar {
   position: relative;
+  justify-self: center;
   display: grid !important;
   place-items: center !important;
   width: 68px !important;
@@ -318,24 +324,26 @@
 
 .tournament-bet-modal__participants .tournament-bet-modal__entry-main {
   display: grid !important;
-  align-content: center !important;
+  align-content: start !important;
+  width: 100%;
   gap: 7px !important;
   min-width: 0 !important;
 }
 
 .tournament-bet-modal__participants .sng-champions-modal__entry-name {
   display: block !important;
-  overflow: hidden !important;
+  overflow-wrap: anywhere;
   color: #f7efe0 !important;
   font-size: 18px !important;
   font-weight: 1000 !important;
-  line-height: 1.05 !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
 }
 
 .tournament-bet-modal__participants .sng-champions-modal__entry-status {
   justify-self: start;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
   display: inline-flex !important;
   min-height: 28px !important;
   padding: 5px 10px !important;
@@ -346,7 +354,7 @@
   background: rgba(37, 91, 18, 0.24) !important;
   font-size: 12px !important;
   font-weight: 900 !important;
-  line-height: 1.05 !important;
+  line-height: 1.2 !important;
 }
 
 .tournament-bet-modal__participants .sng-champions-modal__entry-meta,
@@ -369,7 +377,9 @@
 
 .tournament-bet-modal__participants .tournament-bet-modal__entry-stake {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: 8px;
+  border-top: 1px solid rgba(205, 126, 31, 0.22);
   align-items: baseline;
   gap: 7px;
   color: #ffd36b !important;
@@ -378,7 +388,8 @@
 .tournament-bet-modal__participants .tournament-bet-modal__entry-stake small,
 .tournament-bet-modal__participants .tournament-bet-modal__entry-stake strong {
   min-width: 0;
-  white-space: nowrap !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
 }
 
 .tournament-bet-modal__participants .tournament-bet-modal__entry-stake strong {
@@ -392,8 +403,8 @@
   }
 
   .tournament-bet-modal__participants .tournament-bet-modal__entry {
-    grid-template-columns: 58px minmax(0, 1fr) !important;
-    gap: 0 7px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 16px !important;
     min-height: 122px !important;
     padding: 9px 7px !important;
   }
@@ -409,9 +420,9 @@
   }
 
   .tournament-bet-modal__participants .sng-champions-modal__entry-status {
-    min-height: 34px !important;
+    min-height: 28px !important;
     padding: 3px 5px !important;
-    font-size: 9px !important;
+    font-size: 10px !important;
   }
 
   .tournament-bet-modal__participants .sng-champions-modal__entry-meta,
@@ -704,3 +715,4 @@
 @media (max-width: 380px) {
   .tournament-bet-modal__result-with-art .tournament-bet-modal__result-amounts strong { font-size: 20px; }
 }
+

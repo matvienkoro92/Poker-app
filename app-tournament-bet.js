@@ -306,9 +306,10 @@
       '<div class="tournament-bet-modal__sticky-action"><div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' + action + '</div>';
   }
 
-  function adminHtml(data) {
+  function adminHtml(data, createTab) {
     if (!data.isAdmin) return "";
     if (!data.id || data.status === "settled" || (data.status !== "open" && !(data.entries && data.entries.length))) {
+      if (!createTab) return "";
       var tournaments = eveningTournaments();
       var first = tournaments[0] || null;
       return '<form class="tournament-bet-modal__admin" data-tournament-bet-create>' +
@@ -323,6 +324,7 @@
         '<div class="tournament-bet-modal__inline-status" data-tournament-bet-inline-status role="status" aria-live="assertive" hidden></div>' +
         '<button type="submit">Создать и открыть ставки</button></form>';
     }
+    if (createTab) return '<section class="tournament-bet-modal__empty"><strong>Событие уже создано</strong><p>Завершите текущее событие во вкладке «Ставка на себя», чтобы создать новое.</p></section>';
     var closeButton = data.status === "open" ? '<button type="button" data-tournament-bet-action="close">Закрыть приём ставок</button>' : "";
     var startingBankForm = data.status !== "settled" ? '<form data-tournament-bet-starting-bank><label><span>Стартовый банк</span><input name="startingBank" type="text" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off" value="' + esc(data.startingBank || 0) + '" required></label><button type="submit">Изменить стартовый банк</button></form>' : "";
     var settle = data.entries && data.entries.length && data.status !== "settled"
@@ -335,14 +337,15 @@
   function render() {
     ensureModal();
     var data = state || { active: false, entries: [] };
-    var tabs = '<nav class="tournament-bet-modal__tabs" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="create" class="' + (activeTab === "create" ? 'is-active' : '') + '">Личная ставка</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button></nav>';
+    if (activeTab === "admin-create" && !data.isAdmin) activeTab = "event";
+    var tabs = '<nav class="tournament-bet-modal__tabs' + (data.isAdmin ? ' tournament-bet-modal__tabs--admin' : '') + '" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button>' + (data.isAdmin ? '<button type="button" data-tournament-bet-tab="admin-create" class="' + (activeTab === "admin-create" ? 'is-active' : '') + '">Создать</button>' : '') + '</nav>';
     if (!data.id) {
       var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section><div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data);
-      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + '</div>';
+      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + '</div>';
       updateHomeButton(data);
       return;
     }
-    var panel = activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? (data.createdByPlayer ? eventHtml(data) : createBetHtml(data)) : eventHtml(data);
+    var panel = activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? (data.createdByPlayer ? eventHtml(data) : createBetHtml(data)) : eventHtml(data);
     bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + panel + '</div>';
     updateHomeButton(data);
   }
@@ -432,6 +435,7 @@
           selectedEventId = data.id;
         } else if (payload.action === "create") {
           selectedEventId = "";
+          activeTab = "event";
         }
         setStatus("Готово", "success");
         render();
@@ -473,8 +477,8 @@
     var tabEl = event.target.closest("[data-tournament-bet-tab]");
     if (tabEl) {
       var requestedTab = tabEl.getAttribute("data-tournament-bet-tab");
-      activeTab = requestedTab === "rating" || requestedTab === "create" ? requestedTab : "event";
-      if (activeTab === "event") { selectedEventId = ""; load(false); } else if (activeTab === "create" && state && state.createdByPlayer) render(); else render();
+      activeTab = requestedTab === "admin-create" && state && state.isAdmin ? "admin-create" : requestedTab === "rating" || requestedTab === "create" ? requestedTab : "event";
+      if (activeTab === "admin-create") { selectedEventId = ""; load(false); } else if (activeTab === "event") { selectedEventId = ""; load(false); } else if (activeTab === "create" && state && state.createdByPlayer) render(); else render();
       return;
     }
     var personalEvent = event.target.closest("[data-tournament-bet-personal-event]");
