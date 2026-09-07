@@ -7693,6 +7693,10 @@ html body #app.app.app--view-home
 }
 
 /* Real PNG transparency instead of browser-dependent screen blending. */
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure {
+  filter: brightness(0.83);
+}
+
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures,
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item,
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure { mix-blend-mode: normal !important; }
