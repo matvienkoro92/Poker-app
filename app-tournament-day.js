@@ -850,6 +850,28 @@ function renderHomeTournamentWeekList(activeWeekday) {
     main.appendChild(name);
     main.appendChild(meta);
 
+    row.classList.add("home-tournament-week-row--trophy");
+    if (dow === 2) row.classList.add("home-tournament-week-row--tractor");
+    row.style.setProperty("--trophy-cell", dow === 2 ? "100%" : (dow === 1 || dow === 4) ? "50%" : "0%");
+    var trophyArt = document.createElement("span");
+    trophyArt.className = "home-tournament-trophy__art";
+    trophyArt.setAttribute("aria-hidden", "true");
+    var trophyCopy = document.createElement("span");
+    trophyCopy.className = "home-tournament-trophy__copy";
+    [
+      ["title", item.name || "Турнир"],
+      ["caption", "приз"],
+      ["prize", pokerFormatRubSpacing(item.guarantee || "—")],
+      ["buyin-label", "бай-ин"],
+      ["buyin", pokerFormatRubSpacing(item.buyin || "—")]
+    ].forEach(function (part) {
+      var line = document.createElement("span");
+      line.className = "home-tournament-trophy__" + part[0];
+      line.textContent = part[1];
+      trophyCopy.appendChild(line);
+    });
+    row.appendChild(trophyArt);
+    row.appendChild(trophyCopy);
     row.appendChild(posterWrap);
     row.appendChild(day);
     row.appendChild(main);

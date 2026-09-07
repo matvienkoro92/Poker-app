@@ -7173,3 +7173,69 @@ html body #app.app.app--view-home
   z-index: 5;
   text-shadow: 0 2px 4px #000, 0 0 6px #000;
 }
+
+/* Sculpted tournament trophies share the existing swipe carousel. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus { background: #050706 !important; }
+.app.app--view-home .tournament-day-home-dual--tournament-focus::before,
+.app.app--view-home .tournament-day-home-dual--tournament-focus::after { display: none !important; }
+.app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy {
+  container-type: inline-size;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  transform: translate(-50%,-50%) translateX(calc(var(--carousel-offset) * 76%)) scale(calc(1 - var(--carousel-distance) * .18)) !important;
+  transform-origin: 50% 90%;
+}
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__poster-wrap,
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__main { display: none !important; }
+.home-tournament-trophy__art {
+  position: absolute; inset: 0;
+  background: url('./assets/home-tournament-trophies-v1.png') var(--trophy-cell) center / 300% 100% no-repeat;
+  mask-image: linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
+}
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__day {
+  top: 3%; left: 42%; right: auto; font-size: 6cqw; padding: 2px 6px;
+}
+.home-tournament-trophy__copy {
+  position: absolute; inset: 44% 17% 11%;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; color: #ffc051; line-height: 1.05;
+  text-shadow: 0 1px 2px #000,0 0 4px #c2781c50;
+}
+.home-tournament-trophy__title { font-size: 7cqw; font-weight: 900; text-transform: uppercase; }
+.home-tournament-trophy__caption { font-size: 5cqw; margin-top: 1cqw; }
+.home-tournament-trophy__prize { font-size: 11cqw; font-weight: 900; white-space: nowrap; margin-top: 1cqw; letter-spacing: -.04em; }
+.home-tournament-trophy__buyin-label { font-size: 4.5cqw; margin-top: auto; }
+.home-tournament-trophy__buyin { font-size: 8cqw; font-weight: 900; white-space: nowrap; }
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0;
+}
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__copy { z-index: 1; }
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
+  background-image: url('./assets/home-tournament-trophies-v1.png') !important;
+  background-size: 300% 100% !important;
+  background-position: var(--trophy-cell) center !important;
+  background-repeat: no-repeat !important;
+}
+.app.app--view-home .tournament-day-home-dual--tournament-focus { background: #000 !important; }
+.home-tournament-trophy__copy { bottom: 22%; }
+.home-tournament-trophy__title { font-size: 6.1cqw; }
+.home-tournament-trophy__prize { font-size: 9.5cqw; }
+.home-tournament-trophy__buyin-label { font-size: 3.8cqw; }
+.home-tournament-trophy__buyin { font-size: 6.5cqw; }
+.home-tournament-week-row--tractor .home-tournament-trophy__copy { top: 50%; }
+
+/* Preserve the full illustrated frame inside the slightly rectangular tiles. */
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--levels .home-players-group-art,
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--raffles .home-raffle-gift-art {
+  inset: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  object-fit: fill;
+  border-radius: inherit;
+}
