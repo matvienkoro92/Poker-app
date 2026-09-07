@@ -7326,3 +7326,30 @@ html body #app.app.app--view-home
 .app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
   margin-top: 0 !important;
 }
+
+/* Playing-card displays: live labels follow the engraved panels. */
+.app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy {
+  transform: translate(-50%, -50%) translateX(calc(var(--carousel-offset) * 78%)) rotate(calc(var(--carousel-offset) * 5deg)) scale(calc(1 - var(--carousel-distance) * .16)) !important;
+}
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
+  background-image: url('./assets/home-tournament-cards-v1.png') !important;
+}
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__copy {
+  inset: 0;
+  display: block;
+}
+.home-tournament-trophy__copy > span { position: absolute; left: 19%; width: 62%; margin: 0; }
+.home-tournament-trophy__copy .home-tournament-trophy__title { top: 17%; height: 7%; display: flex; align-items: center; justify-content: center; font-size: 5.3cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__caption { top: 60%; font-size: 4.4cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__prize { top: 64%; font-size: 9cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__buyin-label { top: 74.5%; font-size: 3.7cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__buyin { top: 78%; font-size: 6.8cqw; }
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__day { top: 13.5%; left: 44%; font-size: 4cqw; padding: 0; background: none; color: #ffc65e; }
+.home-last-longer-dock__chip { transform: perspective(700px) rotateY(18deg) rotateZ(-7deg); }
+.home-last-longer-dock__chip::before { transform: translate(-4px, 0); box-shadow: -2px 0 #423016, -3px 0 #17140e, inset 2px 0 3px #0009; }
+.app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy { mix-blend-mode: normal; opacity: 1 !important; }
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
+  mix-blend-mode: normal;
+  mask-image: none;
+  clip-path: polygon(9% 6%, 94% 6%, 97% 9%, 97% 86%, 99% 88%, 99% 93%, 94% 95%, 6% 95%, 3% 93%, 3% 88%, 9% 86%);
+}
