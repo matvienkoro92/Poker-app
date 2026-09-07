@@ -7435,3 +7435,94 @@ html body #app.app.app--view-home
   margin-left: auto !important;
   margin-right: auto !important;
 }
+
+/* Isolate each head from the still body; gestures happen between long pauses. */
+.home-shortcut-figure { --head-x: 50%; --head-y: 24%; --head-w: 21%; --head-h: 15%; }
+.home-mini-icon-item--raffles .home-shortcut-figure { --head-x: 51%; --head-y: 24%; --head-w: 23%; --head-h: 15%; }
+.home-mini-icon-item--levels .home-shortcut-figure { --head-x: 53%; --head-y: 29%; --head-w: 20%; --head-h: 15%; }
+.home-shortcut-figure::before {
+  mask-image: radial-gradient(ellipse var(--head-w) var(--head-h) at var(--head-x) var(--head-y), transparent 86%, #000 100%);
+}
+.home-shortcut-figure::after {
+  mask-image: radial-gradient(ellipse var(--head-w) var(--head-h) at var(--head-x) var(--head-y), #000 86%, transparent 100%);
+  transform-origin: var(--head-x) calc(var(--head-y) + 10%);
+  animation: shortcut-head-nod 8s ease-in-out infinite;
+}
+.home-mini-icon-item--raffles .home-shortcut-figure::after { animation: shortcut-head-greet 9.5s ease-in-out -3s infinite; }
+.home-mini-icon-item--levels .home-shortcut-figure::after { animation: shortcut-head-turn 11s ease-in-out -5s infinite; }
+@keyframes shortcut-head-nod {
+  0%, 65%, 88%, 100% { transform: none; }
+  71%, 81% { transform: translateY(.5%) scaleY(.96) rotate(2deg); }
+  76% { transform: translateY(-.3%) rotate(-1deg); }
+}
+@keyframes shortcut-head-greet {
+  0%, 62%, 90%, 100% { transform: none; }
+  70% { transform: rotate(-5deg); }
+  80% { transform: rotate(2deg); }
+}
+@keyframes shortcut-head-turn {
+  0%, 60%, 95%, 100% { transform: none; }
+  70%, 77% { transform: perspective(500px) rotateY(-12deg) rotate(-2deg); }
+  86% { transform: perspective(500px) rotateY(7deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app .home-shortcut-figure::after { animation: none !important; }
+}
+
+/* Blend the complete isolated button with the page, not just its inner art. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
+  mix-blend-mode: screen;
+  background: transparent !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::before,
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::after {
+  display: block !important;
+  opacity: 1 !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::before,
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::after {
+  background-image: url('./assets/home-shortcut-figures-v1.png') !important;
+  background-size: 300% 100% !important;
+  background-position: var(--figure-cell, 0%) center !important;
+  background-repeat: no-repeat !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
+  mix-blend-mode: screen;
+  background: transparent !important;
+}
+
+/* Bright podium titles and visible head gestures, with still bases. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon__label {
+  color: #fff2bd !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 2px #000, 0 0 5px #ffb52e, 0 0 11px #ffad2855 !important;
+  letter-spacing: .015em !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::after {
+  animation: shortcut-head-nod 4.2s ease-in-out infinite !important;
+  will-change: transform;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-shortcut-figure::after {
+  animation: shortcut-head-greet 4.8s ease-in-out -1.2s infinite !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--levels .home-shortcut-figure::after {
+  animation: shortcut-head-turn 5.4s ease-in-out -2.4s infinite !important;
+}
+@keyframes shortcut-head-nod {
+  0%, 15%, 65%, 100% { transform: none; }
+  30%, 52% { transform: translateY(1%) scaleY(.94) rotate(4deg); }
+  41% { transform: translateY(-.5%) rotate(-2deg); }
+}
+@keyframes shortcut-head-greet {
+  0%, 15%, 75%, 100% { transform: none; }
+  35% { transform: rotate(-7deg); }
+  55% { transform: rotate(4deg); }
+}
+@keyframes shortcut-head-turn {
+  0%, 10%, 85%, 100% { transform: none; }
+  30%, 40% { transform: perspective(500px) rotateY(-20deg) rotate(-4deg); }
+  65% { transform: perspective(500px) rotateY(14deg) rotate(2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after { animation: none !important; }
+}
