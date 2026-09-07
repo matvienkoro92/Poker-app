@@ -350,7 +350,21 @@
   function updateHomeButton(data) {
     var amount = document.querySelector("[data-tournament-bet-home-bank]");
     var button = document.querySelector("[data-tournament-bet-open]");
-    var hasEvent = !!(data && data.id);
+    var hasEvent = !!(data && data.id && (data.status === "open" || data.status === "closed"));
+    if (button) {
+      button.classList.toggle("home-last-longer-dock--unannounced", !hasEvent);
+      var emptyLabel = button.querySelector(".home-last-longer-dock__empty");
+      if (!emptyLabel) {
+        var bar = button.querySelector(".home-last-longer-dock__bar");
+        if (bar) {
+          emptyLabel = document.createElement("span");
+          emptyLabel.className = "home-last-longer-dock__empty";
+          emptyLabel.textContent = "Не объявлен";
+          bar.appendChild(emptyLabel);
+        }
+      }
+      if (emptyLabel) emptyLabel.hidden = hasEvent;
+    }
     if (amount) {
       amount.hidden = false;
       amount.textContent = hasEvent ? rub(data.bank) : "—";

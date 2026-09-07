@@ -6968,7 +6968,7 @@ html body #app.app.app--view-home
 
 /* Tilt the whole chip, with a shaded edge behind its rotating face. */
 .home-last-longer-dock__chip {
-  transform: perspective(600px) rotateY(-19deg) rotateX(8deg) rotateZ(-9deg);
+  transform: perspective(600px) rotateY(19deg) rotateX(8deg) rotateZ(9deg);
   transform-origin: 50% 55%;
   isolation: isolate;
   filter: drop-shadow(5px 8px 6px rgba(0, 0, 0, .65));
@@ -6981,8 +6981,8 @@ html body #app.app.app--view-home
   border: 1px solid #b78b36;
   border-radius: 50%;
   background: repeating-conic-gradient(from -12deg, #32120b 0deg 24deg, #121516 24deg 54deg, #806126 54deg 60deg);
-  transform: translate(5px, 3px);
-  box-shadow: 1px 0 #8f672a, 2px 1px #342617, 3px 2px #161613, inset -4px -2px 5px #0009;
+  transform: translate(-5px, 3px);
+  box-shadow: -1px 0 #8f672a, -2px 1px #342617, -3px 2px #161613, inset 4px -2px 5px #0009;
 }
 .home-last-longer-dock__face {
   background: radial-gradient(ellipse at 28% 15%, #363124 0%, #171811 38%, #060807 78%);
@@ -7118,3 +7118,8 @@ html body #app.app.app--view-home
   letter-spacing: -.025em !important;
 }
 .app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) .home-tournament-bonus__amount { font-size: 2.4cqw !important; }
+.home-last-longer-dock__empty { color: #dfd4b6; font-size: clamp(12px, 1.8cqw, 22px); }
+.home-last-longer-dock__empty[hidden] { display: none !important; }
+.home-last-longer-dock--unannounced .home-last-longer-dock__bar > span:not(.home-last-longer-dock__empty),
+.home-last-longer-dock--unannounced .home-last-longer-dock__stake { display: none; }
+.home-last-longer-dock--unannounced .home-last-longer-dock__bar > .home-last-longer-dock__empty { border: 0; padding: 0; }
