@@ -726,6 +726,16 @@
   cursor: default;
 }
 
+.daily-poker__hand-rule {
+  margin: 10px 0 14px;
+  padding: 0 12px;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+}
+
 .daily-poker__streak-note {
   flex: 1 1 100%;
   margin: -2px 0 0;
@@ -2353,7 +2363,7 @@
   line-height: 1.1;
   text-align: center;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.72);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 @media (max-width: 520px) {

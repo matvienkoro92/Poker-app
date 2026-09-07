@@ -4472,6 +4472,132 @@ async function testProfileUserLookup(redis) {
   assert.strictEqual(redis.h("poker_app:profile_specialties").get("ID100001"), "cash", "profile specialty updates");
 }
 
+async function testDailyPokerLevelEligibility(redis) {
+  const promo = loadHandler("promo");
+  const levelFor = promo._internals.dailyPokerPlayerLevel;
+  const profiles = redis.h("poker_app:pokerplus_profiles");
+  const id = "ID989898";
+  redis.h("poker_app:id_to_user").set(id, "tg_989898");
+  assert.strictEqual(await levelFor(id, "mail_ID989898", "21-989898"), 0, "missing profiles do not qualify");
+  profiles.set("P21-989898", JSON.stringify({ totalCounter: { fee: 26500 } }));
+  assert.strictEqual(await levelFor(id, "mail_ID989898", "21-989898"), 10, "Poker21 alias resolves level 10 from server counters");
+  profiles.set("tg_989898", JSON.stringify({ totalCounter: { fee: 26499 }, level: 100 }));
+  assert.strictEqual(await levelFor(id, "mail_ID989898", "21-989898"), 9, "mapped user profile takes priority and ignores a claimed level field");
+  profiles.set(id, JSON.stringify({ totalCounter: { fee: 26500 } }));
+  assert.strictEqual(await levelFor(id, "mail_ID989898", "21-989898"), 10, "account profile takes priority");
+  assert.strictEqual(await levelFor(id, "mail_ID989898", ""), 0, "unbound account does not qualify through an old profile");
+}
+
+async function testDailyPokerLevelPayout(redis) {
+  const promo = loadHandler("promo");
+  const s = sessions();
+  const id = "ID100001";
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", id);
+  redis.h("poker_app:id_to_user").set(id, "tg_1001");
+  redis.h("poker_app:pokerplus_user_ids").set(id, "P21-1001");
+  const previous = new Date(Date.now() - 86400000).toISOString();
+  const savedRandomInt = crypto.randomInt;
+  try {
+    for (const [level, seedStart, handRank] of [[9, 3, "high_card"], [10, 3, "high_card"], [0, 3, "high_card"], [10, 1, "straight"], [10, 2, "flush"]]) {
+      if (level) redis.h("poker_app:pokerplus_profiles").set(id, JSON.stringify({ totalCounter: { fee: level === 10 ? 26500 : 26499 } }));
+      else redis.h("poker_app:pokerplus_profiles").delete(id);
+      redis.kv.set("poker_app:daily_poker_state:" + id + ":rolling", JSON.stringify({
+        baseAttemptUsed: true, baseAttemptAt: previous, updatedAt: previous,
+        ticketlessStreak: 6, ticketlessStreakAt: previous, ticketlessStreakGameDate: previous.slice(0, 10),
+      }));
+      const status = await call(promo, req("GET", { path: "daily-poker/status", pwaSession: s.user }));
+      assert.strictEqual(status.body.canPlay, true, "level gate does not block normal spins");
+      assert.strictEqual(status.body.ticketlessStreakEligible, level >= 10);
+      assert.strictEqual(status.body.ticketlessStreakMinLevel, 10);
+      let seed = seedStart;
+      crypto.randomInt = (lo, hi) => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return lo + seed % (hi - lo);
+      };
+      const before = Number(redis.h("poker_app:bonus_balances").get(id) || 0);
+      const body = { pwaSession: s.user, idempotencyKey: "level-payout-" + level + "-" + handRank, playerLevel: 100, ticketlessStreakEligible: true };
+      const result = await call(promo, req("POST", { path: "daily-poker/play" }, body));
+      assert.strictEqual(result.statusCode, 200, JSON.stringify(result.body));
+      assert.strictEqual(result.body.handRank, handRank, "deterministic hand fixture");
+      const paysStreak = level >= 10 && handRank === "high_card";
+      const paysBonus = handRank === "straight" || handRank === "flush";
+      assert.strictEqual(result.body.playerLevel, level, "client cannot forge the level");
+      assert.strictEqual(result.body.bonusBalance - before, paysStreak ? 300 : paysBonus ? 50 : 0, "only eligible losing hand receives 300; straight and flush keep only their 50");
+      assert.strictEqual(!!result.body.ticketlessStreakAward, paysStreak);
+      assert.strictEqual(result.body.ticketlessStreak, 0, "seventh losing hand or any balance prize resets the series");
+      assert.strictEqual(result.body.attemptsLeft, paysBonus ? 1 : 0, "ordinary straight/flush extra attempt still works");
+      const replay = await call(promo, req("POST", { path: "daily-poker/play" }, body));
+      assert.strictEqual(replay.body.idempotentReplay, true);
+      assert.strictEqual(Number(redis.h("poker_app:bonus_balances").get(id) || 0), result.body.bonusBalance, "retry never credits the reward twice");
+    }
+    const credits = redis.l("poker_app:bonus_ledger_all").map(key => JSON.parse(redis.kv.get("poker_app:bonus_ledger:" + key)));
+    assert.strictEqual(credits.filter(row => row.source === "daily_poker_ticketless_streak").length, 1, "only eligible completion produces a streak ledger entry");
+    assert.strictEqual(credits.filter(row => row.source === "daily_poker_straight" || row.source === "daily_poker_flush").length, 2, "straight and flush retain their ordinary awards");
+  } finally {
+    crypto.randomInt = savedRandomInt;
+  }
+}
+
+async function testDailyPokerBoardOnlyPayout(redis) {
+  const promo = loadHandler("promo");
+  const s = sessions();
+  const id = "ID100001";
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", id);
+  redis.h("poker_app:id_to_user").set(id, "tg_1001");
+  redis.h("poker_app:pokerplus_user_ids").set(id, "P21-1001");
+  redis.h("poker_app:pokerplus_profiles").set(id, JSON.stringify({ totalCounter: { fee: 26500 } }));
+  const previous = new Date(Date.now() - 86400000).toISOString();
+  const parseCards = text => text.split(" ").map(token => ({ rank: token[0] === "T" ? "10" : token[0], suit: { s: "spades", h: "hearts", d: "diamonds", c: "clubs" }[token[1]] }));
+  const savedRandomInt = crypto.randomInt;
+  try {
+    for (const [handRank, hole, board, streak, amount] of [
+      ["straight", "As Kd", "4s 5h 6c 7d 8s", 5, 0],
+      ["flush", "2s Kd", "4s 6s 8s Ts Qs", 5, 0],
+      ["three_of_a_kind", "Ac Qd", "2h 2d 2s 3c 4s", 5, 0],
+      ["four_of_a_kind", "Ac Qd", "2h 2d 2s 2c 3s", 5, 0],
+      ["royal_flush", "Ac Kd", "Ts Js Qs Ks As", 6, 300],
+    ]) {
+      redis.kv.set("poker_app:daily_poker_state:" + id + ":rolling", JSON.stringify({
+        baseAttemptUsed: true, baseAttemptAt: previous, updatedAt: previous,
+        ticketlessStreak: streak, ticketlessStreakAt: previous, ticketlessStreakGameDate: previous.slice(0, 10),
+      }));
+      const deck = require(path.join(root, "lib/daily-poker")).createDeck();
+      const dealt = parseCards(hole + " " + board);
+      const key = card => card.rank + ":" + card.suit;
+      const used = new Set(dealt.map(key));
+      const target = dealt.concat(deck.filter(card => !used.has(key(card))));
+      const swaps = [];
+      for (let i = deck.length - 1; i > 0; i -= 1) {
+        const j = deck.findIndex(card => key(card) === key(target[i]));
+        assert.ok(j <= i);
+        swaps.push(j);
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      crypto.randomInt = () => swaps.shift();
+      const before = Number(redis.h("poker_app:bonus_balances").get(id) || 0);
+      const result = await call(promo, req("POST", { path: "daily-poker/play" }, {
+        pwaSession: s.user, idempotencyKey: "board-only-" + handRank, holeCardsContribute: true,
+      }));
+      assert.strictEqual(result.statusCode, 200, JSON.stringify(result.body));
+      assert.strictEqual(result.body.handRank, handRank);
+      assert.strictEqual(result.body.holeCardsContribute, false, "client cannot forge participation");
+      assert.strictEqual(result.body.reward.boardOnly, true);
+      assert.strictEqual(result.body.reward.bonusAmount, 0);
+      assert.strictEqual(result.body.reward.ticketAmount, 0);
+      assert.strictEqual(result.body.reward.grantsExtraAttempt, false);
+      assert.strictEqual(result.body.attemptsLeft, 0);
+      assert.strictEqual(result.body.bonusBalance - before, amount, "only the separate eligible losing-series ticket may be paid");
+      assert.strictEqual(result.body.ticketlessStreak, amount ? 0 : 6, "unpaid board hand does not reset the losing series");
+      assert.ok(result.body.reward.message.includes("не начисляется"));
+    }
+    const entries = redis.l("poker_app:bonus_ledger_all").map(key => JSON.parse(redis.kv.get("poker_app:bonus_ledger:" + key)));
+    assert.strictEqual(entries.length, 1);
+    assert.strictEqual(entries[0].source, "daily_poker_ticketless_streak", "no combination payment reaches the ledger");
+  } finally {
+    crypto.randomInt = savedRandomInt;
+  }
+}
+
 async function testDailyPokerWinners(redis) {
   const promo = loadHandler("promo");
   const s = sessions();
@@ -6795,6 +6921,9 @@ async function main() {
     ["respect vote/withdraw", testRespectVoteWithdraw],
     ["profile/user lookup", testProfileUserLookup],
     ["daily poker winners", testDailyPokerWinners],
+    ["daily poker level eligibility", testDailyPokerLevelEligibility],
+    ["daily poker level payout", testDailyPokerLevelPayout],
+    ["daily poker board only payout", testDailyPokerBoardOnlyPayout],
     ["pokerplus key bind fallback matrix", testPokerPlusKeyBindFallbackMatrix],
     ["pokerplus fast bind with email uses mail", testPokerPlusFastBindWithEmailUsesMail],
     ["pokerplus bind failure error priority", testPokerPlusKeyBindFailurePrefersBindingFailed],

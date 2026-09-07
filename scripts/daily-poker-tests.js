@@ -7,11 +7,13 @@ const {
   applyTicketlessStreakToState,
   createDeck,
   evaluateSevenCardHand,
+  evaluateDailyPokerHand,
   getAttemptsLeft,
   getNextAttemptType,
   nextFreeAttemptAt,
   publicStatePayload,
   rewardForHandRank,
+  rewardForDailyPokerHand,
 } = require("../lib/daily-poker");
 const { buildBonusLedgerEntry } = require("../lib/bonus-ledger");
 const promoInternals = require("../lib/api-handlers/promo")._internals;
@@ -64,6 +66,50 @@ function testHandRanks() {
   assert.strictEqual(rank([
     c("A", "hearts"), c("K", "clubs"), c("8", "spades"), c("7", "diamonds"), c("4", "hearts"), c("3", "clubs"), c("2", "spades"),
   ]), "high_card", "high card");
+}
+
+function testHoleCardContribution() {
+  const cards = (text) => text.split(" ").map((token) => ({
+    rank: token[0] === "T" ? "10" : token[0],
+    suit: { s: "spades", h: "hearts", d: "diamonds", c: "clubs" }[token[1]],
+  }));
+  const cases = [
+    ["board straight", "As Kd", "4s 5h 6c 7d 8s", "straight", false],
+    ["equal straight replacing a board rank", "7s Kd", "4s 5h 6c 7d 8s", "straight", false],
+    ["higher straight", "9s Kd", "4s 5h 6c 7d 8s", "straight", true],
+    ["wheel made with hole ace", "As Kd", "2s 3h 4c 5d 9s", "straight", true],
+    ["board wheel", "Ac Kd", "As 2h 3c 4d 5s", "straight", false],
+    ["board flush with low suited hole", "2s Kd", "4s 6s 8s Ts Qs", "flush", false],
+    ["better flush of same category", "As Kd", "4s 6s 8s Ts Qs", "flush", true],
+    ["board full house improved to quads", "Ac Kd", "Ah Ad As Kh Ks", "four_of_a_kind", true],
+    ["same board full house", "Kc Qd", "Ah Ad As Kh Ks", "full_house", false],
+    ["higher full house", "3c Qd", "2h 2d 2s 3h 3s", "full_house", true],
+    ["board quads even with better kicker", "Ac Qd", "2h 2d 2s 2c 3s", "four_of_a_kind", false],
+    ["quads made with hole card", "2c Qd", "2h 2d 2s 3c 4s", "four_of_a_kind", true],
+    ["board trips even with better kicker", "Ac Qd", "2h 2d 2s 3c 4s", "three_of_a_kind", false],
+    ["trips made with hole card", "2c Qd", "2h 2d 5s 3c 4s", "three_of_a_kind", true],
+    ["board trips improved to full house", "Ac Ad", "2h 2d 2s 3c 4s", "full_house", true],
+    ["board royal flush", "Ac Kd", "Ts Js Qs Ks As", "royal_flush", false],
+    ["royal flush made with hole card", "As Kd", "Ts Js Qs Ks 2h", "royal_flush", true],
+    ["board straight flush", "Ac Kd", "4s 5s 6s 7s 8s", "straight_flush", false],
+    ["better straight flush", "9s Kd", "4s 5s 6s 7s 8s", "straight_flush", true],
+  ];
+  for (const [label, hole, board, rank, contributes] of cases) {
+    const evaluated = evaluateDailyPokerHand(cards(hole), cards(board));
+    assert.strictEqual(evaluated.rank, rank, label);
+    assert.strictEqual(evaluated.holeCardsContribute, contributes, label);
+    const reward = rewardForDailyPokerHand(evaluated, {});
+    if (contributes) assert.deepStrictEqual(reward, rewardForHandRank(rank, {}), label + " keeps ordinary reward");
+    else {
+      assert.strictEqual(reward.bonusAmount, 0, label + " gives no bonus");
+      assert.strictEqual(reward.ticketAmount, 0, label + " gives no ticket");
+      assert.strictEqual(reward.grantsExtraAttempt, false, label + " gives no extra attempt");
+      const streak = applyTicketlessStreakToState({ ticketlessStreak: 5, ticketlessStreakAt: "2026-09-05T12:00:00Z" }, "base", reward, "2026-09-06T12:00:00Z", "2026-09-06", 10);
+      assert.strictEqual(streak.state.ticketlessStreak, 6, "unpaid board combination does not reset a losing series");
+      assert.ok(promoInternals.prizeTextForHand(rank, reward, null).includes("не начисляется"));
+    }
+  }
+  assert.throws(() => evaluateDailyPokerHand(cards("As Kd"), cards("As 2h 3c 4d 5s")), /duplicate card/);
 }
 
 function playPure(state, handRank, nowIso) {
@@ -124,7 +170,7 @@ function testTicketlessStreak() {
     const iso = new Date(Date.UTC(2026, 4, 1 + day, 12, 0, 0)).toISOString();
     const reward = rewardForHandRank("high_card", {});
     const afterAttempt = applyAttemptToState(state, "base", reward, iso);
-    const streak = applyTicketlessStreakToState(afterAttempt, "base", reward, iso, gameDateFromIso(iso));
+    const streak = applyTicketlessStreakToState(afterAttempt, "base", reward, iso, gameDateFromIso(iso), 10);
     state = streak.state;
     streakReward = streak.streakReward;
     assert.strictEqual(state.ticketlessStreak, day + 1, "ticketless streak grows for base hands without tickets");
@@ -133,12 +179,12 @@ function testTicketlessStreak() {
   const seventhIso = "2026-05-07T12:00:00.000Z";
   const noPrize = rewardForHandRank("pair", {});
   const seventhAttempt = applyAttemptToState(state, "base", noPrize, seventhIso);
-  const seventh = applyTicketlessStreakToState(seventhAttempt, "base", noPrize, seventhIso, gameDateFromIso(seventhIso));
+  const seventh = applyTicketlessStreakToState(seventhAttempt, "base", noPrize, seventhIso, gameDateFromIso(seventhIso), 10);
   assert.strictEqual(seventh.awarded, true, "seventh ticketless base hand pays the consolation ticket");
   assert.strictEqual(seventh.streakReward.ticketAmount, 300, "ticketless streak reward is a 300 ticket");
   assert.strictEqual(seventh.state.ticketlessStreak, 0, "ticketless streak resets after the 300 ticket");
 
-  const repeatSameDate = applyTicketlessStreakToState(seventh.state, "base", noPrize, seventhIso, gameDateFromIso(seventhIso));
+  const repeatSameDate = applyTicketlessStreakToState(seventh.state, "base", noPrize, seventhIso, gameDateFromIso(seventhIso), 10);
   assert.strictEqual(repeatSameDate.state.ticketlessStreak, 0, "same date cannot increment the streak twice");
 
   const extraNoTicket = applyTicketlessStreakToState(seventh.state, "extra", noPrize, "2026-05-08T12:00:00.000Z", "2026-05-08");
@@ -211,6 +257,54 @@ function testRewardsAndLedger() {
   }), /amount_must_be_positive/, "zero bonus operation is rejected");
 }
 
+function testTicketlessStreakLevelGate() {
+  const state = { ticketlessStreak: 6, ticketlessStreakAt: "2026-09-05T12:00:00.000Z", ticketlessStreakGameDate: "2026-09-05" };
+  const iso = "2026-09-06T12:00:00.000Z";
+  for (const level of [undefined, null, 0, 1, 9, NaN, Infinity]) {
+    const handReward = rewardForHandRank("pair", {});
+    const result = applyTicketlessStreakToState(state, "base", handReward, iso, "2026-09-06", level);
+    assert.strictEqual(result.awarded, false, "unqualified or unknown level cannot receive the streak ticket");
+    assert.strictEqual(result.streakReward, null, "no ticket to credit to the ledger below level 10");
+    assert.strictEqual(result.state.ticketlessStreak, 0, "completed ineligible series does not bank a future payout");
+    const next = applyTicketlessStreakToState(result.state, "base", rewardForHandRank("pair", {}), "2026-09-07T12:00:00.000Z", "2026-09-07", 10);
+    assert.strictEqual(next.awarded, false, "reaching level 10 does not pay a completed ineligible series retroactively");
+    assert.strictEqual(next.state.ticketlessStreak, 1);
+  }
+  for (const level of [10, 11, 100]) {
+    const result = applyTicketlessStreakToState(state, "base", rewardForHandRank("pair", {}), iso, "2026-09-06", level);
+    assert.strictEqual(result.streakReward.ticketAmount, 300, "level 10 and above receives exactly 300");
+    assert.strictEqual(result.awarded, true);
+    assert.strictEqual(result.state.ticketlessStreak, 0);
+    const extra = applyTicketlessStreakToState(state, "extra", rewardForHandRank("pair", {}), iso, "2026-09-06", level);
+    assert.strictEqual(extra.awarded, false, "level 10 does not bypass base-attempt requirement");
+    const ticket = applyTicketlessStreakToState(state, "base", rewardForHandRank("full_house", {}), iso, "2026-09-06", level);
+    assert.strictEqual(ticket.awarded, false, "winning a regular ticket resets the series without a second ticket");
+  }
+}
+
+function testBonusResetsStreak() {
+  const state = { ticketlessStreak: 6, ticketlessStreakAt: "2026-09-05T12:00:00.000Z", ticketlessStreakGameDate: "2026-09-05" };
+  for (const rank of ["straight", "flush"]) {
+    for (const type of ["base", "extra"]) {
+      const reward = rewardForHandRank(rank, type === "extra" ? { extraAttemptGranted: true } : {});
+      const result = applyTicketlessStreakToState(state, type, reward, "2026-09-06T12:00:00.000Z", "2026-09-06", 10);
+      assert.strictEqual(result.state.ticketlessStreak, 0, rank + " resets the series on " + type);
+      assert.strictEqual(result.awarded, false, "50 bonus cannot be combined with the 300 streak ticket");
+      assert.strictEqual(result.streakReward, null);
+      assert.strictEqual(reward.bonusAmount, 50, "ordinary bonus is unchanged");
+      assert.strictEqual(reward.grantsExtraAttempt, type === "base", "ordinary extra-attempt rule is unchanged");
+      const sameDateWin = applyTicketlessStreakToState({ ...state, ticketlessStreakGameDate: "2026-09-06" }, type, reward, "2026-09-06T12:00:00.000Z", "2026-09-06", 10);
+      assert.strictEqual(sameDateWin.state.ticketlessStreak, 0, "same-date guard never prevents a prize from resetting the series");
+      const sameDay = applyTicketlessStreakToState(result.state, "base", rewardForHandRank("pair", {}), "2026-09-06T13:00:00.000Z", "2026-09-06", 10);
+      assert.strictEqual(sameDay.state.ticketlessStreak, 0, "same-day hand cannot restart a reset series");
+      const nextDay = applyTicketlessStreakToState(result.state, "base", rewardForHandRank("pair", {}), "2026-09-07T12:00:00.000Z", "2026-09-07", 10);
+      assert.strictEqual(nextDay.state.ticketlessStreak, 1, "next losing day starts a new series");
+    }
+  }
+  const set = applyTicketlessStreakToState(state, "base", rewardForHandRank("three_of_a_kind", {}), "2026-09-06T12:00:00.000Z", "2026-09-06", 10);
+  assert.strictEqual(set.awarded, true, "an extra attempt without balance credit does not reset the series");
+}
+
 function testPrizeMessages() {
   const ticketMessage = promoInternals.prizeTextForHand("full_house", rewardForHandRank("full_house", {}), null);
   assert.ok(ticketMessage.includes("Бонус начислен на ваш баланс выше"), "ticket reward explains the credited balance");
@@ -223,7 +317,7 @@ function testPrizeMessages() {
     ticketAmount: 300,
   });
   assert.ok(bonusAndStreakMessage.includes("+50 бонусов"), "combined reward explains the hand bonus");
-  assert.ok(bonusAndStreakMessage.includes("Дополнительно за 7 дней без билета начислен билет 300 ₽"), "combined reward explains the streak ticket");
+  assert.ok(bonusAndStreakMessage.includes("Дополнительно за 7 дней без бонусов и билетов начислен билет 300 ₽"), "combined reward explains the streak ticket");
 
   const extraAttemptMessage = promoInternals.prizeTextForHand("three_of_a_kind", rewardForHandRank("three_of_a_kind", {}), null);
   assert.ok(!extraAttemptMessage.includes("Бонус начислен"), "extra attempt without balance credit does not mention credited bonus");
@@ -272,8 +366,11 @@ function testRomanDailyPokerLimit() {
 
 testDeck();
 testHandRanks();
+testHoleCardContribution();
 testAttemptEconomy();
 testTicketlessStreak();
+testTicketlessStreakLevelGate();
+testBonusResetsStreak();
 testRewardsAndLedger();
 testPrizeMessages();
 testRomanDailyPokerLimit();
