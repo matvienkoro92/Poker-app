@@ -7123,3 +7123,53 @@ html body #app.app.app--view-home
 .home-last-longer-dock--unannounced .home-last-longer-dock__bar > span:not(.home-last-longer-dock__empty),
 .home-last-longer-dock--unannounced .home-last-longer-dock__stake { display: none; }
 .home-last-longer-dock--unannounced .home-last-longer-dock__bar > .home-last-longer-dock__empty { border: 0; padding: 0; }
+
+/* A gentle hover over the warm Poker21 chip. */
+.app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--chat {
+  animation: home-chat-plane-hover 4.8s ease-in-out infinite;
+  transform-origin: 50% 65%;
+  filter: saturate(1.1) brightness(1.15) drop-shadow(0 0 6px rgba(255, 200, 125, .24));
+}
+@keyframes home-chat-plane-hover {
+  0%, 100% { transform: translateX(-50%) translateY(0) rotate(-2deg); }
+  50% { transform: translateX(-50%) translateY(-3px) rotate(2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.app--view-home .home-daily-shortcuts .home-mini-icon__hero--chat { animation: none; }
+}
+
+/* Reference group portrait fills the club-players square. */
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--levels .home-players-group-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--levels:has(.home-players-group-art) {
+  filter: none;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--levels:has(.home-players-group-art) .home-mini-icon__label {
+  z-index: 5;
+  text-shadow: 0 2px 4px #000, 0 0 6px #000;
+}
+
+/* Gift box on the same warm Poker21 chip as the chat shortcut. */
+.app.app--view-home .home-daily-shortcuts .home-raffle-gift-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--raffles:has(.home-raffle-gift-art) { filter: none; }
+.app.app--view-home .home-daily-shortcuts .home-mini-icon-item--raffles:has(.home-raffle-gift-art) .home-mini-icon__label {
+  z-index: 5;
+  text-shadow: 0 2px 4px #000, 0 0 6px #000;
+}
