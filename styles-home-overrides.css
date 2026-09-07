@@ -7706,6 +7706,19 @@ html body #app.app.app--view-home
   mask-size: 100% 100%;
 }
 
+/* Generated clothing patches keep the original faces, chest marks and alpha silhouette. */
+.home-shortcut-figure > .home-players-clean-clothes {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: url('./assets/home-shortcut-clean-clothes-v2.png') right center / 300% 100% no-repeat;
+  -webkit-mask: url('./assets/home-shortcut-figures-alpha-v1.png') right center / 300% 100% no-repeat;
+  mask: url('./assets/home-shortcut-figures-alpha-v1.png') right center / 300% 100% no-repeat;
+}
+.home-players-clean-clothes--pants { clip-path: inset(52% 0 30%); }
+.home-players-clean-clothes--hat { clip-path: polygon(7% 27%, 28% 27%, 28% 32.5%, 7% 32.5%); }
+
 /* Larger raffle and club bonus amounts on the podiums. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .raffle-active-amount-badge {
   font-size: 6.4cqw !important;
