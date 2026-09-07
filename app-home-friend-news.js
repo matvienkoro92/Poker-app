@@ -466,6 +466,8 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "киса": "./assets/club-news-personal/zalupa-personal.webp?v=1",
+    "залупа": "./assets/club-news-personal/zalupa-personal.webp?v=1",
     "gucci💱": "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1",
     "smile😎😊😺": "./assets/club-news-personal/smile-news-cutout.webp?v=4",
     "proxor": "./assets/club-news-personal/proxor-personal-cutout.webp?v=3",
