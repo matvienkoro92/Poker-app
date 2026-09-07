@@ -7385,3 +7385,53 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; align-items: start !important; }
 .app.app--view-home .home-daily-shortcuts--figures { grid-template-rows: auto !important; grid-auto-rows: auto !important; }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; aspect-ratio: auto !important; grid-template-rows: auto !important; overflow: visible !important; contain: none !important; }
+
+/* Fixed podiums, independently breathing character layers. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0;
+  box-shadow: none !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item:focus-visible {
+  outline: 2px solid #e9ba54;
+  outline-offset: 3px;
+  border-radius: 12px !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure {
+  background-image: none;
+  mix-blend-mode: screen;
+}
+.home-shortcut-figure::before,
+.home-shortcut-figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('./assets/home-shortcut-figures-v1.png') var(--figure-cell, 0%) center / 300% 100% no-repeat;
+  pointer-events: none;
+}
+.home-mini-icon-item--raffles .home-shortcut-figure { --figure-cell: 50%; --figure-duration: 5.2s; --figure-delay: -1.7s; }
+.home-mini-icon-item--levels .home-shortcut-figure { --figure-cell: 100%; --figure-duration: 6.4s; --figure-delay: -3.2s; }
+.home-shortcut-figure::before {
+  mask-image: linear-gradient(to bottom, transparent 58%, #000 65%);
+}
+.home-shortcut-figure::after {
+  mask-image: linear-gradient(to bottom, #000 58%, transparent 65%);
+  transform-origin: 50% 65%;
+  animation: shortcut-character-breathe var(--figure-duration, 5.8s) ease-in-out var(--figure-delay, 0s) infinite;
+}
+@keyframes shortcut-character-breathe {
+  0%, 100% { transform: scaleY(1) rotate(-.2deg); }
+  50% { transform: scaleY(1.012) rotate(.2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-shortcut-figure::after { animation: none; }
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
+  width: 75% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
