@@ -7697,6 +7697,15 @@ html body #app.app.app--view-home
   clip-path: polygon(0 0, 100% 0, 100% 29%, 77% 29%, 77% 43%, 100% 43%, 100% 100%, 0 100%);
 }
 
+/* Mask the gold confetti baked into the raffle sprite. */
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-shortcut-figure::before {
+  -webkit-mask-image: url('./assets/home-raffle-confetti-mask.svg') !important;
+  mask-image: url('./assets/home-raffle-confetti-mask.svg') !important;
+  mask-mode: luminance;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
 /* Larger raffle and club bonus amounts on the podiums. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .raffle-active-amount-badge {
   font-size: 6.4cqw !important;

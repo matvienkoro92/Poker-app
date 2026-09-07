@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 591.333 887" preserveAspectRatio="none">
+  <path fill="white" d="M0 0H591.333V887H0Z"/>
+  <!-- Detached gold confetti around the figure; tickets and character stay visible. -->
+  <path fill="black" d="M62 116H151V206L129 220L103 202H62Z M435 112H505V205H435Z M495 195H558V253L530 263L490 228Z M430 208H474V282H420V250H430Z M141 195H178V237H141Z M0 307H52L80 355L53 379H0Z M20 378H88L148 423V461H20Z M57 459H161V519H57Z M475 408H530V485H439V459Z"/>
+</svg>
