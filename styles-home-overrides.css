@@ -7719,3 +7719,13 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--levels .home-shortcut-figure::after {
   -webkit-mask-image: radial-gradient(ellipse 10% 5% at 23% 34%, #000 75%, transparent 100%);
 }
+.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-hint {
+  order: 26;
+  width: 100%;
+  margin: 6px 0 12px;
+  padding: 0 12px;
+  color: #dec998;
+  font-size: clamp(11px, 1.5vw, 14px);
+  line-height: 1.4;
+  text-align: center;
+}
