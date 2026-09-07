@@ -7692,6 +7692,11 @@ html body #app.app.app--view-home
   background-image: url('./assets/home-shortcut-figures-alpha-v1.png') !important;
 }
 
+/* Hide the detached right chat bubble within the first sprite cell. */
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item[aria-label="Чат в ТГ"] .home-shortcut-figure::before {
+  clip-path: polygon(0 0, 100% 0, 100% 29%, 77% 29%, 77% 43%, 100% 43%, 100% 100%, 0 100%);
+}
+
 /* Larger raffle and club bonus amounts on the podiums. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .raffle-active-amount-badge {
   font-size: 6.4cqw !important;
