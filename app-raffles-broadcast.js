@@ -153,12 +153,15 @@ function initRafflesBroadcastRuntime(opts) {
       if (count > 0) {
         var summaryText = "";
         if (isCash) {
-          summaryText =
-            count +
-            " " +
-            pluralizeCashBuyins(count) +
-            " на кеш" +
-            prizeSuffix;
+          var cashSource = [raffle.title, raffle.cardTitle, raffle.card_title, raffle.cardSubtitle, raffle.card_subtitle]
+            .concat(groups.map(function (group) { return group && group.prize; })).filter(Boolean).join(" ");
+          var stakes = cashSource.match(/(?:кеш|кэш)\s+(\d+)\s*\/\s*(\d+)/i);
+          var cashSuffix = " на кеш" + (stakes ? " " + stakes[1] + "/" + stakes[2] : "");
+          summaryText = nominalParts.length
+            ? nominalParts.map(function (part) {
+                return part.count + " " + pluralizeCashBuyins(part.count) + " по " + part.nominal + "р";
+              }).join(" и ") + cashSuffix
+            : count + " " + pluralizeCashBuyins(count) + cashSuffix;
         } else {
           summaryText =
             count +
@@ -168,8 +171,7 @@ function initRafflesBroadcastRuntime(opts) {
           var guarantee = raffleBroadcastTournamentGuarantee(raffle);
           if (guarantee) summaryText += " на турнир с гарантией " + guarantee;
         }
-        var title = raffleBroadcastSummaryTitle(raffle);
-        return isCash && title ? title + ": " + summaryText : summaryText;
+        return summaryText;
       }
       var totalPrize = raffleBroadcastTotalPrize(raffle);
       if (totalPrize > 0) return "призовой фонд " + formatRaffleSum(totalPrize);
