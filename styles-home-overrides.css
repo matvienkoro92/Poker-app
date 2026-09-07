@@ -7691,3 +7691,31 @@ html body #app.app.app--view-home
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
   filter: none !important;
 }
+
+/* Real PNG transparency instead of browser-dependent screen blending. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures,
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item,
+.app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure { mix-blend-mode: normal !important; }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::before {
+  background-image: url('./assets/home-shortcut-figures-alpha-v1.png') !important;
+}
+
+/* Larger raffle and club bonus amounts on the podiums. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .raffle-active-amount-badge {
+  font-size: 6.4cqw !important;
+  line-height: 1.15 !important;
+  padding: 5px 9px !important;
+  max-width: 90% !important;
+  white-space: nowrap !important;
+}
+
+/* Explicit mask properties for iOS WebKit expression layers. */
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after {
+  -webkit-mask-image: radial-gradient(ellipse 13% 7% at 50% 26%, #000 75%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  backface-visibility: hidden;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--levels .home-shortcut-figure::after {
+  -webkit-mask-image: radial-gradient(ellipse 10% 5% at 23% 34%, #000 75%, transparent 100%);
+}
