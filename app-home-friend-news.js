@@ -2070,7 +2070,7 @@
           esc(comment.id || "") + '" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>' : "") +
         replyQuote + "<p>" + esc(comment.text || "") +
         (comment.pending ? '<small class="home-news-comment-pending-label">Отправка…</small>' : "") +
-        '<span class="chat-user-modal__comment-reactions">' + commentReactionHtml +
+        '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml +
           (comment.pending ? "" :
           '<button type="button" class="home-news-comment-reply-btn" data-home-comment-reply="' + esc(comment.id || "") +
           '" aria-label="Ответить на комментарий">↩ Ответить</button>') +
