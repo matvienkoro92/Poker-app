@@ -31,8 +31,11 @@ function summerRatingSeasonStatsHtml(stats) {
       return '<tr><td>' + (index + 1) + '</td><td>' + escapeHtmlRating(row.nick) + (single ? '<small>' + escapeHtmlRating(row.date + ' · ' + row.tournament) + '</small>' : '') + '</td><td>' + formatRewardRound(row.reward) + ' ₽</td></tr>';
     }).join('') + '</tbody></table></section>';
   }
-  return '<div class="summer-rating-season-counts"><span>Заносов 50–99 тыс. ₽: <strong>' + stats.mid + '</strong></span><span>Заносов 100 тыс. ₽ и выше: <strong>' + stats.high + '</strong></span></div>' +
-    '<details class="summer-rating-month summer-rating-season-spoiler"><summary>Лето</summary><div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых', stats.topPlayers, false) + table('Топ-10 разовых заносов', stats.topWins, true) + '</div></details>';
+  return '<details class="summer-rating-month summer-rating-season-spoiler"><summary>' +
+    '<span class="summer-rating-season-heading"><span>Лето <small>2026</small></span><span class="summer-rating-season-toggle" aria-hidden="true">⌄</span></span>' +
+    '<span class="summer-rating-season-total"><span>Всего призовых за лето</span><strong>' + formatRewardRound(stats.total) + ' ₽</strong></span>' +
+    '<span class="summer-rating-season-counts"><span><strong>' + stats.mid + '</strong><span>заносов 50–99 тыс. ₽</span></span><span><strong>' + stats.high + '</strong><span>заносов от 100 тыс. ₽</span></span></span>' +
+    '</summary><div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых', stats.topPlayers, false) + table('Топ-10 разовых заносов', stats.topWins, true) + '</div></details>';
 }
 
 // Rating view adapter: shared spring/winter DOM, tables, lightbox, and player modal.
@@ -3715,8 +3718,7 @@ function initWinterRating() {
         }
         upperMonths.style.setProperty("display", "none", "important");
         var summerStats = summerRatingSeasonStats(summerTournaments);
-        summerMonthsHost.innerHTML = '<p class="summer-rating-season-total">Всего призовых за лето: <strong>' +
-          formatRewardRound(summerStats.total) + ' ₽</strong></p>' + summerRatingSeasonStatsHtml(summerStats) + summerMonths.map(function (month) {
+        summerMonthsHost.innerHTML = summerRatingSeasonStatsHtml(summerStats) + summerMonths.map(function (month) {
           return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
             summerSummaryHtml([month], "Итоги месяца") + '</details>';
         }).join("");
