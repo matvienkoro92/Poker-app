@@ -6845,3 +6845,123 @@ html body #app.app.app--view-home
   grid-column: 1 / -1;
   margin: 12px 0 !important;
 }
+
+/* Reference composition: dimensional chip overlaps the active poster's lower left. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus { container-type: inline-size; }
+.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+  --ll-chip: clamp(92px, 14cqw, 210px);
+  order: 25;
+  grid-column: 1 / -1;
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-self: center;
+  width: 46%;
+  min-width: min(94%, 300px);
+  height: var(--ll-chip);
+  margin: calc(var(--ll-chip) * -.57) auto 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff9e8;
+  font: inherit;
+  cursor: pointer;
+  isolation: isolate;
+}
+.home-last-longer-dock__chip {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 var(--ll-chip);
+  width: var(--ll-chip);
+  height: var(--ll-chip);
+  filter: drop-shadow(0 3px 4px #000a);
+}
+.home-last-longer-dock__chip img { display:block; width:100%; height:100%; object-fit:contain; }
+.home-last-longer-dock__stake {
+  position: absolute;
+  top: 66%;
+  left: 20%;
+  width: 60%;
+  text-align: center;
+  font-size: calc(var(--ll-chip) * .13);
+  font-weight: 900;
+  line-height: 1.15;
+  color: #fff9e4;
+  text-shadow: 0 1px 2px #000;
+}
+.home-last-longer-dock__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--ll-chip) * .37);
+  margin: 0 0 calc(var(--ll-chip) * .14) calc(var(--ll-chip) * -.15);
+  padding: 0 10px 0 calc(var(--ll-chip) * .17);
+  border: 2px solid #d4a62e;
+  border-radius: 0 17px 17px 0;
+  background: linear-gradient(#15130b,#020403 55%);
+  box-shadow: inset 0 1px 3px #f1cf7130,0 0 5px #b7862733;
+  white-space: nowrap;
+}
+.home-last-longer-dock__bar > span:nth-child(2) { border-left: 1px solid #7c5d23; padding-left: 12px; }
+.home-last-longer-dock__bar strong { font-size: clamp(13px, 1.9cqw, 25px); }
+.home-last-longer-dock__bar small { font-size: clamp(10px, 1.35cqw, 18px); color: #d8d6ce; }
+.home-last-longer-dock__end { color: #efb82f; font-size: clamp(16px,2.3cqw,30px); }
+.home-last-longer-dock:focus-visible { outline: 2px solid #ffdb74; outline-offset: 4px; border-radius:20px; }
+.home-last-longer-dock:hover { filter: brightness(1.07); }
+@media (max-width:480px) {
+  .home-last-longer-dock__bar { gap:5px; padding-right:7px; border-width:1px; border-radius:0 10px 10px 0; }
+  .home-last-longer-dock__bar > span:nth-child(2) { padding-left:6px; }
+  .home-last-longer-dock__end { display:none; }
+}
+.home-last-longer-dock__chip img { clip-path: circle(47.4% at 50% 50%); }
+
+/* Rotate the dimensional rim while keeping the live chip label level. */
+.home-last-longer-dock__chip img {
+  mask-image: radial-gradient(circle closest-side, transparent 70%, #000 71%);
+  animation: last-longer-rim-spin 14s linear infinite;
+}
+.home-last-longer-dock__face {
+  position: absolute;
+  inset: 15%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--ll-chip) * .018);
+  border: 1px solid #c19532;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 20%, #24231b, #070909 72%);
+  box-shadow: inset 0 0 0 2px #080907;
+  text-align: center;
+}
+.home-last-longer-dock__spade {
+  color: #e8b343;
+  font-size: calc(var(--ll-chip) * .13);
+  line-height: 1;
+}
+.home-last-longer-dock__title {
+  display: block;
+  font-family: Arial, sans-serif;
+  font-size: calc(var(--ll-chip) * .135);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: #fff4d6;
+}
+.home-last-longer-dock__face .home-last-longer-dock__stake {
+  position: static;
+  width: 76%;
+  margin: 0;
+  padding-top: calc(var(--ll-chip) * .022);
+  border-top: 1px solid #93691e;
+  font-size: calc(var(--ll-chip) * .13);
+  line-height: 1;
+}
+@keyframes last-longer-rim-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .home-last-longer-dock__chip img { animation: none; }
+}

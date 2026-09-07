@@ -390,7 +390,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.020" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.022" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.023" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.022" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -989,13 +989,19 @@
         </div>
         <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
           <h2 class="home-tournament-section-title">Турниры вечера в 18 МСК</h2>
-        <button type="button" class="home-tournament-bet-link" data-tournament-bet-open aria-label="Ласт-лонгер. Ставка на себя в турнире">
-          <img class="home-tournament-bet-link__art" src="./assets/home-last-longer-sunday.webp?v=2" srcset="./assets/home-last-longer-sunday-mobile.webp?v=2 900w, ./assets/home-last-longer-sunday.webp?v=2 2123w" sizes="(max-width: 900px) 100vw, 1086px" alt="Ласт-лонгер. Ставка на себя в турнире" width="2123" height="550" loading="lazy" decoding="async" />
-          <span class="home-tournament-bet-link__bar">
-            <span class="home-tournament-bet-link__stat"><small>Участники</small><strong data-tournament-bet-home-players>—</strong></span>
-            <span class="home-tournament-bet-link__stat"><small>Банк</small><strong data-tournament-bet-home-bank>—</strong></span>
-            <span class="home-tournament-bet-link__stat"><small>Ставка</small><strong data-tournament-bet-home-stake>—</strong></span>
-            <span class="home-tournament-bet-link__cta">Сделать ставку</span>
+        <button type="button" class="home-last-longer-dock" data-tournament-bet-open aria-label="Ласт-лонгер. Открыть ставки на себя в турнире">
+          <span class="home-last-longer-dock__chip">
+            <img src="./assets/last-longer-chip-reference-v1.png" width="1024" height="1024" alt="" aria-hidden="true" />
+            <span class="home-last-longer-dock__face">
+              <span class="home-last-longer-dock__spade" aria-hidden="true">♠</span>
+              <strong class="home-last-longer-dock__title">LAST<br>LONGER</strong>
+              <span class="home-last-longer-dock__stake" data-tournament-bet-home-stake>—</span>
+            </span>
+          </span>
+          <span class="home-last-longer-dock__bar">
+            <span><strong data-tournament-bet-home-players>—</strong> <small data-tournament-bet-home-players-label>участников</small></span>
+            <span><small>Банк</small> <strong data-tournament-bet-home-bank>—</strong></span>
+            <span class="home-last-longer-dock__end" aria-hidden="true"><svg viewBox="0 0 24 28" width="24" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2C10 7 3 11 3 17a5 5 0 0 0 8 4c0 2-1 4-3 5h8c-2-1-3-3-3-5a5 5 0 0 0 8-4C21 11 14 7 12 2Z"/></svg></span>
           </span>
         </button>
           <div class="home-tournament-bonuses home-tournament-bonuses--upper" aria-label="Бонусы за комбинации">

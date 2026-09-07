@@ -358,6 +358,11 @@
     var players = document.querySelector("[data-tournament-bet-home-players]");
     var stake = document.querySelector("[data-tournament-bet-home-stake]");
     if (players) players.textContent = hasEvent ? String(data.participantsCount || 0) : "—";
+    var playersLabel = document.querySelector("[data-tournament-bet-home-players-label]");
+    if (playersLabel) {
+      var count = Math.abs(Number(data && data.participantsCount) || 0);
+      playersLabel.textContent = count % 100 >= 11 && count % 100 <= 14 ? "участников" : count % 10 === 1 ? "участник" : count % 10 >= 2 && count % 10 <= 4 ? "участника" : "участников";
+    }
     if (stake) stake.textContent = hasEvent ? rub(data.stakePrice) : "—";
     if (button) button.classList.toggle("home-mini-icon-item--vote-active", !!(data && data.status === "open"));
   }
