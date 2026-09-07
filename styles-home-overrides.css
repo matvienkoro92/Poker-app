@@ -7353,3 +7353,35 @@ html body #app.app.app--view-home
   mask-image: none;
   clip-path: polygon(9% 6%, 94% 6%, 97% 9%, 97% 86%, 99% 88%, 99% 93%, 94% 95%, 6% 95%, 3% 93%, 3% 88%, 9% 86%);
 }
+
+/* Animated Poker21 figures on chip podiums. */
+.app.app--view-home .home-daily-shortcuts--figures { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px !important; overflow: visible; }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item {
+  position: relative; width: 100% !important; height: auto !important; min-height: 0 !important; aspect-ratio: 2 / 3;
+  padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: #000 !important; box-shadow: none !important;
+  overflow: visible !important; container-type: inline-size; transform-origin: 50% 95%;
+  animation: shortcut-figure-sway 5.6s ease-in-out infinite !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item:nth-child(2) { animation-delay: -1.8s !important; }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item:nth-child(3) { animation-delay: -3.6s !important; }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item::before,
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item::after,
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item > img { display: none !important; }
+.home-shortcut-figure { position: absolute; inset: 0; background: url('./assets/home-shortcut-figures-v1.png') 0 center / 300% 100% no-repeat; pointer-events: none; }
+.home-mini-icon-item--raffles .home-shortcut-figure { background-position: 50% center; }
+.home-mini-icon-item--levels .home-shortcut-figure { background-position: 100% center; }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon__label {
+  position: absolute !important; left: 23% !important; right: auto !important; top: 80% !important; bottom: auto !important;
+  width: 54% !important; height: 7%; display: flex; align-items: center; justify-content: center;
+  margin: 0 !important; padding: 0 !important; transform: none !important;
+  font-size: 7cqw !important; line-height: 1 !important; color: #ffdc93 !important; white-space: nowrap !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--levels .home-mini-icon__label { font-size: 5.8cqw !important; }
+.app.app--view-home .home-daily-shortcuts--figures .raffle-active-amount-badge { top: 69% !important; bottom: auto !important; font-size: 5cqw !important; }
+.app.app--view-home .home-daily-shortcuts--figures .feature__badge { top: 12% !important; right: 9% !important; z-index: 10; }
+@keyframes shortcut-figure-sway { 0%,100% { transform: rotate(-.6deg); filter: brightness(1); } 50% { transform: translateY(-3px) rotate(.6deg); filter: brightness(1.13); } }
+@media (prefers-reduced-motion: reduce) { .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item { animation: none !important; } }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item { max-height: none !important; min-width: 0 !important; max-width: none !important; align-self: start; }
+.app.app--view-home .home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; align-items: start !important; }
+.app.app--view-home .home-daily-shortcuts--figures { grid-template-rows: auto !important; grid-auto-rows: auto !important; }
+.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; aspect-ratio: auto !important; grid-template-rows: auto !important; overflow: visible !important; contain: none !important; }

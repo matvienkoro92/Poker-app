@@ -390,7 +390,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.020" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.030" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.031" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.022" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -932,7 +932,7 @@
             aria-hidden="true"
           /></picture>
         </a>
-        <div class="home-mini-icons home-daily-shortcuts" aria-label="Быстрые разделы клуба">
+        <div class="home-mini-icons home-daily-shortcuts home-daily-shortcuts--figures" aria-label="Быстрые разделы клуба">
           <a
             class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
             href="https://t.me/+snBngKmXYa1mYjky"
@@ -943,17 +943,20 @@
           >
             <img class="home-mini-icon__image home-mini-icon__image--stage" src="./assets/home-chat-chip-stage-v1.png" alt="" width="640" height="640" loading="eager" decoding="async" aria-hidden="true" />
             <img class="home-mini-icon__hero home-mini-icon__hero--chat" src="./assets/home-menu-icon-chat-plane.png?v=3.701" alt="" width="266" height="202" loading="eager" decoding="async" aria-hidden="true" />
+            <span class="home-shortcut-figure" aria-hidden="true"></span>
             <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
           </a>
           <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--raffles" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
             <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
             <span class="raffle-active-amount-badge raffle-active-amount-badge--hidden" id="raffleActiveAmountBadge" aria-hidden="true">Идут на 0 ₽</span>
             <img class="home-raffle-gift-art" src="./assets/home-raffle-gift-chip-v1.png" alt="" width="1024" height="1024" loading="lazy" decoding="async" aria-hidden="true" />
+            <span class="home-shortcut-figure" aria-hidden="true"></span>
             <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
           </a>
           <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 15 000 рублей">
             <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 15 000 ₽</span>
             <img class="home-players-group-art" src="./assets/home-players-group-v2.png" alt="" width="1024" height="1024" loading="lazy" decoding="async" aria-hidden="true" />
+            <span class="home-shortcut-figure" aria-hidden="true"></span>
             <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки клуба</span>
           </button>
         </div>
@@ -1543,7 +1546,7 @@
                   <path d="M19 7h-1.7c.3-.5.5-1.1.5-1.7A3.3 3.3 0 0 0 12 3.1 3.3 3.3 0 0 0 6.2 5.3c0 .6.2 1.2.5 1.7H5a2 2 0 0 0-2 2v2h18V9a2 2 0 0 0-2-2ZM9.5 6.8h-.1A1.5 1.5 0 0 1 8 5.3c0-.8.7-1.5 1.5-1.5 1.5 0 2 1.7 2.1 3H9.5Zm5.1 0h-2.2c.2-1.3.7-3 2.1-3 .8 0 1.5.7 1.5 1.5s-.6 1.5-1.4 1.5ZM4 13v6a2 2 0 0 0 2 2h5v-8H4Zm9 8h5a2 2 0 0 0 2-2v-6h-7v8Z"></path>
                 </svg>
               </span>
-              <span>После <strong>7</strong> круток без выигрыша — билет <strong>300 ₽</strong></span>
+              <span>Билет <strong>300 ₽</strong> за <strong>7 дней</strong> без билета — только с <strong>10-го уровня</strong></span>
             </p>
             <button type="button" class="daily-poker__battle-prompt" data-sng-open aria-label="Записаться за баллы в командный баттл">
               <span class="daily-poker__battle-prompt-title">Запишись за баллы</span>
