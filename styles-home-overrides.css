@@ -7477,7 +7477,7 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::before,
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::after {
   display: block !important;
-  opacity: 1 !important;
+  opacity: 1;
 }
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::before,
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::after {
@@ -7526,3 +7526,136 @@ html body #app.app.app--view-home
 @media (prefers-reduced-motion: reduce) {
   .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after { animation: none !important; }
 }
+
+/* Daily deal controls: one clear primary action and quiet supporting details. */
+.app .daily-poker__actions { gap: 12px !important; }
+.app .daily-poker__result {
+  padding: 16px 20px !important; border: 1px solid #b994433d !important;
+  border-radius: 16px !important; background: #101319 !important; box-shadow: none !important;
+}
+.app .daily-poker__result-primary { font-size: clamp(14px, 2vw, 18px) !important; line-height: 1.45 !important; }
+.app .daily-poker__result-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px !important; line-height: 1.5 !important; margin-top: 8px !important; }
+.app .daily-poker__actions .daily-poker__play-btn {
+  min-height: 58px !important; height: auto !important; padding: 16px 24px !important;
+  border: 1px solid #ffe09a !important; border-radius: 16px !important;
+  background: linear-gradient(110deg, #ffe194, #efb13d) !important;
+  color: #241704 !important; font-size: clamp(20px, 3vw, 28px) !important;
+  font-weight: 800 !important; letter-spacing: .02em !important; line-height: 1.2 !important;
+  text-shadow: none !important; box-shadow: 0 4px 16px #f4ad3520 !important;
+}
+.app .daily-poker__actions .daily-poker__play-btn::before,
+.app .daily-poker__actions .daily-poker__play-btn::after { display: none !important; }
+.app .daily-poker__actions .daily-poker__share-actions { display: grid !important; grid-template-columns: 48px minmax(0, 1fr) 48px !important; gap: 10px !important; }
+.app .daily-poker__actions .daily-poker__share-actions > button {
+  height: 48px !important; min-height: 48px !important; padding: 10px !important;
+  border: 1px solid #c7a36255 !important; border-radius: 12px !important;
+  background: #14171d !important; color: #efd6a0 !important; box-shadow: none !important;
+  font-size: 15px !important; text-shadow: none !important;
+}
+.app .daily-poker__share-actions > button::before,
+.app .daily-poker__share-actions > button::after { display: none !important; }
+.app .daily-poker__share-actions svg { width: 22px !important; height: 22px !important; }
+.app .daily-poker__actions .daily-poker__streak-note {
+  display: flex !important; align-items: flex-start !important; gap: 10px !important;
+  min-height: 0 !important; height: auto !important; padding: 14px 16px !important; margin: 0 !important;
+  white-space: normal !important; overflow: visible !important;
+  font-size: 13px !important; line-height: 1.55 !important; font-weight: 400 !important;
+  border: 1px solid #b994432b !important; border-radius: 12px !important;
+  background: #121318 !important; box-shadow: none !important; color: #bfb6a5 !important;
+}
+.app .daily-poker__streak-note > span:last-child { min-width: 0; white-space: normal !important; overflow-wrap: anywhere; }
+.app .daily-poker__streak-note strong { color: #ffe1a0; }
+.app .daily-poker__streak-icon { flex: 0 0 20px !important; width: 20px !important; margin: 0 !important; }
+.app .daily-poker__actions .daily-poker__play-btn { width: 100% !important; max-width: none !important; }
+
+/* Preserve the illustration: no masked head warping or seams. */
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::before {
+  mask-image: none !important;
+  transform: none !important;
+  animation: shortcut-figure-light 6s ease-in-out infinite !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after {
+  display: none !important;
+  animation: none !important;
+  transform: none !important;
+  will-change: auto;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-shortcut-figure::before { animation-delay: -2s !important; }
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--levels .home-shortcut-figure::before { animation-delay: -4s !important; }
+@keyframes shortcut-figure-light { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::before { animation: none !important; }
+}
+
+/* Authored expression frame: only facial pixels change, never geometry. */
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::before {
+  animation: none !important;
+  filter: none !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after {
+  display: block !important;
+  background-image: url('./assets/home-shortcut-expressions-v1.png') !important;
+  mask-image: radial-gradient(ellipse 13% 7% at 50% 26%, #000 75%, transparent 100%) !important;
+  transform: none !important;
+  animation: shortcut-expression-smile 5.8s linear infinite !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-shortcut-figure::after {
+  mask-image: radial-gradient(ellipse 13% 7% at 50% 26%, #000 75%, transparent 100%) !important;
+  animation-delay: -2.3s !important;
+}
+.app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--levels .home-shortcut-figure::after {
+  mask-image: radial-gradient(ellipse 10% 5% at 23% 34%, #000 75%, transparent 100%) !important;
+  animation: shortcut-expression-blink 4.7s linear -1.4s infinite !important;
+}
+@keyframes shortcut-expression-smile {
+  0%, 25%, 62%, 100% { opacity: 0; }
+  30%, 55% { opacity: 1; }
+}
+@keyframes shortcut-expression-blink {
+  0%, 70%, 76%, 100% { opacity: 0; }
+  72%, 74% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after { animation: none !important; opacity: 0 !important; }
+}
+
+/* Clear secondary gestures, isolated from the original illustration. */
+.home-shortcut-motion { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.home-shortcut-motion i { position: absolute; display: block; opacity: 0; }
+.home-mini-icon-item:not(.home-mini-icon-item--raffles):not(.home-mini-icon-item--levels) .home-shortcut-motion i:first-child {
+  width: 16%; height: 12%; left: 63%; top: 22%;
+  background: #b9f4ff; clip-path: polygon(0 37%, 100% 0, 66% 100%, 44% 64%, 76% 24%, 33% 55%);
+  filter: drop-shadow(0 0 5px #08bfff);
+  animation: shortcut-plane-fly 4.5s ease-in-out infinite;
+}
+.home-mini-icon-item--raffles .home-shortcut-motion i {
+  width: 7%; aspect-ratio: 1; background: #fff0a1;
+  clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
+  animation: shortcut-gift-spark 3.6s ease-in-out infinite;
+}
+.home-mini-icon-item--raffles .home-shortcut-motion i:nth-child(1) { left: 24%; top: 35%; }
+.home-mini-icon-item--raffles .home-shortcut-motion i:nth-child(2) { left: 70%; top: 42%; animation-delay: -.8s; }
+.home-mini-icon-item--raffles .home-shortcut-motion i:nth-child(3) { left: 59%; top: 30%; animation-delay: -1.6s; }
+.home-mini-icon-item--levels .home-shortcut-motion { clip-path: ellipse(11% 2.3% at 52% 25.5%); }
+.home-mini-icon-item--levels .home-shortcut-motion i:first-child {
+  top: 21%; left: 34%; width: 6%; height: 10%;
+  background: linear-gradient(90deg, transparent, #fff5cd, transparent);
+  animation: shortcut-glasses-glint 4.2s ease-in-out -1s infinite;
+}
+@keyframes shortcut-plane-fly {
+  0%, 15% { opacity: 0; transform: translate(-35%, 45%) scale(.45); }
+  25% { opacity: 1; }
+  50% { opacity: 0; transform: translate(95%, -110%) scale(1.15); }
+  100% { opacity: 0; transform: translate(95%, -110%) scale(1.15); }
+}
+@keyframes shortcut-gift-spark {
+  0%, 15%, 70%, 100% { opacity: 0; transform: scale(.2) rotate(0); }
+  38% { opacity: 1; transform: scale(1.25) rotate(40deg); }
+  60% { opacity: 0; transform: translateY(-70%) scale(.5) rotate(80deg); }
+}
+@keyframes shortcut-glasses-glint {
+  0%, 20% { opacity: 0; transform: translateX(0) skewX(-20deg); }
+  30%, 45% { opacity: .95; }
+  55%, 100% { opacity: 0; transform: translateX(550%) skewX(-20deg); }
+}
+@media (prefers-reduced-motion: reduce) { .home-shortcut-motion { display: none !important; } }
