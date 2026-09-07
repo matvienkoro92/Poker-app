@@ -949,7 +949,7 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
       bonus.classList.remove("home-tournament-bonus--inactive");
       bonus.setAttribute("aria-disabled", "false");
       if (amountEl) amountEl.textContent = amount;
-      if (labelEl) labelEl.textContent = "за нокаут топ10 Лиги" + leagueNum;
+      if (labelEl) labelEl.textContent = (bonus.closest(".home-tournament-bonuses--table") ? "Нокаут топ10 Лиги" : "за нокаут топ10 Лиги") + leagueNum;
     }
   });
 }
@@ -965,7 +965,7 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
   if (!Number.isFinite(count) || count < 1) count = 1;
   var active = !!amount;
   amountEl.textContent = amount || "—";
-  labelEl.textContent = count === 2 ? "2 баббла" : "бабблу";
+  labelEl.textContent = count === 2 ? "2 баббла" : bonusEl && bonusEl.closest(".home-tournament-bonuses--table") ? "Баббл" : "бабблу";
   if (gridEl) gridEl.classList.toggle("home-tournament-bonuses__grid--has-bubble", active);
   if (bonusEl) {
     bonusEl.hidden = !active;
