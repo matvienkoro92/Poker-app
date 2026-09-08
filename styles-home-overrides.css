@@ -8093,7 +8093,9 @@ html body #app.app.app--view-home
 /* Personal club characters on integrated emerald podiums. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
   aspect-ratio: 3 / 2 !important;
-  background: #080b0e url('./assets/home-shortcuts-personal-emerald-v2.webp') center / 100% 100% no-repeat !important;
+  width: 52.5% !important; /* 70% of the previous 75% width. */
+  background: transparent url('./assets/home-shortcuts-personal-emerald-v3.webp') center / 100% 100% no-repeat !important;
+  mix-blend-mode: screen !important;
   gap: 0 !important;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
@@ -8151,4 +8153,104 @@ html body #app.app.app--view-home
 /* Legacy tournament detail shell is empty in the illustrated carousel layout. */
 .app.app--view-home .tournament-day-home-dual--tournament-focus > .tournament-day-home-wrap--tournament-day {
   display: none !important;
+}
+
+/* Spread the figures toward the edges without enlarging their artwork. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
+  background: transparent !important;
+  width: 94% !important;
+  aspect-ratio: 94 / 35 !important;
+  grid-template-columns: repeat(3, minmax(0, 18.6170213%)) !important;
+  justify-content: space-between;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
+  background: url('./assets/home-figure-valerka-clean-v1.webp') center / 100% 100% no-repeat !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles {
+  background-image: url('./assets/home-figure-alenka-clean-v1.webp') !important;
+  background-position: center !important;
+  transform: scale(.94) !important;
+  transform-origin: center 89%;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels {
+  background-image: url('./assets/home-figure-waaar-clean-v1.webp') !important;
+  background-position: center top !important;
+  background-size: 94% 94% !important;
+}
+
+/* Center live labels on the new individual podium nameplates. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
+  left: 20% !important;
+  width: 60% !important;
+  top: 77% !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-mini-icon__label { top: 79% !important; }
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels .home-mini-icon__label { top: 80% !important; }
+
+/* Separate 3D figures from full-size podiums; normalize visible head-to-foot height. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
+  --figure-art: url('./assets/home-figure-valerka-3d-v2.webp');
+  --figure-image-height: 125.371%;
+  --figure-image-y: 33.426%;
+  background: none !important;
+  transform: none !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles {
+  --figure-art: url('./assets/home-figure-alenka-3d-v2.webp');
+  --figure-image-height: 121.258%;
+  --figure-image-y: 22.508%;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels {
+  --figure-art: url('./assets/home-figure-waaar-3d-v2.webp');
+  --figure-image-height: 121.010%;
+  --figure-image-y: 18.831%;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 28% 0 auto !important;
+  width: 100% !important;
+  height: 44.8% !important; /* 70% of the former 64% character height. */
+  background: var(--figure-art) center var(--figure-image-y) / auto var(--figure-image-height) no-repeat !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  mix-blend-mode: screen;
+  z-index: 2;
+  pointer-events: none;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 69.5% 0 auto !important;
+  width: 100% !important;
+  height: 23% !important;
+  background: url('./assets/home-figure-podium-3d-v2.webp') center / 100% 100% no-repeat !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  z-index: 1;
+  pointer-events: none;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
+  top: 81% !important;
+  left: 21% !important;
+  width: 58% !important;
+  height: 7% !important;
+  z-index: 3;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures #raffleActiveAmountBadge,
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-achievement-bonus-badge {
+  position: absolute !important;
+  top: 75% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  z-index: 4;
 }
