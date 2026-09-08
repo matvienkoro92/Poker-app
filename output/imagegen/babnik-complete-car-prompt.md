@@ -1,0 +1,7 @@
+# Babnik complete car portrait
+
+Built-in imagegen edit using assets/club-news-personal/babnik-news.webp. Final file: assets/club-news-personal/babnik-car-complete-v2.webp (576 × 720, 25232 bytes).
+
+Edit and recompose the reference into a polished vertical 2:3 poker player portrait. Preserve the same adult charming male monkey identity, black slick hair, sunglasses, elegant black suit, black shirt, gold chain, red rose on lapel. Show his ENTIRE body including hair and shoes with generous clear margins. He stands confidently in front of and leans one hand on a classic red convertible. Crucially show the ENTIRE car as a complete coherent car, front bumper to back bumper and both wheels, in a three-quarter angled view behind him; no half car, no sliced door, no cropping at image edges. Use perspective so the full car fits within the portrait while monkey remains main large subject. Car lower half, monkey foreground centered slightly left. Refined cinematic 3D character style matching reference, dark nearly black studio backdrop smoothly fading to pure black along every image edge, subtle ground contact shadows. No scenery, no bars, no borders, no text, no watermark. Complete contained silhouette, nothing touching canvas edges. Warm restrained red-gold accent lighting, detailed materials.
+
+Follow-up: Zoom out composition so the entire car, both bumpers and wheels are visible. Preserve character identity and black suit; use a wider 4:5 portrait and a plain dark background.

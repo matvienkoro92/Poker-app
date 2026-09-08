@@ -4,7 +4,7 @@
   width: 100% !important; height: auto !important; min-height: 0 !important;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
-  background: url('./assets/home-tournament-shtukatur-scene-v2.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-tournament-shtukatur-orange-ticket-v4.webp') center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
 #app .tournament-day-home-dual--tournament-focus::before,
@@ -111,3 +111,59 @@
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar { font-size: 2cqw !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus[hidden] { visibility: hidden !important; pointer-events: none !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus :is(.home-last-longer-dock,.home-tournament-bonus,.home-tournament-week-row,.home-tournament-week-nav):focus-visible { outline: 2px solid #ffe0a0 !important; outline-offset: 2px; }
+
+/* Calm ticket hierarchy and dedicated text area below the bonus icons. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title { font-size: 2.5cqw !important; letter-spacing: .08em; top: 10% !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title::before,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title::after,
+#app.app.app--view-home #homeTournamentWeekList > .home-tournament-week-nav::before,
+#app.app.app--view-home #homeTournamentWeekList > .home-tournament-week-nav::after { display: none !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title { top: 34% !important; font-size: 6.2cqw !important; letter-spacing: .025em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__caption { top: 57% !important; font-size: 2cqw !important; text-transform: uppercase; letter-spacing: .12em; color: #cbb890 !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__prize { top: 67% !important; font-size: 6.4cqw !important; font-weight: 800 !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 36% !important; font-size: 2cqw !important; text-transform: uppercase; letter-spacing: .08em; color: #cbb890 !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 47% !important; font-size: 3cqw !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table { top: 83.5% !important; height: 14% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus { padding-top: 0 !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label { font-size: 1.75cqw !important; min-height: 2.2em; display: flex !important; align-items: center; justify-content: center; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount { font-size: 2.2cqw !important; }
+/* Club ticket identity; all tournament figures remain live text. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+  top: 7% !important; left: 16% !important; width: 53% !important;
+  display: flex; flex-direction: column; align-items: center; gap: 1.8cqw;
+}
+.home-ticket-brand {
+  display: flex; align-items: center; justify-content: center; gap: .8cqw;
+  width: 100%; padding-bottom: 1.2cqw; border-bottom: 1px solid #b7975066;
+  color: #e9ca83; font: 700 2.7cqw/1.15 Arial,sans-serif; letter-spacing: .08em; white-space: nowrap;
+}
+.home-ticket-brand > span:first-child { font-size: 3.4cqw; }
+.home-ticket-brand__cross { color: #9e875a; font-weight: 400; }
+.home-ticket-session { color: #c6b998; font: 500 2.1cqw/1.2 Arial,sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title { top: 40% !important; font: 800 5.8cqw/1.05 Arial,sans-serif !important; color: #ffe5a5 !important; letter-spacing: .035em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__caption { top: 61% !important; font-size: 1.8cqw !important; letter-spacing: .16em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__prize { top: 70% !important; font-size: 6cqw !important; letter-spacing: -.025em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 29% !important; font-size: 1.8cqw !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 40% !important; font-size: 3.2cqw !important; }
+.home-ticket-aces { position: absolute; top: 21%; left: 78%; width: 10%; height: 7%; display: flex; align-items: center; justify-content: center; transform: rotate(-4deg); pointer-events: none; z-index: 4; }
+.home-ticket-aces > span { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 5cqw; height: 6.8cqw; flex-shrink: 0; border: 1px solid #b99a53; border-radius: .5cqw; background: linear-gradient(145deg,#26241c,#0a0c0c); color: #e7cb84; font: 600 2.1cqw/1 Georgia,serif; box-shadow: 0 2px 5px #0008; transform: rotate(-12deg); }
+.home-ticket-aces > span + span { margin-left: -1.4cqw; transform: rotate(12deg) translateY(.5cqw); }
+.home-ticket-aces > span > span { font-size: 2.6cqw; }
+.home-ticket-aces > span + span > span { color: #b98256; }
+
+/* Orange paper ticket, matching the supplied reference. */
+#app .tournament-day-home-dual--tournament-focus .home-ticket-brand,
+#app .tournament-day-home-dual--tournament-focus .home-ticket-aces { display: none !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title { top: 9% !important; left: 23% !important; width: 43% !important; align-items: flex-start; text-align: left; }
+.home-ticket-session { color: #d8d5cb; font-size: 2.25cqw; font-weight: 800; letter-spacing: .1em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__copy > :where(span) { left: 23% !important; width: 43% !important; text-align: left !important; color: #f4e6c7 !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title { top: 31% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: var(--ticket-title-size, 8.5cqw) !important; font-weight: 900 !important; letter-spacing: .025em; padding-bottom: 1cqw !important; border-bottom: 1cqw solid #c75c20; display: block !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__caption { top: 58% !important; font-size: 2.1cqw !important; letter-spacing: .2em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__prize { top: 68% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: 7.3cqw !important; font-weight: 900 !important; letter-spacing: .01em; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 24% !important; left: 72.5% !important; width: 13% !important; text-align: center !important; font-size: 1.8cqw !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 32% !important; left: 72.5% !important; width: 13% !important; text-align: center !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: 3cqw !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock { top: 50.5% !important; left: 32% !important; }
+
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 28% !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 36% !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table { top: 81.5% !important; }

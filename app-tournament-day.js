@@ -858,9 +858,10 @@ function renderHomeTournamentWeekList(activeWeekday) {
     trophyArt.setAttribute("aria-hidden", "true");
     var trophyCopy = document.createElement("span");
     trophyCopy.className = "home-tournament-trophy__copy";
+    trophyCopy.style.setProperty("--ticket-title-size", Math.min(8.5, 67 / Math.max(1, Array.from(item.name || "Турнир").length)) + "cqw");
     [
       ["title", item.name || "Турнир"],
-      ["caption", "приз"],
+      ["caption", "Призовой фонд"],
       ["prize", pokerFormatRubSpacing(item.guarantee || "—")],
       ["buyin-label", "бай-ин"],
       ["buyin", pokerFormatRubSpacing(item.buyin || "—")]
