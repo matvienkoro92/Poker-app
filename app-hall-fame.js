@@ -1821,13 +1821,13 @@ function hallFishDayHeroMonthFilterHtml(data) {
 function hallFishAchievementTrophyHtml(spec) {
   // Full asset paths are required by the static build's asset collector.
   var art = {
-    dayHero: "./assets/achievement-trophy-day-hero-v1.webp",
-    king: "./assets/achievement-trophy-king-v1.webp",
-    monthChampion: "./assets/achievement-trophy-month-v1.webp",
-    big50: "./assets/achievement-trophy-big50-v1.webp",
-    big100: "./assets/achievement-trophy-big100-v1.webp",
-    clubChoice: "./assets/achievement-trophy-choice-v1.webp",
-    sngChampion: "./assets/achievement-trophy-sng-v1.webp"
+    dayHero: "./assets/achievement-trophy-day-hero-v1.webp?v=20260908-2",
+    king: "./assets/achievement-trophy-king-v1.webp?v=20260908-2",
+    monthChampion: "./assets/achievement-trophy-month-v1.webp?v=20260908-2",
+    big50: "./assets/achievement-trophy-big50-v1.webp?v=20260908-2",
+    big100: "./assets/achievement-trophy-big100-v1.webp?v=20260908-2",
+    clubChoice: "./assets/achievement-trophy-choice-v1.webp?v=20260908-2",
+    sngChampion: "./assets/achievement-trophy-sng-v1.webp?v=20260908-2"
   }[spec.key];
   if (!art) return '<span class="hall-fish-trophy-fallback">' + hallFishEsc(spec.title) + '</span>';
   return '<img class="hall-fish-trophy-art" src="' + art + '" width="420" height="420" alt="' + hallFishEsc(spec.title) + '" decoding="async">' +
