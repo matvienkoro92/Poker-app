@@ -11,7 +11,7 @@
 
     function render(total) {
       var amount = Math.round(total).toLocaleString("ru-RU").replace(/\u00a0/g, " ");
-      output.innerHTML = "Выиграно уже <strong>" + amount + " ₽</strong>";
+      output.innerHTML = "Выиграно <strong>" + amount + " ₽</strong>";
       output.title = "Общая сумма выигрышей всех игроков за всё время";
     }
 
