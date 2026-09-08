@@ -213,27 +213,25 @@
 }
 .winter-rating-player-modal__overview {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
   gap: 10px;
   margin: -8px 0 16px;
   min-width: 0;
 }
+/* The character sits above the full-width statistics instead of stretching beside it. */
 .winter-rating-player-modal__art {
   position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  min-height: 124px;
   min-width: 0;
-  height: 100%;
+  height: auto;
   margin: 0;
+  padding: 4px 0;
   overflow: hidden;
-  border: 1px solid rgba(212, 175, 55, 0.28);
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 50% 20%, rgba(255, 194, 70, 0.2), transparent 44%),
-    linear-gradient(180deg, rgba(8, 14, 22, 0.3), rgba(8, 14, 22, 0.78));
+  border: 0;
+  background: none;
 }
 .winter-rating-player-modal__art[hidden] {
   display: none !important;
@@ -431,7 +429,7 @@
 }
 .winter-rating-player-modal__summary {
   min-width: 0;
-  height: 100%;
+  height: auto;
   margin: 0;
   padding: 10px;
   border: 1px solid var(--border-subtle);

@@ -795,3 +795,23 @@
   object-fit: contain;
   object-position: center;
 }
+
+/* Reduce the feature by another quarter, including its internal spacing. */
+.tournament-bet-modal__feature { min-height: 281.25px; }
+.tournament-bet-modal__feature .tournament-bet-modal__offer { gap: 6px; padding: 15px 12px !important; }
+.tournament-bet-modal__feature .tournament-bet-modal__offer > p:first-child { font-size: 9px !important; }
+.tournament-bet-modal__feature .tournament-bet-modal__offer h3 { font-size: clamp(17px,4.5vw,24px) !important; }
+.tournament-bet-modal__feature .tournament-bet-modal__offer h4 { font-size: 12px !important; }
+.tournament-bet-modal__feature .tournament-bet-modal__bank strong { font-size: 36px !important; }
+.tournament-bet-modal__feature .tournament-bet-modal__bank > span { font-size: 11px !important; }
+.tournament-bet-modal__feature .tournament-bet-modal__details { gap: 6px; margin: 3px 0; }
+.tournament-bet-modal__feature .tournament-bet-modal__details dd { font-size: 12px; }
+@media(max-width:600px) {
+  .tournament-bet-modal__feature { min-height: 202.5px; }
+  .tournament-bet-modal__feature .tournament-bet-modal__offer { gap: 4px; padding: 9px 6px !important; }
+  .tournament-bet-modal__feature .tournament-bet-modal__offer h3 { font-size: clamp(14px,3.75vw,18px) !important; }
+  .tournament-bet-modal__feature .tournament-bet-modal__offer h4 { font-size: 10px !important; }
+  .tournament-bet-modal__feature .tournament-bet-modal__bank strong { font-size: 28px !important; }
+  .tournament-bet-modal__feature .tournament-bet-modal__details dt { font-size: 9px; }
+  .tournament-bet-modal__feature .tournament-bet-modal__details dd { font-size: 10px; }
+}

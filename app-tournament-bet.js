@@ -591,6 +591,28 @@
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape" && modal && !modal.hidden) close();
   });
+  // Refresh the public home plaque independently of any selected personal event.
+  var homePlaqueLoading = false;
+  function refreshHomePlaque() {
+    if (homePlaqueLoading || loading || document.visibilityState === "hidden") return;
+    var home = document.querySelector('.app--view-home');
+    if (!home || (modal && !modal.hidden)) return;
+    homePlaqueLoading = true;
+    return fetch(baseUrl() + API_PATH + authQuery("?"), { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Home plaque unavailable");
+        return response.json();
+      })
+      .then(function (data) {
+        if (data && data.ok && !loading && !(modal && !modal.hidden)) updateHomeButton(data);
+      })
+      .catch(function () {})
+      .finally(function () { homePlaqueLoading = false; });
+  }
+  window.setInterval(refreshHomePlaque, 3000);
+  window.addEventListener("online", refreshHomePlaque);
+  window.addEventListener("pageshow", refreshHomePlaque);
+  document.addEventListener("visibilitychange", refreshHomePlaque);
   function initialLoad() { if (deepLinkEventId || deepLinkSection) open(); else load(true); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialLoad, { once: true });
   else initialLoad();
