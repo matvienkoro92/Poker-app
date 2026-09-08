@@ -7470,7 +7470,7 @@ html body #app.app.app--view-home
   aspect-ratio: 1.6 / 1 !important;
 }
 .app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy {
-  width: min(36%, 330px) !important;
+  width: min(43.2%, 396px) !important;
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -7482,7 +7482,7 @@ html body #app.app.app--view-home
   background: linear-gradient(to bottom, #0003, #0005 45%, #000 72%), url('./assets/home-tournament-room-v1.png') center top / 100% auto no-repeat, #000 !important;
 }
 .app.app--view-home #homeTournamentWeekList.home-tournament-week-list:has(.home-tournament-week-row--trophy) {
-  height: min(62.5cqw, 520px) !important;
+  height: min(75cqw, 624px) !important;
   aspect-ratio: auto !important;
   isolation: isolate;
 }
@@ -7516,7 +7516,7 @@ html body #app.app.app--view-home
   transform: translate(-50%, -50%) translateX(calc(var(--carousel-offset) * 78%)) rotate(calc(var(--carousel-offset) * 5deg)) scale(calc(1 - var(--carousel-distance) * .16)) !important;
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
-  background-image: url('./assets/home-tournament-cards-v1.png') !important;
+  background-image: url('./assets/home-tournament-cards-king-v4.png') !important;
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__copy {
   inset: 0;
