@@ -726,8 +726,6 @@ function hallFishEnsureModal() {
       '<div class="hall-fish-modal__tabs" role="tablist" aria-label="Рейтинги игроков">' +
         '<button type="button" class="hall-fish-modal__tab hall-fish-modal__tab--active" data-hall-fish-tab="levels" role="tab" aria-selected="true">Игроки по уровню</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="achievements" role="tab" aria-selected="false">Топы по ачивкам</button>' +
-        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="vote" role="tab" aria-selected="false">Голосование</button>' +
-        '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="sng" role="tab" aria-selected="false">СНГ-батлы</button>' +
         '<button type="button" class="hall-fish-modal__tab" data-hall-fish-tab="birthdays" role="tab" aria-selected="false">Клубный календарь</button>' +
       '</div>' +
       '<div class="hall-fish-modal__body" id="hallFishRatingBody"></div>' +
@@ -1821,9 +1819,18 @@ function hallFishDayHeroMonthFilterHtml(data) {
 }
 
 function hallFishAchievementTrophyHtml(spec) {
-  var art = { dayHero: "day-hero", king: "king", monthChampion: "month", big50: "big50", big100: "big100", clubChoice: "choice", sngChampion: "sng" }[spec.key];
+  // Full asset paths are required by the static build's asset collector.
+  var art = {
+    dayHero: "./assets/achievement-trophy-day-hero-v1.webp",
+    king: "./assets/achievement-trophy-king-v1.webp",
+    monthChampion: "./assets/achievement-trophy-month-v1.webp",
+    big50: "./assets/achievement-trophy-big50-v1.webp",
+    big100: "./assets/achievement-trophy-big100-v1.webp",
+    clubChoice: "./assets/achievement-trophy-choice-v1.webp",
+    sngChampion: "./assets/achievement-trophy-sng-v1.webp"
+  }[spec.key];
   if (!art) return '<span class="hall-fish-trophy-fallback">' + hallFishEsc(spec.title) + '</span>';
-  return '<img class="hall-fish-trophy-art" src="./assets/achievement-trophy-' + art + '-v1.webp" width="420" height="420" alt="' + hallFishEsc(spec.title) + '" decoding="async">' +
+  return '<img class="hall-fish-trophy-art" src="' + art + '" width="420" height="420" alt="' + hallFishEsc(spec.title) + '" decoding="async">' +
     (spec.key === "dayHero" ? '<span class="hall-fish-trophy-prize" aria-hidden="true">' + (hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all" ? "25 000" : "15 000") + ' ₽</span>' : '');
 }
 

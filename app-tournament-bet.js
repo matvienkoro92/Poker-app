@@ -254,18 +254,6 @@
     return '<time class="tournament-bet-modal__event-date" datetime="' + esc(value) + '">' + esc(date.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow", day: "numeric", month: "long", year: "numeric" })) + '</time>';
   }
 
-  function completedEventsHtml(data) {
-    var events = Array.isArray(data.completedEvents) ? data.completedEvents : [];
-    if (!events.length) return "";
-    return '<section class="tournament-bet-modal__history"><h3>Предыдущие события</h3>' + events.map(function (event) {
-      var winner = (event.entries || []).find(function (entry) { return entry.winner; });
-      return '<article class="tournament-bet-modal__history-card">' + eventDateHtml(event) +
-        '<strong>СТАВКА НА СЕБЯ · ' + esc(event.title) + '</strong>' +
-        '<span class="tournament-bet-modal__result-winner">🏆 ' + esc(winner ? winner.name : "Победитель не указан") + '</span>' +
-        '<span>Выигрыш: <strong>' + rub(event.winnerPaidAmount == null ? event.bank : event.winnerPaidAmount) + '</strong> · Участников: ' + (event.entries || []).length + '</span></article>';
-    }).join("") + '</section>';
-  }
-
   function closedEventHtml(data) {
     var entries = Array.isArray(data.entries) ? data.entries : [];
     var winner = entries.find(function (entry) { return entry.winner; });
@@ -360,12 +348,12 @@
     var tabs = '<nav class="tournament-bet-modal__tabs' + (data.isAdmin ? ' tournament-bet-modal__tabs--admin' : '') + '" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button>' + (data.isAdmin ? '<button type="button" data-tournament-bet-tab="admin-create" class="' + (activeTab === "admin-create" ? 'is-active' : '') + '">Создать</button>' : '') + '</nav>';
     if (!data.id) {
       var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section><div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data);
-      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + (activeTab === "event" ? completedEventsHtml(data) : "") + '</div>';
+      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + '</div>';
       updateHomeButton(data);
       return;
     }
     var panel = activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? (data.createdByPlayer ? eventHtml(data) : createBetHtml(data)) : eventHtml(data);
-    bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + panel + (activeTab === "event" ? completedEventsHtml(data) : "") + '</div>';
+    bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + panel + '</div>';
     updateHomeButton(data);
   }
 

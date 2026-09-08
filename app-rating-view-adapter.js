@@ -449,6 +449,7 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "waaar": { src: "./assets/summer-rating-player-waaar.webp", place: 1, league: 1 },
   "покерманки": { src: "./assets/summer-rating-player-pokermanki-v3.webp?v=1", place: 2, league: 1 },
   "coo1er91": { src: "./assets/summer-rating-player-cooler.webp", place: 3, league: 1 },
+  "necoo1er91": { src: "./assets/summer-rating-player-cooler.webp", place: 3, league: 1 },
   "em13!!": { src: "./assets/summer-rating-player-emil.webp", place: 4, league: 1 },
   "winifly": { src: "./assets/summer-rating-player-winifly.webp", place: 5, league: 1 },
   "missclick": { src: "./assets/summer-rating-player-missclick.webp?v=2", place: 6, league: 1 },

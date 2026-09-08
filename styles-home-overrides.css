@@ -7943,16 +7943,25 @@ html body #app.app.app--view-home
   grid-column: 1 / -1 !important;
 }
 
-.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-hint {
-  order: 26;
-  grid-column: 1 / -1 !important;
-  min-width: 0;
-  margin: 6px 0 12px;
-  padding: 0 12px;
+/* The hint shares the participant count's left inset beneath the bank bar. */
+.home-last-longer-dock__bar {
+  position: relative;
+  justify-content: space-between;
+}
+.home-last-longer-dock__bar > .home-last-longer-hint {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: calc(var(--ll-chip) * .17);
+  right: 0;
+  margin: 0;
+  padding: 0;
   color: #dec998;
-  font-size: clamp(11px, 1.5vw, 14px);
-  line-height: 1.4;
-  text-align: center;
+  font-size: clamp(9px, 1.2cqw, 12px);
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
 }
 
 /* The artwork already carries depth and lighting; keep its face in one plane. */
