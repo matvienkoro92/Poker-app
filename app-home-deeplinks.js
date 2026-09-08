@@ -1073,3 +1073,14 @@ function pokerInitHomeDeepLinks(opts) {
     }, 0);
   }
 }
+
+// Confirm before the chat shortcut leaves the app; retain native link navigation.
+window.addEventListener("click", function (event) {
+  var link = event.target && event.target.closest
+    ? event.target.closest("[data-confirm-telegram-chat]") : null;
+  if (!link) return;
+  if (!window.confirm("Действительно ли хотите перейти в Telegram?")) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}, true);

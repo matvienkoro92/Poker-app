@@ -2654,15 +2654,30 @@
         }
       }).observe(document.body, { childList: true, subtree: true });
     }
-    if (window.__pokerHomeWidgetOpening !== "sngChampions") {
-      fetchHomeSummary().then(function (data) {
-        if (data && data.ok) {
-          state = data;
-          rememberStateRevision(data);
-          updateHomePlaque();
+    var homeRefreshRetry = null;
+    function refreshHomeBanner(attempt) {
+      window.clearTimeout(homeRefreshRetry);
+      if (modal && modal.classList.contains("club-choice-vote-modal--open")) return;
+      fetchHomeSummary(true).then(function (data) {
+        if (modal && modal.classList.contains("club-choice-vote-modal--open")) return;
+        if (!data || !data.ok) throw new Error("SNG summary unavailable");
+        state = data;
+        rememberStateRevision(data);
+        updateHomePlaque();
+      }).catch(function () {
+        if (attempt < 2) {
+          homeRefreshRetry = window.setTimeout(function () { refreshHomeBanner(attempt + 1); }, 3000 * (attempt + 1));
         }
-      }).catch(function () {});
+      });
     }
+    window.addEventListener("online", function () { refreshHomeBanner(0); });
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted) refreshHomeBanner(0);
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") refreshHomeBanner(0);
+    });
+    if (window.__pokerHomeWidgetOpening !== "sngChampions") refreshHomeBanner(0);
   }
 
   window.openSngChampionsModal = openModal;

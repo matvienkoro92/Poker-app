@@ -8303,7 +8303,7 @@ html body #app.app.app--view-home
 }
 
 /* Seated character artwork supplied for the club lounge. */
-.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge {
+.app.app--view-home .home-daily-shortcuts--lounge {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 1% !important;
@@ -8312,14 +8312,15 @@ html body #app.app.app--view-home
   padding: 0 7px 2% !important;
   box-sizing: border-box;
   aspect-ratio: auto !important;
-  background: url('./assets/home-lounge-background-v1.webp') center bottom / 100% 100% no-repeat !important;
+  position: relative;
+  background: none !important;
   isolation: isolate;
 }
 .app.app--view-home .home-daily-shortcuts--lounge::before,
 .app.app--view-home .home-daily-shortcuts--lounge::after,
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item::before,
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item::after { content: none !important; }
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item {
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link::before,
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link::after { content: none !important; }
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
   display: block !important;
   position: relative !important;
   width: 100% !important;
@@ -8393,11 +8394,11 @@ html body #app.app.app--view-home
   transform: none !important;
   z-index: 2 !important;
 }
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item:focus-visible {
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:focus-visible {
   outline: 2px solid #ffda76 !important;
   outline-offset: -3px;
 }
-.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge {
+.app.app--view-home .home-daily-shortcuts--lounge {
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -8405,12 +8406,12 @@ html body #app.app.app--view-home
   overflow: hidden !important;
   contain: none !important;
 }
-.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge .home-mini-icon-item {
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
   max-height: none !important;
   max-width: none !important;
   align-self: end !important;
 }
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item .home-lounge-art {
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art {
   width: 100% !important;
   height: 100% !important;
   max-width: none !important;
@@ -8418,12 +8419,12 @@ html body #app.app.app--view-home
   display: block !important;
   transform: none !important;
 }
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item {
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
   filter: none !important;
   outline: none;
 }
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item:first-child .home-lounge-art { translate: 0 4.5%; }
-.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item--levels .home-lounge-art { translate: 0 1.2%; }
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:first-child .home-lounge-art { translate: 0 1.6%; }
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels .home-lounge-art { translate: 0 -3.4%; }
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge,
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge {
   display: flex !important;
@@ -8437,4 +8438,17 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge.raffle-active-amount-badge--hidden { font-size: 0 !important; }
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden::after { content: '—'; font-size: 8cqw; }
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge.raffle-active-amount-badge--hidden::after { content: 'Скоро'; font-size: 3.4cqw; }
-.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge { filter: none !important; }
+.app.app--view-home .home-daily-shortcuts--lounge { filter: none !important; }
+
+/* Keep only the floor behind the aligned podium labels. */
+.app.app--view-home .home-daily-shortcuts--lounge::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  background: url('./assets/home-lounge-background-v1.webp') center bottom / 100% 100% no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
+  mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
+  pointer-events: none;
+  z-index: -1;
+}

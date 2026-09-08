@@ -391,7 +391,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.020" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.053" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.054" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.022" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -933,30 +933,28 @@
             aria-hidden="true"
           /></picture>
         </a>
-        <div class="home-mini-icons home-daily-shortcuts home-daily-shortcuts--lounge" aria-label="Быстрые разделы клуба">
+        <div class="home-daily-shortcuts--lounge" aria-label="Быстрые разделы клуба">
           <a
-            class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale"
+            class="home-lounge-link "
             href="https://t.me/+snBngKmXYa1mYjky"
+            data-confirm-telegram-chat
             target="_blank"
             rel="noopener noreferrer"
             title="Чат в ТГ"
             aria-label="Чат в ТГ"
           >
             <img class="home-lounge-art" src="./assets/home-lounge-chat-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
-            <span class="home-shortcut-figure" aria-hidden="true"></span><span class="home-shortcut-motion" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
           </a>
-          <a href="#" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--raffles" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
+          <a href="#" class="home-lounge-link  home-lounge-link--raffles" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
             <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
             <span class="raffle-active-amount-badge raffle-active-amount-badge--hidden" id="raffleActiveAmountBadge" aria-hidden="true">Идут на 0 ₽</span>
             <img class="home-lounge-art" src="./assets/home-lounge-raffles-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
-            <span class="home-shortcut-figure" aria-hidden="true"></span><span class="home-shortcut-motion" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
           </a>
-          <button type="button" class="home-mini-icon-item home-mini-icon-item--white home-mini-icon-item--hover-scale home-mini-icon-item--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 25 000 рублей">
+          <button type="button" class="home-lounge-link  home-lounge-link--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 25 000 рублей">
             <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 25 000 ₽</span>
             <img class="home-lounge-art" src="./assets/home-lounge-players-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
-            <span class="home-shortcut-figure" aria-hidden="true"><span class="home-players-clean-clothes home-players-clean-clothes--pants"></span><span class="home-players-clean-clothes home-players-clean-clothes--hat"></span></span><span class="home-shortcut-motion" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки клуба</span>
           </button>
         </div>
@@ -1547,7 +1545,7 @@
             </button>
             <div class="daily-poker__sng-champions sng-inline-feature" aria-label="СНГ Лига Чемпионов Два Туза">
               <button type="button" class="sng-inline-feature__image" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
-                <img src="./assets/home-sng-champions-click-banner-team-knockout.webp?v=4" srcset="./assets/home-sng-champions-click-banner-team-knockout-mobile.webp?v=1 900w, ./assets/home-sng-champions-click-banner-team-knockout.webp?v=4 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
+                <img src="./assets/home-sng-champions-battle-3-v2.webp?v=3" srcset="./assets/home-sng-champions-battle-3-v2-mobile.webp?v=3 900w, ./assets/home-sng-champions-battle-3-v2.webp?v=3 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
               </button>
               <div class="sng-inline-feature__bar">
                 <span class="sng-inline-feature__stat"><small>Участники</small><strong data-sng-home-players>—/32</strong></span>
@@ -1888,7 +1886,7 @@
     <script defer src="./app-home-tasks.js?v=4.002"></script>
     <script defer src="./app-tournament-day.js?v=4.028"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=4.002"></script>
-    <script defer src="./app-home-deeplinks.js?v=4.002"></script>
+    <script defer src="./app-home-deeplinks.js?v=4.003"></script>
     <script defer src="./app-home-club-info-modals.js?v=4.002"></script>
     <script defer src="./app-home-vpn-proxy-modal.js?v=4.002"></script>
     <script defer src="./app-home-gazette-comments.js?v=4.002"></script>
@@ -2005,7 +2003,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-club-choice" src="./app-club-choice-vote.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-private-cash" src="./app-private-cash.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-sng" src="./app-sng-champions.js?v=4.003"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-sng" src="./app-sng-champions.js?v=4.004"></script>
     <script defer src="./app-tournament-bet.js?v=4.026"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-spring-runtime.js?v=4.002"></script>
