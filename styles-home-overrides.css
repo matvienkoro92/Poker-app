@@ -8125,3 +8125,30 @@ html body #app.app.app--view-home
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
   font-family: Arial, sans-serif !important;
 }
+
+/* The bonus instructions occupy the logo area on the table apron. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--table .home-tournament-bonuses__hint {
+  position: absolute;
+  z-index: 2;
+  left: 17%;
+  top: 72%;
+  width: 66%;
+  height: 15%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 8px;
+  background: #151310;
+  border-radius: 50%;
+  color: #d7be87;
+  font: 600 clamp(8px, 1.7cqw, 16px)/1.15 Arial, sans-serif;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Legacy tournament detail shell is empty in the illustrated carousel layout. */
+.app.app--view-home .tournament-day-home-dual--tournament-focus > .tournament-day-home-wrap--tournament-day {
+  display: none !important;
+}

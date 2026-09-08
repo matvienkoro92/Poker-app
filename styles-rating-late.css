@@ -5463,7 +5463,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .winter-rating.spring-rating.summer-rating #summerRatingMonthSummaries {
   width: 100%;
   box-sizing: border-box;
-  margin: 120px 0 18px;
+  margin: 56px 0 18px;
   clear: both;
 }
 #summerRatingMonthSummaries .summer-rating-season-total {
@@ -5607,3 +5607,62 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 .summer-results-hero__art { -webkit-mask-image: linear-gradient(90deg,#000 88%,transparent); mask-image: linear-gradient(90deg,#000 88%,transparent); }
 .summer-results-dashboard .summer-rating-season-top { background-color: #070f18; }
 @media(max-width:600px) { .summer-results-hero { aspect-ratio: auto; } }
+
+/* Restrained summer summary: typography first, subtle gold accents. */
+#summerRatingMonthSummaries .summer-results-dashboard { font-family: Arial, sans-serif; }
+#summerRatingMonthSummaries .summer-results-hero {
+  min-height: 180px;
+  border: 1px solid #887347;
+  border-radius: 14px;
+  background: #0a1119;
+  box-shadow: none;
+}
+#summerRatingMonthSummaries .summer-results-hero h2 { font-weight: 700; font-size: clamp(22px, 3.4vw, 38px); white-space: normal; }
+#summerRatingMonthSummaries .summer-results-hero__motto,
+#summerRatingMonthSummaries .summer-results-hero__note { display: none; }
+#summerRatingMonthSummaries .summer-results-hero__total { margin-top: 16px; border-top: 1px solid #ffffff18; }
+#summerRatingMonthSummaries .summer-results-hero__total strong { font-weight: 700; color: #f0d69a; font-size: clamp(25px, 5vw, 54px); }
+#summerRatingMonthSummaries .summer-results-counts > div,
+#summerRatingMonthSummaries .summer-result-metric {
+  border: 1px solid #ffffff1c;
+  border-radius: 12px;
+  background: #0b131c;
+  box-shadow: none;
+  padding: 14px 16px;
+}
+#summerRatingMonthSummaries .summer-result-metric__icon { display: none; }
+#summerRatingMonthSummaries .summer-results-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#summerRatingMonthSummaries .summer-rating-season-top { border-color: #ffffff24; border-radius: 12px; }
+#summerRatingMonthSummaries .summer-rating-season-top h3 > span { display: none; }
+@media (max-width: 600px) {
+  #summerRatingMonthSummaries .summer-results-hero { min-height: 155px; }
+  #summerRatingMonthSummaries .summer-results-counts > div,
+  #summerRatingMonthSummaries .summer-result-metric { padding: 12px; }
+}
+
+/* Keep both season leaderboards side by side at every viewport width. */
+#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-tops {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+}
+#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top { padding: 10px; }
+#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top h3 {
+  min-height: 2.6em;
+  padding-bottom: 8px;
+  font-size: clamp(11px, 2.2vw, 16px);
+  line-height: 1.3;
+}
+#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top table { table-layout: fixed; font-size: clamp(9px, 1.8vw, 13px); }
+#summerRatingMonthSummaries .summer-rating-season-top th,
+#summerRatingMonthSummaries .summer-rating-season-top td { padding: 8px 2px; }
+#summerRatingMonthSummaries .summer-rating-season-top th { font-size: 9px; }
+#summerRatingMonthSummaries .summer-rating-season-top th:first-child { width: 20px; }
+#summerRatingMonthSummaries .summer-rating-season-top th:last-child { width: 42%; }
+#summerRatingMonthSummaries .summer-result-rank { width: 18px; height: 18px; font-size: 10px; }
+#summerRatingMonthSummaries .summer-rating-season-top small { font-size: .8em; line-height: 1.3; }
+@media (max-width: 400px) {
+  #summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-tops { gap: 6px; }
+  #summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top { padding: 6px; }
+  #summerRatingMonthSummaries .summer-rating-season-top td:last-child { white-space: normal; }
+}
