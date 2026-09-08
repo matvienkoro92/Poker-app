@@ -1,13 +1,23 @@
 /* Summer rating only: live statistics over the supplied beach composition. */
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard {
   display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px;
-  padding: 14px; border-radius: 22px; background: #070d16;
+  position: relative; isolation: isolate;
+  padding: 0; border: 0; border-radius: 0; background: transparent;
+  box-shadow: none; overflow: visible;
   color: #f4e8ce; font-family: Arial,sans-serif; container-type: inline-size;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; aspect-ratio: 2;
+  background: url('./assets/summer-results-hammocks-trio-v2.webp') center / cover no-repeat;
+  mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 78%, transparent), linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+  mask-composite: intersect;
+  pointer-events: none; z-index: -1;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero {
   grid-column: 1/-1; display: block; aspect-ratio: 2; min-height: 0;
-  border: 1px solid #80622f; border-radius: 14px; box-shadow: none;
-  background: url('./assets/summer-results-hammocks-trio-v2.webp') center / cover no-repeat;
+  border: 0; border-radius: 0; box-shadow: none;
+  background: transparent; overflow: visible;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__art,
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__note,
@@ -67,7 +77,7 @@
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-rank { width: 24px; height: 24px; font-size: 12px; }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top th:first-child { width: 28px; }
 @media(max-width:520px) {
-  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard { gap: 7px; padding: 8px; border-radius: 14px; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard { gap: 7px; padding: 0; border-radius: 0; }
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-counts > div,
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric { padding: 9px 3px; gap: 3px; border-radius: 11px; }
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-tops { gap: 7px; }
