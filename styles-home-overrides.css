@@ -7371,12 +7371,12 @@ html body #app.app.app--view-home
   overflow: visible !important;
   transform: translate(-50%,-50%) translateX(calc(var(--carousel-offset) * 76%)) scale(calc(1 - var(--carousel-distance) * .18)) !important;
   transform-origin: 50% 90%;
-  filter: brightness(.62) saturate(.82) !important;
+  filter: brightness(.46) saturate(.74) !important;
   mix-blend-mode: screen;
   transition: transform 540ms cubic-bezier(.2,.8,.2,1), opacity 420ms ease, filter 420ms ease;
 }
 .app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy.home-tournament-week-row--active {
-  filter: brightness(1.22) saturate(1.08) !important;
+  filter: brightness(1.32) saturate(1.08) !important;
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__poster-wrap,
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__main { display: none !important; }
@@ -8301,3 +8301,140 @@ html body #app.app.app--view-home
 @media (prefers-reduced-motion: reduce) {
   .home-last-longer-dock__rim { animation: none; will-change: auto; }
 }
+
+/* Seated character artwork supplied for the club lounge. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 1% !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 7px 2% !important;
+  box-sizing: border-box;
+  aspect-ratio: auto !important;
+  background: url('./assets/home-lounge-background-v1.webp') center bottom / 100% 100% no-repeat !important;
+  isolation: isolate;
+}
+.app.app--view-home .home-daily-shortcuts--lounge::before,
+.app.app--view-home .home-daily-shortcuts--lounge::after,
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item::before,
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item::after { content: none !important; }
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  animation: none !important;
+  aspect-ratio: 1122 / 1402 !important;
+  container-type: inline-size;
+  overflow: visible !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon__hero,
+.app.app--view-home .home-daily-shortcuts--lounge .home-shortcut-figure,
+.app.app--view-home .home-daily-shortcuts--lounge .home-shortcut-motion,
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon__label,
+.app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge { display: none !important; }
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge {
+  position: absolute !important;
+  top: 20.1% !important;
+  left: 65.5% !important;
+  right: auto !important;
+  width: 13.5% !important;
+  height: 10.8% !important;
+  padding: 0 !important;
+  border: 2px solid #ffd779 !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 25%, #ff7949, #ee2408) !important;
+  color: #fff !important;
+  font-size: 9cqw !important;
+  line-height: 1 !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 2 !important;
+  transform: none !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge:not(.feature__badge--hidden) { display: flex !important; }
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge {
+  position: absolute !important;
+  top: 70% !important;
+  left: 35% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 30% !important;
+  height: 3.7% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #100e04 !important;
+  color: #ffe18a !important;
+  font-size: 3.4cqw !important;
+  line-height: 1 !important;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transform: none !important;
+  z-index: 2 !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item:focus-visible {
+  outline: 2px solid #ffda76 !important;
+  outline-offset: -3px;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  grid-template-rows: auto !important;
+  overflow: hidden !important;
+  contain: none !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge .home-mini-icon-item {
+  max-height: none !important;
+  max-width: none !important;
+  align-self: end !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item .home-lounge-art {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  display: block !important;
+  transform: none !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item {
+  filter: none !important;
+  outline: none;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item:first-child .home-lounge-art { translate: 0 4.5%; }
+.app.app--view-home .home-daily-shortcuts--lounge .home-mini-icon-item--levels .home-lounge-art { translate: 0 1.2%; }
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge,
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge {
+  display: flex !important;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-weight: 800;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden,
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge.raffle-active-amount-badge--hidden { font-size: 0 !important; }
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden::after { content: '—'; font-size: 8cqw; }
+.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge.raffle-active-amount-badge--hidden::after { content: 'Скоро'; font-size: 3.4cqw; }
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--lounge { filter: none !important; }
