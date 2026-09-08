@@ -7189,7 +7189,7 @@ html body #app.app.app--view-home
   aspect-ratio: 3.25;
   margin: 0 !important;
   padding: 0 !important;
-  background: url('./assets/home-bonus-table-reference-v1.png') center / 100% 100% no-repeat;
+  background: url('./assets/home-bonus-table-rim-hint-v2.webp') center / 100% 100% no-repeat;
   border: 0 !important;
   overflow: visible;
 }
@@ -7371,12 +7371,12 @@ html body #app.app.app--view-home
   overflow: visible !important;
   transform: translate(-50%,-50%) translateX(calc(var(--carousel-offset) * 76%)) scale(calc(1 - var(--carousel-distance) * .18)) !important;
   transform-origin: 50% 90%;
-  filter: brightness(.72) saturate(.85) !important;
+  filter: brightness(.62) saturate(.82) !important;
   mix-blend-mode: screen;
   transition: transform 540ms cubic-bezier(.2,.8,.2,1), opacity 420ms ease, filter 420ms ease;
 }
 .app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy.home-tournament-week-row--active {
-  filter: brightness(1.15) saturate(1.08) !important;
+  filter: brightness(1.22) saturate(1.08) !important;
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__poster-wrap,
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__main { display: none !important; }
@@ -8095,7 +8095,7 @@ html body #app.app.app--view-home
   aspect-ratio: 3 / 2 !important;
   width: 52.5% !important; /* 70% of the previous 75% width. */
   background: transparent url('./assets/home-shortcuts-personal-emerald-v3.webp') center / 100% 100% no-repeat !important;
-  mix-blend-mode: screen !important;
+  mix-blend-mode: normal !important;
   gap: 0 !important;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
@@ -8128,28 +8128,6 @@ html body #app.app.app--view-home
   font-family: Arial, sans-serif !important;
 }
 
-/* The bonus instructions occupy the logo area on the table apron. */
-.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--table .home-tournament-bonuses__hint {
-  position: absolute;
-  z-index: 2;
-  left: 17%;
-  top: 72%;
-  width: 66%;
-  height: 15%;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0 8px;
-  background: #151310;
-  border-radius: 50%;
-  color: #d7be87;
-  font: 600 clamp(8px, 1.7cqw, 16px)/1.15 Arial, sans-serif;
-  text-align: center;
-  text-shadow: 0 1px 2px #000;
-}
-
 /* Legacy tournament detail shell is empty in the illustrated carousel layout. */
 .app.app--view-home .tournament-day-home-dual--tournament-focus > .tournament-day-home-wrap--tournament-day {
   display: none !important;
@@ -8158,9 +8136,9 @@ html body #app.app.app--view-home
 /* Spread the figures toward the edges without enlarging their artwork. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
   background: transparent !important;
-  width: 94% !important;
-  aspect-ratio: 94 / 35 !important;
-  grid-template-columns: repeat(3, minmax(0, 18.6170213%)) !important;
+  width: calc(94% - 14px) !important;
+  aspect-ratio: auto !important;
+  grid-template-columns: repeat(3, minmax(0, calc(18.6170213% + 2.606383px))) !important;
   justify-content: space-between;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
@@ -8189,19 +8167,19 @@ html body #app.app.app--view-home
 
 /* Separate 3D figures from full-size podiums; normalize visible head-to-foot height. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
-  --figure-art: url('./assets/home-figure-valerka-3d-v2.webp');
+  --figure-art: url('./assets/home-figure-valerka-alpha-v3.webp');
   --figure-image-height: 125.371%;
   --figure-image-y: 33.426%;
   background: none !important;
   transform: none !important;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles {
-  --figure-art: url('./assets/home-figure-alenka-3d-v2.webp');
+  --figure-art: url('./assets/home-figure-alenka-alpha-v3.webp');
   --figure-image-height: 121.258%;
   --figure-image-y: 22.508%;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels {
-  --figure-art: url('./assets/home-figure-waaar-3d-v2.webp');
+  --figure-art: url('./assets/home-figure-waaar-alpha-v3.webp');
   --figure-image-height: 121.010%;
   --figure-image-y: 18.831%;
 }
@@ -8209,14 +8187,14 @@ html body #app.app.app--view-home
   content: "" !important;
   display: block !important;
   position: absolute !important;
-  inset: 28% 0 auto !important;
+  inset: 1.12% 0 auto !important;
   width: 100% !important;
-  height: 44.8% !important; /* 70% of the former 64% character height. */
+  height: 71.68% !important; /* 160% of the previous 44.8% figure height. */
   background: var(--figure-art) center var(--figure-image-y) / auto var(--figure-image-height) no-repeat !important;
   border: 0 !important;
   box-shadow: none !important;
   transform: none !important;
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
   z-index: 2;
   pointer-events: none;
 }
@@ -8227,7 +8205,7 @@ html body #app.app.app--view-home
   inset: 69.5% 0 auto !important;
   width: 100% !important;
   height: 23% !important;
-  background: url('./assets/home-figure-podium-3d-v2.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-figure-podium-alpha-v3.webp') center / 100% 100% no-repeat !important;
   border: 0 !important;
   box-shadow: none !important;
   transform: none !important;
@@ -8253,4 +8231,29 @@ html body #app.app.app--view-home
   right: auto !important;
   transform: translateX(-50%) !important;
   z-index: 4;
+}
+
+/* Preserve podium dimensions when adding 7px to each outside margin. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
+  height: auto !important;
+  aspect-ratio: 1 / 2 !important;
+}
+
+/* A soft golden halo highlights the Last Longer chip without washing out its text. */
+.home-last-longer-dock__chip::after {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 3px #ffd46a88, 0 0 25px 7px #efa52e55;
+  opacity: .65;
+  pointer-events: none;
+  animation: last-longer-chip-glow 2.8s ease-in-out infinite;
+}
+@keyframes last-longer-chip-glow {
+  0%, 100% { opacity: .45; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-last-longer-dock__chip::after { animation: none; opacity: .7; }
 }

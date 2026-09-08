@@ -1739,7 +1739,7 @@ function hallFishAchievementSpecs(data) {
   var septemberAward = hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all";
   var heroPrize = septemberAward ? "25 000" : "15 000";
   return [
-    { key: "dayHero", title: "Герой дня (" + heroPrize + "р)", sectionTitle: "Герой дня", description: "Игрок с самым крупным единичным турнирным заносом за день среди всего клуба. Считается с 1 января 2026 года. При равенстве выше игрок с большей суммой победных заносов.", awardText: "Награду " + heroPrize + " ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» " + (septemberAward ? "в сентябре." : "за выбранный месяц."), rows: data && data.dayHero },
+    { key: "dayHero", title: "Герой дня (" + heroPrize + "р)", sectionTitle: "Герой дня", description: "", awardText: "Награду " + heroPrize + " ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» " + (septemberAward ? "в сентябре." : "за выбранный месяц."), rows: data && data.dayHero },
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
