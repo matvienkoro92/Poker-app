@@ -3120,10 +3120,7 @@ function initWinterRating() {
     var cacheV = "v=19";
     container.innerHTML = files.map(function (f, i) {
       var fullSrc = getAssetUrl(f) + "?" + cacheV;
-      // The production build only publishes assets referenced by static data.
-      // Thumbnail URLs are assembled dynamically and are therefore not present
-      // in that build; requesting them leaves broken tiles on fast cached pages.
-      var thumbSrc = fullSrc;
+      var thumbSrc = getRatingThumbnailUrl(f) + "?" + cacheV;
       return "<div class=\"winter-rating__screenshot\" role=\"button\" tabindex=\"0\" data-rating-image-file=\"" + escapeHtml(f) + "\"><img src=\"" + thumbSrc + "\" data-rating-full-src=\"" + fullSrc + "\" alt=\"Скрин рейтинга " + dStr + " (" + (i + 1) + ")\" loading=\"lazy\" decoding=\"async\" /></div>";
     }).join("");
     container.setAttribute("data-rating-screens-filled", "1");
@@ -3544,6 +3541,16 @@ function initWinterRating() {
         clone.classList.remove("winter-rating__date-panel--hidden");
         dateModalBody.innerHTML = "";
         dateModalBody.appendChild(clone);
+        // Cloning does not preserve the source images' error listeners.
+        clone.querySelectorAll(".winter-rating__screenshot img").forEach(function (img) {
+          img.loading = "eager";
+          var fallback = function () {
+            var full = img.getAttribute("data-rating-full-src");
+            if (full && img.src !== full) img.src = full;
+          };
+          img.addEventListener("error", fallback, { once: true });
+          if (img.complete && !img.naturalWidth) fallback();
+        });
         var cloneLeaguesWrap = clone.querySelector(".spring-rating-date-leagues");
         if (cloneLeaguesWrap) {
           applyDateModalLeague(cloneLeaguesWrap, preferredLeague);

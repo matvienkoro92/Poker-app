@@ -170,6 +170,14 @@ function copyReferencedAssets() {
   fs.rmSync(destRoot, { recursive: true, force: true });
   fs.mkdirSync(destRoot, { recursive: true });
   const refs = collectReferencedAssets();
+  // Rating preview URLs are assembled at runtime, so static scanning misses them.
+  for (const rel of Array.from(refs)) {
+    if (!/(?:^|\/)rating-\d{2}-\d{2}-\d{4}[^/]*\.(?:png|jpe?g|webp|avif)$/i.test(rel)) continue;
+    if (rel.startsWith('rating-thumbnails/')) continue;
+    const parsed = path.parse(rel);
+    const thumbnail = path.posix.join('rating-thumbnails', parsed.dir, parsed.name + '.avif');
+    if (fs.existsSync(path.join(assetDir, thumbnail))) refs.add(thumbnail);
+  }
   let copied = 0;
   for (const rel of Array.from(refs).sort()) {
     const archiveMatch = String(rel).match(/(?:^|\/)rating-\d{2}-(\d{2})-2026/i);
