@@ -1,0 +1,5 @@
+# Quiet tournament backdrop
+
+Built-in imagegen edit. Final asset: assets/home-tournament-shtukatur-scene-v2.webp.
+
+Precise background edit of this poker UI scene. Remove ALL wall lamps/sconces, ALL vertical luminous gold strips/columns, background gold architectural trim, and background plants. Replace the entire rear wall behind ticket and monkey with a calm very dark matte charcoal-black surface with barely perceptible texture, almost black, no visible light sources, no glow, no patterns or decorations. Preserve EXACT foreground layout and geometry: empty black gold-rimmed ticket at top including right stub/perforation, plasterer monkey with backward cap/work overalls and tools, chair, hand on LAST LONGER chip, blank pedestal, green poker table, five bottom bonus icons and panels. Keep these objects in precisely the same positions and proportions for existing HTML overlays. Same 4:5 composition. Subtle soft lighting only on foreground character and objects, restrained gold highlights. No new text, no other changes.
