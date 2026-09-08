@@ -1207,7 +1207,8 @@
   text-shadow: 0 0 12px rgba(251, 191, 36, 0.18);
 }
 .hall-fish-achievement-tabs-shell__hint {
-  color: rgba(255, 237, 213, 0.52);
+  color: #e5c781;
+  white-space: nowrap;
   font-size: 11px;
   font-weight: 850;
 }

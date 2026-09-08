@@ -8136,10 +8136,10 @@ html body #app.app.app--view-home
 /* Spread the figures toward the edges without enlarging their artwork. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
   background: transparent !important;
-  width: calc(94% - 14px) !important;
+  width: calc(100% - 14px) !important;
   aspect-ratio: auto !important;
-  grid-template-columns: repeat(3, minmax(0, calc(18.6170213% + 2.606383px))) !important;
-  justify-content: space-between;
+  grid-template-columns: repeat(3, minmax(0, calc(17.5% + 2.45px))) !important;
+  justify-content: space-evenly;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
   background: url('./assets/home-figure-valerka-clean-v1.webp') center / 100% 100% no-repeat !important;
@@ -8256,4 +8256,48 @@ html body #app.app.app--view-home
 }
 @media (prefers-reduced-motion: reduce) {
   .home-last-longer-dock__chip::after { animation: none; opacity: .7; }
+}
+
+/* Enlarge only the characters by 60%, reserving space above the fixed-size podiums. */
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
+  aspect-ratio: 1 / 2.86016 !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item::before {
+  inset: 2.24cqw -30% auto !important;
+  width: 160% !important;
+  height: 229.376cqw !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item::after {
+  top: 225.016cqw !important;
+  height: 46cqw !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
+  top: 248.016cqw !important;
+  height: 14cqw !important;
+}
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures #raffleActiveAmountBadge,
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-achievement-bonus-badge { top: 236.016cqw !important; }
+
+/* Animate an unmasked wrapper so the chip rim has its own compositing layer. */
+.home-last-longer-dock__rim {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  animation: last-longer-rim-layer-spin 14s linear infinite;
+}
+.home-last-longer-dock__rim img {
+  animation: none !important;
+  -webkit-mask-image: radial-gradient(circle closest-side, transparent 70%, #000 71%);
+  mask-image: radial-gradient(circle closest-side, transparent 70%, #000 71%);
+}
+@keyframes last-longer-rim-layer-spin {
+  from { transform: translateZ(0) rotate(0deg); }
+  to { transform: translateZ(0) rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-last-longer-dock__rim { animation: none; will-change: auto; }
 }

@@ -1824,6 +1824,7 @@ function hallFishAchievementTrophyHtml(spec) {
     dayHero: "./assets/achievement-trophy-day-hero-v1.webp?v=20260908-2",
     king: "./assets/achievement-trophy-king-v1.webp?v=20260908-2",
     monthChampion: "./assets/achievement-trophy-month-v1.webp?v=20260908-2",
+    viceChampion: "./assets/achievement-trophy-vice-month-v1.webp",
     big50: "./assets/achievement-trophy-big50-v1.webp?v=20260908-2",
     big100: "./assets/achievement-trophy-big100-v1.webp?v=20260908-2",
     clubChoice: "./assets/achievement-trophy-choice-v1.webp?v=20260908-2",
@@ -1857,7 +1858,7 @@ function hallFishRenderAchievementRows(data) {
     '<div class="hall-fish-achievement-tabs-shell" aria-label="Фильтры топов по ачивкам">' +
       '<div class="hall-fish-achievement-tabs-shell__head">' +
         '<span class="hall-fish-achievement-tabs-shell__eyebrow">Награды клуба</span>' +
-        '<span class="hall-fish-achievement-tabs-shell__hint">выберите достижение</span>' +
+        '<span class="hall-fish-achievement-tabs-shell__hint">Листайте вправо <span aria-hidden="true">→</span></span>' +
       '</div>' +
     '<div class="hall-fish-achievement-tabs hall-fish-achievement-tabs--trophies" role="tablist" aria-label="Топы по ачивкам">' +
       specs.map(function (spec) {
@@ -2531,8 +2532,23 @@ function hallFishSetAchievementState(message, data) {
   hallFishSetSubtitle(subtitle);
   hallFishUpdateTabs("achievements");
   if (myRank) myRank.hidden = true;
-  if (body) body.innerHTML = data ? hallFishRenderAchievementRows(data) : hallFishRenderAchievementSkeleton();
+  var scrollPositions = [];
+  var bodyScrollTop = body ? body.scrollTop : 0;
+  if (body) {
+    [".hall-fish-achievement-tabs", ".hall-fish-day-hero-months"].forEach(function (selector) {
+      var strip = body.querySelector(selector);
+      if (strip) scrollPositions.push({ selector: selector, left: strip.scrollLeft });
+    });
+    body.innerHTML = data ? hallFishRenderAchievementRows(data) : hallFishRenderAchievementSkeleton();
+  }
   modal.hidden = false;
+  if (body) {
+    scrollPositions.forEach(function (position) {
+      var strip = body.querySelector(position.selector);
+      if (strip) strip.scrollLeft = position.left;
+    });
+    body.scrollTop = bodyScrollTop;
+  }
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
 
