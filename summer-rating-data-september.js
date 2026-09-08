@@ -548,4 +548,93 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "07.09.2026": [
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ABevege",
+          "place": 1,
+          "reward": 22296,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "GUCCI",
+          "place": 1,
+          "reward": 7580,
+          "points": 0
+        },
+        {
+          "nick": "Hakas",
+          "place": 3,
+          "reward": 7460,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 1082.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 9,
+          "reward": 15180,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 12,
+          "reward": 7610,
+          "points": 0
+        },
+        {
+          "nick": "Rifa",
+          "place": 4,
+          "reward": 4960,
+          "points": 0
+        },
+        {
+          "nick": "Anton55",
+          "place": 7,
+          "reward": 1560,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WSOPли",
+          "place": 1,
+          "reward": 4292.67,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
