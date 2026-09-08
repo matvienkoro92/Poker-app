@@ -46,7 +46,8 @@
   box-shadow: 0 5px 16px rgba(225, 141, 27, 0.25);
 }
 
-.tournament-bet-modal__tab-panel {
+.tournament-bet-modal__tab-panel,
+.tournament-bet-modal__history {
   display: grid;
   gap: 18px;
 }

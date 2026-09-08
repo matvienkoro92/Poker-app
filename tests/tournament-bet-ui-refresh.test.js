@@ -10,7 +10,7 @@ function harness() {
   const body = { innerHTML: "draft: 25000 / 750", querySelector: () => ({}) };
   const context = {
     URLSearchParams, Promise,
-    window: { location: {}, localStorage: { removeItem() {} }, alert() {} },
+    window: { setInterval() {}, addEventListener() {}, location: {}, localStorage: { removeItem() {} }, alert() {} },
     document: { readyState: "loading", addEventListener() {}, querySelector() { return null; } },
     fetch(url, options) {
       requests.push(options);

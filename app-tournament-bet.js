@@ -254,16 +254,16 @@
     return '<time class="tournament-bet-modal__event-date" datetime="' + esc(value) + '">' + esc(date.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow", day: "numeric", month: "long", year: "numeric" })) + '</time>';
   }
 
-  function closedEventHtml(data) {
+  function closedEventHtml(data, archived) {
     var entries = Array.isArray(data.entries) ? data.entries : [];
     var winner = entries.find(function (entry) { return entry.winner; });
     var winnerArt = winner && typeof window.pokerGetSummerRatingPlayerArt === "function" ? window.pokerGetSummerRatingPlayerArt(winner.name) : null;
     var winnerArtSrc = winnerArt && winnerArt.src || "";
     if (!winnerArtSrc && winner && /^(frankl|andrushamorf|4ezzi)$/i.test(String(winner.name || "").trim())) winnerArtSrc = "./assets/summer-rating-player-morf.webp";
     var settled = data.status === "settled";
-    var expanded = bodyEl && bodyEl.querySelector(".tournament-bet-modal__closed-event[open]");
+    var expanded = bodyEl && Array.prototype.some.call(bodyEl.querySelectorAll(".tournament-bet-modal__closed-event[open]"), function (item) { return item.getAttribute("data-result-id") === String(data.id); });
     var payout = data.winnerPaidAmount == null ? data.bank : data.winnerPaidAmount;
-    return '<details class="tournament-bet-modal__closed-event"' + (expanded ? ' open' : '') + '><summary' + (winnerArtSrc ? ' class="tournament-bet-modal__result-with-art"' : '') + '>' +
+    return '<details data-result-id="' + esc(data.id) + '" class="tournament-bet-modal__closed-event"' + (expanded ? ' open' : '') + '><summary' + (winnerArtSrc ? ' class="tournament-bet-modal__result-with-art"' : '') + '>' +
       (winnerArtSrc ? '<img class="tournament-bet-modal__result-art" src="' + esc(winnerArtSrc) + '" alt="" loading="lazy" decoding="async">' : '') +
       '<span class="tournament-bet-modal__result-status">' + (settled ? 'Событие завершено' : 'Приём ставок закрыт') + '</span>' + eventDateHtml(data) +
       '<strong class="tournament-bet-modal__result-title">СТАВКА НА СЕБЯ<span class="tournament-bet-modal__result-tournament">В ' + esc(/^magic\s+mko$/i.test(String(data.title || "").trim()) ? "Magik MKO" : (data.title || "турнире")) + '</span></strong>' +
@@ -272,8 +272,19 @@
         '<span class="tournament-bet-modal__result-pending">' + (settled ? 'Победитель не указан' : 'Ожидаем результат турнира') + '</span>') +
       '<span class="tournament-bet-modal__result-toggle">Участники: ' + entries.length + ' · Подробнее <span aria-hidden="true">⌄</span></span></summary>' +
       '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' +
-      '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div></details>' +
-      '<div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data);
+      (archived ? "" : '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div>') + '</details>' +
+      (archived ? "" : '<div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data));
+  }
+
+  function completedEventsHtml(data) {
+    var seen = {};
+    var events = (Array.isArray(data.completedEvents) ? data.completedEvents : []).filter(function (item) {
+      if (!item || !item.id || item.id === data.id || item.status !== "settled" || item.createdByPlayer || seen[item.id]) return false;
+      seen[item.id] = true;
+      return true;
+    });
+    if (!events.length) return "";
+    return '<section class="tournament-bet-modal__history"><h3>Прошлые события</h3>' + events.map(function (item) { return closedEventHtml(item, true); }).join("") + '</section>';
   }
 
   function eventHtml(data) {
@@ -348,11 +359,11 @@
     var tabs = '<nav class="tournament-bet-modal__tabs' + (data.isAdmin ? ' tournament-bet-modal__tabs--admin' : '') + '" aria-label="Разделы"><button type="button" data-tournament-bet-tab="event" class="' + (activeTab === "event" ? 'is-active' : '') + '">Ставка на себя</button><button type="button" data-tournament-bet-tab="rating" class="' + (activeTab === "rating" ? 'is-active' : '') + '">Рейтинг</button>' + (data.isAdmin ? '<button type="button" data-tournament-bet-tab="admin-create" class="' + (activeTab === "admin-create" ? 'is-active' : '') + '">Создать</button>' : '') + '</nav>';
     if (!data.id) {
       var emptyEvent = '<section class="tournament-bet-modal__empty"><span aria-hidden="true">♠</span><strong>Ставки ещё не открыты</strong><p>Администратор создаст событие перед турниром.</p></section><div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data);
-      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent) + '</div>';
+      bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + (activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? createBetHtml(data) : emptyEvent + completedEventsHtml(data)) + '</div>';
       updateHomeButton(data);
       return;
     }
-    var panel = activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? (data.createdByPlayer ? eventHtml(data) : createBetHtml(data)) : eventHtml(data);
+    var panel = activeTab === "admin-create" ? adminHtml(data, true) : activeTab === "rating" ? ratingHtml(data) : activeTab === "create" ? (data.createdByPlayer ? eventHtml(data) : createBetHtml(data)) : eventHtml(data) + completedEventsHtml(data);
     bodyEl.innerHTML = tabs + '<div class="tournament-bet-modal__tab-panel">' + panel + '</div>';
     updateHomeButton(data);
   }
