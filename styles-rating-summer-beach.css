@@ -1,13 +1,13 @@
 /* Summer rating only: live statistics over the supplied beach composition. */
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard {
   display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px;
-  padding: 14px; border-radius: 22px; background: #f4eee2;
-  color: #152237; font-family: Arial,sans-serif; container-type: inline-size;
+  padding: 14px; border-radius: 22px; background: #070d16;
+  color: #f4e8ce; font-family: Arial,sans-serif; container-type: inline-size;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero {
   grid-column: 1/-1; display: block; aspect-ratio: 2; min-height: 0;
-  border: 0; border-radius: 14px; box-shadow: none;
-  background: url('./assets/summer-results-beach-v1.webp') center / cover no-repeat;
+  border: 1px solid #80622f; border-radius: 14px; box-shadow: none;
+  background: url('./assets/summer-results-hammocks-trio-v2.webp') center / cover no-repeat;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__art,
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__note,
@@ -16,18 +16,18 @@
   position: absolute; inset: 5% 0 auto; width: 100%; margin: 0; padding: 0;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero h2 {
-  color: #111d30; font: 500 clamp(22px,4.4cqw,48px)/1.1 Georgia,serif;
-  text-align: center; white-space: nowrap; text-shadow: 0 1px 7px #fff9;
+  color: #ffe0a0; font: 500 clamp(22px,4.4cqw,48px)/1.1 Georgia,serif;
+  text-align: center; white-space: nowrap; text-shadow: 0 2px 8px #000;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__total {
   margin: 4% 0 0 5%; padding: 0; width: 60%; border: 0;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__total > span {
-  color: #354353; font-size: clamp(8px,1.4cqw,16px); letter-spacing: .17em; text-transform: uppercase;
+  color: #ded2b7; font-size: clamp(8px,1.4cqw,16px); letter-spacing: .17em; text-transform: uppercase;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__total strong {
-  margin-top: 1%; color: #8a5b20; font: 600 clamp(25px,6.6cqw,74px)/1.15 Georgia,serif;
-  letter-spacing: -.04em; text-shadow: 0 1px 5px #fff9;
+  margin-top: 1%; color: #ffd477; font: 600 clamp(25px,6.6cqw,74px)/1.15 Georgia,serif;
+  letter-spacing: -.04em; text-shadow: 0 2px 8px #000;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-counts,
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-metrics { display: contents; }
@@ -35,7 +35,7 @@
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric {
   display: flex; flex-direction: column; justify-content: center; gap: 6px;
   margin: 0; padding: 14px 6px; min-width: 0; text-align: center;
-  border: 1px solid #fff; border-radius: 18px; background: #fffcf5;
+  border: 1px solid #70552b; border-radius: 18px; background: #0c1420;
   box-shadow: 0 8px 18px #73532212; font-size: clamp(12px,2.1cqw,23px);
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric__icon,
@@ -44,26 +44,26 @@
   color: #b28b3d; font-size: 28px;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-counts strong,
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric strong { color: #142237; font: 600 clamp(22px,3.4cqw,38px)/1.1 Georgia,serif; }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-counts small { color: #865913; font-size: clamp(12px,2cqw,22px); font-weight: 800; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric strong { color: #ffe1a0; font: 600 clamp(22px,3.4cqw,38px)/1.1 Georgia,serif; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-counts small { color: #dec080; font-size: clamp(12px,2cqw,22px); font-weight: 800; }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric small,
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric > span > span { color: #626773; font-size: clamp(10px,1.5cqw,16px); }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-metric > span > span { color: #c6bda9; font-size: clamp(10px,1.5cqw,16px); }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-tops {
   grid-column: 1/-1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top {
-  padding: 12px; background: #fffaf1; border: 1px solid #fff; border-radius: 20px; box-shadow: 0 10px 22px #73532216; min-width: 0;
+  padding: 12px; background: #0c1420; border: 1px solid #70552b; border-radius: 20px; box-shadow: 0 10px 22px #73532216; min-width: 0;
 }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top:first-child { border: 3px solid #364f63; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top:first-child { border: 1px solid #94703a; }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top h3 {
-  color: #152237; font: 500 clamp(13px,2cqw,23px)/1.25 Georgia,serif; border-color: #d6c6aa; min-height: 2.5em;
+  color: #f4e8ce; font: 500 clamp(13px,2cqw,23px)/1.25 Georgia,serif; border-color: #70552b; min-height: 2.5em;
 }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top table { width: 100%; font-size: clamp(10px,1.6cqw,18px); color: #152237; }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top th { color: #72644e; }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top td { color: #152237; border-color: #ddd3c3; padding: 12px 3px; overflow-wrap: anywhere; }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top td:last-child { color: #152237; font-weight: 700; }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top small { color: #72644e; }
-#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top tbody tr:first-child { background: #f4e3b9; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard .summer-rating-season-top table { width: 100%; font-size: clamp(10px,1.6cqw,18px); color: #f4e8ce; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top th { color: #c6bda9; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top td { color: #f4e8ce; border-color: #4e412a; padding: 12px 3px; overflow-wrap: anywhere; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top td:last-child { color: #f4e8ce; font-weight: 700; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top small { color: #c6bda9; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top tbody tr:first-child { background: #342a17; }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-rank { width: 24px; height: 24px; font-size: 12px; }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top th:first-child { width: 28px; }
 @media(max-width:520px) {
