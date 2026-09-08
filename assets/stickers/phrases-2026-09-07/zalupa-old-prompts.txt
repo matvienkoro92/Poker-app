@@ -1,0 +1,4 @@
+Tool: built-in image_gen
+Character edit: Preserve the approved character, costume, pose and nickname Залупа. Make him an elderly male monkey with long silver-gray beard, mustache, gray bushy eyebrows and facial wrinkles.
+Sticker edit: Apply the same aging and beard to the approved sticker. Preserve costume, tissue gesture and exact text «Не плачь, Обижанец!».
+Final background extraction for both: Background extraction only. Isolate the exact foreground artwork from this image as a transparent PNG cutout. Preserve all foreground pixels, beard, costume silhouette, pose and text. Replace the background with an actual empty alpha channel. Do not redraw the character.

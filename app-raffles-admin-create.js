@@ -339,7 +339,7 @@ function initRafflesAdminCreateRuntime(opts) {
     monthGroup.label = "Турниры месяца";
     var group = document.createElement("optgroup");
     group.label = "Остальные турниры отчётных суток";
-    function appendScheduleOption(target, item, scopeLabel, highlighted) {
+    function appendScheduleOption(target, item, scopeLabel, highlighted, dayFirst) {
       var hour = String(Math.max(0, Number(item.hour) || 0)).padStart(2, "0");
       var minute = String(Math.max(0, Number(item.minute) || 0)).padStart(2, "0");
       var time = hour + ":" + minute;
@@ -349,15 +349,17 @@ function initRafflesAdminCreateRuntime(opts) {
       option.value = String(buyin);
       option.setAttribute("data-price", String(buyin));
       option.setAttribute("data-name", String(item.name || item.category || "Турнир") + " (" + time + ")");
+      if (dayFirst) option.style.fontWeight = "700";
       if (highlighted) {
         option.setAttribute("data-tournament-day", "1");
         option.style.color = "#22c55e";
         option.style.backgroundColor = "#052e16";
         option.style.fontWeight = "900";
       }
-      option.textContent = time + " · " + (highlighted ? "🟢 " : "") +
+      var leadingLabel = dayFirst && scopeLabel ? String(scopeLabel).toUpperCase() : time;
+      option.textContent = leadingLabel + " · " + (highlighted ? "🟢 " : "") +
         String(item.name || item.category || "Турнир") +
-        (scopeLabel ? " (" + scopeLabel + ")" : "") +
+        (scopeLabel && !dayFirst ? " (" + scopeLabel + ")" : "") +
         " — вход " + (buyin > 0 ? buyin.toLocaleString("ru-RU") + "₽" : "бесплатно") +
         (guarantee ? " · призы: " + guarantee : "");
       target.appendChild(option);
@@ -368,7 +370,7 @@ function initRafflesAdminCreateRuntime(opts) {
     }).slice().sort(function (a, b) {
       return Number(a.dow) - Number(b.dow) || Number(a.hour) - Number(b.hour);
     }).forEach(function (item) {
-      appendScheduleOption(eveningGroup, item, dayLabels[Number(item.dow)] || "", Number(item.dow) === dow);
+      appendScheduleOption(eveningGroup, item, dayLabels[Number(item.dow)] || "", Number(item.dow) === dow, true);
     });
     schedule.filter(function (item) {
       return item && String(item.category || "").trim().toLowerCase() === "турнир месяца";

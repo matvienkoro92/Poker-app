@@ -1,0 +1,33 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": [
+    {
+      "id": "emil-no-friends",
+      "prompt": "Generate a NEW transparent PNG sticker, transparent background. A sad brown male monkey with spiky orange-brown hair, black sideways Poker21 cap and black hoodie with orange piping hugging a gold trophy, lonely slumped pose. Premium detailed 3D cartoon rendering. Caption in very large white and orange bold Russian typography outlined black below character, exact text: «У меня нет друзей». White die-cut outline around character and caption. Everything beyond this outline must be transparent alpha, with NO checkerboard squares, NO background, NO scenery. Single sticker."
+    },
+    {
+      "id": "fishkopcheny-waaar",
+      "prompt": "Create one premium 3D illustrated Telegram sticker. Reference image is character identity/style only: preserve the recognizable Фишкапченый character and outfit, change pose and expression to: smug professor monkey blowing out a small candle with a curling wisp of smoke. Remove original caption and unnecessary props. Exact new Russian caption: «Вот и потух ваш Вааар». Bold very legible white and orange typography with black stroke below character, white die-cut outline around whole sticker. Fully transparent background with actual alpha, no backdrop, no checkerboard drawn, no ground plane. Entire sticker within canvas with margin."
+    },
+    {
+      "id": "pokermanki-no-ban",
+      "prompt": "Create one premium 3D illustrated Telegram sticker. Reference image is character identity/style only: preserve the recognizable ПокерМанки character and outfit, change pose and expression to: stern dismissive expression, shooing someone away with an open hand. Remove original caption and unnecessary props. Exact new Russian caption: «Без бана, просто в пизду)». Bold very legible white and orange typography with black stroke below character, white die-cut outline around whole sticker. Fully transparent background with actual alpha, no backdrop, no checkerboard drawn, no ground plane. Entire sticker within canvas with margin."
+    },
+    {
+      "id": "pryanik-returned",
+      "prompt": "Create one premium 3D illustrated Telegram sticker. Reference image is character identity/style only: preserve the recognizable Пряник character and outfit, change pose and expression to: self-confident gingerbread man making a theatrical comeback with arms spread wide. Remove original caption and unnecessary props. Exact new Russian caption: «Пиздобол вернулся». Bold very legible white and orange typography with black stroke below character, white die-cut outline around whole sticker. Fully transparent background with actual alpha, no backdrop, no checkerboard drawn, no ground plane. Entire sticker within canvas with margin."
+    },
+    {
+      "id": "pokermanki-no-mood",
+      "prompt": "Create one premium 3D illustrated Telegram sticker. Reference image is character identity/style only: preserve the recognizable ПокерМанки character and outfit, change pose and expression to: utterly fed up, cheek resting in palm, slumped shoulders. Remove original caption and unnecessary props. Exact new Russian caption: «Никакого настроения». Bold very legible white and orange typography with black stroke below character, white die-cut outline around whole sticker. Fully transparent background with actual alpha, no backdrop, no checkerboard drawn, no ground plane. Entire sticker within canvas with margin."
+    },
+    {
+      "id": "kisa-character",
+      "prompt": "Edit this mascot: make it clearly an adult MALE monkey, no eyelashes or nail polish. Keep pink banana costume, badge Киса, shoes, style. REMOVE ALL BACKGROUND INCLUDING GRAY GLOW. Genuine fully transparent background alpha=0 outside white cutout outline, no opaque backdrop. Full body no slogan."
+    },
+    {
+      "id": "kisa-dont-cry",
+      "prompt": "Create one new Telegram sticker of this exact adult male monkey Киса in pink banana costume. Teasing grin, extending a tissue toward viewer, other hand on hip. Exact Russian caption below: «Не плачь, Обижанец!». Large bold white and orange letters with black stroke and white outer sticker border. Keep character identity and costume. No scenery, no glow, genuine transparent alpha background."
+    }
+  ]
+}

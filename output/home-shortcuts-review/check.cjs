@@ -1,0 +1,41 @@
+const {chromium}=require('playwright');
+(async()=>{
+ const b=await chromium.launch({headless:true});
+ const p=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:2});
+ await p.route(/^https?:\/\/(?!127\.0\.0\.1)/,r=>r.fulfill({status:503,body:'{}'}));
+ await p.goto('http://127.0.0.1:4183/',{waitUntil:'domcontentloaded'});
+ await p.waitForTimeout(1800);
+ for(const width of [320,390,430,768,1280]) {
+  await p.setViewportSize({width,height:900});
+  await p.locator('.home-daily-shortcuts').scrollIntoViewIfNeeded();
+  await p.locator('.home-daily-shortcuts').screenshot({path:`output/home-shortcuts-review/cards-${width}.png`});
+  if(width===390) await p.screenshot({path:'output/home-shortcuts-review/home-390.png'});
+  console.log(JSON.stringify(await p.locator('.home-daily-shortcuts').evaluate((el)=>({viewport:innerWidth,width:el.offsetWidth,height:el.offsetHeight,cards:[...el.children].map(c=>({width:c.offsetWidth,height:c.offsetHeight,label:c.querySelector('.home-mini-icon__label').getBoundingClientRect().toJSON(),font:getComputedStyle(c.querySelector('.home-mini-icon__label')).fontSize})),overflow:document.documentElement.scrollWidth>innerWidth}))));
+ }
+ await p.setViewportSize({width:390,height:900});
+ await p.evaluate(()=>updateRaffleBadge(3,15000));
+ await p.locator('.home-daily-shortcuts').screenshot({path:'output/home-shortcuts-review/cards-active-390.png'});
+ const active=await p.locator('#raffleActiveBadge').innerText();
+ if(active!=='3' || !await p.locator('#raffleActiveBadge').isVisible()) throw Error('Active count failed');
+ if(!await p.locator('#raffleActiveAmountBadge').isVisible()) throw Error('Amount failed');
+ await p.evaluate(()=>updateRaffleBadge(0,0));
+ if(await p.locator('#raffleActiveBadge').isVisible() || await p.locator('#raffleActiveAmountBadge').isVisible()) throw Error('Hidden count failed');
+ await p.locator('.home-daily-shortcuts [data-view-target="raffles"]').click();
+ await p.waitForTimeout(700);
+ console.log('raffles action',await p.evaluate(()=>document.querySelector('.app').className));
+ if(!await p.locator('[data-view="raffles"].view--active').count()) throw Error('Raffles navigation failed');
+ await p.evaluate(()=>setView('home'));
+ await p.locator('.home-daily-shortcuts [data-hall-fish-open]').click();
+ await p.waitForTimeout(1200);
+ if(!await p.locator('#hallFishRatingModal').isVisible()) throw Error('Players action failed');
+ console.log('Players modal opened; counters 0/3 and amount passed.');
+ const chat=await p.locator('.home-mini-icon-item--chat').getAttribute('href');
+ if(chat!=='https://t.me/+snBngKmXYa1mYjky') throw Error('Telegram destination changed');
+ console.log('Telegram destination preserved.');
+ await p.locator('.hall-fish-modal__close').click();
+ await p.evaluate(()=>updateRaffleBadge(3,15000));
+ await p.setViewportSize({width:1258,height:900});
+ await p.locator('.home-daily-shortcuts').evaluate(el=>{el.style.setProperty('position','fixed');el.style.setProperty('width','1218px','important');el.style.setProperty('max-width','none','important');el.style.setProperty('left','19px');el.style.setProperty('top','19px');el.style.setProperty('margin','0','important');el.style.setProperty('z-index','999999');});
+ await p.locator('.home-daily-shortcuts').screenshot({path:'output/home-shortcuts-review/cards-reference-scale.png'});
+ await b.close();
+})();

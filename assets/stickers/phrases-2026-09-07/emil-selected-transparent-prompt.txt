@@ -1,0 +1,2 @@
+Built-in image_gen
+Background extraction only. Isolate the exact foreground artwork from this image as a transparent PNG cutout. Preserve all foreground pixels, monkey face and smirk, cap, hair, black hoodie, poker chips, trophy, pose and exact Russian text «У меня нет друзей». Keep the white die-cut outline. Replace the entire checkerboard background with an actual empty alpha channel, including gaps around tail and trophy. Do not redraw the character.

@@ -108,7 +108,7 @@ test("bet action is a single horizontal half-text half-art card", function () {
   assert.match(css, /\.tournament-bet-modal__offer \.tournament-bet-modal__bet/);
   assert.match(css, /\.tournament-bet-modal__feature\s*\{[^}]*grid-template-columns:\s*repeat\(2,/s);
   assert.match(client, /id="tournamentBetTitle">Ставка на себя<\/h2>/);
-  assert.match(client, /Пройдите дальше тех, кто сделал ставку на себя, и заберите весь банк\./);
+  assert.match(client, /Пройдите в турнире дальше тех, кто сделал ставку на себя, и заберите весь банк\./);
   assert.match(client, /ID Poker21/);
   assert.match(client, /tournament-bet-modal__entry-stake/);
   assert.match(css, /Participant cards mirror the data-rich SNG battle list/);
@@ -184,7 +184,7 @@ test("players can create a zero-starting-bank bet from tournaments costing at le
   assert.match(schedule, /if \(item && item\.repeat === "daily"\) return 0/);
   assert.match(schedule, /return dow === 0 \? 7 : dow >= 1 && dow <= 6 \? dow : 8/);
   assert.match(schedule, /dayOrder\(a\) - dayOrder\(b\)/);
-  assert.match(client, /data-tournament-bet-tab="create"/);
+  assert.doesNotMatch(client, /data-tournament-bet-tab="create"/);
   assert.match(client, /Выберите турнир, в котором хотите поставить на себя/);
   assert.match(client, /<h3>Создать персональную ставку<\/h3>/);
   assert.match(client, /action: "create_player"/);
@@ -269,7 +269,7 @@ test("personal bets stay in the create tab and never replace the main event", fu
 test("personal bet tab lists offers before the creation form with accept and decline actions", function () {
   const client = fs.readFileSync(path.join(__dirname, "..", "app-tournament-bet.js"), "utf8");
   const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
-  assert.match(client, />Личная ставка<\/button>/);
+  assert.doesNotMatch(client, />Личная ставка<\/button>/);
   assert.match(client, /return personalList \+ '<form/);
   assert.match(client, /data-tournament-bet-personal-accept/);
   assert.match(client, /data-tournament-bet-personal-decline/);
@@ -318,4 +318,20 @@ test("bettor win rate measures payouts as a percentage of stakes", function () {
     const rating = tournamentBet.ratingFor([event], null, {});
     assert.equal(rating[0].winRate, expected);
   }
+});
+
+
+test("completed history is deduplicated and preserves winner without exposing player IDs", function () {
+  const old = { id: "old", status: "settled", title: "Magic MKO", createdAt: "2026-09-01T12:00:00Z", winnerPaidAt: "2026-09-02T01:00:00Z", winnerAccountId: "private", entries: [{ accountId: "private", poker21Id: "123456", name: "Winner", stake: 500 }], winnerPaidAmount: 9000 };
+  const current = { id: "current", status: "settled", entries: [] };
+  const result = tournamentBet.publicState(current, { isAdmin: false }, [current, old, old, { ...old, id: "open", status: "open" }]);
+  assert.equal(result.completedEvents.length, 1);
+  const event = result.completedEvents[0];
+  assert.equal(event.createdAt, old.createdAt);
+  assert.equal(event.entries[0].winner, true);
+  assert.equal(event.entries[0].name, "Winner");
+  assert.equal(event.entries[0].accountId, "");
+  assert.equal(event.entries[0].poker21Id, "");
+  assert.equal(event.winnerPaidAmount, 9000);
+  assert.equal(tournamentBet.publicState(null, {}, [old]).completedEvents.length, 1);
 });

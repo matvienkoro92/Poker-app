@@ -52,8 +52,11 @@ test("new events notify only subscribers with an event deep link and stake", asy
   await api.notify({ id: "tb_test_1", title: "Magic MKO", stakePrice: 500, tournamentTime: "18:00", createdByPlayer: true }, "token");
   assert.equal(messages.length, 1);
   assert.equal(messages[0].chat_id, "123");
-  assert.match(messages[0].text, /Сумма ставки: 500 ₽/);
-  assert.match(messages[0].text, /Личная ставка/);
+  assert.match(messages[0].text, /Ставка на себя: 500 ₽/);
+  assert.match(messages[0].text, /Magic MKO в 18 мск/);
+  assert.match(messages[0].text, /Сейчас участников 0\./);
+  assert.match(messages[0].text, /Регистрация закроется в 19:30 мск/);
+  assert.doesNotMatch(messages[0].text, /Турнир вечера/);
   assert.equal(new URL(messages[0].buttonUrl).searchParams.get("startapp"), "tournament_bet_tb_test_1");
   await api.subscribe(auth, "ID123456", false, "token");
   await api.notify({ id: "tb_test_2", title: "Next", stakePrice: 100 }, "token");
