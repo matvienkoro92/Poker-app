@@ -132,3 +132,21 @@
 
 .home-summer-dashboard { padding: 12px 0; }
 .home-summer-dashboard > a { display: block; margin: 14px 0; color: #e8cd91; }
+
+/* Home summary uses the same unframed scene as the daily rating. */
+.home-summer-dashboard .summer-results-hero {
+  display: block; position: relative; aspect-ratio: 2; min-height: 0;
+  border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: visible;
+}
+.home-summer-dashboard .summer-results-hero::before {
+  content: ""; position: absolute; inset: 0;
+  background: url('./assets/summer-results-hammocks-trio-v2.webp') center / cover no-repeat;
+  mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 78%, transparent), linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+  mask-composite: intersect; pointer-events: none;
+}
+.home-summer-dashboard .summer-results-hero__art { display: none; }
+.home-summer-dashboard .summer-results-hero__copy { position: absolute; inset: 5% 0 auto; width: 100%; margin: 0; padding: 0; }
+.home-summer-dashboard .summer-results-hero h2 { text-align: center; font-size: clamp(20px, 4.4vw, 42px); color: #ffe0a0; }
+.home-summer-dashboard .summer-results-hero__total { width: 60%; margin: 4% 0 0 5%; border: 0; padding: 0; }
+.home-summer-dashboard .summer-results-hero__total > span { font-size: clamp(8px, 1.4vw, 16px); }
+.home-summer-dashboard .summer-results-hero__total strong { margin-top: 1%; font-size: clamp(25px, 5vw, 54px); color: #ffd477; text-shadow: 0 2px 8px #000; }
