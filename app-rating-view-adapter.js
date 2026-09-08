@@ -432,6 +432,7 @@ function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
 }
 
 var SUMMER_RATING_PLAYER_ART_BY_NICK = {
+  "jeweler": { src: "./assets/club-news-personal/jeweler-personal-v1.webp?v=1" },
   "киса": { src: "./assets/club-news-personal/zalupa-personal.webp?v=1" },
   "залупа": { src: "./assets/club-news-personal/zalupa-personal.webp?v=1" },
   "gucci💱": { src: "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1" },
