@@ -18,7 +18,7 @@ html[data-theme="gold"] body[data-view="home"] {
 /* Актуальный СНГ: баннер и живая строка параметров турнира. */
 .home-daily-deal-hero {
   margin-top: 2px;
-  margin-bottom: 54px;
+  margin-bottom: 26px;
 }
 
 .home-daily-deal-hero__image {
@@ -59,7 +59,7 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
   position: absolute;
   z-index: 9;
   left: 50%;
-  bottom: -45px;
+  bottom: 40px;
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -7523,11 +7523,11 @@ html body #app.app.app--view-home
   display: block;
 }
 .home-tournament-trophy__copy > span { position: absolute; left: 19%; width: 62%; margin: 0; }
-.home-tournament-trophy__copy .home-tournament-trophy__title { top: 17%; height: 7%; display: flex; align-items: center; justify-content: center; font-size: 5.3cqw; }
-.home-tournament-trophy__copy .home-tournament-trophy__caption { top: 60%; font-size: 4.4cqw; }
-.home-tournament-trophy__copy .home-tournament-trophy__prize { top: 64%; font-size: 9cqw; }
-.home-tournament-trophy__copy .home-tournament-trophy__buyin-label { top: 74.5%; font-size: 3.7cqw; }
-.home-tournament-trophy__copy .home-tournament-trophy__buyin { top: 78%; font-size: 6.8cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__title { top: 17%; height: 7%; display: flex; align-items: center; justify-content: center; font-size: 6.2cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__caption { top: 59.5%; font-size: 5.2cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__prize { top: 63.8%; font-size: 10.5cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__buyin-label { top: 74%; font-size: 4.5cqw; }
+.home-tournament-trophy__copy .home-tournament-trophy__buyin { top: 77.5%; font-size: 8.2cqw; }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__day { top: 13.5%; left: 44%; font-size: 4cqw; padding: 0; background: none; color: #ffc65e; }
 .home-last-longer-dock__chip { transform: perspective(700px) rotateY(18deg) rotateZ(-7deg); }
 .home-last-longer-dock__chip::before { transform: translate(-4px, 0); box-shadow: -2px 0 #423016, -3px 0 #17140e, inset 2px 0 3px #0009; }
@@ -8451,4 +8451,47 @@ html body #app.app.app--view-home
   mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
   pointer-events: none;
   z-index: -1;
+}
+
+/* Soften the artwork while retaining bright, legible nameplates. */
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
+  --lounge-label-art: url('./assets/home-lounge-chat-v1.webp');
+  --lounge-label-shift: 1.6%;
+  --lounge-label-clip: inset(77.5% 23% 17% 23%);
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles {
+  --lounge-label-art: url('./assets/home-lounge-raffles-v1.webp');
+  --lounge-label-shift: 0%;
+  --lounge-label-clip: inset(79% 23% 16% 23%);
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels {
+  --lounge-label-art: url('./assets/home-lounge-players-v1.webp');
+  --lounge-label-shift: -3.4%;
+  --lounge-label-clip: inset(82.5% 22% 12% 23%);
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-art {
+  filter: brightness(.84) saturate(.94);
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link::after {
+  content: "" !important;
+  position: absolute;
+  inset: 0;
+  background: var(--lounge-label-art) center / 100% 100% no-repeat;
+  translate: 0 var(--lounge-label-shift);
+  clip-path: var(--lounge-label-clip);
+  filter: brightness(1.16);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Brighten the engraved instruction without lighting up the bonus sectors. */
+.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  background: url('./assets/home-bonus-table-rim-hint-v2.webp') center / 100% 100% no-repeat;
+  clip-path: polygon(21% 64%, 38% 69%, 54% 71%, 70% 69%, 87% 66%, 87% 74%, 70% 77%, 54% 78%, 38% 76%, 21% 71%);
+  filter: brightness(2.1) saturate(1.12);
+  pointer-events: none;
 }

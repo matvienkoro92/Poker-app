@@ -613,7 +613,7 @@
   .tournament-bet-modal__feature .tournament-bet-modal__lead { font-size: 11px !important; line-height: 1.25 !important; }
   .tournament-bet-modal__feature .tournament-bet-modal__bet,
   .tournament-bet-modal__sticky-action .tournament-bet-modal__bet { min-height: 46px !important; padding: 8px !important; font-size: 12px !important; }
-  .tournament-bet-modal__feature-art img { min-height: 320px; object-position: 60% 50%; }
+  .tournament-bet-modal__feature-art img { min-height: 0; object-position: center; }
 
   .tournament-bet-modal__hero--banner .tournament-bet-modal__tournament-banner {
     width: min(100%, 260px) !important;
@@ -628,7 +628,7 @@
 /* Tournament terms stay visible beside the bank on every screen size. */
 .tournament-bet-modal__feature {
   height: auto;
-  min-height: 500px;
+  min-height: 375px;
 }
 .tournament-bet-modal__details {
   display: grid;
@@ -654,7 +654,7 @@
   overflow-wrap: anywhere;
 }
 @media (max-width: 600px) {
-  .tournament-bet-modal__feature { min-height: 360px; }
+  .tournament-bet-modal__feature { min-height: 270px; }
   .tournament-bet-modal__details { gap: 7px 5px; }
   .tournament-bet-modal__details dt { font-size: 10px; }
   .tournament-bet-modal__details dd { font-size: 12px; }
@@ -786,3 +786,12 @@
   line-height: 1.4;
 }
 .tournament-bet-modal__intro > span { color: #68e99a; font-size: 1.2em; flex: 0 0 auto; }
+
+/* Compact the feature without stretching or cropping the character. */
+.tournament-bet-modal__feature-art img {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center;
+}
