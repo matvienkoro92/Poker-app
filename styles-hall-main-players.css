@@ -440,7 +440,7 @@
 }
 .hall-fish-modal__tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   padding: calc(var(--tg-ui-top-clearance, max(0px, env(safe-area-inset-top, 0px))) + 12px) 58px 14px 12px;
   border-bottom: 1px solid rgba(251, 191, 36, 0.2);
