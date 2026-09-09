@@ -4051,3 +4051,36 @@
 .daily-poker__compact-prize-reward { font: 500 clamp(10px, 1.65cqw, 18px)/1.2 Arial, sans-serif; }
 .daily-poker__compact-prize-reward b { color: #ffbf47; font-weight: 800; }
 .daily-poker__prize:nth-child(n+4) .daily-poker__compact-prize-reward b { color: #55c5ff; }
+
+/* Use the supplied six-card artwork, framing each reward independently. */
+#app .daily-poker .daily-poker__prizes {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+}
+#app .daily-poker .daily-poker__prize,
+#app .daily-poker .daily-poker__prize:nth-child(n+4) {
+  aspect-ratio: 1 / 1;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-image: url('./assets/daily-poker-prizes-gold-reference-v1.png');
+  background-size: 600% 200%;
+  background-position: var(--prize-art-x) 45%;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+#app .daily-poker .daily-poker__prize:nth-child(1) { --prize-art-x: 0%; }
+#app .daily-poker .daily-poker__prize:nth-child(2) { --prize-art-x: 20%; }
+#app .daily-poker .daily-poker__prize:nth-child(3) { --prize-art-x: 40%; }
+#app .daily-poker .daily-poker__prize:nth-child(4) { --prize-art-x: 60%; }
+#app .daily-poker .daily-poker__prize:nth-child(5) { --prize-art-x: 80%; }
+#app .daily-poker .daily-poker__prize:nth-child(6) { --prize-art-x: 100%; }
+#app .daily-poker .daily-poker__compact-prize-title,
+#app .daily-poker .daily-poker__compact-prize-reward { display: none; }
+@container (max-width: 700px) {
+  #app .daily-poker .daily-poker__prizes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 4px;
+  }
+}
