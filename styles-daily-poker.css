@@ -4141,3 +4141,40 @@
 #app .daily-poker .daily-poker__prize:nth-child(6) { --prize-art-x: 100%; }
 #app .daily-poker .daily-poker__compact-prize-title,
 #app .daily-poker .daily-poker__compact-prize-reward { display: none; }
+
+/* Keep the deal controls entirely above the board, beside the hole cards. */
+#app .daily-poker .daily-poker__table-deal {
+  left: 58%;
+  top: 12%;
+  width: 38%;
+  transform: none;
+}
+#app .daily-poker .daily-poker__table-deal > .daily-poker__play-btn {
+  min-height: 9cqw;
+  padding: 1.5cqw 1cqw;
+}
+#app .daily-poker .daily-poker__table-deal > .daily-poker__result {
+  position: relative;
+  top: auto;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  max-height: 23cqw;
+  overflow: auto;
+  margin: 1cqw 0 0 !important;
+  padding: 1.2cqw !important;
+  border-radius: 1.5cqw !important;
+  font-size: 2.1cqw;
+  line-height: 1.25;
+}
+#app .daily-poker .daily-poker__table-deal .daily-poker__result-primary {
+  font-size: 2.1cqw !important;
+  line-height: 1.25 !important;
+}
+#app .daily-poker .daily-poker__table-deal .daily-poker__result-nowrap { white-space: normal; }
+#app .daily-poker .daily-poker__table-deal .daily-poker__result-meta {
+  font-size: 1.65cqw !important;
+  line-height: 1.25 !important;
+  gap: .4cqw 1cqw !important;
+  margin-top: .7cqw !important;
+}

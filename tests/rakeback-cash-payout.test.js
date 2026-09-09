@@ -26,3 +26,11 @@ test('uncertain remote result retains permanent reservation and never retries tr
   await assert.rejects(pay(row,500,'admin',deps));
   assert.equal((await pay(row,500,'admin',deps)).status,'processing');assert.equal(count,1);
 });
+test('batch status uses one MGET for all requested rows', async () => {
+  const {statuses}=require('../lib/rakeback-cash-payout');let calls=0;
+  const result=await statuses([row,{...row,groupId:'other'}],async cmds=>{
+    calls++;assert.equal(cmds.length,1);assert.equal(cmds[0][0],'MGET');assert.equal(cmds[0].length,3);
+    return [{result:[JSON.stringify({status:'paid'}),null]}];
+  });
+  assert.equal(calls,1);assert.deepEqual(result,[{status:'paid'},null]);
+});

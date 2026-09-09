@@ -858,7 +858,7 @@
     var room = row.querySelector("[data-rakeback-room]");
     var amount = Number(row.getAttribute("data-rakeback-amount-value"));
     button.hidden = !room || room.value !== "P21";
-    button.disabled = button.dataset.paymentState === "paid" || button.dataset.paymentState === "processing" ||
+    button.disabled = button.dataset.paymentChecked !== "1" || button.dataset.paymentState === "paid" || button.dataset.paymentState === "processing" ||
       row.getAttribute("data-rakeback-saved") !== "1" || !(amount > 0 && amount <= 1000);
     button.title = button.dataset.paymentState === "paid" ? "Уже выдано в кассу" :
       button.dataset.paymentState === "processing" ? "Выдача обрабатывается; повтор запрещён" :
@@ -873,12 +873,47 @@
   }
   function showCashPayout(row, data) {
     var button = row.querySelector("[data-rakeback-cash-pay]");
+    if (button && data && data.ok) button.dataset.paymentChecked = "1";
     if (button && data && data.payment) {
       button.dataset.paymentState = data.payment.status;
       button.textContent = data.payment.status === "paid" ? "✓ ₽" : "…";
     }
     syncCashPayoutButton(row);
   }
+
+  var cashStatusRefreshRunning = false;
+  var cashStatusRefreshTimer = null;
+  function scheduleCashStatusRefresh() {
+    clearTimeout(cashStatusRefreshTimer);
+    cashStatusRefreshTimer = setTimeout(refreshVisibleCashStatuses, 100);
+  }
+  function refreshVisibleCashStatuses() {
+    if (document.hidden || cashStatusRefreshRunning) return;
+    var rows = Array.prototype.slice.call(document.querySelectorAll("[data-rakeback-shared-row]")).filter(function(row) {
+      var button = row.querySelector("[data-rakeback-cash-pay]");
+      var amount = Number(row.getAttribute("data-rakeback-amount-value"));
+      return button && !button.hidden && button.dataset.paymentState !== "paid" && amount > 0 && amount <= 1000 &&
+        row.getAttribute("data-rakeback-saved") === "1" && row.getClientRects().length > 0;
+    }).slice(0, 500);
+    if (!rows.length) return;
+    cashStatusRefreshRunning = true;
+    requestJson(getApiBaseSafe() + "/api/admin-report-shifts", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildAuthBody({ action: "rakeback_cash_statuses", rows: rows.map(function(row) {
+        return { groupId: row.getAttribute("data-rakeback-group"), kind: row.getAttribute("data-rakeback-kind"), createdAt: row.getAttribute("data-rakeback-created-at") };
+      }) }))
+    }).then(function(data) {
+      if (!data || !data.ok || !Array.isArray(data.payments) || data.payments.length !== rows.length) throw new Error("status unavailable");
+      rows.forEach(function(row, i) { showCashPayout(row, { ok: true, payment: data.payments[i] }); });
+    }).catch(function() {
+      rows.forEach(function(row) {
+        row.querySelector("[data-rakeback-cash-pay]").dataset.paymentChecked = "0";
+        syncCashPayoutButton(row);
+      });
+    }).then(function() { cashStatusRefreshRunning = false; });
+  }
+  window.addEventListener("focus", scheduleCashStatusRefresh);
+  document.addEventListener("visibilitychange", scheduleCashStatusRefresh);
 
   function createSharedRow(data, index) {
     data = data || {};
@@ -921,16 +956,15 @@
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку">✎</button>' +
-        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--color" data-rakeback-color-toggle title="Изменить цвет строки" aria-label="Изменить цвет строки"><span class="admin-report-rakeback-color-dot" aria-hidden="true"></span></button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку">×</button>' +
-        '</div><div class="admin-report-rakeback-color-menu" data-rakeback-color-menu hidden>' + getRakebackRowColorButtons(data.color || data.rowColor || data.highlightColor || "") + "</div>" +
+        '</div>' +
       "</td>";
     syncSharedRowAmount(tr);
     updateSharedRowDateBadge(tr, data.baseEntryAt || entryAt);
     applySharedRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
     setSharedRowSaved(tr, saved, false);
     syncCashPayoutButton(tr);
-    if (room === "P21" && persisted) requestCashPayout(tr, "rakeback_cash_status").then(function(data) { showCashPayout(tr, data); }).catch(function() {});
+    if (room === "P21" && persisted) scheduleCashStatusRefresh();
     return tr;
   }
 
@@ -991,8 +1025,7 @@
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись" hidden>+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку" hidden>✎</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--delete" data-rakeback-remove title="Удалить строку" aria-label="Удалить строку" hidden>×</button>' +
-        '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--color" data-rakeback-color-toggle title="Выделить цветом" aria-label="Выделить цветом" hidden><span class="admin-report-rakeback-color-dot" aria-hidden="true"></span></button>' +
-        '</div><div class="admin-report-rakeback-color-menu" data-rakeback-color-menu hidden>' + getRakebackRowColorButtons(defaultColor) + "</div>" +
+        '</div>' +
       "</td>";
     syncSharedRowAmount(tr);
     applySharedRowColor(tr, defaultColor);
@@ -3627,7 +3660,7 @@
       if (sortSelect) sortSelect.addEventListener("change", render);
       if (refreshBtn) {
         refreshBtn.onclick = function () {
-          loadSharedDraft({ force: true, showStatus: true, includeArchive: activePeriodNeedsArchive() });
+          Promise.resolve(loadSharedDraft({ force: true, showStatus: true, includeArchive: activePeriodNeedsArchive() })).then(scheduleCashStatusRefresh);
         };
       }
       if (addBtn) {
@@ -3732,51 +3765,6 @@
           if (idCopyInput && copyRakebackIdInput(idCopyInput)) {
             event.preventDefault();
             event.stopPropagation();
-            return;
-          }
-          var colorControl = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-toggle],[data-rakeback-color-value],[data-rakeback-color-menu]") : null;
-          if (!colorControl) closeSharedRowColorMenus(body);
-          var colorOption = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-value]") : null;
-          if (colorOption) {
-            event.preventDefault();
-            var colorRow = colorOption.closest("[data-rakeback-shared-row],[data-rakeback-template-row]");
-            if (!colorRow) return;
-            var selectedColor = colorOption.getAttribute("data-rakeback-color-value") || "";
-            if (colorRow.hasAttribute("data-rakeback-template-row")) {
-              applySharedRowColor(colorRow, selectedColor);
-              closeSharedRowColorMenus(body);
-              updateTemplateRowActions(colorRow, loading);
-              scheduleTemplateRowDefaultSave(colorRow);
-              return;
-            }
-            if (getRakebackNegativeField(colorRow)) {
-              closeSharedRowColorMenus(body);
-              setStatus("Отрицательные значения сохранять нельзя", true);
-              return;
-            }
-            var colorGroupId = colorRow.getAttribute("data-rakeback-group") || "";
-            var savedColorRow = colorRow.getAttribute("data-rakeback-saved") === "1";
-            applySharedRowColor(colorRow, selectedColor);
-            closeSharedRowColorMenus(body);
-            sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
-            if (getSortMode() === "color") render();
-            if (savedColorRow) {
-              saveSharedDraftNow(true, { upsertGroupIds: [colorGroupId] });
-            } else {
-              syncControls();
-            }
-            return;
-          }
-          var colorToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-color-toggle]") : null;
-          if (colorToggle) {
-            event.preventDefault();
-            var toggleRow = colorToggle.closest("[data-rakeback-shared-row],[data-rakeback-template-row]");
-            if (!toggleRow) return;
-            var menu = toggleRow.querySelector("[data-rakeback-color-menu]");
-            if (!menu) return;
-            var willOpen = menu.hidden;
-            closeSharedRowColorMenus(body, toggleRow);
-            menu.hidden = !willOpen;
             return;
           }
           var templateToggle = event.target && event.target.closest ? event.target.closest("[data-rakeback-template-toggle]") : null;
