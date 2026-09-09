@@ -684,6 +684,7 @@
     if (hidden) return '<div class="daily-poker-card daily-poker-card--back" aria-hidden="true"></div>';
     return '<div class="daily-poker-card' + suitClass + (animate ? " daily-poker-card--dealt" : "") + '">' +
       '<span class="daily-poker-card__rank">' + esc(rank) + '</span>' +
+      '<span class="daily-poker-card__corner-suit" aria-hidden="true">' + esc(suitSymbols[suit] || "?") + '</span>' +
       '<span class="daily-poker-card__suit">' + esc(suitSymbols[suit] || "?") + '</span>' +
       '</div>';
   }

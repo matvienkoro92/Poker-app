@@ -10,6 +10,22 @@
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: url('./assets/home-tournament-shtukatur-bucket-name-v1.png') center / 100% 100% no-repeat !important;
+  clip-path: polygon(5.8% 41%, 24.7% 41%, 23.4% 48.7%, 7.3% 48.7%);
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus::after {
   content: "" !important;
   display: block !important;
@@ -255,7 +271,7 @@
   font-size: 2cqw !important; white-space: nowrap !important; line-height: 1.15 !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {
-  top: 94% !important; color: #d6c5a0; pointer-events: none;
+  top: 80% !important; color: #d6c5a0; pointer-events: none;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
   margin-top: 20px;
@@ -273,4 +289,81 @@
   position: static !important; margin: 0 !important; padding: 0 !important;
   transform: none !important; font: 600 2.4cqw/1 Arial, sans-serif !important;
   color: #ead9b5; white-space: nowrap;
+}
+
+/* Highlight the illustrated Last Longer chip inside its existing button. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+  cursor: pointer;
+  overflow: visible !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock::before {
+  content: "";
+  display: block !important;
+  position: absolute;
+  left: 22.5%;
+  top: -6.8%;
+  width: 58.6%;
+  height: 66.8%;
+  border: 1px solid #ffe4a580;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 1.2cqw #ffd16ca6, 0 0 3cqw #ffad3273, 0 0 5cqw #ff8a202e, inset 0 0 .8cqw #ffd16c40;
+  pointer-events: none;
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock:is(:hover, :focus-visible)::before {
+  border-color: #ffe9b9;
+  box-shadow: 0 0 1.5cqw #ffdf91, 0 0 3.5cqw #ffad3299, 0 0 6cqw #ff8a204d, inset 0 0 1cqw #ffd16c66;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock:active::before {
+  box-shadow: 0 0 .8cqw #ffdf91, 0 0 2cqw #ffad3299, inset 0 0 1.4cqw #ffd16c80;
+}
+
+/* Raised bonus buttons remain aligned with the five felt sectors. */
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus {
+  box-sizing: border-box !important;
+  padding: .7cqw .3cqw .55cqw !important;
+  grid-template-rows: 3cqw 3.1cqw 2.5cqw 1.6cqw !important;
+  gap: .25cqw !important;
+  border: 1px solid #dcb76c !important;
+  border-radius: 1.2cqw !important;
+  background: linear-gradient(155deg, #174e40f2, #06251fee 75%) !important;
+  box-shadow: inset 0 1px 0 #fff1b94d, 0 .4cqw .8cqw #0009, 0 0 1.4cqw #ffc65b30 !important;
+  cursor: pointer;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus::after {
+  content: "Подробнее ›" !important;
+  display: block !important;
+  position: static !important;
+  grid-row: 4;
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  color: #f5d795;
+  font: 600 1.25cqw/1.4 Arial, sans-serif;
+  opacity: 1 !important;
+  transform: none !important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon {
+  width: 3cqw !important;
+  height: 3cqw !important;
+  grid-row: 1;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label {
+  grid-row: 2;
+  color: #fff1d0 !important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount {
+  grid-row: 3;
+  color: #ffe09a !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px #000, 0 0 .8cqw #ffc55b44;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:is(:hover, :focus-visible) {
+  background: linear-gradient(155deg, #256a50, #103f31) !important;
+  box-shadow: inset 0 1px 0 #fff1b980, 0 .4cqw .8cqw #0009, 0 0 2cqw #ffc65b88 !important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:active {
+  box-shadow: inset 0 .25cqw .65cqw #0009, 0 0 1cqw #ffc65b66 !important;
 }
