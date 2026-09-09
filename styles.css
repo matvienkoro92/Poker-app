@@ -2616,7 +2616,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   object-fit: contain;
   -webkit-clip-path: inset(-96px 24px -110px 0);
   clip-path: inset(-96px 24px -110px 0);
-  filter: none;
+  filter: contrast(0.88) saturate(0.88) brightness(0.98);
   pointer-events: none;
   user-select: none;
 }

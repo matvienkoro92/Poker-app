@@ -3537,7 +3537,7 @@ button.admin-report-rakeback-summary__row:focus-visible {
   position: relative;
   display: table-cell;
   text-align: right !important;
-  white-space: nowrap;
+  white-space: normal;
   overflow: visible;
 }
 .admin-report-rakeback-actions .admin-report-rakeback-icon-btn {
@@ -5013,4 +5013,29 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .visitors-admin-item__send button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Keep row actions together, including cash payout and deletion. */
+.admin-report-rakeback-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+.admin-report-rakeback-action-buttons .admin-report-rakeback-icon-btn {
+  flex: 0 1 34px;
+  min-width: 0 !important;
+  margin: 0;
+  box-sizing: border-box;
+}
+.admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 13px; }
+@media (max-width: 560px) {
+  .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table :is(th, td):nth-child(2) { width: 24%; }
+  .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table :is(th, td):nth-child(3) { width: 19%; }
+  .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table :is(th, td):nth-child(6) { width: 11%; }
+  .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table :is(th, td):nth-child(7) { width: 32%; }
+  .admin-report-rakeback-actions { padding-right: 2px !important; }
+  .admin-report-rakeback-action-buttons .admin-report-rakeback-icon-btn { margin: 0; }
+  .admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 10px; }
 }
