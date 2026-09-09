@@ -385,7 +385,7 @@
         if (bar) {
           emptyLabel = document.createElement("span");
           emptyLabel.className = "home-last-longer-dock__empty";
-          emptyLabel.textContent = "Не объявлен";
+          emptyLabel.textContent = "Не сегодня";
           bar.appendChild(emptyLabel);
         }
       }

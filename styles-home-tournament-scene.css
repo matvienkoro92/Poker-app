@@ -168,28 +168,31 @@
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 36% !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table { top: 81.5% !important; }
 
-/* Five bonus controls follow the curved felt rail; icons remain crisp at any size. */
+/* Place live bonus labels on the original illustrated table and its icons. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
   top: 73.3% !important; height: 22% !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid {
   height: 80% !important; padding: 0 !important;
-  background: url('./assets/home-bonus-arc.svg') center / 100% 100% no-repeat !important;
+  background: none !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus {
-  position: absolute !important; width: 19% !important; height: 73% !important;
-  top: 9% !important; left: 1% !important; gap: .45cqw !important;
+  position: absolute !important; width: 18% !important; height: 45% !important;
+  top: 32% !important; left: 5% !important; gap: .45cqw !important;
   transform: rotate(9deg) !important; justify-content: center !important;
   color: #ead19a !important;
 }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 21% !important; top: 19% !important; transform: rotate(4deg) !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 40.5% !important; top: 23% !important; transform: none !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 60% !important; top: 19% !important; transform: rotate(-4deg) !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 80% !important; top: 9% !important; transform: rotate(-9deg) !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 22.5% !important; top: 38% !important; transform: rotate(4deg) !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 41% !important; top: 40% !important; transform: none !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 59.5% !important; top: 38% !important; transform: rotate(-4deg) !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 77% !important; top: 32% !important; transform: rotate(-9deg) !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon {
-  display: block !important; width: 5.3cqw; height: 5.3cqw; flex-shrink: 0; order: -1;
+  display: none !important;
   color: #dbb973; filter: drop-shadow(0 1px 1px #0008);
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label { font-size: 1.7cqw !important; min-height: 2.3em; line-height: 1.15 !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount { font-size: 2.1cqw !important; color: #fff0c8; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note { top: 88%; font-size: 1.65cqw; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note { top: 58%; left: 0; width: 100%; padding: 0; }
+
+.home-tournament-bonuses__note-arc { display: block; width: 100%; height: auto; overflow: visible; }
+.home-tournament-bonuses__note-arc text { fill: currentColor; font: 500 20px Arial, sans-serif; }
