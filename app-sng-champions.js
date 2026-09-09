@@ -2075,6 +2075,10 @@
     });
     var registrationCapacity = Math.max(1, Number(state.capacity) || 32);
     var registrationCount = Math.max(0, Math.min(registrationCapacity, Number(approved) || 0));
+    var registrationPercent = Math.round(registrationCount / registrationCapacity * 100);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-percent]"), function (el) {
+      el.textContent = String(registrationPercent) + "%";
+    });
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-progress]"), function (el) {
       el.style.setProperty("--registration-progress", String(registrationCount / registrationCapacity * 100) + "%");
       el.setAttribute("aria-valuemax", String(registrationCapacity));
