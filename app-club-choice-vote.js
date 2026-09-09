@@ -1031,6 +1031,7 @@
     }
     if (isWaaarNick(key)) src = "./assets/summer-rating-player-waaar.webp";
     if (key === "em13!!" || key === "em13") src = "./assets/summer-rating-player-emil.webp";
+    if (key === "fishkopcheny") src = "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     if (!src) return renderPlayerAvatar(candidate, id);
     return '<span class="club-choice-vote-modal__hero-art" aria-hidden="true">' +
       '<img src="' + escapeHtml(src) + '" alt="" loading="lazy" decoding="async">' +
@@ -1055,6 +1056,8 @@
 
   function renderPlayerAvatar(candidate, id) {
     var src = candidate && candidate.avatar ? String(candidate.avatar).trim() : "";
+    var nick = clubChoiceRatingNick(candidate && (candidate.ratingNick || candidate.rating_nick || candidate.nick));
+    if (nick === "FishKopcheny") src = "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     var art = null;
     try {
       art = !src && typeof window.pokerGetSummerRatingPlayerArt === "function"
