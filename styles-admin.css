@@ -5067,3 +5067,23 @@ button.admin-report-rakeback-summary__row:focus-visible {
 @media (max-width: 430px) {
   .admin-report-rakeback-table .admin-report-rakeback-row { height: 45px; }
 }
+
+/* Scale entry numbers along with the taller rakeback rows. */
+.admin-report-rakeback-row .admin-report-rakeback-input,
+.admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 19.5px; }
+.admin-report-rakeback-row .admin-report-rakeback-row-number { font-size: 16.5px; }
+.admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 16.5px; }
+@media (max-width: 560px) {
+  .admin-report-rakeback-row .admin-report-rakeback-input,
+  .admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 18px; }
+  .admin-report-rakeback-row .admin-report-rakeback-input--id { font-size: 15px; }
+  .admin-report-rakeback-row .admin-report-rakeback-row-number { font-size: 13.5px; }
+  .admin-report-rakeback-row .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input { font-size: 18px; }
+  .admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 13.5px; }
+}
+@media (max-width: 430px) {
+  .admin-report-rakeback-row .admin-report-rakeback-input--id { font-size: 18px; }
+  .admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 19.5px; }
+  .admin-report-rakeback-row .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input,
+  .admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 15px; }
+}
