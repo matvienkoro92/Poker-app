@@ -3691,7 +3691,36 @@
   margin: 0;
   transform: none;
 }
-.daily-poker .daily-poker__zone--hole { top: 10.5%; }
+.daily-poker .daily-poker__zone--hole { top: 10.5%; left: 5%; width: 55%; }
+.daily-poker .daily-poker__zone--hole .daily-poker__cards--hole { width: 69.09%; }
+.daily-poker .daily-poker__zone--hole .daily-poker__zone-label { margin-bottom: 7.82%; }
+.daily-poker .daily-poker__table-deal {
+  position: absolute;
+  left: 63%;
+  top: 29%;
+  width: 29%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+.daily-poker .daily-poker__table-deal > .daily-poker__play-btn {
+  width: 100%;
+  min-height: 10cqw;
+  margin: 0;
+  padding: 2cqw 1cqw;
+  border: 1px solid #ffe6a0;
+  border-radius: 2cqw;
+  color: #080702;
+  background: linear-gradient(125deg, #f7cd65, #f4c45a 48%, #c48b30);
+  box-shadow: inset 0 0 0 2px #9e6d2e, inset 0 0 0 4px #ffdf8680, 0 6px 10px #0008;
+  font: 900 3.3cqw / 1.15 Arial, sans-serif;
+  white-space: normal;
+  text-transform: none;
+  text-shadow: none;
+}
+.daily-poker .daily-poker__table-deal > .daily-poker__play-btn::after { display: none; }
+.daily-poker .daily-poker__table-deal > .daily-poker__play-btn[hidden] { display: none; }
+.daily-poker .daily-poker__table-deal > .daily-poker__play-btn:disabled { opacity: .55; cursor: default; }
+.daily-poker .daily-poker__table-deal > .daily-poker__play-btn:focus-visible { outline: 3px solid #fff2c5; outline-offset: 4px; }
 .daily-poker .daily-poker__zone--board { top: 48.5%; }
 .daily-poker .daily-poker__zone .daily-poker__zone-label {
   position: static;
@@ -3964,7 +3993,13 @@
   align-items: center;
   gap: clamp(6px, 1.4cqw, 16px);
 }
-#app .daily-poker .daily-poker__heading { padding-top: 0; }
+#app .daily-poker .daily-poker__heading {
+  align-self: center;
+  justify-self: stretch;
+  max-width: none;
+  padding-top: 0;
+  text-align: center;
+}
 #app .daily-poker .daily-poker__title { font-size: clamp(20px, 4.6cqw, 52px); }
 #app .daily-poker .daily-poker__header > .daily-poker__balance {
   grid-column: 3;

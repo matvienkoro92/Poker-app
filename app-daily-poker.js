@@ -12,7 +12,7 @@
     reminderSubscribed: false,
   };
 
-  var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать карты», чтобы начать";
+  var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать», чтобы начать";
   var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
   var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
@@ -219,7 +219,7 @@
     }).filter(Boolean) : [];
     var primaryHtml = esc(primary || "");
     if (primary === DAILY_POKER_START_PROMPT) {
-      primaryHtml = '<span class="daily-poker__result-nowrap">Нажмите на кнопку «Раздать карты», чтобы начать</span>';
+      primaryHtml = '<span class="daily-poker__result-nowrap">Нажмите на кнопку «Раздать», чтобы начать</span>';
     }
     var html = '<span class="daily-poker__result-primary">' + primaryHtml + '</span>';
     if (details.length) {
@@ -627,12 +627,12 @@
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       playBtn.disabled = !data.canPlay || dailyPokerState.revealing;
-      playBtn.textContent = "Раздать карты";
+      playBtn.textContent = "Раздать";
     }
     if (extraBtn) {
       extraBtn.hidden = !(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       extraBtn.disabled = !data.canPlay || dailyPokerState.revealing;
-      extraBtn.textContent = "Раздать карты";
+      extraBtn.textContent = "Раздать";
     }
     updateTimer();
     syncStartPrompt(data);
