@@ -1221,7 +1221,7 @@ var profileAchievementsShowcasePromise = null;
 var profileAchievementsRetryTimer = null;
 var profileAchievementsRetryCount = 0;
 var PROFILE_ACHIEVEMENTS_RETRY_MAX = 2;
-var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v2";
+var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v3";
 var PROFILE_ACHIEVEMENTS_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function profileAchievementsCacheKey(data) {
@@ -1281,6 +1281,7 @@ function profileRatingTotalTextFromHtml(html) {
 }
 
 function renderProfileRatingTotalCards(text) {
+  setTimeout(profileLoadMonthSummary, 0);
   var safeText = profileEscapeHtml(String(text || "").trim());
   return (
     '<div class="chat-user-modal__rating-tabs profile-rating-actions">' +
@@ -1291,11 +1292,10 @@ function renderProfileRatingTotalCards(text) {
         '</span></span>' +
         '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
       '</button>' +
-      '<button type="button" class="profile-month-story-card" data-profile-month-story aria-label="Ваша история за прошлый месяц">' +
-        '<span class="profile-month-story-card__eyebrow">Ваша история</span>' +
-        '<span class="profile-month-story-card__title">За прошлый месяц</span>' +
-        '<span class="profile-month-story-card__art" aria-hidden="true">✦</span>' +
-        '<span class="profile-month-story-card__more">Смотреть историю <b aria-hidden="true">›</b></span>' +
+      '<button type="button" class="profile-month-story-card" data-profile-month-story aria-label="Результаты месяца. Поделиться">' +
+        '<span class="profile-month-story-card__eyebrow">В этом месяце:</span>' +
+        '<span data-profile-month-summary>Загружаем результаты…</span>' +
+        '<span class="profile-month-story-card__more">Поделиться ↗</span>' +
       '</button>' +
     '</div>'
   );
@@ -1457,34 +1457,80 @@ function profileMonthStoryRowsHtml(rows, range, hero) {
     (list.length ? '<footer class="profile-month-story__final"><span>♠</span><strong>Это ваша история. Продолжение — за вами.</strong></footer>' : '');
 }
 
+var profileMonthSummary = null;
+var profileMonthSummaryRequest = null;
+function profileLoadMonthSummary() {
+  var nick = profileAchievementRatingNickFromData(pokerProfileUserInfoCache || {}) || profilePublicCardDisplayName();
+  var month = new Date(Date.now() + 10800000).toISOString().slice(0, 7);
+  var key = nick + ":" + month;
+  if (profileMonthSummaryRequest && profileMonthSummaryRequest.key === key) return profileMonthSummaryRequest.promise;
+  var promise = Promise.resolve().then(function () {
+    if (typeof window.pokerGetTournamentAchievementStatsReady !== "function") throw new Error("Рейтинг не загружен");
+    return window.pokerGetTournamentAchievementStatsReady(nick);
+  }).then(function (stats) {
+    var rows = (stats.rows || []).filter(function (row) {
+      var parts = String(row.date || "").split(".");
+      return parts[2] + "-" + parts[1] === month;
+    });
+    var result = { nick: nick, month: month, wins: 0, itm: 0, prize: 0 };
+    rows.forEach(function (row) {
+      if (Number(row.place) === 1) result.wins++;
+      if (Number(row.reward) > 0) { result.itm++; result.prize += Number(row.reward); }
+    });
+    profileMonthSummary = result;
+    document.querySelectorAll("[data-profile-month-summary]").forEach(function (el) {
+      el.innerHTML = '<span>Побед <b>' + result.wins + '</b></span><span>ИТМ <b>' + result.itm + '</b></span><span>Призовых <b>' + profileMonthStoryMoney(result.prize) + '</b></span>';
+    });
+    return result;
+  }).catch(function (error) {
+    document.querySelectorAll("[data-profile-month-summary]").forEach(function (el) { el.textContent = "Не загрузилось. Нажмите, чтобы повторить"; });
+    throw error;
+  }).finally(function () { if (profileMonthSummaryRequest && profileMonthSummaryRequest.key === key) profileMonthSummaryRequest = null; });
+  profileMonthSummaryRequest = { key: key, promise: promise };
+  promise.catch(function () {});
+  return promise;
+}
 function openProfileMonthStory() {
   var modal = ensureProfileMonthStoryModal();
   var content = modal.querySelector("[data-profile-month-story-content]");
-  var range = profilePreviousMonthRange();
   modal.hidden = false;
   document.body.classList.add("profile-month-story-open");
-  content.innerHTML = '<div class="profile-month-story__loading"><span></span><strong>Собираем вашу историю…</strong><small>' + profileEscapeHtml(range.label) + '</small></div>';
-  var data = pokerProfileUserInfoCache || {};
-  var identity = {
-    userId: profileAchievementUserIdFromData(data),
-    accountId: String(data.accountId || data.dtId || ""),
-    pokerPlusNickname: profileAchievementRatingNickFromData(data),
-    p21Id: String(data.p21Id || data.poker21Id || data.pokerPlusUserId || ""),
-    avatarUrl: profilePublicCardAvatarUrl() || String(data.avatarUrl || data.avatar || "") || "./assets/daily-poker-monkey.webp",
-  };
-  var request = typeof window.pokerGetPlayerNews === "function"
-    ? window.pokerGetPlayerNews(identity)
-    : Promise.resolve(typeof window.pokerReadCachedPlayerNews === "function" ? window.pokerReadCachedPlayerNews(identity) : []);
-  Promise.resolve(request).then(function (rows) {
+  document.getElementById("profileMonthStoryTitle").textContent = "Результаты месяца";
+  content.textContent = "Готовим карточку…";
+  profileLoadMonthSummary().then(function (r) {
     if (modal.hidden) return;
-    var monthly = (Array.isArray(rows) ? rows : []).filter(function (row) {
-      var key = profileMonthStoryEventDateKey(row && row.at);
-      return key && key >= range.from && key <= range.to;
-    }).sort(function (a, b) { return new Date(a && a.at || 0).getTime() - new Date(b && b.at || 0).getTime(); });
-    content.innerHTML = profileMonthStoryRowsHtml(monthly, range, profileMonthStoryHero());
-  }).catch(function () {
-    if (!modal.hidden) content.innerHTML = profileMonthStoryRowsHtml([], range, profileMonthStoryHero());
-  });
+    var canvas = document.createElement("canvas"); canvas.width = 900; canvas.height = 900;
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#0d141b"; ctx.fillRect(0, 0, 900, 900);
+    ctx.strokeStyle = "#d4aa55"; ctx.lineWidth = 4; ctx.strokeRect(25, 25, 850, 850);
+    ctx.fillStyle = "#e8c16f"; ctx.font = "bold 30px sans-serif"; ctx.fillText("POKER21 • РЕЗУЛЬТАТЫ МЕСЯЦА", 65, 105);
+    ctx.fillStyle = "#fff1ca"; ctx.font = "bold 60px sans-serif";
+    while (ctx.measureText(r.nick).width > 770) { var size = parseInt(ctx.font.match(/\d+/)[0], 10); ctx.font = "bold " + (size - 1) + "px sans-serif"; }
+    ctx.fillText(r.nick, 65, 210);
+    var level = document.getElementById("profilePublicLevelText");
+    ctx.font = "32px sans-serif"; ctx.fillText("Уровень " + (level ? level.textContent.trim() : "—"), 65, 275);
+    ctx.fillStyle = "#a6b6c2"; ctx.fillText(r.month, 65, 335);
+    [["Побед", r.wins], ["ИТМ", r.itm], ["Призовых", profileMonthStoryMoney(r.prize)]].forEach(function (row, i) {
+      var y = 455 + i * 135; ctx.textAlign = "left"; ctx.font = "36px sans-serif"; ctx.fillStyle = "#dde2e6"; ctx.fillText(row[0], 65, y);
+      ctx.textAlign = "right"; ctx.font = "bold 48px sans-serif"; ctx.fillStyle = "#ffd779"; ctx.fillText(String(row[1]), 835, y);
+    });
+    canvas.toBlob(function (blob) {
+      if (!blob || modal.hidden) return;
+      var url = URL.createObjectURL(blob);
+      content.innerHTML = '<img alt="Результаты месяца" style="width:100%;border-radius:16px" /><button type="button" class="profile-month-share">Поделиться картинкой</button><a download="poker21-month.png">Скачать картинку</a><p role="status"></p>';
+      var img = content.querySelector("img"); img.src = url;
+      content.querySelector("a").href = url;
+      content.querySelector("button").onclick = async function () {
+        var file = new File([blob], "poker21-month.png", { type: "image/png" });
+        try {
+          if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
+          else { content.querySelector("a").click(); content.querySelector("p").textContent = "Картинка сохранена — прикрепите её в нужный чат."; }
+        } catch (err) { if (err.name !== "AbortError") content.querySelector("p").textContent = "Не удалось поделиться. Скачайте картинку и прикрепите в чат."; }
+      };
+      if (modal.dataset.previewUrl) URL.revokeObjectURL(modal.dataset.previewUrl);
+      modal.dataset.previewUrl = url;
+    }, "image/png");
+  }).catch(function () { content.textContent = "Не удалось загрузить результаты. Закройте и попробуйте ещё раз."; });
 }
 
 function profileAchievementRatingNickFromData(data) {

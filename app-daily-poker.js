@@ -18,11 +18,7 @@
   var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
   var DAILY_POKER_WINNERS_PREVIEW_LIMIT = 3;
   var DAILY_POKER_DEAL_SOUND_SRC = "./assets/daily-poker-here-we-go-again.mp3?v=20260706";
-  var DAILY_POKER_WIN_SOUND_SRC = "./assets/daily-poker-win-miscom.mp3?v=20260706";
-  var DAILY_POKER_LOSE_SOUND_SRC = "./assets/daily-poker-lose-keep-up.mp3?v=20260706";
   var dailyPokerDealAudio = null;
-  var dailyPokerWinAudio = null;
-  var dailyPokerLoseAudio = null;
   var dailyPokerWinnersCache = null;
   var dailyPokerWinnersCacheAt = 0;
   var dailyPokerWinnersPromise = null;
@@ -184,20 +180,6 @@
   }
 
   window.playDailyPokerDealSound = playDailyPokerDealSound;
-
-  function playDailyPokerWinSound() {
-    dailyPokerWinAudio = playDailyPokerAudio(dailyPokerWinAudio, DAILY_POKER_WIN_SOUND_SRC);
-  }
-
-  function playDailyPokerLoseSound() {
-    dailyPokerLoseAudio = playDailyPokerAudio(dailyPokerLoseAudio, DAILY_POKER_LOSE_SOUND_SRC);
-  }
-
-  function preloadDailyPokerSounds() {
-    dailyPokerDealAudio = playDailyPokerAudio(dailyPokerDealAudio, DAILY_POKER_DEAL_SOUND_SRC, true);
-    dailyPokerWinAudio = playDailyPokerAudio(dailyPokerWinAudio, DAILY_POKER_WIN_SOUND_SRC, true);
-    dailyPokerLoseAudio = playDailyPokerAudio(dailyPokerLoseAudio, DAILY_POKER_LOSE_SOUND_SRC, true);
-  }
 
   function hasDailyPokerWin(result) {
     var reward = result && result.reward ? result.reward : {};
@@ -756,8 +738,6 @@
     if (board) board.innerHTML = boardHtml(result.boardCards || [], 5, [4]);
     dailyPokerState.revealing = false;
     setResultText(formatResultLine(result), false);
-    if (hasDailyPokerWin(result)) playDailyPokerWinSound();
-    else playDailyPokerLoseSound();
     resetManualDeal();
     syncStatus(result);
     loadWinners({ force: true });
@@ -1030,7 +1010,6 @@
       })
       .then(function (data) {
         setReminderButtonState(!!data.subscribed, false);
-        if (data.subscribed && typeof window.playPokerSubscribeSound === "function") window.playPokerSubscribeSound();
         var tgw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tgw && tgw.HapticFeedback && typeof tgw.HapticFeedback.notificationOccurred === "function") {
           tgw.HapticFeedback.notificationOccurred(data.subscribed ? "success" : "warning");
@@ -1074,7 +1053,6 @@
       showLoginRequiredMessage("Войдите в аккаунт, чтобы сыграть.");
       return;
     }
-    playDailyPokerDealSound();
     dailyPokerState.revealing = true;
     spendAttemptImmediately();
     setBusy(true);
@@ -1133,14 +1111,10 @@
     var winnersList = $("dailyPokerWinnersList");
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
-      playBtn.addEventListener("pointerover", preloadDailyPokerSounds, { passive: true });
-      playBtn.addEventListener("touchstart", preloadDailyPokerSounds, { passive: true });
       playBtn.addEventListener("click", play);
     }
     if (extraBtn && extraBtn.dataset.dailyPokerBound !== "1") {
       extraBtn.dataset.dailyPokerBound = "1";
-      extraBtn.addEventListener("pointerover", preloadDailyPokerSounds, { passive: true });
-      extraBtn.addEventListener("touchstart", preloadDailyPokerSounds, { passive: true });
       extraBtn.addEventListener("click", play);
     }
     if (inviteBtn && inviteBtn.dataset.dailyPokerBound !== "1") {

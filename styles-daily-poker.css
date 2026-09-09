@@ -4145,7 +4145,7 @@
 /* Keep the deal controls entirely above the board, beside the hole cards. */
 #app .daily-poker .daily-poker__table-deal {
   left: 58%;
-  top: 12%;
+  top: 14%;
   width: 38%;
   transform: none;
 }

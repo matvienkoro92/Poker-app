@@ -1753,7 +1753,7 @@ function initProfilePokerPlus() {
     return !!(err && (err.name === "AbortError" || /abort/i.test(String(err.message || ""))));
   }
 
-  function readPokerPlusCachedProfile() {
+  function readPokerPlusCachedProfile(checkSeq) {
     var state = syncVisibility();
     var base = typeof getApiBase === "function" ? getApiBase() : "";
     var body = pokerPlusAuthBody({});
@@ -1765,6 +1765,7 @@ function initProfilePokerPlus() {
       body: JSON.stringify(body),
     }, 7000)
       .then(function (data) {
+        if (checkSeq != null && checkSeq !== pokerPlusPostTimeoutCheckSeq) return null;
         if (!data || !data.ok || !data.linked) return null;
         if (data.accountId) pokerPlusAccountId = String(data.accountId || "").trim();
         renderProfile(data.profile, true);
@@ -1795,7 +1796,7 @@ function initProfilePokerPlus() {
     delays.forEach(function (delay, index) {
       setTimeout(function () {
         if (seq !== pokerPlusPostTimeoutCheckSeq) return;
-        readPokerPlusCachedProfile().then(function (data) {
+        readPokerPlusCachedProfile(seq).then(function (data) {
           if (seq !== pokerPlusPostTimeoutCheckSeq) return;
           if (data && data.linked && (!freshAfter || pokerPlusSyncedAtFromProfile(data) >= freshAfter)) {
             pokerPlusPostTimeoutCheckSeq += 1;
@@ -1803,10 +1804,12 @@ function initProfilePokerPlus() {
             removePokerPlusRefreshKeyInlineForm();
             if (input) input.value = "";
             setFeedback(successText || "Poker21 привязан.", false);
+            setPokerPlusRefreshButtonsState("done");
             return;
           }
           if (index === delays.length - 1) {
             setFeedback(failText || "Пока не увидели привязку Poker21. Попробуйте еще раз.", "warn");
+            setPokerPlusRefreshButtonsState("failed");
           }
         });
       }, delay);
@@ -2122,6 +2125,7 @@ function initProfilePokerPlus() {
   function refreshPokerPlusFromButton() {
     if (pokerPlusButtonRefreshPromise) return pokerPlusButtonRefreshPromise;
     if (pokerPlusButtonResetTimer) clearTimeout(pokerPlusButtonResetTimer);
+    pokerPlusPostTimeoutCheckSeq += 1;
     setFeedback("Обновляем данные Poker21...", false);
     setPokerPlusRefreshButtonsState("loading");
     setPokerPlusRefreshButtonsDisabled(true);
@@ -2138,6 +2142,7 @@ function initProfilePokerPlus() {
         pokerPlusButtonRefreshPromise = null;
         setPokerPlusRefreshButtonsDisabled(false);
         setPokerPlusRefreshButtonsState(refreshStatus);
+        if (refreshStatus === "pending" || refreshStatus === "failed") return;
         pokerPlusButtonResetTimer = setTimeout(function () {
           pokerPlusButtonResetTimer = null;
           setPokerPlusRefreshButtonsState("");

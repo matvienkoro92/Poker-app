@@ -1042,3 +1042,26 @@
 .spring-rating-info-modal__close:hover {
 background: rgba(251, 191, 36, 0.28);
 }
+
+/* Character and overall results share one row; months span the row below. */
+#winterRatingPlayerModal .winter-rating-player-modal__overview {
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.6fr);
+  align-items: center;
+  gap: 14px;
+}
+#winterRatingPlayerModal .winter-rating-player-modal__summary { display: contents; }
+#winterRatingPlayerModal .winter-rating-player-modal__summary-table {
+  min-width: 0;
+  width: 100%;
+  background: #090d13;
+  border: 1px solid #65502a;
+  border-radius: 12px;
+}
+#winterRatingPlayerModal .winter-rating-player-modal__monthly-table { grid-column: 1 / -1; }
+#winterRatingPlayerModal .winter-rating-player-modal__summary-value { white-space: normal; }
+#winterRatingPlayerModal .winter-rating-player-modal__art[hidden] + .winter-rating-player-modal__summary > table { grid-column: 1 / -1; }
+@media (max-width: 520px) {
+  #winterRatingPlayerModal .winter-rating-player-modal__overview { gap: 8px; grid-template-columns: minmax(0, .65fr) minmax(0, 1.65fr); }
+  #winterRatingPlayerModal .winter-rating-player-modal__summary-table td { font-size: 12px; padding: 7px 4px; }
+  #winterRatingPlayerModal .winter-rating-player-modal__art-img { max-width: 100%; height: auto; }
+}

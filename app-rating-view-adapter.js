@@ -1861,8 +1861,8 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
         "<tr><td class=\"winter-rating-player-modal__summary-label\">Первых мест</td><td class=\"winter-rating-player-modal__summary-value\">" + firsts + " (призовые — " + firstsRewardStr + ")</td></tr>" +
         "<tr><td class=\"winter-rating-player-modal__summary-label\">Вторых мест</td><td class=\"winter-rating-player-modal__summary-value\">" + seconds + " (призовые — " + secondsRewardStr + ")</td></tr>" +
         "<tr><td class=\"winter-rating-player-modal__summary-label\">Третьих мест</td><td class=\"winter-rating-player-modal__summary-value\">" + thirds + " (призовые — " + thirdsRewardStr + ")</td></tr>" +
-        (monthRows ? "<tr class=\"winter-rating-player-modal__summary-months-sep\"><td colspan=\"2\">Призовые по месяцам</td></tr>" + monthRows : "") +
-        "</tbody></table>";
+        "</tbody></table>" +
+        (monthRows ? "<table class=\"winter-rating-player-modal__summary-table winter-rating-player-modal__monthly-table\"><tbody><tr class=\"winter-rating-player-modal__summary-months-sep\"><td colspan=\"2\">Призовые по месяцам</td></tr>" + monthRows + "</tbody></table>" : "");
       summaryBlock.style.display = "";
     }
   } else {

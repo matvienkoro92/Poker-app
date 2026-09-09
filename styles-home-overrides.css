@@ -8502,3 +8502,18 @@ html body #app.app.app--view-home
   filter: brightness(2.1) saturate(1.12);
   pointer-events: none;
 }
+
+/* Compact comment toggle leaves room for the profile action. */
+body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
+  grid-template-columns: max-content minmax(0, 1fr) 38px;
+}
+body .home-friend-news-modal .home-friend-news-modal__action-controls .chat-user-modal__news-comment-toggle {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 58px;
+  padding-inline: 12px;
+  gap: 5px;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__action-controls {
+  grid-template-columns: max-content minmax(0, 1fr) 38px 38px;
+}

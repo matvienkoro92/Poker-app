@@ -1465,7 +1465,7 @@ if (chatUserModalEl) {
     if (!String(ratingNick || "").trim()) return [];
     var rows = [];
     var poker21LeaderboardWinners = [
-      { aliases: ["ПокерМанки", "Манки"], place: 1, reward: 250000 },
+      { aliases: ["ПокерМанки", "Манки", "Pokermanki"], place: 1, reward: 250000 },
       { aliases: ["Waaarr", "Waaarrr", "Waaar", "Ваар"], place: 2, reward: 150000 },
       { aliases: ["Coo1er91", "NeCoo1er91", "Кулер"], place: 3, reward: 100000 },
     ];
@@ -1474,7 +1474,7 @@ if (chatUserModalEl) {
     });
     if (leaderboardWin) {
       rows.push({
-        title: "Лидерборд Poker21",
+        title: "МТТ-лидерборд Poker21",
         group: "wins",
         rows: [{ label: leaderboardWin.place + " место · " + leaderboardWin.reward.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " ₽" }],
         info: "Ачивка за попадание в топ-3 лидерборда Poker21.",
@@ -2416,26 +2416,24 @@ if (chatUserModalEl) {
     "</section>";
   }
   function chatUserModalSeasonCupRows(seasonKey, rows) {
-    if (seasonKey === "summer") return [];
     rows = Array.isArray(rows) ? rows : [];
     return rows.reduce(function (items, row) {
       var place = row && row.place != null ? parseInt(row.place, 10) : 0;
       if (!place || place < 1 || place > 3) return items;
       var label = String(place) + " место";
-      if (seasonKey === "spring" && row.league) label += ", Лига " + row.league;
+      if ((seasonKey === "spring" || seasonKey === "summer") && row.league) label += ", Лига " + row.league;
       else if (seasonKey === "winter") label += ", зима";
       items.push({ label: label, row: row, season: seasonKey });
       return items;
     }, []);
   }
-  function chatUserModalSummerCupCardHtml() {
-    return chatUserModalAchievementCardHtml("🏆", "Кубок лета", [], {
-      locked: true,
-      placeholder: "Сейчас идет",
+  function chatUserModalSummerCupCardHtml(rows) {
+    return chatUserModalAchievementCardHtml("🏆", "Кубок лета", chatUserModalSeasonCupRows("summer", rows), {
+      placeholder: "Сезон завершён",
       action: "summer-rating",
       actionLabel: "Открыть рейтинг лета",
-      ariaLabel: "Кубок лета сейчас идет. Открыть рейтинг лета",
-      extraClass: "chat-user-modal__achievement--season-cup chat-user-modal__achievement--season-cup-current",
+      ariaLabel: "Кубок лета завершён. Открыть итоги лета",
+      extraClass: "chat-user-modal__achievement--season-cup",
     });
   }
   function renderChatUserModalAchievementsLoading() {
@@ -2539,7 +2537,7 @@ if (chatUserModalEl) {
       chatUserModalAchievementCardHtml("🏆", "Кубок весны", chatUserModalSeasonCupRows("spring", results && results[1]), {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
-      chatUserModalSummerCupCardHtml() +
+      chatUserModalSummerCupCardHtml(results && results[0]) +
       chatUserModalAchievementCardHtml("★", "СНГ Лига Чемпионов", sngChampions, {
         placeholder: "Гранд-финалист",
         image: "./assets/chat-profile-achievement-sng-champion-card.webp",

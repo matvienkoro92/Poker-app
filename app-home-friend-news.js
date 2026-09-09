@@ -2095,7 +2095,7 @@
         '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
-          '" data-home-news-comments aria-label="Открыть комментарии">💬 <b>Коммент</b>' +
+          '" data-home-news-comments aria-label="Открыть комментарии">💬 <b aria-hidden="true">↓</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
         '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>" +
@@ -2104,7 +2104,8 @@
             '" aria-label="Скопировать ссылку на новость" title="Скопировать ссылку">' +
             '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
             '</button>'
-          : "") + "</span></span>",
+          : "") +
+        (newsModalMode === "club" && shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться">↗</button>' : "") + "</span></span>",
       comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -2230,6 +2231,7 @@
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
+        (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
         poker21LinkedHtml + titleAmountHtml + (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
         profileMetaHtml +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
@@ -2424,12 +2426,41 @@
     startRotation();
   }
 
+  var adminNewsTelegramCache = {};
+  var adminNewsTelegramAuth = "";
+  var adminNewsTelegramLoading = false;
+  var adminNewsTelegramDenied = false;
+  function loadAdminNewsTelegram() {
+    var auth = authSuffix();
+    if (adminNewsTelegramAuth !== auth) {
+      adminNewsTelegramAuth = auth;
+      adminNewsTelegramCache = {};
+      adminNewsTelegramDenied = false;
+    }
+    var nodes = Array.prototype.slice.call(document.querySelectorAll("[data-news-admin-telegram]"));
+    nodes.forEach(function (node) { node.textContent = adminNewsTelegramCache[node.dataset.newsAdminTelegram] || ""; });
+    if (adminNewsTelegramDenied || adminNewsTelegramLoading) return;
+    var ids = Array.from(new Set(nodes.map(function (node) { return node.dataset.newsAdminTelegram; }))).filter(function (id) {
+      return /^(ID\d+|tg_\d+)$/.test(id) && !Object.prototype.hasOwnProperty.call(adminNewsTelegramCache, id);
+    }).slice(0, 100);
+    if (!ids.length) return;
+    adminNewsTelegramLoading = true;
+    fetch(apiBase() + "/api/users" + auth, {
+      method: "POST", cache: "no-store", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody({ action: "admin-news-telegram", ids: ids }) : { action: "admin-news-telegram", ids: ids })
+    }).then(function (response) {
+      if (response.status === 403 || response.status === 401) { if (auth === authSuffix()) adminNewsTelegramDenied = true; return null; }
+      return response.ok ? response.json() : null;
+    }).then(function (data) {
+      if (auth !== authSuffix() || !data || !data.ok) return;
+      ids.forEach(function (id) { adminNewsTelegramCache[id] = data.usernames && data.usernames[id] || ""; });
+      document.querySelectorAll("[data-news-admin-telegram]").forEach(function (node) { node.textContent = adminNewsTelegramCache[node.dataset.newsAdminTelegram] || ""; });
+    }).catch(function () {}).then(function () { adminNewsTelegramLoading = false; });
+  }
   function renderModalList(rows) {
+    setTimeout(loadAdminNewsTelegram, 0);
     var list = el("homeFriendNewsList");
     if (!list) return;
-    var pinnedBanner = newsModalMode === "club"
-      ? '<aside class="home-friend-news-modal__pinned-banner" aria-label="Закреплено: победители МТТ Лидерборда Poker21"><img src="./assets/home-mtt-leaderboard-winners.webp?v=1" alt="Победители МТТ Лидерборда Poker21: ПокерМанки — 250 000 ₽, Ваар — 150 000 ₽, Кулер — 100 000 ₽" width="1086" height="362" decoding="async"></aside>'
-      : "";
     var heroLeaderNick = clubCurrentMonthHeroLeaderNick();
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
@@ -2447,7 +2478,7 @@
     if (activeClubLoading) {
       var skeletonAt = clubEvents[0] && clubEvents[0].at ||
         (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
-      list.innerHTML = pinnedBanner + achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
+      list.innerHTML =  achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(skeletonAt, true)) + '</span></div>' +
         '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
@@ -2478,7 +2509,7 @@
             '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab home-friend-news-modal__club-tab--active">Записи игроков</button></div>' +
           '<div class="home-friend-news-modal__empty"><span aria-hidden="true">✎</span><strong>Записей за этот день пока нет</strong></div></section>'
       : "";
-    list.innerHTML = pinnedBanner + achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
+    list.innerHTML =  achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite;
     window.setTimeout(focusPendingClubNewsEvent, 0);
@@ -2539,6 +2570,59 @@
     item.classList.add("home-friend-news-modal__item--linked");
     if (item.scrollIntoView) item.scrollIntoView({ behavior: "smooth", block: "center" });
     window.setTimeout(function () { item.classList.remove("home-friend-news-modal__item--linked"); }, 2600);
+  }
+
+  async function shareClubNewsCard(button) {
+    var card = button.closest("[data-home-news-share-token]");
+    if (!card) return;
+    button.disabled = true;
+    try {
+      var canvas = document.createElement("canvas"); canvas.width = 1200; canvas.height = 650;
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#111821"; ctx.fillRect(0, 0, 1200, 650);
+      ctx.strokeStyle = "#efb85b"; ctx.lineWidth = 5; ctx.strokeRect(15, 15, 1170, 620);
+      var source = card.querySelector(".home-friend-news-modal__icon img");
+      if (source) {
+        var img = new Image(); img.crossOrigin = "anonymous";
+        await new Promise(function (resolve, reject) { img.onload = resolve; img.onerror = reject; img.src = source.currentSrc || source.src; });
+        var scale = Math.min(330 / img.width, 460 / img.height);
+        ctx.drawImage(img, 40 + (330 - img.width * scale) / 2, 85 + (460 - img.height * scale) / 2, img.width * scale, img.height * scale);
+      }
+      function text(selector) { var node = card.querySelector(selector); return node ? node.textContent.trim() : ""; }
+      ctx.fillStyle = "#ffd786"; ctx.font = "bold 46px sans-serif";
+      ctx.fillText(text(".home-friend-news-modal__player-name"), 410, 100, 730);
+      ctx.fillStyle = "#b3bdc7"; ctx.font = "26px sans-serif";
+      ctx.fillText(text(".home-friend-news-modal__player-meta"), 410, 151, 730);
+      ctx.fillStyle = "#fff0cf"; ctx.font = "bold 30px sans-serif";
+      var y = 225;
+      card.querySelectorAll(".home-friend-news-modal__event-lines strong").forEach(function (node) {
+        var line = "";
+        node.textContent.trim().split(/\s+/).forEach(function (word) {
+          if (line && ctx.measureText(line + " " + word).width > 720) { ctx.fillText(line, 410, y); y += 40; line = word; }
+          else line += (line ? " " : "") + word;
+        });
+        if (line) { ctx.fillText(line, 410, y); y += 54; }
+      });
+      ctx.font = "bold 25px sans-serif"; ctx.fillStyle = "#efb85b"; ctx.fillText("POKER21 • НОВОСТИ КЛУБА", 410, 585);
+      var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });
+      if (!blob) throw new Error("image");
+      var url = URL.createObjectURL(blob);
+      var dialog = document.createElement("dialog");
+      dialog.style.cssText = "max-width:700px;width:90vw;background:#111821;color:#fff0cf;border:1px solid #efb85b;border-radius:18px;padding:16px";
+      dialog.innerHTML = '<button type="button" data-close style="float:right">Закрыть ×</button><h3>Поделиться карточкой</h3><img style="width:100%" alt="Превью карточки"><button type="button" data-send>Поделиться</button> <a download="poker21-news.png">Скачать картинку</a><p role="status"></p>';
+      dialog.querySelector("img").src = url; dialog.querySelector("a").href = url;
+      dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
+      dialog.onclose = function () { URL.revokeObjectURL(url); dialog.remove(); };
+      dialog.querySelector("[data-send]").onclick = async function () {
+        try {
+          var file = new File([blob], "poker21-news.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
+          else { dialog.querySelector("a").click(); dialog.querySelector("p").textContent = "Прикрепите сохранённую картинку в нужный чат."; }
+        } catch (error) { if (error.name !== "AbortError") dialog.querySelector("p").textContent = "Не удалось отправить. Можно скачать картинку."; }
+      };
+      document.body.appendChild(dialog); dialog.showModal();
+    } catch (error) { window.alert("Не удалось подготовить картинку. Попробуйте ещё раз."); }
+    finally { button.disabled = false; }
   }
 
   function copyClubNewsEventLink(button) {
@@ -2780,6 +2864,12 @@
         }
         if (event.target.closest("[data-home-friend-news-close]")) {
           closeModal();
+          return;
+        }
+        var imageShareButton = event.target.closest("[data-home-news-share-image]");
+        if (imageShareButton) {
+          event.preventDefault(); event.stopPropagation();
+          shareClubNewsCard(imageShareButton);
           return;
         }
         var eventCopyButton = event.target.closest("[data-home-news-copy-event]");

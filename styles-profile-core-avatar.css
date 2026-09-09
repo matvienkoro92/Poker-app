@@ -5400,3 +5400,19 @@ body.profile-month-story-open { overflow: hidden; }
     animation: none;
   }
 }
+
+.profile-month-story-card [data-profile-month-summary] { display: grid; gap: 8px; width: 100%; margin: 12px 0; font-size: clamp(16px, 2.6vw, 24px); }
+.profile-month-story-card [data-profile-month-summary] > span { display: flex; justify-content: space-between; gap: 12px; }
+.profile-month-story-card [data-profile-month-summary] b { color: #ffda79; }
+.profile-month-share { display: block; width: 100%; padding: 16px; margin: 12px 0; border: 1px solid #e3bb65; border-radius: 12px; background: #edbd54; color: #17130b; font: inherit; font-weight: bold; }
+.profile-month-story-card { grid-template-rows: auto 1fr auto; }
+.profile-month-story-card::before { display: none; }
+
+/* Fit the longest profile tab label inside its separate outline. */
+#app .view[data-view="profile"] #profileAchievementsTabBtn {
+  min-width: 0;
+  padding-inline: 3px;
+  font-size: clamp(10px, 2.8vw, 20px);
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}

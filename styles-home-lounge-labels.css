@@ -121,3 +121,19 @@
 .sng-character-name--fish { left: 45%; }
 .sng-character-name--morf { left: 66%; }
 .sng-character-name--gucci { left: 87%; }
+
+/* Dim the lower pedestal highlight behind the live raffle amount. */
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles #raffleActiveAmountBadge {
+  text-shadow: none !important;
+  isolation: isolate;
+  color: #fff3ca !important;
+}
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles #raffleActiveAmountBadge::before {
+  content: "";
+  position: absolute;
+  inset: -0.15em 4% -0.5em;
+  background: linear-gradient(180deg, rgba(12, 10, 6, 0.82), rgba(12, 10, 6, 0.94) 60%, rgba(12, 10, 6, 0));
+  border-radius: 0 0 45% 45%;
+  z-index: -1;
+  pointer-events: none;
+}

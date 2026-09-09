@@ -231,6 +231,7 @@
   function playForEvent(event, source) {
     if (pokerIsClickSoundMuted()) return;
     var target = clickSoundTarget(event);
+    if (target && target.closest(".daily-poker, [data-view=\"daily-poker\"]")) return;
     if (!target || shouldSkipDuplicate(event, target, source)) return;
     playPokerClickSound();
   }
