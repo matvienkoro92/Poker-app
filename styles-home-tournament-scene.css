@@ -37,8 +37,8 @@
   margin: 0 !important;
   padding: 0 !important;
   background: inherit !important;
-  mask: url('./assets/home-tournament-head-mask.svg') center / 100% 100% no-repeat;
-  -webkit-mask: url('./assets/home-tournament-head-mask.svg') center / 100% 100% no-repeat;
+  mask: url('./assets/home-tournament-head-mask.svg?v=2') center / 100% 100% no-repeat;
+  -webkit-mask: url('./assets/home-tournament-head-mask.svg?v=2') center / 100% 100% no-repeat;
   transform: none !important;
   opacity: 1 !important;
   pointer-events: none !important;
@@ -381,4 +381,18 @@
   clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
   z-index: -1;
   pointer-events: none;
+}
+
+/* Move the illustrated chip region and its live controls together. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-shifted-art {
+  position: absolute;
+  inset: 0;
+  background: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') center / 100% 100% no-repeat;
+  clip-path: polygon(33% 46.5%, 54% 46.5%, 60% 66.5%, 30% 66.5%);
+  translate: 10px 0;
+  pointer-events: none;
+  z-index: 3;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+  translate: 10px 0;
 }

@@ -523,6 +523,8 @@
   };
 
   function clubNewsPersonalArt(nick) {
+    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-v1.webp";
+    if (["fishkopcheny", "фишкопченый", "фишкапченый"].indexOf(matchKey(nick)) !== -1) return "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
       var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
       if (sharedArt && sharedArt.src) return String(sharedArt.src);
@@ -531,6 +533,8 @@
   }
 
   function clubNewsCardArt(nick, occurrence) {
+    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-v1.webp";
+    if (["fishkopcheny", "фишкопченый", "фишкапченый"].indexOf(matchKey(nick)) !== -1) return "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     var slug = CLUB_NEWS_CARD_ART_BY_NICK[matchKey(nick)] || "";
     var variantIndex = Math.max(0, Number(occurrence) || 0);
     if (slug === "emil") {

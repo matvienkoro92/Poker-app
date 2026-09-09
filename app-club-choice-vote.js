@@ -677,7 +677,7 @@
   }
 
   function renderAchievementCard(className, description) {
-    var text = String(description || "").trim() || "Достижение игрока";
+    var text = String(description || "").replace(/^\s*Август\s*:\s*/i, "").trim() || "Достижение игрока";
     return '<small class="' + className + ' club-choice-vote-modal__achievement-card">' +
       '<span class="club-choice-vote-modal__achievement-card-text">' + escapeHtml(text) + '</span>' +
     '</small>';
