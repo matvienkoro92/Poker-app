@@ -7534,7 +7534,14 @@ html body #app.app.app--view-home
 .app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--trophy { mix-blend-mode: normal; opacity: 1 !important; }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
   mix-blend-mode: normal;
-  mask-image: none;
+  -webkit-mask-image: url('./assets/home-tournament-cards-mask.svg');
+  mask-image: url('./assets/home-tournament-cards-mask.svg');
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-position: var(--trophy-cell) center;
+  mask-position: var(--trophy-cell) center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
   clip-path: none;
 }
 

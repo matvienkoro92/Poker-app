@@ -84,8 +84,8 @@ function syncProfileEmailAuthUi() {
     if (isGuest) textEl.textContent = "Гостевой режим не поддерживает привязку почты. Сначала войдите в аккаунт.";
     else if (authMethod === "email" && linkedEmail) textEl.textContent = "Вы вошли по этой почте. Это ваш текущий способ входа.";
     else if (linkedEmail) textEl.textContent = "Эта почта уже привязана. По ней можно входить в аккаунт на экране авторизации.";
-    else textEl.textContent = "Привяжите email, чтобы потом можно было входить в аккаунт по почте.";
-    textEl.hidden = true;
+    else textEl.textContent = "Привяжите почту здесь и подтвердите кодом — вход через бота и почту будет открывать один профиль с вашей историей.";
+    textEl.hidden = isGuest || !isVerified;
   }
   if (formWrap) {
     formWrap.hidden = !!isGuest || !isVerified || !!linkedEmail;

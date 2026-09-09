@@ -28,6 +28,9 @@
         '<button type="button" class="pwa-auth-screen__enter-btn" id="authPwaEmailLoginModeBtn">' + pwaAuthT("login") + "</button>" +
         '<button type="button" class="auth-banner__mode-link" id="authPwaEmailRegisterModeBtn">' + pwaAuthT("switchToRegister") + "</button>" +
       "</div>" +
+      '<label class="auth-banner__code-intro" id="authPwaEmailNewAccountRow" hidden>' +
+        '<input type="checkbox" id="authPwaEmailNewAccountConfirm" /> ' + pwaAuthT("emailNewAccountConfirm") +
+      '</label>' +
       '<div class="auth-banner__code-row" id="authPwaEmailCodeSendRow">' +
         '<button type="button" class="auth-banner__code-btn auth-banner__code-btn--send" id="authPwaEmailSendBtn">' + pwaAuthT("emailSendCode") + "</button>" +
       "</div>" +
@@ -52,6 +55,8 @@
       "</div>";
     mount.appendChild(wrap);
 
+    var newAccountRow = wrap.querySelector("#authPwaEmailNewAccountRow");
+    var newAccountConfirm = wrap.querySelector("#authPwaEmailNewAccountConfirm");
     var backBtn = wrap.querySelector("#authPwaEmailBackBtn");
     var emailInput = wrap.querySelector("#authPwaEmailInput");
     var passwordInput = wrap.querySelector("#authPwaEmailPasswordInput");
@@ -88,6 +93,8 @@
     if (emailInput) {
       emailInput.addEventListener("input", function () {
         resetEmailRegisterVerification();
+        if (newAccountConfirm) newAccountConfirm.checked = false;
+        if (newAccountRow) newAccountRow.hidden = true;
       });
     }
     function readLastEmail() {
@@ -299,6 +306,7 @@
           body: JSON.stringify({
             action: "request",
             email: email,
+            confirmNewAccount: !!(newAccountConfirm && newAccountConfirm.checked),
             dtIdHint: getEmailDtIdHint(),
             memberIdHint: pokerReadLastMemberIdHint(),
             referralStartParam: typeof pokerReadReferralStartParam === "function" ? pokerReadReferralStartParam() : "",
@@ -306,6 +314,9 @@
         })
           .then(function (r) { return r.json().catch(function () { return {}; }); })
           .then(function (data) {
+            if (data && data.code === "NEW_EMAIL_ACCOUNT_CONFIRMATION_REQUIRED" && newAccountRow) {
+              newAccountRow.hidden = false;
+            }
             var okMsg = pwaAuthT("emailSentDefault");
             if (data && data.ok) saveLastEmail(email);
             if (data && data.ok && data.mode === "register") okMsg = pwaAuthT("emailSentRegister");

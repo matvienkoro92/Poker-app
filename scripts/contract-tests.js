@@ -6084,6 +6084,12 @@ async function testAuthEmailAndPwaCode(redis) {
     email: "Player@Test.com",
     dtIdHint: "ID123456",
   }));
+  assert.strictEqual(r.statusCode, 409, "unknown email does not silently create a duplicate");
+  assert.strictEqual(r.body.code, "NEW_EMAIL_ACCOUNT_CONFIRMATION_REQUIRED");
+  assert.strictEqual(redis.kv.has("poker_app:email_code:player@test.com"), false);
+  r = await call(authEmail, req("POST", {}, {
+    action: "request", email: "Player@Test.com", dtIdHint: "ID123456", confirmNewAccount: true,
+  }));
   assert.strictEqual(r.statusCode, 200, "email code request succeeds");
   assert.strictEqual(r.body.sent, true, "email code request marks sent");
 
@@ -6140,10 +6146,19 @@ async function testAuthEmailAndPwaCode(redis) {
       existingPwaSession: "local-field-ignored-by-telegram-signature",
     }
   )));
-  assert.strictEqual(r.statusCode, 200, "telegram login can link from email pwa session");
-  assert.strictEqual(r.body.dtId, emailDtId, "telegram login reuses linked email account id");
-  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_2002"), emailDtId, "telegram id is linked to email account");
-  assert.strictEqual(redis.h("poker_app:id_to_user").get(emailDtId), "tg_2002", "telegram id becomes preferred account login");
+  assert.strictEqual(r.statusCode, 409, "separate profiles require explicit migration");
+  assert.strictEqual(r.body.code, "ACCOUNT_LINK_CONFLICT");
+  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_2002"), "ID222222", "existing Telegram history stays on its account");
+  assert.strictEqual(redis.h("poker_app:email_links").get("player@test.com"), emailDtId, "email owner is preserved");
+  assert.strictEqual(r.body.pwaSession, undefined, "conflicting link issues no session");
+  r = await call(authTelegramLogin, req("POST", {}, Object.assign(
+    telegramLoginWidgetPayload({ id: 2005, first_name: "New", username: "new_link" }),
+    { linkPwaSession: emailPwaSession }
+  )));
+  assert.strictEqual(r.statusCode, 200, "new Telegram identity can link to verified email profile");
+  assert.strictEqual(r.body.dtId, emailDtId);
+  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_2005"), emailDtId);
+  assert.strictEqual(redis.h("poker_app:id_to_user").get(emailDtId), "tg_2005");
 
   redis.h("poker_app:id_to_user").set("ID654321", "tg_victim");
   r = await call(authTelegramLogin, req("POST", {}, Object.assign(
