@@ -2268,7 +2268,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
   min-height: 280px;
   background:
     url("./assets/summer-rating-player-waaar.webp") 50% 18% / 26.35% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") 18% calc(22% - 10px) / 36.8% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") 18% calc(22% - 10px) / 36.8% auto no-repeat,
     url("./assets/summer-rating-player-cooler.webp") 82% 22% / 18.97% auto no-repeat;
 }
 
@@ -2378,7 +2378,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__cup
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league[data-spring-league="1"] .summer-rating-table-avatar--place-2 {
-  background-image: url("./assets/summer-rating-player-pokermanki-v2.webp?v=1");
+  background-image: url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1");
   background-position: 36% 10%;
 }
 
@@ -3308,7 +3308,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   overflow: visible;
   background:
     url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 25px) / 26.35% auto no-repeat,
-    url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
+    url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
     url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 18px) / 18.36% auto no-repeat;
 }
 
@@ -3320,8 +3320,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   overflow: visible;
   background:
     url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% - 25px) / 18.9% auto no-repeat,
-    url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% - 19px) / 34.62% auto no-repeat,
-    url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% - 18px) / 21.7% auto no-repeat;
+    url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) calc(44% - 19px) / 34.62% auto no-repeat,
+    url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) calc(50% - 18px) / 21.7% auto no-repeat;
 }
 
 .winter-rating.spring-rating.summer-rating .spring-rating-top3__card {
@@ -3676,15 +3676,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 25px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 18px) / 18.36% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% - 25px) / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% - 19px) / 34.62% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% - 18px) / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) calc(44% - 19px) / 34.62% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) calc(50% - 18px) / 21.7% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
@@ -3732,15 +3732,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% - 25px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) calc(44% - 19px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% - 18px) / 18.36% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% - 25px) / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% - 19px) / 34.62% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% - 18px) / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) calc(44% - 19px) / 34.62% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) calc(50% - 18px) / 21.7% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
@@ -4261,13 +4261,13 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league[data-spring-league="2"] .summer-rating-table-avatar--place-2 {
-  background-image: url("./assets/summer-rating-league2-player-shkarubo.webp");
+  background-image: url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp");
   background-position: 67% 10%;
   background-size: 230% auto;
 }
 
 .winter-rating.spring-rating.summer-rating .winter-rating__spring-league[data-spring-league="2"] .summer-rating-table-avatar--place-3 {
-  background-image: url("./assets/summer-rating-league2-player-sarmat.webp");
+  background-image: url("./assets/summer-rating-league2-player-sarmat-light-v1.webp");
   background-position: 53% 9%;
   background-size: 170% auto;
 }
@@ -4318,15 +4318,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 59px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 66px) / 18.36% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% + 59px) / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% + 72px) / 34.62% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% + 66px) / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) calc(44% + 72px) / 34.62% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) calc(50% + 66px) / 21.7% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
@@ -4483,15 +4483,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% 53px / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) 45px / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) 45px / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) 49px / 18.36% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-league2-player-alena.webp") 50% 53px / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) 45px / 34.62% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) 49px / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) 45px / 34.62% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) 49px / 21.7% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
@@ -4543,15 +4543,15 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 28px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) calc(44% + 41px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) calc(44% + 41px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 35px) / 18.36% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% + 28px) / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% + 41px) / 34.62% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% + 35px) / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) calc(44% + 41px) / 34.62% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) calc(50% + 35px) / 21.7% auto no-repeat;
   }
 
   .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__card:nth-child(1),
@@ -4692,7 +4692,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
     #springRatingTop3PodiumLeague1.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-player-waaar.webp") 50% calc(26% + 59px) / 26.35% auto no-repeat,
-      url("./assets/summer-rating-player-pokermanki-v2.webp?v=1") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
+      url("./assets/summer-rating-player-pokermanki-v2-light-v1.webp?v=1") calc(11% - 3px) calc(44% + 72px) / 42.55% auto no-repeat,
       url("./assets/summer-rating-player-cooler.webp") calc(89% - 9px) calc(50% + 66px) / 18.36% auto no-repeat;
   }
 
@@ -4701,8 +4701,8 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
     #springRatingTop3PodiumLeague2.spring-rating-top3--league {
     background:
       url("./assets/summer-rating-league2-player-alena.webp") 50% calc(26% + 59px) / 18.9% auto no-repeat,
-      url("./assets/summer-rating-league2-player-shkarubo.webp") calc(11% - 3px) calc(44% + 72px) / 34.62% auto no-repeat,
-      url("./assets/summer-rating-league2-player-sarmat.webp") calc(89% - 12px) calc(50% + 66px) / 21.7% auto no-repeat;
+      url("./assets/summer-rating-league2-player-shkarubo-light-v1.webp") calc(11% - 3px) calc(44% + 72px) / 34.62% auto no-repeat,
+      url("./assets/summer-rating-league2-player-sarmat-light-v1.webp") calc(89% - 12px) calc(50% + 66px) / 21.7% auto no-repeat;
   }
 
   html.app-view-browser-local.app-view-summer-rating-html-scroll

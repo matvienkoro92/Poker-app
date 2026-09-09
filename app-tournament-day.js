@@ -5,7 +5,7 @@ var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-card-thursday-9x10.w
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-card-friday-9x10.webp";
 var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-card-saturday-9x10.webp";
 var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-card-sunday-9x10.webp";
-var HOME_TOURNAMENT_MONTH_KNOCKOUT_1M_BANNER_FILE = "home-tournament-month-knockout-1m-2026-07-19.webp";
+var HOME_TOURNAMENT_MONTH_KNOCKOUT_1M_BANNER_FILE = "home-tournament-month-knockout-1m-2026-07-19-light-v1.webp";
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {

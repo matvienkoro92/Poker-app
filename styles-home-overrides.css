@@ -7785,7 +7785,7 @@ html body #app.app.app--view-home
 }
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after {
   display: block !important;
-  background-image: url('./assets/home-shortcut-expressions-v1-opt.webp') !important;
+  background-image: url('./assets/home-shortcut-expressions-v1-opt-light-v1.webp') !important;
   mask-image: radial-gradient(ellipse 13% 7% at 50% 26%, #000 75%, transparent 100%) !important;
   transform: none !important;
   animation: shortcut-expression-smile 5.8s linear infinite !important;
@@ -7882,7 +7882,7 @@ html body #app.app.app--view-home
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item,
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure { mix-blend-mode: normal !important; }
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::before {
-  background-image: url('./assets/home-shortcut-figures-alpha-v1-opt.webp') !important;
+  background-image: url('./assets/home-shortcut-figures-alpha-v1-opt-light-v1.webp') !important;
 }
 
 /* Hide the detached right chat bubble within the first sprite cell. */
@@ -7905,9 +7905,9 @@ html body #app.app.app--view-home
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: url('./assets/home-shortcut-clean-clothes-v2-opt.webp') right center / 300% 100% no-repeat;
-  -webkit-mask: url('./assets/home-shortcut-figures-alpha-v1-opt.webp') right center / 300% 100% no-repeat;
-  mask: url('./assets/home-shortcut-figures-alpha-v1-opt.webp') right center / 300% 100% no-repeat;
+  background: url('./assets/home-shortcut-clean-clothes-v2-opt-light-v1.webp') right center / 300% 100% no-repeat;
+  -webkit-mask: url('./assets/home-shortcut-figures-alpha-v1-opt-light-v1.webp') right center / 300% 100% no-repeat;
+  mask: url('./assets/home-shortcut-figures-alpha-v1-opt-light-v1.webp') right center / 300% 100% no-repeat;
 }
 .home-players-clean-clothes--pants { clip-path: inset(52% 0 30%); }
 .home-players-clean-clothes--hat { clip-path: polygon(7% 27%, 28% 27%, 28% 32.5%, 7% 32.5%); }
@@ -8101,7 +8101,7 @@ html body #app.app.app--view-home
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
   aspect-ratio: 3 / 2 !important;
   width: 52.5% !important; /* 70% of the previous 75% width. */
-  background: transparent url('./assets/home-shortcuts-personal-emerald-v3.webp') center / 100% 100% no-repeat !important;
+  background: transparent url('./assets/home-shortcuts-personal-emerald-v3-light-v1.webp') center / 100% 100% no-repeat !important;
   mix-blend-mode: normal !important;
   gap: 0 !important;
 }
@@ -8462,17 +8462,17 @@ html body #app.app.app--view-home
 
 /* Soften the artwork while retaining bright, legible nameplates. */
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
-  --lounge-label-art: url('./assets/home-lounge-chat-v1.webp');
+  --lounge-label-art: url('./assets/home-lounge-chat-v1-light-v1.webp');
   --lounge-label-shift: 1.6%;
   --lounge-label-clip: inset(77.5% 23% 17% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles {
-  --lounge-label-art: url('./assets/home-lounge-raffles-v1.webp');
+  --lounge-label-art: url('./assets/home-lounge-raffles-v1-light-v1.webp');
   --lounge-label-shift: 0%;
   --lounge-label-clip: inset(79% 23% 16% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels {
-  --lounge-label-art: url('./assets/home-lounge-players-v1.webp');
+  --lounge-label-art: url('./assets/home-lounge-players-v1-light-v1.webp');
   --lounge-label-shift: -3.4%;
   --lounge-label-clip: inset(82.5% 22% 12% 23%);
 }

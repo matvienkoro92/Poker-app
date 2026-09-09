@@ -875,7 +875,7 @@
 
   function renderPrivateCashHero(event) {
     return '<figure class="private-cash-modal__table-hero">' +
-      '<img src="./assets/private-cash-table-hero-clean.webp?v=3.714" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
+      '<img src="./assets/private-cash-table-hero-clean-light-v1.webp?v=3.714" alt="Приватный кеш Two Aces Poker Club" loading="lazy" decoding="async">' +
       renderPrivateCashHouseSeat(event) +
       renderPrivateCashSeats(event) +
     '</figure>';

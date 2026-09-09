@@ -36,7 +36,7 @@
   background-image:
     linear-gradient(90deg, rgba(1, 2, 5, 0.98) 0%, rgba(1, 2, 5, 0.84) 34%, rgba(1, 2, 5, 0.36) 64%, rgba(1, 2, 5, 0.08) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.9) 100%),
-    url("./assets/raffles-daily-giveaway-banner.webp");
+    url("./assets/raffles-daily-giveaway-banner-light-v1.webp");
   background-position: center center, center center, 60% 44%;
   background-size: 100% 100%, 100% 100%, auto 88%;
   background-repeat: no-repeat;
@@ -7221,7 +7221,7 @@ body[data-view="raffles"] .raffles-recent-tabs__list .raffles-recent-tab--active
   background-image:
     linear-gradient(90deg, rgba(15, 10, 3, 0.88) 0%, rgba(15, 10, 3, 0.72) 34%, rgba(15, 10, 3, 0.3) 64%, rgba(15, 10, 3, 0.12) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.08) 48%, rgba(0, 0, 0, 0.78) 100%),
-    url("./assets/raffles-daily-giveaway-banner.webp");
+    url("./assets/raffles-daily-giveaway-banner-light-v1.webp");
   border-color: rgba(249, 115, 22, 0.35);
 }
 [data-theme="light"] .raffle-create-form,
