@@ -4178,3 +4178,14 @@
   gap: .4cqw 1cqw !important;
   margin-top: .7cqw !important;
 }
+
+/* Utility buttons sit directly beneath the table without a divider. */
+#app .daily-poker > .daily-poker__actions {
+  margin-top: 6px !important;
+  padding-top: 10px !important;
+}
+#app .daily-poker .daily-poker__actions > .daily-poker__share-actions {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
