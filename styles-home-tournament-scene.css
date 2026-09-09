@@ -4,7 +4,7 @@
   width: 100% !important; height: auto !important; min-height: 0 !important;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
-  background: url('./assets/home-tournament-shtukatur-orange-ticket-v6.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-tournament-shtukatur-clean-v7.png') center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
