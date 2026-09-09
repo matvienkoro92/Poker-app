@@ -561,8 +561,8 @@
 
   var SNG_PLAYER_ART_BY_NICK = {
     "jeweler": "./assets/club-news-personal/jeweler-personal-v1.webp?v=1",
-    "киса": "./assets/club-news-personal/zalupa-personal.webp?v=1",
-    "залупа": "./assets/club-news-personal/zalupa-personal.webp?v=1",
+    "киса": "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1",
+    "залупа": "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1",
     "gucci💱": "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1",
     "porquinho": "./assets/sng-finalist-porquinho.webp",
     "поркиньо": "./assets/sng-finalist-porquinho.webp",

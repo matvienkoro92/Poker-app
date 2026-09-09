@@ -7,7 +7,7 @@
   /* Reclaim part of the transparent space below the illustrated table. */
   margin-bottom: -6% !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
-  background: url('./assets/home-tournament-shtukatur-transparent-v8.png') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
@@ -20,7 +20,7 @@
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  background: url('./assets/home-tournament-shtukatur-bucket-name-v1.png') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-tournament-shtukatur-bucket-name-v1-light-v1.webp') center / 100% 100% no-repeat !important;
   clip-path: polygon(5.8% 41%, 24.7% 41%, 23.4% 48.7%, 7.3% 48.7%);
   transform: none !important;
   opacity: 1 !important;
@@ -320,23 +320,23 @@
   box-shadow: 0 0 .8cqw #ffdf91, 0 0 2cqw #ffad3299, inset 0 0 1.4cqw #ffd16c80;
 }
 
-/* Transparent outlined bonus sectors follow the table arc. */
+/* Bonus labels inside the illustrated sectors follow the table arc. */
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus {
   box-sizing: border-box !important;
-  left: 11% !important;
+  left: 6% !important;
   padding: .65cqw .3cqw !important;
   grid-template-rows: 3.4cqw 3.1cqw 2.5cqw !important;
   gap: .3cqw !important;
-  border: 1px solid #e5c57799 !important;
-  border-radius: 12% 12% 26% 26% / 12% 12% 18% 18% !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
   cursor: pointer;
 }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 28% !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 45% !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 62% !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 79% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 23% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 40% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 57% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 74% !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus::after {
   content: none !important;
   display: none !important;
@@ -355,6 +355,30 @@
   text-shadow: 0 1px 2px #001c13;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:is(:hover, :focus-visible) {
-  border-color: #ffe4a5 !important;
-  box-shadow: 0 0 1cqw #ffdc7933 !important;
+  box-shadow: none !important;
+  filter: brightness(1.15);
+}
+
+/* Wider gold pedestal plaque for the participant count and bank. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+  left: -18% !important;
+  width: 136% !important;
+  top: 62% !important;
+  height: 23% !important;
+  box-sizing: border-box;
+  padding: .5cqw 2cqw !important;
+  white-space: nowrap;
+  background: linear-gradient(105deg, #825019, #ffdd7c 12%, #a9691e 24%, #ffe4a0 50%, #a9691e 78%, #ffdc7c 90%, #825019) !important;
+  clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+  isolation: isolate;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 2px 3px 3px;
+  background: linear-gradient(#29241b, #0d0e0d 55%, #211d15);
+  clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+  z-index: -1;
+  pointer-events: none;
 }

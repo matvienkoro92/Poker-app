@@ -429,8 +429,8 @@ function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
 
 var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "jeweler": { src: "./assets/club-news-personal/jeweler-personal-v1.webp?v=1" },
-  "киса": { src: "./assets/club-news-personal/zalupa-personal.webp?v=1" },
-  "залупа": { src: "./assets/club-news-personal/zalupa-personal.webp?v=1" },
+  "киса": { src: "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1" },
+  "залупа": { src: "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1" },
   "gucci💱": { src: "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1" },
   "porquinho": { src: "./assets/sng-finalist-porquinho.webp" },
   "поркиньо": { src: "./assets/sng-finalist-porquinho.webp" },
@@ -458,12 +458,12 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "prushnik": { src: "./assets/summer-rating-player-prushnik.webp", place: 9, league: 1 },
   "evgen1722": { src: "./assets/summer-rating-player-evgen1722.webp", place: 10, league: 1 },
   "хер вам)))))": { src: "./assets/summer-rating-player-khervam.webp", place: 10, league: 1 },
-  "frankl": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
+  "frankl": { src: "./assets/summer-rating-player-morf-light-v1.webp", place: 10, league: 1 },
   "kriak": { src: "./assets/summer-rating-player-kriak.webp", place: 10, league: 1 },
-  "andrushamorf": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
-  "4ezzi": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
-  "morf": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
-  "морф": { src: "./assets/summer-rating-player-morf.webp", place: 10, league: 1 },
+  "andrushamorf": { src: "./assets/summer-rating-player-morf-light-v1.webp", place: 10, league: 1 },
+  "4ezzi": { src: "./assets/summer-rating-player-morf-light-v1.webp", place: 10, league: 1 },
+  "morf": { src: "./assets/summer-rating-player-morf-light-v1.webp", place: 10, league: 1 },
+  "морф": { src: "./assets/summer-rating-player-morf-light-v1.webp", place: 10, league: 1 },
   "alenast": { src: "./assets/summer-rating-league2-player-alena.webp", place: 1, league: 2 },
   "shkarubo": { src: "./assets/summer-rating-league2-player-shkarubo.webp", place: 2, league: 2 },
   "sarmat1305": { src: "./assets/summer-rating-league2-player-sarmat.webp", place: 3, league: 2 },
@@ -481,8 +481,8 @@ var SUMMER_RATING_PLAYER_ART_BY_NICK = {
   "ksuha🐊": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
   "ksuha🦖": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
   "ksuha🐉": { src: "./assets/summer-rating-league2-player-ksyukha.webp", place: 10, league: 2 },
-  "zagrebnagreb": { src: "./assets/summer-rating-league2-player-zagrebnagreb.webp", place: 10, league: 2 },
-  "zagrebrnagreb": { src: "./assets/summer-rating-league2-player-zagrebnagreb.webp", place: 10, league: 2 },
+  "zagrebnagreb": { src: "./assets/summer-rating-league2-player-zagrebnagreb-light-v1.webp", place: 10, league: 2 },
+  "zagrebrnagreb": { src: "./assets/summer-rating-league2-player-zagrebnagreb-light-v1.webp", place: 10, league: 2 },
 };
 
 function getSummerRatingPlayerArtKey(nick) {
@@ -2189,7 +2189,7 @@ function getSummerRatingInitialAssetUrls() {
     "./assets/summer-rating-player-evgen1722.webp",
     "./assets/summer-rating-player-khervam.webp",
     "./assets/summer-rating-player-kriak.webp",
-    "./assets/summer-rating-player-morf.webp",
+    "./assets/summer-rating-player-morf-light-v1.webp",
     "./assets/summer-rating-league2-player-alena.webp",
     "./assets/summer-rating-league2-player-shkarubo.webp",
     "./assets/summer-rating-league2-player-sarmat.webp",
@@ -2202,7 +2202,7 @@ function getSummerRatingInitialAssetUrls() {
     "./assets/summer-rating-league2-player-babyshark.webp",
     "./assets/summer-rating-league2-player-aspirin.webp",
     "./assets/summer-rating-league2-player-ksyukha.webp",
-    "./assets/summer-rating-league2-player-zagrebnagreb.webp"
+    "./assets/summer-rating-league2-player-zagrebnagreb-light-v1.webp"
   ];
 }
 

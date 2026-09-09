@@ -7189,7 +7189,7 @@ html body #app.app.app--view-home
   aspect-ratio: 3.25;
   margin: 0 !important;
   padding: 0 !important;
-  background: url('./assets/home-bonus-table-rim-hint-v2.webp') center / 100% 100% no-repeat;
+  background: url('./assets/home-bonus-table-rim-hint-v2-light-v1.webp') center / 100% 100% no-repeat;
   border: 0 !important;
   overflow: visible;
 }
@@ -7382,7 +7382,7 @@ html body #app.app.app--view-home
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__main { display: none !important; }
 .home-tournament-trophy__art {
   position: absolute; inset: 0;
-  background: url('./assets/home-tournament-trophies-v1.png') var(--trophy-cell) center / 300% 100% no-repeat;
+  background: url('./assets/home-tournament-trophies-v1-light-v1.webp') var(--trophy-cell) center / 300% 100% no-repeat;
   mask-image: linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__day {
@@ -7407,7 +7407,7 @@ html body #app.app.app--view-home
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__copy { z-index: 1; }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
-  background-image: url('./assets/home-tournament-trophies-v1.png') !important;
+  background-image: url('./assets/home-tournament-trophies-v1-light-v1.webp') !important;
   background-size: 300% 100% !important;
   background-position: var(--trophy-cell) center !important;
   background-repeat: no-repeat !important;
@@ -7479,7 +7479,7 @@ html body #app.app.app--view-home
 
 /* Seat the trophies on one quiet tabletop that continues into the bonus rail. */
 .app.app--view-home .tournament-day-home-dual--tournament-focus {
-  background: linear-gradient(to bottom, #0003, #0005 45%, #000 72%), url('./assets/home-tournament-room-v1.png') center top / 100% auto no-repeat, #000 !important;
+  background: linear-gradient(to bottom, #0003, #0005 45%, #000 72%), url('./assets/home-tournament-room-v1-light-v1.webp') center top / 100% auto no-repeat, #000 !important;
 }
 .app.app--view-home #homeTournamentWeekList.home-tournament-week-list:has(.home-tournament-week-row--trophy) {
   height: min(75cqw, 624px) !important;
@@ -7516,7 +7516,7 @@ html body #app.app.app--view-home
   transform: translate(-50%, -50%) translateX(calc(var(--carousel-offset) * 78%)) rotate(calc(var(--carousel-offset) * 5deg)) scale(calc(1 - var(--carousel-distance) * .16)) !important;
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__art {
-  background-image: url('./assets/home-tournament-cards-king-v4.png') !important;
+  background-image: url('./assets/home-tournament-cards-king-v4-light-v1.webp') !important;
 }
 .app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy > .home-tournament-trophy__copy {
   inset: 0;
@@ -7558,7 +7558,7 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item::before,
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item::after,
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item > :is(img, .home-mini-icon__image, .home-mini-icon__hero, .home-raffle-gift-art, .home-players-group-art) { display: none !important; }
-.home-shortcut-figure { position: absolute; inset: 0; background: url('./assets/home-shortcut-figures-v1.png') 0 center / 300% 100% no-repeat; pointer-events: none; }
+.home-shortcut-figure { position: absolute; inset: 0; background: url('./assets/home-shortcut-figures-v1-light-v1.webp') 0 center / 300% 100% no-repeat; pointer-events: none; }
 .home-mini-icon-item--raffles .home-shortcut-figure { background-position: 50% center; }
 .home-mini-icon-item--levels .home-shortcut-figure { background-position: 100% center; }
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon__label {
@@ -7601,7 +7601,7 @@ html body #app.app.app--view-home
   content: '';
   position: absolute;
   inset: 0;
-  background: url('./assets/home-shortcut-figures-v1.png') var(--figure-cell, 0%) center / 300% 100% no-repeat;
+  background: url('./assets/home-shortcut-figures-v1-light-v1.webp') var(--figure-cell, 0%) center / 300% 100% no-repeat;
   pointer-events: none;
 }
 .home-mini-icon-item--raffles .home-shortcut-figure { --figure-cell: 50%; --figure-duration: 5.2s; --figure-delay: -1.7s; }
@@ -7672,7 +7672,7 @@ html body #app.app.app--view-home
 }
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::before,
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure::after {
-  background-image: url('./assets/home-shortcut-figures-v1.png') !important;
+  background-image: url('./assets/home-shortcut-figures-v1-light-v1.webp') !important;
   background-size: 300% 100% !important;
   background-position: var(--figure-cell, 0%) center !important;
   background-repeat: no-repeat !important;
@@ -7736,7 +7736,7 @@ html body #app.app.app--view-home
 }
 .app .daily-poker__actions .daily-poker__play-btn::before,
 .app .daily-poker__actions .daily-poker__play-btn::after { display: none !important; }
-.app .daily-poker__actions .daily-poker__share-actions { display: grid !important; grid-template-columns: 48px minmax(0, 1fr) 48px !important; gap: 10px !important; }
+.app .daily-poker__actions .daily-poker__share-actions { display: grid !important; grid-template-columns: minmax(0, 1fr) 48px 48px !important; gap: 10px !important; }
 .app .daily-poker__actions .daily-poker__share-actions > button {
   height: 48px !important; min-height: 48px !important; padding: 10px !important;
   border: 1px solid #c7a36255 !important; border-radius: 12px !important;
@@ -8149,16 +8149,16 @@ html body #app.app.app--view-home
   justify-content: space-evenly;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
-  background: url('./assets/home-figure-valerka-clean-v1.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-figure-valerka-clean-v1-light-v1.webp') center / 100% 100% no-repeat !important;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles {
-  background-image: url('./assets/home-figure-alenka-clean-v1.webp') !important;
+  background-image: url('./assets/home-figure-alenka-clean-v1-light-v1.webp') !important;
   background-position: center !important;
   transform: scale(.94) !important;
   transform-origin: center 89%;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels {
-  background-image: url('./assets/home-figure-waaar-clean-v1.webp') !important;
+  background-image: url('./assets/home-figure-waaar-clean-v1-light-v1.webp') !important;
   background-position: center top !important;
   background-size: 94% 94% !important;
 }
@@ -8174,19 +8174,19 @@ html body #app.app.app--view-home
 
 /* Separate 3D figures from full-size podiums; normalize visible head-to-foot height. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
-  --figure-art: url('./assets/home-figure-valerka-alpha-v3.webp');
+  --figure-art: url('./assets/home-figure-valerka-alpha-v3-light-v1.webp');
   --figure-image-height: 125.371%;
   --figure-image-y: 33.426%;
   background: none !important;
   transform: none !important;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles {
-  --figure-art: url('./assets/home-figure-alenka-alpha-v3.webp');
+  --figure-art: url('./assets/home-figure-alenka-alpha-v3-light-v1.webp');
   --figure-image-height: 121.258%;
   --figure-image-y: 22.508%;
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels {
-  --figure-art: url('./assets/home-figure-waaar-alpha-v3.webp');
+  --figure-art: url('./assets/home-figure-waaar-alpha-v3-light-v1.webp');
   --figure-image-height: 121.010%;
   --figure-image-y: 18.831%;
 }
@@ -8212,7 +8212,7 @@ html body #app.app.app--view-home
   inset: 69.5% 0 auto !important;
   width: 100% !important;
   height: 23% !important;
-  background: url('./assets/home-figure-podium-alpha-v3.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-figure-podium-alpha-v3-light-v1.webp') center / 100% 100% no-repeat !important;
   border: 0 !important;
   box-shadow: none !important;
   transform: none !important;
@@ -8497,7 +8497,7 @@ html body #app.app.app--view-home
   display: block !important;
   position: absolute;
   inset: 0;
-  background: url('./assets/home-bonus-table-rim-hint-v2.webp') center / 100% 100% no-repeat;
+  background: url('./assets/home-bonus-table-rim-hint-v2-light-v1.webp') center / 100% 100% no-repeat;
   clip-path: polygon(21% 64%, 38% 69%, 54% 71%, 70% 69%, 87% 66%, 87% 74%, 70% 77%, 54% 78%, 38% 76%, 21% 71%);
   filter: brightness(2.1) saturate(1.12);
   pointer-events: none;

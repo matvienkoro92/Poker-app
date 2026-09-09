@@ -262,7 +262,7 @@
     var winner = entries.find(function (entry) { return entry.winner; });
     var winnerArt = winner && typeof window.pokerGetSummerRatingPlayerArt === "function" ? window.pokerGetSummerRatingPlayerArt(winner.name) : null;
     var winnerArtSrc = winnerArt && winnerArt.src || "";
-    if (!winnerArtSrc && winner && /^(frankl|andrushamorf|4ezzi)$/i.test(String(winner.name || "").trim())) winnerArtSrc = "./assets/summer-rating-player-morf.webp";
+    if (!winnerArtSrc && winner && /^(frankl|andrushamorf|4ezzi)$/i.test(String(winner.name || "").trim())) winnerArtSrc = "./assets/summer-rating-player-morf-light-v1.webp";
     var settled = data.status === "settled";
     var expanded = bodyEl && Array.prototype.some.call(bodyEl.querySelectorAll(".tournament-bet-modal__closed-event[open]"), function (item) { return item.getAttribute("data-result-id") === String(data.id); });
     var payout = data.winnerPaidAmount == null ? data.bank : data.winnerPaidAmount;

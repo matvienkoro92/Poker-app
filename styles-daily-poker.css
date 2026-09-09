@@ -3679,7 +3679,7 @@
   min-height: 0;
   padding: 0;
   border-radius: 7%;
-  background: #00432d url("./assets/daily-poker-table-felt-v2.webp") center / cover no-repeat;
+  background: #00432d url("./assets/daily-poker-table-felt-v2-light-v1.webp") center / cover no-repeat;
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
 }
 .daily-poker .daily-poker__table::before { content: none; }
@@ -4064,7 +4064,7 @@
   padding: 0;
   border: 0;
   border-radius: 0;
-  background-image: url('./assets/daily-poker-prizes-gold-reference-v1.png');
+  background-image: url('./assets/daily-poker-prizes-gold-reference-v1-light-v1.webp');
   background-size: 600% 200%;
   background-position: var(--prize-art-x) 45%;
   background-repeat: no-repeat;

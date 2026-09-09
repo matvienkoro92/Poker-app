@@ -467,8 +467,8 @@
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
     "jeweler": "./assets/club-news-personal/jeweler-personal-v1.webp?v=1",
-    "киса": "./assets/club-news-personal/zalupa-personal.webp?v=1",
-    "залупа": "./assets/club-news-personal/zalupa-personal.webp?v=1",
+    "киса": "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1",
+    "залупа": "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1",
     "gucci💱": "./assets/club-news-personal/gucci-finalist-cutout.webp?v=1",
     "smile😎😊😺": "./assets/club-news-personal/smile-news-cutout.webp?v=4",
     "proxor": "./assets/club-news-personal/proxor-personal-cutout.webp?v=3",
@@ -487,7 +487,7 @@
     "бардюр": "./assets/club-news-personal/bardur-news-cutout.webp?v=2",
     "pryanik2la": "./assets/summer-rating-player-pryanik.webp", "prushnik": "./assets/summer-rating-player-prushnik.webp",
     "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp", "kriak": "./assets/summer-rating-player-kriak.webp",
-    "frankl": "./assets/summer-rating-player-morf.webp", "andrushamorf": "./assets/summer-rating-player-morf.webp", "4ezzi": "./assets/summer-rating-player-morf.webp", "morf": "./assets/summer-rating-player-morf.webp", "морф": "./assets/summer-rating-player-morf.webp",
+    "frankl": "./assets/summer-rating-player-morf-light-v1.webp", "andrushamorf": "./assets/summer-rating-player-morf-light-v1.webp", "4ezzi": "./assets/summer-rating-player-morf-light-v1.webp", "morf": "./assets/summer-rating-player-morf-light-v1.webp", "морф": "./assets/summer-rating-player-morf-light-v1.webp",
     "alenast": "./assets/summer-rating-league2-player-alena.webp", "shkarubo": "./assets/summer-rating-league2-player-shkarubo.webp",
     "sarmat1305": "./assets/summer-rating-league2-player-sarmat.webp", "палач": "./assets/summer-rating-league2-player-palach.webp",
     "nakurikota": "./assets/summer-rating-league2-player-nakurikota.webp", "накурикота": "./assets/summer-rating-league2-player-nakurikota.webp",
@@ -496,7 +496,7 @@
     "babyshark": "./assets/summer-rating-league2-player-babyshark.webp", "аспирин": "./assets/summer-rating-league2-player-aspirin.webp",
     "ksuha": "./assets/summer-rating-league2-player-ksyukha.webp", "ksuha🐍": "./assets/summer-rating-league2-player-ksyukha.webp",
     "ksuha🐊": "./assets/summer-rating-league2-player-ksyukha.webp", "ksuha🦖": "./assets/summer-rating-league2-player-ksyukha.webp", "ksuha🐉": "./assets/summer-rating-league2-player-ksyukha.webp",
-    "zagrebnagreb": "./assets/summer-rating-league2-player-zagrebnagreb.webp", "zagrebrnagreb": "./assets/summer-rating-league2-player-zagrebnagreb.webp"
+    "zagrebnagreb": "./assets/summer-rating-league2-player-zagrebnagreb-light-v1.webp", "zagrebrnagreb": "./assets/summer-rating-league2-player-zagrebnagreb-light-v1.webp"
   };
 
   var CLUB_NEWS_CARD_ART_BY_NICK = {
