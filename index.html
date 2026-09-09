@@ -393,8 +393,8 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
     <link rel="stylesheet" href="./styles-home-overrides.css?v=4.054" />
-    <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=1" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=5" />
+    <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=2" />
+    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=6" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.022" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -513,7 +513,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=Pacifico&family=Permanent+Marker&display=swap"
       rel="stylesheet"
     />
-  </head>
+    <link rel="stylesheet" href="./styles-home-sng-reference.css?v=2" />
+</head>
   <body data-view="home">
     <div id="appBootOverlay" class="app-boot-overlay" role="status" aria-live="polite" aria-busy="true">
       <div class="app-boot-overlay__panel">
@@ -966,12 +967,12 @@
           <div class="home-sng-champions-feature">
             <div class="home-sng-champions-action" aria-label="СНГ Лига Чемпионов Два Туза">
               <button type="button" class="home-sng-champions-image-link" id="sngChampionsOpen" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
-                <img src="./assets/home-sng-champions-battle-3-v2.webp?v=3" srcset="./assets/home-sng-champions-battle-3-v2-mobile.webp?v=3 900w, ./assets/home-sng-champions-battle-3-v2.webp?v=3 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="3-й СНГ-баттл Два туза." width="2172" height="536" loading="eager" decoding="async" fetchpriority="high" data-sng-home-banner />
+                <img src="./assets/home-sng-champions-battle-3-v2-reference.webp?v=1" srcset="./assets/home-sng-champions-battle-3-v2-reference-mobile.webp?v=1 900w, ./assets/home-sng-champions-battle-3-v2-reference.webp?v=1 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="3-й СНГ-баттл Два туза." width="2172" height="536" loading="eager" decoding="async" fetchpriority="high" data-sng-home-banner />
                 <span class="home-sng-champions-action__completed-badge" data-sng-home-completed hidden>ЗАВЕРШЁН</span>
               </button>
             </div>
             <div class="home-sng-champions-action__bar" aria-label="Параметры актуального СНГ-турнира">
-              <span class="home-sng-champions-action__stat home-sng-champions-action__stat--players"><small>Участники</small><strong data-sng-home-players>—/32</strong></span>
+              <span class="home-sng-champions-action__stat home-sng-champions-action__stat--players"><small>Участники</small><strong data-sng-home-players>—/32</strong><span class="home-sng-registration-progress" data-sng-home-progress role="progressbar" aria-label="Набор участников" aria-valuemin="0" aria-valuemax="32" aria-valuenow="0"><span></span></span></span>
               <span class="home-sng-champions-action__stat home-sng-champions-action__stat--prize"><small>Призовой фонд</small><strong data-sng-home-prize>—</strong></span>
               <span class="home-sng-champions-action__stat home-sng-champions-action__stat--buyin"><small>Вход</small><strong data-sng-home-buyin>—</strong></span>
               <span class="home-sng-champions-action__cta-wrap">
@@ -1010,22 +1011,27 @@
           <div class="home-tournament-bonuses home-tournament-bonuses--upper home-tournament-bonuses--table" aria-label="Бонусы за комбинации. Нажмите на бонус, чтобы узнать условия выдачи">
             <div class="home-tournament-bonuses__grid home-tournament-bonuses__grid--upper" role="list">
               <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus-info="four-kind" aria-label="Условия бонуса за каре">
+                <svg class="home-tournament-bonus__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="12" width="25" height="36" rx="3" transform="rotate(-20 22 30)"/><rect x="20" y="10" width="25" height="36" rx="3" transform="rotate(-7 32 28)"/><rect x="31" y="12" width="25" height="36" rx="3" transform="rotate(12 44 30)"/><path d="m42 23-7 10h14Z"/><path d="M42 31v7"/></svg>
                 <span class="home-tournament-bonus__amount">1000 ₽</span>
                 <span class="home-tournament-bonus__label">Каре</span>
               </button>
               <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus-info="straight-flush" aria-label="Условия бонуса за стрит-флеш">
+                <svg class="home-tournament-bonus__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M32 8C27 19 12 25 12 36c0 11 14 14 20 5 6 9 20 6 20-5C52 25 37 19 32 8Z"/><path d="M32 40v13m-10 0h20"/><path d="m48 8 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/></svg>
                 <span class="home-tournament-bonus__amount">2500 ₽</span>
                 <span class="home-tournament-bonus__label">Стрит-флеш</span>
               </button>
               <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus-info="royal-flush" aria-label="Условия бонуса за роял">
+                <svg class="home-tournament-bonus__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 21 8 26h28l8-26-14 10-8-19-8 19Z"/><path d="M19 52h26M18 43h28"/><circle cx="10" cy="18" r="3"/><circle cx="32" cy="9" r="3"/><circle cx="54" cy="18" r="3"/></svg>
                 <span class="home-tournament-bonus__amount">10 000 ₽</span>
                 <span class="home-tournament-bonus__label">Роял</span>
               </button>
               <button type="button" class="home-tournament-bonus home-tournament-bonus--info" data-home-tournament-bonus="league1" data-home-tournament-league-top="1" aria-label="Актуальный топ-10 Лиги 1">
+                <svg class="home-tournament-bonus__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 30a16 16 0 1 1 32 0v10l-8 3v10H24V43l-8-3Z"/><circle cx="24" cy="30" r="4"/><circle cx="40" cy="30" r="4"/><path d="m32 36-3 5h6ZM29 47v6m6-6v6"/></svg>
                 <span class="home-tournament-bonus__amount">500-1500 ₽</span>
-                <span class="home-tournament-bonus__label">Нокаут топ10 Лиги1</span>
+                <span class="home-tournament-bonus__label">Нокаут · топ-10<br>Лиги 1</span>
               </button>
               <button type="button" class="home-tournament-bonus home-tournament-bonus--bubble-buyin home-tournament-bonus--info" data-home-tournament-bubble-bonus="1" aria-label="Условия бонуса бабблу" hidden>
+                <svg class="home-tournament-bonus__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="20" r="8"/><circle cx="13" cy="24" r="6"/><circle cx="51" cy="24" r="6"/><path d="M18 53V42a14 14 0 0 1 28 0v11ZM5 49V41a8 8 0 0 1 12-7m42 15V41a8 8 0 0 0-12-7"/></svg>
                 <span class="home-tournament-bonus__amount" id="homeTournamentBubbleBuyinAmount">500 ₽</span>
                 <span class="home-tournament-bonus__label" id="homeTournamentBubbleBuyinLabel">бабблу</span>
               </button>
@@ -1549,10 +1555,10 @@
             </button>
             <div class="daily-poker__sng-champions sng-inline-feature" aria-label="СНГ Лига Чемпионов Два Туза">
               <button type="button" class="sng-inline-feature__image" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
-                <img src="./assets/home-sng-champions-battle-3-v2.webp?v=3" srcset="./assets/home-sng-champions-battle-3-v2-mobile.webp?v=3 900w, ./assets/home-sng-champions-battle-3-v2.webp?v=3 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
+                <img src="./assets/home-sng-champions-battle-3-v2-reference.webp?v=1" srcset="./assets/home-sng-champions-battle-3-v2-reference-mobile.webp?v=1 900w, ./assets/home-sng-champions-battle-3-v2-reference.webp?v=1 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
               </button>
               <div class="sng-inline-feature__bar">
-                <span class="sng-inline-feature__stat"><small>Участники</small><strong data-sng-home-players>—/32</strong></span>
+                <span class="sng-inline-feature__stat"><small>Участники</small><strong data-sng-home-players>—/32</strong><span class="home-sng-registration-progress" data-sng-home-progress role="progressbar" aria-label="Набор участников" aria-valuemin="0" aria-valuemax="32" aria-valuenow="0"><span></span></span></span>
                 <span class="sng-inline-feature__stat"><small>Призовой фонд</small><strong data-sng-home-prize>—</strong></span>
                 <span class="sng-inline-feature__stat"><small>Вход</small><strong data-sng-home-buyin>—</strong></span>
                 <span class="sng-inline-feature__cta-wrap">
@@ -2007,7 +2013,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-club-choice" src="./app-club-choice-vote.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-private-cash" src="./app-private-cash.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-sng" src="./app-sng-champions.js?v=4.004.1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-sng" src="./app-sng-champions.js?v=4.004.1.1.1"></script>
     <script defer src="./app-tournament-bet.js?v=4.028"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-spring-runtime.js?v=4.002"></script>

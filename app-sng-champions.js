@@ -2010,10 +2010,10 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
       var nextSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout.webp?v=4"
-        : "./assets/home-sng-champions-battle-3-v2.webp?v=3";
+        : "./assets/home-sng-champions-battle-3-v2-reference.webp?v=1";
       var nextMobileSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout-mobile.webp?v=1"
-        : "./assets/home-sng-champions-battle-3-v2-mobile.webp?v=3";
+        : "./assets/home-sng-champions-battle-3-v2-reference-mobile.webp?v=1";
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
@@ -2072,6 +2072,14 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-players]"), function (el) {
       el.textContent = String(approved) + "/" + String(state.capacity || 32);
+    });
+    var registrationCapacity = Math.max(1, Number(state.capacity) || 32);
+    var registrationCount = Math.max(0, Math.min(registrationCapacity, Number(approved) || 0));
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-progress]"), function (el) {
+      el.style.setProperty("--registration-progress", String(registrationCount / registrationCapacity * 100) + "%");
+      el.setAttribute("aria-valuemax", String(registrationCapacity));
+      el.setAttribute("aria-valuenow", String(registrationCount));
+      el.setAttribute("aria-valuetext", String(registrationCount) + " из " + String(registrationCapacity) + " участников");
     });
     var prizeFund = (state.prizes || []).reduce(function (sum, prize) {
       var amount = Number(String(prize && prize.text || "").replace(/[^\d]/g, "")) || 0;

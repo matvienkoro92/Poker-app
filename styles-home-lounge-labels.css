@@ -34,7 +34,7 @@
 .app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge {
   display: flex !important;
   position: absolute !important;
-  top: 96% !important;
+  top: 88% !important;
   bottom: auto !important;
   left: 0 !important;
   right: auto !important;
@@ -47,7 +47,7 @@
   background: none !important;
   box-shadow: none !important;
   color: #ffe18a !important;
-  font: 800 4.2cqw/1.4 Arial, sans-serif !important;
+  font: 800 5.6cqw/1.4 Arial, sans-serif !important;
   justify-content: center;
   align-items: center;
   white-space: nowrap;
@@ -60,5 +60,5 @@
   font-size: 0 !important;
 }
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge.raffle-active-amount-badge--hidden::after {
-  font-size: 4.2cqw;
+  font-size: 5.6cqw;
 }

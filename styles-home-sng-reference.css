@@ -1,0 +1,29 @@
+/* Keep the supplied scene above the existing live controls and signup button. */
+.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2-reference"]) .home-sng-champions-action {
+  margin: 0 !important;
+}
+.home-sng-champions-image-link:has(img[src*="battle-3-v2-reference"]) {
+  display: block !important; width: 100% !important; aspect-ratio: 2100 / 580 !important;
+  height: auto !important; padding: 0 !important; overflow: hidden !important;
+}
+.app.app--view-home .home-sng-champions-feature .home-sng-champions-image-link img[src*="battle-3-v2-reference"] {
+  display: block !important; width: 100% !important; height: auto !important;
+  max-height: none !important; aspect-ratio: 2100 / 749 !important;
+  object-fit: contain !important; transform: none !important; margin: 0 !important;
+}
+.home-sng-champions-action__stat--players .home-sng-registration-progress {
+  display: block; flex: 0 0 auto; width: 82%; height: clamp(4px, .7cqw, 8px);
+  margin: 4px auto 0; padding: 0; overflow: hidden; border: 1px solid #8d692f;
+  border-radius: 999px; background: #15130e; box-sizing: border-box;
+}
+.home-sng-registration-progress > span {
+  display: block; width: var(--registration-progress, 0%); height: 100%;
+  background: linear-gradient(180deg, #ffe5a0, #bf7c26); border-radius: inherit;
+  transition: width .4s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-sng-registration-progress > span { transition: none; }
+}
+.sng-inline-feature__image:has(img[src*="battle-3-v2-reference"]) { display: block; aspect-ratio: 2100 / 580; overflow: hidden; }
+.sng-inline-feature__image img[src*="battle-3-v2-reference"] { width: 100%; height: auto; max-height: none; transform: none; }
+.sng-inline-feature__stat .home-sng-registration-progress { display: block; width: 82%; height: 5px; margin: 4px auto 0; overflow: hidden; border: 1px solid #8d692f; border-radius: 999px; background: #15130e; }
