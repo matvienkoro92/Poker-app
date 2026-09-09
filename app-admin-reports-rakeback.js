@@ -854,6 +854,7 @@
   function syncCashPayoutButton(row) {
     var button = row.querySelector("[data-rakeback-cash-pay]");
     if (!button) return;
+    row.classList.toggle("admin-report-rakeback-row--paid", button.dataset.paymentState === "paid");
     var room = row.querySelector("[data-rakeback-room]");
     var amount = Number(row.getAttribute("data-rakeback-amount-value"));
     button.hidden = !room || room.value !== "P21";

@@ -5039,3 +5039,22 @@ button.admin-report-rakeback-summary__row:focus-visible {
   .admin-report-rakeback-action-buttons .admin-report-rakeback-icon-btn { margin: 0; }
   .admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 10px; }
 }
+
+/* Confirmed payouts remain readable, with a line through the whole row. */
+.admin-report-rakeback-row--paid {
+  filter: brightness(0.78);
+}
+.admin-report-rakeback-row--paid > td {
+  position: relative;
+}
+.admin-report-rakeback-row--paid > td::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(236, 225, 200, 0.65);
+  z-index: 2;
+  pointer-events: none;
+}
