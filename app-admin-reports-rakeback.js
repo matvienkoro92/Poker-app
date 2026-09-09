@@ -654,6 +654,7 @@
     row.setAttribute("data-rakeback-base-rake", String(baseRake || 0));
     row.setAttribute("data-rakeback-room-amount", String(roomAmount || 0));
     row.setAttribute("data-rakeback-amount-value", String(getReportAmount(room, roomAmount)));
+    syncCashPayoutButton(row);
     if (amountEl) amountEl.textContent = roomAmount ? String(roomAmount) : "";
     if (restEl) restEl.classList.toggle("admin-report-rakeback-rest--negative", baseRake < 0);
     if (amountEl) amountEl.classList.toggle("admin-report-rakeback-amount--negative", roomAmount < 0);
@@ -816,6 +817,7 @@
       select.disabled = isAddon || saved || !!busy;
     });
     updateSharedRowActions(row, busy);
+    syncCashPayoutButton(row);
   }
 
   function updateTemplateRowActions(row, busy) {
@@ -847,6 +849,34 @@
       colorBtn.hidden = false;
       colorBtn.disabled = !!busy;
     }
+  }
+
+  function syncCashPayoutButton(row) {
+    var button = row.querySelector("[data-rakeback-cash-pay]");
+    if (!button) return;
+    var room = row.querySelector("[data-rakeback-room]");
+    var amount = Number(row.getAttribute("data-rakeback-amount-value"));
+    button.hidden = !room || room.value !== "P21";
+    button.disabled = button.dataset.paymentState === "paid" || button.dataset.paymentState === "processing" ||
+      row.getAttribute("data-rakeback-saved") !== "1" || !(amount > 0 && amount <= 1000);
+    button.title = button.dataset.paymentState === "paid" ? "Уже выдано в кассу" :
+      button.dataset.paymentState === "processing" ? "Выдача обрабатывается; повтор запрещён" :
+      amount > 1000 ? "Выдача недоступна: рейкбек больше 1000 ₽" : "Выдать рейкбек в кассу Poker21 один раз";
+  }
+  function requestCashPayout(row, action) {
+    return requestJson(getApiBaseSafe() + "/api/admin-report-shifts", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildAuthBody({ action: action, groupId: row.getAttribute("data-rakeback-group"),
+        kind: row.getAttribute("data-rakeback-kind"), createdAt: row.getAttribute("data-rakeback-created-at") }))
+    });
+  }
+  function showCashPayout(row, data) {
+    var button = row.querySelector("[data-rakeback-cash-pay]");
+    if (button && data && data.payment) {
+      button.dataset.paymentState = data.payment.status;
+      button.textContent = data.payment.status === "paid" ? "✓ ₽" : "…";
+    }
+    syncCashPayoutButton(row);
   }
 
   function createSharedRow(data, index) {
@@ -886,6 +916,7 @@
       '<td class="admin-report-rakeback-discount-cell"><label class="admin-report-rakeback-discount-control" title="Отнять 15%"><input type="checkbox" class="admin-report-rakeback-discount" data-rakeback-discount15 aria-label="Отнять 15%"' + (data.discount15 || data.subtract15 ? " checked" : "") + ' /><span class="admin-report-rakeback-discount-box" aria-hidden="true"></span></label></td>' +
       '<td><span class="admin-report-rakeback-amount" data-rakeback-amount></span></td>' +
       '<td class="admin-report-rakeback-actions">' +
+        '<button type="button" class="admin-report-rakeback-icon-btn" data-rakeback-cash-pay title="Выдать рейкбек в кассу Poker21 один раз" aria-label="Выдать рейкбек в кассу Poker21">✓ ₽</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--save" data-rakeback-save title="Сохранить строку" aria-label="Сохранить строку">✓</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--add" data-rakeback-add-addon title="Добавить подзапись" aria-label="Добавить подзапись">+</button>' +
         '<button type="button" class="admin-report-rakeback-icon-btn admin-report-rakeback-icon-btn--edit" data-rakeback-edit title="Редактировать строку" aria-label="Редактировать строку">✎</button>' +
@@ -897,6 +928,8 @@
     updateSharedRowDateBadge(tr, data.baseEntryAt || entryAt);
     applySharedRowColor(tr, data.color || data.rowColor || data.highlightColor || "");
     setSharedRowSaved(tr, saved, false);
+    syncCashPayoutButton(tr);
+    if (room === "P21" && persisted) requestCashPayout(tr, "rakeback_cash_status").then(function(data) { showCashPayout(tr, data); }).catch(function() {});
     return tr;
   }
 
@@ -3663,6 +3696,27 @@
           if (event.target && event.target.matches && event.target.matches("[data-rakeback-room]")) render();
         });
         body.addEventListener("click", function (event) {
+          var payoutButton = event.target.closest && event.target.closest("[data-rakeback-cash-pay]");
+          if (payoutButton) {
+            event.preventDefault();
+            if (payoutButton.disabled) return;
+            var payoutRow = payoutButton.closest("[data-rakeback-shared-row]");
+            payoutButton.disabled = true;
+            payoutButton.dataset.paymentState = "processing";
+            requestCashPayout(payoutRow, "rakeback_cash_pay").then(function(data) {
+              if (!data || !data.ok) throw new Error(data && data.error || "Не удалось выдать рейкбек");
+              showCashPayout(payoutRow, data);
+              setStatus(data.payment && data.payment.status === "paid" ? "Рейкбек выдан в кассу Poker21" : "Выдача обрабатывается. Повторная выдача заблокирована.");
+            }).catch(function(error) {
+              setStatus(error.message || "Ошибка выдачи. Проверьте статус перед повтором.");
+              requestCashPayout(payoutRow, "rakeback_cash_status").then(function(data) {
+                if (data && data.ok && !data.payment) payoutButton.dataset.paymentState = "";
+                showCashPayout(payoutRow, data);
+              }).catch(function() {});
+            });
+            return;
+          }
+
           var addonIdCopy = event.target && event.target.closest ? event.target.closest("[data-rakeback-copy-addon-id]") : null;
           if (addonIdCopy) {
             var addonCopyRow = addonIdCopy.closest("[data-rakeback-shared-row]");
