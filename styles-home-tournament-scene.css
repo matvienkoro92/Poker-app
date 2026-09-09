@@ -3,6 +3,8 @@
   display: block !important; position: relative !important; container-type: inline-size;
   width: 100% !important; height: auto !important; min-height: 0 !important;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
+  /* Reclaim part of the transparent space below the illustrated table. */
+  margin-bottom: -6% !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
   background: url('./assets/home-tournament-shtukatur-transparent-v8.png') center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
@@ -183,8 +185,9 @@
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 32% !important; left: 72.5% !important; width: 13% !important; text-align: center !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: 3cqw !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock { top: 50.5% !important; left: 32% !important; }
 
-#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 28% !important; }
-#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 36% !important; }
+/* Align both lines with the buy-in frame in the current ticket artwork. */
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 28% !important; left: 68% !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin { top: 33% !important; left: 68% !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table { top: 81.5% !important; }
 
 /* Place live bonus labels on the original illustrated table and its icons. */
@@ -252,7 +255,10 @@
   font-size: 2cqw !important; white-space: nowrap !important; line-height: 1.15 !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {
-  top: 103% !important; color: #d6c5a0; pointer-events: none;
+  top: 94% !important; color: #d6c5a0; pointer-events: none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
+  margin-top: 20px;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:focus-visible {
   outline: 2px solid #ffe4a5; outline-offset: .5cqw; border-radius: 10px;

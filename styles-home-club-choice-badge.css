@@ -119,3 +119,26 @@
     animation: none;
   }
 }
+.app.app--view-home .home-club-vote-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  margin: 14px 0 8px;
+  padding: 7px 13px;
+  border: 1px solid #a98242;
+  border-radius: 10px;
+  background: linear-gradient(110deg, #302719, #151719 70%);
+  color: #f0d39b;
+  font: 700 12px/1.2 Arial, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.home-club-vote-strip__title { flex: 1; }
+.home-club-vote-strip__round { color: #ffc369; font-size: 10px; white-space: nowrap; }
+.home-club-vote-strip__arrow { color: #ffc369; font-size: 22px; line-height: 1; }
+.app.app--view-home .home-club-vote-strip:focus-visible { outline: 2px solid #ffda87; outline-offset: 3px; }
+.app.app--view-home .home-club-vote-strip:hover { border-color: #efc477; }
+.app.app--view-home .home-club-vote-strip + .home-club-news { margin-top: 0; }
