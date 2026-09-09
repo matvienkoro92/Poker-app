@@ -5058,3 +5058,12 @@ button.admin-report-rakeback-summary__row:focus-visible {
   z-index: 2;
   pointer-events: none;
 }
+
+/* Give rakeback entries 1.5 times their previous control-driven height. */
+.admin-report-rakeback-table .admin-report-rakeback-row { height: 51px; }
+@media (max-width: 560px) {
+  .admin-report-rakeback-table .admin-report-rakeback-row { height: 42px; }
+}
+@media (max-width: 430px) {
+  .admin-report-rakeback-table .admin-report-rakeback-row { height: 45px; }
+}
