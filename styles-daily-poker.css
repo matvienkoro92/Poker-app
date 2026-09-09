@@ -3721,6 +3721,34 @@
 .daily-poker .daily-poker__table-deal > .daily-poker__play-btn[hidden] { display: none; }
 .daily-poker .daily-poker__table-deal > .daily-poker__play-btn:disabled { opacity: .55; cursor: default; }
 .daily-poker .daily-poker__table-deal > .daily-poker__play-btn:focus-visible { outline: 3px solid #fff2c5; outline-offset: 4px; }
+.daily-poker .daily-poker__table-deal > .daily-poker__result {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  min-height: 0;
+  margin: 1.5cqw 0 0;
+  padding: 1.5cqw;
+  gap: 1cqw;
+  border: 1px solid #514531;
+  border-radius: 2cqw;
+  background: #10151c;
+  box-shadow: none;
+  color: #ece1c8;
+  font-size: 2.4cqw;
+  line-height: 1.3;
+  text-align: center;
+}
+.daily-poker .daily-poker__table-deal .daily-poker__result-primary {
+  font-size: inherit;
+  line-height: inherit;
+}
+.daily-poker .daily-poker__table-deal .daily-poker__result-meta {
+  justify-content: center;
+  gap: .6cqw;
+  font-size: 1.8cqw;
+  text-transform: none;
+}
 .daily-poker .daily-poker__zone--board { top: 48.5%; }
 .daily-poker .daily-poker__zone .daily-poker__zone-label {
   position: static;
