@@ -388,14 +388,14 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat" href="./styles-chat-overlays.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat profile" href="./styles-rating-chat-modals.css?v=4.020" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="learning" href="./styles-learning-games.css?v=4.002" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="daily-poker learning admin admin-bonuses" href="./styles-daily-poker.css?v=4.003" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="daily-poker learning admin admin-bonuses" href="./styles-daily-poker.css?v=4.005" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="raffles" href="./styles-raffles.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.020" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
     <link rel="stylesheet" href="./styles-home-overrides.css?v=4.055" />
-    <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=4" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=17" />
+    <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=5" />
+    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=19" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.023" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -977,6 +977,7 @@
             <div class="home-sng-champions-action" aria-label="СНГ Лига Чемпионов Два Туза">
               <button type="button" class="home-sng-champions-image-link" id="sngChampionsOpen" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
                 <img src="./assets/home-sng-champions-battle-3-v2-reference.webp?v=1" srcset="./assets/home-sng-champions-battle-3-v2-reference-mobile.webp?v=1 900w, ./assets/home-sng-champions-battle-3-v2-reference.webp?v=1 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="3-й СНГ-баттл Два туза." width="2172" height="536" loading="eager" decoding="async" fetchpriority="high" data-sng-home-banner />
+                <span class="sng-character-name sng-character-name--fish">FishKopcheny</span><span class="sng-character-name sng-character-name--morf">Morf</span><span class="sng-character-name sng-character-name--gucci">Гучи</span>
                 <span class="home-sng-champions-action__completed-badge" data-sng-home-completed hidden>ЗАВЕРШЁН</span>
               </button>
             </div>
@@ -1488,16 +1489,7 @@
                 <li class="daily-poker__prize daily-poker__prize--quads" aria-label="Каре, билет за 800 рублей">
                   <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-quads.webp?v=3.569" alt="" loading="lazy" decoding="async" aria-hidden="true" />
                 </li>
-                <li class="daily-poker__prize" aria-label="Фулл-хаус, билет за 300 рублей">
-                  <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-full-house.webp?v=3.568" alt="" loading="lazy" decoding="async" aria-hidden="true" />
-                </li>
-                <li class="daily-poker__prize daily-poker__prize--bonus-extra" aria-label="Флеш или стрит, 50 рублей бонус и дополнительная попытка">
-                  <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-flush-straight.webp?v=3.401" alt="" loading="lazy" decoding="async" aria-hidden="true" />
-                </li>
-                <li class="daily-poker__prize" aria-label="Сет, дополнительная попытка">
-                  <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-set.webp?v=3.401" alt="" loading="lazy" decoding="async" aria-hidden="true" />
-                </li>
-              </ul>
+                </ul>
             </div>
           </div>
 
@@ -1547,6 +1539,17 @@
                 </span>
               </button>
             </div>
+            <ul class="daily-poker__prizes daily-poker__prizes--secondary" aria-label="Другие призы за комбинации">
+<li class="daily-poker__prize" aria-label="Фулл-хаус, билет за 300 рублей">
+                  <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-full-house.webp?v=3.568" alt="" loading="lazy" decoding="async" aria-hidden="true" />
+                </li>
+<li class="daily-poker__prize daily-poker__prize--bonus-extra" aria-label="Флеш или стрит, 50 рублей бонус и дополнительная попытка">
+                  <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-flush-straight.webp?v=3.401" alt="" loading="lazy" decoding="async" aria-hidden="true" />
+                </li>
+<li class="daily-poker__prize" aria-label="Сет, дополнительная попытка">
+                  <img class="daily-poker__prize-art" src="./assets/daily-poker-prize-set.webp?v=3.401" alt="" loading="lazy" decoding="async" aria-hidden="true" />
+                </li>
+</ul>
             <p class="daily-poker__hand-rule">Награда за комбинацию — только если карманная карта собрала или усилила её. Один кикер не считается.</p>
             <p class="daily-poker__streak-note">
               <span class="daily-poker__streak-icon" aria-hidden="true">
@@ -1566,6 +1569,7 @@
             <div class="daily-poker__sng-champions sng-inline-feature" aria-label="СНГ Лига Чемпионов Два Туза">
               <button type="button" class="sng-inline-feature__image" data-sng-open aria-label="Открыть СНГ Лигу Чемпионов Два Туза">
                 <img src="./assets/home-sng-champions-battle-3-v2-reference.webp?v=1" srcset="./assets/home-sng-champions-battle-3-v2-reference-mobile.webp?v=1 900w, ./assets/home-sng-champions-battle-3-v2-reference.webp?v=1 2172w" sizes="(max-width: 900px) 100vw, 1086px" alt="" width="2172" height="724" loading="lazy" decoding="async" data-sng-home-banner />
+                <span class="sng-character-name sng-character-name--fish">FishKopcheny</span><span class="sng-character-name sng-character-name--morf">Morf</span><span class="sng-character-name sng-character-name--gucci">Гучи</span>
               </button>
               <div class="sng-inline-feature__bar">
                 <span class="sng-inline-feature__stat"><small>Участники</small><strong data-sng-home-players>—/32</strong><span class="home-sng-registration-meter"><span class="home-sng-registration-progress" data-sng-home-progress role="progressbar" aria-label="Набор участников" aria-valuemin="0" aria-valuemax="32" aria-valuenow="0"><span></span></span><span class="home-sng-registration-percent" data-sng-home-percent>—%</span></span></span>
