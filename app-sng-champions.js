@@ -2014,6 +2014,7 @@
       var nextMobileSrc = teamKnockoutTitle
         ? "./assets/home-sng-champions-click-banner-team-knockout-mobile.webp?v=1"
         : "./assets/home-sng-champions-battle-3-v2-reference-mobile.webp?v=1";
+      if (banner.getAttribute("src") === nextSrc && banner.getAttribute("data-sng-home-banner-ready") === "1") return;
       banner.removeAttribute("data-sng-home-banner-ready");
       function revealCurrentBanner() {
         if (banner.getAttribute("src") !== nextSrc) return;
@@ -2668,10 +2669,10 @@
       }).observe(document.body, { childList: true, subtree: true });
     }
     var homeRefreshRetry = null;
-    function refreshHomeBanner(attempt) {
+    function refreshHomeBanner(attempt, usePreload) {
       window.clearTimeout(homeRefreshRetry);
       if (modal && modal.classList.contains("club-choice-vote-modal--open")) return;
-      fetchHomeSummary(true).then(function (data) {
+      fetchHomeSummary(!usePreload).then(function (data) {
         if (modal && modal.classList.contains("club-choice-vote-modal--open")) return;
         if (!data || !data.ok) throw new Error("SNG summary unavailable");
         state = data;
@@ -2690,7 +2691,7 @@
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") refreshHomeBanner(0);
     });
-    if (window.__pokerHomeWidgetOpening !== "sngChampions") refreshHomeBanner(0);
+    if (window.__pokerHomeWidgetOpening !== "sngChampions") refreshHomeBanner(0, true);
   }
 
   window.openSngChampionsModal = openModal;

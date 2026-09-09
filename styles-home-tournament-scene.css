@@ -4,7 +4,7 @@
   width: 100% !important; height: auto !important; min-height: 0 !important;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
-  background: url('./assets/home-tournament-shtukatur-clean-v7.png') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-tournament-shtukatur-transparent-v8.png') center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
@@ -218,26 +218,53 @@
 .home-tournament-bonuses__note-arc { display: block; width: 100%; height: auto; overflow: visible; }
 .home-tournament-bonuses__note-arc text { fill: currentColor; font: 500 20px Arial, sans-serif; }
 
-/* Coordinates follow the current 1000 × 1250 scene at every viewport width. */
+/* Bonus centres follow the five illustrated felt panels, with a shallow arc. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
-  top: 49% !important; left: 31% !important; width: 29% !important; height: 19% !important;
+  top: 49% !important; left: 30% !important; width: 28% !important; height: 19% !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
-  top: 75% !important; height: 16% !important;
+  top: 64% !important; height: 16% !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
-  top: 71% !important; height: 17% !important;
+  top: 69.5% !important; height: 14% !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid { height: 100% !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus {
-  top: 8% !important; height: auto !important;
-  display: grid !important; grid-template-rows: 4cqw 3.4cqw 2.5cqw !important;
-  gap: .3cqw !important; justify-content: stretch !important;
+  top: 3% !important; left: 6% !important; width: 15% !important; height: auto !important;
+  display: grid !important; grid-template-rows: 3.8cqw 3.1cqw 2.4cqw !important;
+  gap: .25cqw !important; justify-content: stretch !important;
+  transform: rotate(10deg) !important; transform-origin: center;
 }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2),
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { top: 14% !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { top: 16% !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon { width: 4cqw !important; height: 4cqw !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label { min-height: 0 !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note { top: 82% !important; }
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { top: 14% !important; left: 75% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 23% !important; top: 14% !important; transform: rotate(5deg) !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 40% !important; top: 18% !important; transform: none !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 57% !important; top: 14% !important; transform: rotate(-5deg) !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 74% !important; top: 3% !important; transform: rotate(-10deg) !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon {
+  width: 3.8cqw !important; height: 3.8cqw !important;
+  color: #ffe4a5; fill: #c7963c33; stroke-width: 2.5;
+  filter: drop-shadow(0 1px 0 #79501d) drop-shadow(0 2px 3px #0009);
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label {
+  min-height: 0 !important; font-size: 1.55cqw !important; line-height: 1.1 !important;
+  display: flex !important; align-items: center; justify-content: center;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount {
+  font-size: 2cqw !important; white-space: nowrap !important; line-height: 1.15 !important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {
+  top: 103% !important; color: #d6c5a0; pointer-events: none;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:focus-visible {
+  outline: 2px solid #ffe4a5; outline-offset: .5cqw; border-radius: 10px;
+}
+
+/* Keep the status centred in the plaque, independent of inherited line metrics. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+  align-items: center !important; justify-content: center !important;
+  line-height: 1 !important; text-align: center !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__empty {
+  position: static !important; margin: 0 !important; padding: 0 !important;
+  transform: none !important; font: 600 2.4cqw/1 Arial, sans-serif !important;
+  color: #ead9b5; white-space: nowrap;
+}

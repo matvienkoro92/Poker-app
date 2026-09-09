@@ -266,6 +266,8 @@
     window.__pokerSngHomeSummaryPromise = fetch(sngBase + "/api/sng-champions?summary=1", { cache: "default" })
       .then(function (response) { return response.json(); }).catch(function () { return null; });
   }
+  // Load the renderer alongside the request so cached data can paint immediately.
+  ensureDomain(WIDGETS.sngChampions.domain).catch(function () {});
   refreshClubChoiceRoundBadge();
   window.setInterval(refreshClubChoiceRoundBadge, 45000);
 
