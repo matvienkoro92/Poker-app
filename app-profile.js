@@ -1295,7 +1295,7 @@ function renderProfileRatingTotalCards(text) {
       '<button type="button" class="profile-month-story-card" data-profile-month-story aria-label="Результаты месяца. Поделиться">' +
         '<span class="profile-month-story-card__eyebrow">В этом месяце:</span>' +
         '<span data-profile-month-summary>Загружаем результаты…</span>' +
-        '<span class="profile-month-story-card__more">Поделиться ↗</span>' +
+        '<span class="profile-month-story-card__more">Поделиться <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
       '</button>' +
     '</div>'
   );
@@ -1468,7 +1468,9 @@ function profileLoadMonthSummary() {
     if (typeof window.pokerGetTournamentAchievementStatsReady !== "function") throw new Error("Рейтинг не загружен");
     return window.pokerGetTournamentAchievementStatsReady(nick);
   }).then(function (stats) {
-    var rows = (stats.rows || []).filter(function (row) {
+    if (typeof getWinterRatingPlayerSummary !== "function") throw new Error("История турниров не загружена");
+    var history = getWinterRatingPlayerSummary(nick, { season: "summer" });
+    var rows = history.filter(function (row) {
       var parts = String(row.date || "").split(".");
       return parts[2] + "-" + parts[1] === month;
     });
@@ -3190,3 +3192,82 @@ function initProfileRespectVotersButton() {
     }
   });
 }
+
+// Check earned achievements independently of opening the profile view.
+(function () {
+  var running = false;
+  var scheduled = null;
+  var lastCheckAt = 0;
+  function check() {
+    if (document.hidden || running) return;
+    var auth = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "";
+    if (!auth || auth === "?initData=" || /guestDeviceId/i.test(auth)) return;
+    if (Date.now() - lastCheckAt < 5 * 60 * 1000) return;
+    running = true;
+    profileEnsureLazyScriptDomains(["profile"]).then(function () {
+      return typeof loadCurrentProfileUserInfo === "function" ? loadCurrentProfileUserInfo() : null;
+    }).then(function (data) {
+      if (auth !== (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "")) return;
+      if (!data || !data.ok || !profileAchievementUserIdFromData(data)) return;
+      return ensureProfileAchievementsBuilder().then(function (ready) {
+        if (!ready || document.hidden) return;
+        return window.pokerBuildProfileAchievements({
+          ratingNick: profileAchievementRatingNickFromData(data),
+          profileData: data,
+          userId: profileAchievementUserIdFromData(data),
+          isSelfProfile: true,
+        }).then(function (result) {
+          lastCheckAt = Date.now();
+          writeProfileAchievementsCache(data, result);
+        });
+      });
+    }).catch(function () {}).finally(function () { running = false; });
+  }
+  function schedule() {
+    clearTimeout(scheduled);
+    scheduled = setTimeout(check, 1500);
+  }
+  window.addEventListener("poker-telegram-auth", function () { lastCheckAt = 0; schedule(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) schedule(); });
+  window.addEventListener("focus", schedule);
+  schedule();
+}());
+
+(function () {
+  function attachNameFit() {
+    var title = document.getElementById("profilePublicTitle");
+    if (!title || title.dataset.nameFitBound) return !!title;
+    title.dataset.nameFitBound = "1";
+    var row = title.parentElement;
+    var frame = null;
+    function fit() {
+      frame = null;
+      if (!row.clientWidth) return;
+      title.style.removeProperty("font-size");
+      var maximum = parseFloat(getComputedStyle(title).fontSize) || 32;
+      var available = row.clientWidth;
+      var gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+      Array.prototype.forEach.call(row.children, function (child) {
+        if (child !== title && child.getBoundingClientRect().width) available -= child.getBoundingClientRect().width + gap;
+      });
+      var low = 1, high = maximum;
+      for (var i = 0; i < 12; i++) {
+        var size = (low + high) / 2;
+        title.style.setProperty("font-size", size + "px", "important");
+        if (title.scrollWidth <= Math.max(1, available)) low = size; else high = size;
+      }
+      title.style.setProperty("font-size", low + "px", "important");
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(fit); }
+    new MutationObserver(schedule).observe(title, { childList: true, characterData: true, subtree: true });
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(schedule).observe(row);
+    window.addEventListener("resize", schedule);
+    if (document.fonts) document.fonts.ready.then(schedule);
+    schedule();
+    return true;
+  }
+  if (!attachNameFit()) {
+    var observer = new MutationObserver(function () { if (attachNameFit()) observer.disconnect(); });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
+}());

@@ -16,18 +16,18 @@
         </div>
             </header>
 
-      <dl class="daily-poker__hero-stats" aria-label="Статистика раздачи дня">
+      <dl class="daily-poker__hero-stats daily-poker__stats-spacer" aria-hidden="true">
               <div class="daily-poker__hero-stat">
                 <dt>Уникальных игроков</dt>
-                <dd id="dailyPokerTotalUniquePlayers">—</dd>
+                <dd>—</dd>
               </div>
               <div class="daily-poker__hero-stat">
                 <dt>Всего круток</dt>
-                <dd id="dailyPokerTotalSpins">—</dd>
+                <dd>—</dd>
               </div>
               <div class="daily-poker__hero-stat">
                 <dt>Выиграно</dt>
-                <dd id="dailyPokerTotalPrize">—</dd>
+                <dd>—</dd>
               </div>
             </dl>
       <div class="daily-poker__intro">
@@ -74,7 +74,21 @@
 
     <div class="daily-poker__reward" id="dailyPokerReward" aria-live="off" aria-hidden="true" hidden></div>
 
-    <div class="daily-poker__actions">
+    <dl class="daily-poker__hero-stats daily-poker__stats-below" aria-label="Статистика раздачи дня">
+              <div class="daily-poker__hero-stat">
+                <dt>Уникальных игроков</dt>
+                <dd id="dailyPokerTotalUniquePlayers">—</dd>
+              </div>
+              <div class="daily-poker__hero-stat">
+                <dt>Всего круток</dt>
+                <dd id="dailyPokerTotalSpins">—</dd>
+              </div>
+              <div class="daily-poker__hero-stat">
+                <dt>Выиграно</dt>
+                <dd id="dailyPokerTotalPrize">—</dd>
+              </div>
+            </dl>
+<div class="daily-poker__actions">
       <div class="daily-poker__share-actions">
         <button type="button" class="daily-poker__invite-btn" id="dailyPokerInviteBtn">
           <span class="daily-poker__invite-icon" aria-hidden="true">

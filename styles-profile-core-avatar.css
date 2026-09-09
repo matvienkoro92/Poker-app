@@ -5416,3 +5416,20 @@ body.profile-month-story-open { overflow: hidden; }
   letter-spacing: -0.025em;
   white-space: nowrap;
 }
+#app .profile-public-showcase__verified-name { display: flex; align-items: center; gap: 7px; width: 100%; min-width: 0; max-width: 100%; }
+#app #profilePublicTitle { flex: 0 1 auto; min-width: 0; max-width: 100%; white-space: nowrap; overflow: visible; text-overflow: clip; }
+#app #profilePublicVerifiedBadge { flex-shrink: 0; }
+#app #profileNameEditBtn { display: inline-flex; flex: 0 0 32px; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 0; margin: 0; align-items: center; justify-content: center; border-radius: 9px; font-size: 24px; }
+.profile-month-story-card .profile-month-story-card__more {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 9px;
+  padding: 8px 13px;
+  border: 1px solid rgba(219, 180, 100, .5);
+  border-radius: 11px;
+  background: rgba(219, 180, 100, .06);
+  color: #e8cc91;
+  font-weight: 600;
+}
+.profile-month-story-card__more svg { flex-shrink: 0; }

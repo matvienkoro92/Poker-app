@@ -2105,7 +2105,7 @@
             '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
             '</button>'
           : "") +
-        (newsModalMode === "club" && shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться">↗</button>' : "") + "</span></span>",
+        (newsModalMode === "club" && shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' : "") + "</span></span>",
       comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -2577,33 +2577,65 @@
     if (!card) return;
     button.disabled = true;
     try {
-      var canvas = document.createElement("canvas"); canvas.width = 1200; canvas.height = 650;
-      var ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#111821"; ctx.fillRect(0, 0, 1200, 650);
-      ctx.strokeStyle = "#efb85b"; ctx.lineWidth = 5; ctx.strokeRect(15, 15, 1170, 620);
-      var source = card.querySelector(".home-friend-news-modal__icon img");
-      if (source) {
-        var img = new Image(); img.crossOrigin = "anonymous";
-        await new Promise(function (resolve, reject) { img.onload = resolve; img.onerror = reject; img.src = source.currentSrc || source.src; });
-        var scale = Math.min(330 / img.width, 460 / img.height);
-        ctx.drawImage(img, 40 + (330 - img.width * scale) / 2, 85 + (460 - img.height * scale) / 2, img.width * scale, img.height * scale);
-      }
-      function text(selector) { var node = card.querySelector(selector); return node ? node.textContent.trim() : ""; }
-      ctx.fillStyle = "#ffd786"; ctx.font = "bold 46px sans-serif";
-      ctx.fillText(text(".home-friend-news-modal__player-name"), 410, 100, 730);
-      ctx.fillStyle = "#b3bdc7"; ctx.font = "26px sans-serif";
-      ctx.fillText(text(".home-friend-news-modal__player-meta"), 410, 151, 730);
-      ctx.fillStyle = "#fff0cf"; ctx.font = "bold 30px sans-serif";
-      var y = 225;
-      card.querySelectorAll(".home-friend-news-modal__event-lines strong").forEach(function (node) {
-        var line = "";
-        node.textContent.trim().split(/\s+/).forEach(function (word) {
-          if (line && ctx.measureText(line + " " + word).width > 720) { ctx.fillText(line, 410, y); y += 40; line = word; }
-          else line += (line ? " " : "") + word;
+      await document.fonts.ready;
+      var rect = card.getBoundingClientRect();
+      var width = Math.ceil(rect.width), height = Math.ceil(rect.height);
+      var clone = card.cloneNode(true);
+      async function dataUrl(url) {
+        var response = await fetch(url);
+        if (!response.ok) throw new Error("asset");
+        var blob = await response.blob();
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(blob);
         });
-        if (line) { ctx.fillText(line, 410, y); y += 54; }
-      });
-      ctx.font = "bold 25px sans-serif"; ctx.fillStyle = "#efb85b"; ctx.fillText("POKER21 • НОВОСТИ КЛУБА", 410, 585);
+      }
+      var originals = [card].concat(Array.from(card.querySelectorAll("*")));
+      var copies = [clone].concat(Array.from(clone.querySelectorAll("*")));
+      await Promise.all(originals.map(async function (original, i) {
+        var copy = copies[i], style = getComputedStyle(original);
+        for (var j = 0; j < style.length; j++) copy.style.setProperty(style[j], style.getPropertyValue(style[j]));
+        copy.style.animation = "none"; copy.style.transition = "none";
+        if (original.tagName === "IMG") {
+          copy.src = await dataUrl(original.currentSrc || original.src);
+          copy.removeAttribute("srcset"); copy.removeAttribute("loading");
+        }
+        var background = style.backgroundImage;
+        if (background && background.indexOf("url(") >= 0) {
+          var matches = Array.from(background.matchAll(/url\(["']?([^"')]+)["']?\)/g));
+          for (var match of matches) background = background.replace(match[0], 'url("' + await dataUrl(new URL(match[1], location.href)) + '")');
+          copy.style.backgroundImage = background;
+        }
+      }));
+      clone.querySelectorAll("[data-news-admin-telegram]").forEach(function (node) { node.textContent = ""; });
+      clone.style.margin = "0"; clone.style.width = width + "px"; clone.style.height = height + "px";
+      clone.style.transform = "none"; clone.style.position = "relative";
+      var fontCss = "";
+      async function collectFonts(rules, base) {
+        for (var rule of Array.from(rules || [])) {
+          if (rule.type === 3) { try { await collectFonts(rule.styleSheet.cssRules, rule.href); } catch (_) {} }
+          if (rule.type !== 5) continue;
+          var css = rule.cssText;
+          for (var match of Array.from(css.matchAll(/url\(["']?([^"')]+)["']?\)/g))) {
+            css = css.replace(match[0], 'url("' + await dataUrl(new URL(match[1], base || location.href)) + '")');
+          }
+          fontCss += css;
+        }
+      }
+      for (var sheet of Array.from(document.styleSheets)) { try { await collectFonts(sheet.cssRules, sheet.href); } catch (_) {} }
+      var footerHeight = 40;
+      var wrapper = document.createElement("div");
+      wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      wrapper.style.cssText = "background:#10151d;width:" + width + "px;";
+      var fonts = document.createElement("style"); fonts.textContent = fontCss; wrapper.appendChild(fonts);
+      wrapper.appendChild(clone);
+      var footer = document.createElement("div"); footer.textContent = 'Клуб «Два туза»';
+      footer.style.cssText = "height:40px;display:flex;align-items:center;justify-content:center;color:#e8c987;font:bold 16px Arial,sans-serif";
+      wrapper.appendChild(footer);
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + (height + footerHeight) + '"><foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(wrapper) + '</foreignObject></svg>';
+      var rendered = new Image();
+      await new Promise(function (resolve, reject) { rendered.onload = resolve; rendered.onerror = reject; rendered.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); });
+      var canvas = document.createElement("canvas"); canvas.width = width * 2; canvas.height = (height + footerHeight) * 2;
+      var ctx = canvas.getContext("2d"); ctx.scale(2, 2); ctx.drawImage(rendered, 0, 0);
       var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });
       if (!blob) throw new Error("image");
       var url = URL.createObjectURL(blob);

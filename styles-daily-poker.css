@@ -4145,7 +4145,7 @@
 /* Keep the deal controls entirely above the board, beside the hole cards. */
 #app .daily-poker .daily-poker__table-deal {
   left: 58%;
-  top: 14%;
+  top: 18%;
   width: 38%;
   transform: none;
 }
@@ -4188,4 +4188,12 @@
   border-top: 0 !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
+}
+#app .daily-poker .daily-poker__stats-spacer { visibility: hidden; pointer-events: none; }
+#app .daily-poker > .daily-poker__stats-below { position: relative; margin: 8px 0; width: 100%; box-sizing: border-box; }
+#app .daily-poker #dailyPokerNotifyBtn[data-subscribed="1"] {
+  color: #fff1cd !important;
+  border-color: #ffb342 !important;
+  background: linear-gradient(180deg, #fca62a, #d76a08) !important;
+  box-shadow: 0 0 16px rgba(255, 145, 22, .6), inset 0 1px 0 rgba(255, 241, 198, .55) !important;
 }
