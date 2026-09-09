@@ -68,9 +68,9 @@
   box-sizing: border-box;
   width: 97.6%;
   height: auto !important;
-  min-height: clamp(76px, 10cqw, 110px) !important;
+  min-height: clamp(51px, 6.67cqw, 73px) !important;
   margin: clamp(8px, 1.4cqw, 16px) 1.2% 12px;
-  padding: clamp(8px, 1.2cqw, 14px) !important;
+  padding: clamp(5px, .8cqw, 9px) !important;
   gap: clamp(8px, 1.4cqw, 16px) !important;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.4fr) !important;
   border: 1px solid rgba(218, 180, 107, .22) !important;
@@ -81,8 +81,8 @@
 #app.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2-reference"]) .home-sng-champions-action__stat {
   height: auto !important;
   min-height: 0 !important;
-  padding: 4px !important;
-  gap: clamp(4px, .6cqw, 7px) !important;
+  padding: 0 !important;
+  gap: clamp(2px, .3cqw, 4px) !important;
   border: 0 !important;
 }
 #app.app.app--view-home .home-sng-champions-feature:has(img[src*="battle-3-v2-reference"]) .home-sng-champions-action__stat--buyin {
@@ -123,12 +123,12 @@
   inset: auto !important;
   width: 100% !important;
   height: 100% !important;
-  min-height: 48px !important;
+  min-height: 32px !important;
   margin: 0 !important;
-  padding: 8px 6px !important;
+  padding: 4px 6px !important;
   border: 1px solid #ead29a !important;
   border-radius: clamp(10px, 1.5cqw, 16px) !important;
-  background: linear-gradient(160deg, #f3dfa9, #d0a75a) !important;
+  background: linear-gradient(#ffdc78, #da8b19) !important;
   color: #282011 !important;
   font-size: clamp(11px, 1.8cqw, 20px) !important;
   font-weight: 600 !important;

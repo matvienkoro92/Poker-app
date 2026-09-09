@@ -525,3 +525,17 @@
     align-self: center !important;
   }
 }
+
+/* Half-height birthday and city fields. */
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity),
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row :is(.profile-hero-birth,#profileHeroCity):has(button:not([hidden])) {
+  box-sizing: border-box !important;
+  height: 31px !important; min-height: 31px !important;
+  grid-template-rows: 10px 15px !important;
+  padding: 2px 8px !important; gap: 0 5px !important;
+  border-radius: 9px !important;
+}
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference :is(.profile-hero-birth__label,.profile-identity-field-label) { font-size: 9px !important; line-height: 10px !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row input { height: 15px !important; min-height: 0 !important; line-height: 15px !important; font-size: 12px !important; padding-block: 0 !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-identity-field-icon svg { height: 20px; max-width: 20px; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__details-row button { height: 22px !important; min-height: 0 !important; width: 22px !important; padding: 0 !important; grid-row: 1 / 3 !important; }

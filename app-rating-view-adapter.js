@@ -38,13 +38,9 @@ function summerRatingSeasonStatsHtml(stats) {
       return '<tr><td><span class="summer-result-rank summer-result-rank--' + (index + 1) + '">' + (index + 1) + '</span></td><td>' + escapeHtmlRating(row.nick) + (single ? '<small>' + escapeHtmlRating(row.date + ' · ' + row.tournament) + '</small>' : '') + '</td><td>' + formatRewardRound(row.reward) + ' ₽</td></tr>';
     }).join('') + '</tbody></table></section>';
   }
-  function metric(icon, value, title, caption) {
-    return '<div class="summer-result-metric"><span class="summer-result-metric__icon" aria-hidden="true">' + icon + '</span><span><strong>' + formatRewardRound(value || 0) + '</strong><span>' + title + '</span><small>' + caption + '</small></span></div>';
-  }
   return '<section class="summer-results-dashboard" aria-label="Итоги лета 2026">' +
     '<header class="summer-results-hero"><div class="summer-results-hero__art" aria-hidden="true"></div><div class="summer-results-hero__copy"><h2>Итоги Лета 2026</h2><p class="summer-results-hero__motto">БОЛЬШЕ ИГРЫ. БОЛЬШЕ ПОБЕД.</p><div class="summer-results-hero__total"><span>Всего призовых за лето</span><strong>' + formatRewardRound(stats.total) + ' ₽</strong></div></div><div class="summer-results-hero__note" aria-hidden="true">Лето<br>играет<br>в наших!<span>♔</span></div></header>' +
     '<div class="summer-results-counts"><div><span class="summer-result-metric__icon" aria-hidden="true">♠</span><span><strong>' + stats.mid + '</strong> заносов<small>50–99 тыс. ₽</small></span></div><div><span class="summer-result-metric__icon" aria-hidden="true">♦</span><span><strong>' + stats.high + '</strong> заносов<small>от 100 тыс. ₽</small></span></div></div>' +
-    '<div class="summer-results-metrics">' + metric('●', stats.paidPlaces, 'Призовых мест', 'в турнирах') + metric('🏆', stats.tournaments, 'Турниров', 'в зачёте рейтинга') + '</div>' +
     '<div class="summer-rating-season-tops">' + table('Топ-10 по сумме призовых', stats.topPlayers, false) + table('Топ-10 разовых заносов', stats.topWins, true) + '</div></section>';
 }
 

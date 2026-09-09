@@ -1,6 +1,6 @@
 /* Summer rating only: live statistics over the supplied beach composition. */
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-dashboard {
-  display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px;
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px;
   position: relative; isolation: isolate;
   padding: 0; border: 0; border-radius: 0; background: transparent;
   box-shadow: none; overflow: visible;
@@ -30,7 +30,8 @@
   text-align: center; white-space: nowrap; text-shadow: 0 2px 8px #000;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__total {
-  margin: 4% 0 0 5%; padding: 0; width: 60%; border: 0;
+  margin: 4% auto 0; padding: 0; width: 100%; border: 0;
+  text-align: center; align-items: center;
 }
 #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-results-hero__total > span {
   color: #ded2b7; font-size: clamp(8px,1.4cqw,16px); letter-spacing: .17em; text-transform: uppercase;

@@ -7,6 +7,24 @@
   background: url('./assets/home-tournament-shtukatur-orange-ticket-v6.webp') center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
+/* Reuse the scene pixels above the ticket copy, following the head silhouette. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: inherit !important;
+  mask: url('./assets/home-tournament-head-mask.svg') center / 100% 100% no-repeat;
+  -webkit-mask: url('./assets/home-tournament-head-mask.svg') center / 100% 100% no-repeat;
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+}
 #app .tournament-day-home-dual--tournament-focus::before,
 #app .tournament-day-home-dual--tournament-focus::after,
 #app .tournament-day-home-dual--tournament-focus > .home-tournament-flow,
@@ -199,3 +217,27 @@
 
 .home-tournament-bonuses__note-arc { display: block; width: 100%; height: auto; overflow: visible; }
 .home-tournament-bonuses__note-arc text { fill: currentColor; font: 500 20px Arial, sans-serif; }
+
+/* Coordinates follow the current 1000 × 1250 scene at every viewport width. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+  top: 49% !important; left: 31% !important; width: 29% !important; height: 19% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+  top: 75% !important; height: 16% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
+  top: 71% !important; height: 17% !important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid { height: 100% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus {
+  top: 8% !important; height: auto !important;
+  display: grid !important; grid-template-rows: 4cqw 3.4cqw 2.5cqw !important;
+  gap: .3cqw !important; justify-content: stretch !important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2),
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { top: 14% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { top: 16% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon { width: 4cqw !important; height: 4cqw !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label { min-height: 0 !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note { top: 82% !important; }
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { top: 14% !important; left: 75% !important; }
