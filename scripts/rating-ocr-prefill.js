@@ -354,7 +354,7 @@ async function parseOcrFile(file) {
   if (date === "30.08.2026" && time === "18:00" && buyin === 20000) title = "🥊GRAND KNOCKOUT🥊";
   if (date === "30.08.2026" && time === "21:59" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";
-  if (date === "01.09.2026" && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (["01.09.2026", "08.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "01.09.2026" && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
   if (date === "01.09.2026" && time === "22:00" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "01.09.2026" && time === "23:00" && buyin === 20000) title = "Night magic 80K🌒";
@@ -383,6 +383,22 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // Verified against the September 8 screenshots; Vision omitted these ranks.
+    if (date === "08.09.2026" && time === "21:00") {
+      if (playerId === "2462690" && reward === 3.5) {
+        place = 0;
+        needsPlaceCheck = false;
+      }
+      if (playerId === "434528" && reward === 503.12) {
+        place = 9;
+        needsPlaceCheck = false;
+      }
+    }
+    // Confirmed against IMG_8882: the ninth-place digit is missing from OCR.
+    if (playerId === "942620" && date === "06.09.2026" && time === "18:00" && reward === 5628.12) {
+      place = 9;
+      needsPlaceCheck = false;
+    }
     if (playerId === "183626" && date === "21.07.2026" && time === "18:00" && reward === 900) {
       place = 11;
       needsPlaceCheck = false;

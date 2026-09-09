@@ -549,6 +549,126 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
     }
   ]
 ,
+  "06.09.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 3,
+          "reward": 3600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 8150,
+          "points": 0
+        },
+        {
+          "nick": "Nikolay54rus",
+          "place": 2,
+          "reward": 5920,
+          "points": 0
+        },
+        {
+          "nick": "isildur",
+          "place": 5,
+          "reward": 1040,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресный турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Аспирин",
+          "place": 6,
+          "reward": 17281.25,
+          "points": 0
+        },
+        {
+          "nick": "IRIHKA",
+          "place": 5,
+          "reward": 12767.18,
+          "points": 0
+        },
+        {
+          "nick": "Rifa",
+          "place": 3,
+          "reward": 9406.25,
+          "points": 0
+        },
+        {
+          "nick": "Porquinho",
+          "place": 9,
+          "reward": 5628.12,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 13,
+          "reward": 1300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 1,
+          "reward": 3135,
+          "points": 0
+        },
+        {
+          "nick": "$Denger$",
+          "place": 3,
+          "reward": 25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 3,
+          "reward": 774.68,
+          "points": 0
+        },
+        {
+          "nick": "Denis",
+          "place": 7,
+          "reward": 76.25,
+          "points": 0
+        }
+      ]
+    }
+  ],
   "07.09.2026": [
     {
       "time": "15:00",
@@ -632,6 +752,165 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "nick": "WSOPли",
           "place": 1,
           "reward": 4292.67,
+          "points": 0
+        }
+      ]
+    }
+  ]
+,
+  "08.09.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 15880,
+          "points": 0
+        },
+        {
+          "nick": "FishKopcheny",
+          "place": 2,
+          "reward": 8200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 9,
+          "reward": 3306,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 7,
+          "reward": 1922,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Вторника",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AliySvin",
+          "place": 1,
+          "reward": 37300,
+          "points": 0
+        },
+        {
+          "nick": "mamalena",
+          "place": 2,
+          "reward": 22300,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 3,
+          "reward": 10300,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 5,
+          "reward": 8900,
+          "points": 0
+        },
+        {
+          "nick": "VICTORINOX",
+          "place": 6,
+          "reward": 5900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "PLO4 PKO 🥊 20K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "UnderTaker063",
+          "place": 1,
+          "reward": 10874,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 1009,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 7,
+          "reward": 9344,
+          "points": 0
+        },
+        {
+          "nick": "AngryMouse",
+          "place": 10,
+          "reward": 4322,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 20,
+          "reward": 1268,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 0,
+          "reward": 350,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "DemonDen",
+          "place": 2,
+          "reward": 4475,
+          "points": 0
+        },
+        {
+          "nick": "I🐅I",
+          "place": 5,
+          "reward": 668.12,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 9,
+          "reward": 503.12,
           "points": 0
         }
       ]
