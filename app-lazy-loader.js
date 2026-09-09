@@ -4,6 +4,7 @@
   var loadedStyleDomains = Object.create(null);
   var scriptPromises = Object.create(null);
   var stylePromises = Object.create(null);
+  var scriptPreloads = Object.create(null);
   var profileFriendsPreviewPrewarmPromise = null;
   var profileAchievementScriptsPrefetched = false;
 
@@ -115,6 +116,29 @@
     return scriptPromises[src];
   }
 
+  // Fetch a requested domain in parallel, but keep script evaluation and failure
+  // handling sequential below: these classic scripts share globals.
+  function preloadLazyScripts(nodes) {
+    nodes.forEach(function (sourceNode) {
+      var src = sourceNode.getAttribute("src");
+      if (!src || scriptPreloads[src] || sourceNode.getAttribute("data-poker-loaded") === "1") return;
+      var link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "script";
+      link.href = src;
+      ["crossorigin", "integrity", "referrerpolicy"].forEach(function (attr) {
+        var value = sourceNode.getAttribute(attr);
+        if (value) link.setAttribute(attr, value);
+      });
+      scriptPreloads[src] = link;
+      link.onerror = function () {
+        delete scriptPreloads[src];
+        link.remove();
+      };
+      (document.head || document.documentElement).appendChild(link);
+    });
+  }
+
   function loadLazyStyle(sourceNode) {
     if (!sourceNode || !sourceNode.getAttribute) return Promise.resolve(true);
     if (sourceNode.getAttribute("data-poker-loaded") === "1") return Promise.resolve(true);
@@ -138,7 +162,11 @@
         delete stylePromises[href];
         reject(new Error("Failed to load stylesheet " + href));
       };
-      (document.head || document.documentElement).appendChild(link);
+      if (sourceNode.getAttribute("data-poker-lazy-position") === "source" && sourceNode.parentNode) {
+        sourceNode.parentNode.insertBefore(link, sourceNode);
+      } else {
+        (document.head || document.documentElement).appendChild(link);
+      }
     });
     return stylePromises[href];
   }
@@ -156,6 +184,8 @@
     domainPromises[promiseKey] = ensureDomains(deps, opts)
       .then(function () {
         var chain = Promise.resolve(true);
+        var scripts = loadScripts && !loadedScriptDomains[domain] ? lazyScriptsForDomain(domain) : [];
+        if (domain === "chat") preloadLazyScripts(scripts);
         if (loadStyles && !loadedStyleDomains[domain]) {
           lazyStylesForDomain(domain).forEach(function (style) {
             chain = chain.then(function () {
@@ -164,7 +194,7 @@
           });
         }
         if (loadScripts && !loadedScriptDomains[domain]) {
-          lazyScriptsForDomain(domain).forEach(function (script) {
+          scripts.forEach(function (script) {
             chain = chain.then(function () {
               return loadLazyScript(script);
             });
@@ -292,12 +322,14 @@
   function prefetchProfileAchievementScripts() {
     if (profileAchievementScriptsPrefetched) return;
     profileAchievementScriptsPrefetched = true;
-    var domains = ["chat", "rating-winter", "rating-spring", "rating-summer"];
+    // Chat has its own on-demand parallel loader. Speculative prefetch here
+    // races that loader on first interaction and can download the same code twice.
+    var domains = ["rating-winter", "rating-spring", "rating-summer"];
     var seen = Object.create(null);
     domains.forEach(function (domain) {
       lazyScriptsForDomain(domain).forEach(function (sourceNode) {
         var src = sourceNode && sourceNode.getAttribute ? sourceNode.getAttribute("src") : "";
-        if (!src || seen[src]) return;
+        if (!src || seen[src] || scriptPromises[src] || sourceNode.getAttribute("data-poker-loaded") === "1") return;
         seen[src] = true;
         try {
           var link = document.createElement("link");

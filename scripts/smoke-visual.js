@@ -6,6 +6,7 @@ const http = require("http");
 const path = require("path");
 
 const root = path.join(__dirname, "..");
+const staticRoot = path.resolve(root, process.env.SMOKE_ROOT || ".");
 const port = Number(process.env.SMOKE_VISUAL_PORT || 4181);
 const host = "127.0.0.1";
 const outDir = path.join(root, "tmp", "visual-smoke");
@@ -48,8 +49,8 @@ function startServer() {
       const rawUrl = new URL(req.url || "/", `http://${host}:${port}`);
       let rel = decodeURIComponent(rawUrl.pathname || "/");
       if (rel === "/") rel = "/index.html";
-      const abs = path.normalize(path.join(root, rel));
-      if (!abs.startsWith(root + path.sep) && abs !== root) {
+      const abs = path.normalize(path.join(staticRoot, rel));
+      if (!abs.startsWith(staticRoot + path.sep) && abs !== staticRoot) {
         res.writeHead(403);
         res.end("Forbidden");
         return;

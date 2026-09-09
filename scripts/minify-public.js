@@ -2,8 +2,9 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { transform } = require("esbuild");
+const { transform, build } = require("esbuild");
 const vm = require("node:vm");
+const { bundleChat } = require("./bundle-chat");
 const output = path.join(__dirname, "..", "public");
 async function main() {
   let before = 0, after = 0;
@@ -33,8 +34,29 @@ async function main() {
     if (outputBytes < inputBytes) fs.writeFileSync(file, result.code);
     after += Math.min(inputBytes, outputBytes);
   }
-  // Discover imported CSS before the entry stylesheet arrives, without changing
-  // legacy file boundaries or cascade order.
+  // Inline the startup stylesheet's imports in their original cascade order.
+  // Asset URLs stay relative to public/, just as in the source stylesheets.
+  const startupCss = await build({
+    entryPoints: [path.join(output, "styles.css")],
+    outfile: path.join(output, "styles.css"),
+    bundle: true,
+    write: false,
+    allowOverwrite: true,
+    minifyWhitespace: true,
+    minifyIdentifiers: false,
+    minifySyntax: false,
+    legalComments: "inline",
+    plugins: [{
+      name: "keep-css-asset-urls",
+      setup(builder) {
+        builder.onResolve({ filter: /.*/ }, (args) =>
+          args.kind === "url-token" ? { path: args.path, external: true } : undefined);
+      },
+    }],
+  });
+  if (startupCss.warnings.length) throw new Error(startupCss.warnings.map(w => w.text).join("; "));
+  fs.writeFileSync(path.join(output, "styles.css"), startupCss.outputFiles[0].contents);
+  // Discover remaining eager styles without fetching styles for unopened views.
   const imports = new Set();
   function collectCss(name) {
     const source = fs.readFileSync(path.join(output, name), "utf8");
@@ -51,6 +73,7 @@ async function main() {
   collectCss("styles-tournament.css");
   const preloads = [...imports].map(href => '<link rel="preload" as="style" href="' + href + '">').join("");
   fs.writeFileSync(htmlPath, fs.readFileSync(htmlPath, "utf8").replace('<link rel="stylesheet" href="./styles.css', preloads + '<link rel="stylesheet" href="./styles.css'));
+  console.log("Chat bundles:", JSON.stringify(bundleChat(output)));
   console.log(JSON.stringify({ minifiedMiB: +(before / 1048576).toFixed(2), resultMiB: +(after / 1048576).toFixed(2), savedMiB: +((before - after) / 1048576).toFixed(2) }));
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });

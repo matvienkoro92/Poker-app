@@ -7,8 +7,10 @@ const path = require("path");
 const { pathToFileURL } = require("url");
 
 const root = path.join(__dirname, "..");
+const staticRoot = path.resolve(root, process.env.SMOKE_ROOT || ".");
 const port = Number(process.env.SMOKE_NAV_PORT || 4177);
 const host = "127.0.0.1";
+const chatNetworkRequests = [];
 
 function resolvePlaywright() {
   try {
@@ -52,8 +54,9 @@ function startServer() {
       const rawUrl = new URL(req.url || "/", `http://${host}:${port}`);
       let rel = decodeURIComponent(rawUrl.pathname || "/");
       if (rel === "/") rel = "/index.html";
-      const abs = path.normalize(path.join(root, rel));
-      if (!abs.startsWith(root + path.sep) && abs !== root) {
+      if (/^\/app-chat-.*\.js$/.test(rel)) chatNetworkRequests.push(rel.slice(1));
+      const abs = path.normalize(path.join(staticRoot, rel));
+      if (!abs.startsWith(staticRoot + path.sep) && abs !== staticRoot) {
         res.writeHead(403);
         res.end("Forbidden");
         return;
@@ -840,7 +843,19 @@ async function main() {
     if (!state.adminReportModal) throw new Error("admin report modal fragment was not hydrated");
     if (!state.visitorsAdminModal) throw new Error("visitors admin modal fragment was not hydrated");
     if (!state.imageLightbox) throw new Error("image lightbox fragment was not hydrated");
-    if (state.chatScripts.length < 20) throw new Error("chat scripts were not loaded after chat navigation");
+    const expectedChatFiles = await page.evaluate(() => [...document.querySelectorAll('script[type="application/poker-lazy"][data-poker-lazy-domain="chat"]')].map(node => new URL(node.src).pathname.split('/').pop()));
+    for (const file of expectedChatFiles) {
+      if (!state.chatScripts.includes(file)) throw new Error("Chat script was not loaded: " + file);
+    }
+    if (!expectedChatFiles.length) throw new Error("Chat script manifest is empty");
+    if (process.env.SMOKE_ROOT === "public") {
+      if (expectedChatFiles.length > 6 || expectedChatFiles.some(file => !/^app-chat-bundle-/.test(file))) {
+        throw new Error("Built chat should use at most six bundles");
+      }
+      if (chatNetworkRequests.length !== expectedChatFiles.length) {
+        throw new Error("Chat bundles must be downloaded only once: " + chatNetworkRequests.join(", "));
+      }
+    }
     if (process.env.SMOKE_NAV_ADMIN_DEEP === "1") {
     await clickVisibleOrSetView(page, "home");
     await page.waitForFunction(() => document.body.getAttribute("data-view") === "home", null, { timeout: 4000 });
@@ -1552,7 +1567,7 @@ async function main() {
     if (!winterLoadedScripts.has("winter-rating-data.js")) throw new Error("winter rating data script was not fetched");
     if (errors.length) throw new Error(`Page errors:\n${errors.join("\n")}`);
 
-    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(root, "index.html")).href, views, state, winterState }, null, 2));
+    console.log(JSON.stringify({ ok: true, url: pathToFileURL(path.join(staticRoot, "index.html")).href, views, state, winterState }, null, 2));
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

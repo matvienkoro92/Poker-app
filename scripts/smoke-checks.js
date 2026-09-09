@@ -2890,15 +2890,17 @@ add("Heavy feature CSS is lazy-loaded outside the startup entrypoint", () =>
     'type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=',
     'type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=',
     'type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="cashout" data-poker-lazy-position="source" href="./styles-download.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="rating-summer" data-poker-lazy-position="source" href="./styles-rating-summer-beach.css?v=',
   ]) &&
   hasAll("styles", [
-    "styles-download.css?v=",
     "styles-home-legacy-prelude.css?v=",
     "styles-home-legacy-tail.css?v=",
     "styles-home-rating-promo-legacy.css?v=",
     "styles-layout-touch-targets.css?v=",
     "styles-home-rating-promo-late.css?v=",
   ]) &&
+  !has("styles", "styles-download.css?v=") &&
   !has("styles", "styles-learning-games.css?v=") &&
   !has("styles", "styles-raffles.css?v=") &&
   !has("styles", "styles-rating.css?v=") &&

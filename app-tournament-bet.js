@@ -10,6 +10,9 @@
   var loadPromise = null;
   var subscribed = false;
   var refreshTimer = 0;
+  var homePlaqueHasActiveEvent = false;
+  var homePlaqueLastRefreshAt = 0;
+  var HOME_PLAQUE_REFRESH_MS = 180000;
   var activeTab = "event";
   var selectedEventId = "";
   var deepLinkEventId = "";
@@ -372,6 +375,8 @@
     var amount = document.querySelector("[data-tournament-bet-home-bank]");
     var button = document.querySelector("[data-tournament-bet-open]");
     var hasEvent = !!(data && data.id && (data.status === "open" || data.status === "closed"));
+    homePlaqueHasActiveEvent = hasEvent;
+    homePlaqueLastRefreshAt = Date.now();
     if (button) {
       button.classList.toggle("home-last-longer-dock--unannounced", !hasEvent);
       var emptyLabel = button.querySelector(".home-last-longer-dock__empty");
@@ -605,10 +610,12 @@
   // Refresh the public home plaque independently of any selected personal event.
   var homePlaqueLoading = false;
   function refreshHomePlaque() {
+    if (!homePlaqueHasActiveEvent || Date.now() - homePlaqueLastRefreshAt < HOME_PLAQUE_REFRESH_MS) return;
     if (homePlaqueLoading || loading || document.visibilityState === "hidden") return;
     var home = document.querySelector('.app--view-home');
     if (!home || (modal && !modal.hidden)) return;
     homePlaqueLoading = true;
+    homePlaqueLastRefreshAt = Date.now();
     return fetch(baseUrl() + API_PATH + authQuery("?"), { cache: "no-store" })
       .then(function (response) {
         if (!response.ok) throw new Error("Home plaque unavailable");
@@ -620,7 +627,7 @@
       .catch(function () {})
       .finally(function () { homePlaqueLoading = false; });
   }
-  window.setInterval(refreshHomePlaque, 3000);
+  window.setInterval(refreshHomePlaque, HOME_PLAQUE_REFRESH_MS);
   window.addEventListener("online", refreshHomePlaque);
   window.addEventListener("pageshow", refreshHomePlaque);
   document.addEventListener("visibilitychange", refreshHomePlaque);

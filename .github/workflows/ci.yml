@@ -38,4 +38,4 @@ jobs:
           npm run test:redis
 
       - name: Release gate
-        run: npm run release:check
+        run: npm run release:verify
