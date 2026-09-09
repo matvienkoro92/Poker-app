@@ -4078,9 +4078,3 @@
 #app .daily-poker .daily-poker__prize:nth-child(6) { --prize-art-x: 100%; }
 #app .daily-poker .daily-poker__compact-prize-title,
 #app .daily-poker .daily-poker__compact-prize-reward { display: none; }
-@container (max-width: 700px) {
-  #app .daily-poker .daily-poker__prizes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    row-gap: 4px;
-  }
-}

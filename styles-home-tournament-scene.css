@@ -2,6 +2,7 @@
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus {
   display: block !important; position: relative !important; container-type: inline-size;
   width: 100% !important; height: auto !important; min-height: 0 !important;
+  translate: 5% 0;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
   /* Reclaim part of the transparent space below the illustrated table. */
   margin-bottom: -6% !important;
