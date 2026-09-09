@@ -3957,3 +3957,97 @@
 .daily-poker .daily-poker__actions .daily-poker__result-meta > span + span::before {
   content: "· ";
 }
+
+/* Compact balance beside the title. */
+#app .daily-poker .daily-poker__header {
+  grid-template-columns: clamp(40px, 7cqw, 76px) minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(6px, 1.4cqw, 16px);
+}
+#app .daily-poker .daily-poker__heading { padding-top: 0; }
+#app .daily-poker .daily-poker__title { font-size: clamp(20px, 4.6cqw, 52px); }
+#app .daily-poker .daily-poker__header > .daily-poker__balance {
+  grid-column: 3;
+  grid-row: 1;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: clamp(8px, 1.5cqw, 16px);
+  gap: 3px 5px;
+  clip-path: none;
+  border-radius: 12px;
+  font-size: clamp(10px, 1.65cqw, 18px);
+  z-index: 3;
+  background: linear-gradient(135deg, #282114, #0c0e0d);
+}
+#app .daily-poker .daily-poker__header > .daily-poker__balance::before,
+#app .daily-poker .daily-poker__header > .daily-poker__balance::after { display: none; }
+#app .daily-poker .daily-poker__header .daily-poker__balance strong { font-size: clamp(19px, 3cqw, 34px); }
+#app .daily-poker .daily-poker__header .daily-poker__balance-label { font-size: inherit; }
+#app .daily-poker .daily-poker__header .daily-poker__balance-unit { font-size: inherit; }
+#app .daily-poker .daily-poker__header .daily-poker__balance-note {
+  font-size: clamp(8px, 1.15cqw, 13px);
+  line-height: 1.2;
+  margin: 2px 0 0;
+}
+
+/* Slim statistics strip immediately above the prize cards. */
+#app .daily-poker .daily-poker__hero-stats {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px !important;
+  padding: 8px 4px;
+  border-radius: 10px;
+}
+#app .daily-poker .daily-poker__hero-stat {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 3px 7px;
+  min-height: 0;
+  padding: 0 6px;
+}
+#app .daily-poker .daily-poker__hero-stat dd {
+  order: -1;
+  width: auto;
+  font-size: clamp(13px, 2cqw, 21px);
+  line-height: 1.2;
+}
+#app .daily-poker .daily-poker__hero-stat dt {
+  width: auto;
+  font-size: clamp(8px, 1.2cqw, 13px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: none;
+  overflow-wrap: normal;
+}
+#app .daily-poker .daily-poker__intro { margin-top: 0; }
+
+/* Compact prize summary keeps all six rewards visible above the table. */
+#app .daily-poker .daily-poker__prizes { gap: clamp(5px, 1cqw, 10px); }
+#app .daily-poker .daily-poker__prize {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  aspect-ratio: auto;
+  min-height: clamp(65px, 10cqw, 100px);
+  padding: 12px 5px;
+  border: 1px solid #a9843b;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #302714, #10110f);
+  color: #f4d794;
+  text-align: center;
+}
+#app .daily-poker .daily-poker__prize:nth-child(n+4) {
+  border-color: #315f79;
+  background: linear-gradient(145deg, #152735, #0b1118);
+  color: #b9d9e9;
+}
+.daily-poker__compact-prize-title { font: 700 clamp(11px, 1.9cqw, 21px)/1.15 Georgia, serif; }
+.daily-poker__compact-prize-reward { font: 500 clamp(10px, 1.65cqw, 18px)/1.2 Arial, sans-serif; }
+.daily-poker__compact-prize-reward b { color: #ffbf47; font-weight: 800; }
+.daily-poker__prize:nth-child(n+4) .daily-poker__compact-prize-reward b { color: #55c5ff; }
