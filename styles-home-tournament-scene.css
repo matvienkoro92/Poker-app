@@ -404,3 +404,60 @@
   background:url('./assets/home-table-seam-no-glow-v1.webp') center / 100% 100% no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1400' preserveAspectRatio='none'%3E%3Cpath d='M0 823 Q140 793 407 796 M590 797 Q650 797 741 809 M854 819 Q1020 828 1080 856' fill='none' stroke='white' stroke-width='24'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
+
+/* Active ticket raffle: replace only the bucket/stool area with the chest. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden])) {
+  background: none !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
+  background-image: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') !important;
+  clip-path: none;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0H100V100H0Z M5 33.5H9.5L11.5 38H26.5V48H28L27 49L26 54L0 55.5V48H4V38H6Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  z-index: 0 !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
+  background: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') center / 100% 100% no-repeat !important;
+}
+.home-tournament-raffle-chest-art { display: none; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
+  display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: url('./assets/home-tournament-raffle-chest-scene-v1.webp') center / 100% 100% no-repeat;
+  clip-path: polygon(0 55.5%, 0 53%, 1.5% 53%, 1.7% 42%, 3% 42%, 3% 39.5%, 4.4% 38%, 7.5% 38.5%, 6.8% 35.5%, 8.4% 34.5%, 8.4% 33.5%, 13% 33%, 15.3% 35.4%, 16% 33.5%, 20% 33.2%, 24.7% 34.5%, 23.5% 38.5%, 27.3% 38.5%, 28.5% 40%, 29% 47%, 27% 49%, 26% 54%);
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > #homeTournamentRaffleBonus {
+  position: absolute !important;
+  left: 9.6% !important; top: 39% !important;
+  width: 17.8% !important; height: 14% !important;
+  min-width: 0 !important; min-height: 0 !important;
+  display: block !important; margin: 0 !important; padding: 0 !important;
+  border: 0 !important; border-radius: 0 !important;
+  background: none !important; box-shadow: none !important;
+  overflow: visible !important; animation: none !important;
+  transform: rotate(-2deg) !important;
+  z-index: 4 !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > #homeTournamentRaffleBonus[hidden] { display: none !important; }
+#app.app.app--view-home #homeTournamentRaffleBonus::before,
+#app.app.app--view-home #homeTournamentRaffleBonus::after { content: none !important; }
+#app.app.app--view-home #homeTournamentRaffleBonus:focus-visible { outline: 2px solid #ffe0a0 !important; outline-offset: 4px; border-radius: 6px !important; }
+#app.app.app--view-home #homeTournamentRaffleBonus .home-tournament-raffle-bonus__eyebrow {
+  position: absolute !important; inset: 0 0 auto !important;
+  display: grid !important; place-items: center;
+  height: 24% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
+  background: none !important; border: 0 !important;
+  color: #ffe9ad !important; font: 900 2cqw/1 Arial,sans-serif !important;
+  text-shadow: 0 1px 2px #000 !important;
+}
+#app.app.app--view-home #homeTournamentRaffleBonus .home-tournament-raffle-bonus__main { display: contents !important; }
+#app.app.app--view-home #homeTournamentRaffleBonusTickets {
+  position: absolute; top: 32%; left: 0; width: 100%; height: 31%;
+  display: grid; place-items: center; white-space: nowrap;
+  color: #ffae32; font: 900 2.7cqw/1 Arial,sans-serif;
+  letter-spacing: -.08cqw; text-shadow: 0 1px 2px #000;
+}
+#app.app.app--view-home #homeTournamentRaffleBonus .home-tournament-raffle-bonus__timer-wrap {
+  position: absolute; top: 77%; left: 0; width: 100%; height: 23%;
+  display: flex; align-items: center; justify-content: center; gap: .45cqw;
+  color: #ffe9ad; font: 700 1.5cqw/1 Arial,sans-serif; white-space: nowrap;
+}
+#app.app.app--view-home #homeTournamentRaffleBonusTimer { color: #ffe9ad; font: 900 1.8cqw/1 Arial,sans-serif; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000; }

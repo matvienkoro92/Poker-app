@@ -3,6 +3,12 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { playerRaffleLevelError, playerRaffleRequiredLevel } = require("../lib/raffle-player-level-requirements");
 
+test("salvatore_tm no longer has a personal requirement on either identity", () => {
+  assert.equal(playerRaffleRequiredLevel("ID138504", ""), 0);
+  assert.equal(playerRaffleRequiredLevel("", "508911"), 0);
+  assert.equal(playerRaffleLevelError("ID138504", "508911", 1), null);
+});
+
 test("fixed requirement blocks below target and opens at target without moving it", () => {
   const error = playerRaffleLevelError("ID319715", "524129", 29);
   assert.equal(error.accessLevel, 30);

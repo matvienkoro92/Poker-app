@@ -5087,3 +5087,47 @@ button.admin-report-rakeback-summary__row:focus-visible {
   .admin-report-rakeback-row .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input,
   .admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 15px; }
 }
+
+/* Separate successive days without adding space between player entries. */
+.admin-report-rakeback-date-separator ~ .admin-report-rakeback-date-separator > td {
+  border-top: 8px solid #05070d;
+}
+
+/* Match row controls to the enlarged entry height. */
+.admin-report-rakeback-row { --rakeback-control-height: 47px; }
+.admin-report-rakeback-row .admin-report-rakeback-icon-btn {
+  height: var(--rakeback-control-height) !important;
+  font-size: 30px;
+}
+.admin-report-rakeback-row .admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 18px; }
+.admin-report-rakeback-row .admin-report-rakeback-discount-control {
+  height: var(--rakeback-control-height);
+  width: 100%;
+}
+.admin-report-rakeback-row .admin-report-rakeback-discount-box {
+  width: 27px;
+  height: 27px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.admin-report-rakeback-row .admin-report-rakeback-discount:checked + .admin-report-rakeback-discount-box::after {
+  width: 12px;
+  height: 7px;
+}
+.admin-report-rakeback-row .admin-report-rakeback-color-dot {
+  width: 27px;
+  height: 27px;
+  max-width: 90%;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+}
+@media (max-width: 560px) {
+  .admin-report-rakeback-row { --rakeback-control-height: 38px; }
+  .admin-report-rakeback-row .admin-report-rakeback-icon-btn { font-size: 22px; }
+  .admin-report-rakeback-row .admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 14px; }
+  .admin-report-rakeback-row .admin-report-rakeback-discount-box { width: 24px; height: 24px; }
+  .admin-report-rakeback-row .admin-report-rakeback-color-dot { width: 20px; height: 20px; }
+}
+@media (max-width: 430px) {
+  .admin-report-rakeback-row { --rakeback-control-height: 41px; }
+}

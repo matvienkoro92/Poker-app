@@ -561,7 +561,7 @@
     }
     if (slug === "smile") return "./assets/club-news-personal/smile-news-cutout.webp?v=4";
     if (slug === "bardur") return "./assets/club-news-personal/bardur-news-cutout.webp?v=4";
-    if (slug === "babnik") return "./assets/club-news-personal/babnik-car-complete-v2.webp?v=1";
+    if (slug === "babnik") return "./assets/club-news-personal/babnik-car-transparent-v3.webp?v=1";
     if (slug) return "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=3";
     return clubNewsPersonalArt(nick);
   }
@@ -2580,6 +2580,49 @@
     window.setTimeout(function () { item.classList.remove("home-friend-news-modal__item--linked"); }, 2600);
   }
 
+  function fitClubNewsShareText(clone, copyArea, signature) {
+    if (!copyArea) return;
+    var measure = document.createElement("div");
+    measure.style.cssText = "position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none";
+    measure.setAttribute("inert", "");
+    measure.appendChild(clone);
+    document.body.appendChild(measure);
+    try {
+      var nodes = [copyArea].concat(Array.from(copyArea.querySelectorAll("*")));
+      var sizes = nodes.map(function (node) {
+        return { font: parseFloat(node.style.fontSize), line: parseFloat(node.style.lineHeight) };
+      });
+      function apply(scale) {
+        nodes.forEach(function (node, i) {
+          if (sizes[i].font) node.style.fontSize = sizes[i].font * scale + "px";
+          if (sizes[i].line) node.style.lineHeight = sizes[i].line * scale + "px";
+        });
+      }
+      var right = copyArea.getBoundingClientRect().right;
+      var bottom = signature.getBoundingClientRect().top - 12;
+      function fits() {
+        var walker = document.createTreeWalker(copyArea, NodeFilter.SHOW_TEXT);
+        var node;
+        while ((node = walker.nextNode())) {
+          if (!node.textContent.trim()) continue;
+          var range = document.createRange();
+          range.selectNodeContents(node);
+          if (Array.from(range.getClientRects()).some(function (r) { return r.right > right + 1 || r.bottom > bottom; })) return false;
+        }
+        return true;
+      }
+      // Grow short cards, keeping the footer and the original artwork clear.
+      for (var scale = 1.35; scale > 1; scale -= .025) {
+        apply(scale);
+        if (fits()) return;
+      }
+      apply(1);
+    } finally {
+      clone.remove();
+      measure.remove();
+    }
+  }
+
   async function shareClubNewsCard(button) {
     var card = button.closest("[data-home-news-share-token]");
     if (!card) return;
@@ -2646,6 +2689,7 @@
       signature.textContent = "♠ Poker21   •   Клуб Два туза" + (dateLabel ? "   •   " + dateLabel : "");
       signature.style.cssText = "position:absolute;left:" + copyLeft + "px;right:16px;bottom:20px;color:#cdbb94;font:500 " + Math.max(9, width * .014) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
       clone.appendChild(signature);
+      fitClubNewsShareText(clone, copyArea, signature);
       var fontCss = "";
       async function collectFonts(rules, base) {
         for (var rule of Array.from(rules || [])) {
@@ -2676,15 +2720,57 @@
       var dialog = document.createElement("dialog");
       dialog.className = "news-share-preview";
       dialog.style.cssText = "max-width:700px;width:90vw;background:#111821;color:#fff0cf;border:1px solid #efb85b;border-radius:18px;padding:16px";
-      dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть" title="Закрыть">×</button><h3>Поделиться карточкой</h3><img style="width:100%" alt="Превью карточки"><button type="button" data-send>Поделиться</button> <a download="poker21-news.png">Скачать картинку</a><p role="status"></p>';
-      dialog.querySelector("img").src = url; dialog.querySelector("a").href = url;
+      dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть" title="Закрыть">×</button><h3>Поделиться карточкой</h3><img style="width:100%" alt="Превью карточки"><button type="button" data-send>Поделиться</button> <button type="button" data-download>Скачать картинку</button><p role="status"></p>';
+      dialog.querySelector("img").src = url;
+      function downloadNewsImage(event) {
+        if (event) { event.preventDefault(); event.stopPropagation(); }
+        var status = dialog.querySelector("p");
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (isIOS) {
+          // iOS cannot silently write to Photos. Keep the actual PNG available
+          // for the native image context menu instead of navigating to a blob URL.
+          var preview = dialog.querySelector("img");
+          preview.style.webkitTouchCallout = "default";
+          preview.style.webkitUserSelect = "auto";
+          status.textContent = "Чтобы сохранить в Фото, зажмите картинку выше и выберите «Сохранить в Фото» или «Сохранить изображение».";
+          return;
+        }
+        var download = document.createElement("a");
+        download.href = url;
+        download.download = "poker21-news.png";
+        download.hidden = true;
+        download.addEventListener("click", function (e) { e.stopPropagation(); });
+        dialog.appendChild(download);
+        download.click();
+        download.remove();
+        status.textContent = "Картинка скачивается в PNG. Если её нет в галерее, откройте папку «Загрузки».";
+      }
+      dialog.querySelector("[data-download]").onclick = downloadNewsImage;
       dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
-      dialog.onclose = function () { URL.revokeObjectURL(url); dialog.remove(); };
+      var sharingNewsImage = false;
+      dialog.onclose = function () {
+        if (sharingNewsImage) return;
+        URL.revokeObjectURL(url);
+        dialog.remove();
+      };
       dialog.querySelector("[data-send]").onclick = async function () {
         try {
           var file = new File([blob], "poker21-news.png", { type: "image/png" });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
-          else { dialog.querySelector("a").click(); dialog.querySelector("p").textContent = "Прикрепите сохранённую картинку в нужный чат."; }
+          if (sharingNewsImage) return;
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            // Release the modal top layer before the host opens its share UI.
+            // Otherwise a DOM-based host picker can remain inert, including ×.
+            sharingNewsImage = true;
+            dialog.close();
+            try {
+              await navigator.share({ files: [file] });
+            } finally {
+              // close events are queued: reopen only after that event was handled.
+              await new Promise(function (resolve) { setTimeout(resolve, 0); });
+              if (dialog.isConnected) dialog.showModal();
+              sharingNewsImage = false;
+            }
+          } else { downloadNewsImage(); }
         } catch (error) { if (error.name !== "AbortError") dialog.querySelector("p").textContent = "Не удалось отправить. Можно скачать картинку."; }
       };
       document.body.appendChild(dialog); dialog.showModal();
