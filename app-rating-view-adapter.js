@@ -1873,6 +1873,16 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
 
 function openWinterRatingPlayerModal(nick, options) {
   options = options || {};
+  if (!options.__playerStylesReady && typeof window.pokerEnsureStyleDomains === "function") {
+    var styledOptions = copyWinterRatingPlayerOptions(options);
+    styledOptions.__playerStylesReady = true;
+    return Promise.resolve(window.pokerEnsureStyleDomains(["rating-common"])).then(function () {
+      return openWinterRatingPlayerModal(nick, styledOptions);
+    }).catch(function () {
+      window.alert("Не удалось загрузить оформление карточки. Попробуйте открыть её ещё раз.");
+    });
+  }
+
   if (shouldLoadWinterRatingPlayerHistory(options) && !options.__winterHistoryEnsured && !hasWinterRatingPlayerHistoryData()) {
     var deferredOptions = copyWinterRatingPlayerOptions(options);
     deferredOptions.__winterHistoryEnsured = true;
