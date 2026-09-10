@@ -916,4 +916,183 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "09.09.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "IRIHKA",
+          "place": 2,
+          "reward": 5800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Monfokon",
+          "place": 1,
+          "reward": 3290,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 1110,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 9290,
+          "points": 0
+        },
+        {
+          "nick": "Замотаю",
+          "place": 3,
+          "reward": 1717.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "💥Big Boss 💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 73198.45,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 9768.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Пряник",
+          "place": 2,
+          "reward": 680,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "HR 5000🥊 200K",
+      "buyin": 25000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 8,
+          "reward": 1682,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 1,
+          "reward": 2976.89,
+          "points": 0
+        },
+        {
+          "nick": "GazMays",
+          "place": 3,
+          "reward": 1085.62,
+          "points": 0
+        },
+        {
+          "nick": "Monfokon",
+          "place": 14,
+          "reward": 118.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 0,
+          "reward": 3050,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 10,
+          "reward": 2979,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Мегалодон",
+          "place": 1,
+          "reward": 6400,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K 🌘",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 7,
+          "reward": 1813,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
