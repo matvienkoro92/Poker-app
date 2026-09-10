@@ -19,4 +19,11 @@ test('achievement rows render for every tab with populated tournament data', () 
   const html = context.hallFishRenderAchievementRows(data);
   assert.match(html, /25 000 ₽/);
   assert.match(html, /hall-fish-achievement-row/);
+  const heroHtml = context.hallFishAchievementSectionHtml('Герой дня · Сентябрь', [
+    { nick: 'Em13', telegram: '@Emil013', extraText: '54 149 ₽', value: 1, rank: 1 },
+    { nick: 'FrankL', telegram: '@Drops2010', extraText: '42 830 ₽', value: 1, rank: 2 },
+  ], '', 'dayHero', '');
+  assert.match(heroHtml, /54 149 ₽/);
+  assert.match(heroHtml, /42 830 ₽/);
+  assert.doesNotMatch(heroHtml, /@Emil013|@Drops2010/);
 });

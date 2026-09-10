@@ -36,7 +36,8 @@ function initRafflesAdminCreateRuntime(opts) {
     var raffleAdminActionMode = "";
 
   function getRafflePrizeKind() {
-    return getRaffleCreateType() === "other" ? "cash" : "tournament_ticket";
+    var type = getRaffleCreateType();
+    return type === "other" ? "cash" : type === "prizes" ? "prizes" : "tournament_ticket";
   }
 
   function raffleAdminCreateFormatMoscowInput(date) {

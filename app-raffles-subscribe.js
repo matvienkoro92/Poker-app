@@ -1,6 +1,7 @@
 // Raffles subscribe runtime: user subscribe/unsubscribe button.
 
 function initRafflesSubscribeRuntime(opts) {
+  initRafflesTournamentPush();
   opts = opts || {};
   with (opts) {
   // Подписка на уведомления о новых розыгрышах
@@ -149,4 +150,78 @@ function initRafflesSubscribeRuntime(opts) {
     });
   })();
   }
+}
+
+function initRafflesTournamentPush() {
+  var btn = document.getElementById("rafflesTournamentPushBtn");
+  if (!btn || btn.dataset.bound === "1") return;
+  btn.dataset.bound = "1";
+  var label = document.getElementById("rafflesTournamentPushLabel");
+  var feedback = document.getElementById("rafflesTournamentPushFeedback");
+  var subscribed = false;
+  var busy = false;
+  var generation = 0;
+  function message(text) { feedback.textContent = text || ""; feedback.hidden = !text; }
+  function render(value) {
+    subscribed = !!value;
+    btn.textContent = subscribed ? "Включено" : "Включить";
+    btn.setAttribute("aria-label", subscribed ? "Пуши включены. Нажмите, чтобы отключить" : "Включить пуши о старте турнирных розыгрышей");
+    btn.setAttribute("aria-pressed", subscribed ? "true" : "false");
+    label.textContent = subscribed ? "Пуш о старте турнирных розыгрышей включён" : "Включите пуш о старте турнирных розыгрышей";
+  }
+  function authenticated() { return typeof pokerApiHasCredential === "function" && pokerApiHasCredential(); }
+  function request(action) {
+    var base = typeof getApiBase === "function" ? getApiBase() : "";
+    if (!base) return Promise.reject(new Error("Не удалось подключиться. Обновите страницу."));
+    return fetch(base.replace(/\/$/, "") + "/api/raffle-tournament-push", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody({ action: action })),
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data || !data.ok) throw new Error(data && data.error || "Не удалось сохранить подписку. Попробуйте ещё раз.");
+      return data;
+    });
+  }
+  function refresh() {
+    if (busy) return;
+    var revision = ++generation;
+    if (!authenticated()) { render(false); return; }
+    request("status").then(function (data) {
+      if (revision !== generation) return;
+      render(data.subscribed);
+      if (data.subscribed && !data.notificationsEnabled) message("Подписка сохранена. Чтобы получать пуши, включите уведомления в профиле.");
+      else if (data.subscribed && !data.hasSubscription) message("Подписка сохранена. Настройте пуш-уведомления в профиле на вашем устройстве.");
+      else message("");
+    }).catch(function () { if (revision === generation) message("Не удалось проверить подписку. Попробуйте ещё раз."); });
+  }
+  btn.addEventListener("click", function () {
+    if (busy) return;
+    if (!authenticated()) { message("Войдите в аккаунт, чтобы включить уведомления о розыгрышах."); return; }
+    busy = true; ++generation; btn.disabled = true; message("");
+    // Read the account state again, so another device or a failed initial request cannot toggle the wrong state.
+    request("status").then(function (current) {
+      render(current.subscribed);
+      if (!current.subscribed) {
+        if (!current.notificationsEnabled) throw new Error("Включите уведомления в профиле, затем вернитесь сюда и нажмите «Включить».");
+        if (typeof pokerChatPushIosNeedsStandalonePwa === "function" && pokerChatPushIosNeedsStandalonePwa()) throw new Error("На iPhone или iPad добавьте приложение на экран «Домой», откройте его оттуда и включите уведомления в профиле.");
+        if (typeof pokerChatPushClientSupported !== "function" || !pokerChatPushClientSupported()) throw new Error("Здесь пуши недоступны. Откройте приложение в поддерживаемом браузере или с экрана «Домой» и включите уведомления в профиле.");
+        if (typeof Notification !== "undefined" && Notification.permission === "denied") throw new Error("Уведомления запрещены. Разрешите их в настройках браузера или устройства, затем включите пуши в профиле.");
+        if (typeof Notification === "undefined" || Notification.permission !== "granted") throw new Error("Откройте профиль, включите пуш-уведомления и подтвердите разрешение браузера. Затем нажмите здесь «Включить».");
+        return navigator.serviceWorker.getRegistration().then(function (registration) {
+          return registration && registration.pushManager ? registration.pushManager.getSubscription() : null;
+        }).then(function (deviceSubscription) {
+          if (!deviceSubscription) throw new Error("На этом устройстве пуши ещё не настроены. Включите уведомления в профиле, затем вернитесь сюда.");
+          return request("enable");
+        });
+      }
+      return request("disable");
+    }).then(function (data) {
+      render(data.subscribed);
+      message(data.subscribed ? "Готово! При создании турнирного розыгрыша вам придёт пуш, если уведомления включены в профиле." : "Пуши о старте турнирных розыгрышей выключены.");
+    }).catch(function (e) { message(e.message || "Ошибка сети. Попробуйте ещё раз."); })
+      .finally(function () { busy = false; btn.disabled = false; });
+  });
+  window.addEventListener("poker-telegram-auth", refresh);
+  window.addEventListener("focus", refresh);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
+  refresh();
 }

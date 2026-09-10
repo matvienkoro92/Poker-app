@@ -83,6 +83,7 @@ const handlers = {
   "gazette-editor-planner": () => require(path.join(handlersDir, "gazette-editor-planner.js")),
   "rating-subscribe": () => require(path.join(handlersDir, "rating-subscribe.js")),
   "raffle-subscribe": () => require(path.join(handlersDir, "raffle-subscribe.js")),
+  "raffle-tournament-push": () => require(path.join(handlersDir, "raffle-tournament-push.js")),
   "gazette-notify": () => require(path.join(handlersDir, "gazette-notify.js")),
   "gazette-notify-test": () => require(path.join(handlersDir, "gazette-notify-test.js")),
   "gazette-manual-subscribers": () => require(path.join(handlersDir, "gazette-manual-subscribers.js")),

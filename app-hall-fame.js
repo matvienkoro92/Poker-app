@@ -1772,7 +1772,7 @@ function hallFishAchievementSectionHtml(title, rows, description, key, awardText
     (list.length ? '<div class="hall-fish-level-list hall-fish-achievement-list">' + list.map(function (row) {
       var userId = String(row.accountId || "").trim();
       var name = row.nick || "Игрок";
-      var sub = row.telegram || row.extraText || "";
+      var sub = key === "dayHero" ? row.extraText || row.telegram || "" : row.telegram || row.extraText || "";
       var image = hallFishLevelPlayerImage(row);
       var age = hallFishLevelAgeText(row && row.profileBirthDate);
       var city = String((row && (row.profileCity || row.city)) || "").trim();

@@ -217,6 +217,11 @@
               <button type="button" class="raffles-tab" id="rafflesTabCompleted" data-raffle-tab="completed" aria-selected="false"><span class="raffles-tab__label">Завершённые</span><span class="raffles-tab__meta"><span id="rafflesTabCompletedCount">0</span> · <span id="rafflesTabCompletedSum">0</span></span></button>
               <button type="button" class="raffles-tab raffles-tab--leaders" id="rafflesTabLeaders" data-raffle-tab="leaders" aria-selected="false" aria-label="Кто выигрывал чаще всех" title="Кто выигрывал чаще всех"><span class="raffles-tab__winner-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.6V17c0 .6-.4 1-1 1.3C7.8 18.8 7 20.2 7 22"></path><path d="M14 14.6V17c0 .6.4 1 1 1.3 1.2.5 2 1.9 2 3.7"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg></span></button>
             </div>
+            <div class="raffles-push-strip">
+              <span id="rafflesTournamentPushLabel">Включите пуш о старте турнирных розыгрышей</span>
+              <button type="button" id="rafflesTournamentPushBtn" aria-pressed="false" aria-describedby="rafflesTournamentPushLabel">Включить</button>
+            </div>
+            <p class="raffles-push-feedback" id="rafflesTournamentPushFeedback" role="status" aria-live="polite" hidden></p>
             <div class="raffles-panel raffles-panel--hidden raffles-panel--create" id="rafflesPanelCreate" data-raffle-panel="create"></div>
 
             <div class="raffles-panel raffles-panel--active" id="rafflesPanelActive" data-raffle-panel="active">

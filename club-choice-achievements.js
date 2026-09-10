@@ -14,6 +14,16 @@
    */
   window.POKER_CLUB_CHOICE_ACHIEVEMENTS = window.POKER_CLUB_CHOICE_ACHIEVEMENTS || [
     {
+      month: "2026-07",
+      winners: [
+        {
+          place: 1,
+          nick: "ПокерМанки",
+          description: "«Чемпионская стабильность». Рекорд июля: 39 топ-3, из которых 37 — в Лиге 1. Все 14 побед — в Лиге 1. За месяц — 593 685 ₽.",
+        },
+      ],
+    },
+    {
       month: "2026-06",
       winners: [
         {
