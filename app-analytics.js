@@ -69,7 +69,27 @@
       if (sectionThrottle[key] && now - sectionThrottle[key] < 1200) return Promise.resolve({ ok: true, skipped: true });
       sectionThrottle[key] = now;
     }
-    return window.pokerAnalyticsEnsureSession().then(function () { return postEvent(type, details || {}); });
+    var identity = typeof getVisitorId === "function" ? String(getVisitorId() || "") : "";
+    return window.pokerAnalyticsEnsureSession().then(function () {
+      var current = typeof getVisitorId === "function" ? String(getVisitorId() || "") : "";
+      if (identity !== current) return {ok:false};
+      return postEvent(type, details || {});
+    });
+  };
+
+  var engagementSeen = new Set();
+  window.pokerTrackEngagement = function (type, details) {
+    details = details || {};
+    var identity = typeof getVisitorId === "function" ? String(getVisitorId() || "") : "";
+    var entity = String(details.entity || "");
+    // Hash opaque content IDs; never collect message text, titles or image URLs.
+    var hash = 2166136261;
+    for (var i=0;i<entity.length;i++) { hash ^= entity.charCodeAt(i); hash = Math.imul(hash,16777619); }
+    var token = entity ? "item_" + (hash >>> 0).toString(16) : "";
+    var key = [readSession().id,identity,type,token,details.target||"",details.onceKey||""].join("|");
+    if(details.once && engagementSeen.has(key))return Promise.resolve({ok:true,skipped:true});
+    if(details.once)engagementSeen.add(key);
+    return window.pokerTrackAnalyticsEvent(type,{entity_id:token,source:details.source||"",target:details.target||""}).then(function(result){if(!result.ok)engagementSeen.delete(key);return result;});
   };
 
   window.addEventListener("poker-telegram-auth", function () {

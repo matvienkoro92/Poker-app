@@ -421,6 +421,11 @@ self.addEventListener("notificationclick", function (event) {
   } catch (e2) {
     targetUrl = self.location.origin + "/?startapp=club_chat";
   }
+  try {
+    var trackedTarget = new URL(targetUrl);
+    trackedTarget.searchParams.set('_push_open', Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10));
+    targetUrl=trackedTarget.href;raw=targetUrl;
+  } catch (_) {}
   function waitMs(ms) {
     return new Promise(function (resolve) {
       setTimeout(resolve, ms);

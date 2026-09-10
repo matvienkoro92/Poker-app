@@ -451,6 +451,8 @@ function initPlayerCrmStatsRuntime(deps) {
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\" style=\"display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%!important;min-width:0!important\">" + currentStats.map(currentCard).join("") + "</div>" +
       "</section>";
     var analyticsLabels = {
+      news_read:"Новости: карточка просмотрена",friend_news_read:"Новости друзей: просмотр",news_comment_created:"Комментарии к новостям",news_shared:"Поделились карточкой",news_link_copied:"Скопировали ссылку",review_opened:"Открыли разбор",review_created:"Задали вопрос",review_reply_created:"Ответили в разборе",review_answer_read:"Посмотрели ответ",appearance_saved:"Сохранили оформление",summary_action:"Переходы из сводки",tournament_reminder_saved:"Напоминания о турнирах",push_opened:"Открыли push",
+      "my-summary":"Моя сводка","club-reviews":"Разборы",
       home: "Главная", raffles: "Розыгрыши", rating: "Рейтинг", chat: "Чат", profile: "Профиль",
       "daily-poker": "Крутка дня", "sng-champions": "SNG", "private-cash": "Приватный кеш",
       "vpn-proxy": "VPN за 100 ₽", "hall-of-fame": "Зал славы", transfers: "Переводы",
@@ -503,6 +505,13 @@ function initPlayerCrmStatsRuntime(deps) {
             "<td>" + esc(intFmt(row.uniqueVisitors)) + "</td><td>" + esc(intFmt(row.events)) + "</td></tr>";
         }).join("") + "</tbody></table></div></section>";
     }
+    function engagementTable(data) {
+      if(!data)return '';
+      function rate(value){return value==null?'—':String(value)+'%';}
+      var rows=(data.cohorts||[]).map(function(r){return '<tr><td>'+esc(r.week)+'</td><td>'+esc(r.active)+'</td><td>'+(r.eligible?esc(r.returned):'Период не завершён')+'</td><td>'+rate(r.rate)+'</td></tr>';}).join('');
+      function funnel(label,f){return '<p>'+esc(label)+': '+(data.instrumentedSince?esc(f.converted)+' / '+esc(f.eligible)+' · '+rate(f.rate):'данные ещё не собраны')+'</p>';}
+      return '<section class="player-crm__analytics-breakdown"><h3>Возврат и полезные действия</h3><p>'+esc(data.definition)+'</p><div class="player-crm__source-table-wrap"><table class="player-crm__source-table"><thead><tr><th>Неделя с</th><th>Аккаунтов</th><th>Вернулись</th><th>Доля</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>Заходили в другие разделы, кроме главной, крутки и розыгрышей: '+esc(data.beyondRewards.accounts)+' / '+esc(data.activeAccounts)+' · '+rate(data.beyondRewards.rate)+'</p><p>Содержательные действия: '+(data.instrumentedSince?esc(data.meaningfulActions.accounts)+' аккаунтов':'начнут учитываться после обновления')+'</p><p>Переходы из сводки → открытие раздела / просмотр новости друга за 10 минут: '+(data.instrumentedSince?esc(data.summaryNavigation.reached)+' / '+esc(data.summaryNavigation.clicks):'нет данных')+'</p>'+funnel('Новость → комментарий или пересылка за 7 дней',data.newsToInteraction)+funnel('Новость друга → комментарий или пересылка за 7 дней',data.friendNewsToInteraction)+funnel('Открытие push → просмотр ответа за 24 часа',data.pushToAnswerRead)+'<p>Просмотр означает видимость карточки, а не доказанное прочтение. Новые события не восстанавливаются задним числом. В конверсиях учитываются только завершённые окна наблюдения.</p></section>';
+    }
     var journeyTables = analyticsSummary && analyticsSummary.available
       ? analyticsTable("Куда заходили", analyticsSummary.sections) + analyticsTable("В чём участвовали", analyticsSummary.activities)
       : "";
@@ -517,7 +526,7 @@ function initPlayerCrmStatsRuntime(deps) {
         periodMetrics.map(periodMetricRow).join("") +
       "</div>" +
       "<div class=\"player-crm__week-report\" id=\"playerCrmWeekReport\" aria-live=\"polite\"></div>" +
-      journeyTables;
+      journeyTables + engagementTable(analyticsSummary && analyticsSummary.engagement);
     var anaPeriod = document.getElementById("playerCrmAnalyticsPeriod");
     if (anaPeriod) anaPeriod.textContent = chartPeriodLabel();
     return { active: players.length, botSubscribers: botSubscribers, pushSubscribers: pushSubscribers, deposits: deposits, messages: messages };

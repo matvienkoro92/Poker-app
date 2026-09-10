@@ -141,11 +141,15 @@
   document.addEventListener("click", function (e) {
     var tab = e.target.closest("[data-summary-schedule-tab]");
     if (tab) { scheduleTab = tab.dataset.summaryScheduleTab === "freerolls" ? "freerolls" : "tournaments"; renderSchedule(); document.getElementById("summary-tab-" + scheduleTab).focus(); }
+    var target=e.target.closest('[data-view="my-summary"] [data-view-target]');
+    if(target&&typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('summary_action',{target:target.getAttribute('data-view-target'),source:'my-summary'});
     var review=e.target.closest("[data-summary-review]");
+    if(review&&typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('summary_action',{target:'club-reviews',source:'my-summary'});
+    if(e.target.closest('[data-summary-friends]')&&typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('summary_action',{target:'friend-news',source:'my-summary'});
     if(review && typeof window.pokerOpenClubReview === "function")window.pokerOpenClubReview(review.dataset.summaryReview);
     if (e.target.closest("[data-summary-refresh]")) {loadedAt=0;init();}
     if (e.target.closest("[data-summary-friends]") && typeof window.pokerOpenFriendNews === "function") window.pokerOpenFriendNews();
-  });
+  }, true);
   document.addEventListener("change", function (e) {
     if (!e.target.matches("[data-summary-pin]")) return;
     var hidden = [];

@@ -92,11 +92,20 @@ function pokerInitHomeDeepLinks(opts) {
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
    */
-	  function pokerApplyStartAppDeepLink(startParamRaw, opts) {
+	  var trackedPushClicks = new Set();
+  function pokerApplyStartAppDeepLink(startParamRaw, opts) {
     opts = opts || {};
     var withPeerOpt = opts.withPeer != null ? String(opts.withPeer).trim() : "";
     var startParam = startParamRaw != null ? String(startParamRaw).trim() : "";
     if (!startParam) return;
+    try {
+      var clickToken=new URL(window.location.href).searchParams.get('_push_open');
+      if(clickToken&&!trackedPushClicks.has(clickToken)&&typeof window.pokerTrackEngagement==='function') {
+        trackedPushClicks.add(clickToken);
+        var reviewId=/^review_([a-f0-9]{24})$/.exec(startParam);
+        window.pokerTrackEngagement('push_opened',{entity:reviewId?reviewId[1]:startParam,source:'notification',once:true,onceKey:clickToken}).then(function(result){if(!result.ok)trackedPushClicks.delete(clickToken);});
+      }
+    } catch (_) {}
     if (typeof pokerSplitReferralStartParam === "function") {
       var refSplit = pokerSplitReferralStartParam(startParam);
       if (refSplit && refSplit.routeStartParam) startParam = refSplit.routeStartParam;

@@ -330,6 +330,26 @@
     });
   }
 
+  var engagementObserver = null;
+  function observeNewsEngagement() {
+    if(engagementObserver)engagementObserver.disconnect();
+    var modal=el("homeFriendNewsModal"),list=el("homeFriendNewsList");
+    if(!modal||modal.hidden||!list||typeof IntersectionObserver!=="function")return;
+    var account=friendNewsAccountId,mode=newsModalMode;
+    engagementObserver=new IntersectionObserver(function(entries){entries.forEach(function(entry){
+      var node=entry.target;
+      if(node._engagementTimer)clearTimeout(node._engagementTimer);
+      if(!entry.isIntersecting||entry.intersectionRatio<0.6)return;
+      node._engagementTimer=setTimeout(function(){
+        if(document.hidden||modal.hidden||!node.isConnected||mode!==newsModalMode||account!==friendNewsAccountId)return;
+        var card=node.closest('[data-home-news-event-id]');
+        var id=card&&card.getAttribute('data-home-news-event-id')||node.getAttribute('data-home-news-read-id');
+        if(id&&typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement(mode==='friends'?'friend_news_read':'news_read',{entity:id,source:mode,once:true});
+      },800);
+    });},{root:list,threshold:0.6});
+    list.querySelectorAll('[data-home-news-read-id]').forEach(function(node){engagementObserver.observe(node);});
+  }
+
   function observeFriendNewsRead() {
     if (friendReadObserver) friendReadObserver.disconnect();
     var modal = el("homeFriendNewsModal");
@@ -2962,6 +2982,7 @@
             dialog.close();
             try {
               await navigator.share({ files: [file] });
+              if(typeof window.pokerTrackEngagement==="function")window.pokerTrackEngagement("news_shared",{entity:eventId,source:newsModalMode});
             } finally {
               // close events are queued: reopen only after that event was handled.
               await new Promise(function (resolve) { setTimeout(resolve, 0); });
@@ -2990,6 +3011,7 @@
         else window.alert("Не удалось скопировать ссылку: " + link);
         return;
       }
+      if(typeof window.pokerTrackEngagement==="function") { var card=button.closest('[data-home-news-event-id]');window.pokerTrackEngagement("news_link_copied",{entity:card?card.getAttribute("data-home-news-event-id"):token,source:newsModalMode}); }
       button.classList.add("home-friend-news-modal__event-copy--copied");
       button.setAttribute("aria-label", "Скопировано");
       button.setAttribute("title", "Скопировано");
@@ -3097,6 +3119,7 @@
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
     observeFriendNewsRead();
+    observeNewsEngagement();
     loadActiveModalFeedback(events);
     // Refresh on every open so a friend's newly published wall post appears
     // immediately instead of waiting for the five-minute background update.
@@ -3542,6 +3565,7 @@
         delete eventCommentDrafts[eventId];
         renderModalList(activeModalEvents());
         feedbackRequest(payload).then(function (data) {
+          if(typeof window.pokerTrackEngagement==="function")window.pokerTrackEngagement("news_comment_created",{entity:eventId,source:newsModalMode});
           delete eventCommentSubmitting[eventId];
           eventFeedback[eventId] = data.feedback || {};
           eventCommentsOpen[eventId] = true;
