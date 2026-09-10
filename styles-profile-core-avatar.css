@@ -5446,3 +5446,25 @@ body.profile-month-story-open { overflow: hidden; }
 .profile-prize-place > b { grid-column:1/-1; font-size:clamp(11px,2.7cqw,20px); color:#ffe4af; }
 .profile-prize-place strong { display:block; font-size:clamp(10px,3cqw,24px); white-space:nowrap; color:#f5eee0; }
 .profile-prize-place small { display:block; font-size:clamp(8px,1.8cqw,13px); font-weight:400; color:#aeb8c4; }
+
+/* Keep the expanded prize content in normal vertical flow, overriding the old two-column tile. */
+.view[data-view="profile"] .profile-achievements-showcase__rating-total .chat-user-modal__rating-tab.profile-rating-actions__prizes {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+  gap:12px !important;
+  width:100%; height:auto !important;
+  box-sizing:border-box;
+}
+.view[data-view="profile"] .profile-rating-actions__prizes > .chat-user-modal__rating-tab-main,
+.view[data-view="profile"] .profile-rating-actions__prizes > .profile-prize-details,
+.view[data-view="profile"] .profile-rating-actions__prizes > .chat-user-modal__rating-tab-more {
+  position:relative !important;
+  inset:auto !important;
+  transform:none !important;
+  width:100%; min-width:0; box-sizing:border-box;
+  flex:none !important;
+  margin:0 !important;
+}
+.view[data-view="profile"] .profile-rating-actions__prizes > .chat-user-modal__rating-tab-more { align-self:flex-start; }
