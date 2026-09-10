@@ -1284,6 +1284,8 @@ function pokerRatingAchievementTournamentRowsForSeason(seasonKey) {
     maps.push(getWinterRatingActualSpringTournamentsByDate());
   } else if (seasonKey === "summer") {
     maps.push(getWinterRatingActiveSeasonTournamentsByDate("summer"));
+  } else if (seasonKey === "history") {
+    maps.push(typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {});
   }
   var rows = [];
   maps.forEach(function (map) {
@@ -1345,7 +1347,8 @@ function pokerRatingAchievementAllTournamentRows() {
   return []
     .concat(pokerRatingAchievementTournamentRowsForSeason("winter"))
     .concat(pokerRatingAchievementTournamentRowsForSeason("spring"))
-    .concat(pokerRatingAchievementTournamentRowsForSeason("summer"));
+    .concat(pokerRatingAchievementTournamentRowsForSeason("summer"))
+    .concat(pokerRatingAchievementTournamentRowsForSeason("history"));
 }
 
 function pokerRatingAchievementOverallRowsForSeason(seasonKey) {

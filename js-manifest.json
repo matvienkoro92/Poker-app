@@ -200,7 +200,8 @@
       "app-sng-champions.js",
       "app-referrals-menu.js",
       "app-club-tasks.js",
-      "app-updates.js"
+      "app-updates.js",
+      "app-my-summary.js"
     ],
     "media": [
       "app-streams.js",

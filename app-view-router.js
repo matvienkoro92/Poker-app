@@ -1430,6 +1430,7 @@ function setView(viewName, navOpts) {
     clearInterval(bonusPikhaninaInterval);
     bonusPikhaninaInterval = null;
   }
+  if (viewName === "my-summary" && typeof window.initMySummary === "function") window.initMySummary();
   if (viewName === "daily-poker" && typeof initDailyPoker === "function") initDailyPoker();
   if (viewName === "admin-bonuses" && typeof initAdminBonuses === "function") initAdminBonuses();
   if (viewName === "cooler-game") initCoolerGame();

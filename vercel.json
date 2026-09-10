@@ -113,6 +113,7 @@
     }
   },
   "crons": [
+    { "path": "/api/cron-friend-news", "schedule": "23 * * * *" },
     {
       "path": "/api/cron-reminder-10min",
       "schedule": "21 21 * * 0"

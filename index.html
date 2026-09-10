@@ -377,7 +377,7 @@
       })();
     </script>
     <link type="application/poker-lazy-style" data-poker-lazy-domain="cashout" data-poker-lazy-position="source" href="./styles-download.css?v=4.002" />
-    <link rel="stylesheet" href="./styles.css?v=4.003" />
+    <link rel="stylesheet" href="./styles.css?v=4.031" />
     <link rel="stylesheet" href="./styles-home-summer-results.css?v=2" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-summer" data-poker-lazy-position="source" href="./styles-rating-summer-beach.css?v=4" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament-bet" href="./styles-tournament-bet.css?v=4.003" />
@@ -899,6 +899,7 @@
 
         <section class="card__content">
           <div class="view view--active" data-view="home">
+        <button type="button" class="my-summary-entry" data-view-target="my-summary"><span><strong>Моя сводка</strong><small id="mySummaryHint">Ваш прогресс и ближайшие события</small></span><span aria-hidden="true">↗</span></button>
         <a href="#" class="home-daily-deal-hero" data-view-target="daily-poker" aria-label="Раздача дня">
           <span class="home-daily-deal-hero__admin-version home-admin-version" id="homeAdminVersionTop" aria-label="Версия приложения"></span>
           <span class="home-daily-deal-hero__content">
@@ -1671,6 +1672,7 @@
           <div class="view" data-view="hall-of-fame" data-html-fragment="./html-fragments/hall-of-fame.html?v=3.688" data-html-fragment-view="hall-of-fame"></div>
           <div class="view" data-view="cashout" data-html-fragment="./html-fragments/cashout.html?v=3.002" data-html-fragment-view="cashout"></div>
           <div class="view" data-view="transfers" data-html-fragment="./html-fragments/transfers.html?v=3.010" data-html-fragment-view="transfers"></div>
+          <div class="view" data-view="my-summary"><div class="summary-header"><button type="button" class="summary-link" data-view-target="home">← Главная</button><button type="button" class="summary-link" data-summary-refresh>Обновить</button></div><h1 class="summary-heading">Моя сводка</h1><p class="summary-subtitle" id="mySummaryName">Всё главное для вас</p><div class="summary-grid" id="mySummaryContent"></div></div>
           <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=4.025" data-html-fragment-view="profile"></div>
           <div class="view" data-view="admin-bonuses" data-html-fragment="./html-fragments/admin-bonuses.html?v=3.728" data-html-fragment-view="admin-bonuses"></div>
           <div class="view" data-view="player-crm" id="playerCrmView" data-html-fragment="./html-fragments/player-crm.html?v=3.013" data-html-fragment-view="player-crm"></div>
@@ -1928,18 +1930,19 @@
     <script defer src="./app-home-tasks.js?v=4.002"></script>
     <script defer src="./app-tournament-day.js?v=4.032"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=4.002"></script>
-    <script defer src="./app-home-deeplinks.js?v=4.003"></script>
+    <script defer src="./app-home-deeplinks.js?v=4.031"></script>
     <script defer src="./app-home-club-info-modals.js?v=4.002"></script>
     <script defer src="./app-home-vpn-proxy-modal.js?v=4.003"></script>
     <script defer src="./app-home-gazette-comments.js?v=4.002"></script>
     <script defer src="./app-home-gazette-tasks.js?v=4.002"></script>
     <script defer src="./club-news-data.js?v=4.002"></script>
-    <script defer src="./app-home-friend-news.js?v=4.005.1.016"></script>
+    <script defer src="./app-home-friend-news.js?v=4.031"></script>
+    <script defer src="./app-my-summary.js?v=1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-core.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./app-rating-summer-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js?v=4.015.9"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js?v=4.031"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-render-utils.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-identity-formatters.js?v=4.002"></script>

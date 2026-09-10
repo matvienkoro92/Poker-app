@@ -136,6 +136,15 @@ function pokerInitHomeDeepLinks(opts) {
       }, 40);
       return;
     }
+    if (startParam === "friend_news") {
+      if (typeof setView === "function") setView("profile");
+      retryDeepLinkAction(function () {
+        if (typeof window.pokerOpenFriendNews !== "function") return false;
+        window.pokerOpenFriendNews();
+        return true;
+      });
+      return;
+    }
     if (startParam === "profile_friends") {
       setTimeout(function () {
         if (typeof setView === "function") setView("profile");

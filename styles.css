@@ -11051,3 +11051,15 @@ button.poker-copy-feedback--error,
 @keyframes home-club-news-loading-spin {
   to { transform: rotate(360deg); }
 }
+
+/* Friend news remains unread until its card is viewed, not when Profile opens. */
+[data-view-target="profile"], #profileFriendsTabBtn, #profileFriendsBtn, #homeFriendNewsOpen { position: relative; }
+.friend-news-unread-dot { position: absolute; top: 5px; right: 7px; width: 9px; height: 9px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 0 2px var(--bg-primary, #10121a); pointer-events: none; }
+.friend-news-unread-dot[hidden] { display: none !important; }
+
+/* Personal player summary */
+.my-summary-entry{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;padding:16px 18px;margin:0 0 14px;border:1px solid #bfa66a55;border-radius:18px;background:linear-gradient(110deg,#353324,#1b2625);color:#f6e8bf;cursor:pointer;font:inherit}
+.my-summary-entry strong{display:block;font-size:18px}.my-summary-entry small{display:block;margin-top:5px;color:#c9c7ba;font-size:12px;line-height:1.5}.my-summary-entry>span:last-child{font-size:28px}
+.summary-header{display:flex;justify-content:space-between;gap:12px}.summary-heading{font-size:32px;letter-spacing:-1px;margin:18px 0 6px;color:#f6edcf}.summary-subtitle{color:#b9beb9;margin:0 0 24px}.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:28px}.summary-card{padding:20px;border:1px solid #bec9b323;border-radius:20px;background:linear-gradient(145deg,#242d29,#171e1c);min-width:0;color:#ecefe6}.summary-card:first-child{border-color:#d4bd7355;background:linear-gradient(135deg,#3b3926,#232b23)}.summary-card h2{font-size:15px;color:#cbd2c7;margin:0 0 18px;font-weight:500}.summary-value{display:block;font-size:25px;line-height:1.25;letter-spacing:-.5px;color:#f5e9bf}.summary-value small{font-size:15px}.summary-card p{font-size:14px;line-height:1.5;margin:8px 0}.summary-muted{color:#aeb9b1!important;font-size:13px!important}.summary-link{background:none;border:0;color:#e5cd87;font:inherit;font-size:14px;cursor:pointer;padding:10px 0;text-align:left}.summary-link:focus-visible,.my-summary-entry:focus-visible{outline:2px solid #eed591;outline-offset:3px}.summary-event{padding:14px 0;border-top:1px solid #ffffff12}.summary-event strong{display:block;line-height:1.4;overflow-wrap:anywhere}.summary-kicker{display:block;text-transform:uppercase;letter-spacing:.08em;color:#aabaac;font-size:10px;margin-bottom:6px}.summary-event progress{width:100%;height:7px;accent-color:#d8bc6e;display:block;margin:12px 0}.summary-picks{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.summary-picks label{font-size:12px;border:1px solid #ffffff20;border-radius:12px;padding:8px;cursor:pointer}.summary-picks input{accent-color:#d8bc6e}.summary-event[hidden]{display:none}
+@media(max-width:540px){.summary-grid{grid-template-columns:1fr}.summary-heading{font-size:30px}.summary-card{padding:18px}.summary-value{font-size:24px}}
+a.summary-link{display:inline-block;text-decoration:none}
