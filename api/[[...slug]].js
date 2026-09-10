@@ -12,6 +12,8 @@ const pathSegment = (req) => {
 const path = require("path");
 const handlersDir = path.join(__dirname, "..", "lib", "api-handlers");
 const handlers = {
+  "club-reviews": () => require(path.join(handlersDir, "club-reviews.js")),
+  "profile-appearance": () => require(path.join(handlersDir, "profile-appearance.js")),
   "auth-telegram": () => require(path.join(handlersDir, "auth-telegram.js")),
   "auth-telegram-login": () => require(path.join(handlersDir, "auth-telegram-login.js")),
   "auth-email": () => require(path.join(handlersDir, "auth-email.js")),

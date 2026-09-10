@@ -201,7 +201,10 @@
       "app-referrals-menu.js",
       "app-club-tasks.js",
       "app-updates.js",
-      "app-my-summary.js"
+      "app-my-summary.js",
+      "app-club-social.js",
+      "app-club-reviews.js",
+      "app-profile-appearance.js"
     ],
     "media": [
       "app-streams.js",

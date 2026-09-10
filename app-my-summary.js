@@ -94,15 +94,20 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<p class="summary-muted" role="status">Загружаем…</p>';
-    root.innerHTML = section("spin","Раздача дня",loading) + section("bonus","Мои бонусы",loading) + section("schedule","Ближайшие турниры",loading) + section("rival","Ближайший конкурент",loading) + section("results","Турнирные результаты",loading) + section("raffles","Розыгрыши",loading) + section("friends","Друзья",loading);
+    root.innerHTML = section("spin","Раздача дня",loading) + section("bonus","Мои бонусы",loading) + section("schedule","Ближайшие турниры",loading) + section("rival","Ближайший конкурент",loading) + section("results","Турнирные результаты",loading) + section("raffles","Розыгрыши",loading) + section("reviews","Мои разборы",loading) + section("friends","Друзья",loading);
     friends();
     function valid() {return seq === generation;}
     var schedule = Promise.resolve().then(function () {return pokerEnsureScriptDomains(["tournament"]);}).then(function () {if(valid()) renderSchedule();}).catch(function () {if(valid()) error("schedule");});
     var authed = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     if (!authed) {
-      ["spin","bonus","rival","results","raffles"].forEach(function (id) {put(id, '<p class="summary-muted">Войдите, чтобы увидеть свои данные.</p>' + link("Открыть профиль", "profile"));});
+      ["spin","bonus","rival","results","raffles","reviews"].forEach(function (id) {put(id, '<p class="summary-muted">Войдите, чтобы увидеть свои данные.</p>' + link("Открыть профиль", "profile"));});
       pending = false; return;
     }
+    var reviews = request("club-reviews", {action:"summary"}).then(function(d) {
+      if(!valid())return;
+      var fresh=(d.threads || []).filter(function(t){return t.unread;});
+      put("reviews", '<strong class="summary-value">' + (fresh.length ? 'Есть новые ответы' : 'Вопросы и обсуждения') + '</strong>' + fresh.slice(0,3).map(function(t){return '<p><button type="button" class="summary-link" data-summary-review="'+esc(t.id)+'">'+esc(t.title)+' →</button></p>';}).join('') + link("Мои разборы", "club-reviews"));
+    }).catch(function(){if(valid())error("reviews");});
     var daily = request("promo/daily-poker/status").then(function (d) {if (!valid()) return; if (typeof d.canPlay !== "boolean" || !Number.isFinite(Number(d.bonusBalance))) throw new Error("Invalid status"); spin = d; offset = Date.parse(d.serverTime) - Date.now(); if (!isFinite(offset)) offset = 0; renderSpin();}).catch(function () {if(valid()) {spin=null;error("spin");error("bonus");}});
     var profile = request("pokerplus-player", {}).then(function (d) {
       if (!valid()) return;
@@ -113,15 +118,18 @@
       return Promise.resolve(pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(function () {return window.pokerGetTournamentAchievementStatsReady(nickname);}).then(function (stats) {if(valid()) renderStats(stats);});
     }).catch(function () {if(valid()) {error("results");error("rival");}});
     var raffles = profile.then(function () {if(!valid()) return; return requestRaffles();}).then(function (d) {if(valid() && d) renderRaffles(d);}).catch(function () {if(valid()) error("raffles");});
-    Promise.allSettled([schedule,daily,profile,raffles]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
+    Promise.allSettled([schedule,daily,profile,raffles,reviews]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
   }
   function requestRaffles() { return request("raffles").then(function (d) {return d;}); }
   window.initMySummary = init;
   document.addEventListener("click", function (e) {
+    var review=e.target.closest("[data-summary-review]");
+    if(review && typeof window.pokerOpenClubReview === "function")window.pokerOpenClubReview(review.dataset.summaryReview);
     if (e.target.closest("[data-summary-refresh]")) {loadedAt=0;init();}
     if (e.target.closest("[data-summary-friends]") && typeof window.pokerOpenFriendNews === "function") window.pokerOpenFriendNews();
   });
   window.addEventListener("poker-friend-news-updated", friends);
+  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;});
   window.addEventListener("poker-telegram-auth", function () {generation++;pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="Всё главное для вас";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
   setInterval(function () {if(document.hidden || !document.querySelector('[data-view="my-summary"].view--active'))return;if(spin && !spin.canPlay && Date.parse(spin.nextFreeAttemptAt)<=Date.now()+offset && Date.now()-loadedAt>30000){loadedAt=0;init();}else renderSpin();}, 30000);
 })();

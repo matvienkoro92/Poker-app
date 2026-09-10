@@ -3430,6 +3430,7 @@ if (chatUserModalEl) {
         revealDeferredProfile();
       }, 3500);
     }
+    if (typeof window.pokerApplyMemberAppearance === "function") window.pokerApplyMemberAppearance(id, chatUserModalEl);
     var initialBlockPromise = openingSelfProfile ? Promise.resolve(false) : refreshChatUserModalBlockState(id);
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")

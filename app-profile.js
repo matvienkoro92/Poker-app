@@ -1070,6 +1070,7 @@ function refreshProfilePublicShowcase(profileData) {
   var root = document.getElementById("profilePublicShowcase");
   if (!root) return;
   if (profileData && typeof profileData === "object") profilePublicShowcaseData = profileData;
+  if (typeof window.pokerRefreshOwnAppearance === "function") window.pokerRefreshOwnAppearance().catch(function () {});
   var data = profilePublicShowcaseData || {};
   var title = profilePublicShowcaseDisplayName(data);
   var titleEl = document.getElementById("profilePublicTitle");

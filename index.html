@@ -899,6 +899,7 @@
 
         <section class="card__content">
           <div class="view view--active" data-view="home">
+        <a href="#" class="home-reviews-entry" data-view-target="club-reviews"><span aria-hidden="true">♠</span><span><strong>Разборы с тренером и игроками</strong><small>Задайте вопрос · обсудите раздачу</small></span><span aria-hidden="true">→</span></a>
         <button type="button" class="my-summary-entry" data-view-target="my-summary"><span><strong>Моя сводка</strong><small id="mySummaryHint">Ваш прогресс и ближайшие события</small></span><span aria-hidden="true">↗</span></button>
         <a href="#" class="home-daily-deal-hero" data-view-target="daily-poker" aria-label="Раздача дня">
           <span class="home-daily-deal-hero__admin-version home-admin-version" id="homeAdminVersionTop" aria-label="Версия приложения"></span>
@@ -1672,6 +1673,7 @@
           <div class="view" data-view="hall-of-fame" data-html-fragment="./html-fragments/hall-of-fame.html?v=3.688" data-html-fragment-view="hall-of-fame"></div>
           <div class="view" data-view="cashout" data-html-fragment="./html-fragments/cashout.html?v=3.002" data-html-fragment-view="cashout"></div>
           <div class="view" data-view="transfers" data-html-fragment="./html-fragments/transfers.html?v=3.010" data-html-fragment-view="transfers"></div>
+          <div class="view" data-view="club-reviews"><a class="social-button" href="#" data-view-target="home">← Главная</a><h1 class="summary-heading">Разборы</h1><p class="summary-subtitle">Думаем вместе. Тренер Николай FishKopcheny и игроки клуба.</p><p id="clubReviewsFeedback" class="social-feedback" role="status" aria-live="polite"></p><div id="clubReviewsContent"></div></div>
           <div class="view" data-view="my-summary"><div class="summary-header"><button type="button" class="summary-link" data-view-target="home">← Главная</button><button type="button" class="summary-link" data-summary-refresh>Обновить</button></div><h1 class="summary-heading">Моя сводка</h1><p class="summary-subtitle" id="mySummaryName">Всё главное для вас</p><div class="summary-grid" id="mySummaryContent"></div></div>
           <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=4.025" data-html-fragment-view="profile"></div>
           <div class="view" data-view="admin-bonuses" data-html-fragment="./html-fragments/admin-bonuses.html?v=3.728" data-html-fragment-view="admin-bonuses"></div>
@@ -1938,6 +1940,9 @@
     <script defer src="./club-news-data.js?v=4.002"></script>
     <script defer src="./app-home-friend-news.js?v=4.031"></script>
     <script defer src="./app-my-summary.js?v=1"></script>
+    <script defer src="./app-club-social.js?v=1"></script>
+    <script defer src="./app-club-reviews.js?v=1"></script>
+    <script defer src="./app-profile-appearance.js?v=1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-core.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./app-rating-summer-season.js?v=4.002"></script>

@@ -136,6 +136,12 @@ function pokerInitHomeDeepLinks(opts) {
       }, 40);
       return;
     }
+    var reviewMatch = /^review_([a-f0-9]{24})$/.exec(startParam);
+    if (reviewMatch || startParam === "club_reviews") {
+      window.pokerPendingReviewId = reviewMatch ? reviewMatch[1] : "";
+      openViewThen("club-reviews");
+      return;
+    }
     if (startParam === "friend_news") {
       if (typeof setView === "function") setView("profile");
       retryDeepLinkAction(function () {
