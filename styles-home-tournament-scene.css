@@ -305,10 +305,10 @@
   top: -6.8%;
   width: 58.6%;
   height: 66.8%;
-  border: 1px solid #ffe4a580;
+  border: 1px solid #ffe9b9;
   border-radius: 50%;
   background: transparent;
-  box-shadow: 0 0 1.2cqw #ffd16ca6, 0 0 3cqw #ffad3273, 0 0 5cqw #ff8a202e, inset 0 0 .8cqw #ffd16c40;
+  box-shadow: 0 0 1.5cqw #ffdf91, 0 0 3.5cqw #ffad3299, 0 0 6cqw #ff8a204d, inset 0 0 1cqw #ffd16c66;
   pointer-events: none;
   transition: box-shadow 180ms ease, border-color 180ms ease;
 }
@@ -398,3 +398,9 @@
 .tournament-share-preview pre { white-space:pre-wrap; overflow-wrap:anywhere; font-family:inherit; font-size:16px; line-height:1.5; color:#f2ead8; user-select:text; }
 .tournament-share-preview button { padding:12px 16px; border:1px solid #bd944b; border-radius:12px; background:linear-gradient(#ffd875,#e8a82d); color:#18130a; font-weight:700; cursor:pointer; }
 .tournament-share-preview [data-close] { position:absolute; top:12px; right:12px; padding:5px 11px; background:#151c25; color:#ffe0a0; font-size:24px; }
+/* Apply only the corrected inner rail strip from the edited illustration. */
+#app .tournament-day-home-dual--tournament-focus > .home-table-seam-fix {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:url('./assets/home-table-seam-no-glow-v1.webp') center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1400' preserveAspectRatio='none'%3E%3Cpath d='M0 823 Q140 793 407 796 M590 797 Q650 797 741 809 M854 819 Q1020 828 1080 856' fill='none' stroke='white' stroke-width='24'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}

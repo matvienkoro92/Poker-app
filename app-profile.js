@@ -1281,21 +1281,15 @@ function profileRatingTotalTextFromHtml(html) {
 }
 
 function renderProfileRatingTotalCards(text) {
-  setTimeout(profileLoadMonthSummary, 0);
   var safeText = profileEscapeHtml(String(text || "").trim());
   return (
-    '<div class="chat-user-modal__rating-tabs profile-rating-actions">' +
+    '<div class="chat-user-modal__rating-tabs profile-rating-actions" style="grid-template-columns:minmax(0,1fr)">' +
       '<button type="button" class="chat-user-modal__rating-tab profile-rating-actions__prizes" data-profile-rating-total="1" aria-label="Призовые в турнирах ' +
         safeText + '. Подробнее">' +
         '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' +
           safeText +
         '</span></span>' +
         '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
-      '</button>' +
-      '<button type="button" class="profile-month-story-card" data-profile-month-story aria-label="Результаты месяца. Поделиться">' +
-        '<span class="profile-month-story-card__eyebrow">В этом месяце:</span>' +
-        '<span data-profile-month-summary>Загружаем результаты…</span>' +
-        '<span class="profile-month-story-card__more">Поделиться <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
       '</button>' +
     '</div>'
   );
