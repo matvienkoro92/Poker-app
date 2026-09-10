@@ -184,6 +184,22 @@ function pokerInitHomeDeepLinks(opts) {
     var playerProfileMatch = startParam.match(/^player_profile_([A-Za-z0-9_-]+)$/);
     if (playerProfileMatch && playerProfileMatch[1]) {
       var sharedProfileId = playerProfileMatch[1];
+      var commentEventId = new URLSearchParams(window.location.search).get("profile_event");
+      if (commentEventId) {
+        var commentAttempts = 0;
+        var focusComment = function () {
+          var row = Array.from(document.querySelectorAll("[data-profile-event-id]")).find(function (node) { return node.getAttribute("data-profile-event-id") === commentEventId; });
+          if (row) {
+            var toggle = row.querySelector("[data-profile-event-comments]");
+            var comments = row.querySelector(".chat-user-modal__news-comments");
+            if (toggle && comments && comments.hidden) toggle.click();
+            var updated = Array.from(document.querySelectorAll("[data-profile-event-id]")).find(function (node) { return node.getAttribute("data-profile-event-id") === commentEventId; });
+            if (updated) updated.scrollIntoView({block:"center"});
+          } else if (++commentAttempts < 40) setTimeout(focusComment, 400);
+        };
+        setTimeout(focusComment, 400);
+      }
+
       setTimeout(function () {
         if (typeof setView === "function") setView("home");
         var ready = typeof window.pokerEnsureLazyDomains === "function"

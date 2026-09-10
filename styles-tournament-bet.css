@@ -816,3 +816,12 @@
   .tournament-bet-modal__feature .tournament-bet-modal__details dt { font-size: 9px; }
   .tournament-bet-modal__feature .tournament-bet-modal__details dd { font-size: 10px; }
 }
+
+.tournament-bet-modal__closed-event summary{position:relative}
+.tournament-bet-result-share{position:absolute;right:12px;bottom:12px;z-index:5;border:1px solid #b08a45;border-radius:9px;padding:7px 9px;background:#171714e8;color:#ffe2a1;font:inherit;font-size:11px;cursor:pointer}
+.tournament-bet-result-share:disabled{opacity:.5;cursor:wait}
+.tournament-bet-share-preview{width:min(650px,92vw);max-height:90dvh;overflow:auto;box-sizing:border-box;padding:16px;border:1px solid #b08a45;border-radius:18px;background:#111216;color:#ffe2a1}
+.tournament-bet-share-preview::backdrop{background:#000b}
+.tournament-bet-share-preview img{display:block;width:100%;margin:12px 0}
+.tournament-bet-share-preview button{padding:10px;margin:4px;border:1px solid #b08a45;border-radius:8px;background:#272219;color:#ffe2a1;cursor:pointer}
+.tournament-bet-share-preview [hidden]{display:none}

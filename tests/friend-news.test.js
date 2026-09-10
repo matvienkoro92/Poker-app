@@ -52,7 +52,7 @@ function browserHarness() {
     localStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } },
     sessionStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } } };
   let source = fs.readFileSync(require.resolve("../app-home-friend-news.js"), "utf8");
-  source = source.replace('  if (document.readyState === "loading")', `  window.test = { recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, eventTextHtml,
+  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsThird, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, eventTextHtml,
     bumpLoad: function () { loadSequence++; }, bumpAuth: function () { friendAuthGeneration++; },
     setState: function (id, rows, read) { friendNewsAccountId = id; friendTrackingSince = Date.parse("2026-09-01T00:00:00Z"); events = rows; friendReadIds = read || {}; },
     pending: function () { return friendReadPending; },
@@ -189,4 +189,39 @@ test("historical feed does not become unread when tracking starts", () => {
   h.api.setTracking(null);
   assert.equal(h.window.pokerGetFriendNewsSummary().ready, false);
   assert.equal(h.window.pokerGetFriendNewsSummary().unread, 0);
+});
+
+test("September 10 self-bet result is third in its own day and keeps ordinary news shape", () => {
+  const h = browserHarness();
+  const event = h.api.clubSelfBetNewsEvents(selfBetFixture())[0];
+  const newer={id:"newer",at:"2026-09-11T12:00:00+03:00"};
+  const daily=[1,2,3,4].map(i=>({id:"day"+i,at:event.at}));
+  const rows=h.api.placeSelfBetNewsThird([newer,event,...daily]);
+  assert.equal(rows[0].id,"newer");
+  assert.equal(rows[3].id,event.id);
+  assert.equal(event.actorNick,"Shkarubo");
+  assert.match(event.newsLines.join(" ").replace(/\s/g," "),/300 ₽.*7 000 ₽/);
+  assert.equal(event.image,undefined);
+  assert.equal(event._eventKind,"self-bet-result");
+});
+
+test("self-bet result only appears in the winner's friends feed", () => {
+  const h = browserHarness();
+  h.api.setSelfBet(selfBetFixture());
+  assert.equal(h.api.friendSelfBetNewsEvents([{userId:"ID123456",pokerPlusNickname:"Shkarubo"}]).length,1);
+  assert.equal(h.api.friendSelfBetNewsEvents([{userId:"ID654321",pokerPlusNickname:"Other"}]).length,0);
+  assert.equal(h.api.friendSelfBetNewsEvents([]).length,0);
+});
+
+function selfBetFixture(overrides = {}) {
+  return {ok:true,id:"settled-1",status:"settled",title:"Мистери",winnerPaidAt:"2026-09-10T10:00:00Z",winnerPaidAmount:7000,stakePrice:300,entries:[{name:"Shkarubo",winner:true,stake:300}],...overrides};
+}
+test("automatic self-bet news excludes open, unpaid and private events and deduplicates history", () => {
+  const h=browserHarness();
+  for (const overrides of [{status:"open"},{createdByPlayer:true},{winnerPaidAmount:null},{winnerPaidAt:""},{entries:[]}]) {
+    assert.equal(h.api.clubSelfBetNewsEvents(selfBetFixture(overrides)).length,0);
+  }
+  assert.equal(h.api.clubSelfBetNewsEvents(selfBetFixture({completedEvents:[selfBetFixture()]})).length,1);
+  const row=h.api.clubSelfBetNewsEvents(selfBetFixture({winnerPaidAt:"2026-09-10T01:00:00Z"}))[0];
+  assert.equal(row.at,"2026-09-09T12:00:00+03:00");
 });

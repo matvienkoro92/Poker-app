@@ -273,6 +273,7 @@
       (winner ? '<span class="tournament-bet-modal__result-winner">🏆 ' + esc(winner.name || "Игрок") + '</span>' +
         '<span class="tournament-bet-modal__result-amounts"><span>Поставил <strong>' + rub(winner.stake || data.stakePrice) + '</strong></span><span>Забрал <strong>' + rub(payout) + '</strong></span></span>' :
         '<span class="tournament-bet-modal__result-pending">' + (settled ? 'Победитель не указан' : 'Ожидаем результат турнира') + '</span>') +
+      '<button type="button" class="tournament-bet-result-share" data-tournament-bet-result-share aria-label="Поделиться изображением карточки">Поделиться ↗</button>' +
       '<span class="tournament-bet-modal__result-toggle">Участники: ' + entries.length + ' · Подробнее <span aria-hidden="true">⌄</span></span></summary>' +
       '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' +
       (archived ? "" : '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div>') + '</details>' +
@@ -491,7 +492,65 @@
     clearInterval(refreshTimer);
   }
 
+  async function shareResultImage(button) {
+    var card = button.closest(".tournament-bet-modal__closed-event");
+    if (!card) return;
+    button.disabled = true;
+    try {
+      if (document.fonts) await document.fonts.ready;
+      var summary = card.querySelector("summary"), rect = card.getBoundingClientRect();
+      var width = Math.ceil(rect.width), height = Math.ceil(summary.getBoundingClientRect().height + 2);
+      var wrapper = document.createElement("div");
+      var clone = summary.cloneNode(true);
+      async function embed(url) {
+        var response = await fetch(url);
+        if (!response.ok) throw new Error("Не удалось загрузить изображение");
+        var blob = await response.blob();
+        return new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(blob); });
+      }
+      var originals = [card, summary].concat(Array.from(summary.querySelectorAll("*")));
+      var copies = [wrapper, clone].concat(Array.from(clone.querySelectorAll("*")));
+      await Promise.all(originals.map(async function (original, i) {
+        var copy = copies[i], style = getComputedStyle(original);
+        for (var j = 0; j < style.length; j++) copy.style.setProperty(style[j], style.getPropertyValue(style[j]));
+        copy.style.animation = "none"; copy.style.transition = "none";
+        if (original.tagName === "IMG") { copy.src = await embed(original.currentSrc || original.src); copy.removeAttribute("srcset"); copy.removeAttribute("loading"); }
+        var background = style.backgroundImage;
+        for (var match of Array.from(background.matchAll(/url\(["']?([^"')]+)["']?\)/g))) background = background.replace(match[0], 'url("' + await embed(new URL(match[1], location.href)) + '")');
+        copy.style.backgroundImage = background;
+      }));
+      clone.querySelectorAll("[data-tournament-bet-result-share]").forEach(function (node) { node.remove(); });
+      wrapper.style.margin = "0"; wrapper.style.width = width + "px"; wrapper.style.height = height + "px";
+      wrapper.style.position = "relative"; wrapper.style.transform = "none"; wrapper.style.boxSizing = "border-box";
+      wrapper.appendChild(clone);
+      wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '"><foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(wrapper) + '</foreignObject></svg>';
+      var rendered = new Image();
+      await new Promise(function (resolve, reject) { rendered.onload = resolve; rendered.onerror = reject; rendered.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); });
+      var canvas = document.createElement("canvas"); canvas.width = width * 2; canvas.height = height * 2;
+      var ctx = canvas.getContext("2d"); ctx.scale(2, 2); ctx.drawImage(rendered, 0, 0);
+      var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });
+      if (!blob) throw new Error("Не удалось создать картинку");
+      var url = URL.createObjectURL(blob), file = new File([blob], "poker21-result.png", {type:"image/png"});
+      var dialog = document.createElement("dialog");
+      dialog.className = "tournament-bet-share-preview";
+      dialog.innerHTML = '<button type="button" data-close>Закрыть ×</button><img alt="Карточка результата"><button type="button" data-send>Поделиться картинкой</button><button type="button" data-save>Скачать PNG</button><p role="status"></p>';
+      dialog.querySelector("img").src = url;
+      dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
+      dialog.addEventListener("close", function () { URL.revokeObjectURL(url); dialog.remove(); }, {once:true});
+      dialog.querySelector("[data-save]").onclick = function () { var a = document.createElement("a"); a.href = url; a.download = file.name; dialog.appendChild(a); a.click(); a.remove(); };
+      dialog.querySelector("[data-send]").onclick = async function () {
+        try { await navigator.share({files:[file]}); } catch (error) { if (error.name !== "AbortError") dialog.querySelector("p").textContent = "Не удалось отправить. Скачайте PNG и прикрепите к сообщению."; }
+      };
+      dialog.querySelector("[data-send]").hidden = !(navigator.canShare && navigator.canShare({files:[file]}));
+      document.body.appendChild(dialog); dialog.showModal();
+    } catch (error) { showAlert(error.message || "Не удалось создать картинку"); }
+    finally { button.disabled = false; }
+  }
+
   function onClick(event) {
+    var resultShare = event.target.closest("[data-tournament-bet-result-share]");
+    if (resultShare) { event.preventDefault(); event.stopPropagation(); shareResultImage(resultShare); return; }
     if (event.target.closest("[data-tournament-bet-subscribe]")) {
       post({ action: subscribed ? "unsubscribe" : "subscribe" }, "Сохраняю подписку…");
       return;

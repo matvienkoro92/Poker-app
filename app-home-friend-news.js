@@ -1197,11 +1197,75 @@
     }, []);
   }
 
+  var selfBetNewsRows = [];
+  function loadSelfBetNews() {
+    return cachedFetchJson(apiBase() + "/api/tournament-bet", "self-bet-news", 60000, { cache: "no-store" }).then(function (data) {
+      if (!data || data.ok !== true) throw new Error("self_bet_news_unavailable");
+      selfBetNewsRows = clubSelfBetNewsEvents(data);
+      return selfBetNewsRows;
+    }).catch(function () { return selfBetNewsRows; });
+  }
+
+  function clubSelfBetNewsEvents(data) {
+    if (!data) return selfBetNewsRows;
+    var seen = {};
+    return [data].concat(data.completedEvents || []).filter(function (event) {
+      if (!event || !event.id || seen[event.id] || event.status !== "settled" || event.createdByPlayer) return false;
+      seen[event.id] = true;
+      return true;
+    }).map(function (event) {
+      var winner = (event.entries || []).find(function (entry) { return entry.winner; });
+      var paidAt = Date.parse(event.winnerPaidAt);
+      var amount = Number(event.winnerPaidAmount);
+      if (!winner || !winner.name || !Number.isFinite(paidAt) || !isRecentEvent(event.winnerPaidAt) || !Number.isFinite(amount) || amount <= 0) return null;
+      // Club reporting day rolls over at 06:00 Moscow time, including late-night settlements.
+      var day = new Date(paidAt - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      var color = playerNewsColor(winner.name);
+      var stake = Number(winner.stake || event.stakePrice) || 0;
+      var title = String(event.title || "Турнир");
+      return {
+        id: "club-self-bet:" + event.id, type: "achievement", _eventKind: "self-bet-result",
+        at: day + "T12:00:00+03:00", actorId: "", actorNick: winner.name, actorAvatar: winner.avatar || clubNewsFallbackAvatar(winner.name),
+        playerAccent: color.accent, playerRgb: color.rgb,
+        newsTitle: winner.name,
+        newsLines: ["Ставка на себя · " + title, "Поставил " + formatRub(stake) + " · забрал " + formatRub(amount), "Участников: " + (event.entries || []).length],
+        text: winner.name + " — Ставка на себя: поставил " + formatRub(stake) + ", забрал " + formatRub(amount), target: "profile"
+      };
+    }).filter(Boolean);
+  }
+
+  function friendSelfBetNewsEvents(friends) {
+    return clubSelfBetNewsEvents().filter(function (row) {
+      return isRecentEvent(row.at) && (friends || []).some(function (friend) {
+        return friendRatingNickCandidates(friend).some(function (nick) {
+          return nicknameMatchKeys(nick).some(function (key) { return nicknameMatchKeys(row.actorNick).indexOf(key) !== -1; });
+        });
+      });
+    });
+  }
+
+  function placeSelfBetNewsThird(rows) {
+    var result = rows.filter(function (row) { return row._eventKind !== "self-bet-result"; });
+    var byDay = {};
+    rows.filter(function (row) { return row._eventKind === "self-bet-result"; }).forEach(function (row) {
+      var day = eventDayKey(row.at);
+      (byDay[day] || (byDay[day] = [])).push(row);
+    });
+    Object.keys(byDay).sort().reverse().forEach(function (day) {
+      var indices = [];
+      result.forEach(function (row, index) { if (eventDayKey(row.at) === day) indices.push(index); });
+      var index = indices.length >= 3 ? indices[2] : indices.length ? indices[indices.length - 1] + 1 : result.findIndex(function (row) { return eventDayKey(row.at) < day; });
+      if (index < 0) index = result.length;
+      result.splice.apply(result, [index, 0].concat(byDay[day]));
+    });
+    return result;
+  }
+
   function arrangeClubWinEvents(rows) {
     var merged = mergeRelatedPlayerEvents(Array.isArray(rows) ? rows : []).filter(function (row) {
       return !isStandaloneRatingDrop(row);
     });
-    return distributeBelowTop10RatingEvents(pinLeadingClubWins(distributeDailyClubEvents(merged)));
+    return placeSelfBetNewsThird(distributeBelowTop10RatingEvents(pinLeadingClubWins(distributeDailyClubEvents(merged))));
   }
 
   function eventDateLabel(value, includeYear) {
@@ -3566,6 +3630,7 @@
           if (!payload || payload.ok !== true || !Array.isArray(payload.posts)) throw new Error("friend_feed_invalid");
           return payload;
         }).catch(function () { return { posts: [], failed: true }; }),
+        loadSelfBetNews(),
       ]);
     }).then(function (results) {
       if (!results || requestSequence !== loadSequence) return;
@@ -3606,6 +3671,7 @@
       var nextEvents = attachFriendAvatars(mergeRelatedPlayerEvents(collectLevelEvents(friends).concat(
         collectNewFriendEvents(friends),
         sharedFriendEvents,
+        friendSelfBetNewsEvents(friends),
         personalPostEvents(friends, results[7] && results[7].posts),
         clubTop10RatingEventsForFriends(friends),
         collectTournamentEvents(friends, tournamentSnapshots),
@@ -3633,7 +3699,7 @@
               });
           });
         }).slice(0, MAX_FRIEND_EVENTS);
-      events = nextEvents;
+      events = placeSelfBetNewsThird(nextEvents);
       friendNewsLoading = false;
       friendNewsLoaded = true;
       writeRenderedEventsCache(events);
@@ -3786,7 +3852,8 @@
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
         birthdays,
         ratingChanges,
-        clubChoiceNewsEvents(allPlayers, choiceRows)
+        clubChoiceNewsEvents(allPlayers, choiceRows),
+        clubSelfBetNewsEvents()
       ),
       allPlayers
     ).filter(function (row) {
@@ -3948,6 +4015,7 @@
       clubTournamentSnapshotsReady().catch(function () { return {}; }),
       cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "club-choice-news", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { rows: [] }; }),
+      loadSelfBetNews(),
     ], function (results, complete) {
       var players = (results[0] && Array.isArray(results[0].levelRows) ? results[0].levelRows : []).map(function (row) {
         return Object.assign({}, row, {
