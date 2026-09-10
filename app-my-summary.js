@@ -54,6 +54,47 @@
 
   function monthKey(date) { var m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(date)); return m ? m[3] + "-" + m[2] : ""; }
   function stamp(row) { return String(row.date || "").split(".").reverse().join("") + String(row.time || "00:00"); }
+  function achievementCompetitors() {
+    if (typeof pokerRatingAchievementAllTournamentRows !== "function" || typeof winterRatingSamePlayer !== "function") return null;
+    var players = [], byNick = new Map(), days = {};
+    function player(nick) {
+      if (byNick.has(nick)) return byNick.get(nick);
+      var entry = players.find(function (p) { return winterRatingSamePlayer(p.nick, nick); });
+      if (!entry) { entry = {nick:nick, wins:0, hero:0, million:0}; players.push(entry); }
+      byNick.set(nick, entry); return entry;
+    }
+    pokerRatingAchievementAllTournamentRows().forEach(function (r) {
+      if (!r || !r.nick) return;
+      var p = player(r.nick), reward = Number(r.reward) || 0;
+      if ((Number(r.points) || 0) !== 0 || reward !== 0 || Number(r.place) === 1) {
+        if (Number(r.place) === 1) p.wins++;
+        p.million += reward;
+      }
+      if (stamp(r).slice(0,8) < "20260101" || reward <= 0) return;
+      var best = days[r.date];
+      if (!best || reward > best.reward || (reward === best.reward && r.nick.localeCompare(best.nick, "ru") < 0)) days[r.date] = {nick:r.nick,reward:reward};
+    });
+    var heroes = window.POKER_CLUB_NEWS_DATA && window.POKER_CLUB_NEWS_DATA.dayHeroes;
+    Object.keys(heroes || days).forEach(function (date) {
+      var hero = (heroes || days)[date];
+      if (stamp({date:date}).slice(0,8) < "20260101" || !hero || !hero.nick) return;
+      player(hero.nick).hero++;
+    });
+    return players;
+  }
+  function achievementRival(def, value, players) {
+    if (!players) return '<p class="summary-muted">Данные соперников пока недоступны.</p>';
+    var others = players.filter(function (p) { return !winterRatingSamePlayer(p.nick, nickname) && p[def.id] > 0; });
+    others.sort(function (a,b) { return b[def.id] - a[def.id] || a.nick.localeCompare(b.nick, "ru"); });
+    var ahead = others.filter(function (p) { return p[def.id] > value; });
+    var rival = ahead.length ? ahead[ahead.length - 1] : others[0];
+    if (!rival) return '<p class="summary-muted">Других участников в этой ачивке пока нет.</p>';
+    var gap = Math.abs(rival[def.id] - value);
+    return '<p class="summary-achievement-rival"><span class="summary-muted">' +
+      (ahead.length ? 'Ближайший впереди: ' : gap === 0 ? 'Делите первое место: ' : 'Вы на первом месте · второй: ') +
+      '</span><strong>' + esc(rival.nick) + '</strong> — ' + num(rival[def.id]) + ' ' + def.unit +
+      '</p><p class="summary-muted">' + (gap === 0 ? 'Результаты равны.' : (ahead.length ? 'До соперника: ' : 'Ваш отрыв: ') + num(gap) + ' ' + def.unit + '.') + '</p>';
+  }
   function renderStats(stats) {
     var nowParts = new Intl.DateTimeFormat("en-CA", {timeZone:"Europe/Moscow",year:"numeric",month:"2-digit"}).formatToParts(new Date());
     var month = nowParts.find(function (p) {return p.type === "year";}).value + "-" + nowParts.find(function (p) {return p.type === "month";}).value;
@@ -66,11 +107,12 @@
       {id:"hero",name:"Герой дня",value:(stats.dayHeroes || []).length,tiers:[1,5,15,30,100],unit:"раз"},
       {id:"million",name:"Миллионер клуба",value:stats.totalReward,tiers:[1000000,2000000,3000000,4000000,5000000],unit:"₽"}
     ];
+    var competitors = achievementCompetitors();
     var hidden = []; try { hidden = JSON.parse(localStorage.getItem("my-summary-hidden:" + account) || "[]"); if (!Array.isArray(hidden)) hidden = []; } catch (_) {}
-    put("achievements", '<p class="summary-muted">Выберите, какой прогресс держать перед глазами.</p><div class="summary-picks">' + defs.map(function (d) {return '<label><input type="checkbox" data-summary-pin="' + d.id + '"' + (hidden.indexOf(d.id) < 0 ? ' checked' : '') + '> ' + d.name + '</label>';}).join("") + '</div>' + defs.map(function (d) {
+    put("achievements", '<details class="summary-achievement-picker"><summary>Выбрать ачивки для отслеживания</summary><p class="summary-muted">Отметьте нужные ачивки — они появятся ниже.</p><div class="summary-picks">' + defs.map(function (d) {return '<label><input type="checkbox" data-summary-pin="' + d.id + '"' + (hidden.indexOf(d.id) < 0 ? ' checked' : '') + '> ' + d.name + '</label>';}).join("") + '</div><p class="summary-muted" data-summary-catalog-status>Загружаем остальные ачивки…</p></details>' + defs.map(function (d) {
       var value = Number(d.value) || 0, next = d.tiers.find(function (n) {return n > value;});
-      return '<div class="summary-event" data-summary-progress="' + d.id + '"' + (hidden.indexOf(d.id) >= 0 ? ' hidden' : '') + '><strong>' + d.name + '</strong><p>' + num(value) + (next ? ' / ' + num(next) : '') + ' ' + d.unit + '</p><progress max="' + (next || value || 1) + '" value="' + value + '"></progress><p class="summary-muted">' + (next ? 'До следующей ступени: ' + num(next - value) + ' ' + d.unit : 'Все ступени открыты') + '</p></div>';
-    }).join("") + link("Все достижения", "profile") + '<div class="summary-event"><h3 class="summary-rival-heading">Ближайший конкурент</h3><div id="summary-rival"></div></div>');
+      return '<div class="summary-event" data-summary-progress="' + d.id + '"' + (hidden.indexOf(d.id) >= 0 ? ' hidden' : '') + '><strong>' + d.name + '</strong><p>' + num(value) + (next ? ' / ' + num(next) : '') + ' ' + d.unit + '</p><progress max="' + (next || value || 1) + '" value="' + value + '"></progress><p class="summary-muted">' + (next ? 'До следующей ступени: ' + num(next - value) + ' ' + d.unit : 'Все ступени открыты') + '</p>' + achievementRival(d, value, competitors) + '</div>';
+    }).join("") + '<div id="summary-extra-achievements"></div>' + link("Все достижения", "profile") + '<div class="summary-event"><h3 class="summary-rival-heading">Ближайший конкурент</h3><div id="summary-rival"></div></div>');
     var heroes = window.POKER_CLUB_NEWS_DATA && window.POKER_CLUB_NEWS_DATA.dayHeroes;
     put("rival", '<p class="summary-muted">Данные гонки пока недоступны.</p>');
     if (heroes && typeof window.winterRatingSamePlayer === "function") {
@@ -96,6 +138,47 @@
         '<p class="summary-muted">Вы: ' + (place >= 0 ? (place + 1) + '-е место · ' : '') + 'герой дня: ' + me.wins + '</p>' + link("Мой профиль", "profile"));
     }
 
+  }
+  async function loadAchievementCatalog(profileData, valid) {
+    try {
+      await window.pokerEnsureLazyDomains(["chat"], {styles:true,scripts:true});
+      await window.pokerEnsureGlobalModalsHtml();
+      if (!valid()) return;
+      if (!window.pokerEnsureChatUserModalReady()) throw new Error("Profile achievements unavailable");
+      var catalog = await window.pokerBuildProfileAchievements({ratingNick:nickname,userId:account,profileData:profileData,isSelfProfile:true});
+      if (!valid()) return;
+      var holder = document.createElement("div"); holder.innerHTML = catalog.achievementsHtml;
+      var picks = root.querySelector(".summary-picks"), extra = document.getElementById("summary-extra-achievements");
+      if (!picks || !extra) return;
+      var selected = [];
+      try { selected = JSON.parse(localStorage.getItem("my-summary-extra:" + account) || "[]"); if (!Array.isArray(selected)) selected = []; } catch (_) {}
+      var seen = new Set(["Король турниров","Герой дня","Миллионер клуба"]);
+      function decode(card, key) {
+        var text = card.getAttribute("data-chat-achievement-" + key) || "";
+        try { return decodeURIComponent(text); } catch (_) { return text; }
+      }
+      holder.querySelectorAll("[data-chat-achievement-title]").forEach(function (card) {
+        var title = decode(card, "title");
+        if (!title || seen.has(title)) return;
+        seen.add(title);
+        var id = "catalog-" + encodeURIComponent(title), checked = selected.indexOf(id) >= 0;
+        var label = document.createElement("label"), checkbox = document.createElement("input");
+        checkbox.type = "checkbox"; checkbox.dataset.summaryPin = id; checkbox.checked = checked;
+        label.append(checkbox, document.createTextNode(" " + title)); picks.appendChild(label);
+        var section = document.createElement("div"); section.className = "summary-event"; section.dataset.summaryProgress = id; section.hidden = !checked;
+        var heading = document.createElement("strong"); heading.textContent = title; section.appendChild(heading);
+        var progress = document.createElement("p"); progress.className = "summary-catalog-progress";
+        progress.textContent = decode(card, "progress") || decode(card, "state"); section.appendChild(progress);
+        var button = document.createElement("button"); button.type = "button"; button.className = "summary-link"; button.textContent = "Подробнее →";
+        Array.from(card.attributes).forEach(function (attr) { if (attr.name.indexOf("data-chat-achievement-") === 0) button.setAttribute(attr.name, attr.value); });
+        section.appendChild(button); extra.appendChild(section);
+      });
+      var status = root.querySelector("[data-summary-catalog-status]"); if (status) status.remove();
+    } catch (_) {
+      if (!valid()) return;
+      var status = root.querySelector("[data-summary-catalog-status]");
+      if (status) status.textContent = "Не удалось загрузить весь список. Обновите сводку, чтобы повторить.";
+    }
   }
   function renderRaffles(data) {
     if (!Array.isArray(data.activeRaffles)) throw new Error("Raffle list unavailable");
@@ -131,7 +214,7 @@
       document.getElementById("mySummaryName").textContent = nickname ? nickname : "Всё главное для вас";
       if (d.linked && !nickname) throw new Error("Profile cache unavailable");
       if (!d.linked) { ["results","achievements"].forEach(function (id) {put(id,'<p class="summary-muted">Привяжите Poker21 в профиле, чтобы увидеть результаты и прогресс.</p>' + link("Привязать Poker21", "profile"));}); return; }
-      return Promise.resolve(pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(function () {return window.pokerGetTournamentAchievementStatsReady(nickname);}).then(function (stats) {if(valid()) renderStats(stats);});
+      return Promise.resolve(pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(function () {return window.pokerGetTournamentAchievementStatsReady(nickname);}).then(function (stats) {if(valid()) {renderStats(stats);return loadAchievementCatalog(Object.assign({},p,{accountId:account}),valid);}});
     }).catch(function () {if(valid()) {error("results");error("achievements");}});
     var raffles = profile.then(function () {if(!valid()) return; return requestRaffles();}).then(function (d) {if(valid() && d) renderRaffles(d);}).catch(function () {if(valid()) error("raffles");});
     Promise.allSettled([schedule,daily,profile,raffles,reviews]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
@@ -154,7 +237,11 @@
     if (!e.target.matches("[data-summary-pin]")) return;
     var hidden = [];
     root.querySelectorAll("[data-summary-pin]").forEach(function (input) {root.querySelector('[data-summary-progress="' + input.dataset.summaryPin + '"]').hidden = !input.checked; if(!input.checked) hidden.push(input.dataset.summaryPin);});
-    if(account) try {localStorage.setItem("my-summary-hidden:" + account, JSON.stringify(hidden));} catch (_) {}
+    if(account) try {
+      localStorage.setItem("my-summary-hidden:" + account, JSON.stringify(hidden));
+      var selected = Array.from(root.querySelectorAll('[data-summary-pin]:checked')).map(function (input) { return input.dataset.summaryPin; }).filter(function (id) { return id.indexOf("catalog-") === 0; });
+      localStorage.setItem("my-summary-extra:" + account, JSON.stringify(selected));
+    } catch (_) {}
   });
   window.addEventListener("poker-friend-news-updated", friends);
   window.addEventListener("poker-reviews-updated", function(){loadedAt=0;});

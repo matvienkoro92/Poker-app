@@ -204,6 +204,8 @@
       "app-my-summary.js",
       "app-club-social.js",
       "app-club-reviews.js",
+      "hero-catalog.js",
+      "app-hero-builder.js",
       "app-profile-appearance.js"
     ],
     "media": [
