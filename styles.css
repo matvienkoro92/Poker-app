@@ -11063,3 +11063,26 @@ button.poker-copy-feedback--error,
 .summary-header{display:flex;justify-content:space-between;gap:12px}.summary-heading{font-size:32px;letter-spacing:-1px;margin:18px 0 6px;color:#f6edcf}.summary-subtitle{color:#b9beb9;margin:0 0 24px}.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:28px}.summary-card{padding:20px;border:1px solid #bec9b323;border-radius:20px;background:linear-gradient(145deg,#242d29,#171e1c);min-width:0;color:#ecefe6}.summary-card:first-child{border-color:#d4bd7355;background:linear-gradient(135deg,#3b3926,#232b23)}.summary-card h2{font-size:15px;color:#cbd2c7;margin:0 0 18px;font-weight:500}.summary-value{display:block;font-size:25px;line-height:1.25;letter-spacing:-.5px;color:#f5e9bf}.summary-value small{font-size:15px}.summary-card p{font-size:14px;line-height:1.5;margin:8px 0}.summary-muted{color:#aeb9b1!important;font-size:13px!important}.summary-link{background:none;border:0;color:#e5cd87;font:inherit;font-size:14px;cursor:pointer;padding:10px 0;text-align:left}.summary-link:focus-visible,.my-summary-entry:focus-visible{outline:2px solid #eed591;outline-offset:3px}.summary-event{padding:14px 0;border-top:1px solid #ffffff12}.summary-event strong{display:block;line-height:1.4;overflow-wrap:anywhere}.summary-kicker{display:block;text-transform:uppercase;letter-spacing:.08em;color:#aabaac;font-size:10px;margin-bottom:6px}.summary-event progress{width:100%;height:7px;accent-color:#d8bc6e;display:block;margin:12px 0}.summary-picks{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.summary-picks label{font-size:12px;border:1px solid #ffffff20;border-radius:12px;padding:8px;cursor:pointer}.summary-picks input{accent-color:#d8bc6e}.summary-event[hidden]{display:none}
 @media(max-width:540px){.summary-grid{grid-template-columns:1fr}.summary-heading{font-size:30px}.summary-card{padding:18px}.summary-value{font-size:24px}}
 a.summary-link{display:inline-block;text-decoration:none}
+
+/* Observe the news text independently of tall photos and expanded comments. */
+[data-home-news-read-id] { display: block; }
+
+/* Compact personal summary: quick actions side by side, details full width on phones. */
+[data-view="my-summary"] .summary-heading{font-size:26px;margin:10px 0 3px}
+[data-view="my-summary"] .summary-subtitle{font-size:14px;margin-bottom:12px}
+[data-view="my-summary"] .summary-header .summary-link{padding:6px 0}
+[data-view="my-summary"] .summary-grid{gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+[data-view="my-summary"] .summary-card{padding:12px 14px;border-radius:15px}
+[data-view="my-summary"] .summary-card h2{font-size:13px;margin:0 0 8px}
+[data-view="my-summary"] .summary-value{font-size:21px;line-height:1.2;overflow-wrap:anywhere}
+[data-view="my-summary"] .summary-card p{margin:5px 0;font-size:13px;line-height:1.35}
+[data-view="my-summary"] .summary-muted{font-size:12px!important}
+[data-view="my-summary"] .summary-link{font-size:13px;padding:7px 0 2px}
+[data-view="my-summary"] .summary-event{padding:8px 0}
+[data-view="my-summary"] .summary-event:first-child{border-top:0;padding-top:0}
+[data-view="my-summary"] .summary-kicker{margin-bottom:4px}
+@media(max-width:540px){
+ [data-view="my-summary"] .summary-card{grid-column:1/-1}
+ [data-view="my-summary"] .summary-card--spin,[data-view="my-summary"] .summary-card--bonus{grid-column:auto;align-self:stretch;padding:12px}
+ [data-view="my-summary"] .summary-card--spin .summary-value,[data-view="my-summary"] .summary-card--bonus .summary-value{font-size:19px}
+}

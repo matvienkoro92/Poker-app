@@ -54,8 +54,9 @@ function browserHarness() {
   let source = fs.readFileSync(require.resolve("../app-home-friend-news.js"), "utf8");
   source = source.replace('  if (document.readyState === "loading")', `  window.test = { recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, eventTextHtml,
     bumpLoad: function () { loadSequence++; }, bumpAuth: function () { friendAuthGeneration++; },
-    setState: function (id, rows, read) { friendNewsAccountId = id; events = rows; friendReadIds = read || {}; },
+    setState: function (id, rows, read) { friendNewsAccountId = id; friendTrackingSince = Date.parse("2026-09-01T00:00:00Z"); events = rows; friendReadIds = read || {}; },
     pending: function () { return friendReadPending; },
+    setTracking: function (value) { friendTrackingSince = value; },
     setMode: function (mode) { newsModalMode = mode; },
     setupLoad: function (roster) {
       loadFriendNewsEnvelope = function () { return Promise.resolve({ friends: roster }); };
@@ -101,7 +102,7 @@ test("ordinary prize from Waaar is included regardless of amount and preview ord
 test("dots do not clear by opening Profile; only visible friends-news cards count", () => {
   const h = browserHarness();
   const button = { classList: { toggle(_, value) { button.unread = value; } }, querySelector() { return { hidden: false }; } };
-  h.document.querySelectorAll = () => [button];
+  h.document.querySelectorAll = (selector) => selector === "#homeFriendNewsOpen" ? [button] : [];
   const event = { id: "news:1", at: "2026-09-09T12:00:00Z" };
   h.api.setState(self.userId, [event]);
   h.api.updateFriendNewsBadges();
@@ -153,4 +154,39 @@ test("fractional prize amounts are highlighted as one amount", () => {
   const html = h.api.eventTextHtml("Waaar: 9 768,75 ₽");
   assert.match(html, /amount">\+9 768,75 ₽<\/span>/);
   assert.doesNotMatch(html, /768,\+/);
+});
+
+
+test("seen friend notices stay cleared and news never lights the friends list", () => {
+  const storage = new Map(), nodes = new Map();
+  const node = id => {
+    if (!nodes.has(id)) nodes.set(id, { classes: new Map(), classList: { toggle(k, v) { nodes.get(id).classes.set(k, v); } }, setAttribute() {} });
+    return nodes.get(id);
+  };
+  const c = { window: { addEventListener() {}, pokerGetFriendNewsSummary: () => ({ unread: 1 }) },
+    document: { querySelector: () => node("nav"), getElementById: node, addEventListener() {} },
+    localStorage: { getItem: k => storage.get(k), setItem: (k,v) => storage.set(k,v) }, Date };
+  vm.createContext(c);
+  vm.runInContext(fs.readFileSync(require.resolve("../app-profile-friends.js"), "utf8"), c);
+  const data = { ok: true, friends: [{userId: "ID123456"}], incoming: [], notices: [{userId: "ID123456", status: "accepted"}] };
+  c.pokerUpdateFriendsUnreadFromData(data);
+  assert.equal(c.pokerReadFriendsUnreadFlag(), true);
+  c.pokerMarkFriendsSeen(data);
+  c.pokerUpdateFriendsUnreadFromData(data);
+  assert.equal(c.pokerReadFriendsUnreadFlag(), false);
+  assert.equal(node("profileFriendsBtn").classes.get("profile-friends__btn--unread"), false);
+  assert.equal(node("nav").classes.get("bottom-nav__item--friends-unread"), true);
+  c.window.pokerGetFriendNewsSummary = () => ({unread: 0});
+  c.pokerRefreshFriendsUnreadIndicators();
+  assert.equal(node("nav").classes.get("bottom-nav__item--friends-unread"), false);
+});
+
+test("historical feed does not become unread when tracking starts", () => {
+  const h = browserHarness();
+  h.api.setState(self.userId, [{id:"old",at:"2026-09-09T12:00:00Z"},{id:"new",at:"2026-09-10T11:00:00Z"}]);
+  h.api.setTracking(Date.parse("2026-09-10T10:00:00Z"));
+  assert.equal(h.window.pokerGetFriendNewsSummary().unread, 1);
+  h.api.setTracking(null);
+  assert.equal(h.window.pokerGetFriendNewsSummary().ready, false);
+  assert.equal(h.window.pokerGetFriendNewsSummary().unread, 0);
 });

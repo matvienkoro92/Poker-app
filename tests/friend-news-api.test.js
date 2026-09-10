@@ -25,7 +25,7 @@ test("feed and read receipts use authenticated canonical account, never client a
     "../app-user-blocks": { rejectBlockedAppUser: async () => false },
     "../api-auth": { setCors() {} }, "../redis": { isConfigured: () => true },
     "./friends": { resolveNewsAccountId: async () => "ID400800", readNewsFriends: async () => ({ self: {}, friends: [] }) },
-    "../friend-news": { buildSharedEvents: () => [], readState: async (id) => { assert.equal(id, "ID400800"); return ["read"]; }, markRead: async (id, ids) => writes.push({ id, ids }) },
+    "../friend-news": { buildSharedEvents: () => [], readTrackingSince: async () => "2026-09-10T10:00:00Z", readState: async (id) => { assert.equal(id, "ID400800"); return ["read"]; }, markRead: async (id, ids) => writes.push({ id, ids }) },
     "../friend-tournament-results.json": [],
   });
   const unauth = response(); await handler({ method: "POST", body: {} }, unauth); assert.equal(unauth.statusCode, 401);
@@ -85,4 +85,21 @@ test("cron cannot send notifications without its server secret", async () => {
   assert.equal(denied.statusCode, 403); assert.equal(calls, 0);
   const allowed = response(); await handler({ method: "GET", headers: { authorization: "Bearer test-secret" } }, allowed);
   assert.equal(allowed.statusCode, 200); assert.equal(calls, 1);
+});
+
+test("notification baseline is stable across devices and fails closed on storage errors", async () => {
+  const values = new Map(); let fail = false;
+  const mod = load("../lib/friend-news.js", {
+    crypto, "./chat-webpush-notify": {}, "./account-id": {},
+    "./redis": { pipeline: async commands => fail ? null : commands.map(([op,key,value]) => {
+      if(op === "SET" && !values.has(key)) values.set(key,value);
+      return {result:op === "GET" ? values.get(key) : null};
+    }) },
+  });
+  const first = await mod.readTrackingSince("ID400800");
+  assert.equal(await mod.readTrackingSince("ID400800"),first);
+  await mod.readTrackingSince("ID403173");
+  assert.equal(values.size,2);
+  fail=true;
+  await assert.rejects(mod.readTrackingSince("ID400800"),/unavailable/);
 });

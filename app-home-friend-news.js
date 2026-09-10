@@ -13,6 +13,7 @@
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var friendNewsAccountId = "";
   var friendAuthGeneration = 0;
+  var friendTrackingSince = null;
   var friendReadIds = {};
   var friendReadPending = {};
   var friendReadTimer = 0;
@@ -263,6 +264,7 @@
         friendReadPending = {};
       }
       friendNewsAccountId = data.accountId;
+      friendTrackingSince = Number.isFinite(Date.parse(data.trackingSince)) ? Date.parse(data.trackingSince) : null;
       (data.readIds || []).forEach(function (id) { friendReadIds[id] = true; });
       sharedFriendEvents = data.sharedEvents || [];
       envelopeValue = data;
@@ -274,18 +276,29 @@
     return request;
   }
 
+  function isUnreadFriendEvent(row) {
+    return friendTrackingSince !== null && row && row.id !== "empty" && isRecentEvent(row.at) &&
+      Date.parse(row.at) > friendTrackingSince && !friendReadIds[row.id] && !friendReadPending[row.id];
+  }
+
   window.pokerGetFriendNewsSummary = function () {
-    return { accountId: friendNewsAccountId, unread: friendNewsAccountId ? events.filter(function (row) {
-      return row && row.id !== "empty" && isRecentEvent(row.at) && !friendReadIds[row.id] && !friendReadPending[row.id];
+    return { accountId: friendNewsAccountId, ready: friendTrackingSince !== null, unread: friendNewsAccountId ? events.filter(function (row) {
+      return isUnreadFriendEvent(row);
     }).length : 0 };
   };
 
   function updateFriendNewsBadges() {
     if (typeof window.dispatchEvent === "function" && typeof CustomEvent === "function") window.dispatchEvent(new CustomEvent("poker-friend-news-updated"));
     var unread = !!friendNewsAccountId && events.some(function (row) {
-      return row && row.id !== "empty" && isRecentEvent(row.at) && !friendReadIds[row.id] && !friendReadPending[row.id];
+      return isUnreadFriendEvent(row);
     });
-    document.querySelectorAll('[data-view-target="profile"], #profileFriendsTabBtn, #profileFriendsBtn, #homeFriendNewsOpen').forEach(function (button) {
+    // The friends module owns the combined Profile/Friends indicators.
+    document.querySelectorAll('[data-view-target="profile"], #profileFriendsTabBtn, #profileFriendsBtn').forEach(function (button) {
+      button.classList.remove("has-unread-friend-news");
+      var oldDot = button.querySelector(".friend-news-unread-dot");
+      if (oldDot) oldDot.remove();
+    });
+    document.querySelectorAll("#homeFriendNewsOpen").forEach(function (button) {
       button.classList.toggle("has-unread-friend-news", unread);
       var dot = button.querySelector(".friend-news-unread-dot");
       if (!dot) {
@@ -312,8 +325,8 @@
       if (Object.keys(friendReadPending).length) friendReadTimer = setTimeout(flushFriendNewsRead, 500);
     }).catch(function () {
       if (account !== friendNewsAccountId) return;
-      ids.forEach(function (id) { delete friendReadPending[id]; });
-      updateFriendNewsBadges();
+      // Keep visible cards read locally and retry instead of relighting the dot.
+      friendReadTimer = setTimeout(flushFriendNewsRead, 10000);
     });
   }
 
@@ -2374,13 +2387,14 @@
       ' home-friend-news-event--' + esc(row.type) +
       (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
-      (ticker ? "" : ' data-home-news-read-id="' + esc(row.id) + '" data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') +
+      (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') +
       (shareToken ? ' data-home-news-share-token="' + esc(shareToken) + '"' : "") + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="true">' + visual + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
-      (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) : structuredText +
+      (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
+        '<span data-home-news-read-id="' + esc(row.id) + '">' + structuredText + "</span>" +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         "<small>" + esc(timeLabel) + "</small>" +
         feedbackParts.actions) +
@@ -4053,6 +4067,7 @@
       envelopeValue = null;
       envelopeAt = 0;
       friendNewsAccountId = "";
+      friendTrackingSince = null;
       friendReadIds = {};
       friendReadPending = {};
       sharedFriendEvents = [];

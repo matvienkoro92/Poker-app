@@ -115,10 +115,12 @@ function pokerWriteFriendsUnreadFlag(unread) {
 
 function pokerApplyFriendsUnreadIndicators(unread) {
   var active = !!unread;
+  var news = typeof window.pokerGetFriendNewsSummary === "function" && window.pokerGetFriendNewsSummary().unread > 0;
+  var combined = active || news;
   try {
     var profileNav = document.querySelector('.bottom-nav__item[data-view-target="profile"]');
     if (profileNav) {
-      profileNav.classList.toggle("bottom-nav__item--friends-unread", active);
+      profileNav.classList.toggle("bottom-nav__item--friends-unread", combined);
       profileNav.setAttribute("data-friends-unread", active ? "1" : "0");
     }
   } catch (eNavUnread) {}
@@ -127,7 +129,7 @@ function pokerApplyFriendsUnreadIndicators(unread) {
     if (panel) panel.classList.toggle("profile-friends--unread", active);
     var tab = document.getElementById("profileFriendsTabBtn");
     if (tab) {
-      tab.classList.toggle("profile-tabs__btn--friends-unread", active);
+      tab.classList.toggle("profile-tabs__btn--friends-unread", combined);
       tab.setAttribute("data-friends-unread", active ? "1" : "0");
     }
     var btn = document.getElementById("profileFriendsBtn");
@@ -146,16 +148,18 @@ function pokerUpdateFriendsUnreadFromData(data) {
   if (!data || !data.ok) return;
   var state = pokerFriendsDataState(data);
   var seen = pokerFriendsReadJson(POKER_FRIENDS_SEEN_KEY, null);
-  var explicitNewFriend = state.acceptedNoticeIds.length > 0;
+  var seenAccepted = seen && Array.isArray(seen.acceptedNoticeIds) ? seen.acceptedNoticeIds : [];
+  var explicitNewFriend = state.acceptedNoticeIds.some(function (id) { return seenAccepted.indexOf(id) === -1; });
   var explicitIncoming = state.incomingIds.length > 0 && pokerFriendsHasNewIncoming(state, seen);
   if (!seen && !explicitIncoming && !explicitNewFriend) {
     pokerFriendsWriteJson(POKER_FRIENDS_SEEN_KEY, {
       incomingIds: state.incomingIds,
       friendIds: state.friendIds,
+      acceptedNoticeIds: state.acceptedNoticeIds,
       seenAt: new Date().toISOString(),
     });
   }
-  if (explicitIncoming || explicitNewFriend) pokerWriteFriendsUnreadFlag(true);
+  pokerWriteFriendsUnreadFlag(explicitIncoming || explicitNewFriend);
   pokerRefreshFriendsUnreadIndicators();
 }
 
@@ -164,6 +168,7 @@ function pokerMarkFriendsSeen(data) {
   pokerFriendsWriteJson(POKER_FRIENDS_SEEN_KEY, {
     incomingIds: state.incomingIds,
     friendIds: state.friendIds,
+    acceptedNoticeIds: state.acceptedNoticeIds,
     seenAt: new Date().toISOString(),
   });
   pokerWriteFriendsUnreadFlag(false);
@@ -1926,3 +1931,5 @@ function initProfileFriends() {
 
 pokerRefreshFriendsUnreadIndicators();
 document.addEventListener("DOMContentLoaded", pokerRefreshFriendsUnreadIndicators);
+
+window.addEventListener("poker-friend-news-updated", pokerRefreshFriendsUnreadIndicators);
