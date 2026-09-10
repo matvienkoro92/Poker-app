@@ -13,7 +13,7 @@
   };
 
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать», чтобы начать";
-  var DAILY_POKER_INVITE_TEXT = "Клуб «Два туза» разыгрывает беккинг-билеты на турниры";
+  var DAILY_POKER_INVITE_TEXT = "В клубе Два туза можно крутить 1 раздачу в день бесплатно и выиграть билет на турнир от 300 ₽ до 10 000 ₽";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
   var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
   var DAILY_POKER_WINNERS_PREVIEW_LIMIT = 3;
@@ -886,6 +886,12 @@
     if (evt && typeof evt.stopPropagation === "function") evt.stopPropagation();
     if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var link = buildDailyPokerInviteLink();
+    if (link) {
+      var original = new URL(link, location.href);
+      var start = original.searchParams.get("startapp") || "daily_poker";
+      var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : location.origin;
+      link = new URL("/daily-poker-invite.html", base || location.origin).href + "?startapp=" + encodeURIComponent(start);
+    }
     if (!link) {
       showMessage("Не удалось подготовить ссылку. Попробуйте обновить приложение.", true);
       return;
@@ -963,6 +969,12 @@
     if (evt && typeof evt.stopPropagation === "function") evt.stopPropagation();
     var btn = evt && evt.currentTarget ? evt.currentTarget : $("dailyPokerCopyLinkBtn");
     var link = buildDailyPokerInviteLink();
+    if (link) {
+      var original = new URL(link, location.href);
+      var start = original.searchParams.get("startapp") || "daily_poker";
+      var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : location.origin;
+      link = new URL("/daily-poker-invite.html", base || location.origin).href + "?startapp=" + encodeURIComponent(start);
+    }
     if (!link) {
       showMessage("Не удалось подготовить ссылку. Попробуйте обновить приложение.", true);
       return;

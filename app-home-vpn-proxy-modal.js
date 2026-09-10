@@ -461,3 +461,17 @@ function initHomeVpnProxyModal(opts) {
 
   }
 }
+
+document.addEventListener("click", function (event) {
+  if (!event.target.closest("#vpnInviteFriendBtn")) return;
+  event.preventDefault();
+  var trial = document.querySelector("#vpnProxyModal .vpn-proxy-modal__trial-btn");
+  if (!trial) return;
+  var link = trial.href;
+  var text = "Впн за 100р в месяц";
+  var share = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text);
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(share);
+  else if (navigator.share) navigator.share({ title: "ВПН от клуба", text: text, url: link }).catch(function (error) { if (error.name !== "AbortError") window.open(share, "_blank", "noopener"); });
+  else window.open(share, "_blank", "noopener");
+});

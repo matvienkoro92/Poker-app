@@ -56,6 +56,7 @@ function scriptFilesFromJsManifest() {
 
 const baseFiles = [
   'index.html',
+  'daily-poker-invite.html',
   'styles.css',
   'css-manifest.json',
   'js-manifest.json',

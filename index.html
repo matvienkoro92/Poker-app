@@ -393,9 +393,9 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.021" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.061" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.063" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=6" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=27" />
+    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=28" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.028" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -514,7 +514,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=Pacifico&family=Permanent+Marker&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles-home-sng-reference.css?v=6" />
+    <link rel="stylesheet" href="./styles-home-sng-reference.css?v=7" />
 </head>
   <body data-view="home">
     <div id="appBootOverlay" class="app-boot-overlay" role="status" aria-live="polite" aria-busy="true">
@@ -997,6 +997,7 @@
           </div>
         </div>
         <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
+          <button type="button" class="home-tournament-share" id="homeTournamentShareBtn" aria-label="Поделиться турниром вечера"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 18-7-6 18-5-7-7-4Zm7 4 7-7"/></svg><span>Поделиться</span></button>
           <h2 class="home-tournament-section-title"><span class="home-ticket-brand"><span aria-hidden="true">♠</span> POKER21 <span class="home-ticket-brand__cross">×</span> ДВА ТУЗА</span><span class="home-ticket-session">Турнир вечера · 18:00 МСК</span></h2>
           <div class="home-ticket-aces" aria-hidden="true"><span>A<span>♠</span></span><span>A<span>♥</span></span></div>
         <button type="button" class="home-last-longer-dock" data-tournament-bet-open aria-label="Ласт-лонгер. Открыть ставки на себя в турнире">
@@ -1622,7 +1623,7 @@
           </div>
           <div class="view is-hidden" data-view="cooler-game" data-html-fragment="./html-fragments/cooler-game.html" data-html-fragment-view="cooler-game"></div>
           <div class="view" data-view="plasterer-game" data-html-fragment="./html-fragments/plasterer-game.html" data-html-fragment-view="plasterer-game"></div>
-          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html?v=3.607" data-html-fragment-view="raffles">
+          <div class="view" data-view="raffles" data-html-fragment="./html-fragments/raffles.html?v=4.031" data-html-fragment-view="raffles">
         <section class="raffles-shell-skeleton" aria-label="Розыгрыши загружаются" aria-busy="true">
           <div class="raffles-shell-skeleton__hero">
             <div class="raffles-shell-skeleton__back" aria-hidden="true"></div>
@@ -1924,15 +1925,15 @@
     <script defer src="./app-home-planner-runtime.js?v=4.002"></script>
     <script defer src="./app-home-planner.js?v=4.002"></script>
     <script defer src="./app-home-tasks.js?v=4.002"></script>
-    <script defer src="./app-tournament-day.js?v=4.028.2"></script>
+    <script defer src="./app-tournament-day.js?v=4.031"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=4.002"></script>
     <script defer src="./app-home-deeplinks.js?v=4.003"></script>
     <script defer src="./app-home-club-info-modals.js?v=4.002"></script>
-    <script defer src="./app-home-vpn-proxy-modal.js?v=4.002"></script>
+    <script defer src="./app-home-vpn-proxy-modal.js?v=4.003"></script>
     <script defer src="./app-home-gazette-comments.js?v=4.002"></script>
     <script defer src="./app-home-gazette-tasks.js?v=4.002"></script>
     <script defer src="./club-news-data.js?v=4.002"></script>
-    <script defer src="./app-home-friend-news.js?v=4.005.1.014"></script>
+    <script defer src="./app-home-friend-news.js?v=4.005.1.015"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-core.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./app-rating-summer-season.js?v=4.002"></script>
@@ -2028,7 +2029,7 @@
     <script defer src="./app-referrals-menu.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="learning" src="./app-games.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="daily-poker learning" src="./app-daily-poker.js?v=4.004"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="daily-poker learning" src="./app-daily-poker.js?v=4.005"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-bonuses" src="./app-admin-bonuses.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-subscribe.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-broadcast.js?v=4.004"></script>
@@ -2037,7 +2038,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-public.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-active-view.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-formatters.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js?v=4.002"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js?v=4.030"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-share.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons-modals.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js?v=4.002"></script>

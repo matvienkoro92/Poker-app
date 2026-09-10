@@ -2418,3 +2418,18 @@ function handleTournamentDayShare() {
     if (firstCell) firstCell.textContent = "СЕГОДНЯ";
   }
 })();
+
+document.addEventListener("click", function (event) {
+  if (!event.target.closest("#homeTournamentShareBtn")) return;
+  event.preventDefault(); event.stopPropagation();
+  function read(id) { var el = document.getElementById(id); return el ? el.textContent.trim() : ""; }
+  var name = read("tournamentDayHomeName");
+  if (!name || name === "Турнир дня") { window.alert("Данные турнира ещё загружаются. Попробуйте через несколько секунд."); return; }
+  var text = "Турнир вечера в клубе «Два туза»\n" + name + "\n" + read("tournamentDayHomeWeekTime") + "\nБай-ин: " + read("tournamentDayBuyin") + "\nПризовой фонд: " + read("tournamentDayGuarantee");
+  var url = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : location.origin;
+  var telegramUrl = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text);
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(telegramUrl);
+  else if (navigator.share) navigator.share({ title: name, text: text, url: url }).catch(function (error) { if (error.name !== "AbortError") window.open(telegramUrl, "_blank", "noopener"); });
+  else window.open(telegramUrl, "_blank", "noopener");
+});

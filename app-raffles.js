@@ -1864,30 +1864,22 @@ function initRaffles() {
 
   function handleRafflesActiveChooserCopy(copyBtn) {
     if (!copyBtn) return;
-    if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
     var id = String(copyBtn.getAttribute("data-raffle-active-copy-id") || "").trim();
     var link = String(copyBtn.getAttribute("data-raffle-active-copy-link") || "").trim() || activeRaffleSpecificShareLink(id);
-    var originalText = copyBtn.dataset.copyDefaultText || copyBtn.textContent || "Скопировать ссылку";
-    copyBtn.dataset.copyDefaultText = originalText;
-    copyRaffleActiveText(link).then(function (copied) {
-      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-      if (copied) {
-        copyBtn.classList.add("raffles-active-chooser__copy-btn--copied");
-        copyBtn.textContent = "Готово";
-        copyBtn.setAttribute("aria-label", "Ссылка на этот розыгрыш скопирована");
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_active_card_copy");
-        if (handleRafflesActiveChooserCopy.timer) clearTimeout(handleRafflesActiveChooserCopy.timer);
-        handleRafflesActiveChooserCopy.timer = setTimeout(function () {
-          copyBtn.classList.remove("raffles-active-chooser__copy-btn--copied");
-          copyBtn.textContent = copyBtn.dataset.copyDefaultText || "Скопировать ссылку";
-          copyBtn.setAttribute("aria-label", "Скопировать ссылку на этот розыгрыш");
-          handleRafflesActiveChooserCopy.timer = null;
-        }, 1800);
-        return;
-      }
-      if (tg && tg.showAlert) tg.showAlert("Ссылка: " + link);
-      else alert("Ссылка: " + link);
-    });
+    if (!link) return;
+    var text = "Приглашаю в розыгрыш клуба «Два туза»! Заходи и участвуй.";
+    var shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(text);
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && tg.openTelegramLink) {
+      tg.openTelegramLink(shareUrl);
+    } else if (navigator.share) {
+      navigator.share({ title: "Розыгрыш — клуб «Два туза»", text: text, url: link }).catch(function (error) {
+        if (error.name !== "AbortError") window.open(shareUrl, "_blank", "noopener");
+      });
+    } else {
+      window.open(shareUrl, "_blank", "noopener");
+    }
+    if (typeof recordShareButtonClick === "function") recordShareButtonClick("raffle_active_invite");
   }
 
   function activeRafflePrizePanelHtml(raffle, id, endDate, totalPrize, topPillsHtml) {
@@ -1911,7 +1903,7 @@ function initRaffles() {
       escapeHtml(id) +
       '" data-raffle-active-copy-link="' +
       escapeHtml(shareLink) +
-      '" aria-label="Скопировать ссылку на этот розыгрыш">Скопировать ссылку</button>' +
+      '" aria-label="Позвать друга в этот розыгрыш">Позвать друга</button>' +
       "</span>"
     );
   }

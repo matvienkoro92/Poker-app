@@ -2005,6 +2005,13 @@
   }
   window.pokerShowProfileReactionUsers = showReactionUsers;
 
+  document.addEventListener("contextmenu", function (event) {
+    if (document.querySelector(".profile-reaction-picker")) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
   function openReactionPicker(onSelect) {
     var old = document.querySelector(".profile-reaction-picker");
     if (old) old.remove();
