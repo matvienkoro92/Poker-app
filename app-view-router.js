@@ -1650,6 +1650,18 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
   document.documentElement.classList.toggle("app-view-my-summary-html-scroll", viewName === "my-summary");
+  if (viewName === "my-summary") {
+    requestAnimationFrame(function () {
+      if (document.body.getAttribute("data-view") !== "my-summary") return;
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      var shell = document.querySelector("#app .card");
+      var content = document.querySelector("#app .card__content");
+      if (shell) shell.scrollTop = 0;
+      if (content) content.scrollTop = 0;
+    });
+  }
+
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
   document.documentElement.classList.toggle("app-view-daily-poker-html-scroll", viewName === "daily-poker");

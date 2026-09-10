@@ -2023,3 +2023,36 @@ html.app-view-hall-html-scroll #app.app .card .card__content > .view--active[dat
   padding-right: 0 !important;
   box-sizing: border-box !important;
 }
+
+/* Summary uses one viewport-sized shell and one internal scrollport. */
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] {
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app {
+  height: calc(100vh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app > .card {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card .card__content {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-bottom: 24px !important;
+}
