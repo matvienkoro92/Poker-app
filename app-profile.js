@@ -1296,7 +1296,7 @@ async function profileLoadPrizeDetails() {
       if (place >= 1 && place <= 3) { podium[place - 1].count++; podium[place - 1].reward += reward; }
     });
     var money = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
-    var html = '<span class="profile-prize-best">Топ призовых <b>' + money(top) + ' ₽</b></span><span class="profile-prize-podium">' + podium.map(function (r, i) {
+    var html = '<span class="profile-prize-best">Топ призовых за 1 турнир <b>' + money(top) + ' ₽</b></span><span class="profile-prize-podium">' + podium.map(function (r, i) {
       return '<span class="profile-prize-place"><b>' + (i + 1) + ' место</b><span><strong>' + r.count + '</strong><small>раз</small></span><span><strong>' + money(r.reward) + '</strong><small>призовые, ₽</small></span></span>';
     }).join('') + '</span>';
     document.querySelectorAll('[data-profile-prize-details]').forEach(function (el) { el.innerHTML = html; });
@@ -1306,19 +1306,117 @@ async function profileLoadPrizeDetails() {
   }
 }
 
+async function shareProfilePrizeCard(button) {
+  var card = button.closest(".profile-rating-actions__prizes");
+  if (!card || button.disabled) return;
+  button.disabled = true;
+  var imageUrl = "";
+  try {
+    await document.fonts.ready;
+    var data = Object.assign({}, profilePublicShowcaseData || {}, pokerProfileUserInfoCache || {});
+    var nick = profileAchievementRatingNickFromData(data) || profilePublicCardDisplayName();
+    var playerId = data.p21Id || data.poker21Id || data.pokerPlusUserId || window.__pokerPlusUserId;
+    if (!playerId) throw new Error("Poker21 ID не загружен. Обновите профиль и попробуйте ещё раз.");
+    var width = Math.ceil(card.getBoundingClientRect().width);
+    var height = Math.ceil(card.getBoundingClientRect().height);
+    var clone = card.cloneNode(true);
+    var originals = [card].concat(Array.from(card.querySelectorAll("*")));
+    var copies = [clone].concat(Array.from(clone.querySelectorAll("*")));
+    originals.forEach(function (original, i) {
+      var style = getComputedStyle(original);
+      for (var j = 0; j < style.length; j++) copies[i].style.setProperty(style[j], style.getPropertyValue(style[j]));
+      copies[i].style.animation = "none";
+      copies[i].style.transition = "none";
+    });
+    clone.querySelector(".profile-prize-actions").remove();
+    clone.style.width = width + "px";
+    clone.style.height = height + "px";
+    clone.style.margin = "0";
+    clone.style.position = "relative";
+    clone.style.transform = "none";
+    // Pseudo-elements are not serialized into SVG: preserve the trophy explicitly.
+    var trophy = document.createElement("span");
+    var trophyStyle = getComputedStyle(card, "::after");
+    for (var k = 0; k < trophyStyle.length; k++) trophy.style.setProperty(trophyStyle[k], trophyStyle.getPropertyValue(trophyStyle[k]));
+    trophy.textContent = "🏆";
+    clone.appendChild(trophy);
+    var headerHeight = Math.max(64, Math.ceil(width * .1));
+    var wrapper = document.createElement("div");
+    wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+    wrapper.style.cssText = "background:#10151d;color:#ffe3a0;width:" + width + "px;height:" + (height + headerHeight) + "px";
+    var heading = document.createElement("div");
+    heading.style.cssText = "box-sizing:border-box;height:" + headerHeight + "px;padding:10px 16px;font:700 " + Math.max(14, width * .035) + "px/1.3 Arial,sans-serif;overflow-wrap:anywhere";
+    heading.textContent = nick + " · Poker21 ID: " + playerId;
+    wrapper.appendChild(heading);
+    wrapper.appendChild(clone);
+    async function inlineFont(url) {
+      var response = await fetch(url);
+      if (!response.ok) throw new Error("Не удалось загрузить шрифт карточки.");
+      var blob = await response.blob();
+      return new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(blob); });
+    }
+    var fontCss = "";
+    async function fonts(rules, base) {
+      for (var rule of Array.from(rules || [])) {
+        if (rule.type === 3) { try { await fonts(rule.styleSheet.cssRules, rule.href); } catch (_) {} }
+        if (rule.type !== 5) continue;
+        var css = rule.cssText;
+        for (var match of Array.from(css.matchAll(/url\(["']?([^"')]+)["']?\)/g))) css = css.replace(match[0], 'url("' + await inlineFont(new URL(match[1], base || location.href)) + '")');
+        fontCss += css;
+      }
+    }
+    for (var sheet of Array.from(document.styleSheets)) { try { await fonts(sheet.cssRules, sheet.href); } catch (_) {} }
+    var fontStyle = document.createElement("style"); fontStyle.textContent = fontCss; wrapper.prepend(fontStyle);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + (height + headerHeight) + '"><foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(wrapper) + '</foreignObject></svg>';
+    var rendered = new Image();
+    await new Promise(function (resolve, reject) { rendered.onload = resolve; rendered.onerror = reject; rendered.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); });
+    var canvas = document.createElement("canvas"); canvas.width = width * 2; canvas.height = (height + headerHeight) * 2;
+    var ctx = canvas.getContext("2d"); ctx.scale(2, 2); ctx.drawImage(rendered, 0, 0);
+    var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, "image/png"); });
+    if (!blob) throw new Error("Не удалось подготовить картинку.");
+    imageUrl = URL.createObjectURL(blob);
+    var dialog = document.createElement("dialog"); dialog.className = "news-share-preview";
+    dialog.style.cssText = "max-width:700px;width:90vw;background:#111821;color:#fff0cf;border:1px solid #efb85b;border-radius:18px";
+    dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть">×</button><h3>Поделиться призовыми</h3><img style="width:100%" alt="Карточка призовых"><button type="button" data-send>Поделиться</button><p role="status"></p>';
+    dialog.querySelector("img").src = imageUrl;
+    var sharing = false;
+    dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
+    dialog.onclose = function () { if (!sharing) { URL.revokeObjectURL(imageUrl); dialog.remove(); } };
+    dialog.querySelector("[data-send]").onclick = async function () {
+      if (sharing) return;
+      try {
+        var file = new File([blob], "poker21-prizes.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          sharing = true; dialog.close();
+          try { await navigator.share({ files: [file] }); }
+          finally { await new Promise(function (resolve) { setTimeout(resolve, 0); }); dialog.showModal(); sharing = false; }
+        } else {
+          var link = document.createElement("a"); link.href = imageUrl; link.download = "poker21-prizes.png"; dialog.appendChild(link); link.click(); link.remove();
+          dialog.querySelector("p").textContent = "Прикрепите скачанную картинку в нужный чат.";
+        }
+      } catch (error) { if (error.name !== "AbortError") dialog.querySelector("p").textContent = "Не удалось поделиться картинкой. Попробуйте ещё раз."; }
+    };
+    document.body.appendChild(dialog); dialog.showModal();
+  } catch (error) {
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+    window.alert(error.message || "Не удалось подготовить картинку.");
+  } finally { button.disabled = false; }
+}
+
 function renderProfileRatingTotalCards(text) {
   setTimeout(profileLoadPrizeDetails, 0);
   var safeText = profileEscapeHtml(String(text || "").trim());
   return (
     '<div class="chat-user-modal__rating-tabs profile-rating-actions" style="grid-template-columns:minmax(0,1fr)">' +
-      '<button type="button" class="chat-user-modal__rating-tab profile-rating-actions__prizes" data-profile-rating-total="1" aria-label="Призовые в турнирах ' +
+      '<div class="chat-user-modal__rating-tab profile-rating-actions__prizes" aria-label="Призовые в турнирах ' +
         safeText + '. Подробнее">' +
         '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' +
           safeText +
         '</span></span>' +
         '<span class="profile-prize-details" data-profile-prize-details>Загружаем статистику мест…</span>' +
-        '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
-      '</button>' +
+        '<span class="profile-prize-actions"><button type="button" class="chat-user-modal__rating-tab-more" data-profile-rating-total="1">Подробнее &gt;&gt;</button>' +
+        '<button type="button" class="profile-prize-share" data-profile-prize-share aria-label="Поделиться карточкой" title="Поделиться"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M5 13v7h14v-7"/></svg></button></span>' +
+      '</div>' +
     '</div>'
   );
 }
@@ -1816,6 +1914,12 @@ function initProfileAchievementsShowcase() {
       var monthStoryBtn = event && event.target ? event.target.closest("[data-profile-month-story]") : null;
       if (monthStoryBtn) {
         openProfileMonthStory();
+        return;
+      }
+      var sharePrizes = event && event.target ? event.target.closest("[data-profile-prize-share]") : null;
+      if (sharePrizes) {
+        event.preventDefault();
+        shareProfilePrizeCard(sharePrizes);
         return;
       }
       var totalBtn = event && event.target ? event.target.closest("[data-profile-rating-total]") : null;

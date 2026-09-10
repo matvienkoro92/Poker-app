@@ -5468,3 +5468,16 @@ body.profile-month-story-open { overflow: hidden; }
   margin:0 !important;
 }
 .view[data-view="profile"] .profile-rating-actions__prizes > .chat-user-modal__rating-tab-more { align-self:flex-start; }
+.profile-prize-best { justify-content:flex-start; flex-wrap:wrap; gap:4px 10px; }
+.profile-prize-best b { white-space:nowrap; }
+.profile-prize-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; }
+.view[data-view="profile"] .profile-rating-actions__prizes .profile-prize-actions .chat-user-modal__rating-tab-more {
+  position:static; transform:none; width:auto; margin:0; padding:0; border:0; background:none;
+  box-shadow:none; text-align:left; color:#ffd15c; cursor:pointer;
+}
+.profile-prize-actions .chat-user-modal__rating-tab-more::before,
+.profile-prize-actions .chat-user-modal__rating-tab-more::after { display:none !important; }
+.profile-prize-share { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; padding:0; border:1px solid #bc923e; border-radius:8px; background:#141b23; color:#ffdc83; cursor:pointer; }
+.profile-prize-share:disabled { opacity:.5; cursor:wait; }
+.view[data-view="profile"] .profile-rating-actions__prizes { font-weight:800; }
+.profile-prize-place { text-align:center; }
