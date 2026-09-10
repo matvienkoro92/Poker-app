@@ -723,7 +723,9 @@ html.app-view-daily-poker-html-scroll,
 html:has(body[data-view="profile"]),
 html.app-view-profile-html-scroll,
 html:has(body[data-view="video-lessons"]),
-html.app-view-video-lessons-html-scroll {
+html:has(body[data-view="my-summary"]),
+html.app-view-video-lessons-html-scroll,
+html.app-view-my-summary-html-scroll {
   overflow: hidden !important;
   height: 100vh !important;
   height: 100dvh !important;
@@ -767,9 +769,13 @@ html:has(body[data-view="profile"]) body.app-view-long-scroll,
 html.app-view-profile-html-scroll body,
 html.app-view-profile-html-scroll body.app-view-long-scroll,
 html:has(body[data-view="video-lessons"]) body,
+html:has(body[data-view="my-summary"]) body,
 html:has(body[data-view="video-lessons"]) body.app-view-long-scroll,
+html:has(body[data-view="my-summary"]) body.app-view-long-scroll,
 html.app-view-video-lessons-html-scroll body,
-html.app-view-video-lessons-html-scroll body.app-view-long-scroll {
+html.app-view-my-summary-html-scroll body,
+html.app-view-video-lessons-html-scroll body.app-view-long-scroll,
+html.app-view-my-summary-html-scroll body.app-view-long-scroll {
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -788,7 +794,8 @@ body[data-view="raffles"] #app.app,
 body[data-view="equilator"] #app.app,
 body[data-view="daily-poker"] #app.app,
 body[data-view="profile"] #app.app,
-body[data-view="video-lessons"] #app.app {
+body[data-view="video-lessons"] #app.app,
+body[data-view="my-summary"] #app.app {
   flex: 1 1 0 !important;
   align-self: stretch !important;
   min-height: 0 !important;
@@ -810,7 +817,8 @@ body[data-view="raffles"] #app.app .card,
 body[data-view="equilator"] #app.app .card,
 body[data-view="daily-poker"] #app.app .card,
 body[data-view="profile"] #app.app .card,
-body[data-view="video-lessons"] #app.app .card {
+body[data-view="video-lessons"] #app.app .card,
+body[data-view="my-summary"] #app.app .card {
   flex: 1 1 0 !important;
   flex-shrink: 1 !important;
   width: 100% !important;
@@ -827,7 +835,8 @@ body[data-view="raffles"] #app.app .card {
   border-color: transparent !important;
   box-shadow: none !important;
 }
-body[data-view="video-lessons"] #app.app .card .card__content {
+body[data-view="video-lessons"] #app.app .card .card__content,
+body[data-view="my-summary"] #app.app .card .card__content {
   flex: 1 1 0 !important;
   min-height: 0 !important;
   min-width: 0 !important;
@@ -880,7 +889,8 @@ body[data-view="raffles"] #app.app .card .card__content > .view--active[data-vie
 body[data-view="equilator"] #app.app .card .card__content > .view--active[data-view="equilator"],
 body[data-view="daily-poker"] #app.app .card .card__content > .view--active[data-view="daily-poker"],
 body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
-body[data-view="video-lessons"] #app.app .card .card__content > .view--active[data-view="video-lessons"] {
+body[data-view="video-lessons"] #app.app .card .card__content > .view--active[data-view="video-lessons"],
+body[data-view="my-summary"] #app.app .card .card__content > .view--active[data-view="my-summary"] {
   flex: 0 0 auto !important;
   min-height: 0 !important;
   height: auto !important;
@@ -907,7 +917,9 @@ html.app-view-daily-poker-html-scroll,
 html:has(body[data-view="profile"]),
 html.app-view-profile-html-scroll,
 html:has(body[data-view="video-lessons"]),
+html:has(body[data-view="my-summary"]),
 html.app-view-video-lessons-html-scroll,
+html.app-view-my-summary-html-scroll,
 html:has(body[data-view="download"]) body,
 html.app-view-download-html-scroll body,
 html:has(body[data-view="home"]) body,
@@ -927,7 +939,9 @@ html.app-view-daily-poker-html-scroll body,
 html:has(body[data-view="profile"]) body,
 html.app-view-profile-html-scroll body,
 html:has(body[data-view="video-lessons"]) body,
-html.app-view-video-lessons-html-scroll body {
+html:has(body[data-view="my-summary"]) body,
+html.app-view-video-lessons-html-scroll body,
+html.app-view-my-summary-html-scroll body {
   overscroll-behavior-y: none !important;
 }
 
@@ -940,7 +954,8 @@ body[data-view="raffles"] #app.app .card .card__content,
 body[data-view="equilator"] #app.app .card .card__content,
 body[data-view="daily-poker"] #app.app .card .card__content,
 body[data-view="profile"] #app.app .card .card__content,
-body[data-view="video-lessons"] #app.app .card .card__content {
+body[data-view="video-lessons"] #app.app .card .card__content,
+body[data-view="my-summary"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
 }
 

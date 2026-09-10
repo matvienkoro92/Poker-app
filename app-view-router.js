@@ -557,6 +557,7 @@ function pokerSyncViewHtmlScrollClasses(viewName) {
   root.classList.toggle("app-view-summer-rating-html-scroll", viewName === "summer-rating");
   root.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   root.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  root.classList.toggle("app-view-my-summary-html-scroll", viewName === "my-summary");
   root.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   root.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
   root.classList.toggle("app-view-transfers-html-scroll", viewName === "transfers");
@@ -589,6 +590,7 @@ function pokerSyncViewHtmlScrollClasses(viewName) {
   document.documentElement.classList.toggle("app-view-summer-rating-html-scroll", viewName === "summer-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  document.documentElement.classList.toggle("app-view-my-summary-html-scroll", viewName === "my-summary");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
   document.documentElement.classList.toggle("app-view-transfers-html-scroll", viewName === "transfers");
@@ -1647,6 +1649,7 @@ function setView(viewName, navOpts) {
   document.documentElement.classList.toggle("app-view-summer-rating-html-scroll", viewName === "summer-rating");
   document.documentElement.classList.toggle("app-view-profile-html-scroll", viewName === "profile");
   document.documentElement.classList.toggle("app-view-video-lessons-html-scroll", viewName === "video-lessons");
+  document.documentElement.classList.toggle("app-view-my-summary-html-scroll", viewName === "my-summary");
   document.documentElement.classList.toggle("app-view-raffles-html-scroll", viewName === "raffles");
   document.documentElement.classList.toggle("app-view-equilator-html-scroll", viewName === "equilator");
   document.documentElement.classList.toggle("app-view-daily-poker-html-scroll", viewName === "daily-poker");
