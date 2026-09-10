@@ -12,6 +12,7 @@
   var GENERATED_EVENTS_KEY = "poker_home_friend_generated_events_v6";
   var FRIEND_IDS_KEY = "poker_home_friend_ids_v3";
   var MAX_EVENTS = 50;
+  var MAX_FRIEND_EVENTS = 500;
   var HOME_NEWS_REACTIONS = ["❤️", "🔥", "👍", "👏", "😂", "😮", "😢", "😡"];
   var RECENT_EVENT_MS = 60 * 24 * 60 * 60 * 1000;
   var ROTATE_MS = 4600;
@@ -109,7 +110,7 @@
       return mergeRelatedPlayerEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && !isUndatedTournamentSnapshotEvent(row) &&
           (row.type === "birthday" || isRecentEvent(row.at));
-      })).slice(0, MAX_EVENTS);
+      })).slice(0, MAX_FRIEND_EVENTS);
     } catch (error) {
       return [];
     }
@@ -118,7 +119,7 @@
   function writeRenderedEventsCache(rows) {
     try {
       sessionStorage.setItem(RENDERED_EVENTS_CACHE_KEY, JSON.stringify(
-        (Array.isArray(rows) ? rows : []).filter(function (row) { return row && row.id !== "empty"; }).slice(0, MAX_EVENTS)
+        (Array.isArray(rows) ? rows : []).filter(function (row) { return row && row.id !== "empty"; }).slice(0, MAX_FRIEND_EVENTS)
       ));
     } catch (error) {}
   }
@@ -3330,6 +3331,8 @@
     var request = friendsPromise.then(function (friendsPayload) {
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
+      var publicLevelsPromise = cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
+        .catch(function () { return { levelRows: [] }; });
       return Promise.all([
         Promise.resolve(friendsPayload),
         cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" })
@@ -3338,11 +3341,12 @@
           .catch(function () { return { rows: [] }; }),
         cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
-        tournamentSnapshotsReady(friends),
+        publicLevelsPromise.then(function (payload) {
+          return tournamentSnapshotsReady(enrichFriendsWithPoker21(friends, payload.levelRows || []));
+        }),
         cachedFetchJson(base + "/api/raffles" + suffix + joiner + "mode=achievements", "raffles:" + suffix, 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { raffles: [] }; }),
-        cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
-          .catch(function () { return { levelRows: [] }; }),
+        publicLevelsPromise,
         fetch(base + "/api/profile-wall", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -3414,7 +3418,7 @@
         })
         .filter(function (row, index, rows) {
           return rows.findIndex(function (candidate) { return candidate.id === row.id; }) === index;
-        }).slice(0, MAX_EVENTS);
+        }).slice(0, MAX_FRIEND_EVENTS);
       var previousEvents = events.filter(function (row) { return row && row.id !== "empty" && isRecentEvent(row.at); });
       events = nextEvents.length ? nextEvents : previousEvents;
       friendNewsLoading = false;

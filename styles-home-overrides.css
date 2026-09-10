@@ -8549,3 +8549,15 @@ body .home-friend-news-modal .home-news-comment-input-wrap input { display: bloc
 @media(max-width:420px) { body .home-friend-news-modal .chat-user-modal__news-comment-form > button[type="submit"] { font-size: 12px; padding: 10px 8px; } }
 .home-friend-news-modal [data-home-news-event-id] img,
 .profile-reaction-picker { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* Clip the character at the lower card edge while retaining the raised head. */
+.home-daily-deal-hero > picture {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  clip-path: inset(-200px 0 0 0 round 0 0 22px 22px);
+  pointer-events: none;
+}
+.daily-poker__win-share { display:block; margin:10px auto 0; padding:9px 18px; border:1px solid #ffd67d; border-radius:12px; background:linear-gradient(135deg,#ffe394,#eaa62b); color:#211606; font:700 14px/1.2 Arial,sans-serif; cursor:pointer; }
+.daily-poker__win-share:disabled { opacity:.65; cursor:wait; }

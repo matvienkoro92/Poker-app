@@ -730,6 +730,61 @@
     }
   }
 
+  function addWinShareButton(result) {
+    if (!hasDailyPokerWin(result)) return;
+    var host = $("dailyPokerResult");
+    if (!host) return;
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "daily-poker__win-share";
+    button.textContent = "Готовим картинку…";
+    button.disabled = true;
+    host.appendChild(button);
+    var text = "Мой выигрыш в раздаче дня клуба «Два туза»: " + formatResultLine(result);
+    var link = new URL("/daily-poker-invite.html", typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() || location.origin : location.origin);
+    link.searchParams.set("startapp", "daily_poker");
+    var file = null;
+    var image = new Image();
+    image.onload = function () {
+      var canvas = document.createElement("canvas");
+      canvas.width = 1200; canvas.height = 1400;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0, 1200, 1200);
+      ctx.fillStyle = "#101820"; ctx.fillRect(0, 1200, 1200, 200);
+      ctx.fillStyle = "#ffda7d"; ctx.font = "bold 36px Arial";
+      var words = text.split(/\s+/), line = "", y = 1250;
+      words.forEach(function (word) {
+        if (ctx.measureText(line + word).width > 1100 && line) { ctx.fillText(line, 50, y); line = ""; y += 44; }
+        line += word + " ";
+      });
+      ctx.fillText(line, 50, y);
+      canvas.toBlob(function (blob) {
+        if (blob) file = new File([blob], "daily-poker-win.png", { type: "image/png" });
+        button.disabled = false; button.textContent = "Поделиться";
+      }, "image/png");
+    };
+    image.onerror = function () { button.disabled = false; button.textContent = "Поделиться"; };
+    image.src = "./assets/daily-poker-invite-board-v1.png";
+    button.onclick = function () {
+      var payload = { title: "Мой выигрыш — Два туза", text: text, url: link.href };
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) payload.files = [file];
+      function fallback() {
+        if (file) {
+          var download = document.createElement("a");
+          var objectUrl = URL.createObjectURL(file);
+          download.href = objectUrl; download.download = file.name; download.click();
+          setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 60000);
+        }
+        if (typeof pokerCopyTextToClipboard === "function") pokerCopyTextToClipboard(text + "\n" + link.href).then(function (ok) {
+          button.textContent = ok ? "Текст и ссылка скопированы" : "Поделиться";
+        });
+      }
+      if (typeof navigator.share === "function" && (!file || payload.files)) {
+        navigator.share(payload).catch(function (error) { if (!error || error.name !== "AbortError") fallback(); });
+      } else fallback();
+    };
+  }
+
   function finishManualDeal() {
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
@@ -738,6 +793,7 @@
     if (board) board.innerHTML = boardHtml(result.boardCards || [], 5, [4]);
     dailyPokerState.revealing = false;
     setResultText(formatResultLine(result), false);
+    addWinShareButton(result);
     resetManualDeal();
     syncStatus(result);
     loadWinners({ force: true });

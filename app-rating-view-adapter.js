@@ -1850,19 +1850,18 @@ function applyWinterRatingPlayerModalFilterAndRender(modal) {
       if (byMonth[monthKey] && byMonth[monthKey].sum) {
         var p = monthKey.split(".");
         var monthLabel = (monthNames[p[0]] || p[0]) + " " + p[1];
-        monthRows += "<tr><td class=\"winter-rating-player-modal__summary-label\">" + escapeHtmlRating(monthLabel) + "</td><td class=\"winter-rating-player-modal__summary-value\">" + formatRewardRound(byMonth[monthKey].sum) + "</td></tr>";
+        monthRows += '<div class="player-month"><span>' + escapeHtmlRating(monthLabel) + '</span><strong>' + formatRewardRound(byMonth[monthKey].sum) + '</strong></div>';
       }
     });
     modal._winterPlayerModalTotalStr = totalStr;
     if (summaryBlock) {
-      summaryBlock.innerHTML = "<table class=\"winter-rating-player-modal__summary-table\"><tbody>" +
-        "<tr class=\"winter-rating-player-modal__summary-total-row\"><td class=\"winter-rating-player-modal__summary-label\">Общие призовые</td><td class=\"winter-rating-player-modal__summary-value\">" + totalStr + "</td></tr>" +
-        "<tr><td class=\"winter-rating-player-modal__summary-label\">Топ призовых</td><td class=\"winter-rating-player-modal__summary-value\">" + topRewardStr + "</td></tr>" +
-        "<tr><td class=\"winter-rating-player-modal__summary-label\">Первых мест</td><td class=\"winter-rating-player-modal__summary-value\">" + firsts + " (призовые — " + firstsRewardStr + ")</td></tr>" +
-        "<tr><td class=\"winter-rating-player-modal__summary-label\">Вторых мест</td><td class=\"winter-rating-player-modal__summary-value\">" + seconds + " (призовые — " + secondsRewardStr + ")</td></tr>" +
-        "<tr><td class=\"winter-rating-player-modal__summary-label\">Третьих мест</td><td class=\"winter-rating-player-modal__summary-value\">" + thirds + " (призовые — " + thirdsRewardStr + ")</td></tr>" +
-        "</tbody></table>" +
-        (monthRows ? "<table class=\"winter-rating-player-modal__summary-table winter-rating-player-modal__monthly-table\"><tbody><tr class=\"winter-rating-player-modal__summary-months-sep\"><td colspan=\"2\">Призовые по месяцам</td></tr>" + monthRows + "</tbody></table>" : "");
+      summaryBlock.innerHTML = '<div class="player-prize-hero"><span>Общие призовые</span><strong>' + totalStr +
+        '</strong><div class="player-prize-best"><span>Топ призовых</span><b>' + topRewardStr + '</b></div></div>' +
+        '<div class="player-podium">' + [[firsts, firstsRewardStr], [seconds, secondsRewardStr], [thirds, thirdsRewardStr]].map(function (result, index) {
+          return '<section class="player-podium-card player-podium-card--' + (index + 1) + '"><header><span class="player-trophy" aria-hidden="true">🏆</span><b>' + (index + 1) +
+            ' место</b></header><div class="player-podium-values"><div><strong>' + result[0] + '</strong><small>раз</small></div><div><strong>' + result[1] +
+            '</strong><small>призовые</small></div></div></section>';
+        }).join('') + '</div>' + (monthRows ? '<section class="player-months"><h4>Призовые по месяцам</h4><div class="player-months-grid">' + monthRows + '</div></section>' : '');
       summaryBlock.style.display = "";
     }
   } else {
@@ -1987,6 +1986,18 @@ function closeWinterRatingPlayerModal() {
   }
 }
 
+function buildRatingPlayerShareLink(startParam) {
+  if (typeof buildMiniAppStartLink === "function") {
+    var existing = buildMiniAppStartLink(startParam);
+    if (existing) return existing;
+  }
+  var start = typeof pokerBuildReferralStartParam === "function" ? pokerBuildReferralStartParam(startParam) : startParam;
+  var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
+  var url = new URL(base || "/", window.location.origin);
+  url.searchParams.set("startapp", start);
+  return url.href;
+}
+
 function initWinterRatingPlayerModal() {
   var modal = document.getElementById("winterRatingPlayerModal");
   if (!modal || modal.getAttribute("data-inited") === "1") return;
@@ -2054,7 +2065,7 @@ function initWinterRatingPlayerModal() {
       var seasonKey = modal._winterPlayerModalSeasonKey || getWinterRatingPlayerSeasonKey();
       var startApp = getWinterRatingPlayerSeasonStartAppPrefix("player", seasonKey);
       var link =
-        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
+        buildRatingPlayerShareLink(startApp + nick);
       pokerCopyTextToClipboard(link).then(function (copied) {
         var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (copied) {
@@ -2077,27 +2088,24 @@ function initWinterRatingPlayerModal() {
       var seasonKey = modal._winterPlayerModalSeasonKey || getWinterRatingPlayerSeasonKey();
       var startApp = getWinterRatingPlayerSeasonStartAppPrefix("player", seasonKey);
       var link =
-        typeof buildMiniAppStartLink === "function" ? buildMiniAppStartLink(startApp + nick) : "";
-      if (!link) return;
-      if (isTelegramWebApp() && typeof pokerOpenTelegramShareUrlOnly === "function" && pokerOpenTelegramShareUrlOnly(link)) {
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
-        return;
-      }
+        buildRatingPlayerShareLink(startApp + nick);
       var totalStr = modal._winterPlayerModalTotalStr || "0";
-      var shareText = "Игрок " + nick + " уже выиграл " + totalStr + ". Посмотрите отчет по турнирам.";
-      var shareUrl =
-        typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareText) : "";
-      pokerTryPwaWebShare({ text: shareText + "\n" + link, url: link }).then(function (pwaOk) {
-        if (pwaOk) {
-          if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
-          return;
-        }
-        var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg && tg.openTelegramLink) tg.openTelegramLink(shareUrl);
-        else if (tg && tg.openLink) tg.openLink(shareUrl);
-        else window.open(shareUrl, "_blank");
-        if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
-      });
+      var shareText = "Игрок " + nick + " уже выиграл " + totalStr + " ₽. Клуб «Два туза». Посмотрите отчёт по турнирам.";
+      var shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(shareText);
+      var tg = window.Telegram && window.Telegram.WebApp;
+      function openTelegramShare() {
+        window.open(shareUrl, "_blank", "noopener,noreferrer");
+      }
+      if (tg && typeof tg.openTelegramLink === "function") {
+        tg.openTelegramLink(shareUrl);
+      } else if (typeof navigator.share === "function") {
+        navigator.share({ title: nick + " — Клуб Два туза", text: shareText, url: link }).catch(function (error) {
+          if (!error || error.name !== "AbortError") openTelegramShare();
+        });
+      } else {
+        openTelegramShare();
+      }
+      if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
     });
   }
 }

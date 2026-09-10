@@ -2427,9 +2427,33 @@ document.addEventListener("click", function (event) {
   if (!name || name === "Турнир дня") { window.alert("Данные турнира ещё загружаются. Попробуйте через несколько секунд."); return; }
   var text = "Турнир вечера в клубе «Два туза»\n" + name + "\n" + read("tournamentDayHomeWeekTime") + "\nБай-ин: " + read("tournamentDayBuyin") + "\nПризовой фонд: " + read("tournamentDayGuarantee");
   var url = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : location.origin;
-  var telegramUrl = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text);
-  var tg = window.Telegram && window.Telegram.WebApp;
-  if (tg && tg.openTelegramLink) tg.openTelegramLink(telegramUrl);
-  else if (navigator.share) navigator.share({ title: name, text: text, url: url }).catch(function (error) { if (error.name !== "AbortError") window.open(telegramUrl, "_blank", "noopener"); });
-  else window.open(telegramUrl, "_blank", "noopener");
+  function showSharePreview() {
+    var previous = document.getElementById("tournamentSharePreview");
+    if (previous) previous.remove();
+    var dialog = document.createElement("dialog");
+    dialog.id = "tournamentSharePreview";
+    dialog.className = "tournament-share-preview";
+    dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть">×</button><h3>Поделиться турниром</h3><pre></pre><button type="button" data-copy>Скопировать текст и ссылку</button><p role="status"></p>';
+    dialog.querySelector("pre").textContent = text + "\n\n" + url;
+    dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
+    dialog.addEventListener("close", function () { dialog.remove(); });
+    dialog.querySelector("[data-copy]").onclick = function () {
+      var content = text + "\n" + url;
+      var copy = typeof pokerCopyTextToClipboard === "function"
+        ? pokerCopyTextToClipboard(content)
+        : navigator.clipboard ? navigator.clipboard.writeText(content).then(function () { return true; }) : Promise.resolve(false);
+      Promise.resolve(copy).then(function (ok) {
+        dialog.querySelector('[role="status"]').textContent = ok ? "Скопировано" : "Выделите и скопируйте текст выше";
+      }).catch(function () { dialog.querySelector('[role="status"]').textContent = "Выделите и скопируйте текст выше"; });
+    };
+    document.body.appendChild(dialog);
+    dialog.showModal();
+  }
+  if (typeof navigator.share === "function") {
+    try {
+      navigator.share({ title: name, text: text, url: url }).catch(function (error) {
+        if (!error || error.name !== "AbortError") showSharePreview();
+      });
+    } catch (error) { showSharePreview(); }
+  } else showSharePreview();
 });

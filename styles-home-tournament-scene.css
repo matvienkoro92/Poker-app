@@ -383,9 +383,18 @@
   pointer-events: none;
 }
 #app .tournament-day-home-dual--tournament-focus > .home-tournament-share {
-  position: absolute; left: 70%; top: 20%; width: 15%; height: 11%; z-index: 6;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  padding: 4px; border: 1px solid #a17437; border-radius: 16px; background: #151616;
-  color: #f3d594; font: 700 clamp(8px, 1.4vw, 15px)/1.1 Arial,sans-serif; cursor: pointer;
+  position: absolute; left: 69.2%; top: 18.5%; width: 13%; height: 10%; z-index: 6;
+  box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7cqw;
+  padding: .5cqw; border: 1px solid #a17437; border-radius: 1.8cqw;
+  background: linear-gradient(145deg, #25221b, #131514 65%);
+  box-shadow: inset 0 1px 0 #f3d59426, 0 .3cqw .8cqw #0005;
+  color: #f3d594; font: 700 1.35cqw/1.1 Arial,sans-serif; cursor: pointer;
 }
-.home-tournament-share svg { width: 28px; max-width: 35%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.home-tournament-share svg { width: 3.6cqw; height: 3.6cqw; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.tournament-share-preview { position:fixed; margin:auto; width:min(440px,calc(100vw - 32px)); box-sizing:border-box; padding:24px; border:1px solid #ad8546; border-radius:22px; background:#10171f; color:#ffe0a0; }
+.tournament-share-preview::backdrop { background:#000a; }
+.tournament-share-preview h3 { padding-right:28px; }
+.tournament-share-preview pre { white-space:pre-wrap; overflow-wrap:anywhere; font-family:inherit; font-size:16px; line-height:1.5; color:#f2ead8; user-select:text; }
+.tournament-share-preview button { padding:12px 16px; border:1px solid #bd944b; border-radius:12px; background:linear-gradient(#ffd875,#e8a82d); color:#18130a; font-weight:700; cursor:pointer; }
+.tournament-share-preview [data-close] { position:absolute; top:12px; right:12px; padding:5px 11px; background:#151c25; color:#ffe0a0; font-size:24px; }

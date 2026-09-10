@@ -4197,3 +4197,10 @@
   background: linear-gradient(180deg, #fca62a, #d76a08) !important;
   box-shadow: 0 0 16px rgba(255, 145, 22, .6), inset 0 1px 0 rgba(255, 241, 198, .55) !important;
 }
+
+/* Felt-green reward panels; retain the gold detail of the artwork. */
+#app .daily-poker .daily-poker__prize,
+#app .daily-poker .daily-poker__prize:nth-child(n+4) {
+  background-color: #073e2b;
+  background-blend-mode: lighten;
+}
