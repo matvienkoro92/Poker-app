@@ -2056,3 +2056,39 @@ html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card
   overflow-y: auto !important;
   padding-bottom: 24px !important;
 }
+
+/* Summary spans the page; only the individual information cards have borders. */
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] {
+  padding: 0 !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: stretch !important;
+  --card-padding-x: 0px;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app > .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card .card__content {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card .card__content > .view[data-view="my-summary"] {
+  padding-left: max(8px, env(safe-area-inset-left, 0px)) !important;
+  padding-right: max(8px, env(safe-area-inset-right, 0px)) !important;
+}

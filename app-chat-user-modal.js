@@ -1037,7 +1037,7 @@ if (chatUserModalEl) {
     if (seq !== chatUserModalOpenSeq || !chatUserModalUserId) return;
     chatUserModalEl.setAttribute("aria-hidden", "false");
     chatUserModalEl.classList.add("chat-user-modal--open");
-    document.dispatchEvent(new CustomEvent("poker:chat-user-modal-open"));
+    if (!chatUserModalEl.classList.contains("chat-user-modal--appearance-editor")) document.dispatchEvent(new CustomEvent("poker:chat-user-modal-open"));
   }
   function waitChatUserModalAsset(promise, timeoutMs) {
     if (!promise || typeof promise.then !== "function") return Promise.resolve();
@@ -3591,6 +3591,7 @@ if (chatUserModalEl) {
       revealDeferredProfile();
     });
   }
+  window.pokerCloseChatUserModal = closeChatUserModal;
   window.openChatUserModalById = openChatUserModalById;
   if (modalBackdrop) modalBackdrop.addEventListener("click", closeChatUserModal);
   if (modalClose) modalClose.addEventListener("click", closeChatUserModal);

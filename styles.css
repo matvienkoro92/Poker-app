@@ -11108,3 +11108,12 @@ a.summary-link{display:inline-block;text-decoration:none}
 .summary-schedule-tabs [role="tab"]:focus-visible{outline:2px solid #f2db9b;outline-offset:2px}
 
 .summary-rival-heading{font-size:14px;color:#e5cd87;margin:4px 0 10px}
+
+
+/* The appearance editor embeds the live public profile, keeping its renderer and tabs. */
+.appearance-dialog:has(.appearance-public-card){width:min(680px,calc(100vw - 16px));padding:16px}
+.appearance-public-card{margin:18px 0}
+.appearance-dialog .chat-user-modal--appearance-editor{position:relative!important;inset:auto!important;display:block!important;width:100%!important;height:auto!important;min-height:0!important;padding:0!important;z-index:auto!important;overflow:visible!important}
+.appearance-dialog .chat-user-modal--appearance-editor>.chat-user-modal__backdrop,
+.appearance-dialog .chat-user-modal--appearance-editor>.chat-user-modal__inner>.chat-user-modal__close{display:none!important}
+.appearance-dialog .chat-user-modal--appearance-editor>.chat-user-modal__inner{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;max-height:none!important;margin:0!important;overflow:visible!important;box-sizing:border-box}
