@@ -523,7 +523,7 @@
   };
 
   function clubNewsPersonalArt(nick) {
-    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-v1.webp";
+    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-transparent-v2.webp";
     if (["fishkopcheny", "фишкопченый", "фишкапченый"].indexOf(matchKey(nick)) !== -1) return "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
       var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
@@ -533,7 +533,7 @@
   }
 
   function clubNewsCardArt(nick, occurrence) {
-    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-v1.webp";
+    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-transparent-v2.webp";
     if (["fishkopcheny", "фишкопченый", "фишкапченый"].indexOf(matchKey(nick)) !== -1) return "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     var slug = CLUB_NEWS_CARD_ART_BY_NICK[matchKey(nick)] || "";
     var variantIndex = Math.max(0, Number(occurrence) || 0);
@@ -2105,7 +2105,7 @@
             '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
             '</button>'
           : "") +
-        (newsModalMode === "club" && shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' : "") + "</span></span>",
+        (newsModalMode === "club" && shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3.5 10 16-6.2c.6-.2 1.1.3.9.9l-4.5 15c-.2.7-1 .8-1.4.3l-4.1-5-6.8-3.5c-.7-.3-.7-1.2-.1-1.5Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m10.4 15 5.7-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>' : "") + "</span></span>",
       comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -2609,6 +2609,35 @@
       clone.querySelectorAll("[data-news-admin-telegram]").forEach(function (node) { node.textContent = ""; });
       clone.style.margin = "0"; clone.style.width = width + "px"; clone.style.height = height + "px";
       clone.style.transform = "none"; clone.style.position = "relative";
+      var copyArea = clone.querySelector(".home-friend-news-modal__copy");
+      var originalCopy = card.querySelector(".home-friend-news-modal__copy");
+      var copyLeft = originalCopy ? originalCopy.getBoundingClientRect().left - rect.left : width * .34;
+      var eventId = card.getAttribute("data-home-news-event-id");
+      var shareRow = clubEvents.concat(clubWallEvents || []).find(function (row) { return feedbackEventId(row) === eventId; });
+      var date = shareRow && shareRow.at ? new Date(shareRow.at) : null;
+      var dateLabel = "";
+      if (date && Number.isFinite(date.getTime())) {
+        var parts = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Moscow" }).formatToParts(date);
+        function part(type) { return (parts.find(function (p) { return p.type === type; }) || {}).value || ""; }
+        dateLabel = part("day") + "-е " + part("month") + " " + part("year");
+      }
+      var hero = clone.querySelector(".home-friend-news-modal__day-hero");
+      clone.querySelectorAll(".home-friend-news-modal__action-row, .home-friend-news-modal__player-meta, .chat-user-modal__news-comments, [data-news-admin-telegram]").forEach(function (node) { node.remove(); });
+      if (copyArea) {
+        Array.from(copyArea.children).forEach(function (node) { if (node.tagName === "SMALL") node.remove(); });
+        copyArea.style.height = "auto";
+      }
+      if (hero) {
+        hero.remove();
+        var heroLabel = document.createElement("span");
+        heroLabel.textContent = "ГЕРОЙ ДНЯ";
+        heroLabel.style.cssText = "position:absolute;left:3%;bottom:7%;max-width:27%;box-sizing:border-box;padding:8px 12px;border:1px solid #efc76d;border-radius:12px;background:linear-gradient(135deg,#674615,#211b10);color:#ffe5a3;font:800 " + Math.max(10, width * .016) + "px/1.2 Arial,sans-serif;text-align:center;z-index:5;white-space:nowrap";
+        clone.appendChild(heroLabel);
+      }
+      var signature = document.createElement("span");
+      signature.textContent = "♠ Poker21   •   Клуб Два туза" + (dateLabel ? "   •   " + dateLabel : "");
+      signature.style.cssText = "position:absolute;left:" + copyLeft + "px;right:16px;bottom:20px;color:#cdbb94;font:500 " + Math.max(9, width * .014) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
+      clone.appendChild(signature);
       var fontCss = "";
       async function collectFonts(rules, base) {
         for (var rule of Array.from(rules || [])) {
@@ -2622,15 +2651,12 @@
         }
       }
       for (var sheet of Array.from(document.styleSheets)) { try { await collectFonts(sheet.cssRules, sheet.href); } catch (_) {} }
-      var footerHeight = 40;
+      var footerHeight = 0;
       var wrapper = document.createElement("div");
       wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
       wrapper.style.cssText = "background:#10151d;width:" + width + "px;";
       var fonts = document.createElement("style"); fonts.textContent = fontCss; wrapper.appendChild(fonts);
       wrapper.appendChild(clone);
-      var footer = document.createElement("div"); footer.textContent = 'Клуб «Два туза»';
-      footer.style.cssText = "height:40px;display:flex;align-items:center;justify-content:center;color:#e8c987;font:bold 16px Arial,sans-serif";
-      wrapper.appendChild(footer);
       var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + (height + footerHeight) + '"><foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(wrapper) + '</foreignObject></svg>';
       var rendered = new Image();
       await new Promise(function (resolve, reject) { rendered.onload = resolve; rendered.onerror = reject; rendered.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); });
@@ -2640,8 +2666,9 @@
       if (!blob) throw new Error("image");
       var url = URL.createObjectURL(blob);
       var dialog = document.createElement("dialog");
+      dialog.className = "news-share-preview";
       dialog.style.cssText = "max-width:700px;width:90vw;background:#111821;color:#fff0cf;border:1px solid #efb85b;border-radius:18px;padding:16px";
-      dialog.innerHTML = '<button type="button" data-close style="float:right">Закрыть ×</button><h3>Поделиться карточкой</h3><img style="width:100%" alt="Превью карточки"><button type="button" data-send>Поделиться</button> <a download="poker21-news.png">Скачать картинку</a><p role="status"></p>';
+      dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть" title="Закрыть">×</button><h3>Поделиться карточкой</h3><img style="width:100%" alt="Превью карточки"><button type="button" data-send>Поделиться</button> <a download="poker21-news.png">Скачать картинку</a><p role="status"></p>';
       dialog.querySelector("img").src = url; dialog.querySelector("a").href = url;
       dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
       dialog.onclose = function () { URL.revokeObjectURL(url); dialog.remove(); };
