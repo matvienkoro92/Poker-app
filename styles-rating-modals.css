@@ -1097,3 +1097,9 @@ background: rgba(251, 191, 36, 0.28);
 .player-month:not(:nth-child(3n)) { border-right:1px solid #b2976130; }
 .player-month span { display:block; color:#a4adb8; font-size:2.4cqw; }
 .player-month strong { display:block; margin-top:.6cqw; color:#ffe3a4; font-size:4cqw; line-height:1.15; white-space:nowrap; }
+.rating-player-share-preview { margin:auto; width:min(440px,calc(100vw - 32px)); max-height:85dvh; overflow:auto; box-sizing:border-box; padding:24px; border:1px solid #ad8546; border-radius:22px; background:#10171f; color:#ffe0a0; }
+.rating-player-share-preview::backdrop { background:#000a; }
+.rating-player-share-preview h3 { padding-right:28px; }
+.rating-player-share-preview pre { white-space:pre-wrap; overflow-wrap:anywhere; font-family:inherit; font-size:16px; line-height:1.5; color:#f2ead8; user-select:text; }
+.rating-player-share-preview button { padding:12px 16px; border:1px solid #bd944b; border-radius:12px; background:linear-gradient(#ffd875,#e8a82d); color:#18130a; font-weight:700; cursor:pointer; }
+.rating-player-share-preview [data-close] { position:absolute; top:12px; right:12px; padding:5px 11px; background:#151c25; color:#ffe0a0; font-size:24px; }

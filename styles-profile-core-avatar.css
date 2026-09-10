@@ -5433,3 +5433,16 @@ body.profile-month-story-open { overflow: hidden; }
   font-weight: 600;
 }
 .profile-month-story-card__more svg { flex-shrink: 0; }
+
+/* Expanded tournament total with compact podium statistics. */
+.view[data-view="profile"] .profile-rating-actions__prizes { container-type:inline-size; }
+.profile-prize-details { display:block; width:100%; margin:12px 0; color:#e8dfca; text-transform:none; }
+.profile-prize-best { display:flex; justify-content:space-between; gap:12px; padding:8px 12px; border:1px solid #b9a16a40; border-radius:10px; background:#10171bd9; font-size:clamp(12px,2.6cqw,20px); }
+.profile-prize-best b { color:#ffe0a0; }
+.profile-prize-podium { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px; }
+.profile-prize-place { display:grid; grid-template-columns:.55fr 1.45fr; gap:6px 2px; min-width:0; padding:10px 5px; border:1px solid #aa803b; border-radius:12px; background:linear-gradient(135deg,#50371880,#0d141bea); }
+.profile-prize-place:nth-child(2) { border-color:#777f8a; background:linear-gradient(135deg,#62697455,#0d141bea); }
+.profile-prize-place:nth-child(3) { border-color:#ac693f; background:linear-gradient(135deg,#69382066,#0d141bea); }
+.profile-prize-place > b { grid-column:1/-1; font-size:clamp(11px,2.7cqw,20px); color:#ffe4af; }
+.profile-prize-place strong { display:block; font-size:clamp(10px,3cqw,24px); white-space:nowrap; color:#f5eee0; }
+.profile-prize-place small { display:block; font-size:clamp(8px,1.8cqw,13px); font-weight:400; color:#aeb8c4; }

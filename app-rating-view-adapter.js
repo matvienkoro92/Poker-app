@@ -2101,20 +2101,31 @@ function initWinterRatingPlayerModal() {
         buildRatingPlayerShareLink(startApp + nick);
       var totalStr = modal._winterPlayerModalTotalStr || "0";
       var shareText = "Игрок " + nick + " уже выиграл " + totalStr + " ₽. Клуб «Два туза». Посмотрите отчёт по турнирам.";
-      var shareUrl = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent(shareText);
-      var tg = window.Telegram && window.Telegram.WebApp;
-      function openTelegramShare() {
-        window.open(shareUrl, "_blank", "noopener,noreferrer");
+      function showPlayerSharePreview() {
+        var previous = document.getElementById("ratingPlayerSharePreview");
+        if (previous) previous.remove();
+        var dialog = document.createElement("dialog");
+        dialog.id = "ratingPlayerSharePreview";
+        dialog.className = "rating-player-share-preview";
+        dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть">×</button><h3>Поделиться результатами</h3><pre></pre><button type="button" data-copy>Скопировать текст и ссылку</button><p role="status"></p>';
+        dialog.querySelector("pre").textContent = shareText + "\n\n" + link;
+        dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
+        dialog.addEventListener("close", function () { dialog.remove(); });
+        dialog.querySelector("[data-copy]").onclick = function () {
+          pokerCopyTextToClipboard(shareText + "\n" + link).then(function (ok) {
+            dialog.querySelector('[role="status"]').textContent = ok ? "Скопировано" : "Выделите и скопируйте текст выше";
+          }).catch(function () { dialog.querySelector('[role="status"]').textContent = "Выделите и скопируйте текст выше"; });
+        };
+        document.body.appendChild(dialog);
+        dialog.showModal();
       }
-      if (tg && typeof tg.openTelegramLink === "function") {
-        tg.openTelegramLink(shareUrl);
-      } else if (typeof navigator.share === "function") {
-        navigator.share({ title: nick + " — Клуб Два туза", text: shareText, url: link }).catch(function (error) {
-          if (!error || error.name !== "AbortError") openTelegramShare();
-        });
-      } else {
-        openTelegramShare();
-      }
+      if (typeof navigator.share === "function") {
+        try {
+          navigator.share({ title: nick + " — Клуб Два туза", text: shareText, url: link }).catch(function (error) {
+            if (!error || error.name !== "AbortError") showPlayerSharePreview();
+          });
+        } catch (error) { showPlayerSharePreview(); }
+      } else showPlayerSharePreview();
       if (typeof recordShareButtonClick === "function") recordShareButtonClick("winter_rating_player_share");
     });
   }

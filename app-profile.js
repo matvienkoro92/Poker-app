@@ -1280,7 +1280,34 @@ function profileRatingTotalTextFromHtml(html) {
   return String(sum && sum.textContent || "").trim();
 }
 
+var profilePrizeDetailsSequence = 0;
+async function profileLoadPrizeDetails() {
+  var sequence = ++profilePrizeDetailsSequence;
+  var nick = profileAchievementRatingNickFromData(pokerProfileUserInfoCache || {}) || profilePublicCardDisplayName();
+  try {
+    if (typeof window.pokerEnsureScriptDomains === "function") await window.pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"]);
+    if (sequence !== profilePrizeDetailsSequence) return;
+    var rows = getWinterRatingPlayerSummary(nick, { season: "summer" });
+    var top = 0, podium = [{ count: 0, reward: 0 }, { count: 0, reward: 0 }, { count: 0, reward: 0 }];
+    rows.forEach(function (row) {
+      var reward = Number(row.reward) || 0;
+      top = Math.max(top, reward);
+      var place = Number(row.place);
+      if (place >= 1 && place <= 3) { podium[place - 1].count++; podium[place - 1].reward += reward; }
+    });
+    var money = function (n) { return Math.round(n).toLocaleString("ru-RU"); };
+    var html = '<span class="profile-prize-best">Топ призовых <b>' + money(top) + ' ₽</b></span><span class="profile-prize-podium">' + podium.map(function (r, i) {
+      return '<span class="profile-prize-place"><b>' + (i + 1) + ' место</b><span><strong>' + r.count + '</strong><small>раз</small></span><span><strong>' + money(r.reward) + '</strong><small>призовые, ₽</small></span></span>';
+    }).join('') + '</span>';
+    document.querySelectorAll('[data-profile-prize-details]').forEach(function (el) { el.innerHTML = html; });
+  } catch (error) {
+    if (sequence !== profilePrizeDetailsSequence) return;
+    document.querySelectorAll('[data-profile-prize-details]').forEach(function (el) { el.textContent = "Статистика доступна в подробностях"; });
+  }
+}
+
 function renderProfileRatingTotalCards(text) {
+  setTimeout(profileLoadPrizeDetails, 0);
   var safeText = profileEscapeHtml(String(text || "").trim());
   return (
     '<div class="chat-user-modal__rating-tabs profile-rating-actions" style="grid-template-columns:minmax(0,1fr)">' +
@@ -1289,6 +1316,7 @@ function renderProfileRatingTotalCards(text) {
         '<span class="chat-user-modal__rating-tab-main">Призовые в турнирах <span class="chat-user-modal__rating-tab-sum">' +
           safeText +
         '</span></span>' +
+        '<span class="profile-prize-details" data-profile-prize-details>Загружаем статистику мест…</span>' +
         '<span class="chat-user-modal__rating-tab-more">Подробнее &gt;&gt;</span>' +
       '</button>' +
     '</div>'
