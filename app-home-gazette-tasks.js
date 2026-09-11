@@ -154,7 +154,10 @@ function runGazetteAndTasksInit() {
         });
     });
   })();
+  var openGazetteStyleGate = null;
   function openGazette(goToNews, articleIndex) {
+    if (!openGazetteStyleGate && typeof window.pokerCreateModalStyleGate === "function") openGazetteStyleGate = window.pokerCreateModalStyleGate("home-info-modals");
+    if (openGazetteStyleGate && openGazetteStyleGate.wait(openGazette.bind(null, goToNews, articleIndex))) return;
     try {
       if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("gazette");
     } catch (eTrack) {}
@@ -187,6 +190,7 @@ function runGazetteAndTasksInit() {
   }
   window.openGazette = openGazette;
   function closeGazette() {
+    if (openGazetteStyleGate) openGazetteStyleGate.cancel();
     modal.setAttribute("aria-hidden", "true");
     showGazetteView("pick");
     try {

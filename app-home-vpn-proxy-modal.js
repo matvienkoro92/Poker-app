@@ -179,7 +179,10 @@ function initHomeVpnProxyModal(opts) {
         panelProxy.setAttribute("aria-hidden", isVpn ? "true" : "false");
       }
     }
+    var openModalStyleGate = null;
     function openModal(opts) {
+      if (!openModalStyleGate && typeof window.pokerCreateModalStyleGate === "function") openModalStyleGate = window.pokerCreateModalStyleGate("home-info-modals");
+      if (openModalStyleGate && openModalStyleGate.wait(openModal.bind(null, opts))) return;
       opts = opts || {};
       if (!modal) return;
       try {
@@ -204,6 +207,7 @@ function initHomeVpnProxyModal(opts) {
       }
     }
     function closeModal() {
+      if (openModalStyleGate) openModalStyleGate.cancel();
       if (!modal) return;
       modal.setAttribute("aria-hidden", "true");
       unlockBehind();

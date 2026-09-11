@@ -1279,8 +1279,11 @@ function pokerInitHomePlanner() {
       romanPlannerRestoreOpenSwipe();
       updatePlannerHintText(raw);
     }
+    var openPlannerModalStyleGate = null;
     function openPlannerModal() {
       if (!isPlannerAllowedUser() || !plannerModal) return;
+      if (!openPlannerModalStyleGate && typeof window.pokerCreateModalStyleGate === "function") openPlannerModalStyleGate = window.pokerCreateModalStyleGate("editor-planner");
+      if (openPlannerModalStyleGate && openPlannerModalStyleGate.wait(openPlannerModal.bind(null))) return;
       romanPlannerDirtySinceOpen = false;
       plannerTab = readPlannerTabStorage();
       renderTasks();
@@ -1307,6 +1310,7 @@ function pokerInitHomePlanner() {
       }
     }
     function closePlannerModal() {
+      if (openPlannerModalStyleGate) openPlannerModalStyleGate.cancel();
       romanPlannerStopLiveSync();
       if (plannerModal) plannerModal.setAttribute("aria-hidden", "true");
       if (plannerModal) plannerModal.classList.remove("roman-task-planner-modal--keyboard");

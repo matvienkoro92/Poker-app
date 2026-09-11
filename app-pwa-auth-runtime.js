@@ -985,7 +985,10 @@
       if (panelAndroid) panelAndroid.hidden = iphoneOn;
     }
 
+    var openModalStyleGate = null;
     function openModal() {
+      if (!openModalStyleGate && typeof window.pokerCreateModalStyleGate === "function") openModalStyleGate = window.pokerCreateModalStyleGate("home-info-modals");
+      if (openModalStyleGate && openModalStyleGate.wait(openModal.bind(null))) return;
       setTab("iphone");
       modal.setAttribute("aria-hidden", "false");
       document.documentElement.classList.add("club-charter-modal-open");
@@ -995,6 +998,7 @@
     }
 
     function closeModal() {
+      if (openModalStyleGate) openModalStyleGate.cancel();
       modal.setAttribute("aria-hidden", "true");
       if (!document.querySelector('.club-charter-modal[aria-hidden="false"]')) {
         document.documentElement.classList.remove("club-charter-modal-open");

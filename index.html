@@ -378,6 +378,8 @@
     </script>
     <link type="application/poker-lazy-style" data-poker-lazy-domain="cashout" data-poker-lazy-position="source" href="./styles-download.css?v=4.002" />
     <link rel="stylesheet" href="./styles.css?v=4.031" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="home-info-modals" data-poker-lazy-position="source" href="./styles-home-info-modals.css?v=1" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="editor-planner" data-poker-lazy-position="source" href="./styles-home-planner-modal.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat cashout profile hall player-crm admin-bonuses learning rating-common" data-poker-lazy-position="source" href="./styles-section-layout.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hero profile chat" data-poker-lazy-position="source" href="./styles-hero.css?v=1" />
     <link rel="stylesheet" href="./styles-home-summer-results.css?v=2" />
@@ -934,7 +936,7 @@
           </span>
           <picture><img
             class="home-daily-deal-hero__image"
-                src="./assets/daily-poker-character-no-stacks-v1.webp"
+                src="./assets/daily-poker-character-no-stacks-v1-720.webp"
             alt=""
             width="720"
             height="900"
@@ -954,20 +956,20 @@
             title="Чат в ТГ"
             aria-label="Чат в ТГ"
           >
-            <img class="home-lounge-art" src="./assets/home-lounge-chat-v1-light-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-chat-v1-480.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-lounge-character-name">Валерка</span>
             <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
           </a>
           <a href="#" class="home-lounge-link  home-lounge-link--raffles" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
             <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
             <span class="raffle-active-amount-badge raffle-active-amount-badge--hidden" id="raffleActiveAmountBadge" aria-hidden="true">Идут на 0 ₽</span>
-            <img class="home-lounge-art" src="./assets/home-lounge-raffles-v1-light-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-raffles-v1-480.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-lounge-character-name">Алёнка</span>
             <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
           </a>
           <button type="button" class="home-lounge-link  home-lounge-link--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 25 000 рублей">
             <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 25 000 ₽</span>
-            <img class="home-lounge-art" src="./assets/home-lounge-players-v1-light-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-players-v1-480.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-lounge-character-name">Waaar</span>
             <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки клуба</span>
           </button>
@@ -1009,7 +1011,7 @@
           <div class="home-ticket-aces" aria-hidden="true"><span>A<span>♠</span></span><span>A<span>♥</span></span></div>
         <button type="button" class="home-last-longer-dock" data-tournament-bet-open aria-label="Ласт-лонгер. Открыть ставки на себя в турнире">
           <span class="home-last-longer-dock__chip">
-            <span class="home-last-longer-dock__rim" aria-hidden="true"><img src="./assets/last-longer-chip-reference-v1-light-v1.webp" width="1024" height="1024" alt="" aria-hidden="true" /></span>
+            <span class="home-last-longer-dock__rim" aria-hidden="true"><img src="./assets/last-longer-chip-reference-v1-320.webp" width="1024" height="1024" alt="" aria-hidden="true" /></span>
             <span class="home-last-longer-dock__face">
               <strong class="home-last-longer-dock__title">LAST<br>LONGER</strong>
               <span class="home-last-longer-dock__stake" data-tournament-bet-home-stake>—</span>
@@ -1325,9 +1327,9 @@
                 class="hero__video hero__image"
                 width="448"
                 height="448"
-                loading="eager"
-                decoding="sync"
-                fetchpriority="high"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
               />
             </a>
           </div>

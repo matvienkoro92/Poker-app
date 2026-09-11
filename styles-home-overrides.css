@@ -116,7 +116,6 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
   box-sizing: border-box;
   padding: 4px 6px 5px;
   overflow: hidden;
-  background: none;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-overflow: ellipsis;
@@ -735,8 +734,6 @@ html.app-view-home #app.app.app--view-home > .card > .card__content,
 .app.app--view-home .home-sng-champions-action {
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) 64px !important;
-  height: 100% !important;
-  overflow: hidden !important;
   border: 1px solid rgba(255, 151, 31, 0.72) !important;
   background: #07090d !important;
 }
@@ -833,11 +830,6 @@ body.club-guestbook-open { overflow: hidden; }
   .club-guestbook__feed { padding-inline: 12px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 }
 
-.app.app--view-home .home-sng-champions-image-link {
-  min-height: 0 !important;
-  border-radius: inherit inherit 0 0 !important;
-}
-
 .app.app--view-home .home-sng-champions-action__bar {
   position: relative;
   z-index: 21;
@@ -916,7 +908,6 @@ body.club-guestbook-open { overflow: hidden; }
 
 .app.app--view-home .home-sng-champions-action__cta-wrap .home-sng-champions-action__cta {
   width: 100%;
-  min-height: 34px !important;
   height: auto;
 }
 
@@ -3572,9 +3563,7 @@ body.tournament-bet-modal-open {
   height: auto !important;
   min-height: 0 !important;
   margin: 0 !important;
-  padding: 4px !important;
   border: 2px solid #f18b0b !important;
-  border-radius: 0 !important;
   color: #251000 !important;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 255, 220, 0.82), transparent 45%),
@@ -3640,7 +3629,6 @@ body.tournament-bet-modal-open {
 
 /* Evening tournaments: cinematic poster carousel. */
 .app.app--view-home .tournament-day-home-dual--tournament-focus {
-  container-type: inline-size;
   grid-template-columns: 1fr;
   padding: 22px 12px 16px;
   overflow: hidden;
@@ -4226,14 +4214,10 @@ html body #app.app.app--view-home
   --bonus-gem: 255, 164, 24;
   --bonus-gem-deep: 83, 31, 0;
   --bonus-gem-text: #ffd65d;
-  width: 100%;
-  min-height: 0;
   aspect-ratio: 1.34 / 1;
-  padding: 12px 6px 10px;
   isolation: isolate;
   overflow: hidden;
   border: clamp(2px, 0.24vw, 3px) solid rgba(var(--bonus-gem), 0.96);
-  border-radius: clamp(28px, 4.4vw, 58px);
   background:
     radial-gradient(ellipse at 25% 7%, rgba(255, 255, 255, 0.92) 0 2%, rgba(255, 255, 255, 0.42) 7%, transparent 23%),
     radial-gradient(ellipse at 72% 13%, rgba(255, 255, 255, 0.28), transparent 24%),
@@ -4511,7 +4495,6 @@ html body #app.app.app--view-home
   gap: 10px;
   width: 100%;
   min-width: 0;
-  padding: 8px 12px;
   margin: 8px 0;
   border: 1px solid rgba(255, 166, 40, 0.6);
   border-radius: 16px;
@@ -4636,7 +4619,6 @@ html body #app.app.app--view-home
 .home-tournament-bet-link img.home-tournament-bet-link__art {
   display: block;
   width: 100%;
-  height: auto;
   aspect-ratio: 2083 / 540;
 }
 .home-tournament-bet-link__bar {
@@ -4650,7 +4632,6 @@ html body #app.app.app--view-home
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 4px;
   padding: 8px 3px;
   border-right: 1px solid #77512e;
 }
@@ -4661,7 +4642,6 @@ html body #app.app.app--view-home
   align-items: center;
   justify-content: center;
   gap: 5px;
-  margin: 7px;
   border: 0;
   border-radius: 12px;
   background: linear-gradient(#da401c, #7c1008);
@@ -4887,7 +4867,6 @@ html body #app.app.app--view-home
 /* Rotate the dimensional rim while keeping the live chip label level. */
 .home-last-longer-dock__chip img {
   mask-image: radial-gradient(circle closest-side, transparent 70%, #000 71%);
-  animation: last-longer-rim-spin 14s linear infinite;
 }
 .home-last-longer-dock__face {
   position: absolute;
@@ -4896,7 +4875,6 @@ html body #app.app.app--view-home
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--ll-chip) * .018);
   border: 1px solid #c19532;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 20%, #24231b, #070909 72%);
@@ -4913,22 +4891,17 @@ html body #app.app.app--view-home
   font-family: Arial, sans-serif;
   font-size: calc(var(--ll-chip) * .135);
   font-weight: 900;
-  line-height: 1;
-  letter-spacing: -.04em;
   color: #fff4d6;
 }
 .home-last-longer-dock__face .home-last-longer-dock__stake {
   position: static;
-  width: 76%;
   margin: 0;
   padding-top: calc(var(--ll-chip) * .022);
   border-top: 1px solid #93691e;
   font-size: calc(var(--ll-chip) * .13);
-  line-height: 1;
 }
 @keyframes last-longer-rim-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
-  .home-last-longer-dock__chip img { animation: none; }
 }
 
 /* Tilt the whole chip, with a shaded edge behind its rotating face. */
@@ -4977,8 +4950,6 @@ html body #app.app.app--view-home
 .app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-bonuses--table .home-tournament-bonus {
   position: absolute !important;
   top: 9%;
-  width: 19% !important;
-  height: 55% !important;
   min-height: 0 !important;
   aspect-ratio: auto !important;
   display: flex;
@@ -4986,7 +4957,6 @@ html body #app.app.app--view-home
   align-items: center;
   justify-content: flex-end;
   gap: .4cqw !important;
-  padding: 0 0 2cqw !important;
   margin: 0 !important;
   border: 0 !important;
   border-radius: 8px !important;
@@ -4996,15 +4966,14 @@ html body #app.app.app--view-home
   text-shadow: 0 1px 2px #000, 0 0 5px #c47b2450;
   cursor: pointer;
 }
-.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) { left: 5%; transform: rotate(11deg); }
-.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 23%; transform: rotate(5deg); }
-.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 40.5%; transform: none; }
-.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 58%; transform: rotate(-5deg); color: #b6edb6; }
-.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 76%; transform: rotate(-12deg); }
+.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) { transform: rotate(11deg); }
+.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { transform: rotate(5deg); }
+.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { transform: none; }
+.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { transform: rotate(-5deg); color: #b6edb6; }
+.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { transform: rotate(-12deg); }
 .app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus .home-tournament-bonus__label {
   order: 0;
   font-size: 1.9cqw !important;
-  line-height: 1.08 !important;
   font-weight: 700;
   margin: 0 !important;
   max-width: 100%;
@@ -5013,7 +4982,6 @@ html body #app.app.app--view-home
 .app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus .home-tournament-bonus__amount {
   order: 1;
   font-size: 3.2cqw !important;
-  line-height: 1.05 !important;
   font-weight: 900;
   white-space: nowrap;
   color: inherit !important;
@@ -5166,8 +5134,7 @@ html body #app.app.app--view-home
   background: url('./assets/home-tournament-trophies-v1-light-v1.webp') var(--trophy-cell) center / 300% 100% no-repeat;
   mask-image: linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);
 }
-.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__day {
-  top: 3%; left: 42%; right: auto; font-size: 6cqw; padding: 2px 6px;
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--trophy .home-tournament-week-row__day { right: auto; font-size: 6cqw;
 }
 .home-tournament-trophy__copy {
   position: absolute; inset: 44% 17% 11%;
@@ -5228,8 +5195,6 @@ html body #app.app.app--view-home
 }
 .home-last-longer-dock__title {
   font-size: calc(var(--ll-chip) * .126);
-  line-height: 1.06;
-  letter-spacing: 0;
   text-shadow: 0 1px 1px #000;
 }
 .app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock--unannounced {
@@ -5356,14 +5321,11 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item { max-height: none !important; min-width: 0 !important; max-width: none !important; align-self: start; }
 .app.app--view-home .home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; align-items: start !important; }
 .app.app--view-home .home-daily-shortcuts--figures { grid-template-rows: auto !important; grid-auto-rows: auto !important; }
-.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; aspect-ratio: auto !important; grid-template-rows: auto !important; overflow: visible !important; contain: none !important; }
+.app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures { height: auto !important; max-height: none !important; min-height: 0 !important; grid-template-rows: auto !important; overflow: visible !important; contain: none !important; }
 
 /* Fixed podiums, independently breathing character layers. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
-  animation: none !important;
-  transform: none !important;
   filter: none !important;
-  background: transparent !important;
   border: 0 !important;
   outline: 0;
   box-shadow: none !important;
@@ -5403,7 +5365,6 @@ html body #app.app.app--view-home
   .home-shortcut-figure::after { animation: none; }
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
-  width: 75% !important;
   margin-left: auto !important;
   margin-right: auto !important;
 }
@@ -5460,7 +5421,6 @@ html body #app.app.app--view-home
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts.home-daily-shortcuts--figures {
   mix-blend-mode: screen;
-  background: transparent !important;
 }
 
 /* Bright podium titles and visible head gestures, with still bases. */
@@ -5496,7 +5456,6 @@ html body #app.app.app--view-home
   65% { transform: perspective(500px) rotateY(14deg) rotate(2deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after { animation: none !important; }
 }
 
 /* Daily deal controls: one clear primary action and quiet supporting details. */
@@ -5549,7 +5508,6 @@ html body #app.app.app--view-home
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item .home-shortcut-figure::after {
   display: none !important;
   animation: none !important;
-  transform: none !important;
   will-change: auto;
 }
 .app.app--view-home .home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-shortcut-figure::before { animation-delay: -2s !important; }
@@ -5775,8 +5733,6 @@ html body #app.app.app--view-home
 .home-last-longer-dock__title {
   width: 100%;
   font-size: calc(var(--ll-chip) * .115);
-  line-height: 1.12;
-  letter-spacing: .015em;
   text-align: center;
   text-shadow: none;
 }
@@ -5786,10 +5742,6 @@ html body #app.app.app--view-home
 
 /* Primary podium actions cover the decorative icons; amounts stay secondary. */
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
-  left: 7% !important;
-  width: 86% !important;
-  top: 79% !important;
-  height: 10% !important;
   box-sizing: border-box;
   border: 1px solid #8af0ac !important;
   border-radius: 9px !important;
@@ -5808,7 +5760,6 @@ html body #app.app.app--view-home
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures #raffleActiveAmountBadge,
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-achievement-bonus-badge {
-  top: 70% !important;
   padding: 3px 7px !important;
   background: rgba(10, 14, 11, .9) !important;
   color: #d5c79f !important;
@@ -5888,16 +5839,10 @@ html body #app.app.app--view-home
 }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item {
   aspect-ratio: auto !important;
-  height: 100% !important;
-  background: none !important;
 }
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-figure,
 .app.app--view-home .home-daily-shortcuts--figures .home-shortcut-motion { display: none !important; }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
-  top: 79% !important;
-  left: 28% !important;
-  width: 54% !important;
-  height: 8% !important;
   background: linear-gradient(#11583b, #083b28) !important;
   border-color: #ad8b49 !important;
   color: #fff0cc !important;
@@ -5907,7 +5852,7 @@ html body #app.app.app--view-home
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-mini-icon__label { left: 18% !important; }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels .home-mini-icon__label { left: 9% !important; font-size: 4.7cqw !important; }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures #raffleActiveAmountBadge,
-.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-achievement-bonus-badge { top: 73% !important; font-size: 4.2cqw !important; }
+.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-achievement-bonus-badge { font-size: 4.2cqw !important; }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item:hover .home-mini-icon__label,
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item:focus-visible .home-mini-icon__label { background: #196244 !important; }
 
@@ -5943,13 +5888,6 @@ html body #app.app.app--view-home
   background-position: center top !important;
   background-size: 94% 94% !important;
 }
-
-/* Center live labels on the new individual podium nameplates. */
-.app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item .home-mini-icon__label {
-  left: 20% !important;
-  width: 60% !important;
-  top: 77% !important;
-}
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--raffles .home-mini-icon__label { top: 79% !important; }
 .app.app--view-home .home-mini-icons.home-daily-shortcuts--figures .home-mini-icon-item--levels .home-mini-icon__label { top: 80% !important; }
 
@@ -5976,7 +5914,6 @@ html body #app.app.app--view-home
   display: block !important;
   position: absolute !important;
   inset: 1.12% 0 auto !important;
-  width: 100% !important;
   height: 71.68% !important; /* 160% of the previous 44.8% figure height. */
   background: var(--figure-art) center var(--figure-image-y) / auto var(--figure-image-height) no-repeat !important;
   border: 0 !important;
@@ -6243,17 +6180,17 @@ html body #app.app.app--view-home
 
 /* Soften the artwork while retaining bright, legible nameplates. */
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
-  --lounge-label-art: url('./assets/home-lounge-chat-v1-light-v1.webp');
+  --lounge-label-art: url('./assets/home-lounge-chat-v1-480.webp');
   --lounge-label-shift: 1.6%;
   --lounge-label-clip: inset(77.5% 23% 17% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles {
-  --lounge-label-art: url('./assets/home-lounge-raffles-v1-light-v1.webp');
+  --lounge-label-art: url('./assets/home-lounge-raffles-v1-480.webp');
   --lounge-label-shift: 0%;
   --lounge-label-clip: inset(79% 23% 16% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels {
-  --lounge-label-art: url('./assets/home-lounge-players-v1-light-v1.webp');
+  --lounge-label-art: url('./assets/home-lounge-players-v1-480.webp');
   --lounge-label-shift: -3.4%;
   --lounge-label-clip: inset(82.5% 22% 12% 23%);
 }

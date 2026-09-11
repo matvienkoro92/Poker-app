@@ -22,6 +22,7 @@
     "smoke:nav": "node scripts/smoke-navigation.js",
     "smoke:visual": "node scripts/smoke-visual.js",
     "smoke:css": "node scripts/smoke-css-loading.js",
+    "smoke:home-modals": "SMOKE_INFO_MODALS=1 node scripts/smoke-css-loading.js",
     "smoke:chat": "node scripts/smoke-chat-flows.js",
     "release:check": "npm run build:static && npm run release:verify",
     "release:verify": "npm run check:syntax && npm run smoke && npm run assets:report && npm run test:contracts && node --test tests/*.test.js && SMOKE_ROOT=public SMOKE_NAV_ADMIN_DEEP=1 npm run smoke:nav && SMOKE_ROOT=public npm run smoke:visual && npm run test:pwa-update",
@@ -57,6 +58,8 @@
     "install-hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push scripts/backup.sh scripts/bump-pwa-login-version.js",
     "test:redis": "node scripts/test-redis-integrity.js",
     "measure:mobile": "node scripts/measure-mobile-startup.js",
+    "measure:startup": "MOBILE_STARTUP_ONLY=1 node scripts/measure-mobile-startup.js",
+    "assets:home-art": "node scripts/generate-home-responsive-art.js",
     "check:build-tools": "node scripts/check-build-tools.js",
     "test:pwa-update": "node scripts/test-pwa-update.js",
     "check:hero": "node scripts/check-hero-catalog.js"

@@ -8,7 +8,7 @@ const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 const root = path.join(__dirname, "..");
 const publicRoot = path.join(root, "public");
-const out = path.join(root, "tmp", "mobile-startup");
+const out = path.resolve(root, process.env.MOBILE_OUTPUT_DIR || "tmp/mobile-startup");
 const mime = { ".html": "text/html", ".js": "application/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
 async function main() {
   fs.mkdirSync(out, { recursive: true });
@@ -70,6 +70,7 @@ async function main() {
     const startup = await page.evaluate(() => {
       const resources = performance.getEntriesByType("resource");
       return {
+        resources: resources.map(e => ({ name: e.name.replace(location.origin, ""), type: e.initiatorType, encodedBytes: e.encodedBodySize, duration: e.duration, start: e.startTime })),
         ...window.__mobileAudit,
         fcp: performance.getEntriesByName("first-contentful-paint")[0]?.startTime || 0,
         domContentLoaded: performance.getEntriesByType("navigation")[0]?.domContentLoadedEventEnd,
@@ -84,6 +85,11 @@ async function main() {
     assert.equal(startup.earlyBetCss, false);
     assert.equal(startup.horizontalOverflow, false);
     await page.screenshot({ path: path.join(out, "home.png") });
+    if (process.env.MOBILE_STARTUP_ONLY === "1") {
+      fs.writeFileSync(path.join(out, "startup.json"), JSON.stringify(startup, null, 2));
+      console.log(JSON.stringify(startup, null, 2));
+      return;
+    }
     // Validate the real opener waits for the stylesheet before showing the modal.
     await page.evaluate(() => window.openTournamentBetModal());
     await page.waitForSelector(".tournament-bet-modal:not([hidden])", { timeout: 30000 });

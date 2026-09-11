@@ -72,7 +72,10 @@ function initHomeClubInfoModals() {
         panelComm.setAttribute("aria-hidden", isRaffle ? "true" : "false");
       }
     }
+    var openCharterStyleGate = null;
     function openCharter(opts) {
+      if (!openCharterStyleGate && typeof window.pokerCreateModalStyleGate === "function") openCharterStyleGate = window.pokerCreateModalStyleGate("home-info-modals");
+      if (openCharterStyleGate && openCharterStyleGate.wait(openCharter.bind(null, opts))) return;
       opts = opts || {};
       try {
         if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("club-charter");
@@ -96,6 +99,7 @@ function initHomeClubInfoModals() {
       }
     }
     function closeCharter() {
+      if (openCharterStyleGate) openCharterStyleGate.cancel();
       modal.setAttribute("aria-hidden", "true");
       unlockCharterBehindScroll();
       try {
@@ -247,7 +251,10 @@ function initHomeClubInfoModals() {
       } catch (eUnlock) {}
     }
     if (!modal) return;
+    var openWelcomeStyleGate = null;
     function openWelcome() {
+      if (!openWelcomeStyleGate && typeof window.pokerCreateModalStyleGate === "function") openWelcomeStyleGate = window.pokerCreateModalStyleGate("home-info-modals");
+      if (openWelcomeStyleGate && openWelcomeStyleGate.wait(openWelcome.bind(null))) return;
       try {
         if (typeof window.closeClubCharterModal === "function") window.closeClubCharterModal();
       } catch (eC) {}
@@ -259,6 +266,7 @@ function initHomeClubInfoModals() {
       if (paper) paper.scrollTop = 0;
     }
     function closeWelcome() {
+      if (openWelcomeStyleGate) openWelcomeStyleGate.cancel();
       modal.setAttribute("aria-hidden", "true");
       unlockWelcomeBehindScroll();
     }

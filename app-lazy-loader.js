@@ -401,6 +401,29 @@
   window.pokerEnsureScriptDomains = function (domains) {
     return ensureDomainsMaybeAsync(domains, { styles: false, scripts: true });
   };
+  // Each modal owns cancellation; shared CSS requests remain deduplicated by the loader.
+  window.pokerCreateModalStyleGate = function (domain) {
+    var generation = 0;
+    return {
+      cancel: function () { generation += 1; },
+      wait: function (open) {
+        var current = ++generation;
+        var pending = ensureDomainsMaybeAsync([domain], { styles: true, scripts: false });
+        if (!pending || typeof pending.then !== "function") return false;
+        pending.then(function () {
+          if (current === generation) open();
+        }).catch(function () {
+          if (current !== generation) return;
+          var message = "Не удалось загрузить оформление раздела. Попробуйте открыть его ещё раз.";
+          var tg = window.Telegram && window.Telegram.WebApp;
+          if (tg && tg.initData && tg.showAlert) tg.showAlert(message);
+          else window.alert(message);
+        });
+        return true;
+      }
+    };
+  };
+
   window.pokerEnsureStyleDomains = function (domains) {
     return ensureDomainsMaybeAsync(domains, { styles: true, scripts: false });
   };

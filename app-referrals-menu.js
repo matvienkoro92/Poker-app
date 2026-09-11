@@ -472,7 +472,10 @@
     fallback();
   }
 
+  var openModalStyleGate = null;
   function openModal(options) {
+    if (!openModalStyleGate && typeof window.pokerCreateModalStyleGate === "function") openModalStyleGate = window.pokerCreateModalStyleGate("home-info-modals");
+    if (openModalStyleGate && openModalStyleGate.wait(openModal.bind(null, options))) return;
     var opts = options && typeof options === "object" ? options : {};
     var modal = ensureModal();
     var initialTab = opts.tab || opts.initialTab || "links";
@@ -492,6 +495,7 @@
   }
 
   function closeModal() {
+    if (openModalStyleGate) openModalStyleGate.cancel();
     var modal = document.getElementById("clubReferralsModal");
     if (!modal) return;
     modal.classList.add("club-referrals-modal--hidden");
