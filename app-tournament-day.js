@@ -2210,6 +2210,8 @@ function updateTournamentDayBlock() {
         : getNextWeekdayFreerollSlot(n, selectedWeekday, TOURNAMENT_OF_DAY_BY_WEEKDAY[selectedWeekday]);
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
+    var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
+    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = /трактор/i.test(detailNameStr) ? "shkarubo" : selectedWeekday === 5 ? "cooler" : "shtukatur";
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
     var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;

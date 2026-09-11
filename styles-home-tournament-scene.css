@@ -7,7 +7,7 @@
   /* Reclaim part of the transparent space below the illustrated table. */
   margin-bottom: -6% !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
-  background: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') center / 100% 100% no-repeat !important;
+  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp')) center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
@@ -410,13 +410,13 @@
   background: none !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
-  background-image: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') !important;
+  background-image: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp')) !important;
   clip-path: none;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0H100V100H0Z M5 33.5H9.5L11.5 38H26.5V48H28L27 49L26 54L0 55.5V48H4V38H6Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0 !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
-  background: url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp') center / 100% 100% no-repeat !important;
+  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp')) center / 100% 100% no-repeat !important;
 }
 .home-tournament-raffle-chest-art { display: none; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
@@ -461,3 +461,18 @@
   color: #ffe9ad; font: 700 1.5cqw/1 Arial,sans-serif; white-space: nowrap;
 }
 #app.app.app--view-home #homeTournamentRaffleBonusTimer { color: #ffe9ad; font: 900 1.8cqw/1 Arial,sans-serif; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000; }
+
+/* Tractor tournament uses Pasha Shkarubo, including the raffle scene layers. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
+  --home-tournament-scene: url('./assets/home-tournament-shkarubo-scene-v1.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
+  display: none !important;
+}
+
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
+  --home-tournament-scene: url('./assets/home-tournament-cooler-scene-v1.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
+  display: none !important;
+}

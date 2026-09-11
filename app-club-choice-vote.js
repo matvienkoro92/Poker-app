@@ -698,6 +698,7 @@
       };
     }
     var description = String(candidate && candidate.description || "").trim();
+    if (normalizedNick === "botezgambit" && /30\.08/.test(description) && !/сателлит/i.test(description)) description = "Отобрался через сателлит и выиграл «Турнир Месяца» 30.08 без ребаев и аддонов. Приз — 277 000 ₽, крупнейший за первое место в турнирах клуба за месяц.";
     var titled = description.match(/^\s*[«\"]\s*([^»\"]+?)\s*[»\"]\s*[.\-—:]?\s*(.*)$/s);
     return {
       title: titled ? titled[1].trim() : "",
