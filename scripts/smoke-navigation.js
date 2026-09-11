@@ -197,6 +197,7 @@ async function main() {
     let releaseAdminReportCore;
     let holdAdminReportCore = true;
     const submittedAdminReports = [];
+    let rejectedReportAttempt = null;
     const submittedRakebackDrafts = [];
     // Match the application's 06:00 Moscow business-day date, including overnight runs.
     const dateParts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Moscow", year: "numeric", month: "2-digit", day: "2-digit" })
@@ -268,6 +269,10 @@ async function main() {
       }
       if (method === "POST" || method === "PUT") {
         const payload = JSON.parse(route.request().postData() || "{}");
+        if (payload.action === "rakeback_cash_statuses") {
+          await route.fulfill({ status: 200, headers: corsHeaders, contentType: "application/json", body: JSON.stringify({ ok: true, payments: (payload.rows || []).map(() => null) }) });
+          return;
+        }
         if (payload.action === "rakeback_draft_save") {
           submittedRakebackDrafts.push(payload);
           const incomingRows = Array.isArray(payload.rakebackRows) ? payload.rakebackRows : [];
@@ -307,6 +312,11 @@ async function main() {
             contentType: "application/json; charset=utf-8",
             body: JSON.stringify({ ok: true, rakebackDraft: smokeRakebackDraft }),
           });
+          return;
+        }
+        if (!rejectedReportAttempt) {
+          rejectedReportAttempt = payload;
+          await route.fulfill({ status: 503, headers: corsHeaders, contentType: "application/json", body: JSON.stringify({ ok: false, error: "Тестовый отказ записи" }) });
           return;
         }
         submittedAdminReports.push(payload);
@@ -1065,7 +1075,7 @@ async function main() {
     await sharedRow.locator("[data-rakeback-rake]").fill("10");
     await sharedRow.locator("[data-rakeback-percent]").fill("50");
     const rakebackDraftSaveResponse = page.waitForResponse((response) => {
-      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST" && JSON.parse(response.request().postData() || "{}").action === "rakeback_draft_save";
     }, { timeout: 5000 });
     await sharedRow.locator("[data-rakeback-save]").click();
     await rakebackDraftSaveResponse;
@@ -1116,7 +1126,7 @@ async function main() {
     const addonRow = page.locator("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']").first();
     await addonRow.locator("[data-rakeback-rake]").fill("25");
     const rakebackAddonSaveResponse = page.waitForResponse((response) => {
-      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST" && JSON.parse(response.request().postData() || "{}").action === "rakeback_draft_save";
     }, { timeout: 5000 });
     await addonRow.locator("[data-rakeback-save]").click();
     await rakebackAddonSaveResponse;
@@ -1215,7 +1225,7 @@ async function main() {
       throw new Error("admin report rakeback chained addon did not depend on previous addon: " + JSON.stringify(chainedAddonState));
     }
     const secondAddonSaveResponse = page.waitForResponse((response) => {
-      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST" && JSON.parse(response.request().postData() || "{}").action === "rakeback_draft_save";
     }, { timeout: 5000 });
     await page.evaluate(() => {
       const addon = Array.from(document.querySelectorAll("#adminReportRakebackTableBody [data-rakeback-shared-row][data-rakeback-kind='addon']")).find((row) => {
@@ -1437,7 +1447,7 @@ async function main() {
     await page.locator("[data-admin-report-tab='form']").click();
     await page.locator("#adminReportDeposit").fill("321");
     const submitResponse = page.waitForResponse((response) => {
-      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST";
+      return /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST" && !JSON.parse(response.request().postData() || "{}").action;
     }, { timeout: 5000 });
     await page.locator("#adminReportSubmitBtn").click();
     try {
@@ -1456,7 +1466,13 @@ async function main() {
       }));
       throw new Error("admin report submit POST response was not observed: " + JSON.stringify(submitDebugState) + "\nRequests:\n" + JSON.stringify(adminReportRequests) + "\nPage errors:\n" + errors.join("\n"));
     }
+    await page.waitForFunction(() => !document.getElementById("adminReportSubmitBtn").disabled);
+    if (await page.locator("#adminReportDeposit").inputValue() !== "321") throw new Error("failed report save erased the draft");
+    const reportRetryResponse = page.waitForResponse(response => /\/api\/admin-report-shifts/.test(response.url()) && response.request().method() === "POST" && !JSON.parse(response.request().postData() || "{}").action);
+    await page.locator("#adminReportSubmitBtn").click();
+    await reportRetryResponse;
     await page.waitForTimeout(500);
+    if (!rejectedReportAttempt.requestId || submittedAdminReports[0]?.requestId !== rejectedReportAttempt.requestId) throw new Error("report retry lost its stable operation ID");
     const submittedReportState = await page.evaluate(() => ({
       activePanel: document.querySelector(".admin-report-panel--active")?.getAttribute("data-admin-report-panel") || "",
       depositInput: document.getElementById("adminReportDeposit")?.value || "",

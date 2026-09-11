@@ -154,7 +154,9 @@
         }
       }
 
+      var pendingReportRequest = null;
       function submitAdminReport() {
+        if (submitBtn.disabled) return;
         var winGetApiBase = window && window.getApiBase;
         var base = typeof getApiBase === "function"
           ? getApiBase()
@@ -176,6 +178,17 @@
           payload.date = editingReport.date || payload.date;
           payload.weekday = editingReport.weekday || payload.weekday;
         }
+        if (!editingReportId) {
+          var requestStorageKey = "poker-admin-report-pending-request";
+          if (!pendingReportRequest) {
+            try { pendingReportRequest = JSON.parse(localStorage.getItem(requestStorageKey) || "null"); } catch (_) {}
+          }
+          if (!pendingReportRequest || !pendingReportRequest.id) {
+            pendingReportRequest = { id: "report_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2) };
+            try { localStorage.setItem(requestStorageKey, JSON.stringify(pendingReportRequest)); } catch (_) {}
+          }
+          payload.requestId = pendingReportRequest.id;
+        }
         submitBtn.disabled = true;
         var method = editingReportId ? "PUT" : "POST";
         var url = base.replace(/\/$/, "") + "/api/admin-report-shifts";
@@ -188,6 +201,7 @@
           .then(function (data) {
             submitBtn.disabled = false;
             if (data && data.ok) {
+              if (!editingReportId) { pendingReportRequest = null; try { localStorage.removeItem("poker-admin-report-pending-request"); } catch (_) {} }
               var accountedRakebackRows = null;
               if (!editingReportId && !rakebackModule) {
                 markUnaccountedRakebackRowsAccounted(data.report && data.report.id, data.report && data.report.createdAt);
@@ -214,12 +228,16 @@
                 tg.showAlert("Отчёт отправлен.");
               }
             } else {
-              if (tg && tg.showAlert) tg.showAlert((data && data.error) || "Ошибка отправки.");
+              if (data && data.requestConflict) { pendingReportRequest = null; try { localStorage.removeItem("poker-admin-report-pending-request"); } catch (_) {} }
+              var reportError = (data && data.error) || "Ошибка отправки.";
+              if (tg && tg.showAlert) tg.showAlert(reportError);
+              else window.alert(reportError);
             }
           })
           .catch(function () {
             submitBtn.disabled = false;
             if (tg && tg.showAlert) tg.showAlert(POKER_NET_ERR);
+            else window.alert(POKER_NET_ERR);
           });
       }
 

@@ -269,6 +269,23 @@ class MemoryRedis {
       const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
       const keys = command.slice(3, 3 + keyCount).map(String);
       const args = command.slice(3 + keyCount).map(String);
+      if (String(command[1]).includes("report_transaction_v1")) {
+        for (const snap of JSON.parse(args[0])) {
+          const current = snap.kind === "list" ? this.l(snap.key) : this.kv.get(snap.key);
+          if (snap.kind === "list" ? JSON.stringify(current) !== JSON.stringify(snap.value) : (snap.exists ? current !== snap.value : current != null)) return this.result(0);
+        }
+        for (const cmd of JSON.parse(args[1])) { const row = this.exec(cmd); if (row.error) return row; }
+        return this.result(1);
+      }
+      if (String(command[1]).includes("respect_vote_v1")) {
+        const [target, voter, action] = args, votes = this.h(keys[1]), current = votes.get(voter);
+        if (current === action) return this.result([action === "up" ? "already_raised" : "already_lowered"]);
+        if (action === "withdraw" && !current) return this.result(["no_vote"]);
+        const delta = (action === "up" ? 1 : action === "down" ? -1 : 0) - (current === "up" ? 1 : current === "down" ? -1 : 0);
+        const result = this.exec(["HINCRBY", keys[0], target, delta]);
+        if (action === "withdraw") votes.delete(voter); else votes.set(voter, action);
+        return this.result(["ok", result.result]);
+      }
       if (String(command[1]).includes("profile_comment_save_v1")) {
         const previous = keys[1] ? this.kv.get(keys[1]) : null;
         if (previous != null) return this.result(previous === args[2] ? 0 : -1);
@@ -980,6 +997,7 @@ async function testAuthAndAdmin(redis) {
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.rake, ["300", "400"], "win/loss save preserves figures group");
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.roomWinLoss, ["10", "-20"], "win/loss save updates only its group");
   let shiftReportRes = await call(reportHandler, req("POST", {}, {
+    requestId: "contract-report-1",
     pwaSession: roman1ReportToken,
     date: "01.06.2026",
     weekday: "Понедельник",
@@ -1034,6 +1052,7 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual((shiftReportRes.body.reports || []).some((report) => report.id === shiftReportId), false, "deleted sent report is gone");
 
   shiftReportRes = await call(reportHandler, req("POST", {}, {
+    requestId: "contract-report-2",
     pwaSession: roman178ReportToken,
     date: "15.06.2026",
     weekday: "Понедельник",
