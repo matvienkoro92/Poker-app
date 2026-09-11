@@ -2705,6 +2705,66 @@
         "app-chat-user-modal.js",
         "app-profile-appearance.js"
       ]
+    },
+    {
+      "name": "pokerPublicImageSrc",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-data.js"
+      ],
+      "consumedBy": [
+        "app-home-friend-news.js",
+        "app-hall-fame.js",
+        "app-profile-friends.js"
+      ]
+    },
+    {
+      "name": "pokerLoadTournamentBetHome",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-data.js"
+      ],
+      "consumedBy": [
+        "app-home-friend-news.js",
+        "app-tournament-bet.js"
+      ]
+    },
+    {
+      "name": "pokerInvalidateTournamentBetHome",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-data.js"
+      ],
+      "consumedBy": [
+        "app-tournament-bet.js"
+      ]
+    },
+    {
+      "name": "pokerCreateModalStyleGate",
+      "domain": "lazyLoader",
+      "exportedBy": [
+        "app-lazy-loader.js"
+      ],
+      "consumedBy": [
+        "app-home-club-info-modals.js",
+        "app-home-vpn-proxy-modal.js",
+        "app-home-gazette-tasks.js",
+        "app-referrals-menu.js",
+        "app-pwa-auth-runtime.js",
+        "app-home-planner-runtime.js"
+      ]
+    },
+    {
+      "name": "__pokerSummerArchive",
+      "domain": "rating-summer",
+      "exportedBy": [
+        "app-rating-view-adapter.js",
+        "app-view-router.js"
+      ],
+      "consumedBy": [
+        "app-rating-view-adapter.js",
+        "app-view-router.js"
+      ]
     }
   ]
 }

@@ -29,7 +29,7 @@
     <meta name="apple-mobile-web-app-title" content="Два туза" />
     <meta name="application-name" content="Два туза" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="apple-touch-icon" href="./assets/logo-two-aces.png?v=3.176" />
+    <link rel="apple-touch-icon" href="./assets/logo-two-aces-display-v1.webp?v=3.176" />
     <style id="overscroll-root-critical">
       html {
         background-color: #05070d !important;
@@ -349,7 +349,7 @@
     <meta name="twitter:description" content="Покерный клуб «Два туза»: розыгрыши, раздача дня, рейтинг и новости клуба." />
     <meta name="twitter:image" content="https://poker-app-ebon.vercel.app/assets/home-link-preview.jpg?v=3.510" />
     <link rel="manifest" href="./manifest.json?v=3.176" />
-    <link rel="preload" as="image" href="./assets/logo-two-aces.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="./assets/logo-two-aces-display-v1.webp" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/app-boot-poker21-plus-chip.webp?v=1" fetchpriority="high" />
     <script>
       (function preloadCurrentTournamentPoster() {
@@ -377,6 +377,21 @@
       })();
     </script>
     <link type="application/poker-lazy-style" data-poker-lazy-domain="cashout" data-poker-lazy-position="source" href="./styles-download.css?v=4.002" />
+    <script>
+      if ("IntersectionObserver" in window) {
+        document.documentElement.classList.add("home-art-observer");
+        document.addEventListener("DOMContentLoaded", function () {
+          var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              entry.target.setAttribute("data-home-art-ready", "");
+              observer.unobserve(entry.target);
+            });
+          }, { rootMargin: "300px" });
+          document.querySelectorAll("[data-home-deferred-art]").forEach(function (node) { observer.observe(node); });
+        }, { once: true });
+      }
+    </script>
     <link rel="stylesheet" href="./styles.css?v=4.031" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-info-modals" data-poker-lazy-position="source" href="./styles-home-info-modals.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="editor-planner" data-poker-lazy-position="source" href="./styles-home-planner-modal.css?v=1" />
@@ -396,10 +411,10 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.024" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=4.064" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=home-opt-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=1" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=6" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=30" />
+    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=home-opt-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.030" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -637,7 +652,7 @@
     </script>
     <div class="pwa-auth-screen pwa-auth-screen--hidden" id="pwaAuthScreen" aria-hidden="true">
       <div class="pwa-auth-screen__identifying" id="pwaAuthIdentifyingPanel" aria-live="polite" aria-busy="true" hidden>
-        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
+        <img src="./assets/logo-two-aces-display-v1.webp" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <span class="pwa-auth-screen__identifying-spinner" aria-hidden="true"></span>
         <p class="pwa-auth-screen__identifying-text" id="pwaAuthIdentifyingText">Подождите, идентифицируем ваш аккаунт</p>
@@ -647,7 +662,7 @@
           <button type="button" class="pwa-auth-screen__lang-btn pwa-auth-screen__lang-btn--active" id="pwaAuthLangRuBtn">RU</button>
           <button type="button" class="pwa-auth-screen__lang-btn" id="pwaAuthLangEnBtn">EN</button>
         </div>
-        <img src="./assets/logo-two-aces.png" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
+        <img src="./assets/logo-two-aces-display-v1.webp" alt="TWO ACES" class="pwa-auth-screen__logo" width="62" height="62" decoding="sync" fetchpriority="high" loading="eager" />
         <h1 class="pwa-auth-screen__title">TWO ACES</h1>
         <div class="pwa-auth-screen__mount" id="pwaAuthLoginMount"></div>
       </div>
@@ -682,7 +697,7 @@
         aria-label="О клубе «Два туза»"
           >
         <img
-          src="./assets/logo-two-aces.png"
+          src="./assets/logo-two-aces-display-v1.webp"
           alt="Клуб Два туза"
           class="logo__image"
           width="42"
@@ -936,7 +951,7 @@
           </span>
           <picture><img
             class="home-daily-deal-hero__image"
-                src="./assets/daily-poker-character-no-stacks-v1-720.webp"
+                src="./assets/daily-poker-character-no-stacks-v1-display-v1.webp"
             alt=""
             width="720"
             height="900"
@@ -956,20 +971,20 @@
             title="Чат в ТГ"
             aria-label="Чат в ТГ"
           >
-            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-chat-v1-480.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-chat-v1-light-v1-display-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-lounge-character-name">Валерка</span>
             <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
           </a>
           <a href="#" class="home-lounge-link  home-lounge-link--raffles" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
             <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
             <span class="raffle-active-amount-badge raffle-active-amount-badge--hidden" id="raffleActiveAmountBadge" aria-hidden="true">Идут на 0 ₽</span>
-            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-raffles-v1-480.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-raffles-v1-light-v1-display-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-lounge-character-name">Алёнка</span>
             <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
           </a>
           <button type="button" class="home-lounge-link  home-lounge-link--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки. Бонус 25 000 рублей">
             <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 25 000 ₽</span>
-            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-players-v1-480.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-players-v1-light-v1-display-v1.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-lounge-character-name">Waaar</span>
             <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки клуба</span>
           </button>
@@ -1004,7 +1019,7 @@
             </button>
           </div>
         </div>
-        <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
+        <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus" data-home-deferred-art>
           <span class="home-table-seam-fix" aria-hidden="true"></span>
           <button type="button" class="home-tournament-share" id="homeTournamentShareBtn" aria-label="Позвать друга на турнир вечера"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 18-7-6 18-5-7-7-4Zm7 4 7-7"/></svg><span>Позвать друга</span></button>
           <h2 class="home-tournament-section-title"><span class="home-ticket-brand"><span aria-hidden="true">♠</span> POKER21 <span class="home-ticket-brand__cross">×</span> ДВА ТУЗА</span><span class="home-ticket-session">Турнир вечера · 18:00 МСК</span></h2>
@@ -1209,7 +1224,7 @@
               <span class="home-compact-link__sub">Баллы с января 2026</span>
             </span>
             <span class="home-compact-link__cta">Смотреть рейтинг</span>
-            <img class="home-compact-link__rocket" src="./assets/home-rating-rocket-monkey.png?v=3.222" alt="" width="444" height="720" loading="lazy" decoding="async" aria-hidden="true" />
+            <img class="home-compact-link__rocket" src="./assets/home-rating-rocket-monkey-display-v1.webp?v=3.222" alt="" width="444" height="720" loading="lazy" decoding="async" aria-hidden="true" />
           </a>
           <a href="#" class="home-compact-link home-compact-link--hall" data-view-target="hall-of-fame" aria-label="Зал славы клуба">
             <img class="home-compact-link__banner" src="./assets/home-hall-of-fame-banner-gold.jpg" alt="" width="1672" height="941" loading="lazy" decoding="async" aria-hidden="true" />
@@ -1366,7 +1381,7 @@
               <span class="games-apps-card__text" id="homeEquilatorTitle">Эквилятор</span>
             </a>
             <a href="#" class="feature feature--link feature--app games-apps-card games-apps-card--learn games-apps-grid__promo-learn" data-view-target="learn-play-hub" aria-label="Научиться играть — 1 урок бесплатно, полный пакет за 3 000 рублей">
-              <img class="games-apps-card__image" src="./assets/home-games-learn-card-v2.webp?v=1" alt="" width="560" height="672" loading="lazy" decoding="async" />
+              <img class="games-apps-card__image" src="./assets/home-games-learn-card-v2-display-v1.webp?v=1" alt="" width="560" height="672" loading="lazy" decoding="async" />
               <span class="games-apps-card__text"><span id="homeLearnTitle">Научиться играть</span></span>
             </a>
             <a href="#" class="feature feature--link feature--app games-apps-card games-apps-card--streams" data-view-target="streams" aria-label="Стримы">
@@ -1386,7 +1401,7 @@
               </div>
             </a>
             <button type="button" class="feature feature--app games-apps-card games-apps-card--partnership" id="partnershipOpenBtn" aria-label="Партнёрство">
-              <img class="games-apps-card__image" src="./assets/home-games-partnership-card.webp?v=3.306" alt="" width="560" height="672" loading="lazy" decoding="async" />
+              <img class="games-apps-card__image" src="./assets/home-games-partnership-card-display-v1.webp?v=3.306" alt="" width="560" height="672" loading="lazy" decoding="async" />
               <span class="games-apps-card__text" id="homePartnerTitle">Партнёрство</span>
             </button>
           </div>
@@ -1461,7 +1476,7 @@
           <div class="daily-poker__feature">
             <header class="daily-poker__header">
               <button type="button" class="bonus-game-back daily-poker__back" data-view-target="home" aria-label="На главную">←</button>
-              <img class="daily-poker__hero-monkey" src="./assets/daily-poker-monkey.webp?v=3.319" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
+              <img class="daily-poker__hero-monkey" src="./assets/daily-poker-monkey-display-v1.webp?v=3.319" alt="" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" />
               <div class="daily-poker__heading">
                 <p class="daily-poker__eyebrow">Раздача дня</p>
                 <h2 class="daily-poker__title" id="dailyPokerTitle">Собери комбу и получи бонус</h2>
@@ -1927,7 +1942,7 @@
     <script defer src="./app-network.js?v=4.002"></script>
     <script defer src="./app-shared-helpers.js?v=4.002"></script>
     <script defer src="./app-click-sound.js?v=4.030"></script>
-    <script defer src="./app-home-init.js?v=4.002"></script>
+    <script defer src="./app-home-init.js?v=home-opt-1"></script>
     <script defer src="./app-home-daily-total.js?v=4.003"></script>
     <script src="./asset-runtime-config.js?v=4.002"></script>
     <script defer src="./app-home-media.js?v=4.002"></script>
@@ -1937,7 +1952,7 @@
     <script defer src="./app-home-planner-runtime.js?v=4.002"></script>
     <script defer src="./app-home-planner.js?v=4.002"></script>
     <script defer src="./app-home-tasks.js?v=4.002"></script>
-    <script defer src="./app-tournament-day.js?v=4.032"></script>
+    <script defer src="./app-tournament-day.js?v=home-opt-1-4.032"></script>
     <script defer src="./app-home-widgets-bootstrap.js?v=4.002"></script>
     <script defer src="./app-home-deeplinks.js?v=4.031"></script>
     <script defer src="./app-home-club-info-modals.js?v=4.002"></script>
@@ -1945,7 +1960,8 @@
     <script defer src="./app-home-gazette-comments.js?v=4.002"></script>
     <script defer src="./app-home-gazette-tasks.js?v=4.002"></script>
     <script defer src="./club-news-data.js?v=4.002"></script>
-    <script defer src="./app-home-friend-news.js?v=4.031"></script>
+    <script defer src="./app-home-data.js?v=1"></script>
+    <script defer src="./app-home-friend-news.js?v=home-opt-1"></script>
     <script defer src="./app-my-summary.js?v=1"></script>
     <script defer src="./app-club-social.js?v=1"></script>
     <script defer src="./app-club-reviews.js?v=1"></script>
@@ -1956,7 +1972,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-summer" src="./app-rating-summer-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js?v=4.031"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-utils.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-render-utils.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-identity-formatters.js?v=4.002"></script>
@@ -1969,7 +1985,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-add-members.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-create.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-info.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=4.004"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-access.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-templates.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-render-helpers.js?v=4.002"></script>
@@ -1998,7 +2014,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-unread.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-keyboard.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-auth-guard.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-bootstrap.js?v=4.002"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-bootstrap.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialog-actions.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-dialog-preview.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-push-open.js?v=4.002"></script>
@@ -2023,11 +2039,11 @@
     <script defer src="./app-profile-user-info.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-pokerplus.js?v=4.023"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-email-auth.js?v=4.003"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-friends.js?v=4.002"></script>
-    <script defer src="./app-profile-avatar-cache.js?v=4.002"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-friends.js?v=home-opt-1"></script>
+    <script defer src="./app-profile-avatar-cache.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-avatar.js?v=4.002"></script>
     <script defer src="./rating-player-totals.js?v=4.002"></script>
-    <script defer src="./app-profile.js?v=4.010"></script>
+    <script defer src="./app-profile.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-shows.js?v=4.002"></script>
     <script defer src="./app-pwa-auth-session.js?v=4.002"></script>
     <script defer src="./app-pwa-auth-i18n.js?v=4.003"></script>
@@ -2062,15 +2078,15 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-club-choice" src="./app-club-choice-vote.js?v=4.003"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-private-cash" src="./app-private-cash.js?v=4.003"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-sng" src="./app-sng-champions.js?v=4.004.1.1.3"></script>
-    <script defer src="./app-tournament-bet.js?v=4.029"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="home-widget-sng" src="./app-sng-champions.js?v=home-opt-1"></script>
+    <script defer src="./app-tournament-bet.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="club-tasks" src="./app-club-tasks.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-spring-runtime.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-summer-runtime.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-data-registry.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-week-tops.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=4.010"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=home-opt-1"></script>
     <script defer src="./app-shell-layout.js?v=4.002"></script>
     <script defer src="./app-navigation-scroll.js?v=4.002"></script>
     <script defer src="./app-html-fragments.js?v=4.002"></script>

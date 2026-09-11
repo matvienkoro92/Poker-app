@@ -1477,7 +1477,7 @@ function profileMonthStoryHero() {
     !artImg.classList.contains("chat-user-modal__rating-art-img--avatar-fallback") &&
     !artImg.classList.contains("chat-user-modal__rating-art-img--default-hero");
   return {
-    image: isPersonalCharacter ? artSrc : (profilePublicCardAvatarUrl() || artSrc || "./assets/daily-poker-monkey.webp"),
+    image: isPersonalCharacter ? artSrc : (profilePublicCardAvatarUrl() || artSrc || "./assets/daily-poker-monkey-display-v1.webp"),
     character: isPersonalCharacter,
     name: profilePublicCardDisplayName(),
   };
@@ -1527,7 +1527,7 @@ function profileMonthStoryRowsHtml(rows, range, hero) {
     group.rows.push(row);
   });
   var heroData = hero && typeof hero === "object" ? hero : {};
-  var heroImage = String(heroData.image || "./assets/daily-poker-monkey.webp").trim();
+  var heroImage = String(heroData.image || "./assets/daily-poker-monkey-display-v1.webp").trim();
   var heroName = String(heroData.name || profilePublicCardDisplayName() || "Игрок").trim();
   var prizeTotal = list.reduce(function (sum, row) { return sum + (Number(row && row.prizeAmount) || 0); }, 0);
   var victories = list.filter(function (row) { return Number(row && row.tournamentPlace) === 1; }).length;

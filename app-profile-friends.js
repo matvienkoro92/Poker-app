@@ -911,7 +911,7 @@ function initProfileFriends() {
       }).join("");
       findFriendPlayers.querySelectorAll("img[data-fallback-src]").forEach(function (img) {
         img.addEventListener("error", function () {
-          var fallback = img.getAttribute("data-fallback-src") || "./assets/avatar-chip.jpg";
+          var fallback = img.getAttribute("data-fallback-src") || "./assets/avatar-chip-display-v1.webp";
           if (img.getAttribute("src") !== fallback) img.setAttribute("src", fallback);
         }, { once: true });
       });
@@ -999,6 +999,7 @@ function initProfileFriends() {
   }
 
   function profileFindFriendAvatarSrc(value) {
+  if (typeof window.pokerPublicImageSrc === "function") value = window.pokerPublicImageSrc(value);
     var raw = String(value || "").trim();
     if (!raw) return "";
     if (raw.indexOf("preset:") !== 0) return raw;
@@ -1015,18 +1016,18 @@ function initProfileFriends() {
   function profileFindFriendFallbackAvatar(value) {
     var presets = typeof POKER_PROFILE_AVATAR_PRESETS !== "undefined" && Array.isArray(POKER_PROFILE_AVATAR_PRESETS)
       ? POKER_PROFILE_AVATAR_PRESETS
-      : [{ src: "./assets/avatar-chip.jpg" }];
+      : [{ src: "./assets/avatar-chip-display-v1.webp" }];
     var source = String(value || "Игрок");
     var hash = 0;
     for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
-    return presets[hash % presets.length].src || "./assets/avatar-chip.jpg";
+    return presets[hash % presets.length].src || "./assets/avatar-chip-display-v1.webp";
   }
 
   function loadProfileSearchSuggestRows() {
     if (searchSuggestRowsCache) return Promise.resolve(searchSuggestRowsCache);
     if (searchSuggestRowsPromise) return searchSuggestRowsPromise;
     try {
-      var cachedLevelRows = JSON.parse(sessionStorage.getItem("poker_hall_fish_level_rows_v2") || "null");
+      var cachedLevelRows = JSON.parse(sessionStorage.getItem("poker_hall_fish_level_rows_v3") || "null");
       if (
         cachedLevelRows &&
         Array.isArray(cachedLevelRows.rows) &&
@@ -1037,12 +1038,12 @@ function initProfileFriends() {
       }
     } catch (eLevelRowsCache) {}
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1", { cache: "default" })
+    searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1&avatarFormat=url", { cache: "default" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "suggestions_failed");
         try {
-          sessionStorage.setItem("poker_hall_fish_level_rows_v2", JSON.stringify({
+          sessionStorage.setItem("poker_hall_fish_level_rows_v3", JSON.stringify({
             ts: Date.now(),
             rows: data.levelRows || [],
           }));
@@ -1302,7 +1303,7 @@ function initProfileFriends() {
   }
 
   function previewAvatar(row) {
-    return String((row && (row.avatarUrl || row.avatar || row.photoUrl)) || "./assets/avatar-chip.jpg").trim() || "./assets/avatar-chip.jpg";
+    return String((row && (row.avatarUrl || row.avatar || row.photoUrl)) || "./assets/avatar-chip-display-v1.webp").trim() || "./assets/avatar-chip-display-v1.webp";
   }
 
   function buildFriendInviteLink() {

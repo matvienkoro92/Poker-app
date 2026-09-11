@@ -1243,13 +1243,13 @@ if (chatUserModalEl) {
           "monkey", "fox", "chip", "koala", "raven", "crocodile", "rabbit", "chameleon",
           "panda", "wolf", "owl", "bat", "gorilla",
         ].map(function (id) {
-          return { src: id === "monkey" ? "./assets/daily-poker-monkey.webp" : "./assets/avatar-" + id + ".jpg" };
+          return { src: id === "monkey" ? "./assets/daily-poker-monkey-display-v1.webp" : "./assets/avatar-" + id + ".jpg" };
         });
     var source = String(value || "Игрок");
     var hash = 0;
     for (var i = 0; i < source.length; i += 1) hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
     var preset = presets[hash % presets.length];
-    return String(preset && preset.src || "./assets/avatar-chip.jpg");
+    return String(preset && preset.src || "./assets/avatar-chip-display-v1.webp");
   }
   function applyChatUserModalBaseAvatar(avatarUrl, id, title) {
     if (!modalAvatar || !modalAvatarPlaceholder) return;

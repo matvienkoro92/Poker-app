@@ -503,32 +503,32 @@ var hallFishUpcomingFilter = "all";
 var hallFishUpcomingExpanded = false;
 var hallFishPrefetchedProfiles = Object.create(null);
 var HALL_FISH_LINK_HINT = "Чтобы попасть в рейтинг уровней, привяжите профиль из Покер21 в графе «Профиль».";
-var HALL_FISH_ROWS_SESSION_CACHE_KEY = "poker_hall_fish_level_rows_v2";
+var HALL_FISH_ROWS_SESSION_CACHE_KEY = "poker_hall_fish_level_rows_v3";
 var HALL_FISH_ROWS_SESSION_CACHE_MS = 60000;
 var HALL_FISH_BIRTHDAYS_SESSION_CACHE_KEY = "poker_hall_fish_birthdays_v1";
 var HALL_FISH_CALENDAR_EVENTS_LOCAL_KEY = "poker_hall_fish_calendar_events_v1";
 var HALL_FISH_PRESET_AVATAR_SRC = {
-  tiger: "./assets/avatar-tiger.jpg",
-  raccoon: "./assets/avatar-raccoon.jpg",
-  skull: "./assets/avatar-skull.jpg",
-  phoenix: "./assets/avatar-phoenix.jpg",
-  octopus: "./assets/avatar-octopus.jpg",
-  cat: "./assets/avatar-cat.jpg",
-  robot: "./assets/avatar-robot.jpg",
-  bulldog: "./assets/avatar-bulldog.jpg",
-  monkey: "./assets/daily-poker-monkey.webp",
-  fox: "./assets/avatar-fox.jpg",
-  chip: "./assets/avatar-chip.jpg",
-  koala: "./assets/avatar-koala.jpg",
-  raven: "./assets/avatar-raven.jpg",
-  crocodile: "./assets/avatar-crocodile.jpg",
-  rabbit: "./assets/avatar-rabbit.jpg",
-  chameleon: "./assets/avatar-chameleon.jpg",
-  panda: "./assets/avatar-panda.jpg",
-  wolf: "./assets/avatar-wolf.jpg",
-  owl: "./assets/avatar-owl.jpg",
-  bat: "./assets/avatar-bat.jpg",
-  gorilla: "./assets/avatar-gorilla.jpg",
+  tiger: "./assets/avatar-tiger-display-v1.webp",
+  raccoon: "./assets/avatar-raccoon-display-v1.webp",
+  skull: "./assets/avatar-skull-display-v1.webp",
+  phoenix: "./assets/avatar-phoenix-display-v1.webp",
+  octopus: "./assets/avatar-octopus-display-v1.webp",
+  cat: "./assets/avatar-cat-display-v1.webp",
+  robot: "./assets/avatar-robot-display-v1.webp",
+  bulldog: "./assets/avatar-bulldog-display-v1.webp",
+  monkey: "./assets/daily-poker-monkey-display-v1.webp",
+  fox: "./assets/avatar-fox-display-v1.webp",
+  chip: "./assets/avatar-chip-display-v1.webp",
+  koala: "./assets/avatar-koala-display-v1.webp",
+  raven: "./assets/avatar-raven-display-v1.webp",
+  crocodile: "./assets/avatar-crocodile-display-v1.webp",
+  rabbit: "./assets/avatar-rabbit-display-v1.webp",
+  chameleon: "./assets/avatar-chameleon-display-v1.webp",
+  panda: "./assets/avatar-panda-display-v1.webp",
+  wolf: "./assets/avatar-wolf-display-v1.webp",
+  owl: "./assets/avatar-owl-display-v1.webp",
+  bat: "./assets/avatar-bat-display-v1.webp",
+  gorilla: "./assets/avatar-gorilla-display-v1.webp",
 };
 
 function hallFishEsc(s) {
@@ -557,6 +557,7 @@ function hallFishDecodeData(value) {
 }
 
 function hallFishResolveAvatarSrc(value) {
+  if (typeof window.pokerPublicImageSrc === "function") value = window.pokerPublicImageSrc(value);
   var raw = String(value || "").trim();
   if (!raw) return "";
   if (raw.indexOf("preset:") === 0) {
@@ -692,7 +693,7 @@ function hallFishFetchRows() {
   if (hallFishRatingRowsPromise) return hallFishRatingRowsPromise;
   var base = hallFishGetApiBase();
   if (!base) return Promise.reject(new Error("no-api-base"));
-  var q = "?publicLevels=1";
+  var q = "?publicLevels=1&avatarFormat=url";
   hallFishRatingRowsPromise = hallFishFetch(base + "/api/player-crm" + q + "&_t=" + Date.now(), { cache: "no-store" })
     .then(function (r) { return r.json(); })
     .then(function (data) {

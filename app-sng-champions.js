@@ -593,7 +593,7 @@
     "kriak": "./assets/summer-rating-player-kriak.webp",
     "хер вам)))))": "./assets/summer-rating-player-khervam.webp",
     "alenast": "./assets/summer-rating-league2-player-alena.webp",
-    "shkarubo": "./assets/summer-rating-league2-player-shkarubo-light-v1.webp",
+    "shkarubo": "./assets/summer-rating-league2-player-shkarubo-light-v1-display-v1.webp",
     "sarmat1305": "./assets/summer-rating-league2-player-sarmat-light-v1.webp",
     "палач": "./assets/summer-rating-league2-player-palach.webp",
     "nakurikota": "./assets/summer-rating-league2-player-nakurikota.webp",

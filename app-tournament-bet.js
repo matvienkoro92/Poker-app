@@ -448,6 +448,7 @@
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось выполнить действие");
+        if (typeof window.pokerInvalidateTournamentBetHome === "function") window.pokerInvalidateTournamentBetHome();
         if (payload.action === "subscribe" || payload.action === "unsubscribe") {
           subscribed = data.subscribed === true;
           render();
@@ -675,11 +676,7 @@
     if (!home || (modal && !modal.hidden)) return;
     homePlaqueLoading = true;
     homePlaqueLastRefreshAt = Date.now();
-    return fetch(baseUrl() + API_PATH + authQuery("?"), { cache: "no-store" })
-      .then(function (response) {
-        if (!response.ok) throw new Error("Home plaque unavailable");
-        return response.json();
-      })
+    return window.pokerLoadTournamentBetHome(true)
       .then(function (data) {
         if (data && data.ok && !loading && !(modal && !modal.hidden)) updateHomeButton(data);
       })
@@ -690,7 +687,12 @@
   window.addEventListener("online", refreshHomePlaque);
   window.addEventListener("pageshow", refreshHomePlaque);
   document.addEventListener("visibilitychange", refreshHomePlaque);
-  function initialLoad() { if (deepLinkEventId || deepLinkSection) open(); else load(true); }
+  function initialLoad() {
+    if (deepLinkEventId || deepLinkSection) open();
+    else window.pokerLoadTournamentBetHome().then(function (data) {
+      if (!loading && !(modal && !modal.hidden)) updateHomeButton(data);
+    }).catch(function () {});
+  }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialLoad, { once: true });
   else initialLoad();
   window.openTournamentBetModal = open;

@@ -604,39 +604,47 @@ function hydrateRaffleBadgeFromStorage() {
 }
 
 var raffleBadgeHomeFetchPromise = null;
+var raffleBadgeHomeFetchKey = "";
 var RAFFLE_BADGE_HOME_TTL_MS = 60 * 1000;
 
 function fetchRaffleBadge() {
   var force = arguments.length > 0 && arguments[0] && arguments[0].force === true;
+  var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
   var cached = null;
   try {
     cached = window._rafflesCache && window._rafflesCache.homeBonus;
-    if (!force && cached && cached.data && cached.time && Date.now() - cached.time < RAFFLE_BADGE_HOME_TTL_MS) {
+    if (!force && cached && cached.authKey === q && cached.data && cached.time && Date.now() - cached.time < RAFFLE_BADGE_HOME_TTL_MS) {
       var cachedList = Array.isArray(cached.data.activeRaffles)
         ? cached.data.activeRaffles
         : (cached.data.activeRaffle ? [cached.data.activeRaffle] : []);
       updateRaffleBadge(cachedList);
+      return Promise.resolve(cached.data);
     }
   } catch (eCachedBadge) {}
-  if (!force && raffleBadgeHomeFetchPromise) return raffleBadgeHomeFetchPromise;
+  if (!force && raffleBadgeHomeFetchPromise && raffleBadgeHomeFetchKey === q) return raffleBadgeHomeFetchPromise;
   var base = typeof getApiBase === "function" ? getApiBase() : "";
   if (!base) return;
-  var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
   if (q === "?initData=" && typeof pokerCanSyncGuestProfileToServer === "function" && !pokerCanSyncGuestProfileToServer()) return;
-  raffleBadgeHomeFetchPromise = fetch(base + "/api/raffles" + q + "&homeBonus=1")
-    .then(function (r) { return r.json(); })
+  var demo = window.location && /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(window.location.hostname || "");
+  var request = fetch(base + "/api/raffles" + q + "&homeBonus=1" + (demo ? "&demo=1" : ""))
+    .then(function (r) { if (!r.ok) throw new Error("Raffle summary unavailable"); return r.json(); })
     .then(function (data) {
+      if (raffleBadgeHomeFetchPromise !== request) return;
+      if (typeof pokerRafflesApiQueryLeading === "function" && pokerRafflesApiQueryLeading() !== q) return;
       if (data && data.ok) {
         var activeList = Array.isArray(data.activeRaffles)
           ? data.activeRaffles
           : (data.activeRaffle ? [data.activeRaffle] : []);
         updateRaffleBadge(activeList);
         window._rafflesCache = window._rafflesCache || {};
-        window._rafflesCache.homeBonus = { data: data, time: Date.now() };
+        window._rafflesCache.homeBonus = { data: data, time: Date.now(), authKey: q };
+        return data;
       }
     })
     .catch(function () {})
-    .then(function () { raffleBadgeHomeFetchPromise = null; });
+    .finally(function () { if (raffleBadgeHomeFetchPromise === request) raffleBadgeHomeFetchPromise = null; });
+  raffleBadgeHomeFetchKey = q;
+  raffleBadgeHomeFetchPromise = request;
   return raffleBadgeHomeFetchPromise;
 }
 

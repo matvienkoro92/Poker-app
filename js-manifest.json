@@ -195,6 +195,7 @@
       "app-home-vpn-proxy-modal.js",
       "app-home-gazette-comments.js",
       "app-home-gazette-tasks.js",
+      "app-home-data.js",
       "app-home-friend-news.js",
       "app-club-choice-vote.js",
       "app-private-cash.js",

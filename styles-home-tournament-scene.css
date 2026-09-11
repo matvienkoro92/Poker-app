@@ -7,7 +7,7 @@
   /* Reclaim part of the transparent space below the illustrated table. */
   margin-bottom: -6% !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
-  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp')) center / 100% 100% no-repeat !important;
+  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1-display-v1.webp')) center / 100% 100% no-repeat !important;
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
@@ -20,7 +20,7 @@
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  background: url('./assets/home-tournament-shtukatur-bucket-name-v1-light-v1.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-tournament-shtukatur-bucket-name-v1-light-v1-display-v1.webp') center / 100% 100% no-repeat !important;
   clip-path: polygon(5.8% 41%, 24.7% 41%, 23.4% 48.7%, 7.3% 48.7%);
   transform: none !important;
   opacity: 1 !important;
@@ -401,7 +401,7 @@
 /* Apply only the corrected inner rail strip from the edited illustration. */
 #app .tournament-day-home-dual--tournament-focus > .home-table-seam-fix {
   position:absolute; inset:0; z-index:2; pointer-events:none;
-  background:url('./assets/home-table-seam-no-glow-v1.webp') center / 100% 100% no-repeat;
+  background:url('./assets/home-table-seam-no-glow-v1-display-v1.webp') center / 100% 100% no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1400' preserveAspectRatio='none'%3E%3Cpath d='M0 823 Q140 793 407 796 M590 797 Q650 797 741 809 M854 819 Q1020 828 1080 856' fill='none' stroke='white' stroke-width='24'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
 
@@ -410,18 +410,18 @@
   background: none !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
-  background-image: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp')) !important;
+  background-image: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1-display-v1.webp')) !important;
   clip-path: none;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0H100V100H0Z M5 33.5H9.5L11.5 38H26.5V48H28L27 49L26 54L0 55.5V48H4V38H6Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0 !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
-  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1.webp')) center / 100% 100% no-repeat !important;
+  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1-display-v1.webp')) center / 100% 100% no-repeat !important;
 }
 .home-tournament-raffle-chest-art { display: none; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
   display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background: url('./assets/home-tournament-raffle-chest-scene-v1.webp') center / 100% 100% no-repeat;
+  background: url('./assets/home-tournament-raffle-chest-scene-v1-display-v1.webp') center / 100% 100% no-repeat;
   clip-path: polygon(0 55.5%, 0 53%, 1.5% 53%, 1.7% 42%, 3% 42%, 3% 39.5%, 4.4% 38%, 7.5% 38.5%, 6.8% 35.5%, 8.4% 34.5%, 8.4% 33.5%, 13% 33%, 15.3% 35.4%, 16% 33.5%, 20% 33.2%, 24.7% 34.5%, 23.5% 38.5%, 27.3% 38.5%, 28.5% 40%, 29% 47%, 27% 49%, 26% 54%);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > #homeTournamentRaffleBonus {
@@ -471,7 +471,7 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-scene-v1.webp');
+  --home-tournament-scene: url('./assets/home-tournament-cooler-scene-v1-display-v1.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -503,3 +503,12 @@
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) > .home-tournament-bonuses--table {
   top: 72.5% !important; height: 14% !important;
 }
+
+/* Reveal scene backgrounds shortly before scrolling into view. */
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]),
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready])::before,
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready])::after,
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden]))::before,
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden]))::after,
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]) > .home-table-seam-fix,
+html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art { background-image: none !important; }

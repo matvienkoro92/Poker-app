@@ -1355,14 +1355,17 @@ function loadHomeTournamentRaffleBonus(force) {
     isLocal = /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(window.location.hostname || "");
   } catch (eLocal) {}
   homeTournamentRaffleBonusInFlight = true;
-  fetch(base + "/api/raffles" + q + "&homeBonus=1" + (isLocal ? "&demo=1" : ""))
-    .then(function (r) { return r.json().catch(function () { return null; }); })
+  var request = typeof fetchRaffleBadge === "function"
+    ? fetchRaffleBadge({ force: !!force })
+    : fetch(base + "/api/raffles" + q + "&homeBonus=1" + (isLocal ? "&demo=1" : ""))
+      .then(function (r) { return r.json().catch(function () { return null; }); });
+  Promise.resolve(request)
     .then(function (data) {
       homeTournamentRaffleBonusLoadedAt = Date.now();
       if (data && data.ok) {
         try {
           window._rafflesCache = window._rafflesCache || {};
-          window._rafflesCache.homeBonus = { data: data, time: Date.now() };
+          window._rafflesCache.homeBonus = { data: data, time: Date.now(), authKey: q };
         } catch (eSetCache) {}
         if (typeof updateRaffleBadge === "function") updateRaffleBadge(data.activeRaffles || data.raffles || []);
         setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(data.activeRaffles || data.raffles || []));

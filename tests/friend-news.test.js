@@ -48,11 +48,11 @@ function browserHarness() {
   const storage = new Map();
   const document = { readyState: "loading", hidden: false, addEventListener() {}, getElementById() { return null; }, querySelectorAll() { return []; } };
   const window = { addEventListener(name, callback) { callbacks[name] = callback; } };
-  const context = { window, document, console, Date: class extends Date { static now() { return now; } }, setTimeout, clearTimeout, setInterval, clearInterval,
+  const context = { window, document, console, URLSearchParams, pokerApiAuthQuery: () => "?pwaSession=test-session", Date: class extends Date { static now() { return now; } }, setTimeout, clearTimeout, setInterval, clearInterval,
     localStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } },
     sessionStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } } };
   let source = fs.readFileSync(require.resolve("../app-home-friend-news.js"), "utf8");
-  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsThird, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, eventTextHtml,
+  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsThird, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, loadClubWallEvents, eventTextHtml,
     bumpLoad: function () { loadSequence++; }, bumpAuth: function () { friendAuthGeneration++; },
     setState: function (id, rows, read) { friendNewsAccountId = id; friendTrackingSince = Date.parse("2026-09-01T00:00:00Z"); events = rows; friendReadIds = read || {}; },
     pending: function () { return friendReadPending; },
@@ -66,9 +66,21 @@ function browserHarness() {
     }
   };
   if (document.readyState === "loading")`);
-  vm.createContext(context); vm.runInContext(source, context);
+  vm.createContext(context); vm.runInContext(fs.readFileSync(require.resolve("../app-home-data.js"), "utf8"), context); vm.runInContext(source, context);
   return { context, api: window.test, document, window, storage };
 }
+
+test("guest skips private feeds and login makes them available", async () => {
+  const h = browserHarness();
+  let calls = 0;
+  h.context.pokerApiAuthQuery = () => "?initData=";
+  h.context.fetch = async () => { calls++; return { ok: true, json: async () => ({ ok: true, accountId: "ID1", friends: [], readIds: [], sharedEvents: [] }) }; };
+  await h.api.load(); await h.api.loadFriendNewsEnvelope(); await h.api.loadClubWallEvents([], "2026-09-11");
+  assert.equal(calls, 0);
+  h.context.pokerApiAuthQuery = () => "?pwaVkSession=vk-test";
+  await h.api.loadFriendNewsEnvelope();
+  assert.equal(calls, 1);
+});
 
 test("preview subset never determines membership of friend news", async () => {
   const h = browserHarness();

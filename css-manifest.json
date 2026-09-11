@@ -64,6 +64,22 @@
     "layout": {
       "owner": "shell",
       "scope": "global layout, app chrome, tabbar, responsive shell"
+    },
+    "home-info-modals": {
+      "owner": "home-info-modals",
+      "scope": "Club information dialogs loaded on open"
+    },
+    "home-news-modal": {
+      "owner": "home-news-modal",
+      "scope": "Friend and club news dialog loaded on open"
+    },
+    "editor-planner": {
+      "owner": "editor-planner",
+      "scope": "Editor planner dialog loaded on open"
+    },
+    "section-layout": {
+      "owner": "section-layout",
+      "scope": "Shared non-home section layouts"
     }
   },
   "domains": {
@@ -180,6 +196,18 @@
     "layout": [
       "styles-layout.css",
       "styles-layout-touch-targets.css"
+    ],
+    "home-info-modals": [
+      "styles-home-info-modals.css"
+    ],
+    "home-news-modal": [
+      "styles-home-news-modal.css"
+    ],
+    "editor-planner": [
+      "styles-home-planner-modal.css"
+    ],
+    "section-layout": [
+      "styles-section-layout.css"
     ]
   },
   "views": {

@@ -223,8 +223,10 @@
     } catch (error) {}
     if (remoteFetchInFlight[cacheKey]) return remoteFetchInFlight[cacheKey];
     var request = fetch(url, requestOptions || {}).then(function (response) {
+      if (!response.ok) throw new Error("news_http_" + response.status);
       return response.json();
     }).then(function (data) {
+      if (!data || data.ok === false) throw new Error("news_data_unavailable");
       try {
         sessionStorage.setItem(REMOTE_CACHE_PREFIX + cacheKey, JSON.stringify({ at: Date.now(), data: data }));
       } catch (error) {}
@@ -254,6 +256,7 @@
   }
 
   function loadFriendNewsEnvelope() {
+    if (!hasNewsAuth()) return Promise.resolve({ friends: [], sharedEvents: [], readIds: [] });
     if (envelopePromise) return envelopePromise;
     if (envelopeValue && Date.now() - envelopeAt < 30000) return Promise.resolve(envelopeValue);
     var generation = friendAuthGeneration;
@@ -410,6 +413,11 @@
       if (typeof getAuthQuery === "function") return getAuthQuery();
     } catch (error) {}
     return "";
+  }
+
+  function hasNewsAuth() {
+    var params = new URLSearchParams(authSuffix().replace(/^[?&]/, ""));
+    return ["initData", "pwaSession", "pwaVkSession"].some(function (key) { return !!params.get(key); });
   }
 
   function apiBase() {
@@ -592,23 +600,23 @@
       row.profileAvatarUrl
     ) || "").trim();
     var presets = {
-      tiger: "./assets/avatar-tiger.jpg", raccoon: "./assets/avatar-raccoon.jpg", skull: "./assets/avatar-skull.jpg",
-      phoenix: "./assets/avatar-phoenix.jpg", octopus: "./assets/avatar-octopus.jpg", cat: "./assets/avatar-cat.jpg",
-      robot: "./assets/avatar-robot.jpg", bulldog: "./assets/avatar-bulldog.jpg", monkey: "./assets/daily-poker-monkey.webp",
-      fox: "./assets/avatar-fox.jpg", chip: "./assets/avatar-chip.jpg", koala: "./assets/avatar-koala.jpg",
-      raven: "./assets/avatar-raven.jpg", crocodile: "./assets/avatar-crocodile.jpg", rabbit: "./assets/avatar-rabbit.jpg",
-      chameleon: "./assets/avatar-chameleon.jpg", panda: "./assets/avatar-panda.jpg", wolf: "./assets/avatar-wolf.jpg",
-      owl: "./assets/avatar-owl.jpg", bat: "./assets/avatar-bat.jpg", gorilla: "./assets/avatar-gorilla.jpg",
+      tiger: "./assets/avatar-tiger-display-v1.webp", raccoon: "./assets/avatar-raccoon-display-v1.webp", skull: "./assets/avatar-skull-display-v1.webp",
+      phoenix: "./assets/avatar-phoenix-display-v1.webp", octopus: "./assets/avatar-octopus-display-v1.webp", cat: "./assets/avatar-cat-display-v1.webp",
+      robot: "./assets/avatar-robot-display-v1.webp", bulldog: "./assets/avatar-bulldog-display-v1.webp", monkey: "./assets/daily-poker-monkey-display-v1.webp",
+      fox: "./assets/avatar-fox-display-v1.webp", chip: "./assets/avatar-chip-display-v1.webp", koala: "./assets/avatar-koala-display-v1.webp",
+      raven: "./assets/avatar-raven-display-v1.webp", crocodile: "./assets/avatar-crocodile-display-v1.webp", rabbit: "./assets/avatar-rabbit-display-v1.webp",
+      chameleon: "./assets/avatar-chameleon-display-v1.webp", panda: "./assets/avatar-panda-display-v1.webp", wolf: "./assets/avatar-wolf-display-v1.webp",
+      owl: "./assets/avatar-owl-display-v1.webp", bat: "./assets/avatar-bat-display-v1.webp", gorilla: "./assets/avatar-gorilla-display-v1.webp",
     };
-    return value.indexOf("preset:") === 0 ? (presets[value.slice(7)] || "") : value;
+    return value.indexOf("preset:") === 0 ? (presets[value.slice(7)] || "") : window.pokerPublicImageSrc(value);
   }
 
   function clubNewsFallbackAvatar(value) {
     var avatars = [
-      "./assets/avatar-tiger.jpg", "./assets/avatar-raccoon.jpg", "./assets/avatar-phoenix.jpg",
-      "./assets/avatar-octopus.jpg", "./assets/avatar-cat.jpg", "./assets/avatar-robot.jpg",
-      "./assets/daily-poker-monkey.webp", "./assets/avatar-fox.jpg", "./assets/avatar-koala.jpg",
-      "./assets/avatar-raven.jpg", "./assets/avatar-panda.jpg", "./assets/avatar-wolf.jpg",
+      "./assets/avatar-tiger-display-v1.webp", "./assets/avatar-raccoon-display-v1.webp", "./assets/avatar-phoenix-display-v1.webp",
+      "./assets/avatar-octopus-display-v1.webp", "./assets/avatar-cat-display-v1.webp", "./assets/avatar-robot-display-v1.webp",
+      "./assets/daily-poker-monkey-display-v1.webp", "./assets/avatar-fox-display-v1.webp", "./assets/avatar-koala-display-v1.webp",
+      "./assets/avatar-raven-display-v1.webp", "./assets/avatar-panda-display-v1.webp", "./assets/avatar-wolf-display-v1.webp",
     ];
     var source = matchKey(value) || "player";
     var hash = 0;
@@ -635,11 +643,11 @@
     "winifly": "./assets/summer-rating-player-winifly.webp", "missclick": "./assets/summer-rating-player-missclick.webp?v=2",
     "рыбнадзор": "./assets/summer-rating-player-rybnadzor.webp", "nikola233": "./assets/summer-rating-player-nikola233.webp",
     "milkyway77": "./assets/summer-rating-player-milkyway.webp", "пряник": "./assets/summer-rating-player-pryanik.webp",
-    "бардюр": "./assets/club-news-personal/bardur-news-cutout.webp?v=2",
+    "бардюр": "./assets/club-news-personal/bardur-news-cutout-display-v1.webp?v=2",
     "pryanik2la": "./assets/summer-rating-player-pryanik.webp", "prushnik": "./assets/summer-rating-player-prushnik.webp",
     "evgen1722": "./assets/summer-rating-player-evgen1722.webp", "хер вам)))))": "./assets/summer-rating-player-khervam.webp", "kriak": "./assets/summer-rating-player-kriak.webp",
     "frankl": "./assets/summer-rating-player-morf-light-v1.webp", "andrushamorf": "./assets/summer-rating-player-morf-light-v1.webp", "4ezzi": "./assets/summer-rating-player-morf-light-v1.webp", "morf": "./assets/summer-rating-player-morf-light-v1.webp", "морф": "./assets/summer-rating-player-morf-light-v1.webp",
-    "alenast": "./assets/summer-rating-league2-player-alena.webp", "shkarubo": "./assets/summer-rating-league2-player-shkarubo-light-v1.webp",
+    "alenast": "./assets/summer-rating-league2-player-alena.webp", "shkarubo": "./assets/summer-rating-league2-player-shkarubo-light-v1-display-v1.webp",
     "sarmat1305": "./assets/summer-rating-league2-player-sarmat-light-v1.webp", "палач": "./assets/summer-rating-league2-player-palach.webp",
     "nakurikota": "./assets/summer-rating-league2-player-nakurikota.webp", "накурикота": "./assets/summer-rating-league2-player-nakurikota.webp",
     "wildboar": "./assets/summer-rating-league2-player-wildboar.webp", "бабник": "./assets/summer-rating-league2-player-babnik.webp",
@@ -674,7 +682,7 @@
   };
 
   function clubNewsPersonalArt(nick) {
-    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-transparent-v2.webp";
+    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-transparent-v2-display-v1.webp";
     if (["fishkopcheny", "фишкопченый", "фишкапченый"].indexOf(matchKey(nick)) !== -1) return "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
       var sharedArt = window.pokerGetSummerRatingPlayerArt(nick);
@@ -684,7 +692,7 @@
   }
 
   function clubNewsCardArt(nick, occurrence) {
-    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-transparent-v2.webp";
+    if (matchKey(nick) === "рыбнадзор") return "./assets/club-news-personal/rybnadzor-big-fish-transparent-v2-display-v1.webp";
     if (["fishkopcheny", "фишкопченый", "фишкапченый"].indexOf(matchKey(nick)) !== -1) return "./assets/club-news-personal/fishkopcheny-coach-card.webp";
     var slug = CLUB_NEWS_CARD_ART_BY_NICK[matchKey(nick)] || "";
     var variantIndex = Math.max(0, Number(occurrence) || 0);
@@ -710,7 +718,7 @@
       ][variantIndex % 2];
     }
     if (slug === "smile") return "./assets/club-news-personal/smile-news-cutout.webp?v=4";
-    if (slug === "bardur") return "./assets/club-news-personal/bardur-news-cutout.webp?v=4";
+    if (slug === "bardur") return "./assets/club-news-personal/bardur-news-cutout-display-v1.webp?v=4";
     if (slug === "babnik") return "./assets/club-news-personal/babnik-car-transparent-v3.webp?v=1";
     if (slug) return "./assets/club-news-personal/" + slug + "-news-cutout.webp?v=3";
     return clubNewsPersonalArt(nick);
@@ -1219,7 +1227,7 @@
 
   var selfBetNewsRows = [];
   function loadSelfBetNews() {
-    return cachedFetchJson(apiBase() + "/api/tournament-bet", "self-bet-news", 60000, { cache: "no-store" }).then(function (data) {
+    return window.pokerLoadTournamentBetHome().then(function (data) {
       if (!data || data.ok !== true) throw new Error("self_bet_news_unavailable");
       selfBetNewsRows = clubSelfBetNewsEvents(data);
       return selfBetNewsRows;
@@ -1245,10 +1253,10 @@
       var title = String(event.title || "Турнир");
       return {
         id: "club-self-bet:" + event.id, type: "achievement", _eventKind: "self-bet-result",
-        at: day + "T12:00:00+03:00", actorId: "", actorNick: winner.name, actorAvatar: winner.avatar || clubNewsFallbackAvatar(winner.name),
+        at: day + "T12:00:00+03:00", actorId: "", actorNick: winner.name, actorAvatar: window.pokerPublicImageSrc(winner.avatar) || clubNewsFallbackAvatar(winner.name),
         playerAccent: color.accent, playerRgb: color.rgb,
         newsTitle: winner.name,
-        newsLines: ["Ставка на себя · " + title, "Поставил " + formatRub(stake) + " · забрал " + formatRub(amount), "Участников: " + (event.entries || []).length],
+        newsLines: ["Ставка на себя · " + title, "Поставил " + formatRub(stake) + " · забрал " + formatRub(amount), "Участников: " + (event.participantsCount == null ? (event.entries || []).length : event.participantsCount)],
         text: winner.name + " — Ставка на себя: поставил " + formatRub(stake) + ", забрал " + formatRub(amount), target: "profile"
       };
     }).filter(Boolean);
@@ -3633,6 +3641,13 @@
   }
 
   function load(friendsOverride) {
+    if (!hasNewsAuth()) {
+      friendNewsLoading = false;
+      friendNewsLoaded = true;
+      events = [];
+      render();
+      return Promise.resolve();
+    }
     var base = apiBase();
     if (!base) return;
     var signature = "";
@@ -3647,7 +3662,7 @@
     var request = friendsPromise.then(function (friendsPayload) {
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
-      var publicLevelsPromise = cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
+      var publicLevelsPromise = cachedFetchJson(base + "/api/player-crm?publicLevels=1&avatarFormat=url", "public-levels-urls-v1", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [] }; });
       return Promise.all([
         Promise.resolve(friendsPayload),
@@ -3655,7 +3670,7 @@
           .catch(function () { return { winners: [] }; }),
         cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
-        cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice", 5 * 60 * 1000, { cache: "default" })
+        cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice-achievements-v1", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
         publicLevelsPromise.then(function (payload) {
           return tournamentSnapshotsReady(enrichFriendsWithPoker21(friends, payload.levelRows || []));
@@ -3908,6 +3923,7 @@
   }
 
   function loadClubWallEvents(players, tournamentDay) {
+    if (!hasNewsAuth()) return Promise.resolve([]);
     var base = apiBase();
     var byAccount = {};
     var accountIds = [];
@@ -3971,8 +3987,8 @@
     clubWallLoading = true;
     if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
     var request = cachedFetchJson(
-      base + "/api/player-crm?publicLevels=1",
-      "public-levels",
+      base + "/api/player-crm?publicLevels=1&avatarFormat=url",
+      "public-levels-urls-v1",
       force ? 0 : 5 * 60 * 1000,
       { cache: force ? "no-store" : "default" }
     ).then(function (data) {
@@ -4049,7 +4065,7 @@
     var tournamentDay = clubTournamentDayKey();
     var dailyRangeQuery = tournamentDay ? "&from=" + encodeURIComponent(tournamentDay) + "&to=" + encodeURIComponent(tournamentDay) : "";
     var request = publishClubNewsProgressively([
-      cachedFetchJson(base + "/api/player-crm?publicLevels=1", "public-levels", 5 * 60 * 1000, { cache: "default" })
+      cachedFetchJson(base + "/api/player-crm?publicLevels=1&avatarFormat=url", "public-levels-urls-v1", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [], failed: true }; }),
       cachedFetchJson(
         base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100" + dailyRangeQuery,
@@ -4059,7 +4075,7 @@
       )
         .catch(function () { return { winners: [], failed: true }; }),
       clubTournamentSnapshotsReady().catch(function () { return {}; }),
-      cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "club-choice-news", 5 * 60 * 1000, { cache: "default" })
+      cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice-achievements-v1", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { rows: [] }; }),
       loadSelfBetNews(),
     ], function (results, complete) {
@@ -4270,7 +4286,7 @@
         .catch(function () { return { rows: [] }; })
       : emptyRows;
     var choicePromise = base
-      ? cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "player-choice", 5 * 60 * 1000, { cache: "default" })
+      ? cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice-achievements-v1", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { rows: [] }; })
       : emptyRows;
     snapshotsPromise.then(function (snapshots) {

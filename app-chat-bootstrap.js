@@ -82,7 +82,7 @@ function initChatBootstrap(opts) {
     dialogsView.querySelectorAll(".chat-dialog-item img.chat-dialog-item__avatar[src]").forEach(function (img) {
       var s = img.getAttribute("src") || "";
       if (s.indexOf("dep-manager") !== -1) img.src = assetBase + (s.indexOf("vika") !== -1 ? "dep-manager-vika.jpg" : "dep-manager.jpg");
-      else if (s.indexOf("logo-two-aces") !== -1) img.src = assetBase + "logo-two-aces.png";
+      else if (s.indexOf("logo-two-aces") !== -1) img.src = assetBase + "logo-two-aces-display-v1.webp";
     });
   }
 

@@ -6171,7 +6171,7 @@ html body #app.app.app--view-home
   display: block !important;
   position: absolute;
   inset: 0;
-  background: url('./assets/home-lounge-background-v1.webp') center bottom / 100% 100% no-repeat;
+  background: url('./assets/home-lounge-background-v1-display-v1.webp') center bottom / 100% 100% no-repeat;
   -webkit-mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
   mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
   pointer-events: none;
@@ -6180,17 +6180,17 @@ html body #app.app.app--view-home
 
 /* Soften the artwork while retaining bright, legible nameplates. */
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
-  --lounge-label-art: url('./assets/home-lounge-chat-v1-480.webp');
+  --lounge-label-art: url('./assets/home-lounge-chat-v1-light-v1-display-v1.webp');
   --lounge-label-shift: 1.6%;
   --lounge-label-clip: inset(77.5% 23% 17% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles {
-  --lounge-label-art: url('./assets/home-lounge-raffles-v1-480.webp');
+  --lounge-label-art: url('./assets/home-lounge-raffles-v1-light-v1-display-v1.webp');
   --lounge-label-shift: 0%;
   --lounge-label-clip: inset(79% 23% 16% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels {
-  --lounge-label-art: url('./assets/home-lounge-players-v1-480.webp');
+  --lounge-label-art: url('./assets/home-lounge-players-v1-light-v1-display-v1.webp');
   --lounge-label-shift: -3.4%;
   --lounge-label-clip: inset(82.5% 22% 12% 23%);
 }

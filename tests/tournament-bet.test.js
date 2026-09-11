@@ -282,14 +282,15 @@ test("every tournament bet can be copied, shared and opened by deep link", funct
   assert.match(client, /data-tournament-bet-share>Поделиться/);
   assert.match(client, /"tournament_bet_" \+ String\(id \|\| ""\)/);
   assert.match(client, /\^tournament_bet_\(tb_/);
-  const initialLoad = client.match(/function initialLoad\(\) \{[^\n]+\}/);
+  const initialLoad = client.match(/function initialLoad\(\) \{[\s\S]*?\n  \}/);
   assert.ok(initialLoad, "startup routing is present");
   const vm = require("node:vm");
   for (const [eventId, section, expected] of [["tb_123", false, "open"], ["", true, "open"], ["", false, "summary"]]) {
     const calls = [];
     vm.runInNewContext(initialLoad[0] + "; initialLoad();", {
       deepLinkEventId: eventId, deepLinkSection: section,
-      open: () => calls.push("open"), load: (summary) => calls.push(summary ? "summary" : "full"),
+      open: () => calls.push("open"), loading: false, modal: null, updateHomeButton() {},
+      window: { pokerLoadTournamentBetHome() { calls.push("summary"); return Promise.resolve({ok:true}); } },
     });
     assert.deepEqual(calls, [expected]);
   }
