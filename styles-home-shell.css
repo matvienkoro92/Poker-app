@@ -248,12 +248,12 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-statu
 }
 @media (max-width: 520px) {
   html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts:has(> .header-admin-shortcuts--with-crm) {
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
   }
   html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts > .header-admin-shortcuts--with-crm {
-    order: 4;
-    flex: 0 0 100% !important;
-    justify-content: center;
+    order: 0;
+    flex: 0 0 auto !important;
+    justify-content: flex-start;
   }
 }
 .header-admin-shortcut {
@@ -705,4 +705,40 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-statu
 }
 .pwa-install-btn__label {
   font-size: 11px;
+}
+
+/* Keep every admin control on one line, including the profile and menu. */
+@media (max-width: 520px) {
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts {
+    gap: 4px !important;
+    padding: 8px !important;
+    min-height: 0 !important;
+  }
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .header-actions {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .header-profile-summary {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .header-greeting {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 10px !important;
+  }
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .header-icon-btn {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 44px !important;
+  }
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .logo.logo--welcome,
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .logo__image {
+    width: 36px !important;
+    min-width: 36px !important;
+  }
 }

@@ -4302,3 +4302,26 @@
     gap: 2px;
   }
 }
+
+/* Scroll only the result explanation; the share action stays visible. */
+#app .daily-poker .daily-poker__table-deal > .daily-poker__result:has(.daily-poker__win-share) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 4px;
+}
+#app .daily-poker .daily-poker__result-copy {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#app .daily-poker .daily-poker__table-deal .daily-poker__result > .daily-poker__win-share {
+  flex: 0 0 auto;
+  margin: 0;
+}
+#app .daily-poker .daily-poker__table-deal > .daily-poker__result:has(.daily-poker__win-share) {
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+#app .daily-poker .daily-poker__result-copy { width: 100%; }

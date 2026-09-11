@@ -810,6 +810,10 @@
     if (!hasDailyPokerWin(result)) return;
     var host = $("dailyPokerResult");
     if (!host) return;
+    var copy = document.createElement("div");
+    copy.className = "daily-poker__result-copy";
+    while (host.firstChild) copy.appendChild(host.firstChild);
+    host.appendChild(copy);
     var button = document.createElement("button");
     button.type = "button"; button.className = "daily-poker__win-share";
     button.textContent = "Готовим картинку…"; button.disabled = true; host.appendChild(button);
