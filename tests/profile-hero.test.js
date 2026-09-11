@@ -84,3 +84,8 @@ test('embedded accessories migrate once for inventory and saved outfits without 
  let next=H.mutate(s,71,req('unequip',{slot:'patch'}));assert.equal(H.parse(JSON.stringify(next)).lookEquipped.patch,undefined);
  next.dust=20;next=H.mutate(next,71,req('craft',{modelId:'cufflinks-silver'}));const cuff=K.owned(next,'cufflinks-silver');next=H.mutate(next,71,req('wear',{item:cuff.id}));assert.equal(next.lookEquipped.body,'suit');assert.equal(next.lookEquipped.cufflinks,cuff.id);assert.equal(next.dust,0);
 });
+test('legacy single last-loot ID migrates and follows duplicate remapping without resetting progress',()=>{
+ const raw={...empty(),schema:3,accessoriesVersion:undefined,version:12,dust:9,claimedLevel:8,skills:{bonus:3},inventory:[item('visible','body','club',0),item('duplicate','body','club',2)],lookEquipped:{body:'visible'},lastLoot:'duplicate'};
+ const s=H.parse(JSON.stringify(raw));assert.deepEqual(s.lastLoot,['visible']);assert.equal(s.version,12);assert.equal(s.claimedLevel,8);assert.equal(s.skills.bonus,3);assert.equal(s.dust,13);assert.deepEqual(H.parse(JSON.stringify(s)),s);assert.ok(H.view(s,10).inventory.some(i=>i.id==='visible'));
+ const latest=H.parse(JSON.stringify({...H.fresh(),lastLoot:'single-id'}));assert.deepEqual(latest.lastLoot,['single-id']);
+});
