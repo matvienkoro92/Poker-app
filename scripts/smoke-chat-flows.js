@@ -211,6 +211,7 @@ async function main() {
   const { chromium } = resolvePlaywright();
   const server = await startServer();
   const apiCalls = [];
+  let failChatSend = true;
   let browser;
   try {
     const launchOptions = {};
@@ -350,6 +351,11 @@ async function main() {
         }));
       }
       if (pathname === "/api/chat" && method === "POST") {
+        if (body && body.text === "qa recoverable message") {
+          await new Promise(resolve => setTimeout(resolve, 250));
+          if (failChatSend) return route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({ok:false,error:"Test storage outage"})});
+        }
+
         return route.fulfill(jsonResponse({
           ok: true,
           message: {
@@ -395,6 +401,35 @@ async function main() {
       const overlay = document.getElementById("pokerSectionLoadingOverlay");
       return !overlay || overlay.classList.contains("app-boot-overlay--hidden");
     }, {}, {timeout: 20000});
+    if (process.env.SMOKE_CHAT_RECOVERY === "1") {
+      await page.evaluate(()=>window.chatOpenConvFromDialogs("tg_friend","Smoke Friend","ID123456"));
+      await waitForVisible(page, "#chatConvView:not(.chat-conv-view--hidden)", "recovery conversation");
+      await setComposerText(page, "personal", "qa draft remains");
+      await page.setViewportSize({width:390,height:450});
+      const beforeResize = await page.locator("#chatPersonalInputArea textarea:visible").first().inputValue();
+      if (beforeResize !== "qa draft remains") throw Error("Keyboard-size resize lost draft");
+      await page.setViewportSize({width:390,height:844});
+      await page.evaluate(()=>setView("home"));
+      await page.evaluate(()=>setView("chat"));
+      await page.evaluate(()=>window.chatOpenConvFromDialogs("tg_friend","Smoke Friend","ID123456"));
+      await waitForVisible(page, "#chatConvView:not(.chat-conv-view--hidden)", "draft conversation after navigation");
+      if (await page.locator("#chatPersonalInputArea textarea:visible").first().inputValue() !== "qa draft remains") throw Error("Section navigation lost unsent chat draft");
+      await setComposerText(page, "personal", "qa recoverable message");
+      await domClick(page, "#chatSendBtn");
+      await domClick(page, "#chatSendBtn");
+      await waitForVisible(page, '[data-chat-retry="personal"]', "failed message retry control");
+      const attempts=()=>apiCalls.filter(c=>c.method==="POST"&&c.body&&c.body.text==="qa recoverable message").length;
+      if(attempts()!==1) throw Error("Double click sent duplicate chat request");
+      if(!await page.getByText("qa recoverable message",{exact:true}).count()) throw Error("Failed message text disappeared");
+      failChatSend=false;
+      await page.locator('[data-chat-retry="personal"]').click();
+      await page.waitForFunction(()=>!document.querySelector('[data-chat-retry="personal"]'));
+      await page.waitForTimeout(400);
+      if(attempts()!==2) throw Error("Retry did not make exactly one additional request");
+      if (errors.length) throw new Error(errors.join("\n"));
+      console.log("PASS: chat resize/navigation retain draft; double click sends once; failed message can be retried");
+      return;
+    }
     const contact = page.locator("#chatContacts .chat-contact[data-chat-id='tg_friend']").first();
     await contact.click({trial: true});
     const box = await contact.boundingBox();

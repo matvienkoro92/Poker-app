@@ -730,6 +730,7 @@ function pokerShowSectionLoadingOverlay(viewName) {
   }
   overlay.classList.remove("app-boot-overlay--hidden", "app-boot-overlay--finishing");
   overlay.setAttribute("data-loading-view", String(viewName || ""));
+  overlay.setAttribute("data-loading-generation", String((Number(overlay.getAttribute("data-loading-generation")) || 0) + 1));
   overlay.setAttribute("aria-hidden", "false");
   overlay.setAttribute("aria-busy", "true");
   var title = overlay.querySelector("[data-poker-section-loader-title]");
@@ -748,20 +749,33 @@ function pokerHideSectionLoadingOverlay(viewName, immediate) {
   if (!overlay) return;
   var loadingView = overlay.getAttribute("data-loading-view") || "";
   if (viewName && loadingView && loadingView !== String(viewName)) return;
-  var wait = immediate ? 0 : Math.max(0, 520 - (Date.now() - pokerSectionLoadingOverlayShownAt));
-  if (pokerSectionLoadingOverlayTimer) clearTimeout(pokerSectionLoadingOverlayTimer);
+  var generation = overlay.getAttribute("data-loading-generation");
+  if (pokerSectionLoadingOverlayTimer) {
+    clearTimeout(pokerSectionLoadingOverlayTimer);
+    pokerSectionLoadingOverlayTimer = null;
+  }
+  function isCurrent() {
+    return overlay === document.getElementById("pokerSectionLoadingOverlay") &&
+      overlay.getAttribute("data-loading-generation") === generation;
+  }
+  function hide() {
+    if (!isCurrent()) return;
+    overlay.classList.add("app-boot-overlay--hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.setAttribute("aria-busy", "false");
+  }
+  if (immediate) {
+    hide();
+    return;
+  }
+  var wait = Math.max(0, 520 - (Date.now() - pokerSectionLoadingOverlayShownAt));
   pokerSectionLoadingOverlayTimer = setTimeout(function () {
     pokerSectionLoadingOverlayTimer = null;
-    var current = document.getElementById("pokerSectionLoadingOverlay");
-    if (!current) return;
-    current.classList.add("app-boot-overlay--finishing");
-    var status = current.querySelector(".app-boot-overlay__text");
+    if (!isCurrent()) return;
+    overlay.classList.add("app-boot-overlay--finishing");
+    var status = overlay.querySelector(".app-boot-overlay__text");
     if (status) status.textContent = "Готово";
-    setTimeout(function () {
-      current.classList.add("app-boot-overlay--hidden");
-      current.setAttribute("aria-hidden", "true");
-      current.setAttribute("aria-busy", "false");
-    }, 180);
+    setTimeout(hide, 180);
   }, wait);
 }
 
@@ -856,7 +870,7 @@ function pokerShowViewLoadingShell(viewName) {
   pokerShowSectionLoadingOverlay(viewName);
 }
 
-function pokerClearViewLoadingShell(viewName) {
+function pokerClearViewLoadingShell(viewName, cancelled) {
   if (document.body && document.body.getAttribute("data-poker-loading-view") === String(viewName || "")) {
     document.body.removeAttribute("data-poker-loading-view");
     document.body.classList.remove("poker-view-section-loading", "poker-view-section-load-error");
@@ -866,7 +880,12 @@ function pokerClearViewLoadingShell(viewName) {
       window.pokerClearViewLoadingSkeleton(viewName);
     }
   } catch (eClearPendingSkeleton) {}
-  pokerHideSectionLoadingOverlayWhenReady(viewName);
+  if (cancelled) {
+    pokerSectionLoadingReadyWaitSeq += 1;
+    pokerHideSectionLoadingOverlay(viewName, true);
+  } else {
+    pokerHideSectionLoadingOverlayWhenReady(viewName);
+  }
 }
 
 function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
@@ -949,7 +968,7 @@ function setView(viewName, navOpts) {
   if (previousPendingNavigation) {
     pokerPendingViewNavigationSeq += 1;
     pokerPendingViewNavigation = null;
-    pokerClearViewLoadingShell(previousPendingNavigation.view);
+    pokerClearViewLoadingShell(previousPendingNavigation.view, previousPendingNavigation.view !== viewName);
   }
   if (pokerBeginProgressiveViewNavigation(viewName, navOpts)) return;
   try {
