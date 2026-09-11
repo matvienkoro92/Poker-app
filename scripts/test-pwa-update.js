@@ -16,7 +16,7 @@ async function main() {
     res.setHeader("Cache-Control", "no-store");
     if (req.url === "/sw.js") { res.setHeader("Content-Type", "application/javascript"); res.end(updated ? sw : oldSw); }
     else if (req.url.startsWith("/styles.css")) { res.setHeader("Content-Type", "text/css"); res.end("new-css"); }
-    else { res.setHeader("Content-Type", "text/html"); res.end(`<html data-release="${updated ? 'new' : 'old'}"><body>PWA upgrade fixture</body></html>`); }
+    else { res.setHeader("Content-Type", "text/html"); res.end(`<html data-release="${updated ? 'new' : 'old'}"><body><textarea id="draft">unsaved draft</textarea>PWA upgrade fixture</body></html>`); }
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   let browser;
@@ -29,13 +29,27 @@ async function main() {
     assert.equal(await page.evaluate(() => window.swError || ""), "");
     await page.waitForFunction(() => !!navigator.serviceWorker.controller);
     assert.equal(await page.evaluate(async name => !!await (await caches.open(name)).match('/styles.css'), oldCache), true);
+    await page.evaluate(() => navigator.serviceWorker.addEventListener("message", event => { if (event.data.pokerAppUpdateAvailable) window.updateAvailable = true; }));
     updated = true;
     await page.evaluate(() => { setTimeout(() => { navigator.serviceWorker.getRegistration().then(r => r.update()); }, 50); });
-    await page.waitForFunction(() => document.documentElement.dataset.release === 'new', { }, { timeout: 30000 });
+    for (let attempt = 0; attempt < 100; attempt++) {
+      if (await page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration()).waiting)) break;
+      await page.waitForTimeout(100);
+    }
+    assert.equal(await page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration()).waiting), true);
+    assert.equal(await page.locator('#draft').inputValue(), 'unsaved draft');
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.release), 'old');
+    await page.evaluate(async () => {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {window.swActivated = true;});
+      (await navigator.serviceWorker.getRegistration()).waiting.postMessage({pokerApplyUpdate:true});
+    });
+    await page.waitForFunction(() => window.swActivated);
+    await page.reload();
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.release), 'new');
     assert.equal(await page.evaluate(name => caches.has(name), oldCache), false);
     assert.equal(await page.evaluate(async () => (await fetch('/styles.css')).text()), 'new-css');
     await page.waitForFunction(name => caches.has(name), cacheName);
-    console.log(`PWA upgrade passed: ${oldCache} removed, ${cacheName} active, open page refreshed, fresh CSS loaded.`);
+    console.log(`PWA upgrade passed: ${oldCache} removed, ${cacheName} active, draft preserved until explicit reload, fresh CSS loaded.`);
   } finally {
     clearTimeout(watchdog);
     if (browser) await browser.close();

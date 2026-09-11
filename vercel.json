@@ -108,6 +108,9 @@
     }
   ],
   "functions": {
+    "api/pokerplus-payment-webhook.mjs": {
+      "maxDuration": 60
+    },
     "api/[[...slug]].js": {
       "maxDuration": 60
     }

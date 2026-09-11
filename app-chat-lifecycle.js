@@ -1848,7 +1848,7 @@ function initChat() {
     var rawUrl = documentUrl != null ? String(documentUrl) : "";
     if (!rawUrl) return "";
     var name = documentName != null && String(documentName).trim() ? String(documentName).trim() : "document.pdf";
-    var docHref = escapeHtml(rawUrl);
+    var docHref = escapeHtml(pokerChatDisplayImageSrc(rawUrl));
     var docNameEsc = escapeHtml(name);
     return (
       '<span class="chat-msg__document chat-msg__document-wrap" data-document-name="' +

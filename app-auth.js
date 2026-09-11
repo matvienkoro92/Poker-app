@@ -1292,6 +1292,11 @@ function pokerApiAuthQuery(lead) {
 function pokerChatDisplayImageSrc(raw) {
   if (raw == null || raw === "") return raw;
   var s = String(raw).trim();
+  if (s.indexOf("/api/chat-image?") === 0) {
+    var mediaBase = typeof getApiBase === "function" ? getApiBase() : "";
+    var mediaAuth = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("") : "";
+    return mediaBase + s + (mediaAuth ? "&" + mediaAuth : "");
+  }
   if (s.indexOf("data:") === 0) return s;
   if (s.indexOf("http://") !== 0 && s.indexOf("https://") !== 0) return s;
   var hostname = "";

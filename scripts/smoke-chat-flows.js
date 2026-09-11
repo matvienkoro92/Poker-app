@@ -107,6 +107,7 @@ async function waitForVisible(page, selector, label) {
     const r = el.getBoundingClientRect();
     return st.display !== "none" && st.visibility !== "hidden" && r.width > 0 && r.height > 0;
   }, selector, { timeout: 6000 }).catch(async (err) => {
+    await page.screenshot({path:"/tmp/poker-fix-chat-failure.png"}).catch(()=>{});
     let snapshot = {};
     try {
       snapshot = await page.evaluate(() => ({
@@ -216,7 +217,7 @@ async function main() {
     const executablePath = chromiumExecutablePath();
     if (executablePath) launchOptions.executablePath = executablePath;
     browser = await chromium.launch(launchOptions);
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    const page = await browser.newPage({ serviceWorkers: "block", viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
     const errors = [];
     page.on("pageerror", (err) => errors.push(String((err && (err.stack || err.message)) || err)));
 
@@ -365,6 +366,11 @@ async function main() {
       return route.fulfill(jsonResponse({ ok: true }));
     });
 
+    await page.context().route("**/*", route => {
+      const url = new URL(route.request().url());
+      if (url.origin !== `http://${host}:${port}`) return route.abort();
+      return route.continue();
+    });
     await page.goto(`http://${host}:${port}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(700);
     await page.evaluate(() => {
@@ -385,7 +391,12 @@ async function main() {
     );
     if (!unreadVisible) throw new Error("unread badge did not render from contacts payload");
 
+    await page.waitForFunction(() => {
+      const overlay = document.getElementById("pokerSectionLoadingOverlay");
+      return !overlay || overlay.classList.contains("app-boot-overlay--hidden");
+    }, {}, {timeout: 20000});
     const contact = page.locator("#chatContacts .chat-contact[data-chat-id='tg_friend']").first();
+    await contact.click({trial: true});
     const box = await contact.boundingBox();
     if (!box) throw new Error("contact row has no box");
     await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2);
@@ -459,7 +470,7 @@ async function main() {
     });
     await waitForVisible(page, "#chatConvView:not(.chat-conv-view--hidden)", "conversation view for voice");
     await setComposerText(page, "personal", "");
-    await page.locator("#chatSendBtn").click({ force: true });
+    await page.locator("#chatSendBtn").click();
     await waitForVisible(page, "#chatPersonalVoicePreview:not(.chat-voice-preview--hidden)", "personal voice preview");
     await page.click("#chatPersonalVoiceStop");
     await page.waitForFunction(() => {

@@ -269,6 +269,31 @@ class MemoryRedis {
       const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
       const keys = command.slice(3, 3 + keyCount).map(String);
       const args = command.slice(3 + keyCount).map(String);
+      if (String(command[1]).includes("poker_string_cas_v1")) {
+        const current = this.kv.get(keys[0]);
+        if ((args[0] === "0" && current != null) || (args[0] === "1" && current !== args[1])) return this.result(0);
+        const commands = JSON.parse(args[3]);
+        for (const cmd of commands) {
+          if (cmd[0] === "HINCRBY") {
+            const v = this.h(cmd[1]).get(cmd[2]);
+            if (v != null && !/^-?\d+$/.test(v)) return {error:"invalid counter"};
+          }
+        }
+        for (const cmd of commands) this.exec(cmd);
+        this.kv.set(keys[0], args[2]);
+        return this.result(1);
+      }
+      if (String(command[1]).includes("poker_hash_cas_v1")) {
+        const expected = JSON.parse(args[1]), hash = this.h(keys[0]);
+        if (this.kv.get(keys[1]) !== args[0] || hash.size * 2 !== expected.length) return this.result(0);
+        for (let i=0;i<expected.length;i+=2) if (hash.get(expected[i]) !== expected[i+1]) return this.result(0);
+        hash.set(args[2],args[3]); return this.result(1);
+      }
+      if (String(command[1]).includes("local owner = redis.call('GET', KEYS[1])")) {
+        const owner = this.kv.get(keys[0]);
+        if (owner && owner !== args[0]) return this.result(0);
+        this.kv.set(keys[0], args[0]); return this.result(1);
+      }
       if (String(command[1]).includes("auth-rate-limit-v1")) {
         const count = Number(this.kv.get(keys[0]) || 0) + 1;
         this.kv.set(keys[0], String(count));
@@ -4501,6 +4526,7 @@ async function testDailyPokerLevelPayout(redis) {
     for (const [level, seedStart, handRank] of [[9, 3, "high_card"], [10, 3, "high_card"], [0, 3, "high_card"], [10, 1, "straight"], [10, 2, "flush"]]) {
       if (level) redis.h("poker_app:pokerplus_profiles").set(id, JSON.stringify({ totalCounter: { fee: level === 10 ? 26500 : 26499 } }));
       else redis.h("poker_app:pokerplus_profiles").delete(id);
+      for (const key of redis.kv.keys()) if (key.startsWith("poker_app:daily_poker_state:")) redis.kv.delete(key);
       redis.kv.set("poker_app:daily_poker_state:" + id + ":rolling", JSON.stringify({
         baseAttemptUsed: true, baseAttemptAt: previous, updatedAt: previous,
         ticketlessStreak: 6, ticketlessStreakAt: previous, ticketlessStreakGameDate: previous.slice(0, 10),
@@ -4515,7 +4541,7 @@ async function testDailyPokerLevelPayout(redis) {
         return lo + seed % (hi - lo);
       };
       const before = Number(redis.h("poker_app:bonus_balances").get(id) || 0);
-      const body = { pwaSession: s.user, idempotencyKey: "level-payout-" + level + "-" + handRank, playerLevel: 100, ticketlessStreakEligible: true };
+      const body = { deviceId: "contract-device-123456", pwaSession: s.user, idempotencyKey: "level-payout-" + level + "-" + handRank, playerLevel: 100, ticketlessStreakEligible: true };
       const result = await call(promo, req("POST", { path: "daily-poker/play" }, body));
       assert.strictEqual(result.statusCode, 200, JSON.stringify(result.body));
       assert.strictEqual(result.body.handRank, handRank, "deterministic hand fixture");
@@ -4557,6 +4583,7 @@ async function testDailyPokerBoardOnlyPayout(redis) {
       ["four_of_a_kind", "Ac Qd", "2h 2d 2s 2c 3s", 5, 0],
       ["royal_flush", "Ac Kd", "Ts Js Qs Ks As", 6, 300],
     ]) {
+      for (const key of redis.kv.keys()) if (key.startsWith("poker_app:daily_poker_state:")) redis.kv.delete(key);
       redis.kv.set("poker_app:daily_poker_state:" + id + ":rolling", JSON.stringify({
         baseAttemptUsed: true, baseAttemptAt: previous, updatedAt: previous,
         ticketlessStreak: streak, ticketlessStreakAt: previous, ticketlessStreakGameDate: previous.slice(0, 10),
@@ -4576,7 +4603,7 @@ async function testDailyPokerBoardOnlyPayout(redis) {
       crypto.randomInt = () => swaps.shift();
       const before = Number(redis.h("poker_app:bonus_balances").get(id) || 0);
       const result = await call(promo, req("POST", { path: "daily-poker/play" }, {
-        pwaSession: s.user, idempotencyKey: "board-only-" + handRank, holeCardsContribute: true,
+        deviceId: "contract-device-123456", pwaSession: s.user, idempotencyKey: "board-only-" + handRank, holeCardsContribute: true,
       }));
       assert.strictEqual(result.statusCode, 200, JSON.stringify(result.body));
       assert.strictEqual(result.body.handRank, handRank);
@@ -6887,8 +6914,82 @@ async function testGuestbookAdminDelete(redis) {
   assert.strictEqual(redis.hash.has(commentReactionsKey), false, "admin post delete removes comment reactions");
 }
 
+async function testAuditConcurrentPrivateCash(redis) {
+  const handler = loadHandler("private-cash");
+  const s = sessions();
+  const { signPwaSession } = require(path.join(root, "lib", "poker-pwa-session"));
+  const eventId = "contract_private_cash_random_seats";
+  redis.kv.set("poker_app:private_cash_event:" + eventId, JSON.stringify({
+    id: eventId,
+    date: "2026-07-01",
+    time: "20:00",
+    gameType: "Холдем",
+    stakes: "100/200",
+    buyIn: "10000",
+    status: "active",
+    createdAt: new Date().toISOString(),
+    createdBy: "contract",
+  }));
+  redis.l("poker_app:private_cash_events").push(eventId);
+
+  const tokens = Array.from({ length: 9 }, (_, index) => signPwaSession({
+    id: 7100 + index,
+    username: "cash_player_" + index,
+    first_name: "Cash " + index,
+  }, BOT_TOKEN));
+
+
+  for (let i=0;i<9;i++) {
+    redis.h("poker_app:visitor_dt_ids").set("tg_"+(7100+i),"ID10710"+i);
+    redis.h("poker_app:id_to_user").set("ID10710"+i,"tg_"+(7100+i));
+  }
+  for(let i=0;i<5;i++) await call(handler,req("POST",{}, {pwaSession:tokens[i],action:"join",eventId}));
+  const replies=await Promise.all(tokens.slice(5).map(token=>call(handler,req("POST",{}, {pwaSession:token,action:"join",eventId}))));
+  const rows=Array.from(redis.h("poker_app:private_cash_participants:"+eventId).values()).map(JSON.parse);
+  console.log("AUDIT_CONCURRENT_SEATS",JSON.stringify({status:replies.map(r=>r.statusCode),seats:rows.map(r=>({account:r.accountId,seat:r.seatIndex}))}));
+  assert.equal(new Set(rows.map(r=>r.seatIndex)).size,rows.length,"parallel joins must not assign the same seat");
+}
+
+
+async function testAuditBlockedTransfer(redis) {
+ const s=sessions();
+ redis.h("poker_app:visitor_dt_ids").set("tg_1001","ID100001");
+ redis.h("poker_app:id_to_user").set("ID100001","tg_1001");
+ redis.h("poker_app:pokerplus_user_ids").set("ID100001","208238");
+ redis.h("poker_app:pokerplus_profiles").set("208238",JSON.stringify({nickname:"Audit",totalCounter:{fee:1000000}}));
+ redis.h("poker_app:pokerplus_profiles").set("ID100001",JSON.stringify({nickname:"Audit",totalCounter:{fee:1000000}}));
+ await require(path.join(root,"lib/app-user-blocks")).setAppUserBlocked("ID100001",true,{reason:"audit"});
+ const status=await require(path.join(root,"lib/app-user-blocks")).isAppUserBlocked("tg_1001",{id:1001});
+ const router=require(path.join(root,"api/[[...slug]].js"));
+ const request=req("POST",{}, {pwaSession:s.user,action:"create",kind:"deposit",amount:100});request.url="/api/transfers";
+ const r=await call(router,request);
+ console.log("AUDIT_BLOCKED_TRANSFER",JSON.stringify({blocked:status.blocked,status:r.statusCode,ok:r.body&&r.body.ok,error:r.body&&r.body.error,id:r.body&&r.body.item&&r.body.item.id}));
+ assert.equal(r.statusCode,403,"blocked user must not create transfer");
+}
+
+
+
+async function testTransferCompletionOnce(redis) {
+  const s = sessions();
+  redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+  redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+  redis.h("poker_app:pokerplus_user_ids").set("ID100001", "208238");
+  redis.h("poker_app:pokerplus_profiles").set("208238", JSON.stringify({nickname:"Buyer",totalCounter:{fee:1000000}}));
+  redis.h("poker_app:pokerplus_profiles").set("ID100001", JSON.stringify({nickname:"Buyer",totalCounter:{fee:1000000}}));
+  redis.kv.set("poker_app:transfer:race", JSON.stringify({id:"race",kind:"deposit",status:"seller_transferred",amount:100,buyerAccountId:"ID100001",sellerAccountId:"ID100002",ownerAccountId:"ID100001",buyerUserId:"tg_1001",sellerUserId:"tg_1002"}));
+  const handler = loadHandler("transfers");
+  const replies = await Promise.all([1,2].map(() => call(handler, req("POST", {}, {pwaSession:s.user,action:"received",id:"race"}))));
+  assert.deepEqual(replies.map(r=>r.statusCode).sort(),[200,409]);
+  assert.equal(redis.h("poker_app:transfer_deals_count").get("ID100001"),"1");
+  assert.equal(redis.h("poker_app:transfer_deals_count").get("ID100002"),"1");
+}
+
+
 async function main() {
   const tests = [
+    ["concurrent private cash booking", testAuditConcurrentPrivateCash],
+    ["blocked transfer creation", testAuditBlockedTransfer],
+    ["transfer completion once", testTransferCompletionOnce],
     ["chat core invariants", testChatCoreInvariants],
     ["auth required and admin-only", testAuthAndAdmin],
     ["guestbook admin delete", testGuestbookAdminDelete],

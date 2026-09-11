@@ -698,28 +698,30 @@ function initProfileChatPush() {
 }
 (function initPwaServiceWorkerGlobal() {
   if (!("serviceWorker" in navigator)) return;
-  var pokerSwReloadScheduled = false;
-  function pokerScheduleSwReload(reason) {
-    if (pokerSwReloadScheduled) return;
-    pokerSwReloadScheduled = true;
-    setTimeout(function () {
-      try {
-        var url = new URL(window.location.href);
-        url.searchParams.set("_pwa_reload", String(Date.now()));
-        window.location.replace(url.toString());
-      } catch (eUrl) {
-        try {
-          window.location.reload();
-        } catch (eReload) {}
-      }
-    }, reason === "controllerchange" ? 450 : 80);
+  var pokerSwUserApprovedReload = false;
+  function pokerShowUpdateAvailable() {
+    if (document.getElementById("pokerAppUpdateButton")) return;
+    var button = document.createElement("button");
+    button.id = "pokerAppUpdateButton";
+    button.type = "button";
+    button.textContent = "Доступно обновление · Обновить";
+    button.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:2147483647;padding:10px 16px;border-radius:20px;background:#f5cb67;color:#17120b;border:1px solid #ac853b;font:600 13px sans-serif;max-width:90vw";
+    button.addEventListener("click", function () {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg && reg.waiting) {
+          pokerSwUserApprovedReload = true;
+          reg.waiting.postMessage({ pokerApplyUpdate: true });
+        } else window.location.reload();
+      }).catch(function () { window.location.reload(); });
+    });
+    document.body.appendChild(button);
   }
   try {
     navigator.serviceWorker.addEventListener("message", function (ev) {
       var d = ev.data;
       if (!d) return;
-      if (d.pokerAppReloadRequired) {
-        pokerScheduleSwReload("message");
+      if (d.pokerAppReloadRequired || d.pokerAppUpdateAvailable) {
+        pokerShowUpdateAvailable();
         return;
       }
       if (d.pokerChatPushSound) {
@@ -759,7 +761,7 @@ function initProfileChatPush() {
   } catch (eMsg) {}
   try {
     navigator.serviceWorker.addEventListener("controllerchange", function () {
-      pokerScheduleSwReload("controllerchange");
+      if (pokerSwUserApprovedReload) { window.location.reload(); return; }
       setTimeout(function () {
         try {
           pokerChatPushSyncIfNeeded();
@@ -795,6 +797,7 @@ function initProfileChatPush() {
   navigator.serviceWorker.register(swUrl, { updateViaCache: "none" }).then(function (reg) {
     try {
       if (reg && reg.waiting) {
+        pokerShowUpdateAvailable();
         setTimeout(function () {
           try {
             pokerChatPushSyncIfNeeded();
@@ -802,6 +805,12 @@ function initProfileChatPush() {
         }, 800);
       }
     } catch (eWait) {}
+    if (reg) reg.addEventListener("updatefound", function () {
+      var installing = reg.installing;
+      if (installing) installing.addEventListener("statechange", function () {
+        if (installing.state === "installed" && reg.waiting && navigator.serviceWorker.controller) pokerShowUpdateAvailable();
+      });
+    });
     return reg;
   }).catch(function () {});
 })();

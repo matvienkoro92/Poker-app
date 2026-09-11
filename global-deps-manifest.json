@@ -2015,6 +2015,7 @@
         "app-lazy-loader.js"
       ],
       "consumedBy": [
+        "app-hero-builder.js",
         "app-lazy-loader.js"
       ]
     },
@@ -2111,7 +2112,6 @@
       ],
       "consumedBy": [
         "app-click-sound.js",
-        "app-daily-poker.js",
         "app-home-gazette-tasks.js",
         "app-home-tasks.js",
         "app-private-cash.js",
@@ -2494,6 +2494,216 @@
       "consumedBy": [
         "app-tournament-day.js",
         "app-tournament-bet.js"
+      ]
+    },
+    {
+      "name": "pokerTrackEngagement",
+      "domain": "shell",
+      "exportedBy": [
+        "app-analytics.js"
+      ],
+      "consumedBy": [
+        "app-tournament-day.js",
+        "app-analytics.js",
+        "app-home-deeplinks.js",
+        "app-profile-appearance.js",
+        "app-home-friend-news.js",
+        "app-hero-builder.js",
+        "app-my-summary.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerCloseChatUserModal",
+      "domain": "chat",
+      "exportedBy": [
+        "app-chat-user-modal.js"
+      ],
+      "consumedBy": [
+        "app-chat-user-modal.js",
+        "app-profile-appearance.js"
+      ]
+    },
+    {
+      "name": "initClubReviews",
+      "domain": "home",
+      "exportedBy": [
+        "app-club-reviews.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerPendingReviewId",
+      "domain": "home",
+      "exportedBy": [
+        "app-club-reviews.js",
+        "app-home-deeplinks.js"
+      ],
+      "consumedBy": [
+        "app-home-deeplinks.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerOpenClubReview",
+      "domain": "home",
+      "exportedBy": [
+        "app-club-reviews.js"
+      ],
+      "consumedBy": [
+        "app-my-summary.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerSocialEscape",
+      "domain": "home",
+      "exportedBy": [
+        "app-club-social.js"
+      ],
+      "consumedBy": [
+        "app-club-social.js",
+        "app-profile-appearance.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerSocialRequest",
+      "domain": "home",
+      "exportedBy": [
+        "app-club-social.js"
+      ],
+      "consumedBy": [
+        "app-club-social.js",
+        "app-profile-appearance.js",
+        "app-hero-builder.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerSocialRequestId",
+      "domain": "home",
+      "exportedBy": [
+        "app-club-social.js"
+      ],
+      "consumedBy": [
+        "app-club-social.js",
+        "app-club-reviews.js"
+      ]
+    },
+    {
+      "name": "pokerRenderProfileHero",
+      "domain": "home",
+      "exportedBy": [
+        "app-hero-builder.js"
+      ],
+      "consumedBy": [
+        "app-profile-appearance.js",
+        "app-hero-builder.js"
+      ]
+    },
+    {
+      "name": "pokerMountHeroEditor",
+      "domain": "home",
+      "exportedBy": [
+        "app-hero-builder.js"
+      ],
+      "consumedBy": [
+        "app-hero-builder.js"
+      ]
+    },
+    {
+      "name": "pokerOpenHero",
+      "domain": "home",
+      "exportedBy": [
+        "app-hero-builder.js"
+      ],
+      "consumedBy": [
+        "app-hero-builder.js"
+      ]
+    },
+    {
+      "name": "pokerGetFriendNewsSummary",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-profile-friends.js",
+        "app-home-friend-news.js",
+        "app-my-summary.js"
+      ]
+    },
+    {
+      "name": "pokerOpenFriendNews",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-friend-news.js"
+      ],
+      "consumedBy": [
+        "app-home-deeplinks.js",
+        "app-home-friend-news.js",
+        "app-my-summary.js"
+      ]
+    },
+    {
+      "name": "__pokerSngHomeSummaryPromise",
+      "domain": "home",
+      "exportedBy": [
+        "app-home-widgets-bootstrap.js",
+        "app-sng-champions.js"
+      ],
+      "consumedBy": [
+        "app-home-widgets-bootstrap.js",
+        "app-sng-champions.js"
+      ]
+    },
+    {
+      "name": "__pokerRafflesPrefetch",
+      "domain": "raffles",
+      "exportedBy": [
+        "app-lazy-loader.js",
+        "app-raffles.js"
+      ],
+      "consumedBy": [
+        "app-lazy-loader.js",
+        "app-raffles.js"
+      ]
+    },
+    {
+      "name": "initMySummary",
+      "domain": "home",
+      "exportedBy": [
+        "app-my-summary.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js",
+        "app-my-summary.js"
+      ]
+    },
+    {
+      "name": "pokerRefreshOwnAppearance",
+      "domain": "home",
+      "exportedBy": [
+        "app-profile-appearance.js"
+      ],
+      "consumedBy": [
+        "app-profile.js",
+        "app-profile-appearance.js"
+      ]
+    },
+    {
+      "name": "pokerApplyMemberAppearance",
+      "domain": "home",
+      "exportedBy": [
+        "app-profile-appearance.js"
+      ],
+      "consumedBy": [
+        "app-chat-user-modal.js",
+        "app-profile-appearance.js"
       ]
     }
   ]

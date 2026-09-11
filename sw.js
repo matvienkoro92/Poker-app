@@ -3,15 +3,14 @@ var POKER_CHAT_API_CACHE = "poker-chat-api-v4";
 var POKER_CHAT_API_OLD_CACHES = ["poker-chat-api-v1", "poker-chat-api-v3"];
 var POKER_PUSH_ASSETS_CACHE = "poker-push-assets-v4";
 var POKER_PUSH_ASSETS_OLD_CACHES = ["poker-push-assets-v1", "poker-push-assets-v2", "poker-push-assets-v3"];
-var POKER_STATIC_CACHE = "poker-static-v57";
-var POKER_STATIC_OLD_CACHES = ["poker-static-v56", "poker-static-v55", "poker-static-v54", "poker-static-v53", "poker-static-v52", "poker-static-v51", "poker-static-v50", "poker-static-v49", "poker-static-v48", "poker-static-v47", "poker-static-v46", "poker-static-v45", "poker-static-v44", "poker-static-v43", "poker-static-v42", "poker-static-v41", "poker-static-v40", "poker-static-v39", "poker-static-v38", "poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11", "poker-static-v12", "poker-static-v13", "poker-static-v14", "poker-static-v15", "poker-static-v16", "poker-static-v17", "poker-static-v18", "poker-static-v19", "poker-static-v20", "poker-static-v21", "poker-static-v22", "poker-static-v23", "poker-static-v24", "poker-static-v25", "poker-static-v26", "poker-static-v27", "poker-static-v28", "poker-static-v29", "poker-static-v30", "poker-static-v31", "poker-static-v32", "poker-static-v33", "poker-static-v34", "poker-static-v35", "poker-static-v36", "poker-static-v37"];
+var POKER_STATIC_CACHE = "poker-static-v58";
+var POKER_STATIC_OLD_CACHES = ["poker-static-v57", "poker-static-v56", "poker-static-v55", "poker-static-v54", "poker-static-v53", "poker-static-v52", "poker-static-v51", "poker-static-v50", "poker-static-v49", "poker-static-v48", "poker-static-v47", "poker-static-v46", "poker-static-v45", "poker-static-v44", "poker-static-v43", "poker-static-v42", "poker-static-v41", "poker-static-v40", "poker-static-v39", "poker-static-v38", "poker-static-v1", "poker-static-v2", "poker-static-v3", "poker-static-v4", "poker-static-v5", "poker-static-v6", "poker-static-v7", "poker-static-v8", "poker-static-v9", "poker-static-v10", "poker-static-v11", "poker-static-v12", "poker-static-v13", "poker-static-v14", "poker-static-v15", "poker-static-v16", "poker-static-v17", "poker-static-v18", "poker-static-v19", "poker-static-v20", "poker-static-v21", "poker-static-v22", "poker-static-v23", "poker-static-v24", "poker-static-v25", "poker-static-v26", "poker-static-v27", "poker-static-v28", "poker-static-v29", "poker-static-v30", "poker-static-v31", "poker-static-v32", "poker-static-v33", "poker-static-v34", "poker-static-v35", "poker-static-v36", "poker-static-v37"];
 var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
 var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
 var POKER_SW_BUILD = "4.020";
 
 self.addEventListener("install", function (e) {
-  self.skipWaiting();
   e.waitUntil(
     caches.open(POKER_PUSH_ASSETS_CACHE).then(function (cache) {
       return cache.add(new Request(POKER_CHAT_NOTIFY_AUDIO, { cache: "reload" })).catch(function () {
@@ -20,6 +19,10 @@ self.addEventListener("install", function (e) {
     })
   );
 });
+self.addEventListener("message", function (event) {
+  if (event.data && event.data.pokerApplyUpdate === true) self.skipWaiting();
+});
+
 self.addEventListener("activate", function (e) {
   e.waitUntil(
     Promise.all(
@@ -45,13 +48,9 @@ function pokerSwRefreshOpenClients(reason) {
     var i;
     for (i = 0; i < cs.length; i++) {
       try {
-        cs[i].postMessage({ pokerAppReloadRequired: true, version: POKER_SW_BUILD, reason: reason || "sw_update" });
+        cs[i].postMessage({ pokerAppUpdateAvailable: true, version: POKER_SW_BUILD, reason: reason || "sw_update" });
       } catch (ePost) {}
-      try {
-        if (cs[i] && typeof cs[i].navigate === "function" && cs[i].url) {
-          cs[i].navigate(cs[i].url).catch(function () {});
-        }
-      } catch (eNav) {}
+
     }
     // A navigation handled by this worker can wait for activation to finish.
     // Never make activation wait for that navigation in turn.

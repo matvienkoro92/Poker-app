@@ -2394,7 +2394,7 @@ add("Heavy feature views use JavaScript lazy gates", () =>
     'type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-view-adapter.js',
     'type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js',
     'type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js',
-    'type="application/poker-lazy" data-poker-lazy-domain="learning" src="./app-daily-poker.js',
+    'type="application/poker-lazy" data-poker-lazy-domain="daily-poker learning" src="./app-daily-poker.js',
     'type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons.js',
     'type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons-modals.js',
     'type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js',

@@ -139,7 +139,8 @@
       "app-profile.js",
       "app-profile-shows.js",
       "app-visitor-id.module.mjs",
-      "app-cashout.js"
+      "app-cashout.js",
+      "app-portrait-effects.js"
     ],
     "push": [
       "app-push.js",

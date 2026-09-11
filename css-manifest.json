@@ -87,13 +87,17 @@
       "styles-home-planner.css",
       "styles-home-rating-promo.css",
       "styles-home-rating-promo-late.css",
-      "styles-home-club-choice-badge.css"
+      "styles-home-club-choice-badge.css",
+      "styles-home-sng-reference.css",
+      "styles-home-lounge-labels.css",
+      "styles-home-summer-results.css"
     ],
     "tournament": [
       "styles-tournament.css",
       "styles-hall-tournament-day.css",
       "styles-home-overrides.css",
-      "styles-tournament-bet.css"
+      "styles-tournament-bet.css",
+      "styles-home-tournament-scene.css"
     ],
     "chat": [
       "styles-chat.css",
@@ -136,7 +140,8 @@
       "styles-rating-tables.css",
       "styles-rating-modals.css",
       "styles-rating-late.css",
-      "styles-rating-chat-modals.css"
+      "styles-rating-chat-modals.css",
+      "styles-rating-summer-beach.css"
     ],
     "hall": [
       "styles-hall.css",
@@ -154,7 +159,9 @@
       "styles-profile-poker21.css",
       "styles-profile-status-social.css",
       "styles-profile-adjacent-tools.css",
-      "styles-profile-modals-tail.css"
+      "styles-profile-modals-tail.css",
+      "styles-hero.css",
+      "styles-profile-identity.css"
     ],
     "equilator": [
       "styles-equilator.css",

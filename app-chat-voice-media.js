@@ -88,7 +88,7 @@ function initChatVoiceMedia(opts) {
   function chatVoiceMessageHtml(voiceSrc, opts2) {
     if (!voiceSrc) return "";
     opts2 = opts2 || {};
-    var src = escapeHtml(String(voiceSrc));
+    var src = escapeHtml(String(typeof pokerChatDisplayImageSrc === "function" ? pokerChatDisplayImageSrc(voiceSrc) : voiceSrc));
     var r = pokerGetSavedVoicePlaybackRate();
     function speedBtn(rate, label) {
       var active = pokerNormalizeChatVoiceRate(rate) === r;
