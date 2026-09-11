@@ -1,0 +1,1489 @@
+/* Section-specific rules formerly in eager CSS; preserve base → layout → overrides order. */
+
+/* From styles-base.css */
+
+html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) {
+  margin-top: 8px;
+}
+html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) .card__header {
+  margin-top: 32px !important;
+  margin-bottom: 8px !important;
+}
+/* Чаты: фон html/body/#app как у ленты и списка диалогов — без общего body-bg, чтобы поля по бокам карточки не отличались по цвету */
+html.app-view-chat,
+body.app-view-chat,
+html:has(.view--active[data-view="chat"]),
+body:has(.view--active[data-view="chat"]) {
+  --chat-side-pad: clamp(6px, 2.4vw, 12px);
+  background-color: var(--overscroll-canvas) !important;
+  background-image: var(--bg-blur-gradient) !important;
+}
+html:has(body[data-view="chat"]),
+body[data-view="chat"] {
+  --chat-side-pad: clamp(6px, 2.4vw, 12px);
+}
+[data-theme="light"] html.app-view-chat,
+[data-theme="light"] body.app-view-chat,
+[data-theme="light"] html:has(.view--active[data-view="chat"]),
+[data-theme="light"] body:has(.view--active[data-view="chat"]) {
+  background-color: var(--overscroll-canvas) !important;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
+}
+html.app-view-chat #app.app,
+html:has(body[data-view="chat"]) #app.app,
+#app.app:has(.view--active[data-view="chat"]) {
+  background-color: var(--overscroll-canvas) !important;
+  background-image: var(--bg-blur-gradient) !important;
+  /* Только вырезы у края экрана; сам зазор контента чата — у ленты/полей (--chat-side-pad). */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+[data-theme="light"] html.app-view-chat #app.app,
+[data-theme="light"] html:has(body[data-view="chat"]) #app.app,
+[data-theme="light"] #app.app:has(.view--active[data-view="chat"]) {
+  background-color: var(--overscroll-canvas) !important;
+  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
+}
+/* Скрываем «главный» цветной слой и backdrop у подложки — иначе за карточкой остаётся другой рисунок */
+.app:has(.view--active[data-view="chat"]) .bg-gradient {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.app:has(.view--active[data-view="chat"]) .bg-blur,
+[data-theme="light"] .app:has(.view--active[data-view="chat"]) .bg-blur {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body:has(.view--active[data-view="chat"]) {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  /* Ниже: сначала vh (старые WebView), затем dvh — синхрон с динамическим viewport TG/WKWebView и fixed-таббаром */
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  inset: 0;
+}
+html:has(.view--active[data-view="chat"]) {
+  min-height: 100vh;
+  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+/* Fallback / PWA: без привязки только к :has() — иначе на части WebView body/#app и 100dvh расходятся,
+   снизу появляется полоса, а fixed таббар визуально «поднимается» над краем */
+html.app-view-chat {
+  min-height: 100vh;
+  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+body[data-view="chat"] {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+html.poker-ios-pwa.app-view-chat,
+html.poker-ios-pwa:has(body[data-view="chat"]) {
+  min-height: 100vh;
+  height: 100vh;
+  min-height: -webkit-fill-available;
+  height: -webkit-fill-available;
+  min-height: 100lvh;
+  height: 100lvh;
+}
+html.poker-ios-pwa body[data-view="chat"] {
+  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  min-height: -webkit-fill-available;
+  height: -webkit-fill-available;
+  max-height: -webkit-fill-available;
+  min-height: 100lvh;
+  height: 100lvh;
+  max-height: 100lvh;
+}
+html.poker-ios-pwa body[data-view="chat"] #app.app,
+html.poker-ios-pwa body[data-view="chat"] .app,
+html.poker-ios-pwa body[data-view="chat"] .card,
+html.poker-ios-pwa body[data-view="chat"] .card__content,
+html.poker-ios-pwa body[data-view="chat"] .view--active[data-view="chat"] {
+  min-height: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+html.poker-ios-pwa body[data-view="chat"] .chat-general-header,
+html.poker-ios-pwa body[data-view="chat"] .chat-conv-top,
+html.poker-ios-pwa body[data-view="chat"] .chat-conv-top-inner,
+html.poker-ios-pwa .view--active[data-view="chat"] .chat-general-header,
+html.poker-ios-pwa .view--active[data-view="chat"] .chat-conv-top,
+html.poker-ios-pwa .view--active[data-view="chat"] .chat-conv-top-inner,
+html.poker-android-pwa body[data-view="chat"] .chat-general-header,
+html.poker-android-pwa body[data-view="chat"] .chat-conv-top,
+html.poker-android-pwa body[data-view="chat"] .chat-conv-top-inner,
+html.poker-android-pwa .view--active[data-view="chat"] .chat-general-header,
+html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top,
+html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top-inner {
+  top: 0 !important;
+  margin-top: 0 !important;
+}
+/* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
+html.app-view-chat .bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Надёжный скролл: любой экран кроме чата (новые data-view не нужно вносить вручную) */
+body:not([data-view="chat"]) {
+  position: static;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Иначе body остаётся row-flex + stretch — высота #app ≈ вьюпорт и контент обрезается */
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto !important;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Зал славы: fallback без :has() (старые WebView) + стабильная высота цепочки .app/.card */
+body[data-view="hall-of-fame"] {
+  display: block !important;
+}
+body[data-view="hall-of-fame"] .app {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
+}
+body[data-view="hall-of-fame"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="hall-of-fame"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+  overflow: visible;
+}
+body[data-view="hall-of-fame"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="hall-of-fame"] .view.view--active[data-view="hall-of-fame"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Скачать: fallback по data-view — без overflow:visible на .card__content (ломает внутренний scrollport, см. блок ниже и конец файла) */
+body[data-view="download"] {
+  display: block !important;
+}
+body[data-view="download"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="download"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="download"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="download"] .view.view--active[data-view="download"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Депозит: тот же fallback карточки (совместно с блоком html:has(cashout) ниже) */
+body[data-view="cashout"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="cashout"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="cashout"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="cashout"] .view.view--active[data-view="cashout"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Рейтинг весны: как главная / депозит — цепочка карточки перед html:has(spring-rating) */
+body[data-view="spring-rating"] {
+  display: block !important;
+}
+body[data-view="spring-rating"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="spring-rating"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="spring-rating"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="spring-rating"] .view.view--active[data-view="spring-rating"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Профиль: fallback карточки — как главная / депозит */
+body[data-view="profile"] .app > .bg-gradient {
+  inset: 0;
+}
+body[data-view="profile"] .card {
+  flex-shrink: 0;
+  min-height: min-content;
+  max-height: none;
+}
+body[data-view="profile"] .card .card__content {
+  flex-shrink: 0;
+  min-width: 0;
+}
+body[data-view="profile"] .view.view--active[data-view="profile"] {
+  flex-shrink: 0;
+  min-height: min-content;
+  overflow: visible;
+}
+
+/* Высота/оверфлоу чата; фон полей вокруг карточки — см. html.app-view-chat / #app:has(...) выше */
+.app:has(.view--active[data-view="chat"]),
+html.app-view-chat #app.app {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  align-items: center;
+  padding-bottom: 0 !important;
+  overflow: hidden;
+}
+.card:has(.view--active[data-view="chat"]) {
+  max-height: none;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  width: 100%;
+  /* Было 420px — на широких окнах десктопного Mini App оставались огромные поля по бокам */
+  max-width: min(100%, 520px);
+  padding: 4px 0 8px;
+  gap: 4px;
+  border: none;
+  box-shadow: none;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+@media (min-width: 700px) {
+  .card:has(.view--active[data-view="chat"]) {
+    max-width: min(100%, 720px);
+  }
+}
+@media (min-width: 1100px) {
+  .card:has(.view--active[data-view="chat"]) {
+    max-width: min(100%, 960px);
+  }
+}
+.card:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) {
+  padding-top: 0;
+}
+.card:has(.view--active[data-view="chat"]) .card__content {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.card:has(.view--active[data-view="chat"])::before {
+  display: none;
+}
+.card:has(.view--active[data-view="chat"]) .card__header {
+  display: none;
+}
+
+/* From styles-layout.css */
+
+html.poker-ios-pwa.app-view-chat .bottom-nav,
+html.poker-ios-pwa body[data-view="chat"] .bottom-nav,
+html.poker-ios-pwa #app.app:has(.view--active[data-view="chat"]) ~ .bottom-nav {
+  padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
+}
+
+body[data-view="summer-rating"] #app.app {
+  align-items: stretch !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="summer-rating"] #app.app .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="summer-rating"] #app.app .card .card__content {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="summer-rating"] #app.app .card .card__content > .view--active[data-view="summer-rating"] {
+  width: 100% !important;
+}
+
+body[data-view="download"] #app.app .card .card__content,
+body[data-view="cashout"] #app.app .card .card__content,
+body[data-view="summer-rating"] #app.app .card .card__content,
+body[data-view="profile"] #app.app .card .card__content {
+  scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
+  padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
+}
+body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
+body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
+body[data-view="summer-rating"] #app.app .card .card__content > .view--active[data-view="summer-rating"],
+body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"] {
+  min-height: calc(100% + var(--app-short-panel-overscroll-extra)) !important;
+  box-sizing: border-box !important;
+}
+
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+body[data-view="download"] .download-page--active:not([data-download-page="main"]),
+body[data-view="cashout"] .cashout-manager-block {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+body[data-view="hall-of-fame"] #app.app {
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-bottom: 0 !important;
+}
+body[data-view="hall-of-fame"] #app.app .card {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="hall-of-fame"] #app.app .card .card__content {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
+}
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  body[data-view="hall-of-fame"] #app.app .card .card__content {
+    scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px))) !important;
+  }
+}
+
+body[data-view="admin-bonuses"] #app.app {
+  flex: 1 1 0 !important;
+  align-self: stretch !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body[data-view="admin-bonuses"] #app.app .card {
+  flex: 1 1 0 !important;
+  flex-shrink: 1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body[data-view="admin-bonuses"] #app.app .card .card__content {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: max(
+    calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
+    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
+  ) !important;
+  padding-bottom: max(
+    calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
+    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
+  ) !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body[data-view="admin-bonuses"] #app.app .card .card__content > .view--active[data-view="admin-bonuses"] {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+body[data-view="player-crm"] #app.app {
+  flex: 1 1 0 !important;
+  align-self: stretch !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-bottom: 0 !important;
+}
+body[data-view="player-crm"] #app.app .card {
+  flex: 1 1 0 !important;
+  flex-shrink: 1 !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="player-crm"] #app.app .card .card__header {
+  display: none !important;
+}
+body[data-view="player-crm"] #app.app .card::before,
+body[data-view="player-crm"] #app.app .card::after {
+  display: none !important;
+  content: none !important;
+}
+body[data-view="player-crm"] #app.app .card .bg-decor {
+  display: none !important;
+}
+body[data-view="player-crm"] #app.app .card .card__content {
+  position: relative !important;
+  z-index: 2 !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  padding-bottom: var(--app-bottom-tabbar-pad) !important;
+  margin-left: calc(-1 * var(--card-padding-x)) !important;
+  margin-right: calc(-1 * var(--card-padding-x)) !important;
+  width: calc(100% + 2 * var(--card-padding-x)) !important;
+  max-width: none !important;
+  padding-left: var(--card-padding-x) !important;
+  padding-right: var(--card-padding-x) !important;
+  box-sizing: border-box !important;
+}
+body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"] {
+  display: block !important;
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"],
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
+  position: fixed !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  z-index: 1000 !important;
+  inset: 0 0 var(--app-bottom-tabbar-pad) 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
+  height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
+  max-height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
+  max-height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
+  overflow: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  padding: max(12px, env(safe-area-inset-top, 0px)) var(--screen-gutter-x) 18px !important;
+  box-sizing: border-box !important;
+  background:
+    radial-gradient(ellipse at 16% -8%, rgba(255, 231, 168, 0.08), transparent 36%),
+    radial-gradient(ellipse at 90% 4%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
+}
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] > .bonus-game-back {
+  flex: 0 0 auto !important;
+  position: relative !important;
+  top: auto !important;
+  z-index: 3 !important;
+}
+body[data-view="player-crm"] #playerCrmView.view--active > .admin-section-views {
+  display: none !important;
+}
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] .player-crm {
+  width: min(1120px, 100%) !important;
+  max-width: 100% !important;
+}
+
+/* iOS PWA/WebView can shrink the fixed CRM view to the sticky back button height
+   when the viewport height is expressed through top/bottom inset math. Keep the
+   active CRM screen explicitly viewport-tall so the content below the back arrow
+   is not clipped. */
+body[data-view="player-crm"] #app.app .card .card__content > .view.view--active[data-view="player-crm"],
+body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
+}
+
+body:not([data-view="player-crm"]) #playerCrmView:not(.player-crm-standalone),
+#playerCrmView:not(.view--active):not(.player-crm-standalone) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body[data-view="player-crm"] #playerCrmView.view--active,
+body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body[data-view="player-crm"] #playerCrmView.view--active {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  z-index: 2147483000 !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(ellipse at 16% -8%, rgba(255, 231, 168, 0.08), transparent 36%),
+    radial-gradient(ellipse at 90% 4%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
+}
+
+body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
+  display: block !important;
+  flex: 1 1 auto !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: max(12px, var(--screen-gutter-x, 12px)) !important;
+  bottom: 0 !important;
+  left: max(12px, var(--screen-gutter-x, 12px)) !important;
+  z-index: 2 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
+  box-sizing: border-box !important;
+  color: var(--text, #f8fafc) !important;
+  transform: none !important;
+}
+
+body[data-view="player-crm"] #playerCrmView.view--active .player-crm__period-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#playerCrmView.player-crm-standalone {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 0 12px !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 2147483600 !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
+}
+
+#playerCrmView.player-crm-standalone > .bonus-game-back {
+  display: inline-flex !important;
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 auto !important;
+  z-index: 3 !important;
+  margin: 0 0 14px !important;
+}
+
+body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-game-back {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#playerCrmView.player-crm-standalone .player-crm {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  flex: 1 1 auto !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  max-width: 1120px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y pinch-zoom !important;
+  box-sizing: border-box !important;
+  padding: 0 0 16px !important;
+  color: var(--text, #f4ead6) !important;
+  transform: none !important;
+}
+
+/*
+ * Мобильный профиль: держим быстрый инерционный scrollport внутри .card__content.
+ * Document-scroll в Telegram WebView прокручивается тяжелее и иногда теряет жест.
+ */
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+
+  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
+  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
+  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
+    min-height: calc(100% + var(--app-short-panel-overscroll-extra, 44px)) !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
+  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
+  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
+  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection,
+  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection,
+  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection {
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  body[data-view="profile"] #app.app .view--active[data-view="profile"].profile-view--tab-friends::after,
+  html:has(body[data-view="profile"]) #app.app .view--active[data-view="profile"].profile-view--tab-friends::after,
+  html.app-view-profile-html-scroll #app.app .view--active[data-view="profile"].profile-view--tab-friends::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: max(
+      140px,
+      calc(var(--app-bottom-tabbar-pad, 105px) + 48px)
+    );
+    flex: 0 0 auto;
+    pointer-events: none;
+  }
+}
+
+body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
+html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
+html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
+  width: 100% !important;
+  padding-left: var(--app-content-edge-inset, 5px) !important;
+  padding-right: var(--app-content-edge-inset, 5px) !important;
+  box-sizing: border-box !important;
+}
+
+body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
+html:has(body[data-view="download"]) #app.app .card .card__content > .view--active[data-view="download"],
+html.app-view-download-html-scroll #app.app .card .card__content > .view--active[data-view="download"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+[data-theme="gold"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+[data-theme="dark"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+[data-theme="light"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
+body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block,
+[data-theme="dark"] body[data-view="cashout"] .cashout-manager-block,
+[data-theme="light"] body[data-view="cashout"] .cashout-manager-block,
+body[data-view="cashout"] .cashout-manager-block {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="hall-of-fame"] #app.app .card .card__content > .view--active[data-view="hall-of-fame"],
+html:has(body[data-view="hall-of-fame"]) #app.app .card .card__content > .view--active[data-view="hall-of-fame"],
+html.app-view-hall-html-scroll #app.app .card .card__content > .view--active[data-view="hall-of-fame"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* From styles.css */
+
+
+@media (max-width: 640px) {
+  #hallOfFameView.hall-of-fame--top2026 {
+    --hall-top2026-scene-width: min(100vw, 390px);
+    --hall-top2026-scene-left: calc((100vw - var(--hall-top2026-scene-width)) / 2);
+    --hall-top2026-header-overlap: 104px;
+    --hall-top2026-bg-y: 42px;
+    --hall-top2026-list-offset: 75px;
+    --hall-top2026-list-width: 248px;
+    --hall-top2026-list-max-width: 248px;
+    --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + clamp(54px, 16vw, 66px));
+    --hall-top2026-stage-min-height: clamp(760px, calc(100vw + 408px), 824px);
+    --hall-top2026-lower-bg-y: 402px;
+    --hall-top2026-lower-bg-width: calc(var(--hall-top2026-scene-width) * 1.42);
+    --hall-top2026-trophy-right: -78px;
+    --hall-top2026-trophy-top: 342px;
+    --hall-top2026-trophy-width: 119px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 4px 0 0;
+    overflow: hidden;
+    color: #f5d49a;
+    background: transparent;
+  }
+
+  #hallOfFameView .hall-of-fame__main-title,
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__main-title {
+    display: none !important;
+  }
+
+  #hallOfFameView .hall-of-fame__toolbar {
+    position: relative;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    min-width: 0;
+    margin: 4px 8px;
+  }
+
+  #hallOfFameView .hall-of-fame__toolbar-back {
+    flex: 0 0 34px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    margin: 0 !important;
+    padding: 0;
+    border: 1px solid rgba(196, 125, 39, 0.72) !important;
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 211, 132, 0.22), transparent 70%),
+      linear-gradient(180deg, #22170d 0%, #0a0806 100%) !important;
+    color: #f5d49a;
+    font-size: 22px;
+    line-height: 1;
+    box-shadow: inset 0 1px 0 rgba(255, 229, 177, 0.22), 0 4px 12px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  #hallOfFameView .hall-of-fame__subtabs {
+    display: flex;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 30px;
+    min-height: 30px;
+    overflow: hidden;
+    border: 1px solid rgba(196, 125, 39, 0.72);
+    border-radius: 11px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 204, 120, 0.16), transparent 70%),
+      linear-gradient(180deg, #20180f 0%, #070605 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 229, 177, 0.18),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.46),
+      0 4px 12px rgba(0, 0, 0, 0.32);
+  }
+
+  #hallOfFameView .hall-of-fame__subtab {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    padding: 2px 3px;
+    border: 0;
+    border-right: 1px solid rgba(196, 125, 39, 0.32);
+    border-radius: 0;
+    background: transparent !important;
+    color: rgba(245, 212, 154, 0.78);
+    font: inherit;
+    font-size: clamp(8px, 2.25vw, 10px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  #hallOfFameView .hall-of-fame__subtab:last-child {
+    border-right: 0;
+  }
+
+  #hallOfFameView .hall-of-fame__subtab--active,
+  #hallOfFameView .hall-of-fame__subtab[aria-selected="true"] {
+    color: #ffe5b2;
+    background: rgba(196, 125, 39, 0.18) !important;
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__panels {
+    margin-top: 0;
+    min-width: 0;
+    overflow: hidden;
+    background: #120703;
+  }
+
+  #hallOfFameView .hall-of-fame__panel[hidden] {
+    display: none !important;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--hall-top2026-stage-min-height);
+    margin: calc(-1 * var(--hall-top2026-header-overlap)) 0 0;
+    padding: 318px 10px 18px;
+    overflow: hidden;
+    border-radius: 0 0 18px 18px;
+    background-color: #120703;
+    background-image:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(255, 132, 24, 0.05)),
+      radial-gradient(ellipse at 50% 100%, rgba(126, 48, 12, 0.2), transparent 66%),
+      linear-gradient(90deg, rgba(26, 8, 2, 0.42), rgba(84, 28, 6, 0.12) 18%, rgba(84, 28, 6, 0.12) 82%, rgba(26, 8, 2, 0.42)),
+      linear-gradient(180deg, rgba(22, 8, 3, 0), rgba(41, 15, 5, 0.32) 48%, rgba(16, 6, 2, 0.56)),
+      url("./assets/hall-top2026-lower-floor-light-v1.webp?v=3.772"),
+      url("./assets/hall-top2026-bg-dark.webp?v=3.537");
+    background-position: center top, center bottom, center bottom, center bottom, center var(--hall-top2026-lower-bg-y), center var(--hall-top2026-bg-y);
+    background-repeat: no-repeat;
+    background-size: 100% 100%, var(--hall-top2026-scene-width) 520px, var(--hall-top2026-scene-width) 520px, var(--hall-top2026-scene-width) 520px, var(--hall-top2026-lower-bg-width) auto, var(--hall-top2026-scene-width) auto;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-monkey,
+  #hallOfFameView .hall-of-fame__top2026-trophy {
+    position: absolute;
+    display: block;
+    height: auto;
+    max-width: none;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-monkey {
+    z-index: 12;
+    top: 249px;
+    left: calc(var(--hall-top2026-scene-left) - 99px);
+    width: 236px;
+    clip-path: inset(0 0 0 4px);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-stage::after {
+    left: -24px;
+    right: -24px;
+    bottom: 0;
+    z-index: 0;
+    height: 470px;
+    background:
+      radial-gradient(ellipse at 74% 42%, rgba(156, 86, 28, 0.16), transparent 32%),
+      radial-gradient(ellipse at 18% 48%, rgba(92, 43, 15, 0.24), transparent 36%),
+      linear-gradient(180deg, rgba(23, 8, 3, 0) 0%, rgba(38, 15, 6, 0.52) 42%, rgba(18, 7, 3, 0.92) 100%);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-trophy {
+    z-index: 7;
+    top: var(--hall-top2026-trophy-top);
+    right: calc((100vw - var(--hall-top2026-scene-width)) / 2 + var(--hall-top2026-trophy-right));
+    width: var(--hall-top2026-trophy-width);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-trophy-login {
+    top: calc(var(--hall-top2026-trophy-top) + var(--hall-top2026-trophy-width) * 1.705);
+    right: calc((100vw - var(--hall-top2026-scene-width)) / 2 + var(--hall-top2026-trophy-right) + var(--hall-top2026-trophy-width) * 0.25);
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-list-card {
+    position: absolute;
+    z-index: 9;
+    width: var(--hall-top2026-list-width) !important;
+    max-width: var(--hall-top2026-list-max-width) !important;
+    top: 370px;
+    left: var(--hall-top2026-list-left);
+    margin: 0 !important;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque {
+    width: 102px;
+    min-height: 48px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--sarmat {
+    top: 100px;
+    left: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--whiskey {
+    top: 170px;
+    left: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--waaar {
+    top: 238px;
+    left: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--place5 {
+    top: 100px;
+    right: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--place6 {
+    top: 170px;
+    right: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-plaque--place7 {
+    top: 238px;
+    right: 18px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-quotes {
+    top: 246px;
+    width: 220px;
+    min-height: 112px;
+    font-size: 12px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-share {
+    display: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  #hallOfFameView.hall-of-fame--top2026 {
+    --hall-top2026-list-width: 216px;
+    --hall-top2026-list-max-width: 216px;
+    --hall-top2026-list-left: calc(var(--hall-top2026-scene-left) + 50px);
+    --hall-top2026-trophy-right: -20%;
+    --hall-top2026-trophy-top: calc(439.5px - 25vw);
+    --hall-top2026-trophy-width: 31%;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-trophy {
+    z-index: 7;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-stage .winter-rating__single-top-link,
+  #hallOfFameView .hall-of-fame__top2026-stage .winter-rating__single-top-static {
+    grid-template-columns: 17px 22px minmax(0, 1fr) auto;
+    gap: 2px;
+    padding-inline: 4px;
+    font-size: 9.8px;
+  }
+
+  #hallOfFameView .hall-of-fame__top2026-stage .winter-rating__single-top-amount {
+    font-size: 9.8px;
+  }
+}
+
+@media (min-width: 641px) {
+  #hallOfFameView.hall-of-fame--top2026 {
+    --hall-top2026-header-overlap: 104px;
+    --hall-top2026-bg-width: 390px;
+    --hall-top2026-bg-y: 42px;
+    --hall-top2026-list-offset: 75px;
+    --hall-top2026-list-width: 248px;
+    --hall-top2026-list-max-width: 248px;
+    --hall-top2026-list-left: calc(50% - 146px);
+    --hall-top2026-stage-min-height: 824px;
+    --hall-top2026-lower-bg-y: 402px;
+    --hall-top2026-lower-bg-width: 554px;
+    --hall-top2026-trophy-right: calc(50% - 279px);
+    --hall-top2026-trophy-top: 332px;
+    --hall-top2026-trophy-width: 126px;
+    max-width: 430px;
+    margin-inline: auto;
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-stage {
+    padding-top: 318px;
+    background-size: 100% 100%, 390px 520px, 390px 520px, 390px 520px, var(--hall-top2026-lower-bg-width) auto, var(--hall-top2026-bg-width) auto;
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-monkey {
+    top: 249px;
+    left: calc(50% - 294px);
+    width: 236px;
+    clip-path: inset(0 0 0 4px);
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-trophy {
+    top: var(--hall-top2026-trophy-top);
+    right: var(--hall-top2026-trophy-right);
+    width: var(--hall-top2026-trophy-width);
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-trophy-login {
+    top: calc(var(--hall-top2026-trophy-top) + var(--hall-top2026-trophy-width) * 1.705);
+    right: calc(var(--hall-top2026-trophy-right) + var(--hall-top2026-trophy-width) * 0.25);
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-list-card {
+    position: absolute;
+    z-index: 9;
+    top: 370px;
+    left: var(--hall-top2026-list-left);
+    width: var(--hall-top2026-list-width) !important;
+    max-width: var(--hall-top2026-list-max-width) !important;
+    margin: 0 !important;
+  }
+
+  #hallOfFameView.hall-of-fame--top2026 .hall-of-fame__top2026-share {
+    display: none !important;
+  }
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu {
+  position: fixed !important;
+  z-index: 1500 !important;
+  top: calc(env(safe-area-inset-top, 0px) + 86px) !important;
+  right: max(14px, env(safe-area-inset-right, 0px)) !important;
+  left: auto !important;
+  width: min(300px, calc(100vw - 28px)) !important;
+  max-width: min(300px, calc(100vw - 28px)) !important;
+  max-height: calc(100vh - 112px) !important;
+  max-height: calc(100dvh - 112px) !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  padding: 9px !important;
+  overflow: auto !important;
+  border: 1px solid rgba(251, 191, 36, 0.28) !important;
+  border-radius: 16px !important;
+  background:
+    radial-gradient(ellipse at 86% -10%, rgba(255, 184, 77, 0.2), transparent 48%),
+    linear-gradient(180deg, rgba(11, 14, 21, 0.98), rgba(5, 8, 14, 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 18px 38px rgba(0, 0, 0, 0.52),
+    0 0 22px rgba(251, 146, 60, 0.14) !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu[hidden],
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action[hidden],
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-admin-report--hidden,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .welcome-planner-icon--hidden {
+  display: none !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .theme-toggle,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .site-home-instruction-btn,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .site-home-auth-btn,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  align-items: center !important;
+  justify-content: initial !important;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box !important;
+  border-radius: 14px !important;
+  border-color: rgba(251, 191, 36, 0.2) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)),
+    rgba(14, 19, 32, 0.76) !important;
+  box-shadow: none !important;
+  color: rgba(255, 247, 237, 0.92) !important;
+  font: inherit !important;
+  text-align: left !important;
+  text-decoration: none !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action--gazette,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action--radio {
+  grid-column: auto !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  gap: 7px !important;
+  padding-inline: 8px !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-menu-action__icon {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  background: rgba(251, 191, 36, 0.1) !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action--gazette .header-menu-action__icon,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .header-menu-action--radio .header-menu-action__icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-menu-action__body {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 3px !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-menu-action__title {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  color: rgba(255, 247, 237, 0.94) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-menu-action__hint,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle__listen {
+  display: none !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle .radio-toggle__icon,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .theme-toggle .theme-toggle__icon {
+  display: none !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle .radio-toggle__icon--off,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--chill .radio-toggle__icon--chill,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--lounge .radio-toggle__icon--lounge,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--90s .radio-toggle__icon--90s,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--radio7 .radio-toggle__icon--radio7,
+html[data-theme="dark"] #app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .theme-toggle .theme-toggle__icon--dark,
+html[data-theme="light"] #app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .theme-toggle .theme-toggle__icon--light,
+html[data-theme="gold"] #app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .theme-toggle .theme-toggle__icon--gold,
+html[data-theme="neon"] #app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .theme-toggle .theme-toggle__icon--neon {
+  display: inline-flex !important;
+}
+
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--chill .radio-toggle__icon--off,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--lounge .radio-toggle__icon--off,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--90s .radio-toggle__icon--off,
+#app:has(.view--active[data-view="admin-bonuses"]) .header-more-menu .radio-toggle.radio-toggle--radio7 .radio-toggle__icon--off {
+  display: none !important;
+}
+
+/* Единая клубная шапка для всех обычных разделов приложения. */
+html body:not([data-view="chat"]) #app.app > .card > .card__header {
+  position: relative !important;
+  z-index: 60 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  width: calc(100% + (2 * var(--card-padding-x, 16px)) - 6px) !important;
+  min-height: 66px !important;
+  margin: 0 calc(-1 * var(--card-padding-x, 16px) + 3px) 8px !important;
+  padding: 7px 12px !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(214, 163, 84, 0.3) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.06), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.035), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.94), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.1),
+    inset 0 -18px 34px rgba(0, 0, 0, 0.16),
+    0 18px 46px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="gold"] body:not([data-view="chat"]) #app.app > .card > .card__header {
+  border-color: rgba(214, 163, 84, 0.34) !important;
+  background:
+    radial-gradient(ellipse at 16% 0%, rgba(255, 231, 168, 0.065), transparent 36%),
+    radial-gradient(ellipse at 88% 6%, rgba(255, 198, 74, 0.04), transparent 38%),
+    linear-gradient(160deg, rgba(4, 6, 10, 0.95), rgba(8, 11, 17, 0.9) 46%, rgba(3, 4, 7, 0.94) 76%, rgba(1, 2, 4, 0.97)) !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo.logo--welcome {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  gap: 6px !important;
+  padding: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__image {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__text {
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__title {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0.2em !important;
+  max-width: 100% !important;
+  font-size: clamp(10px, 2.95vw, 13px) !important;
+  line-height: 1.04 !important;
+  white-space: nowrap !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__subtitle {
+  font-size: clamp(7px, 1.95vw, 9px) !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0.2em !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions {
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary,
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-notification-btn {
+  display: none !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions__row {
+  gap: 6px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions__row .header-icon-btn {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+}
+
+@media (max-width: 380px) {
+  html body:not([data-view="chat"]) #app.app > .card > .card__header {
+    min-height: 60px !important;
+    gap: 7px !important;
+    padding: 7px 10px !important;
+  }
+
+  html body:not([data-view="chat"]) #app.app > .card > .card__header .logo.logo--welcome {
+    gap: 5px !important;
+  }
+
+  html body:not([data-view="chat"]) #app.app > .card > .card__header .logo__image {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions__row .header-icon-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header {
+  width: calc(100% - 16px) !important;
+  margin: 0 8px 8px !important;
+  padding: 8px 12px !important;
+  gap: 9px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary {
+  display: flex !important;
+  flex: 1 1 clamp(118px, 38vw, 260px) !important;
+  max-width: clamp(118px, 38vw, 260px) !important;
+  min-width: 0 !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: 3px !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting-wrap {
+  display: flex !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-greeting {
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+  column-gap: 0.22em !important;
+  row-gap: 0 !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-align: right !important;
+  font-size: clamp(10px, 2.85vw, 13px) !important;
+  line-height: 1.08 !important;
+}
+
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions {
+  flex: 1 1 clamp(164px, 50vw, 336px) !important;
+}
+
+#hallOfFameView .hall-of-fame__toolbar {
+  margin-left: 3px !important;
+}

@@ -3110,7 +3110,27 @@
     }).catch(function () {});
   }
 
+  var newsModalOpenSequence = 0;
+
+  function waitForNewsModalStyles(open) {
+    if (typeof window.pokerEnsureStyleDomains !== "function") return false;
+    var pending = window.pokerEnsureStyleDomains(["home-news-modal"]);
+    if (!pending || typeof pending.then !== "function") return false;
+    var sequence = ++newsModalOpenSequence;
+    pending.then(function () {
+      if (sequence === newsModalOpenSequence) open();
+    }).catch(function () {
+      if (sequence !== newsModalOpenSequence) return;
+      var message = "Не удалось загрузить оформление новостей. Попробуйте открыть новости ещё раз.";
+      var tg = window.Telegram && window.Telegram.WebApp;
+      if (tg && tg.initData && tg.showAlert) tg.showAlert(message);
+      else window.alert(message);
+    });
+    return true;
+  }
+
   function openModal() {
+    if (waitForNewsModalStyles(openModal)) return;
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     newsModalMode = "friends";
@@ -3127,6 +3147,7 @@
   }
 
   function openClubModal() {
+    if (waitForNewsModalStyles(openClubModal)) return;
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     if (!clubEvents.length && clubNewsStaticRows().length) {
@@ -3146,6 +3167,7 @@
   window.pokerOpenClubNewsModal = openClubModal;
 
   function closeModal() {
+    newsModalOpenSequence += 1;
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     modal.hidden = true;

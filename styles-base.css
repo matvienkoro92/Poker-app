@@ -1113,13 +1113,6 @@ html.app--tg-content-inset .app {
   padding: 4px 0;
   margin: 0 0 -10px;
 }
-html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) {
-  margin-top: 8px;
-}
-html.app--telegram-miniapp .card:not(:has(.view--active[data-view="chat"])) .card__header {
-  margin-top: 32px !important;
-  margin-bottom: 8px !important;
-}
 html.app--telegram-miniapp .card:has(.view--active[data-view="home"]) {
   padding-top: 28px;
 }
@@ -1127,140 +1120,6 @@ html.app--telegram-miniapp .card:has(.view--active[data-view="home"]) .card__hea
   padding-top: 10px;
   margin-top: 36px !important;
   margin-bottom: 12px !important;
-}
-/* Чаты: фон html/body/#app как у ленты и списка диалогов — без общего body-bg, чтобы поля по бокам карточки не отличались по цвету */
-html.app-view-chat,
-body.app-view-chat,
-html:has(.view--active[data-view="chat"]),
-body:has(.view--active[data-view="chat"]) {
-  --chat-side-pad: clamp(6px, 2.4vw, 12px);
-  background-color: var(--overscroll-canvas) !important;
-  background-image: var(--bg-blur-gradient) !important;
-}
-html:has(body[data-view="chat"]),
-body[data-view="chat"] {
-  --chat-side-pad: clamp(6px, 2.4vw, 12px);
-}
-[data-theme="light"] html.app-view-chat,
-[data-theme="light"] body.app-view-chat,
-[data-theme="light"] html:has(.view--active[data-view="chat"]),
-[data-theme="light"] body:has(.view--active[data-view="chat"]) {
-  background-color: var(--overscroll-canvas) !important;
-  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
-}
-html.app-view-chat #app.app,
-html:has(body[data-view="chat"]) #app.app,
-#app.app:has(.view--active[data-view="chat"]) {
-  background-color: var(--overscroll-canvas) !important;
-  background-image: var(--bg-blur-gradient) !important;
-  /* Только вырезы у края экрана; сам зазор контента чата — у ленты/полей (--chat-side-pad). */
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-}
-[data-theme="light"] html.app-view-chat #app.app,
-[data-theme="light"] html:has(body[data-view="chat"]) #app.app,
-[data-theme="light"] #app.app:has(.view--active[data-view="chat"]) {
-  background-color: var(--overscroll-canvas) !important;
-  background-image: linear-gradient(135deg, rgba(255, 247, 237, 0.97), rgba(255, 237, 213, 0.97), rgba(254, 215, 170, 0.95)) !important;
-}
-/* Скрываем «главный» цветной слой и backdrop у подложки — иначе за карточкой остаётся другой рисунок */
-.app:has(.view--active[data-view="chat"]) .bg-gradient {
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-.app:has(.view--active[data-view="chat"]) .bg-blur,
-[data-theme="light"] .app:has(.view--active[data-view="chat"]) .bg-blur {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body:has(.view--active[data-view="chat"]) {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  /* Ниже: сначала vh (старые WebView), затем dvh — синхрон с динамическим viewport TG/WKWebView и fixed-таббаром */
-  min-height: 100vh;
-  height: 100vh;
-  max-height: 100vh;
-  min-height: 100dvh;
-  height: 100dvh;
-  max-height: 100dvh;
-  inset: 0;
-}
-html:has(.view--active[data-view="chat"]) {
-  min-height: 100vh;
-  height: 100vh;
-  min-height: 100dvh;
-  height: 100dvh;
-  overflow: hidden;
-}
-/* Fallback / PWA: без привязки только к :has() — иначе на части WebView body/#app и 100dvh расходятся,
-   снизу появляется полоса, а fixed таббар визуально «поднимается» над краем */
-html.app-view-chat {
-  min-height: 100vh;
-  height: 100vh;
-  min-height: 100dvh;
-  height: 100dvh;
-  overflow: hidden;
-}
-body[data-view="chat"] {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  min-height: 100vh;
-  height: 100vh;
-  max-height: 100vh;
-  min-height: 100dvh;
-  height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden;
-}
-html.poker-ios-pwa.app-view-chat,
-html.poker-ios-pwa:has(body[data-view="chat"]) {
-  min-height: 100vh;
-  height: 100vh;
-  min-height: -webkit-fill-available;
-  height: -webkit-fill-available;
-  min-height: 100lvh;
-  height: 100lvh;
-}
-html.poker-ios-pwa body[data-view="chat"] {
-  min-height: 100vh;
-  height: 100vh;
-  max-height: 100vh;
-  min-height: -webkit-fill-available;
-  height: -webkit-fill-available;
-  max-height: -webkit-fill-available;
-  min-height: 100lvh;
-  height: 100lvh;
-  max-height: 100lvh;
-}
-html.poker-ios-pwa body[data-view="chat"] #app.app,
-html.poker-ios-pwa body[data-view="chat"] .app,
-html.poker-ios-pwa body[data-view="chat"] .card,
-html.poker-ios-pwa body[data-view="chat"] .card__content,
-html.poker-ios-pwa body[data-view="chat"] .view--active[data-view="chat"] {
-  min-height: 100%;
-  height: 100%;
-  max-height: 100%;
-}
-html.poker-ios-pwa body[data-view="chat"] .chat-general-header,
-html.poker-ios-pwa body[data-view="chat"] .chat-conv-top,
-html.poker-ios-pwa body[data-view="chat"] .chat-conv-top-inner,
-html.poker-ios-pwa .view--active[data-view="chat"] .chat-general-header,
-html.poker-ios-pwa .view--active[data-view="chat"] .chat-conv-top,
-html.poker-ios-pwa .view--active[data-view="chat"] .chat-conv-top-inner,
-html.poker-android-pwa body[data-view="chat"] .chat-general-header,
-html.poker-android-pwa body[data-view="chat"] .chat-conv-top,
-html.poker-android-pwa body[data-view="chat"] .chat-conv-top-inner,
-html.poker-android-pwa .view--active[data-view="chat"] .chat-general-header,
-html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top,
-html.poker-android-pwa .view--active[data-view="chat"] .chat-conv-top-inner {
-  top: 0 !important;
-  margin-top: 0 !important;
 }
 .chat-keyboard-debug {
   display: none !important;
@@ -1306,18 +1165,6 @@ html.app--telegram-miniapp #chatPersonalKeyboardDebug,
 html.poker-telegram-miniapp #chatPersonalKeyboardDebug {
   border-radius: 12px;
 }
-/* Таббар — сосед #app: тот же fixed-body, без смещения по inset */
-html.app-view-chat .bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: auto;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  transform: translate3d(0, 0, 0);
-}
 
 /*
  * iOS PWA (не чат): на части WKWebView min-height с 100dvh короче фактического layout viewport —
@@ -1335,20 +1182,6 @@ html.poker-ios-pwa:not(.app-view-chat) body {
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   min-height: 100lvh;
-}
-
-/* Надёжный скролл: любой экран кроме чата (новые data-view не нужно вносить вручную) */
-body:not([data-view="chat"]) {
-  position: static;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  /* Иначе body остаётся row-flex + stretch — высота #app ≈ вьюпорт и контент обрезается */
-  display: block !important;
-  width: 100%;
-  box-sizing: border-box;
-  height: auto !important;
-  touch-action: pan-y pinch-zoom;
 }
 /* Длинные экраны: скролл на <body>, <html> без вертикального scrollport — иначе в TG/WebView обрезается высота (~«9 карточек») */
 html:has(.view--active[data-view="learn-play-hub"]),
@@ -1491,57 +1324,6 @@ body[data-view="video-lessons"] .view.view--active[data-view="video-lessons"] {
   overflow: visible;
 }
 
-/* Зал славы: fallback без :has() (старые WebView) + стабильная высота цепочки .app/.card */
-body[data-view="hall-of-fame"] {
-  display: block !important;
-}
-body[data-view="hall-of-fame"] .app {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-  padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
-}
-body[data-view="hall-of-fame"] .app > .bg-gradient {
-  inset: 0;
-}
-body[data-view="hall-of-fame"] .card {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-  overflow: visible;
-}
-body[data-view="hall-of-fame"] .card .card__content {
-  flex-shrink: 0;
-  min-width: 0;
-}
-body[data-view="hall-of-fame"] .view.view--active[data-view="hall-of-fame"] {
-  flex-shrink: 0;
-  min-height: min-content;
-  overflow: visible;
-}
-
-/* Скачать: fallback по data-view — без overflow:visible на .card__content (ломает внутренний scrollport, см. блок ниже и конец файла) */
-body[data-view="download"] {
-  display: block !important;
-}
-body[data-view="download"] .app > .bg-gradient {
-  inset: 0;
-}
-body[data-view="download"] .card {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-}
-body[data-view="download"] .card .card__content {
-  flex-shrink: 0;
-  min-width: 0;
-}
-body[data-view="download"] .view.view--active[data-view="download"] {
-  flex-shrink: 0;
-  min-height: min-content;
-  overflow: visible;
-}
-
 /* Главная: fallback по data-view — как у «Скачать» */
 body[data-view="home"] {
   display: block !important;
@@ -1564,47 +1346,6 @@ body[data-view="home"] .view.view--active[data-view="home"] {
   overflow: visible;
 }
 
-/* Депозит: тот же fallback карточки (совместно с блоком html:has(cashout) ниже) */
-body[data-view="cashout"] .app > .bg-gradient {
-  inset: 0;
-}
-body[data-view="cashout"] .card {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-}
-body[data-view="cashout"] .card .card__content {
-  flex-shrink: 0;
-  min-width: 0;
-}
-body[data-view="cashout"] .view.view--active[data-view="cashout"] {
-  flex-shrink: 0;
-  min-height: min-content;
-  overflow: visible;
-}
-
-/* Рейтинг весны: как главная / депозит — цепочка карточки перед html:has(spring-rating) */
-body[data-view="spring-rating"] {
-  display: block !important;
-}
-body[data-view="spring-rating"] .app > .bg-gradient {
-  inset: 0;
-}
-body[data-view="spring-rating"] .card {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-}
-body[data-view="spring-rating"] .card .card__content {
-  flex-shrink: 0;
-  min-width: 0;
-}
-body[data-view="spring-rating"] .view.view--active[data-view="spring-rating"] {
-  flex-shrink: 0;
-  min-height: min-content;
-  overflow: visible;
-}
-
 /* Розыгрыши: как главная / рейтинг весны */
 body[data-view="raffles"] {
   display: block !important;
@@ -1622,25 +1363,6 @@ body[data-view="raffles"] .card .card__content {
   min-width: 0;
 }
 body[data-view="raffles"] .view.view--active[data-view="raffles"] {
-  flex-shrink: 0;
-  min-height: min-content;
-  overflow: visible;
-}
-
-/* Профиль: fallback карточки — как главная / депозит */
-body[data-view="profile"] .app > .bg-gradient {
-  inset: 0;
-}
-body[data-view="profile"] .card {
-  flex-shrink: 0;
-  min-height: min-content;
-  max-height: none;
-}
-body[data-view="profile"] .card .card__content {
-  flex-shrink: 0;
-  min-width: 0;
-}
-body[data-view="profile"] .view.view--active[data-view="profile"] {
   flex-shrink: 0;
   min-height: min-content;
   overflow: visible;
@@ -2054,60 +1776,4 @@ html.app-view-daily-poker-html-scroll .card .card__content {
   touch-action: pan-y pinch-zoom;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad);
   padding-bottom: var(--app-bottom-tabbar-pad);
-}
-
-/* Высота/оверфлоу чата; фон полей вокруг карточки — см. html.app-view-chat / #app:has(...) выше */
-.app:has(.view--active[data-view="chat"]),
-html.app-view-chat #app.app {
-  height: 100%;
-  min-height: 0;
-  max-height: none;
-  align-items: center;
-  padding-bottom: 0 !important;
-  overflow: hidden;
-}
-.card:has(.view--active[data-view="chat"]) {
-  max-height: none;
-  height: 100%;
-  min-height: 0;
-  flex: 1;
-  width: 100%;
-  /* Было 420px — на широких окнах десктопного Mini App оставались огромные поля по бокам */
-  max-width: min(100%, 520px);
-  padding: 4px 0 8px;
-  gap: 4px;
-  border: none;
-  box-shadow: none;
-  border-radius: 16px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: transparent;
-}
-@media (min-width: 700px) {
-  .card:has(.view--active[data-view="chat"]) {
-    max-width: min(100%, 720px);
-  }
-}
-@media (min-width: 1100px) {
-  .card:has(.view--active[data-view="chat"]) {
-    max-width: min(100%, 960px);
-  }
-}
-.card:has(.view--active[data-view="chat"]):has(.chat-general-view:not(.chat-general-view--hidden)) {
-  padding-top: 0;
-}
-.card:has(.view--active[data-view="chat"]) .card__content {
-  flex: 1;
-  min-height: 0;
-  max-height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.card:has(.view--active[data-view="chat"])::before {
-  display: none;
-}
-.card:has(.view--active[data-view="chat"]) .card__header {
-  display: none;
 }

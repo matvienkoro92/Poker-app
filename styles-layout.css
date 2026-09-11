@@ -61,11 +61,6 @@
 html.poker-ios-pwa .bottom-nav {
   padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
 }
-html.poker-ios-pwa.app-view-chat .bottom-nav,
-html.poker-ios-pwa body[data-view="chat"] .bottom-nav,
-html.poker-ios-pwa #app.app:has(.view--active[data-view="chat"]) ~ .bottom-nav {
-  padding-bottom: max(6px, max(env(safe-area-inset-bottom, 0px), 34px)) !important;
-}
 /* Telegram Mini App: padding-bottom из WebApp.contentSafeAreaInset/safeAreaInset (app.js), иначе env() дублирует отступ WebView */
 html.app--tg-bottom-nav-inset .bottom-nav {
   padding-bottom: max(6px, var(--app-bottom-nav-inset-tg, 0px));
@@ -959,37 +954,6 @@ body[data-view="my-summary"] #app.app .card .card__content {
   overscroll-behavior-y: contain !important;
 }
 
-body[data-view="summer-rating"] #app.app {
-  align-items: stretch !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-body[data-view="summer-rating"] #app.app .card {
-  width: 100% !important;
-  max-width: none !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-body[data-view="summer-rating"] #app.app .card .card__content {
-  width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-body[data-view="summer-rating"] #app.app .card .card__content > .view--active[data-view="summer-rating"] {
-  width: 100% !important;
-}
-
 /*
  * Небольшой запас для коротких scrollport-экранов: на «Скачать», «Депозит» и
  * клубной вкладке профиля контент почти влезает, и без хвоста палец не может
@@ -997,28 +961,6 @@ body[data-view="summer-rating"] #app.app .card .card__content > .view--active[da
  */
 :root {
   --app-short-panel-overscroll-extra: 44px;
-}
-
-body[data-view="download"] #app.app .card .card__content,
-body[data-view="cashout"] #app.app .card .card__content,
-body[data-view="summer-rating"] #app.app .card .card__content,
-body[data-view="profile"] #app.app .card .card__content {
-  scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
-  padding-bottom: calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra)) !important;
-}
-body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
-body[data-view="cashout"] #app.app .card .card__content > .view--active[data-view="cashout"],
-body[data-view="summer-rating"] #app.app .card .card__content > .view--active[data-view="summer-rating"],
-body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"] {
-  min-height: calc(100% + var(--app-short-panel-overscroll-extra)) !important;
-  box-sizing: border-box !important;
-}
-
-body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
-body[data-view="download"] .download-page--active:not([data-download-page="main"]),
-body[data-view="cashout"] .cashout-manager-block {
-  border-color: transparent !important;
-  box-shadow: none !important;
 }
 
 /* Главная: margin-top: -2mm у .home-welcome-outline + overflow-y:auto на .card__content обрезали верхнюю линию рамки (::before) */
@@ -1137,44 +1079,6 @@ html.app-view-hall-html-scroll body.app-view-long-scroll {
   max-height: 100dvh !important;
   min-height: 0 !important;
 }
-body[data-view="hall-of-fame"] #app.app {
-  flex: 1 1 auto !important;
-  align-self: stretch !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  padding-bottom: 0 !important;
-}
-body[data-view="hall-of-fame"] #app.app .card {
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  max-width: 420px !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-body[data-view="hall-of-fame"] #app.app .card .card__content {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
-  touch-action: pan-y pinch-zoom !important;
-  scroll-padding-bottom: max(10px, calc(6px + env(safe-area-inset-bottom, 0px))) !important;
-}
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  body[data-view="hall-of-fame"] #app.app .card .card__content {
-    scroll-padding-bottom: max(12px, calc(8px + env(safe-area-inset-bottom, 0px))) !important;
-  }
-}
 
 /*
  * Бонусные балансы: таблица длинная, а нижний таббар fixed. Держим прокрутку
@@ -1203,80 +1107,6 @@ html.app-view-admin-bonuses-html-scroll body.app-view-long-scroll {
   min-height: 0 !important;
 }
 
-body[data-view="admin-bonuses"] #app.app {
-  flex: 1 1 0 !important;
-  align-self: stretch !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: 0 !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  max-height: 100vh !important;
-  max-height: 100dvh !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  padding-bottom: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-body[data-view="admin-bonuses"] #app.app .card {
-  flex: 1 1 0 !important;
-  flex-shrink: 1 !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-body[data-view="admin-bonuses"] #app.app .card .card__content {
-  flex: 1 1 0 !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
-  touch-action: pan-y pinch-zoom !important;
-  scroll-padding-bottom: max(
-    calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
-    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
-  ) !important;
-  padding-bottom: max(
-    calc(var(--app-bottom-tabbar-pad, 105px) + var(--app-short-panel-overscroll-extra, 44px)),
-    calc(74px + max(34px, env(safe-area-inset-bottom, 0px)) + var(--app-short-panel-overscroll-extra, 44px))
-  ) !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  box-sizing: border-box !important;
-}
-
-body[data-view="admin-bonuses"] #app.app .card .card__content > .view--active[data-view="admin-bonuses"] {
-  flex: 0 0 auto !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-
 /*
  * CRM игроков — админский длинный экран: scrollport на .card__content.
  * Body-scroll в Telegram/WebView на этом экране может не стартовать, как у «Скачать»/«Зал славы».
@@ -1301,257 +1131,6 @@ html.app-view-player-crm-html-scroll body.app-view-long-scroll {
   max-height: 100vh !important;
   max-height: 100dvh !important;
   min-height: 0 !important;
-}
-body[data-view="player-crm"] #app.app {
-  flex: 1 1 0 !important;
-  align-self: stretch !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  padding-bottom: 0 !important;
-}
-body[data-view="player-crm"] #app.app .card {
-  flex: 1 1 0 !important;
-  flex-shrink: 1 !important;
-  width: 100% !important;
-  max-width: 420px !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-body[data-view="player-crm"] #app.app .card .card__header {
-  display: none !important;
-}
-body[data-view="player-crm"] #app.app .card::before,
-body[data-view="player-crm"] #app.app .card::after {
-  display: none !important;
-  content: none !important;
-}
-body[data-view="player-crm"] #app.app .card .bg-decor {
-  display: none !important;
-}
-body[data-view="player-crm"] #app.app .card .card__content {
-  position: relative !important;
-  z-index: 2 !important;
-  flex: 1 1 0 !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
-  touch-action: pan-y pinch-zoom !important;
-  scroll-padding-bottom: var(--app-bottom-tabbar-pad) !important;
-  padding-bottom: var(--app-bottom-tabbar-pad) !important;
-  margin-left: calc(-1 * var(--card-padding-x)) !important;
-  margin-right: calc(-1 * var(--card-padding-x)) !important;
-  width: calc(100% + 2 * var(--card-padding-x)) !important;
-  max-width: none !important;
-  padding-left: var(--card-padding-x) !important;
-  padding-right: var(--card-padding-x) !important;
-  box-sizing: border-box !important;
-}
-body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"] {
-  display: block !important;
-  flex: 0 0 auto !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-body[data-view="player-crm"] #app.app .card .card__content > .view--active[data-view="player-crm"],
-body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
-  position: fixed !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 8px !important;
-  z-index: 1000 !important;
-  inset: 0 0 var(--app-bottom-tabbar-pad) 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: 0 !important;
-  height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
-  height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
-  max-height: calc(100vh - var(--app-bottom-tabbar-pad)) !important;
-  max-height: calc(100dvh - var(--app-bottom-tabbar-pad)) !important;
-  overflow: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
-  touch-action: pan-y pinch-zoom !important;
-  padding: max(12px, env(safe-area-inset-top, 0px)) var(--screen-gutter-x) 18px !important;
-  box-sizing: border-box !important;
-  background:
-    radial-gradient(ellipse at 16% -8%, rgba(255, 231, 168, 0.08), transparent 36%),
-    radial-gradient(ellipse at 90% 4%, rgba(255, 198, 74, 0.04), transparent 38%),
-    linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
-}
-body[data-view="player-crm"] .view.view--active[data-view="player-crm"] > .bonus-game-back {
-  flex: 0 0 auto !important;
-  position: relative !important;
-  top: auto !important;
-  z-index: 3 !important;
-}
-body[data-view="player-crm"] #playerCrmView.view--active > .admin-section-views {
-  display: none !important;
-}
-body[data-view="player-crm"] .view.view--active[data-view="player-crm"] .player-crm {
-  width: min(1120px, 100%) !important;
-  max-width: 100% !important;
-}
-
-/* iOS PWA/WebView can shrink the fixed CRM view to the sticky back button height
-   when the viewport height is expressed through top/bottom inset math. Keep the
-   active CRM screen explicitly viewport-tall so the content below the back arrow
-   is not clipped. */
-body[data-view="player-crm"] #app.app .card .card__content > .view.view--active[data-view="player-crm"],
-body[data-view="player-crm"] .view.view--active[data-view="player-crm"] {
-  top: 0 !important;
-  right: 0 !important;
-  bottom: auto !important;
-  left: 0 !important;
-  min-height: 100vh !important;
-  min-height: 100dvh !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  max-height: 100vh !important;
-  max-height: 100dvh !important;
-  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
-}
-
-body:not([data-view="player-crm"]) #playerCrmView:not(.player-crm-standalone),
-#playerCrmView:not(.view--active):not(.player-crm-standalone) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-body[data-view="player-crm"] #playerCrmView.view--active,
-body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-body[data-view="player-crm"] #playerCrmView.view--active {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 8px !important;
-  z-index: 2147483000 !important;
-  pointer-events: auto !important;
-  isolation: isolate !important;
-  overflow: hidden !important;
-  background:
-    radial-gradient(ellipse at 16% -8%, rgba(255, 231, 168, 0.08), transparent 36%),
-    radial-gradient(ellipse at 90% 4%, rgba(255, 198, 74, 0.04), transparent 38%),
-    linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
-}
-
-body[data-view="player-crm"] #playerCrmView.view--active .player-crm {
-  display: block !important;
-  flex: 1 1 auto !important;
-  position: absolute !important;
-  top: 0 !important;
-  right: max(12px, var(--screen-gutter-x, 12px)) !important;
-  bottom: 0 !important;
-  left: max(12px, var(--screen-gutter-x, 12px)) !important;
-  z-index: 2 !important;
-  width: auto !important;
-  max-width: 100% !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  margin: 0 auto !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
-  padding-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
-  box-sizing: border-box !important;
-  color: var(--text, #f8fafc) !important;
-  transform: none !important;
-}
-
-body[data-view="player-crm"] #playerCrmView.view--active .player-crm__period-metrics {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  width: 100% !important;
-  min-width: 0 !important;
-}
-
-#playerCrmView.player-crm-standalone {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 10px !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  padding: 0 12px !important;
-  overflow: hidden !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  z-index: 2147483600 !important;
-  pointer-events: auto !important;
-  isolation: isolate !important;
-  box-sizing: border-box !important;
-  background: linear-gradient(150deg, #030407 0%, #070a10 42%, #020307 100%) !important;
-}
-
-#playerCrmView.player-crm-standalone > .bonus-game-back {
-  display: inline-flex !important;
-  position: relative !important;
-  inset: auto !important;
-  flex: 0 0 auto !important;
-  z-index: 3 !important;
-  margin: 0 0 14px !important;
-}
-
-body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-game-back {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-#playerCrmView.player-crm-standalone .player-crm {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  flex: 1 1 auto !important;
-  position: relative !important;
-  inset: auto !important;
-  z-index: 2 !important;
-  width: 100% !important;
-  max-width: 1120px !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  margin: 0 auto !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important;
-  touch-action: pan-y pinch-zoom !important;
-  box-sizing: border-box !important;
-  padding: 0 0 16px !important;
-  color: var(--text, #f4ead6) !important;
-  transform: none !important;
 }
 
 /*
@@ -1631,24 +1210,6 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
     ) !important;
   }
 
-  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
-  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
-  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
-    min-height: calc(100% + var(--app-short-panel-overscroll-extra, 44px)) !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-  }
-
-  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
-  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
-  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21,
-  body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection,
-  html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection,
-  html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"].profile-view--tab-poker21 #profilePokerPlusSection {
-    touch-action: pan-y pinch-zoom !important;
-  }
-
   body[data-view="profile"] #app.app .profile-view--tab-friends [data-profile-friends-panel],
   html:has(body[data-view="profile"]) #app.app .profile-view--tab-friends [data-profile-friends-panel],
   html.app-view-profile-html-scroll #app.app .profile-view--tab-friends [data-profile-friends-panel] {
@@ -1659,20 +1220,6 @@ body.player-crm-dialog-modal-open #playerCrmView.player-crm-standalone > .bonus-
   html:has(body[data-view="profile"]) #app.app .profile-view--tab-friends .profile-friends,
   html.app-view-profile-html-scroll #app.app .profile-view--tab-friends .profile-friends {
     overflow: visible;
-  }
-
-  body[data-view="profile"] #app.app .view--active[data-view="profile"].profile-view--tab-friends::after,
-  html:has(body[data-view="profile"]) #app.app .view--active[data-view="profile"].profile-view--tab-friends::after,
-  html.app-view-profile-html-scroll #app.app .view--active[data-view="profile"].profile-view--tab-friends::after {
-    content: "";
-    display: block;
-    width: 100%;
-    height: max(
-      140px,
-      calc(var(--app-bottom-tabbar-pad, 105px) + 48px)
-    );
-    flex: 0 0 auto;
-    pointer-events: none;
   }
 }
 
@@ -1707,15 +1254,6 @@ html.app-view-profile-html-scroll #app.app .card .card__content {
   margin-right: 0 !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
-}
-
-body[data-view="profile"] #app.app .card .card__content > .view--active[data-view="profile"],
-html:has(body[data-view="profile"]) #app.app .card .card__content > .view--active[data-view="profile"],
-html.app-view-profile-html-scroll #app.app .card .card__content > .view--active[data-view="profile"] {
-  width: 100% !important;
-  padding-left: var(--app-content-edge-inset, 5px) !important;
-  padding-right: var(--app-content-edge-inset, 5px) !important;
-  box-sizing: border-box !important;
 }
 
 body[data-view="home"] #app.app,
@@ -1861,25 +1399,6 @@ html.app-view-download-html-scroll #app.app .card .card__content {
   padding-right: 0 !important;
 }
 
-body[data-view="download"] #app.app .card .card__content > .view--active[data-view="download"],
-html:has(body[data-view="download"]) #app.app .card .card__content > .view--active[data-view="download"],
-html.app-view-download-html-scroll #app.app .card .card__content > .view--active[data-view="download"] {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-[data-theme="gold"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
-[data-theme="dark"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
-[data-theme="light"] body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout,
-body[data-view="download"] .download-page--active[data-download-page="main"] .download-layout {
-  width: 100% !important;
-  max-width: none !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
 body[data-view="cashout"] #app.app,
 html:has(body[data-view="cashout"]) #app.app,
 html.app-view-cashout-html-scroll #app.app,
@@ -1930,18 +1449,6 @@ html:has(body[data-view="transfers"]) #app.app .card .card__content > .view--act
 html.app-view-transfers-html-scroll #app.app .card .card__content > .view--active[data-view="transfers"] {
   width: 100% !important;
   box-sizing: border-box !important;
-}
-
-[data-theme="gold"] body[data-view="cashout"] .cashout-manager-block,
-[data-theme="dark"] body[data-view="cashout"] .cashout-manager-block,
-[data-theme="light"] body[data-view="cashout"] .cashout-manager-block,
-body[data-view="cashout"] .cashout-manager-block {
-  width: 100% !important;
-  max-width: none !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
 }
 
 #app.app .card .card__content {
@@ -2010,18 +1517,6 @@ html.app-view-hall-html-scroll #app.app .card .card__content {
   margin-right: 0 !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
-}
-
-body[data-view="hall-of-fame"] #app.app .card .card__content > .view--active[data-view="hall-of-fame"],
-html:has(body[data-view="hall-of-fame"]) #app.app .card .card__content > .view--active[data-view="hall-of-fame"],
-html.app-view-hall-html-scroll #app.app .card .card__content > .view--active[data-view="hall-of-fame"] {
-  width: 100% !important;
-  max-width: none !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  box-sizing: border-box !important;
 }
 
 /* Summary uses one viewport-sized shell and one internal scrollport. */
