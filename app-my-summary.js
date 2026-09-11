@@ -212,6 +212,10 @@
       if (!valid()) return;
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname ? nickname : "Всё главное для вас";
+      if(account==='ID400800') {
+        var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.prepend(heroCard);
+        request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero)heroCard.querySelector('p').textContent=h.hero.chests+' наград · '+h.hero.inventory.filter(function(i){return !(h.hero.seen||[]).includes(i.id);}).length+' новых вещей'+(h.hero.adventureAvailable?' · подарок доступен':'');}).catch(function(){});
+      }
       if (d.linked && !nickname) throw new Error("Profile cache unavailable");
       if (!d.linked) { ["results","achievements"].forEach(function (id) {put(id,'<p class="summary-muted">Привяжите Poker21 в профиле, чтобы увидеть результаты и прогресс.</p>' + link("Привязать Poker21", "profile"));}); return; }
       return Promise.resolve(pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(function () {return window.pokerGetTournamentAchievementStatsReady(nickname);}).then(function (stats) {if(valid()) {renderStats(stats);return loadAchievementCatalog(Object.assign({},p,{accountId:account}),valid);}});
