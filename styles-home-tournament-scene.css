@@ -476,3 +476,30 @@
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
 }
+
+/* New character artwork has its own chip, pedestal and table coordinates. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) {
+  translate: none;
+  margin-bottom: 0 !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) #homeTournamentWeekList .home-tournament-trophy__caption {
+  top: 46% !important;
+  font-size: 1.8cqw !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) #homeTournamentWeekList .home-tournament-trophy__prize {
+  top: 53% !important;
+  font-size: 6.8cqw !important;
+  white-space: nowrap !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) > .home-last-longer-dock {
+  left: 30.5% !important; top: 50% !important; width: 28% !important; height: 18% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) > .home-last-longer-dock::before {
+  left: 20% !important; top: 0 !important; width: 60% !important; height: 73% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) .home-last-longer-dock__bar {
+  left: 0 !important; width: 100% !important; top: 85% !important; height: 20% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="cooler"],[data-tournament-character="shkarubo"]) > .home-tournament-bonuses--table {
+  top: 72.5% !important; height: 14% !important;
+}
