@@ -4149,7 +4149,7 @@
 /* Keep the deal controls entirely above the board, beside the hole cards. */
 #app .daily-poker .daily-poker__table-deal {
   left: 58%;
-  top: 18%;
+  top: 10.5%;
   width: 38%;
   transform: none;
 }
@@ -4207,4 +4207,18 @@
 #app .daily-poker .daily-poker__prize:nth-child(n+4) {
   background-color: #073e2b;
   background-blend-mode: lighten;
+}
+
+/* Keep the win action compact enough to stay above the board on phones. */
+#app .daily-poker .daily-poker__table-deal .daily-poker__win-share {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 32px;
+  margin: .6cqw 0 0;
+  padding: .8cqw .5cqw;
+  font-size: clamp(11px, 2.4cqw, 24px);
+  line-height: 1.15;
+  border-radius: 1.5cqw;
 }

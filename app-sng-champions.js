@@ -4,6 +4,7 @@
   var API_PATH = "/api/sng-champions";
   var SNG_START_PARAM = "sng_champions";
   var modal = null;
+  var modalStyleGate = null;
   var bodyEl = null;
   var statusEl = null;
   var joinActionError = "";
@@ -153,6 +154,8 @@
   }
 
   function openModal() {
+    if (!modalStyleGate && typeof window.pokerCreateModalStyleGate === "function") modalStyleGate = window.pokerCreateModalStyleGate("home-widget-sng");
+    if (modalStyleGate && modalStyleGate.wait(openModal)) return;
     ensureModal();
     try {
       if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("sng-champions");
@@ -167,6 +170,7 @@
   }
 
   function closeModal() {
+    if (modalStyleGate) modalStyleGate.cancel();
     if (!modal) return;
     bracketMapExpanded = false;
     bracketMapFit.winners = false;

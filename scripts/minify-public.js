@@ -5,6 +5,7 @@ const path = require("path");
 const { transform, build } = require("esbuild");
 const vm = require("node:vm");
 const { bundleChat } = require("./bundle-chat");
+const { bundleStartup } = require("./bundle-startup");
 const output = path.join(__dirname, "..", "public");
 async function main() {
   let before = 0, after = 0;
@@ -71,9 +72,24 @@ async function main() {
   const html = fs.readFileSync(htmlPath, "utf8");
   for (const match of html.matchAll(/<link rel="stylesheet" href="(\.\/styles[^" ]+\.css(?:\?[^" ]+)?)"/g)) imports.add(match[1]);
   collectCss("styles-tournament.css");
-  const preloads = [...imports].map(href => '<link rel="preload" as="style" href="' + href + '">').join("");
+  // Discover the main blocking sheet first, before optional/secondary sheets.
+  const preloads = [...imports].sort((a, b) => Number(/\/styles\.css(?:\?|$)/.test(b)) - Number(/\/styles\.css(?:\?|$)/.test(a)))
+    .map(href => '<link rel="preload" as="style"' + (/\/styles\.css(?:\?|$)/.test(href) ? ' fetchpriority="high"' : '') + ' href="' + href + '">').join("");
   fs.writeFileSync(htmlPath, fs.readFileSync(htmlPath, "utf8").replace('<link rel="stylesheet" href="./styles.css', preloads + '<link rel="stylesheet" href="./styles.css'));
   console.log("Chat bundles:", JSON.stringify(bundleChat(output)));
+  console.log("Startup bundle:", JSON.stringify(bundleStartup(output)));
+  // Compress executable inline blocks, preserving HTML text and whitespace.
+  let compactHtml = fs.readFileSync(htmlPath, "utf8");
+  const blocks = [...compactHtml.matchAll(/<(script|style)(\s[^>]*)?>([\s\S]*?)<\/\1>/g)];
+  for (const block of blocks.reverse()) {
+    if (!block[3].trim() || /\b(?:src|type)=/.test(block[2] || "")) continue;
+    const result = await transform(block[3], { loader: block[1] === "style" ? "css" : "js", minifyWhitespace: true, minifyIdentifiers: false, minifySyntax: false });
+    if (result.warnings.length) throw new Error("Inline block minification warnings");
+    if (block[1] === "script") new vm.Script(result.code);
+    const replacement = "<" + block[1] + (block[2] || "") + ">" + result.code + "</" + block[1] + ">";
+    compactHtml = compactHtml.slice(0, block.index) + replacement + compactHtml.slice(block.index + block[0].length);
+  }
+  fs.writeFileSync(htmlPath, compactHtml);
   console.log(JSON.stringify({ minifiedMiB: +(before / 1048576).toFixed(2), resultMiB: +(after / 1048576).toFixed(2), savedMiB: +((before - after) / 1048576).toFixed(2) }));
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });

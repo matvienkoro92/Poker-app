@@ -730,56 +730,121 @@
     }
   }
 
+  function dailyPokerWinShareText(result) {
+    var reward = result.reward || {}, prizes = [];
+    if (Number(reward.ticketAmount) > 0) prizes.push("билет на турнир за " + formatRubles(reward.ticketAmount));
+    if (Number(reward.bonusAmount) > 0) prizes.push(Number(reward.bonusAmount) + " бонусов");
+    if (reward.grantsExtraAttempt) prizes.push("ещё одна попытка сегодня");
+    var streak = result.ticketlessStreakAward;
+    if (streak && Number(streak.amount) > 0) prizes.push("билет за " + formatRubles(streak.amount));
+    if (!prizes.length && reward.title) prizes.push(cleanSentencePart(reward.title));
+    return "Мой выигрыш в раздаче дня клуба «Два туза»: " + cleanSentencePart(result.handName || "Комбинация") +
+      ". Мой приз — " + (prizes.join(" и ") || "без приза") + ". Попробуйте тоже бесплатно!";
+  }
+
+  // Snapshot the live table geometry before another deal can replace the cards.
+  // Canvas keeps the actual card layout and felt, without any action controls.
+  function createDailyPokerWinImage() {
+    var table = $("dailyPokerHoleCards").closest(".daily-poker__table");
+    var bounds = table.getBoundingClientRect();
+    var cards = Array.prototype.map.call(table.querySelectorAll(".daily-poker-card"), function (card) {
+      var style = getComputedStyle(card), x = card.offsetWidth / 2, y = card.offsetHeight / 2;
+      for (var node = card; node && node !== table; node = node.offsetParent) { x += node.offsetLeft; y += node.offsetTop; }
+      // Ignore the temporary dealing animation when exporting the final hand.
+      var translate = style.translate.split(/\s+/);
+      y += parseFloat(translate[1]) || 0;
+      return { x: x, y: y,
+        w: card.offsetWidth, h: card.offsetHeight, angle: parseFloat(style.rotate) || 0,
+        ink: style.getPropertyValue("--daily-poker-card-ink").trim() || "#101114",
+        rank: card.querySelector(".daily-poker-card__rank").textContent,
+        suit: card.querySelector(".daily-poker-card__suit").textContent };
+    });
+    var labels = Array.prototype.map.call(table.querySelectorAll(".daily-poker__zone-label"), function (label) {
+      var rect = label.getBoundingClientRect(), style = getComputedStyle(label);
+      return { text: label.textContent.trim(), x: rect.left + rect.width / 2 - bounds.left,
+        y: rect.top + rect.height / 2 - bounds.top, size: parseFloat(style.fontSize), color: style.color };
+    });
+    return new Promise(function (resolve, reject) {
+      var image = new Image();
+      image.onerror = function () { reject(new Error("Не удалось загрузить изображение стола")); };
+      image.onload = function () {
+        try {
+          var canvas = document.createElement("canvas"), scale = 1200 / bounds.width;
+          canvas.width = 1200; canvas.height = Math.round(bounds.height * scale);
+          var ctx = canvas.getContext("2d");
+          ctx.scale(scale, scale);
+          ctx.drawImage(image, 0, 0, bounds.width, bounds.height);
+          labels.forEach(function (label) {
+            ctx.fillStyle = label.color; ctx.font = "bold " + label.size + "px Georgia";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(label.text, label.x, label.y);
+          });
+          cards.forEach(function (card) {
+            ctx.save(); ctx.translate(card.x, card.y); ctx.rotate(card.angle * Math.PI / 180);
+            ctx.translate(-card.w / 2, -card.h / 2);
+            var fill = ctx.createLinearGradient(0, 0, card.w, card.h);
+            fill.addColorStop(0, "#fffdf3"); fill.addColorStop(1, "#e5decb");
+            ctx.fillStyle = fill; ctx.strokeStyle = "#d8d0b9"; ctx.lineWidth = 1;
+            ctx.shadowColor = "rgba(0,0,0,.48)"; ctx.shadowBlur = bounds.width * .016; ctx.shadowOffsetY = bounds.width * .012;
+            ctx.beginPath(); ctx.roundRect(0, 0, card.w, card.h, bounds.width * .014); ctx.fill();
+            ctx.shadowColor = "transparent"; ctx.stroke(); ctx.fillStyle = card.ink;
+            ctx.textAlign = "left"; ctx.textBaseline = "top";
+            ctx.font = "900 " + bounds.width * .08 + "px Arial";
+            ctx.fillText(card.rank, card.w * .08, card.h * .03);
+            ctx.font = bounds.width * .045 + "px Arial";
+            ctx.fillText(card.suit, card.w * .1, card.h * .34);
+            ctx.font = bounds.width * .12 + "px Arial"; ctx.textAlign = "center";
+            ctx.fillText(card.suit, card.w / 2, card.h * .45); ctx.restore();
+          });
+          canvas.toBlob(function (blob) {
+            if (!blob) return reject(new Error("Не удалось подготовить картинку"));
+            resolve(new File([blob], "daily-poker-win.png", { type: "image/png" }));
+          }, "image/png");
+        } catch (error) { reject(error); }
+      };
+      image.src = "./assets/daily-poker-table-felt-v2-light-v1.webp";
+    });
+  }
+
   function addWinShareButton(result) {
     if (!hasDailyPokerWin(result)) return;
     var host = $("dailyPokerResult");
     if (!host) return;
     var button = document.createElement("button");
-    button.type = "button";
-    button.className = "daily-poker__win-share";
-    button.textContent = "Готовим картинку…";
-    button.disabled = true;
-    host.appendChild(button);
-    var text = "Мой выигрыш в раздаче дня клуба «Два туза»: " + formatResultLine(result);
+    button.type = "button"; button.className = "daily-poker__win-share";
+    button.textContent = "Готовим картинку…"; button.disabled = true; host.appendChild(button);
     var link = new URL("/daily-poker-invite.html", typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() || location.origin : location.origin);
     link.searchParams.set("startapp", "daily_poker");
-    var file = null;
-    var image = new Image();
-    image.onload = function () {
-      var canvas = document.createElement("canvas");
-      canvas.width = 1200; canvas.height = 1400;
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(image, 0, 0, 1200, 1200);
-      ctx.fillStyle = "#101820"; ctx.fillRect(0, 1200, 1200, 200);
-      ctx.fillStyle = "#ffda7d"; ctx.font = "bold 36px Arial";
-      var words = text.split(/\s+/), line = "", y = 1250;
-      words.forEach(function (word) {
-        if (ctx.measureText(line + word).width > 1100 && line) { ctx.fillText(line, 50, y); line = ""; y += 44; }
-        line += word + " ";
+    var text = dailyPokerWinShareText(result) + "\n" + link.href, file = null;
+    function prepare() {
+      button.disabled = true; button.textContent = "Готовим картинку…";
+      createDailyPokerWinImage().then(function (image) {
+        file = image; button.disabled = false; button.textContent = "Поделиться";
+      }).catch(function () {
+        button.disabled = false; button.textContent = "Повторить подготовку картинки";
       });
-      ctx.fillText(line, 50, y);
-      canvas.toBlob(function (blob) {
-        if (blob) file = new File([blob], "daily-poker-win.png", { type: "image/png" });
-        button.disabled = false; button.textContent = "Поделиться";
-      }, "image/png");
-    };
-    image.onerror = function () { button.disabled = false; button.textContent = "Поделиться"; };
-    image.src = "./assets/daily-poker-invite-board-v1.png";
-    button.onclick = function () {
-      var payload = { title: "Мой выигрыш — Два туза", text: text, url: link.href };
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) payload.files = [file];
-      function fallback() {
-        if (file) {
-          var download = document.createElement("a");
-          var objectUrl = URL.createObjectURL(file);
-          download.href = objectUrl; download.download = file.name; download.click();
-          setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 60000);
-        }
-        if (typeof pokerCopyTextToClipboard === "function") pokerCopyTextToClipboard(text + "\n" + link.href).then(function (ok) {
-          button.textContent = ok ? "Текст и ссылка скопированы" : "Поделиться";
+    }
+    prepare();
+    function fallback() {
+      var dialog = document.createElement("dialog"), objectUrl = URL.createObjectURL(file);
+      dialog.style.cssText = "max-width: min(90vw, 480px); max-height: 85vh; overflow: auto; background: #101820; color: #ffda7d; border: 1px solid #ba9445; border-radius: 16px; padding: 16px";
+      dialog.innerHTML = '<button type="button" data-close>Закрыть ×</button><p>Здесь нельзя отправить картинку автоматически. Сохраните её и прикрепите к сообщению вместе с текстом.</p><img alt="Ваша раскладка карт" style="width:100%;border-radius:12px"><p data-text style="white-space:pre-wrap"></p><a download="daily-poker-win.png">Сохранить картинку</a> <button type="button" data-copy>Скопировать текст и ссылку</button>';
+      dialog.querySelector("img").src = objectUrl; dialog.querySelector("a").href = objectUrl;
+      dialog.querySelector("[data-text]").textContent = text;
+      dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
+      dialog.querySelector("[data-copy]").onclick = function () {
+        var copy = this;
+        if (typeof pokerCopyTextToClipboard === "function") pokerCopyTextToClipboard(text).then(function (ok) {
+          copy.textContent = ok ? "Скопировано" : "Выделите и скопируйте текст выше";
         });
-      }
-      if (typeof navigator.share === "function" && (!file || payload.files)) {
+      };
+      dialog.addEventListener("close", function () { URL.revokeObjectURL(objectUrl); dialog.remove(); }, { once: true });
+      document.body.appendChild(dialog); dialog.showModal();
+    }
+    button.onclick = function () {
+      if (!file) { prepare(); return; }
+      var payload = { files: [file], text: text, title: "Мой выигрыш — Два туза" };
+      if (typeof navigator.share === "function" && navigator.canShare && navigator.canShare(payload)) {
         navigator.share(payload).catch(function (error) { if (!error || error.name !== "AbortError") fallback(); });
       } else fallback();
     };

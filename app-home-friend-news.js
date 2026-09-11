@@ -2192,6 +2192,7 @@
         eventFeedback[eventId] = snapshot || {};
         renderModalList(activeModalEvents());
         if (typeof alertText === "function") alertText(error.message || "Не удалось поставить реакцию");
+        else window.alert(error.message || "Не удалось поставить реакцию");
       });
   }
 
@@ -2202,7 +2203,7 @@
     var old = document.querySelector(".profile-reaction-users");
     if (old) old.remove();
     var overlay = document.createElement("div");
-    overlay.className = "profile-reaction-users";
+    overlay.className = "profile-reaction-users profile-reaction-users--news";
     overlay.innerHTML = '<div class="profile-reaction-users__dialog" role="dialog" aria-modal="true" aria-label="Кто поставил реакцию">' +
       '<button type="button" class="profile-reaction-users__close" aria-label="Закрыть">×</button>' +
       '<h3>' + esc(emoji) + ' Кто поставил реакцию</h3><div class="profile-reaction-users__list">' +
@@ -2240,7 +2241,7 @@
     var old = document.querySelector(".profile-reaction-picker");
     if (old) old.remove();
     var picker = document.createElement("div");
-    picker.className = "profile-reaction-picker";
+    picker.className = "profile-reaction-picker profile-reaction-picker--news";
     picker.innerHTML = '<div class="profile-reaction-picker__panel" role="dialog" aria-label="Выберите реакцию">' +
       HOME_NEWS_REACTIONS.map(function (emoji) {
         return '<button type="button" data-picker-reaction="' + esc(emoji) + '">' + esc(emoji) + "</button>";
@@ -2250,9 +2251,11 @@
       var button = event.target.closest("[data-picker-reaction]");
       if (button) {
         var emoji = button.getAttribute("data-picker-reaction");
+        homeNewsLongPressTriggered = false;
         picker.remove();
         onSelect(emoji);
       } else if (event.target === picker) {
+        homeNewsLongPressTriggered = false;
         picker.remove();
       }
     });
@@ -2308,6 +2311,7 @@
         (comment.pending ? '<small class="home-news-comment-pending-label">Отправка…</small>' : "") +
         '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml +
           (comment.pending ? "" :
+          '<button type="button" class="home-news-comment-reply-btn" data-home-news-add-reaction data-comment-id="' + esc(comment.id || "") + '" aria-label="Поставить реакцию на комментарий">☺ Реакция</button>' +
           '<button type="button" class="home-news-comment-reply-btn" data-home-comment-reply="' + esc(comment.id || "") +
           '" aria-label="Ответить на комментарий">↩ Ответить</button>') +
         "</span></div>";
@@ -2322,7 +2326,7 @@
     }).join("") + "</span>";
     return {
       actions: '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
-        reactionButtons + '</span>' +
+        reactionButtons + '<button type="button" class="chat-user-modal__news-reaction" data-home-news-add-reaction aria-label="Поставить реакцию на новость">☺ Реакция</button></span>' +
         '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
@@ -2463,7 +2467,7 @@
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
         (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
-        poker21LinkedHtml + titleAmountHtml + (isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + '</span>' +
+        poker21LinkedHtml + titleAmountHtml + '</span>' +
         profileMetaHtml +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";
@@ -2483,7 +2487,8 @@
       (shareToken ? ' data-home-news-share-token="' + esc(shareToken) + '"' : "") + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
-      '" aria-hidden="true">' + visual + "</span>" +
+      '" aria-hidden="' + (!ticker && isDayHero ? 'false' : 'true') + '">' + visual +
+      (!ticker && isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
         '<span data-home-news-read-id="' + esc(row.id) + '">' + structuredText + "</span>" +
@@ -2690,7 +2695,64 @@
       document.querySelectorAll("[data-news-admin-telegram]").forEach(function (node) { node.textContent = adminNewsTelegramCache[node.dataset.newsAdminTelegram] || ""; });
     }).catch(function () {}).then(function () { adminNewsTelegramLoading = false; });
   }
-  function renderModalList(rows) {
+  // Keep decoded images, focused controls and cards in place when asynchronous
+  // profile/feedback responses update the same feed. Replacing innerHTML on
+  // each response used to restart image rendering and discard comment drafts.
+  function patchNewsList(list, html) {
+    if (list.__newsMarkup === html) return;
+    var template = document.createElement("template");
+    template.innerHTML = html;
+    function key(node) {
+      return node.nodeType === 1 ? node.getAttribute("data-home-news-event-id") || node.id || "" : "";
+    }
+    function compatible(before, after) {
+      return before && before.nodeType === after.nodeType && before.nodeName === after.nodeName && key(before) === key(after);
+    }
+    function children(parent, next) {
+      var keyed = Object.create(null);
+      Array.prototype.forEach.call(parent.childNodes, function (node) {
+        var id = key(node);
+        if (id) (keyed[id] || (keyed[id] = [])).push(node);
+      });
+      var cursor = parent.firstChild;
+      Array.prototype.forEach.call(next.childNodes, function (desired) {
+        var candidates = keyed[key(desired)];
+        var current = key(desired) ? candidates && candidates.shift() : cursor;
+        if (!compatible(current, desired)) {
+          current = desired.cloneNode(true);
+          parent.insertBefore(current, cursor);
+        } else {
+          if (current !== cursor) parent.insertBefore(current, cursor);
+          if (current.nodeType === 3) {
+            if (current.nodeValue !== desired.nodeValue) current.nodeValue = desired.nodeValue;
+          } else if (current.nodeType === 1 && !current.isEqualNode(desired)) {
+            Array.prototype.slice.call(current.attributes).forEach(function (attr) {
+              if (!desired.hasAttribute(attr.name)) current.removeAttribute(attr.name);
+            });
+            Array.prototype.forEach.call(desired.attributes, function (attr) {
+              if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
+            });
+            // These values are maintained by the user or the separate admin
+            // lookup, not by the feed's HTML snapshot.
+            if (!/^(INPUT|TEXTAREA)$/.test(current.nodeName) &&
+                !(current.hasAttribute("data-news-admin-telegram") && !desired.textContent)) children(current, desired);
+          }
+        }
+        cursor = current.nextSibling;
+      });
+      while (cursor) {
+        var obsolete = cursor;
+        cursor = cursor.nextSibling;
+        parent.removeChild(obsolete);
+      }
+    }
+    children(list, template.content);
+    list.__newsMarkup = html;
+  }
+
+  function renderModalList(rows, force) {
+    var modal = el("homeFriendNewsModal");
+    if (modal && modal.hidden && !force) return;
     setTimeout(observeFriendNewsRead, 0);
     setTimeout(loadAdminNewsTelegram, 0);
     var list = el("homeFriendNewsList");
@@ -2712,7 +2774,7 @@
     if (activeClubLoading) {
       var skeletonAt = clubEvents[0] && clubEvents[0].at ||
         (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
-      list.innerHTML =  achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
+      patchNewsList(list, achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(skeletonAt, true)) + '</span></div>' +
         '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
           '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
@@ -2720,14 +2782,14 @@
           '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
             (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' + clubWinsDayTabsHtml() +
         '<div class="home-friend-news-modal__skeleton" role="status" aria-label="Загружаем записи">' +
-          '<span></span><span></span><span></span></div></section>';
+          '<span></span><span></span><span></span></div></section>');
       return;
     }
     if (newsModalMode === "friends" && friendNewsLoading && !friendNewsLoaded && !hasRealRows) {
-      list.innerHTML = '<div class="home-friend-news-modal__loading" role="status">' +
+      patchNewsList(list, '<div class="home-friend-news-modal__loading" role="status">' +
         '<span aria-hidden="true"></span><strong>' +
           (newsModalMode === "club" ? "Загружаем новости клуба…" : "Загружаем новости всех друзей…") +
-        '</strong><small>Собираем результаты и достижения игроков</small></div>';
+        '</strong><small>Собираем результаты и достижения игроков</small></div>');
       return;
     }
     var snapshot = Array.isArray(rows) ? rows.slice() : [];
@@ -2743,9 +2805,9 @@
             '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab home-friend-news-modal__club-tab--active">Записи игроков</button></div>' +
           '<div class="home-friend-news-modal__empty"><span aria-hidden="true">✎</span><strong>Записей за этот день пока нет</strong></div></section>'
       : "";
-    list.innerHTML =  achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
+    patchNewsList(list, achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
-      : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite;
+      : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite);
     window.setTimeout(focusPendingClubNewsEvent, 0);
   }
 
@@ -3143,7 +3205,7 @@
     if (!modal) return;
     newsModalMode = "friends";
     syncNewsModalHeading();
-    renderModalList(activeModalEvents());
+    renderModalList(activeModalEvents(), true);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
     observeFriendNewsRead();
@@ -3165,7 +3227,7 @@
     newsModalMode = "club";
     clubNewsTab = "wins";
     syncNewsModalHeading();
-    renderModalList(activeModalEvents());
+    renderModalList(activeModalEvents(), true);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
     Promise.resolve(loadClubNews()).then(function () {
@@ -3380,6 +3442,13 @@
         }
         var item = event.target.closest("[data-home-news-event-id]");
         var eventId = item && item.getAttribute("data-home-news-event-id");
+        var addReaction = event.target.closest("[data-home-news-add-reaction]");
+        if (eventId && addReaction) {
+          event.preventDefault();
+          var reactionCommentId = addReaction.getAttribute("data-comment-id") || "";
+          openReactionPicker(function (emoji) { sendOptimisticReaction(eventId, emoji, reactionCommentId); });
+          return;
+        }
         var replyButton = event.target.closest("[data-home-comment-reply]");
         if (eventId && replyButton) {
           var replyId = replyButton.getAttribute("data-home-comment-reply");
@@ -3593,6 +3662,7 @@
         eventCommentsOpen[eventId] = true;
         delete eventCommentReplies[eventId];
         delete eventCommentDrafts[eventId];
+        if (input) input.value = "";
         renderModalList(activeModalEvents());
         feedbackRequest(payload).then(function (data) {
           if(typeof window.pokerTrackEngagement==="function")window.pokerTrackEngagement("news_comment_created",{entity:eventId,source:newsModalMode});
@@ -3608,6 +3678,7 @@
           eventCommentDrafts[eventId] = text;
           if (previousReply) eventCommentReplies[eventId] = previousReply;
           renderModalList(activeModalEvents());
+          if (input && input.isConnected) input.value = text;
           if (typeof alertText === "function") alertText(error.message || "Не удалось отправить комментарий");
         });
       });

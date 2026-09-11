@@ -206,6 +206,56 @@
 .header-admin-shortcut[hidden] {
   display: none !important;
 }
+
+/* Shared admin shortcuts must occupy space in every section, not overlap the
+   brand and greeting through absolute positioning outside the home screen. */
+html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .logo.logo--welcome {
+  flex: 0 0 40px !important;
+  width: 40px !important;
+  margin-right: 0 !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .logo__image {
+  flex: 0 0 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .logo__text {
+  display: none !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts > :is(.header-crm-shortcut, .header-admin-shortcuts) {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 auto !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .header-actions {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts .header-profile-summary {
+  flex: 1 1 0 !important;
+  max-width: 100% !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-status {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+html body:not([data-view="chat"]) #app.app > .card > .card__header .header-status__level {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts:has(> .header-admin-shortcuts--with-crm) {
+    flex-wrap: wrap !important;
+  }
+  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts > .header-admin-shortcuts--with-crm {
+    order: 4;
+    flex: 0 0 100% !important;
+    justify-content: center;
+  }
+}
 .header-admin-shortcut {
   width: 46px;
   min-width: 46px;

@@ -581,11 +581,11 @@ const engineeringBudgets = {
   },
 };
 
-function indexScriptLoadingStats() {
+function indexScriptLoadingStats(html = files.html) {
   const stats = { eager: 0, lazy: 0, total: 0 };
   const re = /<script\b([^>]*)\bsrc=["']([^"']+)["'][^>]*>/gi;
   let match;
-  while ((match = re.exec(files.html))) {
+  while ((match = re.exec(html))) {
     const attrs = match[1] || "";
     if (/type=["']application\/poker-lazy["']/i.test(attrs)) stats.lazy += 1;
     else stats.eager += 1;
@@ -1809,8 +1809,11 @@ add("New direct window globals are declared in the global dependency manifest", 
 });
 
 add("Index loading stays within the static script budget", () => {
-  const stats = indexScriptLoadingStats();
-  const indexBytes = Buffer.byteLength(files.html, "utf8");
+  // Measure the shipped entrypoint after bundling/minification, not the
+  // development source's individual script tags. Missing builds must fail.
+  const html = read("public/index.html");
+  const stats = indexScriptLoadingStats(html);
+  const indexBytes = Buffer.byteLength(html, "utf8");
   const failures = [];
   if (indexBytes > engineeringBudgets.indexHtmlMaxBytes) {
     failures.push("index.html " + indexBytes + "/" + engineeringBudgets.indexHtmlMaxBytes + " bytes");
@@ -2450,7 +2453,7 @@ add("Shared brand header keeps greeting visible outside chat", () =>
     'class="header-profile-summary"',
     'id="headerMoreMenuBtn"',
   ]) &&
-  hasAll("styles", [
+  [
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary',
     "display: flex !important;",
     "flex: 1 1 clamp(118px, 38vw, 260px) !important;",
@@ -2458,9 +2461,9 @@ add("Shared brand header keeps greeting visible outside chat", () =>
     "text-overflow: clip !important;",
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-actions',
     "flex: 1 1 clamp(164px, 50vw, 336px) !important;",
-  ]) &&
+  ].every(rule => read("styles-section-layout.css").includes(rule)) &&
   appearsBefore(
-    files.styles,
+    read("styles-section-layout.css"),
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary,\nhtml body:not([data-view="chat"]) #app.app > .card > .card__header .header-notification-btn',
     'html body:not([data-view="chat"]) #app.app > .card > .card__header .header-profile-summary {\n  display: flex !important;'
   )

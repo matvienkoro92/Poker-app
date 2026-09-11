@@ -267,7 +267,10 @@
       .then(function (response) { return response.json(); }).catch(function () { return null; });
   }
   // Load the renderer alongside the request so cached data can paint immediately.
-  ensureDomain(WIDGETS.sngChampions.domain).catch(function () {});
+  // The home renderer needs JS, but closed SNG dialogs do not need their CSS.
+  if (typeof window.pokerEnsureScriptDomains === "function") {
+    Promise.resolve(window.pokerEnsureScriptDomains([WIDGETS.sngChampions.domain])).catch(function () {});
+  }
   refreshClubChoiceRoundBadge();
   window.setInterval(refreshClubChoiceRoundBadge, 45000);
 

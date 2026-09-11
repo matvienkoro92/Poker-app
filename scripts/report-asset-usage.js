@@ -40,7 +40,8 @@ function walk(dir) {
 }
 walk(publicAssets);
 
-const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const builtIndex = path.join(root, "public", "index.html");
+const html = fs.readFileSync(builtIndex, "utf8");
 function localFileFromUrl(url) {
   const rel = String(url || "").replace(/^\.\//, "").split(/[?#]/)[0];
   if (!rel || rel.includes("..") || /^(?:https?:)?\/\//i.test(rel)) return "";
@@ -91,7 +92,7 @@ const eagerFiles = Array.from(eager).map((rel) => {
   return { file: rel, bytes: fs.existsSync(file) ? fs.statSync(file).size : 0 };
 }).sort((a, b) => b.bytes - a.bytes);
 
-const startupFiles = [path.join(root, "index.html"), ...eagerScripts, ...eagerStyles, ...eagerFiles.map((item) => path.join(publicAssets, item.file))]
+const startupFiles = [builtIndex, ...eagerScripts, ...eagerStyles, ...eagerFiles.map((item) => path.join(publicAssets, item.file))]
   .filter((file, index, files) => fs.existsSync(file) && files.indexOf(file) === index);
 const startup = {
   transferBytes: startupFiles.reduce((sum, file) => sum + zlib.gzipSync(fs.readFileSync(file), { level: 9 }).length, 0),
@@ -103,11 +104,29 @@ const startup = {
 };
 const startupBudget = config.startupBudgetsKiB || {};
 const violations = [];
+function directoryBytes(dir) {
+  if (!fs.existsSync(dir)) return 0;
+  return fs.readdirSync(dir, { withFileTypes: true }).reduce((sum, entry) => {
+    const file = path.join(dir, entry.name);
+    return sum + (entry.isDirectory() ? directoryBytes(file) : fs.statSync(file).size);
+  }, 0);
+}
+const publicBytes = directoryBytes(path.join(root, "public")) - directoryBytes(path.join(root, "public", "downloads"));
+const sizeBudgets = { publicBuild: publicBytes, coreAndLazyAssets: seasonal.core, currentSeason: seasonal.current, archiveSeasons: seasonal.archive,
+  startupEager: eagerFiles.reduce((sum, item) => sum + item.bytes, 0) };
+for (const [key, bytes] of Object.entries(sizeBudgets)) {
+  if (bytes > Number(config.budgetsMiB[key]) * 1048576) violations.push(`${key} ${mib(bytes)} MiB > ${config.budgetsMiB[key]} MiB`);
+}
+for (const files of Object.values(largest)) {
+  for (const file of files) if (file.bytes > Number(config.budgetsMiB.individualFile) * 1048576) violations.push(`${file.file} ${mib(file.bytes)} MiB > ${config.budgetsMiB.individualFile} MiB`);
+}
 if (startupBudget.transfer && startup.transferBytes / 1024 > startupBudget.transfer) violations.push(`startup transfer ${Math.ceil(startup.transferBytes / 1024)} KiB > ${startupBudget.transfer} KiB`);
 if (startupBudget.jsParse && startup.jsParseBytes / 1024 > startupBudget.jsParse) violations.push(`startup JS parse ${Math.ceil(startup.jsParseBytes / 1024)} KiB > ${startupBudget.jsParse} KiB`);
 if (startupBudget.cssParse && startup.cssParseBytes / 1024 > startupBudget.cssParse) violations.push(`startup CSS parse ${Math.ceil(startup.cssParseBytes / 1024)} KiB > ${startupBudget.cssParse} KiB`);
 
 console.log(JSON.stringify({
+  entrypoint: "public/index.html",
+  publicBuildMiB: mib(publicBytes),
   seasonalMiB: Object.fromEntries(Object.entries(seasonal).map(([key, bytes]) => [key, mib(bytes)])),
   seasonalFiles: counts,
   largestByBucket: Object.fromEntries(Object.entries(largest).map(([bucket, files]) => [

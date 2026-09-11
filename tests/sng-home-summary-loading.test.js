@@ -11,9 +11,9 @@ test('home renderer starts while the early summary request is still pending', as
   let resolveResponse;
   const events = [];
   const context = {
-    window: {}, WIDGETS: { sngChampions: { domain: 'sng' } },
+    window: { pokerEnsureScriptDomains: domains => { events.push(...domains); return Promise.resolve(); } }, WIDGETS: { sngChampions: { domain: 'sng' } },
     fetch: () => { events.push('request'); return new Promise(resolve => { resolveResponse = resolve; }); },
-    ensureDomain: domain => { events.push(domain); return Promise.resolve(); }
+    ensureDomain: () => { assert.fail('Home summary must not load modal styles'); }
   };
   vm.runInNewContext(block, context);
   assert.deepEqual(events, ['request', 'sng']);
