@@ -2462,7 +2462,7 @@
         }).join("") + "</span>"
       : "<strong>" + eventTextHtml(row.text) + "</strong>";
     var profileCue = canOpenProfile
-      ? '<span class="home-friend-news-modal__profile-cue">Профиль <b aria-hidden="true">›</b></span>'
+      ? '<span class="home-friend-news-modal__profile-cue">' + (['ID400800','ID403173','ID495718'].includes(eventPlayerId) ? 'Профиль и образ' : 'Профиль') + ' <b aria-hidden="true">›</b></span>'
       : "";
     var feedbackParts = ticker ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var feedbackId = ticker ? "" : feedbackEventId(row);

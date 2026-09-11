@@ -5,18 +5,18 @@ const empty=()=>({...H.fresh(),inventory:[]});
 const req=(action,extra={})=>({action,requestId:'test-request-00000001',...extra});
 const item=(id,slot='body',set='club',rarity=0)=>({id,slot,set,rarity,level:71});
 const claim=(s,modelId=s.pendingChoice.options[0])=>H.mutate(s,71,req('choose-reward',{choiceId:s.pendingChoice.id,modelId}));
-test('only PokerManki is allowed; request body cannot unlock another account',async()=>{
- assert.equal(H.heroEnabled('ID400800'),true);for(const id of ['ID403173','ID1','ПокерМанки','',undefined]){assert.equal(await H.readHero(id),null);await assert.rejects(H.updateHero(id,req('craft',{accountId:'ID400800',modelId:'club-head'})),e=>e.status===403);}
+test('only configured pilot accounts are allowed; request cannot unlock another account',async()=>{
+ assert.equal(H.heroEnabled('ID400800'),true);assert.equal(H.heroEnabled('ID403173'),true);for(const id of ['ID1','ПокерМанки','',undefined]){assert.equal(await H.readHero(id),null);await assert.rejects(H.updateHero(id,req('craft',{accountId:'ID400800',modelId:'club-head'})),e=>e.status===403);}
 });
 test('v1 and v2 inventories migrate through layers without losing skills, looks, earned levels or dust',()=>{
  const old={version:7,highestLevel:71,skills:{strike:12},equipped:{body:'old'},inventory:[item('old','body','ember',4)],claimedLevel:50,dust:19};
  const v1=H.parse(JSON.stringify(old));assert.equal(v1.schema,4);assert.equal(v1.inventory[0].id,'old');assert.equal(v1.inventory[0].set,'final');assert.equal(v1.dust,19);assert.equal(v1.claimedLevel,50);assert.equal(H.view(v1,71).points,70);assert.deepEqual(H.parse(JSON.stringify(v1)),v1);
  const s=H.migrate({...empty(),schema:2,skills:{bonus:8,collector:5},inventory:[item('suit','body','final',4),item('phones','hand','grinder')],lookEquipped:{body:'suit',hand:'phones'},looks:[{id:'saved',items:{body:'suit',hand:'phones'}}]});
- assert.equal(s.inventory.length,7);assert.equal(s.lookEquipped.head,'phones');assert.equal(s.lookEquipped.legs,'suit-part-legs');assert.deepEqual(s.equipped,s.lookEquipped);assert.deepEqual(s.looks[0].items,s.lookEquipped);assert.equal(s.skills.bonus,8);assert.equal(H.view(s,71).lookCapacity,4);assert.equal(s.inventory.find(i=>i.slot==='feet').salvageValue,0);
+ assert.equal(s.inventory.length,9);assert.equal(s.lookEquipped.head,'phones');assert.equal(s.lookEquipped.legs,'suit-part-legs');assert.deepEqual(s.equipped,s.lookEquipped);assert.deepEqual(s.looks[0].items,s.lookEquipped);assert.equal(s.skills.bonus,8);assert.equal(H.view(s,71).lookCapacity,4);assert.equal(s.inventory.find(i=>i.slot==='feet').salvageValue,0);
 });
 test('same visual duplicates merge once, retain visible ID, favorites, presets, seen state and material value',()=>{
  const old={...empty(),schema:3,skills:{bonus:7},dust:8,inventory:[item('rare','eyes','club',4),{...item('visible','eyes','final',0),favorite:true},item('shoe','feet','club',1),{...item('free-shoe','feet','grinder',1),migratedPart:true,salvageValue:0}],lookEquipped:{eyes:'visible',feet:'shoe'},looks:[{id:'saved',items:{eyes:'rare',feet:'free-shoe'}}],seen:['rare']};
- const s=H.migrate(old);assert.equal(old.inventory.length,4);assert.equal(s.inventory.length,4);assert.equal(s.dust,19);assert.equal(s.looks[0].items.eyes,'visible');assert.equal(s.looks[0].items.feet,'shoe');assert.ok(s.seen.includes('visible'));assert.equal(s.skills.bonus,7);assert.equal(s.inventory.find(i=>i.id==='visible').favorite,true);assert.deepEqual(H.migrate(s),s);
+ const s=H.migrate(old);assert.equal(old.inventory.length,4);assert.equal(s.inventory.length,6);assert.equal(s.dust,19);assert.equal(s.looks[0].items.eyes,'visible');assert.equal(s.looks[0].items.feet,'shoe');assert.ok(s.seen.includes('visible'));assert.equal(s.skills.bonus,7);assert.equal(s.inventory.find(i=>i.id==='visible').favorite,true);assert.deepEqual(H.migrate(s),s);
 });
 test('one wear action updates appearance and equipment; saved looks restore only owned pieces',()=>{
  let s=empty();s.inventory=[item('top'),item('pants','legs','final'),item('shoes','feet','oldschool'),item('hat','head','grinder'),item('glasses','eyes','final')];
@@ -37,8 +37,8 @@ test('a pending option acquired elsewhere becomes materials, never a second item
  let s=H.mutate(empty(),71,req('chest'),0,[0]);const id=s.pendingChoice.options[0];s.dust=20;s=H.mutate(s,71,req('craft',{modelId:id}));assert.equal(s.inventory.length,1);s=claim(s,id);assert.equal(s.inventory.length,1);assert.equal(s.dust,4);assert.equal(s.lastResult.kind,'duplicate');assert.equal(s.claimedLevel,1);
 });
 test('daily gifts have equal model chances unaffected by hidden skills; duplicates give fixed materials',()=>{
- const ids=new Set();for(let n=0;n<C.models.length;n++){const base={...empty(),skills:{one_time:20,river:20,bonus:20}},s=H.mutate(base,71,req('adventure'),0,[n]);ids.add(s.inventory[0].modelId);assert.equal(s.inventory[0].rarity,0);}
- assert.equal(ids.size,C.models.length);let s=H.mutate(empty(),71,req('adventure'),0,[0]);assert.throws(()=>H.mutate(s,71,req('adventure'),1000,[0]),/уже получен/);s=H.mutate(s,71,req('adventure'),86400000,[0]);assert.equal(s.inventory.length,1);assert.equal(s.dust,4);assert.deepEqual(s.lastLoot,[]);
+ const ids=new Set();for(let n=0;n<C.collectionModels().length;n++){const base={...empty(),skills:{one_time:20,river:20,bonus:20}},s=H.mutate(base,71,req('adventure'),0,[n]);ids.add(s.inventory[0].modelId);assert.equal(s.inventory[0].rarity,0);}
+ assert.equal(ids.size,C.collectionModels().length);let s=H.mutate(empty(),71,req('adventure'),0,[0]);assert.throws(()=>H.mutate(s,71,req('adventure'),1000,[0]),/уже получен/);s=H.mutate(s,71,req('adventure'),86400000,[0]);assert.equal(s.inventory.length,1);assert.equal(s.dust,4);assert.deepEqual(s.lastLoot,[]);
 });
 test('daily gift resets at Moscow midnight',()=>{
  const now=Date.parse('2026-09-10T20:59:00Z'),s=H.mutate(empty(),1,req('adventure'),now,[0]);assert.equal(H.view(s,1,true,now).adventureAvailable,false);assert.equal(H.view(s,1,true,now+60001).adventureAvailable,true);
@@ -75,6 +75,12 @@ test('load uses bound canonical friend accounts and restores archived earned his
  delete bound.ID403173;const noFriend=await ctx.module.exports.readHero('ID400800');assert.equal(noFriend.trophyCatalog.some(a=>a.history?.kind==='shared-tournament'),false);assert.ok(noFriend.trophyCatalog.some(a=>a.id==='archived'));
 });
 test('base outfit is owned for free, survives migration and cannot be salvaged for materials',()=>{
- let s=H.fresh();assert.equal(s.inventory.length,3);assert.equal(s.claimedLevel,0);assert.equal(s.dust,0);for(const id of ['club-body','club-legs','club-feet']){const i=K.owned(s,id);assert.ok(i);assert.throws(()=>H.mutate(s,71,req('salvage',{item:i.id,confirm:true})),/Базовые вещи/);}
- s=H.migrate({...s,schema:3,inventory:[]});assert.equal(s.inventory.length,3);assert.equal(s.claimedLevel,0);assert.deepEqual(H.migrate(s),s);
+ let s=H.fresh();assert.equal(s.inventory.length,5);assert.equal(s.claimedLevel,0);assert.equal(s.dust,0);for(const id of ['club-body','club-legs','club-feet']){const i=K.owned(s,id);assert.ok(i);assert.throws(()=>H.mutate(s,71,req('salvage',{item:i.id,confirm:true})),/Базовые вещи/);}
+ s=H.migrate({...s,schema:3,inventory:[]});assert.equal(s.inventory.length,5);assert.equal(s.claimedLevel,0);assert.deepEqual(H.migrate(s),s);
+});
+test('embedded accessories migrate once for inventory and saved outfits without changing rewards',()=>{
+ const original={...H.fresh(),accessoriesVersion:undefined,dust:17,claimedLevel:8,pendingChoice:{id:'pending',level:9,options:['final-head','grinder-head','final-body']},inventory:[item('suit','body','final')],lookEquipped:{body:'suit'},looks:[{id:'saved',items:{body:'suit'}}]};
+ const s=H.migrate(original);for(const slot of ['patch','sleeve','pin']){assert.ok(s.lookEquipped[slot]);assert.equal(s.looks[0].items[slot],s.lookEquipped[slot]);}assert.equal(s.dust,17);assert.equal(s.claimedLevel,8);assert.deepEqual(s.pendingChoice,original.pendingChoice);assert.deepEqual(H.migrate(s),s);
+ let next=H.mutate(s,71,req('unequip',{slot:'patch'}));assert.equal(H.parse(JSON.stringify(next)).lookEquipped.patch,undefined);
+ next.dust=20;next=H.mutate(next,71,req('craft',{modelId:'cufflinks-silver'}));const cuff=K.owned(next,'cufflinks-silver');next=H.mutate(next,71,req('wear',{item:cuff.id}));assert.equal(next.lookEquipped.body,'suit');assert.equal(next.lookEquipped.cufflinks,cuff.id);assert.equal(next.dust,0);
 });

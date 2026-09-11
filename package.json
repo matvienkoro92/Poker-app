@@ -57,7 +57,8 @@
     "test:redis": "node scripts/test-redis-integrity.js",
     "measure:mobile": "node scripts/measure-mobile-startup.js",
     "check:build-tools": "node scripts/check-build-tools.js",
-    "test:pwa-update": "node scripts/test-pwa-update.js"
+    "test:pwa-update": "node scripts/test-pwa-update.js",
+    "check:hero": "node scripts/check-hero-catalog.js"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
