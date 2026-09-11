@@ -451,7 +451,7 @@ function initPlayerCrmStatsRuntime(deps) {
         "<div class=\"player-crm__stats-grid player-crm__stats-grid--current\" style=\"display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%!important;min-width:0!important\">" + currentStats.map(currentCard).join("") + "</div>" +
       "</section>";
     var analyticsLabels = {
-      hero_opened:"Открыли героя",hero_reward_received:"Герой: получили вещи",hero_item_previewed:"Герой: примерка",hero_item_equipped:"Герой: экипировка",hero_look_changed:"Герой: смена внешности",hero_item_salvaged:"Герой: разбор вещи",hero_skill_allocated:"Герой: вложены очки",hero_look_saved:"Герой: сохранён образ",
+      hero_goal_selected:"Герой: выбрана цель",hero_character_opened:"Герой: открыта коллекция персонажа",hero_opened:"Открыли героя",hero_reward_received:"Герой: получили вещи",hero_item_previewed:"Герой: примерка",hero_item_equipped:"Герой: экипировка",hero_look_changed:"Герой: смена внешности",hero_item_salvaged:"Герой: разбор вещи",hero_skill_allocated:"Герой: вложены очки",hero_look_saved:"Герой: сохранён образ",
       news_read:"Новости: карточка просмотрена",friend_news_read:"Новости друзей: просмотр",news_comment_created:"Комментарии к новостям",news_shared:"Поделились карточкой",news_link_copied:"Скопировали ссылку",review_opened:"Открыли разбор",review_created:"Задали вопрос",review_reply_created:"Ответили в разборе",review_answer_read:"Посмотрели ответ",appearance_saved:"Сохранили оформление",summary_action:"Переходы из сводки",tournament_reminder_saved:"Напоминания о турнирах",push_opened:"Открыли push",
       "my-summary":"Моя сводка","club-reviews":"Разборы",
       home: "Главная", raffles: "Розыгрыши", rating: "Рейтинг", chat: "Чат", profile: "Профиль",
