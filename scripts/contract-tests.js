@@ -269,6 +269,19 @@ class MemoryRedis {
       const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
       const keys = command.slice(3, 3 + keyCount).map(String);
       const args = command.slice(3 + keyCount).map(String);
+      if (String(command[1]).includes("profile_comment_save_v1")) {
+        const previous = keys[1] ? this.kv.get(keys[1]) : null;
+        if (previous != null) return this.result(previous === args[2] ? 0 : -1);
+        this.exec(["LPUSH", keys[0], args[0]]);
+        this.exec(["LTRIM", keys[0], "0", String(Number(args[1]) - 1)]);
+        if (keys[1]) this.kv.set(keys[1], args[2]);
+        return this.result(1);
+      }
+      if (String(command[1]).includes("crm_delivery_finish_v1")) {
+        if (this.kv.get(keys[0]) !== args[0]) return this.result(0);
+        if (args[1]) this.kv.set(keys[0], args[1]); else this.kv.delete(keys[0]);
+        return this.result(1);
+      }
       if (String(command[1]).includes("poker_string_cas_v1")) {
         const current = this.kv.get(keys[0]);
         if ((args[0] === "0" && current != null) || (args[0] === "1" && current !== args[1])) return this.result(0);
@@ -709,6 +722,11 @@ async function call(handler, request) {
   return response;
 }
 
+async function callCalculationSave(handler, body) {
+  const loaded = await call(handler, req("POST", {}, { ...body, action: "calculation_draft_load" }));
+  return call(handler, req("POST", {}, { ...body, calculationDraftVersion: loaded.body && loaded.body.calculationDraftVersion }));
+}
+
 async function testAuthAndAdmin(redis) {
   const chat = loadHandler("chat");
   let r = await call(chat, req("POST", {}, { text: "no auth" }));
@@ -905,25 +923,25 @@ async function testAuthAndAdmin(redis) {
   assert.strictEqual(reportAccessRes.statusCode, 403, "ordinary user report access probe is denied");
   const calculationMenuToken = require(path.join(root, "lib", "admin-menu-access-token"))
     .signAccessToken("calculations", "mail_ID000004", BOT_TOKEN);
-  let protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
+  let protectedCalculationDraftRes = await callCalculationSave(reportHandler, {
     pwaSession: nonBonusAdminToken,
     menuAccessToken: calculationMenuToken,
     action: "calculation_draft_save",
     weekStart: "1785121200001",
     calculationDraftGroup: "figures",
     calculationDraft: { rake: ["123"] },
-  }));
+  });
   assert.strictEqual(protectedCalculationDraftRes.statusCode, 200, "calculations menu token can save its protected draft");
   const crmMenuToken = require(path.join(root, "lib", "admin-menu-access-token"))
     .signAccessToken("crm", "mail_ID000004", BOT_TOKEN);
-  protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
+  protectedCalculationDraftRes = await callCalculationSave(reportHandler, {
     pwaSession: nonBonusAdminToken,
     menuAccessToken: crmMenuToken,
     action: "calculation_draft_save",
     weekStart: "1785121200002",
     calculationDraftGroup: "figures",
     calculationDraft: { rake: ["456"] },
-  }));
+  });
   assert.strictEqual(protectedCalculationDraftRes.statusCode, 200, "CRM menu token can save the calculations draft mounted in CRM");
   protectedCalculationDraftRes = await call(reportHandler, req("POST", {}, {
     pwaSession: nonBonusAdminToken,
@@ -933,31 +951,31 @@ async function testAuthAndAdmin(redis) {
   }));
   assert.strictEqual(protectedCalculationDraftRes.statusCode, 403, "calculations menu token cannot mutate admin reports");
   const calculationWeekStart = "1785121200000";
-  let calculationDraftRes = await call(reportHandler, req("POST", {}, {
+  let calculationDraftRes = await callCalculationSave(reportHandler, {
     pwaSession: roman1ReportToken,
     action: "calculation_draft_save",
     weekStart: calculationWeekStart,
     calculationDraftGroup: "cash",
     calculationDraft: { cash: ["100", "200"], rake: ["stale-rake"] },
-  }));
+  });
   assert.strictEqual(calculationDraftRes.statusCode, 200, "calculation cash group saves");
-  calculationDraftRes = await call(reportHandler, req("POST", {}, {
+  calculationDraftRes = await callCalculationSave(reportHandler, {
     pwaSession: roman1ReportToken,
     action: "calculation_draft_save",
     weekStart: calculationWeekStart,
     calculationDraftGroup: "figures",
     calculationDraft: { cash: ["stale-cash"], rake: ["300", "400"], raffleTicketsReturn: "50" },
-  }));
+  });
   assert.strictEqual(calculationDraftRes.statusCode, 200, "calculation figures group saves");
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.cash, ["100", "200"], "figures save preserves cash saved by another group");
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.rake, ["300", "400"], "figures save updates rake fields");
-  calculationDraftRes = await call(reportHandler, req("POST", {}, {
+  calculationDraftRes = await callCalculationSave(reportHandler, {
     pwaSession: roman1ReportToken,
     action: "calculation_draft_save",
     weekStart: calculationWeekStart,
     calculationDraftGroup: "winloss",
     calculationDraft: { roomWinLoss: ["10", "-20"], rake: ["stale-rake"] },
-  }));
+  });
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.cash, ["100", "200"], "win/loss save preserves cash group");
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.rake, ["300", "400"], "win/loss save preserves figures group");
   assert.deepStrictEqual(calculationDraftRes.body.calculationDraft.draft.roomWinLoss, ["10", "-20"], "win/loss save updates only its group");
@@ -1342,14 +1360,14 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.statusCode, 200, "CRM owner can block app user");
   assert.strictEqual(r.body.blocked, true, "CRM block response marks blocked");
 
-  r = await call(crm, req("POST", {}, {
+  r = await callCalculationSave(crm, {
     pwaSession: s.admin,
     menuAccessToken,
     action: "calculation_draft_save",
     weekStart: "1785121200999",
     calculationDraftGroup: "figures",
     calculationDraft: { rake: ["777"], raffleTicketsReturn: "50" },
-  }));
+  });
   assert.strictEqual(r.statusCode, 200, "CRM calculations save through the CRM endpoint");
   assert.deepStrictEqual(r.body.calculationDraft.draft.rake, ["777"], "CRM endpoint persists calculation figures");
   r = await call(crm, req("POST", {}, {
@@ -6985,8 +7003,44 @@ async function testTransferCompletionOnce(redis) {
 }
 
 
+async function testSectionChatHistory(redis) {
+  const chat=loadHandler("chat"),s=sessions();
+  const {convKey}=require(path.join(root,"lib/chat-core"));
+  const {threadMessageIndexKey}=require(path.join(root,"lib/chat-storage"));
+  const key=convKey("tg_1001","tg_1002"),index=threadMessageIndexKey(key);
+  for(let i=0;i<60;i++){const m={id:"old"+i,from:"tg_1001",text:"old "+i,time:new Date(Date.now()-i*60000).toISOString()};const raw=JSON.stringify(m);redis.l(key).push(raw);redis.h(index).set(m.id,raw);}
+  const sent=await call(chat,req("POST",{},{pwaSession:s.user,with:"tg_1002",text:"new"}));
+  assert.equal(sent.statusCode,200);assert.equal(redis.l(key).length,61);assert.equal(redis.h(index).size,60);
+  const older=await call(chat,req("GET",{pwaSession:s.user,with:"tg_1002",beforeId:"old39",beforeTime:new Date(Date.now()-39*60000).toISOString()}));
+  assert.equal(older.statusCode,200);assert.equal(older.body.messages.length,20);assert.equal(older.body.messages[0].id,"old59");
+}
+async function testSectionRatingPwa(redis) {
+  process.env.MINI_APP_URL="https://t.me/Poker_dvatuza_bot/DvaTuza";
+  const h=loadHandler("rating-manual"),s=sessions();
+  assert.equal((await call(h,req("POST",{},{pwaSession:s.user}))).statusCode,403);
+  assert.equal((await call(h,req("POST",{},{pwaSession:s.admin}))).statusCode,200);
+}
+async function testSectionCampaignConcurrency(redis) {
+  const h=loadHandler("player-crm"),s=sessions(),sent=[];installRecordingFetch(redis,sent);
+  const jobId="section_job12345";
+  redis.kv.set("poker_app:crm_campaign_job:"+jobId,JSON.stringify({campaign:{id:jobId,text:"test"},audience:[{accountId:"ID1",telegramIds:["1001"]}],channel:"bot"}));
+  redis.kv.set("poker_app:crm_campaign_progress:"+jobId,JSON.stringify({status:"queued",allIds:["ID1"],processedIds:[],sentIds:[],failedIds:[]}));
+  const token=require(path.join(root,"lib/admin-menu-access-token")).signAccessToken("crm","tg_388008256",BOT_TOKEN);
+  for(const command of ["pause","resume"]) {
+    const control=await call(h,req("POST",{},{pwaSession:s.admin,menuAccessToken:token,action:"control_campaign_job",command,jobId}));
+    assert.equal(control.statusCode,200);
+  }
+  const post=()=>call(h,req("POST",{},{pwaSession:s.admin,menuAccessToken:token,action:"process_campaign_job",jobId}));
+  const replies=await Promise.all([post(),post()]);assert(replies.some(r=>r.statusCode===200));assert(replies.every(r=>[200,409].includes(r.statusCode)));
+  assert.equal(sent.filter(x=>String(x.body.chat_id)==="1001").length,1);
+  assert.equal((await post()).statusCode,200);assert.equal(sent.filter(x=>String(x.body.chat_id)==="1001").length,1);
+}
+
 async function main() {
   const tests = [
+    ["section chat retained history",testSectionChatHistory],
+    ["section rating PWA admin",testSectionRatingPwa],
+    ["section CRM concurrent delivery",testSectionCampaignConcurrency],
     ["concurrent private cash booking", testAuditConcurrentPrivateCash],
     ["blocked transfer creation", testAuditBlockedTransfer],
     ["transfer completion once", testTransferCompletionOnce],

@@ -9019,7 +9019,7 @@ var SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE = {
           "nick": "Evgen1722",
           "place": 5,
           "reward": -30,
-          "points": 60
+          "points": 0
         },
         {
           "nick": "pryanik2la",

@@ -10,6 +10,7 @@
       var calculationPeriodRequestSeq = 0;
       var calculationReportsRequestSeq = 0;
       var calculationDraftRequestSeq = 0;
+      var calculationDraftVersions = Object.create(null);
       var figuresSaveRequestSeq = 0;
       var calculationDisplayedPeriodKey = "";
       var calculationInitialLoadRetryTimer = null;
@@ -1035,6 +1036,7 @@
         if (!calculationsAccessToken) calculationsAccessToken = crmAccessToken;
         if (calculationsAccessToken) payload.menuAccessToken = calculationsAccessToken;
         if (draft) payload.calculationDraft = draft;
+        if (action === "calculation_draft_save") payload.calculationDraftVersion = calculationDraftVersions[payload.weekStart] || "";
         if (group) payload.calculationDraftGroup = String(group);
         var fetchDraft = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout : fetch;
         return Promise.resolve().then(function () {
@@ -1058,10 +1060,13 @@
                   error.status = response.status;
                   throw error;
                 }
+                if (data.calculationDraftVersion) calculationDraftVersions[payload.weekStart] = data.calculationDraftVersion;
                 return data;
               });
             }).catch(function (error) {
               lastError = error;
+              // A lost write response may mean the first endpoint committed. Never replay it elsewhere.
+              if (action === "calculation_draft_save" || (error.status && error.status !== 404)) throw error;
               return attempt(index + 1);
             });
           }
@@ -1281,8 +1286,8 @@
           if (getCalculationDraftKey() !== expectedDraftKey) return;
           setCalculationGroupLocked(group, true);
           setCalculationsStatus(group, "Сохранено");
-        }).catch(function () {
-          setCalculationsStatus(group, "Не удалось сохранить на сервере");
+        }).catch(function (error) {
+          setCalculationsStatus(group, error && error.message || "Не удалось сохранить на сервере");
         });
       }
 
