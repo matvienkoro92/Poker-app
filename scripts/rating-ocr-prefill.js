@@ -298,7 +298,7 @@ async function parseOcrFile(file) {
   const dateOnlyToken = dateMatch ? null : tokens.find((token) => /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])$/.test(token.text));
   const dateOnlyMatch = dateOnlyToken ? String(dateOnlyToken.text).match(/(\d{2})\/(\d{2})/) : null;
   const separateTimeToken = dateOnlyToken
-    ? chooseClosest(tokens, (token) => /^[•·:]?\d{1,2}:\d{2}$/.test(token.text), dateOnlyToken.y, 0.025)
+    ? chooseClosest(tokens, (token) => /^[•·:)\s]*\d{1,2}:\d{2}$/.test(token.text), dateOnlyToken.y, 0.025)
     : null;
   const date = dateMatch
     ? `${dateMatch[2]}.${dateMatch[1]}.2026`
@@ -308,7 +308,7 @@ async function parseOcrFile(file) {
   const time = dateMatch
     ? dateMatch[3].padStart(5, "0")
     : separateTimeToken
-      ? separateTimeToken.text.replace(/^[•·:]/, "").padStart(5, "0")
+      ? separateTimeToken.text.replace(/^[•·:)\s]*/, "").padStart(5, "0")
       : "??:??";
 
   const titleTokens = tokens
@@ -316,6 +316,7 @@ async function parseOcrFile(file) {
     .filter((token) => !/^(MTT|7MAX|MTT-NLH)$/i.test(token.text))
     .sort((a, b) => a.x - b.x);
   let title = normalizeName(titleTokens.map((token) => token.text).join(" ") || "TODO");
+  if (/^Магия Тракториста/i.test(title)) title = "Магия Тракториста🚜";
   if (title === "OK🎰" && time === "17:00") title = "МОК🎰";
 
   const feeToken = chooseClosest(

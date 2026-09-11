@@ -1095,4 +1095,107 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "10.09.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 5,
+          "reward": 6117,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 6,
+          "reward": 8540,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 1,
+          "reward": 33770,
+          "points": 0
+        },
+        {
+          "nick": "mr.Freeman",
+          "place": 4,
+          "reward": 12990,
+          "points": 0
+        },
+        {
+          "nick": "Twisted-fate_08",
+          "place": 7,
+          "reward": 5620,
+          "points": 0
+        },
+        {
+          "nick": "Юрий_77",
+          "place": 10,
+          "reward": 900,
+          "points": 0
+        },
+        {
+          "nick": "DemonDen",
+          "place": 11,
+          "reward": 600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "roma1233",
+          "place": 2,
+          "reward": 1442.5,
+          "points": 0
+        },
+        {
+          "nick": "GazMays",
+          "place": 4,
+          "reward": 778.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Мегалодон",
+          "place": 3,
+          "reward": 2400,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

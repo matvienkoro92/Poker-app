@@ -912,4 +912,9 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-09-09-2026-league1-nlh-knockout-220k-21h.jpg",
     "rating-compressed-preview/rating-09-09-2026-league1-night-magic-80k-23h.jpg"
   ]
+,
+  "10.09.2026": [
+    "rating-compressed-preview/rating-10-09-2026-league1-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-10-09-2026-league1-dv-bounty-100k-13h.jpg"
+  ]
 };
