@@ -1,189 +1,34 @@
 <div class="view" data-view="schedule">
-            <button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
-            <h1 class="title schedule-title">Расписание турниров на неделю</h1>
-            <p class="schedule-subtitle">Poker 21+</p>
-
-            <section class="schedule-section schedule-section--month-tournaments">
-              <h2 class="schedule-section__title">Турниры месяца</h2>
-              <div class="schedule-table-wrap schedule-table-wrap--month-tournaments">
-                <table class="schedule-table schedule-table--event-stack">
-                  <thead>
-                    <tr>
-                      <th>Тип</th>
-                      <th>Дата</th>
-                      <th>Турнир</th>
-                      <th>Бай-ин</th>
-                      <th>Ребай/Аддон</th>
-                      <th>Гарантия / приз</th>
-                      <th>Начало</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="schedule-row--major">
-                      <td><span class="schedule-tag schedule-tag--month">Май</span></td>
-                      <td>31.05</td>
-                      <td>Турнир месяца — Нокаут</td>
-                      <td>10 000₽</td>
-                      <td>R:10 000₽</td>
-                      <td>500 000₽</td>
-                      <td>18:00 МСК</td>
-                    </tr>
-                    <tr class="schedule-row--satellite">
-                      <td><span class="schedule-tag schedule-tag--satellite">Сателлит</span></td>
-                      <td>Ежедневно</td>
-                      <td>К турниру месяца Нокаут</td>
-                      <td>50₽</td>
-                      <td>R:200₽ / A:200₽</td>
-                      <td>1 билет за 10 000₽</td>
-                      <td>15:00 МСК</td>
-                    </tr>
-                    <tr class="schedule-row--satellite">
-                      <td><span class="schedule-tag schedule-tag--satellite">Сателлит</span></td>
-                      <td>Ежедневно</td>
-                      <td>Сателлит к Нокауту за 5 000₽</td>
-                      <td>250₽</td>
-                      <td>R:250₽ / A:250₽</td>
-                      <td>1 билет за 5 000₽</td>
-                      <td>19:00 МСК</td>
-                    </tr>
-                    <tr class="schedule-row--satellite">
-                      <td><span class="schedule-tag schedule-tag--satellite">Сателлит</span></td>
-                      <td>Ежедневно</td>
-                      <td>Сателлит к Нокауту на 1 000 000₽</td>
-                      <td>300₽</td>
-                      <td>R:300₽ / A:500₽</td>
-                      <td>1 билет за 10 000₽</td>
-                      <td>19:00 МСК</td>
-                    </tr>
-                    <tr class="schedule-row--major">
-                      <td><span class="schedule-tag schedule-tag--month">Июнь</span></td>
-                      <td>28.06</td>
-                      <td>Турнир месяца</td>
-                      <td>3 000₽</td>
-                      <td>R:3 000₽ / A:3 000₽</td>
-                      <td>1 000 000₽</td>
-                      <td>18:00 МСК</td>
-                    </tr>
-                    <tr class="schedule-row--freeroll">
-                      <td><span class="schedule-tag schedule-tag--satellite">Сателлит</span></td>
-                      <td>Ежедневно</td>
-                      <td>Бесплатный сателлит к турниру месяца</td>
-                      <td>0₽</td>
-                      <td>—</td>
-                      <td>9 000₽ — 3 билета за 3 000₽</td>
-                      <td>16:00 МСК</td>
-                    </tr>
-                    <tr class="schedule-row--major">
-                      <td><span class="schedule-tag schedule-tag--month">Июль</span></td>
-                      <td>19.07</td>
-                      <td>Нокаут Прогрессив</td>
-                      <td>10 000₽</td>
-                      <td>R:10 000₽</td>
-                      <td>1 000 000₽</td>
-                      <td>18:00 МСК</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="schedule-section schedule-section--week-tournament">
-              <h2 class="schedule-section__title">Турнир недели</h2>
-              <div class="schedule-table-wrap schedule-table-wrap--week-tournament">
-                <table class="schedule-table schedule-table--event-stack">
-                  <thead>
-                    <tr>
-                      <th>Тип</th>
-                      <th>День</th>
-                      <th>Турнир</th>
-                      <th>Бай-ин</th>
-                      <th>Ребай/Аддон</th>
-                      <th>Гарантия / приз</th>
-                      <th>Начало</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="schedule-row--major"><td><span class="schedule-tag schedule-tag--week">Неделя</span></td><td>Воскресенье</td><td>PKO Нокаут Прогрессив</td><td>2 000₽</td><td>R:2 000₽</td><td>300 000₽</td><td>18:00</td></tr>
-                    <tr class="schedule-row--satellite"><td><span class="schedule-tag schedule-tag--satellite">Сателлит</span></td><td>Ежедневно</td><td>К турниру недели</td><td>0₽</td><td>R:100₽ / A:150₽</td><td>1 билет за 2 000₽</td><td>10:00 МСК</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="schedule-section schedule-section--tournament-day">
-              <h2 class="schedule-section__title">Турниры дня в 18:00 МСК</h2>
-              <div class="schedule-table-wrap schedule-table-wrap--tournament-day">
-                <table class="schedule-table">
-                  <thead>
-                    <tr>
-                      <th>День</th>
-                      <th>Турнир</th>
-                      <th>Бай-ин</th>
-                      <th>Ребай/Аддон</th>
-                      <th>Гарантия</th>
-                      <th>Начало</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Понедельник</td>
-                      <td>Magic MKO</td>
-                      <td>500₽</td>
-                      <td>R:500₽</td>
-                      <td>170 000₽</td>
-                      <td>18:00</td>
-                    </tr>
-                    <tr>
-                      <td>Вторник</td>
-                      <td>Турнир Тракториста</td>
-                      <td>300₽</td>
-                      <td>R:300₽ / A:300₽</td>
-                      <td>150 000₽</td>
-                      <td>18:00</td>
-                    </tr>
-                    <tr>
-                      <td>Среда</td>
-                      <td>Нокаут</td>
-                      <td>5 000₽</td>
-                      <td>R:5 000₽</td>
-                      <td>300 000₽</td>
-                      <td>18:00</td>
-                    </tr>
-                    <tr><td>Четверг</td><td>Мистери</td><td>300₽</td><td>R:300₽</td><td>100 000₽</td><td>18:00</td></tr>
-                    <tr><td>Пятница</td><td>Нокаут Прогрессив</td><td>500₽</td><td>R:500₽</td><td>170 000₽</td><td>18:00</td></tr>
-                    <tr><td>Суббота</td><td>Субботний турнир</td><td>350₽</td><td>R:350₽ / A:350₽</td><td>5 билетов по 10 000₽</td><td>18:00</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="schedule-section">
-              <h2 class="schedule-section__title">Ежедневные турниры</h2>
-              <div class="schedule-table-wrap">
-                <table class="schedule-table">
-                  <thead>
-                    <tr>
-                      <th>Турнир</th>
-                      <th>Бай-ин</th>
-                      <th>Ребай/Аддон</th>
-                      <th>Гарантия</th>
-                      <th>Начало (Мск)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>Rebuy DV</td><td>800₽</td><td>R:800₽ / A:800₽</td><td>30 000₽</td><td>12:00</td></tr>
-                    <tr><td>Tournament Rebuy</td><td>100₽</td><td>R:100₽ / A:100₽</td><td>5 000₽</td><td>14:00</td></tr>
-                    <tr><td>Бесплатный сателлит к турниру месяца</td><td>0₽</td><td>—</td><td>9 000₽ — 3 билета за 3 000₽</td><td>16:00</td></tr>
-                    <tr><td>Magic Chest</td><td>50₽</td><td>R:50₽</td><td>3 000₽</td><td>16:00</td></tr>
-                    <tr><td>PKO/MKO</td><td>300₽</td><td>R:300₽</td><td>25 000₽</td><td>17:00</td></tr>
-                    <tr><td>PKO (кроме пятницы и субботы)</td><td>1 000₽</td><td>—</td><td>100 000₽</td><td>19:00</td></tr>
-                    <tr><td>Фризаут (пятница)</td><td>1 000₽</td><td>Без ребая и аддона</td><td>40 000₽</td><td>19:00</td></tr>
-                    <tr><td>Фризаут (суббота)</td><td>1 000₽</td><td>Без ребая и аддона</td><td>70 000₽</td><td>19:00</td></tr>
-                    <tr><td>PLO4</td><td>300₽</td><td>—</td><td>10 000₽</td><td>20:00</td></tr>
-                    <tr><td>Energetic Tournament</td><td>200₽</td><td>R:200₽ / A:200₽</td><td>10 000₽</td><td>22:00</td></tr>
-                    <tr><td>MKO</td><td>50₽</td><td>—</td><td>3 000₽</td><td>23:00</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
+<button type="button" class="bonus-game-back" data-view-target="home" aria-label="На главную">←</button>
+<h1 class="title schedule-title">Расписание турниров на неделю</h1>
+<p class="schedule-subtitle">Poker 21+ · время московское</p>
+<section class="schedule-section"><h2 class="schedule-section__title">Турниры дня</h2><div class="schedule-table-wrap"><table class="schedule-table"><thead><tr><th>День</th><th>Турнир</th><th>Бай-ин</th><th>Гарантия / приз</th><th>Начало</th></tr></thead><tbody>
+<tr><td>Понедельник</td><td>Меджик</td><td>500₽</td><td>170 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Вторник</td><td>Ребайник</td><td>300₽</td><td>150 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Среда</td><td>Меджик</td><td>1 000₽</td><td>170 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Четверг</td><td>Меджик</td><td>300₽</td><td>100 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Пятница</td><td>Нокаут</td><td>500₽</td><td>150 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Суббота</td><td>Нокаут</td><td>5 000₽</td><td>250 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Воскресенье</td><td>Нокаут</td><td>2 000₽</td><td>300 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Среда</td><td>Ребайник 21 (очко)</td><td>500₽</td><td>30 000₽</td><td>18:00 МСК</td></tr>
+<tr><td>Суббота</td><td>Ребайник 21 (очко)</td><td>500₽</td><td>30 000₽</td><td>18:00 МСК</td></tr>
+</tbody></table></div></section>
+<section class="schedule-section"><h2 class="schedule-section__title">Ежедневные турниры</h2><div class="schedule-table-wrap"><table class="schedule-table"><thead><tr><th>День</th><th>Турнир</th><th>Бай-ин</th><th>Гарантия / приз</th><th>Начало</th></tr></thead><tbody>
+<tr><td>Ежедневно</td><td>Ребайник</td><td>800₽</td><td>30 000₽</td><td>12:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Ребайник</td><td>100₽</td><td>5 000₽</td><td>14:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Меджик</td><td>50₽</td><td>3 000₽</td><td>16:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Меджик</td><td>300₽</td><td>25 000₽</td><td>17:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Омаха 6</td><td>100₽</td><td>7 000₽</td><td>20:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Нокаут</td><td>200₽</td><td>10 000₽</td><td>21:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Ребайник</td><td>200₽</td><td>10 000₽</td><td>22:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Меджик</td><td>50₽</td><td>3 000₽</td><td>23:00 МСК</td></tr>
+</tbody></table></div></section>
+<section class="schedule-section"><h2 class="schedule-section__title">Сателлиты</h2><div class="schedule-table-wrap"><table class="schedule-table"><thead><tr><th>День</th><th>Турнир</th><th>Бай-ин</th><th>Гарантия / приз</th><th>Начало</th></tr></thead><tbody>
+<tr><td>Ежедневно</td><td>Сателлит к турниру за 800₽</td><td>80₽</td><td>5 билетов по 800₽</td><td>09:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Сателлит к суперсателлиту за 1 000₽</td><td>30₽</td><td>2 билета по 1 000₽</td><td>15:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Сателлит к 21 (очко) за 500₽</td><td>30₽</td><td>2 билета по 500₽</td><td>15:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Сателлит к Биг Боссу в субботу</td><td>200₽</td><td>1 билет за 5 000₽</td><td>17:00 МСК</td></tr>
+<tr><td>Ежедневно</td><td>Сателлит к суперсателлиту за 1 000₽</td><td>30₽</td><td>2 билета по 1 000₽</td><td>19:00 МСК</td></tr>
+<tr><td>Суббота</td><td>Суперсателлит к турниру с гарантией 800 000₽</td><td>1 000₽</td><td>5 билетов по 10 000₽</td><td>18:00 МСК</td></tr>
+</tbody></table></div></section>
+</div>

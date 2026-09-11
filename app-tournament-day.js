@@ -9,56 +9,56 @@ var HOME_TOURNAMENT_MONTH_KNOCKOUT_1M_BANNER_FILE = "home-tournament-month-knock
 
 var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
-    name: "PKO Нокаут Прогрессив",
+    name: "Нокаут",
     buyin: "2 000₽",
     guarantee: "300 000₽",
     banner: HOME_TOURNAMENT_SUNDAY_BANNER_FILE,
-    bannerAlt: "Poker21 PKO Нокаут Прогрессив воскресенья — вход 2 000 ₽, гарантия 300 000 ₽",
+    bannerAlt: "Poker21 Нокаут — вход 2 000₽, гарантия 300 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
   {
-    name: "Magic MKO",
+    name: "Меджик",
     buyin: "500₽",
     guarantee: "170 000₽",
     banner: HOME_TOURNAMENT_MONDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Magic MKO понедельника — Мистери Баунти 170 000 ₽",
+    bannerAlt: "Poker21 Меджик — вход 500₽, гарантия 170 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
   {
-    name: "Турнир Тракториста",
+    name: "Ребайник",
     buyin: "300₽",
     guarantee: "150 000₽",
     banner: HOME_TOURNAMENT_TUESDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Турнир Тракториста вторника — призовые 150 000 ₽",
+    bannerAlt: "Poker21 Ребайник — вход 300₽, гарантия 150 000₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
+  {
+    name: "Меджик",
+    buyin: "1 000₽",
+    guarantee: "170 000₽",
+    banner: HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Меджик — вход 1 000₽, гарантия 170 000₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
+  {
+    name: "Меджик",
+    buyin: "300₽",
+    guarantee: "100 000₽",
+    banner: HOME_TOURNAMENT_THURSDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Меджик — вход 300₽, гарантия 100 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
   {
     name: "Нокаут",
-    buyin: "5 000₽",
-    guarantee: "250 000₽",
-    banner: HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут среды — вход 5 000 ₽, гарантия 250 000 ₽",
-    bannerWidth: 640,
-    bannerHeight: 915
-  },
-  {
-    name: "Мистери",
-    buyin: "300₽",
-    guarantee: "100 000₽",
-    banner: HOME_TOURNAMENT_THURSDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Мистери четверга — вход 300 ₽, гарантия 100 000 ₽",
-    bannerWidth: 640,
-    bannerHeight: 915
-  },
-  {
-    name: "Нокаут Прогрессив",
     buyin: "500₽",
-    guarantee: "170 000₽",
+    guarantee: "150 000₽",
     banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут Прогрессив пятницы — вход 500 ₽, призовые 170 000 ₽",
+    bannerAlt: "Poker21 Нокаут — вход 500₽, гарантия 150 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
@@ -67,7 +67,7 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     buyin: "5 000₽",
     guarantee: "250 000₽",
     banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут субботы — вход 5 000 ₽, призовые 250 000 ₽",
+    bannerAlt: "Poker21 Нокаут — вход 5 000₽, гарантия 250 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   }
@@ -94,58 +94,297 @@ function pokerGetHomeTournamentItem(dow, now) {
   return TOURNAMENT_OF_DAY_BY_WEEKDAY[dow] || TOURNAMENT_OF_DAY_BY_WEEKDAY[0];
 }
 
-var HOME_FREEROLL_SCHEDULE = [
-  {
-    day: "Еж",
-    daily: true,
-    title: "Приз 9 000₽",
-    meta: "Poker21 · 16:00 МСК",
-    time: "16:00 МСК",
-    hour: 16,
-    minute: 0,
-    room: "Poker21",
-    roomPage: "poker21",
-    buyin: "0₽",
-    guarantee: "9 000₽",
-    desc: "Ежедневный фриролл-сателлит в Poker21. Старт в 16:00 МСК, вход 0₽, гарантия 9 000₽: 3 билета по 3 000₽."
-  },
-  { day: "Сб", dow: 6, name: "Субботний турнир", title: "5 билетов по 10 000₽", meta: "Poker21 · 18:00 МСК", time: "18:00 МСК", hour: 18, minute: 0, room: "Poker21", roomPage: "poker21", buyin: "350₽ · R:350₽ / A:350₽", guarantee: "5 билетов по 10 000₽ каждый", desc: "Субботний турнир в Poker21. Старт в 18:00 МСК, вход 350₽, ребай 350₽, аддон 350₽, призы: 5 билетов по 10 000₽ каждый." }
-];
+var HOME_FREEROLL_SCHEDULE = [];
 
 var DOWNLOAD_XPOKER_FREEROLL_SCHEDULE = [];
 
 var POKER_FULL_TOURNAMENT_SCHEDULE = [
-  { repeat: "daily", category: "Сателлит", name: "К турниру недели", buyin: "0₽", rebuy: "R:100₽ / A:150₽", guarantee: "1 билет за 2 000₽", hour: 10, minute: 0, durationMinutes: 180, priority: 30 },
-  { repeat: "daily", category: "Ежедневный", name: "Rebuy DV", buyin: "800₽", rebuy: "R:800₽ / A:800₽", guarantee: "30 000₽", hour: 12, minute: 0, durationMinutes: 180, priority: 45 },
-  { repeat: "daily", category: "Ежедневный", name: "Tournament Rebuy", buyin: "100₽", rebuy: "R:100₽ / A:100₽", guarantee: "5 000₽", hour: 14, minute: 0, durationMinutes: 180, priority: 45 },
-  { repeat: "daily", category: "Сателлит", name: "К турниру месяца Нокаут", buyin: "50₽", rebuy: "R:200₽ / A:200₽", guarantee: "1 билет за 10 000₽", hour: 15, minute: 0, durationMinutes: 180, priority: 35 },
-  { repeat: "daily", category: "Сателлит", name: "Бесплатный сателлит к турниру месяца", buyin: "0₽", rebuy: "—", guarantee: "9 000₽ — 3 билета за 3 000₽", hour: 16, minute: 0, durationMinutes: 180, priority: 35 },
-  { repeat: "daily", category: "Ежедневный", name: "Magic Chest", buyin: "50₽", rebuy: "R:50₽", guarantee: "3 000₽", hour: 16, minute: 0, durationMinutes: 180, priority: 50 },
-  { repeat: "daily", category: "Ежедневный", name: "PKO/MKO", buyin: "300₽", rebuy: "R:300₽", guarantee: "25 000₽", hour: 17, minute: 0, durationMinutes: 180, priority: 55 },
-  { repeat: "weekly", dow: 1, category: "Турнир дня", name: "Magic MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 2, category: "Турнир дня", name: "Турнир Тракториста", buyin: "300₽", rebuy: "R:300₽ / A:500₽", guarantee: "150 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут", buyin: "5 000₽", rebuy: "R:5 000₽", guarantee: "250 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 3, category: "Турнир дня", name: "Нокаут MKO", buyin: "500₽", rebuy: "R:500₽", guarantee: "50 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 89, levels: "12/10/8" },
-  { repeat: "weekly", dow: 4, category: "Турнир дня", name: "Мистери", buyin: "300₽", rebuy: "R:300₽", guarantee: "100 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 5, category: "Турнир дня", name: "Нокаут Прогрессив", buyin: "500₽", rebuy: "R:500₽", guarantee: "170 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 6, category: "Турнир дня", name: "Субботний турнир", buyin: "350₽", rebuy: "R:350₽ / A:350₽", guarantee: "5 билетов по 10 000₽ каждый", hour: 18, minute: 0, durationMinutes: 180, priority: 90 },
-  { repeat: "weekly", dow: 6, category: "Сателлит", name: "Субботний САТ 1М · NLH", buyin: "350₽", rebuy: "—", guarantee: "Сателлит к турниру с гарантией 1 000 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 91 },
-  { repeat: "weekly", dow: 0, category: "Турнир недели", name: "PKO Нокаут Прогрессив", buyin: "2 000₽", rebuy: "R:2 000₽", guarantee: "300 000₽", hour: 18, minute: 0, durationMinutes: 180, priority: 100 },
-  { repeat: "weekly", dow: 0, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 1, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 2, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 3, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 4, category: "Ежедневный", name: "PKO", buyin: "1 000₽", rebuy: "—", guarantee: "100 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 5, category: "Ежедневный", name: "Фризаут", buyin: "1 000₽", rebuy: "Без ребая и аддона", guarantee: "40 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "weekly", dow: 6, category: "Ежедневный", name: "Фризаут", buyin: "1 000₽", rebuy: "Без ребая и аддона", guarantee: "70 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 58 },
-  { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту за 5 000₽", buyin: "250₽", rebuy: "R:250₽ / A:250₽", guarantee: "1 билет за 5 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 35 },
-  { repeat: "daily", category: "Сателлит", name: "Сателлит к Нокауту на 1 000 000₽", buyin: "300₽", rebuy: "R:300₽ / A:300₽", guarantee: "1 билет за 10 000₽", hour: 19, minute: 0, durationMinutes: 180, priority: 36 },
-  { repeat: "daily", category: "Ежедневный", name: "PLO4", buyin: "300₽", rebuy: "—", guarantee: "10 000₽", hour: 20, minute: 0, durationMinutes: 180, priority: 50 },
-  { repeat: "daily", category: "Ежедневный", name: "Energetic Tournament", buyin: "200₽", rebuy: "R:200₽ / A:200₽", guarantee: "10 000₽", hour: 22, minute: 0, durationMinutes: 180, priority: 50 },
-  { repeat: "daily", category: "Ежедневный", name: "MKO", buyin: "50₽", rebuy: "—", guarantee: "3 000₽", hour: 23, minute: 0, durationMinutes: 180, priority: 45 },
-  { date: "2026-05-31", category: "Турнир месяца", name: "Турнир месяца — Нокаут", buyin: "10 000₽", rebuy: "R:10 000₽", guarantee: "500 000₽", hour: 18, minute: 0, durationMinutes: 240, priority: 120 },
-  { date: "2026-06-28", category: "Турнир месяца", name: "Турнир месяца", buyin: "3 000₽", rebuy: "R:3 000₽ / A:3 000₽", guarantee: "1 000 000₽", hour: 18, minute: 0, durationMinutes: 240, priority: 120 },
-  { date: "2026-07-19", category: "Турнир месяца", name: "Турнир месяца — Нокаут", buyin: "10 000₽", rebuy: "R:10 000₽", guarantee: "1 000 000₽", hour: 18, minute: 0, durationMinutes: 240, priority: 120 }
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Меджик",
+    "buyin": "500₽",
+    "rebuy": "Не указано",
+    "guarantee": "170 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 1
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Ребайник",
+    "buyin": "300₽",
+    "rebuy": "Не указано",
+    "guarantee": "150 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 2
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Меджик",
+    "buyin": "1 000₽",
+    "rebuy": "Не указано",
+    "guarantee": "170 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 3
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Меджик",
+    "buyin": "300₽",
+    "rebuy": "Не указано",
+    "guarantee": "100 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 4
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Нокаут",
+    "buyin": "500₽",
+    "rebuy": "Не указано",
+    "guarantee": "150 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 5
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Нокаут",
+    "buyin": "5 000₽",
+    "rebuy": "Не указано",
+    "guarantee": "250 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 6
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Нокаут",
+    "buyin": "2 000₽",
+    "rebuy": "Не указано",
+    "guarantee": "300 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 90,
+    "dow": 0
+  },
+  {
+    "repeat": "weekly",
+    "category": "Турнир дня",
+    "name": "Ребайник 21 (очко)",
+    "buyin": "500₽",
+    "rebuy": "Не указано",
+    "guarantee": "30 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 89,
+    "dow": 3
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Ребайник",
+    "buyin": "800₽",
+    "rebuy": "Не указано",
+    "guarantee": "30 000₽",
+    "hour": 12,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Ребайник",
+    "buyin": "100₽",
+    "rebuy": "Не указано",
+    "guarantee": "5 000₽",
+    "hour": 14,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Меджик",
+    "buyin": "50₽",
+    "rebuy": "Не указано",
+    "guarantee": "3 000₽",
+    "hour": 16,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Меджик",
+    "buyin": "300₽",
+    "rebuy": "Не указано",
+    "guarantee": "25 000₽",
+    "hour": 17,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Омаха 6",
+    "buyin": "100₽",
+    "rebuy": "Не указано",
+    "guarantee": "7 000₽",
+    "hour": 20,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Нокаут",
+    "buyin": "200₽",
+    "rebuy": "Не указано",
+    "guarantee": "10 000₽",
+    "hour": 21,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Ребайник",
+    "buyin": "200₽",
+    "rebuy": "Не указано",
+    "guarantee": "10 000₽",
+    "hour": 22,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Ежедневный",
+    "name": "Меджик",
+    "buyin": "50₽",
+    "rebuy": "Не указано",
+    "guarantee": "3 000₽",
+    "hour": 23,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 45
+  },
+  {
+    "repeat": "daily",
+    "category": "Сателлит",
+    "name": "Сателлит к турниру за 800₽",
+    "buyin": "80₽",
+    "rebuy": "Не указано",
+    "guarantee": "5 билетов по 800₽",
+    "hour": 9,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 35
+  },
+  {
+    "repeat": "daily",
+    "category": "Сателлит",
+    "name": "Сателлит к суперсателлиту за 1 000₽",
+    "buyin": "30₽",
+    "rebuy": "Не указано",
+    "guarantee": "2 билета по 1 000₽",
+    "hour": 15,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 35
+  },
+  {
+    "repeat": "daily",
+    "category": "Сателлит",
+    "name": "Сателлит к 21 (очко) за 500₽",
+    "buyin": "30₽",
+    "rebuy": "Не указано",
+    "guarantee": "2 билета по 500₽",
+    "hour": 15,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 35
+  },
+  {
+    "repeat": "daily",
+    "category": "Сателлит",
+    "name": "Сателлит к Биг Боссу в субботу",
+    "buyin": "200₽",
+    "rebuy": "Не указано",
+    "guarantee": "1 билет за 5 000₽",
+    "hour": 17,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 35
+  },
+  {
+    "repeat": "daily",
+    "category": "Сателлит",
+    "name": "Сателлит к суперсателлиту за 1 000₽",
+    "buyin": "30₽",
+    "rebuy": "Не указано",
+    "guarantee": "2 билета по 1 000₽",
+    "hour": 19,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 35
+  },
+  {
+    "repeat": "weekly",
+    "dow": 6,
+    "category": "Турнир дня",
+    "name": "Ребайник 21 (очко)",
+    "buyin": "500₽",
+    "rebuy": "Не указано",
+    "guarantee": "30 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 89
+  },
+  {
+    "repeat": "weekly",
+    "dow": 6,
+    "category": "Сателлит",
+    "name": "Суперсателлит к турниру с гарантией 800 000₽",
+    "buyin": "1 000₽",
+    "rebuy": "Не указано",
+    "guarantee": "5 билетов по 10 000₽",
+    "hour": 18,
+    "minute": 0,
+    "durationMinutes": 180,
+    "priority": 35
+  }
 ];
 
 function pokerGetMskDowAndMinutes(now) {
@@ -2214,7 +2453,7 @@ function updateTournamentDayBlock() {
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
-    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = /трактор/i.test(detailNameStr) ? "shkarubo" : selectedWeekday === 5 ? "cooler" : "shtukatur";
+    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 5 ? "cooler" : "shtukatur";
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
     var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;
@@ -2271,7 +2510,7 @@ function updateTournamentDayBlock() {
     var frGuar = document.getElementById("freerollHomeGuarantee");
     var frLab = document.getElementById("freerollHomeTimerLabel");
     var frTime = document.getElementById("freerollHomeTimer");
-    if (frLab && frTime) {
+    if (frLab && frTime && HOME_FREEROLL_SCHEDULE.length) {
       var frState = getNextFreerollState(n);
       var frT = frState.t;
       if (frBuy) frBuy.textContent = frT.buyin || "0₽";
