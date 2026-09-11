@@ -1362,6 +1362,7 @@ function setView(viewName, navOpts) {
     }
   }
   if (viewName === "spring-rating" || viewName === "summer-rating") {
+    window.__pokerSummerArchive = false;
     moveRatingSectionToSeason(viewName);
     try {
       initWinterRating();

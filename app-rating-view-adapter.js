@@ -2337,7 +2337,58 @@ function pokerRefreshRatingSeasonAfterDataReady(seasonKey) {
 }
 window.__pokerRefreshRatingSeasonAfterDataReady = pokerRefreshRatingSeasonAfterDataReady;
 
+function renderAnnualRating() {
+  var host = document.getElementById("summerRatingSectionPlaceholder");
+  if (!host) return;
+  var panel = document.getElementById("annualRatingPanel");
+  if (!panel) {
+    panel = document.createElement("section");
+    panel.id = "annualRatingPanel";
+    panel.className = "winter-rating spring-rating summer-rating";
+    host.prepend(panel);
+  }
+  panel.hidden = false;
+  var section = document.getElementById("winterRatingSection");
+  if (section) section.hidden = true;
+  setSummerRatingInitialLoading(false, section);
+  if (typeof WINTER_RATING_BY_DATE === "undefined" || typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined" || typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE === "undefined") {
+    panel.innerHTML = '<p role="status">Загружаем общий рейтинг…</p>';
+    if (!panel._loading) {
+      panel._loading = true;
+      Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).then(function () {
+        panel._loading = false;
+        if (document.body.dataset.view === "summer-rating" && !window.__pokerSummerArchive) renderAnnualRating();
+      }).catch(function () { panel._loading = false; panel.innerHTML = '<p>Не удалось загрузить рейтинг. Откройте раздел ещё раз.</p>'; });
+    }
+    return;
+  }
+  var data = pokerRatingBuildAnnualStandings();
+  panel.innerHTML = '<h2 class="winter-rating__title">Общий рейтинг</h2>' +
+    '<p>Баллы с 1 января 2026 · обновлено ' + escAnnual(data.dates[data.dates.length - 1] || '—') + '</p>' +
+    '<details class="annual-rating-archive"><summary>Архив рейтингов</summary><button type="button" data-annual-summer-archive>Лето 2026</button> <a href="#" data-view-target="spring-rating">Весна 2026</a> <a href="#" data-view-target="winter-rating">Зима 2026</a></details>' +
+    '<label class="annual-rating-search">Найти игрока <input type="search" placeholder="Ник игрока" aria-label="Найти игрока в общем рейтинге"></label>' +
+    '<div class="winter-rating__table-wrap"><table class="winter-rating__table"><thead><tr><th>Место</th><th>Игрок</th><th>Баллы</th></tr></thead><tbody></tbody></table></div>';
+  function fill(query) {
+    var rows = data.rows.filter(function (row) { return row.nick.toLocaleLowerCase("ru").includes(query.toLocaleLowerCase("ru")); });
+    panel.querySelector('tbody').innerHTML = rows.map(function (row) { return '<tr><td>' + winterRatingPlaceCell(row.place) + '</td><td>' + escAnnual(row.nick) + '</td><td>' + row.points.toLocaleString("ru-RU") + '</td></tr>'; }).join('') || '<tr><td colspan="3">Игрок не найден</td></tr>';
+  }
+  fill('');
+  panel.querySelector('input').addEventListener('input', function (event) { fill(event.target.value.trim()); });
+  panel.querySelector('[data-annual-summer-archive]').addEventListener('click', function () { window.__pokerSummerArchive = true; initWinterRating(); });
+}
+function escAnnual(value) { return String(value).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+
 function initWinterRating() {
+  if (document.body.dataset.view === "summer-rating" && !window.__pokerSummerArchive) { renderAnnualRating(); return; }
+  var annualPanel = document.getElementById("annualRatingPanel");
+  if (annualPanel) annualPanel.hidden = true;
+  var sharedSection = document.getElementById("winterRatingSection");
+  if (sharedSection) {
+    sharedSection.hidden = false;
+    var back = document.getElementById("annualRatingBack");
+    if (!back) { back = document.createElement("button"); back.id = "annualRatingBack"; back.type = "button"; back.textContent = "← Общий рейтинг"; sharedSection.prepend(back); back.onclick = function () { window.__pokerSummerArchive = false; initWinterRating(); }; }
+    back.hidden = document.body.dataset.view !== "summer-rating";
+  }
   try {
     var schedPrev = window.requestIdleCallback
       ? function (fn) { window.requestIdleCallback(fn, { timeout: 600 }); }

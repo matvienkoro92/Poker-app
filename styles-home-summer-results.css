@@ -130,6 +130,16 @@
   .home-summer-dashboard .summer-rating-season-top td:last-child { white-space: normal; }
 }
 
+#annualRatingPanel { width: 100%; min-width: 0; padding: 20px 14px; box-sizing: border-box; }
+#annualRatingPanel[hidden], #winterRatingSection[hidden] { display: none !important; }
+#annualRatingPanel .annual-rating-search { display: grid; gap: 8px; margin: 18px 0; }
+#annualRatingPanel input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #8b743b; border-radius: 12px; background: #10151c; color: #f5dfac; font: inherit; }
+#annualRatingPanel .annual-rating-archive { margin: 16px 0; color: #f5dfac; }
+#annualRatingPanel .annual-rating-archive summary { cursor: pointer; padding: 10px 0; }
+#annualRatingPanel .annual-rating-archive a, #annualRatingPanel button, #annualRatingBack { display: inline-block; padding: 10px; color: #f5dfac; background: #10151c; border: 1px solid #8b743b; border-radius: 12px; }
+#annualRatingPanel .winter-rating__table { width: 100%; }
+#annualRatingPanel td:nth-child(2) { overflow-wrap: anywhere; }
+
 .home-summer-dashboard { padding: 12px 0; }
 .home-summer-dashboard > a { display: block; margin: 14px 0; color: #e8cd91; }
 

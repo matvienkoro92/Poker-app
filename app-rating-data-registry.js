@@ -74,3 +74,45 @@ function pokerRatingBuildSpringRowsByDate() {
   }
   return byDate;
 }
+
+// Annual standings use the points already awarded by each season, never winnings.
+function pokerRatingBuildAnnualStandings() {
+  var totals = Object.create(null);
+  var dates = new Set();
+  function add(date, row) {
+    if (!/^\d{2}\.(0[1-9]|1[0-2])\.2026$/.test(date)) return;
+    dates.add(date);
+    var nick = normalizeWinterNickForFinalTable(row && row.nick);
+    if (!nick) return;
+    var key = nick.toLocaleLowerCase("ru");
+    // September source points are zeroed only to exclude them from the summer season.
+    var points = Number(date.slice(3, 5)) >= 9
+      ? winterRatingPointsForPlace(row.place, row.reward)
+      : winterRatingTournamentPlayerPoints(row);
+    if (!totals[key]) totals[key] = { nick: nick, points: 0 };
+    totals[key].points += points;
+  }
+  var winter = pokerRatingGetWinterRowsByDate();
+  Object.keys(winter).forEach(function (date) { (winter[date] || []).forEach(function (row) { add(date, row); }); });
+  var winterTournaments = pokerRatingGetWinterTournamentsByDate();
+  Object.keys(winterTournaments).forEach(function (date) {
+    if (Array.isArray(winter[date]) && winter[date].length) return;
+    (winterTournaments[date] || []).forEach(function (t) { (t.players || []).forEach(function (p) { add(date, p); }); });
+  });
+  var maps = [
+    typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE : {},
+    typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE : {},
+    typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {}
+  ];
+  maps.forEach(function (map) {
+    Object.keys(map).forEach(function (date) {
+      if (dates.has(date)) return;
+      (map[date] || []).forEach(function (t) { (t.players || []).forEach(function (p) { add(date, p); }); });
+    });
+  });
+  var rows = Object.keys(totals).map(function (key) { return totals[key]; }).filter(function (row) { return row.points > 0; });
+  rows.sort(function (a, b) { return b.points - a.points || a.nick.localeCompare(b.nick, "ru"); });
+  var previous = null;
+  rows.forEach(function (row, i) { row.place = previous && previous.points === row.points ? previous.place : i + 1; previous = row; });
+  return { rows: rows, dates: Array.from(dates).sort(function (a, b) { return a.split('.').reverse().join('').localeCompare(b.split('.').reverse().join('')); }) };
+}

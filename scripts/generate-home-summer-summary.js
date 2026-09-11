@@ -33,7 +33,7 @@ homeStats.topWins = homeStats.topWins.slice(0, 3);
 const homeMarkup = context.summerRatingSeasonStatsHtml(homeStats)
   .replace(/Топ-10/g, "Топ-3")
   .replace(/<div class="summer-results-metrics">[\s\S]*?(?=<div class="summer-rating-season-tops">)/, "");
-const html = '<div class="home-summer-dashboard">' + homeMarkup + '<a href="#" data-view-target="summer-rating">Полный рейтинг лета →</a></div>';
+const html = '<div class="home-summer-dashboard">' + homeMarkup + '<a href="#" data-view-target="summer-rating">Общий рейтинг →</a></div>';
 const ratingCss = fs.readFileSync(path.join(root, "styles-rating-late.css"), "utf8");
 const baseStart = ratingCss.indexOf(".summer-rating-season-counts {");
 const baseEnd = ratingCss.indexOf(" .summer-rating-season-spoiler", baseStart);
