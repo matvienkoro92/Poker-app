@@ -738,8 +738,9 @@
     var streak = result.ticketlessStreakAward;
     if (streak && Number(streak.amount) > 0) prizes.push("билет за " + formatRubles(streak.amount));
     if (!prizes.length && reward.title) prizes.push(cleanSentencePart(reward.title));
-    return "Мой выигрыш в раздаче дня клуба «Два туза»: " + cleanSentencePart(result.handName || "Комбинация") +
-      ". Мой приз — " + (prizes.join(" и ") || "без приза") + ". Попробуйте тоже бесплатно!";
+    return "♠ " + cleanSentencePart(result.handName || "Комбинация") + " в «Раздаче дня»!\n" +
+      "Мой выигрыш: " + (prizes.join(" и ") || "без приза") + ".\n" +
+      "Сыграй бесплатно в клубе «Два туза» ↓";
   }
 
   // Snapshot the live table geometry before another deal can replace the cards.
@@ -847,7 +848,7 @@
     }
     button.onclick = function () {
       if (!file) { prepare(); return; }
-      var payload = { files: [file], text: text, title: "Мой выигрыш — Два туза" };
+      var payload = { files: [file], text: text };
       if (typeof navigator.share === "function" && navigator.canShare && navigator.canShare(payload)) {
         navigator.share(payload).catch(function (error) { if (!error || error.name !== "AbortError") fallback(); });
       } else fallback();
