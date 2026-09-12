@@ -5131,3 +5131,14 @@ button.admin-report-rakeback-summary__row:focus-visible {
 @media (max-width: 430px) {
   .admin-report-rakeback-row { --rakeback-control-height: 41px; }
 }
+
+/* Attribution cards stay readable inside the existing mobile admin dialog. */
+.tracking-journey { margin: 12px 0; padding: 14px; border: 1px solid rgba(148,163,184,.25); border-radius: 12px; overflow-wrap: anywhere; }
+.tracking-journey h3 { margin: 0 0 8px; font-size: 16px; }
+.tracking-journey p { margin: 8px 0; line-height: 1.5; }
+.tracking-journey__events { padding-left: 22px; font-size: 13px; line-height: 1.6; }
+.tracking-journey__events li { margin: 6px 0; }
+.tracking-journey small { opacity: .7; }
+#trackingLinksJourneyMore { margin: 12px 0; }
+#trackingLinksVisitorsModal .share-stats-admin-modal__box,
+#trackingLinksAdminModal .share-stats-admin-modal__box { background-color: var(--bg, #0f172a); }

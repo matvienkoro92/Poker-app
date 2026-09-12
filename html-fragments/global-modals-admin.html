@@ -157,19 +157,24 @@
         </div>
       </div>
       <!-- Модалка: уникальные ссылки на главную (только админ) -->
-      <div class="share-stats-admin-modal" id="trackingLinksAdminModal" role="dialog" aria-modal="true" aria-label="Ссылки на главную" aria-hidden="true">
+      <div class="share-stats-admin-modal" id="trackingLinksAdminModal" role="dialog" aria-modal="true" aria-label="Источники и ссылки" aria-hidden="true">
         <div class="share-stats-admin-modal__backdrop" id="trackingLinksAdminModalBackdrop"></div>
         <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
           <button type="button" class="share-stats-admin-modal__close" id="trackingLinksAdminModalClose" aria-label="Закрыть">×</button>
-          <h2 class="share-stats-admin-modal__title">Ссылки на главную</h2>
-          <p class="share-stats-admin-modal__hint">Ссылка открывает приложение на главной. Учёт переходов по коду <code>ref_</code>. Параметры ниже — для ваших пометок в админке (кампания, источник). После перехода в этой <strong>сессии</strong> пишутся экраны (<code>view:…</code>) и клики по кнопкам с разделами (<code>open:…</code>) — см. колонки «Активн.» / «Событий» и детализацию у каждого посетителя.</p>
+          <h2 class="share-stats-admin-modal__title">Источники и ссылки</h2>
+          <p class="share-stats-admin-modal__hint">Создайте отдельную ссылку для каждого размещения. В «Пути лидов» доступны первый и последний источник, история действий и депозиты из CRM. Открытия учитываются после загрузки приложения. Новая история собирается с момента обновления.</p>
           <div class="tracking-links-admin__form">
             <label class="visitors-admin-modal__broadcast-label">
               <span class="visitors-admin-modal__broadcast-label-text">Название (необязательно)</span>
               <input type="text" id="trackingLinksLabelInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Например: Stories Instagram" />
             </label>
+            <label class="visitors-admin-modal__broadcast-label"><span class="visitors-admin-modal__broadcast-label-text">Источник</span><input id="trackingLinksSourceInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Telegram-канал Иванова" /></label>
+            <label class="visitors-admin-modal__broadcast-label"><span class="visitors-admin-modal__broadcast-label-text">Тип размещения</span><input id="trackingLinksMediumInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Платный пост" /></label>
+            <label class="visitors-admin-modal__broadcast-label"><span class="visitors-admin-modal__broadcast-label-text">Кампания</span><input id="trackingLinksCampaignInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Набор в клуб — сентябрь" /></label>
+            <label class="visitors-admin-modal__broadcast-label"><span class="visitors-admin-modal__broadcast-label-text">Объявление</span><input id="trackingLinksContentInput" class="visitors-admin-modal__broadcast-input" maxlength="200" placeholder="Пост с бонусом" /></label>
+            <label class="visitors-admin-modal__broadcast-label"><span class="visitors-admin-modal__broadcast-label-text">Куда вести</span><select id="trackingLinksLandingInput" class="visitors-admin-modal__broadcast-input"><option value="home">Главная</option><option value="download">Скачивание</option><option value="cashout">Касса</option><option value="profile">Профиль</option><option value="raffles">Розыгрыши</option><option value="schedule">Расписание</option></select></label>
             <label class="visitors-admin-modal__broadcast-label">
-              <span class="visitors-admin-modal__broadcast-label-text">Параметры (JSON-объект)</span>
+              <span class="visitors-admin-modal__broadcast-label-text">Дополнительные параметры (JSON, необязательно)</span>
               <textarea id="trackingLinksParamsInput" class="visitors-admin-modal__broadcast-text" rows="3" placeholder='{"utm_source":"instagram","campaign":"july"}'></textarea>
             </label>
             <button type="button" class="visitors-admin-modal__show-btn primary-button" id="trackingLinksCreateBtn">Создать ссылку</button>
@@ -206,7 +211,11 @@
         <div class="share-stats-admin-modal__box share-stats-admin-modal__box--wide">
           <button type="button" class="share-stats-admin-modal__close" id="trackingLinksVisitorsModalClose" aria-label="Закрыть">×</button>
           <button type="button" class="tracking-links-admin__back-btn" id="trackingLinksVisitorsBackBtn" aria-label="К списку ссылок">←</button>
-          <h2 class="share-stats-admin-modal__title" id="trackingLinksVisitorsTitle">Переходы</h2>
+          <h2 class="share-stats-admin-modal__title" id="trackingLinksVisitorsTitle">Пути лидов</h2>
+          <p id="trackingLinksJourneySummary" class="share-stats-admin-modal__hint" aria-live="polite"></p>
+          <div id="trackingLinksJourneyList"></div>
+          <button type="button" id="trackingLinksJourneyMore" class="primary-button" hidden>Ещё посетители</button>
+          <details><summary>Прежний журнал переходов</summary>
           <div class="tracking-links-admin__table-wrap tracking-links-admin__table-wrap--tall">
             <table class="share-stats-admin-modal__table">
               <thead>
@@ -219,7 +228,7 @@
               </thead>
               <tbody id="trackingLinksVisitorsTableBody"></tbody>
             </table>
-          </div>
+          </div></details>
         </div>
       </div>
       <!-- Модалка «Отчёт за смену» (только админ, заполняется вручную) -->

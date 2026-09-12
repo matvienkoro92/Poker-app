@@ -161,6 +161,9 @@ function recordTrackingLinkHit(ref) {
         if (data && data.link) {
           var ctx = pokerSaveTrackingLinkContext(ref, data.link);
           pokerApplyTrackingLinkLanding(ctx);
+          if (typeof window.pokerTrackAnalyticsEvent === "function") {
+            window.pokerTrackAnalyticsEvent("referral_opened", { tracking_ref: ref });
+          }
         }
         if (data && data.recorded) {
           try {

@@ -40,16 +40,22 @@
       session_id: session.id,
       event_id: randomId("evt_"),
       at_ms: Date.now(),
+      tracking_ref: typeof getPokerTrackingRefFromEnv === "function" ? getPokerTrackingRefFromEnv() : "",
+
     };
     Object.keys(details || {}).forEach(function (key) { body[key] = details[key]; });
     if (typeof pokerGuestOrAuthedPostBody === "function") body = pokerGuestOrAuthedPostBody(body);
-    return fetch(base + "/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      keepalive: true,
-    }).then(function (response) { return response.json().catch(function () { return { ok: false }; }); })
-      .catch(function () { return { ok: false }; });
+    // Retry the exact event ID: both analytics and attribution writes are idempotent.
+    function send(attempt) {
+      return fetch(base + "/api/analytics", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body), keepalive: true,
+      }).then(function (response) {
+        if (response.status >= 500 && attempt < 2) return send(attempt + 1);
+        return response.json().catch(function () { return { ok: false }; });
+      }).catch(function () { return attempt < 2 ? send(attempt + 1) : { ok: false }; });
+    }
+    return send(0);
   }
 
   window.pokerAnalyticsEnsureSession = function () {

@@ -166,6 +166,12 @@ function initTrackingLinksAdminModal() {
     if (newUrlInput) newUrlInput.value = "";
     if (labelInput) labelInput.value = "";
     if (paramsInput) paramsInput.value = "";
+    ["Source", "Medium", "Campaign", "Content"].forEach(function (key) {
+      var field = document.getElementById("trackingLinks" + key + "Input");
+      if (field) field.value = "";
+    });
+    var landing = document.getElementById("trackingLinksLandingInput");
+    if (landing) landing.value = "home";
     loadLinks();
   }
 
@@ -236,7 +242,7 @@ function initTrackingLinksAdminModal() {
               "</td>" +
               "<td><button type=\"button\" class=\"visitors-admin-modal__show-btn primary-button tracking-links-admin__who-btn\" data-tracking-who=\"" +
               esc(link.id) +
-              "\">Кто перешёл</button></td>" +
+              "\">Пути лидов</button></td>" +
               "</tr>"
             );
           })
@@ -247,10 +253,91 @@ function initTrackingLinksAdminModal() {
       });
   }
 
+  var journeySlug = "", journeyOffset = null, journeyRows = [], journeyGeneration = 0, journeyTotal = 0;
+  var journeyList = document.getElementById("trackingLinksJourneyList");
+  var journeySummary = document.getElementById("trackingLinksJourneySummary");
+  var journeyMore = document.getElementById("trackingLinksJourneyMore");
+  var eventNames = { session_started: "Вход в приложение", section_opened: "Открыт раздел", registration_completed: "Регистрация завершена", deposit_confirmed: "Депозит в CRM", telegram_linked: "Привязан Telegram", email_linked: "Привязана почта", poker21_linked: "Привязан игровой аккаунт", referral_opened: "Переход по ссылке", raffle_joined: "Участие в розыгрыше", sng_joined: "Запись в турнир" };
+  function dateLabel(at) { return new Date(at).toLocaleString("ru-RU"); }
+  function moneyLabel(value) { return Number(value || 0).toLocaleString("ru-RU") + " ₽"; }
+  function journeyRequest(params) {
+    var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?";
+    return fetch(getApiBase() + "/api/tracking-links" + q + "&id=" + encodeURIComponent(journeySlug) + params)
+      .then(function (r) { if (!r.ok) throw new Error("request_failed"); return r.json(); })
+      .then(function (d) { if (!d.ok) throw new Error("request_failed"); return d; });
+  }
+  function renderJourneyRows() {
+    var registered = journeyRows.filter(function (r) { return r.status === "new"; }).length;
+    var linked = journeyRows.filter(function (r) { return r.pokerId; }).length;
+    var depositors = journeyRows.filter(function (r) { return r.depositCount > 0; }).length;
+    var acquired = journeyRows.filter(function (r) { return r.context.first.ref === journeySlug; });
+    var amount = journeyRows.reduce(function (sum, r) { return sum + r.depositAmount; }, 0);
+    journeySummary.textContent = "Посетители: " + journeyRows.length + " из " + journeyTotal + ". Регистрации после прихода: " + registered + ". С игровым ID: " + linked +
+      ". Первый источник: " + acquired.length + ". С депозитом: " + depositors + " · " + moneyLabel(amount) +
+      ". Конверсия первого источника в депозит: " + (acquired.length ? (depositors / acquired.length * 100).toFixed(1) + "%" : "—") +
+      ". Итоги по загруженным людям. Депозиты — из доступного CRM-журнала после первого прихода, относятся к первому источнику. Полнота зависит от журнала.";
+    journeyList.innerHTML = journeyRows.map(function (r) {
+      var c = r.context;
+      var status = { guest: "Гость", returning: "Аккаунт зарегистрирован до прихода", new: "Регистрация после прихода", unknown: "Дата регистрации неизвестна" }[r.status];
+      return '<article class="tracking-journey"><h3>' + esc(r.accountId || "Гость · " + r.actor) + '</h3><p>' + esc(status) +
+        (r.pokerId ? " · Игровой ID: " + esc(r.pokerId) : "") + '</p><p>Первый источник: <strong>' + esc(c.first.label || c.first.ref) +
+        '</strong> · ' + esc(dateLabel(c.first.at)) + '<br>Последний источник: <strong>' + esc(c.last.label || c.last.ref) +
+        '</strong> · ' + esc(dateLabel(c.last.at)) + '</p><p>Депозиты: <strong>' + esc(moneyLabel(r.depositAmount)) +
+        '</strong> · ' + r.depositCount + ' шт.</p>' + (r.deposits.length ? '<ul>' + r.deposits.map(function (d) {
+          return '<li>' + esc(dateLabel(d.at)) + ' — ' + esc(moneyLabel(d.amount)) + '</li>';
+        }).join('') + '</ul>' : '') + '<button type="button" class="primary-button" data-journey-actor="' + escAttr(r.actor) + '">Показать путь</button><ol class="tracking-journey__events"></ol></article>';
+    }).join("");
+  }
+  function loadJourneys(offset) {
+    var generation = journeyGeneration;
+    if (journeyMore) journeyMore.disabled = true;
+    journeyRequest("&journey=1&offset=" + offset).then(function (d) {
+      if (generation !== journeyGeneration) return;
+      journeyTotal = d.total || 0;
+      journeyRows = journeyRows.concat(d.rows || []);
+      journeyOffset = d.nextOffset;
+      renderJourneyRows();
+      if (!journeyRows.length) journeySummary.textContent = "Новая история пока пуста. Она появится после входов по ссылке с обновлённой версией приложения. Старые переходы доступны ниже.";
+      if (journeyMore) { journeyMore.hidden = journeyOffset == null; journeyMore.disabled = false; }
+    }).catch(function () {
+      if (generation !== journeyGeneration) return;
+      journeySummary.textContent = "Не удалось загрузить историю. Нажмите «Повторить».";
+      if (journeyMore) { journeyMore.hidden = false; journeyMore.disabled = false; journeyMore.textContent = "Повторить"; }
+    });
+  }
+  if (journeyMore) journeyMore.addEventListener("click", function () { loadJourneys(journeyOffset || 0); });
+  if (journeyList) journeyList.addEventListener("click", function (ev) {
+    var button = ev.target.closest("[data-journey-actor]");
+    if (!button || button.disabled) return;
+    var generation = journeyGeneration;
+    button.disabled = true;
+    var actor = button.getAttribute("data-journey-actor");
+    journeyRequest("&timeline=1&actor=" + encodeURIComponent(actor) + "&cursor=" + encodeURIComponent(button.dataset.cursor || "0"))
+      .then(function (d) {
+        if (generation !== journeyGeneration) return;
+        button._events = (button._events || []).concat(d.events || []);
+        var seen = {};
+        button._events = button._events.filter(function (e) { if (seen[e.id]) return false; seen[e.id] = true; return true; });
+        button._events.sort(function (a, b) { return a.at - b.at; });
+        button.nextElementSibling.innerHTML = button._events.map(function (e) {
+          var sectionLabel = TRACKING_ACTION_LABELS["view:" + e.section] || e.section;
+          return '<li>' + esc(dateLabel(e.at)) + ' · ' + esc(eventNames[e.type] || e.type) + (e.amount ? ' · ' + esc(moneyLabel(e.amount)) : '') + (e.section ? " · " + esc(sectionLabel) : "") + ' <small>ref_' + esc(e.ref) + '</small></li>';
+        }).join("");
+        button.dataset.cursor = d.cursor || "";
+        button.disabled = !d.cursor;
+        button.textContent = d.cursor ? "Загрузить ещё действия" : "Вся сохранённая история загружена";
+      }).catch(function () { button.disabled = false; button.textContent = "Повторить загрузку пути"; });
+  });
+
   function openVisitorsForId(slug, labelText) {
     if (!visModal || !visTbody) return;
+    journeySlug = slug; journeyOffset = 0; journeyRows = []; journeyGeneration += 1;
+    if (journeyList) journeyList.innerHTML = "";
+    if (journeySummary) journeySummary.textContent = "Загрузка истории…";
+    if (journeyMore) { journeyMore.hidden = true; journeyMore.textContent = "Ещё посетители"; }
+    if (journeyList && journeySummary) loadJourneys(0);
     visTbody.innerHTML = "<tr><td colspan=\"4\">Загрузка…</td></tr>";
-    if (visTitle) visTitle.textContent = labelText ? "Переходы: " + labelText : "Переходы";
+    if (visTitle) visTitle.textContent = labelText ? "Пути лидов: " + labelText : "Пути лидов";
     visModal.setAttribute("aria-hidden", "false");
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
@@ -358,6 +445,12 @@ function initTrackingLinksAdminModal() {
           return;
         }
       }
+      [["Source", "utm_source"], ["Medium", "utm_medium"], ["Campaign", "utm_campaign"], ["Content", "utm_content"]].forEach(function (pair) {
+        var field = document.getElementById("trackingLinks" + pair[0] + "Input");
+        if (field && field.value.trim()) paramsPayload[pair[1]] = field.value.trim();
+      });
+      var landingField = document.getElementById("trackingLinksLandingInput");
+      if (landingField && !paramsPayload.target_startapp && !paramsPayload.target_view && !paramsPayload.target_url) paramsPayload.target_view = landingField.value;
       createBtn.disabled = true;
       var createBody =
         typeof pokerGuestOrAuthedPostBody === "function"
