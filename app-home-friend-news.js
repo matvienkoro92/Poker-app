@@ -4114,7 +4114,33 @@
     }));
   }
 
+  var clubNewsSourcePromise = null;
+  var clubNewsSourceCheckedAt = 0;
   function loadClubNews(force) {
+    if (clubNewsSourcePromise) return clubNewsSourcePromise;
+    if (!force && Date.now() - clubNewsSourceCheckedAt < 60000) return loadClubNewsContent(force);
+    var previous = JSON.stringify(window.POKER_CLUB_NEWS_DATA || {});
+    clubNewsSourcePromise = fetch(new URL("./club-news-data.js", document.baseURI).href, { cache: "no-store" })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Club news refresh failed");
+        return response.text();
+      }).then(function (text) {
+        var marker = "window.POKER_CLUB_NEWS_DATA = ";
+        var offset = text.indexOf(marker);
+        if (offset < 0) throw new Error("Invalid club news data");
+        var data = JSON.parse(text.slice(offset + marker.length).trim().replace(/;$/, ""));
+        if (!data || !Array.isArray(data.rows) || !data.latestDate) throw new Error("Invalid club news payload");
+        window.POKER_CLUB_NEWS_DATA = data;
+        clubNewsSourceCheckedAt = Date.now();
+      }).catch(function () {
+        // Preserve the last usable feed when offline; retry on the next refresh.
+      }).then(function () {
+        return loadClubNewsContent(force || previous !== JSON.stringify(window.POKER_CLUB_NEWS_DATA || {}));
+      }).finally(function () { clubNewsSourcePromise = null; });
+    return clubNewsSourcePromise;
+  }
+
+  function loadClubNewsContent(force) {
     var base = apiBase();
     if (!base) {
       clubNewsLoading = true;
@@ -4284,7 +4310,7 @@
     }
     window.addEventListener("poker-auth-changed", resetFriendNewsForAuth);
     window.addEventListener("poker-telegram-auth", resetFriendNewsForAuth);
-    window.addEventListener("focus", function () { load(); });
+    window.addEventListener("focus", function () { load(); loadClubNews(); });
     setInterval(function () {
       if (typeof document !== "undefined" && document.hidden) return;
       // Refresh badges even when Profile has not been opened.
