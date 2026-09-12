@@ -37,7 +37,9 @@ function startHistory(payload) {
   function unit() {return metric === 'resultMinor' ? (mode === 'cash' ? 'ед' : 'фишек') : metric === 'bb100' ? 'bb/100' : 'bb';}
   function value(c) {return metric === 'resultMinor' ? c.resultMinor == null ? null : c.resultMinor/100 : c[metric];}
   function render() {
-    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,cashUnit:'TABLE_CHIP'});
+    const from=$('date-from').value,to=$('date-to').value;
+    if(from&&to&&from>to)return;
+    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     const selectedCell = data.cells.find(c=>c.label===selected);
     $('mode-note').hidden=mode==='cash';
     $('mode-note').textContent=mode==='cash'?'':
@@ -68,10 +70,7 @@ function startHistory(payload) {
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
     $('metric').value=metric;
     $('metric').options[0].textContent=mode==='cash'?'Результат, ед':'Результат, фишки';
-    $('total-count').textContent=data.count?number(data.count):'—';
-    $('total-label').textContent=mode==='cash'?'Результат, ед':'Результат, фишки';
-    $('total-result').textContent=signed(data.resultMinor==null?null:data.resultMinor/100);
-    $('total-rate').textContent=signed(data.bb100)+(data.count?' bb/100':'');
+    $('total-count').textContent=number(data.count);
     $('matrix').replaceChildren(...data.cells.map(c=>{
       const v=value(c),button=document.createElement('button');
       button.type='button';button.className='cell '+(!c.count?'empty':v>0?'profit':v<0?'loss':'');
@@ -114,6 +113,7 @@ function startHistory(payload) {
     });$('detail').append(list);
   }
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;render();}));
+  ['date-from','date-to'].forEach(id=>$(id).addEventListener('change',()=>{const invalid=$('date-from').value&&$('date-to').value&&$('date-from').value>$('date-to').value;$('date-to').setCustomValidity(invalid?'Дата окончания должна быть не раньше начала':'');if(invalid){$('date-to').reportValidity();return;}render();}));
   $('metric').addEventListener('change',e=>{metric=e.target.value;render();});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){selected=b.dataset.hand;render();$('matrix').querySelector('[data-hand="'+selected+'"]').focus({preventScroll:true});}});
   render();
