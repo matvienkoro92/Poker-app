@@ -1383,6 +1383,20 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "18:00",
+      "name": "🏆SHR 1 MLN GTD🏆",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 6,
+          "reward": 60444.00000000001,
+          "points": 0
+        }
+      ]
     }
   ]
 };

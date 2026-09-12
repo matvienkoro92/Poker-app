@@ -922,6 +922,7 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-11-09-2026-league1-dv-rebuy-12h.jpg",
     "rating-compressed-preview/rating-11-09-2026-league1-pyatnica-progressiv-18h.jpg",
     "rating-compressed-preview/rating-11-09-2026-league1-nlh-bounty-400k-18h.jpg",
-    "rating-compressed-preview/rating-11-09-2026-league1-magic-500-120k-22h.jpg"
+    "rating-compressed-preview/rating-11-09-2026-league1-magic-500-120k-22h.jpg",
+    "rating-compressed-preview/rating-11-09-2026-league1-shr-1-mln-gtd-18h.jpg"
   ]
 };

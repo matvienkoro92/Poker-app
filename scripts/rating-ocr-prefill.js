@@ -358,6 +358,8 @@ async function parseOcrFile(file) {
   // Magic's 500 is in its title; NLH Bounty's 1000 was confirmed by the club owner.
   if (date === "11.09.2026" && blue && time === "22:00" && /Magic.*500/i.test(title)) { title = "Magic 🎯500🎯120K"; buyin = 500; }
   if (date === "11.09.2026" && blue && time === "18:00" && /NLH Bounty 400K/i.test(title)) { title = "NLH Bounty 400K"; buyin = 1000; }
+  // IMG_9066: entry fee confirmed by the club owner; 20K is the starting stack.
+  if (date === "11.09.2026" && blue && time === "18:00" && /SHR 1 MLN GTD/i.test(title)) { title = "🏆SHR 1 MLN GTD🏆"; buyin = 10000; }
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";
   if (["01.09.2026", "08.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (["01.09.2026", "09.09.2026"].includes(date) && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
