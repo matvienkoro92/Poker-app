@@ -75,7 +75,8 @@ function startHistory(payload) {
       title.textContent=positionLabel(p.position);amount.textContent=signed(value(p))+' '+unit();amount.className=value(p)>0?'positive':value(p)<0?'negative':'';count.textContent=p.count+' раздач'+(p.count&&p.count<100?' · мало данных':'');b.append(title,amount,count);return b;
     }));
     const searching=!!($('hand-search').value.trim() || $('opponent-search').value.trim());
-    const selectedCell = searching ? {label:'Найденные раздачи',count:data.count,resultMinor:data.resultMinor,bb:data.bb,bb100:data.bb100,
+    const allHands = searching || !selected;
+    const selectedCell = allHands ? {label:searching?'Найденные раздачи':positionByMode[mode]?'Все руки · '+positionLabel(positionByMode[mode]):'Все руки',count:data.count,resultMinor:data.resultMinor,bb:data.bb,bb100:data.bb100,
       wins:data.cells.reduce((n,c)=>n+c.wins,0),losses:data.cells.reduce((n,c)=>n+c.losses,0),even:data.cells.reduce((n,c)=>n+c.even,0),
       hands:data.cells.flatMap(c=>c.hands).sort((a,b)=>b.playedAt.localeCompare(a.playedAt))} : data.cells.find(c=>c.label===selected);
     $('mode-note').hidden=mode!=='sng';
@@ -102,6 +103,8 @@ function startHistory(payload) {
       if(newRound)action.classList.add('replay-round-start');
     }
     if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+number(event.amount):'');more.append(line);}target.append(more);}
+    const shown=(replay.shownOpponents||[]).filter(p=>p.disclosure==='showdown-winner'&&p.playerId!==String(sample.playerId));
+    if(shown.length){add('h4','Вскрытие','street-heading street-river');for(const p of shown)appendCards(add('p',p.actor+' · ','replay-cards'),p.cards);}
     add('p','Ваш результат: '+signed(hand.resultMinor/100)+' '+(mode==='cash'?'ед':'фишек'),'replay-result');
   }
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
@@ -116,13 +119,14 @@ function startHistory(payload) {
     $('matrix').replaceChildren(...data.cells.map(c=>{
       const v=value(c),button=document.createElement('button');
       button.type='button';button.className='cell '+(!c.count?'empty':v>0?'profit':v<0?'loss':'');
+      if(c.count && Number.isFinite(c.bb) && Math.abs(c.bb)>30)button.classList.add('high-bb');
       button.dataset.hand=c.label;button.setAttribute('aria-pressed',String(c.label===selected));
       button.setAttribute('aria-label',c.label+': '+(c.count?signed(v)+' '+unit()+', раздач '+c.count:'нет данных'));
       const name=document.createElement('b'),amount=document.createElement('small');
       name.textContent=c.label;amount.textContent=compactSigned(v);button.title=c.label+': '+signed(v)+' '+unit();button.append(name,amount);return button;
     }));
     const cell=selectedCell;
-    $('detail').innerHTML='<h2 id="detail-title" class="hand-title">'+cell.label+'<span>'+(searching?'По текущим фильтрам':cell.label.length===2?'Карманная пара':cell.label.endsWith('s')?'Одномастная рука':'Разномастная рука')+'</span></h2>';
+    $('detail').innerHTML='<h2 id="detail-title" class="hand-title">'+cell.label+'<span>'+(allHands?'По текущим фильтрам':cell.label.length===2?'Карманная пара':cell.label.endsWith('s')?'Одномастная рука':'Разномастная рука')+'</span></h2>';
     if(!cell.count){
       $('detail').insertAdjacentHTML('beforeend','<div class="empty-state"><strong>Нет подтверждённых раздач</strong>'+(mode!=='sng'?'В загруженной выборке эта рука не встречалась.':'История этого формата пока не загружена.')+' Нет данных — не значит результат 0.</div>');return;
     }
@@ -164,6 +168,6 @@ function startHistory(payload) {
   $('position').addEventListener('change',e=>{positionByMode[mode]=e.target.value;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
   $('metric').addEventListener('change',e=>{metric=e.target.value;render();});
-  $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){selected=b.dataset.hand;render();$('matrix').querySelector('[data-hand="'+selected+'"]').focus({preventScroll:true});}});
+  $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});
   render();
 }

@@ -49,3 +49,9 @@
 .profit-panel{margin:20px 0;padding:16px;border:1px solid #273449;border-radius:14px;background:#0b1220}.profit-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin:12px 0}#profit-chart{width:100%;height:auto;display:block;min-height:180px}#profit-values{font-variant-numeric:tabular-nums;min-height:40px}.history-filters input[type=search]{width:100%;min-width:0;height:40px;background:#111827;border:1px solid #39445c;border-radius:8px;color:inherit;padding:8px;font:inherit}
 
 .position-card--all{grid-column:1 / -1;align-items:center;font-weight:700}
+
+/* Highlight large cumulative bb results without changing cell geometry. */
+.cell.high-bb.profit{background:#205b49;border-color:#6ee7b7;box-shadow:inset 0 0 0 1px #6ee7b7,inset 0 0 12px #6ee7b733}
+.cell.high-bb.loss{background:#633044;border-color:#fb8ca8;box-shadow:inset 0 0 0 1px #fb8ca8,inset 0 0 12px #fb8ca833}
+.cell.high-bb small{color:#fff;font-weight:700}
+.cell.high-bb[aria-pressed="true"]{outline:2px solid #ffae65;outline-offset:1px}

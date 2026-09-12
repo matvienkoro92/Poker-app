@@ -33,13 +33,38 @@ def positions(raw):
 
 def showdown_status(raw, player):
     active={str(c[0]) for c in raw['base_data']['card']};folded=set();board=[]
+    all_in=set();finished=set();runout=set()
     for _,a in sorted(raw['base_data']['opt'].items(),key=lambda kv:int(kv[0])):
         if str(a['type'])=='10':folded.add(str(a['userId']));active.discard(str(a['userId']))
         if str(a['type'])=='94' and isinstance(a.get('card'),list):board=a['card']
+        if str(a['type'])=='5':all_in.add(str(a['userId']))
+        if str(a['type'])=='96':finished.add(str(a['userId']))
+        if str(a['type'])=='95':runout.add(str(a['userId']))
     if player in folded:return False
     if player in active and len(active)==1:return False
     if player in active and len(active)>=2 and len(board)==5:return True
+    # Some completed all-in exports omit the ordinary board runout. Require
+    # terminal records for every remaining contender, not an all-in alone.
+    if (player in active and len(active)>=2 and active & all_in
+            and active <= finished and active <= runout
+            and int(raw.get('EndTime',0)) > int(raw.get('StartTime',0))):return True
     return None
+
+def visible_opponent_cards(raw, player):
+    """Conservative disclosure: winning non-folded opponents at hero's showdown.
+    Never expose the raw hole-card collection or infer disclosure from an all-in alone.
+    """
+    player=str(player)
+    if showdown_status(raw,player) is not True:return []
+    scores={str(raw.get('UserId'+str(i))):int(raw.get('Score'+str(i),0)) for i in range(1,11)}
+    result=[]
+    for entry in raw['base_data'].get('card',[]):
+        pid=str(entry[0])
+        if pid==player or scores.get(pid,0)<=0 or showdown_status(raw,pid) is not True:continue
+        pair=[card(c) for c in entry[2:]]
+        if len(pair)==2 and len(set(pair))==2:
+            result.append({'playerId':pid,'cards':pair,'disclosure':'showdown-winner'})
+    return result
 
 def project(raw, mode):
     if (str(raw.get('PlayMode')),str(raw.get('PlayType'))) != ('201','2002'):

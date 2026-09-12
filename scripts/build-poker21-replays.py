@@ -18,7 +18,8 @@ def build():
    kind=str(a['type']);pid=str(a.get('userId'));cards=a.get('card');board=[imp.card(c) for c in cards] if kind=='94' and isinstance(cards,list) else []
    if kind in ('97','96'):continue # service state updates, not player decisions
    events.append({'sequence':int(seq),'code':kind,'actor':players.get(pid,'Стол'),'actorId':pid,'amount':a.get('bet',0),'board':board})
-  result[hid]={'events':events,'stacks':[{'actor':name,'amount':int(base.get('userCoin',{}).get(pid,0))/100} for pid,name in players.items() if pid!='0'],'cards':allowed[hid]['cards']}
+  shown=[dict(item,actor=players.get(item['playerId'],'Игрок '+item['playerId'])) for item in imp.visible_opponent_cards(raw,allowed[hid]['playerId'])]
+  result[hid]={'shownOpponents':shown,'events':events,'stacks':[{'actor':name,'amount':int(base.get('userCoin',{}).get(pid,0))/100} for pid,name in players.items() if pid!='0'],'cards':allowed[hid]['cards']}
  (p/'bulk-sample.js').write_text('window.Poker21BulkSample = '+json.dumps(bulk,ensure_ascii=False)+';\n')
  db.close();assert len(result)==len(allowed)
  (p/'replays.js').write_text('window.Poker21Replays = '+json.dumps(result,ensure_ascii=False,separators=(',',':'))+';\n');print('Timelines:',len(result))
