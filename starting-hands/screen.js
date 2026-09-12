@@ -20,6 +20,7 @@ function startHistory(payload) {
   'use strict';
   const core = window.PokerHandStatistics;
   let mode = 'cash', metric = 'bb', selected = 'AJo';
+  let appliedFrom='',appliedTo='';
   const outcomeFilters={positive:true,negative:true};
   const $ = id => document.getElementById(id);
   const number = n => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n);
@@ -37,7 +38,7 @@ function startHistory(payload) {
   function unit() {return metric === 'resultMinor' ? (mode === 'cash' ? 'ед' : 'фишек') : metric === 'bb100' ? 'bb/100' : 'bb';}
   function value(c) {return metric === 'resultMinor' ? c.resultMinor == null ? null : c.resultMinor/100 : c[metric];}
   function render() {
-    const from=$('date-from').value,to=$('date-to').value;
+    const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     const selectedCell = data.cells.find(c=>c.label===selected);
@@ -71,6 +72,9 @@ function startHistory(payload) {
     $('metric').value=metric;
     $('metric').options[0].textContent=mode==='cash'?'Результат, ед':'Результат, фишки';
     $('total-count').textContent=number(data.count);
+    const sortedDates=bulk.rows.filter(r=>r.mode===mode).map(r=>r.playedAt).sort();
+    const labelDate=d=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow'}).format(new Date(d));
+    $('period-status').textContent=(data.count?'':(from||to?'За выбранные даты раздач нет. ':''))+(sortedDates.length?'Загружены раздачи: '+labelDate(sortedDates[0])+' — '+labelDate(sortedDates[sortedDates.length-1])+'.':'История этого формата пока не загружена.');
     $('matrix').replaceChildren(...data.cells.map(c=>{
       const v=value(c),button=document.createElement('button');
       button.type='button';button.className='cell '+(!c.count?'empty':v>0?'profit':v<0?'loss':'');
@@ -113,7 +117,9 @@ function startHistory(payload) {
     });$('detail').append(list);
   }
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;render();}));
-  ['date-from','date-to'].forEach(id=>$(id).addEventListener('change',()=>{const invalid=$('date-from').value&&$('date-to').value&&$('date-from').value>$('date-to').value;$('date-to').setCustomValidity(invalid?'Дата окончания должна быть не раньше начала':'');if(invalid){$('date-to').reportValidity();return;}render();}));
+  $('date-apply').addEventListener('click',()=>{const from=$('date-from').value,to=$('date-to').value;const invalid=from&&to&&from>to;$('date-to').setCustomValidity(invalid?'Дата окончания должна быть не раньше начала':'');if(invalid){$('date-to').reportValidity();return;}appliedFrom=from;appliedTo=to;render();});
+  ['date-from','date-to'].forEach(id=>$(id).addEventListener('input',()=>{$('date-to').setCustomValidity('');}));
+  $('date-reset').addEventListener('click',()=>{appliedFrom='';appliedTo='';$('date-from').value='';$('date-to').value='';$('date-to').setCustomValidity('');render();});
   $('metric').addEventListener('change',e=>{metric=e.target.value;render();});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){selected=b.dataset.hand;render();$('matrix').querySelector('[data-hand="'+selected+'"]').focus({preventScroll:true});}});
   render();
