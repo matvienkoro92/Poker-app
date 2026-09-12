@@ -47,3 +47,5 @@
 .position-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:12px 0 22px}.position-card{display:flex;flex-direction:column;gap:6px;padding:12px;background:#111b2c;color:#e5e7eb;border:1px solid #344158;border-radius:12px;cursor:pointer}.position-card[aria-pressed="true"]{border-color:#e9bd65;box-shadow:inset 0 0 0 1px #e9bd65}.position-card small{color:#aab6cb}.position-card:focus-visible{outline:2px solid #e9bd65;outline-offset:2px}
 
 .profit-panel{margin:20px 0;padding:16px;border:1px solid #273449;border-radius:14px;background:#0b1220}.profit-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin:12px 0}#profit-chart{width:100%;height:auto;display:block;min-height:180px}#profit-values{font-variant-numeric:tabular-nums;min-height:40px}.history-filters input[type=search]{width:100%;min-width:0;height:40px;background:#111827;border:1px solid #39445c;border-radius:8px;color:inherit;padding:8px;font:inherit}
+
+.position-card--all{grid-column:1 / -1;align-items:center;font-weight:700}

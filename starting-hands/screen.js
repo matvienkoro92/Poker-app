@@ -64,7 +64,12 @@ function startHistory(payload) {
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,position:positionByMode[mode],handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     renderProfitChart(data);
     $('position').value=positionByMode[mode];
-    $('position-results').replaceChildren(...data.positions.map(p=>{
+    const allPositions=document.createElement('button');
+    allPositions.type='button';allPositions.dataset.position='';
+    allPositions.className='position-card position-card--all';
+    allPositions.textContent='Все позиции';
+    allPositions.setAttribute('aria-pressed',String(!positionByMode[mode]));
+    $('position-results').replaceChildren(allPositions,...data.positions.map(p=>{
       const b=document.createElement('button');b.type='button';b.dataset.position=p.position;b.className='position-card';b.setAttribute('aria-pressed',String(positionByMode[mode]===p.position));
       const title=document.createElement('strong'),amount=document.createElement('span'),count=document.createElement('small');
       title.textContent=positionLabel(p.position);amount.textContent=signed(value(p))+' '+unit();amount.className=value(p)>0?'positive':value(p)<0?'negative':'';count.textContent=p.count+' раздач'+(p.count&&p.count<100?' · мало данных':'');b.append(title,amount,count);return b;
