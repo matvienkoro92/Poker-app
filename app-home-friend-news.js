@@ -2876,6 +2876,31 @@
     measure.appendChild(clone);
     document.body.appendChild(measure);
     try {
+      // Computed pixel widths from the live layout must not freeze text boxes
+      // when the export removes controls or changes font sizes.
+      var cardWidth = clone.getBoundingClientRect().width;
+      var copyLeft = parseFloat(signature.style.left) || 0;
+      copyArea.style.position = "absolute";
+      copyArea.style.left = copyLeft + "px";
+      copyArea.style.right = "16px";
+      copyArea.style.width = Math.max(1, cardWidth - copyLeft - 16) + "px";
+      copyArea.style.minWidth = "0";
+      copyArea.style.maxWidth = "none";
+      copyArea.style.boxSizing = "border-box";
+      copyArea.style.height = "auto";
+      copyArea.querySelectorAll("[data-home-news-read-id], .home-friend-news-modal__player-title, .home-friend-news-modal__player-name, .home-friend-news-modal__event-lines, .home-friend-news-modal__event-lines strong").forEach(function (node) {
+        node.style.width = "auto";
+        node.style.minWidth = "0";
+        node.style.maxWidth = "100%";
+        node.style.height = "auto";
+        node.style.whiteSpace = "normal";
+        node.style.overflow = "visible";
+        node.style.textOverflow = "clip";
+        node.style.overflowWrap = "anywhere";
+        node.style.flexShrink = "1";
+      });
+      var title = copyArea.querySelector(".home-friend-news-modal__player-title");
+      if (title) title.style.flexWrap = "wrap";
       var nodes = [copyArea].concat(Array.from(copyArea.querySelectorAll("*")));
       var sizes = nodes.map(function (node) {
         return { font: parseFloat(node.style.fontSize), line: parseFloat(node.style.lineHeight) };
@@ -2905,6 +2930,17 @@
         if (fits()) return;
       }
       apply(1);
+      // Long events need a taller image, not clipped text or an unreadable font.
+      var textBottom = copyArea.getBoundingClientRect().bottom;
+      var walker = document.createTreeWalker(copyArea, NodeFilter.SHOW_TEXT);
+      var textNode;
+      while ((textNode = walker.nextNode())) {
+        var textRange = document.createRange();
+        textRange.selectNodeContents(textNode);
+        Array.from(textRange.getClientRects()).forEach(function (r) { textBottom = Math.max(textBottom, r.bottom); });
+      }
+      clone.style.height = Math.ceil(Math.max(clone.getBoundingClientRect().height,
+        textBottom - clone.getBoundingClientRect().top + signature.getBoundingClientRect().height + 40)) + "px";
     } finally {
       clone.remove();
       measure.remove();
@@ -2978,6 +3014,7 @@
       signature.style.cssText = "position:absolute;left:" + copyLeft + "px;right:16px;bottom:20px;color:#cdbb94;font:500 " + Math.max(9, width * .014) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
       clone.appendChild(signature);
       fitClubNewsShareText(clone, copyArea, signature);
+      height = Math.ceil(parseFloat(clone.style.height)) || height;
       var fontCss = "";
       async function collectFonts(rules, base) {
         for (var rule of Array.from(rules || [])) {
