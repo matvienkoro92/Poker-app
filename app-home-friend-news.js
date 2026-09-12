@@ -2325,8 +2325,8 @@
       return '<button type="button" data-home-comment-emoji="' + esc(emoji) + '" aria-label="Вставить ' + esc(emoji) + '">' + esc(emoji) + "</button>";
     }).join("") + "</span>";
     return {
-      actions: '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
-        reactionButtons + '<button type="button" class="chat-user-modal__news-reaction" data-home-news-add-reaction aria-label="Поставить реакцию на новость">☺</button></span>' +
+      actions: '<span class="home-friend-news-modal__action-row">' +
+        (reactionButtons ? '<span class="chat-user-modal__news-actions">' + reactionButtons + '</span>' : '') +
         '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
@@ -2340,7 +2340,7 @@
             '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
             '</button>'
           : "") +
-        (newsModalMode === "club" && shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3.5 10 16-6.2c.6-.2 1.1.3.9.9l-4.5 15c-.2.7-1 .8-1.4.3l-4.1-5-6.8-3.5c-.7-.3-.7-1.2-.1-1.5Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m10.4 15 5.7-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>' : "") + "</span></span>",
+        (shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3.5 10 16-6.2c.6-.2 1.1.3.9.9l-4.5 15c-.2.7-1 .8-1.4.3l-4.1-5-6.8-3.5c-.7-.3-.7-1.2-.1-1.5Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m10.4 15 5.7-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>' : "") + "</span></span>",
       comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -2478,7 +2478,7 @@
       : "";
     var feedbackParts = ticker ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var feedbackId = ticker ? "" : feedbackEventId(row);
-    var shareToken = ticker || newsModalMode !== "club" ? "" : clubNewsEventShareToken(feedbackId);
+    var shareToken = ticker ? "" : clubNewsEventShareToken(feedbackId);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
@@ -2952,7 +2952,7 @@
       var originalCopy = card.querySelector(".home-friend-news-modal__copy");
       var copyLeft = originalCopy ? originalCopy.getBoundingClientRect().left - rect.left : width * .34;
       var eventId = card.getAttribute("data-home-news-event-id");
-      var shareRow = clubEvents.concat(clubWallEvents || []).find(function (row) { return feedbackEventId(row) === eventId; });
+      var shareRow = activeModalEvents().find(function (row) { return feedbackEventId(row) === eventId; });
       var date = shareRow && shareRow.at ? new Date(shareRow.at) : null;
       var dateLabel = "";
       if (date && Number.isFinite(date.getTime())) {
