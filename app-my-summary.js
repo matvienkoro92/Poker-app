@@ -232,10 +232,10 @@
   function openStartingHands() {
     if(document.getElementById('startingHandsDialog'))return;
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
-    modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100%;max-height:100%;margin:0;padding:0;border:0;background:#050816;color:#e5e7eb;';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html" style="display:block;width:100%;height:calc(100% - 48px);border:0"></iframe>';
+    modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=closeStartingHands;
-    modal.addEventListener('close',()=>modal.remove());document.body.append(modal);modal.showModal();
+    modal.addEventListener('close',()=>modal.remove());document.body.append(modal);modal.showModal();modal.style.display="grid";
   }
   window.addEventListener('message',async function(event){
     var frame=document.querySelector('#startingHandsDialog iframe');
