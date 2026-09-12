@@ -3013,18 +3013,23 @@
       var copyArea = clone.querySelector(".home-friend-news-modal__copy");
       var originalCopy = card.querySelector(".home-friend-news-modal__copy");
       var copyLeft = originalCopy ? originalCopy.getBoundingClientRect().left - rect.left : width * .34;
-      if (newsModalMode === "friends") {
-        var avatarSize = Math.round(Math.max(64, Math.min(100, width * .18)));
-        var avatarIcon = clone.querySelector(".home-friend-news-modal__icon");
-        if (avatarIcon) {
-          avatarIcon.style.cssText = "border-radius:50%;overflow:hidden;display:block;position:absolute;left:16px;top:20px;margin:0;width:" + avatarSize + "px;height:" + avatarSize + "px;min-width:" + avatarSize + "px;max-width:none";
-          var avatarImage = avatarIcon.querySelector("img");
-          if (avatarImage) avatarImage.style.cssText += ";width:100%;height:100%;max-width:none;max-height:none;object-fit:cover";
-          copyLeft = 16 + avatarSize + 16;
-        }
-      }
       var eventId = card.getAttribute("data-home-news-event-id");
       var shareRow = activeModalEvents().find(function (row) { return feedbackEventId(row) === eventId; });
+      if (newsModalMode === "friends") {
+        var avatarIcon = clone.querySelector(".home-friend-news-modal__icon");
+        if (avatarIcon) {
+          avatarIcon.style.cssText = "display:block;position:absolute;left:8px;top:16px;bottom:64px;margin:0;width:31%;height:auto;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none";
+          var avatarImage = avatarIcon.querySelector("img");
+          if (avatarImage) {
+            var shareArt = shareRow && clubNewsCardArt(shareRow.actorNick, 0);
+            if (shareArt) {
+              try { avatarImage.src = await dataUrl(new URL(shareArt, document.baseURI).href); } catch (_) {}
+            }
+            avatarImage.style.cssText = "display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;object-position:center center;border:0;border-radius:0;background:none;filter:drop-shadow(0 7px 6px rgba(0,0,0,.45))";
+          }
+          copyLeft = Math.round(width * .34);
+        }
+      }
       var date = shareRow && shareRow.at ? new Date(shareRow.at) : null;
       var dateLabel = "";
       if (date && Number.isFinite(date.getTime())) {
