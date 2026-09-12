@@ -2879,7 +2879,10 @@
       // Computed pixel widths from the live layout must not freeze text boxes
       // when the export removes controls or changes font sizes.
       var cardWidth = clone.getBoundingClientRect().width;
-      var copyLeft = parseFloat(signature.style.left) || 0;
+      var copyLeft = parseFloat(copyArea.dataset.shareLeft || signature.style.left) || 0;
+      var copyFont = copyArea.style.font;
+      var copyColor = copyArea.style.color;
+      copyArea.style.cssText = "position:absolute;display:block;font:" + copyFont + ";color:" + copyColor;
       copyArea.style.position = "absolute";
       copyArea.style.left = copyLeft + "px";
       copyArea.style.right = "16px";
@@ -2888,6 +2891,10 @@
       copyArea.style.maxWidth = "none";
       copyArea.style.boxSizing = "border-box";
       copyArea.style.height = "auto";
+      copyArea.style.top = "20px";
+      copyArea.style.margin = "0";
+      copyArea.style.padding = "0";
+      copyArea.style.textAlign = "left";
       copyArea.querySelectorAll("[data-home-news-read-id], .home-friend-news-modal__player-title, .home-friend-news-modal__player-name, .home-friend-news-modal__event-lines, .home-friend-news-modal__event-lines strong").forEach(function (node) {
         node.style.width = "auto";
         node.style.minWidth = "0";
@@ -2899,11 +2906,27 @@
         node.style.overflowWrap = "anywhere";
         node.style.flexShrink = "1";
       });
+      var lines = copyArea.querySelector(".home-friend-news-modal__event-lines");
+      if (lines) {
+        lines.style.display = "flex";
+        lines.style.flexDirection = "column";
+        lines.style.gap = "8px";
+        lines.style.margin = "12px 0 0";
+        lines.style.padding = "0";
+        Array.from(lines.children).forEach(function (line) {
+          line.style.display = "block";
+          line.style.margin = "0";
+          line.style.padding = "0";
+          line.style.textIndent = "0";
+          line.style.lineHeight = "1.35";
+          line.querySelectorAll("*").forEach(function (part) { part.style.lineHeight = "inherit"; });
+        });
+      }
       var title = copyArea.querySelector(".home-friend-news-modal__player-title");
       if (title) title.style.flexWrap = "wrap";
       var nodes = [copyArea].concat(Array.from(copyArea.querySelectorAll("*")));
       var sizes = nodes.map(function (node) {
-        return { font: parseFloat(node.style.fontSize), line: parseFloat(node.style.lineHeight) };
+        return { font: parseFloat(node.style.fontSize), line: /px$/.test(node.style.lineHeight) ? parseFloat(node.style.lineHeight) : 0 };
       });
       function apply(scale) {
         nodes.forEach(function (node, i) {
@@ -2969,6 +2992,9 @@
       await Promise.all(originals.map(async function (original, i) {
         var copy = copies[i], style = getComputedStyle(original);
         for (var j = 0; j < style.length; j++) copy.style.setProperty(style[j], style.getPropertyValue(style[j]));
+        Array.from(copy.style).forEach(function (property) {
+          if (/^(inset|margin|padding)-(inline|block)/.test(property)) copy.style.removeProperty(property);
+        });
         copy.style.animation = "none"; copy.style.transition = "none";
         if (original.tagName === "IMG") {
           copy.src = await dataUrl(original.currentSrc || original.src);
@@ -2987,6 +3013,16 @@
       var copyArea = clone.querySelector(".home-friend-news-modal__copy");
       var originalCopy = card.querySelector(".home-friend-news-modal__copy");
       var copyLeft = originalCopy ? originalCopy.getBoundingClientRect().left - rect.left : width * .34;
+      if (newsModalMode === "friends") {
+        var avatarSize = Math.round(Math.max(64, Math.min(100, width * .18)));
+        var avatarIcon = clone.querySelector(".home-friend-news-modal__icon");
+        if (avatarIcon) {
+          avatarIcon.style.cssText = "border-radius:50%;overflow:hidden;display:block;position:absolute;left:16px;top:20px;margin:0;width:" + avatarSize + "px;height:" + avatarSize + "px;min-width:" + avatarSize + "px;max-width:none";
+          var avatarImage = avatarIcon.querySelector("img");
+          if (avatarImage) avatarImage.style.cssText += ";width:100%;height:100%;max-width:none;max-height:none;object-fit:cover";
+          copyLeft = 16 + avatarSize + 16;
+        }
+      }
       var eventId = card.getAttribute("data-home-news-event-id");
       var shareRow = activeModalEvents().find(function (row) { return feedbackEventId(row) === eventId; });
       var date = shareRow && shareRow.at ? new Date(shareRow.at) : null;
@@ -2999,6 +3035,7 @@
       var hero = clone.querySelector(".home-friend-news-modal__day-hero");
       clone.querySelectorAll(".home-friend-news-modal__action-row, .home-friend-news-modal__player-meta, .chat-user-modal__news-comments, [data-news-admin-telegram]").forEach(function (node) { node.remove(); });
       if (copyArea) {
+        copyArea.dataset.shareLeft = String(copyLeft);
         Array.from(copyArea.children).forEach(function (node) { if (node.tagName === "SMALL") node.remove(); });
         copyArea.style.height = "auto";
       }
@@ -3011,7 +3048,7 @@
       }
       var signature = document.createElement("span");
       signature.textContent = "♠ Poker21   •   Клуб Два туза" + (dateLabel ? "   •   " + dateLabel : "");
-      signature.style.cssText = "position:absolute;left:" + copyLeft + "px;right:16px;bottom:20px;color:#cdbb94;font:500 " + Math.max(9, width * .014) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
+      signature.style.cssText = "position:absolute;left:20px;right:20px;bottom:20px;text-align:center;white-space:normal;color:#cdbb94;font:600 " + Math.max(12, width * .018) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
       clone.appendChild(signature);
       fitClubNewsShareText(clone, copyArea, signature);
       height = Math.ceil(parseFloat(clone.style.height)) || height;
