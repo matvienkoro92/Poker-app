@@ -212,3 +212,11 @@ if (fs.existsSync(assetDir)) {
 }
 
 console.log('Build output is in public/');
+
+// Every published build gets an identity, even when the display version is unchanged.
+const releaseId = require('crypto').randomBytes(16).toString('hex');
+const releaseHtml = path.join(publicDir, 'index.html');
+fs.writeFileSync(releaseHtml, fs.readFileSync(releaseHtml, 'utf8').replace('<html ', '<html data-release-id="' + releaseId + '" '));
+fs.writeFileSync(path.join(publicDir, 'app-release.json'), JSON.stringify({ releaseId }));
+const releaseWorker = path.join(publicDir, 'sw.js');
+fs.appendFileSync(releaseWorker, '\n// Release: ' + releaseId + '\n');
