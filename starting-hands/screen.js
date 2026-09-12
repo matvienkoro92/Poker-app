@@ -39,7 +39,8 @@ function startHistory(payload) {
   function render() {
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,cashUnit:'TABLE_CHIP'});
     const selectedCell = data.cells.find(c=>c.label===selected);
-    $('mode-note').textContent=mode==='cash'?'Кеш NLH · результат в единицах стола и bb. Валюта не подтверждена; результат не обозначается рублями.':
+    $('mode-note').hidden=mode==='cash';
+    $('mode-note').textContent=mode==='cash'?'':
       (mode==='mtt'?'MTT NLH · турнирные фишки и большие блайнды. Призовые сюда не входят.':'SNG · история пока не загружена.');
     async function renderReplay(target,hand){
     let replay;try {target.textContent='Загружаем действия…';replay=await historyRequest('replay',hand.handId);target.textContent='';} catch (_) {target.textContent='Не удалось загрузить действия. Закройте и откройте раздачу, чтобы повторить.';delete target.parentElement.dataset.ready;return;}
