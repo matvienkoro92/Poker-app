@@ -2311,7 +2311,7 @@
         (comment.pending ? '<small class="home-news-comment-pending-label">Отправка…</small>' : "") +
         '</p><span class="chat-user-modal__comment-reactions">' + commentReactionHtml +
           (comment.pending ? "" :
-          '<button type="button" class="home-news-comment-reply-btn" data-home-news-add-reaction data-comment-id="' + esc(comment.id || "") + '" aria-label="Поставить реакцию на комментарий">☺ Реакция</button>' +
+          '<button type="button" class="home-news-comment-reply-btn" data-home-news-add-reaction data-comment-id="' + esc(comment.id || "") + '" aria-label="Поставить реакцию на комментарий">☺</button>' +
           '<button type="button" class="home-news-comment-reply-btn" data-home-comment-reply="' + esc(comment.id || "") +
           '" aria-label="Ответить на комментарий">↩ Ответить</button>') +
         "</span></div>";
@@ -2326,7 +2326,7 @@
     }).join("") + "</span>";
     return {
       actions: '<span class="home-friend-news-modal__action-row"><span class="chat-user-modal__news-actions">' +
-        reactionButtons + '<button type="button" class="chat-user-modal__news-reaction" data-home-news-add-reaction aria-label="Поставить реакцию на новость">☺ Реакция</button></span>' +
+        reactionButtons + '<button type="button" class="chat-user-modal__news-reaction" data-home-news-add-reaction aria-label="Поставить реакцию на новость">☺</button></span>' +
         '<span class="home-friend-news-modal__action-controls">' +
         '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +

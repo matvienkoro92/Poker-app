@@ -137,7 +137,7 @@ async function notifyLatestDayHero() {
   try {
     const { notifyNewDayHero } = require("../lib/day-hero-notifications");
     const result = await notifyNewDayHero(Object.assign({ date: latest }, latestHero));
-    console.log("Day hero push:", result && result.duplicate ? "already sent" : (result && result.ok ? "sent" : "skipped"), result && result.recipients != null ? result.recipients : "");
+    console.log("Day hero push:", { status: result.status || result.skipped || (result.duplicate ? "duplicate" : "unknown"), acceptedAccounts: Array.isArray(result.acceptedAccounts) ? result.acceptedAccounts.length : 0, acceptedDevices: result.acceptedDevices || 0, failedAccounts: Array.isArray(result.failedAccounts) ? result.failedAccounts.length : 0 });
   } catch (error) {
     console.error("Day hero push failed:", error && error.message ? error.message : error);
   }
