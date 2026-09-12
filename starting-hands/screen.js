@@ -42,9 +42,9 @@ function startHistory(payload) {
     if(from&&to&&from>to)return;
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     const selectedCell = data.cells.find(c=>c.label===selected);
-    $('mode-note').hidden=mode==='cash';
+    $('mode-note').hidden=mode!=='sng';
     $('mode-note').textContent=mode==='cash'?'':
-      (mode==='mtt'?'MTT NLH · турнирные фишки и большие блайнды. Призовые сюда не входят.':'SNG · история пока не загружена.');
+      (mode==='mtt'?'':'SNG · история пока не загружена.');
     async function renderReplay(target,hand){
     let replay;try {target.textContent='Загружаем действия…';replay=await historyRequest('replay',hand.handId);target.textContent='';} catch (_) {target.textContent='Не удалось загрузить действия. Закройте и откройте раздачу, чтобы повторить.';delete target.parentElement.dataset.ready;return;}
     const add=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;target.append(el);return el;};
@@ -74,7 +74,9 @@ function startHistory(payload) {
     $('total-count').textContent=number(data.count);
     const sortedDates=bulk.rows.filter(r=>r.mode===mode).map(r=>r.playedAt).sort();
     const labelDate=d=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow'}).format(new Date(d));
-    $('period-status').textContent=(data.count?'':(from||to?'За выбранные даты раздач нет. ':''))+(sortedDates.length?'Загружены раздачи: '+labelDate(sortedDates[0])+' — '+labelDate(sortedDates[sortedDates.length-1])+'.':'История этого формата пока не загружена.');
+    const first=from?labelDate(from+'T00:00:00+03:00'):sortedDates.length?labelDate(sortedDates[0]):'';
+    const last=to?labelDate(to+'T00:00:00+03:00'):sortedDates.length?labelDate(sortedDates[sortedDates.length-1]):'';
+    $('period-range').textContent=first&&last?' за период '+first+' — '+last:'';
     $('matrix').replaceChildren(...data.cells.map(c=>{
       const v=value(c),button=document.createElement('button');
       button.type='button';button.className='cell '+(!c.count?'empty':v>0?'profit':v<0?'loss':'');
