@@ -117,9 +117,9 @@ function startHistory(payload) {
     });$('detail').append(list);
   }
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;render();}));
-  $('date-apply').addEventListener('click',()=>{const from=$('date-from').value,to=$('date-to').value;const invalid=from&&to&&from>to;$('date-to').setCustomValidity(invalid?'Дата окончания должна быть не раньше начала':'');if(invalid){$('date-to').reportValidity();return;}appliedFrom=from;appliedTo=to;render();});
-  ['date-from','date-to'].forEach(id=>$(id).addEventListener('input',()=>{$('date-to').setCustomValidity('');}));
-  $('date-reset').addEventListener('click',()=>{appliedFrom='';appliedTo='';$('date-from').value='';$('date-to').value='';$('date-to').setCustomValidity('');render();});
+  $('date-apply').addEventListener('click',()=>{const from=$('date-from').value,to=$('date-to').value;const invalid=from&&to&&from>to;$('date-to').setCustomValidity(invalid?'Дата окончания должна быть не раньше начала':'');if(invalid){$('date-to').reportValidity();return;}appliedFrom=from;appliedTo=to;render();$('date-status').textContent='✓ Применено';});
+  ['date-from','date-to'].forEach(id=>$(id).addEventListener('input',()=>{$('date-to').setCustomValidity('');$('date-status').textContent=$('date-from').value===appliedFrom&&$('date-to').value===appliedTo?'✓ Применено':'Изменения не применены';}));
+  $('date-reset').addEventListener('click',()=>{appliedFrom='';appliedTo='';$('date-from').value='';$('date-to').value='';$('date-to').setCustomValidity('');render();$('date-status').textContent='Период сброшен';});
   $('metric').addEventListener('change',e=>{metric=e.target.value;render();});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){selected=b.dataset.hand;render();$('matrix').querySelector('[data-hand="'+selected+'"]').focus({preventScroll:true});}});
   render();
