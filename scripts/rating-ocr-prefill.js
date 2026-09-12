@@ -354,6 +354,10 @@ async function parseOcrFile(file) {
   if (date === "23.08.2026" && time === "16:00" && buyin === 10000) title = "MINI FENIX🐦‍🔥60K";
   if (date === "30.08.2026" && time === "18:00" && buyin === 20000) title = "🥊GRAND KNOCKOUT🥊";
   if (date === "30.08.2026" && time === "21:59" && buyin === 10000) title = "Magic 🎯500🎯120K";
+  // September 11: blue cards show starting stacks, not entry fees.
+  // Magic's 500 is in its title; NLH Bounty's 1000 was confirmed by the club owner.
+  if (date === "11.09.2026" && blue && time === "22:00" && /Magic.*500/i.test(title)) { title = "Magic 🎯500🎯120K"; buyin = 500; }
+  if (date === "11.09.2026" && blue && time === "18:00" && /NLH Bounty 400K/i.test(title)) { title = "NLH Bounty 400K"; buyin = 1000; }
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";
   if (["01.09.2026", "08.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (["01.09.2026", "09.09.2026"].includes(date) && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
@@ -362,7 +366,7 @@ async function parseOcrFile(file) {
   if (date === "02.09.2026" && time === "13:00" && buyin === 10000) title = "DV 🏃 Bounty 🥊 100K";
   if (date === "02.09.2026" && time === "14:00" && buyin === 200) title = "Bounty 200🥊 40K GTD";
   const ids = tokens
-    .filter((token) => /(?:^|[^a-z])(?:ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
+    .filter((token) => /(?:^|[^a-z])(?:S?ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
 
   const rows = await Promise.all(ids.map(async (idToken, index) => {
