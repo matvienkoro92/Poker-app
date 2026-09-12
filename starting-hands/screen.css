@@ -39,3 +39,7 @@
 .date-range input{box-sizing:border-box;width:100%;min-width:0;height:40px;min-height:40px;padding:4px 2px;font-size:10px;letter-spacing:-.3px}
 .date-range input::-webkit-calendar-picker-indicator{margin:0;padding:0;width:12px}
 .date-actions{justify-content:flex-end}
+
+.history-filters select,.date-range input{box-sizing:border-box;block-size:40px;min-block-size:40px;max-block-size:40px;margin:0;line-height:normal;align-self:start;-webkit-appearance:none;appearance:none}
+.date-range input::-webkit-date-and-time-value{min-height:0;text-align:left}
+.date-filter:has(#date-status:empty){row-gap:6px}#date-status:empty{display:none}
