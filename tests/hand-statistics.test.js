@@ -63,3 +63,31 @@ test('cash table units must be explicit and never silently become rubles',()=>{
   assert.equal(r.count,1);assert.equal(r.unit,'TABLE_CHIP');
   assert.throws(()=>aggregate([row],{...options,cashUnit:'USD'}));
 });
+
+test('position filter preserves mode isolation and unfiltered positional totals',()=>{
+ const core=require('../starting-hands/core');
+ const row={source:'test',sessionId:'s',handId:'1',playerId:'p',mode:'cash',game:'NLH',playedAt:'2026-09-01T00:00:00Z',status:'completed',verified:true,unit:'TABLE_CHIP',scale:100,netDefinition:'game-net-v1',cards:['As','Kh'],resultMinor:400,bigBlindMinor:200,position:'BTN'};
+ const rows=[row,{...row,handId:'2',position:'BB',resultMinor:-200},{...row,handId:'3',position:undefined},{...row,handId:'4',mode:'mtt',unit:'CHIP',resultMinor:9000}];
+ const x=core.aggregate(rows,{playerId:'p',mode:'cash',cashUnit:'TABLE_CHIP',position:'BTN'});
+ assert.equal(x.count,1);assert.equal(x.bb,2);assert.equal(x.positions.find(p=>p.position==='BB').bb,-1);assert.equal(x.positions.find(p=>p.position==='UNKNOWN').count,1);
+ assert.equal(core.aggregate([row,{...row,position:'BB'}],{playerId:'p',mode:'cash',cashUnit:'TABLE_CHIP',position:'BTN'}).count,0);
+});
+
+test('live search matches partial IDs, opponent fragments, case and transliteration',()=>{
+ const {matchesSearch}=require('../starting-hands/core');
+ const row={handId:'1789152082927',opponents:[{playerId:'776157',name:'PlayerMayer'},{playerId:'975934',name:'Собака Павлова'}]};
+ for(const handQuery of ['1','178','178915','5208'])assert.equal(matchesSearch(row,{handQuery}),true);
+ assert.equal(matchesSearch(row,{handQuery:'999'}),false);
+ for(const opponentQuery of ['mAyEr','@player','собака','sobaka','Павлова','776'])assert.equal(matchesSearch(row,{opponentQuery}),true);
+ assert.equal(matchesSearch(row,{opponentQuery:'Perepil'}),false);
+ assert.equal(matchesSearch(row,{opponentQuery:'Mayer',handQuery:'999'}),false);
+});
+
+test('profit graph is chronological and red plus blue equals green including losses',()=>{
+ const {profitSeries}=require('../starting-hands/core');
+ const rows=[{handId:'2',playedAt:'2026-09-02',resultMinor:-300,bb:-1.5,showdown:true},{handId:'1',playedAt:'2026-09-01',resultMinor:100,bb:1,showdown:false},{handId:'3',playedAt:'2026-09-03',resultMinor:-100,bb:-.5,showdown:false}];
+ const x=profitSeries(rows,'bb');assert.equal(x.unknown,0);assert.equal(x.points[1].handId,'1');for(const p of x.points)assert.equal(p.total,p.showdown+p.nonShowdown);assert.equal(x.points.at(-1).total,-1);
+ assert.equal(profitSeries(rows,'resultMinor').points.at(-1).total,-3);
+ assert.equal(profitSeries([{...rows[0],showdown:null}],'bb').unknown,1);
+ assert.equal(profitSeries([],'bb').points.length,1);
+});

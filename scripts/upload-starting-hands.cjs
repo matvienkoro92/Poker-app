@@ -8,6 +8,11 @@ async function run(){
  for(const file of ['bulk-sample.js','replays.js'])vm.runInContext(fs.readFileSync('output/hand-statistics-preview/'+file,'utf8'),ctx);
  const data=ctx.window.Poker21BulkSample,replays=ctx.window.Poker21Replays;
  if(!data.rows.length||data.rows.some(r=>String(r.playerId)!==String(data.playerId)||!replays[r.handId]))throw Error('Invalid owner or missing replay');
+ for(const row of data.rows){
+  const opponents=new Map();
+  for(const e of replays[row.handId].events || []) if(/^\d+$/.test(e.actorId)&&e.actorId!=='0'&&e.actorId!==String(row.playerId)) opponents.set(e.actorId,{playerId:e.actorId,name:e.actor});
+  row.opponents=Array.isArray(row.opponents)?row.opponents:[...opponents.values()];
+ }
  const pack=x=>gzipSync(JSON.stringify(x)).toString('base64');
  const version=crypto.createHash('sha256').update(JSON.stringify([data,replays])).digest('hex').slice(0,16);
  const prefix='poker_app:starting-hands:'+data.playerId,key=prefix+':'+version;
