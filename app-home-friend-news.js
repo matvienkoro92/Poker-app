@@ -2974,8 +2974,28 @@
     var card = button.closest("[data-home-news-share-token]");
     if (!card) return;
     button.disabled = true;
+    var shareStage = null;
+    var sourceEventId = card.getAttribute("data-home-news-event-id");
+    var sourceRow = activeModalEvents().find(function (row) { return feedbackEventId(row) === sourceEventId; });
     try {
       await document.fonts.ready;
+      if (newsModalMode === "friends" && sourceRow) {
+        // Render through the club card template and CSS so both exports share
+        // typography, title/prize placement and responsive sizing.
+        shareStage = document.createElement("div");
+        shareStage.className = "home-friend-news-modal home-friend-news-modal--club";
+        shareStage.style.cssText = "position:fixed;left:-20000px;top:0;display:block;visibility:hidden;pointer-events:none;width:" + Math.ceil(card.getBoundingClientRect().width) + "px";
+        shareStage.setAttribute("inert", "");
+        var previousMode = newsModalMode;
+        var clubMarkup;
+        try {
+          newsModalMode = "club";
+          clubMarkup = eventHtml(sourceRow, false, false, false, 0);
+        } finally { newsModalMode = previousMode; }
+        shareStage.innerHTML = '<div class="home-friend-news-modal__day-events">' + clubMarkup + '</div>';
+        document.body.appendChild(shareStage);
+        card = shareStage.querySelector("[data-home-news-event-id]");
+      }
       var rect = card.getBoundingClientRect();
       var width = Math.ceil(rect.width), height = Math.ceil(rect.height);
       var clone = card.cloneNode(true);
@@ -3010,11 +3030,13 @@
       clone.querySelectorAll("[data-news-admin-telegram]").forEach(function (node) { node.textContent = ""; });
       clone.style.margin = "0"; clone.style.width = width + "px"; clone.style.height = height + "px";
       clone.style.transform = "none"; clone.style.position = "relative";
+      clone.style.visibility = "visible";
+      clone.querySelectorAll("*").forEach(function (node) { node.style.visibility = "visible"; });
       var copyArea = clone.querySelector(".home-friend-news-modal__copy");
       var originalCopy = card.querySelector(".home-friend-news-modal__copy");
       var copyLeft = originalCopy ? originalCopy.getBoundingClientRect().left - rect.left : width * .34;
-      var eventId = card.getAttribute("data-home-news-event-id");
-      var shareRow = activeModalEvents().find(function (row) { return feedbackEventId(row) === eventId; });
+      var eventId = sourceEventId;
+      var shareRow = sourceRow;
       if (newsModalMode === "friends") {
         var avatarIcon = clone.querySelector(".home-friend-news-modal__icon");
         if (avatarIcon) {
@@ -3143,7 +3165,7 @@
       };
       document.body.appendChild(dialog); dialog.showModal();
     } catch (error) { window.alert("Не удалось подготовить картинку. Попробуйте ещё раз."); }
-    finally { button.disabled = false; }
+    finally { if (shareStage) shareStage.remove(); button.disabled = false; }
   }
 
   function copyClubNewsEventLink(button) {
