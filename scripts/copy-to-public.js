@@ -76,7 +76,7 @@ const localModuleFiles = fs
   .filter((name) => /^app.*\.mjs$/.test(name))
   .sort();
 const toCopy = [...new Set(baseFiles.concat(cssPartFiles, localModuleFiles, localScriptFilesFromIndex(), scriptFilesFromJsManifest()))];
-const dirsToCopy = ['html-fragments', 'downloads'];
+const dirsToCopy = ['html-fragments', 'downloads', 'starting-hands'];
 const assetDir = path.join(root, 'assets');
 const blockedAssetExtensions = new Set(['.mov']);
 const blockedAssetNames = new Set(['README.md']);

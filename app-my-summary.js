@@ -212,15 +212,8 @@
       if (!valid()) return;
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname ? nickname : "Всё главное для вас";
-      // The imported personal history is served only by the local preview server.
-      // Do not expose its URL in the published app or use nickname as identity.
-      if (["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname) &&
-          d.linked && String(d.pokerPlusUserId || p.pokerPlusUserId || "") === "208238") {
-        root.insertAdjacentHTML("afterbegin", section("starting-hands", "Стартовые руки",
-          '<p class="summary-muted">Результат в bb · Кеш и турниры · История каждой раздачи</p>' +
-          '<a class="summary-link" href="http://127.0.0.1:4318/" target="_blank" rel="noopener">Открыть стартовые руки <span aria-hidden="true">→</span></a>'));
-      }
-
+      root.insertAdjacentHTML("afterbegin", section("starting-hands", "Стартовые руки",
+        '<p class="summary-muted">Результат в bb · Кеш и турниры · История каждой раздачи</p><button type="button" class="summary-link" data-starting-hands-open>Открыть стартовые руки →</button>'));
       if(['ID400800','ID403173','ID495718'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.prepend(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
@@ -233,8 +226,31 @@
     Promise.allSettled([schedule,daily,profile,raffles,reviews]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
   }
   function requestRaffles() { return request("raffles").then(function (d) {return d;}); }
+  function closeStartingHands() {
+    var modal=document.getElementById('startingHandsDialog');if(modal){modal.close();modal.remove();}
+  }
+  function openStartingHands() {
+    if(document.getElementById('startingHandsDialog'))return;
+    var modal=document.createElement('dialog');modal.id='startingHandsDialog';
+    modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100%;max-height:100%;margin:0;padding:0;border:0;background:#050816;color:#e5e7eb;';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html" style="display:block;width:100%;height:calc(100% - 48px);border:0"></iframe>';
+    modal.querySelector('button').onclick=closeStartingHands;
+    modal.addEventListener('close',()=>modal.remove());document.body.append(modal);modal.showModal();
+  }
+  window.addEventListener('message',async function(event){
+    var frame=document.querySelector('#startingHandsDialog iframe');
+    if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin||event.data?.type!=='starting-hands-request')return;
+    var message=event.data,seq=generation;
+    if(!['list','replay'].includes(message.action))return;
+    try {var data=await request('starting-hands',{action:message.action,handId:message.handId});
+      if(seq!==generation||!frame.isConnected)return;
+      frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='list'?data:data.replay},window.location.origin);
+    }catch(_){if(seq===generation&&frame.isConnected)frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'load failed'},window.location.origin);}
+  });
+  window.addEventListener('poker-telegram-auth',closeStartingHands);
   window.initMySummary = init;
   document.addEventListener("click", function (e) {
+    if(e.target.closest("[data-starting-hands-open]"))openStartingHands();
     var tab = e.target.closest("[data-summary-schedule-tab]");
     if (tab) { scheduleTab = tab.dataset.summaryScheduleTab === "freerolls" ? "freerolls" : "tournaments"; renderSchedule(); document.getElementById("summary-tab-" + scheduleTab).focus(); }
     var target=e.target.closest('[data-view="my-summary"] [data-view-target]');
