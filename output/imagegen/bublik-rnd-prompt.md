@@ -1,0 +1,8 @@
+Generated using the built-in image_gen tool.
+
+Use case: stylized-concept. Create a premium personal monkey mascot for poker club player BuBlik-RnD (nickname means bagel). Single full-body anthropomorphic cheeky brown monkey, expressive confident friendly grin, detailed stylized 3D game character illustration matching polished poker monkey mascots. Character wears a stylish dark chocolate and warm golden casual jacket, small poker suit accents, sneakers. Holding a large beautifully baked golden sesame bagel like a prized poker trophy, clearly visible hole; curled monkey tail echoes a bagel ring. Playful charismatic personality, one coherent character, readable silhouette and appealing face, richly rendered fur and baked bread texture, warm studio highlights. Entire character including feet and tail fully in frame, centered portrait composition with small margins. Genuinely transparent alpha background, clean cutout edges, NO scene, NO floor, NO background shadow, NO checkerboard painted into image, NO text, NO watermark. Bagel must be a savory golden bread ring, not a pink frosted donut.
+
+Status: draft only. Background extraction attempts returned RGB PNGs with a painted checkerboard, not true alpha. Not integrated into the app.
+
+Selected branded draft: bublik-rnd-branded-v1.png (2,503,153 bytes; 1024×1536; RGB, no alpha).
+Edit prompt: Preserve the full-body monkey, sesame bagel, pose and dark brown/gold clothing. Add clearly readable embroidered jacket patches with exact text "Poker21" and "Two aces". Request genuine transparent alpha background. Built-in image_gen was used; output still has a painted checkerboard and is not ready for app integration.
