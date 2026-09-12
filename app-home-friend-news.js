@@ -2975,6 +2975,7 @@
     if (!card) return;
     button.disabled = true;
     var shareStage = null;
+    var visibleCard = card;
     var sourceEventId = card.getAttribute("data-home-news-event-id");
     var sourceRow = activeModalEvents().find(function (row) { return feedbackEventId(row) === sourceEventId; });
     try {
@@ -2997,7 +2998,8 @@
         card = shareStage.querySelector("[data-home-news-event-id]");
       }
       var rect = card.getBoundingClientRect();
-      var width = Math.ceil(rect.width), height = Math.ceil(rect.height);
+      var width = Math.ceil(rect.width) || Math.ceil(visibleCard.getBoundingClientRect().width);
+      var height = Math.ceil(rect.height) || Math.ceil(visibleCard.getBoundingClientRect().height);
       var clone = card.cloneNode(true);
       async function dataUrl(url) {
         var response = await fetch(url);
@@ -3017,13 +3019,24 @@
         });
         copy.style.animation = "none"; copy.style.transition = "none";
         if (original.tagName === "IMG") {
-          copy.src = await dataUrl(original.currentSrc || original.src);
+          var imageSources = [original.currentSrc, original.src, original.getAttribute("data-news-image-fallback")];
+          var visibleImage = visibleCard.querySelector(".home-friend-news-modal__icon img");
+          if (original.closest(".home-friend-news-modal__icon") && visibleImage) imageSources.push(visibleImage.currentSrc || visibleImage.src);
+          var embeddedImage = "";
+          for (var imageSource of Array.from(new Set(imageSources.filter(Boolean)))) {
+            try { embeddedImage = await dataUrl(new URL(imageSource, document.baseURI).href); break; } catch (_) {}
+          }
+          if (!embeddedImage) throw new Error("news_share_image_unavailable");
+          copy.src = embeddedImage;
           copy.removeAttribute("srcset"); copy.removeAttribute("loading");
         }
         var background = style.backgroundImage;
         if (background && background.indexOf("url(") >= 0) {
           var matches = Array.from(background.matchAll(/url\(["']?([^"')]+)["']?\)/g));
-          for (var match of matches) background = background.replace(match[0], 'url("' + await dataUrl(new URL(match[1], location.href)) + '")');
+          for (var match of matches) {
+            try { background = background.replace(match[0], 'url("' + await dataUrl(new URL(match[1], location.href)) + '")'); }
+            catch (_) { background = background.replace(match[0], "linear-gradient(transparent,transparent)"); }
+          }
           copy.style.backgroundImage = background;
         }
       }));
@@ -3164,7 +3177,7 @@
         } catch (error) { if (error.name !== "AbortError") dialog.querySelector("p").textContent = "Не удалось отправить. Можно скачать картинку."; }
       };
       document.body.appendChild(dialog); dialog.showModal();
-    } catch (error) { window.alert("Не удалось подготовить картинку. Попробуйте ещё раз."); }
+    } catch (error) { console.error("[news-share]", error); window.alert("Не удалось подготовить картинку. Попробуйте ещё раз."); }
     finally { if (shareStage) shareStage.remove(); button.disabled = false; }
   }
 
