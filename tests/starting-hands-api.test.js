@@ -5,6 +5,7 @@ async function call(body,linked='208238',authorized=true){
  const module={exports:{}};
  vm.runInNewContext(fs.readFileSync('lib/api-handlers/starting-hands.js','utf8'),{module,Buffer,require(name){
  if(name==='node:zlib')return zlib;
+ if(name==='../../starting-hands/insights')return require('../starting-hands/insights');
  if(name==='../pokerplus')return {readBoundPokerPlusUserId:async()=>linked};
  if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[]})).toString('base64'));}};
  throw Error(name);
@@ -14,3 +15,11 @@ test('rejects unauthenticated reads without storage access',async()=>{const {res
 test('ignores requested player ID and scopes list and replay to binding',async()=>{for(const action of ['list','replay']){const {res,commands}=await call({action,playerId:'208238',handId:'123'},'999');assert.equal(res.statusCode,200);assert.ok(commands.every(c=>c[1].startsWith('poker_app:starting-hands:999:')));}});
 test('unbound account does not read imported history',async()=>{const {res,commands}=await call({},'');assert.equal(res.data.rows.length,0);assert.equal(commands.length,0);});
 test('invalid hand identifiers are rejected',async()=>{const {res}=await call({action:'replay',handId:'../list'});assert.equal(res.statusCode,400);});
+
+test('insights batch is bounded and uses only bound owner keys',async()=>{
+ for(const handIds of [[],['../list'],Array(101).fill('1')])assert.equal((await call({action:'insights',handIds})).res.statusCode,400);
+ const {res,commands}=await call({action:'insights',handIds:['123','456'],playerId:'208238'},'999');
+ assert.equal(res.statusCode,200);assert.deepEqual(Object.keys(res.data.signals),['123','456']);
+ assert.ok(commands.every(c=>c[1].startsWith('poker_app:starting-hands:999:')));
+ assert.ok(!JSON.stringify(res.data).includes('events'));
+});

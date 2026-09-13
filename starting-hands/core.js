@@ -174,7 +174,7 @@
       g[row.resultMinor > 0 ? 'wins' : row.resultMinor < 0 ? 'losses' : 'even']++;
       // Only the allowed personal projection is exposed to the UI.
       g.hands.push({handId: row.handId, sessionId: row.sessionId, playedAt: row.playedAt,
-        position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
+        bigBlindMinor: row.bigBlindMinor, position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
     });
     if (conflicts.size) excluded.conflict = conflicts.size;
     const cells = matrix().flat().map(label => {

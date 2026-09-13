@@ -252,10 +252,10 @@
     var frame=document.querySelector('#startingHandsDialog iframe');
     if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin||event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
-    if(!['list','replay'].includes(message.action))return;
-    try {var data=await request('starting-hands',{action:message.action,handId:message.handId});
+    if(!['list','replay','insights'].includes(message.action))return;
+    try {var data=await request('starting-hands',{action:message.action,handId:message.handId,handIds:message.handIds});
       if(seq!==generation||!frame.isConnected)return;
-      frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='list'?data:data.replay},window.location.origin);
+      frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='replay'?data.replay:data},window.location.origin);
     }catch(_){if(seq===generation&&frame.isConnected)frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'load failed'},window.location.origin);}
   });
   window.addEventListener('poker-telegram-auth',closeStartingHands);
