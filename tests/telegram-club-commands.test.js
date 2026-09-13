@@ -22,6 +22,7 @@ test('menu callback is answered and edits message without sending another',async
  global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
  await c.handle({callback_query:{id:'a',data:'club:menu',message:{chat:{id:1},message_id:4}}},'test');
  assert.ok(calls[0].url.endsWith('/answerCallbackQuery'));assert.ok(calls[1].url.endsWith('/editMessageText'));assert.equal(calls[1].p.message_id,4);
+ assert.deepEqual(calls[1].p.reply_markup.inline_keyboard.at(-1),[{text:'⬅️ Назад',callback_data:'club:pulse'}]);
 });
 
 test('pulse opens commands and correct download and club links',async t=>{
