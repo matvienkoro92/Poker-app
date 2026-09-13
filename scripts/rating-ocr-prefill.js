@@ -332,6 +332,7 @@ async function parseOcrFile(file) {
   );
   let buyin = feeToken ? buyinFromText(feeToken.text) : 0;
   buyin = effectiveTournamentBuyin(title, buyin);
+  if (date === "12.09.2026" && time === "18:00" && buyin === 1000 && /^Super Sat/i.test(title)) title = "Super Sat 5🎫";
   if (title === "TODO" && time === "21:00" && buyin === 200) title = "OK🎰";
   if (title === "TODO") {
     const poker21TitleByTimeAndBuyin = {
@@ -390,6 +391,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // Verified against IMG_9101: Vision omitted the displayed zero rank.
+    if (playerId === "2354339" && date === "12.09.2026" && time === "08:00" && reward === 11.62) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
     // Verified against IMG_8974: Vision omitted the displayed zero rank.
     if (playerId === "3332806" && date === "09.09.2026" && time === "21:00" && reward === 30.5) {
       place = 0;

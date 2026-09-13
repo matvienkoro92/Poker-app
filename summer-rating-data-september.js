@@ -1399,4 +1399,211 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "12.09.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 1,
+          "reward": 32081,
+          "points": 0
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 7,
+          "reward": 2364,
+          "points": 0
+        },
+        {
+          "nick": "Вадим",
+          "place": 12,
+          "reward": 412,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 1,
+          "reward": 5054,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Bali Yana🌴🆕20k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 20145,
+          "points": 0
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 4,
+          "reward": 6814,
+          "points": 0
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 0,
+          "reward": 1162,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "xx🎰xx",
+          "place": 2,
+          "reward": 14097,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 10,
+          "reward": 1041,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 2,
+          "reward": 11810,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 3,
+          "reward": 1152.5,
+          "points": 0
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 4,
+          "reward": 220,
+          "points": 0
+        },
+        {
+          "nick": "Lucky",
+          "place": 6,
+          "reward": 50,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Super Sat 5🎫",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "time2bass",
+          "place": 3,
+          "reward": 9000,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 7000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "Потяни 21",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Player03.)",
+          "place": 2,
+          "reward": 5000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 4989,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Nikolay54rus",
+          "place": 1,
+          "reward": 6276.89,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 6,
+          "reward": 615,
+          "points": 0
+        },
+        {
+          "nick": "DemonDen",
+          "place": 12,
+          "reward": 25,
+          "points": 0
+        },
+        {
+          "nick": "GazMays",
+          "place": 8,
+          "reward": 12.5,
+          "points": 0
+        },
+        {
+          "nick": "GhooSt",
+          "place": 11,
+          "reward": 1.87,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
