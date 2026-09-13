@@ -625,6 +625,8 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "🦈shark-eyed🦈": "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1",
+    "shark-eyed": "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1",
     "jeweler": "./assets/club-news-personal/jeweler-personal-v1.webp?v=1",
     "киса": "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1",
     "залупа": "./assets/club-news-personal/zalupa-personal-light-v1.webp?v=1",
