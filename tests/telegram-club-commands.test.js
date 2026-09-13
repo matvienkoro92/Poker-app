@@ -24,10 +24,13 @@ test('menu callback is answered and edits message without sending another',async
  assert.ok(calls[0].url.endsWith('/answerCallbackQuery'));assert.ok(calls[1].url.endsWith('/editMessageText'));assert.equal(calls[1].p.message_id,4);
 });
 
-test('pulse opens exactly schedule and tables buttons',async t=>{
+test('pulse opens commands and correct download and club links',async t=>{
  for(const text of ['пульс','/пульс','/pulse','/pulse@DvaTuzaBot'])assert.equal(c.command({message:{text}}),'pulse');
  const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
- assert.deepEqual(calls[0].reply_markup.inline_keyboard.flat().map(b=>b.callback_data),['club:schedule:0','club:menu']);
+ const buttons=calls[0].reply_markup.inline_keyboard.flat();
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:schedule:0','club:menu']);
+ assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
+ assert.equal(buttons.length,4);
 });
