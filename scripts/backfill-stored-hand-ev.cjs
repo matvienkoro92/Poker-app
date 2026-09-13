@@ -24,6 +24,7 @@ async function run(){
   if(JSON.stringify(row.cards)!==JSON.stringify(local.cards))throw Error('Cards mismatch');
   if(!local.ev||!['calculated','unresolved','not_applicable'].includes(local.ev.status))throw Error('Invalid EV status');
   if(local.ev.status==='calculated' && (local.ev.method!==source.method||!Number.isFinite(local.ev.resultMinor)||!Number.isSafeInteger(local.ev.runouts)||local.ev.runouts<1))throw Error('Invalid EV result');
+  if(local.ev.grossEv && (local.ev.grossEv.status!=='calculated'||!Number.isFinite(local.ev.grossEv.resultMinor)||!Number.isFinite(local.ev.grossEv.actualResultMinor)))throw Error('Invalid gross EV');
   if(local.ev.showdownEquity?.status==='calculated' && (!Number.isFinite(local.ev.showdownEquity.share)||local.ev.showdownEquity.share<0||local.ev.showdownEquity.share>1||!Number.isSafeInteger(local.ev.showdownEquity.runouts)))throw Error('Invalid showdown equity');
   if(JSON.stringify(row[field])!==JSON.stringify(local[field])){row[field]=local[field];changed++;}
   const label=row.mode+':'+String(row[field].status);counts[label]=(counts[label]||0)+1;

@@ -136,7 +136,14 @@ def inspect(raw,hero,binary,calculate=True):
   _,actual=equity(binary,holes,[card(c) for c in board],[mask for _,mask in pots])
   if house and len(pots)>1:
    net_pots=infer_net_pots(pots,actual,players,scores,bets)
-   if net_pots is None:return skip('side_pot_deduction')
+   if net_pots is None:
+    if not calculate:return skip('side_pot_deduction')
+    hero_index=players.index(hero)
+    eligible=[j for j,(_,mask) in enumerate(pots) if mask&(1<<hero_index)]
+    runs,shares=equity(binary,holes,[card(c) for c in last_board],[pots[j][1] for j in eligible])
+    gross=sum(pots[j][0]*shares[k][hero_index] for k,j in enumerate(eligible))-bets[hero]
+    actual_gross=sum(pots[j][0]*actual[j][hero_index] for j in eligible)-bets[hero]
+    return skip('side_pot_deduction')|{'grossEv':{'status':'calculated','resultMinor':round(gross,6),'actualResultMinor':round(actual_gross,6),'contributionMinor':bets[hero],'eligiblePotMinor':sum(pots[j][0] for j in eligible),'runouts':runs,'pots':[{'amountMinor':pots[j][0],'share':shares[k][hero_index]} for k,j in enumerate(eligible)],'method':'exact-eligible-pots-before-deduction-v1'}}
    validation='uniquely_reconstructed_net_pots'
   else:net_pots=[pot-house if len(pots)==1 else pot for pot,_ in pots]
   payouts={p:sum(net_pots[j]*actual[j][i] for j in range(len(pots))) for i,p in enumerate(players)}

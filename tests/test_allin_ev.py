@@ -61,6 +61,12 @@ class Equity(unittest.TestCase):
  def test_opponent_allin_matched_by_hero_call(self):
   r=self.raw();r['base_data']['opt']={'0':{'type':'94','userId':'-1','bet':0,'card':['102','203','304']},'1':{'type':'5','userId':'2','bet':100,'card':''},'2':{'type':'2','userId':'1','bet':100,'card':''}}
   result=ev.matched_showdown_equity(r,'1',self.binary);self.assertEqual(result['status'],'calculated');self.assertEqual(result['boardCards'],3);self.assertEqual(result['runouts'],990)
+ def test_gross_ev_excludes_pots_above_hero_contribution(self):
+  r=self.raw();r.update({'UserId3':'3','Score1':-10000,'Score2':25000,'Score3':-20000,'bet_list':'1:10000,2:20000,3:20000,'})
+  r['base_data']['card'].append(['3','0','112','212'])
+  r['base_data']['opt']={'0':{'type':'94','userId':'-1','bet':0,'card':['313','102','203']},'1':{'type':'5','userId':'1','bet':100,'card':''},'2':{'type':'5','userId':'2','bet':200,'card':''},'3':{'type':'2','userId':'3','bet':200,'card':''},'4':{'type':'94','userId':'-1','bet':0,'card':['313','102','203','409','111']}}
+  result=ev.inspect(r,'1',self.binary);self.assertEqual(result['reason'],'side_pot_deduction');gross=result['grossEv']
+  self.assertEqual(gross['eligiblePotMinor'],30000);self.assertEqual(gross['contributionMinor'],10000);self.assertEqual(len(gross['pots']),1);self.assertEqual(gross['actualResultMinor'],-10000)
  def test_unmatched_excess_is_returned(self):
   r=self.raw();r['base_data']['opt']['0']['bet']=200
   self.assertTrue(ev.inspect(r,'1',self.binary,False)['actionsReconcile'])

@@ -27,3 +27,7 @@ Only the owner's EV scalar, status, reason, runout count and method metadata are
 ## Retrospective showdown equity
 
 For later-street-betting exclusions, exact retrospective equity is calculated at the matched effective all-in, whether the owner or opponent declared it. An opponent all-in is matched when the owner's recorded contributions cover it or the owner also goes all-in; an owner's all-in is matched when a final contender covers it. The known board at that point is used against final nonfolded contenders. This includes ties and conditions on later opponents' decisions, so it is shown beside the actual result but does not alter the pot-weighted EV line.
+
+## Gross EV for underdetermined deductions
+
+A hand whose net pot deductions cannot be uniquely reconstructed still gets a separate `grossEv`. It sums exact equity times each gross pot only when the owner's contribution makes the owner eligible for that pot, then subtracts the owner's final contribution. It also records the board-evaluated actual result before deductions. Pots above the owner's contribution are excluded. This explicitly labeled before-deduction metric is not mixed into the net yellow EV line.
