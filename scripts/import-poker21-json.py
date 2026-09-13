@@ -15,7 +15,8 @@ def integer(v):
     return int(n)
 def positions(raw):
     """Clockwise occupied seats, anchored by unique adjacent live SB/BB posts.
-    Ambiguous/dead/multiple blind posts stay unknown rather than guessed.
+    Extra BB posts do not change the live BB immediately clockwise from SB.
+    Without an SB record, use a unique BB as the seat-order anchor.
     """
     base=raw.get('base_data',{}); seats=[str(u) for u in base.get('UserIds',[]) if str(u)!='0']
     unknown={u:'UNKNOWN' for u in seats}
@@ -23,9 +24,16 @@ def positions(raw):
     dealt={str(c[0]) for c in base.get('card',[])}
     if set(seats)!=dealt: return unknown
     posts={t:[str(a.get('userId','')) for a in base.get('opt',{}).values() if str(a.get('type'))==t] for t in ('18','19')}
-    if any(len(posts[t])!=1 for t in posts): return unknown
-    sb,bb=posts['18'][0],posts['19'][0]
-    if sb not in seats or bb not in seats or seats[(seats.index(sb)+1)%len(seats)]!=bb:return unknown
+    if not posts['18']:
+        if len(posts['19'])!=1 or posts['19'][0] not in seats:return unknown
+        bb=posts['19'][0]
+        sb=seats[(seats.index(bb)-1)%len(seats)]
+    else:
+        if len(posts['18'])!=1:return unknown
+        sb=posts['18'][0]
+        if sb not in seats:return unknown
+        bb=seats[(seats.index(sb)+1)%len(seats)]
+        if posts['19'].count(bb)!=1:return unknown
     if len(seats)==2:return {sb:'BTN/SB',bb:'BB'}
     start=(seats.index(bb)+1)%len(seats);ordered=seats[start:]+seats[:start]
     early={3:[],4:['CO'],5:['HJ','CO'],6:['UTG','HJ','CO'],7:['UTG','LJ','HJ','CO'],8:['UTG','UTG+1','LJ','HJ','CO'],9:['UTG','UTG+1','UTG+2','LJ','HJ','CO'],10:['UTG','UTG+1','UTG+2','UTG+3','LJ','HJ','CO']}

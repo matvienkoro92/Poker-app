@@ -43,7 +43,6 @@ function startHistory(payload) {
   function renderProfitChart(data) {
     const graphUnit=metric==='resultMinor'?'resultMinor':'bb',label=graphUnit==='bb'?'bb':mode==='cash'?'ед':'фишек';
     const series=core.profitSeries(data.cells.flatMap(c=>c.hands),graphUnit),svg=$('profit-chart');svg.replaceChildren();
-    $('profit-note').textContent=(mode==='cash'?'Фактический результат игры':'Результат в турнирных фишках / bb, не денежная прибыль')+' · '+label+' · по текущим фильтрам'+(series.unknown?' · Для '+series.unknown+' раздач вскрытие не определено: их результат включён только в зелёную линию.':'');
     const lines=[['nonShowdown','#fb7185'],['showdown','#60a5fa'],['total','#4ade80']];
     const vals=series.points.flatMap(p=>lines.map(([key])=>p[key]));let low=Math.min(0,...vals),high=Math.max(0,...vals);if(low===high){low-=1;high+=1;}const pad=(high-low)*.08;low-=pad;high+=pad;
     const x=i=>65+i/Math.max(1,data.count)*815,y=v=>275-(v-low)/(high-low)*250;
