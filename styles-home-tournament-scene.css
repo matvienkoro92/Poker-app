@@ -519,3 +519,13 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
 }
+
+/* This scene already contains its own rail; the old patch cuts across the glove. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-table-seam-fix {
+  display: none !important;
+}
+/* Keep the ticket lettering behind this character's hat and head silhouette. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]::after {
+  mask-image: url('./assets/home-tournament-fishkopcheny-head-mask.svg');
+  -webkit-mask-image: url('./assets/home-tournament-fishkopcheny-head-mask.svg');
+}
