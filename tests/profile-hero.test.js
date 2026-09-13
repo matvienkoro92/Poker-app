@@ -6,7 +6,7 @@ const req=(action,extra={})=>({action,requestId:'test-request-00000001',...extra
 const item=(id,slot='body',set='club',rarity=0)=>({id,slot,set,rarity,level:71});
 const claim=(s,modelId=s.pendingChoice.options[0])=>H.mutate(s,71,req('choose-reward',{choiceId:s.pendingChoice.id,modelId}));
 test('only configured pilot accounts are allowed; request cannot unlock another account',async()=>{
- assert.equal(H.heroEnabled('ID400800'),true);assert.equal(H.heroEnabled('ID403173'),true);for(const id of ['ID1','ПокерМанки','',undefined]){assert.equal(await H.readHero(id),null);await assert.rejects(H.updateHero(id,req('craft',{accountId:'ID400800',modelId:'club-head'})),e=>e.status===403);}
+ assert.equal(H.heroEnabled('ID400800'),true);assert.equal(H.heroEnabled('ID403173'),false);assert.equal(H.heroEnabled('ID495718'),false);for(const id of ['ID1','ПокерМанки','',undefined]){assert.equal(await H.readHero(id),null);await assert.rejects(H.updateHero(id,req('craft',{accountId:'ID400800',modelId:'club-head'})),e=>e.status===403);}
 });
 test('v1 and v2 inventories migrate through layers without losing skills, looks, earned levels or dust',()=>{
  const old={version:7,highestLevel:71,skills:{strike:12},equipped:{body:'old'},inventory:[item('old','body','ember',4)],claimedLevel:50,dust:19};
