@@ -18,6 +18,21 @@ def equity(binary,holes,board,masks):
  values=[len(holes),len(board),len(masks)]+[c for h in holes for c in h]+board+masks
  result=subprocess.run([binary],input=' '.join(map(str,values)),text=True,capture_output=True,check=True).stdout.splitlines()
  return int(result[0]),[list(map(float,r.split())) for r in result[1:]]
+def hero_showdown_equity(raw,hero,binary):
+ """Retrospective equity vs final contenders at hero's explicit all-in.
+ This is not a pot-weighted EV and does not model later opponents' decisions.
+ """
+ base=raw['base_data'];board=[];at_allin=None;active={str(c[0]) for c in base['card']}
+ for _,e in sorted(base['opt'].items(),key=lambda p:int(p[0])):
+  if str(e['type'])=='94' and isinstance(e.get('card'),list):board=list(e['card'])
+  if str(e['type'])=='5' and str(e.get('userId'))==hero and at_allin is None:at_allin=list(board)
+  if str(e['type'])=='10':active.discard(str(e.get('userId')))
+ if at_allin is None:return {'status':'no_hero_allin'}
+ if hero not in active or len(active)<2:return {'status':'no_contested_showdown'}
+ players=sorted(active);holes=[[card(c) for c in row[2:]] for p in players for row in base['card'] if str(row[0])==p]
+ if len(holes)!=len(players) or any(len(h)!=2 for h in holes):return {'status':'missing_cards'}
+ runs,shares=equity(binary,holes,[card(c) for c in at_allin],[(1<<len(players))-1])
+ return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(at_allin),'opponents':len(players)-1,'runouts':runs,'method':'hero-allin-vs-final-contenders-v1'}
 def inspect(raw,hero,binary,calculate=True):
  base=raw['base_data'];events=[e for _,e in sorted(base['opt'].items(),key=lambda p:int(p[0]))]
  active={str(c[0]) for c in base['card']};board=[];allins=[];last_board=[];money=collections.Counter();ante=0;special=False
@@ -39,7 +54,7 @@ def inspect(raw,hero,binary,calculate=True):
  def skip(reason):return {'status':'unresolved','reason':reason}
  if special:return skip('special_runout')
  if len(board)!=5:return skip('missing_final_board')
- if last_board!=relevant[0]:return skip('betting_after_allin_street')
+ if last_board!=relevant[0]:return skip('betting_after_allin_street')|{'showdownEquity':hero_showdown_equity(raw,hero,binary) if calculate else {'status':'not_calculated'}}
  bets=mapping(raw['bet_list']);scores={str(raw['UserId'+str(i)]):int(raw['Score'+str(i)]) for i in range(1,11) if str(raw.get('UserId'+str(i),'0'))!='0'}
  if set(bets)-set(scores):return skip('contribution_players')
  for p in set(scores)-set(bets):

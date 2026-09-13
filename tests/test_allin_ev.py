@@ -41,6 +41,11 @@ class Equity(unittest.TestCase):
   r=self.raw();self.assertEqual(ev.inspect(r,'1',self.binary,False)['status'],'eligible')
   r['Score1']=11000;self.assertEqual(ev.inspect(r,'1',self.binary,False)['status'],'unresolved')
   r=self.raw();r['base_data']['opt']['2']['card']=[];self.assertEqual(ev.inspect(r,'1',self.binary,False)['reason'],'missing_final_board')
+ def test_hero_equity_uses_hero_allin_street_not_other_allin(self):
+  r=self.raw();r['base_data']['opt']['0']['userId']='2';r['base_data']['opt']['1']['userId']='1'
+  self.assertEqual(ev.hero_showdown_equity(r,'1',self.binary)['status'],'no_hero_allin')
+  r['base_data']['opt']['3']={'type':'5','userId':'1','bet':1,'card':''}
+  result=ev.hero_showdown_equity(r,'1',self.binary);self.assertEqual(result['boardCards'],5);self.assertEqual(result['share'],1);self.assertEqual(result['runouts'],1)
  def test_unmatched_excess_is_returned(self):
   r=self.raw();r['base_data']['opt']['0']['bet']=200
   self.assertTrue(ev.inspect(r,'1',self.binary,False)['actionsReconcile'])

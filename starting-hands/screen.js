@@ -156,6 +156,11 @@ function startHistory(payload) {
     appendCards(add('p','Ваши карты: ','replay-cards'),replay.cards);
     if(hand.ev?.status==='calculated')add('p','All-in EV: '+signed(hand.ev.resultMinor/hand.bigBlindMinor)+' bb · фактически: '+signed(hand.bb)+' bb. Перебрано исходов: '+number(hand.ev.runouts)+'.','note');
     else if(hand.ev?.status==='unresolved')add('p','All-in EV не рассчитан: '+({betting_after_allin_street:'торговля продолжалась на следующих улицах',missing_final_board:'нет полного борда',side_pot_deduction:'неясно распределение удержаний по побочным банкам',payout_does_not_reconcile:'выплаты не сходятся с картами и банками',special_runout:'особый порядок раздачи борда'}[hand.ev.reason]||'недостаточно подтверждённых данных')+'.','note');
+    if(hand.ev?.showdownEquity?.status==='calculated'){
+      const eq=hand.ev.showdownEquity;
+      add('p','Equity на момент твоего олл-ина: '+number(eq.share*100)+'% · '+({0:'префлоп',3:'флоп',4:'тёрн',5:'ривер'}[eq.boardCards]||'')+' · соперников на итоговом вскрытии: '+eq.opponents+'.','note');
+      add('p','Доля банка против карт итоговых участников вскрытия, с учётом делёжек. Более поздние решения соперников уже известны; это отдельный ретроспективный показатель.','note');
+    }else if(hand.ev?.showdownEquity?.status==='no_hero_allin')add('p','В этой раздаче олл-ин был у соперника; твоего олл-ина в истории нет.','note');
     add('h4','Префлоп','street-heading street-preflop');
     let roundActors=new Set();
     const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};

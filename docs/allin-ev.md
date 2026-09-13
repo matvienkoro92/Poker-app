@@ -23,3 +23,7 @@ Only the owner's EV scalar, status, reason, runout count and method metadata are
 ## Current audited projection
 
 2,664 hands; 75 pre-river contested all-in candidates. 52 calculated (8 cash, 44 MTT), 23 unresolved (16 cash, 7 MTT): 12 with later-street betting, 7 missing final boards, 2 with ambiguous side-pot deductions, and 2 with final payout discrepancies. Other 2,589 hands retain their observed results without adjustment.
+
+## Retrospective showdown equity
+
+For the 12 later-street-betting exclusions, a separate audit looks for the owner's explicit all-in (`type=5`). Nine have no owner all-in; three do. The three receive exact equity against final nonfolded showdown contenders using the board at the owner's first all-in (one preflop and two river). This stores an equity share including ties, not a pot-weighted expected result. Future opponent decisions are conditioned upon; this scalar does not alter the EV line or resolve the EV exclusion.
