@@ -76,12 +76,16 @@ function startHistory(payload) {
     add(root,'h2','Разбор игры');
     add(root,'p','По текущим фильтрам · результаты и сортировка в bb','note');
     if(!hands.length){add(root,'p','Нет раздач по выбранным фильтрам.','note');return;}
-    function handList(parent,rows){
+    function handList(parent,rows,showEv=false){
       if(!rows.length){add(parent,'p','Подходящих раздач нет.','note');return;}
       let shown=0;const more=add(parent,'button','Показать ещё','insight-button');more.type='button';
       function next(){for(const h of rows.slice(shown,shown+30)){
         const d=document.createElement('details');d.className='insight-hand';parent.insertBefore(d,more);
         const summary=add(d,'summary',null);add(summary,'strong',signed(h.bb)+' bb');summary.append(' · ');appendCards(summary,h.cards);
+        if(showEv){
+          const delta=window.PokerHandInsights.evDifference(h);
+          add(d,'p','Факт: '+signed(h.bb)+' bb · EV: '+signed(h.ev.resultMinor/h.bigBlindMinor)+' bb · '+(delta<0?'Недобор: ':'Перебор: ')+number(Math.abs(delta))+' bb',delta<0?'negative':'positive');
+        }
         add(summary,'span',' · '+new Date(h.playedAt).toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})+' МСК');
         d.addEventListener('toggle',()=>{if(!d.open||d.dataset.ready)return;d.dataset.ready='1';renderReplay(add(d,'div',null,'replay-body'),h);});
       }shown+=30;more.hidden=shown>=rows.length;}
@@ -109,10 +113,10 @@ function startHistory(payload) {
     const tops=add(root,'div',null,'insight-grid');
     for(const [title,rows] of [['Крупнейшие выигрыши',stats.wins],['Крупнейшие проигрыши',stats.losses]]){const box=add(tops,'div',null,'insight-card');add(box,'h3',title);handList(box,rows);}
     const collections=add(root,'details',null,'insight-section');add(collections,'summary','Подборки для разбора');
-    for(const [key,title] of [['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb']]){
-      const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length);handList(d,rows);
+    for(const [key,title] of [['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 30 bb'],['evAbove','🟢 Перебор EV · от 30 bb']]){
+      const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length,key==='evBelow'?'negative':key==='evAbove'?'positive':undefined);handList(d,rows,key==='evBelow'||key==='evAbove');
     }
-    add(collections,'p','Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
+    add(collections,'p','Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
     for(const [title,groups,key] of [['По сессиям',stats.sessions,'sessionId'],['По лимитам',stats.limits,'bigBlindMinor']]){
       const section=add(root,'details',null,'insight-section');add(section,'summary',title+' · '+groups.length);
       if(key==='bigBlindMinor'&&mode!=='cash')add(section,'p','В турнирах это уровни большого блайнда, а не бай-ины.','note');

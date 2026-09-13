@@ -20,6 +20,10 @@ function actions(replay,playerId){
  }
  return {sawFlop,riverCall,threeBet:ambiguous&&!threeBet?null:threeBet,foldToRaise};
 }
+function evDifference(h){
+ if(h.ev?.status!=='calculated'||!Number.isFinite(h.ev.resultMinor)||!Number.isFinite(h.resultMinor)||!Number.isFinite(h.bigBlindMinor)||h.bigBlindMinor<=0)return null;
+ return (h.resultMinor-h.ev.resultMinor)/h.bigBlindMinor;
+}
 function summarize(hands,signals={}){
  const ordered=hands.slice().sort((a,b)=>a.playedAt.localeCompare(b.playedAt)||a.handId.localeCompare(b.handId));
  const sessions=new Map(),limits=new Map();let total=0,peak=0,peakIndex=0,max=0,troughIndex=0,startIndex=0;
@@ -41,7 +45,9 @@ function summarize(hands,signals={}){
  return {sessions:groups(sessions),limits:groups(limits),drawdown:{amount:max,startIndex,troughIndex,recovery,remaining:max?Math.max(0,cumulative[startIndex]-total):0},
  wins:hands.filter(h=>h.bb>0).sort((a,b)=>b.bb-a.bb).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>a.bb-b.bb).slice(0,5),
  showdown:{loaded:known.length,total:hands.length,sawFlop:flop.length,eligible:eligible.length,count:showdowns.length,profitable:showdowns.filter(h=>h.resultMinor>0).length},
- collections:{riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30)}};
+ collections:{riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30),
+ evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-30).sort((a,b)=>evDifference(a)-evDifference(b)),
+ evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=30).sort((a,b)=>evDifference(b)-evDifference(a))}};
 }
-return {actions,summarize};
+return {actions,summarize,evDifference};
 });
