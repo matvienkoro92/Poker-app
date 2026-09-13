@@ -514,7 +514,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art { background-image: none !important; }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] {
-  --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v1.webp');
+  --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v2.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
