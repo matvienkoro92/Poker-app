@@ -190,7 +190,7 @@
     var city = String(entry.profileCity || "").trim();
     var poker21Id = data && data.isAdmin ? String(entry.poker21Id || "").trim() : "";
     var joined = betTime(entry.joinedAt);
-    var status = entry.winner ? "Победитель · забрал банк" : entry.mine ? "Ваша ставка принята" : "Ставка принята";
+    var status = data.status === "cancelled" ? "Ставка возвращена" : data.status === "cancelling" ? "Возврат ставок" : entry.winner ? "Победитель · забрал банк" : entry.mine ? "Ваша ставка принята" : "Ставка принята";
     return '<article class="sng-champions-modal__entry tournament-bet-modal__entry' + (entry.mine ? ' tournament-bet-modal__entry--mine' : '') + (entry.winner ? ' tournament-bet-modal__entry--winner' : '') + '">' +
       '<span class="tournament-bet-modal__place">' + (index + 1) + '</span>' +
       '<span class="sng-champions-modal__entry-avatar tournament-bet-modal__avatar">' + avatar + (level ? '<em>' + esc(level) + '</em>' : '') + '</span>' +
@@ -264,15 +264,17 @@
     var winnerArtSrc = winnerArt && winnerArt.src || "";
     if (!winnerArtSrc && winner && /^(frankl|andrushamorf|4ezzi)$/i.test(String(winner.name || "").trim())) winnerArtSrc = "./assets/summer-rating-player-morf-light-v1.webp";
     var settled = data.status === "settled";
+    var cancelled = data.status === "cancelled";
+    var cancelling = data.status === "cancelling";
     var expanded = bodyEl && Array.prototype.some.call(bodyEl.querySelectorAll(".tournament-bet-modal__closed-event[open]"), function (item) { return item.getAttribute("data-result-id") === String(data.id); });
     var payout = data.winnerPaidAmount == null ? data.bank : data.winnerPaidAmount;
     return '<details data-result-id="' + esc(data.id) + '" class="tournament-bet-modal__closed-event"' + (expanded ? ' open' : '') + '><summary' + (winnerArtSrc ? ' class="tournament-bet-modal__result-with-art"' : '') + '>' +
       (winnerArtSrc ? '<img class="tournament-bet-modal__result-art" src="' + esc(winnerArtSrc) + '" alt="" loading="lazy" decoding="async">' : '') +
-      '<span class="tournament-bet-modal__result-status">' + (settled ? 'Событие завершено' : 'Приём ставок закрыт') + '</span>' + eventDateHtml(data) +
+      '<span class="tournament-bet-modal__result-status">' + (cancelled ? 'Событие отменено' : cancelling ? 'Возврат ставок не завершён' : settled ? 'Событие завершено' : 'Приём ставок закрыт') + '</span>' + eventDateHtml(data) +
       '<strong class="tournament-bet-modal__result-title">СТАВКА НА СЕБЯ<span class="tournament-bet-modal__result-tournament">В ' + esc(/^magic\s+mko$/i.test(String(data.title || "").trim()) ? "Magik MKO" : (data.title || "турнире")) + '</span></strong>' +
       (winner ? '<span class="tournament-bet-modal__result-winner">🏆 ' + esc(winner.name || "Игрок") + '</span>' +
         '<span class="tournament-bet-modal__result-amounts"><span>Поставил <strong>' + rub(winner.stake || data.stakePrice) + '</strong></span><span>Забрал <strong>' + rub(payout) + '</strong></span></span>' :
-        '<span class="tournament-bet-modal__result-pending">' + (settled ? 'Победитель не указан' : 'Ожидаем результат турнира') + '</span>') +
+        '<span class="tournament-bet-modal__result-pending">' + (cancelled ? 'Ставки возвращены участникам на баланс Poker21' : cancelling ? 'Администратор может продолжить возврат ставок кнопкой отмены' : settled ? 'Победитель не указан' : 'Ожидаем результат турнира') + '</span>') +
       '<button type="button" class="tournament-bet-result-share" data-tournament-bet-result-share aria-label="Поделиться изображением карточки">Поделиться ↗</button>' +
       '<span class="tournament-bet-modal__result-toggle">Участники: ' + entries.length + ' · Подробнее <span aria-hidden="true">⌄</span></span></summary>' +
       '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' +
@@ -292,7 +294,7 @@
   }
 
   function eventHtml(data) {
-    if (data.status === "settled" || data.status === "closed") return closedEventHtml(data);
+    if (data.status === "cancelled" || data.status === "cancelling" || data.status === "settled" || data.status === "closed") return closedEventHtml(data);
     var tournament = eveningTournaments().concat(stakeTournaments()).find(function (item) {
       return String(item.id) === String(data.tournamentId) && item.name === data.title;
     }) || {};
@@ -330,7 +332,7 @@
 
   function adminHtml(data, createTab) {
     if (!data.isAdmin) return "";
-    if (!data.id || data.status === "settled" || (data.status !== "open" && !(data.entries && data.entries.length))) {
+    if (!data.id || data.status === "cancelled" || data.status === "settled" || (data.status !== "open" && !(data.entries && data.entries.length))) {
       if (!createTab) return "";
       var tournaments = eveningTournaments();
       var first = tournaments[0] || null;
@@ -347,13 +349,15 @@
         '<button type="submit">Создать и открыть ставки</button></form>';
     }
     if (createTab) return '<section class="tournament-bet-modal__empty"><strong>Событие уже создано</strong><p>Завершите текущее событие во вкладке «Ставка на себя», чтобы создать новое.</p></section>';
+    var cancelButton = '<button type="button" data-tournament-bet-action="cancel">' + (data.status === "cancelling" ? 'Продолжить возврат ставок' : 'Отменить событие и вернуть ставки') + '</button>';
+    if (data.status === "cancelling") return '<section class="tournament-bet-modal__admin"><h3>Отмена события</h3>' + cancelButton + '</section>';
     var closeButton = data.status === "open" ? '<button type="button" data-tournament-bet-action="close">Закрыть приём ставок</button>' : "";
     var startingBankForm = data.status !== "settled" ? '<form data-tournament-bet-starting-bank><label><span>Стартовый банк</span><input name="startingBank" type="text" inputmode="numeric" pattern="[0-9 ]*" autocomplete="off" value="' + esc(data.startingBank || 0) + '" required></label><button type="submit">Изменить стартовый банк</button></form>' : "";
     var settle = data.entries && data.entries.length && data.status !== "settled"
       ? '<form data-tournament-bet-settle><label><span>Кто прошёл дальше всех</span><select name="winnerAccountId" required><option value="">Выберите победителя</option>' + data.entries.map(function (entry) {
           return '<option value="' + esc(entry.accountId) + '">' + esc(entry.name) + '</option>';
         }).join("") + '</select></label><button type="submit">Начислить победителю весь банк</button></form>' : "";
-    return '<section class="tournament-bet-modal__admin"><h3>Управление событием</h3>' + startingBankForm + closeButton + settle + '</section>';
+    return '<section class="tournament-bet-modal__admin"><h3>Управление событием</h3>' + startingBankForm + closeButton + settle + cancelButton + '</section>';
   }
 
   function render() {
@@ -585,6 +589,8 @@
     if (action === "bet") {
       if (!state || !window.confirm("Списать " + rub(state.stakePrice) + " с баланса Poker21 и сделать ставку на себя?")) return;
       post({ action: "bet" }, "Проверяю баланс и принимаю ставку…");
+    } else if (action === "cancel" && window.confirm("Отменить событие без победителя и вернуть каждому участнику его ставку на баланс Poker21?")) {
+      post({ action: "cancel" }, "Отменяю событие и возвращаю ставки…");
     } else if (action === "close" && window.confirm("Закрыть приём ставок?")) {
       post({ action: "close" }, "Закрываю приём ставок…");
     }
