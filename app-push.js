@@ -297,7 +297,7 @@ function pokerMaybeAutoEnrollChatPushInner() {
       })
       .then(function (d) {
         if (!d || !d.ok || !d.notificationsEnabled) return;
-        if (d.hasSubscription) return;
+        if (d.hasSubscription) { pokerChatPushSyncIfNeeded(); return; }
         if (typeof Notification === "undefined") return;
         if (Notification.permission === "granted") {
           pokerChatPushSubscribeToBrowser().catch(function () {});
@@ -323,51 +323,36 @@ function pokerMaybeAutoEnrollChatPushInner() {
 }
 
 /** При возврате во вкладку: восстановить подписку, если разрешение есть, а endpoint пропал (обновление SW и т.п.). */
+var pokerChatPushSyncInFlight = null;
 function pokerChatPushSyncIfNeeded() {
+  if (pokerChatPushSyncInFlight) return pokerChatPushSyncInFlight;
   if (!pokerChatPushClientSupported() || !pokerApiHasCredential()) return;
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
   var base = typeof getApiBase === "function" ? getApiBase() : "";
   if (!base) return;
-  pokerFetchChatPushConfig().then(function (cfg) {
-    if (!cfg || !cfg.pushConfigured) return;
-    var storedVapidKey = pokerChatPushStoredVapidKey();
-    var needsVapidRefresh = !!(cfg.publicKey && (!storedVapidKey || storedVapidKey !== String(cfg.publicKey)));
-    navigator.serviceWorker.ready
-      .then(function (reg) {
-        return Promise.all([
-          fetch(base + "/api/chat-push-subscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(pokerApiAuthJsonBody({ action: "status" })),
-          })
-            .then(function (r) {
-              return r.json().catch(function () {
-                return null;
-              });
-            })
-            .catch(function () {
-              return null;
-            }),
-          reg.pushManager.getSubscription().catch(function () {
-            return null;
-          }),
-        ]);
-      })
-      .then(function (pair) {
-        var d = pair && pair[0] ? pair[0] : null;
-        var browserSub = pair && pair[1] ? pair[1] : null;
-        if (!d || !d.ok || !d.notificationsEnabled) return;
-        var serverHas = !!d.hasSubscription;
-        var browserHas = !!(browserSub && browserSub.endpoint);
-        if (serverHas && browserHas && needsVapidRefresh) {
-          pokerChatPushForceRepair(storedVapidKey ? "vapid_key_changed" : "vapid_key_missing");
-          return;
-        }
-        if (serverHas && browserHas) return;
-        pokerChatPushForceRepair("sync_mismatch");
-      })
-      .catch(function () {});
-  });
+  pokerChatPushSyncInFlight = Promise.all([pokerFetchChatPushConfig(), navigator.serviceWorker.ready])
+    .then(function (pair) {
+      var cfg = pair[0], reg = pair[1];
+      if (!cfg || !cfg.pushConfigured || !cfg.publicKey) return;
+      return reg.pushManager.getSubscription().then(function (sub) {
+        return fetch(base + "/api/chat-push-subscribe", {
+          method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store",
+          body: JSON.stringify(pokerApiAuthJsonBody({ action: "status", endpoint: sub ? sub.endpoint : "" })),
+        }).then(function (r) { return r.json(); }).then(function (status) {
+          if (!status || !status.ok || !status.notificationsEnabled) return;
+          var storedKey = pokerChatPushStoredVapidKey();
+          if (!sub || storedKey !== String(cfg.publicKey)) return pokerChatPushSubscribeToBrowser();
+          if (status.hasCurrentSubscription === false) {
+            // Save this device without invalidating an otherwise healthy browser subscription.
+            return fetch(base + "/api/chat-push-subscribe", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(pokerApiAuthJsonBody({ action: "subscribe", subscription: sub.toJSON() })),
+            });
+          }
+        });
+      });
+    }).catch(function () {}).finally(function () { pokerChatPushSyncInFlight = null; });
+  return pokerChatPushSyncInFlight;
 }
 
 function pokerChatPushForceRepair(reason) {
@@ -825,7 +810,12 @@ function initProfileChatPush() {
     var swBuild = document && document.documentElement ? String(document.documentElement.getAttribute("data-app-version") || document.documentElement.getAttribute("data-build") || "").trim() : "";
     if (swBuild) swUrl += "?v=" + encodeURIComponent(swBuild);
   } catch (eSwUrl) {}
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") pokerChatPushSyncIfNeeded();
+  });
+  window.addEventListener("online", pokerChatPushSyncIfNeeded);
   navigator.serviceWorker.register(swUrl, { updateViaCache: "none" }).then(function (reg) {
+    pokerChatPushSyncIfNeeded();
     try {
       if (reg && reg.waiting) {
         pokerShowUpdateAvailable();
