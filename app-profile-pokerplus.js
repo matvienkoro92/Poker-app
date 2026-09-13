@@ -1737,7 +1737,13 @@ function initProfilePokerPlus() {
       }, timeoutMs);
     });
     var fetchPromise = fetch(url, options)
-      .then(function (r) { return r.json().catch(function () { return {}; }); });
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          if (!data || typeof data !== "object") data = {};
+          data._httpStatus = r.status;
+          return data;
+        });
+      });
     return pokerPlusRunFinally(
       Promise.race([fetchPromise, timeoutPromise]),
       function () {
@@ -1747,6 +1753,27 @@ function initProfilePokerPlus() {
         }
       }
     );
+  }
+
+  function pokerPlusFetchRefreshWithRetry(url, options, timeoutMs) {
+    function retryable(data) {
+      if (data && data.needsCiphertext) return false;
+      var status = Number(data && data._httpStatus);
+      return [502, 503, 504].indexOf(status) !== -1 ||
+        !!(data && data.syncError && /timeout|timed out|network|fetch failed|пока не отдал свежие данные/i.test(data.syncError));
+    }
+    function again() {
+      return new Promise(function (resolve) { setTimeout(resolve, 700); }).then(function () {
+        return pokerPlusFetchJsonWithTimeout(url, Object.assign({}, options), timeoutMs);
+      });
+    }
+    return pokerPlusFetchJsonWithTimeout(url, Object.assign({}, options), timeoutMs).then(function (data) {
+      return retryable(data) ? again() : data;
+    }, function (error) {
+      if (isPokerPlusAbortError(error)) throw error;
+      if (error && (error.name === "TypeError" || /network|fetch failed|failed to fetch|load failed/i.test(error.message || ""))) return again();
+      throw error;
+    });
   }
 
   function isPokerPlusAbortError(err) {
@@ -1863,7 +1890,7 @@ function initProfilePokerPlus() {
       }
     }
     var loadPromise = pokerPlusRunFinally(
-      pokerPlusFetchJsonWithTimeout(base + "/api/pokerplus-player", {
+      (refresh ? pokerPlusFetchRefreshWithRetry : pokerPlusFetchJsonWithTimeout)(base + "/api/pokerplus-player", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
