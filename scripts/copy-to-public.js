@@ -9,7 +9,12 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
-const archiveAssetBaseUrl = String(process.env.POKER_ARCHIVE_ASSET_BASE_URL || '').trim().replace(/\/+$/, '');
+const archiveManifestPath = path.join(root, 'season-archive.json');
+const archiveManifest = fs.existsSync(archiveManifestPath) ? JSON.parse(fs.readFileSync(archiveManifestPath, 'utf8')) : null;
+// Explicit empty env value restores a fully local build.
+const archiveAssetBaseUrl = String(process.env.POKER_ARCHIVE_ASSET_BASE_URL ?? archiveManifest?.baseUrl ?? '').trim().replace(/\/+$/, '');
+const verifiedArchiveFiles = new Map((archiveManifest?.files || []).map(entry => [entry.file, entry]));
+const directArchiveReferences = new Set();
 
 function stripAssetUrl(raw) {
   return String(raw || '')
@@ -162,6 +167,10 @@ function collectReferencedAssets() {
     if (!fs.existsSync(p) || fs.statSync(p).isDirectory()) continue;
     const text = fs.readFileSync(p, 'utf8');
     collectAssetReferencesFromText(text).forEach((asset) => refs.add(asset));
+    // Literal URLs (e.g. newspaper photos) do not pass through getAssetUrl().
+    for (const match of text.matchAll(/assets\/([^"'`)\s?#<>]+)/g)) {
+      if (/(?:^|\/)rating-\d{2}-0[1-5]-2026/i.test(match[1])) directArchiveReferences.add(match[1]);
+    }
   }
   return refs;
 }
@@ -182,7 +191,17 @@ function copyReferencedAssets() {
   let copied = 0;
   for (const rel of Array.from(refs).sort()) {
     const archiveMatch = String(rel).match(/(?:^|\/)rating-\d{2}-(\d{2})-2026/i);
-    if (archiveAssetBaseUrl && archiveMatch && Number(archiveMatch[1]) <= 5) continue;
+    if (archiveAssetBaseUrl && archiveMatch && Number(archiveMatch[1]) <= 5 && !directArchiveReferences.has(rel)) {
+      // Never drop changed/new assets against a previously published manifest.
+      if (archiveManifest && archiveAssetBaseUrl === archiveManifest.baseUrl) {
+        const entry = verifiedArchiveFiles.get(rel);
+        const source = path.join(assetDir, rel);
+        if (!entry || !fs.existsSync(source) || require('crypto').createHash('sha256').update(fs.readFileSync(source)).digest('hex') !== entry.sha256) {
+          throw new Error('Archive asset is not verified; republish archive or build with POKER_ARCHIVE_ASSET_BASE_URL="": ' + rel);
+        }
+      }
+      continue;
+    }
     const src = path.join(assetDir, rel);
     if (!src.startsWith(assetDir + path.sep)) continue;
     if (!fs.existsSync(src) || fs.statSync(src).isDirectory()) continue;
