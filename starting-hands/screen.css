@@ -56,3 +56,19 @@
 .cell.high-bb small{color:#fff;font-weight:700}
 .cell.high-bb[aria-pressed="true"]{outline:2px solid #ffae65;outline-offset:1px}
 .hand-insights{margin:24px 0;padding:20px 0;border-block:1px solid #344158}.insight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0}.insight-card{min-width:0;background:#111b2c;border:1px solid #344158;border-radius:14px;padding:16px}.insight-card h3{margin:0 0 12px}.insight-card small{color:#aab6cb;line-height:1.5;display:block}.insight-hand{padding:10px 0;border-top:1px solid #344158}.insight-hand summary,.insight-section>summary{cursor:pointer;min-height:44px;line-height:1.6;overflow-wrap:anywhere}.insight-hand summary span{font-size:12px;color:#aab6cb}.insight-section{padding:12px 0;border-top:1px solid #344158}.insight-button{background:#25334c;color:#edf2f9;border:1px solid #63738d;border-radius:9px;padding:12px;min-height:44px}.insight-button:disabled{opacity:.6}.insight-hand .replay-body{overflow-wrap:anywhere}.insight-hand summary:focus-visible,.insight-section>summary:focus-visible{outline:2px solid #e9bd65}@media(max-width:650px){.insight-grid{grid-template-columns:1fr}}
+
+/* Show one player task at a time and keep long lists on demand. */
+[hidden]{display:none!important}
+.history-navigation{display:flex;gap:4px;padding:4px;margin:20px 0;background:#111827;border:1px solid #39445c;border-radius:12px}
+.history-navigation button{flex:1;min-width:0;min-height:44px;padding:10px;border:0;border-radius:8px;background:none;color:#b5bfd0}
+.history-navigation button[aria-pressed=true]{background:#344057;color:#fff;font-weight:700}
+.history-filter-panel{width:100%;border:1px solid #39445c;border-radius:12px;padding:0 12px}
+.history-filter-panel>summary,.position-disclosure>summary,.chart-method>summary,.insight-card>summary{cursor:pointer;min-height:44px;padding:10px 0;line-height:1.5}
+.history-filter-panel .history-filters{padding-bottom:14px}
+.position-disclosure{margin:16px 0;border-block:1px solid #344158}
+.chart-method{margin-top:10px;color:#aab4c5;font-size:14px}
+.insight-collections{margin:20px 0}
+.insight-collections h3{margin-bottom:8px}
+.history-filter-panel>summary:focus-visible,.insight-card>summary:focus-visible{outline:2px solid #ffae65;outline-offset:2px}
+
+.matrix-panel>summary{min-height:44px;padding:10px 0;cursor:pointer}.matrix-panel{min-width:0}.workspace{display:block}.workspace>.detail-panel{margin-top:14px}#reset-filters{margin-bottom:12px}

@@ -9444,7 +9444,7 @@ a.summary-link{display:inline-block;text-decoration:none}
 
 /* Personal summary: charcoal cards, orange actions and responsive artwork. */
 [data-view="my-summary"]{--summary-accent:#ff8b35;--summary-ink:#f5f4f0;--summary-muted:#a8adb5;max-width:1080px;margin-inline:auto}
-[data-view="my-summary"] .summary-heading{font-size:clamp(26px,4vw,38px);font-weight:800;color:var(--summary-ink);letter-spacing:-.04em;margin-top:18px}
+[data-view="my-summary"] .summary-heading{font-size:clamp(26px,4vw,38px);font-weight:800;color:var(--summary-ink);letter-spacing:-.04em;margin:18px 0 28px;text-align:center;overflow-wrap:anywhere}
 [data-view="my-summary"] .summary-subtitle{color:var(--summary-muted);margin-bottom:28px}
 [data-view="my-summary"] .summary-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch;isolation:isolate}
 [data-view="my-summary"] .summary-card{position:relative;grid-column:1/-1;min-width:0;padding:24px;border-radius:24px;border:1px solid #ffffff24;background:radial-gradient(ellipse at 0 0,#ffffff07,transparent 70%),linear-gradient(135deg,#1b1c1d,#0c1012);box-shadow:inset 0 1px 0 #ffffff08,0 12px 30px #0002;color:var(--summary-ink);overflow:visible}
@@ -9541,3 +9541,23 @@ body[data-view="my-summary"]{background:#080c0e}
 [data-view="my-summary"] .summary-art--spin{width:90%;height:76%;right:0;bottom:68px;object-position:center bottom;mask-image:none}
 @media(max-width:600px){[data-view="my-summary"] .summary-art--spin{width:108%;height:67%;right:-4%;bottom:62px}}
 @media(max-width:350px){[data-view="my-summary"] .summary-art--spin{width:66%;height:85%;right:0;bottom:54px}}
+
+/* Task-oriented personal dashboard. */
+[data-view="my-summary"] .summary-navigation{display:flex;gap:4px;padding:4px;margin:0 0 18px;border:1px solid #ffffff20;border-radius:14px;background:#0d1113}
+[data-view="my-summary"] .summary-navigation button{flex:1;min-width:0;min-height:44px;border:0;border-radius:10px;background:none;color:#b7bbc0;font:inherit;cursor:pointer}
+[data-view="my-summary"] .summary-navigation button[aria-pressed="true"]{background:#ff9b47;color:#17110a;font-weight:700}
+[data-view="my-summary"] .summary-navigation button:focus-visible{outline:3px solid #ffbf82;outline-offset:2px}
+[data-view="my-summary"] .summary-card[hidden]{display:none!important}
+[data-view="my-summary"] .summary-card--starting-hands{min-height:150px;padding-right:35%}
+[data-view="my-summary"] .summary-art--starting-hands{width:35%;height:100%;right:0;bottom:0}
+[data-view="my-summary"] .summary-card--spin{grid-row:auto;min-height:0;padding:18px}
+[data-view="my-summary"] .summary-card--spin h2{font-size:20px}
+[data-view="my-summary"] .summary-art--spin{display:none}
+[data-view="my-summary"] #summary-spin{height:auto;min-height:0;gap:8px}
+[data-view="my-summary"] #summary-spin .summary-value{max-width:none;font-size:16px!important}
+[data-view="my-summary"] #summary-spin .summary-link{margin-top:8px;min-height:44px;font-size:15px!important}
+[data-view="my-summary"] .summary-card--bonus{min-height:0;padding:18px}
+[data-view="my-summary"] .summary-card--bonus h2{padding:0;min-height:0;font-size:20px}
+[data-view="my-summary"] .summary-card--bonus .summary-card-icon{display:none}
+[data-view="my-summary"] .summary-card--schedule .summary-event{padding:12px;margin:8px 0}
+@media(max-width:350px){[data-view="my-summary"] .summary-card--spin{grid-column:1}[data-view="my-summary"] .summary-card--bonus{grid-column:2}[data-view="my-summary"] .summary-card--starting-hands{padding-right:18px}[data-view="my-summary"] .summary-art--starting-hands{display:none}}
