@@ -35,3 +35,12 @@ test('pulse opens commands and correct download and club links',async t=>{
  assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
  assert.equal(buttons.length,4);
 });
+
+test('table rows use emoji numbers without blank lines between tables',()=>{
+ const rows=Array.from({length:12},(_,i)=>({leagueId:'184691',playerCount:2,playType:'NLH',deskName:'Table '+i,blindAnnotation:'5/10'}));
+ const text=c.tablePages(rows,'cash').join('\n');
+ assert.match(text,/1️⃣ Table/);
+ assert.match(text,/Блайнды: 5\/10\n2️⃣ Table/);
+ assert.match(text,/1️⃣0️⃣ Table/);
+ assert.doesNotMatch(text,/Блайнды: 5\/10\n\n[0-9]/);
+});
