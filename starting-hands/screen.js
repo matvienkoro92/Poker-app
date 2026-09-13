@@ -44,6 +44,12 @@ function startHistory(payload) {
     const graphUnit=metric==='resultMinor'?'resultMinor':'bb',label=graphUnit==='bb'?'bb':mode==='cash'?'ед':'фишек';
     const series=core.profitSeries(data.cells.flatMap(c=>c.hands),graphUnit),svg=$('profit-chart');svg.replaceChildren();
     const lines=[['nonShowdown','#fb7185'],['showdown','#60a5fa'],['total','#4ade80']];
+    if(series.evCalculated)lines.push(['allinEv','#fbbf24']);
+    $('profit-ev-legend').hidden=!series.evCalculated;
+    $('profit-ev-legend').textContent='━ All-in EV'+(series.evUnresolved||series.evMissing?' · частичный расчёт':'');
+    $('profit-ev-note').textContent=series.evCalculated?
+      'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
+      'Для этой выборки нет рассчитанных выставлений all-in EV.';
     const vals=series.points.flatMap(p=>lines.map(([key])=>p[key]));let low=Math.min(0,...vals),high=Math.max(0,...vals);if(low===high){low-=1;high+=1;}const pad=(high-low)*.08;low-=pad;high+=pad;
     const x=i=>65+i/Math.max(1,data.count)*815,y=v=>275-(v-low)/(high-low)*250;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
@@ -57,7 +63,7 @@ function startHistory(payload) {
       node('text',{x:75,y:18,fill:'#ffb5c1','font-size':12},'Макс. просадка: '+number(drawdown.amount)+' '+label);
     }
     for(const [key,color] of lines)node('path',{d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
-    const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''));
+    const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
     $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
     svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-65)/815*data.count)));$('profit-values').textContent=describe(series.points[n]);};
     svg.onpointerleave=()=>{$('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';};
@@ -148,6 +154,8 @@ function startHistory(payload) {
     const add=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;target.append(el);return el;};
     if(!replay){add('p','История действий пока не загружена.');return;}
     appendCards(add('p','Ваши карты: ','replay-cards'),replay.cards);
+    if(hand.ev?.status==='calculated')add('p','All-in EV: '+signed(hand.ev.resultMinor/hand.bigBlindMinor)+' bb · фактически: '+signed(hand.bb)+' bb. Перебрано исходов: '+number(hand.ev.runouts)+'.','note');
+    else if(hand.ev?.status==='unresolved')add('p','All-in EV не рассчитан: '+({betting_after_allin_street:'торговля продолжалась на следующих улицах',missing_final_board:'нет полного борда',side_pot_deduction:'неясно распределение удержаний по побочным банкам',payout_does_not_reconcile:'выплаты не сходятся с картами и банками',special_runout:'особый порядок раздачи борда'}[hand.ev.reason]||'недостаточно подтверждённых данных')+'.','note');
     add('h4','Префлоп','street-heading street-preflop');
     let roundActors=new Set();
     const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};

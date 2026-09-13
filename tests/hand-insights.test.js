@@ -24,3 +24,9 @@ test('action collections distinguish calls, raises, street and folded players',(
  assert.equal(actions({events:[e(0,'5','villain'),e(1,'3')]},'hero').threeBet,null);
  assert.equal(actions({events:[]},'hero'),null);
 });
+test('EV line replaces only calculated hands and normalizes by each blind',()=>{
+ const core=require('../starting-hands/core');
+ const hands=[h(1,10,{bigBlindMinor:100,ev:{status:'calculated',resultMinor:500}}),h(2,-20,{bigBlindMinor:200,ev:{status:'unresolved'}}),h(3,5,{bigBlindMinor:100,ev:{status:'not_applicable'}})];
+ const s=core.profitSeries(hands,'bb');assert.equal(s.points.at(-1).allinEv,-10);assert.equal(s.evCalculated,1);assert.equal(s.evUnresolved,1);assert.equal(s.evMissing,0);
+ const missing=core.profitSeries([h(1,2)],'bb');assert.equal(missing.evMissing,1);assert.equal(missing.evCalculated,0);
+});

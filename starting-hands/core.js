@@ -174,7 +174,7 @@
       g[row.resultMinor > 0 ? 'wins' : row.resultMinor < 0 ? 'losses' : 'even']++;
       // Only the allowed personal projection is exposed to the UI.
       g.hands.push({handId: row.handId, sessionId: row.sessionId, playedAt: row.playedAt,
-        bigBlindMinor: row.bigBlindMinor, position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
+        ev: row.ev && ['calculated','unresolved','not_applicable'].includes(row.ev.status) ? {status:row.ev.status,resultMinor:row.ev.status==='calculated'&&Number.isFinite(row.ev.resultMinor)?row.ev.resultMinor:null,reason:typeof row.ev.reason==='string'?row.ev.reason:'',boardCards:row.ev.boardCards,runouts:row.ev.runouts} : null, bigBlindMinor: row.bigBlindMinor, position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
     });
     if (conflicts.size) excluded.conflict = conflicts.size;
     const cells = matrix().flat().map(label => {
@@ -197,15 +197,21 @@
       })};
   }
   function profitSeries(hands, unit) {
-    let total=0,showdown=0,nonShowdown=0,unknown=0;
-    const points=[{count:0,total:0,showdown:0,nonShowdown:0}];
+    let total=0,showdown=0,nonShowdown=0,unknown=0,allinEv=0,evCalculated=0,evUnresolved=0,evMissing=0;
+    const points=[{count:0,total:0,showdown:0,nonShowdown:0,allinEv:0}];
     hands.slice().sort((a,b)=>a.playedAt.localeCompare(b.playedAt)||a.handId.localeCompare(b.handId)).forEach((h,i)=>{
       const value=unit==='resultMinor'?h.resultMinor/100:h.bb;
       total+=value;
+      if(h.ev?.status==='calculated'&&Number.isFinite(h.ev.resultMinor)){
+        allinEv+=unit==='resultMinor'?h.ev.resultMinor/100:h.ev.resultMinor/h.bigBlindMinor;evCalculated++;
+      }else{
+        allinEv+=value;
+        if(h.ev?.status==='unresolved')evUnresolved++;else if(h.ev?.status!=='not_applicable')evMissing++;
+      }
       if(h.showdown===true)showdown+=value;else if(h.showdown===false)nonShowdown+=value;else unknown++;
-      points.push({count:i+1,total,showdown,nonShowdown,handId:h.handId});
+      points.push({count:i+1,total,showdown,nonShowdown,allinEv,handId:h.handId});
     });
-    return {points,unknown};
+    return {points,unknown,evCalculated,evUnresolved,evMissing};
   }
   return {profitSeries, handClass, matrix, aggregate, positions, searchName, matchesSearch};
 });
