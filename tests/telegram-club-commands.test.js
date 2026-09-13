@@ -1,0 +1,25 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const c=require('../lib/telegram-club-commands');
+test('Russian and English commands and callbacks',()=>{
+ for(const text of ['/расписание','расписание','/schedule@DvaTuzaBot'])assert.equal(c.command({message:{text}}),'schedule:0');
+ for(const text of ['/tables','столы сейчас','/столы'])assert.equal(c.command({message:{text}}),'menu');
+ assert.equal(c.command({callback_query:{data:'club:cash:1'}}),'cash:1');
+ assert.equal(c.command({message:{text:'/start'}}),null);
+});
+test('schedule uses application source and fits Telegram pages',()=>{
+ const pages=c.schedulePages();assert.ok(pages.join('\n').includes('MAIN EVENT'));
+ assert.ok(pages.join('\n').includes('14 сентября 2026'));
+ assert.ok(pages.every(p=>p.length<3600));
+});
+test('tables preserve scope, sorting, formats and SNG category',()=>{
+ const row={leagueId:'184691',playerCount:2,playType:'PLO6',blindAnnotation:'1/2'};
+ const rows=[{...row,deskName:'Low'},{...row,deskName:'High',blindAnnotation:'25/50'},{...row,deskName:'Private',leagueId:'111'},{...row,deskName:'Empty',playerCount:0},{...row,deskName:'Sit',playType:'SNG'},{...row,deskName:'Seka',playType:'Ceka'}];
+ const cash=c.tablePages(rows,'cash').join('\n');assert.ok(cash.indexOf('High')<cash.indexOf('Low'));assert.match(cash,/СЕКА/);assert.doesNotMatch(cash,/Private|Empty|Sit|ID стола|PLO6/);
+ const tour=c.tablePages(rows,'tournaments').join('\n');assert.match(tour,/Sit/);assert.doesNotMatch(tour,/High|Seka/);
+});
+test('menu callback is answered and edits message without sending another',async t=>{
+ const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
+ global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ await c.handle({callback_query:{id:'a',data:'club:menu',message:{chat:{id:1},message_id:4}}},'test');
+ assert.ok(calls[0].url.endsWith('/answerCallbackQuery'));assert.ok(calls[1].url.endsWith('/editMessageText'));assert.equal(calls[1].p.message_id,4);
+});

@@ -114,6 +114,7 @@
       "maxDuration": 60
     },
     "api/[[...slug]].js": {
+      "includeFiles": "html-fragments/schedule.html",
       "maxDuration": 60
     }
   },
