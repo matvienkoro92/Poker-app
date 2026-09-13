@@ -9561,3 +9561,20 @@ body[data-view="my-summary"]{background:#080c0e}
 [data-view="my-summary"] .summary-card--bonus .summary-card-icon{display:none}
 [data-view="my-summary"] .summary-card--schedule .summary-event{padding:12px;margin:8px 0}
 @media(max-width:350px){[data-view="my-summary"] .summary-card--spin{grid-column:1}[data-view="my-summary"] .summary-card--bonus{grid-column:2}[data-view="my-summary"] .summary-card--starting-hands{padding-right:18px}[data-view="my-summary"] .summary-art--starting-hands{display:none}}
+
+/* Raffles follows the spin and bonus cards in the Play section. */
+[data-view="my-summary"] .summary-card--raffles{grid-column:1/-1;min-height:0;padding:18px}
+[data-view="my-summary"] .summary-card--raffles h2{padding:0;min-height:0;font-size:20px}
+[data-view="my-summary"] .summary-card--raffles .summary-card-icon{display:none}
+@media(min-width:700px){
+ [data-view="my-summary"] .summary-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+ [data-view="my-summary"] .summary-card--spin{grid-column:1/3}
+ [data-view="my-summary"] .summary-card--bonus{grid-column:3/5}
+ [data-view="my-summary"] .summary-card--raffles{grid-column:5/7}
+}
+
+/* Center the player name between the summary header actions. */
+[data-view="my-summary"] .summary-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);align-items:center;gap:8px}
+[data-view="my-summary"] .summary-header .summary-heading{margin:0;font-size:clamp(18px,4vw,30px);min-width:0;line-height:1.2}
+[data-view="my-summary"] .summary-header .summary-link{min-width:0;min-height:44px;padding:6px 0!important;white-space:nowrap}
+[data-view="my-summary"] .summary-header [data-summary-refresh]{text-align:right;justify-self:end}

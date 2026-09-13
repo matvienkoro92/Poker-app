@@ -4,7 +4,7 @@
   var root;
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
-    var groups = {play:["starting-hands","spin","bonus","schedule"],progress:["results","achievements","hero"],club:["raffles","friends","reviews"]};
+    var groups = {play:["starting-hands","spin","bonus","raffles","friends","reviews"],progress:["results","achievements","hero"],schedule:["schedule"]};
     document.querySelectorAll('[data-summary-tab]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.summaryTab===summaryTab));});
     if(root)root.querySelectorAll(':scope > .summary-card').forEach(function(card){
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
