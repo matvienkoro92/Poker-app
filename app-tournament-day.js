@@ -74,6 +74,15 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
 ];
 
 var HOME_TOURNAMENT_DATE_OVERRIDES = {
+  "2026-09-13": {
+    name: "Нокаут",
+    buyin: "10 000₽",
+    guarantee: "800 000₽",
+    banner: HOME_TOURNAMENT_SUNDAY_BANNER_FILE,
+    bannerAlt: "Poker21 Нокаут — вход 10 000 ₽, гарантия 800 000 ₽",
+    bannerWidth: 640,
+    bannerHeight: 915
+  },
   "2026-07-19": {
     name: "Турнир месяца — Нокаут",
     buyin: "10 000₽",
