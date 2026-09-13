@@ -14,6 +14,9 @@ const archiveManifest = fs.existsSync(archiveManifestPath) ? JSON.parse(fs.readF
 // Explicit empty env value restores a fully local build.
 const archiveAssetBaseUrl = String(process.env.POKER_ARCHIVE_ASSET_BASE_URL ?? archiveManifest?.baseUrl ?? '').trim().replace(/\/+$/, '');
 const verifiedArchiveFiles = new Map((archiveManifest?.files || []).map(entry => [entry.file, entry]));
+const summerArchive = archiveManifest?.summer;
+const summerArchiveBaseUrl = String(process.env.POKER_SUMMER_ARCHIVE_ASSET_BASE_URL ?? summerArchive?.baseUrl ?? '').trim().replace(/\/+$/, '');
+const verifiedSummerFiles = new Map((summerArchive?.files || []).map(entry => [entry.file, entry]));
 const directArchiveReferences = new Set();
 
 function stripAssetUrl(raw) {
@@ -106,7 +109,7 @@ for (const file of toCopy) {
 
 fs.writeFileSync(
   path.join(publicDir, 'asset-runtime-config.js'),
-  `window.POKER_ARCHIVE_ASSET_BASE_URL = ${JSON.stringify(archiveAssetBaseUrl)};\n`
+  `window.POKER_ARCHIVE_ASSET_BASE_URL = ${JSON.stringify(archiveAssetBaseUrl)};\nwindow.POKER_SUMMER_ARCHIVE_ASSET_BASE_URL = ${JSON.stringify(summerArchiveBaseUrl)};\n`
 );
 
 function copyDirRecursive(src, dest) {
@@ -169,7 +172,7 @@ function collectReferencedAssets() {
     collectAssetReferencesFromText(text).forEach((asset) => refs.add(asset));
     // Literal URLs (e.g. newspaper photos) do not pass through getAssetUrl().
     for (const match of text.matchAll(/assets\/([^"'`)\s?#<>]+)/g)) {
-      if (/(?:^|\/)rating-\d{2}-0[1-5]-2026/i.test(match[1])) directArchiveReferences.add(match[1]);
+      if (/(?:^|\/)rating-\d{2}-0[1-8]-2026/i.test(match[1])) directArchiveReferences.add(match[1]);
     }
   }
   return refs;
@@ -191,10 +194,15 @@ function copyReferencedAssets() {
   let copied = 0;
   for (const rel of Array.from(refs).sort()) {
     const archiveMatch = String(rel).match(/(?:^|\/)rating-\d{2}-(\d{2})-2026/i);
-    if (archiveAssetBaseUrl && archiveMatch && Number(archiveMatch[1]) <= 5 && !directArchiveReferences.has(rel)) {
+    const month = archiveMatch ? Number(archiveMatch[1]) : 0;
+    const isSummer = month >= 6 && month <= 8;
+    const selectedBase = isSummer ? summerArchiveBaseUrl : archiveAssetBaseUrl;
+    const selectedManifest = isSummer ? summerArchive : archiveManifest;
+    const selectedFiles = isSummer ? verifiedSummerFiles : verifiedArchiveFiles;
+    if (selectedBase && month >= 1 && month <= 8 && !directArchiveReferences.has(rel)) {
       // Never drop changed/new assets against a previously published manifest.
-      if (archiveManifest && archiveAssetBaseUrl === archiveManifest.baseUrl) {
-        const entry = verifiedArchiveFiles.get(rel);
+      if (selectedManifest && selectedBase === selectedManifest.baseUrl) {
+        const entry = selectedFiles.get(rel);
         const source = path.join(assetDir, rel);
         if (!entry || !fs.existsSync(source) || require('crypto').createHash('sha256').update(fs.readFileSync(source)).digest('hex') !== entry.sha256) {
           throw new Error('Archive asset is not verified; republish archive or build with POKER_ARCHIVE_ASSET_BASE_URL="": ' + rel);

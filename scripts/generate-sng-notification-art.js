@@ -11,7 +11,7 @@ const root = path.resolve(__dirname, "..");
   for (const art of sources) {
     const input = art.includes("summer-rating-player-pokermanki-v2") ? "assets/sng-pokermanki-white.png" : art.split("?")[0];
     await sharp(path.join(root, input)).resize({ width: 1000, height: 1000, fit: "contain", background: "#ffffff" })
-      .flatten({ background: "#ffffff" }).jpeg({ quality: 92 })
+      .flatten({ background: "#ffffff" }).jpeg({ quality: 80, mozjpeg: true })
       .toFile(path.join(root, "public", notificationArtPath(art)));
   }
   console.log("Generated white SNG notification images:", sources.length);

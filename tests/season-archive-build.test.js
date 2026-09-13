@@ -47,3 +47,28 @@ test('image and thumbnail helpers route only archived screenshots to storage', (
   context.window.POKER_ARCHIVE_ASSET_BASE_URL = '';
   assert.equal(context.getAssetUrl('rating-01-05-2026.png'), 'https://app.test/assets/rating-01-05-2026.png');
 });
+const summerPattern = /(?:^|\/)rating-\d{2}-0[6-8]-2026/i;
+const summerEntries = local.filter(f => summerPattern.test(f)).map(file => ({ file, sha256: crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'assets', file))).digest('hex') }));
+const summerManifest = { ...manifest, summer: { baseUrl: 'https://example.test/summer', files: summerEntries } };
+test('summer archive excludes June–August and keeps September assets', () => {
+  const copied = run(summerManifest);
+  const winterOnly = run(manifest);
+  assert.ok(winterOnly.length - copied.length > 1000);
+  assert.deepEqual(copied.filter(f => !summerPattern.test(f)), winterOnly.filter(f => !summerPattern.test(f)));
+  assert.ok(copied.some(f => /rating-\d{2}-09-2026/.test(f)));
+  assert.deepEqual(run(summerManifest, { POKER_SUMMER_ARCHIVE_ASSET_BASE_URL: '' }), winterOnly);
+  assert.deepEqual(run(summerManifest, { POKER_ARCHIVE_ASSET_BASE_URL: '', POKER_SUMMER_ARCHIVE_ASSET_BASE_URL: '' }), local);
+  assert.throws(() => run({ ...manifest, summer: { ...summerManifest.summer, files: [] } }), /not verified/);
+});
+test('summer image routing preserves winter origin and September local paths', () => {
+  const context = { window: { POKER_ARCHIVE_ASSET_BASE_URL: manifest.baseUrl, POKER_SUMMER_ARCHIVE_ASSET_BASE_URL: summerManifest.summer.baseUrl }, document: { baseURI: 'https://app.test/' }, URL };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync(path.join(root, 'app-home-media.js'), 'utf8').split('function initImageLightbox()')[0], context);
+  for (const month of ['06', '07', '08']) {
+    const file = 'rating-compressed-preview/rating-01-' + month + '-2026.avif';
+    assert.equal(context.getAssetUrl(file), summerManifest.summer.baseUrl + '/' + file);
+    assert.equal(context.getRatingThumbnailUrl(file), summerManifest.summer.baseUrl + '/rating-thumbnails/' + file);
+  }
+  assert.equal(context.getAssetUrl('rating-01-05-2026.png'), manifest.baseUrl + '/rating-01-05-2026.png');
+  assert.equal(context.getAssetUrl('rating-01-09-2026.png'), 'https://app.test/assets/rating-01-09-2026.png');
+});

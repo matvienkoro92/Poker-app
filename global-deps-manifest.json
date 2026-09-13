@@ -2286,6 +2286,16 @@
       ]
     },
     {
+      "name": "POKER_SUMMER_ARCHIVE_ASSET_BASE_URL",
+      "domain": "assetRuntime",
+      "exportedBy": [
+        "asset-runtime-config.js"
+      ],
+      "consumedBy": [
+        "app-home-media.js"
+      ]
+    },
+    {
       "name": "pokerGetRatingPlayerTotalRewardFast",
       "domain": "ratingPlayerTotals",
       "exportedBy": [

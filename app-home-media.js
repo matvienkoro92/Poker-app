@@ -5,7 +5,9 @@ function getAssetUrl(relativePath) {
     var cleanPath = String(relativePath || "").replace(/^\.?\/?assets\//, "");
     var ratingDate = cleanPath.match(/rating-(\d{2})-(\d{2})-2026/i);
     var archiveBase = typeof window !== "undefined" ? String(window.POKER_ARCHIVE_ASSET_BASE_URL || "").replace(/\/+$/, "") : "";
-    if (archiveBase && ratingDate && Number(ratingDate[2]) <= 5) {
+    var month = ratingDate ? Number(ratingDate[2]) : 0;
+    if (month >= 6 && month <= 8) archiveBase = typeof window !== "undefined" ? String(window.POKER_SUMMER_ARCHIVE_ASSET_BASE_URL || "").replace(/\/+$/, "") : "";
+    if (archiveBase && month >= 1 && month <= 8) {
       return archiveBase + "/" + cleanPath.replace(/^\/+/, "");
     }
     var base = typeof document !== "undefined" && document.baseURI ? document.baseURI : (typeof location !== "undefined" && location.href) || "";
