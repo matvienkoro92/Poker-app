@@ -9441,3 +9441,103 @@ a.summary-link{display:inline-block;text-decoration:none}
 .summary-achievement-picker .summary-picks label{display:flex;align-items:center;gap:8px;min-width:0}
 .summary-catalog-progress{white-space:pre-line;max-height:180px;overflow:auto}
 @media(max-width:400px){.summary-achievement-picker .summary-picks{grid-template-columns:1fr}}
+
+/* Personal summary: charcoal cards, orange actions and responsive artwork. */
+[data-view="my-summary"]{--summary-accent:#ff8b35;--summary-ink:#f5f4f0;--summary-muted:#a8adb5;max-width:1080px;margin-inline:auto}
+[data-view="my-summary"] .summary-heading{font-size:clamp(26px,4vw,38px);font-weight:800;color:var(--summary-ink);letter-spacing:-.04em;margin-top:18px}
+[data-view="my-summary"] .summary-subtitle{color:var(--summary-muted);margin-bottom:28px}
+[data-view="my-summary"] .summary-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch;isolation:isolate}
+[data-view="my-summary"] .summary-card{position:relative;grid-column:1/-1;min-width:0;padding:24px;border-radius:24px;border:1px solid #ffffff24;background:radial-gradient(ellipse at 0 0,#ffffff07,transparent 70%),linear-gradient(135deg,#1b1c1d,#0c1012);box-shadow:inset 0 1px 0 #ffffff08,0 12px 30px #0002;color:var(--summary-ink);overflow:visible}
+[data-view="my-summary"] .summary-card h2{position:relative;z-index:2;font-size:22px;line-height:1.15;font-weight:750;color:var(--summary-ink);letter-spacing:-.025em;margin:0 0 12px}
+[data-view="my-summary"] .summary-card p{font-size:15px;line-height:1.45;margin:9px 0}
+[data-view="my-summary"] .summary-muted{color:var(--summary-muted)!important;font-size:14px!important}
+[data-view="my-summary"] .summary-value{font-size:26px!important;color:var(--summary-ink);line-height:1.2;letter-spacing:-.03em}
+[data-view="my-summary"] .summary-link{position:relative;z-index:3;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:10px 18px!important;border:1px solid #ffffff25;border-radius:14px;color:var(--summary-accent);font-size:15px!important;font-weight:650;text-decoration:none;background:#080b0c40;transition:background .2s,border-color .2s}
+[data-view="my-summary"] .summary-link:hover{background:#ffffff0b;border-color:#ff8b3570}
+[data-view="my-summary"] .summary-link:focus-visible{outline:3px solid #ffad6b;outline-offset:4px}
+[data-view="my-summary"] .summary-header .summary-link{background:none;border-color:transparent;color:#b7bbc0;font-size:13px!important}
+[data-view="my-summary"] .summary-card--starting-hands{order:-5;min-height:225px;display:flex;flex-direction:column;justify-content:center;padding-right:48%;background:radial-gradient(ellipse at 85% 50%,#82401729,transparent 60%),linear-gradient(120deg,#232323,#0d1113)}
+[data-view="my-summary"] .summary-card--starting-hands h2{font-size:clamp(24px,3vw,36px)}
+[data-view="my-summary"] .summary-card--starting-hands .summary-muted{font-size:16px!important}
+[data-view="my-summary"] .summary-art{position:absolute;pointer-events:none;user-select:none;object-fit:contain;z-index:1;max-width:none}
+[data-view="my-summary"] .summary-art--starting-hands{width:49%;height:120%;right:-1%;bottom:-7%;filter:drop-shadow(0 18px 16px #0007);mask-image:linear-gradient(to bottom,#000 84%,transparent)}
+[data-view="my-summary"] .summary-card--starting-hands .summary-link,[data-view="my-summary"] .summary-card--spin .summary-link{background:linear-gradient(115deg,#ffab4b,#ff7b28);color:#17110a;border-color:#ffc07599;box-shadow:inset 0 1px 0 #ffe2b860,0 6px 24px #ee681224;font-weight:800;margin-top:12px;min-width:155px}
+[data-view="my-summary"] .summary-card--spin{order:-4;grid-column:1;grid-row:span 2;min-height:440px;padding:24px;background:radial-gradient(ellipse at 45% 65%,#a65a273c,transparent 68%),linear-gradient(145deg,#26221f,#0c1012);border-color:#ffac4e38}
+[data-view="my-summary"] .summary-card--spin h2{font-size:28px}
+[data-view="my-summary"] #summary-spin{position:relative;z-index:2;display:flex;flex-direction:column;height:calc(100% - 46px);min-height:342px}
+[data-view="my-summary"] #summary-spin .summary-value{font-size:17px!important;max-width:90%;color:#ddd9d1;text-shadow:0 2px 12px #000}
+[data-view="my-summary"] #summary-spin .summary-muted{margin-top:5px;text-shadow:0 2px 10px #000}
+[data-view="my-summary"] #summary-spin .summary-link{margin-top:auto;width:100%;min-width:0;min-height:52px;font-size:20px!important}
+[data-view="my-summary"] .summary-art--spin{width:94%;height:85%;right:-3%;bottom:29px;object-position:bottom;filter:drop-shadow(-8px 8px 16px #0005);mask-image:linear-gradient(to bottom,#000 88%,transparent)}
+[data-view="my-summary"] .summary-card--bonus{order:-3;grid-column:2;min-height:195px;padding:24px}
+[data-view="my-summary"] .summary-card--raffles{order:-2;grid-column:2;min-height:225px;padding:24px}
+[data-view="my-summary"] :is(.summary-card--bonus,.summary-card--raffles) h2{padding-left:62px;min-height:40px;display:flex;align-items:center}
+[data-view="my-summary"] .summary-card-icon{position:absolute;top:19px;left:22px;width:48px;height:48px;display:grid;place-items:center;font-size:33px;color:#ffbd6c;background:linear-gradient(130deg,#ffbe661b,#121416);border:1px solid #ffcf7726;border-radius:14px;text-shadow:0 3px 0 #4c2811,0 0 16px #ff9a4533}
+[data-view="my-summary"] #summary-bonus .summary-value{font-size:38px!important;color:#ffb361}
+[data-view="my-summary"] #summary-bonus .summary-value small{font-size:13px;color:var(--summary-muted);font-weight:400}
+[data-view="my-summary"] :is(#summary-bonus,#summary-raffles)>.summary-link{display:flex;margin-top:16px;width:100%}
+[data-view="my-summary"] #summary-raffles .summary-value{color:#ffb361;font-size:24px!important}
+[data-view="my-summary"] .summary-card--friends{order:-1;padding-left:88px}
+[data-view="my-summary"] .summary-card--friends h2{font-size:15px;font-weight:500;color:var(--summary-muted);margin-bottom:7px}
+[data-view="my-summary"] .summary-card--friends .summary-card-icon{top:30px}
+[data-view="my-summary"] #summary-friends .summary-link{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:0!important;width:44px;padding:0!important;border:0}
+[data-view="my-summary"] #summary-friends .summary-link::after{content:'→';font-size:26px;color:#b9bdc3}
+[data-view="my-summary"] #summary-friends{padding-right:44px}
+[data-view="my-summary"] .summary-card--schedule h2{padding-left:62px;min-height:38px;padding-top:8px}
+[data-view="my-summary"] .summary-schedule-tabs{gap:4px;padding:4px;border:1px solid #ffffff20;border-radius:16px;background:#080b0c;margin-top:18px}
+[data-view="my-summary"] .summary-schedule-tabs [role="tab"]{min-height:44px;background:none;border-color:transparent;color:#adb2ba;border-radius:12px;font-size:15px}
+[data-view="my-summary"] .summary-schedule-tabs [aria-selected="true"]{background:linear-gradient(115deg,#ffab4b,#ff7b28);color:#17110a;font-weight:750;border-color:#ffc07570}
+[data-view="my-summary"] .summary-event{padding:16px;border:1px solid #ffffff13;border-radius:14px;margin:10px 0;background:#ffffff02}
+[data-view="my-summary"] .summary-event:first-child{padding:16px;border-top:1px solid #ffffff13}
+[data-view="my-summary"] .summary-event progress{accent-color:var(--summary-accent)}
+[data-view="my-summary"] #summary-hero{order:10;background:linear-gradient(135deg,#211c18,#0c1012)}
+@media(max-width:600px){
+ [data-view="my-summary"] .summary-grid{gap:12px}
+ [data-view="my-summary"] .summary-card{padding:18px;border-radius:19px}
+ [data-view="my-summary"] .summary-card--starting-hands{min-height:180px;padding-right:43%}
+ [data-view="my-summary"] .summary-card--starting-hands h2{font-size:24px}
+ [data-view="my-summary"] .summary-card--starting-hands .summary-muted{font-size:13px!important}
+ [data-view="my-summary"] .summary-card--starting-hands .summary-link{min-width:115px;padding-inline:12px!important}
+ [data-view="my-summary"] .summary-art--starting-hands{width:53%;height:105%;right:-3%;bottom:0}
+ [data-view="my-summary"] .summary-card--spin{min-height:425px;padding:16px 12px}
+ [data-view="my-summary"] .summary-card--spin h2{font-size:23px}
+ [data-view="my-summary"] #summary-spin{min-height:340px;height:calc(100% - 38px)}
+ [data-view="my-summary"] #summary-spin .summary-value{font-size:14px!important}
+ [data-view="my-summary"] .summary-art--spin{width:115%;height:70%;right:-9%;bottom:56px}
+ [data-view="my-summary"] #summary-spin .summary-link{font-size:17px!important;min-height:46px}
+ [data-view="my-summary"] :is(.summary-card--bonus,.summary-card--raffles){padding:15px 12px;min-height:0}
+ [data-view="my-summary"] :is(.summary-card--bonus,.summary-card--raffles) h2{font-size:17px;padding-left:0;min-height:0;margin-bottom:12px}
+ [data-view="my-summary"] :is(.summary-card--bonus,.summary-card--raffles) .summary-card-icon{display:none}
+ [data-view="my-summary"] #summary-bonus .summary-value{font-size:30px!important}
+ [data-view="my-summary"] #summary-raffles .summary-value{font-size:20px!important}
+ [data-view="my-summary"] .summary-muted{font-size:12px!important}
+ [data-view="my-summary"] .summary-card p{font-size:13px}
+ [data-view="my-summary"] :is(#summary-bonus,#summary-raffles)>.summary-link{padding-inline:8px!important;font-size:13px!important}
+ [data-view="my-summary"] .summary-card--friends{padding-left:66px}
+ [data-view="my-summary"] .summary-card-icon{left:14px;width:38px;height:40px;font-size:27px}
+ [data-view="my-summary"] .summary-card--friends .summary-value{font-size:21px!important}
+ [data-view="my-summary"] .summary-card--schedule h2{padding-left:44px;font-size:22px}
+}
+@media(max-width:350px){
+ [data-view="my-summary"] .summary-card--spin{grid-column:1/-1;grid-row:auto;min-height:330px}
+ [data-view="my-summary"] #summary-spin{min-height:240px;height:auto}
+ [data-view="my-summary"] .summary-art--spin{width:68%;height:108%;right:0;bottom:10px}
+ [data-view="my-summary"] #summary-spin .summary-value{max-width:48%}
+ [data-view="my-summary"] .summary-card--bonus{grid-column:1}
+ [data-view="my-summary"] .summary-card--raffles{grid-column:2}
+}
+
+body[data-view="my-summary"]{background:#080c0e}
+[data-view="my-summary"] .summary-card-icon svg{width:28px;height:28px;filter:drop-shadow(0 2px 2px #0005)}
+@media(max-width:350px){
+ [data-view="my-summary"] .summary-card--friends{padding-left:58px}
+ [data-view="my-summary"] #summary-friends{padding-right:0}
+ [data-view="my-summary"] .summary-card--friends .summary-value{font-size:18px!important;overflow-wrap:normal}
+ [data-view="my-summary"] #summary-friends .summary-link{top:24px;right:8px;width:30px}
+ [data-view="my-summary"] .summary-card--friends h2{padding-right:20px}
+}
+
+/* Native club player: Prushnik. Keep the complete character clear of the action. */
+[data-view="my-summary"] .summary-art--spin{width:90%;height:76%;right:0;bottom:68px;object-position:center bottom;mask-image:none}
+@media(max-width:600px){[data-view="my-summary"] .summary-art--spin{width:108%;height:67%;right:-4%;bottom:62px}}
+@media(max-width:350px){[data-view="my-summary"] .summary-art--spin{width:66%;height:85%;right:0;bottom:54px}}

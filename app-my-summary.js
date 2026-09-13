@@ -6,7 +6,18 @@
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
   function num(n) { return Number(n).toLocaleString("ru-RU", {maximumFractionDigits: 0}); }
   function link(text, target) { return '<a href="#" class="summary-link" data-view-target="' + target + '">' + esc(text) + ' <span aria-hidden="true">→</span></a>'; }
-  function section(id, title, body) { return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '"><h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>'; }
+  function section(id, title, body) {
+    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-starting-cards-v1.webp"};
+    var icons = {
+      bonus:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/>',
+      raffles:'<path d="M7 3h10v7a5 5 0 0 1-10 0zM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 15v5m-5 1h10"/>',
+      friends:'<circle cx="9" cy="7" r="3"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M16 4a3 3 0 0 1 0 6m3 3a5 5 0 0 1 3 5v3"/>',
+      schedule:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 2v6m10-6v6M3 11h18m-13 5h3"/>'
+    };
+    var art = arts[id] ? '<img class="summary-art summary-art--' + id + '" src="./assets/' + arts[id] + '" alt="" aria-hidden="true" decoding="async">' : '';
+    var icon = icons[id] ? '<span class="summary-card-icon" aria-hidden="true">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + icons[id] + '</svg></span>' : '';
+    return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '">' + art + icon + '<h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>';
+  }
   function put(id, html) { var el = document.getElementById("summary-" + id); if (el) el.innerHTML = html; }
   function dateLabel(d) { return new Intl.DateTimeFormat("ru-RU", {timeZone:"Europe/Moscow", day:"numeric", month:"short", hour:"2-digit",minute:"2-digit"}).format(new Date(d)) + " мск"; }
   function request(path, body) {
@@ -34,7 +45,7 @@
   }
   function renderSpin() {
     if (!spin) return;
-    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + link("Раздача дня", "daily-poker"));
+    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
     put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + ' <small>бонусов</small></strong><p class="summary-muted">На билеты для бэкинга.</p>' + link("Обменять", "daily-poker"));
     friends();
   }
@@ -44,7 +55,7 @@
     var freeTab = scheduleTab === "freerolls";
     var chosen = slots.filter(function (s) { return isFree(s) === freeTab; }).slice(0, 3);
     var tabs = '<div class="summary-schedule-tabs" role="tablist" aria-label="Ближайшие игры">' +
-      [{id:"tournaments",label:"Ближайшие турниры"},{id:"freerolls",label:"Ближайшие фрироллы"}].map(function (tab) {
+      [{id:"tournaments",label:"Турниры"},{id:"freerolls",label:"Фрироллы"}].map(function (tab) {
         return '<button type="button" role="tab" id="summary-tab-' + tab.id + '" aria-controls="summary-schedule-panel" aria-selected="' + (scheduleTab === tab.id) + '" data-summary-schedule-tab="' + tab.id + '">' + tab.label + '</button>';
       }).join("") + '</div>';
     put("schedule", tabs + '<div role="tabpanel" id="summary-schedule-panel" aria-labelledby="summary-tab-' + scheduleTab + '">' + chosen.map(function (s) {
@@ -193,7 +204,7 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<p class="summary-muted" role="status">Загружаем…</p>';
-    root.innerHTML = section("spin","Крутка",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("achievements","Мой прогресс",loading) + section("results","Турнирные результаты",loading) + section("reviews","Мои разборы",loading);
+    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("achievements","Мой прогресс",loading) + section("results","Турнирные результаты",loading) + section("reviews","Мои разборы",loading);
     friends();
     function valid() {return seq === generation;}
     var schedule = Promise.resolve().then(function () {return pokerEnsureScriptDomains(["tournament"]);}).then(function () {if(valid()) renderSchedule();}).catch(function () {if(valid()) error("schedule");});
@@ -213,9 +224,9 @@
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname ? nickname : "Всё главное для вас";
       root.insertAdjacentHTML("afterbegin", section("starting-hands", "Стартовые руки",
-        '<p class="summary-muted">Результат в bb · Кеш и турниры · История каждой раздачи</p><button type="button" class="summary-link" data-starting-hands-open>Открыть стартовые руки →</button>'));
+        '<p class="summary-muted">Результат в bb · Кеш и турниры</p><button type="button" class="summary-link" data-starting-hands-open>Открыть →</button>'));
       if(['ID400800'].includes(account)) {
-        var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.prepend(heroCard);
+        var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
       }
       if (d.linked && !nickname) throw new Error("Profile cache unavailable");
