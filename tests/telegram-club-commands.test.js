@@ -23,3 +23,11 @@ test('menu callback is answered and edits message without sending another',async
  await c.handle({callback_query:{id:'a',data:'club:menu',message:{chat:{id:1},message_id:4}}},'test');
  assert.ok(calls[0].url.endsWith('/answerCallbackQuery'));assert.ok(calls[1].url.endsWith('/editMessageText'));assert.equal(calls[1].p.message_id,4);
 });
+
+test('pulse opens exactly schedule and tables buttons',async t=>{
+ for(const text of ['пульс','/пульс','/pulse','/pulse@DvaTuzaBot'])assert.equal(c.command({message:{text}}),'pulse');
+ const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
+ global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
+ await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
+ assert.deepEqual(calls[0].reply_markup.inline_keyboard.flat().map(b=>b.callback_data),['club:schedule:0','club:menu']);
+});
