@@ -32,9 +32,9 @@ test('EV line replaces only calculated hands and normalizes by each blind',()=>{
 });
 test('EV collections use deviation rather than profit, normalize blinds and exclude unavailable EV',()=>{
  const calculated=(id,actual,expected,blind=100)=>h(id,actual/blind,{resultMinor:actual,bigBlindMinor:blind,ev:{status:'calculated',resultMinor:expected}});
- const rows=[calculated(1,1000,5000),calculated(2,-1000,-5000),calculated(3,0,6000,200),calculated(4,0,-12000,200),calculated(5,0,2999),h(6,-100,{ev:{status:'unresolved',grossEv:{resultMinor:10000}}}),h(7,100),calculated(8,10000,0,0),calculated(9,0,NaN)];
+ const rows=[calculated(1,1000,5000),calculated(2,-1000,-5000),calculated(3,0,2000,200),calculated(4,0,-12000,200),calculated(5,0,999),h(6,-100,{ev:{status:'unresolved',grossEv:{resultMinor:10000}}}),h(7,100),calculated(8,10000,0,0),calculated(9,0,NaN),calculated(10,0,-2000,200),calculated(11,0,-999)];
  const c=summarize(rows).collections;
  assert.deepEqual(c.evBelow.map(h=>h.handId),['1','3']);
- assert.deepEqual(c.evAbove.map(h=>h.handId),['4','2']);
+ assert.deepEqual(c.evAbove.map(h=>h.handId),['4','2','10']);
  assert.equal(summarize([rows[2]]).collections.evBelow.length,1);
 });

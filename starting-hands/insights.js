@@ -46,8 +46,8 @@ function summarize(hands,signals={}){
  wins:hands.filter(h=>h.bb>0).sort((a,b)=>b.bb-a.bb).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>a.bb-b.bb).slice(0,5),
  showdown:{loaded:known.length,total:hands.length,sawFlop:flop.length,eligible:eligible.length,count:showdowns.length,profitable:showdowns.filter(h=>h.resultMinor>0).length},
  collections:{riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30),
- evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-30).sort((a,b)=>evDifference(a)-evDifference(b)),
- evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=30).sort((a,b)=>evDifference(b)-evDifference(a))}};
+ evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-10).sort((a,b)=>evDifference(a)-evDifference(b)),
+ evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=10).sort((a,b)=>evDifference(b)-evDifference(a))}};
 }
 return {actions,summarize,evDifference};
 });

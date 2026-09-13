@@ -113,7 +113,7 @@ function startHistory(payload) {
     const tops=add(root,'div',null,'insight-grid');
     for(const [title,rows] of [['Крупнейшие выигрыши',stats.wins],['Крупнейшие проигрыши',stats.losses]]){const box=add(tops,'div',null,'insight-card');add(box,'h3',title);handList(box,rows);}
     const collections=add(root,'details',null,'insight-section');add(collections,'summary','Подборки для разбора');
-    for(const [key,title] of [['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 30 bb'],['evAbove','🟢 Перебор EV · от 30 bb']]){
+    for(const [key,title] of [['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 10 bb'],['evAbove','🟢 Перебор EV · от 10 bb']]){
       const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length,key==='evBelow'?'negative':key==='evAbove'?'positive':undefined);handList(d,rows,key==='evBelow'||key==='evAbove');
     }
     add(collections,'p','Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
