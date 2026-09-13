@@ -72,3 +72,18 @@
 .history-filter-panel>summary:focus-visible,.insight-card>summary:focus-visible{outline:2px solid #ffae65;outline-offset:2px}
 
 .matrix-panel>summary{min-height:44px;padding:10px 0;cursor:pointer}.matrix-panel{min-width:0}.workspace{display:block}.workspace>.detail-panel{margin-top:14px}#reset-filters{margin-bottom:12px}
+
+/* Keep the date range beside the available game formats. */
+.toolbar{display:grid;grid-template-columns:auto minmax(0,300px);align-items:center}
+.toolbar>.segments{width:auto}
+.toolbar>.date-filter{width:100%}
+.history-filter-panel{grid-column:1 / -1}
+@media(max-width:600px){
+  .toolbar{grid-template-columns:auto minmax(0,1fr);gap:10px}
+  .toolbar>.segments{gap:2px;padding:3px}
+  .toolbar>.segments button{padding:10px 12px;font-size:14px}
+}
+@media(max-width:360px){
+  .toolbar{gap:6px}
+  .toolbar>.segments button{padding-inline:8px;font-size:12px}
+}

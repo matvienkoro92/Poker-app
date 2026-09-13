@@ -31,6 +31,17 @@ function startHistory(payload) {
   let appliedFrom='',appliedTo='';
   const outcomeFilters={positive:true,negative:true};
   const $ = id => document.getElementById(id);
+  function resetDateRange(){
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const part=type=>parts.find(p=>p.type===type).value;
+    appliedTo=part('year')+'-'+part('month')+'-'+part('day');
+    const monday=new Date(appliedTo+'T00:00:00Z');
+    monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);
+    appliedFrom=monday.toISOString().slice(0,10);
+    $('date-from').value=appliedFrom;$('date-to').value=appliedTo;
+    $('date-status').textContent='';
+  }
+  resetDateRange();
   const number = n => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n);
   const signed = n => n == null ? '—' : (n > 0 ? '+' : '') + number(n);
   const compactSigned = n => {
@@ -267,8 +278,8 @@ function startHistory(payload) {
   $('position').addEventListener('change',e=>{positionByMode[mode]=e.target.value;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
   $('reset-filters').addEventListener('click',()=>{
-    $('hand-search').value='';$('opponent-search').value='';$('date-from').value='';$('date-to').value='';$('date-status').textContent='';
-    appliedFrom='';appliedTo='';positionByMode[mode]='';selected=null;outcomeFilters.positive=true;outcomeFilters.negative=true;render();
+    $('hand-search').value='';$('opponent-search').value='';resetDateRange();
+    positionByMode[mode]='';selected=null;outcomeFilters.positive=true;outcomeFilters.negative=true;render();
   });
   $('metric').addEventListener('change',e=>{metric=e.target.value;render();});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});
