@@ -39,8 +39,19 @@ test('pulse opens commands and correct download and club links',async t=>{
 test('table rows use emoji numbers without blank lines between tables',()=>{
  const rows=Array.from({length:12},(_,i)=>({leagueId:'184691',playerCount:2,playType:'NLH',deskName:'Table '+i,blindAnnotation:'5/10'}));
  const text=c.tablePages(rows,'cash').join('\n');
- assert.match(text,/1️⃣ Table/);
- assert.match(text,/Блайнды: 5\/10\n2️⃣ Table/);
- assert.match(text,/1️⃣0️⃣ Table/);
+ assert.match(text,/1️⃣ <b>Table/);
+ assert.match(text,/Блайнды: 5\/10\n2️⃣ <b>Table/);
+ assert.match(text,/1️⃣0️⃣ <b>Table/);
  assert.doesNotMatch(text,/Блайнды: 5\/10\n\n[0-9]/);
+});
+
+test('HTML is enabled and external names are escaped; page tags stay balanced',async t=>{
+ const pages=c.tablePages([{leagueId:'184691',playerCount:2,playType:'NLH',deskName:'A < B & C',blindAnnotation:'5/10'}],'cash');
+ assert.match(pages[0],/<b>ХОЛДЕМ<\/b>/);assert.match(pages[0],/<b>A &lt; B &amp; C<\/b>/);
+ for(const page of [...pages,...c.schedulePages()])for(const tag of ['b','i'])assert.equal((page.match(new RegExp('<'+tag+'>','g'))||[]).length,(page.match(new RegExp('</'+tag+'>','g'))||[]).length);
+ assert.match(c.schedulePages()[0],/<b>Меджик/);
+ const old=global.fetch;t.after(()=>global.fetch=old);let payload;
+ global.fetch=async(url,opts)=>{payload=JSON.parse(opts.body);return {json:async()=>({ok:true})};};
+ await c.handle({message:{text:'/расписание',chat:{id:1},message_id:5}},'test');
+ assert.equal(payload.parse_mode,'HTML');
 });
