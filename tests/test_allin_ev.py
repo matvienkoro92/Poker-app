@@ -46,6 +46,21 @@ class Equity(unittest.TestCase):
   self.assertEqual(ev.hero_showdown_equity(r,'1',self.binary)['status'],'no_hero_allin')
   r['base_data']['opt']['3']={'type':'5','userId':'1','bet':1,'card':''}
   result=ev.hero_showdown_equity(r,'1',self.binary);self.assertEqual(result['boardCards'],5);self.assertEqual(result['share'],1);self.assertEqual(result['runouts'],1)
+ def test_unique_side_pot_deductions(self):
+  pots=[(300,7),(100,3)];actual=[[0,0,1],[0,1,0]];players=['1','2','3'];bets={'1':100,'2':100,'3':100};scores={'1':-100,'2':-10,'3':170}
+  self.assertEqual(ev.infer_net_pots(pots,actual,players,scores,bets),[270,90])
+  self.assertIsNone(ev.infer_net_pots(pots,[[1,0,0],[1,0,0]],players,{'1':260,'2':-100,'3':-100},bets))
+ def test_missing_board_accepts_completed_reconciled_ledger(self):
+  r=self.raw();r['base_data']['opt'].pop('2');r['StartTime']=1;r['EndTime']=2
+  for i,(kind,pid) in enumerate([('96','1'),('96','2'),('95','1'),('95','2')],2):r['base_data']['opt'][str(i)]={'type':kind,'userId':pid,'bet':0,'card':''}
+  result=ev.inspect(r,'1',self.binary,False);self.assertEqual(result['status'],'eligible');self.assertEqual(result['validation'],'completed_ledger_without_final_board')
+ def test_only_tied_players_allow_sub_chip_remainder(self):
+  r=self.raw();r['base_data']['card']=[['1','0','101','112'],['2','0','201','212']];r['base_data']['opt']['2']['card']=['310','402','211','408','304'];r['Score1']=50;r['Score2']=-50
+  self.assertEqual(ev.inspect(r,'1',self.binary,False)['validation'],'split_pot_chip_remainder')
+  r['Score1']=100;r['Score2']=-100;self.assertEqual(ev.inspect(r,'1',self.binary,False)['status'],'unresolved')
+ def test_opponent_allin_matched_by_hero_call(self):
+  r=self.raw();r['base_data']['opt']={'0':{'type':'94','userId':'-1','bet':0,'card':['102','203','304']},'1':{'type':'5','userId':'2','bet':100,'card':''},'2':{'type':'2','userId':'1','bet':100,'card':''}}
+  result=ev.matched_showdown_equity(r,'1',self.binary);self.assertEqual(result['status'],'calculated');self.assertEqual(result['boardCards'],3);self.assertEqual(result['runouts'],990)
  def test_unmatched_excess_is_returned(self):
   r=self.raw();r['base_data']['opt']['0']['bet']=200
   self.assertTrue(ev.inspect(r,'1',self.binary,False)['actionsReconcile'])

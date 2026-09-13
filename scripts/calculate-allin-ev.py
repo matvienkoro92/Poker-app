@@ -3,6 +3,7 @@
 Net pots retain the hand's observed total deduction; multi-pot deductions are not guessed.
 """
 import argparse,collections,decimal,itertools,json,pathlib,sqlite3,subprocess
+from fractions import Fraction
 D=decimal.Decimal
 METHOD='exact-runouts-fixed-deduction-v1'
 def mapping(s):return {p.split(':')[0]:int(p.split(':')[1]) for p in str(s).split(',') if ':' in p}
@@ -33,6 +34,44 @@ def hero_showdown_equity(raw,hero,binary):
  if len(holes)!=len(players) or any(len(h)!=2 for h in holes):return {'status':'missing_cards'}
  runs,shares=equity(binary,holes,[card(c) for c in at_allin],[(1<<len(players))-1])
  return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(at_allin),'opponents':len(players)-1,'runouts':runs,'method':'hero-allin-vs-final-contenders-v1'}
+def matched_showdown_equity(raw,hero,binary):
+ """Equity at matched effective all-in vs final contenders; later folds are conditioned on."""
+ base=raw['base_data'];events=[e for _,e in sorted(base['opt'].items(),key=lambda p:int(p[0]))]
+ active={str(c[0]) for c in base['card']}-{str(e.get('userId')) for e in events if str(e['type'])=='10'}
+ if hero not in active or len(active)<2:return {'status':'no_contested_showdown'}
+ board=[];spent=collections.Counter();anchor=None;target=None;hero_allin=False
+ for e in events:
+  code=str(e['type']);pid=str(e.get('userId'))
+  if code=='94' and isinstance(e.get('card'),list):board=list(e['card'])
+  if code in ('2','3','5','18','19','20','30'):spent[pid]+=amount(e)
+  if code=='5' and pid==hero:hero_allin=True
+  if code=='5' and pid in active and target is None:target=pid
+  if target:
+   others=[p for p in active if p!=hero]
+   if target==hero:
+    if any(spent[p]>=spent[hero] for p in others):anchor=list(board);break
+   elif spent[hero]>=spent[target] or hero_allin:anchor=list(board);break
+ if anchor is None:return {'status':'unmatched_allin'}
+ players=sorted(active);holes=[[card(c) for c in row[2:]] for p in players for row in base['card'] if str(row[0])==p]
+ if len(holes)!=len(players) or any(len(h)!=2 for h in holes):return {'status':'missing_cards'}
+ runs,shares=equity(binary,holes,[card(c) for c in anchor],[(1<<len(players))-1])
+ return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(anchor),'opponents':len(players)-1,'runouts':runs,'method':'matched-allin-vs-final-contenders-v1'}
+def infer_net_pots(pots,actual,players,scores,bets):
+ """Solve each net pot only when observed winner payouts give a unique solution."""
+ n=len(pots);matrix=[[Fraction(str(actual[j][i])) for j in range(n)]+[Fraction(scores[p]+bets[p])] for i,p in enumerate(players)]
+ rank=0;pivots=[]
+ for col in range(n):
+  pivot=next((i for i in range(rank,len(matrix)) if matrix[i][col]),None)
+  if pivot is None:continue
+  matrix[rank],matrix[pivot]=matrix[pivot],matrix[rank];v=matrix[rank][col];matrix[rank]=[x/v for x in matrix[rank]]
+  for i in range(len(matrix)):
+   if i!=rank:
+    v=matrix[i][col];matrix[i]=[x-v*y for x,y in zip(matrix[i],matrix[rank])]
+  pivots.append(col);rank+=1
+ if rank!=n or any(not any(row[:n]) and row[n] for row in matrix):return None
+ result=[0.0]*n
+ for i,col in enumerate(pivots):result[col]=float(matrix[i][n])
+ return result if all(0<=v<=pots[i][0] for i,v in enumerate(result)) else None
 def inspect(raw,hero,binary,calculate=True):
  base=raw['base_data'];events=[e for _,e in sorted(base['opt'].items(),key=lambda p:int(p[0]))]
  active={str(c[0]) for c in base['card']};board=[];allins=[];last_board=[];money=collections.Counter();ante=0;special=False
@@ -53,8 +92,8 @@ def inspect(raw,hero,binary,calculate=True):
  if not relevant:return {'status':'not_applicable'}
  def skip(reason):return {'status':'unresolved','reason':reason}
  if special:return skip('special_runout')
- if len(board)!=5:return skip('missing_final_board')
- if last_board!=relevant[0]:return skip('betting_after_allin_street')|{'showdownEquity':hero_showdown_equity(raw,hero,binary) if calculate else {'status':'not_calculated'}}
+ missing_board=len(board)!=5
+ if last_board!=relevant[0]:return skip('betting_after_allin_street')|{'showdownEquity':matched_showdown_equity(raw,hero,binary) if calculate else {'status':'not_calculated'}}
  bets=mapping(raw['bet_list']);scores={str(raw['UserId'+str(i)]):int(raw['Score'+str(i)]) for i in range(1,11) if str(raw.get('UserId'+str(i),'0'))!='0'}
  if set(bets)-set(scores):return skip('contribution_players')
  for p in set(scores)-set(bets):
@@ -85,15 +124,31 @@ def inspect(raw,hero,binary,calculate=True):
  pots=[(pot,mask) for mask,pot in merged.items()]
  house=-sum(scores.values())
  if house<0 or house>sum(bets.values())*.2:return skip('unexplained_payout')
- if house and len(pots)>1:return skip('side_pot_deduction')
- _,actual=equity(binary,holes,[card(c) for c in board],[mask for _,mask in pots])
- net_pots=[pot-house if len(pots)==1 else pot for pot,_ in pots]
- payouts={p:sum(net_pots[j]*actual[j][i] for j in range(len(pots))) for i,p in enumerate(players)}
- if any(abs(scores[p]+bets[p]-payouts.get(p,0))>len(players) for p in bets):return skip('payout_does_not_reconcile')
- if not calculate:return {'status':'eligible','street':len(last_board),'pots':len(pots),'house':house,'actionsReconcile':reconciled}
+ validation='board_and_payouts';rounding=0
+ if missing_board:
+  terminal={str(e.get('userId')) for e in events if str(e['type'])=='96'}
+  runout={str(e.get('userId')) for e in events if str(e['type'])=='95'}
+  if not (active<=terminal and active<=runout and int(raw.get('EndTime',0))>int(raw.get('StartTime',0))):return skip('missing_final_board')
+  if len(pots)!=1 or not reconciled:return skip('missing_board_ledger')
+  if any(scores[p]+bets[p]<0 or (p not in active and scores[p]!=-bets[p]) for p in bets):return skip('payout_does_not_reconcile')
+  net_pots=[pots[0][0]-house];validation='completed_ledger_without_final_board'
+ else:
+  _,actual=equity(binary,holes,[card(c) for c in board],[mask for _,mask in pots])
+  if house and len(pots)>1:
+   net_pots=infer_net_pots(pots,actual,players,scores,bets)
+   if net_pots is None:return skip('side_pot_deduction')
+   validation='uniquely_reconstructed_net_pots'
+  else:net_pots=[pot-house if len(pots)==1 else pot for pot,_ in pots]
+  payouts={p:sum(net_pots[j]*actual[j][i] for j in range(len(pots))) for i,p in enumerate(players)}
+  residual={p:scores[p]+bets[p]-payouts.get(p,0) for p in bets}
+  if any(abs(v)>len(players) for v in residual.values()):
+   tied={players[i] for shares in actual for i,share in enumerate(shares) if 0<share<1}
+   if not tied or abs(sum(residual.values()))>1e-6 or any((p not in tied and abs(v)>1e-6) or abs(v)>=100 for p,v in residual.items()):return skip('payout_does_not_reconcile')
+   rounding=max(abs(v) for v in residual.values());validation='split_pot_chip_remainder'
+ if not calculate:return {'status':'eligible','street':len(last_board),'pots':len(pots),'house':house,'actionsReconcile':reconciled,'validation':validation,'splitRemainderMinor':rounding}
  runs,shares=equity(binary,holes,[card(c) for c in last_board],[mask for _,mask in pots])
  hero_index=players.index(hero);ev=sum(net_pots[j]*shares[j][hero_index] for j in range(len(pots)))-bets[hero]
- return {'status':'calculated','method':METHOD,'resultMinor':round(ev,6),'runouts':runs,'boardCards':len(last_board),'pots':len(pots),'deductionMinor':house,'actionsReconcile':reconciled}
+ return {'status':'calculated','method':METHOD,'resultMinor':round(ev,6),'runouts':runs,'boardCards':len(last_board),'pots':len(pots),'deductionMinor':house,'actionsReconcile':reconciled,'validation':validation,'splitRemainderMinor':rounding}
 def run(args):
  text=pathlib.Path(args.projection).read_text();data=json.loads(text.removeprefix('window.Poker21BulkSample = ').rstrip(';\n'));allowed={r['handId']:r for r in data['rows']};results={};counts=collections.defaultdict(collections.Counter)
  db=sqlite3.connect('file:'+str(pathlib.Path(args.db).resolve())+'?mode=ro',uri=True)
