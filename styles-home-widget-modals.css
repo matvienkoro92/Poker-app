@@ -10238,3 +10238,7 @@ body.club-choice-vote-open {
  html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .private-cash-modal__body{max-height:none!important;min-height:0;overflow-y:auto}
 }
 html:is(.app--telegram-miniapp,.poker-telegram-miniapp) :is(.sng-champions-modal__bracket-map-wrap--expanded,.sng-champions-modal__bracket-map-wrap--fit){top:calc(var(--tg-modal-top-safe,12px) + 8px)}
+
+/* Join and share actions form a compact stack. */
+.sng-champions-modal .club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock{padding-bottom:0!important}
+.sng-champions-modal .club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock + .club-choice-vote-modal__footer{padding-top:0!important;margin-top:0!important;border-top:0}

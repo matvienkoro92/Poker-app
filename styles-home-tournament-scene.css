@@ -553,7 +553,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   top: auto !important; bottom: .5% !important; left: 0 !important; width: 100% !important; height: auto !important; aspect-ratio: 3 / 1;
   padding: 0 !important; z-index: 6;
   border: 0 !important; border-radius: 0 0 8% 8% !important;
-  background: url('./assets/home-bonus-tray-round-v3-light.webp') center / 100% 100% no-repeat !important;
+  background: url('./assets/home-bonus-blue-tray-v4.webp') center / 100% 100% no-repeat !important;
   box-shadow: none !important; color: #ffe5b1 !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__title { display: none !important; }
@@ -567,9 +567,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
   --chip-position: 0%;
   position: relative !important; inset: auto !important; width: 100% !important; height: 100% !important;
-  display: grid !important; grid-template-rows: 5cqw 4cqw 3.5cqw !important;
+  display: grid !important; grid-template-rows: 4cqw 4cqw 3cqw !important;
   align-content: start !important; justify-items: center !important; gap: .2cqw !important;
-  padding: 5cqw 1cqw 0 !important; transform: none !important;
+  padding: 5cqw 3cqw 0 !important; transform: none !important;
   border: 0 !important; border-radius: 45% 45% 10% 10% !important;
   background: none !important;
   box-shadow: none !important; color: #ffe5b1 !important;
@@ -580,19 +580,19 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { --chip-position: 100%; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus[hidden] { display: none !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon {
-  width: 5cqw !important; height: 5cqw !important; color: #f3cd87 !important; fill: none !important;
+  width: 4cqw !important; height: 4cqw !important; color: #f3cd87 !important; fill: none !important;
   filter: drop-shadow(0 1px 1px #000) !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label {
-  color: #ffebbf !important; font: 800 2.8cqw/1.05 'Arial Narrow', Arial, sans-serif !important;
+  color: #ffebbf !important; font: 800 2.15cqw/1.05 'Arial Narrow', Arial, sans-serif !important;
   display: flex !important; align-items: center !important; justify-content: center !important;
   min-height: 0 !important; white-space: pre-line !important; text-shadow: 0 1px 2px #000 !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount {
-  color: #ffe5b1 !important; font: 900 3.8cqw/1 Impact, 'Arial Narrow', sans-serif !important;
+  color: #ffe5b1 !important; font: 900 2.7cqw/1 Impact, 'Arial Narrow', sans-serif !important;
   white-space: nowrap !important; letter-spacing: -.035em !important; text-shadow: 0 1px 2px #000 !important;
 }
-#app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount { font-size: 2.8cqw !important; }
+#app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount { font-size: 2.1cqw !important; }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {
   position: absolute !important; top: auto !important; bottom: 17% !important; left: 14% !important; width: 72% !important; height: 13%;
   display: flex !important; justify-content: center; align-items: center;
@@ -612,3 +612,11 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:not(.home-last-longer-dock__end):not(.home-last-longer-hint) {
   flex-shrink: 0; white-space: nowrap;
 }
+
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table{background:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before{content:"";position:absolute;inset:0;background:url('./assets/home-bonus-blue-tray-v4.webp') center/100% 100% no-repeat;mask:url('./assets/home-bonus-blue-tray-mask.svg') center/100% 100% no-repeat;-webkit-mask:url('./assets/home-bonus-blue-tray-mask.svg') center/100% 100% no-repeat;pointer-events:none}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before{display:block!important;opacity:1!important;transform:none!important;z-index:0;filter:none!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid,#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note{z-index:1}
+
+/* Matte footer replaces the reflective tray beneath the chips. */
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note{left:4%!important;width:92%!important;bottom:8%!important;height:18%!important;background:#0b1012!important;border:1px solid #746044!important;border-radius:6px!important;box-shadow:none!important}
