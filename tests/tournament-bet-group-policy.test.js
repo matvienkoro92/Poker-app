@@ -39,3 +39,12 @@ test('event scope permits only messages in the configured club group',async t=>{
  assert.equal((await send('-100123','sendPhoto')).ok,false);
  assert.equal(sends,1);
 });
+test('SNG scope permits photo and text only in the configured club group',async t=>{
+ const old=global.fetch,oldId=process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID;
+ process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID='-100123';fail=false;
+ t.after(()=>{global.fetch=old;if(oldId===undefined)delete process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID;else process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID=oldId;});
+ global.fetch=async()=>({ok:true});await policy.protectGroup('-100123');await policy.protectGroup('-100999');
+ for(const method of ['sendPhoto','sendMessage'])assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:'-100123'})},'sng-application')).ok,true);
+ assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/sendPhoto',{body:JSON.stringify({chat_id:'-100999'})},'sng-application')).ok,false);
+ assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/forwardMessage',{body:JSON.stringify({chat_id:'-100123'})},'sng-application')).ok,false);
+});
