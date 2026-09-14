@@ -22,7 +22,7 @@ function startHistory(payload) {
   let mode = 'cash', metric = 'bb', selected = null;
   function showHistoryTab(tab){
     document.querySelectorAll('[data-history-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.historyTab===tab)));
-    document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=p.dataset.historyPanel!==tab);
+    document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=!p.dataset.historyPanel.split(' ').includes(tab));
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
   const positionByMode={cash:'',mtt:'',sng:''};
@@ -59,6 +59,7 @@ function startHistory(payload) {
   function renderProfitChart(data) {
     const graphUnit=metric==='resultMinor'?'resultMinor':'bb',label=graphUnit==='bb'?'bb':mode==='cash'?'ед':'фишек';
     const series=core.profitSeries(data.cells.flatMap(c=>c.hands),graphUnit),svg=$('profit-chart');svg.replaceChildren();
+    const axisFont=window.innerWidth<600?28:18;
     const lines=[['nonShowdown','#fb7185'],['showdown','#60a5fa'],['total','#4ade80']];
     if(series.evCalculated)lines.push(['allinEv','#fbbf24']);
     $('profit-ev-legend').hidden=!series.evCalculated;
@@ -67,12 +68,14 @@ function startHistory(payload) {
       'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
       'Для этой выборки нет рассчитанных выставлений all-in EV.';
     const vals=series.points.flatMap(p=>lines.map(([key])=>p[key]));let low=Math.min(0,...vals),high=Math.max(0,...vals);if(low===high){low-=1;high+=1;}const pad=(high-low)*.08;low-=pad;high+=pad;
-    const x=i=>65+i/Math.max(1,data.count)*815,y=v=>275-(v-low)/(high-low)*250;
+    const x=i=>95+i/Math.max(1,data.count)*785,y=v=>275-(v-low)/(high-low)*250;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
-    for(let i=0;i<=4;i++){const v=low+(high-low)*i/4;node('line',{x1:65,x2:880,y1:y(v),y2:y(v),stroke:'#273449'});node('text',{x:57,y:y(v)+4,'text-anchor':'end',fill:'#aab4c5','font-size':12},compactSigned(v));}
-    node('line',{x1:65,x2:880,y1:y(0),y2:y(0),stroke:'#64748b','stroke-dasharray':'4 4'});
-    for(let i=0;i<=4;i++){const n=Math.round(data.count*i/4);node('text',{x:x(n),y:297,'text-anchor':i===4?'end':i===0?'start':'middle',fill:'#aab4c5','font-size':12},number(n));}
-    node('text',{x:465,y:317,'text-anchor':'middle',fill:'#aab4c5','font-size':12},'Раздачи');
+    for(let i=0;i<=4;i++){const v=low+(high-low)*i/4;node('line',{x1:95,x2:880,y1:y(v),y2:y(v),stroke:'#273449'});node('text',{x:85,y:y(v)+4,'text-anchor':'end',fill:'#e8bc68','font-size':axisFont},compactSigned(v));}
+    node('line',{x1:95,x2:95,y1:25,y2:275,stroke:'#e8bc68','stroke-width':2});
+    node('line',{x1:95,x2:880,y1:275,y2:275,stroke:'#8dbfff','stroke-width':2});
+    node('line',{x1:95,x2:880,y1:y(0),y2:y(0),stroke:'#64748b','stroke-dasharray':'4 4'});
+    for(let i=0;i<=4;i++){const n=Math.round(data.count*i/4);node('text',{x:x(n),y:297,'text-anchor':i===4?'end':i===0?'start':'middle',fill:'#8dbfff','font-size':axisFont},number(n));}
+    node('text',{x:465,y:317,'text-anchor':'middle',fill:'#8dbfff','font-size':axisFont},'Раздачи');
     const drawdown=window.PokerHandInsights.summarize(data.cells.flatMap(c=>c.hands).map(h=>({...h,bb:graphUnit==='resultMinor'?h.resultMinor/100:h.bb}))).drawdown;
     if(drawdown.amount>0){
       node('rect',{x:x(drawdown.startIndex),y:25,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:250,fill:'#fb7185',opacity:.09});
@@ -81,7 +84,7 @@ function startHistory(payload) {
     for(const [key,color] of lines)node('path',{d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
     const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
     $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
-    svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-65)/815*data.count)));$('profit-values').textContent=describe(series.points[n]);};
+    svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-95)/785*data.count)));$('profit-values').textContent=describe(series.points[n]);};
     svg.onpointerleave=()=>{$('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';};
   }
   const insightSignals={};let insightsLoading=false,insightsError='';
@@ -149,8 +152,7 @@ function startHistory(payload) {
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,position:positionByMode[mode],handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
-    const filterCount=[$('hand-search').value.trim(),$('opponent-search').value.trim(),positionByMode[mode],appliedFrom||appliedTo].filter(Boolean).length;
-    $('filters-label').textContent='Фильтры и поиск'+(filterCount?' · '+filterCount:'');
+    document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
     renderProfitChart(data);
     $('position').value=positionByMode[mode];
     const allPositions=document.createElement('button');
@@ -213,8 +215,9 @@ function startHistory(payload) {
   }
     renderInsights(data,renderReplay);
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
-    $('metric').value=metric;
-    $('metric').options[0].textContent=mode==='cash'?'Результат, ед':'Результат, фишки';
+    $('metric').textContent=metric==='resultMinor'?'Фишки':metric==='bb100'?'bb/100':'bb';
+    $('metric').setAttribute('aria-label','Показатель: '+$('metric').textContent+'. Переключить');
+    document.querySelector('.date-picker summary').title='Период · МСК: '+(appliedFrom||'начало')+' — '+(appliedTo||'сегодня');
     $('total-count').textContent=number(data.count);
     const sortedDates=bulk.rows.filter(r=>r.mode===mode).map(r=>r.playedAt).sort();
     const labelDate=d=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow'}).format(new Date(d));
@@ -235,8 +238,13 @@ function startHistory(payload) {
     if(!cell.count){
       $('detail').insertAdjacentHTML('beforeend','<div class="empty-state"><strong>Нет подтверждённых раздач</strong>'+(mode!=='sng'?'В загруженной выборке эта рука не встречалась.':'История этого формата пока не загружена.')+' Нет данных — не значит результат 0.</div>');return;
     }
-    const result=document.createElement('p');result.className='big-result '+(value(cell)>0?'positive':value(cell)<0?'negative':'');result.textContent=signed(value(cell))+' '+unit();const header=document.createElement('div');header.className='hand-detail-header';const title=$('detail-title');title.before(header);header.append(title,result);
-    const count=document.createElement('p');count.className='note';count.textContent='Раздач: '+cell.count+' · в плюс: '+cell.wins+' · в минус: '+cell.losses+' · в ноль: '+cell.even;$('detail').append(count);
+    const visibleHands=cell.hands.filter(h=>h.resultMinor>0?outcomeFilters.positive:h.resultMinor<0?outcomeFilters.negative:outcomeFilters.positive&&outcomeFilters.negative);
+    visibleHands.sort((a,b)=>Math.abs(metric==='resultMinor'?b.resultMinor:b.bb)-Math.abs(metric==='resultMinor'?a.resultMinor:a.bb)||Date.parse(b.playedAt)-Date.parse(a.playedAt)||a.handId.localeCompare(b.handId));
+    const visibleStats={count:visibleHands.length,wins:0,losses:0,even:0,resultMinor:0,bb:0};
+    visibleHands.forEach(h=>{visibleStats.resultMinor+=h.resultMinor;visibleStats.bb+=h.bb;visibleStats[h.resultMinor>0?'wins':h.resultMinor<0?'losses':'even']++;});
+    visibleStats.bb100=visibleStats.count?visibleStats.bb*100/visibleStats.count:0;
+    const result=document.createElement('p');result.className='big-result '+(value(visibleStats)>0?'positive':value(visibleStats)<0?'negative':'');result.textContent=signed(value(visibleStats))+' '+unit();const header=document.createElement('div');header.className='hand-detail-header';const title=$('detail-title');title.before(header);header.append(title,result);
+    const count=document.createElement('p');count.className='note';count.textContent='Раздач: '+visibleStats.count+' · в плюс: '+visibleStats.wins+' · в минус: '+visibleStats.losses+' · в ноль: '+visibleStats.even;$('detail').append(count);
     const filters=document.createElement('div');filters.className='hand-outcome-filters';
     [['positive','Плюсовые'],['negative','Минусовые']].forEach(([key,text])=>{
       const label=document.createElement('label'),input=document.createElement('input');
@@ -245,7 +253,6 @@ function startHistory(payload) {
       label.append(input,document.createTextNode(text));filters.append(label);
     });const resultGroup=document.createElement('div');resultGroup.className='hand-result-group';header.append(resultGroup);resultGroup.append(result,filters);
     const list=document.createElement('div');list.className='hand-list';
-    const visibleHands=cell.hands.filter(h=>h.resultMinor>0?outcomeFilters.positive:h.resultMinor<0?outcomeFilters.negative:outcomeFilters.positive&&outcomeFilters.negative);
     if(!visibleHands.length){const empty=document.createElement('p');empty.className='note';empty.textContent='Нет раздач по выбранным фильтрам.';list.append(empty);}
 
     let shownHands=0;
@@ -274,14 +281,16 @@ function startHistory(payload) {
     if(from&&to&&from>to){$('date-status').textContent='Дата окончания раньше начала';return;}
     appliedFrom=from;appliedTo=to;render();$('date-status').textContent='';
   }));
-  ['hand-search','opponent-search'].forEach(id=>$(id).addEventListener('input',()=>{showHistoryTab('hands');render();}));
+  ['hand-search','opponent-search'].forEach(id=>$(id).addEventListener('input',()=>{showHistoryTab('search');render();}));
   $('position').addEventListener('change',e=>{positionByMode[mode]=e.target.value;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
   $('reset-filters').addEventListener('click',()=>{
-    $('hand-search').value='';$('opponent-search').value='';resetDateRange();
-    positionByMode[mode]='';selected=null;outcomeFilters.positive=true;outcomeFilters.negative=true;render();
+    $('hand-search').value='';$('opponent-search').value='';selected=null;render();
+    $('hand-search').focus();
   });
-  $('metric').addEventListener('change',e=>{metric=e.target.value;render();});
+  $('metric').addEventListener('click',()=>{const units=['bb','resultMinor','bb100'];metric=units[(units.indexOf(metric)+1)%units.length];render();});
+  $('date-close').addEventListener('click',()=>{if($('date-status').textContent)return;document.querySelector('.date-picker').open=false;document.querySelector('.date-picker summary').focus();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelector('.date-picker').open=false;}});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});
   render();
 }

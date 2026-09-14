@@ -9571,6 +9571,13 @@ body[data-view="my-summary"]{background:#080c0e}
  [data-view="my-summary"] .summary-card--bonus{grid-column:3/5}
  [data-view="my-summary"] .summary-card--raffles{grid-column:5/7}
 
+/* Highlight the entry to the player's hand history. */
+[data-view="my-summary"] .summary-card--starting-hands{
+ border-color:#ffad4eaa;
+ background:radial-gradient(ellipse at 80% 50%,#ff982d26,transparent 65%),linear-gradient(120deg,#33271c,#111416);
+ box-shadow:inset 0 0 24px #ffab4514,0 0 20px #ff982d30,0 0 5px #ffb65c38;
+}
+
 /* Center the player name between the summary header actions. */
 [data-view="my-summary"] .summary-header{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);align-items:center;gap:8px}
 [data-view="my-summary"] .summary-header .summary-heading{margin:0;font-size:clamp(18px,4vw,30px);min-width:0;line-height:1.2}
@@ -9589,3 +9596,11 @@ body[data-view="my-summary"]{background:#080c0e}
  [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) .summary-link{margin-top:auto;min-width:0;width:100%;padding:8px 3px!important;font-size:12px!important;gap:3px;border-radius:10px}
  [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) .summary-link span{display:none}
 }
+
+/* The entire Play card is its primary action, with native keyboard support. */
+[data-view="my-summary"] .summary-card-action{position:absolute;inset:0;z-index:4;display:block;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:inherit;background:transparent;cursor:pointer;text-decoration:none}
+[data-view="my-summary"] .summary-card-action:focus-visible{outline:3px solid #ffbd73;outline-offset:3px}
+[data-view="my-summary"] .summary-card--actionable:hover{border-color:#ffad4eaa;box-shadow:inset 0 0 24px #ffab4514,0 0 16px #ff982d26}
+[data-view="my-summary"] .summary-card--actionable:active{filter:brightness(1.12)}
+[data-view="my-summary"] .summary-card--actionable [data-summary-review]{z-index:5}
+[data-view="my-summary"] .summary-card--friends.summary-card--actionable #summary-friends{padding-right:0}

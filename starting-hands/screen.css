@@ -87,3 +87,24 @@
   .toolbar{gap:6px}
   .toolbar>.segments button{padding-inline:8px;font-size:12px}
 }
+
+/* Compact controls stay on a single row, with the period in a calendar popup. */
+.toolbar{grid-template-columns:auto auto minmax(0,1fr) 44px;gap:8px;position:relative}
+.toolbar>.segments{padding:3px;gap:2px}
+.toolbar>.segments button{padding:8px 10px;font-size:13px;min-height:38px}
+.metric-toggle{min-height:44px;min-width:58px;padding:6px;border:1px solid #d7ae4c;border-radius:10px;background:#f6c951;color:#251c05;font-weight:700;font-size:12px}
+.position-mini{width:100%;min-width:0;min-height:44px;padding:6px 2px;font-size:12px;border-radius:10px}
+.date-picker{position:static}
+.date-picker>summary{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:#111827;border:1px solid #39445c;border-radius:10px;cursor:pointer;list-style:none}
+.date-picker>summary::-webkit-details-marker{display:none}
+.date-picker[open]>summary{border-color:#f6c951;color:#f6c951}
+.date-popover{position:absolute;right:0;top:54px;z-index:10;width:min(320px,100%);padding:14px;border:1px solid #526078;border-radius:12px;background:#101827;box-shadow:0 12px 32px #0008}
+.date-popover .date-range input{font-size:12px;padding:6px}
+#date-close{display:block;margin:12px 0 0 auto;padding:8px 16px;min-height:40px;border:1px solid #526078;border-radius:8px;background:#25334c;color:inherit}
+@media(max-width:360px){.toolbar{gap:4px}.toolbar>.segments button{padding-inline:6px;font-size:12px}.metric-toggle{min-width:52px}}
+
+.history-navigation [data-history-tab="search"]{flex:0 0 44px;display:flex;align-items:center;justify-content:center;padding:8px}
+.history-navigation [data-history-tab="search"].has-query{color:#f6c951}
+.history-search-panel{margin-top:14px;padding:12px;border:1px solid #39445c;border-radius:12px}
+.history-search-panel .history-filters{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}
+.history-search-panel #reset-filters{margin:12px 0 0;min-height:40px;font-size:13px;padding:8px 12px}

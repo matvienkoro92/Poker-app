@@ -10,6 +10,7 @@
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
       if(id&&id!=='hero')id=id.slice('summary-card--'.length);
       card.hidden=groups[summaryTab].indexOf(id)<0;
+      makeCardAction(card);
     });
   }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
@@ -27,7 +28,32 @@
     var icon = icons[id] ? '<span class="summary-card-icon" aria-hidden="true">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + icons[id] + '</svg></span>' : '';
     return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '">' + art + icon + '<h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>';
   }
-  function put(id, html) { var el = document.getElementById("summary-" + id); if (el) el.innerHTML = html; }
+  function makeCardAction(card) {
+    if (!card || !card.matches(':is(.summary-card--starting-hands,.summary-card--spin,.summary-card--bonus,.summary-card--raffles,.summary-card--friends,.summary-card--reviews)')) return;
+    var action = card.querySelector(':scope > div > .summary-link:last-child');
+    if (!action) return;
+    var previous = card.querySelector(':scope > .summary-card-action');
+    if (previous) previous.remove();
+    action.setAttribute('aria-label', card.querySelector('h2').textContent + ': ' + action.textContent.replace('→', '').trim());
+    action.classList.remove('summary-link');
+    action.classList.add('summary-card-action');
+    action.replaceChildren();
+    card.appendChild(action);
+    card.classList.add('summary-card--actionable');
+  }
+  function put(id, html) {
+    var el = document.getElementById("summary-" + id);
+    if (el) {
+      el.innerHTML = html;
+      var card = el.closest && el.closest('.summary-card');
+      if (card) {
+        var previous = card.querySelector(':scope > .summary-card-action');
+        if (previous) previous.remove();
+        card.classList.remove('summary-card--actionable');
+        makeCardAction(card);
+      }
+    }
+  }
   function dateLabel(d) { return new Intl.DateTimeFormat("ru-RU", {timeZone:"Europe/Moscow", day:"numeric", month:"short", hour:"2-digit",minute:"2-digit"}).format(new Date(d)) + " мск"; }
   function request(path, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 12000);
@@ -102,6 +128,14 @@
     });
     return players;
   }
+  function achievementPlace(def, value, players) {
+    if (!players) return '<p class="summary-muted">Текущее место: данные пока недоступны.</p>';
+    if (value <= 0) return '<p class="summary-muted">Текущее место: пока вне рейтинга.</p>';
+    var others = players.filter(function (p) { return !winterRatingSamePlayer(p.nick, nickname); });
+    var place = 1 + others.filter(function (p) { return p[def.id] > value; }).length;
+    var tied = others.some(function (p) { return p[def.id] === value; });
+    return '<p class="summary-achievement-place">Текущее место: <b>' + num(place) + '</b>' + (tied ? ' · делите с другими игроками' : '') + '</p>';
+  }
   function achievementRival(def, value, players) {
     if (!players) return '<p class="summary-muted">Данные соперников пока недоступны.</p>';
     var others = players.filter(function (p) { return !winterRatingSamePlayer(p.nick, nickname) && p[def.id] > 0; });
@@ -131,7 +165,7 @@
     var hidden = []; try { hidden = JSON.parse(localStorage.getItem("my-summary-hidden:" + account) || "[]"); if (!Array.isArray(hidden)) hidden = []; } catch (_) {}
     put("achievements", '<details class="summary-achievement-picker"><summary>Выбрать ачивки для отслеживания</summary><p class="summary-muted">Отметьте нужные ачивки — они появятся ниже.</p><div class="summary-picks">' + defs.map(function (d) {return '<label><input type="checkbox" data-summary-pin="' + d.id + '"' + (hidden.indexOf(d.id) < 0 ? ' checked' : '') + '> ' + d.name + '</label>';}).join("") + '</div><p class="summary-muted" data-summary-catalog-status>Загружаем остальные ачивки…</p></details>' + defs.map(function (d) {
       var value = Number(d.value) || 0, next = d.tiers.find(function (n) {return n > value;});
-      return '<div class="summary-event" data-summary-progress="' + d.id + '"' + (hidden.indexOf(d.id) >= 0 ? ' hidden' : '') + '><strong>' + d.name + '</strong><p>' + num(value) + (next ? ' / ' + num(next) : '') + ' ' + d.unit + '</p><progress max="' + (next || value || 1) + '" value="' + value + '"></progress><p class="summary-muted">' + (next ? 'До следующей ступени: ' + num(next - value) + ' ' + d.unit : 'Все ступени открыты') + '</p>' + achievementRival(d, value, competitors) + '</div>';
+      return '<div class="summary-event" data-summary-progress="' + d.id + '"' + (hidden.indexOf(d.id) >= 0 ? ' hidden' : '') + '><strong>' + d.name + '</strong>' + achievementPlace(d, value, competitors) + '<p>' + num(value) + (next ? ' / ' + num(next) : '') + ' ' + d.unit + '</p><progress max="' + (next || value || 1) + '" value="' + value + '"></progress><p class="summary-muted">' + (next ? 'До следующей ступени: ' + num(next - value) + ' ' + d.unit : 'Все ступени открыты') + '</p>' + achievementRival(d, value, competitors) + '</div>';
     }).join("") + '<div id="summary-extra-achievements"></div>' + link("Все достижения", "profile") + '<div class="summary-event"><h3 class="summary-rival-heading">Ближайший конкурент</h3><div id="summary-rival"></div></div>');
     var heroes = window.POKER_CLUB_NEWS_DATA && window.POKER_CLUB_NEWS_DATA.dayHeroes;
     put("rival", '<p class="summary-muted">Данные гонки пока недоступны.</p>');
