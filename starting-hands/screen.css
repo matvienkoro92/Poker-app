@@ -108,3 +108,16 @@
 .history-search-panel{margin-top:14px;padding:12px;border:1px solid #39445c;border-radius:12px}
 .history-search-panel .history-filters{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}
 .history-search-panel #reset-filters{margin:12px 0 0;min-height:40px;font-size:13px;padding:8px 12px}
+
+/* Keep the field prompt separate from the native “all positions” option. */
+.position-filter{position:relative;min-width:0;width:100%}
+.position-filter .position-mini{appearance:none;padding-right:28px}
+.position-filter::after{content:"";position:absolute;right:12px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid #e0e6ef;border-bottom:1.5px solid #e0e6ef;transform:rotate(45deg);pointer-events:none}
+.position-filter__placeholder{display:none;position:absolute;left:3px;top:50%;transform:translateY(-50%);font-size:12px;color:#e0e6ef;pointer-events:none}
+.position-filter:has(option[value=""]:checked) .position-mini{color:transparent}
+.position-filter:has(option[value=""]:checked) .position-filter__placeholder{display:block}
+.position-filter .position-mini option{color:#e0e6ef;background:#111827}
+
+.profit-legend label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.profit-legend label[hidden]{display:none}
+.profit-legend input[type=checkbox]{width:15px;height:15px;margin:0;accent-color:currentColor;cursor:pointer}

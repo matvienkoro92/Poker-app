@@ -149,13 +149,75 @@
       '</span><strong>' + esc(rival.nick) + '</strong> — ' + num(rival[def.id]) + ' ' + def.unit +
       '</p><p class="summary-muted">' + (gap === 0 ? 'Результаты равны.' : (ahead.length ? 'До соперника: ' : 'Ваш отрыв: ') + num(gap) + ' ' + def.unit + '.') + '</p>';
   }
+  async function shareResults(button) {
+    if (button.dataset.busy) return;
+    button.dataset.busy = "1";
+    var url = "";
+    try {
+      if (document.fonts) await document.fonts.ready;
+      var card = button.closest(".summary-card"), rect = card.getBoundingClientRect();
+      var width = Math.ceil(rect.width), height = Math.ceil(rect.height), clone = card.cloneNode(true);
+      var originals = [card].concat(Array.from(card.querySelectorAll("*")));
+      var copies = [clone].concat(Array.from(clone.querySelectorAll("*")));
+      originals.forEach(function (original, i) {
+        var style = getComputedStyle(original), copy = copies[i];
+        Array.from(style).forEach(function (key) { copy.style.setProperty(key, style.getPropertyValue(key)); });
+        Array.from(copy.style).forEach(function (key) { if (/^(inset|margin|padding)-(inline|block)/.test(key)) copy.style.removeProperty(key); });
+        copy.style.animation = "none"; copy.style.transition = "none";
+      });
+      clone.style.margin = "0"; clone.style.width = width + "px"; clone.style.height = height + "px";
+      clone.style.position = "relative"; clone.style.inset = "auto"; clone.style.transform = "none";
+      button.disabled = true;
+      async function embed(url) {
+        var response = await fetch(url); if (!response.ok) throw new Error("font");
+        var blob = await response.blob();
+        return new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () {resolve(reader.result);}; reader.onerror = reject; reader.readAsDataURL(blob); });
+      }
+      var fontCss = "";
+      async function fonts(rules, base) {
+        for (var rule of Array.from(rules)) {
+          if (rule.type === 5) {
+            var css = rule.cssText, matches = Array.from(css.matchAll(/url\(["']?([^"')]+)["']?\)/g));
+            for (var match of matches) css = css.replace(match[0], 'url("' + await embed(new URL(match[1], base || location.href).href) + '")');
+            fontCss += css;
+          } else if (rule.cssRules) await fonts(rule.cssRules, base);
+        }
+      }
+      for (var sheet of Array.from(document.styleSheets)) {
+        var rules; try {rules = sheet.cssRules;} catch (_) {continue;}
+        await fonts(rules, sheet.href);
+      }
+      var wrapper = document.createElement("div"); wrapper.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+      wrapper.style.cssText = "width:" + width + "px;height:" + height + "px;background:#090d10";
+      var fontStyle = document.createElement("style"); fontStyle.textContent = fontCss; wrapper.append(fontStyle, clone);
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '"><foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(wrapper) + '</foreignObject></svg>';
+      var image = new Image(); await new Promise(function (resolve, reject) {image.onload=resolve;image.onerror=reject;image.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);});
+      var canvas = document.createElement("canvas"); canvas.width=width*2;canvas.height=height*2;
+      var ctx=canvas.getContext("2d");ctx.scale(2,2);ctx.drawImage(image,0,0);
+      var png=await new Promise(function(resolve){canvas.toBlob(resolve,"image/png");});if(!png)throw new Error("png");
+      var file=new File([png],"poker21-tournament-results.png",{type:"image/png"});url=URL.createObjectURL(png);
+      var dialog=document.createElement("dialog");dialog.className="summary-share-preview";
+      dialog.innerHTML='<button type="button" data-close>Закрыть ×</button><img alt="Турнирные результаты — копия блока"><div><button type="button" data-send>Поделиться картинкой</button> <a data-save download="poker21-tournament-results.png">Скачать PNG</a></div><p role="status"></p>';
+      dialog.querySelector("img").src=url;dialog.querySelector("[data-save]").href=url;
+      dialog.querySelector("[data-close]").onclick=function(){dialog.close();};
+      var canShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}));
+      dialog.querySelector("[data-send]").hidden=!canShare;
+      dialog.querySelector("[data-send]").onclick=async function(){try{await navigator.share({files:[file]});}catch(error){if(error.name!=="AbortError")dialog.querySelector("p").textContent="Не удалось отправить. Скачайте PNG и прикрепите его к сообщению.";}};
+      if(!canShare)dialog.querySelector("p").textContent="Скачайте картинку и прикрепите её к сообщению. На iPhone можно зажать изображение и сохранить в Фото.";
+      var savedUrl=url;dialog.addEventListener("close",function(){URL.revokeObjectURL(savedUrl);dialog.remove();},{once:true});
+      document.body.appendChild(dialog);dialog.showModal();url="";
+    } catch (_) {
+      if(url)URL.revokeObjectURL(url);
+      window.alert("Не удалось подготовить картинку. Попробуйте ещё раз.");
+    } finally {button.disabled=false;delete button.dataset.busy;}
+  }
   function renderStats(stats) {
     var nowParts = new Intl.DateTimeFormat("en-CA", {timeZone:"Europe/Moscow",year:"numeric",month:"2-digit"}).formatToParts(new Date());
     var month = nowParts.find(function (p) {return p.type === "year";}).value + "-" + nowParts.find(function (p) {return p.type === "month";}).value;
     var rows = (stats.rows || []).filter(function (r) {return Number(r.reward) > 0;});
     var current = rows.filter(function (r) {return monthKey(r.date) === month;});
     var latest = rows.slice().sort(function (a,b) {return stamp(b).localeCompare(stamp(a));})[0];
-    put("results", '<span class="summary-kicker">' + esc(new Intl.DateTimeFormat("ru-RU", {month:"long", timeZone:"Europe/Moscow"}).format(new Date())) + '</span><strong class="summary-value">' + num(current.reduce(function (sum,r) {return sum + Number(r.reward);},0)) + ' ₽</strong><p>Учтённые призовые · попаданий в призы: ' + current.length + '</p>' + (latest ? '<div class="summary-event"><span class="summary-kicker">Последнее призовое место · ' + esc(latest.date) + '</span><strong>' + esc(latest.tournamentLabel || latest.tournament || "Турнир") + '</strong><p>' + esc(latest.place) + '-е место · ' + num(latest.reward) + ' ₽</p></div>' : '<p class="summary-muted">Призовых результатов пока нет.</p>') + '<p class="summary-muted">По опубликованным результатам клуба. Это призовые, не чистая прибыль.</p>' + link("Мой профиль", "profile"));
+    put("results", '<span class="summary-kicker">' + esc(new Intl.DateTimeFormat("ru-RU", {month:"long", timeZone:"Europe/Moscow"}).format(new Date())) + '</span><strong class="summary-value">' + num(current.reduce(function (sum,r) {return sum + Number(r.reward);},0)) + ' ₽</strong><p>Учтённые призовые · попаданий в призы: ' + current.length + '</p>' + (latest ? '<div class="summary-event"><span class="summary-kicker">Последнее призовое место · ' + esc(latest.date) + '</span><strong>' + esc(latest.tournamentLabel || latest.tournament || "Турнир") + '</strong><p>' + esc(latest.place) + '-е место · ' + num(latest.reward) + ' ₽</p></div>' : '<p class="summary-muted">Призовых результатов пока нет.</p>') + '<p class="summary-muted">По опубликованным результатам клуба. Это призовые, не чистая прибыль.</p>' + link("Мой профиль", "profile") + ' <button type="button" class="summary-link" data-summary-share-results>Поделиться ↗</button>');
     var defs = [
       {id:"wins",name:"Король турниров",value:stats.firstPlaces,tiers:[1,15,50,100,250],unit:"побед"},
       {id:"hero",name:"Герой дня",value:(stats.dayHeroes || []).length,tiers:[1,5,15,30,100],unit:"раз"},
@@ -247,7 +309,7 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<p class="summary-muted" role="status">Загружаем…</p>';
-    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("achievements","Мой прогресс",loading) + section("results","Турнирные результаты",loading) + section("reviews","Мои разборы",loading);
+    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("achievements","Мой прогресс",loading) + section("reviews","Мои разборы",loading);
     applySummaryTab();
     friends();
     function valid() {return seq === generation;}
@@ -306,6 +368,8 @@
   window.addEventListener('poker-telegram-auth',closeStartingHands);
   window.initMySummary = init;
   document.addEventListener("click", function (e) {
+    var shareButton=e.target.closest("[data-summary-share-results]");
+    if(shareButton){e.preventDefault();shareResults(shareButton);return;}
     var summaryButton=e.target.closest('[data-summary-tab]');
     if(summaryButton){summaryTab=summaryButton.dataset.summaryTab;applySummaryTab();}
     if(e.target.closest("[data-starting-hands-open]"))openStartingHands();

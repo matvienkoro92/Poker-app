@@ -9604,3 +9604,9 @@ body[data-view="my-summary"]{background:#080c0e}
 [data-view="my-summary"] .summary-card--actionable:active{filter:brightness(1.12)}
 [data-view="my-summary"] .summary-card--actionable [data-summary-review]{z-index:5}
 [data-view="my-summary"] .summary-card--friends.summary-card--actionable #summary-friends{padding-right:0}
+
+.summary-share-preview{width:min(92vw,620px);max-height:90dvh;overflow:auto;padding:16px;border:1px solid #a78b55;border-radius:18px;background:#0d1215;color:#f6e8c9}
+.summary-share-preview::backdrop{background:#000b}
+.summary-share-preview img{display:block;width:100%;height:auto;margin:12px 0;-webkit-touch-callout:default}
+.summary-share-preview button,.summary-share-preview a{display:inline-block;padding:10px 14px;border:1px solid #a78b5577;border-radius:10px;background:#1b2326;color:#ffd899;font:inherit;text-decoration:none;cursor:pointer}
+.summary-share-preview p{font-size:13px;color:#bac3c3}

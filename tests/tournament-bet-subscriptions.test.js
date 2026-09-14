@@ -7,7 +7,7 @@ const fs = require("node:fs");
 function setup() {
   const members = new Set();
   const messages = [];
-  let reachable = true;
+  let reachable = true, groupId = "";
   const pipeline = async (commands) => commands.map(([cmd, key, id]) => {
     if (cmd === "SISMEMBER") return { result: Number(members.has(id)) };
     if (cmd === "SADD") members.add(id);
@@ -15,6 +15,7 @@ function setup() {
     return { result: 1 };
   });
   const deps = {
+    "./telegram-group-policy": { eventChatId: async () => groupId },
     "./redis": { pipeline, sscanall: async () => [...members] },
     "./account-id": { getPreferredUserIdByDtId: async () => "tg_42" },
     "./telegram-participation-gate": { canReachTelegramBot: async () => reachable },
@@ -23,7 +24,7 @@ function setup() {
   };
   const context = { module: { exports: {} }, require: (id) => deps[id], process: { env: {} }, URL, console };
   vm.runInNewContext(fs.readFileSync(require.resolve("../lib/tournament-bet-subscriptions"), "utf8"), context);
-  return { api: context.module.exports, members, messages, setReachable: (value) => { reachable = value; } };
+  return { api: context.module.exports, members, messages, setReachable: (value) => { reachable = value; }, setGroup: (id) => {groupId = id;} };
 }
 const auth = { ok: true, memberId: "tg_123", identity: { id: 123 } };
 
@@ -55,7 +56,7 @@ test("new events notify only subscribers with an event deep link and stake", asy
   assert.match(messages[0].text, /Ставка на себя: 500 ₽/);
   assert.match(messages[0].text, /Magic MKO в 18 мск/);
   assert.match(messages[0].text, /Сейчас участников 0\./);
-  assert.match(messages[0].text, /Регистрация закроется в 19:30 мск/);
+  assert.match(messages[0].text, /Регистрация закроется в 20:00 мск/);
   assert.doesNotMatch(messages[0].text, /Турнир вечера/);
   assert.equal(new URL(messages[0].buttonUrl).searchParams.get("startapp"), "tournament_bet_tb_test_1");
   await api.subscribe(auth, "ID123456", false, "token");
@@ -106,4 +107,16 @@ test("personal event creator receives confirmation with their initial bank", asy
   assert.equal(messages[0].chat_id, "111");
   assert.match(messages[0].text, /Ваша ставка: 700 ₽/);
   assert.match(messages[0].text, /Общий банк: 700 ₽/);
+});
+
+
+test("configured group receives creation and entrant announcements with event links", async () => {
+  const { api, messages, setGroup } = setup(); setGroup("-1001227353220");
+  const event={id:"tb_group_test",title:"Меджик",startingBank:5000,stakePrice:500,entries:[]};
+  await api.notify(event,"test");
+  const entrant={accountId:"ID123456",memberId:"tg_123",name:"Игрок",stake:500};event.entries.push(entrant);
+  await api.notifyParticipantJoined(event,entrant,5500,"test");
+  assert.equal(messages.length,2);
+  for(const message of messages){assert.equal(message.chat_id,"-1001227353220");assert.equal(message.notificationScope,"tournament-bet");assert.match(message.buttonUrl,/startapp=tournament_bet_tb_group_test/);}
+  assert.match(messages[0].text,/Новая/);assert.match(messages[1].text,/Игрок/);assert.match(messages[1].text,/5\s500/);
 });

@@ -257,7 +257,18 @@
     return '<time class="tournament-bet-modal__event-date" datetime="' + esc(value) + '">' + esc(date.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow", day: "numeric", month: "long", year: "numeric" })) + '</time>';
   }
 
+  var hiddenCancelledEvents = [];
+  try { var savedHidden = JSON.parse(localStorage.getItem("pokerHiddenCancelledBetEvents") || "[]"); if (Array.isArray(savedHidden)) hiddenCancelledEvents = savedHidden.filter(function (id) { return typeof id === "string"; }); } catch (_) {}
+  function setCancelledEventHidden(id, hidden) {
+    hiddenCancelledEvents = hiddenCancelledEvents.filter(function (item) { return item !== id; });
+    if (hidden) hiddenCancelledEvents.push(id);
+    try { localStorage.setItem("pokerHiddenCancelledBetEvents", JSON.stringify(hiddenCancelledEvents)); } catch (_) {}
+  }
+
   function closedEventHtml(data, archived) {
+    if (data.status === "cancelled" && hiddenCancelledEvents.indexOf(String(data.id)) !== -1) {
+      return '<section class="tournament-bet-modal__empty"><p>Отменённое событие скрыто из списка.</p><button type="button" data-tournament-bet-restore="' + esc(data.id) + '">Показать снова</button></section>';
+    }
     var entries = Array.isArray(data.entries) ? data.entries : [];
     var winner = entries.find(function (entry) { return entry.winner; });
     var winnerArt = winner && typeof window.pokerGetSummerRatingPlayerArt === "function" ? window.pokerGetSummerRatingPlayerArt(winner.name) : null;
@@ -278,6 +289,7 @@
       '<button type="button" class="tournament-bet-result-share" data-tournament-bet-result-share aria-label="Поделиться изображением карточки">Поделиться ↗</button>' +
       '<span class="tournament-bet-modal__result-toggle">Участники: ' + entries.length + ' · Подробнее <span aria-hidden="true">⌄</span></span></summary>' +
       '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, data); }).join("") + '</div>' +
+      (cancelled ? '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-dismiss="' + esc(data.id) + '">Убрать из списка</button></div>' : '') +
       (archived ? "" : '<div class="tournament-bet-modal__share"><button type="button" data-tournament-bet-copy>Скопировать ссылку</button><button type="button" data-tournament-bet-share>Поделиться</button></div>') + '</details>' +
       (archived ? "" : '<div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data));
   }
@@ -554,6 +566,14 @@
   }
 
   function onClick(event) {
+    var dismiss = event.target.closest("[data-tournament-bet-dismiss], [data-tournament-bet-restore]");
+    if (dismiss) {
+      event.preventDefault(); event.stopPropagation();
+      var hidden = dismiss.hasAttribute("data-tournament-bet-dismiss");
+      var id = dismiss.getAttribute(hidden ? "data-tournament-bet-dismiss" : "data-tournament-bet-restore");
+      if (state && state.status === "cancelled" && String(state.id) === id) { setCancelledEventHidden(id, hidden); render(); }
+      return;
+    }
     var resultShare = event.target.closest("[data-tournament-bet-result-share]");
     if (resultShare) { event.preventDefault(); event.stopPropagation(); shareResultImage(resultShare); return; }
     if (event.target.closest("[data-tournament-bet-subscribe]")) {

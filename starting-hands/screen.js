@@ -63,7 +63,7 @@ function startHistory(payload) {
     const lines=[['nonShowdown','#fb7185'],['showdown','#60a5fa'],['total','#4ade80']];
     if(series.evCalculated)lines.push(['allinEv','#fbbf24']);
     $('profit-ev-legend').hidden=!series.evCalculated;
-    $('profit-ev-legend').textContent='━ All-in EV'+(series.evUnresolved||series.evMissing?' · частичный расчёт':'');
+    $('profit-ev-legend').querySelector('span').textContent='All-in EV'+(series.evUnresolved||series.evMissing?' · частичный расчёт':'');
     $('profit-ev-note').textContent=series.evCalculated?
       'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
       'Для этой выборки нет рассчитанных выставлений all-in EV.';
@@ -81,7 +81,7 @@ function startHistory(payload) {
       node('rect',{x:x(drawdown.startIndex),y:25,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:250,fill:'#fb7185',opacity:.09});
       node('text',{x:75,y:18,fill:'#ffb5c1','font-size':12},'Макс. просадка: '+number(drawdown.amount)+' '+label);
     }
-    for(const [key,color] of lines)node('path',{d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
+    for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
     const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
     $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
     svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-95)/785*data.count)));$('profit-values').textContent=describe(series.points[n]);};
@@ -282,6 +282,11 @@ function startHistory(payload) {
     appliedFrom=from;appliedTo=to;render();$('date-status').textContent='';
   }));
   ['hand-search','opponent-search'].forEach(id=>$(id).addEventListener('input',()=>{showHistoryTab('search');render();}));
+  document.querySelector('.profit-legend').addEventListener('change',event=>{
+    const toggle=event.target.closest('[data-profit-line]');if(!toggle)return;
+    const line=$('profit-chart').querySelector('[data-profit-series="'+toggle.dataset.profitLine+'"]');
+    if(line)line.style.display=toggle.checked?'':'none';
+  });
   $('position').addEventListener('change',e=>{positionByMode[mode]=e.target.value;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
   $('reset-filters').addEventListener('click',()=>{
