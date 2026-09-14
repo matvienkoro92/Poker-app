@@ -1221,7 +1221,7 @@ function syncHomeTournamentBonusAvailability(activeWeekday) {
       bonus.classList.remove("home-tournament-bonus--inactive");
       bonus.setAttribute("aria-disabled", "false");
       if (amountEl) amountEl.textContent = amount;
-      if (labelEl) labelEl.textContent = (bonus.closest(".home-tournament-bonuses--table") ? "Нокаут топ10 Лиги" : "за нокаут топ10 Лиги") + leagueNum;
+      if (labelEl) labelEl.textContent = (bonus.closest(".home-tournament-bonuses--table") ? "Нокаут\nТОП-10 Лиги " : "за нокаут топ10 Лиги ") + leagueNum;
     }
   });
 }
@@ -2462,7 +2462,7 @@ function updateTournamentDayBlock() {
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
-    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
+    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
     var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;

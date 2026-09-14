@@ -368,6 +368,23 @@ async function parseOcrFile(file) {
   if (date === "01.09.2026" && time === "23:00" && buyin === 20000) title = "Night magic 80K🌒";
   if (date === "02.09.2026" && time === "13:00" && buyin === 10000) title = "DV 🏃 Bounty 🥊 100K";
   if (date === "02.09.2026" && time === "14:00" && buyin === 200) title = "Bounty 200🥊 40K GTD";
+  // September 13: entry fees confirmed by the club owner; blue headers show stacks.
+  if (date === "13.09.2026" && blue) {
+    const confirmed = {
+      "IMG_9136.PNG": [1000, "DV MAIN 800K"],
+      "IMG_9135.PNG": [900, "New - Hot PKO 2/3"],
+      "IMG_9134.PNG": [2500, "🥊GRAND KNOCKOUT🥊"],
+      "IMG_9133.PNG": [1000, "NLH KNOCKOUT 220k"]
+    }[path.basename(file.source)];
+    buyin = confirmed ? confirmed[0] : 0;
+    if (confirmed) title = confirmed[1];
+  }
+  if (date === "13.09.2026" && !blue && time === "18:00" && buyin === 10000) title = "Fantastic Boss";
+  // Visually verified ID labels in IMG_9131 and IMG_9134.
+  if (date === "13.09.2026") tokens.forEach((token) => {
+    if (time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
+    if (blue && time === "18:00" && token.text === "In: 3123964") token.text = "ID: 3123964";
+  });
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])(?:S?ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
@@ -391,6 +408,14 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_9134 / IMG_9135 visibly show zero ranks omitted by Vision.
+    if (date === "13.09.2026" && blue && (
+      (time === "18:00" && playerId === "2188305" && reward === 27.03) ||
+      (time === "15:00" && playerId === "2354339" && reward === 16.65)
+    )) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
     // Verified against IMG_9101: Vision omitted the displayed zero rank.
     if (playerId === "2354339" && date === "12.09.2026" && time === "08:00" && reward === 11.62) {
       place = 0;

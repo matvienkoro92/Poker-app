@@ -1606,4 +1606,267 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "13.09.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 2,
+          "reward": 6600,
+          "points": 0
+        },
+        {
+          "nick": "denchik333",
+          "place": 3,
+          "reward": 5200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV MAIN 800K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 3,
+          "reward": 67900,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 39,
+          "reward": 1900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 4,
+          "reward": 6441,
+          "points": 0
+        },
+        {
+          "nick": "АршакМкртчян",
+          "place": 0,
+          "reward": 1664.9999999999998,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "🦈Shark-Eyed🦈",
+          "place": 1,
+          "reward": 15372.5,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 2,
+          "reward": 4960,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 3,
+          "reward": 1300,
+          "points": 0
+        },
+        {
+          "nick": "fomichga",
+          "place": 4,
+          "reward": 712.5,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 5,
+          "reward": 110,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Fantastic Boss",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Zeus",
+          "place": 6,
+          "reward": 38000,
+          "points": 0
+        },
+        {
+          "nick": "FishKopcheny",
+          "place": 4,
+          "reward": 28687.5,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 16375,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 11,
+          "reward": 2375,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 25,
+          "reward": 11239,
+          "points": 0
+        },
+        {
+          "nick": "Sergeant",
+          "place": 26,
+          "reward": 9368,
+          "points": 0
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 49,
+          "reward": 4465,
+          "points": 0
+        },
+        {
+          "nick": "AndrushaMorf",
+          "place": 0,
+          "reward": 2703,
+          "points": 0
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 41,
+          "reward": 1505,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "zagrebnagreb",
+          "place": 2,
+          "reward": 900,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 3,
+          "reward": 780,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 4914.55,
+          "points": 0
+        },
+        {
+          "nick": "Neo777",
+          "place": 2,
+          "reward": 2216.25,
+          "points": 0
+        },
+        {
+          "nick": "IIIIII",
+          "place": 4,
+          "reward": 988.43,
+          "points": 0
+        },
+        {
+          "nick": "GhooSt",
+          "place": 3,
+          "reward": 610.31,
+          "points": 0
+        },
+        {
+          "nick": "fomichga",
+          "place": 5,
+          "reward": 294.53,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АршакМкртчян",
+          "place": 2,
+          "reward": 27598,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Odna.pluha",
+          "place": 4,
+          "reward": 1600,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 5,
+          "reward": 1400,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
