@@ -9610,3 +9610,8 @@ body[data-view="my-summary"]{background:#080c0e}
 .summary-share-preview img{display:block;width:100%;height:auto;margin:12px 0;-webkit-touch-callout:default}
 .summary-share-preview button,.summary-share-preview a{display:inline-block;padding:10px 14px;border:1px solid #a78b5577;border-radius:10px;background:#1b2326;color:#ffd899;font:inherit;text-decoration:none;cursor:pointer}
 .summary-share-preview p{font-size:13px;color:#bac3c3}
+
+/* The personal summary uses its own navigation instead of the global header. */
+body[data-view="my-summary"] #app.app > .card > .card__header {
+  display: none !important;
+}

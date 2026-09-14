@@ -23,6 +23,7 @@ function startHistory(payload) {
   function showHistoryTab(tab){
     document.querySelectorAll('[data-history-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.historyTab===tab)));
     document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=!p.dataset.historyPanel.split(' ').includes(tab));
+    if(tab==='review')render();
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
   const positionByMode={cash:'',mtt:'',sng:''};
@@ -80,7 +81,6 @@ function startHistory(payload) {
     const drawdown=window.PokerHandInsights.summarize(data.cells.flatMap(c=>c.hands).map(h=>({...h,bb:graphUnit==='resultMinor'?h.resultMinor/100:h.bb}))).drawdown;
     if(drawdown.amount>0){
       node('rect',{x:x(drawdown.startIndex),y:25,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:250,fill:'#fb7185',opacity:.09});
-      node('text',{x:75,y:18,fill:'#ffb5c1','font-size':12},'Макс. просадка: '+number(drawdown.amount)+' '+label);
     }
     for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
     const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
@@ -116,20 +116,18 @@ function startHistory(payload) {
     const sd=stats.showdown;
     add(showdown,'p',sd.eligible?'Дошёл до вскрытия: '+number(sd.count/sd.eligible*100)+'% · '+sd.count+' из '+sd.eligible+' раздач с флопом':'Дошёл до вскрытия: —');
     add(showdown,'p',sd.count?'Вскрытия в плюс: '+number(sd.profitable/sd.count*100)+'% · '+sd.profitable+' из '+sd.count:'Вскрытия в плюс: —');
-    add(showdown,'small','История действий: '+sd.loaded+' из '+sd.total+' раздач. Неопределённые вскрытия исключены из доли.');
-    const dd=add(cards,'div',null,'insight-card');add(dd,'h3','Максимальная просадка');
-    add(dd,'strong',number(stats.drawdown.amount)+' bb');
-    add(dd,'p',stats.drawdown.amount?'От пика после '+stats.drawdown.startIndex+' раздач до минимума после '+stats.drawdown.troughIndex:'Просадки в выборке нет.');
-    if(stats.drawdown.amount)add(dd,'small',stats.drawdown.recovery!==null?'Пик восстановлен после '+stats.drawdown.recovery+' раздач.':'Пик пока не восстановлен. До него: '+number(stats.drawdown.remaining)+' bb.');
+    add(showdown,'small',sd.loaded===0&&sd.total?'Загружаем историю действий для расчёта вскрытий…':'Учтена история действий: '+sd.loaded+' из '+sd.total+' раздач. Неопределённые вскрытия исключены из доли.');
     const load=add(root,'button',insightsLoading?'Загружаю историю действий…':'Загрузить действия для вскрытий и подборок','insight-button');load.type='button';
     const missing=hands.filter(h=>!Object.prototype.hasOwnProperty.call(insightSignals,h.handId));load.hidden=!missing.length;load.disabled=insightsLoading;
     if(insightsError)add(root,'p',insightsError,'note');
     load.onclick=async()=>{
+      if(insightsLoading)return;
       insightsLoading=true;insightsError='';load.disabled=true;
       try{for(let i=0;i<missing.length;i+=100){load.textContent='Загружаю действия: '+i+' / '+missing.length;const response=await historyRequest('insights',missing.slice(i,i+100).map(h=>h.handId));Object.assign(insightSignals,response.signals);}}
       catch(_){insightsError='Не удалось загрузить все действия. Уже загруженные учтены; можно повторить.';}
       finally{insightsLoading=false;render();}
     };
+    if(missing.length&&!insightsLoading&&!insightsError&&!root.hidden)queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
     const tops=add(root,'div',null,'insight-grid');
     for(const [title,rows] of [['Крупнейшие выигрыши',stats.wins],['Крупнейшие проигрыши',stats.losses]]){const box=add(tops,'details',null,'insight-card');add(box,'summary',title+' · '+rows.length);handList(box,rows);}
     const collections=add(root,'div',null,'insight-collections');add(collections,'h3','Подборки для разбора');

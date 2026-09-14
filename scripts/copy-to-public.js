@@ -163,6 +163,7 @@ function collectReferencedAssets() {
     }
   }
   addDirFiles(path.join(root, 'html-fragments'));
+  addDirFiles(path.join(root, 'starting-hands'));
   addDirFiles(path.join(root, 'api'));
   addDirFiles(path.join(root, 'lib', 'api-handlers'));
   for (const rel of scanFiles) {

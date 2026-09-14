@@ -359,7 +359,16 @@
     var frame=document.querySelector('#startingHandsDialog iframe');
     if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin||event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
-    if(!['list','replay','insights'].includes(message.action))return;
+    if(!['list','replay','insights','chart-wall'].includes(message.action))return;
+    if(message.action==='chart-wall'){
+      try{
+        if(typeof message.handId!=='string'||!message.handId.startsWith('data:image/webp;base64,')||message.handId.length>450000)throw new Error('image');
+        await profileOwnWallRequest({action:'create',text:'Моя игра · График результата',image:message.handId,shareToClub:false});
+        if(typeof refreshProfileOwnWall==='function')refreshProfileOwnWall();
+        frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:{ok:true}},window.location.origin);
+      }catch(_){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'publish failed'},window.location.origin);}
+      return;
+    }
     try {var data=await request('starting-hands',{action:message.action,handId:message.handId,handIds:message.handIds});
       if(seq!==generation||!frame.isConnected)return;
       frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='replay'?data.replay:data},window.location.origin);
