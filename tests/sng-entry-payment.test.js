@@ -69,3 +69,13 @@ test("player cancellation is rejected by the server and absent from the UI", () 
   const client = fs.readFileSync(require.resolve("../app-sng-champions"), "utf8");
   assert.ok(!client.includes('data-sng-action="cancel"'));
 });
+test('recovery verifies an existing debit without requesting another charge',async()=>{
+ let saved,charges=0;
+ const api=createPayments({read:async()=>({key:'test',userId:'123',amount:1000,status:'pending'}),write:async(k,v)=>{saved=v;return true},change:async()=>{charges++},reconcile:async()=>({status:'completed',userId:'123',chips:'-1000'})});
+ assert.equal((await api.reconcile(request)).status,'paid');assert.equal(saved.status,'paid');assert.equal(charges,0);
+});
+test('unconfirmed or mismatched debit cannot approve payment',async()=>{
+ for(const op of [null,{status:'processing',userId:'123',chips:-1000},{status:'completed',userId:'999',chips:-1000}]){
+ const api=createPayments({read:async()=>({userId:'123',amount:1000,status:'pending'}),write:async()=>{throw Error('must not write')},reconcile:async()=>op});assert.equal(await api.reconcile(request),null);
+ }
+});

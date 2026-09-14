@@ -1204,8 +1204,8 @@
       adminPoker21Id = '<span class="sng-champions-modal__entry-poker21"><small>ID Poker21</small><strong>' + escapeHtml(poker21Id || "—") + '</strong></span>';
     }
     if (data.isAdmin && data.status === "open") {
-      if (entry.status !== "approved" && entry.entryPaid) {
-        adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"><span aria-hidden="true">✓</span><strong>Подтвердить</strong></button>';
+      if (entry.status !== "approved" && (entry.entryPaid || entry.paymentPending)) {
+        adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--approve" data-sng-approve="' + escapeHtml(entry.accountId || "") + '"><span aria-hidden="true">✓</span><strong>' + (entry.paymentPending ? 'Проверить оплату' : 'Подтвердить') + '</strong></button>';
       }
       adminButtons += '<button type="button" class="sng-champions-modal__entry-action sng-champions-modal__entry-action--reject" data-sng-reject="' + escapeHtml(entry.accountId || "") + '"' + (entry.status === "rejected" ? " disabled" : "") + '><span aria-hidden="true">×</span><strong>Отклонить</strong></button>';
     }
