@@ -4,7 +4,7 @@
   var root;
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
-    var groups = {play:["starting-hands","spin","bonus","raffles","friends","reviews"],progress:["results","achievements","hero"],schedule:["schedule"]};
+    var groups = {play:["starting-hands","spin","bonus","raffles","friends","reviews"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
     document.querySelectorAll('[data-summary-tab]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.summaryTab===summaryTab));});
     if(root)root.querySelectorAll(':scope > .summary-card').forEach(function(card){
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
@@ -80,7 +80,7 @@
   }
   function renderSpin() {
     if (!spin) return;
-    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
+    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + (spin.lifetimePrizes ? '<p class="summary-muted">Выиграно за всё время:<br><strong>' + num(spin.lifetimePrizes.ticketAmount) + ' ₽ билетами</strong><br>' + num(spin.lifetimePrizes.bonusAmount) + ' бонусов</p>' : '<p class="summary-muted">Сумма выигрышей временно недоступна.</p>') + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
     put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + ' <small>бонусов</small></strong><p class="summary-muted">На билеты для бэкинга.</p>' + link("Обменять", "daily-poker"));
     friends();
   }
@@ -165,6 +165,13 @@
         Array.from(copy.style).forEach(function (key) { if (/^(inset|margin|padding)-(inline|block)/.test(key)) copy.style.removeProperty(key); });
         copy.style.animation = "none"; copy.style.transition = "none";
       });
+      clone.querySelectorAll("button, a, [role=button]").forEach(function (control) { control.remove(); });
+      var lastContent = Array.from(card.children).filter(function (child) { return !child.matches("button, a, [role=button]"); }).pop();
+      if (lastContent) {
+        var cardStyle = getComputedStyle(card);
+        height = Math.ceil(lastContent.getBoundingClientRect().bottom - rect.top + parseFloat(cardStyle.paddingBottom || 0) + parseFloat(cardStyle.borderBottomWidth || 0));
+      }
+      clone.style.minHeight = "0";
       clone.style.margin = "0"; clone.style.width = width + "px"; clone.style.height = height + "px";
       clone.style.position = "relative"; clone.style.inset = "auto"; clone.style.transform = "none";
       button.disabled = true;
@@ -228,9 +235,10 @@
     put("achievements", '<details class="summary-achievement-picker"><summary>Выбрать ачивки для отслеживания</summary><p class="summary-muted">Отметьте нужные ачивки — они появятся ниже.</p><div class="summary-picks">' + defs.map(function (d) {return '<label><input type="checkbox" data-summary-pin="' + d.id + '"' + (hidden.indexOf(d.id) < 0 ? ' checked' : '') + '> ' + d.name + '</label>';}).join("") + '</div><p class="summary-muted" data-summary-catalog-status>Загружаем остальные ачивки…</p></details>' + defs.map(function (d) {
       var value = Number(d.value) || 0, next = d.tiers.find(function (n) {return n > value;});
       return '<div class="summary-event" data-summary-progress="' + d.id + '"' + (hidden.indexOf(d.id) >= 0 ? ' hidden' : '') + '><strong>' + d.name + '</strong>' + achievementPlace(d, value, competitors) + '<p>' + num(value) + (next ? ' / ' + num(next) : '') + ' ' + d.unit + '</p><progress max="' + (next || value || 1) + '" value="' + value + '"></progress><p class="summary-muted">' + (next ? 'До следующей ступени: ' + num(next - value) + ' ' + d.unit : 'Все ступени открыты') + '</p>' + achievementRival(d, value, competitors) + '</div>';
-    }).join("") + '<div id="summary-extra-achievements"></div>' + link("Все достижения", "profile") + '<div class="summary-event"><h3 class="summary-rival-heading">Ближайший конкурент</h3><div id="summary-rival"></div></div>');
+    }).join("") + '<div id="summary-extra-achievements"></div>' + link("Все достижения", "profile"));
     var heroes = window.POKER_CLUB_NEWS_DATA && window.POKER_CLUB_NEWS_DATA.dayHeroes;
-    put("rival", '<p class="summary-muted">Данные гонки пока недоступны.</p>');
+    var raceIntro = '<p><strong>Вы в гонке за 25 000 ₽ в сентябре!</strong></p><p>Заберите больше всех ачивок «Герой дня» в сентябре и получите 25 000 ₽.</p><h3 class="summary-rival-heading">Ближайший конкурент</h3>';
+    put("rival", raceIntro + '<p class="summary-muted">Данные гонки пока недоступны.</p>');
     if (heroes && typeof window.winterRatingSamePlayer === "function") {
       var leaders = [];
       Object.keys(heroes).forEach(function (date) {
@@ -246,7 +254,7 @@
       var me = place >= 0 ? leaders[place] : { wins: 0, reward: 0 };
       var gap = rival ? Math.abs(rival.wins - me.wins) : 0;
       var rewardGap = rival ? Math.abs(rival.reward - me.reward) : 0;
-      put("rival", '<span class="summary-kicker">Герой месяца · ' + esc(new Intl.DateTimeFormat("ru-RU", {month:"long",timeZone:"Europe/Moscow"}).format(new Date())) + '</span>' +
+      put("rival", raceIntro + '<span class="summary-kicker">Герой месяца · ' + esc(new Intl.DateTimeFormat("ru-RU", {month:"long",timeZone:"Europe/Moscow"}).format(new Date())) + '</span>' +
         (rival ? '<strong class="summary-value">' + esc(rival.nick) + '</strong><p>' + (rivalIndex + 1) + '-е место · герой дня: ' + rival.wins + '</p><p class="summary-muted">' +
           (place === 0 ? 'Ближайший преследователь. ' : 'Ближайший впереди. ') +
           (gap ? 'Разница: ' + gap + ' по числу званий.' : 'Званий поровну · разница призовых: ' + num(rewardGap) + ' ₽.') + '</p>' :
@@ -309,7 +317,7 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<p class="summary-muted" role="status">Загружаем…</p>';
-    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("achievements","Мой прогресс",loading) + section("reviews","Мои разборы",loading);
+    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading) + section("reviews","Мои разборы",loading);
     applySummaryTab();
     friends();
     function valid() {return seq === generation;}
