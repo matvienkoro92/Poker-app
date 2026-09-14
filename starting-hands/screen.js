@@ -63,7 +63,8 @@ function startHistory(payload) {
     const lines=[['nonShowdown','#fb7185'],['showdown','#60a5fa'],['total','#4ade80']];
     if(series.evCalculated)lines.push(['allinEv','#fbbf24']);
     $('profit-ev-legend').hidden=!series.evCalculated;
-    $('profit-ev-legend').querySelector('span').textContent='All-in EV'+(series.evUnresolved||series.evMissing?' · частичный расчёт':'');
+    $('profit-ev-legend').querySelector('span').textContent='All-in EV';
+    $('profit-ev-legend').title=series.evUnresolved||series.evMissing?'All-in EV · частичный расчёт':'All-in EV';
     $('profit-ev-note').textContent=series.evCalculated?
       'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
       'Для этой выборки нет рассчитанных выставлений all-in EV.';

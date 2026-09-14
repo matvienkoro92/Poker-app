@@ -111,13 +111,36 @@
 
 /* Keep the field prompt separate from the native “all positions” option. */
 .position-filter{position:relative;min-width:0;width:100%}
-.position-filter .position-mini{appearance:none;padding-right:28px}
+.position-filter .position-mini{display:block;box-sizing:border-box;height:44px;margin:0;appearance:none;padding:6px 28px 6px 10px;color:#e0e6ef}
 .position-filter::after{content:"";position:absolute;right:12px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid #e0e6ef;border-bottom:1.5px solid #e0e6ef;transform:rotate(45deg);pointer-events:none}
-.position-filter__placeholder{display:none;position:absolute;left:3px;top:50%;transform:translateY(-50%);font-size:12px;color:#e0e6ef;pointer-events:none}
-.position-filter:has(option[value=""]:checked) .position-mini{color:transparent}
-.position-filter:has(option[value=""]:checked) .position-filter__placeholder{display:block}
 .position-filter .position-mini option{color:#e0e6ef;background:#111827}
 
 .profit-legend label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .profit-legend label[hidden]{display:none}
 .profit-legend input[type=checkbox]{width:15px;height:15px;margin:0;accent-color:currentColor;cursor:pointer}
+
+/* My Game header: club identity and a single integrated tab bar. */
+.history-masthead{position:relative;margin:0 0 22px;padding:0 10px 10px;border-radius:32px 32px 18px 18px;background:#090d10;overflow:hidden;isolation:isolate}
+.history-masthead__hero{position:relative;min-height:180px;padding:24px 16px 12px;background:url('../assets/my-game-header-thinker-v1-light.webp') center/cover no-repeat}
+.history-masthead .brand{display:flex;align-items:center;gap:16px;margin:0;color:#ff9a45;font-size:19px;letter-spacing:.08em;position:relative;z-index:1}
+.history-masthead .brand b{display:flex;align-items:center;gap:10px;white-space:nowrap;font-weight:850}
+.history-masthead .brand b>span{font-size:32px;line-height:1;color:#ff9a45;margin:0}
+.history-masthead .brand>span{display:block;margin:0;color:#9ba0ae;font-size:13px;letter-spacing:0;font-weight:500;white-space:nowrap}
+.history-masthead h1{position:relative;z-index:1;margin:28px 0 0;color:#f4f4f5;font-size:42px;line-height:1.08;font-weight:850;letter-spacing:-.04em}
+.history-masthead__motto{position:absolute;right:4px;top:14px;margin:0;color:#9c9ca4;font:italic 14px/1.1 cursive;transform:rotate(-9deg);text-align:center}
+.history-masthead__motto span{display:block;width:26px;height:2px;background:#ed8734;margin:7px auto 0;transform:rotate(-10deg)}
+.history-masthead .history-navigation{position:relative;z-index:2;display:flex;align-items:stretch;gap:0;padding:5px;margin:0;border:1px solid #485564;border-radius:15px;background:linear-gradient(115deg,#16212a,#0e1318 68%,#141a20);box-shadow:inset 0 1px 1px #ffffff08}
+.history-masthead .history-navigation button{position:relative;flex:1;min-width:0;min-height:48px;margin:0;padding:10px 5px;border:0;border-radius:11px;background:none;color:#969bab;font:700 15px/1.1 system-ui,sans-serif}
+.history-masthead .history-navigation button[aria-pressed="true"]{background:linear-gradient(135deg,#e99738,#d77528);color:#fff;box-shadow:inset 0 1px 2px #ffdb9466,0 2px 6px #0003}
+.history-masthead .history-navigation button+button:not([aria-pressed="true"])::before{content:"";position:absolute;left:0;top:25%;height:50%;width:1px;background:#ffffff09}
+.history-masthead .history-navigation [data-history-tab="search"]{flex:0 0 40px;display:flex;align-items:center;justify-content:center;padding:6px}
+.history-masthead .history-navigation button:focus-visible{outline:2px solid #ffc277;outline-offset:-2px}
+@media(min-width:700px){.history-masthead__hero{min-height:210px;padding:28px 24px 16px}.history-masthead h1{font-size:50px;margin-top:32px}.history-masthead .brand{font-size:22px}.history-masthead .brand>span{font-size:15px}.history-masthead__motto{right:8px;top:20px;font-size:17px}.history-masthead .history-navigation button{min-height:58px;font-size:18px}}
+@media(max-width:430px){.history-masthead{margin-inline:-6px;border-radius:24px 24px 15px 15px;padding:0 7px 7px}.history-masthead__hero{min-height:145px;padding:19px 9px 10px;background-size:auto 100%;background-position:62% center}.history-masthead .brand{gap:9px;font-size:14px;letter-spacing:.06em}.history-masthead .brand b{gap:6px}.history-masthead .brand b>span{font-size:24px}.history-masthead .brand>span{font-size:10px}.history-masthead h1{font-size:34px;margin-top:26px}.history-masthead__motto{display:none}.history-masthead .history-navigation button{font-size:13px;min-height:44px}.history-masthead .history-navigation [data-history-tab="search"]{flex-basis:34px}}
+@media(max-width:360px){.position-filter .position-mini{padding-left:6px;padding-right:18px;font-size:11px}.position-filter::after{right:7px;width:6px;height:6px}}
+
+/* Keep all four chart visibility controls in one row. */
+.profit-legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;font-size:12px}
+.profit-legend label{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:7px;min-width:0;text-align:center;line-height:1.3}
+.profit-legend input[type=checkbox]{flex:none;width:16px;height:16px;min-height:0;padding:0}
+@media(max-width:360px){.profit-legend{gap:5px;font-size:11px}}
