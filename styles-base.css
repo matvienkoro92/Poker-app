@@ -950,9 +950,10 @@ select {
 }
 html.app--telegram-miniapp {
   --tg-ui-top-clearance: max(
-    64px,
-    calc(env(safe-area-inset-top, 0px) + 52px),
-    calc(var(--app-top-from-tg, 48px) + 12px)
+    12px,
+    env(safe-area-inset-top, 0px),
+    var(--app-top-from-tg, 0px),
+    var(--tg-content-safe-area-inset-top, 0px)
   );
 }
 html.app--telegram-miniapp .app {

@@ -122,15 +122,15 @@ function pokerApplyTelegramTopClearance() {
       10
     ) || 0;
   } catch (eTgTop) {}
-  var clearance = Math.max(76, tgTop + 28);
+  var clearance = Math.max(12, tgTop);
   if (appEl) appEl.style.paddingTop = clearance + "px";
   if (activeHeader && viewName !== "chat") {
-    activeHeader.style.marginTop = "38px";
+    activeHeader.style.marginTop = "0";
     activeHeader.style.marginBottom = "12px";
     activeHeader.style.transform = "translateY(0)";
   }
   if (mainHeader && viewName === "home") {
-    mainHeader.style.marginTop = "46px";
+    mainHeader.style.marginTop = "0";
     mainHeader.style.marginBottom = "14px";
     mainHeader.style.paddingTop = "0";
   }
@@ -145,7 +145,7 @@ function pokerApplyTelegramTopClearance() {
     }
     if (homeHeader) {
       homeHeader.style.paddingTop = "0";
-      homeHeader.style.marginTop = "42px";
+      homeHeader.style.marginTop = "0";
       homeHeader.style.marginBottom = "14px";
     }
     if (homeOutline) {
@@ -154,11 +154,11 @@ function pokerApplyTelegramTopClearance() {
     }
   }
   if (instructionSheet) {
-    instructionSheet.style.marginTop = "40px";
-    instructionSheet.style.maxHeight = "calc(100dvh - 84px)";
+    instructionSheet.style.marginTop = "0";
+    instructionSheet.style.maxHeight = "calc(100dvh - var(--tg-modal-top-safe, 12px) - 12px)";
   }
   if (instructionClose) {
-    instructionClose.style.top = "68px";
+    instructionClose.style.top = "calc(var(--tg-modal-top-safe, 12px) + 8px)";
     instructionClose.style.right = "12px";
   }
 }

@@ -10230,3 +10230,11 @@ body.club-choice-vote-open {
   font-size: 9px;
   line-height: 1;
 }
+
+/* Telegram already owns its native header; use the reported safe area once. */
+@media(max-width:720px){
+ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .private-cash-modal{align-items:flex-start;padding-top:var(--tg-modal-top-safe,12px)!important}
+ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .private-cash-modal__panel{max-height:calc(100dvh - var(--tg-modal-top-safe,12px) - 12px)!important}
+ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .private-cash-modal__body{max-height:none!important;min-height:0;overflow-y:auto}
+}
+html:is(.app--telegram-miniapp,.poker-telegram-miniapp) :is(.sng-champions-modal__bracket-map-wrap--expanded,.sng-champions-modal__bracket-map-wrap--fit){top:calc(var(--tg-modal-top-safe,12px) + 8px)}

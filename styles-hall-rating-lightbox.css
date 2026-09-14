@@ -2036,3 +2036,6 @@ body:not([data-view="spring-rating"]) .spring-rating-view-scroll-btn {
 .winter-rating__date-table-wrap .winter-rating__table tr.winter-rating__tr--reward-high td {
   background-color: rgba(34, 197, 94, 0.35);
 }
+
+html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .winter-rating-lightbox{padding-top:var(--tg-modal-top-safe,12px)}
+html:is(.app--telegram-miniapp,.poker-telegram-miniapp) :is(.winter-rating-lightbox__close,.winter-rating-lightbox .winter-rating-lightbox__back.chat-back-btn){top:calc(var(--tg-modal-top-safe,12px) + 8px)}

@@ -66,7 +66,7 @@
 }
 html.app--telegram-miniapp,
 html.poker-telegram-miniapp {
-  --tg-modal-top-safe: calc(env(safe-area-inset-top, 0px) + 56px);
+  --tg-modal-top-safe: var(--tg-ui-top-clearance, max(12px, env(safe-area-inset-top, 0px), var(--app-top-from-tg, 0px)));
 }
 html.app--telegram-miniapp :is(
   .club-charter-modal,
