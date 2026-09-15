@@ -8,6 +8,7 @@
   var state = null;
   var loading = false;
   var loadPromise = null;
+  var authGeneration = 0;
   var subscribed = false;
   var refreshTimer = 0;
   var homePlaqueHasActiveEvent = false;
@@ -317,7 +318,9 @@
       ["Вход", data.tournamentBuyin || tournament.buyinLabel || tournament.buyin || "Уточняется"]];
     if (!data.createdByPlayer) details.push(["Регистрация до", "20:00 МСК"]);
     var joined = !!data.myEntry;
-    var action = data.status === "open"
+    var action = data.authenticated === false
+      ? '<button type="button" class="tournament-bet-modal__bet" disabled>Войдите в аккаунт, чтобы сделать ставку</button>'
+      : data.status === "open"
       ? joined
         ? '<button type="button" class="tournament-bet-modal__bet tournament-bet-modal__bet--done" disabled>✓ Ваша ставка принята</button>'
         : '<button type="button" class="tournament-bet-modal__bet" data-tournament-bet-action="bet">Сделать ставку на себя · ' + rub(data.stakePrice) + '</button>'
@@ -428,10 +431,12 @@
   function load(silent) {
     if (loading) return Promise.resolve(state);
     loading = true;
+    var requestAuthGeneration = authGeneration;
     if (!silent && bodyEl) bodyEl.innerHTML = '<div class="club-choice-vote-modal__loading">Идёт загрузка…</div>';
     var eventQuery = selectedEventId ? "eventId=" + encodeURIComponent(selectedEventId) + "&" : "";
     loadPromise = fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery), { cache: "no-store" }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
+        if (requestAuthGeneration !== authGeneration) return null;
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
         var activeField = modal && document.activeElement && modal.contains(document.activeElement) && document.activeElement.matches("input, select, textarea");
         if (typeof data.subscribed === "boolean") subscribed = data.subscribed;
@@ -443,16 +448,17 @@
         return data;
       });
     }).catch(function (error) {
-      if (!silent) setStatus(error.message, "error");
+      if (requestAuthGeneration === authGeneration && !silent) setStatus(error.message, "error");
       return null;
-    }).finally(function () { loading = false; loadPromise = null; });
+    }).finally(function () { loading = false; loadPromise = null; if (requestAuthGeneration !== authGeneration && modal && !modal.hidden) load(false); });
     return loadPromise;
   }
 
   function post(payload, pendingText) {
+    var postAuthGeneration = authGeneration;
     if (loadPromise) {
       setStatus(pendingText || "Сохраняю…", "loading");
-      return loadPromise.then(function () { return post(payload, pendingText); });
+      return loadPromise.then(function () { return postAuthGeneration === authGeneration ? post(payload, pendingText) : null; });
     }
     if (loading) return Promise.resolve(null);
     loading = true;
@@ -464,6 +470,7 @@
       body: JSON.stringify(authBody(payload)),
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
+        if (postAuthGeneration !== authGeneration) return null;
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось выполнить действие");
         if (typeof window.pokerInvalidateTournamentBetHome === "function") window.pokerInvalidateTournamentBetHome();
         if (payload.action === "subscribe" || payload.action === "unsubscribe") {
@@ -484,10 +491,11 @@
         return data;
       });
     }).catch(function (error) {
+      if (postAuthGeneration !== authGeneration) return null;
       setStatus(error.message, "error");
       showAlert(error.message);
       return null;
-    }).finally(function () { loading = false; });
+    }).finally(function () { loading = false; if (postAuthGeneration !== authGeneration && modal && !modal.hidden) load(false); });
   }
 
   function open() {
@@ -608,7 +616,7 @@
     if (!actionEl) return;
     var action = actionEl.getAttribute("data-tournament-bet-action");
     if (action === "bet") {
-      if (!state || !window.confirm("Списать " + rub(state.stakePrice) + " с баланса Poker21 и сделать ставку на себя?")) return;
+      if (!state || state.myEntry || state.authenticated === false || !window.confirm("Списать " + rub(state.stakePrice) + " с баланса Poker21 и сделать ставку на себя?")) return;
       post({ action: "bet" }, "Проверяю баланс и принимаю ставку…");
     } else if (action === "cancel" && window.confirm("Отменить событие без победителя и вернуть каждому участнику его ставку на баланс Poker21?")) {
       post({ action: "cancel" }, "Отменяю событие и возвращаю ставки…");
@@ -722,6 +730,16 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialLoad, { once: true });
   else initialLoad();
+  window.addEventListener("poker-telegram-auth", function () {
+    authGeneration++;
+    state = null;
+    subscribed = false;
+    activeTab = "event";
+    if (modal && !modal.hidden) {
+      if (bodyEl) bodyEl.innerHTML = '<div class="club-choice-vote-modal__loading">Проверяю аккаунт…</div>';
+      if (!loading) load(false);
+    }
+  });
   window.openTournamentBetModal = open;
   window.pokerOpenTournamentBetDeepLink = function (eventId) {
     // Finish a previous event request before switching the selection.

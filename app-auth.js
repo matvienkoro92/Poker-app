@@ -1345,6 +1345,16 @@ function pokerApiAuthJsonBody(extra) {
       return o;
     }
   } catch (eGuestBody) {}
+  // GET and POST must select the same explicit email session.
+  try {
+    var emailTok = pokerReadEmailPwaSessionToken();
+    if (emailTok) {
+      o.pwaSession = emailTok;
+      delete o.initData;
+      delete o.pwaVkSession;
+      return o;
+    }
+  } catch (eEmailBody) {}
   var tg0 = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   var tok = pokerReadPwaTgSessionToken();
   var vkt = pokerReadPwaVkSessionToken();
