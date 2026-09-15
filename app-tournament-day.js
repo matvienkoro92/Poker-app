@@ -1507,7 +1507,13 @@ function chooseHomeTractorRaffle(rows, now) {
     if (!raffle || raffle.status !== "active" || raffle.prizeKind !== "tournament_ticket") return false;
     if (!(Date.parse(raffle.endDate) > now)) return false;
     var text = homeTournamentRaffleBonusText(raffle) + " " + String(raffle.promoTournamentName || "");
-    return /тракторист|магия тракториста/i.test(text);
+    if (/тракторист/i.test(text)) return true;
+    // The Tuesday 18:00 ticket raffle still uses the former schedule name.
+    var weekday = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Moscow', weekday: 'short' }).format(new Date(raffle.endDate));
+    return weekday === 'Tue' && (raffle.groups || []).some(function (group) {
+      var prize = String(group.prize || '');
+      return /ребайник/i.test(prize) && /18:00/.test(prize) && /(?:^|[^\d])300\s*(?:₽|р)/i.test(prize);
+    });
   }).sort(function (a, b) { return Date.parse(a.endDate) - Date.parse(b.endDate); })[0] || null;
 }
 function renderHomeTractorRaffle() {
