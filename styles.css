@@ -9615,3 +9615,13 @@ body[data-view="my-summary"]{background:#080c0e}
 body[data-view="my-summary"] #app.app > .card > .card__header {
   display: none !important;
 }
+
+/* Keep the two words in one text flow: flex shrinking must not overlap glyphs. */
+#app.app > .card > .card__header .logo__title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#app.app > .card > .card__header .logo__title-line {
+  display: inline;
+}

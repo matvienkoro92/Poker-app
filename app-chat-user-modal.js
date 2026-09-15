@@ -1253,18 +1253,22 @@ if (chatUserModalEl) {
   }
   function applyChatUserModalBaseAvatar(avatarUrl, id, title) {
     if (!modalAvatar || !modalAvatarPlaceholder) return;
-    var fallback = chatUserModalStableFallbackAvatar(id || title);
     var requested = String(avatarUrl || "").trim();
     modalAvatar.classList.remove("chat-user-modal__avatar--rating-art");
-    modalAvatar.src = requested || fallback;
+    modalAvatarPlaceholder.textContent = Array.from(String(title || "Игрок"))[0];
+    function showInitial() {
+      modalAvatar.style.display = "none";
+      modalAvatar.removeAttribute("src");
+      modalAvatarPlaceholder.style.display = "";
+    }
+    if (!requested) { showInitial(); return; }
+    modalAvatar.onerror = showInitial;
+    modalAvatar.src = requested;
     modalAvatar.alt = title || "Игрок";
-    modalAvatar.onerror = function () {
-      modalAvatar.onerror = null;
-      modalAvatar.src = fallback;
-    };
     modalAvatar.style.display = "";
     modalAvatarPlaceholder.style.display = "none";
   }
+
   function syncChatUserModalRatingArt(nick) {
     var art = null;
     if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
@@ -3058,21 +3062,24 @@ if (chatUserModalEl) {
     var telegramHidden = !!(data && data.telegramVisible === false && data.isAdmin !== true);
     function hidePrivateTelegramLabel(value) {
       var text = String(value || "").trim();
+      if (/^ID\d+$/i.test(text)) return "";
       if (telegramHidden && /^@[A-Za-z0-9_]{5,32}$/.test(text)) return "";
       return text;
     }
     chatUserModalPeerLogin = telegramHidden
       ? "TG скрыт"
-      : (data && data.userName ? String(data.userName) : "");
+      : hidePrivateTelegramLabel(data && data.userName);
     var contactNm =
       data && data.contactName != null && String(data.contactName).trim()
         ? String(data.contactName).trim()
         : "";
+    contactNm = hidePrivateTelegramLabel(contactNm);
     chatUserModalContactName = contactNm;
     var peerChatDisp =
       data && data.chatDisplayName != null && String(data.chatDisplayName).trim()
         ? String(data.chatDisplayName).trim()
         : "";
+    peerChatDisp = hidePrivateTelegramLabel(peerChatDisp);
     var ratingNick = hidePrivateTelegramLabel(chatUserModalRatingNickFromData(data));
     var safeFallbackName = hidePrivateTelegramLabel(fallbackName);
     var titleDisp = contactNm || ratingNick || peerChatDisp || (chatUserModalPeerLogin !== "TG скрыт" ? chatUserModalPeerLogin : "") || safeFallbackName || "Игрок";
@@ -3134,7 +3141,7 @@ if (chatUserModalEl) {
     }
     if (modalFriendMsg) {
       if (isFriend) {
-        modalFriendMsg.textContent = "Теперь " + (displayTitle || "Игрок") + " ваш друг";
+        modalFriendMsg.textContent = "У вас в друзьях";
         modalFriendMsg.style.display = "";
       } else if (pending) {
         modalFriendMsg.textContent = "Заявка в друзья отправлена";
@@ -3308,7 +3315,7 @@ if (chatUserModalEl) {
   }
   function openChatUserModalById(id, name, avatarUrl, options) {
     var userName = String(name || "").trim();
-    if (/^@[A-Za-z0-9_]{5,32}$/.test(userName)) userName = "Игрок";
+    if (/^@[A-Za-z0-9_]{5,32}$/.test(userName) || /^ID\d+$/i.test(userName)) userName = "Игрок";
     if (!userName) userName = "Игрок";
     if (!id || !chatUserModalEl) {
       if (id) openConversation(id, userName, avatarUrl);
@@ -3435,50 +3442,18 @@ if (chatUserModalEl) {
     var profileUrl = openingSelfProfile
       ? base + "/api/users" + pokerApiAuthQuery("?")
       : base + "/api/users?userId=" + encodeURIComponent(id) + pokerApiAuthQuery("&");
-    var cachedProfileData = chatUserModalReadProfileCache(id);
-    var profileDataPromise = cachedProfileData
-      ? Promise.resolve(cachedProfileData)
-      : fetch(profileUrl)
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          chatUserModalWriteProfileCache(id, data);
-          return data;
-        });
-    if (cachedProfileData) {
-      fetch(profileUrl)
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          chatUserModalWriteProfileCache(id, data);
-          if (openSeq === chatUserModalOpenSeq && String(chatUserModalUserId) === String(id)) {
-            updateChatUserModalSpecialtyBadge(data && (data.profileSpecialty || data.specialty || data.pokerSpecialty));
-            syncChatUserModalBirthBadge(data && (data.profileBirthDate || data.birthDate));
-            var birthAdminVisible = chatUserModalRenderBirthAdmin(data, id, openingSelfProfile);
-            chatUserModalApplyPersonalInfo(data, birthAdminVisible);
-            if (data && data.ok) {
-              var freshRatingNick = chatUserModalRatingNickFromData(data) || fallbackRatingNick;
-              syncChatUserModalCompetitivePrivacy(freshRatingNick || userName, data, id);
-              syncChatUserModalSuperpower(data, userName, freshRatingNick);
-              syncChatUserModalTitleFromProfileData(data, userName);
-              syncChatUserModalRatingTab(freshRatingNick);
-              loadChatUserModalNews({
-                userId: id,
-                accountId: data && (data.accountId || data.dtId || data.userId),
-                chatUserId: data && data.chatUserId,
-                ratingNick: freshRatingNick,
-                displayName: userName,
-                p21Id: data && (data.p21Id || data.poker21Id || data.pokerPlusUserId),
-                profileBirthDate: data && (data.profileBirthDate || data.birthDate),
-                avatarUrl: avatarUrl,
-              });
-              syncChatUserModalRatingArt(freshRatingNick);
-              setChatUserModalAchievementsLoader(function () {
-                return syncChatUserModalRatingRanks(freshRatingNick) || Promise.resolve([]);
-              });
-            }
-          }
-        })
-        .catch(function () {});
-    }
+    // Always apply the current profile as one response; stale cache entries
+    // must not retain a previous title/avatar while only badges get refreshed.
+    var profileDataPromise = fetch(profileUrl)
+      .then(function (r) { if (!r.ok) throw new Error("Profile request failed"); return r.json(); });
+    fetch(base + "/api/avatar?userId=" + encodeURIComponent(id))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
+        if (data && data.ok && data.avatar && !modalAvatar.classList.contains("chat-user-modal__avatar--rating-art")) {
+          applyChatUserModalBaseAvatar(data.avatar, id, chatUserModalUserName);
+        }
+      }).catch(function () {});
     var profilePromise = profileDataPromise
       .then(function (data) {
         if (openSeq !== chatUserModalOpenSeq || String(chatUserModalUserId) !== String(id)) return;
@@ -3520,7 +3495,7 @@ if (chatUserModalEl) {
         var ratingArtPromise = syncChatUserModalRatingArt(ratingNick) || Promise.resolve(false);
         if (data && data.ok) {
           if (modalVerifiedBadge) modalVerifiedBadge.classList.toggle("chat-user-modal__verified--hidden", data.pokerPlusVerified !== true);
-          var titleDisp = syncChatUserModalTitleFromProfileData(data, userName);
+          var titleDisp = syncChatUserModalTitleFromProfileData(data, fallbackRatingNick || userName);
           if (modalAvatar && modalAvatarPlaceholder && modalAvatar.style.display !== "none") {
             modalAvatar.alt = titleDisp;
           } else if (modalAvatarPlaceholder) {

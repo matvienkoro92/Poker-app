@@ -510,7 +510,12 @@ window.pokerGetSummerRatingPlayerArt = pokerGetSummerRatingPlayerArt;
 
 function summerRatingPlayerArtCssUrl(nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art || !art.src) return "none";
+  if (!art || !art.src) {
+    if (!String(nick || "").trim()) return "none";
+    var initial = escapeHtmlRating(Array.from(String(nick).trim())[0].toUpperCase());
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="240" viewBox="0 0 160 240"><rect x="12" y="30" width="136" height="190" rx="60" fill="#101820" stroke="#cda555" stroke-width="4"/><text x="80" y="145" text-anchor="middle" font-family="sans-serif" font-size="70" fill="#ffe29a">' + initial + '</text></svg>';
+    return "url('data:image/svg+xml," + encodeURIComponent(svg).replace(/'/g, "%27") + "')";
+  }
   return "url('" + String(art.src).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "')";
 }
 
@@ -530,14 +535,21 @@ function summerRatingTableAvatarStyle(nick) {
 
 function summerRatingLowerArtSizeStyle(place, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art) return "";
+  if (!art) return "--summer-lower-art-" + place + "-size:10%;";
   var size = summerRatingPlayerArtStageSize(art.key);
   return size ? "--summer-lower-art-" + place + "-size:" + size + ";" : "";
 }
 
 function summerRatingTop3ArtSizeStyle(slotName, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art) return "";
+  if (!art) return "--summer-top3-art-" + slotName + "-size:" + (slotName === "center" ? "22%" : "18%") + ";";
+  // September standings can move any player to any slot. Scale by the source
+  // artwork, rather than falling back to the former occupant's width.
+  if (!window.__pokerSummerArchive) {
+    var stageSize = parseFloat(summerRatingPlayerArtStageSize(art.key)) || 14;
+    var scaledSize = stageSize * (slotName === "center" ? 1.8 : 1.5);
+    return "--summer-top3-art-" + slotName + "-size:" + scaledSize.toFixed(2) + "%;";
+  }
   // Top-3 podium art is rendered through inline CSS variables; CSS background fallbacks below do not control these sizes.
   var size = "";
   if (art.league === 1) {
@@ -561,6 +573,7 @@ function summerRatingTop3ArtSizeStyle(slotName, nick) {
 
 function summerRatingPlayerArtStageSize(key) {
   switch (key) {
+    case "alenast": return "10%";
     case "waaar": return "14.7%";
     case "покерманки": return "17.9%";
     case "coo1er91": return "14.0%";
@@ -2348,6 +2361,16 @@ function initWinterRating() {
     sharedSection.hidden = false;
     var back = document.getElementById("annualRatingBack");
     if (!back) { back = document.createElement("button"); back.id = "annualRatingBack"; back.type = "button"; back.textContent = "Архив: лето 2026"; sharedSection.prepend(back); back.onclick = function () { window.__pokerSummerArchive = !window.__pokerSummerArchive; initWinterRating(); }; }
+    var ratingHeader = document.getElementById("ratingHeader");
+    if (!ratingHeader) {
+      ratingHeader = document.createElement("div");
+      ratingHeader.id = "ratingHeader";
+      sharedSection.prepend(ratingHeader);
+      ["winterRatingTitle", "annualRatingBack", "winterRatingSpringMainTabs", "winterRatingSpringActionTabs", "springRatingTabsUpdated"].forEach(function (id) {
+        var item = document.getElementById(id);
+        if (item) ratingHeader.appendChild(item);
+      });
+    }
     back.hidden = document.body.dataset.view !== "summer-rating";
     back.textContent = window.__pokerSummerArchive ? "← Сентябрь 2026" : "Архив: лето 2026";
   }
@@ -2934,7 +2957,7 @@ function initWinterRating() {
       summerRatingTop3ArtSizeStyle("center", top3[1] && top3[1].nick) +
       "--summer-top3-art-right:" + summerRatingPlayerArtCssUrl(top3[2] && top3[2].nick) + ";" +
       summerRatingTop3ArtSizeStyle("right", top3[2] && top3[2].nick);
-    podiumHtml += "<div class=\"spring-rating-top3__podium\" style=\"" + podiumStyle.replace(/"/g, "&quot;") + "\">";
+    podiumHtml += "<div class=\"spring-rating-top3__podium" + (!window.__pokerSummerArchive ? " spring-rating-top3__podium--current" : "") + "\" style=\"" + podiumStyle.replace(/"/g, "&quot;") + "\">";
     for (var pj = 0; pj < 3; pj++) {
       var r = top3[pj];
       var place = places[pj];
