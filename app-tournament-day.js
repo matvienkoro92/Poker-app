@@ -1526,7 +1526,7 @@ function renderHomeTractorRaffle() {
   if (!button) {
     button = document.createElement('button');
     button.type = 'button'; button.className = 'home-tractor-raffle';
-    button.innerHTML = '<span>🎟 Розыгрыш билетов</span>';
+    button.innerHTML = '<span>Розыгрыш билетов</span>';
     button.addEventListener('click', function () {
       var current = chooseHomeTractorRaffle(homeTractorRaffles, Date.now());
       if (!current) { renderHomeTractorRaffle(); return; }

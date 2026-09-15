@@ -464,7 +464,7 @@
 
 /* Tractor tournament uses Pasha Shkarubo, including the raffle scene layers. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene: url('./assets/home-tournament-shkarubo-single-table-v3.webp');
+  --home-tournament-scene: url('./assets/home-tournament-shkarubo-single-table-v4.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -722,7 +722,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* One continuous poker table, with every trophy on the same felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene:url('./assets/home-tournament-shkarubo-single-table-v3.webp');
+  --home-tournament-scene:url('./assets/home-tournament-shkarubo-single-table-v4.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-table-seam-fix {display:none!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table {
@@ -741,3 +741,15 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:not([data-tournament-character="shtukatur"]) > .home-tournament-raffle-chest-art {display:none!important}
 #app.app.app--view-home .home-tractor-raffle {left:1%;top:36%;width:28%;height:20%;padding:0;align-items:center}
 #app.app.app--view-home .home-tractor-raffle span {position:absolute;left:8%;bottom:18%;width:72%;box-sizing:border-box;padding:.7cqw .4cqw;font-size:1.65cqw;transform:rotate(-3deg);border-radius:.5cqw}
+
+/* Gold lettering engraved into the tractor's wooden pedestal. */
+#app.app.app--view-home .home-tractor-raffle span {
+  left:5%;bottom:0;width:90%;padding:0;border:0;border-radius:0;
+  background:none;color:#f1ca7b;font-size:1.65cqw;font-weight:900;
+  line-height:1.2;text-transform:uppercase;letter-spacing:.035cqw;
+  transform:rotate(-3deg);text-shadow:0 1px 0 #241105,0 -1px 0 #ffe5a355;
+}
+#app.app.app--view-home .home-tractor-raffle::before {
+  inset:8% 5% 10%;box-shadow:none;
+  background:radial-gradient(ellipse at 50% 70%,#ffc34416,transparent 70%);
+}
