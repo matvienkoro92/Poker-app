@@ -1581,6 +1581,12 @@ function renderHomeTournamentRaffleBonus() {
   var ticketsEl = document.getElementById("homeTournamentRaffleBonusTickets");
   var timerEl = document.getElementById("homeTournamentRaffleBonusTimer");
   var raffle = homeTournamentRaffleBonusData;
+  var scene = btn && btn.closest('.tournament-day-home-dual--tournament-focus');
+  if (btn && (!scene || scene.getAttribute('data-tournament-character') !== 'shtukatur')) {
+    btn.hidden = true;
+    btn.style.display = 'none';
+    return;
+  }
   if (!btn || !ticketsEl || !timerEl || !raffle) return;
   var end = new Date(raffle.endDate);
   var diff = end.getTime() - Date.now();
@@ -1946,7 +1952,7 @@ function initHomeTournamentLeagueTopButtons() {
 }
 
 function updateHomeTournamentFocusFlow() {
-  renderHomeTractorRaffle();
+  renderHomeTournamentRaffleBonus();
   var section = document.querySelector(".tournament-day-home-dual--tournament-focus");
   if (!section) return;
   var flow = section.querySelector(".home-tournament-flow");

@@ -406,20 +406,20 @@
 }
 
 /* Active ticket raffle: replace only the bucket/stool area with the chest. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden])) {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden])) {
   background: none !important;
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
   background-image: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1-display-v1.webp')) !important;
   clip-path: none;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0H100V100H0Z M5 33.5H9.5L11.5 38H26.5V48H28L27 49L26 54L0 55.5V48H4V38H6Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0 !important;
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
   background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-transparent-v8-light-v1-display-v1.webp')) center / 100% 100% no-repeat !important;
 }
 .home-tournament-raffle-chest-art { display: none; }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
   display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background: url('./assets/home-tournament-raffle-chest-scene-v1-display-v1.webp') center / 100% 100% no-repeat;
   clip-path: polygon(0 55.5%, 0 53%, 1.5% 53%, 1.7% 42%, 3% 42%, 3% 39.5%, 4.4% 38%, 7.5% 38.5%, 6.8% 35.5%, 8.4% 34.5%, 8.4% 33.5%, 13% 33%, 15.3% 35.4%, 16% 33.5%, 20% 33.2%, 24.7% 34.5%, 23.5% 38.5%, 27.3% 38.5%, 28.5% 40%, 29% 47%, 27% 49%, 26% 54%);
@@ -735,3 +735,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
 #app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
 #app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
+
+/* The raffle belongs on Pasha's tractor; only Shtukatur uses a chest. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:not([data-tournament-character="shtukatur"]) > #homeTournamentRaffleBonus,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:not([data-tournament-character="shtukatur"]) > .home-tournament-raffle-chest-art {display:none!important}
+#app.app.app--view-home .home-tractor-raffle {left:1%;top:36%;width:28%;height:20%;padding:0;align-items:center}
+#app.app.app--view-home .home-tractor-raffle span {position:absolute;left:8%;bottom:18%;width:72%;box-sizing:border-box;padding:.7cqw .4cqw;font-size:1.65cqw;transform:rotate(-3deg);border-radius:.5cqw}
