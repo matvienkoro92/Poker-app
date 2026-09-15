@@ -73,6 +73,7 @@ const handlers = {
   "send-bulk": () => require(path.join(handlersDir, "send-bulk.js")),
   "cron-reminder-10min": () => require(path.join(handlersDir, "cron-reminder-10min.js")),
   "cron-raffle-notifications": () => require(path.join(handlersDir, "cron-raffle-notifications.js")),
+  "cron-club-menu-idle": () => require(path.join(handlersDir, "cron-club-menu-idle.js")),
   "cron-raffles": () => require(path.join(handlersDir, "cron-raffles.js")),
   "cron-daily-poker-reminders": () => require(path.join(handlersDir, "cron-daily-poker-reminders.js")),
   "cron-tournament-reminders": () => require(path.join(handlersDir, "cron-tournament-reminders.js")),
