@@ -178,7 +178,7 @@
         title: String(item.name || item.category || "Турнир"),
         time: time,
         buyin: String(item.buyin || ""),
-        label: time + " · " + String(item.name || item.category || "Турнир") + (item.buyin ? " · " + item.buyin : ""),
+        label: (item.date || (item.repeat === "daily" ? "Ежедневно" : ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"][Number(item.dow)])) + " · " + time + " · " + String(item.name || item.category || "Турнир") + (item.buyin ? " · " + item.buyin : ""),
       };
     }).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
   }
@@ -594,8 +594,13 @@
       amount.readOnly = operation === "debit";
     }
     if (comment) comment.value = "";
-    if (tournamentWrap) tournamentWrap.hidden = operation !== "debit";
-    if (operation === "debit") populateTournamentOptions();
+    if (tournamentWrap) tournamentWrap.hidden = false;
+    populateTournamentOptions();
+    if (typeof POKER_FULL_TOURNAMENT_SCHEDULE === "undefined" && typeof window.pokerEnsureScriptDomains === "function") {
+      window.pokerEnsureScriptDomains(["tournament"]).then(function () {
+        if (adminBonusesState.selectedUserId === userId && adminBonusesState.operation === operation) populateTournamentOptions();
+      }).catch(function () { if (message) message.textContent = "Не удалось загрузить расписание. Откройте окно ещё раз."; });
+    }
     if (message) message.textContent = "";
     if (modal) {
       modal.hidden = false;
@@ -654,7 +659,7 @@
       if (message) message.textContent = "Сумма должна быть больше 0.";
       return;
     }
-    var tournament = null;
+    var tournament = adminBonusesState.tournamentOptions.find(function (item) { return item.id === String(tournamentEl && tournamentEl.value || ""); }) || null;
     if (operation === "debit") {
       var tournamentId = String(tournamentEl && tournamentEl.value || "");
       tournament = adminBonusesState.tournamentOptions.find(function (item) { return item.id === tournamentId; }) || null;

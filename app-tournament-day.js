@@ -36,11 +36,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Меджик",
+    name: "Счастливый косарь",
     buyin: "1 000₽",
     guarantee: "170 000₽",
     banner: HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Меджик — вход 1 000₽, гарантия 170 000₽",
+    bannerAlt: "Poker21 Счастливый косарь — вход 1 000₽, гарантия 170 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
@@ -137,7 +137,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   {
     "repeat": "weekly",
     "category": "Турнир дня",
-    "name": "Меджик",
+    "name": "Счастливый косарь",
     "buyin": "1 000₽",
     "rebuy": "Не указано",
     "guarantee": "170 000₽",
