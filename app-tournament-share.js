@@ -121,8 +121,8 @@
       var prizes = (raffle.groups || []).map(function (group) { return group.count + " × " + group.prize; }).join("; ");
       add(": " + (prizes || raffle.title || "билеты на турнир").slice(0, 350));
     }
-    // Share the same current club Last Longer shown on the table, including events spanning multiple tournaments.
-    if (bet && bet.id && (bet.status === "open" || bet.status === "closed")) {
+    // Share only the open Last Longer for the dated tournament on this card.
+    if (typeof window.pokerTournamentBetMatchesHome === "function" && window.pokerTournamentBetMatchesHome(bet, selected)) {
       add("\n\n• ♠ "); add("Last Longer", link("tournament_bet_" + bet.id));
       add(" — " + String(bet.title || name).slice(0, 100) + ". Взнос: " + Number(bet.stakePrice || 0).toLocaleString("ru-RU") + " ₽. Банк: " + Number(bet.bank || 0).toLocaleString("ru-RU") + " ₽. Участников: " + Number(bet.participantsCount || 0) + "." + (bet.status === "closed" ? " Регистрация закрыта." : " Победит тот, кто продержится дольше."));
     }

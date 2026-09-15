@@ -392,12 +392,16 @@
     updateHomeButton(data);
   }
 
-  function updateHomeButton(data) {
+  var homePlaqueData = null;
+  window.pokerRefreshTournamentBetSelection = function () { updateHomeButton(homePlaqueData, true); };
+
+  function updateHomeButton(data, selectionOnly) {
+    homePlaqueData = data;
     var amount = document.querySelector("[data-tournament-bet-home-bank]");
     var button = document.querySelector("[data-tournament-bet-open]");
-    var hasEvent = !!(data && data.id && (data.status === "open" || data.status === "closed"));
+    var hasEvent = typeof window.pokerTournamentBetMatchesHome === "function" && window.pokerTournamentBetMatchesHome(data);
     homePlaqueHasActiveEvent = hasEvent;
-    homePlaqueLastRefreshAt = Date.now();
+    if (!selectionOnly) homePlaqueLastRefreshAt = Date.now();
     if (button) {
       button.classList.toggle("home-last-longer-dock--unannounced", !hasEvent);
       var emptyLabel = button.querySelector(".home-last-longer-dock__empty");
@@ -406,7 +410,7 @@
         if (bar) {
           emptyLabel = document.createElement("span");
           emptyLabel.className = "home-last-longer-dock__empty";
-          emptyLabel.textContent = "Не сегодня";
+          emptyLabel.textContent = "Пока не открыт";
           bar.appendChild(emptyLabel);
         }
       }
@@ -425,7 +429,11 @@
       playersLabel.textContent = count % 100 >= 11 && count % 100 <= 14 ? "участников" : count % 10 === 1 ? "участник" : count % 10 >= 2 && count % 10 <= 4 ? "участника" : "участников";
     }
     if (stake) stake.textContent = hasEvent ? rub(data.stakePrice) : "—";
-    if (button) button.classList.toggle("home-mini-icon-item--vote-active", !!(data && data.status === "open"));
+    if (button) {
+      button.classList.toggle("home-mini-icon-item--vote-active", !!hasEvent);
+      button.disabled = !hasEvent;
+      button.setAttribute("aria-label", hasEvent ? "Last Longer — участники и банк" : "Last Longer к этому турниру пока не открыт");
+    }
   }
 
   function load(silent) {
@@ -705,7 +713,7 @@
   // Refresh the public home plaque independently of any selected personal event.
   var homePlaqueLoading = false;
   function refreshHomePlaque() {
-    if (!homePlaqueHasActiveEvent || Date.now() - homePlaqueLastRefreshAt < HOME_PLAQUE_REFRESH_MS) return;
+    if (Date.now() - homePlaqueLastRefreshAt < HOME_PLAQUE_REFRESH_MS) return;
     if (homePlaqueLoading || loading || document.visibilityState === "hidden") return;
     var home = document.querySelector('.app--view-home');
     if (!home || (modal && !modal.hidden)) return;

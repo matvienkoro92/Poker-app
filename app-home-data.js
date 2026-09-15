@@ -18,6 +18,16 @@
     }
     return src;
   };
+  // The home card represents one dated tournament, not the last stored event.
+  window.pokerTournamentBetMatchesHome = function (data, selected, now) {
+    selected = selected || window._tournamentDayShare;
+    if (!data || !data.id || data.createdByPlayer || data.status !== "open" || !selected) return false;
+    if (data.tournamentId !== "weekly-" + selected.weekday) return false;
+    var created = Date.parse(data.createdAt);
+    if (!Number.isFinite(created)) return false;
+    var date = new Date(created + 10800000).toISOString().slice(0, 10);
+    return date === selected.date && (now == null ? Date.now() : now) < Date.parse(date + "T20:00:00+03:00");
+  };
   window.pokerLoadTournamentBetHome = function (force) {
     if (pending) return pending;
     if (!force && value && Date.now() - updatedAt < 60000) return Promise.resolve(value);

@@ -2509,7 +2509,7 @@ function updateTournamentDayBlock() {
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
-    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
+    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "aza" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
     var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;
@@ -2525,6 +2525,7 @@ function updateTournamentDayBlock() {
       time: detailTime,
       guarantee: detailGuaranteeStr
     };
+    if (typeof window.pokerRefreshTournamentBetSelection === "function") window.pokerRefreshTournamentBetSelection();
     var scheduleTdName = document.getElementById("scheduleTournamentDayName");
     if (scheduleTdName) {
       scheduleTdName.textContent = currentNameStr === "Нокаут Мистери" ? "" : currentNameStr;
