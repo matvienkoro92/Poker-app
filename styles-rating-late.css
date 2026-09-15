@@ -5862,3 +5862,42 @@ html #app #winterRatingSection.summer-rating #ratingHeader #springRatingAchievem
   text-shadow: 0 1px 7px rgba(0, 0, 0, 0.72);
   background: radial-gradient(ellipse at 50% 0%, rgba(255, 236, 164, 0.22), transparent 58%), linear-gradient(180deg, rgba(20, 24, 26, 0.64), rgba(7, 10, 14, 0.72));
 }
+
+/* Place names on the front plaques, with matching clickable areas. */
+html #app #winterRatingSection.summer-rating .spring-rating-top3__nick,
+html #app #winterRatingSection.summer-rating .spring-rating-top3__nick-btn {
+  translate: 0 -44px;
+}
+html #app #winterRatingSection.summer-rating .summer-rating-pedestal-label {
+  top: calc(var(--summer-rating-mobile-lower-podium-label-y) - 50px);
+}
+html #app #winterRatingSection.summer-rating .summer-rating-pedestal-hitbox {
+  top: calc(var(--summer-rating-mobile-lower-podium-hitbox-y) - 50px);
+}
+
+/* Keep search, rows and expansion control together in normal flow. */
+html #app #winterRatingSection.summer-rating .winter-rating__search-wrap--league {
+  order: 3;
+  margin: -90px 0 8px !important;
+}
+html #app #winterRatingSection.summer-rating .winter-rating__table-wrap--league {
+  order: 4;
+  transform: none !important;
+  margin: 0 !important;
+}
+html #app #winterRatingSection.summer-rating .winter-rating__show-all-wrap--league {
+  order: 5;
+  margin: 8px 0 12px !important;
+  padding: 0 !important;
+}
+@media (max-width: 700px) {
+  html #app #winterRatingSection.summer-rating .winter-rating__search-wrap--league {
+    margin-top: -138px !important;
+  }
+}
+
+/* Monthly summaries belong to the calendar, not the league standings. */
+#winterRatingSection.summer-rating[data-summer-filter="1"] #summerRatingMonthSummaries,
+#winterRatingSection.summer-rating[data-summer-filter="2"] #summerRatingMonthSummaries {
+  display: none !important;
+}
