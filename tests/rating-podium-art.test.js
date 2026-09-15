@@ -20,12 +20,13 @@ test('current podium gives every known player an explicit scale in every positio
   }
   assert.equal(c.summerRatingTop3ArtSizeStyle('left', 'Waaar').split(':')[1], c.summerRatingTop3ArtSizeStyle('right', 'Waaar').split(':')[1]);
 });
-test('new participants have a safe visible fallback, but empty places stay empty', () => {
+test('participants without personal artwork leave their podium place empty', () => {
   const c = runtime();
-  assert.match(c.summerRatingPlayerArtCssUrl('Бардюр'), /data:image\/svg\+xml/);
+  assert.equal(c.summerRatingPlayerArtCssUrl('Бардюр'), 'none');
   assert.equal(c.summerRatingPlayerArtCssUrl(''), 'none');
   assert.ok(!c.summerRatingPlayerArtCssUrl('<').includes('<'));
-  assert.match(c.summerRatingLowerArtSizeStyle(4, 'Новый игрок'), /size:10%/);
+  assert.equal(c.summerRatingLowerArtSizeStyle(4, 'Новый игрок'), '');
+  assert.equal(c.summerRatingTop3ArtSizeStyle('right', 'Бардюр'), '');
 });
 test('summer archive retains its original top-three sizes', () => {
   const c = runtime();

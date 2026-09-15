@@ -4921,7 +4921,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating.summer-rating::afte
   right: 22px;
 }
 
-/* Stage artwork follows the current rows; participants without personal art get initials. */
+/* Stage artwork follows current rows; places without personal art stay empty. */
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague1.spring-rating-top3--league,
 .winter-rating.spring-rating.summer-rating #springRatingTop3PodiumLeague2.spring-rating-top3--league {
   --summer-top3-art-center-x: 50%;
@@ -5706,10 +5706,10 @@ html.app-view-summer-rating-html-scroll body #app.app:has(#summerRatingView.view
 /* Rating controls occupy their own rows above the podium. */
 html #app #winterRatingSection.summer-rating #ratingHeader {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "title archive" "leagues leagues" "actions updated";
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  grid-template-areas: "leagues leagues leagues" "actions archive ." "updated updated updated";
   gap: 8px;
-  padding: 8px 0 16px;
+  padding: 3px 0 21px;
   position: relative;
   z-index: 3;
   background: #020812;
@@ -5724,6 +5724,7 @@ html #app #winterRatingSection.summer-rating #ratingHeader > * {
   width: auto !important;
 }
 html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingTitle {
+  display: none !important;
   grid-area: title;
   padding: 0 0 0 44px !important;
   min-height: 40px;
@@ -5762,6 +5763,7 @@ html #app #winterRatingSection.summer-rating #ratingHeader #annualRatingBack {
 }
 html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringMainTabs {
   grid-area: leagues;
+  margin-left: 44px !important;
   display: flex !important;
   height: 40px !important;
   padding: 3px !important;
@@ -5776,6 +5778,7 @@ html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringMa
 }
 html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringActionTabs {
   grid-area: actions;
+  width: max-content !important;
   display: flex;
   height: 32px !important;
   padding: 0 !important;
@@ -5799,16 +5802,24 @@ html #app #winterRatingSection.summer-rating #ratingHeader #summerRatingSectionC
 }
 html #app #winterRatingSection.summer-rating #ratingHeader #springRatingTabsUpdated {
   grid-area: updated;
+  justify-self: end;
+  height: 12px;
+  line-height: 12px;
   align-self: center;
   font-size: 9px !important;
   font-weight: 400 !important;
   color: #b8b0a0;
 }
 html #app #winterRatingSection.summer-rating:has(#ratingHeader) {
-  --summer-rating-stage-bg-offset-y: 116px;
+  --summer-rating-stage-bg-offset-y: 88px;
 }
 @media (max-width: 700px) {
   html #app #winterRatingSection.summer-rating:has(#ratingHeader) {
-    --summer-rating-stage-bg-offset-y: 84px;
+    --summer-rating-stage-bg-offset-y: 56px;
   }
+}
+
+/* Lift the lower characters onto the plinths without moving names or hitboxes. */
+html #app #winterRatingSection.summer-rating .summer-rating-pedestal-labels::before {
+  transform: translateY(calc(var(--summer-rating-mobile-lower-podium-players-y, -48px) - 40px));
 }

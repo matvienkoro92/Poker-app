@@ -510,12 +510,7 @@ window.pokerGetSummerRatingPlayerArt = pokerGetSummerRatingPlayerArt;
 
 function summerRatingPlayerArtCssUrl(nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art || !art.src) {
-    if (!String(nick || "").trim()) return "none";
-    var initial = escapeHtmlRating(Array.from(String(nick).trim())[0].toUpperCase());
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="240" viewBox="0 0 160 240"><rect x="12" y="30" width="136" height="190" rx="60" fill="#101820" stroke="#cda555" stroke-width="4"/><text x="80" y="145" text-anchor="middle" font-family="sans-serif" font-size="70" fill="#ffe29a">' + initial + '</text></svg>';
-    return "url('data:image/svg+xml," + encodeURIComponent(svg).replace(/'/g, "%27") + "')";
-  }
+  if (!art || !art.src) return "none";
   return "url('" + String(art.src).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "')";
 }
 
@@ -535,14 +530,14 @@ function summerRatingTableAvatarStyle(nick) {
 
 function summerRatingLowerArtSizeStyle(place, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art) return "--summer-lower-art-" + place + "-size:10%;";
+  if (!art) return "";
   var size = summerRatingPlayerArtStageSize(art.key);
   return size ? "--summer-lower-art-" + place + "-size:" + size + ";" : "";
 }
 
 function summerRatingTop3ArtSizeStyle(slotName, nick) {
   var art = pokerGetSummerRatingPlayerArt(nick);
-  if (!art) return "--summer-top3-art-" + slotName + "-size:" + (slotName === "center" ? "22%" : "18%") + ";";
+  if (!art) return "";
   // September standings can move any player to any slot. Scale by the source
   // artwork, rather than falling back to the former occupant's width.
   if (!window.__pokerSummerArchive) {
