@@ -411,7 +411,7 @@ function isWinterRatingPlayerSeasonalKey(seasonKey) {
 }
 
 function getWinterRatingPlayerSeasonConfig(seasonKey) {
-  if (seasonKey === "summer" && typeof SUMMER_RATING_SEASON !== "undefined") return SUMMER_RATING_SEASON;
+  if (seasonKey === "summer" && typeof SUMMER_RATING_SEASON !== "undefined") return typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView() ? getRatingSeasonConfig() : SUMMER_RATING_SEASON;
   if (seasonKey === "spring" && typeof SPRING_RATING_SEASON !== "undefined") return SPRING_RATING_SEASON;
   if (typeof getRatingSeasonConfig === "function" && isWinterRatingPlayerSeasonalKey(seasonKey)) return getRatingSeasonConfig();
   return null;
@@ -2186,7 +2186,7 @@ function getWinterRatingOverall() {
 
 function ratingSeasonDataIsLoading(seasonConfig) {
   if (!seasonConfig || !seasonConfig.key || !isSpringRatingMode()) return false;
-  if (seasonConfig.key === "summer") return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE === "undefined";
+  if (seasonConfig.key === "summer") return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE === "undefined" || (typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView() && typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE === "undefined");
   if (seasonConfig.key === "spring") return typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined";
   return false;
 }
@@ -2339,57 +2339,17 @@ function pokerRefreshRatingSeasonAfterDataReady(seasonKey) {
 }
 window.__pokerRefreshRatingSeasonAfterDataReady = pokerRefreshRatingSeasonAfterDataReady;
 
-function renderAnnualRating() {
-  var host = document.getElementById("summerRatingSectionPlaceholder");
-  if (!host) return;
-  var panel = document.getElementById("annualRatingPanel");
-  if (!panel) {
-    panel = document.createElement("section");
-    panel.id = "annualRatingPanel";
-    panel.className = "winter-rating spring-rating summer-rating";
-    host.prepend(panel);
-  }
-  panel.hidden = false;
-  var section = document.getElementById("winterRatingSection");
-  if (section) section.hidden = true;
-  setSummerRatingInitialLoading(false, section);
-  if (typeof WINTER_RATING_BY_DATE === "undefined" || typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined" || typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE === "undefined") {
-    panel.innerHTML = '<p role="status">Загружаем общий рейтинг…</p>';
-    if (!panel._loading) {
-      panel._loading = true;
-      Promise.resolve(window.pokerEnsureScriptDomains(["rating-winter", "rating-spring", "rating-summer"])).then(function () {
-        panel._loading = false;
-        if (document.body.dataset.view === "summer-rating" && !window.__pokerSummerArchive) renderAnnualRating();
-      }).catch(function () { panel._loading = false; panel.innerHTML = '<p>Не удалось загрузить рейтинг. Откройте раздел ещё раз.</p>'; });
-    }
-    return;
-  }
-  var data = pokerRatingBuildAnnualStandings();
-  panel.innerHTML = '<h2 class="winter-rating__title">Общий рейтинг</h2>' +
-    '<p>Баллы с 1 января 2026 · обновлено ' + escAnnual(data.dates[data.dates.length - 1] || '—') + '</p>' +
-    '<details class="annual-rating-archive"><summary>Архив рейтингов</summary><button type="button" data-annual-summer-archive>Лето 2026</button> <a href="#" data-view-target="spring-rating">Весна 2026</a> <a href="#" data-view-target="winter-rating">Зима 2026</a></details>' +
-    '<label class="annual-rating-search">Найти игрока <input type="search" placeholder="Ник игрока" aria-label="Найти игрока в общем рейтинге"></label>' +
-    '<div class="winter-rating__table-wrap"><table class="winter-rating__table"><thead><tr><th>Место</th><th>Игрок</th><th>Баллы</th></tr></thead><tbody></tbody></table></div>';
-  function fill(query) {
-    var rows = data.rows.filter(function (row) { return row.nick.toLocaleLowerCase("ru").includes(query.toLocaleLowerCase("ru")); });
-    panel.querySelector('tbody').innerHTML = rows.map(function (row) { return '<tr><td>' + winterRatingPlaceCell(row.place) + '</td><td>' + escAnnual(row.nick) + '</td><td>' + row.points.toLocaleString("ru-RU") + '</td></tr>'; }).join('') || '<tr><td colspan="3">Игрок не найден</td></tr>';
-  }
-  fill('');
-  panel.querySelector('input').addEventListener('input', function (event) { fill(event.target.value.trim()); });
-  panel.querySelector('[data-annual-summer-archive]').addEventListener('click', function () { window.__pokerSummerArchive = true; initWinterRating(); });
-}
-function escAnnual(value) { return String(value).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
-
 function initWinterRating() {
-  if (document.body.dataset.view === "summer-rating" && !window.__pokerSummerArchive) { renderAnnualRating(); return; }
+
   var annualPanel = document.getElementById("annualRatingPanel");
   if (annualPanel) annualPanel.hidden = true;
   var sharedSection = document.getElementById("winterRatingSection");
   if (sharedSection) {
     sharedSection.hidden = false;
     var back = document.getElementById("annualRatingBack");
-    if (!back) { back = document.createElement("button"); back.id = "annualRatingBack"; back.type = "button"; back.textContent = "← Общий рейтинг"; sharedSection.prepend(back); back.onclick = function () { window.__pokerSummerArchive = false; initWinterRating(); }; }
+    if (!back) { back = document.createElement("button"); back.id = "annualRatingBack"; back.type = "button"; back.textContent = "Архив: лето 2026"; sharedSection.prepend(back); back.onclick = function () { window.__pokerSummerArchive = !window.__pokerSummerArchive; initWinterRating(); }; }
     back.hidden = document.body.dataset.view !== "summer-rating";
+    back.textContent = window.__pokerSummerArchive ? "← Сентябрь 2026" : "Архив: лето 2026";
   }
   try {
     var schedPrev = window.requestIdleCallback
@@ -2458,7 +2418,7 @@ function initWinterRating() {
   if (tabsUpdatedEl) {
     tabsUpdatedEl.hidden = !isSummerRatingMode;
     tabsUpdatedEl.style.display = isSummerRatingMode ? "" : "none";
-    tabsUpdatedEl.textContent = "обновлено 31 августа";
+    tabsUpdatedEl.textContent = seasonConfig.updatedLabel || "";
   }
   if (conditionsBtn && conditionsBtn.getAttribute("data-inited") !== "1") {
     conditionsBtn.setAttribute("data-inited", "1");
@@ -2482,6 +2442,7 @@ function initWinterRating() {
       }
     });
   }
+  if (prizesBtn) prizesBtn.hidden = typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView();
   if (prizesBtn && prizesBtn.getAttribute("data-inited") !== "1") {
     prizesBtn.setAttribute("data-inited", "1");
     prizesBtn.addEventListener("click", function () {
@@ -2499,7 +2460,10 @@ function initWinterRating() {
   if (febBtnLabel) febBtnLabel.textContent = isSpringRatingMode() ? (seasonConfig.topLabel || "Топы весны") : "Топы Февраля";
   var titleTextEl = document.querySelector("#winterRatingSection .winter-rating__title-text");
   if (titleTextEl) {
-    titleTextEl.innerHTML = isSpringRatingMode()
+    titleTextEl.setAttribute("data-season-title", typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView() ? "Рейтинг сентября" : "Рейтинг лета");
+    titleTextEl.innerHTML = typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView()
+      ? "Рейтинг сентября 2026"
+      : isSpringRatingMode()
       ? "Рейтинг Турнирщиков<br /><span class=\"winter-rating__title-accent\">На 250 000р</span>"
       : "Архив рейтинга зимы<br /><span class=\"winter-rating__title-accent\">на 250 000₽</span>";
   }
@@ -2543,9 +2507,9 @@ function initWinterRating() {
   var springLeaguesEl = document.getElementById("winterRatingSpringLeagues");
   var springMainTabsEl = document.getElementById("winterRatingSpringMainTabs");
   var winterRatingShareBtn = document.getElementById("winterRatingShareBtn");
-  if (springMainTabsEl) springMainTabsEl.setAttribute("aria-label", seasonConfig.key === "summer" ? "Лиги рейтинга лета" : "Лиги рейтинга весны");
+  if (springMainTabsEl) springMainTabsEl.setAttribute("aria-label", "Лиги рейтинга: " + seasonConfig.label);
   if (springLeaguesEl) {
-    springLeaguesEl.setAttribute("aria-label", seasonConfig.key === "summer" ? "Итоговые таблицы рейтинга лета по лигам" : "Итоговые таблицы рейтинга весны по лигам");
+    springLeaguesEl.setAttribute("aria-label", "Таблицы по лигам: " + seasonConfig.label);
     springLeaguesEl.querySelectorAll(".winter-rating__spring-league-updated").forEach(function (el) {
       el.textContent = seasonConfig.updatedLabel || "обновлено 28 июня";
     });
@@ -2716,7 +2680,7 @@ function initWinterRating() {
       var mode = shareBtn.getAttribute("data-rating-share-mode") || "copy";
       if (mode === "share") {
         var leagueLabel = sectionKey === "top" ? "по дням" : (sectionKey === "2" ? "Лига 2" : "Лига 1");
-        var seasonLabel = typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "Рейтинг лета 2026" : "Рейтинг весны 2026";
+        var seasonLabel = "Рейтинг · " + seasonConfig.label;
         var shareText = seasonLabel + ": " + leagueLabel;
         var shareUrl = typeof pokerBuildTelegramShareUrlDialog === "function" ? pokerBuildTelegramShareUrlDialog(link, shareText) : "";
         var tryShare = typeof pokerTryPwaWebShare === "function" ? pokerTryPwaWebShare({ title: shareText, text: shareText + "\n" + link, url: link }) : Promise.resolve(false);
@@ -2785,6 +2749,7 @@ function initWinterRating() {
     var league2Body = document.getElementById("winterRatingLeague2Body");
     var league1PrizesByPlace = { 1: 100000, 2: 50000, 3: 25000, 4: 10000, 5: 5000 };
     var league2PrizesByPlace = { 1: 30000, 2: 15000, 3: 7500, 4: 5000, 5: 2500 };
+    if (typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView()) { league1PrizesByPlace = {}; league2PrizesByPlace = {}; }
     function renderLeagueRows(leagueNum, bodyEl) {
       if (!bodyEl) return;
       var raw = [];
@@ -3778,7 +3743,8 @@ function initWinterRating() {
       if (nextEl && canNext) nextEl.addEventListener("click", function () { renderCalendarMonth(monthIndex - 1); });
     }
     if (isSummerRatingMode) {
-      var summerMonths = [6, 7, 8];
+      var septemberMode = typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView();
+      var summerMonths = septemberMode ? [9] : [6, 7, 8];
       var summerTournaments = getSpringRatingTournamentsByDate() || {};
       function summerSummaryHtml(months, label) {
         var reward = 0;
@@ -3818,7 +3784,7 @@ function initWinterRating() {
         }
         upperMonths.style.setProperty("display", "none", "important");
         var summerStats = summerRatingSeasonStats(summerTournaments);
-        summerMonthsHost.innerHTML = summerRatingSeasonStatsHtml(summerStats) + summerMonths.map(function (month) {
+        summerMonthsHost.innerHTML = (septemberMode ? "" : summerRatingSeasonStatsHtml(summerStats)) + summerMonths.map(function (month) {
           return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
             summerSummaryHtml([month], "Итоги месяца") + '</details>';
         }).join("");

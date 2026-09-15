@@ -2853,7 +2853,7 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 }
 
 body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__title-text::before {
-  content: "Рейтинг лета";
+  content: attr(data-season-title);
   font-size: clamp(14px, 4.2vw, 18px);
 }
 
@@ -5676,3 +5676,5 @@ body[data-view="summer-rating"] .winter-rating.spring-rating .winter-rating__tit
 #annualRatingPanel .annual-rating-archive a, #annualRatingPanel button, #annualRatingBack { display: inline-block; padding: 10px; color: #f5dfac; background: #10151c; border: 1px solid #8b743b; border-radius: 12px; }
 #annualRatingPanel .winter-rating__table { width: 100%; }
 #annualRatingPanel td:nth-child(2) { overflow-wrap: anywhere; }
+
+#annualRatingBack { margin-left: 48px; font-size: 12px; }

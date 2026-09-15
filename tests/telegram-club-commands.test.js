@@ -70,10 +70,10 @@ test('pulse shows links only for active raffles and open Last Longer',async t=>{
  redis.pipeline=async()=>{throw Error('unavailable')};
  assert.deepEqual(await c.activeRootMenu(),c.rootMenu());
 });
-test('pulse sends latest hero photo before menu, but callbacks do not repeat it',async t=>{
+test('pulse sends only the menu without a hero photo',async t=>{
  const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
- global.fetch=async(url,opts)=>{if(url.endsWith('/pulse-hero.json'))return {ok:true,json:async()=>({nick:'Игрок',date:'14.09.2026',image:'/assets/pulse/pulse-hero-14-09-2026.jpg'})};calls.push({url,body:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ global.fetch=async(url,opts)=>{calls.push({url,body:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
  await c.handle({message:{chat:{id:-1,type:'group'},message_id:7,text:'/pulse'}},'test');
- assert.ok(calls[0].url.endsWith('/sendPhoto'));assert.match(calls[0].body.caption,/Игрок/);assert.ok(calls[1].url.endsWith('/sendMessage'));
+ assert.equal(calls.length,1);assert.ok(calls[0].url.endsWith('/sendMessage'));
  calls.length=0;await c.handle({callback_query:{id:'c',data:'club:pulse',message:{chat:{id:-1},message_id:8}}},'test');assert.ok(!calls.some(c=>c.url.endsWith('/sendPhoto')));
 });

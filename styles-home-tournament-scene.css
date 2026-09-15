@@ -589,7 +589,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   min-height: 0 !important; white-space: pre-line !important; text-shadow: 0 1px 2px #000 !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount {
-  color: #ffe5b1 !important; font: 900 2.7cqw/1 Impact, 'Arial Narrow', sans-serif !important;
+  color: #ffe5b1 !important; font: 400 2.7cqw/1 'Arial Narrow', Arial, sans-serif !important;
   white-space: nowrap !important; letter-spacing: -.035em !important; text-shadow: 0 1px 2px #000 !important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount { font-size: 2.1cqw !important; }
@@ -764,4 +764,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-last-longer-dock::before {
   mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);
+}
+
+/* Seat the plaque on the rear pedestal, above the foreground chip silhouettes. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] .home-last-longer-dock__bar {
+  top: 74% !important;
 }

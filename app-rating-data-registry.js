@@ -12,7 +12,33 @@ function pokerRatingGetSpringImagesByLeague(leagueNum) {
   return {};
 }
 
+function pokerIsSeptemberRatingView() {
+  return typeof document !== "undefined" && document.body && document.body.getAttribute("data-view") === "summer-rating" && !window.__pokerSummerArchive;
+}
+
+var pokerSeptemberRatingSource = null;
+var pokerSeptemberRatingData = null;
+function pokerRatingGetSeptemberTournamentsByDate() {
+  var source = typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : null;
+  if (!source) return {};
+  if (source === pokerSeptemberRatingSource && pokerSeptemberRatingData) return pokerSeptemberRatingData;
+  var data = {};
+  Object.keys(source).filter(function (date) { return /\.09\.2026$/.test(date); }).forEach(function (date) {
+    data[date] = source[date].map(function (tournament) {
+      var buyin = Number(tournament.buyin);
+      if (tournament.buyin == null || !Number.isFinite(buyin)) throw new Error("Не указан бай-ин турнира " + date + " " + tournament.name);
+      return Object.assign({}, tournament, { league: buyin >= 500 ? 1 : 2, players: (tournament.players || []).map(function (player) {
+        return Object.assign({}, player, { points: winterRatingPointsForPlace(player.place, player.reward) });
+      }) });
+    });
+  });
+  pokerSeptemberRatingSource = source;
+  pokerSeptemberRatingData = data;
+  return data;
+}
+
 function pokerRatingGetSummerTournamentsByDate() {
+  if (pokerIsSeptemberRatingView()) return pokerRatingGetSeptemberTournamentsByDate();
   return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE || {} : {};
 }
 

@@ -194,7 +194,7 @@ function renderSpringRatingViewTotalsWeeks() {
     var label = String(block && block.label || "").trim() || (monthTotals ? "Итого призовые" : "Неделя");
     var startParam = weekStartParam(dates, monthTotals);
     var shareLabel = monthTotals ? "Ссылка на блок итогов " + label : "Ссылка на блок " + label;
-    var shareText = (typeof isSummerRatingMode === "function" && isSummerRatingMode() ? "Рейтинг лета 2026" : "Рейтинг весны 2026") + ": " + label + (totalText && totalText !== "—" ? " · " + totalText : "");
+    var shareText = ("Рейтинг · " + getActiveRatingSeasonConfigSafe().label) + ": " + label + (totalText && totalText !== "—" ? " · " + totalText : "");
     return "<div class=\"spring-rating-view-week__share-row winter-rating__spring-league-share-wrap\" data-rating-week-share-row>" +
       "<button type=\"button\" class=\"winter-rating__share-btn spring-rating-view-week__share-btn\" data-spring-rating-week-share=\"" + escNick(startParam) + "\" data-rating-share-mode=\"share\" data-rating-share-text=\"" + escNick(shareText) + "\">Поделиться</button>" +
       "<button type=\"button\" class=\"winter-rating__share-btn winter-rating__share-btn--copy-icon spring-rating-view-week__share-btn\" data-spring-rating-week-share=\"" + escNick(startParam) + "\" data-rating-share-mode=\"copy\" data-rating-share-text=\"" + escNick(shareText) + "\" aria-label=\"Скопировать ссылку: " + escNick(shareLabel) + "\">" + shareIconHtml() + "</button>" +
