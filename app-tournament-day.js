@@ -27,11 +27,11 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Ребайник",
+    name: "Тракторист",
     buyin: "300₽",
     guarantee: "150 000₽",
     banner: HOME_TOURNAMENT_TUESDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Ребайник — вход 300₽, гарантия 150 000₽",
+    bannerAlt: "Poker21 Тракторист — вход 300₽, гарантия 150 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },

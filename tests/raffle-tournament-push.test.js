@@ -115,3 +115,10 @@ test("subscription endpoint uses authenticated canonical account, never body acc
   await mod.exports(req, res);
   assert.equal(status, 401); assert.equal(recorded, null);
 });
+
+test("push describes ticket count, face value and tournament", () => {
+  const { tournamentRafflePushBody } = require('../lib/raffle-tournament-push');
+  assert.equal(tournamentRafflePushBody({title:'Общий заголовок',groups:[{count:5,prize:'Беккинг-билет 1 000 ₽ — Меджик'}]}),'Розыгрыш 5 билетов за 1 000 ₽ на турнир Меджик. Участвуйте!');
+  const multiple = tournamentRafflePushBody({groups:[{count:1,prize:'Билет 500 ₽ — Меджик'},{count:2,prize:'Билет 300 ₽ — Тракторист'}]});
+  assert.match(multiple,/1 билета за 500 ₽ на турнир Меджик; 2 билетов за 300 ₽ на турнир Тракторист/);
+});

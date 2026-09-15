@@ -513,7 +513,7 @@
   transform: translateY(-1px);
 }
 
-.home-friend-news-modal__item[data-home-news-player-id]:active .home-friend-news-modal__profile-cue {
+.home-friend-news-modal__item[data-home-news-player-id] .home-friend-news-modal__profile-cue:active {
   background: rgba(var(--friend-news-rgb), 0.25);
 }
 
@@ -2385,4 +2385,9 @@ body .home-friend-news-modal .chat-user-modal__news-comment-form .home-news-comm
 .profile-reaction-users--news .profile-reaction-users__empty {
   color: #91a2ba;
   text-align: center;
+}
+
+/* Keep one player illustration; legacy background characters leaked into shares. */
+body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item:nth-child(n) {
+  background-image:radial-gradient(ellipse at 88% 4%,rgba(var(--friend-news-rgb),.13),transparent 42%),linear-gradient(112deg,#080c13 0%,#111824 43%,#090d14 76%,#05080d 100%);
 }

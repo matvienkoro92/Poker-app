@@ -3090,7 +3090,7 @@
       }
       var signature = document.createElement("span");
       signature.textContent = "♠ Poker21   •   Клуб Два туза" + (dateLabel ? "   •   " + dateLabel : "");
-      signature.style.cssText = "position:absolute;left:20px;right:20px;bottom:20px;text-align:center;white-space:normal;color:#cdbb94;font:600 " + Math.max(12, width * .018) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
+      signature.style.cssText = "position:absolute;left:" + Math.max(20, Math.ceil(copyLeft)) + "px;right:20px;bottom:20px;text-align:left;white-space:normal;overflow-wrap:anywhere;color:#cdbb94;font:600 " + Math.max(12, width * .018) + "px/1.4 Arial,sans-serif;letter-spacing:.02em";
       clone.appendChild(signature);
       fitClubNewsShareText(clone, copyArea, signature);
       height = Math.ceil(parseFloat(clone.style.height)) || height;
