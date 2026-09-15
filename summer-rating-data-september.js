@@ -1869,4 +1869,151 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "14.09.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 2,
+          "reward": 9420,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 2260,
+          "points": 0
+        },
+        {
+          "nick": "I🐅I",
+          "place": 5,
+          "reward": 550,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 63040,
+          "points": 0
+        },
+        {
+          "nick": "Aza32",
+          "place": 4,
+          "reward": 17760,
+          "points": 0
+        },
+        {
+          "nick": "Fish007",
+          "place": 2,
+          "reward": 14620,
+          "points": 0
+        },
+        {
+          "nick": "Kosik",
+          "place": 9,
+          "reward": 13740,
+          "points": 0
+        },
+        {
+          "nick": "Baldendi",
+          "place": 3,
+          "reward": 11795,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "konfesta",
+          "place": 2,
+          "reward": 1257.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 5586.18,
+          "points": 0
+        },
+        {
+          "nick": "petroochoo",
+          "place": 2,
+          "reward": 2378.12,
+          "points": 0
+        },
+        {
+          "nick": "konfesta",
+          "place": 4,
+          "reward": 2131.8,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 3,
+          "reward": 1953.75,
+          "points": 0
+        },
+        {
+          "nick": "Виталька",
+          "place": 6,
+          "reward": 360,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 6600,
+          "points": 0
+        },
+        {
+          "nick": "Замотаю",
+          "place": 5,
+          "reward": 1000,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
