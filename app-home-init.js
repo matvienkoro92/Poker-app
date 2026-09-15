@@ -632,6 +632,9 @@ function fetchRaffleBadge() {
       if (raffleBadgeHomeFetchPromise !== request) return;
       if (typeof pokerRafflesApiQueryLeading === "function" && pokerRafflesApiQueryLeading() !== q) return;
       if (data && data.ok) {
+        if (typeof chooseHomeTournamentRaffleBonus === "function" && typeof setHomeTournamentRaffleBonus === "function") {
+          setHomeTournamentRaffleBonus(chooseHomeTournamentRaffleBonus(data.activeRaffles || data.raffles || []));
+        }
         var activeList = Array.isArray(data.activeRaffles)
           ? data.activeRaffles
           : (data.activeRaffle ? [data.activeRaffle] : []);
