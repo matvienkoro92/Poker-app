@@ -38,3 +38,10 @@ test('EV collections use deviation rather than profit, normalize blinds and excl
  assert.deepEqual(c.evAbove.map(h=>h.handId),['4','2','10']);
  assert.equal(summarize([rows[2]]).collections.evBelow.length,1);
 });
+test('review ranks cash results and EV deviations in selected units across stakes',()=>{
+ const rows=[h(1,-100,{ev:{status:'calculated',resultMinor:0}}),h(2,-50,{resultMinor:-50000,bigBlindMinor:1000,ev:{status:'calculated',resultMinor:0}}),h(3,100),h(4,50,{resultMinor:50000,bigBlindMinor:1000})];
+ const bb=summarize(rows),chips=summarize(rows,{},'resultMinor');
+ assert.deepEqual(bb.losses.map(h=>h.handId),['1','2']);assert.deepEqual(chips.losses.map(h=>h.handId),['2','1']);
+ assert.deepEqual(bb.wins.map(h=>h.handId),['3','4']);assert.deepEqual(chips.wins.map(h=>h.handId),['4','3']);
+ assert.deepEqual(bb.collections.evBelow.map(h=>h.handId),['1','2']);assert.deepEqual(chips.collections.evBelow.map(h=>h.handId),['2','1']);
+});

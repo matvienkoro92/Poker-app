@@ -59,19 +59,30 @@ def showdown_status(raw, player):
     return None
 
 def visible_opponent_cards(raw, player):
-    """Conservative disclosure: winning non-folded opponents at hero's showdown.
+    """Conservative disclosure: winners and completed all-in showdowns.
     Never expose the raw hole-card collection or infer disclosure from an all-in alone.
     """
     player=str(player)
     if showdown_status(raw,player) is not True:return []
     scores={str(raw.get('UserId'+str(i))):int(raw.get('Score'+str(i),0)) for i in range(1,11)}
+    actions=list(raw['base_data']['opt'].values())
+    active={str(c[0]) for c in raw['base_data']['card']}
+    active-={str(a['userId']) for a in actions if str(a['type'])=='10'}
+    all_in={str(a['userId']) for a in actions if str(a['type'])=='5'} & active
+    finished={str(a['userId']) for a in actions if str(a['type'])=='96'}
+    # With at most one contender still holding chips, a completed called all-in
+    # exposes the remaining hands. Ordinary losing/mucked hands stay private.
+    allin_showdown=(bool(all_in) and len(active)>=2 and len(active-all_in)<=1
+                    and active<=finished
+                    and int(raw.get('EndTime',0))>int(raw.get('StartTime',0)))
     result=[]
     for entry in raw['base_data'].get('card',[]):
         pid=str(entry[0])
-        if pid==player or scores.get(pid,0)<=0 or showdown_status(raw,pid) is not True:continue
+        if pid==player or showdown_status(raw,pid) is not True:continue
+        if scores.get(pid,0)<=0 and not allin_showdown:continue
         pair=[card(c) for c in entry[2:]]
         if len(pair)==2 and len(set(pair))==2:
-            result.append({'playerId':pid,'cards':pair,'disclosure':'showdown-winner'})
+            result.append({'playerId':pid,'cards':pair,'disclosure':'showdown-winner' if scores.get(pid,0)>0 else 'showdown-allin'})
     return result
 
 def project(raw, mode):

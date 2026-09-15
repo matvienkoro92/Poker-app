@@ -24,7 +24,9 @@ function evDifference(h){
  if(h.ev?.status!=='calculated'||!Number.isFinite(h.ev.resultMinor)||!Number.isFinite(h.resultMinor)||!Number.isFinite(h.bigBlindMinor)||h.bigBlindMinor<=0)return null;
  return (h.resultMinor-h.ev.resultMinor)/h.bigBlindMinor;
 }
-function summarize(hands,signals={}){
+function summarize(hands,signals={},metric='bb'){
+ const amount=h=>metric==='resultMinor'?h.resultMinor/100:h.bb;
+ const deviation=h=>metric==='resultMinor'?(h.resultMinor-h.ev.resultMinor)/100:evDifference(h);
  const ordered=hands.slice().sort((a,b)=>a.playedAt.localeCompare(b.playedAt)||a.handId.localeCompare(b.handId));
  const sessions=new Map(),limits=new Map();let total=0,peak=0,peakIndex=0,max=0,troughIndex=0,startIndex=0;
  const cumulative=[0];
@@ -43,11 +45,11 @@ function summarize(hands,signals={}){
  const showdowns=eligible.filter(h=>h.showdown);
  const groups=map=>[...map.values()].map(g=>({...g,bb100:g.bb*100/g.count}));
  return {sessions:groups(sessions),limits:groups(limits),drawdown:{amount:max,startIndex,troughIndex,recovery,remaining:max?Math.max(0,cumulative[startIndex]-total):0},
- wins:hands.filter(h=>h.bb>0).sort((a,b)=>b.bb-a.bb).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>a.bb-b.bb).slice(0,5),
+ wins:hands.filter(h=>h.bb>0).sort((a,b)=>amount(b)-amount(a)).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>amount(a)-amount(b)).slice(0,5),
  showdown:{loaded:known.length,total:hands.length,sawFlop:flop.length,eligible:eligible.length,count:showdowns.length,profitable:showdowns.filter(h=>h.resultMinor>0).length},
  collections:{riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30),
- evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-10).sort((a,b)=>evDifference(a)-evDifference(b)),
- evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=10).sort((a,b)=>evDifference(b)-evDifference(a))}};
+ evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-10).sort((a,b)=>deviation(a)-deviation(b)),
+ evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=10).sort((a,b)=>deviation(b)-deviation(a))}};
 }
 return {actions,summarize,evDifference};
 });

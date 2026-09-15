@@ -70,41 +70,46 @@ function startHistory(payload) {
       'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
       'Для этой выборки нет рассчитанных выставлений all-in EV.';
     const vals=series.points.flatMap(p=>lines.map(([key])=>p[key]));let low=Math.min(0,...vals),high=Math.max(0,...vals);if(low===high){low-=1;high+=1;}const pad=(high-low)*.08;low-=pad;high+=pad;
-    const x=i=>95+i/Math.max(1,data.count)*785,y=v=>275-(v-low)/(high-low)*250;
+    const plotLeft=110,plotRight=790,plotWidth=plotRight-plotLeft,plotTop=80,plotBottom=plotTop+plotWidth;
+    const x=i=>plotLeft+i/Math.max(1,data.count)*plotWidth,y=v=>plotBottom-(v-low)/(high-low)*plotWidth;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
-    for(let i=0;i<=4;i++){const v=low+(high-low)*i/4;node('line',{x1:95,x2:880,y1:y(v),y2:y(v),stroke:'#273449'});node('text',{x:85,y:y(v)+4,'text-anchor':'end',fill:'#e8bc68','font-size':axisFont},compactSigned(v));}
-    node('line',{x1:95,x2:95,y1:25,y2:275,stroke:'#e8bc68','stroke-width':2});
-    node('line',{x1:95,x2:880,y1:275,y2:275,stroke:'#8dbfff','stroke-width':2});
-    node('line',{x1:95,x2:880,y1:y(0),y2:y(0),stroke:'#64748b','stroke-dasharray':'4 4'});
-    for(let i=0;i<=4;i++){const n=Math.round(data.count*i/4);node('text',{x:x(n),y:297,'text-anchor':i===4?'end':i===0?'start':'middle',fill:'#8dbfff','font-size':axisFont},number(n));}
-    node('text',{x:465,y:317,'text-anchor':'middle',fill:'#8dbfff','font-size':axisFont},'Раздачи');
+    const ticks=Array.from({length:5},(_,i)=>low+(high-low)*i/4).filter(v=>Math.abs(v)>(high-low)*.055);ticks.push(0);ticks.sort((a,b)=>a-b);
+    for(const v of ticks){node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});for(const [side,axisX,anchor] of [['left',plotLeft-10,'end'],['right',plotRight+10,'start']])node('text',{'data-profit-axis':side,x:axisX,y:y(v)+4,'text-anchor':anchor,fill:v===0?'#e4eaf1':'#e8bc68','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));}
+    for(const axisX of [plotLeft,plotRight])node('line',{x1:axisX,x2:axisX,y1:plotTop,y2:plotBottom,stroke:'#e8bc68','stroke-width':2});
+    node('line',{x1:plotLeft,x2:plotRight,y1:plotBottom,y2:plotBottom,stroke:'#8dbfff','stroke-width':2});
+    for(let i=0;i<=4;i++){const n=Math.round(data.count*i/4);node('text',{x:x(n),y:plotBottom+38,'text-anchor':i===4?'end':i===0?'start':'middle',fill:'#8dbfff','font-size':axisFont},number(n));}
+    node('text',{x:(plotLeft+plotRight)/2,y:plotBottom+78,'text-anchor':'middle',fill:'#8dbfff','font-size':axisFont},'Раздачи');
     const drawdown=window.PokerHandInsights.summarize(data.cells.flatMap(c=>c.hands).map(h=>({...h,bb:graphUnit==='resultMinor'?h.resultMinor/100:h.bb}))).drawdown;
     if(drawdown.amount>0){
-      node('rect',{x:x(drawdown.startIndex),y:25,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:250,fill:'#fb7185',opacity:.09});
+      node('rect',{x:x(drawdown.startIndex),y:plotTop,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:plotWidth,fill:'#fb7185',opacity:.09});
     }
+    node('line',{'data-profit-zero':'',x1:plotLeft,x2:plotRight,y1:y(0),y2:y(0),stroke:'#b3bfd0','stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
     for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
     const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
     $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
-    svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-95)/785*data.count)));$('profit-values').textContent=describe(series.points[n]);};
+    svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-plotLeft)/plotWidth*data.count)));$('profit-values').textContent=describe(series.points[n]);};
     svg.onpointerleave=()=>{$('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';};
   }
   const insightSignals={};let insightsLoading=false,insightsError='';
   function renderInsights(data,renderReplay){
     const root=$('hand-insights');root.replaceChildren();
-    const hands=data.cells.flatMap(c=>c.hands),stats=window.PokerHandInsights.summarize(hands,insightSignals);
+    const reviewMetric=metric==='resultMinor'?'resultMinor':'bb',reviewUnit=reviewMetric==='resultMinor'?(mode==='cash'?'ед':'фишек'):'bb';
+    const amount=h=>reviewMetric==='resultMinor'?h.resultMinor/100:h.bb;
+    const hands=data.cells.flatMap(c=>c.hands),stats=window.PokerHandInsights.summarize(hands,insightSignals,reviewMetric);
     const add=(parent,tag,text,cls)=>{const el=document.createElement(tag);if(text!=null)el.textContent=text;if(cls)el.className=cls;parent.append(el);return el;};
     add(root,'h2','Разбор игры');
-    add(root,'p','По текущим фильтрам · результаты и сортировка в bb','note');
+    add(root,'p','По текущим фильтрам · результаты и сортировка в '+reviewUnit+(metric==='bb100'?' (для отдельных раздач)':''),'note');
     if(!hands.length){add(root,'p','Нет раздач по выбранным фильтрам.','note');return;}
     function handList(parent,rows,showEv=false){
       if(!rows.length){add(parent,'p','Подходящих раздач нет.','note');return;}
       let shown=0;const more=add(parent,'button','Показать ещё','insight-button');more.type='button';
       function next(){for(const h of rows.slice(shown,shown+30)){
         const d=document.createElement('details');d.className='insight-hand';parent.insertBefore(d,more);
-        const summary=add(d,'summary',null);add(summary,'strong',signed(h.bb)+' bb');summary.append(' · ');appendCards(summary,h.cards);
+        const summary=add(d,'summary',null);add(summary,'strong',signed(amount(h))+' '+reviewUnit);summary.append(' · ');appendCards(summary,h.cards);
         if(showEv){
-          const delta=window.PokerHandInsights.evDifference(h);
-          add(d,'p','Факт: '+signed(h.bb)+' bb · EV: '+signed(h.ev.resultMinor/h.bigBlindMinor)+' bb · '+(delta<0?'Недобор: ':'Перебор: ')+number(Math.abs(delta))+' bb',delta<0?'negative':'positive');
+          const evAmount=reviewMetric==='resultMinor'?h.ev.resultMinor/100:h.ev.resultMinor/h.bigBlindMinor;
+          const delta=amount(h)-evAmount;
+          add(d,'p','Факт: '+signed(amount(h))+' '+reviewUnit+' · EV: '+signed(evAmount)+' '+reviewUnit+' · '+(delta<0?'Недобор: ':'Перебор: ')+number(Math.abs(delta))+' '+reviewUnit,delta<0?'negative':'positive');
         }
         add(summary,'span',' · '+new Date(h.playedAt).toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})+' МСК');
         d.addEventListener('toggle',()=>{if(!d.open||d.dataset.ready)return;d.dataset.ready='1';renderReplay(add(d,'div',null,'replay-body'),h);});
@@ -138,9 +143,9 @@ function startHistory(payload) {
     for(const [title,groups,key] of [['По сессиям',stats.sessions,'sessionId'],['По лимитам',stats.limits,'bigBlindMinor']]){
       const section=add(root,'details',null,'insight-section');add(section,'summary',title+' · '+groups.length);
       if(key==='bigBlindMinor'&&mode!=='cash')add(section,'p','В турнирах это уровни большого блайнда, а не бай-ины.','note');
-      for(const g of groups.sort((a,b)=>b.bb-a.bb)){
+      for(const g of groups.sort((a,b)=>value(b)-value(a))){
         const d=add(section,'details',null,'insight-section');
-        add(d,'summary',(key==='sessionId'?'Сессия '+g.key:'BB '+number(Number(g.key)/100)+' '+(mode==='cash'?'ед':'фишек'))+' · '+g.count+' раздач · '+signed(g.bb)+' bb · '+signed(g.bb100)+' bb/100');
+        add(d,'summary',(key==='sessionId'?'Сессия '+g.key:'BB '+number(Number(g.key)/100)+' '+(mode==='cash'?'ед':'фишек'))+' · '+g.count+' раздач · '+signed(value(g))+' '+unit()+(metric==='bb100'?'':' · '+signed(g.bb100)+' bb/100'));
         // Materialize long session lists only when opened.
         d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(d,hands.filter(h=>String(h[key])===g.key).sort((a,b)=>b.playedAt.localeCompare(a.playedAt)));}});
       }
@@ -208,7 +213,7 @@ function startHistory(payload) {
       if(newRound)action.classList.add('replay-round-start');
     }
     if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+number(event.amount):'');more.append(line);}target.append(more);}
-    const shown=(replay.shownOpponents||[]).filter(p=>p.disclosure==='showdown-winner'&&p.playerId!==String(sample.playerId));
+    const shown=(replay.shownOpponents||[]).filter(p=>['showdown-winner','showdown-allin'].includes(p.disclosure)&&p.playerId!==String(sample.playerId));
     if(shown.length){add('h4','Вскрытие','street-heading street-river');for(const p of shown)appendCards(add('p',p.actor+' · ','replay-cards'),p.cards);}
     add('p','Ваш результат: '+signed(hand.resultMinor/100)+' '+(mode==='cash'?'ед':'фишек'),'replay-result');
   }

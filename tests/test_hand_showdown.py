@@ -30,4 +30,19 @@ class Disclosure(unittest.TestCase):
   r=self.raw();r['base_data']['opt']={};self.assertEqual(m.visible_opponent_cards(r,'1'),[])
  def test_own_and_losing_cards_excluded(self):self.assertEqual(m.visible_opponent_cards(self.raw(),'2'),[])
 
+class AllInDisclosure(Disclosure):
+ def completed(self):
+  r=self.raw();r.update(StartTime=10,EndTime=20)
+  r['base_data']['opt'].update({'2':{'type':'10','userId':'3'},'3':{'type':'5','userId':'1'},'4':{'type':'2','userId':'2'},'5':{'type':'96','userId':'1'},'6':{'type':'96','userId':'2'}})
+  return r
+ def test_winning_hero_sees_losing_allin(self):
+  self.assertEqual(m.visible_opponent_cards(self.completed(),'2'),[{'playerId':'1','cards':['Ad','2d'],'disclosure':'showdown-allin'}])
+ def test_incomplete_allin_stays_hidden(self):
+  r=self.completed();del r['base_data']['opt']['5'];self.assertEqual(m.visible_opponent_cards(r,'2'),[])
+ def test_multiway_with_further_betting_not_disclosed(self):
+  r=self.completed();del r['base_data']['opt']['2'];r['base_data']['opt']['7']={'type':'96','userId':'3'}
+  self.assertEqual(m.visible_opponent_cards(r,'2'),[])
+ def test_uncalled_allin_stays_hidden(self):
+  r=self.completed();r['base_data']['opt']['4']={'type':'10','userId':'2'};self.assertEqual(m.visible_opponent_cards(r,'1'),[])
+
 if __name__=='__main__':unittest.main()
