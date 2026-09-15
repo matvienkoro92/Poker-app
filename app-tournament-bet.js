@@ -431,8 +431,9 @@
     if (stake) stake.textContent = hasEvent ? rub(data.stakePrice) : "—";
     if (button) {
       button.classList.toggle("home-mini-icon-item--vote-active", !!hasEvent);
-      button.disabled = !hasEvent;
-      button.setAttribute("aria-label", hasEvent ? "Last Longer — участники и банк" : "Last Longer к этому турниру пока не открыт");
+      // The plaque describes this tournament; the section also manages earlier events.
+      button.disabled = false;
+      button.setAttribute("aria-label", hasEvent ? "Last Longer — участники и банк" : "Открыть Last Longer — к этому турниру ставки пока не открыты");
     }
   }
 

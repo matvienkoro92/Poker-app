@@ -45,3 +45,16 @@ test('registration expires at 20:00 Moscow even before the next API refresh',()=
   assert.equal(matches(event,selected,Date.parse('2026-09-16T17:00:00Z')),false);
   assert.equal(matches({...event,createdAt:'2026-09-15T22:00:00Z'},selected,now),true);
 });
+
+test('unopened home plaque remains accessible to manage an unfinished previous event',()=>{
+  const emptyLabel = {hidden:true};
+  const button = {disabled:true,classList:{toggle(){}},querySelector:()=>emptyLabel,setAttribute(){}};
+  const ctx = {window:{pokerTournamentBetMatchesHome:()=>false},document:{querySelector:selector=>selector==='[data-tournament-bet-open]'?button:null},Date,homePlaqueHasActiveEvent:false,homePlaqueLastRefreshAt:0};
+  const renderCode = source.slice(source.indexOf('  var homePlaqueData = null;'),source.indexOf('  function load(silent)'));
+  vm.runInNewContext(renderCode,ctx);
+  ctx.updateHomeButton({id:'tb_previous',status:'closed',participantsCount:7,bank:7100});
+  assert.equal(button.disabled,false);
+  assert.equal(emptyLabel.hidden,false);
+  ctx.updateHomeButton(null);
+  assert.equal(button.disabled,false);
+});
