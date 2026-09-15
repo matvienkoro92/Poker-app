@@ -1501,7 +1501,40 @@ function homeTournamentRaffleBonusScore(raffle) {
   return score;
 }
 
+var homeTractorRaffles = [];
+function chooseHomeTractorRaffle(rows, now) {
+  return (rows || []).filter(function (raffle) {
+    if (!raffle || raffle.status !== "active" || raffle.prizeKind !== "tournament_ticket") return false;
+    if (!(Date.parse(raffle.endDate) > now)) return false;
+    var text = homeTournamentRaffleBonusText(raffle) + " " + String(raffle.promoTournamentName || "");
+    return /тракторист|магия тракториста/i.test(text);
+  }).sort(function (a, b) { return Date.parse(a.endDate) - Date.parse(b.endDate); })[0] || null;
+}
+function renderHomeTractorRaffle() {
+  var scene = document.querySelector('.tournament-day-home-dual--tournament-focus');
+  if (!scene) return;
+  var button = scene.querySelector('.home-tractor-raffle');
+  var raffle = chooseHomeTractorRaffle(homeTractorRaffles, Date.now());
+  if (scene.getAttribute('data-tournament-character') !== 'shkarubo') raffle = null;
+  if (!raffle) { if (button) button.remove(); return; }
+  if (!button) {
+    button = document.createElement('button');
+    button.type = 'button'; button.className = 'home-tractor-raffle';
+    button.innerHTML = '<span>🎟 Розыгрыш билетов</span>';
+    button.addEventListener('click', function () {
+      var current = chooseHomeTractorRaffle(homeTractorRaffles, Date.now());
+      if (!current) { renderHomeTractorRaffle(); return; }
+      window.__pendingRaffleActiveId = String(current.id);
+      if (typeof setView === 'function') setView('raffles');
+    });
+    scene.appendChild(button);
+  }
+  button.setAttribute('aria-label', 'Открыть розыгрыш билетов на Тракторист');
+}
+
 function chooseHomeTournamentRaffleBonus(activeRaffles) {
+  homeTractorRaffles = Array.isArray(activeRaffles) ? activeRaffles : [];
+  renderHomeTractorRaffle();
   var now = Date.now();
   var rows = Array.isArray(activeRaffles) ? activeRaffles : [];
   var candidates = rows.filter(function (raffle) {
@@ -1537,6 +1570,7 @@ function hideHomeTournamentRaffleBonus() {
 }
 
 function renderHomeTournamentRaffleBonus() {
+  renderHomeTractorRaffle();
   var btn = document.getElementById("homeTournamentRaffleBonus");
   var ticketsEl = document.getElementById("homeTournamentRaffleBonusTickets");
   var timerEl = document.getElementById("homeTournamentRaffleBonusTimer");
@@ -1906,6 +1940,7 @@ function initHomeTournamentLeagueTopButtons() {
 }
 
 function updateHomeTournamentFocusFlow() {
+  renderHomeTractorRaffle();
   var section = document.querySelector(".tournament-day-home-dual--tournament-focus");
   if (!section) return;
   var flow = section.querySelector(".home-tournament-flow");
