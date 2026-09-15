@@ -315,6 +315,7 @@
     var details = [["Гарантия", data.tournamentGuarantee || tournament.guarantee || "Уточняется"],
       ["Старт", startTime || "Уточняется"],
       ["Вход", data.tournamentBuyin || tournament.buyinLabel || tournament.buyin || "Уточняется"]];
+    if (!data.createdByPlayer) details.push(["Регистрация до", "20:00 МСК"]);
     var joined = !!data.myEntry;
     var action = data.status === "open"
       ? joined
