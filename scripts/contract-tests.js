@@ -494,8 +494,21 @@ class MemoryRedis {
     }
     if (cmd === "SCARD") return this.result(this.s(key).size);
     if (cmd === "ZADD") {
-      this.z(key).set(String(command[3]), Number(command[2]) || 0);
+      const nx = String(command[2]).toUpperCase() === "NX";
+      const offset = nx ? 3 : 2;
+      const member = String(command[offset + 1]);
+      if (nx && this.z(key).has(member)) return this.result(0);
+      this.z(key).set(member, Number(command[offset]) || 0);
       return this.result(1);
+    }
+    if (cmd === "ZREM") return this.result(this.z(key).delete(String(command[2])) ? 1 : 0);
+    if (cmd === "ZRANGEBYSCORE") {
+      const min = command[2] === "-inf" ? -Infinity : Number(command[2]);
+      const max = command[3] === "+inf" ? Infinity : Number(command[3]);
+      const rows = [...this.z(key)].filter(([, score]) => score >= min && score <= max).sort((a, b) => a[1] - b[1]);
+      const start = command[4] === "LIMIT" ? Number(command[5]) : 0;
+      const count = command[4] === "LIMIT" ? Number(command[6]) : rows.length;
+      return this.result(rows.slice(start, start + count).map(([id]) => id));
     }
     if (cmd === "ZSCORE") {
       const z = this.z(key);
@@ -2737,6 +2750,58 @@ async function testRaffleWinnerReadyAdminNotifications(redis) {
     assert.strictEqual(sentPushes.length, pushCount, "repeated ready does not duplicate web pushes");
   } finally {
     if (webpushRuntime && originalSendNotification) webpushRuntime.sendNotification = originalSendNotification;
+  }
+}
+
+async function testRaffleIssuedPushRetryDelivery(redis) {
+  const sentMessages = [];
+  installRecordingFetch(redis, sentMessages);
+  const raffles = loadHandler("raffles"), sessionsValue = sessions();
+  const webpush = require("web-push"), vapid = webpush.generateVAPIDKeys();
+  const oldPublic = process.env.WEBPUSH_VAPID_PUBLIC_KEY, oldPrivate = process.env.WEBPUSH_VAPID_PRIVATE_KEY;
+  const oldSend = webpush.sendNotification;
+  process.env.WEBPUSH_VAPID_PUBLIC_KEY = vapid.publicKey;
+  process.env.WEBPUSH_VAPID_PRIVATE_KEY = vapid.privateKey;
+  let fail = true; const pushes = [];
+  webpush.sendNotification = async (subscription, payload) => {
+    if (fail) throw Object.assign(new Error("temporary failure"), { statusCode: 503 });
+    pushes.push(JSON.parse(payload)); return { statusCode: 201 };
+  };
+  try {
+    redis.h("poker_app:visitor_dt_ids").set("tg_1001", "ID100001");
+    redis.h("poker_app:id_to_user").set("ID100001", "tg_1001");
+    redis.h("poker_app:chat_push_sub:ID100001").set("device", JSON.stringify({ endpoint: "https://push.test/issued", keys: { auth: "test", p256dh: "test" } }));
+    const raffle = { id: "issued_push_retry", title: "Issued ticket", prizeKind: "tournament_ticket", status: "drawn", totalWinners: 1,
+      groups: [{ prize: "Беккинг-билет 300 ₽", count: 1 }], participants: [], drawnAt: new Date(Date.now() - 600000).toISOString(),
+      winners: [{ userId: "tg_1001", accountId: "ID100001", p21Id: "799755", groupIndex: 0, prize: "Беккинг-билет 300 ₽", winnerReady: true, winnerReadyState: "ready", winnerReadySlotId: "initial_0" }] };
+    persistContractRaffle(redis, raffle);
+    let result = await call(raffles, req("POST", {}, { pwaSession: sessionsValue.admin, action: "setWinnerStatus", raffleId: raffle.id, winnerUserId: "tg_1001", status: "ok" }));
+    assert.equal(result.statusCode, 200);
+    assert.equal(sentMessages.filter(row => String(row.body.chat_id) === "1001").length, 1);
+    assert.equal(pushes.length, 0);
+    const queue = redis.z("poker_app:raffle_notification_retry_queue");
+    queue.set(raffle.id, Date.now() - 1);
+    await raffles.retryNotifications();
+    assert.ok(queue.has(raffle.id), "a fresh issue stays queued even before its retry delay elapses");
+    const saved = JSON.parse(redis.kv.get("poker_app:raffle:" + raffle.id));
+    saved.winners[0].winnerStatusAt = new Date(Date.now() - 3 * 60000).toISOString();
+    persistContractRaffle(redis, saved);
+    queue.set(raffle.id, Date.now() - 1);
+    await raffles.retryNotifications(); // A failed retry must not disable all later attempts.
+    assert.ok(queue.has(raffle.id));
+    fail = false; queue.set(raffle.id, Date.now() - 1);
+    await raffles.retryNotifications();
+    assert.equal(pushes.length, 1);
+    assert.equal(pushes[0].kind, "raffle_prize_issued");
+    assert.equal(pushes[0].title, "Вам выдали билет");
+    assert.match(pushes[0].openUrl, /startapp=raffle_/);
+    queue.set(raffle.id, Date.now() - 1); await raffles.retryNotifications();
+    assert.equal(pushes.length, 1, "successful issued push is deduplicated");
+    assert.equal(sentMessages.filter(row => String(row.body.chat_id) === "1001").length, 1, "push retries do not repeat Telegram delivery");
+  } finally {
+    webpush.sendNotification = oldSend;
+    if (oldPublic === undefined) delete process.env.WEBPUSH_VAPID_PUBLIC_KEY; else process.env.WEBPUSH_VAPID_PUBLIC_KEY = oldPublic;
+    if (oldPrivate === undefined) delete process.env.WEBPUSH_VAPID_PRIVATE_KEY; else process.env.WEBPUSH_VAPID_PRIVATE_KEY = oldPrivate;
   }
 }
 
@@ -7086,6 +7151,7 @@ async function main() {
     ["raffle winner ready private cash reserve", testRaffleWinnerReadyPrivateCashReserve],
     ["raffle winner ready own row only", testRaffleWinnerReadyCannotConfirmAnotherWinner],
     ["raffle winner ready admin notifications", testRaffleWinnerReadyAdminNotifications],
+    ["raffle issued push recovers after repeated delivery failure", testRaffleIssuedPushRetryDelivery],
     ["raffle winner status prize notification", testRaffleWinnerStatusPrizeNotification],
     ["raffle winner ready reroll and burn", testRaffleWinnerReadyRerollAndBurn],
     ["raffle cash winner ready third reroll before burn", testRaffleCashWinnerReadyThirdRerollBeforeBurn],

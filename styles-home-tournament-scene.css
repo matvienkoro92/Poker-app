@@ -675,3 +675,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tractor-raffle:focus-visible { outline:2px solid #ffe2a2; outline-offset:2px; }
 @keyframes tractor-raffle-glow { 50% { opacity:.4; } }
 @media(prefers-reduced-motion:reduce) { #app.app.app--view-home .home-tractor-raffle::before { animation:none; } }
+
+.tournament-share-preview { max-height:90dvh; overflow:auto; }
+.tournament-share-preview > img { display:block; width:100%; height:auto; border-radius:12px; }
+.tournament-share-preview [data-caption] { margin:16px 0; line-height:1.5; color:#f2ead8; user-select:text; }
+.tournament-share-preview [data-caption] a { color:#ffd875; text-decoration:underline; }
+.tournament-share-preview > button:not([data-close]) { margin:4px 0; }

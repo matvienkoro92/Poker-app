@@ -119,6 +119,7 @@
     }
   },
   "crons": [
+    { "path": "/api/cron-raffle-notifications", "schedule": "* * * * *" },
     { "path": "/api/cron-friend-news", "schedule": "23 * * * *" },
     {
       "path": "/api/cron-reminder-10min",

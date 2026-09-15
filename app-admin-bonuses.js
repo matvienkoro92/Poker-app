@@ -160,17 +160,8 @@
     var source = typeof POKER_FULL_TOURNAMENT_SCHEDULE !== "undefined" && Array.isArray(POKER_FULL_TOURNAMENT_SCHEDULE)
       ? POKER_FULL_TOURNAMENT_SCHEDULE.slice()
       : [];
-    var dateKey = businessDateKey(new Date());
-    if (dateKey === "2026-07-19") {
-      source.push({
-        date: "2026-07-19",
-        category: "Сателлит",
-        name: "Сателлит",
-        buyin: "400₽",
-        hour: 15,
-        minute: 0,
-      });
-    }
+    // The tournament calendar uses Moscow midnight; ledger business days have a separate cutoff.
+    var dateKey = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
     var date = new Date(dateKey + "T00:00:00.000Z");
     var dow = date.getUTCDay();
     return source.filter(function (item) {
