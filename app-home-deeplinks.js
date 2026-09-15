@@ -110,6 +110,15 @@ function pokerInitHomeDeepLinks(opts) {
       var refSplit = pokerSplitReferralStartParam(startParam);
       if (refSplit && refSplit.routeStartParam) startParam = refSplit.routeStartParam;
     }
+    var tournamentBetMatch = startParam.match(/^tournament_bet_(tb_[a-z0-9_:-]+)$/i);
+    if (startParam === "tournament_bet" || tournamentBetMatch) {
+      openHomeModalDeepLink(function () {
+        if (typeof window.pokerOpenTournamentBetDeepLink !== "function") return false;
+        window.pokerOpenTournamentBetDeepLink(tournamentBetMatch ? tournamentBetMatch[1] : "");
+        return true;
+      });
+      return;
+    }
     if (startParam === "news" || startParam.indexOf("news_") === 0) {
       var articleNum = startParam === "news" ? undefined : parseInt(startParam.replace("news_", ""), 10);
       if (startParam !== "news" && (Number.isNaN(articleNum) || articleNum < 0)) articleNum = undefined;

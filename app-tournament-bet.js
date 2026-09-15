@@ -723,4 +723,14 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialLoad, { once: true });
   else initialLoad();
   window.openTournamentBetModal = open;
+  window.pokerOpenTournamentBetDeepLink = function (eventId) {
+    // Finish a previous event request before switching the selection.
+    return Promise.resolve(loadPromise).then(function () {
+      selectedEventId = String(eventId || "");
+      deepLinkEventId = selectedEventId;
+      deepLinkSection = !selectedEventId;
+      activeTab = "event";
+      return open();
+    });
+  };
 })();
