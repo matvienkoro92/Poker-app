@@ -753,3 +753,15 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   inset:8% 5% 10%;box-shadow:none;
   background:radial-gradient(ellipse at 50% 70%,#ffc34416,transparent 70%);
 }
+
+.tournament-share-notice {margin:16px 0;padding:14px;border:1px solid #75603a;border-radius:12px;background:#201c14;color:#eed8aa;font-size:14px;line-height:1.45}
+.tournament-share-notice p {margin:0 0 10px}
+.tournament-share-notice a {color:#ffd875;text-decoration:underline}
+.tournament-share-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%}
+.tournament-share-preview .tournament-share-actions button {min-width:0;width:100%;margin:0;padding:12px 3px;font-size:clamp(10px,3vw,14px);line-height:1.2;white-space:nowrap;letter-spacing:0}
+
+/* Keep the Last Longer highlight behind the fingers holding the trophy. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-last-longer-dock::before {
+  mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);
+}

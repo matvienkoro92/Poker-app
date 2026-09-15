@@ -141,7 +141,7 @@
       var file = new File([blob], "poker21-tournament.jpg", { type: "image/jpeg" });
       var url = URL.createObjectURL(blob), dialog = document.createElement("dialog");
       dialog.className = "tournament-share-preview"; dialog.id = "tournamentSharePreview";
-      dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть">×</button><h3>Поделиться турниром</h3><img alt="Карточка турнира"><div data-caption></div><button type="button" data-send>Отправить</button> <button type="button" data-save>Скачать картинку</button> <button type="button" data-copy>Скопировать описание</button><p role="status"></p>';
+      dialog.innerHTML = '<button type="button" data-close aria-label="Закрыть">×</button><h3>Поделиться турниром</h3><img alt="Карточка турнира"><div data-caption></div><div class="tournament-share-actions"><button type="button" data-send>Отправить</button><button type="button" data-save>Скачать</button><button type="button" data-copy title="Скопировать описание">Описание</button></div><p role="status"></p>';
       dialog.querySelector("img").src = url; dialog.querySelector("[data-caption]").innerHTML = message.html;
       dialog.querySelector("[data-close]").onclick = function () { dialog.close(); };
       dialog.addEventListener("close", function () { URL.revokeObjectURL(url); dialog.remove(); }, { once: true });
@@ -158,17 +158,20 @@
       var native = navigator.canShare && navigator.canShare({ files: [file] });
       var send = dialog.querySelector("[data-send]"), prepared = null;
       send.hidden = !telegram && !native;
-      send.textContent = telegram ? "Отправить в Telegram" : "Отправить картинку";
+      send.textContent = "Отправить";
+      send.title = telegram ? "Отправить в Telegram" : "Отправить картинку";
       if (!telegram) {
+        var notice = document.createElement("aside");
+        notice.className = "tournament-share-notice";
         var hint = document.createElement("p");
-        hint.textContent = "Отправка картинки вместе с описанием и ссылками внутри слов доступна из мини-приложения в Telegram. Здесь кнопка отправляет только картинку; описание можно скопировать отдельно.";
-        send.before(hint);
+        hint.textContent = "В Telegram можно отправить картинку с описанием и ссылками. Здесь отправляется только картинка, а описание копируется отдельно.";
+        notice.appendChild(hint);
         var openTelegram = document.createElement("a");
-        openTelegram.textContent = "Открыть в Telegram для отправки с описанием";
+        openTelegram.textContent = "Открыть в Telegram →";
         openTelegram.href = "https://t.me/Poker_dvatuza_bot/DvaTuza";
         openTelegram.target = "_blank"; openTelegram.rel = "noopener noreferrer";
-        openTelegram.style.cssText = "display:block;margin:12px 0;color:#ffd875;text-decoration:underline";
-        send.before(openTelegram);
+        notice.appendChild(openTelegram);
+        send.parentElement.before(notice);
       }
       send.onclick = async function () {
         if (send.disabled) return;
