@@ -3054,17 +3054,17 @@
       var copyLeft = originalCopy ? originalCopy.getBoundingClientRect().left - rect.left : width * .34;
       var eventId = sourceEventId;
       var shareRow = sourceRow;
-      if (newsModalMode === "friends") {
+      if (newsModalMode === "friends" || clone.querySelector(".home-friend-news__avatar--personal-art")) {
         var avatarIcon = clone.querySelector(".home-friend-news-modal__icon");
         if (avatarIcon) {
-          avatarIcon.style.cssText = "display:block;position:absolute;left:8px;top:16px;bottom:64px;margin:0;width:31%;height:auto;overflow:visible;border:0;border-radius:0;background:none;box-shadow:none";
+          avatarIcon.style.cssText = "display:block;position:absolute;left:8px;top:12px;bottom:12px;margin:0;width:31%;height:auto;overflow:hidden;border:0;border-radius:0;background:none;box-shadow:none";
           var avatarImage = avatarIcon.querySelector("img");
           if (avatarImage) {
             var shareArt = shareRow && clubNewsCardArt(shareRow.actorNick, 0);
             if (shareArt) {
               try { avatarImage.src = await dataUrl(new URL(shareArt, document.baseURI).href); } catch (_) {}
             }
-            avatarImage.style.cssText = "display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;object-position:center center;border:0;border-radius:0;background:none;filter:drop-shadow(0 7px 6px rgba(0,0,0,.45))";
+            avatarImage.style.cssText = "display:block;position:absolute;inset:0;margin:0;padding:0;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:none;object-fit:contain;object-position:center center;border:0;border-radius:0;background:none;filter:drop-shadow(0 7px 6px rgba(0,0,0,.45))";
           }
           copyLeft = Math.round(width * .34);
         }
