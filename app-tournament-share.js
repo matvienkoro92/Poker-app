@@ -13,7 +13,7 @@
     function embed(raw) {
       var url = new URL(raw, location.href).href;
       if (/^(data:|#)/.test(raw)) return Promise.resolve(raw);
-      if (!resources.has(url)) resources.set(url, fetch(url).then(function (r) { if (!r.ok) throw new Error("Не удалось загрузить изображение карточки"); return r.blob(); }).then(dataUrl));
+      if (!resources.has(url)) resources.set(url, fetch(url).then(function (r) { if (!r.ok) throw new Error("Не удалось загрузить ресурс карточки: " + new URL(url).pathname); return r.blob(); }).then(dataUrl));
       return resources.get(url);
     }
     async function urls(value) {
@@ -25,6 +25,7 @@
     var pending = [];
     function styleCopy(style, target) {
       for (var property of Array.from(style)) {
+        if (property.indexOf("--") === 0) continue;
         var value = style.getPropertyValue(property);
         // WebKit paints HTML box shadows as opaque bands inside foreignObject.
         if (webkit && property === "box-shadow") value = "none";
