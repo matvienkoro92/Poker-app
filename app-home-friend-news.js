@@ -625,6 +625,8 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "bublik-rnd": "./assets/club-news-personal/bublik-rnd-personal-v2.webp",
+    "бублик": "./assets/club-news-personal/bublik-rnd-personal-v2.webp",
     "🦈shark-eyed🦈": "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1",
     "shark-eyed": "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1",
     "jeweler": "./assets/club-news-personal/jeweler-personal-v1.webp?v=1",
@@ -2418,7 +2420,7 @@
     var avatar = String(linkedProfile && linkedProfile.avatar || row && row.actorAvatar || "").trim();
     var personalArt = clubTicker
       ? clubNewsPersonalArt(row && row.actorNick)
-      : (newsModalMode === "club" ? clubNewsCardArt(row && row.actorNick, artOccurrence) : "");
+      : clubNewsCardArt(row && row.actorNick, artOccurrence);
     var visualUrl = personalArt || avatar;
     var visualFallbackUrl = personalArt
       ? (clubNewsPersonalArt(row && row.actorNick) || avatar)
