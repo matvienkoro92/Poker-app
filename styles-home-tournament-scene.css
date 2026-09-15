@@ -464,7 +464,7 @@
 
 /* Tractor tournament uses Pasha Shkarubo, including the raffle scene layers. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene: url('./assets/home-tournament-shkarubo-scene-v1.webp');
+  --home-tournament-scene: url('./assets/home-tournament-shkarubo-single-table-v3.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -676,8 +676,62 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 @keyframes tractor-raffle-glow { 50% { opacity:.4; } }
 @media(prefers-reduced-motion:reduce) { #app.app.app--view-home .home-tractor-raffle::before { animation:none; } }
 
+/* Reference artwork: five standing chips on matching stacks and green felt. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table {
+  bottom:0!important; aspect-ratio:3/1!important; overflow:hidden!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before {
+  content:""!important;display:block!important;inset:0!important;
+  background:url('./assets/home-bonus-stacks-reference-v1.webp') center/100% 100% no-repeat!important;
+  mask:linear-gradient(transparent,#000 9%)!important;-webkit-mask:linear-gradient(transparent,#000 9%)!important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid {
+  display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;padding:0!important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
+  position:absolute!important;left:10.5%!important;top:34%!important;bottom:auto!important;
+  width:11cqw!important;height:10cqw!important;margin:0!important;padding:0!important;
+  transform:translate(-50%,-50%)!important;background:none!important;border:0!important;box-shadow:none!important;
+  display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:.35cqw!important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2){left:29.8%!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3){left:49.8%!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4){left:69.8%!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5){left:89.4%!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__icon {display:block!important;flex:none!important;width:2.5cqw!important;height:2.5cqw!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__label {font-size:1.65cqw!important;line-height:1.08!important;white-space:normal!important;text-align:center!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount {font-size:2.1cqw!important;line-height:1!important;letter-spacing:-.04em!important}
+#app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__label {font-size:1.4cqw!important}
+#app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount {font-size:1.65cqw!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {display:none!important}
+
+/* Align the table panel and the tractor scene trophy on the same centerline. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table {
+  left:0!important;right:0!important;width:100%!important;margin-inline:auto!important;transform:none!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-last-longer-dock {
+  left:36%!important;right:auto!important;width:28%!important;transform:none!important;
+}
+
 .tournament-share-preview { max-height:90dvh; overflow:auto; }
 .tournament-share-preview > img { display:block; width:100%; height:auto; border-radius:12px; }
 .tournament-share-preview [data-caption] { margin:16px 0; line-height:1.5; color:#f2ead8; user-select:text; }
 .tournament-share-preview [data-caption] a { color:#ffd875; text-decoration:underline; }
 .tournament-share-preview > button:not([data-close]) { margin:4px 0; }
+
+/* One continuous poker table, with every trophy on the same felt. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
+  --home-tournament-scene:url('./assets/home-tournament-shkarubo-single-table-v3.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-table-seam-fix {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table {
+  inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table::before {display:none!important}
+#app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
+#app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
+#app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
+#app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
+#app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
+#app.app.app--view-home [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
