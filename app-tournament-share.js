@@ -157,7 +157,18 @@
       var native = navigator.canShare && navigator.canShare({ files: [file] });
       var send = dialog.querySelector("[data-send]"), prepared = null;
       send.hidden = !telegram && !native;
-      send.textContent = telegram ? "Отправить в Telegram" : "Отправить картинку и описание";
+      send.textContent = telegram ? "Отправить в Telegram" : "Отправить картинку";
+      if (!telegram) {
+        var hint = document.createElement("p");
+        hint.textContent = "Отправка картинки вместе с описанием и ссылками внутри слов доступна из мини-приложения в Telegram. Здесь кнопка отправляет только картинку; описание можно скопировать отдельно.";
+        send.before(hint);
+        var openTelegram = document.createElement("a");
+        openTelegram.textContent = "Открыть в Telegram для отправки с описанием";
+        openTelegram.href = "https://t.me/Poker_dvatuza_bot/DvaTuza";
+        openTelegram.target = "_blank"; openTelegram.rel = "noopener noreferrer";
+        openTelegram.style.cssText = "display:block;margin:12px 0;color:#ffd875;text-decoration:underline";
+        send.before(openTelegram);
+      }
       send.onclick = async function () {
         if (send.disabled) return;
         send.disabled = true;
@@ -173,7 +184,11 @@
             }
             status.textContent = "";
             tg.shareMessage(prepared.id, function (sent) { status.textContent = sent ? "Отправлено" : "Отправка отменена"; });
-          } else await navigator.share({ files: [file], title: name, text: message.plain });
+          } else {
+            // Telegram's system share target can discard files when text is supplied.
+            // Rich caption entities are supported only by the Telegram prepared-message flow.
+            await navigator.share({ files: [file] });
+          }
         } catch (error) { if (error.name !== "AbortError") status.textContent = error.message || "Не удалось отправить. Скачайте картинку и скопируйте описание."; }
         finally { send.disabled = false; }
       };
