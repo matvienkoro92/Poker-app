@@ -78,6 +78,18 @@ function startHistory(payload) {
     note.append(document.createElement('br'),runs);summary.append(note);
   }
   const replayCache=new Map();
+  async function captureHandCard(row){
+    const box=row.getBoundingClientRect(),clone=row.cloneNode(true),originals=[row,...row.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
+    originals.forEach((original,index)=>{const style=getComputedStyle(original),copy=copies[index];for(const key of style)copy.style.setProperty(key,style.getPropertyValue(key));copy.style.animation='none';copy.style.transition='none';});
+    clone.querySelector('.hand-card-actions')?.remove();clone.open=true;clone.style.margin='0';clone.style.width=box.width+'px';clone.style.height='auto';
+    const brand=document.createElement('div');brand.textContent='♠  ДВА ТУЗА · МОЯ ИГРА';brand.style.cssText='padding:14px 15px;background:#0b1220;color:#f6c951;font:700 14px system-ui;letter-spacing:.06em;border:1px solid #344258;border-bottom:0;border-radius:10px 10px 0 0';clone.style.borderRadius='0 0 10px 10px';
+    const wrapper=document.createElement('div');wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');wrapper.style.cssText='width:'+box.width+'px;background:#050816;padding:14px;box-sizing:content-box';wrapper.append(brand,clone);document.body.append(wrapper);wrapper.style.position='fixed';wrapper.style.left='-10000px';wrapper.style.top='0';
+    const width=box.width+28,height=wrapper.getBoundingClientRect().height;wrapper.style.position='static';wrapper.style.left='0';wrapper.style.top='0';wrapper.remove();
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'"><foreignObject width="100%" height="100%">'+new XMLSerializer().serializeToString(wrapper)+'</foreignObject></svg>';
+    const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);});
+    const canvas=document.createElement('canvas'),scale=2;canvas.width=Math.ceil(width*scale);canvas.height=Math.ceil(height*scale);const ctx=canvas.getContext('2d');ctx.scale(scale,scale);ctx.drawImage(image,0,0);
+    return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('image')),'image/png'));
+  }
   function showHandShareDialog(blob,hand){
     const url=URL.createObjectURL(blob),dialog=document.createElement('dialog');dialog.className='hand-share-dialog';
     dialog.innerHTML='<button type="button" data-close aria-label="Закрыть">×</button><h2>Поделиться раздачей</h2><img alt="Карточка раздачи"><div><button type="button" data-send>Поделиться картинкой</button><a data-save>Скачать PNG</a></div><p role="status"></p>';
@@ -87,12 +99,12 @@ function startHistory(payload) {
     send.onclick=async()=>{send.disabled=true;try{await navigator.share({files:[file]});}catch(error){if(error?.name!=='AbortError')dialog.querySelector('p').textContent='Не удалось отправить. Скачайте PNG и прикрепите его к сообщению.';}finally{send.disabled=false;}};
     dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{URL.revokeObjectURL(url);dialog.remove();},{once:true});document.body.append(dialog);dialog.showModal();
   }
-  async function shareHand(button,hand){
+  async function shareHand(button,hand,row,renderReplay){
     const original=button.textContent;button.disabled=true;button.textContent='Готовим…';
     try{
       let replay=replayCache.get(hand.handId);if(!replay){replay=await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);}
-      const blob=await window.PokerHandShare.imageBlob(hand,replay);showHandShareDialog(blob,hand);
-    }catch(error){if(error?.name!=='AbortError'){button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1200));}}
+      let body=row.querySelector('.replay-body');if(body?.dataset.shareReady!=='1'){row.dataset.ready='1';body=body||document.createElement('div');body.className='replay-body';if(!body.isConnected)row.append(body);await renderReplay(body,hand);}row.open=true;const blob=await captureHandCard(row);showHandShareDialog(blob,hand);
+    }catch(error){if(error?.name!=='AbortError'){if(typeof console!=='undefined'&&console.warn)console.warn('hand share image',error);button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1200));}}
     finally{button.disabled=false;button.textContent=original;}
   }
   function createHandCard(h,index,renderReplay){
@@ -105,7 +117,7 @@ function startHistory(payload) {
       const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · Большой блайнд: '+number(h.bigBlindMinor/100)+' '+(mode==='cash'?'₽':'фишек')+' · раздача '+h.handId);
       const arrow=document.createElement('span');arrow.className='hand-arrow';arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
       summary.setAttribute('aria-label','Раздача '+(index+1)+', '+h.cards.join(' ')+', '+signed(h.resultMinor/100)+'. Раскрыть историю');
-      const actions=document.createElement('div'),share=document.createElement('button');actions.className='hand-card-actions';share.type='button';share.className='hand-share-button';share.textContent='Поделиться';share.setAttribute('aria-label','Поделиться раздачей '+h.handId);share.onclick=event=>{event.preventDefault();event.stopPropagation();shareHand(share,h);};actions.append(share);
+      const actions=document.createElement('div'),share=document.createElement('button');actions.className='hand-card-actions';share.type='button';share.className='hand-share-button';share.textContent='Поделиться';share.setAttribute('aria-label','Поделиться раздачей '+h.handId);share.onclick=event=>{event.preventDefault();event.stopPropagation();shareHand(share,h,row,renderReplay);};actions.append(share);
       summary.append(ordinal,date,amount,meta,arrow);appendEvSummary(summary,h);row.append(summary,actions);
       row.addEventListener('toggle',()=>{if(!row.open||row.dataset.ready)return;row.dataset.ready='1';const body=row.querySelector('.replay-body')||document.createElement('div');body.className='replay-body';row.append(body);renderReplay(body,h);});
     return row;
@@ -285,7 +297,7 @@ function startHistory(payload) {
     async function renderReplay(target,hand){
     let replay;try {target.textContent='Загружаем действия…';replay=replayCache.get(hand.handId)||await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);target.textContent='';} catch (_) {target.textContent='Не удалось загрузить действия. Закройте и откройте раздачу, чтобы повторить.';delete target.parentElement.dataset.ready;return;}
     const add=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;target.append(el);return el;};
-    if(!replay){add('p','История действий пока не загружена.');return;}
+    if(!replay){add('p','История действий пока не загружена.');target.dataset.shareReady='1';return;}
     appendCards(add('p','Ваши карты: ','replay-cards'),replay.cards);
     if(hand.ev?.status==='unresolved')add('p','All-in EV не рассчитан: '+({betting_after_allin_street:'торговля продолжалась на следующих улицах',missing_final_board:'нет полного борда',side_pot_deduction:'EV после комиссии не определён из-за распределения удержаний по банкам',payout_does_not_reconcile:'выплаты не сходятся с картами и банками',special_runout:'особый порядок раздачи борда'}[hand.ev.reason]||'недостаточно подтверждённых данных')+'.','note');
     if(hand.ev?.grossEv?.status==='calculated'){
@@ -320,7 +332,7 @@ function startHistory(payload) {
     if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+number(event.amount):'');more.append(line);}target.append(more);}
     const shown=(replay.shownOpponents||[]).filter(p=>['showdown-winner','showdown-allin'].includes(p.disclosure)&&p.playerId!==String(sample.playerId));
     if(shown.length){add('h4','Вскрытие','street-heading street-river');for(const p of shown)appendCards(add('p',p.actor+' · ','replay-cards'),p.cards);}
-    add('p','Ваш результат: '+signed(hand.resultMinor/100)+' '+(mode==='cash'?'₽':'фишек'),'replay-result');
+    add('p','Ваш результат: '+signed(hand.resultMinor/100)+' '+(mode==='cash'?'₽':'фишек'),'replay-result');target.dataset.shareReady='1';
   }
     renderInsights(data,renderReplay);
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));

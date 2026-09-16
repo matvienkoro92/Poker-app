@@ -15,31 +15,5 @@ function text(hand,replay){
  lines.push('','Результат: '+result+' '+unit+' · '+(hand.bb>0?'+':'')+amount(hand.bb)+' bb','Два туза · Моя игра');
  return lines.join('\n');
 }
-function imageBlob(hand,replay){
- const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),width=1080,pad=70,contentWidth=width-pad*2;
- const source=text(hand,replay).split('\n'),rows=[];
- ctx.font='32px system-ui';
- for(const line of source){
-  if(!line){rows.push('');continue;}
-  const words=line.split(' ');let row='';
-  for(const word of words){const next=row?row+' '+word:word;if(ctx.measureText(next).width>contentWidth&&row){rows.push(row);row=word;}else row=next;}
-  rows.push(row);
- }
- const lineHeight=48,height=Math.max(1080,260+rows.length*lineHeight+150);canvas.width=width;canvas.height=height;
- const gradient=ctx.createLinearGradient(0,0,width,height);gradient.addColorStop(0,'#101b2d');gradient.addColorStop(.55,'#07101f');gradient.addColorStop(1,'#1c1320');ctx.fillStyle=gradient;ctx.fillRect(0,0,width,height);
- ctx.strokeStyle='#d7ae4c';ctx.lineWidth=4;ctx.beginPath();ctx.roundRect(28,28,width-56,height-56,34);ctx.stroke();
- ctx.fillStyle='#f6c951';ctx.font='700 30px system-ui';ctx.fillText('♠  ДВА ТУЗА',pad,92);
- ctx.fillStyle='#f3f6fb';ctx.font='800 54px system-ui';ctx.fillText('МОЯ РАЗДАЧА',pad,160);
- ctx.fillStyle='#9eabc0';ctx.font='26px system-ui';ctx.fillText('История игры по улицам',pad,205);
- let y=270;
- rows.forEach((line,index)=>{
-  const heading=/^(Раздача|Префлоп|Флоп:|Тёрн:|Ривер:|Борд:|Результат:)/.test(line);
-  ctx.font=(heading?'700 ':'400 ')+(heading?'34px':'30px')+' system-ui';
-  ctx.fillStyle=line.startsWith('Результат:')?'#f6c951':heading?'#eaf0f8':'#b9c5d7';
-  if(!line){y+=18;return;}ctx.fillText(line,pad,y);y+=lineHeight;
- });
- ctx.fillStyle='#6f7e94';ctx.font='24px system-ui';ctx.fillText('Клуб «Два туза»',pad,height-75);
- return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('image')),'image/png'));
-}
-return {text,card,imageBlob};
+return {text,card};
 });
