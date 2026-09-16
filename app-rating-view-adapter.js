@@ -434,6 +434,8 @@ function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
 }
 
 var SUMMER_RATING_PLAYER_ART_BY_NICK = {
+  "redrocket🚀": { src: "./assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1" },
+  "redrocket": { src: "./assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1" },
   "🦈shark-eyed🦈": { src: "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1" },
   "shark-eyed": { src: "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1" },
   "jeweler": { src: "./assets/club-news-personal/jeweler-personal-v1.webp?v=1" },

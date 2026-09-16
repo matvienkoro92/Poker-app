@@ -28,6 +28,11 @@ test('participants without personal artwork leave their podium place empty', () 
   assert.equal(c.summerRatingLowerArtSizeStyle(4, 'Новый игрок'), '');
   assert.equal(c.summerRatingTop3ArtSizeStyle('right', 'Бардюр'), '');
 });
+test('RedRocket uses the personal transparent monkey artwork', () => {
+  const c = runtime();
+  assert.equal(c.pokerGetSummerRatingPlayerArt('RedRocket🚀').src, './assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1');
+  assert.equal(c.pokerGetSummerRatingPlayerArt('RedRocket').src, './assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1');
+});
 test('summer archive retains its original top-three sizes', () => {
   const c = runtime();
   c.window.__pokerSummerArchive = true;

@@ -625,6 +625,8 @@
   }
 
   var CLUB_NEWS_PERSONAL_ART_BY_NICK = {
+    "redrocket🚀": "./assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1",
+    "redrocket": "./assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1",
     "bublik-rnd": "./assets/club-news-personal/bublik-rnd-personal-v2.webp",
     "бублик": "./assets/club-news-personal/bublik-rnd-personal-v2.webp",
     "🦈shark-eyed🦈": "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1",
