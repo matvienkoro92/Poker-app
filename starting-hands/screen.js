@@ -85,6 +85,22 @@ function startHistory(payload) {
     }
     node('line',{'data-profit-zero':'',x1:plotLeft,x2:plotRight,y1:y(0),y2:y(0),stroke:'#b3bfd0','stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
     for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
+    // Keep exact endpoint values readable even when several lines finish together.
+    if(data.count){
+      const last=series.points.at(-1),font=28,gap=38;
+      const endpoints=lines.filter(([key])=>document.querySelector('[data-profit-line="'+key+'"]').checked)
+        .map(([key,color])=>({key,color,value:last[key],endY:y(last[key])})).sort((a,b)=>a.endY-b.endY);
+      endpoints.forEach((p,i)=>{p.labelY=Math.max(plotTop+gap/2,p.endY,i?endpoints[i-1].labelY+gap:0);});
+      if(endpoints.length){
+        endpoints.at(-1).labelY=Math.min(plotBottom-gap/2,endpoints.at(-1).labelY);
+        for(let i=endpoints.length-2;i>=0;i--)endpoints[i].labelY=Math.min(endpoints[i].labelY,endpoints[i+1].labelY-gap);
+      }
+      for(const p of endpoints){
+        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight-12)+','+p.labelY+' H'+(plotRight-22),fill:'none',stroke:p.color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
+        node('circle',{cx:plotRight,cy:p.endY,r:4,fill:p.color});
+        node('text',{'data-profit-endpoint':p.key,x:plotRight-26,y:p.labelY,'dominant-baseline':'middle','text-anchor':'end',fill:p.color,'font-size':font,'font-weight':700,stroke:'#0b1220','stroke-width':7,'stroke-linejoin':'round','paint-order':'stroke'},signed(p.value)+' '+label);
+      }
+    }
     const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
     $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
     svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-plotLeft)/plotWidth*data.count)));$('profit-values').textContent=describe(series.points[n]);};
@@ -288,8 +304,7 @@ function startHistory(payload) {
   ['hand-search','opponent-search'].forEach(id=>$(id).addEventListener('input',()=>{showHistoryTab('search');render();}));
   document.querySelector('.profit-legend').addEventListener('change',event=>{
     const toggle=event.target.closest('[data-profit-line]');if(!toggle)return;
-    const line=$('profit-chart').querySelector('[data-profit-series="'+toggle.dataset.profitLine+'"]');
-    if(line)line.style.display=toggle.checked?'':'none';
+    render();
   });
   $('position').addEventListener('change',e=>{positionByMode[mode]=e.target.value;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
