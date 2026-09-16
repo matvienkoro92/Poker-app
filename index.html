@@ -747,7 +747,7 @@
             <circle cx="12" cy="12" r="9" />
             <path d="M9 8h4.2a2.3 2.3 0 0 1 0 4.6H9V8Zm0 4.6h4.8a2.4 2.4 0 0 1 0 4.8H9v-4.8ZM11 6v2M11 17.4V20" />
           </svg>
-          <span>Бонусы</span>
+          <span>Баллы</span>
         </button>
         <button type="button" class="header-icon-btn header-admin-shortcut" id="headerRafflesShortcutBtn" title="Завершённые розыгрыши" aria-label="Открыть завершённые розыгрыши" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -778,6 +778,20 @@
                 <span class="header-more-menu__title">Меню клуба</span>
                 <span class="header-more-menu__hint">Быстрые настройки</span>
               </div>
+              <a href="#" class="header-menu-action header-menu-action--admin-bonuses" data-view-target="admin-bonuses" id="adminBonusBalancesHeaderBtn" title="Бонусные балансы" aria-label="Бонусные балансы" aria-hidden="true" role="menuitem" data-header-menu-close hidden>
+                <span class="header-menu-action__icon" aria-hidden="true">Б</span>
+                <span class="header-menu-action__body">
+                  <span class="header-menu-action__title">Бонусные балансы</span>
+                  <span class="header-menu-action__hint">Админка</span>
+                </span>
+              </a>
+              <button type="button" class="header-menu-action header-menu-action--admin-report welcome-admin-report-btn header-admin-report header-admin-report--hidden" id="adminReportBtn" title="Отчёты" aria-label="Отчёты" aria-hidden="true" role="menuitem" data-header-menu-close disabled hidden>
+                <span class="header-menu-action__icon welcome-admin-report-btn__icon" aria-hidden="true">📋</span>
+                <span class="header-menu-action__body">
+                  <span class="header-menu-action__title">Отчёты</span>
+                  <span class="header-menu-action__hint">Админская форма</span>
+                </span>
+              </button>
               <button type="button" class="header-menu-action header-menu-action--vpn" data-vpn-proxy-open title="ВПН от клуба за 100 ₽/месяц" aria-label="Открыть ВПН от клуба за 100 рублей в месяц" role="menuitem" data-header-menu-close>
                 <span class="header-menu-action__icon" aria-hidden="true">🛡️</span>
                 <span class="header-menu-action__body">
