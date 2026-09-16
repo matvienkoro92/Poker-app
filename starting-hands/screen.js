@@ -77,6 +77,17 @@ function startHistory(payload) {
     const runs=document.createElement('span');runs.textContent='Перебрано исходов: '+number(hand.ev.runouts)+'.';
     note.append(document.createElement('br'),runs);summary.append(note);
   }
+  const replayCache=new Map();
+  async function shareHand(button,hand){
+    const original=button.textContent;button.disabled=true;button.textContent='Готовим…';
+    try{
+      let replay=replayCache.get(hand.handId);if(!replay){replay=await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);}
+      const text=window.PokerHandShare.text(hand,replay),title='Раздача #'+hand.handId,link='https://t.me/Poker_dvatuza_bot/DvaTuza';
+      if(typeof navigator.share==='function'){await navigator.share({title,text});}
+      else{const opened=window.open('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text),'_blank','noopener');if(!opened){await navigator.clipboard.writeText(text+'\n'+link);button.textContent='Скопировано';await new Promise(resolve=>setTimeout(resolve,1200));}}
+    }catch(error){if(error?.name!=='AbortError'){button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1200));}}
+    finally{button.disabled=false;button.textContent=original;}
+  }
   function createHandCard(h,index,renderReplay){
       const row=document.createElement('details');row.className='hand-row replay';
       const summary=document.createElement('summary');summary.className='hand-summary';
@@ -87,7 +98,8 @@ function startHistory(payload) {
       const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · Большой блайнд: '+number(h.bigBlindMinor/100)+' '+(mode==='cash'?'₽':'фишек')+' · раздача '+h.handId);
       const arrow=document.createElement('span');arrow.className='hand-arrow';arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
       summary.setAttribute('aria-label','Раздача '+(index+1)+', '+h.cards.join(' ')+', '+signed(h.resultMinor/100)+'. Раскрыть историю');
-      summary.append(ordinal,date,amount,meta,arrow);appendEvSummary(summary,h);row.append(summary);
+      const actions=document.createElement('div'),share=document.createElement('button');actions.className='hand-card-actions';share.type='button';share.className='hand-share-button';share.textContent='Поделиться';share.setAttribute('aria-label','Поделиться раздачей '+h.handId);share.onclick=event=>{event.preventDefault();event.stopPropagation();shareHand(share,h);};actions.append(share);
+      summary.append(ordinal,date,amount,meta,arrow);appendEvSummary(summary,h);row.append(summary,actions);
       row.addEventListener('toggle',()=>{if(!row.open||row.dataset.ready)return;row.dataset.ready='1';const body=row.querySelector('.replay-body')||document.createElement('div');body.className='replay-body';row.append(body);renderReplay(body,h);});
     return row;
   }
@@ -264,7 +276,7 @@ function startHistory(payload) {
     $('mode-note').textContent=mode==='cash'?'':
       (mode==='mtt'?'':'SNG · история пока не загружена.');
     async function renderReplay(target,hand){
-    let replay;try {target.textContent='Загружаем действия…';replay=await historyRequest('replay',hand.handId);target.textContent='';} catch (_) {target.textContent='Не удалось загрузить действия. Закройте и откройте раздачу, чтобы повторить.';delete target.parentElement.dataset.ready;return;}
+    let replay;try {target.textContent='Загружаем действия…';replay=replayCache.get(hand.handId)||await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);target.textContent='';} catch (_) {target.textContent='Не удалось загрузить действия. Закройте и откройте раздачу, чтобы повторить.';delete target.parentElement.dataset.ready;return;}
     const add=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;target.append(el);return el;};
     if(!replay){add('p','История действий пока не загружена.');return;}
     appendCards(add('p','Ваши карты: ','replay-cards'),replay.cards);
