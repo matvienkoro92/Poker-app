@@ -117,8 +117,8 @@ function startHistory(payload) {
       const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · Большой блайнд: '+number(h.bigBlindMinor/100)+' '+(mode==='cash'?'₽':'фишек')+' · раздача '+h.handId);
       const arrow=document.createElement('span');arrow.className='hand-arrow';arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
       summary.setAttribute('aria-label','Раздача '+(index+1)+', '+h.cards.join(' ')+', '+signed(h.resultMinor/100)+'. Раскрыть историю');
-      const actions=document.createElement('div'),share=document.createElement('button');actions.className='hand-card-actions';share.type='button';share.className='hand-share-button';share.textContent='Поделиться';share.setAttribute('aria-label','Поделиться раздачей '+h.handId);share.onclick=event=>{event.preventDefault();event.stopPropagation();shareHand(share,h,row,renderReplay);};actions.append(share);
-      summary.append(ordinal,date,amount,meta,arrow);appendEvSummary(summary,h);row.append(summary,actions);
+      const actions=document.createElement('span'),share=document.createElement('button');actions.className='hand-card-actions';share.type='button';share.className='hand-share-button';share.textContent='↗';share.title='Поделиться';share.setAttribute('aria-label','Поделиться раздачей '+h.handId);share.onclick=event=>{event.preventDefault();event.stopPropagation();shareHand(share,h,row,renderReplay);};actions.append(share);
+      summary.append(ordinal,date,amount,meta,actions,arrow);appendEvSummary(summary,h);row.append(summary);
       row.addEventListener('toggle',()=>{if(!row.open||row.dataset.ready)return;row.dataset.ready='1';const body=row.querySelector('.replay-body')||document.createElement('div');body.className='replay-body';row.append(body);renderReplay(body,h);});
     return row;
   }
