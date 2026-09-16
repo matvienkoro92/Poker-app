@@ -45,3 +45,8 @@ test('review ranks cash results and EV deviations in selected units across stake
  assert.deepEqual(bb.wins.map(h=>h.handId),['3','4']);assert.deepEqual(chips.wins.map(h=>h.handId),['4','3']);
  assert.deepEqual(bb.collections.evBelow.map(h=>h.handId),['1','2']);assert.deepEqual(chips.collections.evBelow.map(h=>h.handId),['2','1']);
 });
+test('postflop nonshowdown outcomes exclude preflop folds, unknowns and showdowns',()=>{
+ const rows=[h(1,10,{showdown:false}),h(2,-4,{showdown:false}),h(3,0,{showdown:false}),h(4,-9,{showdown:false}),h(5,8,{showdown:null}),h(6,3,{showdown:true})];
+ const signals=Object.fromEntries(rows.map(r=>[r.handId,{sawFlop:r.handId!=='4'}]));const s=summarize(rows,signals);
+ assert.equal(s.withoutShowdown.count,3);assert.equal(s.withoutShowdown.wins,1);assert.equal(s.withoutShowdown.losses,1);assert.equal(s.withoutShowdown.even,1);assert.deepEqual(s.withoutShowdown.won,{resultMinor:1000,bb:10});assert.deepEqual(s.withoutShowdown.lost,{resultMinor:-400,bb:-4});assert.equal(s.withoutShowdown.bb,6);assert.equal(s.withoutShowdown.resultMinor,600);assert.equal(s.withoutShowdown.bb100,200);assert.equal(s.showdown.eligible-s.showdown.count,3);
+});

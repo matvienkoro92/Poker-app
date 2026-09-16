@@ -43,9 +43,17 @@ function summarize(hands,signals={},metric='bb'){
  const known=hands.filter(h=>signals[h.handId]);
  const flop=known.filter(h=>signals[h.handId].sawFlop),eligible=flop.filter(h=>typeof h.showdown==='boolean');
  const showdowns=eligible.filter(h=>h.showdown);
+ const withoutShowdown=eligible.filter(h=>!h.showdown);
+ const withoutShowdownStats={count:withoutShowdown.length,wins:withoutShowdown.filter(h=>h.resultMinor>0).length,losses:withoutShowdown.filter(h=>h.resultMinor<0).length,even:withoutShowdown.filter(h=>h.resultMinor===0).length,resultMinor:withoutShowdown.reduce((sum,h)=>sum+h.resultMinor,0),bb:withoutShowdown.reduce((sum,h)=>sum+h.bb,0)};
+ for(const [key,positive] of [['won',true],['lost',false]]){
+  const subset=withoutShowdown.filter(h=>positive?h.resultMinor>0:h.resultMinor<0);
+  withoutShowdownStats[key]={resultMinor:subset.reduce((sum,h)=>sum+h.resultMinor,0),bb:subset.reduce((sum,h)=>sum+h.bb,0)};
+ }
+ withoutShowdownStats.bb100=withoutShowdown.length?withoutShowdownStats.bb*100/withoutShowdown.length:0;
  const groups=map=>[...map.values()].map(g=>({...g,bb100:g.bb*100/g.count}));
  return {sessions:groups(sessions),limits:groups(limits),drawdown:{amount:max,startIndex,troughIndex,recovery,remaining:max?Math.max(0,cumulative[startIndex]-total):0},
  wins:hands.filter(h=>h.bb>0).sort((a,b)=>amount(b)-amount(a)).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>amount(a)-amount(b)).slice(0,5),
+ withoutShowdown:{...withoutShowdownStats,hands:withoutShowdown.slice().sort((a,b)=>Math.abs(amount(b))-Math.abs(amount(a)))},
  showdown:{loaded:known.length,total:hands.length,sawFlop:flop.length,eligible:eligible.length,count:showdowns.length,profitable:showdowns.filter(h=>h.resultMinor>0).length},
  collections:{riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30),
  evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-10).sort((a,b)=>deviation(a)-deviation(b)),

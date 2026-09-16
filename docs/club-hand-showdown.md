@@ -23,3 +23,13 @@ For the imported September 7–13 club dataset:
 Private artifacts stay under `output/club-hand-showdown/`. Never commit these.
 Lists, results, own cards and EV are preserved. Deployment of the UI change is
 required before the new disclosure marker is visible in the application.
+
+The preparer includes both winner and all-in disclosures to repair legacy replays
+that predate winner-card imports. Pass a player ID as its first argument to scope
+a repair, for example `python3 scripts/prepare-club-showdown.py 208238`.
+
+Full disclosure audit: prepare with `--all`, then run the backfill with `--all`
+(and `--apply` to repair missing disclosures). This includes hands with no visible
+opponents, requires complete per-player hand coverage, and rejects any saved
+opponent cards not confirmed by the source disclosure rules. Empty checks preserve
+legacy replays without adding a redundant empty field.
