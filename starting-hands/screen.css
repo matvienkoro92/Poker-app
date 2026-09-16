@@ -169,3 +169,5 @@ main{padding-top:8px}
 .replay .replay-fold{color:#7f8b9e;font-weight:400}
 
 .nonshowdown-outcome{display:block;margin:10px 0;line-height:1.5}
+
+.poker-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;margin:14px 0}.poker-stat{display:flex;flex-direction:column;gap:6px;padding:12px;background:#0b1220;border-radius:8px}.poker-stat>span{font-size:24px;color:#e8bc68}

@@ -25,7 +25,13 @@ def positions(raw):
     if set(seats)!=dealt: return unknown
     posts={t:[str(a.get('userId','')) for a in base.get('opt',{}).values() if str(a.get('type'))==t] for t in ('18','19')}
     if not posts['18']:
-        if len(posts['19'])!=1 or posts['19'][0] not in seats:return unknown
+        if len(posts['19'])!=1:
+            # No unique seat-order anchor: retain explicit BB contributions
+            # for their players without assigning other players' positions.
+            for player in posts['19']:
+                if player in seats:unknown[player]='BB'
+            return unknown
+        if posts['19'][0] not in seats:return unknown
         bb=posts['19'][0]
         sb=seats[(seats.index(bb)-1)%len(seats)]
     else:

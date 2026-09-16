@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Prepare private per-player NLH imports from the verified weekly JSONL export."""
-import collections, importlib.util, json, pathlib, time
+import argparse, collections, importlib.util, json, pathlib, time
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('importer', ROOT/'scripts/import-poker21-json.py')
 imp = importlib.util.module_from_spec(spec)
@@ -21,18 +21,26 @@ def replay(raw, row, names):
     return dict(shownOpponents=shown,events=events,stacks=[dict(actor=name,amount=int(base.get('userCoin',{}).get(pid,0))/100) for pid,name in players.items()],cards=row['cards'])
 
 def main():
-    started=time.monotonic(); out=ROOT/'output/club-hand-import'; roster=json.loads((out/'members.json').read_text())
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source',default=str(ROOT/'output/poker21-export-2026-09-07_13/hands-2026-09-07_13-MSK.jsonl'))
+    parser.add_argument('--out',default=str(ROOT/'output/club-hand-import'))
+    parser.add_argument('--from-ts',type=int,default=1788728400)
+    parser.add_argument('--to-ts',type=int,default=1789333200)
+    parser.add_argument('--period-from',default='2026-09-06T21:00:00Z')
+    parser.add_argument('--period-to',default='2026-09-13T21:00:00Z')
+    args=parser.parse_args()
+    started=time.monotonic(); out=pathlib.Path(args.out); roster=json.loads((out/'members.json').read_text())
     assert roster['groupId']=='758417'
     names=json.loads((ROOT/'rating-player-id-map.json').read_text())
     names.update({p['playerId']:p['nickname'] for p in roster['members']})
     allowed={p['playerId'] for p in roster['members']}; files={}; counts=collections.Counter(); rejected=collections.Counter(); modes=collections.Counter(); seen=set(); unique=0
     folder=out/'players';folder.mkdir(exist_ok=True)
     try:
-        for line in (ROOT/'output/poker21-export-2026-09-07_13/hands-2026-09-07_13-MSK.jsonl').open():
+        for line in pathlib.Path(args.source).open():
             raw=json.loads(line)
             targets={str(raw.get('UserId'+str(i),'0')) for i in range(1,11)} & allowed
             if not targets: continue
-            assert 1788728400 <= int(raw['StartTime']) < 1789333200
+            assert args.from_ts <= int(raw['StartTime']) < args.to_ts
             hid=str(raw['Id']); assert hid not in seen, 'Duplicate hand ID';seen.add(hid)
             mode={'2':'cash','3':'sng','4':'mtt'}.get(str(raw.get('DeskType')))
             if mode is None:
@@ -53,7 +61,7 @@ def main():
                 counts[pid]+=1;modes[mode]+=1
     finally:
         for f in files.values():f.close()
-    report=dict(groupId=roster['groupId'],periodFrom='2026-09-06T21:00:00Z',periodTo='2026-09-13T21:00:00Z',members=len(allowed),players=len(counts),uniqueHands=unique,participations=sum(counts.values()),modes=modes,rejectedHands=rejected,counts=counts,seconds=round(time.monotonic()-started,2))
+    report=dict(groupId=roster['groupId'],periodFrom=args.period_from,periodTo=args.period_to,members=len(allowed),players=len(counts),uniqueHands=unique,participations=sum(counts.values()),modes=modes,rejectedHands=rejected,counts=counts,seconds=round(time.monotonic()-started,2))
     (out/'prepare-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     print(json.dumps({k:v for k,v in report.items() if k!='counts'},ensure_ascii=False))
 if __name__=='__main__':main()

@@ -50,3 +50,14 @@ test('postflop nonshowdown outcomes exclude preflop folds, unknowns and showdown
  const signals=Object.fromEntries(rows.map(r=>[r.handId,{sawFlop:r.handId!=='4'}]));const s=summarize(rows,signals);
  assert.equal(s.withoutShowdown.count,3);assert.equal(s.withoutShowdown.wins,1);assert.equal(s.withoutShowdown.losses,1);assert.equal(s.withoutShowdown.even,1);assert.deepEqual(s.withoutShowdown.won,{resultMinor:1000,bb:10});assert.deepEqual(s.withoutShowdown.lost,{resultMinor:-400,bb:-4});assert.equal(s.withoutShowdown.bb,6);assert.equal(s.withoutShowdown.resultMinor,600);assert.equal(s.withoutShowdown.bb100,200);assert.equal(s.showdown.eligible-s.showdown.count,3);
 });
+const betting=(events)=>actions({events:events.map(([actorId,code,board],sequence)=>({actorId,code,board:board||[],sequence}))},'h').betting;
+test('betting stats count opportunities and exclude ambiguous preflop all-ins',()=>{
+ let s=betting([['v','3'],['h','3'],['v','2'],['','94',['2s','3h','4c']],['v','17'],['h','20']]);assert.equal(s.vpip,true);assert.equal(s.pfr,true);assert.equal(s.threeBet,true);assert.equal(s.cbet,true);assert.equal(s.foldThreeBet,null);
+ s=betting([['h','3'],['v','3'],['h','10']]);assert.equal(s.foldThreeBet,true);assert.equal(s.threeBet,null);
+ s=betting([['v','3'],['h','2'],['','94',['2s','3h','4c']],['h','17'],['v','20'],['h','10']]);assert.equal(s.threeBet,false);assert.equal(s.foldCbet,true);
+ s=betting([['v','5'],['h','2']]);assert.equal(s.vpip,true);assert.equal(s.pfr,null);assert.equal(s.threeBet,null);
+});
+test('donk bets and intervening raises are not cbet or fold-to-cbet opportunities',()=>{
+ let s=betting([['h','3'],['v','2'],['','94',['2s','3h','4c']],['v','20'],['h','10']]);assert.equal(s.cbet,null);assert.equal(s.foldCbet,null);
+ s=betting([['v','3'],['h','2'],['x','2'],['','94',['2s','3h','4c']],['v','20'],['x','3'],['h','10']]);assert.equal(s.foldCbet,null);
+});

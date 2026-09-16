@@ -18,7 +18,34 @@ function actions(replay,playerId){
    if(['2','3','5','17','20'].includes(code))lastRaise=false;
   }
  }
- return {sawFlop,riverCall,threeBet:ambiguous&&!threeBet?null:threeBet,foldToRaise};
+ return {betting:bettingStats(events,playerId),sawFlop,riverCall,threeBet:ambiguous&&!threeBet?null:threeBet,foldToRaise};
+}
+// null means no eligible decision or an ambiguous action sequence.
+function bettingStats(events,playerId){
+ const hero=String(playerId),decisions=new Set(['2','3','5','10','17','20']);
+ const pre=[];const flop=[];let street=0;
+ for(const e of events){if(e.board?.length){street=e.board.length;continue;}if(decisions.has(String(e.code)))(street===0?pre:street===3?flop:[]).push(e);}
+ const mine=pre.filter(e=>String(e.actorId)===hero),result={vpip:mine.length?mine.some(e=>['2','3','5','20'].includes(String(e.code))):null,pfr:null,threeBet:null,foldThreeBet:null,cbet:null,foldCbet:null};
+ // Export all-in codes do not distinguish a call, full raise or short raise.
+ if(pre.some(e=>String(e.code)==='5'))return result;
+ if(!mine.length)return result;
+ result.pfr=mine.some(e=>String(e.code)==='3');
+ let raises=0,opener=null,aggressor=null,folded=false;
+ for(const e of pre){const code=String(e.code),isHero=String(e.actorId)===hero;
+  if(isHero&&raises===1&&opener!==hero&&result.threeBet===null)result.threeBet=code==='3';
+  if(isHero&&raises===2&&opener===hero&&result.foldThreeBet===null)result.foldThreeBet=code==='10';
+  if(code==='3'){raises++;aggressor=String(e.actorId);if(raises===1)opener=aggressor;}
+  if(isHero&&code==='10')folded=true;
+ }
+ if(folded||!aggressor)return result;
+ let bet=false,cbettor=null,raised=false;
+ for(const e of flop){const code=String(e.code),actor=String(e.actorId),isHero=actor===hero;
+  if(code==='5')break;
+  if(isHero&&actor===aggressor&&!bet&&result.cbet===null)result.cbet=['20','3'].includes(code);
+  if(isHero&&cbettor&&cbettor!==hero&&!raised&&result.foldCbet===null)result.foldCbet=code==='10';
+  if(['20','3'].includes(code)){if(!bet){bet=true;if(actor===aggressor)cbettor=actor;}else raised=true;}
+ }
+ return result;
 }
 function evDifference(h){
  if(h.ev?.status!=='calculated'||!Number.isFinite(h.ev.resultMinor)||!Number.isFinite(h.resultMinor)||!Number.isFinite(h.bigBlindMinor)||h.bigBlindMinor<=0)return null;
@@ -51,7 +78,9 @@ function summarize(hands,signals={},metric='bb'){
  }
  withoutShowdownStats.bb100=withoutShowdown.length?withoutShowdownStats.bb*100/withoutShowdown.length:0;
  const groups=map=>[...map.values()].map(g=>({...g,bb100:g.bb*100/g.count}));
- return {sessions:groups(sessions),limits:groups(limits),drawdown:{amount:max,startIndex,troughIndex,recovery,remaining:max?Math.max(0,cumulative[startIndex]-total):0},
+ const betting={};for(const key of ['vpip','pfr','threeBet','foldThreeBet','cbet','foldCbet']){const eligible=known.map(h=>signals[h.handId].betting?.[key]).filter(v=>typeof v==='boolean');betting[key]={count:eligible.filter(Boolean).length,total:eligible.length};}
+ betting.wwsf={count:flop.filter(h=>h.resultMinor>0).length,total:flop.length};
+ return {betting,sessions:groups(sessions),limits:groups(limits),drawdown:{amount:max,startIndex,troughIndex,recovery,remaining:max?Math.max(0,cumulative[startIndex]-total):0},
  wins:hands.filter(h=>h.bb>0).sort((a,b)=>amount(b)-amount(a)).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>amount(a)-amount(b)).slice(0,5),
  withoutShowdown:{...withoutShowdownStats,hands:withoutShowdown.slice().sort((a,b)=>Math.abs(amount(b))-Math.abs(amount(a)))},
  showdown:{loaded:known.length,total:hands.length,sawFlop:flop.length,eligible:eligible.length,count:showdowns.length,profitable:showdowns.filter(h=>h.resultMinor>0).length},

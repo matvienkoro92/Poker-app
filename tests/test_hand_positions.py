@@ -20,7 +20,7 @@ class Positions(unittest.TestCase):
  def test_missing_small_blind_multiple_big_blinds(self):
   r=self.raw(['1','2','3'],'2','3');del r['base_data']['opt']['0']
   r['base_data']['opt']['2']={'type':'19','userId':'1'}
-  self.assertTrue(all(p=='UNKNOWN' for p in m.positions(r).values()))
+  self.assertEqual(m.positions(r),{'1':'BB','2':'UNKNOWN','3':'BB'})
  def test_ambiguous_blinds(self):
   r=self.raw(['1','2','3'],'1','3');self.assertTrue(all(p=='UNKNOWN' for p in m.positions(r).values()))
 if __name__=='__main__':unittest.main()

@@ -55,7 +55,7 @@ function startHistory(payload) {
   function appendCards(target,cards){
     cards.forEach(card=>{const el=document.createElement('span');el.className='playing-card suit-'+card[1];el.textContent=(card[0]==='T'?'10':card[0])+({s:'♠',h:'♥',d:'♦',c:'♣'}[card[1]]);target.append(el);});
   }
-  function unit() {return metric === 'resultMinor' ? (mode === 'cash' ? '₽' : 'фишек') : metric === 'bb100' ? 'bb/100' : 'bb';}
+  function unit() {return metric === 'resultMinor' ? (mode === 'cash' ? '₽' : 'фишек') : 'bb';}
   function value(c) {return metric === 'resultMinor' ? c.resultMinor == null ? null : c.resultMinor/100 : c[metric];}
   function appendEvSummary(summary,hand){
     if(hand.ev?.status!=='calculated')return;
@@ -72,7 +72,7 @@ function startHistory(payload) {
       const date=document.createElement('span');date.textContent=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/Moscow'}).format(new Date(h.playedAt));
       const amount=document.createElement('strong');amount.textContent=signed(metric==='resultMinor'?h.resultMinor/100:h.bb)+' '+(metric==='resultMinor'?(mode==='cash'?'₽':'фишек'):'bb');
       amount.className=h.resultMinor>0?'positive':h.resultMinor<0?'negative':'';
-      const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · раздача '+h.handId);
+      const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · Большой блайнд: '+number(h.bigBlindMinor/100)+' '+(mode==='cash'?'₽':'фишек')+' · раздача '+h.handId);
       const arrow=document.createElement('span');arrow.className='hand-arrow';arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
       summary.setAttribute('aria-label','Раздача '+(index+1)+', '+h.cards.join(' ')+', '+signed(h.resultMinor/100)+'. Раскрыть историю');
       summary.append(ordinal,date,amount,meta,arrow);appendEvSummary(summary,h);row.append(summary);
@@ -139,10 +139,10 @@ function startHistory(payload) {
   // player's history or an older import's version.
   if(payload.version)try{
     const saved=JSON.parse(sessionStorage.getItem(insightCacheKey)||'null');
-    if(saved?.version===payload.version&&saved.schema===1&&saved.signals&&typeof saved.signals==='object')Object.assign(insightSignals,saved.signals);
+    if(saved?.version===payload.version&&saved.schema===2&&saved.signals&&typeof saved.signals==='object')Object.assign(insightSignals,saved.signals);
   }catch(_){}
   function saveInsightSignals(){
-    if(payload.version)try{sessionStorage.setItem(insightCacheKey,JSON.stringify({schema:1,version:payload.version,signals:insightSignals}));}catch(_){}
+    if(payload.version)try{sessionStorage.setItem(insightCacheKey,JSON.stringify({schema:2,version:payload.version,signals:insightSignals}));}catch(_){}
   }
   function renderInsights(data,renderReplay){
     const root=$('hand-insights');root.replaceChildren();
@@ -151,7 +151,6 @@ function startHistory(payload) {
     const hands=data.cells.flatMap(c=>c.hands),stats=window.PokerHandInsights.summarize(hands,insightSignals,reviewMetric);
     const add=(parent,tag,text,cls)=>{const el=document.createElement(tag);if(text!=null)el.textContent=text;if(cls)el.className=cls;parent.append(el);return el;};
     add(root,'h2','Разбор игры');
-    add(root,'p','По текущим фильтрам · результаты и сортировка в '+reviewUnit+(metric==='bb100'?' (для отдельных раздач)':''),'note');
     if(!hands.length){add(root,'p','Нет раздач по выбранным фильтрам.','note');return;}
     function handList(parent,rows,showEv=false){
       if(!rows.length){add(parent,'p','Подходящих раздач нет.','note');return;}
@@ -166,12 +165,25 @@ function startHistory(payload) {
       }shown+=30;more.hidden=shown>=rows.length;}
       more.onclick=next;next();
     }
+    const pokerStats=add(root,'section',null,'insight-card');add(pokerStats,'h3','Основные показатели');
+    const statsGrid=add(pokerStats,'div',null,'poker-stats-grid');
+    for(const [key,title,description] of [
+      ['vpip','VPIP','Добровольно вложил фишки на префлопе'],['pfr','PFR','Сделал рейз на префлопе'],
+      ['threeBet','3-бет','Переставил первый рейз'],['foldThreeBet','Фолд на 3-бет','Сбросил после 3-бета на свой первый рейз'],
+      ['cbet','Контбет флопа','Поставил на флопе как последний префлоп-агрессор, когда до него не было ставки'],
+      ['foldCbet','Фолд на контбет','Сбросил на контбет флопа без промежуточного рейза'],
+      ['wwsf','WWSF','Закончил в плюс, увидев флоп']]){
+      const stat=stats.betting[key],cell=add(statsGrid,'div',null,'poker-stat');
+      add(cell,'strong',title);add(cell,'span',stat.total?number(stat.count/stat.total*100)+'%':'—');
+      add(cell,'small',stat.count+' / '+stat.total+' · '+description);
+    }
+    add(pokerStats,'small','По текущим фильтрам. Под процентом — срабатывания / подходящие ситуации. Неоднозначные олл-ины исключены из показателей рейзов и контбетов; в VPIP учитываются.');
     const cards=add(root,'div',null,'insight-grid');
     const showdown=add(cards,'div',null,'insight-card');add(showdown,'h3','Вскрытия');
     const sd=stats.showdown;
     add(showdown,'p',sd.eligible?'Дошёл до вскрытия: '+number(sd.count/sd.eligible*100)+'% · '+sd.count+' из '+sd.eligible+' раздач с флопом':'Дошёл до вскрытия: —');
     add(showdown,'p',sd.count?'Вскрытия в плюс: '+number(sd.profitable/sd.count*100)+'% · '+sd.profitable+' из '+sd.count:'Вскрытия в плюс: —');
-    add(showdown,'small',sd.loaded===0&&sd.total?'Загружаем историю действий для расчёта вскрытий…':'Учтена история действий: '+sd.loaded+' из '+sd.total+' раздач. Неопределённые вскрытия исключены из доли.');
+    add(showdown,'small',sd.loaded===0&&sd.total?'Загружаем историю действий для расчёта вскрытий…':'Учтена история действий: '+sd.loaded+' из '+sd.total+' раздач.');
     const ns=stats.withoutShowdown;
     if(sd.loaded){
       const section=add(cards,'details',null,'insight-card');
@@ -201,12 +213,12 @@ function startHistory(payload) {
       const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length,key==='evBelow'?'negative':key==='evAbove'?'positive':undefined);handList(d,rows,key==='evBelow'||key==='evAbove');
     }
     add(collections,'p','Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
-    for(const [title,groups,key] of [['По сессиям',stats.sessions,'sessionId'],['По лимитам',stats.limits,'bigBlindMinor']]){
+    for(const [title,groups,key] of [['По сессиям',stats.sessions,'sessionId'],[mode==='cash'?'По ставкам большого блайнда':'По уровням блайндов',stats.limits,'bigBlindMinor']]){
       const section=add(root,'details',null,'insight-section');add(section,'summary',title+' · '+groups.length);
       if(key==='bigBlindMinor'&&mode!=='cash')add(section,'p','В турнирах это уровни большого блайнда, а не бай-ины.','note');
-      for(const g of groups.sort((a,b)=>value(b)-value(a))){
+      for(const g of groups.sort((a,b)=>key==='bigBlindMinor'?Number(a.key)-Number(b.key):value(b)-value(a))){
         const d=add(section,'details',null,'insight-section');
-        add(d,'summary',(key==='sessionId'?'Сессия '+g.key:'BB '+number(Number(g.key)/100)+' '+(mode==='cash'?'₽':'фишек'))+' · '+g.count+' раздач · '+signed(value(g))+' '+unit()+(metric==='bb100'?'':' · '+signed(g.bb100)+' bb/100'));
+        add(d,'summary',(key==='sessionId'?'Сессия '+g.key:'Большой блайнд: '+number(Number(g.key)/100)+' '+(mode==='cash'?'₽':'фишек'))+' · '+g.count+' раздач · '+signed(value(g))+' '+unit()+' · '+signed(g.bb100)+' bb/100');
         // Materialize long session lists only when opened.
         d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(d,hands.filter(h=>String(h[key])===g.key).sort((a,b)=>b.playedAt.localeCompare(a.playedAt)));}});
       }
@@ -280,7 +292,7 @@ function startHistory(payload) {
   }
     renderInsights(data,renderReplay);
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
-    $('metric').textContent=metric==='resultMinor'?(mode==='cash'?'Рубли':'Фишки'):metric==='bb100'?'bb/100':'bb';
+    $('metric').textContent=metric==='resultMinor'?(mode==='cash'?'Рубли':'Фишки'):'bb';
     $('metric').setAttribute('aria-label','Показатель: '+$('metric').textContent+'. Переключить');
     document.querySelector('.date-picker summary').title='Период · МСК: '+(appliedFrom||'начало')+' — '+(appliedTo||'сегодня');
     $('total-count').textContent=number(data.count);
@@ -347,7 +359,7 @@ function startHistory(payload) {
     $('hand-search').value='';$('opponent-search').value='';selected=null;render();
     $('hand-search').focus();
   });
-  $('metric').addEventListener('click',()=>{const units=['bb','resultMinor','bb100'];metric=units[(units.indexOf(metric)+1)%units.length];render();});
+  $('metric').addEventListener('click',()=>{metric=metric==='bb'?'resultMinor':'bb';render();});
   $('date-close').addEventListener('click',()=>{if($('date-status').textContent)return;document.querySelector('.date-picker').open=false;document.querySelector('.date-picker summary').focus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelector('.date-picker').open=false;}});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});

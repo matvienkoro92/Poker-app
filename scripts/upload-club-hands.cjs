@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {gzipSync,gunzipSync}=require('node:zlib');
 const {pipeline}=require('../lib/redis');
-const root=path.resolve(__dirname,'../output/club-hand-import');
+const root=path.resolve(process.env.CLUB_HAND_IMPORT_ROOT||path.resolve(__dirname,'../output/club-hand-import'));
 const pack=x=>gzipSync(JSON.stringify(x)).toString('base64');
 const unpack=x=>JSON.parse(gunzipSync(Buffer.from(x,'base64')));
 async function send(cmds){return (await pipeline(cmds,{context:'club-hand-import',throwOnError:true,timeoutMs:20000})).map(x=>x.result);}
