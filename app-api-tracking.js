@@ -111,6 +111,10 @@ function pokerApplyTrackingLinkLanding(ctx) {
   var applyLanding = function () {
     attempts += 1;
     try {
+      if (targetStartApp && targetStartApp !== "home" && typeof window.__pokerApplyStartAppDeepLink !== "function") {
+        if (attempts < 40) setTimeout(applyLanding, 250);
+        return;
+      }
       if (targetStartApp && targetStartApp !== "home" && typeof window.__pokerApplyStartAppDeepLink === "function") {
         window.__pokerApplyStartAppDeepLink(targetStartApp, {});
       } else if (targetView && typeof setView === "function") {
@@ -122,8 +126,8 @@ function pokerApplyTrackingLinkLanding(ctx) {
         if (typeof trackLinkSessionEvent === "function") trackLinkSessionEvent("landing:external", params.target_label || "");
         if (!window.location || String(window.location.href || "") !== targetUrl) window.location.href = targetUrl;
         return;
-      } else if (targetStartApp && attempts < 40) {
-        setTimeout(applyLanding, 250);
+      } else {
+        if ((targetStartApp || targetView) && attempts < 40) setTimeout(applyLanding, 250);
         return;
       }
       try { sessionStorage.setItem(onceKey, "1"); } catch (eMark) {}
@@ -136,8 +140,9 @@ function recordTrackingLinkHit(ref) {
   if (!ref) return;
   var slug = ref.replace(/^ref_/, "");
   try {
-    if (sessionStorage.getItem("poker_track_ref_" + slug)) {
-      pokerApplyTrackingLinkLanding();
+    var cachedContext = pokerGetTrackingLinkContext();
+    if (sessionStorage.getItem("poker_track_ref_" + slug) && cachedContext && cachedContext.ref === ref) {
+      pokerApplyTrackingLinkLanding(cachedContext);
       return;
     }
   } catch (e) {}

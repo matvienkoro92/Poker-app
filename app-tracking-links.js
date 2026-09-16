@@ -134,6 +134,7 @@ function initTrackingLinksAdminModal() {
   }
 
   function closeVisitorsModal() {
+    journeyGeneration += 1;
     if (visModal) {
       visModal.setAttribute("aria-hidden", "true");
     }
@@ -298,7 +299,7 @@ function initTrackingLinksAdminModal() {
       journeyOffset = d.nextOffset;
       renderJourneyRows();
       if (!journeyRows.length) journeySummary.textContent = "Новая история пока пуста. Она появится после входов по ссылке с обновлённой версией приложения. Старые переходы доступны ниже.";
-      if (journeyMore) { journeyMore.hidden = journeyOffset == null; journeyMore.disabled = false; }
+      if (journeyMore) { journeyMore.hidden = journeyOffset == null; journeyMore.disabled = false; journeyMore.textContent = "Ещё посетители"; }
     }).catch(function () {
       if (generation !== journeyGeneration) return;
       journeySummary.textContent = "Не удалось загрузить историю. Нажмите «Повторить».";
@@ -332,6 +333,7 @@ function initTrackingLinksAdminModal() {
   function openVisitorsForId(slug, labelText) {
     if (!visModal || !visTbody) return;
     journeySlug = slug; journeyOffset = 0; journeyRows = []; journeyGeneration += 1;
+    var generation = journeyGeneration;
     if (journeyList) journeyList.innerHTML = "";
     if (journeySummary) journeySummary.textContent = "Загрузка истории…";
     if (journeyMore) { journeyMore.hidden = true; journeyMore.textContent = "Ещё посетители"; }
@@ -350,6 +352,7 @@ function initTrackingLinksAdminModal() {
         return r.json();
       })
       .then(function (data) {
+        if (generation !== journeyGeneration) return;
         if (!data || !data.ok || !Array.isArray(data.visitors)) {
           visTbody.innerHTML = "<tr><td colspan=\"4\">Нет данных</td></tr>";
           return;
@@ -380,6 +383,7 @@ function initTrackingLinksAdminModal() {
           .join("");
       })
       .catch(function () {
+        if (generation !== journeyGeneration) return;
         visTbody.innerHTML = "<tr><td colspan=\"4\">Ошибка загрузки</td></tr>";
       });
   }
