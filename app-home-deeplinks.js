@@ -92,6 +92,17 @@ function pokerInitHomeDeepLinks(opts) {
    * Один вход для deep link: Telegram start_param и PWA/браузер ?startapp=… (+ ?with= для club_chat_dm).
    * Раньше почти всё обрабатывалось только из Telegram — ссылки с query открывали главную.
    */
+  function pokerConsumeScheduleStartAppQuery() {
+    try {
+      if (typeof window === "undefined" || !window.location || typeof window.history === "undefined") return;
+      if (!window.history || typeof window.history.replaceState !== "function") return;
+      var url = new URL(window.location.href);
+      var startApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(url.searchParams));
+      if (startApp !== "schedule") return;
+      url.searchParams.delete("startapp");
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    } catch (eConsumeScheduleStartApp) {}
+  }
 	  var trackedPushClicks = new Set();
   function pokerApplyStartAppDeepLink(startParamRaw, opts) {
     opts = opts || {};
@@ -1071,6 +1082,7 @@ function pokerInitHomeDeepLinks(opts) {
   if (deepLinkParam) {
     var applyInitialDeepLink = function () {
       pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
+      if (qStartApp === "schedule") pokerConsumeScheduleStartAppQuery();
     };
     // This initializer can run while the shell-ready bootstrap is still
     // attaching home modal handlers. Queueing the route in the next task

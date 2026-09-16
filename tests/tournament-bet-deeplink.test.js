@@ -40,3 +40,19 @@ test('event switch waits for an existing request then selects the deep-linked ev
   assert.equal(context.selectedEventId,'tb_old');finish();await result;
   assert.equal(context.selectedEventId,'tb_new');assert.equal(context.deepLinkEventId,'tb_new');assert.equal(context.activeTab,'event');assert.equal(context.opened,true);
 });
+
+test('schedule query deep link is consumed after the initial route', async () => {
+  const calls=[],timers=[],replacements=[];
+  const location={href:'https://club.test/?startapp=schedule&utm_source=club#today',search:'?startapp=schedule&utm_source=club',hash:'#today'};
+  const history={state:{route:'initial'},replaceState:(state,title,url)=>replacements.push({state,title,url})};
+  const context={URL,URLSearchParams,Promise,Set,location,history,
+    window:{location,history,addEventListener(){}},
+    document:{readyState:'complete',body:{getAttribute:()=> 'home'}},
+    setTimeout:fn=>timers.push(fn),isTelegramWebApp:()=>false,setView:view=>calls.push(view),
+    pokerReadTelegramLaunchStartParam:()=>'',
+    pokerNormalizeWebAppStartParam:value=>value||'',pokerStartAppQueryFromUrlSearchParams:sp=>sp.get('startapp')||''};
+  vm.createContext(context);vm.runInContext(router+'\npokerInitHomeDeepLinks();',context);
+  while(timers.length)timers.shift()();
+  assert.deepEqual(calls,['schedule']);
+  assert.deepEqual(replacements,[{state:{route:'initial'},title:'',url:'/?utm_source=club#today'}]);
+});
