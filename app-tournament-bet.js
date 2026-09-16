@@ -206,8 +206,10 @@
   }
 
   function ratingHtml(data) {
-    var rows = Array.isArray(data.rating) ? data.rating : [];
-    if (!rows.length) return '<section class="tournament-bet-modal__rating-empty"><strong>Рейтинг пока пуст</strong><p>Статистика появится после первой ставки.</p></section>';
+    var rows = (Array.isArray(data.rating) ? data.rating : []).filter(function (entry) {
+      return Number(entry.net) >= 0;
+    });
+    if (!rows.length) return '<section class="tournament-bet-modal__rating-empty"><strong>Рейтинг пока пуст</strong><p>Здесь появятся участники с результатом от 0 ₽.</p></section>';
     return '<section class="tournament-bet-modal__rating"><header><h3>Рейтинг ставочников</h3><span>' + rows.length + '</span></header><div class="tournament-bet-modal__rating-list">' + rows.map(function (entry) {
       var art = "";
       if (typeof window.pokerGetSummerRatingPlayerArt === "function") {
