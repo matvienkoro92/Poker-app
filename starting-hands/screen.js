@@ -57,6 +57,14 @@ function startHistory(payload) {
   }
   function unit() {return metric === 'resultMinor' ? (mode === 'cash' ? 'ед' : 'фишек') : metric === 'bb100' ? 'bb/100' : 'bb';}
   function value(c) {return metric === 'resultMinor' ? c.resultMinor == null ? null : c.resultMinor/100 : c[metric];}
+  function appendEvSummary(summary,hand){
+    if(hand.ev?.status!=='calculated')return;
+    const chips=metric==='resultMinor',divisor=chips?100:hand.bigBlindMinor,label=chips?(mode==='cash'?'ед':'фишек'):'bb';
+    const note=document.createElement('span');note.className='hand-ev-summary';
+    note.textContent='All-in EV: '+signed(hand.ev.resultMinor/divisor)+' '+label+' · фактически: '+signed(hand.resultMinor/divisor)+' '+label+'.';
+    const runs=document.createElement('span');runs.textContent='Перебрано исходов: '+number(hand.ev.runouts)+'.';
+    note.append(document.createElement('br'),runs);summary.append(note);
+  }
   function renderProfitChart(data) {
     const graphUnit=metric==='resultMinor'?'resultMinor':'bb',label=graphUnit==='bb'?'bb':mode==='cash'?'ед':'фишек';
     const series=core.profitSeries(data.cells.flatMap(c=>c.hands),graphUnit),svg=$('profit-chart');svg.replaceChildren();
@@ -70,11 +78,15 @@ function startHistory(payload) {
       'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
       'Для этой выборки нет рассчитанных выставлений all-in EV.';
     const vals=series.points.flatMap(p=>lines.map(([key])=>p[key]));let low=Math.min(0,...vals),high=Math.max(0,...vals);if(low===high){low-=1;high+=1;}const pad=(high-low)*.08;low-=pad;high+=pad;
-    const plotLeft=110,plotRight=790,plotWidth=plotRight-plotLeft,plotTop=80,plotBottom=plotTop+plotWidth;
+    const endpointFont=28,lastPoint=series.points.at(-1);
+    const measure=document.createElementNS('http://www.w3.org/2000/svg','text');
+    measure.setAttribute('font-size',endpointFont);measure.setAttribute('font-weight','700');svg.append(measure);
+    const endpointWidth=Math.max(0,...lines.map(([key])=>{measure.textContent=signed(lastPoint[key])+' '+label;return measure.getComputedTextLength();}));measure.remove();
+    const plotLeft=110,plotRight=Math.min(680,900-endpointWidth-130),plotWidth=plotRight-plotLeft,plotTop=(900-plotWidth-90)/2,plotBottom=plotTop+plotWidth;
     const x=i=>plotLeft+i/Math.max(1,data.count)*plotWidth,y=v=>plotBottom-(v-low)/(high-low)*plotWidth;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
     const ticks=Array.from({length:5},(_,i)=>low+(high-low)*i/4).filter(v=>Math.abs(v)>(high-low)*.055);ticks.push(0);ticks.sort((a,b)=>a-b);
-    for(const v of ticks){node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});for(const [side,axisX,anchor] of [['left',plotLeft-10,'end'],['right',plotRight+10,'start']])node('text',{'data-profit-axis':side,x:axisX,y:y(v)+4,'text-anchor':anchor,fill:v===0?'#e4eaf1':'#e8bc68','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));}
+    for(const v of ticks){node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});for(const [side,axisX,anchor] of [['left',plotLeft-10,'end'],['right',plotRight+10,'start']])node('text',{'data-profit-axis':side,x:axisX,y:y(v)+4,'text-anchor':anchor,fill:v===0?'#e4eaf1':'#e8bc68',stroke:'#0b1220','stroke-width':6,'paint-order':'stroke','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));}
     for(const axisX of [plotLeft,plotRight])node('line',{x1:axisX,x2:axisX,y1:plotTop,y2:plotBottom,stroke:'#e8bc68','stroke-width':2});
     node('line',{x1:plotLeft,x2:plotRight,y1:plotBottom,y2:plotBottom,stroke:'#8dbfff','stroke-width':2});
     for(let i=0;i<=4;i++){const n=Math.round(data.count*i/4);node('text',{x:x(n),y:plotBottom+38,'text-anchor':i===4?'end':i===0?'start':'middle',fill:'#8dbfff','font-size':axisFont},number(n));}
@@ -87,7 +99,7 @@ function startHistory(payload) {
     for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
     // Keep exact endpoint values readable even when several lines finish together.
     if(data.count){
-      const last=series.points.at(-1),font=28,gap=38;
+      const last=series.points.at(-1),font=endpointFont,gap=38;
       const endpoints=lines.filter(([key])=>document.querySelector('[data-profit-line="'+key+'"]').checked)
         .map(([key,color])=>({key,color,value:last[key],endY:y(last[key])})).sort((a,b)=>a.endY-b.endY);
       endpoints.forEach((p,i)=>{p.labelY=Math.max(plotTop+gap/2,p.endY,i?endpoints[i-1].labelY+gap:0);});
@@ -96,11 +108,12 @@ function startHistory(payload) {
         for(let i=endpoints.length-2;i>=0;i--)endpoints[i].labelY=Math.min(endpoints[i].labelY,endpoints[i+1].labelY-gap);
       }
       for(const p of endpoints){
-        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight-12)+','+p.labelY+' H'+(plotRight-22),fill:'none',stroke:p.color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
+        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight+10)+','+p.labelY+' H'+(plotRight+105),fill:'none',stroke:p.color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
         node('circle',{cx:plotRight,cy:p.endY,r:4,fill:p.color});
-        node('text',{'data-profit-endpoint':p.key,x:plotRight-26,y:p.labelY,'dominant-baseline':'middle','text-anchor':'end',fill:p.color,'font-size':font,'font-weight':700,stroke:'#0b1220','stroke-width':7,'stroke-linejoin':'round','paint-order':'stroke'},signed(p.value)+' '+label);
+        node('text',{'data-profit-endpoint':p.key,x:plotRight+115,y:p.labelY,'dominant-baseline':'middle','text-anchor':'start',fill:p.color,'font-size':font,'font-weight':700,stroke:'#0b1220','stroke-width':7,'stroke-linejoin':'round','paint-order':'stroke'},signed(p.value)+' '+label);
       }
     }
+    svg.querySelectorAll('[data-profit-axis]').forEach(tick=>svg.append(tick));
     const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
     $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
     svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-plotLeft)/plotWidth*data.count)));$('profit-values').textContent=describe(series.points[n]);};
@@ -128,6 +141,7 @@ function startHistory(payload) {
           add(d,'p','Факт: '+signed(amount(h))+' '+reviewUnit+' · EV: '+signed(evAmount)+' '+reviewUnit+' · '+(delta<0?'Недобор: ':'Перебор: ')+number(Math.abs(delta))+' '+reviewUnit,delta<0?'negative':'positive');
         }
         add(summary,'span',' · '+new Date(h.playedAt).toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})+' МСК');
+        appendEvSummary(summary,h);
         d.addEventListener('toggle',()=>{if(!d.open||d.dataset.ready)return;d.dataset.ready='1';renderReplay(add(d,'div',null,'replay-body'),h);});
       }shown+=30;more.hidden=shown>=rows.length;}
       more.onclick=next;next();
@@ -198,8 +212,7 @@ function startHistory(payload) {
     const add=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;target.append(el);return el;};
     if(!replay){add('p','История действий пока не загружена.');return;}
     appendCards(add('p','Ваши карты: ','replay-cards'),replay.cards);
-    if(hand.ev?.status==='calculated')add('p','All-in EV: '+signed(hand.ev.resultMinor/hand.bigBlindMinor)+' bb · фактически: '+signed(hand.bb)+' bb. Перебрано исходов: '+number(hand.ev.runouts)+'.','note');
-    else if(hand.ev?.status==='unresolved')add('p','All-in EV не рассчитан: '+({betting_after_allin_street:'торговля продолжалась на следующих улицах',missing_final_board:'нет полного борда',side_pot_deduction:'EV после комиссии не определён из-за распределения удержаний по банкам',payout_does_not_reconcile:'выплаты не сходятся с картами и банками',special_runout:'особый порядок раздачи борда'}[hand.ev.reason]||'недостаточно подтверждённых данных')+'.','note');
+    if(hand.ev?.status==='unresolved')add('p','All-in EV не рассчитан: '+({betting_after_allin_street:'торговля продолжалась на следующих улицах',missing_final_board:'нет полного борда',side_pot_deduction:'EV после комиссии не определён из-за распределения удержаний по банкам',payout_does_not_reconcile:'выплаты не сходятся с картами и банками',special_runout:'особый порядок раздачи борда'}[hand.ev.reason]||'недостаточно подтверждённых данных')+'.','note');
     if(hand.ev?.grossEv?.status==='calculated'){
       const gross=hand.ev.grossEv;
       add('p','All-in EV до комиссии: '+signed(gross.resultMinor/hand.bigBlindMinor)+' bb · фактический результат до комиссии: '+signed(gross.actualResultMinor/hand.bigBlindMinor)+' bb.','note');
@@ -288,7 +301,7 @@ function startHistory(payload) {
       const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · раздача '+h.handId);
       const arrow=document.createElement('span');arrow.className='hand-arrow';arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
       summary.setAttribute('aria-label','Раздача '+(index+1)+', '+h.cards.join(' ')+', '+signed(h.resultMinor/100)+'. Раскрыть историю');
-      summary.append(ordinal,date,amount,meta,arrow);row.append(summary);
+      summary.append(ordinal,date,amount,meta,arrow);appendEvSummary(summary,h);row.append(summary);
       row.addEventListener('toggle',()=>{if(!row.open||row.dataset.ready)return;row.dataset.ready='1';const body=row.querySelector('.replay-body')||document.createElement('div');body.className='replay-body';row.append(body);renderReplay(body,h);});
       list.append(row);
     });shownHands+=30;moreHands.hidden=shownHands>=visibleHands.length;moreHands.textContent='Показать ещё · осталось '+Math.max(0,visibleHands.length-shownHands);
