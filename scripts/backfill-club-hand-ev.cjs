@@ -3,7 +3,8 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {gzipSync,gunzipSync}=require('node:zlib');
 const {pipeline}=require('../lib/redis');
-const root=path.resolve(__dirname,'../output/club-hand-ev');
+const root=path.resolve(process.env.CLUB_HAND_EV_ROOT||path.resolve(__dirname,'../output/club-hand-ev'));
+const importReport=path.resolve(process.env.CLUB_HAND_IMPORT_REPORT||path.resolve(root,'../club-hand-import/prepare-report.json'));
 const method='exact-runouts-fixed-deduction-v1';
 const pack=x=>gzipSync(JSON.stringify(x)).toString('base64');
 const unpack=x=>JSON.parse(gunzipSync(Buffer.from(x,'base64')));
@@ -27,7 +28,7 @@ function mergeEv(data,source){
  });return {data:{...data,rows},changed};
 }
 async function exportPlayers(){
- const ids=Object.keys(JSON.parse(fs.readFileSync(path.resolve(root,'../club-hand-import/prepare-report.json'))).counts);fs.mkdirSync(path.join(root,'input'),{recursive:true});
+ const ids=Object.keys(JSON.parse(fs.readFileSync(importReport)).counts);fs.mkdirSync(path.join(root,'input'),{recursive:true});
  const versions=await send(ids.map(id=>['GET','poker_app:starting-hands:'+id+':active']));const snapshot=[];
  for(let i=0;i<ids.length;i+=20){const group=ids.slice(i,i+20);if(group.some((id,j)=>!versions[i+j]))throw Error('Missing active history');
   const values=await send(group.flatMap((id,j)=>[['HGET','poker_app:starting-hands:'+id+':'+versions[i+j],'list'],['HLEN','poker_app:starting-hands:'+id+':'+versions[i+j]]]));
@@ -47,12 +48,12 @@ function prepare(){
 async function apply(){
  const summary=JSON.parse(fs.readFileSync(path.join(root,'plan.json')));let next=0,failure=null;
  async function upload(id){const p=JSON.parse(fs.readFileSync(path.join(root,'plans',id+'.json'))),prefix='poker_app:starting-hands:'+id;
-  const [current]=await send([['GET',prefix+':active']]);if(current===p.nextVersion)return;if(current!==p.version)throw Error('Live version changed '+id);
+  const [current]=await send([['GET',prefix+':active']]);if(current===p.nextVersion)return;if(current!==p.version)throw Error('Live version changed '+id+': '+current+' (expected '+p.version+' or '+p.nextVersion+')');
   const [original]=await send([['HGET',prefix+':'+current,'list']]);if(crypto.createHash('sha256').update(original).digest('hex')!==p.listHash)throw Error('Original data changed');
   const key=prefix+':'+p.nextVersion;const [exists]=await send([['EXISTS',key]]);if(!exists){const [copied]=await send([['COPY',prefix+':'+p.version,key]]);if(Number(copied)!==1)throw Error('Copy failed');}
   await send([['HSET',key,'list',p.packed]]);
   const [actual,count]=await send([['HGET',key,'list'],['HLEN',key]]);if(actual!==p.packed||Number(count)!==p.count)throw Error('Verification failed');
-  const [switched]=await send([['EVAL',"if redis.call('GET',KEYS[1]) ~= ARGV[1] then return 0 end;redis.call('SET',KEYS[1],ARGV[2]);return 1",'1',prefix+':active',p.version,p.nextVersion]]);if(Number(switched)!==1)throw Error('Concurrent change');
+  const [switched]=await send([['EVAL',"if redis.call('GET',KEYS[1]) ~= ARGV[1] then return 0 end;redis.call('SET',KEYS[1],ARGV[2]);return 1",'1',prefix+':active',p.version,p.nextVersion]]);if(Number(switched)!==1)throw Error('Concurrent change '+id);
   fs.appendFileSync(path.join(root,'journal.jsonl'),JSON.stringify({playerId:id,previous:p.version,version:p.nextVersion,changed:p.changed,verifiedAt:new Date().toISOString()})+'\n');
  }
  await Promise.all(Array.from({length:4},async()=>{while(!failure&&next<summary.plans.length){const id=summary.plans[next++];try{await upload(id);}catch(e){failure=e;}}}));if(failure)throw failure;console.log('Verified and activated all EV projections');

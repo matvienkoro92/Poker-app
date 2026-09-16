@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Calculate exact private EV for current club projections, with resumable hand checkpoints."""
-import collections,concurrent.futures,functools,hashlib,importlib.util,json,pathlib,time,datetime,subprocess
+import collections,concurrent.futures,functools,hashlib,importlib.util,json,pathlib,time,datetime,subprocess,os
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-OUT=ROOT/'output/club-hand-ev'
+OUT=pathlib.Path(os.environ.get('CLUB_HAND_EV_ROOT',ROOT/'output/club-hand-ev'))
 def load_calculator():
  spec=importlib.util.spec_from_file_location('ev',ROOT/'scripts/calculate-allin-ev.py');ev=importlib.util.module_from_spec(spec);spec.loader.exec_module(ev)
  original=ev.equity
@@ -25,39 +25,40 @@ def main():
  rows={pid:{r['handId']:r for r in d['rows']} for pid,d in data.items()};owners=collections.defaultdict(list)
  for pid,rs in rows.items():
   for hid in rs:owners[hid].append(pid)
- source=ROOT/'output/poker21-export-2026-09-07_13/hands-2026-09-07_13-MSK.jsonl'
+ sources=[pathlib.Path(p) for p in os.environ.get('CLUB_HAND_EV_SOURCES',str(ROOT/'output/poker21-export-2026-09-07_13/hands-2026-09-07_13-MSK.jsonl')).split(os.pathsep)]
  signature=hashlib.sha256((OUT/'snapshot.json').read_bytes()+(ROOT/'scripts/calculate-allin-ev.py').read_bytes()+(ROOT/'scripts/holdem-equity.cpp').read_bytes()+pathlib.Path(__file__).read_bytes()).hexdigest()
  marker=OUT/'calculation-source.json'
  if marker.exists():assert json.loads(marker.read_text())['signature']==signature,'Checkpoint source changed'
- else:marker.write_text(json.dumps({'signature':signature,'source':str(source),'sourceSize':source.stat().st_size}))
+ else:marker.write_text(json.dumps({'signature':signature,'sources':[{'path':str(source),'size':source.stat().st_size} for source in sources]}))
  results={pid:{} for pid in rows};done=set();checkpoint=OUT/'checkpoint.jsonl';counts=collections.Counter();checked=set();jobs=[]
  if checkpoint.exists():
   for line in checkpoint.open():
    entry=json.loads(line);done.add(entry['handId'])
    for pid,ev in entry['owners'].items():results[pid][entry['handId']]=ev;counts[ev.get('reason',ev['status'])]+=1
  # Only all-ins of remaining contenders require expensive equity enumeration.
- for line in source.open():
-  raw=json.loads(line);hid=str(raw['Id'])
-  if hid not in owners:continue
-  if hid in checked:raise ValueError('Duplicate hand source')
-  checked.add(hid);base=raw['base_data'];seats={str(raw.get('UserId'+str(i),'0')):i for i in range(1,11)}
-  for pid in owners[hid]:
-   r=rows[pid][hid]
-   if pid not in seats or int(raw['Score'+str(seats[pid])])!=r['resultMinor']:raise ValueError('Owner or result mismatch')
-   if r['sessionId'] not in [str(raw[k]) for k in ('RecordId','DeskId','CompetitionId')]:raise ValueError('Session mismatch')
-   if int(datetime.datetime.fromisoformat(r['playedAt'].replace('Z','+00:00')).timestamp())!=int(raw['StartTime']):raise ValueError('Time mismatch')
-   if r['mode']!={'2':'cash','3':'sng','4':'mtt'}[str(raw['DeskType'])]:raise ValueError('Mode mismatch')
-   cards=next(e[2:] for e in base['card'] if str(e[0])==pid)
-   def decode(c):
-    n=int(c);return {1:'A',10:'T',11:'J',12:'Q',13:'K'}.get(n%100,str(n%100))+{1:'d',2:'c',3:'h',4:'s'}[n//100]
-   if [decode(c) for c in cards]!=r['cards']:raise ValueError('Own cards mismatch')
-  if hid in done:continue
-  events=base['opt'].values();folded={str(e.get('userId')) for e in events if str(e['type'])=='10'};active={str(e[0]) for e in base['card']}-folded
-  allins={str(e.get('userId')) for e in events if str(e['type'])=='5'}
-  candidates=[pid for pid in owners[hid] if pid in active and len(active)>1 and active&allins]
-  for pid in owners[hid]:
-   if pid not in candidates:results[pid][hid]={'status':'not_applicable'};counts['not_applicable']+=1
-  if candidates:jobs.append((raw,candidates))
+ for source in sources:
+  for line in source.open():
+   raw=json.loads(line);hid=str(raw['Id'])
+   if hid not in owners:continue
+   if hid in checked:raise ValueError('Duplicate hand source')
+   checked.add(hid);base=raw['base_data'];seats={str(raw.get('UserId'+str(i),'0')):i for i in range(1,11)}
+   for pid in owners[hid]:
+    r=rows[pid][hid]
+    if pid not in seats or int(raw['Score'+str(seats[pid])])!=r['resultMinor']:raise ValueError('Owner or result mismatch')
+    if r['sessionId'] not in [str(raw[k]) for k in ('RecordId','DeskId','CompetitionId')]:raise ValueError('Session mismatch')
+    if int(datetime.datetime.fromisoformat(r['playedAt'].replace('Z','+00:00')).timestamp())!=int(raw['StartTime']):raise ValueError('Time mismatch')
+    if r['mode']!={'2':'cash','3':'sng','4':'mtt'}[str(raw['DeskType'])]:raise ValueError('Mode mismatch')
+    cards=next(e[2:] for e in base['card'] if str(e[0])==pid)
+    def decode(c):
+     n=int(c);return {1:'A',10:'T',11:'J',12:'Q',13:'K'}.get(n%100,str(n%100))+{1:'d',2:'c',3:'h',4:'s'}[n//100]
+    if [decode(c) for c in cards]!=r['cards']:raise ValueError('Own cards mismatch')
+   if hid in done:continue
+   events=base['opt'].values();folded={str(e.get('userId')) for e in events if str(e['type'])=='10'};active={str(e[0]) for e in base['card']}-folded
+   allins={str(e.get('userId')) for e in events if str(e['type'])=='5'}
+   candidates=[pid for pid in owners[hid] if pid in active and len(active)>1 and active&allins]
+   for pid in owners[hid]:
+    if pid not in candidates:results[pid][hid]={'status':'not_applicable'};counts['not_applicable']+=1
+   if candidates:jobs.append((raw,candidates))
  missing=set(owners)-checked
  if missing:raise ValueError('Missing original hands: '+str(len(missing)))
  print(json.dumps({'phase':'prepared','players':len(rows),'participations':sum(len(r) for r in rows.values()),'hands':len(checked),'allinHandsToCalculate':len(jobs),'resumedHands':len(done),'preparationSeconds':round(time.monotonic()-started,1)}),flush=True)
