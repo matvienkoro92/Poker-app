@@ -42,17 +42,18 @@ function startHistory(payload) {
   let appliedFrom='',appliedTo='';
   const outcomeFilters={positive:true,negative:true};
   const $ = id => document.getElementById(id);
-  function resetDateRange(){
-    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  function moscowDateValue(value){
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(value);
     const part=type=>parts.find(p=>p.type===type).value;
-    appliedTo=part('year')+'-'+part('month')+'-'+part('day');
-    const monday=new Date(appliedTo+'T00:00:00Z');
-    monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);
-    appliedFrom=monday.toISOString().slice(0,10);
+    return part('year')+'-'+part('month')+'-'+part('day');
+  }
+  function resetDateRange(){
+    appliedTo=moscowDateValue(new Date());
+    const first=bulk.rows.map(row=>Date.parse(row.playedAt)).filter(Number.isFinite).sort((a,b)=>a-b)[0];
+    appliedFrom=first==null?appliedTo:moscowDateValue(new Date(first));
     $('date-from').value=appliedFrom;$('date-to').value=appliedTo;
     $('date-status').textContent='';
   }
-  resetDateRange();
   const number = n => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n);
   const signed = n => n == null ? '—' : (n > 0 ? '+' : '') + number(n);
   const compactSigned = n => {
@@ -62,6 +63,7 @@ function startHistory(payload) {
   };
   const sample = {playerId:payload.playerId};
   const bulk = {rows:payload.rows};
+  resetDateRange();
   function appendCards(target,cards){
     cards.forEach(card=>{const el=document.createElement('span');el.className='playing-card suit-'+card[1];el.textContent=(card[0]==='T'?'10':card[0])+({s:'♠',h:'♥',d:'♦',c:'♣'}[card[1]]);target.append(el);});
   }
@@ -306,6 +308,8 @@ function startHistory(payload) {
     $('metric').textContent=metric==='resultMinor'?(mode==='cash'?'Рубли':'Фишки'):'bb';
     $('metric').setAttribute('aria-label','Показатель: '+$('metric').textContent+'. Переключить');
     document.querySelector('.date-picker summary').title='Период · МСК: '+(appliedFrom||'начало')+' — '+(appliedTo||'сегодня');
+    const compactDate=value=>value?value.slice(8,10)+'.'+value.slice(5,7):'—';
+    $('date-summary-text').textContent=compactDate(appliedFrom)+'–'+compactDate(appliedTo);
     $('total-count').textContent=number(data.count);
     const sortedDates=bulk.rows.filter(r=>r.mode===mode).map(r=>r.playedAt).sort();
     const labelDate=d=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow'}).format(new Date(d));
