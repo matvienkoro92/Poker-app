@@ -1,13 +1,22 @@
 let requestNumber=0;
 const waiting=new Map();
+let activeHistoryPlayerId='',activeHistoryVersion='',versionCheckPending=false;
 function historyRequest(action,handId){return new Promise((resolve,reject)=>{
  const id=++requestNumber;
  const timer=setTimeout(()=>{waiting.delete(id);reject(new Error('timeout'));},20000);
  waiting.set(id,{resolve,reject,timer});
  parent.postMessage({type:'starting-hands-request',id,action,handId,handIds:Array.isArray(handId)?handId:undefined},location.origin);
 });}
-window.addEventListener('message',event=>{
- if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='starting-hands-response')return;
+window.addEventListener('message',async event=>{
+ if(event.source!==parent||event.origin!==location.origin)return;
+ if(event.data?.type==='starting-hands-resume'){
+  if(versionCheckPending||!activeHistoryPlayerId)return;
+  versionCheckPending=true;
+  try{const latest=await historyRequest('version');if(String(latest.playerId||'')!==activeHistoryPlayerId||String(latest.version||'')!==activeHistoryVersion)location.reload();}
+  catch(_){}finally{versionCheckPending=false;}
+  return;
+ }
+ if(event.data?.type!=='starting-hands-response')return;
  const item=waiting.get(event.data.id);if(!item)return;waiting.delete(event.data.id);clearTimeout(item.timer);
  event.data.error?item.reject(new Error(event.data.error)):item.resolve(event.data.payload);
 });
@@ -18,6 +27,7 @@ async function loadHistory(){
 loadHistory();
 function startHistory(payload) {
   'use strict';
+  activeHistoryPlayerId=String(payload.playerId||'');activeHistoryVersion=String(payload.version||'');
   const core = window.PokerHandStatistics;
   let mode = 'cash', metric = 'bb', selected = null;
   function showHistoryTab(tab){
@@ -172,7 +182,8 @@ function startHistory(payload) {
       ['threeBet','3-бет','Переставил первый рейз'],['foldThreeBet','Фолд на 3-бет','Сбросил после 3-бета на свой первый рейз'],
       ['cbet','Контбет флопа','Поставил на флопе как последний префлоп-агрессор, когда до него не было ставки'],
       ['foldCbet','Фолд на контбет','Сбросил на контбет флопа без промежуточного рейза'],
-      ['wwsf','WWSF','Закончил в плюс, увидев флоп']]){
+      ['wwsf','WWSF','Закончил в плюс, увидев флоп'],
+      ['wtsd','WTSD','Дошёл до вскрытия после просмотра флопа']]){
       const stat=stats.betting[key],cell=add(statsGrid,'div',null,'poker-stat');
       add(cell,'strong',title);add(cell,'span',stat.total?number(stat.count/stat.total*100)+'%':'—');
       add(cell,'small',stat.count+' / '+stat.total+' · '+description);

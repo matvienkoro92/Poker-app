@@ -352,22 +352,25 @@
     Promise.allSettled([schedule,daily,profile,raffles,reviews]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
   }
   function requestRaffles() { return request("raffles").then(function (d) {return d;}); }
-  function closeStartingHands() {
-    var modal=document.getElementById('startingHandsDialog');if(modal){modal.close();modal.remove();}
+  function closeStartingHands(destroy) {
+    var modal=document.getElementById('startingHandsDialog');if(!modal)return;
+    if(modal.open)modal.close();
+    if(destroy===true)modal.remove();
   }
   function openStartingHands() {
-    if(document.getElementById('startingHandsDialog'))return;
+    var existing=document.getElementById('startingHandsDialog');
+    if(existing){existing.showModal();existing.style.display='grid';var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260914-chart-controls-2" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
-    modal.querySelector('button').onclick=closeStartingHands;
-    modal.addEventListener('close',()=>modal.remove());document.body.append(modal);modal.showModal();modal.style.display="grid";
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260916-wtsd-cache-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.querySelector('button').onclick=function(){closeStartingHands(false);};
+    document.body.append(modal);modal.showModal();modal.style.display="grid";
   }
   window.addEventListener('message',async function(event){
     var frame=document.querySelector('#startingHandsDialog iframe');
     if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin||event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
-    if(!['list','replay','insights','chart-wall'].includes(message.action))return;
+    if(!['list','replay','insights','version','chart-wall'].includes(message.action))return;
     if(message.action==='chart-wall'){
       try{
         if(typeof message.handId!=='string'||!message.handId.startsWith('data:image/webp;base64,')||message.handId.length>450000)throw new Error('image');
@@ -382,7 +385,7 @@
       frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='replay'?data.replay:data},window.location.origin);
     }catch(_){if(seq===generation&&frame.isConnected)frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'load failed'},window.location.origin);}
   });
-  window.addEventListener('poker-telegram-auth',closeStartingHands);
+  window.addEventListener('poker-telegram-auth',function(){closeStartingHands(true);});
   window.initMySummary = init;
   document.addEventListener("click", function (e) {
     var shareButton=e.target.closest("[data-summary-share-results]");

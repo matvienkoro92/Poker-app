@@ -14,6 +14,7 @@ test('sessions and BB levels aggregate weighted bb/100 and preserve filters',()=
 test('flop and showdown denominator excludes unknown showdown and preflop folds',()=>{
  const s=summarize([h(1,3,{showdown:true}),h(2,-2,{showdown:null}),h(3,1,{showdown:false}),h(4,2,{showdown:true})],{'1':{sawFlop:true},'2':{sawFlop:true},'3':{sawFlop:true}});
  assert.deepEqual(s.showdown,{loaded:3,total:4,sawFlop:3,eligible:2,count:1,profitable:1});
+ assert.deepEqual(s.betting.wtsd,{count:1,total:2});
 });
 const e=(sequence,code,actorId='hero',board=[])=>({sequence,code,actorId,board});
 test('action collections distinguish calls, raises, street and folded players',()=>{

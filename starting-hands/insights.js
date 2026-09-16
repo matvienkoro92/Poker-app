@@ -80,6 +80,7 @@ function summarize(hands,signals={},metric='bb'){
  const groups=map=>[...map.values()].map(g=>({...g,bb100:g.bb*100/g.count}));
  const betting={};for(const key of ['vpip','pfr','threeBet','foldThreeBet','cbet','foldCbet']){const eligible=known.map(h=>signals[h.handId].betting?.[key]).filter(v=>typeof v==='boolean');betting[key]={count:eligible.filter(Boolean).length,total:eligible.length};}
  betting.wwsf={count:flop.filter(h=>h.resultMinor>0).length,total:flop.length};
+ betting.wtsd={count:showdowns.length,total:eligible.length};
  return {betting,sessions:groups(sessions),limits:groups(limits),drawdown:{amount:max,startIndex,troughIndex,recovery,remaining:max?Math.max(0,cumulative[startIndex]-total):0},
  wins:hands.filter(h=>h.bb>0).sort((a,b)=>amount(b)-amount(a)).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>amount(a)-amount(b)).slice(0,5),
  withoutShowdown:{...withoutShowdownStats,hands:withoutShowdown.slice().sort((a,b)=>Math.abs(amount(b))-Math.abs(amount(a)))},
