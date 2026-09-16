@@ -7,6 +7,7 @@
   var scriptPreloads = Object.create(null);
   var profileFriendsPreviewPrewarmPromise = null;
   var profileAchievementScriptsPrefetched = false;
+  var dailyPokerArtPrewarm = null;
 
   var DOMAIN_DEPS = {
     "home-widget-club-choice": ["home-widget-modals"],
@@ -279,6 +280,27 @@
     }
   }
 
+  function prewarmDailyPokerArt(priority) {
+    if (dailyPokerArtPrewarm) {
+      dailyPokerArtPrewarm.forEach(function (image) { try { image.fetchPriority = priority || "high"; } catch (_) {} });
+      return dailyPokerArtPrewarm;
+    }
+    if (shouldSkipIntentPrewarm()) return null;
+    var sources = [
+      "./assets/daily-poker-table-felt-v2-light-v1-fast.avif",
+      "./assets/daily-poker-card-back-red-fast.avif"
+    ];
+    dailyPokerArtPrewarm = sources.map(function (src) {
+      var image = new Image();
+      try { image.fetchPriority = priority || "low"; } catch (_) {}
+      image.decoding = "async";
+      image.src = src;
+      if (typeof image.decode === "function") image.decode().catch(function () {});
+      return image;
+    });
+    return dailyPokerArtPrewarm;
+  }
+
   function profileFriendsPrewarmViewerId() {
     var candidates = [];
     try { candidates.push(sessionStorage.getItem("poker_dt_id")); } catch (eSessionProfileFriendsPrewarm) {}
@@ -354,6 +376,7 @@
     if (shouldSkipIntentPrewarm()) return;
     var viewName = viewIntentTarget(event && event.target);
     if (!viewName || viewName === "home") return;
+    if (viewName === "daily-poker") prewarmDailyPokerArt("high");
     var domains = VIEW_DOMAINS[viewName];
     if (!domains || !domains.length) return;
     var key = "view:" + viewName;
@@ -450,6 +473,7 @@
 
   window.pokerEnsureViewScripts = function (viewName) {
     if (String(viewName) === "raffles") prefetchRafflesData();
+    if (String(viewName) === "daily-poker") prewarmDailyPokerArt("high");
     return ensureDomainsMaybeAsync(VIEW_DOMAINS[String(viewName || "")] || [], { styles: true, scripts: true });
   };
   window.pokerEnsureViewStyles = function (viewName) {
@@ -460,6 +484,7 @@
     window.__pokerLikelyViewAssetsPrewarmed = true;
     prewarmProfileFriendsPreview();
     prefetchProfileAchievementScripts();
+    prewarmDailyPokerArt("low");
     // Styles are warmed by pointer/focus/touch intent, not speculatively at startup.
   };
   window.addEventListener("poker-telegram-auth", function () {
