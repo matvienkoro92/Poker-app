@@ -2016,4 +2016,207 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "15.09.2026": [
+    {
+      "time": "08:00",
+      "name": "Bali Yana🌴🆕20k",
+      "buyin": 600,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ферапонт",
+          "place": 0,
+          "reward": 1560,
+          "points": 0
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 4,
+          "reward": 1101,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 15297.999999999998,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 7939,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Алеша™",
+          "place": 1,
+          "reward": 10210,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 4,
+          "reward": 1252.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Вторника",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Zeus",
+          "place": 2,
+          "reward": 22200,
+          "points": 0
+        },
+        {
+          "nick": "Аспирин",
+          "place": 5,
+          "reward": 7300,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 6,
+          "reward": 5900,
+          "points": 0
+        },
+        {
+          "nick": "Baldendi",
+          "place": 8,
+          "reward": 1900,
+          "points": 0
+        },
+        {
+          "nick": "GUCCI",
+          "place": 9,
+          "reward": 1900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "BOUNTY MAGIC 🥊 50K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "shockin",
+          "place": 19,
+          "reward": 33269,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WSOPли",
+          "place": 5,
+          "reward": 242.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 3884.38,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 14,
+          "reward": 203.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 13,
+          "reward": 4273,
+          "points": 0
+        },
+        {
+          "nick": "shockin",
+          "place": 18,
+          "reward": 831,
+          "points": 0
+        },
+        {
+          "nick": "odna.pluha",
+          "place": 0,
+          "reward": 700,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RedRocket🚀",
+          "place": 2,
+          "reward": 58879,
+          "points": 0
+        },
+        {
+          "nick": "Вадим",
+          "place": 18,
+          "reward": 209,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

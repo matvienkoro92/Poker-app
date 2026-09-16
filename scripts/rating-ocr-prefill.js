@@ -142,6 +142,16 @@ function effectiveTournamentBuyin(title, detectedBuyin) {
   return detectedBuyin;
 }
 
+// Club owner confirmed these recurring entry fees; blue card headers show stacks.
+function confirmedBlueTournamentBuyin(title) {
+  if (/^Bali\s+Yana\b/i.test(title)) return 600;
+  if (/^New\s*[-–—]?\s*Hot\s+PKO\b/i.test(title)) return 900;
+  if (/^BOUNTY\s+MAGIC\b/i.test(title)) return 1000;
+  if (/^NLH\s+KNOCKOUT\s+220k\b/i.test(title)) return 1000;
+  if (/^(?:DV\s+Turbo\s+500|Magic.*500)/i.test(title)) return 500;
+  return null;
+}
+
 function looksLikePlayerName(token) {
   const text = token.text.trim();
   if (!text || text.length < 2) return false;
@@ -362,7 +372,7 @@ async function parseOcrFile(file) {
   // IMG_9066: entry fee confirmed by the club owner; 20K is the starting stack.
   if (date === "11.09.2026" && blue && time === "18:00" && /SHR 1 MLN GTD/i.test(title)) { title = "🏆SHR 1 MLN GTD🏆"; buyin = 10000; }
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";
-  if (["01.09.2026", "08.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (["01.09.2026", "08.09.2026", "15.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (["01.09.2026", "09.09.2026"].includes(date) && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
   if (date === "01.09.2026" && time === "22:00" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "01.09.2026" && time === "23:00" && buyin === 20000) title = "Night magic 80K🌒";
@@ -380,6 +390,12 @@ async function parseOcrFile(file) {
     if (confirmed) title = confirmed[1];
   }
   if (date === "13.09.2026" && !blue && time === "18:00" && buyin === 10000) title = "Fantastic Boss";
+  // September 15 blue cards show starting stacks; require a known entry fee.
+  if (date === "15.09.2026" && blue) {
+    buyin = confirmedBlueTournamentBuyin(title) || 0;
+    if (/^Magic.*500/i.test(title)) title = "Magic 🎯500🎯120K";
+  }
+  if (blue) buyin = confirmedBlueTournamentBuyin(title) ?? buyin;
   // Visually verified ID labels in IMG_9131 and IMG_9134.
   if (date === "13.09.2026") tokens.forEach((token) => {
     if (time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
@@ -408,6 +424,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_9223 visibly shows a zero rank for Ферапонт.
+    if (date === "15.09.2026" && blue && time === "08:00" && playerId === "3399185" && reward === 15.6) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
     // IMG_9134 / IMG_9135 visibly show zero ranks omitted by Vision.
     if (date === "13.09.2026" && blue && (
       (time === "18:00" && playerId === "2188305" && reward === 27.03) ||
