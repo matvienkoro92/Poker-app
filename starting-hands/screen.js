@@ -78,13 +78,20 @@ function startHistory(payload) {
     note.append(document.createElement('br'),runs);summary.append(note);
   }
   const replayCache=new Map();
+  function showHandShareDialog(blob,hand){
+    const url=URL.createObjectURL(blob),dialog=document.createElement('dialog');dialog.className='hand-share-dialog';
+    dialog.innerHTML='<button type="button" data-close aria-label="Закрыть">×</button><h2>Поделиться раздачей</h2><img alt="Карточка раздачи"><div><button type="button" data-send>Поделиться картинкой</button><a data-save>Скачать PNG</a></div><p role="status"></p>';
+    dialog.querySelector('img').src=url;const save=dialog.querySelector('[data-save]');save.href=url;save.download='poker-hand-'+hand.handId+'.png';
+    const file=new File([blob],'poker-hand-'+hand.handId+'.png',{type:'image/png'}),send=dialog.querySelector('[data-send]'),canShare=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}));
+    if(!canShare){send.hidden=true;dialog.querySelector('p').textContent='Скачайте картинку и прикрепите её к сообщению.';}
+    send.onclick=async()=>{send.disabled=true;try{await navigator.share({files:[file]});}catch(error){if(error?.name!=='AbortError')dialog.querySelector('p').textContent='Не удалось отправить. Скачайте PNG и прикрепите его к сообщению.';}finally{send.disabled=false;}};
+    dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{URL.revokeObjectURL(url);dialog.remove();},{once:true});document.body.append(dialog);dialog.showModal();
+  }
   async function shareHand(button,hand){
     const original=button.textContent;button.disabled=true;button.textContent='Готовим…';
     try{
       let replay=replayCache.get(hand.handId);if(!replay){replay=await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);}
-      const text=window.PokerHandShare.text(hand,replay),title='Раздача #'+hand.handId,link='https://t.me/Poker_dvatuza_bot/DvaTuza';
-      if(typeof navigator.share==='function'){await navigator.share({title,text});}
-      else{const opened=window.open('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text),'_blank','noopener');if(!opened){await navigator.clipboard.writeText(text+'\n'+link);button.textContent='Скопировано';await new Promise(resolve=>setTimeout(resolve,1200));}}
+      const blob=await window.PokerHandShare.imageBlob(hand,replay);showHandShareDialog(blob,hand);
     }catch(error){if(error?.name!=='AbortError'){button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1200));}}
     finally{button.disabled=false;button.textContent=original;}
   }
