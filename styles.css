@@ -9718,39 +9718,17 @@ body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active
   [data-view="club-reviews"] .review-thread-card .review-share-actions .social-button { padding-inline: 9px; }
 }
 
-/* Reviews use an internal scrollport above the fixed bottom navigation. */
-body[data-view="club-reviews"] {
-  height: 100vh !important;
-  height: 100dvh !important;
-  overflow: hidden !important;
-}
-body[data-view="club-reviews"] #app.app {
-  height: calc(100vh - var(--app-bottom-tabbar-pad, 90px)) !important;
-  height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-body[data-view="club-reviews"] #app.app > .card {
-  flex: 1 1 0 !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-body[data-view="club-reviews"] #app.app > .card > .card__content {
-  flex: 1 1 0 !important;
-  min-height: 0 !important;
-  height: auto !important;
+/* Keep reviews visible and scrollable without changing the app shell geometry. */
+body[data-view="club-reviews"] #app.app .view--active[data-view="club-reviews"] {
+  display: block !important;
+  max-height: calc(100vh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  max-height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  scroll-padding-bottom: 32px;
-  padding-bottom: 32px !important;
+  scroll-padding-bottom: 40px;
+  padding-bottom: 40px !important;
 }
 
 /* Render the hand history as native full-width text instead of an embedded screenshot. */
@@ -9792,4 +9770,70 @@ body[data-view="club-reviews"] #app.app > .card > .card__content {
   border-top: 1px solid #ffffff24;
   color: #d9f5a6;
   font-weight: 700;
+}
+
+/* Immediate summary placeholders shown before its lazy runtime and API data arrive. */
+[data-view="my-summary"] .summary-bootstrap-skeleton {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+[data-view="my-summary"] .summary-skeleton-card {
+  position: relative;
+  min-width: 0;
+  min-height: 150px;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid #ffffff1f;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #1c2222, #0d1113);
+}
+[data-view="my-summary"] .summary-skeleton-card--feature { grid-column: span 3; }
+[data-view="my-summary"] .summary-skeleton-card--compact { grid-column: span 2; min-height: 105px; }
+[data-view="my-summary"] .summary-skeleton-card--wide { grid-column: 1 / -1; min-height: 130px; }
+[data-view="my-summary"] .summary-skeleton-card :is(i,b,span) {
+  display: block;
+  height: 13px;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  background: #ffffff13;
+}
+[data-view="my-summary"] .summary-skeleton-card i { width: 38%; height: 17px; }
+[data-view="my-summary"] .summary-skeleton-card b { width: 68%; height: 25px; }
+[data-view="my-summary"] .summary-skeleton-card span { width: 52%; }
+[data-view="my-summary"] .summary-skeleton-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+  background: linear-gradient(100deg, transparent 25%, #ffffff12 48%, transparent 72%);
+  animation: summary-skeleton-shimmer 1.35s ease-in-out infinite;
+}
+[data-view="my-summary"] .summary-card-loading { position: relative; overflow: hidden; }
+[data-view="my-summary"] .summary-card-loading :is(i,b,span) {
+  display: block;
+  width: 72%;
+  height: 10px;
+  margin: 0 0 9px;
+  border-radius: 999px;
+  background: #ffffff13;
+}
+[data-view="my-summary"] .summary-card-loading b { width: 48%; height: 18px; }
+[data-view="my-summary"] .summary-card-loading span { width: 62%; }
+[data-view="my-summary"] .summary-card-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+  background: linear-gradient(100deg, transparent 20%, #ffffff14 50%, transparent 80%);
+  animation: summary-skeleton-shimmer 1.35s ease-in-out infinite;
+}
+@keyframes summary-skeleton-shimmer { to { transform: translateX(110%); } }
+@media (max-width: 600px) {
+  [data-view="my-summary"] .summary-bootstrap-skeleton { gap: 8px; }
+  [data-view="my-summary"] .summary-skeleton-card { padding: 12px; border-radius: 16px; }
+  [data-view="my-summary"] .summary-skeleton-card--feature { min-height: 120px; }
+  [data-view="my-summary"] .summary-skeleton-card--compact { min-height: 86px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-view="my-summary"] :is(.summary-skeleton-card,.summary-card-loading)::after { animation: none; }
 }

@@ -313,10 +313,11 @@
   }
   function init() {
     root = document.getElementById("mySummaryContent"); if (!root || pending) return;
+    root.classList.remove("summary-bootstrap-skeleton");root.removeAttribute("aria-busy");root.removeAttribute("aria-label");
     friends();
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
-    var loading = '<p class="summary-muted" role="status">Загружаем…</p>';
+    var loading = '<div class="summary-card-loading" role="status" aria-label="Загружаем"><i></i><b></b><span></span></div>';
     root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
     applySummaryTab();
     friends();
