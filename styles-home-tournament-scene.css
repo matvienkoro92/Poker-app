@@ -192,10 +192,10 @@
 /* Orange paper ticket, matching the supplied reference. */
 #app .tournament-day-home-dual--tournament-focus .home-ticket-brand,
 #app .tournament-day-home-dual--tournament-focus .home-ticket-aces { display: none !important; }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title { top: 9% !important; left: 23% !important; width: 43% !important; align-items: flex-start; text-align: left; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title { top: 7.5% !important; left: 23% !important; width: 43% !important; align-items: flex-start; text-align: left; }
 .home-ticket-session { color: #d8d5cb; font-size: 2.25cqw; font-weight: 800; letter-spacing: .1em; }
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__copy > :where(span) { left: 23% !important; width: 43% !important; text-align: left !important; color: #f4e6c7 !important; }
-#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title { top: 31% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: var(--ticket-title-size, 8.5cqw) !important; font-weight: 900 !important; letter-spacing: .025em; padding-bottom: 1cqw !important; border-bottom: 1cqw solid #c75c20; display: block !important; }
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title { top: 28% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: var(--ticket-title-size, 8.5cqw) !important; font-weight: 900 !important; letter-spacing: .025em; padding-bottom: 1cqw !important; border-bottom: 1cqw solid #c75c20; display: block !important; }
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__caption { top: 58% !important; font-size: 2.1cqw !important; letter-spacing: .2em; }
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__prize { top: 68% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: 7.3cqw !important; font-weight: 900 !important; letter-spacing: .01em; }
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 24% !important; left: 72.5% !important; width: 13% !important; text-align: center !important; font-size: 1.8cqw !important; }
@@ -390,6 +390,15 @@
   background: linear-gradient(145deg, #25221b, #131514 65%);
   box-shadow: inset 0 1px 0 #f3d59426, 0 .3cqw .8cqw #0005;
   color: #f3d594; font: 700 1.35cqw/1.1 Arial,sans-serif; cursor: pointer;
+  transform: rotate(-4deg); transform-origin: center;
+  animation: home-tournament-share-glow 2.2s ease-in-out infinite;
+}
+@keyframes home-tournament-share-glow {
+  0%, 100% { box-shadow: inset 0 1px 0 #f3d59426, 0 .3cqw .8cqw #0005, 0 0 0 rgba(255, 184, 67, 0); }
+  50% { box-shadow: inset 0 1px 0 #fff0b85c, 0 .3cqw .8cqw #0005, 0 0 1.8cqw rgba(255, 174, 50, .48); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app .tournament-day-home-dual--tournament-focus > .home-tournament-share { animation: none; }
 }
 .home-tournament-share svg { width: 3.6cqw; height: 3.6cqw; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
 .tournament-share-preview { position:fixed; margin:auto; width:min(440px,calc(100vw - 32px)); box-sizing:border-box; padding:24px; border:1px solid #ad8546; border-radius:22px; background:#10171f; color:#ffe0a0; }
