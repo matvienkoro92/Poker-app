@@ -17,6 +17,7 @@
 
 .cell.neutral{color:#818ba0;background:#101726;border-color:#273247}.cell.neutral small{color:#69758a}
 .hand-publish-dialog form{display:grid;gap:16px}.hand-publish-dialog .hand-publish-toggle{display:flex;align-items:center;gap:10px}.hand-publish-dialog input{width:18px;height:18px}.hand-publish-comment textarea{box-sizing:border-box;width:100%;padding:10px;background:#111d2e;color:#e5e7eb;border:1px solid #526078;border-radius:8px;font:16px system-ui;resize:vertical}.hand-publish-dialog form>div{display:flex;justify-content:flex-end;gap:10px}.hand-publish-dialog button{padding:10px 14px;border:1px solid #63738d;border-radius:9px;background:#25334c;color:#edf2f9;font:600 14px system-ui}
+.hand-publish-success{width:min(92vw,420px);text-align:center}.hand-publish-success>div{justify-content:center}.hand-publish-success [data-open]{background:#b9dda2;color:#152117;border-color:#b9dda2}
 
 .replay .street-heading{padding:10px 12px;margin:22px 0 12px;border-left:4px solid var(--street-color);border-radius:6px;background:#1b293b;color:var(--street-color);font-size:15px;font-weight:800;letter-spacing:.02em}.street-preflop{--street-color:#a8c5ff}.street-flop{--street-color:#76ddbb}.street-turn{--street-color:#f1c779}.street-river{--street-color:#cfacff}.replay p.replay-round-start{border-top:1px dashed #526078;margin-top:14px;padding-top:12px}
 

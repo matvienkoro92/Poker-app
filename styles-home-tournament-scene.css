@@ -471,7 +471,7 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-scene-v1-display-v1.webp');
+  --home-tournament-scene: url('./assets/home-tournament-cooler-single-table-v2-display-v1.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -816,3 +816,21 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-last-longer-dock {left:36%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] .home-last-longer-dock__bar {top:74%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
+
+/* Friday: Cooler uses the same single continuous table as every other day. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-table-seam-fix {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-bonuses--table {
+  inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-bonuses--table::before {display:none!important}
+#app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
+#app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
+#app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
+#app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
+#app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
+#app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]::before,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]::after {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock {left:36%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] .home-last-longer-dock__bar {top:74%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}

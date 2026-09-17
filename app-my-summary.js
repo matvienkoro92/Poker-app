@@ -4,7 +4,7 @@
   var root;
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
-    var groups = {play:["starting-hands","spin","bonus","raffles","friends","reviews"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
+    var groups = {play:["starting-hands","spin","bonus","raffles","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
     document.querySelectorAll('[data-summary-tab]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.summaryTab===summaryTab));});
     if(root)root.querySelectorAll(':scope > .summary-card').forEach(function(card){
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
@@ -29,7 +29,7 @@
     return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '">' + art + icon + '<h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>';
   }
   function makeCardAction(card) {
-    if (!card || !card.matches(':is(.summary-card--starting-hands,.summary-card--spin,.summary-card--bonus,.summary-card--raffles,.summary-card--friends,.summary-card--reviews)')) return;
+    if (!card || !card.matches(':is(.summary-card--starting-hands,.summary-card--spin,.summary-card--bonus,.summary-card--raffles,.summary-card--friends)')) return;
     var action = card.querySelector(':scope > div > .summary-link:last-child');
     if (!action) return;
     var previous = card.querySelector(':scope > .summary-card-action');
@@ -317,28 +317,23 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<p class="summary-muted" role="status">Загружаем…</p>';
-    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading) + section("reviews","Мои разборы",loading);
+    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
     applySummaryTab();
     friends();
     function valid() {return seq === generation;}
     var schedule = Promise.resolve().then(function () {return pokerEnsureScriptDomains(["tournament"]);}).then(function () {if(valid()) renderSchedule();}).catch(function () {if(valid()) error("schedule");});
     var authed = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     if (!authed) {
-      ["spin","bonus","achievements","results","raffles","reviews"].forEach(function (id) {put(id, '<p class="summary-muted">Войдите, чтобы увидеть свои данные.</p>' + link("Открыть профиль", "profile"));});
+      ["spin","bonus","achievements","results","raffles"].forEach(function (id) {put(id, '<p class="summary-muted">Войдите, чтобы увидеть свои данные.</p>' + link("Открыть профиль", "profile"));});
       pending = false; return;
     }
-    var reviews = request("club-reviews", {action:"summary"}).then(function(d) {
-      if(!valid())return;
-      var fresh=(d.threads || []).filter(function(t){return t.unread;});
-      put("reviews", '<strong class="summary-value">' + (fresh.length ? 'Есть новые ответы' : 'Вопросы и обсуждения') + '</strong>' + fresh.slice(0,3).map(function(t){return '<p><button type="button" class="summary-link" data-summary-review="'+esc(t.id)+'">'+esc(t.title)+' →</button></p>';}).join('') + link("Мои разборы", "club-reviews"));
-    }).catch(function(){if(valid())error("reviews");});
     var daily = request("promo/daily-poker/status").then(function (d) {if (!valid()) return; if (typeof d.canPlay !== "boolean" || !Number.isFinite(Number(d.bonusBalance))) throw new Error("Invalid status"); spin = d; offset = Date.parse(d.serverTime) - Date.now(); if (!isFinite(offset)) offset = 0; renderSpin();}).catch(function () {if(valid()) {spin=null;error("spin");error("bonus");}});
     var profile = request("pokerplus-player", {}).then(function (d) {
       if (!valid()) return;
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname || "";
       root.insertAdjacentHTML("afterbegin", section("starting-hands", "Моя игра",
-        '<p class="summary-muted">График, EV и разбор раздач</p><div class="summary-primary-actions"><button type="button" class="summary-link summary-link--primary" data-starting-hands-open>Моя игра <span aria-hidden="true">→</span></button>' + link("Мои разборы", "club-reviews") + '</div>'));
+        '<p class="summary-muted">График, EV и разбор раздач</p><div class="summary-primary-actions"><button type="button" class="summary-link summary-link--primary" data-starting-hands-open>Моя игра <span aria-hidden="true">→</span></button>' + link("Разборы раздач", "club-reviews") + '</div>'));
       if(['ID400800'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
@@ -349,7 +344,7 @@
       return Promise.resolve(pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(function () {return window.pokerGetTournamentAchievementStatsReady(nickname);}).then(function (stats) {if(valid()) {renderStats(stats);return loadAchievementCatalog(Object.assign({},p,{accountId:account}),valid);}});
     }).catch(function () {if(valid()) {error("results");error("achievements");}});
     var raffles = profile.then(function () {if(!valid()) return; return requestRaffles();}).then(function (d) {if(valid() && d) renderRaffles(d);}).catch(function () {if(valid()) error("raffles");});
-    Promise.allSettled([schedule,daily,profile,raffles,reviews]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
+    Promise.allSettled([schedule,daily,profile,raffles]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
   }
   function requestRaffles() { return request("raffles").then(function (d) {return d;}); }
   function closeStartingHands(destroy) {
@@ -363,14 +358,20 @@
     if(existing){existing.showModal();existing.style.display='grid';var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260916-share-in-card-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260917-publish-success-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=function(){closeStartingHands(false);};
     modal.addEventListener('close',function(){modal.style.display='none';});
     document.body.append(modal);modal.showModal();modal.style.display="grid";
   }
   window.addEventListener('message',async function(event){
     var frame=document.querySelector('#startingHandsDialog iframe');
-    if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin||event.data?.type!=='starting-hands-request')return;
+    if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin)return;
+    if(event.data?.type==='starting-hands-open-review'){
+      closeStartingHands(false);
+      if(typeof window.pokerOpenClubReview==='function')window.pokerOpenClubReview(event.data.id||'');
+      return;
+    }
+    if(event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
     if(!['list','replay','insights','version','chart-wall','review-publish'].includes(message.action))return;
     if(message.action==='review-publish'){

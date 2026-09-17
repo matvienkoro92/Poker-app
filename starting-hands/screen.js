@@ -114,6 +114,13 @@ function startHistory(payload) {
       document.body.append(dialog);dialog.showModal();
     });
   }
+  function showPublicationSuccess(reviewId){
+    const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog hand-publish-success';
+    dialog.innerHTML='<h2>Ваша раздача опубликована</h2><div><button type="button" data-close>Закрыть</button><button type="button" data-open>Перейти в раздел</button></div>';
+    dialog.querySelector('[data-close]').onclick=()=>dialog.close();
+    dialog.querySelector('[data-open]').onclick=()=>{window.parent.postMessage({type:'starting-hands-open-review',id:reviewId||''},window.location.origin);dialog.close();};
+    dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
+  }
   async function publishHand(button,hand,row,renderReplay){
     if(button.disabled)return;
     button.disabled=true;
@@ -131,6 +138,7 @@ function startHistory(payload) {
       const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards+(options.showShowdown?' · '+result:''),question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode},hand),replay,options),image});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
+      showPublicationSuccess(response?.id);
     }catch(error){button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1400));button.textContent=original;button.disabled=false;return;}
     button.disabled=true;
   }
