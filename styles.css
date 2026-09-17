@@ -9610,6 +9610,19 @@ body[data-view="my-summary"]{background:#080c0e}
 [data-view="my-summary"] .summary-card--starting-hands .summary-primary-actions .summary-link:not(.summary-link--primary){background:#080b0c99;color:#ffae68;border-color:#ff9b4755;box-shadow:none}
 @media(max-width:420px){[data-view="my-summary"] .summary-card--starting-hands .summary-primary-actions{gap:6px}[data-view="my-summary"] .summary-card--starting-hands .summary-primary-actions .summary-link{padding-inline:6px!important;font-size:12px!important}}
 
+/* Two independent top-level actions: hand history and club hand reviews. */
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry){grid-column:span 3;min-height:150px;order:-5}
+[data-view="my-summary"] .summary-card--reviews-entry{display:flex;flex-direction:column;justify-content:center;border-color:#ffad4e70;background:radial-gradient(ellipse at 90% 20%,#ff982d20,transparent 60%),linear-gradient(120deg,#251e19,#101315)}
+[data-view="my-summary"] .summary-card--reviews-entry h2{font-size:clamp(22px,3vw,34px)}
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry).summary-card--actionable{cursor:pointer}
+@media(max-width:600px){
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry){min-height:145px;padding:16px}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry) h2{font-size:clamp(17px,5vw,23px)}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry) .summary-muted{font-size:11px!important}
+ [data-view="my-summary"] .summary-card--starting-hands{padding-right:35%}
+ [data-view="my-summary"] .summary-art--starting-hands{width:42%;height:82%}
+}
+
 .summary-share-preview{width:min(92vw,620px);max-height:90dvh;overflow:auto;padding:16px;border:1px solid #a78b55;border-radius:18px;background:#0d1215;color:#f6e8c9}
 .summary-share-preview::backdrop{background:#000b}
 .summary-share-preview img{display:block;width:100%;height:auto;margin:12px 0;-webkit-touch-callout:default}

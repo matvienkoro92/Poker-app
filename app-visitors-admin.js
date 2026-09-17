@@ -400,6 +400,11 @@
     if (typeof pokerShouldShowHomeTopVersionForSpecialUser === "function" && pokerShouldShowHomeTopVersionForSpecialUser()) {
       showKeyboardLabOnly();
     }
+    if (pokerIsKnownClientReportUser()) {
+      window.__pokerAdminReportAccessVerified = true;
+      reportAccessProbeState = "allowed";
+      showReportUi();
+    }
     if (pokerIsKnownClientAdmin()) {
       showAdminUi();
       return;

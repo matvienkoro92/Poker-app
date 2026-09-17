@@ -831,6 +831,6 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]::after {display:none!important}
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock {left:36%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock {left:30.5%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] .home-last-longer-dock__bar {top:74%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}

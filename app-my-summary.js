@@ -4,7 +4,7 @@
   var root;
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
-    var groups = {play:["starting-hands","spin","bonus","raffles","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
+    var groups = {play:["starting-hands","reviews-entry","spin","bonus","raffles","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
     document.querySelectorAll('[data-summary-tab]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.summaryTab===summaryTab));});
     if(root)root.querySelectorAll(':scope > .summary-card').forEach(function(card){
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
@@ -29,7 +29,7 @@
     return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '">' + art + icon + '<h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>';
   }
   function makeCardAction(card) {
-    if (!card || !card.matches(':is(.summary-card--starting-hands,.summary-card--spin,.summary-card--bonus,.summary-card--raffles,.summary-card--friends)')) return;
+    if (!card || !card.matches(':is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--spin,.summary-card--bonus,.summary-card--raffles,.summary-card--friends)')) return;
     var action = card.querySelector(':scope > div > .summary-link:last-child');
     if (!action) return;
     var previous = card.querySelector(':scope > .summary-card-action');
@@ -332,8 +332,9 @@
       if (!valid()) return;
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname || "";
-      root.insertAdjacentHTML("afterbegin", section("starting-hands", "Моя игра",
-        '<p class="summary-muted">График, EV и разбор раздач</p><div class="summary-primary-actions"><button type="button" class="summary-link summary-link--primary" data-starting-hands-open>Моя игра <span aria-hidden="true">→</span></button>' + link("Разборы раздач", "club-reviews") + '</div>'));
+      root.insertAdjacentHTML("afterbegin",
+        section("starting-hands", "Моя игра", '<p class="summary-muted">График и EV по раздачам</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
+        section("reviews-entry", "Разборы раздач", '<p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")));
       if(['ID400800'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
