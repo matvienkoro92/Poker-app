@@ -338,7 +338,7 @@
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname || "";
       root.insertAdjacentHTML("afterbegin", section("starting-hands", "Моя игра",
-        '<p class="summary-muted">Результаты, EV и разбор раздач</p><button type="button" class="summary-link" data-starting-hands-open>Открыть →</button>'));
+        '<p class="summary-muted">График, EV и разбор раздач</p><div class="summary-primary-actions"><button type="button" class="summary-link summary-link--primary" data-starting-hands-open>Моя игра <span aria-hidden="true">→</span></button>' + link("Мои разборы", "club-reviews") + '</div>'));
       if(['ID400800'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
@@ -372,7 +372,15 @@
     var frame=document.querySelector('#startingHandsDialog iframe');
     if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin||event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
-    if(!['list','replay','insights','version','chart-wall'].includes(message.action))return;
+    if(!['list','replay','insights','version','chart-wall','review-publish'].includes(message.action))return;
+    if(message.action==='review-publish'){
+      try{
+        var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',forCoach:false,image:message.image,cards:message.cards,handId:message.handId});
+        window.dispatchEvent(new Event('poker-reviews-updated'));
+        frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:{ok:true,id:published.thread&&published.thread.id}},window.location.origin);
+      }catch(_){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'publish failed'},window.location.origin);}
+      return;
+    }
     if(message.action==='chart-wall'){
       try{
         if(typeof message.handId!=='string'||!message.handId.startsWith('data:image/webp;base64,')||message.handId.length>450000)throw new Error('image');

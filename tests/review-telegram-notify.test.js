@@ -1,0 +1,21 @@
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+function setup(){
+ const sent=[];
+ const deps={'./account-id':{getPreferredUserIdByDtId:async id=>({ID1:'tg_101',ID2:'tg_202'})[id]},
+ './telegram-bot-send':{sendTelegramMessage:async(token,payload)=>{sent.push(payload);return {ok:true};}},
+ './telegram-group-policy':{eventChatId:async()=>'-100123'},
+ './telegram-participation-gate':{canReachTelegramBot:async()=>true}};
+ const box={module:{exports:{}},require:id=>deps[id],process:{env:{TELEGRAM_BOT_TOKEN:'test'}},console,URL};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/review-telegram-notify'),'utf8'),box);
+ return {api:box.module.exports,sent};
+}
+const topic={id:'a'.repeat(24),type:'hand',authorName:'Автор',cards:['Ah','Kd'],followers:{ID1:true,ID2:true,ID3:false}};
+test('new hand announcement includes author, cards and personal topic link',async()=>{
+ const {api,sent}=setup();await api.notify(topic,{accountId:'ID1'});
+ assert.equal(sent.length,1);assert.equal(sent[0].chat_id,'-100123');assert.match(sent[0].text,/Автор · A♥ K♦/);assert.match(sent[0].buttonUrl,/review_aaaaaaaaaaaaaaaaaaaaaaaa/);assert.equal(sent[0].notificationScope,'club-review');
+});
+test('comments notify followers privately excluding sender and unsubscribed users',async()=>{
+ const {api,sent}=setup();await api.notify(topic,{accountId:'ID1'},{authorName:'Автор',text:'Комментарий'});
+ assert.equal(sent.length,1);assert.equal(sent[0].chat_id,'202');assert.match(sent[0].text,/Комментарий/);
+ assert.equal(await api.checkSubscription('ID2'),'');assert.match(await api.checkSubscription('ID3'),/Telegram/);
+});
