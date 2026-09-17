@@ -343,7 +343,15 @@ function startHistory(payload) {
     const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};
     const unknown=[];
     for(const event of replay.events){
-      if(event.board.length){lastBoardLength=Math.max(lastBoardLength,event.board.length);roundActors.clear();const street=add('h4',({3:'Флоп',4:'Тёрн',5:'Ривер'}[event.board.length]||'Борд')+' · ','replay-board street-heading street-'+({3:'flop',4:'turn',5:'river'}[event.board.length]||'board'));appendCards(street,event.board);street.append(' · Банк: '+potLabel()+' '+potUnit);continue;}
+      if(event.board.length){
+        lastBoardLength=Math.max(lastBoardLength,event.board.length);roundActors.clear();
+        const streetName=({3:'Флоп',4:'Тёрн',5:'Ривер'}[event.board.length]||'Борд');
+        const street=add('h4','','replay-board street-heading street-'+({3:'flop',4:'turn',5:'river'}[event.board.length]||'board'));
+        const board=document.createElement('span'),pot=document.createElement('span');
+        board.className='street-board-cards';board.textContent=streetName+' · ';appendCards(board,event.board);
+        pot.className='street-pot';pot.textContent='· Банк: '+potLabel()+' '+potUnit;
+        street.append(board,pot);continue;
+      }
       if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount){currentPot+=Number(event.amount)||0;add('p','Параметр обязательных взносов: '+number(event.amount)+' '+(mode==='cash'?'₽':'фишек'),'note');}continue;}
       if(!labels[event.code]){unknown.push(event);continue;}
       const label=labels[event.code];
@@ -355,7 +363,7 @@ function startHistory(payload) {
       if(event.code==='10')action.classList.add('replay-fold');
       if(newRound)action.classList.add('replay-round-start');
     }
-    if(hand.showdown&&lastBoardLength===4)add('h4','Ривер · нет карты · Банк: '+potLabel()+' '+potUnit,'replay-board street-heading street-river');
+    if(hand.showdown&&lastBoardLength===4){const street=add('h4','','replay-board street-heading street-river'),board=document.createElement('span'),pot=document.createElement('span');board.className='street-board-cards';board.textContent='Ривер · нет карты';pot.className='street-pot';pot.textContent='· Банк: '+potLabel()+' '+potUnit;street.append(board,pot);}
     if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+number(event.amount):'');more.append(line);}target.append(more);}
     const shown=(replay.shownOpponents||[]).filter(p=>['showdown-winner','showdown-allin'].includes(p.disclosure)&&p.playerId!==String(sample.playerId));
     if(shown.length){add('h4','Вскрытие','street-heading street-river replay-showdown');for(const p of shown)appendCards(add('p',p.actor+' · ','replay-cards replay-showdown'),p.cards);}
@@ -395,7 +403,7 @@ function startHistory(payload) {
     visibleHands.forEach(h=>{visibleStats.resultMinor+=h.resultMinor;visibleStats.bb+=h.bb;visibleStats[h.resultMinor>0?'wins':h.resultMinor<0?'losses':'even']++;});
     visibleStats.bb100=visibleStats.count?visibleStats.bb*100/visibleStats.count:0;
     const result=document.createElement('p');result.className='big-result '+(value(visibleStats)>0?'positive':value(visibleStats)<0?'negative':'');result.textContent=signed(value(visibleStats))+' '+unit();const header=document.createElement('div');header.className='hand-detail-header';const title=$('detail-title');title.before(header);header.append(title,result);
-    const count=document.createElement('p');count.className='note';count.textContent='Раздач: '+visibleStats.count+' · в плюс: '+visibleStats.wins+' · в минус: '+visibleStats.losses+' · в ноль: '+visibleStats.even;$('detail').append(count);
+    const count=document.createElement('p');count.className='note hand-count-summary';count.textContent='Раздач: '+visibleStats.count+' · в плюс: '+visibleStats.wins+' · в минус: '+visibleStats.losses+' · в ноль: '+visibleStats.even;$('detail').append(count);
     const filters=document.createElement('div');filters.className='hand-outcome-filters';
     [['positive','Плюсовые'],['negative','Минусовые']].forEach(([key,text])=>{
       const label=document.createElement('label'),input=document.createElement('input');

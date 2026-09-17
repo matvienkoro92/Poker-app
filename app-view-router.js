@@ -986,6 +986,7 @@ function setView(viewName, navOpts) {
     if (navOpts.fromPendingShell) prevView = String(navOpts.pendingFromView || "");
     else if (document.body && document.body.getAttribute) prevView = document.body.getAttribute("data-view") || "";
   } catch (ePrev) {}
+  if(viewName === 'club-reviews' && prevView && prevView !== 'club-reviews') window.pokerReviewsReturnView=prevView;
   try {
     if (viewName === "raffles" && prevView === "home" && typeof window !== "undefined") {
       if (navOpts && navOpts.raffleCompletedTarget) {

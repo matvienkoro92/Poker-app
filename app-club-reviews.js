@@ -7,6 +7,7 @@
   function root(){return document.getElementById('clubReviewsContent');}
   function date(s){return new Date(s).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
   function feedback(text){var el=document.getElementById('clubReviewsFeedback');if(el)el.textContent=text||'';}
+  document.addEventListener('click',function(e){if(!e.target.closest('[data-review-back]'))return;if(thread){loadList(false);return;}setView(window.pokerReviewsReturnView||'my-summary',{fromBack:true});});
   function button(text,action,id,cls){return '<button type="button" class="social-button '+(cls||'')+'" data-review-action="'+action+'"'+(id?' data-id="'+esc(id)+'"':'')+'>'+esc(text)+'</button>';}
   function setBusy(value){busy=value;var r=root();if(r)r.querySelectorAll('button,input,textarea,select').forEach(function(el){el.disabled=value;});}
   function topicLink(id){return new URL('./?startapp=review_'+id,location.href).href;}
