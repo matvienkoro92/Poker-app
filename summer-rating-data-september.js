@@ -2219,4 +2219,219 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "16.09.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 1,
+          "reward": 38842,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MGGEESS",
+          "place": 2,
+          "reward": 12446,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 2705,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 2,
+          "reward": 1460,
+          "points": 0
+        },
+        {
+          "nick": "Odna.pluha",
+          "place": 3,
+          "reward": 840,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 🃏🃏🃏 20K 🏆",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 2,
+          "reward": 5035,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Евгений.А",
+          "place": 2,
+          "reward": 4960,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 1970,
+          "points": 0
+        },
+        {
+          "nick": "Zeus",
+          "place": 5,
+          "reward": 87.5,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 7,
+          "reward": 50,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Счастливый Косарь",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RedRocket🚀",
+          "place": 1,
+          "reward": 65675,
+          "points": 0
+        },
+        {
+          "nick": "Алеша™",
+          "place": 3,
+          "reward": 37200,
+          "points": 0
+        },
+        {
+          "nick": "Baldendi",
+          "place": 4,
+          "reward": 5300,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 8,
+          "reward": 1500,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 10,
+          "reward": 1500,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "⚡72⚡",
+          "place": 3,
+          "reward": 950,
+          "points": 0
+        },
+        {
+          "nick": "Neo777",
+          "place": 4,
+          "reward": 510,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "HR 5000🥊 200K",
+      "buyin": 25000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 2,
+          "reward": 45981,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 3,
+          "reward": 191.71,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 13,
+          "reward": 134.69,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RomanRomanov",
+          "place": 2,
+          "reward": 34841,
+          "points": 0
+        },
+        {
+          "nick": "Вадим",
+          "place": 8,
+          "reward": 4191,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

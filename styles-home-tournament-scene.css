@@ -795,3 +795,24 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-last-longer-dock {left:36%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] .home-last-longer-dock__bar {top:74%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
+
+/* Thursday: RedRocket at the same straight, continuous table layout. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
+  --home-tournament-scene:url('./assets/home-tournament-redrocket-single-table-v2.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-seam-fix {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-bonuses--table {
+  inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-bonuses--table::before {display:none!important}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"]::before,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"]::after {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-last-longer-dock {left:36%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] .home-last-longer-dock__bar {top:74%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}

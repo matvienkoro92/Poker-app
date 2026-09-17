@@ -72,6 +72,8 @@ function normalizeName(raw) {
   if (/^Фризаут/i.test(name)) return "Фризаут 💸";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
   if (/^DV\s+Turbo\s+500/i.test(name)) return "DV Turbo 500🏆 50K";
+  if (/^HR\s+5000.*200K/i.test(name)) return "HR 5000🥊 200K";
+  if (/^Magic.*500.*120K/i.test(name)) return "Magic 🎯500🎯120K";
   if (/^DV\s*2?\s*PLO5/i.test(name)) return "DV🏃 PLO5 🥊 30k🥊";
   if (/^DV\b.*Bounty.*100k/i.test(name)) return "DV 🏃 Bounty 🥊 100k";
   if (/^Bali\s+Yana/i.test(name)) return "Bali Yana🌴🆕20k";
@@ -86,6 +88,7 @@ function normalizeName(raw) {
   if (/Deep\s+Night\s+15k/i.test(name)) return "✨Deep Night 15k ✨";
   if (/LUCKY\s+555/i.test(name)) return "🍀LUCKY 555🍀 GTD";
   if (/^PL[O0]?4\s+[РP]KO/i.test(name)) return "PLO4 PKO 🥊 20K";
+  if (/^PLO4.*20K/i.test(name)) return "PLO4 🃏🃏🃏 20K 🏆";
   if (/^PLO5\s*-\s*[РP]KO/i.test(name)) return "PLO5 - PKO 🥊 200k 🏆";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
   return name;
