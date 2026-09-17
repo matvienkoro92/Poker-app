@@ -9674,3 +9674,122 @@ body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active
 #app.app > .card > .card__header .logo__title-line {
   display: inline;
 }
+
+/* Review subscription belongs to the review title row, not the thread body. */
+[data-view="club-reviews"] .club-reviews-header__action {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+[data-view="club-reviews"] .club-reviews-header__action:empty { display: none; }
+[data-view="club-reviews"] .club-reviews-header__action .social-button { white-space: nowrap; }
+@media (max-width: 420px) {
+  [data-view="club-reviews"] .club-reviews-header { gap: 8px; }
+  [data-view="club-reviews"] .club-reviews-header__action .social-button { padding-inline: 9px; }
+}
+
+[data-view="club-reviews"] .review-thread-card {
+  position: relative;
+  padding-top: 68px;
+}
+[data-view="club-reviews"] .review-thread-card .review-share-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  margin: 0;
+}
+[data-view="club-reviews"] .playing-card {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 2px 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #f8fafc;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+[data-view="club-reviews"] .playing-card:is(.suit-h,.suit-d) { color: #c51f38; }
+[data-view="club-reviews"] .playing-card:is(.suit-s,.suit-c) { color: #172033; }
+@media (max-width: 420px) {
+  [data-view="club-reviews"] .review-thread-card { padding-top: 62px; }
+  [data-view="club-reviews"] .review-thread-card .review-share-actions { top: 12px; right: 12px; gap: 6px; }
+  [data-view="club-reviews"] .review-thread-card .review-share-actions .social-button { padding-inline: 9px; }
+}
+
+/* Reviews use an internal scrollport above the fixed bottom navigation. */
+body[data-view="club-reviews"] {
+  height: 100vh !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
+}
+body[data-view="club-reviews"] #app.app {
+  height: calc(100vh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="club-reviews"] #app.app > .card {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+body[data-view="club-reviews"] #app.app > .card > .card__content {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-bottom: 32px;
+  padding-bottom: 32px !important;
+}
+
+/* Render the hand history as native full-width text instead of an embedded screenshot. */
+[data-view="club-reviews"] .review-context {
+  width: 100%;
+  margin-top: 18px;
+  padding-top: 16px;
+}
+[data-view="club-reviews"] .review-context > .social-copy { margin: 0; }
+[data-view="club-reviews"] .review-hand-text {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  color: #dce3ee;
+  font-size: 14px;
+  line-height: 1.55;
+}
+[data-view="club-reviews"] .review-hand-text__space { height: 4px; }
+[data-view="club-reviews"] .review-hand-text__line--meta { color: #aeb9ca; }
+[data-view="club-reviews"] .review-hand-text__street,
+[data-view="club-reviews"] .review-hand-text__showdown {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-left: 4px solid currentColor;
+  border-radius: 8px;
+  background: #1b293b;
+  font-weight: 700;
+}
+[data-view="club-reviews"] .review-hand-text__street--preflop { color: #a8c5ff; }
+[data-view="club-reviews"] .review-hand-text__street--flop { color: #76ddbb; }
+[data-view="club-reviews"] .review-hand-text__street--turn { color: #f1c779; }
+[data-view="club-reviews"] .review-hand-text__street--river,
+[data-view="club-reviews"] .review-hand-text__showdown { color: #cfacff; }
+[data-view="club-reviews"] .review-hand-text__result {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #ffffff24;
+  color: #d9f5a6;
+  font-weight: 700;
+}
