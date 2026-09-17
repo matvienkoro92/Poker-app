@@ -81,9 +81,8 @@ function startHistory(payload) {
   async function captureHandCard(row){
     const box=row.getBoundingClientRect(),clone=row.cloneNode(true),originals=[row,...row.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
     originals.forEach((original,index)=>{const style=getComputedStyle(original),copy=copies[index];for(const key of style)copy.style.setProperty(key,style.getPropertyValue(key));copy.style.animation='none';copy.style.transition='none';});
-    clone.querySelector('.hand-card-actions')?.remove();clone.open=true;clone.style.margin='0';clone.style.width=box.width+'px';clone.style.height='auto';
-    const brand=document.createElement('div');brand.textContent='♠  ДВА ТУЗА · МОЯ ИГРА';brand.style.cssText='padding:14px 15px;background:#0b1220;color:#f6c951;font:700 14px system-ui;letter-spacing:.06em;border:1px solid #344258;border-bottom:0;border-radius:10px 10px 0 0';clone.style.borderRadius='0 0 10px 10px';
-    const wrapper=document.createElement('div');wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');wrapper.style.cssText='width:'+box.width+'px;background:#050816;padding:14px;box-sizing:content-box';wrapper.append(brand,clone);document.body.append(wrapper);wrapper.style.position='fixed';wrapper.style.left='-10000px';wrapper.style.top='0';
+    clone.querySelector('.hand-summary')?.remove();clone.open=true;clone.style.margin='0';clone.style.width=box.width+'px';clone.style.height='auto';
+    const wrapper=document.createElement('div');wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');wrapper.style.cssText='width:'+box.width+'px;background:#050816;padding:14px;box-sizing:content-box';wrapper.append(clone);document.body.append(wrapper);wrapper.style.position='fixed';wrapper.style.left='-10000px';wrapper.style.top='0';
     const width=box.width+28,height=wrapper.getBoundingClientRect().height;wrapper.style.position='static';wrapper.style.left='0';wrapper.style.top='0';wrapper.remove();
     const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'"><foreignObject width="100%" height="100%">'+new XMLSerializer().serializeToString(wrapper)+'</foreignObject></svg>';
     const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);});
@@ -298,8 +297,7 @@ function startHistory(payload) {
     let replay;try {target.textContent='Загружаем действия…';replay=replayCache.get(hand.handId)||await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);target.textContent='';} catch (_) {target.textContent='Не удалось загрузить действия. Закройте и откройте раздачу, чтобы повторить.';delete target.parentElement.dataset.ready;return;}
     const add=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;target.append(el);return el;};
     if(!replay){add('p','История действий пока не загружена.');target.dataset.shareReady='1';return;}
-    add('h4','Префлоп','street-heading street-preflop');
-    appendCards(add('p','Ваши карты: ','replay-cards'),replay.cards);
+    appendCards(add('h4','Префлоп · ','replay-cards street-heading street-preflop'),replay.cards);
     if(hand.ev?.status==='unresolved')add('p','All-in EV не рассчитан: '+({betting_after_allin_street:'торговля продолжалась на следующих улицах',missing_final_board:'нет полного борда',side_pot_deduction:'EV после комиссии не определён из-за распределения удержаний по банкам',payout_does_not_reconcile:'выплаты не сходятся с картами и банками',special_runout:'особый порядок раздачи борда'}[hand.ev.reason]||'недостаточно подтверждённых данных')+'.','note');
     if(hand.ev?.grossEv?.status==='calculated'){
       const gross=hand.ev.grossEv;
@@ -314,20 +312,26 @@ function startHistory(payload) {
       add('p','Доля банка против карт итоговых участников вскрытия, с учётом делёжек. Более поздние решения соперников уже известны; это отдельный ретроспективный показатель.','note');
     }else if(hand.ev?.showdownEquity?.status==='no_hero_allin')add('p','В этой раздаче олл-ин был у соперника; твоего олл-ина в истории нет.','note');
     let roundActors=new Set();
+    let lastBoardLength=0;
+    let currentPot=0;
+    const potUnit=mode==='cash'?'₽':'фишек';
+    const contributionCodes=new Set(['2','3','5','18','19','20']);
     const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};
     const unknown=[];
     for(const event of replay.events){
-      if(event.board.length){roundActors.clear();appendCards(add('h4',({3:'Флоп',4:'Тёрн',5:'Ривер'}[event.board.length]||'Борд')+' · ','replay-board street-heading street-'+({3:'flop',4:'turn',5:'river'}[event.board.length]||'board')),event.board);continue;}
-      if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount)add('p','Параметр обязательных взносов: '+number(event.amount)+' '+(mode==='cash'?'₽':'фишек'),'note');continue;}
+      if(event.board.length){lastBoardLength=Math.max(lastBoardLength,event.board.length);roundActors.clear();const street=add('h4',({3:'Флоп',4:'Тёрн',5:'Ривер'}[event.board.length]||'Борд')+' · ','replay-board street-heading street-'+({3:'flop',4:'turn',5:'river'}[event.board.length]||'board'));appendCards(street,event.board);street.append(' · Банк: '+number(currentPot)+' '+potUnit);continue;}
+      if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount){currentPot+=Number(event.amount)||0;add('p','Параметр обязательных взносов: '+number(event.amount)+' '+(mode==='cash'?'₽':'фишек'),'note');}continue;}
       if(!labels[event.code]){unknown.push(event);continue;}
       const label=labels[event.code];
       const decision=!['18','19'].includes(event.code);
       let newRound=false;
       if(decision){if(roundActors.has(event.actorId)){newRound=true;roundActors.clear();}roundActors.add(event.actorId);}
       const action=add('p',event.actor+' · '+label+(event.amount?' · '+number(event.amount):''),event.actor==='Вы'?'replay-hero':'replay-action');
+      if(contributionCodes.has(event.code)&&event.amount)currentPot+=Number(event.amount)||0;
       if(event.code==='10')action.classList.add('replay-fold');
       if(newRound)action.classList.add('replay-round-start');
     }
+    if(hand.showdown&&lastBoardLength===4)add('h4','Ривер · карта отсутствует в отчёте Poker21 · Банк: '+number(currentPot)+' '+potUnit,'replay-board street-heading street-river');
     if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+number(event.amount):'');more.append(line);}target.append(more);}
     const shown=(replay.shownOpponents||[]).filter(p=>['showdown-winner','showdown-allin'].includes(p.disclosure)&&p.playerId!==String(sample.playerId));
     if(shown.length){add('h4','Вскрытие','street-heading street-river');for(const p of shown)appendCards(add('p',p.actor+' · ','replay-cards'),p.cards);}
@@ -347,8 +351,9 @@ function startHistory(payload) {
     const last=to?labelDate(to+'T00:00:00+03:00'):sortedDates.length?labelDate(sortedDates[sortedDates.length-1]):'';
     $('period-range').textContent=first&&last?' за период '+first+' — '+last:'';
     $('matrix').replaceChildren(...data.cells.map(c=>{
-      const v=value(c),button=document.createElement('button');
-      button.type='button';button.className='cell '+(!c.count?'empty':v>0?'profit':v<0?'loss':'');
+      const v=value(c),button=document.createElement('button'),neutralLimit=metric==='resultMinor'?100:3;
+      const neutral=c.count&&Number.isFinite(v)&&Math.abs(v)<neutralLimit;
+      button.type='button';button.className='cell '+(!c.count?'empty':neutral?'neutral':v>0?'profit':v<0?'loss':'');
       if(c.count && Number.isFinite(c.bb) && Math.abs(c.bb)>30)button.classList.add('high-bb');
       button.dataset.hand=c.label;button.setAttribute('aria-pressed',String(c.label===selected));
       button.setAttribute('aria-label',c.label+': '+(c.count?signed(v)+' '+unit()+', раздач '+c.count:'нет данных'));
