@@ -63,6 +63,20 @@
     return fetch(getApiBase() + "/api/" + path, opts).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (d) { if (d.ok === false) throw new Error("API"); return d; }).finally(function () { clearTimeout(timeout); });
   }
   function error(id) { put(id, '<p class="summary-muted">Не удалось загрузить. Попробуйте обновить сводку.</p>'); }
+  function renderReviewUnread(count) {
+    var badge = root && root.querySelector("[data-summary-review-unread]");
+    if (!badge) return;
+    count = Math.max(0, Number(count) || 0);
+    badge.hidden = count === 0;
+    badge.textContent = count > 99 ? "99+" : String(count);
+    badge.setAttribute("aria-label", "Непросмотренных тем: " + count);
+  }
+  function loadReviewUnread(valid) {
+    return request("club-reviews", {action:"summary"}).then(function (d) {
+      if (valid && !valid()) return;
+      renderReviewUnread((d.threads || []).filter(function (thread) {return thread && thread.unread;}).length);
+    }).catch(function () { if (!valid || valid()) renderReviewUnread(0); });
+  }
   function friends() {
     var data = typeof window.pokerGetFriendNewsSummary === "function" ? window.pokerGetFriendNewsSummary() : null;
     put("friends", '<strong class="summary-value">' + (data && data.accountId && data.ready !== false ? (data.unread ? num(data.unread) + ' непрочитанных' : 'Вы всё прочитали') : 'События ваших друзей') + '</strong><p class="summary-muted">Результаты и события друзей.</p><button type="button" class="summary-link" data-summary-friends>Новости друзей →</button>');
@@ -335,7 +349,8 @@
       document.getElementById("mySummaryName").textContent = nickname || "";
       root.insertAdjacentHTML("afterbegin",
         section("starting-hands", "Моя игра", '<p class="summary-muted">График и EV по раздачам</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
-        section("reviews-entry", "Разборы раздач", '<p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")));
+        section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")));
+      loadReviewUnread(valid);
       if(['ID400800'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
@@ -360,7 +375,7 @@
     if(existing){existing.showModal();existing.style.display='grid';var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260917-publish-success-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-review-spoiler-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=function(){closeStartingHands(false);};
     modal.addEventListener('close',function(){modal.style.display='none';});
     document.body.append(modal);modal.showModal();modal.style.display="grid";
@@ -378,7 +393,7 @@
     if(!['list','replay','insights','version','chart-wall','review-publish'].includes(message.action))return;
     if(message.action==='review-publish'){
       try{
-        var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',forCoach:false,image:message.image,cards:message.cards,handId:message.handId});
+        var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',hideShowdown:message.hideShowdown===true,forCoach:false,image:message.image,cards:message.cards,handId:message.handId});
         window.dispatchEvent(new Event('poker-reviews-updated'));
         frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:{ok:true,id:published.thread&&published.thread.id}},window.location.origin);
       }catch(_){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'publish failed'},window.location.origin);}
@@ -428,7 +443,7 @@
     } catch (_) {}
   });
   window.addEventListener("poker-friend-news-updated", friends);
-  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;});
+  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;if(root&&root.querySelector("[data-summary-review-unread]"))loadReviewUnread();});
   window.addEventListener("poker-telegram-auth", function () {generation++;pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
   setInterval(function () {if(document.hidden || !document.querySelector('[data-view="my-summary"].view--active'))return;if(spin && !spin.canPlay && Date.parse(spin.nextFreeAttemptAt)<=Date.now()+offset && Date.now()-loadedAt>30000){loadedAt=0;init();}else renderSpin();}, 30000);
 })();

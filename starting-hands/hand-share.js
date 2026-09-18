@@ -12,10 +12,8 @@ function text(hand,replay,options){
   const label=labels[String(event.code)];if(!label)continue;
   lines.push(String(event.actor||'Игрок')+' — '+label+(event.amount?' '+amount(event.amount):''));
  }
- if(options?.showShowdown!==false){
-  for(const player of replay.shownOpponents||[]){if(['showdown-winner','showdown-allin'].includes(player.disclosure))lines.push('Вскрытие: '+player.actor+' · '+(player.cards||[]).map(card).join(' '));}
-  lines.push('','Результат: '+result+' '+unit+' · '+(hand.bb>0?'+':'')+amount(hand.bb)+' bb');
- }
+ for(const player of replay.shownOpponents||[]){if(['showdown-winner','showdown-allin'].includes(player.disclosure))lines.push('Вскрытие: '+player.actor+' · '+(player.cards||[]).map(card).join(' '));}
+ lines.push('','Результат: '+result+' '+unit+' · '+(hand.bb>0?'+':'')+amount(hand.bb)+' bb');
  lines.push('Два туза · Моя игра');
  return lines.join('\n');
 }

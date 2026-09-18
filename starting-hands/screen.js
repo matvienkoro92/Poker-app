@@ -135,7 +135,7 @@ function startHistory(payload) {
       if(image.length>450000)throw new Error('image-too-large');
       const cards=(replay.cards||hand.cards||[]).map(card=>window.PokerHandShare.card(card)).join(' ');
       const result=signed(hand.resultMinor/100)+' '+(mode==='cash'?'₽':'фишек');
-      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards+(options.showShowdown?' · '+result:''),question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode},hand),replay,options),image});
+      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards+(options.showShowdown?' · '+result:''),question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode},hand),replay,options),hideShowdown:options.showShowdown===false,image});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
       showPublicationSuccess(response?.id);

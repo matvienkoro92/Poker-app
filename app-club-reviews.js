@@ -6,7 +6,11 @@
   function api(b){return pokerSocialRequest('club-reviews',b);}
   function root(){return document.getElementById('clubReviewsContent');}
   function date(s){return new Date(s).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
-  function feedback(text){var el=document.getElementById('clubReviewsFeedback');if(el)el.textContent=text||'';}
+  function feedback(text){
+    var loading=/^(?:Загружаем разборы|Открываем обсуждение)/.test(text||'');
+    var loader=document.getElementById('clubReviewsLoading');if(loader)loader.hidden=!loading;
+    var el=document.getElementById('clubReviewsFeedback');if(el)el.textContent=loading?'':text||'';
+  }
   function headerAction(t){
     var host=document.getElementById('clubReviewsHeaderAction');if(!host)return;
     if(!t){host.innerHTML='';return;}
@@ -15,6 +19,7 @@
   }
   document.addEventListener('click',function(e){if(!e.target.closest('[data-review-back]'))return;if(thread){loadList(false);return;}setView(window.pokerReviewsReturnView||'my-summary',{fromBack:true});});
   function button(text,action,id,cls){return '<button type="button" class="social-button '+(cls||'')+'" data-review-action="'+action+'"'+(id?' data-id="'+esc(id)+'"':'')+'>'+esc(text)+'</button>';}
+  function shareButtons(){return '<button type="button" class="social-button review-share-button" data-review-action="share"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Поделиться</span></button><button type="button" class="social-button review-copy-button" data-review-action="copy" aria-label="Скопировать ссылку" title="Скопировать ссылку"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4"/></svg></button>';}
   function setBusy(value){busy=value;var r=root();if(r)r.querySelectorAll('button,input,textarea,select').forEach(function(el){el.disabled=value;});}
   function topicLink(id){return new URL('./?startapp=review_'+id,location.href).href;}
   function cardsText(t){return (t.cards||[]).map(function(c){return c.replace(/^T/,'10').replace(/[shdc]$/,function(s){return {s:'♠',h:'♥',d:'♦',c:'♣'}[s];});}).join(' ');}
@@ -26,16 +31,33 @@
     while((match=re.exec(raw))){out+=esc(raw.slice(last,match.index));var suit={"♠":"s","♥":"h","♦":"d","♣":"c"}[match[2]];out+='<span class="playing-card suit-'+suit+'">'+esc(match[0])+'</span>';last=re.lastIndex;}
     return out+esc(raw.slice(last));
   }
-  function contextHtml(text){
-    return '<div class="review-hand-text">'+String(text||'').split(/\r?\n/).map(function(line,index){
-      if(!line.trim())return '<span class="review-hand-text__space" aria-hidden="true"></span>';
+  function actionLineHtml(line,heroName){
+    var match=/^(.+?)\s+—\s+(.+)$/.exec(line),html=inlineCards(line);
+    if(match&&(match[1].trim()==='Вы'||heroName&&match[1].trim()===heroName))html='<strong class="review-hand-text__hero">'+esc(match[1].trim())+'</strong> — '+inlineCards(match[2]);
+    return '<div class="review-hand-text__line'+(/\s—\sФолд(?:\s|$)/.test(line)?' review-hand-text__line--fold':'')+'">'+html+'</div>';
+  }
+  function contextLinesHtml(lines,heroName){
+    return lines.map(function(line,index){
+      if(!line.trim())return /^(?:Флоп|Тёрн|Ривер)(?::|$)/.test(lines[index+1]||'')?'':'<span class="review-hand-text__space" aria-hidden="true"></span>';
       if(line==='Два туза · Моя игра')return '';
       var street=/^(Префлоп|Флоп|Тёрн|Ривер)(?::|$)/.exec(line);
       if(street)return '<div class="review-hand-text__street review-hand-text__street--'+({"Префлоп":"preflop","Флоп":"flop","Тёрн":"turn","Ривер":"river"}[street[1]])+'">'+inlineCards(line)+'</div>';
       if(/^Вскрытие:/.test(line))return '<div class="review-hand-text__showdown">'+inlineCards(line)+'</div>';
       if(/^Результат:/.test(line))return '<div class="review-hand-text__result">'+inlineCards(line)+'</div>';
+      if(/\s—\s/.test(line))return actionLineHtml(line,heroName);
       return '<div class="review-hand-text__line'+(index<3?' review-hand-text__line--meta':'')+'">'+inlineCards(line)+'</div>';
-    }).join('')+'</div>';
+    }).join('');
+  }
+  function contextHtml(text,hideShowdown,heroName){
+    var lines=String(text||'').split(/\r?\n/),split=-1;
+    if(hideShowdown){
+      var allIn=lines.findIndex(function(line){return /(?:^|\s)[Оо]лл-ин(?:\s|$)/.test(line);});
+      split=lines.findIndex(function(line,index){return index>allIn&&(/^(?:Флоп|Тёрн|Ривер)(?::|$)/.test(line)||/^Вскрытие:/.test(line)||/^Результат:/.test(line));});
+      if(split<0)split=lines.findIndex(function(line){return /^Вскрытие:/.test(line)||/^Результат:/.test(line);});
+      while(split>0&&!lines[split-1].trim())split--;
+    }
+    var visible=split>=0?lines.slice(0,split):lines,hidden=split>=0?lines.slice(split):[];
+    return '<div class="review-hand-text">'+contextLinesHtml(visible,heroName)+'</div>'+(hidden.length?'<details class="review-hand-spoiler"><summary>Показать продолжение и результат</summary><div class="review-hand-text review-hand-spoiler__body">'+contextLinesHtml(hidden,heroName)+'</div></details>':'');
   }
   function avatar(t){return '<span class="review-topic__avatar"><img src="/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image" alt="" loading="lazy"><span>'+esc((t.authorName||'И').slice(0,1))+'</span></span>';}
   function renderList(){
@@ -62,10 +84,10 @@
     article.querySelector('.social-kicker')?.remove();
     article.querySelector('h2').innerHTML=topicTitleHtml(t);
     var share=document.createElement('div');share.className='social-actions review-share-actions';
-    share.innerHTML=button('Поделиться','share')+button('Скопировать','copy');
+    share.innerHTML=shareButtons();
     article.insertBefore(share,article.querySelector('h2').nextSibling);
     var context=article.querySelector('.review-context');
-    if(context){context.querySelector('h3')?.remove();var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(t.context);}
+    if(context){context.querySelector('h3')?.remove();var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(t.context,t.hideShowdown===true,t.authorName);}
     article.querySelector('.review-image')?.closest('a')?.remove();
     article.querySelectorAll('details').forEach(function(details){var summary=details.querySelector(':scope > summary');if(summary&&summary.textContent.trim()==='Текст раздачи'){summary.remove();details.replaceWith.apply(details,Array.from(details.childNodes));}});
     if(!same||resetDraft||!replyKey)replyKey=pokerSocialRequestId();parentId=oldParent;
