@@ -63,7 +63,16 @@ function startHistory(payload) {
   };
   const sample = {playerId:payload.playerId};
   const bulk = {rows:payload.rows};
-  let stackBand='',stackLoadPromise=null,stacksLoaded=false;
+  let stackBand='',tournamentId='',stackLoadPromise=null,stacksLoaded=false;
+  const tournamentSelect=$('tournament-filter');
+  const tournamentGroups=new Map();
+  bulk.rows.filter(row=>row.mode==='mtt'&&row.sessionId).forEach(row=>{
+    const key=String(row.sessionId),current=tournamentGroups.get(key);
+    if(!current||row.playedAt<current.playedAt)tournamentGroups.set(key,{id:key,playedAt:row.playedAt,name:String(row.tournamentName||row.tournament||'').trim(),count:(current?.count||0)+1});
+    else current.count++;
+  });
+  const tournamentDate=value=>new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'}).format(new Date(value));
+  [...tournamentGroups.values()].sort((a,b)=>b.playedAt.localeCompare(a.playedAt)).forEach(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=(item.name||'Турнир '+item.id)+' · '+tournamentDate(item.playedAt)+' · '+item.count+' раздач';tournamentSelect.append(option);});
   resetDateRange();
   async function ensureMttStacks(){
     if(stacksLoaded)return;
@@ -346,7 +355,7 @@ function startHistory(payload) {
     if(mode==='mtt')metric='bb';
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
-    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
+    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
     renderProfitChart(data);
     $('position').value=positionByMode[mode];
@@ -415,6 +424,8 @@ function startHistory(payload) {
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
     $('stack-filter-wrap').hidden=mode!=='mtt';
     $('stack-filter').value=stackBand;
+    $('tournament-filter-wrap').hidden=mode!=='mtt';
+    $('tournament-filter').value=tournamentId;
     $('metric').textContent=metric==='resultMinor'?(mode==='cash'?'Рубли':'Фишки'):'bb';
     $('metric').disabled=mode==='mtt';
     $('metric').setAttribute('aria-label',mode==='mtt'?'Показатель MTT: только bb':'Показатель: '+$('metric').textContent+'. Переключить');
@@ -482,6 +493,7 @@ function startHistory(payload) {
   });
   $('position').addEventListener('change',e=>{positionByMode[mode]=e.target.value;render();});
   $('stack-filter').addEventListener('change',e=>{stackBand=e.target.value;selected=null;render();});
+  $('tournament-filter').addEventListener('change',e=>{tournamentId=e.target.value;selected=null;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
   $('reset-filters').addEventListener('click',()=>{
     $('hand-search').value='';$('opponent-search').value='';selected=null;render();

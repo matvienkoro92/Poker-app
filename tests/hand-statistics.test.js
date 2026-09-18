@@ -82,6 +82,14 @@ test('MTT stack-depth filter uses half-open BB bands',()=>{
  assert.throws(()=>aggregate(rows,{playerId:'player',mode:'cash',stackBand:'short'}));
 });
 
+test('MTT tournament filter selects one session only',()=>{
+ const row={...base,mode:'mtt',unit:'CHIP',sessionId:'tournament-1'};
+ const rows=[row,{...row,handId:'2',sessionId:'tournament-2'}];
+ assert.equal(aggregate(rows,{playerId:'player',mode:'mtt',tournamentId:'tournament-1'}).count,1);
+ assert.equal(aggregate(rows,{playerId:'player',mode:'mtt',tournamentId:'missing'}).count,0);
+ assert.throws(()=>aggregate([{...row,mode:'cash',unit:'TABLE_CHIP'}],{playerId:'player',mode:'cash',cashUnit:'TABLE_CHIP',tournamentId:'tournament-1'}));
+});
+
 test('live search matches partial IDs, opponent fragments, case and transliteration',()=>{
  const {matchesSearch}=require('../starting-hands/core');
  const row={handId:'1789152082927',opponents:[{playerId:'776157',name:'PlayerMayer'},{playerId:'975934',name:'Собака Павлова'}]};
