@@ -313,11 +313,13 @@ async function parseOcrFile(file) {
   const separateTimeToken = dateOnlyToken
     ? chooseClosest(tokens, (token) => /^[•·:)\s]*\d{1,2}:\d{2}$/.test(token.text), dateOnlyToken.y, 0.025)
     : null;
-  const date = dateMatch
+  let date = dateMatch
     ? `${dateMatch[2]}.${dateMatch[1]}.2026`
     : dateOnlyMatch
       ? `${dateOnlyMatch[2]}.${dateOnlyMatch[1]}.2026`
       : "??.??.2026";
+  // The September 17 batch was exported with a stale 03/17 client header.
+  if (/^IMG_78(?:0[3-9]|1[0-4])-/.test(path.basename(file.source))) date = "17.09.2026";
   const time = dateMatch
     ? dateMatch[3].padStart(5, "0")
     : separateTimeToken
@@ -361,6 +363,17 @@ async function parseOcrFile(file) {
       "22:00|200": "EnergetikTournament"
     };
     title = poker21TitleByTimeAndBuyin[`${time}|${buyin}`] || title;
+  }
+  if (date === "17.09.2026") {
+    if (time === "00:00") title = "S.Bounty 2/3 🥊 150k";
+    if (time === "06:00") title = "Tai 7 € 1/2 KO 🥊 20k";
+    if (time === "09:00") title = "KG PLO6 / 2$";
+    if (time === "10:00") title = "DV Turbo 500🏆 90K";
+    if (time === "12:00" && blue) title = "DV🏃 PLO5 🥊 30k🥊";
+    if (time === "13:00") title = "DV 🏃 Bounty 🥊 150k";
+    if (time === "18:00" && blue) title = "BOUNTY MAGIC 🥊 50K";
+    if (time === "20:00" && blue) title = "HR 5000🥊 250K";
+    if (time === "20:00" && !blue) title = "HOK🥊 Magic";
   }
   if (date === "23.08.2026" && time === "18:00" && buyin === 2000) title = "Воскресный турнир 🏆";
   if (date === "23.08.2026" && time === "00:00" && buyin === 20000) title = "S.Bounty 2/3 🥊 120k";
@@ -427,6 +440,19 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // Visually verified September 17 ranks omitted by Vision.
+    if (date === "17.09.2026") {
+      const verifiedPlace = {
+        "00:00|2462690|144.95": 3,
+        "06:00|2757940|11.9": 0,
+        "12:00|2390619|2.28": 9,
+        "20:00|3618829|88.89": 9
+      }[`${time}|${playerId}|${reward}`];
+      if (verifiedPlace != null) {
+        place = verifiedPlace;
+        needsPlaceCheck = false;
+      }
+    }
     // IMG_9223 visibly shows a zero rank for Ферапонт.
     if (date === "15.09.2026" && blue && time === "08:00" && playerId === "3399185" && reward === 15.6) {
       place = 0;

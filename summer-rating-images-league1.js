@@ -966,4 +966,18 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-16-09-2026-league1-hr-5000-200k-20h.jpg",
     "rating-compressed-preview/rating-16-09-2026-league1-magic-500-120k-22h.jpg"
   ]
+,
+  "17.09.2026": [
+    "rating-compressed-preview/rating-17-09-2026-league1-s-bounty-2-3-150k-00h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-tai-7-1-2-ko-20k-06h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-kg-plo6-2-09h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-dv-turbo-500-90k-10h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-dv-plo5-30k-12h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-dv-bounty-150k-13h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-rebuy-17h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-bounty-magic-50k-18h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-hok-magic-20h.jpg",
+    "rating-compressed-preview/rating-17-09-2026-league1-hr-5000-250k-20h.jpg"
+  ]
 };
