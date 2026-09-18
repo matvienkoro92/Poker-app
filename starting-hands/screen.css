@@ -188,6 +188,7 @@ main{padding-top:8px}
 
 .replay .replay-fold{color:#7f8b9e;font-weight:400}
 .replay .replay-raise{color:#ff7272;font-weight:700}.replay .replay-call{color:#72b7ff}.replay .replay-reraise{color:#ffad57;font-weight:700}
+.replay .replay-bet{color:#ffa3a3}.replay .replay-allin{color:#ff861f;font-weight:700}
 
 .nonshowdown-outcome{display:block;margin:10px 0;line-height:1.5}
 

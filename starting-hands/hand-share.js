@@ -15,6 +15,17 @@ function positions(hand,replay){
  for(const seat of replay.seats||[])set(seat,shortPosition(seat.position));
  return event=>byId.get(String(event&&event.actorId))||byActor.get(String(event&&event.actor||''))||'';
 }
+function splitOutcome(text){
+ const lines=String(text||'').split(/\r?\n/);
+ const action=/\s—\s(?:Колл|Рейз|Олл-ин|Фолд|Чек|Ставка|Малый блайнд|Большой блайнд)(?:\s|$)/;
+ let lastAction=-1,allIn=false;
+ lines.forEach((line,index)=>{if(action.test(line))lastAction=index;if(/\s—\sОлл-ин(?:\s|$)/.test(line))allIn=true;});
+ // Keep every decision, including side-pot betting and calls after an all-in.
+ let split=lines.findIndex((line,index)=>/^Вскрытие:|^Результат:/.test(line)||(allIn&&index>lastAction&&/^(?:Флоп|Тёрн|Ривер)(?::|\s*·|$)/.test(line)));
+ if(split<0)return {visible:lines.join('\n'),hidden:''};
+ while(split>0&&!lines[split-1].trim())split--;
+ return {visible:lines.slice(0,split).join('\n'),hidden:lines.slice(split).join('\n')};
+}
 function text(hand,replay,options){
  const date=new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'}).format(new Date(hand.playedAt));
  const metric=hand.metric||(options&&options.metric),inBb=metric==='bb',bigBlind=Number(hand.bigBlindMinor)/100;
@@ -36,7 +47,8 @@ function text(hand,replay,options){
  for(const player of replay.shownOpponents||[]){if(['showdown-winner','showdown-allin'].includes(player.disclosure))lines.push('Вскрытие: '+player.actor+' · '+(player.cards||[]).map(card).join(' '));}
  lines.push('','Результат: '+result+' '+unit+(inBb?'':' · '+(hand.bb>0?'+':'')+amount(hand.bb)+' bb'));
  lines.push('Два туза · Моя игра');
- return lines.join('\n');
+ const full=lines.join('\n');
+ return options?.showShowdown===false?splitOutcome(full).visible:full;
 }
-return {text,card,positions};
+return {text,card,positions,splitOutcome};
 });

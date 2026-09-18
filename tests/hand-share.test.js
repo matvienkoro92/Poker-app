@@ -1,5 +1,23 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const share=require('../starting-hands/hand-share');
+test('all-in runout is separated after the last call, not after the first shove',()=>{
+ const before='Префлоп · Банк: 100\nMP: A — Олл-ин 50\nBTN: B — Колл 50';
+ const after='Флоп: A♠ K♣ 2♦\nТёрн: A♠ K♣ 2♦ 3♠\nРивер: A♠ K♣ 2♦ 3♠ 4♠\nВскрытие: A · Q♠ Q♣\nРезультат: +100';
+ assert.deepEqual(share.splitOutcome(before+'\n'+after),{visible:before,hidden:after});
+});
+test('river shove and side-pot decisions stay visible',()=>{
+ const before='Префлоп\nA — Олл-ин 10\nB — Колл 10\nC — Колл 10\nФлоп: A♠ K♣ 2♦\nB — Ставка 20\nC — Колл 20\nРивер: A♠ K♣ 2♦ 3♠ 4♠\nB — Олл-ин 50\nC — Колл 50';
+ assert.deepEqual(share.splitOutcome(before+'\nВскрытие: B · Q♠ Q♣\nРезультат: -100'),{visible:before,hidden:'Вскрытие: B · Q♠ Q♣\nРезультат: -100'});
+});
+test('without an all-in the board stays visible but showdown and result are separated',()=>{
+ const before='Флоп: A♠ K♣ 2♦\nB — Чек\nРивер: A♠ K♣ 2♦ 3♠ 4♠\nB — Чек';
+ assert.equal(share.splitOutcome(before+'\nРезультат: +100').visible,before);
+ assert.deepEqual(share.splitOutcome(before),{visible:before,hidden:''});
+});
+test('hidden publication contains no runout, opponent cards or result',()=>{
+ const text=share.text({handId:'1',playedAt:'2026-09-18',position:'SB',bigBlindMinor:100,resultMinor:200,bb:2},{events:[{actor:'Вы',code:'5',amount:2},{actor:'B',code:'2',amount:2},{board:['As','Kd','2h']}],shownOpponents:[{actor:'B',disclosure:'showdown-allin',cards:['Qs','Qc']}]},{showShowdown:false});
+ assert.match(text,/B — Колл/);assert.doesNotMatch(text,/Флоп|Вскрытие|Результат|Q♠/);
+});
 test('formats a complete hand for sharing',()=>{
  const text=share.text({handId:'123',mode:'cash',playedAt:'2026-09-16T10:00:00Z',cards:['As','Kh'],position:'BTN',bigBlindMinor:200,resultMinor:500,bb:2.5},{cards:['As','Kh'],events:[{code:'3',actor:'Вы',amount:6,board:[]},{code:'94',actor:'Стол',board:['2d','Tc','Js']},{code:'20',actor:'Вы',amount:10,board:[]}]});
  assert.match(text,/Раздача #123/);assert.match(text,/Мои карты: A♠ K♥/);assert.match(text,/Флоп: 2♦ 10♣ J♠/);assert.match(text,/Вы — Рейз 6/);assert.match(text,/Результат: \+5 ₽ · \+2,5 bb/);

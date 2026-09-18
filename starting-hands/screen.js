@@ -136,9 +136,9 @@ function startHistory(payload) {
   function publicationOptions(button){
     return new Promise(resolve=>{
       const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog';
-      dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>Опубликовать в раздел «Мои раздачи» на разбор для игроков клуба?</p><label class="hand-publish-toggle"><input type="checkbox" name="showShowdown" checked> Показать вскрытие и результат</label><label class="hand-publish-comment">Комментарий (необязательно)<textarea name="comment" maxlength="3000" rows="4" placeholder="Что хотите обсудить в этой раздаче?"></textarea></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
+      dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>Опубликовать в раздел «Мои раздачи» на разбор для игроков клуба?</p><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="show" checked> Показать результат — под спойлером</label><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="hide"> Скрыть результат — раздача будет опубликована без ШД</label><p>Карты следующих улиц после завершения выставления, карты соперников и выигрыш или проигрыш будут под спойлером либо полностью убраны.</p><label class="hand-publish-comment">Комментарий (необязательно)<textarea name="comment" maxlength="3000" rows="4" placeholder="Что хотите обсудить в этой раздаче?"></textarea></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
       const draft=button._publishDraft;
-      if(draft){dialog.querySelector('input').checked=draft.showShowdown;dialog.querySelector('textarea').value=draft.comment;}
+      if(draft){dialog.querySelector('input[value="'+(draft.showShowdown?'show':'hide')+'"]').checked=true;dialog.querySelector('textarea').value=draft.comment;}
       let result=null;
       dialog.querySelector('form').onsubmit=event=>{event.preventDefault();result={showShowdown:dialog.querySelector('input').checked,comment:dialog.querySelector('textarea').value.trim()};button._publishDraft=result;dialog.close();};
       dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();
@@ -163,7 +163,7 @@ function startHistory(payload) {
       let replay=replayCache.get(hand.handId);if(!replay){replay=await historyRequest('replay',hand.handId);replayCache.set(hand.handId,replay);}
       let body=row.querySelector('.replay-body');if(body?.dataset.shareReady!=='1'){row.dataset.ready='1';body=body||document.createElement('div');body.className='replay-body';if(!body.isConnected)row.append(body);await renderReplay(body,hand);}
       row.open=true;
-      const image=await blobDataUrl(await captureHandCard(row,options));
+      const image=''; // Structured publication: no image that could reveal the hidden runout.
       if(image.length>450000)throw new Error('image-too-large');
       const cards=(replay.cards||hand.cards||[]).map(card=>window.PokerHandShare.card(card)).join(' ');
       const result=signed(hand.resultMinor/100)+' '+(mode==='cash'?'₽':'фишек');
@@ -171,7 +171,7 @@ function startHistory(payload) {
       const startingStackMinor=Number.isSafeInteger(hand.startingStackMinor)?hand.startingStackMinor:heroStack&&Number.isFinite(heroStack.amount)&&heroStack.amount>=0?Math.round(heroStack.amount*100):null;
       const potCodes=new Set(['2','3','5','18','19','20','92']);
       const totalPotMinor=Math.round((replay.events||[]).reduce((sum,event)=>sum+(potCodes.has(String(event.code))?(Number(event.amount)||0):0),0)*100);
-      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards+(options.showShowdown?' · '+result:''),question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
+      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
       showPublicationSuccess(response?.id);
@@ -416,6 +416,8 @@ function startHistory(payload) {
       if(decision){if(roundActors.has(event.actorId)){newRound=true;roundActors.clear();}roundActors.add(event.actorId);}
       const action=add('p',(positionFor(event)?positionFor(event)+': ':'')+event.actor+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');
       if(event.code==='2')action.classList.add('replay-call');
+      if(event.code==='20')action.classList.add('replay-bet');
+      if(event.code==='5')action.classList.add('replay-allin');
       if(event.code==='3'){action.classList.add(raisesOnStreet?'replay-reraise':'replay-raise');raisesOnStreet++;}
       if(contributionCodes.has(event.code)&&event.amount)currentPot+=Number(event.amount)||0;
       if(event.code==='10')action.classList.add('replay-fold');

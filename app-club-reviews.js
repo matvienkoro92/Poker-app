@@ -96,20 +96,13 @@
       if(street){raisesOnStreet=0;var pot=/\s·\sБанк:\s*(.+)$/.exec(line),streetText=(pot?line.slice(0,pot.index):line)+(street[1]==='Префлоп'&&heroCards?' · '+heroCards:'');return '<div class="review-hand-text__street review-hand-text__street--'+({"Префлоп":"preflop","Флоп":"flop","Тёрн":"turn","Ривер":"river"}[street[1]])+'"><span>'+inlineCards(streetText)+'</span>'+(pot?'<span class="review-hand-text__pot">Банк: '+inlineCards(pot[1])+'</span>':'')+'</div>';}
       if(/^Вскрытие:/.test(line))return '<div class="review-hand-text__showdown">'+inlineCards(line)+'</div>';
       if(/^Результат:/.test(line))return '<div class="review-hand-text__result">'+inlineCards(line)+'</div>';
-      if(/\s—\s/.test(line)){var actionClass='';if(/\s—\sКолл(?:\s|$)/.test(line))actionClass='review-hand-text__line--call';else if(/\s—\sРейз(?:\s|$)/.test(line)){actionClass=raisesOnStreet?'review-hand-text__line--reraise':'review-hand-text__line--raise';raisesOnStreet++;}return actionLineHtml(line,heroName,actionClass);}
+      if(/\s—\s/.test(line)){var actionClass='';if(/\s—\sКолл(?:\s|$)/.test(line))actionClass='review-hand-text__line--call';else if(/\s—\sСтавка(?:\s|$)/.test(line))actionClass='review-hand-text__line--bet';else if(/\s—\sОлл-ин(?:\s|$)/.test(line))actionClass='review-hand-text__line--allin';else if(/\s—\sРейз(?:\s|$)/.test(line)){actionClass=raisesOnStreet?'review-hand-text__line--reraise':'review-hand-text__line--raise';raisesOnStreet++;}return actionLineHtml(line,heroName,actionClass);}
       return '<div class="review-hand-text__line'+(index<3?' review-hand-text__line--meta':'')+'">'+inlineCards(line)+'</div>';
     }).join('');
   }
   function contextHtml(text,hideShowdown,heroName){
-    var lines=String(text||'').split(/\r?\n/),split=-1;
-    if(hideShowdown){
-      var allIn=lines.findIndex(function(line){return /(?:^|\s)[Оо]лл-ин(?:\s|$)/.test(line);});
-      split=lines.findIndex(function(line,index){return index>allIn&&(/^(?:Флоп|Тёрн|Ривер)(?::|$)/.test(line)||/^Вскрытие:/.test(line)||/^Результат:/.test(line));});
-      if(split<0)split=lines.findIndex(function(line){return /^Вскрытие:/.test(line)||/^Результат:/.test(line);});
-      while(split>0&&!lines[split-1].trim())split--;
-    }
-    var visible=split>=0?lines.slice(0,split):lines,hidden=split>=0?lines.slice(split):[];
-    return '<div class="review-hand-text">'+contextLinesHtml(visible,heroName)+'</div>'+(hidden.length?'<details class="review-hand-spoiler"><summary>Показать продолжение и результат</summary><div class="review-hand-text review-hand-spoiler__body">'+contextLinesHtml(hidden,heroName)+'</div></details>':'');
+    var parts=window.PokerHandShare.splitOutcome(text);
+    return '<p class="social-muted">'+(hideShowdown?'Раздача опубликована без ШД — вскрытие и результат скрыты':'Вскрытие и результат — под спойлером')+'</p><div class="review-hand-text">'+contextLinesHtml(parts.visible.split('\n'),heroName)+'</div>'+(!hideShowdown&&parts.hidden?'<details class="review-hand-spoiler"><summary>Показать продолжение, вскрытие и результат</summary><div class="review-hand-text review-hand-spoiler__body">'+contextLinesHtml(parts.hidden.split('\n'),heroName)+'</div></details>':'');
   }
   function detectHandMetric(text){return /Банк:[^\n]*(?:₽|фишек)/i.test(text||'')?'native':'bb';}
   function handUnitToggle(t){
