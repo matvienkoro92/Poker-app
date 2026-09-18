@@ -47,7 +47,7 @@ async function main(){
   const hero=aliases.get(t.authorNick)||aliases.get(t.authorName);
   if(hero)aliases.set('Вы',hero);
   let changed=false;
-  for(const field of ['context','outcome'])if(typeof t[field]==='string')t[field]=t[field].replace(/^([A-Z0-9+\/]{2,7}): (.+?) — /gm,(full,pos,actor)=>{const id=aliases.get(actor);if(!id)return full;const p=meta.positions[id];const next=(p==='UNKNOWN'?'':p==='BTN/SB'?'SB: ':p+': ')+actor+' — ';changed=changed||next!==full;return next;});
+  for(const field of ['context','outcome'])if(typeof t[field]==='string')t[field]=t[field].replace(/^(?:([A-Z0-9+\/]{2,7}): )?(.+?) — /gm,(full,pos,actor)=>{const id=aliases.get(actor);if(!id)return full;const p=meta.positions[id];const next=(p==='UNKNOWN'?'':p==='BTN/SB'?'SB: ':p+': ')+actor+' — ';changed=changed||next!==full;return next;});
   if(changed){stats.reviews++;if(apply){await send([['SET',key+':before-position-repair',raw,'NX']]);const [ok]=await send([['EVAL',"if redis.call('GET',KEYS[1])~=ARGV[1] then return 0 end redis.call('SET',KEYS[1],ARGV[2]);return 1",1,key,raw,JSON.stringify(t)]]);if(Number(ok)!==1)throw Error('Review changed concurrently');}}
  }
  console.log('FINAL '+JSON.stringify(stats));
