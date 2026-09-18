@@ -1,9 +1,21 @@
 (function(){
   'use strict';
   var generation=0,serial=0,mine=false,cursor=null,rows=[],thread=null,busy=false,imageData='',imageBusy=false,formKey='',replyKey='',parentId='',handMetric='bb',listMetric='bb',listMode='all';
-  var answerObserver=null,viewerId='';
+  var answerObserver=null,viewerId='',activity=null;
   function esc(s){return pokerSocialEscape(s);}
-  function api(b){return pokerSocialRequest('club-reviews',b);}
+  function api(b){var gen=generation;return pokerSocialRequest('club-reviews',b).then(function(d){if(gen===generation){if(d.activity)activity=d.activity;if(d.accountId)viewerId=d.accountId;}return d;});}
+  function activityHtml(){
+    if(!activity)return '';
+    var progress=Math.max(0,Math.min(6,Number(activity.progress)||0));
+    return '<section class="review-activity" aria-label="Награды за активность"><div class="review-activity__heading"><strong>До следующей крутки</strong><span>'+progress+' / 7</span></div><div class="review-activity__track" role="progressbar" aria-label="Активные действия" aria-valuemin="0" aria-valuemax="7" aria-valuenow="'+progress+'">'+Array.from({length:7},function(_,i){return '<i'+(i<progress?' class="is-filled"':'')+'></i>';}).join('')+'</div><p>Публикации сегодня: '+Number(activity.publicationsToday)+' / 3 · Заработано за активность: '+Number(activity.bonusEarned).toLocaleString('ru-RU')+' ₽</p>'+(activity.spinsAvailable?'<button type="button" class="social-button" data-review-action="activity-play">Крутки за активность: '+Number(activity.spinsAvailable)+' →</button>':'')+'<details><summary>Как получить награды</summary><p>Публикация своей раздачи с вопросом — +10 ₽ на бонусный баланс и 1 действие. До 3 публикаций в день, обновление в 00:00 МСК. Вопрос — минимум 20 букв или цифр. Повторную раздачу опубликовать нельзя.</p><p>Комментарий в чужом разборе — 1 действие: от 60 букв или цифр без ссылок, цитат и эмодзи. Один зачёт на раздачу, без бессмысленных повторов и почти одинаковых комментариев (в том числе с заменой цифр). Короткие комментарии разрешены, но не дают награды. Нужен привязанный игровой аккаунт.</p><p>Каждые 7 действий — крутка. Прогресс и крутки не сгорают. Комментарии в своих разборах не учитываются. Заработанная сумма включает +10 ₽ за публикации и выигрыши круток за активность; это не остаток баланса.</p></details></section>';
+  }
+  function activityNotice(d){
+    if(d.activityAward)return 'Опубликовано · '+(d.activityAward.bonus?'+'+d.activityAward.bonus+' ₽ · ':'')+'+1 действие'+(d.activityAward.spin?' · +1 крутка!':'');
+    var reasons={author_unlinked:'игровой аккаунт автора старой раздачи не подтверждён',own_thread:'свои разборы не дают действий',unlinked:'для наград привяжите игровой аккаунт',text_rules:'для зачёта нужен текст от 60 букв/цифр без бессмысленных повторов',already_counted:'комментарий в этой раздаче уже зачтён',similar_text:'повторяющийся или почти одинаковый текст не даёт действий'};
+    return 'Опубликовано'+(reasons[d.activityReason]?'. Без награды: '+reasons[d.activityReason]+'.':'');
+  }
+  function countedText(text){return String(text||'').normalize('NFKC').split(/\r?\n/).filter(function(line){return !/^\s*>/.test(line);}).join(' ').replace(/https?:\/\/\S+|www\.\S+|«[^»]*»|“[^”]*”|"[^"]*"/giu,'').replace(/[^\p{L}\p{N}]/gu,'').length;}
+  document.addEventListener('input',function(e){if(!e.target.matches('#reviewReplyForm textarea'))return;var hint=document.getElementById('reviewActivityHint');if(hint&&thread&&thread.authorId!==viewerId)hint.textContent='Для зачёта: '+countedText(e.target.value)+' / 60 букв и цифр · один комментарий на чужую раздачу';});
   function root(){return document.getElementById('clubReviewsContent');}
   function date(s){return new Date(s).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
   function feedback(text){
@@ -152,6 +164,7 @@
       var count=article.querySelector('.review-topic__count');count.replaceWith(controls);controls.append(count);
       controls.insertAdjacentHTML('beforeend',button('Удалить','delete-topic',topic.id,'review-topic__delete'));
     });
+    r.insertAdjacentHTML('afterbegin',activityHtml());
   }
   function loadList(more){
     var seq=++serial,gen=generation;thread=null;headerAction(null);feedback('Загружаем разборы…');
@@ -187,6 +200,9 @@
     document.querySelector('#reviewReplyForm textarea').value=draft;
     var replyingTo=t.replies.find(function(r){return r.id===parentId;});
     if(replyingTo)document.getElementById('reviewReplyTarget').textContent='В ответ '+replyingTo.authorName;else parentId='';
+    var replyForm=document.getElementById('reviewReplyForm');
+    replyForm.querySelector('textarea').insertAdjacentHTML('afterend','<p id="reviewActivityHint" class="social-muted review-activity-hint">'+(t.authorId===viewerId?'Комментарии в своей раздаче не дают действий.':'Для зачёта: от 60 букв и цифр · один комментарий на чужую раздачу')+'</p>');
+    r.insertAdjacentHTML('afterbegin',activityHtml());
     observeAnswers(t);
   }
   function observeAnswers(t){
@@ -215,8 +231,9 @@
   document.addEventListener('focusin',function(e){if(!e.target.matches('[data-view="club-reviews"] #reviewReplyForm textarea'))return;document.body.classList.add('review-reply-input-active');scheduleReviewReplyVisible();});
   document.addEventListener('focusout',function(e){if(!e.target.matches('[data-view="club-reviews"] #reviewReplyForm textarea'))return;setTimeout(function(){if(!document.activeElement?.matches('[data-view="club-reviews"] #reviewReplyForm textarea'))document.body.classList.remove('review-reply-input-active');},120);});
   if(window.visualViewport){window.visualViewport.addEventListener('resize',keepReviewReplyVisible);window.visualViewport.addEventListener('scroll',keepReviewReplyVisible);}
-  document.addEventListener('submit',function(e){if(!['reviewCreateForm','reviewReplyForm'].includes(e.target.id))return;e.preventDefault();if(busy)return;if(imageBusy){feedback('Дождитесь подготовки изображения');return;}var f=e.target,values=new FormData(f),payload=f.id==='reviewCreateForm'?{action:'create',requestId:formKey,type:f.dataset.type,title:values.get('title'),question:values.get('question'),context:values.get('context'),outcome:values.get('outcome'),forCoach:values.get('audience')==='coach',image:imageData}:{action:'reply',id:thread.id,requestId:replyKey,parentId:parentId,text:values.get('text')};var gen=generation;setBusy(true);feedback('Отправляем…');api(payload).then(function(d){if(gen!==generation)return;renderThread(d.thread,true);if(typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement(payload.action==='reply'?'review_reply_created':'review_created',{entity:d.thread.id,source:'club-reviews',once:true,onceKey:payload.requestId});feedback('Опубликовано');window.dispatchEvent(new Event('poker-reviews-updated'));}).catch(function(err){if(gen===generation)feedback(err.message);}).finally(function(){if(gen===generation)setBusy(false);});});
+  document.addEventListener('submit',function(e){if(!['reviewCreateForm','reviewReplyForm'].includes(e.target.id))return;e.preventDefault();if(busy)return;if(imageBusy){feedback('Дождитесь подготовки изображения');return;}var f=e.target,values=new FormData(f),payload=f.id==='reviewCreateForm'?{action:'create',requestId:formKey,type:f.dataset.type,title:values.get('title'),question:values.get('question'),context:values.get('context'),outcome:values.get('outcome'),forCoach:values.get('audience')==='coach',image:imageData}:{action:'reply',id:thread.id,requestId:replyKey,parentId:parentId,text:values.get('text')};var gen=generation;setBusy(true);feedback('Отправляем…');api(payload).then(function(d){if(gen!==generation)return;renderThread(d.thread,true);if(typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement(payload.action==='reply'?'review_reply_created':'review_created',{entity:d.thread.id,source:'club-reviews',once:true,onceKey:payload.requestId});feedback(activityNotice(d));window.dispatchEvent(new Event('poker-reviews-updated'));}).catch(function(err){if(gen===generation)feedback(err.message);}).finally(function(){if(gen===generation)setBusy(false);});});
   document.addEventListener('click',function(e){var el=e.target.closest('[data-review-action]');if(!el||busy)return;var action=el.dataset.reviewAction,id=el.dataset.id;
+    if(action==='activity-play'){setView('daily-poker');return;}
     if(action==='new-question'||action==='new-hand'){form(action==='new-hand'?'hand':'question');return;}
     if(['all','mine','back','reload','more'].includes(action)){if(action==='all'||action==='mine')mine=action==='mine';loadList(action==='more');return;}
     if(action==='open'){open(id);return;}
@@ -246,5 +263,5 @@
   });
   window.initClubReviews=function(){if(typeof pokerApiHasCredential!=='function'||!pokerApiHasCredential()){root().innerHTML='<div class="social-empty"><h2>Войдите, чтобы участвовать</h2><p>Вопросы тренеру, раздачи и ответы игроков клуба.</p><a class="social-button" href="#" data-view-target="profile">Открыть профиль</a></div>';return;}var id=window.pokerPendingReviewId;window.pokerPendingReviewId='';if(id)open(id);else loadList(false);};
   window.pokerOpenClubReview=function(id){window.pokerPendingReviewId=id||'';setView('club-reviews');};
-  window.addEventListener('poker-telegram-auth',function(){generation++;serial++;viewerId='';if(answerObserver)answerObserver.disconnect();rows=[];thread=null;busy=false;imageData='';imageBusy=false;formKey='';replyKey='';parentId='';if(root())root().innerHTML='';feedback('');if(document.querySelector('[data-view="club-reviews"].view--active'))window.initClubReviews();});
+  window.addEventListener('poker-telegram-auth',function(){generation++;serial++;viewerId='';activity=null;if(answerObserver)answerObserver.disconnect();rows=[];thread=null;busy=false;imageData='';imageBusy=false;formKey='';replyKey='';parentId='';if(root())root().innerHTML='';feedback('');if(document.querySelector('[data-view="club-reviews"].view--active'))window.initClubReviews();});
 })();

@@ -9977,3 +9977,24 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 @media (prefers-reduced-motion: reduce) {
   [data-view="my-summary"] :is(.summary-skeleton-card,.summary-card-loading)::after { animation: none; }
 }
+
+.review-activity { margin: 0 0 18px; padding: 14px 16px; border: 1px solid #8b713840; border-radius: 16px; background: linear-gradient(125deg,#c49c3516,#111820); color: #eee5d2; }
+.review-activity__heading { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.review-activity__heading span { color: #f5cd69; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.review-activity__track { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; margin: 11px 0; }
+.review-activity__track i { display: block; height: 8px; border-radius: 4px; background: #ffffff14; }
+.review-activity__track .is-filled { background: #f3ca64; }
+.review-activity p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: #aeb7c2; }
+.review-activity details { margin-top: 8px; font-size: 12px; }
+.review-activity summary { cursor: pointer; color: #e2c889; }
+.review-activity > button { margin-top: 9px; font-size: 13px; padding: 7px 12px; min-height: 36px; }
+.review-reply-form .review-activity-hint { font-size: 12px; margin: 6px 0; }
+.profile-review-activity { margin: 8px 0; font-size: 12px; line-height: 1.5; color: #e2c889; }
+.daily-poker-activity-summary { display: block; margin-top: 5px; font-size: 12px; line-height: 1.4; color: #babfc8; }
+.admin-bonuses__activity-totals { margin: 18px 0; padding: 16px; border: 1px solid #d3ad6245; border-radius: 16px; background: #111820; }
+.admin-bonuses__activity-totals h3 { margin: 0 0 12px; font-size: 17px; color: #f2d48d; }
+.admin-bonuses__activity-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; }
+.admin-bonuses__activity-grid > div { display: grid; gap: 5px; padding: 12px; border-radius: 10px; background: #ffffff06; }
+.admin-bonuses__activity-grid strong { font-size: 23px; color: #f2d48d; }
+.admin-bonuses__activity-grid span { font-size: 13px; }
+.admin-bonuses__activity-grid small,.admin-bonuses__activity-totals p { color: #aeb7c2; font-size: 12px; line-height: 1.5; }

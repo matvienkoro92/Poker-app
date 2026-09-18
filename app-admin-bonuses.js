@@ -289,6 +289,17 @@
     value.textContent = fmtPoints(total);
   }
 
+  function syncActivityTotals(data){
+    var el=$('adminBonusesActivityTotals');if(!el)return;el.hidden=false;
+    if(!data||!data.available){el.textContent='Итоги активности временно недоступны. Обновите список.';return;}
+    var items=[['За публикации',fmtPoints(data.publicationBonus)+' ₽',fmtPoints(data.publications)+' публикаций'],
+      ['За комментарии',fmtPoints(data.commentBonus)+' ₽',fmtPoints(data.comments)+' зачтённых · дают шаги к крутке'],
+      ['Крутки за 7 действий',fmtPoints(data.spinsEarned),'Всего выдано, включая использованные'],
+      ['Дополнительные крутки',fmtPoints(data.extraSpinsEarned),'Выиграны в крутках за активность'],
+      ['Выигрыши этих круток',fmtPoints(data.spinBonus)+' ₽','Начислено на бонусные балансы'],
+      ['Всего за активность',fmtPoints(data.bonusTotal)+' ₽','Публикации + выигрыши круток']];
+    el.innerHTML='<h3>Активность в разборах · всего по клубу</h3><div class="admin-bonuses__activity-grid">'+items.map(function(item){return '<div><span>'+esc(item[0])+'</span><strong>'+esc(item[1])+'</strong><small>'+esc(item[2])+'</small></div>';}).join('')+'</div><p>За всё время работы наград. Не зависит от поиска и страницы списка. Осталось круток: '+fmtPoints(data.spinsAvailable)+'. Обновлено: '+esc(fmtDate(data.asOf))+'.</p>';
+  }
   function renderTable(users) {
     var body = $("adminBonusesTableBody");
     if (!body) return;
@@ -309,7 +320,7 @@
             '<button type="button" data-admin-bonus-debit="' + esc(user.userId) + '">Списать</button>' +
           '</div>' +
         '</td>' +
-        '<td><strong>' + esc(user.bonusBalance || 0) + '</strong></td>' +
+        '<td><strong>' + esc(user.bonusBalance || 0) + '</strong><small style="display:block" title="Всего заработано за публикации и крутки за активность, не остаток">За активность: ' + esc(user.activityBonusEarned || 0) + ' ₽' + (user.activitySpinsEarned!=null?' · круток: '+esc(user.activitySpinsEarned):'') + '</small></td>' +
         '<td>' + esc(user.dailyPokerGamesPlayed || 0) + '</td>' +
         '<td>' + esc(user.ticketsWon || 0) + '</td>' +
       '</tr>';
@@ -348,12 +359,14 @@
         syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
         syncTotalDebited(adminBonusesState.totalDebited);
         syncTotalBalance(adminBonusesState.totalBalance);
+        syncActivityTotals(data.activityTotals);
         setStatus("Показано: " + adminBonusesState.users.length + " из " + adminBonusesState.total, false);
       })
       .catch(function (err) {
         if (err && err.name === "AbortError") return;
         if (requestSeq !== adminBonusesState.listRequestSeq) return;
         adminBonusesState.loading = false;
+        syncActivityTotals(null);
         syncShowAllButton(0, 0);
         syncTotalDebited(adminBonusesState.totalDebited);
         syncTotalBalance(adminBonusesState.totalBalance);

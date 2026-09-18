@@ -1072,6 +1072,13 @@ function refreshProfilePublicShowcase(profileData) {
   if (profileData && typeof profileData === "object") profilePublicShowcaseData = profileData;
   if (typeof window.pokerRefreshOwnAppearance === "function") window.pokerRefreshOwnAppearance().catch(function () {});
   var data = profilePublicShowcaseData || {};
+  root.querySelector('[data-review-activity-profile]')?.remove();
+  if(data.reviewActivity){
+    var activityInfo=document.createElement('p');activityInfo.dataset.reviewActivityProfile='';activityInfo.className='profile-review-activity';
+    activityInfo.textContent='За активность в разборах: '+Number(data.reviewActivity.bonusEarned||0).toLocaleString('ru-RU')+' ₽ · круток заработано: '+Number(data.reviewActivity.spinsEarned||0);
+    activityInfo.title='Всего начислено за публикации и выигрыши круток за активность. Это не остаток баланса.';
+    root.appendChild(activityInfo);
+  }
   var title = profilePublicShowcaseDisplayName(data);
   var titleEl = document.getElementById("profilePublicTitle");
   var verified = document.getElementById("profilePublicVerifiedBadge");

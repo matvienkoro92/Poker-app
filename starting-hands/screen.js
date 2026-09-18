@@ -136,19 +136,22 @@ function startHistory(payload) {
   function publicationOptions(button){
     return new Promise(resolve=>{
       const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog';
-      dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>Опубликовать в раздел «Мои раздачи» на разбор для игроков клуба?</p><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="show" checked> Показать результат — под спойлером</label><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="hide"> Скрыть результат — раздача будет опубликована без ШД</label><p>Карты следующих улиц после завершения выставления, карты соперников и выигрыш или проигрыш будут под спойлером либо полностью убраны.</p><label class="hand-publish-comment">Комментарий (необязательно)<textarea name="comment" maxlength="3000" rows="4" placeholder="Что хотите обсудить в этой раздаче?"></textarea></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
+      dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>+10 ₽ на бонусный баланс и 1 шаг к крутке. До 3 раздач в день (МСК). Каждые 7 действий — крутка.</p><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="show" checked> Показать результат — под спойлером</label><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="hide"> Скрыть результат — раздача будет опубликована без ШД</label><p>Карты следующих улиц после завершения выставления, карты соперников и выигрыш или проигрыш будут под спойлером либо полностью убраны.</p><label class="hand-publish-comment">Ваш вопрос — минимум 20 букв или цифр<textarea name="comment" required minlength="20" maxlength="3000" rows="4" placeholder="Какое решение в этой раздаче хотите обсудить?"></textarea></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
       const draft=button._publishDraft;
       if(draft){dialog.querySelector('input[value="'+(draft.showShowdown?'show':'hide')+'"]').checked=true;dialog.querySelector('textarea').value=draft.comment;}
       let result=null;
-      dialog.querySelector('form').onsubmit=event=>{event.preventDefault();result={showShowdown:dialog.querySelector('input').checked,comment:dialog.querySelector('textarea').value.trim()};button._publishDraft=result;dialog.close();};
+      const textarea=dialog.querySelector('textarea');
+      textarea.oninput=()=>textarea.setCustomValidity('');
+      dialog.querySelector('form').onsubmit=event=>{event.preventDefault();const text=textarea.value.trim(),count=text.normalize('NFKC').split(/\r?\n/).filter(line=>!/^\s*>/.test(line)).join(' ').replace(/https?:\/\/\S+|www\.\S+|«[^»]*»|“[^”]*”|"[^"]*"/giu,'').replace(/[^\p{L}\p{N}]/gu,'').length;if(count<20){textarea.setCustomValidity('Напишите вопрос: минимум 20 букв или цифр без ссылок и цитат');textarea.reportValidity();return;}result={showShowdown:dialog.querySelector('input').checked,comment:text};button._publishDraft=result;dialog.close();};
       dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();
       dialog.addEventListener('close',()=>{dialog.remove();resolve(result);},{once:true});
       document.body.append(dialog);dialog.showModal();
     });
   }
-  function showPublicationSuccess(reviewId){
+  function showPublicationSuccess(reviewId,response){
     const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog hand-publish-success';
     dialog.innerHTML='<h2>Ваша раздача опубликована</h2><div><button type="button" data-close>Закрыть</button><button type="button" data-open>Перейти в раздел</button></div>';
+    if(response?.activity){const p=document.createElement('p'),a=response.activity;p.textContent=(response.activityAward?'+10 ₽ на бонусный баланс · +1 действие'+(response.activityAward.spin?' · +1 крутка!':'')+'. ':'')+'Прогресс: '+a.progress+'/7. Публикации сегодня: '+a.publicationsToday+'/3.';dialog.querySelector('h2').after(p);}
     dialog.querySelector('[data-close]').onclick=()=>dialog.close();
     dialog.querySelector('[data-open]').onclick=()=>{window.parent.postMessage({type:'starting-hands-open-review',id:reviewId||''},window.location.origin);dialog.close();};
     dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
@@ -171,11 +174,11 @@ function startHistory(payload) {
       const startingStackMinor=Number.isSafeInteger(hand.startingStackMinor)?hand.startingStackMinor:heroStack&&Number.isFinite(heroStack.amount)&&heroStack.amount>=0?Math.round(heroStack.amount*100):null;
       const potCodes=new Set(['2','3','5','18','19','20','92']);
       const totalPotMinor=Math.round((replay.events||[]).reduce((sum,event)=>sum+(potCodes.has(String(event.code))?(Number(event.amount)||0):0),0)*100);
-      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
+      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment,context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
-      showPublicationSuccess(response?.id);
-    }catch(error){button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1400));button.textContent=original;button.disabled=false;return;}
+      showPublicationSuccess(response?.id,response);
+    }catch(error){button.textContent=original;button.disabled=false;const dialog=document.createElement('dialog');dialog.className='hand-share-dialog';const p=document.createElement('p');p.textContent=error.message||'Не удалось опубликовать раздачу';const close=document.createElement('button');close.textContent='Понятно';close.onclick=()=>dialog.close();dialog.append(p,close);dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();return;}
     button.disabled=true;
   }
   async function shareHand(button,hand,row,renderReplay){

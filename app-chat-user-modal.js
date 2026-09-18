@@ -3388,6 +3388,7 @@ if (chatUserModalEl) {
     }
     if (modalRespectVal) modalRespectVal.textContent = "—";
     if (modalStatusScale) modalStatusScale.style.setProperty("--status-value", "0");
+    chatUserModalEl.querySelector('[data-review-activity-profile]')?.remove();
     if (modalStatusSection) modalStatusSection.hidden = true;
     if (modalStatusCards[0]) modalStatusCards[0].textContent = "1";
     if (modalStatusCards[1]) modalStatusCards[1].textContent = "2";
@@ -3471,6 +3472,13 @@ if (chatUserModalEl) {
           modalLevelText.hidden = false;
         }
         syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
+        if(data&&data.ok&&data.reviewActivity&&modalLevelText){
+          chatUserModalEl.querySelector('[data-review-activity-profile]')?.remove();
+          var activityInfo=document.createElement('p');activityInfo.dataset.reviewActivityProfile='';activityInfo.className='profile-review-activity';
+          activityInfo.textContent='За активность в разборах: '+Number(data.reviewActivity.bonusEarned||0).toLocaleString('ru-RU')+' ₽ · круток заработано: '+Number(data.reviewActivity.spinsEarned||0);
+          activityInfo.title='Всего начислено за публикации и выигрыши круток за активность. Это не остаток баланса.';
+          modalLevelText.after(activityInfo);
+        }
         if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
         var ratingNick = data && data.ok ? chatUserModalRatingNickFromData(data) : "";
         ratingNick = ratingNick || fallbackRatingNick;

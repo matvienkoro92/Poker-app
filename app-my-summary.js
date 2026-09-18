@@ -116,6 +116,7 @@
     if (!spin) return;
     put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + (spin.lifetimePrizes ? '<p class="summary-muted">Уже выиграно:<br><strong>' + num(spin.lifetimePrizes.ticketAmount) + ' ₽ билетами</strong><br>' + num(spin.lifetimePrizes.bonusAmount) + ' бонусов</p>' : '<p class="summary-muted">Сумма выигрышей временно недоступна.</p>') + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
     put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + ' <small>бонусов</small></strong><p class="summary-muted">На билеты для бэкинга.</p>' + link("Обменять", "daily-poker"));
+    if(spin.activity){var bonusCard=document.getElementById('summary-bonus');if(bonusCard)bonusCard.insertAdjacentHTML('beforeend','<p class="summary-muted">Заработано за активность: '+num(spin.activity.bonusEarned)+' ₽</p>');}
     friends();
   }
   function renderSchedule() {
@@ -396,7 +397,7 @@
     if(existing){existing.showModal();existing.style.display='grid';var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-action-positions-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-review-activity-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=function(){closeStartingHands(false);};
     modal.addEventListener('close',function(){modal.style.display='none';});
     document.body.append(modal);modal.showModal();modal.style.display="grid";
@@ -416,8 +417,8 @@
       try{
         var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',hideShowdown:message.hideShowdown===true,forCoach:false,image:message.image,cards:message.cards,handId:message.handId,gameMode:message.gameMode,bigBlindMinor:message.bigBlindMinor,startingStackMinor:message.startingStackMinor,totalPotMinor:message.totalPotMinor});
         window.dispatchEvent(new Event('poker-reviews-updated'));
-        frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:{ok:true,id:published.thread&&published.thread.id}},window.location.origin);
-      }catch(_){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'publish failed'},window.location.origin);}
+        frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:{ok:true,id:published.thread&&published.thread.id,activity:published.activity,activityAward:published.activityAward}},window.location.origin);
+      }catch(error){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:error.message||'Не удалось опубликовать раздачу'},window.location.origin);}
       return;
     }
     if(message.action==='chart-wall'){

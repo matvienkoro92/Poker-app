@@ -18,6 +18,7 @@ test('handler prevents foreign deletion, stamps coach from resolved account and 
   const h=load('lib/api-handlers/club-reviews.js',{
     '../club-social':{context:async req=>({body:req.body,accountId:who,admin}),memberProfile:async()=>({name:'Игрок'}),coachAccount:async()=> 'ID3'},
     '../club-reviews':m,
+    '../review-activity':{summary:async()=>({progress:0,target:7}),commit:async({thread,raw,keys})=>{const [ok]=await mem.redis([['EVAL','cas',keys.length,...keys,raw,JSON.stringify(thread),Date.parse(thread.updatedAt),thread.id]]);return Number(ok)===1;}},
     '../chat-webpush-notify':{sendToMemberDevices:async(id,p)=>{sent.push({id,p});}},
     '../review-telegram-notify':{checkSubscription:async()=>'',notify:async()=>{}}
   });
