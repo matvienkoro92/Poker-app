@@ -9722,6 +9722,18 @@ body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active
 [data-view="club-reviews"] .review-share-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 [data-view="club-reviews"] .review-share-actions .review-share-button{font-weight:700}
 [data-view="club-reviews"] .review-share-actions .review-copy-button{width:40px;padding:0;border-radius:50%}
+[data-view="club-reviews"] .review-hand-format{color:#f1c66c;font-size:.72em;font-weight:800;letter-spacing:.035em;white-space:nowrap}
+@media (min-width: 700px) {
+  [data-view="club-reviews"] .review-thread-card { padding-top: 20px; }
+  [data-view="club-reviews"] .review-thread-card > h2 {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    margin-top: 0;
+    padding-right: 250px;
+  }
+  [data-view="club-reviews"] .review-thread-card .review-share-actions { top: 20px; }
+}
 [data-view="club-reviews"] .playing-card {
   display: inline-block;
   margin: 0 3px;
@@ -9787,6 +9799,8 @@ body[data-view="club-reviews"] #app.app .view--active[data-view="club-reviews"] 
   background: #1b293b;
   font-weight: 700;
 }
+[data-view="club-reviews"] .review-hand-text__street { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+[data-view="club-reviews"] .review-hand-text__pot { margin-left: auto; white-space: nowrap; color: currentColor; font-size: .92em; }
 [data-view="club-reviews"] .review-hand-text__street--preflop { color: #a8c5ff; }
 [data-view="club-reviews"] .review-hand-text__street--flop { color: #76ddbb; }
 [data-view="club-reviews"] .review-hand-text__street--turn { color: #f1c779; }
@@ -9799,6 +9813,10 @@ body[data-view="club-reviews"] #app.app .view--active[data-view="club-reviews"] 
   color: #d9f5a6;
   font-weight: 700;
 }
+[data-view="club-reviews"] .review-hand-text__line--raise{color:#ff7272}
+[data-view="club-reviews"] .review-hand-text__line--call{color:#72b7ff}
+[data-view="club-reviews"] .review-hand-text__line--reraise{color:#ffad57}
+[data-view="club-reviews"] :is(.review-hand-text__line--raise,.review-hand-text__line--call,.review-hand-text__line--reraise) .review-hand-text__hero{color:inherit}
 [data-view="club-reviews"] .review-hand-spoiler{margin-top:14px;border:1px solid #d3ad6245;border-radius:12px;background:#0d1115;overflow:hidden}
 [data-view="club-reviews"] .review-hand-spoiler>summary{padding:13px 15px;color:#f0d590;font-weight:750;cursor:pointer;list-style:none}
 [data-view="club-reviews"] .review-hand-spoiler>summary::-webkit-details-marker{display:none}

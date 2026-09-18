@@ -157,7 +157,11 @@ function startHistory(payload) {
       if(image.length>450000)throw new Error('image-too-large');
       const cards=(replay.cards||hand.cards||[]).map(card=>window.PokerHandShare.card(card)).join(' ');
       const result=signed(hand.resultMinor/100)+' '+(mode==='cash'?'₽':'фишек');
-      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards+(options.showShowdown?' · '+result:''),question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode},hand),replay,options),hideShowdown:options.showShowdown===false,image});
+      const heroStack=(replay.stacks||[]).find(item=>item&&item.actor==='Вы');
+      const startingStackMinor=Number.isSafeInteger(hand.startingStackMinor)?hand.startingStackMinor:heroStack&&Number.isFinite(heroStack.amount)&&heroStack.amount>=0?Math.round(heroStack.amount*100):null;
+      const potCodes=new Set(['2','3','5','18','19','20','92']);
+      const totalPotMinor=Math.round((replay.events||[]).reduce((sum,event)=>sum+(potCodes.has(String(event.code))?(Number(event.amount)||0):0),0)*100);
+      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards+(options.showShowdown?' · '+result:''),question:options.comment||'Как бы вы сыграли эту раздачу?',context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
       showPublicationSuccess(response?.id);

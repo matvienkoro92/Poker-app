@@ -24,30 +24,42 @@
   function topicLink(id){return new URL('./?startapp=review_'+id,location.href).href;}
   function cardsText(t){return (t.cards||[]).map(function(c){return c.replace(/^T/,'10').replace(/[shdc]$/,function(s){return {s:'♠',h:'♥',d:'♦',c:'♣'}[s];});}).join(' ');}
   function cardsHtml(t){return (t.cards||[]).map(function(c){var suit=c.slice(-1),rank=c.slice(0,-1).replace(/^T$/,'10');return '<span class="playing-card suit-'+suit+'">'+esc(rank+({s:'♠',h:'♥',d:'♦',c:'♣'}[suit]||''))+'</span>';}).join('');}
+  function handFormat(t){
+    if(!t||t.type!=='hand')return '';
+    var mode=t.gameMode||(/\bфишек\b/i.test(t.context||'')?'mtt':/(?:₽|руб)/i.test(t.context||'')?'cash':'');
+    var bigBlind=Number(t.bigBlindMinor)/100;
+    if(!(bigBlind>0)){var match=/большой блайнд\s+([\d\s.,]+)/i.exec(t.context||'');if(match)bigBlind=Number(match[1].replace(/\s/g,'').replace(',','.'));}
+    var stackBb=bigBlind>0&&Number.isSafeInteger(t.startingStackMinor)&&t.startingStackMinor>=0?t.startingStackMinor/100/bigBlind:NaN;
+    var stack=Number.isFinite(stackBb)?' · стек '+stackBb.toLocaleString('ru-RU',{maximumFractionDigits:1})+' BB':'';
+    if(mode==='mtt')return 'МТТ'+stack;
+    if(mode==='cash')return 'КЕШ'+(bigBlind>0?' · '+(bigBlind/2).toLocaleString('ru-RU',{maximumFractionDigits:2})+'/'+bigBlind.toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽':'')+stack;
+    return '';
+  }
   function topicTitle(t){return (t.cards||[]).length?t.authorName+' · '+cardsText(t):t.title;}
-  function topicTitleHtml(t){return (t.cards||[]).length?esc(t.authorName)+' · '+cardsHtml(t):esc(t.title);}
+  function topicTitleHtml(t){var format=handFormat(t);return (format?'<span class="review-hand-format">'+esc(format)+'</span> · ':'')+((t.cards||[]).length?esc(t.authorName)+' · '+cardsHtml(t):esc(t.title));}
   function inlineCards(text){
     var raw=String(text||''),out='',last=0,re=/(10|[2-9JQKA])([♠♥♦♣])/g,match;
     while((match=re.exec(raw))){out+=esc(raw.slice(last,match.index));var suit={"♠":"s","♥":"h","♦":"d","♣":"c"}[match[2]];out+='<span class="playing-card suit-'+suit+'">'+esc(match[0])+'</span>';last=re.lastIndex;}
     return out+esc(raw.slice(last));
   }
-  function actionLineHtml(line,heroName){
+  function actionLineHtml(line,heroName,actionClass){
     var match=/^(.+?)\s+—\s+(.+)$/.exec(line),html=inlineCards(line);
     if(match&&(match[1].trim()==='Вы'||heroName&&match[1].trim()===heroName))html='<strong class="review-hand-text__hero">'+esc(match[1].trim())+'</strong> — '+inlineCards(match[2]);
-    return '<div class="review-hand-text__line'+(/\s—\sФолд(?:\s|$)/.test(line)?' review-hand-text__line--fold':'')+'">'+html+'</div>';
+    return '<div class="review-hand-text__line'+(/\s—\sФолд(?:\s|$)/.test(line)?' review-hand-text__line--fold':'')+(actionClass?' '+actionClass:'')+'">'+html+'</div>';
   }
   function contextLinesHtml(lines,heroName){
     var cardsLine=lines.find(function(line){return /^Мои карты:\s*/.test(line);})||'';
     var heroCards=cardsLine.replace(/^Мои карты:\s*/, '');
+    var raisesOnStreet=0;
     return lines.map(function(line,index){
       if(!line.trim())return /^(?:Флоп|Тёрн|Ривер)(?::|$)/.test(lines[index+1]||'')?'':'<span class="review-hand-text__space" aria-hidden="true"></span>';
       if(line==='Два туза · Моя игра')return '';
       if(/^(?:Раздача #|Мои карты:|Позиция:)/.test(line))return '';
-      var street=/^(Префлоп|Флоп|Тёрн|Ривер)(?::|$)/.exec(line);
-      if(street){var streetText=line+(street[1]==='Префлоп'&&heroCards?' · '+heroCards:'');return '<div class="review-hand-text__street review-hand-text__street--'+({"Префлоп":"preflop","Флоп":"flop","Тёрн":"turn","Ривер":"river"}[street[1]])+'">'+inlineCards(streetText)+'</div>';}
+      var street=/^(Префлоп|Флоп|Тёрн|Ривер)(?::|\s*·|$)/.exec(line);
+      if(street){raisesOnStreet=0;var pot=/\s·\sБанк:\s*(.+)$/.exec(line),streetText=(pot?line.slice(0,pot.index):line)+(street[1]==='Префлоп'&&heroCards?' · '+heroCards:'');return '<div class="review-hand-text__street review-hand-text__street--'+({"Префлоп":"preflop","Флоп":"flop","Тёрн":"turn","Ривер":"river"}[street[1]])+'"><span>'+inlineCards(streetText)+'</span>'+(pot?'<span class="review-hand-text__pot">Банк: '+inlineCards(pot[1])+'</span>':'')+'</div>';}
       if(/^Вскрытие:/.test(line))return '<div class="review-hand-text__showdown">'+inlineCards(line)+'</div>';
       if(/^Результат:/.test(line))return '<div class="review-hand-text__result">'+inlineCards(line)+'</div>';
-      if(/\s—\s/.test(line))return actionLineHtml(line,heroName);
+      if(/\s—\s/.test(line)){var actionClass='';if(/\s—\sКолл(?:\s|$)/.test(line))actionClass='review-hand-text__line--call';else if(/\s—\sРейз(?:\s|$)/.test(line)){actionClass=raisesOnStreet?'review-hand-text__line--reraise':'review-hand-text__line--raise';raisesOnStreet++;}return actionLineHtml(line,heroName,actionClass);}
       return '<div class="review-hand-text__line'+(index<3?' review-hand-text__line--meta':'')+'">'+inlineCards(line)+'</div>';
     }).join('');
   }
