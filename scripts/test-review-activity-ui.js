@@ -19,7 +19,7 @@ async function main() {
       window.setView = view => { window.lastView = view; };
       window.fixture = { id:'f'.repeat(24), type:'hand', authorId:'ID999999', authorName:'Игрок', authorNick:'Покерманки',
         title:'Раздача', question:'Как лучше сыграть на тёрне против этого соперника?', gameMode:'cash', bigBlindMinor:4000, totalPotMinor:120000,
-        cards:['As','Kh'], createdAt:'2026-09-18T10:00:00Z', updatedAt:'2026-09-18T10:00:00Z', context:'Префлоп · Банк: 30 bb\nSB: Вы — Рейз 3 bb',
+        cards:['As','Kh'], createdAt:'2026-09-18T10:00:00Z', updatedAt:'2026-09-18T10:00:00Z', context:'Префлоп · Банк: 30 bb\nSB: Вы — Рейз 3 bb\nРивер: Q♣ 9♦ 5♥ 9♥ 7♠ · Банк: 100,5 bb',
         replies:[], votes:{fold:0,call:0,raise:0}, following:false, version:0, replyCount:0 };
       let progress = 6;
       window.pokerSocialRequest = async (_, body) => {
@@ -41,6 +41,17 @@ async function main() {
     }
     await page.locator('[data-review-action="open"]').click();
     await page.waitForSelector('#reviewReplyForm');
+    for (const width of [320, 360, 390, 430, 1280]) {
+      await page.setViewportSize({width,height:900});
+      const layout = await page.locator('.review-hand-text__street--river').evaluate(el => {
+        const cards = [...el.querySelectorAll('.playing-card')].map(card => card.getBoundingClientRect());
+        const board = el.querySelector('.review-hand-text__board').getBoundingClientRect();
+        const pot = el.querySelector('.review-hand-text__pot').getBoundingClientRect();
+        const lines = [...el.querySelector('.review-hand-text__pot').children].map(line => line.getBoundingClientRect());
+        return {count:cards.length,oneRow:cards.every(card=>Math.abs(card.top-cards[0].top)<1),separate:board.right<=pot.left,stacked:lines[1].top>=lines[0].bottom-1,overflow:el.scrollWidth>el.clientWidth+1};
+      });
+      assert.deepEqual(layout,{count:5,oneRow:true,separate:true,stacked:true,overflow:false},'river layout at '+width);
+    }
     const text='На тёрне я бы продолжил небольшим размером, потому что в диапазоне соперника ещё много слабых рук и дро.';
     await page.locator('#reviewReplyForm textarea').fill(text);
     assert.match(await page.locator('#reviewActivityHint').textContent(), /\d+ \/ 60/);
