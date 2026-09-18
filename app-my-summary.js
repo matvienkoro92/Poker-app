@@ -353,7 +353,7 @@
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname || "";
       root.insertAdjacentHTML("afterbegin",
-        section("starting-hands", "Моя игра", '<p class="summary-muted">График и EV по раздачам</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
+        section("starting-hands", "Мои раздачи", '<p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
         section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")));
       loadReviewUnread(valid);
       if(['ID400800'].includes(account)) {
@@ -380,7 +380,7 @@
     if(existing){existing.showModal();existing.style.display='grid';var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-mtt-stacks-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-replay-bb-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=function(){closeStartingHands(false);};
     modal.addEventListener('close',function(){modal.style.display='none';});
     document.body.append(modal);modal.showModal();modal.style.display="grid";

@@ -339,6 +339,7 @@ function startHistory(payload) {
   }
 
   function render() {
+    if(mode==='mtt')metric='bb';
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
@@ -371,8 +372,11 @@ function startHistory(payload) {
     let roundActors=new Set();
     let lastBoardLength=0;
     let currentPot=0;
-    const potUnit=mode==='cash'?'₽':'фишек';
-    const potLabel=()=>number(Math.round(currentPot));
+    const replayInBb=metric==='bb';
+    const bigBlind=hand.bigBlindMinor/100;
+    const replayAmount=amount=>number(replayInBb?Number(amount)/bigBlind:Number(amount));
+    const potUnit=replayInBb?'bb':mode==='cash'?'₽':'фишек';
+    const potLabel=()=>replayAmount(currentPot);
     const contributionCodes=new Set(['2','3','5','18','19','20']);
     const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};
     const unknown=[];
@@ -386,29 +390,30 @@ function startHistory(payload) {
         pot.className='street-pot';pot.textContent='· Банк: '+potLabel()+' '+potUnit;
         street.append(board,pot);continue;
       }
-      if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount){currentPot+=Number(event.amount)||0;add('p','Параметр обязательных взносов: '+number(event.amount)+' '+(mode==='cash'?'₽':'фишек'),'note');}continue;}
+      if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount){currentPot+=Number(event.amount)||0;add('p','Параметр обязательных взносов: '+replayAmount(event.amount)+' '+potUnit,'note');}continue;}
       if(!labels[event.code]){unknown.push(event);continue;}
       const label=labels[event.code];
       const decision=!['18','19'].includes(event.code);
       let newRound=false;
       if(decision){if(roundActors.has(event.actorId)){newRound=true;roundActors.clear();}roundActors.add(event.actorId);}
-      const action=add('p',event.actor+' · '+label+(event.amount?' · '+number(event.amount):''),event.actor==='Вы'?'replay-hero':'replay-action');
+      const action=add('p',event.actor+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');
       if(contributionCodes.has(event.code)&&event.amount)currentPot+=Number(event.amount)||0;
       if(event.code==='10')action.classList.add('replay-fold');
       if(newRound)action.classList.add('replay-round-start');
     }
     if(hand.showdown&&lastBoardLength===4){const street=add('h4','','replay-board street-heading street-river'),board=document.createElement('span'),pot=document.createElement('span');board.className='street-board-cards';board.textContent='Ривер · нет карты';pot.className='street-pot';pot.textContent='· Банк: '+potLabel()+' '+potUnit;street.append(board,pot);}
-    if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+number(event.amount):'');more.append(line);}target.append(more);}
+    if(unknown.length){const more=document.createElement('details'),caption=document.createElement('summary');caption.textContent='Нераспознанные записи отчёта ('+unknown.length+')';more.append(caption);for(const event of unknown){const line=document.createElement('p');line.textContent=event.actor+' · код '+event.code+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):'');more.append(line);}target.append(more);}
     const shown=(replay.shownOpponents||[]).filter(p=>['showdown-winner','showdown-allin'].includes(p.disclosure)&&p.playerId!==String(sample.playerId));
     if(shown.length){add('h4','Вскрытие','street-heading street-river replay-showdown');for(const p of shown)appendCards(add('p',p.actor+' · ','replay-cards replay-showdown'),p.cards);}
-    add('p','Ваш результат: '+signed(hand.resultMinor/100)+' '+(mode==='cash'?'₽':'фишек'),'replay-result');target.dataset.shareReady='1';
+    add('p','Ваш результат: '+signed(replayInBb?hand.bb:hand.resultMinor/100)+' '+potUnit,'replay-result');target.dataset.shareReady='1';
   }
     renderInsights(data,renderReplay);
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
     $('stack-filter-wrap').hidden=mode!=='mtt';
     $('stack-filter').value=stackBand;
     $('metric').textContent=metric==='resultMinor'?(mode==='cash'?'Рубли':'Фишки'):'bb';
-    $('metric').setAttribute('aria-label','Показатель: '+$('metric').textContent+'. Переключить');
+    $('metric').disabled=mode==='mtt';
+    $('metric').setAttribute('aria-label',mode==='mtt'?'Показатель MTT: только bb':'Показатель: '+$('metric').textContent+'. Переключить');
     document.querySelector('.date-picker summary').title='Период · МСК: '+(appliedFrom||'начало')+' — '+(appliedTo||'сегодня');
     const compactDate=value=>value?value.slice(8,10)+'.'+value.slice(5,7):'—';
     $('date-summary-text').textContent=compactDate(appliedFrom)+'–'+compactDate(appliedTo);
@@ -460,7 +465,7 @@ function startHistory(payload) {
     }
     moreHands.onclick=appendHandPage;appendHandPage();$('detail').append(list,moreHands);
   }
-  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;render();if(mode==='mtt')ensureMttStacks();}));
+  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;if(mode==='mtt')metric='bb';render();if(mode==='mtt')ensureMttStacks();}));
   ['date-from','date-to'].forEach(id=>$(id).addEventListener('change',()=>{
     const from=$('date-from').value,to=$('date-to').value;
     if(from&&to&&from>to){$('date-status').textContent='Дата окончания раньше начала';return;}
@@ -478,7 +483,7 @@ function startHistory(payload) {
     $('hand-search').value='';$('opponent-search').value='';selected=null;render();
     $('hand-search').focus();
   });
-  $('metric').addEventListener('click',()=>{metric=metric==='bb'?'resultMinor':'bb';render();});
+  $('metric').addEventListener('click',()=>{if(mode==='mtt')return;metric=metric==='bb'?'resultMinor':'bb';render();});
   $('date-close').addEventListener('click',()=>{if($('date-status').textContent)return;document.querySelector('.date-picker').open=false;document.querySelector('.date-picker summary').focus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelector('.date-picker').open=false;}});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});
