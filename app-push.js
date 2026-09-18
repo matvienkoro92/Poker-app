@@ -683,7 +683,41 @@ function initProfileChatPush() {
 }
 (function initPwaServiceWorkerGlobal() {
   var pokerSwUserApprovedReload = false;
-  function pokerShowUpdateAvailable() {
+  var pokerUpdateNoticeKey = "poker_app_update_notice_pending_v1";
+  var pokerPendingUpdateMessage = "";
+  function pokerShowUpdatedNotice(message) {
+    var notice = document.createElement("div");
+    notice.id = "pokerAppUpdatedNotice";
+    notice.setAttribute("role", "status");
+    notice.setAttribute("aria-live", "polite");
+    var title = document.createElement("strong");
+    title.textContent = "✓ Приложение обновлено";
+    var details = document.createElement("span");
+    details.textContent = String(message || "Установлена последняя версия").slice(0, 180);
+    details.style.cssText = "display:block;margin-top:3px;color:#c9c3b7;font-weight:400";
+    notice.appendChild(title);
+    notice.appendChild(details);
+    notice.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translate(-50%,-8px);z-index:2147483647;padding:8px 13px;border-radius:14px;background:#171a1ef2;color:#f3d998;border:1px solid #a985485c;box-shadow:0 8px 24px #0007;font:600 12px/1.25 sans-serif;max-width:min(82vw,360px);text-align:left;opacity:0;transition:opacity .18s ease,transform .18s ease;pointer-events:none";
+    document.body.appendChild(notice);
+    requestAnimationFrame(function () { notice.style.opacity = "1"; notice.style.transform = "translate(-50%,0)"; });
+    setTimeout(function () {
+      notice.style.opacity = "0";
+      notice.style.transform = "translate(-50%,-8px)";
+      setTimeout(function () { if (notice.parentNode) notice.parentNode.removeChild(notice); }, 220);
+    }, 2800);
+  }
+  try {
+    var pokerSavedUpdateNotice = sessionStorage.getItem(pokerUpdateNoticeKey);
+    if (pokerSavedUpdateNotice) {
+      sessionStorage.removeItem(pokerUpdateNoticeKey);
+      var pokerSavedUpdateMessage = "";
+      try { pokerSavedUpdateMessage = JSON.parse(pokerSavedUpdateNotice).message || ""; } catch (eUpdateNoticeParse) {}
+      if (document.body) pokerShowUpdatedNotice(pokerSavedUpdateMessage);
+      else document.addEventListener("DOMContentLoaded", function () { pokerShowUpdatedNotice(pokerSavedUpdateMessage); }, { once: true });
+    }
+  } catch (eUpdateNotice) {}
+  function pokerShowUpdateAvailable(message) {
+    if (typeof message === "string" && message.trim()) pokerPendingUpdateMessage = message.trim().slice(0, 180);
     if (document.getElementById("pokerAppUpdateButton")) return;
     var button = document.createElement("button");
     button.id = "pokerAppUpdateButton";
@@ -693,6 +727,7 @@ function initProfileChatPush() {
     button.addEventListener("click", function () {
       button.disabled = true;
       button.textContent = "Обновляем…";
+      try { sessionStorage.setItem(pokerUpdateNoticeKey, JSON.stringify({ message: pokerPendingUpdateMessage })); } catch (eUpdateMark) {}
       var clearStatic = "caches" in window ? caches.keys().then(function (names) {
         return Promise.all(names.filter(function (name) { return name.indexOf("poker-static-") === 0; }).map(function (name) { return caches.delete(name); }));
       }).catch(function () {}) : Promise.resolve();
@@ -721,7 +756,7 @@ function initProfileChatPush() {
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (data) {
         if (data && typeof data.releaseId === "string" && data.releaseId && data.releaseId !== releaseId) {
-          pokerShowUpdateAvailable();
+          pokerShowUpdateAvailable(data.whatsNew);
           if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistration().then(function (reg) { if (reg) return reg.update(); }).catch(function () {});
         }
       }).catch(function () {}).finally(function () { clearTimeout(timeout); releaseCheckPending = false; });

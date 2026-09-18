@@ -243,8 +243,13 @@ console.log('Build output is in public/');
 
 // Every published build gets an identity, even when the display version is unchanged.
 const releaseId = require('crypto').randomBytes(16).toString('hex');
+let releaseWhatsNew = '';
+try {
+  const releaseNotes = JSON.parse(fs.readFileSync(path.join(root, 'app-release-notes.json'), 'utf8'));
+  releaseWhatsNew = String(releaseNotes.whatsNew || '').trim().slice(0, 180);
+} catch (_) {}
 const releaseHtml = path.join(publicDir, 'index.html');
 fs.writeFileSync(releaseHtml, fs.readFileSync(releaseHtml, 'utf8').replace('<html ', '<html data-release-id="' + releaseId + '" '));
-fs.writeFileSync(path.join(publicDir, 'app-release.json'), JSON.stringify({ releaseId }));
+fs.writeFileSync(path.join(publicDir, 'app-release.json'), JSON.stringify({ releaseId, whatsNew: releaseWhatsNew }));
 const releaseWorker = path.join(publicDir, 'sw.js');
 fs.appendFileSync(releaseWorker, '\n// Release: ' + releaseId + '\n');

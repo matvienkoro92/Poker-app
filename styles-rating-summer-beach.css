@@ -86,3 +86,53 @@
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-result-rank { width: 18px; height: 18px; font-size: 10px; }
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-season-top th:first-child { width: 20px; }
 }
+
+/* Monthly top-10 tables stay as one compact two-column row. */
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+  padding: 0 7px 10px;
+  margin: 0;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-rating-season-top {
+  min-width: 0;
+  padding: 8px;
+  border-radius: 12px;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-rating-season-top h3 {
+  min-height: 0;
+  margin: 0 0 7px;
+  padding: 0 0 7px;
+  font-size: clamp(11px,1.6cqw,16px);
+  line-height: 1.2;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops table {
+  table-layout: fixed;
+  font-size: clamp(9px,1.35cqw,13px);
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops th,
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops td {
+  padding: 6px 2px;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops th:first-child { width: 22px; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops th:last-child { width: 34%; }
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-result-rank {
+  width: 19px;
+  height: 19px;
+  font-size: 10px;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops small {
+  margin-top: 2px;
+  font-size: .76em;
+  line-height: 1.2;
+}
+@media(max-width:520px) {
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops { gap: 5px; padding-inline: 3px; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-rating-season-top { padding: 5px 4px; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-rating-season-top h3 { font-size: 10px; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops table { font-size: 8.5px; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops th:first-child { width: 17px; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops th:last-child { width: 36%; }
+  #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-result-rank { width: 15px; height: 15px; font-size: 8px; }
+}
