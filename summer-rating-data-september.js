@@ -2434,4 +2434,119 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "17.09.2026": [
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Alesha",
+          "place": 2,
+          "reward": 4595,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "kingofclowns",
+          "place": 1,
+          "reward": 14360,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 3790,
+          "points": 0
+        },
+        {
+          "nick": "SantaClauS",
+          "place": 4,
+          "reward": 2550,
+          "points": 0
+        },
+        {
+          "nick": "Nikolay54rus",
+          "place": 3,
+          "reward": 1240,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "petroochoo",
+          "place": 2,
+          "reward": 20350,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 4,
+          "reward": 6730,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 9,
+          "reward": 1610,
+          "points": 0
+        },
+        {
+          "nick": "Алеша™",
+          "place": 7,
+          "reward": 710,
+          "points": 0
+        },
+        {
+          "nick": "Vitofish",
+          "place": 12,
+          "reward": 590,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 716.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RomanRomanov",
+          "place": 1,
+          "reward": 34396,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
