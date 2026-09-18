@@ -9612,8 +9612,9 @@ body[data-view="my-summary"]{background:#080c0e}
 
 /* Two independent top-level actions: hand history and club hand reviews. */
 [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry){grid-column:span 3;min-height:150px;order:-5}
-[data-view="my-summary"] .summary-card--reviews-entry{display:flex;flex-direction:column;justify-content:center;border-color:#ffad4e70;background:radial-gradient(ellipse at 90% 20%,#ff982d20,transparent 60%),linear-gradient(120deg,#251e19,#101315)}
+[data-view="my-summary"] .summary-card--reviews-entry{display:flex;flex-direction:column;justify-content:center;padding-right:35%;border-color:#ffad4e70;background:radial-gradient(ellipse at 90% 20%,#ff982d20,transparent 60%),linear-gradient(120deg,#251e19,#101315)}
 [data-view="my-summary"] .summary-card--reviews-entry h2{font-size:clamp(22px,3vw,34px)}
+[data-view="my-summary"] .summary-art--reviews-entry{width:35%;height:100%;right:0;bottom:0;filter:drop-shadow(0 12px 12px #0008)}
 [data-view="my-summary"] .summary-review-unread{position:absolute;z-index:2;top:16px;right:16px;display:grid;place-items:center;min-width:32px;height:32px;padding:0 8px;box-sizing:border-box;border:2px solid #ffe3a2;border-radius:999px;background:linear-gradient(145deg,#ffb13b,#ff632d);box-shadow:0 0 0 4px #ff8a2d24,0 5px 16px #ff702d66;color:#fff;font-size:16px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;pointer-events:none}
 [data-view="my-summary"] .summary-review-unread[hidden]{display:none}
 [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry).summary-card--actionable{cursor:pointer}
@@ -9621,8 +9622,8 @@ body[data-view="my-summary"]{background:#080c0e}
  [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry){min-height:145px;padding:16px}
  [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry) h2{font-size:clamp(17px,5vw,23px)}
  [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry) .summary-muted{font-size:11px!important}
- [data-view="my-summary"] .summary-card--starting-hands{padding-right:35%}
- [data-view="my-summary"] .summary-art--starting-hands{width:42%;height:82%}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry){padding-right:35%}
+ [data-view="my-summary"] :is(.summary-art--starting-hands,.summary-art--reviews-entry){width:42%;height:82%}
 }
 
 /* Friend news precedes the restored full-size daily action cards. */
@@ -9635,48 +9636,6 @@ body[data-view="my-summary"]{background:#080c0e}
  [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) .summary-value{font-size:14px!important;line-height:1.15}
  [data-view="my-summary"] #summary-bonus .summary-value{font-size:20px!important}
  [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) p{font-size:8.5px!important;line-height:1.2;margin:2px 0}
-}
-
-/* Compact hand-history entry, styled as a small dashboard button. */
-[data-view="my-summary"] .summary-card--starting-hands{
- align-self:start;
- min-height:72px;
- padding:11px 38px 11px 78px;
- border-radius:18px;
- justify-content:center;
- background:linear-gradient(110deg,#26211b,#101315);
-}
-[data-view="my-summary"] .summary-card--starting-hands h2{font-size:18px;line-height:1.15;margin:0 0 3px}
-[data-view="my-summary"] .summary-card--starting-hands .summary-muted{font-size:12px!important;line-height:1.2;margin:0}
-[data-view="my-summary"] .summary-art--starting-hands{
- display:block;
- left:9px;
- right:auto;
- top:50%;
- bottom:auto;
- width:60px;
- height:60px;
- transform:translateY(-50%);
- object-fit:contain;
- filter:drop-shadow(0 5px 7px #0008);
- mask-image:none;
-}
-[data-view="my-summary"] .summary-card--starting-hands::after{
- content:'›';
- position:absolute;
- right:14px;
- top:50%;
- transform:translateY(-52%);
- color:#ffc474;
- font-size:32px;
- line-height:1;
-}
-@media(max-width:600px){
- [data-view="my-summary"] .summary-card--starting-hands{min-height:64px;padding:9px 30px 9px 66px;border-radius:15px}
- [data-view="my-summary"] .summary-card--starting-hands h2{font-size:15px}
- [data-view="my-summary"] .summary-card--starting-hands .summary-muted{font-size:10px!important}
- [data-view="my-summary"] .summary-art--starting-hands{left:7px;width:52px;height:52px}
- [data-view="my-summary"] .summary-card--starting-hands::after{right:10px;font-size:27px}
 }
 
 .summary-share-preview{width:min(92vw,620px);max-height:90dvh;overflow:auto;padding:16px;border:1px solid #a78b55;border-radius:18px;background:#0d1215;color:#f6e8c9}

@@ -17,7 +17,7 @@
   function num(n) { return Number(n).toLocaleString("ru-RU", {maximumFractionDigits: 0}); }
   function link(text, target) { return '<a href="#" class="summary-link" data-view-target="' + target + '">' + esc(text) + ' <span aria-hidden="true">→</span></a>'; }
   function section(id, title, body) {
-    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-starting-cards-v1.webp"};
+    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-starting-cards-v1.webp", "reviews-entry":"summary-reviews-discussion-v1.webp"};
     var icons = {
       bonus:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/>',
       raffles:'<path d="M7 3h10v7a5 5 0 0 1-10 0zM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 15v5m-5 1h10"/>',
