@@ -19,10 +19,22 @@
   function keepReviewReplyVisible(){
     var textarea=document.querySelector('[data-view="club-reviews"].view--active #reviewReplyForm textarea');
     if(!textarea||document.activeElement!==textarea)return;
-    var view=textarea.closest('[data-view="club-reviews"]'),rect=textarea.getBoundingClientRect();
+    var view=textarea.closest('[data-view="club-reviews"]');
     var viewport=window.visualViewport,top=(viewport?Number(viewport.offsetTop):0)+12;
     var bottom=(viewport?Number(viewport.offsetTop)+Number(viewport.height):window.innerHeight)-16;
     if(!view)return;
+    // The keyboard and each clipping ancestor can independently hide the form.
+    // Reserve enough scroll room even when iOS pans the layout viewport.
+    view.style.setProperty('--review-keyboard-space',Math.max(0,window.innerHeight-bottom)+'px');
+    var form=textarea.closest('form'),rect=form.getBoundingClientRect();
+    for(var ancestor=view;ancestor&&ancestor!==document.body;ancestor=ancestor.parentElement){
+      if(/auto|scroll|hidden|clip/.test(getComputedStyle(ancestor).overflowY)){
+        var bounds=ancestor.getBoundingClientRect();
+        top=Math.max(top,bounds.top+12);bottom=Math.min(bottom,bounds.bottom-12);
+      }
+    }
+    if(bottom<=top)return;
+    if(rect.height>bottom-top)rect=textarea.getBoundingClientRect();
     if(rect.height>bottom-top)view.scrollTop+=rect.top-top;
     else if(rect.bottom>bottom)view.scrollTop+=rect.bottom-bottom;
     else if(rect.top<top)view.scrollTop-=top-rect.top;
@@ -69,7 +81,7 @@
   }
   function actionLineHtml(line,heroName,actionClass){
     var match=/^(.+?)\s+—\s+(.+)$/.exec(line),html=inlineCards(line);
-    if(match){var actor=match[1].trim(),plainActor=actor.replace(/^[A-Z0-9]{2}:\s*/, '');if(plainActor==='Вы'||heroName&&plainActor===heroName)html=(actor!==plainActor?esc(actor.slice(0,actor.length-plainActor.length)):'')+'<strong class="review-hand-text__hero">'+esc(plainActor)+'</strong> — '+inlineCards(match[2]);}
+    if(match){var actor=match[1].trim(),plainActor=actor.replace(/^[A-Z0-9+]{2,5}:\s*/, '');if(plainActor==='Вы'||heroName&&plainActor===heroName)html=(actor!==plainActor?esc(actor.slice(0,actor.length-plainActor.length)):'')+'<strong class="review-hand-text__hero">'+esc(plainActor)+'</strong> — '+inlineCards(match[2]);}
     return '<div class="review-hand-text__line'+(/\s—\sФолд(?:\s|$)/.test(line)?' review-hand-text__line--fold':'')+(actionClass?' '+actionClass:'')+'">'+html+'</div>';
   }
   function contextLinesHtml(lines,heroName){
@@ -161,7 +173,7 @@
     headerAction(null);
     var article=r.querySelector('article');article.classList.add('review-thread-card');
     article.querySelector('.social-kicker')?.remove();
-    var title=article.querySelector('h2');title.innerHTML=esc(handAuthor(t))+' · '+cardsHtml(t);
+    var title=article.querySelector('h2');title.innerHTML='<span>'+esc(handAuthor(t))+'</span><span class="review-title-cards">'+cardsHtml(t)+'</span>';
     var share=document.createElement('div');share.className='social-actions review-share-actions';
     share.innerHTML=shareButtons();
     var heading=document.createElement('div');heading.className='review-thread-heading-row';

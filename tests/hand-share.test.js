@@ -11,5 +11,6 @@ test('publishes actions and street pots in selected big blinds',()=>{
 test('adds compact positions to action lines',()=>{
  const hand={handId:'789',playerId:'hero',mode:'cash',playedAt:'2026-09-18T10:00:00Z',cards:['As','Kd'],position:'BTN',bigBlindMinor:4000,resultMinor:0,bb:0};
  const replay={stacks:[{actor:'UTG'},{actor:'Вы'},{actor:'Small'},{actor:'Big'}],events:[{code:'18',actor:'Small',actorId:'sb',amount:20},{code:'19',actor:'Big',actorId:'bb',amount:40},{code:'10',actor:'UTG',actorId:'utg'},{code:'3',actor:'Вы',actorId:'hero',amount:120}]};
- const text=share.text(hand,replay);assert.match(text,/SB: Small — Малый блайнд/);assert.match(text,/BB: Big — Большой блайнд/);assert.match(text,/CO: UTG — Фолд/);assert.match(text,/BU: Вы — Рейз/);
+ replay.seats=[{actorId:'utg',actor:'UTG',position:'CO'},{actorId:'hero',actor:'Вы',position:'BTN'},{actorId:'sb',actor:'Small',position:'SB'},{actorId:'bb',actor:'Big',position:'BB'}];
+ const text=share.text(hand,replay);assert.match(text,/SB: Small — Малый блайнд/);assert.match(text,/BB: Big — Большой блайнд/);assert.match(text,/CO: UTG — Фолд/);assert.match(text,/BTN: Вы — Рейз/);
 });

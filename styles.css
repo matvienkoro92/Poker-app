@@ -9793,6 +9793,10 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
 }
 [data-view="club-reviews"] .playing-card:is(.suit-h,.suit-d) { color: #c51f38; }
 [data-view="club-reviews"] .playing-card:is(.suit-s,.suit-c) { color: #172033; }
+[data-view="club-reviews"] .review-thread-heading-row { flex-wrap: wrap; }
+[data-view="club-reviews"] .review-thread-heading-row>h2 { gap: 5px; }
+[data-view="club-reviews"] .review-title-cards { display: inline-flex; flex-wrap: nowrap; gap: 3px; }
+[data-view="club-reviews"] .review-title-cards .playing-card { margin: 0; padding: 1px 3px; font-size: 12px; }
 @media (max-width: 420px) {
   [data-view="club-reviews"] .club-reviews-header .summary-heading { font-size: 25px; }
   [data-view="club-reviews"] .review-thread-heading-row{gap:8px}
@@ -9813,6 +9817,15 @@ body[data-view="club-reviews"] #app.app .view--active[data-view="club-reviews"] 
   -webkit-overflow-scrolling: touch;
   scroll-padding-bottom: 40px;
   padding-bottom: 40px !important;
+}
+
+body[data-view="club-reviews"].review-reply-input-active #app.app .view--active[data-view="club-reviews"] {
+  max-height: 100dvh !important;
+  padding-bottom: calc(16px + var(--review-keyboard-space, 0px)) !important;
+  scroll-padding-bottom: 16px;
+}
+body[data-view="club-reviews"].review-reply-input-active #app.app {
+  --app-bottom-tabbar-pad: 0px;
 }
 
 /* Render the hand history as native full-width text instead of an embedded screenshot. */

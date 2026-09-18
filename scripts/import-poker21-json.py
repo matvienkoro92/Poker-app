@@ -28,8 +28,6 @@ def positions(raw):
         if len(posts['19'])!=1:
             # No unique seat-order anchor: retain explicit BB contributions
             # for their players without assigning other players' positions.
-            for player in posts['19']:
-                if player in seats:unknown[player]='BB'
             return unknown
         if posts['19'][0] not in seats:return unknown
         bb=posts['19'][0]
@@ -42,7 +40,7 @@ def positions(raw):
         if posts['19'].count(bb)!=1:return unknown
     if len(seats)==2:return {sb:'BTN/SB',bb:'BB'}
     start=(seats.index(bb)+1)%len(seats);ordered=seats[start:]+seats[:start]
-    early={3:[],4:['CO'],5:['HJ','CO'],6:['UTG','HJ','CO'],7:['UTG','LJ','HJ','CO'],8:['UTG','UTG+1','LJ','HJ','CO'],9:['UTG','UTG+1','UTG+2','LJ','HJ','CO'],10:['UTG','UTG+1','UTG+2','UTG+3','LJ','HJ','CO']}
+    early={3:[],4:['CO'],5:['MP','CO'],6:['UTG','MP','CO'],7:['UTG','MP','MP+1','CO'],8:['UTG','UTG+1','MP','MP+1','CO'],9:['UTG','UTG+1','UTG+2','MP','MP+1','CO'],10:['UTG','UTG+1','UTG+2','UTG+3','MP','MP+1','CO']}
     return dict(zip(ordered,early[len(seats)]+['BTN','SB','BB']))
 
 def showdown_status(raw, player):

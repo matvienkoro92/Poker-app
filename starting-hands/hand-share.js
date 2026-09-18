@@ -4,15 +4,15 @@ const suits={s:'♠',h:'♥',d:'♦',c:'♣'},labels={'2':'Колл','3':'Рей
 const potCodes=new Set(['2','3','5','18','19','20','92']);
 const card=value=>String(value||'').replace(/^T/,'10').replace(/([shdc])$/,(_,s)=>suits[s]||s);
 const amount=value=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(Number(value)||0);
-const shortPosition=value=>({'UTG':'UT','UTG+1':'U1','UTG+2':'U2','UTG+3':'U3','BTN':'BU','BTN/SB':'SB'}[value]||value||'');
+const shortPosition=value=>({'LJ':'MP','HJ':'MP+1','BTN/SB':'SB','UNKNOWN':''}[value]??value??'');
 function positions(hand,replay){
  const byId=new Map(),byActor=new Map(),set=(event,position)=>{if(!position||!event)return;if(event.actorId!=null)byId.set(String(event.actorId),position);if(event.actor)byActor.set(String(event.actor),position);};
  const events=replay.events||[],heroEvent=events.find(event=>String(event.actorId)===String(hand.playerId)||event.actor==='Вы');set(heroEvent,shortPosition(hand.position));
  events.forEach(event=>{if(String(event.code)==='18')set(event,'SB');if(String(event.code)==='19')set(event,'BB');});
- const actors=[...new Set((replay.stacks||[]).map(item=>String(item&&item.actor||'')).filter(Boolean))],n=actors.length;
- const layouts={2:['SB','BB'],3:['BU','SB','BB'],4:['CO','BU','SB','BB'],5:['HJ','CO','BU','SB','BB'],6:['LJ','HJ','CO','BU','SB','BB'],7:['UT','LJ','HJ','CO','BU','SB','BB'],8:['UT','U1','LJ','HJ','CO','BU','SB','BB'],9:['UT','U1','U2','LJ','HJ','CO','BU','SB','BB'],10:['UT','U1','U2','U3','LJ','HJ','CO','BU','SB','BB']};
- const used=new Set([...byActor.values()]),available=(layouts[n]||[]).filter(position=>!used.has(position));let index=0,seen=new Set();
- for(const event of events){if(event.board?.length)break;const code=String(event.code);if(['18','19','92','93','94'].includes(code)||!event.actor||event.actor==='Стол')continue;const actor=String(event.actor);if(seen.has(actor)){continue;}seen.add(actor);if(byActor.has(actor))continue;set(event,available[index++]);}
+ // Seats must come from the source, never from the order players first act
+ // (straddles, missing actions and all-ins make that order ambiguous).
+ if(replay.seats?.length){byId.clear();byActor.clear();}
+ for(const seat of replay.seats||[])set(seat,shortPosition(seat.position));
  return event=>byId.get(String(event&&event.actorId))||byActor.get(String(event&&event.actor||''))||'';
 }
 function text(hand,replay,options){

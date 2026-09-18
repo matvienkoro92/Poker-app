@@ -18,7 +18,9 @@ def replay(raw, row, names):
         board = [imp.card(c) for c in a['card']] if kind == '94' and isinstance(a.get('card'),list) else []
         events.append(dict(sequence=int(seq),code=kind,actor=players.get(pid,'Стол'),actorId=pid,amount=a.get('bet',0),board=board))
     shown = [dict(item,actor=players.get(item['playerId'],'Игрок '+item['playerId'])) for item in imp.visible_opponent_cards(raw,owner)]
-    return dict(shownOpponents=shown,events=events,stacks=[dict(actor=name,amount=int(base.get('userCoin',{}).get(pid,0))/100) for pid,name in players.items()],cards=row['cards'])
+    seat_positions=imp.positions(raw)
+    seats=[dict(actorId=pid,actor=players[pid],position=seat_positions.get(pid,'UNKNOWN')) for pid in map(str,base.get('UserIds',[])) if pid in players]
+    return dict(seats=seats,shownOpponents=shown,events=events,stacks=[dict(actor=name,amount=int(base.get('userCoin',{}).get(pid,0))/100) for pid,name in players.items()],cards=row['cards'])
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
