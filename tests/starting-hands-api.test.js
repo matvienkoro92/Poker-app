@@ -7,7 +7,7 @@ async function call(body,linked='208238',authorized=true){
  if(name==='node:zlib')return zlib;
  if(name==='../../starting-hands/insights')return require('../starting-hands/insights');
  if(name==='../pokerplus')return {readBoundPokerPlusUserId:async()=>linked};
- if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[]})).toString('base64'));}};
+ if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[],stacks:[{actor:'Вы',amount:12.5}]})).toString('base64'));}};
  throw Error(name);
  }});await module.exports({method:'POST'},res);return {res,commands};
 }
@@ -21,6 +21,12 @@ test('insights batch is bounded and uses only bound owner keys',async()=>{
  for(const handIds of [[],['../list'],Array(101).fill('1')])assert.equal((await call({action:'insights',handIds})).res.statusCode,400);
  const {res,commands}=await call({action:'insights',handIds:['123','456'],playerId:'208238'},'999');
  assert.equal(res.statusCode,200);assert.deepEqual(Object.keys(res.data.signals),['123','456']);
+ assert.ok(commands.every(c=>c[1].startsWith('poker_app:starting-hands:999:')));
+ assert.ok(!JSON.stringify(res.data).includes('events'));
+});
+test('stack batch returns only the bound hero stack in minor units',async()=>{
+ const {res,commands}=await call({action:'stacks',handIds:['123','456'],playerId:'208238'},'999');
+ assert.equal(res.statusCode,200);assert.equal(res.data.stacks['123'],1250);assert.equal(res.data.stacks['456'],1250);
  assert.ok(commands.every(c=>c[1].startsWith('poker_app:starting-hands:999:')));
  assert.ok(!JSON.stringify(res.data).includes('events'));
 });

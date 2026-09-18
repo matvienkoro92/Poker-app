@@ -112,10 +112,12 @@ def project(raw, mode):
         pair=[card(c) for c in cards.get(pid,[])]
         if len(pair)!=2 or pair[0]==pair[1]: raise ValueError('missing or invalid hole cards')
         score=integer(raw['Score'+str(i)])
+        stack_raw=base.get('userCoin',{}).get(pid)
+        stack_minor=integer(stack_raw) if stack_raw is not None else None
         result.append(dict(source='poker21-json',sessionId=str(raw['RecordId']),handId=str(raw['Id']),playerId=pid,
             mode=mode,game='NLH',position=position_map.get(pid,'UNKNOWN'),showdown=showdown_status(raw,pid),playedAt=datetime.datetime.fromtimestamp(started,datetime.timezone.utc).isoformat().replace('+00:00','Z'),
             status='completed',verified=True,unit='TABLE_CHIP' if mode=='cash' else 'CHIP',scale=100,
-            netDefinition='game-net-v1',cards=pair,resultMinor=score,bigBlindMinor=blinds[0]))
+            netDefinition='game-net-v1',cards=pair,resultMinor=score,bigBlindMinor=blinds[0],startingStackMinor=stack_minor))
     if not result: raise ValueError('no players')
     return result
 

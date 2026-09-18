@@ -129,6 +129,8 @@
     if (!Array.isArray(rows)) throw new Error('Expected hand rows');
     if (o.cashUnit != null && !['RUB','TABLE_CHIP'].includes(o.cashUnit)) throw new Error('Invalid cash unit');
     if (o.position && !positions.includes(o.position)) throw new Error('Invalid position');
+    const stackBands = {short:[0,10],push:[10,20],medium:[20,40],deep:[40,80],veryDeep:[80,Infinity]};
+    if (o.stackBand && (o.mode !== 'mtt' || !stackBands[o.stackBand])) throw new Error('Invalid stack band');
     const expectedUnit = o.mode === 'cash' ? (o.cashUnit || 'RUB') : 'CHIP';
     const from = o.from == null ? -Infinity : validDate(o.from) ? Date.parse(o.from) : NaN;
     const to = o.to == null ? Infinity : validDate(o.to) ? Date.parse(o.to) : NaN;
@@ -145,6 +147,10 @@
       if (row.status !== 'completed' || row.verified !== true) { skip('unverified'); return; }
       if (row.unit !== expectedUnit || row.scale !== 100 || row.netDefinition !== 'game-net-v1') { skip('units'); return; }
       if (!Number.isSafeInteger(row.resultMinor) || !Number.isSafeInteger(row.bigBlindMinor) || row.bigBlindMinor <= 0) { skip('amount'); return; }
+      if (o.stackBand) {
+        const range=stackBands[o.stackBand],stackBb=Number.isSafeInteger(row.startingStackMinor)?row.startingStackMinor/row.bigBlindMinor:NaN;
+        if (!Number.isFinite(stackBb) || stackBb < range[0] || stackBb >= range[1]) return;
+      }
       const label = handClass(row.cards);
       if (!label) { skip('cards'); return; }
       if (![row.source, row.sessionId, row.handId].every(v => typeof v === 'string' && v.trim())) { skip('identity'); return; }
@@ -174,7 +180,7 @@
       g[row.resultMinor > 0 ? 'wins' : row.resultMinor < 0 ? 'losses' : 'even']++;
       // Only the allowed personal projection is exposed to the UI.
       g.hands.push({handId: row.handId, sessionId: row.sessionId, playedAt: row.playedAt,
-        ev: row.ev && ['calculated','unresolved','not_applicable'].includes(row.ev.status) ? {status:row.ev.status,resultMinor:row.ev.status==='calculated'&&Number.isFinite(row.ev.resultMinor)?row.ev.resultMinor:null,reason:typeof row.ev.reason==='string'?row.ev.reason:'',boardCards:row.ev.boardCards,runouts:row.ev.runouts,validation:row.ev.validation,grossEv:row.ev.grossEv?.status==='calculated'&&Number.isFinite(row.ev.grossEv.resultMinor)&&Number.isFinite(row.ev.grossEv.actualResultMinor)?{status:'calculated',resultMinor:row.ev.grossEv.resultMinor,actualResultMinor:row.ev.grossEv.actualResultMinor,contributionMinor:row.ev.grossEv.contributionMinor,eligiblePotMinor:row.ev.grossEv.eligiblePotMinor,runouts:row.ev.grossEv.runouts}:null,showdownEquity: row.ev.showdownEquity?.status==='calculated'&&Number.isFinite(row.ev.showdownEquity.share)&&row.ev.showdownEquity.share>=0&&row.ev.showdownEquity.share<=1 ? {status:'calculated',share:row.ev.showdownEquity.share,boardCards:row.ev.showdownEquity.boardCards,opponents:row.ev.showdownEquity.opponents,runouts:row.ev.showdownEquity.runouts} : row.ev.showdownEquity?.status==='no_hero_allin'?{status:'no_hero_allin'}:null} : null, bigBlindMinor: row.bigBlindMinor, position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
+        ev: row.ev && ['calculated','unresolved','not_applicable'].includes(row.ev.status) ? {status:row.ev.status,resultMinor:row.ev.status==='calculated'&&Number.isFinite(row.ev.resultMinor)?row.ev.resultMinor:null,reason:typeof row.ev.reason==='string'?row.ev.reason:'',boardCards:row.ev.boardCards,runouts:row.ev.runouts,validation:row.ev.validation,grossEv:row.ev.grossEv?.status==='calculated'&&Number.isFinite(row.ev.grossEv.resultMinor)&&Number.isFinite(row.ev.grossEv.actualResultMinor)?{status:'calculated',resultMinor:row.ev.grossEv.resultMinor,actualResultMinor:row.ev.grossEv.actualResultMinor,contributionMinor:row.ev.grossEv.contributionMinor,eligiblePotMinor:row.ev.grossEv.eligiblePotMinor,runouts:row.ev.grossEv.runouts}:null,showdownEquity: row.ev.showdownEquity?.status==='calculated'&&Number.isFinite(row.ev.showdownEquity.share)&&row.ev.showdownEquity.share>=0&&row.ev.showdownEquity.share<=1 ? {status:'calculated',share:row.ev.showdownEquity.share,boardCards:row.ev.showdownEquity.boardCards,opponents:row.ev.showdownEquity.opponents,runouts:row.ev.showdownEquity.runouts} : row.ev.showdownEquity?.status==='no_hero_allin'?{status:'no_hero_allin'}:null} : null, bigBlindMinor: row.bigBlindMinor, startingStackMinor:Number.isSafeInteger(row.startingStackMinor)?row.startingStackMinor:null, position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
     });
     if (conflicts.size) excluded.conflict = conflicts.size;
     const cells = matrix().flat().map(label => {

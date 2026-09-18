@@ -73,6 +73,15 @@ test('position filter preserves mode isolation and unfiltered positional totals'
  assert.equal(core.aggregate([row,{...row,position:'BB'}],{playerId:'p',mode:'cash',cashUnit:'TABLE_CHIP',position:'BTN'}).count,0);
 });
 
+test('MTT stack-depth filter uses half-open BB bands',()=>{
+ const row={...base,mode:'mtt',unit:'CHIP',startingStackMinor:2000,bigBlindMinor:200};
+ const rows=[row,{...row,handId:'2',startingStackMinor:1999},{...row,handId:'3',startingStackMinor:4000},{...row,handId:'4',startingStackMinor:null}];
+ assert.equal(aggregate(rows,{playerId:'player',mode:'mtt',stackBand:'short'}).count,1);
+ assert.equal(aggregate(rows,{playerId:'player',mode:'mtt',stackBand:'push'}).count,1);
+ assert.equal(aggregate(rows,{playerId:'player',mode:'mtt',stackBand:'medium'}).count,1);
+ assert.throws(()=>aggregate(rows,{playerId:'player',mode:'cash',stackBand:'short'}));
+});
+
 test('live search matches partial IDs, opponent fragments, case and transliteration',()=>{
  const {matchesSearch}=require('../starting-hands/core');
  const row={handId:'1789152082927',opponents:[{playerId:'776157',name:'PlayerMayer'},{playerId:'975934',name:'Собака Павлова'}]};

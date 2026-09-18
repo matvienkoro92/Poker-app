@@ -6,6 +6,9 @@ class ImportTests(unittest.TestCase):
   return {'Id':'12','RecordId':'99','PlayMode':'201','PlayType':'2002','StartTime':'1789154835','EndTime':'1789154850','UserId1':'208238','Score1':'-4800','base_data':{'card':[['208238','0','301','302']],'opt':{'3':{'type':'19','bet':40}}}}
  def test_units_cards_and_no_private_fields(self):
   r=m.project(self.raw(),'cash')[0];self.assertEqual(r['cards'],['Ah','2h']);self.assertEqual(r['resultMinor'],-4800);self.assertEqual(r['bigBlindMinor'],4000);self.assertEqual(r['unit'],'TABLE_CHIP');self.assertNotIn('opt',r)
+ def test_starting_stack_is_projected_in_minor_units(self):
+  raw=self.raw();raw['base_data']['userCoin']={'208238':'123456'}
+  self.assertEqual(m.project(raw,'mtt')[0]['startingStackMinor'],123456)
  def test_ambiguous_blind_rejected(self):
   r=self.raw();r['base_data']['opt']['4']={'type':'19','bet':80}
   with self.assertRaises(ValueError):m.project(r,'cash')
