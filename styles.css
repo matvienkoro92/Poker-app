@@ -9673,6 +9673,8 @@ body[data-view="my-summary"] #app.app > .card > .card__header {
 .review-topic__hand{display:flex;align-items:center;flex-wrap:wrap;gap:2px;line-height:1.35}
 .review-topic__body small{font-size:12px;color:#aab4c5}
 .review-topic__count{white-space:nowrap;color:#aab4c5;font-size:13px}
+.review-topic__controls{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.review-topic__delete.social-button{min-height:32px;padding:5px 8px;font-size:12px;color:#ffaaaa}
 .review-share-actions{margin:12px 0}
 body[data-view="club-reviews"] #app.app > .card {
   width: 100% !important;

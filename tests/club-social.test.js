@@ -14,9 +14,9 @@ test('public cards conceal subscriber identities and other voters',()=>{const m=
 test('hidden showdown preference survives publication and is returned only in full thread data',()=>{const m=reviewModule(memory()),t=m.newThread({...body,hideShowdown:true,context:'Префлоп\nИгрок — Олл-ин 100\nФлоп: A♠ K♣ 2♦\nРезультат: +100'},actor,'a');assert.equal(t.hideShowdown,true);assert.equal(m.publicThread(t,actor).hideShowdown,true);assert.equal(m.publicThread(t,actor,false).hideShowdown,undefined);});
 test('published hands preserve validated game, blind, stack, pot and player nickname metadata',()=>{const m=reviewModule(memory()),t=m.newThread({...body,gameMode:'cash',bigBlindMinor:4000,startingStackMinor:400000,totalPotMinor:320000},actor,'a'),p=m.publicThread(t,actor);assert.equal(p.gameMode,'cash');assert.equal(p.bigBlindMinor,4000);assert.equal(p.startingStackMinor,400000);assert.equal(p.totalPotMinor,320000);assert.equal(p.authorNick,'Покерманки');const invalid=m.publicThread(m.newThread({...body,gameMode:'sng',bigBlindMinor:'4000',startingStackMinor:-1,totalPotMinor:-1},actor,'b'),actor);assert.equal(invalid.gameMode,'');assert.equal(invalid.bigBlindMinor,null);assert.equal(invalid.startingStackMinor,null);assert.equal(invalid.totalPotMinor,null);});
 test('handler prevents foreign deletion, stamps coach from resolved account and sends only to explicit subscribers',async()=>{
-  const mem=memory(),m=reviewModule(mem);const {thread}=await m.create(body,actor);let who='ID2',sent=[];
+  const mem=memory(),m=reviewModule(mem);const {thread}=await m.create(body,actor);let who='ID2',sent=[],admin=false;
   const h=load('lib/api-handlers/club-reviews.js',{
-    '../club-social':{context:async req=>({body:req.body,accountId:who,admin:false}),memberProfile:async()=>({name:'Игрок'}),coachAccount:async()=> 'ID3'},
+    '../club-social':{context:async req=>({body:req.body,accountId:who,admin}),memberProfile:async()=>({name:'Игрок'}),coachAccount:async()=> 'ID3'},
     '../club-reviews':m,
     '../chat-webpush-notify':{sendToMemberDevices:async(id,p)=>{sent.push({id,p});}},
     '../review-telegram-notify':{checkSubscription:async()=>'',notify:async()=>{}}
@@ -27,6 +27,11 @@ test('handler prevents foreign deletion, stamps coach from resolved account and 
   who='ID3';res=response();await h({body:{action:'reply',id:thread.id,text:'Разбор тренера',requestId:'f'.repeat(24)}},res);assert.equal(res.body.thread.replies[1].coach,true);
   assert.equal(sent.length,2);assert.ok(sent.every(x=>x.id==='ID1'));
   who='ID2';res=response();await h({body:{action:'delete-reply',id:thread.id,replyId:res.body?.thread?.replies?.[1]?.id|| (await m.read(thread.id)).replies[1].id}},res);assert.equal(res.statusCode,403);
+  assert.equal(m.publicThread(await m.read(thread.id),{accountId:who,admin:false},false).canDelete,false);
+  admin=true;assert.equal(m.publicThread(await m.read(thread.id),{accountId:who,admin},false).canDelete,true);
+  res=response();await h({body:{action:'delete',id:thread.id}},res);assert.equal(res.statusCode,200);assert.equal(res.body.thread,null);
+  await assert.rejects(()=>m.read(thread.id),/Разбор удалён/);
+  assert.equal((await m.list({accountId:who,admin},false)).threads.length,0);
 });
 test('appearance only accepts earned catalog awards and known frame IDs',()=>{const m=load('lib/profile-appearance.js',{'./club-social':{},'./profile-achievement-catalog.json':{}});const awards=m.earned('Waaar',{'waaar':{first:1,total:999999,heroes:0,big50:1}});assert.equal(awards.some(x=>x.id==='millionaire'),false);assert.throws(()=>m.validate({frame:'gold',achievement:'millionaire'},awards),/не получена/);assert.throws(()=>m.validate({frame:'url(javascript:1)'},awards),/рамка/);assert.equal(m.validate({frame:'emerald',achievement:'tournament-king'},awards).achievement,'tournament-king');assert.equal(m.nickKey('Waaaarr'),'waaar');});
 test('appearance writes are always scoped to authenticated account',async()=>{let written;const h=load('lib/api-handlers/profile-appearance.js',{'../club-social':{context:async req=>({body:req.body,accountId:'ID1'}),redis:async cmds=>{written=cmds;return ['OK'];}},'../account-id':{resolveAccountId:async id=>id},'../profile-appearance':{readAppearance:async id=>({accountId:id,achievements:[],frames:[]}),validate:()=>({frame:'gold',achievement:''})}});const res=response();await h({body:{action:'save',targetId:'ID2'}},res);assert.equal(res.statusCode,200);assert.equal(written[0][1],'poker_app:profile_appearance:ID1');});

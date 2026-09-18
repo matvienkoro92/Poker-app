@@ -146,6 +146,12 @@
     var visibleRows=rows.filter(function(t){return listMode==='all'||handMode(t)===listMode;});
     r.innerHTML='<div class="social-tabs" role="group" aria-label="Раздачи"><button type="button" data-review-action="all" aria-pressed="'+!mine+'">Все раздачи</button><button type="button" data-review-action="mine" aria-pressed="'+mine+'">Мои раздачи</button></div><div class="review-list-filters"><div role="group" aria-label="Тип игры"><button type="button" data-review-action="list-mode" data-id="all" aria-pressed="'+(listMode==='all')+'">Все</button><button type="button" data-review-action="list-mode" data-id="cash" aria-pressed="'+(listMode==='cash')+'">Кеш</button><button type="button" data-review-action="list-mode" data-id="mtt" aria-pressed="'+(listMode==='mtt')+'">МТТ</button></div><div role="group" aria-label="Единицы"><button type="button" data-review-action="list-unit" data-id="bb" aria-pressed="'+(listMetric==='bb')+'">BB</button><button type="button" data-review-action="list-unit" data-id="native" aria-pressed="'+(listMetric==='native')+'">₽ / фишки</button></div></div><div class="review-topic-list">'+visibleRows.map(function(t){return '<article class="review-topic">'+avatar(t)+'<button type="button" class="review-title review-topic__body" data-review-action="open" data-id="'+esc(t.id)+'"><strong>'+topicListTitleHtml(t)+'</strong><small>'+esc(date(t.updatedAt))+(t.unread?' · Новые комментарии':'')+'</small></button><span class="review-topic__count" aria-label="Комментарии: '+t.replyCount+'">💬 '+t.replyCount+'</span></article>';}).join('')+'</div>'+(!visibleRows.length?'<p class="social-muted">Раздач с такими параметрами пока нет.</p>':'')+(cursor!==null?button('Показать ещё','more'):'');
     r.querySelectorAll('.review-topic__avatar img').forEach(function(img){img.onerror=function(){img.hidden=true;};});
+    r.querySelectorAll('.review-topic').forEach(function(article,index){
+      var topic=visibleRows[index];if(!topic.canDelete)return;
+      var controls=document.createElement('div');controls.className='review-topic__controls';
+      var count=article.querySelector('.review-topic__count');count.replaceWith(controls);controls.append(count);
+      controls.insertAdjacentHTML('beforeend',button('Удалить','delete-topic',topic.id,'review-topic__delete'));
+    });
   }
   function loadList(more){
     var seq=++serial,gen=generation;thread=null;headerAction(null);feedback('Загружаем разборы…');
@@ -168,7 +174,7 @@
     article.querySelector('.social-kicker')?.remove();
     var title=article.querySelector('h2');title.innerHTML='<span>'+esc(handAuthor(t))+'</span><span class="review-title-cards">'+cardsHtml(t)+'</span>';
     var share=document.createElement('div');share.className='social-actions review-share-actions';
-    share.innerHTML=shareButtons();
+    share.innerHTML=shareButtons()+(t.canDelete?button('Удалить раздачу','delete',t.id):'');
     var heading=document.createElement('div');heading.className='review-thread-heading-row';
     article.insertBefore(heading,title);heading.append(title,share);
     var format=document.createElement('div');format.className='review-thread-format';format.textContent=handFormat(t,handMetric);heading.after(format);
@@ -219,6 +225,13 @@
     if(action==='list-unit'&&['bb','native'].includes(id)){listMetric=id;renderList();return;}
     if(action==='remove-image'){imageData='';document.getElementById('reviewImageInput').value='';document.getElementById('reviewImagePreview').innerHTML='';return;}
     if(action==='reply-to'){parentId=id;var reply=thread.replies.find(function(r){return r.id===id;});document.getElementById('reviewReplyTarget').textContent='В ответ '+(reply.authorNick||reply.authorName);document.querySelector('#reviewReplyForm textarea').focus();return;}
+    if(action==='delete-topic'){
+      var topic=rows.find(function(t){return t.id===id;});if(!topic||!topic.canDelete)return;
+      if(!window.confirm('Удалить эту раздачу вместе с обсуждением?'))return;
+      var deleteGeneration=generation;setBusy(true);
+      api({action:'delete',id:id}).then(function(){if(deleteGeneration!==generation)return;loadList(false);window.dispatchEvent(new Event('poker-reviews-updated'));}).catch(function(err){if(deleteGeneration===generation)feedback(err.message);}).finally(function(){if(deleteGeneration===generation)setBusy(false);});
+      return;
+    }
     if(!thread)return;
     if(action==='unit'&&['bb','native'].includes(id)){handMetric=id;renderThread(thread);return;}
     if(action==='copy'||action==='share'){
