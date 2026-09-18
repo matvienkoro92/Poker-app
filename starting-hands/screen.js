@@ -29,7 +29,7 @@ function startHistory(payload) {
   'use strict';
   activeHistoryPlayerId=String(payload.playerId||'');activeHistoryVersion=String(payload.version||'');
   const core = window.PokerHandStatistics;
-  let mode = 'cash', metric = 'bb', selected = null;
+  let mode = 'cash', game = 'NLH', metric = 'bb', selected = null;
   function showHistoryTab(tab){
     document.querySelectorAll('[data-history-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.historyTab===tab)));
     document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=!p.dataset.historyPanel.split(' ').includes(tab));
@@ -105,8 +105,9 @@ function startHistory(payload) {
     if(hand.ev?.status!=='calculated')return;
     const chips=metric==='resultMinor',divisor=chips?100:hand.bigBlindMinor,label=chips?(mode==='cash'?'₽':'фишек'):'bb';
     const note=document.createElement('span');note.className='hand-ev-summary';
-    note.textContent='All-in EV: '+signed(hand.ev.resultMinor/divisor)+' '+label+' · фактически: '+signed(hand.resultMinor/divisor)+' '+label+'.';
-    const runs=document.createElement('span');runs.textContent='Перебрано исходов: '+number(hand.ev.runouts)+'.';
+    const simulated=String(hand.ev.method||'').includes('simulation');
+    note.textContent='All-in EV'+(simulated?' (симуляция)':'')+': '+signed(hand.ev.resultMinor/divisor)+' '+label+' · фактически: '+signed(hand.resultMinor/divisor)+' '+label+'.';
+    const runs=document.createElement('span');runs.textContent=(simulated?'Смоделировано':'Перебрано')+' исходов: '+number(hand.ev.runouts)+'.';
     note.append(document.createElement('br'),runs);summary.append(note);
   }
   const replayCache=new Map();
@@ -174,7 +175,7 @@ function startHistory(payload) {
       const startingStackMinor=Number.isSafeInteger(hand.startingStackMinor)?hand.startingStackMinor:heroStack&&Number.isFinite(heroStack.amount)&&heroStack.amount>=0?Math.round(heroStack.amount*100):null;
       const potCodes=new Set(['2','3','5','18','19','20','92']);
       const totalPotMinor=Math.round((replay.events||[]).reduce((sum,event)=>sum+(potCodes.has(String(event.code))?(Number(event.amount)||0):0),0)*100);
-      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment,context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
+      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment,context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),potTiming:'opening',hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
       showPublicationSuccess(response?.id,response);
@@ -361,7 +362,7 @@ function startHistory(payload) {
     if(mode==='mtt')metric='bb';
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
-    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
+    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,game,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
     renderProfitChart(data);
     $('position').value=positionByMode[mode];
@@ -376,7 +377,7 @@ function startHistory(payload) {
       title.textContent=positionLabel(p.position);amount.textContent=signed(value(p))+' '+unit();amount.className=value(p)>0?'positive':value(p)<0?'negative':'';count.textContent=p.count+' раздач'+(p.count&&p.count<100?' · мало данных':'');b.append(title,amount,count);return b;
     }));
     const searching=!!($('hand-search').value.trim() || $('opponent-search').value.trim());
-    const allHands = searching || !selected;
+    const allHands = game!=='NLH' || searching || !selected;
     const selectedCell = allHands ? {label:searching?'Найденные раздачи':positionByMode[mode]?'Все руки · '+positionLabel(positionByMode[mode]):'Все руки',count:data.count,resultMinor:data.resultMinor,bb:data.bb,bb100:data.bb100,
       wins:data.cells.reduce((n,c)=>n+c.wins,0),losses:data.cells.reduce((n,c)=>n+c.losses,0),even:data.cells.reduce((n,c)=>n+c.even,0),
       hands:data.cells.flatMap(c=>c.hands).sort((a,b)=>b.playedAt.localeCompare(a.playedAt))} : data.cells.find(c=>c.label===selected);
@@ -434,6 +435,8 @@ function startHistory(payload) {
   }
     renderInsights(data,renderReplay);
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+    $('game-filter').value=game;
+    $('matrix-panel').hidden=game!=='NLH';
     $('stack-filter-wrap').hidden=mode!=='mtt';
     $('stack-filter').value=stackBand;
     $('tournament-filter-wrap').hidden=mode!=='mtt';
@@ -461,7 +464,8 @@ function startHistory(payload) {
       name.textContent=c.label;amount.textContent=compactSigned(v);button.title=c.label+': '+signed(v)+' '+unit();button.append(name,amount);return button;
     }));
     const cell=selectedCell;
-    $('detail').innerHTML='<h2 id="detail-title" class="hand-title">'+cell.label+'<span>'+(allHands?'По текущим фильтрам':cell.label.length===2?'Карманная пара':cell.label.endsWith('s')?'Одномастная рука':'Разномастная рука')+'</span></h2>';
+    const detailLabel=game==='NLH'?cell.label:game+' · все руки';
+    $('detail').innerHTML='<h2 id="detail-title" class="hand-title">'+detailLabel+'<span>'+(allHands?'По текущим фильтрам':cell.label.length===2?'Карманная пара':cell.label.endsWith('s')?'Одномастная рука':'Разномастная рука')+'</span></h2>';
     if(!cell.count){
       $('detail').insertAdjacentHTML('beforeend','<div class="empty-state"><strong>Нет подтверждённых раздач</strong>'+(mode!=='sng'?'В загруженной выборке эта рука не встречалась.':'История этого формата пока не загружена.')+' Нет данных — не значит результат 0.</div>');return;
     }
@@ -493,6 +497,7 @@ function startHistory(payload) {
     moreHands.onclick=appendHandPage;appendHandPage();$('detail').append(list,moreHands);
   }
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;if(mode==='mtt')metric='bb';render();if(mode==='mtt')ensureMttStacks();}));
+  $('game-filter').addEventListener('change',e=>{game=e.target.value;selected=null;render();});
   ['date-from','date-to'].forEach(id=>$(id).addEventListener('change',()=>{
     const from=$('date-from').value,to=$('date-to').value;
     if(from&&to&&from>to){$('date-status').textContent='Дата окончания раньше начала';return;}

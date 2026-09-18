@@ -84,13 +84,19 @@ def visible_opponent_cards(raw, player):
         pid=str(entry[0])
         if pid==player or showdown_status(raw,pid) is not True:continue
         if scores.get(pid,0)<=0 and not allin_showdown:continue
-        pair=[card(c) for c in entry[2:]]
-        if len(pair)==2 and len(set(pair))==2:
-            result.append({'playerId':pid,'cards':pair,'disclosure':'showdown-winner' if scores.get(pid,0)>0 else 'showdown-allin'})
+        hole=[card(c) for c in entry[2:]]
+        if 2 <= len(hole) <= 6 and len(set(hole))==len(hole):
+            result.append({'playerId':pid,'cards':hole,'disclosure':'showdown-winner' if scores.get(pid,0)>0 else 'showdown-allin'})
     return result
 
 def project(raw, mode):
-    if (str(raw.get('PlayMode')),str(raw.get('PlayType'))) != ('201','2002'):
+    play_mode,play_type=str(raw.get('PlayMode')),str(raw.get('PlayType'))
+    if (play_mode,play_type)==('201','2002'):
+        game,expected_cards='NLH',2
+    elif play_type=='2004' and play_mode in {'203','205','207','208'}:
+        expected_cards={'203':4,'205':5,'207':6,'208':6}[play_mode]
+        game='PLO'+str(expected_cards)
+    else:
         raise ValueError('unsupported game codes')
     base=raw['base_data']; started=integer(raw['StartTime']);ended=integer(raw['EndTime'])
     if ended<started or ended<=0: raise ValueError('incomplete hand')
@@ -107,15 +113,15 @@ def project(raw, mode):
         if pid=='0': continue
         if not pid.isdigit() or pid in players: raise ValueError('invalid player identity')
         players.add(pid)
-        pair=[card(c) for c in cards.get(pid,[])]
-        if len(pair)!=2 or pair[0]==pair[1]: raise ValueError('missing or invalid hole cards')
+        hole=[card(c) for c in cards.get(pid,[])]
+        if len(hole)!=expected_cards or len(set(hole))!=len(hole): raise ValueError('missing or invalid hole cards')
         score=integer(raw['Score'+str(i)])
         stack_raw=base.get('userCoin',{}).get(pid)
         stack_minor=integer(stack_raw) if stack_raw is not None else None
         result.append(dict(source='poker21-json',sessionId=str(raw['RecordId']),handId=str(raw['Id']),playerId=pid,
-            mode=mode,game='NLH',position=position_map.get(pid,'UNKNOWN'),showdown=showdown_status(raw,pid),playedAt=datetime.datetime.fromtimestamp(started,datetime.timezone.utc).isoformat().replace('+00:00','Z'),
+            mode=mode,game=game,position=position_map.get(pid,'UNKNOWN'),showdown=showdown_status(raw,pid),playedAt=datetime.datetime.fromtimestamp(started,datetime.timezone.utc).isoformat().replace('+00:00','Z'),
             status='completed',verified=True,unit='TABLE_CHIP' if mode=='cash' else 'CHIP',scale=100,
-            netDefinition='game-net-v1',cards=pair,resultMinor=score,bigBlindMinor=blinds[0],startingStackMinor=stack_minor))
+            netDefinition='game-net-v1',cards=hole,resultMinor=score,bigBlindMinor=blinds[0],startingStackMinor=stack_minor))
     if not result: raise ValueError('no players')
     return result
 

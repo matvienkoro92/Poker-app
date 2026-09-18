@@ -18,6 +18,15 @@ class ImportTests(unittest.TestCase):
  def test_unknown_format_rejected(self):
   r=self.raw();r['PlayType']='999'
   with self.assertRaises(ValueError):m.project(r,'cash')
+ def test_omaha_four_five_and_six_card_formats(self):
+  for play_mode,count,label in [('203',4,'PLO4'),('205',5,'PLO5'),('207',6,'PLO6')]:
+   r=self.raw();r['PlayMode']=play_mode;r['PlayType']='2004'
+   r['base_data']['card'][0]=['208238','0']+['3%02d'%n for n in range(1,count+1)]
+   row=m.project(r,'cash')[0]
+   self.assertEqual(row['game'],label);self.assertEqual(len(row['cards']),count)
+ def test_omaha_rejects_wrong_hole_card_count(self):
+  r=self.raw();r['PlayMode']='203';r['PlayType']='2004'
+  with self.assertRaises(ValueError):m.project(r,'cash')
  def test_repeat_and_conflict_quarantine(self):
   with tempfile.TemporaryDirectory() as t:
    p=pathlib.Path(t);f=p/'in.json';db=p/'db.sqlite';r=self.raw();f.write_text(json.dumps([r]))

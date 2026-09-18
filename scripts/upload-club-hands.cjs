@@ -17,7 +17,7 @@ function merge(existing,items,pid){
   const old=rows.get(row.handId);
   if(old){
    if(old.mode==='mtt'&&row.mode==='sng'&&row.sourceDeskType==='3'){rows.set(row.handId,{...old,mode:'sng',sourceDeskType:'3'});corrected++;}
-   for(const key of ['source','mode','playedAt','resultMinor','bigBlindMinor','unit','cards'])if(JSON.stringify(rows.get(row.handId)[key])!==JSON.stringify(row[key]))throw Error('Existing hand conflict '+pid+' '+row.handId+' '+key);}
+   for(const key of ['source','mode','game','playedAt','resultMinor','bigBlindMinor','unit','cards'])if(JSON.stringify(rows.get(row.handId)[key])!==JSON.stringify(row[key]))throw Error('Existing hand conflict '+pid+' '+row.handId+' '+key);}
   else {rows.set(row.handId,row);entries.push([row.handId,pack(replay)]);}
  }
  return {corrected,rows:[...rows.values()].sort((a,b)=>a.playedAt.localeCompare(b.playedAt)||a.handId.localeCompare(b.handId)),entries};

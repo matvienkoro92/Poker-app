@@ -8,6 +8,7 @@
   'use strict';
   const ranks = 'AKQJT98765432';
   const modes = ['cash', 'mtt', 'sng'];
+  const games = ['NLH','PLO4','PLO5','PLO6'];
   const positions = ['UTG','UTG+1','UTG+2','UTG+3','MP','MP+1','CO','BTN','SB','BB','UNKNOWN'];
   function searchName(value) {
     return String(value || '').normalize('NFKC').toLowerCase().replace(/ё/g,'е').replace(/[^0-9a-zа-я_]+/g,'');
@@ -126,6 +127,8 @@
   function aggregate(rows, options) {
     const o = options || {};
     if (!o.playerId || typeof o.playerId !== 'string' || !modes.includes(o.mode)) throw new Error('Player and mode required');
+    const game=o.game||'NLH';
+    if (!games.includes(game)) throw new Error('Invalid game');
     if (!Array.isArray(rows)) throw new Error('Expected hand rows');
     if (o.cashUnit != null && !['RUB','TABLE_CHIP'].includes(o.cashUnit)) throw new Error('Invalid cash unit');
     if (o.position && !positions.includes(o.position)) throw new Error('Invalid position');
@@ -144,7 +147,7 @@
       if (!validDate(row.playedAt)) { skip('date'); return; }
       const time = Date.parse(row.playedAt);
       if (time < from || time >= to) return;
-      if (row.game !== 'NLH') { skip('format'); return; }
+      if (row.game !== game) return;
       if (o.tournamentId && String(row.sessionId) !== String(o.tournamentId)) return;
       if (row.status !== 'completed' || row.verified !== true) { skip('unverified'); return; }
       if (row.unit !== expectedUnit || row.scale !== 100 || row.netDefinition !== 'game-net-v1') { skip('units'); return; }
@@ -153,8 +156,9 @@
         const range=stackBands[o.stackBand],stackBb=Number.isSafeInteger(row.startingStackMinor)?row.startingStackMinor/row.bigBlindMinor:NaN;
         if (!Number.isFinite(stackBb) || stackBb < range[0] || stackBb >= range[1]) return;
       }
-      const label = handClass(row.cards);
-      if (!label) { skip('cards'); return; }
+      const label = game==='NLH' ? handClass(row.cards) : 'ALL';
+      const expectedCards=game==='PLO4'?4:game==='PLO5'?5:game==='PLO6'?6:2;
+      if (!label || !Array.isArray(row.cards) || row.cards.length!==expectedCards || row.cards.some(c=>typeof c!=='string'||!/^[AKQJT2-9][cdhs]$/.test(c)) || new Set(row.cards).size!==row.cards.length) { skip('cards'); return; }
       if (![row.source, row.sessionId, row.handId].every(v => typeof v === 'string' && v.trim())) { skip('identity'); return; }
       const key = JSON.stringify([row.source, row.mode, row.sessionId, row.handId, row.playerId]);
       const fingerprint = JSON.stringify([row.playedAt, row.cards.slice().sort(), row.resultMinor, row.bigBlindMinor, row.position || 'UNKNOWN', row.showdown]);
@@ -186,7 +190,8 @@
         ev: row.ev && ['calculated','unresolved','not_applicable'].includes(row.ev.status) ? {status:row.ev.status,resultMinor:row.ev.status==='calculated'&&Number.isFinite(row.ev.resultMinor)?row.ev.resultMinor:null,reason:typeof row.ev.reason==='string'?row.ev.reason:'',boardCards:row.ev.boardCards,runouts:row.ev.runouts,validation:row.ev.validation,grossEv:row.ev.grossEv?.status==='calculated'&&Number.isFinite(row.ev.grossEv.resultMinor)&&Number.isFinite(row.ev.grossEv.actualResultMinor)?{status:'calculated',resultMinor:row.ev.grossEv.resultMinor,actualResultMinor:row.ev.grossEv.actualResultMinor,contributionMinor:row.ev.grossEv.contributionMinor,eligiblePotMinor:row.ev.grossEv.eligiblePotMinor,runouts:row.ev.grossEv.runouts}:null,showdownEquity: row.ev.showdownEquity?.status==='calculated'&&Number.isFinite(row.ev.showdownEquity.share)&&row.ev.showdownEquity.share>=0&&row.ev.showdownEquity.share<=1 ? {status:'calculated',share:row.ev.showdownEquity.share,boardCards:row.ev.showdownEquity.boardCards,opponents:row.ev.showdownEquity.opponents,runouts:row.ev.showdownEquity.runouts} : row.ev.showdownEquity?.status==='no_hero_allin'?{status:'no_hero_allin'}:null} : null, bigBlindMinor: row.bigBlindMinor, startingStackMinor:Number.isSafeInteger(row.startingStackMinor)?row.startingStackMinor:null, position, showdown: typeof row.showdown==='boolean'?row.showdown:null, cards: row.cards.slice(), resultMinor: row.resultMinor, bb: row.resultMinor / row.bigBlindMinor});
     });
     if (conflicts.size) excluded.conflict = conflicts.size;
-    const cells = matrix().flat().map(label => {
+    const labels=game==='NLH'?matrix().flat():['ALL'];
+    const cells = labels.map(label => {
       const g = groups.get(label);
       return g ? {...g, bb100: g.bb * 100 / g.count, smallSample: g.count < 100,
         hands: g.hands.sort((a, b) => b.playedAt.localeCompare(a.playedAt))}
@@ -199,7 +204,7 @@
       return next;
     }, 0);
     const bb = cells.reduce((n, c) => n + (c.bb || 0), 0);
-    return {mode: o.mode, unit: expectedUnit, scale: 100, count, resultMinor: count ? resultMinor : null,
+    return {mode: o.mode, game, unit: expectedUnit, scale: 100, count, resultMinor: count ? resultMinor : null,
       bb: count ? bb : null, bb100: count ? bb * 100 / count : null, cells, excluded, duplicates, positions: positions.map(position => {
         const g=positionGroups.get(position);
         return g ? {...g, bb100:g.bb*100/g.count} : {position,count:0,resultMinor:null,bb:null,bb100:null};

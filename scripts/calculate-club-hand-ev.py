@@ -7,13 +7,20 @@ def load_calculator():
  spec=importlib.util.spec_from_file_location('ev',ROOT/'scripts/calculate-allin-ev.py');ev=importlib.util.module_from_spec(spec);spec.loader.exec_module(ev)
  original=ev.equity
  @functools.lru_cache(maxsize=128)
- def cached(binary,holes,board,masks):return original(binary,[list(h) for h in holes],list(board),list(masks))
- ev.equity=lambda binary,holes,board,masks:cached(str(binary),tuple(tuple(h) for h in holes),tuple(board),tuple(masks))
+ def cached(binary,holes,board,masks):
+  result=original(binary,[list(h) for h in holes],list(board),list(masks))
+  return result,original.last_method
+ def cached_equity(binary,holes,board,masks):
+  result,method=cached(str(binary),tuple(tuple(h) for h in holes),tuple(board),tuple(masks));cached_equity.last_method=method;return result
+ cached_equity.last_method=ev.METHOD;ev.equity=cached_equity
  return ev
 EV=None
 def init_worker():
  global EV
  EV=load_calculator()
+def build_binary(source,target):
+ if target.exists() and target.stat().st_mtime>=source.stat().st_mtime:return
+ subprocess.run(['clang++','-O3','-std=c++17',str(source),'-o',str(target)],check=True)
 def calculate(job):
  raw,owners=job;result={}
  for pid in owners:
@@ -22,11 +29,12 @@ def calculate(job):
  return {'handId':str(raw['Id']),'owners':result}
 def main():
  started=time.monotonic();snapshot=json.loads((OUT/'snapshot.json').read_text());data={p['playerId']:json.loads((OUT/'input'/f"{p['playerId']}.json").read_text()) for p in snapshot}
+ build_binary(ROOT/'scripts/holdem-equity.cpp',OUT/'equity');build_binary(ROOT/'scripts/omaha-equity.cpp',OUT/'omaha-equity')
  rows={pid:{r['handId']:r for r in d['rows']} for pid,d in data.items()};owners=collections.defaultdict(list)
  for pid,rs in rows.items():
   for hid in rs:owners[hid].append(pid)
  sources=[pathlib.Path(p) for p in os.environ.get('CLUB_HAND_EV_SOURCES',str(ROOT/'output/poker21-export-2026-09-07_13/hands-2026-09-07_13-MSK.jsonl')).split(os.pathsep)]
- signature=hashlib.sha256((OUT/'snapshot.json').read_bytes()+(ROOT/'scripts/calculate-allin-ev.py').read_bytes()+(ROOT/'scripts/holdem-equity.cpp').read_bytes()+pathlib.Path(__file__).read_bytes()).hexdigest()
+ signature=hashlib.sha256((OUT/'snapshot.json').read_bytes()+(ROOT/'scripts/calculate-allin-ev.py').read_bytes()+(ROOT/'scripts/holdem-equity.cpp').read_bytes()+(ROOT/'scripts/omaha-equity.cpp').read_bytes()+pathlib.Path(__file__).read_bytes()).hexdigest()
  marker=OUT/'calculation-source.json'
  if marker.exists():assert json.loads(marker.read_text())['signature']==signature,'Checkpoint source changed'
  else:marker.write_text(json.dumps({'signature':signature,'sources':[{'path':str(source),'size':source.stat().st_size} for source in sources]}))

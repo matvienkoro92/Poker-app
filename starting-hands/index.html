@@ -22,6 +22,7 @@
       <button type="button" data-mode="mtt" aria-pressed="false">MTT</button>
     </div>
     <button type="button" id="metric" class="metric-toggle" aria-label="Показатель: bb. Переключить">bb</button>
+    <label class="game-filter"><span class="visually-hidden">Вид покера</span><select id="game-filter" aria-label="Вид покера"><option value="NLH">Холдем</option><option value="PLO4">PLO4</option><option value="PLO5">PLO5</option><option value="PLO6">PLO6</option></select></label>
     <div class="position-filter"><select id="position" class="position-mini" aria-label="Позиция"><option value="">Все</option></select></div>
     <details class="date-picker"><summary aria-label="Выбрать период по МСК"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 2v6m10-6v6M3 11h18"/></svg><span id="date-summary-text"></span></summary><div class="date-popover"><div class="date-filter"><span>Дата · МСК</span><div class="date-range"><input type="date" id="date-from" aria-label="Дата с"><span>—</span><input type="date" id="date-to" aria-label="Дата по"></div><span id="date-status" role="status" aria-live="polite" style="font-size:12px;color:#b9dda2"></span></div><button type="button" id="date-close">Готово</button></div></details>
     <div id="stack-filter-wrap" class="stack-filter" hidden><span>Глубина стека</span><select id="stack-filter" aria-label="Глубина стека в MTT"><option value="">Все стеки</option><option value="short">до 10 BB</option><option value="push">10–20 BB</option><option value="medium">20–40 BB</option><option value="deep">40–80 BB</option><option value="veryDeep">80+ BB</option></select><small id="stack-status" role="status"></small></div>
@@ -36,7 +37,7 @@
   <details data-history-panel="hands" hidden class="position-disclosure"><summary>Результат по позициям</summary><section aria-labelledby="positions-title"><h2 id="positions-title">Результат по позициям</h2><p class="note">В выбранном формате и периоде · нажмите позицию, чтобы отфильтровать руки.</p><div id="position-results" class="position-results"></div></section></details>
   <section data-history-panel="review" hidden id="hand-insights" class="hand-insights" aria-label="Разбор игры"></section>
   <div data-history-panel="hands search" hidden class="workspace">
-    <details class="matrix-panel"><summary>По стартовым рукам</summary>
+    <details class="matrix-panel" id="matrix-panel"><summary>По стартовым рукам</summary>
       <p class="note">s — одномастные · o — разномастные. Нажмите на руку.</p>
       <div class="matrix-scroll" tabindex="0" role="region" aria-label="Матрица рук, прокручивается по горизонтали"><div id="matrix" class="matrix"></div></div>
       <div class="legend"><span class="positive">+ Положительный</span><span class="negative">− Отрицательный</span><span>— Нет данных</span></div>

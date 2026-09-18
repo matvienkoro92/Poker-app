@@ -19,10 +19,13 @@ async function main() {
       window.setView = view => { window.lastView = view; };
       window.fixture = { id:'f'.repeat(24), type:'hand', authorId:'ID999999', authorName:'Игрок', authorNick:'Покерманки',
         title:'Раздача', question:'Как лучше сыграть на тёрне против этого соперника?', gameMode:'cash', bigBlindMinor:4000, totalPotMinor:120000,
-        cards:['As','Kh'], createdAt:'2026-09-18T10:00:00Z', updatedAt:'2026-09-18T10:00:00Z', context:'Префлоп · Банк: 30 bb\nSB: Вы — Рейз 3 bb\nРивер: Q♣ 9♦ 5♥ 9♥ 7♠ · Банк: 100,5 bb',
+        cards:['As','Kh'], handId:'legacy-hand', createdAt:'2026-09-18T10:00:00Z', updatedAt:'2026-09-18T10:00:00Z', context:'Префлоп · Банк: 30 bb\nSB: Вы — Рейз 3 bb\nРивер: Q♣ 9♦ 5♥ 9♥ 7♠ · Банк: 100,5 bb\nBB: Соперник — Колл 70,5 bb',
         replies:[], votes:{fold:0,call:0,raise:0}, following:false, version:0, replyCount:0 };
       let progress = 6;
+      let topicSubscribed=true;
       window.pokerSocialRequest = async (_, body) => {
+        if(body.action==='topic-push-status')return {ok:true,subscribed:topicSubscribed,notificationsEnabled:true,hasSubscription:true};
+        if(body.action==='topic-push-set'){topicSubscribed=body.enabled;return {ok:true,subscribed:topicSubscribed};}
         const award = body.action === 'reply' ? { action:true,bonus:0,spin:1 } : null;
         if(award){ progress=0; window.fixture.replies.push({id:'e'.repeat(24),authorId:'ID123456',authorNick:'Ваш ник',authorLevel:4,text:body.text,createdAt:'2026-09-18T11:00:00Z',canDelete:true}); }
         return { ok:true,accountId:'ID123456',threads:[window.fixture],nextCursor:null,thread:window.fixture,activityAward:award,
@@ -33,6 +36,9 @@ async function main() {
     await page.addScriptTag({ path: path.join(root, 'app-club-reviews.js') });
     await page.evaluate(() => window.initClubReviews());
     await page.waitForSelector('.review-activity');
+    await page.waitForFunction(()=>document.querySelector('.review-topic-push button')?.textContent==='Выключить');
+    await page.locator('.review-topic-push button').click();
+    await page.waitForFunction(()=>document.querySelector('.review-topic-push button')?.textContent==='Включить');
     assert.equal(await page.locator('.review-activity__track .is-filled').count(), 6);
     for (const width of [360, 390, 1280]) {
       await page.setViewportSize({width,height:900});
@@ -41,6 +47,9 @@ async function main() {
     }
     await page.locator('[data-review-action="open"]').click();
     await page.waitForSelector('#reviewReplyForm');
+    assert.equal((await page.locator('.review-hand-text__final-pot').textContent()).trim(),'Итоговый банк: 100,5 bb');
+    assert.match((await page.locator('.review-hand-text__street--preflop').textContent()).replace(/\s+/g,' '),/Банк\s*0 bb/);
+    assert.match((await page.locator('.review-hand-text__street--river').textContent()).replace(/\s+/g,' '),/Банк\s*30 bb/);
     for (const width of [320, 360, 390, 430, 1280]) {
       await page.setViewportSize({width,height:900});
       const layout = await page.locator('.review-hand-text__street--river').evaluate(el => {

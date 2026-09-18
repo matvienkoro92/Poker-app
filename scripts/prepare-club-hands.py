@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare private per-player NLH imports from the verified weekly JSONL export."""
+"""Prepare private per-player NLH/PLO imports from the verified weekly JSONL export."""
 import argparse, collections, importlib.util, json, pathlib, time
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('importer', ROOT/'scripts/import-poker21-json.py')

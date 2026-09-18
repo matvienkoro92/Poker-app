@@ -6,12 +6,13 @@ const {pipeline}=require('../lib/redis');
 const root=path.resolve(process.env.CLUB_HAND_EV_ROOT||path.resolve(__dirname,'../output/club-hand-ev'));
 const importReport=path.resolve(process.env.CLUB_HAND_IMPORT_REPORT||path.resolve(root,'../club-hand-import/prepare-report.json'));
 const method='exact-runouts-fixed-deduction-v1';
+const calculatedMethods=new Set([method,'omaha-exact-2hole-3board-v1','omaha-simulation-2hole-3board-v1']);
 const pack=x=>gzipSync(JSON.stringify(x)).toString('base64');
 const unpack=x=>JSON.parse(gunzipSync(Buffer.from(x,'base64')));
 async function send(commands){return (await pipeline(commands,{context:'club-hand-ev',throwOnError:true,timeoutMs:20000})).map(r=>r.result);}
 function validateEv(ev){
  if(!ev||!['calculated','unresolved','not_applicable'].includes(ev.status))throw Error('Invalid EV status');
- if(ev.status==='calculated'&&(ev.method!==method||!Number.isFinite(ev.resultMinor)||!Number.isSafeInteger(ev.runouts)||ev.runouts<1))throw Error('Invalid calculated EV');
+ if(ev.status==='calculated'&&(!calculatedMethods.has(ev.method)||!Number.isFinite(ev.resultMinor)||!Number.isSafeInteger(ev.runouts)||ev.runouts<1))throw Error('Invalid calculated EV');
  if(ev.status==='unresolved'&&typeof ev.reason!=='string')throw Error('Missing unresolved reason');
  if(ev.grossEv&&(ev.grossEv.status!=='calculated'||!Number.isFinite(ev.grossEv.resultMinor)||!Number.isFinite(ev.grossEv.actualResultMinor)))throw Error('Invalid gross EV');
  if(ev.showdownEquity?.status==='calculated'&&(!Number.isFinite(ev.showdownEquity.share)||ev.showdownEquity.share<0||ev.showdownEquity.share>1))throw Error('Invalid equity');

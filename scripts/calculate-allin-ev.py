@@ -2,7 +2,7 @@
 """Conservative exact runout EV. Local raw cards never enter the output projection.
 Net pots retain the hand's observed total deduction; multi-pot deductions are not guessed.
 """
-import argparse,collections,decimal,itertools,json,pathlib,sqlite3,subprocess
+import argparse,collections,decimal,itertools,json,pathlib,sqlite3,subprocess,math
 from fractions import Fraction
 D=decimal.Decimal
 METHOD='exact-runouts-fixed-deduction-v1'
@@ -16,9 +16,17 @@ def card(c):
  if s not in range(1,5) or r not in range(1,14):raise ValueError('invalid_cards')
  return (s-1)*13+(12 if r==1 else r-2)
 def equity(binary,holes,board,masks):
- values=[len(holes),len(board),len(masks)]+[c for h in holes for c in h]+board+masks
- result=subprocess.run([binary],input=' '.join(map(str,values)),text=True,capture_output=True,check=True).stdout.splitlines()
- return int(result[0]),[list(map(float,r.split())) for r in result[1:]]
+ hole_count=len(holes[0]) if holes else 0
+ if hole_count==2:
+  values=[len(holes),len(board),len(masks)]+[c for h in holes for c in h]+board+masks;executable=binary
+ else:
+  if hole_count not in (4,5,6) or any(len(h)!=hole_count for h in holes):raise ValueError('invalid_cards')
+  values=[len(holes),hole_count,len(board),len(masks)]+[c for h in holes for c in h]+board+masks
+  executable=str(pathlib.Path(binary).with_name('omaha-equity'))
+ result=subprocess.run([executable],input=' '.join(map(str,values)),text=True,capture_output=True,check=True).stdout.splitlines()
+ first=result[0].split();runs=int(first[-1]);equity.last_method=('omaha-'+first[0]+'-2hole-3board-v1') if hole_count>2 else METHOD
+ return runs,[list(map(float,r.split())) for r in result[1:]]
+equity.last_method=METHOD
 def hero_showdown_equity(raw,hero,binary):
  """Retrospective equity vs final contenders at hero's explicit all-in.
  This is not a pot-weighted EV and does not model later opponents' decisions.
@@ -31,9 +39,9 @@ def hero_showdown_equity(raw,hero,binary):
  if at_allin is None:return {'status':'no_hero_allin'}
  if hero not in active or len(active)<2:return {'status':'no_contested_showdown'}
  players=sorted(active);holes=[[card(c) for c in row[2:]] for p in players for row in base['card'] if str(row[0])==p]
- if len(holes)!=len(players) or any(len(h)!=2 for h in holes):return {'status':'missing_cards'}
+ if len(holes)!=len(players) or len({len(h) for h in holes})!=1 or len(holes[0]) not in (2,4,5,6):return {'status':'missing_cards'}
  runs,shares=equity(binary,holes,[card(c) for c in at_allin],[(1<<len(players))-1])
- return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(at_allin),'opponents':len(players)-1,'runouts':runs,'method':'hero-allin-vs-final-contenders-v1'}
+ return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(at_allin),'opponents':len(players)-1,'runouts':runs,'method':equity.last_method}
 def matched_showdown_equity(raw,hero,binary):
  """Equity at matched effective all-in vs final contenders; later folds are conditioned on."""
  base=raw['base_data'];events=[e for _,e in sorted(base['opt'].items(),key=lambda p:int(p[0]))]
@@ -53,9 +61,9 @@ def matched_showdown_equity(raw,hero,binary):
    elif spent[hero]>=spent[target] or hero_allin:anchor=list(board);break
  if anchor is None:return {'status':'unmatched_allin'}
  players=sorted(active);holes=[[card(c) for c in row[2:]] for p in players for row in base['card'] if str(row[0])==p]
- if len(holes)!=len(players) or any(len(h)!=2 for h in holes):return {'status':'missing_cards'}
+ if len(holes)!=len(players) or len({len(h) for h in holes})!=1 or len(holes[0]) not in (2,4,5,6):return {'status':'missing_cards'}
  runs,shares=equity(binary,holes,[card(c) for c in anchor],[(1<<len(players))-1])
- return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(anchor),'opponents':len(players)-1,'runouts':runs,'method':'matched-allin-vs-final-contenders-v1'}
+ return {'status':'calculated','share':shares[0][players.index(hero)],'boardCards':len(anchor),'opponents':len(players)-1,'runouts':runs,'method':equity.last_method}
 def infer_net_pots(pots,actual,players,scores,bets):
  """Solve each net pot only when observed winner payouts give a unique solution."""
  n=len(pots);matrix=[[Fraction(str(actual[j][i])) for j in range(n)]+[Fraction(scores[p]+bets[p])] for i,p in enumerate(players)]
@@ -111,7 +119,7 @@ def inspect(raw,hero,binary,calculate=True):
  # bet_list is the final contribution ledger. Missing forced-post actions are
  # tolerated only when that ledger independently reconciles every final payout.
  players=sorted(active);holes=[[card(c) for c in row[2:]] for p in players for row in base['card'] if str(row[0])==p]
- if len(holes)!=len(players) or any(len(h)!=2 for h in holes):return skip('missing_cards')
+ if len(holes)!=len(players) or len({len(h) for h in holes})!=1 or len(holes[0]) not in (2,4,5,6):return skip('missing_cards')
  known=list(itertools.chain.from_iterable(holes))+[card(c) for c in board]
  if len(set(known))!=len(known):return skip('duplicate_cards')
  levels=sorted(set(bets.values())-{0});pots=[];previous=0
@@ -155,7 +163,7 @@ def inspect(raw,hero,binary,calculate=True):
  if not calculate:return {'status':'eligible','street':len(last_board),'pots':len(pots),'house':house,'actionsReconcile':reconciled,'validation':validation,'splitRemainderMinor':rounding}
  runs,shares=equity(binary,holes,[card(c) for c in last_board],[mask for _,mask in pots])
  hero_index=players.index(hero);ev=sum(net_pots[j]*shares[j][hero_index] for j in range(len(pots)))-bets[hero]
- return {'status':'calculated','method':METHOD,'resultMinor':round(ev,6),'runouts':runs,'boardCards':len(last_board),'pots':len(pots),'deductionMinor':house,'actionsReconcile':reconciled,'validation':validation,'splitRemainderMinor':rounding}
+ return {'status':'calculated','method':equity.last_method,'resultMinor':round(ev,6),'runouts':runs,'boardCards':len(last_board),'pots':len(pots),'deductionMinor':house,'actionsReconcile':reconciled,'validation':validation,'splitRemainderMinor':rounding}
 def run(args):
  text=pathlib.Path(args.projection).read_text();data=json.loads(text.removeprefix('window.Poker21BulkSample = ').rstrip(';\n'));allowed={r['handId']:r for r in data['rows']};results={};counts=collections.defaultdict(collections.Counter)
  db=sqlite3.connect('file:'+str(pathlib.Path(args.db).resolve())+'?mode=ro',uri=True)

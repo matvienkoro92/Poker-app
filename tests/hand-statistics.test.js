@@ -24,6 +24,15 @@ test('normalizes each hand by its own blind, never averages per-hand percentages
   const r=aggregate([base,{...base,handId:'2',resultMinor:1000,bigBlindMinor:1000}],options);
   assert.equal(r.resultMinor,800); assert.equal(r.bb,0); assert.equal(r.bb100,0);
 });
+test('keeps Omaha variants separate and aggregates them without a Holdem matrix',()=>{
+  const plo4={...base,game:'PLO4',cards:['As','Kh','Qd','Jc']};
+  const plo5={...base,handId:'2',game:'PLO5',cards:['As','Kh','Qd','Jc','Ts']};
+  const result=aggregate([base,plo4,plo5],{...options,game:'PLO4'});
+  assert.equal(result.game,'PLO4');assert.equal(result.count,1);assert.equal(result.cells.length,1);
+  assert.equal(result.cells[0].label,'ALL');assert.deepEqual(result.cells[0].hands[0].cards,plo4.cards);
+  assert.equal(aggregate([base,plo4,plo5],{...options,game:'PLO5'}).count,1);
+  assert.throws(()=>aggregate([base],{...options,game:'PLO7'}));
+});
 test('isolates player, cash, MTT, SNG and rejects wrong units', () => {
   const rows=[base,{...base,playerId:'other'},{...base,mode:'mtt',unit:'CHIP'},
     {...base,mode:'sng',unit:'CHIP'},{...base,handId:'bad-unit',unit:'CHIP'}];

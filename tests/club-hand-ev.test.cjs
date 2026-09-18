@@ -12,4 +12,5 @@ test('backfill rejects owner, hand count and immutable source conflicts',()=>{
 test('backfill rejects invalid EV and embedded private cards',()=>{
  for(const bad of [{...ev,resultMinor:NaN},{...ev,runouts:0},{...ev,method:'guess'},{status:'unresolved'},{...ev,holes:[['Ah','Kd']]},{...ev,detail:{opponents:[]}}])assert.throws(()=>validateEv(bad));
  validateEv({status:'unresolved',reason:'betting_after_allin_street',showdownEquity:{status:'calculated',share:0.5,opponents:2}});validateEv({status:'not_applicable'});validateEv({status:'unresolved',reason:'side_pot_deduction'});
+ validateEv({...ev,method:'omaha-exact-2hole-3board-v1'});validateEv({...ev,method:'omaha-simulation-2hole-3board-v1',runouts:100000});
 });

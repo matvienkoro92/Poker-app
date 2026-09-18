@@ -17,6 +17,32 @@
   function countedText(text){return String(text||'').normalize('NFKC').split(/\r?\n/).filter(function(line){return !/^\s*>/.test(line);}).join(' ').replace(/https?:\/\/\S+|www\.\S+|«[^»]*»|“[^”]*”|"[^"]*"/giu,'').replace(/[^\p{L}\p{N}]/gu,'').length;}
   document.addEventListener('input',function(e){if(!e.target.matches('#reviewReplyForm textarea'))return;var hint=document.getElementById('reviewActivityHint');if(hint&&thread&&thread.authorId!==viewerId)hint.textContent='Для зачёта: '+countedText(e.target.value)+' / 60 букв и цифр · один комментарий на чужую раздачу';});
   function root(){return document.getElementById('clubReviewsContent');}
+  function topicPushPanel(){
+    var panel=document.createElement('section');panel.className='review-topic-push';
+    panel.innerHTML='<div><strong>Пуши о новых темах</strong><small>Отдельно от розыгрышей и ответов</small></div><button type="button" class="social-button" aria-pressed="false" disabled>Загрузка…</button><p role="status"></p>';
+    var btn=panel.querySelector('button'),hint=panel.querySelector('p'),gen=generation;
+    function active(){return gen===generation&&panel.isConnected;}
+    function render(data){btn.textContent=data.subscribed?'Выключить':'Включить';btn.setAttribute('aria-pressed',String(!!data.subscribed));hint.textContent=data.subscribed&&(!data.notificationsEnabled||!data.hasSubscription)?'Подписка сохранена. Включите пуш-уведомления в профиле.':'';}
+    api({action:'topic-push-status'}).then(function(data){if(active())render(data);}).catch(function(){if(active()){btn.textContent='Повторить';hint.textContent='Не удалось проверить подписку.';}}).finally(function(){if(active())btn.disabled=false;});
+    btn.addEventListener('click',async function(){
+      btn.disabled=true;hint.textContent='';
+      try{
+        var current=await api({action:'topic-push-status'});if(!active())return;render(current);
+        if(!current.subscribed){
+          if(typeof pokerChatPushIosNeedsStandalonePwa==='function'&&pokerChatPushIosNeedsStandalonePwa())throw new Error('На iPhone добавьте приложение на экран «Домой» и включите уведомления в профиле.');
+          if(typeof Notification==='undefined'||Notification.permission!=='granted'||!navigator.serviceWorker)throw new Error('Включите пуш-уведомления в профиле и разрешите их на устройстве, затем вернитесь сюда.');
+          var registration=await navigator.serviceWorker.getRegistration();
+          var subscription=registration&&registration.pushManager?await registration.pushManager.getSubscription():null;
+          if(!subscription)throw new Error('На этом устройстве пуши не настроены. Включите их в профиле.');
+        }
+        if(!active())return;
+        var saved=await api({action:'topic-push-set',enabled:!current.subscribed});
+        if(active()){render(saved);hint.textContent=saved.subscribed?'Пуши о новых темах включены.':'Пуши о новых темах выключены.';}
+      }catch(error){if(active())hint.textContent=error.message;}
+      finally{if(active())btn.disabled=false;}
+    });
+    return panel;
+  }
   function date(s){return new Date(s).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
   function feedback(text){
     var loading=/^(?:Загружаем разборы|Открываем обсуждение)/.test(text||'');
@@ -107,6 +133,7 @@
       var street=/^(Префлоп|Флоп|Тёрн|Ривер)(?::|\s*·|$)/.exec(line);
       if(street){raisesOnStreet=0;var pot=/\s·\sБанк:\s*(.+)$/.exec(line),streetText=(pot?line.slice(0,pot.index):line)+(street[1]==='Префлоп'&&heroCards?' · '+heroCards:'');return '<div class="review-hand-text__street review-hand-text__street--'+({"Префлоп":"preflop","Флоп":"flop","Тёрн":"turn","Ривер":"river"}[street[1]])+'"><span class="review-hand-text__board">'+inlineCards(streetText)+'</span>'+(pot?'<span class="review-hand-text__pot"><span>Банк</span><span>'+inlineCards(pot[1])+'</span></span>':'')+'</div>';}
       if(/^Вскрытие:/.test(line))return '<div class="review-hand-text__showdown">'+inlineCards(line)+'</div>';
+      if(/^Итоговый банк:/.test(line))return '<div class="review-hand-text__final-pot">'+inlineCards(line)+'</div>';
       if(/^Результат:/.test(line))return '<div class="review-hand-text__result">'+inlineCards(line)+'</div>';
       if(/\s—\s/.test(line)){var actionClass='';if(/\s—\sКолл(?:\s|$)/.test(line))actionClass='review-hand-text__line--call';else if(/\s—\sСтавка(?:\s|$)/.test(line))actionClass='review-hand-text__line--bet';else if(/\s—\sОлл-ин(?:\s|$)/.test(line))actionClass='review-hand-text__line--allin';else if(/\s—\sРейз(?:\s|$)/.test(line)){actionClass=raisesOnStreet?'review-hand-text__line--reraise':'review-hand-text__line--raise';raisesOnStreet++;}return actionLineHtml(line,heroName,actionClass);}
       return '<div class="review-hand-text__line'+(index<3?' review-hand-text__line--meta':'')+'">'+inlineCards(line)+'</div>';
@@ -145,6 +172,21 @@
       });
     }).join('\n');
   }
+  function openingPotContext(text,t){
+    var raw=String(text||'');
+    if(!t.handId||t.potTiming==='opening'||/^Итоговый банк:/m.test(raw))return raw;
+    var lines=raw.split(/\r?\n/),streets=[];
+    lines.forEach(function(line,index){var match=/^(Префлоп|Флоп|Тёрн|Ривер)(.*?)(\s·\sБанк:\s*)(.+)$/.exec(line);if(match)streets.push({index:index,head:match[1]+match[2]+match[3],pot:match[4]});});
+    if(!streets.length)return raw;
+    var unit=/(bb|₽|фишек)\s*$/i.exec(streets[0].pot),zero='0 '+(unit?unit[1]:'');
+    streets.forEach(function(street,index){lines[street.index]=street.head+(index?streets[index-1].pot:zero);});
+    var finalLine='Итоговый банк: '+streets[streets.length-1].pot;
+    var insert=lines.findIndex(function(line){return /^(?:Вскрытие:|Результат:|Два туза ·)/.test(line);});
+    if(insert<0)insert=lines.length;
+    while(insert>0&&!lines[insert-1].trim())insert--;
+    lines.splice(insert,0,'',finalLine,'');
+    return lines.join('\n');
+  }
   function avatar(t){return '<span class="review-topic__avatar"><img src="/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image" alt="" loading="lazy"><span>'+esc((handAuthor(t)||'И').slice(0,1))+'</span></span>';}
   function replyHtml(reply,t){
     var parent=t.replies.find(function(row){return row.id===reply.parentId;}),name=reply.authorNick||reply.authorName||'Игрок';
@@ -165,6 +207,7 @@
       controls.insertAdjacentHTML('beforeend',button('Удалить','delete-topic',topic.id,'review-topic__delete'));
     });
     r.insertAdjacentHTML('afterbegin',activityHtml());
+    r.prepend(topicPushPanel());
   }
   function loadList(more){
     var seq=++serial,gen=generation;thread=null;headerAction(null);feedback('Загружаем разборы…');
@@ -192,7 +235,7 @@
     article.insertBefore(heading,title);heading.append(title,share);
     var format=document.createElement('div');format.className='review-thread-format';format.textContent=handFormat(t,handMetric);heading.after(format);
     var context=article.querySelector('.review-context');
-    if(context){context.querySelector('h3')?.remove();context.insertAdjacentHTML('afterbegin',handUnitToggle(t));var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(contextInMetric(t.context,t,handMetric),t.hideShowdown===true,handAuthor(t));}
+    if(context){context.querySelector('h3')?.remove();context.insertAdjacentHTML('afterbegin',handUnitToggle(t));var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(contextInMetric(openingPotContext(t.context,t),t,handMetric),t.hideShowdown===true,handAuthor(t));}
     article.querySelector('.review-image')?.closest('a')?.remove();
     r.querySelectorAll('.review-comment__avatar img').forEach(function(img){img.onerror=function(){img.hidden=true;};});
     article.querySelectorAll('details').forEach(function(details){var summary=details.querySelector(':scope > summary');if(summary&&summary.textContent.trim()==='Текст раздачи'){summary.remove();details.replaceWith.apply(details,Array.from(details.childNodes));}});
