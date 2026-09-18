@@ -9625,6 +9625,18 @@ body[data-view="my-summary"]{background:#080c0e}
  [data-view="my-summary"] .summary-art--starting-hands{width:42%;height:82%}
 }
 
+/* Friend news precedes the restored full-size daily action cards. */
+[data-view="my-summary"] .summary-card--friends{order:-4}
+[data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles){order:-3;min-height:220px;padding:18px}
+@media(max-width:1000px){
+ [data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles){min-height:220px;padding:18px;border-radius:19px}
+ [data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles) h2{font-size:20px;line-height:1.15;min-height:0;margin-bottom:12px}
+ [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles){gap:7px}
+ [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) .summary-value{font-size:21px!important;line-height:1.2}
+ [data-view="my-summary"] #summary-bonus .summary-value{font-size:30px!important}
+ [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) p{font-size:13px!important;line-height:1.35;margin:4px 0}
+}
+
 .summary-share-preview{width:min(92vw,620px);max-height:90dvh;overflow:auto;padding:16px;border:1px solid #a78b55;border-radius:18px;background:#0d1215;color:#f6e8c9}
 .summary-share-preview::backdrop{background:#000b}
 .summary-share-preview img{display:block;width:100%;height:auto;margin:12px 0;-webkit-touch-callout:default}
@@ -9694,7 +9706,10 @@ body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active
   padding-top: 68px;
   border-color: #b98a4d42;
   background: linear-gradient(145deg,#171817,#090c0e);
+  margin-bottom: 5px;
 }
+[data-view="club-reviews"] .review-thread-card + .social-section-title{margin-top:10px;margin-bottom:5px}
+[data-view="club-reviews"] .social-section-title + #reviewReplyForm{margin-top:5px}
 [data-view="club-reviews"] .review-thread-card .review-share-actions {
   position: absolute;
   top: 16px;

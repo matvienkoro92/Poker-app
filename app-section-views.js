@@ -92,13 +92,8 @@
     window.pokerRecordSectionViewOpen(section);
   }
   window.pokerInitAdminSectionViewsUi = function () {
-    window.__pokerShowAdminSectionViews = true;
-    ensureBars();
-    document.querySelectorAll(".admin-section-views").forEach(function (el) {
-      el.classList.remove("admin-section-views--hidden");
-      el.setAttribute("aria-hidden", "false");
-    });
-    fetchCounts();
+    window.__pokerShowAdminSectionViews = false;
+    document.querySelectorAll(".admin-section-views").forEach(function (el) { el.remove(); });
   };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () { setTimeout(recordCurrentViewOnce, 600); });
