@@ -8,7 +8,7 @@
   'use strict';
   const ranks = 'AKQJT98765432';
   const modes = ['cash', 'mtt', 'sng'];
-  const positions = ['UTG','UTG+1','UTG+2','UTG+3','MP','MP+1','CO','BTN','SB','BB','BTN/SB','UNKNOWN'];
+  const positions = ['UTG','UTG+1','UTG+2','UTG+3','MP','MP+1','CO','BTN','SB','BB','UNKNOWN'];
   function searchName(value) {
     return String(value || '').normalize('NFKC').toLowerCase().replace(/ё/g,'е').replace(/[^0-9a-zа-я_]+/g,'');
   }
@@ -169,7 +169,7 @@
     seen.forEach(({row, label}, key) => {
       if (conflicts.has(key)) return;
       if (!matchesSearch(row,o)) return;
-      const normalizedPosition = ({LJ:'MP',HJ:'MP+1'})[row.position] || row.position;
+      const normalizedPosition = ({LJ:'MP',HJ:'MP+1','BTN/SB':'SB'})[row.position] || row.position;
       const position = positions.includes(normalizedPosition) ? normalizedPosition : 'UNKNOWN';
       if (!positionGroups.has(position)) positionGroups.set(position, {position, count:0, resultMinor:0, bb:0});
       const pg = positionGroups.get(position);
