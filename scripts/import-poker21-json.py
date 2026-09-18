@@ -38,7 +38,7 @@ def positions(raw):
         if sb not in seats:return unknown
         bb=seats[(seats.index(sb)+1)%len(seats)]
         if posts['19'].count(bb)!=1:return unknown
-    if len(seats)==2:return {sb:'BTN/SB',bb:'BB'}
+    if len(seats)==2:return {sb:'SB',bb:'BB'}
     start=(seats.index(bb)+1)%len(seats);ordered=seats[start:]+seats[:start]
     early={3:[],4:['CO'],5:['MP','CO'],6:['UTG','MP','CO'],7:['UTG','MP','MP+1','CO'],8:['UTG','UTG+1','MP','MP+1','CO'],9:['UTG','UTG+1','UTG+2','MP','MP+1','CO'],10:['UTG','UTG+1','UTG+2','UTG+3','MP','MP+1','CO']}
     return dict(zip(ordered,early[len(seats)]+['BTN','SB','BB']))

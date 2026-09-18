@@ -37,7 +37,7 @@ function startHistory(payload) {
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
   const positionByMode={cash:'',mtt:'',sng:''};
-  const positionLabel=p=>p==='UNKNOWN'?'Не определена':p;
+  const positionLabel=p=>({UNKNOWN:'Не определена','BTN/SB':'SB',LJ:'MP',HJ:'MP+1'}[p]||p);
   for(const p of core.positions){const option=document.createElement('option');option.value=p;option.textContent=positionLabel(p);document.getElementById('position').append(option);}
   let appliedFrom='',appliedTo='';
   const outcomeFilters={positive:true,negative:true};
