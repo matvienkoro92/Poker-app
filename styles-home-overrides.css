@@ -6174,6 +6174,7 @@ html body #app.app.app--view-home
   background: url('./assets/home-lounge-background-v1-display-v1.webp') center bottom / 100% 100% no-repeat;
   -webkit-mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
   mask-image: linear-gradient(to bottom, transparent 70%, #000 84%);
+  opacity: 0;
   pointer-events: none;
   z-index: -1;
 }
@@ -6195,7 +6196,7 @@ html body #app.app.app--view-home
   --lounge-label-clip: inset(82.5% 22% 12% 23%);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-art {
-  filter: brightness(.84) saturate(.94);
+  filter: brightness(.78) saturate(.82) contrast(.97);
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link::after {
   content: "" !important;
@@ -6204,7 +6205,7 @@ html body #app.app.app--view-home
   background: var(--lounge-label-art) center / 100% 100% no-repeat;
   translate: 0 var(--lounge-label-shift);
   clip-path: var(--lounge-label-clip);
-  filter: brightness(1.16);
+  filter: brightness(1.08) saturate(.9);
   pointer-events: none;
   z-index: 2;
 }
