@@ -140,6 +140,231 @@
 #annualRatingPanel .winter-rating__table { width: 100%; }
 #annualRatingPanel td:nth-child(2) { overflow-wrap: anywhere; }
 
+#annualRatingBack { margin-left: 48px; font-size: 12px; }
+
+/* Anchor current standings to the steps, independent of the player's height. */
+html #app .summer-rating .spring-rating-top3__podium--current {
+  container-type: inline-size;
+}
+html #app .summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__podium--current::before,
+html #app .summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__podium--current::before {
+  background-position: left 50% bottom 30cqw, left 11% bottom 24cqw, left 89% bottom 23cqw !important;
+}
+
+/* scrollIntoView on the league tabs must not pan the whole screen sideways. */
+html.app-view-summer-rating-html-scroll body #app.app:has(#summerRatingView.view--active) {
+  overflow: clip !important;
+}
+@media (max-width: 360px) {
+  html #app .winter-rating.spring-rating.summer-rating
+    :is(#springRatingTop3PodiumLeague1, #springRatingTop3PodiumLeague2).spring-rating-top3--league:has(.spring-rating-top3__podium--current) {
+    width: 100vw;
+  }
+  html #app .summer-rating #springRatingTop3PodiumLeague1 .spring-rating-top3__podium--current::before,
+  html #app .summer-rating #springRatingTop3PodiumLeague2 .spring-rating-top3__podium--current::before {
+    background-position: left 50% bottom 120px, left 11% bottom 96px, left 89% bottom 92px !important;
+  }
+}
+
+/* Rating controls occupy their own rows above the podium. */
+html #app #winterRatingSection.summer-rating #ratingHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content max-content;
+  grid-template-areas: "leagues leagues leagues" ". actions archive" "updated updated updated";
+  gap: 8px;
+  padding: 3px 0 21px;
+  position: relative;
+  z-index: 3;
+  background: #020812;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader > * {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: auto !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingTitle {
+  display: none !important;
+  grid-area: title;
+  padding: 0 0 0 44px !important;
+  min-height: 40px;
+  justify-content: flex-start !important;
+  align-items: center;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader .winter-rating__title-text {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  align-items: flex-start !important;
+  white-space: normal !important;
+  font-size: 0 !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  text-align: left;
+  transform: none !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader .winter-rating__title-text::before {
+  content: attr(data-season-title);
+  display: block;
+  font-size: clamp(14px, 4vw, 16px) !important;
+  line-height: 1.15 !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader .winter-rating__title-text::after {
+  display: block;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #annualRatingBack {
+  grid-area: archive;
+  align-self: center;
+  padding: 8px !important;
+  font-size: 10px;
+  line-height: 1.2;
+  border-radius: 10px;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringMainTabs {
+  grid-area: leagues;
+  margin-left: 44px !important;
+  display: flex !important;
+  height: 40px !important;
+  padding: 3px !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringMainTabs > button {
+  flex: 1;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  font-size: 12px !important;
+  margin: 0 !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringActionTabs {
+  grid-area: actions;
+  width: max-content !important;
+  display: flex;
+  height: 32px !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  gap: 6px;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #winterRatingSpringActionTabs > button {
+  position: static !important;
+  transform: none !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #summerRatingSectionCopyBtn {
+  width: 32px !important;
+  min-width: 32px !important;
+  padding: 6px !important;
+}
+html #app #winterRatingSection.summer-rating #ratingHeader #springRatingTabsUpdated {
+  grid-area: updated;
+  justify-self: end;
+  height: 12px;
+  line-height: 12px;
+  align-self: center;
+  font-size: 9px !important;
+  font-weight: 400 !important;
+  color: #b8b0a0;
+}
+html #app #winterRatingSection.summer-rating:has(#ratingHeader) {
+  --summer-rating-stage-bg-offset-y: 88px;
+}
+@media (max-width: 700px) {
+  html #app #winterRatingSection.summer-rating:has(#ratingHeader) {
+    --summer-rating-stage-bg-offset-y: 56px;
+  }
+}
+
+/* Lift the lower characters onto the plinths without moving names or hitboxes. */
+html #app #winterRatingSection.summer-rating .summer-rating-pedestal-labels::before {
+  transform: translateY(calc(var(--summer-rating-mobile-lower-podium-players-y, -48px) - 40px));
+}
+
+.home-summer-dashboard .summer-rating-month-tops {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 0 10px 12px;
+  margin: 0;
+}
+.home-summer-dashboard .summer-rating-month-tops .summer-rating-season-top {
+  padding: 12px;
+}
+.home-summer-dashboard .summer-rating-month-tops table {
+  table-layout: auto;
+  font-size: 13px;
+}
+.home-summer-dashboard .summer-rating-month-tops h3 {
+  font-size: 16px;
+  line-height: 1.3;
+}
+.home-summer-dashboard .summer-rating-month-tops small {
+  font-size: 11px;
+  white-space: normal;
+}
+
+html #app #winterRatingSection.summer-rating #ratingHeader #annualRatingBack,
+html #app #winterRatingSection.summer-rating #ratingHeader #springRatingAchievementsBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 32px !important;
+  padding: 0 15px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  font-size: 11px !important;
+  font-weight: 950;
+  line-height: 1;
+  color: rgba(255, 232, 184, 0.9);
+  text-shadow: 0 1px 7px rgba(0, 0, 0, 0.72);
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 236, 164, 0.22), transparent 58%), linear-gradient(180deg, rgba(20, 24, 26, 0.64), rgba(7, 10, 14, 0.72));
+}
+
+/* Place names on the front plaques, with matching clickable areas. */
+html #app #winterRatingSection.summer-rating .spring-rating-top3__nick,
+html #app #winterRatingSection.summer-rating .spring-rating-top3__nick-btn {
+  translate: 0 -44px;
+}
+html #app #winterRatingSection.summer-rating .summer-rating-pedestal-label {
+  top: calc(var(--summer-rating-mobile-lower-podium-label-y) - 50px);
+}
+html #app #winterRatingSection.summer-rating .summer-rating-pedestal-hitbox {
+  top: calc(var(--summer-rating-mobile-lower-podium-hitbox-y) - 50px);
+}
+
+/* Keep search, rows and expansion control together in normal flow. */
+html #app #winterRatingSection.summer-rating .winter-rating__search-wrap--league {
+  order: 3;
+  margin: -90px 0 8px !important;
+}
+html #app #winterRatingSection.summer-rating .winter-rating__table-wrap--league {
+  order: 4;
+  transform: none !important;
+  margin: 0 !important;
+}
+html #app #winterRatingSection.summer-rating .winter-rating__show-all-wrap--league {
+  order: 5;
+  margin: 8px 0 12px !important;
+  padding: 0 !important;
+}
+@media (max-width: 700px) {
+  html #app #winterRatingSection.summer-rating .winter-rating__search-wrap--league {
+    margin-top: -138px !important;
+  }
+}
+
+/* Monthly summaries belong to the calendar, not the league standings. */
+#winterRatingSection.summer-rating[data-summer-filter="1"] .home-summer-dashboard,
+#winterRatingSection.summer-rating[data-summer-filter="2"] .home-summer-dashboard {
+  display: none !important;
+}
+
 .home-summer-dashboard { padding: 12px 0; }
 .home-summer-dashboard > a { display: block; margin: 14px 0; color: #e8cd91; }
 

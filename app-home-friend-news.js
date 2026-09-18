@@ -255,6 +255,29 @@
     });
   }
 
+  var FRIEND_READ_CACHE_PREFIX = "poker_friend_news_read_v1:";
+  function saveFriendReadCache() {
+    if (!friendNewsAccountId) return;
+    try {
+      localStorage.setItem(FRIEND_READ_CACHE_PREFIX + friendNewsAccountId, JSON.stringify({
+        pending: Object.keys(friendReadPending),
+        read: Object.keys(friendReadIds).slice(-5000),
+      }));
+    } catch (_) {}
+  }
+
+  function restoreFriendReadCache() {
+    try {
+      var cache = JSON.parse(localStorage.getItem(FRIEND_READ_CACHE_PREFIX + friendNewsAccountId) || "{}");
+      ["read", "pending"].forEach(function (kind) {
+        var target = kind === "read" ? friendReadIds : friendReadPending;
+        (Array.isArray(cache[kind]) ? cache[kind] : []).forEach(function (id) {
+          if (typeof id === "string" && id.length > 0 && id.length <= 1000) target[id] = true;
+        });
+      });
+    } catch (_) {}
+  }
+
   function loadFriendNewsEnvelope() {
     if (!hasNewsAuth()) return Promise.resolve({ friends: [], sharedEvents: [], readIds: [] });
     if (envelopePromise) return envelopePromise;
@@ -267,8 +290,14 @@
         friendReadPending = {};
       }
       friendNewsAccountId = data.accountId;
+      restoreFriendReadCache();
       friendTrackingSince = Number.isFinite(Date.parse(data.trackingSince)) ? Date.parse(data.trackingSince) : null;
-      (data.readIds || []).forEach(function (id) { friendReadIds[id] = true; });
+      (data.readIds || []).forEach(function (id) { friendReadIds[id] = true; delete friendReadPending[id]; });
+      saveFriendReadCache();
+      if (Object.keys(friendReadPending).length) {
+        clearTimeout(friendReadTimer);
+        friendReadTimer = setTimeout(flushFriendNewsRead, 500);
+      }
       sharedFriendEvents = data.sharedEvents || [];
       envelopeValue = data;
       envelopeAt = Date.now();
@@ -323,6 +352,7 @@
     friendNewsRequest({ action: "read", ids: ids }).then(function () {
       if (account !== friendNewsAccountId) return;
       ids.forEach(function (id) { friendReadIds[id] = true; delete friendReadPending[id]; });
+      saveFriendReadCache();
       envelopeAt = 0;
       updateFriendNewsBadges();
       if (Object.keys(friendReadPending).length) friendReadTimer = setTimeout(flushFriendNewsRead, 500);
@@ -366,6 +396,7 @@
         if (!entry.isIntersecting || entry.intersectionRatio < 0.6 || !id || document.hidden || modal.hidden || newsModalMode !== "friends" || account !== friendNewsAccountId) return;
         if (friendReadIds[id] || friendReadPending[id]) return;
         friendReadPending[id] = true;
+        saveFriendReadCache();
         updateFriendNewsBadges();
         clearTimeout(friendReadTimer);
         friendReadTimer = setTimeout(flushFriendNewsRead, 500);

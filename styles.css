@@ -9374,8 +9374,8 @@ button.poker-copy-feedback--error,
 .friend-news-unread-dot[hidden] { display: none !important; }
 
 /* Personal player summary */
-.my-summary-entry{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;padding:16px 18px;margin:0 0 14px;border:1px solid #bfa66a55;border-radius:18px;background:linear-gradient(110deg,#353324,#1b2625);color:#f6e8bf;cursor:pointer;font:inherit}
-.my-summary-entry strong{display:block;font-size:18px}.my-summary-entry small{display:block;margin-top:5px;color:#c9c7ba;font-size:12px;line-height:1.5}.my-summary-entry>span:last-child{font-size:28px}
+.my-summary-entry{width:100%;min-height:58px;display:flex;align-items:center;gap:12px;text-align:left;padding:8px 16px;margin:0 0 10px;border:1px solid #ffffff12;border-radius:18px;background:linear-gradient(110deg,#171a20,#0d1116);box-shadow:inset 0 1px 0 #ffffff08;color:#f3ddb0;cursor:pointer;font:inherit}
+.my-summary-entry strong{display:block;font-size:17px;line-height:1.2}.my-summary-entry__icon{display:grid;flex:0 0 auto;place-items:center;width:38px;height:38px;border:1px solid #ffffff16;border-radius:50%;background:linear-gradient(145deg,#2a2e35,#181b20);color:#adb1b7;box-shadow:inset 0 1px 0 #ffffff0d}.my-summary-entry__icon svg{width:23px;height:23px;fill:currentColor}.my-summary-entry__badge{display:grid;place-items:center;min-width:20px;height:20px;margin-left:auto;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#d68131;color:#17110b;font-size:11px;font-weight:800}.my-summary-entry__badge[hidden]{display:none}
 .summary-header{display:flex;justify-content:space-between;gap:12px}.summary-heading{font-size:32px;letter-spacing:-1px;margin:18px 0 6px;color:#f6edcf}.summary-subtitle{color:#b9beb9;margin:0 0 24px}.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:28px}.summary-card{padding:20px;border:1px solid #bec9b323;border-radius:20px;background:linear-gradient(145deg,#242d29,#171e1c);min-width:0;color:#ecefe6}.summary-card:first-child{border-color:#d4bd7355;background:linear-gradient(135deg,#3b3926,#232b23)}.summary-card h2{font-size:15px;color:#cbd2c7;margin:0 0 18px;font-weight:500}.summary-value{display:block;font-size:25px;line-height:1.25;letter-spacing:-.5px;color:#f5e9bf}.summary-value small{font-size:15px}.summary-card p{font-size:14px;line-height:1.5;margin:8px 0}.summary-muted{color:#aeb9b1!important;font-size:13px!important}.summary-link{background:none;border:0;color:#e5cd87;font:inherit;font-size:14px;cursor:pointer;padding:10px 0;text-align:left}.summary-link:focus-visible,.my-summary-entry:focus-visible{outline:2px solid #eed591;outline-offset:3px}.summary-event{padding:14px 0;border-top:1px solid #ffffff12}.summary-event strong{display:block;line-height:1.4;overflow-wrap:anywhere}.summary-kicker{display:block;text-transform:uppercase;letter-spacing:.08em;color:#aabaac;font-size:10px;margin-bottom:6px}.summary-event progress{width:100%;height:7px;accent-color:#d8bc6e;display:block;margin:12px 0}.summary-picks{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.summary-picks label{font-size:12px;border:1px solid #ffffff20;border-radius:12px;padding:8px;cursor:pointer}.summary-picks input{accent-color:#d8bc6e}.summary-event[hidden]{display:none}
 @media(max-width:540px){.summary-grid{grid-template-columns:1fr}.summary-heading{font-size:30px}.summary-card{padding:18px}.summary-value{font-size:24px}}
 a.summary-link{display:inline-block;text-decoration:none}
@@ -9627,14 +9627,14 @@ body[data-view="my-summary"]{background:#080c0e}
 
 /* Friend news precedes the restored full-size daily action cards. */
 [data-view="my-summary"] .summary-card--friends{order:-4}
-[data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles){order:-3;min-height:220px;padding:18px}
+[data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles){order:-3;min-height:0;aspect-ratio:1/1;padding:14px;border-radius:16px;overflow:hidden}
 @media(max-width:1000px){
- [data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles){min-height:220px;padding:18px;border-radius:19px}
- [data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles) h2{font-size:20px;line-height:1.15;min-height:0;margin-bottom:12px}
- [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles){gap:7px}
- [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) .summary-value{font-size:21px!important;line-height:1.2}
- [data-view="my-summary"] #summary-bonus .summary-value{font-size:30px!important}
- [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) p{font-size:13px!important;line-height:1.35;margin:4px 0}
+ [data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles){min-height:0;padding:10px;border-radius:13px}
+ [data-view="my-summary"] :is(.summary-card--spin,.summary-card--bonus,.summary-card--raffles) h2{font-size:13px;line-height:1.1;min-height:0;margin-bottom:6px}
+ [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles){gap:3px}
+ [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) .summary-value{font-size:14px!important;line-height:1.15}
+ [data-view="my-summary"] #summary-bonus .summary-value{font-size:20px!important}
+ [data-view="my-summary"] :is(#summary-spin,#summary-bonus,#summary-raffles) p{font-size:8.5px!important;line-height:1.2;margin:2px 0}
 }
 
 .summary-share-preview{width:min(92vw,620px);max-height:90dvh;overflow:auto;padding:16px;border:1px solid #a78b55;border-radius:18px;background:#0d1215;color:#f6e8c9}

@@ -66,8 +66,8 @@ test("new events notify only subscribers with an event deep link and stake", asy
 
 test("new participant notifies existing event players once, without section subscription", async () => {
   const { api, messages } = setup();
-  const newcomer = { accountId: "ID000003", memberId: "tg_333", name: "New Nick" };
-  const event = { id: "tb_join", title: "Magic MKO", entries: [
+  const newcomer = { accountId: "ID000003", memberId: "tg_333", name: "New Nick", stake: 1300 };
+  const event = { id: "tb_join", title: "Magic MKO", stakePrice: 300, entries: [
     { accountId: "ID000001", memberId: "tg_111" },
     { accountId: "ID000002", memberId: "tg_222" },
     { accountId: "ID000004", memberId: "tg_111" }, newcomer,
@@ -76,6 +76,7 @@ test("new participant notifies existing event players once, without section subs
   assert.deepEqual(messages.map((msg) => msg.chat_id), ["111", "222"]);
   assert.match(messages[0].text, /Новый участник «New Nick» сделал ставку на себя/);
   assert.match(messages[0].text.replace(/\u00a0/g, " "), /Общий банк теперь: 9 500 ₽/);
+  assert.match(messages[0].text.replace(/\u00a0/g, " "), /Сумма ставки: 1 300 ₽/);
   assert.match(messages[0].text, /Событие — турнир «Magic MKO»/);
   assert.equal(new URL(messages[0].buttonUrl).searchParams.get("startapp"), "tournament_bet_tb_join");
 });
