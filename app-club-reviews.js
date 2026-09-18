@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  var generation=0,serial=0,mine=false,cursor=null,rows=[],thread=null,busy=false,imageData='',imageBusy=false,formKey='',replyKey='',parentId='';
+  var generation=0,serial=0,mine=false,cursor=null,rows=[],thread=null,busy=false,imageData='',imageBusy=false,formKey='',replyKey='',parentId='',handMetric='bb',listMetric='bb',listMode='all';
   var answerObserver=null,viewerId='';
   function esc(s){return pokerSocialEscape(s);}
   function api(b){return pokerSocialRequest('club-reviews',b);}
@@ -11,6 +11,23 @@
     var loader=document.getElementById('clubReviewsLoading');if(loader)loader.hidden=!loading;
     var el=document.getElementById('clubReviewsFeedback');if(el)el.textContent=loading?'':text||'';
   }
+  function resetReviewsScroll(){
+    var view=root()?.closest('[data-view="club-reviews"]');
+    if(view)view.scrollTop=0;
+    if(typeof scrollMainDocumentToTop==='function')scrollMainDocumentToTop({force:true});
+  }
+  function keepReviewReplyVisible(){
+    var textarea=document.querySelector('[data-view="club-reviews"].view--active #reviewReplyForm textarea');
+    if(!textarea||document.activeElement!==textarea)return;
+    var view=textarea.closest('[data-view="club-reviews"]'),rect=textarea.getBoundingClientRect();
+    var viewport=window.visualViewport,top=(viewport?Number(viewport.offsetTop):0)+12;
+    var bottom=(viewport?Number(viewport.offsetTop)+Number(viewport.height):window.innerHeight)-16;
+    if(!view)return;
+    if(rect.height>bottom-top)view.scrollTop+=rect.top-top;
+    else if(rect.bottom>bottom)view.scrollTop+=rect.bottom-bottom;
+    else if(rect.top<top)view.scrollTop-=top-rect.top;
+  }
+  function scheduleReviewReplyVisible(){[0,80,180,360,650].forEach(function(delay){setTimeout(keepReviewReplyVisible,delay);});}
   function headerAction(t){
     var host=document.getElementById('clubReviewsHeaderAction');if(!host)return;
     if(!t){host.innerHTML='';return;}
@@ -24,19 +41,27 @@
   function topicLink(id){return new URL('./?startapp=review_'+id,location.href).href;}
   function cardsText(t){return (t.cards||[]).map(function(c){return c.replace(/^T/,'10').replace(/[shdc]$/,function(s){return {s:'♠',h:'♥',d:'♦',c:'♣'}[s];});}).join(' ');}
   function cardsHtml(t){return (t.cards||[]).map(function(c){var suit=c.slice(-1),rank=c.slice(0,-1).replace(/^T$/,'10');return '<span class="playing-card suit-'+suit+'">'+esc(rank+({s:'♠',h:'♥',d:'♦',c:'♣'}[suit]||''))+'</span>';}).join('');}
-  function handFormat(t){
+  function handMode(t){return t.gameMode||(/\bфишек\b/i.test(t.context||'')?'mtt':/(?:₽|руб)/i.test(t.context||'')?'cash':'');}
+  function handAuthor(t){return t&&t.type==='hand'&&(t.authorNick||'').trim()||t.authorName||'';}
+  function handFormat(t,metric){
     if(!t||t.type!=='hand')return '';
-    var mode=t.gameMode||(/\bфишек\b/i.test(t.context||'')?'mtt':/(?:₽|руб)/i.test(t.context||'')?'cash':'');
+    var mode=handMode(t);
     var bigBlind=Number(t.bigBlindMinor)/100;
     if(!(bigBlind>0)){var match=/большой блайнд\s+([\d\s.,]+)/i.exec(t.context||'');if(match)bigBlind=Number(match[1].replace(/\s/g,'').replace(',','.'));}
-    var stackBb=bigBlind>0&&Number.isSafeInteger(t.startingStackMinor)&&t.startingStackMinor>=0?t.startingStackMinor/100/bigBlind:NaN;
-    var stack=Number.isFinite(stackBb)?' · стек '+stackBb.toLocaleString('ru-RU',{maximumFractionDigits:1})+' BB':'';
-    if(mode==='mtt')return 'МТТ'+stack;
-    if(mode==='cash')return 'КЕШ'+(bigBlind>0?' · '+(bigBlind/2).toLocaleString('ru-RU',{maximumFractionDigits:2})+'/'+bigBlind.toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽':'')+stack;
+    var pot=Number.isSafeInteger(t.totalPotMinor)?t.totalPotMinor/100:NaN;
+    var nativeUnit=mode==='cash'?'₽':'фишек';
+    var bank='';
+    if(Number.isFinite(pot)&&pot>=0){var shown=metric==='bb'&&bigBlind>0?pot/bigBlind:pot;bank=' · Банк '+shown.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+(metric==='bb'?'BB':nativeUnit);}
+    if(mode==='mtt')return 'МТТ'+bank;
+    if(mode==='cash')return 'КЕШ'+(bigBlind>0?' · '+(bigBlind/2).toLocaleString('ru-RU',{maximumFractionDigits:2})+'/'+bigBlind.toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽':'')+bank;
     return '';
   }
-  function topicTitle(t){return (t.cards||[]).length?t.authorName+' · '+cardsText(t):t.title;}
-  function topicTitleHtml(t){var format=handFormat(t);return (format?'<span class="review-hand-format">'+esc(format)+'</span> · ':'')+((t.cards||[]).length?esc(t.authorName)+' · '+cardsHtml(t):esc(t.title));}
+  function topicTitle(t){return (t.cards||[]).length?handAuthor(t)+' · '+cardsText(t):t.title;}
+  function topicTitleHtml(t,metric){var format=handFormat(t,metric);return (format?'<span class="review-hand-format">'+esc(format)+'</span> · ':'')+((t.cards||[]).length?esc(handAuthor(t))+' · '+cardsHtml(t):esc(t.title));}
+  function topicListTitleHtml(t){
+    var format=handFormat(t,listMetric);
+    return '<span class="review-topic__format">'+esc(format)+'</span><span class="review-topic__hand">'+esc(handAuthor(t))+' · '+cardsHtml(t)+'</span>';
+  }
   function inlineCards(text){
     var raw=String(text||''),out='',last=0,re=/(10|[2-9JQKA])([♠♥♦♣])/g,match;
     while((match=re.exec(raw))){out+=esc(raw.slice(last,match.index));var suit={"♠":"s","♥":"h","♦":"d","♣":"c"}[match[2]];out+='<span class="playing-card suit-'+suit+'">'+esc(match[0])+'</span>';last=re.lastIndex;}
@@ -44,7 +69,7 @@
   }
   function actionLineHtml(line,heroName,actionClass){
     var match=/^(.+?)\s+—\s+(.+)$/.exec(line),html=inlineCards(line);
-    if(match&&(match[1].trim()==='Вы'||heroName&&match[1].trim()===heroName))html='<strong class="review-hand-text__hero">'+esc(match[1].trim())+'</strong> — '+inlineCards(match[2]);
+    if(match){var actor=match[1].trim(),plainActor=actor.replace(/^[A-Z0-9]{2}:\s*/, '');if(plainActor==='Вы'||heroName&&plainActor===heroName)html=(actor!==plainActor?esc(actor.slice(0,actor.length-plainActor.length)):'')+'<strong class="review-hand-text__hero">'+esc(plainActor)+'</strong> — '+inlineCards(match[2]);}
     return '<div class="review-hand-text__line'+(/\s—\sФолд(?:\s|$)/.test(line)?' review-hand-text__line--fold':'')+(actionClass?' '+actionClass:'')+'">'+html+'</div>';
   }
   function contextLinesHtml(lines,heroName){
@@ -74,10 +99,47 @@
     var visible=split>=0?lines.slice(0,split):lines,hidden=split>=0?lines.slice(split):[];
     return '<div class="review-hand-text">'+contextLinesHtml(visible,heroName)+'</div>'+(hidden.length?'<details class="review-hand-spoiler"><summary>Показать продолжение и результат</summary><div class="review-hand-text review-hand-spoiler__body">'+contextLinesHtml(hidden,heroName)+'</div></details>':'');
   }
-  function avatar(t){return '<span class="review-topic__avatar"><img src="/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image" alt="" loading="lazy"><span>'+esc((t.authorName||'И').slice(0,1))+'</span></span>';}
+  function detectHandMetric(text){return /Банк:[^\n]*(?:₽|фишек)/i.test(text||'')?'native':'bb';}
+  function handUnitToggle(t){
+    if(t.type!=='hand'||!(Number(t.bigBlindMinor)>0))return '';
+    var nativeLabel=t.gameMode==='cash'?'₽':'Фишки';
+    return '<div class="review-unit-toggle" role="group" aria-label="Единицы раздачи"><button type="button" data-review-action="unit" data-id="bb" aria-pressed="'+(handMetric==='bb')+'">BB</button><button type="button" data-review-action="unit" data-id="native" aria-pressed="'+(handMetric==='native')+'">'+nativeLabel+'</button></div>';
+  }
+  function parseAmount(value){return Number(String(value||'').replace(/[\s\u00a0\u202f]/g,'').replace(',','.'));}
+  function formatAmount(value,withPlus){
+    var rounded=Math.round((Number(value)||0)*100)/100;
+    return (withPlus&&rounded>0?'+':'')+rounded.toLocaleString('ru-RU',{maximumFractionDigits:2});
+  }
+  function contextInMetric(text,t,metric){
+    var blind=Number(t.bigBlindMinor)/100;
+    if(!(blind>0)||!['bb','native'].includes(metric))return String(text||'');
+    var nativeUnit=t.gameMode==='cash'?'₽':'фишек';
+    return String(text||'').split(/\r?\n/).map(function(line){
+      if(/^Результат:/.test(line)){
+        var values=Array.from(line.matchAll(/([+-]?\d[\d\s\u00a0\u202f]*(?:[,.]\d+)?)\s*(bb|₽|фишек)/gi));
+        var preferred=values.find(function(match){return metric==='bb'?match[2].toLowerCase()==='bb':match[2].toLowerCase()!=='bb';})||values[0];
+        if(preferred){var amount=parseAmount(preferred[1]),isBb=preferred[2].toLowerCase()==='bb',converted=metric==='bb'?(isBb?amount:amount/blind):(isBb?amount*blind:amount);return 'Результат: '+formatAmount(converted,/\+/.test(preferred[1]))+' '+(metric==='bb'?'bb':nativeUnit);}
+      }
+      return line.replace(/([+-]?\d[\d\s\u00a0\u202f]*(?:[,.]\d+)?)\s*(bb|₽|фишек)/gi,function(full,value,unit){
+        var amount=parseAmount(value),isBb=unit.toLowerCase()==='bb';
+        if(!Number.isFinite(amount))return full;
+        var converted=metric==='bb'?(isBb?amount:amount/blind):(isBb?amount*blind:amount);
+        return formatAmount(converted,/\+/.test(value))+' '+(metric==='bb'?'bb':nativeUnit);
+      });
+    }).join('\n');
+  }
+  function avatar(t){return '<span class="review-topic__avatar"><img src="/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image" alt="" loading="lazy"><span>'+esc((handAuthor(t)||'И').slice(0,1))+'</span></span>';}
+  function replyHtml(reply,t){
+    var parent=t.replies.find(function(row){return row.id===reply.parentId;}),name=reply.authorNick||reply.authorName||'Игрок';
+    var avatarUrl='/api/avatar?userId='+encodeURIComponent(reply.authorId)+'&format=image';
+    return '<article class="review-comment'+(reply.coach?' review-comment--coach':'')+'"><header><button type="button" class="review-comment__author" data-review-action="profile" data-id="'+esc(reply.authorId)+'" data-name="'+esc(name)+'"><span class="review-comment__avatar"><span>'+esc(name.slice(0,1).toUpperCase())+'</span><img src="'+esc(avatarUrl)+'" alt="" loading="lazy"></span><span class="review-comment__identity"><strong>'+esc(name)+'</strong><small data-review-read-id="'+esc(reply.id)+'">'+(reply.authorLevel?'Уровень '+Math.max(0,Number(reply.authorLevel)||0)+' · ':'')+date(reply.createdAt)+'</small></span></button>'+(reply.coach?'<span class="review-coach">Тренер</span>':'')+(reply.canDelete?'<button type="button" class="review-comment__delete" data-review-action="delete-reply" data-id="'+esc(reply.id)+'" aria-label="Удалить комментарий" title="Удалить комментарий">×</button>':'')+'</header>'+(parent?'<blockquote>В ответ '+esc(parent.authorNick||parent.authorName)+': '+esc(parent.text.slice(0,140))+'</blockquote>':'')+'<p>'+esc(reply.text)+'</p><footer><button type="button" class="review-comment__reply" data-review-action="reply-to" data-id="'+esc(reply.id)+'">↩ Ответить</button></footer></article>';
+  }
   function renderList(){
     var r=root();if(!r)return;
-    r.innerHTML='<div class="social-tabs" role="group" aria-label="Раздачи"><button type="button" data-review-action="all" aria-pressed="'+!mine+'">Все раздачи</button><button type="button" data-review-action="mine" aria-pressed="'+mine+'">Мои раздачи</button></div><div class="review-topic-list">'+rows.map(function(t){return '<article class="review-topic">'+avatar(t)+'<button type="button" class="review-title review-topic__body" data-review-action="open" data-id="'+esc(t.id)+'"><strong>'+topicTitleHtml(t)+'</strong><small>'+esc(date(t.updatedAt))+(t.unread?' · Новые комментарии':'')+'</small></button><span class="review-topic__count" aria-label="Комментарии: '+t.replyCount+'">💬 '+t.replyCount+'</span></article>';}).join('')+'</div>'+(!rows.length?'<p class="social-muted">Раздач пока нет. Нажмите «Опубликовать» рядом с раздачей в разделе «Моя игра».</p>':'')+(cursor!==null?button('Показать ещё','more'):'');
+    document.body.classList.remove('review-reply-input-active');
+    document.querySelector('[data-view="club-reviews"] .club-reviews-header')?.classList.remove('club-reviews-header--thread');
+    var visibleRows=rows.filter(function(t){return listMode==='all'||handMode(t)===listMode;});
+    r.innerHTML='<div class="social-tabs" role="group" aria-label="Раздачи"><button type="button" data-review-action="all" aria-pressed="'+!mine+'">Все раздачи</button><button type="button" data-review-action="mine" aria-pressed="'+mine+'">Мои раздачи</button></div><div class="review-list-filters"><div role="group" aria-label="Тип игры"><button type="button" data-review-action="list-mode" data-id="all" aria-pressed="'+(listMode==='all')+'">Все</button><button type="button" data-review-action="list-mode" data-id="cash" aria-pressed="'+(listMode==='cash')+'">Кеш</button><button type="button" data-review-action="list-mode" data-id="mtt" aria-pressed="'+(listMode==='mtt')+'">МТТ</button></div><div role="group" aria-label="Единицы"><button type="button" data-review-action="list-unit" data-id="bb" aria-pressed="'+(listMetric==='bb')+'">BB</button><button type="button" data-review-action="list-unit" data-id="native" aria-pressed="'+(listMetric==='native')+'">₽ / фишки</button></div></div><div class="review-topic-list">'+visibleRows.map(function(t){return '<article class="review-topic">'+avatar(t)+'<button type="button" class="review-title review-topic__body" data-review-action="open" data-id="'+esc(t.id)+'"><strong>'+topicListTitleHtml(t)+'</strong><small>'+esc(date(t.updatedAt))+(t.unread?' · Новые комментарии':'')+'</small></button><span class="review-topic__count" aria-label="Комментарии: '+t.replyCount+'">💬 '+t.replyCount+'</span></article>';}).join('')+'</div>'+(!visibleRows.length?'<p class="social-muted">Раздач с такими параметрами пока нет.</p>':'')+(cursor!==null?button('Показать ещё','more'):'');
     r.querySelectorAll('.review-topic__avatar img').forEach(function(img){img.onerror=function(){img.hidden=true;};});
   }
   function loadList(more){
@@ -85,25 +147,30 @@
     return api({action:'list',mine:mine,cursor:more?cursor:0}).then(function(d){if(seq!==serial||gen!==generation)return;rows=more?rows.concat(d.threads):d.threads;cursor=d.nextCursor;renderList();feedback('');}).catch(function(e){if(seq!==serial||gen!==generation)return;feedback(e.message);if(!rows.length)root().innerHTML=button('Повторить','reload');});
   }
   function renderThread(t,resetDraft){
+    document.body.classList.remove('review-reply-input-active');
     var same=thread&&thread.id===t.id,oldInput=document.querySelector('#reviewReplyForm textarea');
     var draft=same&&!resetDraft&&oldInput?oldInput.value:'';
     var oldParent=same&&!resetDraft?parentId:'';
     thread=t;var r=root();if(!r)return;
     var sorted=t.replies.slice().sort(function(a,b){return Number(b.coach)-Number(a.coach)||a.createdAt.localeCompare(b.createdAt);});
-    r.innerHTML='<div class="social-actions">'+button('← Все разборы','back')+button(t.following?'Отписаться':'Следить за ответами','subscribe')+'</div><article class="social-card"><div class="social-kicker">'+(t.forCoach?'Вопрос тренеру · отвечать могут все':'Обсуждение с игроками')+'</div><h2>'+esc(t.title)+'</h2><p class="social-muted">'+esc(t.authorName)+' · '+date(t.createdAt)+'</p><p class="social-copy">'+esc(t.question)+'</p>'+(t.context?'<div class="review-context"><h3>Ситуация</h3><p class="social-copy">'+esc(t.context)+'</p></div>':'')+(t.image?'<a href="'+esc(t.image)+'" target="_blank" rel="noopener"><img class="review-image" src="'+esc(t.image)+'" alt="Раздача игрока"></a>':'')+(t.outcome?'<details class="review-outcome"><summary>Показать исход раздачи</summary><p class="social-copy">'+esc(t.outcome)+'</p></details>':'')+(t.type==='hand'?'<div class="review-votes"><h3>Как бы вы сыграли?</h3>'+[['fold','Пас'],['call','Колл'],['raise','Рейз']].map(function(v){return '<button type="button" class="social-button" data-review-action="vote" data-id="'+v[0]+'" aria-pressed="'+(t.myVote===v[0])+'">'+v[1]+(t.myVote?' · '+t.votes[v[0]]:'')+'</button>';}).join('')+'<p class="social-muted">Мнение участников, а не оценка правильности решения.</p></div>':'')+'</article><h2 class="social-section-title">Ответы · '+t.replies.length+'</h2>'+sorted.map(function(reply){var parent=t.replies.find(function(p){return p.id===reply.parentId;});return '<article class="social-card review-reply'+(reply.coach?' review-reply--coach':'')+'"><div class="social-actions"><strong>'+esc(reply.authorName)+'</strong>'+(reply.coach?'<span class="review-coach">Тренер</span>':'')+'</div>'+(parent?'<blockquote>В ответ '+esc(parent.authorName)+': '+esc(parent.text.slice(0,140))+'</blockquote>':'')+'<p class="social-copy">'+esc(reply.text)+'</p><small data-review-read-id="'+esc(reply.id)+'" class="social-muted">'+date(reply.createdAt)+'</small><div class="social-actions">'+button('Ответить','reply-to',reply.id)+(reply.canDelete?button('Удалить','delete-reply',reply.id):'')+'</div></article>';}).join('')+'<form id="reviewReplyForm" class="social-card social-form"><h3>Ваш ответ</h3><p id="reviewReplyTarget" class="social-muted"></p><label>Объясните своё решение<textarea name="text" required minlength="2" maxlength="3000" rows="5" placeholder="Как сыграть в этой ситуации?"></textarea></label><button class="social-button social-button--primary" type="submit">Ответить</button><p class="social-muted">Отвечать могут все участники клуба.</p></form>';
+    r.innerHTML='<div class="social-actions">'+button('← Все разборы','back')+button(t.following?'Отписаться':'Следить за ответами','subscribe')+'</div><article class="social-card"><div class="social-kicker">'+(t.forCoach?'Вопрос тренеру · отвечать могут все':'Обсуждение с игроками')+'</div><h2>'+esc(t.title)+'</h2><p class="social-muted">'+esc(handAuthor(t))+' · '+date(t.createdAt)+'</p><p class="social-copy">'+esc(t.question)+'</p>'+(t.context?'<div class="review-context"><h3>Ситуация</h3><p class="social-copy">'+esc(t.context)+'</p></div>':'')+(t.image?'<a href="'+esc(t.image)+'" target="_blank" rel="noopener"><img class="review-image" src="'+esc(t.image)+'" alt="Раздача игрока"></a>':'')+(t.outcome?'<details class="review-outcome"><summary>Показать исход раздачи</summary><p class="social-copy">'+esc(t.outcome)+'</p></details>':'')+(t.type==='hand'?'<div class="review-votes"><h3>Как бы вы сыграли?</h3>'+[['fold','Пас'],['call','Колл'],['raise','Рейз']].map(function(v){return '<button type="button" class="social-button" data-review-action="vote" data-id="'+v[0]+'" aria-pressed="'+(t.myVote===v[0])+'">'+v[1]+(t.myVote?' · '+t.votes[v[0]]:'')+'</button>';}).join('')+'<p class="social-muted">Мнение участников, а не оценка правильности решения.</p></div>':'')+'</article>'+sorted.map(function(reply){return replyHtml(reply,t);}).join('')+'<form id="reviewReplyForm" class="social-form review-reply-form"><p id="reviewReplyTarget" class="social-muted"></p><textarea name="text" aria-label="Комментарий" required minlength="2" maxlength="3000" rows="3" placeholder="Напишите комментарий…"></textarea><div class="review-reply-form__actions"><button class="social-button social-button--primary" type="submit">Отправить</button><span class="social-muted">Комментировать могут все участники клуба</span></div></form>';
     r.querySelector('.review-votes')?.remove();
     var oldThreadActions=r.firstElementChild;
-    if(oldThreadActions&&oldThreadActions.classList.contains('social-actions'))oldThreadActions.remove();
-    headerAction(t);
+    if(oldThreadActions&&oldThreadActions.classList.contains('social-actions'))oldThreadActions.classList.add('review-thread-nav');
+    document.querySelector('[data-view="club-reviews"] .club-reviews-header')?.classList.add('club-reviews-header--thread');
+    headerAction(null);
     var article=r.querySelector('article');article.classList.add('review-thread-card');
     article.querySelector('.social-kicker')?.remove();
-    article.querySelector('h2').innerHTML=topicTitleHtml(t);
+    var title=article.querySelector('h2');title.innerHTML=esc(handAuthor(t))+' · '+cardsHtml(t);
     var share=document.createElement('div');share.className='social-actions review-share-actions';
     share.innerHTML=shareButtons();
-    article.insertBefore(share,article.querySelector('h2').nextSibling);
+    var heading=document.createElement('div');heading.className='review-thread-heading-row';
+    article.insertBefore(heading,title);heading.append(title,share);
+    var format=document.createElement('div');format.className='review-thread-format';format.textContent=handFormat(t,handMetric);heading.after(format);
     var context=article.querySelector('.review-context');
-    if(context){context.querySelector('h3')?.remove();var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(t.context,t.hideShowdown===true,t.authorName);}
+    if(context){context.querySelector('h3')?.remove();context.insertAdjacentHTML('afterbegin',handUnitToggle(t));var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(contextInMetric(t.context,t,handMetric),t.hideShowdown===true,handAuthor(t));}
     article.querySelector('.review-image')?.closest('a')?.remove();
+    r.querySelectorAll('.review-comment__avatar img').forEach(function(img){img.onerror=function(){img.hidden=true;};});
     article.querySelectorAll('details').forEach(function(details){var summary=details.querySelector(':scope > summary');if(summary&&summary.textContent.trim()==='Текст раздачи'){summary.remove();details.replaceWith.apply(details,Array.from(details.childNodes));}});
     if(!same||resetDraft||!replyKey)replyKey=pokerSocialRequestId();parentId=oldParent;
     document.querySelector('#reviewReplyForm textarea').value=draft;
@@ -130,18 +197,25 @@
     });},{threshold:1});
     view.querySelectorAll('[data-review-read-id]').forEach(function(node){answerObserver.observe(node);});
   }
-  function open(id){var seq=++serial,gen=generation;feedback('Открываем обсуждение…');return api({action:'get',id:id}).then(function(d){if(gen!==generation||seq!==serial)return;viewerId=d.accountId||'';renderThread(d.thread);if(typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('review_opened',{entity:id,source:'club-reviews',once:true});feedback('');}).catch(function(e){if(gen===generation&&seq===serial){feedback(e.message);root().innerHTML=button('К списку разборов','back');}});}
+  function open(id){var seq=++serial,gen=generation;feedback('Открываем обсуждение…');return api({action:'get',id:id}).then(function(d){if(gen!==generation||seq!==serial)return;viewerId=d.accountId||'';handMetric=detectHandMetric(d.thread.context);renderThread(d.thread);resetReviewsScroll();requestAnimationFrame(resetReviewsScroll);if(typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('review_opened',{entity:id,source:'club-reviews',once:true});feedback('');}).catch(function(e){if(gen===generation&&seq===serial){feedback(e.message);root().innerHTML=button('К списку разборов','back');}});}
   function form(type){thread=null;serial++;imageData='';imageBusy=false;formKey=pokerSocialRequestId();feedback('');root().innerHTML=button('← К разборам','back')+'<form id="reviewCreateForm" class="social-card social-form" data-type="'+type+'"><div class="social-kicker">'+(type==='hand'?'Разбор раздачи':'Вопрос клубу')+'</div><h2>'+(type==='hand'?'Как здесь сыграть?':'Что хотите обсудить?')+'</h2><label>Короткий заголовок<input name="title" required minlength="3" maxlength="140" placeholder="Например: колл на тёрне с топ-парой?"></label><label>Конкретный вопрос<textarea name="question" required minlength="5" maxlength="3000" rows="4" placeholder="В чём сомневаетесь? Какие варианты рассматриваете?"></textarea></label><label>Кому адресован вопрос<select name="audience"><option value="coach">Тренеру и игрокам</option value="players">Игрокам клуба</option></select></label>'+(type==='hand'?'<label>Позиции, стеки и ход раздачи<textarea name="context" maxlength="2000" rows="5" placeholder="Формат турнира, блайнды, эффективный стек, позиции, карты, борд и ставки по улицам."></textarea></label><label>Скриншот раздачи<input type="file" id="reviewImageInput" accept="image/jpeg,image/png,image/webp"></label><p class="social-muted">Можно приложить один скриншот. Проверьте, что на нём нет личных данных.</p><div id="reviewImagePreview"></div><label>Чем закончилась раздача (необязательно)<textarea name="outcome" maxlength="2000" rows="3" placeholder="Будет скрыто под кнопкой «Показать исход»."></textarea></label>':'')+'<p class="social-muted">Вопрос и ответы видны участникам клуба. Вы будете подписаны на новые ответы. Ответ тренера появится, когда он разберёт вопрос.</p><button type="submit" class="social-button social-button--primary">Опубликовать</button></form>';}
   async function resizeImage(file){if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>12*1024*1024)throw new Error('Выберите JPG, PNG или WebP до 12 МБ');var bitmap=await createImageBitmap(file);try{var scale=Math.min(1,1400/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);for(var quality=.85;quality>=.25;quality-=.15){var data=canvas.toDataURL('image/jpeg',quality);if(data.length<=450000)return data;}throw new Error('Скриншот слишком большой. Обрежьте его до раздачи.');}finally{bitmap.close();}}
   document.addEventListener('change',function(e){if(e.target.id!=='reviewImageInput')return;var gen=generation,key=formKey;imageBusy=true;imageData='';feedback('Подготавливаем изображение…');resizeImage(e.target.files[0]).then(function(data){if(gen!==generation||key!==formKey)return;imageData=data;document.getElementById('reviewImagePreview').innerHTML='<img class="review-image" src="'+data+'" alt="Прикреплённый скриншот">'+button('Убрать изображение','remove-image');feedback('');}).catch(function(err){if(gen===generation)feedback(err.message);}).finally(function(){if(gen===generation)imageBusy=false;});});
+  document.addEventListener('focusin',function(e){if(!e.target.matches('[data-view="club-reviews"] #reviewReplyForm textarea'))return;document.body.classList.add('review-reply-input-active');scheduleReviewReplyVisible();});
+  document.addEventListener('focusout',function(e){if(!e.target.matches('[data-view="club-reviews"] #reviewReplyForm textarea'))return;setTimeout(function(){if(!document.activeElement?.matches('[data-view="club-reviews"] #reviewReplyForm textarea'))document.body.classList.remove('review-reply-input-active');},120);});
+  if(window.visualViewport){window.visualViewport.addEventListener('resize',keepReviewReplyVisible);window.visualViewport.addEventListener('scroll',keepReviewReplyVisible);}
   document.addEventListener('submit',function(e){if(!['reviewCreateForm','reviewReplyForm'].includes(e.target.id))return;e.preventDefault();if(busy)return;if(imageBusy){feedback('Дождитесь подготовки изображения');return;}var f=e.target,values=new FormData(f),payload=f.id==='reviewCreateForm'?{action:'create',requestId:formKey,type:f.dataset.type,title:values.get('title'),question:values.get('question'),context:values.get('context'),outcome:values.get('outcome'),forCoach:values.get('audience')==='coach',image:imageData}:{action:'reply',id:thread.id,requestId:replyKey,parentId:parentId,text:values.get('text')};var gen=generation;setBusy(true);feedback('Отправляем…');api(payload).then(function(d){if(gen!==generation)return;renderThread(d.thread,true);if(typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement(payload.action==='reply'?'review_reply_created':'review_created',{entity:d.thread.id,source:'club-reviews',once:true,onceKey:payload.requestId});feedback('Опубликовано');window.dispatchEvent(new Event('poker-reviews-updated'));}).catch(function(err){if(gen===generation)feedback(err.message);}).finally(function(){if(gen===generation)setBusy(false);});});
   document.addEventListener('click',function(e){var el=e.target.closest('[data-review-action]');if(!el||busy)return;var action=el.dataset.reviewAction,id=el.dataset.id;
     if(action==='new-question'||action==='new-hand'){form(action==='new-hand'?'hand':'question');return;}
     if(['all','mine','back','reload','more'].includes(action)){if(action==='all'||action==='mine')mine=action==='mine';loadList(action==='more');return;}
     if(action==='open'){open(id);return;}
+    if(action==='profile'){var profileName=el.dataset.name||'Игрок',profileAvatar='/api/avatar?userId='+encodeURIComponent(id)+'&format=image';if(typeof window.pokerOpenChatUserModalSafe==='function')window.pokerOpenChatUserModalSafe(id,profileName,profileAvatar);else if(typeof window.openChatUserModalById==='function')window.openChatUserModalById(id,profileName,profileAvatar);return;}
+    if(action==='list-mode'&&['all','cash','mtt'].includes(id)){listMode=id;renderList();return;}
+    if(action==='list-unit'&&['bb','native'].includes(id)){listMetric=id;renderList();return;}
     if(action==='remove-image'){imageData='';document.getElementById('reviewImageInput').value='';document.getElementById('reviewImagePreview').innerHTML='';return;}
-    if(action==='reply-to'){parentId=id;var reply=thread.replies.find(function(r){return r.id===id;});document.getElementById('reviewReplyTarget').textContent='В ответ '+reply.authorName;document.querySelector('#reviewReplyForm textarea').focus();return;}
+    if(action==='reply-to'){parentId=id;var reply=thread.replies.find(function(r){return r.id===id;});document.getElementById('reviewReplyTarget').textContent='В ответ '+(reply.authorNick||reply.authorName);document.querySelector('#reviewReplyForm textarea').focus();return;}
     if(!thread)return;
+    if(action==='unit'&&['bb','native'].includes(id)){handMetric=id;renderThread(thread);return;}
     if(action==='copy'||action==='share'){
       var url=topicLink(thread.id);
       if(action==='share'&&navigator.share){navigator.share({title:topicTitle(thread),url:url}).catch(function(e){if(e.name!=='AbortError')feedback('Не удалось поделиться. Скопируйте ссылку.');});}

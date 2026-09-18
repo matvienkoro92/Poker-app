@@ -65,14 +65,15 @@ function startHistory(payload) {
   const bulk = {rows:payload.rows};
   let stackBand='',tournamentId='',stackLoadPromise=null,stacksLoaded=false;
   const tournamentSelect=$('tournament-filter');
+  const tournamentNames=window.Poker21TournamentNames||{};
   const tournamentGroups=new Map();
   bulk.rows.filter(row=>row.mode==='mtt'&&row.sessionId).forEach(row=>{
     const key=String(row.sessionId),current=tournamentGroups.get(key);
-    if(!current||row.playedAt<current.playedAt)tournamentGroups.set(key,{id:key,playedAt:row.playedAt,name:String(row.tournamentName||row.tournament||'').trim(),count:(current?.count||0)+1});
+    if(!current||row.playedAt<current.playedAt)tournamentGroups.set(key,{id:key,playedAt:row.playedAt,name:String(row.tournamentName||row.tournament||tournamentNames[key]||'').trim(),count:(current?.count||0)+1});
     else current.count++;
   });
   const tournamentDate=value=>new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Moscow'}).format(new Date(value));
-  [...tournamentGroups.values()].sort((a,b)=>b.playedAt.localeCompare(a.playedAt)).forEach(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=(item.name||'Турнир '+item.id)+' · '+tournamentDate(item.playedAt)+' · '+item.count+' раздач';tournamentSelect.append(option);});
+  [...tournamentGroups.values()].sort((a,b)=>b.playedAt.localeCompare(a.playedAt)).forEach(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=(item.name||'MTT')+' · '+tournamentDate(item.playedAt)+' · '+item.count+' раздач';tournamentSelect.append(option);});
   resetDateRange();
   async function ensureMttStacks(){
     if(stacksLoaded)return;
@@ -192,7 +193,9 @@ function startHistory(payload) {
       const dateWrap=document.createElement('span'),date=document.createElement('span'),publish=document.createElement('button');dateWrap.className='hand-date-actions';date.className='hand-date';date.textContent=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/Moscow'}).format(new Date(h.playedAt));publish.type='button';publish.className='hand-publish-button';publish.textContent='Опубликовать';publish.onclick=event=>{event.preventDefault();event.stopPropagation();publishHand(publish,h,row,renderReplay);};dateWrap.append(date,publish);
       const amount=document.createElement('strong');amount.textContent=signed(metric==='resultMinor'?h.resultMinor/100:h.bb)+' '+(metric==='resultMinor'?(mode==='cash'?'₽':'фишек'):'bb');
       amount.className=h.resultMinor>0?'positive':h.resultMinor<0?'negative':'';
-      const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · Сессия '+h.sessionId+' · ';appendCards(meta,h.cards);meta.append(' · Большой блайнд: '+number(h.bigBlindMinor/100)+' '+(mode==='cash'?'₽':'фишек')+' · раздача '+h.handId);
+      const meta=document.createElement('span');meta.className='meta';meta.textContent=positionLabel(h.position)+' · ';appendCards(meta,h.cards);
+      const bigBlind=h.bigBlindMinor/100;meta.append(' · Блайнды '+number(bigBlind/2)+'/'+number(bigBlind)+(mode==='cash'?' ₽':''));
+      const handNumber=document.createElement('span');handNumber.className='hand-number';handNumber.textContent='Раздача '+h.handId;meta.append(document.createElement('br'),handNumber);
       const arrow=document.createElement('span');arrow.className='hand-arrow';arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
       summary.setAttribute('aria-label','Раздача '+(index+1)+', '+h.cards.join(' ')+', '+signed(h.resultMinor/100)+'. Раскрыть историю');
       const actions=document.createElement('span'),share=document.createElement('button');actions.className='hand-card-actions';share.type='button';share.className='hand-share-button';share.textContent='↗';share.title='Поделиться';share.setAttribute('aria-label','Поделиться раздачей '+h.handId);share.onclick=event=>{event.preventDefault();event.stopPropagation();shareHand(share,h,row,renderReplay);};actions.append(share);
@@ -383,6 +386,7 @@ function startHistory(payload) {
     if(!replay){add('p','История действий пока не загружена.');target.dataset.shareReady='1';return;}
     appendCards(add('h4','Префлоп · ','replay-cards street-heading street-preflop'),replay.cards);
     let roundActors=new Set();
+    let raisesOnStreet=0;
     let lastBoardLength=0;
     let currentPot=0;
     const replayInBb=metric==='bb';
@@ -390,12 +394,13 @@ function startHistory(payload) {
     const replayAmount=amount=>number(replayInBb?Number(amount)/bigBlind:Number(amount));
     const potUnit=replayInBb?'bb':mode==='cash'?'₽':'фишек';
     const potLabel=()=>replayAmount(currentPot);
+    const positionFor=window.PokerHandShare.positions(Object.assign({playerId:sample.playerId},hand),replay);
     const contributionCodes=new Set(['2','3','5','18','19','20']);
     const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};
     const unknown=[];
     for(const event of replay.events){
       if(event.board.length){
-        lastBoardLength=Math.max(lastBoardLength,event.board.length);roundActors.clear();
+        lastBoardLength=Math.max(lastBoardLength,event.board.length);roundActors.clear();raisesOnStreet=0;
         const streetName=({3:'Флоп',4:'Тёрн',5:'Ривер'}[event.board.length]||'Борд');
         const street=add('h4','','replay-board street-heading street-'+({3:'flop',4:'turn',5:'river'}[event.board.length]||'board'));
         const board=document.createElement('span'),pot=document.createElement('span');
@@ -409,7 +414,9 @@ function startHistory(payload) {
       const decision=!['18','19'].includes(event.code);
       let newRound=false;
       if(decision){if(roundActors.has(event.actorId)){newRound=true;roundActors.clear();}roundActors.add(event.actorId);}
-      const action=add('p',event.actor+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');
+      const action=add('p',(positionFor(event)?positionFor(event)+': ':'')+event.actor+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');
+      if(event.code==='2')action.classList.add('replay-call');
+      if(event.code==='3'){action.classList.add(raisesOnStreet?'replay-reraise':'replay-raise');raisesOnStreet++;}
       if(contributionCodes.has(event.code)&&event.amount)currentPot+=Number(event.amount)||0;
       if(event.code==='10')action.classList.add('replay-fold');
       if(newRound)action.classList.add('replay-round-start');

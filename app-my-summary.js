@@ -55,6 +55,21 @@
     }
   }
   function dateLabel(d) { return new Intl.DateTimeFormat("ru-RU", {timeZone:"Europe/Moscow", day:"numeric", month:"short", hour:"2-digit",minute:"2-digit"}).format(new Date(d)) + " мск"; }
+  function rafflePrizeList(raffles) {
+    var seen = new Set(), items = [];
+    (raffles || []).forEach(function (raffle) {
+      (raffle.groups || []).forEach(function (group) {
+        var prize = String(group && group.prize || "").trim(), count = Math.max(1, parseInt(group && group.count, 10) || 1), amount = /([\d\s]+)\s*(?:₽|р\b)/i.exec(prize), label;
+        if (!prize) return;
+        if (/трениров/i.test(prize)) label = "Тренировка";
+        else if (/б[эе]ккинг|байин|buy.?in/i.test(prize) && amount) label = count + " БИ по " + num(String(amount[1]).replace(/\s/g, "")) + " ₽";
+        else if (/билет/i.test(prize) && amount) label = count + " билетов по " + num(String(amount[1]).replace(/\s/g, "")) + " ₽";
+        else label = (count > 1 ? count + " × " : "") + prize;
+        if (!seen.has(label)) { seen.add(label); items.push(label); }
+      });
+    });
+    return items.slice(0, 4);
+  }
   function request(path, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 12000);
     var opts = {cache:"no-store", signal:controller.signal};
@@ -99,7 +114,7 @@
   }
   function renderSpin() {
     if (!spin) return;
-    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + (spin.lifetimePrizes ? '<p class="summary-muted">Выиграно за всё время:<br><strong>' + num(spin.lifetimePrizes.ticketAmount) + ' ₽ билетами</strong><br>' + num(spin.lifetimePrizes.bonusAmount) + ' бонусов</p>' : '<p class="summary-muted">Сумма выигрышей временно недоступна.</p>') + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
+    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + (spin.lifetimePrizes ? '<p class="summary-muted">Уже выиграно:<br><strong>' + num(spin.lifetimePrizes.ticketAmount) + ' ₽ билетами</strong><br>' + num(spin.lifetimePrizes.bonusAmount) + ' бонусов</p>' : '<p class="summary-muted">Сумма выигрышей временно недоступна.</p>') + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
     put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + ' <small>бонусов</small></strong><p class="summary-muted">На билеты для бэкинга.</p>' + link("Обменять", "daily-poker"));
     friends();
   }
@@ -328,7 +343,8 @@
     var active = data.activeRaffles;
     var mine = active.filter(function (r) {return (r.participants || []).some(function (p) {return account && String(p.accountId || p.userId) === account;});});
     var next = (mine.length ? mine : active).filter(function (r) {return isFinite(Date.parse(r.endDate));}).sort(function (a,b) {return Date.parse(a.endDate)-Date.parse(b.endDate);})[0];
-    put("raffles", '<strong class="summary-value">' + (mine.length ? 'Вы участвуете: ' + mine.length : 'Активных: ' + active.length) + '</strong>' + (next ? '<p>' + esc(next.title || next.name || "Ближайший розыгрыш") + '</p><p class="summary-muted">' + esc(dateLabel(next.endDate)) + '</p>' : '<p class="summary-muted">Новые розыгрыши появятся здесь.</p>') + link("Открыть", "raffles"));
+    var prizes = rafflePrizeList(active);
+    put("raffles", '<strong class="summary-value">' + (mine.length ? 'Вы участвуете: ' + mine.length : 'Активных: ' + active.length) + '</strong>' + (prizes.length ? '<ul class="summary-raffle-prizes">' + prizes.map(function (prize) {return '<li>' + esc(prize) + '</li>';}).join('') + '</ul>' : '<p class="summary-muted">Новые розыгрыши появятся здесь.</p>') + (next ? '<p class="summary-muted summary-raffle-date">До ' + esc(dateLabel(next.endDate)) + '</p>' : '') + link("Открыть", "raffles"));
   }
   function init() {
     root = document.getElementById("mySummaryContent"); if (!root || pending) return;
@@ -380,7 +396,7 @@
     if(existing){existing.showModal();existing.style.display='grid';var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:48px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-mtt-tournament-filter-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.innerHTML='<button type="button" style="height:48px;padding:0 20px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit">← Моя сводка</button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260918-action-positions-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=function(){closeStartingHands(false);};
     modal.addEventListener('close',function(){modal.style.display='none';});
     document.body.append(modal);modal.showModal();modal.style.display="grid";
