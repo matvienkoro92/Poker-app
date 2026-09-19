@@ -10030,6 +10030,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 .admin-bonuses__activity-grid small,.admin-bonuses__activity-totals p { color: #aeb7c2; font-size: 12px; line-height: 1.5; }
 .chart-unread-dot{display:inline-block!important;width:9px!important;min-width:9px!important;height:9px!important;padding:0!important;border-radius:50%;background:#ff3547!important;box-shadow:0 0 7px #ff354766}
 .chart-unread-dot[hidden]{display:none!important}
+.my-summary-entry #mySummaryBadge.chart-unread-dot{position:absolute;right:38px;top:50%;transform:translateY(-50%);margin:0}
 .summary-card--starting-hands{position:relative}
 .summary-card--starting-hands [data-chart-unread]{position:absolute;right:18px;top:18px}
 

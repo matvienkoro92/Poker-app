@@ -10,6 +10,15 @@
   }
   function renderChartUnread() {
     var unread = !!(chartHistory && (chartHistory.rows || []).some(function(row) {return chartSeen[row.handId] !== chartFingerprint(row);}));
+    try {
+      var auth = typeof pokerApiAuthJsonBody === 'function' ? pokerApiAuthJsonBody({}) : {};
+      var identity = auth.pwaSession || auth.pwaVkSession || auth.initData;
+      if(identity){
+        var key='poker-chart-unread:'+chartFingerprint({identity:identity});
+        if(chartHistory)localStorage.setItem(key,unread?'1':'0');
+        else unread=localStorage.getItem(key)==='1';
+      }
+    } catch (_) {}
     document.querySelectorAll('#mySummaryBadge,[data-chart-unread]').forEach(function(badge) {
       badge.hidden = !unread; badge.textContent = ''; badge.classList.add('chart-unread-dot');
       badge.setAttribute('aria-label', 'Есть непросмотренный график');
@@ -25,6 +34,11 @@
     chartCheckPending = true;
     var seq = generation;
     try {
+      if(!chartHistory){
+        var initial = await request('starting-hands', {action:'list'});
+        if(seq===generation)acceptChartHistory(initial);
+        return;
+      }
       var latest = await request('starting-hands', {action:'version'});
       if (seq !== generation) return;
       if (!chartHistory || chartHistory.playerId !== latest.playerId || chartHistory.version !== latest.version) {
@@ -484,6 +498,7 @@
   window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};renderChartUnread();setTimeout(checkChartUnread,0);});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)checkChartUnread();});
   window.addEventListener('storage',function(e){if(chartHistory && e.key==='poker-chart-seen:'+chartHistory.playerId)acceptChartHistory(chartHistory);});
+  renderChartUnread();
   setTimeout(checkChartUnread,0);
   setInterval(checkChartUnread,60000);
   window.addEventListener("poker-reviews-updated", function(){loadedAt=0;if(root&&root.querySelector("[data-summary-review-unread]"))loadReviewUnread();});
