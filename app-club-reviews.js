@@ -8,11 +8,12 @@
     if(!activity)return '';
     var target=Number(activity.target)||5;
     function track(label,value){return '<div class="review-activity__heading"><strong>'+label+'</strong><span>'+value+' / '+target+'</span></div><div class="review-activity__track" role="progressbar" aria-label="'+label+'" aria-valuemin="0" aria-valuemax="'+target+'" aria-valuenow="'+value+'">'+Array.from({length:target},function(_,i){return '<i'+(i<value?' class="is-filled"':'')+'></i>';}).join('')+'</div>';}
+    function ticketTrack(value,ticketTarget,amount){var percent=Math.max(0,Math.min(100,value/ticketTarget*100));return '<div class="review-activity__heading"><strong>Бонус-билет '+amount+' ₽</strong><span>'+value+' / '+ticketTarget+'</span></div><div class="review-activity__ticket-track" role="progressbar" aria-label="Бонус-билет '+amount+' рублей" aria-valuemin="0" aria-valuemax="'+ticketTarget+'" aria-valuenow="'+value+'"><i style="width:'+percent+'%"></i></div>';}
     var publicationProgress=Number(activity.publicationProgress)||0,commentProgress=Number(activity.commentProgress)||0;
-    return '<section class="review-activity" aria-label="Награды за активность">'+track('Публикации раздач',publicationProgress)+track('Полезные комментарии',commentProgress)+'<p>Публикации сегодня: '+Number(activity.publicationsToday)+' / '+Number(activity.publicationLimit)+'</p>'+(activity.spinsAvailable?'<button type="button" class="social-button" data-review-action="activity-play">Крутки за активность: '+Number(activity.spinsAvailable)+' →</button>':'')+'<details><summary>Как получить награды</summary><p>За каждые 5 публикаций своих раздач с вопросом — 1 крутка. До 7 публикаций в день, обновление в 00:00 МСК. Вопрос — минимум 20 букв или цифр. Повторную раздачу опубликовать нельзя.</p><p>За каждые 5 подходящих комментариев в чужих разборах — ещё 1 крутка. Для зачёта нужно от 60 букв или цифр без ссылок, цитат и эмодзи. Один зачёт на раздачу, без бессмысленных повторов и почти одинаковых комментариев. Короткие комментарии разрешены, но не дают прогресса.</p><p>Это два независимых счётчика. Прогресс и заработанные крутки не сгорают. Комментарии в своих разборах не учитываются. Нужен привязанный игровой аккаунт.</p></details></section>';
+    return '<section class="review-activity" aria-label="Награды за активность">'+track('Публикации раздач',publicationProgress)+track('Полезные комментарии',commentProgress)+ticketTrack(Number(activity.ticketProgress)||0,Number(activity.ticketTarget)||40,Number(activity.ticketAmount)||300)+'<p>Публикации сегодня: '+Number(activity.publicationsToday)+' / '+Number(activity.publicationLimit)+'</p>'+(activity.spinsAvailable?'<button type="button" class="social-button" data-review-action="activity-play">Крутки за активность: '+Number(activity.spinsAvailable)+' →</button>':'')+'<details><summary>Как получить награды</summary><p>За каждые 5 публикаций своих раздач с вопросом — 1 крутка. До 7 публикаций в день, обновление в 00:00 МСК. Вопрос — минимум 20 букв или цифр. Повторную раздачу опубликовать нельзя.</p><p>За каждые 5 подходящих комментариев в чужих разборах — ещё 1 крутка. Для зачёта нужно от 60 букв или цифр без ссылок, цитат и эмодзи. Один зачёт на раздачу, без бессмысленных повторов и почти одинаковых комментариев. Короткие комментарии разрешены, но не дают прогресса.</p><p>Публикации и подходящие комментарии вместе считаются активными действиями. За каждые 40 действий бонус-билет на 300 ₽ начисляется автоматически.</p><p>Счётчики круток независимы. Прогресс и заработанные награды не сгорают. Комментарии в своих разборах не учитываются. Нужен привязанный игровой аккаунт.</p></details></section>';
   }
   function activityNotice(d){
-    if(d.activityAward)return 'Опубликовано · +1 к прогрессу'+(d.activityAward.spin?' · +1 крутка!':'');
+    if(d.activityAward)return 'Опубликовано · +1 к прогрессу'+(d.activityAward.spin?' · +1 крутка!':'')+(d.activityAward.ticket?' · бонус-билет 300 ₽ начислен!':'');
     var reasons={author_unlinked:'игровой аккаунт автора старой раздачи не подтверждён',own_thread:'свои разборы не дают действий',unlinked:'для наград привяжите игровой аккаунт',text_rules:'для зачёта нужен текст от 60 букв/цифр без бессмысленных повторов',already_counted:'комментарий в этой раздаче уже зачтён',similar_text:'повторяющийся или почти одинаковый текст не даёт действий'};
     return 'Опубликовано'+(reasons[d.activityReason]?'. Без награды: '+reasons[d.activityReason]+'.':'');
   }
@@ -211,6 +212,20 @@
     r.insertAdjacentHTML('afterbegin',activityHtml());
     r.prepend(topicPushPanel());
   }
+  function renderListWithoutScrollJump(action,id){
+    var view=root()?.closest('[data-view="club-reviews"]');
+    var viewTop=view?view.scrollTop:0;
+    var pageTop=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0;
+    renderList();
+    function restore(){
+      if(view)view.scrollTop=viewTop;
+      if(typeof window.scrollTo==='function')window.scrollTo(window.pageXOffset||0,pageTop);
+    }
+    restore();
+    var replacement=root()?.querySelector('[data-review-action="'+action+'"][data-id="'+id+'"]');
+    if(replacement)replacement.focus({preventScroll:true});
+    requestAnimationFrame(restore);
+  }
   function loadList(more){
     var seq=++serial,gen=generation;thread=null;headerAction(null);feedback('Загружаем разборы…');
     return api({action:'list',mine:mine,cursor:more?cursor:0}).then(function(d){if(seq!==serial||gen!==generation)return;rows=more?rows.concat(d.threads):d.threads;cursor=d.nextCursor;renderList();feedback('');}).catch(function(e){if(seq!==serial||gen!==generation)return;feedback(e.message);if(!rows.length)root().innerHTML=button('Повторить','reload');});
@@ -283,8 +298,8 @@
     if(['all','mine','back','reload','more'].includes(action)){if(action==='all'||action==='mine')mine=action==='mine';loadList(action==='more');return;}
     if(action==='open'){open(id);return;}
     if(action==='profile'){var profileName=el.dataset.name||'Игрок',profileAvatar='/api/avatar?userId='+encodeURIComponent(id)+'&format=image';if(typeof window.pokerOpenChatUserModalSafe==='function')window.pokerOpenChatUserModalSafe(id,profileName,profileAvatar);else if(typeof window.openChatUserModalById==='function')window.openChatUserModalById(id,profileName,profileAvatar);return;}
-    if(action==='list-mode'&&['all','cash','mtt'].includes(id)){listMode=id;renderList();return;}
-    if(action==='list-unit'&&['bb','native'].includes(id)){listMetric=id;renderList();return;}
+    if(action==='list-mode'&&['all','cash','mtt'].includes(id)){listMode=id;renderListWithoutScrollJump(action,id);return;}
+    if(action==='list-unit'&&['bb','native'].includes(id)){listMetric=id;renderListWithoutScrollJump(action,id);return;}
     if(action==='remove-image'){imageData='';document.getElementById('reviewImageInput').value='';document.getElementById('reviewImagePreview').innerHTML='';return;}
     if(action==='reply-to'){parentId=id;var reply=thread.replies.find(function(r){return r.id===id;});document.getElementById('reviewReplyTarget').textContent='В ответ '+(reply.authorNick||reply.authorName);document.querySelector('#reviewReplyForm textarea').focus();return;}
     if(action==='delete-topic'){

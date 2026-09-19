@@ -10014,6 +10014,8 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 .review-activity__track { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; margin: 11px 0; }
 .review-activity__track i { display: block; height: 8px; border-radius: 4px; background: #ffffff14; }
 .review-activity__track .is-filled { background: #f3ca64; }
+.review-activity__ticket-track { height: 8px; overflow: hidden; margin: 11px 0; border-radius: 4px; background: #ffffff14; }
+.review-activity__ticket-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#f3ca64,#ffe28c); }
 .review-activity p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: #aeb7c2; }
 .review-activity details { margin-top: 8px; font-size: 12px; }
 .review-activity summary { cursor: pointer; color: #e2c889; }

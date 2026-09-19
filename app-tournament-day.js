@@ -445,8 +445,8 @@ function pokerFindNextFreerollItem(items, now) {
 var HOME_TOURNAMENT_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 var HOME_TOURNAMENT_WEEK_DAY_LABELS = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
 var HOME_FREEROLL_DAY_LABELS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1000 ₽", 1: "1000 ₽", 2: "1000 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "1000 ₽" };
-var HOME_TOURNAMENT_BUBBLE_COUNTS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1 };
+var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1000 ₽", 1: "1000 ₽", 2: "1000 ₽", 3: "2000 ₽", 4: "1200 ₽", 5: "1000 ₽", 6: "1000 ₽" };
+var HOME_TOURNAMENT_BUBBLE_COUNTS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
 var HOME_TOURNAMENT_BANNER_VERSION = "2026080802";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
 

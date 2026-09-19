@@ -43,6 +43,7 @@ function harness() {
     for (const [op, key, ...args] of commands) {
       if (op === 'SET') values.set(key, String(args[0]));
       else if (op === 'HSET') hset(key, args[0], args[1]);
+      else if (op === 'HINCRBY') hset(key, args[0], Number(hget(key,args[0]) || 0) + Number(args[1]));
       else if (op === 'INCRBY') values.set(key, String(Number(values.get(key) || 0) + Number(args[0])));
       else if(op==='LPUSH')lists.set(key,[args[0],...(lists.get(key)||[])]);
       else if(op==='LTRIM')lists.set(key,(lists.get(key)||[]).slice(Number(args[0]),Number(args[1])+1));
@@ -138,6 +139,23 @@ test('publication and comment progress award spins independently', async () => {
   assert.equal(a.actions, 5); assert.equal(a.publicationProgress, 1); assert.equal(a.commentProgress, 4); assert.equal(a.spinsEarned, 0); assert.equal(a.spinsAvailable, 0); assert.equal(a.bonusEarned, 0);
   await h.comment('another'); a = await h.activity.summary(h.actor.accountId);
   assert.equal(a.publicationProgress, 1); assert.equal(a.commentProgress, 0); assert.equal(a.spinsAvailable, 1);
+});
+test('the 40th combined active action atomically awards one 300 ruble bonus ticket', async () => {
+  const h=harness();
+  h.values.set(h.activity.stateKey(h.actor.accountId),JSON.stringify({
+    ...h.activity.emptyState(),actions:39,commentActions:39,spinsEarned:7,spinsAvailable:7
+  }));
+  const reply=await h.comment('milestone');
+  const summary=await h.activity.summary(h.actor.accountId);
+  assert.equal(summary.actions,40);assert.equal(summary.ticketProgress,0);assert.equal(summary.ticketTarget,40);
+  assert.equal(summary.activityTicketsEarned,1);assert.equal(reply.activityAward.ticket,1);assert.equal(reply.activityAward.bonus,300);
+  assert.equal(Number(h.hget('poker_app:bonus_balances',h.actor.accountId)),300);
+  assert.equal(Number(h.hget('poker_app:daily_poker_ticket_count',h.actor.accountId)),1);
+  const ticketIds=h.commits.at(-1).commands.filter(c=>c[0]==='LPUSH'&&c[1]==='poker_app:daily_poker_tickets_user:'+h.actor.accountId).map(c=>c[2]);
+  assert.equal(ticketIds.length,1);
+  assert.equal(JSON.parse(h.values.get('poker_app:daily_poker_ticket:'+ticketIds[0])).amount,300);
+  assert.equal(h.commits.at(-1).opts.balances[0].value,0);
+  assert.equal(h.locks.size,0);
 });
 test('short, own-thread, duplicate, second-in-thread and unbound comments remain allowed without reward', async () => {
   const h = harness(); await h.comment('short', 'Хорошая раздача');

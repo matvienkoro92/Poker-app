@@ -855,7 +855,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
-  --home-tournament-scene:url('./assets/home-tournament-shtukatur-single-table-v3.webp');
+  --home-tournament-scene:url('./assets/home-tournament-shtukatur-single-table-v4-no-spade.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
@@ -895,3 +895,13 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] .home-last-longer-dock__bar {top:86%!important;left:0!important;width:100%!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {z-index:6!important}
+
+/* The illustrated bonus chips are foreground objects. Repeat only their
+   silhouettes above Last Longer so any overlap is naturally hidden behind them. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character]::after {
+  display:block!important;
+  background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cellipse cx='12.3' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='31' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='50' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='68.5' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='87.4' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3C/svg%3E") center/100% 100% no-repeat!important;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cellipse cx='12.3' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='31' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='50' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='68.5' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3Cellipse cx='87.4' cy='72' rx='8.4' ry='9.5' fill='white'/%3E%3C/svg%3E") center/100% 100% no-repeat!important;
+  z-index:5!important;
+}
