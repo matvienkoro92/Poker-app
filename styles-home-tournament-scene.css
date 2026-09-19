@@ -895,12 +895,12 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
-  position:absolute;top:calc(100% + 5cqw);left:50%;transform:translate(-50%,-50%);margin:0;width:11.5cqw;
-  font-size:2.3cqw;line-height:1.1;gap:.5cqw;
+  position:absolute;top:calc(100% + 4.35cqw);left:50%;transform:translate(-50%,-50%);margin:0;width:11.5cqw;
+  align-content:center;gap:.08cqw;font-size:2.3cqw;line-height:.96;
 }
-#app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1.1}
+#app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock {
-  left:30.6%!important;top:47.5%!important;width:28%!important;height:18%!important;
+  left:30.6%!important;top:47.5%!important;width:28%!important;height:18%!important;z-index:3!important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {
   left:20%!important;top:0!important;width:60%!important;height:73%!important;
@@ -908,3 +908,4 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   -webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 12%,#000 30%);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] .home-last-longer-dock__bar {top:86%!important;left:0!important;width:100%!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {z-index:6!important}
