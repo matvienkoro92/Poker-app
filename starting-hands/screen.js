@@ -12,7 +12,7 @@ window.addEventListener('message',async event=>{
  if(event.data?.type==='starting-hands-resume'){
   if(versionCheckPending||!activeHistoryPlayerId)return;
   versionCheckPending=true;
-  try{const latest=await historyRequest('version');if(String(latest.playerId||'')!==activeHistoryPlayerId||String(latest.version||'')!==activeHistoryVersion)location.reload();}
+  try{const latest=await historyRequest('version');if(String(latest.playerId||'')!==activeHistoryPlayerId||String(latest.version||'')!==activeHistoryVersion)location.reload();else window.dispatchEvent(new Event('history-chart-resume'));}
   catch(_){}finally{versionCheckPending=false;}
   return;
  }
@@ -33,7 +33,7 @@ function startHistory(payload) {
   function showHistoryTab(tab){
     document.querySelectorAll('[data-history-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.historyTab===tab)));
     document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=!p.dataset.historyPanel.split(' ').includes(tab));
-    if(tab==='review')render();
+    if(tab==='review'||tab==='overview')render();
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
   const positionByMode={cash:'',mtt:'',sng:''};
@@ -365,6 +365,9 @@ function startHistory(payload) {
     const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,game,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
     renderProfitChart(data);
+    if(!document.querySelector('.profit-panel').hidden && !document.hidden) {
+      parent.postMessage({type:'starting-hands-chart-viewed',playerId:activeHistoryPlayerId,version:activeHistoryVersion,handIds:data.cells.flatMap(c=>c.hands).map(h=>String(h.handId))},location.origin);
+    }
     $('position').value=positionByMode[mode];
     const allPositions=document.createElement('button');
     allPositions.type='button';allPositions.dataset.position='';
@@ -520,5 +523,6 @@ function startHistory(payload) {
   $('date-close').addEventListener('click',()=>{if($('date-status').textContent)return;document.querySelector('.date-picker').open=false;document.querySelector('.date-picker summary').focus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelector('.date-picker').open=false;}});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});
+  window.addEventListener('history-chart-resume',render);
   render();
 }

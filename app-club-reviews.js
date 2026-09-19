@@ -250,7 +250,7 @@
   }
   function observeAnswers(t){
     if(answerObserver)answerObserver.disconnect();
-    var gen=generation,view=root(),pending=new Set(t.replies.map(function(r){return r.id;})),sent=false;
+    var gen=generation,view=root(),pending=new Set(t.replies.filter(function(r){return r.authorId!==viewerId && (!r.readVersion || r.readVersion>(t.readVersion||0));}).map(function(r){return r.id;})),sent=false;
     function active(){return gen===generation&&thread===t&&!document.hidden&&document.querySelector('[data-view="club-reviews"].view--active');}
     function finish(){if(pending.size||sent||!active())return;sent=true;api({action:'read',id:t.id,version:t.version}).then(function(){if(gen===generation)window.dispatchEvent(new Event('poker-reviews-updated'));}).catch(function(){sent=false;});}
     if(!pending.size){finish();return;}
@@ -264,8 +264,8 @@
         if(viewerId&&reply&&reply.authorId!==viewerId&&typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('review_answer_read',{entity:t.id,source:'club-reviews',once:true,onceKey:id});
         finish();
       },800);
-    });},{threshold:1});
-    view.querySelectorAll('[data-review-read-id]').forEach(function(node){answerObserver.observe(node);});
+    });},{threshold:0.5});
+    view.querySelectorAll('[data-review-read-id]').forEach(function(node){if(pending.has(node.getAttribute('data-review-read-id')))answerObserver.observe(node);});
   }
   function open(id){var seq=++serial,gen=generation;feedback('Открываем обсуждение…');return api({action:'get',id:id}).then(function(d){if(gen!==generation||seq!==serial)return;viewerId=d.accountId||'';handMetric=detectHandMetric(d.thread.context);renderThread(d.thread);resetReviewsScroll();requestAnimationFrame(resetReviewsScroll);if(typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement('review_opened',{entity:id,source:'club-reviews',once:true});feedback('');}).catch(function(e){if(gen===generation&&seq===serial){feedback(e.message);root().innerHTML=button('К списку разборов','back');}});}
   function form(type){thread=null;serial++;imageData='';imageBusy=false;formKey=pokerSocialRequestId();feedback('');root().innerHTML=button('← К разборам','back')+'<form id="reviewCreateForm" class="social-card social-form" data-type="'+type+'"><div class="social-kicker">'+(type==='hand'?'Разбор раздачи':'Вопрос клубу')+'</div><h2>'+(type==='hand'?'Как здесь сыграть?':'Что хотите обсудить?')+'</h2><label>Короткий заголовок<input name="title" required minlength="3" maxlength="140" placeholder="Например: колл на тёрне с топ-парой?"></label><label>Конкретный вопрос<textarea name="question" required minlength="5" maxlength="3000" rows="4" placeholder="В чём сомневаетесь? Какие варианты рассматриваете?"></textarea></label><label>Кому адресован вопрос<select name="audience"><option value="coach">Тренеру и игрокам</option value="players">Игрокам клуба</option></select></label>'+(type==='hand'?'<label>Позиции, стеки и ход раздачи<textarea name="context" maxlength="2000" rows="5" placeholder="Формат турнира, блайнды, эффективный стек, позиции, карты, борд и ставки по улицам."></textarea></label><label>Скриншот раздачи<input type="file" id="reviewImageInput" accept="image/jpeg,image/png,image/webp"></label><p class="social-muted">Можно приложить один скриншот. Проверьте, что на нём нет личных данных.</p><div id="reviewImagePreview"></div><label>Чем закончилась раздача (необязательно)<textarea name="outcome" maxlength="2000" rows="3" placeholder="Будет скрыто под кнопкой «Показать исход»."></textarea></label>':'')+'<p class="social-muted">Вопрос и ответы видны участникам клуба. Вы будете подписаны на новые ответы. Ответ тренера появится, когда он разберёт вопрос.</p><button type="submit" class="social-button social-button--primary">Опубликовать</button></form>';}

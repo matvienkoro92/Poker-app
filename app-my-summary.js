@@ -2,6 +2,37 @@
   "use strict";
   var generation = 0, pending = false, loadedAt = 0, spin = null, offset = 0, nickname = "", account = "";
   var root;
+  var chartHistory = null, chartSeen = {}, chartCheckPending = false;
+  function chartFingerprint(row) {
+    var text = JSON.stringify(row), hash = 2166136261;
+    for(var i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);
+    return (hash>>>0).toString(36);
+  }
+  function renderChartUnread() {
+    var unread = !!(chartHistory && (chartHistory.rows || []).some(function(row) {return chartSeen[row.handId] !== chartFingerprint(row);}));
+    document.querySelectorAll('#mySummaryBadge,[data-chart-unread]').forEach(function(badge) {
+      badge.hidden = !unread; badge.textContent = ''; badge.classList.add('chart-unread-dot');
+      badge.setAttribute('aria-label', 'Есть непросмотренный график');
+    });
+  }
+  function acceptChartHistory(data) {
+    chartHistory = data; chartSeen = {};
+    try {chartSeen = JSON.parse(localStorage.getItem('poker-chart-seen:' + data.playerId) || '{}') || {};} catch (_) {}
+    renderChartUnread();
+  }
+  async function checkChartUnread() {
+    if (chartCheckPending || document.hidden) return;
+    chartCheckPending = true;
+    var seq = generation;
+    try {
+      var latest = await request('starting-hands', {action:'version'});
+      if (seq !== generation) return;
+      if (!chartHistory || chartHistory.playerId !== latest.playerId || chartHistory.version !== latest.version) {
+        var data = await request('starting-hands', {action:'list'});
+        if (seq === generation) acceptChartHistory(data);
+      }
+    } catch (_) {} finally {chartCheckPending = false;}
+  }
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
     var groups = {play:["starting-hands","reviews-entry","spin","bonus","raffles","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
@@ -86,21 +117,20 @@
     badge.textContent = count > 99 ? "99+" : String(count);
     badge.setAttribute("aria-label", "Непросмотренных тем: " + count);
   }
+  var reviewUnreadRequest = 0;
   function loadReviewUnread(valid) {
+    var seq = generation, requestId = ++reviewUnreadRequest;
     return request("club-reviews", {action:"summary"}).then(function (d) {
-      if (valid && !valid()) return;
+      if (seq !== generation || requestId !== reviewUnreadRequest || (valid && !valid())) return;
       renderReviewUnread((d.threads || []).filter(function (thread) {return thread && thread.unread;}).length);
-    }).catch(function () { if (!valid || valid()) renderReviewUnread(0); });
+    }).catch(function () { /* Keep the last confirmed count on a network error. */ });
   }
   function friends() {
     var data = typeof window.pokerGetFriendNewsSummary === "function" ? window.pokerGetFriendNewsSummary() : null;
     put("friends", '<strong class="summary-value">' + (data && data.accountId && data.ready !== false ? (data.unread ? num(data.unread) + ' непрочитанных' : 'Вы всё прочитали') : 'События ваших друзей') + '</strong><p class="summary-muted">Результаты и события друзей.</p><button type="button" class="summary-link" data-summary-friends>Новости друзей →</button>');
     var badge = document.getElementById("mySummaryBadge");
     if (badge) {
-      var unread = data && data.unread ? Number(data.unread) || 0 : 0;
-      badge.hidden = unread < 1;
-      badge.textContent = unread > 99 ? "99+" : String(unread);
-      badge.setAttribute("aria-label", "Новых событий: " + unread);
+      renderChartUnread();
     }
   }
   function spinText() {
@@ -370,9 +400,10 @@
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname || "";
       root.insertAdjacentHTML("afterbegin",
-        section("starting-hands", "Мои раздачи", '<p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
+        section("starting-hands", "Мои раздачи", '<span data-chart-unread class="chart-unread-dot" aria-label="Есть непросмотренный график" hidden></span><p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
         section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")));
       loadReviewUnread(valid);
+      renderChartUnread(); checkChartUnread();
       if(['ID400800'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
@@ -405,6 +436,13 @@
   window.addEventListener('message',async function(event){
     var frame=document.querySelector('#startingHandsDialog iframe');
     if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin)return;
+    if(event.data?.type==='starting-hands-chart-viewed'){
+      if(!document.querySelector('#startingHandsDialog[open]') || document.hidden || !chartHistory || event.data.playerId!==chartHistory.playerId || event.data.version!==chartHistory.version || !Array.isArray(event.data.handIds))return;
+      var viewed = new Set(event.data.handIds.map(String));
+      (chartHistory.rows||[]).forEach(function(row){if(viewed.has(String(row.handId)))chartSeen[row.handId]=chartFingerprint(row);});
+      try {localStorage.setItem('poker-chart-seen:'+chartHistory.playerId,JSON.stringify(chartSeen));}catch(_){}
+      renderChartUnread();return;
+    }
     if(event.data?.type==='starting-hands-open-review'){
       closeStartingHands(false);
       if(typeof window.pokerOpenClubReview==='function')window.pokerOpenClubReview(event.data.id||'');
@@ -432,6 +470,7 @@
     }
     try {var data=await request('starting-hands',{action:message.action,handId:message.handId,handIds:message.handIds});
       if(seq!==generation||!frame.isConnected)return;
+      if(message.action==='list')acceptChartHistory(data);
       frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='replay'?data.replay:data},window.location.origin);
     }catch(_){if(seq===generation&&frame.isConnected)frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'load failed'},window.location.origin);}
   });
@@ -465,6 +504,11 @@
     } catch (_) {}
   });
   window.addEventListener("poker-friend-news-updated", friends);
+  window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};renderChartUnread();setTimeout(checkChartUnread,0);});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)checkChartUnread();});
+  window.addEventListener('storage',function(e){if(chartHistory && e.key==='poker-chart-seen:'+chartHistory.playerId)acceptChartHistory(chartHistory);});
+  setTimeout(checkChartUnread,0);
+  setInterval(checkChartUnread,60000);
   window.addEventListener("poker-reviews-updated", function(){loadedAt=0;if(root&&root.querySelector("[data-summary-review-unread]"))loadReviewUnread();});
   window.addEventListener("poker-telegram-auth", function () {generation++;pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
   setInterval(function () {if(document.hidden || !document.querySelector('[data-view="my-summary"].view--active'))return;if(spin && !spin.canPlay && Date.parse(spin.nextFreeAttemptAt)<=Date.now()+offset && Date.now()-loadedAt>30000){loadedAt=0;init();}else renderSpin();}, 30000);
