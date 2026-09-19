@@ -428,7 +428,7 @@
     var frame=document.querySelector('#startingHandsDialog iframe');
     if(!frame||event.source!==frame.contentWindow||event.origin!==window.location.origin)return;
     if(event.data?.type==='starting-hands-chart-viewed'){
-      if(!document.querySelector('#startingHandsDialog[open]') || document.hidden || !chartHistory || event.data.playerId!==chartHistory.playerId || event.data.version!==chartHistory.version || !Array.isArray(event.data.handIds))return;
+      if(!document.querySelector('#startingHandsDialog[open]') || document.hidden || !chartHistory || String(event.data.playerId)!==String(chartHistory.playerId) || String(event.data.version)!==String(chartHistory.version) || !Array.isArray(event.data.handIds))return;
       var viewed = new Set(event.data.handIds.map(String));
       (chartHistory.rows||[]).forEach(function(row){if(viewed.has(String(row.handId)))chartSeen[row.handId]=chartFingerprint(row);});
       try {localStorage.setItem('poker-chart-seen:'+chartHistory.playerId,JSON.stringify(chartSeen));}catch(_){}

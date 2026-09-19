@@ -370,7 +370,7 @@ function startHistory(payload) {
     document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
     renderProfitChart(data);
     if(!document.querySelector('.profit-panel').hidden && !document.hidden) {
-      parent.postMessage({type:'starting-hands-chart-viewed',playerId:activeHistoryPlayerId,version:activeHistoryVersion,handIds:data.cells.flatMap(c=>c.hands).map(h=>String(h.handId))},location.origin);
+      parent.postMessage({type:'starting-hands-chart-viewed',playerId:activeHistoryPlayerId,version:activeHistoryVersion,handIds:bulk.rows.map(h=>String(h.handId))},location.origin);
     }
     $('position').value=positionByMode[mode];
     const allPositions=document.createElement('button');

@@ -30,3 +30,15 @@ test('seen state belongs to the player and survives reload',()=>{
  h.run("acceptChartHistory({playerId:'2',rows:[{handId:'10'}]})");assert.ok(h.badges.every(b=>!b.hidden));
  h.run("acceptChartHistory({playerId:'',rows:[]})");assert.ok(h.badges.every(b=>b.hidden));
 });
+test('viewing a filtered chart acknowledges the loaded history, including other game modes',()=>{
+ const source=fs.readFileSync(require.resolve('../starting-hands/screen.js'),'utf8');
+ const start=source.indexOf("    if(!document.querySelector('.profit-panel').hidden");
+ const end=source.indexOf("    $('position').value",start);
+ const messages=[];
+ const context={document:{hidden:false,querySelector:()=>({hidden:false})},parent:{postMessage:m=>messages.push(m)},location:{origin:'https://example.test'},activeHistoryPlayerId:'1',activeHistoryVersion:'v1',bulk:{rows:[{handId:'cash'},{handId:'mtt'}]},data:{cells:[{hands:[{handId:'cash'}]}]}};
+ vm.runInNewContext(source.slice(start,end),context);
+ assert.deepEqual(Array.from(messages[0].handIds),['cash','mtt']);
+ context.document.hidden=true;
+ vm.runInNewContext(source.slice(start,end),context);
+ assert.equal(messages.length,1);
+});
