@@ -125,6 +125,14 @@ test("tournament bet hydrates the level from the same cached Poker21 profile as 
   assert.match(server, /\[entry\.poker21Id, entry\.accountId, entry\.memberId\]/);
 });
 
+test("tournament bet refreshes a saved participant nickname even when the level already exists", function () {
+  const server = fs.readFileSync(path.join(__dirname, "..", "lib/api-handlers/tournament-bet.js"), "utf8");
+  const hydrateBlock = server.slice(server.indexOf("async function hydrateEntryProfiles"), server.indexOf("async function linkedPoker21Id"));
+  assert.match(hydrateBlock, /if \(entry\.poker21Id\) \{/);
+  assert.match(hydrateBlock, /getGroupMemberData\(\{ userId: entry\.poker21Id \}\)/);
+  assert.doesNotMatch(hydrateBlock, /if \(entry\.level == null && entry\.poker21Id\)/);
+});
+
 test("bettor rating aggregates participation, wins, stakes, prizes and net result", function () {
   const settled = {
     id: "old", status: "settled", startingBank: 10000, stakePrice: 500,

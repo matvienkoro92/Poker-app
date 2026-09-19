@@ -383,24 +383,39 @@
   pointer-events: none;
 }
 #app .tournament-day-home-dual--tournament-focus > .home-tournament-share {
-  position: absolute; left: 69.2%; top: 18.5%; width: 13%; height: 10%; z-index: 6;
+  position: absolute; left: 66.7%; top: 17.2%; width: 18%; height: 13%; z-index: 6;
   box-sizing: border-box;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7cqw;
-  padding: .5cqw; border: 1px solid #a17437; border-radius: 1.8cqw;
-  background: linear-gradient(145deg, #25221b, #131514 65%);
-  box-shadow: inset 0 1px 0 #f3d59426, 0 .3cqw .8cqw #0005;
-  color: #f3d594; font: 700 1.35cqw/1.1 Arial,sans-serif; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9cqw;
+  padding: 0; border: 0; border-radius: 0; outline: 0;
+  background: none; box-shadow: none;
+  color: #ffe09a; font: 800 2cqw/1.1 Arial,sans-serif; cursor: pointer;
   transform: rotate(-4deg); transform-origin: center;
+  isolation: isolate;
   animation: home-tournament-share-glow 2.2s ease-in-out infinite;
 }
+#app .tournament-day-home-dual--tournament-focus > .home-tournament-share::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 20%;
+  width: 16cqw; height: 30cqw;
+  border-radius: 38%;
+  background: #0d0f0f;
+  mask-image: radial-gradient(ellipse at center,#000 0 62%,rgba(0,0,0,.92) 72%,transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center,#000 0 62%,rgba(0,0,0,.92) 72%,transparent 100%);
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: -1;
+}
 @keyframes home-tournament-share-glow {
-  0%, 100% { box-shadow: inset 0 1px 0 #f3d59426, 0 .3cqw .8cqw #0005, 0 0 0 rgba(255, 184, 67, 0); }
-  50% { box-shadow: inset 0 1px 0 #fff0b85c, 0 .3cqw .8cqw #0005, 0 0 1.8cqw rgba(255, 174, 50, .48); }
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 .25cqw rgba(255,190,72,.35)); }
+  50% { filter: brightness(1.35) drop-shadow(0 0 .85cqw rgba(255,184,55,.95)); }
 }
 @media (prefers-reduced-motion: reduce) {
   #app .tournament-day-home-dual--tournament-focus > .home-tournament-share { animation: none; }
 }
-.home-tournament-share svg { width: 3.6cqw; height: 3.6cqw; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.home-tournament-share svg { position:relative;z-index:1;width:6.2cqw;height:6.2cqw;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round;filter:drop-shadow(0 0 .65cqw rgba(255,195,79,.82)); }
+.home-tournament-share span { position:relative;z-index:1;text-shadow:0 0 .45cqw #ffb52ca6;white-space:nowrap; }
+#app .tournament-day-home-dual--tournament-focus > .home-tournament-share:focus-visible { filter:brightness(1.4) drop-shadow(0 0 1cqw rgba(255,205,112,1)); }
 .tournament-share-preview { position:fixed; margin:auto; width:min(440px,calc(100vw - 32px)); box-sizing:border-box; padding:24px; border:1px solid #ad8546; border-radius:22px; background:#10171f; color:#ffe0a0; }
 .tournament-share-preview::backdrop { background:#000a; }
 .tournament-share-preview h3 { padding-right:28px; }
@@ -717,10 +732,10 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__label {font-size:1.4cqw!important}
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount {font-size:1.65cqw!important}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout {width:17cqw!important;height:19cqw!important;overflow:visible!important}
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before {content:""!important;display:block!important;position:absolute!important;z-index:0!important;left:50%!important;bottom:-1.8cqw!important;width:16.5cqw!important;height:8cqw!important;transform:translateX(-50%)!important;border:.28cqw solid #b18c4b!important;border-radius:45% 45% 26% 26%!important;background:linear-gradient(180deg,#121616 0 42%,#080b0b 43% 100%)!important;box-shadow:inset 0 .2cqw .2cqw #ffe19b26,0 .5cqw .7cqw #0009!important;pointer-events:none}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before {content:""!important;display:block!important;position:absolute!important;z-index:0!important;left:50%!important;bottom:-9.8cqw!important;width:16.5cqw!important;height:16cqw!important;transform:translateX(-50%)!important;border:.28cqw solid #b18c4b!important;border-radius:38% 38% 18% 18%!important;background:linear-gradient(180deg,#161b1a 0 18%,#0e1211 19% 76%,#070909 77% 100%)!important;box-shadow:inset 0 .2cqw .2cqw #ffe19b26,inset 0 -.18cqw .3cqw #0008,0 .5cqw .7cqw #0009!important;pointer-events:none}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove {position:absolute!important;z-index:1!important;inset:50% auto auto 50%!important;width:17cqw!important;max-width:none!important;height:19cqw!important;object-fit:contain!important;transform:translate(-50%,-50%)!important;filter:drop-shadow(0 .8cqw .65cqw #000b)!important;pointer-events:none}
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label {position:relative;z-index:2;display:grid;gap:.25cqw;width:9.2cqw;margin-top:1.4cqw;color:#ffe4a4;font-size:1.75cqw;font-weight:950;line-height:.95;text-align:center;text-shadow:0 .18cqw .22cqw #000,0 0 .5cqw #000;pointer-events:none}
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.15cqw;line-height:1.05}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label {position:absolute;z-index:2;left:50%;bottom:-6.2cqw;display:grid;gap:.35cqw;width:13.5cqw;margin:0;transform:translateX(-50%);color:#ffe4a4;font-size:1.85cqw;font-weight:950;line-height:.95;text-align:center;text-shadow:0 .18cqw .22cqw #000,0 0 .5cqw #000;pointer-events:none}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.25cqw;line-height:1.05}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {display:none!important}
 
 /* Align the table panel and the tractor scene trophy on the same centerline. */
@@ -854,13 +869,19 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
-  --home-tournament-scene:url('./assets/home-tournament-shtukatur-single-table-v2.webp');
+  --home-tournament-scene:url('./assets/home-tournament-shtukatur-single-table-v3.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table::before {
   display:none!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {
+  display:block!important;
+  background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
+  mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
+  -webkit-mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
+  z-index:5!important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
@@ -873,6 +894,11 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  position:absolute;top:calc(100% + 5cqw);left:50%;transform:translate(-50%,-50%);margin:0;width:11.5cqw;
+  font-size:2.3cqw;line-height:1.1;gap:.5cqw;
+}
+#app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1.1}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock {
   left:30.6%!important;top:47.5%!important;width:28%!important;height:18%!important;
 }

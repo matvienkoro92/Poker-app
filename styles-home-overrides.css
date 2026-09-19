@@ -6149,6 +6149,10 @@ html body #app.app.app--view-home
   outline: none;
 }
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:first-child .home-lounge-art { translate: 0 1.6%; }
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:first-child .home-lounge-art {
+  /* Hide the detached low-alpha glow fragments below Valerka's pedestal. */
+  clip-path: inset(0 0 8.67% 0);
+}
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels .home-lounge-art { translate: 0 -3.4%; }
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge,
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge {

@@ -21,3 +21,10 @@ test('an incomplete account cache does not hide a nickname in its linked profile
   vm.runInContext(source.slice(source.indexOf('function uniquePokerProfileLookupIds'), source.indexOf('async function readPokerPlusStatsVisibilityFromCandidates')), c);
   assert.equal((await c.readPokerPlusProfileFromCandidates(['ID403173','telegram-linked'])).nickname, 'EnotSimuran');
 });
+
+test('profile payload prefers the current Poker21 nickname over the cached nickname', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../lib/api-handlers/users.js'), 'utf8');
+  const applyBlock = source.slice(source.indexOf('async function applyPokerProfileStatusPayload'), source.indexOf('function sanitizeChatDisplayName'));
+  assert.match(applyBlock, /getGroupMemberData\(\{ userId: payload\.p21Id \}\)/);
+  assert.match(applyBlock, /payload\.pokerPlusNickname = String\(currentNickname\)/);
+});
