@@ -390,21 +390,7 @@
   background: none; box-shadow: none;
   color: #ffe09a; font: 800 2cqw/1.1 Arial,sans-serif; cursor: pointer;
   transform: rotate(-4deg); transform-origin: center;
-  isolation: isolate;
   animation: home-tournament-share-glow 2.2s ease-in-out infinite;
-}
-#app .tournament-day-home-dual--tournament-focus > .home-tournament-share::before {
-  content: "";
-  position: absolute;
-  left: 50%; top: 20%;
-  width: 16cqw; height: 30cqw;
-  border-radius: 38%;
-  background: #0d0f0f;
-  mask-image: radial-gradient(ellipse at center,#000 0 62%,rgba(0,0,0,.92) 72%,transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse at center,#000 0 62%,rgba(0,0,0,.92) 72%,transparent 100%);
-  transform: translate(-50%,-50%);
-  pointer-events: none;
-  z-index: -1;
 }
 @keyframes home-tournament-share-glow {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 .25cqw rgba(255,190,72,.35)); }
