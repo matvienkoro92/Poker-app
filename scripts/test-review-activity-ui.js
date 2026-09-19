@@ -20,7 +20,7 @@ async function main() {
       window.fixture = { id:'f'.repeat(24), type:'hand', authorId:'ID999999', authorName:'Игрок', authorNick:'Покерманки',
         title:'Раздача', question:'Как лучше сыграть на тёрне против этого соперника?', gameMode:'cash', bigBlindMinor:4000, totalPotMinor:120000,
         cards:['As','Kh'], handId:'legacy-hand', createdAt:'2026-09-18T10:00:00Z', updatedAt:'2026-09-18T10:00:00Z', context:'Префлоп · Банк: 30 bb\nSB: Вы — Рейз 3 bb\nРивер: Q♣ 9♦ 5♥ 9♥ 7♠ · Банк: 100,5 bb\nBB: Соперник — Колл 70,5 bb',
-        replies:[], votes:{fold:0,call:0,raise:0}, following:false, version:0, replyCount:0 };
+        replies:[], votes:{fold:0,call:0,raise:0}, following:false, version:0, replyCount:0, unread:true };
       let progress = 3;
       let topicSubscribed=true;
       window.pokerSocialRequest = async (_, body) => {
@@ -36,9 +36,11 @@ async function main() {
     await page.addScriptTag({ path: path.join(root, 'app-club-reviews.js') });
     await page.evaluate(() => window.initClubReviews());
     await page.waitForSelector('.review-activity');
-    await page.waitForFunction(()=>document.querySelector('.review-topic-push button')?.textContent==='Выключить');
+    await page.waitForFunction(()=>document.querySelector('.review-topic-push button')?.textContent==='Выкл');
     await page.locator('.review-topic-push button').click();
-    await page.waitForFunction(()=>document.querySelector('.review-topic-push button')?.textContent==='Включить');
+    await page.waitForFunction(()=>document.querySelector('.review-topic-push button')?.textContent==='Вкл');
+    assert.equal(await page.locator('.review-topic').getAttribute('class'),'review-topic review-topic--unread');
+    assert.equal((await page.locator('.review-topic__unread-badge').textContent()).trim(),'Есть новый комментарий');
     assert.equal(await page.locator('.review-activity__track .is-filled').count(), 6);
     assert.equal(await page.locator('.review-activity__ticket-track').getAttribute('aria-valuenow'),'17');
     for (const width of [360, 390, 1280]) {
@@ -64,7 +66,7 @@ async function main() {
     }
     const text='На тёрне я бы продолжил небольшим размером, потому что в диапазоне соперника ещё много слабых рук и дро.';
     await page.locator('#reviewReplyForm textarea').fill(text);
-    assert.match(await page.locator('#reviewActivityHint').textContent(), /\d+ \/ 60/);
+    assert.match(await page.locator('#reviewActivityHint').textContent(), /\d+ \/ 20/);
     await page.locator('#reviewReplyForm button[type="submit"]').click();
     await page.waitForSelector('[data-review-action="activity-play"]');
     assert.match(await page.locator('#clubReviewsFeedback').textContent(), /\+1 крутка/);

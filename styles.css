@@ -9800,7 +9800,7 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
 [data-view="club-reviews"] .review-title-cards { display: inline-flex; flex-wrap: nowrap; gap: 3px; }
 [data-view="club-reviews"] .review-title-cards .playing-card { margin: 0; padding: 1px 3px; font-size: 12px; }
 @media (max-width: 420px) {
-  [data-view="club-reviews"] .club-reviews-header .summary-heading { font-size: 25px; }
+  [data-view="club-reviews"] .club-reviews-header .summary-heading { font-size: 22px; }
   [data-view="club-reviews"] .review-thread-heading-row{gap:8px}
   [data-view="club-reviews"] .review-thread-heading-row>h2{font-size:16px}
   [data-view="club-reviews"] .review-thread-card .review-share-actions{gap:5px}
@@ -10010,8 +10010,28 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 
 .review-activity { margin: 0 0 18px; padding: 14px 16px; border: 1px solid #8b713840; border-radius: 16px; background: linear-gradient(125deg,#c49c3516,#111820); color: #eee5d2; }
 .review-activity__heading { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.review-back-button { width: 42px; min-width: 42px; padding: 0; font-size: 22px; line-height: 1; }
+.club-reviews-header .summary-heading { font-size: 24px; }
+@media (max-width: 420px) { [data-view="club-reviews"] .club-reviews-header .summary-heading { font-size: 22px; } }
+[data-view="club-reviews"] .club-reviews-header { justify-content: flex-start; }
+[data-view="club-reviews"] .club-reviews-header__action { margin-left: auto; }
+[data-view="club-reviews"] .club-reviews-header__action .review-topic-push { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; margin: 0; padding: 4px 5px 4px 9px; border-radius: 11px; white-space: nowrap; }
+[data-view="club-reviews"] .club-reviews-header__action .review-topic-push strong { font-size: 11px; }
+[data-view="club-reviews"] .club-reviews-header__action .review-topic-push .social-button { min-height: 30px; padding: 4px 8px; border-radius: 8px; font-size: 11px; }
+[data-view="club-reviews"] .club-reviews-header__action .review-topic-push p { display: none; }
+[data-view="club-reviews"] .review-topic--unread { margin-inline: -8px; padding-inline: 8px; border-radius: 12px; border-bottom-color: #79cfff55; background: linear-gradient(90deg,#54bfff20,#3879bc0b 72%,transparent); box-shadow: inset 3px 0 0 #6bc8ff99; }
+[data-view="club-reviews"] .review-topic__unread-badge { display: inline-flex; width: fit-content; margin-top: 5px; padding: 3px 7px; border: 1px solid #79d0ff70; border-radius: 999px; background: #4ebcff20; color: #9dddff; font-weight: 800; letter-spacing: .01em; animation: review-unread-pulse 1.7s ease-in-out infinite; }
+@keyframes review-unread-pulse { 0%,100% { background-color:#4ebcff18; box-shadow:0 0 0 0 #63c7ff00; } 50% { background-color:#4ebcff36; box-shadow:0 0 0 4px #63c7ff18; } }
+@media (prefers-reduced-motion: reduce) { [data-view="club-reviews"] .review-topic__unread-badge { animation: none; } }
 .review-activity__heading span { color: #f5cd69; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.review-activity__ticket .review-activity__heading { font-size: 17px; }
+.review-activity__spin-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 14px; }
+.review-activity__spin-item { min-width: 0; padding: 10px; border: 1px solid #8b71382b; border-radius: 11px; background: #ffffff05; }
+.review-activity__spin-item .review-activity__heading { align-items: flex-start; gap: 5px; font-size: clamp(10px,3.2vw,14px); line-height: 1.2; }
+.review-activity__spin-item .review-activity__heading strong { min-width: 0; }
+.review-activity__spin-item small { display: block; margin-top: 5px; color: #e2c889; font-size: clamp(9px,2.8vw,12px); line-height: 1.2; }
 .review-activity__track { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; margin: 11px 0; }
+.review-activity__spin-item .review-activity__track { gap: 3px; margin: 9px 0 0; }
 .review-activity__track i { display: block; height: 8px; border-radius: 4px; background: #ffffff14; }
 .review-activity__track .is-filled { background: #f3ca64; }
 .review-activity__ticket-track { height: 8px; overflow: hidden; margin: 11px 0; border-radius: 4px; background: #ffffff14; }

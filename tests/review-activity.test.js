@@ -167,6 +167,12 @@ test('short, own-thread, duplicate, second-in-thread and unbound comments remain
   h.unbind(); await h.comment('unbound', 'Мнение нового игрока про эту ситуацию. '.repeat(4));
   assert.equal((await h.activity.summary(h.actor.accountId)).actions, 1);
 });
+test('useful comments count from 20 letters or digits', async () => {
+  const h = harness();
+  const reply = await h.comment('twenty', 'Лучше здесь сыграть колл');
+  assert.equal(reply.activityAward.action, true);
+  assert.equal((await h.activity.summary(h.actor.accountId)).commentActions, 1);
+});
 test('short question, fabricated hand and unbound publication fail without money or progress', async () => {
   const h = harness();
   await assert.rejects(h.publish('1', { question: 'Как сыграть?' }), /20 букв/);

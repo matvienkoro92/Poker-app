@@ -30,14 +30,19 @@ function startHistory(payload) {
   activeHistoryPlayerId=String(payload.playerId||'');activeHistoryVersion=String(payload.version||'');
   const core = window.PokerHandStatistics;
   let mode = 'cash', game = 'NLH', metric = 'bb', selected = null;
-  let currentHistoryTab='overview',handBreakdown='positions';
+  let currentHistoryTab='overview',handBreakdown='';
   function applyHandBreakdown(){
     if(game!=='NLH'&&handBreakdown==='hands')handBreakdown='positions';
-    document.querySelectorAll('[data-hand-breakdown]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.handBreakdown===handBreakdown)));
+    document.querySelectorAll('[data-hand-breakdown]').forEach(button=>{
+      const active=button.dataset.handBreakdown===handBreakdown;button.setAttribute('aria-selected',String(active));
+      const status=button.querySelector('[data-hand-breakdown-status]');
+      if(status)status.textContent=active?(button.dataset.handBreakdown==='positions'?(positionByMode[mode]?positionLabel(positionByMode[mode]):'Все позиции'):(selected||'Все руки')):'';
+    });
     const handsButton=document.querySelector('[data-hand-breakdown="hands"]');handsButton.disabled=game!=='NLH';
-    const positions=document.querySelector('[data-hand-breakdown-panel="positions"]'),matrix=$('matrix-panel');
+    const positions=document.querySelector('[data-hand-breakdown-panel="positions"]'),matrix=$('matrix-panel'),detail=document.querySelector('.workspace>.detail-panel');
     positions.hidden=currentHistoryTab!=='hands'||handBreakdown!=='positions';
-    matrix.hidden=game!=='NLH'||(currentHistoryTab==='hands'&&handBreakdown!=='hands');
+    matrix.hidden=currentHistoryTab!=='hands'||game!=='NLH'||handBreakdown!=='hands';
+    detail.hidden=currentHistoryTab==='hands'&&!handBreakdown;
   }
   function showHistoryTab(tab){
     currentHistoryTab=tab;
@@ -47,7 +52,7 @@ function startHistory(payload) {
     if(tab==='review'||tab==='overview')render();
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
-  document.querySelectorAll('[data-hand-breakdown]').forEach(button=>button.addEventListener('click',()=>{handBreakdown=button.dataset.handBreakdown;applyHandBreakdown();button.focus();}));
+  document.querySelectorAll('[data-hand-breakdown]').forEach(button=>button.addEventListener('click',()=>{handBreakdown=handBreakdown===button.dataset.handBreakdown?'':button.dataset.handBreakdown;applyHandBreakdown();button.focus();}));
   const positionByMode={cash:'',mtt:'',sng:''};
   const positionLabel=p=>({UNKNOWN:'Не определена','BTN/SB':'SB',LJ:'MP',HJ:'MP+1'}[p]||p);
   for(const p of core.positions){const option=document.createElement('option');option.value=p;option.textContent=positionLabel(p);document.getElementById('position').append(option);}

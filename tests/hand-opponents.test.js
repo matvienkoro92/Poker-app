@@ -23,6 +23,14 @@ test('all-in raise and call identify the actual opponent',()=>{
 test('multiway showdown keeps remaining opponents and excludes folded player',()=>{
  assert.deepEqual(run([e('h','3',3),e('x','2',3),e('y','2',3),e('z','2',3),board,e('z','10'),e('h','17'),e('x','17'),e('y','17')]),['x','y']);
 });
+test('shared postflop streets count checks and multiway play',()=>{
+ const turn={board:['As','Kd','4c','7h']};
+ assert.deepEqual(run([e('h','3',3),e('x','2',3),board,e('h','17'),e('x','17'),turn,e('h','20',5),e('x','2',5)]),['x']);
+ assert.deepEqual(run([e('h','3',3),e('x','2',3),e('y','2',3),board,e('h','17'),e('x','17'),e('y','17'),turn,e('y','10'),e('h','20',5),e('x','2',5)]),['x','y']);
+});
+test('player folding on the flop before hero continues against someone else stays excluded',()=>{
+ assert.deepEqual(run([e('h','3',3),e('x','2',3),e('y','2',3),board,e('y','20',5),e('x','10'),e('h','2',5),{board:['As','Kd','4c','7h']}]),['y']);
+});
 test('search requires verified confrontation but ID search remains available',()=>{
  const row={handId:'123',opponents:[{playerId:'x',name:'Cooler'}]};
  assert.equal(core.matchesSearch(row,{opponentQuery:'cool'}),false);

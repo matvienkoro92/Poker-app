@@ -131,9 +131,9 @@
 .position-filter .position-mini{display:block;box-sizing:border-box;height:44px;margin:0;appearance:none;padding:6px 28px 6px 10px;color:#e0e6ef}
 .position-filter::after{content:"";position:absolute;right:12px;top:calc(50% - 5px);width:7px;height:7px;border-right:1.5px solid #e0e6ef;border-bottom:1.5px solid #e0e6ef;transform:rotate(45deg);pointer-events:none}
 .position-filter .position-mini option{color:#e0e6ef;background:#111827}
-.stack-filter{grid-column:1/3;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;padding:5px 8px;border:1px solid #39445c;border-radius:11px;background:#0d1524;color:#9eabba;font-size:11px}.stack-filter select{width:100%;min-width:0;min-height:36px;padding:5px 28px 5px 10px;border-radius:8px;color:#f2d798}.stack-filter small{grid-column:1/-1;color:#9eabba}.stack-filter small:empty{display:none}
-.tournament-filter{grid-column:3/5;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;padding:5px 8px;border:1px solid #39445c;border-radius:11px;background:#0d1524;color:#9eabba;font-size:11px}.tournament-filter select{width:100%;min-width:0;min-height:36px;padding:5px 28px 5px 10px;border-radius:8px;color:#f2d798;background:#111827;border:1px solid #39445c;font:inherit}
-@media(max-width:650px){.stack-filter,.tournament-filter{grid-column:1/-1}}
+.stack-filter{grid-column:4/6;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;padding:5px 8px;border:1px solid #39445c;border-radius:11px;background:#0d1524;color:#9eabba;font-size:11px}.stack-filter select{width:100%;min-width:0;min-height:36px;padding:5px 28px 5px 10px;border-radius:8px;color:#f2d798}.stack-filter small{grid-column:1/-1;color:#9eabba}.stack-filter small:empty{display:none}
+.tournament-filter{grid-column:1/4;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;padding:5px 8px;border:1px solid #39445c;border-radius:11px;background:#0d1524;color:#9eabba;font-size:11px}.tournament-filter select{width:100%;min-width:0;min-height:36px;padding:5px 28px 5px 10px;border-radius:8px;color:#f2d798;background:#111827;border:1px solid #39445c;font:inherit;text-overflow:ellipsis}
+@media(max-width:650px){.tournament-filter{grid-column:1/4}.stack-filter{grid-column:4/7}.stack-filter,.tournament-filter{grid-template-columns:minmax(0,1fr);align-self:stretch}.stack-filter>span,.tournament-filter>span{white-space:nowrap}.stack-filter small{grid-column:1}}
 
 .profit-legend label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .profit-legend label[hidden]{display:none}
@@ -201,7 +201,9 @@ main{padding-top:8px}
 .hand-breakdown-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:16px 0 10px;padding:4px;border:1px solid #39445c;border-radius:12px;background:#111827}
 .hand-breakdown-tabs button{min-width:0;min-height:48px;padding:7px 8px;border:0;border-radius:9px;background:transparent;color:#b9c3d2;font-size:13px;font-weight:700;line-height:1.15}
 .hand-breakdown-tabs button[aria-selected="true"]{background:linear-gradient(145deg,#38445a,#273247);color:#ffe0a0;box-shadow:inset 0 0 0 1px #c99a4f55}
-.hand-breakdown-tabs button[aria-selected="true"]::after{content:"Выбрано";display:block;margin-top:4px;color:#b9dda2;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.hand-breakdown-tabs button small{display:block;min-height:0;margin-top:0;color:#b9dda2;font-size:10px;font-weight:650;letter-spacing:.04em;text-transform:uppercase}
+.hand-breakdown-tabs button small:empty{display:none}
+.hand-breakdown-tabs button[aria-selected="true"] small{margin-top:5px}
 .position-disclosure,.matrix-panel{margin:0 0 14px;padding:14px 0;border:0}
 .position-disclosure h2,.matrix-panel h2{margin:0 0 6px}
 
