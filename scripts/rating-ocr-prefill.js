@@ -399,10 +399,11 @@ async function parseOcrFile(file) {
     if (/^Magic.*500/i.test(title)) title = "Magic 🎯500🎯120K";
   }
   if (blue) buyin = confirmedBlueTournamentBuyin(title) ?? buyin;
-  // Visually verified ID labels in IMG_9131 and IMG_9134.
-  if (date === "13.09.2026") tokens.forEach((token) => {
-    if (time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
-    if (blue && time === "18:00" && token.text === "In: 3123964") token.text = "ID: 3123964";
+  // Visually verified ID labels that Vision prefixed or distorted.
+  tokens.forEach((token) => {
+    if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
+    if (date === "13.09.2026" && blue && time === "18:00" && token.text === "In: 3123964") token.text = "ID: 3123964";
+    if (date === "18.09.2026" && time === "18:00" && token.text === "yID:120005") token.text = "ID:120005";
   });
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])(?:S?ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
@@ -496,6 +497,11 @@ async function parseOcrFile(file) {
     }
     if (playerId === "508911" && date === "29.08.2026" && time === "19:00" && reward === 1018.75) {
       place = 11;
+      needsPlaceCheck = false;
+    }
+    // Verified against IMG_9321: Hakas is shown in ninth place; Vision omitted the digit.
+    if (playerId === "120005" && date === "18.09.2026" && time === "18:00" && reward === 1930) {
+      place = 9;
       needsPlaceCheck = false;
     }
 

@@ -2549,4 +2549,79 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "18.09.2026": [
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "IIIIII",
+          "place": 1,
+          "reward": 37878.14,
+          "points": 0
+        },
+        {
+          "nick": "I🐅I",
+          "place": 2,
+          "reward": 22985.89,
+          "points": 0
+        },
+        {
+          "nick": "Hakas",
+          "place": 9,
+          "reward": 1930,
+          "points": 0
+        },
+        {
+          "nick": "kingofclowns",
+          "place": 7,
+          "reward": 1621.71,
+          "points": 0
+        },
+        {
+          "nick": "DeNMeN",
+          "place": 20,
+          "reward": 1528.12,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 5954.7,
+          "points": 0
+        },
+        {
+          "nick": "Pekan31",
+          "place": 10,
+          "reward": 365,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "CCCP",
+          "place": 1,
+          "reward": 30314,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

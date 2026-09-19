@@ -971,4 +971,9 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-17-09-2026-league1-new-hot-pko-2-3-15h.jpg",
     "rating-compressed-preview/rating-17-09-2026-league1-magic-500-120k-22h.jpg"
   ]
+,
+  "18.09.2026": [
+    "rating-compressed-preview/rating-18-09-2026-league1-pyatnica-progressiv-18h.jpg",
+    "rating-compressed-preview/rating-18-09-2026-league1-magic-500-120k-22h.jpg"
+  ]
 };
