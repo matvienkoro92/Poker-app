@@ -123,6 +123,10 @@
 .sng-character-name--gucci { left: 87%; }
 
 /* Dim the lower pedestal highlight behind the live raffle amount. */
+.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-art {
+  clip-path: inset(0 0 8% 0);
+}
+
 .app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles #raffleActiveAmountBadge {
   text-shadow: none !important;
   isolation: isolate;

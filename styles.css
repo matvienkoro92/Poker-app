@@ -9811,17 +9811,22 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
 /* Keep reviews visible and scrollable without changing the app shell geometry. */
 body[data-view="club-reviews"] #app.app .view--active[data-view="club-reviews"] {
   display: block !important;
+  height: calc(100vh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
   max-height: calc(100vh - var(--app-bottom-tabbar-pad, 90px)) !important;
   max-height: calc(100dvh - var(--app-bottom-tabbar-pad, 90px)) !important;
+  min-height: 0 !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
+  touch-action: pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
   scroll-padding-bottom: 40px;
   padding-bottom: 40px !important;
 }
 
 body[data-view="club-reviews"].review-reply-input-active #app.app .view--active[data-view="club-reviews"] {
+  height: 100dvh !important;
   max-height: 100dvh !important;
   padding-bottom: calc(16px + var(--review-keyboard-space, 0px)) !important;
   scroll-padding-bottom: 16px;

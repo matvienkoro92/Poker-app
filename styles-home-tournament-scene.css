@@ -715,6 +715,11 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__amount {font-size:2.1cqw!important;line-height:1!important;letter-spacing:-.04em!important}
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__label {font-size:1.4cqw!important}
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount {font-size:1.65cqw!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout {width:17cqw!important;height:19cqw!important;overflow:visible!important}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before {content:""!important;display:block!important;position:absolute!important;z-index:0!important;left:50%!important;bottom:-1.8cqw!important;width:16.5cqw!important;height:8cqw!important;transform:translateX(-50%)!important;border:.28cqw solid #b18c4b!important;border-radius:45% 45% 26% 26%!important;background:linear-gradient(180deg,#121616 0 42%,#080b0b 43% 100%)!important;box-shadow:inset 0 .2cqw .2cqw #ffe19b26,0 .5cqw .7cqw #0009!important;pointer-events:none}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove {position:absolute!important;z-index:1!important;inset:50% auto auto 50%!important;width:17cqw!important;max-width:none!important;height:19cqw!important;object-fit:contain!important;transform:translate(-50%,-50%)!important;filter:drop-shadow(0 .8cqw .65cqw #000b)!important;pointer-events:none}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label {position:relative;z-index:2;display:grid;gap:.25cqw;width:9.2cqw;margin-top:1.4cqw;color:#ffe4a4;font-size:1.75cqw;font-weight:950;line-height:.95;text-align:center;text-shadow:0 .18cqw .22cqw #000,0 0 .5cqw #000;pointer-events:none}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.15cqw;line-height:1.05}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {display:none!important}
 
 /* Align the table panel and the tractor scene trophy on the same centerline. */

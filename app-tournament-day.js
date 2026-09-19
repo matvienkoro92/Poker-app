@@ -1254,7 +1254,8 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
 var HOME_TOURNAMENT_BONUS_INFO = {
   "four-kind": { title: "Бонус за каре", amount: "1000 ₽" },
   "straight-flush": { title: "Бонус за стрит-флеш", amount: "2500 ₽" },
-  "royal-flush": { title: "Бонус за роял", amount: "10 000 ₽" }
+  "royal-flush": { title: "Бонус за роял", amount: "10 000 ₽" },
+  "pokermanki-knockout": { title: "5000р за ПокерМанки", amount: "5000р за выбивание ПокерМанки после конца регистрации", standalone: true }
 };
 
 function fillHomeTournamentBonusModal(kind) {
@@ -1262,9 +1263,11 @@ function fillHomeTournamentBonusModal(kind) {
   var title = document.getElementById("homeTournamentBonusModalTitle");
   var meta = document.getElementById("homeTournamentBonusModalMeta");
   var fourKindRule = document.getElementById("homeTournamentBonusModalFourKindRule");
+  var table = document.querySelector("#homeTournamentBonusModal .home-bonus-modal__table");
   if (title) title.textContent = info.title;
-  if (meta) meta.textContent = "Выплата: " + info.amount;
+  if (meta) meta.textContent = info.standalone ? info.amount : "Выплата: " + info.amount;
   if (fourKindRule) fourKindRule.hidden = kind !== "four-kind";
+  if (table) table.hidden = info.standalone === true;
 }
 
 function closeHomeTournamentBonusModal() {
