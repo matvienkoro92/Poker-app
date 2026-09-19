@@ -9958,7 +9958,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
   background: linear-gradient(145deg, #1c2222, #0d1113);
 }
 [data-view="my-summary"] .summary-skeleton-card--feature { grid-column: span 3; }
-[data-view="my-summary"] .summary-skeleton-card--compact { grid-column: span 2; min-height: 105px; }
+[data-view="my-summary"] .summary-skeleton-card--compact { grid-column: span 2; min-height: 238px; }
 [data-view="my-summary"] .summary-skeleton-card--wide { grid-column: 1 / -1; min-height: 130px; }
 [data-view="my-summary"] .summary-skeleton-card :is(i,b,span) {
   display: block;
@@ -10001,8 +10001,8 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 @media (max-width: 600px) {
   [data-view="my-summary"] .summary-bootstrap-skeleton { gap: 8px; }
   [data-view="my-summary"] .summary-skeleton-card { padding: 12px; border-radius: 16px; }
-  [data-view="my-summary"] .summary-skeleton-card--feature { min-height: 120px; }
-  [data-view="my-summary"] .summary-skeleton-card--compact { min-height: 86px; }
+  [data-view="my-summary"] .summary-skeleton-card--feature { min-height: 145px; }
+  [data-view="my-summary"] .summary-skeleton-card--compact { min-height: 205px; }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-view="my-summary"] :is(.summary-skeleton-card,.summary-card-loading)::after { animation: none; }
@@ -10032,3 +10032,21 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 .chart-unread-dot[hidden]{display:none!important}
 .summary-card--starting-hands{position:relative}
 .summary-card--starting-hands [data-chart-unread]{position:absolute;right:18px;top:18px}
+
+/* Summary: friend news and balance share a 3:1 row. */
+[data-view="my-summary"] .summary-grid{grid-template-columns:repeat(12,minmax(0,1fr));align-items:stretch}
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-skeleton-card--feature){grid-column:span 6}
+[data-view="my-summary"] :is(.summary-card--friends,.summary-skeleton-card--wide){grid-column:1/10;min-height:130px}
+[data-view="my-summary"] :is(.summary-card--bonus,.summary-skeleton-card--compact){grid-column:10/13;order:-3;min-height:130px;padding:14px 10px;border-radius:16px}
+[data-view="my-summary"] .summary-skeleton-card--compact{order:0}
+[data-view="my-summary"] #summary-bonus .summary-value{font-size:clamp(18px,3vw,30px)!important;line-height:1.15;overflow-wrap:anywhere}
+[data-view="my-summary"] #summary-bonus .summary-spin-status{font-size:12px!important;line-height:1.35;color:var(--summary-muted);margin:8px 0 0}
+@media(max-width:600px){
+ [data-view="my-summary"] :is(.summary-card--friends,.summary-skeleton-card--wide){min-height:118px}
+ [data-view="my-summary"] :is(.summary-card--bonus,.summary-skeleton-card--compact){min-height:118px;padding:12px 7px}
+ [data-view="my-summary"] .summary-card--bonus h2{font-size:12px}
+ [data-view="my-summary"] #summary-bonus .summary-spin-status{font-size:10px!important}
+ [data-view="my-summary"] .summary-card--friends{padding-left:14px}
+ [data-view="my-summary"] .summary-card--friends .summary-card-icon{display:none}
+ [data-view="my-summary"] .summary-card--friends h2{padding-right:0}
+}

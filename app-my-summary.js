@@ -35,7 +35,7 @@
   }
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
-    var groups = {play:["starting-hands","reviews-entry","spin","bonus","raffles","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
+    var groups = {play:["starting-hands","reviews-entry","bonus","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
     document.querySelectorAll('[data-summary-tab]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.summaryTab===summaryTab));});
     if(root)root.querySelectorAll(':scope > .summary-card').forEach(function(card){
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
@@ -86,21 +86,6 @@
     }
   }
   function dateLabel(d) { return new Intl.DateTimeFormat("ru-RU", {timeZone:"Europe/Moscow", day:"numeric", month:"short", hour:"2-digit",minute:"2-digit"}).format(new Date(d)) + " мск"; }
-  function rafflePrizeList(raffles) {
-    var seen = new Set(), items = [];
-    (raffles || []).forEach(function (raffle) {
-      (raffle.groups || []).forEach(function (group) {
-        var prize = String(group && group.prize || "").trim(), count = Math.max(1, parseInt(group && group.count, 10) || 1), amount = /([\d\s]+)\s*(?:₽|р\b)/i.exec(prize), label;
-        if (!prize) return;
-        if (/трениров/i.test(prize)) label = "Тренировка";
-        else if (/б[эе]ккинг|байин|buy.?in/i.test(prize) && amount) label = count + " БИ по " + num(String(amount[1]).replace(/\s/g, "")) + " ₽";
-        else if (/билет/i.test(prize) && amount) label = count + " билетов по " + num(String(amount[1]).replace(/\s/g, "")) + " ₽";
-        else label = (count > 1 ? count + " × " : "") + prize;
-        if (!seen.has(label)) { seen.add(label); items.push(label); }
-      });
-    });
-    return items.slice(0, 4);
-  }
   function request(path, body) {
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 12000);
     var opts = {cache:"no-store", signal:controller.signal};
@@ -144,9 +129,7 @@
   }
   function renderSpin() {
     if (!spin) return;
-    put("spin", '<strong class="summary-value">' + esc(spinText()) + '</strong><p class="summary-muted">' + (spin.canPlay ? 'Попыток: ' + num(spin.attemptsLeft) : 'До бесплатной попытки.') + '</p>' + (spin.lifetimePrizes ? '<p class="summary-muted">Уже выиграно:<br><strong>' + num(spin.lifetimePrizes.ticketAmount) + ' ₽ билетами</strong><br>' + num(spin.lifetimePrizes.bonusAmount) + ' бонусов</p>' : '<p class="summary-muted">Сумма выигрышей временно недоступна.</p>') + link(spin.canPlay ? "Крутить" : "Открыть", "daily-poker"));
-    put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + ' <small>бонусов</small></strong><p class="summary-muted">На билеты для бэкинга.</p>' + link("Обменять", "daily-poker"));
-    if(spin.activity){var bonusCard=document.getElementById('summary-bonus');if(bonusCard)bonusCard.insertAdjacentHTML('beforeend','<p class="summary-muted">Заработано за активность: '+num(spin.activity.bonusEarned)+' ₽</p>');}
+    put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + '</strong><p class="summary-spin-status" role="status">' + esc(spinText()) + '</p>' + link("Бонусы и крутка", "daily-poker"));
     friends();
   }
   function renderSchedule() {
@@ -369,14 +352,6 @@
       if (status) status.textContent = "Не удалось загрузить весь список. Обновите сводку, чтобы повторить.";
     }
   }
-  function renderRaffles(data) {
-    if (!Array.isArray(data.activeRaffles)) throw new Error("Raffle list unavailable");
-    var active = data.activeRaffles;
-    var mine = active.filter(function (r) {return (r.participants || []).some(function (p) {return account && String(p.accountId || p.userId) === account;});});
-    var next = (mine.length ? mine : active).filter(function (r) {return isFinite(Date.parse(r.endDate));}).sort(function (a,b) {return Date.parse(a.endDate)-Date.parse(b.endDate);})[0];
-    var prizes = rafflePrizeList(active);
-    put("raffles", '<strong class="summary-value">' + (mine.length ? 'Вы участвуете: ' + mine.length : 'Активных: ' + active.length) + '</strong>' + (prizes.length ? '<ul class="summary-raffle-prizes">' + prizes.map(function (prize) {return '<li>' + esc(prize) + '</li>';}).join('') + '</ul>' : '<p class="summary-muted">Новые розыгрыши появятся здесь.</p>') + (next ? '<p class="summary-muted summary-raffle-date">До ' + esc(dateLabel(next.endDate)) + '</p>' : '') + link("Открыть", "raffles"));
-  }
   function init() {
     root = document.getElementById("mySummaryContent"); if (!root || pending) return;
     root.classList.remove("summary-bootstrap-skeleton");root.removeAttribute("aria-busy");root.removeAttribute("aria-label");
@@ -384,39 +359,41 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<div class="summary-card-loading" role="status" aria-label="Загружаем"><i></i><b></b><span></span></div>';
-    root.innerHTML = section("spin","Крутка дня",loading) + section("bonus","Бонусы",loading) + section("raffles","Розыгрыши",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
+    root.innerHTML = section("starting-hands", "Мои раздачи", '<span data-chart-unread class="chart-unread-dot" aria-label="Есть непросмотренный график" hidden></span><p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
+        section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")) +
+      section("bonus","Бонусы",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
     applySummaryTab();
     friends();
     function valid() {return seq === generation;}
     var schedule = Promise.resolve().then(function () {return pokerEnsureScriptDomains(["tournament"]);}).then(function () {if(valid()) renderSchedule();}).catch(function () {if(valid()) error("schedule");});
     var authed = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     if (!authed) {
-      ["spin","bonus","achievements","results","raffles"].forEach(function (id) {put(id, '<p class="summary-muted">Войдите, чтобы увидеть свои данные.</p>' + link("Открыть профиль", "profile"));});
+      ["bonus","achievements","results","rival"].forEach(function (id) {put(id, '<p class="summary-muted">Войдите, чтобы увидеть свои данные.</p>' + link("Открыть профиль", "profile"));});
       pending = false; return;
     }
-    var daily = request("promo/daily-poker/status").then(function (d) {if (!valid()) return; if (typeof d.canPlay !== "boolean" || !Number.isFinite(Number(d.bonusBalance))) throw new Error("Invalid status"); spin = d; offset = Date.parse(d.serverTime) - Date.now(); if (!isFinite(offset)) offset = 0; renderSpin();}).catch(function () {if(valid()) {spin=null;error("spin");error("bonus");}});
+    loadReviewUnread(valid);
+    renderChartUnread(); checkChartUnread();
+    var daily = request("promo/daily-poker/status").then(function (d) {if (!valid()) return; if (typeof d.canPlay !== "boolean" || !Number.isFinite(Number(d.bonusBalance))) throw new Error("Invalid status"); spin = d; offset = Date.parse(d.serverTime) - Date.now(); if (!isFinite(offset)) offset = 0; renderSpin();}).catch(function () {if(valid()) {spin=null;error("bonus");}});
     var profile = request("pokerplus-player", {}).then(function (d) {
       if (!valid()) return;
       account = String(d.accountId || ""); var p = d.profile || {}; nickname = p.nickname || p.Nike || p.nick || p.name || "";
       document.getElementById("mySummaryName").textContent = nickname || "";
-      root.insertAdjacentHTML("afterbegin",
-        section("starting-hands", "Мои раздачи", '<span data-chart-unread class="chart-unread-dot" aria-label="Есть непросмотренный график" hidden></span><p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
-        section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Темы и обсуждения игроков клуба</p>' + link("Открыть", "club-reviews")));
-      loadReviewUnread(valid);
-      renderChartUnread(); checkChartUnread();
       if(['ID400800'].includes(account)) {
         var heroCard=document.createElement('section');heroCard.id='summary-hero';heroCard.className='summary-card';heroCard.innerHTML='<h3>Мой герой</h3><p>Вещи, кубки и образы ПокерМанки</p><button type="button" class="summary-link" data-profile-hero-open>Открыть коллекцию →</button>';root.appendChild(heroCard);
         request('profile-hero',{action:'get'}).then(function(h){if(valid()&&h.hero){var model=window.POKER_HERO_CATALOG&&window.POKER_HERO_CATALOG.model(h.hero.goal);heroCard.querySelector('p').textContent=h.hero.pendingChoice?'Продолжите выбор одной из трёх вещей':model?'Цель: '+model.name+' · '+h.hero.dust+'/'+model.cost+' оск.':h.hero.chests+' наград за уровни'+(h.hero.adventureAvailable?' · подарок доступен':'');}}).catch(function(){});
       }
       applySummaryTab();
+      return d;
+    });
+    var progress = profile.then(function (d) {
+      if (!valid()) return;
+      var p = d.profile || {};
       if (d.linked && !nickname) throw new Error("Profile cache unavailable");
-      if (!d.linked) { ["results","achievements"].forEach(function (id) {put(id,'<p class="summary-muted">Привяжите Poker21 в профиле, чтобы увидеть результаты и прогресс.</p>' + link("Привязать Poker21", "profile"));}); return; }
+      if (!d.linked) { ["results","achievements","rival"].forEach(function (id) {put(id,'<p class="summary-muted">Привяжите Poker21 в профиле, чтобы увидеть результаты и прогресс.</p>' + link("Привязать Poker21", "profile"));}); return; }
       return Promise.resolve(pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"])).then(function () {return window.pokerGetTournamentAchievementStatsReady(nickname);}).then(function (stats) {if(valid()) {renderStats(stats);return loadAchievementCatalog(Object.assign({},p,{accountId:account}),valid);}});
-    }).catch(function () {if(valid()) {error("results");error("achievements");}});
-    var raffles = profile.then(function () {if(!valid()) return; return requestRaffles();}).then(function (d) {if(valid() && d) renderRaffles(d);}).catch(function () {if(valid()) error("raffles");});
-    Promise.allSettled([schedule,daily,profile,raffles]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
+    }).catch(function () {if(valid()) {error("results");error("achievements");error("rival");}});
+    Promise.allSettled([schedule,daily,progress]).then(function () {if(valid()) {pending=false;loadedAt=Date.now();}});
   }
-  function requestRaffles() { return request("raffles").then(function (d) {return d;}); }
   function closeStartingHands(destroy) {
     var modal=document.getElementById('startingHandsDialog');if(!modal)return;
     if(modal.open)modal.close();
