@@ -6,7 +6,7 @@ const {pipeline}=require('../lib/redis');
 const root=path.resolve(process.env.CLUB_HAND_EV_ROOT||path.resolve(__dirname,'../output/club-hand-ev'));
 const importReport=path.resolve(process.env.CLUB_HAND_IMPORT_REPORT||path.resolve(root,'../club-hand-import/prepare-report.json'));
 const method='exact-runouts-fixed-deduction-v1';
-const calculatedMethods=new Set([method,'omaha-exact-2hole-3board-v1','omaha-simulation-2hole-3board-v1']);
+const calculatedMethods=new Set([method,'holdem-simulation-fixed-deduction-v1','omaha-exact-2hole-3board-v1','omaha-simulation-2hole-3board-v1']);
 const pack=x=>gzipSync(JSON.stringify(x)).toString('base64');
 const unpack=x=>JSON.parse(gunzipSync(Buffer.from(x,'base64')));
 async function send(commands){return (await pipeline(commands,{context:'club-hand-ev',throwOnError:true,timeoutMs:20000})).map(r=>r.result);}

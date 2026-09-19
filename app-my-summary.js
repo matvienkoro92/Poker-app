@@ -441,7 +441,7 @@
     }
     if(event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
-    if(!['list','replay','insights','stacks','version','chart-wall','review-publish'].includes(message.action))return;
+    if(!['list','replay','insights','opponents','stacks','version','chart-wall','review-publish'].includes(message.action))return;
     if(message.action==='review-publish'){
       try{
         var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',hideShowdown:message.hideShowdown===true,forCoach:false,image:message.image,cards:message.cards,handId:message.handId,gameMode:message.gameMode,bigBlindMinor:message.bigBlindMinor,startingStackMinor:message.startingStackMinor,totalPotMinor:message.totalPotMinor});

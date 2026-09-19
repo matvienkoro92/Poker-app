@@ -7,6 +7,7 @@ const {pipeline}=require('../lib/redis');
 async function run(){
  const source=JSON.parse(fs.readFileSync('output/ev-audit/calculated.json','utf8'));
  if(source.method!=='exact-runouts-fixed-deduction-v1')throw Error('Unknown EV method');
+ const calculatedMethods=new Set([source.method,'holdem-simulation-fixed-deduction-v1','omaha-exact-2hole-3board-v1','omaha-simulation-2hole-3board-v1']);
  if(!/^\d+$/.test(String(source.playerId)))throw Error('Invalid player');
  const field='ev';
  const rows=new Map(source.rows.map(r=>[String(r.handId),r]));
@@ -23,7 +24,7 @@ async function run(){
   for(const key of ['sessionId','mode','playedAt','resultMinor','bigBlindMinor'])if(row[key]!==local[key])throw Error('Source mismatch: '+key);
   if(JSON.stringify(row.cards)!==JSON.stringify(local.cards))throw Error('Cards mismatch');
   if(!local.ev||!['calculated','unresolved','not_applicable'].includes(local.ev.status))throw Error('Invalid EV status');
-  if(local.ev.status==='calculated' && (local.ev.method!==source.method||!Number.isFinite(local.ev.resultMinor)||!Number.isSafeInteger(local.ev.runouts)||local.ev.runouts<1))throw Error('Invalid EV result');
+  if(local.ev.status==='calculated' && (!calculatedMethods.has(local.ev.method)||!Number.isFinite(local.ev.resultMinor)||!Number.isSafeInteger(local.ev.runouts)||local.ev.runouts<1))throw Error('Invalid EV result');
   if(local.ev.grossEv && (local.ev.grossEv.status!=='calculated'||!Number.isFinite(local.ev.grossEv.resultMinor)||!Number.isFinite(local.ev.grossEv.actualResultMinor)))throw Error('Invalid gross EV');
   if(local.ev.showdownEquity?.status==='calculated' && (!Number.isFinite(local.ev.showdownEquity.share)||local.ev.showdownEquity.share<0||local.ev.showdownEquity.share>1||!Number.isSafeInteger(local.ev.showdownEquity.runouts)))throw Error('Invalid showdown equity');
   if(JSON.stringify(row[field])!==JSON.stringify(local[field])){row[field]=local[field];changed++;}

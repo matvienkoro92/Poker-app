@@ -6,6 +6,7 @@ import argparse,collections,decimal,itertools,json,pathlib,sqlite3,subprocess,ma
 from fractions import Fraction
 D=decimal.Decimal
 METHOD='exact-runouts-fixed-deduction-v1'
+SIMULATION_METHOD='holdem-simulation-fixed-deduction-v1'
 def mapping(s):return {p.split(':')[0]:int(p.split(':')[1]) for p in str(s).split(',') if ':' in p}
 def amount(e):
  n=D(str(e.get('bet',0)))*100
@@ -24,7 +25,7 @@ def equity(binary,holes,board,masks):
   values=[len(holes),hole_count,len(board),len(masks)]+[c for h in holes for c in h]+board+masks
   executable=str(pathlib.Path(binary).with_name('omaha-equity'))
  result=subprocess.run([executable],input=' '.join(map(str,values)),text=True,capture_output=True,check=True).stdout.splitlines()
- first=result[0].split();runs=int(first[-1]);equity.last_method=('omaha-'+first[0]+'-2hole-3board-v1') if hole_count>2 else METHOD
+ first=result[0].split();runs=int(first[-1]);equity.last_method=('omaha-'+first[0]+'-2hole-3board-v1') if hole_count>2 else (SIMULATION_METHOD if first[0]=='simulation' else METHOD)
  return runs,[list(map(float,r.split())) for r in result[1:]]
 equity.last_method=METHOD
 def hero_showdown_equity(raw,hero,binary):

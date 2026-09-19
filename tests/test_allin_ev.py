@@ -35,6 +35,11 @@ class Equity(unittest.TestCase):
   _,v=ev.equity(self.binary,[[13,14],[26,27]],[8,9,10,11,12],[3]);self.assertEqual(v,[[.5,.5]])
  def test_turn_quads_and_runout_count(self):
   runs,v=ev.equity(self.binary,[[12,25],[11,24]],[38,51,0,1],[3]);self.assertEqual(runs,44);self.assertEqual(v,[[1,0]])
+ def test_holdem_preflop_simulation_is_bounded_and_repeatable(self):
+  holes=[[12,25],[11,24]]
+  runs,a=ev.equity(self.binary,holes,[],[3]);runs2,b=ev.equity(self.binary,holes,[],[3])
+  self.assertEqual(runs,100000);self.assertEqual(runs2,runs);self.assertEqual(a,b)
+  self.assertEqual(ev.equity.last_method,'holdem-simulation-fixed-deduction-v1');self.assertAlmostEqual(sum(a[0]),1,12)
  def test_omaha_uses_exactly_two_hole_and_three_board_cards(self):
   # Hero's ace-high spade flush wins; neither player may play only one hole card.
   holes=[[51,50,23,22],[49,47,37,35]];board=[40,43,47-39,1,18]

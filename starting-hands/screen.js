@@ -30,12 +30,24 @@ function startHistory(payload) {
   activeHistoryPlayerId=String(payload.playerId||'');activeHistoryVersion=String(payload.version||'');
   const core = window.PokerHandStatistics;
   let mode = 'cash', game = 'NLH', metric = 'bb', selected = null;
+  let currentHistoryTab='overview',handBreakdown='positions';
+  function applyHandBreakdown(){
+    if(game!=='NLH'&&handBreakdown==='hands')handBreakdown='positions';
+    document.querySelectorAll('[data-hand-breakdown]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.handBreakdown===handBreakdown)));
+    const handsButton=document.querySelector('[data-hand-breakdown="hands"]');handsButton.disabled=game!=='NLH';
+    const positions=document.querySelector('[data-hand-breakdown-panel="positions"]'),matrix=$('matrix-panel');
+    positions.hidden=currentHistoryTab!=='hands'||handBreakdown!=='positions';
+    matrix.hidden=game!=='NLH'||(currentHistoryTab==='hands'&&handBreakdown!=='hands');
+  }
   function showHistoryTab(tab){
+    currentHistoryTab=tab;
     document.querySelectorAll('[data-history-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.historyTab===tab)));
     document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=!p.dataset.historyPanel.split(' ').includes(tab));
+    applyHandBreakdown();
     if(tab==='review'||tab==='overview')render();
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
+  document.querySelectorAll('[data-hand-breakdown]').forEach(button=>button.addEventListener('click',()=>{handBreakdown=button.dataset.handBreakdown;applyHandBreakdown();button.focus();}));
   const positionByMode={cash:'',mtt:'',sng:''};
   const positionLabel=p=>({UNKNOWN:'Не определена','BTN/SB':'SB',LJ:'MP',HJ:'MP+1'}[p]||p);
   for(const p of core.positions){const option=document.createElement('option');option.value=p;option.textContent=positionLabel(p);document.getElementById('position').append(option);}
@@ -63,6 +75,27 @@ function startHistory(payload) {
   };
   const sample = {playerId:payload.playerId};
   const bulk = {rows:payload.rows};
+  let opponentLoading=false,opponentFailed=false,opponentTimer;
+  $('opponent-retry').addEventListener('click',()=>{opponentFailed=false;render();});
+  async function loadOpponentContests(){
+    const query=$('opponent-search').value.trim();
+    if(!query){$('opponent-status').textContent='';$('opponent-retry').hidden=true;opponentFailed=false;return;}
+    if(opponentLoading||opponentFailed)return;
+    const missing=bulk.rows.filter(row=>row.contestedOpponentIds===undefined&&core.matchesSearch(row,{opponentQuery:query,seatedOpponents:true}));
+    if(!missing.length){$('opponent-status').textContent='';return;}
+    opponentLoading=true;
+    try{
+      for(let i=0;i<missing.length;i+=100){
+        if($('opponent-search').value.trim()!==query)break;
+        $('opponent-status').textContent='Проверяем действия: '+i+' / '+missing.length;
+        const chunk=missing.slice(i,i+100),response=await historyRequest('opponents',chunk.map(row=>row.handId));
+        if(response.version!==payload.version){location.reload();return;}
+        for(const row of chunk){const ids=response.signals?.[row.handId];if(!Array.isArray(ids))throw new Error('Missing actions');row.contestedOpponentIds=ids;}
+      }
+      $('opponent-status').textContent='';
+    }catch(_){opponentFailed=true;$('opponent-status').textContent='Не удалось проверить все действия. Результаты неполные.';}
+    finally{opponentLoading=false;$('opponent-retry').hidden=!opponentFailed;render();}
+  }
   let stackBand='',tournamentId='',stackLoadPromise=null,stacksLoaded=false;
   const tournamentSelect=$('tournament-filter');
   const tournamentNames=window.Poker21TournamentNames||{};
@@ -107,8 +140,7 @@ function startHistory(payload) {
     const note=document.createElement('span');note.className='hand-ev-summary';
     const simulated=String(hand.ev.method||'').includes('simulation');
     note.textContent='All-in EV'+(simulated?' (симуляция)':'')+': '+signed(hand.ev.resultMinor/divisor)+' '+label+' · фактически: '+signed(hand.resultMinor/divisor)+' '+label+'.';
-    const runs=document.createElement('span');runs.textContent=(simulated?'Смоделировано':'Перебрано')+' исходов: '+number(hand.ev.runouts)+'.';
-    note.append(document.createElement('br'),runs);summary.append(note);
+    summary.append(note);
   }
   const replayCache=new Map();
   async function captureHandCard(row,options){
@@ -363,6 +395,7 @@ function startHistory(payload) {
   }
 
   function render() {
+    clearTimeout(opponentTimer);opponentTimer=setTimeout(loadOpponentContests,250);
     if(mode==='mtt')metric='bb';
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
@@ -452,7 +485,7 @@ function startHistory(payload) {
     renderInsights(data,renderReplay);
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
     $('game-filter').value=game;
-    $('matrix-panel').hidden=game!=='NLH';
+    applyHandBreakdown();
     $('stack-filter-wrap').hidden=mode!=='mtt';
     $('stack-filter').value=stackBand;
     $('tournament-filter-wrap').hidden=mode!=='mtt';
@@ -505,10 +538,10 @@ function startHistory(payload) {
     let shownHands=0;
     const moreHands=document.createElement('button');moreHands.type='button';moreHands.className='insight-button';
     function appendHandPage(){
-    visibleHands.slice(shownHands,shownHands+30).forEach((h,index)=>{index+=shownHands;
+    visibleHands.slice(shownHands,shownHands+10).forEach((h,index)=>{index+=shownHands;
       const row=createHandCard(h,index,renderReplay);
       list.append(row);
-    });shownHands+=30;moreHands.hidden=shownHands>=visibleHands.length;moreHands.textContent='Показать ещё · осталось '+Math.max(0,visibleHands.length-shownHands);
+    });shownHands+=10;moreHands.hidden=shownHands>=visibleHands.length;moreHands.textContent='Показать ещё 10 · осталось '+Math.max(0,visibleHands.length-shownHands);
     }
     moreHands.onclick=appendHandPage;appendHandPage();$('detail').append(list,moreHands);
   }
@@ -528,10 +561,6 @@ function startHistory(payload) {
   $('stack-filter').addEventListener('change',e=>{stackBand=e.target.value;selected=null;render();});
   $('tournament-filter').addEventListener('change',e=>{tournamentId=e.target.value;selected=null;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
-  $('reset-filters').addEventListener('click',()=>{
-    $('hand-search').value='';$('opponent-search').value='';selected=null;render();
-    $('hand-search').focus();
-  });
   $('metric').addEventListener('click',()=>{if(mode==='mtt')return;metric=metric==='bb'?'resultMinor':'bb';render();});
   $('date-close').addEventListener('click',()=>{if($('date-status').textContent)return;document.querySelector('.date-picker').open=false;document.querySelector('.date-picker summary').focus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelector('.date-picker').open=false;}});

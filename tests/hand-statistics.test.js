@@ -101,7 +101,7 @@ test('MTT tournament filter selects one session only',()=>{
 
 test('live search matches partial IDs, opponent fragments, case and transliteration',()=>{
  const {matchesSearch}=require('../starting-hands/core');
- const row={handId:'1789152082927',opponents:[{playerId:'776157',name:'PlayerMayer'},{playerId:'975934',name:'Собака Павлова'}]};
+ const row={handId:'1789152082927',contestedOpponentIds:['776157','975934'],opponents:[{playerId:'776157',name:'PlayerMayer'},{playerId:'975934',name:'Собака Павлова'}]};
  for(const handQuery of ['1','178','178915','5208'])assert.equal(matchesSearch(row,{handQuery}),true);
  assert.equal(matchesSearch(row,{handQuery:'999'}),false);
  for(const opponentQuery of ['mAyEr','@player','собака','sobaka','Павлова','776'])assert.equal(matchesSearch(row,{opponentQuery}),true);
