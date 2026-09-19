@@ -10023,6 +10023,16 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .review-topic__unread-badge { display: inline-flex; width: fit-content; margin-top: 5px; padding: 3px 7px; border: 1px solid #79d0ff70; border-radius: 999px; background: #4ebcff20; color: #9dddff; font-weight: 800; letter-spacing: .01em; animation: review-unread-pulse 1.7s ease-in-out infinite; }
 @keyframes review-unread-pulse { 0%,100% { background-color:#4ebcff18; box-shadow:0 0 0 0 #63c7ff00; } 50% { background-color:#4ebcff36; box-shadow:0 0 0 4px #63c7ff18; } }
 @media (prefers-reduced-motion: reduce) { [data-view="club-reviews"] .review-topic__unread-badge { animation: none; } }
+[data-view="club-reviews"] .review-thread-card > .review-share-actions { justify-content: flex-end; width: 100%; box-sizing: border-box; margin: 18px 0 0; padding-top: 14px; border-top: 1px solid #ffffff18; }
+[data-view="club-reviews"] .review-thread-loading { position: relative; display: grid; gap: 10px; margin-top: 18px; overflow: hidden; }
+[data-view="club-reviews"] .review-thread-loading span { color: #b9c5d2; font-size: 13px; }
+[data-view="club-reviews"] .review-thread-loading i { display: block; height: 12px; border-radius: 6px; background: #ffffff12; }
+[data-view="club-reviews"] .review-thread-loading i:nth-of-type(1) { width: 94%; }
+[data-view="club-reviews"] .review-thread-loading i:nth-of-type(2) { width: 76%; }
+[data-view="club-reviews"] .review-thread-loading i:nth-of-type(3) { width: 58%; }
+[data-view="club-reviews"] .review-thread-loading::after { content:""; position:absolute; inset:25px -45% 0; background:linear-gradient(90deg,transparent,#8fd6ff18,transparent); transform:translateX(-55%); animation:review-thread-loading 1.1s ease-in-out infinite; }
+@keyframes review-thread-loading { to { transform:translateX(75%); } }
+@media (prefers-reduced-motion: reduce) { [data-view="club-reviews"] .review-thread-loading::after { animation:none; } }
 .review-activity__heading span { color: #f5cd69; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .review-activity__ticket .review-activity__heading { font-size: 17px; }
 .review-activity__spin-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 14px; }

@@ -26,6 +26,7 @@ async function main() {
       window.pokerSocialRequest = async (_, body) => {
         if(body.action==='topic-push-status')return {ok:true,subscribed:topicSubscribed,notificationsEnabled:true,hasSubscription:true};
         if(body.action==='topic-push-set'){topicSubscribed=body.enabled;return {ok:true,subscribed:topicSubscribed};}
+        if(body.action==='get')await new Promise(resolve=>setTimeout(resolve,80));
         const award = body.action === 'reply' ? { action:true,bonus:0,spin:1 } : null;
         if(award){ progress=0; window.fixture.replies.push({id:'e'.repeat(24),authorId:'ID123456',authorNick:'Ваш ник',authorLevel:4,text:body.text,createdAt:'2026-09-18T11:00:00Z',canDelete:true}); }
         return { ok:true,accountId:'ID123456',threads:[window.fixture],nextCursor:null,thread:window.fixture,activityAward:award,
@@ -49,7 +50,11 @@ async function main() {
       assert.equal(overflow,false,'activity panel overflow at '+width);
     }
     await page.locator('[data-review-action="open"]').click();
+    await page.waitForSelector('.review-thread-card--loading');
+    assert.equal((await page.locator('.review-thread-loading span').textContent()).trim(),'Открываем раздачу…');
     await page.waitForSelector('#reviewReplyForm');
+    assert.equal(await page.locator('.review-activity').count(),0,'reward progress is hidden inside a hand');
+    assert.equal(await page.locator('.review-thread-card').evaluate(article=>article.lastElementChild.classList.contains('review-share-actions')),true,'share actions are at the bottom of the hand');
     assert.equal((await page.locator('.review-hand-text__final-pot').textContent()).trim(),'Итоговый банк: 100,5 bb');
     assert.match((await page.locator('.review-hand-text__street--preflop').textContent()).replace(/\s+/g,' '),/Банк\s*0 bb/);
     assert.match((await page.locator('.review-hand-text__street--river').textContent()).replace(/\s+/g,' '),/Банк\s*30 bb/);
@@ -68,10 +73,11 @@ async function main() {
     await page.locator('#reviewReplyForm textarea').fill(text);
     assert.match(await page.locator('#reviewActivityHint').textContent(), /\d+ \/ 20/);
     await page.locator('#reviewReplyForm button[type="submit"]').click();
-    await page.waitForSelector('[data-review-action="activity-play"]');
     assert.match(await page.locator('#clubReviewsFeedback').textContent(), /\+1 крутка/);
-    assert.equal(await page.locator('.review-activity__track .is-filled').count(),0);
     assert.equal(await page.locator('#reviewReplyForm textarea').inputValue(),'');
+    await page.locator('[data-review-action="back"]').click();
+    await page.waitForSelector('[data-review-action="activity-play"]');
+    assert.equal(await page.locator('.review-activity__track .is-filled').count(),0);
     await page.locator('[data-review-action="activity-play"]').click();
     assert.equal(await page.evaluate(()=>window.lastView),'daily-poker');
     await page.setViewportSize({width:390,height:900});
