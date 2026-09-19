@@ -98,6 +98,15 @@ test('one publication advances only the publication counter without paying money
   assert.equal((await h.activity.summary(h.actor.accountId)).actions, 1);
   await assert.rejects(h.publish('1', { id: 'new-request' }), /уже опубликована/);
 });
+test('today publications made before separate counters backfill publication progress', async () => {
+  const h=harness();
+  h.values.set(h.activity.PREFIX+'player_day:123',JSON.stringify({day:h.activity.day(),count:4}));
+  let summary=await h.activity.summary(h.actor.accountId);
+  assert.equal(summary.publicationsToday,4);assert.equal(summary.publicationActions,4);assert.equal(summary.publicationProgress,4);
+  await h.publish('5');
+  summary=await h.activity.summary(h.actor.accountId);
+  assert.equal(summary.publicationProgress,0);assert.equal(summary.spinsAvailable,1);assert.equal(summary.spinsEarned,1);
+});
 test('seven publications per Moscow day; deletion cannot recover quota; reset does not reset progress', async () => {
   const h = harness(); for (let i = 1; i <= 7; i++) await h.publish(String(i));
   const firstCycle = await h.activity.summary(h.actor.accountId);
