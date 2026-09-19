@@ -1,6 +1,6 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.PokerHandShare=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const suits={s:'♠',h:'♥',d:'♦',c:'♣'},labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};
+const suits={s:'♠',h:'♥',d:'♦',c:'♣'},labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка'};
 const potCodes=new Set(['2','3','5','18','19','20','92']);
 const card=value=>String(value||'').replace(/^T/,'10').replace(/([shdc])$/,(_,s)=>suits[s]||s);
 const amount=value=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(Number(value)||0);
@@ -17,7 +17,7 @@ function positions(hand,replay){
 }
 function splitOutcome(text){
  const lines=String(text||'').split(/\r?\n/);
- const action=/\s—\s(?:Колл|Рейз|Олл-ин|Фолд|Чек|Ставка|Малый блайнд|Большой блайнд)(?:\s|$)/;
+ const action=/\s—\s(?:Колл|Рейз|Олл-ин|Фолд|Чек|Ставка|МБ|ББ)(?:\s|$)/;
  let lastAction=-1,allIn=false;
  lines.forEach((line,index)=>{if(action.test(line))lastAction=index;if(/\s—\sОлл-ин(?:\s|$)/.test(line))allIn=true;});
  // Keep every decision, including side-pot betting and calls after an all-in.
@@ -34,6 +34,8 @@ function text(hand,replay,options){
  const lines=['Раздача #'+hand.handId+' · '+date+' МСК','Мои карты: '+(replay.cards||hand.cards||[]).map(card).join(' '),'Позиция: '+hand.position+' · большой блайнд '+(inBb?'1':amount(bigBlind))+' '+unit,''];
  let street='Префлоп',streetCards='',pot=0;
  const positionFor=positions(hand,replay);
+ const startingStacks=new Map((replay.stacks||[]).map(player=>[String(player.actor||''),Number(player.amount)]));
+ const actorLabel=event=>{const actor=String(event.actor||'Игрок');if(actor==='Вы'||String(event.actorId)===String(hand.playerId))return actor;const stack=startingStacks.get(actor);return Number.isFinite(stack)?actor+' ('+display(stack)+' '+unit+')':actor;};
  const startStreet=()=>{lines.push(street+(streetCards?': '+streetCards:'')+' · Банк: '+display(pot)+' '+unit);};
  startStreet();
  for(const event of replay.events||[]){
@@ -41,7 +43,7 @@ function text(hand,replay,options){
   if(String(event.code)==='92'){pot+=Number(event.amount)||0;continue;}
   const label=labels[String(event.code)];if(!label)continue;
   if(potCodes.has(String(event.code)))pot+=Number(event.amount)||0;
-  const position=positionFor(event);lines.push((position?position+': ':'')+String(event.actor||'Игрок')+' — '+label+(event.amount?' '+display(event.amount)+' '+unit:''));
+  const position=positionFor(event);lines.push((position?position+': ':'')+actorLabel(event)+' — '+label+(event.amount?' '+display(event.amount)+' '+unit:''));
  }
  lines.push('','Итоговый банк: '+display(pot)+' '+unit);
  for(const player of replay.shownOpponents||[]){if(['showdown-winner','showdown-allin'].includes(player.disclosure))lines.push('Вскрытие: '+player.actor+' · '+(player.cards||[]).map(card).join(' '));}

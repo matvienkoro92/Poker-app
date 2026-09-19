@@ -98,21 +98,21 @@ test('one publication commits thread, money, progress, quota, earned totals and 
   assert.equal((await h.activity.summary(h.actor.accountId)).actions, 1);
   await assert.rejects(h.publish('1', { id: 'new-request' }), /уже опубликована/);
 });
-test('three publications per Moscow day; deletion cannot recover quota; reset does not reset progress', async () => {
-  const h = harness(); for (let i = 1; i <= 3; i++) await h.publish(String(i));
-  await assert.rejects(h.publish('4'), /до 3 раздач/);
+test('five publications per Moscow day; deletion cannot recover quota; reset does not reset progress', async () => {
+  const h = harness(); for (let i = 1; i <= 5; i++) await h.publish(String(i));
+  await assert.rejects(h.publish('6'), /до 5 раздач/);
   h.values.delete('thread:thread-1');
-  await assert.rejects(h.publish('5'), /до 3 раздач/);
+  await assert.rejects(h.publish('7'), /до 5 раздач/);
   const state = await h.activity.readState(h.actor.accountId); state.publicationsDay = '2000-01-01';
   h.values.set(h.activity.stateKey(h.actor.accountId), JSON.stringify(state));
   h.values.delete(h.activity.PREFIX+'player_day:123');
-  await h.publish('6');
+  await h.publish('8');
   const result = await h.activity.summary(h.actor.accountId);
-  assert.equal(result.progress, 4); assert.equal(result.publicationsToday, 1); assert.equal(result.bonusEarned, 40);
+  assert.equal(result.progress, 1); assert.equal(result.publicationsToday, 1); assert.equal(result.bonusEarned, 60);
   assert.equal(h.activity.day(new Date('2026-09-18T20:59:59Z')), '2026-09-18');
   assert.equal(h.activity.day(new Date('2026-09-18T21:00:00Z')), '2026-09-19');
 });
-test('seven mixed actions award exactly one permanent spin; progress carries over', async () => {
+test('five mixed actions award exactly one permanent spin; progress carries over', async () => {
   const h = harness(); await h.publish();
   const comments=[
     'На префлопе выбираю трибет увеличенного размера, потому что глубокие стеки позволят собрать большой банк с нашей сильной рукой.',
@@ -122,9 +122,9 @@ test('seven mixed actions award exactly one permanent spin; progress carries ove
     'Против маленькой ставки флопа можно продолжать с гатшотом и оверкартой, если за нами не осталось агрессивных участников банка.',
     'Без позиции трудно реализовать эквити слабой пары. Предпочитаю чекать весь диапазон и принимать дальнейшее решение после действий соперника.'
   ];
-  for (let i = 0; i < 6; i++) await h.comment('foreign-' + i, comments[i]);
+  for (let i = 0; i < 4; i++) await h.comment('foreign-' + i, comments[i]);
   let a = await h.activity.summary(h.actor.accountId);
-  assert.equal(a.actions, 7); assert.equal(a.progress, 0); assert.equal(a.spinsEarned, 1); assert.equal(a.spinsAvailable, 1); assert.equal(a.bonusEarned, 10);
+  assert.equal(a.actions, 5); assert.equal(a.progress, 0); assert.equal(a.spinsEarned, 1); assert.equal(a.spinsAvailable, 1); assert.equal(a.bonusEarned, 10);
   await h.comment('another'); a = await h.activity.summary(h.actor.accountId);
   assert.equal(a.progress, 1); assert.equal(a.spinsAvailable, 1);
 });
@@ -163,13 +163,13 @@ test('write failure or concurrent thread update cannot give a partial reward', a
   await h.publish(); assert.equal((await h.activity.summary(h.actor.accountId)).actions, 1);
 });
 test('concurrent requests cannot overrun publication quota', async () => {
-  const h = harness(); await h.publish('1'); await h.publish('2');
-  const results = await Promise.allSettled([h.publish('3'), h.publish('4')]);
+  const h = harness(); await h.publish('1'); await h.publish('2'); await h.publish('3'); await h.publish('4');
+  const results = await Promise.allSettled([h.publish('5'), h.publish('6')]);
   assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
-  assert.equal((await h.activity.summary(h.actor.accountId)).publicationsToday, 3);
+  assert.equal((await h.activity.summary(h.actor.accountId)).publicationsToday, 5);
 });
 test('activity spins are separate from daily state, can grant one extra and cannot become negative', () => {
-  const { activity: a } = harness(); const original = { ...a.emptyState(), spinsAvailable: 2, actions: 14, spinsEarned: 2 };
+  const { activity: a } = harness(); const original = { ...a.emptyState(), spinsAvailable: 2, actions: 10, spinsEarned: 2 };
   const next = a.spendSpin(original, 'activity', { grantsExtraAttempt: true });
   assert.equal(original.spinsAvailable, 2); assert.equal(next.spinsAvailable, 1); assert.equal(next.extraSpins, 1);
   const usedExtra = a.spendSpin(next, 'activity-extra', { grantsExtraAttempt: true });
@@ -198,8 +198,8 @@ test('moving Poker21 between app accounts cannot reset quotas, republish a hand 
   await assert.rejects(h.publish('1',{id:'new-request'}),/уже опубликована/);
   const own=await h.comment('old-own',undefined,{authorId:'ID123456',authorPokerId:'123'});
   assert.equal(own.activityReason,'own_thread');assert.equal(own.activityAward,undefined);
-  await h.publish('2');await h.publish('3');
-  h.moveAccount('ID777777');await assert.rejects(h.publish('4'),/до 3 раздач/);
+  await h.publish('2');await h.publish('3');await h.publish('4');await h.publish('5');
+  h.moveAccount('ID777777');await assert.rejects(h.publish('6'),/до 5 раздач/);
 });
 test('credited comment remains spent across account transfer, deletion and different text',async()=>{
   const h=harness();await h.comment('one');h.moveAccount('ID654321');

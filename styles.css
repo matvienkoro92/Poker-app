@@ -10011,7 +10011,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 .review-activity { margin: 0 0 18px; padding: 14px 16px; border: 1px solid #8b713840; border-radius: 16px; background: linear-gradient(125deg,#c49c3516,#111820); color: #eee5d2; }
 .review-activity__heading { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
 .review-activity__heading span { color: #f5cd69; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.review-activity__track { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; margin: 11px 0; }
+.review-activity__track { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; margin: 11px 0; }
 .review-activity__track i { display: block; height: 8px; border-radius: 4px; background: #ffffff14; }
 .review-activity__track .is-filled { background: #f3ca64; }
 .review-activity p { margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: #aeb7c2; }

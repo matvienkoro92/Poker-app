@@ -6,7 +6,7 @@ function harness({free=false,special=false}={}){
   const values=new Map(),locks=new Map(),writes=[];let balance=10,game=0;
   const now=new Date().toISOString(),state={baseAttemptUsed:!free,baseAttemptAt:free?'':now,extraAttemptGranted:false,extraAttemptUsed:false,ticketlessStreak:6,ticketlessStreakAt:now,updatedAt:now};
   values.set('state:ID1',JSON.stringify(state));
-  values.set(activity.stateKey('ID1'),JSON.stringify({...activity.emptyState(),actions:7,spinsEarned:1,spinsAvailable:1,bonusEarned:10}));
+  values.set(activity.stateKey('ID1'),JSON.stringify({...activity.emptyState(),actions:5,spinsEarned:1,spinsAvailable:1,bonusEarned:10}));
   const ctx={...daily,...ledger,console,Date,JSON,Number,Math,String,
     BOT_TOKEN:'test',DAILY_POKER_REQUIRED_CHANNEL:'test',ROMAN_DAILY_POKER_LIMIT:100,TICKETLESS_STREAK_MIN_LEVEL:1,
     reviewActivity:{...activity,readState:async()=>JSON.parse(values.get(activity.stateKey('ID1')))},

@@ -46,8 +46,8 @@ test('carries the completed pot into the next street header, never the current s
  assert.match(text,/Итоговый банк: 460 ₽/);
 });
 test('adds compact positions to action lines',()=>{
- const hand={handId:'789',playerId:'hero',mode:'cash',playedAt:'2026-09-18T10:00:00Z',cards:['As','Kd'],position:'BTN',bigBlindMinor:4000,resultMinor:0,bb:0};
- const replay={stacks:[{actor:'UTG'},{actor:'Вы'},{actor:'Small'},{actor:'Big'}],events:[{code:'18',actor:'Small',actorId:'sb',amount:20},{code:'19',actor:'Big',actorId:'bb',amount:40},{code:'10',actor:'UTG',actorId:'utg'},{code:'3',actor:'Вы',actorId:'hero',amount:120}]};
+ const hand={handId:'789',playerId:'hero',mode:'cash',metric:'bb',playedAt:'2026-09-18T10:00:00Z',cards:['As','Kd'],position:'BTN',bigBlindMinor:4000,resultMinor:0,bb:0};
+ const replay={stacks:[{actor:'UTG',amount:800},{actor:'Вы',amount:1200},{actor:'Small',amount:400},{actor:'Big',amount:1600}],events:[{code:'18',actor:'Small',actorId:'sb',amount:20},{code:'19',actor:'Big',actorId:'bb',amount:40},{code:'10',actor:'UTG',actorId:'utg'},{code:'3',actor:'Вы',actorId:'hero',amount:120}]};
  replay.seats=[{actorId:'utg',actor:'UTG',position:'CO'},{actorId:'hero',actor:'Вы',position:'BTN'},{actorId:'sb',actor:'Small',position:'SB'},{actorId:'bb',actor:'Big',position:'BB'}];
- const text=share.text(hand,replay);assert.match(text,/SB: Small — Малый блайнд/);assert.match(text,/BB: Big — Большой блайнд/);assert.match(text,/CO: UTG — Фолд/);assert.match(text,/BTN: Вы — Рейз/);
+ const text=share.text(hand,replay);assert.match(text,/SB: Small \(10 bb\) — МБ/);assert.match(text,/BB: Big \(40 bb\) — ББ/);assert.match(text,/CO: UTG \(20 bb\) — Фолд/);assert.match(text,/BTN: Вы — Рейз/);assert.doesNotMatch(text,/Вы \(/);
 });

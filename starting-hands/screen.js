@@ -137,7 +137,7 @@ function startHistory(payload) {
   function publicationOptions(button){
     return new Promise(resolve=>{
       const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog';
-      dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>+10 ₽ на бонусный баланс и 1 шаг к крутке. До 3 раздач в день (МСК). Каждые 7 действий — крутка.</p><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="show" checked> Показать результат — под спойлером</label><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="hide"> Скрыть результат — раздача будет опубликована без ШД</label><p>Карты следующих улиц после завершения выставления, карты соперников и выигрыш или проигрыш будут под спойлером либо полностью убраны.</p><label class="hand-publish-comment">Ваш вопрос — минимум 20 букв или цифр<textarea name="comment" required minlength="20" maxlength="3000" rows="4" placeholder="Какое решение в этой раздаче хотите обсудить?"></textarea></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
+      dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>+10 ₽ на бонусный баланс и 1 шаг к крутке. До 5 раздач в день (МСК). Каждые 5 действий — крутка.</p><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="show" checked> Показать результат — под спойлером</label><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="hide"> Скрыть результат — раздача будет опубликована без ШД</label><p>Карты следующих улиц после завершения выставления, карты соперников и выигрыш или проигрыш будут под спойлером либо полностью убраны.</p><label class="hand-publish-comment">Ваш вопрос — минимум 20 букв или цифр<textarea name="comment" required minlength="20" maxlength="3000" rows="4" placeholder="Какое решение в этой раздаче хотите обсудить?"></textarea></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
       const draft=button._publishDraft;
       if(draft){dialog.querySelector('input[value="'+(draft.showShowdown?'show':'hide')+'"]').checked=true;dialog.querySelector('textarea').value=draft.comment;}
       let result=null;
@@ -152,7 +152,7 @@ function startHistory(payload) {
   function showPublicationSuccess(reviewId,response){
     const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog hand-publish-success';
     dialog.innerHTML='<h2>Ваша раздача опубликована</h2><div><button type="button" data-close>Закрыть</button><button type="button" data-open>Перейти в раздел</button></div>';
-    if(response?.activity){const p=document.createElement('p'),a=response.activity;p.textContent=(response.activityAward?'+10 ₽ на бонусный баланс · +1 действие'+(response.activityAward.spin?' · +1 крутка!':'')+'. ':'')+'Прогресс: '+a.progress+'/7. Публикации сегодня: '+a.publicationsToday+'/3.';dialog.querySelector('h2').after(p);}
+    if(response?.activity){const p=document.createElement('p'),a=response.activity;p.textContent=(response.activityAward?'+10 ₽ на бонусный баланс · +1 действие'+(response.activityAward.spin?' · +1 крутка!':'')+'. ':'')+'Прогресс: '+a.progress+'/'+a.target+'. Публикации сегодня: '+a.publicationsToday+'/'+a.publicationLimit+'.';dialog.querySelector('h2').after(p);}
     dialog.querySelector('[data-close]').onclick=()=>dialog.close();
     dialog.querySelector('[data-open]').onclick=()=>{window.parent.postMessage({type:'starting-hands-open-review',id:reviewId||''},window.location.origin);dialog.close();};
     dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();
@@ -403,7 +403,15 @@ function startHistory(payload) {
     const potLabel=()=>replayAmount(currentPot);
     const positionFor=window.PokerHandShare.positions(Object.assign({playerId:sample.playerId},hand),replay);
     const contributionCodes=new Set(['2','3','5','18','19','20']);
-    const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'Малый блайнд','19':'Большой блайнд','20':'Ставка'};
+    const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка'};
+    const startingStacks=new Map((replay.stacks||[]).map(player=>[String(player.actor||''),Number(player.amount)]));
+    const actorLabel=event=>{
+      const actor=String(event.actor||'Игрок');
+      if(actor==='Вы'||String(event.actorId)===String(sample.playerId))return actor;
+      const stack=startingStacks.get(actor);
+      if(!Number.isFinite(stack))return actor;
+      return actor+' ('+replayAmount(stack)+' '+potUnit+')';
+    };
     const unknown=[];
     for(const event of replay.events){
       if(event.board.length){
@@ -415,13 +423,14 @@ function startHistory(payload) {
         pot.className='street-pot';pot.textContent='· Банк: '+potLabel()+' '+potUnit;
         street.append(board,pot);continue;
       }
+      if(['95','96'].includes(event.code))continue;
       if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount){currentPot+=Number(event.amount)||0;add('p','Параметр обязательных взносов: '+replayAmount(event.amount)+' '+potUnit,'note');}continue;}
       if(!labels[event.code]){unknown.push(event);continue;}
       const label=labels[event.code];
       const decision=!['18','19'].includes(event.code);
       let newRound=false;
       if(decision){if(roundActors.has(event.actorId)){newRound=true;roundActors.clear();}roundActors.add(event.actorId);}
-      const action=add('p',(positionFor(event)?positionFor(event)+': ':'')+event.actor+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');
+      const action=add('p',(positionFor(event)?positionFor(event)+': ':'')+actorLabel(event)+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');
       if(event.code==='2')action.classList.add('replay-call');
       if(event.code==='20')action.classList.add('replay-bet');
       if(event.code==='5')action.classList.add('replay-allin');
