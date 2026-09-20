@@ -9739,7 +9739,7 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
 
 [data-view="club-reviews"] .review-thread-card {
   position: relative;
-  padding-top: 20px;
+  padding: 20px 10px;
   border: 0;
   background: linear-gradient(145deg,#171817,#090c0e);
   margin-bottom: 0;
