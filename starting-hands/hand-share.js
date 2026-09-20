@@ -16,8 +16,9 @@ function positions(hand,replay){
  return event=>byId.get(String(event&&event.actorId))||byActor.get(String(event&&event.actor||''))||'';
 }
 // Poker21 omits the live straddle post from opt. It can still be recovered when
-// the preflop action starts immediately left of the straddler, contains only
-// calls/folds, and ends with that non-BB player checking their option.
+// a raise-free preflop has calls above the BB and ends with a non-BB player
+// checking their option. Do not rely on replay.seats order: live exports may
+// list physical seats rather than action order.
 function events(replay){
  const source=Array.isArray(replay&&replay.events)?replay.events:[];
  const boardIndex=source.findIndex(event=>Array.isArray(event.board)&&event.board.length);
@@ -26,10 +27,9 @@ function events(replay){
  const checks=decisions.filter(event=>String(event.code)==='17'),calls=decisions.filter(event=>String(event.code)==='2');
  if(!decisions.length||checks.length!==1||!calls.length||decisions.at(-1)!==checks[0]||decisions.some(event=>['3','5','20'].includes(String(event.code))))return source;
  const straddler=checks[0],actorId=String(straddler.actorId??''),seats=Array.isArray(replay&&replay.seats)?replay.seats:[];
- const seatIndex=seats.findIndex(seat=>String(seat.actorId??'')===actorId),firstIndex=seats.findIndex(seat=>String(seat.actorId??'')===String(decisions[0].actorId??''));
- const straddlerSeat=seats[seatIndex],bb=preflop.find(event=>String(event.code)==='19'),amount=Number(calls[0].amount);
+ const straddlerSeat=seats.find(seat=>String(seat.actorId??'')===actorId),bb=preflop.find(event=>String(event.code)==='19'),amount=Number(calls[0].amount);
  const alreadyContributed=preflop.some(event=>String(event.actorId??'')===actorId&&['2','3','5','18','19','20','21'].includes(String(event.code))&&Number(event.amount)>0);
- if(seatIndex<0||firstIndex!==(seatIndex+1)%seats.length||straddlerSeat&&String(straddlerSeat.position)==='BB'||alreadyContributed||!Number.isFinite(amount)||amount<=Number(bb&&bb.amount||0)||calls.some(event=>Number(event.amount)!==amount))return source;
+ if(!straddlerSeat||String(straddlerSeat.position)==='BB'||alreadyContributed||!Number.isFinite(amount)||amount<=Number(bb&&bb.amount||0)||calls.some(event=>Number(event.amount)!==amount))return source;
  const insertAt=Math.max(0,source.indexOf(decisions[0]));
  const inferred={sequence:Number(straddler.sequence)-0.5,code:'21',actor:straddler.actor,actorId:straddler.actorId,amount,board:[],inferred:true};
  return [...source.slice(0,insertAt),inferred,...source.slice(insertAt)];

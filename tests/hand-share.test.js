@@ -63,3 +63,8 @@ test('does not invent a straddle for an ordinary limp and BB check',()=>{
  const replay={seats:[{actorId:'u',position:'UTG'},{actorId:'b',position:'BB'}],events:[{code:'19',actorId:'b',amount:40,board:[]},{code:'2',actorId:'u',amount:40,board:[]},{code:'17',actorId:'b',amount:0,board:[]}]};
  assert.equal(share.events(replay),replay.events);
 });
+test('restores a straddle when live seat storage is not in action order',()=>{
+ const replay={seats:[{actorId:'co',position:'CO'},{actorId:'bb',position:'BB'},{actorId:'straddle',position:'MP'},{actorId:'utg',position:'UTG'}],events:[{code:'19',actorId:'bb',amount:40,board:[]},{code:'10',actorId:'co',amount:0,board:[]},{code:'2',actorId:'utg',amount:80,board:[]},{code:'17',actor:'Straddler',actorId:'straddle',amount:0,board:[]}]};
+ const inferred=share.events(replay).find(event=>event.code==='21');
+ assert.deepEqual({actorId:inferred.actorId,amount:inferred.amount},{actorId:'straddle',amount:80});
+});
