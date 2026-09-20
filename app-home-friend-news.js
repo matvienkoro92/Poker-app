@@ -1854,36 +1854,22 @@
       });
     });
     if (!nicks.length) return Promise.resolve({});
-    function read() {
-      return typeof window.pokerGetFriendNewsTournamentSnapshotsReady === "function"
-        ? window.pokerGetFriendNewsTournamentSnapshotsReady(nicks)
-        : Promise.resolve({});
-    }
-    if (typeof window.pokerGetFriendNewsTournamentSnapshotsReady === "function") return read();
-    if (typeof window.pokerEnsureScriptDomains === "function") {
-      return Promise.resolve(window.pokerEnsureScriptDomains([
-        "rating-common",
-        "rating-winter",
-        "rating-spring",
-        "rating-summer",
-      ])).then(read).catch(function () { return {}; });
-    }
-    return Promise.resolve({});
+    return clubTournamentSnapshotsReady().then(function (snapshots) {
+      var selected = {};
+      nicks.forEach(function (nick) { var key = matchKey(nick); if (snapshots[key]) selected[key] = snapshots[key]; });
+      selected.__recentEvents = (snapshots.__recentEvents || []).filter(function (event) {return !!selected[event.nickKey];});
+      return selected;
+    }).catch(function () {return {};});
   }
 
+  var newsRatingSnapshotPromise = null;
   function clubTournamentSnapshotsReady() {
-    function read() {
-      return typeof window.pokerGetClubNewsTournamentSnapshotsReady === "function"
-        ? window.pokerGetClubNewsTournamentSnapshotsReady()
-        : Promise.resolve({});
+    if (!newsRatingSnapshotPromise) {
+      newsRatingSnapshotPromise = fetch('./news-rating-snapshots.json', {cache:'no-cache'})
+        .then(function (response) { if (!response.ok) throw new Error('rating_summary'); return response.json(); })
+        .catch(function (error) { newsRatingSnapshotPromise = null; throw error; });
     }
-    if (typeof window.pokerGetClubNewsTournamentSnapshotsReady === "function") return read();
-    if (typeof window.pokerEnsureScriptDomains === "function") {
-      return Promise.resolve(window.pokerEnsureScriptDomains([
-        "rating-common", "rating-winter", "rating-spring", "rating-summer",
-      ])).then(read).catch(function () { return {}; });
-    }
-    return Promise.resolve({});
+    return newsRatingSnapshotPromise;
   }
 
   function applyRaffleSnapshots(friends, snapshots, raffles) {

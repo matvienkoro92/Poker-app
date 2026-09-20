@@ -22,6 +22,7 @@ function initRafflesCompletedRuntime(opts) {
     var raffleCompletedActiveRecentKey = "";
     var raffleCurrentWeekReturns = null;
     var raffleCurrentWeekIssueTotalsServer = null;
+    var raffleCurrentWeekIssueTotalsState = "loading";
 
   function raffleCurrentWeekReturnsHtml() {
     if (!raffleCurrentWeekReturns || !isFinite(Number(raffleCurrentWeekReturns.amount))) return "";
@@ -643,46 +644,29 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function raffleCurrentWeekIssueTotals(completed) {
-    if (raffleCurrentWeekIssueTotalsServer &&
-        raffleCurrentWeekIssueTotalsServer.ticket &&
-        raffleCurrentWeekIssueTotalsServer.cash) {
-      return raffleCurrentWeekIssueTotalsServer;
-    }
-    var range = raffleCurrentMoscowWeekRange();
-    var totals = {
-      ticket: { issued: 0, returned: 0 },
-      cash: { issued: 0, returned: 0 }
-    };
-    (Array.isArray(completed) ? completed : []).forEach(function (raffle) {
-      var kind = String(raffle && (raffle.prizeKind || raffle.prize_kind) || "").toLowerCase() === "cash"
-        ? "cash"
-        : "ticket";
-      var raffleDate = raffle && (raffle.drawnAt || raffle.completedAt || raffle.endDate || raffle.createdAt);
-      (Array.isArray(raffle && raffle.winners) ? raffle.winners : []).forEach(function (winner) {
-        var prizeAmount = raffleWinnerPrizeAmount(raffleWinnerPrizeText(raffle, winner));
-        if (String(winner && winner.winnerStatus || "") === "ok" &&
-            raffleDateIsInRange(winner && winner.winnerStatusAt, range)) {
-          totals[kind].issued += prizeAmount;
-        }
-        if (String(winner && winner.winnerSeatStatus || "") === "not_seated" &&
-            raffleDateIsInRange(winner && winner.winnerSeatStatusAt || raffleDate, range)) {
-          totals[kind].returned += prizeAmount;
-        } else if (String(winner && winner.winnerCashoutStatus || "") === "plus" &&
-            raffleDateIsInRange(winner && winner.winnerCashoutAt || raffleDate, range)) {
-          totals[kind].returned += Math.max(0, Number(winner && winner.winnerCashoutAmount) || 0);
-        }
-      });
-    });
-    return totals;
+    // A recent-results page is not the complete accounting week.
+    return raffleCurrentWeekIssueTotalsServer;
   }
 
-  function setRaffleCurrentWeekIssueTotals(totals) {
+  function setRaffleCurrentWeekIssueTotals(totals, state) {
     raffleCurrentWeekIssueTotalsServer = totals && totals.ticket && totals.cash ? totals : null;
+    raffleCurrentWeekIssueTotalsState = raffleCurrentWeekIssueTotalsServer ? "ready" : (state || "error");
+    if (rafflesCompleted) {
+      rafflesCompleted.querySelectorAll(".raffles-week-issue-summary").forEach(function (section) {
+        section.outerHTML = raffleCurrentWeekIssueTotalsHtml();
+      });
+    }
   }
 
   function raffleCurrentWeekIssueTotalsHtml(completed) {
     if (!rafflesIsAdmin) return "";
     var totals = raffleCurrentWeekIssueTotals(completed);
+    if (!totals) {
+      return '<section class="raffles-week-issue-summary" role="status">' +
+        (raffleCurrentWeekIssueTotalsState === "loading"
+          ? 'Загружаем выдачи и возвраты за неделю…'
+          : 'Не удалось загрузить выдачи и возвраты за неделю. <button type="button" class="raffles-archive-retry" data-raffles-list-retry>Повторить</button>') + '</section>';
+    }
     function amount(value) {
       var rounded = Math.max(0, Math.round(Number(value) || 0));
       return typeof formatRaffleSum === "function"

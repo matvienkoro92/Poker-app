@@ -5068,24 +5068,23 @@ button.admin-report-rakeback-summary__row:focus-visible {
   .admin-report-rakeback-table .admin-report-rakeback-row { height: 45px; }
 }
 
-/* Scale entry numbers along with the taller rakeback rows. */
+/* Compact numbers fit beside the payout controls on narrow screens. */
 .admin-report-rakeback-row .admin-report-rakeback-input,
-.admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 19.5px; }
-.admin-report-rakeback-row .admin-report-rakeback-row-number { font-size: 16.5px; }
-.admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 16.5px; }
+.admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 13px; }
+.admin-report-rakeback-row .admin-report-rakeback-row-number,
+.admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 11px; }
 @media (max-width: 560px) {
   .admin-report-rakeback-row .admin-report-rakeback-input,
-  .admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 18px; }
-  .admin-report-rakeback-row .admin-report-rakeback-input--id { font-size: 15px; }
-  .admin-report-rakeback-row .admin-report-rakeback-row-number { font-size: 13.5px; }
-  .admin-report-rakeback-row .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input { font-size: 18px; }
-  .admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 13.5px; }
-}
-@media (max-width: 430px) {
-  .admin-report-rakeback-row .admin-report-rakeback-input--id { font-size: 18px; }
-  .admin-report-rakeback-row .admin-report-rakeback-amount { font-size: 19.5px; }
-  .admin-report-rakeback-row .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input,
-  .admin-report-rakeback-row .admin-report-rakeback-rest { font-size: 15px; }
+  .admin-report-rakeback-row .admin-report-rakeback-amount,
+  .admin-report-rakeback-row .admin-report-rakeback-input--id { font-size: 12px; }
+  .admin-report-rakeback-row .admin-report-rakeback-row-number,
+  .admin-report-rakeback-row .admin-report-rakeback-rest,
+  .admin-report-rakeback-row .admin-report-rakeback-rake-with-rest .admin-report-rakeback-input { font-size: 10px; }
+  .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table :is(th, td):nth-child(6) { width: 17%; }
+  .admin-report-rakeback-wrap--by-room .admin-report-rakeback-table :is(th, td):nth-child(7) { width: 26%; }
+  .admin-report-rakeback-summary .admin-report-rakeback-summary__value,
+  .admin-report-rakeback-date-separator .admin-report-rakeback-date-separator__total { font-size: 14px; }
+  .admin-report-rakeback-summary__label { font-size: 11px; }
 }
 
 /* Separate successive days without adding space between player entries. */
@@ -5123,8 +5122,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
 }
 @media (max-width: 560px) {
   .admin-report-rakeback-row { --rakeback-control-height: 38px; }
-  .admin-report-rakeback-row .admin-report-rakeback-icon-btn { font-size: 22px; }
-  .admin-report-rakeback-row .admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 14px; }
+  .admin-report-rakeback-row .admin-report-rakeback-icon-btn { font-size: 16px; }
+  .admin-report-rakeback-row .admin-report-rakeback-action-buttons [data-rakeback-cash-pay] { font-size: 11px; }
   .admin-report-rakeback-row .admin-report-rakeback-discount-box { width: 24px; height: 24px; }
   .admin-report-rakeback-row .admin-report-rakeback-color-dot { width: 20px; height: 20px; }
 }

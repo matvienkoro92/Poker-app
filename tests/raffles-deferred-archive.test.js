@@ -55,3 +55,24 @@ test('reopening completed refreshes recent rerolls even after archive was loaded
   const end = source.indexOf('  if (rafflesTabCreate)', source.indexOf('\n  }', start));
   assert.match(source.slice(start, end), /isCompleted && tabChanged[\s\S]*skipCache:\s*true[\s\S]*keepCurrentOnLoading:\s*true/);
 });
+
+test('completed tab loads recent results without requesting the full archive or reopening the tab', () => {
+  const source = fs.readFileSync(require.resolve('../app-raffles.js'), 'utf8');
+  const start = source.indexOf('  function requestCompletedArchiveLoad()');
+  const end = source.indexOf('  function renderStoredCompletedRafflesPanel()', start);
+  const requests = [];
+  const context = {rafflesArchiveLoaded:false,rafflesArchiveLoading:false,rafflesCurrentTab:'completed',loadRaffles:options=>requests.push(options)};
+  vm.createContext(context);
+  vm.runInContext(source.slice(start,end),context);
+  context.requestCompletedArchiveLoad();
+  assert.equal(requests[0].includeArchive,false);
+  assert.equal(requests[0].recentOnly,true);
+  assert.equal(requests[0].switchToCompleted,undefined);
+  context.rafflesArchiveLoading=true;
+  context.requestCompletedArchiveLoad();
+  assert.equal(requests.length,1);
+  context.rafflesArchiveLoading=false;
+  context.rafflesCurrentTab='leaders';
+  context.requestCompletedArchiveLoad();
+  assert.equal(requests[1].includeArchive,true);
+});

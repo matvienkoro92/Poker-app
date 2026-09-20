@@ -386,8 +386,11 @@
     setStatus("");
   }
 
-  function fetchState() {
-    return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
+  var archiveGeneration = 0;
+  var archiveState = null;
+  var archiveDetails = {};
+  function fetchState(tab) {
+    return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + (tab === "archive" ? "&scope=archive" : tab === "results" ? "&scope=results" : "") + "&_t=" + Date.now(), { cache: "no-store" })
       .then(function (res) { return res.json(); });
   }
 
@@ -472,11 +475,13 @@
   function loadState() {
     if (loading) return;
     loading = true;
-    fetchState()
+    var requestedTab = activeTab, generation = archiveGeneration;
+    fetchState(requestedTab)
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
-        state = data;
-        updateHomeButton(data);
+        if (generation !== archiveGeneration) return;
+        if (requestedTab === "archive") archiveState = data;
+        else { state = data; updateHomeButton(data); }
         render();
       })
       .catch(function (error) {
@@ -484,6 +489,8 @@
       })
       .finally(function () {
         loading = false;
+        if (generation === archiveGeneration && requestedTab !== activeTab &&
+            (activeTab === "archive" && !archiveState || activeTab === "results")) loadState();
       });
   }
 
@@ -1017,13 +1024,13 @@
 
   function renderArchiveEvent(event) {
     if (!event || !event.id) return "";
-    return '<details class="private-cash-modal__archive-item">' +
+    return '<details class="private-cash-modal__archive-item" data-private-cash-archive-id="' + escapeHtml(event.id) + '">' +
       '<summary class="private-cash-modal__archive-summary">' +
         '<span class="private-cash-modal__archive-date">' + escapeHtml(formatDate(event.date)) + ' · ' + escapeHtml(event.time || "") + '</span>' +
         '<span class="private-cash-modal__archive-meta">' + escapeHtml(eventStatusLabel(event.status)) + (event.gameType ? " · " + escapeHtml(event.gameType) : "") + '</span>' +
       '</summary>' +
       '<div class="private-cash-modal__archive-body">' +
-        renderEvent(event) +
+        (archiveDetails[event.id] ? renderEvent(archiveDetails[event.id]) : 'Откройте игру, чтобы загрузить подробности.') +
       '</div>' +
     '</details>';
   }
@@ -1069,7 +1076,7 @@
     }
     if (activeTab === "create" && !state.isAdmin) activeTab = "signup";
     var events = state.events || [];
-    var content = activeTab === "create" ? renderAdminForm() : activeTab === "results" ? renderResultsTab() : activeTab === "archive" ? renderArchiveTab(events) : renderSignupTab(events);
+    var content = activeTab === "create" ? renderAdminForm() : activeTab === "results" ? renderResultsTab() : activeTab === "archive" ? renderArchiveTab(archiveState ? archiveState.events : []) : renderSignupTab(events);
     bodyEl.innerHTML =
       renderTabs() +
       renderTabPanel(content);
@@ -1138,6 +1145,27 @@
     }
   }
 
+  window.addEventListener("poker-telegram-auth", function () {
+    archiveGeneration++; archiveState = null; archiveDetails = {}; state = null;
+  });
+  document.addEventListener("toggle", function (event) {
+    var details = event.target;
+    var id = details && details.getAttribute && details.getAttribute("data-private-cash-archive-id");
+    if (!id || !details.open || archiveDetails[id] || details.dataset.loading === "1") return;
+    var generation = archiveGeneration;
+    details.dataset.loading = "1";
+    var body = details.querySelector(".private-cash-modal__archive-body");
+    body.textContent = "Загружаем игру…";
+    fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&eventId=" + encodeURIComponent(id), {cache:"no-store"})
+      .then(function (r) { return r.json(); }).then(function (data) {
+        if (generation !== archiveGeneration) return;
+        var row = data.ok && (data.events || []).find(function (item) { return item.id === id; });
+        if (!row) throw new Error("Игра не загрузилась. Закройте и откройте её повторно.");
+        archiveDetails[id] = row; body.innerHTML = renderEvent(row);
+      }).catch(function (error) {body.textContent = error.message;})
+      .finally(function () {delete details.dataset.loading;});
+  }, true);
+
   function onModalClick(event) {
     var close = event.target && event.target.closest ? event.target.closest("[data-private-cash-close]") : null;
     if (close) {
@@ -1150,6 +1178,7 @@
       activeTab = nextTab === "create" && state && state.isAdmin ? "create" : nextTab === "results" ? "results" : nextTab === "archive" ? "archive" : "signup";
       editingEventId = "";
       render();
+      if (activeTab === "archive" && !archiveState || activeTab === "results") loadState();
       return;
     }
     var edit = event.target && event.target.closest ? event.target.closest("[data-private-cash-edit]") : null;

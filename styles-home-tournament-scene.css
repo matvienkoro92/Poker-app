@@ -569,12 +569,16 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   display: none !important;
 }
 #app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
-  top: 13.55cqw; bottom: auto; width: 10.5cqw; gap: 0;
-  color: #251605; text-shadow: none; font: 950 1.9cqw/.86 'Arial Narrow', Arial, sans-serif;
-  letter-spacing: -.04em; white-space: nowrap;
+  top: 13.05cqw; bottom: auto; width: 14cqw; gap: .25cqw;
+  box-sizing: border-box; padding: .55cqw .3cqw;
+  border: .2cqw solid #fff0b5; border-radius: .35cqw;
+  background: linear-gradient(135deg, #fff3b7, #ffd56b 55%, #ffec9a);
+  box-shadow: 0 .25cqw .5cqw #000b, inset 0 0 0 .15cqw #b77b25;
+  color: #241400; text-shadow: none; font: 950 2.45cqw/1 Arial, sans-serif;
+  letter-spacing: -.035em; white-space: nowrap;
 }
 #app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {
-  font: 900 1.35cqw/.9 'Arial Narrow', Arial, sans-serif; letter-spacing: -.055em;
+  font: 900 1.7cqw/1.05 Arial, sans-serif; letter-spacing: -.035em;
 }
 
 /* Blend the illustrated bonus felt into the main table instead of exposing its rectangular top edge. */

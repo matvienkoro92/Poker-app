@@ -42,7 +42,7 @@ function startHistory(payload) {
     const positions=document.querySelector('[data-hand-breakdown-panel="positions"]'),matrix=$('matrix-panel'),detail=document.querySelector('.workspace>.detail-panel');
     positions.hidden=currentHistoryTab!=='hands'||handBreakdown!=='positions';
     matrix.hidden=currentHistoryTab!=='hands'||game!=='NLH'||handBreakdown!=='hands';
-    detail.hidden=currentHistoryTab==='hands'&&!handBreakdown;
+    detail.hidden=false;
   }
   function showHistoryTab(tab){
     currentHistoryTab=tab;

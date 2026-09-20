@@ -15,7 +15,8 @@
     "home-widget-sng": ["home-widget-modals"],
     "rating-winter": ["rating-common"],
     "rating-spring": ["rating-common"],
-    "rating-summer": ["rating-common"],
+    "rating-current": ["rating-common"],
+    "rating-summer": ["rating-current"],
     "streams": ["peer-media"]
   };
 
@@ -24,7 +25,7 @@
     "chat": ["chat"],
     "winter-rating": ["rating-common", "rating-winter"],
     "spring-rating": ["rating-common", "rating-spring"],
-    "summer-rating": ["rating-common", "rating-summer"],
+    "summer-rating": ["rating-common", "rating-current"],
     "raffles": ["raffles"],
     "daily-poker": ["daily-poker"],
     "learn-play-hub": ["learning"],
@@ -375,7 +376,7 @@
   function prewarmViewFromIntent(event) {
     if (shouldSkipIntentPrewarm()) return;
     var viewName = viewIntentTarget(event && event.target);
-    if (!viewName || viewName === "home") return;
+    if (!viewName || viewName === "home" || /^(winter|spring|summer)-rating$/.test(viewName)) return;
     if (viewName === "daily-poker") prewarmDailyPokerArt("high");
     var domains = VIEW_DOMAINS[viewName];
     if (!domains || !domains.length) return;
@@ -483,7 +484,7 @@
     if (window.__pokerLikelyViewAssetsPrewarmed) return;
     window.__pokerLikelyViewAssetsPrewarmed = true;
     prewarmProfileFriendsPreview();
-    prefetchProfileAchievementScripts();
+    // Season archives load only when a view explicitly needs them.
     prewarmDailyPokerArt("low");
     // Styles are warmed by pointer/focus/touch intent, not speculatively at startup.
   };

@@ -1,0 +1,24 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+test('weekly summary waits for full totals and updates the visible block after deferred response',()=>{
+ const source=fs.readFileSync(require.resolve('../app-raffles-completed.js'),'utf8');
+ const section={outerHTML:''};
+ const context={rafflesIsAdmin:true,raffleCurrentWeekIssueTotalsServer:null,raffleCurrentWeekIssueTotalsState:'loading',rafflesCompleted:{querySelectorAll:()=>[section]},escapeHtml:String,formatRaffleSum:n=>n+' ₽'};
+ vm.createContext(context);
+ vm.runInContext(source.slice(source.indexOf('  function raffleCurrentWeekIssueTotals(completed)'),source.indexOf('  function raffleWinnerLeaderTotalText')),context);
+ const partial=[{prizeKind:'cash',winners:[{prize:'9600 ₽',winnerStatus:'ok'}]}];
+ assert.match(context.raffleCurrentWeekIssueTotalsHtml(partial),/Загружаем/);
+ assert.doesNotMatch(context.raffleCurrentWeekIssueTotalsHtml(partial),/9600|Выдано/);
+ context.setRaffleCurrentWeekIssueTotals({ticket:{issued:15000,returned:1000},cash:{issued:22000,returned:6000}});
+ assert.match(section.outerHTML,/15000 ₽/);
+ assert.match(section.outerHTML,/22000 ₽/);
+ assert.match(section.outerHTML,/6000 ₽/);
+ context.setRaffleCurrentWeekIssueTotals(null,'error');
+ assert.match(section.outerHTML,/Не удалось загрузить/);
+ assert.match(section.outerHTML,/data-raffles-list-retry/);
+ assert.doesNotMatch(section.outerHTML,/Выдано|\+0/);
+ context.setRaffleCurrentWeekIssueTotals({ticket:{issued:0,returned:0},cash:{issued:0,returned:0}});
+ assert.match(section.outerHTML,/Выдано <b>0 ₽/);
+});

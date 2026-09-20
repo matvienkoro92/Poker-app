@@ -2202,7 +2202,7 @@ function getWinterRatingOverall() {
 
 function ratingSeasonDataIsLoading(seasonConfig) {
   if (!seasonConfig || !seasonConfig.key || !isSpringRatingMode()) return false;
-  if (seasonConfig.key === "summer") return typeof SUMMER_RATING_TOURNAMENTS_BY_DATE === "undefined" || (typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView() && typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE === "undefined");
+  if (seasonConfig.key === "summer") return typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView() ? typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE === "undefined" : typeof SUMMER_RATING_TOURNAMENTS_BY_DATE === "undefined";
   if (seasonConfig.key === "spring") return typeof SPRING_RATING_TOURNAMENTS_BY_DATE === "undefined";
   return false;
 }
@@ -2364,7 +2364,14 @@ function initWinterRating() {
   if (sharedSection) {
     sharedSection.hidden = false;
     var back = document.getElementById("annualRatingBack");
-    if (!back) { back = document.createElement("button"); back.id = "annualRatingBack"; back.type = "button"; back.textContent = "Архив: лето 2026"; sharedSection.prepend(back); back.onclick = function () { window.__pokerSummerArchive = !window.__pokerSummerArchive; initWinterRating(); }; }
+    if (!back) { back = document.createElement("button"); back.id = "annualRatingBack"; back.type = "button"; back.textContent = "Архив: лето 2026"; sharedSection.prepend(back); back.onclick = async function () {
+      if (back.disabled) return;
+      back.disabled = true;
+      try {
+        if (!window.__pokerSummerArchive) await window.pokerEnsureScriptDomains(["rating-summer"]);
+        window.__pokerSummerArchive = !window.__pokerSummerArchive; initWinterRating();
+      } finally { back.disabled = false; }
+    }; }
     var ratingHeader = document.getElementById("ratingHeader");
     if (!ratingHeader) {
       ratingHeader = document.createElement("div");

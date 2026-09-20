@@ -73,6 +73,7 @@ const baseFiles = [
   'asset-runtime-config.js',
   'preview-iphone.html',
   'manifest.json',
+  'news-rating-snapshots.json',
   'sw.js',
 ];
 const cssPartFiles = fs

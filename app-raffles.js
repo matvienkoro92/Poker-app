@@ -2976,7 +2976,9 @@ function initRaffles() {
 
   function requestCompletedArchiveLoad() {
     if (rafflesArchiveLoaded || rafflesArchiveLoading) return;
-    loadRaffles({ includeArchive: true, skipCache: true, keepCurrentOnLoading: true, switchToCompleted: rafflesCurrentTab === "completed" });
+    // Completed cards come from the small recent list; the archive loads by month.
+    // Only the leaders view still needs the complete winner history.
+    loadRaffles({ includeArchive: rafflesCurrentTab === "leaders", recentOnly: rafflesCurrentTab !== "leaders", skipCache: true, keepCurrentOnLoading: true });
   }
 
   function renderStoredCompletedRafflesPanel() {
@@ -3289,7 +3291,12 @@ function initRaffles() {
 
     function showRafflesError(data) {
       if (rafflesRoot) rafflesRoot.classList.remove("raffles--initial-loading");
-      if (loadOptions.includeArchive && rafflesCompleted) {
+      if (!rafflesRoot || rafflesRoot.dataset.resultsLoaded !== "1") {
+        [rafflesHeroDoneCount, rafflesHeroPrizeSum, rafflesHeroUniqueParticipants, rafflesHeroWinnersCount,
+          rafflesTabCompletedCount, rafflesTabCompletedSum].forEach(function (node) { if (node) node.textContent = "—"; });
+      }
+      if ((loadOptions.includeArchive || loadOptions.recentOnly) && rafflesCompleted) {
+        rafflesCompleted.querySelectorAll("[data-raffles-list-retry]").forEach(function (button) { button.remove(); });
         rafflesCompleted.insertAdjacentHTML("afterbegin", '<button type="button" class="raffles-archive-retry" data-raffles-list-retry>Не удалось загрузить завершённые розыгрыши. Повторить</button>');
         return;
       }
@@ -3326,7 +3333,7 @@ function initRaffles() {
     }
 
     function startFetch() {
-      if (loadOptions.includeArchive) rafflesArchiveLoading = true;
+      if (loadOptions.includeArchive || loadOptions.recentOnly) rafflesArchiveLoading = true;
       var bypassServerListCacheUntil = 0;
       try {
         bypassServerListCacheUntil = parseInt(window.__rafflesBypassServerListCacheUntil, 10) || 0;
@@ -3396,10 +3403,10 @@ function initRaffles() {
         })
         .then(function (data) {
           if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
-          if (loadOptions.includeArchive) rafflesArchiveLoading = false;
+          if (loadOptions.includeArchive || loadOptions.recentOnly) rafflesArchiveLoading = false;
           if (loadSeq !== rafflesLoadSeq) return;
           if (!data || !data.ok) {
-            if (loadOptions.includeArchive || !cacheUsable) showRafflesError(data);
+            if (loadOptions.includeArchive || loadOptions.recentOnly || !cacheUsable) showRafflesError(data);
             return;
           }
           if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
@@ -3408,7 +3415,8 @@ function initRaffles() {
             fetch(base + "/api/raffles" + qLead + "&scope=viewer-details")
               .then(function (response) { return response.ok ? response.json() : null; })
               .then(function (details) {
-                if (loadSeq !== rafflesLoadSeq || !details || !details.ok) return;
+                if (loadSeq !== rafflesLoadSeq) return;
+                if (!details || !details.ok) throw new Error("raffles_viewer_details_failed");
                 data.subscriptionGate = details.subscriptionGate;
                 data.currentWeekIssueTotals = details.currentWeekIssueTotals;
                 rafflesSubscriptionGate = details.subscriptionGate || null;
@@ -3416,14 +3424,18 @@ function initRaffles() {
                   rafflesCompletedRuntime.setCurrentWeekIssueTotals(details.currentWeekIssueTotals || null);
                 }
                 if (currentRaffleData) renderRaffle(currentRaffleData);
-              }).catch(function () {});
+              }).catch(function () {
+                if (loadSeq === rafflesLoadSeq && rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
+                  rafflesCompletedRuntime.setCurrentWeekIssueTotals(null, "error");
+                }
+              });
           }
         })
         .catch(function () {
           if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
-          if (loadOptions.includeArchive) rafflesArchiveLoading = false;
+          if (loadOptions.includeArchive || loadOptions.recentOnly) rafflesArchiveLoading = false;
           if (loadSeq !== rafflesLoadSeq) return;
-          if (loadOptions.includeArchive || !cacheUsable) showRafflesError();
+          if (loadOptions.includeArchive || loadOptions.recentOnly || !cacheUsable) showRafflesError();
         }).finally(function () { clearTimeout(requestTimer); });
     }
 
@@ -3458,7 +3470,7 @@ function initRaffles() {
         }
         rafflesIsAdmin = !!data.isAdmin;
         if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
-          rafflesCompletedRuntime.setCurrentWeekIssueTotals(data.currentWeekIssueTotals || null);
+          rafflesCompletedRuntime.setCurrentWeekIssueTotals(data.currentWeekIssueTotals || null, data.viewerDetailsDeferred ? "loading" : "error");
         }
         if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
           window.pokerMarkAdminAccess("raffles");

@@ -297,7 +297,12 @@
       (archived ? "" : '<div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data));
   }
 
+  var historyLoaded = false;
+  var historyLoading = false;
+  var historyEvents = [];
   function completedEventsHtml(data) {
+    if (!historyLoaded) return '<section class="tournament-bet-modal__history"><button type="button" data-tournament-bet-history>' + (historyLoading ? 'Загружаем…' : 'Архив прошлых событий') + '</button></section>';
+    data = Object.assign({}, data, {completedEvents: historyEvents});
     var seen = {};
     var events = (Array.isArray(data.completedEvents) ? data.completedEvents : []).filter(function (item) {
       if (!item || !item.id || item.id === data.id || item.status !== "settled" || item.createdByPlayer || seen[item.id]) return false;
@@ -445,7 +450,7 @@
     var requestAuthGeneration = authGeneration;
     if (!silent && bodyEl) bodyEl.innerHTML = '<div class="club-choice-vote-modal__loading">Идёт загрузка…</div>';
     var eventQuery = selectedEventId ? "eventId=" + encodeURIComponent(selectedEventId) + "&" : "";
-    loadPromise = fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery), { cache: "no-store" }).then(function (response) {
+    loadPromise = fetch(baseUrl() + API_PATH + authQuery("?" + eventQuery + (activeTab === "rating" ? "mode=rating&" : "")), { cache: "no-store" }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (requestAuthGeneration !== authGeneration) return null;
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось загрузить событие");
@@ -605,7 +610,7 @@
     if (tabEl) {
       var requestedTab = tabEl.getAttribute("data-tournament-bet-tab");
       activeTab = requestedTab === "admin-create" && state && state.isAdmin ? "admin-create" : requestedTab === "rating" || requestedTab === "create" ? requestedTab : "event";
-      if (activeTab === "admin-create") { selectedEventId = ""; load(false); } else if (activeTab === "event") { selectedEventId = ""; load(false); } else if (activeTab === "create" && state && state.createdByPlayer) render(); else render();
+      if (activeTab === "admin-create") { selectedEventId = ""; load(false); } else if (activeTab === "event") { selectedEventId = ""; load(false); } else if (activeTab === "rating") load(false); else if (activeTab === "create" && state && state.createdByPlayer) render(); else render();
       return;
     }
     var personalEvent = event.target.closest("[data-tournament-bet-personal-event]");
@@ -620,6 +625,19 @@
     }
     var personalDecline = event.target.closest("[data-tournament-bet-personal-decline]");
     if (personalDecline) { declinePersonalEvent(personalDecline.getAttribute("data-tournament-bet-personal-decline") || ""); render(); return; }
+    if (event.target.closest("[data-tournament-bet-history]")) {
+      if (historyLoading) return;
+      historyLoading = true; render();
+      var historyGeneration = authGeneration;
+      fetch(baseUrl() + API_PATH + authQuery("?mode=history&"), {cache:"no-store"})
+        .then(function (r) {return r.json();}).then(function (data) {
+          if (historyGeneration !== authGeneration) return;
+          if (!data.ok) throw new Error(data.error || "Не удалось загрузить архив");
+          historyEvents = data.completedEvents || []; historyLoaded = true;
+        }).catch(function () {})
+        .finally(function () {historyLoading = false; if (historyGeneration === authGeneration) render();});
+      return;
+    }
     if (event.target.closest("[data-tournament-bet-personal-back]")) { selectedEventId = ""; activeTab = "create"; load(false); return; }
     if (event.target.closest("[data-tournament-bet-copy]")) { if (state && state.id) copyEventLink(state.id); return; }
     if (event.target.closest("[data-tournament-bet-share]")) { if (state && state.id) shareEvent(state); return; }
@@ -743,6 +761,7 @@
   else initialLoad();
   window.addEventListener("poker-telegram-auth", function () {
     authGeneration++;
+    historyLoaded = false; historyEvents = []; historyLoading = false;
     state = null;
     subscribed = false;
     activeTab = "event";
