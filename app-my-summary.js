@@ -2,14 +2,19 @@
   "use strict";
   var generation = 0, pending = false, loadedAt = 0, spin = null, offset = 0, nickname = "", account = "";
   var root;
-  var chartHistory = null, chartSeen = {}, chartCheckPending = false;
+  var chartHistory = null, chartSeen = {}, chartSeenSnapshot = "", chartCheckPending = false;
   function chartFingerprint(row) {
     var text = JSON.stringify(row), hash = 2166136261;
     for(var i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);
     return (hash>>>0).toString(36);
   }
+  function chartSnapshot(data) {
+    return chartFingerprint((data.rows || []).map(function(row) {
+      return [String(row.handId), chartFingerprint(row)];
+    }).sort(function(a, b) { return a[0].localeCompare(b[0]); }));
+  }
   function renderChartUnread() {
-    var unread = !!(chartHistory && (chartHistory.rows || []).some(function(row) {return chartSeen[row.handId] !== chartFingerprint(row);}));
+    var unread = !!(chartHistory && chartSeenSnapshot !== chartSnapshot(chartHistory) && (chartHistory.rows || []).some(function(row) {return chartSeen[row.handId] !== chartFingerprint(row);}));
     try {
       var auth = typeof pokerApiAuthJsonBody === 'function' ? pokerApiAuthJsonBody({}) : {};
       var identity = auth.pwaSession || auth.pwaVkSession || auth.initData;
@@ -25,8 +30,14 @@
     });
   }
   function acceptChartHistory(data) {
-    chartHistory = data; chartSeen = {};
-    try {chartSeen = JSON.parse(localStorage.getItem('poker-chart-seen:' + data.playerId) || '{}') || {};} catch (_) {}
+    var samePlayer = chartHistory && String(chartHistory.playerId) === String(data.playerId);
+    chartHistory = data;
+    if (!samePlayer) { chartSeen = {}; chartSeenSnapshot = ""; }
+    try {
+      chartSeenSnapshot = localStorage.getItem('poker-chart-seen-snapshot:' + data.playerId) || chartSeenSnapshot;
+      var storedSeen = JSON.parse(localStorage.getItem('poker-chart-seen:' + data.playerId) || '{}') || {};
+      chartSeen = Object.assign(storedSeen, chartSeen);
+    } catch (_) {}
     var dialog = document.getElementById('startingHandsDialog');
     if (dialog && dialog.open && !document.hidden) acknowledgeChartHistory();
     renderChartUnread();
@@ -34,7 +45,12 @@
   function acknowledgeChartHistory() {
     if (!chartHistory) return;
     (chartHistory.rows || []).forEach(function(row) {chartSeen[row.handId] = chartFingerprint(row);});
-    try {localStorage.setItem('poker-chart-seen:' + chartHistory.playerId, JSON.stringify(chartSeen));} catch (_) {}
+    chartSeenSnapshot = chartSnapshot(chartHistory);
+    try {
+      // Replace the potentially large per-hand record before writing a compact marker.
+      localStorage.removeItem('poker-chart-seen:' + chartHistory.playerId);
+      localStorage.setItem('poker-chart-seen-snapshot:' + chartHistory.playerId, chartSeenSnapshot);
+    } catch (_) {}
     renderChartUnread();
   }
   async function checkChartUnread() {
@@ -438,6 +454,9 @@
     if(event.data?.type==='starting-hands-chart-viewed'){
       if(!document.querySelector('#startingHandsDialog[open]') || document.hidden || !chartHistory || String(event.data.playerId)!==String(chartHistory.playerId) || String(event.data.version)!==String(chartHistory.version) || !Array.isArray(event.data.handIds))return;
       var viewed = new Set(event.data.handIds.map(String));
+      if ((chartHistory.rows || []).every(function(row) { return viewed.has(String(row.handId)); })) {
+        acknowledgeChartHistory();return;
+      }
       (chartHistory.rows||[]).forEach(function(row){if(viewed.has(String(row.handId)))chartSeen[row.handId]=chartFingerprint(row);});
       try {localStorage.setItem('poker-chart-seen:'+chartHistory.playerId,JSON.stringify(chartSeen));}catch(_){}
       renderChartUnread();return;
@@ -503,9 +522,9 @@
     } catch (_) {}
   });
   window.addEventListener("poker-friend-news-updated", friends);
-  window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};renderChartUnread();setTimeout(checkChartUnread,0);});
+  window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};chartSeenSnapshot="";renderChartUnread();setTimeout(checkChartUnread,0);});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)checkChartUnread();});
-  window.addEventListener('storage',function(e){if(chartHistory && e.key==='poker-chart-seen:'+chartHistory.playerId)acceptChartHistory(chartHistory);});
+  window.addEventListener('storage',function(e){if(chartHistory && (e.key==='poker-chart-seen:'+chartHistory.playerId || e.key==='poker-chart-seen-snapshot:'+chartHistory.playerId))acceptChartHistory(chartHistory);});
   renderChartUnread();
   setTimeout(checkChartUnread,0);
   setInterval(checkChartUnread,60000);

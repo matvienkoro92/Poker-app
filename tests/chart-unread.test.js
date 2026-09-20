@@ -6,7 +6,7 @@ function harness(){
  const source=fs.readFileSync(require.resolve('../app-my-summary.js'),'utf8');
  const badges=[{},{}].map(b=>Object.assign(b,{classList:{add(){}},setAttribute(){}}));
  const saved=new Map();
- const ctx={document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>badges},localStorage:{getItem:k=>saved.get(k),setItem:(k,v)=>saved.set(k,v)},Math,JSON};
+ const ctx={document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>badges},localStorage:{getItem:k=>saved.get(k),setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)},Math,JSON};
  vm.createContext(ctx);
  vm.runInContext(source.slice(source.indexOf('  var chartHistory'),source.indexOf('  async function checkChartUnread')),ctx);
  return {ctx,badges,saved,run:s=>vm.runInContext(s,ctx)};
@@ -26,7 +26,8 @@ test('opening a loaded chart acknowledges the complete history immediately',()=>
  const h=harness();
  h.run("acceptChartHistory({playerId:'1',rows:[{handId:'10'},{handId:'11'}]});acknowledgeChartHistory()");
  assert.ok(h.badges.every(b=>b.hidden));
- assert.deepEqual(Object.keys(JSON.parse(h.saved.get('poker-chart-seen:1'))).sort(),['10','11']);
+ assert.ok(h.saved.get('poker-chart-seen-snapshot:1'));
+ assert.equal(h.saved.has('poker-chart-seen:1'),false);
 });
 test('seen state belongs to the player and survives reload',()=>{
  const h=harness();
@@ -47,4 +48,20 @@ test('viewing a filtered chart acknowledges the loaded history, including other 
  context.document.hidden=true;
  vm.runInNewContext(source.slice(start,end),context);
  assert.equal(messages.length,1);
+});
+
+test('compact acknowledgement survives reload and flags new or corrected hands',()=>{
+ const h=harness();
+ h.run("acceptChartHistory({playerId:'1',rows:[{handId:'10',resultMinor:100}]});acknowledgeChartHistory();chartHistory=null;chartSeen={};chartSeenSnapshot='';acceptChartHistory({playerId:'1',rows:[{handId:'10',resultMinor:100}]})");
+ assert.ok(h.badges.every(b=>b.hidden));
+ h.run("acceptChartHistory({playerId:'1',rows:[{handId:'10',resultMinor:200}]})");
+ assert.ok(h.badges.every(b=>!b.hidden));
+ h.run("acknowledgeChartHistory();acceptChartHistory({playerId:'1',rows:[{handId:'10',resultMinor:200},{handId:'11'}]})");
+ assert.ok(h.badges.every(b=>!b.hidden));
+});
+test('storage failure does not relight viewed history on the next response',()=>{
+ const h=harness();
+ h.ctx.localStorage.setItem=()=>{throw new Error('QuotaExceededError');};
+ h.run("acceptChartHistory({playerId:'1',rows:[{handId:'10'}]});acknowledgeChartHistory();acceptChartHistory({playerId:'1',rows:[{handId:'10'}]})");
+ assert.ok(h.badges.every(b=>b.hidden));
 });
