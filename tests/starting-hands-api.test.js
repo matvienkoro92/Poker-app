@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const zlib=require('node:zlib');
-async function call(body,linked='208238',authorized=true){
+async function call(body,linked='208238',authorized=true,storedValue){
  const commands=[];const res={setHeader(){},status(n){this.statusCode=n;return this;},json(d){this.data=d;return this;}};
  const module={exports:{}};
  vm.runInNewContext(fs.readFileSync('lib/api-handlers/starting-hands.js','utf8'),{module,Buffer,require(name){
@@ -8,7 +8,7 @@ async function call(body,linked='208238',authorized=true){
  if(name==='node:zlib')return zlib;
  if(name==='../../starting-hands/insights')return require('../starting-hands/insights');
  if(name==='../pokerplus')return {readBoundPokerPlusUserId:async()=>linked};
- if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[],stacks:[{actor:'Вы',amount:12.5}]})).toString('base64'));}};
+ if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':storedValue!==undefined?storedValue:zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[],stacks:[{actor:'Вы',amount:12.5}]})).toString('base64'));}};
  throw Error(name);
  }});await module.exports({method:'POST'},res);return {res,commands};
 }
@@ -37,4 +37,8 @@ test('opponent batches are bounded, owner-scoped and return only IDs',async()=>{
  assert.equal(res.statusCode,200);assert.deepEqual(res.data.signals['123'],[]);
  assert.ok(commands.every(c=>c[1].startsWith('poker_app:starting-hands:999:')));
  assert.ok(!JSON.stringify(res.data).includes('events'));
+});
+test('one unreadable replay does not fail the whole opponent search batch',async()=>{
+ const {res}=await call({action:'opponents',handIds:['123']},'999',true,'not-a-gzip-replay');
+ assert.equal(res.statusCode,200);assert.equal(res.data.signals['123'],null);
 });

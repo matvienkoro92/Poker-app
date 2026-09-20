@@ -66,8 +66,9 @@ function startHistory(payload) {
   }
   function resetDateRange(){
     appliedTo=moscowDateValue(new Date());
-    const first=bulk.rows.map(row=>Date.parse(row.playedAt)).filter(Number.isFinite).sort((a,b)=>a-b)[0];
-    appliedFrom=first==null?appliedTo:moscowDateValue(new Date(first));
+    const todayAtNoon=new Date(appliedTo+'T12:00:00+03:00');
+    const daysSinceMonday=(todayAtNoon.getUTCDay()+6)%7;
+    appliedFrom=moscowDateValue(new Date(todayAtNoon.getTime()-daysSinceMonday*86400000));
     $('date-from').value=appliedFrom;$('date-to').value=appliedTo;
     $('date-status').textContent='';
   }
@@ -80,32 +81,41 @@ function startHistory(payload) {
   };
   const sample = {playerId:payload.playerId};
   const bulk = {rows:payload.rows};
-  let opponentLoading=false,opponentFailed=false,opponentTimer;
-  $('opponent-retry').addEventListener('click',()=>{opponentFailed=false;render();});
+  let opponentLoading=false,opponentFailed=false,opponentTimer,opponentRequestToken=0;
+  $('opponent-retry').addEventListener('click',()=>{opponentFailed=false;scheduleOpponentSearch(0);});
   function matchingOpponentIds(query){
     const ids=new Set();
     if(query)for(const row of bulk.rows)for(const opponent of row.opponents||[])if(core.matchesSearch({handId:'',opponents:[opponent]},{opponentQuery:query,seatedOpponents:true}))ids.add(String(opponent.playerId));
     return ids;
   }
-  async function loadOpponentContests(){
-    const query=$('opponent-search').value.trim();
+  async function loadOpponentContests(query,requestToken){
+    if(requestToken!==opponentRequestToken)return;
     if(!query){$('opponent-status').textContent='';$('opponent-retry').hidden=true;opponentFailed=false;return;}
-    if(opponentLoading||opponentFailed)return;
     const opponentIds=matchingOpponentIds(query);
-    const missing=bulk.rows.filter(row=>row.contestedOpponentIds===undefined&&core.matchesSearch(row,{opponentQuery:query,opponentIds:[...opponentIds],seatedOpponents:true}));
+    const from=appliedFrom?Date.parse(appliedFrom+'T00:00:00+03:00'):-Infinity;
+    const to=appliedTo?Date.parse(appliedTo+'T00:00:00+03:00')+86400000:Infinity;
+    const missing=bulk.rows.filter(row=>row.contestedOpponentIds===undefined&&row.mode===mode&&row.game===game&&Date.parse(row.playedAt)>=from&&Date.parse(row.playedAt)<to&&core.matchesSearch(row,{opponentQuery:query,opponentIds:[...opponentIds],seatedOpponents:true}));
     if(!missing.length){$('opponent-status').textContent='';return;}
     opponentLoading=true;
     try{
       for(let i=0;i<missing.length;i+=100){
-        if($('opponent-search').value.trim()!==query)break;
+        if(requestToken!==opponentRequestToken||$('opponent-search').value.trim()!==query)return;
         $('opponent-status').textContent='Проверяем действия: '+i+' / '+missing.length;
         const chunk=missing.slice(i,i+100),response=await historyRequest('opponents',chunk.map(row=>row.handId));
         if(response.version!==payload.version){location.reload();return;}
-        for(const row of chunk){const ids=response.signals?.[row.handId];if(!Array.isArray(ids))throw new Error('Missing actions');row.contestedOpponentIds=ids;}
+        for(const row of chunk){const ids=response.signals?.[row.handId];row.contestedOpponentIds=Array.isArray(ids)?ids:[];}
       }
-      $('opponent-status').textContent='';
-    }catch(_){opponentFailed=true;$('opponent-status').textContent='Не удалось проверить все действия. Результаты неполные.';}
-    finally{opponentLoading=false;$('opponent-retry').hidden=!opponentFailed;render();}
+      if(requestToken===opponentRequestToken)$('opponent-status').textContent='';
+    }catch(_){if(requestToken===opponentRequestToken){opponentFailed=true;$('opponent-status').textContent='Не удалось проверить все действия. Результаты неполные.';}}
+    finally{if(requestToken===opponentRequestToken){opponentLoading=false;$('opponent-retry').hidden=!opponentFailed;render();}}
+  }
+  function scheduleOpponentSearch(delay=350){
+    clearTimeout(opponentTimer);
+    const requestToken=++opponentRequestToken;
+    const query=$('opponent-search').value.trim();
+    if(!query){opponentLoading=false;opponentFailed=false;$('opponent-status').textContent='';$('opponent-retry').hidden=true;render();return;}
+    opponentFailed=false;$('opponent-retry').hidden=true;
+    opponentTimer=setTimeout(()=>{if(requestToken!==opponentRequestToken)return;render();loadOpponentContests(query,requestToken);},delay);
   }
   let stackBand='',tournamentId='',stackLoadPromise=null,stacksLoaded=false;
   const tournamentSelect=$('tournament-filter');
@@ -406,7 +416,6 @@ function startHistory(payload) {
   }
 
   function render() {
-    clearTimeout(opponentTimer);opponentTimer=setTimeout(loadOpponentContests,250);
     if(mode==='mtt')metric='bb';
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
@@ -564,7 +573,8 @@ function startHistory(payload) {
     if(from&&to&&from>to){$('date-status').textContent='Дата окончания раньше начала';return;}
     appliedFrom=from;appliedTo=to;render();$('date-status').textContent='';
   }));
-  ['hand-search','opponent-search'].forEach(id=>$(id).addEventListener('input',()=>{showHistoryTab('search');render();}));
+  $('hand-search').addEventListener('input',()=>{showHistoryTab('search');render();});
+  $('opponent-search').addEventListener('input',()=>{showHistoryTab('search');scheduleOpponentSearch();});
   document.querySelector('.profit-legend').addEventListener('change',event=>{
     const toggle=event.target.closest('[data-profit-line]');if(!toggle)return;
     render();
