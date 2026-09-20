@@ -82,11 +82,17 @@ function startHistory(payload) {
   const bulk = {rows:payload.rows};
   let opponentLoading=false,opponentFailed=false,opponentTimer;
   $('opponent-retry').addEventListener('click',()=>{opponentFailed=false;render();});
+  function matchingOpponentIds(query){
+    const ids=new Set();
+    if(query)for(const row of bulk.rows)for(const opponent of row.opponents||[])if(core.matchesSearch({handId:'',opponents:[opponent]},{opponentQuery:query,seatedOpponents:true}))ids.add(String(opponent.playerId));
+    return ids;
+  }
   async function loadOpponentContests(){
     const query=$('opponent-search').value.trim();
     if(!query){$('opponent-status').textContent='';$('opponent-retry').hidden=true;opponentFailed=false;return;}
     if(opponentLoading||opponentFailed)return;
-    const missing=bulk.rows.filter(row=>row.contestedOpponentIds===undefined&&core.matchesSearch(row,{opponentQuery:query,seatedOpponents:true}));
+    const opponentIds=matchingOpponentIds(query);
+    const missing=bulk.rows.filter(row=>row.contestedOpponentIds===undefined&&core.matchesSearch(row,{opponentQuery:query,opponentIds:[...opponentIds],seatedOpponents:true}));
     if(!missing.length){$('opponent-status').textContent='';return;}
     opponentLoading=true;
     try{
@@ -308,10 +314,10 @@ function startHistory(payload) {
   // player's history or an older import's version.
   if(payload.version)try{
     const saved=JSON.parse(sessionStorage.getItem(insightCacheKey)||'null');
-    if(saved?.version===payload.version&&saved.schema===2&&saved.signals&&typeof saved.signals==='object')Object.assign(insightSignals,saved.signals);
+    if(saved?.version===payload.version&&saved.schema===3&&saved.signals&&typeof saved.signals==='object')Object.assign(insightSignals,saved.signals);
   }catch(_){}
   function saveInsightSignals(){
-    if(payload.version)try{sessionStorage.setItem(insightCacheKey,JSON.stringify({schema:2,version:payload.version,signals:insightSignals}));}catch(_){}
+    if(payload.version)try{sessionStorage.setItem(insightCacheKey,JSON.stringify({schema:3,version:payload.version,signals:insightSignals}));}catch(_){}
   }
   function renderInsights(data,renderReplay){
     const root=$('hand-insights');root.replaceChildren();
@@ -383,10 +389,10 @@ function startHistory(payload) {
     };
     if(missing.length&&!insightsLoading&&!insightsError&&!root.hidden)queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
     const collections=add(root,'div',null,'insight-collections');add(collections,'h3','Подборки для разбора');
-    for(const [key,title] of [['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 10 bb'],['evAbove','🟢 Перебор EV · от 10 bb']]){
+    for(const [key,title] of [['aceHighShowdown','Вскрытие с A-хай'],['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 10 bb'],['evAbove','🟢 Перебор EV · от 10 bb']]){
       const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length,key==='evBelow'?'negative':key==='evAbove'?'positive':undefined);handList(d,rows,key==='evBelow'||key==='evAbove');
     }
-    add(collections,'p','Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
+    add(collections,'p','A-хай учитывает подтверждённые вскрытия с полной доской, где итоговая комбинация — старшая карта с тузом. Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
     for(const [title,groups,key] of [['По сессиям',stats.sessions,'sessionId'],[mode==='cash'?'По ставкам большого блайнда':'По уровням блайндов',stats.limits,'bigBlindMinor']]){
       const section=add(root,'details',null,'insight-section');add(section,'summary',title+' · '+groups.length);
       if(key==='bigBlindMinor'&&mode!=='cash')add(section,'p','В турнирах это уровни большого блайнда, а не бай-ины.','note');
@@ -404,7 +410,8 @@ function startHistory(payload) {
     if(mode==='mtt')metric='bb';
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
-    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,game,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery:$('opponent-search').value,cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
+    const opponentQuery=$('opponent-search').value.trim(),opponentIds=matchingOpponentIds(opponentQuery);
+    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,game,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery,opponentIds:[...opponentIds],cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
     document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
     renderProfitChart(data);
     if(!document.querySelector('.profit-panel').hidden && !document.hidden) {

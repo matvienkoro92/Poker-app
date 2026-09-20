@@ -3,9 +3,9 @@
 function actions(replay,playerId){
  if(!Array.isArray(replay?.events)||!replay.events.length)return null;
  const events=replay.events.slice().sort((a,b)=>a.sequence-b.sequence);
- let street=0,folded=false,sawFlop=false,riverCall=false,threeBet=false,foldToRaise=false,raises=0,lastRaise=false,ambiguous=false;
+ let street=0,folded=false,sawFlop=false,riverCall=false,threeBet=false,foldToRaise=false,raises=0,lastRaise=false,ambiguous=false,board=[];
  for(const e of events){
-  if(e.board?.length){street=e.board.length;lastRaise=false;if(street>=3&&!folded)sawFlop=true;continue;}
+  if(e.board?.length){street=e.board.length;board=e.board.slice();lastRaise=false;if(street>=3&&!folded)sawFlop=true;continue;}
   const hero=String(e.actorId)===String(playerId),code=String(e.code);
   if(code==='5'&&street===0)ambiguous=true; // Cannot classify an all-in as a raise from its code alone.
   if(code==='3'){
@@ -18,7 +18,7 @@ function actions(replay,playerId){
    if(['2','3','5','17','20'].includes(code))lastRaise=false;
   }
  }
- return {betting:bettingStats(events,playerId),sawFlop,riverCall,threeBet:ambiguous&&!threeBet?null:threeBet,foldToRaise};
+ return {betting:bettingStats(events,playerId),sawFlop,riverCall,threeBet:ambiguous&&!threeBet?null:threeBet,foldToRaise,board};
 }
 // null means no eligible decision or an ambiguous action sequence.
 function bettingStats(events,playerId){
@@ -50,6 +50,19 @@ function bettingStats(events,playerId){
 function evDifference(h){
  if(h.ev?.status!=='calculated'||!Number.isFinite(h.ev.resultMinor)||!Number.isFinite(h.resultMinor)||!Number.isFinite(h.bigBlindMinor)||h.bigBlindMinor<=0)return null;
  return (h.resultMinor-h.ev.resultMinor)/h.bigBlindMinor;
+}
+function aceHighAtShowdown(hand,signal){
+ if(hand.showdown!==true||!Array.isArray(hand.cards)||hand.cards.length!==2||!Array.isArray(signal?.board)||signal.board.length!==5)return false;
+ const cards=hand.cards.concat(signal.board);
+ if(cards.length!==7||new Set(cards).size!==7||cards.some(card=>typeof card!=='string'||!/^[AKQJT2-9][cdhs]$/.test(card)))return false;
+ const values=cards.map(card=>'23456789TJQKA'.indexOf(card[0])+2),counts=new Map();
+ values.forEach(value=>counts.set(value,(counts.get(value)||0)+1));
+ if([...counts.values()].some(count=>count>1))return false;
+ const unique=[...counts.keys()].sort((a,b)=>a-b),straightValues=unique.includes(14)?[1,...unique]:unique;
+ for(let i=0;i<=straightValues.length-5;i++)if(straightValues[i+4]-straightValues[i]===4)return false;
+ const suits=new Map();cards.forEach(card=>suits.set(card[1],(suits.get(card[1])||0)+1));
+ if([...suits.values()].some(count=>count>=5))return false;
+ return values.includes(14);
 }
 function summarize(hands,signals={},metric='bb'){
  const amount=h=>metric==='resultMinor'?h.resultMinor/100:h.bb;
@@ -85,9 +98,9 @@ function summarize(hands,signals={},metric='bb'){
  wins:hands.filter(h=>h.bb>0).sort((a,b)=>amount(b)-amount(a)).slice(0,5),losses:hands.filter(h=>h.bb<0).sort((a,b)=>amount(a)-amount(b)).slice(0,5),
  withoutShowdown:{...withoutShowdownStats,hands:withoutShowdown.slice().sort((a,b)=>Math.abs(amount(b))-Math.abs(amount(a)))},
  showdown:{loaded:known.length,total:hands.length,sawFlop:flop.length,eligible:eligible.length,count:showdowns.length,profitable:showdowns.filter(h=>h.resultMinor>0).length},
- collections:{riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30),
+ collections:{aceHighShowdown:known.filter(h=>aceHighAtShowdown(h,signals[h.handId])),riverLoss:known.filter(h=>signals[h.handId].riverCall&&h.bb<0),threeBet:known.filter(h=>signals[h.handId].threeBet===true),foldRaise:known.filter(h=>signals[h.handId].foldToRaise),bigLoss:hands.filter(h=>h.bb < -30),
  evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-10).sort((a,b)=>deviation(a)-deviation(b)),
  evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=10).sort((a,b)=>deviation(b)-deviation(a))}};
 }
-return {actions,summarize,evDifference};
+return {actions,summarize,evDifference,aceHighAtShowdown};
 });

@@ -1,5 +1,15 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const {actions,summarize}=require('../starting-hands/insights');
+const {actions,summarize,aceHighAtShowdown}=require('../starting-hands/insights');
+
+test('A-high showdown requires a complete board and no made hand',()=>{
+ const hand={showdown:true,cards:['As','7d']};
+ assert.equal(aceHighAtShowdown(hand,{board:['Kc','Qh','9s','5d','2c']}),true);
+ assert.equal(aceHighAtShowdown(hand,{board:['Kc','Qh','Js','Td','2c']}),false);
+ assert.equal(aceHighAtShowdown(hand,{board:['Kc','Qh','9s','7c','2c']}),false);
+ assert.equal(aceHighAtShowdown(hand,{board:['Kc','Qc','9c','5c','2c']}),false);
+ assert.equal(aceHighAtShowdown({...hand,showdown:false},{board:['Kc','Qh','9s','5d','2c']}),false);
+ assert.equal(aceHighAtShowdown(hand,{board:['Kc','Qh','9s','5d']}),false);
+});
 const h=(id,bb,extra={})=>({handId:String(id),sessionId:'a',playedAt:`2026-09-01T00:00:${String(id).padStart(2,'0')}Z`,bb,resultMinor:bb*100,bigBlindMinor:100,...extra});
 test('drawdown measures peak to trough and first recovery, including initial losses',()=>{
  let s=summarize([h(1,10),h(2,-8),h(3,-5),h(4,13)]);

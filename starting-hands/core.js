@@ -74,7 +74,7 @@
       .replace(/i([bcdfghjklmnpqrstvwxyz])e/g, "ai$1")
       .replace(/a([bcdfghjklmnpqrstvwxyz])e/g, "ei$1");
     [
-      ["shch", "sch"], ["ph", "f"], ["wh", "w"], ["kh", "h"], ["ck", "k"],
+      ["shch", "sch"], ["zh", "j"], ["ph", "f"], ["wh", "w"], ["kh", "h"], ["ck", "k"],
       ["qu", "kv"], ["oo", "u"], ["ee", "i"], ["oe", "e"], ["x", "ks"],
       ["q", "k"], ["c", "k"], ["w", "v"], ["y", "i"]
     ].forEach(function (pair) {
@@ -106,7 +106,8 @@
 
   function matchesSearch(row, options) {
     const id=String(options.handQuery || '').trim(), opponent=searchName(options.opponentQuery), forms=profileSearchForms(options.opponentQuery);
-    return (!id || row.handId.includes(id)) && (!opponent || (row.opponents || []).filter(p=>options.seatedOpponents===true || (row.contestedOpponentIds || []).includes(String(p.playerId))).some(p=>profileSearchForms(p.name).some(name=>forms.some(query=>name.includes(query))) || searchName(p.playerId).includes(opponent)));
+    const opponentIds=new Set((options.opponentIds||[]).map(String));
+    return (!id || row.handId.includes(id)) && (!opponent || (row.opponents || []).filter(p=>options.seatedOpponents===true || (row.contestedOpponentIds || []).includes(String(p.playerId))).some(p=>opponentIds.has(String(p.playerId))||profileSearchForms(p.name).some(name=>forms.some(query=>name.includes(query))) || searchName(p.playerId).includes(opponent)));
   }
   function handClass(cards) {
     if (!Array.isArray(cards) || cards.length !== 2 || cards[0] === cards[1]) return null;
