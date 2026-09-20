@@ -528,16 +528,16 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art { background-image: none !important; }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] {
-  --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v3.webp');
+  --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v4.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__caption,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
-  left: 13% !important;
+  left: 23% !important;
   width: 42% !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
-  top: 51% !important;
-  font-size: 5.9cqw !important;
+  top: 52% !important;
+  font-size: 5.5cqw !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-last-longer-dock::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
@@ -556,6 +556,20 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   mask-image: url('./assets/home-tournament-fishkopcheny-head-mask.svg');
   -webkit-mask-image: url('./assets/home-tournament-fishkopcheny-head-mask.svg');
 }
+
+/* Sunday uses a complete illustrated glove trophy, without a covering panel. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses.home-tournament-bonuses--table::before {
+  background-image: url('./assets/home-bonus-stacks-glove-v2.webp') !important;
+}
+#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
+#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove {
+  display: none !important;
+}
+#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  top: 14.2cqw; bottom: auto; width: 9cqw; gap: .15cqw;
+  color: #251605; text-shadow: none; font-size: 1.65cqw;
+}
+#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small { font-size: 1cqw; }
 
 /* Monday's magician uses the rating character Morf. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] {

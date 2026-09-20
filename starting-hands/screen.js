@@ -36,7 +36,7 @@ function startHistory(payload) {
     document.querySelectorAll('[data-hand-breakdown]').forEach(button=>{
       const active=button.dataset.handBreakdown===handBreakdown;button.setAttribute('aria-selected',String(active));
       const status=button.querySelector('[data-hand-breakdown-status]');
-      if(status)status.textContent=active?(button.dataset.handBreakdown==='positions'?(positionByMode[mode]?positionLabel(positionByMode[mode]):'Все позиции'):(selected||'Все руки')):'';
+      if(status)status.textContent=button.dataset.handBreakdown==='positions'?(positionByMode[mode]?positionLabel(positionByMode[mode]):'Все позиции'):(selected||'Все стартовые руки');
     });
     const handsButton=document.querySelector('[data-hand-breakdown="hands"]');handsButton.disabled=game!=='NLH';
     const positions=document.querySelector('[data-hand-breakdown-panel="positions"]'),matrix=$('matrix-panel'),detail=document.querySelector('.workspace>.detail-panel');
