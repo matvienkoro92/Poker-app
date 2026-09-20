@@ -528,7 +528,20 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art { background-image: none !important; }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] {
-  --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v2.webp');
+  --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v3.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__caption,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
+  left: 13% !important;
+  width: 42% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
+  top: 51% !important;
+  font-size: 5.9cqw !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-last-longer-dock::before,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
+  display: none !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
