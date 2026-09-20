@@ -412,7 +412,7 @@
         if (bar) {
           emptyLabel = document.createElement("span");
           emptyLabel.className = "home-last-longer-dock__empty";
-          emptyLabel.textContent = "Пока не открыт";
+          emptyLabel.textContent = "Пока не объявлен";
           bar.appendChild(emptyLabel);
         }
       }

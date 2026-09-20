@@ -8,6 +8,8 @@
 | --- | --- | --- | --- |
 | `poker_app:visitor_dt_ids` | HASH `userId -> IDxxxxxx` | `lib/account-id.js` | Основная связь runtime-id (`tg_*`, `vk_*`, `mail_*`) с публичным `dtId`. |
 | `poker_app:id_to_user` | HASH `IDxxxxxx -> userId` | `lib/account-id.js` | Обратный индекс для поиска владельца `dtId`. |
+| `poker_app:account_redirects` | HASH `oldAccountId -> accountId` | `lib/account-canonical.js` | Только проверенные перенаправления после восстановления/объединения профилей. Совпадения ника или игрового ID недостаточно. |
+| `poker_app:account_legacy_ids:<accountId>` | SET | identity repair | Архивные ID, сохранённые при проверенном восстановлении. |
 | `poker_app:visitor_usernames` | HASH `userId -> username` | chat/users | Telegram username / login label. |
 | `poker_app:visitor_chat_display_names` | HASH `accountId|userId -> displayName` | chat/users | Отображаемое имя в чате. |
 | `poker_app:account_passwords` | HASH `accountId -> passwordRecord` | `lib/account-password.js` | PWA пароль аккаунта. |
@@ -23,6 +25,10 @@
 - Email runtime id: `mail_*`, но каноническим account id для профиля остаётся `dtId`.
 - Legacy id вроде `tg_ID123456`, `vk_ID123456`, `mail_ID123456` нормализуется к `ID123456`.
 - Для новых account-scoped данных предпочтителен `dtId`; runtime-id допустим там, где данные привязаны к конкретному каналу доставки.
+- Создание forward/reverse/alias связей выполняется одной Lua-транзакцией: параллельные первые входы получают один ID. Ошибка чтения не считается отсутствием аккаунта.
+- Исторический `dtIdHint` клиента не может заменить существующую действующую привязку. Перенаправления разрешаются на сервере для Telegram/VK/PWA/email и прямых ссылок.
+- Транзакции бонусных балансов, активности и круток проверяют отсутствие перенаправления исходного кошелька, чтобы запрос, начатый до объединения, не записал награду в старый профиль.
+- Общий дневной лимит по Poker21 не является источником накопленных действий или заработанных круток. Восстановление счётчиков требует сохранённых `activityAward.action`, с сохранением потраченных круток и уже начисленных денег.
 
 ## Chat
 

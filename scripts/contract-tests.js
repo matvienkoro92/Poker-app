@@ -269,6 +269,15 @@ class MemoryRedis {
       const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
       const keys = command.slice(3, 3 + keyCount).map(String);
       const args = command.slice(3 + keyCount).map(String);
+      if (String(command[1]).includes("create-account-v2")) {
+        const existing = this.h(keys[0]).get(args[0]);
+        if (existing) return this.result(existing);
+        if (this.h(keys[1]).has(args[1]) || this.h(keys[3]).has(args[1])) return this.result("");
+        this.h(keys[0]).set(args[0], args[1]);
+        this.h(keys[1]).set(args[1], args[0]);
+        this.s(keys[2]).add(args[0]);
+        return this.result(args[1]);
+      }
       if (String(command[1]).includes("report_transaction_v1")) {
         for (const snap of JSON.parse(args[0])) {
           const current = snap.kind === "list" ? this.l(snap.key) : this.kv.get(snap.key);
@@ -6380,7 +6389,12 @@ async function testReferralsTrustedDtIdHint(redis) {
   assert.strictEqual(r.statusCode, 200, "referrals endpoint ignores untrusted dt id hint");
   assert.notStrictEqual(r.body.accountId, "ID999999", "untrusted referrals hint is not used");
   assert.strictEqual(r.body.invited.length, 0, "untrusted referrals hint does not expose another account invites");
+  const activeId = r.body.accountId;
 
+  r = await call(referrals, req("GET", { pwaSession: s.user, dtIdHint: "ID400800" }));
+  assert.strictEqual(r.body.accountId, activeId, "historical browser hint cannot switch an existing profile or its wallets");
+  assert.strictEqual(redis.h("poker_app:visitor_dt_ids").get("tg_1001"), activeId);
+  redis.h("poker_app:visitor_dt_ids").delete("tg_1001");
   r = await call(referrals, req("GET", { pwaSession: s.user, dtIdHint: "ID400800" }));
   assert.strictEqual(r.statusCode, 200, "referrals endpoint accepts trusted id_to_user dt id hint");
   assert.strictEqual(r.body.accountId, "ID400800", "trusted referrals hint selects the owner account");

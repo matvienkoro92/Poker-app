@@ -99,14 +99,14 @@ test('one publication advances only the publication counter without paying money
   assert.equal((await h.activity.summary(h.actor.accountId)).actions, 1);
   await assert.rejects(h.publish('1', { id: 'new-request' }), /уже опубликована/);
 });
-test('today publications made before separate counters backfill publication progress', async () => {
+test('daily quota without award records cannot backfill earned progress', async () => {
   const h=harness();
   h.values.set(h.activity.PREFIX+'player_day:123',JSON.stringify({day:h.activity.day(),count:4}));
   let summary=await h.activity.summary(h.actor.accountId);
-  assert.equal(summary.publicationsToday,4);assert.equal(summary.publicationActions,4);assert.equal(summary.publicationProgress,4);
+  assert.equal(summary.publicationsToday,4);assert.equal(summary.publicationActions,0);assert.equal(summary.publicationProgress,0);
   await h.publish('5');
   summary=await h.activity.summary(h.actor.accountId);
-  assert.equal(summary.publicationProgress,0);assert.equal(summary.spinsAvailable,1);assert.equal(summary.spinsEarned,1);
+  assert.equal(summary.publicationProgress,1);assert.equal(summary.spinsAvailable,0);assert.equal(summary.spinsEarned,0);
 });
 test('seven publications per Moscow day; deletion cannot recover quota; reset does not reset progress', async () => {
   const h = harness(); for (let i = 1; i <= 7; i++) await h.publish(String(i));
@@ -230,11 +230,25 @@ test('moving Poker21 between app accounts cannot reset quotas, republish a hand 
   const h=harness();await h.publish('1');
   h.moveAccount('ID654321');
   assert.equal((await h.activity.summary(h.actor.accountId)).publicationsToday,1);
+  assert.equal((await h.activity.summary(h.actor.accountId)).publicationProgress,0);
+  assert.equal((await h.activity.summary(h.actor.accountId)).ticketProgress,0);
   await assert.rejects(h.publish('1',{id:'new-request'}),/уже опубликована/);
   const own=await h.comment('old-own',undefined,{authorId:'ID123456',authorPokerId:'123'});
   assert.equal(own.activityReason,'own_thread');assert.equal(own.activityAward,undefined);
   await h.publish('2');await h.publish('3');await h.publish('4');await h.publish('5');await h.publish('6');await h.publish('7');
   h.moveAccount('ID777777');await assert.rejects(h.publish('8'),/до 7 раздач/);
+});
+test('shared daily quota never invents earned publication spins in another account',async()=>{
+  const h=harness();
+  for(let i=1;i<=4;i++)await h.publish(String(i));
+  h.moveAccount('ID654321');
+  await h.publish('5');
+  const summary=await h.activity.summary(h.actor.accountId);
+  assert.equal(summary.publicationsToday,5);
+  assert.equal(summary.publicationActions,1);
+  assert.equal(summary.actions,1);
+  assert.equal(summary.spinsAvailable,0);
+  assert.equal(summary.ticketProgress,1);
 });
 test('credited comment remains spent across account transfer, deletion and different text',async()=>{
   const h=harness();await h.comment('one');h.moveAccount('ID654321');

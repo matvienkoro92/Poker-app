@@ -6,7 +6,7 @@ function harness(){
  const source=fs.readFileSync(require.resolve('../app-my-summary.js'),'utf8');
  const badges=[{},{}].map(b=>Object.assign(b,{classList:{add(){}},setAttribute(){}}));
  const saved=new Map();
- const ctx={document:{querySelectorAll:()=>badges},localStorage:{getItem:k=>saved.get(k)},Math,JSON};
+ const ctx={document:{hidden:false,getElementById:()=>null,querySelectorAll:()=>badges},localStorage:{getItem:k=>saved.get(k),setItem:(k,v)=>saved.set(k,v)},Math,JSON};
  vm.createContext(ctx);
  vm.runInContext(source.slice(source.indexOf('  var chartHistory'),source.indexOf('  async function checkChartUnread')),ctx);
  return {ctx,badges,saved,run:s=>vm.runInContext(s,ctx)};
@@ -21,6 +21,12 @@ test('new graph flags both entries; viewed rows clear them; additions and correc
  assert.ok(h.badges.every(b=>!b.hidden));
  h.run("chartSeen[10]=chartFingerprint(chartHistory.rows[0]);chartHistory.rows.push({handId:'11'});renderChartUnread()");
  assert.ok(h.badges.every(b=>!b.hidden));
+});
+test('opening a loaded chart acknowledges the complete history immediately',()=>{
+ const h=harness();
+ h.run("acceptChartHistory({playerId:'1',rows:[{handId:'10'},{handId:'11'}]});acknowledgeChartHistory()");
+ assert.ok(h.badges.every(b=>b.hidden));
+ assert.deepEqual(Object.keys(JSON.parse(h.saved.get('poker-chart-seen:1'))).sort(),['10','11']);
 });
 test('seen state belongs to the player and survives reload',()=>{
  const h=harness();

@@ -23,3 +23,6 @@ tmp/
 # Локальные резервные копии (папка на уровень выше проекта)
 ../poker-club-miniapp-backups/
 .vercel
+
+# Private identity audit snapshots and repair backups
+output/profile-consistency/

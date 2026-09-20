@@ -9749,24 +9749,33 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
 [data-view="club-reviews"] .review-comment--coach{border-color:#d4b56655;background:linear-gradient(140deg,#252317e8,#101712e8)}
 [data-view="club-reviews"] .review-comment>header{display:flex;align-items:center;gap:8px;min-height:34px;padding-right:34px}
 [data-view="club-reviews"] .review-comment__author{display:inline-flex;align-items:center;min-width:0;gap:8px;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-[data-view="club-reviews"] .review-comment__avatar{position:relative;display:grid;flex:0 0 32px;width:32px;height:32px;place-items:center;overflow:hidden;border:1px solid #ffc95b73;border-radius:50%;background:#101925;color:#ffd98b;font-size:13px;font-weight:950}
+[data-view="club-reviews"] .review-comment__avatar{position:relative;display:grid;flex:0 0 44px;width:44px;height:44px;place-items:center;overflow:hidden;border:1px solid #ffc95b73;border-radius:50%;background:#101925;color:#ffd98b;font-size:15px;font-weight:950}
 [data-view="club-reviews"] .review-comment__avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+[data-view="club-reviews"] .review-comment__avatar--personal-art img{object-position:50% 18%}
 [data-view="club-reviews"] .review-comment__avatar img[hidden]{display:none}
 [data-view="club-reviews"] .review-comment__identity{display:grid;min-width:0;gap:1px}
 [data-view="club-reviews"] .review-comment__identity strong{overflow:hidden;color:#ffd98b;font-size:13px;text-overflow:ellipsis;white-space:nowrap}
 [data-view="club-reviews"] .review-comment__identity small{color:#8ea0b8;font-size:10.5px;white-space:nowrap}
 [data-view="club-reviews"] .review-comment .review-coach{padding:3px 6px;font-size:9px}
 [data-view="club-reviews"] .review-comment__delete{position:absolute;top:8px;right:8px;width:28px;height:28px;padding:0;border:1px solid #ff6b6b8c;border-radius:50%;background:#491014b8;color:#ff9a9a;font:800 20px/24px Arial,sans-serif;cursor:pointer}
-[data-view="club-reviews"] .review-comment>p{margin:6px 30px 0 40px;color:#dbe5f4;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
-[data-view="club-reviews"] .review-comment>blockquote{margin:7px 30px 4px 40px;padding:6px 8px;border-left:2px solid #8b9b7e;background:#ffffff08;color:#aebbd0;font-size:11px;line-height:1.3}
-[data-view="club-reviews"] .review-comment>footer{display:flex;align-items:center;gap:6px;margin:5px 0 0 36px}
+[data-view="club-reviews"] .review-comment>p{margin:6px 30px 0 52px;color:#dbe5f4;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+[data-view="club-reviews"] .review-comment>blockquote{margin:7px 30px 4px 52px;padding:6px 8px;border-left:2px solid #8b9b7e;background:#ffffff08;color:#aebbd0;font-size:11px;line-height:1.3}
+[data-view="club-reviews"] .review-comment>footer{display:flex;align-items:center;gap:6px;margin:5px 0 0 48px}
 [data-view="club-reviews"] .review-comment__reply{min-height:24px;padding:0 7px;border:0;border-radius:8px;background:transparent;color:#9fb0c7;font:inherit;font-size:11px;font-weight:850;cursor:pointer}
 [data-view="club-reviews"] .review-comment__reply:hover,[data-view="club-reviews"] .review-comment__reply:focus-visible{background:#65c7ff1f;color:#dff4ff}
 [data-view="club-reviews"] .review-reply-form{gap:10px;margin:8px 0 0;padding:14px 0 2px;border-top:1px solid #d3ad6245}
 [data-view="club-reviews"] #reviewReplyTarget:empty{display:none}
 [data-view="club-reviews"] .review-reply-form textarea{min-height:96px;max-height:220px;background:#0b1016;border-color:#b9955570}
-[data-view="club-reviews"] .review-reply-form__actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px}
-[data-view="club-reviews"] .review-reply-form__actions .social-muted{margin:0}
+[data-view="club-reviews"] .review-reply-form__actions{display:flex;align-items:center;justify-content:space-between;gap:10px}
+[data-view="club-reviews"] .review-emoji-wrap{position:relative}
+[data-view="club-reviews"] :is(.review-emoji-toggle,.review-reply-send){display:grid;place-items:center;width:46px;height:46px;min-height:46px;padding:0;border:1px solid #d3ad6270;border-radius:50%;background:#10151c;color:#f4d58b;box-shadow:inset 0 1px 0 #fff1b51c,0 5px 14px #0006;cursor:pointer}
+[data-view="club-reviews"] .review-emoji-toggle{font-size:22px}
+[data-view="club-reviews"] .review-reply-send svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+[data-view="club-reviews"] .review-emoji-picker{position:absolute;z-index:20;left:0;bottom:54px;display:grid;grid-template-columns:repeat(6,36px);gap:4px;padding:7px;border:1px solid #d3ad6270;border-radius:13px;background:#111820;box-shadow:0 12px 28px #000b}
+[data-view="club-reviews"] .review-emoji-picker[hidden]{display:none}
+[data-view="club-reviews"] .review-emoji-picker button{display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:8px;background:transparent;font-size:20px;cursor:pointer}
+[data-view="club-reviews"] .review-emoji-picker button:hover,[data-view="club-reviews"] .review-emoji-picker button:focus-visible{background:#ffffff14}
+@media(max-width:420px){[data-view="club-reviews"] .review-emoji-picker{grid-template-columns:repeat(4,36px)}}
 [data-view="club-reviews"] .review-thread-heading-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 [data-view="club-reviews"] .review-thread-heading-row>h2{display:flex;align-items:center;flex-wrap:wrap;min-width:0;margin:0;font-size:18px;line-height:1.25;color:#f5dda4}
 [data-view="club-reviews"] .review-thread-date{flex:0 0 auto;margin-left:auto;color:#aeb9ca;font-size:12px;line-height:1.3;white-space:nowrap}
@@ -9776,7 +9785,7 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
 [data-view="club-reviews"] .review-share-actions .social-button::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 20%,#fff2b817 48%,transparent 72%);pointer-events:none}
 [data-view="club-reviews"] .review-share-actions .social-button:hover{border-color:#ffd278cc;background:linear-gradient(145deg,#493819,#1b140b)}
 [data-view="club-reviews"] .review-share-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-[data-view="club-reviews"] .review-share-actions .review-share-button{padding-inline:13px;border-radius:13px;font-weight:800}
+[data-view="club-reviews"] .review-share-actions .review-share-button{width:42px;padding:0;border-radius:13px;font-weight:800}
 [data-view="club-reviews"] .review-share-actions .review-copy-button{width:42px;padding:0;border-radius:13px}
 [data-view="club-reviews"] .review-hand-format{color:#f1c66c;font-size:.72em;font-weight:800;letter-spacing:.035em;white-space:nowrap}
 [data-view="club-reviews"] .review-thread-format{margin:11px 0 2px;color:#f1c66c;font-size:14px;font-weight:850;letter-spacing:.025em}
@@ -9805,7 +9814,7 @@ body.review-reply-input-active [data-view="club-reviews"] #reviewReplyForm texta
   [data-view="club-reviews"] .review-thread-heading-row>h2{font-size:16px}
   [data-view="club-reviews"] .review-thread-card .review-share-actions{gap:5px}
   [data-view="club-reviews"] .review-thread-card .review-share-actions .social-button { min-height:38px;padding-inline:8px;font-size:11px; }
-  [data-view="club-reviews"] .review-share-actions .review-copy-button{width:38px;padding:0}
+  [data-view="club-reviews"] .review-share-actions :is(.review-share-button,.review-copy-button){width:38px;padding:0}
 }
 
 /* Keep reviews visible and scrollable without changing the app shell geometry. */
@@ -10023,11 +10032,14 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .club-reviews-header__action .review-topic-push strong { font-size: 11px; }
 [data-view="club-reviews"] .club-reviews-header__action .review-topic-push .social-button { min-height: 30px; padding: 4px 8px; border-radius: 8px; font-size: 11px; }
 [data-view="club-reviews"] .club-reviews-header__action .review-topic-push p { display: none; }
-[data-view="club-reviews"] .review-topic--unread { margin-inline: -8px; padding-inline: 8px; border-radius: 12px; border-bottom-color: #79cfff55; background: linear-gradient(90deg,#54bfff20,#3879bc0b 72%,transparent); box-shadow: inset 3px 0 0 #6bc8ff99; }
-[data-view="club-reviews"] .review-topic__unread-badge { display: inline-flex; width: fit-content; margin-top: 5px; padding: 3px 7px; border: 1px solid #79d0ff70; border-radius: 999px; background: #4ebcff20; color: #9dddff; font-weight: 800; letter-spacing: .01em; animation: review-unread-pulse 1.7s ease-in-out infinite; }
-@keyframes review-unread-pulse { 0%,100% { background-color:#4ebcff18; box-shadow:0 0 0 0 #63c7ff00; } 50% { background-color:#4ebcff36; box-shadow:0 0 0 4px #63c7ff18; } }
+[data-view="club-reviews"] .review-topic--unread { margin-inline: -8px; padding-inline: 8px; border-radius: 12px; border-bottom-color: #57c8ff80; background: linear-gradient(90deg,#168fd83d,#126ebc18 74%,transparent); box-shadow: inset 3px 0 0 #55c9ffcc; }
+[data-view="club-reviews"] .review-topic__unread-badge { display: inline-flex; width: fit-content; margin-top: 5px; padding: 3px 7px; border: 1px solid #63cbff99; border-radius: 999px; background: #178fd83d; color: #a8e4ff; font-weight: 800; letter-spacing: .01em; animation: review-unread-pulse 1.7s ease-in-out infinite; }
+@keyframes review-unread-pulse { 0%,100% { background-color:#178fd830; box-shadow:0 0 0 0 #49bdff00; } 50% { background-color:#219fe05c; box-shadow:0 0 0 4px #49bdff24; } }
 @media (prefers-reduced-motion: reduce) { [data-view="club-reviews"] .review-topic__unread-badge { animation: none; } }
 [data-view="club-reviews"] .review-thread-card > .review-share-actions { justify-content: flex-end; width: 100%; box-sizing: border-box; margin: 18px 0 0; padding-top: 14px; border-top: 1px solid #ffffff18; }
+[data-view="club-reviews"] .review-thread-footer { display:flex;align-items:flex-start;gap:8px;width:100%;margin-top:14px; }
+[data-view="club-reviews"] .review-thread-footer .review-hand-spoiler { flex:1 1 auto;min-width:0;margin-top:0; }
+[data-view="club-reviews"] .review-thread-footer .review-share-actions { flex:0 0 auto;margin:0;padding:0;border:0; }
 [data-view="club-reviews"] .review-thread-loading { position: relative; display: grid; gap: 10px; margin-top: 18px; overflow: hidden; }
 [data-view="club-reviews"] .review-thread-loading span { color: #b9c5d2; font-size: 13px; }
 [data-view="club-reviews"] .review-thread-loading i { display: block; height: 12px; border-radius: 6px; background: #ffffff12; }
