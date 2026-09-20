@@ -246,12 +246,13 @@
     headerAction(t);
     var article=r.querySelector('article');article.classList.add('review-thread-card');
     article.querySelector('.social-kicker')?.remove();
-    var title=article.querySelector('h2');title.innerHTML='<span>'+esc(handAuthor(t))+'</span><span class="review-title-cards">'+cardsHtml(t)+'</span>';
+    var title=article.querySelector('h2'),meta=title.nextElementSibling;title.innerHTML='<span>'+esc(handAuthor(t))+'</span><span class="review-title-cards">'+cardsHtml(t)+'</span>';
     var share=document.createElement('div');share.className='social-actions review-share-actions';
     share.innerHTML=shareButtons()+(t.canDelete?button('Удалить раздачу','delete',t.id):'');
     var heading=document.createElement('div');heading.className='review-thread-heading-row';
-    article.insertBefore(heading,title);heading.append(title);article.append(share);
+    article.insertBefore(heading,title);heading.append(title);var headingDate=document.createElement('time');headingDate.className='review-thread-date';headingDate.dateTime=t.createdAt;headingDate.textContent=date(t.createdAt);heading.append(headingDate);article.append(share);
     var format=document.createElement('div');format.className='review-thread-format';format.textContent=handFormat(t,handMetric);heading.after(format);
+    if(meta){meta.classList.add('review-thread-meta-spacer');meta.textContent='\u00a0';meta.setAttribute('aria-hidden','true');}
     var context=article.querySelector('.review-context');
     if(context){context.querySelector('h3')?.remove();context.insertAdjacentHTML('afterbegin',handUnitToggle(t));var contextCopy=context.querySelector('.social-copy');if(contextCopy)contextCopy.innerHTML=contextHtml(contextInMetric(openingPotContext(t.context,t),t,handMetric),t.hideShowdown===true,handAuthor(t));}
     article.querySelector('.review-image')?.closest('a')?.remove();
