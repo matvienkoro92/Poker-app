@@ -1,7 +1,7 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.PokerHandShare=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const suits={s:'♠',h:'♥',d:'♦',c:'♣'},labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка','21':'Страдл'};
-const potCodes=new Set(['2','3','5','18','19','20','21','92']);
+const suits={s:'♠',h:'♥',d:'♦',c:'♣'},labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка','21':'Страдл','30':'Взнос в бомб-пот'};
+const potCodes=new Set(['2','3','5','18','19','20','21','30','92']);
 const card=value=>String(value||'').replace(/^T/,'10').replace(/([shdc])$/,(_,s)=>suits[s]||s);
 const amount=value=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(Number(value)||0);
 const shortPosition=value=>({'LJ':'MP','HJ':'MP+1','BTN/SB':'SB','UNKNOWN':''}[value]??value??'');

@@ -82,15 +82,24 @@ function startHistory(payload) {
   const sample = {playerId:payload.playerId};
   const bulk = {rows:payload.rows};
   let opponentLoading=false,opponentFailed=false,opponentTimer,opponentRequestToken=0;
+  const resolvedOpponentIds=new Map();
   $('opponent-retry').addEventListener('click',()=>{opponentFailed=false;scheduleOpponentSearch(0);});
   function matchingOpponentIds(query){
-    const ids=new Set();
+    const ids=new Set(resolvedOpponentIds.get(query)||[]);
     if(query)for(const row of bulk.rows)for(const opponent of row.opponents||[])if(core.matchesSearch({handId:'',opponents:[opponent]},{opponentQuery:query,seatedOpponents:true}))ids.add(String(opponent.playerId));
     return ids;
   }
   async function loadOpponentContests(query,requestToken){
     if(requestToken!==opponentRequestToken)return;
     if(!query){$('opponent-status').textContent='';$('opponent-retry').hidden=true;opponentFailed=false;return;}
+    if(!resolvedOpponentIds.has(query)){
+      let lookup;
+      try{lookup=await historyRequest('opponent-lookup',null,{query});}
+      catch(_){if(requestToken===opponentRequestToken){opponentFailed=true;$('opponent-status').textContent='Не удалось найти игрока по нику.';$('opponent-retry').hidden=false;}return;}
+      if(requestToken!==opponentRequestToken)return;
+      resolvedOpponentIds.set(query,Array.isArray(lookup.playerIds)?lookup.playerIds.map(String):[]);
+      render();
+    }
     const opponentIds=matchingOpponentIds(query);
     const from=appliedFrom?Date.parse(appliedFrom+'T00:00:00+03:00'):-Infinity;
     const to=appliedTo?Date.parse(appliedTo+'T00:00:00+03:00')+86400000:Infinity;
@@ -460,8 +469,8 @@ function startHistory(payload) {
     const potUnit=replayInBb?'bb':mode==='cash'?'₽':'фишек';
     const potLabel=()=>replayAmount(currentPot);
     const positionFor=window.PokerHandShare.positions(Object.assign({playerId:sample.playerId},hand),replay);
-    const contributionCodes=new Set(['2','3','5','18','19','20','21']);
-    const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка','21':'Страдл'};
+    const contributionCodes=new Set(['2','3','5','18','19','20','21','30']);
+    const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка','21':'Страдл','30':'Взнос в бомб-пот'};
     const startingStacks=new Map((replay.stacks||[]).map(player=>[String(player.actor||''),Number(player.amount)]));
     const actorLabel=event=>{
       const actor=String(event.actor||'Игрок');
@@ -485,7 +494,7 @@ function startHistory(payload) {
       if(['92','93'].includes(event.code)){if(event.code==='92'&&event.amount){currentPot+=Number(event.amount)||0;add('p','Параметр обязательных взносов: '+replayAmount(event.amount)+' '+potUnit,'note');}continue;}
       if(!labels[event.code]){unknown.push(event);continue;}
       const label=labels[event.code];
-      const decision=!['18','19'].includes(event.code);
+      const decision=!['18','19','30'].includes(event.code);
       let newRound=false;
       if(decision){if(roundActors.has(event.actorId)){newRound=true;roundActors.clear();}roundActors.add(event.actorId);}
       const action=add('p',(positionFor(event)?positionFor(event)+': ':'')+actorLabel(event)+' · '+label+(event.amount?' · '+replayAmount(event.amount)+(replayInBb?' bb':''):''),event.actor==='Вы'?'replay-hero':'replay-action');

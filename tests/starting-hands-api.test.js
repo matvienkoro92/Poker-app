@@ -7,8 +7,8 @@ async function call(body,linked='208238',authorized=true,storedValue){
  if(name==='../hand-opponents')return require('../lib/hand-opponents');
  if(name==='node:zlib')return zlib;
  if(name==='../../starting-hands/insights')return require('../starting-hands/insights');
- if(name==='../pokerplus')return {readBoundPokerPlusUserId:async()=>linked};
- if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':storedValue!==undefined?storedValue:zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[],stacks:[{actor:'Вы',amount:12.5}]})).toString('base64'));}};
+ if(name==='../pokerplus')return {readBoundPokerPlusUserId:async()=>linked,NICKNAME_REVERSE_HASH_KEY:'nick-reverse',BIND_HASH_KEY:'bind',normalizePokerPlusNicknameKey:value=>String(value).trim().toLowerCase().replace(/ё/g,'е')};
+ if(name==='../club-social')return {context:async()=>authorized?{accountId:'owner',body}:(res.status(401).json({ok:false}),null),redis:async cmds=>{commands.push(...cmds);return cmds.map(c=>c[0]==='GET'?'v1':body.action==='opponent-lookup'?(c[1]==='nick-reverse'?'ID1':'464311'):storedValue!==undefined?storedValue:zlib.gzipSync(JSON.stringify(c[2]==='list'?{playerId:linked,rows:[]}:{events:[],stacks:[{actor:'Вы',amount:12.5}]})).toString('base64'));}};
  throw Error(name);
  }});await module.exports({method:'POST'},res);return {res,commands};
 }
@@ -41,4 +41,9 @@ test('opponent batches are bounded, owner-scoped and return only IDs',async()=>{
 test('one unreadable replay does not fail the whole opponent search batch',async()=>{
  const {res}=await call({action:'opponents',handIds:['123']},'999',true,'not-a-gzip-replay');
  assert.equal(res.statusCode,200);assert.equal(res.data.signals['123'],null);
+});
+test('opponent nickname lookup resolves a Poker21 player ID',async()=>{
+ const {res,commands}=await call({action:'opponent-lookup',query:'Мажор'},'999');
+ assert.equal(res.statusCode,200);assert.deepEqual(Array.from(res.data.playerIds),['464311']);
+ assert.equal(JSON.stringify(commands.slice(1)),JSON.stringify([['HGET','nick-reverse','мажор'],['HGET','bind','ID1']]));
 });
