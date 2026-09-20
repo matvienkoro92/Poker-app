@@ -990,8 +990,18 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   border:0!important;box-shadow:none!important;font-size:1.5cqw!important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonuses__note {
-  top:auto!important;bottom:-13%!important;height:25%!important;
+  top:auto!important;bottom:-7%!important;height:25%!important;
 }
 #app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses__note-arc text {
   font-size:28px;
+}
+
+/* Fade the cut edge of the bonus artwork into the black apron below the rail. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table::before {
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table {
+  border:0!important;border-radius:0!important;box-shadow:none!important;
 }
