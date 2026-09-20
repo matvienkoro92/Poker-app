@@ -68,3 +68,10 @@ test('restores a straddle when live seat storage is not in action order',()=>{
  const inferred=share.events(replay).find(event=>event.code==='21');
  assert.deepEqual({actorId:inferred.actorId,amount:inferred.amount},{actorId:'straddle',amount:80});
 });
+test('repairs straddles and pots in already published hand text',()=>{
+ const old=['Префлоп · Банк: 0 bb','SB: Small — МБ 0,5 bb','BB: Big — ББ 1 bb','CO: C — Фолд','BTN: D — Фолд','UTG: Вы — Колл 2 bb','MP: Player — Чек','','Флоп: 8♠ 6♠ 10♣ · Банк: 6,5 bb','Итоговый банк: 8,5 bb'].join('\n');
+ const repaired=share.restoreTextStraddle(old);
+ assert.match(repaired,/MP: Player — Страдл 2 bb[\s\S]*CO: C — Фолд/);
+ assert.match(repaired,/Флоп: .+ · Банк: 8,5 bb/);assert.match(repaired,/Итоговый банк: 10,5 bb/);
+ assert.equal(share.restoreTextStraddle(repaired),repaired);
+});

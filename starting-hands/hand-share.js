@@ -34,6 +34,20 @@ function events(replay){
  const inferred={sequence:Number(straddler.sequence)-0.5,code:'21',actor:straddler.actor,actorId:straddler.actorId,amount,board:[],inferred:true};
  return [...source.slice(0,insertAt),inferred,...source.slice(insertAt)];
 }
+function restoreTextStraddle(value){
+ const lines=String(value||'').split(/\r?\n/);if(lines.some(line=>/\s—\sСтрадл(?:\s|$)/.test(line)))return lines.join('\n');
+ const flop=lines.findIndex(line=>/^Флоп(?::|\s*·|$)/.test(line));if(flop<0)return lines.join('\n');
+ const pre=lines.slice(0,flop),actions=pre.filter(line=>/\s—\s(?:Колл|Рейз|Олл-ин|Фолд|Чек|Ставка)(?:\s|$)/.test(line));
+ const checks=actions.filter(line=>/\s—\sЧек(?:\s|$)/.test(line)),calls=actions.map(line=>/\s—\sКолл\s+([\d\s\u00a0\u202f]+(?:[,.]\d+)?)\s*(bb|₽|фишек)/i.exec(line)).filter(Boolean);
+ const blind=pre.map(line=>/^BB:.*\s—\sББ\s+([\d\s\u00a0\u202f]+(?:[,.]\d+)?)\s*(bb|₽|фишек)/i.exec(line)).find(Boolean);
+ const number=text=>Number(String(text).replace(/[\s\u00a0\u202f]/g,'').replace(',','.'));
+ if(checks.length!==1||actions.at(-1)!==checks[0]||!calls.length||!blind||actions.some(line=>/\s—\s(?:Рейз|Олл-ин|Ставка)(?:\s|$)/.test(line)))return lines.join('\n');
+ const amount=number(calls[0][1]),unit=calls[0][2];if(!Number.isFinite(amount)||amount<=number(blind[1])||calls.some(call=>number(call[1])!==amount||call[2].toLowerCase()!==unit.toLowerCase())||/^BB:/.test(checks[0]))return lines.join('\n');
+ const shown=amount.toLocaleString('ru-RU',{maximumFractionDigits:2}),straddle=checks[0].replace(/\s—\sЧек(?:\s.*)?$/,' — Страдл '+shown+' '+unit),first=lines.findIndex(line=>actions.includes(line));
+ lines.splice(first,0,straddle);
+ const addToPot=line=>line.replace(/((?:·\sБанк:|Итоговый банк:)\s*)([\d\s\u00a0\u202f]+(?:[,.]\d+)?)(\s*)(bb|₽|фишек)/i,(full,prefix,current,space,potUnit)=>potUnit.toLowerCase()===unit.toLowerCase()?prefix+(number(current)+amount).toLocaleString('ru-RU',{maximumFractionDigits:2})+space+potUnit:full);
+ return lines.map((line,index)=>index>first&&(/^(?:Флоп|Тёрн|Ривер)(?::|\s*·|$)/.test(line)||/^Итоговый банк:/.test(line))?addToPot(line):line).join('\n');
+}
 function splitOutcome(text){
  const lines=String(text||'').split(/\r?\n/);
  const action=/\s—\s(?:Колл|Рейз|Олл-ин|Фолд|Чек|Ставка|МБ|ББ)(?:\s|$)/;
@@ -71,5 +85,5 @@ function text(hand,replay,options){
  const full=lines.join('\n');
  return options?.showShowdown===false?splitOutcome(full).visible:full;
 }
-return {text,card,positions,events,splitOutcome};
+return {text,card,positions,events,restoreTextStraddle,splitOutcome};
 });

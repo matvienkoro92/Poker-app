@@ -143,6 +143,7 @@
     }).join('');
   }
   function contextHtml(text,hideShowdown,heroName){
+    text=window.PokerHandShare.restoreTextStraddle(text);
     var parts=window.PokerHandShare.splitOutcome(text);
     return '<p class="social-muted">'+(hideShowdown?'Раздача опубликована без ШД — вскрытие и результат скрыты':'Вскрытие и результат — под спойлером')+'</p><div class="review-hand-text">'+contextLinesHtml(parts.visible.split('\n'),heroName)+'</div>'+(!hideShowdown&&parts.hidden?'<details class="review-hand-spoiler"><summary>Показать продолжение</summary><div class="review-hand-text review-hand-spoiler__body">'+contextLinesHtml(parts.hidden.split('\n'),heroName)+'</div></details>':'');
   }
