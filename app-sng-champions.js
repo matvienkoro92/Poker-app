@@ -2065,8 +2065,10 @@
       }
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-cta]"), function (cta) {
-      var canJoin = state.status === "open";
-      var canWatch = state.status === "bracket" || state.status === "completed";
+      var homeCapacity = Math.max(1, Number(state.capacity) || 32);
+      var isFull = approved >= homeCapacity;
+      var canJoin = state.status === "open" && !isFull;
+      var canWatch = isFull || state.status === "bracket" || state.status === "completed";
       cta.hidden = !canJoin && !canWatch;
       cta.textContent = canJoin ? "Записаться" : "Смотреть";
       cta.setAttribute("aria-label", canJoin ? "Записаться на СНГ-турнир" : "Смотреть сетку СНГ-турнира");
