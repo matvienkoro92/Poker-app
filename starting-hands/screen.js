@@ -444,8 +444,8 @@ function startHistory(payload) {
     const potUnit=replayInBb?'bb':mode==='cash'?'₽':'фишек';
     const potLabel=()=>replayAmount(currentPot);
     const positionFor=window.PokerHandShare.positions(Object.assign({playerId:sample.playerId},hand),replay);
-    const contributionCodes=new Set(['2','3','5','18','19','20']);
-    const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка'};
+    const contributionCodes=new Set(['2','3','5','18','19','20','21']);
+    const labels={'2':'Колл','3':'Рейз','5':'Олл-ин','10':'Фолд','17':'Чек','18':'МБ','19':'ББ','20':'Ставка','21':'Страдл'};
     const startingStacks=new Map((replay.stacks||[]).map(player=>[String(player.actor||''),Number(player.amount)]));
     const actorLabel=event=>{
       const actor=String(event.actor||'Игрок');
@@ -455,7 +455,7 @@ function startHistory(payload) {
       return actor+' ('+replayAmount(stack)+' '+potUnit+')';
     };
     const unknown=[];
-    for(const event of replay.events){
+    for(const event of window.PokerHandShare.events(replay)){
       if(event.board.length){
         lastBoardLength=Math.max(lastBoardLength,event.board.length);roundActors.clear();raisesOnStreet=0;
         const streetName=({3:'Флоп',4:'Тёрн',5:'Ривер'}[event.board.length]||'Борд');

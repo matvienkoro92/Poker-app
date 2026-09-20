@@ -51,3 +51,15 @@ test('adds compact positions to action lines',()=>{
  replay.seats=[{actorId:'utg',actor:'UTG',position:'CO'},{actorId:'hero',actor:'Вы',position:'BTN'},{actorId:'sb',actor:'Small',position:'SB'},{actorId:'bb',actor:'Big',position:'BB'}];
  const text=share.text(hand,replay);assert.match(text,/SB: Small \(10 bb\) — МБ/);assert.match(text,/BB: Big \(40 bb\) — ББ/);assert.match(text,/CO: UTG \(20 bb\) — Фолд/);assert.match(text,/BTN: Вы — Рейз/);assert.doesNotMatch(text,/Вы \(/);
 });
+test('restores an omitted Poker21 straddle before the first preflop decision',()=>{
+ const hand={handId:'4789853475792',playerId:'508434',mode:'cash',metric:'bb',playedAt:'2026-09-19T21:31:15Z',cards:['Th','8d'],position:'UTG',bigBlindMinor:4000,resultMinor:0,bb:0};
+ const replay={seats:[{actorId:'508434',actor:'Вы',position:'UTG'},{actorId:'464311',actor:'MP player',position:'MP'},{actorId:'878178',actor:'CO player',position:'CO'},{actorId:'589733',actor:'BTN player',position:'BTN'},{actorId:'208238',actor:'SB player',position:'SB'},{actorId:'286730',actor:'BB player',position:'BB'}],events:[{sequence:0,code:'92',actor:'Стол',actorId:'-1',amount:120,board:[]},{sequence:2,code:'18',actor:'SB player',actorId:'208238',amount:20,board:[]},{sequence:3,code:'19',actor:'BB player',actorId:'286730',amount:40,board:[]},{sequence:10,code:'10',actor:'CO player',actorId:'878178',amount:0,board:[]},{sequence:12,code:'10',actor:'BTN player',actorId:'589733',amount:0,board:[]},{sequence:14,code:'10',actor:'SB player',actorId:'208238',amount:0,board:[]},{sequence:16,code:'10',actor:'BB player',actorId:'286730',amount:0,board:[]},{sequence:18,code:'2',actor:'Вы',actorId:'508434',amount:80,board:[]},{sequence:21,code:'17',actor:'MP player',actorId:'464311',amount:0,board:[]},{sequence:22,code:'94',actor:'Стол',actorId:'-1',amount:0,board:['8s','6s','Tc']}]};
+ const normalized=share.events(replay),straddle=normalized.find(event=>event.code==='21');
+ assert.deepEqual({actorId:straddle.actorId,amount:straddle.amount,inferred:straddle.inferred},{actorId:'464311',amount:80,inferred:true});
+ assert.ok(normalized.indexOf(straddle)<normalized.findIndex(event=>event.code==='10'));
+ const text=share.text(hand,replay);assert.match(text,/MP: MP player — Страдл 2 bb/);assert.match(text,/Флоп: 8♠ 6♠ 10♣ · Банк: 8,5 bb/);
+});
+test('does not invent a straddle for an ordinary limp and BB check',()=>{
+ const replay={seats:[{actorId:'u',position:'UTG'},{actorId:'b',position:'BB'}],events:[{code:'19',actorId:'b',amount:40,board:[]},{code:'2',actorId:'u',amount:40,board:[]},{code:'17',actorId:'b',amount:0,board:[]}]};
+ assert.equal(share.events(replay),replay.events);
+});
