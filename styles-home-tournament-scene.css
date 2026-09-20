@@ -543,6 +543,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
   display: none !important;
 }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock--unannounced .home-last-longer-dock__bar {
+  display: flex !important;
+}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
 }
@@ -566,10 +569,19 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   display: none !important;
 }
 #app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
-  top: 14.2cqw; bottom: auto; width: 9cqw; gap: .15cqw;
-  color: #251605; text-shadow: none; font-size: 1.65cqw;
+  top: 13.55cqw; bottom: auto; width: 10.5cqw; gap: 0;
+  color: #251605; text-shadow: none; font: 950 1.9cqw/.86 'Arial Narrow', Arial, sans-serif;
+  letter-spacing: -.04em; white-space: nowrap;
 }
-#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small { font-size: 1cqw; }
+#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {
+  font: 900 1.35cqw/.9 'Arial Narrow', Arial, sans-serif; letter-spacing: -.055em;
+}
+
+/* Blend the illustrated bonus felt into the main table instead of exposing its rectangular top edge. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table::before {
+  mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.18) 5%, #000 18%) !important;
+  -webkit-mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.18) 5%, #000 18%) !important;
+}
 
 /* Monday's magician uses the rating character Morf. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] {
@@ -750,6 +762,25 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label {position:absolute;z-index:2;left:50%;bottom:-6.2cqw;display:grid;gap:.35cqw;width:13.5cqw;margin:0;transform:translateX(-50%);color:#ffe4a4;font-size:1.85cqw;font-weight:950;line-height:.95;text-align:center;text-shadow:0 .18cqw .22cqw #000,0 0 .5cqw #000;pointer-events:none}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.25cqw;line-height:1.05}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note {display:none!important}
+
+/* Follow the lower table rail with the bonus hint and leave air before achievements. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-tournament-bonuses--table .home-tournament-bonuses__note {
+  display:block!important; position:absolute!important; z-index:3!important;
+  left:8%!important; bottom:-.5%!important; width:84%!important; height:9%!important;
+  margin:0!important; padding:0!important; border:0!important; border-radius:0!important;
+  background:none!important; box-shadow:none!important; color:#e5bd6b!important;
+  pointer-events:none!important; overflow:visible!important;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note-arc {
+  display:block; width:100%; height:100%; overflow:visible;
+}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__note-arc text {
+  fill:currentColor; font:700 21px/1 'Arial Narrow',Arial,sans-serif; letter-spacing:.7px;
+  paint-order:stroke; stroke:#100b05; stroke-width:2px; stroke-linejoin:round;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
+  margin-top:clamp(42px,7vw,76px)!important;
+}
 
 /* Align the table panel and the tractor scene trophy on the same centerline. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table {

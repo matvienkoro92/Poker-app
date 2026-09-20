@@ -414,7 +414,7 @@
     <link rel="stylesheet" href="./styles-home-overrides.css?v=home-lounge-even-rim-light-3" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=news-reactions-1" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=20260919-no-bottom-glow-1" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20260920-fishkopcheny-polish-2" />
+    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20260920-table-seam-hint-3" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=4.030" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -1022,7 +1022,7 @@
               </button>
               <button type="button" class="home-tournament-bonus home-tournament-bonus--info home-tournament-bonus--pokermanki-knockout" data-home-tournament-bonus-info="pokermanki-knockout" aria-label="5000р за выбивание ПокерМанки после конца регистрации">
                 <img class="home-tournament-bonus__glove" src="./assets/home-pokermanki-knockout-glove-v1.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <span class="home-tournament-bonus__glove-label">5000р<small>за ПокерМанки</small></span>
+                <span class="home-tournament-bonus__glove-label">5000₽ за<small>ПокерМанки</small></span>
               </button>
               <button type="button" class="home-tournament-bonus home-tournament-bonus--bubble-buyin home-tournament-bonus--info" data-home-tournament-bubble-bonus="1" aria-label="Условия бонуса бабблу" hidden>
                 <svg class="home-tournament-bonus__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="27" r="18"/><path d="M18 42 12 56l11-3 4 7 5-15 5 15 4-7 11 3-6-14"/><path d="m32 14 4 8 9 1-7 7 2 9-8-5-8 5 2-9-7-7 9-1Z" fill="currentColor"/></svg>
@@ -1030,7 +1030,12 @@
                 <span class="home-tournament-bonus__label" id="homeTournamentBubbleBuyinLabel">бабблу</span>
               </button>
             </div>
-            <p class="home-tournament-bonuses__note">Нажми на бонус, чтобы узнать условия</p>
+            <p class="home-tournament-bonuses__note">
+              <svg class="home-tournament-bonuses__note-arc" viewBox="0 0 1000 90" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <path id="homeTournamentBonusHintArc" d="M 70 70 Q 500 -10 930 70" fill="none" />
+                <text><textPath href="#homeTournamentBonusHintArc" startOffset="50%" text-anchor="middle">Нажмите на бонус, чтобы узнать условия получения</textPath></text>
+              </svg>
+            </p>
           </div>
           <span class="home-tournament-flow" aria-hidden="true">
             <svg class="home-tournament-flow__svg" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">
