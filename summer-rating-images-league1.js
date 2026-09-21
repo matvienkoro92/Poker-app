@@ -988,4 +988,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-19-09-2026-league1-big-boss-18h.jpg",
     "rating-compressed-preview/rating-19-09-2026-league1-lucky-555-gtd-18h.jpg"
   ]
+,
+  "20.09.2026": [
+    "rating-compressed-preview/rating-20-09-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-20-09-2026-league1-dv-main-700k-13h.jpg",
+    "rating-compressed-preview/rating-20-09-2026-league1-voskresnyj-turnir-18h.jpg",
+    "rating-compressed-preview/rating-20-09-2026-league1-hr-5000-200k-2159h.jpg"
+  ]
 };

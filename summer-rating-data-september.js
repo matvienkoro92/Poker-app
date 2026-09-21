@@ -2877,4 +2877,155 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "20.09.2026": [
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 1,
+          "reward": 7100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FishKopcheny",
+          "place": 2,
+          "reward": 5800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "🏃DV MAIN 700K🏃",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 4,
+          "reward": 50900,
+          "points": 0
+        },
+        {
+          "nick": "XP4313558",
+          "place": 13,
+          "reward": 1700,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 3130,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 1715,
+          "points": 0
+        },
+        {
+          "nick": "SvD_mafia",
+          "place": 3,
+          "reward": 1210,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 1760,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресный турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13",
+          "place": 2,
+          "reward": 31328.12,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "lucky",
+          "place": 1,
+          "reward": 7365.64,
+          "points": 0
+        },
+        {
+          "nick": "PlayerA2BA07",
+          "place": 2,
+          "reward": 2200.62,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 4,
+          "reward": 949.37,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 3,
+          "reward": 661.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:59",
+      "name": "HR 5000🥊 200K",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 12888.999999999998,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

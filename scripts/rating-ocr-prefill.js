@@ -72,6 +72,7 @@ function normalizeName(raw) {
   if (/^Фризаут/i.test(name)) return "Фризаут 💸";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
   if (/^DV\s+Turbo\s+500/i.test(name)) return "DV Turbo 500🏆 50K";
+  if (/^(?:\d+[.]?\s*)?DV\s+MAIN\s+700K/i.test(name)) return "🏃DV MAIN 700K🏃";
   if (/^HR\s+5000.*200K/i.test(name)) return "HR 5000🥊 200K";
   if (/^Magic.*500.*120K/i.test(name)) return "Magic 🎯500🎯120K";
   if (/^DV\s*2?\s*PLO5/i.test(name)) return "DV🏃 PLO5 🥊 30k🥊";
@@ -397,6 +398,12 @@ async function parseOcrFile(file) {
   if (date === "15.09.2026" && blue) {
     buyin = confirmedBlueTournamentBuyin(title) || 0;
     if (/^Magic.*500/i.test(title)) title = "Magic 🎯500🎯120K";
+  }
+  // September 20: entry fees confirmed by the club owner; blue headers show stacks.
+  if (date === "20.09.2026" && blue) {
+    if (time === "02:00" && /Deep\s+Night\s+15k/i.test(title)) buyin = 200;
+    if (time === "13:00" && /DV\s+MAIN\s+700K/i.test(title)) { title = "🏃DV MAIN 700K🏃"; buyin = 1000; }
+    if (time === "21:59" && /^HR\s+5000.*200K/i.test(title)) buyin = 5000;
   }
   if (blue) buyin = confirmedBlueTournamentBuyin(title) ?? buyin;
   // Visually verified ID labels that Vision prefixed or distorted.
