@@ -561,14 +561,14 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 
 /* Sunday uses a complete illustrated glove trophy, without a covering panel. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses.home-tournament-bonuses--table::before {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses.home-tournament-bonuses--table::before {
   background-image: url('./assets/home-bonus-stacks-glove-v2.webp') !important;
 }
-#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
-#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove {
+#app.app.app--view-home :is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
+#app.app.app--view-home :is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) .home-tournament-bonuses--table .home-tournament-bonus__glove {
   display: none !important;
 }
-#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+#app.app.app--view-home :is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
   top: 13.05cqw; bottom: auto; width: 14cqw; gap: .25cqw;
   box-sizing: border-box; padding: .55cqw .3cqw;
   border: .2cqw solid #fff0b5; border-radius: .35cqw;
@@ -577,19 +577,19 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   color: #241400; text-shadow: none; font: 950 2.45cqw/1 Arial, sans-serif;
   letter-spacing: -.035em; white-space: nowrap;
 }
-#app.app.app--view-home [data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {
+#app.app.app--view-home :is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {
   font: 900 1.7cqw/1.05 Arial, sans-serif; letter-spacing: -.035em;
 }
 
 /* Blend the illustrated bonus felt into the main table instead of exposing its rectangular top edge. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table::before {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table::before {
   mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.18) 5%, #000 18%) !important;
   -webkit-mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.18) 5%, #000 18%) !important;
 }
 
 /* Monday's magician uses the rating character Morf. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] {
-  --home-tournament-scene: url('./assets/home-tournament-morf-magic-v1-light.webp');
+  --home-tournament-scene: url('./assets/home-tournament-morf-single-table-v2.webp');
   translate: none;
   margin-bottom: 0 !important;
 }
@@ -1001,11 +1001,34 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 
 /* Fade the cut edge of the bonus artwork into the black apron below the rail. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table::before {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table::before {
   border:0!important;border-radius:0!important;box-shadow:none!important;
   mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table {
   border:0!important;border-radius:0!important;box-shadow:none!important;
 }
+
+/* Monday is permanently bound to Morf's single-table scene. Keep the ticket
+   behind the actual hat silhouette, without copying stray table fragments. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"]::after {
+  mask:url('./assets/home-tournament-morf-head-mask.svg') center/100% 100% no-repeat!important;
+  -webkit-mask:url('./assets/home-tournament-morf-head-mask.svg') center/100% 100% no-repeat!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-tournament-bonuses--table {
+  top:auto!important;bottom:5%!important;height:auto!important;aspect-ratio:3/1!important;overflow:visible!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-last-longer-dock {
+  left:33.5%!important;top:62.4%!important;width:21%!important;height:3.8%!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-last-longer-dock::before {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] .home-last-longer-dock__bar {
+  display:flex!important;left:0!important;top:0!important;width:100%!important;height:100%!important;
+  padding:0 .5cqw!important;gap:.4cqw!important;background:none!important;clip-path:none!important;
+  border:0!important;box-shadow:none!important;font-size:1.5cqw!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] .home-tournament-bonuses--table .home-tournament-bonuses__note {
+  top:auto!important;bottom:-7%!important;height:25%!important;
+}
+#app.app.app--view-home [data-tournament-character="morf"] .home-tournament-bonuses__note-arc text {font-size:28px}
