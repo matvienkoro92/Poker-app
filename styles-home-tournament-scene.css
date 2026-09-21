@@ -761,7 +761,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__label {font-size:1.4cqw!important}
 #app.app.app--view-home .home-tournament-bonuses--table [data-home-tournament-bonus] .home-tournament-bonus__amount {font-size:1.65cqw!important}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout {width:17cqw!important;height:19cqw!important;overflow:visible!important}
-#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before {content:""!important;display:block!important;position:absolute!important;z-index:0!important;left:50%!important;bottom:-9.8cqw!important;width:16.5cqw!important;height:16cqw!important;transform:translateX(-50%)!important;border:.28cqw solid #b18c4b!important;border-radius:38% 38% 18% 18%!important;background:linear-gradient(180deg,#161b1a 0 18%,#0e1211 19% 76%,#070909 77% 100%)!important;box-shadow:inset 0 .2cqw .2cqw #ffe19b26,inset 0 -.18cqw .3cqw #0008,0 .5cqw .7cqw #0009!important;pointer-events:none}
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before {content:none!important;display:none!important}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove {position:absolute!important;z-index:1!important;inset:50% auto auto 50%!important;width:17cqw!important;max-width:none!important;height:19cqw!important;object-fit:contain!important;transform:translate(-50%,-50%)!important;filter:drop-shadow(0 .8cqw .65cqw #000b)!important;pointer-events:none}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label {position:absolute;z-index:2;left:50%;bottom:-6.2cqw;display:grid;gap:.35cqw;width:13.5cqw;margin:0;transform:translateX(-50%);color:#ffe4a4;font-size:1.85cqw;font-weight:950;line-height:.95;text-align:center;text-shadow:0 .18cqw .22cqw #000,0 0 .5cqw #000;pointer-events:none}
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.25cqw;line-height:1.05}
@@ -960,18 +960,18 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {z-index:6!important}
 
-/* The illustrated bonus chips are foreground objects. Repeat only their
-   silhouettes above Last Longer so any overlap is naturally hidden behind them. */
+/* Only repeat actual head silhouettes above scene controls. Broad chip masks
+   copied unrelated table pixels over the Last Longer plaque on other days. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character]::after {
   display:block!important;
   background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
-  mask:radial-gradient(ellipse 8.4% 9.5% at 31% 72%,transparent 0 67%,#000 70% 97%,transparent 100%),radial-gradient(ellipse 8.4% 9.5% at 50% 72%,transparent 0 67%,#000 70% 97%,transparent 100%)!important;
-  -webkit-mask:radial-gradient(ellipse 8.4% 9.5% at 31% 72%,transparent 0 67%,#000 70% 97%,transparent 100%),radial-gradient(ellipse 8.4% 9.5% at 50% 72%,transparent 0 67%,#000 70% 97%,transparent 100%)!important;
+  mask:linear-gradient(transparent,transparent)!important;
+  -webkit-mask:linear-gradient(transparent,transparent)!important;
   z-index:5!important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {
-  mask:url('./assets/home-tournament-head-mask.svg?v=2') center/100% 100% no-repeat,radial-gradient(ellipse 8.4% 9.5% at 31% 72%,transparent 0 67%,#000 70% 97%,transparent 100%),radial-gradient(ellipse 8.4% 9.5% at 50% 72%,transparent 0 67%,#000 70% 97%,transparent 100%)!important;
-  -webkit-mask:url('./assets/home-tournament-head-mask.svg?v=2') center/100% 100% no-repeat,radial-gradient(ellipse 8.4% 9.5% at 31% 72%,transparent 0 67%,#000 70% 97%,transparent 100%),radial-gradient(ellipse 8.4% 9.5% at 50% 72%,transparent 0 67%,#000 70% 97%,transparent 100%)!important;
+  mask:url('./assets/home-tournament-head-mask.svg?v=2') center/100% 100% no-repeat!important;
+  -webkit-mask:url('./assets/home-tournament-head-mask.svg?v=2') center/100% 100% no-repeat!important;
 }
 
 /* Sunday uses the same illustrated bonus row as the other tables.
