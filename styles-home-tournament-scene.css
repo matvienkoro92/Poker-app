@@ -486,6 +486,7 @@
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
   --home-tournament-scene: url('./assets/home-tournament-cooler-single-table-v2-display-v1.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-single-table-v2-display-v1.webp') 1x, url('./assets/home-tournament-cooler-single-table-v2-hd.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -529,6 +530,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] {
   --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v4.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-fishkopcheny-boxing-v4.webp') 1x, url('./assets/home-tournament-fishkopcheny-boxing-v4-hd.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__caption,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
@@ -590,6 +592,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* Monday's magician uses the rating character Morf. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] {
   --home-tournament-scene: url('./assets/home-tournament-morf-single-table-v2.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-morf-single-table-v2.webp') 1x, url('./assets/home-tournament-morf-single-table-v2-hd.webp') 2x);
   translate: none;
   margin-bottom: 0 !important;
 }
