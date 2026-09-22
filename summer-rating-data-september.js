@@ -3028,4 +3028,199 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "21.09.2026": [
+    {
+      "time": "06:00",
+      "name": "Tai 7 €& 1/2 KO o*15k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Evgen1722",
+          "place": 3,
+          "reward": 3325,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Tim",
+          "place": 2,
+          "reward": 11044,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "I🐅I",
+          "place": 2,
+          "reward": 6600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 11347,
+          "points": 0
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 26,
+          "reward": 1812,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 2470,
+          "points": 0
+        },
+        {
+          "nick": "Monfokon",
+          "place": 2,
+          "reward": 1435,
+          "points": 0
+        },
+        {
+          "nick": "time2bass",
+          "place": 3,
+          "reward": 760,
+          "points": 0
+        },
+        {
+          "nick": "__JD__",
+          "place": 5,
+          "reward": 450,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 27150,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 3,
+          "reward": 11840,
+          "points": 0
+        },
+        {
+          "nick": "IRIHKA",
+          "place": 7,
+          "reward": 10300,
+          "points": 0
+        },
+        {
+          "nick": "mr.Freeman",
+          "place": 6,
+          "reward": 6350,
+          "points": 0
+        },
+        {
+          "nick": "RedRocket🚀",
+          "place": 4,
+          "reward": 1870,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Monday Y 200k GT...",
+      "buyin": 7500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Tim",
+          "place": 1,
+          "reward": 47912,
+          "points": 0
+        },
+        {
+          "nick": "butovskiy",
+          "place": 15,
+          "reward": 1574,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Monfokon",
+          "place": 1,
+          "reward": 5776.58,
+          "points": 0
+        },
+        {
+          "nick": "SvD_mafia",
+          "place": 2,
+          "reward": 2344.99,
+          "points": 0
+        },
+        {
+          "nick": "PlayerVBYAjK",
+          "place": 12,
+          "reward": 44.37,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K 🌘",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 6,
+          "reward": 800,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

@@ -707,4 +707,9 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-20-09-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-20-09-2026-league2-ok-21h.jpg"
   ]
+,
+  "21.09.2026": [
+    "rating-compressed-preview/rating-21-09-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-21-09-2026-league2-ok-21h.jpg"
+  ]
 };
