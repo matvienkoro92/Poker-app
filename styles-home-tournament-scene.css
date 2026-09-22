@@ -475,7 +475,7 @@
 
 /* Tractor tournament uses Pasha Shkarubo, including the raffle scene layers. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene: url('./assets/home-tournament-shkarubo-single-table-v4.webp');
+  --home-tournament-scene: url('./assets/home-tournament-shkarubo-no-purple-v1.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix {
   display: none !important;
@@ -485,8 +485,8 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-single-table-v2-display-v1.webp');
-  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-single-table-v2-display-v1.webp') 1x, url('./assets/home-tournament-cooler-single-table-v2-hd.webp') 2x);
+  --home-tournament-scene: url('./assets/home-tournament-cooler-no-purple-v1.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-no-purple-v1.webp') 1x, url('./assets/home-tournament-cooler-no-purple-v1-hd.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -806,7 +806,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* One continuous poker table, with every trophy on the same felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene:url('./assets/home-tournament-shkarubo-single-table-v4.webp');
+  --home-tournament-scene:url('./assets/home-tournament-shkarubo-no-purple-v1.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-table-seam-fix {display:none!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table {
@@ -859,7 +859,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* One continuous poker table, with every trophy on the same felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] {
-  --home-tournament-scene:url('./assets/home-tournament-aza-single-table-v1.webp');
+  --home-tournament-scene:url('./assets/home-tournament-aza-no-purple-v1.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-table-seam-fix {display:none!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-tournament-bonuses--table {
@@ -882,7 +882,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* Thursday: RedRocket at the same straight, continuous table layout. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
-  --home-tournament-scene:url('./assets/home-tournament-redrocket-single-table-v2.webp');
+  --home-tournament-scene:url('./assets/home-tournament-redrocket-no-purple-v1.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-seam-fix {display:none!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-bonuses--table {
@@ -946,7 +946,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
-  position:absolute;top:calc(100% + 4.35cqw);left:50%;transform:translate(-50%,-50%);margin:0;width:11.5cqw;
+  position:absolute;top:calc(100% + 4.35cqw);bottom:auto;left:50%;transform:translate(-50%,-50%);margin:0;width:11.5cqw;
   align-content:center;gap:.08cqw;font-size:2.3cqw;line-height:.96;
 }
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1}
@@ -1035,3 +1035,20 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   top:auto!important;bottom:-7%!important;height:25%!important;
 }
 #app.app.app--view-home [data-tournament-character="morf"] .home-tournament-bonuses__note-arc text {font-size:28px}
+
+/* A compact engraved pedestal makes the live knockout reward readable.
+   The four weekday scenes have empty felt beneath the separate glove asset. */
+#app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  box-sizing:border-box;padding:.55cqw .3cqw;
+  border:.2cqw solid #fff0b5;border-radius:.35cqw;
+  background:linear-gradient(135deg,#fff3b7,#ffd56b 55%,#ffec9a);
+  box-shadow:0 .3cqw .5cqw #000b,inset 0 0 0 .15cqw #b77b25;
+  color:#241400;text-shadow:none;white-space:nowrap;
+}
+#app.app.app--view-home :is([data-tournament-character="shkarubo"],[data-tournament-character="aza"],[data-tournament-character="redrocket"],[data-tournament-character="cooler"]) .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  bottom:-6.8cqw;width:14.5cqw;min-height:4.7cqw;
+  align-content:center;font:950 2cqw/1 Arial,sans-serif;gap:.3cqw;
+}
+#app.app.app--view-home :is([data-tournament-character="shkarubo"],[data-tournament-character="aza"],[data-tournament-character="redrocket"],[data-tournament-character="cooler"]) .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {
+  font:900 1.45cqw/1 Arial,sans-serif;
+}

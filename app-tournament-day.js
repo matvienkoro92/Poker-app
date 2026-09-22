@@ -1254,12 +1254,36 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
 var HOME_TOURNAMENT_BONUS_INFO = {
   "four-kind": { title: "Бонус за каре", amount: "1000 ₽" },
   "straight-flush": { title: "Бонус за стрит-флеш", amount: "2500 ₽" },
-  "royal-flush": { title: "Бонус за роял", amount: "10 000 ₽" },
-  "pokermanki-knockout": { title: "5000р за ПокерМанки", amount: "5000р за выбивание ПокерМанки после конца регистрации", standalone: true }
+  "royal-flush": { title: "Бонус за роял", amount: "10 000 ₽" }
 };
 
+// Use the displayed tournament day, including when browsing another weekday.
+function getHomePokermankiKnockoutInfo(weekday) {
+  if (weekday == null) {
+    var scene = document.querySelector(".tournament-day-home-dual--tournament-focus");
+    weekday = scene && scene.dataset.tournamentWeekday;
+    if (weekday == null) weekday = getTournamentDayState(new Date()).weekday;
+  }
+  var reward = Number(weekday) === 2 ? 3000 : 5000;
+  return {
+    reward: reward,
+    title: reward + " ₽ за ПокерМанки",
+    amount: reward + " ₽ за выбивание ПокерМанки после конца регистрации",
+    standalone: true
+  };
+}
+
+function renderHomePokermankiKnockout(weekday) {
+  var info = getHomePokermankiKnockoutInfo(weekday);
+  var button = document.querySelector('[data-home-tournament-bonus-info="pokermanki-knockout"]');
+  if (!button) return;
+  button.setAttribute("aria-label", info.amount);
+  var amount = button.querySelector("[data-home-pokermanki-reward]");
+  if (amount) amount.textContent = info.reward + " ₽ за";
+}
+
 function fillHomeTournamentBonusModal(kind) {
-  var info = HOME_TOURNAMENT_BONUS_INFO[kind] || HOME_TOURNAMENT_BONUS_INFO["four-kind"];
+  var info = kind === "pokermanki-knockout" ? getHomePokermankiKnockoutInfo() : (HOME_TOURNAMENT_BONUS_INFO[kind] || HOME_TOURNAMENT_BONUS_INFO["four-kind"]);
   var title = document.getElementById("homeTournamentBonusModalTitle");
   var meta = document.getElementById("homeTournamentBonusModalMeta");
   var fourKindRule = document.getElementById("homeTournamentBonusModalFourKindRule");
@@ -2513,6 +2537,8 @@ function updateTournamentDayBlock() {
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
     if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "aza" : selectedWeekday === 4 ? "redrocket" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
+    if (tournamentScene) tournamentScene.dataset.tournamentWeekday = String(selectedWeekday);
+    renderHomePokermankiKnockout(selectedWeekday);
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
     var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;
