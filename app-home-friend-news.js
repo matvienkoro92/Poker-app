@@ -1185,6 +1185,7 @@
     if (!clubCashHighlights) return '<div class="home-friend-news-modal__loading" role="status">Загружаем кеш-раздачи…</div>';
     var data = clubCashHighlights;
     var format = function (value) { return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(value); };
+    var limitNumber = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
     var categories = [
       ['potBb', 'Самый большой выигранный банк в больших блайндах', function (row) { return format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
       ['potRub', 'Самый большой выигранный банк в рублях', function (row) { return format(row.potMinor / 100) + ' ₽'; }],
@@ -1198,10 +1199,10 @@
         return '<details class="home-friend-news-modal__cash-group"><summary><span>' + category[1] + '</span><b>' +
           (rows.length ? category[2](rows[0]) : '—') + '</b></summary>' +
           (rows.length ? rows.map(function (row) {
-            var cards = (row.cards || []).join(' '), board = (row.board || []).join(' ');
+            var blind = Number(row.bigBlindMinor) / 100;
+            var limit = blind > 0 ? ' · ' + limitNumber.format(blind / 2) + '/' + limitNumber.format(blind) + ' ₽' : '';
             return '<details class="home-friend-news-modal__cash-hand" data-cash-player="' + esc(row.playerId) + '" data-cash-hand="' + esc(row.handId) + '"><summary><span class="cash-hand-summary"><strong>' + esc(row.player) + '</strong>' +
-              '<small>' + esc(new Date(row.playedAt).toLocaleDateString('ru-RU')) + ' · ' + esc(row.game) + ' · ' + esc(cards) +
-              (board ? ' · борд ' + esc(board) : '') + '</small></span><b>' + category[2](row) + '</b></summary>' +
+              '<small>' + esc(new Date(row.playedAt).toLocaleDateString('ru-RU')) + ' · ' + esc(row.game) + limit + '</small></span><b>' + category[2](row) + '</b></summary>' +
               '<div class="cash-hand-details"><small>Банк ' + format(row.potMinor / 100) + ' ₽ · результат ' + (row.resultMinor > 0 ? '+' : '') + format(row.resultMinor / 100) + ' ₽' +
               (row.evResultMinor == null ? '' : ' · EV ' + format(row.evResultMinor / 100) + ' ₽') + '</small><div data-club-cash-replay-body></div></div></details>';
           }).join('') : '<p>Подходящих раздач пока нет.</p>') + '</details>';
@@ -1215,7 +1216,7 @@
       '<h3 class="home-friend-news-modal__cash-days-title">По датам</h3>' +
       (data.days || []).map(function (day) {
         var label = new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-        return '<details class="home-friend-news-modal__cash-day"><summary><span>' + esc(label) + '</span><small>' + format(day.count) + ' раздач</small></summary>' +
+        return '<details class="home-friend-news-modal__cash-day"><summary><span>' + esc(label) + '</span></summary>' +
           groupHtml(day.groups) + '</details>';
       }).join('') + '</div>';
   }

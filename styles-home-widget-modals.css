@@ -4702,6 +4702,28 @@ button.sng-champions-modal__singles-duel-player {
   text-shadow: none;
 }
 
+.sng-champions-modal__map-player--pending.sng-champions-modal__map-player--source {
+  display: grid;
+  justify-items: center;
+  width: min(100%, 150px);
+  max-width: 100%;
+  padding: 2px 5px;
+  font-size: 7px;
+  line-height: 1.1;
+  border-radius: 7px;
+}
+
+.sng-champions-modal__map-pending-names {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 7px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sng-champions-modal__map-player--bye {
   min-width: 0;
   max-width: 100%;
@@ -4899,6 +4921,15 @@ button.sng-champions-modal__singles-duel-player {
   max-width: 72px;
   padding: 4px 8px;
   font-size: 11px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-player--pending.sng-champions-modal__map-player--source {
+  max-width: min(100%, 180px);
+  font-size: 9px;
+}
+
+.sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-pending-names {
+  font-size: 9px;
 }
 
 .sng-champions-modal__bracket-map-wrap--expanded .sng-champions-modal__map-status {

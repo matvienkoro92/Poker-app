@@ -1641,9 +1641,56 @@
     '</span>';
   }
 
-  function renderBracketMapPendingPlayer(noOpponent) {
-    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending' + (noOpponent ? ' sng-champions-modal__map-player--bye' : '') + '">' +
-      (noOpponent ? 'Нет соперника' : '???') +
+  function bracketMapPendingSource(match, round, slot, data) {
+    if (!round) return null;
+    var roundIndex = Number(round.index) || 1;
+    var matchIndex = Number(match.index) || 1;
+    var sourceRound;
+    var sourceIndex;
+    if (!round.loserBracket) {
+      sourceRound = (data.rounds || [])[roundIndex - 2];
+      sourceIndex = (matchIndex * 2) - 1 + slot;
+    } else if ([1, 3, 5].indexOf(roundIndex) >= 0 && roundIndex > 1) {
+      sourceRound = (data.loserRounds || [])[roundIndex - 2];
+      sourceIndex = (matchIndex * 2) - 1 + slot;
+    } else if ([2, 4, 6].indexOf(roundIndex) >= 0 && slot === 0) {
+      sourceRound = (data.loserRounds || [])[roundIndex - 2];
+      sourceIndex = matchIndex;
+    } else if (roundIndex === 2) {
+      sourceRound = (data.rounds || [])[1];
+      sourceIndex = ((matchIndex - 1 + 4) % 8) + 1;
+    } else if (roundIndex === 4) {
+      sourceRound = (data.rounds || [])[2];
+      sourceIndex = ((matchIndex - 1 + 2) % 4) + 1;
+    } else if (roundIndex === 6) {
+      sourceRound = (data.rounds || [])[3];
+      sourceIndex = 3 - matchIndex;
+    } else if (roundIndex === 8) {
+      sourceRound = slot === 0 ? (data.loserRounds || [])[6] : (data.rounds || [])[4];
+      sourceIndex = 1;
+    } else if (roundIndex === 9) {
+      sourceRound = slot === 0 ? (data.rounds || [])[4] : (data.loserRounds || [])[7];
+      sourceIndex = 1;
+    } else {
+      return null;
+    }
+    var sourceMatch = sourceRound && (sourceRound.matches || [])[sourceIndex - 1];
+    return sourceMatch ? { match: sourceMatch, round: sourceRound } : null;
+  }
+
+  function renderBracketMapPendingPlayer(noOpponent, source, data) {
+    var sourceNames = source && Array.isArray(source.match.playerIds)
+      ? source.match.playerIds.map(function (id) {
+          var player = id && data.playersById && data.playersById[id];
+          return player ? playerName(player) : '';
+        }).filter(Boolean)
+      : [];
+    var sourceText = sourceNames.length === 2 ? sourceNames.join(' — ') : '';
+    var sourceStage = source && !sourceText
+      ? (source.round.loserBracket ? loserRoundStageLabel(source.round, Number(source.round.index) - 1) : roundStageLabel(source.round, Number(source.round.index) - 1, data.rounds || []))
+      : '';
+    return '<span class="sng-champions-modal__map-player sng-champions-modal__map-player--pending' + (noOpponent ? ' sng-champions-modal__map-player--bye' : '') + (sourceText ? ' sng-champions-modal__map-player--source' : '') + '"' + (sourceText ? ' title="Ждём пару: ' + escapeHtml(sourceText) + '"' : '') + '>' +
+      (noOpponent ? 'Нет соперника' : sourceText ? '<span>Ждём пару</span><span class="sng-champions-modal__map-pending-names">' + escapeHtml(sourceText) + '</span>' : 'Ждём пару' + (sourceStage ? ' ' + escapeHtml(sourceStage) : '')) +
     '</span>';
   }
 
@@ -1696,7 +1743,7 @@
         renderBracketSeriesRule(match, data, true) +
       '</span>' +
       '<span class="sng-champions-modal__map-players">' +
-        playerIds.map(function (id) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(automaticBye); }).join("") +
+        playerIds.map(function (id, slot) { return id ? renderBracketMapPlayer(id, match, data, waitingForOpponent, unplayed) : renderBracketMapPendingPlayer(automaticBye, bracketMapPendingSource(match, round, slot, data), data); }).join("") +
       '</span>' +
       renderBracketMapHeadToHead(match, data) +
       (nextIndex ? '<span class="sng-champions-modal__map-next">к паре ' + escapeHtml(nextIndex) + '</span>' : '') +
