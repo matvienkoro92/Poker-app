@@ -44,6 +44,7 @@
     "backup": "./scripts/backup.sh",
     "rating:ocr": "node scripts/rating-ocr-prefill.js",
     "rating:daily": "node scripts/rating-daily-import.js",
+    "club:cash-highlights": "node scripts/generate-club-cash-highlights.cjs",
     "rating:snippet": "node scripts/rating-entry-helper.js snippet",
     "rating:import": "node scripts/rating-entry-helper.js import",
     "rating:import:summer": "node scripts/rating-entry-helper.js import --season=summer --target-kb=30",

@@ -1229,7 +1229,7 @@ var profileAchievementsShowcasePromise = null;
 var profileAchievementsRetryTimer = null;
 var profileAchievementsRetryCount = 0;
 var PROFILE_ACHIEVEMENTS_RETRY_MAX = 2;
-var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v3";
+var PROFILE_ACHIEVEMENTS_CACHE_VERSION = "v4";
 var PROFILE_ACHIEVEMENTS_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 
 function profileAchievementsCacheKey(data) {

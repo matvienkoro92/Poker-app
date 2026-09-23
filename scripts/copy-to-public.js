@@ -74,6 +74,7 @@ const baseFiles = [
   'preview-iphone.html',
   'manifest.json',
   'news-rating-snapshots.json',
+  'club-cash-highlights.json',
   'sw.js',
 ];
 const cssPartFiles = fs

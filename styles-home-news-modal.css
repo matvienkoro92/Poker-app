@@ -1331,11 +1331,26 @@ body.home-friend-news-modal-open {
 }
 
 .home-friend-news-modal--club .home-friend-news-modal__club-tab:first-child::after {
-  margin-left: 8px;
-  color: currentColor;
-  content: "🏆";
-  font-size: 15px;
+  content: none;
 }
+.home-friend-news-modal__cash{padding:8px 4px 28px;color:#f7eddb}
+.home-friend-news-modal__cash-month{padding:12px;border:1px solid #c38a4570;border-radius:18px;background:#231e18;margin-bottom:20px}
+.home-friend-news-modal__cash-month h3,.home-friend-news-modal__cash-days-title{margin:0 0 10px;font-size:18px;color:#ffd37c}
+.home-friend-news-modal__cash-day{margin:8px 0;border:1px solid #9f825360;border-radius:15px;background:#141a22}
+.home-friend-news-modal__cash-day>summary,.home-friend-news-modal__cash-group>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;font-weight:800}
+.home-friend-news-modal__cash-day>summary::-webkit-details-marker,.home-friend-news-modal__cash-group>summary::-webkit-details-marker{display:none}
+.home-friend-news-modal__cash-day>summary::before,.home-friend-news-modal__cash-group>summary::before{content:'▸';color:#ffd37c}
+.home-friend-news-modal__cash-day[open]>summary::before,.home-friend-news-modal__cash-group[open]>summary::before{content:'▾'}
+.home-friend-news-modal__cash-day>summary small{margin-left:auto;color:#b8c4d4;white-space:nowrap}
+.home-friend-news-modal__cash-group{margin:6px 8px;border:1px solid #86694070;border-radius:12px;background:#12171e}
+.home-friend-news-modal__cash-group>summary{font-size:13px}
+.home-friend-news-modal__cash-group>summary span{flex:1;min-width:0}
+.home-friend-news-modal__cash-group>summary b{color:#ffce69;white-space:nowrap}
+.home-friend-news-modal__cash-hand{margin:6px 8px;padding:10px 12px;border:1px solid #b8884370;border-radius:12px;background:linear-gradient(130deg,#1b222b,#11151c)}
+.home-friend-news-modal__cash-hand>div{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.home-friend-news-modal__cash-hand strong{min-width:0;overflow-wrap:anywhere}
+.home-friend-news-modal__cash-hand b{flex:none;color:#ffce69}
+.home-friend-news-modal__cash-hand small{display:block;margin-top:7px;color:#bbc4ce;line-height:1.4}
 
 .home-friend-news-modal--club .home-friend-news-modal__club-tabs .home-friend-news-modal__club-tab--active {
   border-color: #fff0b0 !important;

@@ -933,6 +933,16 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
 }
+.chat-user-modal__achievement-group--cash .chat-user-modal__achievement-group-list{grid-template-columns:minmax(140px,1fr) minmax(0,3fr);gap:12px;align-items:start}
+.chat-user-modal__cash-achievement-previews{min-width:0;padding:10px;border:1px solid rgba(241,188,87,.4);border-radius:12px;background:#12181d}
+.chat-user-modal__cash-achievement-previews>strong{display:block;margin-bottom:8px;color:#ffd77b}
+.chat-user-modal__cash-achievement-hand{margin:6px 0;border:1px solid rgba(241,188,87,.25);border-radius:9px;background:#1b2228}
+.chat-user-modal__cash-achievement-hand>summary{display:flex;justify-content:space-between;gap:8px;padding:9px;cursor:pointer;list-style:none;font-size:12px}
+.chat-user-modal__cash-achievement-hand>summary::-webkit-details-marker{display:none}
+.chat-user-modal__cash-achievement-hand>summary b{color:#ffd77b;white-space:nowrap}
+.chat-user-modal__cash-achievement-hand pre{margin:0;padding:10px;max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid rgba(241,188,87,.2);font-family:inherit;font-size:11px;line-height:1.45;color:#dfe5e9}
+.chat-user-modal__cash-achievement-previews>small{display:block;color:#aeb8c4;margin-top:7px}
+@media(max-width:560px){.chat-user-modal__achievement-group--cash .chat-user-modal__achievement-group-list{grid-template-columns:minmax(0,1fr)}.chat-user-modal__achievement-group--cash .chat-user-modal__achievement{max-width:190px}}
 .chat-user-modal__achievement {
   position: relative;
   display: grid;

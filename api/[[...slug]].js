@@ -13,6 +13,7 @@ const path = require("path");
 const handlersDir = path.join(__dirname, "..", "lib", "api-handlers");
 const handlers = {
   "starting-hands": () => require(path.join(handlersDir, "starting-hands.js")),
+  "cash-achievement": () => require(path.join(handlersDir, "cash-achievement.js")),
   "club-reviews": () => require(path.join(handlersDir, "club-reviews.js")),
   "profile-hero": () => require(path.join(handlersDir, "profile-hero.js")),
   "profile-appearance": () => require(path.join(handlersDir, "profile-appearance.js")),

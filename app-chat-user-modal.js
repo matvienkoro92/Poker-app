@@ -2156,6 +2156,7 @@ if (chatUserModalEl) {
         guestbookReview: false,
         privateCash2040Played: privateCash2040Played,
         selfBetWins: 0,
+        cashAceHigh: null,
         isClubAdmin: true,
         isSelfProfile: !!isSelfProfile,
       });
@@ -2168,6 +2169,7 @@ if (chatUserModalEl) {
       getChatUserModalReferralsCountReady(isSelfProfile),
       getChatUserModalGuestbookReviewReady(profileData, userId),
       getChatUserModalSelfBetWinsReady(ratingNick, profileData, userId),
+      typeof window.pokerSocialRequest === 'function' ? window.pokerSocialRequest('cash-achievement',{targetId:userId}).catch(function(){return null;}) : Promise.resolve(null),
     ]).then(function (parts) {
       return {
         tournaments: parts && parts[0] || null,
@@ -2178,6 +2180,7 @@ if (chatUserModalEl) {
         guestbookReview: !!(parts && parts[5]),
         privateCash2040Played: privateCash2040Played,
         selfBetWins: parts && parts[6] != null ? parts[6] : 0,
+        cashAceHigh: parts && parts[7] || null,
         isClubAdmin: false,
         isSelfProfile: !!isSelfProfile,
       };
@@ -2185,6 +2188,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementMeta(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("выигрыш по а-хай") >= 0) return { mod: "cash-ace-high", label: "А-ХАЙ<br>ОТ 1000 ₽", img: "./assets/chat-profile-achievement-cash-ace-high.svg" };
     if (key.indexOf("оставил отзыв") >= 0) return { mod: "club-review", label: "ОСТАВИЛ<br>ОТЗЫВ", img: "./assets/chat-profile-achievement-club-review-v2.webp?v=1" };
     if (key.indexOf("снг") >= 0) return { mod: "sng-champion", label: "СНГ<br>ЛИГА<br>ЧЕМПИОНОВ", img: "./assets/chat-profile-achievement-sng-champion-card.webp" };
     if (key.indexOf("админ") >= 0) return { mod: "club-admin", label: "АДМИН<br>КЛУБА", img: "./assets/home-hall-of-fame-medal.png" };
@@ -2233,6 +2237,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementRule(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("выигрыш по а-хай") >= 0) return "Выиграйте кеш-раздачу от 1 000 ₽ с тузом старшей картой на подтверждённом вскрытии. Каждая подходящая раздача засчитывается отдельно.";
     if (key.indexOf("оставил отзыв") >= 0) return "Опубликуйте отзыв о клубе в книге отзывов и жалоб. Достижение выдается один раз и не имеет уровней.";
     if (key.indexOf("снг") >= 0) return "Даётся гранд-финалистам турнира СНГ Лига Чемпионов Два Туза: 1 место получает статус чемпиона СНГ сезона, 2 место — финалиста.";
     if (key.indexOf("админ") >= 0) return "Особая клубная ачивка для администраторов клуба. Для Вики и Ани показывается только эта карточка.";
@@ -2380,7 +2385,7 @@ if (chatUserModalEl) {
     var isLocked = options.locked === true || (tier ? tier.locked : !rows.length);
     var info = chatUserModalAchievementInfoFrom(title, rows, options, tier);
     var badge = String(options.badge || "").trim();
-    var achievementValue = Math.max(0, parseInt(tier ? tier.value : rows.length, 10) || 0);
+    var achievementValue = Math.max(0, parseInt(tier ? tier.value : options.value != null ? options.value : rows.length, 10) || 0);
     var attrs = ' role="button" tabindex="0" data-chat-achievement-info="1"' +
       ' data-chat-achievement-title="' + escapeHtml(chatUserModalEncodeData(title)) + '"' +
       ' data-chat-achievement-value="' + escapeHtml(achievementValue) + '"' +
@@ -2407,6 +2412,7 @@ if (chatUserModalEl) {
   }
   function chatUserModalAchievementGroupClass(title) {
     var key = String(title || "").toLowerCase();
+    if (key.indexOf("кеш") >= 0) return "cash";
     if (key.indexOf("куб") >= 0) return "cups";
     if (key.indexOf("соц") >= 0) return "social";
     return "wins";
@@ -2483,6 +2489,26 @@ if (chatUserModalEl) {
       return { label: "Месяц: " + (month || "—") + " · " + place + (amount ? " · " + amount : "") };
     });
   }
+  function chatUserModalCashAceHighHtml(data) {
+    var previews = data && Array.isArray(data.previews) ? data.previews : [];
+    var count = data && Number.isFinite(Number(data.count)) ? Math.max(0, Number(data.count)) : 0;
+    var rows = previews.slice(0, 3).map(function (row) {
+      return { label: '+' + chatUserModalFormatAchievementRub(Number(row.resultMinor) / 100) + ' · ' + new Date(row.playedAt).toLocaleDateString('ru-RU') };
+    });
+    var card = chatUserModalAchievementCardHtml('A', 'Выигрыш по А-хай от 1000 ₽', rows, {
+      badge: '×' + count,
+      value: count,
+      placeholder: data ? 'Пока нет подходящих раздач' : 'Данные недоступны',
+      info: 'Выиграйте кеш-раздачу от 1 000 ₽ с тузом старшей картой на подтверждённом вскрытии. Каждая подходящая раздача засчитывается отдельно.',
+    });
+    var previewHtml = previews.length ? '<div class="chat-user-modal__cash-achievement-previews"><strong>Раздачи · ' + count + '</strong>' + previews.map(function (row) {
+      var value = Number(row.resultMinor) / 100;
+      return '<details class="chat-user-modal__cash-achievement-hand"><summary><span>' +
+        escapeHtml((row.cards || []).join(' ')) + ' · ' + escapeHtml(new Date(row.playedAt).toLocaleDateString('ru-RU')) +
+        '</span><b>+' + escapeHtml(chatUserModalFormatAchievementRub(value)) + '</b></summary><pre>' + escapeHtml(row.text || '') + '</pre></details>';
+    }).join('') + (count > previews.length ? '<small>Показаны последние ' + previews.length + ' из ' + count + ' раздач</small>' : '') + '</div>' : '';
+    return card + previewHtml;
+  }
   function chatUserModalAchievementsHtml(results, ratingNick, metrics) {
     var luckyMonth = Array.isArray(results && results[4]) ? results[4] : [];
     var clubChoice = Array.isArray(results && results[5]) ? results[5] : [];
@@ -2505,7 +2531,7 @@ if (chatUserModalEl) {
       return chatUserModalAchievementGroupHtml("Кубки", chatUserModalSummerCupCardHtml()) +
         chatUserModalAchievementGroupHtml("Турниры", chatUserModalAchievementCardHtml("🏆", "Победа в оффлайн турнире", [], {
           placeholder: "Нет оффлайн побед",
-        }));
+        })) + chatUserModalAchievementGroupHtml("Кеш", chatUserModalCashAceHighHtml(metrics.cashAceHigh));
     }
     var seasons = [
       { key: "summer", rows: results && results[0] },
@@ -2714,6 +2740,7 @@ if (chatUserModalEl) {
     return chatUserModalSngChampionBannerHtml(ratingNick) + [
       chatUserModalAchievementGroupHtml("Кубки", cupsHtml),
       chatUserModalAchievementGroupHtml("Заносы", winsHtml),
+      chatUserModalAchievementGroupHtml("Кеш", chatUserModalCashAceHighHtml(metrics.cashAceHigh)),
       chatUserModalAchievementGroupHtml("Социальные", socialHtml),
     ].join("");
   }

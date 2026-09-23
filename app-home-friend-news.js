@@ -34,6 +34,9 @@
   var clubTickerEvents = [];
   var clubWallEvents = [];
   var clubNewsTab = "wins";
+  var clubCashHighlights = null;
+  var clubCashLoading = false;
+  var clubCashError = false;
   var clubWinsDayTab = "latest";
   var activeIndex = 0;
   var clubActiveIndex = 0;
@@ -1114,6 +1117,63 @@
         (keys.length < 2 ? ' disabled' : '') + '>Позавчера</button>' +
       '<button type="button" data-club-wins-day="heroes" class="home-friend-news-modal__day-tab home-friend-news-modal__day-tab--heroes' +
         (clubWinsDayTab === "heroes" ? ' home-friend-news-modal__day-tab--active' : '') + '">Герои ' + esc(clubHeroMonthLabel()) + '</button></div>';
+  }
+
+  function clubNewsTabsHtml() {
+    return '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
+      '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
+        (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '"><span aria-hidden="true">🏆</span> Турниры</button>' +
+      '<button type="button" data-club-news-tab="cash" class="home-friend-news-modal__club-tab' +
+        (clubNewsTab === "cash" ? ' home-friend-news-modal__club-tab--active' : '') + '">Кеш</button></div>';
+  }
+
+  function clubCashHighlightsHtml() {
+    if (clubCashError) return '<div class="home-friend-news-modal__empty"><strong>Не удалось загрузить кеш-раздачи</strong><button type="button" data-club-cash-retry>Повторить</button></div>';
+    if (!clubCashHighlights) return '<div class="home-friend-news-modal__loading" role="status">Загружаем кеш-раздачи…</div>';
+    var data = clubCashHighlights;
+    var format = function (value) { return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(value); };
+    var categories = [
+      ['potBb', 'Самый большой выигранный банк в больших блайндах', function (row) { return format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
+      ['potRub', 'Самый большой выигранный банк в рублях', function (row) { return format(row.potMinor / 100) + ' ₽'; }],
+      ['lossBb', 'Самый минусовый результат в больших блайндах', function (row) { return '−' + format(-row.resultMinor / row.bigBlindMinor) + ' BB'; }],
+      ['evBelow', 'Самый большой недобор по EV', function (row) { return '−' + format((row.evResultMinor - row.resultMinor) / row.bigBlindMinor) + ' BB'; }],
+      ['highCard', 'Вскрытия после ставки с хай-картой', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
+    ];
+    function groupHtml(groups) {
+      return categories.map(function (category) {
+        var rows = groups && groups[category[0]] || [];
+        return '<details class="home-friend-news-modal__cash-group"><summary><span>' + category[1] + '</span><b>' +
+          (rows.length ? category[2](rows[0]) : '—') + '</b></summary>' +
+          (rows.length ? rows.map(function (row) {
+            var cards = (row.cards || []).join(' '), board = (row.board || []).join(' ');
+            return '<article class="home-friend-news-modal__cash-hand"><div><strong>' + esc(row.player) + '</strong><b>' + category[2](row) + '</b></div>' +
+              '<small>' + esc(new Date(row.playedAt).toLocaleDateString('ru-RU')) + ' · ' + esc(row.game) + ' · ' + esc(cards) +
+              (board ? ' · борд ' + esc(board) : '') + '</small>' +
+              '<small>Банк ' + format(row.potMinor / 100) + ' ₽ · результат ' + (row.resultMinor > 0 ? '+' : '') + format(row.resultMinor / 100) + ' ₽' +
+              (row.evResultMinor == null ? '' : ' · EV ' + format(row.evResultMinor / 100) + ' ₽') + '</small></article>';
+          }).join('') : '<p>Подходящих раздач пока нет.</p>') + '</details>';
+      }).join('');
+    }
+    var currentMonth = (data.months || [])[0];
+    var monthLabel = currentMonth ? new Date(currentMonth.month + '-01T12:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) : '';
+    return '<div class="home-friend-news-modal__cash">' +
+      '<section class="home-friend-news-modal__cash-month"><h3>🏆 Топы месяца · ' + esc(monthLabel) + '</h3>' +
+        (currentMonth ? groupHtml(currentMonth.groups) : '<p>Пока нет кеш-раздач.</p>') + '</section>' +
+      '<h3 class="home-friend-news-modal__cash-days-title">По датам</h3>' +
+      (data.days || []).map(function (day) {
+        var label = new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        return '<details class="home-friend-news-modal__cash-day"><summary><span>' + esc(label) + '</span><small>' + format(day.count) + ' раздач</small></summary>' +
+          groupHtml(day.groups) + '</details>';
+      }).join('') + '</div>';
+  }
+
+  function loadClubCashHighlights() {
+    if (clubCashLoading) return;
+    clubCashLoading = true; clubCashError = false;
+    fetch('./club-cash-highlights.json').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
+      .then(function (data) { if (!data || !Array.isArray(data.days) || !Array.isArray(data.months)) throw new Error('cash'); clubCashHighlights = data; })
+      .catch(function () { clubCashError = true; })
+      .finally(function () { clubCashLoading = false; if (newsModalMode === 'club' && clubNewsTab === 'cash') renderModalList([]); });
   }
 
   function isDailyClubEvent(row) {
@@ -2552,11 +2612,7 @@
         return eventHtml(row, false, row === dayHero, false, artOccurrence);
       }).join("");
       return '<section class="home-friend-news-modal__day-group">' +
-        (newsModalMode === "club" && groupIndex === 0 ? '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
-          '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
-            (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
-          '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
-            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' + clubWinsDayTabsHtml() : "") +
+        (newsModalMode === "club" && groupIndex === 0 ? clubNewsTabsHtml() + clubWinsDayTabsHtml() : "") +
         '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
         '<div class="home-friend-news-modal__day-events">' +
@@ -2789,6 +2845,10 @@
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть</button>' +
         '</aside>'
       : "";
+    if (newsModalMode === "club" && clubNewsTab === "cash") {
+      patchNewsList(list, achievementPromo + clubNewsTabsHtml() + clubCashHighlightsHtml());
+      return;
+    }
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
     var activeClubLoading = newsModalMode === "club" &&
       (clubNewsTab === "wall"
@@ -2799,11 +2859,7 @@
         (clubTournamentDayKey() ? clubTournamentDayKey() + "T12:00:00" : new Date().toISOString());
       patchNewsList(list, achievementPromo + '<section class="home-friend-news-modal__day-group" aria-busy="true">' +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(skeletonAt, true)) + '</span></div>' +
-        '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
-          '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
-            (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '">Выигрыши</button>' +
-          '<button type="button" data-club-news-tab="wall" class="home-friend-news-modal__club-tab' +
-            (clubNewsTab === "wall" ? ' home-friend-news-modal__club-tab--active' : '') + '">Записи игроков</button></div>' + clubWinsDayTabsHtml() +
+        clubNewsTabsHtml() + clubWinsDayTabsHtml() +
         '<div class="home-friend-news-modal__skeleton" role="status" aria-label="Загружаем записи">' +
           '<span></span><span></span><span></span></div></section>');
       return;
@@ -3485,11 +3541,10 @@
         }
         var clubTab = event.target.closest("[data-club-news-tab]");
         if (clubTab) {
-          clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "wall" ? "wall" : "wins";
-          if (clubNewsTab === "wall") {
-            renderModalList(clubWallEvents);
-            loadActiveModalFeedback(clubWallEvents);
-            loadClubWallNews(false);
+          clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "cash" ? "cash" : "wins";
+          if (clubNewsTab === "cash") {
+            renderModalList([]);
+            if (!clubCashHighlights) loadClubCashHighlights();
           } else {
             var activeWins = clubWinsEventsForTab(clubEvents);
             renderModalList(activeWins);
@@ -3497,6 +3552,7 @@
           }
           return;
         }
+        if (event.target.closest('[data-club-cash-retry]')) { clubCashError = false; renderModalList([]); loadClubCashHighlights(); return; }
         var winsDayTab = event.target.closest("[data-club-wins-day]");
         if (winsDayTab && !winsDayTab.disabled) {
           var requestedWinsDay = winsDayTab.getAttribute("data-club-wins-day");
