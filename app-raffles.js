@@ -2942,7 +2942,7 @@ function initRaffles() {
     return (
       "<details class=\"raffles-completed-spoiler raffles-completed-archive raffles-completed-archive--deferred\" data-raffles-archive-deferred=\"1\">" +
         "<summary class=\"raffles-completed-spoiler__summary\">" +
-          "<span class=\"raffles-completed-spoiler__title\">Архив</span>" +
+          "<span class=\"raffles-completed-spoiler__title\">Текущая и прошлая недели</span>" +
           "<span class=\"raffles-completed-spoiler__count\">" +
             "<span class=\"raffles-completed-spoiler__count-number\">—</span>" +
             "<span class=\"raffles-completed-spoiler__sum\">—</span>" +

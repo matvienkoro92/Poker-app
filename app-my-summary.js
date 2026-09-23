@@ -2,7 +2,7 @@
   "use strict";
   var generation = 0, pending = false, loadedAt = 0, spin = null, offset = 0, nickname = "", account = "";
   var root;
-  var chartHistory = null, chartSeen = {}, chartSeenSnapshot = "", chartCheckPending = false;
+  var chartHistory = null, chartSeen = {}, chartSeenSnapshot = "", chartCheckPending = false, chartUnreadCached = null;
   function chartFingerprint(row) {
     var text = JSON.stringify(row), hash = 2166136261;
     for(var i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);
@@ -14,13 +14,19 @@
     }).sort(function(a, b) { return a[0].localeCompare(b[0]); }));
   }
   function renderChartUnread() {
-    var unread = !!(chartHistory && chartSeenSnapshot !== chartSnapshot(chartHistory) && (chartHistory.rows || []).some(function(row) {return chartSeen[row.handId] !== chartFingerprint(row);}));
+    var unread = chartHistory
+      ? !!(chartSeenSnapshot !== chartSnapshot(chartHistory) && (chartHistory.rows || []).some(function(row) {return chartSeen[row.handId] !== chartFingerprint(row);}))
+      : chartUnreadCached === true;
+    if (chartHistory && chartHistory.playerId) {
+      chartUnreadCached = unread;
+      try { localStorage.setItem('poker-chart-state:' + chartHistory.playerId, JSON.stringify({version:chartHistory.version,unread:unread})); } catch (_) {}
+    }
     try {
       var auth = typeof pokerApiAuthJsonBody === 'function' ? pokerApiAuthJsonBody({}) : {};
       var identity = auth.pwaSession || auth.pwaVkSession || auth.initData;
       if(identity){
         var key='poker-chart-unread:'+chartFingerprint({identity:identity});
-        if(chartHistory)localStorage.setItem(key,unread?'1':'0');
+        if(chartHistory || chartUnreadCached !== null)localStorage.setItem(key,unread?'1':'0');
         else unread=localStorage.getItem(key)==='1';
       }
     } catch (_) {}
@@ -59,6 +65,14 @@
     var seq = generation;
     try {
       if(!chartHistory){
+        var versionInfo = await request('starting-hands', {action:'version'});
+        if(seq!==generation)return;
+        if(!versionInfo.playerId || !versionInfo.version){chartUnreadCached=false;renderChartUnread();return;}
+        var saved = null;
+        try { saved = JSON.parse(localStorage.getItem('poker-chart-state:' + versionInfo.playerId) || 'null'); } catch (_) {}
+        if(saved && saved.version===versionInfo.version && typeof saved.unread==='boolean'){
+          chartUnreadCached=saved.unread;renderChartUnread();return;
+        }
         var initial = await request('starting-hands', {action:'list'});
         if(seq===generation)acceptChartHistory(initial);
         return;
@@ -522,7 +536,7 @@
     } catch (_) {}
   });
   window.addEventListener("poker-friend-news-updated", friends);
-  window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};chartSeenSnapshot="";renderChartUnread();setTimeout(checkChartUnread,0);});
+  window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};chartSeenSnapshot="";chartUnreadCached=null;renderChartUnread();setTimeout(checkChartUnread,0);});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)checkChartUnread();});
   window.addEventListener('storage',function(e){if(chartHistory && (e.key==='poker-chart-seen:'+chartHistory.playerId || e.key==='poker-chart-seen-snapshot:'+chartHistory.playerId))acceptChartHistory(chartHistory);});
   renderChartUnread();

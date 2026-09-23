@@ -50,6 +50,8 @@ async function testRaffleCurrentWeekReturnsCalculation(redis) {
     currentMoscowWeekRange,
     currentWeekRaffleWinnerReturnAmount,
     currentWeekRaffleIssueTotalsFromRaffles,
+    loadCurrentWeekRaffleIssueTotals,
+    loadRaffleArchiveScopePayload,
   } = raffles._test;
   const range = currentMoscowWeekRange(new Date("2026-07-25T12:00:00.000Z"));
   assert.strictEqual(
@@ -178,6 +180,27 @@ async function testRaffleCurrentWeekReturnsCalculation(redis) {
   assert.strictEqual(followupResponse.body && followupResponse.body.ok, true, "cashout follow-up returns success");
   assert.strictEqual(redis.kv.has(weekCacheKey), false, "cashout follow-up invalidates the weekly totals cache: " + JSON.stringify([...redis.kv.keys()].filter((key) => key.includes("week_issue"))));
   assert.strictEqual(redis.kv.get(weekCacheKey + ":generation"), "1", "cashout follow-up advances the weekly totals cache generation");
+
+  // A prize from an old raffle can be issued this week. The day index must
+  // find it without reading the full historical raffle list.
+  const lateId = "contract-late-prize-index";
+  const lateDay = require(path.join(root, "lib", "player-crm-utils")).mskDateKeyFromMs(Date.now());
+  redis.kv.set("poker_app:raffle_stats_index:v3:ready", "1");
+  redis.s("poker_app:raffle_stats_day:v3:" + lateDay).add(lateId);
+  redis.kv.set("poker_app:raffle:" + lateId, JSON.stringify({
+    id: lateId, status: "completed", drawnAt: new Date(liveRange.startMs - 30 * 86400000).toISOString(),
+    groups: [{ prize: "Билет 500 ₽" }],
+    winners: [{ groupIndex: 0, winnerStatus: "ok", winnerStatusAt: new Date().toISOString() }],
+  }));
+  const indexedTotals = await loadCurrentWeekRaffleIssueTotals(new Date());
+  assert.ok(indexedTotals.ticket.issued >= 500, "late issue from an old raffle remains in the current week totals");
+
+  const oldWeek = "2026-08-10";
+  const oldArchive = await loadRaffleArchiveScopePayload({ query: { scope: "archive-week", week: oldWeek } }, false);
+  assert.strictEqual(oldArchive.ok, false, "older archive weeks are unavailable from the regular endpoint");
+  const shortArchive = await loadRaffleArchiveScopePayload({ query: { scope: "archive-index" } }, false);
+  assert.strictEqual(shortArchive.weeks.length, 2, "archive index contains only current and previous weeks");
+  assert.deepStrictEqual(shortArchive.weeks.map((week) => week.key), ["2026-08-31", "2026-08-24"]);
 }
 
 process.env.UPSTASH_REDIS_REST_URL = "https://mock-redis.local";
@@ -1436,8 +1459,8 @@ async function testCrmAppUserBlock(redis) {
   assert.strictEqual(r.body.raffles.uniqueWinners, 2, "raffle summary includes unique winners");
   assert.strictEqual(r.body.raffles.recipientsPending, true, "raffle summary defers recipient details until the modal opens");
   const raffleStatsDayKey = require(path.join(root, "lib", "player-crm-utils")).mskDateKeyFromMs(Date.parse(raffleNow));
-  assert.strictEqual(redis.kv.get("poker_app:raffle_stats_index:v2:ready"), "1", "raffle summary completes the historical date index");
-  assert.ok(redis.s("poker_app:raffle_stats_day:v2:" + raffleStatsDayKey).has(raffleId), "historical raffle is indexed under its CRM business day");
+  assert.strictEqual(redis.kv.get("poker_app:raffle_stats_index:v3:ready"), "1", "raffle summary completes the historical date index");
+  assert.ok(redis.s("poker_app:raffle_stats_day:v3:" + raffleStatsDayKey).has(raffleId), "historical raffle is indexed under its CRM business day");
   const calculationsAccessToken = signAccessToken("calculations", "tg_388008256", BOT_TOKEN);
   const calculationSummaryRequest = req("GET", { pwaSession: s.admin, mode: "raffle-summary" });
   calculationSummaryRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
@@ -1465,7 +1488,7 @@ async function testCrmAppUserBlock(redis) {
       winnerCashoutAt: raffleNow,
     }],
   }));
-  redis.s("poker_app:raffle_stats_day:v2:" + issuedDay).add(issuedInPeriodRaffleId);
+  redis.s("poker_app:raffle_stats_day:v3:" + issuedDay).add(issuedInPeriodRaffleId);
   const issuedPeriodRequest = req("GET", { pwaSession: s.admin, mode: "raffle-summary", from: issuedDay, to: issuedDay });
   issuedPeriodRequest.url = "/api/player-crm?pwaSession=" + encodeURIComponent(s.admin) +
     "&menuAccessToken=" + encodeURIComponent(calculationsAccessToken) + "&mode=raffle-summary&from=" + issuedDay + "&to=" + issuedDay;

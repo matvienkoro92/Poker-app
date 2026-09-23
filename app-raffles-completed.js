@@ -1805,11 +1805,11 @@ function initRafflesCompletedRuntime(opts) {
       "</details>";
   }
 
-  function raffleArchiveWeekHtml(week) {
+  function raffleArchiveWeekHtml(week, index) {
     return "<details class=\"raffles-completed-archive-week\" data-raffles-archive-week=\"" + escapeHtml(week.key) + "\">" +
       "<summary class=\"raffles-completed-archive-week__summary\">" +
       "<span class=\"raffles-completed-archive-week__title\">" +
-      escapeHtml(raffleArchiveShortDate(week.key) + " — " + raffleArchiveShortDate(week.endKey)) +
+      escapeHtml((index === 0 ? "Текущая неделя · " : "Прошлая неделя · ") + raffleArchiveShortDate(week.key) + " — " + raffleArchiveShortDate(week.endKey)) +
       "</span>" +
       raffleArchiveBadgeFromTotals(week) +
       "</summary>" +
@@ -1823,15 +1823,15 @@ function initRafflesCompletedRuntime(opts) {
     if (!details || details.dataset.archiveLoaded === "1" || details.dataset.archiveLoading === "1") return;
     details.dataset.archiveLoading = "1";
     var body = details.querySelector(".raffles-completed-archive__body");
-    if (body) body.innerHTML = raffleArchiveLoadingHtml(5, "Загружаем месяцы");
+    if (body) body.innerHTML = raffleArchiveLoadingHtml(2, "Загружаем две недели");
     raffleArchiveFetch("archive-index")
       .then(function (data) {
         details.dataset.archiveLoaded = "1";
         delete details.dataset.archiveLoading;
         var badge = details.querySelector(".raffles-completed-spoiler__count");
         if (badge) badge.outerHTML = raffleArchiveBadgeFromTotals(data.totals);
-        if (body) body.innerHTML = (data.months || []).map(raffleArchiveMonthHtml).join("") ||
-          "<div class=\"raffles-completed-empty\">Архив пока пуст.</div>";
+        if (body) body.innerHTML = (data.weeks || []).map(raffleArchiveWeekHtml).join("") ||
+          "<div class=\"raffles-completed-empty\">Розыгрышей за две недели пока нет.</div>";
       })
       .catch(function (error) {
         delete details.dataset.archiveLoading;
