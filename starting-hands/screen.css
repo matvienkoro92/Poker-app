@@ -82,7 +82,9 @@
 .position-disclosure{margin:16px 0;border-block:1px solid #344158}
 .chart-method{margin-top:10px;color:#aab4c5;font-size:14px}
 .insight-collections{margin:20px 0}
-.insight-collections h3{margin-bottom:8px}
+.insight-collections-header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+.insight-collections-header h3{margin:0}
+.insight-collections-total{white-space:nowrap;color:#aab4c5;font-weight:600}
 .history-filter-panel>summary:focus-visible,.insight-card>summary:focus-visible{outline:2px solid #ffae65;outline-offset:2px}
 
 .matrix-panel>summary{min-height:44px;padding:10px 0;cursor:pointer}.matrix-panel{min-width:0}.workspace{display:block}.workspace>.detail-panel{margin-top:14px}#reset-filters{margin-bottom:12px}

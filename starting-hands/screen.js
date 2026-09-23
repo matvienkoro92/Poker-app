@@ -407,8 +407,12 @@ function startHistory(payload) {
       finally{insightsLoading=false;render();}
     };
     if(missing.length&&!insightsLoading&&!insightsError&&!root.hidden)queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
-    const collections=add(root,'div',null,'insight-collections');add(collections,'h3','Подборки для разбора');
-    for(const [key,title] of [['aceHighShowdown','Вскрытие с A-хай'],['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 10 bb'],['evAbove','🟢 Перебор EV · от 10 bb']]){
+    const collections=add(root,'div',null,'insight-collections');
+    const collectionGroups=[['aceHighShowdown','Вскрытие с A-хай'],['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 10 bb'],['evAbove','🟢 Перебор EV · от 10 bb']];
+    const collectionHeader=add(collections,'div',null,'insight-collections-header');
+    add(collectionHeader,'h3','Подборки для разбора');
+    add(collectionHeader,'span','Всего: '+collectionGroups.reduce((sum,[key])=>sum+stats.collections[key].length,0),'insight-collections-total');
+    for(const [key,title] of collectionGroups){
       const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length,key==='evBelow'?'negative':key==='evAbove'?'positive':undefined);handList(d,rows,key==='evBelow'||key==='evAbove');
     }
     add(collections,'p','A-хай учитывает подтверждённые вскрытия с полной доской, где итоговая комбинация — старшая карта с тузом. Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
