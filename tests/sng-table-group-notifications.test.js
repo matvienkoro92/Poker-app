@@ -7,6 +7,29 @@ const source = fs.readFileSync(require.resolve("../lib/api-handlers/sng-champion
 const helpers = source.slice(source.indexOf("async function buildTournamentBroadcastNotifications("), source.indexOf("async function buildMatchReadyReminderNotifications(")) +
   source.slice(source.indexOf("async function notifyEntryStatus("), source.indexOf("function entryId("));
 
+test("match start sends the password privately and announces the table without it in the club chat", async () => {
+  const context = {
+    cleanText: String,
+    roundStageLabelForState: () => "1/8",
+    playableIds: (match) => match.playerIds,
+    participantDisplayName: (_state, id) => id,
+    participantTeamMembersText: () => "",
+    bracketLabelForRound: () => "Основная сетка",
+    notificationsForParticipants: (_state, ids, action, text) => ids.map((chatId) => ({ action, chatId, text })),
+    eventChatId: async () => "-1001227353220",
+    console,
+  };
+  vm.createContext(context);
+  vm.runInContext(source.slice(source.indexOf("async function buildMatchStartedNotifications("), source.indexOf("async function buildTournamentBroadcastNotifications(")), context);
+  const notifications = await context.buildMatchStartedNotifications({}, {}, { playerIds: ["123", "456"], tablePassword: "5555" });
+  assert.equal(notifications.length, 3);
+  assert.equal(notifications.filter((item) => item.text.includes("Пароль стола: 5555")).length, 2);
+  const club = notifications.find((item) => item.chatId === "-1001227353220");
+  assert.match(club.text, /Создан стол/);
+  assert.match(club.text, /Пароль отправлен участникам в личку/);
+  assert.doesNotMatch(club.text, /5555|Пароль стола:/);
+});
+
 for (const action of ["matchStarted", "teamRoundStarted", "matchAdvancedBroadcast"]) {
   for (const duplicate of [false, true]) {
     test(`${action} sends announcement to club once, existing admin target: ${duplicate}`, async () => {
