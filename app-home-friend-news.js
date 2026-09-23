@@ -37,6 +37,7 @@
   var clubCashHighlights = null;
   var clubCashLoading = false;
   var clubCashError = false;
+  var clubCashSelectedDayKey = "";
   var clubWinsDayTab = "latest";
   var activeIndex = 0;
   var clubActiveIndex = 0;
@@ -1223,15 +1224,54 @@
     }
     var currentMonth = (data.months || [])[0];
     var monthLabel = currentMonth ? new Date(currentMonth.month + '-01T12:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) : '';
+    var recentDays = (data.days || []).slice(0, 3);
+    if (recentDays.length && !recentDays.some(function (day) { return day.date === clubCashSelectedDayKey; })) clubCashSelectedDayKey = recentDays[0].date;
     return '<div class="home-friend-news-modal__cash">' +
       '<section class="home-friend-news-modal__cash-month"><div class="cash-month-heading"><span class="cash-month-emblem" aria-hidden="true"><i>A♠</i><i>A♥</i></span><span><small>ДВА ТУЗА · POKER21</small><h3>Топы месяца · ' + esc(monthLabel) + '</h3></span></div>' +
         (currentMonth ? '<div class="home-friend-news-modal__cash-month-groups">' + groupHtml(currentMonth.groups, true) + '</div>' : '<p>Пока нет кеш-раздач.</p>') + '</section>' +
+      clubCashCalendarHtml(recentDays) +
       '<h3 class="home-friend-news-modal__cash-days-title">Последние 3 дня</h3>' +
-      (data.days || []).slice(0, 3).map(function (day) {
+      recentDays.map(function (day) {
         var label = new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-        return '<details class="home-friend-news-modal__cash-day"><summary><span>' + esc(label) + '</span></summary>' +
+        return '<details class="home-friend-news-modal__cash-day" data-cash-day="' + esc(day.date) + '"' + (day.date === clubCashSelectedDayKey ? ' open' : '') + '><summary><span>' + esc(label) + '</span></summary>' +
           groupHtml(day.groups) + '</details>';
       }).join('') + '</div>';
+  }
+
+  function clubCashCalendarHtml(days) {
+    if (!days.length) return '';
+    var selectedIndex = Math.max(0, days.findIndex(function (day) { return day.date === clubCashSelectedDayKey; }));
+    var selected = days[selectedIndex];
+    var others = days.filter(function (day) { return day.date !== selected.date; }).sort(function (a, b) { return a.date.localeCompare(b.date); });
+    var selectedDate = new Date(selected.date + 'T12:00:00');
+    var month = selectedDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+    function card(day, active) {
+      if (!day) return '<span class="cash-calendar-card cash-calendar-card--empty" aria-hidden="true"></span>';
+      var date = new Date(day.date + 'T12:00:00');
+      var weekday = date.toLocaleDateString('ru-RU', { weekday: 'long' });
+      return '<button type="button" class="cash-calendar-card' + (active ? ' cash-calendar-card--active' : '') + '" data-cash-calendar-date="' + esc(day.date) + '" aria-pressed="' + (active ? 'true' : 'false') + '" aria-label="' + esc(date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })) + '">' +
+        '<strong>' + esc(date.getDate()) + '</strong><small>' + esc(weekday) + '</small></button>';
+    }
+    return '<section class="cash-calendar" aria-label="Календарь кеш-раздач">' +
+      '<header class="cash-calendar-header"><button type="button" data-cash-calendar-step="-1" aria-label="К более новым датам"' + (selectedIndex === 0 ? ' disabled' : '') + '>‹</button><strong>' + esc(month) + '</strong><button type="button" data-cash-calendar-step="1" aria-label="К более старым датам"' + (selectedIndex === days.length - 1 ? ' disabled' : '') + '>›</button></header>' +
+      '<div class="cash-calendar-stage">' + card(others[0], false) + card(selected, true) + card(others[1], false) + '</div>' +
+      '<nav class="cash-calendar-tabs" aria-label="Выбор даты">' + days.slice().reverse().map(function (day) {
+        var date = new Date(day.date + 'T12:00:00');
+        return '<button type="button" data-cash-calendar-date="' + esc(day.date) + '" aria-pressed="' + (day.date === selected.date ? 'true' : 'false') + '"' + (day.date === selected.date ? ' class="is-active"' : '') + '>' + esc(date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })) + '</button>';
+      }).join('') + '</nav></section>';
+  }
+
+  function selectClubCashDay(dateKey) {
+    var days = clubCashHighlights && Array.isArray(clubCashHighlights.days) ? clubCashHighlights.days.slice(0, 3) : [];
+    if (!days.some(function (day) { return day.date === dateKey; })) return;
+    clubCashSelectedDayKey = dateKey;
+    var list = el('homeFriendNewsList');
+    if (!list) return;
+    var calendar = list.querySelector('.cash-calendar');
+    if (calendar) calendar.outerHTML = clubCashCalendarHtml(days);
+    list.querySelectorAll('.home-friend-news-modal__cash-day').forEach(function (details) {
+      details.open = details.getAttribute('data-cash-day') === dateKey;
+    });
   }
 
   function loadClubCashHighlights() {
@@ -3623,6 +3663,22 @@
           return;
         }
         if (event.target.closest('[data-club-cash-retry]')) { clubCashError = false; renderModalList([]); loadClubCashHighlights(); return; }
+        var cashDateButton = event.target.closest('[data-cash-calendar-date]');
+        if (cashDateButton) { selectClubCashDay(cashDateButton.getAttribute('data-cash-calendar-date') || ''); return; }
+        var cashStepButton = event.target.closest('[data-cash-calendar-step]');
+        if (cashStepButton && !cashStepButton.disabled) {
+          var cashDays = clubCashHighlights && Array.isArray(clubCashHighlights.days) ? clubCashHighlights.days.slice(0, 3) : [];
+          var cashIndex = cashDays.findIndex(function (day) { return day.date === clubCashSelectedDayKey; });
+          var cashNext = cashDays[cashIndex + Number(cashStepButton.getAttribute('data-cash-calendar-step'))];
+          if (cashNext) selectClubCashDay(cashNext.date);
+          return;
+        }
+        var cashDaySummary = event.target.closest('.home-friend-news-modal__cash-day > summary');
+        if (cashDaySummary) {
+          var cashDayDetails = cashDaySummary.parentElement;
+          window.setTimeout(function () { if (cashDayDetails.open) selectClubCashDay(cashDayDetails.getAttribute('data-cash-day') || ''); }, 0);
+          return;
+        }
         var winsDayTab = event.target.closest("[data-club-wins-day]");
         if (winsDayTab && !winsDayTab.disabled) {
           var requestedWinsDay = winsDayTab.getAttribute("data-club-wins-day");

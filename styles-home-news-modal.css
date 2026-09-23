@@ -1402,6 +1402,26 @@ body.home-friend-news-modal-open {
 .home-friend-news-modal__cash{padding:8px 4px 28px;color:#f7eddb}
 .home-friend-news-modal__cash-month{padding:12px;border:1px solid #c38a4570;border-radius:18px;background:#231e18;margin-bottom:20px}
 .home-friend-news-modal__cash-month h3,.home-friend-news-modal__cash-days-title{margin:0 0 10px;font-size:18px;color:#ffd37c}
+.cash-calendar{margin:8px 0 20px;padding:10px 12px 0;overflow:hidden;border:1px solid #8e6a4270;border-radius:18px;background:radial-gradient(ellipse at 50% 0,#3b302550,transparent 60%),linear-gradient(180deg,#191919,#101112);box-shadow:inset 0 1px #ffdfa21a}
+.cash-calendar-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;color:#f6e8d4}
+.cash-calendar-header strong{font-size:clamp(14px,2vw,22px);font-weight:600;letter-spacing:.25em;text-transform:capitalize;text-align:center}
+.cash-calendar-header button{display:grid;place-items:center;width:34px;height:34px;flex:none;padding:0;color:#fff0d8;border:0;border-radius:50%;background:transparent;font:inherit;font-size:34px;line-height:1;cursor:pointer}
+.cash-calendar-header button:disabled{opacity:.3;cursor:default}
+.cash-calendar-stage{display:grid;grid-template-columns:1fr 1.28fr 1fr;align-items:center;gap:7px;min-width:0;padding:5px 6px 10px}
+.cash-calendar-card{position:relative;display:grid;grid-template-rows:1fr auto;align-items:center;justify-items:center;min-width:0;height:150px;overflow:hidden;padding:9px 4px 17px;color:#c3c4c7;border:1px solid #363636;border-radius:12px;background:linear-gradient(#2a2a2a 0 49%,#151617 50% 100%);box-shadow:inset 0 2px #ffffff10,inset 0 -3px #0008,0 7px 14px #0007;cursor:pointer}
+.cash-calendar-card::before{content:'';position:absolute;top:49.7%;right:0;left:0;height:1px;background:#050505;box-shadow:0 1px #ffffff16;pointer-events:none}
+.cash-calendar-card strong{z-index:1;align-self:end;font-size:clamp(48px,8vw,88px);font-weight:950;line-height:.95;text-shadow:0 3px 10px #0008}
+.cash-calendar-card small{z-index:1;margin-top:7px;font-size:clamp(8px,1.2vw,12px);font-weight:800;letter-spacing:.17em;text-transform:uppercase;white-space:nowrap}
+.cash-calendar-card--active{height:188px;color:#fff1d1;border:2px solid #8c7251;background:linear-gradient(#343332 0 49%,#20201f 50% 100%);box-shadow:inset 0 2px #ffffff20,inset 0 -3px #0009,0 8px 20px #000a}
+.cash-calendar-card--active strong{font-size:clamp(82px,12vw,138px)}
+.cash-calendar-card--active small{color:#ffb65f}
+.cash-calendar-card--empty{opacity:.3;cursor:default}
+.cash-calendar-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border-top:1px solid #ffffff10}
+.cash-calendar-tabs button{position:relative;min-width:0;padding:12px 3px 13px;color:#b8b9bc;border:0;background:none;font:inherit;font-size:clamp(10px,1.55vw,16px);white-space:nowrap;cursor:pointer}
+.cash-calendar-tabs button.is-active{color:#ffbb6d}
+.cash-calendar-tabs button.is-active::after{content:'';position:absolute;right:4px;bottom:0;left:4px;height:3px;border-radius:3px 3px 0 0;background:#f1a44b;box-shadow:0 0 10px #f1a44b70}
+.cash-calendar-card:focus-visible,.cash-calendar-tabs button:focus-visible,.cash-calendar-header button:focus-visible{outline:2px solid #ffcf83;outline-offset:2px}
+@media(max-width:620px){.cash-calendar{padding:8px 7px 0;border-radius:14px}.cash-calendar-header{margin-bottom:4px}.cash-calendar-header strong{font-size:13px;letter-spacing:.15em}.cash-calendar-header button{width:25px;height:25px;font-size:28px}.cash-calendar-stage{gap:4px;padding:5px 2px 8px}.cash-calendar-card{height:105px;padding:5px 2px 11px;border-radius:8px}.cash-calendar-card strong{font-size:45px}.cash-calendar-card small{font-size:7px;letter-spacing:.08em}.cash-calendar-card--active{height:132px}.cash-calendar-card--active strong{font-size:78px}.cash-calendar-tabs button{padding:9px 1px 10px;font-size:10px}}
 .home-friend-news-modal__cash-day{margin:8px 0;border:1px solid #9f825360;border-radius:15px;background:#141a22}
 .home-friend-news-modal__cash-day>summary,.home-friend-news-modal__cash-group>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;font-weight:800}
 .home-friend-news-modal__cash-day>summary::-webkit-details-marker,.home-friend-news-modal__cash-group>summary::-webkit-details-marker{display:none}
