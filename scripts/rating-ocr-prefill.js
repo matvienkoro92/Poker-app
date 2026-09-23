@@ -376,7 +376,7 @@ async function parseOcrFile(file) {
   // IMG_9066: entry fee confirmed by the club owner; 20K is the starting stack.
   if (date === "11.09.2026" && blue && time === "18:00" && /SHR 1 MLN GTD/i.test(title)) { title = "🏆SHR 1 MLN GTD🏆"; buyin = 10000; }
   if (date === "31.08.2026" && time === "18:00" && buyin === 500) title = "Турнир Понедельника";
-  if (["01.09.2026", "08.09.2026", "15.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (["01.09.2026", "08.09.2026", "15.09.2026", "22.09.2026"].includes(date) && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (["01.09.2026", "09.09.2026"].includes(date) && time === "20:00" && buyin === 25000) title = "HR 5000🥊 200K";
   if (date === "01.09.2026" && time === "22:00" && buyin === 10000) title = "Magic 🎯500🎯120K";
   if (date === "01.09.2026" && time === "23:00" && buyin === 20000) title = "Night magic 80K🌒";
@@ -451,6 +451,16 @@ async function parseOcrFile(file) {
     // Verified against IMG_9101: Vision omitted the displayed zero rank.
     if (playerId === "2354339" && date === "12.09.2026" && time === "08:00" && reward === 11.62) {
       place = 0;
+      needsPlaceCheck = false;
+    }
+    // IMG_9443 visibly shows a zero rank for АршакМкртчян.
+    if (playerId === "2354339" && date === "22.09.2026" && time === "15:00" && reward === 4.5) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
+    // IMG_9436 visibly shows CD_u_Dymau in ninth place.
+    if (playerId === "938160" && date === "22.09.2026" && time === "18:00" && reward === 1900) {
+      place = 9;
       needsPlaceCheck = false;
     }
     // Verified against IMG_8974: Vision omitted the displayed zero rank.
