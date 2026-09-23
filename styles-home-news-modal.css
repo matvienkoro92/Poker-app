@@ -1347,10 +1347,28 @@ body.home-friend-news-modal-open {
 .home-friend-news-modal__cash-group>summary span{flex:1;min-width:0}
 .home-friend-news-modal__cash-group>summary b{color:#ffce69;white-space:nowrap}
 .home-friend-news-modal__cash-hand{margin:6px 8px;padding:10px 12px;border:1px solid #b8884370;border-radius:12px;background:linear-gradient(130deg,#1b222b,#11151c)}
-.home-friend-news-modal__cash-hand>div{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.home-friend-news-modal__cash-hand>summary{display:flex;justify-content:space-between;gap:12px;align-items:baseline;cursor:pointer;list-style:none}
+.home-friend-news-modal__cash-hand>summary::-webkit-details-marker{display:none}
+.home-friend-news-modal__cash-hand>summary::before{content:'▸';color:#ffce69}
+.home-friend-news-modal__cash-hand[open]>summary::before{content:'▾'}
+.home-friend-news-modal__cash-hand .cash-hand-summary{flex:1;min-width:0}
 .home-friend-news-modal__cash-hand strong{min-width:0;overflow-wrap:anywhere}
 .home-friend-news-modal__cash-hand b{flex:none;color:#ffce69}
 .home-friend-news-modal__cash-hand small{display:block;margin-top:7px;color:#bbc4ce;line-height:1.4}
+.home-friend-news-modal__cash-hand .cash-hand-details{margin-top:10px;padding-top:10px;border-top:1px solid #b888434d}
+.home-friend-news-modal__cash-replay{margin-top:10px;line-height:1.5;font-size:13px;color:#e9edf1;overflow-wrap:anywhere}
+.home-friend-news-modal__cash-replay .playing-card{display:inline-block;margin:1px 2px;padding:1px 4px;border-radius:4px;background:#f8fafc;color:#172033;font-weight:800;white-space:nowrap}
+.home-friend-news-modal__cash-replay .playing-card:is(.suit-h,.suit-d){color:#c3233a}
+.cash-replay-id,.cash-replay-meta{color:#adb9c7;margin:5px 0}
+.cash-replay-street{margin:12px 0 7px;padding:8px 10px;border-left:4px solid currentColor;border-radius:6px;background:#222c39;font-weight:800}
+.cash-replay-street--preflop{color:#a8c5ff}.cash-replay-street--flop{color:#76ddbb}.cash-replay-street--turn{color:#f1c779}.cash-replay-street--river{color:#cfacff}
+.cash-replay-action{padding:4px 8px;border-bottom:1px solid #ffffff12}
+.cash-replay-action--fold{color:#818b9b}.cash-replay-action--call{color:#8ec7ff}.cash-replay-action--bet{color:#ffa3a3}.cash-replay-action--raise{color:#ff7272}.cash-replay-action--reraise{color:#ffad57}.cash-replay-action--allin{color:#ff861f}
+.cash-replay-showdown,.cash-replay-result{margin-top:9px;padding:8px 10px;border-radius:6px;background:#28233a;color:#dec3ff;font-weight:800}
+.cash-replay-result{background:#2c261a;color:#ffdc8b}
+.cash-replay-units{display:flex;gap:5px;margin:10px 0}
+.cash-replay-units button{border:1px solid #9c7a40;border-radius:7px;background:#1d252e;color:#dfe6ee;padding:5px 14px;font-weight:800;cursor:pointer}
+.cash-replay-units button[aria-pressed=true]{background:#d59b3b;color:#17130d}
 
 .home-friend-news-modal--club .home-friend-news-modal__club-tabs .home-friend-news-modal__club-tab--active {
   border-color: #fff0b0 !important;

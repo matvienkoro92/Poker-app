@@ -60,7 +60,7 @@ async function main(){
    const potMinor=Math.round(events.reduce((sum,event)=>sum+(potCodes.has(String(event.code))?Number(event.amount)||0:0),0)*100);
    const board=events.filter(event=>Array.isArray(event.board)&&event.board.length).at(-1)?.board||[];
    const ev=evByPlayer.get(playerId)?.get(String(row.handId));
-   const item={handId:String(row.handId),player:names.get(playerId)||'Игрок',playedAt:row.playedAt,game:row.game||'NLH',cards:row.cards||[],board,potMinor,resultMinor:row.resultMinor,bigBlindMinor:row.bigBlindMinor,evResultMinor:ev?.status==='calculated'?ev.resultMinor:null};
+   const item={handId:String(row.handId),playerId,player:names.get(playerId)||'Игрок',playedAt:row.playedAt,game:row.game||'NLH',position:row.position||'',cards:row.cards||[],board,potMinor,resultMinor:row.resultMinor,bigBlindMinor:row.bigBlindMinor,evResultMinor:ev?.status==='calculated'?ev.resultMinor:null};
    const add=(key,entry,score)=>{insert(daily.groups,key,entry,score);insert(monthly.groups,key,entry,score);};
    if(row.resultMinor>0&&potMinor>0){add('potBb',item,potMinor/row.bigBlindMinor);add('potRub',item,potMinor);}
    if(row.resultMinor<0)add('lossBb',item,-row.resultMinor/row.bigBlindMinor);

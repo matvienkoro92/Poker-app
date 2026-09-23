@@ -28,22 +28,24 @@ const homeSource = fs.readFileSync(require.resolve('../app-home-data.js'), 'utf8
 const homeContext = {window:{}, sessionStorage:{removeItem(){}}, Date};
 vm.runInNewContext(homeSource, homeContext);
 const matches = homeContext.window.pokerTournamentBetMatchesHome;
+const matchesSelected = homeContext.window.pokerTournamentBetMatchesSelected;
 const selected = {weekday:3,date:'2026-09-16'};
 const event = {id:'tb_current',tournamentId:'weekly-3',status:'open',createdAt:'2026-09-16T07:00:00Z'};
 const now = Date.parse('2026-09-16T12:00:00Z');
-test('home Last Longer requires the selected tournament, Moscow date and open registration',()=>{
+test('home Last Longer shows the current open event regardless of selected tournament',()=>{
   assert.equal(matches(event,selected,now),true);
-  assert.equal(matches({...event,tournamentId:'weekly-2'},selected,now),false);
-  assert.equal(matches({...event,createdAt:'2026-09-09T07:00:00Z'},selected,now),false);
+  assert.equal(matches({...event,tournamentId:'weekly-1'},selected,now),true);
+  assert.equal(matches({...event,createdAt:'2026-09-09T07:00:00Z'},selected,now),true);
   for(const status of ['closed','settled','cancelled']) assert.equal(matches({...event,status},selected,now),false);
   assert.equal(matches({...event,createdByPlayer:true},selected,now),false);
-  assert.equal(matches({...event,createdAt:''},selected,now),false);
-  assert.equal(matches(event,{weekday:4,date:'2026-09-17'},now),false);
+  assert.equal(matches(null,selected,now),false);
 });
-test('registration expires at 20:00 Moscow even before the next API refresh',()=>{
-  assert.equal(matches(event,selected,Date.parse('2026-09-16T16:59:59Z')),true);
-  assert.equal(matches(event,selected,Date.parse('2026-09-16T17:00:00Z')),false);
-  assert.equal(matches({...event,createdAt:'2026-09-15T22:00:00Z'},selected,now),true);
+test('tournament share requires its selected date and tournament',()=>{
+  assert.equal(matchesSelected(event,selected,now),true);
+  assert.equal(matchesSelected({...event,tournamentId:'weekly-1'},selected,now),false);
+  assert.equal(matchesSelected({...event,createdAt:'2026-09-09T07:00:00Z'},selected,now),false);
+  assert.equal(matchesSelected(event,{weekday:4,date:'2026-09-17'},now),false);
+  assert.equal(matchesSelected(event,selected,Date.parse('2026-09-16T17:00:00Z')),false);
 });
 
 test('unopened home plaque remains accessible to manage an unfinished previous event',()=>{

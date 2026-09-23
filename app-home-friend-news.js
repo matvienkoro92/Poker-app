@@ -1127,6 +1127,59 @@
         (clubNewsTab === "cash" ? ' home-friend-news-modal__club-tab--active' : '') + '">Кеш</button></div>';
   }
 
+  function clubCashCardsHtml(value) {
+    var raw = String(value || ''), out = '', last = 0, match;
+    var pattern = /(10|[2-9JQKA])([♠♥♦♣])/g;
+    while ((match = pattern.exec(raw))) {
+      out += esc(raw.slice(last, match.index));
+      out += '<span class="playing-card suit-' + ({'♠':'s','♥':'h','♦':'d','♣':'c'}[match[2]]) + '">' + esc(match[0]) + '</span>';
+      last = pattern.lastIndex;
+    }
+    return out + esc(raw.slice(last));
+  }
+
+  function clubCashReplayHtml(text) {
+    var raises = 0;
+    return '<div class="home-friend-news-modal__cash-replay">' + String(text || '').split(/\r?\n/).map(function (line) {
+      if (!line || line === 'Два туза · Моя игра') return '';
+      if (/^Раздача #/.test(line)) return '<div class="cash-replay-id">' + esc(line) + '</div>';
+      if (/^Мои карты:|^Позиция:/.test(line)) return '<div class="cash-replay-meta">' + clubCashCardsHtml(line) + '</div>';
+      var street = /^(Префлоп|Флоп|Тёрн|Ривер)(?::|\s*·|$)/.exec(line);
+      if (street) {
+        raises = 0;
+        return '<div class="cash-replay-street cash-replay-street--' + ({'Префлоп':'preflop','Флоп':'flop','Тёрн':'turn','Ривер':'river'}[street[1]]) + '">' + clubCashCardsHtml(line) + '</div>';
+      }
+      if (/^Вскрытие:/.test(line)) return '<div class="cash-replay-showdown">' + clubCashCardsHtml(line) + '</div>';
+      if (/^Итоговый банк:|^Результат:/.test(line)) return '<div class="cash-replay-result">' + clubCashCardsHtml(line) + '</div>';
+      var action = /\s—\s(Колл|Рейз|Ставка|Олл-ин|Фолд|Чек)/.exec(line);
+      if (action) {
+        var kind = ({'Колл':'call','Ставка':'bet','Олл-ин':'allin','Фолд':'fold','Чек':'check'})[action[1]] || (raises++ ? 'reraise' : 'raise');
+        return '<div class="cash-replay-action cash-replay-action--' + kind + '">' + clubCashCardsHtml(line.replace(/(^|\s)Вы(?=\s—)/, '$1Хиро')) + '</div>';
+      }
+      return '<div class="cash-replay-action">' + clubCashCardsHtml(line) + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function loadClubCashReplay(details) {
+    if (details.dataset.loaded || details.dataset.loading || !details.open) return;
+    var body = details.querySelector('[data-club-cash-replay-body]');
+    if (!body) return;
+    details.dataset.loading = '1';body.textContent = 'Загружаем раздачу…';
+    pokerSocialRequest('club-cash-replay', {playerId:details.dataset.cashPlayer,handId:details.dataset.cashHand})
+      .then(function (data) {
+        if (!details.isConnected) return;
+        details.dataset.loaded = '1';
+        body.innerHTML = '<div class="cash-replay-units" role="group" aria-label="Единицы раздачи"><button type="button" data-cash-unit="rub" aria-pressed="true">₽</button><button type="button" data-cash-unit="bb" aria-pressed="false">BB</button></div>' +
+          '<div data-cash-panel="rub">' + clubCashReplayHtml(data.text) + '</div><div data-cash-panel="bb" hidden>' + clubCashReplayHtml(data.textBb) + '</div>';
+        body.querySelectorAll('[data-cash-unit]').forEach(function (button) {button.addEventListener('click',function () {
+          var unit = button.dataset.cashUnit;
+          body.querySelectorAll('[data-cash-unit]').forEach(function (choice) {choice.setAttribute('aria-pressed', String(choice.dataset.cashUnit === unit));});
+          body.querySelectorAll('[data-cash-panel]').forEach(function (panel) {panel.hidden = panel.dataset.cashPanel !== unit;});
+        });});
+      }).catch(function () {if (details.isConnected) body.textContent = 'Не удалось загрузить раздачу. Закройте и откройте её ещё раз.';})
+      .finally(function () {delete details.dataset.loading;});
+  }
+
   function clubCashHighlightsHtml() {
     if (clubCashError) return '<div class="home-friend-news-modal__empty"><strong>Не удалось загрузить кеш-раздачи</strong><button type="button" data-club-cash-retry>Повторить</button></div>';
     if (!clubCashHighlights) return '<div class="home-friend-news-modal__loading" role="status">Загружаем кеш-раздачи…</div>';
@@ -1146,11 +1199,11 @@
           (rows.length ? category[2](rows[0]) : '—') + '</b></summary>' +
           (rows.length ? rows.map(function (row) {
             var cards = (row.cards || []).join(' '), board = (row.board || []).join(' ');
-            return '<article class="home-friend-news-modal__cash-hand"><div><strong>' + esc(row.player) + '</strong><b>' + category[2](row) + '</b></div>' +
+            return '<details class="home-friend-news-modal__cash-hand" data-cash-player="' + esc(row.playerId) + '" data-cash-hand="' + esc(row.handId) + '"><summary><span class="cash-hand-summary"><strong>' + esc(row.player) + '</strong>' +
               '<small>' + esc(new Date(row.playedAt).toLocaleDateString('ru-RU')) + ' · ' + esc(row.game) + ' · ' + esc(cards) +
-              (board ? ' · борд ' + esc(board) : '') + '</small>' +
-              '<small>Банк ' + format(row.potMinor / 100) + ' ₽ · результат ' + (row.resultMinor > 0 ? '+' : '') + format(row.resultMinor / 100) + ' ₽' +
-              (row.evResultMinor == null ? '' : ' · EV ' + format(row.evResultMinor / 100) + ' ₽') + '</small></article>';
+              (board ? ' · борд ' + esc(board) : '') + '</small></span><b>' + category[2](row) + '</b></summary>' +
+              '<div class="cash-hand-details"><small>Банк ' + format(row.potMinor / 100) + ' ₽ · результат ' + (row.resultMinor > 0 ? '+' : '') + format(row.resultMinor / 100) + ' ₽' +
+              (row.evResultMinor == null ? '' : ' · EV ' + format(row.evResultMinor / 100) + ' ₽') + '</small><div data-club-cash-replay-body></div></div></details>';
           }).join('') : '<p>Подходящих раздач пока нет.</p>') + '</details>';
       }).join('');
     }
@@ -2847,6 +2900,7 @@
       : "";
     if (newsModalMode === "club" && clubNewsTab === "cash") {
       patchNewsList(list, achievementPromo + clubNewsTabsHtml() + clubCashHighlightsHtml());
+      list.querySelectorAll('.home-friend-news-modal__cash-hand').forEach(function (details) {details.addEventListener('toggle',function () {loadClubCashReplay(details);});});
       return;
     }
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });

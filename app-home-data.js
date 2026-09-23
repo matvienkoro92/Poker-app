@@ -18,8 +18,12 @@
     }
     return src;
   };
-  // The home card represents one dated tournament, not the last stored event.
-  window.pokerTournamentBetMatchesHome = function (data, selected, now) {
+  // The plaque shows the current open event even when another tournament day is selected.
+  window.pokerTournamentBetMatchesHome = function (data) {
+    return !!(data && data.id && !data.createdByPlayer && data.status === "open");
+  };
+  // A tournament share still links only the Last Longer for that dated tournament.
+  window.pokerTournamentBetMatchesSelected = function (data, selected, now) {
     selected = selected || window._tournamentDayShare;
     if (!data || !data.id || data.createdByPlayer || data.status !== "open" || !selected) return false;
     if (data.tournamentId !== "weekly-" + selected.weekday) return false;
