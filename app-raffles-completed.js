@@ -2170,7 +2170,6 @@ function initRafflesCompletedRuntime(opts) {
   }
 
         function renderCompletedRafflesPanel(completed) {
-          renderRaffleWinnerLeaders(completed);
           if (!rafflesCompleted) return;
           if (completed.length > 0) {
             if (rafflesCompletedEmpty) rafflesCompletedEmpty.classList.add("raffle-empty--hidden");

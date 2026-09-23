@@ -2313,7 +2313,7 @@ add("Raffles HTML is lazy-loaded from a fragment", () =>
     'id="raffleCreateForm"',
     'id="rafflesTabs"',
     'id="raffleCurrent"',
-    'id="raffleWinnerLeadersModal"',
+    'id="rafflesTabCompleted"',
   ]) &&
   fs.existsSync(path.join(root, "html-fragments", "raffles.html"))
 );

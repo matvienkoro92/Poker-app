@@ -46,12 +46,9 @@ function initRaffles() {
   var rafflesTabCreate = document.getElementById("rafflesTabCreate");
   var rafflesTabActive = document.getElementById("rafflesTabActive");
   var rafflesTabCompleted = document.getElementById("rafflesTabCompleted");
-  var rafflesTabLeaders = document.getElementById("rafflesTabLeaders");
   var rafflesPanelCreate = document.getElementById("rafflesPanelCreate");
   var rafflesPanelActive = document.getElementById("rafflesPanelActive");
   var rafflesPanelCompleted = document.getElementById("rafflesPanelCompleted");
-  var rafflesPanelLeaders = document.getElementById("rafflesPanelLeaders");
-  var raffleWinnerLeadersEmpty = document.getElementById("raffleWinnerLeadersEmpty");
   var rafflesTabActiveCount = document.getElementById("rafflesTabActiveCount");
   var rafflesTabActiveSum = document.getElementById("rafflesTabActiveSum");
   var rafflesTabCompletedCount = document.getElementById("rafflesTabCompletedCount");
@@ -2976,9 +2973,8 @@ function initRaffles() {
 
   function requestCompletedArchiveLoad() {
     if (rafflesArchiveLoaded || rafflesArchiveLoading) return;
-    // Completed cards come from the small recent list; the archive loads by month.
-    // Only the leaders view still needs the complete winner history.
-    loadRaffles({ includeArchive: rafflesCurrentTab === "leaders", recentOnly: rafflesCurrentTab !== "leaders", skipCache: true, keepCurrentOnLoading: true });
+    // Completed cards come from the small recent list; the archive loads by week.
+    loadRaffles({ recentOnly: true, skipCache: true, keepCurrentOnLoading: true });
   }
 
   function renderStoredCompletedRafflesPanel() {
@@ -3250,9 +3246,6 @@ function initRaffles() {
       switchToCompleted = !!loadOptions.switchToCompleted;
     }
     switchToCompleted = !!switchToCompleted;
-    if (!loadOptions.includeArchive && readPendingActiveRaffleId()) {
-      loadOptions.includeArchive = true;
-    }
     var loadSeq = ++rafflesLoadSeq;
     var hostname = typeof window !== "undefined" && window.location && window.location.hostname ? window.location.hostname : "";
     var baseStr = (base || "").toString();
@@ -3340,8 +3333,7 @@ function initRaffles() {
       } catch (eBypassServerCache) {}
       var useActiveScope =
         !isLocal &&
-        !loadOptions.includeArchive &&
-        !readPendingActiveRaffleId();
+        !loadOptions.includeArchive;
       var bypassActiveScopeCache =
         useActiveScope &&
         (loadOptions.skipCache || loadOptions.deadlineRefresh || Date.now() < bypassServerListCacheUntil);
@@ -3354,7 +3346,8 @@ function initRaffles() {
         (useActiveScope ? "&scope=active" : "") +
         (bypassActiveScopeCache ? "&bypassListCache=1" : "") +
         (isLocal ? "&demo=1" : "");
-      var pendingCompletedTarget = !loadOptions.includeArchive ? readPendingCompletedRaffleId() : "";
+      var pendingCompletedTarget = !loadOptions.includeArchive
+        ? (readPendingCompletedRaffleId() || readPendingActiveRaffleId()) : "";
       var pendingCompletedFetch = pendingCompletedTarget
         ? fetch(
             base + "/api/raffles" + qLead + "&scope=completed-one&target=" +
@@ -3817,8 +3810,7 @@ function initRaffles() {
         var completedPanelVisible =
           !!(
             switchToCompleted ||
-            (rafflesPanelCompleted && !rafflesPanelCompleted.classList.contains("raffles-panel--hidden")) ||
-            (rafflesPanelLeaders && !rafflesPanelLeaders.classList.contains("raffles-panel--hidden"))
+            (rafflesPanelCompleted && !rafflesPanelCompleted.classList.contains("raffles-panel--hidden"))
           );
         if (archiveUnavailable && completedPanelVisible && rafflesCurrentTab === "completed") {
           renderDeferredCompletedArchivePanel(completed);
@@ -3875,8 +3867,7 @@ function initRaffles() {
     var isCreate = tab === "create";
     var isActive = tab === "active";
     var isCompleted = tab === "completed";
-    var isLeaders = tab === "leaders";
-    if (!isCreate && !isActive && !isCompleted && !isLeaders) {
+    if (!isCreate && !isActive && !isCompleted) {
       tab = "active";
       isActive = true;
     }
@@ -3895,10 +3886,6 @@ function initRaffles() {
       rafflesTabCompleted.classList.toggle("raffles-tab--active", isCompleted);
       rafflesTabCompleted.setAttribute("aria-selected", isCompleted ? "true" : "false");
     }
-    if (rafflesTabLeaders) {
-      rafflesTabLeaders.classList.toggle("raffles-tab--active", isLeaders);
-      rafflesTabLeaders.setAttribute("aria-selected", isLeaders ? "true" : "false");
-    }
     if (rafflesPanelCreate) {
       rafflesPanelCreate.classList.toggle("raffles-panel--active", isCreate);
       rafflesPanelCreate.classList.toggle("raffles-panel--hidden", !isCreate);
@@ -3911,28 +3898,18 @@ function initRaffles() {
       rafflesPanelCompleted.classList.toggle("raffles-panel--active", isCompleted);
       rafflesPanelCompleted.classList.toggle("raffles-panel--hidden", !isCompleted);
     }
-    if (rafflesPanelLeaders) {
-      rafflesPanelLeaders.classList.toggle("raffles-panel--active", isLeaders);
-      rafflesPanelLeaders.classList.toggle("raffles-panel--hidden", !isLeaders);
-    }
     if (isCreate && typeof window !== "undefined" && typeof window.pokerRafflesOpenCreateActionTab === "function") {
       window.pokerRafflesOpenCreateActionTab();
     }
     if (!isActive) closeRafflesActiveInfoModal();
     rafflesCurrentTab = tab;
-    if ((isCompleted || isLeaders) && !rafflesArchiveLoaded) {
-      if (isCompleted) renderDeferredCompletedArchivePanel(rafflesLastCompleted || []);
-      if (isLeaders) {
-        if (raffleWinnerLeadersEmpty) {
-          raffleWinnerLeadersEmpty.textContent = "Загружаем статистику победителей…";
-          raffleWinnerLeadersEmpty.classList.remove("raffle-empty--hidden");
-        }
-      }
+    if (isCompleted && !rafflesArchiveLoaded) {
+      renderDeferredCompletedArchivePanel(rafflesLastCompleted || []);
       requestCompletedArchiveLoad();
       if (tabChanged) restoreRafflesTabScroll(yBefore, tabsTopBefore);
       return;
     }
-    if ((isCompleted || isLeaders) && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
+    if (isCompleted && rafflesCompletedDirty) renderStoredCompletedRafflesPanel();
     if (isCompleted) schedulePendingCompletedRaffleFocus();
     if (isCompleted && tabChanged) {
       // The archive can stay cached, but recent winners keep changing while
@@ -3954,7 +3931,6 @@ function initRaffles() {
       loadRaffles(false, { skipCache: true });
     }
   });
-  if (rafflesTabLeaders) rafflesTabLeaders.addEventListener("click", function () { setRafflesTab("leaders"); });
   if (rafflesCompleted && rafflesCompleted.dataset.archiveDeferredBound !== "1") {
     rafflesCompleted.dataset.archiveDeferredBound = "1";
     rafflesCompleted.addEventListener("click", function (e) {
