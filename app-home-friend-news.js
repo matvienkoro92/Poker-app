@@ -1193,11 +1193,24 @@
       ['evBelow', 'Самый большой недобор по EV', function (row) { return '−' + format((row.evResultMinor - row.resultMinor) / row.bigBlindMinor) + ' BB'; }],
       ['highCard', 'Вскрытия после ставки с хай-картой', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
     ];
-    function groupHtml(groups) {
-      return categories.map(function (category) {
+    var monthlyDescriptions = [
+      'Крупнейший банк месяца в BB',
+      'Крупнейший банк месяца в рублях',
+      'Максимальный проигрыш в BB',
+      'Самый большой недобор по EV',
+      'Выигрыш на вскрытии с хай-картой',
+    ];
+    function groupHtml(groups, monthly) {
+      return categories.map(function (category, index) {
         var rows = groups && groups[category[0]] || [];
-        return '<details class="home-friend-news-modal__cash-group"><summary><span>' + category[1] + '</span><b>' +
-          (rows.length ? category[2](rows[0]) : '—') + '</b></summary>' +
+        var value = rows.length ? category[2](rows[0]) : '—';
+        var monthlySummary = '<span class="cash-monthly-title">' + category[1] + '</span>' +
+          '<span class="cash-monthly-icon" aria-hidden="true">' + (index < 2 ? '<img src="./assets/home-news-cash-black-gold-chips-v1.webp" alt="" loading="lazy">' : index === 4 ? '♠' : '↘') + '</span>' +
+          '<b class="cash-monthly-value">' + value + '</b>' +
+          '<small class="cash-monthly-description">' + monthlyDescriptions[index] + (rows.length && rows[0].player ? ' · <strong>' + esc(rows[0].player) + '</strong>' : '') + '</small>' +
+          '<span class="cash-monthly-chevron" aria-hidden="true">›</span>';
+        return '<details class="home-friend-news-modal__cash-group' + (monthly ? ' home-friend-news-modal__cash-group--monthly' + (index < 2 ? ' home-friend-news-modal__cash-group--featured' : '') : '') + '"><summary>' +
+          (monthly ? monthlySummary : '<span>' + category[1] + '</span><b>' + value + '</b>') + '</summary>' +
           (rows.length ? rows.map(function (row) {
             var blind = Number(row.bigBlindMinor) / 100;
             var limit = blind > 0 ? ' · ' + limitNumber.format(blind / 2) + '/' + limitNumber.format(blind) + ' ₽' : '';
@@ -1211,10 +1224,10 @@
     var currentMonth = (data.months || [])[0];
     var monthLabel = currentMonth ? new Date(currentMonth.month + '-01T12:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) : '';
     return '<div class="home-friend-news-modal__cash">' +
-      '<section class="home-friend-news-modal__cash-month"><h3>🏆 Топы месяца · ' + esc(monthLabel) + '</h3>' +
-        (currentMonth ? groupHtml(currentMonth.groups) : '<p>Пока нет кеш-раздач.</p>') + '</section>' +
-      '<h3 class="home-friend-news-modal__cash-days-title">По датам</h3>' +
-      (data.days || []).map(function (day) {
+      '<section class="home-friend-news-modal__cash-month"><div class="cash-month-heading"><span class="cash-month-emblem" aria-hidden="true"><i>A♠</i><i>A♥</i></span><span><small>ДВА ТУЗА · POKER21</small><h3>Топы месяца · ' + esc(monthLabel) + '</h3></span></div>' +
+        (currentMonth ? '<div class="home-friend-news-modal__cash-month-groups">' + groupHtml(currentMonth.groups, true) + '</div>' : '<p>Пока нет кеш-раздач.</p>') + '</section>' +
+      '<h3 class="home-friend-news-modal__cash-days-title">Последние 3 дня</h3>' +
+      (data.days || []).slice(0, 3).map(function (day) {
         var label = new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
         return '<details class="home-friend-news-modal__cash-day"><summary><span>' + esc(label) + '</span></summary>' +
           groupHtml(day.groups) + '</details>';
@@ -2893,10 +2906,12 @@
     var heroLeaderNick = clubCurrentMonthHeroLeaderNick();
     var achievementPromo = newsModalMode === "club"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
+          '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/home-news-day-hero-ape-v1.webp" alt="" aria-hidden="true" loading="lazy">' +
+          '<span class="home-friend-news-modal__achievement-promo-content"><b>ГЕРОЙ ДНЯ</b>' +
           '<strong>' + (clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
-          '<span><b>«Герой дня» · ' + esc(clubHeroMonthLabel()) + '</b>' +
-          '<small>' + (heroLeaderNick ? 'Лидирует: ' + esc(heroLeaderNick) : 'Награда лидеру месяца') + '</small></span>' +
-          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>Смотреть</button>' +
+          '<small>' + (heroLeaderNick ? 'Лидирует: <em>' + esc(heroLeaderNick) + '</em>' : 'Награда лидеру месяца') + '</small></span>' +
+          '<span class="home-friend-news-modal__achievement-promo-side"><small>СЕГОДНЯ<br>ПОБЕЖДАЮТ<br>СВОИ</small>' +
+          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
         '</aside>'
       : "";
     if (newsModalMode === "club" && clubNewsTab === "cash") {

@@ -32,6 +32,29 @@ test("match start sends the password privately and announces the table without i
   assert.doesNotMatch(club.text, /5555|Пароль стола:/);
 });
 
+test("single match reminder names the player and repeats the table password", async () => {
+  const context = {
+    cleanText: (value) => String(value || ""),
+    playableIds: (match) => match.playerIds,
+    roundStageLabelForState: () => "L 1/8",
+    bracketLabelForRound: () => "Сетка №2",
+    participantDisplayName: (_state, id) => id === "one" ? "AuraKK" : "Monfokon",
+    notificationsForParticipant: (_state, id, action, text) => [{ id, action, text }],
+  };
+  vm.createContext(context);
+  vm.runInContext(source.slice(source.indexOf("async function buildMatchReadyReminderNotifications("), source.indexOf("function pendingOpponentSnapshot(")), context);
+  const notifications = await context.buildMatchReadyReminderNotifications(
+    { tournamentType: "single" }, {},
+    { playerIds: ["one", "two"], readyById: { two: true }, tablePassword: "1234" }
+  );
+  assert.equal(notifications.length, 1);
+  assert.equal(notifications[0].id, "one");
+  assert.match(notifications[0].text, /соперник: Monfokon/);
+  assert.match(notifications[0].text, /Подтвердите готовность к игре/);
+  assert.match(notifications[0].text, /Пароль стола: 1234/);
+  assert.doesNotMatch(notifications[0].text, /команды/);
+});
+
 for (const action of ["matchStarted", "teamRoundStarted", "matchAdvancedBroadcast"]) {
   for (const duplicate of [false, true]) {
     test(`${action} sends announcement to club once, existing admin target: ${duplicate}`, async () => {
