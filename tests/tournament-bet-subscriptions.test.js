@@ -120,4 +120,6 @@ test("configured group receives creation and entrant announcements with event li
   assert.equal(messages.length,2);
   for(const message of messages){assert.equal(message.chat_id,"-1001227353220");assert.equal(message.notificationScope,"tournament-bet");assert.match(message.buttonUrl,/startapp=tournament_bet_tb_group_test/);}
   assert.match(messages[0].text,/Новая/);assert.match(messages[1].text,/Игрок/);assert.match(messages[1].text,/5\s500/);
+  assert.equal(messages[0].parseMode,"HTML");
+  assert.match(messages[0].text,/Меджик\n\n<b>Банк на ставку: 5\s000 ₽<\/b>\n\n<b>Ставка на себя: 500 ₽<\/b>\n\nЗадача/);
 });
