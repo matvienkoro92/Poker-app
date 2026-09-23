@@ -12,7 +12,7 @@ test("match start sends the password privately and announces the table without i
     cleanText: String,
     roundStageLabelForState: () => "1/8",
     playableIds: (match) => match.playerIds,
-    participantDisplayName: (_state, id) => id,
+    participantDisplayName: (_state, id) => id === "123" ? "Аза32" : "Врей",
     participantTeamMembersText: () => "",
     bracketLabelForRound: () => "Основная сетка",
     notificationsForParticipants: (_state, ids, action, text) => ids.map((chatId) => ({ action, chatId, text })),
@@ -25,6 +25,8 @@ test("match start sends the password privately and announces the table without i
   assert.equal(notifications.length, 3);
   assert.equal(notifications.filter((item) => item.text.includes("Пароль стола: 5555")).length, 2);
   const club = notifications.find((item) => item.chatId === "-1001227353220");
+  assert.equal(club.parseMode, "HTML");
+  assert.match(club.text, /^<b>Аза32 - Врей<\/b>\n\nСетка:/);
   assert.match(club.text, /Создан стол/);
   assert.match(club.text, /Пароль отправлен участникам в личку/);
   assert.doesNotMatch(club.text, /5555|Пароль стола:/);
