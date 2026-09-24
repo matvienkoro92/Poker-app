@@ -3,6 +3,7 @@
   var generation=0,serial=0,mine=false,page=1,totalPages=1,rows=[],thread=null,busy=false,imageData='',imageBusy=false,formKey='',replyKey='',parentId='',handMetric='bb',listMetric='bb',listModes={cash:true,mtt:true};
   var openingId='',openingPromise=null,loadedThreadId='';
   var answerObserver=null,viewerId='',activity=null;
+  var nameFitObserver=null;
   function esc(s){return pokerSocialEscape(s);}
   function api(b){var gen=generation;return pokerSocialRequest('club-reviews',b).then(function(d){if(gen===generation){if(d.activity)activity=d.activity;if(d.accountId)viewerId=d.accountId;}return d;});}
   function activityHtml(){
@@ -23,10 +24,10 @@
   function root(){return document.getElementById('clubReviewsContent');}
   function topicPushPanel(){
     var panel=document.createElement('section');panel.className='review-topic-push';
-    panel.innerHTML='<strong>Пуши</strong><button type="button" class="social-button" aria-pressed="false" disabled>…</button><p role="status"></p>';
+    panel.innerHTML='<button type="button" class="social-button" aria-pressed="false" disabled>Пуши</button><p role="status"></p>';
     var btn=panel.querySelector('button'),hint=panel.querySelector('p'),gen=generation;
     function active(){return gen===generation&&panel.isConnected;}
-    function render(data){var ready=!!(data.subscribed&&data.notificationsEnabled&&data.hasSubscription&&data.pushConfigured);var state=!data.subscribed?'off':!data.pushConfigured?'unavailable':ready?'on':'needs-setup';var full=state==='on'?'Включены':state==='off'?'Выключены':state==='unavailable'?'Недоступны':'Не настроены';var short=state==='on'?'Вкл':state==='off'?'Выкл':state==='unavailable'?'Нет':'Настр.';btn.innerHTML='<span class="review-topic-push__full">'+full+'</span><span class="review-topic-push__short">'+short+'</span>';btn.title=data.subscribed?'Выключить пуши о новых темах':'Включить пуши о новых темах';btn.setAttribute('aria-label','Пуши о новых темах: '+full.toLowerCase()+'. '+btn.title);btn.setAttribute('aria-pressed',String(!!data.subscribed));btn.dataset.pushState=state;hint.textContent=state==='needs-setup'?'Включите уведомления в профиле.':state==='unavailable'?'Пуши временно недоступны.':'';}
+    function render(data){var ready=!!(data.subscribed&&data.notificationsEnabled&&data.hasSubscription&&data.pushConfigured);var state=!data.subscribed?'off':!data.pushConfigured?'unavailable':ready?'on':'needs-setup';var full=state==='on'?'Включены':state==='off'?'Выключены':state==='unavailable'?'Недоступны':'Не настроены';btn.textContent='Пуши';btn.title=data.subscribed?'Выключить пуши о новых темах':'Включить пуши о новых темах';btn.setAttribute('aria-label','Пуши о новых темах: '+full.toLowerCase()+'. '+btn.title);btn.setAttribute('aria-pressed',String(!!data.subscribed));btn.dataset.pushState=state;hint.textContent=state==='needs-setup'?'Включите уведомления в профиле.':state==='unavailable'?'Пуши временно недоступны.':'';}
     api({action:'topic-push-status'}).then(function(data){if(active())render(data);}).catch(function(){if(active()){btn.textContent='Повторить';hint.textContent='Не удалось проверить подписку.';}}).finally(function(){if(active())btn.disabled=false;});
     btn.addEventListener('click',async function(){
       btn.disabled=true;hint.textContent='';
@@ -216,6 +217,21 @@
     if (/^(?:покерманки|pokermanki|романдий)/.test(nameKey)||/home-news-pokermanki-thumb/.test(personalArt)) personalArt='./assets/summer-rating-player-pokermanki-v3.webp?v=1';
     return '<span class="review-topic__avatar'+(personalArt?' review-topic__avatar--personal-art':'')+'"><img src="'+esc(personalArt||profileAvatar)+'"'+(personalArt?' data-review-avatar-fallback="'+esc(profileAvatar)+'"':'')+' alt="" loading="lazy"><span>'+esc((name||'И').slice(0,1))+'</span></span>';
   }
+  function fitTopicNames(list){
+    if(!list)return;
+    list.querySelectorAll('.review-topic__name').forEach(function(label){
+      var width=label.parentElement.clientWidth;
+      if(!width)return;
+      label.style.fontSize='';
+      label.style.whiteSpace='nowrap';
+      var base=parseFloat(getComputedStyle(label).fontSize)||26;
+      if(label.scrollWidth>width){
+        label.style.fontSize=Math.max(10,Math.floor(base*width/label.scrollWidth))+'px';
+        while(label.scrollWidth>width&&parseFloat(label.style.fontSize)>10)label.style.fontSize=(parseFloat(label.style.fontSize)-1)+'px';
+        if(label.scrollWidth>width)label.style.whiteSpace='normal';
+      }
+    });
+  }
   function replyHtml(reply,t){
     var parent=t.replies.find(function(row){return row.id===reply.parentId;}),name=reply.authorNick||reply.authorName||'Игрок';
     var profileAvatar=String(reply.authorAvatar||'').trim()||'/api/avatar?userId='+encodeURIComponent(reply.authorId)+'&format=image';
@@ -230,6 +246,13 @@
     document.querySelector('[data-view="club-reviews"] .club-reviews-header')?.classList.remove('club-reviews-header--thread');
     var visibleRows=rows;
     r.innerHTML='<div class="review-topic-list">'+visibleRows.map(topicListRow).join('')+'</div>'+(!visibleRows.length?'<p class="social-muted">Раздач с такими параметрами пока нет.</p>':'')+(totalPages>1?'<nav class="review-pagination" aria-label="Страницы раздач">'+(page>1?button('←','page',String(page-1)):'')+Array.from({length:totalPages},function(_,i){var number=i+1;return '<button type="button" class="review-pagination__page" data-review-action="page" data-id="'+number+'" aria-label="Страница '+number+'"'+(number===page?' aria-current="page"':'')+'>'+number+'</button>';}).join('')+(page<totalPages?button('→','page',String(page+1)):'')+'</nav>':'');
+    var topicList=r.querySelector('.review-topic-list');
+    if(nameFitObserver)nameFitObserver.disconnect();
+    if(typeof ResizeObserver==='function'){
+      nameFitObserver=new ResizeObserver(function(){fitTopicNames(topicList);});
+      nameFitObserver.observe(topicList);
+    }
+    requestAnimationFrame(function(){fitTopicNames(topicList);});
     var headerFilters=document.getElementById('clubReviewsHeaderFilters');if(headerFilters)headerFilters.innerHTML=listFiltersHtml();
     document.querySelector('[data-view="club-reviews"] .club-reviews-header')?.classList.add('club-reviews-header--list');
     r.querySelectorAll('.review-topic__avatar img').forEach(function(img){img.onerror=function(){var fallback=img.getAttribute('data-review-avatar-fallback');if(fallback){img.removeAttribute('data-review-avatar-fallback');img.src=fallback;return;}img.hidden=true;};});
