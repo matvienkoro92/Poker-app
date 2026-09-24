@@ -3458,4 +3458,183 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "23.09.2026": [
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 9906,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "I🐅I",
+          "place": 1,
+          "reward": 13400,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Prushnik",
+          "place": 1,
+          "reward": 16891.26,
+          "points": 0
+        },
+        {
+          "nick": "FishKopcheny",
+          "place": 3,
+          "reward": 3286.09,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 5,
+          "reward": 2705.31,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 2057.19,
+          "points": 0
+        },
+        {
+          "nick": "Monfokon",
+          "place": 18,
+          "reward": 210,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Счастливый Косарь",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ШАХиМАТ",
+          "place": 1,
+          "reward": 78475,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 17700,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 2,
+          "reward": 10600,
+          "points": 0
+        },
+        {
+          "nick": "bom_rapaz",
+          "place": 4,
+          "reward": 7600,
+          "points": 0
+        },
+        {
+          "nick": "Aza32",
+          "place": 5,
+          "reward": 5900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 11056,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 1,
+          "reward": 4512.43,
+          "points": 0
+        },
+        {
+          "nick": "Aza32",
+          "place": 4,
+          "reward": 1277.5,
+          "points": 0
+        },
+        {
+          "nick": "PlayerA2BA07",
+          "place": 3,
+          "reward": 1257.34,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 3,
+          "reward": 20659,
+          "points": 0
+        },
+        {
+          "nick": "Tim",
+          "place": 12,
+          "reward": 3977.0000000000005,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 22,
+          "reward": 956,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 39,
+          "reward": 800,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
