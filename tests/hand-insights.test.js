@@ -1,5 +1,19 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const {actions,summarize,aceHighAtShowdown}=require('../starting-hands/insights');
+const {actions,summarize,aceHighAtShowdown,personalSummary}=require('../starting-hands/insights');
+
+test('personal summary uses filtered counts and avoids strong claims from a small sample',()=>{
+ const stats={betting:{vpip:{count:18,total:60},pfr:{count:10,total:60}},showdown:{eligible:30,count:12,profitable:7},collections:{bigLoss:[{}]}};
+ const full=personalSummary(stats,60,50);
+ assert.match(full.coverage,/50 \/ 60/);
+ assert.equal(full.lines.length,3);
+ assert.match(full.lines[0],/VPIP 30%.*PFR 16,7%/);
+ assert.match(full.lines[1],/12 из 30.*7 из 12/);
+ assert.match(full.lines[2],/больше 30 bb: 1/);
+ const thin=personalSummary({betting:{vpip:{count:1,total:3},pfr:{count:0,total:3}},showdown:{eligible:2,count:1,profitable:0},collections:{bigLoss:[]}},5,2);
+ assert.match(thin.coverage,/2 \/ 5/);
+ assert.match(thin.lines[0],/мало подходящих раздач/);
+ assert.doesNotMatch(thin.lines.join(' '),/%/);
+});
 
 test('A-high showdown requires a complete board and no made hand',()=>{
  const hand={showdown:true,cards:['As','7d']};

@@ -102,5 +102,26 @@ function summarize(hands,signals={},metric='bb'){
  evBelow:hands.filter(h=>evDifference(h)!==null&&evDifference(h)<=-10).sort((a,b)=>deviation(a)-deviation(b)),
  evAbove:hands.filter(h=>evDifference(h)!==null&&evDifference(h)>=10).sort((a,b)=>deviation(b)-deviation(a))}};
 }
-return {actions,summarize,evDifference,aceHighAtShowdown};
+ function personalSummary(stats,totalHands,loadedHands){
+  const total=Math.max(0,Number(totalHands)||0),loaded=Math.min(total,Math.max(0,Number(loadedHands)||0));
+  const format=value=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(value);
+  const lines=[],vpip=stats?.betting?.vpip,pfr=stats?.betting?.pfr,showdown=stats?.showdown;
+  if(vpip?.total>=20&&pfr?.total>=20){
+   const vpipRate=vpip.count/vpip.total*100,pfrRate=pfr.count/pfr.total*100;
+   let line='Префлоп: VPIP '+format(vpipRate)+'% ('+vpip.count+'/'+vpip.total+'), PFR '+format(pfrRate)+'% ('+pfr.count+'/'+pfr.total+').';
+   if(vpip.total===pfr.total&&vpipRate-pfrRate>=8)line+=' Разница — '+format(vpipRate-pfrRate)+' п.п.';
+   lines.push(line);
+  }
+  if(showdown?.eligible>=10){
+   let line='После флопа дошли до вскрытия в '+showdown.count+' из '+showdown.eligible+' раздач.';
+   if(showdown.count>=5)line+=' Результат в плюс — в '+showdown.profitable+' из '+showdown.count+' вскрытий.';
+   lines.push(line);
+  }
+  const bigLosses=stats?.collections?.bigLoss?.length||0;
+  if(bigLosses)lines.push('Раздач с потерей больше 30 bb: '+bigLosses+'. Они собраны в подборке для разбора.');
+  if(!lines.length)lines.push('Пока мало подходящих раздач для наблюдений по решениям.');
+  else if(loaded<20&&lines.length<3)lines.push('Истории действий пока мало для наблюдений по решениям.');
+  return {coverage:'Выбрано '+total+' раздач · история действий: '+loaded+' / '+total+(loaded<total?' · показатели по действиям ещё могут измениться.':'.'),lines:lines.slice(0,3)};
+ }
+ return {actions,summarize,evDifference,aceHighAtShowdown,personalSummary};
 });

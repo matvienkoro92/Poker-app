@@ -289,13 +289,14 @@ function startHistory(payload) {
     measure.setAttribute('font-size',endpointFont);measure.setAttribute('font-weight','700');svg.append(measure);
     const endpointWidths=Object.fromEntries(lines.map(([key])=>{measure.textContent=signed(lastPoint[key]);return [key,measure.getComputedTextLength()];}));
     measure.setAttribute('font-size',axisFont);measure.setAttribute('font-weight','400');
-    const axisWidth=Math.max(0,...ticks.map(v=>{measure.textContent=compactSigned(v);return measure.getComputedTextLength();}));measure.remove();
-    const endpointWidth=Math.max(...Object.values(endpointWidths));
-    const plotLeft=Math.max(78,Math.ceil(axisWidth)+16),plotRight=Math.min(770,900-endpointWidth-40),plotWidth=plotRight-plotLeft,plotTop=28,plotBottom=plotTop+plotWidth;
+    const axisWidth=Math.max(0,...ticks.map(v=>{measure.textContent=compactSigned(v);return measure.getComputedTextLength();}));
+    measure.setAttribute('font-size',18);measure.setAttribute('font-weight','600');measure.textContent=label;
+    const unitWidth=measure.getComputedTextLength();measure.remove();
+    const plotLeft=Math.max(78,Math.ceil(axisWidth)+16),plotRight=880,plotWidth=plotRight-plotLeft,plotTop=28,plotHeight=Math.min(630,plotWidth),plotBottom=plotTop+plotHeight;
     const chartHeight=Math.ceil(plotBottom+90);
     svg.setAttribute('viewBox','0 0 900 '+chartHeight);
     svg.style.aspectRatio='900 / '+chartHeight;
-    const x=i=>plotLeft+i/Math.max(1,data.count)*plotWidth,y=v=>plotBottom-(v-low)/(high-low)*plotWidth;
+    const x=i=>plotLeft+i/Math.max(1,data.count)*plotWidth,y=v=>plotBottom-(v-low)/(high-low)*plotHeight;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
     for(const v of ticks){node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});node('text',{'data-profit-axis':'left',x:plotLeft-10,y:y(v)+4,'text-anchor':'end',fill:v===0?'#e4eaf1':'#e8bc68',stroke:'#0b1220','stroke-width':6,'paint-order':'stroke','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));}
     for(const axisX of [plotLeft,plotRight])node('line',{x1:axisX,x2:axisX,y1:plotTop,y2:plotBottom,stroke:'#e8bc68','stroke-width':2});
@@ -304,7 +305,7 @@ function startHistory(payload) {
     node('text',{x:(plotLeft+plotRight)/2,y:plotBottom+78,'text-anchor':'middle',fill:'#8dbfff','font-size':axisFont},'Раздачи');
     const drawdown=window.PokerHandInsights.summarize(data.cells.flatMap(c=>c.hands).map(h=>({...h,bb:graphUnit==='resultMinor'?h.resultMinor/100:h.bb}))).drawdown;
     if(drawdown.amount>0){
-      node('rect',{x:x(drawdown.startIndex),y:plotTop,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:plotWidth,fill:'#fb7185',opacity:.09});
+      node('rect',{x:x(drawdown.startIndex),y:plotTop,width:Math.max(2,x(drawdown.troughIndex)-x(drawdown.startIndex)),height:plotHeight,fill:'#fb7185',opacity:.09});
     }
     node('line',{'data-profit-zero':'',x1:plotLeft,x2:plotRight,y1:y(0),y2:y(0),stroke:'#b3bfd0','stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
     for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
@@ -319,11 +320,12 @@ function startHistory(payload) {
         for(let i=endpoints.length-2;i>=0;i--)endpoints[i].labelY=Math.min(endpoints[i].labelY,endpoints[i+1].labelY-gap);
       }
       for(const p of endpoints){
-        const labelX=888,leaderEnd=Math.max(plotRight+18,labelX-endpointWidths[p.key]-8);
-        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight+10)+','+p.labelY+' H'+leaderEnd,fill:'none',stroke:p.color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
+        const labelX=plotRight-17,boxWidth=Math.max(endpointWidths[p.key],unitWidth)+22;
+        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight-8)+','+p.labelY,fill:'none',stroke:p.color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
+        node('rect',{'data-profit-endpoint-box':p.key,x:plotRight-8-boxWidth,y:p.labelY-25,width:boxWidth,height:48,rx:8,fill:'#0b1220','fill-opacity':.94,stroke:p.color,'stroke-opacity':.8,'stroke-width':1});
         node('circle',{cx:plotRight,cy:p.endY,r:4,fill:p.color});
-        node('text',{'data-profit-endpoint':p.key,x:labelX,y:p.labelY-5,'text-anchor':'end',fill:p.color,'font-size':font,'font-weight':700,stroke:'#0b1220','stroke-width':7,'stroke-linejoin':'round','paint-order':'stroke'},signed(p.value));
-        node('text',{'data-profit-unit':p.key,x:labelX,y:p.labelY+18,'text-anchor':'end',fill:p.color,'font-size':18,'font-weight':600,stroke:'#0b1220','stroke-width':5,'stroke-linejoin':'round','paint-order':'stroke'},label);
+        node('text',{'data-profit-endpoint':p.key,x:labelX,y:p.labelY-5,'text-anchor':'end',fill:p.color,'font-size':font,'font-weight':700},signed(p.value));
+        node('text',{'data-profit-unit':p.key,x:labelX,y:p.labelY+17,'text-anchor':'end',fill:p.color,'font-size':18,'font-weight':600},label);
       }
     }
     svg.querySelectorAll('[data-profit-axis]').forEach(tick=>svg.append(tick));
@@ -367,16 +369,25 @@ function startHistory(payload) {
     if(payload.version)try{sessionStorage.setItem(insightCacheKey,JSON.stringify({schema:3,version:payload.version,signals:insightSignals}));}catch(_){}
   }
   function renderInsights(data,renderReplay){
-    const root=$('hand-insights');root.replaceChildren();
+    const root=$('hand-insights'),statsPanel=$('hand-statistics');root.replaceChildren();statsPanel.replaceChildren();
     const reviewMetric=metric==='resultMinor'?'resultMinor':'bb',reviewUnit=reviewMetric==='resultMinor'?(mode==='cash'?'₽':'фишек'):'bb';
     const amount=h=>reviewMetric==='resultMinor'?h.resultMinor/100:h.bb;
     const hands=data.cells.flatMap(c=>c.hands),stats=window.PokerHandInsights.summarize(hands,insightSignals,reviewMetric);
     const add=(parent,tag,text,cls)=>{const el=document.createElement(tag);if(text!=null)el.textContent=text;if(cls)el.className=cls;parent.append(el);return el;};
-    add(root,'h2','Разбор игры');
-    if(!hands.length){add(root,'p','Нет раздач по выбранным фильтрам.','note');return;}
+    add(root,'h2','Разбор раздач','visually-hidden');
+    add(statsPanel,'summary','Статистика игры');
+    if(!hands.length){add(root,'p','Нет раздач по выбранным фильтрам.','note');add(statsPanel,'p','Нет раздач по выбранным фильтрам.','note');return;}
     const missing=hands.filter(h=>!Object.prototype.hasOwnProperty.call(insightSignals,h.handId));
+    const personal=window.PokerHandInsights.personalSummary(stats,hands.length,hands.length-missing.length);
+    const personalCard=add(statsPanel,'section',null,'insight-personal-summary');
+    add(personalCard,'h3','Коротко по вашей игре');
+    add(personalCard,'p',personal.coverage,'insight-personal-summary__coverage');
+    const personalList=add(personalCard,'ul');
+    for(const line of personal.lines)add(personalList,'li',line);
+    const personalStatus=add(personalCard,'p',insightsError||'','insight-personal-summary__status');personalStatus.hidden=!insightsError;
     const load=add(root,'button',insightsLoading?'Загружаю историю действий…':'Загрузить действия для вскрытий и подборок','insight-button insight-button--loading');load.type='button';load.hidden=!missing.length;load.disabled=insightsLoading;
     if(insightsError)add(root,'p',insightsError,'note');
+    if(insightsError&&missing.length){const retry=add(personalCard,'button','Повторить загрузку','insight-button');retry.type='button';retry.onclick=()=>{insightsError='';load.click();};}
     function handList(parent,rows,showEv=false){
       if(!rows.length){add(parent,'p','Подходящих раздач нет.','note');return;}
       let shown=0;const more=add(parent,'button','Показать ещё','insight-button');more.type='button';
@@ -390,14 +401,10 @@ function startHistory(payload) {
       }shown+=30;more.hidden=shown>=rows.length;}
       more.onclick=next;next();
     }
-    const topTabs=add(root,'div',null,'insight-top-tabs');topTabs.setAttribute('role','tablist');topTabs.setAttribute('aria-label','Крупнейшие результаты');
-    const topPanel=add(root,'div',null,'insight-top-panel');topPanel.hidden=true;topPanel.setAttribute('role','tabpanel');
-    [['wins','Крупнейшие выигрыши',stats.wins],['losses','Крупнейшие проигрыши',stats.losses]].forEach(([key,title,rows])=>{
-      const tab=add(topTabs,'button',title+' · '+rows.length);tab.type='button';tab.dataset.insightTop=key;tab.setAttribute('role','tab');tab.setAttribute('aria-selected','false');
-      tab.onclick=()=>{const closing=tab.getAttribute('aria-selected')==='true';topTabs.querySelectorAll('button').forEach(button=>button.setAttribute('aria-selected','false'));topPanel.replaceChildren();if(closing){topPanel.hidden=true;return;}tab.setAttribute('aria-selected','true');topPanel.hidden=false;handList(topPanel,rows);};
-    });
-    const pokerStats=add(root,'section',null,'insight-card');add(pokerStats,'h3','Основные показатели');
+    const pokerStats=add(statsPanel,'section',null,'insight-card');add(pokerStats,'h3','Основные показатели');
     const statsGrid=add(pokerStats,'div',null,'poker-stats-grid');
+    const cashNlh=mode==='cash'&&game==='NLH';
+    const reference={vpip:'22–28%',pfr:'18–22%',threeBet:'6–10%',foldThreeBet:'40–50%',cbet:'50–70%*',foldCbet:'<50%*',wwsf:'45–53%',wtsd:'27–32%'};
     for(const [key,title,description] of [
       ['vpip','VPIP','Добровольно вложил фишки на префлопе'],['pfr','PFR','Сделал рейз на префлопе'],
       ['threeBet','3-бет','Переставил первый рейз'],['foldThreeBet','Фолд на 3-бет','Сбросил после 3-бета на свой первый рейз'],
@@ -406,11 +413,15 @@ function startHistory(payload) {
       ['wwsf','WWSF','Закончил в плюс, увидев флоп'],
       ['wtsd','WTSD','Дошёл до вскрытия после просмотра флопа']]){
       const stat=stats.betting[key],cell=add(statsGrid,'div',null,'poker-stat');
-      add(cell,'strong',title);add(cell,'span',stat.total?number(stat.count/stat.total*100)+'%':'—');
+      add(cell,'strong',title);
+      const values=add(cell,'div',null,'poker-stat__values');
+      add(values,'span',stat.total?number(stat.count/stat.total*100)+'%':'—','poker-stat__actual');
+      if(cashNlh)add(values,'span',reference[key],'poker-stat__reference');
       add(cell,'small',stat.count+' / '+stat.total+' · '+description);
     }
+    if(cashNlh)add(pokerStats,'small','Зелёным — ориентиры для NLH кеша 6-max, а не личная норма. * Контбет зависит от позиции и типа банка; фолд на контбет — также от размера ставки.');
     add(pokerStats,'small','По текущим фильтрам. Под процентом — срабатывания / подходящие ситуации. Неоднозначные олл-ины исключены из показателей рейзов и контбетов; в VPIP учитываются.');
-    const cards=add(root,'div',null,'insight-grid');
+    const cards=add(statsPanel,'div',null,'insight-grid');
     const showdown=add(cards,'div',null,'insight-card');add(showdown,'h3','Вскрытия');
     const sd=stats.showdown;
     add(showdown,'p',sd.eligible?'Дошёл до вскрытия: '+number(sd.count/sd.eligible*100)+'% · '+sd.count+' из '+sd.eligible+' раздач с флопом':'Дошёл до вскрытия: —');
@@ -429,23 +440,54 @@ function startHistory(payload) {
     }
     load.onclick=async()=>{
       if(insightsLoading)return;
-      insightsLoading=true;insightsError='';load.disabled=true;
+      insightsLoading=true;insightsError='';load.disabled=true;personalStatus.hidden=false;personalStatus.textContent='Загружаю историю действий…';
       try{for(let i=0;i<missing.length;i+=100){load.textContent='Загружаю действия: '+i+' / '+missing.length;const response=await historyRequest('insights',missing.slice(i,i+100).map(h=>h.handId));Object.assign(insightSignals,response.signals);if(response.version===payload.version)saveInsightSignals();}}
       catch(_){insightsError='Не удалось загрузить все действия. Уже загруженные учтены; можно повторить.';}
       finally{insightsLoading=false;render();}
     };
-    if(missing.length&&!insightsLoading&&!insightsError&&!root.hidden)queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
+    statsPanel.ontoggle=()=>{if(statsPanel.open&&missing.length&&!insightsLoading&&!insightsError)load.click();};
+    if(missing.length&&!insightsLoading&&!insightsError&&(!root.hidden||(!statsPanel.hidden&&statsPanel.open)))queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
     const collections=add(root,'div',null,'insight-collections');
-    const collectionGroups=[['aceHighShowdown','Вскрытие с A-хай'],['riverLoss','Заколлировал ривер и проиграл'],['threeBet','Сделал 3-бет'],['foldRaise','Выбросил на рейз'],['bigLoss','Проиграл больше 30 bb'],['evBelow','🔴 Недобор от EV · от 10 bb'],['evAbove','🟢 Перебор EV · от 10 bb']];
+    const collectionGroups=[
+      ['Стоит посмотреть',[['riverLoss','Колл ривера с проигрышем'],['aceHighShowdown','Вскрытия с A-хай'],['bigLoss','Потери больше 30 bb']]],
+      ['Действия',[['threeBet','3-беты'],['foldRaise','Фолды на рейз']]],
+      ['Отклонение от all-in EV',[['evBelow','Результат ниже EV на 10 bb+'],['evAbove','Результат выше EV на 10 bb+']]]
+    ];
+    const collectionKeys=collectionGroups.flatMap(([,items])=>items.map(([key])=>key));
+    const uniqueCount=new Set(collectionKeys.flatMap(key=>stats.collections[key].map(h=>String(h.handId)))).size;
     const collectionHeader=add(collections,'div',null,'insight-collections-header');
-    add(collectionHeader,'h3','Подборки для разбора');
-    add(collectionHeader,'span','Всего: '+collectionGroups.reduce((sum,[key])=>sum+stats.collections[key].length,0),'insight-collections-total');
-    for(const [key,title] of collectionGroups){
-      const rows=stats.collections[key],d=add(collections,'details',null,'insight-section');add(d,'summary',title+' · '+rows.length,key==='evBelow'?'negative':key==='evAbove'?'positive':undefined);handList(d,rows,key==='evBelow'||key==='evAbove');
+    add(collectionHeader,'h3','Ситуации для разбора');
+    add(collectionHeader,'span',uniqueCount+' из '+hands.length+' раздач','insight-collections-total');
+    add(collections,'p','История действий: '+(hands.length-missing.length)+' / '+hands.length,'insight-collections-progress');
+    let visibleGroups=0;
+    for(const [heading,items] of collectionGroups){
+      const available=items.filter(([key])=>stats.collections[key].length);
+      if(!available.length)continue;
+      visibleGroups++;
+      const group=add(collections,'section',null,'insight-collection-group');
+      add(group,'h4',heading);
+      for(const [key,title] of available){
+        const raw=stats.collections[key],rows=['riverLoss','bigLoss'].includes(key)?raw.slice().sort((a,b)=>amount(a)-amount(b)):raw;
+        const d=add(group,'details',null,'insight-collection');
+        const summary=add(d,'summary',null);add(summary,'span',title,'insight-collection__title');add(summary,'strong',number(rows.length),'insight-collection__count');
+        const body=add(d,'div',null,'insight-collection__body');
+        d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(body,rows,key==='evBelow'||key==='evAbove');}});
+      }
     }
-    add(collections,'p','A-хай учитывает подтверждённые вскрытия с полной доской, где итоговая комбинация — старшая карта с тузом. Подборки EV учитывают только раздачи с рассчитанным денежным EV; сначала показаны наибольшие отклонения. Подборки по действиям учитывают загруженные истории. 3-бет — второй префлоп-рейз; неоднозначные олл-ины исключены.','note');
+    if(!visibleGroups)add(collections,'p',missing.length?'Подборки появятся после загрузки истории действий.':'По выбранным фильтрам подходящих раздач нет.','note');
+    add(collections,'p','Одна раздача может входить в несколько подборок. Отклонение от all-in EV показывает разброс результата, а не качество решения.','insight-collections-note');
+    if(stats.wins.length||stats.losses.length){
+      const topGroup=add(collections,'section',null,'insight-collection-group');add(topGroup,'h4','Крупнейшие раздачи');
+      for(const [title,rows] of [['Выигрыши',stats.wins],['Проигрыши',stats.losses]]){
+        if(!rows.length)continue;
+        const d=add(topGroup,'details',null,'insight-collection');const summary=add(d,'summary',null);
+        add(summary,'span',title,'insight-collection__title');add(summary,'strong',number(rows.length),'insight-collection__count');
+        const body=add(d,'div',null,'insight-collection__body');
+        d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(body,rows);}});
+      }
+    }
     for(const [title,groups,key] of [['По сессиям',stats.sessions,'sessionId'],[mode==='cash'?'По ставкам большого блайнда':'По уровням блайндов',stats.limits,'bigBlindMinor']]){
-      const section=add(root,'details',null,'insight-section');add(section,'summary',title+' · '+groups.length);
+      const section=add(statsPanel,'details',null,'insight-section');add(section,'summary',title+' · '+groups.length);
       if(key==='bigBlindMinor'&&mode!=='cash')add(section,'p','В турнирах это уровни большого блайнда, а не бай-ины.','note');
       for(const g of groups.sort((a,b)=>key==='bigBlindMinor'?Number(a.key)-Number(b.key):value(b)-value(a))){
         const d=add(section,'details',null,'insight-section');
