@@ -449,7 +449,7 @@ var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1000 ₽", 1: "1000 ₽", 2: "1000 �
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
 var HOME_TOURNAMENT_BANNER_VERSION = "2026080802";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
-var HOME_REDROCKET_SCENE_URL = "./assets/home-tournament-redrocket-no-spade-v2-display-v1.webp";
+var HOME_REDROCKET_SCENE_URL = "./assets/home-tournament-redrocket-no-spade-v2.webp";
 var homeRedRocketScenePreload = null;
 
 function getHomeTournamentBannerUrl(file) {

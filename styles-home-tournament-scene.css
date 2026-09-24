@@ -1055,7 +1055,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* RedRocket: align the live ticket copy and put the prize behind the helmet. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
-  --home-tournament-scene:url('./assets/home-tournament-redrocket-no-spade-v2-display-v1.webp');
+  --home-tournament-scene:url('./assets/home-tournament-redrocket-no-spade-v2.webp');
 }
 #app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-trophy__copy > :where(span) {
   left:20% !important;
