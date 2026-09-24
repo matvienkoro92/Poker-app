@@ -9661,6 +9661,9 @@ body[data-view="my-summary"]{background:#080c0e}
 body[data-view="my-summary"] #app.app > .card > .card__header {
   display: none !important;
 }
+#app.app:has(.view--active[data-view="my-summary"]) > .card > .card__header {
+  display: none !important;
+}
 
 /* Reviews are a full-width app section, not a card inside another card. */
 .review-topic{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid #ffffff20}
@@ -10113,3 +10116,25 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
  [data-view="my-summary"] .summary-card--friends .summary-card-icon{display:none}
  [data-view="my-summary"] .summary-card--friends h2{padding-right:0}
 }
+
+/* Play: four equal dashboard cards fill the space below the section tabs. */
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-rows: repeat(2,minmax(220px,1fr));
+  min-height: max(460px,calc(100dvh - 250px - var(--app-bottom-tabbar-pad,90px)));
+  align-items: stretch;
+}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--friends,.summary-card--bonus) {
+  grid-column: auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: clamp(16px,2.5vw,28px);
+  border-radius: 20px;
+}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--friends,.summary-card--bonus) h2 {
+  font-size: clamp(18px,3vw,30px);
+  line-height: 1.15;
+}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) .summary-card--friends .summary-card-icon { display: none; }
