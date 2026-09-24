@@ -1273,7 +1273,7 @@ function getHomePokermankiKnockoutInfo(weekday) {
     weekday = scene && scene.dataset.tournamentWeekday;
     if (weekday == null) weekday = getTournamentDayState(new Date()).weekday;
   }
-  var reward = Number(weekday) === 2 ? 3000 : 5000;
+  var reward = [2, 4].includes(Number(weekday)) ? 3000 : 5000;
   return {
     reward: reward,
     title: reward + " ₽ за ПокерМанки",
