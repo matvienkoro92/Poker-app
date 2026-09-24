@@ -292,13 +292,18 @@ function startHistory(payload) {
     const axisWidth=Math.max(0,...ticks.map(v=>{measure.textContent=compactSigned(v);return measure.getComputedTextLength();}));
     measure.setAttribute('font-size',18);measure.setAttribute('font-weight','600');measure.textContent=label;
     const unitWidth=measure.getComputedTextLength();measure.remove();
-    const plotLeft=Math.max(78,Math.ceil(axisWidth)+16),plotRight=880,plotWidth=plotRight-plotLeft,plotTop=28,plotHeight=Math.min(630,plotWidth),plotBottom=plotTop+plotHeight;
+    const plotLeft=14,plotRight=880,plotWidth=plotRight-plotLeft,plotTop=28,plotHeight=Math.min(630,plotWidth),plotBottom=plotTop+plotHeight;
     const chartHeight=Math.ceil(plotBottom+90);
     svg.setAttribute('viewBox','0 0 900 '+chartHeight);
     svg.style.aspectRatio='900 / '+chartHeight;
     const x=i=>plotLeft+i/Math.max(1,data.count)*plotWidth,y=v=>plotBottom-(v-low)/(high-low)*plotHeight;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
-    for(const v of ticks){node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});node('text',{'data-profit-axis':'left',x:plotLeft-10,y:y(v)+4,'text-anchor':'end',fill:v===0?'#e4eaf1':'#e8bc68',stroke:'#0b1220','stroke-width':6,'paint-order':'stroke','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));}
+    for(const v of ticks){
+      node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});
+      const boxHeight=axisFont+12,boxY=Math.max(plotTop,Math.min(plotBottom-boxHeight,y(v)-boxHeight/2));
+      node('rect',{'data-profit-axis':'left',x:plotLeft+8,y:boxY,width:Math.ceil(axisWidth)+18,height:boxHeight,rx:7,fill:'#0b1220','fill-opacity':.92});
+      node('text',{'data-profit-axis':'left',x:plotLeft+17,y:boxY+boxHeight/2,'dominant-baseline':'middle',fill:v===0?'#e4eaf1':'#e8bc68','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));
+    }
     for(const axisX of [plotLeft,plotRight])node('line',{x1:axisX,x2:axisX,y1:plotTop,y2:plotBottom,stroke:'#e8bc68','stroke-width':2});
     node('line',{x1:plotLeft,x2:plotRight,y1:plotBottom,y2:plotBottom,stroke:'#8dbfff','stroke-width':2});
     for(let i=0;i<=4;i++){const n=Math.round(data.count*i/4);node('text',{x:x(n),y:plotBottom+38,'text-anchor':i===4?'end':i===0?'start':'middle',fill:'#8dbfff','font-size':axisFont},number(n));}
