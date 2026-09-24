@@ -10339,7 +10339,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="my-summary"] .summary-card--reviews-entry .summary-muted{max-width:52%}
 [data-view="my-summary"] .summary-card--starting-hands .summary-art{width:43%;height:100%;right:0;bottom:0;object-fit:cover;object-position:53% 50%;filter:none;mask-image:none}
 [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:62%;height:77%;right:-3%;bottom:-1%;object-fit:cover;object-position:50% 55%;filter:none;mask-image:linear-gradient(to right,transparent,#000 28%)}
-[data-view="my-summary"] .summary-card--bonus .summary-art{width:55%;height:87%;right:-2%;bottom:-1%;object-fit:cover;object-position:52% 50%;filter:none;mask-image:linear-gradient(to right,transparent,#000 25%)}
+[data-view="my-summary"] .summary-card--bonus .summary-art{width:54%;height:96%;right:-2%;bottom:-1%;object-fit:contain;object-position:right bottom;filter:none;mask-image:none}
 [data-view="my-summary"] .summary-card--bonus .summary-card-icon{display:none}
 [data-view="my-summary"] .summary-chart-art{position:absolute;z-index:1;left:7%;bottom:8%;width:59%;height:64%;overflow:visible;pointer-events:none}
 [data-view="my-summary"] .summary-chart-grid{stroke:#9e672e55;stroke-width:1;stroke-dasharray:3 5}
@@ -10386,7 +10386,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
  [data-view="my-summary"] .summary-card--reviews-entry .summary-muted{max-width:72%}
  [data-view="my-summary"] .summary-card--starting-hands .summary-art{width:48%;mask-image:none}
  [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:65%;height:75%;mask-image:linear-gradient(to right,transparent 0%,#000 34%)}
- [data-view="my-summary"] .summary-card--bonus .summary-art{width:60%;height:85%;mask-image:linear-gradient(to right,transparent 0%,#000 30%)}
+ [data-view="my-summary"] .summary-card--bonus .summary-art{width:58%;height:96%;mask-image:none}
  [data-view="my-summary"] .summary-chart-art{left:8%;width:57%;height:65%;bottom:5%}
  [data-view="my-summary"] .summary-card--bonus #summary-bonus{max-width:75%}
  [data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-value{font-size:34px!important;margin-top:5px}
@@ -10443,3 +10443,22 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 }
 /* Show established player character art in hand-list avatars, with a tighter portrait crop. */
 [data-view="club-reviews"] .review-topic__avatar--personal-art img{object-position:50% 18%;transform:scale(1.45);transform-origin:50% 25%}
+
+/* Tournament prizes nested in the personal tournament-results card. */
+[data-view="my-summary"] .summary-prizes{margin:20px 0 16px;padding:20px 22px;border:1px solid #d9a43e;border-radius:21px;background:repeating-linear-gradient(135deg,#ffffff06 0 22px,transparent 22px 44px),linear-gradient(125deg,#1b2029,#10151a);box-shadow:inset 0 1px 0 #ffffff16;color:#f8f7f3}
+[data-view="my-summary"] .summary-prizes__heading{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:clamp(20px,3vw,30px);font-weight:850;line-height:1.15;letter-spacing:-.035em}
+[data-view="my-summary"] .summary-prizes__heading span:last-child{font-size:clamp(29px,4vw,48px);line-height:1}
+[data-view="my-summary"] .summary-prizes__total{display:block;margin:5px 0 20px;color:#ffe49a;font-size:clamp(30px,5vw,48px);font-weight:900;line-height:1.08;letter-spacing:-.04em;overflow-wrap:anywhere}
+[data-view="my-summary"] .summary-prizes__best{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;border:1px solid #9d8e6c66;border-radius:17px;background:#1b2024e8;font-size:clamp(14px,2.5vw,21px);font-weight:750}
+[data-view="my-summary"] .summary-prizes__best strong{color:#ffe5a7;white-space:nowrap}
+[data-view="my-summary"] .summary-prizes__podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+[data-view="my-summary"] .summary-prizes__place{display:grid;grid-template-columns:1fr 1.5fr;gap:4px;align-content:start;min-width:0;min-height:96px;padding:12px 10px;border:1px solid #c28b36;border-radius:15px;background:linear-gradient(135deg,#63432266,#141b21)}
+[data-view="my-summary"] .summary-prizes__place:nth-child(2){border-color:#8f959e;background:linear-gradient(135deg,#62697455,#141b21)}
+[data-view="my-summary"] .summary-prizes__place:nth-child(3){border-color:#b87249;background:linear-gradient(135deg,#79482e66,#141b21)}
+[data-view="my-summary"] .summary-prizes__place>b{grid-column:1/-1;text-align:center;color:#ffe7b0;font-size:clamp(13px,2.4vw,19px)}
+[data-view="my-summary"] .summary-prizes__place>div{text-align:center;min-width:0}
+[data-view="my-summary"] .summary-prizes__place strong,[data-view="my-summary"] .summary-prizes__place small{display:block;white-space:nowrap}
+[data-view="my-summary"] .summary-prizes__place strong{font-size:clamp(13px,2.8vw,22px);font-weight:850}
+[data-view="my-summary"] .summary-prizes__place small{color:#bfc5cc;font-size:clamp(9px,1.5vw,12px)}
+[data-view="my-summary"] .summary-prizes>.summary-link{margin-top:18px;padding:0!important;min-height:0;border:0;background:none;color:#ffe17c;font-size:clamp(16px,2.5vw,21px)!important;font-weight:850;text-transform:uppercase}
+@media(max-width:540px){[data-view="my-summary"] .summary-prizes{padding:15px 12px;border-radius:17px}[data-view="my-summary"] .summary-prizes__best{padding:10px 12px}[data-view="my-summary"] .summary-prizes__podium{gap:6px}[data-view="my-summary"] .summary-prizes__place{grid-template-columns:minmax(0,1fr);gap:5px;padding:10px 4px;min-height:112px}[data-view="my-summary"] .summary-prizes__place>b{grid-column:1}[data-view="my-summary"] .summary-prizes__place strong{font-size:clamp(11px,3.4vw,16px)}[data-view="my-summary"] .summary-prizes__place small{font-size:9px}[data-view="my-summary"] .summary-prizes__place>div:first-of-type{display:flex;justify-content:center;align-items:baseline;gap:3px}}

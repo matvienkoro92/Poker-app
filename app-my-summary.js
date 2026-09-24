@@ -100,7 +100,7 @@
   function num(n) { return Number(n).toLocaleString("ru-RU", {maximumFractionDigits: 0}); }
   function link(text, target) { return '<a href="#" class="summary-link" data-view-target="' + target + '">' + esc(text) + ' <span aria-hidden="true">→</span></a>'; }
   function section(id, title, body) {
-    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-hands-reference-v2.webp", "reviews-entry":"summary-reviews-hands-v3.webp", bonus:"summary-bonus-reference-v2.webp", friends:"summary-friends-news-monkeys-v1.webp"};
+    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-hands-reference-v2.webp", "reviews-entry":"summary-reviews-hands-v3.webp", bonus:"summary-bonus-monkey-ticket-v1.png", friends:"summary-friends-news-monkeys-v1.webp"};
     var icons = {
       bonus:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/>',
       raffles:'<path d="M7 3h10v7a5 5 0 0 1-10 0zM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 15v5m-5 1h10"/>',
@@ -325,7 +325,20 @@
     var rows = (stats.rows || []).filter(function (r) {return Number(r.reward) > 0;});
     var current = rows.filter(function (r) {return monthKey(r.date) === month;});
     var latest = rows.slice().sort(function (a,b) {return stamp(b).localeCompare(stamp(a));})[0];
-    put("results", '<span class="summary-kicker">' + esc(new Intl.DateTimeFormat("ru-RU", {month:"long", timeZone:"Europe/Moscow"}).format(new Date())) + '</span><strong class="summary-value">' + num(current.reduce(function (sum,r) {return sum + Number(r.reward);},0)) + ' ₽</strong><p>Учтённые призовые · попаданий в призы: ' + current.length + '</p>' + (latest ? '<div class="summary-event"><span class="summary-kicker">Последнее призовое место · ' + esc(latest.date) + '</span><strong>' + esc(latest.tournamentLabel || latest.tournament || "Турнир") + '</strong><p>' + esc(latest.place) + '-е место · ' + num(latest.reward) + ' ₽</p></div>' : '<p class="summary-muted">Призовых результатов пока нет.</p>') + '<p class="summary-muted">По опубликованным результатам клуба. Это призовые, не чистая прибыль.</p>' + link("Мой профиль", "profile") + ' <button type="button" class="summary-link" data-summary-share-results>Поделиться ↗</button>');
+    var podium = [{count:0,reward:0},{count:0,reward:0},{count:0,reward:0}];
+    rows.forEach(function (row) {
+      var place = Number(row.place);
+      if (place >= 1 && place <= 3) {podium[place-1].count++;podium[place-1].reward += Number(row.reward) || 0;}
+    });
+    var prizes = '<div class="summary-prizes" aria-label="Призовые в турнирах">' +
+      '<div class="summary-prizes__heading"><span>Призовые в турнирах</span><span aria-hidden="true">🏆</span></div>' +
+      '<strong class="summary-prizes__total">' + num(stats.totalReward || 0) + ' ₽</strong>' +
+      '<div class="summary-prizes__best"><span>Топ призовых за 1 турнир</span><strong>' + num(stats.topWin || 0) + ' ₽</strong></div>' +
+      '<div class="summary-prizes__podium">' + podium.map(function (result, index) {
+        return '<div class="summary-prizes__place"><b>' + (index+1) + ' место</b><div><strong>' + num(result.count) + '</strong><small>раз</small></div><div><strong>' + num(result.reward) + '</strong><small>призовые, ₽</small></div></div>';
+      }).join('') + '</div>' +
+      link("Подробнее »", "profile") + '</div>';
+    put("results", '<span class="summary-kicker">' + esc(new Intl.DateTimeFormat("ru-RU", {month:"long", timeZone:"Europe/Moscow"}).format(new Date())) + '</span><strong class="summary-value">' + num(current.reduce(function (sum,r) {return sum + Number(r.reward);},0)) + ' ₽</strong><p>Учтённые призовые · попаданий в призы: ' + current.length + '</p>' + (latest ? '<div class="summary-event"><span class="summary-kicker">Последнее призовое место · ' + esc(latest.date) + '</span><strong>' + esc(latest.tournamentLabel || latest.tournament || "Турнир") + '</strong><p>' + esc(latest.place) + '-е место · ' + num(latest.reward) + ' ₽</p></div>' : '<p class="summary-muted">Призовых результатов пока нет.</p>') + '<p class="summary-muted">По опубликованным результатам клуба. Это призовые, не чистая прибыль.</p>' + prizes + '<button type="button" class="summary-link" data-summary-share-results>Поделиться ↗</button>');
     var defs = [
       {id:"wins",name:"Король турниров",value:stats.firstPlaces,tiers:[1,15,50,100,250],unit:"побед"},
       {id:"hero",name:"Герой дня",value:(stats.dayHeroes || []).length,tiers:[1,5,15,30,100],unit:"раз"},
