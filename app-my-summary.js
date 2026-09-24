@@ -100,7 +100,7 @@
   function num(n) { return Number(n).toLocaleString("ru-RU", {maximumFractionDigits: 0}); }
   function link(text, target) { return '<a href="#" class="summary-link" data-view-target="' + target + '">' + esc(text) + ' <span aria-hidden="true">→</span></a>'; }
   function section(id, title, body) {
-    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-starting-cards-v1.webp", "reviews-entry":"summary-reviews-discussion-v1.webp"};
+    var arts = {spin:"summer-rating-player-prushnik.webp", "starting-hands":"summary-hands-reference-v2.webp", "reviews-entry":"summary-reviews-reference-v2.webp", bonus:"summary-bonus-reference-v2.webp"};
     var icons = {
       bonus:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/>',
       raffles:'<path d="M7 3h10v7a5 5 0 0 1-10 0zM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 15v5m-5 1h10"/>',
@@ -108,8 +108,9 @@
       schedule:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 2v6m10-6v6M3 11h18m-13 5h3"/>'
     };
     var art = arts[id] ? '<img class="summary-art summary-art--' + id + '" src="./assets/' + arts[id] + '" alt="" aria-hidden="true" decoding="async">' : '';
+    var chartArt = id === "starting-hands" ? '<svg class="summary-chart-art" viewBox="0 0 550 220" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="summary-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fb872c" stop-opacity=".35"/><stop offset="1" stop-color="#fb872c" stop-opacity="0"/></linearGradient><linearGradient id="summary-chart-line"><stop stop-color="#ef6b1b"/><stop offset="1" stop-color="#ffb545"/></linearGradient></defs><path class="summary-chart-grid" d="M72 52V216M152 52V216M232 52V216M312 52V216M392 52V216M472 52V216"/><path class="summary-chart-area" d="M0 210 C30 209 46 174 72 177 S105 189 132 170 S169 166 188 128 S222 150 247 128 S278 96 302 104 S337 139 366 111 S391 121 415 91 S440 54 466 60 S494 45 520 12 L520 216H0Z"/><path class="summary-chart-line" d="M0 210 C30 209 46 174 72 177 S105 189 132 170 S169 166 188 128 S222 150 247 128 S278 96 302 104 S337 139 366 111 S391 121 415 91 S440 54 466 60 S494 45 520 12"/><g class="summary-chart-points"><circle cx="72" cy="177" r="5"/><circle cx="188" cy="128" r="5"/><circle cx="302" cy="104" r="5"/><circle cx="366" cy="111" r="5"/><circle cx="466" cy="60" r="5"/><circle cx="520" cy="12" r="7"/></g></svg>' : '';
     var icon = icons[id] ? '<span class="summary-card-icon" aria-hidden="true">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + icons[id] + '</svg></span>' : '';
-    return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '">' + art + icon + '<h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>';
+    return '<section class="summary-card summary-card--' + id + '" aria-labelledby="summary-title-' + id + '">' + art + chartArt + icon + '<h2 id="summary-title-' + id + '">' + title + '</h2><div id="summary-' + id + '">' + body + '</div></section>';
   }
   function makeCardAction(card) {
     if (!card || !card.matches(':is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--spin,.summary-card--bonus,.summary-card--raffles,.summary-card--friends)')) return;

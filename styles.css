@@ -10311,3 +10311,85 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
   line-height: 1.15;
 }
 [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) .summary-card--friends .summary-card-icon { display: none; }
+
+/* Three Play entries styled after the September poker dashboard reference. */
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])){
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:minmax(335px,auto) minmax(310px,auto) auto;
+  gap:18px;
+  min-height:0;
+}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--starting-hands{grid-column:1/-1;grid-row:1}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--reviews-entry{grid-column:1;grid-row:2}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--bonus{grid-column:2;grid-row:2}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--friends{grid-column:1/-1;grid-row:3;min-height:150px}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus){
+  position:relative;display:flex;flex-direction:column;justify-content:flex-start;
+  min-height:0;height:100%;padding:32px 34px;border-radius:34px;overflow:hidden;
+  border:2px solid #8f765442;background:#211a14;
+  box-shadow:inset 0 1px 0 #e6c79b24,0 16px 32px #0005;
+}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--starting-hands{padding-top:60px;background:radial-gradient(ellipse at 60% 100%,#75401945,transparent 65%),linear-gradient(110deg,#2e241a,#17130f 75%)}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--reviews-entry{background:radial-gradient(ellipse at 75% 100%,#6638174a,transparent 66%),linear-gradient(115deg,#30251b,#1d1713)}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--bonus{background:radial-gradient(ellipse at 75% 100%,#5539603c,transparent 65%),linear-gradient(115deg,#261e2b,#15131c);border-color:#806e8545}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) h2{z-index:2;max-width:100%;margin:0;color:#ffebc6;font-size:clamp(31px,4vw,54px);font-weight:900;letter-spacing:-.045em;line-height:1.08;text-shadow:0 3px 18px #0008}
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--reviews-entry,.summary-card--bonus) h2{font-size:clamp(26px,3.4vw,39px);padding:0;min-height:0}
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) > div{position:relative;z-index:2}
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-muted{font-size:clamp(17px,2.4vw,26px)!important;line-height:1.32;margin-top:14px;color:#bfc0c6!important}
+[data-view="my-summary"] .summary-card--reviews-entry .summary-muted{max-width:52%}
+[data-view="my-summary"] .summary-card--starting-hands .summary-art{width:43%;height:100%;right:0;bottom:0;object-fit:cover;object-position:53% 50%;filter:none;mask-image:linear-gradient(to right,transparent,#000 17%)}
+[data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:62%;height:77%;right:-3%;bottom:-1%;object-fit:cover;object-position:50% 55%;filter:none;mask-image:linear-gradient(to right,transparent,#000 28%)}
+[data-view="my-summary"] .summary-card--bonus .summary-art{width:55%;height:87%;right:-2%;bottom:-1%;object-fit:cover;object-position:52% 50%;filter:none;mask-image:linear-gradient(to right,transparent,#000 25%)}
+[data-view="my-summary"] .summary-card--bonus .summary-card-icon{display:none}
+[data-view="my-summary"] .summary-chart-art{position:absolute;z-index:1;left:7%;bottom:8%;width:59%;height:64%;overflow:visible;pointer-events:none}
+[data-view="my-summary"] .summary-chart-grid{stroke:#9e672e55;stroke-width:1;stroke-dasharray:3 5}
+[data-view="my-summary"] .summary-chart-area{fill:url(#summary-chart-fill)}
+[data-view="my-summary"] .summary-chart-line{fill:none;stroke:url(#summary-chart-line);stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 0 4px #ff792c99)}
+[data-view="my-summary"] .summary-chart-points circle{fill:#ff9b37;stroke:#ffe5a3;stroke-width:2}
+[data-view="my-summary"] .summary-card--bonus #summary-bonus{max-width:60%}
+[data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-value{margin-top:12px;color:#ffa94e;font-size:clamp(46px,6vw,68px)!important;white-space:nowrap;overflow-wrap:normal;letter-spacing:-.045em}
+[data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-spin-status{color:#bfc0c6;font-size:clamp(16px,2vw,23px)!important;line-height:1.25;margin-top:10px}
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-card-action::after{content:'›';position:absolute;left:32px;bottom:28px;display:grid;place-items:center;width:66px;height:66px;border:2px solid #c5b29934;border-radius:50%;background:#29241f99;box-shadow:inset 0 1px 0 #ffffff15;color:#ffe6b3;font-size:52px;font-weight:300;line-height:1;padding-bottom:9px;box-sizing:border-box;transition:background .2s,transform .2s}
+[data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-card-action:hover::after{background:#5a3b24;transform:translateX(3px)}
+@media(max-width:620px){
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])){grid-template-columns:1fr;grid-template-rows:260px 240px 240px auto;gap:12px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--reviews-entry{grid-column:1;grid-row:2}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--bonus{grid-column:1;grid-row:3}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--friends{grid-column:1;grid-row:4}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus){padding:26px;border-radius:27px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--starting-hands{padding-top:30px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) h2{font-size:clamp(27px,7vw,39px)}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-muted{font-size:17px!important;margin-top:8px}
+ [data-view="my-summary"] .summary-card--reviews-entry .summary-muted{max-width:50%}
+ [data-view="my-summary"] .summary-card--starting-hands .summary-art{width:50%}
+ [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:55%}
+ [data-view="my-summary"] .summary-card--bonus .summary-art{width:52%}
+ [data-view="my-summary"] .summary-chart-art{left:8%;width:60%;height:55%;bottom:5%}
+ [data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-value{font-size:48px!important}
+ [data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-spin-status{font-size:16px!important}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-card-action::after{left:24px;bottom:20px;width:54px;height:54px;font-size:42px;padding-bottom:7px}
+}
+
+/* The mini app can be phone-width inside a wide desktop window. */
+[data-view="my-summary"]{container:summary-play / inline-size}
+@container summary-play (max-width:620px){
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])){grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:170px 155px auto;gap:9px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--starting-hands{grid-column:1/-1;grid-row:1}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--reviews-entry{grid-column:1;grid-row:2}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--bonus{grid-column:2;grid-row:2}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--friends{grid-column:1/-1;grid-row:3}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus){padding:17px;border-radius:20px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--starting-hands{padding:31px 18px 18px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--starting-hands h2{font-size:28px}
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > :is(.summary-card--reviews-entry,.summary-card--bonus) h2{font-size:20px}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-muted{font-size:12px!important;margin-top:7px}
+ [data-view="my-summary"] .summary-card--reviews-entry .summary-muted{max-width:72%}
+ [data-view="my-summary"] .summary-card--starting-hands .summary-art{width:48%;mask-image:linear-gradient(to right,transparent 0%,transparent 20%,#000 55%)}
+ [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:65%;height:75%;mask-image:linear-gradient(to right,transparent 0%,#000 34%)}
+ [data-view="my-summary"] .summary-card--bonus .summary-art{width:60%;height:85%;mask-image:linear-gradient(to right,transparent 0%,#000 30%)}
+ [data-view="my-summary"] .summary-chart-art{left:8%;width:57%;height:65%;bottom:5%}
+ [data-view="my-summary"] .summary-card--bonus #summary-bonus{max-width:75%}
+ [data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-value{font-size:34px!important;margin-top:5px}
+ [data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-spin-status{font-size:12px!important;margin-top:3px}
+ [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-card-action::after{left:16px;bottom:14px;width:35px;height:35px;font-size:30px;padding-bottom:5px;border-width:1px}
+}
