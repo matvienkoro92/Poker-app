@@ -127,7 +127,7 @@
   function topicCommentWord(count){var n=Math.abs(Number(count)||0)%100,last=n%10;return n>=11&&n<=14?'комментариев':last===1?'комментарий':last>=2&&last<=4?'комментария':'комментариев';}
   function topicListRow(t){
     var mode=handMode(t);
-    return '<article class="review-topic'+(mode==='mtt'?' review-topic--mtt':mode==='cash'?' review-topic--cash':'')+(t.unread?' review-topic--unread':'')+'"><span class="review-topic__mode-stripe" aria-hidden="true"></span>'+avatar(t)+'<button type="button" class="review-title review-topic__body" data-review-action="open" data-id="'+esc(t.id)+'">'+topicListTitleHtml(t)+'</button><span class="review-topic__count" aria-label="Комментарии: '+Number(t.replyCount||0)+'"><span class="review-topic__watermark" aria-hidden="true"></span>'+topicCommentIcon()+'<span class="review-topic__count-number">'+Number(t.replyCount||0)+'</span><small>'+topicCommentWord(t.replyCount)+'</small>'+(t.unread?'<span class="review-topic__unread-badge">Есть новый комментарий</span>':'')+'</span><details class="review-topic__menu"><summary aria-label="Действия с раздачей" title="Действия с раздачей">'+topicMenuIcon()+'</summary><div class="review-topic__menu-actions">'+button('Открыть','open',t.id)+(t.canDelete?button('Удалить','delete-topic',t.id,'review-topic__delete'):'')+'</div></details></article>';
+    return '<article class="review-topic'+(mode==='mtt'?' review-topic--mtt':mode==='cash'?' review-topic--cash':'')+(t.unread?' review-topic--unread':'')+'"><span class="review-topic__mode-stripe" aria-hidden="true"></span>'+avatar(t)+'<button type="button" class="review-title review-topic__body" data-review-action="open" data-id="'+esc(t.id)+'">'+topicListTitleHtml(t)+'</button><span class="review-topic__count" aria-label="Комментарии: '+Number(t.replyCount||0)+'"><span class="review-topic__watermark" aria-hidden="true"></span>'+topicCommentIcon()+'<span class="review-topic__count-number">'+Number(t.replyCount||0)+'</span><small>'+topicCommentWord(t.replyCount)+'</small>'+(t.unread?'<span class="review-topic__unread-badge" aria-label="Есть новый комментарий">Новый</span>':'')+'</span><details class="review-topic__menu"><summary aria-label="Действия с раздачей" title="Действия с раздачей">'+topicMenuIcon()+'</summary><div class="review-topic__menu-actions">'+button('Открыть','open',t.id)+(t.canDelete?button('Удалить','delete-topic',t.id,'review-topic__delete'):'')+'</div></details></article>';
   }
   function listFiltersHtml(){
     var cash=listModes.cash,mtt=listModes.mtt,compactLabel=cash&&mtt?'К+М':cash?'Кеш':mtt?'МТТ':'Нет';
@@ -212,6 +212,7 @@
   function avatar(t){
     var name=handAuthor(t),profileAvatar='/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image';
     var personalArt=typeof window.pokerGetClubNewsPersonalArt==='function'?String(window.pokerGetClubNewsPersonalArt(name)||'').trim():'';
+    if (/^(?:покерманки|романдий)$/i.test(name.trim())) personalArt='./assets/summer-rating-player-pokermanki-v3.webp?v=1';
     return '<span class="review-topic__avatar'+(personalArt?' review-topic__avatar--personal-art':'')+'"><img src="'+esc(personalArt||profileAvatar)+'"'+(personalArt?' data-review-avatar-fallback="'+esc(profileAvatar)+'"':'')+' alt="" loading="lazy"><span>'+esc((name||'И').slice(0,1))+'</span></span>';
   }
   function replyHtml(reply,t){
