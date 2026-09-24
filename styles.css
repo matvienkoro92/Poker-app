@@ -10441,3 +10441,5 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
  [data-view="club-reviews"] .review-topic__bank{font-size:clamp(16px,4.3cqw,18px)}
  [data-view="club-reviews"] .review-topic__date{font-size:clamp(9px,2.3cqw,11px)}
 }
+/* Show established player character art in hand-list avatars, with a tighter portrait crop. */
+[data-view="club-reviews"] .review-topic__avatar--personal-art img{object-position:50% 18%;transform:scale(1.45);transform-origin:50% 25%}

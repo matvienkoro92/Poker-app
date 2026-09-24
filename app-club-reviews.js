@@ -209,7 +209,11 @@
     lines.splice(insert,0,'',finalLine,'');
     return lines.join('\n');
   }
-  function avatar(t){return '<span class="review-topic__avatar"><img src="/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image" alt="" loading="lazy"><span>'+esc((handAuthor(t)||'И').slice(0,1))+'</span></span>';}
+  function avatar(t){
+    var name=handAuthor(t),profileAvatar='/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image';
+    var personalArt=typeof window.pokerGetClubNewsPersonalArt==='function'?String(window.pokerGetClubNewsPersonalArt(name)||'').trim():'';
+    return '<span class="review-topic__avatar'+(personalArt?' review-topic__avatar--personal-art':'')+'"><img src="'+esc(personalArt||profileAvatar)+'"'+(personalArt?' data-review-avatar-fallback="'+esc(profileAvatar)+'"':'')+' alt="" loading="lazy"><span>'+esc((name||'И').slice(0,1))+'</span></span>';
+  }
   function replyHtml(reply,t){
     var parent=t.replies.find(function(row){return row.id===reply.parentId;}),name=reply.authorNick||reply.authorName||'Игрок';
     var profileAvatar=String(reply.authorAvatar||'').trim()||'/api/avatar?userId='+encodeURIComponent(reply.authorId)+'&format=image';
@@ -226,7 +230,7 @@
     r.innerHTML='<div class="review-topic-list">'+visibleRows.map(topicListRow).join('')+'</div>'+(!visibleRows.length?'<p class="social-muted">Раздач с такими параметрами пока нет.</p>':'')+(totalPages>1?'<nav class="review-pagination" aria-label="Страницы раздач">'+(page>1?button('←','page',String(page-1)):'')+Array.from({length:totalPages},function(_,i){var number=i+1;return '<button type="button" class="review-pagination__page" data-review-action="page" data-id="'+number+'" aria-label="Страница '+number+'"'+(number===page?' aria-current="page"':'')+'>'+number+'</button>';}).join('')+(page<totalPages?button('→','page',String(page+1)):'')+'</nav>':'');
     var headerFilters=document.getElementById('clubReviewsHeaderFilters');if(headerFilters)headerFilters.innerHTML=listFiltersHtml();
     document.querySelector('[data-view="club-reviews"] .club-reviews-header')?.classList.add('club-reviews-header--list');
-    r.querySelectorAll('.review-topic__avatar img').forEach(function(img){img.onerror=function(){img.hidden=true;};});
+    r.querySelectorAll('.review-topic__avatar img').forEach(function(img){img.onerror=function(){var fallback=img.getAttribute('data-review-avatar-fallback');if(fallback){img.removeAttribute('data-review-avatar-fallback');img.src=fallback;return;}img.hidden=true;};});
     r.insertAdjacentHTML('afterbegin',activityHtml());
     var pushHost=document.getElementById('clubReviewsHeaderAction');if(pushHost&&!pushHost.querySelector('.review-topic-push'))pushHost.replaceChildren(topicPushPanel());
   }
