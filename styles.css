@@ -10418,3 +10418,11 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 @container summary-play (max-width:620px){
  [data-view="my-summary"] .summary-card--friends #summary-friends{max-width:48%}
 }
+/* The review card shows the same Q♥ Q♣ hand and discussion cue as the hand list. */
+[data-view="my-summary"] .summary-card--reviews-entry .summary-art{object-fit:contain;object-position:center bottom;mask-image:linear-gradient(to right,transparent 0%,#000 22%)}
+@container summary-play (max-width:620px){
+ [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:66%;height:82%;right:-6%;bottom:-1%}
+}
+@container summary-play (max-width:620px){
+ [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:80%;height:92%;right:-8%;bottom:-4%}
+}
