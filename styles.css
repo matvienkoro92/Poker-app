@@ -9664,6 +9664,12 @@ body[data-view="my-summary"] #app.app > .card > .card__header {
 #app.app:has(.view--active[data-view="my-summary"]) > .card > .card__header {
   display: none !important;
 }
+html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card .card__content > .view[data-view="my-summary"] {
+  padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px), var(--tg-ui-top-clearance, 0px)) !important;
+}
+html.app--telegram-miniapp.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card .card__content > .view[data-view="my-summary"] {
+  padding-top: max(56px, var(--tg-ui-top-clearance, 0px)) !important;
+}
 
 /* Reviews are a full-width app section, not a card inside another card. */
 .review-topic{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid #ffffff20}
@@ -10047,6 +10053,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .club-reviews-header__action .review-topic-push .social-button { min-height: 30px; padding: 4px 8px; border-radius: 8px; font-size: 11px; }
 [data-view="club-reviews"] .club-reviews-header__action .review-topic-push p { display: none; }
 [data-view="club-reviews"] .review-topic--unread { width: 100%; box-sizing: border-box; margin-inline: 0; padding-inline: 12px; border: 1px solid #52bbf4a6; border-radius: 12px; background: linear-gradient(90deg,#1479b16b,#1263995c); box-shadow: inset 4px 0 0 #73d3ff,0 0 18px #168fd824; }
+[data-view="club-reviews"] .review-topic--unread .review-topic__body { background: transparent !important; border: 0 !important; box-shadow: none !important; }
 [data-view="club-reviews"] .review-topic--unread .review-topic__count { display: inline-flex; align-items: center; gap: 3px; padding: 4px 7px; border: 1px solid #ffd671; border-radius: 999px; color: #ffe4a0; background: #8d641d42; box-shadow: 0 0 0 1px #ffd6713b,0 0 10px #ffd67170; animation: review-comment-gold-pulse 1.8s ease-in-out infinite; }
 @keyframes review-comment-gold-pulse { 0%,100% { box-shadow: 0 0 0 1px #ffd6713b,0 0 8px #ffd67159; } 50% { box-shadow: 0 0 0 3px #ffd6717a,0 0 18px #ffd671ba; } }
 [data-view="club-reviews"] .review-topic__unread-badge { display: inline-flex; width: fit-content; margin-top: 5px; padding: 3px 7px; border: 1px solid #63cbff99; border-radius: 999px; background: #178fd83d; color: #a8e4ff; font-weight: 800; letter-spacing: .01em; animation: review-unread-pulse 1.7s ease-in-out infinite; }
