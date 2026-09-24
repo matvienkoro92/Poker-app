@@ -9726,6 +9726,26 @@ body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active
 #app.app > .card > .card__header .logo__title-line {
   display: inline;
 }
+/* The brand text needs its intrinsic width; flex must not squeeze it to an ellipsis. */
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts) .logo.logo--welcome {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: max-content !important;
+}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts) .logo__text {
+  flex: 0 0 auto !important;
+  width: max-content !important;
+}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts) :is(.logo__title,.logo__subtitle) {
+  width: max-content !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+html body[data-view="home"] #app.app > .card > .card__header:not(.card__header--admin-shortcuts) .header-actions {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
 
 /* Review subscription belongs to the review title row, not the thread body. */
 [data-view="club-reviews"] .club-reviews-header__action {
@@ -10080,6 +10100,65 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 @keyframes review-unread-pulse { 0%,100% { background-color:#178fd830; box-shadow:0 0 0 0 #49bdff00; } 50% { background-color:#219fe05c; box-shadow:0 0 0 4px #49bdff24; } }
 @media (prefers-reduced-motion: reduce) { [data-view="club-reviews"] .review-topic__unread-badge { animation: none; } }
 @media (prefers-reduced-motion: reduce) { [data-view="club-reviews"] .review-topic--unread .review-topic__count { animation: none; } }
+/* Ticket layout for the hand list. Keep the club's dark, gold and blue palette. */
+[data-view="club-reviews"] .review-topic-list{display:grid;gap:10px;padding:4px 0}
+[data-view="club-reviews"] .review-topic{position:relative;display:grid;grid-template-columns:88px minmax(0,1fr) minmax(128px,24%);align-items:center;gap:14px;min-height:158px;box-sizing:border-box;margin:0;padding:15px 20px;overflow:visible;border:1px solid #a986507a;border-radius:15px;background:linear-gradient(115deg,#30281f,#1a2026 70%,#1b1b20);box-shadow:inset 0 1px 0 #ffe0a312,0 8px 18px #0004}
+[data-view="club-reviews"] .review-topic:has(.review-topic__menu[open]){z-index:5}
+[data-view="club-reviews"] .review-topic::before,[data-view="club-reviews"] .review-topic::after{content:"";position:absolute;top:50%;width:14px;height:28px;border:1px solid #a986507a;background:#090c10;transform:translateY(-50%);pointer-events:none}
+[data-view="club-reviews"] .review-topic::before{left:-1px;border-left:0;border-radius:0 15px 15px 0}
+[data-view="club-reviews"] .review-topic::after{right:-1px;border-right:0;border-radius:15px 0 0 15px}
+[data-view="club-reviews"] .review-topic__avatar{width:80px;height:80px;border:1px solid #d8b46e87;background:#202a34;box-shadow:0 2px 9px #0006;font-size:22px}
+[data-view="club-reviews"] .review-topic__body{display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,45%);gap:12px;align-items:center;width:100%;min-height:0;padding:0;text-align:left;color:#f4e8d4}
+[data-view="club-reviews"] .review-topic__identity{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:7px}
+[data-view="club-reviews"] .review-topic__name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:22px;font-weight:900;line-height:1.2}
+[data-view="club-reviews"] .review-topic__cards{display:flex;gap:5px;align-items:center}
+[data-view="club-reviews"] .review-topic__cards .playing-card{display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:69px;box-sizing:border-box;margin:0;padding:2px;border:1px solid #f3dfc5;border-radius:5px;background:#fff1df;color:#1b2230;box-shadow:0 2px 5px #0005;font-size:23px;font-weight:900;line-height:1}
+[data-view="club-reviews"] .review-topic__cards .playing-card__suit{font-size:31px;line-height:.9}
+[data-view="club-reviews"] .review-topic__cards .playing-card:is(.suit-h,.suit-d){color:#c43140}
+[data-view="club-reviews"] .review-topic__cards .playing-card:is(.suit-s,.suit-c){color:#172033}
+[data-view="club-reviews"] .review-topic__title{font-size:13px;line-height:1.25;color:#d9c9a6}
+[data-view="club-reviews"] .review-topic__details{display:flex;min-width:0;flex-direction:column;align-items:flex-start;line-height:1.16}
+[data-view="club-reviews"] .review-topic__format{color:#ceb997;font-size:14px;font-weight:700;letter-spacing:.02em}
+[data-view="club-reviews"] .review-topic__bank-label{margin-top:6px;color:#e4dccf;font-size:14px}
+[data-view="club-reviews"] .review-topic__bank{max-width:100%;color:#ffd28a;font-size:27px;font-weight:950;overflow-wrap:anywhere}
+[data-view="club-reviews"] .review-topic__date{margin-top:5px;color:#aeb9c8;font-size:12px;white-space:nowrap}
+[data-view="club-reviews"] .review-topic__count,[data-view="club-reviews"] .review-topic--unread .review-topic__count{display:grid;grid-template-columns:32px auto;align-content:center;align-items:center;column-gap:5px;row-gap:0;min-width:0;align-self:stretch;padding:8px 0 6px 13px;border:0;border-left:1px dashed #bca26873;border-radius:0;background:transparent;box-shadow:none;white-space:normal;color:#e0b878;animation:none}
+[data-view="club-reviews"] .review-topic__count svg{grid-row:1;grid-column:1;width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+[data-view="club-reviews"] .review-topic__count-number{grid-row:1;grid-column:2;font-size:40px;font-weight:900;line-height:1}
+[data-view="club-reviews"] .review-topic__count small{grid-column:1/-1;margin-top:3px;color:#c7b59a;font-size:11px;text-align:center}
+[data-view="club-reviews"] .review-topic__menu{position:absolute;z-index:3;top:12px;right:15px}
+[data-view="club-reviews"] .review-topic__menu>summary{display:grid;place-items:center;width:28px;height:32px;list-style:none;cursor:pointer;color:#dec186}
+[data-view="club-reviews"] .review-topic__menu>summary::-webkit-details-marker{display:none}
+[data-view="club-reviews"] .review-topic__menu svg{width:20px;height:20px;fill:currentColor}
+[data-view="club-reviews"] .review-topic__menu-actions{position:absolute;top:32px;right:0;display:grid;gap:5px;min-width:110px;padding:6px;border:1px solid #bc985d;border-radius:10px;background:#131820;box-shadow:0 8px 18px #000a}
+[data-view="club-reviews"] .review-topic__menu-actions .social-button{min-height:34px;padding:5px 9px;white-space:nowrap}
+[data-view="club-reviews"] .review-topic--unread{border-color:#69cfff;background:linear-gradient(110deg,#174767,#1a3548 65%,#20222a);box-shadow:inset 3px 0 0 #73d3ff,0 0 15px #168fd83a}
+[data-view="club-reviews"] .review-topic--unread .review-topic__count{color:#ffd671;animation:none}
+[data-view="club-reviews"] .review-topic--unread .review-topic__count svg{filter:drop-shadow(0 0 5px #ffd671b0);animation:review-icon-gold-pulse 1.8s ease-in-out infinite}
+@keyframes review-icon-gold-pulse{50%{filter:drop-shadow(0 0 11px #ffd671);stroke:#ffe9aa}}
+[data-view="club-reviews"] .review-topic__unread-badge{grid-column:1/-1;margin:5px 0 0;padding:3px 5px;font-size:9px;line-height:1.2;text-align:center}
+@media(max-width:600px){
+  [data-view="club-reviews"] .review-topic{grid-template-columns:52px minmax(0,1fr) 78px;gap:7px;min-height:118px;padding:10px 12px}
+  [data-view="club-reviews"] .review-topic__avatar{width:50px;height:50px}
+  [data-view="club-reviews"] .review-topic__body{grid-template-columns:minmax(0,1fr);gap:5px}
+  [data-view="club-reviews"] .review-topic__identity{gap:4px}
+  [data-view="club-reviews"] .review-topic__name{font-size:15px}
+  [data-view="club-reviews"] .review-topic__cards .playing-card{width:28px;height:37px;font-size:14px}
+  [data-view="club-reviews"] .review-topic__cards .playing-card__suit{font-size:17px}
+  [data-view="club-reviews"] .review-topic__format{font-size:9px}
+  [data-view="club-reviews"] .review-topic__bank-label{display:none}
+  [data-view="club-reviews"] .review-topic__bank{font-size:16px}
+  [data-view="club-reviews"] .review-topic__date{font-size:9px}
+  [data-view="club-reviews"] .review-topic__count,[data-view="club-reviews"] .review-topic--unread .review-topic__count{grid-template-columns:22px auto;column-gap:3px;padding-left:6px}
+  [data-view="club-reviews"] .review-topic__count svg{width:21px;height:21px}
+  [data-view="club-reviews"] .review-topic__count-number{font-size:22px}
+  [data-view="club-reviews"] .review-topic__count small{font-size:8px}
+  [data-view="club-reviews"] .review-topic__menu{top:5px;right:7px}
+  [data-view="club-reviews"] .review-topic__menu>summary{width:20px;height:24px}
+  [data-view="club-reviews"] .review-topic__menu svg{width:16px;height:16px}
+  [data-view="club-reviews"] .review-topic__unread-badge{font-size:7.5px}
+}
+@media(prefers-reduced-motion:reduce){[data-view="club-reviews"] .review-topic--unread .review-topic__count svg{animation:none}}
 [data-view="club-reviews"] .review-thread-card > .review-share-actions { justify-content: flex-end; width: 100%; box-sizing: border-box; margin: 18px 0 0; padding-top: 14px; border-top: 1px solid #ffffff18; }
 [data-view="club-reviews"] .review-thread-footer { display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%;margin-top:14px; }
 [data-view="club-reviews"] .review-thread-footer .review-hand-spoiler { width:100%;box-sizing:border-box;margin-top:0; }
