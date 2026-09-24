@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Моя игра · Два туза</title>
-  <link rel="stylesheet" href="screen.css?v=20260925-profit-totals-row-1">
+  <link rel="stylesheet" href="screen.css?v=20260925-profit-help-clean-1">
   <script defer src="core.js?v=20260920-opponent-alias-1"></script>
   <script defer src="insights.js?v=20260920-ace-high-1"></script>
   <script defer src="hand-share.js?v=20260920-bomb-pot-4"></script>
   <script defer src="tournament-catalog.js?v=20260918-1"></script>
-  <script defer src="screen.js?v=20260925-profit-totals-row-1"></script>
+  <script defer src="screen.js?v=20260925-profit-help-clean-1"></script>
   <script defer src="chart-share.js?v=20260914-1"></script>
 </head>
 <body>
@@ -32,7 +32,7 @@
     <p class="note">Раздачи с совместной постфлоп-игрой, включая мультипоты и чеки. Ранний выход перед борьбой с другим игроком исключается.</p><p id="opponent-status" class="note" aria-live="polite"></p><button type="button" id="opponent-retry" hidden>Повторить поиск</button></section>
   <p id="mode-note" class="note"></p>
   <p class="history-count" aria-live="polite"><span id="total-count">0</span> раздач<span id="period-range"></span></p>
-  <section data-history-panel="overview" class="profit-panel" aria-labelledby="profit-title"><h2 id="profit-title">График результата</h2><div class="profit-legend"><label style="color:#4ade80"><input type="checkbox" data-profit-line="total" checked> Общий результат</label><label style="color:#60a5fa"><input type="checkbox" data-profit-line="showdown" checked> Со вскрытием</label><label style="color:#fb7185"><input type="checkbox" data-profit-line="nonShowdown" checked> Без вскрытия</label><label id="profit-ev-legend" hidden style="color:#fbbf24"><input type="checkbox" data-profit-line="allinEv" checked> <span>All-in EV</span></label></div><svg id="profit-chart" viewBox="0 0 900 760" role="img" aria-label="Накопленный результат по раздачам"></svg><div id="profit-values" class="profit-totals" aria-live="polite"></div><div class="profit-share-actions"><button type="button" data-chart-share><span>Поделиться</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button><button type="button" data-chart-wall aria-label="Добавить график на стену профиля"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div><details class="chart-method"><summary>Как считается EV</summary><p id="profit-ev-note" class="note"></p></details></section>
+  <section data-history-panel="overview" class="profit-panel" aria-labelledby="profit-title"><h2 id="profit-title" class="visually-hidden">График результата</h2><div class="profit-legend"><label style="color:#4ade80"><input type="checkbox" data-profit-line="total" checked> Общий результат</label><label style="color:#60a5fa"><input type="checkbox" data-profit-line="showdown" checked> Со вскрытием</label><label style="color:#fb7185"><input type="checkbox" data-profit-line="nonShowdown" checked> Без вскрытия</label><label id="profit-ev-legend" hidden style="color:#fbbf24"><input type="checkbox" data-profit-line="allinEv" checked> <span>All-in EV</span></label></div><svg id="profit-chart" viewBox="0 0 900 760" role="img" aria-label="Накопленный результат по раздачам"></svg><div id="profit-values" class="profit-totals" aria-live="polite"></div><div class="profit-share-actions"><button type="button" data-chart-share><span>Поделиться</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button><button type="button" data-chart-wall aria-label="Добавить график на стену профиля"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div></section>
   <div data-history-panel="hands" hidden class="hand-breakdown-tabs" role="tablist" aria-label="Критерий разбивки раздач"><button type="button" role="tab" data-hand-breakdown="positions" aria-selected="false"><span>По позициям</span><small data-hand-breakdown-status="positions"></small></button><button type="button" role="tab" data-hand-breakdown="hands" aria-selected="false"><span>По стартовым рукам</span><small data-hand-breakdown-status="hands"></small></button></div>
   <section data-history-panel="hands" hidden class="position-disclosure" data-hand-breakdown-panel="positions" aria-labelledby="positions-title"><h2 id="positions-title">Результат по позициям</h2><p class="note">В выбранном формате и периоде · нажмите позицию, чтобы отфильтровать руки.</p><div id="position-results" class="position-results"></div></section>
   <section data-history-panel="review" hidden id="hand-insights" class="hand-insights" aria-label="Разбор игры"></section>
@@ -45,11 +45,6 @@
     </section>
     <section class="detail-panel" aria-labelledby="detail-title" aria-live="polite"><div id="detail"></div></section>
   </div>
-  <details class="explanation"><summary>Как считается результат</summary>
-    <p>В полной истории учитываются все завершённые раздачи, в которых вам выдали эту руку: в том числе фолды, блайнды и раздачи с нулевым результатом.</p>
-    <p>Результат в bb считается для каждой раздачи по её большому блайнду. bb/100 = сумма этих результатов / число раздач × 100.</p>
-    <p>Это фактический результат выборки, а не EV и не оценка качества решений. Отметка «мало данных» при менее чем 100 наблюдениях — напоминание о размере выборки, а не статистическая граница достоверности.</p>
-  </details>
 </main>
 </body>
 </html>

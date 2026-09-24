@@ -282,21 +282,21 @@ function startHistory(payload) {
     $('profit-ev-legend').hidden=!series.evCalculated;
     $('profit-ev-legend').querySelector('span').textContent='All-in EV';
     $('profit-ev-legend').title=series.evUnresolved||series.evMissing?'All-in EV · частичный расчёт':'All-in EV';
-    $('profit-ev-note').textContent=series.evCalculated?
-      'All-in EV · рассчитано раздач: '+series.evCalculated+' · не разобрано '+series.evUnresolved+(series.evMissing?' · без проверки '+series.evMissing:'')+'. Точный перебор карт при фактическом удержании из банка. В неразобранных раздачах сохранён фактический результат.':
-      'Для этой выборки нет рассчитанных выставлений all-in EV.';
     const vals=series.points.flatMap(p=>lines.map(([key])=>p[key]));let low=Math.min(0,...vals),high=Math.max(0,...vals);if(low===high){low-=1;high+=1;}const pad=(high-low)*.08;low-=pad;high+=pad;
-    const endpointFont=28,lastPoint=series.points.at(-1);
+    const ticks=Array.from({length:5},(_,i)=>low+(high-low)*i/4).filter(v=>Math.abs(v)>(high-low)*.055);ticks.push(0);ticks.sort((a,b)=>a-b);
+    const endpointFont=27,lastPoint=series.points.at(-1);
     const measure=document.createElementNS('http://www.w3.org/2000/svg','text');
     measure.setAttribute('font-size',endpointFont);measure.setAttribute('font-weight','700');svg.append(measure);
-    const endpointWidth=Math.max(0,...lines.map(([key])=>{measure.textContent=signed(lastPoint[key])+' '+label;return measure.getComputedTextLength();}));measure.remove();
-    const plotLeft=100,plotRight=Math.min(725,900-endpointWidth-38),plotWidth=plotRight-plotLeft,plotTop=28,plotBottom=plotTop+plotWidth;
+    const endpointWidths=Object.fromEntries(lines.map(([key])=>{measure.textContent=signed(lastPoint[key]);return [key,measure.getComputedTextLength()];}));
+    measure.setAttribute('font-size',axisFont);measure.setAttribute('font-weight','400');
+    const axisWidth=Math.max(0,...ticks.map(v=>{measure.textContent=compactSigned(v);return measure.getComputedTextLength();}));measure.remove();
+    const endpointWidth=Math.max(...Object.values(endpointWidths));
+    const plotLeft=Math.max(78,Math.ceil(axisWidth)+16),plotRight=Math.min(770,900-endpointWidth-40),plotWidth=plotRight-plotLeft,plotTop=28,plotBottom=plotTop+plotWidth;
     const chartHeight=Math.ceil(plotBottom+90);
     svg.setAttribute('viewBox','0 0 900 '+chartHeight);
     svg.style.aspectRatio='900 / '+chartHeight;
     const x=i=>plotLeft+i/Math.max(1,data.count)*plotWidth,y=v=>plotBottom-(v-low)/(high-low)*plotWidth;
     function node(tag,attrs,text){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));if(text!=null)el.textContent=text;svg.append(el);return el;}
-    const ticks=Array.from({length:5},(_,i)=>low+(high-low)*i/4).filter(v=>Math.abs(v)>(high-low)*.055);ticks.push(0);ticks.sort((a,b)=>a-b);
     for(const v of ticks){node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});node('text',{'data-profit-axis':'left',x:plotLeft-10,y:y(v)+4,'text-anchor':'end',fill:v===0?'#e4eaf1':'#e8bc68',stroke:'#0b1220','stroke-width':6,'paint-order':'stroke','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));}
     for(const axisX of [plotLeft,plotRight])node('line',{x1:axisX,x2:axisX,y1:plotTop,y2:plotBottom,stroke:'#e8bc68','stroke-width':2});
     node('line',{x1:plotLeft,x2:plotRight,y1:plotBottom,y2:plotBottom,stroke:'#8dbfff','stroke-width':2});
@@ -310,7 +310,7 @@ function startHistory(payload) {
     for(const [key,color] of lines)node('path',{'data-profit-series':key,style:document.querySelector('[data-profit-line="'+key+'"]').checked?'':'display:none',d:series.points.map((p,i)=>(i?'L':'M')+x(i).toFixed(2)+','+y(p[key]).toFixed(2)).join(' '),fill:'none',stroke:color,'stroke-width':2,'vector-effect':'non-scaling-stroke'});
     // Keep exact endpoint values readable even when several lines finish together.
     if(data.count){
-      const last=series.points.at(-1),font=endpointFont,gap=38;
+      const last=series.points.at(-1),font=endpointFont,gap=52;
       const endpoints=lines.filter(([key])=>document.querySelector('[data-profit-line="'+key+'"]').checked)
         .map(([key,color])=>({key,color,value:last[key],endY:y(last[key])})).sort((a,b)=>a.endY-b.endY);
       endpoints.forEach((p,i)=>{p.labelY=Math.max(plotTop+gap/2,p.endY,i?endpoints[i-1].labelY+gap:0);});
@@ -319,9 +319,11 @@ function startHistory(payload) {
         for(let i=endpoints.length-2;i>=0;i--)endpoints[i].labelY=Math.min(endpoints[i].labelY,endpoints[i+1].labelY-gap);
       }
       for(const p of endpoints){
-        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight+10)+','+p.labelY+' H'+(plotRight+20),fill:'none',stroke:p.color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
+        const labelX=888,leaderEnd=Math.max(plotRight+18,labelX-endpointWidths[p.key]-8);
+        node('path',{d:'M'+plotRight+','+p.endY+' L'+(plotRight+10)+','+p.labelY+' H'+leaderEnd,fill:'none',stroke:p.color,'stroke-width':1.5,'vector-effect':'non-scaling-stroke'});
         node('circle',{cx:plotRight,cy:p.endY,r:4,fill:p.color});
-        node('text',{'data-profit-endpoint':p.key,x:plotRight+28,y:p.labelY,'dominant-baseline':'middle','text-anchor':'start',fill:p.color,'font-size':font,'font-weight':700,stroke:'#0b1220','stroke-width':7,'stroke-linejoin':'round','paint-order':'stroke'},signed(p.value)+' '+label);
+        node('text',{'data-profit-endpoint':p.key,x:labelX,y:p.labelY-5,'text-anchor':'end',fill:p.color,'font-size':font,'font-weight':700,stroke:'#0b1220','stroke-width':7,'stroke-linejoin':'round','paint-order':'stroke'},signed(p.value));
+        node('text',{'data-profit-unit':p.key,x:labelX,y:p.labelY+18,'text-anchor':'end',fill:p.color,'font-size':18,'font-weight':600,stroke:'#0b1220','stroke-width':5,'stroke-linejoin':'round','paint-order':'stroke'},label);
       }
     }
     svg.querySelectorAll('[data-profit-axis]').forEach(tick=>svg.append(tick));
