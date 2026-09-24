@@ -212,7 +212,8 @@
   function avatar(t){
     var name=handAuthor(t),profileAvatar='/api/avatar?userId='+encodeURIComponent(t.authorId)+'&format=image';
     var personalArt=typeof window.pokerGetClubNewsPersonalArt==='function'?String(window.pokerGetClubNewsPersonalArt(name)||'').trim():'';
-    if (/^(?:покерманки|романдий)$/i.test(name.trim())) personalArt='./assets/summer-rating-player-pokermanki-v3.webp?v=1';
+    var nameKey=name.toLocaleLowerCase('ru-RU').replace(/[^а-яёa-z0-9]/g,'');
+    if (/^(?:покерманки|pokermanki|романдий)/.test(nameKey)||/home-news-pokermanki-thumb/.test(personalArt)) personalArt='./assets/summer-rating-player-pokermanki-v3.webp?v=1';
     return '<span class="review-topic__avatar'+(personalArt?' review-topic__avatar--personal-art':'')+'"><img src="'+esc(personalArt||profileAvatar)+'"'+(personalArt?' data-review-avatar-fallback="'+esc(profileAvatar)+'"':'')+' alt="" loading="lazy"><span>'+esc((name||'И').slice(0,1))+'</span></span>';
   }
   function replyHtml(reply,t){
