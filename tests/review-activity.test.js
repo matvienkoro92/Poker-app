@@ -140,14 +140,14 @@ test('publication and comment progress award spins independently', async () => {
   await h.comment('another'); a = await h.activity.summary(h.actor.accountId);
   assert.equal(a.publicationProgress, 1); assert.equal(a.commentProgress, 0); assert.equal(a.spinsAvailable, 1);
 });
-test('the 40th combined active action atomically awards one 300 ruble bonus ticket', async () => {
+test('the 35th combined active action atomically awards one 300 ruble bonus ticket', async () => {
   const h=harness();
   h.values.set(h.activity.stateKey(h.actor.accountId),JSON.stringify({
-    ...h.activity.emptyState(),actions:39,commentActions:39,spinsEarned:7,spinsAvailable:7
+    ...h.activity.emptyState(),actions:34,commentActions:34,spinsEarned:6,spinsAvailable:6
   }));
   const reply=await h.comment('milestone');
   const summary=await h.activity.summary(h.actor.accountId);
-  assert.equal(summary.actions,40);assert.equal(summary.ticketProgress,0);assert.equal(summary.ticketTarget,40);
+  assert.equal(summary.actions,35);assert.equal(summary.ticketProgress,0);assert.equal(summary.ticketTarget,35);
   assert.equal(summary.activityTicketsEarned,1);assert.equal(reply.activityAward.ticket,1);assert.equal(reply.activityAward.bonus,300);
   assert.equal(Number(h.hget('poker_app:bonus_balances',h.actor.accountId)),300);
   assert.equal(Number(h.hget('poker_app:daily_poker_ticket_count',h.actor.accountId)),1);

@@ -10559,3 +10559,36 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .review-topic-push button.social-button[data-push-state="needs-setup"],[data-view="club-reviews"] .review-topic-push button.social-button[data-push-state="unavailable"]{background:#413824;color:#ffe0a1}
 [data-view="club-reviews"] .review-topic__read-badge{grid-column:1/-1;justify-self:center;margin-top:7px;color:#9bcbb2;font-size:11px;font-weight:750;line-height:1.15;white-space:nowrap}
 @container review-list (max-width:600px){[data-view="club-reviews"] .review-topic__read-badge{font-size:9px}}
+[data-view="club-reviews"] .review-thread-heading-row{align-items:flex-start}
+[data-view="club-reviews"] .review-thread-heading-main{display:flex;flex:1 1 auto;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+[data-view="club-reviews"] .review-thread-heading-main>h2{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0;margin:0;color:#f5dda4;font-size:18px;line-height:1.25}
+[data-view="club-reviews"] .review-thread-heading-main .review-thread-format{margin:0}
+@media(max-width:420px){[data-view="club-reviews"] .review-thread-heading-main>h2{font-size:16px}}
+
+/* Dark felt and diagonal light for an opened hand. */
+[data-view="club-reviews"] .review-thread-card{
+  isolation:isolate;
+  background:
+    repeating-linear-gradient(18deg,#ffffff02 0 1px,transparent 1px 4px),
+    linear-gradient(128deg,transparent 32%,#00000030 32.2% 47%,transparent 47.2%),
+    linear-gradient(128deg,transparent 63%,#ffffff0a 63.2% 76%,transparent 76.2%),
+    radial-gradient(ellipse at 18% 6%,#36373866 0%,transparent 57%),
+    linear-gradient(145deg,#252627 0%,#1b1d1e 52%,#111315 100%);
+}
+[data-view="club-reviews"] .review-thread-card::before{
+  content:"♣";
+  position:absolute;
+  z-index:-1;
+  top:34%;
+  right:1%;
+  color:#080a0b;
+  font:220px/.8 Georgia,serif;
+  opacity:.4;
+  text-shadow:0 2px 2px #ffffff16,0 -3px 6px #000b;
+  pointer-events:none;
+}
+@media(max-width:600px){[data-view="club-reviews"] .review-thread-card::before{right:-2%;font-size:150px}}
+
+/* Old cached PokerManki portraits include a rectangular backdrop. */
+[data-view="club-reviews"] .review-topic__avatar--pokermanki,[data-view="club-reviews"] .review-topic__avatar--personal-art:has(img[src*="pokermanki"]){background:transparent!important;box-shadow:none}
+[data-view="club-reviews"] .review-topic__avatar--personal-art img[src*="pokermanki"]{content:url("./assets/summer-rating-player-pokermanki-v3.webp?v=2")}

@@ -322,10 +322,33 @@ function startHistory(payload) {
       }
     }
     svg.querySelectorAll('[data-profit-axis]').forEach(tick=>svg.append(tick));
-    const describe=p=>'Раздач: '+p.count+' · Общий: '+signed(p.total)+' '+label+(' · Со вскрытием: '+signed(p.showdown)+' · Без вскрытия: '+signed(p.nonShowdown)+(series.unknown?' · Не классифицировано: '+signed(p.total-p.showdown-p.nonShowdown):''))+(series.evCalculated?' · All-in EV: '+signed(p.allinEv)+' '+label:'');
-    $('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';
-    svg.onpointermove=e=>{const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-plotLeft)/plotWidth*data.count)));$('profit-values').textContent=describe(series.points[n]);};
-    svg.onpointerleave=()=>{$('profit-values').textContent=data.count?describe(series.points.at(-1)):'Нет раздач по выбранным фильтрам';};
+    const totals=$('profit-values');
+    const metrics=[['total','Общий результат'],['showdown','Со вскрытием'],['nonShowdown','Без вскрытия']];
+    if(series.evCalculated)metrics.push(['allinEv','All-in EV']);
+    totals.dataset.items=String(metrics.length);
+    if(!data.count){totals.textContent='Нет раздач по выбранным фильтрам';}
+    else{
+      totals.replaceChildren(...metrics.map(([key,title])=>{
+        const item=document.createElement('div'),heading=document.createElement('span'),value=document.createElement('strong');
+        item.className='profit-total profit-total--'+key;
+        heading.textContent=title;
+        value.textContent=signed(lastPoint[key])+' '+label;
+        item.append(heading,value);
+        return item;
+      }));
+      if(series.unknown){
+        const unknown=document.createElement('small');
+        unknown.className='profit-totals__unknown';
+        unknown.textContent='Не классифицировано: '+signed(lastPoint.total-lastPoint.showdown-lastPoint.nonShowdown)+' '+label;
+        totals.append(unknown);
+      }
+    }
+    const updateTotals=point=>{
+      metrics.forEach(([key],index)=>{totals.children[index].querySelector('strong').textContent=signed(point[key])+' '+label;});
+      if(series.unknown)totals.querySelector('.profit-totals__unknown').textContent='Не классифицировано: '+signed(point.total-point.showdown-point.nonShowdown)+' '+label;
+    };
+    svg.onpointermove=e=>{if(!data.count)return;const box=svg.getBoundingClientRect(),n=Math.max(0,Math.min(data.count,Math.round(((e.clientX-box.left)/box.width*900-plotLeft)/plotWidth*data.count)));updateTotals(series.points[n]);};
+    svg.onpointerleave=()=>{if(data.count)updateTotals(lastPoint);};
   }
   const insightCacheKey='poker-hand-insights:'+payload.playerId;
   const insightSignals={};let insightsLoading=false,insightsError='';

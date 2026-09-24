@@ -30,7 +30,7 @@ async function main() {
         const award = body.action === 'reply' ? { action:true,bonus:0,spin:1 } : null;
         if(award){ progress=0; window.fixture.replies.push({id:'e'.repeat(24),authorId:'ID123456',authorNick:'Ваш ник',authorLevel:4,text:body.text,createdAt:'2026-09-18T11:00:00Z',canDelete:true}); }
         return { ok:true,accountId:'ID123456',threads:[window.fixture],nextCursor:null,thread:window.fixture,activityAward:award,
-          activity:{progress,target:5,publicationProgress:progress,commentProgress:progress,ticketProgress:17,ticketTarget:40,ticketAmount:300,bonusEarned:30,spinsAvailable:progress?0:1,spinsEarned:progress?0:1,publicationsToday:3,publicationLimit:7} };
+          activity:{progress,target:5,publicationProgress:progress,commentProgress:progress,ticketProgress:17,ticketTarget:35,ticketAmount:300,bonusEarned:30,spinsAvailable:progress?0:1,spinsEarned:progress?0:1,publicationsToday:3,publicationLimit:7} };
       };
     });
     await page.addScriptTag({ path: path.join(root, 'starting-hands/hand-share.js') });
