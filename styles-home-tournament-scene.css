@@ -1081,3 +1081,27 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   -webkit-mask:url('./assets/home-tournament-redrocket-head-mask.svg') center/100% 100% no-repeat !important;
   z-index:5 !important;
 }
+
+/* The chip already has an illustrated face ring. A second CSS ring drifted off it. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-last-longer-dock::before {
+  display:none !important;
+  content:none !important;
+}
+
+/* Tone down the baked-in bright rails on the other tournament tables. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-table-rim-dimmer {
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:block;
+  pointer-events:none;
+  background:#090d0dd8;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1402' preserveAspectRatio='none'%3E%3Cpath d='M-20 900 Q190 820 400 812 M690 812 Q940 830 1142 900' fill='none' stroke='white' stroke-width='24'/%3E%3Cpath d='M-20 1195 Q561 1365 1142 1195' fill='none' stroke='white' stroke-width='38'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1402' preserveAspectRatio='none'%3E%3Cpath d='M-20 900 Q190 820 400 812 M690 812 Q940 830 1142 900' fill='none' stroke='white' stroke-width='24'/%3E%3Cpath d='M-20 1195 Q561 1365 1142 1195' fill='none' stroke='white' stroke-width='38'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
+  --home-tournament-scene:url('./assets/home-tournament-redrocket-matte-table-v3.png');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-rim-dimmer {
+  display:none;
+}
