@@ -200,8 +200,6 @@
   font-weight: 900;
 }
 .home-friend-news-modal__achievement-promo-runner > em {
-  display: block;
-  margin-top: 5px;
   color: #fff4da;
   font-style: normal;
   font-weight: 900;
@@ -294,9 +292,6 @@
   .home-friend-news-modal__achievement-promo-content > small {
     font-size: 10px;
   }
-  .home-friend-news-modal__achievement-promo-leader > em {
-    display: block;
-  }
   .home-friend-news-modal__achievement-promo-side {
     gap: 5px;
     padding: 3px 0 3px 7px;
@@ -355,6 +350,14 @@
   border: 1px solid rgba(255, 199, 91, 0.2);
   border-radius: 999px;
   line-height: 1;
+  white-space: nowrap;
+}
+.home-friend-news-modal__list .home-friend-news-modal__date small {
+  color: #ffcd70;
+  font-size: .9em;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .home-friend-news-modal__day-events {
@@ -1483,6 +1486,62 @@ body.home-friend-news-modal-open {
 @media(max-width:620px){.home-friend-news-modal__cash-month-groups{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.home-friend-news-modal__cash-group--monthly>summary{grid-template-columns:38px minmax(0,1fr) auto 27px;column-gap:7px;padding:11px 9px;min-height:74px}.home-friend-news-modal__cash-group--monthly .cash-monthly-title{font-size:13px}.home-friend-news-modal__cash-group--monthly .cash-monthly-description{font-size:10px}.home-friend-news-modal__cash-group--monthly .cash-monthly-icon{font-size:28px}.home-friend-news-modal__cash-group--monthly .cash-monthly-value{font-size:14px}.home-friend-news-modal__cash-group--monthly .cash-monthly-chevron{width:25px;height:25px;font-size:22px}.home-friend-news-modal__cash-group--featured>summary{grid-template-columns:40px minmax(0,1fr) 20px;grid-template-rows:minmax(59px,auto) auto auto;column-gap:4px;min-height:152px;padding:9px 7px}.home-friend-news-modal__cash-group--featured .cash-monthly-title{font-size:11px;line-height:1.13}.home-friend-news-modal__cash-group--featured .cash-monthly-icon{max-width:40px}.home-friend-news-modal__cash-group--featured .cash-monthly-value{grid-column:2/4;font-size:clamp(13px,3.7vw,17px)}.home-friend-news-modal__cash-group--featured .cash-monthly-description{grid-column:2/4;font-size:8px;line-height:1.2}.home-friend-news-modal__cash-group--featured .cash-monthly-chevron{width:20px;height:20px;font-size:19px}}
 @media(max-width:620px){.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured)>summary{grid-template-columns:38px minmax(0,1fr) 27px;grid-template-rows:auto auto auto;min-height:88px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-icon{grid-row:1/4}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-value{grid-column:2;grid-row:3;justify-self:start;margin-top:6px;font-size:17px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-chevron{grid-column:3;grid-row:1/4}}
 @media(max-width:620px){.home-friend-news-modal__cash-group--loss>summary{grid-template-columns:67px minmax(0,1fr) 27px;min-height:128px;padding:11px}.home-friend-news-modal__cash-group--loss .cash-monthly-title{font-size:15px}.home-friend-news-modal__cash-group--loss .cash-monthly-icon{max-width:65px}.home-friend-news-modal__cash-group--loss .cash-monthly-icon::after{right:-3px;bottom:-5px;font-size:28px}.home-friend-news-modal__cash-group--loss .cash-monthly-value{font-size:27px}.home-friend-news-modal__cash-group--loss .cash-monthly-description{font-size:10px}}
+/* Keep the monthly records readable without making each card a tall poster. */
+.home-friend-news-modal__cash-group--featured > summary {
+  min-height: 142px;
+  grid-template-rows: auto auto auto;
+  align-content: center;
+  row-gap: 5px;
+}
+.home-friend-news-modal__cash-group--featured .cash-monthly-icon {
+  align-self: center;
+}
+.home-friend-news-modal__cash-group--featured .cash-monthly-value {
+  align-self: end;
+}
+.home-friend-news-modal__cash-group--featured .cash-monthly-description {
+  margin-top: 0;
+}
+.home-friend-news-modal__cash-group--loss > summary {
+  min-height: 116px;
+}
+@media (max-width: 620px) {
+  .home-friend-news-modal__cash-month { padding: 12px; }
+  .home-friend-news-modal__cash-month .cash-month-heading { margin-bottom: 10px; }
+  .home-friend-news-modal__cash-month-groups { gap: 7px; }
+  .home-friend-news-modal__cash-group--featured > summary {
+    min-height: 106px;
+    padding: 9px;
+    grid-template-columns: 34px minmax(0, 1fr) 19px;
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    row-gap: 3px;
+  }
+  .home-friend-news-modal__cash-group--featured .cash-monthly-title {
+    font-size: 11px;
+    line-height: 1.15;
+  }
+  .home-friend-news-modal__cash-group--featured .cash-monthly-icon { max-width: 33px; }
+  .home-friend-news-modal__cash-group--featured .cash-monthly-value {
+    font-size: clamp(14px, 3.3vw, 19px);
+    line-height: 1.1;
+  }
+  .home-friend-news-modal__cash-group--featured .cash-monthly-description {
+    font-size: 8px;
+    line-height: 1.18;
+  }
+  .home-friend-news-modal__cash-group--loss > summary {
+    min-height: 94px;
+    grid-template-columns: 54px minmax(0, 1fr) 25px;
+  }
+  .home-friend-news-modal__cash-group--loss .cash-monthly-icon { max-width: 51px; }
+  .home-friend-news-modal__cash-group--loss .cash-monthly-title { font-size: 14px; }
+  .home-friend-news-modal__cash-group--loss .cash-monthly-value { font-size: 23px; }
+  .home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) > summary {
+    min-height: 74px;
+    padding: 9px;
+  }
+}
 .home-friend-news-modal__cash-hand{margin:6px 8px;padding:10px 12px;border:1px solid #b8884370;border-radius:12px;background:linear-gradient(130deg,#1b222b,#11151c)}
 .home-friend-news-modal__cash-hand>summary{display:flex;justify-content:space-between;gap:12px;align-items:baseline;cursor:pointer;list-style:none}
 .home-friend-news-modal__cash-hand>summary::-webkit-details-marker{display:none}

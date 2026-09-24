@@ -1052,3 +1052,32 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home :is([data-tournament-character="shkarubo"],[data-tournament-character="aza"],[data-tournament-character="redrocket"],[data-tournament-character="cooler"]) .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {
   font:900 1.45cqw/1 Arial,sans-serif;
 }
+
+/* RedRocket: align the live ticket copy and put the prize behind the helmet. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
+  --home-tournament-scene:url('./assets/home-tournament-redrocket-no-spade-v2.webp');
+}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-trophy__copy > :where(span) {
+  left:20% !important;
+  width:46% !important;
+}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-trophy__title {
+  top:25% !important;
+  font-size:7.9cqw !important;
+}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-trophy__caption {
+  top:55% !important;
+  letter-spacing:.12em !important;
+}
+#app.app.app--view-home [data-tournament-character="redrocket"] .home-tournament-trophy__prize {
+  top:65% !important;
+  left:17% !important;
+  font-size:6.9cqw !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"]::after {
+  display:block !important;
+  background:var(--home-tournament-scene) center/100% 100% no-repeat !important;
+  mask:url('./assets/home-tournament-redrocket-head-mask.svg') center/100% 100% no-repeat !important;
+  -webkit-mask:url('./assets/home-tournament-redrocket-head-mask.svg') center/100% 100% no-repeat !important;
+  z-index:5 !important;
+}

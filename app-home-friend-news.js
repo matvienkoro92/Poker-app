@@ -1066,7 +1066,7 @@
     if (!standing) return "";
     var winsWord = standing.wins === 1 ? "раз" : standing.wins >= 2 && standing.wins <= 4 ? "раза" : "раз";
     var reward = Number(standing.reward).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽";
-    return '<em>' + esc(standing.nick) + '</em><span>' + standing.wins + ' ' + winsWord + ' · ' + esc(reward) + '</span>';
+    return '<em>' + esc(standing.nick) + '</em><span>Герой дня ' + standing.wins + ' ' + winsWord + ' — ' + esc(reward) + '</span>';
   }
 
   function clubCurrentMonthHeroEvents(rows) {
@@ -2732,8 +2732,8 @@
       }).join("");
       return '<section class="home-friend-news-modal__day-group">' +
         (newsModalMode === "club" && groupIndex === 0 ? clubWinsDayTabsHtml() : "") +
-        '<div class="home-friend-news-modal__day-count">Всего за день: <strong>' + count + " " + countWord + "</strong></div>" +
-        '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) + "</span></div>" +
+        '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) +
+          ' <small>(' + count + ' ' + countWord + ')</small></span></div>' +
         '<div class="home-friend-news-modal__day-events">' +
           dayEventsHtml +
         "</div>" +
@@ -2962,9 +2962,9 @@
           '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/home-news-day-hero-ape-v1.webp" alt="" aria-hidden="true" loading="lazy">' +
           '<span class="home-friend-news-modal__achievement-promo-content"><b>ГЕРОЙ ДНЯ В ' + esc(clubHeroMonthPrepositionLabel().toUpperCase()) + '</b>' +
           '<strong>' + (clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
-          '<small class="home-friend-news-modal__achievement-promo-leader">' + (heroStandings[0] ? 'Лидирует: ' + clubHeroStandingHtml(heroStandings[0]) : 'Награда лидеру месяца') + '</small></span>' +
+          '<small class="home-friend-news-modal__achievement-promo-leader">' + (heroStandings[0] ? 'Лидирует ' + clubHeroStandingHtml(heroStandings[0]) : 'Награда лидеру месяца') + '</small></span>' +
           '<span class="home-friend-news-modal__achievement-promo-side">' +
-          (heroStandings[1] ? '<small class="home-friend-news-modal__achievement-promo-runner">2-е место' + clubHeroStandingHtml(heroStandings[1]) + '</small>' : '') +
+          (heroStandings[1] ? '<small class="home-friend-news-modal__achievement-promo-runner">2-е место: ' + clubHeroStandingHtml(heroStandings[1]) + '</small>' : '') +
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
         '</aside>'
       : "";
