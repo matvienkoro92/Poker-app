@@ -10121,12 +10121,12 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .review-topic__cards .playing-card:is(.suit-s,.suit-c){color:#172033}
 [data-view="club-reviews"] .review-topic__title{font-size:13px;line-height:1.25;color:#d9c9a6}
 [data-view="club-reviews"] .review-topic__details{display:flex;min-width:0;flex-direction:column;align-items:flex-start;line-height:1.16}
-[data-view="club-reviews"] .review-topic__format{font-size:17px;font-weight:800;letter-spacing:.02em;line-height:1.25}
+[data-view="club-reviews"] .review-topic__format{max-width:100%;font-size:clamp(18px,2vw,21px);font-weight:800;letter-spacing:.02em;line-height:1.25;overflow-wrap:anywhere}
 [data-view="club-reviews"] .review-topic--mtt .review-topic__format{color:#ff9b42}
 [data-view="club-reviews"] .review-topic--cash .review-topic__format{color:#44b5f5}
-[data-view="club-reviews"] .review-topic__bank-label{margin-top:6px;color:#e4dccf;font-size:16px}
-[data-view="club-reviews"] .review-topic__bank{max-width:100%;color:#ffd28a;font-size:clamp(23px,2.7vw,30px);font-weight:950;white-space:nowrap}
-[data-view="club-reviews"] .review-topic__date{margin-top:5px;color:#aeb9c8;font-size:14px;white-space:nowrap}
+[data-view="club-reviews"] .review-topic__bank-label{margin-top:6px;color:#e4dccf;font-size:clamp(17px,1.8vw,19px)}
+[data-view="club-reviews"] .review-topic__bank{max-width:100%;color:#ffd28a;font-size:clamp(26px,3vw,34px);font-weight:950;white-space:nowrap}
+[data-view="club-reviews"] .review-topic__date{margin-top:5px;color:#aeb9c8;font-size:clamp(15px,1.6vw,18px);white-space:nowrap}
 [data-view="club-reviews"] .review-topic__count,[data-view="club-reviews"] .review-topic--unread .review-topic__count{display:grid;grid-template-columns:32px auto;align-content:center;align-items:center;column-gap:5px;row-gap:0;min-width:0;align-self:stretch;padding:8px 0 6px 13px;border:0;border-left:1px dashed #bca26873;border-radius:0;background:transparent;box-shadow:none;white-space:normal;color:#e0b878;animation:none}
 [data-view="club-reviews"] .review-topic__count svg{grid-row:1;grid-column:1;width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 [data-view="club-reviews"] .review-topic__count-number{grid-row:1;grid-column:2;font-size:40px;font-weight:900;line-height:1}
@@ -10189,7 +10189,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
   [data-view="club-reviews"] .review-topic__name{font-size:18px}
   [data-view="club-reviews"] .review-topic__cards .playing-card{width:43px;height:59px;font-size:19px}
   [data-view="club-reviews"] .review-topic__cards .playing-card__suit{font-size:25px}
-  [data-view="club-reviews"] .review-topic__bank{font-size:19px;white-space:normal;overflow-wrap:anywhere}
+  [data-view="club-reviews"] .review-topic__bank{font-size:22px;white-space:normal;overflow-wrap:anywhere}
 }
 @media(max-width:600px){
   [data-view="club-reviews"] .review-topic__mode-stripe{left:5px;width:4px}
@@ -10425,4 +10425,19 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 }
 @container summary-play (max-width:620px){
  [data-view="my-summary"] .summary-card--reviews-entry .summary-art{width:80%;height:92%;right:-8%;bottom:-4%}
+}
+
+/* Scale hand-list details to the card's available width, including a narrow app in a wide browser. */
+[data-view="club-reviews"]{container:review-list / inline-size}
+@container review-list (max-width:600px){
+ [data-view="club-reviews"] .review-topic__format{font-size:clamp(12px,2.8cqw,15px)}
+ [data-view="club-reviews"] .review-topic__bank-label{font-size:clamp(11px,2.5cqw,14px)}
+ [data-view="club-reviews"] .review-topic__bank{font-size:clamp(18px,4cqw,23px);white-space:normal;overflow-wrap:anywhere}
+ [data-view="club-reviews"] .review-topic__date{font-size:clamp(10px,2.3cqw,13px)}
+}
+@container review-list (max-width:400px){
+ [data-view="club-reviews"] .review-topic__format{font-size:clamp(11px,2.8cqw,12px)}
+ [data-view="club-reviews"] .review-topic__bank-label{font-size:clamp(10px,2.6cqw,11px)}
+ [data-view="club-reviews"] .review-topic__bank{font-size:clamp(16px,4.3cqw,18px)}
+ [data-view="club-reviews"] .review-topic__date{font-size:clamp(9px,2.3cqw,11px)}
 }
