@@ -10393,3 +10393,28 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
  [data-view="my-summary"] .summary-card--bonus #summary-bonus .summary-spin-status{font-size:12px!important;margin-top:3px}
  [data-view="my-summary"] :is(.summary-card--starting-hands,.summary-card--reviews-entry,.summary-card--bonus) .summary-card-action::after{left:16px;bottom:14px;width:35px;height:35px;font-size:30px;padding-bottom:5px;border-width:1px}
 }
+
+/* Friend news artwork: Waaar, Emil and Cooler in the reference's orange portrait rings. */
+[data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--friends{
+  position:relative;min-height:170px;padding:22px 24px;overflow:hidden;
+  border:2px solid #8f765442;border-radius:25px;
+  background:radial-gradient(ellipse at 75% 100%,#6d351b55,transparent 65%),linear-gradient(110deg,#28211b,#11151a);
+}
+[data-view="my-summary"] .summary-card--friends .summary-art--friends{
+  position:absolute;z-index:1;right:0;bottom:0;width:58%;height:100%;max-width:none;
+  object-fit:cover;object-position:center 43%;pointer-events:none;
+  mask-image:linear-gradient(to right,transparent,#000 23%);
+}
+[data-view="my-summary"] .summary-card--friends h2,[data-view="my-summary"] .summary-card--friends #summary-friends{position:relative;z-index:2;max-width:55%;padding:0}
+[data-view="my-summary"] .summary-card--friends h2{margin-bottom:9px;color:#ffebc6;font-size:22px;font-weight:900}
+[data-view="my-summary"] .summary-card--friends .summary-value{font-size:20px!important;line-height:1.15}
+[data-view="my-summary"] .summary-card--friends .summary-muted{font-size:12px!important;line-height:1.3}
+@container summary-play (max-width:620px){
+ [data-view="my-summary"] .summary-grid:has(.summary-card--starting-hands:not([hidden])) > .summary-card--friends{min-height:155px;padding:17px 18px;border-radius:20px}
+ [data-view="my-summary"] .summary-card--friends h2{font-size:18px}
+ [data-view="my-summary"] .summary-card--friends .summary-value{font-size:17px!important}
+ [data-view="my-summary"] .summary-card--friends .summary-art--friends{width:59%;object-position:center 39%}
+}
+@container summary-play (max-width:620px){
+ [data-view="my-summary"] .summary-card--friends #summary-friends{max-width:48%}
+}
