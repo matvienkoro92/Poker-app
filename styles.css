@@ -10557,3 +10557,5 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .review-topic-push button.social-button[aria-pressed="true"]{background:#f6c951;color:#211907}
 [data-view="club-reviews"] .review-topic-push button.social-button[aria-pressed="true"]::before{content:"✓";border-color:#38260a;background:#38260a;color:#ffda72}
 [data-view="club-reviews"] .review-topic-push button.social-button[data-push-state="needs-setup"],[data-view="club-reviews"] .review-topic-push button.social-button[data-push-state="unavailable"]{background:#413824;color:#ffe0a1}
+[data-view="club-reviews"] .review-topic__read-badge{grid-column:1/-1;justify-self:center;margin-top:7px;color:#9bcbb2;font-size:11px;font-weight:750;line-height:1.15;white-space:nowrap}
+@container review-list (max-width:600px){[data-view="club-reviews"] .review-topic__read-badge{font-size:9px}}
