@@ -26,7 +26,7 @@
     panel.innerHTML='<strong>Пуши</strong><button type="button" class="social-button" aria-pressed="false" disabled>…</button><p role="status"></p>';
     var btn=panel.querySelector('button'),hint=panel.querySelector('p'),gen=generation;
     function active(){return gen===generation&&panel.isConnected;}
-    function render(data){btn.textContent=data.subscribed?'Выкл':'Вкл';btn.title=data.subscribed?'Выключить пуши о новых темах':'Включить пуши о новых темах';btn.setAttribute('aria-label',btn.title);btn.setAttribute('aria-pressed',String(!!data.subscribed));hint.textContent=data.subscribed&&(!data.notificationsEnabled||!data.hasSubscription)?'Включите уведомления в профиле.':'';}
+    function render(data){var ready=!!(data.subscribed&&data.notificationsEnabled&&data.hasSubscription&&data.pushConfigured);var state=!data.subscribed?'off':!data.pushConfigured?'unavailable':ready?'on':'needs-setup';btn.textContent=state==='on'?'Включены':state==='off'?'Выключены':state==='unavailable'?'Недоступны':'Не настроены';btn.title=data.subscribed?'Выключить пуши о новых темах':'Включить пуши о новых темах';btn.setAttribute('aria-label','Пуши о новых темах: '+btn.textContent.toLowerCase()+'. '+btn.title);btn.setAttribute('aria-pressed',String(!!data.subscribed));btn.dataset.pushState=state;hint.textContent=state==='needs-setup'?'Включите уведомления в профиле.':state==='unavailable'?'Пуши временно недоступны.':'';}
     api({action:'topic-push-status'}).then(function(data){if(active())render(data);}).catch(function(){if(active()){btn.textContent='Повторить';hint.textContent='Не удалось проверить подписку.';}}).finally(function(){if(active())btn.disabled=false;});
     btn.addEventListener('click',async function(){
       btn.disabled=true;hint.textContent='';
@@ -41,7 +41,7 @@
         }
         if(!active())return;
         var saved=await api({action:'topic-push-set',enabled:!current.subscribed});
-        if(active()){render(saved);hint.textContent=saved.subscribed?'Пуши о новых темах включены.':'Пуши о новых темах выключены.';}
+        if(active()){render(saved);hint.textContent=btn.dataset.pushState==='needs-setup'?'Подписка включена. Настройте уведомления в профиле.':btn.dataset.pushState==='unavailable'?'Пуши временно недоступны.':saved.subscribed?'Пуши о новых темах включены.':'Пуши о новых темах выключены.';}
       }catch(error){if(active())hint.textContent=error.message;}
       finally{if(active())btn.disabled=false;}
     });

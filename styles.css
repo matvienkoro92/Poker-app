@@ -9697,6 +9697,15 @@ body[data-view="club-reviews"] #app.app > .card {
 body[data-view="club-reviews"] #app.app > .card > .card__header {
   display: none !important;
 }
+#app.app:has(.view--active[data-view="club-reviews"]) > .card > .card__header {
+  display: none !important;
+}
+#app.app .card .card__content > .view--active[data-view="club-reviews"] {
+  padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px), var(--tg-ui-top-clearance, 0px)) !important;
+}
+html.app--telegram-miniapp #app.app .card .card__content > .view--active[data-view="club-reviews"] {
+  padding-top: max(56px, var(--tg-ui-top-clearance, 0px)) !important;
+}
 body[data-view="club-reviews"] #app.app > .card > .card__content,
 body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active[data-view="club-reviews"] {
   width: 100% !important;
@@ -9920,6 +9929,8 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 [data-view="club-reviews"] .review-topic-push p { flex-basis:100%; margin:0; font-size:12px; color:#aeb9ca; }
 [data-view="club-reviews"] .review-topic-push p:empty { display:none; }
 [data-view="club-reviews"] .review-topic-push button[aria-pressed="true"] { background:#f6c951; color:#211907; }
+[data-view="club-reviews"] .review-topic-push button[data-push-state="needs-setup"],
+[data-view="club-reviews"] .review-topic-push button[data-push-state="unavailable"] { background:#413824; color:#ffe0a1; border-color:#b89a55; }
 [data-view="club-reviews"] .review-hand-text__space { height: 2px; }
 [data-view="club-reviews"] .review-hand-text__line--meta { color: #aeb9ca; }
 [data-view="club-reviews"] .review-hand-text__line--fold { color: #78828f; }

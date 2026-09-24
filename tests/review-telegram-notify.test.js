@@ -19,3 +19,13 @@ test('comments notify followers privately excluding sender and unsubscribed user
  assert.equal(sent.length,1);assert.equal(sent[0].chat_id,'202');assert.match(sent[0].text,/Комментарий/);
  assert.equal(await api.checkSubscription('ID2'),'');assert.match(await api.checkSubscription('ID3'),/Telegram/);
 });
+test('a new comment privately notifies the topic author without a follow subscription',async()=>{
+ const {api,sent}=setup();
+ await api.notify({...topic,authorId:'ID1',followers:{}},{accountId:'ID2',nick:'МиссClick'},{authorName:'Имя игрока',text:'Я бы сыграл колл на тёрне'});
+ assert.equal(sent.length,1);
+ assert.equal(sent[0].chat_id,'101');
+ assert.match(sent[0].text,/Игрок МиссClick оставил комментарий к вашей раздаче/);
+ assert.match(sent[0].text,/Я бы сыграл колл на тёрне/);
+ assert.equal(sent[0].buttonText,'Открыть раздачу');
+ assert.match(sent[0].buttonUrl,/startapp=review_aaaaaaaaaaaaaaaaaaaaaaaa/);
+});
