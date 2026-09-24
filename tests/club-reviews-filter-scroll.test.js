@@ -11,6 +11,7 @@ test("review list filters preserve scroll and restore focus without scrolling", 
   assert.match(block, /viewTop=view\?view\.scrollTop:0/);
   assert.match(block, /view\.scrollTop=viewTop/);
   assert.match(block, /focus\(\{preventScroll:true\}\)/);
-  assert.match(source, /listMode=id;renderListWithoutScrollJump\(action,id\)/);
   assert.match(source, /listMetric=id;renderListWithoutScrollJump\(action,id\)/);
+  assert.match(source, /listModes\[id\]=!listModes\[id\];loadList\(1\)/);
+  assert.match(source, /mine=!mine;loadList\(1\)/);
 });
