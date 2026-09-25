@@ -476,6 +476,68 @@
   }
 }
 
+/* Full-screen friends directory with two cards per row. */
+.friends-list-modal { padding: 0; }
+.friends-list-modal__inner {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  box-sizing: border-box;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-radius: 0;
+}
+.friends-list-modal__close { top: calc(14px + env(safe-area-inset-top, 0px)); right: 18px; z-index: 2; }
+.friends-list-modal__title { margin-bottom: 14px; }
+.friends-list-modal__section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 12px;
+}
+.friends-list-modal__section-title { grid-column: 1 / -1; margin-bottom: 0; }
+.friends-list-modal__item {
+  min-width: 0;
+  min-height: 150px;
+  box-sizing: border-box;
+  margin: 0;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  justify-content: stretch;
+}
+.friends-list-modal__item-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-self: end;
+  width: 100%;
+}
+.friends-list-modal__btn,.friends-list-modal__status { min-width: 0; white-space: normal; text-align: center; }
+@media (max-width: 600px) {
+  .friends-list-modal__inner {
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 10px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .friends-list-modal__close { right: 12px; }
+  .friends-list-modal__section { gap: 9px; }
+  .friends-list-modal__item {
+    min-height: 172px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px 8px;
+  }
+  .friends-list-modal__item-name { font-size: 13px; line-height: 1.15; }
+  .friends-list-modal__item-login { font-size: 11px; }
+  .friends-list-modal__item-actions { display: flex; flex-direction: column; gap: 6px; }
+  .friends-list-modal__btn,.friends-list-modal__status {
+    min-height: 35px;
+    padding: 5px 4px;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+}
+
 .profile-personal {
   display: none !important;
 }

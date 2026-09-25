@@ -469,6 +469,51 @@ function initProfileFriends() {
     return "";
   }
 
+  function friendProfileOpensKey() {
+    var viewer = profileFriendsViewerAccountId();
+    return viewer ? "poker_profile_friend_opens_v1:" + viewer : "";
+  }
+
+  function readFriendProfileOpens() {
+    var key = friendProfileOpensKey();
+    var value = key ? pokerFriendsReadJson(key, {}) : {};
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+
+  function recordFriendProfileOpen(userId) {
+    var key = friendProfileOpensKey();
+    var id = String(userId || "").trim();
+    if (!key || !id) return;
+    var opens = readFriendProfileOpens();
+    opens[id] = Date.now();
+    var ids = Object.keys(opens).sort(function (a, b) { return Number(opens[b]) - Number(opens[a]); });
+    ids.slice(200).forEach(function (oldId) { delete opens[oldId]; });
+    pokerFriendsWriteJson(key, opens);
+  }
+
+  function sortFriendsForModal(rows) {
+    var opens = readFriendProfileOpens();
+    var list = (Array.isArray(rows) ? rows : []).slice();
+    function addedAt(row) {
+      var value = Date.parse(String(row && row.friendSince || ""));
+      return Number.isFinite(value) && value > 0 ? value : 0;
+    }
+    function label(row) {
+      return String(row && (row.contactName || row.pokerPlusNickname || row.userName || row.userId) || "");
+    }
+    list.sort(function (a, b) { return addedAt(b) - addedAt(a) || label(a).localeCompare(label(b), "ru"); });
+    // Keep the two newest pairs at the top; then use the last profile open.
+    var newest = list.filter(function (row) { return addedAt(row) > 0; }).slice(0, 4);
+    var newestIds = {};
+    newest.forEach(function (row) { newestIds[pokerFriendsRowId(row)] = true; });
+    var rest = list.filter(function (row) { return !newestIds[pokerFriendsRowId(row)]; });
+    rest.sort(function (a, b) {
+      return (Number(opens[pokerFriendsRowId(b)]) || 0) - (Number(opens[pokerFriendsRowId(a)]) || 0) ||
+        addedAt(b) - addedAt(a) || label(a).localeCompare(label(b), "ru");
+    });
+    return newest.concat(rest);
+  }
+
   function staticDefaultFriendsData() {
     return { ok: true, fallback: true, staticFallback: true, friends: [], incoming: [], outgoing: [], notices: [] };
   }
@@ -1593,9 +1638,11 @@ function initProfileFriends() {
         var name = item.dataset.userName;
         var avatar = item.dataset.avatarUrl || "";
         if ((id || chatId) && typeof window.pokerOpenChatUserModalSafe === "function") {
+          if (item.dataset.section === "friends") recordFriendProfileOpen(id || chatId);
           closeFriendsModal();
           window.pokerOpenChatUserModalSafe(id || chatId, name, avatar);
         } else if ((id || chatId) && typeof window.openChatUserModalById === "function") {
+          if (item.dataset.section === "friends") recordFriendProfileOpen(id || chatId);
           closeFriendsModal();
           window.openChatUserModalById(id || chatId, name, avatar);
         }
@@ -1739,7 +1786,7 @@ function initProfileFriends() {
     renderIncomingNotice(incoming.length);
     renderFriendsPreview(friends);
     var chunks = [];
-    chunks.push(renderSection("Друзья", friends, "friends", function (row) {
+    chunks.push(renderSection("Друзья", sortFriendsForModal(friends), "friends", function (row) {
       var removeHtml = row && row.defaultFriend
         ? ""
         : '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--remove" data-delete-kind="friends">Удалить из друзей</button>';
