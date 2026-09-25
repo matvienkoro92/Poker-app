@@ -470,6 +470,16 @@ function startHistory(payload) {
     statsPanel.ontoggle=()=>{if(statsPanel.open&&missing.length&&!insightsLoading&&!insightsError)load.click();};
     if(missing.length&&!insightsLoading&&!insightsError&&(!root.hidden||(!statsPanel.hidden&&statsPanel.open)))queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
     const collections=add(root,'div',null,'insight-collections');
+    if(stats.wins.length||stats.losses.length){
+      const topGroup=add(collections,'section',null,'insight-collection-group');add(topGroup,'h4','Крупнейшие раздачи');
+      for(const [title,rows] of [['Выигрыши',stats.wins],['Проигрыши',stats.losses]]){
+        if(!rows.length)continue;
+        const d=add(topGroup,'details',null,'insight-collection');const summary=add(d,'summary',null);
+        add(summary,'span',title,'insight-collection__title');add(summary,'strong',number(rows.length),'insight-collection__count');
+        const body=add(d,'div',null,'insight-collection__body');
+        d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(body,rows);}});
+      }
+    }
     const collectionGroups=[
       ['Стоит посмотреть',[['riverLoss','Колл ривера с проигрышем'],['aceHighShowdown','Вскрытия с A-хай'],['bigLoss','Потери больше 30 bb']]],
       ['Действия',[['threeBet','3-беты'],['foldRaise','Фолды на рейз']]],
@@ -498,16 +508,6 @@ function startHistory(payload) {
     }
     if(!visibleGroups)add(collections,'p',missing.length?'Подборки появятся после загрузки истории действий.':'По выбранным фильтрам подходящих раздач нет.','note');
     add(collections,'p','Одна раздача может входить в несколько подборок. Отклонение от all-in EV показывает разброс результата, а не качество решения.','insight-collections-note');
-    if(stats.wins.length||stats.losses.length){
-      const topGroup=add(collections,'section',null,'insight-collection-group');add(topGroup,'h4','Крупнейшие раздачи');
-      for(const [title,rows] of [['Выигрыши',stats.wins],['Проигрыши',stats.losses]]){
-        if(!rows.length)continue;
-        const d=add(topGroup,'details',null,'insight-collection');const summary=add(d,'summary',null);
-        add(summary,'span',title,'insight-collection__title');add(summary,'strong',number(rows.length),'insight-collection__count');
-        const body=add(d,'div',null,'insight-collection__body');
-        d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(body,rows);}});
-      }
-    }
   }
 
   function render() {
