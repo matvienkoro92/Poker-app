@@ -440,9 +440,11 @@ function startHistory(payload) {
     const sd=stats.showdown;
     const showdownRate=add(showdown,'div',null,'insight-outcome-metric');
     add(showdownRate,'span','Дошёл до вскрытия');add(showdownRate,'strong',sd.eligible?number(sd.count/sd.eligible*100)+'%':'—');
+    if(cashNlh)add(showdownRate,'span','27–32%','insight-outcome-reference');
     add(showdownRate,'small',sd.count+' / '+sd.eligible+' с флопом');
     const profitableRate=add(showdown,'div',null,'insight-outcome-metric');
     add(profitableRate,'span','В плюс');add(profitableRate,'strong',sd.count?number(sd.profitable/sd.count*100)+'%':'—');
+    if(cashNlh)add(profitableRate,'span','49–54%','insight-outcome-reference');
     add(profitableRate,'small',sd.profitable+' / '+sd.count+' вскрытий');
     add(showdown,'small',sd.loaded===0&&sd.total?'Загружаю действия…':'Действия: '+sd.loaded+' / '+sd.total,'insight-outcome-footnote');
     const ns=stats.withoutShowdown;

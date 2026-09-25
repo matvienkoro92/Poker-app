@@ -37,7 +37,6 @@
   var clubCashHighlights = null;
   var clubCashLoading = false;
   var clubCashError = false;
-  var clubCashSelectedDayKey = "";
   var clubWinsDayTab = "latest";
   var activeIndex = 0;
   var clubActiveIndex = 0;
@@ -1200,29 +1199,28 @@
     var format = function (value) { return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 }).format(value); };
     var limitNumber = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
     var categories = [
-      ['potBb', 'Самый большой выигранный банк в больших блайндах', function (row) { return format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
-      ['potRub', 'Самый большой выигранный банк в рублях', function (row) { return format(row.potMinor / 100) + ' ₽'; }],
-      ['lossBb', 'Самый минусовый банк', function (row) { return '−' + format(-row.resultMinor / row.bigBlindMinor) + ' BB'; }],
-      ['evBelow', 'Самый большой недобор по EV', function (row) { return '−' + format((row.evResultMinor - row.resultMinor) / row.bigBlindMinor) + ' BB'; }],
-      ['highCard', 'Вскрытия после ставки с хай-картой', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
+      ['potBb', 'Крупнейший банк · BB', function (row) { return format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
+      ['potRub', 'Крупнейший банк · ₽', function (row) { return format(row.potMinor / 100) + ' ₽'; }],
+      ['lossBb', 'Крупнейший проигрыш', function (row) { return '−' + format(-row.resultMinor / row.bigBlindMinor) + ' BB'; }],
+      ['evBelow', 'Максимальный недобор EV', function (row) { return '−' + format((row.evResultMinor - row.resultMinor) / row.bigBlindMinor) + ' BB'; }],
+      ['highCard', 'Вскрытие с хай-картой', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
     ];
-    var monthlyDescriptions = [
-      'Крупнейший банк месяца в BB',
-      'Крупнейший банк месяца в рублях',
-      'Крупнейший проигрыш в одной раздаче',
-      'Самый большой недобор по EV',
-      'Выигрыш на вскрытии с хай-картой',
-    ];
+    function monthlyIcon(index) {
+      if (index < 3) return '<img src="./assets/home-news-cash-black-gold-chips-v1.webp" alt="" loading="lazy">' + (index === 1 ? '<i class="cash-monthly-ruble">₽</i>' : '');
+      if (index === 3) return '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="9" y="40" width="13" height="28" rx="3" fill="#a7aeb1"/><rect x="29" y="24" width="13" height="44" rx="3" fill="#d0d0c6"/><rect x="49" y="11" width="13" height="57" rx="3" fill="#f0d9a8"/><path d="M65 28v35m0 0-12-12m12 12 12-12" stroke="#ff7f87" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      return '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="11" y="11" width="43" height="59" rx="5" transform="rotate(-12 11 11)" fill="#151b20" stroke="#d9a861"/><rect x="24" y="8" width="44" height="60" rx="5" transform="rotate(8 24 8)" fill="#20262a" stroke="#f0c677"/><path d="m48 28-9 12 9 15 9-15-9-12Z" fill="#dcb971"/><text x="34" y="24" fill="#ffe2a2" font-size="15" font-weight="bold">A</text></svg>';
+    }
     function groupHtml(groups, monthly) {
       return categories.map(function (category, index) {
         var rows = groups && groups[category[0]] || [];
         var value = rows.length ? category[2](rows[0]) : '—';
         var monthlySummary = '<span class="cash-monthly-title">' + category[1] + '</span>' +
-          '<span class="cash-monthly-icon" aria-hidden="true">' + (index < 3 ? '<img src="./assets/home-news-cash-black-gold-chips-v1.webp" alt="" loading="lazy">' : index === 4 ? '♠' : '↘') + '</span>' +
+          '<span class="cash-monthly-icon" aria-hidden="true">' + monthlyIcon(index) + '</span>' +
+          (index === 4 ? '<span class="cash-monthly-context">После ставки</span>' : '') +
           '<b class="cash-monthly-value">' + value + '</b>' +
-          '<small class="cash-monthly-description">' + monthlyDescriptions[index] + (rows.length && rows[0].player ? ' · <strong>' + esc(rows[0].player) + '</strong>' : '') + '</small>' +
+          '<small class="cash-monthly-description"><i aria-hidden="true">●</i><strong>' + (rows.length && rows[0].player ? esc(rows[0].player) : 'Нет данных') + '</strong></small>' +
           '<span class="cash-monthly-chevron" aria-hidden="true">›</span>';
-        return '<details class="home-friend-news-modal__cash-group' + (monthly ? ' home-friend-news-modal__cash-group--monthly' + (index < 3 ? ' home-friend-news-modal__cash-group--featured' : '') + (index === 2 ? ' home-friend-news-modal__cash-group--loss' : '') : '') + '"><summary>' +
+        return '<details class="home-friend-news-modal__cash-group' + (monthly ? ' home-friend-news-modal__cash-group--monthly' + (index < 2 ? ' home-friend-news-modal__cash-group--featured' : '') + (index === 2 ? ' home-friend-news-modal__cash-group--loss' : '') : '') + '"><summary>' +
           (monthly ? monthlySummary : '<span>' + category[1] + '</span><b>' + value + '</b>') + '</summary>' +
           (rows.length ? rows.map(function (row) {
             var blind = Number(row.bigBlindMinor) / 100;
@@ -1236,60 +1234,22 @@
     }
     var currentMonth = (data.months || [])[0];
     var monthLabel = currentMonth ? new Date(currentMonth.month + '-01T12:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) : '';
-    var recentDays = (data.days || []).slice(0, 3);
-    if (recentDays.length && !recentDays.some(function (day) { return day.date === clubCashSelectedDayKey; })) clubCashSelectedDayKey = recentDays[0].date;
+    var cashDays = data.days || [];
+    var previousDayKeys = clubAvailableWinDayKeys(clubEvents);
+    if (!previousDayKeys.length) previousDayKeys = clubAvailableWinDayKeys(cashDays.map(function (day) { return { at: day.date + 'T12:00:00' }; }));
+    var previousDay = cashDays.find(function (day) { return day.date === previousDayKeys[0]; });
+    var previousDayLabel = previousDay ? new Date(previousDay.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     return '<div class="home-friend-news-modal__cash">' +
       '<section class="home-friend-news-modal__cash-month"><div class="cash-month-heading"><span class="cash-month-emblem" aria-hidden="true"><i>A♠</i><i>A♥</i></span><span><small>ДВА ТУЗА · POKER21</small><h3>Топы месяца · ' + esc(monthLabel) + '</h3></span></div>' +
         (currentMonth ? '<div class="home-friend-news-modal__cash-month-groups">' + groupHtml(currentMonth.groups, true) + '</div>' : '<p>Пока нет кеш-раздач.</p>') + '</section>' +
-      clubCashCalendarHtml(recentDays) +
-      '<h3 class="home-friend-news-modal__cash-days-title">Последние 3 дня</h3>' +
-      recentDays.map(function (day) {
-        var label = new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-        return '<details class="home-friend-news-modal__cash-day" data-cash-day="' + esc(day.date) + '"' + (day.date === clubCashSelectedDayKey ? ' open' : '') + '><summary><span>' + esc(label) + '</span></summary>' +
-          groupHtml(day.groups) + '</details>';
-      }).join('') + '</div>';
-  }
-
-  function clubCashCalendarHtml(days) {
-    if (!days.length) return '';
-    var selectedIndex = Math.max(0, days.findIndex(function (day) { return day.date === clubCashSelectedDayKey; }));
-    var selected = days[selectedIndex];
-    var others = days.filter(function (day) { return day.date !== selected.date; }).sort(function (a, b) { return a.date.localeCompare(b.date); });
-    var selectedDate = new Date(selected.date + 'T12:00:00');
-    var month = selectedDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
-    function card(day, active) {
-      if (!day) return '<span class="cash-calendar-card cash-calendar-card--empty" aria-hidden="true"></span>';
-      var date = new Date(day.date + 'T12:00:00');
-      var weekday = date.toLocaleDateString('ru-RU', { weekday: 'long' });
-      return '<button type="button" class="cash-calendar-card' + (active ? ' cash-calendar-card--active' : '') + '" data-cash-calendar-date="' + esc(day.date) + '" aria-pressed="' + (active ? 'true' : 'false') + '" aria-label="' + esc(date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })) + '">' +
-        '<strong>' + esc(date.getDate()) + '</strong><small>' + esc(weekday) + '</small></button>';
-    }
-    return '<section class="cash-calendar" aria-label="Календарь кеш-раздач">' +
-      '<header class="cash-calendar-header"><button type="button" data-cash-calendar-step="-1" aria-label="К более новым датам"' + (selectedIndex === 0 ? ' disabled' : '') + '>‹</button><strong>' + esc(month) + '</strong><button type="button" data-cash-calendar-step="1" aria-label="К более старым датам"' + (selectedIndex === days.length - 1 ? ' disabled' : '') + '>›</button></header>' +
-      '<div class="cash-calendar-stage">' + card(others[0], false) + card(selected, true) + card(others[1], false) + '</div>' +
-      '<nav class="cash-calendar-tabs" aria-label="Выбор даты">' + days.slice().reverse().map(function (day) {
-        var date = new Date(day.date + 'T12:00:00');
-        return '<button type="button" data-cash-calendar-date="' + esc(day.date) + '" aria-pressed="' + (day.date === selected.date ? 'true' : 'false') + '"' + (day.date === selected.date ? ' class="is-active"' : '') + '>' + esc(date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })) + '</button>';
-      }).join('') + '</nav></section>';
-  }
-
-  function selectClubCashDay(dateKey) {
-    var days = clubCashHighlights && Array.isArray(clubCashHighlights.days) ? clubCashHighlights.days.slice(0, 3) : [];
-    if (!days.some(function (day) { return day.date === dateKey; })) return;
-    clubCashSelectedDayKey = dateKey;
-    var list = el('homeFriendNewsList');
-    if (!list) return;
-    var calendar = list.querySelector('.cash-calendar');
-    if (calendar) calendar.outerHTML = clubCashCalendarHtml(days);
-    list.querySelectorAll('.home-friend-news-modal__cash-day').forEach(function (details) {
-      details.open = details.getAttribute('data-cash-day') === dateKey;
-    });
+      '<h3 class="home-friend-news-modal__cash-days-title">' + (previousDay ? 'Предыдущий день · ' + esc(previousDayLabel) : 'Предыдущий день') + '</h3>' +
+      (previousDay ? groupHtml(previousDay.groups) : '<p>За предыдущий день кеш-раздач нет.</p>') + '</div>';
   }
 
   function loadClubCashHighlights() {
     if (clubCashLoading) return;
     clubCashLoading = true; clubCashError = false;
-    fetch('./club-cash-highlights.json').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
+    fetch('./club-cash-highlights.json?v=postflop-high-card-1').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
       .then(function (data) { if (!data || !Array.isArray(data.days) || !Array.isArray(data.months)) throw new Error('cash'); clubCashHighlights = data; })
       .catch(function () { clubCashError = true; })
       .finally(function () { clubCashLoading = false; if (newsModalMode === 'club' && clubNewsTab === 'cash') renderModalList([]); });
@@ -2604,6 +2564,7 @@
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
+    var showCardTime = !(newsModalMode === "club" && !ticker && timeLabel === "вчера");
     var linkedClubProfile = newsModalMode === "club" ? clubProfileForNick(row && row.actorNick) : null;
     var friendProfileKey = matchKey(row && row.actorNick);
     var linkedFriendProfile = newsModalMode === "friends"
@@ -2695,7 +2656,7 @@
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
         '<span data-home-news-read-id="' + esc(row.id) + '">' + structuredText + "</span>" +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
-        "<small>" + esc(timeLabel) + "</small>" +
+        (showCardTime ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
       "</span>" + feedbackParts.comments + "</span>";
   }
@@ -3674,22 +3635,6 @@
           return;
         }
         if (event.target.closest('[data-club-cash-retry]')) { clubCashError = false; renderModalList([]); loadClubCashHighlights(); return; }
-        var cashDateButton = event.target.closest('[data-cash-calendar-date]');
-        if (cashDateButton) { selectClubCashDay(cashDateButton.getAttribute('data-cash-calendar-date') || ''); return; }
-        var cashStepButton = event.target.closest('[data-cash-calendar-step]');
-        if (cashStepButton && !cashStepButton.disabled) {
-          var cashDays = clubCashHighlights && Array.isArray(clubCashHighlights.days) ? clubCashHighlights.days.slice(0, 3) : [];
-          var cashIndex = cashDays.findIndex(function (day) { return day.date === clubCashSelectedDayKey; });
-          var cashNext = cashDays[cashIndex + Number(cashStepButton.getAttribute('data-cash-calendar-step'))];
-          if (cashNext) selectClubCashDay(cashNext.date);
-          return;
-        }
-        var cashDaySummary = event.target.closest('.home-friend-news-modal__cash-day > summary');
-        if (cashDaySummary) {
-          var cashDayDetails = cashDaySummary.parentElement;
-          window.setTimeout(function () { if (cashDayDetails.open) selectClubCashDay(cashDayDetails.getAttribute('data-cash-day') || ''); }, 0);
-          return;
-        }
         var winsDayTab = event.target.closest("[data-club-wins-day]");
         if (winsDayTab && !winsDayTab.disabled) {
           var requestedWinsDay = winsDayTab.getAttribute("data-club-wins-day");

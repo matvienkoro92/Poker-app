@@ -65,7 +65,12 @@ async function main(){
    if(row.resultMinor>0&&potMinor>0){add('potBb',item,potMinor/row.bigBlindMinor);add('potRub',item,potMinor);}
    if(row.resultMinor<0)add('lossBb',item,-row.resultMinor/row.bigBlindMinor);
    if(ev?.status==='calculated'&&Number.isFinite(ev.resultMinor)&&row.resultMinor<ev.resultMinor)add('evBelow',item,(ev.resultMinor-row.resultMinor)/row.bigBlindMinor);
-   if(row.showdown===true&&events.some(event=>String(event.actorId)===playerId&&['3','5','20'].includes(String(event.code)))){
+   let flopDealt=false;
+   const postflopBet=events.some(event=>{
+    if(Array.isArray(event.board)&&event.board.length>=3)flopDealt=true;
+    return flopDealt&&String(event.actorId)===playerId&&['3','5','20'].includes(String(event.code));
+   });
+   if(row.showdown===true&&postflopBet){
     const rank=highCard([...row.cards,...board]);if(rank)add('highCard',{...item,highCardRank:rank},potMinor/row.bigBlindMinor);
    }
    });
