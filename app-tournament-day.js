@@ -1059,8 +1059,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
     var row = document.createElement("button");
     row.type = "button";
     row.className = "home-tournament-week-row";
-    var isFridayKnockout500 = dow === 5 && item.name === "Нокаут" && Number(String(item.buyin || "").replace(/\D/g, "")) === 500;
-    if (isFridayKnockout500) row.classList.add("home-tournament-week-row--knockout-history");
+    row.classList.add("home-tournament-week-row--ticket-info");
     if (dow === activeWeekday) row.classList.add("home-tournament-week-row--active");
     row.setAttribute("aria-pressed", dow === activeWeekday ? "true" : "false");
     if (item.name === "Фриролл") row.classList.add("home-tournament-week-row--freeroll");
@@ -1118,8 +1117,8 @@ function renderHomeTournamentWeekList(activeWeekday) {
     trophyArt.setAttribute("aria-hidden", "true");
     var trophyCopy = document.createElement("span");
     trophyCopy.className = "home-tournament-trophy__copy";
-    var ticketTitle = isFridayKnockout500 ? "Нокаут 500 ₽" : (item.name || "Турнир");
-    trophyCopy.style.setProperty("--ticket-title-size", Math.min(8.5, 67 / Math.max(1, Array.from(ticketTitle).length)) + "cqw");
+    var ticketTitle = (item.name || "Турнир") + (item.buyin ? " " + pokerFormatRubSpacing(item.buyin) : "");
+    trophyCopy.style.setProperty("--ticket-title-size", Math.min(5.6, Math.max(2.8, 90 / Math.max(1, Array.from(ticketTitle).length))) + "cqw");
     [
       ["title", ticketTitle],
       ["caption", "Призовой фонд"],
@@ -2551,7 +2550,20 @@ function updateTournamentDayBlock() {
     if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "aza" : selectedWeekday === 4 ? "redrocket" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
     if (tournamentScene) tournamentScene.dataset.tournamentWeekday = String(selectedWeekday);
     var historyButton = document.getElementById("homeTournamentHistoryOpen");
-    if (historyButton) historyButton.hidden = !(selectedWeekday === 5 && detailNameStr === "Нокаут" && Number(String(detailBuyinStr).replace(/\D/g, "")) === 500);
+    if (historyButton) {
+      historyButton.hidden = false;
+      historyButton.dataset.tournamentWeekday = String(selectedWeekday);
+      historyButton.dataset.tournamentName = detailNameStr || "Турнир";
+      historyButton.dataset.tournamentBuyin = pokerFormatRubSpacing(detailBuyinStr || "—");
+      historyButton.dataset.tournamentGuarantee = pokerFormatRubSpacing(detailState.t && detailState.t.guarantee || "—");
+      historyButton.dataset.tournamentDay = HOME_TOURNAMENT_WEEK_DAY_LABELS[selectedWeekday] || "Турнирный день";
+      historyButton.dataset.tournamentTime = detailState.t && Number.isFinite(Number(detailState.t.hour))
+        ? String(Math.floor(Number(detailState.t.hour))).padStart(2, "0") + ":" + String(Math.floor(Number(detailState.t.minute) || 0)).padStart(2, "0")
+        : "18:00";
+      historyButton.setAttribute("aria-label", "Рейтинг призёров турнира " + historyButton.dataset.tournamentName);
+      var historyLabel = historyButton.querySelector("[data-home-tournament-history-label]");
+      if (historyLabel) historyLabel.textContent = "Победители";
+    }
     renderHomePokermankiKnockout(selectedWeekday);
     var detailGuaranteeStr = detailState.t ? detailState.t.guarantee : "";
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
