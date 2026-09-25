@@ -3828,6 +3828,20 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 🃏🃏🃏 20K 🏆",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 6,
+          "reward": 2260,
+          "points": 0
+        }
+      ]
     }
   ]
 };
