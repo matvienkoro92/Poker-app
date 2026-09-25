@@ -70,8 +70,8 @@ async function main(){
     if(Array.isArray(event.board)&&event.board.length>=3)flopDealt=true;
     return flopDealt&&String(event.actorId)===playerId&&['3','5','20'].includes(String(event.code));
    });
-   if(row.showdown===true&&postflopBet){
-    const rank=highCard([...row.cards,...board]);if(rank)add('highCard',{...item,highCardRank:rank},potMinor/row.bigBlindMinor);
+   if(row.showdown===true&&row.resultMinor>0&&postflopBet){
+    const rank=highCard([...row.cards,...board]);if(rank==='A')add('highCard',{...item,highCardRank:rank},potMinor/row.bigBlindMinor);
    }
    });
   }

@@ -1203,7 +1203,7 @@
       ['potRub', 'Крупнейший банк · ₽', function (row) { return format(row.potMinor / 100) + ' ₽'; }],
       ['lossBb', 'Крупнейший проигрыш', function (row) { return '−' + format(-row.resultMinor / row.bigBlindMinor) + ' BB'; }],
       ['evBelow', 'Максимальный недобор EV', function (row) { return '−' + format((row.evResultMinor - row.resultMinor) / row.bigBlindMinor) + ' BB'; }],
-      ['highCard', 'Вскрытие с хай-картой', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
+      ['highCard', 'Вскрытие по Хай', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
     ];
     function monthlyIcon(index) {
       if (index < 3) return '<img src="./assets/home-news-cash-black-gold-chips-v1.webp" alt="" loading="lazy">' + (index === 1 ? '<i class="cash-monthly-ruble">₽</i>' : '');
@@ -1249,7 +1249,7 @@
   function loadClubCashHighlights() {
     if (clubCashLoading) return;
     clubCashLoading = true; clubCashError = false;
-    fetch('./club-cash-highlights.json?v=postflop-high-card-1').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
+    fetch('./club-cash-highlights.json?v=winning-a-high-1').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
       .then(function (data) { if (!data || !Array.isArray(data.days) || !Array.isArray(data.months)) throw new Error('cash'); clubCashHighlights = data; })
       .catch(function () { clubCashError = true; })
       .finally(function () { clubCashLoading = false; if (newsModalMode === 'club' && clubNewsTab === 'cash') renderModalList([]); });
