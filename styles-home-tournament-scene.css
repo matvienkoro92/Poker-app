@@ -485,8 +485,8 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-no-spade-v2.webp');
-  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-no-spade-v2.webp') 1x, url('./assets/home-tournament-cooler-no-spade-v2-hd.webp') 2x);
+  --home-tournament-scene: url('./assets/home-tournament-cooler-no-circle-v3.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-no-circle-v3.webp') 1x, url('./assets/home-tournament-cooler-no-circle-v3-hd.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -1145,6 +1145,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--knockout-history .home-tournament-trophy__title {
   left: 9% !important;
   width: 57% !important;
+  box-sizing: border-box;
+  padding-left: 11cqw !important;
   font-size: 5.6cqw !important;
   white-space: nowrap !important;
   letter-spacing: 0 !important;
