@@ -44,8 +44,12 @@
       dialog.appendChild(intro);
       var money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
       var winners = {};
+      var overall = {};
       results.forEach(function (entry) {
         entry[1].forEach(function (player) {
+          if (!overall[player[1]]) overall[player[1]] = { wins: 0, prize: 0 };
+          overall[player[1]].prize += player[2];
+          if (player[0] === 1) overall[player[1]].wins += 1;
           if (player[0] !== 1) return;
           if (!winners[player[1]]) winners[player[1]] = { wins: 0, prize: 0 };
           winners[player[1]].wins += 1;
@@ -71,6 +75,25 @@
         ranking.appendChild(row);
       });
       dialog.appendChild(ranking);
+      var overallRanking = document.createElement("section");
+      overallRanking.className = "home-tournament-history-dialog__ranking home-tournament-history-dialog__ranking--overall";
+      var overallTitle = document.createElement("h3");
+      overallTitle.textContent = "Общий рейтинг топ‑3 · победы и призовые";
+      overallRanking.appendChild(overallTitle);
+      Object.keys(overall).sort(function (a, b) {
+        return overall[b].wins - overall[a].wins || overall[b].prize - overall[a].prize || a.localeCompare(b, "ru");
+      }).forEach(function (nick, index) {
+        var row = document.createElement("div");
+        row.className = "home-tournament-history-dialog__rank-row";
+        var name = document.createElement("span");
+        name.textContent = (index + 1) + ". " + nick;
+        var value = document.createElement("strong");
+        value.textContent = overall[nick].wins + " побед" + (overall[nick].wins === 1 ? "а" : overall[nick].wins >= 2 && overall[nick].wins <= 4 ? "ы" : "") + " · " + money.format(overall[nick].prize) + " ₽";
+        row.appendChild(name);
+        row.appendChild(value);
+        overallRanking.appendChild(row);
+      });
+      dialog.appendChild(overallRanking);
       var listTitle = document.createElement("h3");
       listTitle.className = "home-tournament-history-dialog__section-title";
       listTitle.textContent = "Топ‑3 по датам";
