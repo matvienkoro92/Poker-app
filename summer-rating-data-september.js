@@ -3637,4 +3637,197 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "24.09.2026": [
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 15205.000000000002,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FishKopcheny",
+          "place": 2,
+          "reward": 7600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Micro 200🏆 40K GTD",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 16642,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 19,
+          "reward": 79,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 25789,
+          "points": 0
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 7,
+          "reward": 1855.9999999999998,
+          "points": 0
+        },
+        {
+          "nick": "Freedom",
+          "place": 0,
+          "reward": 382,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Prushnik",
+          "place": 1,
+          "reward": 46990,
+          "points": 0
+        },
+        {
+          "nick": "Zeus",
+          "place": 5,
+          "reward": 12260,
+          "points": 0
+        },
+        {
+          "nick": "simba",
+          "place": 14,
+          "reward": 1490,
+          "points": 0
+        },
+        {
+          "nick": "kriak",
+          "place": 8,
+          "reward": 480,
+          "points": 0
+        },
+        {
+          "nick": "MoW3R",
+          "place": 22,
+          "reward": 450,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "zagrebnagreb",
+          "place": 3,
+          "reward": 640,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 4,
+          "reward": 225,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "EvgenDerby",
+          "place": 1,
+          "reward": 3662.51,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 4,
+          "reward": 1330,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 5,
+          "reward": 1068.75,
+          "points": 0
+        },
+        {
+          "nick": "PlayerA2BA07",
+          "place": 3,
+          "reward": 912.5,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 2,
+          "reward": 845,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 8,
+          "reward": 5528,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 54,
+          "reward": 250,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

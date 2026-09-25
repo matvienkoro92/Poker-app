@@ -332,6 +332,7 @@ async function parseOcrFile(file) {
   let title = normalizeName(titleTokens.map((token) => token.text).join(" ") || "TODO");
   if (/^Магия Тракториста/i.test(title)) title = "Магия Тракториста🚜";
   if (title === "OK🎰" && time === "17:00") title = "МОК🎰";
+  if (date === "24.09.2026" && time === "14:00" && /^Micro 200/i.test(title)) title = "Micro 200🏆 40K GTD";
 
   const feeToken = chooseClosest(
     tokens,
@@ -406,6 +407,8 @@ async function parseOcrFile(file) {
     if (time === "21:59" && /^HR\s+5000.*200K/i.test(title)) buyin = 5000;
   }
   if (blue) buyin = confirmedBlueTournamentBuyin(title) ?? buyin;
+  // IMG_9516: the 10K in the blue header is a starting stack, not an entry fee.
+  if (date === "24.09.2026" && blue && time === "16:00" && /^PLO4 🃏🃏🃏 20K 🏆$/.test(title)) buyin = 0;
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
