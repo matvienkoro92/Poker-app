@@ -1112,17 +1112,17 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* Friday history control and compact Last Longer counters on the felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-history {
   position: absolute !important;
-  left: 67% !important;
-  top: 8.3% !important;
-  width: 14% !important;
-  height: 7.2% !important;
+  left: 66.1% !important;
+  top: 7.5% !important;
+  width: 16.2% !important;
+  height: 8.8% !important;
   z-index: 7 !important;
   display: flex !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .15cqw;
-  padding: .45cqw !important;
+  gap: 0;
+  padding: .3cqw !important;
   border: 0 !important;
   border-radius: .5cqw !important;
   background: transparent !important;
@@ -1130,18 +1130,31 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   color: #ffe3a3 !important;
   font: 800 1.55cqw/1.05 Arial, sans-serif !important;
   text-align: center;
-  text-shadow: 0 1px 2px #000;
+  text-shadow: 0 1px 3px #000, 0 0 .4cqw #7d4a0c;
   transform: rotate(-6deg);
   cursor: pointer;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-history[hidden] { display: none !important; }
-#app.app.app--view-home .home-tournament-history__icon {
-  display: grid; place-items: center;
-  width: 3.2cqw; height: 3.2cqw;
-  border: .28cqw solid #ffe1a1; border-radius: 50%;
-  background: #2f261b; color: #fff1c8;
-  font: 900 2.4cqw/1 Georgia, serif;
-  box-shadow: 0 0 .8cqw #ffcf7044;
+#app.app.app--view-home .home-tournament-history::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1.1cqw -1.4cqw;
+  background: radial-gradient(ellipse at center, #101111 48%, #101111 70%, transparent 100%);
+  pointer-events: none;
+}
+#app.app.app--view-home .home-tournament-history__trophy {
+  display: block;
+  width: 7.3cqw;
+  height: 7.3cqw;
+  object-fit: contain;
+  filter: drop-shadow(0 0 .6cqw #ffbd47) drop-shadow(0 0 1.15cqw #f48a18a8);
+  pointer-events: none;
+}
+#app.app.app--view-home .home-tournament-history > span {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
 }
 #app.app.app--view-home .home-tournament-history:is(:hover,:focus-visible) { filter: brightness(1.18); outline: 2px solid #ffdc85 !important; outline-offset: 2px; }
 
