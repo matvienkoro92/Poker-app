@@ -224,8 +224,10 @@ main{padding-top:0}
 .replay .replay-bet{color:#ffa3a3}.replay .replay-allin{color:#ff861f;font-weight:700}
 
 .nonshowdown-outcome{display:block;margin:10px 0;line-height:1.5}
+.insight-grid--outcomes{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.insight-grid--outcomes>.insight-card:only-child{grid-column:1/-1}.insight-card--outcome{padding:12px}.insight-card--outcome h3{margin:0 0 10px;font-size:17px}.insight-outcome-metric{margin:0 0 8px}.insight-outcome-metric>span,.insight-outcome-count{display:block;color:#c4cfdf;font-size:12px;line-height:1.3}.insight-outcome-metric>strong{display:inline-block;margin-right:6px;color:#f1cc86;font-size:21px;line-height:1.2}.insight-outcome-metric>small{display:inline;color:#aab6cb;font-size:11px}.insight-card--outcome .insight-outcome-footnote{display:block;margin-top:7px;color:#aab6cb;font-size:11px;line-height:1.35}.insight-outcome-summary{display:block;min-height:0!important;padding:0!important;line-height:1.3!important}.insight-outcome-summary>strong{display:block;margin-bottom:10px;font-size:17px}.insight-outcome-summary>b{display:block;margin-top:4px;font-size:21px;line-height:1.2}.insight-outcome-detail{padding-top:10px;border-top:1px solid #344158}.insight-outcome-detail p{margin:5px 0;font-size:12px;line-height:1.4}.insight-outcome-detail small{font-size:11px}@media(max-width:400px){.insight-grid--outcomes{gap:6px}.insight-card--outcome{padding:9px}.insight-card--outcome h3,.insight-outcome-summary>strong{font-size:15px}.insight-outcome-metric>strong,.insight-outcome-summary>b{font-size:18px}.insight-outcome-metric>small{display:block}}
 
 .poker-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:14px 0}.poker-stat{display:flex;flex-direction:column;gap:6px;padding:12px;background:#0b1220;border-radius:8px}.poker-stat__values{display:flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap}.poker-stat__actual{font-size:24px;color:#e8bc68}.poker-stat__reference{color:#76dda7;opacity:.68;font-size:12px;font-weight:600}
+.poker-stat-recommendation{margin:10px 0 0;padding:10px 12px;border-left:3px solid #76dda7;border-radius:0 8px 8px 0;background:#17302780;color:#d6e9dd;font-size:13px;line-height:1.45}
 
 /* Keep the selected-hand counters readable on one line, including narrow phones. */
 .hand-count-summary{width:100%;white-space:nowrap;font-size:clamp(8px,2.65vw,14px);letter-spacing:-.025em;font-variant-numeric:tabular-nums}
@@ -266,3 +268,21 @@ main{padding-top:0}
   .date-picker>summary{font-size:12px}
   .date-popover{top:100%}
 }
+
+/* Fit the five primary filters on one line at phone widths. */
+@media(min-width:355px) and (max-width:600px){
+  .toolbar{grid-template-columns:minmax(75px,1.15fr) minmax(38px,.5fr) minmax(50px,.65fr) minmax(70px,1fr) minmax(78px,1.05fr);gap:4px;align-items:center}
+  .toolbar>.segments,.toolbar>.metric-toggle,.toolbar>.game-filter,.toolbar>.position-filter,.toolbar>.date-picker{grid-column:auto;min-width:0;width:100%;padding-top:0}
+  .toolbar>.segments{gap:0;padding:2px}
+  .toolbar>.segments button{min-width:0;min-height:40px;padding:4px 1px;font-size:11px}
+  .toolbar>.metric-toggle{min-height:44px;padding:2px;font-size:11px}
+  .toolbar>.game-filter select,.toolbar>.position-filter select,.toolbar>.date-picker>summary{height:44px;min-height:44px;border-radius:10px}
+  .toolbar>.game-filter select{padding:4px 15px 4px 5px;font-size:11px}
+  .toolbar>.position-filter select{padding:4px 15px 4px 5px;font-size:10px}
+  .toolbar>.position-filter::after{right:6px;width:6px;height:6px}
+  .toolbar>.date-picker>summary{gap:2px;padding:2px;font-size:10px}
+  .toolbar>.date-picker>summary svg{width:14px;height:14px}
+  .toolbar>.tournament-filter{grid-column:1/4}
+  .toolbar>.stack-filter{grid-column:4/6}
+}
+@media(min-width:355px) and (max-width:420px){.toolbar>.date-picker>summary svg{display:none}.toolbar>.date-picker>summary{font-size:9px}}

@@ -1,5 +1,12 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const {actions,summarize,aceHighAtShowdown,personalSummary}=require('../starting-hands/insights');
+const {actions,summarize,aceHighAtShowdown,personalSummary,statRecommendation}=require('../starting-hands/insights');
+
+test('stat recommendation prioritizes a supported preflop deviation and waits for enough hands',()=>{
+ const stats={betting:{vpip:{count:62,total:300},pfr:{count:45,total:300},threeBet:{count:27,total:409}}};
+ assert.match(statRecommendation(stats,300,'cash','NLH'),/PFR.*15%.*18–22%/);
+ assert.match(statRecommendation(stats,50,'cash','NLH'),/пока рано/);
+ assert.match(statRecommendation(stats,300,'mtt','NLH'),/без учёта стека/);
+});
 
 test('personal summary uses filtered counts and avoids strong claims from a small sample',()=>{
  const stats={betting:{vpip:{count:18,total:60},pfr:{count:10,total:60}},showdown:{eligible:30,count:12,profitable:7},collections:{bigLoss:[{}]}};

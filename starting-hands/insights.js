@@ -123,5 +123,26 @@ function summarize(hands,signals={},metric='bb'){
   else if(loaded<20&&lines.length<3)lines.push('Истории действий пока мало для наблюдений по решениям.');
   return {coverage:'Выбрано '+total+' раздач · история действий: '+loaded+' / '+total+(loaded<total?' · показатели по действиям ещё могут измениться.':'.'),lines:lines.slice(0,3)};
  }
- return {actions,summarize,evDifference,aceHighAtShowdown,personalSummary};
+ function statRecommendation(stats,loadedHands,mode,game){
+  if(mode!=='cash'||game!=='NLH')return 'Что подтянуть: сравнивайте VPIP и PFR по позициям. Для этого формата общая «оптимальная» частота без учёта стека и состава стола не подходит.';
+  const loaded=Math.max(0,Number(loadedHands)||0),betting=stats?.betting||{};
+  if(loaded<300||betting.vpip?.total<300||betting.pfr?.total<300)return 'Что подтянуть: пока рано выбирать один стат — нужна выборка хотя бы из 300 раздач с историей действий.';
+  const candidates=[
+   ['vpip','VPIP',22,28,300,300,'Проверьте, не пропускаете ли выгодные открытия в поздних позициях.','Проверьте, не входите ли со слишком слабыми руками вне позиции.'],
+   ['pfr','PFR',18,22,300,300,'Проверьте диапазоны открытия: возможно, часть подходящих рук разыгрывается коллом вместо рейза.','Проверьте, не открываете ли слишком широкий диапазон из ранних позиций.'],
+   ['threeBet','3-бет',6,10,1000,100,'Проверьте, не упускаете ли подходящие 3-беты против открытий соперников.','Проверьте, не переставляете ли слишком часто без учёта позиции и диапазона соперника.'],
+   ['foldThreeBet','Фолд на 3-бет',40,50,1500,100,'Проверьте, не защищаете ли открытия слишком широко против 3-бетов.','Проверьте, не сбрасываете ли слишком часто после собственного открытия.'],
+   ['wwsf','WWSF',45,53,8000,500,'Проверьте, не сдаёте ли слишком много банков после флопа.','Проверьте, не продолжаете ли слишком агрессивно со слабыми руками.'],
+   ['wtsd','WTSD',27,32,8000,500,'Проверьте, не сбрасываете ли слишком часто до вскрытия.','Проверьте, не доходите ли до вскрытия со слишком слабыми руками.']
+  ];
+  const deviations=candidates.flatMap(([key,title,low,high,minHands,minOpportunities,below,above])=>{
+   const stat=betting[key];if(loaded<minHands||!stat||stat.total<minOpportunities)return [];
+   const rate=stat.count/stat.total*100,distance=rate<low?low-rate:rate>high?rate-high:0;
+   return distance?[{title,rate,low,high,reason:rate<low?below:above,score:distance/((high-low)||1)}]:[];
+  }).sort((a,b)=>b.score-a.score);
+  if(!deviations.length)return 'Что подтянуть: явного отклонения в показателях с достаточной выборкой нет. Следующий шаг — смотреть решения по позициям и конкретным раздачам.';
+  const best=deviations[0],format=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);
+  return 'Что подтянуть: '+best.title+' — '+format(best.rate)+'% при ориентире '+best.low+'–'+best.high+'%. '+best.reason;
+ }
+ return {actions,summarize,evDifference,aceHighAtShowdown,personalSummary,statRecommendation};
 });
