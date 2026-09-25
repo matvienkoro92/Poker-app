@@ -485,8 +485,8 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-no-purple-v1.webp');
-  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-no-purple-v1.webp') 1x, url('./assets/home-tournament-cooler-no-purple-v1-hd.webp') 2x);
+  --home-tournament-scene: url('./assets/home-tournament-cooler-no-spade-v2.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-no-spade-v2.webp') 1x, url('./assets/home-tournament-cooler-no-spade-v2-hd.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
@@ -1109,34 +1109,35 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* Friday history control and compact Last Longer counters on the felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-history {
   position: absolute !important;
-  left: 68% !important;
-  top: 5% !important;
-  width: 17% !important;
-  height: 7% !important;
+  left: 67% !important;
+  top: 8.3% !important;
+  width: 14% !important;
+  height: 7.2% !important;
   z-index: 7 !important;
   display: flex !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .1cqw;
-  padding: .3cqw !important;
+  gap: .15cqw;
+  padding: .45cqw !important;
   border: 0 !important;
   border-radius: .5cqw !important;
   background: transparent !important;
   box-shadow: none !important;
   color: #ffe3a3 !important;
-  font: 800 1.8cqw/1.05 Arial, sans-serif !important;
+  font: 800 1.55cqw/1.05 Arial, sans-serif !important;
   text-align: center;
   text-shadow: 0 1px 2px #000;
+  transform: rotate(-6deg);
   cursor: pointer;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-history[hidden] { display: none !important; }
 #app.app.app--view-home .home-tournament-history__icon {
   display: grid; place-items: center;
-  width: 4cqw; height: 4cqw;
-  border: .35cqw solid #ffe1a1; border-radius: 50%;
+  width: 3.2cqw; height: 3.2cqw;
+  border: .28cqw solid #ffe1a1; border-radius: 50%;
   background: #2f261b; color: #fff1c8;
-  font: 900 3cqw/1 Georgia, serif;
+  font: 900 2.4cqw/1 Georgia, serif;
   box-shadow: 0 0 .8cqw #ffcf7044;
 }
 #app.app.app--view-home .home-tournament-history:is(:hover,:focus-visible) { filter: brightness(1.18); outline: 2px solid #ffdc85 !important; outline-offset: 2px; }
