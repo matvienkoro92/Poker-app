@@ -485,8 +485,8 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-holding-longer-glove-v5.webp');
-  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-holding-longer-glove-v5.webp') 1x, url('./assets/home-tournament-cooler-holding-longer-glove-v5-2x.webp') 2x);
+  --home-tournament-scene: url('./assets/home-tournament-cooler-clean-table-v6.webp');
+  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-clean-table-v6.webp') 1x, url('./assets/home-tournament-cooler-clean-table-v6-2x.webp') 2x);
 }
 #app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus__glove {
   display: none !important;
@@ -1115,7 +1115,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* Friday history control and compact Last Longer counters on the felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-history {
   position: absolute !important;
-  left: 66.1% !important;
+  left: 66.6% !important;
   top: 7.5% !important;
   width: 16.2% !important;
   height: 8.8% !important;
@@ -1148,8 +1148,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .home-tournament-history__trophy {
   display: block;
-  width: 7.3cqw;
-  height: 7.3cqw;
+  width: 8.4cqw;
+  height: 8.4cqw;
+  margin-inline: auto;
   object-fit: contain;
   filter: drop-shadow(0 0 .6cqw #ffbd47) drop-shadow(0 0 1.15cqw #f48a18a8);
   pointer-events: none;
