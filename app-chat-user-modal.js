@@ -3499,8 +3499,8 @@ if (chatUserModalEl) {
           modalLevelText.hidden = false;
         }
         syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
-        if(data&&data.ok&&data.reviewActivity&&modalLevelText){
-          chatUserModalEl.querySelector('[data-review-activity-profile]')?.remove();
+        chatUserModalEl.querySelector('[data-review-activity-profile]')?.remove();
+        if(openingSelfProfile&&data&&data.ok&&data.reviewActivity&&modalLevelText){
           var activityInfo=document.createElement('p');activityInfo.dataset.reviewActivityProfile='';activityInfo.className='profile-review-activity';
           activityInfo.textContent='За активность в разборах: '+Number(data.reviewActivity.bonusEarned||0).toLocaleString('ru-RU')+' ₽ · круток заработано: '+Number(data.reviewActivity.spinsEarned||0);
           activityInfo.title='Всего начислено за публикации и выигрыши круток за активность. Это не остаток баланса.';
