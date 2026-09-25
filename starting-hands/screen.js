@@ -48,8 +48,14 @@ function startHistory(payload) {
     currentHistoryTab=tab;
     document.querySelectorAll('[data-history-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.historyTab===tab)));
     document.querySelectorAll('[data-history-panel]').forEach(p=>p.hidden=!p.dataset.historyPanel.split(' ').includes(tab));
+    syncSearchVisibility();
     applyHandBreakdown();
     if(tab==='review'||tab==='overview')render();
+  }
+  function syncSearchVisibility(){
+    const awaitingPlayer=currentHistoryTab==='search'&&!document.getElementById('opponent-search').value.trim();
+    document.querySelector('.workspace').hidden=awaitingPlayer||!['hands','search'].includes(currentHistoryTab);
+    document.querySelector('.history-count').hidden=awaitingPlayer;
   }
   document.querySelectorAll('[data-history-tab]').forEach(b=>b.addEventListener('click',()=>showHistoryTab(b.dataset.historyTab)));
   document.querySelectorAll('[data-hand-breakdown]').forEach(button=>button.addEventListener('click',()=>{handBreakdown=handBreakdown===button.dataset.handBreakdown?'':button.dataset.handBreakdown;applyHandBreakdown();button.focus();}));
@@ -301,8 +307,8 @@ function startHistory(payload) {
     for(const v of ticks){
       node('line',{x1:plotLeft,x2:plotRight,y1:y(v),y2:y(v),stroke:'#273449'});
       const boxHeight=axisFont+12,boxY=Math.max(plotTop,Math.min(plotBottom-boxHeight,y(v)-boxHeight/2));
-      node('rect',{'data-profit-axis':'left',x:plotLeft+8,y:boxY,width:Math.ceil(axisWidth)+18,height:boxHeight,rx:7,fill:'#0b1220','fill-opacity':.92});
-      node('text',{'data-profit-axis':'left',x:plotLeft+17,y:boxY+boxHeight/2,'dominant-baseline':'middle',fill:v===0?'#e4eaf1':'#e8bc68','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));
+      if(v!==0)node('rect',{'data-profit-axis':'left',x:plotLeft+8,y:boxY,width:Math.ceil(axisWidth)+18,height:boxHeight,rx:7,fill:'#0b1220','fill-opacity':.92});
+      node('text',{'data-profit-axis':'left',x:plotLeft+17,y:boxY+boxHeight/2,'dominant-baseline':'middle',fill:v===0?'#e4eaf1':'#e8bc68',stroke:v===0?'#0b1220':'none','stroke-width':v===0?3:0,'paint-order':'stroke','font-size':axisFont,'font-weight':v===0?600:400},compactSigned(v));
     }
     for(const axisX of [plotLeft,plotRight])node('line',{x1:axisX,x2:axisX,y1:plotTop,y2:plotBottom,stroke:'#e8bc68','stroke-width':2});
     node('line',{x1:plotLeft,x2:plotRight,y1:plotBottom,y2:plotBottom,stroke:'#8dbfff','stroke-width':2});
@@ -425,7 +431,10 @@ function startHistory(payload) {
       add(cell,'small',stat.count+' / '+stat.total+' · '+description);
     }
     if(cashNlh)add(pokerStats,'small','Зелёным — ориентиры для NLH кеша 6-max, а не личная норма. * Контбет зависит от позиции и типа банка; фолд на контбет — также от размера ставки.');
-    add(pokerStats,'p',window.PokerHandInsights.statRecommendation(stats,hands.length-missing.length,mode,game),'poker-stat-recommendation');
+    const advice=window.PokerHandInsights.statRecommendation(stats,hands.length-missing.length,mode,game);
+    const adviceBox=add(pokerStats,'div',null,'poker-stat-recommendation');
+    if(advice.focus.length){add(adviceBox,'strong','Что подтянуть');const list=add(adviceBox,'ul');for(const line of advice.focus)add(list,'li',line);}
+    for(const line of advice.other)add(adviceBox,'p',line);
     const cards=add(statsPanel,'div',null,'insight-grid insight-grid--outcomes');
     const showdown=add(cards,'div',null,'insight-card insight-card--outcome');add(showdown,'h3','Вскрытия');
     const sd=stats.showdown;
@@ -506,8 +515,9 @@ function startHistory(payload) {
     const from=appliedFrom,to=appliedTo;
     if(from&&to&&from>to)return;
     const opponentQuery=$('opponent-search').value.trim(),opponentIds=matchingOpponentIds(opponentQuery);
-    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,game,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',handQuery:$('hand-search').value,opponentQuery,opponentIds:[...opponentIds],cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
-    document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean($('hand-search').value.trim()||$('opponent-search').value.trim()));
+    const data = core.aggregate(bulk.rows,{playerId:sample.playerId,mode,game,position:positionByMode[mode],stackBand:mode==='mtt'?stackBand:'',tournamentId:mode==='mtt'?tournamentId:'',opponentQuery,opponentIds:[...opponentIds],cashUnit:'TABLE_CHIP',from:from?new Date(from+'T00:00:00+03:00').toISOString():undefined,to:to?new Date(Date.parse(to+'T00:00:00+03:00')+86400000).toISOString():undefined});
+    document.querySelector('[data-history-tab=search]').classList.toggle('has-query',Boolean(opponentQuery));
+    syncSearchVisibility();
     renderProfitChart(data);
     if(!document.querySelector('.profit-panel').hidden && !document.hidden) {
       parent.postMessage({type:'starting-hands-chart-viewed',playerId:activeHistoryPlayerId,version:activeHistoryVersion,handIds:bulk.rows.map(h=>String(h.handId))},location.origin);
@@ -523,7 +533,7 @@ function startHistory(payload) {
       const title=document.createElement('strong'),amount=document.createElement('span'),count=document.createElement('small');
       title.textContent=positionLabel(p.position);amount.textContent=signed(value(p))+' '+unit();amount.className=value(p)>0?'positive':value(p)<0?'negative':'';count.textContent=p.count+' раздач'+(p.count&&p.count<100?' · мало данных':'');b.append(title,amount,count);return b;
     }));
-    const searching=!!($('hand-search').value.trim() || $('opponent-search').value.trim());
+    const searching=!!opponentQuery;
     const allHands = game!=='NLH' || searching || !selected;
     const selectedCell = allHands ? {label:searching?'Найденные раздачи':positionByMode[mode]?'Все руки · '+positionLabel(positionByMode[mode]):'Все руки',count:data.count,resultMinor:data.resultMinor,bb:data.bb,bb100:data.bb100,
       wins:data.cells.reduce((n,c)=>n+c.wins,0),losses:data.cells.reduce((n,c)=>n+c.losses,0),even:data.cells.reduce((n,c)=>n+c.even,0),
@@ -623,7 +633,10 @@ function startHistory(payload) {
     const detailLabel=game==='NLH'?cell.label:game+' · все руки';
     $('detail').innerHTML='<h2 id="detail-title" class="hand-title">'+detailLabel+'<span>'+(allHands?'По текущим фильтрам':cell.label.length===2?'Карманная пара':cell.label.endsWith('s')?'Одномастная рука':'Разномастная рука')+'</span></h2>';
     if(!cell.count){
-      $('detail').insertAdjacentHTML('beforeend','<div class="empty-state"><strong>Нет подтверждённых раздач</strong>'+(mode!=='sng'?'В загруженной выборке эта рука не встречалась.':'История этого формата пока не загружена.')+' Нет данных — не значит результат 0.</div>');return;
+      const empty=document.createElement('div');empty.className='empty-state';
+      const title=document.createElement('strong');title.textContent=searching?'По запросу ничего не найдено':'Нет подтверждённых раздач';
+      empty.append(title,document.createTextNode(searching?'Проверьте ID игрока Poker21, период, формат и позицию. Здесь показываются только раздачи с совместной игрой после флопа.':mode!=='sng'?'В загруженной выборке эта рука не встречалась. Нет данных — не значит результат 0.':'История этого формата пока не загружена. Нет данных — не значит результат 0.'));
+      $('detail').append(empty);return;
     }
     const visibleHands=cell.hands.filter(h=>h.resultMinor>0?outcomeFilters.positive:h.resultMinor<0?outcomeFilters.negative:outcomeFilters.positive&&outcomeFilters.negative);
     visibleHands.sort((a,b)=>Math.abs(metric==='resultMinor'?b.resultMinor:b.bb)-Math.abs(metric==='resultMinor'?a.resultMinor:a.bb)||Date.parse(b.playedAt)-Date.parse(a.playedAt)||a.handId.localeCompare(b.handId));
@@ -659,8 +672,7 @@ function startHistory(payload) {
     if(from&&to&&from>to){$('date-status').textContent='Дата окончания раньше начала';return;}
     appliedFrom=from;appliedTo=to;render();$('date-status').textContent='';
   }));
-  $('hand-search').addEventListener('input',()=>{showHistoryTab('search');render();});
-  $('opponent-search').addEventListener('input',()=>{showHistoryTab('search');scheduleOpponentSearch();});
+  $('opponent-search').addEventListener('input',()=>{showHistoryTab('search');render();scheduleOpponentSearch();});
   document.querySelector('.profit-legend').addEventListener('change',event=>{
     const toggle=event.target.closest('[data-profit-line]');if(!toggle)return;
     render();

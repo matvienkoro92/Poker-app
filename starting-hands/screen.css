@@ -153,6 +153,7 @@
 .history-navigation [data-history-tab="search"].has-query{color:#f6c951}
 .history-search-panel{margin-top:14px}
 .history-search-panel .history-filters{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+.history-player-search{display:grid;gap:7px;width:min(100%,680px);color:#e5eaf2;font-weight:700}.history-player-search input{width:100%;min-height:46px;padding:10px 14px;border:1px solid #53647e;border-radius:10px;background:#111827;color:#fff;font:inherit;font-weight:400}.history-search-id-hint{width:min(100%,680px);margin:10px 0;padding:10px 13px;border:1px solid #d9ad5e80;border-left:4px solid #f6c951;border-radius:9px;background:#35281966;color:#f3deb0;font-size:13px;line-height:1.45}.history-search-id-hint strong{color:#ffe196}
 
 /* Keep the field prompt separate from the native “all positions” option. */
 .position-filter{position:relative;min-width:0;width:100%}
@@ -228,6 +229,7 @@ main{padding-top:0}
 
 .poker-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:14px 0}.poker-stat{display:flex;flex-direction:column;gap:6px;padding:12px;background:#0b1220;border-radius:8px}.poker-stat__values{display:flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap}.poker-stat__actual{font-size:24px;color:#e8bc68}.poker-stat__reference{color:#76dda7;opacity:.68;font-size:12px;font-weight:600}
 .poker-stat-recommendation{margin:10px 0 0;padding:10px 12px;border-left:3px solid #76dda7;border-radius:0 8px 8px 0;background:#17302780;color:#d6e9dd;font-size:13px;line-height:1.45}
+.poker-stat-recommendation>strong{display:block;margin-bottom:6px;color:#9bedbd}.poker-stat-recommendation ul{margin:0 0 7px;padding-left:18px}.poker-stat-recommendation li+li{margin-top:5px}.poker-stat-recommendation p{margin:6px 0 0;color:#b9cfc1}
 
 /* Keep the selected-hand counters readable on one line, including narrow phones. */
 .hand-count-summary{width:100%;white-space:nowrap;font-size:clamp(8px,2.65vw,14px);letter-spacing:-.025em;font-variant-numeric:tabular-nums}

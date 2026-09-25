@@ -124,9 +124,9 @@ function summarize(hands,signals={},metric='bb'){
   return {coverage:'Выбрано '+total+' раздач · история действий: '+loaded+' / '+total+(loaded<total?' · показатели по действиям ещё могут измениться.':'.'),lines:lines.slice(0,3)};
  }
  function statRecommendation(stats,loadedHands,mode,game){
-  if(mode!=='cash'||game!=='NLH')return 'Что подтянуть: сравнивайте VPIP и PFR по позициям. Для этого формата общая «оптимальная» частота без учёта стека и состава стола не подходит.';
+  if(mode!=='cash'||game!=='NLH')return {focus:[],other:['Сравнивайте VPIP и PFR по позициям: для этого формата общая «оптимальная» частота без учёта стека и состава стола не подходит.']};
   const loaded=Math.max(0,Number(loadedHands)||0),betting=stats?.betting||{};
-  if(loaded<300||betting.vpip?.total<300||betting.pfr?.total<300)return 'Что подтянуть: пока рано выбирать один стат — нужна выборка хотя бы из 300 раздач с историей действий.';
+  if(loaded<300||betting.vpip?.total<300||betting.pfr?.total<300)return {focus:[],other:['Пока рано выбирать стат для улучшения: нужна выборка хотя бы из 300 раздач с историей действий.']};
   const candidates=[
    ['vpip','VPIP',22,28,300,300,'Проверьте, не пропускаете ли выгодные открытия в поздних позициях.','Проверьте, не входите ли со слишком слабыми руками вне позиции.'],
    ['pfr','PFR',18,22,300,300,'Проверьте диапазоны открытия: возможно, часть подходящих рук разыгрывается коллом вместо рейза.','Проверьте, не открываете ли слишком широкий диапазон из ранних позиций.'],
@@ -135,14 +135,22 @@ function summarize(hands,signals={},metric='bb'){
    ['wwsf','WWSF',45,53,8000,500,'Проверьте, не сдаёте ли слишком много банков после флопа.','Проверьте, не продолжаете ли слишком агрессивно со слабыми руками.'],
    ['wtsd','WTSD',27,32,8000,500,'Проверьте, не сбрасываете ли слишком часто до вскрытия.','Проверьте, не доходите ли до вскрытия со слишком слабыми руками.']
   ];
+  const insufficient=[],inRange=[];
+  const format=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);
   const deviations=candidates.flatMap(([key,title,low,high,minHands,minOpportunities,below,above])=>{
-   const stat=betting[key];if(loaded<minHands||!stat||stat.total<minOpportunities)return [];
+   const stat=betting[key];
+   if(loaded<minHands||!stat||stat.total<minOpportunities){insufficient.push(title);return [];}
    const rate=stat.count/stat.total*100,distance=rate<low?low-rate:rate>high?rate-high:0;
-   return distance?[{title,rate,low,high,reason:rate<low?below:above,score:distance/((high-low)||1)}]:[];
+   if(!distance){inRange.push(title+' '+format(rate)+'%');return [];}
+   return [{title,rate,low,high,reason:rate<low?below:above,score:distance/((high-low)||1)}];
   }).sort((a,b)=>b.score-a.score);
-  if(!deviations.length)return 'Что подтянуть: явного отклонения в показателях с достаточной выборкой нет. Следующий шаг — смотреть решения по позициям и конкретным раздачам.';
-  const best=deviations[0],format=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(n);
-  return 'Что подтянуть: '+best.title+' — '+format(best.rate)+'% при ориентире '+best.low+'–'+best.high+'%. '+best.reason;
+  const focus=deviations.map(item=>item.title+' — '+format(item.rate)+'% при ориентире '+item.low+'–'+item.high+'%. '+item.reason);
+  const other=[];
+  if(!focus.length)other.push('Среди показателей с достаточной выборкой явных отклонений нет; проверьте решения по позициям и отдельные раздачи.');
+  if(inRange.length)other.push('В пределах ориентира: '+inRange.join(', ')+'.');
+  if(insufficient.length)other.push('Пока мало данных для вывода: '+insufficient.join(', ')+'.');
+  other.push('Контбет и фолд на него оценивайте по позиции, типу банка и размеру ставки: общий процент сам по себе не показывает ошибку.');
+  return {focus,other};
  }
  return {actions,summarize,evDifference,aceHighAtShowdown,personalSummary,statRecommendation};
 });
