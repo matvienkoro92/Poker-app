@@ -1786,6 +1786,14 @@ function initProfileFriends() {
     renderIncomingNotice(incoming.length);
     renderFriendsPreview(friends);
     var chunks = [];
+    chunks.push(renderSection("Входящие заявки", incoming, "incoming", function (row) {
+      return renderRow(
+        row,
+        "incoming",
+        '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--accept">Принять</button>' +
+          '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--reject">Отклонить</button>'
+      );
+    }));
     chunks.push(renderSection("Друзья", sortFriendsForModal(friends), "friends", function (row) {
       var removeHtml = row && row.defaultFriend
         ? ""
@@ -1795,14 +1803,6 @@ function initProfileFriends() {
         "friends",
         '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile">Открыть профиль</button>' +
           removeHtml
-      );
-    }));
-    chunks.push(renderSection("Входящие заявки", incoming, "incoming", function (row) {
-      return renderRow(
-        row,
-        "incoming",
-        '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--accept">Принять</button>' +
-          '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--reject">Отклонить</button>'
       );
     }));
     chunks.push(renderSection("Отправленные", outgoing, "outgoing", function (row) {
@@ -1828,12 +1828,7 @@ function initProfileFriends() {
     wireActionButtons();
     if (focusIncomingOnOpen) {
       focusIncomingOnOpen = false;
-      setTimeout(function () {
-        var incomingSection = listEl.querySelector('[data-friends-section="incoming"]');
-        if (incomingSection && typeof incomingSection.scrollIntoView === "function") {
-          incomingSection.scrollIntoView({ block: "start", behavior: "auto" });
-        }
-      }, 0);
+      listEl.scrollTop = 0;
     }
   }
 
