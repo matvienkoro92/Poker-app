@@ -923,8 +923,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
-  --home-tournament-scene:url('./assets/home-tournament-shtukatur-grail-v7.webp');
-  --home-tournament-scene:image-set(url('./assets/home-tournament-shtukatur-grail-v7.webp') 1x, url('./assets/home-tournament-shtukatur-grail-v7-2x.webp') 2x);
+  --home-tournament-scene:url('./assets/home-tournament-shtukatur-poker-table-v8.webp');
+  --home-tournament-scene:image-set(url('./assets/home-tournament-shtukatur-poker-table-v8.webp') 1x, url('./assets/home-tournament-shtukatur-poker-table-v8-2x.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
@@ -1101,6 +1101,10 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   display:none !important;
   content:none !important;
 }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {
+  display:block!important;
+  content:""!important;
+}
 
 /* Tone down the baked-in bright rails on the other tournament tables. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-table-rim-dimmer {
@@ -1117,6 +1121,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   --home-tournament-scene:url('./assets/home-tournament-redrocket-matte-table-v3.png');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-rim-dimmer {
+  display:none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-rim-dimmer {
   display:none;
 }
 
