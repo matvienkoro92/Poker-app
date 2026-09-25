@@ -1238,14 +1238,9 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 .home-tournament-history-dialog > p { margin: 0 0 16px; font: 14px/1.45 Arial, sans-serif; color: #dcccae; }
 .home-tournament-history-dialog__close { position: absolute; top: 9px; right: 10px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #332718; color: #fff0d2; font: 28px/1 Arial, sans-serif; cursor: pointer; }
 .home-tournament-history-dialog__ranking { margin-bottom: 16px; padding: 12px; border: 1px solid #98723b; border-radius: 12px; background: #212019; }
-.home-tournament-history-dialog__ranking h3,.home-tournament-history-dialog__section-title { margin: 0 0 9px; color: #ffcf79; font: 800 16px Arial, sans-serif; }
+.home-tournament-history-dialog__ranking h3 { margin: 0 0 9px; color: #ffcf79; font: 800 16px Arial, sans-serif; }
 .home-tournament-history-dialog__empty { margin: 5px 0 0; color: #dcccae; font: 13px/1.4 Arial, sans-serif; }
 .home-tournament-history-dialog__rank-row { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-top: 1px solid #695133; font: 13px/1.25 Arial, sans-serif; }
 .home-tournament-history-dialog__rank-row > span { min-width: 0; overflow-wrap: anywhere; }
 .home-tournament-history-dialog__rank-row strong { flex: none; color: #ffe2a1; font-size: 12px; }
-.home-tournament-history-dialog__list { display: grid; gap: 10px; padding-right: 3px; }
-.home-tournament-history-dialog__list section { padding: 10px 12px; border: 1px solid #685035; border-radius: 10px; background: #1b271f; }
-.home-tournament-history-dialog__list h3 { margin: 0 0 7px; color: #ffcf79; font: 800 14px Arial, sans-serif; }
-.home-tournament-history-dialog__row { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font: 14px/1.25 Arial, sans-serif; }
-.home-tournament-history-dialog__row strong { flex: none; color: #ffe5a8; }
 .home-tournament-history-dialog .home-tournament-history-dialog__note { margin: 13px 0 0; font-size: 12px; color: #c8baa4; }

@@ -78,22 +78,6 @@
     }
     appendRanking(dialog, "Победители · по числу первых мест", sortedNames(winners), winners, money);
     appendRanking(dialog, "Общий рейтинг топ‑3 · победы и призовые", sortedNames(overall), overall, money);
-    dialog.appendChild(textElement("h3", "home-tournament-history-dialog__section-title", "Топ‑3 по датам"));
-    var list = document.createElement("div");
-    list.className = "home-tournament-history-dialog__list";
-    results.slice().reverse().forEach(function (entry) {
-      var section = document.createElement("section");
-      section.appendChild(textElement("h3", "", entry[0]));
-      entry[1].forEach(function (player) {
-        var row = document.createElement("div");
-        row.className = "home-tournament-history-dialog__row";
-        row.appendChild(textElement("span", "", player[0] + ". " + player[1]));
-        row.appendChild(textElement("strong", "", money.format(player[2]) + " ₽"));
-        section.appendChild(row);
-      });
-      list.appendChild(section);
-    });
-    dialog.appendChild(list);
     dialog.appendChild(textElement("p", "home-tournament-history-dialog__note", "Показаны только результаты игроков клуба, сохранённые в приложении. Отсутствующие места в топ‑3 неизвестны."));
     dialog.addEventListener("click", function (event) { if (event.target === dialog) dialog.close(); });
     document.body.appendChild(dialog);
