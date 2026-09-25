@@ -2358,21 +2358,27 @@ function hallFishStatusFishSrc(level) {
 }
 
 function hallFishEnsureProfileModal() {
-  if (typeof window.openChatUserModalById === "function") return true;
+  if (typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true) return true;
   if (typeof initChatUserModals !== "function") return false;
+  if (!document.getElementById("chatUserModal")) return false;
   initChatUserModals({
     base: hallFishGetApiBase(),
     tg: window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null,
   });
-  return typeof window.openChatUserModalById === "function";
+  return typeof window.openChatUserModalById === "function" && window.openChatUserModalById.__pokerFallback !== true;
 }
 
 function hallFishEnsureProfileModalReady() {
-  if (hallFishEnsureProfileModal()) return Promise.resolve(true);
-  if (typeof window.pokerEnsureScriptDomains !== "function") return Promise.resolve(false);
-  return Promise.resolve(window.pokerEnsureScriptDomains(["chat"]))
-    .then(function () { return hallFishEnsureProfileModal(); })
-    .catch(function () { return hallFishEnsureProfileModal(); });
+  if (typeof window.pokerEnsureLazyDomains !== "function" ||
+      typeof window.pokerEnsureGlobalModalsHtml !== "function") return Promise.resolve(false);
+  return Promise.all([
+    Promise.resolve(window.pokerEnsureLazyDomains(["chat"])),
+    Promise.resolve(window.pokerEnsureGlobalModalsHtml()),
+  ]).then(function () {
+    return hallFishEnsureProfileModal();
+  }).catch(function () {
+    return false;
+  });
 }
 
 var hallTop2026ProfileLookupCache = {};
