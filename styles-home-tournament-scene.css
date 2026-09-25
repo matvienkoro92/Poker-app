@@ -976,8 +976,11 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   z-index:5!important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {
-  mask:url('./assets/home-tournament-head-mask.svg?v=2') center/100% 100% no-repeat!important;
-  -webkit-mask:url('./assets/home-tournament-head-mask.svg?v=2') center/100% 100% no-repeat!important;
+  mask:url('./assets/home-tournament-shtukatur-head-front-mask.svg') center/100% 100% no-repeat!important;
+  -webkit-mask:url('./assets/home-tournament-shtukatur-head-front-mask.svg') center/100% 100% no-repeat!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] #homeTournamentWeekList .home-tournament-trophy__prize {
+  left: 21% !important;
 }
 
 /* Sunday uses the same illustrated bonus row as the other tables.
