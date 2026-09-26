@@ -3505,12 +3505,6 @@ if (chatUserModalEl) {
         }
         syncChatUserModalStatusXp(data && data.statusPoints != null ? data.statusPoints : null);
         chatUserModalEl.querySelector('[data-review-activity-profile]')?.remove();
-        if(openingSelfProfile&&data&&data.ok&&data.reviewActivity&&modalLevelText){
-          var activityInfo=document.createElement('p');activityInfo.dataset.reviewActivityProfile='';activityInfo.className='profile-review-activity';
-          activityInfo.textContent='За активность в разборах: '+Number(data.reviewActivity.bonusEarned||0).toLocaleString('ru-RU')+' ₽ · круток заработано: '+Number(data.reviewActivity.spinsEarned||0);
-          activityInfo.title='Всего начислено за публикации и выигрыши круток за активность. Это не остаток баланса.';
-          modalLevelText.after(activityInfo);
-        }
         if (modalStatusScale && data && data.statusValue != null) modalStatusScale.style.setProperty("--status-value", String(data.statusValue));
         var ratingNick = data && data.ok ? chatUserModalRatingNickFromData(data) : "";
         ratingNick = ratingNick || fallbackRatingNick;

@@ -603,7 +603,6 @@
     var extraBtn = $("dailyPokerExtraBtn");
     if (balanceEl) {
       balanceEl.innerHTML = buildDailyPokerBalanceHtml(data.bonusBalance);
-      if(data.activity)balanceEl.insertAdjacentHTML('beforeend','<small class="daily-poker-activity-summary">За активность заработано: '+Number(data.activity.bonusEarned||0).toLocaleString('ru-RU')+' ₽ · круток осталось: '+Number(data.activity.spinsAvailable||0)+'</small>');
     }
     if (battleBonusEl && Object.prototype.hasOwnProperty.call(data, "bonusBalance")) {
       battleBonusEl.textContent = formatCompactAmount(data.bonusBalance) + " баллов";
