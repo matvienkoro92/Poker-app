@@ -1620,7 +1620,7 @@ function initProfileFriends() {
     if (!rows.length) return "";
     return (
       '<section class="friends-list-modal__section" data-friends-section="' + esc(section) + '">' +
-      '<h4 class="friends-list-modal__section-title">' + esc(title) + "</h4>" +
+      (section === "friends" ? "" : '<h4 class="friends-list-modal__section-title">' + esc(title) + "</h4>") +
       rows.map(function (row) { return renderer(row); }).join("") +
       "</section>"
     );
@@ -1797,11 +1797,11 @@ function initProfileFriends() {
     chunks.push(renderSection("Друзья", sortFriendsForModal(friends), "friends", function (row) {
       var removeHtml = row && row.defaultFriend
         ? ""
-        : '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--remove" data-delete-kind="friends">Удалить из друзей</button>';
+        : '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--remove" data-delete-kind="friends" aria-label="Удалить из друзей">Удалить</button>';
       return renderRow(
         row,
         "friends",
-        '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile">Открыть профиль</button>' +
+        '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile" aria-label="Открыть профиль">Открыть</button>' +
           removeHtml
       );
     }));

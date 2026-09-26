@@ -10600,3 +10600,13 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 .download-chat-tabs>button{flex:1;min-height:42px;border:0;border-radius:12px;background:transparent;color:#e9d6a4;font:inherit;font-weight:700;cursor:pointer}
 .download-chat-tabs>button[aria-current="page"]{background:linear-gradient(#ffe1a0,#d9a23a);color:#211907}
 .bottom-nav__item[data-club-news-open] .bottom-nav__label{white-space:normal;line-height:1.1}
+
+.profile-friend-news-card{margin:12px 0 20px}
+.profile-friend-news-card[hidden]{display:none!important}
+.profile-friend-news-card>button{position:relative;display:flex;align-items:center;min-height:160px;width:100%;box-sizing:border-box;overflow:hidden;padding:20px 48% 20px 22px;border:2px solid #6e60464d;border-radius:24px;background:radial-gradient(ellipse at 85% 50%,#82401729,transparent 60%),linear-gradient(120deg,#2a241d,#101214);color:#f5dda4;text-align:left;font:inherit;cursor:pointer}
+.profile-friend-news-card__copy{position:relative;z-index:1;display:grid;gap:10px}
+.profile-friend-news-card__copy strong{font-size:clamp(18px,3vw,27px);font-weight:850}
+.profile-friend-news-card__copy b{font-size:clamp(16px,2.5vw,23px);color:#f0eeeb}
+.profile-friend-news-card__copy small{font-size:13px;color:#aeb4bd;line-height:1.4}
+.profile-friend-news-card img{position:absolute;right:0;bottom:0;width:53%;height:100%;object-fit:contain;object-position:right bottom;pointer-events:none}
+.profile-friend-news-card>button:focus-visible{outline:2px solid #ffc875;outline-offset:3px}

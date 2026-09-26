@@ -427,7 +427,7 @@
     var loading = '<div class="summary-card-loading" role="status" aria-label="Загружаем"><i></i><b></b><span></span></div>';
     root.innerHTML = section("starting-hands", "Мои раздачи", '<span data-chart-unread class="chart-unread-dot" aria-label="Есть непросмотренный график" hidden></span><p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
         section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Получайте билеты за активность</p>' + link("Открыть", "club-reviews")) +
-      section("bonus","Бонусы",loading) + section("friends","Новости друзей",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
+      section("bonus","Бонусы",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
     applySummaryTab();
     friends();
     function valid() {return seq === generation;}

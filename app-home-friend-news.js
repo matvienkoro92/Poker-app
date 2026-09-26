@@ -323,6 +323,11 @@
   };
 
   function updateFriendNewsBadges() {
+    var countLabel = el("profileFriendNewsUnread");
+    if (countLabel) {
+      var summary = window.pokerGetFriendNewsSummary();
+      countLabel.textContent = summary.accountId && summary.ready ? (summary.unread ? summary.unread + " непрочитанных" : "Вы всё прочитали") : "События ваших друзей";
+    }
     if (typeof window.dispatchEvent === "function" && typeof CustomEvent === "function") window.dispatchEvent(new CustomEvent("poker-friend-news-updated"));
     var unread = !!friendNewsAccountId && events.some(function (row) {
       return isUnreadFriendEvent(row);
@@ -556,28 +561,14 @@
   }
 
   function ensureDom() {
-    var homeShortcuts = document.querySelector(".home-daily-shortcuts");
-    if (homeShortcuts && !el("homeClubNews")) {
-      homeShortcuts.insertAdjacentHTML("afterend",
-        '<section class="home-friend-news home-club-news" id="homeClubNews" aria-label="Новости клуба">' +
-          '<button type="button" class="home-friend-news__ticker home-club-news__ticker" id="homeClubNewsOpen">' +
-            '<span class="home-friend-news__label" id="homeClubNewsLabel">Новости клуба</span>' +
-            '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeClubNewsTrack" aria-live="polite"></span></span>' +
-            '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
-          "</button>" +
-        "</section>");
-    }
     var friendsPanel = el("profileFriendsPanel");
     if (friendsPanel && !el("homeFriendNews")) {
       friendsPanel.insertAdjacentHTML("beforebegin",
-        '<section class="home-friend-news" id="homeFriendNews" data-profile-friends-panel aria-label="Новости друзей" hidden>' +
-          '<button type="button" class="home-friend-news__ticker" id="homeFriendNewsOpen" aria-haspopup="dialog" aria-controls="homeFriendNewsModal">' +
-            '<span class="home-friend-news__badge" aria-hidden="true">●</span>' +
-            '<span class="home-friend-news__label">Новости друзей</span>' +
-            '<span class="home-friend-news__viewport"><span class="home-friend-news__track" id="homeFriendNewsTrack" aria-live="polite"></span></span>' +
-            '<span class="home-friend-news__arrow" aria-hidden="true">›</span>' +
-          "</button>" +
-        "</section>");
+        '<section class="profile-friend-news-card" id="homeFriendNews" data-profile-friends-panel hidden>' +
+          '<button type="button" id="homeFriendNewsOpen" aria-haspopup="dialog" aria-controls="homeFriendNewsModal">' +
+            '<span class="profile-friend-news-card__copy"><strong>Новости друзей</strong><b id="profileFriendNewsUnread">События ваших друзей</b><small>Результаты и события друзей.</small></span>' +
+            '<img src="./assets/summary-friends-news-monkeys-v1.webp" alt="" aria-hidden="true" loading="lazy">' +
+          '</button></section>');
     }
     if (!el("homeFriendNewsModal")) {
       document.body.insertAdjacentHTML("beforeend",
@@ -2805,22 +2796,8 @@
   function render() {
     updateFriendNewsBadges();
     var root = el("homeFriendNews");
-    var track = el("homeFriendNewsTrack");
-    if (!root || !track) return;
-    root.hidden = false;
-    if (!events.length) {
-      events = [{
-        id: "empty",
-        type: "empty",
-        icon: "♣",
-        text: "Здесь появятся новости ваших друзей",
-        at: "",
-      }];
-    }
-    track.innerHTML = events.map(function (row) { return eventHtml(row, true); }).join("");
+    if (!root) return;
     renderModalList(activeModalEvents());
-    showIndex(0, false);
-    startRotation();
   }
 
   var adminNewsTelegramCache = {};
