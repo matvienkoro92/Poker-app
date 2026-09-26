@@ -1,5 +1,11 @@
 # Project Instructions
 
+- All daily tournament scenes follow the shared composition in
+  `docs/tournament-scene-composition.md`. Choose the featured player by first-place
+  finishes in that specific tournament, breaking ties by prize money from those
+  first-place finishes. Preserve the common background ticket concept and live UI
+  layout; do not choose characters arbitrarily by weekday.
+
 - Do not run `git push` unless the user explicitly asks for it in the current conversation.
 - Summer rating top-3 character art sizes are controlled by inline CSS variables from
   `summerRatingTop3ArtSizeStyle()` in `app-rating-view-adapter.js`. Do not tune those
