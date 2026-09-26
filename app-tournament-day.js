@@ -1290,6 +1290,7 @@ function renderHomePokermankiKnockout(weekday) {
   var info = getHomePokermankiKnockoutInfo(weekday);
   var button = document.querySelector('[data-home-tournament-bonus-info="pokermanki-knockout"]');
   if (!button) return;
+  button.hidden = Number(weekday) === 6;
   button.setAttribute("aria-label", info.amount);
   var amount = button.querySelector("[data-home-pokermanki-reward]");
   if (amount) amount.textContent = info.reward + " ₽ за";

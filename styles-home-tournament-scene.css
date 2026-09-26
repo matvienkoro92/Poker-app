@@ -923,8 +923,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
-  --home-tournament-scene:url('./assets/home-tournament-shtukatur-poker-table-v8.webp');
-  --home-tournament-scene:image-set(url('./assets/home-tournament-shtukatur-poker-table-v8.webp') 1x, url('./assets/home-tournament-shtukatur-poker-table-v8-2x.webp') 2x);
+  --home-tournament-scene:url('./assets/home-tournament-pokermanki-table-v2.png');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
@@ -1128,6 +1127,15 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 
 /* Friday history control and compact Last Longer counters on the felt. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-ticket-frame-cleanup {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-single-table-v1-display-v1.webp')) center / 100% 100% no-repeat;
+  clip-path: polygon(43.8% 8%, 57.9% 6.7%, 59.1% 14.5%, 44.8% 15.8%);
+  transform: translateX(22%);
+}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-history {
   position: absolute !important;
   left: 65.6% !important;
@@ -1255,3 +1263,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 .home-tournament-history-dialog__rank-row > span { min-width: 0; overflow-wrap: anywhere; }
 .home-tournament-history-dialog__rank-row strong { flex: none; color: #ffe2a1; font-size: 12px; }
 .home-tournament-history-dialog .home-tournament-history-dialog__note { margin: 13px 0 0; font-size: 12px; color: #c8baa4; }
+
+/* The new Saturday artwork already has a clean ticket. */
+#app.app.app--view-home [data-tournament-character="shtukatur"] > .home-ticket-frame-cleanup { display:none; }
+
+#app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonus--pokermanki-knockout { display:none!important; }
