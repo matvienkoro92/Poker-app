@@ -33,7 +33,11 @@ test('pulse opens commands and correct download and club links',async t=>{
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
  assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:schedule:0','club:menu']);
  assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
- assert.equal(buttons.length,4);
+ assert.equal(buttons.length,6);
+ assert.deepEqual(buttons.slice(-2),[
+  {text:'Скопировать ссылку на клубное приложение',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
+  {text:'Скопировать ссылку на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
+ ]);
 });
 
 test('table rows use emoji numbers without blank lines between tables',()=>{

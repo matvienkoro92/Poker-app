@@ -2703,14 +2703,13 @@
     var request = ++profileTournamentsRequest;
     panel.hidden = true;
     panel.innerHTML = "";
-    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var auth = apiAuthQuery("?");
-    fetch(baseUrl() + API_PATH + auth + "&mode=my-tournaments", { cache: "no-store" })
+    fetch(baseUrl() + API_PATH + auth + "&mode=ongoing-tournaments", { cache: "no-store" })
       .then(function (res) { if (!res.ok) throw new Error("SNG profile unavailable"); return res.json(); })
       .then(function (data) {
         if (request !== profileTournamentsRequest || auth !== apiAuthQuery("?") || !data || !data.ok) return;
         var rows = (data.tournaments || []).filter(function (row) {
-          return row.myEntryStatus === "approved" && row.status === "bracket";
+          return row.status === "bracket";
         });
         panel.innerHTML = rows.map(function (row) {
           return '<button type="button" class="profile-sng-card" data-sng-profile-tournament="' + escapeHtml(row.id) + '" aria-label="Открыть ' + escapeHtml(row.title) + '"><strong>' + escapeHtml(row.title) + '</strong></button>';
