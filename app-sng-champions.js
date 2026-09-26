@@ -2713,9 +2713,7 @@
           return row.myEntryStatus === "approved" && row.status === "bracket";
         });
         panel.innerHTML = rows.map(function (row) {
-          return '<div class="profile-sng-card"><strong>' + escapeHtml(row.title) + '</strong><span>' +
-            escapeHtml(row.status === "completed" ? "Завершён · итоги" : row.activeStage || "Турнир идёт") +
-            '</span><button type="button" class="home-sng-champions-action__cta" data-sng-profile-tournament="' + escapeHtml(row.id) + '">Смотреть</button></div>';
+          return '<button type="button" class="profile-sng-card" data-sng-profile-tournament="' + escapeHtml(row.id) + '" aria-label="Открыть ' + escapeHtml(row.title) + '"><strong>' + escapeHtml(row.title) + '</strong></button>';
         }).join("");
         panel.hidden = !rows.length;
       }).catch(function () {});
