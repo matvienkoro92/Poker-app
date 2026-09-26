@@ -1,0 +1,5 @@
+Tool: built-in image_gen, 2026-09-26.
+Quality reference: assets/home-tournament-pokermanki-table-v4.webp.
+Edit the FIRST image only. Redraw ONLY its small bonus poker chip stacks on the green table to match the clean high quality chips in the SECOND reference image. Crisp smooth circles, regular cylindrical stacks with straight clean continuous edges, evenly spaced rectangular colored inlays, matte black ceramic with restrained highlights. No melted irregular jagged reflections. Keep EXACT original positions, size, number and colors of stacks and empty green centers. Preserve all other elements of FIRST image: character identity pose accessories, ticket, table geometry texture rim, glove if present, text. Do not add glove or remove existing glove. No text on bonus chips. Preserve original canvas aspect ratio. Second image is QUALITY reference ONLY, do not copy its character or layout.
+Delivery: native-size WebP, quality 88, effort 6; no upscaling.
+Applies to the five prepared non-PokerManki scenes, four active weekday scenes and shared Monday/Sunday bonus tray.

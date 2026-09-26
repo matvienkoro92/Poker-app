@@ -475,7 +475,7 @@
 
 /* Tractor tournament uses Pasha Shkarubo, including the raffle scene layers. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene: url('./assets/home-tournament-shkarubo-no-purple-v1.webp');
+  --home-tournament-scene: url('./assets/home-tournament-shkarubo-chips-v2.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix {
   display: none !important;
@@ -485,8 +485,7 @@
 }
 
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
-  --home-tournament-scene: url('./assets/home-tournament-cooler-clean-table-v6.webp');
-  --home-tournament-scene: image-set(url('./assets/home-tournament-cooler-clean-table-v6.webp') 1x, url('./assets/home-tournament-cooler-clean-table-v6-2x.webp') 2x);
+  --home-tournament-scene: url('./assets/home-tournament-cooler-chips-v7.webp');
 }
 #app.app.app--view-home [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus__glove {
   display: none !important;
@@ -745,7 +744,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before {
   content:""!important;display:block!important;inset:0!important;
-  background:url('./assets/home-bonus-stacks-reference-v1.webp') center/100% 100% no-repeat!important;
+  background:url('./assets/home-bonus-stacks-reference-v2.webp') center/100% 100% no-repeat!important;
   mask:linear-gradient(transparent,#000 9%)!important;-webkit-mask:linear-gradient(transparent,#000 9%)!important;
 }
 #app.app.app--view-home .home-tournament-bonuses--table .home-tournament-bonuses__grid {
@@ -809,7 +808,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* One continuous poker table, with every trophy on the same felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
-  --home-tournament-scene:url('./assets/home-tournament-shkarubo-no-purple-v1.webp');
+  --home-tournament-scene:url('./assets/home-tournament-shkarubo-chips-v2.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-table-seam-fix {display:none!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table {
@@ -862,7 +861,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* One continuous poker table, with every trophy on the same felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] {
-  --home-tournament-scene:url('./assets/home-tournament-aza-no-purple-v1.webp');
+  --home-tournament-scene:url('./assets/home-tournament-aza-chips-v2.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-table-seam-fix {display:none!important}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-tournament-bonuses--table {
@@ -923,8 +922,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
-  --home-tournament-scene:url('./assets/home-tournament-pokermanki-table-v3.webp');
-  --home-tournament-scene:image-set(url('./assets/home-tournament-pokermanki-table-v3.webp') 1x, url('./assets/home-tournament-pokermanki-table-v3-2x.webp') 2x);
+  --home-tournament-scene:url('./assets/home-tournament-pokermanki-table-v4.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
@@ -1123,7 +1121,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1402' preserveAspectRatio='none'%3E%3Cpath d='M-20 900 Q190 820 400 812 M690 812 Q940 830 1142 900' fill='none' stroke='white' stroke-width='24'/%3E%3Cpath d='M-20 1195 Q561 1365 1142 1195' fill='none' stroke='white' stroke-width='38'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
-  --home-tournament-scene:url('./assets/home-tournament-redrocket-matte-table-v3.png');
+  --home-tournament-scene:url('./assets/home-tournament-redrocket-chips-v4.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-rim-dimmer {
   display:none;

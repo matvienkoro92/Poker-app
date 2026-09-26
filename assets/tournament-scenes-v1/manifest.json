@@ -15,7 +15,7 @@
       "wins": 2,
       "firstPlacePrize": 90190,
       "image": "pokermanki.webp",
-      "bytes": 199884,
+      "bytes": 189330,
       "pokermankiKnockoutEnabled": true
     },
     {
@@ -30,7 +30,7 @@
       "wins": 2,
       "firstPlacePrize": 65110,
       "image": "shkarubo.webp",
-      "bytes": 186554,
+      "bytes": 178482,
       "pokermankiKnockoutEnabled": true
     },
     {
@@ -45,7 +45,7 @@
       "wins": 1,
       "firstPlacePrize": 78475,
       "image": "gucci.webp",
-      "bytes": 177176,
+      "bytes": 172206,
       "pokermankiKnockoutEnabled": true
     },
     {
@@ -60,7 +60,7 @@
       "wins": 1,
       "firstPlacePrize": 46990,
       "image": "prushnik.webp",
-      "bytes": 180292,
+      "bytes": 172676,
       "pokermankiKnockoutEnabled": true
     },
     {
@@ -75,7 +75,7 @@
       "wins": 2,
       "firstPlacePrize": 78610.8,
       "image": "morf.webp",
-      "bytes": 194138,
+      "bytes": 177632,
       "pokermankiKnockoutEnabled": true
     },
     {
@@ -90,7 +90,7 @@
       "wins": 2,
       "firstPlacePrize": 174982.83,
       "image": "pokermanki.webp",
-      "bytes": 199884,
+      "bytes": 189330,
       "pokermankiKnockoutEnabled": false
     },
     {
@@ -105,7 +105,7 @@
       "wins": 2,
       "firstPlacePrize": 157794.94,
       "image": "waaar.webp",
-      "bytes": 198310,
+      "bytes": 181394,
       "pokermankiKnockoutEnabled": true
     }
   ]
