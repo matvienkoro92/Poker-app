@@ -2334,12 +2334,25 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
 .raffle-active-info-modal__content {
   min-width: 0;
 }
-.raffles-help-modal__box {
-  width: min(620px, calc(100vw - 24px));
-  padding: 18px;
+.raffles-help-modal .raffles-help-modal__box {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  border: 0;
+  border-radius: 0;
 }
-.raffles-help-modal {
+.raffle-active-info-modal.raffles-help-modal {
   z-index: 20010;
+  height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+}
+.raffles-help-modal .raffles-help-modal__close {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
 }
 
 body.raffle-active-info-modal-open,
