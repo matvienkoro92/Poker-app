@@ -1,5 +1,10 @@
 /* Loaded before opening club/friends news. Original rule order is preserved. */
 
+/* Club news is a bottom navigation destination; keep the bar outside its scroller. */
+body:has(.home-friend-news-modal--club:not([hidden])) .bottom-nav {
+  z-index: 16001;
+}
+
 
 .home-friend-news-modal {
   position: fixed;
@@ -2670,3 +2675,25 @@ body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-fri
   .home-friend-news-modal__cash-group--loss .cash-monthly-icon::after{font-size:24px}
 }
 @media(max-width:390px){.home-friend-news-modal__cash-group--featured .cash-monthly-value{font-size:17px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured)>summary{grid-template-columns:38px minmax(0,1fr) auto 22px;gap:1px 4px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-icon{width:38px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-value{font-size:13px}}
+
+.home-friend-news-modal.home-friend-news-modal--club {
+  bottom: var(--app-bottom-tabbar-height, 80px);
+  padding: 0;
+  align-items: stretch;
+}
+.home-friend-news-modal--club .home-friend-news-modal__panel {
+  height: 100%;
+  box-sizing: border-box;
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  border-radius: 0;
+}
+.home-friend-news-modal--club .home-friend-news-modal__header,
+.home-friend-news-modal--club .home-friend-news-modal__list {
+  flex: 0 0 auto;
+}
+.home-friend-news-modal--club .home-friend-news-modal__list {
+  overflow: visible;
+}

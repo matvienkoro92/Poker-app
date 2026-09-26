@@ -153,9 +153,10 @@
     return modal;
   }
 
-  function openModal() {
+  function openModal(tournamentId) {
+    tournamentId = typeof tournamentId === "string" ? tournamentId : "";
     if (!modalStyleGate && typeof window.pokerCreateModalStyleGate === "function") modalStyleGate = window.pokerCreateModalStyleGate("home-widget-sng");
-    if (modalStyleGate && modalStyleGate.wait(openModal)) return;
+    if (modalStyleGate && modalStyleGate.wait(function () { openModal(tournamentId); })) return;
     ensureModal();
     try {
       if (typeof window.pokerRecordSectionViewOpen === "function") window.pokerRecordSectionViewOpen("sng-champions");
@@ -163,7 +164,8 @@
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
     activeTabManual = false;
-    tournamentDetailOpen = false;
+    tournamentDetailOpen = !!tournamentId;
+    if (tournamentId) activeTournamentId = tournamentId;
     startBracketTimerRefresh();
     renderLoading();
     loadState();
@@ -2054,8 +2056,15 @@
     });
   }
 
+  var homeTournamentId = "";
   function updateHomePlaque() {
     if (!state) return;
+    if (state.summary) homeTournamentId = state.tournamentId;
+    if (state.summary || state.tournamentId === homeTournamentId) {
+      document.querySelectorAll(".home-sng-champions-feature, .daily-poker__sng-champions").forEach(function (card) {
+        card.hidden = state.status !== "open";
+      });
+    }
     var normalizedHomeTitle = String(state.title || "").trim();
     var teamKnockoutTitle = state.status !== "draft" && /^1(?:ый|й)\s+командный\s+снг[-\s]?нокаут\s+баттл\s+два\s+туза$/i.test(normalizedHomeTitle);
     Array.prototype.forEach.call(document.querySelectorAll("[data-sng-home-banner]"), function (banner) {
@@ -2687,7 +2696,42 @@
     if (leftEl) { leftEl.textContent = (total - distributed).toLocaleString("ru-RU") + "р"; leftEl.classList.toggle("is-error", total - distributed !== 0); }
   }
 
+  var profileTournamentsRequest = 0;
+  function refreshProfileTournaments() {
+    var panel = document.getElementById("profileSngTournaments");
+    if (!panel) return;
+    var request = ++profileTournamentsRequest;
+    panel.hidden = true;
+    panel.innerHTML = "";
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
+    var auth = apiAuthQuery("?");
+    fetch(baseUrl() + API_PATH + auth + "&mode=my-tournaments", { cache: "no-store" })
+      .then(function (res) { if (!res.ok) throw new Error("SNG profile unavailable"); return res.json(); })
+      .then(function (data) {
+        if (request !== profileTournamentsRequest || auth !== apiAuthQuery("?") || !data || !data.ok) return;
+        var rows = (data.tournaments || []).filter(function (row) {
+          return row.myEntryStatus === "approved" && (row.status === "bracket" || row.status === "completed");
+        });
+        panel.innerHTML = rows.map(function (row) {
+          return '<div class="profile-sng-card"><strong>' + escapeHtml(row.title) + '</strong><span>' +
+            escapeHtml(row.status === "completed" ? "Завершён · итоги" : row.activeStage || "Турнир идёт") +
+            '</span><button type="button" class="home-sng-champions-action__cta" data-sng-profile-tournament="' + escapeHtml(row.id) + '">Смотреть</button></div>';
+        }).join("");
+        panel.hidden = !rows.length;
+      }).catch(function () {});
+  }
+
   function bind() {
+    window.addEventListener("poker-auth-changed", refreshProfileTournaments);
+    document.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-sng-profile-tournament]");
+      if (button) {
+        openModal(button.getAttribute("data-sng-profile-tournament"));
+      } else if (event.target.closest('[data-view-target="profile"], [data-profile-tab="club"]')) {
+        refreshProfileTournaments();
+      }
+    });
+    refreshProfileTournaments();
     try {
       var cachedHome = JSON.parse(window.sessionStorage.getItem("pokerSngHomeSummary:v1") || "null");
       if (!state && cachedHome && cachedHome.data && cachedHome.data.ok && Date.now() - cachedHome.at < 5 * 60 * 1000) {
@@ -2713,6 +2757,7 @@
           for (var j = 0; j < nodes.length; j++) {
             var node = nodes[j];
             if (!node || node.nodeType !== 1) continue;
+            if ((node.matches && node.matches("#profileSngTournaments")) || (node.querySelector && node.querySelector("#profileSngTournaments"))) refreshProfileTournaments();
             if ((node.matches && node.matches("[data-sng-open], #sngChampionsOpen")) || (node.querySelector && node.querySelector("[data-sng-open], #sngChampionsOpen"))) {
               updateHomePlaque();
               return;

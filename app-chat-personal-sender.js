@@ -376,6 +376,7 @@ function sendMessage(overrideText) {
       setPersonalSendBusy(false);
       hideProgress();
       if (data && data.ok) {
+        if (typeof window.pokerRecordFriendInteraction === "function") window.pokerRecordFriendInteraction(personalWithOut, "message");
         if (data.pollRev && typeof data.pollRev === "string") window.__pokerPersonalPollRev = data.pollRev;
         if (data.trace && data.trace.serverNowMs) {
           pokerChatRecordTrace("personal-send-ack", {

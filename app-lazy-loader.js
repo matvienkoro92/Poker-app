@@ -330,7 +330,7 @@
           localStorage.setItem("poker_profile_friends_preview_v1:" + viewer, JSON.stringify({
             ok: true,
             preview: true,
-            friends: data.friends.slice(0, 3),
+            friends: data.friends,
             friendCount: Math.max(0, Number(data.friendCount != null ? data.friendCount : data.friends.length) || 0),
             incomingCount: Math.max(0, Number(data.incomingCount) || 0),
             cachedAt: Date.now(),

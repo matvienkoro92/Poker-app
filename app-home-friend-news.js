@@ -387,7 +387,7 @@
         var id=card&&card.getAttribute('data-home-news-event-id')||node.getAttribute('data-home-news-read-id');
         if(id&&typeof window.pokerTrackEngagement==='function')window.pokerTrackEngagement(mode==='friends'?'friend_news_read':'news_read',{entity:id,source:mode,once:true});
       },800);
-    });},{root:list,threshold:0.6});
+    });},{root:newsScrollContainer(),threshold:0.6});
     list.querySelectorAll('[data-home-news-read-id]').forEach(function(node){engagementObserver.observe(node);});
   }
 
@@ -500,7 +500,7 @@
     var list = el("homeFriendNewsList");
     newsProfileReturnState = {
       mode: newsModalMode,
-      scrollTop: list ? list.scrollTop : 0,
+      scrollTop: list ? newsScrollContainer().scrollTop : 0,
     };
     setNewsProfileLoading(true, name);
 
@@ -518,7 +518,7 @@
       document.body.classList.add("home-friend-news-modal-open");
       window.requestAnimationFrame(function () {
         var restoredList = el("homeFriendNewsList");
-        if (restoredList) restoredList.scrollTop = Number(state.scrollTop) || 0;
+        if (restoredList) newsScrollContainer().scrollTop = Number(state.scrollTop) || 0;
       });
     }
 
@@ -564,7 +564,7 @@
     var friendsPanel = el("profileFriendsPanel");
     if (friendsPanel && !el("homeFriendNews")) {
       friendsPanel.insertAdjacentHTML("beforebegin",
-        '<section class="profile-friend-news-card" id="homeFriendNews" data-profile-friends-panel hidden>' +
+        '<section class="profile-friend-news-card" id="homeFriendNews" data-profile-friends-panel>' +
           '<button type="button" id="homeFriendNewsOpen" aria-haspopup="dialog" aria-controls="homeFriendNewsModal">' +
             '<span class="profile-friend-news-card__copy"><strong>Новости друзей</strong><b id="profileFriendNewsUnread">События ваших друзей</b><small>Результаты и события друзей.</small></span>' +
             '<img src="./assets/summary-friends-news-monkeys-v1.webp" alt="" aria-hidden="true" loading="lazy">' +
@@ -3360,6 +3360,11 @@
     showResult(copied);
   }
 
+  function newsScrollContainer() {
+    var list = el("homeFriendNewsList");
+    return newsModalMode === "club" && list ? list.parentElement : list;
+  }
+
   function syncNewsModalHeading() {
     var title = el("homeFriendNewsModalTitle");
     var eyebrow = el("homeFriendNewsModalEyebrow");
@@ -3497,6 +3502,14 @@
   }
 
   function bind() {
+    if (!document.documentElement.dataset.newsNavBound) {
+      document.documentElement.dataset.newsNavBound = "1";
+      document.addEventListener("click", function (event) {
+        var target = event.target.closest(".bottom-nav [data-view-target]");
+        var modal = el("homeFriendNewsModal");
+        if (target && !target.hasAttribute("data-club-news-open") && modal && !modal.hidden && newsModalMode === "club") closeModal();
+      }, true);
+    }
     var open = el("homeFriendNewsOpen");
     var clubOpen = el("homeClubNewsOpen");
     document.querySelectorAll("[data-club-news-open]").forEach(function(button){
@@ -3654,7 +3667,7 @@
           if (achievementsOpen.disabled) return;
           var list = el("homeFriendNewsList");
           returnToClubNewsAfterAchievements = true;
-          returnToClubNewsScrollTop = list ? list.scrollTop : 0;
+          returnToClubNewsScrollTop = list ? newsScrollContainer().scrollTop : 0;
           achievementsOpen.disabled = true;
           achievementsOpen.classList.add("is-loading");
           achievementsOpen.setAttribute("aria-busy", "true");
@@ -3788,16 +3801,16 @@
         if (eventId && event.target.closest("[data-home-news-comments]")) {
           var commentsList = el("homeFriendNewsList");
           var commentsCard = event.target.closest("[data-home-news-event-id]");
-          var savedScrollTop = commentsList ? commentsList.scrollTop : 0;
+          var savedScrollTop = commentsList ? newsScrollContainer().scrollTop : 0;
           var savedCardTop = commentsCard && commentsList
-            ? commentsCard.getBoundingClientRect().top - commentsList.getBoundingClientRect().top
+            ? commentsCard.getBoundingClientRect().top - newsScrollContainer().getBoundingClientRect().top
             : 0;
           eventCommentsOpen[eventId] = !eventCommentsOpen[eventId];
           renderModalList(activeModalEvents());
           function restoreCommentsAnchor() {
             var restoredList = el("homeFriendNewsList");
             if (!restoredList) return;
-            restoredList.scrollTop = savedScrollTop;
+            newsScrollContainer().scrollTop = savedScrollTop;
             var restoredCard = Array.prototype.find.call(
               restoredList.querySelectorAll("[data-home-news-event-id]"),
               function (item) {
@@ -3805,8 +3818,8 @@
               }
             );
             if (!restoredCard || !commentsCard) return;
-            var currentTop = restoredCard.getBoundingClientRect().top - restoredList.getBoundingClientRect().top;
-            restoredList.scrollTop += currentTop - savedCardTop;
+            var currentTop = restoredCard.getBoundingClientRect().top - newsScrollContainer().getBoundingClientRect().top;
+            newsScrollContainer().scrollTop += currentTop - savedCardTop;
           }
           restoreCommentsAnchor();
           window.requestAnimationFrame(function () {
@@ -3866,7 +3879,7 @@
         syncNewsModalHeading();
         if (newsModal) newsModal.hidden = false;
         document.body.classList.add("home-friend-news-modal-open");
-        if (list) list.scrollTop = returnToClubNewsScrollTop;
+        if (list) newsScrollContainer().scrollTop = returnToClubNewsScrollTop;
       });
       modal.addEventListener("input", function (event) {
         var form = event.target.closest("[data-home-news-comment-form]");

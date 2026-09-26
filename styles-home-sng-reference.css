@@ -138,3 +138,19 @@
 .sng-inline-feature .sng-inline-feature__bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, 1.2fr); align-items: center; }
 .sng-inline-feature .sng-inline-feature__cta-wrap { grid-column: 3; grid-row: 1; }
 .sng-inline-feature .sng-inline-feature__cta { white-space: nowrap; }
+
+.home-sng-champions-feature[hidden],
+.daily-poker__sng-champions[hidden],
+#profileSngTournaments[hidden] { display: none !important; }
+.profile-sng-card {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 20px;
+  border: 1px solid #8d703c;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #252015, #0c1016);
+  color: #f5dda4;
+}
+.profile-sng-card strong { font-size: 20px; }
+.profile-sng-card .home-sng-champions-action__cta { width: 100%; }

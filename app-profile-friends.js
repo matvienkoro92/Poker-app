@@ -1466,7 +1466,7 @@ function initProfileFriends() {
     pokerFriendsWriteJson(POKER_FRIENDS_PREVIEW_CACHE_KEY + ":" + viewer, {
       ok: true,
       preview: true,
-      friends: data.friends.slice(0, 3),
+      friends: data.friends,
       friendCount: Math.max(0, Number(data.friendCount != null ? data.friendCount : data.friends.length) || 0),
       incomingCount: Math.max(0, Number(data.incomingCount) || 0),
       cachedAt: Date.now(),
@@ -1486,15 +1486,7 @@ function initProfileFriends() {
     if (!previewEl) return;
     if (panelEl) panelEl.classList.remove("profile-friends--loading");
     window.setTimeout(function () { renderFindFriendPlayers(friends); }, 120);
-    var rows = (Array.isArray(friends) ? friends.slice() : [])
-      .map(function (row, index) {
-        return { row: row, index: index, priority: profileFriendsBirthdayPriority(row) };
-      })
-      .sort(function (a, b) {
-        return b.priority - a.priority || a.index - b.index;
-      })
-      .slice(0, 3)
-      .map(function (item) { return item.row; });
+    var rows = window.pokerRankFriendPreview(friends).slice(0, 3);
     var html = rows.map(function (row) {
       var meta = displayData(row);
       var avatar = previewAvatar(row);

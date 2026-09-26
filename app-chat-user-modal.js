@@ -241,6 +241,7 @@ if (chatUserModalEl) {
   var chatUserModalSngAchievementsReady = null;
   var chatUserModalRanksSeq = 0;
   var chatUserModalOpenSeq = 0;
+  var chatUserModalAffinitySeq = -1;
   var chatUserModalBlockedByMe = false;
   var chatUserModalBlockBusy = false;
   var chatUserModalBlockSeq = 0;
@@ -1035,6 +1036,10 @@ if (chatUserModalEl) {
   }
   function revealChatUserModal(seq) {
     if (seq !== chatUserModalOpenSeq || !chatUserModalUserId) return;
+    if (chatUserModalAffinitySeq !== seq && !chatUserModalEl.classList.contains("chat-user-modal--appearance-editor")) {
+      chatUserModalAffinitySeq = seq;
+      if (typeof window.pokerRecordFriendInteraction === "function") window.pokerRecordFriendInteraction(chatUserModalUserId, "profile");
+    }
     chatUserModalEl.setAttribute("aria-hidden", "false");
     chatUserModalEl.classList.add("chat-user-modal--open");
     if (!chatUserModalEl.classList.contains("chat-user-modal--appearance-editor")) document.dispatchEvent(new CustomEvent("poker:chat-user-modal-open"));

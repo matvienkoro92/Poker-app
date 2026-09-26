@@ -870,13 +870,3 @@
 }
 
 /* z-index выше подложек/оверлеев, чтобы нижнее меню никогда не перекрывалось */
-
-/* Compact friend rows: identity and both actions stay on one line. */
-.friends-list-modal__section[data-friends-section="friends"]{grid-template-columns:minmax(0,1fr)}
-.friends-list-modal__item[data-section="friends"]{grid-template-columns:42px minmax(0,1fr) auto;grid-template-rows:auto;min-height:0;align-items:center;gap:10px}
-.friends-list-modal__item[data-section="friends"] .friends-list-modal__item-actions{grid-column:3;grid-row:1;display:flex;flex-direction:row;align-self:center;width:auto;gap:6px}
-.friends-list-modal__item[data-section="friends"] .friends-list-modal__btn{min-height:32px;padding:6px 9px;white-space:nowrap;font-size:12px}
-@media(max-width:420px){
- .friends-list-modal__item[data-section="friends"]{grid-template-columns:38px minmax(0,1fr) auto;gap:7px}
- .friends-list-modal__item[data-section="friends"] .friends-list-modal__btn{padding:6px;font-size:11px}
-}

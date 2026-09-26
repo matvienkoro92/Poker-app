@@ -6,6 +6,11 @@
   --app-content-width: 100%;
 }
 
+/* The shared toolbar belongs to Home; removing it from flow lifts other views. */
+body[data-view]:not([data-view="home"]) #app.app .card > .card__header {
+  display: none !important;
+}
+
 .bottom-nav.bottom-nav--no-transition {
   transition: none !important;
 }
