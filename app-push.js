@@ -692,11 +692,8 @@ function initProfileChatPush() {
     notice.setAttribute("aria-live", "polite");
     var title = document.createElement("strong");
     title.textContent = "✓ Приложение обновлено";
-    var details = document.createElement("span");
-    details.textContent = String(message || "Установлена последняя версия").slice(0, 180);
-    details.style.cssText = "display:block;margin-top:3px;color:#c9c3b7;font-weight:400";
+    // Confirm installation without replaying release notes from an older build.
     notice.appendChild(title);
-    notice.appendChild(details);
     notice.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translate(-50%,-8px);z-index:2147483647;padding:8px 13px;border-radius:14px;background:#171a1ef2;color:#f3d998;border:1px solid #a985485c;box-shadow:0 8px 24px #0007;font:600 12px/1.25 sans-serif;max-width:min(82vw,360px);text-align:left;opacity:0;transition:opacity .18s ease,transform .18s ease;pointer-events:none";
     document.body.appendChild(notice);
     requestAnimationFrame(function () { notice.style.opacity = "1"; notice.style.transform = "translate(-50%,0)"; });
