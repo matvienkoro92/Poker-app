@@ -923,7 +923,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
-  --home-tournament-scene:url('./assets/home-tournament-pokermanki-table-v2.png');
+  --home-tournament-scene:url('./assets/home-tournament-pokermanki-table-v3.webp');
+  --home-tournament-scene:image-set(url('./assets/home-tournament-pokermanki-table-v3.webp') 1x, url('./assets/home-tournament-pokermanki-table-v3-2x.webp') 2x);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
@@ -985,7 +986,12 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   -webkit-mask:linear-gradient(transparent,transparent)!important;
   z-index:5!important;
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {
+  display:block!important;
+  mask:url('./assets/home-tournament-pokermanki-head-mask.svg') center/100% 100% no-repeat!important;
+  -webkit-mask:url('./assets/home-tournament-pokermanki-head-mask.svg') center/100% 100% no-repeat!important;
+  pointer-events:none;
+}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] #homeTournamentWeekList .home-tournament-trophy__prize {
   left: 21% !important;
 }
