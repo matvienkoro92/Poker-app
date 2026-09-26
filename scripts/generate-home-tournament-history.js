@@ -15,6 +15,7 @@ const sources = [
   ["summer-rating-data-september.js", "SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE"],
 ];
 const tournaments = {
+  monthly3000: { buyin: 3000, name: /^Турнир Месяца/iu, weekdays: [0, 1, 2, 3, 4, 5, 6], historyDays: "Турнир месяца" },
   0: { buyin: 2000, name: /^Воскресн[ыи]й турнир(?:\s|$)/iu },
   1: { buyin: 500, name: /^Турнир Понедельника(?:\s|$)/iu },
   2: { buyin: 300, name: /^Турнир Вторника(?:\s|$)/iu },

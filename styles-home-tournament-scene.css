@@ -1273,3 +1273,68 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="shtukatur"] > .home-ticket-frame-cleanup { display:none; }
 
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonus--pokermanki-knockout { display:none!important; }
+
+/* Monthly tournament: Hakas, ranked by wins then first-place prizes. */
+/* Shared ticket and table geometry; the glove remains a live UI element. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
+  --home-tournament-scene:url('./assets/home-tournament-hakas-month-v1.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-table-seam-fix,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-bonuses--table::before {
+  display:none!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::after {
+  display:block!important;
+  background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
+  mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
+  -webkit-mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
+  z-index:5!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-bonuses--table {
+  inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:71.5%!important;pointer-events:auto}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  position:absolute;top:calc(100% + 4.35cqw);bottom:auto;left:50%;transform:translate(-50%,-50%);margin:0;width:11.5cqw;
+  align-content:center;gap:.08cqw;font-size:2.3cqw;line-height:.96;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock {
+  left:37%!important;top:38%!important;width:26%!important;height:19%!important;z-index:3!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock::before {
+  left:0!important;top:0!important;width:100%!important;height:100%!important;
+  border:0!important;
+  background:radial-gradient(circle,transparent 49%,#fff1a633 58%,#ffb34738 70%,transparent 82%)!important;
+  box-shadow:0 0 2cqw #ffe7a9cc,0 0 5cqw #ffbd5588,0 0 9cqw #ff8a2944!important;
+  mask:none!important;-webkit-mask:none!important;
+  animation:hakas-longer-aura 2.4s ease-in-out infinite;
+}
+@keyframes hakas-longer-aura {
+  0%,100% {opacity:.55;transform:scale(.93)}
+  50% {opacity:1;transform:scale(1.15)}
+}
+@media (prefers-reduced-motion:reduce) {
+  #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock::before {animation:none;opacity:.8}
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar {
+  display:none!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-bonuses--table {z-index:6!important}
+
+
+#app.app.app--view-home [data-tournament-character="hakas"] > .home-ticket-frame-cleanup {display:none!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::after {display:none!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:block!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {top:calc(100% + 2cqw)!important}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock {top:40%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] #homeTournamentWeekList .home-tournament-trophy__caption {left:20%!important;top:48%!important;font-size:1.65cqw!important;letter-spacing:.1em!important}
+#app.app.app--view-home [data-tournament-character="hakas"] #homeTournamentWeekList .home-tournament-trophy__prize {left:18%!important;top:56%!important;font-size:4.5cqw!important;white-space:nowrap!important}

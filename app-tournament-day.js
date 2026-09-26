@@ -74,6 +74,20 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
 ];
 
 var HOME_TOURNAMENT_DATE_OVERRIDES = {
+  "2026-09-27": {
+    name: "Турнир месяца",
+    buyin: "3 000₽",
+    guarantee: "1 000 000₽",
+    hour: 18,
+    minute: 0,
+    time: "18:00 МСК",
+    character: "hakas",
+    historyKey: "monthly3000",
+    banner: "home-tournament-hakas-month-v1.webp",
+    bannerAlt: "Турнир месяца — вход 3 000 ₽, призовой фонд 1 000 000 ₽",
+    bannerWidth: 1122,
+    bannerHeight: 1402
+  },
   "2026-09-13": {
     name: "Нокаут",
     buyin: "10 000₽",
@@ -2550,11 +2564,12 @@ function updateTournamentDayBlock() {
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
-    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "aza" : selectedWeekday === 4 ? "redrocket" : selectedWeekday === 5 ? "cooler" : "fishkopcheny";
+    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = detailState.t && detailState.t.character || (selectedWeekday === 1 ? "morf" : selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "aza" : selectedWeekday === 4 ? "redrocket" : selectedWeekday === 5 ? "cooler" : "fishkopcheny");
     if (tournamentScene) tournamentScene.dataset.tournamentWeekday = String(selectedWeekday);
     var historyButton = document.getElementById("homeTournamentHistoryOpen");
     if (historyButton) {
       historyButton.hidden = false;
+      historyButton.dataset.tournamentHistoryKey = detailState.t && detailState.t.historyKey || "";
       historyButton.dataset.tournamentWeekday = String(selectedWeekday);
       historyButton.dataset.tournamentName = detailNameStr || "Турнир";
       historyButton.dataset.tournamentBuyin = pokerFormatRubSpacing(detailBuyinStr || "—");

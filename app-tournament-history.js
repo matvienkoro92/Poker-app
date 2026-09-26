@@ -33,7 +33,7 @@
 
   function openHistory(button) {
     var weekday = Number(button.getAttribute("data-tournament-weekday"));
-    var source = typeof HOME_TOURNAMENT_HISTORY_BY_WEEKDAY !== "undefined" && HOME_TOURNAMENT_HISTORY_BY_WEEKDAY[weekday];
+    var source = typeof HOME_TOURNAMENT_HISTORY_BY_WEEKDAY !== "undefined" && HOME_TOURNAMENT_HISTORY_BY_WEEKDAY[button.getAttribute("data-tournament-history-key") || weekday];
     var selectedBuyin = Number(String(button.getAttribute("data-tournament-buyin") || "").replace(/\D/g, ""));
     var results = source && source.buyin === selectedBuyin && Array.isArray(source.results) ? source.results : [];
     var name = button.getAttribute("data-tournament-name") || "Турнир";
