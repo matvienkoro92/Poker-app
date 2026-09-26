@@ -173,28 +173,44 @@
 }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
   display: flex !important; position: absolute !important;
-  top: 113cqw !important; left: 2% !important; width: 96% !important; max-width: none !important; height: 15cqw !important;
+  top: 113cqw !important; left: 2% !important; width: 96% !important; max-width: none !important; height: 17cqw !important;
   margin: 0 !important; padding: 0 !important; transform: none !important;
   align-items: center; justify-content: center;
   box-sizing: border-box;
-  border: 1px solid transparent !important; border-radius: 7px !important;
+  border: 1px solid transparent !important; border-radius: 3px !important;
   background:
-    linear-gradient(115deg, #ffffff0d, transparent 35% 65%, #edb95812) padding-box,
-    linear-gradient(180deg, #394239 0%, #1d2720 45%, #111b15 50%, #20291e 100%) padding-box,
-    linear-gradient(135deg, #8b5923, #ffe4a0 28%, #ab7939 50%, #e5be70 76%, #795021) border-box !important;
-  box-shadow: inset 0 1px 0 #fff3c84d, inset 0 -2px 0 #050a07, 0 2px 0 #66451f, 0 4px 7px #0009, 0 0 9px #e7af3814 !important;
-  color: #ffe7ae !important; font: 900 clamp(9px, 6.2cqw, 20px)/1 Arial, sans-serif !important;
-  text-transform: uppercase; text-shadow: 0 1px 1px #000, 0 0 7px #ffc86426 !important; white-space: nowrap;
+    radial-gradient(ellipse at 50% 120%, #9c64272b, transparent 68%) padding-box,
+    linear-gradient(180deg, #191714, #090a0a 55%, #14110d) padding-box,
+    linear-gradient(110deg, #624622, #c7974c 22%, #ffe4a2 50%, #c7974c 78%, #624622) border-box !important;
+  box-shadow: inset 0 0 0 2px #080909, inset 0 0 0 3px #b08b4938, 0 3px 9px #0009 !important;
+  color: #edce92 !important; font: 800 clamp(9px, 5.7cqw, 19px)/1 Arial, sans-serif !important;
+  letter-spacing: .045em;
+  text-transform: uppercase; text-shadow: 0 1px 2px #000, 0 0 10px #e3ad4a20 !important; white-space: nowrap;
   transition: filter .18s ease, box-shadow .18s ease, translate .12s ease;
   clip-path: none !important; opacity: 1 !important; visibility: visible !important;
 }
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge,
-#app.app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge { top: 129cqw !important; font-size: 4.5cqw !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge { top: 133cqw !important; font-size: 4.5cqw !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge::before { display: none; }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { isolation: auto !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden { display: none !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art { mix-blend-mode: normal !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { mix-blend-mode: normal; }
+
+/* Small engraved suit ornaments tie the actions to the character pedestals. */
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label::before,
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label::after {
+  content: "♠";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b9904e;
+  font: 400 5cqw/1 Georgia, serif;
+  text-shadow: 0 1px 1px #000;
+  pointer-events: none;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label::before { left: 5%; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label::after { right: 5%; }
 
 /* Raised brass plaques respond to pointer and keyboard interaction. */
 @media (hover: hover) {
