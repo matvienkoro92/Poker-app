@@ -16,16 +16,29 @@ test('new hand announcement includes nickname, cards, cash limit, pot, comment a
 });
 test('comments notify followers privately excluding sender and unsubscribed users',async()=>{
  const {api,sent}=setup();await api.notify(topic,{accountId:'ID1'},{authorName:'Автор',text:'Комментарий'});
- assert.equal(sent.length,1);assert.equal(sent[0].chat_id,'202');assert.match(sent[0].text,/Комментарий/);
+ assert.equal(sent.length,2);assert.equal(sent[1].chat_id,'202');assert.match(sent[1].text,/Комментарий/);
  assert.equal(await api.checkSubscription('ID2'),'');assert.match(await api.checkSubscription('ID3'),/Telegram/);
 });
 test('a new comment privately notifies the topic author without a follow subscription',async()=>{
- const {api,sent}=setup();
+ const {api,sent:allSent}=setup();
  await api.notify({...topic,authorId:'ID1',followers:{}},{accountId:'ID2',nick:'МиссClick'},{authorName:'Имя игрока',text:'Я бы сыграл колл на тёрне'});
+ const sent=allSent.filter(message=>message.chat_id!=='-100123');
  assert.equal(sent.length,1);
  assert.equal(sent[0].chat_id,'101');
  assert.match(sent[0].text,/Игрок МиссClick оставил комментарий к вашей раздаче/);
  assert.match(sent[0].text,/Я бы сыграл колл на тёрне/);
  assert.equal(sent[0].buttonText,'Открыть раздачу');
  assert.match(sent[0].buttonUrl,/startapp=review_aaaaaaaaaaaaaaaaaaaaaaaa/);
+});
+test('hand comments are announced in the club chat with escaped text and a hand link',async()=>{
+ const {api,sent}=setup();
+ await api.notify({...topic,followers:{}},{accountId:'ID1',nick:'Игрок <1>'},{text:'Колл < рейз & пас'});
+ assert.equal(sent.length,1);
+ assert.equal(sent[0].chat_id,'-100123');
+ assert.match(sent[0].text,/💬 Новый комментарий к раздаче\nПокерманки · A♥ K♦/);
+ assert.match(sent[0].text,/<b>Игрок &lt;1&gt;<\/b>\nКолл &lt; рейз &amp; пас/);
+ assert.equal(sent[0].parseMode,'HTML');
+ assert.equal(sent[0].notificationScope,'club-review');
+ assert.equal(sent[0].buttonText,'Открыть раздачу');
+ assert.match(sent[0].buttonUrl,/review_aaaaaaaaaaaaaaaaaaaaaaaa/);
 });

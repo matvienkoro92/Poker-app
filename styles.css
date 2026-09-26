@@ -9707,7 +9707,7 @@ body[data-view="club-reviews"] #app.app > .card > .card__header {
   padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px), var(--tg-ui-top-clearance, 0px));
 }
 html.app--telegram-miniapp #app.app .card .card__content > .view--active[data-view="club-reviews"] > .club-reviews-header {
-  padding-top: max(56px, var(--tg-ui-top-clearance, 0px)) !important;
+  padding-top: 16px !important;
 }
 body[data-view="club-reviews"] #app.app > .card > .card__content,
 body[data-view="club-reviews"] #app.app > .card > .card__content > .view--active[data-view="club-reviews"] {
