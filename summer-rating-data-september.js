@@ -3844,4 +3844,239 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "25.09.2026": [
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 12887,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 11869,
+          "points": 0
+        },
+        {
+          "nick": "Freedom",
+          "place": 4,
+          "reward": 4645,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 2,
+          "reward": 6600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 3,
+          "reward": 10506,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 1,
+          "reward": 2520,
+          "points": 0
+        },
+        {
+          "nick": "__JD__",
+          "place": 3,
+          "reward": 830,
+          "points": 0
+        },
+        {
+          "nick": "zagrebnagreb",
+          "place": 5,
+          "reward": 390,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200 €* 40K GT...",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 4717,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 6915.000000000001,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 35360.62,
+          "points": 0
+        },
+        {
+          "nick": "konfesta",
+          "place": 2,
+          "reward": 22279.66,
+          "points": 0
+        },
+        {
+          "nick": "roma1233",
+          "place": 5,
+          "reward": 9558.09,
+          "points": 0
+        },
+        {
+          "nick": "Алеша™",
+          "place": 3,
+          "reward": 8117.46,
+          "points": 0
+        },
+        {
+          "nick": "RedRocket🚀",
+          "place": 6,
+          "reward": 3573.04,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ферапонт",
+          "place": 6,
+          "reward": 3701,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 10,
+          "reward": 7890.000000000001,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 22,
+          "reward": 1400,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 20,
+          "reward": 689,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Мегалодон",
+          "place": 3,
+          "reward": 2850,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 5,
+          "reward": 1670,
+          "points": 0
+        },
+        {
+          "nick": "Travolta0707",
+          "place": 4,
+          "reward": 1310,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "СлонФартов",
+          "place": 4,
+          "reward": 16350,
+          "points": 0
+        },
+        {
+          "nick": "NeSkromnii Samui",
+          "place": 11,
+          "reward": 750,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

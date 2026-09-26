@@ -409,6 +409,8 @@ async function parseOcrFile(file) {
   if (blue) buyin = confirmedBlueTournamentBuyin(title) ?? buyin;
   // IMG_9516: the 10K in the blue header is a starting stack; owner confirmed a 200 entry fee.
   if (date === "24.09.2026" && blue && time === "16:00" && /^PLO4 🃏🃏🃏 20K 🏆$/.test(title)) buyin = 200;
+  // IMG_9551: owner confirmed 1000; the blue header shows a 10K starting stack.
+  if (date === "25.09.2026" && blue && time === "13:00" && /^DV.*Bounty.*100k/i.test(title)) buyin = 1000;
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
