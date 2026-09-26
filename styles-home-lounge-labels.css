@@ -141,3 +141,51 @@
   z-index: -1;
   pointer-events: none;
 }
+
+/* Flat figurine platforms with live labels below the artwork. */
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
+  position: relative !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1.42 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link::before,
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link::after { display: none !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art {
+  position: absolute !important;
+  inset: 2cqw 0 auto !important;
+  width: 100% !important;
+  height: auto !important;
+  translate: none !important;
+  transform: none !important;
+  clip-path: none !important;
+  filter: brightness(.85) saturate(.85) !important;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:first-child .home-lounge-art { top: 8cqw !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles .home-lounge-art { top: -6cqw !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-character-name {
+  top: 106cqw !important; left: 0 !important; width: 100% !important; height: auto !important;
+  border: 0 !important; background: none !important; box-shadow: none !important;
+  font: 600 4.2cqw/1.2 Arial, sans-serif !important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
+  display: flex !important; position: absolute !important;
+  top: 113cqw !important; left: 2% !important; width: 96% !important; height: 13cqw !important;
+  margin: 0 !important; padding: 0 !important; transform: none !important;
+  align-items: center; justify-content: center;
+  border: 1px solid #8b703b !important; border-radius: 8px !important;
+  background: #11130e !important; box-shadow: none !important;
+  color: #ffe3a3 !important; font: 900 6.2cqw/1 Arial, sans-serif !important;
+  text-transform: uppercase; text-shadow: none !important; white-space: nowrap;
+  clip-path: none !important; opacity: 1 !important; visibility: visible !important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge,
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge { top: 129cqw !important; font-size: 4.5cqw !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge::before { display: none; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { isolation: auto !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden { display: none !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art { mix-blend-mode: screen !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { mix-blend-mode: screen; }

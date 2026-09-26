@@ -142,6 +142,11 @@
 #app.app .home-sng-champions-feature[hidden],
 #app.app .daily-poker__sng-champions[hidden],
 #profileSngTournaments[hidden] { display: none !important; }
+
+/* A hidden SNG banner must not leave its empty wrapper and margins behind. */
+#app.app.app--view-home .home-club-actions-block:has(> .home-sng-champions-feature[hidden]):not(:has(> :not([hidden]))) {
+  display: none !important;
+}
 .profile-sng-card {
   display: grid;
   gap: 12px;
