@@ -149,13 +149,22 @@
 }
 .profile-sng-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  box-sizing: border-box;
+  min-height: clamp(180px, 26vw, 260px);
+  aspect-ratio: 3 / 1;
   gap: 12px;
   margin: 16px 0;
-  padding: 20px;
+  padding: 24px 43% 24px 24px;
   border: 1px solid #8d703c;
   border-radius: 20px;
-  background: linear-gradient(120deg, #252015, #0c1016);
+  background: #091410 url('./assets/profile-sng-championship-v1.webp') center / cover no-repeat;
   color: #f5dda4;
 }
-.profile-sng-card strong { font-size: 20px; }
+.profile-sng-card strong { font-size: clamp(18px, 2.5vw, 25px); line-height: 1.2; text-wrap: balance; }
+.profile-sng-card > span { color: #ffe3a0; font-weight: 600; }
 .profile-sng-card .home-sng-champions-action__cta { width: 100%; }
+@media (max-width: 480px) {
+  .profile-sng-card { padding: 20px 39% 20px 16px; background-position: 58% center; }
+}

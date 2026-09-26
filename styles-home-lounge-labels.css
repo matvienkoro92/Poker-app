@@ -29,7 +29,7 @@
 }
 .app.app--view-home .home-daily-shortcuts--lounge {
   margin-top: 10px !important;
-  padding-bottom: 5% !important;
+  padding-bottom: 0 !important;
 }
 .app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge,
 .app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge {
@@ -161,7 +161,7 @@
   transform: none !important;
   clip-path: none !important;
   filter: brightness(.85) saturate(.85) !important;
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
   pointer-events: none;
 }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:first-child .home-lounge-art { top: 8cqw !important; }
@@ -187,5 +187,5 @@
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge::before { display: none; }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { isolation: auto !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden { display: none !important; }
-#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art { mix-blend-mode: screen !important; }
-#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { mix-blend-mode: screen; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art { mix-blend-mode: normal !important; }
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { mix-blend-mode: normal; }

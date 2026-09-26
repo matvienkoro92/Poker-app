@@ -5,6 +5,7 @@
   translate: 5% 0;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
   /* Reclaim part of the transparent space below the illustrated table. */
+  margin-top: 0 !important;
   margin-bottom: -6% !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
   background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-single-table-v1-display-v1.webp')) center / 100% 100% no-repeat !important;
