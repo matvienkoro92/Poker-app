@@ -21,7 +21,7 @@ const tournaments = {
   3: { buyin: 1000, name: /^Счастливый Косарь$/iu },
   4: { buyin: 300, name: /^(?:Турнир Четверга(?:\s|$)|Четверг МК[ОO](?:\s|$)|Магия Тракториста)/iu },
   5: { buyin: 500, name: /^Пятница Прогрессив$/iu },
-  6: { buyin: 5000, name: /Big Boss/iu },
+  6: { buyin: 5000, name: /Big Boss/iu, weekdays: [3, 6], historyDays: "СР и СБ" },
 };
 
 const context = vm.createContext({});
@@ -31,6 +31,7 @@ for (const [file] of sources) {
 
 const history = Object.fromEntries(Object.entries(tournaments).map(([day, config]) => [day, {
   buyin: config.buyin,
+  ...(config.historyDays ? { historyDays: config.historyDays } : {}),
   results: [],
 }]));
 for (const [, variable] of sources) {
@@ -38,17 +39,19 @@ for (const [, variable] of sources) {
     const match = date.match(/^(\d{2})\.(\d{2})\.(2026)$/);
     if (!match || !Array.isArray(entries)) continue;
     const weekday = new Date(Date.UTC(+match[3], +match[2] - 1, +match[1])).getUTCDay();
-    const config = tournaments[weekday];
     for (const entry of entries) {
-      if (!entry || entry.time !== "18:00" || Number(entry.buyin) !== config.buyin ||
-          !config.name.test(String(entry.name || ""))) continue;
+      const target = Object.entries(tournaments).find(([day, config]) =>
+        (config.weekdays || [Number(day)]).includes(weekday) &&
+        entry && entry.time === "18:00" && Number(entry.buyin) === config.buyin &&
+        config.name.test(String(entry.name || "")));
+      if (!target) continue;
       const podium = (Array.isArray(entry.players) ? entry.players : [])
         .filter((player) => player && Number.isInteger(Number(player.place)) &&
           Number(player.place) >= 1 && Number(player.place) <= 3 &&
           String(player.nick || "").trim() && Number(player.reward) > 0)
         .map((player) => [Number(player.place), String(player.nick).trim(), Number(player.reward)])
         .sort((a, b) => a[0] - b[0]);
-      if (podium.length) history[weekday].results.push([date, podium]);
+      if (podium.length) history[target[0]].results.push([date, podium]);
     }
   }
 }

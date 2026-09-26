@@ -39,6 +39,7 @@
     var name = button.getAttribute("data-tournament-name") || "Турнир";
     var buyin = button.getAttribute("data-tournament-buyin") || "—";
     var day = button.getAttribute("data-tournament-day") || "Турнирный день";
+    if (source && source.buyin === selectedBuyin && source.historyDays) day = source.historyDays;
     var time = button.getAttribute("data-tournament-time") || "18:00";
     var guarantee = button.getAttribute("data-tournament-guarantee") || "—";
     var money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
