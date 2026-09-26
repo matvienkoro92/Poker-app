@@ -112,8 +112,8 @@
     return '';
   }
   function threadFormatHtml(t,metric){
-    var format=handFormat(t,metric);
-    return format?'<span class="review-thread-format__mode">'+esc(format.split(' · ')[0])+'</span>'+esc(format.slice(format.indexOf(' · ')<0?format.length:format.indexOf(' · '))):'';
+    var format=handFormat(t,metric),bankParts=format.split(' · Банк '),details=bankParts[0];
+    return format?'<span class="review-thread-format__mode">'+esc(details.split(' · ')[0])+'</span>'+esc(details.slice(details.indexOf(' · ')<0?details.length:details.indexOf(' · ')))+(bankParts.length>1?'<span class="review-thread-format__bank">Банк '+esc(bankParts.slice(1).join(' · Банк '))+'</span>':''):'';
   }
   function topicTitle(t){return (t.cards||[]).length?handAuthor(t)+' · '+cardsText(t):t.title;}
   function topicTitleHtml(t,metric){var format=handFormat(t,metric);return (format?'<span class="review-hand-format">'+esc(format)+'</span> · ':'')+((t.cards||[]).length?esc(handAuthor(t))+' · '+cardsHtml(t):esc(t.title));}
