@@ -1277,7 +1277,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* Monthly tournament: Hakas, ranked by wins then first-place prizes. */
 /* Shared ticket and table geometry; the glove remains a live UI element. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
-  --home-tournament-scene:url('./assets/home-tournament-hakas-month-v1.webp');
+  --home-tournament-scene:url('./assets/home-tournament-hakas-month-v2.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-table-seam-fix,
