@@ -855,7 +855,7 @@ function pokerShowViewLoadingShell(viewName) {
     view.classList.toggle("view--active", view.dataset.view === viewName);
   });
   navItems.forEach(function (item) {
-    item.classList.toggle("bottom-nav__item--active", item.dataset.viewTarget === viewName);
+    item.classList.toggle("bottom-nav__item--active", (item.dataset.viewTarget === viewName || (viewName === "chat" && item.dataset.viewTarget === "download")));
   });
   if (footer) footer.classList.toggle("card__footer--hidden", viewName !== "home");
   try {
@@ -1169,7 +1169,7 @@ function setView(viewName, navOpts) {
     } catch (eNavNt) {}
   }
   navItems.forEach(function (item) {
-    if (item.dataset.viewTarget === viewName) {
+    if ((item.dataset.viewTarget === viewName || (viewName === "chat" && item.dataset.viewTarget === "download"))) {
       item.classList.add("bottom-nav__item--active");
     } else {
       item.classList.remove("bottom-nav__item--active");
@@ -2398,4 +2398,12 @@ document.addEventListener("click", function (e) {
     return;
   }
   if (e.target.closest("[data-download-back]")) setDownloadPage("main");
+});
+
+// These tabs arrive with lazy-loaded HTML fragments after navItems is captured.
+document.addEventListener("click", function (event) {
+  var tab = event.target.closest && event.target.closest(".download-chat-tabs [data-view-target]");
+  if (!tab) return;
+  event.preventDefault();
+  setView(tab.dataset.viewTarget);
 });

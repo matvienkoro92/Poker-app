@@ -10594,3 +10594,9 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 /* Old cached PokerManki portraits include a rectangular backdrop. */
 [data-view="club-reviews"] .review-topic__avatar--pokermanki,[data-view="club-reviews"] .review-topic__avatar--personal-art:has(img[src*="pokermanki"]){background:transparent!important;box-shadow:none}
 [data-view="club-reviews"] .review-topic__avatar--personal-art img[src*="pokermanki"]{content:url("./assets/summer-rating-player-pokermanki-v3.webp?v=2")}
+
+/* Download and chat share one navigation entry. */
+.download-chat-tabs{display:flex;gap:8px;margin:0 0 16px;padding:4px;border:1px solid #a8884e70;border-radius:16px;background:#10151c;flex:none}
+.download-chat-tabs>button{flex:1;min-height:42px;border:0;border-radius:12px;background:transparent;color:#e9d6a4;font:inherit;font-weight:700;cursor:pointer}
+.download-chat-tabs>button[aria-current="page"]{background:linear-gradient(#ffe1a0,#d9a23a);color:#211907}
+.bottom-nav__item[data-club-news-open] .bottom-nav__label{white-space:normal;line-height:1.1}

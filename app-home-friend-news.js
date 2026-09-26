@@ -3522,6 +3522,11 @@
   function bind() {
     var open = el("homeFriendNewsOpen");
     var clubOpen = el("homeClubNewsOpen");
+    document.querySelectorAll("[data-club-news-open]").forEach(function(button){
+      if(button.dataset.clubNewsBound === "1")return;
+      button.dataset.clubNewsBound = "1";
+      button.addEventListener("click", openClubModal);
+    });
     var clubCopy = el("homeClubNewsCopyLink");
     var modal = el("homeFriendNewsModal");
     if (open && open.dataset.friendNewsBound !== "1") {

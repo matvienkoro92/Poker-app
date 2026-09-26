@@ -1,5 +1,6 @@
           <!-- Чат: поиск → Чаты (меню) → общий чат → Админы → Игроки -->
           <div class="view" data-view="chat">
+<nav class="download-chat-tabs" aria-label="Скачать и чаты"><button type="button" data-view-target="download">Скачать</button><button type="button" data-view-target="chat" aria-current="page" id="chatNavBtn">Чаты</button></nav>
             <!-- Один textarea для общего и личного чата: иначе iOS показывает панель «< > Готово» над клавиатурой -->
             <div id="chatComposerPool" class="chat-composer-pool" aria-hidden="true">
               <textarea class="chat-input chat-input--textarea" id="chatSharedComposer" maxlength="4096" rows="1" autocomplete="off" enterkeyhint="send" autocorrect="on" autocapitalize="sentences"></textarea>
