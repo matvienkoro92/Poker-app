@@ -136,3 +136,19 @@
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops th:last-child { width: 36%; }
   #summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month-tops .summer-result-rank { width: 15px; height: 15px; font-size: 8px; }
 }
+#summerRatingMonthSummaries#summerRatingMonthSummaries.summer-rating-month-summaries--september {
+  margin-top: 24px;
+}
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month--expanded,
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month--expanded .summer-rating-summary,
+#summerRatingMonthSummaries#summerRatingMonthSummaries .summer-rating-month--expanded .summer-rating-season-top {
+  border: 0;
+  box-shadow: none;
+}
+#summerRatingMonthSummaries .summer-rating-month--expanded > h2 {
+  margin: 0;
+  padding: 10px 14px;
+  color: #ffe9bd;
+  font-size: 14px;
+  font-weight: 600;
+}

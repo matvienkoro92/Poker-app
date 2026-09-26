@@ -39,8 +39,9 @@ function summerRatingPrizeTopTable(title, rows, single) {
     }).join('') + '</tbody></table></section>';
   }
 
-function summerRatingMonthTopsHtml(stats) {
-  return '<div class="summer-rating-season-tops summer-rating-month-tops">' + summerRatingPrizeTopTable("Топ-10 разовых выигрышей", stats.topWins, true) + summerRatingPrizeTopTable("Топ-10 по суммарным выигрышам", stats.topPlayers, false) + "</div>";
+function summerRatingMonthTopsHtml(stats, limit) {
+  limit = limit || 10;
+  return '<div class="summer-rating-season-tops summer-rating-month-tops">' + summerRatingPrizeTopTable("Топ-" + limit + " разовых выигрышей", stats.topWins.slice(0, limit), true) + summerRatingPrizeTopTable("Топ-" + limit + " по суммарным выигрышам", stats.topPlayers.slice(0, limit), false) + "</div>";
 }
 
 function summerRatingSeasonStatsHtml(stats) {
@@ -3816,11 +3817,15 @@ function initWinterRating() {
           summerMonthsHost.id = "summerRatingMonthSummaries";
           upperMonths.parentNode.insertBefore(summerMonthsHost, upperMonths);
         }
+        summerMonthsHost.classList.toggle("summer-rating-month-summaries--september", septemberMode);
         upperMonths.style.setProperty("display", "none", "important");
         var summerStats = summerRatingSeasonStats(summerTournaments);
         summerMonthsHost.innerHTML = (septemberMode ? "" : summerRatingSeasonStatsHtml(summerStats)) + summerMonths.map(function (month) {
-          return '<details class="summer-rating-month"><summary>' + monthNames[month - 1] + ' 2026</summary>' +
-            summerSummaryHtml([month], "Итоги месяца") + summerRatingMonthTopsHtml(summerRatingSeasonStats(summerTournaments, [month])) + '</details>';
+          var title = monthNames[month - 1] + " 2026";
+          var content = summerSummaryHtml([month], "Итоги месяца") + summerRatingMonthTopsHtml(summerRatingSeasonStats(summerTournaments, [month]), septemberMode ? 7 : 10);
+          return septemberMode
+            ? '<section class="summer-rating-month summer-rating-month--expanded"><h2>' + title + '</h2>' + content + '</section>'
+            : '<details class="summer-rating-month"><summary>' + title + '</summary>' + content + '</details>';
         }).join("");
       }
     } else {
