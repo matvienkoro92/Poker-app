@@ -2710,7 +2710,7 @@
       .then(function (data) {
         if (request !== profileTournamentsRequest || auth !== apiAuthQuery("?") || !data || !data.ok) return;
         var rows = (data.tournaments || []).filter(function (row) {
-          return row.myEntryStatus === "approved" && (row.status === "bracket" || row.status === "completed");
+          return row.myEntryStatus === "approved" && row.status === "bracket";
         });
         panel.innerHTML = rows.map(function (row) {
           return '<div class="profile-sng-card"><strong>' + escapeHtml(row.title) + '</strong><span>' +

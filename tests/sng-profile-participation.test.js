@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../app-sng-champions.js'), 'utf8');
 const code = source.slice(source.indexOf('  var profileTournamentsRequest ='), source.indexOf('  function bind()'));
-test('profile includes only approved started tournaments and hides on logout', async () => {
+test('profile includes only approved ongoing tournaments and hides on logout', async () => {
   const panel = {hidden:true, innerHTML:''};
   let loggedIn = true;
   const context = {document:{getElementById:()=>panel},pokerApiHasCredential:()=>loggedIn,apiAuthQuery:()=>'?auth=user',baseUrl:()=>'',API_PATH:'/api/sng-champions',escapeHtml:String,fetch:async()=>({ok:true,json:async()=>({ok:true,tournaments:[
@@ -18,8 +18,8 @@ test('profile includes only approved started tournaments and hides on logout', a
   context.refreshProfileTournaments();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(panel.hidden,false);
-  assert.match(panel.innerHTML,/Playing/);assert.match(panel.innerHTML,/Finished/);
-  assert.doesNotMatch(panel.innerHTML,/Waiting|Stranger|Pending/);
+  assert.match(panel.innerHTML,/Playing/);
+  assert.doesNotMatch(panel.innerHTML,/Finished|Waiting|Stranger|Pending/);
   loggedIn=false;context.refreshProfileTournaments();
   assert.equal(panel.hidden,true);assert.equal(panel.innerHTML,'');
 });
