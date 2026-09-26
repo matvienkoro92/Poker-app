@@ -173,13 +173,19 @@
 }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
   display: flex !important; position: absolute !important;
-  top: 113cqw !important; left: 2% !important; width: 96% !important; height: 13cqw !important;
+  top: 113cqw !important; left: 2% !important; width: 96% !important; max-width: none !important; height: 15cqw !important;
   margin: 0 !important; padding: 0 !important; transform: none !important;
   align-items: center; justify-content: center;
-  border: 1px solid #8b703b !important; border-radius: 8px !important;
-  background: #11130e !important; box-shadow: none !important;
-  color: #ffe3a3 !important; font: 900 6.2cqw/1 Arial, sans-serif !important;
-  text-transform: uppercase; text-shadow: none !important; white-space: nowrap;
+  box-sizing: border-box;
+  border: 1px solid transparent !important; border-radius: 7px !important;
+  background:
+    linear-gradient(115deg, #ffffff0d, transparent 35% 65%, #edb95812) padding-box,
+    linear-gradient(180deg, #394239 0%, #1d2720 45%, #111b15 50%, #20291e 100%) padding-box,
+    linear-gradient(135deg, #8b5923, #ffe4a0 28%, #ab7939 50%, #e5be70 76%, #795021) border-box !important;
+  box-shadow: inset 0 1px 0 #fff3c84d, inset 0 -2px 0 #050a07, 0 2px 0 #66451f, 0 4px 7px #0009, 0 0 9px #e7af3814 !important;
+  color: #ffe7ae !important; font: 900 clamp(9px, 6.2cqw, 20px)/1 Arial, sans-serif !important;
+  text-transform: uppercase; text-shadow: 0 1px 1px #000, 0 0 7px #ffc86426 !important; white-space: nowrap;
+  transition: filter .18s ease, box-shadow .18s ease, translate .12s ease;
   clip-path: none !important; opacity: 1 !important; visibility: visible !important;
 }
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge,
@@ -189,3 +195,24 @@
 #app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge.feature__badge--hidden { display: none !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art { mix-blend-mode: normal !important; }
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link { mix-blend-mode: normal; }
+
+/* Raised brass plaques respond to pointer and keyboard interaction. */
+@media (hover: hover) {
+  #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:hover .home-mini-icon__label {
+    filter: brightness(1.18);
+    translate: 0 -1px;
+  }
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:focus-visible .home-mini-icon__label {
+  outline: 2px solid #fff0bb;
+  outline-offset: 3px;
+  filter: brightness(1.15);
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:active .home-mini-icon__label {
+  translate: 0 2px;
+  filter: brightness(.95);
+  box-shadow: inset 0 2px 5px #0008, 0 1px 0 #9a7238 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label { transition: none; }
+}
