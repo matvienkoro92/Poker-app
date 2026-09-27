@@ -37,3 +37,14 @@ test("411042 must reach level 18 for raffles and spins under either identity", (
     }
   }
 });
+test("992854 fixed level 17 applies to raffles and spins under either identity", () => {
+  for (const check of [playerRaffleLevelError, playerDailyPokerLevelError]) {
+    for (const [account, poker] of [["ID102224", "different"], ["different", "992854"]]) {
+      for (const level of [0, 10, 16, NaN]) assert.equal(check(account, poker, level).accessLevel, 17);
+      assert.equal(check(account, poker, 17), null);
+      assert.equal(check(account, poker, 18), null);
+    }
+  }
+  assert.equal(playerDailyPokerLevelError("ID319715", "524129", 1), null);
+  assert.equal(playerDailyPokerLevelError("ID813235", "923321", 1), null);
+});

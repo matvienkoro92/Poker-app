@@ -30,10 +30,10 @@ function imports(){
  const candidates=fs.readdirSync(output).filter(name=>name.startsWith('club-hand-import')&&fs.existsSync(path.join(output,name,'upload-journal.jsonl'))&&fs.existsSync(path.join(output,name,'prepare-report.json'))&&fs.existsSync(path.join(output,name,'players')))
   .map(name=>({dir:path.join(output,name),report:JSON.parse(fs.readFileSync(path.join(output,name,'prepare-report.json')))}))
   .sort((a,b)=>String(b.report.periodTo).localeCompare(String(a.report.periodTo))||String(a.report.periodFrom).localeCompare(String(b.report.periodFrom))||Number(b.report.modes?.cash||0)-Number(a.report.modes?.cash||0));
- const selected=[];let earliest='9999';
- for(const candidate of candidates)if(candidate.report.periodFrom<earliest){selected.push(candidate);earliest=candidate.report.periodFrom;}
- if(!selected.length)throw Error('No imported club hand histories');
- return selected;
+ // Imports may contain only new hands even when their requested period overlaps
+ // the entire month. Merge every source; player/hand identities are deduplicated below.
+ if(!candidates.length)throw Error('No imported club hand histories');
+ return candidates;
 }
 function evDirectory(source){
  const base=process.env.CLUB_CASH_EV_SOURCE?path.resolve(process.env.CLUB_CASH_EV_SOURCE):path.join(output,path.basename(source).replace('club-hand-import','club-hand-ev'));

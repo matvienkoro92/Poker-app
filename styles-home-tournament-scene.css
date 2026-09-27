@@ -1450,3 +1450,14 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(2) { order: -1; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(2) small { display: none; }
+
+/* The painted Hakas chip ends halfway down its larger click target. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
+  top: 45% !important;
+  min-width: 16cqw !important;
+  padding: .55cqw 1cqw !important;
+  border: .2cqw solid #d6aa60 !important;
+  border-radius: .5cqw !important;
+  background: linear-gradient(180deg, #344237, #14251d 55%, #0b1711) !important;
+  box-shadow: inset 0 0 0 .15cqw #f7d99422, 0 .3cqw .65cqw #000b !important;
+}

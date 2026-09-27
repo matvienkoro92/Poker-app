@@ -1220,9 +1220,10 @@
     var currentMonth = (data.months || [])[0];
     var monthLabel = currentMonth ? new Date(currentMonth.month + '-01T12:00:00').toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) : '';
     var cashDays = data.days || [];
-    var previousDayKeys = clubAvailableWinDayKeys(clubEvents);
-    if (!previousDayKeys.length) previousDayKeys = clubAvailableWinDayKeys(cashDays.map(function (day) { return { at: day.date + 'T12:00:00' }; }));
-    var previousDay = cashDays.find(function (day) { return day.date === previousDayKeys[0]; });
+    var yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    var previousDayKey = eventDayKey(yesterday);
+    var previousDay = cashDays.find(function (day) { return day.date === previousDayKey; });
     var previousDayLabel = previousDay ? new Date(previousDay.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     return '<div class="home-friend-news-modal__cash">' +
       '<section class="home-friend-news-modal__cash-month"><div class="cash-month-heading"><strong class="cash-month-brand"><i>♠</i> POKER<span>21</span> · ДВА ТУЗА</strong><span><h3>Топы месяца</h3><small>' + esc(monthLabel) + '</small></span></div>' +
@@ -1234,7 +1235,7 @@
   function loadClubCashHighlights() {
     if (clubCashLoading) return;
     clubCashLoading = true; clubCashError = false;
-    fetch('./club-cash-highlights.json?v=winning-a-high-1').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
+    fetch('./club-cash-highlights.json?v=merged-imports-2').then(function (response) { if (!response.ok) throw new Error('cash'); return response.json(); })
       .then(function (data) { if (!data || !Array.isArray(data.days) || !Array.isArray(data.months)) throw new Error('cash'); clubCashHighlights = data; })
       .catch(function () { clubCashError = true; })
       .finally(function () { clubCashLoading = false; if (newsModalMode === 'club' && clubNewsTab === 'cash') renderModalList([]); });
@@ -2549,7 +2550,7 @@
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
-    var showCardTime = !(newsModalMode === "club" && !ticker && timeLabel === "вчера");
+    var showCardTime = row.type !== "birthday" && !(newsModalMode === "club" && !ticker && timeLabel === "вчера");
     var linkedClubProfile = newsModalMode === "club" ? clubProfileForNick(row && row.actorNick) : null;
     var friendProfileKey = matchKey(row && row.actorNick);
     var linkedFriendProfile = newsModalMode === "friends"
@@ -2614,9 +2615,10 @@
       : "";
     var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
+        (row.type === "birthday" ? profileMetaHtml : "") +
         (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
         poker21LinkedHtml + titleAmountHtml + '</span>' +
-        profileMetaHtml +
+        (row.type === "birthday" ? "" : profileMetaHtml) +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"

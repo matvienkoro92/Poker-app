@@ -2788,3 +2788,28 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-friend-news-modal__cash-month .home-friend-news-modal__cash-group--monthly>summary>.cash-monthly-context {position:static!important;align-self:flex-start!important;text-align:left!important;width:auto!important;max-width:100%;transform:none!important;order:0}
 .home-friend-news-modal__cash-month .home-friend-news-modal__cash-group--monthly>summary>.cash-monthly-value {font-size:clamp(21px,7.4cqw,76px)!important}
 .home-friend-news-modal__cash-month .home-friend-news-modal__cash-group--monthly[data-cash-category="highCard"]>summary>.cash-monthly-value {font-size:clamp(18px,5.6cqw,59px)!important}
+
+/* Birthday identity and controls each occupy one compact row. */
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__player-title {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:4px 8px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__player-title .home-friend-news-modal__player-meta {
+  display:inline;
+  flex:0 0 auto;
+  margin:0;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-controls {
+  display:grid;
+  grid-template-columns:minmax(32px,1fr) minmax(64px,1.1fr) 26px 26px;
+  gap:5px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-controls > * {
+  min-width:0;
+  margin:0;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-controls .home-friend-news-modal__profile-cue {
+  padding-inline:6px;
+}

@@ -499,13 +499,18 @@ function startHistory(payload) {
     };
     statsPanel.ontoggle=()=>{if(statsPanel.open&&missing.length&&!insightsLoading&&!insightsError)load.click();};
     if(missing.length&&!insightsLoading&&!insightsError&&(!root.hidden||(!statsPanel.hidden&&statsPanel.open)))queueMicrotask(()=>{if(load.isConnected&&!insightsLoading)load.click();});
+    function collectionTotal(summary,rows){
+      const total=rows.reduce((sum,hand)=>sum+amount(hand),0);
+      const value=add(summary,'b',signed(total)+' '+reviewUnit,'insight-collection__result '+(total>0?'positive':total<0?'negative':''));
+      value.setAttribute('aria-label','Суммарный результат: '+signed(total)+' '+reviewUnit);
+    }
     const collections=add(root,'div',null,'insight-collections');
     if(stats.wins.length||stats.losses.length){
       const topGroup=add(collections,'section',null,'insight-collection-group');add(topGroup,'h4','Крупнейшие раздачи');
       for(const [title,rows] of [['Выигрыши',stats.wins],['Проигрыши',stats.losses]]){
         if(!rows.length)continue;
         const d=add(topGroup,'details',null,'insight-collection');const summary=add(d,'summary',null);
-        add(summary,'span',title,'insight-collection__title');add(summary,'strong',number(rows.length),'insight-collection__count');
+        add(summary,'span',title,'insight-collection__title');collectionTotal(summary,rows);add(summary,'strong',number(rows.length),'insight-collection__count');
         const body=add(d,'div',null,'insight-collection__body');
         d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(body,rows);}});
       }
@@ -531,7 +536,7 @@ function startHistory(payload) {
       for(const [key,title] of available){
         const raw=stats.collections[key],rows=['riverLoss','bigLoss'].includes(key)?raw.slice().sort((a,b)=>amount(a)-amount(b)):raw;
         const d=add(group,'details',null,'insight-collection');
-        const summary=add(d,'summary',null);add(summary,'span',title,'insight-collection__title');add(summary,'strong',number(rows.length),'insight-collection__count');
+        const summary=add(d,'summary',null);add(summary,'span',title,'insight-collection__title');collectionTotal(summary,rows);add(summary,'strong',number(rows.length),'insight-collection__count');
         const body=add(d,'div',null,'insight-collection__body');
         d.addEventListener('toggle',()=>{if(d.open&&!d.dataset.ready){d.dataset.ready='1';handList(body,rows,key==='evBelow'||key==='evAbove');}});
       }
