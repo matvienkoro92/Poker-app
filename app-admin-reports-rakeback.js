@@ -39,7 +39,7 @@
     try {
       if (typeof window === "undefined" || !window.localStorage) return;
       var pending = (Array.isArray(rows) ? rows : []).filter(function (row) {
-        return row && row.persisted !== true && String(row.playerId || "").trim();
+        return row && (row.persisted !== true || row.saved !== true) && String(row.playerId || "").trim();
       }).slice(0, 100);
       if (pending.length) window.localStorage.setItem(RAKEBACK_PENDING_ROWS_STORAGE_KEY, JSON.stringify(pending));
       else window.localStorage.removeItem(RAKEBACK_PENDING_ROWS_STORAGE_KEY);
@@ -505,12 +505,22 @@
     var winFetch = window && window["fetch"];
     var requestFetch = typeof winFetch === "function" ? winFetch.bind(window) : null;
     if (!requestFetch) return Promise.reject(new Error("fetch unavailable"));
-    return requestFetch(url, options || {}).then(function (response) {
+    var controller = typeof AbortController === "function" ? new AbortController() : null;
+    var timer;
+    var requestOptions = Object.assign({}, options || {});
+    if (controller) requestOptions.signal = controller.signal;
+    var timeout = new Promise(function (_, reject) {
+      timer = setTimeout(function () {
+        if (controller) controller.abort();
+        reject(new Error("request_timeout"));
+      }, 20000);
+    });
+    return Promise.race([requestFetch(url, requestOptions).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (data && typeof data === "object") data.__httpStatus = response.status;
         return data;
       });
-    });
+    }), timeout]).finally(function () { clearTimeout(timer); });
   }
 
   function createRoomOptions(activeRoom) {
@@ -2425,7 +2435,18 @@
       pendingDelete = null;
       if (item.timer) clearTimeout(item.timer);
       if (undoEl) undoEl.hidden = true;
-      if (!item.persisted) return;
+      if (!item.persisted) { writePendingRakebackRows(sharedRows); return; }
+      function finishDelete(ok) {
+        if (ok) return;
+        if (item.kind === "addon") delete locallyDeletedRowKeys[item.localKey];
+        else delete locallyDeletedGroupIds[item.groupId];
+        var current = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+        var keys = new Set(current.map(getSharedRowLocalKey));
+        sharedRows = current.concat((item.rows || []).filter(function (row) { return !keys.has(getSharedRowLocalKey(row)); }));
+        writePendingRakebackRows(sharedRows);
+        render();
+        setStatus("Удаление не подтверждено. Строка восстановлена", true);
+      }
       if (item.kind === "addon") {
         saveSharedDraftNow(true, {
           upsertGroupIds: [item.groupId],
@@ -2433,14 +2454,14 @@
           permanentlyDeleteRows: canPermanentlyDelete() ? (item.rows || []) : [],
           auditAction: "delete",
           auditDeletedCount: 1,
-        });
+        }).then(finishDelete);
       } else {
         saveSharedDraftNow(true, {
           deleteGroupIds: [item.groupId],
           permanentlyDeleteRows: canPermanentlyDelete() ? (item.rows || []) : [],
           auditAction: "delete",
           auditDeletedCount: Math.max(1, Array.isArray(item.rows) ? item.rows.length : 1),
-        });
+        }).then(finishDelete);
       }
     }
 
@@ -2660,6 +2681,7 @@
       var merged = existingRows.map(function (row) {
         var key = getSharedRowLocalKey(row);
         if (!key || !loadedByKey[key]) return row;
+        if (row.saved !== true) { seen[key] = true; return row; }
         seen[key] = true;
         return mergeServerRowWithLocalVisualState(loadedByKey[key], row);
       });
@@ -2833,6 +2855,28 @@
         if (data && data.ok && data.rakebackDraft) {
           rememberServerDeletedTemplates(data.rakebackDraft.deletedTemplates);
           var serverRows = filterLocallyDeletedSharedRows(normalizeDraftRows(data.rakebackDraft.rows));
+          var confirmed = payload.rakebackRows.every(function (sent) {
+            return serverRows.some(function (row) {
+              return getSharedRowLocalKey(row) === getSharedRowLocalKey(sent) &&
+                String(row.playerId) === String(sent.playerId) && row.room === sent.room &&
+                parseNumber(row.rake) === parseNumber(sent.rake) && parseNumber(row.percent) === parseNumber(sent.percent) &&
+                row.discount15 === sent.discount15;
+            });
+          });
+          var returnedRows = normalizeDraftRows(data.rakebackDraft.rows);
+          var deletedGroups = payload.deleteRakebackGroupIds || [];
+          var deletedKeys = payload.deleteRakebackRowKeys || [];
+          if (returnedRows.some(function (row) {
+            return deletedGroups.indexOf(row.groupId) >= 0 ||
+              (deletedKeys.indexOf(getSharedRowServerKey(row)) >= 0 && !payload.rakebackRows.some(function (sent) { return getSharedRowServerKey(sent) === getSharedRowServerKey(row); }));
+          })) confirmed = false;
+          if (!confirmed) {
+            writePendingRakebackRows(localRows.map(function (row) {
+              return payload.rakebackRows.indexOf(row) >= 0 ? Object.assign({}, row, { saved: false }) : row;
+            }));
+            if (showStatus) setStatus("Сервер не подтвердил сохранение строки. Правки оставлены в таблице", true);
+            return false;
+          }
           var currentLocalRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
           if (archiveMode) {
             sharedRows = mergeLoadedRowsIntoExisting(serverRows, currentLocalRows);
@@ -2902,6 +2946,10 @@
       else if (markBusy) syncControls();
       return requestJson(base + "/api/admin-report-shifts" + q).then(function (data) {
         var draft = data && data.ok ? data.rakebackDraft : null;
+        if (!draft || (draft.notModified !== true && !Array.isArray(draft.rows))) {
+          if (options.showStatus) setStatus((data && data.error) || "Не удалось обновить. Данные в таблице сохранены", true);
+          return false;
+        }
         rememberServerDeletedTemplates(draft && draft.deletedTemplates);
         var responseUpdatedAt = draft && draft.updatedAt ? String(draft.updatedAt) : "";
         var currentUpdatedAtMs = sharedUpdatedAt ? Date.parse(sharedUpdatedAt) : 0;
@@ -3710,6 +3758,7 @@
           row.classList.add("admin-report-rakeback-row--dirty");
           syncSharedGroupRows();
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+          writePendingRakebackRows(sharedRows);
           syncControls();
           applyQuickFilter();
         });
@@ -3725,6 +3774,7 @@
           row.classList.add("admin-report-rakeback-row--dirty");
           syncSharedGroupRows();
           sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+          writePendingRakebackRows(sharedRows);
           syncControls();
           applyQuickFilter();
           if (event.target && event.target.matches && event.target.matches("[data-rakeback-room]")) render();
@@ -3875,6 +3925,7 @@
               failedRow.setAttribute("data-rakeback-persisted", wasPersisted ? "1" : "0");
               setSharedRowSaved(failedRow, false, false);
               sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true });
+              writePendingRakebackRows(sharedRows);
             });
             return;
           }
