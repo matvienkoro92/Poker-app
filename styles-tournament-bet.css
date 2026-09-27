@@ -825,3 +825,20 @@
 .tournament-bet-share-preview img{display:block;width:100%;margin:12px 0}
 .tournament-bet-share-preview button{padding:10px;margin:4px;border:1px solid #b08a45;border-radius:8px;background:#272219;color:#ffe2a1;cursor:pointer}
 .tournament-bet-share-preview [hidden]{display:none}
+
+.tournament-bet-modal__history-card > button[data-tournament-bet-archive] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #ffe1a0;
+  text-align: left;
+  cursor: pointer;
+}
+.tournament-bet-modal__history-card > button[data-tournament-bet-archive] strong { flex-basis: 100%; }
+.tournament-bet-modal__history-card > button[data-tournament-bet-archive] .tournament-bet-modal__event-date { margin: 0; }

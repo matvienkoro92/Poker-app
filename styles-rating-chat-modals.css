@@ -4469,21 +4469,19 @@ html body #chatUserModal .chat-user-modal__last-seen {
 }
 html body #chatUserModal .chat-user-modal__top-actions {
   display: flex !important;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
   width: 100% !important;
   min-width: 0;
   transform: none !important;
-  gap: 8px;
+  gap: 6px;
 }
-html body #chatUserModal .chat-user-modal__write-row {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 40px;
-  gap: 8px;
-}
+html body #chatUserModal .chat-user-modal__write-row,
+html body #chatUserModal .chat-user-modal__friend-row,
 html body #chatUserModal .chat-user-modal__friend-buttons {
-  display: flex !important;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: contents !important;
 }
 html body #chatUserModal .chat-user-modal__top-actions button {
   box-sizing: border-box;
@@ -4498,12 +4496,18 @@ html body #chatUserModal .chat-user-modal__top-actions button {
   clip-path: none !important;
   transform: none !important;
 }
-html body #chatUserModal .chat-user-modal__friend-buttons button {
-  flex: 1;
-  min-width: 100px;
+html body #chatUserModal .chat-user-modal__top-actions button {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 0;
+  padding-inline: 10px !important;
 }
+html body #chatUserModal .chat-user-modal__copy-profile-btn { order: 1; }
 html body #chatUserModal .chat-user-modal__friend-msg {
   display: block;
+  order: 2;
+  flex-basis: 100%;
+  text-align: right;
   margin-top: 6px;
   font-size: 12px !important;
   line-height: 1.4;

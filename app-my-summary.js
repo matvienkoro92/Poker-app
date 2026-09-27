@@ -148,13 +148,15 @@
   }
   function error(id) { put(id, '<p class="summary-muted">Не удалось загрузить. Попробуйте обновить сводку.</p>'); }
   function renderReviewUnread(count) {
-    var badge = root && root.querySelector("[data-summary-review-unread]");
-    if (!badge) return;
     count = Math.max(0, Number(count) || 0);
-    badge.hidden = count === 0;
-    badge.textContent = count > 99 ? "99+" : String(count);
-    badge.setAttribute("aria-label", "Непросмотренных тем: " + count);
+    document.querySelectorAll("[data-summary-review-unread], #bottomNavReviewUnread").forEach(function (badge) {
+      badge.hidden = count === 0;
+      badge.textContent = count > 99 ? "99+" : String(count);
+      badge.setAttribute("aria-label", "Непросмотренных тем: " + count);
+      if (badge.id === "bottomNavReviewUnread") badge.classList.toggle("bottom-nav__badge--on", count > 0);
+    });
   }
+
   var reviewUnreadRequest = 0;
   function loadReviewUnread(valid) {
     var seq = generation, requestId = ++reviewUnreadRequest;
@@ -556,7 +558,10 @@
   renderChartUnread();
   setTimeout(checkChartUnread,0);
   setInterval(checkChartUnread,60000);
-  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;if(root&&root.querySelector("[data-summary-review-unread]"))loadReviewUnread();});
-  window.addEventListener("poker-telegram-auth", function () {generation++;pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
+  setTimeout(function () { loadReviewUnread(); }, 0);
+  setInterval(function () { if (!document.hidden) loadReviewUnread(); }, 60000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) loadReviewUnread(); });
+  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;loadReviewUnread();});
+  window.addEventListener("poker-telegram-auth", function () {generation++;renderReviewUnread(0);loadReviewUnread();pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
   setInterval(function () {if(document.hidden || !document.querySelector('[data-view="my-summary"].view--active'))return;if(spin && !spin.canPlay && Date.parse(spin.nextFreeAttemptAt)<=Date.now()+offset && Date.now()-loadedAt>30000){loadedAt=0;init();}else renderSpin();}, 30000);
 })();

@@ -913,11 +913,13 @@
             <span class="home-daily-deal-hero__prize">10 000 ₽</span>
             <span class="home-daily-deal-hero__timer">1 раз в 24 часа</span>
           </span>
-          <span class="home-daily-deal-hero__won" id="homeDailyPokerWon" aria-live="polite">
-            Выиграно <strong>— ₽</strong>
-          </span>
           <span class="home-daily-deal-hero__cta">
-            <span>Сыграть раздачу</span>
+            <span class="home-daily-deal-hero__cta-copy">
+              <span>Сыграть раздачу</span>
+              <span class="home-daily-deal-hero__won" id="homeDailyPokerWon" aria-live="polite">
+                Выиграно <strong>— ₽</strong>
+              </span>
+            </span>
             <span class="home-daily-deal-hero__arrow" aria-hidden="true">›</span>
           </span>
           <picture><img
@@ -1876,13 +1878,14 @@
         <span class="bottom-nav__label" id="bottomNavHomeLabel">Главная</span>
       </button>
       <div class="bottom-nav__chat-wrap">
-        <button type="button" class="bottom-nav__item" data-club-news-open aria-label="Новости клуба">
+        <button type="button" class="bottom-nav__item" data-club-news-open aria-label="Победы клуба">
           <span class="bottom-nav__icon-wrap">
         <span class="bottom-nav__icon" aria-hidden="true">
-          <span class="bottom-nav__emoji">📰</span>
+          <span class="bottom-nav__emoji">🏆</span>
         </span>
           </span>
-          <span class="bottom-nav__label" id="bottomNavClubNewsLabel">Новости клуба</span>
+          <span class="bottom-nav__label" id="bottomNavClubNewsLabel">Победы
+клуба</span>
         </button>
       </div>
       <button type="button" class="bottom-nav__item" data-view-target="download">
@@ -1894,8 +1897,9 @@
       <button type="button" class="bottom-nav__item" data-view-target="my-summary">
         <span class="bottom-nav__icon" aria-hidden="true">
           <span class="bottom-nav__emoji">🃏</span>
+          <span class="bottom-nav__badge" id="bottomNavReviewUnread" aria-live="polite" hidden></span>
         </span>
-        <span class="bottom-nav__label" id="bottomNavHandsLabel">Мои раздачи</span>
+        <span class="bottom-nav__label" id="bottomNavHandsLabel">Раздачи</span>
       </button>
       <button type="button" class="bottom-nav__item" data-view-target="profile">
         <span class="bottom-nav__icon" aria-hidden="true">

@@ -10612,7 +10612,7 @@ body[data-view="club-reviews"].review-reply-input-active #app.app {
 .download-chat-tabs{display:flex;gap:8px;margin:0 0 16px;padding:4px;border:1px solid #a8884e70;border-radius:16px;background:#10151c;flex:none}
 .download-chat-tabs>button{flex:1;min-height:42px;border:0;border-radius:12px;background:transparent;color:#e9d6a4;font:inherit;font-weight:700;cursor:pointer}
 .download-chat-tabs>button[aria-current="page"]{background:linear-gradient(#ffe1a0,#d9a23a);color:#211907}
-.bottom-nav__item[data-club-news-open] .bottom-nav__label{white-space:normal;line-height:1.1}
+.bottom-nav__item[data-club-news-open] .bottom-nav__label{white-space:pre-line;line-height:1.1}
 
 .profile-friend-news-card{margin:12px 0 20px}
 .profile-friend-news-card[hidden]{display:none!important}

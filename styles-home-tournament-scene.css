@@ -1366,16 +1366,15 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__icon {
-  position:absolute!important;top:23%!important;left:50%!important;transform:translateX(-50%)!important;
-  width:1.98cqw!important;height:1.98cqw!important;
+  display:none!important;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label,
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {
   position:absolute!important;left:0!important;width:100%!important;text-align:center!important;
   color:#ffe8b8!important;text-shadow:0 1px 2px #000!important;
 }
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:37%!important;font-size:1.62cqw!important}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:49%!important;font-size:1.845cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:30%!important;font-size:1.62cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:42%!important;font-size:1.845cqw!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
   top:82%!important;left:50%!important;width:17cqw!important;transform:translate(-50%,-50%)!important;
   padding:.6cqw .3cqw!important;background:#10251f!important;border:1px solid #b99250!important;border-radius:.8cqw!important;box-shadow:0 .3cqw .7cqw #0009!important;

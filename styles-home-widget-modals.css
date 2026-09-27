@@ -3952,13 +3952,13 @@ button.sng-champions-modal__singles-duel-player {
   }
 }
 
-.sng-champions-modal:has(.sng-champions-modal__bracket-map-wrap--expanded) .club-choice-vote-modal__footer,
-.sng-champions-modal:has(.sng-champions-modal__bracket-map-wrap--fit) .club-choice-vote-modal__footer {
+.sng-champions-modal:has([data-sng-tab-panel="bracket"]:not([hidden]) [data-sng-bracket-view-panel]:not([hidden]) .sng-champions-modal__bracket-map-wrap--expanded) .club-choice-vote-modal__footer,
+.sng-champions-modal:has([data-sng-tab-panel="bracket"]:not([hidden]) [data-sng-bracket-view-panel]:not([hidden]) .sng-champions-modal__bracket-map-wrap--fit) .club-choice-vote-modal__footer {
   display: none;
 }
 
-.club-choice-vote-modal__body:has(.sng-champions-modal__bracket-map-wrap--expanded),
-.club-choice-vote-modal__body:has(.sng-champions-modal__bracket-map-wrap--fit) {
+.club-choice-vote-modal__body:has([data-sng-tab-panel="bracket"]:not([hidden]) [data-sng-bracket-view-panel]:not([hidden]) .sng-champions-modal__bracket-map-wrap--expanded),
+.club-choice-vote-modal__body:has([data-sng-tab-panel="bracket"]:not([hidden]) [data-sng-bracket-view-panel]:not([hidden]) .sng-champions-modal__bracket-map-wrap--fit) {
   overflow: visible;
 }
 

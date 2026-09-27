@@ -297,20 +297,38 @@
       (archived ? "" : '<div class="tournament-bet-modal__share">' + subscriptionButtonHtml() + '</div>' + adminHtml(data));
   }
 
-  var historyLoaded = false;
-  var historyLoading = false;
-  var historyEvents = [];
+  var archiveDetails = Object.create(null);
+  var archiveOpen = Object.create(null);
+  var archivePending = Object.create(null);
+  var archiveErrors = Object.create(null);
   function completedEventsHtml(data) {
-    if (!historyLoaded) return '<section class="tournament-bet-modal__history"><button type="button" data-tournament-bet-history>' + (historyLoading ? 'Загружаем…' : 'Архив прошлых событий') + '</button></section>';
-    data = Object.assign({}, data, {completedEvents: historyEvents});
     var seen = {};
-    var events = (Array.isArray(data.completedEvents) ? data.completedEvents : []).filter(function (item) {
+    var events = (Array.isArray(data.archiveEvents) ? data.archiveEvents : []).filter(function (item) {
       if (!item || !item.id || item.id === data.id || item.status !== "settled" || item.createdByPlayer || seen[item.id]) return false;
       seen[item.id] = true;
       return true;
     });
     if (!events.length) return "";
-    return '<section class="tournament-bet-modal__history"><h3>Прошлые события</h3>' + events.map(function (item) { return closedEventHtml(item, true); }).join("") + '</section>';
+    return '<section class="tournament-bet-modal__history"><h3>Прошлые события</h3>' + events.map(function (item) {
+      var id = item.id;
+      return '<section class="tournament-bet-modal__history-card"><button type="button" data-tournament-bet-archive="' + esc(id) + '" aria-expanded="' + !!archiveOpen[id] + '">' +
+        '<strong>' + esc(item.title || "Турнир вечера") + '</strong>' + eventDateHtml(item) + '<span>' + (archiveOpen[id] ? 'Свернуть ▴' : 'Открыть ▾') + '</span></button>' +
+        (archiveOpen[id] ? '<div>' + (archiveDetails[id] ? closedEventHtml(archiveDetails[id], true) : archiveErrors[id] ? '<p role="alert">' + esc(archiveErrors[id]) + '</p><button type="button" data-tournament-bet-archive-retry="' + esc(id) + '">Повторить</button>' : '<p role="status">Загружаем событие…</p>') + '</div>' : '') + '</section>';
+    }).join("") + '</section>';
+  }
+
+  function loadArchiveEvent(id) {
+    if (archiveDetails[id] || archivePending[id]) return;
+    var generation = authGeneration;
+    archivePending[id] = true;
+    delete archiveErrors[id];
+    fetch(baseUrl() + API_PATH + authQuery("?eventId=" + encodeURIComponent(id) + "&"), { cache: "no-store" })
+      .then(function (response) { return response.json().then(function (data) {
+        if (!response.ok || !data.ok || data.id !== id) throw new Error(data.error || "Не удалось загрузить событие");
+        if (generation === authGeneration) archiveDetails[id] = data;
+      }); })
+      .catch(function (error) { if (generation === authGeneration) archiveErrors[id] = error.message; })
+      .finally(function () { if (generation === authGeneration) { delete archivePending[id]; if (modal && !modal.hidden) render(); } });
   }
 
   function eventHtml(data) {
@@ -625,17 +643,12 @@
     }
     var personalDecline = event.target.closest("[data-tournament-bet-personal-decline]");
     if (personalDecline) { declinePersonalEvent(personalDecline.getAttribute("data-tournament-bet-personal-decline") || ""); render(); return; }
-    if (event.target.closest("[data-tournament-bet-history]")) {
-      if (historyLoading) return;
-      historyLoading = true; render();
-      var historyGeneration = authGeneration;
-      fetch(baseUrl() + API_PATH + authQuery("?mode=history&"), {cache:"no-store"})
-        .then(function (r) {return r.json();}).then(function (data) {
-          if (historyGeneration !== authGeneration) return;
-          if (!data.ok) throw new Error(data.error || "Не удалось загрузить архив");
-          historyEvents = data.completedEvents || []; historyLoaded = true;
-        }).catch(function () {})
-        .finally(function () {historyLoading = false; if (historyGeneration === authGeneration) render();});
+    var archiveButton = event.target.closest("[data-tournament-bet-archive], [data-tournament-bet-archive-retry]");
+    if (archiveButton) {
+      var archiveId = archiveButton.getAttribute("data-tournament-bet-archive") || archiveButton.getAttribute("data-tournament-bet-archive-retry");
+      archiveOpen[archiveId] = archiveButton.hasAttribute("data-tournament-bet-archive-retry") || !archiveOpen[archiveId];
+      if (archiveOpen[archiveId]) loadArchiveEvent(archiveId);
+      render();
       return;
     }
     if (event.target.closest("[data-tournament-bet-personal-back]")) { selectedEventId = ""; activeTab = "create"; load(false); return; }
@@ -761,7 +774,7 @@
   else initialLoad();
   window.addEventListener("poker-telegram-auth", function () {
     authGeneration++;
-    historyLoaded = false; historyEvents = []; historyLoading = false;
+    archiveDetails = Object.create(null); archiveOpen = Object.create(null); archivePending = Object.create(null); archiveErrors = Object.create(null);
     state = null;
     subscribed = false;
     activeTab = "event";
