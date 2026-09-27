@@ -31,3 +31,15 @@ COLOR: emerald green / sapphire blue / ruby red / amber orange.
 ## Glove prompt
 
 Single luxury boxing glove trophy separate UI asset on true transparent background. Square canvas. Front three-quarter view one upright black supple leather boxing glove, delicate champagne gold piping and fine gold embroidery of spade symbol, mounted on small elegant black marble and gold pedestal. Blank dark polished gold-rimmed horizontal plaque at base for later HTML text. Exquisite sharp studio product 3D render matching premium casino chip assets, fine stitching, restrained metallic highlights, realistic smooth leather grain no cracks no scratches no grunge. Object occupies 90% image height centered, full silhouette visible, small contact shadow. No text, no numbers, no background, no table, no other objects.
+
+## Proportion adjustment
+
+`assets/home-tournament-hakas-layered-v2.webp` reduces Hakas, his held chip and
+his eagle while retaining the original ticket size and position. Built-in imagegen
+edit of v1: shrink character to approximately 77% and eagle to 80%, preserve
+identity, clothing, blank ticket, black background, no table or bonus objects.
+Saved at native 1122×1402 as WebP quality 92 (150256 bytes).
+
+The independent table keeps its geometry. Bonus boxes decrease from 23cqw to
+17.5cqw and move inward to 17%, 33.5%, 50%, 66.5%, 83%, with top at 73%.
+Live labels and the Last Longer hit area follow the resized art.

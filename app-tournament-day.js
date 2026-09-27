@@ -83,7 +83,7 @@ var HOME_TOURNAMENT_DATE_OVERRIDES = {
     time: "18:00 МСК",
     character: "hakas",
     historyKey: "monthly3000",
-    banner: "home-tournament-hakas-layered-v1.webp",
+    banner: "home-tournament-hakas-layered-v2.webp",
     bannerAlt: "Турнир месяца — вход 3 000 ₽, призовой фонд 1 000 000 ₽",
     bannerWidth: 1122,
     bannerHeight: 1402

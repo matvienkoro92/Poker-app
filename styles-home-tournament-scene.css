@@ -1341,7 +1341,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* Hakas: independent high-resolution scene, table and interactive bonus objects. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
-  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v1.webp');
+  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v2.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before {
   content:""!important;display:block!important;inset:61% -7.5% auto!important;
@@ -1350,7 +1350,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   clip-path:none!important;mask:none!important;-webkit-mask:none!important;z-index:2!important;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
-  top:70%!important;width:23cqw!important;height:23cqw!important;
+  top:73%!important;width:17.5cqw!important;height:17.5cqw!important;
   transform:translateX(-50%)!important;isolation:isolate;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(1) {--bonus-art:url('./assets/home-tournament-chip-green-v1.webp')}
@@ -1367,20 +1367,26 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__icon {
   position:absolute!important;top:23%!important;left:50%!important;transform:translateX(-50%)!important;
-  width:2.5cqw!important;height:2.5cqw!important;
+  width:2cqw!important;height:2cqw!important;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label,
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {
   position:absolute!important;left:0!important;width:100%!important;text-align:center!important;
   color:#ffe8b8!important;text-shadow:0 1px 2px #000!important;
 }
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:37%!important;font-size:1.75cqw!important}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:49%!important;font-size:2.1cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:37%!important;font-size:1.65cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:49%!important;font-size:1.85cqw!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
-  top:83%!important;left:50%!important;width:10cqw!important;transform:translate(-50%,-50%)!important;
+  top:83%!important;left:50%!important;width:8cqw!important;transform:translate(-50%,-50%)!important;
   padding:0!important;background:none!important;border:0!important;box-shadow:none!important;
-  color:#ffe8b8!important;font-size:1.6cqw!important;text-shadow:0 1px 2px #000!important;
+  color:#ffe8b8!important;font-size:1.3cqw!important;text-shadow:0 1px 2px #000!important;
 }
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.15cqw!important}
-#app.app.app--view-home [data-tournament-character="hakas"] > .home-last-longer-dock {left:39%!important;top:42%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:.95cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] > .home-last-longer-dock {left:41%!important;top:43.2%!important;width:18%!important;height:14.4%!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonuses__note {top:94%!important;bottom:auto!important}
+
+/* Keep the smaller bonus objects on the felt, clear of both side rails. */
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:17%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:33.5%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:66.5%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:83%!important}
