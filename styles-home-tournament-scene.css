@@ -1338,3 +1338,49 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock {top:40%!important}
 #app.app.app--view-home [data-tournament-character="hakas"] #homeTournamentWeekList .home-tournament-trophy__caption {left:20%!important;top:48%!important;font-size:1.65cqw!important;letter-spacing:.1em!important}
 #app.app.app--view-home [data-tournament-character="hakas"] #homeTournamentWeekList .home-tournament-trophy__prize {left:18%!important;top:56%!important;font-size:4.5cqw!important;white-space:nowrap!important}
+
+/* Hakas: independent high-resolution scene, table and interactive bonus objects. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
+  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v1.webp');
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before {
+  content:""!important;display:block!important;inset:61% -7.5% auto!important;
+  width:115%!important;height:39%!important;
+  background:url('./assets/home-tournament-table-premium-v1.webp') center/100% 100% no-repeat!important;
+  clip-path:none!important;mask:none!important;-webkit-mask:none!important;z-index:2!important;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
+  top:70%!important;width:23cqw!important;height:23cqw!important;
+  transform:translateX(-50%)!important;isolation:isolate;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(1) {--bonus-art:url('./assets/home-tournament-chip-green-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(2) {--bonus-art:url('./assets/home-tournament-chip-blue-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(3) {--bonus-art:url('./assets/home-tournament-chip-red-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(4) {--bonus-art:url('./assets/home-tournament-glove-premium-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(5) {--bonus-art:url('./assets/home-tournament-chip-orange-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus::before {
+  content:""!important;display:block!important;position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;transform:none!important;border:0!important;border-radius:0!important;
+  background:var(--bonus-art) center/contain no-repeat!important;box-shadow:none!important;z-index:-1!important;
+  filter:drop-shadow(0 .5cqw .5cqw #0005);pointer-events:none;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__icon {
+  position:absolute!important;top:23%!important;left:50%!important;transform:translateX(-50%)!important;
+  width:2.5cqw!important;height:2.5cqw!important;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label,
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {
+  position:absolute!important;left:0!important;width:100%!important;text-align:center!important;
+  color:#ffe8b8!important;text-shadow:0 1px 2px #000!important;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:37%!important;font-size:1.75cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:49%!important;font-size:2.1cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  top:83%!important;left:50%!important;width:10cqw!important;transform:translate(-50%,-50%)!important;
+  padding:0!important;background:none!important;border:0!important;box-shadow:none!important;
+  color:#ffe8b8!important;font-size:1.6cqw!important;text-shadow:0 1px 2px #000!important;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.15cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] > .home-last-longer-dock {left:39%!important;top:42%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonuses__note {top:94%!important;bottom:auto!important}
