@@ -3367,7 +3367,8 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
   max-width: 100%;
 }
 .player-crm__links-table {
-  min-width: 860px;
+  min-width: 0;
+  width: 100%;
   table-layout: auto;
 }
 .player-crm__links-table th,
@@ -4097,4 +4098,11 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
   .player-crm .player-crm__period-metric span {
     font-size: 9px;
   }
+}
+
+.player-crm__links-table .player-crm__links-controls td {
+  padding: 2px 2px 10px;
+}
+.player-crm__links-controls .player-crm__links-action-row {
+  flex-wrap: wrap;
 }

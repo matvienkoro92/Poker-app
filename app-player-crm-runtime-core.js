@@ -2187,7 +2187,7 @@
       return;
     }
     el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__links-table\"><thead><tr>" +
-      "<th>Название</th><th>Раздел</th><th title=\"По убыванию\">Клики ↓</th><th>Уник.</th><th>Активн.</th><th>Событий</th><th>Действия</th><th class=\"player-crm__links-url-cell\">Ссылка</th>" +
+      "<th>Название</th><th>Раздел</th><th title=\"По убыванию\">Клики ↓</th><th>Уник.</th><th>Активн.</th><th>Событий</th>" +
       "</tr></thead><tbody>" + links.map(function (link) {
         var url = crmLinkUrl(link);
         return "<tr>" +
@@ -2197,8 +2197,7 @@
           "<td>" + esc(intFmt(crmLinkMetric(link, "uniqueClicks"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "activeVisitors"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "actionEvents"))) + "</td>" +
-          "<td><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button><button type=\"button\" class=\"player-crm__danger-btn\" data-crm-link-delete=\"" + esc(link.id || "") + "\">Удалить</button></span></td>" +
-          "<td class=\"player-crm__links-url-cell\"><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\" title=\"Скопировать ссылку\">" + esc(url || "—") + "</button></td>" +
+          "</tr><tr class=\"player-crm__links-controls\"><td colspan=\"6\"><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button><button type=\"button\" class=\"player-crm__danger-btn\" data-crm-link-delete=\"" + esc(link.id || "") + "\">Удалить</button></span></td>" +
         "</tr>";
       }).join("") + "</tbody></table></div>";
   }
@@ -2334,34 +2333,35 @@
     if (subtitleEl) subtitleEl.textContent = "ref_" + state.linkDetailsId + " · " + crmLinkTargetLabel(link);
     var detailItems = [
       ["Название", crmLinkTitle(link)],
-      ["Ref", "ref_" + state.linkDetailsId],
-      ["Раздел", crmLinkTargetLabel(link)],
-      ["Текст кнопки", crmLinkButtonText(link)],
-      ["Ссылка", url],
-      ["Создана", link.createdAt || "—"],
-      ["Источник", params.utm_source || "—"],
-      ["Канал", params.utm_medium || "—"],
-      ["Кампания", params.utm_campaign || "—"],
-      ["Креатив", params.utm_content || "—"],
-      ["Аудитория", params.utm_term || "—"],
-      ["Оффер", params.lead_offer || "—"],
-      ["Ответственный", params.lead_owner || "—"],
-      ["Клики", intFmt(crmLinkMetric(link, "totalClicks"))],
-      ["Уникальные", intFmt(crmLinkMetric(link, "uniqueClicks"))],
-      ["Активные", intFmt(crmLinkMetric(link, "activeVisitors"))],
-      ["События", intFmt(crmLinkMetric(link, "actionEvents"))]
+      ["Куда ведёт", crmLinkTargetLabel(link)],
+      ["Создана · МСК", dateTime(link.createdAt)],
+      ["Всего переходов", intFmt(crmLinkMetric(link, "totalClicks"))],
+      ["Уникальные посетители", intFmt(crmLinkMetric(link, "uniqueClicks"))],
+      ["Посетители с действиями", intFmt(crmLinkMetric(link, "activeVisitors"))],
+      ["Всего действий", intFmt(crmLinkMetric(link, "actionEvents"))]
     ];
+    [
+      ["Источник", params.utm_source],
+      ["Канал", params.utm_medium],
+      ["Кампания", params.utm_campaign],
+      ["Креатив", params.utm_content],
+      ["Аудитория", params.utm_term],
+      ["Предложение", params.lead_offer],
+      ["Ответственный", params.lead_owner]
+    ].forEach(function (item) {
+      if (String(item[1] || "").trim()) detailItems.push(item);
+    });
     var visitorsHtml = state.linkDetailsVisitorsLoading
       ? "<div class=\"player-crm__notice player-crm__notice--loading\">Загружаем переходы…</div>"
       : state.linkDetailsVisitorsError
       ? "<div class=\"player-crm__notice player-crm__notice--error\">" + esc(state.linkDetailsVisitorsError) + "</div>"
       : state.linkDetailsVisitors && state.linkDetailsVisitors.length
-      ? "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visits-table\"><thead><tr><th>Время</th><th>Visitor</th><th>Telegram</th><th>Действия</th></tr></thead><tbody>" +
+      ? "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__visits-table\"><thead><tr><th>Время · МСК</th><th>Посетитель</th><th>Telegram</th><th>Действия</th></tr></thead><tbody>" +
         state.linkDetailsVisitors.map(function (v) {
           var parts = [];
           if (v.firstName) parts.push(v.firstName);
           if (v.username) parts.push("@" + v.username);
-          return "<tr><td>" + esc(v.t || "") + "</td><td>" + esc(v.visitorId || "") + "</td><td>" + esc(parts.join(" · ") || "—") + "</td><td>" + renderCrmLinkActivity(v.activity) + "</td></tr>";
+          return "<tr><td>" + esc(dateTime(v.t)) + "</td><td>" + esc(v.visitorId || "") + "</td><td>" + esc(parts.join(" · ") || "—") + "</td><td>" + renderCrmLinkActivity(v.activity) + "</td></tr>";
         }).join("") + "</tbody></table></div>"
       : "<div class=\"player-crm__notice\">Переходов пока нет.</div>";
     bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" +
@@ -2369,12 +2369,42 @@
       "<div class=\"player-crm__link-detail-grid\">" + detailItems.map(function (item) {
         return "<div class=\"player-crm__link-detail-item\"><small>" + esc(item[0]) + "</small><strong>" + esc(item[1]) + "</strong></div>";
       }).join("") + "</div>" +
-      "<h4 class=\"player-crm__edit-title\">Параметры для отслеживания лида</h4>" +
-      "<pre class=\"player-crm__link-detail-json\">" + esc(JSON.stringify(params, null, 2)) + "</pre>" +
+      "<p class=\"player-crm__detail-muted\">Показатели за всё время. Посетители с действиями — те, у кого зафиксированы события после перехода.</p>" +
+      '<h4 class="player-crm__edit-title">Участники по ссылке</h4>' +
+      '<p class="player-crm__detail-muted">Зарегистрированные аккаунты с подтверждённым переходом. Новые регистрации отмечены отдельно.</p>' +
+      '<div class="player-crm__source-table-wrap"><table class="player-crm__source-table"><thead><tr><th>Игрок</th><th>ID клуба</th><th>Игровой ID</th><th>Уровень</th><th>Регистрация</th></tr></thead><tbody>' +
+      (state.linkParticipants || []).filter(function (r) { return r.accountId; }).map(function (r) {
+        return '<tr><td>' + esc(r.nick || 'Игрок') + '</td><td>' + esc(r.accountId) + '</td><td>' + esc(r.pokerId || '—') + '</td><td>' + esc(r.level == null ? '—' : r.level) + '</td><td>' + esc(r.status === 'new' ? 'После перехода' : r.status === 'returning' ? 'До перехода' : 'Дата неизвестна') + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<p class="player-crm__detail-muted">' + (state.linkParticipantsLoading ? 'Загружаем участников…' : state.linkParticipantsError ? 'Не удалось загрузить участников.' : !(state.linkParticipants || []).some(function (r) { return r.accountId; }) ? 'На загруженных страницах нет подтверждённых аккаунтов. Старые анонимные переходы нельзя связать с регистрацией задним числом.' : '') + '</p>' +
+      (state.linkParticipantsNext != null || state.linkParticipantsError ? '<button type="button" class="player-crm__ghost-btn" data-crm-participants-more' + (state.linkParticipantsLoading ? ' disabled' : '') + '>' + (state.linkParticipantsError ? 'Повторить' : 'Ещё участники') + '</button>' : '') +
       "<h4 class=\"player-crm__edit-title\">Переходы и действия</h4>" + visitorsHtml +
       "</div>";
+    var moreParticipants = bodyEl.querySelector('[data-crm-participants-more]');
+    if (moreParticipants) moreParticipants.onclick = function () { loadCrmLinkParticipants(state.linkDetailsRequestSeq); };
     modal.hidden = false;
     if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
+  }
+
+  function loadCrmLinkParticipants(requestSeq) {
+    if (state.linkParticipantsLoading) return;
+    state.linkParticipantsLoading = true;
+    state.linkParticipantsError = false;
+    renderCrmLinkDetailsModal();
+    var q = authQuerySafe();
+    fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'journey=1&participants=1&id=' + encodeURIComponent(state.linkDetailsId) + '&offset=' + (state.linkParticipantsNext || 0))
+      .then(function (r) { return r.json(); }).then(function (data) {
+        if (requestSeq !== state.linkDetailsRequestSeq) return;
+        if (!data.ok || !Array.isArray(data.rows)) throw new Error('participants');
+        state.linkParticipants = (state.linkParticipants || []).concat(data.rows);
+        state.linkParticipantsNext = data.nextOffset;
+      }).catch(function () {
+        if (requestSeq === state.linkDetailsRequestSeq) state.linkParticipantsError = true;
+      }).finally(function () {
+        if (requestSeq !== state.linkDetailsRequestSeq) return;
+        state.linkParticipantsLoading = false;
+        renderCrmLinkDetailsModal();
+      });
   }
 
   function openCrmLinkDetails(id) {
@@ -2382,6 +2412,10 @@
     if (!id) return;
     var requestSeq = ++state.linkDetailsRequestSeq;
     state.linkDetailsId = id;
+    state.linkParticipants = [];
+    state.linkParticipantsNext = 0;
+    state.linkParticipantsLoading = false;
+    state.linkParticipantsError = false;
     state.linkDetailsVisitors = [];
     state.linkDetailsVisitorsError = "";
     state.linkDetailsVisitorsLoading = true;
@@ -2395,6 +2429,7 @@
     }
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
+    loadCrmLinkParticipants(requestSeq);
     fetch(base + "/api/tracking-links" + q + sep + "id=" + encodeURIComponent(id) + "&visitors=1")
       .then(function (r) { return r.json(); })
       .then(function (data) {
