@@ -26,3 +26,14 @@ test("unlisted players unaffected; unknown level cannot bypass a requirement", (
   assert.equal(playerRaffleLevelError("ID111111", "111111", 1), null);
   assert.equal(playerRaffleLevelError("ID864019", "773051", NaN).accessLevel, 9);
 });
+
+const { playerDailyPokerLevelError } = require("../lib/raffle-player-level-requirements");
+test("411042 must reach level 18 for raffles and spins under either identity", () => {
+  for (const check of [playerRaffleLevelError, playerDailyPokerLevelError]) {
+    for (const [account, poker] of [["ID862503", "different"], ["different", "411042"]]) {
+      for (const level of [0, 13, 17, NaN]) assert.equal(check(account, poker, level).accessLevel, 18);
+      assert.equal(check(account, poker, 18), null);
+      assert.equal(check(account, poker, 19), null);
+    }
+  }
+});
