@@ -26,10 +26,16 @@ test("match start sends the password privately and announces the table without i
   assert.equal(notifications.filter((item) => item.text.includes("Пароль стола: 5555")).length, 2);
   const club = notifications.find((item) => item.chatId === "-1001227353220");
   assert.equal(club.parseMode, "HTML");
-  assert.match(club.text, /^<b>Аза32 - Врей<\/b>\n\nСетка:/);
-  assert.match(club.text, /Создан стол/);
+  assert.match(club.text, /^<b>Аза32 - Врей<\/b>\n<b>1\/8<\/b>\n\nСетка:/);
+  assert.doesNotMatch(club.text, /Создан стол/);
   assert.match(club.text, /Пароль отправлен участникам в личку/);
   assert.doesNotMatch(club.text, /5555|Пароль стола:/);
+  for (const stage of ["1/2", "L 1/2"]) {
+    context.roundStageLabelForState = () => stage;
+    const semifinal = (await context.buildMatchStartedNotifications({}, {}, {playerIds:["123", "456"],tablePassword:"5555"})).find(item => item.chatId === "-1001227353220");
+    assert.match(semifinal.text, /<b>Аза32 - Врей<\/b>\n<b>Полуфинал<\/b>/);
+    assert.doesNotMatch(semifinal.text, /Создан стол|5555/);
+  }
 });
 
 test("single match reminder names the player and repeats the table password", async () => {
