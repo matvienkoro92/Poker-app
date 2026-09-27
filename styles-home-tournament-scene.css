@@ -5,7 +5,7 @@
   translate: 5% 0;
   aspect-ratio: 4 / 5 !important; padding: 0 !important; gap: 0 !important;
   /* Reclaim part of the transparent space below the illustrated table. */
-  margin-top: 0 !important;
+  margin-top: 10px !important;
   margin-bottom: -6% !important;
   border: 0 !important; border-radius: 0 !important; overflow: visible !important;
   background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-single-table-v1-display-v1.webp')) center / 100% 100% no-repeat !important;
@@ -789,7 +789,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   paint-order:stroke; stroke:#100b05; stroke-width:2px; stroke-linejoin:round;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
-  margin-top:calc(clamp(42px,7vw,76px) + 10px)!important;
+  margin-top:calc(clamp(42px,7vw,76px) + 4px)!important;
 }
 
 /* Align the table panel and the tractor scene trophy on the same centerline. */
