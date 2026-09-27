@@ -11,10 +11,12 @@ async function main() {
   const cacheName = sw.match(/var POKER_STATIC_CACHE = "([^"]+)"/)[1];
   const oldCache = sw.match(/var POKER_STATIC_OLD_CACHES = \["([^"]+)"/)[1];
   let updated = false;
+  let navigationFailure = false;
   const oldSw = `self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open('${oldCache}').then(c => c.put('/styles.css',new Response('old-css')))); }); self.addEventListener('activate',e => e.waitUntil(self.clients.claim()));`;
   const server = http.createServer((req, res) => {
     res.setHeader("Cache-Control", "no-store");
     if (req.url === "/sw.js") { res.setHeader("Content-Type", "application/javascript"); res.end(updated ? sw : oldSw); }
+    else if (navigationFailure && req.url.startsWith("/?")) { res.statusCode = 502; res.end("temporary failure"); }
     else if (req.url.startsWith("/styles.css")) { res.setHeader("Content-Type", "text/css"); res.end("new-css"); }
     else { res.setHeader("Content-Type", "text/html"); res.end(`<html data-release="${updated ? 'new' : 'old'}"><body><textarea id="draft">unsaved draft</textarea>PWA upgrade fixture</body></html>`); }
   });
@@ -49,6 +51,17 @@ async function main() {
     assert.equal(await page.evaluate(name => caches.has(name), oldCache), false);
     assert.equal(await page.evaluate(async () => (await fetch('/styles.css')).text()), 'new-css');
     await page.waitForFunction(name => caches.has(name), cacheName);
+    navigationFailure = true;
+    await page.goto(`http://127.0.0.1:${server.address().port}/?startapp=raffles#tgWebAppData=launch%26auth`);
+    await page.getByRole('heading', {name:'Не удалось загрузить клуб'}).waitFor();
+    navigationFailure = false;
+    await page.getByRole('link', {name:'Повторить загрузку'}).click();
+    await page.locator('#draft').waitFor();
+    const recovered = new URL(page.url());
+    assert.equal(recovered.searchParams.get('startapp'), 'raffles');
+    assert.equal(recovered.hash, '#tgWebAppData=launch%26auth');
+    assert.ok(recovered.searchParams.get('_club_retry'));
+    console.log('Navigation recovery passed: retry loaded the app and preserved Telegram launch data.');
     console.log(`PWA upgrade passed: ${oldCache} removed, ${cacheName} active, draft preserved until explicit reload, fresh CSS loaded.`);
   } finally {
     clearTimeout(watchdog);

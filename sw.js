@@ -196,10 +196,28 @@ function pokerSwIsPublicApiRequest(url) {
 
 // Navigation must settle even when the network never returns the document.
 function pokerSwNavigationFallback(request) {
-  var retryUrl = String(request && request.url || "/").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // A different query forces a document navigation even if the current page has
+  // Telegram's launch fragment (a same-document link may otherwise do nothing).
+  var retryTarget = new URL(request && request.url || "/", self.location.origin);
+  retryTarget.searchParams.set("_club_retry", String(Date.now()));
+  var retryUrl = retryTarget.href.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return new Response(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f172a"><title>Два туза — загрузка</title><style>
   *{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;background:#0f172a;color:#fff3d6;font:17px/1.5 system-ui,sans-serif;text-align:center}main{max-width:420px}h1{font-size:26px;line-height:1.2}p{color:#c4cbd8}.retry{display:inline-block;text-decoration:none;font:inherit;font-weight:700;border:0;border-radius:14px;padding:15px 24px;background:#ffd477;color:#201505;cursor:pointer}.retry:focus-visible{outline:3px solid white;outline-offset:4px}
-  </style></head><body><main><h1>Не удалось загрузить клуб</h1><p>Соединение прервалось или сервер долго отвечает. Проверьте интернет и попробуйте ещё раз.</p><a class="retry" href="${retryUrl}">Повторить загрузку</a></main></body></html>`, {
+  </style></head><body><main><h1>Не удалось загрузить клуб</h1><p>Соединение прервалось или сервер долго отвечает. Проверьте интернет и попробуйте ещё раз.</p><a class="retry" href="${retryUrl}">Повторить загрузку</a></main><script>
+  (function () {
+    var retry = document.querySelector(".retry");
+    // Navigation requests do not carry the fragment; recover Telegram launch
+    // data from the actual page URL before navigating away from this fallback.
+    retry.hash = window.location.hash;
+    retry.addEventListener("click", function (event) {
+      event.preventDefault();
+      var target = new URL(window.location.href);
+      target.searchParams.set("_club_retry", String(Date.now()));
+      retry.textContent = "Загружаем…";
+      window.location.replace(target.href);
+    });
+  })();
+  </script></body></html>`, {
     status: 503,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
   });
@@ -212,14 +230,27 @@ function pokerSwNavigation(request) {
     timer = setTimeout(function () {
       resolve(pokerSwNavigationFallback(request));
       controller.abort();
-    }, 7000);
+    }, 30000);
   });
-  var network = fetch(request, { signal: controller.signal }).then(function (response) {
-    if (!response.ok) return pokerSwNavigationFallback(request);
-    // Return the document stream immediately so the browser can paint the boot UI.
-    // Waiting for clone().text() here blocked rendering until all HTML arrived.
-    return response;
-  }).catch(function () { return pokerSwNavigationFallback(request); });
+  function attempt(retriesLeft) {
+    if (controller.signal.aborted) return Promise.resolve(pokerSwNavigationFallback(request));
+    return fetch(request, { signal: controller.signal, cache: "no-store" }).then(function (response) {
+      if (!response.ok) {
+        // Retry temporary gateway/server failures once, within the same deadline.
+        if (response.status >= 500 && retriesLeft && !controller.signal.aborted) {
+          if (response.body) response.body.cancel().catch(function () {});
+          return attempt(retriesLeft - 1);
+        }
+        return pokerSwNavigationFallback(request);
+      }
+      // Return the document stream immediately; do not buffer HTML before paint.
+      return response;
+    }, function () {
+      if (retriesLeft && !controller.signal.aborted) return attempt(retriesLeft - 1);
+      return pokerSwNavigationFallback(request);
+    });
+  }
+  var network = attempt(1);
   return Promise.race([network, timeout]).then(function (response) {
     clearTimeout(timer);
     return response;
