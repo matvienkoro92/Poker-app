@@ -1274,6 +1274,12 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 #app.app.app--view-home [data-tournament-character="shtukatur"] .home-tournament-bonus--pokermanki-knockout { display:none!important; }
 
+/* Magic 500 is led by ПокерМанки too. Keep Monday's live knockout bonus. */
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonus--pokermanki-knockout { display:block!important; }
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus__glove { display:block!important; }
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] > #homeTournamentRaffleBonus,
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-raffle-chest-art { display:none!important; }
+
 /* Monthly tournament: Hakas, ranked by wins then first-place prizes. */
 /* Shared ticket and table geometry; the glove remains a live UI element. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
