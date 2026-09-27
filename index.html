@@ -1908,7 +1908,8 @@
         <span class="bottom-nav__label" id="bottomNavProfileLabel">Профиль</span>
       </button>
     </nav>
-    <script defer src="./telegram-web-app.js?v=4.002"></script>
+    <!-- Reveal the parsed interface before waiting for the rest of the deferred scripts. -->
+    <script defer src="./telegram-web-app.js?v=4.002" onload="try { window.Telegram.WebApp.ready(); } catch (e) {}"></script>
     <script defer src="./updates-data.js?v=4.002"></script>
     <script defer src="./poker-tasks-data.js?v=4.002"></script>
     <script defer src="./app-auth.js?v=4.002"></script>
