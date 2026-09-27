@@ -304,7 +304,10 @@ class MemoryRedis {
       if (String(command[1]).includes("report_transaction_v1")) {
         for (const snap of JSON.parse(args[0])) {
           const current = snap.kind === "list" ? this.l(snap.key) : this.kv.get(snap.key);
-          if (snap.kind === "list" ? JSON.stringify(current) !== JSON.stringify(snap.value) : (snap.exists ? current !== snap.value : current != null)) return this.result(0);
+          const digest = value => crypto.createHash("sha1").update(value).digest("hex");
+          if (snap.kind === "list"
+            ? JSON.stringify(current.map(digest)) !== JSON.stringify(snap.hashes)
+            : (snap.exists ? current == null || digest(current) !== snap.hash : current != null)) return this.result(0);
         }
         for (const cmd of JSON.parse(args[1])) { const row = this.exec(cmd); if (row.error) return row; }
         return this.result(1);
