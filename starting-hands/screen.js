@@ -262,8 +262,9 @@ function startHistory(payload) {
     }catch(error){if(error?.name!=='AbortError'){if(typeof console!=='undefined'&&console.warn)console.warn('hand share image',error);button.textContent='Не удалось';await new Promise(resolve=>setTimeout(resolve,1200));}}
     finally{button.disabled=false;button.textContent=original;}
   }
+  let restoringHands=new Set();
   function createHandCard(h,index,renderReplay){
-      const row=document.createElement('details');row.className='hand-row replay';
+      const row=document.createElement('details');row.className='hand-row replay';row.dataset.handId=h.handId;
       const summary=document.createElement('summary');summary.className='hand-summary';
       const ordinal=document.createElement('span');ordinal.className='hand-number';ordinal.textContent='#'+(index+1);
       const dateWrap=document.createElement('span'),date=document.createElement('span'),publish=document.createElement('button');dateWrap.className='hand-date-actions';date.className='hand-date';date.textContent=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/Moscow'}).format(new Date(h.playedAt));publish.type='button';publish.className='hand-publish-button';publish.textContent='Опубликовать';publish.onclick=event=>{event.preventDefault();event.stopPropagation();publishHand(publish,h,row,renderReplay);};dateWrap.append(date,publish);
@@ -370,6 +371,7 @@ function startHistory(payload) {
   }
   const insightCacheKey='poker-hand-insights:'+payload.playerId;
   const insightSignals={};let insightsLoading=false,insightsError='';
+  let updateInsightProgress=()=>{};
   // Keep small derived action flags across iframe recreation; never reuse another
   // player's history or an older import's version.
   if(payload.version)try{
@@ -396,7 +398,19 @@ function startHistory(payload) {
     const personalList=add(personalCard,'ul');
     for(const line of personal.lines)add(personalList,'li',line);
     const personalStatus=add(personalCard,'p',insightsError||'','insight-personal-summary__status');personalStatus.hidden=!insightsError;
+    const progress=add(personalCard,'progress',null,'insight-personal-summary__progress');
+    progress.max=hands.length;progress.setAttribute('aria-label','Загрузка истории действий');progress.style.width='100%';
     const load=add(root,'button',insightsLoading?'Загружаю историю действий…':'Загрузить действия для вскрытий и подборок','insight-button insight-button--loading');load.type='button';load.hidden=!missing.length;load.disabled=insightsLoading;
+    updateInsightProgress=()=>{
+      const loaded=hands.filter(h=>Object.prototype.hasOwnProperty.call(insightSignals,h.handId)).length;
+      progress.value=loaded;progress.hidden=!insightsLoading;personalStatus.classList.toggle('insight-personal-summary__status--loading',insightsLoading);
+      if(insightsLoading){
+        const text='Загружено действий: '+loaded+' / '+hands.length+' · '+Math.floor(loaded/hands.length*100)+'%';
+        personalStatus.hidden=false;personalStatus.textContent=text;load.textContent=text;
+        personalCard.querySelector('.insight-personal-summary__coverage').textContent=window.PokerHandInsights.personalSummary(stats,hands.length,loaded).coverage;
+      }
+    };
+    updateInsightProgress();
     if(insightsError)add(root,'p',insightsError,'note');
     if(insightsError&&missing.length){const retry=add(personalCard,'button','Повторить загрузку','insight-button');retry.type='button';retry.onclick=()=>{insightsError='';load.click();};}
     function handList(parent,rows,showEv=false){
@@ -411,6 +425,8 @@ function startHistory(payload) {
         }
       }shown+=30;more.hidden=shown>=rows.length;}
       more.onclick=next;next();
+      const lastOpen=rows.reduce((last,h,i)=>restoringHands.has(String(h.handId))?i:last,-1);
+      while(shown<=lastOpen&&shown<rows.length)next();
     }
     const pokerStats=add(statsPanel,'section',null,'insight-card');add(pokerStats,'h3','Основные показатели');
     const statsGrid=add(pokerStats,'div',null,'poker-stats-grid');
@@ -464,9 +480,21 @@ function startHistory(payload) {
     }
     load.onclick=async()=>{
       if(insightsLoading)return;
-      insightsLoading=true;insightsError='';load.disabled=true;personalStatus.hidden=false;personalStatus.textContent='Загружаю историю действий…';
-      try{for(let i=0;i<missing.length;i+=100){load.textContent='Загружаю действия: '+i+' / '+missing.length;const response=await historyRequest('insights',missing.slice(i,i+100).map(h=>h.handId));Object.assign(insightSignals,response.signals);if(response.version===payload.version)saveInsightSignals();}}
-      catch(_){insightsError='Не удалось загрузить все действия. Уже загруженные учтены; можно повторить.';}
+      insightsLoading=true;insightsError='';load.disabled=true;updateInsightProgress();
+      try{
+        for(let i=0;i<missing.length;){
+          const ids=missing.slice(i,i+(i===0?20:100)).map(h=>h.handId);
+          let response;
+          for(let attempt=0;attempt<2;attempt++){
+            try{response=await historyRequest('insights',ids);break;}
+            catch(error){if(attempt===1)throw error;await new Promise(resolve=>setTimeout(resolve,750));}
+          }
+          if(!response||response.version!==payload.version)throw new Error('История обновилась. Закройте и откройте график заново.');
+          if(!response.signals||ids.some(id=>!Object.prototype.hasOwnProperty.call(response.signals,id)))throw new Error('Сервер вернул неполную историю действий.');
+          Object.assign(insightSignals,response.signals);updateInsightProgress();saveInsightSignals();i+=ids.length;
+        }
+      }
+      catch(error){insightsError=(error.message==='timeout'?'Сервер не ответил вовремя.':error.message||'Не удалось загрузить все действия.')+' Уже загруженные данные сохранены. Можно повторить загрузку.';}
       finally{insightsLoading=false;render();}
     };
     statsPanel.ontoggle=()=>{if(statsPanel.open&&missing.length&&!insightsLoading&&!insightsError)load.click();};
@@ -665,7 +693,10 @@ function startHistory(payload) {
       list.append(row);
     });shownHands+=10;moreHands.hidden=shownHands>=visibleHands.length;moreHands.textContent='Показать ещё 10 · осталось '+Math.max(0,visibleHands.length-shownHands);
     }
-    moreHands.onclick=appendHandPage;appendHandPage();$('detail').append(list,moreHands);
+    moreHands.onclick=appendHandPage;appendHandPage();
+    const lastOpen=visibleHands.reduce((last,h,i)=>restoringHands.has(String(h.handId))?i:last,-1);
+    while(shownHands<=lastOpen&&shownHands<visibleHands.length)appendHandPage();
+    $('detail').append(list,moreHands);
   }
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;if(mode==='mtt')metric='bb';render();if(mode==='mtt')ensureMttStacks();}));
   $('game-filter').addEventListener('change',e=>{game=e.target.value;selected=null;render();});
@@ -683,7 +714,25 @@ function startHistory(payload) {
   $('stack-filter').addEventListener('change',e=>{stackBand=e.target.value;selected=null;render();});
   $('tournament-filter').addEventListener('change',e=>{tournamentId=e.target.value;selected=null;render();});
   $('position-results').addEventListener('click',e=>{const b=e.target.closest('[data-position]');if(b){positionByMode[mode]=positionByMode[mode]===b.dataset.position?'':b.dataset.position;render();}});
-  $('metric').addEventListener('click',()=>{if(mode==='mtt')return;metric=metric==='bb'?'resultMinor':'bb';render();});
+  function disclosureKey(el){
+    if(el.dataset.handId)return 'hand:'+el.dataset.handId;
+    if(el.id)return 'id:'+el.id;
+    const summary=el.querySelector(':scope > summary');
+    return el.className+':'+(summary?.firstElementChild?.textContent||summary?.textContent||'').trim();
+  }
+  $('metric').addEventListener('click',()=>{
+    if(mode==='mtt')return;
+    const opened=new Set([...document.querySelectorAll('details[open]')].map(disclosureKey));
+    restoringHands=new Set([...document.querySelectorAll('details[open][data-hand-id]')].map(el=>el.dataset.handId));
+    const scrollX=window.scrollX,scrollY=window.scrollY;
+    metric=metric==='bb'?'resultMinor':'bb';render();
+    // Opening a collection creates its hand cards lazily; restore parents first.
+    for(let pass=0;pass<3;pass++)for(const el of document.querySelectorAll('details')){
+      if(!el.open&&opened.has(disclosureKey(el))){el.open=true;el.dispatchEvent(new Event('toggle'));}
+    }
+    restoringHands=new Set();
+    requestAnimationFrame(()=>window.scrollTo(scrollX,scrollY));
+  });
   $('date-close').addEventListener('click',()=>{if($('date-status').textContent)return;document.querySelector('.date-picker').open=false;document.querySelector('.date-picker summary').focus();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelector('.date-picker').open=false;}});
   $('matrix').addEventListener('click',e=>{const b=e.target.closest('[data-hand]');if(b){const hand=b.dataset.hand;selected=selected===hand?null:hand;render();$('matrix').querySelector('[data-hand="'+hand+'"]').focus({preventScroll:true});}});

@@ -289,3 +289,10 @@ main{padding-top:0}
   .toolbar>.stack-filter{grid-column:4/6}
 }
 @media(min-width:355px) and (max-width:420px){.toolbar>.date-picker>summary svg{display:none}.toolbar>.date-picker>summary{font-size:9px}}
+
+.insight-personal-summary__status--loading{padding:10px 12px;border:1px solid #ffc34d;border-radius:9px;background:#49330e;color:#ffe49a;font-size:14px;font-weight:800;box-shadow:0 0 14px #ffb52d30}
+.insight-personal-summary__progress{display:block;height:12px;margin-top:9px;appearance:none;border:1px solid #aa762d;border-radius:999px;overflow:hidden;background:#17232b;accent-color:#ffc247}
+.insight-personal-summary__progress[hidden]{display:none}
+.insight-personal-summary__progress::-webkit-progress-bar{background:#17232b;border-radius:999px}
+.insight-personal-summary__progress::-webkit-progress-value{background:linear-gradient(90deg,#ff9600,#ffe48a);border-radius:999px}
+.insight-personal-summary__progress::-moz-progress-bar{background:linear-gradient(90deg,#ff9600,#ffe48a);border-radius:999px}

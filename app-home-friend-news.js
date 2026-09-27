@@ -1196,22 +1196,16 @@
       ['evBelow', 'Максимальный недобор EV', function (row) { return '−' + format((row.evResultMinor - row.resultMinor) / row.bigBlindMinor) + ' BB'; }],
       ['highCard', 'Вскрытие по Хай', function (row) { return esc(row.highCardRank) + '-хай · ' + format(row.potMinor / row.bigBlindMinor) + ' BB'; }],
     ];
-    function monthlyIcon(index) {
-      if (index < 3) return '<img src="./assets/home-news-cash-black-gold-chips-v1.webp" alt="" loading="lazy">' + (index === 1 ? '<i class="cash-monthly-ruble">₽</i>' : '');
-      if (index === 3) return '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="9" y="40" width="13" height="28" rx="3" fill="#a7aeb1"/><rect x="29" y="24" width="13" height="44" rx="3" fill="#d0d0c6"/><rect x="49" y="11" width="13" height="57" rx="3" fill="#f0d9a8"/><path d="M65 28v35m0 0-12-12m12 12 12-12" stroke="#ff7f87" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      return '<svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="11" y="11" width="43" height="59" rx="5" transform="rotate(-12 11 11)" fill="#151b20" stroke="#d9a861"/><rect x="24" y="8" width="44" height="60" rx="5" transform="rotate(8 24 8)" fill="#20262a" stroke="#f0c677"/><path d="m48 28-9 12 9 15 9-15-9-12Z" fill="#dcb971"/><text x="34" y="24" fill="#ffe2a2" font-size="15" font-weight="bold">A</text></svg>';
-    }
     function groupHtml(groups, monthly) {
       return categories.map(function (category, index) {
         var rows = groups && groups[category[0]] || [];
         var value = rows.length ? category[2](rows[0]) : '—';
-        var monthlySummary = '<span class="cash-monthly-title">' + category[1] + '</span>' +
-          '<span class="cash-monthly-icon" aria-hidden="true">' + monthlyIcon(index) + '</span>' +
+        var monthlySummary = '<span class="cash-monthly-title">' + (index < 2 ? 'Крупнейший банк' : category[1]) + '</span>' +
           (index === 4 ? '<span class="cash-monthly-context">После ставки</span>' : '') +
           '<b class="cash-monthly-value">' + value + '</b>' +
-          '<small class="cash-monthly-description"><i aria-hidden="true">●</i><strong>' + (rows.length && rows[0].player ? esc(rows[0].player) : 'Нет данных') + '</strong></small>' +
+          '<small class="cash-monthly-description"><strong>' + (rows.length && rows[0].player ? esc(rows[0].player) : 'Нет данных') + '</strong></small>' +
           '<span class="cash-monthly-chevron" aria-hidden="true">›</span>';
-        return '<details class="home-friend-news-modal__cash-group' + (monthly ? ' home-friend-news-modal__cash-group--monthly' + (index < 2 ? ' home-friend-news-modal__cash-group--featured' : '') + (index === 2 ? ' home-friend-news-modal__cash-group--loss' : '') : '') + '"><summary>' +
+        return '<details data-cash-category="' + category[0] + '" class="home-friend-news-modal__cash-group' + (monthly ? ' home-friend-news-modal__cash-group--monthly' + (index < 2 ? ' home-friend-news-modal__cash-group--featured' : '') + (index === 2 ? ' home-friend-news-modal__cash-group--loss' : '') : '') + '"><summary>' +
           (monthly ? monthlySummary : '<span>' + category[1] + '</span><b>' + value + '</b>') + '</summary>' +
           (rows.length ? rows.map(function (row) {
             var blind = Number(row.bigBlindMinor) / 100;
@@ -1231,7 +1225,7 @@
     var previousDay = cashDays.find(function (day) { return day.date === previousDayKeys[0]; });
     var previousDayLabel = previousDay ? new Date(previousDay.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     return '<div class="home-friend-news-modal__cash">' +
-      '<section class="home-friend-news-modal__cash-month"><div class="cash-month-heading"><span class="cash-month-emblem" aria-hidden="true"><i>A♠</i><i>A♥</i></span><span><small>ДВА ТУЗА · POKER21</small><h3>Топы месяца · ' + esc(monthLabel) + '</h3></span></div>' +
+      '<section class="home-friend-news-modal__cash-month"><div class="cash-month-heading"><strong class="cash-month-brand"><i>♠</i> POKER<span>21</span> · ДВА ТУЗА</strong><span><h3>Топы месяца</h3><small>' + esc(monthLabel) + '</small></span></div>' +
         (currentMonth ? '<div class="home-friend-news-modal__cash-month-groups">' + groupHtml(currentMonth.groups, true) + '</div>' : '<p>Пока нет кеш-раздач.</p>') + '</section>' +
       '<h3 class="home-friend-news-modal__cash-days-title">' + (previousDay ? 'Предыдущий день · ' + esc(previousDayLabel) : 'Предыдущий день') + '</h3>' +
       (previousDay ? groupHtml(previousDay.groups) : '<p>За предыдущий день кеш-раздач нет.</p>') + '</div>';

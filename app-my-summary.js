@@ -144,7 +144,7 @@
     var opts = {cache:"no-store", signal:controller.signal};
     if (body) { opts.method = "POST"; opts.headers = {"Content-Type":"application/json"}; opts.body = JSON.stringify(pokerApiAuthJsonBody(body)); }
     else path += pokerApiAuthQuery("?") + (path === "raffles" ? "&scope=active" : "");
-    return fetch(getApiBase() + "/api/" + path, opts).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (d) { if (d.ok === false) throw new Error("API"); return d; }).finally(function () { clearTimeout(timeout); });
+    return fetch(getApiBase() + "/api/" + path, opts).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (d) { if (d.ok === false) throw new Error(d.error || "API"); return d; }).finally(function () { clearTimeout(timeout); });
   }
   function error(id) { put(id, '<p class="summary-muted">Не удалось загрузить. Попробуйте обновить сводку.</p>'); }
   function renderReviewUnread(count) {
@@ -520,7 +520,7 @@
       if(seq!==generation||!frame.isConnected)return;
       if(message.action==='list')acceptChartHistory(data);
       frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='replay'?data.replay:data},window.location.origin);
-    }catch(_){if(seq===generation&&frame.isConnected)frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'load failed'},window.location.origin);}
+    }catch(error){if(seq===generation&&frame.isConnected)frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:error.name==='AbortError'?'Сервер не ответил вовремя.':error.message||'Не удалось загрузить историю'},window.location.origin);}
   });
   window.addEventListener('poker-telegram-auth',function(){closeStartingHands(true);});
   window.initMySummary = init;
