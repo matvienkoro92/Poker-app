@@ -2697,3 +2697,63 @@ body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-fri
 .home-friend-news-modal--club .home-friend-news-modal__list {
   overflow: visible;
 }
+
+/* Compact birthday announcements without shrinking expanded comments. */
+body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item.home-friend-news-event--birthday:nth-child(n) {
+  min-height: 76px;
+  padding: 6px 8px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__icon {
+  width: 18%;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__icon .home-friend-news__avatar {
+  width: min(80%, 60px);
+  height: auto;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__copy {
+  width: 82%;
+  margin-left: 18%;
+  min-height: 0;
+  gap: 2px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__player-title {
+  font-size: 14px;
+  line-height: 1.1;
+  margin: 0;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__player-meta {
+  font-size: 10px;
+  line-height: 1.1;
+  margin: 1px 0;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__event-lines,
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__event-lines strong {
+  font-size: 11px;
+  line-height: 1.15;
+  margin: 0;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__copy > small {
+  font-size: 9px;
+  line-height: 1;
+  margin: 0;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-row {
+  margin-top: 3px;
+  gap: 3px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-controls {
+  gap: 5px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) 26px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-controls button,
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__profile-cue {
+  min-height: 26px;
+  height: 26px;
+  padding: 2px 6px;
+  font-size: 10px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__event-copy,
+body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__event-share {
+  width: 26px;
+  min-width: 26px;
+}
