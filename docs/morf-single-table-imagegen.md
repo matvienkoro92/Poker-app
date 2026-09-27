@@ -11,4 +11,4 @@ Edit target image 1, the magician monkey Morf. Image 2 is ONLY reference for the
 
 ## Integration
 
-Monday remains bound to `data-tournament-character="morf"`. Its ticket text is behind the Morf head mask, and its Last Longer status is placed on the illustrated pedestal without an extra plaque. Bonus artwork and glove labels reuse Sunday's treatment. All seven weekday scenes were visually checked; none uses the old double-tier Morf table. Monday was checked at viewport widths 320, 390 and 768, including the bonus modal.
+This describes the earlier Morf scene. On 28.09.2026 the Monday «Меджик 500 ₽» scene was switched to ПокерМанки, who leads this tournament by first-place finishes. Its updated table keeps the single-table geometry and separate bonus stacks from the Morf composition; the current table asset is `assets/home-tournament-pokermanki-magic-table-v2.webp`. The original Pokermanki scene is layered above the new table to preserve the sharp character and ticket. The prize amount is occluded by `assets/home-tournament-pokermanki-magic-head-mask.svg`.

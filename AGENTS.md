@@ -5,6 +5,11 @@
   finishes in that specific tournament, breaking ties by prize money from those
   first-place finishes. Preserve the common background ticket concept and live UI
   layout; do not choose characters arbitrarily by weekday.
+- For every tournament scene, the live prize amount must pass behind the
+  featured player's actual hair, ears, and head silhouette, including its
+  rightmost digits and ₽ sign. Recheck the mask in a rendered mobile scene
+  whenever the art changes. If only the table changes, preserve the original
+  character and ticket pixels instead of regenerating or blurring them.
 
 - Do not run `git push` unless the user explicitly asks for it in the current conversation.
 - Summer rating top-3 character art sizes are controlled by inline CSS variables from

@@ -1031,8 +1031,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   border:0!important;border-radius:0!important;box-shadow:none!important;
 }
 
-/* Monday is permanently bound to Morf's single-table scene. Keep the ticket
-   behind the actual hat silhouette, without copying stray table fragments. */
+/* Legacy Morf single-table scene retains its own hat silhouette mask. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"]::after {
   mask:url('./assets/home-tournament-morf-head-mask.svg') center/100% 100% no-repeat!important;
   -webkit-mask:url('./assets/home-tournament-morf-head-mask.svg') center/100% 100% no-repeat!important;
@@ -1477,3 +1476,51 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   filter:blur(.55cqw)!important;box-shadow:none!important;opacity:1!important;
   mask:none!important;-webkit-mask:none!important;z-index:-2!important;pointer-events:none!important;
 }
+
+/* Monday Magic: Pokermanki keeps his own upper scene while the table and
+   separately clickable bonus stacks use the former Morf composition. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] {
+  --home-tournament-scene: url('./assets/home-tournament-pokermanki-magic-table-v2.webp');
+}
+/* Reuse the original high-detail art above the rail; only the table is new. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix {
+  display:block!important;position:absolute!important;inset:0!important;z-index:2!important;
+  background:url('./assets/home-tournament-pokermanki-table-v4.webp') center/100% 100% no-repeat!important;
+  mask:linear-gradient(to bottom,#000 0%,#000 57%,transparent 61%)!important;
+  -webkit-mask:linear-gradient(to bottom,#000 0%,#000 57%,transparent 61%)!important;
+  pointer-events:none!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after {
+  background:url('./assets/home-tournament-pokermanki-table-v4.webp') center/100% 100% no-repeat!important;
+  mask:url('./assets/home-tournament-pokermanki-magic-head-mask.svg') center/100% 100% no-repeat!important;
+  -webkit-mask:url('./assets/home-tournament-pokermanki-magic-head-mask.svg') center/100% 100% no-repeat!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
+  inset:auto 0 5% 0!important;
+  width:100%!important;height:auto!important;aspect-ratio:3/1!important;
+  overflow:visible!important;background:none!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table::before {
+  display:block!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:url('./assets/home-bonus-stacks-glove-v2.webp') center/100% 100% no-repeat!important;
+  mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
+  -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
+}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:34%!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:10.5%!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:29.8%!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:49.8%!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:69.8%!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:89.4%!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
+  display:grid!important;top:13.05cqw!important;bottom:auto!important;width:14cqw!important;
+  gap:.25cqw!important;padding:.55cqw .3cqw!important;border:.2cqw solid #fff0b5!important;
+  border-radius:.35cqw!important;background:linear-gradient(135deg,#fff3b7,#ffd56b 55%,#ffec9a)!important;
+  box-shadow:0 .25cqw .5cqw #000b,inset 0 0 0 .15cqw #b77b25!important;
+  color:#241400!important;text-shadow:none!important;font:950 2.45cqw/1 Arial,sans-serif!important;
+}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font:900 1.7cqw/1.05 Arial,sans-serif!important}
+#app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonuses__note {bottom:-7%!important;height:25%!important}

@@ -3366,29 +3366,34 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
   min-width: 0;
   max-width: 100%;
 }
-.player-crm__links-table {
+.player-crm__source-table.player-crm__links-table {
   min-width: 0;
   width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
 }
+.player-crm__links-table th:first-child,
+.player-crm__links-table td:first-child { width: 28%; }
 .player-crm__links-table th,
 .player-crm__links-table td {
   height: auto;
   padding: 5px 6px;
   line-height: 1.2;
 }
+.player-crm__source-table.player-crm__links-table th { white-space: normal; overflow-wrap: anywhere; }
 .player-crm__links-table th:first-child,
 .player-crm__links-table td:first-child {
   padding-left: 2px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .player-crm__links-table th:nth-child(2),
 .player-crm__links-table td:nth-child(2) {
-  width: 1%;
-  max-width: 190px;
+  width: 18%;
+  white-space: normal;
 }
 .player-crm__links-table th:nth-child(n+3):nth-child(-n+6),
 .player-crm__links-table td:nth-child(n+3):nth-child(-n+6) {
-  width: 1%;
+  width: 13.5%;
   padding-left: 5px;
   padding-right: 5px;
   text-align: center;
@@ -3397,6 +3402,14 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
   width: 1%;
   padding-right: 2px;
   text-align: right;
+}
+@media (max-width: 620px) {
+  .player-crm__source-table.player-crm__links-table { font-size: 10px; }
+  .player-crm__source-table.player-crm__links-table th { font-size: 9px; }
+  .player-crm__links-table th,
+  .player-crm__links-table td { padding: 5px 2px; }
+  .player-crm__links-table th:nth-child(n+3):nth-child(-n+6),
+  .player-crm__links-table td:nth-child(n+3):nth-child(-n+6) { padding-inline: 1px; }
 }
 .player-crm__links-url-btn {
   display: block;
