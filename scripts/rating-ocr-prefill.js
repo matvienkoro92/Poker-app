@@ -411,6 +411,13 @@ async function parseOcrFile(file) {
   if (date === "24.09.2026" && blue && time === "16:00" && /^PLO4 🃏🃏🃏 20K 🏆$/.test(title)) buyin = 200;
   // IMG_9551: owner confirmed 1000; the blue header shows a 10K starting stack.
   if (date === "25.09.2026" && blue && time === "13:00" && /^DV.*Bounty.*100k/i.test(title)) buyin = 1000;
+  // September 26: entry fees confirmed by the owner; blue headers show stacks.
+  if (date === "26.09.2026" && blue) {
+    if (time === "02:00" && /Deep\s+Night\s+15k/i.test(title)) buyin = 200;
+    if (time === "08:00" && /^Island bounty/i.test(title)) { buyin = 200; title = "Island bounty🌴 20k"; }
+    if (time === "13:00" && /^DV.*Bounty.*100k/i.test(title)) buyin = 1000;
+    if (time === "18:00" && /LUCKY\s+555/i.test(title)) buyin = 1000;
+  }
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
@@ -440,6 +447,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_9599: visually verified seventh place; Vision omitted the digit.
+    if (date === "26.09.2026" && !blue && time === "21:00" && playerId === "491163" && reward === 335) {
+      place = 7;
+      needsPlaceCheck = false;
+    }
     // IMG_9223 visibly shows a zero rank for Ферапонт.
     if (date === "15.09.2026" && blue && time === "08:00" && playerId === "3399185" && reward === 15.6) {
       place = 0;

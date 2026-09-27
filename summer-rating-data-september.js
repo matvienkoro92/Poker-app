@@ -4079,4 +4079,245 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "26.09.2026": [
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 1976.0000000000002,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 13515,
+          "points": 0
+        },
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 1752,
+          "points": 0
+        },
+        {
+          "nick": "Alesha",
+          "place": 4,
+          "reward": 480,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 2,
+          "reward": 6600,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 3,
+          "reward": 2800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 15261.000000000002,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 8194,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 4669,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Baldendi",
+          "place": 1,
+          "reward": 10160,
+          "points": 0
+        },
+        {
+          "nick": "MoW3R",
+          "place": 3,
+          "reward": 1680,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 6,
+          "reward": 430,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "💥Big Boss 💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FishKopcheny",
+          "place": 1,
+          "reward": 91768.76,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 2,
+          "reward": 44393.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🍀LUCKY 555🍀 GTD",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Freedom",
+          "place": 4,
+          "reward": 40394,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Satur",
+          "place": 1,
+          "reward": 4803.13,
+          "points": 0
+        },
+        {
+          "nick": "Евгений.А",
+          "place": 3,
+          "reward": 396.25,
+          "points": 0
+        },
+        {
+          "nick": "PlayerA2BA07",
+          "place": 7,
+          "reward": 335,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "АртемГончаро...",
+          "place": 7,
+          "reward": 7384.999999999999,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 6,
+          "reward": 5776,
+          "points": 0
+        },
+        {
+          "nick": "Olegan393",
+          "place": 8,
+          "reward": 4043,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 59,
+          "reward": 250,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "СлонФартов",
+          "place": 1,
+          "reward": 37474,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 6,
+          "reward": 12899,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 8,
+          "reward": 800,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
