@@ -794,11 +794,16 @@ function initProfileChatPush() {
           window.__pokerHandleIncomingChatPush(d);
         } catch (ePushUi) {}
       }
-      if (d.pokerChatOpenUrl && typeof window.__pokerOpenChatFromPushUrl === "function") {
-        try {
-          pokerPushOpenDebug("sw-message", d.pokerChatOpenUrl);
-          window.__pokerOpenChatFromPushUrl(d.pokerChatOpenUrl);
-        } catch (ePushOpen) {}
+      if (d.pokerChatOpenUrl) {
+        // A notification can wake the app before the home router is initialized.
+        window.__pokerPendingPushOpenUrl = d.pokerChatOpenUrl;
+        if (typeof window.__pokerOpenChatFromPushUrl === "function") {
+          try {
+            pokerPushOpenDebug("sw-message", d.pokerChatOpenUrl);
+            window.__pokerOpenChatFromPushUrl(d.pokerChatOpenUrl);
+            window.__pokerPendingPushOpenUrl = "";
+          } catch (ePushOpen) {}
+        }
       }
       if (d.pokerChatPushRepair) {
         try {

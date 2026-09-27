@@ -147,6 +147,7 @@ function pokerInitHomeDeepLinks(opts) {
       ensureHomeViewForDeepLink();
       retryDeepLinkAction(function () {
         if (typeof window.pokerOpenClubNewsModal !== "function") return false;
+        if (!document.getElementById("homeFriendNewsModal")) return false;
         window.pokerOpenClubNewsModal();
         return true;
       }, 40);
@@ -1077,8 +1078,13 @@ function pokerInitHomeDeepLinks(opts) {
     qStartApp = pokerNormalizeWebAppStartParam(pokerStartAppQueryFromUrlSearchParams(qsDeep));
     qWithParam = (qsDeep.get("with") || "").trim();
   } catch (eQsDeep) {}
-  var deepLinkParam = (startParam && String(startParam).trim()) || qStartApp;
-  var hadDeepLinkAtInit = !!deepLinkParam;
+  var pendingPushUrl = window.__pokerPendingPushOpenUrl;
+  if (pendingPushUrl) {
+    window.__pokerPendingPushOpenUrl = "";
+    setTimeout(function () { window.__pokerOpenChatFromPushUrl(pendingPushUrl); }, 0);
+  }
+  var deepLinkParam = pendingPushUrl ? "" : ((startParam && String(startParam).trim()) || qStartApp);
+  var hadDeepLinkAtInit = !!deepLinkParam || !!pendingPushUrl;
   if (deepLinkParam) {
     var applyInitialDeepLink = function () {
       pokerApplyStartAppDeepLink(deepLinkParam, { withPeer: qWithParam });
