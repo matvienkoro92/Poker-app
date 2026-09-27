@@ -25,7 +25,7 @@ for (const [name, fetch] of [
   const response = await runtime(fetch).context.pokerSwNavigation({});
   assert.equal(response.status,503);
   assert.equal(response.headers.get('cache-control'),'no-store');
-  assert.match(await response.text(),/Повторить загрузку/);
+  assert.match(await response.text(),/Попробовать ещё раз/);
 });
 test('slow response headers get thirty seconds before fallback', async () => {
   const r = runtime(() => new Promise(() => {}));

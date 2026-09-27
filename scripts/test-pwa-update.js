@@ -53,9 +53,9 @@ async function main() {
     await page.waitForFunction(name => caches.has(name), cacheName);
     navigationFailure = true;
     await page.goto(`http://127.0.0.1:${server.address().port}/?startapp=raffles#tgWebAppData=launch%26auth`);
-    await page.getByRole('heading', {name:'Не удалось загрузить клуб'}).waitFor();
+    await page.getByRole('heading', {name:'Не получилось открыть приложение'}).waitFor();
     navigationFailure = false;
-    await page.getByRole('link', {name:'Повторить загрузку'}).click();
+    await page.getByRole('link', {name:'Попробовать ещё раз'}).click();
     await page.locator('#draft').waitFor();
     const recovered = new URL(page.url());
     assert.equal(recovered.searchParams.get('startapp'), 'raffles');

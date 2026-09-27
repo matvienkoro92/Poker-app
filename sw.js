@@ -203,7 +203,7 @@ function pokerSwNavigationFallback(request) {
   var retryUrl = retryTarget.href.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return new Response(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f172a"><title>Два туза — загрузка</title><style>
   *{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;background:#0f172a;color:#fff3d6;font:17px/1.5 system-ui,sans-serif;text-align:center}main{max-width:420px}h1{font-size:26px;line-height:1.2}p{color:#c4cbd8}.retry{display:inline-block;text-decoration:none;font:inherit;font-weight:700;border:0;border-radius:14px;padding:15px 24px;background:#ffd477;color:#201505;cursor:pointer}.retry:focus-visible{outline:3px solid white;outline-offset:4px}
-  </style></head><body><main><h1>Не удалось загрузить клуб</h1><p>Соединение прервалось или сервер долго отвечает. Проверьте интернет и попробуйте ещё раз.</p><a class="retry" href="${retryUrl}">Повторить загрузку</a></main><script>
+  </style></head><body><main><h1>Не получилось открыть приложение</h1><p>Не удалось получить ответ от сервера. Нажмите «Попробовать ещё раз». Если не поможет — проверьте интернет и откройте приложение чуть позже.</p><a class="retry" href="${retryUrl}">Попробовать ещё раз</a></main><script>
   (function () {
     var retry = document.querySelector(".retry");
     // Navigation requests do not carry the fragment; recover Telegram launch
