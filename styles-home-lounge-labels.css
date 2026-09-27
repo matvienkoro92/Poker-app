@@ -272,3 +272,29 @@
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels .home-mini-icon__label {
   left:28%!important;width:65%!important;font-size:8.5cqw!important;
 }
+
+/* Original lounge figures with the current neon action plaques. */
+#app.app.app--view-home .home-daily-shortcuts--lounge {
+  aspect-ratio:auto!important;background:none!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge::before {display:none!important}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-button-art {
+  position:absolute;top:80cqw;left:0;width:100%;height:100cqw;
+  background:url('./assets/home-lounge-neon-buttons-v1.webp') 0% center/300% 100% no-repeat;
+  z-index:2;pointer-events:none;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles .home-lounge-button-art {background-position:50% center}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels .home-lounge-button-art {background-position:100% center}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
+  height:auto!important;aspect-ratio:1 / 1.54!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art {display:block!important}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-character-name {
+  top:107cqw!important;height:5.6cqw!important;z-index:4!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
+  top:120.4cqw!important;height:12.6cqw!important;z-index:4!important;
+}
+#app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge,
+#app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge {display:none!important}
+#app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge {z-index:4!important}
