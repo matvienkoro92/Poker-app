@@ -1341,7 +1341,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* Hakas: independent high-resolution scene, table and interactive bonus objects. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
-  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v3.webp');
+  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v4.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before {
   content:""!important;display:block!important;inset:50% -7.5% auto!important;
