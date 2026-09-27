@@ -43,3 +43,34 @@ Saved at native 1122×1402 as WebP quality 92 (150256 bytes).
 The independent table keeps its geometry. Bonus boxes decrease from 23cqw to
 17.5cqw and move inward to 17%, 33.5%, 50%, 66.5%, 83%, with top at 73%.
 Live labels and the Last Longer hit area follow the resized art.
+
+## Raised composition and readable knockout bonus
+
+`home-tournament-hakas-layered-v3.webp` moves Hakas and the eagle upward about
+5–6% of scene height while keeping their scale and the ticket geometry. Generated
+as an imagegen edit of v2; native 1122×1402 WebP, quality 92, 143956 bytes.
+The independent table moves from top 61% to 55%; bonuses move to 65% and return
+to 21cqw for a fuller appearance and larger live lettering. The knockout reward
+gets a separate legible gold-bordered label: «5 000 ₽ / Нокаут ПокерМанки».
+The Last Longer hit area moves upward with the held chip.
+
+## Restore the classic chip design
+
+User clarified that the requested change was the chip appearance, not a larger
+version of the ornate chips. `home-tournament-chips-classic-v1.webp` restores the
+bright lime, blue, red and orange inserts with polished black bodies and a thin
+gold inner ring, using `home-bonus-stacks-reference-v2.webp` as the imagegen
+reference. Four evenly spaced cells, native 2172×724, WebP quality 92, no upscaling.
+Each CSS cell is 3:4, so chip circles are not stretched. The generator returned an
+opaque background despite the transparency request; the UI applies
+`home-tournament-classic-chip-mask.svg` to each cell to reveal the table outside
+the chip silhouette. Live labels remain HTML. Checked at 390px and 1000px with
+3× device pixel ratio; knockout bonus still opens its 5000 ₽ conditions.
+
+## Final felt placement
+
+Classic chip cells were reduced from 19cqw to 17cqw, then another 10% to
+15.3×20.4cqw. Centers are 17%, 33.5%, 50%, and 83%; tops 64%, 66%, 66.8%,
+and 64% form a shallow arc. Live lettering scales with the chips. Soft radial
+contact shadows render beneath the stacks outside the artwork mask. All stacks
+remain on the felt with visible clearance from the padded rail.

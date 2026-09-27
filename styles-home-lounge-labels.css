@@ -232,3 +232,43 @@
 @media (prefers-reduced-motion: reduce) {
   #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label { transition: none; }
 }
+
+/* Three neon lounge actions, matched to the supplied September reference. */
+#app.app.app--view-home .home-daily-shortcuts--lounge {
+  gap:0!important;padding:0!important;margin-bottom:10px!important;aspect-ratio:1836 / 857!important;
+  background:url('./assets/home-lounge-neon-reference-v1.webp') center/100% 100% no-repeat!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
+  height:100%!important;aspect-ratio:auto!important;overflow:visible!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-art {display:none!important}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-lounge-character-name {
+  top:68.5%!important;left:35%!important;width:40%!important;height:4%!important;
+  color:#ffda82;font:700 4.6cqw/1 Arial,sans-serif!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
+  top:76%!important;left:35%!important;width:59%!important;height:9%!important;
+  border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;
+  font:900 9cqw/1 Impact,'Arial Narrow',sans-serif!important;letter-spacing:0!important;
+  color:#fff5e6!important;text-shadow:0 0 1cqw #ffcf8c70!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:first-child .home-mini-icon__label {
+  font-size:10.5cqw!important;color:#effaff!important;text-shadow:0 0 1cqw #59cfff90!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--raffles .home-mini-icon__label {
+  color:#fff0e5!important;text-shadow:0 0 1cqw #ff523d90!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label::before,
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label::after {display:none!important}
+#app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveAmountBadge,
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-achievement-bonus-badge {
+  top:92.5%!important;font-size:5cqw!important;color:#ffe9a5!important;text-shadow:0 1px 2px #000!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge {
+  top:23%!important;left:65%!important;width:13%!important;height:9.3%!important;
+  font-size:8cqw!important;box-shadow:0 0 2cqw #ff6b32aa!important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:active .home-mini-icon__label {box-shadow:none!important}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link--levels .home-mini-icon__label {
+  left:28%!important;width:65%!important;font-size:8.5cqw!important;
+}

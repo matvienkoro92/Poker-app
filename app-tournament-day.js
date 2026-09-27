@@ -83,7 +83,7 @@ var HOME_TOURNAMENT_DATE_OVERRIDES = {
     time: "18:00 МСК",
     character: "hakas",
     historyKey: "monthly3000",
-    banner: "home-tournament-hakas-layered-v2.webp",
+    banner: "home-tournament-hakas-layered-v3.webp",
     bannerAlt: "Турнир месяца — вход 3 000 ₽, призовой фонд 1 000 000 ₽",
     bannerWidth: 1122,
     bannerHeight: 1402
@@ -1307,7 +1307,11 @@ function renderHomePokermankiKnockout(weekday) {
   button.hidden = Number(weekday) === 6;
   button.setAttribute("aria-label", info.amount);
   var amount = button.querySelector("[data-home-pokermanki-reward]");
-  if (amount) amount.textContent = info.reward + " ₽ за";
+  var scene = button.closest("[data-tournament-character]");
+  var isHakas = scene && scene.dataset.tournamentCharacter === "hakas";
+  if (amount) amount.textContent = isHakas ? info.reward.toLocaleString("ru-RU") + " ₽" : info.reward + " ₽ за";
+  var caption = button.querySelector(".home-tournament-bonus__glove-label small");
+  if (caption) caption.textContent = isHakas ? "Нокаут ПокерМанки" : "ПокерМанки";
 }
 
 function fillHomeTournamentBonusModal(kind) {

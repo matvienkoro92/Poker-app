@@ -789,7 +789,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   paint-order:stroke; stroke:#100b05; stroke-width:2px; stroke-linejoin:round;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
-  margin-top:clamp(42px,7vw,76px)!important;
+  margin-top:calc(clamp(42px,7vw,76px) + 10px)!important;
 }
 
 /* Align the table panel and the tractor scene trophy on the same centerline. */
@@ -1341,52 +1341,76 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* Hakas: independent high-resolution scene, table and interactive bonus objects. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
-  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v2.webp');
+  --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v3.webp');
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before {
-  content:""!important;display:block!important;inset:61% -7.5% auto!important;
+  content:""!important;display:block!important;inset:55% -7.5% auto!important;
   width:115%!important;height:39%!important;
   background:url('./assets/home-tournament-table-premium-v1.webp') center/100% 100% no-repeat!important;
   clip-path:none!important;mask:none!important;-webkit-mask:none!important;z-index:2!important;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
-  top:73%!important;width:17.5cqw!important;height:17.5cqw!important;
+  top:65%!important;width:21cqw!important;height:21cqw!important;
   transform:translateX(-50%)!important;isolation:isolate;
 }
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(1) {--bonus-art:url('./assets/home-tournament-chip-green-v1.webp')}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(2) {--bonus-art:url('./assets/home-tournament-chip-blue-v1.webp')}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(3) {--bonus-art:url('./assets/home-tournament-chip-red-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(1) {--bonus-art:url('./assets/home-tournament-chips-classic-v1.webp');--bonus-art-position:0%;--bonus-art-size:400% 100%}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(2) {--bonus-art:url('./assets/home-tournament-chips-classic-v1.webp');--bonus-art-position:33.333333%;--bonus-art-size:400% 100%}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(3) {--bonus-art:url('./assets/home-tournament-chips-classic-v1.webp');--bonus-art-position:66.666667%;--bonus-art-size:400% 100%}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(4) {--bonus-art:url('./assets/home-tournament-glove-premium-v1.webp')}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(5) {--bonus-art:url('./assets/home-tournament-chip-orange-v1.webp')}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonus:nth-child(5) {--bonus-art:url('./assets/home-tournament-chips-classic-v1.webp');--bonus-art-position:100%;--bonus-art-size:400% 100%}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus::before {
   content:""!important;display:block!important;position:absolute!important;inset:0!important;
   width:100%!important;height:100%!important;transform:none!important;border:0!important;border-radius:0!important;
-  background:var(--bonus-art) center/contain no-repeat!important;box-shadow:none!important;z-index:-1!important;
+  background:var(--bonus-art) var(--bonus-art-position, center)/var(--bonus-art-size, contain) no-repeat!important;box-shadow:none!important;z-index:-1!important;
   filter:drop-shadow(0 .5cqw .5cqw #0005);pointer-events:none;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:none!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__icon {
   position:absolute!important;top:23%!important;left:50%!important;transform:translateX(-50%)!important;
-  width:2cqw!important;height:2cqw!important;
+  width:1.98cqw!important;height:1.98cqw!important;
 }
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label,
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {
   position:absolute!important;left:0!important;width:100%!important;text-align:center!important;
   color:#ffe8b8!important;text-shadow:0 1px 2px #000!important;
 }
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:37%!important;font-size:1.65cqw!important}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:49%!important;font-size:1.85cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__label {top:37%!important;font-size:1.62cqw!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__amount {top:49%!important;font-size:1.845cqw!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {
-  top:83%!important;left:50%!important;width:8cqw!important;transform:translate(-50%,-50%)!important;
-  padding:0!important;background:none!important;border:0!important;box-shadow:none!important;
-  color:#ffe8b8!important;font-size:1.3cqw!important;text-shadow:0 1px 2px #000!important;
+  top:82%!important;left:50%!important;width:17cqw!important;transform:translate(-50%,-50%)!important;
+  padding:.6cqw .3cqw!important;background:#10251f!important;border:1px solid #b99250!important;border-radius:.8cqw!important;box-shadow:0 .3cqw .7cqw #0009!important;
+  color:#ffe8b8!important;font-size:2.5cqw!important;line-height:1.1!important;text-shadow:0 1px 2px #000!important;
 }
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:.95cqw!important}
-#app.app.app--view-home [data-tournament-character="hakas"] > .home-last-longer-dock {left:41%!important;top:43.2%!important;width:18%!important;height:14.4%!important}
-#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonuses__note {top:94%!important;bottom:auto!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.75cqw!important;line-height:1.15!important;white-space:normal!important}
+#app.app.app--view-home [data-tournament-character="hakas"] > .home-last-longer-dock {left:41%!important;top:38.2%!important;width:18%!important;height:14.4%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonuses__note {top:88%!important;bottom:auto!important}
 
 /* Keep the smaller bonus objects on the felt, clear of both side rails. */
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:17%!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:33.5%!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:66.5%!important}
 #app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:83%!important}
+
+/* Classic bright chips: four equal 3:4 cells with a shared silhouette mask. */
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:not(.home-tournament-bonus--pokermanki-knockout) {
+  top:64.4%!important;width:15.3cqw!important;height:20.4cqw!important;
+}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:not(.home-tournament-bonus--pokermanki-knockout)::before {
+  mask:url('./assets/home-tournament-classic-chip-mask.svg') center/100% 100% no-repeat;
+  -webkit-mask:url('./assets/home-tournament-classic-chip-mask.svg') center/100% 100% no-repeat;
+}
+
+/* A shallow arc follows the front curve of the felt, with clear rail space. */
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {top:64%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {top:66%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {top:66.8%!important}
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {top:64%!important}
+/* Contact shadows sit outside the artwork mask, directly on the felt. */
+#app.app.app--view-home [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:not(.home-tournament-bonus--pokermanki-knockout)::after {
+  content:""!important;display:block!important;position:absolute!important;
+  inset:auto auto 4% 50%!important;width:83%!important;height:8%!important;
+  transform:translateX(-50%)!important;border:0!important;border-radius:50%!important;
+  background:radial-gradient(ellipse,#000a 0%,#0006 45%,transparent 74%)!important;
+  filter:blur(.35cqw)!important;box-shadow:none!important;opacity:1!important;
+  mask:none!important;-webkit-mask:none!important;z-index:-2!important;pointer-events:none!important;
+}
