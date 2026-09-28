@@ -1281,7 +1281,7 @@ function syncHomeTournamentBubbleBuyinLabel(activeWeekday) {
 var HOME_TOURNAMENT_BONUS_INFO = {
   "four-kind": { title: "Бонус за каре", amount: "1000 ₽" },
   "straight-flush": { title: "Бонус за стрит-флеш", amount: "2500 ₽" },
-  "royal-flush": { title: "Бонус за роял", amount: "10 000 ₽" }
+  "royal-flush": { title: "Бонус за роял-флеш", amount: "5 000 ₽" }
 };
 
 // Use the displayed tournament day, including when browsing another weekday.

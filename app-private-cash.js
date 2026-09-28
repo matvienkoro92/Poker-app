@@ -18,7 +18,7 @@
   var BONUS_PRESETS = [
     { id: "four-kind", amount: "4000 ₽", condition: "за каре по 2м" },
     { id: "straight-flush", amount: "5000 ₽", condition: "за стрит-флеш" },
-    { id: "royal", amount: "30 000 ₽", condition: "за роял" },
+    { id: "royal", amount: "5 000 ₽", condition: "за роял" },
     { id: "biggest-loser", amount: "5000 ₽", condition: "тому, кто больше всех в минусе" },
     { id: "first-seven-stack", amount: "+10%", condition: "на любой стек от 5к до 20к, первым 7ми записавшимся (после 100 раздач)" },
     { id: "table-winner", amount: "100 баллов", condition: "победителю стола" },
