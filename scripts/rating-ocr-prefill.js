@@ -437,6 +437,8 @@ async function parseOcrFile(file) {
     if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
     if (date === "13.09.2026" && blue && time === "18:00" && token.text === "In: 3123964") token.text = "ID: 3123964";
     if (date === "18.09.2026" && time === "18:00" && token.text === "yID:120005") token.text = "ID:120005";
+    // IMG_9638: Vision prefixed GetHigh's visible ID with a stray letter.
+    if (date === "27.09.2026" && time === "18:00" && !blue && token.text === "yID:764264") token.text = "ID:764264";
   });
   const ids = tokens
     .filter((token) => /(?:^|[^a-z])(?:S?ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
@@ -463,6 +465,11 @@ async function parseOcrFile(file) {
     const playerId = playerIdFromText(idToken.text);
     // IMG_9599: visually verified seventh place; Vision omitted the digit.
     if (date === "26.09.2026" && !blue && time === "21:00" && playerId === "491163" && reward === 335) {
+      place = 7;
+      needsPlaceCheck = false;
+    }
+    // IMG_9638: the seventh-place digit is visible, but Vision omitted it.
+    if (date === "27.09.2026" && time === "18:00" && !blue && playerId === "764264" && reward === 37000) {
       place = 7;
       needsPlaceCheck = false;
     }

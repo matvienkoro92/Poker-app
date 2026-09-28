@@ -4477,6 +4477,12 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
           "points": 0
         },
         {
+          "nick": "GetHigh",
+          "place": 7,
+          "reward": 37000,
+          "points": 0
+        },
+        {
           "nick": "AliySvin",
           "place": 15,
           "reward": 9000,
