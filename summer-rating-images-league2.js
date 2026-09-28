@@ -748,4 +748,12 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-26-09-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-26-09-2026-league2-ok-21h.jpg"
   ]
+,
+  "27.09.2026": [
+    "rating-compressed-preview/rating-27-09-2026-league2-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-27-09-2026-league2-mystic-bounty-50k-11h.jpg",
+    "rating-compressed-preview/rating-27-09-2026-league2-plo4-20k-16h.jpg",
+    "rating-compressed-preview/rating-27-09-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-27-09-2026-league2-ok-21h.jpg"
+  ]
 };

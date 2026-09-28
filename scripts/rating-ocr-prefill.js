@@ -66,6 +66,7 @@ function normalizeName(raw) {
   let name = String(raw || "").trim();
   name = name.replace(/\s+/g, " ");
   if (/^OK\b/i.test(name) || /^ОК\b/i.test(name)) return "OK🎰";
+  if (/^OKTI$/i.test(name)) return "OK🎰";
   if (/^MOK/i.test(name) || /^МОК/i.test(name)) return "МОК🎰";
   if (/^[HН][OО][KК]/i.test(name)) return "HOK🥊";
   if (/Big\s*Boss/i.test(name)) return "💥Big Boss 💥";
@@ -92,6 +93,7 @@ function normalizeName(raw) {
   if (/^PLO4.*20K/i.test(name)) return "PLO4 🃏🃏🃏 20K 🏆";
   if (/^PLO5\s*-\s*[РP]KO/i.test(name)) return "PLO5 - PKO 🥊 200k 🏆";
   if (/^Воскресный турнир$/i.test(name)) return "Воскресный турнир 🏆";
+  if (/^Турнир Месяца/i.test(name)) return "Турнир Месяца";
   return name;
 }
 
@@ -417,6 +419,18 @@ async function parseOcrFile(file) {
     if (time === "08:00" && /^Island bounty/i.test(title)) { buyin = 200; title = "Island bounty🌴 20k"; }
     if (time === "13:00" && /^DV.*Bounty.*100k/i.test(title)) buyin = 1000;
     if (time === "18:00" && /LUCKY\s+555/i.test(title)) buyin = 1000;
+  }
+  // September 27: entry fees confirmed by the club owner. Blue headers show starting stacks.
+  if (date === "27.09.2026" && blue) {
+    const confirmed = {
+      "00:00": [1500, "S.Bounty 2/3 🥊 120k"],
+      "02:00": [200, "✨Deep Night 15k ✨"],
+      "08:00": [600, "Island bounty🌴 20k"],
+      "11:00": [300, "Mystic Bounty🥊 50k"],
+      "16:00": [200, "PLO4 🃏🃏🃏 20K 🏆"],
+      "18:00": [2500, "🥊GRAND KNOCKOUT🥊"]
+    }[time];
+    if (confirmed) { buyin = confirmed[0]; title = confirmed[1]; }
   }
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {

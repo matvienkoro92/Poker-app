@@ -4320,4 +4320,229 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "27.09.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 1,
+          "reward": 47626,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 3,
+          "reward": 2138,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 600,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 19332,
+          "points": 0
+        },
+        {
+          "nick": "АртемГончаро...",
+          "place": 4,
+          "reward": 1050,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 2,
+          "reward": 9019,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 6,
+          "reward": 2885,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Mystic Bounty🥊 50k",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 3145,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 3,
+          "reward": 2362,
+          "points": 0
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 5,
+          "reward": 944.9999999999999,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 🃏🃏🃏 20K 🏆",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 4,
+          "reward": 2127,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ПСИХ",
+          "place": 3,
+          "reward": 1310,
+          "points": 0
+        },
+        {
+          "nick": "IIIIII",
+          "place": 6,
+          "reward": 720,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Месяца",
+      "buyin": 3000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 264000,
+          "points": 0
+        },
+        {
+          "nick": "ICEGG",
+          "place": 6,
+          "reward": 38000,
+          "points": 0
+        },
+        {
+          "nick": "AliySvin",
+          "place": 15,
+          "reward": 9000,
+          "points": 0
+        },
+        {
+          "nick": "Rifa",
+          "place": 13,
+          "reward": 6000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 11,
+          "reward": 19981,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 21,
+          "reward": 1717.0000000000002,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Виталька",
+          "place": 2,
+          "reward": 2570.24,
+          "points": 0
+        },
+        {
+          "nick": "Damir86rus",
+          "place": 1,
+          "reward": 1970.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 4,
+          "reward": 12140,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
