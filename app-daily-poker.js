@@ -13,7 +13,7 @@
   };
 
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать», чтобы начать";
-  var DAILY_POKER_INVITE_TEXT = "В клубе Два туза можно крутить 1 раздачу в день бесплатно и выиграть билет на турнир от 300 ₽ до 5 000 ₽";
+  var DAILY_POKER_INVITE_TEXT = "В клубе Два туза можно крутить 1 раздачу в день бесплатно и выиграть билет на турнир от 300 ₽ до 10 000 ₽";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
   var DAILY_POKER_WINNERS_CACHE_MS = 60 * 1000;
   var DAILY_POKER_WINNERS_PREVIEW_LIMIT = 3;
