@@ -1525,11 +1525,11 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font:900 1.7cqw/1.05 Arial,sans-serif!important}
 #app.app.app--view-home [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonuses__note {bottom:-7%!important;height:25%!important}
 
-/* The oval and four dividers mark five betting boxes on the felt. */
+/* A single fine inset line follows the table rail on the felt. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-poker-betting-line { display:none; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
-  display:block;position:absolute;inset:0;z-index:5;pointer-events:none;
-  background:url('./assets/home-poker-betting-line.svg?v=3') center/100% 100% no-repeat;
+  display:block;position:absolute;inset:0;z-index:7;pointer-events:none;
+  background:url('./assets/home-poker-betting-line.svg?v=9') center/100% 100% no-repeat;
 }
 /* Lift the stacks into the playing area while leaving the painted table rail in place. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
