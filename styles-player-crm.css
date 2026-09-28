@@ -3359,6 +3359,18 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
 .player-crm__links-form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.player-crm__links-optional {
+  margin-top: 10px;
+}
+.player-crm__links-optional > summary {
+  width: fit-content;
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+.player-crm__links-optional[open] > .player-crm__links-form-grid {
+  margin-top: 12px;
+}
 .player-crm__links-result:empty {
   display: none;
 }

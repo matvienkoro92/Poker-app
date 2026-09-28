@@ -1528,8 +1528,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 /* A single betting line follows the real table's oval, underneath the bonus stacks. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-poker-betting-line { display:none; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
-  display:block;position:absolute;inset:0;z-index:3;pointer-events:none;
-  background:url('./assets/home-poker-betting-line.svg') center/100% 100% no-repeat;
+  display:block;position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:url('./assets/home-poker-betting-line.svg?v=2') center/100% 100% no-repeat;
 }
 /* Lift the stacks into the playing area while leaving the painted table rail in place. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
