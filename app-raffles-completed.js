@@ -1057,10 +1057,17 @@ function initRafflesCompletedRuntime(opts) {
     buttons.forEach(function (item) { item.disabled = true; });
     if (kind !== "seat") btn.classList.add("raffle-winner-followup-btn--loading");
     rememberRaffleCompletedWinnerTab(btn);
+    var followupController = typeof AbortController === "function" ? new AbortController() : null;
+    var followupTimedOut = false;
+    var followupTimeout = window.setTimeout(function () {
+      followupTimedOut = true;
+      if (followupController) followupController.abort();
+    }, 15000);
     fetch(base + "/api/raffles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
+      signal: followupController ? followupController.signal : undefined,
       body: JSON.stringify(pokerGuestOrAuthedPostBody({
         action: "setWinnerFollowup",
         raffleId: rid,
@@ -1079,6 +1086,7 @@ function initRafflesCompletedRuntime(opts) {
           });
       })
       .then(function (data) {
+        window.clearTimeout(followupTimeout);
         // Show the outcome controls only once they are ready for interaction.
         // Previously they appeared disabled while the seat request was saving.
         optimisticOutcomeButtons.forEach(function (item) {
@@ -1100,6 +1108,7 @@ function initRafflesCompletedRuntime(opts) {
         refreshRafflesAfterWinnerAction(data);
       })
       .catch(function (err) {
+        window.clearTimeout(followupTimeout);
         optimisticOutcomeButtons.forEach(function (item) { item.remove(); });
         buttons.forEach(function (item) { item.disabled = false; });
         if (activeClass) btn.classList.remove(activeClass);
@@ -1108,8 +1117,12 @@ function initRafflesCompletedRuntime(opts) {
         if (weekReturnsBadge && weekReturnsBadge.classList.contains("raffle-winner-week-returns--loading")) {
           weekReturnsBadge.remove();
         }
-        if (tg && tg.showAlert) tg.showAlert(err && err.message ? err.message : POKER_NET_ERR);
-        else window.alert(err && err.message ? err.message : POKER_NET_ERR);
+        if (followupTimedOut) refreshRafflesAfterWinnerAction(null);
+        var message = followupTimedOut
+          ? "Ответ сервера задержался. Обновляю архив, чтобы проверить, сохранилась ли отметка."
+          : err && err.message ? err.message : POKER_NET_ERR;
+        if (tg && tg.showAlert) tg.showAlert(message);
+        else window.alert(message);
       });
   }
 
