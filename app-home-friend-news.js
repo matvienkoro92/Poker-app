@@ -1418,6 +1418,8 @@
         at: day + "T12:00:00+03:00", actorId: "", actorNick: winner.name, actorAvatar: window.pokerPublicImageSrc(winner.avatar) || clubNewsFallbackAvatar(winner.name),
         playerAccent: color.accent, playerRgb: color.rgb,
         newsTitle: winner.name,
+        lastLongerTitle: title, lastLongerStake: stake, lastLongerPayout: amount,
+        lastLongerParticipants: event.participantsCount == null ? (event.entries || []).length : event.participantsCount,
         newsLines: ["Ставка на себя · " + title, "Поставил " + formatRub(stake) + " · забрал " + formatRub(amount), "Участников: " + (event.participantsCount == null ? (event.entries || []).length : event.participantsCount)],
         text: winner.name + " — Ставка на себя: поставил " + formatRub(stake) + ", забрал " + formatRub(amount), target: "profile"
       };
@@ -2547,6 +2549,7 @@
   }
 
   function eventHtml(row, ticker, isDayHero, clubTicker, artOccurrence) {
+    var isLastLonger = row && row._eventKind === "self-bet-result";
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
@@ -2563,11 +2566,11 @@
       ? String(linkedClubProfile && linkedClubProfile.id || "")
       : String(row && row.actorId || "");
     var avatar = String(linkedProfile && linkedProfile.avatar || row && row.actorAvatar || "").trim();
-    var personalArt = clubTicker
+    var personalArt = isLastLonger ? "" : clubTicker
       ? clubNewsPersonalArt(row && row.actorNick)
       : clubNewsCardArt(row && row.actorNick, artOccurrence);
-    var visualUrl = personalArt || avatar;
-    var visualFallbackUrl = personalArt
+    var visualUrl = isLastLonger ? "./assets/last-longer-chip-reference-v1-320.webp" : (personalArt || avatar);
+    var visualFallbackUrl = isLastLonger ? "" : personalArt
       ? (clubNewsPersonalArt(row && row.actorNick) || avatar)
       : "";
     if (personalArt.indexOf("/cooler-news-cutout.webp") !== -1) visualFallbackUrl = avatar;
@@ -2613,7 +2616,11 @@
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
         ' role="button" tabindex="0"'
       : "";
-    var structuredText = row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
+    var structuredText = isLastLonger && !ticker
+      ? '<span class="home-friend-news-modal__last-longer-line"><b>Ластлонгер</b> · ' + esc(row.newsTitle || row.actorNick || "Игрок") +
+        ' · ' + esc(row.lastLongerTitle || "Турнир") + ' · ' + esc(formatRub(row.lastLongerStake)) +
+        ' → ' + esc(formatRub(row.lastLongerPayout)) + ' · ' + esc(String(row.lastLongerParticipants)) + ' уч.</span>'
+      : row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
         (row.type === "birthday" ? profileMetaHtml : "") +
         (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
@@ -2626,11 +2633,12 @@
     var profileCue = canOpenProfile
       ? '<span class="home-friend-news-modal__profile-cue">' + (['ID400800'].includes(eventPlayerId) ? 'Профиль и образ' : 'Профиль') + ' <b aria-hidden="true">›</b></span>'
       : "";
-    var feedbackParts = ticker ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
+    var feedbackParts = ticker || isLastLonger ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var feedbackId = ticker ? "" : feedbackEventId(row);
     var shareToken = ticker ? "" : clubNewsEventShareToken(feedbackId);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
+      (isLastLonger ? " home-friend-news-event--last-longer" : "") +
       (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
       (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') +
@@ -2638,12 +2646,12 @@
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="' + (!ticker && isDayHero ? 'false' : 'true') + '">' + visual +
-      (!ticker && isDayHero ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + "</span>" +
+      (!ticker && isDayHero && !isLastLonger ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
         '<span data-home-news-read-id="' + esc(row.id) + '">' + structuredText + "</span>" +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
-        (showCardTime ? "<small>" + esc(timeLabel) + "</small>" : "") +
+        (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
       "</span>" + feedbackParts.comments + "</span>";
   }

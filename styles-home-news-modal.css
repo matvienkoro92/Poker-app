@@ -2737,6 +2737,62 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
   line-height: 1;
   margin: 0;
 }
+
+/* Last Longer results are compact announcements, not player portrait cards. */
+body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item.home-friend-news-event--last-longer:nth-child(n) {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 60px;
+  padding: 7px 11px;
+}
+body .home-friend-news-modal--club .home-friend-news-event--last-longer .home-friend-news-modal__icon {
+  position: relative;
+  inset: auto;
+  width: 44px;
+  height: 44px;
+  overflow: visible;
+  -webkit-mask-image: none;
+  mask-image: none;
+  background: none;
+}
+body .home-friend-news-modal--club .home-friend-news-event--last-longer .home-friend-news-modal__icon::after {
+  display: none;
+}
+body .home-friend-news-modal--club .home-friend-news-event--last-longer .home-friend-news-modal__icon .home-friend-news__avatar {
+  position: static;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  object-fit: contain;
+  filter: none;
+  transform: none;
+}
+body .home-friend-news-modal--club .home-friend-news-event--last-longer .home-friend-news-modal__copy {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__last-longer-line {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: #f5e6c9;
+  font-size: clamp(11px, 2.8vw, 14px);
+  font-weight: 650;
+  line-height: 1.2;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__last-longer-line b {
+  color: #ffcf73;
+}
 body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-row {
   margin-top: 3px;
   gap: 3px;
