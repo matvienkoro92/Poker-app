@@ -52,7 +52,7 @@ function browserHarness() {
     localStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } },
     sessionStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } } };
   let source = fs.readFileSync(require.resolve("../app-home-friend-news.js"), "utf8");
-  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsThird, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, loadClubWallEvents, eventTextHtml,
+  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsAfterWinner, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, loadClubWallEvents, eventTextHtml,
     bumpLoad: function () { loadSequence++; }, bumpAuth: function () { friendAuthGeneration++; },
     setState: function (id, rows, read) { friendNewsAccountId = id; friendTrackingSince = Date.parse("2026-09-01T00:00:00Z"); events = rows; friendReadIds = read || {}; },
     pending: function () { return friendReadPending; },
@@ -203,14 +203,15 @@ test("historical feed does not become unread when tracking starts", () => {
   assert.equal(h.window.pokerGetFriendNewsSummary().unread, 0);
 });
 
-test("September 10 self-bet result is third in its own day and keeps ordinary news shape", () => {
+test("self-bet result follows its winner's news on the same day", () => {
   const h = browserHarness();
   const event = h.api.clubSelfBetNewsEvents(selfBetFixture())[0];
   const newer={id:"newer",at:"2026-09-11T12:00:00+03:00"};
-  const daily=[1,2,3,4].map(i=>({id:"day"+i,at:event.at}));
-  const rows=h.api.placeSelfBetNewsThird([newer,event,...daily]);
+  const daily=[{id:"other",actorNick:"Other",at:event.at},{id:"winner",actorNick:"Shkarubo",at:event.at},{id:"later",actorNick:"Another",at:event.at}];
+  const rows=h.api.placeSelfBetNewsAfterWinner([newer,event,...daily]);
   assert.equal(rows[0].id,"newer");
   assert.equal(rows[3].id,event.id);
+  assert.equal(rows[2].id,"winner");
   assert.equal(event.actorNick,"Shkarubo");
   assert.match(event.newsLines.join(" ").replace(/\s/g," "),/300 ₽.*7 000 ₽/);
   assert.equal(event.image,undefined);

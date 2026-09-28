@@ -1436,19 +1436,19 @@
     });
   }
 
-  function placeSelfBetNewsThird(rows) {
+  function placeSelfBetNewsAfterWinner(rows) {
     var result = rows.filter(function (row) { return row._eventKind !== "self-bet-result"; });
-    var byDay = {};
     rows.filter(function (row) { return row._eventKind === "self-bet-result"; }).forEach(function (row) {
       var day = eventDayKey(row.at);
-      (byDay[day] || (byDay[day] = [])).push(row);
-    });
-    Object.keys(byDay).sort().reverse().forEach(function (day) {
-      var indices = [];
-      result.forEach(function (row, index) { if (eventDayKey(row.at) === day) indices.push(index); });
-      var index = indices.length >= 3 ? indices[2] : indices.length ? indices[indices.length - 1] + 1 : result.findIndex(function (row) { return eventDayKey(row.at) < day; });
+      var winnerKeys = nicknameMatchKeys(row.actorNick);
+      var index = result.findIndex(function (candidate) {
+        return candidate._eventKind !== "self-bet-result" && eventDayKey(candidate.at) === day &&
+          nicknameMatchKeys(candidate.actorNick).some(function (key) { return winnerKeys.indexOf(key) !== -1; });
+      });
+      if (index !== -1) index += 1;
+      else index = result.findIndex(function (candidate) { return eventDayKey(candidate.at) < day; });
       if (index < 0) index = result.length;
-      result.splice.apply(result, [index, 0].concat(byDay[day]));
+      result.splice(index, 0, row);
     });
     return result;
   }
@@ -1457,7 +1457,7 @@
     var merged = mergeRelatedPlayerEvents(Array.isArray(rows) ? rows : []).filter(function (row) {
       return !isStandaloneRatingDrop(row);
     });
-    return placeSelfBetNewsThird(distributeBelowTop10RatingEvents(pinLeadingClubWins(distributeDailyClubEvents(merged))));
+    return placeSelfBetNewsAfterWinner(distributeBelowTop10RatingEvents(pinLeadingClubWins(distributeDailyClubEvents(merged))));
   }
 
   function eventDateLabel(value, includeYear) {
@@ -2569,7 +2569,7 @@
     var personalArt = isLastLonger ? "" : clubTicker
       ? clubNewsPersonalArt(row && row.actorNick)
       : clubNewsCardArt(row && row.actorNick, artOccurrence);
-    var visualUrl = isLastLonger ? "./assets/last-longer-chip-reference-v1-320.webp" : (personalArt || avatar);
+    var visualUrl = isLastLonger ? "./assets/last-longer-chip-transparent-v1.png" : (personalArt || avatar);
     var visualFallbackUrl = isLastLonger ? "" : personalArt
       ? (clubNewsPersonalArt(row && row.actorNick) || avatar)
       : "";
@@ -4105,7 +4105,7 @@
               });
           });
         }).slice(0, MAX_FRIEND_EVENTS);
-      events = placeSelfBetNewsThird(nextEvents);
+      events = placeSelfBetNewsAfterWinner(nextEvents);
       friendNewsLoading = false;
       friendNewsLoaded = true;
       writeRenderedEventsCache(events);
