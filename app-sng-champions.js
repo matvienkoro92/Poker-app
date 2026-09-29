@@ -2367,10 +2367,9 @@
         }
         if (value) tablePasswords[input.getAttribute("data-sng-table-password")] = value;
       }
-      if (Object.keys(tablePasswords).length !== passwordInputs.length) {
-        showAlert(passwordInputs.length > 1 ? "Заполните пароли для всех столов." : "Введите пароль стола из 4 цифр.");
-        var emptyInput = passwordInputs.find(function (input) { return !tablePasswords[input.getAttribute("data-sng-table-password")]; });
-        if (emptyInput) emptyInput.focus();
+      if (!Object.keys(tablePasswords).length) {
+        showAlert("Введите пароль хотя бы одного стола из 4 цифр.");
+        if (passwordInputs[0]) passwordInputs[0].focus();
         return;
       }
       setButtonLoading(playing, true);
