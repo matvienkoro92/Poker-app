@@ -44,6 +44,27 @@
   gap: 10px;
 }
 
+.download-telegram-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 18px;
+  border: 1px solid #e8b665;
+  border-radius: 16px;
+  background: linear-gradient(115deg, #172530, #10151c 65%, #302318);
+  box-shadow: inset 0 1px 0 #ffe5a045, 0 8px 20px #0005;
+  color: #ffe2a4;
+  font-size: clamp(16px, 4.2vw, 22px);
+  font-weight: 850;
+  text-align: center;
+  text-decoration: none;
+}
+.download-telegram-link svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; flex: none; }
+.download-telegram-link:hover { filter: brightness(1.14); }
+.download-telegram-link:focus-visible { outline: 2px solid #ffe2a4; outline-offset: 3px; }
+
 .download-app-group {
   display: flex;
   flex-direction: column;

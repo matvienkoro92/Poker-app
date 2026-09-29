@@ -250,7 +250,7 @@ var POKER_PWA_AUTH_I18N = {
         footerNote: "Клуб «Два туза» · с 2018 года · Играйте\u00a0ответственно",
         navHome: "Главная",
         navChat: "Чаты",
-        navDownload: "Скачать",
+        navDownload: "Играть",
         navCashout: "Депозит",
         navProfile: "Профиль"
       },
@@ -290,7 +290,7 @@ var POKER_PWA_AUTH_I18N = {
         footerNote: "Two Aces Club · since 2018 · Play\u00a0responsibly",
         navHome: "Home",
         navChat: "Chats",
-        navDownload: "Download",
+        navDownload: "Play",
         navCashout: "Deposit",
         navProfile: "Profile"
       }

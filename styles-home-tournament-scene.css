@@ -1566,8 +1566,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* Shared ticket hierarchy: the session leads, while the buy-in keeps its size. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
-  left: 14% !important;
-  top: 3% !important;
+  left: 17% !important;
+  top: 5.5% !important;
   width: 51% !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-ticket-session {
@@ -1576,7 +1576,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   gap: .35cqw;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 1.15cqw 2.2cqw 1.3cqw;
+  padding: 1.4cqw 2.6cqw 1.5cqw;
   border-left: .55cqw solid #ffad42;
   border-radius: .45cqw;
   background: linear-gradient(90deg, #b650184d, #b6501812 82%, transparent);
@@ -1599,12 +1599,12 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title {
   display: flex !important;
   align-items: baseline;
-  gap: 1.6cqw;
+  gap: 2cqw;
   top: 30% !important;
   white-space: nowrap !important;
 }
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title-name {
-  font-size: calc(var(--ticket-title-size, 5.6cqw) * .72);
+  font-size: calc(var(--ticket-title-size, 5.6cqw) * .6) !important;
   line-height: 1;
 }
 #app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title-buyin {
@@ -1613,7 +1613,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 
 /* Every tournament scene seats Last Longer to the left of its featured player. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-bonuses-sign-sharp-v3.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-bonuses-right-v4.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] { --home-tournament-scene: url('./assets/home-tournament-aza-last-longer-left-v1.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-last-longer-left-v1.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-last-longer-left-v1.webp'); }
@@ -1648,6 +1648,10 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) strong { font-size: 3.2cqw !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(2) small { display: inline !important; font-size: 2.2cqw !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:first-child {
+  justify-content: center; width: 72% !important; padding-top: .22cqw !important;
+  border-top: .12cqw solid #cba45c !important;
+}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 64% !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__pedestal {
   display: block !important; position: absolute; left: 0; top: -24%; width: 100%; height: 142%;
@@ -1655,7 +1659,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   filter: drop-shadow(0 .45cqw .55cqw #000b);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout {
-  position: absolute; left: -6%; top: -25%; width: 110%; height: 57%; overflow: visible;
+  position: absolute; left: -12%; top: -18%; width: 110%; height: 57%; overflow: visible;
   pointer-events: none; color: #ffe2a0; fill: currentColor; z-index: 2;
   filter: drop-shadow(0 .15cqw .2cqw #000);
 }

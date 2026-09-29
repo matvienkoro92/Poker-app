@@ -27,7 +27,7 @@
   var VIEW_SKELETON_TITLES = {
     "winter-rating": "Рейтинг",
     "chat": "Чаты",
-    "download": "Скачать",
+    "download": "Играть",
     "bonus-game": "Бонусная игра",
     "cooler-game": "Кулер",
     "plasterer-game": "Штукатур",
