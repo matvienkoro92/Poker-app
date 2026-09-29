@@ -1,12 +1,16 @@
 /* Poker21 welcome screen: live controls over the supplied clean artwork. */
 .view[data-view="download"]:has(.play-portal) > .download-chat-tabs { display: none; }
+#app.app .card .card__content > .view.view--active[data-view="download"]:has(.download-page--active[data-download-page="main"] .play-portal) {
+  padding-left: env(safe-area-inset-left, 0px) !important;
+  padding-right: env(safe-area-inset-right, 0px) !important;
+}
 body[data-view="download"] .view--active[data-view="download"]:has(.download-page--active[data-download-page="main"]) {
-  background: url('./assets/play-poker21-portal-v1.webp') center bottom / min(100%, 560px) 400% no-repeat;
+  background: #090807;
 }
 .play-portal {
-  position: relative; width: 100%; max-width: 560px; aspect-ratio: 1122 / 1402;
+  position: relative; width: 100%; aspect-ratio: 852 / 1846;
   margin: 0 auto; overflow: hidden; container-type: inline-size;
-  background: #090807 url('./assets/play-poker21-portal-v1.webp') center / 100% 100% no-repeat;
+  background: #090807 url('./assets/play-poker21-portal-full-v2.webp') center top / cover no-repeat;
   color: #fff0d5; font-family: Arial, sans-serif;
 }
 .play-portal *, .play-portal *::before, .play-portal *::after { box-sizing: border-box; }
@@ -67,7 +71,7 @@ body[data-view="download"] .view--active[data-view="download"]:has(.download-pag
 .play-portal__step--manager a { display: flex; align-items: center; gap: 2cqw; width: 100%; height: 100%; padding: .6cqw 1.2cqw .6cqw 2cqw; color: #fff0d5 !important; text-decoration: none; border-radius: inherit; }
 .play-portal__step--manager a:hover { background: #e7932628; }
 .play-portal__step-chevron { margin-left: auto; color: #ffc15f; font-size: 4cqw; }
-.play-portal__club-id { position: absolute; left: 42%; top: 65.1%; width: 39%; text-align: center; color: #ffdfa0; text-shadow: 0 0 2cqw #fa681d; transform: rotate(-2deg); }
+.play-portal__club-id { position: absolute; left: 39%; top: 48.5%; width: 45%; text-align: center; color: #ffdfa0; text-shadow: 0 0 2cqw #fa681d; transform: rotate(-2deg); }
 .play-portal__club-id span { display: block; font: 800 italic 3.1cqw/1 Arial, sans-serif; }
 .play-portal__club-id strong { display: block; margin-top: 1cqw; font: 900 8.8cqw/1 Arial, sans-serif; letter-spacing: -.25cqw; }
 .play-portal__copy {
@@ -76,7 +80,7 @@ body[data-view="download"] .view--active[data-view="download"]:has(.download-pag
   color: #ffeac5; font: 750 2.9cqw/1 Arial, sans-serif; text-decoration: none; white-space: nowrap;
   box-shadow: inset 0 .25cqw .4cqw #f6ba5944, 0 .9cqw 2cqw #0009; cursor: pointer;
 }
-.play-portal__copy { left: 38%; top: 77.5%; width: 48%; height: 6.7%; }
+.play-portal__copy { left: 38%; top: 55%; width: 48%; height: 5.2%; }
 .play-portal__copy span { color: #ffc65e; font-size: 4cqw; }
 .play-portal :is(a,button):focus-visible { outline: .7cqw solid #fff1bb; outline-offset: .3cqw; }
 .play-portal :is(a,button):active { filter: brightness(1.2); }
