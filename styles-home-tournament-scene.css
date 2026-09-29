@@ -1613,7 +1613,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 
 /* Every tournament scene seats Last Longer to the left of its featured player. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-matte-v5.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] { --home-tournament-scene: url('./assets/home-tournament-aza-last-longer-left-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] { --home-tournament-scene: url('./assets/home-tournament-aza-hand-sign-v2.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-last-longer-left-v1.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-last-longer-left-v1.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] { --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-last-longer-left-v1.webp'); }
@@ -1690,6 +1690,15 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign span { font-size: 1.25em; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign:focus-visible {
   outline: .45cqw solid #ffe6a6; outline-offset: .3cqw;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-tournament-play-sign {
+  left: 72.4%; top: 35%; width: 19%; height: 8.8%;
+  padding: 0; transform: rotate(-3deg);
+  color: #ffdc91; background: transparent; border: 0; border-radius: 0;
+  box-shadow: none; font-size: 3cqw;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-table-rim-dimmer {
+  display: none;
 }
 
 /* Keep the ticket-raffle entry available without covering the Last Longer chip. */
