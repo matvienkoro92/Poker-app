@@ -8,10 +8,10 @@ test('past results display separate cards without duplicate or current-event act
  const source=fs.readFileSync(require.resolve('../app-tournament-bet.js'),'utf8').replace('  window.openTournamentBetModal = open;', '  window.historyHtml = completedEventsHtml; window.closedHistoryHtml = completedEventsHtml;');
  vm.runInNewContext(source,context);
  assert.equal(context.window.closedHistoryHtml({archiveEvents:[]}), "");
- const event=(id,name)=>({id,status:'settled',title:name,bank:6200,stakePrice:300,entries:[{name:'Winner',winner:true,stake:300}]});
+ const event=(id,name)=>({id,status:'settled',title:name,winnerName:'Winner',winnerStake:300,winnerPaidAmount:6200,participantsCount:2});
  const html=context.window.historyHtml({id:'current',archiveEvents:[event('past1','First'),event('past2','Second'),event('past1','Duplicate'),event('current','Current'),{...event('personal','Personal'),createdByPlayer:true}]});
  assert.equal((html.match(/data-tournament-bet-archive=/g)||[]).length,2);
- assert.match(html,/First/);assert.match(html,/Second/);assert.doesNotMatch(html,/Winner|<img|<details/);
+ assert.match(html,/First/);assert.match(html,/Second/);assert.match(html,/Winner/);assert.match(html,/6\s?200/);assert.doesNotMatch(html,/<img|<details/);
  assert.doesNotMatch(html,/Duplicate|Current|Personal|data-tournament-bet-action|data-tournament-bet-copy|data-tournament-bet-share/);
  assert.equal(context.window.historyHtml({archiveEvents:[]}), '');
  assert.match(context.window.historyHtml({archiveEvents:[event('past','No current')]}),/No current/);

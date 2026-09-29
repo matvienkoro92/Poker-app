@@ -11,6 +11,7 @@
   var authGeneration = 0;
   var subscribed = false;
   var refreshTimer = 0;
+  var EVENT_REFRESH_MS = 180000;
   var homePlaqueHasActiveEvent = false;
   var homePlaqueLastRefreshAt = 0;
   var HOME_PLAQUE_REFRESH_MS = 180000;
@@ -311,9 +312,21 @@
     if (!events.length) return "";
     return '<section class="tournament-bet-modal__history"><h3>Прошлые события</h3>' + events.map(function (item) {
       var id = item.id;
-      return '<section class="tournament-bet-modal__history-card"><button type="button" data-tournament-bet-archive="' + esc(id) + '" aria-expanded="' + !!archiveOpen[id] + '">' +
-        '<strong>' + esc(item.title || "Турнир вечера") + '</strong>' + eventDateHtml(item) + '<span>' + (archiveOpen[id] ? 'Свернуть ▴' : 'Открыть ▾') + '</span></button>' +
-        (archiveOpen[id] ? '<div>' + (archiveDetails[id] ? closedEventHtml(archiveDetails[id], true) : archiveErrors[id] ? '<p role="alert">' + esc(archiveErrors[id]) + '</p><button type="button" data-tournament-bet-archive-retry="' + esc(id) + '">Повторить</button>' : '<p role="status">Загружаем событие…</p>') + '</div>' : '') + '</section>';
+      var detail = archiveDetails[id];
+      var entries = detail && Array.isArray(detail.entries) ? detail.entries : [];
+      return '<section class="tournament-bet-modal__history-card tournament-bet-modal__closed-event">' +
+        '<div class="tournament-bet-modal__history-summary">' +
+        '<span class="tournament-bet-modal__result-status">Событие завершено</span>' + eventDateHtml(item) +
+        '<strong class="tournament-bet-modal__result-title">СТАВКА НА СЕБЯ<span class="tournament-bet-modal__result-tournament">В ' + esc(item.title || "турнире") + '</span></strong>' +
+        (item.winnerName ? '<span class="tournament-bet-modal__result-winner">🏆 ' + esc(item.winnerName) + '</span>' +
+          '<span class="tournament-bet-modal__result-amounts"><span>Поставил <strong>' + rub(item.winnerStake) + '</strong></span><span>Забрал <strong>' + rub(item.winnerPaidAmount) + '</strong></span></span>' :
+          '<span class="tournament-bet-modal__result-pending">Победитель не указан</span>') +
+        '<button type="button" class="tournament-bet-modal__history-toggle" data-tournament-bet-archive="' + esc(id) + '" aria-expanded="' + !!archiveOpen[id] + '" aria-controls="tournament-bet-archive-' + esc(id) + '">' +
+          'Участники: ' + esc(item.participantsCount || 0) + ' · ' + (archiveOpen[id] ? 'Свернуть ▴' : 'Подробнее ▾') + '</button></div>' +
+        (archiveOpen[id] ? '<div class="tournament-bet-modal__history-details" id="tournament-bet-archive-' + esc(id) + '">' +
+          (detail ? '<div class="tournament-bet-modal__participants-grid">' + entries.map(function (entry, index) { return participantHtml(entry, index, detail); }).join("") + '</div>' :
+            archiveErrors[id] ? '<p role="alert">' + esc(archiveErrors[id]) + '</p><button type="button" data-tournament-bet-archive-retry="' + esc(id) + '">Повторить</button>' : '<p role="status">Загружаем участников…</p>') +
+          '</div>' : '') + '</section>';
     }).join("") + '</section>';
   }
 
@@ -476,6 +489,7 @@
         if (typeof data.subscribed === "boolean") subscribed = data.subscribed;
         state = data;
         if (deepLinkEventId && data && data.id === deepLinkEventId) { activeTab = data.createdByPlayer ? "create" : "event"; deepLinkEventId = ""; }
+        syncRefreshTimer();
         var adminForm = bodyEl && bodyEl.querySelector("form");
         if (!(silent && (activeTab === "create" || activeField || adminForm))) render();
         else updateHomeButton(data);
@@ -486,6 +500,20 @@
       return null;
     }).finally(function () { loading = false; loadPromise = null; if (requestAuthGeneration !== authGeneration && modal && !modal.hidden) load(false); });
     return loadPromise;
+  }
+
+  function syncRefreshTimer() {
+    var shouldRefresh = modal && !modal.hidden && document.visibilityState !== "hidden" &&
+      activeTab === "event" && !selectedEventId && state && state.status === "open";
+    if (!shouldRefresh) {
+      clearInterval(refreshTimer);
+      refreshTimer = 0;
+    } else if (!refreshTimer) {
+      refreshTimer = window.setInterval(function () {
+        if (modal && !modal.hidden && document.visibilityState !== "hidden" && activeTab === "event" && !selectedEventId && state && state.status === "open") load(true);
+        else syncRefreshTimer();
+      }, EVENT_REFRESH_MS);
+    }
   }
 
   function post(payload, pendingText) {
@@ -540,8 +568,7 @@
       document.body.classList.add("tournament-bet-modal-open");
       setStatus("");
       load(false);
-      clearInterval(refreshTimer);
-      refreshTimer = window.setInterval(function () { if (modal && !modal.hidden) load(true); }, 15000);
+      syncRefreshTimer();
     }).catch(function () { setStatus("Не удалось открыть турнир. Попробуйте ещё раз."); });
   }
 
@@ -549,7 +576,7 @@
     if (!modal) return;
     modal.hidden = true;
     document.body.classList.remove("tournament-bet-modal-open");
-    clearInterval(refreshTimer);
+    syncRefreshTimer();
   }
 
   async function shareResultImage(button) {
@@ -628,11 +655,12 @@
     if (tabEl) {
       var requestedTab = tabEl.getAttribute("data-tournament-bet-tab");
       activeTab = requestedTab === "admin-create" && state && state.isAdmin ? "admin-create" : requestedTab === "rating" || requestedTab === "create" ? requestedTab : "event";
+      syncRefreshTimer();
       if (activeTab === "admin-create") { selectedEventId = ""; load(false); } else if (activeTab === "event") { selectedEventId = ""; load(false); } else if (activeTab === "rating") load(false); else if (activeTab === "create" && state && state.createdByPlayer) render(); else render();
       return;
     }
     var personalEvent = event.target.closest("[data-tournament-bet-personal-event]");
-    if (personalEvent) { selectedEventId = personalEvent.getAttribute("data-tournament-bet-personal-event") || ""; activeTab = "create"; load(false); return; }
+    if (personalEvent) { selectedEventId = personalEvent.getAttribute("data-tournament-bet-personal-event") || ""; activeTab = "create"; syncRefreshTimer(); load(false); return; }
     var personalAccept = event.target.closest("[data-tournament-bet-personal-accept]");
     if (personalAccept) {
       var acceptId = personalAccept.getAttribute("data-tournament-bet-personal-accept") || "";
@@ -764,6 +792,7 @@
   window.addEventListener("online", refreshHomePlaque);
   window.addEventListener("pageshow", refreshHomePlaque);
   document.addEventListener("visibilitychange", refreshHomePlaque);
+  document.addEventListener("visibilitychange", syncRefreshTimer);
   function initialLoad() {
     if (deepLinkEventId || deepLinkSection) open();
     else window.pokerLoadTournamentBetHome().then(function (data) {
@@ -776,6 +805,7 @@
     authGeneration++;
     archiveDetails = Object.create(null); archiveOpen = Object.create(null); archivePending = Object.create(null); archiveErrors = Object.create(null);
     state = null;
+    syncRefreshTimer();
     subscribed = false;
     activeTab = "event";
     if (modal && !modal.hidden) {
