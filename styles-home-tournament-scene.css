@@ -1612,16 +1612,16 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 
 /* Every tournament scene seats Last Longer to the left of its featured player. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-matte-v5.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] { --home-tournament-scene: url('./assets/home-tournament-aza-supported-longer-v3.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-last-longer-left-v1.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-last-longer-left-v1.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] { --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-last-longer-left-v1.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-last-longer-left-v1.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-magic-last-longer-left-v1.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] { --home-tournament-scene: url('./assets/home-tournament-hakas-last-longer-left-v1.webp'); }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix { background-image: url('./assets/home-tournament-pokermanki-magic-last-longer-left-v1.webp') !important; }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after { background-image: url('./assets/home-tournament-pokermanki-magic-last-longer-left-v1.webp') !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] { --home-tournament-scene: url('./assets/home-tournament-aza-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] { --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] { --home-tournament-scene: url('./assets/home-tournament-hakas-shared-v2.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix { background-image: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp') !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after { background-image: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp') !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]::before,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-raffle-chest-art { display: none !important; }
 
@@ -1700,6 +1700,27 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] > .home-table-rim-dimmer {
   display: none;
 }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-table-rim-dimmer {
+  display: none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
+  display: none;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-play-sign,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-play-sign,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-play-sign,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-play-sign,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-play-sign,
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-play-sign {
+  padding: 0; color: #ffdc91; background: transparent; border: 0; border-radius: 0;
+  box-shadow: none; font-size: 3cqw;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-play-sign { left: 72%; top: 32%; width: 20%; height: 10%; transform: rotate(-3deg); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-play-sign { left: 72%; top: 29%; width: 23%; height: 11.5%; transform: rotate(-4deg); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-play-sign { left: 71%; top: 33.5%; width: 21%; height: 10%; transform: rotate(-4deg); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-play-sign { left: 69%; top: 33%; width: 23%; height: 10%; transform: rotate(-4deg); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-play-sign { left: 74%; top: 41%; width: 19%; height: 9%; transform: rotate(-2deg); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock { top: 34% !important; height: 20% !important; }
 
 /* Keep the ticket-raffle entry available without covering the Last Longer chip. */
 #app.app.app--view-home .home-tractor-raffle {
