@@ -4551,4 +4551,191 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "28.09.2026": [
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 600,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 2556,
+          "points": 0
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 8,
+          "reward": 1380,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 3,
+          "reward": 5565,
+          "points": 0
+        },
+        {
+          "nick": "asianflushie",
+          "place": 8,
+          "reward": 2615,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Mystic Bounty🥊 50k",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Откотика_Я",
+          "place": 8,
+          "reward": 774,
+          "points": 0
+        },
+        {
+          "nick": "Freedom",
+          "place": 14,
+          "reward": 459,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 5160,
+          "points": 0
+        },
+        {
+          "nick": "I🐅I",
+          "place": 4,
+          "reward": 4200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 1224,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Prushnik",
+          "place": 2,
+          "reward": 8060,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 7460,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 2250,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПСИХ",
+          "place": 1,
+          "reward": 34480,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 8,
+          "reward": 3130,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 15,
+          "reward": 740,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Виктор",
+          "place": 1,
+          "reward": 13604.35,
+          "points": 0
+        },
+        {
+          "nick": "Adam1993",
+          "place": 2,
+          "reward": 10909.77,
+          "points": 0
+        },
+        {
+          "nick": "roma1233",
+          "place": 3,
+          "reward": 5381.56,
+          "points": 0
+        },
+        {
+          "nick": "konfesta",
+          "place": 6,
+          "reward": 2203.75,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 7,
+          "reward": 909.53,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

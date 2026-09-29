@@ -432,6 +432,11 @@ async function parseOcrFile(file) {
     }[time];
     if (confirmed) { buyin = confirmed[0]; title = confirmed[1]; }
   }
+  if (date === "28.09.2026") {
+    if (time === "20:00" && !blue) title = "ПЯТИХАТКА КО";
+    if (blue && time === "08:00" && /^Island bounty/i.test(title)) { buyin = 600; title = "Island bounty🌴 20k"; }
+    if (blue && time === "11:00" && /^Mystic Bounty/i.test(title)) { buyin = 300; title = "Mystic Bounty🥊 50k"; }
+  }
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
