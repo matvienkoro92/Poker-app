@@ -2584,7 +2584,7 @@ function updateTournamentDayBlock() {
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
-    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = detailState.t && detailState.t.character || (selectedWeekday === 1 || selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "aza" : selectedWeekday === 4 ? "redrocket" : selectedWeekday === 5 ? "cooler" : "fishkopcheny");
+    if (tournamentScene) tournamentScene.dataset.tournamentCharacter = detailState.t && detailState.t.character || (selectedWeekday === 1 || selectedWeekday === 6 ? "shtukatur" : selectedWeekday === 2 ? "shkarubo" : selectedWeekday === 3 ? "gucci" : selectedWeekday === 4 ? "redrocket" : selectedWeekday === 5 ? "cooler" : "fishkopcheny");
     if (tournamentScene) tournamentScene.dataset.tournamentWeekday = String(selectedWeekday);
     var historyButton = document.getElementById("homeTournamentHistoryOpen");
     if (historyButton) {
