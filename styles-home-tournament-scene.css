@@ -1441,7 +1441,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   mask:none!important;-webkit-mask:none!important;z-index:-2!important;pointer-events:none!important;
 }
 
-/* Live Last Longer bank and attendance sit below the illustrated chip. */
+/* Keep both live figures on the illustrated Last Longer pedestal. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock .home-last-longer-dock__bar {
   display: none !important;
 }
@@ -1449,17 +1449,17 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   display: flex !important;
   flex-direction: column !important;
   left: 50% !important;
-  top: 100% !important;
+  top: 45% !important;
   transform: translateX(-50%) !important;
   width: max-content !important;
   min-width: 18cqw !important;
   height: auto !important;
-  padding: .7cqw 1.2cqw !important;
-  gap: .4cqw !important;
-  border: .2cqw solid #bd9048 !important;
-  border-radius: .8cqw !important;
-  background: linear-gradient(#1e3027, #0a1711) !important;
-  box-shadow: 0 .4cqw .9cqw #0009 !important;
+  padding: 0 !important;
+  gap: .2cqw !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: #ffe7b2 !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock .home-last-longer-dock__bar > span:nth-child(-n+2) {
