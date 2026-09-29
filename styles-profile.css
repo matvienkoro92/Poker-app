@@ -7,6 +7,27 @@
 
 @import url("./styles-profile-identity.css?v=4.023");
 
+/* Additional tools moved from Home into the Profile's Other tab. */
+.view[data-view="profile"] [data-profile-other-panel] { display: none !important; }
+.view[data-view="profile"].profile-view--tab-other [data-profile-other-panel] { display: block !important; }
+.view[data-view="profile"].profile-view--guest [data-profile-other-panel] { display: block !important; }
+.view[data-view="profile"].profile-view--tab-other :is([data-profile-club-panel], [data-profile-poker21-panel], [data-profile-achievements-panel], [data-profile-friends-panel]) { display: none !important; }
+.view[data-view="profile"] .profile-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.view[data-view="profile"] #profileOtherPanel .features-section-title--games { margin: 4px 0 14px; color: #ffdfa0; font-size: clamp(22px, 5vw, 32px); font-weight: 900; }
+.view[data-view="profile"] #profileOtherPanel .games-apps-block { margin: 0; padding: 0; border: 0; background: transparent; }
+.view[data-view="profile"] #profileOtherPanel .games-apps-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: auto; gap: 10px; margin: 0; }
+.view[data-view="profile"] #profileOtherPanel .games-apps-card { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 5 / 6; padding: 0; border: 0; border-radius: 14px; overflow: hidden; background: #030303; box-shadow: 0 0 0 1px #ffbe575e, 0 8px 18px #0008; cursor: pointer; }
+.view[data-view="profile"] #profileOtherPanel .games-apps-grid .feature[hidden] { display: none !important; }
+.view[data-view="profile"] #profileOtherPanel .games-apps-card__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+.view[data-view="profile"] #profileOtherPanel .games-apps-card__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.view[data-view="profile"] #profileOtherPanel .home-transfer-vpn-row { display: grid; grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); gap: 10px; margin-top: 16px; }
+.view[data-view="profile"] #profileOtherPanel .home-vpn-cta { min-width: 0; min-height: 58px; padding: 8px 12px; border: 1px solid #da9e58; border-radius: 14px; background: linear-gradient(110deg, #65411c, #28180d); color: #fff0cf; font: 900 clamp(14px, 3vw, 22px)/1.15 Arial, sans-serif; box-shadow: 0 5px 18px #0008; cursor: pointer; }
+.view[data-view="profile"] #profileOtherPanel #vpnProxyOpenBtn { border-color: #ba62eb; background: linear-gradient(110deg, #1a0d2e, #6b2c9a); }
+@media (max-width: 700px) {
+  .view[data-view="profile"] .profile-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .view[data-view="profile"] #profileOtherPanel .games-apps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}
+
 /* Desktop profile header: specialization on top, gender directly below. */
 @media (min-width: 701px) {
   .view[data-view="profile"] .profile-public-showcase__title-preferences {
