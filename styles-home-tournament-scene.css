@@ -391,19 +391,18 @@
   background: none; box-shadow: none;
   color: #ffe09a; font: 800 2cqw/1.1 Arial,sans-serif; cursor: pointer;
   transform: rotate(-4deg); transform-origin: center;
-  animation: home-tournament-share-glow 2.2s ease-in-out infinite;
 }
-/* These tickets have a printed spade inside the share circle. Cover only its
-   interior; the live invite icon and label stay above the cover. */
-#app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"], [data-tournament-character="aza"], [data-tournament-character="shkarubo"], [data-tournament-character="redrocket"]) > .home-tournament-share::before {
+/* Reuse a clean part of each ticket to hide its printed share circle. */
+#app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="aza"], [data-tournament-character="shkarubo"], [data-tournament-character="redrocket"], [data-tournament-character="shtukatur"]:not([data-tournament-weekday="1"]):not([data-tournament-weekday="6"])) > .home-tournament-share::before {
   content: "";
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 8.1cqw;
-  height: 8.1cqw;
-  border-radius: 50%;
-  background: #111214;
+  width: 18cqw;
+  height: 18cqw;
+  background: var(--home-tournament-scene) -25cqw -22cqw / 100cqw 125cqw no-repeat;
+  mask-image: radial-gradient(circle, #000 62%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle, #000 62%, transparent 100%);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -411,11 +410,11 @@
   0%, 100% { filter: brightness(1) drop-shadow(0 0 .25cqw rgba(255,190,72,.35)); }
   50% { filter: brightness(1.35) drop-shadow(0 0 .85cqw rgba(255,184,55,.95)); }
 }
-@media (prefers-reduced-motion: reduce) {
-  #app .tournament-day-home-dual--tournament-focus > .home-tournament-share { animation: none; }
-}
-.home-tournament-share svg { position:relative;z-index:1;width:6.2cqw;height:6.2cqw;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round;filter:drop-shadow(0 0 .65cqw rgba(255,195,79,.82)); }
+.home-tournament-share svg { position:relative;z-index:1;width:6.2cqw;height:6.2cqw;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round;animation:home-tournament-share-glow 2.2s ease-in-out infinite; }
 .home-tournament-share span { position:relative;z-index:1;text-shadow:0 0 .45cqw #ffb52ca6;white-space:nowrap; }
+@media (prefers-reduced-motion: reduce) {
+  .home-tournament-share svg { animation: none; }
+}
 #app .tournament-day-home-dual--tournament-focus > .home-tournament-share:focus-visible { filter:brightness(1.4) drop-shadow(0 0 1cqw rgba(255,205,112,1)); }
 .tournament-share-preview { position:fixed; margin:auto; width:min(440px,calc(100vw - 32px)); box-sizing:border-box; padding:24px; border:1px solid #ad8546; border-radius:22px; background:#10171f; color:#ffe0a0; }
 .tournament-share-preview::backdrop { background:#000a; }
