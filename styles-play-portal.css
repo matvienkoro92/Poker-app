@@ -1,5 +1,8 @@
 /* Poker21 welcome screen: live controls over the supplied clean artwork. */
 .view[data-view="download"]:has(.play-portal) > .download-chat-tabs { display: none; }
+body[data-view="download"] .view--active[data-view="download"]:has(.download-page--active[data-download-page="main"]) {
+  background: url('./assets/play-poker21-portal-v1.webp') center bottom / min(100%, 560px) 400% no-repeat;
+}
 .play-portal {
   position: relative; width: 100%; max-width: 560px; aspect-ratio: 1122 / 1402;
   margin: 0 auto; overflow: hidden; container-type: inline-size;
