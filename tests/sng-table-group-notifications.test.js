@@ -42,6 +42,30 @@ test("match start sends the password privately and announces the table without i
   }
 });
 
+test("resending a partial table list also announces the match to the club without passwords", async () => {
+  const context = {
+    cleanText: (value) => String(value || ""),
+    roundStageLabelForState: () => "1/2",
+    playableIds: (match) => match.playerIds,
+    participantDisplayName: (_state, id) => id,
+    participantTeamMembersText: () => "",
+    bracketLabelForRound: () => "Основная сетка",
+    notificationsForParticipants: (_state, ids, action, text) => ids.map((chatId) => ({ action, chatId, text })),
+    eventChatId: async () => "-1001227353220",
+    console,
+  };
+  vm.createContext(context);
+  vm.runInContext(source.slice(source.indexOf("async function buildMatchStartedNotifications("), source.indexOf("async function buildTournamentBroadcastNotifications(")), context);
+  const notifications = await context.buildMatchStartedNotifications({}, {}, {
+    playerIds: ["123", "456"], playingAt: "2026-09-29T12:00:00.000Z", tablePasswords: { "1": "0010" },
+  });
+  assert.equal(notifications.length, 3);
+  assert.equal(notifications.filter((item) => item.text.includes("Стол 1: 0010")).length, 2);
+  const club = notifications.find((item) => item.chatId === "-1001227353220");
+  assert.match(club.text, /Пароль отправлен участникам в личку/);
+  assert.doesNotMatch(club.text, /0010|Пароли столов|Стол 1/);
+});
+
 test("single match reminder names the player and repeats the table password", async () => {
   const context = {
     cleanText: (value) => String(value || ""),
