@@ -393,6 +393,20 @@
   transform: rotate(-4deg); transform-origin: center;
   animation: home-tournament-share-glow 2.2s ease-in-out infinite;
 }
+/* These tickets have a printed spade inside the share circle. Cover only its
+   interior; the live invite icon and label stay above the cover. */
+#app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"], [data-tournament-character="aza"], [data-tournament-character="shkarubo"], [data-tournament-character="redrocket"]) > .home-tournament-share::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8.1cqw;
+  height: 8.1cqw;
+  border-radius: 50%;
+  background: #111214;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
 @keyframes home-tournament-share-glow {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 .25cqw rgba(255,190,72,.35)); }
   50% { filter: brightness(1.35) drop-shadow(0 0 .85cqw rgba(255,184,55,.95)); }
