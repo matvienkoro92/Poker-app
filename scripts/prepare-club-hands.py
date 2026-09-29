@@ -28,6 +28,7 @@ def main():
     parser.add_argument('--out',default=str(ROOT/'output/club-hand-import'))
     parser.add_argument('--from-ts',type=int,default=1788728400)
     parser.add_argument('--to-ts',type=int,default=1789333200)
+    parser.add_argument('--time-field',choices=['StartTime','EndTime'],default='StartTime',help='Timestamp used for source period validation')
     parser.add_argument('--period-from',default='2026-09-06T21:00:00Z')
     parser.add_argument('--period-to',default='2026-09-13T21:00:00Z')
     parser.add_argument('--exclude-player',action='append',default=[],help='Player ID to omit from personal projections (repeatable)')
@@ -44,7 +45,7 @@ def main():
             raw=json.loads(line)
             targets={str(raw.get('UserId'+str(i),'0')) for i in range(1,11)} & allowed
             if not targets: continue
-            assert args.from_ts <= int(raw['StartTime']) < args.to_ts
+            assert args.from_ts <= int(raw[args.time_field]) < args.to_ts
             hid=str(raw['Id']); assert hid not in seen, 'Duplicate hand ID';seen.add(hid)
             mode={'2':'cash','3':'sng','4':'mtt'}.get(str(raw.get('DeskType')))
             if mode is None:
@@ -65,7 +66,7 @@ def main():
                 counts[pid]+=1;modes[mode]+=1
     finally:
         for f in files.values():f.close()
-    report=dict(groupId=roster['groupId'],periodFrom=args.period_from,periodTo=args.period_to,members=len(allowed),excludedPlayers=sorted(excluded),players=len(counts),uniqueHands=unique,participations=sum(counts.values()),modes=modes,rejectedHands=rejected,counts=counts,seconds=round(time.monotonic()-started,2))
+    report=dict(groupId=roster['groupId'],periodFrom=args.period_from,periodTo=args.period_to,timeField=args.time_field,members=len(allowed),excludedPlayers=sorted(excluded),players=len(counts),uniqueHands=unique,participations=sum(counts.values()),modes=modes,rejectedHands=rejected,counts=counts,seconds=round(time.monotonic()-started,2))
     (out/'prepare-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     print(json.dumps({k:v for k,v in report.items() if k!='counts'},ensure_ascii=False))
 if __name__=='__main__':main()
