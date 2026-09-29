@@ -1613,7 +1613,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 
 /* Every tournament scene seats Last Longer to the left of its featured player. */
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-bonuses-sign-v2.webp'); }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-bonuses-sign-sharp-v3.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="aza"] { --home-tournament-scene: url('./assets/home-tournament-aza-last-longer-left-v1.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-last-longer-left-v1.webp'); }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-last-longer-left-v1.webp'); }
@@ -1635,14 +1635,13 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
   display: flex !important; flex-direction: column !important; align-items: center !important;
   left: 50% !important; top: 69% !important; width: 128% !important; min-width: 0 !important;
-  height: auto !important; padding: .65cqw .8cqw .75cqw !important; gap: .25cqw !important;
+  height: auto !important; padding: 1cqw .8cqw 1.1cqw !important; gap: .25cqw !important;
   transform: translateX(-50%) !important; color: #fff0d0 !important;
-  background: linear-gradient(180deg, #332f25 0%, #0b0d0e 36%, #07090a 100%) !important;
-  border: .2cqw solid #d49b44 !important; border-radius: .75cqw !important;
-  box-shadow: inset 0 .15cqw .35cqw #ffe4a765, 0 .35cqw .7cqw #000b !important;
+  background: none !important; border: 0 !important; box-shadow: none !important;
+  isolation: isolate;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) {
-  display: flex !important; flex-direction: row !important; position: static !important;
+  display: flex !important; flex-direction: row !important; position: relative !important; z-index: 1;
   width: auto !important; height: auto !important; padding: 0 !important;
   background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
   font-size: 2.35cqw !important; line-height: 1.06 !important; white-space: nowrap !important;
@@ -1650,8 +1649,13 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) strong { font-size: 3.2cqw !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(2) small { display: inline !important; font-size: 2.2cqw !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 64% !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__pedestal {
+  display: block !important; position: absolute; left: 0; top: -24%; width: 100%; height: 142%;
+  z-index: 0; overflow: visible; pointer-events: none;
+  filter: drop-shadow(0 .45cqw .55cqw #000b);
+}
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout {
-  position: absolute; left: 57%; top: -19%; width: 125%; height: 54%; overflow: visible;
+  position: absolute; left: -6%; top: -25%; width: 110%; height: 57%; overflow: visible;
   pointer-events: none; color: #ffe2a0; fill: currentColor; z-index: 2;
   filter: drop-shadow(0 .15cqw .2cqw #000);
 }
@@ -1660,6 +1664,16 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout-arrow {
   fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* The share invitation sits on the ticket behind the featured player's head. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus > .home-tournament-share { z-index: 4 !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]::after {
+  display: block !important;
+  background: var(--home-tournament-scene) center / 100% 100% no-repeat !important;
+  mask: url('./assets/home-tournament-shkarubo-head-mask.svg') center / 100% 100% no-repeat !important;
+  -webkit-mask: url('./assets/home-tournament-shkarubo-head-mask.svg') center / 100% 100% no-repeat !important;
+  z-index: 5 !important;
 }
 
 /* Keep the ticket-raffle entry available without covering the Last Longer chip. */
