@@ -493,13 +493,13 @@
   }
 
   function renderWinners(data) {
+    renderHeroStats(data);
     var list = $("dailyPokerWinnersList");
     var meta = $("dailyPokerWinnersMeta");
     if (!list) return;
     var winners = data && Array.isArray(data.winners) ? data.winners : [];
     var totalRubles = Math.max(0, parseInt(data && data.totalPrizeRubles || "0", 10) || 0);
     if (meta) meta.textContent = totalRubles ? "За всё время: " + formatRubles(totalRubles) : "За всё время";
-    renderHeroStats(data);
     renderSpinStats(data);
     if (!winners.length) {
       setWinnersMessage("Рублёвых выигрышей пока нет.");
