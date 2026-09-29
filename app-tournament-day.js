@@ -463,7 +463,7 @@ var HOME_TOURNAMENT_BUBBLE_BONUSES = { 0: "1000 ₽", 1: "1000 ₽", 2: "1000 �
 var HOME_TOURNAMENT_BUBBLE_COUNTS = { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
 var HOME_TOURNAMENT_BANNER_VERSION = "2026080802";
 var HOME_TOURNAMENT_BANNER_PRELOADS = {};
-var HOME_REDROCKET_SCENE_URL = "./assets/home-tournament-redrocket-no-spade-v2.webp";
+var HOME_REDROCKET_SCENE_URL = "./assets/home-tournament-redrocket-last-longer-left-v1.webp";
 var homeRedRocketScenePreload = null;
 
 function getHomeTournamentBannerUrl(file) {
@@ -1594,21 +1594,21 @@ function chooseHomeTractorRaffle(rows, now) {
 function renderHomeTractorRaffle() {
   var scene = document.querySelector('.tournament-day-home-dual--tournament-focus');
   if (!scene) return;
-  var button = scene.querySelector('.home-tractor-raffle');
+  var button = scene.parentNode.querySelector('.home-tractor-raffle');
   var raffle = chooseHomeTractorRaffle(homeTractorRaffles, Date.now());
   if (scene.getAttribute('data-tournament-character') !== 'shkarubo') raffle = null;
   if (!raffle) { if (button) button.remove(); return; }
   if (!button) {
     button = document.createElement('button');
     button.type = 'button'; button.className = 'home-tractor-raffle';
-    button.innerHTML = '<span>Розыгрыш билетов</span>';
+    button.innerHTML = '<span>Розыгрыш билетов на турнир</span>';
     button.addEventListener('click', function () {
       var current = chooseHomeTractorRaffle(homeTractorRaffles, Date.now());
       if (!current) { renderHomeTractorRaffle(); return; }
       window.__pendingRaffleActiveId = String(current.id);
       if (typeof setView === 'function') setView('raffles');
     });
-    scene.appendChild(button);
+    scene.insertAdjacentElement('afterend', button);
   }
   button.setAttribute('aria-label', 'Открыть розыгрыш билетов на Тракторист');
 }
