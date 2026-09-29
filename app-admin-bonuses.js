@@ -180,6 +180,12 @@
         buyin: String(item.buyin || ""),
         label: (item.date || (item.repeat === "daily" ? "Ежедневно" : ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"][Number(item.dow)])) + " · " + time + " · " + String(item.name || item.category || "Турнир") + (item.buyin ? " · " + item.buyin : ""),
       };
+    }).concat({
+      id: "bonus-debit|20|0|ПЯТИХАТКА",
+      title: "ПЯТИХАТКА",
+      time: "20:00 МСК",
+      buyin: "500₽",
+      label: "20:00 МСК · ПЯТИХАТКА · 500₽",
     }).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
   }
 
