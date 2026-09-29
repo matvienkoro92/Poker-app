@@ -10,6 +10,9 @@ const images = [
   ["home-lounge-players-v1-light-v1.webp", "home-lounge-players-v1-480.webp", 480],
   ["last-longer-chip-reference-v1-light-v1.webp", "last-longer-chip-reference-v1-320.webp", 320],
   ["daily-poker-character-no-stacks-v1.webp", "daily-poker-character-no-stacks-v1-720.webp", 720],
+  ["home-lounge-chat-flat-alpha-v2.webp", "home-lounge-chat-flat-alpha-v2-560.webp", 560, 92],
+  ["home-lounge-raffles-hand-gift-v3.webp", "home-lounge-raffles-hand-gift-v3-560.webp", 560, 92],
+  ["home-lounge-players-flat-alpha-v2.webp", "home-lounge-players-flat-alpha-v2-560.webp", 560, 92],
 ];
 const displayImages = [
   ["logo-two-aces.png", 256],
@@ -43,8 +46,8 @@ const visibleBounds = {
 };
 async function main() {
   const only = process.env.HOME_ART_ONLY ? process.env.HOME_ART_ONLY.split(",") : null;
-  for (const [source, target, width] of only ? [] : images) {
-    await sharp(path.join(assets, source)).resize({width,withoutEnlargement:true}).webp({quality:90,alphaQuality:100,effort:6}).toFile(path.join(assets,target));
+  for (const [source, target, width, quality = 90] of only ? [] : images) {
+    await sharp(path.join(assets, source)).resize({width,withoutEnlargement:true}).webp({quality,alphaQuality:100,effort:6}).toFile(path.join(assets,target));
     console.log(`${target}: ${fs.statSync(path.join(assets,source)).size} → ${fs.statSync(path.join(assets,target)).size} bytes`);
   }
   for (const [source, width] of displayImages) {

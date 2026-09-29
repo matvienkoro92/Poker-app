@@ -424,6 +424,7 @@
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=20260919-no-bottom-glow-1" />
     <link rel="preload" as="image" href="./assets/home-tournament-pokermanki-magic-head-mask.svg" />
     <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20260929-history-fullscreen-1" />
+    <link rel="stylesheet" href="./styles-navigation-hubs.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=20260925-friends-grid-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -945,18 +946,18 @@
             title="Чат в ТГ"
             aria-label="Чат в ТГ"
           >
-            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-chat-flat-alpha-v2.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-chat-flat-alpha-v2.webp" srcset="./assets/home-lounge-chat-flat-alpha-v2-560.webp 560w, ./assets/home-lounge-chat-flat-alpha-v2.webp 1122w" sizes="(max-width: 900px) 33vw, 374px" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-mini-icon__label" id="homeMiniChatLabel">Чат в ТГ</span>
           </a>
           <a href="#" class="home-lounge-link  home-lounge-link--raffles" data-view-target="raffles" title="Розыгрыши" aria-label="Розыгрыши">
             <span class="feature__badge feature__badge--hidden" id="raffleActiveBadge" aria-hidden="true">1</span>
             <span class="raffle-active-amount-badge raffle-active-amount-badge--hidden" id="raffleActiveAmountBadge" aria-hidden="true">Идут на 0 ₽</span>
-            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-raffles-hand-gift-v3.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-raffles-hand-gift-v3.webp" srcset="./assets/home-lounge-raffles-hand-gift-v3-560.webp 560w, ./assets/home-lounge-raffles-hand-gift-v3.webp 1122w" sizes="(max-width: 900px) 33vw, 374px" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-mini-icon__label" id="homeMiniRafflesLabel">Розыгрыши</span>
           </a>
           <button type="button" class="home-lounge-link  home-lounge-link--levels" data-hall-fish-open="1" title="Игроки клуба" aria-label="Открыть игроков клуба и ачивки">
             <span class="raffle-active-amount-badge home-achievement-bonus-badge" aria-hidden="true">Бонус 25 000 ₽</span>
-            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-players-flat-alpha-v2.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
+            <img class="home-lounge-art" fetchpriority="low" src="./assets/home-lounge-players-flat-alpha-v2.webp" srcset="./assets/home-lounge-players-flat-alpha-v2-560.webp 560w, ./assets/home-lounge-players-flat-alpha-v2.webp 1122w" sizes="(max-width: 900px) 33vw, 374px" width="1122" height="1402" alt="" aria-hidden="true" decoding="async" />
             <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки клуба</span>
           </button>
         </div>
@@ -1162,6 +1163,7 @@
             </span>
           </button>
         </div>
+        <a href="#" class="home-tournament-join-link" data-view-target="download" data-download-page="poker21">Как сыграть в турнир вечера <span aria-hidden="true">→</span></a>
         <h2 class="home-club-achievements-title">Достижения клуба</h2>
         <a href="#" class="home-club-hero-banner" data-view-target="hall-of-fame" aria-label="Герой клуба: Эмиль Ахмедов, победа года">
           <img
@@ -1669,6 +1671,15 @@
           <div class="view" data-view="cashout" data-html-fragment="./html-fragments/cashout.html?v=3.002" data-html-fragment-view="cashout"></div>
           <div class="view" data-view="transfers" data-html-fragment="./html-fragments/transfers.html?v=3.010" data-html-fragment-view="transfers"></div>
           <div class="view" data-view="club-reviews"><div class="club-reviews-header"><button type="button" class="social-button review-back-button" data-review-back aria-label="Вернуться назад" title="Назад"><span aria-hidden="true">←</span></button><div class="club-reviews-header__copy"><div class="club-reviews-header__title"><h1 class="summary-heading">Разборы</h1><span class="club-reviews-loader" id="clubReviewsLoading" role="status" aria-label="Загрузка" hidden></span></div></div><div class="club-reviews-header__filters" id="clubReviewsHeaderFilters"></div><div class="club-reviews-header__action" id="clubReviewsHeaderAction"></div></div><p id="clubReviewsFeedback" class="social-feedback" role="status" aria-live="polite"></p><div id="clubReviewsContent"></div></div>
+          <div class="view navigation-hub" data-view="play">
+            <header class="navigation-hub__header"><span class="navigation-hub__eyebrow">Турниры · Poker21</span><h1>Играть</h1><p>Ближайшая игра, расписание и вступление в клуб.</p></header>
+            <section class="navigation-hub__feature" aria-labelledby="playNextTitle"><span class="navigation-hub__eyebrow">Ближайший турнир</span><h2 id="playNextTitle">Загружаем расписание…</h2><p id="playNextDetails"></p><a href="#" class="navigation-hub__primary" data-view-target="download" data-download-page="poker21">Как сыграть <span aria-hidden="true">→</span></a></section>
+            <div class="navigation-hub__links"><a href="#" data-view-target="schedule"><span aria-hidden="true">🗓️</span><span><strong>Расписание</strong><small>Все турниры и фрироллы</small></span><b aria-hidden="true">→</b></a><a href="#" data-view-target="download" data-download-page="poker21"><span aria-hidden="true">📲</span><span><strong>Установить Poker21</strong><small>Подать заявку в клуб и написать менеджеру</small></span><b aria-hidden="true">→</b></a></div>
+          </div>
+          <div class="view navigation-hub" data-view="club">
+            <header class="navigation-hub__header"><span class="navigation-hub__eyebrow">Два туза</span><h1>Клуб</h1><p>Победы игроков, новости, друзья и общение.</p></header>
+            <div class="navigation-hub__links"><button type="button" data-club-news-open><span aria-hidden="true">🏆</span><span><strong>Победы клуба</strong><small>Турниры и крупные заносы</small></span><b aria-hidden="true">→</b></button><button type="button" data-club-friend-news-open><span aria-hidden="true">📰</span><span><strong>Новости</strong><small>События друзей и игроков</small></span><b aria-hidden="true">→</b></button><button type="button" data-club-friends-open><span aria-hidden="true">👥</span><span><strong>Друзья</strong><small>Список друзей в профиле</small></span><b aria-hidden="true">→</b></button><a href="#" data-view-target="chat"><span aria-hidden="true">💬</span><span><strong>Чат клуба</strong><small>Общение с игроками</small></span><b aria-hidden="true">→</b></a></div>
+          </div>
           <div class="view" data-view="my-summary"><div class="summary-header"><button type="button" class="summary-link" data-view-target="home">← Главная</button><h1 class="summary-heading" id="mySummaryName"></h1><button type="button" class="summary-link" data-summary-refresh>Обновить</button></div><nav class="summary-navigation" aria-label="Разделы личного кабинета"><button type="button" data-summary-tab="play" aria-pressed="true">Играть</button><button type="button" data-summary-tab="progress" aria-pressed="false">Прогресс</button><button type="button" data-summary-tab="schedule" aria-pressed="false">Расписание</button></nav><div class="summary-grid summary-bootstrap-skeleton" id="mySummaryContent" aria-label="Сводка загружается" aria-busy="true"><div class="summary-skeleton-card summary-skeleton-card--feature"><i></i><b></b><span></span></div><div class="summary-skeleton-card summary-skeleton-card--feature"><i></i><b></b><span></span></div><div class="summary-skeleton-card summary-skeleton-card--wide"><i></i><b></b><span></span></div><div class="summary-skeleton-card summary-skeleton-card--compact"><i></i><b></b><span></span></div></div></div>
           <div class="view" data-view="profile" data-html-fragment="./html-fragments/profile.html?v=4.025" data-html-fragment-view="profile"></div>
           <div class="view" data-view="admin-bonuses" data-html-fragment="./html-fragments/admin-bonuses.html?v=3.728" data-html-fragment-view="admin-bonuses"></div>
@@ -1879,22 +1890,9 @@
         </span>
         <span class="bottom-nav__label" id="bottomNavHomeLabel">Главная</span>
       </button>
-      <div class="bottom-nav__chat-wrap">
-        <button type="button" class="bottom-nav__item" data-club-news-open aria-label="Победы клуба">
-          <span class="bottom-nav__icon-wrap">
-        <span class="bottom-nav__icon" aria-hidden="true">
-          <span class="bottom-nav__emoji">🏆</span>
-        </span>
-          </span>
-          <span class="bottom-nav__label" id="bottomNavClubNewsLabel">Победы
-клуба</span>
-        </button>
-      </div>
-      <button type="button" class="bottom-nav__item" data-view-target="download">
-        <span class="bottom-nav__icon" aria-hidden="true">
-          <span class="bottom-nav__emoji">📲</span>
-        </span>
-        <span class="bottom-nav__label" id="bottomNavDownloadLabel">Скачать</span>
+      <button type="button" class="bottom-nav__item" data-view-target="play">
+        <span class="bottom-nav__icon" aria-hidden="true"><span class="bottom-nav__emoji">♠️</span></span>
+        <span class="bottom-nav__label" id="bottomNavPlayLabel">Играть</span>
       </button>
       <button type="button" class="bottom-nav__item" data-view-target="my-summary">
         <span class="bottom-nav__icon" aria-hidden="true">
@@ -1902,6 +1900,10 @@
           <span class="bottom-nav__badge" id="bottomNavReviewUnread" aria-live="polite" hidden></span>
         </span>
         <span class="bottom-nav__label" id="bottomNavHandsLabel">Раздачи</span>
+      </button>
+      <button type="button" class="bottom-nav__item" data-view-target="club">
+        <span class="bottom-nav__icon" aria-hidden="true"><span class="bottom-nav__emoji">🏆</span></span>
+        <span class="bottom-nav__label" id="bottomNavClubNewsLabel">Клуб</span>
       </button>
       <button type="button" class="bottom-nav__item" data-view-target="profile">
         <span class="bottom-nav__icon" aria-hidden="true">
@@ -2079,6 +2081,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-overscroll-debug.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-lifecycle.js?v=4.002"></script>
     <script defer src="./app-view-router.js?v=4.002"></script>
+    <script defer src="./app-navigation-hubs.js?v=1"></script>
     <script defer src="./app-popstate-recovery.js?v=4.002"></script>
     <script defer src="./app-visitor-id.js?v=4.002"></script>
     <script defer src="./app-api-tracking.js?v=4.002"></script>

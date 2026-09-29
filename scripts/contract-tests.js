@@ -7063,7 +7063,7 @@ async function testAuditConcurrentPrivateCash(redis) {
   const eventId = "contract_private_cash_random_seats";
   redis.kv.set("poker_app:private_cash_event:" + eventId, JSON.stringify({
     id: eventId,
-    date: "2026-07-01",
+    date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     time: "20:00",
     gameType: "Холдем",
     stakes: "100/200",
@@ -7085,9 +7085,13 @@ async function testAuditConcurrentPrivateCash(redis) {
     redis.h("poker_app:visitor_dt_ids").set("tg_"+(7100+i),"ID10710"+i);
     redis.h("poker_app:id_to_user").set("ID10710"+i,"tg_"+(7100+i));
   }
-  for(let i=0;i<5;i++) await call(handler,req("POST",{}, {pwaSession:tokens[i],action:"join",eventId}));
+  for(let i=0;i<5;i++) {
+    const reply = await call(handler,req("POST",{}, {pwaSession:tokens[i],action:"join",eventId}));
+    assert.equal(reply.statusCode, 200, "setup player must join before concurrent booking");
+  }
   const replies=await Promise.all(tokens.slice(5).map(token=>call(handler,req("POST",{}, {pwaSession:token,action:"join",eventId}))));
   const rows=Array.from(redis.h("poker_app:private_cash_participants:"+eventId).values()).map(JSON.parse);
+  assert.ok(rows.length >= 5, "concurrent booking test must contain occupied seats");
   console.log("AUDIT_CONCURRENT_SEATS",JSON.stringify({status:replies.map(r=>r.statusCode),seats:rows.map(r=>({account:r.accountId,seat:r.seatIndex}))}));
   assert.equal(new Set(rows.map(r=>r.seatIndex)).size,rows.length,"parallel joins must not assign the same seat");
 }

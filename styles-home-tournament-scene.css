@@ -1561,3 +1561,6 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   mask:linear-gradient(to bottom,transparent 0%,#000 7%,#000 74%,transparent 86%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 7%,#000 74%,transparent 86%)!important;
 }
+.home-tournament-join-link{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin:12px 12px 24px;padding:10px 18px;border:1px solid #f5cb7a88;border-radius:14px;background:linear-gradient(110deg,#efaa48,#f6d58c);box-shadow:0 8px 24px #0005;color:#251809;font-weight:800;text-align:center;text-decoration:none}
+.home-tournament-join-link:hover{filter:brightness(1.07)}
+.home-tournament-join-link:focus-visible{outline:3px solid #fff2bf;outline-offset:3px}

@@ -61,6 +61,7 @@
   }
   async function checkChartUnread() {
     if (chartCheckPending || document.hidden) return;
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     chartCheckPending = true;
     var seq = generation;
     try {
@@ -87,7 +88,7 @@
   }
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
-    var groups = {play:["starting-hands","reviews-entry","bonus","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
+    var groups = {play:["tournament-play","starting-hands","reviews-entry","bonus","friends"],progress:["results","rival","achievements","hero"],schedule:["schedule"]};
     document.querySelectorAll('[data-summary-tab]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.summaryTab===summaryTab));});
     if(root)root.querySelectorAll(':scope > .summary-card').forEach(function(card){
       var id=card.id==='summary-hero'?'hero':Array.from(card.classList).find(function(c){return c.indexOf('summary-card--')===0;});
@@ -144,7 +145,8 @@
     var opts = {cache:"no-store", signal:controller.signal};
     if (body) { opts.method = "POST"; opts.headers = {"Content-Type":"application/json"}; opts.body = JSON.stringify(pokerApiAuthJsonBody(body)); }
     else path += pokerApiAuthQuery("?") + (path === "raffles" ? "&scope=active" : "");
-    return fetch(getApiBase() + "/api/" + path, opts).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (d) { if (d.ok === false) throw new Error(d.error || "API"); return d; }).finally(function () { clearTimeout(timeout); });
+    var apiBase = typeof getApiBase === "function" ? getApiBase() : "";
+    return fetch(apiBase + "/api/" + path, opts).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (d) { if (d.ok === false) throw new Error(d.error || "API"); return d; }).finally(function () { clearTimeout(timeout); });
   }
   function error(id) { put(id, '<p class="summary-muted">Не удалось загрузить. Попробуйте обновить сводку.</p>'); }
   function renderReviewUnread(count) {
@@ -159,6 +161,10 @@
 
   var reviewUnreadRequest = 0;
   function loadReviewUnread(valid) {
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      renderReviewUnread(0);
+      return Promise.resolve();
+    }
     var seq = generation, requestId = ++reviewUnreadRequest;
     return request("club-reviews", {action:"summary"}).then(function (d) {
       if (seq !== generation || requestId !== reviewUnreadRequest || (valid && !valid())) return;
@@ -198,7 +204,7 @@
       }).join("") + '</div>';
     put("schedule", tabs + '<div role="tabpanel" id="summary-schedule-panel" aria-labelledby="summary-tab-' + scheduleTab + '">' + chosen.map(function (s) {
       return '<div class="summary-event"><strong>' + esc(s.item.name) + '</strong><p>' + esc(dateLabel(s.start)) + '</p><p class="summary-muted">' + (freeTab ? 'Бесплатный вход' : 'Вход: ' + esc(s.item.buyin)) + (s.item.rebuy && s.item.rebuy !== "—" ? ' · Ребай: ' + esc(s.item.rebuy) : '') + '</p></div>';
-    }).join("") + (!chosen.length ? '<p class="summary-muted">' + (freeTab ? 'Ближайших фрироллов пока нет.' : 'Ближайших турниров пока нет.') + '</p>' : '') + '</div>' + link("Всё расписание", "schedule"));
+    }).join("") + (!chosen.length ? '<p class="summary-muted">' + (freeTab ? 'Ближайших фрироллов пока нет.' : 'Ближайших турниров пока нет.') + '</p>' : '') + '</div>' + (freeTab ? '' : '<a href="#" class="summary-link" data-view-target="download" data-download-page="poker21">Как сыграть в турнир вечера <span aria-hidden="true">→</span></a>') + link("Всё расписание", "schedule"));
   }
 
   function monthKey(date) { var m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(date)); return m ? m[3] + "-" + m[2] : ""; }
@@ -427,7 +433,8 @@
     if (Date.now() - loadedAt < 30000) {renderSpin(); return;}
     var seq = ++generation; pending = true; account = "";
     var loading = '<div class="summary-card-loading" role="status" aria-label="Загружаем"><i></i><b></b><span></span></div>';
-    root.innerHTML = section("starting-hands", "Мои раздачи", '<span data-chart-unread class="chart-unread-dot" aria-label="Есть непросмотренный график" hidden></span><p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
+    root.innerHTML = section("tournament-play", "Турнир вечера", '<p class="summary-muted">Игра проходит в Poker21. Узнайте, как установить приложение и вступить в клуб.</p><a href="#" class="summary-link" data-view-target="download" data-download-page="poker21">Как сыграть в турнир вечера <span aria-hidden="true">→</span></a>') +
+      section("starting-hands", "Мои раздачи", '<span data-chart-unread class="chart-unread-dot" aria-label="Есть непросмотренный график" hidden></span><p class="summary-muted">График</p><button type="button" class="summary-link" data-starting-hands-open>Открыть <span aria-hidden="true">→</span></button>') +
         section("reviews-entry", "Разборы раздач", '<span class="summary-review-unread" data-summary-review-unread hidden></span><p class="summary-muted">Получайте билеты за активность</p>' + link("Открыть", "club-reviews")) +
       section("bonus","Бонусы",loading) + section("schedule","Расписание",loading) + section("results","Турнирные результаты",loading) + section("rival","Гонка за 25 000 ₽",loading) + section("achievements","Мой прогресс",loading);
     applySummaryTab();
