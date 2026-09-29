@@ -1387,12 +1387,20 @@
   }
 
   function renderPlayingAction(match, players, data) {
-    if (!data || !data.isAdmin || data.status !== "bracket" || !match || match.winnerId || players.length < 2) return "";
-    var active = !!match.playingAt;
-    var password = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
-    return '<div class="sng-champions-modal__playing-tools">' +
-      '<label class="sng-champions-modal__table-password"><span>Пароль стола</span><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" data-sng-table-password="' + escapeHtml(match.id || "") + '" value="' + escapeHtml(password) + '"' + (active ? " disabled" : "") + '></label>' +
-      '<button type="button" class="sng-champions-modal__playing-btn' + (active ? " sng-champions-modal__playing-btn--active" : "") + '" data-sng-playing="' + escapeHtml(match.id || "") + '">' + (active ? "Играют" : "Играют") + '</button>' +
+    if (!data || data.status !== "bracket" || !match || players.length < 2 || (data.isAdmin && match.winnerId)) return "";
+    var target = matchSeriesTarget(match, data);
+    var count = target ? target * 2 - 1 : 1;
+    var saved = match.tablePasswords && typeof match.tablePasswords === "object" ? match.tablePasswords : {};
+    var passwords = Array.from({ length: count }, function (_, index) {
+      var game = index + 1;
+      var password = String(saved[String(game)] || (game === 1 ? match.tablePassword : "") || "").replace(/\D/g, "").slice(0, 4);
+      if (!data.isAdmin) return password ? '<div class="sng-champions-modal__round-password"><span>Стол ' + game + '</span><strong>' + escapeHtml(password) + '</strong></div>' : "";
+      return '<label class="sng-champions-modal__table-password"><span>' + (target ? 'Стол ' + game : 'Пароль стола') + '</span><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" data-sng-table-password="' + game + '" value="' + escapeHtml(password) + '"></label>';
+    }).join("");
+    if (!data.isAdmin) return target ? '<div class="sng-champions-modal__series-passwords">' + passwords + '</div>' : "";
+    return '<div class="sng-champions-modal__playing-tools' + (target ? ' sng-champions-modal__playing-tools--series' : '') + '">' +
+      (target ? '<div class="sng-champions-modal__series-passwords">' + passwords + '</div>' : passwords) +
+      '<button type="button" class="sng-champions-modal__playing-btn' + (match.playingAt ? ' sng-champions-modal__playing-btn--active' : '') + '" data-sng-playing="' + escapeHtml(match.id || "") + '">' + (target ? (match.playingAt ? 'Отправить снова' : 'Отправить пароли') : 'Играют') + '</button>' +
     '</div>';
   }
 
@@ -1570,7 +1578,7 @@
     var matchStatus = match.winnerId ? "Сыграли" : hasStartedRound ? "Играют" : "Ожидают";
     var matchStatusClass = match.winnerId ? "done" : hasStartedRound ? "playing" : "waiting";
     var tablePassword = String(match.tablePassword || "").replace(/\D/g, "").slice(0, 4);
-    var tablePasswordHtml = data.tournamentType === "team" ? "" : '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
+    var tablePasswordHtml = data.tournamentType === "team" || matchSeriesTarget(match, data) ? "" : '<div class="sng-champions-modal__match-meta' + (tablePassword ? "" : " sng-champions-modal__match-meta--empty") + '">' +
       '<span>Пароль стола</span><strong>' + (tablePassword ? escapeHtml(tablePassword) : '&nbsp;') + '</strong>' +
     '</div>';
     var playerRowItems = players.length ? players.map(function (id) {
@@ -2347,19 +2355,31 @@
     if (playing) {
       var matchId = playing.getAttribute("data-sng-playing") || "";
       var matchCard = playing.closest ? playing.closest(".sng-champions-modal__bracket-match") : null;
-      var passwordInput = matchCard && matchCard.querySelector ? matchCard.querySelector('[data-sng-table-password="' + matchId.replace(/"/g, '\\"') + '"]') : null;
-      var tablePassword = passwordInput ? String(passwordInput.value || "").replace(/\D/g, "").slice(0, 4) : "";
-      if (!/^\d{4}$/.test(tablePassword)) {
-        showAlert("Введите пароль стола из 4 цифр.");
-        if (passwordInput && passwordInput.focus) passwordInput.focus();
+      var passwordInputs = matchCard && matchCard.querySelectorAll ? Array.from(matchCard.querySelectorAll('[data-sng-table-password]')) : [];
+      var tablePasswords = {};
+      for (var i = 0; i < passwordInputs.length; i += 1) {
+        var input = passwordInputs[i];
+        var value = String(input.value || "").replace(/\D/g, "").slice(0, 4);
+        if (value && !/^\d{4}$/.test(value)) {
+          showAlert("Каждый заполненный пароль должен содержать 4 цифры.");
+          input.focus();
+          return;
+        }
+        if (value) tablePasswords[input.getAttribute("data-sng-table-password")] = value;
+      }
+      if (Object.keys(tablePasswords).length !== passwordInputs.length) {
+        showAlert(passwordInputs.length > 1 ? "Заполните пароли для всех столов." : "Введите пароль стола из 4 цифр.");
+        var emptyInput = passwordInputs.find(function (input) { return !tablePasswords[input.getAttribute("data-sng-table-password")]; });
+        if (emptyInput) emptyInput.focus();
         return;
       }
       setButtonLoading(playing, true);
       postAction({
         action: "setPlaying",
         matchId: matchId,
-        tablePassword: tablePassword,
-      }, { status: "Отправляю оповещение...", success: "Оповещение о столе отправлено" })
+        tablePassword: tablePasswords["1"],
+        tablePasswords: tablePasswords,
+      }, { status: "Отправляю пароли участникам...", success: "Все пароли отправлены участникам" })
         .finally(function () { setButtonLoading(playing, false); });
       return;
     }

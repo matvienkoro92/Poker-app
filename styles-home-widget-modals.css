@@ -10273,3 +10273,18 @@ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) :is(.sng-champions-modal
 /* Join and share actions form a compact stack. */
 .sng-champions-modal .club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock{padding-bottom:0!important}
 .sng-champions-modal .club-choice-vote-modal__body.sng-champions-modal__body--with-join-dock + .club-choice-vote-modal__footer{padding-top:0!important;margin-top:0!important;border-top:0}
+
+.sng-champions-modal__playing-tools--series {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sng-champions-modal__series-passwords {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.sng-champions-modal__playing-tools--series > .sng-champions-modal__playing-btn {
+  justify-self: end;
+}
