@@ -1563,3 +1563,51 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 .home-tournament-join-link{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin:12px 12px 24px;padding:10px 18px;border:1px solid #f5cb7a88;border-radius:14px;background:linear-gradient(110deg,#efaa48,#f6d58c);box-shadow:0 8px 24px #0005;color:#251809;font-weight:800;text-align:center;text-decoration:none}
 .home-tournament-join-link:hover{filter:brightness(1.07)}
 .home-tournament-join-link:focus-visible{outline:3px solid #fff2bf;outline-offset:3px}
+
+/* Shared ticket hierarchy: the session leads, while the buy-in keeps its size. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+  left: 14% !important;
+  top: 3% !important;
+  width: 51% !important;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-ticket-session {
+  display: inline-grid;
+  justify-items: start;
+  gap: .35cqw;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: .7cqw 1.2cqw .8cqw;
+  border-left: .55cqw solid #ffad42;
+  border-radius: .45cqw;
+  background: linear-gradient(90deg, #b650184d, #b6501812 82%, transparent);
+  text-align: left;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-ticket-session__label {
+  color: #fff0bd;
+  font: 900 4.9cqw/1 Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  letter-spacing: .055em;
+  text-shadow: 0 1px 2px #000, 0 0 1.2cqw #ee8a3299;
+  white-space: nowrap;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-ticket-session__time {
+  color: #ffc06f;
+  font: 900 3.3cqw/1 Arial, sans-serif;
+  letter-spacing: .1em;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title {
+  display: flex !important;
+  align-items: baseline;
+  gap: .45cqw;
+  top: 30% !important;
+  white-space: nowrap !important;
+}
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title-name {
+  font-size: calc(var(--ticket-title-size, 5.6cqw) * .84);
+  line-height: 1;
+}
+#app.app.app--view-home #homeTournamentWeekList .home-tournament-trophy__title-buyin {
+  font-size: var(--ticket-title-size, 5.6cqw);
+  line-height: 1;
+}

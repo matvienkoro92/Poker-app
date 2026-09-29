@@ -1131,7 +1131,9 @@ function renderHomeTournamentWeekList(activeWeekday) {
     trophyArt.setAttribute("aria-hidden", "true");
     var trophyCopy = document.createElement("span");
     trophyCopy.className = "home-tournament-trophy__copy";
-    var ticketTitle = (item.name || "Турнир") + (item.buyin ? " " + pokerFormatRubSpacing(item.buyin) : "");
+    var ticketName = item.name || "Турнир";
+    var ticketBuyin = item.buyin ? pokerFormatRubSpacing(item.buyin) : "";
+    var ticketTitle = ticketName + (ticketBuyin ? " " + ticketBuyin : "");
     var ticketPrize = pokerFormatRubSpacing(item.guarantee || "—");
     if (dow === 6) ticketPrize = ticketPrize.replace(/\s*₽\s*$/, "");
     trophyCopy.style.setProperty("--ticket-title-size", Math.min(5.6, Math.max(2.8, 90 / Math.max(1, Array.from(ticketTitle).length))) + "cqw");
@@ -1144,7 +1146,21 @@ function renderHomeTournamentWeekList(activeWeekday) {
     ].forEach(function (part) {
       var line = document.createElement("span");
       line.className = "home-tournament-trophy__" + part[0];
-      line.textContent = part[1];
+      if (part[0] === "title") {
+        var namePart = document.createElement("span");
+        namePart.className = "home-tournament-trophy__title-name";
+        namePart.textContent = ticketName;
+        line.appendChild(namePart);
+        if (ticketBuyin) {
+          line.appendChild(document.createTextNode(" "));
+          var buyinPart = document.createElement("span");
+          buyinPart.className = "home-tournament-trophy__title-buyin";
+          buyinPart.textContent = ticketBuyin;
+          line.appendChild(buyinPart);
+        }
+      } else {
+        line.textContent = part[1];
+      }
       trophyCopy.appendChild(line);
     });
     row.appendChild(trophyArt);
@@ -2591,6 +2607,8 @@ function updateTournamentDayBlock() {
     var detailHour = detailState.t && Number.isFinite(Number(detailState.t.hour)) ? Math.floor(Number(detailState.t.hour)) : 18;
     var detailMinute = detailState.t && Number.isFinite(Number(detailState.t.minute)) ? Math.floor(Number(detailState.t.minute)) : 0;
     var detailTime = String(detailHour).padStart(2, "0") + ":" + String(detailMinute).padStart(2, "0");
+    var ticketTime = document.querySelector("[data-home-ticket-time]");
+    if (ticketTime) ticketTime.textContent = detailTime + " МСК";
     renderHomeTournamentWeekList(selectedWeekday);
     renderHomeLiveTournament(n);
     var homeTournamentName = document.getElementById("tournamentDayHomeName");
