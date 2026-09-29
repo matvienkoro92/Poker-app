@@ -163,6 +163,7 @@
     if (viewName === "download") {
       safeCall(window.pokerUpdateDownloadInfoSubsections);
       safeCall(window.pokerInitDownloadRefActions);
+      safeCall(window.updateTournamentDayBlock);
     }
     if (viewName === "schedule") safeCall(window.updateTournamentDayBlock);
     if (viewName === "winter-rating") safeCall(window.pokerInitWinterRatingWeekTops);

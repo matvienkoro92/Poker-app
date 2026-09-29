@@ -62,6 +62,7 @@ fs.appendFileSync(path.join(root, "styles-home-summer-results.css"), `
 const indexPath = path.join(root, "index.html");
 const index = fs.readFileSync(indexPath, "utf8");
 const marker = /<!-- home-summer-results:start -->[\s\S]*?<!-- home-summer-results:end -->/;
-if (!marker.test(index)) throw new Error("Home summer results markers are missing");
-fs.writeFileSync(indexPath, index.replace(marker, `<!-- home-summer-results:start -->\n${html}\n<!-- home-summer-results:end -->`));
+if (marker.test(index)) {
+  fs.writeFileSync(indexPath, index.replace(marker, `<!-- home-summer-results:start -->\n${html}\n<!-- home-summer-results:end -->`));
+}
 console.log("Home summer results:", totals);

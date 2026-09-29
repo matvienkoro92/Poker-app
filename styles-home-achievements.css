@@ -38,6 +38,28 @@
   margin-top: 0;
 }
 
+body[data-view="home"] #app.app .home-achievements-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: max-content !important;
+  max-width: calc(100% - 24px);
+  min-height: 36px;
+  margin: 10px auto 20px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(255, 193, 91, 0.55);
+  color: #ffe3ad;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+body[data-view="home"] #app.app .home-achievements-all:focus-visible {
+  outline: 2px solid #ffd477;
+  outline-offset: 3px;
+}
+
 .app.app--view-home .home-compact-link--hall .home-compact-link__hall-title {
   position: absolute;
   left: 12px;
