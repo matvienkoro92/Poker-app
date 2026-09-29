@@ -1136,7 +1136,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
   --home-tournament-scene:url('./assets/home-tournament-redrocket-chips-v4.webp');
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-rim-dimmer {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="redrocket"], [data-tournament-character="shkarubo"]) > .home-table-rim-dimmer {
   display:none;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"], [data-tournament-character="hakas"]) > .home-table-rim-dimmer {
