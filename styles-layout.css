@@ -143,7 +143,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   max-width: 100%;
 }
 
-.bottom-nav__item:nth-child(3),
+.bottom-nav__item[data-view-target="download"],
 .bottom-nav__chat-wrap .bottom-nav__item {
   font-size: 10px;
   padding: 5px 5px 6px;
@@ -225,7 +225,7 @@ html.app--tg-bottom-nav-inset .bottom-nav {
   visibility: hidden;
 }
 
-.bottom-nav__item:nth-child(3) .bottom-nav__icon,
+.bottom-nav__item[data-view-target="download"] .bottom-nav__icon,
 .bottom-nav__chat-wrap .bottom-nav__icon {
   width: 26px;
   height: 26px;
