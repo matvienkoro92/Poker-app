@@ -207,7 +207,7 @@ test("self-bet result follows its winner's news on the same day", () => {
   const h = browserHarness();
   const event = h.api.clubSelfBetNewsEvents(selfBetFixture())[0];
   const newer={id:"newer",at:"2026-09-11T12:00:00+03:00"};
-  const daily=[{id:"other",actorNick:"Other",at:event.at},{id:"winner",actorNick:"Shkarubo",at:event.at},{id:"later",actorNick:"Another",at:event.at}];
+  const daily=[{id:"other",actorNick:"Other",at:event.at},{id:"winner",actorNick:"Shkarubo",at:event.at,prizeAmount:12000,tournamentName:"Мистери"},{id:"later",actorNick:"Another",at:event.at}];
   const rows=h.api.placeSelfBetNewsAfterWinner([newer,event,...daily]);
   assert.equal(rows[0].id,"newer");
   assert.equal(rows[3].id,event.id);
@@ -216,6 +216,16 @@ test("self-bet result follows its winner's news on the same day", () => {
   assert.match(event.newsLines.join(" ").replace(/\s/g," "),/300 ₽.*7 000 ₽/);
   assert.equal(event.image,undefined);
   assert.equal(event._eventKind,"self-bet-result");
+});
+
+test("self-bet result stays directly under its tournament win when payout is on another day", () => {
+  const h = browserHarness();
+  const bet = h.api.clubSelfBetNewsEvents(selfBetFixture({title:"Вейдер · Меджик"}))[0];
+  const win = {id:"win",actorNick:"Shkarubo",at:"2026-09-09T12:00:00+03:00",prizeAmount:50000,tournamentName:"Меджик",_eventKind:"tournament"};
+  const unrelated = {id:"unrelated",actorNick:"Shkarubo",at:bet.at,prizeAmount:10000,tournamentName:"Нокаут",_eventKind:"tournament"};
+  const rows = h.api.placeSelfBetNewsAfterWinner([unrelated,bet,win]);
+  assert.deepEqual(rows.map(row => row.id), ["unrelated","win",bet.id]);
+  assert.equal(bet.at,win.at);
 });
 
 test("self-bet result only appears in the winner's friends feed", () => {

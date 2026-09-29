@@ -1441,12 +1441,31 @@
     rows.filter(function (row) { return row._eventKind === "self-bet-result"; }).forEach(function (row) {
       var day = eventDayKey(row.at);
       var winnerKeys = nicknameMatchKeys(row.actorNick);
-      var index = result.findIndex(function (candidate) {
-        return candidate._eventKind !== "self-bet-result" && eventDayKey(candidate.at) === day &&
+      var betTitle = matchKey(row.lastLongerTitle);
+      var isWinnerCard = function (candidate) {
+        return candidate._eventKind !== "self-bet-result" && Number(candidate.prizeAmount) > 0 &&
           nicknameMatchKeys(candidate.actorNick).some(function (key) { return winnerKeys.indexOf(key) !== -1; });
+      };
+      var matchesTournament = function (candidate) {
+        var title = matchKey(candidate.tournamentName);
+        return !!title && !!betTitle && (betTitle.indexOf(title) !== -1 || title.indexOf(betTitle) !== -1);
+      };
+      var index = result.findIndex(function (candidate) {
+        return isWinnerCard(candidate) && eventDayKey(candidate.at) === day && matchesTournament(candidate);
       });
-      if (index !== -1) index += 1;
-      else index = result.findIndex(function (candidate) { return eventDayKey(candidate.at) < day; });
+      if (index < 0) index = result.findIndex(function (candidate) {
+        return isWinnerCard(candidate) && matchesTournament(candidate) &&
+          Math.abs(eventTime(candidate.at) - eventTime(row.at)) <= 3 * 86400000;
+      });
+      if (index < 0) index = result.findIndex(function (candidate) {
+        return isWinnerCard(candidate) && eventDayKey(candidate.at) === day;
+      });
+      if (index !== -1) {
+        // The win card uses the tournament day; payout can happen the next day.
+        // Give both cards one day key so the grouped feed keeps them together.
+        row.at = result[index].at;
+        index += 1;
+      } else index = result.findIndex(function (candidate) { return eventDayKey(candidate.at) < day; });
       if (index < 0) index = result.length;
       result.splice(index, 0, row);
     });
