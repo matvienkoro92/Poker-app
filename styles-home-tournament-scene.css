@@ -1560,9 +1560,6 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   mask:linear-gradient(to bottom,transparent 0%,#000 7%,#000 74%,transparent 86%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 7%,#000 74%,transparent 86%)!important;
 }
-.home-tournament-join-link{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin:12px 12px 24px;padding:10px 18px;border:1px solid #f5cb7a88;border-radius:14px;background:linear-gradient(110deg,#efaa48,#f6d58c);box-shadow:0 8px 24px #0005;color:#251809;font-weight:800;text-align:center;text-decoration:none}
-.home-tournament-join-link:hover{filter:brightness(1.07)}
-.home-tournament-join-link:focus-visible{outline:3px solid #fff2bf;outline-offset:3px}
 
 /* Shared ticket hierarchy: the session leads, while the buy-in keeps its size. */
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
@@ -1656,12 +1653,12 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 64% !important; }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__pedestal {
-  display: block !important; position: absolute; left: 0; top: -24%; width: 100%; height: 142%;
+  display: block !important; position: absolute; left: 0; top: -42%; width: 100%; height: 180%;
   z-index: 0; overflow: visible; pointer-events: none;
   filter: drop-shadow(0 .45cqw .55cqw #000b);
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout {
-  position: absolute; left: -2%; top: -24%; width: 110%; height: 59%; overflow: visible;
+  position: absolute; left: -2%; top: -12%; width: 110%; height: 54%; overflow: visible;
   pointer-events: none; color: #ffe2a0; fill: currentColor; z-index: 2;
   filter: drop-shadow(0 .15cqw .2cqw #000);
 }
@@ -1682,8 +1679,7 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   z-index: 5 !important;
 }
 
-.home-tournament-play-sign { display: none; }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-play-sign {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign {
   display: flex; position: absolute; left: 73.4%; top: 36.9%; width: 16.8%; height: 9.8%;
   z-index: 8; align-items: center; justify-content: center; gap: .5cqw;
   padding: .5cqw; transform: rotate(-4deg); cursor: pointer;
@@ -1691,8 +1687,8 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
   background: #090909; border: .15cqw solid #bc771e; border-radius: .5cqw;
   box-shadow: inset 0 0 .5cqw #bd70234d; text-shadow: 0 .2cqw .2cqw #000;
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-play-sign span { font-size: 1.25em; }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-play-sign:focus-visible {
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign span { font-size: 1.25em; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign:focus-visible {
   outline: .45cqw solid #ffe6a6; outline-offset: .3cqw;
 }
 

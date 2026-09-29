@@ -16,8 +16,14 @@
   color: #ffd17d; text-decoration: none;
 }
 .play-portal__back { left: 3.2%; font: 900 7cqw/1 Arial, sans-serif; cursor: pointer; }
-.play-portal__telegram { right: 3.2%; }
-.play-portal__telegram svg { width: 55%; height: 55%; }
+.play-portal__telegram {
+  right: 3.2%; width: 34%; gap: 1.2cqw; padding: 0 1.6cqw;
+  border-radius: 2.1cqw; font: 800 3.1cqw/1.1 Arial, sans-serif;
+  white-space: nowrap;
+}
+.play-portal__telegram svg { width: 5.2cqw; height: 5.2cqw; flex: none; }
+.play-portal__telegram:hover { filter: brightness(1.15); }
+.play-portal__telegram:focus-visible { outline: .5cqw solid #ffe2a4; outline-offset: .4cqw; }
 .play-portal__title {
   position: absolute; top: 11%; left: 4.8%; margin: 0;
   color: #ffedcc; font: 900 11.5cqw/.92 Arial, sans-serif;
