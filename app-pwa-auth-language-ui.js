@@ -168,8 +168,7 @@
     setText("homePartnerTitle", t.partner);
     setText("homeFooterNoteText", t.footerNote);
     setText("bottomNavHomeLabel", t.navHome);
-    setText("bottomNavClubNewsLabel", locale === "en" ? "Club" : "Клуб");
-    setText("bottomNavPlayLabel", locale === "en" ? "Play" : "Играть");
+    setText("bottomNavClubNewsLabel", locale === "en" ? "Club\nwins" : "Победы\nклуба");
     setText("bottomNavHandsLabel", locale === "en" ? "Hands" : "Раздачи");
     setText("bottomNavDownloadLabel", t.navDownload);
     setText("bottomNavCashoutLabel", t.navCashout);

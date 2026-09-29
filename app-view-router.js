@@ -855,7 +855,7 @@ function pokerShowViewLoadingShell(viewName) {
     view.classList.toggle("view--active", view.dataset.view === viewName);
   });
   navItems.forEach(function (item) {
-    item.classList.toggle("bottom-nav__item--active", (item.dataset.viewTarget === viewName || ((viewName === "schedule" || viewName === "download") && item.dataset.viewTarget === "play") || (viewName === "chat" && item.dataset.viewTarget === "club")));
+    item.classList.toggle("bottom-nav__item--active", (item.dataset.viewTarget === viewName || (viewName === "chat" && item.dataset.viewTarget === "download")));
   });
   if (footer) footer.classList.toggle("card__footer--hidden", viewName !== "home");
   try {
@@ -1169,7 +1169,7 @@ function setView(viewName, navOpts) {
     } catch (eNavNt) {}
   }
   navItems.forEach(function (item) {
-    if ((item.dataset.viewTarget === viewName || ((viewName === "schedule" || viewName === "download") && item.dataset.viewTarget === "play") || (viewName === "chat" && item.dataset.viewTarget === "club"))) {
+    if ((item.dataset.viewTarget === viewName || (viewName === "chat" && item.dataset.viewTarget === "download"))) {
       item.classList.add("bottom-nav__item--active");
     } else {
       item.classList.remove("bottom-nav__item--active");
@@ -1421,7 +1421,6 @@ function setView(viewName, navOpts) {
     loadProfileRespect();
     initProfileRespectVotersButton();
     initProfileFriends();
-    if (navOpts.profileTab === "friends" && typeof setProfileTab === "function") setProfileTab("friends");
     initProfileExitBtn();
     initProfileChatPush();
   }
