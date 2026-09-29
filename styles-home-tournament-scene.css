@@ -1634,19 +1634,33 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar,
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
   display: flex !important; flex-direction: column !important; align-items: center !important;
-  left: 50% !important; top: 72% !important; width: 100% !important; min-width: 0 !important;
-  height: auto !important; padding: 0 !important; gap: .1cqw !important;
+  left: 50% !important; top: 69% !important; width: 128% !important; min-width: 0 !important;
+  height: auto !important; padding: .65cqw .8cqw .75cqw !important; gap: .25cqw !important;
   transform: translateX(-50%) !important; color: #fff0d0 !important;
-  background: none !important; border: 0 !important; box-shadow: none !important;
+  background: linear-gradient(180deg, #332f25 0%, #0b0d0e 36%, #07090a 100%) !important;
+  border: .2cqw solid #d49b44 !important; border-radius: .75cqw !important;
+  box-shadow: inset 0 .15cqw .35cqw #ffe4a765, 0 .35cqw .7cqw #000b !important;
 }
 #app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) {
   display: flex !important; flex-direction: row !important; position: static !important;
   width: auto !important; height: auto !important; padding: 0 !important;
   background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
-  font-size: 1.45cqw !important; line-height: 1 !important; white-space: nowrap !important;
+  font-size: 2.35cqw !important; line-height: 1.06 !important; white-space: nowrap !important;
 }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) strong { font-size: 1.8cqw !important; }
-#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 66% !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) strong { font-size: 3.2cqw !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(2) small { display: inline !important; font-size: 2.2cqw !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 64% !important; }
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout {
+  position: absolute; left: 57%; top: -19%; width: 125%; height: 54%; overflow: visible;
+  pointer-events: none; color: #ffe2a0; fill: currentColor; z-index: 2;
+  filter: drop-shadow(0 .15cqw .2cqw #000);
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout text {
+  font: 800 16px/1 sans-serif; letter-spacing: .2px;
+}
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout-arrow {
+  fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round;
+}
 
 /* Keep the ticket-raffle entry available without covering the Last Longer chip. */
 #app.app.app--view-home .home-tractor-raffle {
