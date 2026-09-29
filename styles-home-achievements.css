@@ -44,6 +44,10 @@ body[data-view="home"] #app.app .card__footer--home {
   border-top: 0;
 }
 
+body[data-view="home"] #app.app .card .card__content {
+  padding-bottom: 32px !important;
+}
+
 .app.app--view-home .home-compact-link--hall .home-compact-link__hall-title {
   position: absolute;
   left: 12px;
