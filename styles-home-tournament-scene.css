@@ -1744,3 +1744,10 @@ html.home-art-observer #app.app.app--view-home .tournament-day-home-dual--tourna
 }
 #app.app.app--view-home .home-tractor-raffle::before { display: none !important; }
 #app.app.app--view-home .home-tractor-raffle span { position: static !important; width: 100% !important; transform: none !important; font-size: 14px !important; }
+
+/* The evening tournament scene is removed from the Home page. */
+#app.app.app--view-home .tournament-day-home-dual--tournament-focus {
+  display: none !important;
+  margin: 0 !important;
+}
+#app.app.app--view-home .home-tractor-raffle { display: none !important; }
