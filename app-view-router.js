@@ -5,6 +5,7 @@ const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-b
 const footer = document.querySelector(".card__footer");
 
 function setDownloadPage(pageName) {
+  if (pageName === "poker21") pageName = "main";
   var downloadPages = document.querySelectorAll(".download-page[data-download-page]");
   downloadPages.forEach(function (page) {
     if (page.dataset.downloadPage === pageName) {
@@ -21,6 +22,11 @@ function setDownloadPage(pageName) {
   try {
     if (typeof window.pokerInitDownloadRefActions === "function") window.pokerInitDownloadRefActions();
   } catch (eDownloadRef) {}
+  var managerLink = document.querySelector("[data-play-manager-link]");
+  if (managerLink) {
+    var moscowHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Moscow", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
+    managerLink.href = moscowHour >= 6 && moscowHour < 18 ? "https://t.me/qweenpoker" : "https://t.me/vikipoker";
+  }
 }
 
 var POKER_DOWNLOAD_REF_SECTIONS = {
@@ -2377,6 +2383,18 @@ document.addEventListener("click", function (e) {
 });
 
 document.addEventListener("click", function (e) {
+  var clubIdCopy = e.target.closest("[data-play-club-id-copy]");
+  if (clubIdCopy) {
+    e.preventDefault();
+    if (typeof pokerCopyTextToClipboard === "function") {
+      pokerCopyTextToClipboard("758417").then(function (copied) {
+        var label = clubIdCopy.innerHTML;
+        clubIdCopy.textContent = copied ? "ID скопирован" : "Не удалось скопировать ID";
+        setTimeout(function () { clubIdCopy.innerHTML = label; }, 1800);
+      });
+    }
+    return;
+  }
   var downloadCopyBtn = e.target.closest("[data-download-ref-copy]");
   if (downloadCopyBtn) {
     e.preventDefault();

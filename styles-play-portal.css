@@ -1,0 +1,70 @@
+/* Poker21 welcome screen: live controls over the supplied clean artwork. */
+.view[data-view="download"]:has(.play-portal) > .download-chat-tabs { display: none; }
+.play-portal {
+  position: relative; width: 100%; max-width: 560px; aspect-ratio: 1122 / 1402;
+  margin: 0 auto; overflow: hidden; container-type: inline-size;
+  background: #090807 url('./assets/play-poker21-portal-v1.webp') center / 100% 100% no-repeat;
+  color: #fff0d5; font-family: Arial, sans-serif;
+}
+.play-portal *, .play-portal *::before, .play-portal *::after { box-sizing: border-box; }
+.play-portal button, .play-portal a { -webkit-tap-highlight-color: transparent; }
+.play-portal__back, .play-portal__telegram {
+  position: absolute; top: 1.7%; z-index: 2; width: 8.8%; height: 7%;
+  display: flex; align-items: center; justify-content: center;
+  border: .25cqw solid #d08324; border-radius: 22%;
+  background: #080808db; box-shadow: 0 0 2cqw #e769263b, inset 0 0 .9cqw #ae561b88;
+  color: #ffd17d; text-decoration: none;
+}
+.play-portal__back { left: 3.2%; font: 900 7cqw/1 Arial, sans-serif; cursor: pointer; }
+.play-portal__telegram { right: 3.2%; }
+.play-portal__telegram svg { width: 55%; height: 55%; }
+.play-portal__title {
+  position: absolute; top: 11%; left: 4.8%; margin: 0;
+  color: #ffedcc; font: 900 11.5cqw/.92 Arial, sans-serif;
+  letter-spacing: -.55cqw; text-shadow: 0 .5cqw 1.4cqw #000;
+}
+.play-portal__title > span { color: #ff841e; }
+.play-portal__title > small { display: block; margin: 1cqw 0 0 1cqw; font: 700 4.2cqw/1.1 Arial, sans-serif; letter-spacing: 0; }
+.play-portal__stores { position: absolute; top: 26.7%; left: 3.4%; width: 49%; height: 7.4%; display: flex; gap: 3%; }
+.play-portal__stores a {
+  display: flex; flex: 1; align-items: center; justify-content: center; gap: 1cqw; min-width: 0;
+  border: .3cqw solid #ffc15e; border-radius: 3cqw;
+  background: linear-gradient(#ffc048, #ff8713); box-shadow: 0 0 2.4cqw #ff7c2477, inset 0 .5cqw .6cqw #ffe5a277;
+  color: #150e08 !important; font: 800 2.8cqw/1 Arial, sans-serif; text-decoration: none; white-space: nowrap;
+}
+.play-portal__stores a svg { width: 4.5cqw; height: 4.5cqw; flex: none; }
+.play-portal__steps { position: absolute; top: 38%; left: 3.4%; width: 42%; margin: 0; padding: 0; list-style: none; }
+.play-portal__steps::before { content: ''; position: absolute; left: 3.1cqw; top: 4cqw; bottom: 4cqw; width: .3cqw; background: #e77b24; box-shadow: 0 0 1.3cqw #e87720; }
+.play-portal__steps li {
+  position: relative; display: flex; align-items: center; gap: 2cqw; width: 100%; height: 9.5cqw;
+  margin: 0 0 3cqw 3.3cqw; padding: .6cqw 1cqw .6cqw 2cqw;
+  border: .1cqw solid #9d622f78; border-radius: 2.5cqw;
+  background: linear-gradient(95deg, #0c0c0eec, #1c1110d9); box-shadow: 0 .7cqw 1.8cqw #0008;
+  font: 700 2.8cqw/1.1 Arial, sans-serif;
+}
+.play-portal__steps li::before {
+  position: absolute; left: -6.4cqw; top: 1.4cqw; width: 6.1cqw; height: 6.1cqw;
+  display: flex; align-items: center; justify-content: center;
+  border: .3cqw solid #f28d21; border-radius: 50%; background: #0b0a0a;
+  box-shadow: 0 0 1cqw #ff871d; color: #ffbd53; font: 800 3.5cqw/1 Arial, sans-serif;
+}
+.play-portal__steps li:nth-child(1)::before { content: '1'; }
+.play-portal__steps li:nth-child(2)::before { content: '2'; }
+.play-portal__steps li:nth-child(3)::before { content: '3'; }
+.play-portal__step-icon { display: flex; align-items: center; justify-content: center; width: 7cqw; height: 7cqw; flex: none; border: .1cqw solid #8d592f; border-radius: 2cqw; color: #ffc15f; font-size: 4.7cqw; box-shadow: inset 0 0 1cqw #ac5e1b88; }
+.play-portal__club-id { position: absolute; left: 42%; top: 65.1%; width: 39%; text-align: center; color: #ffdfa0; text-shadow: 0 0 2cqw #fa681d; transform: rotate(-2deg); }
+.play-portal__club-id span { display: block; font: 800 italic 3.1cqw/1 Arial, sans-serif; }
+.play-portal__club-id strong { display: block; margin-top: 1cqw; font: 900 8.8cqw/1 Arial, sans-serif; letter-spacing: -.25cqw; }
+.play-portal__copy, .play-portal__manager {
+  position: absolute; display: flex; align-items: center; justify-content: center; gap: 1.3cqw;
+  border: .2cqw solid #e9a34e; border-radius: 2.4cqw; background: linear-gradient(#1a1715eb, #08090bed);
+  color: #ffeac5; font: 750 2.9cqw/1 Arial, sans-serif; text-decoration: none; white-space: nowrap;
+  box-shadow: inset 0 .25cqw .4cqw #f6ba5944, 0 .9cqw 2cqw #0009; cursor: pointer;
+}
+.play-portal__copy { left: 38%; top: 77.5%; width: 48%; height: 6.7%; }
+.play-portal__copy span { color: #ffc65e; font-size: 4cqw; }
+.play-portal__manager { left: 21%; top: 87.8%; width: 58%; height: 7%; }
+.play-portal__manager span:first-child { color: #ffc65e; font-size: 4cqw; }
+.play-portal__manager span:last-child { margin-left: auto; margin-right: 2cqw; font-size: 5cqw; }
+.play-portal :is(a,button):focus-visible { outline: .7cqw solid #fff1bb; outline-offset: .3cqw; }
+.play-portal :is(a,button):active { filter: brightness(1.2); }
