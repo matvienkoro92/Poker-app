@@ -3,7 +3,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin: 33px 0 8px;
+  margin: 14px 0 8px;
   color: #e8ad54;
   font-size: clamp(8.4px, 2.38vw, 11.2px);
   font-weight: 900;
@@ -38,26 +38,10 @@
   margin-top: 0;
 }
 
-body[data-view="home"] #app.app .home-achievements-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: max-content !important;
-  max-width: calc(100% - 24px);
-  min-height: 36px;
-  margin: 10px auto 20px;
-  padding: 6px 4px;
-  border-bottom: 1px solid rgba(255, 193, 91, 0.55);
-  color: #ffe3ad;
-  font-size: 14px;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-body[data-view="home"] #app.app .home-achievements-all:focus-visible {
-  outline: 2px solid #ffd477;
-  outline-offset: 3px;
+body[data-view="home"] #app.app .card__footer--home {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .app.app--view-home .home-compact-link--hall .home-compact-link__hall-title {
@@ -96,7 +80,7 @@ body[data-view="home"] #app.app .home-achievements-all:focus-visible {
 
 @media (max-width: 360px) {
   .app.app--view-home .home-club-achievements-title {
-    margin-top: 31px;
+    margin-top: 12px;
     gap: 8px;
     font-size: 7.7px;
     letter-spacing: 0.24em;
