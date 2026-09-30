@@ -1201,9 +1201,11 @@ function renderHomeTournamentWeekList(activeWeekday) {
 
     var swipeStartX = null;
     el.addEventListener("pointerdown", function (event) {
+      if (el.closest("[data-play-flow]")) return;
       swipeStartX = event.clientX;
     });
     el.addEventListener("pointerup", function (event) {
+      if (el.closest("[data-play-flow]")) { swipeStartX = null; return; }
       if (swipeStartX === null) return;
       var deltaX = event.clientX - swipeStartX;
       swipeStartX = null;
@@ -1215,6 +1217,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
     });
     el.addEventListener("pointercancel", function () { swipeStartX = null; });
     el.addEventListener("keydown", function (event) {
+      if (el.closest("[data-play-flow]")) return;
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       event.preventDefault();
       var selectedIndex = HOME_TOURNAMENT_WEEK_ORDER.indexOf(Number(window._homeTournamentSelectedWeekday));

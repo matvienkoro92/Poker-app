@@ -5,6 +5,7 @@
   var observer = null;
   var sceneObserver = null;
   var touchStart = null;
+  var lastSwipeAt = 0;
 
   function show(panel) {
     var current = document.querySelector(".download-page--active[data-download-page='main'] [data-play-flow]") || flow;
@@ -58,6 +59,11 @@
 
   window.pokerPlayFlowShow = show;
   document.addEventListener("click", function (event) {
+    if (Date.now() - lastSwipeAt > 500 || !event.target.closest("[data-play-flow]")) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+  document.addEventListener("click", function (event) {
     var control = event.target.closest("[data-play-next], [data-play-prev], [data-play-panel-target]");
     if (!control || !control.closest("[data-play-flow]")) return;
     event.preventDefault();
@@ -67,7 +73,7 @@
   });
   document.addEventListener("touchstart", function (event) {
     var target = event.target.closest("[data-play-flow]");
-    if (!target || event.touches.length !== 1 || event.target.closest("button, a, input, select, textarea")) return;
+    if (!target || event.touches.length !== 1 || event.target.closest("input, select, textarea")) return;
     touchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY, flow: target };
   }, { passive: true });
   document.addEventListener("touchend", function (event) {
@@ -76,11 +82,13 @@
     var dy = event.changedTouches[0].clientY - touchStart.y;
     if (touchStart.flow.isConnected && Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
       connect();
+      lastSwipeAt = Date.now();
       if (touchStart.flow.dataset.playPanel === "tournament" && dx > 0) show("poker21");
       else if (touchStart.flow.dataset.playPanel === "poker21" && dx < 0) show("tournament");
     }
     touchStart = null;
   }, { passive: true });
+  document.addEventListener("touchcancel", function () { touchStart = null; }, { passive: true });
   window.addEventListener("resize", size);
   document.addEventListener("keydown", function (event) {
     if (!event.target.closest || !event.target.closest("[data-play-flow]")) return;
