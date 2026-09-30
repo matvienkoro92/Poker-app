@@ -2046,6 +2046,19 @@
     return base + (base.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(startParam || "");
   }
 
+  var crmLinkPreviewStartParam = "";
+
+  function renderCrmLinkPreview() {
+    var urlEl = document.getElementById("playerCrmLinkPreviewUrl");
+    var hintEl = document.getElementById("playerCrmLinkPreviewHint");
+    if (!urlEl) return;
+    var type = crmLinkFieldValue("playerCrmLinkType") === "website" ? "website" : "telegram";
+    var target = crmLinkTargetByKey(crmLinkFieldValue("playerCrmLinkTarget") || "home");
+    urlEl.textContent = buildCrmLinkUrl(crmLinkPreviewStartParam || "ref_XXXXXXXX", type);
+    if (hintEl) hintEl.textContent = (crmLinkPreviewStartParam ? "Готовая ссылка. " : "XXXXXXXX — код, который появится после создания. ") +
+      "Откроется: " + target.label + ". Название и источник сохраняются в статистике и не меняют адрес.";
+  }
+
   function copyCrmLinkText(text) {
     if (!text) return;
     function done(ok) {
@@ -2088,25 +2101,20 @@
       target_startapp: target.startapp,
       target_label: target.label,
       utm_source: crmLinkFieldValue("playerCrmLinkSource"),
-      utm_medium: crmLinkFieldValue("playerCrmLinkMedium"),
-      utm_campaign: crmLinkFieldValue("playerCrmLinkCampaign"),
-      utm_content: crmLinkFieldValue("playerCrmLinkContent"),
-      utm_term: crmLinkFieldValue("playerCrmLinkTerm"),
-      lead_offer: crmLinkFieldValue("playerCrmLinkOffer"),
-      lead_owner: crmLinkFieldValue("playerCrmLinkOwner"),
-      lead_note: crmLinkFieldValue("playerCrmLinkNote"),
       created_from: "dashboard_links",
       created_at_client: new Date().toISOString()
     });
   }
 
   function clearCrmLinkForm() {
-    ["playerCrmLinkLabel", "playerCrmLinkSource", "playerCrmLinkMedium", "playerCrmLinkCampaign", "playerCrmLinkContent", "playerCrmLinkTerm", "playerCrmLinkOffer", "playerCrmLinkOwner", "playerCrmLinkNote"].forEach(function (id) {
+    ["playerCrmLinkLabel", "playerCrmLinkSource"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.value = "";
     });
     var typeEl = document.getElementById("playerCrmLinkType");
     if (typeEl) typeEl.value = "telegram";
+    crmLinkPreviewStartParam = "";
+    renderCrmLinkPreview();
     setCrmLinksResult("", false);
   }
 
@@ -2156,6 +2164,7 @@
 
   function renderCrmTrackingLinks() {
     renderCrmLinkTargetOptions();
+    renderCrmLinkPreview();
     var el = document.getElementById("playerCrmLinksList");
     var summary = document.getElementById("playerCrmLinksSummary");
     var builder = document.getElementById("playerCrmLinksBuilder");
@@ -2271,6 +2280,8 @@
           setCrmLinksResult((data && data.error) || "Не удалось создать ссылку.", true);
           return;
         }
+        crmLinkPreviewStartParam = data.startParam;
+        renderCrmLinkPreview();
         var url = buildCrmLinkUrl(data.startParam, params.link_type);
         setCrmLinksResult("<div>Ссылка создана.</div><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\">" + esc(url || data.startParam) + "</button>", false);
         loadCrmTrackingLinks();
@@ -5500,6 +5511,18 @@
       if (e.key === "Escape") closeCrmDateRangePicker();
     });
 
+    ["playerCrmLinkType", "playerCrmLinkTarget", "playerCrmLinkLabel", "playerCrmLinkSource"].forEach(function (id) {
+      var field = document.getElementById(id);
+      if (!field) return;
+      field.addEventListener("input", function () {
+        crmLinkPreviewStartParam = "";
+        renderCrmLinkPreview();
+      });
+      field.addEventListener("change", function () {
+        crmLinkPreviewStartParam = "";
+        renderCrmLinkPreview();
+      });
+    });
     var search = document.getElementById("playerCrmSearch");
     if (search) {
       search.addEventListener("input", function () {

@@ -22,3 +22,26 @@ for (const standalone of [false, true]) {
     assert.equal(url("ref_123"), standalone ? "https://club.example?startapp=ref_123" : "https://t.me/club_bot/app?startapp=ref_123");
   });
 }
+test("preview switches resource and replaces placeholder with created code", () => {
+  const elements = { playerCrmLinkPreviewUrl: {}, playerCrmLinkPreviewHint: {} };
+  let type = "telegram", target = "home";
+  const scope = {
+    document: { getElementById: id => elements[id] },
+    crmLinkFieldValue: id => id === "playerCrmLinkType" ? type : target,
+    crmLinkTargetByKey: key => ({ label: key === "home" ? "Главная" : "Расписание" }),
+    getWebsiteOriginBaseForLinks: () => "https://club.example/",
+    POKER_DEFAULT_TELEGRAM_MINI_APP_URL: "https://t.me/club_bot/app"
+  };
+  vm.runInNewContext(build, scope);
+  scope.renderCrmLinkPreview();
+  assert.equal(elements.playerCrmLinkPreviewUrl.textContent, "https://t.me/club_bot/app?startapp=ref_XXXXXXXX");
+  type = "website";
+  target = "schedule";
+  scope.renderCrmLinkPreview();
+  assert.equal(elements.playerCrmLinkPreviewUrl.textContent, "https://club.example?startapp=ref_XXXXXXXX");
+  assert.match(elements.playerCrmLinkPreviewHint.textContent, /Расписание/);
+  scope.crmLinkPreviewStartParam = "ref_abcdef12";
+  scope.renderCrmLinkPreview();
+  assert.equal(elements.playerCrmLinkPreviewUrl.textContent, "https://club.example?startapp=ref_abcdef12");
+  assert.match(elements.playerCrmLinkPreviewHint.textContent, /Готовая ссылка/);
+});

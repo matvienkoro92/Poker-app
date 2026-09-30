@@ -4131,3 +4131,17 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
 .player-crm__links-controls .player-crm__links-action-row {
   flex-wrap: wrap;
 }
+
+.player-crm__link-preview {
+  margin: 12px 0 18px;
+  padding: 14px;
+  border: 1px solid rgba(199, 163, 106, 0.4);
+  border-radius: 12px;
+  background: rgba(199, 163, 106, 0.06);
+}
+.player-crm__link-preview-url {
+  margin: 8px 0;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
