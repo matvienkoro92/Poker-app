@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const {notifyProfileComment}=require('../lib/profile-comment-notify');
+const {notifyProfileComment,notifyProfileReaction}=require('../lib/profile-comment-notify');
 const comment={id:'comment1',memberId:'ID111111',author:'ПокерМанки',text:'Отлично!'};
 function harness(profiles={}){const sent=[];return {sent,deps:{resolveAccountId:async id=>id==='tg_123'?'ID222222':id,hscanall:async()=>profiles,send:async(id,payload)=>sent.push({id,payload})}};}
 test('comments on level news and wall posts notify their owner with a stable image-free push',async()=>{
@@ -20,4 +20,19 @@ test('tournament news resolves a unique nickname on the server',async()=>{
  const h=harness({'ID222222':JSON.stringify({nickname:'Waaar'})});
  await notifyProfileComment('history:tournament:rating:waaar:11.09.2026:1:100',comment,h.deps);
  assert.equal(h.sent[0].id,'ID222222');
+});
+test('a reaction to tournament news pushes its owner and opens the record',async()=>{
+ const h=harness({'ID222222':JSON.stringify({nickname:'LuckyBoom'})});
+ await notifyProfileReaction('history:tournament:rating:luckyboom:29.09.2026:1:5624',{memberId:'ID111111',author:'ПокерМанки',emoji:'🔥'},h.deps);
+ assert.equal(h.sent.length,1);
+ assert.equal(h.sent[0].id,'ID222222');
+ assert.match(h.sent[0].payload.body,/ПокерМанки.*🔥/);
+ assert.match(h.sent[0].payload.openUrl,/profile_event=/);
+ assert.match(h.sent[0].payload.dedupeKey,/ID111111/);
+});
+test('own reactions and ambiguous nicknames do not push',async()=>{
+ const h=harness({'ID222222':JSON.stringify({nickname:'LuckyBoom'}),'ID333333':JSON.stringify({nickname:'LuckyBoom'})});
+ await notifyProfileReaction('wall:ID111111:post1',{memberId:'ID111111',author:'Я',emoji:'❤️'},h.deps);
+ await notifyProfileReaction('history:tournament:rating:luckyboom:29.09.2026:1:5624',{memberId:'ID111111',author:'ПокерМанки',emoji:'🔥'},h.deps);
+ assert.equal(h.sent.length,0);
 });
