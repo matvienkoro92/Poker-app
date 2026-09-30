@@ -121,10 +121,9 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
 .play-single__steps li {
   position: relative;
   display: flex;
-  justify-self: start;
   align-items: center;
   gap: 2cqw;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   min-height: 0;
   padding: 0 5px 0 1.5cqw;
@@ -155,6 +154,15 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
 .play-single__steps li:nth-child(1)::before { content: '1'; }
 .play-single__steps li:nth-child(2)::before { content: '2'; }
 .play-single__steps li:nth-child(3)::before { content: '3'; }
+.play-single__steps li:nth-child(3) {
+  border-color: #f0a641;
+  background: linear-gradient(100deg, #17120df7, #3a2112ef);
+  box-shadow: 0 0 1.8cqw #ff9b3980, inset 0 0 1.2cqw #ffba594d;
+}
+.play-single__steps li:nth-child(3):hover,
+.play-single__steps li:nth-child(3):focus-within {
+  box-shadow: 0 0 2.8cqw #ff9b39bb, inset 0 0 1.6cqw #ffba5973;
+}
 .play-single__step-icon {
   display: flex;
   align-items: center;
@@ -197,13 +205,14 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   position: absolute;
   z-index: 3;
   top: 80%;
-  left: 38%;
+  left: 62.5%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1.5cqw;
-  width: 49%;
+  width: max-content;
   height: 6.5%;
+  padding: 0 5px;
   border: .2cqw solid #f2a944;
   border-radius: 2cqw;
   background: linear-gradient(#211a16f5, #0b0d0ef7);
@@ -212,6 +221,7 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   font: 800 clamp(12px, 2.6cqw, 29px)/1 Arial,sans-serif;
   white-space: nowrap;
   cursor: pointer;
+  transform: translate(-50%, -20%);
 }
 .play-single__copy > svg { width: 4cqw; height: 4cqw; color: #ffc060; flex: none; }
 @media (max-width: 599px) {
@@ -224,5 +234,5 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   .play-single__club-id { top: 69.5%; left: 39%; width: 55%; }
   .play-single__club-id span { font-size: 4.2cqw; }
   .play-single__club-id strong { font-size: 10cqw; }
-  .play-single__copy { top: 79%; left: 37%; width: 58%; height: 6%; }
+  .play-single__copy { top: 79%; left: 66%; height: 6%; }
 }
