@@ -54,9 +54,9 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  --evening-background:url('./assets/evening-room-v1.webp');
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art {display:block!important;position:absolute;pointer-events:none;object-fit:contain;max-width:none!important;}
-.evening-reference__art--portal-top {left:38%;top:30%;width:54%;height:auto;z-index:2;}
+.evening-reference__art--portal-top {left:10%;top:30%;width:54%;height:auto;z-index:2;}
 .evening-reference__art--portal-side {left:72%;top:23%;width:43%;height:auto;z-index:1;}
-.evening-reference__art--chair-center {left:54%;top:47%;width:23%;height:auto;z-index:2;}
+.evening-reference__art--chair-center {left:26%;top:47%;width:23%;height:auto;z-index:2;}
 .evening-reference__art--players {left:-7%;top:43%;width:114%;height:auto;z-index:3;}
 .evening-reference__art--table {left:-10%;top:49%;width:120%;height:auto;z-index:4;}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {left:23%!important;top:65.9%!important;width:54%!important;height:6.3%!important;opacity:0!important;z-index:6!important;}
@@ -96,8 +96,8 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 
 /* Four seats: three occupied, the fourth beneath the descending portal. */
 .evening-reference__art--chair-left {left:5%;top:47%;width:25%;height:auto;z-index:2;}
-.evening-reference__art--chair-middle {left:24%;top:46%;width:26%;height:auto;z-index:2;}
+.evening-reference__art--chair-middle {left:52%;top:46%;width:26%;height:auto;z-index:2;}
 .evening-reference__art--chair-right {left:79%;top:47%;width:25%;height:auto;z-index:2;}
 .evening-reference__art--player-left {left:-1%;top:46%;width:28%;height:auto;z-index:3;}
-.evening-reference__art--player-middle {left:23%;top:45%;width:35%;height:auto;z-index:3;}
+.evening-reference__art--player-middle {left:51%;top:45%;width:35%;height:auto;z-index:3;}
 .evening-reference__art--player-right {left:77%;top:46%;width:28%;height:auto;z-index:3;}
