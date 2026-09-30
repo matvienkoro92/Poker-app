@@ -9,13 +9,12 @@ function profileEscapeHtml(value) {
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
-  var activeTab = tab === "poker21" || tab === "achievements" || tab === "friends" || tab === "other" ? tab : "club";
+  var activeTab = tab === "poker21" || tab === "achievements" || tab === "friends" ? tab : "club";
   if (root) {
     root.classList.toggle("profile-view--tab-poker21", activeTab === "poker21");
     root.classList.toggle("profile-view--tab-club", activeTab === "club");
     root.classList.toggle("profile-view--tab-achievements", activeTab === "achievements");
     root.classList.toggle("profile-view--tab-friends", activeTab === "friends");
-    root.classList.toggle("profile-view--tab-other", activeTab === "other");
     root.dataset.profileActiveTab = activeTab;
   }
   tabs.forEach(function (btn) {
@@ -449,13 +448,6 @@ function initProfilePoker21Tabs() {
 function initProfileTabs() {
   var root = document.getElementById("profileView");
   if (!root) return;
-  var otherPanel = document.getElementById("profileOtherPanel");
-  var gamesTitle = document.getElementById("homeGamesTitle");
-  var gamesBlock = document.querySelector(".games-apps-block");
-  if (otherPanel && gamesTitle && gamesBlock && gamesTitle.parentNode !== otherPanel) {
-    otherPanel.appendChild(gamesTitle);
-    otherPanel.appendChild(gamesBlock);
-  }
   var tabs = document.querySelectorAll("[data-profile-tab]");
   if (!tabs.length) return;
   if (root.dataset.profileTabsBound !== "1") {

@@ -6239,5 +6239,3 @@ html body #app.app.app--view-home
 .daily-poker__win-share:disabled { opacity:.65; cursor:wait; }
 
 html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .player-stickers-modal{padding-top:var(--tg-modal-top-safe,12px)}
-#app.app--view-home #homeGamesTitle,
-#app.app--view-home .games-apps-block { display: none !important; }
