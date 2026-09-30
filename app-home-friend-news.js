@@ -3488,6 +3488,7 @@
     renderModalList(activeModalEvents(), true);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
+    syncClubNewsNav(false);
     observeFriendNewsRead();
     observeNewsEngagement();
     loadActiveModalFeedback(events);
@@ -3510,11 +3511,22 @@
     renderModalList(activeModalEvents(), true);
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
+    syncClubNewsNav(true);
     Promise.resolve(loadClubNews()).then(function () {
       if (newsModalMode === "club" && !modal.hidden) loadActiveModalFeedback(clubEvents);
     });
   }
   window.pokerOpenClubNewsModal = openClubModal;
+
+  function syncClubNewsNav(isClubOpen) {
+    document.querySelectorAll(".bottom-nav .bottom-nav__item").forEach(function (item) {
+      var active = isClubOpen
+        ? item.hasAttribute("data-club-news-open")
+        : item.dataset.viewTarget === document.body.dataset.view ||
+          (document.body.dataset.view === "chat" && item.dataset.viewTarget === "download");
+      item.classList.toggle("bottom-nav__item--active", active);
+    });
+  }
 
   function closeModal() {
     newsModalOpenSequence += 1;
@@ -3522,6 +3534,7 @@
     if (!modal) return;
     modal.hidden = true;
     document.body.classList.remove("home-friend-news-modal-open");
+    syncClubNewsNav(false);
   }
 
   function bind() {
