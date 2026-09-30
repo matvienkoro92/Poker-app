@@ -101,3 +101,23 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 .evening-reference__art--player-left {left:-1%;top:46%;width:28%;height:auto;z-index:3;}
 .evening-reference__art--player-middle {left:51%;top:45%;width:35%;height:auto;z-index:3;}
 .evening-reference__art--player-right {left:77%;top:46%;width:28%;height:auto;z-index:3;}
+
+/* Compact tournament layout with the live guarantee inside the ticket. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tournament > .play-tournament-scene {height:var(--play-tournament-height,100%)!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {aspect-ratio:auto!important;height:100%!important;min-height:180cqw;container-type:size;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {height:auto!important;min-height:16%;padding-bottom:2cqw;z-index:5;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .evening-reference__ticket > .evening-reference__prize {position:static!important;display:flex!important;flex-direction:row;align-items:baseline;justify-content:space-between;gap:1cqw;width:100%;margin-top:1.5cqw;padding-top:1.5cqw;border-top:1px solid #ae6a2c;color:#fff1c9;font:800 3.2cqw/1 Arial,sans-serif;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference #tournamentDayGuarantee {font-size:6.8cqw!important;letter-spacing:-.15cqw!important;}
+.evening-reference__art--portal-top {top:20%;}
+.evening-reference__art--portal-side {top:19%;width:39%;left:75%;}
+.evening-reference__art--chair-left {top:36%;}
+.evening-reference__art--chair-middle {top:35%;}
+.evening-reference__art--chair-right {top:36%;}
+.evening-reference__art--chair-center {top:36%;}
+.evening-reference__art--player-left {top:35%;}
+.evening-reference__art--player-middle {top:34%;}
+.evening-reference__art--player-right {top:35%;}
+.evening-reference__art--table {top:39%;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(39% + 37.4cqw)!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {top:calc(39% + 65cqw)!important;}

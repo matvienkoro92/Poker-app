@@ -33,6 +33,7 @@
     var height = panel.clientHeight;
     if (!width || !height) return;
     var scene = flow.querySelector(".tournament-day-home-dual--tournament-focus");
+    flow.style.setProperty("--play-tournament-height", height + "px");
     var zoom = scene && scene.dataset.tournamentCharacter === "gucci" ? 1.18 : 1.05;
     flow.style.setProperty("--play-tournament-width", Math.floor(scene && scene.classList.contains("evening-reference") ? width : Math.min(width * zoom, height * 1122 / 1402)) + "px");
     var portalRatio = width >= 600 ? 1072 / 1467 : 852 / 1846;
