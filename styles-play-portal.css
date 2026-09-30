@@ -47,30 +47,6 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
 .play-single *, .play-single *::before, .play-single *::after { box-sizing: border-box; }
 .play-single :is(a,button) { -webkit-tap-highlight-color: transparent; }
 .play-single :is(a,button):focus-visible { outline: 3px solid #fff1bc; outline-offset: 3px; }
-.play-single__back, .play-single__telegram {
-  position: absolute;
-  z-index: 3;
-  top: 1.7%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(48px, 9cqw, 96px);
-  aspect-ratio: 1;
-  border: 2px solid #dd8425;
-  border-radius: 25%;
-  background: linear-gradient(145deg, #201105e8, #07090bea);
-  box-shadow: 0 0 1.5cqw #ff761e66, inset 0 0 .9cqw #e8932f66;
-  color: #ffbf56;
-  text-decoration: none;
-}
-.play-single__back {
-  top: max(42px, calc(env(safe-area-inset-top, 0px) + 8px), calc(var(--tg-content-safe-area-inset-top, 0px) + 8px));
-  left: 3.3%;
-  font: 900 clamp(32px, 6cqw, 60px)/1 Arial,sans-serif;
-  cursor: pointer;
-}
-.play-single__telegram { right: 3.3%; }
-.play-single__telegram svg { width: 65%; height: 65%; }
 .play-single__title {
   position: absolute;
   z-index: 2;
@@ -126,7 +102,8 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   display: grid;
   grid-template-rows: repeat(3, 1fr);
   gap: 5%;
-  width: 35%;
+  width: max-content;
+  max-width: 35%;
   height: 29%;
   margin: 0;
   padding: 0;
@@ -144,10 +121,13 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
 .play-single__steps li {
   position: relative;
   display: flex;
+  justify-self: start;
   align-items: center;
   gap: 2cqw;
+  width: max-content;
+  max-width: 100%;
   min-height: 0;
-  padding: 0 1.5cqw;
+  padding: 0 5px 0 1.5cqw;
   border: .12cqw solid #855126aa;
   border-radius: 2cqw;
   background: linear-gradient(100deg, #0c1013f5, #241610db);
@@ -194,7 +174,7 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   display: flex;
   align-items: center;
   gap: 2cqw;
-  width: 100%;
+  width: max-content;
   height: 100%;
   color: inherit;
   text-decoration: none;
@@ -203,7 +183,7 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
 .play-single__club-id {
   position: absolute;
   z-index: 2;
-  top: 65%;
+  top: 69.5%;
   left: 41%;
   width: 46%;
   text-align: center;
@@ -216,7 +196,7 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
 .play-single__copy {
   position: absolute;
   z-index: 3;
-  top: 77.5%;
+  top: 80%;
   left: 38%;
   display: flex;
   align-items: center;
@@ -238,11 +218,11 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   .play-single { background-position: 46% calc(50% + 20px); }
   .play-single__title { top: 12.5%; }
   .play-single__stores { top: 25%; width: 55%; height: 7%; }
-  .play-single__steps { top: 36%; left: 12%; width: 51%; height: 31%; }
+  .play-single__steps { top: 36%; left: 12%; max-width: 51%; height: 31%; }
   .play-single__steps li { gap: 1.4cqw; }
   .play-single__step-link { gap: 1.4cqw; }
-  .play-single__club-id { top: 65%; left: 39%; width: 55%; }
+  .play-single__club-id { top: 69.5%; left: 39%; width: 55%; }
   .play-single__club-id span { font-size: 4.2cqw; }
   .play-single__club-id strong { font-size: 10cqw; }
-  .play-single__copy { top: 76%; left: 37%; width: 58%; height: 6%; }
+  .play-single__copy { top: 79%; left: 37%; width: 58%; height: 6%; }
 }
