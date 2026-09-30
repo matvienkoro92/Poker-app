@@ -40,7 +40,7 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   overflow: hidden;
   isolation: isolate;
   container-type: inline-size;
-  background: #090a0c url('./assets/play-portal-clean-reference-20260930.webp') center center / cover no-repeat;
+  background: #090a0c url('./assets/play-portal-clean-reference-20260930.webp') center calc(50% + 20px) / cover no-repeat;
   color: #ffefd1;
   font-family: Arial, sans-serif;
 }
@@ -63,7 +63,12 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   color: #ffbf56;
   text-decoration: none;
 }
-.play-single__back { left: 3.3%; font: 900 clamp(32px, 6cqw, 60px)/1 Arial,sans-serif; cursor: pointer; }
+.play-single__back {
+  top: max(42px, calc(env(safe-area-inset-top, 0px) + 8px), calc(var(--tg-content-safe-area-inset-top, 0px) + 8px));
+  left: 3.3%;
+  font: 900 clamp(32px, 6cqw, 60px)/1 Arial,sans-serif;
+  cursor: pointer;
+}
 .play-single__telegram { right: 3.3%; }
 .play-single__telegram svg { width: 65%; height: 65%; }
 .play-single__title {
@@ -185,6 +190,16 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   box-shadow: inset 0 0 .8cqw #b45a1677;
 }
 .play-single__step-icon svg { width: 65%; height: 65%; }
+.play-single__step-link {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.play-single__step-link:hover { color: #ffcf79; }
 .play-single__club-id {
   position: absolute;
   z-index: 2;
@@ -219,36 +234,15 @@ body[data-view="download"] #app.app .card .card__content:has(.download-page--act
   cursor: pointer;
 }
 .play-single__copy > svg { width: 4cqw; height: 4cqw; color: #ffc060; flex: none; }
-.play-single__manager {
-  position: absolute;
-  z-index: 3;
-  bottom: 4.5%;
-  left: 21%;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  width: 58%;
-  height: 7%;
-  padding: 0 3cqw;
-  border: .2cqw solid #e8942d;
-  border-radius: 2cqw;
-  background: linear-gradient(#151618f2, #07090beb);
-  color: #fff1d7 !important;
-  font: 800 clamp(13px, 2.55cqw, 29px)/1 Arial,sans-serif;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.play-single__manager > svg { width: 4cqw; height: 4cqw; color: #ffe1a8; flex: none; }
-.play-single__manager > span:last-child { font-size: 4cqw; }
 @media (max-width: 599px) {
-  .play-single { background-position: 46% center; }
+  .play-single { background-position: 46% calc(50% + 20px); }
   .play-single__title { top: 12.5%; }
   .play-single__stores { top: 25%; width: 55%; height: 7%; }
   .play-single__steps { top: 36%; left: 12%; width: 51%; height: 31%; }
   .play-single__steps li { gap: 1.4cqw; }
+  .play-single__step-link { gap: 1.4cqw; }
   .play-single__club-id { top: 65%; left: 39%; width: 55%; }
   .play-single__club-id span { font-size: 4.2cqw; }
   .play-single__club-id strong { font-size: 10cqw; }
   .play-single__copy { top: 76%; left: 37%; width: 58%; height: 6%; }
-  .play-single__manager { bottom: 4%; left: 8%; width: 84%; height: 6.5%; }
 }

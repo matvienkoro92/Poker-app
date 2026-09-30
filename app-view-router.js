@@ -22,11 +22,6 @@ function setDownloadPage(pageName) {
   try {
     if (typeof window.pokerInitDownloadRefActions === "function") window.pokerInitDownloadRefActions();
   } catch (eDownloadRef) {}
-  var managerLink = document.querySelector("[data-play-manager-link]");
-  if (managerLink) {
-    var moscowHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Moscow", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
-    managerLink.href = moscowHour >= 6 && moscowHour < 18 ? "https://t.me/qweenpoker" : "https://t.me/vikipoker";
-  }
 }
 
 var POKER_DOWNLOAD_REF_SECTIONS = {

@@ -165,6 +165,7 @@
       safeCall(window.pokerInitDownloadRefActions);
       safeCall(window.updateTournamentDayBlock);
     }
+    if (viewName === "profile") safeCall(window.syncGlobalAppLanguageUi);
     if (viewName === "schedule") safeCall(window.updateTournamentDayBlock);
     if (viewName === "winter-rating") safeCall(window.pokerInitWinterRatingWeekTops);
     if (viewName === "raffles") safeCall(window.pokerInitRafflesHeroShare);

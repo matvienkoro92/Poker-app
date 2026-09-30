@@ -182,7 +182,7 @@ html.poker-telegram-miniapp .site-home-instruction-modal .club-charter-modal__cl
   right: 12px;
   z-index: 4;
 }
-html.site-home-header-mode #vpnProxyOpenBtn,
+html.site-home-header-mode body[data-view="home"] #vpnProxyOpenBtn,
 html.site-home-header-mode #radioToggle,
 html.site-home-header-mode #pwaInstallBtn {
   display: none !important;

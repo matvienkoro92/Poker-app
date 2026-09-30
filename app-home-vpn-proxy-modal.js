@@ -7,7 +7,6 @@ function initHomeVpnProxyModal(opts) {
     var VPN_PROXY_HASH = "#vpn-proxy";
     var VPN_PROXY_HASH_PROXY = "#vpn-proxy-proxy";
     var modal = document.getElementById("vpnProxyModal");
-    var openButtons = document.querySelectorAll("#vpnProxyOpenBtn, [data-vpn-proxy-open]");
     var closeBtn = document.getElementById("vpnProxyModalClose");
     var backdrop = document.getElementById("vpnProxyModalBackdrop");
     var paper = modal && modal.querySelector(".club-charter-modal__paper");
@@ -224,11 +223,10 @@ function initHomeVpnProxyModal(opts) {
       openModal(opts || {});
     };
     if (!modal) return;
-    openButtons.forEach(function (openBtn) {
-      openBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        openModal({ tab: "vpn" });
-      });
+    document.addEventListener("click", function (e) {
+      if (!e.target || !e.target.closest || !e.target.closest("#vpnProxyOpenBtn, [data-vpn-proxy-open]")) return;
+      e.preventDefault();
+      openModal({ tab: "vpn" });
     });
     if (closeBtn) {
       closeBtn.addEventListener("click", function (e) {

@@ -7,7 +7,6 @@ function pokerInitHomeTasks() {
     var closeBtn = document.getElementById("partnershipModalClose");
     var track = document.getElementById("partnershipModalTrack");
     var indicator = document.getElementById("partnershipPageIndicator");
-    var openBtn = document.getElementById("partnershipOpenBtn");
     if (!modal || !track || !indicator || modal.dataset.partnershipBound === "1") return;
     modal.dataset.partnershipBound = "1";
     var partnershipAssets = [
@@ -35,7 +34,11 @@ function pokerInitHomeTasks() {
     function closePartnership() {
       modal.setAttribute("aria-hidden", "true");
     }
-    if (openBtn) openBtn.addEventListener("click", function (e) { e.preventDefault(); openPartnership(); });
+    document.addEventListener("click", function (e) {
+      if (!e.target || !e.target.closest || !e.target.closest("#partnershipOpenBtn")) return;
+      e.preventDefault();
+      openPartnership();
+    });
     if (closeBtn) closeBtn.addEventListener("click", closePartnership);
     if (backdrop) backdrop.addEventListener("click", closePartnership);
     modal.addEventListener("click", function (e) {

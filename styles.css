@@ -5779,7 +5779,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   color: rgba(92, 47, 10, 0.62);
 }
 
-.app.app--view-home .features-section-title--games {
+.profile-games-apps .features-section-title--games {
   margin: 34px 0 10px;
   color: #ffe7b0;
   font-size: clamp(21px, 4.6vw, 34px);
@@ -5788,7 +5788,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   text-shadow: 0 0 18px rgba(255, 159, 26, 0.24);
 }
 
-.app.app--view-home .games-apps-block {
+.profile-games-apps .games-apps-block {
   margin-top: 12px;
   padding: 0;
   border: 0;
@@ -5798,13 +5798,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   overflow-anchor: none;
 }
 
-[data-theme="light"] .app.app--view-home .games-apps-block {
+[data-theme="light"] .profile-games-apps .games-apps-block {
   border: 0;
   background: transparent;
 }
 
-.app.app--view-home .games-apps-block .games-apps-grid,
-.app.app--view-home .games-apps-grid {
+.profile-games-apps .games-apps-block .games-apps-grid,
+.profile-games-apps .games-apps-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-auto-rows: auto;
@@ -5814,7 +5814,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   align-items: stretch;
 }
 
-.app.app--view-home .games-apps-grid .games-apps-card {
+.profile-games-apps .games-apps-grid .games-apps-card {
   position: relative;
   display: block;
   width: 100%;
@@ -5840,15 +5840,19 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     filter 0.15s ease;
 }
 
-.app.app--view-home .games-apps-grid button.games-apps-card {
+.profile-games-apps .games-apps-grid [hidden] {
+  display: none;
+}
+
+.profile-games-apps .games-apps-grid button.games-apps-card {
   font: inherit;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 }
 
-.app.app--view-home .games-apps-grid .games-apps-card:hover,
-.app.app--view-home .games-apps-grid .games-apps-card:focus-visible {
+.profile-games-apps .games-apps-grid .games-apps-card:hover,
+.profile-games-apps .games-apps-grid .games-apps-card:focus-visible {
   transform: translateY(-2px);
   filter: brightness(1.08);
   box-shadow:
@@ -5857,18 +5861,18 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 12px 24px rgba(0, 0, 0, 0.4);
 }
 
-.app.app--view-home .games-apps-grid .games-apps-card:active {
+.profile-games-apps .games-apps-grid .games-apps-card:active {
   transform: translateY(1px);
 }
 
-.app.app--view-home .games-apps-card__image {
+.profile-games-apps .games-apps-card__image {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.app.app--view-home .games-apps-card__text {
+.profile-games-apps .games-apps-card__text {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -5880,7 +5884,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   border: 0;
 }
 
-.app.app--view-home .games-apps-card__text > span {
+.profile-games-apps .games-apps-card__text > span {
   display: block;
   width: 1px;
   height: 1px;
@@ -5889,7 +5893,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   white-space: nowrap;
 }
 
-.app.app--view-home .home-transfer-vpn-row {
+.profile-games-apps .home-transfer-vpn-row {
   display: grid;
   grid-template-columns: minmax(0, 0.74fr) minmax(0, 1.26fr);
   gap: clamp(6px, 1.7vw, 10px);
@@ -5897,7 +5901,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   overflow-anchor: none;
 }
 
-.app.app--view-home .home-vpn-cta {
+.profile-games-apps .home-vpn-cta {
   position: relative;
   isolation: isolate;
   display: flex;
@@ -5935,14 +5939,14 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   -webkit-tap-highlight-color: transparent;
 }
 
-.app.app--view-home .home-transfer-vpn-row .home-vpn-cta {
+.profile-games-apps .home-transfer-vpn-row .home-vpn-cta {
   margin: 0;
   font-size: clamp(14px, 3.5vw, 22px);
   line-height: 1.08;
   white-space: normal;
 }
 
-.app.app--view-home .home-vpn-cta.home-transfer-cta {
+.profile-games-apps .home-vpn-cta.home-transfer-cta {
   border-color: rgba(255, 184, 77, 0.92);
   background:
     radial-gradient(circle at 16% 18%, rgba(255, 221, 120, 0.48), transparent 25%),
@@ -5962,7 +5966,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   white-space: nowrap;
 }
 
-.app.app--view-home .home-vpn-cta.home-transfer-cta::after {
+.profile-games-apps .home-vpn-cta.home-transfer-cta::after {
   right: auto;
   left: -28px;
   background:
@@ -5972,7 +5976,7 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   filter: blur(1px) drop-shadow(0 0 18px rgba(255, 138, 35, 0.5));
 }
 
-.app.app--view-home .home-vpn-cta::before {
+.profile-games-apps .home-vpn-cta::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -5983,13 +5987,13 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   pointer-events: none;
 }
 
-.app.app--view-home .home-vpn-cta.home-transfer-cta::before {
+.profile-games-apps .home-vpn-cta.home-transfer-cta::before {
   background:
     linear-gradient(90deg, rgba(3, 4, 9, 0.96) 0%, rgba(10, 7, 4, 0.86) 52%, rgba(61, 25, 0, 0.32) 100%),
     linear-gradient(180deg, rgba(255, 220, 148, 0.08), rgba(0, 0, 0, 0.36));
 }
 
-.app.app--view-home .home-vpn-cta::after {
+.profile-games-apps .home-vpn-cta::after {
   content: "";
   position: absolute;
   top: -34px;
@@ -6006,8 +6010,8 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
   pointer-events: none;
 }
 
-.app.app--view-home .home-vpn-cta:hover,
-.app.app--view-home .home-vpn-cta:focus-visible {
+.profile-games-apps .home-vpn-cta:hover,
+.profile-games-apps .home-vpn-cta:focus-visible {
   outline: none;
   filter: brightness(1.06);
   box-shadow:
@@ -6018,12 +6022,12 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
     0 14px 30px rgba(76, 29, 149, 0.42);
 }
 
-.app.app--view-home .home-vpn-cta:active {
+.profile-games-apps .home-vpn-cta:active {
   transform: translateY(1px);
 }
 
-.app.app--view-home .home-vpn-cta.home-transfer-cta:hover,
-.app.app--view-home .home-vpn-cta.home-transfer-cta:focus-visible {
+.profile-games-apps .home-vpn-cta.home-transfer-cta:hover,
+.profile-games-apps .home-vpn-cta.home-transfer-cta:focus-visible {
   box-shadow:
     inset 0 1px 0 rgba(255, 247, 214, 0.28),
     inset 0 0 34px rgba(255, 140, 22, 0.25),
@@ -6033,32 +6037,32 @@ body[data-view="daily-poker"] #app.app .daily-poker__header::before {
 }
 
 @media (max-width: 430px) {
-  .app.app--view-home .features-section-title--games {
+  .profile-games-apps .features-section-title--games {
     margin-top: 22px;
     margin-bottom: 10px;
     font-size: 22px;
   }
 
-  .app.app--view-home .games-apps-block {
+  .profile-games-apps .games-apps-block {
     margin-top: 10px;
   }
 
-  .app.app--view-home .games-apps-block .games-apps-grid,
-  .app.app--view-home .games-apps-grid {
+  .profile-games-apps .games-apps-block .games-apps-grid,
+  .profile-games-apps .games-apps-grid {
     gap: 6px;
   }
 
-  .app.app--view-home .games-apps-grid .games-apps-card {
+  .profile-games-apps .games-apps-grid .games-apps-card {
     border-radius: 10px;
   }
 
-  .app.app--view-home .home-vpn-cta {
+  .profile-games-apps .home-vpn-cta {
     min-height: 48px;
     padding-inline: 10px;
     font-size: clamp(16px, 4.4vw, 19px);
   }
 
-  .app.app--view-home .home-transfer-vpn-row {
+  .profile-games-apps .home-transfer-vpn-row {
     grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
   }
 }
