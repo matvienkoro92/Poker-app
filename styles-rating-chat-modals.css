@@ -4545,7 +4545,7 @@ html body #chatUserModal .chat-user-modal__top-actions {
   align-items: stretch;
   justify-self: end;
   width: 100% !important;
-  padding-top: 34px;
+  padding-top: 0;
   gap: 6px;
 }
 html body #chatUserModal .chat-user-modal__top-actions .chat-user-modal__write-btn,
