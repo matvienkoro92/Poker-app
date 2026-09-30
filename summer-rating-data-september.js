@@ -4738,4 +4738,205 @@ var SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "29.09.2026": [
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 11220,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Аспирин",
+          "place": 4,
+          "reward": 3300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 1,
+          "reward": 1840,
+          "points": 0
+        },
+        {
+          "nick": "__JD__",
+          "place": 2,
+          "reward": 1110,
+          "points": 0
+        },
+        {
+          "nick": "Виталька",
+          "place": 5,
+          "reward": 460,
+          "points": 0
+        },
+        {
+          "nick": "DemonDen",
+          "place": 4,
+          "reward": 420,
+          "points": 0
+        },
+        {
+          "nick": "Monfokon",
+          "place": 3,
+          "reward": 405,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 4,
+          "reward": 1440,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Вторника",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "BigPen",
+          "place": 4,
+          "reward": 8900,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 6,
+          "reward": 5900,
+          "points": 0
+        },
+        {
+          "nick": "mamalena",
+          "place": 7,
+          "reward": 4100,
+          "points": 0
+        },
+        {
+          "nick": "ИЮЛЬ",
+          "place": 25,
+          "reward": 1100,
+          "points": 0
+        },
+        {
+          "nick": "DeNMeN",
+          "place": 28,
+          "reward": 100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА МОК",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 21220,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 3,
+          "reward": 3750,
+          "points": 0
+        },
+        {
+          "nick": "Exotikt🏝️ravel",
+          "place": 5,
+          "reward": 1890,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "HR 5000🥊 200K",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 3,
+          "reward": 22586,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 1,
+          "reward": 5623.93,
+          "points": 0
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 6,
+          "reward": 1089.69,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 5,
+          "reward": 857.81,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RedRocket🚀",
+          "place": 2,
+          "reward": 35579,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
