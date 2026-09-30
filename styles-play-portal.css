@@ -23,6 +23,7 @@ body[data-view="download"] .view--active[data-view="download"]:has(.download-pag
   color: #ffd17d; text-decoration: none;
 }
 .play-portal__back { left: 3.2%; font: 900 7cqw/1 Arial, sans-serif; cursor: pointer; }
+.play-flow .play-portal__back { display: none; }
 .play-portal__telegram {
   right: 3.2%; width: 34%; gap: 1.2cqw; padding: 0 1.6cqw;
   border-radius: 2.1cqw; font: 800 3.1cqw/1.1 Arial, sans-serif;
@@ -71,7 +72,7 @@ body[data-view="download"] .view--active[data-view="download"]:has(.download-pag
 .play-portal__step--manager a { display: flex; align-items: center; gap: 2cqw; width: 100%; height: 100%; padding: .6cqw 1.2cqw .6cqw 2cqw; color: #fff0d5 !important; text-decoration: none; border-radius: inherit; }
 .play-portal__step--manager a:hover { background: #e7932628; }
 .play-portal__step-chevron { margin-left: auto; color: #ffc15f; font-size: 4cqw; }
-.play-portal__club-id { position: absolute; left: 39%; top: 48.5%; width: 45%; text-align: center; color: #ffdfa0; text-shadow: 0 0 2cqw #fa681d; transform: rotate(-2deg); }
+.play-portal__club-id { position: absolute; left: 48%; top: 48.5%; width: 42%; text-align: center; color: #ffdfa0; text-shadow: 0 0 2cqw #fa681d; transform: rotate(-2deg); }
 .play-portal__club-id span { display: block; font: 800 italic 3.1cqw/1 Arial, sans-serif; }
 .play-portal__club-id strong { display: block; margin-top: 1cqw; font: 900 8.8cqw/1 Arial, sans-serif; letter-spacing: -.25cqw; }
 .play-portal__copy {
@@ -80,7 +81,244 @@ body[data-view="download"] .view--active[data-view="download"]:has(.download-pag
   color: #ffeac5; font: 750 2.9cqw/1 Arial, sans-serif; text-decoration: none; white-space: nowrap;
   box-shadow: inset 0 .25cqw .4cqw #f6ba5944, 0 .9cqw 2cqw #0009; cursor: pointer;
 }
-.play-portal__copy { left: 38%; top: 55%; width: 48%; height: 5.2%; }
+.play-portal__copy { left: 44%; top: 55%; width: 46%; height: 5.2%; }
 .play-portal__copy span { color: #ffc65e; font-size: 4cqw; }
 .play-portal :is(a,button):focus-visible { outline: .7cqw solid #fff1bb; outline-offset: .3cqw; }
 .play-portal :is(a,button):active { filter: brightness(1.2); }
+
+/* The evening tournament and Poker21 are two viewport-sized windows into one play flow. */
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) > .card {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+}
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) > .card > :is(.card__header, .card__footer) {
+  display: none !important;
+}
+body[data-view="download"] #app.app .card .card__content:has(.download-page--active[data-download-page="main"] .play-flow) {
+  width: 100% !important;
+  max-width: none !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100dvh !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+body[data-view="download"] #app.app .card .card__content > .view.view--active[data-view="download"]:has(.download-page--active[data-download-page="main"] .play-flow) {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+body[data-view="download"] #app.app .card .card__content > .view.view--active[data-view="download"] > .download-page--active[data-download-page="main"]:has(.play-flow) {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.play-flow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #080706;
+  touch-action: pan-y;
+}
+.play-flow__track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  transform: translateX(0);
+  transition: transform 360ms cubic-bezier(.2,.75,.2,1);
+  will-change: transform;
+}
+.play-flow[data-play-panel="poker21"] .play-flow__track { transform: translateX(-50%); }
+.play-flow__panel {
+  position: relative;
+  display: flex;
+  flex: 0 0 50%;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.play-flow__panel--tournament {
+  order: -1;
+  background: radial-gradient(ellipse at 50% 52%, #33200e 0%, #0b0907 62%, #050505 100%);
+}
+.play-flow__panel--portal {
+  background: radial-gradient(ellipse at 65% 52%, #30200e 0%, #0b0907 62%, #050505 100%);
+}
+body[data-view="download"] #app.app .play-flow__panel > .play-tournament-scene {
+  flex: none;
+  width: var(--play-tournament-width, 100%) !important;
+  height: auto !important;
+  margin: 0 !important;
+  overflow: visible;
+}
+body[data-view="download"] #app.app .play-flow__panel > .play-tournament-scene > .tournament-day-home-dual--tournament-focus {
+  width: 100% !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+.play-flow__panel > .play-portal {
+  flex: none;
+  width: var(--play-portal-width, 100%);
+  height: auto;
+  margin: 0;
+  background-size: 100% 100%;
+}
+.play-flow__home {
+  position: absolute;
+  z-index: 12;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  left: 12px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #b9772c;
+  border-radius: 14px;
+  color: #ffdda1;
+  background: #0a0909df;
+  font: 800 30px/1 Arial, sans-serif;
+  cursor: pointer;
+}
+.play-flow[data-play-panel="poker21"] .play-flow__home { display: none; }
+.play-flow__nav {
+  position: absolute;
+  z-index: 12;
+  bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  display: flex;
+  gap: 9px;
+  transform: translateX(-50%);
+}
+.play-flow__dot {
+  width: 24px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid #ca852b;
+  border-radius: 99px;
+  background: #20150d;
+  cursor: pointer;
+}
+.play-flow__dot[aria-current="true"] { background: #ffa529; box-shadow: 0 0 10px #ff9326; }
+@media (prefers-reduced-motion: reduce) {
+  .play-flow__track { transition: none; }
+}
+
+body[data-view="download"]:has(.download-page--active[data-download-page="main"] .play-flow) .bottom-nav {
+  display: none !important;
+}
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) {
+  width: 100vw !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) > .card {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+.play-flow__panel--tournament::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('./assets/play-poker21-portal-wide-v1.webp') center / cover no-repeat;
+  filter: blur(20px) brightness(.28);
+  transform: scale(1.05);
+  pointer-events: none;
+}
+.play-flow__panel--tournament:has([data-tournament-character="gucci"])::before {
+  background-image: url('./assets/home-tournament-gucci-ace-room-v2.webp');
+}
+@media (max-width: 599px) {
+  .play-flow__panel--tournament:has([data-tournament-character="gucci"])::before {
+    background-image: url('./assets/play-tournament-mobile-room-v1.webp');
+    filter: blur(8px) brightness(.6);
+  }
+  .play-flow__panel > .play-portal {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    background-image: url('./assets/play-poker21-portal-wide-v1.webp');
+    background-position: 78% center;
+    background-size: cover;
+  }
+  .play-portal__club-id {
+    left: 45%; top: 70%; width: 49%;
+    padding: 2cqw 1cqw;
+    border: .22cqw solid #ba6d22;
+    border-radius: 2cqw;
+    background: linear-gradient(#15110fdb, #08090bee);
+    box-shadow: 0 0 2cqw #e7732340, inset 0 .3cqw .5cqw #ffcb6540;
+    transform: none;
+  }
+  .play-portal__copy { left: 46%; top: 80%; width: 47%; height: 6%; }
+}
+.play-flow__panel--portal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #090807ac, #09080730 50%, #090807ac),
+    url('./assets/play-poker21-portal-full-v2.webp') center / cover no-repeat;
+  opacity: .55;
+  pointer-events: none;
+}
+body[data-view="download"] #app.app .play-flow .tournament-day-home-wrap--week .tournament-day-block {
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-play-sign {
+  left: 24% !important;
+  top: 58% !important;
+  width: 35% !important;
+  height: 8% !important;
+  padding: 0 !important;
+  transform: rotate(-2deg) !important;
+  border: .25cqw solid #d88927 !important;
+  border-radius: 1cqw !important;
+  background: linear-gradient(#20180f, #080808) !important;
+  box-shadow: 0 0 1.2cqw #f78a2b70, inset 0 0 .5cqw #ffcd6b40 !important;
+  color: #ffe0a4 !important;
+  font-size: 4.2cqw !important;
+}
+@media (min-width: 600px) {
+  .play-flow__panel--portal::before {
+    background-image: linear-gradient(90deg, #09080780, #09080720 50%, #09080780),
+      url('./assets/play-poker21-portal-wide-v1.webp');
+  }
+  .play-flow__panel > .play-portal {
+    aspect-ratio: 1072 / 1467;
+    background-image: url('./assets/play-poker21-portal-wide-v1.webp');
+  }
+  .play-portal__back, .play-portal__telegram { top: 3%; height: 7%; }
+  .play-portal__title { top: 6%; left: 6%; font-size: 9.2cqw; }
+  .play-portal__title > small { font-size: 3.4cqw; }
+  .play-portal__telegram { width: 31%; font-size: 2.8cqw; }
+  .play-portal__stores { top: 23%; left: 6%; width: 44%; height: 8%; }
+  .play-portal__stores a { font-size: 2.6cqw; }
+  .play-portal__steps { top: 44%; left: 6%; width: 41%; }
+  .play-portal__club-id {
+    left: 58%; top: 68%; width: 38%; height: 18%;
+    padding: 2cqw 1cqw;
+    border: .22cqw solid #ba6d22;
+    border-radius: 2cqw;
+    background: linear-gradient(#15110fdb, #08090bee);
+    box-shadow: 0 0 2cqw #e7732340, inset 0 .3cqw .5cqw #ffcb6540;
+    transform: none;
+  }
+  .play-portal__club-id span { font-size: 3cqw; }
+  .play-portal__club-id strong { font-size: 7.5cqw; }
+  .play-portal__copy { left: 59%; top: 82%; width: 36%; height: 6%; font-size: 2.6cqw; }
+}

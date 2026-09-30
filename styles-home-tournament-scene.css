@@ -1613,7 +1613,7 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-tro
 
 /* Every tournament scene seats Last Longer to the left of its featured player. */
 body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] { --home-tournament-scene: url('./assets/home-tournament-gucci-wednesday-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] { --home-tournament-scene: url('./assets/home-tournament-gucci-ace-room-v2.webp'); }
 body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-shared-v1.webp'); }
 body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-shared-v1.webp'); }
 body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] { --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-shared-v1.webp'); }

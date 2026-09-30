@@ -1776,5 +1776,5 @@ html.app-view-daily-poker-html-scroll .card .card__content {
   overscroll-behavior-y: contain;
   touch-action: pan-y pinch-zoom;
   scroll-padding-bottom: var(--app-bottom-tabbar-pad);
-  padding-bottom: var(--app-bottom-tabbar-pad);
+  padding-bottom: 0;
 }

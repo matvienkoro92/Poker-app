@@ -2,8 +2,11 @@
 <nav class="download-chat-tabs" aria-label="Играть и чаты"><button type="button" data-view-target="download" aria-current="page">Играть</button><button type="button" data-view-target="chat">Чаты</button></nav>
             <!-- Главный экран: список приложений -->
             <div class="download-page download-page--active" data-download-page="main">
+              <div class="play-flow" data-play-flow data-play-panel="tournament" aria-label="Турнир вечера и вход в Poker21">
+                <div class="play-flow__track">
+                <div class="play-flow__panel play-flow__panel--portal">
               <section class="play-portal" aria-label="Poker21 — твой вход в клуб">
-                <button type="button" class="play-portal__back" data-view-target="home" aria-label="На главную">←</button>
+                <button type="button" class="play-portal__back" data-play-prev aria-label="Вернуться к турниру">←</button>
                 <a class="play-portal__telegram" href="https://t.me/+snBngKmXYa1mYjky" target="_blank" rel="noopener noreferrer" aria-label="Чат игроков в ТГ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 18-7-6 18-5-7-7-4Zm7 4 7-7"/></svg><span>Чат игроков в ТГ</span></a>
                 <h1 class="play-portal__title">Poker<span>21</span><small>Твой вход в клуб</small></h1>
                 <div class="play-portal__stores">
@@ -18,13 +21,15 @@
                 <div class="play-portal__club-id"><span>ID клуба</span><strong>758417</strong></div>
                 <button type="button" class="play-portal__copy" data-play-club-id-copy><span aria-hidden="true">▢</span> Скопировать ID</button>
               </section>
+                </div>
+                <div class="play-flow__panel play-flow__panel--tournament">
               <div class="play-tournament-scene" aria-label="Турнир вечера">
         <div class="tournament-day-home-dual tournament-day-home-dual--tournament-focus">
           <span class="home-table-seam-fix" aria-hidden="true"></span>
           <span class="home-table-rim-dimmer" aria-hidden="true"></span>
           <span class="home-poker-betting-line" aria-hidden="true"></span>
           <button type="button" class="home-tournament-share" id="homeTournamentShareBtn" aria-label="Позвать друга на турнир вечера"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 18-7-6 18-5-7-7-4Zm7 4 7-7"/></svg><span>Позвать друга</span></button>
-          <button type="button" class="home-tournament-play-sign" data-view-target="download" data-download-page="poker21" aria-label="Сыграть в Poker21">СЫГРАТЬ <span aria-hidden="true">→</span></button>
+          <button type="button" class="home-tournament-play-sign" data-play-next aria-label="Сыграть в Poker21">СЫГРАТЬ <span aria-hidden="true">→</span></button>
           <h2 class="home-tournament-section-title"><span class="home-ticket-brand"><span aria-hidden="true">♠</span> POKER21 <span class="home-ticket-brand__cross">×</span> ДВА ТУЗА</span><span class="home-ticket-session"><span class="home-ticket-session__label">Турнир вечера</span><span class="home-ticket-session__time" data-home-ticket-time>18:00 МСК</span></span></h2>
           <div class="home-ticket-aces" aria-hidden="true"><span>A<span>♠</span></span><span>A<span>♥</span></span></div>
         <button type="button" class="home-last-longer-dock" data-tournament-bet-open aria-label="Ласт-лонгер. Сделать ставку на себя">
@@ -211,7 +216,14 @@
           </button>
         </div>
               </div>
-
+                </div>
+                </div>
+                <button type="button" class="play-flow__home" data-view-target="home" aria-label="На главную">←</button>
+                <nav class="play-flow__nav" aria-label="Части раздела Играть">
+                  <button type="button" class="play-flow__dot" data-play-panel-target="tournament" aria-label="Турнир вечера" aria-current="true"></button>
+                  <button type="button" class="play-flow__dot" data-play-panel-target="poker21" aria-label="Скачать Poker21"></button>
+                </nav>
+              </div>
             </div>
 
             <!-- Страница Poker21 -->

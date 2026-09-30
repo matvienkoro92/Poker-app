@@ -1278,7 +1278,7 @@
   --daily-poker-blue: #1d9be6;
   --daily-poker-black: #030405;
   width: min(960px, 100%);
-  min-height: 100dvh;
+  min-height: 0;
   padding: max(18px, calc(env(safe-area-inset-top, 0px) + 14px)) 0 max(30px, calc(env(safe-area-inset-bottom, 0px) + 20px));
   color: #f7ead2;
   background:
@@ -3293,21 +3293,21 @@
 }
 
 .daily-poker {
-  scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 104px) + 18px);
-  padding-bottom: max(30px, calc(var(--app-bottom-tabbar-pad, 104px) + 18px));
+  scroll-padding-bottom: 20px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
 }
 
 @container (max-width: 720px) {
   .daily-poker {
-    scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 104px) + 14px);
-    padding-bottom: max(24px, calc(var(--app-bottom-tabbar-pad, 104px) + 14px));
+    scroll-padding-bottom: 20px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (max-width: 720px) {
   .daily-poker {
-    scroll-padding-bottom: calc(var(--app-bottom-tabbar-pad, 104px) + 14px);
-    padding-bottom: max(24px, calc(var(--app-bottom-tabbar-pad, 104px) + 14px));
+    scroll-padding-bottom: 20px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
   }
 }
 
