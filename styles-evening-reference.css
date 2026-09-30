@@ -1,0 +1,83 @@
+/* Live reference layout. Artwork slots await the supplied background and cutouts. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .play-flow__panel--tournament { background:#100b08; }
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
+  position:relative!important; aspect-ratio:474/1048!important; container-type:inline-size;
+  background:var(--evening-background, radial-gradient(ellipse at 80% 45%,#482411 0,transparent 45%),linear-gradient(145deg,#18100b,#080706 55%,#302012)) center/cover!important;
+  border:0!important; border-radius:0!important; overflow:hidden!important; isolation:isolate;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference::before,
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference::after,
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > * { display:none!important; }
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__ticket,.evening-reference__prize,.home-tournament-share,.home-tournament-play-sign,.home-last-longer-dock,.home-tournament-bonuses),
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history:not([hidden]) { display:flex!important; }
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {
+ position:absolute;left:6%;top:2%;width:72%;height:11%;padding:2cqw 2.5cqw;flex-direction:column;
+ border:.45cqw solid #ff9a29;border-radius:2cqw;background:#080909;box-shadow:0 0 3cqw #f8791620;color:#fff4d6;
+}
+.evening-reference__ticket h2 {margin:0;font:1000 8.4cqw/.95 Impact,'Arial Narrow',sans-serif;letter-spacing:-.25cqw;white-space:nowrap;}
+.evening-reference__ticket > strong {color:#ff963d;font:900 5.8cqw/1.1 Arial,sans-serif;}
+.evening-reference__entry {display:flex;align-items:center;justify-content:space-between;gap:1cqw;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference #tournamentDayHomeName {position:static!important;margin:0!important;font:800 2.7cqw/1 Arial,sans-serif!important;color:#fff3d1!important;transform:none!important;max-width:60%;}
+.evening-reference__entry > span {font:700 2.9cqw/1 Arial,sans-serif;white-space:nowrap;border-left:1px solid #dda55b;padding-left:2cqw;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference #tournamentDayBuyin {font:900 4.2cqw/1 Arial,sans-serif;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__prize {position:absolute;top:14%;left:4%;width:92%;flex-direction:column;align-items:center;color:#fff1c9;font:800 4.8cqw/1.2 Arial,sans-serif;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference #tournamentDayGuarantee {position:static!important;transform:none!important;font:1000 16cqw/1 Impact,'Arial Narrow',sans-serif!important;letter-spacing:-.5cqw;margin:0!important;color:#fff1c9!important;background:none!important;text-shadow:0 .5cqw 2cqw #000!important;white-space:nowrap;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.home-tournament-share,.home-tournament-history) {position:absolute!important;left:80%!important;width:18%!important;height:6%!important;transform:none!important;flex-direction:column;align-items:center;justify-content:center;gap:.5cqw;background:none!important;border:0!important;box-shadow:none!important;color:#fff4dd!important;font:700 2.5cqw/1 Arial,sans-serif!important;z-index:3!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {top:2%!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-share {top:8%!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference :is(.home-tournament-share,.home-tournament-history)::before {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-share svg {width:8cqw!important;height:8cqw!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-history img {position:static!important;width:10cqw!important;height:10cqw!important;object-fit:contain;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {position:absolute!important;left:23%!important;top:66%!important;width:56%!important;height:6%!important;transform:none!important;align-items:center;justify-content:center;border:.6cqw solid #ff9a32!important;border-radius:3cqw!important;background:linear-gradient(#25170e,#070706)!important;box-shadow:0 0 2cqw #fb791a,inset 0 0 1cqw #ffae49!important;color:#fff3d2!important;font:1000 8cqw/1 Impact,Arial,sans-serif!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {position:absolute!important;left:5%!important;top:26%!important;width:23%!important;height:12%!important;transform:none!important;background:none!important;border:0!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-last-longer-dock > * {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-last-longer-dock::before {content:'♠\A ЛАСТЛОНГЕР'!important;white-space:pre;display:grid!important;place-content:center;position:absolute!important;inset:14% 0 0!important;width:100%!important;height:auto!important;border:2cqw dashed #ed373a!important;border-radius:50%!important;background:#101312!important;color:#fff3d3;font:900 2.5cqw/1.5 Arial,sans-serif;transform:none!important;mask:none!important;-webkit-mask:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {position:absolute!important;left:7%!important;top:74%!important;width:86%!important;height:23%!important;transform:none!important;background:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonuses :is(.home-tournament-bonuses__title,.home-tournament-bonus__glove),
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonuses::before {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonuses__grid {position:static!important;display:flex!important;flex-wrap:wrap;justify-content:center;align-content:start;gap:4cqw 3cqw;width:100%!important;height:100%!important;transform:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonuses .home-tournament-bonus:nth-child(n) {--chip:#efc34c;position:relative!important;inset:auto!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:.5cqw;width:28%!important;height:auto!important;aspect-ratio:1;transform:none!important;padding:2cqw!important;border:2cqw dashed var(--chip)!important;border-radius:50%!important;background:radial-gradient(circle,#126345,#033825)!important;box-shadow:0 2cqw 0 #080907,0 3cqw 0 var(--chip)!important;color:#fff3ce!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(1){--chip:#22d94d!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(2){--chip:#2a9dff!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(3){--chip:#ff393b!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus[hidden] {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus::before,
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus::after {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus > * {position:static!important;transform:none!important;opacity:1!important;width:auto!important;height:auto!important;font:800 3cqw/1.05 Arial,sans-serif!important;text-align:center;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus .home-tournament-bonus__icon {width:7cqw!important;height:7cqw!important;order:-2;color:#ffe29b;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus__label {order:-1;}
+
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-share svg {fill:none!important;stroke:currentColor!important;stroke-width:1.6;}
+
+/* Supplied transparent artwork, positioned as independent layers. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
+ --evening-background:url('./assets/evening-room-v1.webp');
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art {display:block!important;position:absolute;pointer-events:none;object-fit:contain;max-width:none!important;}
+.evening-reference__art--portal-top {left:29%;top:22%;width:54%;height:auto;z-index:2;}
+.evening-reference__art--portal-side {left:72%;top:23%;width:43%;height:auto;z-index:1;}
+.evening-reference__art--chair-center {left:43%;top:47%;width:24%;height:auto;z-index:2;}
+.evening-reference__art--players {left:-7%;top:43%;width:114%;height:auto;z-index:3;}
+.evening-reference__art--table {left:-10%;top:49%;width:120%;height:auto;z-index:4;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {left:23%!important;top:65.9%!important;width:54%!important;height:6.3%!important;opacity:0!important;z-index:6!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign:focus-visible {opacity:1!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {top:74%!important;height:24%!important;z-index:5!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonuses__grid {gap:0 3cqw;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonuses .home-tournament-bonus:nth-child(n) {
+ border:0!important;border-radius:0!important;box-shadow:none!important;aspect-ratio:475/490!important;padding:0!important;background:var(--evening-chip) center/100% 100% no-repeat!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(1){--evening-chip:url('./assets/evening-chip-four-kind-v1.webp');}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(2){--evening-chip:url('./assets/evening-chip-straight-flush-v1.webp');}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(3){--evening-chip:url('./assets/evening-chip-royal-flush-v1.webp');}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(4){--evening-chip:url('./assets/evening-chip-pokermanki-v1.webp');}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(5){--evening-chip:url('./assets/evening-chip-bubble-v1.webp');}
+/* Keep changing reward amounts live over the supplied chip faces. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus > :is(svg,.home-tournament-bonus__glove) {display:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus > :is(.home-tournament-bonus__label,.home-tournament-bonus__amount,.home-tournament-bonus__glove-label) {position:absolute!important;left:17%!important;width:66%!important;background:#06472f!important;font:800 2.9cqw/1.05 Arial,sans-serif!important;white-space:normal!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus__label {top:42%!important;height:17%!important;display:grid;place-content:center;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus__amount {top:59%!important;height:16%!important;display:grid;place-content:center;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus__glove-label {top:43%!important;height:32%!important;display:flex;flex-direction:column;justify-content:center;gap:.4cqw;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus__glove-label small {font:800 2.8cqw/1 Arial,sans-serif!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {z-index:5!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus:nth-child(2) .home-tournament-bonus__label {font-size:2.5cqw!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-bonus__glove-label {font-size:2.5cqw!important;}
