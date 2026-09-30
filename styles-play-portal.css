@@ -1,387 +1,254 @@
-/* Poker21 welcome screen: live controls over the supplied clean artwork. */
-.view[data-view="download"]:has(.play-portal) > .download-chat-tabs { display: none; }
-#app.app .card .card__content > .view.view--active[data-view="download"]:has(.download-page--active[data-download-page="main"] .play-portal) {
-  padding-left: env(safe-area-inset-left, 0px) !important;
-  padding-right: env(safe-area-inset-right, 0px) !important;
-}
-body[data-view="download"] .view--active[data-view="download"]:has(.download-page--active[data-download-page="main"]) {
-  background: #090807;
-}
-.play-portal {
-  position: relative; width: 100%; aspect-ratio: 852 / 1846;
-  margin: 0 auto; overflow: hidden; container-type: inline-size;
-  background: #090807 url('./assets/play-poker21-portal-full-v2.webp') center top / cover no-repeat;
-  color: #fff0d5; font-family: Arial, sans-serif;
-}
-.play-portal *, .play-portal *::before, .play-portal *::after { box-sizing: border-box; }
-.play-portal button, .play-portal a { -webkit-tap-highlight-color: transparent; }
-.play-portal__back, .play-portal__telegram {
-  position: absolute; top: 1.7%; z-index: 2; width: 8.8%; height: 7%;
-  display: flex; align-items: center; justify-content: center;
-  border: .25cqw solid #d08324; border-radius: 22%;
-  background: #080808db; box-shadow: 0 0 2cqw #e769263b, inset 0 0 .9cqw #ae561b88;
-  color: #ffd17d; text-decoration: none;
-}
-.play-portal__back { left: 3.2%; font: 900 7cqw/1 Arial, sans-serif; cursor: pointer; }
-.play-flow .play-portal__back { display: none; }
-.play-portal__telegram {
-  right: 3.2%; width: 34%; gap: 1.2cqw; padding: 0 1.6cqw;
-  border-radius: 2.1cqw; font: 800 3.1cqw/1.1 Arial, sans-serif;
-  white-space: nowrap;
-}
-.play-portal__telegram svg { width: 5.2cqw; height: 5.2cqw; flex: none; }
-.play-portal__telegram:hover { filter: brightness(1.15); }
-.play-portal__telegram:focus-visible { outline: .5cqw solid #ffe2a4; outline-offset: .4cqw; }
-.play-portal__title {
-  position: absolute; top: 11%; left: 4.8%; margin: 0;
-  color: #ffedcc; font: 900 11.5cqw/.92 Arial, sans-serif;
-  letter-spacing: -.55cqw; text-shadow: 0 .5cqw 1.4cqw #000;
-}
-.play-portal__title > span { color: #ff841e; }
-.play-portal__title > small { display: block; margin: 1cqw 0 0 1cqw; font: 700 4.2cqw/1.1 Arial, sans-serif; letter-spacing: 0; }
-.play-portal__stores { position: absolute; top: 26.7%; left: 3.4%; width: 49%; height: 7.4%; display: flex; gap: 3%; }
-.play-portal__stores a {
-  display: flex; flex: 1; align-items: center; justify-content: center; gap: 1cqw; min-width: 0;
-  border: .3cqw solid #ffc15e; border-radius: 3cqw;
-  background: linear-gradient(#ffc048, #ff8713); box-shadow: 0 0 2.4cqw #ff7c2477, inset 0 .5cqw .6cqw #ffe5a277;
-  color: #150e08 !important; font: 800 2.8cqw/1 Arial, sans-serif; text-decoration: none; white-space: nowrap;
-}
-.play-portal__stores a svg { width: 4.5cqw; height: 4.5cqw; flex: none; }
-.play-portal__steps { position: absolute; top: 38%; left: 3.4%; width: 42%; margin: 0; padding: 0; list-style: none; }
-.play-portal__steps::before { content: ''; position: absolute; left: 3.1cqw; top: 4cqw; bottom: 4cqw; width: .22cqw; background: linear-gradient(#d07b2e, #603913); }
-.play-portal__steps li {
-  position: relative; display: flex; align-items: center; gap: 2cqw; width: 100%; height: 9.5cqw;
-  margin: 0 0 3cqw 3.3cqw; padding: .6cqw 1.2cqw .6cqw 2cqw;
-  border: .12cqw solid #aa6b358c; border-radius: 2.7cqw;
-  background: linear-gradient(110deg, #101114f5 0%, #1c1313e8 72%, #1b1010cf);
-  box-shadow: inset 0 .15cqw .25cqw #f2bc5340, 0 .8cqw 1.7cqw #0009;
-  color: #fff0d5; font: 700 2.8cqw/1.1 Arial, sans-serif;
-}
-.play-portal__steps li::before {
-  position: absolute; left: -6.4cqw; top: 1.4cqw; width: 6.1cqw; height: 6.1cqw;
-  display: flex; align-items: center; justify-content: center;
-  border: .3cqw solid #f28d21; border-radius: 50%; background: #0b0a0a;
-  box-shadow: 0 0 1cqw #ff871d; color: #ffbd53; font: 800 3.5cqw/1 Arial, sans-serif;
-}
-.play-portal__steps li:nth-child(1)::before { content: '1'; }
-.play-portal__steps li:nth-child(2)::before { content: '2'; }
-.play-portal__steps li:nth-child(3)::before { content: '3'; }
-.play-portal__step-icon { display: flex; align-items: center; justify-content: center; width: 7cqw; height: 7cqw; flex: none; border: .12cqw solid #ad6c2f; border-radius: 1.8cqw; color: #ffc15f; font-size: 4.7cqw; background: #100e0df0; box-shadow: inset 0 0 .9cqw #b65b1e77; }
-.play-portal__step-icon svg { width: 4.5cqw; height: 4.5cqw; }
-.play-portal__step--manager { padding: 0 !important; }
-.play-portal__step--manager a { display: flex; align-items: center; gap: 2cqw; width: 100%; height: 100%; padding: .6cqw 1.2cqw .6cqw 2cqw; color: #fff0d5 !important; text-decoration: none; border-radius: inherit; }
-.play-portal__step--manager a:hover { background: #e7932628; }
-.play-portal__step-chevron { margin-left: auto; color: #ffc15f; font-size: 4cqw; }
-.play-portal__club-id { position: absolute; left: 48%; top: 48.5%; width: 42%; text-align: center; color: #ffdfa0; text-shadow: 0 0 2cqw #fa681d; transform: rotate(-2deg); }
-.play-portal__club-id span { display: block; font: 800 italic 3.1cqw/1 Arial, sans-serif; }
-.play-portal__club-id strong { display: block; margin-top: 1cqw; font: 900 8.8cqw/1 Arial, sans-serif; letter-spacing: -.25cqw; }
-.play-portal__copy {
-  position: absolute; display: flex; align-items: center; justify-content: center; gap: 1.3cqw;
-  border: .2cqw solid #e9a34e; border-radius: 2.4cqw; background: linear-gradient(#1a1715eb, #08090bed);
-  color: #ffeac5; font: 750 2.9cqw/1 Arial, sans-serif; text-decoration: none; white-space: nowrap;
-  box-shadow: inset 0 .25cqw .4cqw #f6ba5944, 0 .9cqw 2cqw #0009; cursor: pointer;
-}
-.play-portal__copy { left: 44%; top: 55%; width: 46%; height: 5.2%; }
-.play-portal__copy span { color: #ffc65e; font-size: 4cqw; }
-.play-portal :is(a,button):focus-visible { outline: .7cqw solid #fff1bb; outline-offset: .3cqw; }
-.play-portal :is(a,button):active { filter: brightness(1.2); }
-
-/* The evening tournament and Poker21 are two viewport-sized windows into one play flow. */
-body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) > .card {
-  height: calc(100dvh - var(--app-bottom-tabbar-height, 56px)) !important;
-  max-height: calc(100dvh - var(--app-bottom-tabbar-height, 56px)) !important;
-}
-body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) > .card > :is(.card__header, .card__footer) {
-  display: none !important;
-}
-body[data-view="download"] #app.app .card .card__content:has(.download-page--active[data-download-page="main"] .play-flow) {
-  width: 100% !important;
-  max-width: none !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  height: 100% !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-}
-body[data-view="download"] #app.app .card .card__content > .view.view--active[data-view="download"]:has(.download-page--active[data-download-page="main"] .play-flow) {
-  width: 100% !important;
-  max-width: none !important;
-  height: 100% !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-}
-body[data-view="download"] #app.app .card .card__content > .view.view--active[data-view="download"] > .download-page--active[data-download-page="main"]:has(.play-flow) {
-  width: 100% !important;
-  max-width: none !important;
-  height: 100% !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-}
-.play-flow {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  background: #080706 url('./assets/play-room-reference-20260930.webp') center / cover no-repeat;
-  touch-action: pan-y;
-}
-.play-flow__track {
-  display: flex;
-  width: 200%;
-  height: 100%;
-  transform: translateX(0);
-  transition: transform 360ms cubic-bezier(.2,.75,.2,1);
-  will-change: transform;
-}
-.play-flow[data-play-panel="poker21"] .play-flow__track { transform: translateX(-50%); }
-.play-flow__panel {
-  position: relative;
-  display: flex;
-  flex: 0 0 50%;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-.play-flow__panel--tournament {
-  order: -1;
-}
-body[data-view="download"] #app.app .play-flow__panel > .play-tournament-scene {
-  flex: none;
-  width: var(--play-tournament-width, 100%) !important;
-  height: auto !important;
-  margin: 0 !important;
-  overflow: visible;
-}
-body[data-view="download"] #app.app .play-flow__panel > .play-tournament-scene > .tournament-day-home-dual--tournament-focus {
-  width: 100% !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-.play-flow__panel > .play-portal {
-  flex: none;
-  width: var(--play-portal-width, 100%);
-  height: auto;
-  margin: 0;
-  background-size: 100% 100%;
-}
-.play-flow__home {
-  position: absolute;
-  z-index: 12;
-  top: max(12px, env(safe-area-inset-top, 0px));
-  left: 12px;
-  width: 44px;
-  height: 44px;
-  border: 1px solid #b9772c;
-  border-radius: 14px;
-  color: #ffdda1;
-  background: #0a0909df;
-  font: 800 30px/1 Arial, sans-serif;
-  cursor: pointer;
-}
-.play-flow[data-play-panel="poker21"] .play-flow__home { display: none; }
-.play-flow__nav {
-  position: absolute;
-  z-index: 12;
-  bottom: max(10px, env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  display: flex;
-  gap: 9px;
-  transform: translateX(-50%);
-}
-.play-flow__dot {
-  width: 24px;
-  height: 8px;
-  padding: 0;
-  border: 1px solid #ca852b;
-  border-radius: 99px;
-  background: #20150d;
-  cursor: pointer;
-}
-.play-flow__dot[aria-current="true"] { background: #ffa529; box-shadow: 0 0 10px #ff9326; }
-@media (prefers-reduced-motion: reduce) {
-  .play-flow__track { transition: none; }
-}
-
-body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) {
+/* A single, viewport-sized Poker21 entrance over the supplied clean artwork. */
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single) {
   width: 100vw !important;
   max-width: none !important;
-  padding: 0 !important;
   margin: 0 !important;
+  padding: 0 !important;
 }
-body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-flow) > .card {
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single) > .card {
+  width: 100% !important;
+  max-width: none !important;
+  height: calc(100dvh - var(--app-bottom-tabbar-height, 56px)) !important;
+  max-height: calc(100dvh - var(--app-bottom-tabbar-height, 56px)) !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
+}
+body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single) > .card > :is(.card__header, .card__footer) {
+  display: none !important;
+}
+body[data-view="download"] #app.app .card .card__content:has(.download-page--active[data-download-page="main"] .play-single),
+body[data-view="download"] #app.app .card .card__content > .view.view--active[data-view="download"]:has(.download-page--active[data-download-page="main"] .play-single),
+body[data-view="download"] #app.app .download-page--active[data-download-page="main"]:has(.play-single) {
   width: 100% !important;
   max-width: none !important;
-}
-@media (max-width: 599px) {
-  .play-flow__panel > .play-portal {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-    background-image: url('./assets/play-poker21-portal-wide-v1.webp');
-    background-position: 78% center;
-    background-size: cover;
-  }
-  .play-portal__club-id {
-    left: 45%; top: 70%; width: 49%;
-    padding: 2cqw 1cqw;
-    border: .22cqw solid #ba6d22;
-    border-radius: 2cqw;
-    background: linear-gradient(#15110fdb, #08090bee);
-    box-shadow: 0 0 2cqw #e7732340, inset 0 .3cqw .5cqw #ffcb6540;
-    transform: none;
-  }
-  .play-portal__copy { left: 46%; top: 80%; width: 47%; height: 6%; }
-}
-body[data-view="download"] #app.app .play-flow .tournament-day-home-wrap--week .tournament-day-block {
-  background: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-play-sign {
-  left: 24% !important;
-  top: 58% !important;
-  width: 35% !important;
-  height: 8% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
   padding: 0 !important;
-  transform: rotate(-2deg) !important;
-  border: .25cqw solid #d88927 !important;
-  border-radius: 1cqw !important;
-  background: linear-gradient(#20180f, #080808) !important;
-  box-shadow: 0 0 1.2cqw #f78a2b70, inset 0 0 .5cqw #ffcd6b40 !important;
-  color: #ffe0a4 !important;
-  font-size: 4.2cqw !important;
+  overflow: hidden !important;
 }
-@media (min-width: 600px) {
-  .play-flow__panel > .play-portal {
-    aspect-ratio: 1072 / 1467;
-    background-image: url('./assets/play-poker21-portal-wide-v1.webp');
-  }
-  .play-portal__back, .play-portal__telegram { top: 3%; height: 7%; }
-  .play-portal__title { top: 6%; left: 6%; font-size: 9.2cqw; }
-  .play-portal__title > small { font-size: 3.4cqw; }
-  .play-portal__telegram { width: 31%; font-size: 2.8cqw; }
-  .play-portal__stores { top: 23%; left: 6%; width: 44%; height: 8%; }
-  .play-portal__stores a { font-size: 2.6cqw; }
-  .play-portal__steps { top: 44%; left: 6%; width: 41%; }
-  .play-portal__club-id {
-    left: 58%; top: 68%; width: 38%; height: 18%;
-    padding: 2cqw 1cqw;
-    border: .22cqw solid #ba6d22;
-    border-radius: 2cqw;
-    background: linear-gradient(#15110fdb, #08090bee);
-    box-shadow: 0 0 2cqw #e7732340, inset 0 .3cqw .5cqw #ffcb6540;
-    transform: none;
-  }
-  .play-portal__club-id span { font-size: 3cqw; }
-  .play-portal__club-id strong { font-size: 7.5cqw; }
-  .play-portal__copy { left: 59%; top: 82%; width: 36%; height: 6%; font-size: 2.6cqw; }
+body[data-view="download"] #app.app .card .card__content:has(.download-page--active[data-download-page="main"] .play-single) {
+  flex: 1 1 auto !important;
 }
-
-/* The supplied table and chips replace the baked table in the Gucci evening scene. */
-.play-tournament-table-art,
-.play-tournament-bonus-art,
-.play-tournament-last-longer-art { display: none; }
-body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] {
-  background: url('./assets/play-tournament-clean-underlay-v2.webp') center / 100% 100% no-repeat !important;
+.play-single {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: inline-size;
+  background: #090a0c url('./assets/play-portal-clean-reference-20260930.webp') center center / cover no-repeat;
+  color: #ffefd1;
+  font-family: Arial, sans-serif;
 }
-body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"]::before {
-  display: block !important;
-  background: var(--home-tournament-scene) center / 100% 100% no-repeat !important;
-  clip-path: polygon(0 0, 100% 0, 100% 55%, 65% 55%, 65% 58%, 32% 58%, 32% 55%, 25% 55%, 25% 35%, 0 35%) !important;
-  z-index: 2 !important;
-}
-body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .play-tournament-table-art {
-  display: block;
+.play-single *, .play-single *::before, .play-single *::after { box-sizing: border-box; }
+.play-single :is(a,button) { -webkit-tap-highlight-color: transparent; }
+.play-single :is(a,button):focus-visible { outline: 3px solid #fff1bc; outline-offset: 3px; }
+.play-single__back, .play-single__telegram {
   position: absolute;
-  left: 0;
+  z-index: 3;
+  top: 1.7%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(48px, 9cqw, 96px);
+  aspect-ratio: 1;
+  border: 2px solid #dd8425;
+  border-radius: 25%;
+  background: linear-gradient(145deg, #201105e8, #07090bea);
+  box-shadow: 0 0 1.5cqw #ff761e66, inset 0 0 .9cqw #e8932f66;
+  color: #ffbf56;
+  text-decoration: none;
+}
+.play-single__back { left: 3.3%; font: 900 clamp(32px, 6cqw, 60px)/1 Arial,sans-serif; cursor: pointer; }
+.play-single__telegram { right: 3.3%; }
+.play-single__telegram svg { width: 65%; height: 65%; }
+.play-single__title {
+  position: absolute;
+  z-index: 2;
+  top: 11.2%;
+  left: 4.5%;
+  margin: 0;
+  color: #ffefcd;
+  font: 900 clamp(44px, 11.5cqw, 130px)/.91 Arial,sans-serif;
+  letter-spacing: -.055em;
+  white-space: nowrap;
+  text-shadow: 0 .5cqw 1.5cqw #000;
+}
+.play-single__title > span { color: #ff861c; }
+.play-single__title > small {
+  display: block;
+  margin: .9cqw 0 0 1cqw;
+  color: #fff0cb;
+  font: 800 clamp(17px, 4cqw, 45px)/1.1 Arial,sans-serif;
+  letter-spacing: 0;
+}
+.play-single__stores {
+  position: absolute;
+  z-index: 3;
+  top: 26.5%;
+  left: 3.5%;
+  display: flex;
+  gap: 2%;
+  width: 50%;
+  height: 7.5%;
+}
+.play-single__stores a {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 1.3cqw;
+  min-width: 0;
+  border: .22cqw solid #ffd074;
+  border-radius: 2.6cqw;
+  background: linear-gradient(#ffbb46, #ff8519);
+  box-shadow: 0 0 2cqw #fc6b2277, inset 0 .5cqw .6cqw #ffe6a077;
+  color: #180c07 !important;
+  font: 800 clamp(11px, 2.65cqw, 28px)/1 Arial,sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.play-single__stores svg { width: 4.1cqw; height: 4.1cqw; min-width: 15px; min-height: 15px; flex: none; }
+.play-single__steps {
+  position: absolute;
+  z-index: 3;
+  top: 38.5%;
+  left: 11.2%;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 5%;
+  width: 35%;
+  height: 29%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.play-single__steps::before {
+  content: '';
+  position: absolute;
+  left: -5.6cqw;
+  top: 5%;
+  bottom: 5%;
+  width: 2px;
+  background: linear-gradient(#e38d27, #5b3718);
+}
+.play-single__steps li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  min-height: 0;
+  padding: 0 1.5cqw;
+  border: .12cqw solid #855126aa;
+  border-radius: 2cqw;
+  background: linear-gradient(100deg, #0c1013f5, #241610db);
+  box-shadow: inset 0 .2cqw .4cqw #ffc76b38, 0 .6cqw 1.5cqw #0008;
+  color: #fff1d4;
+  font: 700 clamp(13px, 2.6cqw, 29px)/1.12 Arial,sans-serif;
+}
+.play-single__steps li::before {
+  position: absolute;
+  left: -8.4cqw;
   top: 50%;
-  width: 100%;
-  height: auto;
-  z-index: 1;
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6.3cqw;
+  height: 6.3cqw;
+  border: .3cqw solid #f89825;
+  border-radius: 50%;
+  background: #100c0a;
+  box-shadow: 0 0 1.2cqw #ff8526bb;
+  color: #ffbd4f;
+  font: 800 3.8cqw/1 Arial,sans-serif;
+  transform: translateY(-50%);
 }
-body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .play-tournament-bonus-art {
-  display: block;
+.play-single__steps li:nth-child(1)::before { content: '1'; }
+.play-single__steps li:nth-child(2)::before { content: '2'; }
+.play-single__steps li:nth-child(3)::before { content: '3'; }
+.play-single__step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6.2cqw;
+  height: 6.2cqw;
+  flex: none;
+  border: .12cqw solid #b76d2a;
+  border-radius: 1.6cqw;
+  color: #ffc465;
+  font-size: 4.3cqw;
+  background: #100e0c;
+  box-shadow: inset 0 0 .8cqw #b45a1677;
+}
+.play-single__step-icon svg { width: 65%; height: 65%; }
+.play-single__club-id {
   position: absolute;
-  left: 0;
-  top: 69%;
-  width: 100%;
-  height: auto;
-  z-index: 5;
-  pointer-events: none;
+  z-index: 2;
+  top: 65%;
+  left: 41%;
+  width: 46%;
+  text-align: center;
+  color: #ffdc8e;
+  text-shadow: 0 0 1.5cqw #ff6d1c;
+  transform: rotate(-2deg);
 }
-body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-bonuses--table {
-  top: 69% !important;
-  height: 27% !important;
-  z-index: 6 !important;
-  pointer-events: none;
-}
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonuses__grid {
-  height: 100% !important;
-}
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
-  top: 0 !important;
-  width: 20% !important;
-  height: 100% !important;
-  transform: none !important;
-  pointer-events: auto !important;
-}
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) { left: 0 !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 20% !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 40% !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 60% !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 80% !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus > * { opacity: 0 !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonuses__note { display: none !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-last-longer-dock__chip,
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-last-longer-dock__bar { display: none !important; }
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] > .home-last-longer-dock::before {
-  display: block !important;
-  content: "" !important;
-  position: absolute !important;
-  left: 0 !important;
-  top: 50% !important;
-  width: 90% !important;
-  height: 63% !important;
-  border: .25cqw solid #a16a36 !important;
-  border-radius: 1cqw !important;
-  background: linear-gradient(155deg, #282526, #070708 65%, #20150e) !important;
-  box-shadow: 0 .8cqw 1.3cqw #000b, inset 0 .4cqw .4cqw #ffffff20 !important;
-  mask: none !important;
-  -webkit-mask: none !important;
-  transform: none !important;
-  z-index: 0 !important;
-}
-body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .play-tournament-last-longer-art {
-  display: block;
+.play-single__club-id span { display: block; font: 800 italic 3.1cqw/1 Arial,sans-serif; }
+.play-single__club-id strong { display: block; margin-top: .7cqw; font: 900 8.7cqw/1 Arial,sans-serif; letter-spacing: -.2cqw; }
+.play-single__copy {
   position: absolute;
-  left: -5%;
-  top: -60%;
-  width: 180%;
-  height: 180%;
-  object-fit: contain;
-  pointer-events: none;
-  z-index: 1;
+  z-index: 3;
+  top: 77.5%;
+  left: 38%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5cqw;
+  width: 49%;
+  height: 6.5%;
+  border: .2cqw solid #f2a944;
+  border-radius: 2cqw;
+  background: linear-gradient(#211a16f5, #0b0d0ef7);
+  box-shadow: 0 0 1.3cqw #ff7d214d, inset 0 .25cqw .5cqw #ffda7a44;
+  color: #fff1cd;
+  font: 800 clamp(12px, 2.6cqw, 29px)/1 Arial,sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
 }
+.play-single__copy > svg { width: 4cqw; height: 4cqw; color: #ffc060; flex: none; }
+.play-single__manager {
+  position: absolute;
+  z-index: 3;
+  bottom: 4.5%;
+  left: 21%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 58%;
+  height: 7%;
+  padding: 0 3cqw;
+  border: .2cqw solid #e8942d;
+  border-radius: 2cqw;
+  background: linear-gradient(#151618f2, #07090beb);
+  color: #fff1d7 !important;
+  font: 800 clamp(13px, 2.55cqw, 29px)/1 Arial,sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.play-single__manager > svg { width: 4cqw; height: 4cqw; color: #ffe1a8; flex: none; }
+.play-single__manager > span:last-child { font-size: 4cqw; }
 @media (max-width: 599px) {
-  body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .play-tournament-bonus-art {
-    left: 7.5%;
-    width: 85%;
-  }
-  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) { width: 17% !important; }
-  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) { left: 7.5% !important; }
-  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 24.5% !important; }
-  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 41.5% !important; }
-  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 58.5% !important; }
-  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 75.5% !important; }
+  .play-single { background-position: 46% center; }
+  .play-single__title { top: 12.5%; }
+  .play-single__stores { top: 25%; width: 55%; height: 7%; }
+  .play-single__steps { top: 36%; left: 12%; width: 51%; height: 31%; }
+  .play-single__steps li { gap: 1.4cqw; }
+  .play-single__club-id { top: 65%; left: 39%; width: 55%; }
+  .play-single__club-id span { font-size: 4.2cqw; }
+  .play-single__club-id strong { font-size: 10cqw; }
+  .play-single__copy { top: 76%; left: 37%; width: 58%; height: 6%; }
+  .play-single__manager { bottom: 4%; left: 8%; width: 84%; height: 6.5%; }
 }

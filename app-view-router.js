@@ -5,7 +5,6 @@ const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-b
 const footer = document.querySelector(".card__footer");
 
 function setDownloadPage(pageName) {
-  var playPanel = pageName === "poker21" ? "poker21" : "tournament";
   if (pageName === "poker21") pageName = "main";
   var downloadPages = document.querySelectorAll(".download-page[data-download-page]");
   downloadPages.forEach(function (page) {
@@ -17,7 +16,6 @@ function setDownloadPage(pageName) {
   });
   var dlCc = typeof pokerGetDownloadCardContentScrollEl === "function" ? pokerGetDownloadCardContentScrollEl() : null;
   if (dlCc) dlCc.scrollTop = 0;
-  if (pageName === "main" && typeof window.pokerPlayFlowShow === "function") window.pokerPlayFlowShow(playPanel);
   try {
     if (typeof window.pokerUpdateDownloadInfoSubsections === "function") window.pokerUpdateDownloadInfoSubsections();
   } catch (eDownloadInfo) {}
