@@ -2030,10 +2030,16 @@
     return out;
   }
 
-  function buildCrmLinkUrl(startParam) {
+  function buildCrmLinkUrl(startParam, linkType) {
     var base = "";
     try {
-      base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
+      if (linkType === "website") {
+        base = typeof getWebsiteOriginBaseForLinks === "function" ? getWebsiteOriginBaseForLinks() : window.location.origin + "/";
+      } else if (linkType === "telegram") {
+        base = typeof POKER_DEFAULT_TELEGRAM_MINI_APP_URL === "string" ? POKER_DEFAULT_TELEGRAM_MINI_APP_URL : "";
+      } else {
+        base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : "";
+      }
     } catch (e) {}
     base = String(base || "").replace(/\/$/, "");
     if (!base) return startParam || "";
@@ -2076,6 +2082,7 @@
   function buildCrmTrackingParams() {
     var target = crmLinkTargetByKey(crmLinkFieldValue("playerCrmLinkTarget") || "home");
     return compactCrmLinkParams({
+      link_type: crmLinkFieldValue("playerCrmLinkType") === "website" ? "website" : "telegram",
       target_section: target.key,
       target_view: target.view,
       target_startapp: target.startapp,
@@ -2098,6 +2105,8 @@
       var el = document.getElementById(id);
       if (el) el.value = "";
     });
+    var typeEl = document.getElementById("playerCrmLinkType");
+    if (typeEl) typeEl.value = "telegram";
     setCrmLinksResult("", false);
   }
 
@@ -2142,7 +2151,7 @@
 
   function crmLinkUrl(link) {
     var id = link && link.id ? String(link.id) : "";
-    return id ? buildCrmLinkUrl("ref_" + id) : "";
+    return id ? buildCrmLinkUrl("ref_" + id, crmLinkParams(link).link_type) : "";
   }
 
   function renderCrmTrackingLinks() {
@@ -2192,7 +2201,7 @@
         var url = crmLinkUrl(link);
         return "<tr>" +
           "<td><button type=\"button\" class=\"player-crm__table-link\" data-crm-link-details=\"" + esc(link.id || "") + "\">" + esc(crmLinkTitle(link)) + "</button><br><span class=\"player-crm__detail-muted\">ref_" + esc(link.id || "") + "</span></td>" +
-          "<td>" + esc(crmLinkTargetLabel(link)) + "</td>" +
+          "<td>" + esc(crmLinkTargetLabel(link)) + (crmLinkParams(link).link_type ? "<br><span class=\"player-crm__detail-muted\">" + (crmLinkParams(link).link_type === "website" ? "Сайт" : "Telegram-миниапп") + "</span>" : "") + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "totalClicks"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "uniqueClicks"))) + "</td>" +
           "<td>" + esc(intFmt(crmLinkMetric(link, "activeVisitors"))) + "</td>" +
@@ -2262,7 +2271,7 @@
           setCrmLinksResult((data && data.error) || "Не удалось создать ссылку.", true);
           return;
         }
-        var url = buildCrmLinkUrl(data.startParam);
+        var url = buildCrmLinkUrl(data.startParam, params.link_type);
         setCrmLinksResult("<div>Ссылка создана.</div><button type=\"button\" class=\"player-crm__links-url-btn\" data-crm-link-copy=\"" + esc(url) + "\">" + esc(url || data.startParam) + "</button>", false);
         loadCrmTrackingLinks();
       })
