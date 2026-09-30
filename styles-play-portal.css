@@ -286,3 +286,102 @@ body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tourna
   .play-portal__club-id strong { font-size: 7.5cqw; }
   .play-portal__copy { left: 59%; top: 82%; width: 36%; height: 6%; font-size: 2.6cqw; }
 }
+
+/* The supplied table and chips replace the baked table in the Gucci evening scene. */
+.play-tournament-table-art,
+.play-tournament-bonus-art,
+.play-tournament-last-longer-art { display: none; }
+body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] {
+  background: url('./assets/play-tournament-clean-underlay-v2.webp') center / 100% 100% no-repeat !important;
+}
+body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"]::before {
+  display: block !important;
+  background: var(--home-tournament-scene) center / 100% 100% no-repeat !important;
+  clip-path: polygon(0 0, 100% 0, 100% 55%, 65% 55%, 65% 58%, 32% 58%, 32% 55%, 25% 55%, 25% 35%, 0 35%) !important;
+  z-index: 2 !important;
+}
+body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .play-tournament-table-art {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: auto;
+  z-index: 1;
+  pointer-events: none;
+}
+body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .play-tournament-bonus-art {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 69%;
+  width: 100%;
+  height: auto;
+  z-index: 5;
+  pointer-events: none;
+}
+body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-bonuses--table {
+  top: 69% !important;
+  height: 27% !important;
+  z-index: 6 !important;
+  pointer-events: none;
+}
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonuses__grid {
+  height: 100% !important;
+}
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
+  top: 0 !important;
+  width: 20% !important;
+  height: 100% !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) { left: 0 !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 20% !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 40% !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 60% !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 80% !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus > * { opacity: 0 !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonuses__note { display: none !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-last-longer-dock__chip,
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-last-longer-dock__bar { display: none !important; }
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] > .home-last-longer-dock::before {
+  display: block !important;
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  width: 90% !important;
+  height: 63% !important;
+  border: .25cqw solid #a16a36 !important;
+  border-radius: 1cqw !important;
+  background: linear-gradient(155deg, #282526, #070708 65%, #20150e) !important;
+  box-shadow: 0 .8cqw 1.3cqw #000b, inset 0 .4cqw .4cqw #ffffff20 !important;
+  mask: none !important;
+  -webkit-mask: none !important;
+  transform: none !important;
+  z-index: 0 !important;
+}
+body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .play-tournament-last-longer-art {
+  display: block;
+  position: absolute;
+  left: -5%;
+  top: -60%;
+  width: 180%;
+  height: 180%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 1;
+}
+@media (max-width: 599px) {
+  body[data-view="download"] #app.app .play-flow .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .play-tournament-bonus-art {
+    left: 7.5%;
+    width: 85%;
+  }
+  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) { width: 17% !important; }
+  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) { left: 7.5% !important; }
+  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) { left: 24.5% !important; }
+  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) { left: 41.5% !important; }
+  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) { left: 58.5% !important; }
+  body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) { left: 75.5% !important; }
+}
