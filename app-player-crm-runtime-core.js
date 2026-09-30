@@ -2337,6 +2337,48 @@
     return null;
   }
 
+  function crmLinkSummaryHtml() {
+    var periods = [["all", "Всё время"], ["today", "Сегодня · МСК"], ["7", "7 дней"], ["30", "30 дней"]];
+    var html = '<div class="player-crm__form-grid"><label><span>Период воронки</span><select id="playerCrmLinkSummaryPeriod">' + periods.map(function (p) {
+      return '<option value="' + p[0] + '"' + ((state.linkSummaryPeriod || "all") === p[0] ? ' selected' : '') + '>' + p[1] + '</option>';
+    }).join('') + '</select></label><label><span><input type="checkbox" id="playerCrmLinkExcludeSelf"' + (state.linkSummaryExcludeSelf ? ' checked' : '') + ' /> Исключить мои переходы</span></label></div>';
+    if (state.linkSummaryLoading) return html + '<p>Загружаем воронку…</p>';
+    if (state.linkSummaryError) return html + '<p class="player-crm__notice--error">Статистика не загрузилась.</p><button type="button" class="player-crm__ghost-btn" id="playerCrmLinkSummaryRetry">Повторить</button>';
+    var data = state.linkSummary;
+    if (!data) return html;
+    function percent(value) { return value == null ? '—' : Number(value).toFixed(1) + '%'; }
+    var items = [["Посетители", intFmt(data.visitors)], ["Новые регистрации", intFmt(data.registrations)],
+      ["Вернувшиеся игроки", intFmt(data.returning)], ["С целевыми действиями", intFmt(data.engaged)],
+      ["Сделали первый депозит", intFmt(data.firstDepositors)], ["Сделали депозит", intFmt(data.depositors)], ["Сумма депозитов", intFmt(data.depositAmount) + ' ₽'],
+      ["Конверсия в регистрацию", percent(data.registrationConversion)], ["Конверсия в депозит", percent(data.depositConversion)]];
+    return html + '<div class="player-crm__link-detail-grid">' + items.map(function (item) {
+      return '<div class="player-crm__link-detail-item"><small>' + esc(item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>';
+    }).join('') + '</div><p class="player-crm__detail-muted">Воронка по сохранённой истории: аккаунты объединены между устройствами; гости считаются отдельно. За период считаются посетители и события этого периода. Регистрации и депозиты относятся к первой ссылке привлечения. Целевые действия: регистрация, привязка игрового ID, участие, заявка, подписка или депозит; открытие экрана не считается. Первый депозит определяется по доступным записям CRM. Сумма депозитов — не доход клуба. Факт начала игры пока не отслеживается. Исключение своих переходов работает для подтверждённого аккаунта.</p>';
+  }
+
+  function loadCrmLinkSummary() {
+    var id = state.linkDetailsId;
+    if (!id) return;
+    var seq = state.linkSummarySeq = (state.linkSummarySeq || 0) + 1;
+    state.linkSummaryLoading = true;
+    state.linkSummaryError = false;
+    renderCrmLinkDetailsModal();
+    var q = authQuerySafe();
+    fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') +
+      'summary=1&id=' + encodeURIComponent(id) + '&period=' + encodeURIComponent(state.linkSummaryPeriod || 'all') + '&excludeSelf=' + (state.linkSummaryExcludeSelf ? '1' : '0'))
+      .then(function (r) { return r.json(); }).then(function (data) {
+        if (seq !== state.linkSummarySeq || id !== state.linkDetailsId) return;
+        if (!data.ok || !data.summary) throw new Error('summary');
+        state.linkSummary = data.summary;
+      }).catch(function () {
+        if (seq === state.linkSummarySeq && id === state.linkDetailsId) state.linkSummaryError = true;
+      }).finally(function () {
+        if (seq !== state.linkSummarySeq || id !== state.linkDetailsId) return;
+        state.linkSummaryLoading = false;
+        renderCrmLinkDetailsModal();
+      });
+  }
+
   function renderCrmLinkDetailsModal() {
     var modal = document.getElementById("playerCrmLinkDetailsModal");
     var subtitleEl = document.getElementById("playerCrmLinkDetailsSubtitle");
@@ -2353,6 +2395,8 @@
     if (subtitleEl) subtitleEl.textContent = "ref_" + state.linkDetailsId + " · " + crmLinkTargetLabel(link);
     var detailItems = [
       ["Название", crmLinkTitle(link)],
+      ["Тип ресурса", params.link_type === "website" ? "Сайт" : params.link_type === "telegram" ? "Telegram-миниапп" : "Автоматический (старая ссылка)"],
+      ["Адрес", url],
       ["Куда ведёт", crmLinkTargetLabel(link)],
       ["Создана · МСК", dateTime(link.createdAt)],
       ["Всего переходов", intFmt(crmLinkMetric(link, "totalClicks"))],
@@ -2386,6 +2430,8 @@
       : "<div class=\"player-crm__notice\">Переходов пока нет.</div>";
     bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" +
       "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать ссылку</button><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-links-refresh>Обновить список</button></div>" +
+      '<h4 class="player-crm__edit-title">Эффективность ссылки</h4>' + crmLinkSummaryHtml() +
+      '<h4 class="player-crm__edit-title">Параметры и общие счётчики · всё время</h4>' +
       "<div class=\"player-crm__link-detail-grid\">" + detailItems.map(function (item) {
         return "<div class=\"player-crm__link-detail-item\"><small>" + esc(item[0]) + "</small><strong>" + esc(item[1]) + "</strong></div>";
       }).join("") + "</div>" +
@@ -2400,6 +2446,12 @@
       (state.linkParticipantsNext != null || state.linkParticipantsError ? '<button type="button" class="player-crm__ghost-btn" data-crm-participants-more' + (state.linkParticipantsLoading ? ' disabled' : '') + '>' + (state.linkParticipantsError ? 'Повторить' : 'Ещё участники') + '</button>' : '') +
       "<h4 class=\"player-crm__edit-title\">Переходы и действия</h4>" + visitorsHtml +
       "</div>";
+    var periodEl = bodyEl.querySelector('#playerCrmLinkSummaryPeriod');
+    if (periodEl) periodEl.onchange = function () { state.linkSummaryPeriod = this.value; loadCrmLinkSummary(); };
+    var excludeEl = bodyEl.querySelector('#playerCrmLinkExcludeSelf');
+    if (excludeEl) excludeEl.onchange = function () { state.linkSummaryExcludeSelf = this.checked; loadCrmLinkSummary(); };
+    var retryEl = bodyEl.querySelector('#playerCrmLinkSummaryRetry');
+    if (retryEl) retryEl.onclick = loadCrmLinkSummary;
     var moreParticipants = bodyEl.querySelector('[data-crm-participants-more]');
     if (moreParticipants) moreParticipants.onclick = function () { loadCrmLinkParticipants(state.linkDetailsRequestSeq); };
     modal.hidden = false;
@@ -2432,6 +2484,9 @@
     if (!id) return;
     var requestSeq = ++state.linkDetailsRequestSeq;
     state.linkDetailsId = id;
+    state.linkSummary = null;
+    state.linkSummaryError = false;
+    state.linkSummaryLoading = true;
     state.linkParticipants = [];
     state.linkParticipantsNext = 0;
     state.linkParticipantsLoading = false;
@@ -2450,6 +2505,7 @@
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
     loadCrmLinkParticipants(requestSeq);
+    loadCrmLinkSummary();
     fetch(base + "/api/tracking-links" + q + sep + "id=" + encodeURIComponent(id) + "&visitors=1")
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -5162,6 +5218,7 @@
       }
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
       if (linksRefresh) {
+        if (state.linkDetailsId) loadCrmLinkSummary();
         loadCrmTrackingLinks();
         return;
       }
