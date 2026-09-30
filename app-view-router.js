@@ -2381,11 +2381,20 @@ document.addEventListener("click", function (e) {
   var clubIdCopy = e.target.closest("[data-play-club-id-copy]");
   if (clubIdCopy) {
     e.preventDefault();
-    if (typeof pokerCopyTextToClipboard === "function") {
+    if (!clubIdCopy.disabled && typeof pokerCopyTextToClipboard === "function") {
+      clubIdCopy.disabled = true;
       pokerCopyTextToClipboard("758417").then(function (copied) {
         var label = clubIdCopy.innerHTML;
-        clubIdCopy.textContent = copied ? "ID скопирован" : "Не удалось скопировать ID";
-        setTimeout(function () { clubIdCopy.innerHTML = label; }, 1800);
+        var message = copied ? "ID скопирован" : "Не удалось скопировать ID";
+        clubIdCopy.textContent = copied ? "✓" : "!";
+        clubIdCopy.setAttribute("aria-label", message);
+        clubIdCopy.setAttribute("title", message);
+        setTimeout(function () {
+          clubIdCopy.innerHTML = label;
+          clubIdCopy.setAttribute("aria-label", "Скопировать ID клуба");
+          clubIdCopy.setAttribute("title", "Скопировать ID клуба");
+          clubIdCopy.disabled = false;
+        }, 1800);
       });
     }
     return;
