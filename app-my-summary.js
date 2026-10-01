@@ -479,7 +479,7 @@
     if(existing){existing.showModal();existing.style.display='grid';acknowledgeChartHistory();var existingFrame=existing.querySelector('iframe');if(existingFrame?.contentWindow)existingFrame.contentWindow.postMessage({type:'starting-hands-resume'},window.location.origin);return;}
     var modal=document.createElement('dialog');modal.id='startingHandsDialog';
     modal.style.cssText='position:fixed;inset:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;box-sizing:border-box;margin:0;padding:var(--tg-ui-top-clearance, calc(env(safe-area-inset-top, 0px) + 8px)) 0 env(safe-area-inset-bottom, 0px);border:0;background:#050816;color:#e5e7eb;overflow:hidden;grid-template-rows:52px minmax(0,1fr);';
-    modal.innerHTML='<button type="button" aria-label="Назад в личный кабинет" style="display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit;cursor:pointer"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="m12 19-7-7 7-7M5 12h14"/></svg><span style="display:flex;align-items:baseline;gap:7px;min-width:0;font-size:clamp(15px,4vw,20px);white-space:nowrap"><strong>Два туза</strong><span style="color:#aab4c5;font-size:.78em">Личный кабинет</span></span></button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20260925-header-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
+    modal.innerHTML='<button type="button" aria-label="Назад в личный кабинет" style="display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;background:#101827;color:#e5e7eb;border:0;width:100%;text-align:left;font:inherit;cursor:pointer"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="m12 19-7-7 7-7M5 12h14"/></svg><span style="display:flex;align-items:baseline;gap:7px;min-width:0;font-size:clamp(15px,4vw,20px);white-space:nowrap"><strong>Два туза</strong><span style="color:#aab4c5;font-size:.78em">Личный кабинет</span></span></button><iframe title="Стартовые руки" src="starting-hands/index.html?v=20261001-bulk-export-1" style="display:block;width:100%;height:100%;min-height:0;border:0"></iframe>';
     modal.querySelector('button').onclick=function(){closeStartingHands(false);};
     modal.addEventListener('close',function(){modal.style.display='none';});
     document.body.append(modal);modal.showModal();modal.style.display="grid";acknowledgeChartHistory();
@@ -504,7 +504,7 @@
     }
     if(event.data?.type!=='starting-hands-request')return;
     var message=event.data,seq=generation;
-    if(!['list','replay','insights','opponents','stacks','version','chart-wall','review-publish'].includes(message.action))return;
+    if(!['list','replay','insights','opponents','stacks','version','export','chart-wall','review-publish'].includes(message.action))return;
     if(message.action==='review-publish'){
       try{
         var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',hideShowdown:message.hideShowdown===true,forCoach:false,image:message.image,cards:message.cards,handId:message.handId,gameMode:message.gameMode,bigBlindMinor:message.bigBlindMinor,startingStackMinor:message.startingStackMinor,totalPotMinor:message.totalPotMinor});
@@ -522,7 +522,7 @@
       }catch(_){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:'publish failed'},window.location.origin);}
       return;
     }
-    try {var data=await request('starting-hands',{action:message.action,handId:message.handId,handIds:message.handIds});
+    try {var data=await request('starting-hands',{action:message.action,handId:message.handId,handIds:message.handIds,version:message.version});
       if(seq!==generation||!frame.isConnected)return;
       if(message.action==='list')acceptChartHistory(data);
       frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:message.action==='replay'?data.replay:data},window.location.origin);

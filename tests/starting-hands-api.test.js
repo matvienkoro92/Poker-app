@@ -47,3 +47,13 @@ test('opponent nickname lookup resolves a Poker21 player ID',async()=>{
  assert.equal(res.statusCode,200);assert.deepEqual(Array.from(res.data.playerIds),['464311']);
  assert.equal(JSON.stringify(commands.slice(1)),JSON.stringify([['HGET','nick-reverse','мажор'],['HGET','bind','ID1']]));
 });
+
+test('export is private, bounded and pinned to the displayed history version',async()=>{
+ for(const handIds of [[],['../list'],['1','1'],Array.from({length:51},(_,i)=>String(i))])assert.equal((await call({action:'export',handIds,version:'v1'})).res.statusCode,400);
+ const denied=await call({action:'export',handIds:['123'],version:'v1'},'999',false);assert.equal(denied.res.statusCode,401);assert.equal(denied.commands.length,0);
+ for(const version of [undefined,'old']){const mismatch=await call({action:'export',handIds:['123'],version});assert.equal(mismatch.res.statusCode,409);assert.equal(mismatch.commands.length,1);}
+ const {res,commands}=await call({action:'export',handIds:['123','456'],version:'v1',playerId:'other'},'999');
+ assert.equal(res.statusCode,200);assert.equal(res.data.playerId,'999');assert.equal(res.data.version,'v1');assert.equal(res.data.hands.length,2);assert.equal(res.data.hands[0].handId,'123');assert.ok(res.data.hands[0].replay.events);
+ assert.ok(commands.every(c=>c[1].startsWith('poker_app:starting-hands:999:')));
+ assert.equal((await call({action:'export',handIds:['123'],version:'v1'},'999',true,null)).res.statusCode,404);
+});

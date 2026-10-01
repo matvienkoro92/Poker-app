@@ -65,6 +65,27 @@ function startHistory(payload) {
   let appliedFrom='',appliedTo='';
   const outcomeFilters={positive:true,negative:true};
   const $ = id => document.getElementById(id);
+  let exportRows=[],exportBusy=false;
+  const exportButton=$('hand-export-button'),exportStatus=$('hand-export-status');
+  exportButton.addEventListener('click',async()=>{
+    if(exportBusy||!exportRows.length)return;
+    const rows=exportRows.slice(),format=$('hand-export-format').value;
+    exportBusy=true;exportButton.disabled=true;exportButton.textContent='Загружаем…';
+    exportStatus.textContent='Загружено 0 из '+rows.length;
+    try{
+      const data=await window.PokerHandExport.collect(rows,activeHistoryPlayerId,activeHistoryVersion,
+        (ids,version)=>historyRequest('export',ids,{version}),
+        (done,total)=>{exportStatus.textContent='Загружено '+done+' из '+total;});
+      const content=window.PokerHandExport.serialize(data,format,window.PokerHandShare.text);
+      const blob=new Blob([content],{type:format==='json'?'application/json;charset=utf-8':'text/plain;charset=utf-8'});
+      const name='poker21-hands-'+data.playerId+'-'+new Date().toISOString().slice(0,10)+'.'+format;
+      const url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+      exportStatus.textContent='Файл подготовлен: '+data.count+' раздач · '+format.toUpperCase();
+    }catch(error){exportStatus.textContent=error.message==='timeout'?'Сервер не ответил. Повторите экспорт.':error.message||'Не удалось скачать раздачи. Повторите экспорт.';}
+    finally{exportBusy=false;exportButton.disabled=!exportRows.length;exportButton.textContent='Скачать раздачи ('+exportRows.length+')';}
+  });
+
   function moscowDateValue(value){
     const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(value);
     const part=type=>parts.find(p=>p.type===type).value;
@@ -665,6 +686,9 @@ function startHistory(payload) {
       name.textContent=c.label;amount.textContent=compactSigned(v);button.title=c.label+': '+signed(v)+' '+unit();button.append(name,amount);return button;
     }));
     const cell=selectedCell;
+    exportRows=(cell?.hands||[]).filter(h=>{const result=Number(h.resultMinor)||0;return result>0?outcomeFilters.positive:result<0?outcomeFilters.negative:outcomeFilters.positive&&outcomeFilters.negative;});
+    if(!exportBusy){exportButton.disabled=!exportRows.length;exportButton.textContent='Скачать раздачи ('+exportRows.length+')';}
+
     const detailLabel=game==='NLH'?cell.label:game+' · все руки';
     $('detail').innerHTML='<h2 id="detail-title" class="hand-title">'+detailLabel+'<span>'+(allHands?'По текущим фильтрам':cell.label.length===2?'Карманная пара':cell.label.endsWith('s')?'Одномастная рука':'Разномастная рука')+'</span></h2>';
     if(!cell.count){
