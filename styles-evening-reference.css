@@ -350,7 +350,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 
 /* Winners sit beside the session; Last Longer takes the former trophy slot. */
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {
- left:61%!important;top:calc(2% + 13cqw)!important;width:18%!important;height:10cqw!important;transform:none!important;z-index:7!important;font-size:2.5cqw!important;gap:.5cqw;
+ left:61%!important;top:2%!important;width:18%!important;height:10cqw!important;transform:none!important;z-index:7!important;font-size:2.5cqw!important;gap:.5cqw;
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-history img {width:8cqw!important;height:8cqw!important;}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {
@@ -363,6 +363,12 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  content:'\41b \430 \441 \442 \43b \43e \43d \433 \435 \440 '!important;display:block!important;position:absolute!important;inset:8.4cqw 0 auto!important;width:100%!important;height:auto!important;border:0!important;background:none!important;box-shadow:none!important;transform:none!important;color:#fff4dd!important;font:700 2.3cqw/1 Arial,sans-serif!important;text-align:center!important;
 }
 @media(max-width:680px) {
- body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {top:calc(2% + 13cqw + max(28px, env(safe-area-inset-top, 0px)))!important;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {top:calc(2% + max(28px, env(safe-area-inset-top, 0px)))!important;}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {top:calc(2% + max(28px, env(safe-area-inset-top, 0px)))!important;}
 }
+
+/* Invite a friend from the empty chair's backrest. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-share {
+ left:var(--chair-invite-left,31%)!important;top:var(--chair-invite-top,40%)!important;width:var(--chair-invite-width,12%)!important;height:var(--chair-invite-height,12cqw)!important;transform:none!important;translate:none!important;z-index:6!important;gap:.6cqw!important;font-size:2cqw!important;text-align:center;color:#f7d79a!important;background:radial-gradient(ellipse,#171411f5 40%,#17141100 74%)!important;text-shadow:0 1px 2px #000;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-share svg {width:5cqw!important;height:5cqw!important;flex:none;}

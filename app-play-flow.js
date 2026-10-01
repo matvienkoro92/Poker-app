@@ -90,8 +90,24 @@
     });
   }
 
+  function placeChairInvite() {
+    var scene = flow && flow.querySelector(".evening-reference");
+    var chair = scene && scene.querySelector(".evening-reference__art--chair-center");
+    var invite = scene && scene.querySelector(".home-tournament-share");
+    if (!chair || !invite || !chair.complete || !chair.naturalWidth) return;
+    var sceneRect = scene.getBoundingClientRect();
+    if (!sceneRect.width) return;
+    var rect = chair.getBoundingClientRect();
+    var scale = sceneRect.width / scene.offsetWidth;
+    invite.style.setProperty("--chair-invite-left", ((rect.left - sceneRect.left + rect.width * .23) / scale) + "px");
+    invite.style.setProperty("--chair-invite-top", ((rect.top - sceneRect.top + rect.height * .1) / scale) + "px");
+    invite.style.setProperty("--chair-invite-width", (rect.width * .54 / scale) + "px");
+    invite.style.setProperty("--chair-invite-height", (rect.height * .32 / scale) + "px");
+  }
+
   function placeVpnCat() {
     if (!flow) return;
+    placeChairInvite();
     var scene = flow.querySelector(".evening-reference");
     var table = scene && scene.querySelector(".evening-reference__art--table");
     var cat = scene && scene.querySelector(".evening-vpn-cat");
@@ -105,7 +121,7 @@
   }
 
   document.addEventListener("load", function (event) {
-    if (event.target.matches && event.target.matches(".evening-reference__art--table")) placeVpnCat();
+    if (event.target.matches && event.target.matches(".evening-reference__art--table, .evening-reference__art--chair-center")) placeVpnCat();
   }, true);
 
   function size() {
