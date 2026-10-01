@@ -2946,6 +2946,38 @@
     list.__newsMarkup = html;
   }
 
+  function clubAchievementPosts() {
+    var titles = { record: "Рекорд недели", first: "Первые победы", series: "Серия побед", big: "Крупные заносы дня", personal: "Новые личные рекорды", milestone: "Рубеж по призовым", weekly: "Итоги турнирной недели" };
+    function rub(n) { return Number(n || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
+    function period(item) { return item.start.split('-').reverse().join('.') + ' — ' + item.end.split('-').reverse().join('.'); }
+    return ((window.POKER_CLUB_NEWS_DATA || {}).achievementNews || []).map(function (post) {
+      var items = post.items || [], first = items[0];
+      if (!first || !titles[post.kind]) return null;
+      var lead, detail;
+      if (post.kind === "weekly" || post.kind === "record") {
+        lead = post.kind === "weekly" ? rub(first.total) + ' призовых · ' + first.first + ' побед' : first.top[0].nick + ' — ' + rub(first.top[0].reward);
+        detail = '<p>' + esc(period(first) + ' · ' + first.paid + ' попаданий в деньги · ' + first.players + ' игроков') + '</p>' +
+          '<p>' + esc('Заносов 50–99 тыс. ₽: ' + first.big50 + ' · 100 тыс. ₽+: ' + first.big100) + '</p><ol class="home-news-achievement__list">' + first.top.map(function (r) {
+            return '<li><b>' + esc(r.nick + ' — ' + rub(r.reward)) + '</b><small>' + esc(r.date + ' · ' + r.tournament + ' · ' + r.place + '-е место') + '</small></li>';
+          }).join('') + '</ol>';
+      } else {
+        lead = post.kind === "series" ? first.nick + ' · ' + first.wins + ' первых мест за неделю' :
+          post.kind === "milestone" ? first.nick + ' · ' + rub(first.threshold) + ' суммарных призовых' : first.nick + ' — ' + rub(first.reward);
+        if (items.length > 1) lead += ' · ещё ' + (items.length - 1);
+        detail = '<ul class="home-news-achievement__list">' + items.map(function (r) {
+          var result = post.kind === 'series' ? r.wins + ' побед · ' + rub(r.reward) : post.kind === 'milestone' ? 'Рубеж ' + rub(r.threshold) + ' · всего ' + rub(r.total) : rub(r.reward);
+          var context = post.kind === 'series' ? period(r) : r.date + ' · ' + r.tournament + ' · ' + r.place + '-е место';
+          if (post.kind === 'personal') context += ' · прежний рекорд ' + rub(r.previous);
+          return '<li><b>' + esc(r.nick + ' — ' + result) + '</b><small>' + esc(context) + '</small></li>';
+        }).join('') + '</ul>';
+      }
+      var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
+      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p>' +
+        '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
+        '<p class="home-news-achievement__note">По данным клуба. Призовые до вычета бай-инов.' + (['first','personal','milestone'].indexOf(post.kind) !== -1 ? ' Достижение за доступную историю учёта.' : '') + '</p></details></article>' };
+    }).filter(Boolean);
+  }
+
   function clubSeptemberResultsHtml() {
     var summary = (window.POKER_CLUB_NEWS_DATA || {}).monthlySummaries;
     var data = summary && summary["2026-09"];
@@ -3012,6 +3044,7 @@
           '<img src="./assets/home-mtt-leaderboard-winners.webp" alt="Победители прошлого МТТ-лидерборда Poker21">' +
           '<p>Победители прошлого лидерборда Poker21: <b>ПокерМанки — 250 000 ₽</b>, <b>Ваар — 150 000 ₽</b>, <b>Кулер — 100 000 ₽</b>. Поздравляем чемпионов и желаем удачи участникам нового сезона!</p></article>' }
       ];
+      editorialPosts = editorialPosts.concat(clubAchievementPosts()).sort(function (a, b) { return b.date.localeCompare(a.date); });
       patchNewsList(list, clubTabs + editorialPosts.map(function (post) {
         return '<section class="home-friend-news-modal__day-group"><div class="home-friend-news-modal__date"><span>' +
           esc(eventDateLabel(post.date, true)) + '</span></div>' + post.html + '</section>';

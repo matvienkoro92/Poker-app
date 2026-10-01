@@ -2971,3 +2971,26 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-news-month-results details.home-news-month-results__spoiler {margin:0;border-color:#a5813940;background:#080d1238;}
 .home-news-month-results__spoiler > summary {padding:10px 12px;font-size:12px;}
 .home-news-month-results__body {padding:4px 10px 8px;border-top:1px solid #a5813930;}
+
+.home-news-achievement {padding:14px 16px;}
+.home-news-achievement h3 {font-size:19px;line-height:1.2;margin:8px 0;}
+.home-news-achievement p.home-news-achievement__lead {margin:8px 0 12px;font-size:14px;line-height:1.4;font-weight:600;color:#ffe0a0;}
+.home-news-achievement details {border:1px solid #a5813940;border-radius:10px;background:#080d1238;overflow:hidden;}
+.home-news-achievement summary {display:flex;justify-content:space-between;gap:10px;padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer;list-style:none;}
+.home-news-achievement summary::-webkit-details-marker {display:none;}
+.home-news-achievement details[open] summary span {transform:rotate(180deg);}
+.home-news-achievement details > p {margin:10px 12px;font-size:12px;}
+.home-news-achievement__list {margin:0;padding:0 12px 0 30px;}
+.home-news-achievement__list li {padding:10px 0;border-top:1px solid #a5813928;font-size:12px;line-height:1.4;overflow-wrap:anywhere;}
+.home-news-achievement__list small {display:block;margin-top:4px;letter-spacing:0;font-size:10px;line-height:1.5;color:#bdb29d;}
+.home-news-achievement details p.home-news-achievement__note {font-size:10px;color:#a59e8e;line-height:1.4;}
+
+/* Center the artwork and copy within their own columns. */
+.home-friend-news-modal__hero-month-result {display:grid;grid-template-columns:140px minmax(0,1fr);align-items:center;justify-items:center;gap:12px;padding:12px;}
+.home-friend-news-modal__hero-month-result img {position:static;left:auto;bottom:auto;width:100%;height:175px;align-self:center;object-position:center;}
+.home-friend-news-modal__hero-month-result > div {display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-width:0;text-align:center;}
+.home-friend-news-modal__hero-month-result span {width:100%;}
+@media(max-width:480px) {
+ .home-friend-news-modal__hero-month-result {grid-template-columns:115px minmax(0,1fr);gap:8px;padding:10px;}
+ .home-friend-news-modal__hero-month-result img {width:100%;height:155px;}
+}
