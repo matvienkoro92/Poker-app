@@ -1,6 +1,46 @@
 (function initHomeFriendNews() {
   "use strict";
 
+  var dayHeroPushEnabled = null;
+  var dayHeroPushBusy = false;
+  var dayHeroPushAuth = "";
+  var dayHeroPushError = "";
+  function dayHeroPushRequest(payload) {
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return Promise.reject(new Error("Войдите, чтобы изменить уведомления"));
+    return fetch((typeof getApiBase === "function" ? getApiBase() : "") + "/api/chat-push-subscribe", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pokerApiAuthJsonBody(payload)), cache: "no-store"
+    }).then(function (response) { return response.json(); }).then(function (data) {
+      if (!data.ok || typeof data.dayHeroEnabled !== "boolean") throw new Error(data.error || "Не удалось сохранить настройки");
+      return data.dayHeroEnabled;
+    });
+  }
+  function loadDayHeroPush() {
+    var auth = typeof pokerApiAuthJsonBody === "function" ? JSON.stringify(pokerApiAuthJsonBody({})) : "";
+    if (auth !== dayHeroPushAuth) { dayHeroPushEnabled = null; dayHeroPushError = ""; dayHeroPushAuth = auth; }
+    if (dayHeroPushBusy || dayHeroPushEnabled !== null || dayHeroPushError) return;
+    dayHeroPushBusy = true;
+    dayHeroPushRequest({ action: "day_hero_status" }).then(function (enabled) {
+      if (auth === dayHeroPushAuth) dayHeroPushEnabled = enabled;
+    }).catch(function (error) { dayHeroPushError = error.message; }).finally(function () {
+      dayHeroPushBusy = false;
+      renderModalList(activeModalEvents());
+    });
+  }
+  document.addEventListener("change", function (event) {
+    if (!event.target.matches("[data-day-hero-push]")) return;
+    var wanted = event.target.checked;
+    dayHeroPushBusy = true;
+    dayHeroPushError = "";
+    renderModalList(activeModalEvents());
+    dayHeroPushRequest({ action: "day_hero_set", enabled: wanted }).then(function (enabled) {
+      dayHeroPushEnabled = enabled;
+    }).catch(function (error) { dayHeroPushError = error.message; }).finally(function () {
+      dayHeroPushBusy = false;
+      renderModalList(activeModalEvents());
+    });
+  });
+
   var LEVELS_KEY = "poker_home_friend_levels_v1";
   var LEVEL_EVENTS_KEY = "poker_home_friend_level_events_v1";
   var TOURNAMENT_SNAPSHOTS_KEY = "poker_home_friend_tournament_snapshots_v2";
@@ -2914,6 +2954,7 @@
     var list = el("homeFriendNewsList");
     if (!list) return;
     var heroStandings = clubCurrentMonthHeroStandings();
+    if (newsModalMode === "club" && clubNewsTab === "wins") loadDayHeroPush();
     var clubTabs = newsModalMode === "club" ? clubNewsTabsHtml() : "";
     var achievementPromo = newsModalMode === "club" && clubNewsTab === "wins"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
@@ -2924,7 +2965,9 @@
           '<span class="home-friend-news-modal__achievement-promo-side">' +
           (heroStandings[1] ? '<small class="home-friend-news-modal__achievement-promo-runner">2-е место: ' + clubHeroStandingHtml(heroStandings[1]) + '</small>' : '') +
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
-        '</aside>'
+        '</aside><div class="home-news-day-hero-push"><label><span>Пуши о героях дня</span><input type="checkbox" role="switch" data-day-hero-push aria-label="Пуши о героях дня"' +
+          (dayHeroPushEnabled === true ? ' checked' : '') + (dayHeroPushBusy || dayHeroPushEnabled === null ? ' disabled' : '') + '></label>' +
+          '<small role="status">' + esc(dayHeroPushError || (dayHeroPushBusy ? 'Загрузка…' : dayHeroPushEnabled ? 'Включены' : 'Отключены')) + '</small></div>'
       : "";
     if (newsModalMode === "club" && clubNewsTab === "news") {
       // Editorial posts are added manually here, newest date first.
