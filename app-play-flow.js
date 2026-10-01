@@ -108,7 +108,7 @@
     var tableRect = table.getBoundingClientRect();
     if (!sceneRect.width) return;
     var scale = sceneRect.width / scene.offsetWidth;
-    var top = (tableRect.bottom - sceneRect.top) / scale - cat.offsetHeight * .25;
+    var top = (tableRect.bottom - sceneRect.top) / scale - cat.offsetHeight * .6;
     cat.style.setProperty("--vpn-cat-top", top + "px");
   }
 
