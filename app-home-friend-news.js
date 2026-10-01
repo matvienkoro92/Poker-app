@@ -2923,7 +2923,7 @@
             if (current.nodeValue !== desired.nodeValue) current.nodeValue = desired.nodeValue;
           } else if (current.nodeType === 1 && !current.isEqualNode(desired)) {
             Array.prototype.slice.call(current.attributes).forEach(function (attr) {
-              if (!desired.hasAttribute(attr.name)) current.removeAttribute(attr.name);
+              if (!desired.hasAttribute(attr.name) && !(attr.name === "open" && current.hasAttribute("data-month-ranking"))) current.removeAttribute(attr.name);
             });
             Array.prototype.forEach.call(desired.attributes, function (attr) {
               if (current.getAttribute(attr.name) !== attr.value) current.setAttribute(attr.name, attr.value);
@@ -2944,6 +2944,31 @@
     }
     children(list, template.content);
     list.__newsMarkup = html;
+  }
+
+  function clubSeptemberResultsHtml() {
+    var summary = (window.POKER_CLUB_NEWS_DATA || {}).monthlySummaries;
+    var data = summary && summary["2026-09"];
+    if (!data) return "";
+    function rub(value) { return Number(value || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
+    function metric(value, label) { return '<div><strong>' + esc(value) + '</strong><span>' + esc(label) + '</span></div>'; }
+    function ranking(rows, total) {
+      return '<ol class="home-news-month-results__ranking">' + rows.map(function (row) {
+        return '<li><div><b>' + esc(row.nick) + '</b><small>' + esc(total
+          ? row.wins + ' попаданий в деньги · ' + row.firstPlaces + ' первых мест'
+          : row.date + ' · ' + row.tournament + ' · ' + row.place + '-е место') +
+          '</small></div><strong>' + esc(rub(row.reward)) + '</strong></li>';
+      }).join('') + '</ol>';
+    }
+    return '<article class="home-friend-news-modal__editorial home-news-month-results"><small>ДОСТИЖЕНИЯ КЛУБА · 1–30 СЕНТЯБРЯ 2026</small>' +
+      '<h3>Сентябрь за турнирными столами</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
+      '<div class="home-news-month-results__metrics">' + metric(data.big50, 'Заносов 50–99 тыс. ₽') + metric(data.big100, 'Заносов 100 тыс. ₽+') +
+        metric(data.firstPlaces, 'Первых мест') + metric(data.podiums, 'Финишей в топ-3') + metric(data.paidFinishes, 'Попаданий в деньги') + metric(data.players, 'Игроков с призовыми') + '</div>' +
+      '<p>Результаты в ' + esc(data.tournaments) + ' турнире за ' + esc(data.days) + ' дней. Выдано ' + esc(data.heroAwards) + ' ачивок «Герой дня».</p>' +
+      '<p class="home-news-month-results__record">Крупнейший занос: <b>' + esc(data.topWins[0].nick) + ' — ' + esc(rub(data.topWins[0].reward)) + '</b><br>' + esc(data.topWins[0].tournament + ' · ' + data.topWins[0].date) + '</p>' +
+      '<details data-month-ranking="single"><summary>Топ-10 крупнейших заносов<span aria-hidden="true">⌄</span></summary>' + ranking(data.topWins, false) + '</details>' +
+      '<details data-month-ranking="total"><summary>Топ-10 по сумме выигрышей<span aria-hidden="true">⌄</span></summary>' + ranking(data.topTotals, true) + '</details>' +
+      '<p class="home-news-month-results__note">По внесённым результатам клуба. Призовые до вычета бай-инов. Диапазон 50–99 тыс. ₽: от 50 000 ₽ до 100 000 ₽.</p></article>';
   }
 
   function renderModalList(rows, force) {
@@ -2972,6 +2997,7 @@
     if (newsModalMode === "club" && clubNewsTab === "news") {
       // Editorial posts are added manually here, newest date first.
       var editorialPosts = [
+        { date: "2026-10-01T13:00:00", html: clubSeptemberResultsHtml() },
         { date: "2026-10-01T12:00:00", html: '<aside class="home-friend-news-modal__hero-month-result" aria-label="Итоги Героя дня за сентябрь">' +
         '<img src="./assets/summer-rating-player-pokermanki-v3.webp" alt="ПокерМанки">' +
         '<div><small>ИТОГИ СЕНТЯБРЯ · ГЕРОЙ ДНЯ</small><h3>ПокерМанки</h3>' +
@@ -2979,7 +3005,7 @@
         '<span>Октябрь уже запущен · новый приз <b>35 000 ₽</b></span></div></aside>' },
         { date: "2026-09-28T12:00:00", html:
           '<article class="home-friend-news-modal__editorial"><small>POKER21 · МТТ · ДВЕ ЛИГИ</small>' +
-          '<h3>Стартовал МТТ-лидерборд на 700 000 ₽</h3>' +
+          '<h3 class="home-news-mtt-title">Стартовал МТТ-лидерборд на 700 000 ₽</h3>' +
           '<p>На Poker21 запущен новый МТТ-лидерборд на три месяца. Игроки соревнуются по лигам за общий призовой фонд 700 000 ₽.</p>' +
           '<img src="./assets/home-mtt-leaderboard-winners.webp" alt="Победители прошлого МТТ-лидерборда Poker21">' +
           '<p>Победители прошлого лидерборда Poker21: <b>ПокерМанки — 250 000 ₽</b>, <b>Ваар — 150 000 ₽</b>, <b>Кулер — 100 000 ₽</b>. Поздравляем чемпионов и желаем удачи участникам нового сезона!</p></article>' }
