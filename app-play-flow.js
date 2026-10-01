@@ -9,9 +9,28 @@
 
   var coolerSpeech = null;
   var coolerSpeechTimer = null;
+  var coolerMotionTimer = null;
+  var coolerMotionArt = null;
+  var coolerMotionClone = null;
   document.addEventListener("click", function (event) {
     var target = event.target.closest && event.target.closest(".evening-reference__cooler-hit");
     if (!target) return;
+    clearTimeout(coolerMotionTimer);
+    if (coolerMotionClone) coolerMotionClone.remove();
+    if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
+    coolerMotionArt = target.parentElement.querySelector("img.evening-reference__art--portal-side");
+    if (coolerMotionArt && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      coolerMotionClone = coolerMotionArt.cloneNode(false);
+      coolerMotionClone.classList.add("evening-cooler-motion");
+      coolerMotionArt.classList.add("evening-cooler-motion-source");
+      coolerMotionArt.after(coolerMotionClone);
+      coolerMotionTimer = setTimeout(function () {
+        if (coolerMotionClone) coolerMotionClone.remove();
+        if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
+        coolerMotionClone = null;
+        coolerMotionArt = null;
+      }, 700);
+    }
     clearTimeout(coolerSpeechTimer);
     if (coolerSpeech) coolerSpeech.remove();
     coolerSpeech = document.createElement("div");
