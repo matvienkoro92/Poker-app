@@ -5488,3 +5488,33 @@ body.profile-month-story-open { overflow: hidden; }
 #app #profilePublicShowcase .profile-public-showcase__name-actions #profileNameEditBtn{position:static!important;transform:none!important;margin:0!important;flex:0 0 34px!important}
 #app #profilePublicShowcase .profile-public-showcase__name-actions #profileNameEditBtn{order:0!important}
 #app #profilePublicShowcase .profile-public-showcase__name-actions .profile-public-showcase__appearance{order:1!important}
+
+/* Narrow owner profile: give the character room and keep the level readable. */
+@media(max-width:480px) {
+ .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero.chat-user-modal__hero {grid-template-columns:minmax(0,1fr) minmax(0,1.12fr)!important;gap:8px!important;padding:10px 8px!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__hero-status {min-width:0!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__rating-art {height:230px!important;min-width:0!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img {width:100%!important;max-width:100%!important;height:94%!important;max-height:94%!important;object-fit:contain!important;object-position:center!important;transform:none!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__title {font-size:18px!important;line-height:1.15!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__status-title {font-size:15px!important;line-height:1.2!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__level-text {font-size:40px!important;line-height:1.1!important;margin:8px 0!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__level-rest {font-size:20px!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__status-xp {font-size:13px!important;line-height:1.3!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__status-track {height:11px!important;}
+ .view[data-view="profile"] #profilePublicShowcase .profile-status__refresh-feedback {font-size:10px!important;line-height:1.35!important;overflow-wrap:anywhere;}
+ .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name {gap:5px!important;flex-wrap:wrap!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__verified {width:20px!important;height:20px!important;font-size:14px!important;}
+ .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__appearance {font-size:10px!important;min-height:26px!important;padding:3px 6px!important;}
+}
+@media(max-width:480px) {
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__rating-art {position:relative!important;width:100%!important;max-width:100%!important;overflow:hidden!important;transform:none!important;}
+ .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__hero--art .chat-user-modal__rating-art-img {position:absolute!important;inset:0!important;margin:auto!important;}
+}
+
+.view[data-view="profile"] .profile-review-invite:not(.profile-review-invite--push) {padding:10px 12px;gap:8px 12px;}
+.profile-review-invite__copy > span {display:none!important;}
+@media(max-width:620px) {
+ .view[data-view="profile"] .profile-review-invite:not(.profile-review-invite--push) {grid-template-columns:42px minmax(0,1fr);}
+ .profile-review-invite:not(.profile-review-invite--push) .profile-review-invite__icon {width:42px;height:42px;font-size:23px;border-radius:13px;}
+ .profile-review-invite:not(.profile-review-invite--push) .profile-review-invite__button {min-height:36px;}
+}

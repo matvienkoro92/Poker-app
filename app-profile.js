@@ -958,7 +958,7 @@ function profileReviewInviteRender() {
   invite.classList.toggle("profile-review-invite--push", needsPush);
   invite.querySelector(".profile-review-invite__icon").textContent = needsPush ? "♧" : "🏆";
   invite.querySelector(".profile-review-invite__copy strong").textContent = needsPush ? "Включите пуш, чтобы получать уведомления" : "Оставьте для клуба отзыв или предложение/идею.";
-  invite.querySelector(".profile-review-invite__copy > span").textContent = needsPush ? "" : "Помогите клубу в развитии и получите новую ачивку.";
+  invite.querySelector(".profile-review-invite__copy > span").textContent = "";
   document.getElementById("profileReviewInviteBtn").textContent = needsPush ? "Включить →" : "Перейти к отзывам";
 }
 
