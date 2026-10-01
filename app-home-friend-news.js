@@ -2994,7 +2994,7 @@
         return '<div class="home-news-month-results__leader"><span class="home-news-month-results__place">' + (index + 1) + '</span>' +
           (art[player.nick] ? '<img src="./assets/' + art[player.nick] + '" alt="" aria-hidden="true" loading="lazy">' : '') +
           '<b>' + esc(player.nick) + '</b><strong>' + esc(rub(player.reward)) + '</strong></div>';
-      }).join('') + '</div><div class="home-news-month-results__best"><img src="./assets/achievement-trophy-big100-v1.webp" alt="" aria-hidden="true" loading="lazy"><div><small>КРУПНЕЙШИЙ ЗАНОС</small><b>' + esc(data.topWins[0].nick) + '<strong>' + esc(rub(data.topWins[0].reward)) + '</strong></b></div></div></div>';
+      }).join('') + '</div><div class="home-news-month-results__best"><img src="./assets/achievement-trophy-big100-v1.webp?v=20261001-news" alt="" aria-hidden="true" onerror="this.onerror=null;this.src=\'./assets/home-tournament-trophy-button-v1.webp?v=20261001-news\'"><div><small>КРУПНЕЙШИЙ ЗАНОС</small><b>' + esc(data.topWins[0].nick) + '<strong>' + esc(rub(data.topWins[0].reward)) + '</strong></b></div></div></div>';
     }
     function ranking(rows, total) {
       return '<ol class="home-news-month-results__ranking">' + rows.map(function (row) {
