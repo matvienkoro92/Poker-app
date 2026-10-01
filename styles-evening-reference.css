@@ -305,5 +305,5 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  translate:0 -3px;
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop,.evening-reference__art--player-left,.evening-reference__art--player-middle,.evening-reference__art--player-right,.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center,.home-tournament-play-sign) {
- translate:0 -17px;
+ translate:0 -34px;
 }
