@@ -85,7 +85,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 /* Fill the viewport width; shorter screens scroll instead of shrinking the scene. */
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .play-flow__panel--tournament {
  align-items:flex-start!important;overflow-y:auto!important;overflow-x:hidden!important;
- background:#100b08 url('./assets/evening-two-aces-room-v2.webp') center/cover no-repeat!important;
+ background:#100b08!important;
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tournament > .play-tournament-scene {
  width:100%!important;min-height:100%;
@@ -328,7 +328,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 .evening-vpn-cat-dialog a {background:#7550a2;}
 
 /* A low oval woven rug under both sleeping and awake cat poses. */
-.evening-vpn-cat::before {content:"";position:absolute;left:-12%;bottom:13%;width:124%;height:28%;border:2px solid #75604e;border-radius:50%;background:repeating-radial-gradient(ellipse at center,#51423a 0 2px,#665347 3px 4px,#44362e 5px 6px);box-shadow:0 3px 7px #0009,inset 0 0 0 3px #30271f;transform:rotate(-5deg);}
+.evening-vpn-cat::before {content:"";position:absolute;left:-12%;bottom:13%;width:124%;height:28%;border:2px solid #75604e;border-radius:50%;background:repeating-radial-gradient(ellipse at center,#51423a 0 2px,#665347 3px 4px,#44362e 5px 6px);box-shadow:0 3px 7px #0009,inset 0 0 0 3px #30271f;transform:none;}
 .evening-vpn-cat__sprite {position:relative;z-index:1;}
 
 /* Keep only the transparent cat and its oval rug, without button chrome. */
@@ -336,7 +336,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important;
 }
 .evening-vpn-cat::after {content:none!important;display:none!important;}
-.evening-vpn-cat__sprite {transform:scaleX(-1);}
+.evening-vpn-cat__sprite {transform:rotate(3deg) scaleX(-1);}
 @media(max-width:680px) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {bottom:24%;}
 }
