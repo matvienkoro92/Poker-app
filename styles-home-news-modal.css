@@ -3017,7 +3017,7 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-news-achievement__player {display:grid;place-items:center;min-width:0;}
 .home-news-achievement__player img {width:68px;height:68px;object-fit:cover;border-radius:50%;border:1px solid #bd903f80;margin:0;background:#0b1117;}
 .home-news-achievement__player.is-personal img {width:76px;height:112px;object-fit:contain;border:0;border-radius:0;background:none;filter:drop-shadow(0 4px 8px #0006);}
-.home-news-achievement__art {display:grid;place-items:center;align-self:stretch;min-height:88px;border-radius:12px;background:radial-gradient(ellipse,#efad3420,transparent 70%);}
+.home-news-achievement__art {display:grid;place-items:center;align-self:stretch;min-height:88px;}
 .home-news-achievement__art img {width:76px;height:90px;object-fit:contain;margin:0;border-radius:0;filter:drop-shadow(0 3px 7px #0006);}
 .home-news-achievement__copy {min-width:0;}
 .home-news-achievement__copy > small {font-size:9px;letter-spacing:.05em;line-height:1.4;}

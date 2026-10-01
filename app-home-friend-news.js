@@ -2947,7 +2947,7 @@
   }
 
   function clubAchievementPosts() {
-    var newsArt = { first: "chat-profile-achievement-cup.webp", personal: "chat-profile-achievement-top-win-2026.webp", milestone: "achievement-trophy-big100-v1.webp", big: "achievement-trophy-big50-v1.webp", record: "achievement-trophy-king-v1.webp", series: "chat-profile-achievement-legend.webp", weekly: "achievement-trophy-month-v1.webp" };
+    var newsArt = { first: "news-category-first-poker21-v2.webp", personal: "news-category-personal-poker21-v2.webp", milestone: "news-category-milestone-poker21-v2.webp", big: "news-category-big-poker21-v2.webp", record: "news-category-record-poker21-v2.webp", series: "news-category-series-poker21-v2.webp", weekly: "news-category-weekly-poker21-v2.webp" };
     var titles = { record: "Рекорд недели", first: "Первые победы", series: "Серия побед", big: "Крупные заносы дня", personal: "Новые личные рекорды", milestone: "Рубеж по призовым", weekly: "Итоги турнирной недели" };
     function rub(n) { return Number(n || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
     function period(item) { return item.start.split('-').reverse().join('.') + ' — ' + item.end.split('-').reverse().join('.'); }
