@@ -130,3 +130,12 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art,.home-tournament-play-sign,.home-tournament-bonuses) {
  transform:translateY(var(--evening-scene-drop))!important;
 }
+
+/* Show the seated players above the rail and turn the middle player toward the portal. */
+.evening-reference__art--player-left {top:32.5%;}
+.evening-reference__art--player-middle {top:31.5%;}
+.evening-reference__art--player-right {top:32.5%;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-middle {
+ transform:translateY(var(--evening-scene-drop)) scaleX(-1)!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:18%;z-index:6;}
