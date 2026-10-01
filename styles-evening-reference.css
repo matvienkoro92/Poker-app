@@ -278,14 +278,14 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
   transform:translateY(max(28px, env(safe-area-inset-top, 0px)))!important;
  }
 }
-/* Chair backs follow the seated players, with matching vertical offsets. */
-body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:1%;top:calc(35.5% + 4cqw);}
-body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:55%;top:calc(34.5% + 5cqw);}
-body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:79%;top:calc(35.5% + 4cqw);}
+/* Occupied chairs sit behind the players’ hips; the table hides the seats. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:8%;width:18%;top:calc(35.5% + 10cqw);}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:57%;width:20%;top:calc(34.5% + 10cqw);}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:79%;width:18%;top:calc(35.5% + 10cqw);}
 @media(min-aspect-ratio:3/5){
- body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:7.5%;top:calc(100% - 65cqw);}
- body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:58%;top:calc(100% - 64cqw);}
- body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:73.5%;top:calc(100% - 65cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:14%;width:18%;top:calc(100% - 61cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:58%;width:20%;top:calc(100% - 61cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:73%;width:18%;top:calc(100% - 61cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-center {top:calc(100% - 65cqw);}
 }
 /* Additional right-portal adjustment for the narrow composition only. */
@@ -293,4 +293,9 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
   transform:translateY(calc(var(--evening-scene-drop) + 11px)) scale(.836)!important;
  }
+}
+
+/* Shift both complete portal groups together by 14 screen pixels. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--portal-top,.evening-reference__art--portal-ring,.evening-reference__art--portal-side) {
+ translate:0 14px;
 }
