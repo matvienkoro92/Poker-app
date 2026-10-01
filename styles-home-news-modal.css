@@ -2895,3 +2895,12 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
  .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__day-tabs button {min-height:28px;padding:4px 7px;font-size:10px;}
  .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__date {margin:6px 0;}
 }
+
+.home-friend-news-modal__hero-month-result {display:flex;align-items:center;gap:14px;margin:10px 0 14px;padding:14px;border:1px solid #c59a4b;border-radius:18px;background:radial-gradient(ellipse at left,#69502066,transparent 65%),linear-gradient(135deg,#191b1c,#090d10);color:#f8e4b3;overflow:hidden;}
+.home-friend-news-modal__hero-month-result img {width:100px;height:140px;object-fit:contain;align-self:end;}
+.home-friend-news-modal__hero-month-result small {font-size:10px;letter-spacing:.08em;color:#e2bc70;}
+.home-friend-news-modal__hero-month-result h3 {margin:6px 0;font-size:24px;}
+.home-friend-news-modal__hero-month-result strong {font-size:26px;color:#ffe094;}
+.home-friend-news-modal__hero-month-result p {margin:6px 0;font-size:12px;}
+.home-friend-news-modal__hero-month-result span {display:block;padding-top:8px;border-top:1px solid #a77d3955;font-size:12px;}
+@media(max-width:480px){.home-friend-news-modal__hero-month-result {gap:8px;padding:10px;}.home-friend-news-modal__hero-month-result img {width:76px;height:120px;}.home-friend-news-modal__hero-month-result h3 {font-size:20px;}.home-friend-news-modal__hero-month-result strong {font-size:23px;}}

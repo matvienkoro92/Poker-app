@@ -1008,9 +1008,6 @@
   }
 
   function clubCurrentHeroMonth() {
-    var data = window.POKER_CLUB_NEWS_DATA || {};
-    var match = String(data.latestDate || "").match(/^\d{2}\.(\d{2})\.(\d{4})$/);
-    if (match) return { month: Number(match[1]), year: Number(match[2]) };
     var now = new Date();
     return { month: now.getMonth() + 1, year: now.getFullYear() };
   }
@@ -2922,13 +2919,20 @@
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
           '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/home-news-day-hero-ape-v1.webp" alt="" aria-hidden="true" loading="lazy">' +
           '<span class="home-friend-news-modal__achievement-promo-content"><b>ГЕРОЙ ДНЯ В ' + esc(clubHeroMonthPrepositionLabel().toUpperCase()) + '</b>' +
-          '<strong>' + (clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
+          '<strong>' + (clubCurrentHeroMonth().month === 10 && clubCurrentHeroMonth().year === 2026 ? '35 000' : clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
           '<small class="home-friend-news-modal__achievement-promo-leader">' + (heroStandings[0] ? 'Лидирует ' + clubHeroStandingHtml(heroStandings[0]) : 'Награда лидеру месяца') + '</small></span>' +
           '<span class="home-friend-news-modal__achievement-promo-side">' +
           (heroStandings[1] ? '<small class="home-friend-news-modal__achievement-promo-runner">2-е место: ' + clubHeroStandingHtml(heroStandings[1]) + '</small>' : '') +
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
         '</aside>'
       : "";
+    if (newsModalMode === "club" && clubNewsTab === "wins") {
+      achievementPromo = '<aside class="home-friend-news-modal__hero-month-result" aria-label="Итоги Героя дня за сентябрь">' +
+        '<img src="./assets/summer-rating-player-pokermanki-v3.webp" alt="ПокерМанки">' +
+        '<div><small>ИТОГИ СЕНТЯБРЯ · ГЕРОЙ ДНЯ</small><h3>ПокерМанки</h3>' +
+        '<strong>Приз 25 000 ₽</strong><p>Герой дня 3 раза · выигрыши 400 238,45 ₽</p>' +
+        '<span>Октябрь уже запущен · новый приз <b>35 000 ₽</b></span></div></aside>' + achievementPromo;
+    }
     if (newsModalMode === "club" && clubNewsTab === "cash") {
       patchNewsList(list, clubTabs + clubCashHighlightsHtml());
       list.querySelectorAll('.home-friend-news-modal__cash-hand').forEach(function (details) {details.addEventListener('toggle',function () {loadClubCashReplay(details);});});
