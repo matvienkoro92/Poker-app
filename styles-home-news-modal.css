@@ -3013,7 +3013,10 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 
 /* Achievement news uses the club's existing illustrated awards. */
 .home-news-achievement {background:radial-gradient(ellipse at 8% 25%,#a8772830,transparent 55%),linear-gradient(125deg,#211e17,#0b1016);}
-.home-news-achievement__preview {display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:12px;margin-bottom:12px;}
+.home-news-achievement__preview {display:grid;grid-template-columns:68px minmax(0,1fr) 76px;align-items:center;gap:10px;margin-bottom:12px;}
+.home-news-achievement__player {display:grid;place-items:center;min-width:0;}
+.home-news-achievement__player img {width:68px;height:68px;object-fit:cover;border-radius:50%;border:1px solid #bd903f80;margin:0;background:#0b1117;}
+.home-news-achievement__player.is-personal img {width:76px;height:112px;object-fit:contain;border:0;border-radius:0;background:none;filter:drop-shadow(0 4px 8px #0006);}
 .home-news-achievement__art {display:grid;place-items:center;align-self:stretch;min-height:88px;border-radius:12px;background:radial-gradient(ellipse,#efad3420,transparent 70%);}
 .home-news-achievement__art img {width:76px;height:90px;object-fit:contain;margin:0;border-radius:0;filter:drop-shadow(0 3px 7px #0006);}
 .home-news-achievement__copy {min-width:0;}
@@ -3021,4 +3024,4 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-news-achievement__copy h3 {font-size:clamp(16px,5cqw,21px);line-height:1.15;margin:6px 0;}
 .home-news-achievement__copy p.home-news-achievement__lead {font-size:12px;line-height:1.4;margin:0;color:#f5d99d;}
 .home-news-achievement details {background:linear-gradient(90deg,#13181d,#0a0f14);}
-@media(max-width:360px) {.home-news-achievement__preview {grid-template-columns:62px minmax(0,1fr);gap:9px;}.home-news-achievement__art img {width:62px;height:82px;}}
+@media(max-width:360px) {.home-news-achievement__preview {grid-template-columns:48px minmax(0,1fr) 54px;gap:7px;}.home-news-achievement__art img {width:48px;height:72px;}.home-news-achievement__player img {width:50px;height:50px;}.home-news-achievement__player.is-personal img {width:54px;height:90px;}}

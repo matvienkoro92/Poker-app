@@ -2947,7 +2947,7 @@
   }
 
   function clubAchievementPosts() {
-    var newsArt = { first: "home-tournament-trophy-button-v1.webp", personal: "home-tournament-trophy-button-v1.webp", milestone: "home-news-cash-black-gold-chips-v1.webp", big: "home-news-cash-black-gold-chips-v1.webp", record: "summer-rating-player-pokermanki-v3.webp", series: "home-tournament-trophy-button-v1.webp", weekly: "hall-top2026-trophy-v4.webp" };
+    var newsArt = { first: "chat-profile-achievement-cup.webp", personal: "chat-profile-achievement-top-win-2026.webp", milestone: "achievement-trophy-big100-v1.webp", big: "achievement-trophy-big50-v1.webp", record: "achievement-trophy-king-v1.webp", series: "chat-profile-achievement-legend.webp", weekly: "achievement-trophy-month-v1.webp" };
     var titles = { record: "Рекорд недели", first: "Первые победы", series: "Серия побед", big: "Крупные заносы дня", personal: "Новые личные рекорды", milestone: "Рубеж по призовым", weekly: "Итоги турнирной недели" };
     function rub(n) { return Number(n || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
     function period(item) { return item.start.split('-').reverse().join('.') + ' — ' + item.end.split('-').reverse().join('.'); }
@@ -2972,11 +2972,14 @@
           return '<li><b>' + esc(r.nick + ' — ' + result) + '</b><small>' + esc(context) + '</small></li>';
         }).join('') + '</ul>';
       }
-      var playerArt = { "ПокерМанки": "summer-rating-player-pokermanki-v3.webp", "Ваар": "summer-rating-player-waaar.webp", "Luck_is_Suck": "club-news-personal/luck-is-suck-personal-cutout.webp" };
-      var leadNick = post.kind === "record" ? first.top[0].nick : first.nick;
-      var image = playerArt[leadNick] || (post.kind === "record" ? "home-tournament-trophy-button-v1.webp" : newsArt[post.kind]);
+      var leadNick = post.kind === "record" || post.kind === "weekly" ? first.top[0].nick : first.nick;
+      var personalArt = clubNewsPersonalArt(leadNick);
+      var profile = clubProfileForNick(leadNick);
+      var playerImage = personalArt || (profile && profile.avatar) || clubNewsFallbackAvatar(leadNick);
+      var playerHtml = '<div class="home-news-achievement__player' + (personalArt ? ' is-personal' : '') + '"><img src="' + esc(playerImage) + '" alt="' + esc(leadNick) + '" loading="lazy"></div>';
+      var image = newsArt[post.kind];
       var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
-      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/' + image + '" alt="" aria-hidden="true" loading="lazy"></div><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div></div>' +
+      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/' + image + '" alt="" aria-hidden="true" loading="lazy"></div><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
         '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
         '<p class="home-news-achievement__note">По данным клуба. Призовые до вычета бай-инов.' + (['first','personal','milestone'].indexOf(post.kind) !== -1 ? ' Достижение за доступную историю учёта.' : '') + '</p></details></article>' };
     }).filter(Boolean);
@@ -2996,26 +2999,13 @@
           '<b>' + esc(player.nick) + '</b><strong>' + esc(rub(player.reward)) + '</strong></div>';
       }).join('') + '</div><div class="home-news-month-results__best"><img src="./assets/achievement-trophy-big100-v1.webp?v=20261001-news" alt="" aria-hidden="true" onerror="this.onerror=null;this.src=\'./assets/home-tournament-trophy-button-v1.webp?v=20261001-news\'"><div><small>КРУПНЕЙШИЙ ЗАНОС</small><b>' + esc(data.topWins[0].nick) + '<strong>' + esc(rub(data.topWins[0].reward)) + '</strong></b></div></div></div>';
     }
-    function ranking(rows, total) {
-      return '<ol class="home-news-month-results__ranking">' + rows.map(function (row) {
-        return '<li><div><b>' + esc(row.nick) + '</b><small>' + esc(total
-          ? row.wins + ' попаданий в деньги · ' + row.firstPlaces + ' первых мест'
-          : row.date + ' · ' + row.tournament + ' · ' + row.place + '-е место') +
-          '</small></div><strong>' + esc(rub(row.reward)) + '</strong></li>';
-      }).join('') + '</ol>';
-    }
-    return '<article class="home-friend-news-modal__editorial home-news-month-results"><small>ДОСТИЖЕНИЯ КЛУБА · 1–30 СЕНТЯБРЯ 2026</small>' +
+    return '<article class="home-friend-news-modal__editorial home-news-month-results">' +
       '<h3>Итоги сентября</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
       '<p class="home-news-month-results__highlights">' + esc(data.firstPlaces) + ' побед · ' + esc(data.paidFinishes) + ' призовых финиша</p>' +
       leadersPreview() +
-      '<details class="home-news-month-results__spoiler" data-month-ranking="summary"><summary>Достижения и топ-10<span aria-hidden="true">⌄</span></summary><div class="home-news-month-results__body">' +
       '<div class="home-news-month-results__metrics">' + metric(data.big50, 'Заносов 50–99 тыс. ₽') + metric(data.big100, 'Заносов 100 тыс. ₽+') +
         metric(data.firstPlaces, 'Первых мест') + metric(data.podiums, 'Финишей в топ-3') + metric(data.paidFinishes, 'Попаданий в деньги') + metric(data.players, 'Игроков с призовыми') + '</div>' +
-      '<p>Результаты в ' + esc(data.tournaments) + ' турнире за ' + esc(data.days) + ' дней. Выдано ' + esc(data.heroAwards) + ' ачивок «Герой дня».</p>' +
-      '<p class="home-news-month-results__record">Крупнейший занос: <b>' + esc(data.topWins[0].nick) + ' — ' + esc(rub(data.topWins[0].reward)) + '</b><br>' + esc(data.topWins[0].tournament + ' · ' + data.topWins[0].date) + '</p>' +
-      '<details data-month-ranking="single"><summary>Топ-10 крупнейших заносов<span aria-hidden="true">⌄</span></summary>' + ranking(data.topWins, false) + '</details>' +
-      '<details data-month-ranking="total"><summary>Топ-10 по сумме выигрышей<span aria-hidden="true">⌄</span></summary>' + ranking(data.topTotals, true) + '</details>' +
-      '<p class="home-news-month-results__note">По внесённым результатам клуба. Призовые до вычета бай-инов. Диапазон 50–99 тыс. ₽: от 50 000 ₽ до 100 000 ₽.</p></div></details></article>';
+      '</article>';
   }
 
   function renderModalList(rows, force) {
