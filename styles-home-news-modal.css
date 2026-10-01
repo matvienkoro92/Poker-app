@@ -2960,3 +2960,14 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-news-month-results__ranking strong {font-size:12px;white-space:nowrap;color:#ffe0a0;font-variant-numeric:tabular-nums;}
 .home-news-month-results p.home-news-month-results__note {font-size:10px;color:#a59e8e;line-height:1.4;}
 @media(max-width:360px) {.home-news-month-results__metrics {grid-template-columns:repeat(2,minmax(0,1fr));}.home-news-month-results__ranking li {gap:5px;}.home-news-month-results__ranking strong {font-size:11px;}}
+
+/* Compact month recap; the full report stays behind one disclosure. */
+.home-news-month-results {padding:14px 16px;background:radial-gradient(ellipse at top right,#a5752120,transparent 65%),linear-gradient(130deg,#211e17,#0b1016);}
+.home-news-month-results h3 {margin:8px 0 10px;font-size:20px;line-height:1.2;}
+.home-news-month-results__total {margin:0;padding:0;border:0;gap:3px;}
+.home-news-month-results__total strong {font-size:clamp(24px,7.4cqw,32px);letter-spacing:-.025em;}
+.home-news-month-results__total span {font-size:12px;}
+.home-news-month-results p.home-news-month-results__highlights {margin:10px 0 12px;font-size:12px;color:#d7c69d;}
+.home-news-month-results details.home-news-month-results__spoiler {margin:0;border-color:#a5813940;background:#080d1238;}
+.home-news-month-results__spoiler > summary {padding:10px 12px;font-size:12px;}
+.home-news-month-results__body {padding:4px 10px 8px;border-top:1px solid #a5813930;}

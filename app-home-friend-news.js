@@ -2961,14 +2961,16 @@
       }).join('') + '</ol>';
     }
     return '<article class="home-friend-news-modal__editorial home-news-month-results"><small>ДОСТИЖЕНИЯ КЛУБА · 1–30 СЕНТЯБРЯ 2026</small>' +
-      '<h3>Сентябрь за турнирными столами</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
+      '<h3>Итоги сентября</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
+      '<p class="home-news-month-results__highlights">' + esc(data.firstPlaces) + ' побед · ' + esc(data.paidFinishes) + ' призовых финиша</p>' +
+      '<details class="home-news-month-results__spoiler" data-month-ranking="summary"><summary>Достижения и топ-10<span aria-hidden="true">⌄</span></summary><div class="home-news-month-results__body">' +
       '<div class="home-news-month-results__metrics">' + metric(data.big50, 'Заносов 50–99 тыс. ₽') + metric(data.big100, 'Заносов 100 тыс. ₽+') +
         metric(data.firstPlaces, 'Первых мест') + metric(data.podiums, 'Финишей в топ-3') + metric(data.paidFinishes, 'Попаданий в деньги') + metric(data.players, 'Игроков с призовыми') + '</div>' +
       '<p>Результаты в ' + esc(data.tournaments) + ' турнире за ' + esc(data.days) + ' дней. Выдано ' + esc(data.heroAwards) + ' ачивок «Герой дня».</p>' +
       '<p class="home-news-month-results__record">Крупнейший занос: <b>' + esc(data.topWins[0].nick) + ' — ' + esc(rub(data.topWins[0].reward)) + '</b><br>' + esc(data.topWins[0].tournament + ' · ' + data.topWins[0].date) + '</p>' +
       '<details data-month-ranking="single"><summary>Топ-10 крупнейших заносов<span aria-hidden="true">⌄</span></summary>' + ranking(data.topWins, false) + '</details>' +
       '<details data-month-ranking="total"><summary>Топ-10 по сумме выигрышей<span aria-hidden="true">⌄</span></summary>' + ranking(data.topTotals, true) + '</details>' +
-      '<p class="home-news-month-results__note">По внесённым результатам клуба. Призовые до вычета бай-инов. Диапазон 50–99 тыс. ₽: от 50 000 ₽ до 100 000 ₽.</p></article>';
+      '<p class="home-news-month-results__note">По внесённым результатам клуба. Призовые до вычета бай-инов. Диапазон 50–99 тыс. ₽: от 50 000 ₽ до 100 000 ₽.</p></div></details></article>';
   }
 
   function renderModalList(rows, force) {
