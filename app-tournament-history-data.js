@@ -677,6 +677,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             17700
           ]
         ]
+      ],
+      [
+        "30.09.2026",
+        [
+          [
+            1,
+            "Waaar",
+            31500
+          ]
+        ]
       ]
     ]
   },

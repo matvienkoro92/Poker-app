@@ -441,6 +441,14 @@ async function parseOcrFile(file) {
   if (date === "29.09.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "29.09.2026" && blue && time === "08:00" && /^Island bounty/i.test(title)) { buyin = 200; title = "Island bounty🌴 20k"; }
   if (date === "29.09.2026" && blue && time === "20:00" && /^HR 5000/i.test(title)) buyin = 5000;
+  // September 30: reuse the owner's saved fees as requested; blue headers are stacks.
+  if (date === "30.09.2026") {
+    if (!blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА КО";
+    if (blue && /^S\.Bounty/i.test(title)) buyin = 1500;
+    if (blue && /^Island bounty/i.test(title)) { buyin = 200; title = "Island bounty🌴 20k"; }
+    if (blue && /^DV.*Bounty.*100k/i.test(title)) buyin = 1000;
+    if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
+  }
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "29.09.2026" && time === "18:00" && token.text === "yID:709473") token.text = "ID:709473";
