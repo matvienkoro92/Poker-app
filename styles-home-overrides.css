@@ -6378,3 +6378,7 @@ html body .bottom-nav .bottom-nav__badge {
  #app.app.app--view-home .home-daily-deal-hero {height:309.6px!important;}
  #app.app.app--view-home .home-daily-deal-hero__image {top:-86.4px!important;}
 }
+/* Extra clearance below the header on Pro Max width phones. */
+@media (min-width:390px) and (max-width:440px) {
+ #app.app.app--view-home .home-daily-deal-hero__image {top:-36.2px!important;}
+}
