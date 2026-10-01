@@ -5502,7 +5502,7 @@ body.profile-month-story-open { overflow: hidden; }
  .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__status-xp {font-size:13px!important;line-height:1.3!important;}
  .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__status-track {height:11px!important;}
  .view[data-view="profile"] #profilePublicShowcase .profile-status__refresh-feedback {font-size:10px!important;line-height:1.35!important;overflow-wrap:anywhere;}
- .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name {gap:5px!important;flex-wrap:wrap!important;}
+ .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name {gap:5px!important;flex-wrap:nowrap!important;}
  .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__verified {width:20px!important;height:20px!important;font-size:14px!important;}
  .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__appearance {font-size:10px!important;min-height:26px!important;padding:3px 6px!important;}
 }
@@ -5518,3 +5518,17 @@ body.profile-month-story-open { overflow: hidden; }
  .profile-review-invite:not(.profile-review-invite--push) .profile-review-invite__icon {width:42px;height:42px;font-size:23px;border-radius:13px;}
  .profile-review-invite:not(.profile-review-invite--push) .profile-review-invite__button {min-height:36px;}
 }
+
+/* Keep the owner identity and appearance action on one compact row. */
+#app .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name {
+ display:flex!important;align-items:center!important;flex-wrap:nowrap!important;gap:6px!important;min-width:0;width:100%;container-type:inline-size;
+}
+#app .view[data-view="profile"] #profilePublicShowcase #profilePublicTitle {
+ flex:0 1 auto!important;min-width:0!important;margin:0!important;font-size:clamp(11px,8cqw,24px)!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#app .view[data-view="profile"] #profilePublicShowcase #profilePublicVerifiedBadge {flex:0 0 auto!important;width:clamp(16px,9cqw,24px)!important;height:clamp(16px,9cqw,24px)!important;font-size:clamp(11px,6cqw,17px)!important;}
+#app .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name .profile-public-showcase__appearance {
+ position:static!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;margin:0!important;min-height:26px!important;padding:5px 8px!important;border:1px solid #c49b5080!important;border-radius:9px!important;background:linear-gradient(145deg,#49351c,#191b1e 75%)!important;box-shadow:inset 0 1px 0 #ffe3a022,0 2px 6px #0003!important;color:#ffe0a0!important;font-size:clamp(9px,4.8cqw,13px)!important;font-weight:600!important;line-height:1.15!important;white-space:nowrap!important;
+}
+#app .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__appearance:hover {border-color:#e4bd73!important;filter:brightness(1.12);}
+#app .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__appearance:focus-visible {outline:2px solid #f4cb80;outline-offset:3px;}
