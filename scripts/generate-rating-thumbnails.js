@@ -8,6 +8,9 @@ const sharp = require("sharp");
 const root = path.join(__dirname, "..");
 const assetsDir = path.join(root, "assets");
 const outputDir = path.join(assetsDir, "rating-thumbnails");
+const archivePath = path.join(root, "season-archive.json");
+const archive = fs.existsSync(archivePath) ? JSON.parse(fs.readFileSync(archivePath, "utf8")) : {};
+const archivedFiles = new Map([...(archive.files || []), ...(archive.summer?.files || [])].map(entry => [entry.file, entry]));
 const mapFiles = [
   "winter-rating-data.js",
   "spring-rating-images-league1.js",
@@ -41,6 +44,13 @@ async function main() {
     const parsed = path.parse(relative);
     const destination = path.join(outputDir, parsed.dir, parsed.name + ".avif");
     if (!fs.existsSync(source)) continue;
+    // Git checkout timestamps do not describe image changes. Preserve published
+    // archive bytes instead of re-encoding them with the CI platform's encoder.
+    const archived = archivedFiles.get(path.relative(assetsDir, destination).split(path.sep).join("/"));
+    if (archived && fs.existsSync(destination) && require("crypto").createHash("sha256").update(fs.readFileSync(destination)).digest("hex") === archived.sha256) {
+      skipped += 1;
+      continue;
+    }
     const sourceStat = fs.statSync(source);
     if (fs.existsSync(destination) && fs.statSync(destination).mtimeMs >= sourceStat.mtimeMs) {
       skipped += 1;
