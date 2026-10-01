@@ -121,3 +121,12 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 .evening-reference__art--table {top:39%;}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(39% + 37.4cqw)!important;}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {top:calc(39% + 65cqw)!important;}
+
+/* Anchor the table near the screen bottom without moving the tournament ticket. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
+ --evening-scene-drop:max(4cqw,calc(59cqh - 63.5cqw));
+ overflow:visible!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art,.home-tournament-play-sign,.home-tournament-bonuses) {
+ transform:translateY(var(--evening-scene-drop))!important;
+}
