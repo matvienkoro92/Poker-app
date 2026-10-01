@@ -6254,3 +6254,108 @@ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) .player-stickers-modal{p
 
 /* Keep the daily-deal artwork free of the admin version label. */
 #app.app .home-daily-deal-hero__admin-version {display:none!important;}
+
+/* Enlarge the daily-deal character while keeping its right-edge anchor. */
+#app.app.app--view-home .home-daily-deal-hero__image {transform:scale(1.1);transform-origin:right bottom;}
+
+@media (min-width:681px) {
+ #app.app.app--view-home .home-daily-deal-hero__image {height:190%!important;top:-72px!important;right:-20px!important;transform:none!important;}
+}
+
+/* One shared height and alignment for all five navigation destinations. */
+html body .bottom-nav {
+ align-items:stretch!important;gap:6px!important;
+ padding:8px max(8px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))!important;
+ background:linear-gradient(180deg,#141820,#090c12)!important;border-top:1px solid #d6ae5b40!important;
+ box-shadow:0 -8px 28px #0005!important;
+}
+html body .bottom-nav__chat-wrap {display:flex!important;align-items:stretch!important;flex:1!important;min-width:0!important;max-width:110px!important;}
+html body .bottom-nav .bottom-nav__item {
+ height:66px!important;min-height:66px!important;max-height:66px!important;max-width:110px!important;
+ margin:0!important;padding:6px 3px!important;gap:3px!important;transform:none!important;
+ border:1px solid #b78e464f!important;border-radius:16px!important;
+ background:linear-gradient(155deg,#222834,#10151e)!important;color:#d9dce2!important;
+ box-shadow:inset 0 1px 0 #ffffff0c!important;letter-spacing:0!important;font-size:10px!important;
+}
+html body .bottom-nav .bottom-nav__icon {width:26px!important;height:26px!important;min-height:26px!important;margin:0!important;background:transparent!important;box-shadow:none!important;transform:none!important;}
+html body .bottom-nav .bottom-nav__emoji {font-size:23px!important;transform:none!important;filter:none!important;}
+html body .bottom-nav .bottom-nav__label {height:24px!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:pre-line!important;text-align:center!important;line-height:1.1!important;font-weight:700!important;color:inherit!important;text-shadow:none!important;}
+html body .bottom-nav .bottom-nav__item--active {
+ background:linear-gradient(145deg,#ffe6ac,#d6a653)!important;color:#30200a!important;border-color:#ffe6a3!important;
+ box-shadow:inset 0 1px 0 #fff6d9,0 3px 14px #dbad4e20!important;
+}
+html body .bottom-nav .bottom-nav__item:focus-visible {outline:2px solid #ffe6a3;outline-offset:2px;}
+
+@media(max-width:680px) {
+ #app.app #headerPokerStatus:has([data-status-fish-level="0"]) #headerPokerStatusLevel {
+  font-size:clamp(7px,2.2vw,10px)!important;letter-spacing:-.02em!important;
+  white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.15!important;text-align:right;max-width:100%;
+ }
+}
+
+html body .bottom-nav {box-sizing:border-box!important;padding-inline:10px!important;gap:5px!important;border-radius:0!important;}
+html body .bottom-nav .bottom-nav__item {border-radius:13px!important;height:62px!important;min-height:62px!important;max-height:62px!important;padding:6px 2px!important;font-size:9px!important;overflow:hidden!important;border-color:#ffffff12!important;box-shadow:none!important;}
+html body .bottom-nav .bottom-nav__item--active {border-color:#e8c67f!important;background:linear-gradient(145deg,#f8df9e,#d2a14d)!important;}
+html body .bottom-nav .bottom-nav__line-icon {display:block;width:24px;height:24px;color:inherit;}
+html body .bottom-nav .bottom-nav__label {font-weight:600!important;letter-spacing:-.02em!important;}
+
+/* Gold navigation matching the club reference. */
+html body .bottom-nav {width:calc(100% - 12px)!important;left:6px!important;right:6px!important;bottom:4px!important;max-width:none!important;gap:2px!important;padding:5px!important;border:1px solid #ad89544d!important;border-radius:28px!important;background:linear-gradient(160deg,#282b2f 0%,#111417 48%,#090b0c 100%)!important;box-shadow:inset 0 1px 1px #fff3,0 5px 20px #0008!important;}
+html body .bottom-nav__chat-wrap {max-width:none!important;}
+html body .bottom-nav .bottom-nav__item {flex:1!important;max-width:none!important;border:0!important;border-radius:23px!important;background:transparent!important;height:70px!important;min-height:70px!important;max-height:70px!important;padding:5px 1px!important;gap:3px!important;color:#e8e8e7!important;}
+html body .bottom-nav .bottom-nav__icon {width:30px!important;height:30px!important;min-height:30px!important;}
+html body .bottom-nav .bottom-nav__line-icon {width:30px;height:30px;filter:drop-shadow(0 2px 2px #0008);}
+html body .bottom-nav .bottom-nav__label {font-size:clamp(8px,2.55vw,13px)!important;font-weight:800!important;height:23px!important;letter-spacing:-.02em!important;}
+html body .bottom-nav .bottom-nav__item--active {background:linear-gradient(135deg,#fff0b4,#f4c568 55%,#dba749)!important;color:#201b12!important;box-shadow:inset 0 0 0 1px #fff0ba,inset 0 2px 3px #fff9,0 0 12px #efbc4b35!important;}
+@media(min-width:681px){html body .bottom-nav {padding:8px!important;border-radius:42px!important;}html body .bottom-nav .bottom-nav__item{height:94px!important;min-height:94px!important;max-height:94px!important;border-radius:34px!important;gap:6px!important;}html body .bottom-nav .bottom-nav__icon,html body .bottom-nav .bottom-nav__line-icon{width:44px!important;height:44px!important;min-height:44px!important;}html body .bottom-nav .bottom-nav__label{font-size:15px!important;height:30px!important;}}
+
+/* Individual metal-edged navigation tiles, twenty percent shorter. */
+html body .bottom-nav {gap:6px!important;padding:4px!important;border:0!important;border-radius:0!important;background:linear-gradient(#101214,#080a0c)!important;box-shadow:0 -3px 18px #0008!important;}
+html body .bottom-nav .bottom-nav__item {height:56px!important;min-height:56px!important;max-height:56px!important;border:1px solid #918778!important;border-radius:17px!important;padding:3px 1px!important;gap:1px!important;background:linear-gradient(145deg,#343536 0%,#171a1c 40%,#090c0e 85%)!important;box-shadow:inset 0 1px 0 #ffffff90,inset 0 0 0 2px #181a1c,0 1px 0 #8f662d!important;}
+html body .bottom-nav .bottom-nav__item--active {color:#fff0bd!important;border-color:#ffe6a6!important;background:linear-gradient(140deg,#e6b65a,#6f4b1e 55%,#36230e)!important;box-shadow:inset 0 1px 0 #fff5c8,inset 0 0 0 2px #b17b30,0 0 10px #f6b33640!important;}
+html body .bottom-nav .bottom-nav__icon,html body .bottom-nav .bottom-nav__line-icon {width:25px!important;height:25px!important;min-height:25px!important;}
+html body .bottom-nav .bottom-nav__label {height:21px!important;font-size:clamp(8px,2.4vw,12px)!important;}
+@media(min-width:681px){html body .bottom-nav {gap:9px!important;padding:6px!important;}html body .bottom-nav .bottom-nav__item {height:75px!important;min-height:75px!important;max-height:75px!important;border-radius:24px!important;gap:2px!important;}html body .bottom-nav .bottom-nav__icon,html body .bottom-nav .bottom-nav__line-icon {width:35px!important;height:35px!important;min-height:35px!important;}html body .bottom-nav .bottom-nav__label {font-size:14px!important;height:28px!important;}}
+
+/* Use the supplied three-dimensional button artwork itself. */
+html body .bottom-nav {gap:3px!important;padding:2px!important;background:#090b0d!important;}
+html body .bottom-nav .bottom-nav__item {position:relative!important;isolation:isolate;overflow:hidden!important;border:0!important;box-shadow:none!important;background:transparent!important;border-radius:14px!important;}
+html body .bottom-nav .bottom-nav__item::before {content:""!important;position:absolute;inset:0;z-index:-1;background-image:url('./assets/bottom-nav-reference.png');background-size:500% 100%;background-repeat:no-repeat;pointer-events:none;}
+html body .bottom-nav .bottom-nav__item[data-view-target="home"]::before {background-position:0% 0;filter:grayscale(1) brightness(.65);}
+html body .bottom-nav .bottom-nav__item[data-view-target="download"]::before {background-position:25% 0;}
+html body .bottom-nav .bottom-nav__item[data-view-target="my-summary"]::before {background-position:50% 0;}
+html body .bottom-nav .bottom-nav__item[data-club-news-open]::before {background-position:75% 0;}
+html body .bottom-nav .bottom-nav__item[data-view-target="profile"]::before {background-position:100% 0;}
+html body .bottom-nav .bottom-nav__item--active::before {filter:sepia(.65) saturate(1.5)!important;}
+html body .bottom-nav .bottom-nav__item[data-view-target="home"].bottom-nav__item--active::before {filter:none!important;}
+html body .bottom-nav .bottom-nav__item--active {background:linear-gradient(#d6a450,#725022)!important;box-shadow:0 0 8px #efb64060!important;}
+html body .bottom-nav .bottom-nav__line-icon,html body .bottom-nav .bottom-nav__label {opacity:0!important;}
+html body .bottom-nav .bottom-nav__item--active {outline:1px solid #ffdb80!important;outline-offset:-2px!important;}
+html body .bottom-nav .bottom-nav__item--active::after {content:"";position:absolute;inset:0;background:linear-gradient(135deg,#ffd67f60,#bd791a35);mix-blend-mode:screen;pointer-events:none;border-radius:inherit;}
+html body .bottom-nav .bottom-nav__item[data-view-target="home"].bottom-nav__item--active::after {display:none;}
+/* Preserve the artwork proportions instead of stretching each sprite to the tile. */
+html body .bottom-nav .bottom-nav__item::before {inset:0 auto 0 50%!important;width:47px!important;transform:translateX(-50%);background-size:500% 100%!important;}
+@media(min-width:681px){html body .bottom-nav .bottom-nav__item::before{width:63px!important;}}
+/* Keep only the reference icons; render clean, consistent live tile frames and labels. */
+html body .bottom-nav .bottom-nav__item {border:1px solid #77736a!important;border-radius:14px!important;background:linear-gradient(145deg,#303235,#121618 65%,#090c0e)!important;box-shadow:inset 0 1px 0 #ffffff70,inset 0 0 0 2px #1e2021!important;}
+html body .bottom-nav .bottom-nav__item::before {clip-path:inset(10% 15% 39% 15%);filter:none!important;}
+html body .bottom-nav .bottom-nav__item--active {background:linear-gradient(145deg,#c39a4b,#705020 65%,#422c11)!important;border-color:#ffe29a!important;box-shadow:inset 0 1px 0 #fff1bc,inset 0 0 0 2px #ad7d34,0 0 8px #edbd4b50!important;outline:0!important;}
+html body .bottom-nav .bottom-nav__item--active::after {display:none!important;}
+html body .bottom-nav .bottom-nav__label {opacity:1!important;position:absolute;bottom:3px;left:0;right:0;color:#eae9e5!important;font-size:clamp(8px,2.5vw,12px)!important;}
+html body .bottom-nav .bottom-nav__item--active .bottom-nav__label {color:#fff0bd!important;}
+@media(min-width:681px){html body .bottom-nav .bottom-nav__item{border-radius:20px!important;}html body .bottom-nav .bottom-nav__label{bottom:5px;font-size:14px!important;}}
+/* Isolated alpha icons: no pieces of the reference button backdrop. */
+html body .bottom-nav .bottom-nav__item::before {background-image:url('./assets/bottom-nav-icons-transparent-v1.png')!important;clip-path:none!important;width:36px!important;height:34px!important;inset:0 auto auto 50%!important;background-size:500% auto!important;background-position-y:center!important;filter:none!important;}
+@media(min-width:681px){html body .bottom-nav .bottom-nav__item::before{width:49px!important;height:45px!important;top:2px!important;}}
+/* Full reference tiles, cropped consistently without stretching. */
+html body .bottom-nav .bottom-nav__item {background:transparent!important;border:0!important;box-shadow:none!important;outline:0!important;overflow:visible!important;}
+html body .bottom-nav .bottom-nav__item::before {background-image:url('./assets/bottom-nav-reference-v2.png')!important;inset:0 auto auto 50%!important;width:48px!important;height:56px!important;background-size:528% 153%!important;background-position-y:44%!important;clip-path:none!important;filter:none!important;}
+html body .bottom-nav .bottom-nav__item[data-view-target="home"]::before {background-position-x:1.7%!important;filter:grayscale(1) brightness(.7)!important;}
+html body .bottom-nav .bottom-nav__item[data-view-target="download"]::before {background-position-x:27.1%!important;}
+html body .bottom-nav .bottom-nav__item[data-view-target="my-summary"]::before {background-position-x:50.7%!important;}
+html body .bottom-nav .bottom-nav__item[data-club-news-open]::before {background-position-x:74.4%!important;}
+html body .bottom-nav .bottom-nav__item[data-view-target="profile"]::before {background-position-x:98%!important;}
+html body .bottom-nav .bottom-nav__label {opacity:0!important;}
+html body .bottom-nav .bottom-nav__item--active::before {filter:sepia(.8) saturate(1.6) brightness(1.25)!important;}
+html body .bottom-nav .bottom-nav__item[data-view-target="home"].bottom-nav__item--active::before {filter:none!important;}
+@media(min-width:681px){html body .bottom-nav .bottom-nav__item::before{width:65px!important;height:75px!important;top:0!important;}}

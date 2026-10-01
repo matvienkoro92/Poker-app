@@ -78,6 +78,10 @@
     setText("profileTelegramLinkBtn", t.linkTelegram);
     setText("profilePokerPlusTitle", t.pokerPlus);
     setText("profilePokerPlusText", t.pokerPlusText);
+    setText("profilePokerPlusGuideStep1", t.pokerPlusGuideStep1);
+    setText("profilePokerPlusGuideStep2", t.pokerPlusGuideStep2);
+    setText("profilePokerPlusGuideStep3", t.pokerPlusGuideStep3);
+    setText("profilePokerPlusKeyLabel", t.pokerPlusKeyLabel);
     setText("profilePokerPlusBindBtn", t.pokerPlusBind);
     setText("profilePokerPlusUnbindBtn", t.pokerPlusUnbind);
     setText("profilePokerPlusEmailLabel", t.pokerPlusEmailLabel);

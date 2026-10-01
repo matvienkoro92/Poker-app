@@ -930,22 +930,79 @@
   flex-direction: column;
   gap: 10px;
 }
+#profilePokerPlusSection [hidden] {
+  display: none !important;
+}
 .profile-pokerplus-key-guide {
   display: grid;
-  justify-items: center;
-  max-width: min(100%, 360px);
-  margin: 12px auto 0;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  margin: 16px auto;
+}
+.profile-pokerplus-key-guide__steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: pokerplus-guide;
+}
+.profile-pokerplus-key-guide__steps li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  align-items: start;
+  gap: 10px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  counter-increment: pokerplus-guide;
+}
+.profile-pokerplus-key-guide__steps li::before {
+  content: counter(pokerplus-guide);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(245, 177, 75, 0.4);
+  border-radius: 50%;
+  background: rgba(245, 177, 75, 0.12);
+  color: var(--accent, #f5b14b);
+  font-size: 12px;
+  font-weight: 800;
+}
+.profile-pokerplus-key-guide__crop {
+  width: 100%;
+  aspect-ratio: 1320 / 780;
+  overflow: hidden;
+  border: 1px solid rgba(245, 177, 75, 0.24);
+  border-radius: 12px;
+  background: #05070c;
 }
 .profile-pokerplus-key-guide__img {
   display: block;
   width: 100%;
-  max-height: 560px;
-  object-fit: contain;
-  object-position: top center;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 8px;
-  background: #05070c;
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+  height: auto;
+}
+#profilePokerPlusSection:not(.profile-pokerplus-card--linked) #profilePokerPlusForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.profile-pokerplus-key-label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+#profilePokerPlusSection #profilePokerPlusCiphertextInput {
+  width: 100%;
+  box-sizing: border-box;
+}
+#profilePokerPlusSection #profilePokerPlusBindBtn {
+  width: 100%;
 }
 .profile-email-auth--email-linked .profile-email-auth__form {
   display: none !important;

@@ -26,3 +26,22 @@
     order: 2;
   }
 }
+
+/* Guests see one welcoming login action; account content returns after sign-in. */
+#app.app .view.profile-view--login-only > :not(.profile-header-row) {display:none!important;}
+#app.app .profile-view--login-only .profile-header-row > .title,
+#app.app .profile-view--login-only .profile-header-controls > :not(#profileExitBtn) {display:none!important;}
+#app.app .profile-view--login-only .profile-header-row {display:flex!important;align-items:center;justify-content:center;min-height:calc(100dvh - 100px);width:100%;margin:0!important;padding:20px 0;box-sizing:border-box;}
+#app.app .profile-view--login-only .profile-header-controls {position:relative;display:flex!important;flex-direction:column;align-items:center;width:min(100%,440px);margin:0!important;gap:0;}
+#app.app .profile-view--login-only .profile-header-controls::before {content:"";display:block;width:100%;height:360px;background:url('./assets/profile-guest-pokermanki-v3.webp') center/contain no-repeat;}
+#app.app .profile-view--login-only #profileExitBtn {display:flex!important;align-items:center;justify-content:center;width:85%!important;min-height:60px!important;margin:-35px 0 0!important;padding:14px!important;border:1px solid #ffe3a1!important;border-radius:17px!important;background:linear-gradient(145deg,#ffe7aa,#efb64a 60%,#c4862e)!important;color:#2a1b08!important;font:900 clamp(20px,5vw,28px)/1.2 Arial,sans-serif!important;box-shadow:0 8px 30px #e6a43a35,inset 0 1px 0 #fff4d4!important;z-index:2;cursor:pointer;}
+#app.app .profile-view--login-only #profileExitBtn::before {content:none!important;}
+@media(max-height:600px){#app.app .profile-view--login-only .profile-header-controls::before{height:240px;}}
+
+#app.app .profile-view--login-only #profileExitBtn {position:absolute!important;top:58%;width:86%!important;margin:0!important;min-height:54px!important;background:transparent!important;color:#ffe3ad!important;border:0!important;box-shadow:none!important;text-shadow:0 2px 8px #000;font-size:23px!important;}
+
+.profile-review-invite--push {padding:8px 12px!important;min-height:0!important;gap:9px!important;cursor:pointer;}
+.profile-review-invite--push .profile-review-invite__copy {font-size:12px!important;line-height:1.25!important;}
+.profile-review-invite--push .profile-review-invite__copy > span {display:none;}
+.profile-review-invite--push .profile-review-invite__button {font-size:11px!important;padding:7px 10px!important;white-space:nowrap;}
+.profile-review-invite--push .profile-review-invite__icon {font-size:20px!important;}

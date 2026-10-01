@@ -367,30 +367,21 @@
               </div>
             </section>
             <section class="profile-email-auth" id="profilePokerPlusSection" hidden data-profile-poker21-panel>
-              <h2 class="profile-section__title" id="profilePokerPlusTitle">Профиль в Poker21</h2>
+              <h2 class="profile-section__title" id="profilePokerPlusTitle">Привязка Poker21</h2>
               <div class="profile-pokerplus-view-tabs" id="profilePokerPlusViewTabs" role="tablist" aria-label="Разделы профиля Poker21" hidden>
                 <button type="button" class="profile-pokerplus-view-tabs__btn profile-pokerplus-view-tabs__btn--active" id="profilePokerPlusStatsViewTab" data-profile-poker21-tab="stats" role="tab" aria-selected="true">Статистика</button>
               </div>
               <div class="profile-pokerplus-panel" id="profilePokerPlusStatsPanel" data-profile-poker21-tab-panel="stats" role="tabpanel" aria-labelledby="profilePokerPlusStatsViewTab">
-              <p class="profile-email-auth__text" id="profilePokerPlusText">Вставьте свой ключ из Poker21, чтобы привязать аккаунт. Ключ найдите по кнопке в клубе, указанной на картинке.</p>
-              <div class="profile-email-auth__form" id="profilePokerPlusForm">
-                <input
-                  type="text"
-                  id="profilePokerPlusCiphertextInput"
-                  class="profile-chat-name__input"
-                  maxlength="64"
-                  placeholder="Ключ из PokerPlus"
-                  aria-label="Ключ из PokerPlus"
-                  autocomplete="off"
-                  autocapitalize="none"
-                  autocorrect="off"
-                  spellcheck="false"
-                />
-                <div class="profile-email-auth__actions">
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusBindBtn">Привязать по ключу из Poker21</button>
-                </div>
-              </div>
+              <p class="profile-email-auth__text" id="profilePokerPlusText">Привяжите аккаунт, чтобы видеть свой уровень и статистику Poker21.</p>
               <figure class="profile-pokerplus-key-guide" aria-label="Где взять ключ Poker21">
+                <figcaption class="profile-pokerplus-key-guide__caption">
+                  <ol class="profile-pokerplus-key-guide__steps">
+                    <li id="profilePokerPlusGuideStep1">Откройте клуб в Poker21 и нажмите кнопку, на которую указывает стрелка.</li>
+                    <li id="profilePokerPlusGuideStep2">Скопируйте свой ключ и вставьте его в поле ниже.</li>
+                    <li id="profilePokerPlusGuideStep3">Если ключ не копируется, перепишите его вручную в поле ниже.</li>
+                  </ol>
+                </figcaption>
+                <div class="profile-pokerplus-key-guide__crop">
                 <img
                   class="profile-pokerplus-key-guide__img"
                   src="./assets/poker21-key-location-guide-light-v1.webp"
@@ -400,7 +391,27 @@
                   loading="lazy"
                   decoding="async"
                 />
+                </div>
               </figure>
+              <div class="profile-email-auth__form" id="profilePokerPlusForm">
+                <label class="profile-pokerplus-key-label" id="profilePokerPlusKeyLabel" for="profilePokerPlusCiphertextInput">Ваш ключ из Poker21</label>
+                <input
+                  type="text"
+                  id="profilePokerPlusCiphertextInput"
+                  class="profile-chat-name__input"
+                  maxlength="64"
+                  placeholder="Ключ из Poker21"
+                  aria-label="Ключ из Poker21"
+                  autocomplete="off"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  spellcheck="false"
+                />
+                <div class="profile-email-auth__actions">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profilePokerPlusBindBtn">Привязать аккаунт</button>
+                </div>
+              </div>
+
               <div class="profile-email-auth__linked" id="profilePokerPlusEmailRow" hidden>
                 <span class="profile-email-auth__label" id="profilePokerPlusEmailLabel">Email для проверки:</span>
                 <span class="profile-email-auth__value" id="profilePokerPlusEmailValue">—</span>

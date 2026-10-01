@@ -259,3 +259,38 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {top:calc(100% - 104cqw);left:68%;width:30%;}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(100% - 29cqw)!important;}
 }
+
+/* Keep the tournament ticket below the phone status bar without shifting the scene. */
+@media (max-width:680px) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {
+  top:calc(2% + max(28px, env(safe-area-inset-top, 0px)))!important;
+ }
+}
+
+/* Move and scale the complete right portal group together. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
+ transform-origin:right top;
+ transform:translateY(calc(var(--evening-scene-drop) + 4px)) scale(.95)!important;
+}
+
+@media (max-width:680px) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.home-tournament-history,.home-tournament-share) {
+  transform:translateY(max(28px, env(safe-area-inset-top, 0px)))!important;
+ }
+}
+/* Chair backs follow the seated players, with matching vertical offsets. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:1%;top:calc(35.5% + 4cqw);}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:55%;top:calc(34.5% + 5cqw);}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:79%;top:calc(35.5% + 4cqw);}
+@media(min-aspect-ratio:3/5){
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:7.5%;top:calc(100% - 65cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:58%;top:calc(100% - 64cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:73.5%;top:calc(100% - 65cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-center {top:calc(100% - 65cqw);}
+}
+/* Additional right-portal adjustment for the narrow composition only. */
+@media(max-aspect-ratio:3/5) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
+  transform:translateY(calc(var(--evening-scene-drop) + 11px)) scale(.836)!important;
+ }
+}

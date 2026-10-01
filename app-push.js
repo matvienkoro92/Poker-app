@@ -434,6 +434,8 @@ function pokerProfileChatPushReadUiCache() {
   }
 }
 function pokerProfileChatPushWriteUiCache(memberId, notificationsEnabled, hasSubscription) {
+  window.__pokerProfilePushInviteStatus = { enabled: !!notificationsEnabled && !!hasSubscription };
+  if (typeof profileReviewInviteRender === "function") profileReviewInviteRender();
   try {
     localStorage.setItem(
       PROFILE_CHAT_PUSH_UI_CACHE_KEY,
@@ -459,6 +461,8 @@ function pokerProfileChatPushApplyCachedToggle(toggle) {
   if (!c || String(c.memberId) !== String(me)) return;
   if (typeof c.t === "number" && Date.now() - c.t > 86400000 * 30) return;
   toggle.checked = !!c.notificationsEnabled;
+  window.__pokerProfilePushInviteStatus = { enabled: !!c.notificationsEnabled && !!c.hasSubscription };
+  if (typeof profileReviewInviteRender === "function") profileReviewInviteRender();
 }
 
 var profileChatPushBound = false;

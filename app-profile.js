@@ -937,7 +937,15 @@ var profileReviewInviteState = { loading: false, loaded: false, linked: false, h
 function profileReviewInviteRender() {
   var invite = document.getElementById("profileReviewInvite");
   if (!invite) return;
-  invite.hidden = !(profileReviewInviteState.loaded && profileReviewInviteState.linked && !profileReviewInviteState.hasReview);
+  var push = window.__pokerProfilePushInviteStatus;
+  var needsPush = !!push && !push.enabled;
+  invite.hidden = !profileReviewInviteState.linked || (!needsPush && !(profileReviewInviteState.loaded && !profileReviewInviteState.hasReview));
+  invite.dataset.inviteMode = needsPush ? "push" : "review";
+  invite.classList.toggle("profile-review-invite--push", needsPush);
+  invite.querySelector(".profile-review-invite__icon").textContent = needsPush ? "♧" : "🏆";
+  invite.querySelector(".profile-review-invite__copy strong").textContent = needsPush ? "Включите пуш, чтобы получать уведомления" : "Оставьте для клуба отзыв или предложение/идею.";
+  invite.querySelector(".profile-review-invite__copy > span").textContent = needsPush ? "" : "Помогите клубу в развитии и получите новую ачивку.";
+  document.getElementById("profileReviewInviteBtn").textContent = needsPush ? "Включить →" : "Перейти к отзывам";
 }
 
 function profileReviewInviteSync(linked, force) {
@@ -1155,7 +1163,17 @@ function initProfilePublicShowcase() {
   var reviewInviteBtn = document.getElementById("profileReviewInviteBtn");
   if (reviewInviteBtn && reviewInviteBtn.dataset.profileReviewInviteBound !== "1") {
     reviewInviteBtn.dataset.profileReviewInviteBound = "1";
+    var invitePanel = document.getElementById("profileReviewInvite");
+    if (invitePanel) invitePanel.addEventListener("click", function (event) {
+      if (invitePanel.dataset.inviteMode === "push" && !event.target.closest("button")) reviewInviteBtn.click();
+    });
     reviewInviteBtn.addEventListener("click", function () {
+      var invite = document.getElementById("profileReviewInvite");
+      if (invite && invite.dataset.inviteMode === "push") {
+        var row = document.getElementById("profileChatPushRow");
+        if (row) { row.scrollIntoView({ behavior: "smooth", block: "center" }); var toggle = document.getElementById("profileChatPushToggle"); if (toggle) toggle.focus({ preventScroll: true }); }
+        return;
+      }
       if (typeof window.pokerOpenClubGuestbook === "function") window.pokerOpenClubGuestbook("review");
       else {
         var openButton = document.getElementById("clubGuestbookOpenBtn");

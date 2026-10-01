@@ -558,6 +558,8 @@ function updateProfileExitBtnVisibility() {
   btn.hidden = !show;
   btn.classList.toggle("profile-exit-btn--auth-cta", !authState.hasAccountSession);
   btn.textContent = authState.hasAccountSession ? "Выйти из аккаунта" : "Войти в аккаунт";
+  var guestView = document.getElementById("profileView");
+  if (guestView) guestView.classList.toggle("profile-view--login-only", !authState.hasAccountSession);
   try {
     if (typeof window.__pokerSyncHeaderAuthMenuButton === "function") window.__pokerSyncHeaderAuthMenuButton();
   } catch (eHeaderAuthMenu) {}
