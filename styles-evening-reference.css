@@ -341,12 +341,25 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {bottom:24%;}
 }
 
-/* Separate head turn and a small forearm gesture; the body remains still. */
-.evening-cooler-motion-source {clip-path:polygon(evenodd,0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,6% 32%,9% 26%,19% 22%,30% 24%,35% 30%,36% 35%,28% 40%,15% 41%,7% 38%,6% 32%,0% 0%,9% 43%,20% 44%,17% 52%,15% 61%,9% 65%,2% 63%,1% 56%,5% 49%,9% 43%,0% 0%);}
-.evening-cooler-motion-head {clip-path:polygon(6% 32%,9% 26%,19% 22%,30% 24%,35% 30%,36% 35%,28% 40%,15% 41%,7% 38%);animation:evening-cooler-head-turn 1s ease-in-out;transform-origin:24% 40%!important;pointer-events:none!important;}
-.evening-cooler-motion-hand {clip-path:polygon(9% 43%,20% 44%,17% 52%,15% 61%,9% 65%,2% 63%,1% 56%,5% 49%);animation:evening-cooler-hand-gesture 1s ease-in-out;transform-origin:18% 46%!important;pointer-events:none!important;}
-@keyframes evening-cooler-head-turn {0%,100% {rotate:0deg;} 30%,65% {rotate:5deg;} 80% {rotate:2deg;}}
-@keyframes evening-cooler-hand-gesture {0%,100% {rotate:0deg;} 25% {rotate:-8deg;} 50% {rotate:-3deg;} 70% {rotate:-7deg;}}
+/* A restrained sway of the intact artwork keeps the neck and shoulders connected. */
+.evening-cooler-motion-source {animation:evening-cooler-sway 1s ease-in-out;transform-origin:25% 88%!important;}
+@keyframes evening-cooler-sway {0%,100% {rotate:0deg;} 30% {rotate:-.6deg;} 65% {rotate:.35deg;} 82% {rotate:-.15deg;}}
 
 /* Follow the rendered table edge across all aspect ratios instead of viewport percentages. */
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {top:var(--vpn-cat-top,auto);bottom:auto;}
+
+/* Winners sit beside the session; Last Longer takes the former trophy slot. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {
+ left:65%!important;top:calc(2% + 8.5cqw)!important;width:13%!important;height:10cqw!important;transform:none!important;z-index:7!important;font-size:2cqw!important;gap:.3cqw;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-history img {width:6cqw!important;height:6cqw!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {
+ display:flex!important;position:absolute!important;left:80%!important;top:2%!important;width:18%!important;height:10cqw!important;align-items:center;justify-content:center;transform:none!important;z-index:7!important;padding:0!important;background:none!important;box-shadow:none!important;border:0!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-last-longer-dock::before {
+ content:'\2660\A \41b \430 \441 \442 \43b \43e \43d \433 \435 \440 '!important;display:grid!important;place-content:center!important;inset:0!important;white-space:pre!important;border:0!important;border-radius:0!important;background:none!important;color:#ffe1a0!important;font:700 2.3cqw/1.5 Arial,sans-serif!important;text-align:center;text-shadow:0 0 1cqw #b77425;
+}
+@media(max-width:680px) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {top:calc(2% + 8.5cqw + max(28px, env(safe-area-inset-top, 0px)))!important;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {top:calc(2% + max(28px, env(safe-area-inset-top, 0px)))!important;}
+}

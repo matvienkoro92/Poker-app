@@ -11,26 +11,18 @@
   var coolerSpeechTimer = null;
   var coolerMotionTimer = null;
   var coolerMotionArt = null;
-  var coolerMotionClones = [];
   document.addEventListener("click", function (event) {
     var target = event.target.closest && event.target.closest(".evening-reference__cooler-hit");
     if (!target) return;
     clearTimeout(coolerMotionTimer);
-    coolerMotionClones.forEach(function (part) { part.remove(); });
     if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
     coolerMotionArt = target.parentElement.querySelector("img.evening-reference__art--portal-side");
     if (coolerMotionArt && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      coolerMotionClones = ["head", "hand"].map(function (part) {
-        var layer = coolerMotionArt.cloneNode(false);
-        layer.classList.add("evening-cooler-motion-" + part);
-        coolerMotionArt.after(layer);
-        return layer;
-      });
+      // Animate the intact artwork so the neck and shoulders stay connected.
+      void coolerMotionArt.offsetWidth;
       coolerMotionArt.classList.add("evening-cooler-motion-source");
       coolerMotionTimer = setTimeout(function () {
-        coolerMotionClones.forEach(function (part) { part.remove(); });
         if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
-        coolerMotionClones = [];
         coolerMotionArt = null;
       }, 1000);
     }
