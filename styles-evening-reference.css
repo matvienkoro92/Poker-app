@@ -307,3 +307,22 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop,.evening-reference__art--player-left,.evening-reference__art--player-middle,.evening-reference__art--player-right,.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center,.home-tournament-play-sign) {
  translate:0 -34px;
 }
+
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__cooler-hit {
+ display:block!important;aspect-ratio:2/3;height:auto!important;padding:0;border:0;background:transparent;box-shadow:none;z-index:8;pointer-events:auto!important;cursor:pointer;
+ clip-path:polygon(19% 22%,34% 24%,36% 35%,48% 43%,58% 62%,43% 66%,58% 76%,47% 82%,28% 72%,26% 96%,2% 97%,12% 72%,15% 64%,1% 64%,1% 54%,9% 43%,5% 35%,8% 28%);
+}
+.evening-cooler-speech {position:fixed;z-index:10000;max-width:220px;padding:12px 16px;border:2px solid #ffb84c;border-radius:18px;background:#fff4d6;color:#241409;box-shadow:0 5px 20px #0008;font:800 16px/1.25 Arial,sans-serif;pointer-events:none;}
+.evening-cooler-speech::after {content:"";position:absolute;right:18px;bottom:-10px;width:16px;height:16px;background:#fff4d6;border-right:2px solid #ffb84c;border-bottom:2px solid #ffb84c;transform:rotate(45deg);}
+
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {display:block!important;position:absolute;left:13%;bottom:9%;width:20%;aspect-ratio:1;z-index:3;padding:0;border:0;background:transparent;cursor:pointer;opacity:.65;transition:opacity .2s,transform .2s;}
+.evening-vpn-cat__sprite {display:block;width:100%;height:100%;background:url('./assets/evening-vpn-cat-v1.webp') left center/200% 100% no-repeat;filter:brightness(.72);}
+.evening-vpn-cat[aria-expanded="true"] {opacity:1!important;transform:translateY(-3px);}
+.evening-vpn-cat[aria-expanded="true"] .evening-vpn-cat__sprite {background-position:right center;filter:brightness(1);}
+.evening-vpn-cat:focus-visible {outline:2px solid #b697ee;outline-offset:2px;border-radius:50%;}
+.evening-vpn-cat-dialog {max-width: min(320px,calc(100vw - 32px));box-sizing:border-box;padding:20px;border:1px solid #ad8bd1;border-radius:20px;background:#21182e;color:#fff0dd;box-shadow:0 16px 60px #0009;font:600 16px/1.4 Arial,sans-serif;}
+.evening-vpn-cat-dialog::backdrop {background:#08050c88;}
+.evening-vpn-cat-dialog p {margin:0 0 16px;}
+.evening-vpn-cat-dialog__actions {display:flex;gap:10px;}
+.evening-vpn-cat-dialog :is(button,a) {flex:1;padding:10px;border-radius:10px;border:1px solid #8665a7;color:#fff;text-decoration:none;text-align:center;font:700 14px Arial,sans-serif;background:#382349;cursor:pointer;}
+.evening-vpn-cat-dialog a {background:#7550a2;}

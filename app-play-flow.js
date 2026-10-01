@@ -7,6 +7,57 @@
   var touchStart = null;
   var lastSwipeAt = 0;
 
+  var coolerSpeech = null;
+  var coolerSpeechTimer = null;
+  document.addEventListener("click", function (event) {
+    var target = event.target.closest && event.target.closest(".evening-reference__cooler-hit");
+    if (!target) return;
+    clearTimeout(coolerSpeechTimer);
+    if (coolerSpeech) coolerSpeech.remove();
+    coolerSpeech = document.createElement("div");
+    coolerSpeech.className = "evening-cooler-speech";
+    coolerSpeech.setAttribute("role", "status");
+    coolerSpeech.textContent = "Игру-то понимать надо";
+    document.body.appendChild(coolerSpeech);
+    var rect = target.getBoundingClientRect();
+    coolerSpeech.style.left = Math.max(8, Math.min(window.innerWidth - coolerSpeech.offsetWidth - 8, rect.left - coolerSpeech.offsetWidth * .65)) + "px";
+    coolerSpeech.style.top = Math.max(8, rect.top + rect.height * .23 - coolerSpeech.offsetHeight - 12) + "px";
+    coolerSpeechTimer = setTimeout(function () {
+      if (coolerSpeech) coolerSpeech.remove();
+      coolerSpeech = null;
+    }, 2000);
+  });
+
+  var vpnCatDialog = null;
+  var awakeVpnCat = null;
+  document.addEventListener("click", function (event) {
+    var cat = event.target.closest && event.target.closest(".evening-vpn-cat");
+    if (!cat) return;
+    if (!vpnCatDialog) {
+      vpnCatDialog = document.createElement("dialog");
+      vpnCatDialog.className = "evening-vpn-cat-dialog";
+      vpnCatDialog.setAttribute("aria-labelledby", "vpnCatQuestion");
+      vpnCatDialog.innerHTML = '<p id="vpnCatQuestion">Хочешь установить ВПН за 100 ₽/месяц?</p><div class="evening-vpn-cat-dialog__actions"><a href="https://t.me/KOTIKsVPN_bot?start=src_telegram_channel_ad" target="_blank" rel="noopener noreferrer">Да</a><button type="button">Не сейчас</button></div>';
+      document.body.appendChild(vpnCatDialog);
+      vpnCatDialog.querySelector("button").addEventListener("click", function () { vpnCatDialog.close(); });
+      vpnCatDialog.querySelector("a").addEventListener("click", function (e) {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && typeof tg.openTelegramLink === "function") {
+          e.preventDefault();
+          tg.openTelegramLink(this.href);
+        }
+        vpnCatDialog.close();
+      });
+      vpnCatDialog.addEventListener("close", function () {
+        if (awakeVpnCat) awakeVpnCat.setAttribute("aria-expanded", "false");
+        awakeVpnCat = null;
+      });
+    }
+    awakeVpnCat = cat;
+    cat.setAttribute("aria-expanded", "true");
+    vpnCatDialog.showModal();
+  });
+
   function show(panel) {
     var current = document.querySelector(".download-page--active[data-download-page='main'] [data-play-flow]") || flow;
     if (!current) return;
