@@ -2904,3 +2904,24 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-friend-news-modal__hero-month-result p {margin:6px 0;font-size:12px;}
 .home-friend-news-modal__hero-month-result span {display:block;padding-top:8px;border-top:1px solid #a77d3955;font-size:12px;}
 @media(max-width:480px){.home-friend-news-modal__hero-month-result {gap:8px;padding:10px;}.home-friend-news-modal__hero-month-result img {width:76px;height:120px;}.home-friend-news-modal__hero-month-result h3 {font-size:20px;}.home-friend-news-modal__hero-month-result strong {font-size:23px;}}
+/* Give the winner artwork the same prominence as daily news characters. */
+.home-friend-news-modal__hero-month-result {position:relative;min-height:175px;padding:12px 12px 12px 145px;gap:0;}
+.home-friend-news-modal__hero-month-result img {position:absolute;left:2px;bottom:0;width:140px;height:195px;object-fit:contain;object-position:center bottom;}
+.home-friend-news-modal__hero-month-result small {font-size:9px;letter-spacing:.05em;}
+.home-friend-news-modal__hero-month-result h3 {font-size:21px;margin:5px 0;}
+.home-friend-news-modal__hero-month-result strong {font-size:23px;}
+.home-friend-news-modal__hero-month-result p,.home-friend-news-modal__hero-month-result span {font-size:11px;line-height:1.3;}
+@media(max-width:480px){
+ .home-friend-news-modal__hero-month-result {min-height:160px;padding:10px 10px 10px 118px;}
+ .home-friend-news-modal__hero-month-result img {width:115px;height:175px;}
+ .home-friend-news-modal__hero-month-result h3 {font-size:18px;}
+ .home-friend-news-modal__hero-month-result strong {font-size:21px;}
+ .home-friend-news-modal__hero-month-result p,.home-friend-news-modal__hero-month-result span {font-size:10px;}
+}
+
+.home-friend-news-modal__editorial {padding:16px;border:1px solid #a58139;border-radius:18px;background:linear-gradient(130deg,#29241b,#080d12);color:#f7dea1;}
+.home-friend-news-modal__editorial small {font-size:10px;letter-spacing:.08em;color:#dfb758;}
+.home-friend-news-modal__editorial h3 {font-size:22px;line-height:1.15;margin:8px 0;}
+.home-friend-news-modal__editorial p {font-size:13px;line-height:1.5;margin:10px 0;}
+.home-friend-news-modal__editorial img {display:block;width:100%;height:auto;border-radius:10px;margin:12px 0;}
+.home-friend-news-modal__club-tab[data-club-news-tab="news"] {font-size:clamp(11px,3.1vw,16px);line-height:1.15;}

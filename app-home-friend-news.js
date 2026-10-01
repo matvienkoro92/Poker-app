@@ -1123,8 +1123,8 @@
     return '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
       '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
         (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '"><span aria-hidden="true">🏆</span> Турниры</button>' +
-      '<button type="button" data-club-news-tab="cash" class="home-friend-news-modal__club-tab' +
-        (clubNewsTab === "cash" ? ' home-friend-news-modal__club-tab--active' : '') + '">Кеш</button></div>';
+      '<button type="button" data-club-news-tab="news" class="home-friend-news-modal__club-tab' +
+        (clubNewsTab === "news" ? ' home-friend-news-modal__club-tab--active' : '') + '">Лента новостей клуба</button></div>';
   }
 
   function clubCashCardsHtml(value) {
@@ -2926,16 +2926,25 @@
           '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
         '</aside>'
       : "";
-    if (newsModalMode === "club" && clubNewsTab === "wins") {
-      achievementPromo = '<aside class="home-friend-news-modal__hero-month-result" aria-label="Итоги Героя дня за сентябрь">' +
+    if (newsModalMode === "club" && clubNewsTab === "news") {
+      // Editorial posts are added manually here, newest date first.
+      var editorialPosts = [
+        { date: "2026-10-01T12:00:00", html: '<aside class="home-friend-news-modal__hero-month-result" aria-label="Итоги Героя дня за сентябрь">' +
         '<img src="./assets/summer-rating-player-pokermanki-v3.webp" alt="ПокерМанки">' +
         '<div><small>ИТОГИ СЕНТЯБРЯ · ГЕРОЙ ДНЯ</small><h3>ПокерМанки</h3>' +
         '<strong>Приз 25 000 ₽</strong><p>Герой дня 3 раза · выигрыши 400 238,45 ₽</p>' +
-        '<span>Октябрь уже запущен · новый приз <b>35 000 ₽</b></span></div></aside>' + achievementPromo;
-    }
-    if (newsModalMode === "club" && clubNewsTab === "cash") {
-      patchNewsList(list, clubTabs + clubCashHighlightsHtml());
-      list.querySelectorAll('.home-friend-news-modal__cash-hand').forEach(function (details) {details.addEventListener('toggle',function () {loadClubCashReplay(details);});});
+        '<span>Октябрь уже запущен · новый приз <b>35 000 ₽</b></span></div></aside>' },
+        { date: "2026-09-28T12:00:00", html:
+          '<article class="home-friend-news-modal__editorial"><small>POKER21 · МТТ · ДВЕ ЛИГИ</small>' +
+          '<h3>Стартовал МТТ-лидерборд на 700 000 ₽</h3>' +
+          '<p>На Poker21 запущен новый МТТ-лидерборд на три месяца. Игроки соревнуются по лигам за общий призовой фонд 700 000 ₽.</p>' +
+          '<img src="./assets/home-mtt-leaderboard-winners.webp" alt="Победители прошлого МТТ-лидерборда Poker21">' +
+          '<p>Победители прошлого лидерборда Poker21: <b>ПокерМанки — 250 000 ₽</b>, <b>Ваар — 150 000 ₽</b>, <b>Кулер — 100 000 ₽</b>. Поздравляем чемпионов и желаем удачи участникам нового сезона!</p></article>' }
+      ];
+      patchNewsList(list, clubTabs + editorialPosts.map(function (post) {
+        return '<section class="home-friend-news-modal__day-group"><div class="home-friend-news-modal__date"><span>' +
+          esc(eventDateLabel(post.date, true)) + '</span></div>' + post.html + '</section>';
+      }).join(''));
       return;
     }
     var hasRealRows = Array.isArray(rows) && rows.some(function (row) { return row && row.id !== "empty"; });
@@ -3658,10 +3667,9 @@
         }
         var clubTab = event.target.closest("[data-club-news-tab]");
         if (clubTab) {
-          clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "cash" ? "cash" : "wins";
-          if (clubNewsTab === "cash") {
+          clubNewsTab = clubTab.getAttribute("data-club-news-tab") === "news" ? "news" : "wins";
+          if (clubNewsTab === "news") {
             renderModalList([]);
-            if (!clubCashHighlights) loadClubCashHighlights();
           } else {
             var activeWins = clubWinsEventsForTab(clubEvents);
             renderModalList(activeWins);
