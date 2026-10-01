@@ -2926,7 +2926,13 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-friend-news-modal__editorial img {display:block;width:100%;height:auto;border-radius:10px;margin:12px 0;}
 .home-friend-news-modal__club-tab[data-club-news-tab="news"] {font-size:clamp(11px,3.1vw,16px);line-height:1.15;}
 
-.home-news-day-hero-push {margin:8px 0 12px;padding:10px 14px;border:1px solid #70552b;border-radius:14px;background:#11151b;color:#ffe0a0;}
-.home-news-day-hero-push label {display:flex;align-items:center;justify-content:space-between;gap:16px;font-weight:700;cursor:pointer;}
-.home-news-day-hero-push input {width:20px;height:20px;accent-color:#ffb636;flex:none;cursor:pointer;}
-.home-news-day-hero-push small {display:block;margin-top:4px;color:#b9b4a8;font-size:12px;}
+.home-news-day-hero-push {position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;min-height:34px;box-sizing:border-box;margin:6px 0 10px;padding:6px 12px;border:1px solid #70552b80;border-radius:10px;background:linear-gradient(100deg,#191710,#10151b);color:#ffe0a0;}
+.home-news-day-hero-push label {display:contents;font-size:13px;line-height:20px;font-weight:600;cursor:pointer;}
+.home-news-day-hero-push input {grid-column:3;grid-row:1;appearance:none;-webkit-appearance:none;position:relative;width:32px;height:18px;margin:0;border:1px solid #655c48;border-radius:20px;background:#292d32;flex:none;cursor:pointer;transition:background .18s,border-color .18s;}
+.home-news-day-hero-push input::before {content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#a7a9ac;transition:transform .18s,background .18s;}
+.home-news-day-hero-push input:checked {background:#a87625;border-color:#d7a443;}
+.home-news-day-hero-push input:checked::before {transform:translateX(14px);background:#ffe6ad;box-shadow:0 1px 3px #0004;}
+.home-news-day-hero-push input:focus-visible {outline:2px solid #ffda8b;outline-offset:3px;}
+.home-news-day-hero-push input:disabled {opacity:.5;cursor:wait;}
+.home-news-day-hero-push small {grid-column:2;grid-row:1;font-size:11px;line-height:16px;color:#a9a69c;}
+.home-news-day-hero-push small:not(:empty) {max-width:120px;}
