@@ -299,3 +299,11 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--portal-top,.evening-reference__art--portal-ring,.evening-reference__art--portal-side) {
  translate:0 14px;
 }
+
+/* Raise the left portal and the complete seated table composition by 17px. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--portal-top,.evening-reference__art--portal-ring) {
+ translate:0 -3px;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop,.evening-reference__art--player-left,.evening-reference__art--player-middle,.evening-reference__art--player-right,.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center,.home-tournament-play-sign) {
+ translate:0 -17px;
+}

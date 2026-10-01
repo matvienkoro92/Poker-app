@@ -398,7 +398,13 @@ body[data-view="download"] #app.app .play-flow [data-tournament-character="gucci
  box-shadow:inset 0 1px 0 #fff3cd,0 0 1.2cqw #ff922c60;
 }
 @media (max-width:599px) {
- .play-single .play-single__club-id {left:39%;width:52%;}
+ .play-single .play-single__club-id {
+  left:34%;width:60%;padding:8px 7px;
+  border:2px solid #eea044;border-radius:10px;
+  background:linear-gradient(145deg,#20150f,#0b0b0c 65%);
+  box-shadow:inset 0 0 0 2px #4c2f1a,inset 0 1px 0 #ffe1a170,0 0 9px #ff761555;
+ }
+ .play-single .play-single__club-id-number {white-space:nowrap;}
  .play-single .play-single__club-id-number {width:100%;gap:1.5cqw;}
  .play-single .play-single__club-id strong {font-size:8.8cqw;letter-spacing:-.25cqw;}
  .play-single .play-single__copy {width:7cqw;height:7cqw;min-width:28px;min-height:28px;}
