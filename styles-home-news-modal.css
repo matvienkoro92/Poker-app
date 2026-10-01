@@ -2871,3 +2871,27 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 body .home-friend-news-modal--club .home-friend-news-event--birthday .home-friend-news-modal__action-controls .home-friend-news-modal__profile-cue {
   padding-inline:6px;
 }
+
+/* Compact club news on phone-sized screens. */
+@media (max-width:680px) {
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__header {padding:12px 14px 10px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__header h2 {font-size:22px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__header span {font-size:9px;letter-spacing:.08em;}
+ .home-friend-news-modal.home-friend-news-modal--club :is(.home-friend-news-modal__close,.home-friend-news-modal__copy-link) {width:32px;height:32px;min-width:32px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__list {padding:10px 8px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__club-tab {min-height:34px;font-size:13px;padding:5px 8px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo {min-height:108px;padding:8px 8px 8px 0;grid-template-columns:24% minmax(0,1fr) 25%;margin-bottom:7px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-content {gap:3px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-content > b {font-size:9px;letter-spacing:.1em;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-content > strong {font-size:27px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-content > small {font-size:10px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-side {gap:5px;padding:2px 0 2px 7px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-side > small {font-size:8px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__achievement-promo-action {min-height:28px;padding:4px;font-size:9px;border-radius:9px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__item {padding:8px;min-height:0;gap:8px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__player-meta {margin-bottom:4px;font-size:10px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__event-lines > strong {font-size:12px;line-height:1.25;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__action-row {margin-top:5px;gap:4px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__day-tabs button {min-height:28px;padding:4px 7px;font-size:10px;}
+ .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__date {margin:6px 0;}
+}

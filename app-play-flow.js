@@ -1,4 +1,4 @@
-// Two full-screen parts of the Play section: Poker21, then the tournament.
+// Two full-screen parts of the Play section: Tournament, then Poker21.
 (function () {
   "use strict";
   var flow = null;
@@ -67,6 +67,7 @@
     event.stopImmediatePropagation();
   }, true);
   document.addEventListener("click", function (event) {
+    if (event.target.closest('[data-view-target="download"]')) { connect(); show("tournament"); }
     var control = event.target.closest("[data-play-next], [data-play-prev], [data-play-panel-target]");
     if (!control || !control.closest("[data-play-flow]")) return;
     event.preventDefault();
@@ -97,7 +98,7 @@
       touchStart.flow.classList.add("play-flow--dragging");
     }
     event.preventDefault();
-    var offset = touchStart.flow.dataset.playPanel === "tournament" ? -touchStart.width : 0;
+    var offset = touchStart.flow.dataset.playPanel === "poker21" ? -touchStart.width : 0;
     var position = Math.max(-touchStart.width, Math.min(0, offset + dx));
     touchStart.flow.querySelector(".play-flow__track").style.transform = "translateX(" + position + "px)";
   }, { passive: false });
@@ -110,8 +111,8 @@
       var change = Math.abs(dx) >= touchStart.width * .25 ||
         (Math.abs(dx) >= 45 && Date.now() - touchStart.at < 250);
       var panel = touchStart.flow.dataset.playPanel;
-      if (change && dx < 0 && panel === "poker21") panel = "tournament";
-      else if (change && dx > 0 && panel === "tournament") panel = "poker21";
+      if (change && dx < 0 && panel === "tournament") panel = "poker21";
+      else if (change && dx > 0 && panel === "poker21") panel = "tournament";
       show(panel);
     }
     touchStart = null;
@@ -123,8 +124,8 @@
   window.addEventListener("resize", size);
   document.addEventListener("keydown", function (event) {
     if (!event.target.closest || !event.target.closest("[data-play-flow]")) return;
-    if (event.key === "ArrowRight") show("tournament");
-    else if (event.key === "ArrowLeft") show("poker21");
+    if (event.key === "ArrowRight") show("poker21");
+    else if (event.key === "ArrowLeft") show("tournament");
     else return;
     event.preventDefault();
   });

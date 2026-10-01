@@ -51,7 +51,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 
 /* Supplied transparent artwork, positioned as independent layers. */
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
- --evening-background:url('./assets/evening-room-v1.webp');
+ --evening-background:url('./assets/evening-two-aces-room-v2.webp');
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art {display:block!important;position:absolute;pointer-events:none;object-fit:contain;max-width:none!important;}
 .evening-reference__art--portal-top {left:10%;top:30%;width:54%;height:auto;z-index:2;}
@@ -85,7 +85,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 /* Fill the viewport width; shorter screens scroll instead of shrinking the scene. */
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .play-flow__panel--tournament {
  align-items:flex-start!important;overflow-y:auto!important;overflow-x:hidden!important;
- background:#100b08 url('./assets/evening-room-v1.webp') center/cover no-repeat!important;
+ background:#100b08 url('./assets/evening-two-aces-room-v2.webp') center/cover no-repeat!important;
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tournament > .play-tournament-scene {
  width:100%!important;min-height:100%;
@@ -139,3 +139,123 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  transform:translateY(var(--evening-scene-drop)) scaleX(-1)!important;
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:18%;z-index:6;}
+
+/* Lower the table slightly while the portals and seated players retain their positions. */
+.evening-reference__art--table {top:42%;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(42% + 37.4cqw)!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {top:calc(42% + 65cqw)!important;}
+.evening-reference__art--chair-left {top:39%;}
+.evening-reference__art--chair-middle {top:38%;}
+.evening-reference__art--chair-right {top:39%;}
+.evening-reference__art--chair-center {top:39%;}
+.evening-reference__art--player-left {top:35.5%;}
+.evening-reference__art--player-middle {top:34.5%;}
+.evening-reference__art--player-right {top:35.5%;}
+
+/* Temporarily hide the bonus chips below the tournament table. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {display:none!important;}
+
+/* On narrow phones, keep a small gap below the table while portals stay fixed. */
+@media (max-width:600px) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
+  --evening-table-drop:max(0px,calc(53cqh - 63.5cqw - var(--evening-scene-drop)));
+ }
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center,.evening-reference__art--player-left,.evening-reference__art--player-right,.home-tournament-play-sign) {
+  transform:translateY(calc(var(--evening-scene-drop) + var(--evening-table-drop)))!important;
+ }
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-middle {
+  transform:translateY(calc(var(--evening-scene-drop) + var(--evening-table-drop))) scaleX(-1)!important;
+ }
+}
+
+/* Darken only the room backdrop, keeping the supplied foreground artwork bright. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
+ background:linear-gradient(#00000069,#00000069),var(--evening-background) center/cover no-repeat!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:29%;}
+.evening-reference__art--portal-side {left:65%;top:21%;width:48%;}
+
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:31%;left:5.95%;width:62.1%;}
+
+/* Fine alignment in screen pixels, shared by phone and wider layouts. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
+ transform:translateY(calc(var(--evening-scene-drop) - 8px))!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center,.evening-reference__art--player-left,.evening-reference__art--player-right,.home-tournament-play-sign) {
+ transform:translateY(calc(var(--evening-scene-drop) + var(--evening-table-drop,0px) - 15px))!important;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-middle {
+ transform:translateY(calc(var(--evening-scene-drop) + var(--evening-table-drop,0px) - 15px)) scaleX(-1)!important;
+}
+
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {transform:translateY(calc(var(--evening-scene-drop) - 10px))!important;}
+
+/* Scale and offset the ring independently of the original leg pixels. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {
+ mask:url('./assets/evening-portal-leg-mask.svg') center/100% 100% no-repeat;
+ -webkit-mask:url('./assets/evening-portal-leg-mask.svg') center/100% 100% no-repeat;
+ z-index:7;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-ring {
+ left:calc(1.2925% - 6px);top:31%;width:71.415%;height:auto;z-index:6;
+ transform:translateY(calc(var(--evening-scene-drop) - 10px - 2.2cqw))!important;
+}
+
+/* Compact tournament heading, with session and terms on single lines. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {
+ left:4%;width:74%;min-height:0!important;border:0;border-radius:0;background:linear-gradient(90deg,#080909e8,#08090995);box-shadow:none;padding:2cqw 1.5cqw 2.5cqw;gap:1.5cqw;
+}
+.evening-reference__session {display:flex;align-items:baseline;gap:2cqw;white-space:nowrap;}
+.evening-reference__session strong {color:#ff963d;font:900 4.2cqw/1.2 Arial,sans-serif;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .evening-reference__session #tournamentDayHomeName {font-size:4.2cqw!important;max-width:none;}
+.evening-reference__terms {display:flex;align-items:baseline;gap:1.2cqw;border-top:1px solid #ae6a2c;padding-top:1.7cqw;white-space:nowrap;font:700 3.1cqw/1.3 Arial,sans-serif;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .evening-reference__terms :is(#tournamentDayBuyin,#tournamentDayGuarantee) {display:inline!important;font:900 3.8cqw/1.2 Arial,sans-serif!important;letter-spacing:-.08cqw!important;text-shadow:none!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {top:2%!important;height:10cqw!important;}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-share {top:calc(2% + 13cqw)!important;height:10cqw!important;}
+
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--flop {
+ left:-10%;top:42%;width:120%;height:auto;z-index:5;
+ transform:translateY(calc(var(--evening-scene-drop) + var(--evening-table-drop,0px) - 15px))!important;
+}
+
+/* Wider windows need smaller portals above the seated players. */
+@media (min-aspect-ratio:3/5) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {
+  top:22%;transform-origin:50% 0;
+  transform:translateY(calc(var(--evening-scene-drop) - 10px)) scale(.7)!important;
+ }
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-ring {
+  top:22%;transform-origin:50% 0;
+  transform:translateY(calc(var(--evening-scene-drop) - 10px - 1.54cqw)) scale(.7)!important;
+ }
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
+  top:19%;left:70%;width:34%;
+ }
+}
+@media (min-aspect-ratio:3/5) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {min-height:110cqw;--evening-scene-drop:0px;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop) {width:90%;left:5%;top:calc(100% - 54cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center) {top:calc(100% - 59cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--player-left,.evening-reference__art--player-middle,.evening-reference__art--player-right) {top:calc(100% - 64cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:calc(100% - 84cqw);transform:translateY(-10px) scale(.5)!important;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-ring {top:calc(100% - 84cqw);transform:translateY(calc(-10px - 1.1cqw)) scale(.5)!important;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {top:calc(100% - 97cqw);left:73%;width:25%;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(100% - 26cqw)!important;left:22%!important;width:56%!important;}
+}
+/* Seat the wide-layout players inside the table edges, with visible chairs. */
+@media (min-aspect-ratio:3/5) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-left {left:7%;width:23%;top:calc(100% - 70cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-middle {left:51%;width:29%;top:calc(100% - 69cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-right {left:73%;width:23%;top:calc(100% - 70cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:9%;width:22%;top:calc(100% - 70cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:54%;width:22%;top:calc(100% - 70cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:73%;width:22%;top:calc(100% - 70cqw);}
+}
+/* Fill the wide scene with the table and larger portal effects. */
+@media (min-aspect-ratio:3/5) {
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop) {width:102%;left:-1%;top:calc(100% - 60.75cqw);}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:calc(100% - 91cqw);transform:translateY(-10px) scale(.65)!important;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-ring {top:calc(100% - 91cqw);transform:translateY(calc(-10px - 1.43cqw)) scale(.65)!important;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {top:calc(100% - 104cqw);left:68%;width:30%;}
+ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(100% - 29cqw)!important;}
+}
