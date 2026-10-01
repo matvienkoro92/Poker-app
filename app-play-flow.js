@@ -11,25 +11,28 @@
   var coolerSpeechTimer = null;
   var coolerMotionTimer = null;
   var coolerMotionArt = null;
-  var coolerMotionClone = null;
+  var coolerMotionClones = [];
   document.addEventListener("click", function (event) {
     var target = event.target.closest && event.target.closest(".evening-reference__cooler-hit");
     if (!target) return;
     clearTimeout(coolerMotionTimer);
-    if (coolerMotionClone) coolerMotionClone.remove();
+    coolerMotionClones.forEach(function (part) { part.remove(); });
     if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
     coolerMotionArt = target.parentElement.querySelector("img.evening-reference__art--portal-side");
     if (coolerMotionArt && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      coolerMotionClone = coolerMotionArt.cloneNode(false);
-      coolerMotionClone.classList.add("evening-cooler-motion");
+      coolerMotionClones = ["head", "hand"].map(function (part) {
+        var layer = coolerMotionArt.cloneNode(false);
+        layer.classList.add("evening-cooler-motion-" + part);
+        coolerMotionArt.after(layer);
+        return layer;
+      });
       coolerMotionArt.classList.add("evening-cooler-motion-source");
-      coolerMotionArt.after(coolerMotionClone);
       coolerMotionTimer = setTimeout(function () {
-        if (coolerMotionClone) coolerMotionClone.remove();
+        coolerMotionClones.forEach(function (part) { part.remove(); });
         if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
-        coolerMotionClone = null;
+        coolerMotionClones = [];
         coolerMotionArt = null;
-      }, 700);
+      }, 1000);
     }
     clearTimeout(coolerSpeechTimer);
     if (coolerSpeech) coolerSpeech.remove();
@@ -95,6 +98,24 @@
     });
   }
 
+  function placeVpnCat() {
+    if (!flow) return;
+    var scene = flow.querySelector(".evening-reference");
+    var table = scene && scene.querySelector(".evening-reference__art--table");
+    var cat = scene && scene.querySelector(".evening-vpn-cat");
+    if (!table || !cat || !table.complete || !table.naturalWidth) return;
+    var sceneRect = scene.getBoundingClientRect();
+    var tableRect = table.getBoundingClientRect();
+    if (!sceneRect.width) return;
+    var scale = sceneRect.width / scene.offsetWidth;
+    var top = (tableRect.bottom - sceneRect.top) / scale - cat.offsetHeight * .25;
+    cat.style.setProperty("--vpn-cat-top", top + "px");
+  }
+
+  document.addEventListener("load", function (event) {
+    if (event.target.matches && event.target.matches(".evening-reference__art--table")) placeVpnCat();
+  }, true);
+
   function size() {
     if (!flow || !flow.isConnected) return;
     var panel = flow.querySelector(".play-flow__panel");
@@ -106,6 +127,7 @@
     flow.style.setProperty("--play-tournament-height", height + "px");
     var zoom = scene && scene.dataset.tournamentCharacter === "gucci" ? 1.18 : 1.05;
     flow.style.setProperty("--play-tournament-width", Math.floor(scene && scene.classList.contains("evening-reference") ? width : Math.min(width * zoom, height * 1122 / 1402)) + "px");
+    requestAnimationFrame(placeVpnCat);
     var portalRatio = width >= 600 ? 1072 / 1467 : 852 / 1846;
     flow.style.setProperty("--play-portal-width", Math.floor(Math.min(width, height * portalRatio)) + "px");
   }

@@ -341,7 +341,12 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {bottom:24%;}
 }
 
-/* Animate the isolated Cooler pixels while the portal and second player stay still. */
-.evening-cooler-motion-source {clip-path:polygon(evenodd,0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,19% 22%,34% 24%,36% 35%,48% 43%,58% 62%,43% 66%,58% 76%,47% 82%,28% 72%,26% 96%,2% 97%,12% 72%,15% 64%,1% 64%,1% 54%,9% 43%,5% 35%,8% 28%,19% 22%,0% 0%);}
-.evening-cooler-motion {clip-path:polygon(19% 22%,34% 24%,36% 35%,48% 43%,58% 62%,43% 66%,58% 76%,47% 82%,28% 72%,26% 96%,2% 97%,12% 72%,15% 64%,1% 64%,1% 54%,9% 43%,5% 35%,8% 28%);animation:evening-cooler-nod .7s ease-in-out;transform-origin:28% 65%!important;pointer-events:none!important;}
-@keyframes evening-cooler-nod {0%,100% {rotate:0deg;} 25% {rotate:-4deg;} 55% {rotate:3deg;} 78% {rotate:-1.5deg;}}
+/* Separate head turn and a small forearm gesture; the body remains still. */
+.evening-cooler-motion-source {clip-path:polygon(evenodd,0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,6% 32%,9% 26%,19% 22%,30% 24%,35% 30%,36% 35%,28% 40%,15% 41%,7% 38%,6% 32%,0% 0%,9% 43%,20% 44%,17% 52%,15% 61%,9% 65%,2% 63%,1% 56%,5% 49%,9% 43%,0% 0%);}
+.evening-cooler-motion-head {clip-path:polygon(6% 32%,9% 26%,19% 22%,30% 24%,35% 30%,36% 35%,28% 40%,15% 41%,7% 38%);animation:evening-cooler-head-turn 1s ease-in-out;transform-origin:24% 40%!important;pointer-events:none!important;}
+.evening-cooler-motion-hand {clip-path:polygon(9% 43%,20% 44%,17% 52%,15% 61%,9% 65%,2% 63%,1% 56%,5% 49%);animation:evening-cooler-hand-gesture 1s ease-in-out;transform-origin:18% 46%!important;pointer-events:none!important;}
+@keyframes evening-cooler-head-turn {0%,100% {rotate:0deg;} 30%,65% {rotate:5deg;} 80% {rotate:2deg;}}
+@keyframes evening-cooler-hand-gesture {0%,100% {rotate:0deg;} 25% {rotate:-8deg;} 50% {rotate:-3deg;} 70% {rotate:-7deg;}}
+
+/* Follow the rendered table edge across all aspect ratios instead of viewport percentages. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {top:var(--vpn-cat-top,auto);bottom:auto;}
