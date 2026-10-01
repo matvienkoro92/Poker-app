@@ -2947,6 +2947,7 @@
   }
 
   function clubAchievementPosts() {
+    var newsArt = { first: "home-tournament-trophy-button-v1.webp", personal: "home-tournament-trophy-button-v1.webp", milestone: "home-news-cash-black-gold-chips-v1.webp", big: "home-news-cash-black-gold-chips-v1.webp", record: "summer-rating-player-pokermanki-v3.webp", series: "home-tournament-trophy-button-v1.webp", weekly: "hall-top2026-trophy-v4.webp" };
     var titles = { record: "Рекорд недели", first: "Первые победы", series: "Серия побед", big: "Крупные заносы дня", personal: "Новые личные рекорды", milestone: "Рубеж по призовым", weekly: "Итоги турнирной недели" };
     function rub(n) { return Number(n || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
     function period(item) { return item.start.split('-').reverse().join('.') + ' — ' + item.end.split('-').reverse().join('.'); }
@@ -2971,8 +2972,11 @@
           return '<li><b>' + esc(r.nick + ' — ' + result) + '</b><small>' + esc(context) + '</small></li>';
         }).join('') + '</ul>';
       }
+      var playerArt = { "ПокерМанки": "summer-rating-player-pokermanki-v3.webp", "Ваар": "summer-rating-player-waaar.webp", "Luck_is_Suck": "club-news-personal/luck-is-suck-personal-cutout.webp" };
+      var leadNick = post.kind === "record" ? first.top[0].nick : first.nick;
+      var image = playerArt[leadNick] || (post.kind === "record" ? "home-tournament-trophy-button-v1.webp" : newsArt[post.kind]);
       var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
-      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p>' +
+      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/' + image + '" alt="" aria-hidden="true" loading="lazy"></div><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div></div>' +
         '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
         '<p class="home-news-achievement__note">По данным клуба. Призовые до вычета бай-инов.' + (['first','personal','milestone'].indexOf(post.kind) !== -1 ? ' Достижение за доступную историю учёта.' : '') + '</p></details></article>' };
     }).filter(Boolean);
@@ -2984,6 +2988,14 @@
     if (!data) return "";
     function rub(value) { return Number(value || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
     function metric(value, label) { return '<div><strong>' + esc(value) + '</strong><span>' + esc(label) + '</span></div>'; }
+    function leadersPreview() {
+      var art = { "ПокерМанки": "summer-rating-player-pokermanki-v3.webp", "Ваар": "summer-rating-player-waaar.webp", "Luck_is_Suck": "club-news-personal/luck-is-suck-personal-cutout.webp" };
+      return '<div class="home-news-month-results__leaders"><small>ТОП-3 ПО СУММЕ ПРИЗОВЫХ</small><div class="home-news-month-results__podium">' + data.topTotals.slice(0, 3).map(function (player, index) {
+        return '<div class="home-news-month-results__leader"><span class="home-news-month-results__place">' + (index + 1) + '</span>' +
+          (art[player.nick] ? '<img src="./assets/' + art[player.nick] + '" alt="" aria-hidden="true" loading="lazy">' : '') +
+          '<b>' + esc(player.nick) + '</b><strong>' + esc(rub(player.reward)) + '</strong></div>';
+      }).join('') + '</div><div class="home-news-month-results__best"><img src="./assets/achievement-trophy-big100-v1.webp" alt="" aria-hidden="true" loading="lazy"><div><small>КРУПНЕЙШИЙ ЗАНОС</small><b>' + esc(data.topWins[0].nick) + '<strong>' + esc(rub(data.topWins[0].reward)) + '</strong></b></div></div></div>';
+    }
     function ranking(rows, total) {
       return '<ol class="home-news-month-results__ranking">' + rows.map(function (row) {
         return '<li><div><b>' + esc(row.nick) + '</b><small>' + esc(total
@@ -2995,6 +3007,7 @@
     return '<article class="home-friend-news-modal__editorial home-news-month-results"><small>ДОСТИЖЕНИЯ КЛУБА · 1–30 СЕНТЯБРЯ 2026</small>' +
       '<h3>Итоги сентября</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
       '<p class="home-news-month-results__highlights">' + esc(data.firstPlaces) + ' побед · ' + esc(data.paidFinishes) + ' призовых финиша</p>' +
+      leadersPreview() +
       '<details class="home-news-month-results__spoiler" data-month-ranking="summary"><summary>Достижения и топ-10<span aria-hidden="true">⌄</span></summary><div class="home-news-month-results__body">' +
       '<div class="home-news-month-results__metrics">' + metric(data.big50, 'Заносов 50–99 тыс. ₽') + metric(data.big100, 'Заносов 100 тыс. ₽+') +
         metric(data.firstPlaces, 'Первых мест') + metric(data.podiums, 'Финишей в топ-3') + metric(data.paidFinishes, 'Попаданий в деньги') + metric(data.players, 'Игроков с призовыми') + '</div>' +

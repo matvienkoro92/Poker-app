@@ -150,7 +150,9 @@ function initProfilePokerPlus() {
     } catch (ePokerPlusProfileCacheClear) {}
   }
 
+  var pokerPlusRefreshErrorText = "";
   function setFeedback(text, tone) {
+    pokerPlusRefreshErrorText = tone ? String(text || "") : "";
     if (!feedback) return;
     feedback.textContent = text || "";
     feedback.style.color = tone === "warn" ? "#f59e0b" : tone ? "#ef4444" : "";
@@ -524,7 +526,7 @@ function initProfilePokerPlus() {
       }
     }
     if (statusFeedback) {
-      statusFeedback.textContent = text;
+      statusFeedback.textContent = state === "failed" ? (pokerPlusRefreshErrorText || "Не удалось получить свежие данные Poker21. Попробуйте обновить ещё раз.") : text;
       statusFeedback.hidden = !text;
       statusFeedback.dataset.state = state;
     }
@@ -1912,8 +1914,9 @@ function initProfilePokerPlus() {
             if (!refresh && section && section.dataset) section.dataset.profilePokerPlusLoaded = "";
             if (!refresh && !silentRefresh && !pokerPlusProfileLinked) setPokerPlusInitialLoading(false);
             setProfileStatusLoading(false);
-            if (!silentRefresh && data && data.error) {
-              setFeedback(refresh ? "Не удалось обновить Poker21: " + data.error + " Старые данные оставили." : data.error, true);
+            if (!silentRefresh) {
+              var reason = data && data.error || "Сервер не вернул данные. Проверьте соединение и повторите обновление.";
+              setFeedback(refresh ? "Не удалось обновить Poker21: " + reason + " Сохранённые данные оставили." : reason, true);
             }
             return { refreshStatus: "failed" };
           }
@@ -1950,7 +1953,7 @@ function initProfilePokerPlus() {
             if (data.needsCiphertext || /сохран[её]нн(?:ый|ого)\s+ключ|saved\s+key|нужен\s+ключ/i.test(syncError)) {
               setPokerPlusRefreshNeedsKeyMode();
             }
-            var keyHint = /binding failed|bind failed/i.test(syncError) ? ". Если ошибка повторится, отвяжите Poker21 и привяжите заново." : "";
+            var keyHint = "";
             if (!silentRefresh) setFeedback("Показаны сохранённые данные Poker21. Свежее обновление не прошло: " + syncError + keyHint, "warn");
             return { refreshStatus: "failed" };
           } else if (refresh && refreshCiphertext) {
