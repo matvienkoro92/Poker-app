@@ -574,3 +574,6 @@
 /* The selected frame replaces the portrait border instead of adding an outer ring. */
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar[data-appearance-frame] { outline: none !important; box-shadow: none !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar[data-appearance-frame] .chat-user-modal__avatar { border: 3px solid var(--appearance-color,transparent) !important; box-shadow: 0 0 20px var(--appearance-glow,transparent) !important; }
+
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference .profile-public-showcase__top { display: none !important; }
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name .profile-public-showcase__appearance { flex: 0 0 auto; width: auto !important; min-width: 0 !important; min-height: 28px !important; height: auto !important; margin: 0 !important; padding: 4px 8px !important; border-radius: 8px !important; font-size: 12px !important; line-height: 1.2 !important; white-space: nowrap; }
