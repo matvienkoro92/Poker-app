@@ -846,6 +846,7 @@ function profilePublicShowcaseSyncArt(nick, opts) {
   var artWrap = document.getElementById("profilePublicRatingArt");
   var artImg = document.getElementById("profilePublicRatingArtImg");
   if (!artWrap || !artImg) return;
+  var avatarWrap = document.getElementById("profilePublicHeroAvatar");
   var art = null;
   if (!opts.forceDefault && nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
     try {
@@ -869,8 +870,11 @@ function profilePublicShowcaseSyncArt(nick, opts) {
       }
       return;
     }
-    var avatarFallback = !opts.forceDefault ? profilePublicCardAvatarUrl() : "";
-    art = avatarFallback ? { src: avatarFallback, nick: nick || "Фото профиля", avatarFallback: true } : profileDefaultHeroArt(profileHeroGenderValue);
+    profilePublicShowcaseArtSeq += 1;
+    profilePublicShowcaseHideArt(artImg);
+    artWrap.hidden = false;
+    if (avatarWrap) avatarWrap.hidden = false;
+    return;
   }
   artWrap.hidden = false;
   if (art && art.src) {
@@ -890,6 +894,7 @@ function profilePublicShowcaseSyncArt(nick, opts) {
     if (currentSrc === resolvedSrc && artImg.complete && artImg.naturalWidth > 0) {
       artImg.hidden = false;
       artImg.style.display = "";
+      if (avatarWrap) avatarWrap.hidden = true;
       return;
     }
     artImg.hidden = true;
@@ -898,6 +903,7 @@ function profilePublicShowcaseSyncArt(nick, opts) {
       if (seq !== profilePublicShowcaseArtSeq) return;
       artImg.hidden = false;
       artImg.style.display = "";
+      if (avatarWrap) avatarWrap.hidden = true;
       if (profileOwnWallState.tab === "personal") renderProfileOwnWall();
     };
     artImg.onerror = function () {

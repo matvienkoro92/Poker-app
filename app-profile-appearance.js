@@ -13,6 +13,16 @@
     var request=pokerSocialRequest('profile-appearance',{action:'get'}).then(function(d){if(gen!==generation)return null;ownData=d.appearance;loadedAt=Date.now();apply(ownRoot(),ownData);return ownData;}).finally(function(){if(ownRequest===request)ownRequest=null;});ownRequest=request;return request;
   };
   window.pokerApplyMemberAppearance=function(id,root){if(!root)return;apply(root,null);var key=String(id)+':'+Math.random();root._appearanceRequest=key;var gen=generation;pokerSocialRequest('profile-appearance',{action:'get',targetId:id}).then(function(d){if(gen===generation&&root._appearanceRequest===key){apply(root,d.appearance);if(root===embeddedCard)preview();}}).catch(function(){});};
+  function releaseIdentity(){
+    var settings=document.getElementById('profileAppearanceIdentitySettings');
+    var home=document.getElementById('profileAppearanceIdentityHome');
+    if(settings&&home)home.appendChild(settings);
+  }
+  function mountIdentity(){
+    var settings=document.getElementById('profileAppearanceIdentitySettings');
+    var slot=dialog.querySelector('.appearance-identity-slot');
+    if(settings&&slot)slot.appendChild(settings);
+  }
   function releaseCard(){
     if(!embeddedCard)return;
     var card=embeddedCard;embeddedCard=null;
@@ -44,15 +54,17 @@
     preview();
   }
   function render(data){
+    releaseIdentity();
     ownData=data;selection={frame:data.frame,achievement:data.achievement?data.achievement.id:''};
-    dialog.innerHTML='<form method="dialog" class="appearance-close-row"><button class="social-button" aria-label="Закрыть оформление">✕</button></form><span class="social-kicker">Ваша карточка в клубе</span><h2 id="appearanceTitle">Оформить профиль</h2><p class="social-muted">Рамку и ачивку увидят игроки, открывшие ваш профиль.</p>'+(data.hero?'<div class="appearance-hero-entry"><strong>Вещи, кубки и навыки — в «Моём герое»</strong><button type="button" class="social-button" data-profile-hero-open>Открыть моего героя</button></div>':'')+'<details class="appearance-card-preview"><summary>Как профиль видят другие игроки</summary><div class="appearance-public-card"></div></details><h3>Рамка аватара</h3><div class="appearance-frames">'+data.frames.map(function(f){return '<button type="button" class="social-button" data-appearance-frame-choice="'+f.id+'" aria-pressed="'+(f.id===data.frame)+'"><span class="appearance-swatch" data-appearance-frame="'+f.id+'"></span>'+esc(f.title)+'</button>';}).join('')+'</div><label class="appearance-label">Витринная ачивка<select id="appearanceAchievement"><option value="">Без ачивки</option>'+data.achievements.map(function(a){return '<option value="'+a.id+'"'+(a.id===selection.achievement?' selected':'')+'>'+esc(a.title)+'</option>';}).join('')+'</select></label>'+(!data.achievements.length?'<p class="social-muted">Здесь появятся заработанные турнирные ачивки после публикации результатов и привязки Poker21.</p>':'')+'<p class="social-muted">На витрине доступны турнирные достижения: победы, герой дня, миллион призовых и крупные заносы.</p><p id="appearanceFeedback" role="status" aria-live="polite"></p><button type="button" id="appearanceSave" class="social-button social-button--primary">Сохранить оформление</button>';
+    dialog.innerHTML='<form method="dialog" class="appearance-close-row"><button class="social-button" aria-label="Закрыть оформление">✕</button></form><span class="social-kicker">Ваша карточка в клубе</span><h2 id="appearanceTitle">Оформить профиль</h2><p class="social-muted">Рамку и ачивку увидят игроки, открывшие ваш профиль.</p>'+(data.hero?'<div class="appearance-hero-entry"><strong>Вещи, кубки и навыки — в «Моём герое»</strong><button type="button" class="social-button" data-profile-hero-open>Открыть моего героя</button></div>':'')+'<details class="appearance-card-preview"><summary>Как профиль видят другие игроки</summary><div class="appearance-public-card"></div></details><div class="appearance-identity-slot"></div><h3>Рамка аватара</h3><div class="appearance-frames">'+data.frames.map(function(f){return '<button type="button" class="social-button" data-appearance-frame-choice="'+f.id+'" aria-pressed="'+(f.id===data.frame)+'"><span class="appearance-swatch" data-appearance-frame="'+f.id+'"></span>'+esc(f.title)+'</button>';}).join('')+'</div><label class="appearance-label">Витринная ачивка<select id="appearanceAchievement"><option value="">Без ачивки</option>'+data.achievements.map(function(a){return '<option value="'+a.id+'"'+(a.id===selection.achievement?' selected':'')+'>'+esc(a.title)+'</option>';}).join('')+'</select></label>'+(!data.achievements.length?'<p class="social-muted">Здесь появятся заработанные турнирные ачивки после публикации результатов и привязки Poker21.</p>':'')+'<p class="social-muted">На витрине доступны турнирные достижения: победы, герой дня, миллион призовых и крупные заносы.</p><p id="appearanceFeedback" role="status" aria-live="polite"></p><button type="button" id="appearanceSave" class="social-button social-button--primary">Сохранить оформление</button>';
+    mountIdentity();
     return mountCard(data);
   }
   function open(){
-    if(!dialog){dialog=document.createElement('dialog');dialog.className='appearance-dialog';dialog.setAttribute('aria-labelledby','appearanceTitle');document.body.appendChild(dialog);dialog.addEventListener('cancel',function(e){if(saving)e.preventDefault();});dialog.addEventListener('close',releaseCard);}
-    releaseCard();
+    if(!dialog){dialog=document.createElement('dialog');dialog.className='appearance-dialog';dialog.setAttribute('aria-labelledby','appearanceTitle');document.body.appendChild(dialog);dialog.addEventListener('cancel',function(e){if(saving)e.preventDefault();});dialog.addEventListener('close',function(){releaseIdentity();releaseCard();});}
+    releaseIdentity();releaseCard();
     dialog.innerHTML='<h2 id="appearanceTitle">Оформить профиль</h2><p role="status">Загружаем оформление…</p><form method="dialog"><button class="social-button">Закрыть</button></form>';if(!dialog.open)dialog.showModal();
-    var gen=generation;window.pokerRefreshOwnAppearance(true).then(function(data){if(gen!==generation||!dialog.open)return;if(!data)throw new Error('Войдите в аккаунт, чтобы оформить профиль');return render(data);}).catch(function(e){if(gen!==generation)return;releaseCard();dialog.innerHTML='<h2 id="appearanceTitle">Оформить профиль</h2><p role="alert">'+esc(e.message)+'</p><form method="dialog"><button class="social-button">Закрыть</button></form>';});
+    var gen=generation;window.pokerRefreshOwnAppearance(true).then(function(data){if(gen!==generation||!dialog.open)return;if(!data)throw new Error('Войдите в аккаунт, чтобы оформить профиль');return render(data);}).catch(function(e){if(gen!==generation)return;releaseIdentity();releaseCard();dialog.innerHTML='<h2 id="appearanceTitle">Оформить профиль</h2><p role="alert">'+esc(e.message)+'</p><form method="dialog"><button class="social-button">Закрыть</button></form>';});
   }
   document.addEventListener('click',function(e){
     if(e.target.closest('[data-profile-appearance-open]')){open();return;}
@@ -63,5 +75,5 @@
   });
   document.addEventListener('change',function(e){if(e.target.id==='appearanceAchievement'&&selection&&!saving){selection.achievement=e.target.value;preview();}});
   window.addEventListener('poker-hero-updated',function(e){if(!ownData)return;ownData.hero=e.detail;apply(ownRoot(),ownData);if(embeddedCard)preview();});
-  window.addEventListener('poker-telegram-auth',function(){generation++;ownData=null;ownRequest=null;loadedAt=0;selection=null;saving=false;apply(ownRoot(),null);var modal=document.getElementById('chatUserModal');if(modal){modal._appearanceRequest='';apply(modal,null);}releaseCard();if(dialog){dialog.close();dialog.innerHTML='';}});
+  window.addEventListener('poker-telegram-auth',function(){generation++;ownData=null;ownRequest=null;loadedAt=0;selection=null;saving=false;apply(ownRoot(),null);var modal=document.getElementById('chatUserModal');if(modal){modal._appearanceRequest='';apply(modal,null);}releaseIdentity();releaseCard();if(dialog){dialog.close();dialog.innerHTML='';}});
 })();
