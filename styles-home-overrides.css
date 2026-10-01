@@ -6369,3 +6369,12 @@ html body .bottom-nav .bottom-nav__badge {
   font-size: 9px;
   box-shadow: none;
 }
+/* Larger daily-deal card and character on Pro Max phones and medium screens. */
+@media (min-width:390px) and (max-width:680px) {
+ #app.app.app--view-home .home-daily-deal-hero {height:216.72px!important;}
+ #app.app.app--view-home .home-daily-deal-hero__image {top:-43.2px!important;}
+}
+@media (min-width:681px) and (max-width:1000px) {
+ #app.app.app--view-home .home-daily-deal-hero {height:309.6px!important;}
+ #app.app.app--view-home .home-daily-deal-hero__image {top:-86.4px!important;}
+}
