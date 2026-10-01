@@ -26,6 +26,27 @@
             <div id="profileAppearanceIdentityHome" hidden>
               <div class="appearance-identity-settings" id="profileAppearanceIdentitySettings">
                 <h3>Данные профиля</h3>
+                <label for="profileChatDisplayNameInput">Имя</label>
+              <div class="profile-chat-name profile-chat-name--editor profile-public-showcase__name-editor" id="profileChatNameEditor">
+                <div class="profile-chat-name__row" id="profileChatNameRow">
+                  <div class="profile-chat-name__cell">
+                    <input
+                      type="text"
+                      id="profileChatDisplayNameInput"
+                      class="profile-chat-name__input"
+                      maxlength="80"
+                      placeholder="Как вас показывать в чате?"
+                      aria-label="Отображаемое имя в чатах"
+                      autocomplete="nickname"
+                    />
+                  </div>
+                </div>
+                <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
+                  <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
+                  <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
+                </div>
+              </div>
+
                       <div class="profile-public-showcase__title-preferences">
                         <div class="profile-hero-gender profile-public-showcase__identity-gender" id="profileHeroGender" role="group" aria-label="Пол героя">
                           <button type="button" class="profile-hero-gender__btn profile-hero-gender__btn--active" data-profile-gender="male" aria-pressed="true">М</button>
@@ -60,14 +81,7 @@
                 <div class="chat-user-modal__header profile-public-showcase__header">
                   <div class="chat-user-modal__title-block">
                     <div class="chat-user-modal__title-row">
-                      <span class="profile-public-showcase__verified-name">
-                        <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
-                        <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
-                        <span class="profile-public-showcase__name-actions">
-                        <button type="button" class="profile-hero-card__edit-name profile-public-showcase__edit-name" id="profileNameEditBtn" aria-label="Редактировать профиль" title="Редактировать профиль"><span aria-hidden="true">✎</span></button>
-                          <button type="button" class="social-button profile-public-showcase__appearance" data-profile-appearance-open>Оформить профиль</button>
-                        </span>
-                      </span>
+                      <button type="button" class="social-button profile-public-showcase__appearance" data-profile-appearance-open>О себе</button>
 
                     </div>
 
@@ -76,25 +90,6 @@
                 <div class="profile-public-showcase__self-actions" aria-label="Настройки своего профиля">
                     <p class="chat-user-modal__login-sub" id="profilePublicLoginSub" hidden></p>
                     <p class="chat-user-modal__last-seen" id="profilePublicLastSeen" hidden></p>
-                </div>
-              </div>
-              <div class="profile-chat-name profile-chat-name--editor profile-public-showcase__name-editor" id="profileChatNameEditor" hidden>
-                <div class="profile-chat-name__row" id="profileChatNameRow">
-                  <div class="profile-chat-name__cell">
-                    <input
-                      type="text"
-                      id="profileChatDisplayNameInput"
-                      class="profile-chat-name__input"
-                      maxlength="80"
-                      placeholder="Как вас показывать в чате?"
-                      aria-label="Отображаемое имя в чатах"
-                      autocomplete="nickname"
-                    />
-                  </div>
-                </div>
-                <div class="profile-chat-name__save-wrap" id="profileChatNameSaveWrap">
-                  <button type="button" class="profile-visible-to-others__p21-save" id="profileSaveBtn">Сохранить</button>
-                  <span class="profile-visible-to-others__p21-feedback profile-chat-name__save-feedback" id="profileSaveFeedback" aria-live="polite"></span>
                 </div>
               </div>
               <aside class="profile-review-invite" id="profileReviewInvite" hidden>
@@ -117,6 +112,10 @@
                       <button type="button" class="profile-visible-to-others__p21-save profile-status__refresh-btn" id="profilePokerPlusRefreshBtn" hidden>Обновить</button>
                       <button type="button" class="profile-status__points-info-btn" id="profileStatusPointsInfoBtn">Как получить уровень</button>
                     </div>
+                  </div>
+                  <div class="profile-public-showcase__hero-name">
+                    <h3 class="chat-user-modal__title" id="profilePublicTitle">Игрок</h3>
+                    <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="profilePublicVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
                   </div>
                   <section class="chat-user-modal__status" aria-labelledby="profilePublicStatusTitle" id="profilePublicStatusSection">
                     <div class="profile-status__title-row"><h4 class="chat-user-modal__status-title" id="profilePublicStatusTitle">Текущий уровень</h4><button type="button" class="profile-visible-to-others__p21-save profile-status__refresh-btn" id="profileStatusRefreshBtn" hidden>Обновить</button></div>

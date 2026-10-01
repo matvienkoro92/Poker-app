@@ -561,3 +561,16 @@
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar[hidden] { display: none !important; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar .chat-user-modal__avatar { width: 100% !important; height: 100% !important; box-sizing: border-box; object-fit: cover; border-radius: 50%; cursor: pointer; }
 .view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar .chat-user-modal__avatar--placeholder { align-items: center; justify-content: center; font-size: clamp(48px,12vw,100px); }
+
+#profileExitBtn .profile-exit-btn__copy { display: grid; gap: 2px; text-align: center; }
+#profileExitBtn .profile-exit-btn__copy small { font-size: .8em; font-weight: 600; line-height: 1.2; opacity: .75; }
+
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; margin: 0 0 12px; }
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero-name .chat-user-modal__title { font-size: clamp(20px,3vw,32px) !important; overflow-wrap: anywhere; }
+.appearance-identity-settings #profileChatNameEditor { display: block; margin: 8px 0 20px; }
+.appearance-identity-settings #profileChatDisplayNameInput { width: 100%; box-sizing: border-box; }
+.appearance-identity-settings #profileChatNameSaveWrap { margin-top: 8px; }
+
+/* The selected frame replaces the portrait border instead of adding an outer ring. */
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar[data-appearance-frame] { outline: none !important; box-shadow: none !important; }
+.view[data-view="profile"] #profilePublicShowcase.profile-public-showcase--reference #profilePublicHeroAvatar[data-appearance-frame] .chat-user-modal__avatar { border: 3px solid var(--appearance-color,transparent) !important; box-shadow: 0 0 20px var(--appearance-glow,transparent) !important; }

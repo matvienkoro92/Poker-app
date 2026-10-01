@@ -847,6 +847,14 @@ function profilePublicShowcaseSyncArt(nick, opts) {
   var artImg = document.getElementById("profilePublicRatingArtImg");
   if (!artWrap || !artImg) return;
   var avatarWrap = document.getElementById("profilePublicHeroAvatar");
+  var showcase = document.getElementById("profilePublicShowcase");
+  if (showcase && showcase.dataset.portrait === "avatar") {
+    profilePublicShowcaseArtSeq += 1;
+    profilePublicShowcaseHideArt(artImg);
+    artWrap.hidden = false;
+    if (avatarWrap) avatarWrap.hidden = false;
+    return;
+  }
   var art = null;
   if (!opts.forceDefault && nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
     try {

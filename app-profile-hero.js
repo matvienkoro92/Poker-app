@@ -101,7 +101,7 @@ if (!window.__pokerProfileHeroTextFitBound) {
 
 function closeProfileNameEditor() {
   var editor = document.getElementById("profileChatNameEditor");
-  if (editor) editor.hidden = true;
+  if (editor && !editor.closest(".appearance-dialog")) editor.hidden = true;
 }
 
 function openProfileNameEditor() {
@@ -123,9 +123,9 @@ function openProfileNameEditor() {
 function initProfileNameEditor() {
   var btn = document.getElementById("profileNameEditBtn");
   var input = document.getElementById("profileChatDisplayNameInput");
-  if (!btn || !input || btn.dataset.bound === "1") return;
-  btn.dataset.bound = "1";
-  btn.addEventListener("click", function () {
+  if (!input || input.dataset.nameEditorBound === "1") return;
+  input.dataset.nameEditorBound = "1";
+  if (btn) btn.addEventListener("click", function () {
     var editor = document.getElementById("profileChatNameEditor");
     if (editor && !editor.hidden) closeProfileNameEditor();
     else openProfileNameEditor();

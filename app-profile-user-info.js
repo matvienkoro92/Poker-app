@@ -557,7 +557,11 @@ function updateProfileExitBtnVisibility() {
   btn.classList.toggle("profile-exit-btn--hidden", !show);
   btn.hidden = !show;
   btn.classList.toggle("profile-exit-btn--auth-cta", !authState.hasAccountSession);
-  btn.textContent = authState.hasAccountSession ? "Выйти из аккаунта" : "Войти в аккаунт";
+  if (authState.hasAccountSession) {
+    btn.innerHTML = '<span class="profile-exit-btn__copy"><span>Выйти из аккаунта.</span><small>Но зачем?</small></span>';
+  } else {
+    btn.textContent = "Войти в аккаунт";
+  }
   var guestView = document.getElementById("profileView");
   if (guestView) guestView.classList.toggle("profile-view--login-only", !authState.hasAccountSession);
   try {
