@@ -13,10 +13,9 @@
   var turboReady=false, turboPilot=new Image();
   turboPilot.onload=function(){if(turboPilot.decode)turboPilot.decode().then(function(){turboReady=true;}).catch(function(){});else turboReady=true;};
   turboPilot.src='./assets/cooler-flight/cooler-pilot-turbo-v1.webp';
-  var pilot = new Image(), monkey = new Image(), fan = new Image();
+  var pilot = new Image(), monkey = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
   monkey.src = './assets/pokermanki-animation-head.webp';
-  fan.src = './assets/hero-poker/pilots-v1/cooler-fan.webp';
   function active() { return document.body.getAttribute('data-view') === 'cooler-flight'; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
   function storageKey() {
@@ -196,7 +195,15 @@
     var ultra=state && state.version>=8 && state.passes>=70 && ultraReady;
     var sprite=ultra?ultraPilot:turbo?turboPilot:pilot;
     if(sprite.complete && sprite.naturalWidth)ctx.drawImage(sprite,-size*.37,-size*.55,size*.75,size);
-    if (!ghost && !turbo && fan.complete && fan.naturalWidth) { ctx.save();ctx.translate(-size*.23,size*.14);ctx.rotate((state ? state.tick : performance.now()/16)*.32);ctx.globalAlpha=.72;ctx.drawImage(fan,-size*.11,-size*.11,size*.22,size*.22);ctx.restore(); }
+    if (!turbo && !ultra && pilot.complete && pilot.naturalWidth) {
+      // Animate the original rear wheel blades inside its stationary housing.
+      ctx.save();ctx.translate(-size*.245,size*.16);ctx.scale(.8,1);
+      ctx.beginPath();ctx.arc(0,0,size*.1,0,Math.PI*2);ctx.clip();
+      ctx.rotate((state ? state.tick : performance.now()/16)*.24);
+      var wheel=pilot.naturalWidth*.285;
+      ctx.drawImage(pilot,pilot.naturalWidth*.03,pilot.naturalHeight*.60,wheel,wheel,-size*.1,-size*.1,size*.2,size*.2);
+      ctx.restore();
+    }
     if (!ghost && (turbo || ultra)) {ctx.strokeStyle='#6beaff';ctx.lineWidth=3;ctx.globalAlpha=.8;for(var jet=0;jet<3;jet++){ctx.beginPath();if(ultra){ctx.moveTo(-size*.15+jet*size*.12,size*.28);ctx.lineTo(-size*.15+jet*size*.12,size*.4+(state.tick%6)*.3);}else{ctx.moveTo(-size*.28,size*.17+jet*size*.04);ctx.lineTo(-size*.58-(state.tick%6)*.5,size*.17+jet*size*.04);}ctx.stroke();}}
     if (!ghost && !turbo) { ctx.strokeStyle='#78e8e2';ctx.globalAlpha=.45;ctx.lineWidth=2;for(var j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-size*.37-j*5,size*.12+j*7);ctx.lineTo(-size*.53-j*7,size*.12+j*7);ctx.stroke();} }
     ctx.restore();
@@ -364,7 +371,6 @@
     g.textAlign='center';g.fillStyle='#a8c8b7';g.font='bold 22px sans-serif';g.fillText('АРКАДА КЛУБА ДВА ТУЗА',450,89);
     g.fillStyle='#ffe2a1';g.font='bold 46px sans-serif';g.fillText('КУЛЕРШАН',450,185);
     if(pilot.complete&&pilot.naturalWidth)g.drawImage(pilot,155,270,360,477);
-    if(monkey.complete&&monkey.naturalWidth)g.drawImage(monkey,578,372,165,144);
     g.font='900 150px sans-serif';g.fillStyle='#ffe2a1';g.fillText(String(state.score),450,900);
     g.font='bold 30px sans-serif';g.fillStyle='#ceead8';g.fillText('ФИШЕК · ПОБЕЙ МОЙ РЕКОРД',450,952);
     g.font='22px sans-serif';g.fillStyle='#83bdac';g.fillText('POKER21 × ДВА ТУЗА',450,1030);
@@ -410,7 +416,7 @@
       ctx=canvas.getContext('2d');var dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=390*dpr;canvas.height=600*dpr;ctx.scale(dpr,dpr);makeBackdrop();
       canvas.addEventListener('pointerdown',function(e){if(e.button!==0&&e.pointerType==='mouse')return;e.preventDefault();flap();});
       canvas.addEventListener('keydown',function(e){if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(!e.repeat)flap();}else if(e.code==='Escape')pause();});
-      document.querySelector('.cooler-flight').addEventListener('click',function(e){if(e.target.closest('.cooler-flight__back')){e.preventDefault();e.stopPropagation();cleanup();if(typeof window.setView==='function')window.setView('profile',{fromBack:true});else location.href='/';return;}var b=e.target.closest('[data-flight-action]');if(b)action(b.dataset.flightAction);var m=e.target.closest('[data-flight-mode]');if(m){if(phase==='playing'||phase==='paused'||phase==='countdown'||phase==='waiting'){status('Завершите полёт или отмените дуэль, чтобы сменить режим.');return;}generation++;stopPolling();room=null;runId='';mode=m.dataset.flightMode;document.querySelectorAll('[data-flight-mode]').forEach(function(n){n.setAttribute('aria-pressed',n===m?'true':'false');});status('');ready();}});
+      document.querySelector('.cooler-flight').addEventListener('click',function(e){if(e.target.closest('.cooler-flight__back')){e.preventDefault();e.stopPropagation();cleanup();if(typeof window.setView==='function')window.setView(window.pokerGameReturnViews && window.pokerGameReturnViews['cooler-flight'] || 'profile',{fromBack:true});else location.href='/';return;}var b=e.target.closest('[data-flight-action]');if(b)action(b.dataset.flightAction);var m=e.target.closest('[data-flight-mode]');if(m){if(phase==='playing'||phase==='paused'||phase==='countdown'||phase==='waiting'){status('Завершите полёт или отмените дуэль, чтобы сменить режим.');return;}generation++;stopPolling();room=null;runId='';mode=m.dataset.flightMode;document.querySelectorAll('[data-flight-mode]').forEach(function(n){n.setAttribute('aria-pressed',n===m?'true':'false');});status('');ready();}});
       ui.pause.addEventListener('click',pause);document.getElementById('coolerFlightTop').addEventListener('click',showTop);
       document.getElementById('coolerFlightSound').addEventListener('click',function(){sound=!sound;this.setAttribute('aria-pressed',String(sound));this.setAttribute('aria-label',sound?'Выключить звук':'Включить звук');tone(660,.1);});
       new MutationObserver(function(){if(!active())cleanup();}).observe(document.body,{attributes:true,attributeFilter:['data-view']});

@@ -5,3 +5,5 @@ body[data-view="monkey-race"] .app{max-width:560px;padding:8px 10px 14px!importa
 .race-arena{aspect-ratio:390/600;max-height:calc(100svh - 235px);}
 .race-arena canvas{width:100%;height:100%;}
 .monkey-race button:focus-visible,.monkey-race canvas:focus-visible{outline:3px solid #73e9d8;outline-offset:3px;}
+
+.race-controls button{padding:9px 4px;font-size:11px;}.race-controls button[data-race-action="duck"]{flex:1.7;background:#25334b;color:#d9f5ff;touch-action:none;user-select:none;-webkit-user-select:none;}.race-controls button[data-race-action="duck"]:active{background:#49617c;}
