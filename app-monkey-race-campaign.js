@@ -1,0 +1,5 @@
+/* Campaign wraps the existing race engine; standalone records and duels are unchanged. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./app-monkey-race-engine'));else root.MonkeyRaceCampaign=factory(root.MonkeyRaceEngine);})(typeof globalThis!=='undefined'?globalThis:this,function(E){
+function create(){return {phase:'route',tick:0,hp:3,warning:false,lane:1,won:false,goal:12};}
+function step(c,s,action){if(c.won||!s.alive)return;E.step(s,action);if(!s.alive)return;if(c.phase==='route'&&s.passes>=c.goal){c.phase='boss';c.tick=0;s.obstacles=[];s.nextId=10;s.spawnDistance=-1000000;}else if(c.phase==='boss'){c.tick++;s.obstacles=[];s.spawnDistance=-1000000;if(c.tick===30){c.lane=s.lane;c.warning=true;}if(c.tick===115){if(s.lane===c.lane&&s.jump<40)s.alive=false;else c.hp--;c.warning=false;if(c.hp===0){c.won=true;s.alive=false;}}if(c.tick>=165)c.tick=0;}}
+return {create,step};});

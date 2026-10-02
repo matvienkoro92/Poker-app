@@ -70,6 +70,7 @@ const baseFiles = [
   'app-last-buy-in-game.js',
   'app-last-buy-in-story.js',
   'monkey-race-play.html',
+  'app-monkey-race-campaign.js',
   'styles.css',
   'css-manifest.json',
   'js-manifest.json',

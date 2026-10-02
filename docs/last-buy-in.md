@@ -21,19 +21,19 @@
 
 Время постановочное, не часы реального ежедневного турнира. Внутриигровые билеты не выдаются аккаунту и не являются настоящим призом.
 
-## Механики прототипа
+## Gameplay revision 2
 
-1. Общая физика гонки, 8 преград, затем 3 тарана Колла. Красная дорожка фиксирует цель; уход на другую дорожку заставляет босса столкнуться с заграждением.
-2. Две волны охраны. Удар и бросок стула, затем совместный бой с Чеком и Рейзом: блокирующая фаза/предупреждение и окно атаки.
-3. Платформы и движущиеся лифты, прыжок и камера, следующий за игроком. Карты Пересдачи требуют уклонения; удар рядом или механизм повреждают босса.
-4. Извивающиеся вагоны над пропастью, три прохода к хвосту. Удав помечает секцию; необходимо отцепить её до сжатия.
-5. Шлюзы, полёт короткими нажатиями, водомёт, щит, три охлаждающих бака босса.
-6. Вид сверху, фишкомёт, укрытия, автоматическое прицеливание, 6 патронов, ручная/автоматическая перезарядка, дым. Три заданные покерные ситуации и Слоуплей с заранее фиксируемой линией выстрела. 90 секунд игрового времени; покерный экран приостанавливает этот таймер.
-7. Четыре фазы машины Нита: меняются активный герой, дальность атаки и атаки босса. Красная броня защищает босса; в синей фазе его можно повредить. Помощь команды даёт временную защиту.
+1. Chapter one embeds the existing app-monkey-race.js and its renderer, controls and engine. After 12 obstacles, Captain Call locks a lane, charges, and can be lured into three barriers. Campaign runs never call the record API. The regular game is unchanged.
+2. Roma: a 1900px club arena, four guard encounters, solid furniture, a three-hit combo, limited chair projectiles with knockback, jumping to evade, and separate shield/baton brothers.
+3. Missclick: a 3370px route, moving lifts, steam traps, chips, two checkpoints, a door lever and a complete solid boss arena.
+4. Vaar: one continuous 13-car bending train, three real locks, local checkpoints, no repeated teleport to the beginning, then the coil boss.
+5. Cooler: the real CoolerFlightEngine physics through 15 gates, upgrade after 10 gates, checkpoint healing, temporary shield and six hits on the cooling robot.
+6. Emil: three tactical rooms, different cover layouts, chip launcher, six-shot magazine, manual/automatic reload, smoke, three visible poker hands and a telegraphed sniper boss.
+7. Final: four hero phases, 24 boss health, card rain, targeted volleys, frontal armour windows and team support.
 
-Все главы открыты для тестирования. Медали за победу, отсутствие потери жизней и индивидуальный секрет сохраняются в localStorage `poker-last-buy-in:v1`. Повторное прохождение сохраняет лучший результат и ранее полученные медали. При уходе на карту игровой RAF отменяется; в паузе и на результате постоянной перерисовки нет. При сворачивании — пауза.
+Full-body Roma and Missclick use idle/walk/punch/jump images. Check, Raise, Reshuffle, Nuts, Slowplay and Nit have distinct art. Four scenic backgrounds are stored in assets/last-buy-in with the prompts in prompts-v2.txt. Images generated using the built-in image_gen tool and converted to WebP with alpha preserved.
 
-Это короткие прототипы, не финальные уровни: персонажи используют сохранённые арты приложения; у большинства боссов пока общий полицейский спрайт с различными механиками/обстановкой. Арт боссов, длинные постановочные трассы, звук, тонкая настройка баланса и облачное сохранение — следующий этап.
+All chapters remain available to the owner for testing. Best score and medals use localStorage poker-last-buy-in:v1. The game stops its RAF on map/exit, pause and results. Sound, elaborate sprite animation and cloud campaign saves are not implemented.
 
 ## Проверка
 
