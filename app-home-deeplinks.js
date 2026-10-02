@@ -50,6 +50,16 @@ function pokerInitHomeDeepLinks(opts) {
       runAfterReady();
     }, 0);
   }
+  var coolerDuel = String(startParam || "").match(/^cooler_duel_([a-f0-9]{12})$/i);
+  try {
+    var coolerQuery = new URLSearchParams(location.search).get("coolerDuel");
+    if (coolerQuery && /^[a-f0-9]{12}$/i.test(coolerQuery)) coolerDuel = [coolerQuery, coolerQuery];
+  } catch (eCoolerQuery) {}
+  if (coolerDuel) {
+    window.__pendingCoolerDuel = coolerDuel[1].toLowerCase();
+    openViewThen("cooler-flight");
+    return;
+  }
   function retryDeepLinkAction(action, attemptsLeft) {
     var left = attemptsLeft == null ? 40 : Math.max(1, Number(attemptsLeft) || 1);
     var run = function () {
@@ -576,6 +586,7 @@ function pokerInitHomeDeepLinks(opts) {
       bonus_game: "bonus-game",
       plasterer_game: "plasterer-game",
       cooler_game: "cooler-game",
+      cooler_flight: "cooler-flight",
     };
     if (simpleViewByStartApp[startParam]) {
       var vn = simpleViewByStartApp[startParam];

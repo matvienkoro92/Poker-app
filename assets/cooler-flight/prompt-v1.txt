@@ -1,0 +1,7 @@
+Built-in image_gen, identity-preserve, transparent_background=true.
+Reference: assets/club-news-personal/cooler-news-cutout.webp.
+Generated original: /Users/kosmonavt/.codex/generated_images/01a0f87e-25f4-7fd0-bf05-3a8ca00ee854/exec-05cf82d4-e691-4a94-a720-e170884db521.png
+Project asset: assets/cooler-flight/cooler-pilot-v1.webp (trimmed, 520px, WebP quality 90; alpha preserved).
+
+Prompt:
+Use case: identity-preserve. Asset type: transparent side-view arcade game character sprite. Use the reference as character identity: the exact smiling brown monkey named Cooler, backwards dark cap, black sunglasses, headphones, black hoodie with orange trim and black sneakers. Draw this same monkey RIDING STRADDLE on a compact WHITE OFFICE WATER DISPENSER (water cooler), with a large transparent blue water bottle mounted on TOP in front of his torso, water clearly visible. He flies facing RIGHT, hands gripping improvised handle bars, legs visible on the sides. A large circular computer cooling FAN mounted at the REAR LEFT of the white water dispenser propels the machine rightwards, RGB turquoise fan ring. Funny determined smile. Compact readable silhouette for a mobile Flappy Bird type game; three-quarter side view, whole character and machine visible with margin. Rich polished game illustration matching reference, bold clean outlines, warm gold highlights, turquoise accents. ONE isolated sprite only. NO floor, no scenery, no text, no logo, no motion streaks; genuinely transparent background. Save the output image.

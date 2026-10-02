@@ -1791,3 +1791,10 @@ body[data-view="equilator"] #app.app .card .card__content > .view--active[data-v
 .streams-remote-video {
   max-height: 280px;
 }
+
+.cooler-flight-entry { grid-column: 1 / -1; display: flex !important; align-items: center; gap: 14px; min-height: 115px; padding: 12px 18px !important; border: 1px solid #547461 !important; border-radius: 18px; background: radial-gradient(ellipse at 10% 50%,#22826a55,transparent 65%),#0b211b !important; color: #ffe3a0; text-decoration: none; overflow: hidden; }
+.cooler-flight-entry img { width: 105px; height: 100px; object-fit: contain; flex: 0 0 auto; }
+.cooler-flight-entry strong { display: block; font-size: 18px; line-height: 1.2; }
+.cooler-flight-entry small { display: block; color: #b5d2c2; font-size: 12px; line-height: 1.5; margin-top: 6px; }
+
+.profile-cooler-flight { margin-top: 20px; padding-bottom: 16px; }

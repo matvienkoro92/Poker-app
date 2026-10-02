@@ -30,6 +30,7 @@
     "download": "Играть",
     "bonus-game": "Бонусная игра",
     "cooler-game": "Кулер",
+    "cooler-flight": "Кулер против ПокерМанки",
     "plasterer-game": "Штукатур",
     "raffles": "Розыгрыши",
     "poker-tasks": "Задания клуба",

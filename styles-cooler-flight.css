@@ -1,0 +1,63 @@
+body[data-view="cooler-flight"] .card__header, body[data-view="cooler-flight"] .bottom-nav { display: none !important; }
+body[data-view="cooler-flight"] .card { padding: 0 !important; overflow: visible; background: transparent !important; border: 0; box-shadow: none; }
+body[data-view="cooler-flight"] .app { max-width: 560px; padding: 8px 10px 14px !important; }
+body[data-view="cooler-flight"] .app-footer { display: none; }
+.cooler-flight { color: #fff4d7; font-family: inherit; max-width: 520px; margin: auto; }
+.cooler-flight button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
+.cooler-flight button:focus-visible, .cooler-flight canvas:focus-visible { outline: 3px solid #76efdc; outline-offset: 3px; }
+.cooler-flight__header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.cooler-flight__back, .cooler-flight__icon-btn { flex: 0 0 44px; min-height: 44px; border: 1px solid #766037; border-radius: 14px; background: #171b1d; color: #ffe0a0; font-size: 25px; }
+.cooler-flight__icon-btn { margin-left: auto; font-size: 22px; opacity: .6; }
+.cooler-flight__icon-btn[aria-pressed="true"] { opacity: 1; color: #75ecd4; }
+.cooler-flight__eyebrow { display: block; font-size: 9px; letter-spacing: 2px; color: #a6baa9; margin-bottom: 4px; }
+.cooler-flight__header h1 { margin: 0; font-size: 17px; line-height: 1.25; font-weight: 850; }
+.cooler-flight__header h1 span { display: block; color: #f4c86d; }
+.cooler-flight__modes { display: flex; gap: 5px; padding: 4px; margin-bottom: 9px; background: #121b1b; border: 1px solid #2c4140; border-radius: 14px; }
+.cooler-flight__modes button { flex: 1; border: 0; border-radius: 10px; background: transparent; color: #b5c4bc; min-height: 42px; font-size: 11px; font-weight: 700; padding: 5px; }
+.cooler-flight__modes button[aria-pressed="true"] { background: #f0cf87; color: #1b211d; }
+.cooler-flight__arena { width: 100%; aspect-ratio: 390 / 600; max-height: calc(100svh - 172px); position: relative; overflow: hidden; border: 1px solid #577263; border-radius: 22px; box-shadow: 0 15px 60px #0008, inset 0 0 0 1px #b8d3c21a; background: #082c25; }
+.cooler-flight canvas { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
+.cooler-flight__hud { position: absolute; inset: 16px 19px auto; display: flex; justify-content: space-between; pointer-events: none; text-shadow: 0 2px 7px #000; }
+.cooler-flight__hud small { display: block; font-size: 8px; letter-spacing: 1.5px; color: #bad5c5; }
+.cooler-flight__hud strong { display: block; font-size: 34px; line-height: 1.15; }
+.cooler-flight__hud-right { text-align: right; }
+.cooler-flight__hud-right strong { font-size: 22px; color: #efcf88; }
+.cooler-flight__pause { position: absolute; right: 14px; top: 78px; min-width: 44px; min-height: 44px; border-radius: 50%; border: 1px solid #ffffff30; background: #0a171fcc; color: #fff; font-size: 18px; }
+.cooler-flight__overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg,#03130c20,#03130c70); padding: 18px; }
+.cooler-flight__overlay[hidden], .cooler-flight [hidden] { display: none !important; }
+.cooler-flight__panel { width: 100%; max-width: 350px; text-align: center; padding: 21px 18px; border: 1px solid #8b987351; border-radius: 22px; background: #071f1aee; box-shadow: 0 14px 40px #0008; backdrop-filter: blur(9px); }
+.cooler-flight__panel h2 { font-size: 26px; margin: 6px 0 10px; line-height: 1.1; color: #ffdd91; }
+.cooler-flight__panel p { font-size: 13px; line-height: 1.5; color: #d6e4d8; margin: 10px 0 15px; }
+.cooler-flight__panel .flight-tag { color: #77e7d0; font-size: 10px; font-weight: 800; letter-spacing: 2px; }
+.cooler-flight__panel .flight-button { display: block; width: 100%; min-height: 48px; padding: 11px 13px; border: 0; border-radius: 13px; font-size: 15px; font-weight: 800; margin-top: 8px; background: linear-gradient(130deg,#ffe3a2,#eaba56); color: #15251e; }
+.cooler-flight__panel .flight-button--secondary { background: #ffffff0c; color: #e5efdc; border: 1px solid #77978570; }
+.cooler-flight__panel .flight-score { font-size: 64px; font-weight: 900; color: #ffdf91; line-height: 1; margin: 14px 0 5px; }
+.cooler-flight__panel .flight-code { font-size: 24px; letter-spacing: 3px; color: #77e7d0; font-weight: 800; user-select: all; }
+.cooler-flight__panel label { font-size: 12px; display: block; text-align: left; color: #afcabc; margin-top: 13px; }
+.cooler-flight__panel input { display: block; box-sizing: border-box; width: 100%; margin-top: 6px; padding: 12px; font: inherit; color: #fff; background: #021811; border: 1px solid #557968; border-radius: 11px; min-height: 46px; }
+.cooler-flight__panel ol { padding: 0; list-style: none; max-height: 210px; overflow: auto; margin: 15px 0; text-align: left; }
+.cooler-flight__panel li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #ffffff15; padding: 9px 3px; font-size: 12px; }
+.cooler-flight__panel li span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cooler-flight__panel li strong { color: #ffdf91; }
+.cooler-flight__panel .flight-mine { background: #f4cf7419; border-radius: 7px; }
+.cooler-flight__toast { position: absolute; bottom: 70px; width: 100%; pointer-events: none; text-align: center; color: #ffe59e; font-size: 15px; font-weight: 800; text-shadow: 0 2px 7px #000; }
+.cooler-flight__hint { text-align: center; margin: 10px 0 5px; color: #b4c6b8; font-size: 11px; }
+.cooler-flight__status { min-height: 16px; text-align: center; font-size: 11px; color: #ddc78d; margin: 4px 0; }
+.cooler-flight-entry { grid-column: 1 / -1; display: flex !important; align-items: center; gap: 14px; min-height: 115px; padding: 12px 18px !important; border: 1px solid #547461 !important; border-radius: 18px; background: radial-gradient(ellipse at 10% 50%,#22826a55,transparent 65%),#0b211b !important; color: #ffe3a0; text-decoration: none; overflow: hidden; }
+.cooler-flight-entry img { width: 105px; height: 100px; object-fit: contain; flex: 0 0 auto; }
+.cooler-flight-entry strong { display: block; font-size: 18px; line-height: 1.2; }
+.cooler-flight-entry small { display: block; color: #b5d2c2; font-size: 12px; line-height: 1.5; margin-top: 6px; }
+@media (max-width: 350px) { .cooler-flight__header h1 { font-size: 15px; } .cooler-flight__panel { padding: 15px 12px; } .cooler-flight__panel h2 { font-size: 23px; } }
+@media (prefers-reduced-motion: reduce) { .cooler-flight__panel { backdrop-filter: none; } }
+.cooler-flight__arena { width: min(100%, calc((100svh - 172px) * .65)); max-height: none; margin-inline: auto; }
+.cooler-flight__overlay[data-kind="ready"] { align-items: flex-end; padding-bottom: 24px; }
+.cooler-flight__panel { max-height: 100%; overflow: auto; box-sizing: border-box; }
+
+body[data-view="cooler-flight"] { background: #061312 !important; }
+body[data-view="cooler-flight"] .app { background: transparent !important; }
+body[data-view="cooler-flight"] .bg-decor, body[data-view="cooler-flight"] #pokerAppUpdateButton { display: none !important; }
+
+.cooler-flight__hud { inset: 0 0 auto; padding: 16px 19px 12px; background: linear-gradient(#041f20e6, #041f2000); z-index: 2; }
+.cooler-flight__pause { z-index: 3; }
+.cooler-flight__overlay { z-index: 4; }
+.cooler-flight__toast { z-index: 3; }

@@ -266,6 +266,10 @@
       "app-shell-bootstrap.js",
       "app.js",
       "app-section-views.js"
+    ],
+    "coolerFlight": [
+      "app-cooler-flight-engine.js",
+      "app-cooler-flight.js"
     ]
   }
 }

@@ -31,6 +31,7 @@
     "learn-play-hub": ["learning"],
     "bonus-game": ["learning"],
     "cooler-game": ["learning"],
+    "cooler-flight": ["cooler-flight"],
     "plasterer-game": ["learning"],
     "poker-tasks": ["club-tasks"],
     "hall-of-fame": ["hall"],

@@ -80,6 +80,10 @@
     "section-layout": {
       "owner": "section-layout",
       "scope": "Shared non-home section layouts"
+    },
+    "cooler-flight": {
+      "owner": "cooler-flight",
+      "scope": "flight arcade, duel lobby and leaderboard"
     }
   },
   "domains": {
@@ -208,6 +212,9 @@
     ],
     "section-layout": [
       "styles-section-layout.css"
+    ],
+    "cooler-flight": [
+      "styles-cooler-flight.css"
     ]
   },
   "views": {
@@ -318,6 +325,11 @@
     "player-crm": [
       "base",
       "playerCrm",
+      "layout"
+    ],
+    "cooler-flight": [
+      "base",
+      "cooler-flight",
       "layout"
     ]
   }

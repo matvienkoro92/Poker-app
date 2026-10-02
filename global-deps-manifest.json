@@ -2775,6 +2775,27 @@
         "app-rating-view-adapter.js",
         "app-view-router.js"
       ]
+    },
+    {
+      "name": "initCoolerFlight",
+      "domain": "coolerFlight",
+      "exportedBy": [
+        "app-cooler-flight.js"
+      ],
+      "consumedBy": [
+        "app-view-router.js"
+      ]
+    },
+    {
+      "name": "__pendingCoolerDuel",
+      "domain": "coolerFlight",
+      "exportedBy": [
+        "app-home-deeplinks.js",
+        "app-cooler-flight.js"
+      ],
+      "consumedBy": [
+        "app-cooler-flight.js"
+      ]
     }
   ]
 }
