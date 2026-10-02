@@ -7,40 +7,50 @@
   var touchStart = null;
   var lastSwipeAt = 0;
 
-  var coolerSpeech = null;
-  var coolerSpeechTimer = null;
-  var coolerMotionTimer = null;
-  var coolerMotionArt = null;
-  document.addEventListener("click", function (event) {
-    var target = event.target.closest && event.target.closest(".evening-reference__cooler-hit");
-    if (!target) return;
-    clearTimeout(coolerMotionTimer);
-    if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
-    coolerMotionArt = target.parentElement.querySelector("img.evening-reference__art--portal-side");
-    if (coolerMotionArt && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // Animate the intact artwork so the neck and shoulders stay connected.
-      void coolerMotionArt.offsetWidth;
-      coolerMotionArt.classList.add("evening-cooler-motion-source");
-      coolerMotionTimer = setTimeout(function () {
-        if (coolerMotionArt) coolerMotionArt.classList.remove("evening-cooler-motion-source");
-        coolerMotionArt = null;
-      }, 1000);
+  var coolerSpeech = null, coolerSpeechTimer = null, coolerPose = null, coolerTarget = null;
+  var greetingArt = './assets/cooler-flight/cooler-scene-greeting-v1.webp';
+  var hurtArt = './assets/cooler-flight/cooler-scene-hurt-v1.webp';
+  function closeCooler() {
+    clearTimeout(coolerSpeechTimer);coolerSpeechTimer=null;
+    if(coolerSpeech)coolerSpeech.remove();coolerSpeech=null;
+    if(coolerPose){coolerPose.parentElement.classList.remove('evening-cooler-active');coolerPose.remove();}coolerPose=null;
+    if(coolerTarget)coolerTarget.setAttribute('aria-expanded','false');coolerTarget=null;
+  }
+  function positionCoolerSpeech() {
+    if(!coolerSpeech || !coolerTarget)return;
+    var rect=coolerTarget.getBoundingClientRect(),width=coolerSpeech.offsetWidth,height=coolerSpeech.offsetHeight;
+    coolerSpeech.style.left=Math.max(8,Math.min(window.innerWidth-width-8,rect.left-width*.75))+'px';
+    coolerSpeech.style.top=Math.max(12,Math.min(window.innerHeight-height-12,rect.top+rect.height*.2-height-10))+'px';
+  }
+  function inviteCooler() {
+    coolerPose.src=greetingArt;coolerSpeech.dataset.state='invite';
+    coolerSpeech.innerHTML='<p>Помогите набить мне банкрол. Игру-то понимать надо.</p><p>Сыграйте со мной в игру Кулершан.</p><div class="evening-cooler-speech__actions"><button type="button" data-cooler-choice="play">Сыграть</button><button type="button" data-cooler-choice="skip">Пропустить бродягу</button><button type="button" data-cooler-choice="hit">Ударить</button></div>';
+    positionCoolerSpeech();
+  }
+  document.addEventListener('click',function(event){
+    var choice=event.target.closest && event.target.closest('[data-cooler-choice]');
+    if(choice && coolerSpeech && coolerSpeech.contains(choice)){
+      event.preventDefault();
+      if(choice.dataset.coolerChoice==='hit'){
+        coolerPose.src=hurtArt;coolerSpeech.dataset.state='hurt';coolerSpeech.innerHTML='<p>Не дорос ты еще с Дядей Кулером тягаться!</p>';positionCoolerSpeech();
+        coolerSpeechTimer=setTimeout(function(){coolerSpeechTimer=null;if(coolerSpeech && document.body.dataset.view==='download')inviteCooler();else closeCooler();},3000);
+      }else{var play=choice.dataset.coolerChoice==='play';var target=coolerTarget;closeCooler();if(play && typeof window.setView==='function')window.setView('cooler-flight');else if(target)target.focus({preventScroll:true});}
+      return;
     }
-    clearTimeout(coolerSpeechTimer);
-    if (coolerSpeech) coolerSpeech.remove();
-    coolerSpeech = document.createElement("div");
-    coolerSpeech.className = "evening-cooler-speech";
-    coolerSpeech.setAttribute("role", "status");
-    coolerSpeech.textContent = "Игру-то понимать надо";
-    document.body.appendChild(coolerSpeech);
-    var rect = target.getBoundingClientRect();
-    coolerSpeech.style.left = Math.max(8, Math.min(window.innerWidth - coolerSpeech.offsetWidth - 8, rect.left - coolerSpeech.offsetWidth * .65)) + "px";
-    coolerSpeech.style.top = Math.max(8, rect.top + rect.height * .23 - coolerSpeech.offsetHeight - 12) + "px";
-    coolerSpeechTimer = setTimeout(function () {
-      if (coolerSpeech) coolerSpeech.remove();
-      coolerSpeech = null;
-    }, 2000);
+    var target=event.target.closest && event.target.closest('.evening-reference__cooler-hit');
+    if(!target || coolerSpeechTimer)return;
+    event.preventDefault();closeCooler();coolerTarget=target;target.setAttribute('aria-expanded','true');
+    var scene=target.parentElement,art=scene.querySelector('img.evening-reference__art--portal-side');if(!art)return;
+    coolerPose=art.cloneNode(false);coolerPose.classList.add('evening-cooler-pose');coolerPose.src=greetingArt;scene.appendChild(coolerPose);
+    coolerSpeech=document.createElement('div');coolerSpeech.className='evening-cooler-speech';coolerSpeech.setAttribute('role','dialog');coolerSpeech.setAttribute('aria-label','Кулер приглашает в Кулершан');coolerSpeech.setAttribute('aria-live','polite');document.body.appendChild(coolerSpeech);
+    inviteCooler();var pose=coolerPose;function showPose(){if(coolerPose===pose){scene.classList.add('evening-cooler-active');pose.classList.add('evening-cooler-pose--visible');}}if(pose.complete && pose.naturalWidth)showPose();else pose.addEventListener('load',showPose,{once:true});
+    coolerSpeech.querySelector('button').focus({preventScroll:true});
+    [greetingArt,hurtArt].forEach(function(src){var image=new Image();image.src=src;});
   });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape' && coolerSpeech){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});}});
+  window.addEventListener('resize',positionCoolerSpeech);
+  window.addEventListener('scroll',positionCoolerSpeech,{passive:true});
+  new MutationObserver(function(){if(document.body.dataset.view!=='download')closeCooler();}).observe(document.body,{attributes:true,attributeFilter:['data-view']});
 
   var vpnCatDialog = null;
   var awakeVpnCat = null;

@@ -1,0 +1,6 @@
+Reference: assets/evening-portal-club-walking-v3.webp
+Greeting source: /Users/kosmonavt/.codex/generated_images/01a0f87e-25f4-7fd0-bf05-3a8ca00ee854/exec-5bb3f4bd-fb99-4b3e-8ce9-f6631f66e784.png
+Hurt source: /Users/kosmonavt/.codex/generated_images/01a0f87e-25f4-7fd0-bf05-3a8ca00ee854/exec-f5dc5725-90e9-43d8-b2e1-7d9aed5dc232.png
+Greeting direction: same transparent 1024x1536 scene and identity, foreground Cooler looks at viewer and raises right hand (viewer left), friendly beckoning gesture; same clothes, legs, scale and lighting. No text or UI.
+Hurt direction: same identity and pose, playful purple black eye, tiny white cheek plaster, crooked sunglasses, scuffed cap and defiant grin. No blood or gore. No text or UI.
+Integration uses CSS foreground polygon and inverse SVG mask so original portal, PokerManki and the other scene layers stay visible. Images encoded to WebP at quality 88 with sharp.

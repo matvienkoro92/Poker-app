@@ -372,3 +372,18 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  left:var(--chair-invite-left,31%)!important;top:var(--chair-invite-top,40%)!important;width:var(--chair-invite-width,12%)!important;height:var(--chair-invite-height,12cqw)!important;transform:none!important;translate:none!important;z-index:6!important;gap:.6cqw!important;font-size:2cqw!important;text-align:center;color:#f7d79a!important;background:radial-gradient(ellipse,#171411f5 40%,#17141100 74%)!important;text-shadow:0 1px 2px #000;
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-tournament-share svg {width:5cqw!important;height:5cqw!important;flex:none;}
+
+.evening-cooler-speech {pointer-events:auto;max-width:min(340px,calc(100vw - 24px));box-sizing:border-box;font-size:14px;line-height:1.4;}
+.evening-cooler-speech p {margin:0 0 10px;}
+.evening-cooler-speech p:last-child {margin:0;}
+.evening-cooler-speech__actions {display:flex;flex-wrap:wrap;gap:7px;}
+.evening-cooler-speech__actions button {min-height:42px;padding:9px 12px;border:1px solid #be8738;border-radius:10px;background:#fff4d6;color:#241409;font:700 12px/1.2 Arial,sans-serif;cursor:pointer;touch-action:manipulation;}
+.evening-cooler-speech__actions button:first-child {background:#ecac39;flex:1 0 100%;}
+.evening-cooler-speech__actions button:focus-visible {outline:3px solid #725318;outline-offset:2px;}
+.evening-cooler-speech[data-state="hurt"] {background:#ffe8dc;border-color:#d67548;}
+.evening-cooler-pose {opacity:0;transition:opacity .25s ease;clip-path:polygon(0% 27.34%,10.74% 19.53%,36.13% 19.53%,42.48% 35.16%,41.02% 39.06%,50.29% 46.88%,58.59% 63.8%,56.64% 78.13%,38.09% 80.73%,29.3% 98.63%,0% 100%,0% 55.34%);}
+.evening-cooler-pose--visible {opacity:1;}
+.evening-cooler-active > img.evening-reference__art--portal-side:not(.evening-cooler-pose) {-webkit-mask-image:url('./assets/cooler-flight/cooler-scene-mask-v1.svg');mask-image:url('./assets/cooler-flight/cooler-scene-mask-v1.svg');mask-size:100% 100%;}
+@media(prefers-reduced-motion:reduce){.evening-cooler-pose{transition:none;}}
+.evening-cooler-speech .evening-cooler-speech__actions button {background:#fff4d6!important;color:#241409!important;}
+.evening-cooler-speech .evening-cooler-speech__actions button:first-child {background:#ecac39!important;}
