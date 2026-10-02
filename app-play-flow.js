@@ -6,6 +6,13 @@
   var sceneObserver = null;
   var touchStart = null;
   var lastSwipeAt = 0;
+  var dragFrame = 0, dragTrack = null, dragPosition = 0;
+  function flushDrag() {
+    if(dragFrame)cancelAnimationFrame(dragFrame);dragFrame=0;
+    if(dragTrack && dragTrack.isConnected)dragTrack.style.transform='translate3d('+dragPosition+'px,0,0)';
+    dragTrack=null;
+  }
+
 
   var coolerSpeech = null, coolerSpeechTimer = null, coolerPose = null, coolerTarget = null;
   var greetingArt = './assets/cooler-flight/cooler-scene-greeting-v1.webp';
@@ -104,6 +111,8 @@
     var current = document.querySelector(".download-page--active[data-download-page='main'] [data-play-flow]") || flow;
     if (!current) return;
     panel = panel === "poker21" ? "poker21" : "tournament";
+    flushDrag();
+    closeCooler();
     current.dataset.playPanel = panel;
     current.classList.remove("play-flow--dragging");
     current.querySelector(".play-flow__track").style.transform = "";
@@ -184,6 +193,10 @@
       sceneObserver = new MutationObserver(size);
       sceneObserver.observe(scene, { attributes: true, attributeFilter: ["data-tournament-character"] });
     }
+    flow.querySelectorAll('img').forEach(function(image){
+      image.loading='eager';image.decoding='async';
+      if(typeof image.decode==='function')image.decode().catch(function(){});
+    });
     size();
     show(flow.dataset.playPanel);
   }
@@ -212,6 +225,8 @@
       at: Date.now(),
       flow: target,
       width: target.clientWidth,
+      track: target.querySelector(".play-flow__track"),
+      offset: target.dataset.playPanel === "poker21" ? -target.clientWidth : 0,
       dragging: false
     };
   }, { passive: true });
@@ -226,9 +241,9 @@
       touchStart.flow.classList.add("play-flow--dragging");
     }
     event.preventDefault();
-    var offset = touchStart.flow.dataset.playPanel === "poker21" ? -touchStart.width : 0;
-    var position = Math.max(-touchStart.width, Math.min(0, offset + dx));
-    touchStart.flow.querySelector(".play-flow__track").style.transform = "translateX(" + position + "px)";
+    dragPosition=Math.max(-touchStart.width,Math.min(0,touchStart.offset+dx));
+    dragTrack=touchStart.track;
+    if(!dragFrame)dragFrame=requestAnimationFrame(function(){dragFrame=0;if(dragTrack)dragTrack.style.transform='translate3d('+dragPosition+'px,0,0)';});
   }, { passive: false });
   document.addEventListener("touchend", function (event) {
     if (!touchStart || !event.changedTouches.length) return;
