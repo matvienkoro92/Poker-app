@@ -53,9 +53,9 @@ function fixture() {
 function fly(seed,until=1100){
   const s=Engine.create(seed),taps=[];
   while(s.alive){
-    const next=s.obstacles.find(o=>o.x+o.width>s.x-16);
+    const next=s.obstacles.find(o=>o.x+o.width>s.x-Engine.RADIUS);
     const target=next?next.center:270;
-    const flap=s.tick<until && s.tick-s.lastFlap>=7 && s.y+Math.max(0,s.vy)*10>target+20;
+    const flap=s.tick<until && s.tick-s.lastFlap>=7 && s.vy>=0 && s.y+Math.max(0,s.vy)*10>target+35;
     if(flap)taps.push(s.tick);Engine.step(s,flap);
   }
   return {s,taps};

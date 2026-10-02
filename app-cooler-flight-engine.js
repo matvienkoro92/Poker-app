@@ -4,34 +4,38 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 1, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 2, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed) {
     return { version: VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
-      score: 0, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
+      score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
   }
   function step(s, flap) {
     if (!s.alive) return s;
     if (flap && s.tick - s.lastFlap >= 7) { s.vy = -4.6; s.lastFlap = s.tick; }
     s.vy = Math.min(7, s.vy + 0.245);
     s.y += s.vy;
-    var speed = Math.min(4.3, 2.1 + s.score * 0.035);
+    s.stage = 1 + Math.floor(s.passes / 5);
+    var speed = Math.min(4.3, 2.1 + (s.stage - 1) * 0.25);
     s.distance += speed; s.spawnDistance += speed;
     if (!s.nextId || s.spawnDistance >= 236) {
-      var gap = Math.max(158, 206 - s.score * 0.7);
-      var center = 180 + random(s) * 170;
+      var gap = Math.max(148, 260 - (s.stage - 1) * 16);
+      var roll = random(s);
+      var center = s.nextId ? Math.max(180, Math.min(350, s.lastCenter + (roll * 2 - 1) * 55)) : 180 + roll * 170;
+      s.lastCenter = center;
       s.obstacles.push({ id: s.nextId++, x: s.nextId === 1 ? 450 : WIDTH + 80, width: 62,
-        center: center, gap: gap, scored: false, variant: Math.floor(random(s) * 3) });
+        center: center, gap: gap, scored: false, collected: false, variant: Math.floor(random(s) * 3) });
       s.spawnDistance = 0;
     }
-    var radius = 16;
+    var radius = 48;
     s.obstacles.forEach(function (o) {
       o.x -= speed;
-      if (s.x + radius > o.x && s.x - radius < o.x + o.width &&
-          (s.y - radius < o.center - o.gap / 2 || s.y + radius > o.center + o.gap / 2)) s.alive = false;
+      if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; s.score += 10; s.perfect++; }
+      var dx = Math.max(o.x - 8 - s.x, 0, s.x - (o.x + o.width + 8));
+      var top = o.center - o.gap / 2, bottom = o.center + o.gap / 2;
+      if (Math.hypot(dx, Math.max(0, s.y - top)) < radius || Math.hypot(dx, Math.max(0, bottom - s.y)) < radius) s.alive = false;
       if (!o.scored && o.x + o.width < s.x - radius) {
-        o.scored = true; s.score++;
-        if (Math.abs(s.y - o.center) < 22) s.perfect++;
+        o.scored = true; s.passes++;
       }
     });
     s.obstacles = s.obstacles.filter(function (o) { return o.x > -150; });
@@ -52,5 +56,5 @@
     if (s.alive || s.tick !== ticks || at !== taps.length) throw new Error('Flight has not ended at the supplied frame');
     return s;
   }
-  return { VERSION: VERSION, WIDTH: WIDTH, HEIGHT: HEIGHT, FLOOR: FLOOR, MAX_TICKS: MAX_TICKS, create: create, step: step, replay: replay };
+  return { VERSION: VERSION, WIDTH: WIDTH, HEIGHT: HEIGHT, FLOOR: FLOOR, MAX_TICKS: MAX_TICKS, RADIUS: 48, create: create, step: step, replay: replay };
 });

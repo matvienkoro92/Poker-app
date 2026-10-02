@@ -8,8 +8,8 @@ test('replay rejects fabricated duration, reordered taps, taps after collision a
   const {s,taps}=fly(44);assert.throws(()=>E.replay(44,taps,s.tick+1));assert.throws(()=>E.replay(44,[0,1],100));assert.throws(()=>E.replay(44,[-1],100));assert.throws(()=>E.replay(44,[],2));assert.throws(()=>E.replay(44,[...taps,s.tick],s.tick));assert.throws(()=>E.replay(44,[],E.MAX_TICKS+1));
 });
 test('simulation keeps generating reachable-sized gaps and stops at the ceiling or felt',()=>{
-  const s=E.create(8);while(s.alive)E.step(s,false);assert.ok(s.y+16>E.FLOOR);const a=E.create(8);while(a.alive)E.step(a,a.tick%7===0);assert.ok(a.y-16<24);
-  const hard=E.create(812);hard.score=100;E.step(hard,false);assert.equal(hard.obstacles[0].gap,158);assert.ok(hard.obstacles[0].center>=180 && hard.obstacles[0].center<=350);
+  const s=E.create(8);while(s.alive)E.step(s,false);assert.ok(s.y+E.RADIUS>E.FLOOR);const a=E.create(8);while(a.alive)E.step(a,a.tick%7===0);assert.ok(a.y-E.RADIUS<24);
+  const hard=E.create(812);hard.passes=100;E.step(hard,false);assert.equal(hard.obstacles[0].gap,148);assert.ok(hard.obstacles[0].center>=180 && hard.obstacles[0].center<=350);
 });
 test('server requires identity, binds a run to its owner, verifies score and consumes once',async()=>{
   const f=fixture();assert.equal((await f.request({action:'start'},'')).status,401);
@@ -19,7 +19,7 @@ test('server requires identity, binds a run to its owner, verifies score and con
   assert.equal((await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps})).status,409);
 });
 test('fast fabricated flights and malformed replays do not enter the leaderboard',async()=>{
-  const f=fixture();const {data:run}=await f.request({action:'start'});const {s,taps}=fly(run.seed);
+  const f=fixture();const {data:run}=await f.request({action:'start'});const {s,taps}=fly(run.seed);f.advance(-10000);
   assert.equal((await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps})).status,400);
   assert.equal((await f.request({action:'finish',runId:run.runId,ticks:10,taps:[4,2]})).status,400);assert.equal(f.top.size,0);
 });
@@ -38,3 +38,19 @@ test('live updates never award points; validated results determine duel winner a
   assert.equal((await f.request({action:'progress',runId:host.runId,tick:1,score:999})).status,409);assert.equal((await f.request({action:'abandon',runId:host.runId})).status,409);assert.equal(f.top.get('Alice'),s.score);
 });
 test('missing storage reports unavailable, without accepting unverified records',async()=>{const f=fixture();f.setConfigured(false);assert.equal((await f.request({action:'start'})).status,503);});
+
+test('chips award bankroll once and collision includes the head and wall lips',()=>{
+ const s=E.create(1);s.nextId=1;s.obstacles=[{id:0,x:63+2.6,width:62,center:270,gap:188,collected:false,scored:false,variant:0}];E.step(s,false);assert.equal(s.score,10);E.step(s,false);assert.equal(s.score,10);assert.equal(s.perfect,1);
+ const hit=E.create(1);hit.nextId=1;hit.y=190;hit.obstacles=[{id:0,x:94,width:62,center:270,gap:188,collected:false,scored:false,variant:0}];E.step(hit,false);assert.equal(hit.alive,false);
+});
+test('duel live replay preserves the opponent world and rejects malformed controls',async()=>{
+ const f=fixture();const host=(await f.request({action:'create'})).data;await f.request({action:'join',roomId:host.roomId},'Bob');
+ const taps=[0,25];await f.request({action:'progress',runId:host.runId,tick:30,taps});const room=(await f.request({action:'room',roomId:host.roomId},'Bob')).data;assert.deepEqual(room.opponent.taps,taps);assert.equal(room.opponent.tick,30);
+ assert.equal((await f.request({action:'progress',runId:host.runId,tick:30,taps:[0,2]})).status,400);
+});
+
+test('difficulty starts gently and increases only after each five gates',()=>{
+ const initial=E.create(1);E.step(initial,false);assert.equal(initial.stage,1);assert.equal(initial.distance,2.1);assert.equal(initial.obstacles[0].gap,260);
+ const before=E.create(1);before.passes=4;E.step(before,false);assert.equal(before.stage,1);assert.equal(before.obstacles[0].gap,260);
+ const next=E.create(1);next.passes=5;E.step(next,false);assert.equal(next.stage,2);assert.equal(next.distance,2.35);assert.equal(next.obstacles[0].gap,244);
+});

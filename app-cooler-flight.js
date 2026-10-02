@@ -18,7 +18,7 @@
       if (auth && (auth.status === 'verified' || auth.status === 'dev_skip') && user) identity = String(user.memberId || user.id || 'guest');
     } catch (_) {}
     var hash = 0; for (var i = 0; i < identity.length; i++) hash = (Math.imul(hash, 31) + identity.charCodeAt(i)) >>> 0;
-    return 'cooler-flight-v1-best-' + hash;
+    return 'cooler-flight-v2-best-' + hash;
   }
   function readBest() { bestKey = storageKey(); try { best = Math.max(0, Math.min(10000, Number(localStorage.getItem(bestKey)) || 0)); } catch (_) { best = 0; } }
   function saveBest() { if (state.score <= best) return false; best = state.score; try { localStorage.setItem(bestKey, String(best)); } catch (_) {} return true; }
@@ -50,10 +50,10 @@
   }
   function ready() {
     phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0;
-    ui.score.textContent = '0'; ui.best.textContent = best;
+    ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Не дай Манки<br>тебя переехать</h2><p>Лети между картами и фишками.<br>Каждый проход — очко. Побей рекорд клуба!</p>' + button('start', 'Полетели →'), 'ready');
-    else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто дальше?</h2>' + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: каждая +10 к банкроллу.<br>Светящийся круг — граница столкновения.</p>' + button('start', 'Полетели →'), 'ready');
+    else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
   function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
@@ -95,9 +95,9 @@
   function resultPanel(newBest) {
     var title = newBest ? 'Новый личный рекорд!' : state.score ? 'Манки забрал банк' : 'Кулер, ещё попытку?';
     var outcome = room && room.result;
-    if (outcome) title = outcome === 'win' ? 'Ты выиграл дуэль!' : outcome === 'draw' ? 'Ничья! Реванш?' : 'Соперник улетел дальше';
-    var caption = state.score + ' пролётов · ' + state.perfect + ' золотых фишек';
-    if (room && room.opponent && room.opponent.finished) caption += '<br>' + esc(room.opponentName) + ': ' + (room.opponent.forfeited ? 'вышел из дуэли' : room.opponent.score + ' пролётов');
+    if (outcome) title = outcome === 'win' ? 'Ты выиграл дуэль!' : outcome === 'draw' ? 'Ничья! Реванш?' : 'Соперник набил больше';
+    var caption = state.score + ' в банкролле · Фишек: ' + state.perfect;
+    if (room && room.opponent && room.opponent.finished) caption += '<br>' + esc(room.opponentName) + ': ' + (room.opponent.forfeited ? 'вышел из дуэли' : room.opponent.score + ' в банкролле');
     else if (room && !outcome) caption += '<br>Ждём результат ' + esc(room.opponentName || 'друга') + '…';
     panel('<span class="flight-tag">' + (mode === 'duel' ? 'ДУЭЛЬ' : 'ЕЩЁ ОДИН ПОЛЁТ?') + '</span><h2>' + title + '</h2><div class="flight-score">' + state.score + '</div><p>' + caption + '</p>' +
       button(mode === 'duel' ? 'rematch' : 'start', mode === 'duel' ? 'Новая дуэль →' : 'Ещё полететь →') + button('share', 'Похвастаться результатом', true) + button('card', 'Сохранить карточку рекорда', true) + (pendingResult ? button('save', 'Повторить сохранение', true) : ''), 'result');
@@ -174,7 +174,7 @@
       var above=o.id%2===0, my=above?top-46:bottom+42;
       ctx.drawImage(monkey,x-4,my-29,o.width+8,59);
     }
-    if(!o.scored){ctx.fillStyle='#f8d485';ctx.globalAlpha=.65;ctx.beginPath();ctx.arc(x+o.width/2,o.center,5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
+    if(!o.collected){ctx.beginPath();ctx.arc(x+o.width/2,o.center,12,0,Math.PI*2);ctx.fillStyle='#edc05f';ctx.fill();ctx.strokeStyle='#fff2bd';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#674114';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('10',x+o.width/2,o.center+4);}
     ctx.restore();
   }
   function draw() {
@@ -190,11 +190,16 @@
       if(monkey.complete&&monkey.naturalWidth)ctx.drawImage(monkey,262,190-bob,88,77);
       ctx.font='bold 12px sans-serif';ctx.fillStyle='#f2d9a4';ctx.textAlign='center';ctx.fillText('ПОКЕРМАНКИ',306,283);
     } else {
-      if(room&&room.opponent&&!room.opponent.finished&&phase==='playing') {
-        var ghost=room.opponent,xg=Math.max(45,Math.min(335,94+(ghost.tick-state.tick)*2.1));drawPilot(xg,ghost.y,112,true);
-        ctx.font='bold 10px sans-serif';ctx.fillStyle='#b2e0d3';ctx.textAlign='center';ctx.fillText(room.opponentName.slice(0,18),xg,ghost.y-71);
+      ctx.save();ctx.strokeStyle=state.alive?'#8af4e1':'#ff7973';ctx.fillStyle='#8af4e109';ctx.lineWidth=2;ctx.beginPath();ctx.arc(state.x,state.y,E.RADIUS,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+      drawPilot(state.x,state.y,78,false);
+      if(room&&room.opponent&&Array.isArray(room.opponent.taps)&&phase==='playing') {
+        var remote=room.opponent;
+        if(!remote._flight){remote._flight=E.create(room.seed);var at=0;while(remote._flight.alive&&remote._flight.tick<remote.tick){var flap=remote.taps[at]===remote._flight.tick;if(flap)at++;E.step(remote._flight,flap);}}
+        var ownState=state;state=remote._flight;
+        ctx.save();ctx.translate(278,120);ctx.beginPath();ctx.rect(0,0,98,150);ctx.clip();ctx.scale(.25,.25);ctx.drawImage(backdrop,0,0);state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,78,false);ctx.restore();state=ownState;
+        ctx.strokeStyle='#8af4e1';ctx.lineWidth=1;ctx.strokeRect(278,120,98,150);
+        ctx.font='10px sans-serif';ctx.fillStyle='#daf5df';ctx.textAlign='right';ctx.fillText('Полёт соперника',376,113);
       }
-      drawPilot(state.x,Math.max(55,Math.min(515,state.y)),122,false);
     }
     particles.forEach(function(p){ctx.globalAlpha=Math.max(0,p.life/62);ctx.fillStyle='#84eaff';ctx.beginPath();ctx.ellipse(p.x,p.y,3,6,.4,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
     if(room&&phase==='playing'){ctx.font='bold 12px sans-serif';ctx.fillStyle='#daf5df';ctx.textAlign='center';ctx.fillText((room.opponentName||'Соперник')+': '+(room.opponent?Math.max(0,room.opponent.score):0),195,97);}
@@ -209,7 +214,8 @@
         var doFlap=pendingFlap&&state.tick-state.lastFlap>=7;
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
         E.step(state,doFlap);accumulator-=1000/60;
-        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);ui.toast.textContent=state.perfect?'Пролёт! Банк: '+state.perfect+' золотых':'Чисто! +1';toastUntil=time+1000;}
+        ui.hint.textContent = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот';
+        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);ui.toast.textContent='+10 · Банкролл: '+state.score;toastUntil=time+1000;}
       }
       if(!state.alive)finish();
     }
@@ -228,13 +234,13 @@
     if(d.waiting){phase='waiting';panel('<span class="flight-tag">ПРИГЛАШЕНИЕ ГОТОВО</span><h2>Ждём второго Кулера</h2><p>Отправь другу ссылку или этот код:</p><div class="flight-code">'+esc(d.roomId)+'</div>'+button('invite','Поделиться приглашением')+button('cancel','Отменить',true),'ready');}
     else if(!duelStarted&&phase!=='playing'&&phase!=='over'){
       if(d.startAt<Date.now()+clockOffset-10000){status('Начало пропущено. Создайте новую дуэль.');abandon();stopPolling();phase='ready';ready();return;}
-      phase='countdown';panel('<span class="flight-tag">'+esc(d.opponentName)+' УЖЕ ЗДЕСЬ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>5</div><p>Одна трасса. Кто пролетит дальше?</p>');
+      phase='countdown';panel('<span class="flight-tag">'+esc(d.opponentName)+' УЖЕ ЗДЕСЬ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>5</div><p>Одна трасса. Кто соберёт больше фишек?</p>');
     }
   }
   function pollRoom() {
     if(!room||!active()||polling)return;
     polling=true;var g=generation, roomId=room.roomId;
-    var req=phase==='playing'?api('progress',{runId:runId,tick:state.tick,y:state.y,score:state.score}).catch(function(){return null;}):Promise.resolve();
+    var req=phase==='playing'?api('progress',{runId:runId,tick:state.tick,y:state.y,score:state.score,taps:taps.slice()}).catch(function(){return null;}):Promise.resolve();
     req.then(function(){return api('room',{roomId:roomId});}).then(function(d){if(g===generation&&active()){adoptRoom(d);if(phase==='playing')status('Дуэль с '+d.opponentName);}}).catch(function(e){if(g===generation&&active())status(e.message);}).finally(function(){if(g===generation&&active()){polling=false;if(room&&!room.result&&!room.expired)roomTimer=setTimeout(pollRoom,1000);}});
   }
   async function createRoom() {
@@ -259,11 +265,11 @@
     bg.addColorStop(0,'#062a24'); bg.addColorStop(1,'#031612');g.fillStyle=bg;g.fillRect(0,0,900,1100);
     g.strokeStyle='#d3b770';g.lineWidth=3;g.beginPath();g.roundRect(25,25,850,1050,35);g.stroke();
     g.textAlign='center';g.fillStyle='#a8c8b7';g.font='bold 22px sans-serif';g.fillText('АРКАДА КЛУБА ДВА ТУЗА',450,89);
-    g.fillStyle='#ffe2a1';g.font='bold 46px sans-serif';g.fillText('КУЛЕР ПРОТИВ',450,162);g.fillText('ПОКЕРМАНКИ',450,218);
+    g.fillStyle='#ffe2a1';g.font='bold 46px sans-serif';g.fillText('КУЛЕРШАН',450,185);
     if(pilot.complete&&pilot.naturalWidth)g.drawImage(pilot,155,270,360,477);
     if(monkey.complete&&monkey.naturalWidth)g.drawImage(monkey,578,372,165,144);
     g.font='900 150px sans-serif';g.fillStyle='#ffe2a1';g.fillText(String(state.score),450,900);
-    g.font='bold 30px sans-serif';g.fillStyle='#ceead8';g.fillText('ПРОЛЁТОВ · ПОБЕЙ МОЙ РЕКОРД',450,952);
+    g.font='bold 30px sans-serif';g.fillStyle='#ceead8';g.fillText('БАНКРОЛЛ · ПОБЕЙ МОЙ РЕКОРД',450,952);
     g.font='22px sans-serif';g.fillStyle='#83bdac';g.fillText('POKER21 × ДВА ТУЗА',450,1030);
     return new Promise(function(resolve){c.toBlob(resolve,'image/png');});
   }
@@ -273,12 +279,12 @@
     status('Карточка рекорда сохранена.');
   }
   async function share(invite) {
-    var text=invite?'Летим на Кулерах? Одна трасса, два игрока. Код: '+room.roomId:'Кулер против ПокерМанки: мой результат — '+state.score+' пролётов! Побьёшь?';
+    var text=invite?'Летим на Кулерах? Одна трасса, два игрока. Код: '+room.roomId:'Кулершан: мой результат — '+state.score+' в банкролле! Побьёшь?';
     var url=invite?invitationUrl():(typeof getApiBase==='function'?getApiBase():location.origin)+'/?startapp=cooler_flight';
     try {
       if(navigator.share) {
-        if(!invite&&navigator.canShare){var blob=await resultCard();if(blob){var file=new File([blob],'cooler-record-'+state.score+'.png',{type:'image/png'});if(navigator.canShare({files:[file]})){await navigator.share({title:'Кулер против ПокерМанки',text:text+'\n'+url,files:[file]});return;}}}
-        await navigator.share({title:'Кулер против ПокерМанки',text:text,url:url});
+        if(!invite&&navigator.canShare){var blob=await resultCard();if(blob){var file=new File([blob],'cooler-record-'+state.score+'.png',{type:'image/png'});if(navigator.canShare({files:[file]})){await navigator.share({title:'Кулершан',text:text+'\n'+url,files:[file]});return;}}}
+        await navigator.share({title:'Кулершан',text:text,url:url});
       } else {await navigator.clipboard.writeText(text+'\n'+url);status(invite?'Приглашение скопировано. Отправьте другу.':'Результат и ссылка скопированы.');}
     }catch(e){if(e.name!=='AbortError')status('Скопируйте ссылку: '+url);}
   }
