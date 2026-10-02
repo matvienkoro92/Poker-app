@@ -13,6 +13,7 @@ const sources = [
   ["summer-rating-data-july.js", "SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE"],
   ["summer-rating-data-august.js", "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE"],
   ["summer-rating-data-september.js", "SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE"],
+  ["summer-rating-data-october.js", "SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE"],
 ];
 const tournaments = {
   monthly3000: { buyin: 3000, name: /^Турнир Месяца/iu, weekdays: [0, 1, 2, 3, 4, 5, 6], historyDays: "Турнир месяца" },

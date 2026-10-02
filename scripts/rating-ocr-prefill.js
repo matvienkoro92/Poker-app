@@ -15,7 +15,8 @@ const RATING_DATA_FILES = [
   "summer-rating-data-june.js",
   "summer-rating-data-july.js",
   "summer-rating-data-august.js",
-  "summer-rating-data-september.js"
+  "summer-rating-data-september.js",
+  "summer-rating-data-october.js"
 ].map((file) => path.join(ROOT, file));
 
 function usage(exitCode) {
@@ -149,6 +150,29 @@ function effectiveTournamentBuyin(title, detectedBuyin) {
 }
 
 // Club owner confirmed these recurring entry fees; blue card headers show stacks.
+function historicalTournamentBuyin(title, date, time) {
+  const sandbox = {};
+  vm.createContext(sandbox);
+  const rows = [];
+  RATING_DATA_FILES.forEach((file) => {
+    if (!fs.existsSync(file)) return;
+    vm.runInContext(fs.readFileSync(file, "utf8"), sandbox);
+  });
+  const stamp = value => value.split(".").reverse().join("");
+  Object.values(sandbox).forEach(map => {
+    if (!map || typeof map !== "object") return;
+    Object.entries(map).forEach(([day, tournaments]) => {
+      if (!Array.isArray(tournaments) || stamp(day) >= stamp(date)) return;
+      tournaments.forEach(t => {
+        if (normalizeName(t.name) === normalizeName(title) && t.time === time && Number(t.buyin) > 0)
+          rows.push({ day, buyin: Number(t.buyin) });
+      });
+    });
+  });
+  rows.sort((a, b) => stamp(b.day).localeCompare(stamp(a.day)));
+  return rows[0]?.buyin ?? null;
+}
+
 function confirmedBlueTournamentBuyin(title) {
   if (/^Bali\s+Yana\b/i.test(title)) return 600;
   if (/^New\s*[-–—]?\s*Hot\s+PKO\b/i.test(title)) return 900;
@@ -449,6 +473,8 @@ async function parseOcrFile(file) {
     if (blue && /^DV.*Bounty.*100k/i.test(title)) buyin = 1000;
     if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
   }
+  if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
+  if (date === "01.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "29.09.2026" && time === "18:00" && token.text === "yID:709473") token.text = "ID:709473";
@@ -579,6 +605,7 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
 
+    if (playerId === "4302724" && date === "01.10.2026" && time === "13:00") { place = 0; needsPlaceCheck = false; }
     // Gold trophy often has no OCR text, but when the list starts from first place this is safe.
     const nextKnownPlace = ids.slice(index + 1).map((nextId) => {
       const nextCenter = nextId.y + nextId.height / 2;

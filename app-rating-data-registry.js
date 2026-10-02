@@ -19,11 +19,12 @@ function pokerIsSeptemberRatingView() {
 var pokerSeptemberRatingSource = null;
 var pokerSeptemberRatingData = null;
 function pokerRatingGetSeptemberTournamentsByDate() {
-  var source = typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : null;
+  var october = typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE : {};
+  var source = Object.keys(october).length ? october : typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : null;
   if (!source) return {};
   if (source === pokerSeptemberRatingSource && pokerSeptemberRatingData) return pokerSeptemberRatingData;
   var data = {};
-  Object.keys(source).filter(function (date) { return /\.09\.2026$/.test(date); }).forEach(function (date) {
+  Object.keys(source).filter(function (date) { return /\.(09|10)\.2026$/.test(date); }).forEach(function (date) {
     data[date] = source[date].map(function (tournament) {
       var buyin = Number(tournament.buyin);
       if (tournament.buyin == null || !Number.isFinite(buyin)) throw new Error("Не указан бай-ин турнира " + date + " " + tournament.name);
@@ -128,7 +129,8 @@ function pokerRatingBuildAnnualStandings() {
   var maps = [
     typeof SPRING_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SPRING_RATING_TOURNAMENTS_BY_DATE : {},
     typeof SUMMER_RATING_TOURNAMENTS_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_BY_DATE : {},
-    typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {}
+    typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {},
+    typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE : {}
   ];
   maps.forEach(function (map) {
     Object.keys(map).forEach(function (date) {

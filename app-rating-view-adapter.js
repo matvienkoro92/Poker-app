@@ -1179,6 +1179,7 @@ function getWinterRatingPlayerSummary(nick, options) {
   var historyTournaments = {};
   mergeWinterRatingDateMap(historyTournaments, tournamentsByDate);
   mergeWinterRatingDateMap(historyTournaments, typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {});
+  mergeWinterRatingDateMap(historyTournaments, typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE : {});
   tournamentsByDate = historyTournaments;
   var byDate = getRatingByDate();
   if (isSeasonal && typeof WINTER_RATING_BY_DATE !== "undefined") {
@@ -1305,6 +1306,7 @@ function pokerRatingAchievementTournamentRowsForSeason(seasonKey) {
     maps.push(getWinterRatingActiveSeasonTournamentsByDate("summer"));
   } else if (seasonKey === "history") {
     maps.push(typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {});
+    maps.push(typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE : {});
   }
   var rows = [];
   maps.forEach(function (map) {
@@ -2384,7 +2386,7 @@ function initWinterRating() {
       });
     }
     back.hidden = document.body.dataset.view !== "summer-rating";
-    back.textContent = window.__pokerSummerArchive ? "← Сентябрь 2026" : "Архив: лето 2026";
+    back.textContent = window.__pokerSummerArchive ? (typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" && Object.keys(SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE).length ? "← Октябрь 2026" : "← Сентябрь 2026") : "Архив: лето 2026";
   }
   try {
     var schedPrev = window.requestIdleCallback
@@ -3779,7 +3781,7 @@ function initWinterRating() {
     }
     if (isSummerRatingMode) {
       var septemberMode = typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView();
-      var summerMonths = septemberMode ? [9] : [6, 7, 8];
+      var summerMonths = septemberMode ? [/\.10\.2026$/.test(Object.keys(pokerRatingGetSeptemberTournamentsByDate())[0] || "") ? 10 : 9] : [6, 7, 8];
       var summerTournaments = getSpringRatingTournamentsByDate() || {};
       function summerSummaryHtml(months, label) {
         var reward = 0;

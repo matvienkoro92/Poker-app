@@ -15,6 +15,7 @@ const DATA_FILES = [
   "summer-rating-data-july.js",
   "summer-rating-data-august.js",
   "summer-rating-data-september.js",
+  "summer-rating-data-october.js",
   "summer-rating-data.js",
   "spring-rating-images-league1.js",
   "spring-rating-images-league2.js",
@@ -34,6 +35,7 @@ const MONTH_FILES = {
   "06": { file: "summer-rating-data-june.js", varName: "SUMMER_RATING_TOURNAMENTS_JUNE_BY_DATE", season: "summer" },
   "07": { file: "summer-rating-data-july.js", varName: "SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE", season: "summer" },
   "08": { file: "summer-rating-data-august.js", varName: "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE", season: "summer" },
+  "10": { file: "summer-rating-data-october.js", varName: "SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE", season: "summer" },
   "09": { file: "summer-rating-data-september.js", varName: "SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE", season: "summer" }
 };
 MONTH_FILES["03"].season = "spring";
@@ -389,7 +391,8 @@ function monthNameRu(month) {
     "06": "июня",
     "07": "июля",
     "08": "августа",
-    "09": "сентября"
+    "09": "сентября",
+    "10": "октября"
   }[String(month).padStart(2, "0")] || "";
 }
 
@@ -460,7 +463,7 @@ function toStoredTournament(t) {
         nick: String(p.nick || ""),
         place: Number(p.place) || 0,
         reward,
-        points: /\.09\.2026$/.test(String(t.date || "")) ? 0 : pointsForPlayer({ place: Number(p.place) || 0, reward })
+        points: /\.(09|10)\.2026$/.test(String(t.date || "")) ? 0 : pointsForPlayer({ place: Number(p.place) || 0, reward })
       };
     })
   };
@@ -636,7 +639,7 @@ function replaceExact(fileName, pattern, replacement, opts) {
 
 function updateSummerMeta(latestDate, opts) {
   const p = dateParts(latestDate);
-  if (p.month === "09") return null;
+  if (Number(p.month) >= 9) return null;
   const month = monthNameRu(p.month);
   if (!month) return null;
   const shortValue = `${Number(p.day)} ${month}`;

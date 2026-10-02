@@ -16,12 +16,13 @@ function isSeasonalRatingMode() {
 function getRatingSeasonConfig() {
   if (isSummerRatingMode() && typeof SUMMER_RATING_SEASON !== "undefined") {
     if (typeof pokerIsSeptemberRatingView === "function" && pokerIsSeptemberRatingView()) {
-      var dates = Object.keys(typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {}).sort();
+      var dates = Object.keys(pokerRatingGetSeptemberTournamentsByDate()).sort();
+      var october = dates.some(function (date) { return /\.10\.2026$/.test(date); });
       return Object.assign({}, SUMMER_RATING_SEASON, {
-        label: "Сентябрь 2026", topLabel: "Топы сентября", maxWinLabel: "за сентябрь", top3WinsLabel: "за сентябрь",
-        updatedLabel: "обновлено " + (dates[dates.length - 1] || "—"), emptyDataText: "Данные с 1 сентября",
-        monthRegex: /\.09\.2026$/, monthToneRegex: /\.09\./,
-        finalAt: new Date(2026, 8, 30, 23, 59, 59, 999), finalText: "Итоги 30-го сентября",
+        label: october ? "Октябрь 2026" : "Сентябрь 2026", topLabel: october ? "Топы октября" : "Топы сентября", maxWinLabel: october ? "за октябрь" : "за сентябрь", top3WinsLabel: october ? "за октябрь" : "за сентябрь",
+        updatedLabel: "обновлено " + (dates[dates.length - 1] || "—"), emptyDataText: october ? "Данные с 1 октября" : "Данные с 1 сентября",
+        monthRegex: october ? /\.10\.2026$/ : /\.09\.2026$/, monthToneRegex: october ? /\.10\./ : /\.09\./,
+        finalAt: new Date(2026, october ? 9 : 8, october ? 31 : 30, 23, 59, 59, 999), finalText: october ? "Итоги 31-го октября" : "Итоги 30-го сентября",
         viewMonths: [], pastWeekDates: [], currentWeekDates: dates.slice(-7), nextWeekDates: []
       });
     }
