@@ -93,25 +93,33 @@
     tone(180, .35, 'sawtooth');
   }
   function resultPanel(newBest) {
+    if (room && !room.result && !room.expired && room.opponentName) {
+      phase = 'spectating';
+      panel('<span class="flight-tag">СМОТРИМ ПОЛЁТ</span><h2>' + esc(room.opponentName) + ' ещё в игре</h2><p>Твой банкролл: ' + state.score + ' · Банкролл соперника: ' + (room.opponent ? Math.max(0, room.opponent.score) : 0) + '</p>' + (pendingResult ? button('save', 'Повторить сохранение', true) : ''), 'spectator');
+      ui.hint.textContent = 'Соперник доигрывает · Затем можно повторить вдвоём';
+      ensureLoop(); return;
+    }
     var title = newBest ? 'Новый личный рекорд!' : state.score ? 'Манки забрал банк' : 'Кулер, ещё попытку?';
     var outcome = room && room.result;
     if (outcome) title = outcome === 'win' ? 'Ты выиграл дуэль!' : outcome === 'draw' ? 'Ничья! Реванш?' : 'Соперник набил больше';
     var caption = state.score + ' в банкролле · Фишек: ' + state.perfect;
     if (room && room.opponent && room.opponent.finished) caption += '<br>' + esc(room.opponentName) + ': ' + (room.opponent.forfeited ? 'вышел из дуэли' : room.opponent.score + ' в банкролле');
     else if (room && !outcome) caption += '<br>Ждём результат ' + esc(room.opponentName || 'друга') + '…';
+    if(room && room.opponentReady && !room.rematchReady)caption += '<br>Друг готов к реваншу — нажми «Повторить»';
     panel('<span class="flight-tag">' + (mode === 'duel' ? 'ДУЭЛЬ' : 'ЕЩЁ ОДИН ПОЛЁТ?') + '</span><h2>' + title + '</h2><div class="flight-score">' + state.score + '</div><p>' + caption + '</p>' +
-      button(mode === 'duel' ? 'rematch' : 'start', mode === 'duel' ? 'Новая дуэль →' : 'Ещё полететь →') + button('share', 'Похвастаться результатом', true) + button('card', 'Сохранить карточку рекорда', true) + (pendingResult ? button('save', 'Повторить сохранение', true) : ''), 'result');
+      button(mode === 'duel' ? 'rematch' : 'start', mode === 'duel' ? (room && room.rematchReady ? 'Ждём, когда друг нажмёт «Повторить»' : 'Повторить →') : 'Ещё полететь →') + button('share', 'Похвастаться результатом', true) + button('card', 'Сохранить карточку рекорда', true) + (pendingResult ? button('save', 'Повторить сохранение', true) : ''), 'result');
   }
   async function submit() {
     if (!pendingResult) return;
     var payload = pendingResult, g = generation; status('Проверяем полёт…');
     try {
       var d = await api('finish', payload); if (g !== generation || !active()) return;
+      if(room && payload.runId !== room.runId)return;
       pendingResult = null;
       status('Результат подтверждён · Рекорд: ' + d.best + (d.place ? ' · Место в клубе: ' + d.place : ''));
       resultPanel(state.score >= best && state.score > 0);
     } catch (e) {
-      if (g !== generation || !active()) return;
+      if (g !== generation || !active() || (room && payload.runId !== room.runId)) return;
       if (e.status === 409) pendingResult = null;
       status(e.message); resultPanel(false);
     }
@@ -155,7 +163,7 @@
     ctx=old;
   }
   function drawPilot(x,y,size,ghost) {
-    ctx.save();ctx.translate(x,y);ctx.globalAlpha=ghost?.38:1;ctx.rotate(phase === 'playing' ? Math.max(-.22,Math.min(.32,state.vy*.035)) : -.05);
+    ctx.save();ctx.translate(x,y);ctx.globalAlpha=ghost?.38:1;ctx.rotate((phase === 'playing' || phase === 'spectating') ? Math.max(-.22,Math.min(.32,state.vy*.035)) : -.05);
     if (pilot.complete && pilot.naturalWidth) ctx.drawImage(pilot,-size*.37,-size*.55,size*.75,size);
     if (!ghost && fan.complete && fan.naturalWidth) { ctx.save();ctx.translate(-size*.23,size*.14);ctx.rotate((state ? state.tick : performance.now()/16)*.32);ctx.globalAlpha=.72;ctx.drawImage(fan,-size*.11,-size*.11,size*.22,size*.22);ctx.restore(); }
     if (!ghost) { ctx.strokeStyle='#78e8e2';ctx.globalAlpha=.45;ctx.lineWidth=2;for(var j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-size*.37-j*5,size*.12+j*7);ctx.lineTo(-size*.53-j*7,size*.12+j*7);ctx.stroke();} }
@@ -177,8 +185,26 @@
     if(!o.collected){ctx.beginPath();ctx.arc(x+o.width/2,o.center,12,0,Math.PI*2);ctx.fillStyle='#edc05f';ctx.fill();ctx.strokeStyle='#fff2bd';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#674114';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('10',x+o.width/2,o.center+4);}
     ctx.restore();
   }
+  function opponentFlight() {
+    var remote=room && room.opponent;if(!remote || !Array.isArray(remote.taps))return null;
+    var now=performance.now();
+    if(!remote._flight){remote._flight=E.create(room.seed);var at=0;while(remote._flight.alive&&remote._flight.tick<remote.tick){var flap=remote.taps[at]===remote._flight.tick;if(flap)at++;E.step(remote._flight,flap);}remote._time=now;remote._acc=0;}
+    remote._acc+=Math.min(100,now-remote._time);remote._time=now;
+    while(remote._acc>=1000/60&&remote._flight.alive&&remote._flight.tick<remote.tick){E.step(remote._flight,remote.taps.indexOf(remote._flight.tick)!==-1);remote._acc-=1000/60;}
+    if(remote._flight.tick>=remote.tick)remote._acc=0;
+    return remote._flight;
+  }
   function draw() {
     if(!ctx || !state) return;
+    if (phase === 'spectating') {
+      ctx.clearRect(0,0,390,600);ctx.drawImage(backdrop,0,0);
+      var remote = room && room.opponent;
+      if (remote && Array.isArray(remote.taps)) {
+        opponentFlight();
+        var own=state;state=remote._flight;state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,78,false);state=own;
+      }
+      return;
+    }
     ctx.clearRect(0,0,390,600);ctx.drawImage(backdrop,0,0);
     var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var d=phase==='playing'?state.distance:0;
@@ -194,7 +220,7 @@
       drawPilot(state.x,state.y,78,false);
       if(room&&room.opponent&&Array.isArray(room.opponent.taps)&&phase==='playing') {
         var remote=room.opponent;
-        if(!remote._flight){remote._flight=E.create(room.seed);var at=0;while(remote._flight.alive&&remote._flight.tick<remote.tick){var flap=remote.taps[at]===remote._flight.tick;if(flap)at++;E.step(remote._flight,flap);}}
+        opponentFlight();
         var ownState=state;state=remote._flight;
         ctx.save();ctx.translate(278,120);ctx.beginPath();ctx.rect(0,0,98,150);ctx.clip();ctx.scale(.25,.25);ctx.drawImage(backdrop,0,0);state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,78,false);ctx.restore();state=ownState;
         ctx.strokeStyle='#8af4e1';ctx.lineWidth=1;ctx.strokeRect(278,120,98,150);
@@ -227,26 +253,36 @@
   function stopPolling(){if(roomTimer)clearTimeout(roomTimer);roomTimer=0;polling=false;}
   function abandon(){if(runId&&mode==='duel'&&phase!=='over')api('abandon',{runId:runId}).catch(function(){});runId='';}
   function adoptRoom(d) {
+    if(room && (d.round || 1) < (room.round || 1))return;
+    if(room && room.runId===d.runId && room.opponent && room.opponent._flight && d.opponent){d.opponent._flight=room.opponent._flight;d.opponent._time=room.opponent._time;d.opponent._acc=room.opponent._acc;}
+    if(room && room.runId !== d.runId){duelStarted=false;phase='ready';pendingResult=null;particles=[];ui.score.textContent='0';}
     room=d;runId=d.runId;clockOffset=d.serverNow-Date.now();
     if(d.expired){stopPolling();phase='over';panel('<h2>Дуэль завершена</h2><p>Время ожидания истекло. Создайте новую дуэль.</p>'+button('rematch','Новая дуэль'));return;}
-    if(d.result){stopPolling();if(phase!=='over'&&d.mine&&d.mine.finished){state=E.create(d.seed);state.score=Math.max(0,d.mine.score);state.perfect=d.mine.perfect||0;state.tick=d.mine.tick;state.alive=false;phase='over';}if(phase==='over')resultPanel(false);return;}
+    if(d.result){if(phase!=='over'&&d.mine&&d.mine.finished){state=E.create(d.seed);state.score=Math.max(0,d.mine.score);state.perfect=d.mine.perfect||0;state.tick=d.mine.tick;state.alive=false;phase='over';}if(phase==='over')resultPanel(false);return;}
     if(d.mine&&d.mine.finished){phase='over';state=E.create(d.seed);state.score=Math.max(0,d.mine.score);state.perfect=d.mine.perfect||0;state.tick=d.mine.tick;state.alive=false;resultPanel(false);return;}
     if(d.waiting){phase='waiting';panel('<span class="flight-tag">ПРИГЛАШЕНИЕ ГОТОВО</span><h2>Ждём второго Кулера</h2><p>Отправь другу ссылку или этот код:</p><div class="flight-code">'+esc(d.roomId)+'</div>'+button('invite','Поделиться приглашением')+button('cancel','Отменить',true),'ready');}
     else if(!duelStarted&&phase!=='playing'&&phase!=='over'){
       if(d.startAt<Date.now()+clockOffset-10000){status('Начало пропущено. Создайте новую дуэль.');abandon();stopPolling();phase='ready';ready();return;}
-      phase='countdown';panel('<span class="flight-tag">'+esc(d.opponentName)+' УЖЕ ЗДЕСЬ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>5</div><p>Одна трасса. Кто соберёт больше фишек?</p>');
+      phase='countdown';ui.hint.textContent='Нажал — взлетел · Отпустил — снижаешься';status('Раунд '+(d.round||1)+' · Приготовься к старту');panel('<span class="flight-tag">'+esc(d.opponentName)+' УЖЕ ЗДЕСЬ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>5</div><p>Одна трасса. Кто соберёт больше фишек?</p>');
     }
   }
   function pollRoom() {
     if(!room||!active()||polling)return;
     polling=true;var g=generation, roomId=room.roomId;
     var req=phase==='playing'?api('progress',{runId:runId,tick:state.tick,y:state.y,score:state.score,taps:taps.slice()}).catch(function(){return null;}):Promise.resolve();
-    req.then(function(){return api('room',{roomId:roomId});}).then(function(d){if(g===generation&&active()){adoptRoom(d);if(phase==='playing')status('Дуэль с '+d.opponentName);}}).catch(function(e){if(g===generation&&active())status(e.message);}).finally(function(){if(g===generation&&active()){polling=false;if(room&&!room.result&&!room.expired)roomTimer=setTimeout(pollRoom,1000);}});
+    req.then(function(){return api('room',{roomId:roomId});}).then(function(d){if(g===generation&&active()){adoptRoom(d);if(phase==='playing')status('Дуэль с '+d.opponentName);}}).catch(function(e){if(g===generation&&active())status(e.message);}).finally(function(){if(g===generation&&active()){polling=false;if(room&&!room.expired)roomTimer=setTimeout(pollRoom,1000);}});
   }
   async function createRoom() {
     abandon();stopPolling();duelStarted=false;room=null;var g=++generation;phase='loading';panel('<h2>Создаём дуэль…</h2>');
     try { var d=await api('create');if(g!==generation||!active())return;adoptRoom(d);status('Дуэль без ставок. Приглашение действует 2 часа.');pollRoom(); }
     catch(e){if(g!==generation||!active())return;ready();status(e.message);}
+  }
+  async function rematch() {
+    if(!room || room.expired){createRoom();return;}
+    if(room.rematchReady){status('Ждём, когда друг нажмёт «Повторить».');return;}
+    var g=generation;
+    try{var d=await api('rematch',{roomId:room.roomId,runId:room.runId});if(g!==generation||!active())return;adoptRoom(d);status(d.rematchReady?'Ты готов. Ждём друга.':'Реванш начинается!');if(!polling)pollRoom();}
+    catch(e){if(g===generation&&active())status(e.message);}
   }
   function parseRoom(value){var m=String(value||'').match(/(?:coolerDuel=|cooler_duel_)([a-f0-9]{12})/i);if(m)return m[1].toLowerCase();return /^[a-f0-9]{12}$/i.test(String(value||'').trim())?String(value).trim().toLowerCase():'';}
   async function joinRoom(code) {
@@ -297,7 +333,7 @@
     }catch(e){if(g===generation&&active())panel('<h2>Топ пока недоступен</h2><p>'+esc(e.message)+'</p>'+button('back','Вернуться',true));}
   }
   function action(a) {
-    if(a==='start')startSolo();else if(a==='resume')resume();else if(a==='create'||a==='rematch')createRoom();
+    if(a==='start')startSolo();else if(a==='resume')resume();else if(a==='create')createRoom();else if(a==='rematch')rematch();
     else if(a==='join'){var el=document.getElementById('coolerFlightRoomCode');joinRoom(el?el.value:'');}
     else if(a==='invite')share(true);else if(a==='share')share(false);else if(a==='card')downloadCard();else if(a==='save')submit();
     else if(a==='cancel'||a==='back'||a==='quit'){abandon();generation++;stopPolling();room=null;duelStarted=false;status('');ready();}

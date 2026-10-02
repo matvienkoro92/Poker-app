@@ -54,3 +54,17 @@ test('difficulty starts gently and increases only after each five gates',()=>{
  const before=E.create(1);before.passes=4;E.step(before,false);assert.equal(before.stage,1);assert.equal(before.obstacles[0].gap,260);
  const next=E.create(1);next.passes=5;E.step(next,false);assert.equal(next.stage,2);assert.equal(next.distance,2.35);assert.equal(next.obstacles[0].gap,244);
 });
+
+test('same-room rematch needs both players and stale retries cannot start an extra round',async()=>{
+ const f=fixture();const host=(await f.request({action:'create'})).data;const guest=(await f.request({action:'join',roomId:host.roomId},'Bob')).data;
+ assert.equal((await f.request({action:'rematch',roomId:host.roomId,runId:host.runId},'Carol')).status,403);
+ assert.equal((await f.request({action:'rematch',roomId:host.roomId,runId:host.runId})).status,409);
+ await f.request({action:'abandon',runId:host.runId});await f.request({action:'abandon',runId:guest.runId},'Bob');
+ const one=(await f.request({action:'rematch',roomId:host.roomId,runId:host.runId})).data;assert.equal(one.rematchReady,true);assert.equal(one.round,1);assert.equal(one.runId,host.runId);
+ const waiting=(await f.request({action:'room',roomId:host.roomId},'Bob')).data;assert.equal(waiting.opponentReady,true);
+ const again=(await f.request({action:'rematch',roomId:host.roomId,runId:host.runId})).data;assert.equal(again.round,1);
+ const [a,b]=await Promise.all([f.request({action:'rematch',roomId:host.roomId,runId:guest.runId},'Bob'),f.request({action:'rematch',roomId:host.roomId,runId:guest.runId},'Bob')]);
+ assert.equal(a.data.round,2);assert.equal(b.data.round,2);assert.equal(a.data.runId,b.data.runId);assert.equal(a.data.roomId,host.roomId);assert.equal(a.data.result,null);assert.equal(a.data.mine,null);assert.ok(a.data.startAt>a.data.serverNow);
+ const next=(await f.request({action:'room',roomId:host.roomId})).data;assert.notEqual(next.runId,host.runId);assert.equal(next.seed,a.data.seed);assert.equal(next.startAt,a.data.startAt);assert.equal(next.opponentName,'Bob');assert.equal(next.rematchReady,false);
+ const old=(await f.request({action:'rematch',roomId:host.roomId,runId:host.runId})).data;assert.equal(old.round,2);assert.equal(old.rematchReady,false);
+});

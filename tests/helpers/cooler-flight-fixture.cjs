@@ -18,6 +18,15 @@ function fixture() {
     if(op==='EVAL'){
       const count=Number(args[0]), keys=args.slice(1,1+count), values=args.slice(1+count);
       if(k.includes("redis.call('INCR'"))return 1;
+      if(k.includes('r.rematch=r.rematch or')){
+        const raw=strings.get(keys[0]);if(!raw)return 'missing';const r=JSON.parse(raw);
+        const side=r.host.member===values[0]?'host':r.guest&&r.guest.member===values[0]?'guest':'';
+        if(!side)return 'forbidden';if(r[side].runId!==values[1])return 'stale';if(!r.guest)return 'unfinished';
+        const a=JSON.parse(strings.get(keys[1])||'null'),b=JSON.parse(strings.get(keys[2])||'null');if(!a||!b||!a.finished||!b.finished)return 'unfinished';
+        r.rematch=r.rematch||{};r.rematch[side]=true;
+        if(r.rematch.host&&r.rematch.guest){const h=JSON.parse(values[2]),g=JSON.parse(values[3]);r.host.runId=h.id;r.guest.runId=g.id;r.seed=h.seed;r.startAt=h.startAt;r.round=(r.round||1)+1;r.rematch={};strings.set(keys[3],values[2]);strings.set(keys[4],values[3]);}
+        strings.set(keys[0],JSON.stringify(r));return 'ready';
+      }
       if(k.includes('r.guest=cjson.decode')){
         const raw=strings.get(keys[0]);if(!raw)return 'missing';const r=JSON.parse(raw);
         if(r.host.member===values[0])return 'host';

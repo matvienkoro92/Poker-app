@@ -67,3 +67,8 @@ body[data-view="cooler-flight"] .app { padding: max(24px, env(safe-area-inset-to
 .cooler-flight__header, .cooler-flight__modes, .cooler-flight__hint, .cooler-flight__status { flex-shrink: 0; }
 .cooler-flight__arena { width: 100%; flex: 1; min-height: 260px; aspect-ratio: auto; }
 .cooler-flight__panel h2 { font-size: 22px; }
+
+.cooler-flight__overlay[data-kind="spectator"] { align-items: flex-end; background: transparent; pointer-events: none; padding: 12px; }
+.cooler-flight__overlay[data-kind="spectator"] .cooler-flight__panel { pointer-events: auto; padding: 12px; }
+.cooler-flight__overlay[data-kind="spectator"] h2 { font-size: 16px; margin: 5px 0; }
+.cooler-flight__overlay[data-kind="spectator"] p { margin: 5px 0; font-size: 11px; }
