@@ -4,7 +4,7 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 2, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 3, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed) {
     return { version: VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
@@ -30,7 +30,7 @@
     var radius = 48;
     s.obstacles.forEach(function (o) {
       o.x -= speed;
-      if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; s.score += 10; s.perfect++; }
+      if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; s.score++; s.perfect++; }
       var dx = Math.max(o.x - 8 - s.x, 0, s.x - (o.x + o.width + 8));
       var top = o.center - o.gap / 2, bottom = o.center + o.gap / 2;
       if (Math.hypot(dx, Math.max(0, s.y - top)) < radius || Math.hypot(dx, Math.max(0, bottom - s.y)) < radius) s.alive = false;

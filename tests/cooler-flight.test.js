@@ -2,7 +2,7 @@
 const test=require('node:test');const assert=require('node:assert/strict');
 const E=require('../app-cooler-flight-engine');const {fixture,fly}=require('./helpers/cooler-flight-fixture.cjs');
 test('fixed-step flight is repeatable and legitimate flights replay to the same score',()=>{
-  for(const seed of [0,1,123456,4294967295]){const {s,taps}=fly(seed);assert.ok(s.score>=3);assert.deepEqual(E.replay(seed,taps,s.tick),s);}
+  for(const seed of [0,1,123456,4294967295]){const {s,taps}=fly(seed);assert.ok(s.score>=1);assert.deepEqual(E.replay(seed,taps,s.tick),s);}
 });
 test('replay rejects fabricated duration, reordered taps, taps after collision and unfinished flights',()=>{
   const {s,taps}=fly(44);assert.throws(()=>E.replay(44,taps,s.tick+1));assert.throws(()=>E.replay(44,[0,1],100));assert.throws(()=>E.replay(44,[-1],100));assert.throws(()=>E.replay(44,[],2));assert.throws(()=>E.replay(44,[...taps,s.tick],s.tick));assert.throws(()=>E.replay(44,[],E.MAX_TICKS+1));
@@ -39,8 +39,8 @@ test('live updates never award points; validated results determine duel winner a
 });
 test('missing storage reports unavailable, without accepting unverified records',async()=>{const f=fixture();f.setConfigured(false);assert.equal((await f.request({action:'start'})).status,503);});
 
-test('chips award bankroll once and collision includes the head and wall lips',()=>{
- const s=E.create(1);s.nextId=1;s.obstacles=[{id:0,x:63+2.6,width:62,center:270,gap:188,collected:false,scored:false,variant:0}];E.step(s,false);assert.equal(s.score,10);E.step(s,false);assert.equal(s.score,10);assert.equal(s.perfect,1);
+test('each chip awards exactly one point once and collision includes the head and wall lips',()=>{
+ const s=E.create(1);s.nextId=1;s.obstacles=[{id:0,x:63+2.6,width:62,center:270,gap:188,collected:false,scored:false,variant:0}];E.step(s,false);assert.equal(s.score,1);E.step(s,false);assert.equal(s.score,1);assert.equal(s.perfect,1);
  const hit=E.create(1);hit.nextId=1;hit.y=190;hit.obstacles=[{id:0,x:94,width:62,center:270,gap:188,collected:false,scored:false,variant:0}];E.step(hit,false);assert.equal(hit.alive,false);
 });
 test('duel live replay preserves the opponent world and rejects malformed controls',async()=>{

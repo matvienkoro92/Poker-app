@@ -18,7 +18,7 @@
       if (auth && (auth.status === 'verified' || auth.status === 'dev_skip') && user) identity = String(user.memberId || user.id || 'guest');
     } catch (_) {}
     var hash = 0; for (var i = 0; i < identity.length; i++) hash = (Math.imul(hash, 31) + identity.charCodeAt(i)) >>> 0;
-    return 'cooler-flight-v2-best-' + hash;
+    return 'cooler-flight-v3-best-' + hash;
   }
   function readBest() { bestKey = storageKey(); try { best = Math.max(0, Math.min(10000, Number(localStorage.getItem(bestKey)) || 0)); } catch (_) { best = 0; } }
   function saveBest() { if (state.score <= best) return false; best = state.score; try { localStorage.setItem(bestKey, String(best)); } catch (_) {} return true; }
@@ -52,7 +52,7 @@
     phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: каждая +10 к банкроллу.<br>Светящийся круг — граница столкновения.</p>' + button('start', 'Полетели →'), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.<br>Светящийся круг — граница столкновения.</p>' + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
@@ -95,15 +95,15 @@
   function resultPanel(newBest) {
     if (room && !room.result && !room.expired && room.opponentName) {
       phase = 'spectating';
-      panel('<span class="flight-tag">СМОТРИМ ПОЛЁТ</span><h2>' + esc(room.opponentName) + ' ещё в игре</h2><p>Твой банкролл: ' + state.score + ' · Банкролл соперника: ' + (room.opponent ? Math.max(0, room.opponent.score) : 0) + '</p>' + (pendingResult ? button('save', 'Повторить сохранение', true) : ''), 'spectator');
+      panel('<span class="flight-tag">СМОТРИМ ПОЛЁТ</span><h2>' + esc(room.opponentName) + ' ещё в игре</h2><p>Твои фишки: ' + state.score + ' · Фишки соперника: ' + (room.opponent ? Math.max(0, room.opponent.score) : 0) + '</p>' + (pendingResult ? button('save', 'Повторить сохранение', true) : ''), 'spectator');
       ui.hint.textContent = 'Соперник доигрывает · Затем можно повторить вдвоём';
       ensureLoop(); return;
     }
     var title = newBest ? 'Новый личный рекорд!' : state.score ? 'Манки забрал банк' : 'Кулер, ещё попытку?';
     var outcome = room && room.result;
     if (outcome) title = outcome === 'win' ? 'Ты выиграл дуэль!' : outcome === 'draw' ? 'Ничья! Реванш?' : 'Соперник набил больше';
-    var caption = state.score + ' в банкролле · Фишек: ' + state.perfect;
-    if (room && room.opponent && room.opponent.finished) caption += '<br>' + esc(room.opponentName) + ': ' + (room.opponent.forfeited ? 'вышел из дуэли' : room.opponent.score + ' в банкролле');
+    var caption = 'Собрано фишек: ' + state.score;
+    if (room && room.opponent && room.opponent.finished) caption += '<br>' + esc(room.opponentName) + ': ' + (room.opponent.forfeited ? 'вышел из дуэли' : 'Фишек: ' + room.opponent.score);
     else if (room && !outcome) caption += '<br>Ждём результат ' + esc(room.opponentName || 'друга') + '…';
     if(room && room.opponentReady && !room.rematchReady)caption += '<br>Друг готов к реваншу — нажми «Повторить»';
     panel('<span class="flight-tag">' + (mode === 'duel' ? 'ДУЭЛЬ' : 'ЕЩЁ ОДИН ПОЛЁТ?') + '</span><h2>' + title + '</h2><div class="flight-score">' + state.score + '</div><p>' + caption + '</p>' +
@@ -182,7 +182,7 @@
       var above=o.id%2===0, my=above?top-46:bottom+42;
       ctx.drawImage(monkey,x-4,my-29,o.width+8,59);
     }
-    if(!o.collected){ctx.beginPath();ctx.arc(x+o.width/2,o.center,12,0,Math.PI*2);ctx.fillStyle='#edc05f';ctx.fill();ctx.strokeStyle='#fff2bd';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#674114';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('10',x+o.width/2,o.center+4);}
+    if(!o.collected){ctx.beginPath();ctx.arc(x+o.width/2,o.center,12,0,Math.PI*2);ctx.fillStyle='#edc05f';ctx.fill();ctx.strokeStyle='#fff2bd';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#674114';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('1',x+o.width/2,o.center+4);}
     ctx.restore();
   }
   function opponentFlight() {
@@ -241,7 +241,7 @@
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
         E.step(state,doFlap);accumulator-=1000/60;
         ui.hint.textContent = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот';
-        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);ui.toast.textContent='+10 · Банкролл: '+state.score;toastUntil=time+1000;}
+        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
       }
       if(!state.alive)finish();
     }
@@ -305,7 +305,7 @@
     if(pilot.complete&&pilot.naturalWidth)g.drawImage(pilot,155,270,360,477);
     if(monkey.complete&&monkey.naturalWidth)g.drawImage(monkey,578,372,165,144);
     g.font='900 150px sans-serif';g.fillStyle='#ffe2a1';g.fillText(String(state.score),450,900);
-    g.font='bold 30px sans-serif';g.fillStyle='#ceead8';g.fillText('БАНКРОЛЛ · ПОБЕЙ МОЙ РЕКОРД',450,952);
+    g.font='bold 30px sans-serif';g.fillStyle='#ceead8';g.fillText('ФИШЕК · ПОБЕЙ МОЙ РЕКОРД',450,952);
     g.font='22px sans-serif';g.fillStyle='#83bdac';g.fillText('POKER21 × ДВА ТУЗА',450,1030);
     return new Promise(function(resolve){c.toBlob(resolve,'image/png');});
   }
@@ -315,7 +315,7 @@
     status('Карточка рекорда сохранена.');
   }
   async function share(invite) {
-    var text=invite?'Летим на Кулерах? Одна трасса, два игрока. Код: '+room.roomId:'Кулершан: мой результат — '+state.score+' в банкролле! Побьёшь?';
+    var text=invite?'Летим на Кулерах? Одна трасса, два игрока. Код: '+room.roomId:'Кулершан: мой результат — '+state.score+' фишек! Побьёшь?';
     var url=invite?invitationUrl():(typeof getApiBase==='function'?getApiBase():location.origin)+'/?startapp=cooler_flight';
     try {
       if(navigator.share) {
