@@ -49,15 +49,16 @@ function fixture() {
   }
   class Clock extends Date { static now(){return now;} }
   const context={module:{exports:{}},require(p){if(p==='crypto')return crypto;if(p.includes('engine'))return Engine;
-    if(p==='../api-auth')return {parseBody:r=>typeof r.body==='string'?JSON.parse(r.body):r.body||{},setCors(){},authRequired:r=>r.testPlayer?{ok:true,memberId:r.testPlayer,identity:{first_name:r.testPlayer}}:{ok:false,status:401}};
+    if(p==='../pokerplus')return {PROFILE_HASH_KEY:'poker_app:pokerplus_profiles'};if(p==='../account-canonical')return {canonicalAccountId:async id=>(hashes.get('poker_app:account_redirects')||new Map()).get(id)||id};
+    if(p==='../api-auth')return {parseBody:r=>typeof r.body==='string'?JSON.parse(r.body):r.body||{},setCors(){},authRequired:r=>r.testPlayer?{ok:true,memberId:r.testPlayer,identity:r.testIdentity||{first_name:r.testPlayer}}:{ok:false,status:401}};
     if(p==='../redis')return {isConfigured:()=>configured,pipeline:async list=>list.map(c=>({result:command(c)}))};throw new Error(p);},process:{env:{}},Date:Clock,console};
   vm.runInNewContext(fs.readFileSync(require.resolve('../../lib/api-handlers/cooler-flight'),'utf8'),context);
-  async function request(body,player='Alice'){
+  async function request(body,player='Alice',identity){
     let statusCode=200,data;
-    await context.module.exports({method:'POST',body,testPlayer:player},{setHeader(){},status(n){statusCode=n;return this;},json(d){data=JSON.parse(JSON.stringify(d));return this;},end(){return this;}});
+    await context.module.exports({method:'POST',body,testPlayer:player,testIdentity:identity},{setHeader(){},status(n){statusCode=n;return this;},json(d){data=JSON.parse(JSON.stringify(d));return this;},end(){return this;}});
     return {status:statusCode,data};
   }
-  return {request,strings,top,advance:ms=>{now+=ms;},setConfigured:v=>{configured=v;}};
+  return {request,strings,top,hashes,advance:ms=>{now+=ms;},setConfigured:v=>{configured=v;}};
 }
 function fly(seed,until=1100){
   const s=Engine.create(seed),taps=[];

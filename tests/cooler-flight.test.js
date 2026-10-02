@@ -72,3 +72,12 @@ test('same-room rematch needs both players and stale retries cannot start an ext
 test('one tap gives a slightly longer lift',()=>{const s=E.create(1);E.step(s,true);assert.equal(s.vy,-4.75+0.245);while(s.vy<0)E.step(s,false);assert.ok(s.tick>=20);assert.ok(270-s.y>42 && 270-s.y<46);});
 
 test('previous-version issued flights still verify with their original impulse',()=>{const s=E.create(8,3);E.step(s,true);assert.equal(s.vy,-4.6+0.245);while(s.alive)E.step(s,false);assert.deepEqual(E.replay(8,[0],s.tick,3),s);});
+
+test('club nicknames replace generic names in existing records and new duel invitations',async()=>{
+ const f=fixture();f.top.set('Alice',7);f.hashes.set('poker_app:visitor_dt_ids',new Map([['Alice','ID123456']]));f.hashes.set('poker_app:account_redirects',new Map([['ID123456','ID654321']]));f.hashes.set('poker_app:pokerplus_profiles',new Map([['ID654321',JSON.stringify({Nike:'Кулер'})],['ID111111',JSON.stringify({nickname:'ПокерМанки'})]]));
+ f.hashes.set('poker_app:cooler_flight:v3:names',new Map([['Alice','Игрок клуба']]));
+ const board=(await f.request({action:'leaderboard'})).data;assert.equal(board.rows[0].name,'Кулер');assert.equal(board.rows[0].score,7);
+ const room=(await f.request({action:'create'})).data;assert.equal(room.name,'Кулер');const guest=(await f.request({action:'join',roomId:room.roomId},'ID111111')).data;assert.equal(guest.name,'ПокерМанки');assert.equal(guest.opponentName,'Кулер');
+});
+
+test('unlinked users use the actual API identity name rather than a generic label',async()=>{const f=fixture();const result=await f.request({action:'create'},'tg_123',{firstName:'Алекс',lastName:'Петров',telegramUsername:'alex'});assert.equal(result.data.name,'Алекс Петров');});
