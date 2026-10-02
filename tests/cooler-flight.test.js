@@ -68,3 +68,7 @@ test('same-room rematch needs both players and stale retries cannot start an ext
  const next=(await f.request({action:'room',roomId:host.roomId})).data;assert.notEqual(next.runId,host.runId);assert.equal(next.seed,a.data.seed);assert.equal(next.startAt,a.data.startAt);assert.equal(next.opponentName,'Bob');assert.equal(next.rematchReady,false);
  const old=(await f.request({action:'rematch',roomId:host.roomId,runId:host.runId})).data;assert.equal(old.round,2);assert.equal(old.rematchReady,false);
 });
+
+test('one tap gives a slightly longer lift',()=>{const s=E.create(1);E.step(s,true);assert.equal(s.vy,-4.75+0.245);while(s.vy<0)E.step(s,false);assert.ok(s.tick>=20);assert.ok(270-s.y>42 && 270-s.y<46);});
+
+test('previous-version issued flights still verify with their original impulse',()=>{const s=E.create(8,3);E.step(s,true);assert.equal(s.vy,-4.6+0.245);while(s.alive)E.step(s,false);assert.deepEqual(E.replay(8,[0],s.tick,3),s);});
