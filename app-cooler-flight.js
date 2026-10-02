@@ -31,7 +31,8 @@
     var part = chipStreak % 6;
     if(part >= 1 && part <= 3)chipSpeech = ['Игру-то', 'понимать', 'надо'][part - 1];
     else {var options=chipLines.filter(function(line){return line !== previousChipLine;});chipSpeech=options[Math.floor(Math.random()*options.length)];}
-    previousChipLine=chipSpeech;chipSpeechUntil=time+1100;
+    if(state.score===31)chipSpeech='Турбо-кулер!';
+    previousChipLine=chipSpeech;chipSpeechUntil=time+(state.score===31?2000:1100);
   }
   function saveBest() { if (state.score <= best) return false; best = state.score; try { localStorage.setItem(bestKey, String(best)); } catch (_) {} return true; }
   function api(action, data) {
@@ -185,6 +186,14 @@
   function drawPilot(x,y,size,ghost) {
     ctx.save();ctx.translate(x,y);ctx.globalAlpha=ghost?.38:1;ctx.rotate((phase === 'playing' || phase === 'spectating') ? Math.max(-.22,Math.min(.32,state.vy*.035)) : -.05);
     if (pilot.complete && pilot.naturalWidth) ctx.drawImage(pilot,-size*.37,-size*.55,size*.75,size);
+    if(state && state.version>=6 && state.passes>=30){
+      // Compact upgraded chassis stays inside the existing sprite footprint.
+      ctx.fillStyle='#9baebd';ctx.strokeStyle='#66f5ff';ctx.lineWidth=1.5;
+      ctx.fillRect(-size*.22,size*.03,size*.43,size*.31);ctx.strokeRect(-size*.22,size*.03,size*.43,size*.31);
+      ctx.fillStyle='#183c58';ctx.fillRect(-size*.16,size*.07,size*.31,size*.2);
+      ctx.fillStyle='#5ff3ff';ctx.fillRect(-size*.13,size*.1,size*.25,size*.035);
+      for(var side of [-1,1]){ctx.save();ctx.translate(side*size*.26,size*.2);ctx.fillStyle='#142b40';ctx.beginPath();ctx.arc(0,0,size*.115,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.rotate(state.tick*.4);ctx.fillStyle='#c1faff';for(var blade=0;blade<3;blade++){ctx.rotate(Math.PI*2/3);ctx.fillRect(-size*.018,-size*.08,size*.036,size*.09);}ctx.restore();}
+    }
     if (!ghost && fan.complete && fan.naturalWidth) { ctx.save();ctx.translate(-size*.23,size*.14);ctx.rotate((state ? state.tick : performance.now()/16)*.32);ctx.globalAlpha=.72;ctx.drawImage(fan,-size*.11,-size*.11,size*.22,size*.22);ctx.restore(); }
     if (!ghost) { ctx.strokeStyle='#78e8e2';ctx.globalAlpha=.45;ctx.lineWidth=2;for(var j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-size*.37-j*5,size*.12+j*7);ctx.lineTo(-size*.53-j*7,size*.12+j*7);ctx.stroke();} }
     ctx.restore();
@@ -231,6 +240,7 @@
     remote._drawOffset=(remote._flight.distance-remote._previousDistance)*(1-blend);
     return remote._flight;
   }
+  function pilotSize(flight){return flight.version>=6 && flight.passes>=30?61:122;}
   function opponentName(x,y) {
     ctx.font='bold 12px sans-serif';ctx.textAlign='center';var name=room.opponentName||'Соперник';
     var width=Math.min(210,ctx.measureText(name).width+16),cx=Math.max(width/2+4,Math.min(386-width/2,x)),cy=Math.max(115,y-78);
@@ -243,7 +253,7 @@
       var remote = room && room.opponent;
       if (remote && Array.isArray(remote.taps)) {
         opponentFlight();
-        var own=state;state=remote._flight;drawOffset=remote._drawOffset;state.obstacles.forEach(drawObstacle);drawPilot(state.x,remote._renderY,122,false);opponentName(state.x,remote._renderY);state=own;drawOffset=0;
+        var own=state;state=remote._flight;drawOffset=remote._drawOffset;state.obstacles.forEach(drawObstacle);drawPilot(state.x,remote._renderY,pilotSize(state),false);opponentName(state.x,remote._renderY);state=own;drawOffset=0;
       }
       return;
     }
@@ -255,7 +265,7 @@
     var d=phase==='playing'?state.distance-drawOffset:0;
     for(var i=0;i<9;i++){var x=(i*63-d*.35)%570;if(x<0)x+=570;ctx.globalAlpha=.12;ctx.fillStyle='#f4d18b';ctx.font='22px serif';ctx.textAlign='center';ctx.fillText(i%2?'♠':'♦',x-80,390+(i%3)*17);ctx.globalAlpha=1;}
     if(room && phase === 'playing' && room.opponent && !room.opponent.finished){
-      var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,room.opponent._renderY,122,true);opponentName(ownFlight.x+26,room.opponent._renderY);state=ownFlight;}
+      var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,room.opponent._renderY,pilotSize(state),true);opponentName(ownFlight.x+26,room.opponent._renderY);state=ownFlight;}
     }
     state.obstacles.forEach(drawObstacle);
     if(phase==='ready'||phase==='loading'||phase==='waiting'||phase==='countdown') {
@@ -264,7 +274,7 @@
       if(monkey.complete&&monkey.naturalWidth)ctx.drawImage(monkey,262,190-bob,88,77);
       ctx.font='bold 12px sans-serif';ctx.fillStyle='#f2d9a4';ctx.textAlign='center';ctx.fillText('ПОКЕРМАНКИ',306,283);
     } else {
-      drawPilot(state.x,renderY,122,false);
+      drawPilot(state.x,renderY,pilotSize(state),false);
     }
     if(phase==='playing' && chipSpeech && performance.now()<chipSpeechUntil){ctx.font='bold 14px sans-serif';ctx.textAlign='center';var bubbleWidth=ctx.measureText(chipSpeech).width+20;var bx=Math.max(bubbleWidth/2+6,Math.min(384-bubbleWidth/2,state.x+38)),by=Math.max(120,renderY-80);ctx.fillStyle='#fff4d6';ctx.fillRect(bx-bubbleWidth/2,by-18,bubbleWidth,28);ctx.fillStyle='#241409';ctx.fillText(chipSpeech,bx,by+1);}
     particles.forEach(function(p){ctx.globalAlpha=Math.max(0,p.life/62);ctx.fillStyle='#84eaff';ctx.beginPath();ctx.ellipse(p.x,p.y,3,6,.4,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
@@ -280,10 +290,11 @@
       while(accumulator>=1000/60&&state.alive){
         var doFlap=pendingFlap&&state.tick-state.lastFlap>=7;
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
-        previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
+        var wasSmall=pilotSize(state)===61;previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
         var hint = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот';
         if(ui.hint.textContent !== hint)ui.hint.textContent = hint;
         if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
+        if(!wasSmall && pilotSize(state)===61){chipSpeech='Уменьшаемся!';chipSpeechUntil=time+2000;}
       }
       if(!state.alive)finish();
     }
