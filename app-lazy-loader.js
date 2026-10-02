@@ -31,6 +31,7 @@
     "learn-play-hub": ["learning"],
     "bonus-game": ["learning"],
     "cooler-game": ["learning"],
+    "monkey-race": ["monkey-race"],
     "cooler-flight": ["cooler-flight"],
     "plasterer-game": ["learning"],
     "poker-tasks": ["club-tasks"],

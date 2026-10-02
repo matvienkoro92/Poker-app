@@ -688,6 +688,7 @@ var POKER_SECTION_LOADING_LABELS = {
   "learn-play-hub": "Загружаем обучение",
   "bonus-game": "Загружаем бонусную игру",
   "cooler-game": "Загружаем игру",
+  "monkey-race": "Манки готовится к гонке",
   "cooler-flight": "Кулер готовится к взлёту",
   "plasterer-game": "Загружаем игру",
   "poker-tasks": "Загружаем задания клуба",
@@ -1459,6 +1460,7 @@ function setView(viewName, navOpts) {
   if (viewName === "my-summary" && typeof window.initMySummary === "function") window.initMySummary();
   if (viewName === "daily-poker" && typeof initDailyPoker === "function") initDailyPoker();
   if (viewName === "admin-bonuses" && typeof initAdminBonuses === "function") initAdminBonuses();
+  if (viewName === "monkey-race" && typeof window.initMonkeyRace === "function") window.initMonkeyRace();
   if (viewName === "cooler-flight" && typeof window.initCoolerFlight === "function") window.initCoolerFlight();
   if (viewName === "cooler-game") initCoolerGame();
   if (viewName === "plasterer-game") initPlastererGame();
@@ -2140,7 +2142,7 @@ function pokerOpenPlayerCrmFromHome() {
 
   function clickSoundTarget(e) {
     if (!e || !e.target || !e.target.closest) return null;
-    if (e.target.closest(".cooler-flight")) return null;
+    if (e.target.closest(".cooler-flight, .monkey-race")) return null;
     var interactive = e.target.closest("button, a[href], .feature--link, .home-mini-icon-item, .hero__link, .bottom-nav__item, [data-view-target], .feature, [role=\"button\"], [role=\"menuitem\"], [data-menu-item]");
     if (!interactive || e.target.closest("audio") || interactive.getAttribute("aria-hidden") === "true") return null;
     if (interactive.disabled || interactive.getAttribute("disabled") != null) return null;

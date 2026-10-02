@@ -112,10 +112,10 @@ test('verified finishes enter daily board exactly once',async()=>{
   const result=await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps});assert.equal(result.status,200);assert.equal(result.data.daily.rows[0].score,s.score);
   assert.equal((await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps})).status,409);
 });
-test('Cooler collision radius halves at 30 gates and speed caps at 50',()=>{
+test('Cooler collision radius halves at 25 gates and speed caps at 50',()=>{
   function sample(passes,version){const s=E.create(1,version);s.passes=passes;s.y=60;s.vy=0;E.step(s,false);return s;}
-  assert.equal(sample(29).alive,false);assert.equal(sample(30).alive,true);
-  assert.equal(sample(30,5).alive,false);
+  assert.equal(sample(24).alive,false);assert.equal(sample(25).alive,true);
+  assert.equal(sample(30,5).alive,false);assert.equal(sample(25,8).alive,false);assert.equal(sample(30,8).alive,true);
   assert.ok(Math.abs(sample(40).distance-4.35)<1e-9);
   assert.ok(Math.abs(sample(45).distance-4.6)<1e-9);
   assert.ok(Math.abs(sample(50).distance-4.85)<1e-9);

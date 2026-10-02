@@ -3,7 +3,8 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const Engine = require('../../app-cooler-flight-engine');
-function fixture() {
+function fixture(options={}) {
+  const race=!!options.race,engine=race?require('../../app-monkey-race-engine'):Engine;
   const strings = new Map(), hashes = new Map(), top = new Map(), boards=new Map();
   let now = Date.now(), configured = true;
   function ranked(k) { return [...(k && k.includes(':daily:') ? boards.get(k)||new Map() : top).entries()].sort((a,b) => b[1]-a[1] || b[0].localeCompare(a[0])); }
@@ -62,11 +63,11 @@ function fixture() {
     throw new Error('Unsupported fixture command '+op);
   }
   class Clock extends Date { static now(){return now;} }
-  const context={module:{exports:{}},require(p){if(p==='../cooler-flight-daily'){const dailyContext={module:{exports:{}},Date:Clock};vm.runInNewContext(fs.readFileSync(require.resolve('../../lib/cooler-flight-daily'),'utf8'),dailyContext);return dailyContext.module.exports;}if(p==='crypto')return crypto;if(p.includes('engine'))return Engine;
+  const context={module:{exports:{}},require(p){if(p==='../cooler-flight-daily'){const dailyContext={module:{exports:{}},Date:Clock};vm.runInNewContext(fs.readFileSync(require.resolve('../../lib/cooler-flight-daily'),'utf8'),dailyContext);return dailyContext.module.exports;}if(p==='crypto')return crypto;if(p.includes('engine'))return engine;
     if(p==='../pokerplus')return {PROFILE_HASH_KEY:'poker_app:pokerplus_profiles'};if(p==='../account-canonical')return {canonicalAccountId:async id=>(hashes.get('poker_app:account_redirects')||new Map()).get(id)||id};
     if(p==='../api-auth')return {parseBody:r=>typeof r.body==='string'?JSON.parse(r.body):r.body||{},setCors(){},authRequired:r=>r.testPlayer?{ok:true,memberId:r.testPlayer,identity:r.testIdentity||{first_name:r.testPlayer}}:{ok:false,status:401}};
     if(p==='../redis')return {isConfigured:()=>configured,pipeline:async list=>list.map(c=>({result:command(c)}))};throw new Error(p);},process:{env:{}},Date:Clock,console};
-  vm.runInNewContext(fs.readFileSync(require.resolve('../../lib/api-handlers/cooler-flight'),'utf8'),context);
+  vm.runInNewContext(fs.readFileSync(require.resolve(race?'../../lib/api-handlers/monkey-race':'../../lib/api-handlers/cooler-flight'),'utf8'),context);
   async function request(body,player='Alice',identity){
     let statusCode=200,data;
     await context.module.exports({method:'POST',body,testPlayer:player,testIdentity:identity},{setHeader(){},status(n){statusCode=n;return this;},json(d){data=JSON.parse(JSON.stringify(d));return this;},end(){return this;}});

@@ -192,7 +192,7 @@
   function drawPilot(x,y,size,ghost) {
     ctx.save();ctx.translate(x,y);ctx.globalAlpha=ghost?.38:1;ctx.rotate((phase === 'playing' || phase === 'spectating') ? Math.max(-.22,Math.min(.32,state.vy*.035)) : -.05);
     if(state && state.tick<state.invulnerableUntil)ctx.globalAlpha=ghost?.25:.65;
-    var turbo=state && state.version>=6 && state.passes>=30 && turboReady;
+    var turbo=state && state.version>=6 && state.passes>=(state.version>=9?25:30) && turboReady;
     var ultra=state && state.version>=8 && state.passes>=70 && ultraReady;
     var sprite=ultra?ultraPilot:turbo?turboPilot:pilot;
     if(sprite.complete && sprite.naturalWidth)ctx.drawImage(sprite,-size*.37,-size*.55,size*.75,size);
@@ -243,7 +243,7 @@
     remote._drawOffset=(remote._flight.distance-remote._previousDistance)*(1-blend);
     return remote._flight;
   }
-  function pilotSize(flight){return flight.version>=6 && flight.passes>=30?61:122;}
+  function pilotSize(flight){return flight.version>=6 && flight.passes>=(flight.version>=9?25:30)?61:122;}
   function opponentName(x,y) {
     ctx.font='bold 12px sans-serif';ctx.textAlign='center';var name=room.opponentName||'Соперник';
     var width=Math.min(210,ctx.measureText(name).width+16),cx=Math.max(width/2+4,Math.min(386-width/2,x)),cy=Math.max(115,y-78);

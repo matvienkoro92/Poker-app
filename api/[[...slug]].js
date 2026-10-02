@@ -12,6 +12,7 @@ const pathSegment = (req) => {
 const path = require("path");
 const handlersDir = path.join(__dirname, "..", "lib", "api-handlers");
 const handlers = {
+  "monkey-race": () => require(path.join(handlersDir, "monkey-race.js")),
   "cooler-flight": () => require(path.join(handlersDir, "cooler-flight.js")),
   "starting-hands": () => require(path.join(handlersDir, "starting-hands.js")),
   "cash-achievement": () => require(path.join(handlersDir, "cash-achievement.js")),

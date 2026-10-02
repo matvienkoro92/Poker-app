@@ -4,10 +4,10 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 8, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 9, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed, version) {
-    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
+    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 || version === 8 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
       lives: 0, invulnerableUntil: 0, revives: 0, score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
   }
   function step(s, flap) {
@@ -34,7 +34,7 @@
         center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && (s.nextId === 50 || s.version >= 8 && s.nextId === 100), variant: Math.floor(random(s) * 3) });
       s.spawnDistance = 0;
     }
-    var radius = s.version >= 6 && s.passes >= 30 ? 24 : 48;
+    var radius = s.version >= 6 && s.passes >= (s.version >= 9 ? 25 : 30) ? 24 : 48;
     s.obstacles.forEach(function (o) {
       o.x -= speed;
       if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; if(o.life)s.lives++;else {s.score++; s.perfect++;} }
