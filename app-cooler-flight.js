@@ -61,12 +61,14 @@
     ui.panel.innerHTML = ((kind === 'result' || kind === 'spectator') ? '<button class="cooler-flight__close" data-flight-action="close-result" aria-label="Закрыть меню результата">×</button>' : '') + html; ui.pause.hidden = true;
     if((kind === 'result' || kind === 'spectator') && resultClosed)ui.overlay.hidden = true;
   }
+  function prizeRules(){return '<p><b>Каждый день — билет победителю!</b><br>Набери больше всех фишек к 17:00 МСК. В будни — билет на турнир вечера, в субботу и воскресенье — билет за 500 ₽. После 17:00 начинается новый круг.</p><p>Засчитывается лучший завершённый полёт в аккаунте. При равенстве побеждает более ранний результат. Тренировка без сохранения не участвует.</p>';}
+  function dailyBoard(d){if(!d)return '';return '<h2>Билет дня</h2><p>'+esc(d.prize)+' · до 17:00 МСК '+esc(d.date)+'</p>'+ (d.rows.length?'<ol>'+d.rows.map(function(r){return '<li><b>'+r.place+'</b><span>'+esc(r.name)+(r.mine?' · ты':'')+'</span><strong>'+r.score+'</strong></li>';}).join('')+'</ol>':'<p>Новый круг: стань первым!</p>')+'<h2>Победители</h2>'+(d.winners.length?'<ol>'+d.winners.map(function(w){return '<li><span>'+esc(w.date)+' · '+esc(w.name)+'<br>'+esc(w.prize)+'</span><strong>'+w.score+'</strong></li>';}).join('')+'</ol>':'<p>Здесь появятся победители ежедневных кругов.</p>');}
   function ready() {
     resultClosed = false; soloCountdown = null; phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.</p>' + button('start', 'Полетели →'), 'ready');
-    else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
+    else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + prizeRules() + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
   function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
@@ -370,7 +372,7 @@
     var g=++generation;phase='top';panel('<h2>Рекорды клуба</h2><p>Загружаем…</p>'+button('back','Вернуться',true));
     try{
       var d=await api('leaderboard');if(g!==generation||!active()||phase!=='top')return;
-      panel('<span class="flight-tag">ПРОВЕРЕННЫЕ ПОЛЁТЫ</span><h2>Рекорды клуба</h2>'+(d.rows.length?'<ol>'+d.rows.map(function(r){return '<li class="'+(r.mine?'flight-mine':'')+'"><b>'+r.place+'</b><span>'+esc(r.name)+(r.mine?' · ты':'')+'</span><strong>'+r.score+'</strong></li>';}).join('')+'</ol>':'<p>Здесь пока пусто.<br>Стань первым Кулером в топе!</p>')+(d.place?'<p>Твоё место: '+d.place+' · Рекорд: '+d.best+'</p>':'')+button('back','Вернуться к полёту',true));
+      panel('<span class="flight-tag">ПРОВЕРЕННЫЕ ПОЛЁТЫ</span><h2>Рекорды клуба</h2>'+dailyBoard(d.daily)+'<h2>За всё время</h2>'+(d.rows.length?'<ol>'+d.rows.map(function(r){return '<li class="'+(r.mine?'flight-mine':'')+'"><b>'+r.place+'</b><span>'+esc(r.name)+(r.mine?' · ты':'')+'</span><strong>'+r.score+'</strong></li>';}).join('')+'</ol>':'<p>Здесь пока пусто.<br>Стань первым Кулером в топе!</p>')+(d.place?'<p>Твоё место: '+d.place+' · Рекорд: '+d.best+'</p>':'')+button('back','Вернуться к полёту',true));
     }catch(e){if(g===generation&&active())panel('<h2>Топ пока недоступен</h2><p>'+esc(e.message)+'</p>'+button('back','Вернуться',true));}
   }
   function action(a) {

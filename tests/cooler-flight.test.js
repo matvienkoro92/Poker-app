@@ -87,3 +87,28 @@ test('course has meaningful up/down changes while keeping gates within the arena
  for(let i=0;i<16;i++){s.alive=true;s.y=270;s.vy=0;s.spawnDistance=236;E.step(s,false);const o=s.obstacles.at(-1);centers.push(o.center);assert.ok(o.center-o.gap/2>=24);assert.ok(o.center+o.gap/2<=E.FLOOR);}
  const deltas=centers.slice(1).map((c,i)=>c-centers[i]);assert.ok(deltas.some(d=>d>45));assert.ok(deltas.some(d=>d< -45));assert.ok(deltas.every(d=>Math.abs(d)<=90));
 });
+test('daily rounds switch at 17 Moscow and use the closing day prize',()=>{
+  const {round}=require('../lib/cooler-flight-daily');
+  assert.equal(round(Date.parse('2026-10-02T13:59:59Z')).date,'2026-10-02');
+  assert.equal(round(Date.parse('2026-10-02T14:00:00Z')).date,'2026-10-03');
+  assert.equal(round(Date.parse('2026-10-02T14:00:00Z')).prize,'Билет за 500 ₽');
+  assert.equal(round(Date.parse('2026-10-04T14:00:00Z')).prize,'Билет на турнир вечера');
+});
+test('daily winner is immutable after cutoff, ties favor earlier result, and a new round is empty',async()=>{
+  const f=fixture();f.setTime(Date.parse('2026-10-02T13:50:00Z'));
+  const prefix='poker_app:cooler_flight:daily:v1:',end=Date.parse('2026-10-02T14:00:00Z');
+  f.boards.set(prefix+'2026-10-02',new Map([['Alice',300000000+500000],['Bob',300000000+400000]]));
+  f.hashes.set(prefix+'2026-10-02:names',new Map([['Alice','Кулер'],['Bob','Манки']]));
+  f.boards.set(prefix+'pending',new Map([['2026-10-02',end]]));
+  let daily=(await f.request({action:'leaderboard'})).data.daily;assert.equal(daily.winners.length,0);assert.equal(daily.rows[0].name,'Кулер');
+  f.setTime(end);daily=(await f.request({action:'leaderboard'})).data.daily;
+  assert.equal(daily.rows.length,0);assert.equal(daily.winners[0].name,'Кулер');assert.equal(daily.winners[0].score,3);
+  f.boards.get(prefix+'2026-10-02').set('Bob',900000000);
+  daily=(await f.request({action:'leaderboard'})).data.daily;assert.equal(daily.winners[0].name,'Кулер');assert.equal(daily.prize,'Билет за 500 ₽');
+});
+test('verified finishes enter daily board exactly once',async()=>{
+  const f=fixture();f.setTime(Date.parse('2026-10-02T12:00:00Z'));
+  const run=(await f.request({action:'start'})).data,{s,taps}=fly(run.seed);f.advance(s.tick*1000/60+1000);
+  const result=await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps});assert.equal(result.status,200);assert.equal(result.data.daily.rows[0].score,s.score);
+  assert.equal((await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps})).status,409);
+});

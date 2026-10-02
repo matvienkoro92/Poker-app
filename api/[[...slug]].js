@@ -50,6 +50,7 @@ const handlers = {
   "chat-push-admin-send": () => require(path.join(handlersDir, "chat-push-admin-send.js")),
   "chat-push-admin-broadcast": () => require(path.join(handlersDir, "chat-push-admin-broadcast.js")),
   "friend-news": () => require(path.join(handlersDir, "friend-news.js")),
+  "cron-cooler-flight": () => require(path.join(handlersDir, "cron-cooler-flight.js")),
   "cron-friend-news": () => require(path.join(handlersDir, "cron-friend-news.js")),
   "achievement-notifications": () => require(path.join(handlersDir, "achievement-notifications.js")),
   "club-choice-vote": () => require(path.join(handlersDir, "club-choice-vote.js")),

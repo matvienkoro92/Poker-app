@@ -11,7 +11,21 @@
   var greetingArt = './assets/cooler-flight/cooler-scene-greeting-v1.webp';
   var angryArt = './assets/cooler-flight/cooler-scene-angry-v1.webp';
   var hurtArt = './assets/cooler-flight/cooler-scene-hurt-v1.webp';
+  var coolerPoseChange = 0;
+  function changeCoolerPose(src) {
+    if(!coolerPose || coolerPose.getAttribute('src')===src)return;
+    var previous=coolerPose, change=++coolerPoseChange;
+    var next=previous.cloneNode(false);next.src=src;next.loading='eager';
+    function swap(){
+      if(change!==coolerPoseChange || coolerPose!==previous || !next.naturalWidth)return;
+      previous.replaceWith(next);coolerPose=next;
+    }
+    if(typeof next.decode==='function')next.decode().then(swap).catch(function(){});
+    else if(next.complete)swap();else next.addEventListener('load',swap,{once:true});
+  }
   function closeCooler() {
+    coolerPoseChange++;
+
     clearTimeout(coolerSpeechTimer);coolerSpeechTimer=null;
     if(coolerSpeech)coolerSpeech.remove();coolerSpeech=null;
     if(coolerPose){coolerPose.parentElement.classList.remove('evening-cooler-active');coolerPose.remove();}coolerPose=null;
@@ -24,7 +38,7 @@
     coolerSpeech.style.top=Math.max(12,Math.min(window.innerHeight-height-12,rect.top+rect.height*.2-height-10))+'px';
   }
   function inviteCooler() {
-    coolerPose.src=greetingArt;coolerSpeech.dataset.state='invite';
+    changeCoolerPose(greetingArt);coolerSpeech.dataset.state='invite';
     coolerSpeech.innerHTML='<p>Помогите набить мне банкрол.</p><p>Сыграйте со мной в игру Кулершан.</p><div class="evening-cooler-speech__actions"><button type="button" data-cooler-choice="play">Сыграть</button><button type="button" data-cooler-choice="skip">Послать</button><button type="button" data-cooler-choice="hit">Ударить</button></div>';
     positionCoolerSpeech();
   }
@@ -33,10 +47,10 @@
     if(choice && coolerSpeech && coolerSpeech.contains(choice)){
       event.preventDefault();
       if(choice.dataset.coolerChoice==='skip'){
-        coolerPose.src=angryArt;coolerSpeech.dataset.state='angry';coolerSpeech.innerHTML='<p>Игру-то понимать надо!</p>';positionCoolerSpeech();
+        changeCoolerPose(angryArt);coolerSpeech.dataset.state='angry';coolerSpeech.innerHTML='<p>Игру-то понимать надо!</p>';positionCoolerSpeech();
         coolerSpeechTimer=setTimeout(function(){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});},3000);
       }else if(choice.dataset.coolerChoice==='hit'){
-        coolerPose.src=hurtArt;coolerSpeech.dataset.state='hurt';coolerSpeech.innerHTML='<p>Ах ты ска! Не дорос еще с дядей Кулером тягаться!</p>';positionCoolerSpeech();
+        changeCoolerPose(hurtArt);coolerSpeech.dataset.state='hurt';coolerSpeech.innerHTML='<p>Ах ты ска! Не дорос еще с дядей Кулером тягаться!</p>';positionCoolerSpeech();
         coolerSpeechTimer=setTimeout(function(){coolerSpeechTimer=null;if(coolerSpeech && document.body.dataset.view==='download')inviteCooler();else closeCooler();},3000);
       }else{var play=choice.dataset.coolerChoice==='play';var target=coolerTarget;closeCooler();if(play && typeof window.setView==='function')window.setView('cooler-flight');else if(target)target.focus({preventScroll:true});}
       return;
