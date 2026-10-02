@@ -1416,6 +1416,7 @@ function setView(viewName, navOpts) {
     } catch (eFrC) {}
     initProfileKeyboardViewportCleanup();
     initProfileTabs();
+    if (typeof window.pokerSyncOwnerGameEntries === "function") window.pokerSyncOwnerGameEntries();
     initProfileP21Id();
     initProfilePokerPlus();
     initProfileEmailAuth();

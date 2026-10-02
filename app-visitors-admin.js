@@ -87,6 +87,13 @@
     return email === "matvienkoro92@gmail.com" || email === "matvienko.r2@yandex.ru";
   }
 
+  function syncOwnerGameEntries() {
+    var allowed = collectAdminIdentityCandidates().some(isCrmOwnerUser);
+    document.querySelectorAll('[data-owner-game-entry]').forEach(function (entry) { entry.hidden = !allowed; });
+  }
+  window.pokerSyncOwnerGameEntries = syncOwnerGameEntries;
+  window.addEventListener('poker-admin-access', syncOwnerGameEntries);
+
   function isCrmMenuUser(user) {
     if (!user) return false;
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
@@ -199,6 +206,7 @@
   }
 
   function checkAdminAndShowVisitorsButton() {
+    syncOwnerGameEntries();
     var wrap = document.getElementById("footerAdminVisitorsWrap");
     var keyboardLabWrap = document.getElementById("footerKeyboardLabWrap");
     var ratingAdminRow = document.getElementById("winterRatingAdminRow");

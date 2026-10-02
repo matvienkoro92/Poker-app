@@ -65,6 +65,8 @@ function scriptFilesFromJsManifest() {
 const baseFiles = [
   'index.html',
   'daily-poker-invite.html',
+  'last-buy-in.html',
+  'monkey-race-play.html',
   'styles.css',
   'css-manifest.json',
   'js-manifest.json',
