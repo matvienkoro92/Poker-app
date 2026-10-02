@@ -52,7 +52,7 @@
     phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.<br>Светящийся круг — граница столкновения.</p>' + button('start', 'Полетели →'), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.<br>Светящийся круг — граница столкновения.</p>' + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
