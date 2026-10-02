@@ -108,7 +108,7 @@
     var nativeUnit=mode==='cash'?'₽':'фишек';
     var bank='';
     if(Number.isFinite(pot)&&pot>=0){var shown=metric==='bb'&&bigBlind>0?pot/bigBlind:pot;bank=' · Банк '+shown.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+(metric==='bb'?'BB':nativeUnit);}
-    if(mode==='mtt')return 'МТТ'+bank;
+    if(mode==='mtt'){var stage=({early:'Начало турнира',middle:'Середина (перед призами)',in_money:'Призовая зона',final_table:'Финальный стол'})[t.tournamentStage]||'';return 'МТТ'+(stage?' · '+stage:'')+bank;}
     if(mode==='cash')return 'КЕШ'+(bigBlind>0?' · '+(bigBlind/2).toLocaleString('ru-RU',{maximumFractionDigits:2})+'/'+bigBlind.toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽':'')+bank;
     return '';
   }

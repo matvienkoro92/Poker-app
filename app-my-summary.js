@@ -507,7 +507,7 @@
     if(!['list','replay','insights','opponents','stacks','version','export','chart-wall','review-publish'].includes(message.action))return;
     if(message.action==='review-publish'){
       try{
-        var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',hideShowdown:message.hideShowdown===true,forCoach:false,image:message.image,cards:message.cards,handId:message.handId,gameMode:message.gameMode,bigBlindMinor:message.bigBlindMinor,startingStackMinor:message.startingStackMinor,totalPotMinor:message.totalPotMinor});
+        var published=await pokerSocialRequest('club-reviews',{action:'create',requestId:message.requestId,type:'hand',title:message.title,question:message.question,context:message.context,outcome:'',hideShowdown:message.hideShowdown===true,forCoach:false,image:message.image,cards:message.cards,handId:message.handId,gameMode:message.gameMode,tournamentStage:message.tournamentStage,bigBlindMinor:message.bigBlindMinor,startingStackMinor:message.startingStackMinor,totalPotMinor:message.totalPotMinor});
         window.dispatchEvent(new Event('poker-reviews-updated'));
         frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,payload:{ok:true,id:published.thread&&published.thread.id,activity:published.activity,activityAward:published.activityAward}},window.location.origin);
       }catch(error){frame.contentWindow.postMessage({type:'starting-hands-response',id:message.id,error:error.message||'Не удалось опубликовать раздачу'},window.location.origin);}

@@ -20,7 +20,7 @@ test('review pages fetch at most ten threads and expose the page count',async()=
 test('review format filters paginate matching hands and can show both or neither',async()=>{
   const mem=memory(),m=reviewModule(mem),other={...actor,accountId:'ID2'};
   for(let i=0;i<12;i++)await m.create({...body,requestId:i.toString(16).padStart(24,'0'),gameMode:'cash'},i%2?other:actor);
-  for(let i=12;i<17;i++)await m.create({...body,requestId:i.toString(16).padStart(24,'0'),gameMode:'mtt'},actor);
+  for(let i=12;i<17;i++)await m.create({...body,requestId:i.toString(16).padStart(24,'0'),gameMode:'mtt',tournamentStage:'early'},actor);
   const first=await m.list(actor,false,0,10,['cash']),second=await m.list(actor,false,10,10,['cash']);
   assert.equal(first.threads.length,10);assert.equal(second.threads.length,2);assert.equal(first.totalPages,2);
   assert.ok(first.threads.every(t=>t.gameMode==='cash'));
@@ -61,3 +61,17 @@ test('appearance only accepts earned catalog awards and known frame IDs',()=>{co
 test('appearance writes are always scoped to authenticated account',async()=>{let written;const h=load('lib/api-handlers/profile-appearance.js',{'../club-social':{context:async req=>({body:req.body,accountId:'ID1'}),redis:async cmds=>{written=cmds;return ['OK'];}},'../account-id':{resolveAccountId:async id=>id},'../profile-appearance':{readAppearance:async id=>({accountId:id,achievements:[],frames:[]}),validate:()=>({frame:'gold',achievement:''})}});const res=response();await h({body:{action:'save',targetId:'ID2'}},res);assert.equal(res.statusCode,200);assert.equal(written[0][1],'poker_app:profile_appearance:ID1');});
 test('trainer identity is pinned from verified binding, never a user display name',async()=>{const mem=memory();mem.hash.set('reverse',{fishkopcheny:'ID3'});mem.hash.set('profiles',{ID3:JSON.stringify({nickname:'FishKopcheny'})});mem.hash.set('bind',{ID3:'poker-player'});const m=load('lib/club-social.js',{'./redis':{pipeline:async cmds=>(await mem.redis(cmds)).map(result=>({result})),isConfigured:()=>true},'./resolve-telegram-auth':{},'./api-handlers/friends':{},'./app-user-blocks':{},'./api-auth':{},'./api-limits':{},'./pokerplus':{PROFILE_HASH_KEY:'profiles',BIND_HASH_KEY:'bind',NICKNAME_REVERSE_HASH_KEY:'reverse'}});assert.equal(await m.coachAccount(),'ID3');mem.hash.set('reverse',{fishkopcheny:'ID9'});assert.equal(await m.coachAccount(),'ID3');});
 test('shared API gate requires a real signed-in account and rejects blocked users and null bodies',async()=>{let identity=null,blocked=false;const m=load('lib/club-social.js',{'./redis':{pipeline:async()=>[],isConfigured:()=>true},'./resolve-telegram-auth':{resolveTelegramIdentity:()=>identity,memberIdFromIdentity:who=>who.id},'./api-handlers/friends':{resolveNewsAccountId:async()=> 'ID1'},'./app-user-blocks':{rejectBlockedAppUser:async(req,res)=>{if(blocked)res.status(403).json({ok:false});return blocked;}},'./api-auth':{setCors(){},isAdminIdentity:()=>false},'./api-limits':{rejectIfPayloadTooLarge:()=>false,rateLimit:()=>false},'./pokerplus':{}});let res=response();assert.equal(await m.context({method:'POST',body:{}},res,'test'),null);assert.equal(res.statusCode,401);identity={id:'guest_fake'};res=response();await m.context({method:'POST',body:{}},res,'test');assert.equal(res.statusCode,401);identity={id:'tg_1'};blocked=true;res=response();await m.context({method:'POST',body:{}},res,'test');assert.equal(res.statusCode,403);blocked=false;res=response();await m.context({method:'POST',body:'null'},res,'test');assert.equal(res.statusCode,400);res=response();const c=await m.context({method:'POST',body:{accountId:'ID9'}},res,'test');assert.equal(c.accountId,'ID1');});
+
+test('MTT publication requires a recognized stage and returns it in lists and full posts',()=>{
+  const m=reviewModule(memory());
+  for(const stage of ['early','middle','in_money','final_table']){
+    const t=m.newThread({...body,gameMode:'mtt',tournamentStage:stage},actor,'a');
+    assert.equal(m.publicThread(t,actor).tournamentStage,stage);
+    assert.equal(m.publicThread(t,actor,false).tournamentStage,stage);
+  }
+  for(const stage of [undefined,'','forged'])assert.throws(()=>m.newThread({...body,gameMode:'mtt',tournamentStage:stage},actor,'a'),/стадию турнира/);
+  const cash=m.newThread({...body,gameMode:'cash',tournamentStage:'final_table'},actor,'a');
+  assert.equal(m.publicThread(cash,actor).tournamentStage,'');
+  delete cash.tournamentStage;cash.gameMode='mtt';
+  assert.equal(m.publicThread(cash,actor).tournamentStage,'');
+});

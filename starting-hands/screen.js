@@ -228,15 +228,22 @@ function startHistory(payload) {
       const dialog=document.createElement('dialog');dialog.className='hand-share-dialog hand-publish-dialog';
       const publishEmojis=['😀','😂','🤔','😎','😱','🔥','👍','👎','❤️','👏','💪','🙏','♠️','♥️','♦️','♣️','🃏','💰'];
       dialog.innerHTML='<form><h2>Опубликовать раздачу?</h2><p>Каждые 5 опубликованных раздач дают 1 крутку. До 7 раздач в день (МСК).</p><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="show" checked> Показать результат — под спойлером</label><label class="hand-publish-toggle"><input type="radio" name="showShowdown" value="hide"> Скрыть результат — раздача будет опубликована без ШД</label><p>Карты следующих улиц после завершения выставления, карты соперников и выигрыш или проигрыш будут под спойлером либо полностью убраны.</p><label class="hand-publish-comment">Ваш вопрос — минимум 20 букв или цифр<textarea name="comment" required minlength="20" maxlength="3000" rows="4" placeholder="Какое решение в этой раздаче хотите обсудить?"></textarea><span class="hand-publish-comment__emoji-tools"><button type="button" class="hand-publish-comment__emoji-toggle" data-emoji-toggle aria-label="Добавить смайл" aria-expanded="false">☺</button><span class="hand-publish-comment__emoji-picker" data-emoji-picker hidden>'+publishEmojis.map(emoji=>'<button type="button" data-emoji="'+emoji+'" aria-label="Вставить '+emoji+'">'+emoji+'</button>').join('')+'</span></span></label><div><button type="button" data-cancel>Отмена</button><button type="submit">Опубликовать</button></div></form>';
+      if(mode==='mtt'){
+        const label=document.createElement('label');label.className='hand-publish-stage';
+        label.innerHTML='Стадия турнира<select name="tournamentStage" required><option value="" disabled selected>Выберите стадию</option><option value="early">Начало турнира</option><option value="middle">Середина (перед призами)</option><option value="in_money">Призовая зона</option><option value="final_table">Финальный стол</option></select>';
+        dialog.querySelector('.hand-publish-toggle').before(label);
+      }
+      const stageSelect=dialog.querySelector('[name="tournamentStage"]');
       const draft=button._publishDraft;
       if(draft){dialog.querySelector('input[value="'+(draft.showShowdown?'show':'hide')+'"]').checked=true;dialog.querySelector('textarea').value=draft.comment;}
+      if(stageSelect&&draft)stageSelect.value=draft.tournamentStage||'';
       let result=null;
       const textarea=dialog.querySelector('textarea');
       textarea.oninput=()=>textarea.setCustomValidity('');
       const emojiToggle=dialog.querySelector('[data-emoji-toggle]'),emojiPicker=dialog.querySelector('[data-emoji-picker]');
       emojiToggle.onclick=()=>{const open=emojiPicker.hidden;emojiPicker.hidden=!open;emojiToggle.setAttribute('aria-expanded',String(open));};
       emojiPicker.onclick=event=>{const choice=event.target.closest('[data-emoji]');if(!choice)return;const emoji=choice.dataset.emoji||'',start=Number.isInteger(textarea.selectionStart)?textarea.selectionStart:textarea.value.length,end=Number.isInteger(textarea.selectionEnd)?textarea.selectionEnd:start;textarea.value=(textarea.value.slice(0,start)+emoji+textarea.value.slice(end)).slice(0,textarea.maxLength);const caret=Math.min(start+emoji.length,textarea.value.length);textarea.setSelectionRange(caret,caret);textarea.dispatchEvent(new Event('input',{bubbles:true}));textarea.focus();};
-      dialog.querySelector('form').onsubmit=event=>{event.preventDefault();const text=textarea.value.trim(),count=text.normalize('NFKC').split(/\r?\n/).filter(line=>!/^\s*>/.test(line)).join(' ').replace(/https?:\/\/\S+|www\.\S+|«[^»]*»|“[^”]*”|"[^"]*"/giu,'').replace(/[^\p{L}\p{N}]/gu,'').length;if(count<20){textarea.setCustomValidity('Напишите вопрос: минимум 20 букв или цифр без ссылок и цитат');textarea.reportValidity();return;}result={showShowdown:dialog.querySelector('input').checked,comment:text};button._publishDraft=result;dialog.close();};
+      dialog.querySelector('form').onsubmit=event=>{event.preventDefault();const text=textarea.value.trim(),count=text.normalize('NFKC').split(/\r?\n/).filter(line=>!/^\s*>/.test(line)).join(' ').replace(/https?:\/\/\S+|www\.\S+|«[^»]*»|“[^”]*”|"[^"]*"/giu,'').replace(/[^\p{L}\p{N}]/gu,'').length;if(count<20){textarea.setCustomValidity('Напишите вопрос: минимум 20 букв или цифр без ссылок и цитат');textarea.reportValidity();return;}result={showShowdown:dialog.querySelector('input').checked,comment:text,tournamentStage:stageSelect?stageSelect.value:''};button._publishDraft=result;dialog.close();};
       dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();
       dialog.addEventListener('close',()=>{dialog.remove();resolve(result);},{once:true});
       document.body.append(dialog);dialog.showModal();
@@ -268,7 +275,7 @@ function startHistory(payload) {
       const startingStackMinor=Number.isSafeInteger(hand.startingStackMinor)?hand.startingStackMinor:heroStack&&Number.isFinite(heroStack.amount)&&heroStack.amount>=0?Math.round(heroStack.amount*100):null;
       const potCodes=new Set(['2','3','5','18','19','20','92']);
       const totalPotMinor=Math.round((replay.events||[]).reduce((sum,event)=>sum+(potCodes.has(String(event.code))?(Number(event.amount)||0):0),0)*100);
-      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment,context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),potTiming:'opening',hideShowdown:options.showShowdown===false,image,gameMode:mode,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
+      const response=await historyRequest('review-publish',hand.handId,{requestId:button._publishRequestId||(button._publishRequestId=requestId()),cards:replay.cards||hand.cards||[],title:'Раздача '+cards,question:options.comment,context:window.PokerHandShare.text(Object.assign({mode,metric},hand),replay,options),potTiming:'opening',hideShowdown:options.showShowdown===false,image,gameMode:mode,tournamentStage:options.tournamentStage,bigBlindMinor:hand.bigBlindMinor,startingStackMinor,totalPotMinor});
       button.textContent='Опубликовано';button.dataset.published='1';
       if(response?.id)button.dataset.reviewId=response.id;
       showPublicationSuccess(response?.id,response);
