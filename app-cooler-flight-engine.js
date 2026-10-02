@@ -4,11 +4,11 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 6, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 7, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed, version) {
-    return { version: version === 3 || version === 4 || version === 5 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
-      score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
+    return { version: version === 3 || version === 4 || version === 5 || version === 6 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
+      lives: 0, invulnerableUntil: 0, revives: 0, score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
   }
   function step(s, flap) {
     if (!s.alive) return s;
@@ -30,23 +30,26 @@
       }
       s.lastCenter = center;
       s.obstacles.push({ id: s.nextId++, x: s.nextId === 1 ? 450 : WIDTH + 80, width: 62,
-        center: center, gap: gap, scored: false, collected: false, variant: Math.floor(random(s) * 3) });
+        center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && s.nextId === 50, variant: Math.floor(random(s) * 3) });
       s.spawnDistance = 0;
     }
     var radius = s.version >= 6 && s.passes >= 30 ? 24 : 48;
     s.obstacles.forEach(function (o) {
       o.x -= speed;
-      if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; s.score++; s.perfect++; }
+      if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; if(o.life)s.lives++;else {s.score++; s.perfect++;} }
       var dx = Math.max(o.x - 8 - s.x, 0, s.x - (o.x + o.width + 8));
       var top = o.center - o.gap / 2, bottom = o.center + o.gap / 2;
-      if (Math.hypot(dx, Math.max(0, s.y - top)) < radius || Math.hypot(dx, Math.max(0, bottom - s.y)) < radius) s.alive = false;
+      if (s.tick >= s.invulnerableUntil && (Math.hypot(dx, Math.max(0, s.y - top)) < radius || Math.hypot(dx, Math.max(0, bottom - s.y)) < radius)) s.alive = false;
       if (!o.scored && o.x + o.width < s.x - radius) {
         o.scored = true; s.passes++;
       }
     });
     s.obstacles = s.obstacles.filter(function (o) { return o.x > -150; });
     s.tick++;
-    if (s.y - radius < 24 || s.y + radius > FLOOR || s.tick >= MAX_TICKS) s.alive = false;
+    if (s.tick >= s.invulnerableUntil && (s.y - radius < 24 || s.y + radius > FLOOR)) s.alive = false;
+    if(!s.alive && s.lives>0 && s.tick<MAX_TICKS){s.lives--;s.revives++;s.alive=true;s.invulnerableUntil=s.tick+90;s.vy=0;}
+    if(s.tick<s.invulnerableUntil)s.y=Math.max(24+radius,Math.min(FLOOR-radius,s.y));
+    if(s.tick>=MAX_TICKS)s.alive=false;
     return s;
   }
   function replay(seed, taps, ticks, version) {
