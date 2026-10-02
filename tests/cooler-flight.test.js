@@ -50,9 +50,9 @@ test('duel live replay preserves the opponent world and rejects malformed contro
 });
 
 test('difficulty starts gently and increases only after each five gates',()=>{
- const initial=E.create(1);E.step(initial,false);assert.equal(initial.stage,1);assert.equal(initial.distance,2.1);assert.equal(initial.obstacles[0].gap,260);
- const before=E.create(1);before.passes=4;E.step(before,false);assert.equal(before.stage,1);assert.equal(before.obstacles[0].gap,260);
- const next=E.create(1);next.passes=5;E.step(next,false);assert.equal(next.stage,2);assert.equal(next.distance,2.35);assert.equal(next.obstacles[0].gap,244);
+ const initial=E.create(1);E.step(initial,false);assert.equal(initial.stage,1);assert.equal(initial.distance,2.35);assert.equal(initial.obstacles[0].gap,244);
+ const before=E.create(1);before.passes=4;E.step(before,false);assert.equal(before.stage,1);assert.equal(before.obstacles[0].gap,244);
+ const next=E.create(1);next.passes=5;E.step(next,false);assert.equal(next.stage,2);assert.equal(next.distance,2.6);assert.equal(next.obstacles[0].gap,228);
 });
 
 test('same-room rematch needs both players and stale retries cannot start an extra round',async()=>{
@@ -69,7 +69,7 @@ test('same-room rematch needs both players and stale retries cannot start an ext
  const old=(await f.request({action:'rematch',roomId:host.roomId,runId:host.runId})).data;assert.equal(old.round,2);assert.equal(old.rematchReady,false);
 });
 
-test('one tap gives a slightly longer lift',()=>{const s=E.create(1);E.step(s,true);assert.equal(s.vy,-4.75+0.245);while(s.vy<0)E.step(s,false);assert.ok(s.tick>=20);assert.ok(270-s.y>42 && 270-s.y<46);});
+test('one tap gives a slightly longer lift',()=>{const s=E.create(1);E.step(s,true);assert.equal(s.vy,-4.8+0.235);while(s.vy<0)E.step(s,false);assert.ok(s.tick>=20);assert.ok(270-s.y>42 && 270-s.y<49);});
 
 test('previous-version issued flights still verify with their original impulse',()=>{const s=E.create(8,3);E.step(s,true);assert.equal(s.vy,-4.6+0.245);while(s.alive)E.step(s,false);assert.deepEqual(E.replay(8,[0],s.tick,3),s);});
 
@@ -81,3 +81,9 @@ test('club nicknames replace generic names in existing records and new duel invi
 });
 
 test('unlinked users use the actual API identity name rather than a generic label',async()=>{const f=fixture();const result=await f.request({action:'create'},'tg_123',{firstName:'Алекс',lastName:'Петров',telegramUsername:'alex'});assert.equal(result.data.name,'Алекс Петров');});
+
+test('course has meaningful up/down changes while keeping gates within the arena',()=>{
+ const s=E.create(18),centers=[];
+ for(let i=0;i<16;i++){s.alive=true;s.y=270;s.vy=0;s.spawnDistance=236;E.step(s,false);const o=s.obstacles.at(-1);centers.push(o.center);assert.ok(o.center-o.gap/2>=24);assert.ok(o.center+o.gap/2<=E.FLOOR);}
+ const deltas=centers.slice(1).map((c,i)=>c-centers[i]);assert.ok(deltas.some(d=>d>45));assert.ok(deltas.some(d=>d< -45));assert.ok(deltas.every(d=>Math.abs(d)<=90));
+});

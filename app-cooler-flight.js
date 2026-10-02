@@ -5,6 +5,7 @@
   var raf = 0, lastTime = 0, accumulator = 0, room = null, roomTimer = 0, polling = false;
   var generation = 0, pendingResult = null, best = 0, bestKey = '', sound = false, audio = null;
   var particles = [], lastScore = 0, clockOffset = 0, duelStarted = false, toastUntil = 0, soloCountdown = null, resultClosed = false;
+  var previousY = 270, previousDistance = 0, drawOffset = 0;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var pilot = new Image(), monkey = new Image(), fan = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
@@ -61,7 +62,7 @@
   function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
   function begin(seed, id) {
     if (!active()) return;
-    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed); phase = 'playing'; taps = []; particles = []; lastScore = 0; accumulator = 0; lastTime = 0; pendingFlap = true;
+    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed); previousY=state.y;previousDistance=state.distance;phase = 'playing'; taps = []; particles = []; lastScore = 0; accumulator = 0; lastTime = 0; pendingFlap = true;
     ui.overlay.hidden = true; ui.pause.hidden = mode === 'duel'; ui.toast.textContent = ''; ui.canvas.focus({ preventScroll: true });
     window.scrollTo(0, 0);
     var shell = document.querySelector('.card'); if (shell) shell.scrollTop = 0;
@@ -195,12 +196,12 @@
   function drawObstacle(o) {
     var ready = monkey.complete && monkey.naturalWidth;
     if(!o._art || o._artReady !== ready){
-      var art=document.createElement('canvas');art.width=172;art.height=E.FLOOR*2;
-      var main=ctx;ctx=art.getContext('2d');ctx.scale(2,2);ctx.translate(12,0);
+      var art=document.createElement('canvas'),scale=Math.min(2,window.devicePixelRatio||1);art.width=86*scale;art.height=E.FLOOR*scale;
+      var main=ctx;ctx=art.getContext('2d');ctx.scale(scale,scale);ctx.translate(12,0);
       drawObstacleArt({x:0,width:o.width,center:o.center,gap:o.gap,variant:o.variant,id:o.id});ctx=main;o._art=art;o._artReady=ready;
     }
-    ctx.drawImage(o._art,o.x-12,0,86,E.FLOOR);
-    var x=o.x;
+    var x=o.x+drawOffset;
+    ctx.drawImage(o._art,x-12,0,86,E.FLOOR);
     if(!o.collected){ctx.beginPath();ctx.arc(x+o.width/2,o.center,12,0,Math.PI*2);ctx.fillStyle='#edc05f';ctx.fill();ctx.strokeStyle='#fff2bd';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#674114';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('1',x+o.width/2,o.center+4);}
   }
   function opponentFlight() {
@@ -215,7 +216,7 @@
   function draw() {
     if(!ctx || !state) return;
     if (phase === 'spectating') {
-      ctx.clearRect(0,0,390,600);ctx.drawImage(backdrop,0,0);
+      drawOffset=0;ctx.clearRect(0,0,390,600);ctx.drawImage(backdrop,0,0);
       var remote = room && room.opponent;
       if (remote && Array.isArray(remote.taps)) {
         opponentFlight();
@@ -225,7 +226,10 @@
     }
     ctx.clearRect(0,0,390,600);ctx.drawImage(backdrop,0,0);
     var reduced=reducedMotion.matches;
-    var d=phase==='playing'?state.distance:0;
+    var blend=phase==='playing'?Math.max(0,Math.min(1,accumulator/(1000/60))):1;
+    drawOffset=phase==='playing'?(state.distance-previousDistance)*(1-blend):0;
+    var renderY=phase==='playing'?previousY+(state.y-previousY)*blend:state.y;
+    var d=phase==='playing'?state.distance-drawOffset:0;
     for(var i=0;i<9;i++){var x=(i*63-d*.35)%570;if(x<0)x+=570;ctx.globalAlpha=.12;ctx.fillStyle='#f4d18b';ctx.font='22px serif';ctx.textAlign='center';ctx.fillText(i%2?'♠':'♦',x-80,390+(i%3)*17);ctx.globalAlpha=1;}
     if(room && phase === 'playing' && room.opponent && !room.opponent.finished){
       var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,hologram.y,122,true);state=ownFlight;}
@@ -237,7 +241,7 @@
       if(monkey.complete&&monkey.naturalWidth)ctx.drawImage(monkey,262,190-bob,88,77);
       ctx.font='bold 12px sans-serif';ctx.fillStyle='#f2d9a4';ctx.textAlign='center';ctx.fillText('ПОКЕРМАНКИ',306,283);
     } else {
-      drawPilot(state.x,state.y,122,false);
+      drawPilot(state.x,renderY,122,false);
     }
     particles.forEach(function(p){ctx.globalAlpha=Math.max(0,p.life/62);ctx.fillStyle='#84eaff';ctx.beginPath();ctx.ellipse(p.x,p.y,3,6,.4,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
     if(room&&phase==='playing'){ctx.font='bold 12px sans-serif';ctx.fillStyle='#daf5df';ctx.textAlign='center';ctx.fillText((room.opponentName||'Соперник')+': '+(room.opponent?Math.max(0,room.opponent.score):0),195,97);}
@@ -252,7 +256,7 @@
       while(accumulator>=1000/60&&state.alive){
         var doFlap=pendingFlap&&state.tick-state.lastFlap>=7;
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
-        E.step(state,doFlap);accumulator-=1000/60;
+        previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
         var hint = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот';
         if(ui.hint.textContent !== hint)ui.hint.textContent = hint;
         if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
@@ -354,7 +358,7 @@
     else if(a==='cancel'||a==='back'||a==='quit'){abandon();generation++;stopPolling();room=null;duelStarted=false;status('');ready();}
   }
   function cleanup() {
-    abandon();generation++;stopPolling();if(raf)cancelAnimationFrame(raf);raf=0;room=null;phase='ready';pendingFlap=false;duelStarted=false;pendingResult=null;
+    abandon();generation++;stopPolling();if(raf)cancelAnimationFrame(raf);raf=0;if(state)state.obstacles=[];particles=[];soloCountdown=null;room=null;phase='ready';pendingFlap=false;duelStarted=false;pendingResult=null;
   }
   window.initCoolerFlight=function(){
     var canvas=document.getElementById('coolerFlightCanvas');if(!canvas)return;
