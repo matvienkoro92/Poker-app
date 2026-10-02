@@ -4,7 +4,7 @@
   var ui, ctx, state, phase = 'ready', mode = 'solo', runId = '', taps = [], pendingFlap = false;
   var raf = 0, lastTime = 0, accumulator = 0, room = null, roomTimer = 0, polling = false;
   var generation = 0, pendingResult = null, best = 0, bestKey = '', sound = false, audio = null;
-  var particles = [], lastScore = 0, clockOffset = 0, duelStarted = false, toastUntil = 0;
+  var particles = [], lastScore = 0, clockOffset = 0, duelStarted = false, toastUntil = 0, soloCountdown = null, resultClosed = false;
   var pilot = new Image(), monkey = new Image(), fan = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
   monkey.src = './assets/pokermanki-animation-head.webp';
@@ -46,20 +46,21 @@
   function button(action, label, secondary) { return '<button type="button" class="flight-button' + (secondary ? ' flight-button--secondary' : '') + '" data-flight-action="' + action + '">' + label + '</button>'; }
   function panel(html, kind) {
     ui.overlay.hidden = false; ui.overlay.dataset.kind = kind || '';
-    ui.panel.innerHTML = html; ui.pause.hidden = true;
+    ui.panel.innerHTML = ((kind === 'result' || kind === 'spectator') ? '<button class="cooler-flight__close" data-flight-action="close-result" aria-label="Закрыть меню результата">×</button>' : '') + html; ui.pause.hidden = true;
+    if((kind === 'result' || kind === 'spectator') && resultClosed)ui.overlay.hidden = true;
   }
   function ready() {
-    phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0;
+    resultClosed = false; soloCountdown = null; phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.<br>Светящийся круг — граница столкновения.</p>' + button('start', 'Полетели →'), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.</p>' + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
   function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
   function begin(seed, id) {
     if (!active()) return;
-    runId = id || ''; state = E.create(seed); phase = 'playing'; taps = []; particles = []; lastScore = 0; accumulator = 0; lastTime = 0; pendingFlap = true;
+    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed); phase = 'playing'; taps = []; particles = []; lastScore = 0; accumulator = 0; lastTime = 0; pendingFlap = true;
     ui.overlay.hidden = true; ui.pause.hidden = mode === 'duel'; ui.toast.textContent = ''; ui.canvas.focus({ preventScroll: true });
     window.scrollTo(0, 0);
     var shell = document.querySelector('.card'); if (shell) shell.scrollTop = 0;
@@ -71,14 +72,19 @@
     var g = ++generation; phase = 'loading'; panel('<span class="flight-tag">КУЛЕР ПРОГРЕВАЕТ ВЕНТИЛЯТОР</span><h2>Готовимся к полёту…</h2>');
     try {
       var d = await api('start'); if (g !== generation || !active()) return;
-      status('Результат будет проверен и сохранён в топ клуба.'); begin(d.seed, d.runId);
+      status('Результат будет проверен и сохранён в топ клуба.'); countdownSolo(d.seed, d.runId);
     } catch (e) {
       if (g !== generation || !active()) return;
       status(e.status === 401 ? 'Тренировка. Войдите в аккаунт для топа клуба и дуэлей.' : 'Тренировка: сервер недоступен. Рекорд сохранится на этом устройстве.');
-      begin((Math.random() * 4294967296) >>> 0, '');
+      countdownSolo((Math.random() * 4294967296) >>> 0, '');
     }
   }
+  function countdownSolo(seed, id) {
+    soloCountdown = { seed: seed, id: id, end: performance.now() + 3000 };
+    phase = 'countdown';panel('<span class="flight-tag">КУЛЕР ГОТОВ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>3</div><p>Нажимай на поле, чтобы взлететь.</p>');ensureLoop();
+  }
   function flap() {
+    if((phase === 'over' || phase === 'spectating') && resultClosed){resultClosed=false;resultPanel(false);return;}
     if (phase !== 'playing') return;
     pendingFlap = true;
   }
@@ -130,7 +136,7 @@
     var newBest = saveBest(); ui.best.textContent = best;
     pendingResult = runId ? { runId: runId, ticks: state.tick, taps: taps.slice() } : null;
     var g = generation;
-    setTimeout(function () { if (g === generation && active() && phase === 'over') { resultPanel(newBest); if (pendingResult) submit(); } }, 450);
+    setTimeout(function () { if (g === generation && active() && (phase === 'over' || phase === 'spectating')) { if(phase === 'over')resultPanel(newBest); if (pendingResult) submit(); } }, 450);
   }
   function round(x, y, w, h, r, fill, stroke) {
     if (h <= 0 || w <= 0) return;
@@ -201,7 +207,7 @@
       var remote = room && room.opponent;
       if (remote && Array.isArray(remote.taps)) {
         opponentFlight();
-        var own=state;state=remote._flight;state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,78,false);state=own;
+        var own=state;state=remote._flight;state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,122,false);state=own;
       }
       return;
     }
@@ -209,6 +215,9 @@
     var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var d=phase==='playing'?state.distance:0;
     for(var i=0;i<9;i++){var x=(i*63-d*.35)%570;if(x<0)x+=570;ctx.globalAlpha=.12;ctx.fillStyle='#f4d18b';ctx.font='22px serif';ctx.textAlign='center';ctx.fillText(i%2?'♠':'♦',x-80,390+(i%3)*17);ctx.globalAlpha=1;}
+    if(room && phase === 'playing' && room.opponent && !room.opponent.finished){
+      var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,hologram.y,122,true);state=ownFlight;}
+    }
     state.obstacles.forEach(drawObstacle);
     if(phase==='ready'||phase==='loading'||phase==='waiting'||phase==='countdown') {
       var bob=reduced?0:Math.sin(performance.now()/650)*4;
@@ -216,16 +225,7 @@
       if(monkey.complete&&monkey.naturalWidth)ctx.drawImage(monkey,262,190-bob,88,77);
       ctx.font='bold 12px sans-serif';ctx.fillStyle='#f2d9a4';ctx.textAlign='center';ctx.fillText('ПОКЕРМАНКИ',306,283);
     } else {
-      ctx.save();ctx.strokeStyle=state.alive?'#8af4e1':'#ff7973';ctx.fillStyle='#8af4e109';ctx.lineWidth=2;ctx.beginPath();ctx.arc(state.x,state.y,E.RADIUS,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
-      drawPilot(state.x,state.y,78,false);
-      if(room&&room.opponent&&Array.isArray(room.opponent.taps)&&phase==='playing') {
-        var remote=room.opponent;
-        opponentFlight();
-        var ownState=state;state=remote._flight;
-        ctx.save();ctx.translate(278,120);ctx.beginPath();ctx.rect(0,0,98,150);ctx.clip();ctx.scale(.25,.25);ctx.drawImage(backdrop,0,0);state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,78,false);ctx.restore();state=ownState;
-        ctx.strokeStyle='#8af4e1';ctx.lineWidth=1;ctx.strokeRect(278,120,98,150);
-        ctx.font='10px sans-serif';ctx.fillStyle='#daf5df';ctx.textAlign='right';ctx.fillText('Полёт соперника',376,113);
-      }
+      drawPilot(state.x,state.y,122,false);
     }
     particles.forEach(function(p){ctx.globalAlpha=Math.max(0,p.life/62);ctx.fillStyle='#84eaff';ctx.beginPath();ctx.ellipse(p.x,p.y,3,6,.4,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
     if(room&&phase==='playing'){ctx.font='bold 12px sans-serif';ctx.fillStyle='#daf5df';ctx.textAlign='center';ctx.fillText((room.opponentName||'Соперник')+': '+(room.opponent?Math.max(0,room.opponent.score):0),195,97);}
@@ -233,6 +233,7 @@
   function frame(time) {
     raf=0;if(!active())return;
     var delta=lastTime?Math.min(100,time-lastTime):0;lastTime=time;
+    if(phase==='countdown'&&soloCountdown){var remaining=Math.min(3,Math.ceil((soloCountdown.end-time)/1000));if(remaining<=0){var start=soloCountdown;begin(start.seed,start.id);}else{var number=ui.panel.querySelector('[data-flight-countdown]');if(number)number.textContent=remaining;}}
     if(phase==='countdown'&&room&&room.startAt){var left=Math.ceil((room.startAt-(Date.now()+clockOffset))/1000);if(left<=0&&!duelStarted){duelStarted=true;status('Дуэль началась!');begin(room.seed,room.runId);}else if(left>0){var count=ui.panel.querySelector('[data-flight-countdown]');if(count)count.textContent=left;}}
     if(phase==='playing') {
       accumulator+=delta;
@@ -333,6 +334,7 @@
     }catch(e){if(g===generation&&active())panel('<h2>Топ пока недоступен</h2><p>'+esc(e.message)+'</p>'+button('back','Вернуться',true));}
   }
   function action(a) {
+    if(a==='close-result'){resultClosed=true;ui.overlay.hidden=true;ui.hint.textContent='Коснись поля, чтобы открыть результат';return;}
     if(a==='start')startSolo();else if(a==='resume')resume();else if(a==='create')createRoom();else if(a==='rematch')rematch();
     else if(a==='join'){var el=document.getElementById('coolerFlightRoomCode');joinRoom(el?el.value:'');}
     else if(a==='invite')share(true);else if(a==='share')share(false);else if(a==='card')downloadCard();else if(a==='save')submit();

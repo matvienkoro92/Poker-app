@@ -72,3 +72,6 @@ body[data-view="cooler-flight"] .app { padding: max(24px, env(safe-area-inset-to
 .cooler-flight__overlay[data-kind="spectator"] .cooler-flight__panel { pointer-events: auto; padding: 12px; }
 .cooler-flight__overlay[data-kind="spectator"] h2 { font-size: 16px; margin: 5px 0; }
 .cooler-flight__overlay[data-kind="spectator"] p { margin: 5px 0; font-size: 11px; }
+
+.cooler-flight__panel { position: relative; }
+.cooler-flight__close { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: transparent; color: #cce5d8; font-size: 28px; line-height: 1; border-radius: 50%; }
