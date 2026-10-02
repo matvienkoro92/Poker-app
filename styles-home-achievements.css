@@ -3,7 +3,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin: 14px 0 8px;
+  margin: 24px 0 8px;
   color: #e8ad54;
   font-size: clamp(8.4px, 2.38vw, 11.2px);
   font-weight: 900;
@@ -84,7 +84,7 @@ body[data-view="home"] #app.app .card .card__content {
 
 @media (max-width: 360px) {
   .app.app--view-home .home-club-achievements-title {
-    margin-top: 12px;
+    margin-top: 22px;
     gap: 8px;
     font-size: 7.7px;
     letter-spacing: 0.24em;

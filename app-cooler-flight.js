@@ -23,6 +23,16 @@
     return 'cooler-flight-v3-best-' + hash;
   }
   function readBest() { bestKey = storageKey(); try { best = Math.max(0, Math.min(10000, Number(localStorage.getItem(bestKey)) || 0)); } catch (_) { best = 0; } }
+  var chipLines = ['ОПА!', 'НИХ@Я!', 'Пошла отмазка!', 'Сюда', 'Сюдааааа!', 'Попалася рыбешка', 'Банк растёт!', 'Вот это занос!', 'Фишечку сюда!', 'Плюс в копилку!', 'Дядя в деле!', 'Лови натс!', 'Хорошо пошла!', 'Ещё одну!', 'Забираем банк!'];
+  var chipStreak = 0, lastChipGate = -2, previousChipLine = '', chipSpeech = '', chipSpeechUntil = 0;
+  function collectedChip(time) {
+    var gate = state.obstacles.find(function(o){return o.collected && o.id > lastChipGate;});
+    if(gate){chipStreak = gate.id === lastChipGate + 1 ? chipStreak + 1 : 1;lastChipGate = gate.id;}
+    var part = chipStreak % 6;
+    if(part >= 1 && part <= 3)chipSpeech = ['Игру-то', 'понимать', 'надо'][part - 1];
+    else {var options=chipLines.filter(function(line){return line !== previousChipLine;});chipSpeech=options[Math.floor(Math.random()*options.length)];}
+    previousChipLine=chipSpeech;chipSpeechUntil=time+1100;
+  }
   function saveBest() { if (state.score <= best) return false; best = state.score; try { localStorage.setItem(bestKey, String(best)); } catch (_) {} return true; }
   function api(action, data) {
     var base = typeof getApiBase === 'function' ? getApiBase() : location.origin;
@@ -52,7 +62,7 @@
     if((kind === 'result' || kind === 'spectator') && resultClosed)ui.overlay.hidden = true;
   }
   function ready() {
-    resultClosed = false; soloCountdown = null; phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0;
+    resultClosed = false; soloCountdown = null; phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
     if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.</p>' + button('start', 'Полетели →'), 'ready');
@@ -62,7 +72,7 @@
   function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
   function begin(seed, id) {
     if (!active()) return;
-    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed); previousY=state.y;previousDistance=state.distance;phase = 'playing'; taps = []; particles = []; lastScore = 0; accumulator = 0; lastTime = 0; pendingFlap = true;
+    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed); previousY=state.y;previousDistance=state.distance;phase = 'playing'; taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0; accumulator = 0; lastTime = 0; pendingFlap = true;
     ui.overlay.hidden = true; ui.pause.hidden = mode === 'duel'; ui.toast.textContent = ''; ui.canvas.focus({ preventScroll: true });
     window.scrollTo(0, 0);
     var shell = document.querySelector('.card'); if (shell) shell.scrollTop = 0;
@@ -207,11 +217,22 @@
   function opponentFlight() {
     var remote=room && room.opponent;if(!remote || !Array.isArray(remote.taps))return null;
     var now=performance.now();
-    if(!remote._flight){remote._flight=E.create(room.seed);var at=0;while(remote._flight.alive&&remote._flight.tick<remote.tick){var flap=remote.taps[at]===remote._flight.tick;if(flap)at++;E.step(remote._flight,flap);}remote._time=now;remote._acc=0;}
+    if(!remote._flight){remote._flight=E.create(room.seed);remote._time=now;remote._acc=0;remote._previousY=remote._flight.y;remote._previousDistance=0;}
     remote._acc+=Math.min(100,now-remote._time);remote._time=now;
-    while(remote._acc>=1000/60&&remote._flight.alive&&remote._flight.tick<remote.tick){E.step(remote._flight,remote.taps.indexOf(remote._flight.tick)!==-1);remote._acc-=1000/60;}
-    if(remote._flight.tick>=remote.tick)remote._acc=0;
+    var target=Math.max(0,remote.tick-18);
+    if(remote._controlsSource!==remote.taps){remote._controlsSource=remote.taps;remote._controls=new Set(remote.taps);}
+    var controls=remote._controls;
+    while(remote._acc>=1000/60&&remote._flight.alive&&remote._flight.tick<target){remote._previousY=remote._flight.y;remote._previousDistance=remote._flight.distance;E.step(remote._flight,controls.has(remote._flight.tick));remote._acc-=1000/60;}
+    if(remote._flight.tick>=target)remote._acc=Math.min(remote._acc,1000/60);
+    var blend=Math.min(1,remote._acc/(1000/60));
+    remote._renderY=remote._previousY+(remote._flight.y-remote._previousY)*blend;
+    remote._drawOffset=(remote._flight.distance-remote._previousDistance)*(1-blend);
     return remote._flight;
+  }
+  function opponentName(x,y) {
+    ctx.font='bold 12px sans-serif';ctx.textAlign='center';var name=room.opponentName||'Соперник';
+    var width=Math.min(210,ctx.measureText(name).width+16),cx=Math.max(width/2+4,Math.min(386-width/2,x)),cy=Math.max(115,y-78);
+    ctx.fillStyle='#10292de0';ctx.fillRect(cx-width/2,cy-16,width,23);ctx.fillStyle='#a8f4ff';ctx.fillText(name,cx,cy,194);
   }
   function draw() {
     if(!ctx || !state) return;
@@ -220,7 +241,7 @@
       var remote = room && room.opponent;
       if (remote && Array.isArray(remote.taps)) {
         opponentFlight();
-        var own=state;state=remote._flight;state.obstacles.forEach(drawObstacle);drawPilot(state.x,state.y,122,false);state=own;
+        var own=state;state=remote._flight;drawOffset=remote._drawOffset;state.obstacles.forEach(drawObstacle);drawPilot(state.x,remote._renderY,122,false);opponentName(state.x,remote._renderY);state=own;drawOffset=0;
       }
       return;
     }
@@ -232,7 +253,7 @@
     var d=phase==='playing'?state.distance-drawOffset:0;
     for(var i=0;i<9;i++){var x=(i*63-d*.35)%570;if(x<0)x+=570;ctx.globalAlpha=.12;ctx.fillStyle='#f4d18b';ctx.font='22px serif';ctx.textAlign='center';ctx.fillText(i%2?'♠':'♦',x-80,390+(i%3)*17);ctx.globalAlpha=1;}
     if(room && phase === 'playing' && room.opponent && !room.opponent.finished){
-      var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,hologram.y,122,true);state=ownFlight;}
+      var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,room.opponent._renderY,122,true);opponentName(ownFlight.x+26,room.opponent._renderY);state=ownFlight;}
     }
     state.obstacles.forEach(drawObstacle);
     if(phase==='ready'||phase==='loading'||phase==='waiting'||phase==='countdown') {
@@ -243,6 +264,7 @@
     } else {
       drawPilot(state.x,renderY,122,false);
     }
+    if(phase==='playing' && chipSpeech && performance.now()<chipSpeechUntil){ctx.font='bold 14px sans-serif';ctx.textAlign='center';var bubbleWidth=ctx.measureText(chipSpeech).width+20;var bx=Math.max(bubbleWidth/2+6,Math.min(384-bubbleWidth/2,state.x+38)),by=Math.max(120,renderY-80);ctx.fillStyle='#fff4d6';ctx.fillRect(bx-bubbleWidth/2,by-18,bubbleWidth,28);ctx.fillStyle='#241409';ctx.fillText(chipSpeech,bx,by+1);}
     particles.forEach(function(p){ctx.globalAlpha=Math.max(0,p.life/62);ctx.fillStyle='#84eaff';ctx.beginPath();ctx.ellipse(p.x,p.y,3,6,.4,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
     if(room&&phase==='playing'){ctx.font='bold 12px sans-serif';ctx.fillStyle='#daf5df';ctx.textAlign='center';ctx.fillText((room.opponentName||'Соперник')+': '+(room.opponent?Math.max(0,room.opponent.score):0),195,97);}
   }
@@ -259,7 +281,7 @@
         previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
         var hint = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот';
         if(ui.hint.textContent !== hint)ui.hint.textContent = hint;
-        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
+        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
       }
       if(!state.alive)finish();
     }
@@ -272,7 +294,8 @@
   function abandon(){if(runId&&mode==='duel'&&phase!=='over')api('abandon',{runId:runId}).catch(function(){});runId='';}
   function adoptRoom(d) {
     if(room && (d.round || 1) < (room.round || 1))return;
-    if(room && room.runId===d.runId && room.opponent && room.opponent._flight && d.opponent){d.opponent._flight=room.opponent._flight;d.opponent._time=room.opponent._time;d.opponent._acc=room.opponent._acc;}
+    if(!d.waiting && !d.opponent)d.opponent={tick:0,taps:[],score:0,finished:false};
+    if(room && room.runId===d.runId && room.opponent && room.opponent._flight && d.opponent){d.opponent._flight=room.opponent._flight;d.opponent._time=room.opponent._time;d.opponent._acc=room.opponent._acc;d.opponent._previousY=room.opponent._previousY;d.opponent._previousDistance=room.opponent._previousDistance;}
     if(room && room.runId !== d.runId){duelStarted=false;phase='ready';pendingResult=null;particles=[];ui.score.textContent='0';}
     room=d;runId=d.runId;clockOffset=d.serverNow-Date.now();
     if(d.expired){stopPolling();phase='over';panel('<h2>Дуэль завершена</h2><p>Время ожидания истекло. Создайте новую дуэль.</p>'+button('rematch','Новая дуэль'));return;}
@@ -288,7 +311,7 @@
     if(!room||!active()||polling)return;
     polling=true;var g=generation, roomId=room.roomId;
     var req=phase==='playing'?api('progress',{runId:runId,tick:state.tick,y:state.y,score:state.score,taps:taps.slice()}).catch(function(){return null;}):Promise.resolve();
-    req.then(function(){return api('room',{roomId:roomId});}).then(function(d){if(g===generation&&active()){adoptRoom(d);if(phase==='playing')status('Дуэль с '+d.opponentName);}}).catch(function(e){if(g===generation&&active())status(e.message);}).finally(function(){if(g===generation&&active()){polling=false;if(room&&!room.expired)roomTimer=setTimeout(pollRoom,1000);}});
+    req.then(function(){return api('room',{roomId:roomId});}).then(function(d){if(g===generation&&active()){adoptRoom(d);if(phase==='playing')status('Дуэль с '+d.opponentName);}}).catch(function(e){if(g===generation&&active())status(e.message);}).finally(function(){if(g===generation&&active()){polling=false;if(room&&!room.expired)roomTimer=setTimeout(pollRoom,phase==='playing'||phase==='spectating'?250:500);}});
   }
   async function createRoom() {
     abandon();stopPolling();duelStarted=false;room=null;var g=++generation;phase='loading';panel('<h2>Создаём дуэль…</h2>');

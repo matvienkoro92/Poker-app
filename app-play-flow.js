@@ -9,6 +9,7 @@
 
   var coolerSpeech = null, coolerSpeechTimer = null, coolerPose = null, coolerTarget = null;
   var greetingArt = './assets/cooler-flight/cooler-scene-greeting-v1.webp';
+  var angryArt = './assets/cooler-flight/cooler-scene-angry-v1.webp';
   var hurtArt = './assets/cooler-flight/cooler-scene-hurt-v1.webp';
   function closeCooler() {
     clearTimeout(coolerSpeechTimer);coolerSpeechTimer=null;
@@ -24,15 +25,18 @@
   }
   function inviteCooler() {
     coolerPose.src=greetingArt;coolerSpeech.dataset.state='invite';
-    coolerSpeech.innerHTML='<p>Помогите набить мне банкрол. Игру-то понимать надо.</p><p>Сыграйте со мной в игру Кулершан.</p><div class="evening-cooler-speech__actions"><button type="button" data-cooler-choice="play">Сыграть</button><button type="button" data-cooler-choice="skip">Пропустить бродягу</button><button type="button" data-cooler-choice="hit">Ударить</button></div>';
+    coolerSpeech.innerHTML='<p>Помогите набить мне банкрол.</p><p>Сыграйте со мной в игру Кулершан.</p><div class="evening-cooler-speech__actions"><button type="button" data-cooler-choice="play">Сыграть</button><button type="button" data-cooler-choice="skip">Послать</button><button type="button" data-cooler-choice="hit">Ударить</button></div>';
     positionCoolerSpeech();
   }
   document.addEventListener('click',function(event){
     var choice=event.target.closest && event.target.closest('[data-cooler-choice]');
     if(choice && coolerSpeech && coolerSpeech.contains(choice)){
       event.preventDefault();
-      if(choice.dataset.coolerChoice==='hit'){
-        coolerPose.src=hurtArt;coolerSpeech.dataset.state='hurt';coolerSpeech.innerHTML='<p>Не дорос ты еще с Дядей Кулером тягаться!</p>';positionCoolerSpeech();
+      if(choice.dataset.coolerChoice==='skip'){
+        coolerPose.src=angryArt;coolerSpeech.dataset.state='angry';coolerSpeech.innerHTML='<p>Игру-то понимать надо!</p>';positionCoolerSpeech();
+        coolerSpeechTimer=setTimeout(function(){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});},3000);
+      }else if(choice.dataset.coolerChoice==='hit'){
+        coolerPose.src=hurtArt;coolerSpeech.dataset.state='hurt';coolerSpeech.innerHTML='<p>Ах ты ска! Не дорос еще с дядей Кулером тягаться!</p>';positionCoolerSpeech();
         coolerSpeechTimer=setTimeout(function(){coolerSpeechTimer=null;if(coolerSpeech && document.body.dataset.view==='download')inviteCooler();else closeCooler();},3000);
       }else{var play=choice.dataset.coolerChoice==='play';var target=coolerTarget;closeCooler();if(play && typeof window.setView==='function')window.setView('cooler-flight');else if(target)target.focus({preventScroll:true});}
       return;
@@ -45,7 +49,7 @@
     coolerSpeech=document.createElement('div');coolerSpeech.className='evening-cooler-speech';coolerSpeech.setAttribute('role','dialog');coolerSpeech.setAttribute('aria-label','Кулер приглашает в Кулершан');coolerSpeech.setAttribute('aria-live','polite');document.body.appendChild(coolerSpeech);
     inviteCooler();var pose=coolerPose;function showPose(){if(coolerPose===pose){scene.classList.add('evening-cooler-active');pose.classList.add('evening-cooler-pose--visible');}}if(pose.complete && pose.naturalWidth)showPose();else pose.addEventListener('load',showPose,{once:true});
     coolerSpeech.querySelector('button').focus({preventScroll:true});
-    [greetingArt,hurtArt].forEach(function(src){var image=new Image();image.src=src;});
+    [greetingArt,hurtArt,angryArt].forEach(function(src){var image=new Image();image.src=src;});
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape' && coolerSpeech){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});}});
   window.addEventListener('resize',positionCoolerSpeech);

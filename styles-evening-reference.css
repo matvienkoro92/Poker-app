@@ -379,6 +379,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 .evening-cooler-speech__actions {display:flex;flex-wrap:wrap;gap:7px;}
 .evening-cooler-speech__actions button {min-height:42px;padding:9px 12px;border:1px solid #be8738;border-radius:10px;background:#fff4d6;color:#241409;font:700 12px/1.2 Arial,sans-serif;cursor:pointer;touch-action:manipulation;}
 .evening-cooler-speech__actions button:first-child {background:#ecac39;flex:1 0 100%;}
+.evening-cooler-speech__actions button[data-cooler-choice="hit"] {flex:1;}
 .evening-cooler-speech__actions button:focus-visible {outline:3px solid #725318;outline-offset:2px;}
 .evening-cooler-speech[data-state="hurt"] {background:#ffe8dc;border-color:#d67548;}
 .evening-cooler-pose {opacity:0;transition:opacity .25s ease;clip-path:polygon(0% 27.34%,10.74% 19.53%,36.13% 19.53%,42.48% 35.16%,41.02% 39.06%,50.29% 46.88%,58.59% 63.8%,56.64% 78.13%,38.09% 80.73%,29.3% 98.63%,0% 100%,0% 55.34%);}
@@ -387,3 +388,5 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 @media(prefers-reduced-motion:reduce){.evening-cooler-pose{transition:none;}}
 .evening-cooler-speech .evening-cooler-speech__actions button {background:#fff4d6!important;color:#241409!important;}
 .evening-cooler-speech .evening-cooler-speech__actions button:first-child {background:#ecac39!important;}
+
+.evening-reference__character-hint {margin:0;padding-top:.4cqw;color:#ffe5ac;font:600 2.6cqw/1.35 Arial,sans-serif;}
