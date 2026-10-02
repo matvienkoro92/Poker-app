@@ -4,10 +4,10 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 7, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 8, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed, version) {
-    return { version: version === 3 || version === 4 || version === 5 || version === 6 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
+    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
       lives: 0, invulnerableUntil: 0, revives: 0, score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
   }
   function step(s, flap) {
@@ -17,6 +17,7 @@
     s.y += s.vy;
     s.stage = 1 + Math.floor(s.passes / 5);
     var speed = Math.min(s.version >= 6 ? 4.85 : 4.3, (s.version < 5 ? 2.1 : 2.35) + (s.stage - 1) * 0.25);
+    if(s.version>=8)speed+=s.passes>=100?1.2:s.passes>=70?.6:0;
     s.distance += speed; s.spawnDistance += speed;
     if (!s.nextId || s.spawnDistance >= 236) {
       var gap = Math.max(148, (s.version < 5 ? 260 : 244) - (s.stage - 1) * 16);
@@ -30,7 +31,7 @@
       }
       s.lastCenter = center;
       s.obstacles.push({ id: s.nextId++, x: s.nextId === 1 ? 450 : WIDTH + 80, width: 62,
-        center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && s.nextId === 50, variant: Math.floor(random(s) * 3) });
+        center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && (s.nextId === 50 || s.version >= 8 && s.nextId === 100), variant: Math.floor(random(s) * 3) });
       s.spawnDistance = 0;
     }
     var radius = s.version >= 6 && s.passes >= 30 ? 24 : 48;

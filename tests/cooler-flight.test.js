@@ -119,7 +119,7 @@ test('Cooler collision radius halves at 30 gates and speed caps at 50',()=>{
   assert.ok(Math.abs(sample(40).distance-4.35)<1e-9);
   assert.ok(Math.abs(sample(45).distance-4.6)<1e-9);
   assert.ok(Math.abs(sample(50).distance-4.85)<1e-9);
-  assert.equal(sample(50).distance,sample(100).distance);
+  assert.equal(sample(50,6).distance,sample(100,6).distance);
   assert.equal(sample(50,5).distance,4.3);
 });
 test('gate 50 replaces its chip with one extra life, consumed only once',()=>{
@@ -131,4 +131,13 @@ test('gate 50 replaces its chip with one extra life, consumed only once',()=>{
   for(let i=0;i<20;i++){s.y=10;E.step(s,false);assert.equal(s.alive,true);}
   s.tick=s.invulnerableUntil;s.y=10;E.step(s,false);assert.equal(s.alive,false);
   const old=E.create(9,6);old.nextId=49;old.spawnDistance=236;old.lastCenter=270;E.step(old,false);assert.equal(old.obstacles[0].life,false);
+});
+test('70 and 100 gates increase speed and gate 100 grants a second extra life',()=>{
+  function speed(passes,version){const s=E.create(1,version);s.passes=passes;E.step(s,false);return s.distance;}
+  assert.equal(speed(69),4.85);assert.ok(Math.abs(speed(70)-5.45)<1e-9);assert.ok(Math.abs(speed(100)-6.05)<1e-9);assert.equal(speed(100,7),4.85);
+  const s=E.create(9);s.passes=99;s.nextId=99;s.spawnDistance=236;s.lastCenter=270;s.lives=1;E.step(s,false);
+  const heart=s.obstacles.find(o=>o.id===99);assert.equal(heart.life,true);heart.x=s.x-heart.width/2+6.05;s.y=heart.center;s.vy=0;E.step(s,false);assert.equal(s.lives,2);assert.equal(s.score,0);
+  s.y=10;E.step(s,false);assert.equal(s.lives,1);assert.equal(s.alive,true);
+  s.tick=s.invulnerableUntil;s.y=10;E.step(s,false);assert.equal(s.lives,0);assert.equal(s.alive,true);
+  s.tick=s.invulnerableUntil;s.y=10;E.step(s,false);assert.equal(s.alive,false);
 });

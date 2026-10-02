@@ -7,6 +7,9 @@
   var particles = [], lastScore = 0, clockOffset = 0, duelStarted = false, toastUntil = 0, soloCountdown = null, resultClosed = false;
   var previousY = 270, previousDistance = 0, drawOffset = 0;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var turboReady=false, turboPilot=new Image();
+  turboPilot.onload=function(){if(turboPilot.decode)turboPilot.decode().then(function(){turboReady=true;}).catch(function(){});else turboReady=true;};
+  turboPilot.src='./assets/cooler-flight/cooler-pilot-turbo-v1.webp';
   var pilot = new Image(), monkey = new Image(), fan = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
   monkey.src = './assets/pokermanki-animation-head.webp';
@@ -186,17 +189,12 @@
   function drawPilot(x,y,size,ghost) {
     ctx.save();ctx.translate(x,y);ctx.globalAlpha=ghost?.38:1;ctx.rotate((phase === 'playing' || phase === 'spectating') ? Math.max(-.22,Math.min(.32,state.vy*.035)) : -.05);
     if(state && state.tick<state.invulnerableUntil)ctx.globalAlpha=ghost?.25:.65;
-    if (pilot.complete && pilot.naturalWidth) ctx.drawImage(pilot,-size*.37,-size*.55,size*.75,size);
-    if(state && state.version>=6 && state.passes>=30){
-      // Compact upgraded chassis stays inside the existing sprite footprint.
-      ctx.fillStyle='#9baebd';ctx.strokeStyle='#66f5ff';ctx.lineWidth=1.5;
-      ctx.fillRect(-size*.22,size*.03,size*.43,size*.31);ctx.strokeRect(-size*.22,size*.03,size*.43,size*.31);
-      ctx.fillStyle='#183c58';ctx.fillRect(-size*.16,size*.07,size*.31,size*.2);
-      ctx.fillStyle='#5ff3ff';ctx.fillRect(-size*.13,size*.1,size*.25,size*.035);
-      for(var side of [-1,1]){ctx.save();ctx.translate(side*size*.26,size*.2);ctx.fillStyle='#142b40';ctx.beginPath();ctx.arc(0,0,size*.115,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.rotate(state.tick*.4);ctx.fillStyle='#c1faff';for(var blade=0;blade<3;blade++){ctx.rotate(Math.PI*2/3);ctx.fillRect(-size*.018,-size*.08,size*.036,size*.09);}ctx.restore();}
-    }
-    if (!ghost && fan.complete && fan.naturalWidth) { ctx.save();ctx.translate(-size*.23,size*.14);ctx.rotate((state ? state.tick : performance.now()/16)*.32);ctx.globalAlpha=.72;ctx.drawImage(fan,-size*.11,-size*.11,size*.22,size*.22);ctx.restore(); }
-    if (!ghost) { ctx.strokeStyle='#78e8e2';ctx.globalAlpha=.45;ctx.lineWidth=2;for(var j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-size*.37-j*5,size*.12+j*7);ctx.lineTo(-size*.53-j*7,size*.12+j*7);ctx.stroke();} }
+    var turbo=state && state.version>=6 && state.passes>=30 && turboReady;
+    var sprite=turbo?turboPilot:pilot;
+    if(sprite.complete && sprite.naturalWidth)ctx.drawImage(sprite,-size*.37,-size*.55,size*.75,size);
+    if (!ghost && !turbo && fan.complete && fan.naturalWidth) { ctx.save();ctx.translate(-size*.23,size*.14);ctx.rotate((state ? state.tick : performance.now()/16)*.32);ctx.globalAlpha=.72;ctx.drawImage(fan,-size*.11,-size*.11,size*.22,size*.22);ctx.restore(); }
+    if (!ghost && turbo) {ctx.strokeStyle='#6beaff';ctx.lineWidth=3;ctx.globalAlpha=.8;for(var jet=0;jet<3;jet++){ctx.beginPath();ctx.moveTo(-size*.28,size*.17+jet*size*.04);ctx.lineTo(-size*.58-(state.tick%6)*.5,size*.17+jet*size*.04);ctx.stroke();}}
+    if (!ghost && !turbo) { ctx.strokeStyle='#78e8e2';ctx.globalAlpha=.45;ctx.lineWidth=2;for(var j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-size*.37-j*5,size*.12+j*7);ctx.lineTo(-size*.53-j*7,size*.12+j*7);ctx.stroke();} }
     ctx.restore();
   }
   function drawObstacleArt(o) {
@@ -291,13 +289,15 @@
       while(accumulator>=1000/60&&state.alive){
         var doFlap=pendingFlap&&state.tick-state.lastFlap>=7;
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
-        var previousLives=state.lives,previousRevives=state.revives;var wasSmall=pilotSize(state)===61;previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
-        var hint = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ 1 жизнь':'');
+        var previousPasses=state.passes;var previousLives=state.lives,previousRevives=state.revives;var wasSmall=pilotSize(state)===61;previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
+        var hint = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ '+state.lives:'');
         if(ui.hint.textContent !== hint)ui.hint.textContent = hint;
         if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
         if(state.lives>previousLives){chipSpeech='Вторая жизнь!';chipSpeechUntil=time+2000;ui.toast.textContent='♥ Дополнительная жизнь';toastUntil=time+2000;}
         if(state.revives>previousRevives){chipSpeech='Ещё живём!';chipSpeechUntil=time+2000;}
         if(!wasSmall && pilotSize(state)===61){chipSpeech='Уменьшаемся!';chipSpeechUntil=time+2000;}
+        if(state.version>=8 && previousPasses<70 && state.passes>=70){chipSpeech='Е@ааать, ускоряемся!';chipSpeechUntil=time+2500;}
+        if(state.version>=8 && previousPasses<100 && state.passes>=100){chipSpeech='Ну все пи@да!';chipSpeechUntil=time+2500;}
       }
       if(!state.alive)finish();
     }
