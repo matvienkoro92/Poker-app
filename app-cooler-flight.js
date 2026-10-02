@@ -7,6 +7,9 @@
   var particles = [], lastScore = 0, clockOffset = 0, duelStarted = false, toastUntil = 0, soloCountdown = null, resultClosed = false;
   var previousY = 270, previousDistance = 0, drawOffset = 0;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var ultraReady=false,ultraPilot=new Image();
+  ultraPilot.onload=function(){if(ultraPilot.decode)ultraPilot.decode().then(function(){ultraReady=true;}).catch(function(){});else ultraReady=true;};
+  ultraPilot.src='./assets/cooler-flight/cooler-pilot-ultra-v1.webp';
   var turboReady=false, turboPilot=new Image();
   turboPilot.onload=function(){if(turboPilot.decode)turboPilot.decode().then(function(){turboReady=true;}).catch(function(){});else turboReady=true;};
   turboPilot.src='./assets/cooler-flight/cooler-pilot-turbo-v1.webp';
@@ -190,10 +193,11 @@
     ctx.save();ctx.translate(x,y);ctx.globalAlpha=ghost?.38:1;ctx.rotate((phase === 'playing' || phase === 'spectating') ? Math.max(-.22,Math.min(.32,state.vy*.035)) : -.05);
     if(state && state.tick<state.invulnerableUntil)ctx.globalAlpha=ghost?.25:.65;
     var turbo=state && state.version>=6 && state.passes>=30 && turboReady;
-    var sprite=turbo?turboPilot:pilot;
+    var ultra=state && state.version>=8 && state.passes>=70 && ultraReady;
+    var sprite=ultra?ultraPilot:turbo?turboPilot:pilot;
     if(sprite.complete && sprite.naturalWidth)ctx.drawImage(sprite,-size*.37,-size*.55,size*.75,size);
     if (!ghost && !turbo && fan.complete && fan.naturalWidth) { ctx.save();ctx.translate(-size*.23,size*.14);ctx.rotate((state ? state.tick : performance.now()/16)*.32);ctx.globalAlpha=.72;ctx.drawImage(fan,-size*.11,-size*.11,size*.22,size*.22);ctx.restore(); }
-    if (!ghost && turbo) {ctx.strokeStyle='#6beaff';ctx.lineWidth=3;ctx.globalAlpha=.8;for(var jet=0;jet<3;jet++){ctx.beginPath();ctx.moveTo(-size*.28,size*.17+jet*size*.04);ctx.lineTo(-size*.58-(state.tick%6)*.5,size*.17+jet*size*.04);ctx.stroke();}}
+    if (!ghost && (turbo || ultra)) {ctx.strokeStyle=ultra?'#ffb64c':'#6beaff';ctx.lineWidth=ultra?4:3;ctx.globalAlpha=.8;for(var jet=0;jet<3;jet++){ctx.beginPath();ctx.moveTo(-size*.28,size*.17+jet*size*.04);ctx.lineTo(-size*.58-(state.tick%6)*.5,size*.17+jet*size*.04);ctx.stroke();}}
     if (!ghost && !turbo) { ctx.strokeStyle='#78e8e2';ctx.globalAlpha=.45;ctx.lineWidth=2;for(var j=0;j<3;j++){ctx.beginPath();ctx.moveTo(-size*.37-j*5,size*.12+j*7);ctx.lineTo(-size*.53-j*7,size*.12+j*7);ctx.stroke();} }
     ctx.restore();
   }
