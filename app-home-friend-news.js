@@ -2973,7 +2973,7 @@
       });
       return { date: date, html: '<article class="home-news-sng-archive" data-club-sng-winner="' + esc(date + ":" + title) + '">' +
         winnerCard + '<ol class="home-news-achievement__list">' + podium.map(function (winner) {
-          return '<li value="' + Number(winner.place) + '"><b>' + esc(name(winner)) + '</b> · ' + Number(winner.place) + ' место</li>';
+          return '<li value="' + Number(winner.place) + '"><b>' + esc(name(winner)) + '</b></li>';
         }).join("") + '</ol></article>' };
     }).filter(Boolean);
   }
