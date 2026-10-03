@@ -2,14 +2,14 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./app-monkey-race-engine.js'),require('./app-cooler-flight-engine.js'));else root.LastBuyInEngine=factory(root.MonkeyRaceEngine,root.CoolerFlightEngine);})(typeof globalThis!=='undefined'?globalThis:this,function(Race,Flight){
 'use strict';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-const names=['Капитан Колл','Братья Чек и Рейз','Дилер Пересдача','Удав Депозит','Охранник Натс','Снайпер Слоуплей','Железный натс'];
+const names=['Капитан Колл','Братья Чек и Рейз','Дилер Пересдача','Удав Депозит','Охранник Натс','Снайпер Слоуплей','Валера · Железный натс'];
 function create(chapter){if(chapter===0)throw Error('Chapter one uses MonkeyRaceCampaign');const s={chapter,tick:0,phase:'route',health:5,hits:0,inv:0,cooldown:0,specialCooldown:0,score:0,secret:false,won:false,lost:false,x:90,y:410,vy:0,facing:1,attack:0,progress:0,enemies:[],shots:[],platforms:[],picked:0,boss:{x:310,y:395,hp:chapter===6?12:5,max:chapter===6?12:5,name:names[chapter],timer:0,warning:false},message:'',wave:0,finalPhase:0,ground:false,chairCharges:4,combo:0,particles:[],tokens:[],jumpHeight:0,jumpSpeed:0,checkpoint:0,shake:0,locks:[],gates:[]};
  if(chapter===1){s.y=390;s.world=3100;s.boss.hp=s.boss.max=10;s.furniture=[{x:400,y:315,w:100,h:46},{x:860,y:410,w:95,h:45},{x:1210,y:315,w:100,h:46}];spawnWave(s);}
  if(chapter===2){s.y=420;s.world=6010;s.boss.x=5860;s.boss.y=390;s.boss.hp=s.boss.max=7;s.platforms=[{x:0,w:290,base:470,y:470}];for(let i=1;i<35;i++){const x=245+(i-1)*165,base=470-(i%3)*22;s.platforms.push({x,w:150,base,y:base,moving:i%4===2});s.tokens.push({x:x+55,y:base-55,collected:false});}s.platforms.push({x:5640,w:350,base:470,y:470});s.vents=[550,1220,2050,2680,3350,4020,4690,5360];s.gates=[{x:5590,open:false}];}
  if(chapter===3){s.x=70;s.y=350;s.world=3850;s.platforms=train(s);s.boss.hp=s.boss.max=3;s.locks=Array.from({length:7},(_,i)=>({x:430+i*490,open:false}));}
  if(chapter===4){s.flight=Flight.create(927313,9);s.x=94;s.y=270;s.boss.x=316;s.boss.y=270;s.boss.hp=s.boss.max=6;s.devices=[true,true,true];}
  if(chapter===5){s.x=55;s.y=455;s.boss.x=310;s.boss.y=85;s.enemies=[{x:330,y:365,hp:3,type:0},{x:60,y:240,hp:3,type:1},{x:325,y:165,hp:3,type:0}];s.covers=[{x:110,y:330,w:65,h:30},{x:210,y:230,w:70,h:30}];s.room=1;s.ammo=6;s.reload=0;s.timer=240*60;s.switches=0;}
- if(chapter===6){s.x=70;s.y=410;s.phase='boss';s.boss.x=300;s.boss.y=280;s.boss.hp=s.boss.max=24;s.weakUntil=0;s.telegraphs=[];}
+ if(chapter===6){s.x=70;s.y=410;s.phase='boss';s.boss.x=280;s.boss.y=280;s.boss.hp=s.boss.max=24;s.weakUntil=0;s.telegraphs=[];}
  return s;}
 function train(s){return Array.from({length:27},(_,i)=>({x:15+i*142,w:134,y:385+Math.sin(s.tick*.015+i*.55)*(40+15*(s.intensity||0)),car:i}));}
 function damage(s){if(s.inv||s.won||s.lost)return;s.health--;s.hits++;s.inv=80;s.shake=10;if(s.health<=0)s.lost=true;}
