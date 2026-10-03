@@ -156,7 +156,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-bonuses {display:none!important;}
 
 /* On narrow phones, keep a small gap below the table while portals stay fixed. */
-@media (max-width:600px) {
+@container play-screen (max-width:600px) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
   --evening-table-drop:max(0px,calc(53cqh - 63.5cqw - var(--evening-scene-drop)));
  }
@@ -219,7 +219,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 }
 
 /* Wider windows need smaller portals above the seated players. */
-@media (min-aspect-ratio:3/5) {
+@container play-screen (min-aspect-ratio:3/5) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {
   top:22%;transform-origin:50% 0;
   transform:translateY(calc(var(--evening-scene-drop) - 10px)) scale(.7)!important;
@@ -232,7 +232,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
   top:19%;left:70%;width:34%;
  }
 }
-@media (min-aspect-ratio:3/5) {
+@container play-screen (min-aspect-ratio:3/5) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {min-height:110cqw;--evening-scene-drop:0px;}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop) {width:90%;left:5%;top:calc(100% - 54cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--chair-left,.evening-reference__art--chair-middle,.evening-reference__art--chair-right,.evening-reference__art--chair-center) {top:calc(100% - 59cqw);}
@@ -243,7 +243,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-play-sign {top:calc(100% - 26cqw)!important;left:22%!important;width:56%!important;}
 }
 /* Seat the wide-layout players inside the table edges, with visible chairs. */
-@media (min-aspect-ratio:3/5) {
+@container play-screen (min-aspect-ratio:3/5) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-left {left:7%;width:23%;top:calc(100% - 70cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-middle {left:51%;width:29%;top:calc(100% - 69cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--player-right {left:73%;width:23%;top:calc(100% - 70cqw);}
@@ -252,7 +252,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:73%;width:22%;top:calc(100% - 70cqw);}
 }
 /* Fill the wide scene with the table and larger portal effects. */
-@media (min-aspect-ratio:3/5) {
+@container play-screen (min-aspect-ratio:3/5) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.evening-reference__art--table,.evening-reference__art--flop) {width:102%;left:-1%;top:calc(100% - 60.75cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-top {top:calc(100% - 91cqw);transform:translateY(-10px) scale(.65)!important;}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-ring {top:calc(100% - 91cqw);transform:translateY(calc(-10px - 1.43cqw)) scale(.65)!important;}
@@ -261,7 +261,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 }
 
 /* Keep the tournament ticket below the phone status bar without shifting the scene. */
-@media (max-width:680px) {
+@container play-screen (max-width:680px) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {
   top:calc(2% + max(28px, env(safe-area-inset-top, 0px)))!important;
  }
@@ -273,7 +273,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
  transform:translateY(calc(var(--evening-scene-drop) + 4px)) scale(.95)!important;
 }
 
-@media (max-width:680px) {
+@container play-screen (max-width:680px) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.home-tournament-history,.home-tournament-share) {
   transform:translateY(max(28px, env(safe-area-inset-top, 0px)))!important;
  }
@@ -282,14 +282,14 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:8%;width:18%;top:calc(35.5% + 10cqw);}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:57%;width:20%;top:calc(34.5% + 10cqw);}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:79%;width:18%;top:calc(35.5% + 10cqw);}
-@media(min-aspect-ratio:3/5){
+@container play-screen (min-aspect-ratio:3/5){
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-left {left:14%;width:18%;top:calc(100% - 61cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-middle {left:58%;width:20%;top:calc(100% - 61cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-right {left:73%;width:18%;top:calc(100% - 61cqw);}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--chair-center {top:calc(100% - 65cqw);}
 }
 /* Additional right-portal adjustment for the narrow composition only. */
-@media(max-aspect-ratio:3/5) {
+@container play-screen (max-aspect-ratio:3/5) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
   transform:translateY(calc(var(--evening-scene-drop) + 11px)) scale(.836)!important;
  }
@@ -337,7 +337,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 }
 .evening-vpn-cat::after {content:none!important;display:none!important;}
 .evening-vpn-cat__sprite {transform:rotate(3deg) scaleX(-1);}
-@media(max-width:680px) {
+@container play-screen (max-width:680px) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-vpn-cat {bottom:24%;}
 }
 
@@ -362,7 +362,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference .home-last-longer-dock::after {
  content:'\41b \430 \441 \442 \43b \43e \43d \433 \435 \440 '!important;display:block!important;position:absolute!important;inset:8.4cqw 0 auto!important;width:100%!important;height:auto!important;border:0!important;background:none!important;box-shadow:none!important;transform:none!important;color:#fff4dd!important;font:700 2.3cqw/1 Arial,sans-serif!important;text-align:center!important;
 }
-@media(max-width:680px) {
+@container play-screen (max-width:680px) {
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-tournament-history {top:calc(2% + 3cqw + max(28px, env(safe-area-inset-top, 0px)))!important;}
  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .home-last-longer-dock {top:calc(2% + 3cqw + max(28px, env(safe-area-inset-top, 0px)))!important;}
 }

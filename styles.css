@@ -1,5 +1,5 @@
 /* CSS entrypoint. Keep imports in this order: the legacy cascade depends on it. */
-@import url("./styles-base.css?v=4.004");
+@import url("./styles-base.css?v=4.005");
 @import url("./styles-home-rating-promo.css?v=4.002");
 @import url("./styles-auth.css?v=4.002");
 @import url("./styles-home.css?v=4.002");
@@ -6644,7 +6644,7 @@ body[data-view="home"] #app.app .card .card__content > .view--active[data-view="
 
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   html.app-view-browser-local:not(.app--telegram-miniapp) {
-    --app-content-width: min(430px, calc(100vw - 32px));
+    --app-content-width: min(var(--app-frame-width, 430px), calc(100vw - 32px));
   }
 
   html.app-view-browser-local:not(.app--telegram-miniapp) #app.app {
