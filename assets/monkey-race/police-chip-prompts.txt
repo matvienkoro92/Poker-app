@@ -1,0 +1,18 @@
+{
+  "mode": "built-in image_gen",
+  "original": [
+    [
+      "car",
+      "Premium stylized 3D game sprite, isolated transparent background. A compact comical monkey police patrol car, viewed from side with slight front three-quarter depth, nose facing LEFT. Navy and ivory body, gold spade police emblem, red blue rooftop siren, chunky black tires, monkey officer visible through window. Strong clean silhouette, glossy detailed materials, cyan and warm gold nighttime reflections. Whole vehicle fully in frame, no ground scene, no text, no shadow outside object. For a side scrolling poker racing game, readable at 80 pixels wide."
+    ],
+    [
+      "booth",
+      "Premium stylized 3D game sprite isolated transparent background. A compact monkey police checkpoint booth road obstacle, three-quarter side view. Dark navy steel kiosk, ivory panels, gold spade badge, red blue small flashing lamps, orange striped protective base, barred window with grumpy monkey policeman peeking out. Beautiful polished materials, bold clear silhouette, nighttime cyan gold highlights. Entire object in frame, no scenery, no lettering, no external shadows. For side scrolling poker racing game, readable at 50 pixels wide."
+    ],
+    [
+      "chip",
+      "Premium 3D collectible poker chip game sprite isolated on transparent background. One perfectly round upright poker chip, nearly front facing with very slight three-quarter depth showing thick engraved golden edge. Rich emerald green face, alternating ivory and gold rim inserts, crisp bold centered lettering exactly 'POKER' on top line and '21' large below. Luxurious metallic gold raised lettering, highly readable at small size, sophisticated tactile casino chip materials, clean silhouette. One chip only fully in frame, no scenery, no extra objects, no external shadows."
+    ]
+  ],
+  "chipEdit": "Edit this poker chip only: change emerald green areas to deep matte black, gold rim inserts to rich vivid red, gold lettering to crisp silver-white. Keep exact POKER and 21 lettering, round shape, detailed premium 3D materials, transparent background and composition. Black and red Poker21 chip, readable small."
+}
