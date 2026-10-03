@@ -419,6 +419,7 @@ function initProfileKeyboardViewportCleanup() {
   if (!profileRoot || profileRoot.getAttribute("data-kb-vv-bound") === "1") return;
   profileRoot.setAttribute("data-kb-vv-bound", "1");
   var flushTimer = null;
+  var profileKeyboardCleanupPending = false;
   function ensureProfileFieldVisible(target, behavior) {
     if (!target) return;
     try {
@@ -454,6 +455,8 @@ function initProfileKeyboardViewportCleanup() {
       ) {
         return;
       }
+      if (!profileKeyboardCleanupPending) return;
+      profileKeyboardCleanupPending = false;
       if (typeof pokerFlushViewportAfterProfileFieldBlur === "function") {
         pokerFlushViewportAfterProfileFieldBlur();
       }
@@ -466,6 +469,7 @@ function initProfileKeyboardViewportCleanup() {
       if (!t || (t.tagName !== "INPUT" && t.tagName !== "TEXTAREA")) return;
       if (t.id === "profileAvatarInput") return;
       if (t.id === "profileFriendsSearchInput") return;
+      profileKeyboardCleanupPending = true;
       if (t.id === "profileCityInput") {
         if (typeof ensureProfileFieldVisible === "function") {
           requestAnimationFrame(function () {
@@ -529,6 +533,9 @@ function initProfileKeyboardViewportCleanup() {
   var vvDebounce = null;
   function onVvResizeProfile() {
     if (document.body.getAttribute("data-view") !== "profile") return;
+    // Browser chrome and inertial scrolling also resize the visual viewport.
+    // Only repair it after a profile field has actually used the keyboard.
+    if (!profileKeyboardCleanupPending) return;
     if (document.body.classList.contains("chat-keyboard-open")) return;
     var ih = window.innerHeight || 0;
     var vvh = window.visualViewport ? Number(window.visualViewport.height) || 0 : 0;
@@ -537,6 +544,10 @@ function initProfileKeyboardViewportCleanup() {
     vvDebounce = setTimeout(function () {
       vvDebounce = null;
       if (document.body.getAttribute("data-view") !== "profile") return;
+      if (!profileKeyboardCleanupPending) return;
+      var active = document.activeElement;
+      if (active && profileRoot.contains(active) && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+      profileKeyboardCleanupPending = false;
       if (typeof pokerFlushViewportAfterProfileFieldBlur === "function") {
         pokerFlushViewportAfterProfileFieldBlur();
       }
