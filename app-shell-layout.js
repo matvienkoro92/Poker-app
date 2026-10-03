@@ -644,7 +644,24 @@ if (tg) {
     tryExpand();
     document.removeEventListener("touchstart", expandOnFirstTouch);
   }, { once: true, passive: true, capture: true });
-  // requestFullscreen() не вызываем: после него на части устройств (iOS) перестают работать клики по кнопкам
+  // Enter fullscreen once on launch; keep controls inside Telegram's safe areas.
+  var pokerFullscreenRequested = false;
+  function pokerEnterFullscreen() {
+    if (pokerFullscreenRequested || tg.isFullscreen || typeof tg.requestFullscreen !== "function") return;
+    if (typeof tg.isVersionAtLeast === "function" && !tg.isVersionAtLeast("8.0")) return;
+    pokerFullscreenRequested = true;
+    try { tg.requestFullscreen(); } catch (eFullscreen) { pokerFullscreenRequested = false; }
+  }
+  if (typeof tg.onEvent === "function") {
+    tg.onEvent("fullscreenChanged", function () {
+      if (typeof pokerApplyAppTopPadding === "function") pokerApplyAppTopPadding();
+      if (typeof pokerApplyTelegramTopClearance === "function") pokerApplyTelegramTopClearance();
+      if (typeof pokerSyncBottomNavTelegramInset === "function") pokerSyncBottomNavTelegramInset();
+      if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
+    });
+  }
+  pokerEnterFullscreen();
+  document.addEventListener("pointerdown", pokerEnterFullscreen, { once: true, passive: true });
   // Адаптация под тему Telegram
   const themeParams = tg.themeParams || {};
   if (themeParams.bg_color) {
