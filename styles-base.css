@@ -1778,3 +1778,15 @@ html.app-view-daily-poker-html-scroll .card .card__content {
   scroll-padding-bottom: var(--app-bottom-tabbar-pad);
   padding-bottom: 0;
 }
+
+/* Keep the mobile app composition centered on laptop and tablet windows. */
+#app.app {
+  max-width: 430px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+body .bottom-nav {
+  max-width: 430px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
