@@ -1020,7 +1020,7 @@
       tournamentHeroHtml + winnerHtml + '</div>';
   }
 
-  function renderCompletedTournamentOption(item) {
+  function renderCompletedTournamentOption(item, staticCard) {
     var winnerName = String(item && item.winnerName || "Чемпион").trim() || "Чемпион";
     var winnerMembers = item && Array.isArray(item.winnerMembers) ? item.winnerMembers.filter(Boolean) : [];
     var art = winnerMembers.length ? "" : sngPlayerArt({ displayName: winnerName, pokerPlusNickname: winnerName });
@@ -1035,7 +1035,7 @@
     var winnerLabel = winnerMembers.length
       ? winnerMembers.map(function (member) { return playerName(member); }).join(" + ")
       : winnerName;
-    return '<button type="button" class="sng-champions-modal__completed-option" data-sng-tournament="' + escapeHtml(item.id) + '">' +
+    return (staticCard ? '<div class="sng-champions-modal__completed-option">' : '<button type="button" class="sng-champions-modal__completed-option" data-sng-tournament="' + escapeHtml(item.id) + '">') +
       '<span class="club-choice-vote-modal__hero-winner sng-champions-modal__completed-winner' + (winnerMembers.length ? ' sng-champions-modal__completed-winner--team' : '') + '">' +
         '<span class="club-choice-vote-modal__hero-winner-avatar">' +
           winnersArtHtml +
@@ -1047,8 +1047,12 @@
           '<em>' + (winnerMembers.length ? 'Чемпионы турнира · ' + escapeHtml(winnerName) : 'Чемпион турнира') + '</em>' +
         '</span>' +
       '</span>' +
-    '</button>';
+    (staticCard ? '</div>' : '</button>');
   }
+
+  window.pokerRenderSngArchivedWinner = function (item) {
+    return renderCompletedTournamentOption(item, true);
+  };
 
   function renderTournamentMenu(data) {
     var rows = Array.isArray(data.tournaments) ? data.tournaments : [];

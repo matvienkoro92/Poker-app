@@ -2964,14 +2964,15 @@
       var podium = (tournament.winners || []).filter(function (winner) {
         return Number(winner.place) >= 1 && Number(winner.place) <= 3;
       }).sort(function (a, b) { return Number(a.place) - Number(b.place); });
-      var profile = clubProfileForNick(name(winners[0]));
-      var image = profile && profile.avatar || clubNewsFallbackAvatar(name(winners[0]));
+      if (typeof window.pokerRenderSngArchivedWinner !== "function") return null;
       var title = String(tournament.title || "СНГ-турнир");
-      return { date: date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-sng-winner="' + esc(date + ":" + title) + '">' +
-        '<div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/sng-champions-prize-ticket.webp" alt="" aria-hidden="true" loading="lazy"></div>' +
-        '<div class="home-news-achievement__copy"><small>' + esc(title) + '</small><h3>' + esc(championNames) + '</h3><p class="home-news-achievement__lead">' + (winners.length > 1 ? 'Победители СНГ-турнира' : 'Победитель СНГ-турнира') + '</p></div>' +
-        '<div class="home-news-achievement__player"><img src="' + esc(image) + '" alt="' + esc(name(winners[0])) + '" loading="lazy"></div></div>' +
-        '<ol class="home-news-achievement__list">' + podium.map(function (winner) {
+      var winnerCard = window.pokerRenderSngArchivedWinner({
+        title: title,
+        winnerName: championNames,
+        winnerMembers: winners.length > 1 ? winners : [],
+      });
+      return { date: date, html: '<article class="home-news-sng-archive" data-club-sng-winner="' + esc(date + ":" + title) + '">' +
+        winnerCard + '<ol class="home-news-achievement__list">' + podium.map(function (winner) {
           return '<li value="' + Number(winner.place) + '"><b>' + esc(name(winner)) + '</b> · ' + Number(winner.place) + ' место</li>';
         }).join("") + '</ol></article>' };
     }).filter(Boolean);
@@ -2979,7 +2980,12 @@
 
   function loadClubSngWinnerNews() {
     if (clubSngNewsPromise || Date.now() - clubSngNewsCheckedAt < 60000) return;
-    clubSngNewsPromise = cachedFetchJson(apiBase() + "/api/sng-champions?mode=achievements", "club-sng-winners-v1", 60000, { cache: "no-store" })
+    clubSngNewsPromise = Promise.all([
+      cachedFetchJson(apiBase() + "/api/sng-champions?mode=achievements", "club-sng-winners-v1", 60000, { cache: "no-store" }),
+      typeof window.pokerEnsureLazyDomains === "function"
+        ? window.pokerEnsureLazyDomains(["home-widget-sng"], { styles: true, scripts: true })
+        : Promise.resolve(),
+    ]).then(function (results) { return results[0]; })
       .then(function (data) {
         if (!data || data.ok !== true || !Array.isArray(data.rows)) throw new Error("Invalid SNG results");
         clubSngNewsRows = data.rows;
