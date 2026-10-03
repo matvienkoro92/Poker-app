@@ -33,11 +33,11 @@ function platform(s,a){const oldY=s.y;s.x=clamp(s.x+((a.right?1:0)-(a.left?1:0))
  for(const token of s.tokens){if(!token.collected&&Math.hypot(s.x-token.x,s.y-35-token.y)<42){token.collected=true;s.score+=25;s.picked++;}}
  if(a.special&&s.phase==='route'&&!s.specialCooldown){s.specialCooldown=180;s.ventOffUntil=s.tick+110;}s.ventCycle=Math.round(160-25*s.intensity);for(const v of s.vents){if(s.tick>(s.ventOffUntil||0)&&s.tick%s.ventCycle>s.ventCycle-60&&Math.abs(s.x-v)<22&&s.y>350)damage(s);}
  if(s.x>1000&&s.checkpoint<1){s.checkpoint=1;s.health=Math.min(5,s.health+1);}if(s.x>2050&&s.checkpoint<2){s.checkpoint=2;s.health=Math.min(5,s.health+1);}
- if(s.y>565){damage(s);s.x=[70,1030,2050][s.checkpoint];s.y=290;s.vy=0;}
+ if(s.y>565){damage(s);if(!s.lost)s.x=[70,1030,2050][s.checkpoint];s.y=290;s.vy=0;}
  s.progress=Math.floor(s.x/165);if(s.picked>=12)s.secret=true;if(s.x>5690&&s.phase==='route'){s.phase='boss';s.health=Math.min(5,s.health+2);}if(s.phase==='boss'){s.boss.timer++;s.boss.warning=s.boss.timer%115<45;if(s.boss.timer%115===45){for(let i=0;i<3;i++)projectile(s,s.boss.x-25,s.y-35-i*40,-3.5,0,true,'card');}if(a.attack&&!s.cooldown&&Math.abs(s.x-s.boss.x)<105){s.cooldown=32;s.attack=12;hurtBoss(s,1);}if(a.special&&!s.specialCooldown&&Math.abs(s.x-s.boss.x)<115){s.specialCooldown=110;s.inv=Math.max(s.inv,30);hurtBoss(s,1);}}
 }
 function snake(s,a){s.platforms=train(s);const oldY=s.y;s.x=clamp(s.x+((a.right?1:0)-(a.left?1:0))*3,15,s.world-30);if(a.jump&&s.ground){s.vy=-10.8;s.ground=false;}s.vy+=.45;s.y+=s.vy;s.ground=false;for(const p of s.platforms){if(s.vy>=0&&s.x>=p.x-8&&s.x<=p.x+p.w+8&&oldY<=p.y+8&&s.y>=p.y){s.y=p.y;s.vy=0;s.ground=true;}}
- if(s.y>560){damage(s);s.x=s.checkpoint||70;s.y=260;s.vy=0;}
+ if(s.y>560){damage(s);if(!s.lost)s.x=s.checkpoint||70;s.y=260;s.vy=0;}
  if(s.phase==='route'){for(const l of s.locks){if(!l.open&&a.special&&Math.abs(s.x-l.x)<60){l.open=true;s.picked++;s.score+=80;s.checkpoint=l.x;s.health=Math.min(5,s.health+1);}}if(s.picked===7&&s.x>3470){s.phase='boss';s.boss.timer=0;s.targetX=3540;s.health=Math.min(5,s.health+1);s.secret=s.hits===0;}}
  if(s.phase==='boss'){s.boss.timer++;s.boss.warning=s.boss.timer%170<95;if(s.boss.timer%170===1)s.targetX=clamp(s.x+(s.boss.hp%2?85:-85),3390,3780);if(s.boss.timer%170===95&&Math.abs(s.x-s.targetX)<65)damage(s);if(a.special&&!s.specialCooldown&&Math.abs(s.x-s.targetX)<55&&s.boss.warning){s.specialCooldown=130;hurtBoss(s,1);}}s.progress=s.picked;
 }
@@ -55,4 +55,5 @@ function final(s,a){move(s,a,2.8);const phase=Math.min(3,Math.floor((s.boss.max-
 }
 function shots(s){for(const p of s.shots){p.x+=p.vx;p.y+=p.vy;p.life--;if(s.covers?.some(c=>p.x>c.x&&p.x<c.x+c.w&&p.y>c.y&&p.y<c.y+c.h)){p.life=0;continue;}if(p.enemy){if(s.jumpHeight<30&&Math.hypot(p.x-s.x,p.y-(s.chapter===2?s.y-25:s.y))<22){damage(s);p.life=0;}}else{const enemy=s.enemies.find(e=>e.hp>0&&dist(e,p)<30);if(enemy){enemy.hp-=p.kind==='chair'?2:1;enemy.stun=50;if(p.kind==='chair')enemy.x=clamp(enemy.x+p.vx*7,30,(s.world||390)-30);s.score+=30;p.life=0;}else if(s.phase==='boss'&&dist(s.boss,p)<45){hurtBoss(s,1);p.life=0;}}}s.shots=s.shots.filter(p=>p.life>0&&p.x>-100&&p.x<(s.world||390)+100&&p.y>-100&&p.y<600);}
 function choose(s,choice){if(s.chapter!==5||s.phase!=='duel'||s.won||s.lost)return false;const answers=['fold','call','raise'];if(choice===answers[s.hand]){s.score+=100;s.hand++;if(s.hand===3)s.phase='boss';return true;}damage(s);return false;}
-return {create,step,names,choose};});
+function revive(s){s.lost=false;s.health=5;s.inv=180;s.vy=0;s.shots=s.shots.filter(p=>!p.enemy);if(s.chapter===2||s.chapter===3){const p=s.platforms.reduce((best,p)=>Math.abs(p.x+p.w/2-s.x)<Math.abs(best.x+best.w/2-s.x)?p:best,s.platforms[0]);if(p){s.x=clamp(s.x,p.x+15,p.x+p.w-15);s.y=p.y-40;s.ground=false;}}if(s.timer<=0)s.timer=60*60;if(s.flight){const f=s.flight;f.alive=true;f.vy=0;f.y=clamp(f.y,100,450);f.obstacles=f.obstacles.filter(o=>Math.abs(o.x-f.x)>85);f.invulnerableUntil=f.tick+180;}return s;}
+return {create,step,names,choose,revive};});
