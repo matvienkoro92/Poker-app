@@ -237,4 +237,215 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "02.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 3133.94,
+          "points": 0
+        },
+        {
+          "nick": "isildur",
+          "place": 5,
+          "reward": 799.06,
+          "points": 0
+        },
+        {
+          "nick": "Damir86rus",
+          "place": 6,
+          "reward": 321.56,
+          "points": 0
+        },
+        {
+          "nick": "Danger",
+          "place": 4,
+          "reward": 236.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 11800,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 3,
+          "reward": 2800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 43014.61,
+          "points": 0
+        },
+        {
+          "nick": "Девственник",
+          "place": 5,
+          "reward": 8821.01,
+          "points": 0
+        },
+        {
+          "nick": "Y-gin",
+          "place": 7,
+          "reward": 4355.31,
+          "points": 0
+        },
+        {
+          "nick": "Darkstorn",
+          "place": 13,
+          "reward": 2995.39,
+          "points": 0
+        },
+        {
+          "nick": "BOTEZGAMBIT",
+          "place": 16,
+          "reward": 2390.78,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА МОК",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "I🐅I",
+          "place": 1,
+          "reward": 25502.5,
+          "points": 0
+        },
+        {
+          "nick": "PlayerA2BA07",
+          "place": 2,
+          "reward": 9820,
+          "points": 0
+        },
+        {
+          "nick": "Nikolay54rus",
+          "place": 5,
+          "reward": 812.5,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 330,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Olegan393",
+          "place": 2,
+          "reward": 11217,
+          "points": 0
+        },
+        {
+          "nick": "СлонФартов",
+          "place": 11,
+          "reward": 642,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 4,
+          "reward": 10701,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 23,
+          "reward": 1678,
+          "points": 0
+        },
+        {
+          "nick": "comotd",
+          "place": 16,
+          "reward": 766,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 41,
+          "reward": 50,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Freedom",
+          "place": 3,
+          "reward": 22951,
+          "points": 0
+        },
+        {
+          "nick": "туз буби",
+          "place": 17,
+          "reward": 103,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K 🌘",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 8308,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

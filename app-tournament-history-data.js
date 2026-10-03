@@ -1112,6 +1112,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             8117.46
           ]
         ]
+      ],
+      [
+        "02.10.2026",
+        [
+          [
+            1,
+            "Coo1er91",
+            43014.61
+          ]
+        ]
       ]
     ]
   },

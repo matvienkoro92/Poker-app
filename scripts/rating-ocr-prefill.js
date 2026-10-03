@@ -475,8 +475,10 @@ async function parseOcrFile(file) {
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
   if (date === "01.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
+  if (date === "02.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА МОК";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
+    if (date === "02.10.2026" && time === "12:00" && token.text === "yID:173085") token.text = "ID:173085";
     if (date === "29.09.2026" && time === "18:00" && token.text === "yID:709473") token.text = "ID:709473";
     if (date === "29.09.2026" && time === "20:00" && !blue && token.text === "*ID:347375") token.text = "ID:347375";
     if (date === "13.09.2026" && time === "17:00" && token.text === "yID:173085") token.text = "ID:173085";
@@ -606,6 +608,8 @@ async function parseOcrFile(file) {
     }
 
     if (playerId === "4302724" && date === "01.10.2026" && time === "13:00") { place = 0; needsPlaceCheck = false; }
+    if (date === "02.10.2026" && playerId === "173085" && time === "12:00") { place = 3; needsPlaceCheck = false; }
+    if (date === "02.10.2026" && playerId === "679591" && time === "18:00") { place = 7; needsPlaceCheck = false; }
     // Gold trophy often has no OCR text, but when the list starts from first place this is safe.
     const nextKnownPlace = ids.slice(index + 1).map((nextId) => {
       const nextCenter = nextId.y + nextId.height / 2;
