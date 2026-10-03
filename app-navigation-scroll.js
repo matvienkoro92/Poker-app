@@ -297,3 +297,35 @@ if (document.readyState === "loading") {
 window.addEventListener("pageshow", function (e) {
   if (e && e.persisted) scrollHomeToTop(true);
 });
+
+// Preserve the exact app screen and panel position across the standalone campaign.
+(function () {
+  var key = 'poker-story-return';
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a[href]');
+    if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || link.target === '_blank') return;
+    var url; try { url = new URL(link.href, location.href); } catch (_) { return; }
+    if (url.origin !== location.origin || !url.pathname.endsWith('/last-buy-in.html')) return;
+    var panel = pokerGetPanelScrollCardContentEl();
+    var view = document.body.getAttribute('data-view') || 'profile';
+    var back = new URL(location.href); back.searchParams.set('startapp', view);
+    try { sessionStorage.setItem(key, JSON.stringify({url: back.href, view: view, windowY: window.scrollY, panelY: panel ? panel.scrollTop : 0, pending: false})); } catch (_) {}
+  });
+  function restore() {
+    var saved; try { saved = JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (_) { return; }
+    if (!saved || !saved.pending) return;
+    var attempts = 0, timer = setInterval(function () {
+      if (++attempts > 40) { clearInterval(timer); return; }
+      if (typeof window.setView !== 'function') return;
+      if (document.body.getAttribute('data-view') !== saved.view) window.setView(saved.view, {fromBack: true});
+      var panel = pokerGetPanelScrollCardContentEl();
+      if (panel) panel.scrollTop = saved.panelY;
+      window.scrollTo(0, saved.windowY);
+      if (attempts >= 5 && (!panel || Math.abs(panel.scrollTop - saved.panelY) < 2)) {
+        clearInterval(timer); sessionStorage.removeItem(key);
+      }
+    }, 100);
+  }
+  window.addEventListener('pageshow', restore);
+  if (document.readyState === 'complete') restore();
+})();

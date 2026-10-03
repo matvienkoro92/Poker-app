@@ -9,3 +9,15 @@ test('Weapon race requires a first-place finish rather than elapsed time',()=>{c
 test('Swim requires all keys and exit; surface pockets replenish air',()=>{const s=E.create(4);s.x=150;s.y=130;s.air=100;E.step(s,{});assert.ok(s.air>100);s.x=s.world-50;E.step(s,{});assert.equal(s.won,false);for(const t of s.tokens){s.x=t.x;s.y=t.y;E.step(s,{});}s.x=s.world-50;E.step(s,{});assert.equal(s.won,true);});
 test('Speed loop carries the rider through a full circular path, then returns control',()=>{const s=E.create(3);s.x=1160;s.y=430;s.vx=7;E.step(s,{right:true});assert.ok(s.loop);let min=540,max=0;for(let i=0;i<150&&s.loop;i++){E.step(s,{});min=Math.min(min,s.y);max=Math.max(max,s.y);}assert.equal(s.loop,null);assert.ok(min<300&&max>440);assert.ok(s.vx>4);});
 test('all nine new chapters can be completed through normal controls, sharing at most three campaign lives',()=>{const {controller}=require('./helpers/last-buy-in-campaign-player.cjs');let spent=0;for(const chapter of [2,3,4,5,6,7,8,9,10]){const s=E.create(chapter);while(!s.won&&s.tick<20000){E.step(s,controller(s));assert.ok(Number.isFinite(s.x)&&Number.isFinite(s.y));if(s.lost){spent++;assert.ok(spent<3,'campaign lives exhausted in chapter '+chapter);E.revive(s);}}assert.equal(s.won,true,'chapter '+chapter+' is not completable');const tick=s.tick;E.step(s,{right:true,attack:true});assert.equal(s.tick,tick);}});
+test('Platform obstacles have solid sides, walkable tops and a one-use underside reward',()=>{
+ const setup=()=>{const s=E.create(2);s.enemies=[];s.mushrooms=[];s.traps=[];s.pipes=[];s.platforms=[];s.blocks=[{x:100,y:300,w:40,h:30,kind:'question',used:false}];return s;};
+ let s=setup();s.x=87;s.y=340;E.step(s,{right:true});assert.equal(s.x,88);
+ s=setup();s.x=120;s.y=298;s.vy=4;E.step(s,{});assert.equal(s.y,300);assert.equal(s.ground,true);
+ s=setup();s.x=120;s.y=380;s.vy=-10;E.step(s,{});assert.equal(s.y,375);assert.equal(s.blocks[0].used,true);assert.equal(s.picked,1);
+ s.y=380;s.vy=-10;E.step(s,{});assert.equal(s.picked,1);
+ s=setup();s.blocks[0].kind='brick';s.big=100;s.x=120;s.y=380;s.vy=-10;E.step(s,{});assert.equal(s.blocks[0].broken,true);
+});
+test('Pipe guard cycles and remains inside while the player stands nearby',()=>{
+ const s=E.create(2),p=s.pipes.find(p=>p.plant);s.mushrooms=[];s.enemies=[];s.traps=[];s.tick=130-Math.floor(p.x);s.x=p.x-100;s.y=p.y+60;E.step(s,{});assert.ok(p.extension>0);
+ s.x=p.x+p.w/2;s.y=p.y;s.vy=0;E.step(s,{});assert.ok(s.health<5);p.extension=0;s.inv=0;s.health=5;E.step(s,{});assert.equal(p.extension,0);assert.equal(s.health,5);
+});
