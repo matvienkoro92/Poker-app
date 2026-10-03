@@ -102,6 +102,9 @@
   var clubNewsLoaded = false;
   var clubNewsLoadPromise = null;
   var clubNewsUpdatedAt = 0;
+  var clubSngNewsRows = [];
+  var clubSngNewsPromise = null;
+  var clubSngNewsCheckedAt = 0;
   var clubWallLoadPromise = null;
   var clubWallLoading = false;
   var clubWallUpdatedAt = 0;
@@ -2946,6 +2949,49 @@
     list.__newsMarkup = html;
   }
 
+  function clubSngWinnerPosts(rows) {
+    return (Array.isArray(rows) ? rows : []).map(function (tournament) {
+      var date = String(tournament && tournament.completedAt || "");
+      if (!Number.isFinite(Date.parse(date))) return null;
+      var winners = (Array.isArray(tournament.winners) ? tournament.winners : []).filter(function (winner) {
+        return Number(winner && winner.place) === 1;
+      });
+      if (!winners.length) return null;
+      function name(winner) {
+        return String(winner.pokerPlusNickname || winner.nick || winner.displayName || "Игрок");
+      }
+      var championNames = winners.map(name).join(" и ");
+      var podium = (tournament.winners || []).filter(function (winner) {
+        return Number(winner.place) >= 1 && Number(winner.place) <= 3;
+      }).sort(function (a, b) { return Number(a.place) - Number(b.place); });
+      var profile = clubProfileForNick(name(winners[0]));
+      var image = profile && profile.avatar || clubNewsFallbackAvatar(name(winners[0]));
+      var title = String(tournament.title || "СНГ-турнир");
+      return { date: date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-sng-winner="' + esc(date + ":" + title) + '">' +
+        '<div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/sng-champions-prize-ticket.webp" alt="" aria-hidden="true" loading="lazy"></div>' +
+        '<div class="home-news-achievement__copy"><small>' + esc(title) + '</small><h3>' + esc(championNames) + '</h3><p class="home-news-achievement__lead">' + (winners.length > 1 ? 'Победители СНГ-турнира' : 'Победитель СНГ-турнира') + '</p></div>' +
+        '<div class="home-news-achievement__player"><img src="' + esc(image) + '" alt="' + esc(name(winners[0])) + '" loading="lazy"></div></div>' +
+        '<ol class="home-news-achievement__list">' + podium.map(function (winner) {
+          return '<li value="' + Number(winner.place) + '"><b>' + esc(name(winner)) + '</b> · ' + Number(winner.place) + ' место</li>';
+        }).join("") + '</ol></article>' };
+    }).filter(Boolean);
+  }
+
+  function loadClubSngWinnerNews() {
+    if (clubSngNewsPromise || Date.now() - clubSngNewsCheckedAt < 60000) return;
+    clubSngNewsPromise = cachedFetchJson(apiBase() + "/api/sng-champions?mode=achievements", "club-sng-winners-v1", 60000, { cache: "no-store" })
+      .then(function (data) {
+        if (!data || data.ok !== true || !Array.isArray(data.rows)) throw new Error("Invalid SNG results");
+        clubSngNewsRows = data.rows;
+      }).catch(function () {
+        // Keep previously loaded winners during a temporary network failure.
+      }).finally(function () {
+        clubSngNewsCheckedAt = Date.now();
+        clubSngNewsPromise = null;
+        if (newsModalMode === "club" && clubNewsTab === "news") renderModalList([]);
+      });
+  }
+
   function clubAchievementPosts() {
     var newsArt = { first: "news-category-first-poker21-v2.webp", personal: "news-category-personal-poker21-v2.webp", milestone: "news-category-milestone-poker21-v2.webp", big: "news-category-big-poker21-v2.webp", record: "news-category-record-poker21-v2.webp", series: "news-category-series-poker21-v2.webp", weekly: "news-category-weekly-poker21-v2.webp" };
     var titles = { record: "Рекорд недели", first: "Первые победы", series: "Серия побед", big: "Крупные заносы дня", personal: "Новые личные рекорды", milestone: "Рубеж по призовым", weekly: "Итоги турнирной недели" };
@@ -3032,7 +3078,8 @@
           '<small role="status">' + esc(dayHeroPushError || (dayHeroPushBusy ? 'Загрузка…' : dayHeroPushEnabled ? 'Включены' : 'Отключены')) + '</small></div>'
       : "";
     if (newsModalMode === "club" && clubNewsTab === "news") {
-      // Editorial posts are added manually here, newest date first.
+      loadClubSngWinnerNews();
+      // Tournament winner posts are loaded from completed SNG results.
       var editorialPosts = [
         { date: "2026-10-01T13:00:00", html: clubSeptemberResultsHtml() },
         { date: "2026-10-01T12:00:00", html: '<aside class="home-friend-news-modal__hero-month-result" aria-label="Итоги Героя дня за сентябрь">' +
@@ -3047,7 +3094,7 @@
           '<img src="./assets/home-mtt-leaderboard-winners.webp" alt="Победители прошлого МТТ-лидерборда Poker21">' +
           '<p>Победители прошлого лидерборда Poker21: <b>ПокерМанки — 250 000 ₽</b>, <b>Ваар — 150 000 ₽</b>, <b>Кулер — 100 000 ₽</b>. Поздравляем чемпионов и желаем удачи участникам нового сезона!</p></article>' }
       ];
-      editorialPosts = editorialPosts.concat(clubAchievementPosts()).sort(function (a, b) { return b.date.localeCompare(a.date); });
+      editorialPosts = editorialPosts.concat(clubAchievementPosts(), clubSngWinnerPosts(clubSngNewsRows)).sort(function (a, b) { return b.date.localeCompare(a.date); });
       patchNewsList(list, clubTabs + editorialPosts.map(function (post) {
         return '<section class="home-friend-news-modal__day-group"><div class="home-friend-news-modal__date"><span>' +
           esc(eventDateLabel(post.date, true)) + '</span></div>' + post.html + '</section>';
