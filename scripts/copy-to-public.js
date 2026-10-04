@@ -66,6 +66,7 @@ const baseFiles = [
   'index.html',
   'daily-poker-invite.html',
   'last-buy-in.html',
+  'cooler-flight-play.html',
   'app-last-buy-in-engine.js',
   'app-last-buy-in-game.js',
   'app-last-buy-in-story.js',

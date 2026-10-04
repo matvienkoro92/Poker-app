@@ -1,0 +1,26 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Кулершан — на очки</title><link rel="stylesheet" href="styles-cooler-flight.css"><style>*{box-sizing:border-box}body{margin:0;background:#07101b;color:#ffe6b1;font-family:Arial,sans-serif}.cooler-flight__header,.cooler-flight__modes,.cooler-flight__hint{display:none}.cooler-flight{padding:0!important;max-width:none!important}.cooler-flight__arena{height:100svh!important;max-height:none!important;border:0!important;border-radius:0!important}.cooler-flight__arena canvas{width:100%;height:100%;object-fit:contain}.cooler-flight__hud{top:calc(72px + env(safe-area-inset-top))!important}.cooler-flight__status{position:fixed;bottom:0;font-size:11px}[hidden]{display:none!important}</style></head><body data-view="cooler-flight"><div class="view" data-view="cooler-flight">
+<section class="cooler-flight" aria-labelledby="coolerFlightTitle">
+  <header class="cooler-flight__header">
+    <button type="button" class="cooler-flight__back" data-view-target="profile" aria-label="Вернуться в профиль">←</button>
+    <div><span class="cooler-flight__eyebrow">АРКАДА ДВА ТУЗА</span><h1 id="coolerFlightTitle">Кулершан</h1></div>
+    <button type="button" class="cooler-flight__icon-btn" id="coolerFlightSound" aria-label="Включить звук" aria-pressed="false">♪</button>
+  </header>
+  <div class="cooler-flight__modes" role="group" aria-label="Режим игры">
+    <button type="button" data-flight-mode="solo" aria-pressed="true">На рекорд</button>
+    <button type="button" data-flight-mode="duel" aria-pressed="false">Дуэль с другом</button>
+    <button type="button" id="coolerFlightTop">Топ клуба</button>
+  </div>
+  <div class="cooler-flight__arena" id="coolerFlightArena">
+    <canvas id="coolerFlightCanvas" width="390" height="600" tabindex="0" role="img" aria-label="Кулер летит на водяном кулере. Нажимайте на поле или пробел, чтобы подняться; отпускайте, чтобы снизиться."></canvas>
+    <div class="cooler-flight__hud" aria-hidden="true"><div><small>ФИШКИ</small><strong id="coolerFlightScore">0</strong></div><div class="cooler-flight__hud-right"><small>ЛИЧНЫЙ РЕКОРД</small><strong id="coolerFlightBest">0</strong></div></div>
+    <button type="button" class="cooler-flight__pause" id="coolerFlightPause" aria-label="Приостановить игру" hidden>Ⅱ</button>
+    <div class="cooler-flight__overlay" id="coolerFlightOverlay">
+      <div class="cooler-flight__panel" id="coolerFlightPanel"></div>
+    </div>
+    <div class="cooler-flight__toast" id="coolerFlightToast" aria-live="polite"></div>
+  </div>
+  <p class="cooler-flight__hint" id="coolerFlightHint">Нажал — взлетел · Отпустил — снижаешься</p>
+  <p class="cooler-flight__status" id="coolerFlightStatus" aria-live="polite"></p>
+</section>
+</div>
+<script>window.setView=()=>parent.postMessage({type:'poker-story-exit'},location.origin);try{for(const name of ['__pokerTelegramAuth','pokerApiAuthJsonBody','getApiBase'])if(parent[name])window[name]=typeof parent[name]==='function'?parent[name].bind(parent):parent[name];}catch(_){} </script><script src="app-cooler-flight-engine.js"></script><script src="app-cooler-flight.js"></script><script>initCoolerFlight();</script></body></html>
