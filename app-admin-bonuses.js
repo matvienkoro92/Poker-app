@@ -180,13 +180,21 @@
         buyin: String(item.buyin || ""),
         label: (item.date || (item.repeat === "daily" ? "Ежедневно" : ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"][Number(item.dow)])) + " · " + time + " · " + String(item.name || item.category || "Турнир") + (item.buyin ? " · " + item.buyin : ""),
       };
-    }).concat({
-      id: "bonus-debit|20|0|ПЯТИХАТКА",
-      title: "ПЯТИХАТКА",
-      time: "20:00 МСК",
-      buyin: "500₽",
-      label: "20:00 МСК · ПЯТИХАТКА · 500₽",
-    }).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
+    }).concat([
+      { title: "Нокаут", hour: 8, buyin: "300₽" },
+      { title: "Аддонник", hour: 10, buyin: "200₽" },
+      { title: "ПЯТИХАТКА", hour: 20, buyin: "500₽" },
+      { title: "Аддонник", hour: 22, buyin: "500₽" },
+    ].map(function (item) {
+      var time = String(item.hour).padStart(2, "0") + ":00 МСК";
+      return {
+        id: "bonus-debit|" + item.hour + "|0|" + item.title,
+        title: item.title,
+        time: time,
+        buyin: item.buyin,
+        label: time + " · " + item.title + " · " + item.buyin,
+      };
+    })).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
   }
 
   function populateTournamentOptions() {
