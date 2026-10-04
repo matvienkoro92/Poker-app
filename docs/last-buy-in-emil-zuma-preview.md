@@ -1,0 +1,7 @@
+# Превью четвёртой главы
+
+Калининградский кубок, Эмиль, Робошапка и Павел. Иллюстрация вступления показывает механику Zuma с фишками Poker21. Файл: `assets/last-buy-in/emil-zuma-preview-v1.webp`.
+
+## Prompt
+
+Use case: illustration-story. NEW 1024x1536 portrait mobile chapter preview, polished sharp cinematic videogame illustration. Reference 1 exact Emil chimp champion black/gold Poker21 hoodie backwards cap and Kaliningrad waterfront cathedral through windows; reference 2 exact thin human hooded villain Pavel; reference 3 exact knitted-hat metallic Roboshapka blue eyes. New scene is ZUMA POKER21 CHAMPIONSHIP, not a poker card game. Large Emil foreground aims a stylish chip-launcher at winding raised emerald/gold tabletop track carrying colorful RED BLUE GREEN PURPLE GOLD round Poker21 chips with cream notches. Clearly visible groups of same-color chips on curving track, one launched chip trails toward matching group. Emil confident determined face, gold championship cup prominent between rivals, Pavel behind right reaches toward secret speed-control lever, Roboshapka behind left overseeing chip feeder. No playing cards. Kaliningrad cathedral and river evening panorama simple readable background. Large characters no tiny clutter. Trophy competition clearly motivates scene. Upper 75% action, bottom25% dark quiet felt and table edge for live Russian captions. No UI, no baked subtitles, no watermark; only small POKER21 chip branding. Keep identities and clothes.

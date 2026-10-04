@@ -10,3 +10,10 @@ body:has(#gameEntrance:not([hidden])),body:has(#scoreSelect:not([hidden])){overf
 .entrance-mode .mode-heading>span,.entrance-mode>span:not(.mode-heading),.entrance-mode progress,.entrance-mode strong{display:none}
 .entrance-mode:hover,.entrance-mode:focus-visible{color:#fff9de;background:#ffffff0c}
 .entrance-mode:active{transform:translateY(1px);color:#ffd16b}
+/* The poster fills the phone; menu sits on the road rather than a separate panel. */
+@media(max-aspect-ratio:1/1){
+ .game-entrance{height:100dvh}
+ .entrance-poster{height:100%;width:100%;object-fit:cover;object-position:center top}
+ .game-entrance:after{inset:64% 0 0;background:linear-gradient(transparent,#06111b55)}
+ .entrance-choices{bottom:calc(28px + env(safe-area-inset-bottom));gap:5px}
+}
