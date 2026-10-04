@@ -1,0 +1,8 @@
+# Мобильная афиша v5
+
+Создана встроенным imagegen по исходнику `entrance-poster-extended-v4.webp`.
+Результат: `assets/last-buy-in/entrance-poster-mobile-v5.webp`.
+
+## Запрос
+
+Use case: style-transfer. Edit target: attached game entrance poster. Rebuild this SAME concept as a premium crisp mobile game poster, portrait 9:20. Preserve identity and costumes of stern PokerMonkey in green tracksuit driving gold-and-green jet poker kart, and smiling Cooler with black hoodie sunglasses riding blue water cooler at upper right. Preserve exact gold Russian title 'ДВА ТУЗА' and 'ПОСЛЕДНИЙ БАЙ-ИН' (spade between БАЙ and ИН). Large legible title at 12–30% height; monkey kart at 44–69%; Cooler at 32–48%. Keep characters fully inside central 85% width. Top 9% calm dark blue sunset sky reserved for phone controls. Bottom 28% must be quiet empty dark teal asphalt, subtle broad reflection only, reserved for two real UI buttons; DO NOT draw any buttons or extra text there. Major improvement: REMOVE microscopic noise, gritty textures, confetti, sparks, loose flying chips, tiny buildings, crowds, yachts, glitter, scribbly road streaks. Use only three large smooth Art Deco neon beachfront buildings at left, 2 palms at edges, simple sunset ocean at right; softly out of focus uncluttered background, broad color shapes, smooth gradients, clear dimensional clean polished 3D character rendering, sharp clean hands faces tires and lettering, no mosaic pixel blocks, no blur on heroes, no excessive detailed skyline. Retain original cinematic gold/cyan/pink Miami sunset mood and dynamic concept, not flat cartoon. Fewer background details, excellent antialiasing, coherent lighting and perspective. Title and characters never cover lower button zone.
