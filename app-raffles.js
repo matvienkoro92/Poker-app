@@ -138,6 +138,7 @@ function initRaffles() {
   var rafflesLastCompleted = [];
   var rafflesCompletedDirty = false;
   var rafflesLoadSeq = 0;
+  var rafflesAccountingLoadSeq = 0;
   var rafflesDeadlineRefreshInFlight = false;
   var rafflesPendingCompletedId = "";
   var rafflesArchiveLoaded = false;
@@ -3247,6 +3248,7 @@ function initRaffles() {
     }
     switchToCompleted = !!switchToCompleted;
     var loadSeq = ++rafflesLoadSeq;
+    var accountingSeq = loadOptions.deadlineRefresh ? rafflesAccountingLoadSeq : ++rafflesAccountingLoadSeq;
     var hostname = typeof window !== "undefined" && window.location && window.location.hostname ? window.location.hostname : "";
     var baseStr = (base || "").toString();
     var isLocal = /localhost|127\.0\.0\.1/i.test(hostname) || /localhost|127\.0\.0\.1/i.test(baseStr);
@@ -3404,21 +3406,23 @@ function initRaffles() {
           }
           if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
           applyRafflesData(data, switchToCompleted);
-          if (data.viewerDetailsDeferred) {
+          // Deadline polling updates winner cards, not the accounting summary.
+          // Totals are fetched on opening and after explicit writes only.
+          if (data.viewerDetailsDeferred && !loadOptions.deadlineRefresh) {
             fetch(base + "/api/raffles" + qLead + "&scope=viewer-details")
               .then(function (response) { return response.ok ? response.json() : null; })
               .then(function (details) {
-                if (loadSeq !== rafflesLoadSeq) return;
                 if (!details || !details.ok) throw new Error("raffles_viewer_details_failed");
+                if (accountingSeq === rafflesAccountingLoadSeq && rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
+                  rafflesCompletedRuntime.setCurrentWeekIssueTotals(details.currentWeekIssueTotals || null);
+                }
+                if (loadSeq !== rafflesLoadSeq) return;
                 data.subscriptionGate = details.subscriptionGate;
                 data.currentWeekIssueTotals = details.currentWeekIssueTotals;
                 rafflesSubscriptionGate = details.subscriptionGate || null;
-                if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
-                  rafflesCompletedRuntime.setCurrentWeekIssueTotals(details.currentWeekIssueTotals || null);
-                }
                 if (currentRaffleData) renderRaffle(currentRaffleData);
               }).catch(function () {
-                if (loadSeq === rafflesLoadSeq && rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
+                if (accountingSeq === rafflesAccountingLoadSeq && rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
                   rafflesCompletedRuntime.setCurrentWeekIssueTotals(null, "error");
                 }
               });
@@ -3462,7 +3466,7 @@ function initRaffles() {
           switchToCompleted = true;
         }
         rafflesIsAdmin = !!data.isAdmin;
-        if (rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
+        if (!loadOptions.deadlineRefresh && rafflesCompletedRuntime && typeof rafflesCompletedRuntime.setCurrentWeekIssueTotals === "function") {
           rafflesCompletedRuntime.setCurrentWeekIssueTotals(data.currentWeekIssueTotals || null, data.viewerDetailsDeferred ? "loading" : "error");
         }
         if (rafflesIsAdmin && typeof window.pokerMarkAdminAccess === "function") {
