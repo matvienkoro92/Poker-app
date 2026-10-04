@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),E=require('../app-last-buy-in-campaign-engine'),C=require('../app-last-buy-in-chapters');
-test('twelve ordered chapters and five boss encounters, all allies remain allies',()=>{assert.equal(C.length,12);assert.equal(C.filter(c=>c.boss).length,5);assert.equal(C[11].hero,'valera');for(const c of C)assert.ok(c.before&&c.after&&c.goal);assert.deepEqual(C.map(c=>c.mode),['chase','fight','platform','chips','poker','swim','carpet','bomb','zuma','race','portal','final']);});
+test('twelve ordered chapters and five boss encounters, all allies remain allies',()=>{assert.equal(C.length,12);assert.equal(C.filter(c=>c.boss).length,5);assert.equal(C[11].hero,'valera');for(const c of C)assert.ok(c.before&&c.after&&c.goal);assert.deepEqual(C.map(c=>c.mode),['chase','fight','platform','zuma','chips','swim','carpet','bomb','zuma','race','portal','final']);});
 test('Bomb explosions stop at solid walls and chain into adjacent bombs',()=>{const s=E.create(7);s.bombs=[{x:1,y:1,fuse:1},{x:3,y:1,fuse:99}];E.step(s,{});assert.equal(s.bombs.length,0);assert.ok(s.flames.some(f=>f.x===4&&f.y===1));assert.ok(!s.flames.some(f=>f.x===2&&f.y===2));assert.ok(s.health<5);});
 test('Zuma inserts a colour and removes a real matching run; all three batches are completable',()=>{const s=E.create(8);let limit=0;while(!s.won&&limit++<5000){const at=s.chain.findIndex(c=>c.color===s.ball),aim=at<0?0:at;if(at<0){E.step(s,{special:true});E.step(s,{});continue;}E.step(s,{});E.step(s,{aim,attack:true});for(let i=0;i<16;i++)E.step(s,{});}assert.equal(s.won,true);assert.equal(s.wave,3);assert.ok(s.score>1000);});
 test('Portals require moving and depositing a cube on each button',()=>{const s=E.create(10);for(let n=0;n<3;n++){s.x=s.panel.x-45;s.y=350;for(let hit=0;hit<3;hit++){s.x=s.panel.x-45;s.y=200;s.vy=0;E.step(s,{attack:true});for(let t=0;t<24;t++)E.step(s,{});}assert.equal(s.panel.hp,0);s.x=s.cube.x;s.y=s.cube.y+20;s.vy=0;E.step(s,{attack:true});assert.equal(s.carry,true);E.step(s,{});s.portalCooldown=0;s.x=s.portals[0].x;s.y=s.portals[0].y;E.step(s,{});assert.equal(s.crossedPortal,true);s.x=s.pad.x-25;s.y=s.pad.y+20;s.vy=0;E.step(s,{attack:true});E.step(s,{});assert.equal(s.puzzles,n+1);}assert.equal(s.won,true);});
@@ -22,7 +22,7 @@ test('Pipe guard cycles and remains inside while the player stands nearby',()=>{
  s.x=p.x+p.w/2;s.y=p.y;s.vy=0;E.step(s,{});assert.ok(s.health<5);p.extension=0;s.inv=0;s.health=5;E.step(s,{});assert.equal(p.extension,0);assert.equal(s.health,5);
 });
 test('Emil charges a spin dash, releases into a roll and loses rings before health',()=>{
- const s=E.create(3,{archivedSpeed:true});assert.equal(C[4].hero,'emil');s.x=100;s.y=450;s.ground=true;
+ const s=E.create(3,{archivedSpeed:true});assert.equal(C[3].hero,'emil');s.x=100;s.y=450;s.ground=true;
  for(let i=0;i<30;i++)E.step(s,{special:true});assert.ok(s.charge>40);E.step(s,{right:true});assert.ok(s.vx>=9);assert.equal(s.rolling,true);assert.equal(s.charge,0);
  s.rings=9;const health=s.health;E.damage(s);assert.equal(s.rings,0);assert.equal(s.health,health);assert.equal(s.scatter.length,9);E.damage(s);assert.equal(s.health,health);
  s.inv=0;E.damage(s);assert.equal(s.health,health-1);
@@ -31,12 +31,12 @@ test('Each speed loop requires momentum and gives control back after a full circ
  for(const index of [0,1,2]){const s=E.create(3,{archivedSpeed:true}),l=s.loops[index];s.x=l.x-5;s.y=440;s.vx=0;E.step(s,{});assert.ok(!s.loop);s.x=l.x-5;s.y=440;s.vx=7;E.step(s,{right:true});assert.ok(s.loop);for(let i=0;i<160&&s.loop;i++)E.step(s,{});assert.ok(!s.loop);assert.equal(l.done,true);assert.ok(s.x>l.x);}
 });
 test('Chip taps are precise, swipes collect combos and bombs cause damage',()=>{
- const s=E.create(3);s.nextSpawn=999;s.objects=[{id:1,x:100,y:300,vx:0,vy:0,r:18,bomb:false}];E.step(s,{slice:true,pointerX:160,pointerY:300});assert.equal(s.picked,0);E.step(s,{});E.step(s,{slice:true,pointerX:100,pointerY:300});assert.equal(s.picked,1);assert.equal(s.objects.length,0);
+ const s=E.create(4);s.nextSpawn=999;s.objects=[{id:1,x:100,y:300,vx:0,vy:0,r:18,bomb:false}];E.step(s,{slice:true,pointerX:160,pointerY:300});assert.equal(s.picked,0);E.step(s,{});E.step(s,{slice:true,pointerX:100,pointerY:300});assert.equal(s.picked,1);assert.equal(s.objects.length,0);
  E.step(s,{});s.objects=[{id:2,x:150,y:300,vx:0,vy:0,r:18,bomb:false},{id:3,x:220,y:300,vx:0,vy:0,r:18,bomb:false}];E.step(s,{slice:true,pointerX:120,pointerY:300});E.step(s,{slice:true,pointerX:250,pointerY:300});assert.equal(s.picked,3);assert.ok(s.combo>=2);
  E.step(s,{});s.objects=[{id:4,x:200,y:300,vx:0,vy:0,r:18,bomb:true}];E.step(s,{slice:true,pointerX:200,pointerY:300});assert.equal(s.health,4);assert.equal(s.picked,3);assert.equal(s.combo,0);
 });
 test('Three missed chips hurt once, missed bombs are harmless and replay preserves a batch',()=>{
- const s=E.create(3);s.nextSpawn=999;s.objects=Array.from({length:3},(_,i)=>({id:i,x:100,y:562,vx:0,vy:0,r:18,bomb:false}));E.step(s,{});assert.equal(s.misses,3);assert.equal(s.health,4);E.step(s,{});assert.equal(s.misses,3);
+ const s=E.create(4);s.nextSpawn=999;s.objects=Array.from({length:3},(_,i)=>({id:i,x:100,y:562,vx:0,vy:0,r:18,bomb:false}));E.step(s,{});assert.equal(s.misses,3);assert.equal(s.health,4);E.step(s,{});assert.equal(s.misses,3);
  s.inv=0;s.objects=[{id:4,x:100,y:562,vx:0,vy:0,r:18,bomb:true}];E.step(s,{});assert.equal(s.health,4);s.wave=2;s.batchPicked=7;s.health=0;s.lost=true;E.revive(s);assert.equal(s.wave,2);assert.equal(s.batchPicked,7);
 });
 test('City lifts carry Vaar and unsafe ledges collapse then recover',()=>{
