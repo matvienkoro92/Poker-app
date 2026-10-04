@@ -63,3 +63,12 @@ test('issued video-table prize explicitly names video tables, ordinary cash reta
   const ordinary=raffles.buildRafflePrizeIssuedText({prizeKind:'cash',title:'7 байинов по 1000р на кеш 20/40',groups:[{prize:'Беккинг-байин 1000 ₽ на кеш 20/40'}]},winner);
   assert.match(ordinary,/Бонус гейм 20\/40/);assert.doesNotMatch(ordinary,/видео/);
 });
+
+test('only the explicit 2000 RUB cash video-table prize requests its dedicated payout allowance',()=>{
+  const winner={p21Id:'778130',groupIndex:0,winnerReadySlotId:'initial_2'};
+  const video={prizeKind:'cash',title:'Розыгрыш на видеостол — 5 байинов по 2000р',groups:[{prize:'Беккинг-байин 2000 ₽ на видеостол'}]};
+  const spec=raffles.raffleWinnerPoker21PayoutSpec('sunday',video,winner);
+  assert.equal(spec.amount,2000);assert.equal(spec.videoTableRafflePrize,true);
+  assert.equal(spec.idempotencyKey,'raffle:sunday:winner:initial_2:cash-prize');
+  for(const raffle of [{...video,prizeKind:'tournament_ticket'},{...video,title:'Обычный кеш',groups:[{prize:'Беккинг-байин 2000 ₽ на кеш'}]},{...video,groups:[{prize:'Беккинг-байин 3000 ₽ на видеостол'}]}])assert.equal(raffles.raffleWinnerPoker21PayoutSpec('sunday',raffle,winner).videoTableRafflePrize,undefined);
+});
