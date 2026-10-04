@@ -108,3 +108,9 @@ test('ordinary cash winner does not receive the video-table restriction', async 
   await h.service.notifyWinnersRaffleCompleted('delivery',h.raffle);
   assert.doesNotMatch(h.messages[0].text,/видео/);assert.doesNotMatch(h.pushes[0].payload.body,/видео/);
 });
+
+test('winner ready reminder explicitly identifies video-table prizes', async t => {
+  const h=fixture(t);h.raffle.title='Розыгрыш на видеостол — 5 байинов по 2000р';
+  const result=await h.service.notifyWinnerReadyReminder('delivery',h.raffle,{...h.winner(),prize:'Беккинг-байин 2000 ₽ на видеостол'},'5 минут');
+  assert.equal(result.ok,true);assert.match(h.messages[0].text,/Это розыгрыш на видео-столы\./);assert.match(h.messages[0].text,/Я готов/);
+});
