@@ -87,3 +87,24 @@ test('retry queue only reads due jobs, retains failures, and removes completed j
   assert.equal(jobs.has('done'), false); assert.equal(jobs.get('failed'), now + 120000);
   assert.equal((await queue.drain()).processed, 0);
 });
+
+test('Sunday video-table winner sees the table restriction in Telegram and push', async t => {
+  const h = fixture(t);
+  h.raffle.title = 'Розыгрыш на видеостол — 5 байинов по 2000р';
+  h.raffle.prizeKind = 'cash';
+  h.raffle.groups = [{count:5,prize:'Беккинг-байин 2000 ₽ на видеостол'}];
+  h.raffle.winners = [{...h.winner(),prize:h.raffle.groups[0].prize}];
+  h.store(); await h.service.notifyWinnersRaffleCompleted('delivery',h.raffle);
+  assert.match(h.messages[0].text,/Это розыгрыш на видео-столы\./);
+  assert.match(h.messages[0].text,/2000 ₽/);
+  assert.match(h.pushes[0].payload.body,/^Это розыгрыш на видео-столы\./);
+  assert.match(h.pushes[0].payload.body,/Я готов/);
+});
+
+test('ordinary cash winner does not receive the video-table restriction', async t => {
+  const h = fixture(t); h.raffle.title='7 байинов по 1000р на кеш 20/40';h.raffle.prizeKind='cash';
+  h.raffle.groups=[{count:7,prize:'Беккинг-байин 1000 ₽ на кеш 20/40'}];
+  h.raffle.winners=[{...h.winner(),prize:h.raffle.groups[0].prize}];h.store();
+  await h.service.notifyWinnersRaffleCompleted('delivery',h.raffle);
+  assert.doesNotMatch(h.messages[0].text,/видео/);assert.doesNotMatch(h.pushes[0].payload.body,/видео/);
+});

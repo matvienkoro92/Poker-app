@@ -53,3 +53,13 @@ test("ticket and ambiguous raffles can never trigger Poker21 cash payouts", () =
     groups: [{ prize: "Турнирный билет 1 000 ₽" }],
   }, {}), false);
 });
+
+test('issued video-table prize explicitly names video tables, ordinary cash retains Bonus game', () => {
+  const winner = {p21Id:'208238',groupIndex:0};
+  const video = {prizeKind:'cash',title:'Розыгрыш на видеостол — 5 байинов по 2000р',groups:[{prize:'Беккинг-байин 2000 ₽ на видеостол'}]};
+  const text = raffles.buildRafflePrizeIssuedText(video,winner);
+  assert.match(text,/Это розыгрыш на видео-столы\./);assert.match(text,/беккинг-байин на видео-столы/);
+  assert.match(text,/2000 ₽/);assert.doesNotMatch(text,/Бонус гейм/);
+  const ordinary=raffles.buildRafflePrizeIssuedText({prizeKind:'cash',title:'7 байинов по 1000р на кеш 20/40',groups:[{prize:'Беккинг-байин 1000 ₽ на кеш 20/40'}]},winner);
+  assert.match(ordinary,/Бонус гейм 20\/40/);assert.doesNotMatch(ordinary,/видео/);
+});
