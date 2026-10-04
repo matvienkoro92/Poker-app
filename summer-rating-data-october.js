@@ -448,4 +448,295 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "03.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "I🐅I",
+          "place": 1,
+          "reward": 3877.51,
+          "points": 0
+        },
+        {
+          "nick": "kriak",
+          "place": 10,
+          "reward": 210,
+          "points": 0
+        },
+        {
+          "nick": "komAsoer",
+          "place": 5,
+          "reward": 190.94,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 4,
+          "reward": 172.97,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 7,
+          "reward": 2.81,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "A Аддоник А",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Jeweler",
+          "place": 1,
+          "reward": 6190,
+          "points": 0
+        },
+        {
+          "nick": "I🐅I",
+          "place": 2,
+          "reward": 2720,
+          "points": 0
+        },
+        {
+          "nick": "Damir86rus",
+          "place": 5,
+          "reward": 1070,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 3,
+          "reward": 630,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 6383,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 3802.0000000000005,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Tanechka",
+          "place": 2,
+          "reward": 1100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 14910,
+          "points": 0
+        },
+        {
+          "nick": "Марс",
+          "place": 2,
+          "reward": 2510,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 3,
+          "reward": 1320,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 5,
+          "reward": 540,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Super Sat 5🎫",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "BOTEZGAMBIT",
+          "place": 1,
+          "reward": 9000,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 2,
+          "reward": 8000,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 8000,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 5,
+          "reward": 8000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🍀LUCKY 555🍀 GTD",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 15,
+          "reward": 5433,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 18,
+          "reward": 4333,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "19:00",
+      "name": "💥Big Boss 💥",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 16377.34,
+          "points": 0
+        },
+        {
+          "nick": "ICEGG",
+          "place": 9,
+          "reward": 1640.62,
+          "points": 0
+        },
+        {
+          "nick": "Y-gin",
+          "place": 6,
+          "reward": 312.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Юрий_77",
+          "place": 2,
+          "reward": 590,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "СлонФартов",
+          "place": 2,
+          "reward": 8811,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 3639.45,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 3,
+          "reward": 595,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "A Аддоник А",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 15300,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 2,
+          "reward": 9400,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 5,
+          "reward": 2500,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
