@@ -13,3 +13,4 @@ test('arrival alone cannot win: unlock the archive, enter and take the case',()=
  E.step(s,{special:true});assert.equal(s.won,true);assert.equal(s.archive.caseTaken,true);assert.equal(s.progress,100);
 });
 test('collected archive keys survive loss of a campaign life',()=>{const s=E.create(2);s.caseKeys[0].collected=true;s.lost=true;E.revive(s);assert.equal(s.caseKeys[0].collected,true);assert.equal(s.caseKeys[1].collected,false);});
+test('Vaar has authored traversal districts and optional elevated rewards',()=>{const s=E.create(2);assert.ok(s.platforms.some(p=>p.district===1&&p.lift));assert.ok(s.platforms.some(p=>p.district===2&&p.swing));assert.ok(s.platforms.some(p=>p.district===3&&p.fade&&p.slide));assert.equal(s.bonusPlatforms.length,4);assert.equal(s.tokens.filter(t=>t.bonus).length,12);assert.equal(s.routeSigns.length,5);assert.ok(s.platforms.some(p=>p.baseY<=305));});

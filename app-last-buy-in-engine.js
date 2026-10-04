@@ -15,14 +15,27 @@ function create(chapter){if(chapter===0)throw Error('Chapter one uses MonkeyRace
 function train(s){return Array.from({length:27},(_,i)=>({x:15+i*142,w:134,y:385+Math.sin(s.tick*.015+i*.55)*(40+15*(s.intensity||0)),car:i}));}
 function damage(s){if(s.inv||s.won||s.lost)return;s.health--;s.hits++;s.inv=80;s.shake=10;if(s.health<=0)s.lost=true;}
 function hurtBoss(s,n){if(s.boss.hp<=0)return;s.boss.hp=Math.max(0,s.boss.hp-n);s.score+=100;if(!s.boss.hp){s.won=true;s.phase='done';}}
-function romaTables(room){const layouts=[[[195,340,125,62]],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w,h}));}
+function romaTables(room){const layouts=[[[195,340,125,62]],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w:w*1.12,h:h*1.12}));}
 function tableAt(s,x,y){return (s.furniture||[]).find(f=>((x-f.x)/(f.w/2+14))**2+((y-f.y)/(f.h/2+14))**2<1);}
 function aroundTables(s,e,oldX,oldY){const dx=e.x-oldX,dy=e.y-oldY,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/4));e.x=oldX;e.y=oldY;for(let i=0;i<n;i++){const x=e.x+dx/n;if(!tableAt(s,x,e.y))e.x=x;const y=e.y+dy/n;if(!tableAt(s,e.x,y))e.y=y;}}
+// Find a route around solid furniture; a side nudge alone gets stuck at oval corners.
+function clearTablePath(s,a,b,margin=20){const n=Math.ceil(dist(a,b)/5);for(let i=1;i<=n;i++)if((s.furniture||[]).some(f=>((a.x+(b.x-a.x)*i/n-f.x)/(f.w/2+margin))**2+((a.y+(b.y-a.y)*i/n-f.y)/(f.h/2+margin))**2<1))return false;return true;}
+function guardWaypoint(s,e,goal){
+ if(clearTablePath(s,e,goal)){e.navPath=null;return goal;}
+ if(!e.navPath||dist(goal,e.navGoal)>25){
+  const step=10,cols=34,rows=29,toCell=p=>({x:clamp(Math.round((p.x-25)/step),0,cols-1),y:clamp(Math.round((p.y-205)/step),0,rows-1)}),point=n=>({x:25+(n%cols)*step,y:205+Math.floor(n/cols)*step});
+  const start=toCell(e),target=toCell(goal),first=start.y*cols+start.x,last=target.y*cols+target.x,queue=[first],parents=new Map([[first,-1]]);let found=-1;
+  for(let head=0;head<queue.length;head++){const id=queue[head],a=point(id);if(id===last){found=id;break;}for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){const x=id%cols+dx,y=Math.floor(id/cols)+dy,n=y*cols+x;if(x<0||x>=cols||y<0||y>=rows||parents.has(n))continue;const b=point(n);if(tableAt(s,b.x,b.y)||!clearTablePath(s,id===first?e:a,b,id===first?14:20))continue;parents.set(n,id);queue.push(n);}}
+  e.navPath=[];if(found>=0){for(let id=found;id!==first&&id!==-1;id=parents.get(id))e.navPath.unshift(point(id));}e.navGoal={x:goal.x,y:goal.y};e.navTick=s.tick;
+ }
+ while(e.navPath?.length&&dist(e,e.navPath[0])<7)e.navPath.shift();
+ if(e.navPath?.length){for(let i=e.navPath.length-1;i>0;i--)if(clearTablePath(s,e,e.navPath[i])){e.navPath.splice(0,i);break;}return e.navPath[0];}return e;
+}
 function spawnWave(s){s.wave++;s.roomName=romaRooms[s.wave-1];s.roomSkin=[0,1,2,1,3,3,0][s.wave-1];s.furniture=romaTables(s.wave-1);s.enemies=Array.from({length:2+Math.floor((s.wave-1)/2)},(_,i)=>({x:260+(i%3)*38,y:230+(i%4)*65,hp:4+Math.floor((s.wave-1)/3),type:s.wave>=3&&i===0?2:s.wave>=4?i%3:i%2,timer:i*35,stun:0}));for(const e of s.enemies)if(tableAt(s,e.x,e.y))e.x=355;s.door={x:343,y:220,open:false};s.message=s.roomName+': не подпускай охрану';}
 function enterRomaRoom(s){s.shots=[];s.cashTraps=[];s.bossZones=[];s.x=65;s.y=370;s.health=Math.min(5,s.health+1);s.inv=Math.max(s.inv,90);if(s.wave<7){s.phase='route';spawnWave(s);}else{s.phase='boss';s.roomName=romaRooms[7];s.roomSkin=3;s.furniture=romaTables(7);s.door={x:343,y:220,open:false};s.boss.hp=s.boss.max=34;s.enemies=[{x:300,y:270,hp:18,type:2,timer:0,stun:0},{x:340,y:425,hp:16,type:1,timer:60,stun:0}];s.secret=s.hits<2;s.message='Чек и Рейз охраняют хранилище!';}}
 function projectile(s,x,y,vx,vy,enemy,kind){s.shots.push({x,y,vx,vy,enemy,life:140,kind:kind||'chip'});}
 function move(s,a,speed){s.x=clamp(s.x+((a.right?1:0)-(a.left?1:0))*speed,25,s.world?s.world-25:365);s.y=clamp(s.y+((a.down?1:0)-(a.up?1:0))*speed,s.chapter===1?205:125,s.chapter===1?490:475);if(a.right)s.facing=1;if(a.left)s.facing=-1;}
-function step(s,a){if(s.won||s.lost)return s;a=a||{};s.previousX=s.x;s.previousY=s.y;s.tick++;s.inv=Math.max(0,s.inv-1);s.cooldown=Math.max(0,s.cooldown-1);s.specialCooldown=Math.max(0,s.specialCooldown-1);s.attack=Math.max(0,s.attack-1);s.intensity=s.chapter===1?Math.min(1,(s.wave-1)/6):s.chapter===2?Math.min(1,s.x/5690):s.chapter===3?Math.min(1,s.picked/7):s.chapter===4?Math.min(1,s.progress/70):s.chapter===5?Math.min(1,(s.room-1)/6):Math.min(1,(s.boss.max-s.boss.hp)/s.boss.max);s.shake=Math.max(0,s.shake-1);if(s.jumpHeight||s.jumpSpeed){s.jumpHeight+=s.jumpSpeed;s.jumpSpeed-=.55;if(s.jumpHeight<0){s.jumpHeight=0;s.jumpSpeed=0;}}
+function step(s,a){if(s.won||s.lost)return s;a=a||{};s.previousX=s.x;s.previousY=s.y;s.tick++;s.inv=Math.max(0,s.inv-1);if(s.chapter!==1||!['exit','room-transition'].includes(s.phase)){s.cooldown=Math.max(0,s.cooldown-1);s.specialCooldown=Math.max(0,s.specialCooldown-1);}s.attack=Math.max(0,s.attack-1);s.intensity=s.chapter===1?Math.min(1,(s.wave-1)/6):s.chapter===2?Math.min(1,s.x/5690):s.chapter===3?Math.min(1,s.picked/7):s.chapter===4?Math.min(1,s.progress/70):s.chapter===5?Math.min(1,(s.room-1)/6):Math.min(1,(s.boss.max-s.boss.hp)/s.boss.max);s.shake=Math.max(0,s.shake-1);if(s.jumpHeight||s.jumpSpeed){s.jumpHeight+=s.jumpSpeed;s.jumpSpeed-=.55;if(s.jumpHeight<0){s.jumpHeight=0;s.jumpSpeed=0;}}
  switch(s.chapter){case 1:fight(s,a);break;case 2:platform(s,a);break;case 3:snake(s,a);break;case 4:flight(s,a);break;case 5:shooter(s,a);break;case 6:final(s,a);break;}
  shots(s);if(s.health<=0)s.lost=true;return s;}
 // Both brothers telegraph locked targets; bait and the super cancel their wind-ups.
@@ -43,7 +56,8 @@ function brothers(s){
  }
 }
 function fight(s,a){
- s.dashCooldown=Math.max(0,(s.dashCooldown||0)-1);s.superCooldown=Math.max(0,(s.superCooldown||0)-1);s.superFlash=Math.max(0,(s.superFlash||0)-1);
+ if(!['exit','room-transition'].includes(s.phase)){s.dashCooldown=Math.max(0,(s.dashCooldown||0)-1);s.superCooldown=Math.max(0,(s.superCooldown||0)-1);}s.superFlash=Math.max(0,(s.superFlash||0)-1);
+ if(s.door?.open)s.door.openProgress=Math.min(1,(s.door.openProgress||0)+1/45);
  // Feet stay within the floor plane; the club wall is scenery, never walkable.
  if(s.phase==='room-transition'){s.roomTransition--;if(!s.roomTransition)enterRomaRoom(s);return;}
  if(s.phase==='exit'){move(s,a,2.7);aroundTables(s,s,s.previousX,s.previousY);if(Math.hypot(s.x-s.door.x,s.y-s.door.y)<42&&(a.special||a.right)){s.phase='room-transition';s.roomTransition=45;s.shots=[];}return;}
@@ -61,10 +75,11 @@ function fight(s,a){
  const cadence=s.phase==='boss'?125:Math.max(105,165-(s.wave-1)*9);const cycle=e.timer%cadence;
  if(s.phase!=='boss'&&cycle<35){e.warning=true;if(cycle===1)e.target={x:s.x,y:s.y};}
  const speed=(e.type===2?.65:e.type===1?1.05:.85)*(s.phase==='boss'?1:1+(s.wave-1)*.055);
- if(cycle>=35&&(!e.skill||bait)){const oldX=e.x,oldY=e.y;e.x=clamp(e.x+(goal.x-e.x)/d*speed,25,365);e.y=clamp(e.y+(goal.y-e.y)/d*speed,205,490);aroundTables(s,e,oldX,oldY);if(Math.hypot(e.x-oldX,e.y-oldY)<speed*.35){const f=tableAt(s,oldX+(goal.x-oldX)/d*speed,oldY+(goal.y-oldY)/d*speed);if(f){e.navSide=e.navSide|| (oldY<f.y?-1:1);const y=clamp(e.y+e.navSide*speed,205,490);if(!tableAt(s,e.x,y))e.y=y;else e.navSide*=-1;}}}
+ if(cycle>=35&&(!e.skill||bait)){const oldX=e.x,oldY=e.y,target=guardWaypoint(s,e,goal),length=Math.max(1,dist(e,target));e.x=clamp(e.x+(target.x-e.x)/length*speed,25,365);e.y=clamp(e.y+(target.y-e.y)/length*speed,205,490);aroundTables(s,e,oldX,oldY);}
  if(s.phase!=='boss'&&cycle===35&&e.type===1&&e.target){const len=Math.max(1,dist(e,e.target));const angle=Math.atan2(e.target.y-e.y,e.target.x-e.x),v=2.7+(s.wave-1)*.12;for(const offset of (s.wave>=5?[-.17,0,.17]:[0]))projectile(s,e.x,e.y,Math.cos(angle+offset)*v,Math.sin(angle+offset)*v,true,'chip');}
  if(dist(s,e)<32)damage(s);
  }
+ for(const e of s.enemies){const old=enemyStarts.get(e);const distance=old?Math.hypot(e.x-old.x,e.y-old.y):0;e.walking=distance>.05;e.walkDistance=(e.walkDistance||0)+distance;}
  if(s.enemies.every(e=>e.hp<=0)){if(s.phase==='boss'){s.boss.hp=0;s.won=true;s.phase='done';}else{s.phase='exit';s.door.open=true;s.shots=[];s.message='Зал свободен. Пройди в дверь справа сверху';}}
  if(s.phase==='boss')s.boss.hp=s.enemies.reduce((n,e)=>n+Math.max(0,e.hp),0);s.progress=s.wave;
 }

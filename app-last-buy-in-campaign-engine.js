@@ -21,14 +21,21 @@ if(s.mode==='swim'){s.world=13000;s.tokens=[{x:3500,y:380},{x:8900,y:230},{x:120
 if(s.mode==='carpet'){s.world=16400;s.flightGates=Array.from({length:29},(_,i)=>({x:2100+i*470,center:230+Math.sin(i*1.4)*45}));}
 if(s.mode==='chips'){s.target=48;}
 if(s.mode==='bomb'){s.bombRound=1;s.clearedGenerators=0;}
-if(s.mode==='platform'){s.fences=[];for(const [i,p] of s.platforms.entries()){if(i>0&&i%12===4)for(const side of ['left','right'])s.fences.push({platform:p,side,x:side==='left'?p.x:p.x+p.w-10,y:p.y-42,w:10,h:42});else if(i>0&&i%12===8)s.fences.push({platform:p,side:'right',x:p.x+p.w-10,y:p.y-42,w:10,h:42});}}
+if(s.mode==='platform'){s.fences=[];for(const [i,p] of s.platforms.entries()){if(!p.bonus&&i>0&&i%12===4)for(const side of ['left','right'])s.fences.push({platform:p,side,x:side==='left'?p.x:p.x+p.w-10,y:p.y-42,w:10,h:42});else if(!p.bonus&&i>0&&i%12===8)s.fences.push({platform:p,side:'right',x:p.x+p.w-10,y:p.y-42,w:10,h:42});}}
 if(s.mode==='platform')for(const b of s.blocks){const floor=s.platforms.find(p=>b.x+b.w/2>=p.x&&b.x+b.w/2<=p.x+p.w);if(floor)b.y=(floor.baseY??floor.y)-180;}
 if(s.mode==='poker')Poker.init(s,options);return s;}
 // Five distinct service districts end at an interactive archive, not an empty wall.
 function vaarRoute(s){
  s.world=13850;s.platforms=[{x:0,y:465,w:380,baseY:465}];
- const widths=[245,170,210,150,260,180,160,230],heights=[465,435,405,435,465,415,385,425],gaps=[55,75,50,80,45,65];
- for(let i=0;i<50;i++){const prev=s.platforms.at(-1),x=prev.x+prev.w+gaps[i%gaps.length];if(x>s.world-1100)break;const district=Math.floor(x/2800),y=heights[(i+district*2)%heights.length];s.platforms.push({x,y,baseY:y,w:widths[(i+district)%widths.length],lift:i%10===4,crumble:i%10===7||district===3&&i%5===2,crumbleTick:0});}
+ const sections=[
+  {heights:[465,445,465,415,445,465,405,435,465,425],widths:[250,210,240,190,220],gaps:[45,60,55,75,50]},
+  {heights:[435,395,350,305,350,395,435,385,335,395],widths:[190,170,180,200,175],gaps:[45,55,60,50,70]},
+  {heights:[405,385,355,385,405,365,335,365,405,435],widths:[160,185,165,210,180],gaps:[70,80,55,85,60]},
+  {heights:[435,415,435,385,415,445,405,375,415,445],widths:[150,170,160,210,175],gaps:[70,55,80,60,75]},
+  {heights:[425,385,345,385,425,405,445,405,435,465],widths:[205,180,225,170,240],gaps:[55,75,50,65,45]}
+ ];
+ for(let i=0;i<50;i++){const prev=s.platforms.at(-1),district=Math.min(4,Math.floor(i/10)),local=i%10,design=sections[district],x=prev.x+prev.w+design.gaps[local%5];if(x>s.world-700)break;const y=design.heights[local];s.platforms.push({x,y,baseY:y,w:design.widths[local%5],district,lift:false,crumble:district===3&&local%3===1,crumbleTick:0});}
+
  const last=s.platforms.at(-1),endX=last.x+last.w+55;s.platforms.push({x:endX,y:465,baseY:465,w:s.world-endX+100});
  s.tokens=[];s.enemies=[];s.blocks=[];s.pipes=[];s.streetHazards=[];s.traps=[];s.mushrooms=[];
  for(let i=0;i<s.platforms.length-1;i++){const p=s.platforms[i];s.tokens.push({x:p.x+p.w*.45,y:p.y-65,collected:false});if(i>1&&i%2===0)s.enemies.push({x:p.x+p.w*.55,y:p.y,homeX:p.x+p.w*.55,hp:1,type:i%4===0?1:0});if(i%6===1)s.blocks.push({x:p.x+35,y:p.y-180,w:40,h:30,kind:i%12===1?'question':'brick',used:false});if(i%9===5)s.pipes.push({x:p.x+p.w*.4,y:p.y-55,w:40,h:55,plant:i%18===5,extension:0});if(i%9===8&&!p.lift&&!p.crumble)s.streetHazards.push({x:p.x+65,y:p.y,w:65,offset:i*17,disabledUntil:0});if(i%11===9)s.traps.push({x:p.x+p.w*.75,y:160,timer:0,disabled:false});if([0,12,27,39].includes(i))s.mushrooms.push({x:p.x+60,y:p.y-18,collected:false});}
@@ -36,14 +43,21 @@ function vaarRoute(s){
  for(const [i,p] of s.platforms.entries()){
   p.baseX=p.x;p.phase=i*.73;
   if(i>2&&i<s.platforms.length-2&&!s.pipes.some(q=>q.x>=p.x&&q.x<p.x+p.w)&&!s.blocks.some(q=>q.x>=p.x&&q.x<p.x+p.w)){
-   const kind=i%8;
-   if(kind===3){p.lift=true;p.travel=70;p.crumble=false;}
-   if(kind===5){p.slide=true;p.travelX=28;p.lift=false;}
-   if(kind===6){p.slide=true;p.travelX=20;p.fade=true;p.lift=false;p.crumble=false;}
-   if(kind===7){p.swing=true;p.lift=false;p.crumble=false;p.anchorX=p.x+p.w/2;p.anchorY=p.y-155;}
+   const district=p.district,local=(i-1)%10;
+   if(district===1&&[2,5,8].includes(local)){p.lift=true;p.travel=60;p.crumble=false;}
+   if(district===2&&[1,4,7].includes(local)){p.swing=true;p.anchorX=p.x+p.w/2;p.anchorY=p.y-155;}
+   if(district===2&&local===8){p.slide=true;p.travelX=25;}
+   if(district===3&&[2,5,8].includes(local)){p.slide=true;p.travelX=20;p.fade=true;p.crumble=false;}
+   if(district===4&&[2,6].includes(local)){p.lift=true;p.travel=45;}
+
   }
  }
- for(const t of s.tokens){t.platform=s.platforms.find(p=>t.x>=p.x&&t.x<=p.x+p.w);if(t.platform)t.offsetX=t.x-t.platform.x;}
+ s.routeSigns=[1,11,21,31,41].map((index,n)=>{const p=s.platforms[index];return {x:p.x+p.w/2,floor:p,text:['Прыгай на грибы сверху','Подъёмники ведут на крыши','Лови момент на подвесах','Мигает? Прыгай дальше!','Три ключа — и дело твоё'][n]};});
+ s.bonusPlatforms=[];
+ // Optional high ledges reward a detour; the lower route stays passable.
+ for(const index of [7,17,28,37]){const floor=s.platforms[index];if(!floor)continue;const bonus={x:floor.baseX+floor.w*.3,y:floor.baseY-95,baseX:floor.baseX+floor.w*.3,baseY:floor.baseY-95,w:100,bonus:true,phase:0};s.bonusPlatforms.push(bonus);for(let n=0;n<3;n++)s.tokens.push({x:bonus.x+20+n*27,y:bonus.y-40,collected:false,platform:bonus,offsetX:20+n*27,bonus:true});}
+ s.platforms.push(...s.bonusPlatforms);
+ for(const t of s.tokens){t.platform=t.platform||s.platforms.find(p=>t.x>=p.x&&t.x<=p.x+p.w);if(t.platform)t.offsetX=t.x-t.platform.x;}
  s.caseKeys=[9,24,40].map((i,n)=>{const p=s.platforms[Math.min(i,s.platforms.length-2)];return {x:p.x+p.w*.35,y:p.y-60,platform:p,collected:false,n:n+1};});
  s.archive={x:s.world-240,y:465,openTicks:0,caseTaken:false};s.districts=['Служебный двор','Подъёмники отдела','Охраняемые крыши','Аварийные мостки','Склад улик'];
 }
@@ -72,7 +86,7 @@ function platformEnemy(s,e){
  }
  if(e.y>600)e.hp=0;
 }
-function platform(s,a){if(s.mode==='platform'){const riding=s.ground?s.platforms.find(p=>!p.gone&&Math.abs(p.y-s.y)<2&&s.x>=p.x-9&&s.x<=p.x+p.w+9):null;for(const p of s.platforms){const old=p.y,oldX=p.x;const phase=s.tick*.018+(p.phase||0);if(p.lift)p.y=p.baseY+Math.sin(phase)*(p.travel||25);if(p.slide)p.x=p.baseX+Math.sin(phase)*(p.travelX||28);if(p.swing){const angle=Math.sin(phase)*.3;p.x=p.baseX+Math.sin(angle)*155;p.y=p.baseY+(Math.cos(angle)-1)*155;}if(p.fade){const beat=(s.tick+Math.floor((p.phase||0)*60))%300;p.fadeWarning=beat>=185&&beat<230;p.gone=beat>=230;}if(riding===p&&!p.gone){s.y+=p.y-old;s.x+=p.x-oldX;}if(p.crumbleTick){p.crumbleTick++;if(p.crumbleTick>60)p.gone=true;if(p.crumbleTick>220){p.gone=false;p.crumbleTick=0;}}}for(const f of s.fences||[]){f.y=f.platform.y-f.h;f.x=f.side==='left'?f.platform.x:f.platform.x+f.platform.w-10;}for(const t of s.tokens){const p=t.platform||s.platforms.find(p=>t.x>=p.x&&t.x<=p.x+p.w);if(p){if(t.platform)t.x=p.x+t.offsetX;t.y=p.y-65;}}
+function platform(s,a){if(s.mode==='platform'){const riding=s.ground?s.platforms.find(p=>!p.gone&&Math.abs(p.y-s.y)<2&&s.x>=p.x-9&&s.x<=p.x+p.w+9):null;for(const p of s.platforms){const old=p.y,oldX=p.x;const phase=s.tick*.018+(p.phase||0);if(p.lift)p.y=p.baseY+Math.sin(phase)*(p.travel||25);if(p.slide)p.x=p.baseX+Math.sin(phase)*(p.travelX||28);if(p.swing){const angle=Math.sin(phase)*.3;p.x=p.baseX+Math.sin(angle)*155;p.y=p.baseY+(Math.cos(angle)-1)*155;}if(p.fade){const beat=(s.tick+Math.floor((p.phase||0)*60))%300;p.fadeWarning=beat>=185&&beat<230;p.gone=beat>=230;}if(riding===p&&!p.gone){s.y+=p.y-old;s.x+=p.x-oldX;}if(p.crumbleTick){p.crumbleTick++;if(p.crumbleTick>60)p.gone=true;if(p.crumbleTick>220){p.gone=false;p.crumbleTick=0;}}}for(const f of s.fences||[]){f.y=f.platform.y-f.h;f.x=f.side==='left'?f.platform.x:f.platform.x+f.platform.w-10;}for(const t of s.tokens){const p=t.platform||s.platforms.find(p=>t.x>=p.x&&t.x<=p.x+p.w);if(p){if(t.platform)t.x=p.x+t.offsetX;t.y=p.y-(t.bonus?40:65);}}
 for(const m of s.mushrooms){const floor=s.platforms.filter(p=>m.x>=p.x&&m.x<=p.x+p.w).sort((a,b)=>b.y-a.y)[0];if(floor)m.y=floor.y-18;}s.big=Math.max(0,s.big-1);s.shoutTicks=Math.max(0,s.shoutTicks-1);for(const m of s.mushrooms)if(!m.collected&&Math.hypot(s.x-m.x,s.y-30-m.y)<55){m.collected=true;s.big=900;s.shoutTicks=150;s.lastDouble=s.tick;s.shoutText='Опа! Удвоение!';s.score+=100;s.message=s.shoutText;}}if(s.mode==='platform'&&!s.big&&s.tick-s.lastDouble>=1200&&!s.shoutTicks){s.shoutTicks=150;s.shoutText='Щас бы удвоиться и норм!';s.lastDouble=s.tick;}const oldY=s.y,oldX=s.x,fast=s.mode==='speed';const dir=(a.right?1:0)-(a.left?1:0);s.vx=fast?clamp(s.vx+dir*.38,-8.5,8.5):dir*3.4;if(fast&&!dir)s.vx*=.97;if(fast){if(a.special&&s.ground){s.charge=Math.min(60,s.charge+2);s.vx*=.7;}else if(s.charge){s.vx=(dir||1)*(7+s.charge/15);s.charge=0;s.rolling=true;}if(a.down&&s.ground&&Math.abs(s.vx)>2)s.rolling=true;if(s.ground&&Math.abs(s.vx)<1&&!a.special)s.rolling=false;}s.x=clamp(s.x+s.vx,20,s.world-20);
 if(fast&&s.loop){const l=s.loop;l.angle-=Math.max(4,l.speed)/l.r;s.x=l.x+Math.cos(l.angle)*l.r;s.y=l.y+Math.sin(l.angle)*l.r;s.vy=0;s.rolling=true;s.progress=Math.floor(s.x/s.world*100);if(l.angle<=Math.PI/2-Math.PI*2){s.x=l.x+100;s.y=l.y+10;s.vx=l.speed;s.vy=-5;s.loop=null;}return;}if(fast){const l=s.loops.find(l=>!l.done&&s.x>=l.x-15&&s.x<l.x+30&&s.y>390);if(l&&Math.abs(s.vx)>4){s.loop={...l,angle:Math.PI/2,speed:Math.abs(s.vx)};l.done=true;s.loopDone=true;return;}}
 if(pressed(s,a,'jump')&&s.ground){s.vy=fast?-12:-10.7;s.ground=false;}s.vy+=.43;s.y+=s.vy;s.ground=false;
