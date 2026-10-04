@@ -311,21 +311,36 @@ window.addEventListener("pageshow", function (e) {
     var back = new URL(location.href); back.searchParams.set('startapp', view);
     try { sessionStorage.setItem(key, JSON.stringify({url: back.href, view: view, windowY: window.scrollY, panelY: panel ? panel.scrollTop : 0, pending: false, capturedAt: Date.now()})); } catch (_) {}
   }, true);
+  var cancelRestore = null;
   function restore() {
+    if (cancelRestore) return;
     var saved; try { saved = JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (_) { return; }
     if (!saved || !saved.pending) return;
-    var attempts = 0, stableSince = 0, timer = setInterval(function () {
-      if (++attempts > 100) { clearInterval(timer); return; }
+    var attempts = 0, stableSince = 0, entered = false, timer;
+    var inputEvents = ['touchstart', 'wheel', 'pointerdown', 'keydown'];
+    function finish() {
+      clearInterval(timer);
+      inputEvents.forEach(function (type) { window.removeEventListener(type, finish, true); });
+      cancelRestore = null;
+      try { sessionStorage.removeItem(key); } catch (_) {}
+    }
+    cancelRestore = finish;
+    inputEvents.forEach(function (type) { window.addEventListener(type, finish, {capture: true, passive: true}); });
+    timer = setInterval(function () {
+      if (++attempts > 100) { finish(); return; }
+      // A new gesture or navigation owns the position from now on.
+      if (entered && document.body.getAttribute('data-view') !== saved.view) { finish(); return; }
       if (typeof window.setView !== 'function') return;
       if (document.body.getAttribute('data-view') !== saved.view) window.setView(saved.view, {fromBack: true});
+      entered = true;
       var panel = pokerGetPanelScrollCardContentEl();
-      if (panel) panel.scrollTop = saved.panelY;
+      if (panel && Math.abs(panel.scrollTop - saved.panelY) >= 2) panel.scrollTop = saved.panelY;
       window.scrollTo(0, saved.windowY);
       var settled = document.readyState === 'complete' && document.body.getAttribute('data-view') === saved.view && (!panel || Math.abs(panel.scrollTop - saved.panelY) < 2);
       if (!settled) stableSince = 0;
       else if (!stableSince) stableSince = Date.now();
       if (stableSince && Date.now() - stableSince >= 2000) {
-        clearInterval(timer); sessionStorage.removeItem(key);
+        finish();
       }
     }, 100);
   }
