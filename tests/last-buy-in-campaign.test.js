@@ -44,8 +44,8 @@ test('City lifts carry Vaar and unsafe ledges collapse then recover',()=>{
  const c=s.platforms.find(p=>p.crumble);s.x=c.x+30;s.y=c.y;s.ground=true;for(let i=0;i<62;i++)E.step(s,{});assert.equal(c.gone,true);for(let i=0;i<170;i++)E.step(s,{});assert.equal(c.gone,false);
 });
 test('Electrical strips warn, hurt on contact and switch off immediately with cooldown',()=>{
- const s=E.create(2),h=s.streetHazards[0];s.mushrooms=[];s.enemies=[];s.traps=[];s.pipes=[];s.x=h.x+30;s.y=h.y;s.ground=true;s.tick=270-h.offset;E.step(s,{});assert.equal(h.warning,true);assert.equal(h.active,false);assert.equal(s.health,5);
- s.tick=310-h.offset;E.step(s,{});assert.equal(h.active,true);assert.equal(s.health,4);s.inv=0;s.previous={};E.step(s,{special:true});assert.equal(h.active,false);assert.equal(s.health,4);assert.equal(s.cooldown,180);assert.equal(h.disabledUntil,s.tick+240);
+ const s=E.create(2),h=s.streetHazards[0];s.mushrooms=[];s.enemies=[];s.traps=[];s.pipes=[];s.x=h.x+30;s.y=h.y;s.ground=true;s.tick=2160-h.offset;E.step(s,{});assert.equal(h.warning,true);assert.equal(h.active,false);assert.equal(s.health,5);
+ s.tick=2200-h.offset;E.step(s,{});assert.equal(h.active,true);assert.equal(s.health,4);s.inv=0;s.previous={};E.step(s,{special:true});assert.equal(h.active,false);assert.equal(s.health,4);assert.equal(s.cooldown,180);assert.equal(h.disabledUntil,s.tick+240);
 });
 
 test('Vaar can run below raised reward boxes and hit them by jumping, including a powered-up brick strike',()=>{const initial=E.create(2);for(const block of initial.blocks){const floor=initial.platforms.find(p=>block.x+block.w/2>=p.x&&block.x+block.w/2<=p.x+p.w);assert.ok(block.y+block.h<floor.y-114,'clearance above even the enlarged hero');const s=E.create(2);s.blocks=[{...block}];s.platforms=[{x:block.x-100,y:floor.y,w:300}];s.enemies=[];s.mushrooms=[];s.pipes=[];s.traps=[];s.streetHazards=[];s.x=block.x+block.w/2;s.y=floor.y;s.ground=true;s.big=block.kind==='brick'?100:0;E.step(s,{});assert.equal(s.y,floor.y);for(let i=0;i<60&&!s.blocks[0].used&&!s.blocks[0].broken;i++)E.step(s,{jump:i===0});assert.ok(s.blocks[0].used||s.blocks[0].broken,'jump reaches raised '+block.kind);}});

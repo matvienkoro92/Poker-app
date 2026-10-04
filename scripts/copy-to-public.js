@@ -69,6 +69,7 @@ const baseFiles = [
   'app-last-buy-in-engine.js',
   'app-last-buy-in-game.js',
   'app-last-buy-in-story.js',
+  'app-last-buy-in-victory-scenes.js',
   'app-last-buy-in-chapters.js',
   'app-last-buy-in-poker-engine.js',
   'app-last-buy-in-campaign-engine.js',

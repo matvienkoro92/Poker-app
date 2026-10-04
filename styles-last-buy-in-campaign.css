@@ -14,3 +14,6 @@ body:has(#play:not([hidden])),body:has(#play:not([hidden])) *{-webkit-user-selec
 .campaign-controls[hidden]{display:none}
 
 .poker-controls{display:flex;gap:10px;max-width:620px;margin:auto}.poker-controls button{flex:1;max-width:none;min-height:58px;font-size:17px;font-weight:800;background:#223345}.poker-controls button[data-bet=call]{background:#16624f}.poker-controls button[data-bet=raise]{background:#ebba51;color:#251c12}.poker-controls button:disabled{opacity:.45}.poker-stage .campaign-dialog p{font-size:14px;line-height:1.5}
+
+/* Keep mission names in one caption instead of stacking them over nearby pins. */
+.chapter-city-map .map-node small{display:none}.city-map-caption{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-width:500px;margin:0 auto;padding:10px 12px;border:1px solid #89cbc477;border-radius:12px;background:#062530ed;box-shadow:0 4px 15px #001c2677;pointer-events:none;text-align:center;color:#fff3cf;z-index:4}.city-map-caption b{display:block;font-size:14px;line-height:1.3}.city-map-caption span{display:block;margin-top:4px;color:#ffde82;font-size:11px}.city-map-caption small{display:block;margin-top:5px;font-size:10px;letter-spacing:0;color:#bcd9db}.mission-zoom .city-map-caption{opacity:0}

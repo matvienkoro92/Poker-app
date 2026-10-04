@@ -4,7 +4,7 @@
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const names=['Капитан Колл','Братья Чек и Рейз','Дилер Пересдача','Удав Депозит','Охранник Натс','Снайпер Слоуплей','Валера · Железный натс'];
 function create(chapter){if(chapter===0)throw Error('Chapter one uses MonkeyRaceCampaign');const s={chapter,tick:0,phase:'route',health:5,hits:0,inv:0,cooldown:0,specialCooldown:0,score:0,secret:false,won:false,lost:false,x:90,y:410,vy:0,facing:1,attack:0,progress:0,enemies:[],shots:[],platforms:[],picked:0,boss:{x:310,y:395,hp:chapter===6?12:5,max:chapter===6?12:5,name:names[chapter],timer:0,warning:false},message:'',wave:0,finalPhase:0,ground:false,chairCharges:4,combo:0,particles:[],tokens:[],jumpHeight:0,jumpSpeed:0,checkpoint:0,shake:0,locks:[],gates:[]};
- if(chapter===1){s.y=410;s.world=390;s.boss.hp=s.boss.max=18;s.furniture=[];s.cashTraps=[];s.dashCooldown=0;s.superCooldown=0;s.superFlash=0;spawnWave(s);}
+ if(chapter===1){s.y=410;s.world=390;s.boss.hp=s.boss.max=34;s.furniture=[];s.cashTraps=[];s.dashCooldown=0;s.superCooldown=0;s.superFlash=0;spawnWave(s);}
  if(chapter===2){s.y=420;s.world=6010;s.boss.x=5860;s.boss.y=390;s.boss.hp=s.boss.max=7;s.platforms=[{x:0,w:290,base:470,y:470}];for(let i=1;i<35;i++){const x=245+(i-1)*165,base=470-(i%3)*22;s.platforms.push({x,w:150,base,y:base,moving:i%4===2});s.tokens.push({x:x+55,y:base-55,collected:false});}s.platforms.push({x:5640,w:350,base:470,y:470});s.vents=[550,1220,2050,2680,3350,4020,4690,5360];s.gates=[{x:5590,open:false}];}
  if(chapter===3){s.x=70;s.y=350;s.world=3850;s.platforms=train(s);s.boss.hp=s.boss.max=3;s.locks=Array.from({length:7},(_,i)=>({x:430+i*490,open:false}));}
  if(chapter===4){s.flight=Flight.create(927313,9);s.x=94;s.y=270;s.boss.x=316;s.boss.y=270;s.boss.hp=s.boss.max=6;s.devices=[true,true,true];}
@@ -20,6 +20,23 @@ function move(s,a,speed){s.x=clamp(s.x+((a.right?1:0)-(a.left?1:0))*speed,25,s.w
 function step(s,a){if(s.won||s.lost)return s;a=a||{};s.previousX=s.x;s.previousY=s.y;s.tick++;s.inv=Math.max(0,s.inv-1);s.cooldown=Math.max(0,s.cooldown-1);s.specialCooldown=Math.max(0,s.specialCooldown-1);s.attack=Math.max(0,s.attack-1);s.intensity=s.chapter===1?Math.min(1,(s.wave-1)/6):s.chapter===2?Math.min(1,s.x/5690):s.chapter===3?Math.min(1,s.picked/7):s.chapter===4?Math.min(1,s.progress/70):s.chapter===5?Math.min(1,(s.room-1)/6):Math.min(1,(s.boss.max-s.boss.hp)/s.boss.max);s.shake=Math.max(0,s.shake-1);if(s.jumpHeight||s.jumpSpeed){s.jumpHeight+=s.jumpSpeed;s.jumpSpeed-=.55;if(s.jumpHeight<0){s.jumpHeight=0;s.jumpSpeed=0;}}
  switch(s.chapter){case 1:fight(s,a);break;case 2:platform(s,a);break;case 3:snake(s,a);break;case 4:flight(s,a);break;case 5:shooter(s,a);break;case 6:final(s,a);break;}
  shots(s);if(s.health<=0)s.lost=true;return s;}
+// Both brothers telegraph locked targets; bait and the super cancel their wind-ups.
+function brothers(s){
+ s.bossZones=s.bossZones||[];for(const z of s.bossZones){z.age++;if(z.age===z.warningTicks&&Math.hypot(s.x-z.x,s.y-z.y)<z.r&&!s.inv)damage(s);}s.bossZones=s.bossZones.filter(z=>z.age<z.warningTicks+35);
+ const rage=s.enemies.reduce((n,e)=>n+Math.max(0,e.hp),0)<=17;
+ for(const e of s.enemies){if(e.hp<=0)continue;e.shieldOpen=Math.max(0,(e.shieldOpen||0)-1);const bait=s.cashTraps.find(t=>t.life>0&&dist(e,t)<170);
+ if(e.stun>=60||bait){if(e.skill){e.skill=null;e.shieldOpen=90;e.nextSkill=80;}continue;}
+ e.nextSkill=e.nextSkill??(e.type===2?60:115);
+ if(!e.skill){if(e.stun)continue;if(--e.nextSkill>0)continue;const n=e.skillCount||0;e.skillCount=n+1;const kind=e.type===2?(n%2?'sweep':'charge'):(n%2?'seizure':'fan');e.skill={kind,age:0,warningTicks:rage?44:60,target:{x:s.x,y:s.y},origin:{x:e.x,y:e.y}};}
+ const k=e.skill;k.age++;e.warning=k.age<=k.warningTicks;
+ if(k.kind==='charge'&&k.age>k.warningTicks&&k.age<=k.warningTicks+38){const dx=k.target.x-k.origin.x,dy=k.target.y-k.origin.y,d=Math.max(1,Math.hypot(dx,dy)),speed=rage?6.2:5.3;e.x=clamp(e.x+dx/d*speed,25,365);e.y=clamp(e.y+dy/d*speed,270,490);if(dist(s,e)<40)damage(s);}
+ if(k.kind==='charge'&&k.age===k.warningTicks+39){e.shieldOpen=95;e.stun=Math.max(e.stun,32);s.shake=12;s.message='Чек остановился! Щит открыт — стреляй!';}
+ if(k.kind==='sweep'&&k.age===k.warningTicks){e.shieldOpen=75;if(dist(s,e)<95)damage(s);s.message='Чек: удар щитом! Отойди от красного круга';}
+ if(k.kind==='fan'&&[0,24,48].includes(k.age-k.warningTicks)){const base=Math.atan2(k.target.y-e.y,k.target.x-e.x);for(const shift of [-.32,0,.32]){const angle=base+shift;projectile(s,e.x,e.y,Math.cos(angle)*(rage?3.9:3.2),Math.sin(angle)*(rage?3.9:3.2),true,'policechip');}}
+ if(k.kind==='seizure'&&k.age===1){const spots=[k.target,{x:clamp(k.target.x+(k.target.x<195?90:-90),35,355),y:clamp(k.target.y+(k.target.y<380?55:-55),285,480)}];for(const t of spots)s.bossZones.push({...t,r:39,age:0,warningTicks:rage?58:76,owner:e.type});s.message='Рейз: конфискация! Уйди из красных зон';}
+ if(k.age>k.warningTicks+(k.kind==='fan'?95:k.kind==='charge'?85:65)){e.skill=null;e.nextSkill=rage?65:95;}
+ }
+}
 function fight(s,a){
  // Feet stay within the floor plane; the club wall is scenery, never walkable.
  move(s,a,2.7);s.x=clamp(s.x,30,360);s.y=clamp(s.y,270,490);
@@ -30,17 +47,17 @@ function fight(s,a){
  if(a.attack&&!s.cooldown&&target){s.cooldown=18;s.attack=8;const d=Math.max(1,dist(s,target));s.facing=target.x>s.x?1:-1;projectile(s,s.x,s.y,(target.x-s.x)/d*7,(target.y-s.y)/d*7,false,'banknote');}
  if(a.special&&!s.specialCooldown){s.specialCooldown=210;s.cashTraps.push({x:s.x,y:s.y,life:240});s.message='Инкассация! Охрана отвлеклась на деньги';for(const e of s.enemies)if(e.hp>0&&dist(s,e)<150){e.stun=80;e.hp--;e.x=clamp(e.x+(e.x-s.x)/Math.max(1,dist(s,e))*45,30,360);}}
  for(const trap of s.cashTraps)trap.life--;s.cashTraps=s.cashTraps.filter(t=>t.life>0);
- for(const e of s.enemies){if(e.hp<=0)continue;e.timer++;e.stun=Math.max(0,e.stun-1);e.warning=false;if(e.stun)continue;
- const bait=s.cashTraps.find(t=>dist(e,t)<170),goal=bait||s,d=Math.max(1,dist(e,goal));
- if(bait&&d<23){e.stun=90;bait.life=0;s.score+=15;continue;}
+ if(s.phase==='boss')brothers(s);
+ for(const e of s.enemies){if(e.hp<=0)continue;e.timer++;e.stun=Math.max(0,e.stun-1);e.warning=!!e.skill&&e.skill.age<=e.skill.warningTicks;const bait=!e.stun?s.cashTraps.find(t=>t.life>0&&dist(e,t)<170):null,goal=bait||s,d=Math.max(1,dist(e,goal));e.baiting=!!bait;e.facing=goal.x>e.x?1:-1;if(e.stun)continue;
+ if(bait&&d<23){e.stun=90;e.baiting=false;e.facing=s.x>e.x?1:-1;bait.life=0;s.score+=15;continue;}
  const cycle=e.timer%(s.phase==='boss'?125:165);
- if(cycle<35){e.warning=true;if(cycle===1)e.target={x:s.x,y:s.y};}
+ if(s.phase!=='boss'&&cycle<35){e.warning=true;if(cycle===1)e.target={x:s.x,y:s.y};}
  const speed=e.type===2?.65:e.type===1?1.05:.85;
- if(cycle>=35){e.x=clamp(e.x+(goal.x-e.x)/d*speed,25,365);e.y=clamp(e.y+(goal.y-e.y)/d*speed,270,490);}
- if(cycle===35&&e.type===1&&e.target){const len=Math.max(1,dist(e,e.target));projectile(s,e.x,e.y,(e.target.x-e.x)/len*2.7,(e.target.y-e.y)/len*2.7,true,'chip');}
+ if(cycle>=35&&(!e.skill||bait)){e.x=clamp(e.x+(goal.x-e.x)/d*speed,25,365);e.y=clamp(e.y+(goal.y-e.y)/d*speed,270,490);}
+ if(s.phase!=='boss'&&cycle===35&&e.type===1&&e.target){const len=Math.max(1,dist(e,e.target));projectile(s,e.x,e.y,(e.target.x-e.x)/len*2.7,(e.target.y-e.y)/len*2.7,true,'chip');}
  if(dist(s,e)<32)damage(s);
  }
- if(s.enemies.every(e=>e.hp<=0)){if(s.phase==='boss'){s.boss.hp=0;s.won=true;s.phase='done';}else if(s.wave<7){s.shots=[];s.health=Math.min(5,s.health+1);spawnWave(s);}else{s.phase='boss';s.boss.hp=s.boss.max=18;s.enemies=[{x:300,y:365,hp:10,type:2,timer:0,stun:0},{x:340,y:445,hp:8,type:1,timer:60,stun:0}];s.secret=s.hits<2;s.message='Чек держит щит. Инкассация открывает его!';}}
+ if(s.enemies.every(e=>e.hp<=0)){if(s.phase==='boss'){s.boss.hp=0;s.won=true;s.phase='done';}else if(s.wave<7){s.shots=[];s.health=Math.min(5,s.health+1);spawnWave(s);}else{s.phase='boss';s.boss.hp=s.boss.max=34;s.enemies=[{x:300,y:365,hp:18,type:2,timer:0,stun:0},{x:340,y:445,hp:16,type:1,timer:60,stun:0}];s.secret=s.hits<2;s.message='Чек держит щит. Инкассация открывает его!';}}
  if(s.phase==='boss')s.boss.hp=s.enemies.reduce((n,e)=>n+Math.max(0,e.hp),0);s.progress=s.wave;
 }
 function platform(s,a){const oldY=s.y;s.x=clamp(s.x+((a.right?1:0)-(a.left?1:0))*3.1,20,s.world-25);if(s.gates[0]&&!s.gates[0].open&&s.x>s.gates[0].x-25){s.x=s.gates[0].x-25;if(a.special){s.gates[0].open=true;s.health=Math.min(5,s.health+1);}}
@@ -68,8 +85,8 @@ function final(s,a){move(s,a,2.8);const phase=Math.min(3,Math.floor((s.boss.max-
  if(beat===1)s.aim={x:s.x,y:s.y};if(beat===60){if(phase===0){for(let i=0;i<5;i++)projectile(s,75+i*60,100,0,2.7,true,'card');}else if(phase===1){for(let i=-1;i<=1;i++)projectile(s,s.aim.x+i*55,110,0,3,true,'card');}else{const d=Math.max(1,dist(s,s.boss));for(let i=-1;i<=1;i++)projectile(s,s.boss.x,s.boss.y,(s.x-s.boss.x)/d*3+i*.6,(s.y-s.boss.y)/d*3,true,'water');}}
  if(a.jump&&!s.jumpHeight)s.jumpSpeed=8;if(a.special&&!s.specialCooldown){s.specialCooldown=300;s.inv=Math.max(s.inv,90);}if(a.attack&&!s.cooldown&&!s.boss.warning&&s.finalCycleFired!==Math.floor(s.boss.timer/165)){s.cooldown=28;s.attack=12;if(phase<2){if(dist(s,s.boss)<125){hurtBoss(s,1);s.finalCycleFired=Math.floor(s.boss.timer/165);}}else{projectile(s,s.x,s.y,(s.boss.x-s.x)/Math.max(1,dist(s,s.boss))*7,(s.boss.y-s.y)/Math.max(1,dist(s,s.boss))*7,false);s.finalCycleFired=Math.floor(s.boss.timer/165);}}if(s.boss.hp<=6)s.secret=s.hits<3;
 }
-function shots(s){for(const p of s.shots){p.x+=p.vx;p.y+=p.vy;p.life--;if(s.covers?.some(c=>p.x>c.x&&p.x<c.x+c.w&&p.y>c.y&&p.y<c.y+c.h)){p.life=0;continue;}if(p.enemy){if(s.jumpHeight<30&&Math.hypot(p.x-s.x,p.y-(s.chapter===2?s.y-25:s.y))<22){damage(s);p.life=0;}}else{const enemy=s.enemies.find(e=>e.hp>0&&dist(e,p)<30);if(enemy){if(s.chapter===1&&enemy.type===2&&!enemy.stun&&p.kind!=='supernote'){enemy.shieldHits=(enemy.shieldHits||0)+1;if(enemy.shieldHits%4!==0){p.life=0;s.message='Щит: отвлеки инкассацией или пробей очередью';continue;}}enemy.hp-=p.kind==='supernote'?2:p.kind==='chair'?2:1;enemy.stun=s.chapter===1?20:50;if(s.chapter===1){enemy.x=clamp(enemy.x+p.vx*2.5,25,365);enemy.y=clamp(enemy.y+p.vy*2.5,270,490);}if(p.kind==='chair')enemy.x=clamp(enemy.x+p.vx*7,30,(s.world||390)-30);s.score+=30;p.life=0;}else if(s.chapter!==1&&s.phase==='boss'&&dist(s.boss,p)<45){hurtBoss(s,1);p.life=0;}}}s.shots=s.shots.filter(p=>p.life>0&&p.x>-100&&p.x<(s.world||390)+100&&p.y>-100&&p.y<600);}
+function shots(s){for(const p of s.shots){p.x+=p.vx;p.y+=p.vy;p.life--;if(s.covers?.some(c=>p.x>c.x&&p.x<c.x+c.w&&p.y>c.y&&p.y<c.y+c.h)){p.life=0;continue;}if(p.enemy){if(s.jumpHeight<30&&Math.hypot(p.x-s.x,p.y-(s.chapter===2?s.y-25:s.y))<22){damage(s);p.life=0;}}else{const enemy=s.enemies.find(e=>e.hp>0&&dist(e,p)<30);if(enemy){if(s.chapter===1&&enemy.type===2&&!enemy.stun&&!enemy.shieldOpen&&p.kind!=='supernote'&&p.vx*(enemy.facing|| (s.x>enemy.x?1:-1))<0){enemy.shieldHits=(enemy.shieldHits||0)+1;if(enemy.shieldHits%4!==0){p.life=0;s.message='Щит: отвлеки инкассацией или пробей очередью';continue;}}enemy.hp-=p.kind==='supernote'?2:p.kind==='chair'?2:1;enemy.stun=s.chapter===1?(s.phase==='boss'?6:20):50;if(s.chapter===1){enemy.x=clamp(enemy.x+p.vx*2.5,25,365);enemy.y=clamp(enemy.y+p.vy*2.5,270,490);}if(p.kind==='chair')enemy.x=clamp(enemy.x+p.vx*7,30,(s.world||390)-30);s.score+=30;p.life=0;}else if(s.chapter!==1&&s.phase==='boss'&&dist(s.boss,p)<45){hurtBoss(s,1);p.life=0;}}}s.shots=s.shots.filter(p=>p.life>0&&p.x>-100&&p.x<(s.world||390)+100&&p.y>-100&&p.y<600);}
 function choose(s,choice){if(s.chapter!==5||s.phase!=='duel'||s.won||s.lost)return false;const answers=['fold','call','raise'];if(choice===answers[s.hand]){s.score+=100;s.hand++;if(s.hand===3)s.phase='boss';return true;}damage(s);return false;}
-function revive(s){s.lost=false;s.health=5;s.inv=180;s.vy=0;s.shots=s.shots.filter(p=>!p.enemy);if(s.chapter===2||s.chapter===3){const p=s.platforms.reduce((best,p)=>Math.abs(p.x+p.w/2-s.x)<Math.abs(best.x+best.w/2-s.x)?p:best,s.platforms[0]);if(p){s.x=clamp(s.x,p.x+15,p.x+p.w-15);s.y=p.y-40;s.ground=false;}}if(s.timer<=0)s.timer=60*60;if(s.flight){const f=s.flight;f.alive=true;f.vy=0;f.y=clamp(f.y,100,450);f.obstacles=f.obstacles.filter(o=>Math.abs(o.x-f.x)>85);f.invulnerableUntil=f.tick+180;}return s;}
-function createBoss(chapter){const s=create(chapter);s.phase='boss';s.enemies=[];if(chapter===1){s.wave=7;s.x=70;s.y=410;s.boss.hp=s.boss.max=18;s.enemies=[{x:300,y:365,hp:10,type:2,timer:0,stun:0},{x:340,y:445,hp:8,type:1,timer:60,stun:0}];}if(chapter===2){s.x=5730;s.y=430;s.gates[0].open=true;}if(chapter===3){s.x=3500;s.y=300;s.targetX=3540;s.picked=7;}if(chapter===5)s.room=7;return s;}
+function revive(s){s.lost=false;s.health=5;s.inv=180;s.vy=0;s.shots=s.shots.filter(p=>!p.enemy);if(s.chapter===2||s.chapter===3){const p=s.platforms.reduce((best,p)=>Math.abs(p.x+p.w/2-s.x)<Math.abs(best.x+best.w/2-s.x)?p:best,s.platforms[0]);if(p){s.x=clamp(s.x,p.x+15,p.x+p.w-15);s.y=p.y-40;s.ground=false;}}if(s.chapter===1){s.bossZones=[];for(const e of s.enemies){e.skill=null;e.nextSkill=90;}}if(s.timer<=0)s.timer=60*60;if(s.flight){const f=s.flight;f.alive=true;f.vy=0;f.y=clamp(f.y,100,450);f.obstacles=f.obstacles.filter(o=>Math.abs(o.x-f.x)>85);f.invulnerableUntil=f.tick+180;}return s;}
+function createBoss(chapter){const s=create(chapter);s.phase='boss';s.enemies=[];if(chapter===1){s.wave=7;s.x=70;s.y=410;s.boss.hp=s.boss.max=34;s.enemies=[{x:300,y:365,hp:18,type:2,timer:0,stun:0},{x:340,y:445,hp:16,type:1,timer:60,stun:0}];}if(chapter===2){s.x=5730;s.y=430;s.gates[0].open=true;}if(chapter===3){s.x=3500;s.y=300;s.targetX=3540;s.picked=7;}if(chapter===5)s.room=7;return s;}
 return {create,createBoss,step,names,choose,revive};});
