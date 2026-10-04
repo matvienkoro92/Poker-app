@@ -43,9 +43,14 @@ test('City lifts carry Vaar and unsafe ledges collapse then recover',()=>{
  const s=E.create(2),p=s.platforms.find(p=>p.lift);s.mushrooms=[];s.enemies=[];s.pipes=[];s.traps=[];s.streetHazards=[];s.x=p.x+25;s.y=p.y;s.ground=true;const y=s.y;E.step(s,{});assert.notEqual(s.y,y);assert.equal(s.y,p.y);
  const c=s.platforms.find(p=>p.crumble);s.x=c.x+30;s.y=c.y;s.ground=true;for(let i=0;i<62;i++)E.step(s,{});assert.equal(c.gone,true);for(let i=0;i<170;i++)E.step(s,{});assert.equal(c.gone,false);
 });
-test('Electrical strips warn, hurt on contact and switch off immediately with cooldown',()=>{
+test('Electrical strips must be avoided; the archive action cannot disable them',()=>{
  const s=E.create(2),h=s.streetHazards[0];s.mushrooms=[];s.enemies=[];s.traps=[];s.pipes=[];s.x=h.x+30;s.y=h.y;s.ground=true;s.tick=2160-h.offset;E.step(s,{});assert.equal(h.warning,true);assert.equal(h.active,false);assert.equal(s.health,5);
- s.tick=2200-h.offset;E.step(s,{});assert.equal(h.active,true);assert.equal(s.health,4);s.inv=0;s.previous={};E.step(s,{special:true});assert.equal(h.active,false);assert.equal(s.health,4);assert.equal(s.cooldown,180);assert.equal(h.disabledUntil,s.tick+240);
+ s.tick=2200-h.offset;E.step(s,{});assert.equal(h.active,true);assert.equal(s.health,4);s.inv=0;s.previous={};E.step(s,{special:true});assert.equal(h.active,true);assert.equal(s.health,3);assert.equal(h.disabledUntil,0);
 });
 
 test('Vaar can run below raised reward boxes and hit them by jumping, including a powered-up brick strike',()=>{const initial=E.create(2);for(const block of initial.blocks){const floor=initial.platforms.find(p=>block.x+block.w/2>=p.x&&block.x+block.w/2<=p.x+p.w);assert.ok(block.y+block.h<floor.y-114,'clearance above even the enlarged hero');const s=E.create(2);s.blocks=[{...block}];s.platforms=[{x:block.x-100,y:floor.y,w:300}];s.enemies=[];s.mushrooms=[];s.pipes=[];s.traps=[];s.streetHazards=[];s.x=block.x+block.w/2;s.y=floor.y;s.ground=true;s.big=block.kind==='brick'?100:0;E.step(s,{});assert.equal(s.y,floor.y);for(let i=0;i<60&&!s.blocks[0].used&&!s.blocks[0].broken;i++)E.step(s,{jump:i===0});assert.ok(s.blocks[0].used||s.blocks[0].broken,'jump reaches raised '+block.kind);}});
+
+test('Moving, fading and suspended platforms carry Vaar and keep tokens anchored',()=>{
+ for(const kind of ['slide','swing','fade']){const s=E.create(2),p=s.platforms.find(p=>p[kind]);assert.ok(p,kind);s.enemies=[];s.traps=[];s.pipes=[];s.streetHazards=[];s.mushrooms=[];if(p.fade)s.tick=300-Math.floor(p.phase*60);s.x=p.x+p.w/2;s.y=p.y;s.ground=true;const offset=s.x-p.x;for(let i=0;i<30;i++)E.step(s,{});assert.ok(Math.abs(s.x-p.x-offset)<.001,kind+' carries horizontally');assert.equal(s.y,p.y);if(kind==='fade'){s.tick=230-Math.floor(p.phase*60);E.step(s,{});assert.equal(p.gone,true);s.tick=300-Math.floor(p.phase*60);E.step(s,{});assert.equal(p.gone,false);}}
+});
+test('One archive press at the visible entrance takes the case',()=>{const s=E.create(2);s.caseKeys.forEach(k=>k.collected=true);s.archive.openTicks=60;s.x=s.archive.x-75;s.y=s.archive.y;s.ground=true;s.previous={special:true};E.step(s,{special:true});assert.equal(s.won,true);assert.equal(s.archive.caseTaken,true);});
