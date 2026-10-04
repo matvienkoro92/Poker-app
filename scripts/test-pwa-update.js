@@ -53,15 +53,25 @@ async function main() {
     await page.waitForFunction(name => caches.has(name), cacheName);
     navigationFailure = true;
     await page.goto(`http://127.0.0.1:${server.address().port}/?startapp=raffles#tgWebAppData=launch%26auth`);
-    await page.getByRole('heading', {name:'Не получилось открыть приложение'}).waitFor();
+    await page.getByRole('heading', {name:'Подключаемся…'}).waitFor();
     navigationFailure = false;
-    await page.getByRole('link', {name:'Попробовать ещё раз'}).click();
     await page.locator('#draft').waitFor();
     const recovered = new URL(page.url());
     assert.equal(recovered.searchParams.get('startapp'), 'raffles');
     assert.equal(recovered.hash, '#tgWebAppData=launch%26auth');
     assert.ok(recovered.searchParams.get('_club_retry'));
-    console.log('Navigation recovery passed: retry loaded the app and preserved Telegram launch data.');
+    console.log('Automatic navigation recovery preserved Telegram launch data.');
+    navigationFailure = true;
+    await page.goto(`http://127.0.0.1:${server.address().port}/?startapp=raffles#tgWebAppData=launch%26auth`);
+    await page.getByRole('heading', {name:'Пока нет соединения'}).waitFor({timeout:20000});
+    const stoppedUrl = page.url();
+    await page.waitForTimeout(1500);
+    assert.equal(page.url(), stoppedUrl);
+    navigationFailure = false;
+    await page.getByRole('link', {name:'Попробовать ещё раз'}).click();
+    await page.locator('#draft').waitFor();
+    assert.equal(new URL(page.url()).hash, '#tgWebAppData=launch%26auth');
+    console.log('Persistent outage stops after bounded retries; manual recovery works.');
     console.log(`PWA upgrade passed: ${oldCache} removed, ${cacheName} active, draft preserved until explicit reload, fresh CSS loaded.`);
   } finally {
     clearTimeout(watchdog);

@@ -1,0 +1,22 @@
+const {chromium}=require('playwright'),assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({headless:true});try{
+ const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('http://127.0.0.1:4204/last-buy-in.html?adminChapters=1');
+ await page.evaluate(()=>{const step=LastBuyInEngine.step;LastBuyInEngine.step=(s,a)=>{window.__roma=s;return step(s,a);};document.querySelector('#gameEntrance').hidden=true;StoryArcade.mount(document.querySelector('#arcadeRoot'),1,()=>{},()=>{}, {bossOnly:true});document.querySelector('#play').hidden=false;});
+ await page.waitForFunction(()=>window.__roma);
+ await page.evaluate(()=>{__roma.inv=10000;__roma.shots.push(...[0,Math.PI/2,Math.PI,-Math.PI/2].map(a=>({x:195,y:350,vx:Math.cos(a)*2,vy:Math.sin(a)*2,enemy:true,life:180})));});
+ await page.waitForTimeout(600);
+ assert.deepEqual(errors,[]);
+ await page.locator('#arcadePause').click();
+ const before=await page.evaluate(()=>__roma.tick);
+ await page.waitForTimeout(200);
+ assert.equal(await page.evaluate(()=>__roma.tick),before);
+ assert.equal(await page.locator('[data-resume]').isVisible(),true);
+ assert.deepEqual(await page.evaluate(()=>{const m=document.querySelector('#storyCanvas').getContext('2d').getTransform();return [m.a,m.b,m.c,m.d,m.e,m.f];}),[1,0,0,1,0,0]);
+ await page.locator('[data-resume]').click();
+ await page.waitForFunction(t=>__roma.tick>t,before);
+ await page.waitForTimeout(1500);
+ assert.deepEqual(errors,[]);
+ console.log('Roma boss bullets, balanced canvas, pause and resume passed');
+ }finally{await browser.close();}})().catch(error=>{console.error(error);process.exitCode=1;});

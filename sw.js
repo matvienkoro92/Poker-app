@@ -203,18 +203,38 @@ function pokerSwNavigationFallback(request) {
   var retryUrl = retryTarget.href.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return new Response(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f172a"><title>Два туза — загрузка</title><style>
   *{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;background:#0f172a;color:#fff3d6;font:17px/1.5 system-ui,sans-serif;text-align:center}main{max-width:420px}h1{font-size:26px;line-height:1.2}p{color:#c4cbd8}.retry{display:inline-block;text-decoration:none;font:inherit;font-weight:700;border:0;border-radius:14px;padding:15px 24px;background:#ffd477;color:#201505;cursor:pointer}.retry:focus-visible{outline:3px solid white;outline-offset:4px}
-  </style></head><body><main><h1>Не получилось открыть приложение</h1><p>Не удалось получить ответ от сервера. Нажмите «Попробовать ещё раз». Если не поможет — проверьте интернет и откройте приложение чуть позже.</p><a class="retry" href="${retryUrl}">Попробовать ещё раз</a></main><script>
+  </style></head><body><main><h1>Подключаемся…</h1><p>Повторяем подключение автоматически.</p><a class="retry" href="${retryUrl}">Попробовать ещё раз</a></main><script>
   (function () {
     var retry = document.querySelector(".retry");
     // Navigation requests do not carry the fragment; recover Telegram launch
     // data from the actual page URL before navigating away from this fallback.
     retry.hash = window.location.hash;
-    retry.addEventListener("click", function (event) {
-      event.preventDefault();
+    var key = "poker-navigation-recovery";
+    var recovery = {count:0, started:Date.now()};
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(key));
+      if (saved && Date.now()-saved.started < 60000) recovery = saved;
+    } catch (e) {}
+    function reconnect(manual) {
+      if (manual) recovery = {count:0, started:Date.now()};
+      recovery.count++;
+      try { sessionStorage.setItem(key, JSON.stringify(recovery)); } catch (e) {}
       var target = new URL(window.location.href);
       target.searchParams.set("_club_retry", String(Date.now()));
       retry.textContent = "Загружаем…";
       window.location.replace(target.href);
+    }
+    var reconnectTimer;
+    if (recovery.count < 3) {
+      reconnectTimer = setTimeout(function () { reconnect(false); }, 1000*Math.pow(2,recovery.count));
+    } else {
+      document.querySelector("h1").textContent = "Пока нет соединения";
+      document.querySelector("p").textContent = "Проверьте интернет и попробуйте ещё раз.";
+    }
+    retry.addEventListener("click", function (event) {
+      event.preventDefault();
+      clearTimeout(reconnectTimer);
+      reconnect(true);
     });
   })();
   </script></body></html>`, {
