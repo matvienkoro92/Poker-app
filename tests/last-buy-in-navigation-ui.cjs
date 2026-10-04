@@ -1,0 +1,14 @@
+const {chromium}=require('playwright'),assert=require('node:assert/strict');
+const base=process.env.CAMPAIGN_BASE||'http://127.0.0.1:4204';
+(async()=>{const browser=await chromium.launch({headless:true});try{const page=await browser.newPage({viewport:{width:390,height:844}});
+await page.goto(base+'/?startapp=profile');await page.waitForFunction(()=>document.body.dataset.view==='profile');await page.waitForTimeout(1800);await page.evaluate(()=>document.fonts.ready);
+await page.evaluate(()=>{const panel=pokerGetPanelScrollCardContentEl();if(panel){panel.scrollTop=500;}else window.scrollTo(0,500);});
+const position=await page.evaluate(()=>({panelY:pokerGetPanelScrollCardContentEl()?.scrollTop||0,windowY:window.scrollY}));
+await page.locator('a[href*="last-buy-in"]').first().evaluate(el=>el.click());await page.waitForURL('**/last-buy-in.html*');
+const saved=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('poker-story-return')));assert.equal(saved.view,'profile');assert.equal(saved.panelY,position.panelY);assert.equal(saved.windowY,position.windowY);
+assert.equal(await page.locator('#storyBack').isVisible(),false);
+await page.locator('#next').click();assert.equal(await page.locator('#map').isVisible(),true);await page.locator('#storyBack').click();assert.equal(await page.locator('#intro').isVisible(),true);assert.ok(page.url().includes('/last-buy-in.html'));
+await page.locator('#exitGame').click();await page.waitForURL(base+'/?startapp=profile');await page.waitForTimeout(2800);
+assert.equal(await page.locator('body').getAttribute('data-view'),'profile');const restored=await page.evaluate(()=>({panelY:pokerGetPanelScrollCardContentEl()?.scrollTop||0,windowY:window.scrollY}));assert.ok(Math.abs(restored.panelY-position.panelY)<2,JSON.stringify({position,restored}));assert.ok(Math.abs(restored.windowY-position.windowY)<2);
+console.log('Game back stays inside game; close returns to profile and restores the original scroll position.');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

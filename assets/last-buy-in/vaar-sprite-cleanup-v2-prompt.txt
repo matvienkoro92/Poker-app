@@ -1,0 +1,11 @@
+Built-in image_gen; transparent background; precise-object-edit.
+
+platform-chip-v2.webp: Remove ONLY the unrelated green grass and orange brick platform fragment on the far left. Preserve the full black-red-gold round Poker21 chip, its exact text, suit ornaments, detail and colors. Center the complete chip alone with transparency and no other objects.
+
+vaar-side-pose-3-v2.webp: Remove ONLY the stray fragment of another shoe in the bottom-left corner. Preserve the complete monkey jumping RIGHT: orange headband and hair, black-orange outfit, tucked knees, fists, tail and sneakers. No redesign, extra feet, shadow or ground.
+
+vaar-side-pose-2-v2.webp: Remove ONLY the stray orange-black shoe fragment at the far left bottom. Preserve the full main monkey running RIGHT, exact pose, proportions and detail. No additional objects.
+
+Outputs retain alpha. Sprite poses normalized to 319 px visible height with 8 px side margins, 9 px top and 8 px bottom for the existing renderer.
+
+platform-block-v2.webp: Remove ONLY the unwanted grass-and-brick platform fragment at the far right. Preserve the full main green-gold question-mark cube exactly with its question mark and suit ornaments. Return the intact cube alone on transparency with no other objects or redesign.

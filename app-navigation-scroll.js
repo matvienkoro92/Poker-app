@@ -303,25 +303,28 @@ window.addEventListener("pageshow", function (e) {
   var key = 'poker-story-return';
   document.addEventListener('click', function (event) {
     var link = event.target.closest && event.target.closest('a[href]');
-    if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || link.target === '_blank') return;
+    if (!link || event.metaKey || event.ctrlKey || link.target === '_blank') return;
     var url; try { url = new URL(link.href, location.href); } catch (_) { return; }
     if (url.origin !== location.origin || !url.pathname.endsWith('/last-buy-in.html')) return;
     var panel = pokerGetPanelScrollCardContentEl();
     var view = document.body.getAttribute('data-view') || 'profile';
     var back = new URL(location.href); back.searchParams.set('startapp', view);
-    try { sessionStorage.setItem(key, JSON.stringify({url: back.href, view: view, windowY: window.scrollY, panelY: panel ? panel.scrollTop : 0, pending: false})); } catch (_) {}
-  });
+    try { sessionStorage.setItem(key, JSON.stringify({url: back.href, view: view, windowY: window.scrollY, panelY: panel ? panel.scrollTop : 0, pending: false, capturedAt: Date.now()})); } catch (_) {}
+  }, true);
   function restore() {
     var saved; try { saved = JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (_) { return; }
     if (!saved || !saved.pending) return;
-    var attempts = 0, timer = setInterval(function () {
-      if (++attempts > 40) { clearInterval(timer); return; }
+    var attempts = 0, stableSince = 0, timer = setInterval(function () {
+      if (++attempts > 100) { clearInterval(timer); return; }
       if (typeof window.setView !== 'function') return;
       if (document.body.getAttribute('data-view') !== saved.view) window.setView(saved.view, {fromBack: true});
       var panel = pokerGetPanelScrollCardContentEl();
       if (panel) panel.scrollTop = saved.panelY;
       window.scrollTo(0, saved.windowY);
-      if (attempts >= 5 && (!panel || Math.abs(panel.scrollTop - saved.panelY) < 2)) {
+      var settled = document.readyState === 'complete' && document.body.getAttribute('data-view') === saved.view && (!panel || Math.abs(panel.scrollTop - saved.panelY) < 2);
+      if (!settled) stableSince = 0;
+      else if (!stableSince) stableSince = Date.now();
+      if (stableSince && Date.now() - stableSince >= 2000) {
         clearInterval(timer); sessionStorage.removeItem(key);
       }
     }, 100);
