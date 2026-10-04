@@ -12,3 +12,5 @@
 body:has(#play:not([hidden])),body:has(#play:not([hidden])) *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}#play canvas,#play button,.campaign-stage,.campaign-controls,.arcade-arena,.arcade-move,.arcade-actions{touch-action:none}#play img{-webkit-user-drag:none}
 
 .campaign-controls[hidden]{display:none}
+
+.poker-controls{display:flex;gap:10px;max-width:620px;margin:auto}.poker-controls button{flex:1;max-width:none;min-height:58px;font-size:17px;font-weight:800;background:#223345}.poker-controls button[data-bet=call]{background:#16624f}.poker-controls button[data-bet=raise]{background:#ebba51;color:#251c12}.poker-controls button:disabled{opacity:.45}.poker-stage .campaign-dialog p{font-size:14px;line-height:1.5}
