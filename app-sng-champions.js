@@ -2724,8 +2724,6 @@
     var panel = document.getElementById("profileSngTournaments");
     if (!panel) return;
     var request = ++profileTournamentsRequest;
-    panel.hidden = true;
-    panel.innerHTML = "";
     var auth = apiAuthQuery("?");
     fetch(baseUrl() + API_PATH + auth + "&mode=ongoing-tournaments", { cache: "no-store" })
       .then(function (res) { if (!res.ok) throw new Error("SNG profile unavailable"); return res.json(); })
@@ -2734,10 +2732,15 @@
         var rows = (data.tournaments || []).filter(function (row) {
           return row.status === "bracket";
         });
-        panel.innerHTML = rows.map(function (row) {
+        var html = rows.map(function (row) {
           return '<button type="button" class="profile-sng-card" data-sng-profile-tournament="' + escapeHtml(row.id) + '" aria-label="Открыть ' + escapeHtml(row.title) + '"><strong>' + escapeHtml(row.title) + '</strong></button>';
         }).join("");
-        panel.hidden = !rows.length;
+        var update = function () {
+          if (panel.innerHTML !== html) panel.innerHTML = html;
+          panel.hidden = !rows.length;
+        };
+        if (typeof window !== "undefined" && typeof window.pokerPreserveProfileScrollDuringUpdate === "function") window.pokerPreserveProfileScrollDuringUpdate(update);
+        else update();
       }).catch(function () {});
   }
 

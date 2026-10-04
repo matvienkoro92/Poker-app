@@ -56,6 +56,33 @@ function pokerGetPanelScrollCardContentEl() {
   }
 }
 
+// Keep the visible profile item in place across a synchronous data render.
+// Measure the content itself; never restore an old scrollTop during a gesture.
+var pokerProfileScrollUpdateDepth = 0;
+function pokerPreserveProfileScrollDuringUpdate(update) {
+  var panel = pokerGetPanelScrollCardContentEl();
+  if (pokerProfileScrollUpdateDepth || !panel || document.body.getAttribute("data-view") !== "profile" || panel.scrollTop < 2) return update();
+  var bounds = panel.getBoundingClientRect();
+  var node = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + Math.min(80, bounds.height / 2));
+  var anchor = node && node.closest ? node.closest('[data-profile-scroll-key], [id]') : null;
+  if (!anchor || !panel.contains(anchor) || anchor === document.getElementById("profileView")) return update();
+  var id = anchor.id;
+  var key = anchor.getAttribute("data-profile-scroll-key");
+  var top = anchor.getBoundingClientRect().top;
+  pokerProfileScrollUpdateDepth++;
+  try { return update(); }
+  finally {
+    pokerProfileScrollUpdateDepth--;
+    var current = anchor.isConnected ? anchor : id ? document.getElementById(id) :
+      panel.querySelector('[data-profile-scroll-key="' + CSS.escape(key) + '"]');
+    if (current && panel.contains(current)) {
+      var delta = current.getBoundingClientRect().top - top;
+      if (Math.abs(delta) > 0.5) panel.scrollTop += delta;
+    }
+  }
+}
+window.pokerPreserveProfileScrollDuringUpdate = pokerPreserveProfileScrollDuringUpdate;
+
 function pokerGetDownloadCardContentScrollEl() {
   try {
     if (!pokerIsDownloadViewActive()) return null;

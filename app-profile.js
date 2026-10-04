@@ -102,7 +102,7 @@ function profileOwnWallRowHtml(row) {
         return "<strong>" + profileEscapeHtml(line) + "</strong>";
       }).join("") + "</span>"
     : (row.text ? "<strong>" + profileEscapeHtml(row.text) + "</strong>" : "");
-  return '<article class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
+  return '<article data-profile-scroll-key="wall-' + profileEscapeHtml(row.id || row.at + ':' + row.text) + '" class="chat-user-modal__news-item chat-user-modal__news-item--' + (row.personal ? "personal" : profileEscapeHtml(row.type || "achievement")) + '">' +
     '<span class="chat-user-modal__news-icon' + (ownAvatar ? ' chat-user-modal__news-icon--avatar' : '') + '" aria-hidden="true">' +
       (ownAvatar ? '<img src="' + profileEscapeHtml(ownAvatar) + '" alt="">' : (row.personal ? "✎" : "♠")) + "</span>" +
     '<span class="chat-user-modal__news-copy">' + (row.pinned ? '<span class="chat-user-modal__wall-pinned">📌 Закреплено</span>' : "") +
@@ -149,7 +149,22 @@ function profileOwnWallDayGroupsHtml(rows) {
   }).join("");
 }
 
+function updateProfileOwnWallHtml(list, html) {
+  if (list.__pokerWallHtml === html) return;
+  var openMonths = Array.from(list.querySelectorAll("details[open][data-profile-scroll-key]")).map(function (el) { return el.getAttribute("data-profile-scroll-key"); });
+  list.innerHTML = html;
+  list.__pokerWallHtml = html;
+  list.querySelectorAll("details[data-profile-scroll-key]").forEach(function (el) {
+    el.open = openMonths.indexOf(el.getAttribute("data-profile-scroll-key")) !== -1;
+  });
+}
+
 function renderProfileOwnWall() {
+  var update = function () { return renderProfileOwnWallContent(); };
+  return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
+}
+
+function renderProfileOwnWallContent() {
   var root = document.getElementById("profileOwnWall");
   var list = document.getElementById("profileOwnWallList");
   var count = document.getElementById("profileOwnWallCount");
@@ -176,13 +191,13 @@ function renderProfileOwnWall() {
     count.textContent = wallCount + (profileOwnWallState.tab === "personal" ? " " + wallCountWord : " событий");
   }
   if (!rows.length) {
-    list.innerHTML = '<div class="chat-user-modal__wall-empty"><strong>' +
+    updateProfileOwnWallHtml(list, '<div class="chat-user-modal__wall-empty"><strong>' +
       (profileOwnWallState.tab === "personal" ? "На стене пока пусто" : "Турнирных событий пока нет") +
-      '</strong>' + (profileOwnWallState.tab === "personal" ? "<span>Напишите первую личную запись.</span>" : "") + "</div>";
+      '</strong>' + (profileOwnWallState.tab === "personal" ? "<span>Напишите первую личную запись.</span>" : "") + "</div>");
     return;
   }
   if (profileOwnWallState.tab === "personal") {
-    list.innerHTML = rows.map(profileOwnWallRowHtml).join("");
+    updateProfileOwnWallHtml(list, rows.map(profileOwnWallRowHtml).join(""));
     return;
   }
   var currentDate = new Date();
@@ -196,10 +211,10 @@ function renderProfileOwnWall() {
     ? profileOwnWallDayGroupsHtml(currentRows)
     : '<div class="chat-user-modal__wall-empty profile-own-wall__month-empty"><strong>В этом месяце событий пока нет</strong></div>';
   var previousHtml = previousRows.length
-    ? '<details class="profile-own-wall__month-spoiler"><summary><span>' + profileEscapeHtml(profileOwnWallMonthTitle(previousDate)) +
+    ? '<details data-profile-scroll-key="month-' + previousKey + '" class="profile-own-wall__month-spoiler"><summary><span>' + profileEscapeHtml(profileOwnWallMonthTitle(previousDate)) +
       '</span><small>' + previousRows.length + ' событий</small></summary><div>' + profileOwnWallDayGroupsHtml(previousRows) + "</div></details>"
     : "";
-  list.innerHTML = currentHtml + previousHtml;
+  updateProfileOwnWallHtml(list, currentHtml + previousHtml);
 }
 
 function refreshProfileOwnWall(force) {
@@ -842,6 +857,11 @@ function setProfilePublicShowcaseLoading(isLoading, opts) {
 }
 
 function profilePublicShowcaseSyncArt(nick, opts) {
+  var update = function () { return profilePublicShowcaseSyncArtContent(nick, opts); };
+  return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
+}
+
+function profilePublicShowcaseSyncArtContent(nick, opts) {
   opts = opts || {};
   var artWrap = document.getElementById("profilePublicRatingArt");
   var artImg = document.getElementById("profilePublicRatingArtImg");
@@ -909,10 +929,14 @@ function profilePublicShowcaseSyncArt(nick, opts) {
     artImg.style.display = "none";
     artImg.onload = function () {
       if (seq !== profilePublicShowcaseArtSeq) return;
-      artImg.hidden = false;
-      artImg.style.display = "";
-      if (avatarWrap) avatarWrap.hidden = true;
-      if (profileOwnWallState.tab === "personal") renderProfileOwnWall();
+      var update = function () {
+        artImg.hidden = false;
+        artImg.style.display = "";
+        if (avatarWrap) avatarWrap.hidden = true;
+        if (profileOwnWallState.tab === "personal") renderProfileOwnWall();
+      };
+      if (typeof window.pokerPreserveProfileScrollDuringUpdate === "function") window.pokerPreserveProfileScrollDuringUpdate(update);
+      else update();
     };
     artImg.onerror = function () {
       if (seq !== profilePublicShowcaseArtSeq) return;
@@ -949,6 +973,11 @@ function profilePublicShowcaseSyncKnownArt(data) {
 var profileReviewInviteState = { loading: false, loaded: false, linked: false, hasReview: false };
 
 function profileReviewInviteRender() {
+  var update = function () { return profileReviewInviteRenderContent(); };
+  return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
+}
+
+function profileReviewInviteRenderContent() {
   var invite = document.getElementById("profileReviewInvite");
   if (!invite) return;
   var push = window.__pokerProfilePushInviteStatus;
@@ -999,6 +1028,11 @@ function profileReviewInviteSync(linked, force) {
 }
 
 function profilePublicShowcaseApplyStatus(status) {
+  var update = function () { return profilePublicShowcaseApplyStatusContent(status); };
+  return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
+}
+
+function profilePublicShowcaseApplyStatusContent(status) {
   profilePublicShowcaseStatus = status || null;
   var section = document.getElementById("profilePublicStatusSection");
   var scale = document.getElementById("profilePublicStatusScale");
@@ -1089,6 +1123,11 @@ function profilePublicShowcaseApplyStatus(status) {
 }
 
 function refreshProfilePublicShowcase(profileData) {
+  var update = function () { return refreshProfilePublicShowcaseContent(profileData); };
+  return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
+}
+
+function refreshProfilePublicShowcaseContent(profileData) {
   var root = document.getElementById("profilePublicShowcase");
   if (!root) return;
   if (profileData && typeof profileData === "object") profilePublicShowcaseData = profileData;
@@ -1292,6 +1331,11 @@ function writeProfileAchievementsCache(data, result) {
 }
 
 function applyProfileAchievementsResult(result) {
+  var update = function () { return applyProfileAchievementsResultContent(result); };
+  return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
+}
+
+function applyProfileAchievementsResultContent(result) {
   var showcase = document.getElementById("profileAchievementsShowcase");
   var total = document.getElementById("profileRatingTotal");
   var achievements = document.getElementById("profileAchievementsList");
