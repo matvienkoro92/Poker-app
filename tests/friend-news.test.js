@@ -52,7 +52,7 @@ function browserHarness() {
     localStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } },
     sessionStorage: { getItem(k) { return storage.get(k); }, setItem(k, v) { storage.set(k, v); } } };
   let source = fs.readFileSync(require.resolve("../app-home-friend-news.js"), "utf8");
-  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsAfterWinner, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, loadClubWallEvents, eventTextHtml,
+  source = source.replace('  if (document.readyState === "loading")', `  window.test = { setSelfBet: function (data) { selfBetNewsRows = clubSelfBetNewsEvents(data); }, friendSelfBetNewsEvents, clubSelfBetNewsEvents, placeSelfBetNewsAfterWinner, buildClubEventsFromRows, recentTournamentEvents, nicknameMatchKeys, readJson, writeJson, updateFriendNewsBadges, observeFriendNewsRead, load, flushFriendNewsRead, loadFriendNewsEnvelope, loadClubWallEvents, eventTextHtml,
     bumpLoad: function () { loadSequence++; }, bumpAuth: function () { friendAuthGeneration++; },
     setState: function (id, rows, read) { friendNewsAccountId = id; friendTrackingSince = Date.parse("2026-09-01T00:00:00Z"); events = rows; friendReadIds = read || {}; },
     pending: function () { return friendReadPending; },
@@ -247,4 +247,22 @@ test("automatic self-bet news excludes open, unpaid and private events and dedup
   assert.equal(h.api.clubSelfBetNewsEvents(selfBetFixture({completedEvents:[selfBetFixture()]})).length,1);
   const row=h.api.clubSelfBetNewsEvents(selfBetFixture({winnerPaidAt:"2026-09-10T01:00:00Z"}))[0];
   assert.equal(row.at,"2026-09-09T12:00:00+03:00");
+});
+
+
+test("club news retains next-day Last Longer payout under yesterday's tournament result", () => {
+  const h = browserHarness();
+  h.context.Date = class extends Date { constructor(...args) { super(...(args.length ? args : [now])); } static now() { return now; } };
+  h.window.pokerPublicImageSrc = value => value;
+  h.window.POKER_CLUB_NEWS_DATA = { latestDate: "09.09.2026", rows: [{
+    tournamentId: "magic", dateLabel: "09.09.2026", date: "2026-09-09T12:00:00",
+    nick: "Local", place: 2, reward: 9010, tournament: "МОК🎰"
+  }] };
+  h.api.setSelfBet(selfBetFixture({title:"Меджик", createdAt:"2026-09-09T13:32:25Z", entries:[{name:"Local",winner:true,stake:100}], winnerPaidAmount:3500}));
+  const news = h.api.buildClubEventsFromRows([], [], {}, []);
+  const index = news.findIndex(row => row.actorNick === "Local" && row.prizeAmount === 9010);
+  assert.ok(index >= 0);
+  assert.equal(news[index + 1]._eventKind, "self-bet-result");
+  assert.equal(news[index + 1].lastLongerPayout, 3500);
+  assert.equal(news[index + 1].at, news[index].at);
 });

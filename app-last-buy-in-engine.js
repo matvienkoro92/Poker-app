@@ -5,7 +5,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.
 const romaRooms=['Гардероб','Покерный зал','Коктейльный бар','Турнирный зал','VIP-галерея','Касса клуба','Служебный коридор','Хранилище · Чек и Рейз'];
 const names=['Капитан Колл','Братья Чек и Рейз','Дилер Пересдача','Удав Депозит','Охранник Натс','Снайпер Слоуплей','Валера · Железный натс'];
 function create(chapter){if(chapter===0)throw Error('Chapter one uses MonkeyRaceCampaign');const s={chapter,tick:0,phase:'route',health:5,hits:0,inv:0,cooldown:0,specialCooldown:0,score:0,secret:false,won:false,lost:false,x:90,y:410,vy:0,facing:1,attack:0,progress:0,enemies:[],shots:[],platforms:[],picked:0,boss:{x:310,y:395,hp:chapter===6?12:5,max:chapter===6?12:5,name:names[chapter],timer:0,warning:false},message:'',wave:0,finalPhase:0,ground:false,chairCharges:4,combo:0,particles:[],tokens:[],jumpHeight:0,jumpSpeed:0,checkpoint:0,shake:0,locks:[],gates:[]};
- if(chapter===1){s.y=410;s.world=390;s.boss.hp=s.boss.max=34;s.furniture=[];s.cashTraps=[];s.dashCooldown=0;s.superCooldown=0;s.superFlash=0;spawnWave(s);}
+ if(chapter===1){s.x=155;s.y=435;s.world=390;s.boss.hp=s.boss.max=34;s.furniture=[];s.cashTraps=[];s.dashCooldown=0;s.superCooldown=0;s.superFlash=0;spawnWave(s);}
  if(chapter===2){s.y=420;s.world=6010;s.boss.x=5860;s.boss.y=390;s.boss.hp=s.boss.max=7;s.platforms=[{x:0,w:290,base:470,y:470}];for(let i=1;i<35;i++){const x=245+(i-1)*165,base=470-(i%3)*22;s.platforms.push({x,w:150,base,y:base,moving:i%4===2});s.tokens.push({x:x+55,y:base-55,collected:false});}s.platforms.push({x:5640,w:350,base:470,y:470});s.vents=[550,1220,2050,2680,3350,4020,4690,5360];s.gates=[{x:5590,open:false}];}
  if(chapter===3){s.x=70;s.y=350;s.world=3850;s.platforms=train(s);s.boss.hp=s.boss.max=3;s.locks=Array.from({length:7},(_,i)=>({x:430+i*490,open:false}));}
  if(chapter===4){s.flight=Flight.create(927313,9);s.x=94;s.y=270;s.boss.x=316;s.boss.y=270;s.boss.hp=s.boss.max=6;s.devices=[true,true,true];}
@@ -17,7 +17,7 @@ function damage(s){if(s.inv||s.won||s.lost)return;s.health--;s.hits++;s.inv=80;s
 function hurtBoss(s,n){if(s.boss.hp<=0)return;s.boss.hp=Math.max(0,s.boss.hp-n);s.score+=100;if(!s.boss.hp){s.won=true;s.phase='done';}}
 function romaTables(room){const layouts=[[[195,340,125,62]],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w:w*1.12,h:h*1.12}));}
 function romaProps(room){const layouts=[
- [['rack',180,235,75,28],['sofa',285,455,100,32]],
+ [['rack',65,475,100,28],['sofa',295,470,132,32]],
  [['sofa',75,450,90,32],['trolley',285,245,55,30]],
  [['rack',40,235,50,28],['sofa',300,455,85,32]],
  [['trolley',60,455,55,30],['sofa',300,455,90,28]],

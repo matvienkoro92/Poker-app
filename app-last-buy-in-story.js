@@ -33,7 +33,7 @@ function loseChapter(i,resume){if(!storyRun.active||storyRun.lives<=0)return;sto
 let introduced=false;try{introduced=localStorage.getItem('poker-last-buy-in:introduced')==='1';}catch(_){}
 function stopCinema(){clearTimeout(cinemaTimer);cinemaTimer=0;cinemaDone=null;cinemaPaused=false;document.body.classList.remove('cinematic','cinema-paused');$('scene').removeAttribute('role');$('scene').removeAttribute('tabindex');$('scene').removeAttribute('aria-label');$('scene').setAttribute('aria-hidden','true');}
 function unlockedChapter(){let i=0;while(i<chapters.length-1&&medals[i])i++;return i;}
-const cityChapterPoints=[[80,84],[83,34],[82,8],[77,21],[61,9],[62,30],[28,39],[25,58],[44,82],[61,70],[62,50],[88,49]];
+const cityChapterPoints=[[80,84],[83,34],[82,8],[71.5,8.5],[61,9],[62,30],[28,39],[25,58],[44,82],[61,70],[62,50],[88,49]];
 const cityChapterRoutes=cityChapterPoints.slice(1).map((p,i)=>{const a=cityChapterPoints[i];return [a,[a[0],(a[1]+p[1])/2],[p[0],(a[1]+p[1])/2],p];});
 function cityRoute(points){return points.map((p,i)=>(i?'L':'M')+p[0]*10+','+p[1]*10).join(' ');}
 function selectMapChapter(i){if(i<0||i>accessibleChapter())return;const c=chapters[i],names={alena:'Алёнка',shkarubo:'Паша Шкарубо',frank:'Frankl (Morf)',man:'ПокерМанки',roma:'Рома Банкомат',vaar:'Вааар',miss:'Мисслик',emil:'Эмиль',cool:'Кулершан',valera:'Валера'};const dialog=$('missionChoice');dialog.innerHTML='<p class="mission-hero">'+(names[c.hero]||'Команда Poker21')+'</p><h2 id="missionChoiceTitle">'+c.title+'</h2><div class="mission-choice-actions"><button class="primary" data-mission-start="'+i+'">Начать</button><button data-mission-cancel>Отмена</button></div>';dialog.showModal();dialog.querySelector('[data-mission-start]').focus();}

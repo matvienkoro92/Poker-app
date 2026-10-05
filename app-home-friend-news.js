@@ -1448,8 +1448,10 @@
       var paidAt = Date.parse(event.winnerPaidAt);
       var amount = Number(event.winnerPaidAmount);
       if (!winner || !winner.name || !Number.isFinite(paidAt) || !isRecentEvent(event.winnerPaidAt) || !Number.isFinite(amount) || amount <= 0) return null;
-      // Club reporting day rolls over at 06:00 Moscow time, including late-night settlements.
-      var day = new Date(paidAt - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      // Use the tournament's creation day: its payout may arrive the next morning.
+      // Club reporting day rolls over at 06:00 Moscow time.
+      var createdAt = Date.parse(event.createdAt);
+      var day = new Date((Number.isFinite(createdAt) ? createdAt : paidAt) - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
       var color = playerNewsColor(winner.name);
       var stake = Number(winner.stake || event.stakePrice) || 0;
       var title = String(event.title || "Турнир");
@@ -3033,7 +3035,7 @@
       var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
       return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/' + image + '" alt="" aria-hidden="true" loading="lazy"></div><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
         '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
-        '<p class="home-news-achievement__note">По данным клуба. Призовые до вычета бай-инов.' + (['first','personal','milestone'].indexOf(post.kind) !== -1 ? ' Достижение за доступную историю учёта.' : '') + '</p></details></article>' };
+        '</details></article>' };
     }).filter(Boolean);
   }
 
@@ -4457,7 +4459,7 @@
       });
       if (!alreadyLoaded) birthdays.push(row);
     });
-    return arrangeClubWinEvents(attachFriendAvatars(
+    return arrangeClubWinEvents(placeSelfBetNewsAfterWinner(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
         birthdays,
@@ -4466,7 +4468,7 @@
         clubSelfBetNewsEvents()
       ),
       allPlayers
-    ).filter(function (row) {
+    )).filter(function (row) {
       return isCurrentClubEvent(row);
     })).slice(0, MAX_EVENTS);
   }
