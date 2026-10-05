@@ -298,6 +298,12 @@ self.addEventListener("fetch", function (event) {
       event.respondWith(fetch(event.request));
       return;
     }
+    // Raffle fixes must take effect when reopening the section, even if the
+    // caller still uses a script URL saved before the latest deployment.
+    if (/^\/app-raffles(?:-[a-z-]+)?\.js$/.test(u.pathname)) {
+      event.respondWith(pokerSwNetworkFirst(POKER_STATIC_CACHE, event.request));
+      return;
+    }
     // Rating imports regenerate this file daily. Cache-first/stale data can
     // leave the previous day hero selected while current win cards are shown.
     if (u.pathname === "/club-news-data.js") {

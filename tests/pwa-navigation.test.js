@@ -68,7 +68,7 @@ test('retry executes a new navigation with Telegram fragment and launch query in
   const link = {addEventListener(name, handler) { assert.equal(name, 'click'); click = handler; }};
   const original = 'https://club.test/?startapp=raffles&_club_retry=old#tgWebAppData=launch%26auth';
   vm.runInNewContext(html.match(/<script>([\s\S]*?)<\/script>/)[1], {
-    URL, Date, document:{querySelector:()=>link},
+    URL, Date, setTimeout:()=>1, clearTimeout(){}, document:{querySelector:()=>link},
     window:{location:{href:original, hash:new URL(original).hash, replace:url=>destination=url}}
   });
   assert.equal(link.hash, new URL(original).hash);
@@ -106,4 +106,18 @@ test('client errors do not cause automatic retries', async () => {
   const r = runtime(async () => { calls++; return new Response('missing', {status:404}); });
   assert.equal((await r.context.pokerSwNavigation({})).status, 503);
   assert.equal(calls, 1);
+});
+test('raffle scripts use fresh network code rather than a cached broken renderer',async()=>{
+ const fresh={status:200,type:'basic',clone(){return this}},stale={old:true};let reads=0,writes=0;
+ const r=runtime(async()=>fresh);
+ r.context.caches={open:async()=>({match:async()=>{reads++;return stale;},put:()=>writes++})};
+ let pending;
+ r.handlers.fetch({request:{url:'https://club.test/app-raffles.js?v=4.031',method:'GET'},respondWith:value=>pending=value});
+ assert.equal(await pending,fresh);assert.equal(reads,0);assert.equal(writes,1);
+});
+test('raffle code remains available from cache when offline',async()=>{
+ const cached={offline:true};const r=runtime(async()=>{throw Error('offline')});
+ r.context.caches={open:async()=>({match:async()=>cached})};let pending;
+ r.handlers.fetch({request:{url:'https://club.test/app-raffles-completed.js?v=1',method:'GET'},respondWith:value=>pending=value});
+ assert.equal(await pending,cached);
 });
