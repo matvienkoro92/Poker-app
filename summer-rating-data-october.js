@@ -739,4 +739,223 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "04.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 2,
+          "reward": 2874.92,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 3,
+          "reward": 1491.87,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 9,
+          "reward": 18.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 10600,
+          "points": 0
+        },
+        {
+          "nick": "I🐅I",
+          "place": 4,
+          "reward": 4200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 🃏🃏🃏 20K 🏆",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "vvllaadd",
+          "place": 2,
+          "reward": 4943,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Zeus",
+          "place": 1,
+          "reward": 13140,
+          "points": 0
+        },
+        {
+          "nick": "SantaClauS",
+          "place": 2,
+          "reward": 3650,
+          "points": 0
+        },
+        {
+          "nick": "Виктор",
+          "place": 4,
+          "reward": 3050,
+          "points": 0
+        },
+        {
+          "nick": "Палач",
+          "place": 5,
+          "reward": 930,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресный турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 5,
+          "reward": 13137.5,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 6,
+          "reward": 6281.25,
+          "points": 0
+        },
+        {
+          "nick": "Player746595",
+          "place": 12,
+          "reward": 3000,
+          "points": 0
+        },
+        {
+          "nick": "Zeus",
+          "place": 24,
+          "reward": 1612.5,
+          "points": 0
+        },
+        {
+          "nick": "Proxor",
+          "place": 15,
+          "reward": 468.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Nikolay54rus",
+          "place": 2,
+          "reward": 9741.56,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 7,
+          "reward": 2811.87,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "jeanCat",
+          "place": 1,
+          "reward": 4554.85,
+          "points": 0
+        },
+        {
+          "nick": "time2bass",
+          "place": 2,
+          "reward": 3161.1,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:59",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 13555.000000000002,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 18,
+          "reward": 183,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "A Аддоник А",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 11900,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 3,
+          "reward": 2940,
+          "points": 0
+        },
+        {
+          "nick": "Proxor",
+          "place": 5,
+          "reward": 2300,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

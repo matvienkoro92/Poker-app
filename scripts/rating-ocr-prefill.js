@@ -477,6 +477,7 @@ async function parseOcrFile(file) {
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
   if (date === "01.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
   if (date === "02.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА МОК";
+  if (date === "04.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "02.10.2026" && time === "12:00" && token.text === "yID:173085") token.text = "ID:173085";

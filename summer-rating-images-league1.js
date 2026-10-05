@@ -1112,4 +1112,12 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-03-10-2026-league1-big-boss-19h.jpg",
     "rating-compressed-preview/rating-03-10-2026-league1-a-addonik-a-22h.jpg"
   ]
+,
+  "04.10.2026": [
+    "rating-compressed-preview/rating-04-10-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-04-10-2026-league1-voskresnyj-turnir-18h.jpg",
+    "rating-compressed-preview/rating-04-10-2026-league1-pyatihatka-ko-20h.jpg",
+    "rating-compressed-preview/rating-04-10-2026-league1-magic-500-120k-2159h.jpg",
+    "rating-compressed-preview/rating-04-10-2026-league1-a-addonik-a-22h.jpg"
+  ]
 };
