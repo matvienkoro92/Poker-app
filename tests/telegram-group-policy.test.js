@@ -62,5 +62,8 @@ test('event scope permits only messages in the configured club group',async t=>{
  assert.equal((await send('-100123','sendMessage','cooler-record')).ok,true);
  assert.equal((await send('-100999','sendMessage','cooler-record')).ok,false);
  assert.equal((await send('-100123','sendPhoto','cooler-record')).ok,false);
- assert.equal(sends,3);
+ assert.equal((await send('-100123','sendMessage','cooler-winner')).ok,true);
+ assert.equal((await send('-100999','sendMessage','cooler-winner')).ok,false);
+ assert.equal((await send('-100123','sendPhoto','cooler-winner')).ok,false);
+ assert.equal(sends,4);
 });

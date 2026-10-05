@@ -1,5 +1,5 @@
 /* One scene, with live tournament and bonus controls on top. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) {
   display: block !important; position: relative !important; container-type: inline-size;
   width: 100% !important; height: auto !important; min-height: 0 !important;
   translate: 5% 0;
@@ -12,7 +12,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   box-shadow: none !important; isolation: isolate;
 }
 /* Reuse the scene pixels above the ticket copy, following the head silhouette. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)::before {
   content: "" !important;
   display: block !important;
   position: absolute !important;
@@ -28,7 +28,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:
   pointer-events: none !important;
   z-index: 2 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)::after {
   content: "" !important;
   display: block !important;
   position: absolute !important;
@@ -45,17 +45,17 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:
   pointer-events: none !important;
   z-index: 5 !important;
 }
-#app .tournament-day-home-dual--tournament-focus::before,
-#app .tournament-day-home-dual--tournament-focus::after,
-#app .tournament-day-home-dual--tournament-focus > .home-tournament-flow,
-#app .tournament-day-home-dual--tournament-focus > .tournament-day-home-wrap--tournament-day { display: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference)::before,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference)::after,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-flow,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .tournament-day-home-wrap--tournament-day { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title {
   position: absolute !important; top: 8% !important; left: 15% !important; width: 55% !important;
   margin: 0 !important; padding: 0 !important; color: #ffe0a0 !important;
   font: 800 3cqw/1.2 Arial,sans-serif !important; text-align: center; transform: rotate(-4deg);
   z-index: 4; text-shadow: 0 1px 2px #000 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .tournament-day-home-wrap--week {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .tournament-day-home-wrap--week {
   position: absolute !important; inset: 0 !important; width: 100% !important; height: 40% !important;
   margin: 0 !important; padding: 0 !important; z-index: 3;
 }
@@ -93,25 +93,25 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-tro
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin { top: 45% !important; left: 75% !important; width: 15% !important; font-size: 3.5cqw !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList > .home-tournament-week-nav,
 body[data-view="download"] #app.app #homeTournamentWeekList > .home-tournament-week-row::after { display: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock {
   display: block !important; position: absolute !important; left: 33% !important; top: 52% !important;
   width: 30% !important; height: 20% !important; margin: 0 !important; padding: 0 !important;
   background: none !important; border: 0 !important; box-shadow: none !important; transform: none !important; z-index: 4;
 }
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-dock::before,
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-dock::after,
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__chip,
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__end,
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-hint { display: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock::before,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock::after,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__chip,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__end,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-hint { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar {
   display: flex !important; position: absolute !important; top: 78% !important; left: 0 !important; width: 100% !important; height: 18% !important;
   min-height: 0 !important; padding: 0 !important; margin: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important;
   gap: 3% !important; align-items: center; justify-content: center; color: #ffe7b2 !important; font-size: 1.6cqw !important;
 }
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar::before,
-#app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar::after { display: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar :is(strong,small) { font-size: inherit !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar::before,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar::after { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar :is(strong,small) { font-size: inherit !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-bonuses--table {
   display: block !important; position: absolute !important; top: 81% !important; left: 0 !important; width: 100% !important; height: 16% !important;
   margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; z-index: 4;
 }
@@ -140,21 +140,21 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus__amount { font-size: 2.5cqw !important; font-weight: 800 !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__note { display: block !important; position: absolute; top: 68%; left: 6%; width: 88%; margin: 0; font-size: 1.7cqw; text-align: center; color: #d9b875; }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock { container-type: normal !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar { transform: none !important; right: auto !important; bottom: auto !important; font-size: 1.65cqw !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock { container-type: normal !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar { transform: none !important; right: auto !important; bottom: auto !important; font-size: 1.65cqw !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus { container-type: normal !important; flex-direction: column !important; justify-content: flex-start !important; padding-top: 8% !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus__label { order: 0 !important; font-size: 2cqw !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus__amount { order: 1 !important; font-size: 2.5cqw !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar { min-width: 0 !important; max-width: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar { font-size: 2cqw !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar { min-width: 0 !important; max-width: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar { font-size: 2cqw !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus[hidden] { visibility: hidden !important; pointer-events: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus :is(.home-last-longer-dock,.home-tournament-bonus,.home-tournament-week-row,.home-tournament-week-nav):focus-visible { outline: 2px solid #ffe0a0 !important; outline-offset: 2px; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) :is(.home-last-longer-dock,.home-tournament-bonus,.home-tournament-week-row,.home-tournament-week-nav):focus-visible { outline: 2px solid #ffe0a0 !important; outline-offset: 2px; }
 
 /* Calm ticket hierarchy and dedicated text area below the bonus icons. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title { font-size: 2.5cqw !important; letter-spacing: .08em; top: 10% !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title::after,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title { font-size: 2.5cqw !important; letter-spacing: .08em; top: 10% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title::after,
 body[data-view="download"] #app.app #homeTournamentWeekList > .home-tournament-week-nav::before,
 body[data-view="download"] #app.app #homeTournamentWeekList > .home-tournament-week-nav::after { display: none !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__title { top: 34% !important; font-size: 6.2cqw !important; letter-spacing: .025em; }
@@ -162,12 +162,12 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-tro
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__prize { top: 67% !important; font-size: 6.4cqw !important; font-weight: 800 !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 36% !important; font-size: 2cqw !important; text-transform: uppercase; letter-spacing: .08em; color: #cbb890 !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin { top: 47% !important; font-size: 3cqw !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table { top: 83.5% !important; height: 14% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-bonuses--table { top: 83.5% !important; height: 14% !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus { padding-top: 0 !important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus__label { font-size: 1.75cqw !important; min-height: 2.2em; display: flex !important; align-items: center; justify-content: center; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus__amount { font-size: 2.2cqw !important; }
 /* Club ticket identity; all tournament figures remain live text. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title {
   top: 7% !important; left: 16% !important; width: 53% !important;
   display: flex; flex-direction: column; align-items: center; gap: 1.8cqw;
 }
@@ -191,9 +191,9 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-tro
 .home-ticket-aces > span + span > span { color: #b98256; }
 
 /* Orange paper ticket, matching the supplied reference. */
-#app .tournament-day-home-dual--tournament-focus .home-ticket-brand,
-#app .tournament-day-home-dual--tournament-focus .home-ticket-aces { display: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title { top: 7.5% !important; left: 23% !important; width: 43% !important; align-items: flex-start; text-align: left; }
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-ticket-brand,
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-ticket-aces { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title { top: 7.5% !important; left: 23% !important; width: 43% !important; align-items: flex-start; text-align: left; }
 .home-ticket-session { color: #d8d5cb; font-size: 2.25cqw; font-weight: 800; letter-spacing: .1em; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__copy > :where(span) { left: 23% !important; width: 43% !important; text-align: left !important; color: #f4e6c7 !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__title { top: 28% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: var(--ticket-title-size, 8.5cqw) !important; font-weight: 900 !important; letter-spacing: .025em; padding-bottom: 1cqw !important; border-bottom: 1cqw solid #c75c20; display: block !important; }
@@ -201,15 +201,15 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-tro
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__prize { top: 68% !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: 7.3cqw !important; font-weight: 900 !important; letter-spacing: .01em; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 24% !important; left: 72.5% !important; width: 13% !important; text-align: center !important; font-size: 1.8cqw !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin { top: 32% !important; left: 72.5% !important; width: 13% !important; text-align: center !important; font-family: Impact, 'Arial Narrow', sans-serif !important; font-size: 3cqw !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock { top: 50.5% !important; left: 32% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock { top: 50.5% !important; left: 32% !important; }
 
 /* Align both lines with the buy-in frame in the current ticket artwork. */
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin-label { top: 28% !important; left: 68% !important; }
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-trophy__buyin { top: 33% !important; left: 68% !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table { top: 81.5% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-bonuses--table { top: 81.5% !important; }
 
 /* Place live bonus labels on the original illustrated table and its icons. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-bonuses--table {
   top: 73.3% !important; height: 22% !important;
 }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__grid {
@@ -240,13 +240,13 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 .home-tournament-bonuses__note-arc text { fill: currentColor; font: 500 20px Arial, sans-serif; }
 
 /* Bonus centres follow the five illustrated felt panels, with a shallow arc. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock {
   top: 49% !important; left: 30% !important; width: 28% !important; height: 19% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar {
   top: 64% !important; height: 16% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-bonuses--table {
   top: 69.5% !important; height: 14% !important;
 }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__grid { height: 100% !important; }
@@ -275,7 +275,7 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__note {
   top: 80% !important; color: #d6c5a0; pointer-events: none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) + .home-club-achievements-title {
   margin-top: 20px;
 }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus:focus-visible {
@@ -283,22 +283,22 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 }
 
 /* Keep the status centred in the plaque, independent of inherited line metrics. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar {
   align-items: center !important; justify-content: center !important;
   line-height: 1 !important; text-align: center !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__empty {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__empty {
   position: static !important; margin: 0 !important; padding: 0 !important;
   transform: none !important; font: 600 2.4cqw/1 Arial, sans-serif !important;
   color: #ead9b5; white-space: nowrap;
 }
 
 /* Highlight the illustrated Last Longer chip inside its existing button. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock {
   cursor: pointer;
   overflow: visible !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock::before {
   content: "";
   display: block !important;
   position: absolute;
@@ -313,11 +313,11 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   pointer-events: none;
   transition: box-shadow 180ms ease, border-color 180ms ease;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock:is(:hover, :focus-visible)::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock:is(:hover, :focus-visible)::before {
   border-color: #ffe9b9;
   box-shadow: 0 0 1.5cqw #ffdf91, 0 0 3.5cqw #ffad3299, 0 0 6cqw #ff8a204d, inset 0 0 1cqw #ffd16c66;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock:active::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock:active::before {
   box-shadow: 0 0 .8cqw #ffdf91, 0 0 2cqw #ffad3299, inset 0 0 1.4cqw #ffd16c80;
 }
 
@@ -361,7 +361,7 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 }
 
 /* Wider gold pedestal plaque for the participant count and bank. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar {
   left: -18% !important;
   width: 136% !important;
   top: 62% !important;
@@ -373,7 +373,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
   isolation: isolate;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar::before {
   content: "" !important;
   display: block !important;
   position: absolute;
@@ -383,7 +383,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   z-index: -1;
   pointer-events: none;
 }
-#app .tournament-day-home-dual--tournament-focus > .home-tournament-share {
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-share {
   position: absolute; left: 66.7%; top: 17.2%; width: 18%; height: 13%; z-index: 6;
   box-sizing: border-box;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9cqw;
@@ -393,7 +393,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   transform: rotate(-4deg); transform-origin: center;
 }
 /* Reuse a clean part of each ticket to hide its printed share circle. */
-#app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="gucci"], [data-tournament-character="shkarubo"], [data-tournament-character="redrocket"], [data-tournament-character="shtukatur"]:not([data-tournament-weekday="1"]):not([data-tournament-weekday="6"])) > .home-tournament-share::before {
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="gucci"], [data-tournament-character="shkarubo"], [data-tournament-character="redrocket"], [data-tournament-character="shtukatur"]:not([data-tournament-weekday="1"]):not([data-tournament-weekday="6"])) > .home-tournament-share::before {
   content: "";
   position: absolute;
   left: 50%;
@@ -415,7 +415,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
 @media (prefers-reduced-motion: reduce) {
   .home-tournament-share svg { animation: none; }
 }
-#app .tournament-day-home-dual--tournament-focus > .home-tournament-share:focus-visible { filter:brightness(1.4) drop-shadow(0 0 1cqw rgba(255,205,112,1)); }
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-share:focus-visible { filter:brightness(1.4) drop-shadow(0 0 1cqw rgba(255,205,112,1)); }
 .tournament-share-preview { position:fixed; margin:auto; width:min(440px,calc(100vw - 32px)); box-sizing:border-box; padding:24px; border:1px solid #ad8546; border-radius:22px; background:#10171f; color:#ffe0a0; }
 .tournament-share-preview::backdrop { background:#000a; }
 .tournament-share-preview h3 { padding-right:28px; }
@@ -423,33 +423,33 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
 .tournament-share-preview button { padding:12px 16px; border:1px solid #bd944b; border-radius:12px; background:linear-gradient(#ffd875,#e8a82d); color:#18130a; font-weight:700; cursor:pointer; }
 .tournament-share-preview [data-close] { position:absolute; top:12px; right:12px; padding:5px 11px; background:#151c25; color:#ffe0a0; font-size:24px; }
 /* Apply only the corrected inner rail strip from the edited illustration. */
-#app .tournament-day-home-dual--tournament-focus > .home-table-seam-fix {
+#app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-table-seam-fix {
   position:absolute; inset:0; z-index:2; pointer-events:none;
   background:url('./assets/home-table-seam-no-glow-v1-display-v1.webp') center / 100% 100% no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1400' preserveAspectRatio='none'%3E%3Cpath d='M0 823 Q140 793 407 796 M590 797 Q650 797 741 809 M854 819 Q1020 828 1080 856' fill='none' stroke='white' stroke-width='24'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
 
 /* Active ticket raffle: replace only the bucket/stool area with the chest. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden])) {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden])) {
   background: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden]))::before {
   display: block !important;
   background-image: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-single-table-v1-display-v1.webp')) !important;
   clip-path: none;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0H100V100H0Z M5 33.5H9.5L11.5 38H26.5V48H28L27 49L26 54L0 55.5V48H4V38H6Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   z-index: 0 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden]))::after {
   background: var(--home-tournament-scene, url('./assets/home-tournament-shtukatur-single-table-v1-display-v1.webp')) center / 100% 100% no-repeat !important;
 }
 .home-tournament-raffle-chest-art { display: none; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]:has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art {
   display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background: url('./assets/home-tournament-raffle-chest-scene-v1-display-v1.webp') center / 100% 100% no-repeat;
   clip-path: polygon(0 55.5%, 0 53%, 1.5% 53%, 1.7% 42%, 3% 42%, 3% 39.5%, 4.4% 38%, 7.5% 38.5%, 6.8% 35.5%, 8.4% 34.5%, 8.4% 33.5%, 13% 33%, 15.3% 35.4%, 16% 33.5%, 20% 33.2%, 24.7% 34.5%, 23.5% 38.5%, 27.3% 38.5%, 28.5% 40%, 29% 47%, 27% 49%, 26% 54%);
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > #homeTournamentRaffleBonus {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > #homeTournamentRaffleBonus {
   position: absolute !important;
   left: 9.6% !important; top: 39% !important;
   width: 17.8% !important; height: 14% !important;
@@ -461,7 +461,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   transform: rotate(-2deg) !important;
   z-index: 4 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > #homeTournamentRaffleBonus[hidden] { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > #homeTournamentRaffleBonus[hidden] { display: none !important; }
 body[data-view="download"] #app.app #homeTournamentRaffleBonus::before,
 body[data-view="download"] #app.app #homeTournamentRaffleBonus::after { content: none !important; }
 body[data-view="download"] #app.app #homeTournamentRaffleBonus:focus-visible { outline: 2px solid #ffe0a0 !important; outline-offset: 4px; border-radius: 6px !important; }
@@ -488,98 +488,98 @@ body[data-view="download"] #app.app #homeTournamentRaffleBonus .home-tournament-
 body[data-view="download"] #app.app #homeTournamentRaffleBonusTimer { color: #ffe9ad; font: 900 1.8cqw/1 Arial,sans-serif; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000; }
 
 /* Tractor tournament uses Pasha Shkarubo, including the raffle scene layers. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] {
   --home-tournament-scene: url('./assets/home-tournament-shkarubo-chips-v2.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-table-seam-fix {
   display: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
 }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] {
   --home-tournament-scene: url('./assets/home-tournament-cooler-chips-v7.webp');
 }
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus__glove {
   display: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
 }
 
 /* Character artwork has its own chip and table coordinates. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) {
   translate: none;
   margin-bottom: 0 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) #homeTournamentWeekList .home-tournament-trophy__caption {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) #homeTournamentWeekList .home-tournament-trophy__caption {
   top: 46% !important;
   font-size: 1.8cqw !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) #homeTournamentWeekList .home-tournament-trophy__prize {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) #homeTournamentWeekList .home-tournament-trophy__prize {
   top: 53% !important;
   font-size: 6.8cqw !important;
   white-space: nowrap !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) > .home-last-longer-dock {
   left: 30.5% !important; top: 50% !important; width: 28% !important; height: 18% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) > .home-last-longer-dock::before {
   left: 20% !important; top: 0 !important; width: 60% !important; height: 73% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) .home-last-longer-dock__bar {
   left: 0 !important; width: 100% !important; top: 85% !important; height: 20% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"],[data-tournament-character="cooler"],[data-tournament-character="shkarubo"],[data-tournament-character="fishkopcheny"],[data-tournament-character="gucci"]) > .home-tournament-bonuses--table {
   top: 72.5% !important; height: 14% !important;
 }
 
 /* Reveal scene backgrounds shortly before scrolling into view. */
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]),
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready])::before,
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready])::after,
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden]))::before,
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden]))::after,
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]) > .home-table-seam-fix,
-html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art { background-image: none !important; }
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready]),
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready])::before,
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready])::after,
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden]))::before,
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden]))::after,
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready]) > .home-table-seam-fix,
+html.home-art-observer body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-home-deferred-art]:not([data-home-art-ready]):has(> #homeTournamentRaffleBonus:not([hidden])) > .home-tournament-raffle-chest-art { background-image: none !important; }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] {
   --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-boxing-v4.webp');
   --home-tournament-scene: image-set(url('./assets/home-tournament-fishkopcheny-boxing-v4.webp') 1x, url('./assets/home-tournament-fishkopcheny-boxing-v4-hd.webp') 2x);
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__caption,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__caption,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
   left: 23% !important;
   width: 42% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] #homeTournamentWeekList .home-tournament-trophy__prize {
   top: 52% !important;
   font-size: 5.5cqw !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-last-longer-dock::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] > .home-last-longer-dock::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
   display: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock--unannounced .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] .home-last-longer-dock--unannounced .home-last-longer-dock__bar {
   display: flex !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"]:not(:has(> #homeTournamentRaffleBonus:not([hidden])))::before {
   display: none !important;
 }
 
 /* This scene already contains its own rail; the old patch cuts across the glove. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-table-seam-fix {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] > .home-table-seam-fix {
   display: none !important;
 }
 /* Keep the ticket lettering behind this character's hat and head silhouette. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"]::after {
   mask-image: url('./assets/home-tournament-fishkopcheny-head-mask.svg');
   -webkit-mask-image: url('./assets/home-tournament-fishkopcheny-head-mask.svg');
 }
 
 /* Sunday uses a complete illustrated glove trophy, without a covering panel. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses.home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses.home-tournament-bonuses--table::before {
   background-image: url('./assets/home-bonus-stacks-glove-solid-v1.webp') !important;
 }
 body[data-view="download"] #app.app :is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) .home-tournament-bonuses--table .home-tournament-bonus--pokermanki-knockout::before,
@@ -600,32 +600,32 @@ body[data-view="download"] #app.app :is([data-tournament-character="fishkopcheny
 }
 
 /* Blend the illustrated bonus felt into the main table instead of exposing its rectangular top edge. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table::before {
   mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.18) 5%, #000 18%) !important;
   -webkit-mask: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.18) 5%, #000 18%) !important;
 }
 
 /* Monday's magician uses the rating character Morf. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] {
   --home-tournament-scene: url('./assets/home-tournament-morf-single-table-v2.webp');
   --home-tournament-scene: image-set(url('./assets/home-tournament-morf-single-table-v2.webp') 1x, url('./assets/home-tournament-morf-single-table-v2-hd.webp') 2x);
   translate: none;
   margin-bottom: 0 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-table-seam-fix { display: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] > .home-table-seam-fix { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"]::after {
   mask-image: url('./assets/home-tournament-morf-head-mask.svg');
   -webkit-mask-image: url('./assets/home-tournament-morf-head-mask.svg');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] #homeTournamentWeekList .home-tournament-trophy__caption { top: 46% !important; font-size: 1.8cqw !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] #homeTournamentWeekList .home-tournament-trophy__prize { top: 53% !important; font-size: 6.8cqw !important; white-space: nowrap !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-last-longer-dock { left: 30.5% !important; top: 50% !important; width: 28% !important; height: 18% !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-last-longer-dock::before { left: 20% !important; top: 0 !important; width: 60% !important; height: 73% !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] .home-last-longer-dock__bar { left: 0 !important; width: 100% !important; top: 85% !important; height: 20% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] #homeTournamentWeekList .home-tournament-trophy__caption { top: 46% !important; font-size: 1.8cqw !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] #homeTournamentWeekList .home-tournament-trophy__prize { top: 53% !important; font-size: 6.8cqw !important; white-space: nowrap !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] > .home-last-longer-dock { left: 30.5% !important; top: 50% !important; width: 28% !important; height: 18% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] > .home-last-longer-dock::before { left: 20% !important; top: 0 !important; width: 60% !important; height: 73% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] .home-last-longer-dock__bar { left: 0 !important; width: 100% !important; top: 85% !important; height: 20% !important; }
 
 /* Five colored chip trophies, with live bonus labels and amounts. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table {
   top: auto !important; bottom: .5% !important; left: 0 !important; width: 100% !important; height: auto !important; aspect-ratio: 3 / 1;
   padding: 0 !important; z-index: 6;
   border: 0 !important; border-radius: 0 0 8% 8% !important;
@@ -680,25 +680,25 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus:focus-visible { outline: 2px solid #ffe3a1 !important; outline-offset: -2px; }
 
 /* Allow the complete participant count and bank to fit inside the sloped plaque. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar {
   left: -30% !important; width: 160% !important;
   padding: .4cqw 4cqw !important; gap: 1.5cqw !important;
   font-size: 1.85cqw !important; line-height: 1.15 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:not(.home-last-longer-dock__end):not(.home-last-longer-hint) {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:not(.home-last-longer-dock__end):not(.home-last-longer-hint) {
   flex-shrink: 0; white-space: nowrap;
 }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table{background:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before{content:"";position:absolute;inset:0;background:url('./assets/home-bonus-blue-tray-v4.webp') center/100% 100% no-repeat;mask:url('./assets/home-bonus-blue-tray-mask.svg') center/100% 100% no-repeat;-webkit-mask:url('./assets/home-bonus-blue-tray-mask.svg') center/100% 100% no-repeat;pointer-events:none}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before{display:block!important;opacity:1!important;transform:none!important;z-index:0;filter:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table{background:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table::before{content:"";position:absolute;inset:0;background:url('./assets/home-bonus-blue-tray-v4.webp') center/100% 100% no-repeat;mask:url('./assets/home-bonus-blue-tray-mask.svg') center/100% 100% no-repeat;-webkit-mask:url('./assets/home-bonus-blue-tray-mask.svg') center/100% 100% no-repeat;pointer-events:none}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table::before{display:block!important;opacity:1!important;transform:none!important;z-index:0;filter:none!important}
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__grid,body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__note{z-index:1}
 
 /* Matte footer replaces the reflective tray beneath the chips. */
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__note{left:4%!important;width:92%!important;bottom:8%!important;height:18%!important;background:#0b1012!important;border:1px solid #746044!important;border-radius:6px!important;box-shadow:none!important}
 
 /* Individual circular chips seated on matte display boxes. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before { display:none!important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table::before { display:none!important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__grid { height:70%!important; gap:1cqw!important; padding:0 1cqw!important; }
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {
   --bonus-chip-color:#f7ce35;
@@ -753,10 +753,10 @@ body[data-view="download"] #app.app .home-tractor-raffle:focus-visible { outline
 @media(prefers-reduced-motion:reduce) { body[data-view="download"] #app.app .home-tractor-raffle::before { animation:none; } }
 
 /* Reference artwork: five standing chips on matching stacks and green felt. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table {
   bottom:0!important; aspect-ratio:3/1!important; overflow:hidden!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table::before {
   content:""!important;display:block!important;inset:0!important;
   background:url('./assets/home-bonus-stacks-reference-v2.webp') center/100% 100% no-repeat!important;
   mask:linear-gradient(transparent,#000 9%)!important;-webkit-mask:linear-gradient(transparent,#000 9%)!important;
@@ -787,7 +787,7 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
 body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tournament-bonuses__note {display:none!important}
 
 /* Follow the lower table rail with the bonus hint and leave air before achievements. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-tournament-bonuses--table .home-tournament-bonuses__note {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-tournament-bonuses--table .home-tournament-bonuses__note {
   display:block!important; position:absolute!important; z-index:3!important;
   left:8%!important; bottom:-.5%!important; width:84%!important; height:9%!important;
   margin:0!important; padding:0!important; border:0!important; border-radius:0!important;
@@ -801,15 +801,15 @@ body[data-view="download"] #app.app .home-tournament-bonuses--table .home-tourna
   fill:currentColor; font:700 21px/1 'Arial Narrow',Arial,sans-serif; letter-spacing:.7px;
   paint-order:stroke; stroke:#100b05; stroke-width:2px; stroke-linejoin:round;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus + .home-club-achievements-title {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) + .home-club-achievements-title {
   margin-top:calc(clamp(42px,7vw,76px) + 4px)!important;
 }
 
 /* Align the table panel and the tractor scene trophy on the same centerline. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-bonuses--table {
   left:0!important;right:0!important;width:100%!important;margin-inline:auto!important;transform:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] > .home-last-longer-dock {
   left:36%!important;right:auto!important;width:28%!important;transform:none!important;
 }
 
@@ -820,15 +820,15 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
 .tournament-share-preview > button:not([data-close]) { margin:4px 0; }
 
 /* One continuous poker table, with every trophy on the same felt. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) { translate:0 0!important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] {
   --home-tournament-scene:url('./assets/home-tournament-shkarubo-chips-v2.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-table-seam-fix {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] > .home-table-seam-fix {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table::before {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] > .home-tournament-bonuses--table::before {display:none!important}
 body[data-view="download"] #app.app [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
 body[data-view="download"] #app.app [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
 body[data-view="download"] #app.app [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
@@ -837,8 +837,8 @@ body[data-view="download"] #app.app [data-tournament-character="shkarubo"] .home
 body[data-view="download"] #app.app [data-tournament-character="shkarubo"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
 
 /* The raffle belongs on Pasha's tractor; only Shtukatur uses a chest. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not([data-tournament-character="shtukatur"]) > #homeTournamentRaffleBonus,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not([data-tournament-character="shtukatur"]) > .home-tournament-raffle-chest-art {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):not([data-tournament-character="shtukatur"]) > #homeTournamentRaffleBonus,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):not([data-tournament-character="shtukatur"]) > .home-tournament-raffle-chest-art {display:none!important}
 body[data-view="download"] #app.app .home-tractor-raffle {left:1%;top:36%;width:28%;height:20%;padding:0;align-items:center}
 body[data-view="download"] #app.app .home-tractor-raffle span {position:absolute;left:8%;bottom:18%;width:72%;box-sizing:border-box;padding:.7cqw .4cqw;font-size:1.65cqw;transform:rotate(-3deg);border-radius:.5cqw}
 
@@ -861,27 +861,27 @@ body[data-view="download"] #app.app .home-tractor-raffle::before {
 .tournament-share-preview .tournament-share-actions button {min-width:0;width:100%;margin:0;padding:12px 3px;font-size:clamp(10px,3vw,14px);line-height:1.2;white-space:nowrap;letter-spacing:0}
 
 /* Keep the Last Longer highlight behind the fingers holding the trophy. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] > .home-last-longer-dock::before {
   mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);
   -webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);
 }
 
 /* Seat the plaque on the rear pedestal, above the foreground chip silhouettes. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] .home-last-longer-dock__bar {
   top: 74% !important;
 }
 
 /* Wednesday: Gucci, the leading winner of Lucky Thousand, at the shared table. */
 /* One continuous poker table, with every trophy on the same felt. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus { translate:0 0!important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) { translate:0 0!important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] {
   --home-tournament-scene:url('./assets/home-tournament-aza-chips-v2.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-table-seam-fix {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-table-seam-fix {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-bonuses--table::before {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-tournament-bonuses--table::before {display:none!important}
 body[data-view="download"] #app.app [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
 body[data-view="download"] #app.app [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
 body[data-view="download"] #app.app [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
@@ -890,67 +890,67 @@ body[data-view="download"] #app.app [data-tournament-character="gucci"] .home-to
 body[data-view="download"] #app.app [data-tournament-character="gucci"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
 
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"]::after {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-last-longer-dock {left:36%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] .home-last-longer-dock__bar {top:74%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"]::after {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-last-longer-dock {left:36%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] .home-last-longer-dock__bar {top:74%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 
 /* Thursday: RedRocket at the same straight, continuous table layout. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] {
   --home-tournament-scene:url('./assets/home-tournament-redrocket-no-purple-v1.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-table-seam-fix {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-table-seam-fix {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-bonuses--table::before {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-tournament-bonuses--table::before {display:none!important}
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"]::after {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-last-longer-dock {left:36%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] .home-last-longer-dock__bar {top:74%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"]::after {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-last-longer-dock {left:36%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] .home-last-longer-dock__bar {top:74%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 
 /* Friday: Cooler uses the same single continuous table as every other day. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-table-seam-fix {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-table-seam-fix {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-bonuses--table::before {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-tournament-bonuses--table::before {display:none!important}
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:74%!important;pointer-events:auto}
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(1) {left:12.3%!important}
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(2) {left:31%!important}
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(3) {left:50%!important}
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(4) {left:68.5%!important}
 body[data-view="download"] #app.app [data-tournament-character="cooler"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(5) {left:87.4%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"]::after {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock {left:30.5%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] .home-last-longer-dock__bar {top:74%!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"]::after {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-last-longer-dock {left:30.5%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] .home-last-longer-dock__bar {top:74%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-last-longer-dock::before {mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,transparent 24%,#000 45%,#000 100%)}
 /* Saturday: artwork contains one table and a complete glove trophy. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] {
   --home-tournament-scene:url('./assets/home-tournament-pokermanki-table-v4.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-table-seam-fix,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-table-seam-fix,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table::before {
   display:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]::after {
   display:block!important;
   background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
   mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
   z-index:5!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
 }
 body[data-view="download"] #app.app [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:71.5%!important;pointer-events:auto}
@@ -966,10 +966,10 @@ body[data-view="download"] #app.app [data-tournament-character="shtukatur"] .hom
   align-content:center;gap:.08cqw;font-size:2.3cqw;line-height:.96;
 }
 body[data-view="download"] #app.app [data-tournament-character="shtukatur"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-last-longer-dock {
   left:37%!important;top:38%!important;width:26%!important;height:19%!important;z-index:3!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {
   left:0!important;top:0!important;width:100%!important;height:100%!important;
   border:0!important;
   background:radial-gradient(circle,transparent 49%,#fff1a633 58%,#ffb34738 70%,transparent 82%)!important;
@@ -982,52 +982,52 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   50% {opacity:1;transform:scale(1.15)}
 }
 @media (prefers-reduced-motion:reduce) {
-  body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {animation:none;opacity:.8}
+  body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {animation:none;opacity:.8}
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] .home-last-longer-dock__bar {
   display:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {z-index:6!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-tournament-bonuses--table {z-index:6!important}
 
 /* Only repeat actual head silhouettes above scene controls. Broad chip masks
    copied unrelated table pixels over the Last Longer plaque on other days. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character]::after {
   display:block!important;
   background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
   mask:linear-gradient(transparent,transparent)!important;
   -webkit-mask:linear-gradient(transparent,transparent)!important;
   z-index:5!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"]::after {
   display:block!important;
   mask:url('./assets/home-tournament-pokermanki-head-mask.svg?v=2') center/100% 100% no-repeat!important;
   -webkit-mask:url('./assets/home-tournament-pokermanki-head-mask.svg?v=2') center/100% 100% no-repeat!important;
   pointer-events:none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] #homeTournamentWeekList .home-tournament-trophy__prize {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] #homeTournamentWeekList .home-tournament-trophy__prize {
   left: 21% !important;
 }
 
 /* Sunday uses the same illustrated bonus row as the other tables.
    Keep every overlay in the original artwork coordinate system. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"]::after {
   background:var(--home-tournament-scene) center top/100% auto no-repeat!important;
   mask:url('./assets/home-tournament-fishkopcheny-head-mask.svg') center top/100% auto no-repeat!important;
   -webkit-mask:url('./assets/home-tournament-fishkopcheny-head-mask.svg') center top/100% auto no-repeat!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] > .home-tournament-bonuses--table {
   left:0!important;top:auto!important;bottom:5%!important;width:100%!important;
   height:auto!important;aspect-ratio:3/1!important;overflow:visible!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] > .home-last-longer-dock {
   left:38.5%!important;top:65.5%!important;width:24%!important;height:5%!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] .home-last-longer-dock__bar {
   display:flex!important;left:0!important;top:0!important;width:100%!important;height:100%!important;
   padding:0 1cqw!important;gap:.5cqw!important;background:none!important;clip-path:none!important;
   border:0!important;box-shadow:none!important;font-size:1.5cqw!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonuses__note {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] .home-tournament-bonuses--table .home-tournament-bonuses__note {
   top:auto!important;bottom:-7%!important;height:25%!important;
 }
 body[data-view="download"] #app.app [data-tournament-character="fishkopcheny"] .home-tournament-bonuses__note-arc text {
@@ -1035,33 +1035,33 @@ body[data-view="download"] #app.app [data-tournament-character="fishkopcheny"] .
 }
 
 /* Fade the cut edge of the bonus artwork into the black apron below the rail. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table::before {
   border:0!important;border-radius:0!important;box-shadow:none!important;
   mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 18%,#000 86%,transparent 100%)!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="fishkopcheny"],[data-tournament-character="morf"]) > .home-tournament-bonuses--table {
   border:0!important;border-radius:0!important;box-shadow:none!important;
 }
 
 /* Legacy Morf single-table scene retains its own hat silhouette mask. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"]::after {
   mask:url('./assets/home-tournament-morf-head-mask.svg') center/100% 100% no-repeat!important;
   -webkit-mask:url('./assets/home-tournament-morf-head-mask.svg') center/100% 100% no-repeat!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] > .home-tournament-bonuses--table {
   top:auto!important;bottom:5%!important;height:auto!important;aspect-ratio:3/1!important;overflow:visible!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] > .home-last-longer-dock {
   left:33.5%!important;top:62.4%!important;width:21%!important;height:3.8%!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] > .home-last-longer-dock::before {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] > .home-last-longer-dock::before {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] .home-last-longer-dock__bar {
   display:flex!important;left:0!important;top:0!important;width:100%!important;height:100%!important;
   padding:0 .5cqw!important;gap:.4cqw!important;background:none!important;clip-path:none!important;
   border:0!important;box-shadow:none!important;font-size:1.5cqw!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] .home-tournament-bonuses--table .home-tournament-bonuses__note {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] .home-tournament-bonuses--table .home-tournament-bonuses__note {
   top:auto!important;bottom:-7%!important;height:25%!important;
 }
 body[data-view="download"] #app.app [data-tournament-character="morf"] .home-tournament-bonuses__note-arc text {font-size:28px}
@@ -1084,7 +1084,7 @@ body[data-view="download"] #app.app :is([data-tournament-character="shkarubo"],[
 }
 
 /* RedRocket: align the live ticket copy and put the prize behind the helmet. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] {
   --home-tournament-scene:url('./assets/home-tournament-redrocket-no-spade-v2.webp');
 }
 body[data-view="download"] #app.app [data-tournament-character="redrocket"] .home-tournament-trophy__copy > :where(span) {
@@ -1104,7 +1104,7 @@ body[data-view="download"] #app.app [data-tournament-character="redrocket"] .hom
   left:17% !important;
   font-size:6.9cqw !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"]::after {
   display:block !important;
   background:var(--home-tournament-scene) center/100% 100% no-repeat !important;
   mask:url('./assets/home-tournament-redrocket-head-mask.svg') center/100% 100% no-repeat !important;
@@ -1113,17 +1113,17 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
 }
 
 /* The chip already has an illustrated face ring. A second CSS ring drifted off it. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-last-longer-dock::before {
   display:none !important;
   content:none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-last-longer-dock::before {
   display:block!important;
   content:""!important;
 }
 
 /* Tone down the baked-in bright rails on the other tournament tables. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-table-rim-dimmer {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-table-rim-dimmer {
   position:absolute;
   inset:0;
   z-index:2;
@@ -1133,18 +1133,18 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1402' preserveAspectRatio='none'%3E%3Cpath d='M-20 900 Q190 820 400 812 M690 812 Q940 830 1142 900' fill='none' stroke='white' stroke-width='24'/%3E%3Cpath d='M-20 1195 Q561 1365 1142 1195' fill='none' stroke='white' stroke-width='38'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1122 1402' preserveAspectRatio='none'%3E%3Cpath d='M-20 900 Q190 820 400 812 M690 812 Q940 830 1142 900' fill='none' stroke='white' stroke-width='24'/%3E%3Cpath d='M-20 1195 Q561 1365 1142 1195' fill='none' stroke='white' stroke-width='38'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] {
   --home-tournament-scene:url('./assets/home-tournament-redrocket-chips-v4.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="redrocket"], [data-tournament-character="shkarubo"]) > .home-table-rim-dimmer {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="redrocket"], [data-tournament-character="shkarubo"]) > .home-table-rim-dimmer {
   display:none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:is([data-tournament-character="shtukatur"], [data-tournament-character="hakas"]) > .home-table-rim-dimmer {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference):is([data-tournament-character="shtukatur"], [data-tournament-character="hakas"]) > .home-table-rim-dimmer {
   display:none;
 }
 
 /* Friday history control and compact Last Longer counters on the felt. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-ticket-frame-cleanup {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-ticket-frame-cleanup {
   position: absolute;
   inset: 0;
   z-index: 6;
@@ -1153,7 +1153,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   clip-path: polygon(43.8% 8%, 57.9% 6.7%, 59.1% 14.5%, 44.8% 15.8%);
   transform: translateX(22%);
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-history {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-history {
   position: absolute !important;
   left: 65.6% !important;
   top: 5.2% !important;
@@ -1177,7 +1177,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   transform: rotate(-6deg);
   cursor: pointer;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-history[hidden] { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-history[hidden] { display: none !important; }
 body[data-view="download"] #app.app .home-tournament-history::before {
   content: none;
 }
@@ -1209,10 +1209,10 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-wee
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-week-row--ticket-info .home-tournament-trophy__buyin-label,
 body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-week-row--ticket-info .home-tournament-trophy__buyin { visibility: hidden !important; }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="morf"] .home-last-longer-dock__bar,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="morf"] .home-last-longer-dock__bar,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] .home-last-longer-dock__bar {
   left: -37% !important;
   top: 18% !important;
   width: 174% !important;
@@ -1226,8 +1226,8 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   clip-path: none !important;
   pointer-events: none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar::before { display: none !important; content: none !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(-n+2) {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar::before { display: none !important; content: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:nth-child(-n+2) {
   position: absolute;
   top: 0;
   width: 26%;
@@ -1246,13 +1246,13 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   color: #fff2d2;
   text-align: center;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:first-child { left: 0; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(2) { right: 0; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(-n+2) strong {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:first-child { left: 0; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:nth-child(2) { right: 0; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:nth-child(-n+2) strong {
   font: 900 2.1cqw/1 Arial, sans-serif !important;
   white-space: nowrap;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(-n+2) small {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:nth-child(-n+2) small {
   font: 700 1.45cqw/1 Arial, sans-serif !important;
   white-space: nowrap;
 }
@@ -1302,22 +1302,22 @@ body[data-view="download"] #app.app [data-tournament-character="shtukatur"][data
 
 /* Monthly tournament: Hakas, ranked by wins then first-place prizes. */
 /* Shared ticket and table geometry; the glove remains a live UI element. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] {
   --home-tournament-scene:url('./assets/home-tournament-hakas-month-v2.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-table-seam-fix,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-table-seam-fix,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-tournament-bonuses--table::before {
   display:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"]::after {
   display:block!important;
   background:var(--home-tournament-scene) center/100% 100% no-repeat!important;
   mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0 68%,#000 73% 100%)!important;
   z-index:5!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-tournament-bonuses--table {
   inset:0!important;width:100%!important;height:100%!important;aspect-ratio:auto!important;pointer-events:none;
 }
 body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus:nth-child(n) {top:71.5%!important;pointer-events:auto}
@@ -1333,10 +1333,10 @@ body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-to
   align-content:center;gap:.08cqw;font-size:2.3cqw;line-height:.96;
 }
 body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label small {font-size:1.35cqw;line-height:1}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-last-longer-dock {
   left:37%!important;top:38%!important;width:26%!important;height:19%!important;z-index:3!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-last-longer-dock::before {
   left:0!important;top:0!important;width:100%!important;height:100%!important;
   border:0!important;
   background:radial-gradient(circle,transparent 49%,#fff1a633 58%,#ffb34738 70%,transparent 82%)!important;
@@ -1349,27 +1349,27 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   50% {opacity:1;transform:scale(1.15)}
 }
 @media (prefers-reduced-motion:reduce) {
-  body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock::before {animation:none;opacity:.8}
+  body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-last-longer-dock::before {animation:none;opacity:.8}
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] .home-last-longer-dock__bar {
   display:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-bonuses--table {z-index:6!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-tournament-bonuses--table {z-index:6!important}
 
 
 body[data-view="download"] #app.app [data-tournament-character="hakas"] > .home-ticket-frame-cleanup {display:none!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::after {display:none!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"]::after {display:none!important}
 body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove {display:block!important}
 body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-tournament-bonuses--table .home-tournament-bonus__glove-label {top:calc(100% + 2cqw)!important}
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock {top:40%!important}
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-last-longer-dock {top:40%!important}
 body[data-view="download"] #app.app [data-tournament-character="hakas"] #homeTournamentWeekList .home-tournament-trophy__caption {left:20%!important;top:48%!important;font-size:1.65cqw!important;letter-spacing:.1em!important}
 body[data-view="download"] #app.app [data-tournament-character="hakas"] #homeTournamentWeekList .home-tournament-trophy__prize {left:18%!important;top:56%!important;font-size:4.5cqw!important;white-space:nowrap!important}
 
 /* Hakas: independent high-resolution scene, table and interactive bonus objects. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] {
   --home-tournament-scene:url('./assets/home-tournament-hakas-layered-v4.webp');
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"]::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"]::before {
   content:""!important;display:block!important;inset:50% -7.5% auto!important;
   width:115%!important;height:39%!important;
   background:url('./assets/home-tournament-table-premium-v1.webp') center/100% 100% no-repeat!important;
@@ -1441,10 +1441,10 @@ body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-to
 }
 
 /* Keep both live figures on the illustrated Last Longer pedestal. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock .home-last-longer-dock__bar {
   display: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
   display: flex !important;
   flex-direction: column !important;
   left: 50% !important;
@@ -1461,7 +1461,7 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   box-shadow: none !important;
   color: #ffe7b2 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock .home-last-longer-dock__bar > span:nth-child(-n+2) {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock .home-last-longer-dock__bar > span:nth-child(-n+2) {
   position: static !important;
   display: flex !important;
   flex-direction: row !important;
@@ -1474,11 +1474,11 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   background: none !important;
   box-shadow: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(2) { order: -1; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-last-longer-dock__bar > span:nth-child(2) small { display: none; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:nth-child(2) { order: -1; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-last-longer-dock__bar > span:nth-child(2) small { display: none; }
 
 /* The painted Hakas chip ends halfway down its larger click target. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
   top: 45% !important;
   min-width: 16cqw !important;
   padding: .55cqw 1cqw !important;
@@ -1500,29 +1500,29 @@ body[data-view="download"] #app.app [data-tournament-character="hakas"] .home-to
 
 /* Monday Magic: Pokermanki keeps his own upper scene while the table and
    separately clickable bonus stacks use the former Morf composition. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] {
   --home-tournament-scene: url('./assets/home-tournament-pokermanki-magic-table-v2.webp');
 }
 /* Reuse the original high-detail art above the rail; only the table is new. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix {
   display:block!important;position:absolute!important;inset:0!important;z-index:2!important;
   background:url('./assets/home-tournament-pokermanki-table-v4.webp') center/100% 100% no-repeat!important;
   mask:linear-gradient(to bottom,#000 0%,#000 57%,transparent 61%)!important;
   -webkit-mask:linear-gradient(to bottom,#000 0%,#000 57%,transparent 61%)!important;
   pointer-events:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after {
   background:url('./assets/home-tournament-pokermanki-table-v4.webp') center/100% 100% no-repeat!important;
   mask:url('./assets/home-tournament-pokermanki-magic-head-mask.svg') center/100% 100% no-repeat!important;
   -webkit-mask:url('./assets/home-tournament-pokermanki-magic-head-mask.svg') center/100% 100% no-repeat!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
   inset:auto 0 5% 0!important;
   width:100%!important;height:auto!important;aspect-ratio:3/1!important;
   overflow:visible!important;background:none!important;border:0!important;
   border-radius:0!important;box-shadow:none!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table::before {
   display:block!important;
   border:0!important;border-radius:0!important;box-shadow:none!important;
   background:url('./assets/home-bonus-stacks-glove-solid-v1.webp') center/100% 100% no-repeat!important;
@@ -1547,27 +1547,27 @@ body[data-view="download"] #app.app [data-tournament-character="shtukatur"][data
 body[data-view="download"] #app.app [data-tournament-character="shtukatur"][data-tournament-weekday="1"] .home-tournament-bonuses--table .home-tournament-bonuses__note {bottom:-7%!important;height:25%!important}
 
 /* A single fine inset line follows the table rail on the felt. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-poker-betting-line { display:none; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-poker-betting-line { display:none; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
   display:block;position:absolute;inset:0;z-index:7;pointer-events:none;
   background:url('./assets/home-poker-betting-line.svg?v=9') center/100% 100% no-repeat;
 }
 /* Lift the stacks into the playing area while leaving the painted table rail in place. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table {
   bottom:9%!important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-tournament-bonuses--table::before {
   mask:linear-gradient(to bottom,transparent 0%,#000 7%,#000 74%,transparent 86%)!important;
   -webkit-mask:linear-gradient(to bottom,transparent 0%,#000 7%,#000 74%,transparent 86%)!important;
 }
 
 /* Shared ticket hierarchy: the session leads, while the buy-in keeps its size. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-tournament-section-title {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-tournament-section-title {
   left: 17% !important;
   top: 5.5% !important;
   width: 51% !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-ticket-session {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-ticket-session {
   display: inline-grid;
   justify-items: start;
   gap: .35cqw;
@@ -1579,14 +1579,14 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus 
   background: linear-gradient(90deg, #b650184d, #b6501812 82%, transparent);
   text-align: left;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-ticket-session__label {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-ticket-session__label {
   color: #fff0bd;
   font: 900 4.9cqw/1 Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
   letter-spacing: .055em;
   text-shadow: 0 1px 2px #000, 0 0 1.2cqw #ee8a3299;
   white-space: nowrap;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus .home-ticket-session__time {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) .home-ticket-session__time {
   color: #ffc06f;
   font: 900 3.3cqw/1 Arial, sans-serif;
   letter-spacing: .1em;
@@ -1612,26 +1612,26 @@ body[data-view="download"] #app.app #homeTournamentWeekList .home-tournament-tro
 }
 
 /* Every tournament scene seats Last Longer to the left of its featured player. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] { --home-tournament-scene: url('./assets/home-tournament-gucci-ace-room-v2.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] { --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] { --home-tournament-scene: url('./assets/home-tournament-hakas-shared-v2.webp'); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix { background-image: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp') !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after { background-image: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp') !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]::before,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-raffle-chest-art { display: none !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] { --home-tournament-scene: url('./assets/home-tournament-shkarubo-shared-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] { --home-tournament-scene: url('./assets/home-tournament-gucci-ace-room-v2.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] { --home-tournament-scene: url('./assets/home-tournament-redrocket-shared-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] { --home-tournament-scene: url('./assets/home-tournament-cooler-shared-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] { --home-tournament-scene: url('./assets/home-tournament-fishkopcheny-shared-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-shared-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] { --home-tournament-scene: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] { --home-tournament-scene: url('./assets/home-tournament-hakas-shared-v2.webp'); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-table-seam-fix { background-image: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp') !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"]::after { background-image: url('./assets/home-tournament-pokermanki-magic-shared-v1.webp') !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"]::before,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-tournament-raffle-chest-art { display: none !important; }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-last-longer-dock {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-last-longer-dock {
   left: 3% !important; top: 36% !important; width: 25% !important; height: 19% !important;
   right: auto !important; bottom: auto !important; transform: none !important; z-index: 7 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock { top: 47% !important; height: 22% !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-last-longer-dock { top: 47% !important; height: 22% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock.home-mini-icon-item--vote-active .home-last-longer-dock__bar {
   display: flex !important; flex-direction: column !important; align-items: center !important;
   left: 50% !important; top: 69% !important; width: 128% !important; min-width: 0 !important;
   height: auto !important; padding: 1cqw .8cqw 1.1cqw !important; gap: .25cqw !important;
@@ -1639,60 +1639,60 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   background: none !important; border: 0 !important; box-shadow: none !important;
   isolation: isolate;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) {
   display: flex !important; flex-direction: row !important; position: relative !important; z-index: 1;
   width: auto !important; height: auto !important; padding: 0 !important;
   background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
   font-size: 2.35cqw !important; line-height: 1.06 !important; white-space: nowrap !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) strong { font-size: 3.2cqw !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(2) small { display: inline !important; font-size: 2.2cqw !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__bar > span:first-child {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(-n+2) strong { font-size: 3.2cqw !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar > span:nth-child(2) small { display: inline !important; font-size: 2.2cqw !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__bar > span:first-child {
   justify-content: center; width: 72% !important; padding-top: .22cqw !important;
   border-top: .12cqw solid #cba45c !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 64% !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__pedestal {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] .home-last-longer-dock__bar { top: 64% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__pedestal {
   display: block !important; position: absolute; left: 0; top: -42%; width: 100%; height: 180%;
   z-index: 0; overflow: visible; pointer-events: none;
   filter: drop-shadow(0 .45cqw .55cqw #000b);
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__callout {
   position: absolute; left: -2%; top: -12%; width: 110%; height: 54%; overflow: visible;
   pointer-events: none; color: #ffe2a0; fill: currentColor; z-index: 2;
   filter: drop-shadow(0 .15cqw .2cqw #000);
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout text {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__callout text {
   font: 800 18px/1 sans-serif; letter-spacing: .2px;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] .home-last-longer-dock__callout-arrow {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] .home-last-longer-dock__callout-arrow {
   fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round;
 }
 
 /* The share invitation sits on the ticket behind the featured player's head. */
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus > .home-tournament-share { z-index: 4 !important; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference) > .home-tournament-share { z-index: 4 !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"]::after {
   display: block !important;
   background: var(--home-tournament-scene) center / 100% 100% no-repeat !important;
   mask: url('./assets/home-tournament-shkarubo-head-mask.svg') center / 100% 100% no-repeat !important;
   -webkit-mask: url('./assets/home-tournament-shkarubo-head-mask.svg') center / 100% 100% no-repeat !important;
   z-index: 5 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"]::after {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"]::after {
   display: block !important;
   background: var(--home-tournament-scene) center / 100% 100% no-repeat !important;
   mask: url('./assets/home-tournament-gucci-head-mask.svg') center / 100% 100% no-repeat !important;
   -webkit-mask: url('./assets/home-tournament-gucci-head-mask.svg') center / 100% 100% no-repeat !important;
   z-index: 5 !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-ticket-frame-cleanup {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-ticket-frame-cleanup {
   display: none !important;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-share::before {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-tournament-share::before {
   display: none !important;
 }
 
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-play-sign {
   display: flex; position: absolute; left: 73.4%; top: 36.9%; width: 16.8%; height: 9.8%;
   z-index: 8; align-items: center; justify-content: center; gap: .5cqw;
   padding: .5cqw; transform: rotate(-4deg); cursor: pointer;
@@ -1700,40 +1700,40 @@ body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[
   background: #090909; border: .15cqw solid #bc771e; border-radius: .5cqw;
   box-shadow: inset 0 0 .5cqw #bd70234d; text-shadow: 0 .2cqw .2cqw #000;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign span { font-size: 1.25em; }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-tournament-play-sign:focus-visible {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-play-sign span { font-size: 1.25em; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-tournament-play-sign:focus-visible {
   outline: .45cqw solid #ffe6a6; outline-offset: .3cqw;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-tournament-play-sign {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-tournament-play-sign {
   left: 73.4%; top: 35.6%; width: 16.8%; height: 9.8%;
   padding: 0; transform: rotate(-4deg);
   color: #ffdc91; background: transparent; border: 0; border-radius: 0;
   box-shadow: none; font-size: 3cqw;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="gucci"] > .home-table-rim-dimmer {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="gucci"] > .home-table-rim-dimmer {
   display: none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character] > .home-table-rim-dimmer {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character] > .home-table-rim-dimmer {
   display: none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"][data-tournament-weekday="1"] > .home-poker-betting-line {
   display: none;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shkarubo"] > .home-tournament-play-sign,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-play-sign,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-play-sign,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-play-sign,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-play-sign,
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-play-sign {
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shkarubo"] > .home-tournament-play-sign,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-tournament-play-sign,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-tournament-play-sign,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] > .home-tournament-play-sign,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-tournament-play-sign,
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-tournament-play-sign {
   padding: 0; color: #ffdc91; background: transparent; border: 0; border-radius: 0;
   box-shadow: none; font-size: 3cqw;
 }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="redrocket"] > .home-tournament-play-sign { left: 72%; top: 32%; width: 20%; height: 10%; transform: rotate(-3deg); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="cooler"] > .home-tournament-play-sign { left: 72%; top: 29%; width: 23%; height: 11.5%; transform: rotate(-4deg); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="fishkopcheny"] > .home-tournament-play-sign { left: 71%; top: 33.5%; width: 21%; height: 10%; transform: rotate(-4deg); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="shtukatur"] > .home-tournament-play-sign { left: 69%; top: 33%; width: 23%; height: 10%; transform: rotate(-4deg); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-tournament-play-sign { left: 74%; top: 41%; width: 19%; height: 9%; transform: rotate(-2deg); }
-body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus[data-tournament-character="hakas"] > .home-last-longer-dock { top: 34% !important; height: 20% !important; }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="redrocket"] > .home-tournament-play-sign { left: 72%; top: 32%; width: 20%; height: 10%; transform: rotate(-3deg); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="cooler"] > .home-tournament-play-sign { left: 72%; top: 29%; width: 23%; height: 11.5%; transform: rotate(-4deg); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="fishkopcheny"] > .home-tournament-play-sign { left: 71%; top: 33.5%; width: 21%; height: 10%; transform: rotate(-4deg); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="shtukatur"] > .home-tournament-play-sign { left: 69%; top: 33%; width: 23%; height: 10%; transform: rotate(-4deg); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-tournament-play-sign { left: 74%; top: 41%; width: 19%; height: 9%; transform: rotate(-2deg); }
+body[data-view="download"] #app.app .tournament-day-home-dual--tournament-focus:not(.evening-reference)[data-tournament-character="hakas"] > .home-last-longer-dock { top: 34% !important; height: 20% !important; }
 
 /* Keep the ticket-raffle entry available without covering the Last Longer chip. */
 body[data-view="download"] #app.app .home-tractor-raffle {

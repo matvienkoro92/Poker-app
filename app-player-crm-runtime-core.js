@@ -1509,7 +1509,7 @@
         return true;
       });
     }
-    return loadCrmHeavyData("broadcast");
+    return fetchBroadcastAudience();
   }
 
   function renderBroadcastOptions() {
@@ -3464,6 +3464,45 @@
     if (state.tab === "links" && !state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
   }
 
+  function fetchBroadcastAudience() {
+    var key = broadcastAudiencePeriodKey();
+    var base = getApiBaseSafe();
+    if (!base) return Promise.resolve(false);
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timeoutId;
+    var request = fetch(base + "/api/player-crm" + crmQuery({ mode: "send" }), {
+      cache: "no-store",
+      signal: controller ? controller.signal : undefined
+    }).then(function (response) {
+      if (!response.ok) throw new Error("broadcast-audience");
+      return response.json();
+    });
+    var deadline = new Promise(function (resolve, reject) {
+      timeoutId = setTimeout(function () {
+        reject(new Error("broadcast-audience-timeout"));
+        if (controller) controller.abort();
+      }, 30000);
+    });
+    var pending = Promise.race([request, deadline]).then(function (data) {
+      if (!data || data.ok === false || !Array.isArray(data.players)) throw new Error("broadcast-audience");
+      if (state.broadcastAudiencePrefetchPromise !== pending || broadcastAudiencePeriodKey() !== key) return false;
+      state.broadcastPlayers = data.players;
+      state.broadcastAudienceLoadedAt = Date.now();
+      state.broadcastAudiencePeriodKey = key;
+      writeBroadcastAudienceCache();
+      if (state.tab === "broadcast") renderBroadcastOptions();
+      return true;
+    }).catch(function () {
+      return false;
+    }).then(function (ok) {
+      clearTimeout(timeoutId);
+      if (state.broadcastAudiencePrefetchPromise === pending) state.broadcastAudiencePrefetchPromise = null;
+      return ok;
+    });
+    state.broadcastAudiencePrefetchPromise = pending;
+    return pending;
+  }
+
   function prefetchBroadcastAudience() {
     if (state.crmError || state.broadcastAudienceLoadedAt || state.broadcastAudiencePrefetchPromise) return;
     var key = broadcastAudiencePeriodKey();
@@ -3474,25 +3513,7 @@
       state.broadcastAudiencePeriodKey = key;
       return;
     }
-    var base = getApiBaseSafe();
-    if (!base) return;
-    state.broadcastAudiencePrefetchPromise = fetch(base + "/api/player-crm" + crmQuery({ mode: "send" }), { cache: "no-store" })
-      .then(function (response) {
-        if (!response.ok) throw new Error("broadcast-prefetch");
-        return response.json();
-      })
-      .then(function (data) {
-        if (!data || data.ok === false || !Array.isArray(data.players)) throw new Error("broadcast-prefetch");
-        state.broadcastPlayers = data.players;
-        state.broadcastAudienceLoadedAt = Date.now();
-        state.broadcastAudiencePeriodKey = key;
-        writeBroadcastAudienceCache();
-        if (state.tab === "broadcast") renderBroadcastOptions();
-      })
-      .catch(function () {})
-      .then(function () {
-        state.broadcastAudiencePrefetchPromise = null;
-      });
+    return fetchBroadcastAudience();
   }
 
   function scheduleBroadcastAudiencePrefetch() {
@@ -4523,18 +4544,22 @@
       return;
     }
     setBroadcastResult("Обновляем список получателей перед отправкой…");
+    if (state.broadcastAudienceSendPending) return;
+    state.broadcastAudienceSendPending = true;
     var pending = state.broadcastAudiencePrefetchPromise || loadBroadcastAudience(true);
-    Promise.resolve(pending).then(function () {
+    Promise.resolve(pending).then(function (ok) {
+      state.broadcastAudienceSendPending = false;
       var ready = state.broadcastAudienceLoadedAt &&
         Date.now() - state.broadcastAudienceLoadedAt < freshnessMs &&
         state.broadcastAudiencePeriodKey === broadcastAudiencePeriodKey();
-      if (!ready) {
+      if (!ok || !ready) {
         setBroadcastResult("Не удалось обновить получателей. Рассылка не отправлена — попробуй ещё раз.");
         return;
       }
       renderBroadcastOptions();
       runBroadcast("send_campaign", options);
     }).catch(function () {
+      state.broadcastAudienceSendPending = false;
       setBroadcastResult("Не удалось обновить получателей. Рассылка не отправлена — попробуй ещё раз.");
     });
   }

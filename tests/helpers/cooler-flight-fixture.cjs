@@ -24,7 +24,7 @@ function fixture(options={}) {
       if(k.includes("redis.call('HEXISTS'")){
         if(!hashes.has(keys[2]))hashes.set(keys[2],new Map());const archive=hashes.get(keys[2]);
         if(archive.has(values[0])||now<Number(values[1]))return 0;
-        const winner=ranked(keys[0])[0];if(winner)archive.set(values[0],JSON.stringify({...JSON.parse(values[2]),member:winner[0],name:hashes.get(keys[1]).get(winner[0]),score:Math.floor(winner[1]/100000000)}));
+        const winner=ranked(keys[0])[0];if(winner){const payload=JSON.stringify({...JSON.parse(values[2]),member:winner[0],name:hashes.get(keys[1]).get(winner[0]),score:Math.floor(winner[1]/100000000)});archive.set(values[0],payload);if(keys[4]){if(!hashes.has(keys[4]))hashes.set(keys[4],new Map());hashes.get(keys[4]).set(values[0],payload);}}
         boards.get(keys[3])?.delete(values[0]);return 1;
       }
 
