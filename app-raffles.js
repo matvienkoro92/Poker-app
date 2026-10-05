@@ -3319,7 +3319,7 @@ function initRaffles() {
     var cache = typeof window !== "undefined" ? window._rafflesCache : null;
     var cacheUsable = !loadOptions.skipCache && !!(cache && cache.data && cache.data.ok);
     if (cacheUsable) {
-      applyRafflesData(cache.data, switchToCompleted);
+      applyRafflesData(cache.data, switchToCompleted, loadOptions);
       if (!loadOptions.includeArchive && raffleCacheIsFresh(cache) && !loadOptions.deadlineRefresh && !readPendingCompletedRaffleId() && !readPendingActiveRaffleId()) {
         return;
       }
@@ -3405,7 +3405,7 @@ function initRaffles() {
             return;
           }
           if (typeof window !== "undefined") window._rafflesCache = { data: data, time: Date.now() };
-          applyRafflesData(data, switchToCompleted);
+          applyRafflesData(data, switchToCompleted, loadOptions);
           // Deadline polling updates winner cards, not the accounting summary.
           // Totals are fetched on opening and after explicit writes only.
           if (data.viewerDetailsDeferred && !loadOptions.deadlineRefresh) {
@@ -3447,7 +3447,8 @@ function initRaffles() {
     }
   }
 
-  function applyRafflesData(data, switchToCompleted) {
+  function applyRafflesData(data, switchToCompleted, options) {
+        var loadOptions = options && typeof options === "object" ? options : {};
         if (!data || !data.ok) return;
         if (rafflesRoot) {
           rafflesRoot.classList.remove("raffles--initial-loading");
