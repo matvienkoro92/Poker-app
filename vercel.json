@@ -119,7 +119,7 @@
     }
   },
   "crons": [
-    { "path": "/api/cron-cooler-flight", "schedule": "0 14 * * *" },
+    { "path": "/api/cron-cooler-flight", "schedule": "*/5 * * * *" },
     { "path": "/api/cron-club-menu-idle", "schedule": "* * * * *" },
     { "path": "/api/cron-raffle-notifications", "schedule": "* * * * *" },
     { "path": "/api/cron-friend-news", "schedule": "23 * * * *" },

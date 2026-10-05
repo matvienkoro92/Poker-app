@@ -49,8 +49,8 @@ function fixture(options={}) {
         const raw=strings.get(keys[0]);if(!raw)return 0;const r=JSON.parse(raw);if(r.member!==values[0])return -1;
         strings.delete(keys[0]);strings.set(keys[1],values[1]);
         if(Number(values[2])>=0){top.set(values[0],Math.max(top.get(values[0])||0,Number(values[2])));if(!hashes.has(keys[3]))hashes.set(keys[3],new Map());hashes.get(keys[3]).set(values[0],values[3]);}
-        if(keys.length===7 && Number(values[2])>0 && now<Number(values[4])){
-          if(!boards.has(keys[4]))boards.set(keys[4],new Map());const board=boards.get(keys[4]);const value=Number(values[2])*100000000+Number(values[4])-now;
+        if(keys.length>=7 && Number(values[2])>0 && now<Number(values[4])){
+          if(!boards.has(keys[4]))boards.set(keys[4],new Map());const board=boards.get(keys[4]);const previous=Math.max(0,...board.values());if(keys.length===8 && Number(values[2])>Math.floor(previous/100000000)){if(!hashes.has(keys[7]))hashes.set(keys[7],new Map());hashes.get(keys[7]).set(r.id,values[6]);}const value=Number(values[2])*100000000+Number(values[4])-now;
           board.set(values[0],Math.max(board.get(values[0])||0,value));if(!hashes.has(keys[5]))hashes.set(keys[5],new Map());hashes.get(keys[5]).set(values[0],values[3]);
           if(!boards.has(keys[6]))boards.set(keys[6],new Map());boards.get(keys[6]).set(values[5],Number(values[4]));
         }return 1;
@@ -63,7 +63,7 @@ function fixture(options={}) {
     throw new Error('Unsupported fixture command '+op);
   }
   class Clock extends Date { static now(){return now;} }
-  const context={module:{exports:{}},require(p){if(p==='../cooler-flight-daily'){const dailyContext={module:{exports:{}},Date:Clock};vm.runInNewContext(fs.readFileSync(require.resolve('../../lib/cooler-flight-daily'),'utf8'),dailyContext);return dailyContext.module.exports;}if(p==='crypto')return crypto;if(p.includes('engine'))return engine;
+  const context={module:{exports:{}},require(p){if(p==='../cooler-flight-daily'){const dailyContext={module:{exports:{}},Date:Clock};vm.runInNewContext(fs.readFileSync(require.resolve('../../lib/cooler-flight-daily'),'utf8'),dailyContext);return dailyContext.module.exports;}if(p==='../cooler-flight-record-notifications')return {QUEUE_KEY:'poker_app:cooler_flight:record_notifications:v1',flush:async()=>{}};if(p==='crypto')return crypto;if(p.includes('engine'))return engine;
     if(p==='../pokerplus')return {PROFILE_HASH_KEY:'poker_app:pokerplus_profiles'};if(p==='../account-canonical')return {canonicalAccountId:async id=>(hashes.get('poker_app:account_redirects')||new Map()).get(id)||id};
     if(p==='../api-auth')return {parseBody:r=>typeof r.body==='string'?JSON.parse(r.body):r.body||{},setCors(){},authRequired:r=>r.testPlayer?{ok:true,memberId:r.testPlayer,identity:r.testIdentity||{first_name:r.testPlayer}}:{ok:false,status:401}};
     if(p==='../redis')return {isConfigured:()=>configured,pipeline:async list=>list.map(c=>({result:command(c)}))};throw new Error(p);},process:{env:{}},Date:Clock,console};
