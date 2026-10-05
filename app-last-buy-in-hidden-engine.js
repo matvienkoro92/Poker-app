@@ -10,7 +10,7 @@ function hit(s,x,y,scale=1){if(s.won)return null;const candidates=s.items.filter
 function count(s,type){return s.items.filter(i=>i.type===type&&i.found).length;}
 function hint(s){if(s.won||s.hints<=0||s.hintCooldown)return null;const item=s.items.find(i=>!i.found&&(s.selected===null||i.type===s.selected))||s.items.find(i=>!i.found);if(!item)return null;s.hints--;s.hintCooldown=1800;s.hintId=item.id;s.hintUntil=s.tick+240;return item;}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function viewport(w,h){const minScale=Math.min(w/W,h/H);return constrain({w,h,minScale,maxScale:minScale*4,scale:Math.max(w/W,h/H),tx:0,ty:0});}
+function viewport(w,h){const minScale=Math.min(w/W,h/H),scale=Math.max(w/W,h/H)*2;return constrain({w,h,minScale,maxScale:Math.max(minScale*4,scale),scale,tx:(w-W*scale)/2,ty:(h-H*scale)/2});}
 function constrain(v){const sw=W*v.scale,sh=H*v.scale;v.tx=sw<=v.w?(v.w-sw)/2:clamp(v.tx,v.w-sw,0);v.ty=sh<=v.h?(v.h-sh)/2:clamp(v.ty,v.h-sh,0);return v;}
 function point(v,x,y){return {x:(x-v.tx)/v.scale,y:(y-v.ty)/v.scale};}
 function zoom(v,factor,x=v.w/2,y=v.h/2){const p=point(v,x,y);v.scale=clamp(v.scale*factor,v.minScale,v.maxScale);v.tx=x-p.x*v.scale;v.ty=y-p.y*v.scale;return constrain(v);}

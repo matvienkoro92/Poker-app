@@ -31,3 +31,4 @@ body:has(#play:not([hidden])),body:has(#play:not([hidden])) *{-webkit-user-selec
 .arcade-countdown{width:100%;text-align:center}.arcade-countdown h2{margin:0}.arcade-countdown h2+h2{margin-top:20px}
 
 .vaar-health{position:fixed;z-index:7;box-sizing:border-box;padding:5px 7px;border:1px solid #79b9a677;border-radius:8px;background:#071d24e8;text-align:center;color:#e0f3e8;pointer-events:none;font:700 10px Arial}.vaar-health>div{display:flex;gap:4px;margin-top:4px}.vaar-health i{flex:1;height:6px;border-radius:2px;background:#33414a}.vaar-health i.filled{background:#69e1ae}.vaar-health.is-hit{border-color:#ff796a;color:#ffb1a5;background:#481c24ee}
+.hidden-inventory button[hidden]{display:none}
