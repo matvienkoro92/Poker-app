@@ -51,3 +51,25 @@ body:has(#play:not([hidden])),body:has(#play:not([hidden])) *{-webkit-user-selec
 .portal-stage .campaign-actions [data-input=special]:disabled{opacity:.4}
 
 .arcade-overlay[data-brothers-dialogue="true"]{background:#05111b66;padding:20px}.brothers-intro{width:100%;max-width:420px;padding:24px;background:#091c27ed;border:2px solid #cf9c45;border-radius:22px;max-height:75svh;overflow:auto;text-align:left}.brothers-intro small{color:#ffd28a;letter-spacing:.12em;text-transform:uppercase;font-weight:700}.brothers-intro h2{font-size:24px;margin:12px 0}.brothers-intro p{font-size:19px;line-height:1.5}.brothers-intro button{min-height:52px;background:#efb545;color:#251807;font-weight:800}
+
+.hidden-hard .hidden-item:not(.is-found){filter:brightness(.72) saturate(.65)}
+
+.roma-health>div{margin-top:0}
+
+.vaar-stage .campaign-directions{display:none}
+.vaar-stage .campaign-controls{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));pointer-events:none}
+.vaar-stage .campaign-actions{width:100%;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.vaar-stage .campaign-actions button{pointer-events:auto}
+.vaar-stage [data-input=jump]{flex:none;width:104px;height:104px;min-width:104px;border-radius:50%;font-size:17px;font-weight:800;background:#173b3de8;border:2px solid #ddb86e;box-shadow:0 4px 12px #0005;padding:0}
+.vaar-stage [data-input=special]{flex:none;max-width:108px;margin-left:auto}
+
+.vaar-progress{position:fixed;z-index:7;top:110px;left:12px;right:68px;width:max-content;max-width:calc(100% - 90px);padding:6px 9px;border-radius:8px;background:#071d24d9;color:#fff1c9;font:700 11px Arial;pointer-events:none}
+.vaar-progress::after{content:attr(data-location);display:block;margin-top:4px;color:#a5e8dd;font-size:10px}
+
+/* Mission labels belong to places; markers sit beside the landmark art. */
+.chapter-city-map .map-node{width:clamp(36px,5.5vw,58px);height:clamp(36px,5.5vw,58px);min-width:0;min-height:0;font-size:clamp(18px,2.5vw,25px);overflow:visible}
+.chapter-city-map .map-node small{display:block;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);width:max-content;max-width:clamp(76px,12vw,125px);padding:3px 4px;border-radius:5px;background:#062530eb;color:#fff1c5;font-size:clamp(8px,1.3vw,11px);line-height:1.2;box-shadow:0 2px 4px #001c2655;pointer-events:none}
+.mission-location{color:#95dad4;font-size:13px;margin:0 0 12px}
+
+.tanks-stage canvas{object-fit:fill}.tanks-stage .campaign-controls{bottom:calc(12px + env(safe-area-inset-bottom));align-items:center}.tanks-stage .campaign-actions{align-self:center}
+.comic-stage{position:fixed;inset:0;overflow:hidden;background:#e4cf9e;touch-action:none}.comic-stage canvas{width:100%;height:100%;display:block}.comic-pause{position:absolute;top:calc(66px + env(safe-area-inset-top));right:12px;width:44px;height:44px;padding:0;z-index:55}.comic-controls{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom));left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;gap:8px}.comic-controls>div:first-child{display:flex;gap:6px}.comic-controls>div:last-child{display:grid;grid-template-columns:72px 72px;gap:6px}.comic-controls button{min-width:44px;height:48px;padding:4px;background:#102e38;border:2px solid #ddc799;color:#ffe6b3;font-size:12px;touch-action:none}.comic-controls [data-action=attack]{background:#e9ab40;color:#1b2225}.comic-dialog{position:absolute;z-index:60;left:50%;top:50%;transform:translate(-50%,-50%);width:min(90%,430px);box-sizing:border-box;max-height:85svh;overflow:auto;padding:22px;background:#112f37f5;border:3px solid #e3ca99;box-shadow:7px 7px 0 #101f27;color:#ffe3b2;text-align:center}.comic-dialog[hidden]{display:none}.comic-dialog h2{font-size:24px}.comic-dialog p{font-size:15px;line-height:1.5}.comic-dialog button{width:100%;background:#efbb4e;color:#172630;font-weight:bold;min-height:48px}
