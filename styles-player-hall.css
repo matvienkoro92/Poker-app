@@ -60,3 +60,9 @@
 .player-hall__cabinet-object--7{left:9%;width:12%;height:7%;bottom:69.4%}
 .player-hall__cabinet-object--8{left:9%;width:12%;height:7%;bottom:59.5%}
 .player-hall__cabinet-object--9{left:39%;width:7%;height:6%;bottom:59.5%}
+.player-hall__hotspot--cabinet{top:20%;height:12%}.player-hall__hotspot--seasons{left:53%;top:34%;width:37%;height:14%}
+.player-hall__header>div{flex:1}.player-hall__settings-open{font-size:19px!important}
+.player-hall__award-section>h3{font-size:19px;color:#ead8b3;margin:23px 0 12px}.player-hall__award-section h3 small,.player-hall__section-panel h3 small{font-size:12px;font-weight:400;color:#b8aa8e;margin-left:8px}
+.player-hall__locked img{filter:brightness(.15) grayscale(1);opacity:.55}.player-hall__locked progress{width:100%;accent-color:#c9ab6b;height:5px}.player-hall__locked small{display:block;color:#b9ad95;font-size:10px;margin-top:7px}
+.player-hall__section-panel{position:absolute;z-index:5;left:0;right:0;bottom:calc(79px + env(safe-area-inset-bottom,0px));max-height:40%;overflow:auto;padding:14px 18px;background:#101910ef;border-top:1px solid #d9bb7440;backdrop-filter:blur(14px);box-sizing:border-box}
+.player-hall__section-panel>header{display:flex;justify-content:space-between;align-items:center;gap:8px}.player-hall__section-panel>header h3{margin:0;font-size:17px;color:#ead8b3}.player-hall__section-panel>header button{font-size:10px;padding:7px}.player-hall__section-panel .player-hall__award-section>h3{display:none}.player-hall__section-panel .player-hall__collection{display:flex;gap:10px;overflow-x:auto;padding:12px 0 6px;scroll-snap-type:x proximity}.player-hall__section-panel article{flex:0 0 130px;scroll-snap-align:start;padding:10px}.player-hall__section-panel .player-hall__trophy img{height:70px}.player-hall__section-panel .player-hall__collection-title{font-size:11px}.player-hall__section-panel .player-hall__collection article>p{font-size:10px}
