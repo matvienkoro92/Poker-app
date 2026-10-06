@@ -4,7 +4,18 @@
   var labels={cups:'Кубки',achievements:'Достижения',seasons:'Сезоны',memories:'Воспоминания'};
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function money(n){return Number(n).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';}
-  function art(item){var name=item.season?'chat-profile-achievement-cup-'+item.season+'.webp':({'day-hero':'achievement-trophy-day-hero-v1.webp','win-50':'achievement-trophy-big50-v1.webp','win-100':'achievement-trophy-big100-v1.webp'})[item.id]||(item.kind==='memories'?'achievement-trophy-choice-v1.webp':'achievement-trophy-king-v1.webp');return '<img src="./assets/'+name+'" alt="" decoding="async">';}
+  var trophyArt={
+    winner:'./assets/achievement-trophy-king-v1.webp?v=20261006-hall-2',
+    memory:'./assets/achievement-trophy-choice-v1.webp?v=20261006-hall-2',
+    'day-hero':'./assets/achievement-trophy-day-hero-v1.webp?v=20261006-hall-2',
+    'win-50':'./assets/achievement-trophy-big50-v1.webp?v=20261006-hall-2',
+    'win-100':'./assets/achievement-trophy-big100-v1.webp?v=20261006-hall-2',
+    winter:'./assets/chat-profile-achievement-cup-winter.webp?v=20261006-hall-2',
+    spring:'./assets/chat-profile-achievement-cup-spring.webp?v=20261006-hall-2',
+    summer:'./assets/chat-profile-achievement-cup-summer.webp?v=20261006-hall-2'
+  };
+  function art(item){var src=trophyArt[item.season]||trophyArt[item.id]||(item.kind==='memories'?trophyArt.memory:trophyArt.winner);return '<img data-hall-art src="'+src+'" alt="" decoding="async">';}
+  document.addEventListener('error',function(e){var img=e.target;if(!img||!img.hasAttribute||!img.hasAttribute('data-hall-art'))return;if(!img.dataset.hallRetry){img.dataset.hallRetry='1';img.src=img.getAttribute('src')+'&retry=1';return;}var fallback=document.createElement('span');fallback.className='player-hall__art-fallback';fallback.setAttribute('aria-hidden','true');fallback.textContent='♜';img.replaceWith(fallback);},true);
   function trophy(item){return '<button class="player-hall__trophy" data-hall-item="'+esc(item.id)+'" aria-label="'+esc(item.title+' · '+item.origin)+'">'+art(item)+'<span>'+esc(item.title)+'</span></button>';}
   function selectedItems(){return selection.featured.map(function(id){return data.items.find(function(i){return i.id===id;});}).filter(Boolean);}
   function portrait(){var a=typeof window.pokerGetSummerRatingPlayerArt==='function'?window.pokerGetSummerRatingPlayerArt(data.nick):null;var own=document.getElementById('profilePublicAvatar');var known=document.getElementById('profilePublicRatingArtImg');if(!a&&data.self&&known&&known.getAttribute('src')&&known.style.display!=='none')a={src:known.getAttribute('src')};if(a&&a.src)return '<img class="player-hall__portrait" src="'+esc(a.src)+'" alt="Персонаж '+esc(data.name)+'">';if(data.self&&own&&own.src&&own.style.display!=='none')return '<img class="player-hall__avatar" src="'+esc(own.src)+'" alt="'+esc(data.name)+'">';return '<div class="player-hall__monogram" aria-hidden="true">'+esc(Array.from(data.name||'И')[0])+'</div>';}
