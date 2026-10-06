@@ -33,3 +33,19 @@ test('Sunday completed and partially drawn prizes remain unchanged',()=>{
   for(const drawn of [true,false]){const r=raffle(series[1]);r.endDate='2026-10-04T14:30:00Z';r.recurrence.startTime=series[1].startTime;
     if(drawn)r.status='drawn';else r.winners=[{accountId:'B'}];const before=JSON.stringify(r);assert.equal(normalize(r),false);assert.equal(JSON.stringify(r),before);}
 });
+
+test('manual replacement survives repeated daily normalization without changing recurrence',()=>{
+  const r=raffle(series[1]);
+  r.prizesUpdatedAt='2026-10-06T13:11:00Z';
+  r.title='5 × Беккинг-байин 2000 ₽ на видеостол';
+  r.totalWinners=5;
+  r.groups=[{count:5,prize:'Беккинг-байин 2000 ₽ на видеостол'}];
+  r.endDate='2026-10-06T15:30:00Z';
+  const before=JSON.stringify(r);
+  for(let i=0;i<3;i++){assert.equal(normalize(r),false);assert.equal(JSON.stringify(r),before);}
+});
+test('manual additions also survive the daily template',()=>{
+  const r=raffle(series[1]);r.prizesUpdatedAt='2026-10-06T13:11:00Z';
+  r.groups.push({count:1,prize:'Беккинг-байин 2000 ₽ на видеостол'});r.totalWinners=11;
+  const before=JSON.stringify(r);assert.equal(normalize(r),false);assert.equal(JSON.stringify(r),before);
+});
