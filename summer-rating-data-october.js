@@ -958,4 +958,341 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "05.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "I🐅I",
+          "place": 2,
+          "reward": 1807.5,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 3,
+          "reward": 1309.99,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 2,
+          "reward": 3652.0000000000005,
+          "points": 0
+        },
+        {
+          "nick": "Вадим",
+          "place": 8,
+          "reward": 750,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "09:00",
+      "name": "Crazy knock🥊",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Alesha",
+          "place": 2,
+          "reward": 1787,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 5190,
+          "points": 0
+        },
+        {
+          "nick": "adiga666",
+          "place": 9,
+          "reward": 4400,
+          "points": 0
+        },
+        {
+          "nick": "туз буби",
+          "place": 13,
+          "reward": 2000,
+          "points": 0
+        },
+        {
+          "nick": "Alesha",
+          "place": 16,
+          "reward": 1362,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Надзор",
+          "place": 3,
+          "reward": 1400,
+          "points": 0
+        },
+        {
+          "nick": "Tanechka",
+          "place": 5,
+          "reward": 1100,
+          "points": 0
+        },
+        {
+          "nick": "Monfokon",
+          "place": 4,
+          "reward": 1080,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Bounty 200🥊 40K GTD",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "butovskiy",
+          "place": 3,
+          "reward": 3004,
+          "points": 0
+        },
+        {
+          "nick": "Alesha",
+          "place": 13,
+          "reward": 1019,
+          "points": 0
+        },
+        {
+          "nick": "MillioneONE77",
+          "place": 0,
+          "reward": 238,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "I🐅I",
+          "place": 1,
+          "reward": 14770,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 5,
+          "reward": 200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Девственник",
+          "place": 5,
+          "reward": 6150,
+          "points": 0
+        },
+        {
+          "nick": "QQQ777",
+          "place": 19,
+          "reward": 660,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 15,
+          "reward": 260,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Надзор",
+          "place": 7,
+          "reward": 1624.37,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 5,
+          "reward": 1234.69,
+          "points": 0
+        },
+        {
+          "nick": "roma1233",
+          "place": 26,
+          "reward": 243.75,
+          "points": 0
+        },
+        {
+          "nick": "SantaClauS",
+          "place": 39,
+          "reward": 243.74,
+          "points": 0
+        },
+        {
+          "nick": "Мегалодон",
+          "place": 15,
+          "reward": 190.62,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Юрий_77",
+          "place": 4,
+          "reward": 320,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 6,
+          "reward": 200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "туз буби",
+          "place": 1,
+          "reward": 45098,
+          "points": 0
+        },
+        {
+          "nick": "outsider",
+          "place": 17,
+          "reward": 4618,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 14,
+          "reward": 2492,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 20,
+          "reward": 18,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 3660,
+          "points": 0
+        },
+        {
+          "nick": "EvgenDerby",
+          "place": 3,
+          "reward": 890,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "A Аддоник А",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 6600,
+          "points": 0
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 3,
+          "reward": 3100,
+          "points": 0
+        },
+        {
+          "nick": "Девственник",
+          "place": 4,
+          "reward": 900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 2,
+          "reward": 23995,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

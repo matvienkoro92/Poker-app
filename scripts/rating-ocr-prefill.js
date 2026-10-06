@@ -66,6 +66,10 @@ function isDateTime(text) {
 function normalizeName(raw) {
   let name = String(raw || "").trim();
   name = name.replace(/\s+/g, " ");
+  if (/^Island bounty/i.test(name)) return "Island bounty🌴 20k";
+  if (/^Bounty\s*200.*40K/i.test(name)) return "Bounty 200🥊 40K GTD";
+  if (/^Crazy knock/i.test(name)) return "Crazy knock🥊";
+  if (/ПЯТИХАТКА\s*КО/i.test(name)) return "ПЯТИХАТКА КО";
   if (/^OK\b/i.test(name) || /^ОК\b/i.test(name)) return "OK🎰";
   if (/^OKTI$/i.test(name)) return "OK🎰";
   if (/^MOK/i.test(name) || /^МОК/i.test(name)) return "МОК🎰";
@@ -475,6 +479,7 @@ async function parseOcrFile(file) {
     if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
+  if (blue && date === "05.10.2026" && time === "09:00" && /^Crazy knock/i.test(title)) buyin = 200;
   if (date === "01.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
   if (date === "02.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА МОК";
   if (date === "04.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
@@ -490,7 +495,7 @@ async function parseOcrFile(file) {
     if (date === "27.09.2026" && time === "18:00" && !blue && token.text === "yID:764264") token.text = "ID:764264";
   });
   const ids = tokens
-    .filter((token) => /(?:^|[^a-z])(?:S?ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
+    .filter((token) => /(?:^|[^a-z])(?:[MS]?ID|D)\s*:?\s*\d+/i.test(token.text) && token.x > 0.20 && token.x < 0.52 && token.y < 0.65 && token.y > 0.12)
     .sort((a, b) => b.y - a.y);
 
   const rows = await Promise.all(ids.map(async (idToken, index) => {
