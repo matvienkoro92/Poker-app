@@ -27,3 +27,13 @@ test('rooftop crate warns before release and continues falling after Vaar leaves
 test('spring cannot launch a player on a higher overlapping ledge, on a box, or above a missing support',()=>{const s=isolatedRoute();s.springs=[250];s.platforms.push({x:200,y:350,baseX:200,baseY:350,w:100});s.y=350;E.step(s,{});assert.equal(s.ground,true);assert.equal(s.vy,0);s.platforms.pop();s.blocks=[{x:225,y:415,w:50,h:50}];s.y=415;s.vy=0;s.ground=true;E.step(s,{});assert.equal(s.vy,0);s.blocks=[];s.platforms[0].gone=true;s.y=465;s.vy=0;s.ground=true;E.step(s,{});assert.notEqual(s.vy,-15);s.platforms[0].gone=false;s.y=465;s.vy=0;s.ground=true;E.step(s,{});assert.equal(s.vy,-15);});
 
 test('raised timed gate damages contact but a jump above it is safe',()=>{for(const above of [false,true]){const s=isolatedRoute(),p=s.platforms[0],f={platform:p,side:'right',timed:true,offset:0,w:12,h:0};s.fences=[f];s.tick=200;s.x=p.x+p.w-14;s.y=above?p.y-110:p.y;s.ground=!above;s.inv=0;E.step(s,{});assert.equal(s.health,above?3:2);}});
+test('antitilt terminal requires interaction and dispenses one key and one heart only once',()=>{
+ const s=E.create(2),k=s.caseKeys[0];s.enemies=[];s.traps=[];s.shooters=[];s.searchlights=[];s.streetHazards=[];s.mushrooms=[];s.x=k.x;s.y=k.platform.y;s.ground=true;s.health=1;
+ E.step(s,{});assert.equal(k.collected,false);assert.equal(s.health,1);
+ E.step(s,{special:true});assert.equal(k.collected,true);assert.equal(s.health,2);assert.equal(s.terminalNoticeTicks,210);const score=s.score;
+ E.step(s,{});E.step(s,{special:true});assert.equal(s.health,2);assert.equal(s.score,score);s.lost=true;E.revive(s);assert.equal(k.collected,true);
+});
+test('antitilt terminal cannot be used remotely or overfill health',()=>{
+ const s=E.create(2),k=s.caseKeys[0];s.enemies=[];s.traps=[];s.shooters=[];s.searchlights=[];s.streetHazards=[];s.mushrooms=[];
+ E.step(s,{special:true});assert.equal(k.collected,false);E.step(s,{});s.x=k.x;s.y=k.platform.y;s.ground=true;E.step(s,{special:true});assert.equal(k.collected,true);assert.equal(s.health,3);
+});
