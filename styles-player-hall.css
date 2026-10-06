@@ -44,3 +44,9 @@
 .player-hall__object-label{display:none!important}
 .player-hall__empty{inset:44% 54% auto 8%;font-size:10px;background:#132016b0;padding:10px;border-radius:7px}
 @media(prefers-reduced-motion:reduce){.player-hall__scene{transition:none}.player-hall__owner{transition:none}}
+
+.player-hall__camera-ui{inset:0;padding:0 14px calc(91px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:flex-end;pointer-events:none;z-index:11;box-sizing:border-box}
+.player-hall-dialog .player-hall__camera-ui button{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));left:20px;width:40px;height:40px;padding:0;border-radius:50%;font-size:24px;pointer-events:auto}
+.player-hall-dialog--immersive:has(.player-hall__room:not([data-camera=wide])) .player-hall__header h2{margin-left:52px}
+.player-hall-dialog--immersive .player-hall__header{pointer-events:none}
+.player-hall-dialog--immersive .player-hall__header>button{pointer-events:auto}
