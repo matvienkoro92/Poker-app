@@ -80,6 +80,10 @@ function initRaffles() {
   var raffleAddPrizeText = document.getElementById("raffleAddPrizeText");
   var raffleAddPrizeAccess = document.getElementById("raffleAddPrizeAccess");
   var raffleAddPrizeAccessWrap = document.getElementById("raffleAddPrizeAccessWrap");
+  var rafflePrizeActionReplace = document.getElementById("rafflePrizeActionReplace");
+  var rafflePrizeActionAdd = document.getElementById("rafflePrizeActionAdd");
+  var rafflePrizeAddOptions = document.getElementById("rafflePrizeAddOptions");
+  var rafflePrizesSubmitting = false;
   var raffleAddPrizesSubmit = document.getElementById("raffleAddPrizesSubmit");
   var raffleStatWinners = document.getElementById("raffleStatWinners");
   var raffleStatPrize = document.getElementById("raffleStatPrize");
@@ -4054,6 +4058,7 @@ function initRaffles() {
   }
 
   function getRaffleAddPrizeMode() {
+    if (rafflePrizeActionReplace && rafflePrizeActionReplace.checked) return "replace";
     var groups = raffleAddPrizeGroups();
     if (!groups.length) return "new";
     return raffleAddPrizeModeNew && raffleAddPrizeModeNew.checked ? "new" : "existing";
@@ -4080,14 +4085,18 @@ function initRaffles() {
     }
     if (raffleAddPrizeModeNew && !groups.length) raffleAddPrizeModeNew.checked = true;
     var mode = getRaffleAddPrizeMode();
+    if (rafflePrizeAddOptions) rafflePrizeAddOptions.hidden = mode === "replace";
+    if (raffleAddPrizesSubmit && !rafflePrizesSubmitting) raffleAddPrizesSubmit.textContent = mode === "replace" ? "Заменить" : "Добавить";
     if (raffleAddPrizeExistingGroupWrap) raffleAddPrizeExistingGroupWrap.hidden = mode !== "existing";
-    if (raffleAddPrizeNewGroupWrap) raffleAddPrizeNewGroupWrap.hidden = mode !== "new";
-    if (raffleAddPrizeAccessWrap) raffleAddPrizeAccessWrap.hidden = mode !== "new";
-    if (raffleAddPrizeText) raffleAddPrizeText.disabled = mode !== "new";
-    if (raffleAddPrizeAccess) raffleAddPrizeAccess.disabled = mode !== "new";
+    if (raffleAddPrizeNewGroupWrap) raffleAddPrizeNewGroupWrap.hidden = mode === "existing";
+    if (raffleAddPrizeAccessWrap) raffleAddPrizeAccessWrap.hidden = mode === "existing";
+    if (raffleAddPrizeText) raffleAddPrizeText.disabled = mode === "existing";
+    if (raffleAddPrizeAccess) raffleAddPrizeAccess.disabled = mode === "existing";
     var hint = raffleAddPrizesForm ? raffleAddPrizesForm.querySelector(".raffle-add-prizes-form__hint") : null;
     if (hint) {
-      hint.textContent = mode === "existing"
+      hint.textContent = mode === "replace"
+        ? "Все прежние призы заменятся указанными. Участники и время итогов сохранятся."
+        : mode === "existing"
         ? "Количество добавится в выбранную существующую группу призов."
         : "Добавится новая группа победителей в текущий активный розыгрыш.";
     }
@@ -4124,12 +4133,13 @@ function initRaffles() {
 
   function resetRaffleAddPrizesSubmit() {
     if (!raffleAddPrizesSubmit) return;
+    rafflePrizesSubmitting = false;
     raffleAddPrizesSubmit.disabled = false;
-    raffleAddPrizesSubmit.textContent = "Добавить";
+    syncRaffleAddPrizesMode();
   }
 
   function submitRaffleAddPrizes() {
-    if (!rafflesIsAdmin) return;
+    if (!rafflesIsAdmin || rafflePrizesSubmitting) return;
     if (!currentRaffleId) {
       if (tg && tg.showAlert) tg.showAlert("Розыгрыш не выбран. Обновите страницу.");
       return;
@@ -4157,7 +4167,7 @@ function initRaffles() {
       }
       prize = String(selectedGroup.prize || "").replace(/\s+/g, " ").trim();
     }
-    if (mode === "new" && !prize) {
+    if (mode !== "existing" && !prize) {
       if (tg && tg.showAlert) tg.showAlert("Укажите приз");
       return;
     }
@@ -4165,12 +4175,14 @@ function initRaffles() {
       ? (count + " мест в " + raffleAddPrizeGroupOptionLabel(selectedGroup, selectedGroupIndex))
       : (activeRaffleTicketGroupShortLabel(count, prize) || (count + " приз(ов): " + prize));
     var doAdd = function () {
+      if (rafflePrizesSubmitting) return;
+      rafflePrizesSubmitting = true;
       if (raffleAddPrizesSubmit) {
         raffleAddPrizesSubmit.disabled = true;
-        raffleAddPrizesSubmit.textContent = "Добавляем...";
+        raffleAddPrizesSubmit.textContent = mode === "replace" ? "Заменяем..." : "Добавляем...";
       }
       var addPayload = {
-        action: "addPrizeGroups",
+        action: mode === "replace" ? "replacePrizeGroups" : "addPrizeGroups",
         raffleId: currentRaffleId,
         count: count,
       };
@@ -4197,14 +4209,14 @@ function initRaffles() {
             clearRafflesCache();
             setRaffleAddPrizesFormVisible(false);
             if (raffleAddPrizeCount) raffleAddPrizeCount.value = "1";
-            if (mode === "new" && raffleAddPrizeText) raffleAddPrizeText.value = "";
-            if (tg && tg.showAlert) tg.showAlert("Призы добавлены");
-            else showRaffleFeedback("Призы добавлены", "ok");
+            if (mode !== "existing" && raffleAddPrizeText) raffleAddPrizeText.value = "";
+            if (tg && tg.showAlert) tg.showAlert(mode === "replace" ? "Призы заменены" : "Призы добавлены");
+            else showRaffleFeedback(mode === "replace" ? "Призы заменены" : "Призы добавлены", "ok");
             loadRaffles();
           } else if (tg && tg.showAlert) {
-            tg.showAlert((data && data.error) || "Ошибка добавления призов");
+            tg.showAlert((data && data.error) || "Ошибка изменения призов");
           } else {
-            showRaffleFeedback((data && data.error) || "Ошибка добавления призов", "err");
+            showRaffleFeedback((data && data.error) || "Ошибка изменения призов", "err");
           }
         })
         .catch(function () {
@@ -4213,7 +4225,7 @@ function initRaffles() {
           else showRaffleFeedback(POKER_NET_ERR, "err");
         });
     };
-    confirmRaffleAdminAction("Добавить в текущий розыгрыш: " + groupLabel + "?", doAdd);
+    confirmRaffleAdminAction((mode === "replace" ? "Заменить ВСЕ призы текущего розыгрыша на: " : "Добавить в текущий розыгрыш: ") + groupLabel + "?", doAdd);
   }
 
   if (raffleAddPrizesToggleBtn) {
@@ -4222,6 +4234,10 @@ function initRaffles() {
       setRaffleAddPrizesFormVisible(!raffleAddPrizesForm || raffleAddPrizesForm.hidden);
     });
   }
+
+  [rafflePrizeActionAdd, rafflePrizeActionReplace].forEach(function (input) {
+    if (input) input.addEventListener("change", syncRaffleAddPrizesMode);
+  });
 
   if (raffleAddPrizeModeExisting) {
     raffleAddPrizeModeExisting.addEventListener("change", syncRaffleAddPrizesMode);
