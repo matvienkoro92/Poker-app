@@ -2769,11 +2769,13 @@
       "domain": "rating-summer",
       "exportedBy": [
         "app-rating-view-adapter.js",
-        "app-view-router.js"
+        "app-view-router.js",
+        "app-player-hall.js"
       ],
       "consumedBy": [
         "app-rating-view-adapter.js",
-        "app-view-router.js"
+        "app-view-router.js",
+        "app-player-hall.js"
       ]
     },
     {

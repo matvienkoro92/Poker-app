@@ -1,0 +1,11 @@
+'use strict';
+// Use the same ranking functions as profile season history, including winter corrections.
+const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const root=path.join(__dirname,'..'),c=vm.createContext({window:{__pokerSummerArchive:true},console});
+for(const f of ['app-rating-core.js','app-rating.js','app-rating-spring-season.js','app-rating-summer-season.js','winter-rating-data.js','spring-rating-data-march.js','spring-rating-data-april.js','spring-rating-data-may.js','spring-rating-data.js','summer-rating-data-june.js','summer-rating-data-july.js','summer-rating-data-august.js','summer-rating-data.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8').split('window.openWinterRatingPlayerModalReady =')[0],c,{filename:f});
+const s=fs.readFileSync(path.join(root,'app-rating-view-adapter.js'),'utf8');
+for(const [a,b] of [['function winterRatingPointsForPlace(','function winterRatingRewardTone('],['function normalizeWinterRatingPlayerSeasonKey(','var SUMMER_RATING_PLAYER_ART_BY_NICK'],['function getTournamentRatingTournamentsBySeason(','var pokerTournamentProfileOpenLoadingNick']])vm.runInContext(s.slice(s.indexOf(a),s.indexOf(b)),c);
+const nicks=new Set(Object.keys(require('../lib/profile-achievement-catalog.json'))),out={};
+for(const map of [c.WINTER_RATING_BY_DATE,c.SPRING_RATING_TOURNAMENTS_BY_DATE,c.SUMMER_RATING_TOURNAMENTS_BY_DATE])for(const rows of Object.values(map||{}))for(const row of rows)for(const p of row.players||[row])if(p.nick)nicks.add(p.nick);
+for(const nick of nicks){const key=require('../lib/profile-appearance').nickKey(nick);const previous=out[key]||[];out[key]=['winter','spring','summer'].flatMap(season=>c.getTournamentRatingPlaceRows(nick,season).map(r=>({id:'season-'+season+'-2026-'+r.league,kind:'seasons',title:({winter:'Зима 2025–2026',spring:'Весна 2026',summer:'Лето 2026'})[season],place:r.place,league:r.league,season,art:r.place<=3?4:7,origin:r.place+'-е место · Лига '+r.league+' · Итоги сезона'})));out[key]=[...new Map([...previous,...out[key]].map(i=>[i.id,i])).values()];}
+fs.writeFileSync(path.join(root,'lib/player-hall-seasons.json'),JSON.stringify(out));console.log('Hall season history:',Object.keys(out).length,'players');

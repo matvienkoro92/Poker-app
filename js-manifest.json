@@ -90,7 +90,8 @@
       "app-chat-keyboard-dock-composer-layout.js",
       "app-chat-keyboard-dock-viewport-events.js",
       "app-chat-keyboard-dock.js",
-      "app-chat-view-glue.js"
+      "app-chat-view-glue.js",
+      "app-player-hall.js"
     ],
     "rating": [
       "app-rating-core.js",
@@ -142,7 +143,8 @@
       "app-profile-shows.js",
       "app-visitor-id.module.mjs",
       "app-cashout.js",
-      "app-portrait-effects.js"
+      "app-portrait-effects.js",
+      "app-player-hall.js"
     ],
     "push": [
       "app-push.js",

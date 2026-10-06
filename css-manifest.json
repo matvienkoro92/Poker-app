@@ -136,7 +136,8 @@
       "styles-chat-after-shell.css",
       "styles-chat-after-modals.css",
       "styles-chat-after-responsive.css",
-      "styles-chat-overlays.css"
+      "styles-chat-overlays.css",
+      "styles-player-hall.css"
     ],
     "learning": [
       "styles-learning-games.css",
@@ -181,7 +182,8 @@
       "styles-profile-adjacent-tools.css",
       "styles-profile-modals-tail.css",
       "styles-hero.css",
-      "styles-profile-identity.css"
+      "styles-profile-identity.css",
+      "styles-player-hall.css"
     ],
     "equilator": [
       "styles-equilator.css",
