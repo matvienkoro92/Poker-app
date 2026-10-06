@@ -15,15 +15,15 @@ function create(chapter){if(chapter===0)throw Error('Chapter one uses MonkeyRace
 function train(s){return Array.from({length:27},(_,i)=>({x:15+i*142,w:134,y:385+Math.sin(s.tick*.015+i*.55)*(40+15*(s.intensity||0)),car:i}));}
 function damage(s){if(s.inv||s.won||s.lost)return;s.health--;s.hits++;s.inv=80;s.shake=10;if(s.health<=0)s.lost=true;}
 function hurtBoss(s,n){if(s.boss.hp<=0)return;s.boss.hp=Math.max(0,s.boss.hp-n);s.score+=100;if(!s.boss.hp){s.won=true;s.phase='done';}}
-function romaTables(room){const layouts=[[[195,340,125,62]],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w:w*1.12,h:h*1.12}));}
+function romaTables(room){const layouts=[[],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w:w*1.12,h:h*1.12}));}
 function romaProps(room){const layouts=[
- [['rack',65,475,100,28],['sofa',295,470,132,32]],
- [['sofa',75,450,90,32],['trolley',285,245,55,30]],
- [['rack',40,235,50,28],['sofa',300,455,85,32]],
- [['trolley',60,455,55,30],['sofa',300,455,90,28]],
- [['sofa',75,445,90,32],['sofa',295,255,90,32]],
+ [['rack',72,290,84,28],['sofa',291,330,102,32]],
+ [['sofa',70,390,90,32],['trolley',285,245,55,30]],
+ [['rack',40,235,50,28],['sofa',305,410,85,32]],
+ [['trolley',62,365,55,30],['sofa',305,415,90,28]],
+ [['sofa',72,400,90,32],['sofa',295,255,90,32]],
  [['safe',75,245,75,36],['trolley',310,305,55,30]],
- [['rack',65,250,70,28],['trolley',305,445,55,30]],
+ [['rack',65,250,70,28],['trolley',305,390,55,30]],
  [['safe',20,490,65,30],['trolley',370,490,55,28]]
  ];return layouts[room].map(([kind,x,y,w,h])=>({kind,x,y,w,h,cover:kind==='sofa'||kind==='safe'}));}
 function roomSolids(s){return [...(s.furniture||[]),...(s.props||[])];}
