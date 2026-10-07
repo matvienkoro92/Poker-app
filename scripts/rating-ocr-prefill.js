@@ -483,6 +483,9 @@ async function parseOcrFile(file) {
   if (date === "01.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
   if (date === "02.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА МОК";
   if (date === "04.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
+  if (date === "06.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (date === "06.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
+  if (date === "06.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     if (date === "02.10.2026" && time === "12:00" && token.text === "yID:173085") token.text = "ID:173085";

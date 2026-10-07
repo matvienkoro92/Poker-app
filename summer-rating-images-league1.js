@@ -1130,4 +1130,11 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-05-10-2026-league1-a-addonik-a-22h.jpg",
     "rating-compressed-preview/rating-05-10-2026-league1-magic-500-120k-22h.jpg"
   ]
+,
+  "06.10.2026": [
+    "rating-compressed-preview/rating-06-10-2026-league1-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-06-10-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-06-10-2026-league1-bounty-magic-50k-18h.jpg",
+    "rating-compressed-preview/rating-06-10-2026-league1-pyatihatka-mok-20h.jpg"
+  ]
 };
