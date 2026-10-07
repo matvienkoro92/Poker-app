@@ -78,7 +78,7 @@ const baseFiles = [
   'app-last-buy-in-hidden-game.js',
   'app-last-buy-in-campaign-engine.js',
   'app-last-buy-in-campaign-game.js',
-  'app-last-buy-in-comic-engine.js',
+  'app-last-buy-in-race-engine.js', 'app-last-buy-in-comic-engine.js',
   'app-last-buy-in-comic-game.js',
   'styles-last-buy-in-campaign.css',
   'monkey-race-play.html',

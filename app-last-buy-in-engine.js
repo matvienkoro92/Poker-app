@@ -17,18 +17,22 @@ function damage(s){if(s.inv||s.won||s.lost)return;s.health--;s.hits++;s.inv=80;s
 function hurtBoss(s,n){if(s.boss.hp<=0)return;s.boss.hp=Math.max(0,s.boss.hp-n);s.score+=100;if(!s.boss.hp){s.won=true;s.phase='done';}}
 function romaTables(room){const layouts=[[],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w:w*1.12,h:h*1.12}));}
 function romaProps(room){const layouts=[
- [['rack',55,248,60,24],['sofa',332,260,82,28]],
+ [],
  [['sofa',52,265,82,28],['trolley',308,238,48,26]],
  [['rack',48,248,54,24],['sofa',337,290,76,28]],
  [['trolley',45,262,48,26],['sofa',337,290,76,28]],
  [['sofa',52,260,82,28],['sofa',332,260,82,28]],
  [['safe',55,250,62,30],['trolley',333,275,48,26]],
- [['rack',55,248,60,24],['trolley',332,275,48,26]],
+ [['trolley',332,275,48,26]],
  [['safe',45,265,62,30],['trolley',337,270,48,26]]
  ];return layouts[room].map(([kind,x,y,w,h])=>({kind,x,y,w,h,cover:kind==='sofa'||kind==='safe'}));}
 function roomSolids(s){return [...(s.furniture||[]),...(s.props||[])];}
 function tableAt(s,x,y){return roomSolids(s).find(f=>((x-f.x)/(f.w/2+14))**2+((y-f.y)/(f.h/2+14))**2<1);}
-function aroundTables(s,e,oldX,oldY){const dx=e.x-oldX,dy=e.y-oldY,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/4));e.x=oldX;e.y=oldY;for(let i=0;i<n;i++){const x=e.x+dx/n;if(!tableAt(s,x,e.y))e.x=x;const y=e.y+dy/n;if(!tableAt(s,e.x,y))e.y=y;}}
+function aroundTables(s,e,oldX,oldY){const dx=e.x-oldX,dy=e.y-oldY,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/4));e.x=oldX;e.y=oldY;
+ // A spawn or restored position can overlap furniture: allow movement out, never deeper in.
+ const canMove=(x,y)=>roomSolids(s).every(f=>{const rx=f.w/2+14,ry=f.h/2+14,before=((e.x-f.x)/rx)**2+((e.y-f.y)/ry)**2,after=((x-f.x)/rx)**2+((y-f.y)/ry)**2;return after>=1||(before<1&&after>before+1e-9);});
+ for(let i=0;i<n;i++){const x=e.x+dx/n;if(canMove(x,e.y))e.x=x;const y=e.y+dy/n;if(canMove(e.x,y))e.y=y;}}
+
 // Find a route around solid furniture; a side nudge alone gets stuck at oval corners.
 function clearTablePath(s,a,b,margin=20){const n=Math.ceil(dist(a,b)/5);for(let i=1;i<=n;i++)if(roomSolids(s).some(f=>((a.x+(b.x-a.x)*i/n-f.x)/(f.w/2+margin))**2+((a.y+(b.y-a.y)*i/n-f.y)/(f.h/2+margin))**2<1))return false;return true;}
 function guardWaypoint(s,e,goal){
