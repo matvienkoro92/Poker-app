@@ -1,0 +1,7 @@
+# Две полки по пять мест
+
+Встроенный imagegen, итоговый файл `assets/player-hall/lounge-garage-panorama-v11.webp`, lossless WebP. Верхняя полка для кубков, нижняя для достижений. Руль и декор сохранены, шлем перенесён на комод. Предметы игрока, подписи и кнопки редактирования рисуются приложением. Пустые места сохраняются; каждая категория допускает до пяти полученных наград. Старые витрины переводятся автоматически.
+
+## Промпт
+
+Edit only the slim trophy cabinet immediately left of garage doorway in this panorama. Keep its exact outer frame position. Replace its top display bay (x350-490,y120-255 in this 1341x1173 image) with an EMPTY illuminated dark walnut shelf having five equal subtle vertical divisions, for five live trophies to be added by the app. Replace its bottom display bay (x350-490,y415-545) with another EMPTY shelf with five equal subtle vertical divisions for live achievement plaques. Keep the middle display bay with steering wheel, golden spade and checkered decoration. Relocate the red black helmet and small monkey statuette from lower bay onto left sideboard next to existing helmet, without hiding monkey face. Preserve EVERYTHING else exactly: chimp Nike sneakers, pose, chair, floor, garage kart and gap, lights, perspective, all garage shelves. No trophies in the two empty shelf bays. No text, labels, buttons, UI. Sharp details, no blur.

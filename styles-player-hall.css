@@ -172,3 +172,26 @@
 .player-hall__detail-close{position:sticky;top:0;z-index:10;min-width:44px;min-height:44px;background:#20231f!important}
 .player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v10.webp')}
 .player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v10.webp')}
+/* Two independent five-place displays belong to the cabinet camera plane. */
+.player-hall__display-shelf{position:absolute;left:52%;width:22%;height:12%;top:10%;z-index:3;color:#e6cf9e}
+.player-hall__display-shelf--achievements{top:35%}
+.player-hall__display-shelf h3{margin:0;text-align:center;font-size:.7cqh;line-height:1.4;font-weight:500;letter-spacing:.02em;background:#21170c;border:1px solid #ac8d4c80;border-radius:2px;padding:.2cqh}
+.player-hall__display-shelf>div{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.25cqh;height:80%;padding:.5cqh .3cqh .2cqh;box-sizing:border-box}
+.player-hall__display-slot{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;border-bottom:2px solid #a97b40;box-shadow:inset -1px 0 #ab87502b}
+.player-hall-dialog .player-hall__display-slot .player-hall__cabinet-object{position:relative;inset:auto;width:100%;height:65%;display:flex;pointer-events:auto}
+.player-hall__display-slot .player-hall__cabinet-object img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(1px 2px 2px #0009)}
+.player-hall__slot-title{width:100%;font-size:.48cqh;line-height:1.2;text-align:center;min-height:2.4em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;background:#20160dea;color:#f3deae;padding:1px;box-sizing:border-box}
+.player-hall__slot-empty{font-size:1.5cqh;opacity:.35;flex:1;display:grid;place-items:center}
+.player-hall-dialog .player-hall__slot-edit{position:absolute;right:0;top:0;padding:0;width:1.35cqh;height:1.35cqh;border-radius:50%;font-size:.8cqh;background:#17150fec;border:1px solid #c69b54;z-index:4}
+.player-hall__room[data-camera=wide] .player-hall__slot-edit{display:none}
+.player-hall__room[data-camera=wide] .player-hall__display-slot .player-hall__cabinet-object{pointer-events:none}
+.player-hall__hotspot--shelves{left:52%;top:47%;width:27%;height:3%}
+.player-hall__room[data-camera=shelves] .player-hall__spaces{transform:translate(-8%,6%) scale(2.4);transform-origin:33% 37%}
+.player-hall__room[data-camera=cabinet] .player-hall__spaces{transform:translate(-8%,20%) scale(2.4);transform-origin:33% 18%}
+.player-hall__room:not([data-camera=wide]) .player-hall__section-panel{max-height:30%}
+.player-hall__hotspot--seasons{left:6%;top:31%;width:32%;height:3%}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v11.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v11.webp')}
+.player-hall-dialog .player-hall__slot-edit{width:1.8cqh;height:1.8cqh;font-size:1cqh}
+.player-hall__slot-edit:after{content:'';position:absolute;inset:-4px}
+.player-hall__room[data-camera=shelves] .player-hall__spaces{transform:translate(-8%,0%) scale(2.4)}
