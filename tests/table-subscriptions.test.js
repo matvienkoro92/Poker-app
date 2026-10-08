@@ -64,6 +64,11 @@ test('player search uses exact ID, tracks new seating, escapes names, deletion i
 test('upstream failures preserve previous seating and group entry only links to private bot',async()=>{
   const f=fixture();await f.callback('menu',42,'supergroup');
   assert.equal(f.db.size,0);assert.match(f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].url,/TestBot\?start=tablesub/);
+  assert.equal(f.calls.at(-1).method,'editMessageText');
+  assert.equal(f.calls.at(-1).body.chat_id,-1);
+  assert.equal(f.calls.at(-1).body.message_id,1);
+  assert.deepEqual(f.calls.at(-1).body.reply_markup.inline_keyboard.at(-1),[{text:'⬅️ Назад',callback_data:'club:pulse'}]);
+  assert.ok(!f.calls.some(call=>call.method==='sendMessage'));
   f.setTables([base]);await f.callback('add:PLO6:any');const before=f.db.get('poker21:table-subscriptions:test:user:42');
   f.setFailure(true);await assert.rejects(f.service.poll(),/upstream/);assert.equal(f.db.get('poker21:table-subscriptions:test:user:42'),before);
 });
