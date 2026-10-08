@@ -397,9 +397,14 @@ Normalized table fields:
   "groupId": "",
   "playType": "",
   "blindAnnotation": "",
-  "entryFees": null
+  "entryFees": null,
+  "pos": { "pos1": 0, "pos2": 0, "pos3": 0, "pos4": 0, "pos5": 0, "pos6": 0, "pos7": 0, "pos8": 0, "pos9": 0 }
 }
 ```
+
+`pos` preserves the vendor's seat values (`pos1` through `pos9`), including
+player IDs supplied as strings. The vendor sample uses `0` for empty seats.
+If seating is absent in an older response, our API returns `pos: null`.
 
 The frontend does not currently display this list in the profile UI.
 
