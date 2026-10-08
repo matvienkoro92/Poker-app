@@ -36,8 +36,8 @@ test('pulse opens commands and correct download and club links',async t=>{
  assert.equal(buttons.length,7);
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
  assert.deepEqual(buttons.slice(-3,-1),[
-  {text:'Скопировать ссылку на клубное приложение',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
-  {text:'Скопировать ссылку на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
+  {text:'📋 Ссылка',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
+  {text:'📋 Ссылка на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
  ]);
 });
 
