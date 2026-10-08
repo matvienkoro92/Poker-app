@@ -236,3 +236,13 @@
 .player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-empty-v13.webp')}
 .player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-empty-v13.webp')}
 .player-hall__character-foreground{position:absolute;inset:0;background:inherit;pointer-events:none;z-index:2;clip-path:polygon(0% 70%,22% 70%,27% 72%,27% 77%,46% 78%,53% 81%,55% 86%,56% 100%,0% 100%)}
+/* Clean right cabinet: two illuminated trophy niches and a single middle sign. */
+.player-hall__display-shelf--cups .player-hall__display-slot--3{left:57%;top:9%;height:14.2%;width:15%}
+.player-hall__display-shelf--cups .player-hall__display-slot--4{left:57%;top:28%;height:16.5%;width:15%}
+.player-hall__hotspot--cabinet{left:55%;top:24%;width:20%;height:3%}
+.player-hall__display-shelf--cups h3{display:none}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-empty-v14.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-empty-v14.webp')}
+.player-hall__display-shelf--cups .player-hall__display-slot--3{top:9%;height:16%}
+.player-hall__display-shelf--cups .player-hall__display-slot--4{top:34%;height:10.5%}
+.player-hall__hotspot--cabinet{top:27%;height:3%}
