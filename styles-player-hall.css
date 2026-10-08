@@ -154,3 +154,7 @@
 .player-hall__hotspot--shelves{top:35%;height:3%}
 .player-hall__hotspot--seasons{left:60%;width:25%}
 .player-hall-dialog .player-hall__space-arrow{top:62%}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v9.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v9.webp')}
+/* Camera transform and origin animate together via Web Animations. */
+.player-hall__spaces{transition:none}
