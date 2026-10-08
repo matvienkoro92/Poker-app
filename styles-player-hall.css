@@ -137,3 +137,10 @@
 @media(prefers-reduced-motion:reduce){.player-hall__spaces{transition:none}}
 .player-hall__room[data-space=hall][data-camera=wide] .player-hall__spaces{transform:translateX(-2%)}
 .player-hall__garage-object--helmet,.player-hall__garage-object--chips,.player-hall__garage-object--tools{left:10%;width:42%}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v7.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v7.webp')}
+.player-hall__room[data-space=hall][data-camera=wide] .player-hall__spaces{transform:translateX(2%)}
+.player-hall__room[data-space=garage] .player-hall__spaces{transform:translateX(-35%) scale(.9);transform-origin:65% 58%}
+.player-hall__room[data-space=garage][data-garage-focus=kart] .player-hall__spaces{transform:translateX(-35%) scale(1.05);transform-origin:60% 58%}
+.player-hall__garage-object--kart{left:-22%;top:43%;width:82%;height:31%}
+@media(max-width:350px){.player-hall__room[data-space=garage][data-garage-focus=""] .player-hall__spaces{transform:translateX(-35%) scale(.75)}}
