@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const {create,parseLimit,matches} = require('../lib/table-subscriptions');
 const base = {deskId:'1',deskName:'Классика',leagueId:'184691',unionId:'7158',groupId:'680649',playType:'PLO6',blindAnnotation:'5/10',playerCount:2,pos:{pos1:123,pos2:456}};
 function fixture() {
-  const db = new Map(), sets = new Map(), calls = [], commandsLog = [];
+  const db = new Map(), sets = new Map(), sorted = new Map(), calls = [], commandsLog = [];
   let tables = [], fail = false, deliveryFail = false;
   const redis = {isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,key,...args])=>{
     commandsLog.push([cmd,key,...args]);
@@ -15,6 +15,10 @@ function fixture() {
     else if (cmd === 'SADD') {const s=sets.get(key)||new Set();s.add(args[0]);sets.set(key,s);result=1;}
     else if (cmd === 'SREM') result = Number(sets.get(key)?.delete(args[0]));
     else if (cmd === 'SSCAN') result = ['0',[...(sets.get(key)||[])]];
+    else if (cmd === 'SMEMBERS') result=[...(sets.get(key)||[])];
+    else if (cmd === 'ZADD') {const z=sorted.get(key)||new Map();z.set(args[1],Number(args[0]));sorted.set(key,z);result=1;}
+    else if (cmd === 'ZREM') result=Number(sorted.get(key)?.delete(args[0]));
+    else if (cmd === 'ZRANGEBYSCORE') result=[...(sorted.get(key)||[])].filter(([,score])=>score<=Number(args[1])).map(([member])=>member);
     else if (cmd === 'EVAL') {const [,lock,token]=args;result=db.get(lock)===token ? Number(db.delete(lock)) : 0;}
     else throw new Error(cmd);
     return {result};
@@ -22,7 +26,7 @@ function fixture() {
   const service = create({redis,namespace:'test',getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
   const callback = (action,user=42,type='private') => service.handle({callback_query:{id:'cb',data:'club:sub:'+action,from:{id:user},message:{message_id:1,chat:{id:type==='private'?user:-1,type}}}});
   const message = (text,user=42) => service.handle({message:{text,from:{id:user},chat:{id:user,type:'private'}}});
-  return {service,callback,message,calls,db,commandsLog,setTables:v=>tables=v,setFailure:v=>fail=v,setDeliveryFailure:v=>deliveryFail=v};
+  return {service,redis,callback,message,calls,db,commandsLog,setTables:v=>tables=v,setFailure:v=>fail=v,setDeliveryFailure:v=>deliveryFail=v};
 }
 test('game and limits distinguish exact, minimum, malformed values and private scopes',()=>{
   assert.deepEqual(parseLimit('5/10р'),{small:5,big:10});
@@ -120,4 +124,47 @@ test('shared snapshot avoids fetching tables and confirms whether the user batch
   const result=await f.service.poll([base]);assert.equal(result.complete,true);assert.equal(result.sent,1);
   const marker=f.commandsLog.find(([cmd,key])=>cmd==='SET'&&key.includes(':delivery:'));
   assert.equal(marker.at(-1),'86400');
+});
+
+test('indexed dispatch selects exact and qualifying minimum limits without reading unrelated users',async()=>{
+  const f=fixture();
+  for (const [user,game,mode,limit] of [[42,'PLO6','exact','5/10'],[43,'PLO6','from','25/50'],[44,'PLO6','from','1/2'],[45,'NLH','exact','5/10']]) {
+    await f.callback('limit:'+game+':'+mode,user);await f.message(limit,user);
+  }
+  f.commandsLog.length=0;f.calls.length=0;
+  await f.service.poll([base],{games:[{game:'PLO6',limit:{small:5,big:10}}],players:[]});
+  const reads=f.commandsLog.filter(([cmd,key])=>cmd==='GET'&&/:user:\d+$/.test(key)).map(([,key])=>key.split(':').at(-1));
+  assert.deepEqual(reads.sort(),['42','44']);
+  assert.equal(f.commandsLog.some(([cmd])=>cmd==='SSCAN'),false);
+  assert.deepEqual(f.calls.filter(c=>c.method==='sendMessage').map(c=>c.body.chat_id).sort(),['42','44']);
+});
+test('player-only event does not read game subscribers; deleting one overlapping subscription preserves the index',async()=>{
+  const f=fixture();await f.callback('player:123',42);await f.callback('add:PLO6:any',43);
+  f.commandsLog.length=0;
+  await f.service.poll([base],{players:['123'],games:[]});
+  assert.equal(f.commandsLog.some(([cmd,key])=>cmd==='GET'&&key==='poker21:table-subscriptions:test:user:43'),false);
+  await f.callback('limit:PLO6:from',44);await f.message('1/2',44);
+  await f.callback('limit:PLO6:from',44);await f.message('0.5/2',44);
+  const subs=JSON.parse(f.db.get('poker21:table-subscriptions:test:user:44'));
+  await f.callback('delete:'+subs[0].id,44);f.commandsLog.length=0;
+  await f.service.poll([base],{players:[],games:[{game:'PLO6',limit:{small:5,big:10}}]});
+  assert.ok(f.commandsLog.some(([cmd,key])=>cmd==='GET'&&key==='poker21:table-subscriptions:test:user:44'));
+  await f.callback('delete:'+subs[1].id,44);f.commandsLog.length=0;
+  await f.service.poll([base],{players:[],games:[{game:'PLO6',limit:{small:5,big:10}}]});
+  assert.equal(f.commandsLog.some(([cmd,key])=>cmd==='GET'&&key==='poker21:table-subscriptions:test:user:44'),false);
+});
+
+
+test('coordinator and indexed subscriptions handle activation, departure and reentry together',async()=>{
+  const f=fixture();await f.callback('player:123',42);await f.callback('add:PLO6:any',43);
+  let snapshot=[];
+  const coordinator=require('../lib/table-subscription-coordinator').createCoordinator({redis:f.redis,getTables:async()=>snapshot,pollClub:(tables,interests)=>f.service.poll(tables,interests)});
+  await coordinator();f.calls.length=0;
+  snapshot=[base];await coordinator();assert.equal(f.calls.length,2);
+  f.commandsLog.length=0;snapshot=[{...base,pos:{pos1:456}}];await coordinator();
+  assert.equal(f.commandsLog.some(([cmd,key])=>cmd==='GET'&&key==='poker21:table-subscriptions:test:user:43'),false);
+  snapshot=[base];await coordinator();assert.equal(f.calls.length,3);
+  assert.equal(f.calls[2].body.chat_id,'42');
+  const before=f.commandsLog.length;assert.equal((await coordinator()).unchanged,true);
+  assert.equal(f.commandsLog.slice(before).some(([cmd,key])=>cmd==='GET'&&/:user:\d+$/.test(key)),false);
 });
