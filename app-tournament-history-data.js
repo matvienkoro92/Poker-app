@@ -687,6 +687,26 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             31500
           ]
         ]
+      ],
+      [
+        "07.10.2026",
+        [
+          [
+            1,
+            "Coo1er91",
+            91250
+          ],
+          [
+            2,
+            "AgroMonkey",
+            20600
+          ],
+          [
+            3,
+            "Em13",
+            9900
+          ]
+        ]
       ]
     ]
   },

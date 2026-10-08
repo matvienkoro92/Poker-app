@@ -1528,4 +1528,237 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "07.10.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 1,
+          "reward": 40044,
+          "points": 0
+        },
+        {
+          "nick": "туз буби",
+          "place": 2,
+          "reward": 15627.000000000002,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 6806.42,
+          "points": 0
+        },
+        {
+          "nick": "Аспирин",
+          "place": 3,
+          "reward": 2442.18,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 2,
+          "reward": 515,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ABevege",
+          "place": 3,
+          "reward": 2383,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 3,
+          "reward": 6800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 3200,
+          "points": 0
+        },
+        {
+          "nick": "Аспирин",
+          "place": 5,
+          "reward": 1500,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 1,
+          "reward": 13160,
+          "points": 0
+        },
+        {
+          "nick": "Playerj8WeU6",
+          "place": 2,
+          "reward": 4570,
+          "points": 0
+        },
+        {
+          "nick": "Девственник",
+          "place": 3,
+          "reward": 1860,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Счастливый Косарь",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 91250,
+          "points": 0
+        },
+        {
+          "nick": "AgroMonkey",
+          "place": 2,
+          "reward": 20600,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 5,
+          "reward": 12000,
+          "points": 0
+        },
+        {
+          "nick": "Em13",
+          "place": 3,
+          "reward": 9900,
+          "points": 0
+        },
+        {
+          "nick": "nblx",
+          "place": 11,
+          "reward": 1200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Надзор",
+          "place": 1,
+          "reward": 14354.08,
+          "points": 0
+        },
+        {
+          "nick": "roma1233",
+          "place": 8,
+          "reward": 1986.09,
+          "points": 0
+        },
+        {
+          "nick": "FridaKahlo",
+          "place": 7,
+          "reward": 482.5,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 14,
+          "reward": 389.84,
+          "points": 0
+        },
+        {
+          "nick": "Proxor",
+          "place": 21,
+          "reward": 164.06,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "HR 5000🥊 200K",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 6,
+          "reward": 4179,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "butovskiy",
+          "place": 4,
+          "reward": 29858.999999999996,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 13,
+          "reward": 178,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
