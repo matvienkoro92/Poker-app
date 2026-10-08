@@ -246,3 +246,4 @@
 .player-hall__display-shelf--cups .player-hall__display-slot--3{top:9%;height:16%}
 .player-hall__display-shelf--cups .player-hall__display-slot--4{top:34%;height:10.5%}
 .player-hall__hotspot--cabinet{top:27%;height:3%}
+.player-hall__room[data-camera=cabinet] .player-hall__hotspot--cabinet{display:flex;pointer-events:none}
