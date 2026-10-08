@@ -17,3 +17,17 @@ body:has(#gameEntrance:not([hidden])),body:has(#scoreSelect:not([hidden])){overf
  .game-entrance:after{inset:64% 0 0;background:linear-gradient(transparent,#06111b55)}
  .entrance-choices{bottom:calc(28px + env(safe-area-inset-bottom));gap:5px}
 }
+
+/* Keep poster typography below phone chrome and reserve only the menu foreground. */
+@media(max-aspect-ratio:1/1){
+ .game-entrance{background:#102d58}
+ .entrance-poster{top:max(24px,env(safe-area-inset-top));bottom:0;height:calc(100% - max(24px,env(safe-area-inset-top)));object-fit:cover;object-position:center top}
+ .game-entrance:after{inset:82% 0 0;background:linear-gradient(transparent,#06111b70)}
+ .entrance-choices{bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+@media(max-aspect-ratio:1/1) and (max-height:650px){
+ .entrance-poster{object-fit:contain;object-position:center top}
+ .game-entrance{background:linear-gradient(#1559a0,#183955 55%,#071624)}
+ .entrance-choices{bottom:calc(8px + env(safe-area-inset-bottom));gap:0}
+ .entrance-mode,.entrance-mode.story-mode{min-height:42px;padding:8px 14px}
+}

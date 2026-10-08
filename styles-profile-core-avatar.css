@@ -5532,3 +5532,9 @@ body.profile-month-story-open { overflow: hidden; }
 }
 #app .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__appearance:hover {border-color:#e4bd73!important;filter:brightness(1.12);}
 #app .view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__appearance:focus-visible {outline:2px solid #f4cb80;outline-offset:3px;}
+
+/* A quiet waterfront joins the character and level into one Poker21 scene. */
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero.chat-user-modal__hero::before {
+ inset:0!important;width:100%!important;border-radius:inherit;
+ background:linear-gradient(90deg,#05080d12 25%,#05080d65 58%,#05080d80),url("./assets/profile-level-miami-night-v1.webp") center bottom / cover no-repeat!important;
+}
