@@ -215,3 +215,25 @@ test('temporary game subscriptions stop at expiry and remove their game index',a
  await f.service.expire();assert.deepEqual(JSON.parse(f.db.get('poker21:table-subscriptions:test:user:42')),[]);
  assert.ok(f.commandsLog.some(c=>c[0]==='SREM'&&c[1].endsWith('index:game:PLO6:any')));
 });
+
+test('friend alerts use their own player index, ignore tournaments and stop on disable',async()=>{
+ const f=fixture();
+ assert.deepEqual(await f.service.list('ID111111'),[]);
+ await f.service.setFriend('ID111111',{accountId:'ID222222',playerId:'123',nick:'Друг'},true);
+ assert.equal((await f.service.list('ID111111'))[0].cashOnly,true);
+ f.calls.length=0;
+ const tournament={...base,playType:'MTT NLH'};
+ await f.service.poll([tournament],{players:['123'],games:[]});assert.equal(f.calls.length,0);
+ await f.service.poll([base],{players:['123'],games:[]});assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
+ await f.service.poll([base],{players:['123'],games:[]});assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
+ await f.service.setFriend('ID111111',{accountId:'ID222222'},false);
+ await f.service.poll([{...base,deskId:'2'}],{players:['123'],games:[]});assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
+ assert.deepEqual(await f.service.list('ID111111'),[]);
+});
+
+test('friend channel settings are stored independently and carried to delivery',async()=>{
+ const f=fixture();await f.service.setFriend('ID111111',{accountId:'ID222222',playerId:'123',botEnabled:false,pushEnabled:true},true);
+ const [sub]=await f.service.list('ID111111');assert.equal(sub.botEnabled,false);assert.equal(sub.pushEnabled,true);
+ await f.service.poll([base],{players:['123'],games:[]});
+ assert.equal(f.calls.at(-1).body.friendAccountId,'ID222222');
+});

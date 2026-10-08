@@ -1656,7 +1656,7 @@ function initProfileFriends() {
 
   function postFriendAction(targetUserId, action, button) {
     var base = getApiBase();
-    if (!targetUserId) return;
+    if (!targetUserId && action.indexOf("table_alerts_all:") !== 0) return;
     var listScrollTopBeforeAction = listEl ? listEl.scrollTop : 0;
     if (button) button.disabled = true;
     fetch(base + "/api/friends", {
@@ -1668,8 +1668,19 @@ function initProfileFriends() {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d && d.ok) {
+          if (action.indexOf("table_alerts_all:") === 0) {
+            afterMutate({ keepContent: true, preserveListScroll: true, listScrollTop: listScrollTopBeforeAction });
+            return;
+          }
           var changedItem = button && button.closest ? button.closest(".friends-list-modal__item") : null;
           if (changedItem && (action === "accept" || action === "reject" || action === "cancel")) changedItem.remove();
+          if (action === "table_alerts_on" || action === "table_alerts_off") {
+            button.disabled = false;
+            button.setAttribute("aria-pressed", d.tableAlertsEnabled ? "true" : "false");
+            button.textContent = "🔔 Оповещения: " + (d.tableAlertsEnabled ? "вкл" : "выкл");
+            afterMutate({ keepContent: true, preserveListScroll: true, listScrollTop: listScrollTopBeforeAction });
+            return;
+          }
           alertText(action === "accept" ? "Заявка принята" : action === "cancel" ? "Заявка отменена" : "Заявка отклонена");
           afterMutate({ keepContent: true, preserveListScroll: true, listScrollTop: listScrollTopBeforeAction });
         } else {
@@ -1718,6 +1729,12 @@ function initProfileFriends() {
 
   function wireActionButtons() {
     wireProfileButtons();
+    listEl.querySelectorAll("[data-friend-alerts-all]").forEach(function (button) {
+      button.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        postFriendAction("", button.getAttribute("data-friend-alerts-all"), button);
+      });
+    });
     listEl.querySelectorAll(".friends-list-modal__btn--accept").forEach(function (button) {
       button.addEventListener("click", function (e) {
         e.preventDefault();
@@ -1740,6 +1757,13 @@ function initProfileFriends() {
         e.stopPropagation();
         var item = button.closest(".friends-list-modal__item");
         postFriendAction(item && item.dataset.userId, "cancel", button);
+      });
+    });
+    listEl.querySelectorAll(".friends-list-modal__btn--table-alerts").forEach(function (button) {
+      button.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var item = button.closest(".friends-list-modal__item");
+        postFriendAction(item && item.dataset.userId, button.getAttribute("aria-pressed") === "true" ? "table_alerts_off" : "table_alerts_on", button);
       });
     });
     listEl.querySelectorAll(".friends-list-modal__btn--remove").forEach(function (button) {
@@ -1778,6 +1802,14 @@ function initProfileFriends() {
     renderIncomingNotice(incoming.length);
     renderFriendsPreview(friends);
     var chunks = [];
+    if (friends.length) {
+      var channelButton = function (channel, label, field) {
+        var enabledCount = friends.filter(function (row) { return row[field] === true; }).length;
+        var state = enabledCount === friends.length ? "вкл" : enabledCount === 0 ? "выкл" : "Индивидуально";
+        return '<button type="button" class="friends-list-modal__btn" data-friend-alerts-all="table_alerts_all:' + channel + ':' + (state === "вкл" ? "off" : "on") + '">' + label + ': ' + state + '</button>';
+      };
+      chunks.push('<div class="friends-list-modal__alert-controls">' + channelButton("bot", "🔔 Оповещения в боте", "tableBotAlertsEnabled") + channelButton("push", "📲 Пуши", "tablePushAlertsEnabled") + '</div>');
+    }
     chunks.push(renderSection("Входящие заявки", incoming, "incoming", function (row) {
       return renderRow(
         row,
@@ -1794,6 +1826,7 @@ function initProfileFriends() {
         row,
         "friends",
         '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--profile" aria-label="Открыть профиль">Открыть</button>' +
+          '<button type="button" class="friends-list-modal__btn friends-list-modal__btn--table-alerts" aria-pressed="' + (row.tableAlertsEnabled ? 'true' : 'false') + '">🔔 Оповещения: ' + (row.tableAlertsEnabled ? 'вкл' : 'выкл') + '</button>' +
           removeHtml
       );
     }));
