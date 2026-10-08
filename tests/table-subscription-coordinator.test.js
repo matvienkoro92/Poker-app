@@ -52,3 +52,11 @@ test('player seating changes select only that player, not every game subscriber'
   assert.equal(interestsBetween([base],[]).games.length,1);
   assert.equal(interestsBetween([base],[{...base,blindAnnotation:'25/50'}]).games.length,2);
 });
+
+test('player count alone changes fingerprint and selects game subscribers',()=>{
+ const {fingerprint,interestsBetween}=require('../lib/table-subscription-coordinator');
+ const table={leagueId:'184691',deskId:'count-test',playType:'PLO6',blindAnnotation:'5/10',playerCount:2,pos:{pos1:123}};
+ const next={...table,playerCount:3};
+ assert.notEqual(fingerprint([table]),fingerprint([next]));
+ assert.deepEqual(interestsBetween([table],[next]),{players:[],games:[{game:'PLO6',limit:{small:5,big:10}}]});
+});

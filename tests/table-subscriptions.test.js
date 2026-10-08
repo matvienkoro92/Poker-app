@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {create,parseLimit,matches} = require('../lib/table-subscriptions');
 const base = {deskId:'1',deskName:'Классика',leagueId:'184691',unionId:'7158',groupId:'680649',playType:'PLO6',blindAnnotation:'5/10',playerCount:2,pos:{pos1:123,pos2:456}};
-function fixture() {
+function fixture(push) {
   const db = new Map(), sets = new Map(), sorted = new Map(), calls = [], commandsLog = [];
   let tables = [], fail = false, deliveryFail = false;
   const redis = {isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,key,...args])=>{
@@ -23,7 +23,7 @@ function fixture() {
     else throw new Error(cmd);
     return {result};
   })};
-  const service = create({redis,namespace:'test',getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
+  const service = create({redis,namespace:'test',push,getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
   const callback = (action,user=42,type='private') => service.handle({callback_query:{id:'cb',data:'club:sub:'+action,from:{id:user},message:{message_id:1,chat:{id:type==='private'?user:-1,type}}}});
   const message = (text,user=42) => service.handle({message:{text,from:{id:user},chat:{id:user,type:'private'}}});
   return {service,redis,callback,message,calls,db,commandsLog,setTables:v=>tables=v,setFailure:v=>fail=v,setDeliveryFailure:v=>deliveryFail=v};
@@ -172,4 +172,26 @@ test('coordinator and indexed subscriptions handle activation, departure and ree
   assert.equal(f.calls[2].body.chat_id,'42');
   const before=f.commandsLog.length;assert.equal((await coordinator()).unchanged,true);
   assert.equal(f.commandsLog.slice(before).some(([cmd,key])=>cmd==='GET'&&/:user:\d+$/.test(key)),false);
+});
+
+test('application push controls edit the menu and dispatch alongside Telegram events',async()=>{
+ let enabled=false,notifications=0;
+ const push={status:async()=>({subscribed:enabled,ready:true}),set:async(user,value)=>{enabled=value;return {ok:true};},notify:async()=>{if(enabled)notifications++;}};
+ const f=fixture(push);
+ await f.callback('menu');assert.match(f.calls.at(-1).body.reply_markup.inline_keyboard.at(-1)[0].text,/выключен/);
+ await f.callback('push:on');assert.match(f.calls.at(-1).body.text,/включён/);assert.equal(f.calls.at(-1).method,'editMessageText');
+ await f.callback('add:PLO6:any');f.setTables([base]);await f.service.poll();assert.equal(notifications,1);
+ await f.service.poll();assert.equal(notifications,1);
+ await f.callback('push:off');f.setTables([base,{...base,deskId:'2'}]);await f.service.poll();assert.equal(notifications,1);
+});
+
+test('minimum player count waits for threshold and notifies again after dropping below it',async()=>{
+ const f=fixture();f.setTables([{...base,playerCount:1}]);
+ await f.callback('game:PLO6');assert.match(f.calls.at(-1).body.text,/Выберите минимум/);
+ await f.callback('count:PLO6:3');assert.ok(f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].callback_data.endsWith(':3'));
+ await f.callback('add:PLO6:any:3');f.calls.length=0;
+ f.setTables([{...base,playerCount:2}]);await f.service.poll();assert.equal(f.calls.length,0);
+ f.setTables([{...base,playerCount:3}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
+ f.setTables([{...base,playerCount:4}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
+ f.setTables([{...base,playerCount:2}]);await f.service.poll();f.setTables([{...base,playerCount:3}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,2);
 });

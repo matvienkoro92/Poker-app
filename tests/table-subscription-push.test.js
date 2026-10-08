@@ -1,0 +1,24 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {createService}=require('../lib/table-subscription-push');
+test('push opt-in requires a linked, unblocked account and enabled device notifications',async()=>{
+ let account=null,blocked=false,writes=0,sends=0;
+ let current={subscribed:false,notificationsEnabled:true,hasSubscription:true,pushConfigured:true};
+ const service=createService({getAccount:async id=>{assert.equal(id,'tg_42');return account;},isBlocked:async()=>blocked,preferences:{status:async()=>({...current}),setSubscription:async(id,enabled)=>{assert.equal(id,'ID123456');writes++;current.subscribed=enabled;return {ok:true};}},sendPush:async(id,payload)=>{assert.equal(id,'ID123456');assert.equal(payload.title,'Игрок сел');sends++;return 1;}});
+ assert.match((await service.set('42',true)).error,/войдите/);assert.equal(writes,0);
+ account='ID123456';blocked=true;
+ assert.match((await service.set('42',true)).error,/ограничен/);assert.equal(writes,0);
+ blocked=false;current.notificationsEnabled=false;
+ assert.match((await service.set('42',true)).error,/профиль/);assert.equal(writes,0);
+ current.notificationsEnabled=true;current.hasSubscription=false;
+ assert.equal((await service.set('42',true)).ok,false);assert.equal(writes,0);
+ current.hasSubscription=true;current.pushConfigured=false;
+ assert.match((await service.set('42',true)).error,/временно/);
+ current.pushConfigured=true;
+ await service.notify('42',{title:'Игрок сел',eventId:'event'});assert.equal(sends,0);
+ assert.equal((await service.set('42',true)).ok,true);
+ await service.notify('42',{title:'Игрок сел',eventId:'event'});assert.equal(sends,1);
+ current.notificationsEnabled=false;
+ await service.notify('42',{title:'Игрок сел',eventId:'event2'});assert.equal(sends,1);
+ assert.equal((await service.set('42',false)).ok,true);assert.equal(current.subscribed,false);
+});
