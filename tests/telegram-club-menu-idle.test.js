@@ -21,7 +21,7 @@ const club = require('../lib/telegram-club-commands');
 const message = {chat:{id:-100,type:'supergroup'},message_id:42};
 const saved = () => JSON.parse(values.get('poker_app:telegram:club_menu:-100:42'));
 
-test('each group menu click schedules a fresh 60-second reset; stale deliveries do nothing', async t => {
+test('each group menu click schedules a fresh 120-second reset; stale deliveries do nothing', async t => {
   values.clear();due.clear();
   const oldFetch=global.fetch, oldNow=Date.now, originalEnv={...process.env};
   t.after(()=>{global.fetch=oldFetch;Date.now=oldNow;process.env=originalEnv;});
@@ -31,18 +31,18 @@ test('each group menu click schedules a fresh 60-second reset; stale deliveries 
   global.fetch=async(url,options)=>{calls.push({url,options,body:JSON.parse(options.body)});return {ok:true,json:async()=>({ok:true})};};
   const click=action=>club.handle({callback_query:{id:'callback',data:'club:'+action,message}},'bot');
   await click('menu');
-  const first=saved();assert.equal(first.dueAt,160000);
+  const first=saved();assert.equal(first.dueAt,220000);
   const publish=calls.find(call=>call.url.includes('/v2/publish/'));
-  assert.equal(publish.options.headers['Upstash-Delay'],'60s');
+  assert.equal(publish.options.headers['Upstash-Delay'],'120s');
   assert.equal(publish.options.headers['Upstash-Forward-X-Cron-Secret'],'secret');
   now=145000;await click('schedule:0');const second=saved();
-  assert.equal(second.dueAt,205000);assert.notEqual(first.revision,second.revision);
+  assert.equal(second.dueAt,265000);assert.notEqual(first.revision,second.revision);
   let edits=0;const edit=async()=>{edits++};
-  assert.equal(await idle.restore(first.id,first.revision,edit,160000),false);
-  assert.equal(await idle.restore(second.id,second.revision,edit,204999),false);
-  assert.equal(await idle.restore(second.id,second.revision,edit,205000),true);
+  assert.equal(await idle.restore(first.id,first.revision,edit,220000),false);
+  assert.equal(await idle.restore(second.id,second.revision,edit,264999),false);
+  assert.equal(await idle.restore(second.id,second.revision,edit,265000),true);
   assert.equal(edits,1);
-  assert.equal(await idle.restore(second.id,second.revision,edit,206000),false);
+  assert.equal(await idle.restore(second.id,second.revision,edit,266000),false);
   await click('schedule:1');const third=saved();await click('pulse');
   assert.equal(await idle.restore(third.id,third.revision,edit,999999),false);
 });
@@ -87,7 +87,7 @@ test('cron fallback restores only due menus when delayed delivery is unavailable
   t.after(()=>{Date.now=oldNow;if(oldToken!==undefined)process.env.QSTASH_TOKEN=oldToken;});
   await idle.arm(message,'menu');
   now=31000;await idle.arm({...message,message_id:44},'cash:0');
-  now=61000;const edited=[];
+  now=121000;const edited=[];
   assert.deepEqual(await idle.sweep(async message=>edited.push(message.message_id)),{restored:1,failed:0});
   assert.deepEqual(edited,[42]);
   assert.ok(values.has('poker_app:telegram:club_menu:-100:44'));

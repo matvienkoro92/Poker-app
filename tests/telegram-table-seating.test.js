@@ -7,7 +7,8 @@ test('table messages show occupied seat IDs in seat order and omit empty or inva
   const text = tablePages([{ ...base, pos: { pos9: '9007199254740993', pos1: 990919, pos2: 0, pos3: '0', pos4: null, pos5: '<b>bad</b>' } }], 'cash', new Map([['990919', 'Ник <&>']])).join('\n');
   assert.match(text, /Игроки · место \/ ID \/ ник:\n1\. <code>990919<\/code> — Ник &lt;&amp;&gt;\n9\. <code>9007199254740993<\/code> — ник неизвестен/);
   assert.doesNotMatch(text, /<code>0<\/code>|bad/);
-  assert.match(text, /Игроков: 2 · Блайнды: 5\/10/);
+  assert.match(text, /<b>Bonus Game 5\/10р<\/b>\n<b>NLH · Игроков: 2<\/b>/);
+  assert.doesNotMatch(text, /Блайнды/);
 });
 
 test('older table responses keep rendering and private table seating stays excluded', () => {
