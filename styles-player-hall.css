@@ -230,3 +230,9 @@
 .player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v12.webp')}
 .player-hall__display-shelf--cups .player-hall__slot-title{position:absolute;top:100%;left:0}
 .player-hall__display-shelf--cups h3{top:23.7%}
+/* Character is an independent transparent asset in the room's camera plane. */
+.player-hall__character{position:absolute;left:6%;top:39.5%;width:68%;height:42%;object-fit:contain;object-position:center bottom;pointer-events:none;z-index:1}
+.player-hall__character[data-hall-character=monkey]{filter:none}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-empty-v13.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-empty-v13.webp')}
+.player-hall__character-foreground{position:absolute;inset:0;background:inherit;pointer-events:none;z-index:2;clip-path:polygon(0% 70%,22% 70%,27% 72%,27% 77%,46% 78%,53% 81%,55% 86%,56% 100%,0% 100%)}
