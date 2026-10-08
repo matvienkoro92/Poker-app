@@ -144,3 +144,13 @@
 .player-hall__room[data-space=garage][data-garage-focus=kart] .player-hall__spaces{transform:translateX(-35%) scale(1.05);transform-origin:60% 58%}
 .player-hall__garage-object--kart{left:-22%;top:43%;width:82%;height:31%}
 @media(max-width:350px){.player-hall__room[data-space=garage][data-garage-focus=""] .player-hall__spaces{transform:translateX(-35%) scale(.75)}}
+/* Clear artwork and labels anchored to furniture, outside the face. */
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v8.webp');will-change:auto}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v8.webp')}
+.player-hall__hotspot span{transform:none}
+.player-hall__hotspot--shelves{left:max(6%,calc((100% - 100cqw)/2 + 12px));top:30%;width:40%;height:5%}
+.player-hall__hotspot--cabinet{left:52%;top:22%;width:29%;height:4%}
+.player-hall__hotspot--seasons{left:52%;top:52%;width:29%;height:5%}
+.player-hall__hotspot--shelves{top:35%;height:3%}
+.player-hall__hotspot--seasons{left:60%;width:25%}
+.player-hall-dialog .player-hall__space-arrow{top:62%}
