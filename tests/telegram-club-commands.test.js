@@ -31,12 +31,13 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:schedule:0']);
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:manager','club:schedule:0']);
  assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
- assert.equal(buttons.length,7);
+ assert.equal(buttons.length,8);
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
- assert.deepEqual(buttons.slice(-3,-1),[
+ assert.deepEqual(buttons.slice(-4,-1),[
   {text:'📋 Ссылка',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
+  {text:'✉️ Написать менеджеру',callback_data:'club:manager'},
   {text:'📋 Ссылка на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
  ]);
 });
@@ -92,4 +93,19 @@ test('pulse sends only the menu without a hero photo',async t=>{
  await c.handle({message:{chat:{id:-1,type:'group'},message_id:7,text:'/pulse'}},'test');
  assert.equal(calls.length,1);assert.ok(calls[0].url.endsWith('/sendMessage'));
  calls.length=0;await c.handle({callback_query:{id:'c',data:'club:pulse',message:{chat:{id:-1},message_id:8}}},'test');assert.ok(!calls.some(c=>c.url.endsWith('/sendPhoto')));
+});
+
+test('manager shifts use Moscow time at every boundary and show overnight wait',()=>{
+ const check=(utc,name)=>assert.equal(c.currentManager(new Date('2026-10-09T'+utc+'Z')).name,name);
+ check('02:59:00','Аня');check('03:00:00','Аня');check('14:59:00','Аня');check('15:00:00','Вика');check('22:59:00','Вика');check('23:00:00','Аня');
+ assert.match(c.currentManager(new Date('2026-10-09T23:00:00Z')).text,/через 4 ч/);
+ assert.match(c.currentManager(new Date('2026-10-09T02:15:00Z')).text,/через 45 мин/);
+});
+test('manager callback edits the same message and includes contact and back buttons',async t=>{
+ const old=global.fetch;t.after(()=>global.fetch=old);const calls=[];
+ global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ await c.handle({callback_query:{id:'manager',data:'club:manager',message:{chat:{id:1},message_id:42}}},'test');
+ const edit=calls.find(call=>call.url.endsWith('/editMessageText'));
+ assert.equal(edit.p.message_id,42);assert.match(edit.p.reply_markup.inline_keyboard[0][0].url,/https:\/\/t.me\/(qweenpoker|vikipoker)/);
+ assert.equal(edit.p.reply_markup.inline_keyboard.at(-1)[0].callback_data,'club:pulse');
 });
