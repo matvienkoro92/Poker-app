@@ -31,13 +31,25 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:schedule:0','club:menu','club:sub:menu']);
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:schedule:0']);
  assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
  assert.equal(buttons.length,7);
- assert.deepEqual(buttons.slice(-2),[
+ assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
+ assert.deepEqual(buttons.slice(-3,-1),[
   {text:'Скопировать ссылку на клубное приложение',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
   {text:'Скопировать ссылку на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
  ]);
+});
+
+test('schedule button edits the same message and returns to the root menu',async t=>{
+ const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
+ global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ await c.handle({callback_query:{id:'schedule',data:'club:schedule:0',message:{chat:{id:1},message_id:42}}},'test');
+ const edit=calls.find(call=>call.url.endsWith('/editMessageText'));
+ assert.ok(edit);assert.equal(edit.p.message_id,42);
+ assert.match(edit.p.text,/РАСПИСАНИЕ ТУРНИРОВ/);
+ assert.deepEqual(edit.p.reply_markup.inline_keyboard.at(-1),[{text:'⬅️ Назад',callback_data:'club:pulse'}]);
+ assert.ok(!calls.some(call=>call.url.endsWith('/sendMessage')));
 });
 
 test('table rows stay compact with checkmarks and limits in the heading',()=>{
