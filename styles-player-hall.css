@@ -110,3 +110,30 @@
 .player-hall__space-view{position:absolute;inset:0;overflow:hidden}
 .player-hall__space-view--garage{left:100%;right:-100%}
 .player-hall__garage-scene{left:calc((100% - max(100cqw,57.142857cqh))/2)}
+/* Both rooms are camera positions in the same continuous panorama. */
+.player-hall__spaces{width:max(200cqw,114.285714cqh);height:max(100cqh,175cqw);left:calc((100cqw - max(100cqw,57.142857cqh))/2);top:calc((100cqh - max(100cqh,175cqw))/2);right:auto;bottom:auto;transform-origin:33% 24%;transition:transform 1050ms cubic-bezier(.22,.7,.16,1)}
+.player-hall__space-view{width:50%;height:100%;top:0;bottom:auto;left:0;right:auto;overflow:visible}
+.player-hall__space-view--garage{left:50%}
+.player-hall__scene,.player-hall__garage-scene{inset:0;width:100%;height:100%;background-image:url('./assets/player-hall/lounge-garage-panorama-v6.webp');background-size:200% 100%;transform:none!important;transition:none}
+.player-hall__scene{background-position:left center}
+.player-hall__garage-scene{background-position:right center}
+.player-hall__room[data-space=garage] .player-hall__spaces{transform:translateX(-35%)}
+.player-hall__room[data-camera=cabinet] .player-hall__spaces{transform:translate(-8%,20%) scale(1.7)}
+.player-hall__room[data-camera=shelves] .player-hall__spaces{transform:translate(7%,6%) scale(2);transform-origin:12% 34%}
+.player-hall__room[data-space=garage][data-garage-focus=kart] .player-hall__spaces{transform:translateX(-35%) scale(1.25);transform-origin:57% 58%}
+.player-hall__room[data-space=garage][data-garage-focus=helmet] .player-hall__spaces,.player-hall__room[data-space=garage][data-garage-focus=chips] .player-hall__spaces,.player-hall__room[data-space=garage][data-garage-focus=tools] .player-hall__spaces{transform:translate(-35%,18%) scale(1.45);transform-origin:74% 26%}
+.player-hall__garage-object--kart{left:-20%;top:43%;width:75%;height:31%}
+.player-hall__garage-object--helmet{left:27%;top:13%;width:57%;height:11%}
+.player-hall__garage-object--chips{left:27%;top:25%;width:57%;height:10%}
+.player-hall__garage-object--tools{left:27%;top:36%;width:57%;height:9%}
+.player-hall__cabinet-object--0{left:57%;width:13%;height:11%;bottom:78.7%}
+.player-hall__cabinet-object--1{left:71%;width:10%;height:8%;bottom:78.7%}
+.player-hall__cabinet-object--2{left:63%;width:10%;height:8%;bottom:78.7%}
+.player-hall__cabinet-object--3{left:9%;width:13%;height:8%;bottom:66.3%}
+.player-hall__cabinet-object--4{left:23%;width:12%;height:8%;bottom:66.3%}
+.player-hall__cabinet-object--5{left:57%;width:13%;height:9%;bottom:47.2%}
+.player-hall__cabinet-object--6{left:69%;width:11%;height:8%;bottom:47.2%}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v6.webp');background-size:200% 100%;background-position:left center}
+@media(prefers-reduced-motion:reduce){.player-hall__spaces{transition:none}}
+.player-hall__room[data-space=hall][data-camera=wide] .player-hall__spaces{transform:translateX(-2%)}
+.player-hall__garage-object--helmet,.player-hall__garage-object--chips,.player-hall__garage-object--tools{left:10%;width:42%}
