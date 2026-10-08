@@ -189,7 +189,7 @@ test('minimum player count waits for threshold and notifies again after dropping
  const f=fixture();f.setTables([{...base,playerCount:1}]);
  await f.callback('game:PLO6');assert.match(f.calls.at(-1).body.text,/Лимит для/);
  await f.callback('choose:PLO6:any');assert.match(f.calls.at(-1).body.text,/Выберите минимум/);
- await f.callback('minimum:3');f.calls.length=0;
+ await f.callback('minimum:3');await f.callback('duration:0');f.calls.length=0;
  f.setTables([{...base,playerCount:2}]);await f.service.poll();assert.equal(f.calls.length,0);
  f.setTables([{...base,playerCount:3}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
  f.setTables([{...base,playerCount:4}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
@@ -200,7 +200,18 @@ test('exact limit is entered before minimum player count and retained on save',a
  const f=fixture();await f.callback('game:NLH');await f.callback('choose:NLH:exact');await f.message('25/50');
  assert.match(f.calls.at(-1).body.text,/Сколько игроков/);
  assert.equal(f.db.has('poker21:table-subscriptions:test:user:42'),false);
- await f.callback('minimum:2');
+ await f.callback('minimum:2');await f.callback('duration:0');
  const [sub]=JSON.parse(f.db.get('poker21:table-subscriptions:test:user:42'));
  assert.deepEqual(sub.limit,{small:25,big:50});assert.equal(sub.minPlayers,2);assert.equal(sub.mode,'exact');
+});
+
+test('temporary game subscriptions stop at expiry and remove their game index',async t=>{
+ const oldNow=Date.now;t.after(()=>Date.now=oldNow);let now=100000;Date.now=()=>now;
+ const f=fixture();await f.callback('choose:PLO6:any');await f.callback('minimum:2');await f.callback('duration:2');
+ const [sub]=JSON.parse(f.db.get('poker21:table-subscriptions:test:user:42'));
+ assert.equal(sub.expiresAt,now+7200000);
+ assert.equal(matches(sub,[base]).length,1);
+ now=sub.expiresAt;assert.equal(matches(sub,[base]).length,0);
+ await f.service.expire();assert.deepEqual(JSON.parse(f.db.get('poker21:table-subscriptions:test:user:42')),[]);
+ assert.ok(f.commandsLog.some(c=>c[0]==='SREM'&&c[1].endsWith('index:game:PLO6:any')));
 });
