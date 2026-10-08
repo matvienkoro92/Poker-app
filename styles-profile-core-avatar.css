@@ -5538,3 +5538,11 @@ body.profile-month-story-open { overflow: hidden; }
  inset:0!important;width:100%!important;border-radius:inherit;
  background:linear-gradient(90deg,#05080d12 25%,#05080d65 58%,#05080d80),url("./assets/profile-level-miami-night-v1.webp") center bottom / cover no-repeat!important;
 }
+/* Solid terrace and contact shadow ground the independent character layer. */
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero.chat-user-modal__hero::before {
+ background:linear-gradient(90deg,#05080d12 25%,#05080d65 58%,#05080d80),url("./assets/profile-level-miami-terrace-v2.webp") center bottom / cover no-repeat!important;
+}
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__rating-art:after {
+ content:"";position:absolute;left:12%;right:5%;bottom:5%;height:7%;background:radial-gradient(ellipse,#000b,transparent 70%);pointer-events:none;z-index:0;
+}
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__rating-art-img {position:relative;z-index:1;}
