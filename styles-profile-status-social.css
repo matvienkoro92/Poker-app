@@ -2113,3 +2113,7 @@
 [data-theme="light"] .profile-chat-push__checkbox {
   accent-color: #c2410c;
 }
+/* Friends heading keeps the name and count together without the icon column. */
+#profileFriendsPanel .profile-friends__head{grid-template-columns:minmax(0,1fr) auto}
+#profileFriendsPanel .profile-friends__title{display:inline-flex;align-items:baseline;gap:.3em;white-space:nowrap;font-size:clamp(20px,5.5vw,24px)}
+#profileFriendsPanel .profile-friends__btn{grid-column:auto}
