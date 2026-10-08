@@ -1,0 +1,11 @@
+# Фронтальная стена и кубки 3+1+1
+
+Встроенный imagegen. Файл `assets/player-hall/lounge-garage-panorama-v12.webp`, lossless WebP. Пять достижений на стене вместо картины, три кубка на комоде слева, ещё два на отдельных подсвеченных полках справа. Шлем, руль и статуэтка сохранены как декор. Выборы и номера мест сохранены, изменено только расположение.
+
+## Основной промпт
+
+Edit target supplied panorama. Redesign ONLY left lounge wall and its shelf furniture. Make wall perfectly flat FRONT-FACING, no corner angled wall, no slanted painting plane. Keep panorama 8:7, chimp and chair exact positions, Nike sneakers, garage right half, kart gap and seamless passage. On left wall REMOVE painting and replace with EMPTY rectangular elegant dark green velvet wall plaque mounting area, frontal rectangle x25..285 y140..315 in this 1341x1173 image: five live achievement plaques will be overlaid by app, do NOT draw plaques. Under it an EMPTY straight horizontal walnut shelf, x30..310 at y390, with warm lamp illumination, space for THREE live trophies side by side. Slim cabinet at x350..490: EMPTY upper illuminated shelf at y250 for ONE live trophy, EMPTY lower illuminated shelf at y520 for ONE live trophy. Remove five vertical partitions in these bays. Keep steering wheel and golden spade on middle shelf between them. Keep helmet and monkey figurine on a small decor ledge below left shelf at y435, outside all three empty trophy surfaces. Keep lamps, warm reflections, upscale dark leather walnut mood. No text, trophies, UI or labels on the designated empty areas. High detail, sharp textures, geometry frontal.
+
+## Уточнение
+
+Precise edit of this panorama only: left sideboard's top ledge x30..350 at y410 must be COMPLETELY EMPTY so app can place three trophies. Move helmet, small gold monkey and plant from this ledge onto the middle bay of slim cabinet x380..490 y250..390, beside steering wheel/gold spade; reduce decorations slightly as needed. Remove narrow floating wooden shelf at y290 below green wall panel, leaving flat wallpaper clear between panel bottom y270 and sideboard ledge y410. Keep green rectangular achievement wall area, empty top and bottom cabinet trophy bays, all lighting, chimp, furniture, full garage and car exactly unchanged. No text, no trophies, no UI. Sharp image.

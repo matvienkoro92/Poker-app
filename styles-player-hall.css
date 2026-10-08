@@ -195,3 +195,38 @@
 .player-hall-dialog .player-hall__slot-edit{width:1.8cqh;height:1.8cqh;font-size:1cqh}
 .player-hall__slot-edit:after{content:'';position:absolute;inset:-4px}
 .player-hall__room[data-camera=shelves] .player-hall__spaces{transform:translate(-8%,0%) scale(2.4)}
+/* Frontal achievement wall and trophy placement: three left, one per right shelf. */
+.player-hall__display-shelf--achievements{left:4%;top:12%;width:39%;height:15%}
+.player-hall__display-shelf--achievements .player-hall__display-slot{border-bottom:0;box-shadow:none}
+.player-hall__display-shelf--achievements .player-hall__cabinet-object img{object-position:center;filter:drop-shadow(1px 3px 2px #000b)}
+.player-hall__display-shelf--cups{inset:0;width:100%;height:100%;pointer-events:none}
+.player-hall__display-shelf--cups h3{position:absolute;left:6%;top:28%;width:39%;box-sizing:border-box}
+.player-hall__display-shelf--cups>div{display:block;padding:0;height:100%}
+.player-hall__display-shelf--cups .player-hall__display-slot{position:absolute;width:12%;height:10%;top:23%;pointer-events:auto;border:0;box-shadow:none}
+.player-hall__display-shelf--cups .player-hall__display-slot--0{left:5%}
+.player-hall__display-shelf--cups .player-hall__display-slot--1{left:18%}
+.player-hall__display-shelf--cups .player-hall__display-slot--2{left:31%}
+.player-hall__display-shelf--cups .player-hall__display-slot--3{left:56%;top:12%;width:15%;height:10%}
+.player-hall__display-shelf--cups .player-hall__display-slot--4{left:56%;top:36%;width:15%;height:9%}
+.player-hall__display-shelf--cups h3{top:34%}
+.player-hall__hotspot--shelves{left:5%;top:27%;width:38%;height:3%}
+.player-hall__hotspot--cabinet{left:53%;top:23%;width:24%;height:3%}
+.player-hall__hotspot--seasons{left:6%;top:37%;width:32%;height:3%}
+.player-hall__room[data-camera=shelves] .player-hall__spaces{transform:translate(8%,18%) scale(1.8);transform-origin:12% 20%}
+.player-hall__room[data-camera=cabinet] .player-hall__spaces{transform:translate(2%,12%) scale(1.1);transform-origin:25% 25%}
+.player-hall__display-slot .player-hall__slot-title{font-size:.6cqh}
+.player-hall-dialog .player-hall__slot-edit{width:2.3cqh;height:2.3cqh;font-size:1.3cqh}
+.player-hall__display-shelf--achievements{left:9%;top:10%;width:42%;height:12%}
+.player-hall__display-shelf--cups .player-hall__display-slot{top:26%;height:9%;width:14%}
+.player-hall__display-shelf--cups .player-hall__display-slot--0{left:7%}
+.player-hall__display-shelf--cups .player-hall__display-slot--1{left:23%}
+.player-hall__display-shelf--cups .player-hall__display-slot--2{left:39%}
+.player-hall__display-shelf--cups .player-hall__display-slot--3{left:57%;top:11%;height:8.5%;width:15%}
+.player-hall__display-shelf--cups .player-hall__display-slot--4{left:57%;top:35%;height:9.3%;width:15%}
+.player-hall__display-shelf--cups h3{left:7%;width:46%;top:35.5%}
+.player-hall__hotspot--shelves{left:9%;top:22%;width:42%;height:3%}
+.player-hall__hotspot--seasons{left:55%;top:47%;width:24%;height:3%}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v12.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v12.webp')}
+.player-hall__display-shelf--cups .player-hall__slot-title{position:absolute;top:100%;left:0}
+.player-hall__display-shelf--cups h3{top:23.7%}
