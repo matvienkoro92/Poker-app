@@ -158,3 +158,17 @@
 .player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v9.webp')}
 /* Camera transform and origin animate together via Web Animations. */
 .player-hall__spaces{transition:none}
+/* Reachable navigation on every view, including long award collections. */
+.player-hall-dialog{position:fixed;inset:0;height:100dvh;min-height:0;max-height:100dvh;overscroll-behavior:contain;padding:0 20px calc(24px + env(safe-area-inset-bottom,0px))}
+.player-hall-dialog:not(.player-hall-dialog--immersive) .player-hall__header{position:sticky;top:0;z-index:20;margin:0 -20px 16px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px;background:#171a18;align-items:center}
+.player-hall__header>button{min-width:44px;min-height:44px}
+.player-hall-dialog .player-hall__back{font-size:24px}
+.player-hall-dialog--immersive{padding:0}
+.player-hall-dialog--immersive .player-hall__header{align-items:flex-start;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 16px;background:linear-gradient(#080b09b8,transparent)}
+.player-hall__identity{margin:5px 0 0;display:grid;gap:3px;text-shadow:0 2px 5px #000;font-size:11px;line-height:1.4;color:#e0cfaf;overflow-wrap:anywhere}
+.player-hall__identity strong{font-size:14px;color:#fff0d1;font-weight:500}
+.player-hall-dialog--immersive:has(.player-hall__room:not([data-camera=wide])) .player-hall__identity{margin-left:52px}
+.player-hall-detail{position:fixed;inset:0;margin:auto;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)}
+.player-hall__detail-close{position:sticky;top:0;z-index:10;min-width:44px;min-height:44px;background:#20231f!important}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v10.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v10.webp')}
