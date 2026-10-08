@@ -187,11 +187,20 @@ test('application push controls edit the menu and dispatch alongside Telegram ev
 
 test('minimum player count waits for threshold and notifies again after dropping below it',async()=>{
  const f=fixture();f.setTables([{...base,playerCount:1}]);
- await f.callback('game:PLO6');assert.match(f.calls.at(-1).body.text,/Выберите минимум/);
- await f.callback('count:PLO6:3');assert.ok(f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].callback_data.endsWith(':3'));
- await f.callback('add:PLO6:any:3');f.calls.length=0;
+ await f.callback('game:PLO6');assert.match(f.calls.at(-1).body.text,/Лимит для/);
+ await f.callback('choose:PLO6:any');assert.match(f.calls.at(-1).body.text,/Выберите минимум/);
+ await f.callback('minimum:3');f.calls.length=0;
  f.setTables([{...base,playerCount:2}]);await f.service.poll();assert.equal(f.calls.length,0);
  f.setTables([{...base,playerCount:3}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
  f.setTables([{...base,playerCount:4}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
  f.setTables([{...base,playerCount:2}]);await f.service.poll();f.setTables([{...base,playerCount:3}]);await f.service.poll();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,2);
+});
+
+test('exact limit is entered before minimum player count and retained on save',async()=>{
+ const f=fixture();await f.callback('game:NLH');await f.callback('choose:NLH:exact');await f.message('25/50');
+ assert.match(f.calls.at(-1).body.text,/Сколько игроков/);
+ assert.equal(f.db.has('poker21:table-subscriptions:test:user:42'),false);
+ await f.callback('minimum:2');
+ const [sub]=JSON.parse(f.db.get('poker21:table-subscriptions:test:user:42'));
+ assert.deepEqual(sub.limit,{small:25,big:50});assert.equal(sub.minPlayers,2);assert.equal(sub.mode,'exact');
 });
