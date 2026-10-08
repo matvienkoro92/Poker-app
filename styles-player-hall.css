@@ -66,3 +66,47 @@
 .player-hall__locked img{filter:brightness(.15) grayscale(1);opacity:.55}.player-hall__locked progress{width:100%;accent-color:#c9ab6b;height:5px}.player-hall__locked small{display:block;color:#b9ad95;font-size:10px;margin-top:7px}
 .player-hall__section-panel{position:absolute;z-index:5;left:0;right:0;bottom:calc(79px + env(safe-area-inset-bottom,0px));max-height:40%;overflow:auto;padding:14px 18px;background:#101910ef;border-top:1px solid #d9bb7440;backdrop-filter:blur(14px);box-sizing:border-box}
 .player-hall__section-panel>header{display:flex;justify-content:space-between;align-items:center;gap:8px}.player-hall__section-panel>header h3{margin:0;font-size:17px;color:#ead8b3}.player-hall__section-panel>header button{font-size:10px;padding:7px}.player-hall__section-panel .player-hall__award-section>h3{display:none}.player-hall__section-panel .player-hall__collection{display:flex;gap:10px;overflow-x:auto;padding:12px 0 6px;scroll-snap-type:x proximity}.player-hall__section-panel article{flex:0 0 130px;scroll-snap-align:start;padding:10px}.player-hall__section-panel .player-hall__trophy img{height:70px}.player-hall__section-panel .player-hall__collection-title{font-size:11px}.player-hall__section-panel .player-hall__collection article>p{font-size:10px}
+/* Racing lounge and adjacent garage. */
+.player-hall-entry__art{background-image:url('./assets/player-hall/racing-lounge-v5.webp')}
+.player-hall__spaces{position:absolute;inset:0;transition:transform 900ms cubic-bezier(.22,.7,.16,1)}
+.player-hall__room[data-space=garage] .player-hall__spaces{transform:translateX(-100%)}
+.player-hall__scene{background-image:url('./assets/player-hall/racing-lounge-v5.webp')}
+.player-hall__garage-scene{position:absolute;width:max(100cqw,57.142857cqh);height:max(100cqh,175cqw);left:calc(100% + (100% - max(100cqw,57.142857cqh))/2);top:calc((100% - max(100cqh,175cqw))/2);background:url('./assets/player-hall/racing-garage-v5.webp') center/100% 100%;transform-origin:50% 50%;transition:transform 800ms cubic-bezier(.22,.7,.16,1)}
+.player-hall__room[data-space=garage] .player-hall__owner,.player-hall__room[data-space=garage] .player-hall__empty{visibility:hidden}
+.player-hall-dialog .player-hall__space-arrow{position:absolute;z-index:7;top:55%;display:grid;justify-items:center;gap:4px;padding:9px 8px;background:#142014c9;border:1px solid #d5b97d55;border-radius:25px;backdrop-filter:blur(10px);box-shadow:0 3px 12px #0006}
+.player-hall__space-arrow b{font-size:24px;line-height:1}.player-hall__space-arrow span{font-size:9px}.player-hall__space-arrow--right{right:12px}.player-hall__space-arrow--left{left:12px}
+.player-hall__room[data-space=hall] .player-hall__space-arrow--left,.player-hall__room[data-space=garage] .player-hall__space-arrow--right,.player-hall__room:not([data-camera=wide]) .player-hall__space-arrow,.player-hall__room[data-space=garage]:not([data-garage-focus=""]) .player-hall__space-arrow{display:none}
+.player-hall__owner{top:calc(82px + env(safe-area-inset-top,0px));left:26px;max-width:calc(100% - 78px);background:#102017eb}
+.player-hall__hotspot--cabinet{left:52%;top:18%;width:29%;height:9%}
+.player-hall__hotspot--seasons{left:52%;top:45%;width:29%;height:9%}
+.player-hall__hotspot--shelves{left:max(6%,calc((100% - 100cqw)/2 + 12px));top:33%;width:40%;height:8%}
+.player-hall__cabinet-object--0{left:58%;width:14%;height:11%;bottom:77.7%}
+.player-hall__cabinet-object--1{left:73%;width:10%;height:8%;bottom:77.7%}
+.player-hall__cabinet-object--2{left:67%;width:10%;height:8%;bottom:77.7%}
+.player-hall__cabinet-object--3{left:9%;width:13%;height:8%;bottom:65.1%}
+.player-hall__cabinet-object--4{left:23%;width:12%;height:8%;bottom:65.1%}
+.player-hall__cabinet-object--5{left:58%;width:13%;height:9%;bottom:45.3%}
+.player-hall__cabinet-object--6{left:73%;width:11%;height:8%;bottom:45.3%}
+.player-hall__cabinet-object--7{left:1%;width:8%;height:7%;bottom:65.1%}
+.player-hall__cabinet-object--8{left:23%;width:10%;height:7%;bottom:61.5%}
+.player-hall__cabinet-object--9{left:9%;width:10%;height:7%;bottom:61.5%}
+.player-hall__room[data-camera=cabinet] .player-hall__scene{transform:translate(-29%,27%) scale(1.65)}
+.player-hall__room[data-camera=shelves] .player-hall__scene{transform:translate(40%,23%) scale(2.0)}
+.player-hall-dialog .player-hall__garage-object{position:absolute;border:0;background:none;display:flex;justify-content:center;align-items:flex-end;padding:0;border-radius:0}
+.player-hall__garage-object span{font-size:10px;padding:7px 10px;border:1px solid #d9be7b55;border-radius:20px;background:#102015d9;box-shadow:0 3px 12px #0008;backdrop-filter:blur(8px)}
+.player-hall__garage-object small{display:block;font-size:8px;margin-top:3px;color:#c9bea5}.player-hall__garage-object b{color:#d9b979}
+.player-hall__garage-object--kart{left:16%;top:47%;width:73%;height:27%}
+.player-hall__garage-object--helmet{left:25%;top:12%;width:46%;height:9%}
+.player-hall__garage-object--chips{left:25%;top:22%;width:46%;height:9%}
+.player-hall__garage-object--tools{left:25%;top:32%;width:46%;height:8%}
+.player-hall__room[data-garage-focus=kart] .player-hall__garage-scene{transform:translate(0,-16%) scale(1.35)}
+.player-hall__room[data-garage-focus=helmet] .player-hall__garage-scene,.player-hall__room[data-garage-focus=chips] .player-hall__garage-scene,.player-hall__room[data-garage-focus=tools] .player-hall__garage-scene{transform:translate(0,24%) scale(1.55)}
+.player-hall__room:not([data-garage-focus=""]) .player-hall__garage-object{visibility:hidden}
+.player-hall__garage-panel p{font-size:13px;line-height:1.65;color:#d8cdb7;margin:14px 0}.player-hall__garage-panel{padding-bottom:18px}
+.player-hall-dialog--immersive:has(.player-hall__room[data-space=garage]:not([data-garage-focus=""])) .player-hall__header h2{margin-left:52px}
+@media(prefers-reduced-motion:reduce){.player-hall__spaces,.player-hall__garage-scene{transition:none}}
+.player-hall__room{container-type:size}
+.player-hall__scene{position:absolute;width:max(100cqw,57.142857cqh);height:max(100cqh,175cqw);left:calc((100% - max(100cqw,57.142857cqh))/2);top:calc((100% - max(100cqh,175cqw))/2)}
+.player-hall__space-view{position:absolute;inset:0;overflow:hidden}
+.player-hall__space-view--garage{left:100%;right:-100%}
+.player-hall__garage-scene{left:calc((100% - max(100cqw,57.142857cqh))/2)}
