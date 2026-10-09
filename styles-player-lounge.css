@@ -65,3 +65,18 @@
 .lounge-seat__status>strong{font-size:.72cqh;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#bdcca9}
 .lounge-seat--3 .lounge-seat__status{top:-12cqh;left:0;transform:none;max-width:125%}
 .lounge-seat--4 .lounge-seat__status{top:-12cqh;left:auto;right:0;transform:none;max-width:125%}
+
+/* One panorama: friends, trophy wall and garage are adjacent camera positions. */
+.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/friends-hall-garage-panorama-v1.webp');background-size:300% 100%;background-repeat:no-repeat}
+.player-hall__lounge-scene{background-position:left center}
+.player-hall__scene{background-position:center center}
+.player-hall__garage-scene{background-position:right center}
+.player-hall-dialog .lounge-wall-board{left:26.1%;top:10%;width:48%;height:15.2%}
+.lounge-seat--0,.lounge-hands.lounge-seat--0{top:37%}
+.lounge-seat--1,.lounge-hands.lounge-seat--1{top:36.6%}
+.lounge-seat--2,.lounge-hands.lounge-seat--2{top:37%}
+.player-hall-dialog .lounge-seat--3,.player-hall-dialog .lounge-seat--4,.lounge-hands.lounge-seat--3,.lounge-hands.lounge-seat--4{top:45%}
+.lounge-table-foreground{clip-path:polygon(16% 49.4%,40% 49%,64% 49.3%,82% 50.4%,89% 52.5%,86% 55%,86% 66.5%,16% 66.5%,16% 55%,14% 52.5%)}
+.player-hall-dialog .lounge-roster-entry{top:74%}
+.player-hall-dialog .lounge-live-retry,.lounge-room-note{top:83%}
+.player-hall__room[data-space=lounge] .player-hall__lounge-return{top:74%}

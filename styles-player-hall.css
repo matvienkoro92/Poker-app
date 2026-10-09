@@ -338,3 +338,6 @@
 .player-hall__room[data-camera=wide] .player-hall__display-slot .player-hall__cabinet-object{pointer-events:auto}
 .player-hall__featured{pointer-events:none}
 .player-hall__display-slot .player-hall__slot-edit{pointer-events:auto}
+
+/* Trophy nameplate above the upper right display, clear of objects and captions. */
+.player-hall__display-shelf--cups h3{top:6%}
