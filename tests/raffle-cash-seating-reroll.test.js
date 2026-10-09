@@ -27,9 +27,9 @@ test('confirmed cash return rerolls a ready issued winner once and preserves the
   assert.equal(replacement.poker21PayoutStatus, undefined);
   assert.equal(replacement.cashSeatingMonitor, undefined);
   assert.equal(settleRaffleReadyWindows(raffle, now).rerolled, false);
-  const text = buildRaffleCompletedAnnouncement(raffle);
+  const text = buildRaffleCompletedAnnouncement(raffle, now.getTime());
   assert.match(text, /Победители реролла:\n• Новый/);
-  assert.match(text, /@first ❌ — не сел за 10 минут/);
+  assert.match(text, /@first · ID 11 ❌ — не сел за 10 минут/);
   assert.doesNotMatch(text, /@first ✅/);
 });
 test('pending, seated and unconfirmed return never reroll a ready winner', () => {

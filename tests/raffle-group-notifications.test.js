@@ -20,6 +20,7 @@ function completedHarness() {
   const notify = createRaffleCompletedGroupNotifier({
     botToken: 'test', eventChatId: async () => chat,
     pipeline: async commands => commands.map(([cmd, key, value, ...args]) => {
+      if (cmd === 'SADD' || cmd === 'SREM') return { result: 1 };
       if (cmd === 'GET') return { result: store.get(key) || null };
       if (cmd === 'DEL') { store.delete(key); return { result: 1 }; }
       if (args.includes('NX') && store.has(key)) return { result: null };
@@ -77,6 +78,7 @@ test('ready changes edit the saved message and preserve its button', async () =>
   const store = new Map(), edits = []; let sends = 0;
   const notify = createRaffleCompletedGroupNotifier({ botToken: 'test', eventChatId: async () => '-1001',
     pipeline: async commands => commands.map(([cmd, key, value, ...args]) => {
+      if (cmd === 'SADD' || cmd === 'SREM') return { result: 1 };
       if (cmd === 'GET') return { result: store.get(key) || null };
       if (cmd === 'DEL') { store.delete(key); return { result: 1 }; }
       if (args.includes('NX') && store.has(key)) return { result: null };
@@ -93,6 +95,8 @@ test('ready changes edit the saved message and preserve its button', async () =>
   assert.equal(edits[0].messageId, 75); assert.equal(edits[0].chatId, '-1001');
   assert.match(edits[0].text, /@player ✅/); assert.doesNotMatch(edits[0].text, /Нажмите/);
   assert.equal(edits[0].buttonText, 'Посмотреть розыгрыш');
+  await notify(raffle);
+  assert.equal(edits.length, 1);
 });
 
 test('reroll retains unclaimed players separately and marks replacement winners', () => {
@@ -143,4 +147,38 @@ test('active cash raffles announce their start once in the group', async () => {
   assert.match(sent[0].text, /Новый розыгрыш бай-инов на кеш/);
   assert.match(sent[0].text, /7 бай-ин/);
   assert.match(sent[0].buttonUrl, /startapp=r_cash$/);
+});
+
+test('readiness and seating countdowns use deadlines and disappear when resolved', () => {
+  const { winnerCountdown } = require('../lib/raffle-group-notifications');
+  const now = Date.parse('2026-10-10T10:00:00Z');
+  const winner = { name: 'Игрок', winnerReadyDeadlineAt: '2026-10-10T10:07:00Z' };
+  assert.equal(winnerCountdown(winner, now), '⏳ «Готов»: 7 мин');
+  assert.equal(winnerCountdown(winner, now + 60000), '⏳ «Готов»: 6 мин');
+  assert.equal(winnerCountdown({ ...winner, winnerReady: true }, now), '');
+  assert.equal(winnerCountdown({ ...winner, winnerReadyExpired: true }, now), '');
+  const cash = { ...winner, winnerReady: true, cashSeatingMonitor: {status:'pending', issuedAt:'2026-10-10T09:58:00Z'} };
+  assert.equal(winnerCountdown(cash, now), '⏳ сесть за стол: 8 мин');
+  assert.match(buildRaffleCompletedAnnouncement({ winners: [cash] }, now), /✅ · ⏳ сесть за стол: 8 мин/);
+  for (const status of ['seated', 'returned', 'returning']) {
+    assert.equal(winnerCountdown({ ...cash, cashSeatingMonitor: {...cash.cashSeatingMonitor, status} }, now), '');
+  }
+  assert.equal(winnerCountdown({ ...winner, winnerReadyDeadlineAt: 'invalid' }, now), '');
+});
+
+test('minute refresh loads current raffle state and removes deleted or unfinished raffles', async () => {
+  const { refreshGroupTimers } = require('../lib/raffle-group-notifications');
+  const updated = [], removed = [];
+  await refreshGroupTimers({
+    pipeline: async commands => commands.map(([cmd,key,id]) => {
+      if (cmd === 'SMEMBERS') return { result: ['live','deleted','active'] };
+      if (cmd === 'GET') return { result: key.endsWith(':deleted') ? null : JSON.stringify({status:key.endsWith(':active')?'active':'drawn',winners:[{winnerReady:true}]}) };
+      if (cmd === 'SREM') { removed.push(id); return {result:1}; }
+      throw Error(cmd);
+    }),
+    notify: async raffle => updated.push(raffle),
+  });
+  assert.deepEqual(updated.map(raffle => raffle.id), ['live']);
+  assert.equal(updated[0].winners[0].winnerReady, true);
+  assert.deepEqual(removed.sort(), ['active','deleted']);
 });
