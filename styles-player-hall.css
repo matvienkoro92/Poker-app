@@ -241,9 +241,18 @@
 .player-hall__display-shelf--cups .player-hall__display-slot--4{left:57%;top:28%;height:16.5%;width:15%}
 .player-hall__hotspot--cabinet{left:55%;top:24%;width:20%;height:3%}
 .player-hall__display-shelf--cups h3{display:none}
-.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-empty-v14.webp')}
-.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-empty-v14.webp')}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-empty-v15.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-empty-v15.webp')}
 .player-hall__display-shelf--cups .player-hall__display-slot--3{top:9%;height:16%}
 .player-hall__display-shelf--cups .player-hall__display-slot--4{top:34%;height:10.5%}
 .player-hall__hotspot--cabinet{top:27%;height:3%}
 .player-hall__room[data-camera=cabinet] .player-hall__hotspot--cabinet{display:flex;pointer-events:none}
+
+/* Labels sit below the achievement frame; trophy captions include winnings. */
+.player-hall__hotspot--shelves{top:24%;height:3%;width:30%}
+.player-hall__display-shelf--cups .player-hall__slot-title{display:block;overflow:visible;font-size:.9cqh;line-height:1.25;padding:.35cqh .3cqh;border:1px solid #bc95553d;border-radius:.35cqh;min-height:0;background:#19160fed}
+.player-hall__display-shelf--cups .player-hall__slot-title>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.player-hall__slot-prize{display:block;margin-top:.2cqh;font-size:1.05cqh;color:#ffe0a0;white-space:nowrap}
+/* Unobstructed room: retain controls and an accessible dialog title. */
+.player-hall-dialog--immersive .player-hall__header>div{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.player-hall-dialog--immersive .player-hall__tabs{display:none}

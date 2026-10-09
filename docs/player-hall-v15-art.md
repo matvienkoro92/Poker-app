@@ -1,0 +1,8 @@
+# Hall background v15
+
+Mode: built-in image_gen edit. Source v14, final `/Users/kosmonavt/.codex/generated_images/01a10e86-0a13-7491-8b47-de0b78614162/exec-1d5e359b-7f7d-45a0-8ce2-44c1653fc225.png`. Native output 1341×1173; requested larger resolution was not returned. Lossless WebP, no resampling. Existing independent monkey layer preserved.
+
+Prompt:
+
+Restore this exact game room panoramic background to pristine sharp detailed quality. This is a fidelity restoration, NOT a redesign. Preserve exact camera, aspect ratio, every object position and silhouette, empty red leather armchair on left, empty framed green achievement board, black cabinets, two EMPTY vertical lit wooden trophy niches, garage doorway, poker-table green black gold kart on right, shelves, red patterned rug, foreground low round table whisky glass ashtray books and plants. NO character, NO monkey, NO person, NO text. Remove ALL depth of field blur and smearing everywhere including foreground plants, sofa leather, whisky glass, table, carpet, far garage cabinets, car wheels. Everything in equally sharp deep focus as architectural product photography, crisply defined leather upholstery stitches and buttons, accurate wood grain, clean metal edges, detailed leaves, engraved books, crisp glass refraction, detailed carpet weave, clean machinery. Maintain warm existing amber lighting and black/red/green/gold palette, no extra fog, no bloom, no over sharpening halos, no artificial grain. Preserve layout absolutely so existing interactive HTML shelf positions still align. Highest native detail possible, request 2688x2352 landscape approximately 1.143 aspect matching reference. Output background only.
+
