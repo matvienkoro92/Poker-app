@@ -486,8 +486,11 @@ async function parseOcrFile(file) {
   if (date === "06.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "06.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "06.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
+  if (date === "08.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
+    // IMG_0037: Vision attached a stray K to GUCCI’s visible ID.
+    if (date === "08.10.2026" && time === "20:00" && !blue && token.text === "KID:642453") token.text = "ID:642453";
     if (date === "02.10.2026" && time === "12:00" && token.text === "yID:173085") token.text = "ID:173085";
     if (date === "29.09.2026" && time === "18:00" && token.text === "yID:709473") token.text = "ID:709473";
     if (date === "29.09.2026" && time === "20:00" && !blue && token.text === "*ID:347375") token.text = "ID:347375";
