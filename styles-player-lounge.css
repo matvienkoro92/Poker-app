@@ -80,3 +80,13 @@
 .player-hall-dialog .lounge-roster-entry{top:74%}
 .player-hall-dialog .lounge-live-retry,.lounge-room-note{top:83%}
 .player-hall__room[data-space=lounge] .player-hall__lounge-return{top:74%}
+
+/* Only confirmed live players occupy chairs. Keep identities above the table. */
+.player-hall-dialog .lounge-seat[hidden]{display:none}
+.player-hall-dialog .lounge-seat--playing{z-index:5}
+.lounge-seat--playing .lounge-seat__character{clip-path:inset(0 0 25% 0)}
+.lounge-seat--playing .lounge-seat__name{top:-4cqh;bottom:auto;font-size:1.05cqh;max-width:140%}
+.lounge-seat--playing .lounge-seat__status{top:-7cqh}
+.lounge-seat--3.lounge-seat--playing .lounge-seat__name,.lounge-seat--4.lounge-seat--playing .lounge-seat__name{top:-8cqh}
+.lounge-seat--3.lounge-seat--playing .lounge-seat__status,.lounge-seat--4.lounge-seat--playing .lounge-seat__status{top:-12cqh}
+.lounge-seat__status>strong,.lounge-hands>.lounge-seat__name{display:none}
