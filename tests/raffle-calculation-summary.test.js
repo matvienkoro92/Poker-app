@@ -28,3 +28,11 @@ test("calculation raffle summary separates issued tickets, cash and dated return
   assert.equal(totals.returnedCashAmount, 1000);
   assert.equal(totals.issuedPrizeAmount, 1500);
 });
+test('automatic cash return credits actual issued amount including a plain numeric prize', () => {
+  const totals=summarizeRafflesForRange([{prizeKind:'cash',winners:[{
+    prize:'300',poker21PayoutAmount:300,winnerStatus:'ok',winnerStatusAt:'2026-10-09T10:00:00Z',
+    winnerSeatStatus:'not_seated',winnerSeatStatusAt:'2026-10-09T10:10:00Z',
+    cashSeatingMonitor:{status:'returned',amount:300},
+  }]}], '2026-10-09','2026-10-09');
+  assert.equal(totals.issuedCashAmount,300);assert.equal(totals.returnedCashAmount,300);assert.equal(totals.returnCount,1);
+});

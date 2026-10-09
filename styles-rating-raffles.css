@@ -13509,3 +13509,15 @@ body[data-view="raffles"] .raffles-active-chooser__item--training
   border-radius: 18px !important;
   overflow: hidden !important;
 }
+
+/* Issued cash stays blue until seating has been confirmed. */
+.raffle-winner-row--cash.raffle-winner-row--issued:not(.raffle-winner-row--seated) {
+  border-color: rgba(59, 130, 246, .84);
+  background: linear-gradient(135deg, rgba(59, 130, 246, .34), rgba(29, 78, 216, .24)), #0b2348;
+  box-shadow: 0 0 0 1px #3b82f638, 0 8px 24px #3b82f62e, inset 0 1px 0 #ffffff14;
+}
+.raffle-winner-row--cash.raffle-winner-row--issued:not(.raffle-winner-row--seated) .raffle-winner-ready-badge--issued {
+  border-color: #60a5fa;
+  background: #3b82f62e;
+  color: #bfdbfe;
+}

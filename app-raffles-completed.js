@@ -334,7 +334,7 @@ function initRafflesCompletedRuntime(opts) {
     return false;
   }
 
-  function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber) {
+  function buildRaffleWinnerRowHtml(w, raffleId, isAdmin, winnerNumber, raffle) {
     var actionRaffleId = String((w && w.sourceRaffleId) || raffleId || "").trim();
     var uidRaw = String(w.userId != null ? w.userId : "").trim();
     var isManualPlaceholderUserId = typeof pokerRafflesIsManualPlaceholderUserId === "function"
@@ -351,6 +351,9 @@ function initRafflesCompletedRuntime(opts) {
     var statusIcon = status === "ok" ? " ✓" : status === "fail" ? " ✗" : "";
     var statusClass = status === "ok" ? "raffle-winner-status--ok" : status === "fail" ? "raffle-winner-status--fail" : "";
     var prizeIssued = status === "ok";
+    var cashPrize = raffleRecentCompletedKindLabel(raffle) === "Кеш";
+    var cashReturned = w.cashSeatingMonitor && ["returning", "returned"].indexOf(w.cashSeatingMonitor.status) !== -1;
+    var seatStatus = cashReturned ? "not_seated" : w.winnerApiSeated ? "seated" : String(w.winnerSeatStatus || "");
     var prizeDeclined = status === "fail";
     var winnerReady = raffleWinnerIsReady(w);
     var privateCashRegistered = !!(w && w.privateCashRegistered);
@@ -470,7 +473,9 @@ function initRafflesCompletedRuntime(opts) {
         )
       : "";
     var readyTimerLine = readyTimer ? '<span class="raffle-winner-row__ready-timer-line">' + readyTimer + "</span>" : "";
-    var metaItems = readyBadge + poker21PayoutBadge;
+    var returnBadge = w.cashSeatingMonitor && w.cashSeatingMonitor.status === "returned"
+      ? '<span class="raffle-winner-ready-badge">Возврат +' + escapeHtml(String(w.cashSeatingMonitor.amount)) + ' ₽</span>' : "";
+    var metaItems = readyBadge + poker21PayoutBadge + returnBadge;
     var profileMeta = metaItems ? "<span class=\"raffle-winner-row__meta\">" + metaItems + "</span>" : "";
     var identityClass = "raffle-winner-row__identity" + (isAdmin ? " raffle-winner-row__identity--admin" : "");
     var profileBlock = "<span class=\"raffle-winner-row__person\"><span class=\"" + identityClass + "\">" + profileOpen + (adminLevelLine || tgOpen) + readyTimerLine + "</span></span>";
@@ -479,6 +484,8 @@ function initRafflesCompletedRuntime(opts) {
       (isAdmin ? " raffle-winner-row--admin" : "") +
       (winnerReady && !prizeIssued ? " raffle-winner-row--ready" : "") +
       (prizeIssued ? " raffle-winner-row--issued" : "") +
+      (cashPrize ? " raffle-winner-row--cash" : "") +
+      (seatStatus === "seated" ? " raffle-winner-row--seated" : "") +
       (prizeDeclined ? " raffle-winner-row--declined" : "") +
       (readyExpired ? " raffle-winner-row--missed" : "") +
       (raffleWinnerIsReroll(w) ? " raffle-winner-row--reroll" : "");
@@ -489,7 +496,7 @@ function initRafflesCompletedRuntime(opts) {
     if (isAdmin) {
       var okActive = status === "ok" ? " raffle-winner-btn--active" : "";
       var failActive = status === "fail" ? " raffle-winner-btn--active" : "";
-      var seatStatus = String(w.winnerSeatStatus || "");
+
       var cashoutStatus = String(w.winnerCashoutStatus || "");
       var cashoutAmount = Math.max(0, Number(w.winnerCashoutAmount) || 0);
       var followupAttrs =
@@ -1338,7 +1345,7 @@ function initRafflesCompletedRuntime(opts) {
       "<span class=\"raffle-winner-reroll-arrow__label\">Рерролл</span>" +
       "</span><ul class=\"raffle-winner-reroll-list\">";
     rows.forEach(function (w) {
-      html += buildRaffleWinnerRowHtml(w, actionRaffleId, rafflesIsAdmin, winnerNumber);
+      html += buildRaffleWinnerRowHtml(w, actionRaffleId, rafflesIsAdmin, winnerNumber, raffle);
     });
     html += "</ul></li>";
     return html;
@@ -1384,7 +1391,7 @@ function initRafflesCompletedRuntime(opts) {
     var actionRaffleId = raffle && (raffle.sourceRaffleId || raffle.id);
     (Array.isArray(rows) ? rows : []).forEach(function (w, index) {
       var winnerNumber = index + 1;
-      html += buildRaffleWinnerRowHtml(w, actionRaffleId, rafflesIsAdmin, winnerNumber);
+      html += buildRaffleWinnerRowHtml(w, actionRaffleId, rafflesIsAdmin, winnerNumber, raffle);
       if (!raffleWinnerIsReroll(w)) {
         var key = raffleWinnerPrimaryRenderKey(w);
         html += raffleCompletedRerollRowsHtml(raffle, key && rerollsByOriginal ? rerollsByOriginal[key] : [], winnerNumber);

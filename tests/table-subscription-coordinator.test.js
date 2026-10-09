@@ -8,6 +8,7 @@ function fixture() {
     commands.push([cmd,key,...args]);let result=null;
     if(cmd==='GET')result=db.get(key)||null;
     else if(cmd==='SET'){if(!(args.includes('NX')&&db.has(key))){db.set(key,args[0]);result='OK';}}
+    else if(cmd==='HSET'){const hash=db.get(key)||{};for(let i=0;i<args.length;i+=2)hash[args[i]]=args[i+1];db.set(key,hash);result=args.length/2;}
     else if(cmd==='EVAL'){const [,lock,token]=args;result=db.get(lock)===token?Number(db.delete(lock)):0;}
     else throw Error(cmd);
     return {result};
