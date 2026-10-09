@@ -15,18 +15,9 @@ function create(chapter){if(chapter===0)throw Error('Chapter one uses MonkeyRace
 function train(s){return Array.from({length:27},(_,i)=>({x:15+i*142,w:134,y:385+Math.sin(s.tick*.015+i*.55)*(40+15*(s.intensity||0)),car:i}));}
 function damage(s){if(s.inv||s.won||s.lost)return;s.health--;s.hits++;s.inv=80;s.shake=10;if(s.health<=0)s.lost=true;}
 function hurtBoss(s,n){if(s.boss.hp<=0)return;s.boss.hp=Math.max(0,s.boss.hp-n);s.score+=100;if(!s.boss.hp){s.won=true;s.phase='done';}}
-function romaTables(room){const layouts=[[],[[132,300,100,52],[267,395,100,52]],[[130,280,90,48],[265,340,90,48],[150,430,90,48]],[[125,285,88,46],[270,285,88,46],[195,410,105,54]],[[195,335,145,72]],[[132,305,100,52],[265,405,100,52]],[[195,350,115,58]],[[140,290,92,48],[260,400,92,48]]];return layouts[room].map(([x,y,w,h])=>({x,y,w:w*1.12,h:h*1.12}));}
-function romaProps(room){const layouts=[
- [],
- [['sofa',52,265,82,28],['trolley',308,238,48,26]],
- [['rack',48,248,54,24],['sofa',337,290,76,28]],
- [['trolley',45,262,48,26],['sofa',337,290,76,28]],
- [['sofa',52,260,82,28],['sofa',332,260,82,28]],
- [['safe',55,250,62,30],['trolley',333,275,48,26]],
- [['trolley',332,275,48,26]],
- [['safe',45,265,62,30],['trolley',337,270,48,26]]
- ];return layouts[room].map(([kind,x,y,w,h])=>({kind,x,y,w,h,cover:kind==='sofa'||kind==='safe'}));}
-function roomSolids(s){return [...(s.furniture||[]),...(s.props||[])];}
+function romaTables(room){const layouts=[[],[[128,320,108,54],[265,430,108,54]],[[122,320,60,32],[270,420,60,32]],[[125,315,100,52],[267,425,100,52]],[[195,350,144,70]],[[130,280,115,42]],[],[]];return layouts[room].map(([x,y,w,h])=>({x,y,w,h,kind:room===2?'cocktail':room===5?'counter':'poker'}));}
+function romaProps(room){const layouts=[[],[['trolley',65,230,38,22]],[['trolley',65,232,38,22]],[],[['sofa',70,230,82,28],['trolley',300,235,38,22]],[['safe',55,230,50,28],['trolley',260,230,38,22]],[['rack',55,245,44,24],['trolley',275,230,38,22]],[['safe',55,230,50,28],['trolley',270,235,38,22]]];const props=layouts[room].map(([kind,x,y,w,h])=>({kind,x,y,w,h,cover:kind==='sofa'||kind==='safe'}));for(const t of romaTables(room)){if(t.kind!=='poker')continue;const dx=t.w*.57;for(const [x,y,back]of [[t.x-dx,t.y-8,false],[t.x+dx,t.y-8,false],[t.x-t.w*.24,t.y+37,true],[t.x+t.w*.24,t.y+37,true]])props.push({kind:back?'chairBack':'chair',x,y,w:32,h:20,cover:false});props.push({kind:'dealer',x:t.x,y:t.y-34,w:45,h:22,decorative:true});}return props;}
+function roomSolids(s){return [...(s.furniture||[]),...(s.props||[])].filter(f=>!f.decorative);}
 function tableAt(s,x,y){return roomSolids(s).find(f=>((x-f.x)/(f.w/2+14))**2+((y-f.y)/(f.h/2+14))**2<1);}
 function aroundTables(s,e,oldX,oldY){const dx=e.x-oldX,dy=e.y-oldY,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/4));e.x=oldX;e.y=oldY;
  // A spawn or restored position can overlap furniture: allow movement out, never deeper in.

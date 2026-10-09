@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   var E = window.CoolerFlightEngine;
+  var missionTarget = location.pathname.endsWith('/cooler-flight-play.html') && new URLSearchParams(location.search).get('mission') === '70' && parent !== window ? 70 : 0;
   var ui, ctx, state, phase = 'ready', mode = 'solo', runId = '', taps = [], pendingFlap = false;
   var raf = 0, lastTime = 0, accumulator = 0, room = null, roomTimer = 0, polling = false;
   var generation = 0, pendingResult = null, best = 0, bestKey = '', sound = false, audio = null;
@@ -16,6 +17,7 @@
   var pilot = new Image(), monkey = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
   monkey.src = './assets/pokermanki-animation-head.webp';
+  window.addEventListener('message',function(e){if(missionTarget&&e.origin===location.origin&&e.source===parent&&e.data?.type==='cooler-mission-retry')startSolo();});
   function active() { return document.body.getAttribute('data-view') === 'cooler-flight'; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
   function storageKey() {
@@ -73,6 +75,7 @@
     resultClosed = false; soloCountdown = null; phase = 'ready'; pendingResult = null; state = E.create((Math.random() * 4294967296) >>> 0); taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
+    if(missionTarget){panel('<span class="flight-tag">МИССИЯ · КУЛЕРШАН</span><h2>Воздушная доставка</h2><p>Пройди 70 ворот и доставь билеты в TWO ACES. Касайся поля, чтобы подняться; отпускай, чтобы снижаться.</p>'+button('start','Полетели →'),'ready');return;}
     if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + prizeRules() + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
@@ -89,6 +92,7 @@
   }
   async function startSolo() {
     if (phase === 'loading') return;
+    if(missionTarget){generation++;status('Доставь билеты · 70 ворот');countdownSolo(210070,'');return;}
     var g = ++generation; phase = 'loading'; panel('<span class="flight-tag">КУЛЕР ПРОГРЕВАЕТ ВЕНТИЛЯТОР</span><h2>Готовимся к полёту…</h2>');
     try {
       var d = await api('start'); if (g !== generation || !active()) return;
@@ -152,7 +156,7 @@
   }
   function finish() {
     if (phase !== 'playing') return;
-    phase = 'over'; pendingFlap = false; splash(); ui.pause.hidden = true;
+    phase = 'over'; pendingFlap = false; if(missionTarget){ui.pause.hidden=true;panel('<h2>Полёт прерван</h2><p>Продолжение — в меню миссии.</p>');parent.postMessage({type:'cooler-mission-loss'},location.origin);return;} splash(); ui.pause.hidden = true;
     var newBest = saveBest(); ui.best.textContent = best;
     pendingResult = runId ? { runId: runId, ticks: state.tick, taps: taps.slice() } : null;
     var g = generation;
@@ -301,9 +305,10 @@
         var doFlap=pendingFlap&&state.tick-state.lastFlap>=7;
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
         var previousPasses=state.passes;var previousLives=state.lives,previousRevives=state.revives;var wasSmall=pilotSize(state)===61;previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
-        var hint = 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ '+state.lives:'');
-        if(ui.hint.textContent !== hint)ui.hint.textContent = hint;
-        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
+        if(missionTarget && state.passes>=missionTarget){phase='over';pendingFlap=false;ui.pause.hidden=true;parent.postMessage({type:'cooler-mission-win',score:state.score*100+state.passes*25,hits:state.revives},location.origin);break;}
+        var hint = missionTarget ? 'Ворота '+state.passes+'/70' : 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ '+state.lives:'');
+        if(ui.hint.textContent !== hint)ui.hint.textContent = hint;if(missionTarget)ui.score.textContent=state.passes+'/70';
+        if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=missionTarget ? state.passes+'/70' : state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
         if(state.lives>previousLives){chipSpeech='Вторая жизнь!';chipSpeechUntil=time+2000;ui.toast.textContent='♥ Дополнительная жизнь';toastUntil=time+2000;}
         if(state.revives>previousRevives){chipSpeech='Ещё живём!';chipSpeechUntil=time+2000;}
         if(!wasSmall && pilotSize(state)===61){chipSpeech='Уменьшаемся!';chipSpeechUntil=time+2000;}

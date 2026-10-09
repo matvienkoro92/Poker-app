@@ -5546,3 +5546,11 @@ body.profile-month-story-open { overflow: hidden; }
  content:"";position:absolute;left:12%;right:5%;bottom:5%;height:7%;background:radial-gradient(ellipse,#000b,transparent 70%);pointer-events:none;z-index:0;
 }
 .view[data-view="profile"] #profilePublicShowcase .chat-user-modal__rating-art-img {position:relative;z-index:1;}
+
+/* One waterfront scene: character art must not retain the shared modal backdrop. */
+.view[data-view="profile"] #profilePublicShowcase .profile-public-showcase__hero.chat-user-modal__hero {
+ background:#05080d!important;
+}
+.view[data-view="profile"] #profilePublicShowcase .chat-user-modal__hero--art .chat-user-modal__rating-art {
+ background:none!important;
+}
