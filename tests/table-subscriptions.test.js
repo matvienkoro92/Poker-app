@@ -248,20 +248,29 @@ test('player subscriptions support several selected games and limits with all as
  assert.match(f.calls.at(-1).body.text,/виды игры/);
  assert.equal(f.db.has('poker21:table-subscriptions:test:user:42'),false);
  await f.callback('pg:PLO6');await f.callback('pg:NLH');await f.callback('pg:next');
- await f.callback('pl:1');await f.callback('pl:2');await f.callback('pl:save');
- const [sub]=await f.service.list('42');assert.deepEqual(sub.selectedGames,['PLO6','NLH']);assert.deepEqual(sub.selectedLimits,['5/10','10/20']);
- assert.equal(matches(sub,[base]).length,1);assert.equal(matches(sub,[{...base,playType:'PLO5'}]).length,0);assert.equal(matches(sub,[{...base,blindAnnotation:'25/50'}]).length,0);
+ await f.callback('pl:0');await f.callback('pl:1');await f.callback('pl:save');
+ const [sub]=await f.service.list('42');assert.deepEqual(sub.selectedGames,['PLO6','NLH']);assert.deepEqual(sub.selectedLimits,['low','middle']);
+ assert.equal(matches(sub,[base]).length,1);assert.equal(matches(sub,[{...base,playType:'PLO5'}]).length,0);assert.equal(matches(sub,[{...base,blindAnnotation:'50/100'}]).length,0);
  assert.equal(matches({...sub,selectedGames:[],selectedLimits:[]},[{...base,playType:'PLO5',blindAnnotation:'25/50'}]).length,1);
 });
 
 test('game checkboxes retain selected games and limits through player count and duration with indexed dispatch',async()=>{
  const f=fixture();await f.callback('games');await f.callback('gg:PLO6');await f.callback('gg:NLH');await f.callback('gg:next');
- await f.callback('gl:1');await f.callback('gl:2');await f.callback('gl:save');
+ await f.callback('gl:0');await f.callback('gl:1');await f.callback('gl:save');
  assert.match(f.calls.at(-1).body.text,/Сколько игроков/);
  await f.callback('minimum:3');await f.callback('duration:0');
- const [sub]=await f.service.list('42');assert.deepEqual(sub.selectedGames,['PLO6','NLH']);assert.deepEqual(sub.selectedLimits,['5/10','10/20']);assert.equal(sub.minPlayers,3);
+ const [sub]=await f.service.list('42');assert.deepEqual(sub.selectedGames,['PLO6','NLH']);assert.deepEqual(sub.selectedLimits,['low','middle']);assert.equal(sub.minPlayers,3);
  assert.equal(matches(sub,[base]).length,0);
  const three={...base,playerCount:3};assert.equal(matches(sub,[three]).length,1);assert.equal(matches(sub,[{...three,playType:'PLO5'}]).length,0);
  f.calls.length=0;await f.service.poll([three],{players:[],games:[{game:'PLO6',limit:{small:5,big:10}}]});assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
  const all={...sub,selectedGames:[],selectedLimits:[]};assert.equal(matches(all,[{...three,playType:'PLO5',blindAnnotation:'25/50'}]).length,1);
+});
+
+test('limit categories include their boundaries and all higher limits without changing legacy exact filters',()=>{
+ const sub={kind:'game',mode:'selected',selectedGames:['PLO6'],selectedLimits:['low']};
+ const hit=value=>matches(sub,[{...base,blindAnnotation:value}]).length;
+ assert.equal(hit('1/2'),1);assert.equal(hit('3/6'),1);assert.equal(hit('5/10'),1);assert.equal(hit('10/20'),0);
+ sub.selectedLimits=['middle'];assert.equal(hit('10/20'),1);assert.equal(hit('15/30'),1);assert.equal(hit('25/50'),1);assert.equal(hit('30/60'),0);
+ sub.selectedLimits=['high'];assert.equal(hit('50/100'),1);assert.equal(hit('1000/2000'),1);assert.equal(hit('25/50'),0);
+ sub.selectedLimits=['5/10'];assert.equal(hit('5/10'),1);assert.equal(hit('3/6'),0);
 });
