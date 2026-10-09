@@ -50,3 +50,14 @@ test('cash seating reroll respects the round limit and candidate availability', 
   assert.equal(settleRaffleReadyWindows(empty, now).rerolled, false);
   assert.equal(empty.winners[0].winnerBurned, true);
 });
+
+test('expired and returned prize slots cannot be issued again', () => {
+  const { raffleWinnerPrizeForfeited } = require('../lib/api-handlers/raffles')._test;
+  for (const winner of [
+    {winnerReadyExpired:true}, {winnerBurned:true}, {winnerReadyState:'missed'}, {winnerReadyState:'burned'},
+    {cashSeatingMonitor:{status:'returning'}}, {cashSeatingMonitor:{status:'returned'}},
+  ]) assert.equal(raffleWinnerPrizeForfeited(winner), true);
+  for (const winner of [{winnerReady:true}, {winnerReadyState:'pending'}, {cashSeatingMonitor:{status:'seated'}}]) {
+    assert.equal(raffleWinnerPrizeForfeited(winner), false);
+  }
+});
