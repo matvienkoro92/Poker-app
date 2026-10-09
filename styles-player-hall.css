@@ -318,3 +318,23 @@
 .player-hall-dialog .garage-goal-list button{display:block;width:100%;text-align:left;border:1px solid #ffffff14;background:#1b252d;border-radius:10px;margin:6px 0;padding:10px 12px;min-height:48px}
 .garage-goal-list button strong{display:block;font-size:12px;color:#ead8b1}.garage-goal-list button span{display:block;font-size:10px;color:#a1adb7;margin-top:4px}.garage-goal-list [aria-pressed=true]{border-color:#c0a569!important}
 .garage-race-trophy img{width:48px;height:64px;object-fit:contain}
+
+/* Nested views have their own return controls; keep the hall close button out of them. */
+.player-hall-dialog:not(.player-hall-dialog--immersive) [data-hall-close],
+.player-hall-dialog:has(.player-hall__section-panel) .player-hall__header [data-hall-close]{display:none}
+.player-hall-dialog--picker{padding-bottom:0}
+.player-hall__picker-actions{position:sticky;bottom:0;z-index:21;margin:16px -20px 0;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#171a18;border-top:1px solid #d9bb7440}
+.player-hall__picker-actions>div{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.player-hall__picker-actions button{min-height:48px}
+.player-hall__picker-actions p:empty{display:none}
+.player-hall-dialog:has(.player-hall__section-panel) .player-hall__header .player-hall__settings-open{display:none}
+.player-hall-dialog--picker .player-hall__settings-open{display:none}
+
+/* Club nameplates belong to the shelf edges, within the camera plane. */
+.player-hall__display-shelf h3{padding:0;border-color:#b798586e;background:linear-gradient(#302819,#17160f);box-shadow:inset 0 1px #ead4a329,0 1px 2px #0008}
+.player-hall-dialog .player-hall__shelf-label{display:block;width:100%;min-height:0;padding:.25cqh .4cqh;border:0;border-radius:0;background:transparent;color:#edd9a9;font-size:1cqh;font-weight:600;letter-spacing:.08em;line-height:1.25;pointer-events:auto}
+.player-hall__display-shelf--cups h3{display:block;left:55%;top:27%;width:20%;pointer-events:auto;z-index:5}
+.player-hall__display-shelf--achievements h3{position:relative;z-index:5}
+.player-hall__room[data-camera=wide] .player-hall__display-slot .player-hall__cabinet-object{pointer-events:auto}
+.player-hall__featured{pointer-events:none}
+.player-hall__display-slot .player-hall__slot-edit{pointer-events:auto}
