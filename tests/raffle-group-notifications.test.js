@@ -3,7 +3,7 @@ const {createRaffleGroupNotifier}=require('../lib/raffle-group-notifications');
 test('only active ticket raffles are announced once with direct link',async()=>{
  const store=new Map(),sent=[];const notify=createRaffleGroupNotifier({botToken:'test',eventChatId:async()=>'-1001227353220',pipeline:async commands=>commands.map(([cmd,key,value,...args])=>{if(cmd==='DEL'){store.delete(key);return {result:1}}if(args.includes('NX')&&store.has(key))return {result:null};store.set(key,value);return {result:'OK'}}),sendTelegramMessage:async(token,payload)=>{sent.push(payload);return {ok:true}}});
  const r={id:'abc',title:'Билеты в Меджик',status:'active',prizeKind:'tournament_ticket'};
- await notify({...r,status:'draft'});await notify({...r,prizeKind:'cash'});assert.equal(sent.length,0);
+ await notify({...r,status:'draft'});await notify({...r,prizeKind:'prizes'});assert.equal(sent.length,0);
  await notify(r);await notify(r);assert.equal(sent.length,1);assert.equal(sent[0].chatId,'-1001227353220');assert.equal(sent[0].notificationScope,'raffle-start');assert.equal(sent[0].parseMode,'HTML');assert.match(sent[0].buttonUrl,/startapp=r_abc$/);
 });
 test('announcement includes total, quantities, values and tournament description with time',()=>{
@@ -126,4 +126,21 @@ test('Poker21 IDs appear for original, reroll and unclaimed players before statu
   assert.match(text, /@second · ID 67890/);
   assert.match(text, /@third · ID 54321 ❌/);
   assert.doesNotMatch(text, /@no_id · ID/);
+});
+
+test('active cash raffles announce their start once in the group', async () => {
+  const sent = [], store = new Set();
+  const notify = createRaffleGroupNotifier({ botToken: 'test', eventChatId: async () => '-1001',
+    pipeline: async commands => commands.map(([cmd,key,value,...args]) => {
+      if (args.includes('NX') && store.has(key)) return { result: null };
+      store.add(key); return { result: 'OK' };
+    }),
+    sendTelegramMessage: async (_, payload) => { sent.push(payload); return { ok: true }; },
+  });
+  const raffle = { id: 'cash', status: 'active', prizeKind: 'cash', title: 'Кеш 20/40', groups: [{count: 7, prize: '1000 ₽ на кеш 20/40'}] };
+  await notify(raffle); await notify(raffle);
+  assert.equal(sent.length, 1);
+  assert.match(sent[0].text, /Новый розыгрыш бай-инов на кеш/);
+  assert.match(sent[0].text, /7 бай-ин/);
+  assert.match(sent[0].buttonUrl, /startapp=r_cash$/);
 });

@@ -122,3 +122,16 @@ test("push describes ticket count, face value and tournament", () => {
   const multiple = tournamentRafflePushBody({groups:[{count:1,prize:'Билет 500 ₽ — Меджик'},{count:2,prize:'Билет 300 ₽ — Тракторист'}]});
   assert.match(multiple,/1 билета за 500 ₽ на турнир Меджик; 2 билетов за 300 ₽ на турнир Тракторист/);
 });
+
+test('all active cash raffle starts reach the group, including regular and video-table prizes', async () => {
+  const announced = [];
+  const service = createTournamentPushService({
+    notifyGroup: async raffle => { announced.push(raffle.id); },
+    redisPipeline: async () => { throw new Error('Cash must not read tournament push subscribers'); },
+  });
+  for (const [id, title] of [['manual', 'Кеш 20/40'], ['daily', 'Ежедневный кеш'], ['video', 'Бай-ин на видеостолы']]) {
+    await service.notifyCreated({ id, title, status: 'active', prizeKind: 'cash' });
+  }
+  await service.notifyCreated({ id: 'finished', status: 'drawn', prizeKind: 'cash' });
+  assert.deepEqual(announced, ['manual', 'daily', 'video']);
+});
