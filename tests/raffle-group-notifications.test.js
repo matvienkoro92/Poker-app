@@ -114,3 +114,16 @@ test('no reminder remains when all tickets expired', () => {
   assert.match(text, /Победителей: 0/);
   assert.doesNotMatch(text, /Нажмите «Готов»/);
 });
+
+test('Poker21 IDs appear for original, reroll and unclaimed players before status marks', () => {
+  const text = buildRaffleCompletedAnnouncement({ winners: [
+    { name: 'Первый', telegramUsername: 'first', p21Id: '12345', winnerReady: true },
+    { name: 'Второй', telegramUsername: 'second', p21Id: '67890', winnerReroll: true },
+    { name: 'Третий', telegramUsername: 'third', p21Id: '54321', winnerReadyExpired: true },
+    { name: 'Без ID', telegramUsername: 'no_id' },
+  ] });
+  assert.match(text, /@first · ID 12345 ✅/);
+  assert.match(text, /@second · ID 67890/);
+  assert.match(text, /@third · ID 54321 ❌/);
+  assert.doesNotMatch(text, /@no_id · ID/);
+});
