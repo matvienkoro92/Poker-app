@@ -24,7 +24,12 @@ function fixture(push) {
     return {result};
   })};
   const service = create({redis,namespace:'test',push,getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
-  const callback = (action,user=42,type='private') => service.handle({callback_query:{id:'cb',data:'club:sub:'+action,from:{id:user},message:{message_id:1,chat:{id:type==='private'?user:-1,type}}}});
+  const callback = async (action,user=42,type='private',finish=true) => {
+    const update=a=>({callback_query:{id:'cb',data:'club:sub:'+a,from:{id:user},message:{message_id:1,chat:{id:type==='private'?user:-1,type}}}});
+    const result=await service.handle(update(action));
+    if(finish && /^player:\d+$/.test(action) && type==='private') {await service.handle(update('pg:next'));await service.handle(update('pl:save'));}
+    return result;
+  };
   const message = (text,user=42) => service.handle({message:{text,from:{id:user},chat:{id:user,type:'private'}}});
   return {service,redis,callback,message,calls,db,commandsLog,setTables:v=>tables=v,setFailure:v=>fail=v,setDeliveryFailure:v=>deliveryFail=v};
 }
@@ -236,4 +241,27 @@ test('friend channel settings are stored independently and carried to delivery',
  const [sub]=await f.service.list('ID111111');assert.equal(sub.botEnabled,false);assert.equal(sub.pushEnabled,true);
  await f.service.poll([base],{players:['123'],games:[]});
  assert.equal(f.calls.at(-1).body.friendAccountId,'ID222222');
+});
+
+test('player subscriptions support several selected games and limits with all as default',async()=>{
+ const f=fixture();await f.callback('player:123',42,'private',false);
+ assert.match(f.calls.at(-1).body.text,/виды игры/);
+ assert.equal(f.db.has('poker21:table-subscriptions:test:user:42'),false);
+ await f.callback('pg:PLO6');await f.callback('pg:NLH');await f.callback('pg:next');
+ await f.callback('pl:1');await f.callback('pl:2');await f.callback('pl:save');
+ const [sub]=await f.service.list('42');assert.deepEqual(sub.selectedGames,['PLO6','NLH']);assert.deepEqual(sub.selectedLimits,['5/10','10/20']);
+ assert.equal(matches(sub,[base]).length,1);assert.equal(matches(sub,[{...base,playType:'PLO5'}]).length,0);assert.equal(matches(sub,[{...base,blindAnnotation:'25/50'}]).length,0);
+ assert.equal(matches({...sub,selectedGames:[],selectedLimits:[]},[{...base,playType:'PLO5',blindAnnotation:'25/50'}]).length,1);
+});
+
+test('game checkboxes retain selected games and limits through player count and duration with indexed dispatch',async()=>{
+ const f=fixture();await f.callback('games');await f.callback('gg:PLO6');await f.callback('gg:NLH');await f.callback('gg:next');
+ await f.callback('gl:1');await f.callback('gl:2');await f.callback('gl:save');
+ assert.match(f.calls.at(-1).body.text,/Сколько игроков/);
+ await f.callback('minimum:3');await f.callback('duration:0');
+ const [sub]=await f.service.list('42');assert.deepEqual(sub.selectedGames,['PLO6','NLH']);assert.deepEqual(sub.selectedLimits,['5/10','10/20']);assert.equal(sub.minPlayers,3);
+ assert.equal(matches(sub,[base]).length,0);
+ const three={...base,playerCount:3};assert.equal(matches(sub,[three]).length,1);assert.equal(matches(sub,[{...three,playType:'PLO5'}]).length,0);
+ f.calls.length=0;await f.service.poll([three],{players:[],games:[{game:'PLO6',limit:{small:5,big:10}}]});assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
+ const all={...sub,selectedGames:[],selectedLimits:[]};assert.equal(matches(all,[{...three,playType:'PLO5',blindAnnotation:'25/50'}]).length,1);
 });
