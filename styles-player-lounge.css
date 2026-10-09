@@ -39,3 +39,29 @@
 .lounge-seat--occupied.lounge-seat--0 .lounge-seat__name,
 .lounge-seat--occupied.lounge-seat--1 .lounge-seat__name,
 .lounge-seat--occupied.lounge-seat--2 .lounge-seat__name{order:-1;margin-bottom:.5cqh}
+/* Live players use independent seated bodies, the actual table and hand layers. */
+.player-hall-dialog .lounge-seat--playing{overflow:visible}
+.lounge-seat__character,.lounge-hands>img{position:absolute;left:50%;bottom:-5cqh;width:155%;height:auto;max-width:none;transform:translateX(-50%);filter:drop-shadow(0 .45cqh .25cqh #0005)}
+.lounge-table-foreground{position:absolute;inset:0;background:inherit;clip-path:polygon(14% 44.2%,38% 43.6%,63% 43.6%,81% 44.6%,88% 47.5%,84% 50.1%,84% 58%,17% 58%,17% 50.1%,12% 47.5%);z-index:4;pointer-events:none}
+.lounge-hands{position:absolute;width:16%;height:13%;z-index:5;pointer-events:none}
+.lounge-hands--left{clip-path:polygon(0% 58%,45% 58%,45% 83%,0% 83%)}
+.lounge-hands--right{clip-path:polygon(55% 58%,100% 58%,100% 83%,55% 83%)}
+.lounge-hands.lounge-seat--3,.lounge-hands.lounge-seat--4,.lounge-seat--3,.lounge-seat--4{top:36%}
+.lounge-seat--playing .lounge-seat__name{position:absolute;bottom:-4.6cqh;left:50%;transform:translateX(-50%);order:0!important;margin:0!important;max-width:120%;z-index:6;font-size:.82cqh}
+.lounge-seat__status{position:absolute;top:-2.2cqh;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:.35cqh;white-space:nowrap;max-width:160%;padding:.35cqh .5cqh;background:#12261bf0;border:1px solid #70b18a66;border-radius:4px;color:#e4f0d7;font-size:.92cqh;line-height:1.2;z-index:6;box-shadow:0 2px 5px #0005}
+.lounge-seat__status>i{width:.45cqh;height:.45cqh;background:#76c794;border-radius:50%;flex-shrink:0}
+.lounge-seat--3 .lounge-seat__status,.lounge-seat--4 .lounge-seat__status{top:0;font-size:.85cqh;max-width:130%}
+.lounge-seat__away{position:absolute;left:50%;transform:translateX(-50%);top:100%;font-size:.7cqh;white-space:nowrap;color:#c5bca4;background:#19221bbe;padding:.25cqh .3cqh;border-radius:3px}
+.lounge-seat__chips{position:absolute;bottom:-1.5cqh;left:42%;display:flex;align-items:flex-end;gap:.2cqh;z-index:6;pointer-events:none;filter:drop-shadow(0 2px 1px #0008)}
+.lounge-seat__chips>i{display:block;width:.65cqh;height:1.3cqh;border-radius:40%/12%;background:repeating-linear-gradient(#bc4437 0 .18cqh,#edcf9b .18cqh .23cqh);border:1px solid #d0a26a66}.lounge-seat__chips>i:nth-child(2){height:1.7cqh;background:repeating-linear-gradient(#245f46 0 .18cqh,#e6d49a .18cqh .23cqh)}.lounge-seat__chips>i:nth-child(3){height:.9cqh}
+.player-hall-dialog .lounge-live-retry{position:absolute;left:15%;right:15%;top:74%;font-size:1cqh;min-height:3.4cqh;padding:.6cqh;background:#283328e8;border:1px solid #bea7655a;border-radius:6px;z-index:7}
+.lounge-live-details{margin:16px 18px;padding:14px;background:#25312d;border:1px solid #ffffff16;border-radius:12px;font-size:12px;color:#bcc6bd}.lounge-live-details>strong{display:block;color:#dfcfb0;font-size:13px;margin-bottom:6px}.lounge-live-details>span{display:block;margin-top:5px}.lounge-live-details--playing{background:#19362b;border-color:#5bb88955}.lounge-live-details--playing>strong{color:#ace0b9}.lounge-directory-live{color:#c4bb9b!important}
+.lounge-hands>.lounge-seat__name{position:absolute;bottom:-4.6cqh;left:50%;transform:translateX(-50%);max-width:120%;margin:0;font-size:.82cqh;z-index:6}
+.lounge-seat__character{pointer-events:none}
+.player-hall-dialog .lounge-seat--3,.player-hall-dialog .lounge-seat--4,.lounge-hands.lounge-seat--3,.lounge-hands.lounge-seat--4{top:40%;height:9%}
+.lounge-seat__status{flex-direction:column;gap:.15cqh;top:-1cqh}
+.lounge-seat__status>span{display:flex;align-items:center;gap:.35cqh}
+.lounge-seat__status i{width:.45cqh;height:.45cqh;background:#76c794;border-radius:50%;flex-shrink:0}
+.lounge-seat__status>strong{font-size:.72cqh;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#bdcca9}
+.lounge-seat--3 .lounge-seat__status{top:-12cqh;left:0;transform:none;max-width:125%}
+.lounge-seat--4 .lounge-seat__status{top:-12cqh;left:auto;right:0;transform:none;max-width:125%}
