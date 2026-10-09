@@ -153,8 +153,8 @@ test('readiness and seating countdowns use deadlines and disappear when resolved
   const { winnerCountdown } = require('../lib/raffle-group-notifications');
   const now = Date.parse('2026-10-10T10:00:00Z');
   const winner = { name: 'Игрок', winnerReadyDeadlineAt: '2026-10-10T10:07:00Z' };
-  assert.equal(winnerCountdown(winner, now), '⏳ «Готов»: 7 мин');
-  assert.equal(winnerCountdown(winner, now + 60000), '⏳ «Готов»: 6 мин');
+  assert.equal(winnerCountdown(winner, now), '⏳ Не готов · осталось 7 мин');
+  assert.equal(winnerCountdown(winner, now + 60000), '⏳ Не готов · осталось 6 мин');
   assert.equal(winnerCountdown({ ...winner, winnerReady: true }, now), '');
   assert.equal(winnerCountdown({ ...winner, winnerReadyExpired: true }, now), '');
   const cash = { ...winner, winnerReady: true, cashSeatingMonitor: {status:'pending', issuedAt:'2026-10-10T09:58:00Z'} };
@@ -192,4 +192,19 @@ test('cash group post distinguishes readiness from actual seating', () => {
   assert.match(text,/• Сел ✅ · сел 🪑/);
   assert.match(text,/• Ждём ✅ · 🔵 ожидаем посадку · ⏳ сесть за стол: 8 мин/);
   assert.match(text,/• Не сел ❌ — не сел за 10 минут/);
+});
+
+test('cash start names the destination and totals bare numeric buy-ins', () => {
+  const {buildRaffleAnnouncement} = require('../lib/raffle-group-notifications');
+  const text = buildRaffleAnnouncement({prizeKind:'cash', title:'Беккинг байины на кеш Бонус гейм 20/40 и 5/10', groups:[{count:3,prize:'200'}]});
+  assert.match(text,/Куда: Бонус гейм 20\/40 и 5\/10/);
+  assert.match(text,/Общая сумма: 600 ₽/);
+  assert.match(text,/3 бай-ин\. по 200 ₽ — Бонус гейм 20\/40 и 5\/10/);
+  assert.doesNotMatch(text,/не указана/);
+});
+
+test('completed cash post specifies destination and buy-in amounts', () => {
+  const text = buildRaffleCompletedAnnouncement({prizeKind:'cash',title:'Беккинг байины на кеш Бонус гейм 20/40 и 5/10',groups:[{count:3,prize:'200'}]});
+  assert.match(text,/Куда: Бонус гейм 20\/40 и 5\/10/);
+  assert.match(text,/3 бай-ин\. по 200 ₽/);
 });
