@@ -37,7 +37,7 @@ test('pulse opens commands and correct download and club links',async t=>{
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
  assert.deepEqual(buttons.slice(-4,-1),[
   {text:'📋 Ссылка',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
-  {text:'✉️ Написать менеджеру',callback_data:'club:manager'},
+  {text:'✉️ Написать менеджеру',style:'success',callback_data:'club:manager'},
   {text:'📋 Ссылка на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
  ]);
 });
@@ -108,4 +108,23 @@ test('manager callback edits the same message and includes contact and back butt
  const edit=calls.find(call=>call.url.endsWith('/editMessageText'));
  assert.equal(edit.p.message_id,42);assert.match(edit.p.reply_markup.inline_keyboard[0][0].url,/https:\/\/t.me\/(qweenpoker|vikipoker)/);
  assert.equal(edit.p.reply_markup.inline_keyboard.at(-1)[0].callback_data,'club:pulse');
+});
+
+test('group schedule asks first, sends only to clicking user after yes and restores menu after no',async t=>{
+ const old=global.fetch;t.after(()=>global.fetch=old);const calls=[];
+ global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ const update=action=>({callback_query:{id:'schedule',data:'club:'+action,from:{id:123},message:{chat:{id:-100,type:'supergroup'},message_id:42}}});
+ await c.handle(update('schedule:0'),'test');
+ assert.equal(calls.at(-1).p.text,'Отправить расписание в ЛС?');assert.ok(!calls.some(x=>x.url.endsWith('/sendMessage')));
+ calls.length=0;await c.handle(update('schedule:send'),'test');
+ const sent=calls.filter(x=>x.url.endsWith('/sendMessage'));assert.equal(sent.length,c.schedulePages().length);assert.ok(sent.every(x=>x.p.chat_id===123));
+ assert.equal(calls.at(-1).p.message_id,42);
+ calls.length=0;await c.handle(update('schedule:no'),'test');assert.equal(calls.at(-1).p.text,c.rootMenu().text);assert.ok(!calls.some(x=>x.url.endsWith('/sendMessage')));
+});
+test('unreachable schedule recipient gets a private start link and start opens the schedule',async t=>{
+ const old=global.fetch;t.after(()=>global.fetch=old);const calls=[];
+ global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:!url.endsWith('/sendMessage'),description:'Forbidden'})};};
+ await c.handle({callback_query:{id:'s',data:'club:schedule:send',from:{id:123},message:{chat:{id:-100,type:'group'},message_id:42}}},'test');
+ assert.match(calls.at(-1).p.reply_markup.inline_keyboard[0][0].url,/start=schedule$/);
+ assert.equal(c.command({message:{text:'/start schedule',chat:{type:'private'}}}),'schedule:0');
 });
