@@ -182,3 +182,14 @@ test('minute refresh loads current raffle state and removes deleted or unfinishe
   assert.equal(updated[0].winners[0].winnerReady, true);
   assert.deepEqual(removed.sort(), ['active','deleted']);
 });
+
+test('cash group post distinguishes readiness from actual seating', () => {
+  const text = buildRaffleCompletedAnnouncement({prizeKind:'cash',winners:[
+    {name:'Сел',winnerReady:true,winnerStatus:'ok',cashSeatingMonitor:{status:'seated'}},
+    {name:'Ждём',winnerReady:true,winnerStatus:'ok',cashSeatingMonitor:{status:'pending',issuedAt:'2026-10-10T10:00:00Z'}},
+    {name:'Не сел',winnerReady:true,winnerStatus:'ok',cashSeatingMonitor:{status:'returned'}},
+  ]}, Date.parse('2026-10-10T10:02:00Z'));
+  assert.match(text,/• Сел ✅ · сел 🪑/);
+  assert.match(text,/• Ждём ✅ · 🔵 ожидаем посадку · ⏳ сесть за стол: 8 мин/);
+  assert.match(text,/• Не сел ❌ — не сел за 10 минут/);
+});

@@ -142,7 +142,7 @@ function initRafflesCompletedRuntime(opts) {
   function raffleWinnerReadyTimerKey(w, raffleId, mode, deadlineMs, startMs) {
     var parts = [
       String(raffleId || ""),
-      mode === "burn" ? "burn" : "reroll",
+      mode === "seating" ? "seating" : mode === "burn" ? "burn" : "reroll",
       String(w && (w.winnerReadySlotId || w.userId || w.accountId || w.p21Id || w.name) || ""),
       String(startMs || ""),
       String(deadlineMs || "")
@@ -190,7 +190,7 @@ function initRafflesCompletedRuntime(opts) {
   }
 
   function raffleReadyTimerLabel(mode) {
-    return mode === "burn" ? "До сгорания" : "До рерола";
+    return mode === "seating" ? "Сесть за стол" : mode === "burn" ? "До сгорания" : "До рерола";
   }
 
   function raffleReadyTimerHtml(timerInfo, mode, className) {
@@ -213,7 +213,7 @@ function initRafflesCompletedRuntime(opts) {
       "\"" +
       timerAttrs +
       " data-raffle-ready-timer-mode=\"" +
-      escapeHtml(mode === "burn" ? "burn" : "reroll") +
+      escapeHtml(mode === "seating" ? "seating" : mode === "burn" ? "burn" : "reroll") +
       "\" data-raffle-ready-timer-label=\"" +
       escapeHtml(label) +
       "\" aria-live=\"polite\">" +
@@ -299,7 +299,7 @@ function initRafflesCompletedRuntime(opts) {
       if (expired) {
         var winnerRow = el.closest ? el.closest(".raffle-winner-row") : null;
         var readyBtn = winnerRow && winnerRow.querySelector ? winnerRow.querySelector(".raffle-winner-ready-btn") : null;
-        if (readyBtn && !readyBtn.classList.contains("raffle-winner-ready-btn--active")) {
+        if (mode !== "seating" && readyBtn && !readyBtn.classList.contains("raffle-winner-ready-btn--active")) {
           readyBtn.disabled = true;
           readyBtn.setAttribute("aria-disabled", "true");
           readyBtn.textContent = "Время вышло";
@@ -472,6 +472,17 @@ function initRafflesCompletedRuntime(opts) {
           "raffle-winner-ready-timer"
         )
       : "";
+    if (cashPrize && prizeIssued && w.cashSeatingMonitor && w.cashSeatingMonitor.status === "pending" && seatStatus !== "seated") {
+      var seatingStartMs = new Date(w.cashSeatingMonitor.issuedAt).getTime();
+      if (isFinite(seatingStartMs)) {
+        var seatingDeadlineMs = seatingStartMs + 10 * 60 * 1000;
+        readyTimer = raffleReadyTimerHtml({
+          startMs: seatingStartMs,
+          deadlineMs: seatingDeadlineMs,
+          key: raffleWinnerReadyTimerKey(w, raffleId, "seating", seatingDeadlineMs, seatingStartMs)
+        }, "seating", "raffle-winner-ready-timer");
+      }
+    }
     var readyTimerLine = readyTimer ? '<span class="raffle-winner-row__ready-timer-line">' + readyTimer + "</span>" : "";
     var returnBadge = w.cashSeatingMonitor && w.cashSeatingMonitor.status === "returned"
       ? '<span class="raffle-winner-ready-badge">Возврат +' + escapeHtml(String(w.cashSeatingMonitor.amount)) + ' ₽</span>' : "";
