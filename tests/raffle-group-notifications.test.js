@@ -20,6 +20,7 @@ function completedHarness() {
   const notify = createRaffleCompletedGroupNotifier({
     botToken: 'test', eventChatId: async () => chat,
     pipeline: async commands => commands.map(([cmd, key, value, ...args]) => {
+      if (cmd === 'GET') return { result: store.get(key) || null };
       if (cmd === 'DEL') { store.delete(key); return { result: 1 }; }
       if (args.includes('NX') && store.has(key)) return { result: null };
       store.set(key, value); return { result: 'OK' };
@@ -38,10 +39,10 @@ test('completion announces actual winners for all prize types, with a button to 
     assert.equal(message.chatId, '-1001227353220');
     assert.equal(message.notificationScope, 'raffle-completed');
     assert.match(message.text, /Розыгрыш завершён!/);
-    assert.match(message.text, /Победителей: 2$/);
+    assert.match(message.text, /Победителей: 2\n/);
     assert.equal(message.buttonText, 'Посмотреть розыгрыш');
     assert.match(message.buttonUrl, /startapp=raffle_42$/);
-    assert.doesNotMatch(message.text, /https?:/);
+    assert.equal(message.parseMode, "HTML");
   }
 });
 test('completion ignores unfinished/cancelled raffles and deduplicates parallel or repeated callbacks', async () => {
@@ -62,4 +63,54 @@ test('completion can retry a rejected send and does not consume delivery marker 
   await assert.rejects(h.notify(raffle)); assert.equal(h.store.size, 0);
   h.setFail(false); await h.notify(raffle); assert.equal(h.sent.length, 1);
   assert.match(buildRaffleCompletedAnnouncement(raffle), /Победителей: 0$/);
+});
+
+test('winners have safe mentions, ready players first and a separated reminder', () => {
+  const text = buildRaffleCompletedAnnouncement({ title: '<Итоги>', winners: [
+    { name: 'Ожидает', telegramUsername: '@waiting', userId: '12' },
+    { name: 'Готов & игрок', userId: '34', winnerReady: true },
+  ] });
+  assert.match(text, /&lt;Итоги&gt;/);
+  assert.match(text, /• Готов &amp; игрок — <a href="tg:\/\/user\?id=34">Готов &amp; игрок<\/a> ✅\n\n• Ожидает — @waiting\n\nНажмите «Готов», чтобы забрать билет\./);
+});
+test('ready changes edit the saved message and preserve its button', async () => {
+  const store = new Map(), edits = []; let sends = 0;
+  const notify = createRaffleCompletedGroupNotifier({ botToken: 'test', eventChatId: async () => '-1001',
+    pipeline: async commands => commands.map(([cmd, key, value, ...args]) => {
+      if (cmd === 'GET') return { result: store.get(key) || null };
+      if (cmd === 'DEL') { store.delete(key); return { result: 1 }; }
+      if (args.includes('NX') && store.has(key)) return { result: null };
+      store.set(key, value); return { result: 'OK' };
+    }),
+    sendTelegramMessage: async () => { sends++; return { ok: true, messageId: 75 }; },
+    editTelegramMessage: async (_, payload) => { edits.push(payload); return { ok: true }; },
+  });
+  const raffle = { id: 'update', status: 'drawn', winners: [{ name: 'Игрок', telegramUsername: 'player' }] };
+  await notify(raffle);
+  raffle.winners[0].winnerReady = true;
+  await notify(raffle);
+  assert.equal(sends, 1); assert.equal(edits.length, 1);
+  assert.equal(edits[0].messageId, 75); assert.equal(edits[0].chatId, '-1001');
+  assert.match(edits[0].text, /@player ✅/); assert.doesNotMatch(edits[0].text, /Нажмите/);
+  assert.equal(edits[0].buttonText, 'Посмотреть розыгрыш');
+});
+
+test('reroll retains unclaimed players separately and marks replacement winners', () => {
+  const text = buildRaffleCompletedAnnouncement({ winners: [
+    { name: 'Первый', telegramUsername: 'first', winnerReadyExpired: true, winnerReadyState: 'missed' },
+    { name: 'Второй', telegramUsername: 'second', winnerReroll: true, winnerReady: true },
+    { name: 'Третий', telegramUsername: 'third', winnerReroll: true },
+    { name: 'Четвертый', telegramUsername: 'fourth', winnerBurned: true },
+    { name: 'Пятый', telegramUsername: 'fifth', winnerReady: true },
+  ] });
+  assert.match(text, /Победителей: 3/);
+  assert.match(text, /• Пятый — @fifth ✅\n\nПобедители реролла:\n• Второй — @second ✅\n\n• Третий — @third/);
+  assert.match(text, /Не забрали билет:\n• Первый — @first ❌ — не забрал\n• Четвертый — @fourth ❌ — не забрал/);
+  assert.match(text, /\n\nНажмите «Готов»/);
+});
+test('no reminder remains when all tickets expired', () => {
+  const text = buildRaffleCompletedAnnouncement({ winners: [{ name: 'Игрок', winnerReadyState: 'burned' }] });
+  assert.match(text, /❌ — не забрал/);
+  assert.match(text, /Победителей: 0/);
+  assert.doesNotMatch(text, /Нажмите «Готов»/);
 });
