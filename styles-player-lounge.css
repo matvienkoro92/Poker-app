@@ -93,3 +93,10 @@
 
 /* Prefer the compact detailed panorama; WebP remains the fallback. */
 .player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v2.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v2.webp") type("image/webp"))}
+
+/* One continuous panorama across all camera positions; no repeated crop seams. */
+.player-hall__spaces::before{content:"";position:absolute;left:-50%;top:0;width:150%;height:100%;background:var(--hall-panorama) center/100% 100% no-repeat;pointer-events:none}
+.player-hall__room{--hall-panorama:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v3.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v3.webp") type("image/webp"))}
+.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:none}
+.player-hall__character-foreground{display:none}
+.lounge-table-foreground{background-image:var(--hall-panorama);background-size:300% 100%;background-position:left center}
