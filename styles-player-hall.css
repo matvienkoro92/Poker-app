@@ -350,3 +350,11 @@
 /* Three achievement places give each award a readable caption. */
 .player-hall__display-shelf--achievements>div{grid-template-columns:repeat(3,minmax(0,1fr));gap:.6cqh}
 .player-hall__display-shelf--achievements .player-hall__slot-title{font-size:1cqh;line-height:1.25;min-height:2.5em;padding:.25cqh .3cqh;-webkit-line-clamp:2}
+
+/* Keep award artwork and captions within the framed achievement display. */
+.player-hall__display-shelf--achievements{display:grid;grid-template-rows:1.8cqh minmax(0,1fr);box-sizing:border-box;padding-bottom:.5cqh}
+.player-hall__display-shelf--achievements>div{height:100%;min-height:0;grid-template-rows:minmax(0,1fr);padding:.4cqh .3cqh 0}
+.player-hall__display-shelf--achievements .player-hall__display-slot{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 3cqh;justify-items:center}
+.player-hall-dialog .player-hall__display-shelf--achievements .player-hall__cabinet-object{height:100%;min-height:0}
+.player-hall__display-shelf--achievements .player-hall__slot-title{min-height:0;height:3cqh;box-sizing:border-box;font-size:.95cqh;background:transparent}
+.player-hall__display-shelf--cups .player-hall__display-slot:has(.player-hall__cabinet-object) .player-hall__slot-title{background:transparent;border-color:transparent;text-shadow:0 1px 3px #000,0 0 5px #000}
