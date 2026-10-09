@@ -116,3 +116,15 @@
 .player-hall__room[data-theme=midnight] .player-hall__spaces::after{background:#294c9b70}
 
 .player-hall__lamp::after{content:"";position:absolute;inset:-8px}
+
+/* Keep award bases in contact with solid ledges and short contact shadows. */
+.player-hall__display-shelf--cups .player-hall__display-slot--0,
+.player-hall__display-shelf--cups .player-hall__display-slot--1,
+.player-hall__display-shelf--cups .player-hall__display-slot--2{top:23%;height:12%}
+.player-hall-dialog .player-hall__display-shelf--cups .player-hall__display-slot:nth-child(-n+3) .player-hall__cabinet-object{height:80%}
+.player-hall__display-slot:has(.player-hall__cabinet-object)::before{content:"";position:absolute;left:3%;width:94%;top:calc(100% - .15cqh);height:.6cqh;background:linear-gradient(#ac8953 0%,#68502e 30%,#2b2217 36%,#45331f 100%);border-radius:.12cqh;box-shadow:0 .35cqh .4cqh #0008;pointer-events:none;z-index:1}
+.player-hall__display-slot:has(.player-hall__cabinet-object)::after{content:"";position:absolute;left:17%;width:66%;top:calc(100% - .45cqh);height:.65cqh;background:radial-gradient(ellipse,#000c 0%,#0007 40%,transparent 73%);pointer-events:none;z-index:1}
+.player-hall__display-shelf--achievements .player-hall__display-slot:has(.player-hall__cabinet-object)::before{top:calc(100% - 3cqh - .1cqh);height:.45cqh}
+.player-hall__display-shelf--achievements .player-hall__display-slot:has(.player-hall__cabinet-object)::after{top:calc(100% - 3cqh - .4cqh)}
+.player-hall__display-slot .player-hall__cabinet-object img{object-position:center bottom;filter:drop-shadow(.15cqh .15cqh .12cqh #0006)}
+.player-hall__display-slot .player-hall__slot-title{z-index:3}
