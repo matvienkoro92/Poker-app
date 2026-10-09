@@ -241,8 +241,8 @@
 .player-hall__display-shelf--cups .player-hall__display-slot--4{left:57%;top:28%;height:16.5%;width:15%}
 .player-hall__hotspot--cabinet{left:55%;top:24%;width:20%;height:3%}
 .player-hall__display-shelf--cups h3{display:none}
-.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-empty-v15.webp')}
-.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-empty-v15.webp')}
+.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-stage-v16.webp')}
+.player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-stage-v16.webp')}
 .player-hall__display-shelf--cups .player-hall__display-slot--3{top:9%;height:16%}
 .player-hall__display-shelf--cups .player-hall__display-slot--4{top:34%;height:10.5%}
 .player-hall__hotspot--cabinet{top:27%;height:3%}
@@ -256,3 +256,65 @@
 /* Unobstructed room: retain controls and an accessible dialog title. */
 .player-hall-dialog--immersive .player-hall__header>div{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .player-hall-dialog--immersive .player-hall__tabs{display:none}
+/* Garage workshop: a touch-friendly inspection sheet in the existing room. */
+.player-hall-dialog .player-hall__garage-panel--workshop{bottom:0;max-height:76%;padding:0;border:1px solid #c7a46b55;border-bottom:0;border-radius:24px 24px 0 0;background:#10171ef7;backdrop-filter:blur(18px);overscroll-behavior:contain;box-shadow:0 -18px 60px #0006;z-index:12}
+.garage-workshop__header{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;background:#10171ef5;border-bottom:1px solid #ffffff0b}
+.garage-workshop__header span,.garage-scoreboard>span{font-size:9px;letter-spacing:.18em;color:#bca87e}
+.garage-workshop__header h3{margin:5px 0 0;font-size:19px;color:#f1e5ce}
+.player-hall-dialog .garage-workshop__header button{width:40px;height:40px;min-height:40px;padding:0;border:1px solid #ffffff25;background:#202a32;border-radius:50%;font-size:25px}
+.garage-preview{position:relative;background:radial-gradient(ellipse at 50% 75%,#bea15c17,transparent 65%);border-bottom:1px solid #ffffff0a}
+.garage-preview canvas{display:block;width:100%;height:auto;max-height:190px;object-fit:contain}
+.garage-angles{display:flex;justify-content:center;gap:6px;padding:0 0 12px}
+.player-hall-dialog .garage-angles button,.player-hall-dialog .garage-categories button{padding:7px 12px;border:1px solid #ffffff16;border-radius:20px;font-size:11px;background:#1b252d;color:#b6bec4;min-height:34px;white-space:nowrap}
+.player-hall-dialog .garage-angles [aria-pressed=true],.player-hall-dialog .garage-categories [aria-pressed=true]{color:#f9e6b5;border-color:#c5a86b;background:#78623435}
+.garage-categories{display:flex;gap:7px;padding:14px 18px;overflow-x:auto;scrollbar-width:thin}
+.garage-options{display:flex;align-items:stretch;gap:10px;overflow-x:auto;padding:0 18px 16px;scroll-snap-type:x proximity}
+.garage-option{flex:0 0 133px;background:#19232b;border:1px solid #ffffff12;border-radius:14px;padding:10px;scroll-snap-align:start}
+.player-hall-dialog .garage-option>button:first-child{display:flex;flex-direction:column;align-items:flex-start;gap:7px;width:100%;padding:0;background:none;border:0;text-align:left;min-height:95px;color:#e5dfd0}
+.garage-option i{display:grid;place-items:center;width:42px;height:32px;background:linear-gradient(135deg,#fff3,var(--swatch));border:1px solid #ffffff25;border-radius:8px;font-size:27px;color:#fff;box-shadow:0 3px 10px #0003;font-style:normal}
+.garage-option strong{font-size:12px;line-height:1.4}
+.garage-option small{font-size:10px;color:#a8b6c0}
+.garage-option:has([aria-pressed=true]){border-color:#d1b477;background:#312e22}
+.garage-option--locked{background:#151d24}
+.garage-option--locked i{opacity:.5}
+.garage-option button:disabled{cursor:default;opacity:1}
+.garage-option p{font-size:10px;line-height:1.4;color:#99a5af;margin:9px 0}
+.garage-option progress,.garage-next progress{display:block;width:100%;height:4px;accent-color:#d0b373}
+.player-hall-dialog .garage-target{font-size:10px;border:0;background:transparent;color:#ddc48d;padding:8px 0;min-height:34px;text-align:left}
+.garage-number{display:flex;align-items:center;gap:10px;padding:0 18px 16px;font-size:12px;color:#d5cebd}
+.garage-number input{width:64px;background:#0c131a;color:#ffe6ab;border:1px solid #9b8252;border-radius:8px;padding:8px;font:600 14px inherit;text-align:center}
+.garage-number span{font-size:10px;color:#84919b}
+.garage-next{padding:13px 15px;margin:0 18px 16px;border:1px solid #c0a26a30;border-radius:12px;background:linear-gradient(120deg,#b09a4a12,#121c24)}
+.garage-next>span{font-size:10px;color:#bba575;display:block;margin-bottom:4px}
+.garage-next strong{font-size:14px;color:#e9dbc0}
+.garage-next p{font-size:11px;line-height:1.4;color:#aab4ba;margin:7px 0}
+.garage-next small{display:block;margin-top:6px;font-size:10px;color:#c8b68f}
+.garage-workshop__footer{position:sticky;bottom:0;background:#111a22fa;border-top:1px solid #ffffff12;padding:10px 18px calc(14px + env(safe-area-inset-bottom,0px));z-index:3}
+.garage-workshop__footer p{font-size:11px;line-height:1.4;color:#aeb8bf;margin:0 0 8px}
+.garage-workshop__footer>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.player-hall-dialog .garage-workshop__footer button{font-size:12px;min-height:42px;padding:10px 8px;border-radius:10px;border:1px solid #ffffff25;background:#202b34;color:#d1d8db}
+.player-hall-dialog .garage-workshop__footer .garage-save{background:linear-gradient(120deg,#e1c88e,#b89a5c);border-color:#e1c88e;color:#251e13;font-weight:700}
+.garage-scoreboard{padding:20px 0 0}.garage-scoreboard>span,.garage-scoreboard>h3{margin-left:18px}.garage-scoreboard>h3{color:#eee2c9;font-size:21px;margin-top:6px}
+.garage-stat-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;margin:18px}
+.garage-stat-grid>div{padding:14px 8px;background:#202b33;border:1px solid #ffffff0c;border-radius:12px}
+.garage-stat-grid b{display:block;font-size:23px;font-variant-numeric:tabular-nums;color:#edd7a6}.garage-stat-grid span{display:block;margin-top:5px;font-size:10px;color:#9eadb7}
+.garage-rival,.garage-muted{margin:18px;font-size:12px;line-height:1.5;color:#aebbc3}.garage-rival strong{display:block;font-size:18px;color:#f0dba8;margin-top:5px}
+.garage-race-trophy{display:flex;align-items:center;gap:14px;margin:18px;padding:16px;border:1px solid #caae7138;border-radius:14px;color:#e5c87c;font-size:36px;background:#c1a4520a}.garage-race-trophy span{font-size:12px;color:#b6aa90}.garage-race-trophy strong{display:block;font-size:18px;color:#e8d5a5;margin-top:5px}
+@media(min-width:700px){.player-hall-dialog .player-hall__garage-panel--workshop{left:50%;right:20px;bottom:20px;max-height:80%;border-radius:24px;border-bottom:1px solid #c7a46b55}.garage-preview canvas{max-height:230px}}
+@media(prefers-reduced-motion:reduce){.garage-option,.garage-preview{transition:none}}
+
+.player-hall__parked-kart{position:absolute;left:40.5%;top:41.5%;width:44%;height:auto;aspect-ratio:3/2;pointer-events:none;z-index:2;filter:drop-shadow(0 10px 7px #0007)}
+.player-hall__garage-object{z-index:3}
+/* Focus must never scroll the camera plane when navigating workshop options. */
+@supports(overflow:clip){.player-hall__room{overflow:clip}}
+.player-hall__garage-panel--workshop{overflow-x:hidden}
+.player-hall__room[data-space=garage][data-garage-focus=""] .player-hall__spaces{transform:translateX(var(--garage-pan,-38%)) scale(var(--garage-scale,.84));transform-origin:65% 58%}
+.player-hall__empty{inset:25% 54% auto 8%;background:#132016b0}
+.player-hall__garage-panel .garage-rival{margin:18px;font-size:12px;line-height:1.5;color:#aebbc3}
+.garage-rival small{display:block;margin-top:4px;font-size:11px;color:#b2a17d}
+.player-hall__garage-panel .garage-counter-note{margin:12px 18px;font-size:10px;line-height:1.5;color:#84949e}
+.garage-goal-list{margin:0 18px 16px;color:#d7c393;font-size:12px}
+.garage-goal-list summary{padding:10px 0;cursor:pointer;min-height:24px}
+.player-hall-dialog .garage-goal-list button{display:block;width:100%;text-align:left;border:1px solid #ffffff14;background:#1b252d;border-radius:10px;margin:6px 0;padding:10px 12px;min-height:48px}
+.garage-goal-list button strong{display:block;font-size:12px;color:#ead8b1}.garage-goal-list button span{display:block;font-size:10px;color:#a1adb7;margin-top:4px}.garage-goal-list [aria-pressed=true]{border-color:#c0a569!important}
+.garage-race-trophy img{width:48px;height:64px;object-fit:contain}
