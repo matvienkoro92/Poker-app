@@ -17,7 +17,18 @@
   var pilot = new Image(), monkey = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
   monkey.src = './assets/pokermanki-animation-head.webp';
-  window.addEventListener('message',function(e){if(missionTarget&&e.origin===location.origin&&e.source===parent&&e.data?.type==='cooler-mission-retry')startSolo();});
+  window.addEventListener('message',function(e){if(missionTarget&&e.origin===location.origin&&e.source===parent&&e.data?.type==='cooler-mission-retry')continueMission();});
+  function continueMission(){
+    if(!missionTarget||!state||state.alive||phase!=='over')return;
+    soloCountdown={resume:true,end:performance.now()+3000};phase='countdown';
+    panel('<span class="flight-tag">ПРОДОЛЖАЕМ · '+state.passes+'/70 ВОРОТ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>3</div><p>Полёт продолжится с места столкновения.</p>');ensureLoop();
+  }
+  function resumeMissionFlight(){
+    soloCountdown=null;state.alive=true;state.revives++;state.vy=0;state.invulnerableUntil=state.tick+180;
+    var radius=pilotSize(state)===61?24:48;state.y=Math.max(24+radius,Math.min(548-radius,state.y));
+    previousY=state.y;previousDistance=state.distance;phase='playing';accumulator=0;lastTime=0;pendingFlap=false;
+    ui.overlay.hidden=true;ui.pause.hidden=false;ui.toast.textContent='Продолжаем · защита 3 сек';toastUntil=performance.now()+3000;ui.canvas.focus({preventScroll:true});
+  }
   function active() { return document.body.getAttribute('data-view') === 'cooler-flight'; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
   function storageKey() {
@@ -297,7 +308,7 @@
   function frame(time) {
     raf=0;if(!active())return;
     var delta=lastTime?Math.min(100,time-lastTime):0;lastTime=time;
-    if(phase==='countdown'&&soloCountdown){var remaining=Math.min(3,Math.ceil((soloCountdown.end-time)/1000));if(remaining<=0){var start=soloCountdown;begin(start.seed,start.id);}else{var number=ui.panel.querySelector('[data-flight-countdown]');if(number)number.textContent=remaining;}}
+    if(phase==='countdown'&&soloCountdown){var remaining=Math.min(3,Math.ceil((soloCountdown.end-time)/1000));if(remaining<=0){var start=soloCountdown;if(start.resume)resumeMissionFlight();else begin(start.seed,start.id);}else{var number=ui.panel.querySelector('[data-flight-countdown]');if(number)number.textContent=remaining;}}
     if(phase==='countdown'&&room&&room.startAt){var left=Math.ceil((room.startAt-(Date.now()+clockOffset))/1000);if(left<=0&&!duelStarted){duelStarted=true;status('Дуэль началась!');begin(room.seed,room.runId);}else if(left>0){var count=ui.panel.querySelector('[data-flight-countdown]');if(count)count.textContent=left;}}
     if(phase==='playing') {
       accumulator+=delta;
