@@ -357,4 +357,6 @@
 .player-hall__display-shelf--achievements .player-hall__display-slot{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 3cqh;justify-items:center}
 .player-hall-dialog .player-hall__display-shelf--achievements .player-hall__cabinet-object{height:100%;min-height:0}
 .player-hall__display-shelf--achievements .player-hall__slot-title{min-height:0;height:3cqh;box-sizing:border-box;font-size:.95cqh;background:transparent}
-.player-hall__display-shelf--cups .player-hall__display-slot:has(.player-hall__cabinet-object) .player-hall__slot-title{background:transparent;border-color:transparent;text-shadow:0 1px 3px #000,0 0 5px #000}
+.player-hall-dialog .player-hall__display-shelf--cups .player-hall__cabinet-object{background:transparent;box-shadow:none;border:0}
+.player-hall__display-shelf--cups .player-hall__display-slot:has(.player-hall__cabinet-object){background:transparent;box-shadow:none}
+.player-hall__display-shelf--cups .player-hall__cabinet-object img{filter:none}
