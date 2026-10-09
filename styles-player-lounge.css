@@ -67,7 +67,7 @@
 .lounge-seat--4 .lounge-seat__status{top:-12cqh;left:auto;right:0;transform:none;max-width:125%}
 
 /* One panorama: friends, trophy wall and garage are adjacent camera positions. */
-.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/friends-hall-garage-panorama-v1.webp');background-size:300% 100%;background-repeat:no-repeat}
+.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/friends-hall-garage-panorama-v2.webp');background-size:300% 100%;background-repeat:no-repeat}
 .player-hall__lounge-scene{background-position:left center}
 .player-hall__scene{background-position:center center}
 .player-hall__garage-scene{background-position:right center}
@@ -90,3 +90,6 @@
 .lounge-seat--3.lounge-seat--playing .lounge-seat__name,.lounge-seat--4.lounge-seat--playing .lounge-seat__name{top:-8cqh}
 .lounge-seat--3.lounge-seat--playing .lounge-seat__status,.lounge-seat--4.lounge-seat--playing .lounge-seat__status{top:-12cqh}
 .lounge-seat__status>strong,.lounge-hands>.lounge-seat__name{display:none}
+
+/* Prefer the compact detailed panorama; WebP remains the fallback. */
+.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v2.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v2.webp") type("image/webp"))}
