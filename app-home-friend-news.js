@@ -2714,7 +2714,7 @@
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
-      "</span>" + feedbackParts.comments + "</span>";
+      "</span>" + (!ticker && typeof window.pokerGarageNewsShowcaseHtml === "function" ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId) : "") + feedbackParts.comments + "</span>";
   }
 
   function modalEventsHtml(rows) {
@@ -2949,6 +2949,7 @@
     }
     children(list, template.content);
     list.__newsMarkup = html;
+    if (typeof window.pokerHydrateGarageNews === "function") window.pokerHydrateGarageNews(list);
   }
 
   function clubSngWinnerPosts(rows) {
@@ -2976,7 +2977,7 @@
       return { date: date, html: '<article class="home-news-sng-archive" data-club-sng-winner="' + esc(date + ":" + title) + '">' +
         winnerCard + '<ol class="home-news-achievement__list">' + podium.map(function (winner) {
           return '<li value="' + Number(winner.place) + '"><b>' + esc(name(winner)) + '</b></li>';
-        }).join("") + '</ol></article>' };
+        }).join("") + '</ol>' + (winners.length === 1 && typeof window.pokerGarageNewsShowcaseHtml === 'function' ? window.pokerGarageNewsShowcaseHtml({type:'achievement'}, (clubProfileForNick(name(winners[0])) || {}).id) : '') + '</article>' };
     }).filter(Boolean);
   }
 
@@ -3035,7 +3036,7 @@
       var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
       return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/' + image + '" alt="" aria-hidden="true" loading="lazy"></div><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
         '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
-        '</details></article>' };
+        '</details>' + (['personal','series','milestone'].includes(post.kind) && typeof window.pokerGarageNewsShowcaseHtml === 'function' ? window.pokerGarageNewsShowcaseHtml({type:'achievement'}, profile && profile.id) : '') + '</article>' };
     }).filter(Boolean);
   }
 
@@ -4038,7 +4039,7 @@
           });
           return;
         }
-        if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+        if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerCard) {
@@ -4164,7 +4165,7 @@
       });
       modal.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
-        if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments")) return;
+        if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         if (!playerCard) return;
         event.preventDefault();
@@ -4788,6 +4789,7 @@
       load();
       loadClubNews();
     }
+    window.addEventListener("poker-admin-access", function () { renderModalList(activeModalEvents()); });
     window.addEventListener("poker-auth-changed", resetFriendNewsForAuth);
     window.addEventListener("poker-telegram-auth", resetFriendNewsForAuth);
     window.addEventListener("focus", function () { load(); loadClubNews(); });

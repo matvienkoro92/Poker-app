@@ -3359,6 +3359,7 @@ if (chatUserModalEl) {
     var fallbackRatingNick = openOptions.ratingNick != null ? String(openOptions.ratingNick).trim() : "";
     var openingSelfProfile = openOptions.selfProfile === true || chatUserModalIsSelf(id);
     chatUserModalUserId = id;
+    if (typeof window.pokerMountGarageShowcase === "function") window.pokerMountGarageShowcase(chatUserModalEl.querySelector(".chat-user-modal__inner") || chatUserModalEl, id);
     chatUserModalUserName = userName;
     chatUserModalHeroAvatarUrl = String(avatarUrl || "").trim();
     var openSeq = ++chatUserModalOpenSeq;

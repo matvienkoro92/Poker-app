@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v90" data-app-version="4.020.1.7">
+<html lang="ru" data-theme="gold" class="app-view-home app-view-home-html-scroll" data-build="v90" data-app-version="4.020.1.8">
   <head>
     <script>
       (function () {
@@ -426,7 +426,7 @@
     <link rel="preload" as="image" href="./assets/home-tournament-pokermanki-magic-head-mask.svg" />
     <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20260930-play-flow-2" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-hall.css?v=20261010-garage-update-2" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-lounge.css?v=20261011-helmet-visor-1" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-lounge.css?v=20261011-earned-badges-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=20261010-hands-card-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-widget-modals" href="./styles-home-widget-modals.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="equilator" href="./styles-equilator.css?v=4.002" />
@@ -546,7 +546,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles-home-sng-reference.css?v=8" />
-<script src="app-game-touch-guard.js?v=1"></script></head>
+<script src="app-game-touch-guard.js?v=1"></script>
+    <link rel="stylesheet" href="./styles-garage-showcase.css?v=20261011-showcase-duo-1">
+</head>
   <body data-view="home">
     <div id="appBootOverlay" class="app-boot-overlay" role="status" aria-live="polite" aria-busy="true">
       <div class="app-boot-overlay__panel">
@@ -1668,19 +1670,20 @@
     <script defer src="./club-news-data.js?v=4.002"></script>
     <script defer src="./app-home-data.js?v=1"></script>
     <script defer src="./app-friend-affinity.js?v=1"></script>
-    <script defer src="./app-home-friend-news.js?v=20261010-group-date-2"></script>
+    <script defer src="./app-home-friend-news.js?v=20261011-showcase-1"></script>
     <script defer src="./app-my-summary.js?v=20261001-bulk-export-1"></script>
     <script defer src="./app-club-social.js?v=1"></script>
     <script defer src="./starting-hands/hand-share.js?v=20260920-straddle-3"></script>
     <script defer src="./app-club-reviews.js?v=20260925-pokermanki-clean-art-1"></script>
     <script defer src="./hero-catalog.js?v=1"></script>
     <script defer src="./app-hero-builder.js?v=1"></script>
-    <script defer src="./app-garage-catalog.js?v=20261011-black-rims-1"></script>
-    <script defer src="./app-garage-workshop.js?v=20261011-helmet-visor-1"></script>
+    <script defer src="./app-garage-catalog.js?v=20261011-earned-badges-1"></script>
+    <script defer src="./app-garage-showcase.js?v=20261011-showcase-duo-1"></script>
+    <script defer src="./app-garage-workshop.js?v=20261011-earned-badges-1"></script>
     <script defer src="./app-profile-appearance.js?v=20261008-admin-hall-2"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-lounge-live.js?v=20261009-presence-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-player-lounge.js?v=20261010-refined-car-1"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-player-hall.js?v=20261011-unique-awards-1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-player-hall.js?v=20261011-showcase-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-core.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-spring" src="./app-rating-spring-season.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-current" src="./app-rating-summer-season.js?v=4.002"></script>
@@ -1698,7 +1701,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-add-members.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-create.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-group-info.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=20260925-own-review-activity-1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-user-modal.js?v=20261011-showcase-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-club-access.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-templates.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="chat" src="./app-chat-message-render-helpers.js?v=4.002"></script>
@@ -1756,7 +1759,7 @@
     <script defer src="./app-profile-avatar-cache.js?v=home-opt-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-avatar.js?v=4.002"></script>
     <script defer src="./rating-player-totals.js?v=4.002"></script>
-    <script defer src="./app-profile.js?v=20261001-push-invite-1"></script>
+    <script defer src="./app-profile.js?v=20261011-showcase-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile" src="./app-profile-shows.js?v=4.002"></script>
     <script defer src="./app-pwa-auth-session.js?v=4.002"></script>
     <script defer src="./app-pwa-auth-i18n.js?v=20260929-play-1"></script>

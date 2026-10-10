@@ -283,3 +283,6 @@
 .player-hall__garage-object--kart{left:-18%;top:44.5%}
 
 .garage-visor-tabs{display:flex;gap:10px;padding:0 20px 16px}.garage-visor-tabs button{flex:1;padding:12px;border:1px solid #49535a;border-radius:16px;background:#1b252c;color:#c3cbd1;font-family:inherit;font-size:16px;font-weight:600}.garage-visor-tabs button[aria-pressed="true"]{border-color:#d9b666;background:#332f23;color:#ffe3a3}.garage-visor-tabs button:disabled{opacity:.45}
+.garage-patch-name{display:flex;flex-direction:column;gap:10px;margin:20px;color:#e9d8af;font-weight:700}.garage-patch-name input{min-height:48px;padding:8px 14px;border:1px solid #8b7348;border-radius:12px;background:#0c1319;color:#fce6b4;font:inherit}.garage-patch-name small{color:#a5b2ba;font-size:14px;font-weight:400}
+.garage-category-note{margin:0;padding:0 20px 16px;color:#aab8c0;font-size:14px;line-height:1.5}
+.garage-option--locked .garage-option-art{opacity:1}.garage-option--locked [data-choice]{cursor:pointer}.garage-option--locked:has([aria-pressed=true]){border-color:#d5ae60;background:#302b22}
