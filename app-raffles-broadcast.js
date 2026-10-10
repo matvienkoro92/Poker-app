@@ -1,3 +1,18 @@
+async function pokerRaffleBroadcastLoadActiveList(base, query, fetcher) {
+  var response = await fetcher(base + '/api/raffles' + query + '&bypassListCache=1&_t=' + Date.now(), {cache:'no-store'});
+  var payload = await response.json();
+  if (!response.ok || !payload || !payload.ok || !Array.isArray(payload.raffles)) throw new Error('Не удалось обновить список розыгрышей. Рассылка не отправлена.');
+  var seen = {};
+  var active = payload.raffles.concat(payload.activeRaffles || []).filter(function (raffle) {
+    var id = String(raffle && raffle.id || '');
+    if (!id || seen[id] || raffle.status !== 'active') return false;
+    seen[id] = true;
+    return true;
+  });
+  if (!active.length) throw new Error('Нет активных розыгрышей для рассылки.');
+  return active;
+}
+
 // Raffles broadcast runtime: admin subscriber broadcast, reports, retry, and purge tools.
 
 function initRafflesBroadcastRuntime(opts) {
@@ -22,7 +37,7 @@ function initRafflesBroadcastRuntime(opts) {
   }
 
   /** Поля для POST raffle-manual-subscribers (текущий активный розыгрыш в форме) */
-  function raffleManualBroadcastBodyFromCurrentRaffle() {
+  function raffleManualBroadcastBodyFromCurrentRaffle(freshActiveRaffles) {
     function raffleBroadcastTotalPrize(raffle) {
       if (!raffle) return 0;
       if (typeof getRaffleTotalPrize === "function") return getRaffleTotalPrize(raffle);
@@ -214,9 +229,9 @@ function initRafflesBroadcastRuntime(opts) {
       pokerRafflesIsCashPrize(broadcastRaffleData);
     var activeRaffles = [];
     try {
-      var activeSource = Array.isArray(rafflesActiveBroadcastList)
-        ? rafflesActiveBroadcastList
-        : [];
+      var activeSource = Array.isArray(freshActiveRaffles)
+        ? freshActiveRaffles
+        : Array.isArray(rafflesActiveBroadcastList) ? rafflesActiveBroadcastList : [];
       var activeSeen = {};
       activeRaffles = activeSource.filter(function (raffle) {
         var id = String((raffle && raffle.id) || "");
@@ -344,7 +359,7 @@ function initRafflesBroadcastRuntime(opts) {
 
   (function initRafflesSubscribersAdminNotify() {
     if (!rafflesNotifySubsBtn) return;
-    rafflesNotifySubsBtn.addEventListener("click", function () {
+    rafflesNotifySubsBtn.addEventListener("click", async function () {
       if (window.__pokerRaffleSubsBroadcastInFlight) return;
       if (!base || !pokerApiHasCredential()) {
         if (tg && tg.showAlert) tg.showAlert("Войдите в приложение (Telegram или PWA).");
@@ -356,7 +371,19 @@ function initRafflesBroadcastRuntime(opts) {
       btn.disabled = true;
       btn.textContent = "Рассылаем…";
       if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = "";
-      var extra = raffleManualBroadcastBodyFromCurrentRaffle();
+      var extra;
+      try {
+        // Read the full authoritative list: the screen and active index may omit
+        // a newly created tournament-ticket raffle.
+        var freshRaffles = await pokerRaffleBroadcastLoadActiveList(base, pokerRafflesApiQueryLeading(), fetch);
+        extra = raffleManualBroadcastBodyFromCurrentRaffle(freshRaffles);
+      } catch (refreshError) {
+        if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = refreshError.message || POKER_NET_ERR;
+        window.__pokerRaffleSubsBroadcastInFlight = false;
+        btn.disabled = false;
+        btn.textContent = originalText;
+        return;
+      }
       var broadcastIdemKey =
         typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
