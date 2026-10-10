@@ -133,26 +133,10 @@
               </div>
             </section>
             <div class="profile-achievements-showcase__rating-total" id="profileRatingTotal" data-profile-club-panel></div>
-            <section class="profile-own-wall" id="profileOwnWall" data-profile-club-panel aria-labelledby="profileOwnWallTitle">
-              <div class="chat-user-modal__news-heading">
-                <span id="profileOwnWallTitle">Стена</span>
-                <small id="profileOwnWallCount">Загрузка…</small>
-              </div>
-              <div class="chat-user-modal__wall-tabs" role="tablist" aria-label="Разделы стены">
-                <button type="button" class="chat-user-modal__wall-tab chat-user-modal__wall-tab--active" data-profile-wall-tab="tournaments">Турниры</button>
-                <button type="button" class="chat-user-modal__wall-tab" data-profile-wall-tab="personal">Личные записи <span id="profileOwnWallPersonalCount">(…)</span></button>
-              </div>
-              <div class="chat-user-modal__news-list profile-own-wall__list" id="profileOwnWallList"></div>
-              <form class="chat-user-modal__wall-composer" id="profileOwnWallComposer" hidden>
-                <textarea id="profileOwnWallText" maxlength="1500" rows="3" placeholder="Напишите что-нибудь на своей стене…"></textarea>
-                <input type="file" id="profileOwnWallImageInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
-                <div class="profile-own-wall__image-preview" id="profileOwnWallImagePreview" hidden></div>
-                <label class="profile-own-wall__club-share"><input type="checkbox" id="profileOwnWallClubShare" checked> <span>Добавить в Новости дня клуба</span></label>
-                <div class="profile-own-wall__composer-actions">
-                  <button type="button" class="profile-own-wall__attach" id="profileOwnWallImageButton">📷 Прикрепить фото</button>
-                  <button type="submit">Опубликовать</button>
-                </div>
-              </form>
+            <section class="profile-own-wall profile-my-hands" id="profileMyHands" data-profile-club-panel aria-labelledby="profileMyHandsTitle">
+              <div class="chat-user-modal__news-heading"><span id="profileMyHandsTitle">Мои раздачи</span></div>
+              <p>Раздачи, разборы и график моей игры</p>
+              <a href="#" class="chat-user-modal__news-all" data-view-target="my-summary">Открыть раздачи <span aria-hidden="true">›</span></a>
             </section>
             <section class="profile-friends profile-friends--loading" id="profileFriendsPanel" data-profile-friends-panel aria-label="Друзья" aria-busy="true">
               <div class="profile-friends__head">

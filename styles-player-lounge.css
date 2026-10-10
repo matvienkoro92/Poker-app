@@ -206,3 +206,23 @@
 /* Original table pixels occlude the seated character, including the complete rim and legs. */
 .player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(8.709% 81.524%,9.622% 80.376%,12.911% 79.332%,15.834% 78.706%,16.017% 72.129%,16.565% 71.086%,18.575% 70.459%,22.412% 70.355%,24.787% 70.981%,24.970% 72.443%,23.873% 75.678%,28.989% 76.096%,29.537% 74.113%,30.816% 73.486%,35.384% 73.173%,37.942% 74.008%,37.942% 76.409%,41.230% 77.349%,48.356% 78.184%,53.837% 79.436%,56.577% 80.689%,57.674% 82.046%,56.760% 83.612%,54.933% 84.551%,54.385% 90.292%,53.289% 91.754%,51.096% 92.693%,50.914% 85.386%,17.296% 85.491%,16.931% 90.605%,15.834% 92.067%,13.642% 92.589%,14.373% 84.864%,11.267% 84.342%,9.257% 83.194%);z-index:2}
 .player-hall__room[data-theme=midnight] .player-hall__character-foreground{filter:brightness(.35) saturate(.6)}
+
+/* Anchor each alpha-trimmed object to the perspective line of its shelf. */
+.garage-shelf-grid{position:relative;display:block}
+.player-hall-dialog .garage-shelf-part{position:absolute;width:44%;height:31%;padding:0;display:block}
+.garage-shelf-part[data-hall-garage=helmet]{left:0;bottom:66.7%}.garage-shelf-part[data-hall-garage=wheels]{right:0;bottom:62.6%}
+.garage-shelf-part[data-hall-garage=paint]{left:0;bottom:29.6%}.garage-shelf-part[data-hall-garage=light]{right:0;bottom:28%}
+.garage-shelf-part[data-hall-garage=suit]{left:0;bottom:1.3%}.garage-shelf-part[data-hall-garage=shoes]{right:0;bottom:.7%}
+.garage-shelf-art{position:relative;filter:none;isolation:isolate}
+.garage-shelf-art:has(canvas)::before{content:"";position:absolute;left:17%;right:17%;bottom:-2%;height:9%;background:radial-gradient(ellipse,#000e 0%,#0009 35%,transparent 72%);transform:rotate(3deg);filter:blur(.8px);z-index:-1;pointer-events:none}
+.garage-shelf-art canvas{position:relative;display:block;object-fit:contain;width:auto;max-width:85%;height:87%;filter:drop-shadow(2px 1px 1px #0008);transform-origin:center bottom}
+.garage-shelf-part[data-hall-garage=light] canvas{height:auto;max-height:47%;width:76%;transform:rotate(3deg)}
+.garage-shelf-part[data-hall-garage=suit] canvas,.garage-shelf-part[data-hall-garage=shoes] canvas{height:68%;transform:rotate(2deg)}
+.player-hall__room[data-theme=midnight] .garage-shelf-art{filter:brightness(.75) drop-shadow(0 0 2px #9c7bff55)}
+
+/* Workshop occupies the full room on phones and desktops. */
+.player-hall-dialog .player-hall__garage-panel--workshop{position:absolute;inset:0;width:100%;height:100%;max-height:100%;margin:0;border:0;border-radius:0;background:#10171e;z-index:20;padding:0;overflow-y:auto;padding-top:env(safe-area-inset-top,0px);box-sizing:border-box}
+.player-hall__garage-panel--workshop .garage-workshop__header{position:sticky;top:0;z-index:3;background:#10171ef5}
+.player-hall__garage-panel--workshop .garage-3d-stage{height:clamp(270px,43dvh,540px)}
+.player-hall__garage-panel--workshop .garage-workshop__footer{padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
+.garage-option--locked button[data-choice]{position:relative}.garage-option--locked button[data-choice]::after{content:"🔒";position:absolute;right:12px;top:12px;font-size:19px}
