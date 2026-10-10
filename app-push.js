@@ -717,9 +717,18 @@ function initProfileChatPush() {
       else document.addEventListener("DOMContentLoaded", function () { pokerShowUpdatedNotice(pokerSavedUpdateMessage); }, { once: true });
     }
   } catch (eUpdateNotice) {}
+  function pokerPlaceUpdateButton() {
+    var button = document.getElementById("pokerAppUpdateButton");
+    if (!button) return;
+    var dialogs = document.querySelectorAll("dialog[open]");
+    var parent = dialogs.length ? dialogs[dialogs.length - 1] : document.body;
+    if (parent && button.parentNode !== parent) parent.appendChild(button);
+  }
+  var pokerUpdateDialogObserver = new MutationObserver(pokerPlaceUpdateButton);
+  if (document.body) pokerUpdateDialogObserver.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["open"] });
   function pokerShowUpdateAvailable(message) {
     if (typeof message === "string" && message.trim()) pokerPendingUpdateMessage = message.trim().slice(0, 180);
-    if (document.getElementById("pokerAppUpdateButton")) return;
+    if (document.getElementById("pokerAppUpdateButton")) { pokerPlaceUpdateButton(); return; }
     var button = document.createElement("button");
     button.id = "pokerAppUpdateButton";
     button.type = "button";
@@ -743,6 +752,7 @@ function initProfileChatPush() {
       });
     });
     document.body.appendChild(button);
+    pokerPlaceUpdateButton();
   }
   var releaseId = document.documentElement.getAttribute("data-release-id");
   var releaseCheckPending = false;
