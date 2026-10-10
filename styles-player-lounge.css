@@ -143,3 +143,21 @@
 
 .player-hall-map-scroll.is-zoomed img{min-width:850px}
 .player-hall-map-dialog [data-hall-map-zoom]{margin-bottom:10px;padding:8px 14px}
+
+.player-hall-dialog .garage-car-menu{display:flex;flex-direction:column;gap:12px;padding:22px;background:linear-gradient(145deg,#192225,#0b1115);border:1px solid #ae915a66;border-radius:20px}
+.garage-car-menu header{display:flex;align-items:center;justify-content:space-between;gap:12px}.garage-car-menu h3{margin:0;color:#f2d9a5}
+.player-hall-dialog .garage-car-menu>button{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:58px;padding:14px 18px;border:1px solid #b89b6255;border-radius:13px;background:#222b2e;color:#f0dfbd;font-size:16px;text-align:left}
+.player-hall-dialog .garage-car-menu>button[data-hall-garage]{background:linear-gradient(135deg,#d2b477,#98733e);color:#201709;font-weight:700}.garage-car-menu p{font-size:12px;color:#9dabae;margin:0;text-align:center}
+.garage-lock{display:inline-block}.garage-lock.is-shaking{animation:garage-lock-shake .42s ease-in-out}
+@keyframes garage-lock-shake{0%,100%{transform:translateX(0) rotate(0)}20%,60%{transform:translateX(-4px) rotate(-12deg)}40%,80%{transform:translateX(4px) rotate(12deg)}}
+.garage-level-progress{display:flex;flex-direction:column;gap:5px;padding:12px 16px;border:1px solid #c4a26855;background:#b99a4d15;border-radius:12px;color:#f2d59d}.garage-level-progress span{font-size:12px;color:#b6b9bc}
+
+.garage-progression{margin:0 18px 20px;border:1px solid #c9ab6744;border-radius:12px;padding:12px;color:#e4d5b5}.garage-progression summary{cursor:pointer;font-size:13px;font-weight:700}.garage-progression>p{font-size:12px;color:#aeb9c2;line-height:1.5}.garage-milestone{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #ffffff10;font-size:12px}.garage-milestone>b{flex:0 0 44px;color:#d3b676}.garage-milestone>span{flex:1;line-height:1.5}.garage-milestone>small{color:#94a4b1;font-size:10px}.garage-milestone.is-open>small{color:#d8c692}
+
+/* The cabinet contains the saved collection, on the same camera plane as the car. */
+.garage-shelf-inventory{position:absolute;left:8%;top:11%;width:75%;height:30%;box-sizing:border-box;background:linear-gradient(90deg,#11191d,#24272a 48%,#11171b);border:5px solid #38352b;border-top-color:#726044;box-shadow:inset 0 0 24px #000,0 5px 9px #0009;z-index:3;display:flex;flex-direction:column;container-type:inline-size}
+.garage-shelf-inventory>header{box-sizing:border-box;width:66.666%;display:flex;justify-content:space-between;gap:8px;align-items:center;padding:5px 10px;background:#171b1c;color:#e6c891;font-size:2cqw;border-bottom:1px solid #9a815655}.garage-shelf-inventory>header>span{font-size:1.8cqw;color:#b6b4a5}
+.garage-shelf-grid{width:66.666%;flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr)}
+.player-hall-dialog .garage-shelf-part{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1px;padding:3px 2px 5px;border:0;border-bottom:4px solid #7d6541;border-radius:0;background:radial-gradient(ellipse at 50% 10%,#c39d5530,transparent 80%);color:#ebd9b1;box-shadow:inset 0 -4px 7px #0009;overflow:hidden;cursor:pointer}
+.garage-shelf-art{display:flex;align-items:center;justify-content:center;flex:1;min-height:0;width:80%;filter:drop-shadow(2px 3px 2px #0009)}.garage-shelf-art svg,.garage-shelf-art img{display:block;max-height:100%;height:100%;width:100%;object-fit:contain}.garage-shelf-part>strong{font-size:1.8cqw;line-height:1.2;text-align:center}.garage-shelf-part>small{font-size:1.6cqw;color:#b6b9b1;line-height:1.2}.garage-shelf-part>.garage-shelf-next{color:#c4a979;font-size:1.5cqw}.garage-shelf-empty{font-size:8cqw;color:#9c9584;opacity:.6}
+.player-hall__room:not([data-space=garage]) .garage-shelf-inventory{visibility:hidden}
