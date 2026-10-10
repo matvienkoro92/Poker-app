@@ -5,7 +5,7 @@
 .player-hall__room[data-space=lounge] .player-hall__empty,.player-hall__room[data-space=lounge] .player-hall__space-arrow{display:none}
 .player-hall-dialog .player-hall__lounge-arrow,.player-hall-dialog .player-hall__lounge-return{position:absolute;z-index:7;top:62%;display:grid;justify-items:center;gap:4px;min-width:46px;min-height:54px;padding:9px 8px;background:#142014d9;border:1px solid #d5b97d55;border-radius:25px;box-shadow:0 3px 12px #0006}
 .player-hall__lounge-arrow{left:12px}.player-hall__lounge-return{right:12px}.player-hall__lounge-arrow b,.player-hall__lounge-return b{font-size:24px;line-height:1}.player-hall__lounge-arrow span,.player-hall__lounge-return span{font-size:9px}
-.player-hall__room:not([data-space=hall]) .player-hall__lounge-arrow,.player-hall__room:not([data-space=lounge]) .player-hall__lounge-return,.player-hall__room:not([data-camera=wide]) .player-hall__lounge-arrow,.player-hall__room[data-space=lounge]:not([data-lounge-focus=""]) .player-hall__lounge-return{display:none}
+.player-hall__room:not([data-space=hall]) .player-hall__lounge-arrow,.player-hall__room:not([data-space=lounge]) .player-hall__lounge-return,.player-hall__room:not([data-camera=wide]) .player-hall__lounge-arrow{display:none}
 .player-hall-dialog .lounge-wall-board{position:absolute;left:25%;top:14.3%;width:47.5%;height:12.3%;display:flex;flex-direction:column;justify-content:center;gap:.35cqh;padding:.8cqh 1.2cqh;background:transparent;border:0;border-radius:0;color:#e9d5a4;text-align:left}
 .lounge-wall-board>span:first-child{font-size:.72cqh;letter-spacing:.12em;color:#d4b57a}.lounge-wall-board>strong{font-size:1.25cqh}.lounge-wall-board>small{font-size:.7cqh;color:#b7af90}.lounge-wall-row{display:flex;align-items:center;gap:.7cqh;font-size:.85cqh}.lounge-wall-row>b{color:#d7b86e;font-size:.9cqh}.lounge-wall-row>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lounge-wall-row>em{font-style:normal;color:#f4deb2;font-variant-numeric:tabular-nums}
 .player-hall-dialog .lounge-seat{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0;background:transparent;border:0;border-radius:0;width:16%;height:13%;z-index:3;overflow:visible}
@@ -171,7 +171,7 @@
 /* Night lighting covers foreground art too; neon marks actual interaction targets. */
 .player-hall__room[data-theme=midnight] .lounge-table-foreground{filter:brightness(.35) saturate(.6)}
 .player-hall__room[data-theme=midnight] :is(.lounge-seat__character,.lounge-hands>img){filter:brightness(.5) saturate(.75) drop-shadow(0 0 3px #8972ff55)}
-.player-hall__room[data-theme=midnight] .player-hall__parked-kart{filter:brightness(.5) saturate(.8) drop-shadow(0 0 6px #9175ff77)}
+.player-hall__room[data-theme=midnight] .player-hall__parked-kart{filter:brightness(.85) saturate(1.08) drop-shadow(0 0 6px #9175ff77)}
 .player-hall__room[data-theme=midnight] :is(.lounge-wall-board,.player-hall__house-map,.lounge-roster-entry,.lounge-live-retry,.player-hall__shelf-label,.player-hall__slot-add,.player-hall__slot-edit,.player-hall__lounge-arrow,.player-hall__lounge-return,.player-hall__space-arrow,.player-hall__camera-ui>button){border:1px solid #a48bff!important;box-shadow:0 0 5px #b19aff99,0 0 15px #7856dd77,inset 0 0 8px #9e79ff22!important;color:#eee4ff!important}
 .player-hall__room[data-theme=midnight] .lounge-wall-board{border-radius:5px;background:#17132844}
 .player-hall__room[data-theme=midnight] .player-hall__house-map{background:#171426}
@@ -226,3 +226,7 @@
 .player-hall__garage-panel--workshop .garage-3d-stage{height:clamp(270px,43dvh,540px)}
 .player-hall__garage-panel--workshop .garage-workshop__footer{padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
 .garage-option--locked button[data-choice]{position:relative}.garage-option--locked button[data-choice]::after{content:"🔒";position:absolute;right:12px;top:12px;font-size:19px}
+
+/* Return navigation remains available while viewing friends or the records board. */
+.player-hall-dialog .player-hall__room[data-space=lounge] .player-hall__lounge-return{display:grid;visibility:visible;opacity:1;right:12px;left:auto;z-index:12;pointer-events:auto}
+.player-hall-dialog .player-hall__room[data-space=lounge]:not([data-lounge-focus=""]) .player-hall__lounge-return{top:14%;bottom:auto}

@@ -1,6 +1,6 @@
 (function(){'use strict';
 const G=window.PokerGarage;if(!G)return;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let sequence=0,viewerLoad=null;
-function loadViewer(){if(window.pokerCreateGarage3D)return Promise.resolve();if(!viewerLoad)viewerLoad=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./app-garage-3d.js?v=20261010-refined-car-1';script.onload=resolve;script.onerror=()=>{viewerLoad=null;reject(Error('Не удалось загрузить 3D-просмотр'));};document.head.appendChild(script);});return viewerLoad;}
+function loadViewer(){if(window.pokerCreateGarage3D)return Promise.resolve();if(!viewerLoad)viewerLoad=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./app-garage-3d.js?v=20261010-car-light-1';script.onload=resolve;script.onerror=()=>{viewerLoad=null;reject(Error('Не удалось загрузить 3D-просмотр'));};document.head.appendChild(script);});return viewerLoad;}
 
 const shelfAtlas=new Image();shelfAtlas.src='./assets/player-hall/garage-collection-atlas-v1.webp';
 function shelfArt(slot){return slot.empty?'':'<canvas width="512" height="512" data-shelf-art="'+slot.kind+'" aria-hidden="true"></canvas>';}

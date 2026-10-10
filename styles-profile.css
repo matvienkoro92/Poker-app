@@ -45,3 +45,11 @@
 .profile-review-invite--push .profile-review-invite__copy > span {display:none;}
 .profile-review-invite--push .profile-review-invite__button {font-size:11px!important;padding:7px 10px!important;white-space:nowrap;}
 .profile-review-invite--push .profile-review-invite__icon {font-size:20px!important;}
+
+/* Personal hands entry: one large, accessible black and gold card. */
+.view[data-view="profile"] .profile-my-hands{margin-top:22px;border:1px solid #b98a3f88;border-radius:22px;background:radial-gradient(ellipse at 8% 0%,#c99b4020,transparent 65%),linear-gradient(130deg,#1d2023,#0f151e 75%);overflow:hidden;box-shadow:inset 0 1px #ffe5a414,0 10px 28px #0003}
+.profile-my-hands__link{position:relative;display:grid;grid-template-columns:100px minmax(0,1fr);align-items:center;gap:10px 18px;padding:24px 24px 0;color:#f4e6c5;text-decoration:none;isolation:isolate;transition:background .2s}
+.profile-my-hands__art{display:block;width:100px;height:112px;filter:drop-shadow(0 8px 8px #0007)}.profile-my-hands__art svg{display:block;width:100%;height:100%}
+.profile-my-hands__copy{display:grid;gap:8px}.profile-my-hands__eyebrow{font-size:10px;letter-spacing:2px;color:#bfa16d}.profile-my-hands__copy strong{font-size:clamp(23px,5.8vw,32px);line-height:1.12;color:#ffe2a0;font-weight:800;letter-spacing:-.6px}.profile-my-hands__description{font-size:13px;line-height:1.55;color:#b5bcc6}
+.profile-my-hands__bottom{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #d1a35429;padding:17px 0;margin-top:10px;font-size:11px;color:#9ea8b6}.profile-my-hands__open{display:flex;align-items:center;gap:12px;padding:10px 15px;border:1px solid #d2aa5b66;border-radius:10px;background:linear-gradient(135deg,#d7b86d24,#a87e3614);color:#ffe1a0;font-size:13px;font-weight:700}.profile-my-hands__open>span{font-size:20px;line-height:1}.profile-my-hands__link:hover{background:#e4b85e08}.profile-my-hands__link:focus-visible{outline:2px solid #f2cc7c;outline-offset:-4px;border-radius:22px}.profile-my-hands__link:active{background:#e4b85e13}
+@media(max-width:350px){.profile-my-hands__link{grid-template-columns:80px minmax(0,1fr);padding:20px 18px 0;gap:12px}.profile-my-hands__art{width:80px;height:100px}.profile-my-hands__bottom{font-size:10px}.profile-my-hands__open{padding:9px 11px}}
