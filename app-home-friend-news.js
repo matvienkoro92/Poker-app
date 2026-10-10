@@ -2614,7 +2614,7 @@
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
-    var showCardTime = row.type !== "birthday" && !(newsModalMode === "club" && !ticker && timeLabel === "вчера");
+    var showCardTime = row.type !== "birthday" && newsModalMode !== "club";
     var linkedClubProfile = newsModalMode === "club" ? clubProfileForNick(row && row.actorNick) : null;
     var friendProfileKey = matchKey(row && row.actorNick);
     var linkedFriendProfile = newsModalMode === "friends"

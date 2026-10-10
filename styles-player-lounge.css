@@ -128,3 +128,17 @@
 .player-hall__display-shelf--achievements .player-hall__display-slot:has(.player-hall__cabinet-object)::after{top:calc(100% - 3cqh - .4cqh)}
 .player-hall__display-slot .player-hall__cabinet-object img{object-position:center bottom;filter:drop-shadow(.15cqh .15cqh .12cqh #0006)}
 .player-hall__display-slot .player-hall__slot-title{z-index:3}
+
+/* Framed house plan on the lounge wall. Full map loads only on opening. */
+.player-hall-dialog .player-hall__house-map{position:absolute;left:60%;top:29%;width:19%;padding:3px;border:2px solid #a78b48;border-radius:2px;background:#19251c;color:#f1dda3;box-shadow:0 3px 8px #0009;z-index:5;transform:rotate(-2deg)}
+.player-hall__house-map img{display:block;width:100%;height:auto}
+.player-hall__house-map span{display:block;font-size:clamp(9px,1.6vw,13px);line-height:1.4}
+.player-hall__room:not([data-space=hall]) .player-hall__house-map,.player-hall__room:not([data-camera=wide]) .player-hall__house-map{visibility:hidden}
+.player-hall-detail.player-hall-map-dialog{width:min(1100px,96vw);max-width:96vw;padding:18px;box-sizing:border-box}
+.player-hall-map-dialog h2{padding-right:36px}
+.player-hall-map-scroll{overflow:auto;max-height:70dvh;touch-action:pan-x pan-y;border:1px solid #8c773f;border-radius:6px}
+.player-hall-map-scroll img{display:block;width:100%;min-width:0;max-width:none;height:auto}
+.player-hall-map-dialog p{color:#dbcda8;font-size:14px}
+
+.player-hall-map-scroll.is-zoomed img{min-width:850px}
+.player-hall-map-dialog [data-hall-map-zoom]{margin-bottom:10px;padding:8px 14px}
