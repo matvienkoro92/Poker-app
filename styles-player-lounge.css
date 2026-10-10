@@ -236,7 +236,7 @@
 .garage-main-tabs button{min-height:62px;border:1px solid #46515a;border-radius:18px;background:linear-gradient(145deg,#26323a,#172127);color:#bbc5cb;font-family:inherit;font-size:clamp(20px,3vw,27px);font-weight:700;line-height:1.2;cursor:pointer;box-shadow:inset 0 1px 0 #ffffff12}
 .garage-main-tabs button[aria-selected=true]{border-color:#d8b461;background:linear-gradient(135deg,#57492a,#292a21);color:#ffe3a0;box-shadow:inset 0 1px 0 #ffe6a244,0 3px 18px #0003}
 .garage-main-tabs button:focus-visible{outline:2px solid #ffe3a0;outline-offset:3px}
-.garage-character-stage{height:clamp(270px,43dvh,540px);display:flex;justify-content:center;padding:12px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 70%,#30332b,transparent 65%)}
+.garage-character-stage{height:clamp(360px,55dvh,720px);display:flex;justify-content:center;padding:12px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 70%,#30332b,transparent 65%)}
 .garage-character-stage canvas{height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 10px 14px #0008)}
 
 .player-hall-dialog .player-hall__lamp{left:12.5%;top:69.1%;width:8.5%;height:8.5%}
@@ -269,3 +269,17 @@
 .garage-option--locked .garage-option-art{opacity:.65}
 .garage-option button[data-choice]{height:auto;min-height:100%;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}
 .garage-option button[data-choice]>strong,.garage-option button[data-choice]>small{text-align:left}
+
+/* Award names and their verified amount/count remain readable on the shelf. */
+.player-hall__display-shelf--achievements .player-hall__display-slot{grid-template-rows:minmax(0,1fr) 4.4cqh}
+.player-hall__display-shelf--achievements .player-hall__slot-title{height:4.4cqh;font-size:.95cqh}
+.player-hall__achievement-metric{display:block;color:#ffe1a0;font-size:1.12em;line-height:1.35;font-weight:800;font-variant-numeric:tabular-nums}
+.player-hall__display-shelf--achievements .player-hall__slot-title>span{-webkit-line-clamp:2}
+.player-hall__display-shelf--achievements .player-hall__display-slot{grid-template-rows:minmax(0,1fr) 3.8cqh}
+.player-hall__display-shelf--achievements .player-hall__slot-title{height:3.8cqh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:visible;font-size:.9cqh}
+.player-hall__display-shelf--achievements .player-hall__slot-title>span{display:block;overflow:visible;text-overflow:clip;white-space:normal}
+/* Move the parked car along its forward diagonal, with its menu hotspot. */
+.player-hall__parked-kart{left:42.5%;top:43%}
+.player-hall__garage-object--kart{left:-18%;top:44.5%}
+
+.garage-visor-tabs{display:flex;gap:10px;padding:0 20px 16px}.garage-visor-tabs button{flex:1;padding:12px;border:1px solid #49535a;border-radius:16px;background:#1b252c;color:#c3cbd1;font-family:inherit;font-size:16px;font-weight:600}.garage-visor-tabs button[aria-pressed="true"]{border-color:#d9b666;background:#332f23;color:#ffe3a3}.garage-visor-tabs button:disabled{opacity:.45}
