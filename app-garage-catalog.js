@@ -31,5 +31,43 @@ const rgb=color=>[1,3,5].map(n=>parseInt(color.slice(n,n+2),16));const colors={p
 for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){const n=(y*canvas.width+x)*4;if(d[n+3]<10)continue;const r=d[n],g=d[n+1],b=d[n+2],localY=y%550;let color=null;if(g>r*1.08&&g>b*1.08&&g>8&&g-Math.min(r,b)>4){const group=greenMaterial(x,y,canvas.width,canvas.height,role);if(v[group]!=='classic')color=colors[group];}else if(b>r*1.45&&g>r*1.4&&g>100&&v.light!=='cyan')color=colors.light;else if(v.wheels!=='classic'&&r>b*1.5&&g>b*1.15&&(role==='vehicle'?((x-canvas.width*.08)**2+(y-canvas.height*.44)**2<(canvas.width*.09)**2||(x-canvas.width*.44)**2+(y-canvas.height*.77)**2<(canvas.width*.13)**2):canvas.width<1000?y>canvas.height*.57:((x-455)**2+(localY-440)**2<78**2||(x-1080)**2+(localY-440)**2<78**2)))color=colors.wheels;else if(v.shoes!=='classic'&&localY>285&&localY<352&&x>850&&x<980&&r>120&&Math.max(r,g,b)-Math.min(r,g,b)<50)color=colors.shoes;if(color){const light=Math.max(r,g,b)/Math.max(...color);d[n]=Math.min(255,color[0]*light);d[n+1]=Math.min(255,color[1]*light);d[n+2]=Math.min(255,color[2]*light);}}
 ctx.putImageData(pixels,0,0);if(artCache.size>8)artCache.clear();artCache.set(key,canvas);return canvas;}
 function draw(ctx,v){v={...defaults,...v};ctx.save();ctx.font='bold 4.5px Arial';ctx.textAlign='center';ctx.fillStyle='#fff0ba';ctx.shadowColor='#000';ctx.shadowBlur=1;ctx.drawImage(plateCanvas(v),-4,21,16,9.38);ctx.shadowBlur=0;if(v.helmet!=='none')loadHelmet(false);if(v.helmet!=='none'&&helmet&&helmet.naturalWidth){ctx.drawImage(helmetArt(false,v),-12,-20,25,25);ctx.font='bold 2px Arial';ctx.fillStyle='#e1c27a';ctx.fillText('POKER21',-3,-8);} ctx.restore();}
-function renderCharacter(image,v){if(typeof document==='undefined'||!image.naturalWidth)return image;v={...defaults,...v};if(v.helmet!=='none')loadHelmet(true);const key='character:'+image.src+JSON.stringify([v.suit,v.shoes,v.helmet])+(helmetFront&&helmetFront.naturalWidth||0);if(artCache.has(key))return artCache.get(key);const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(image,0,0);const pixels=c.getImageData(0,0,canvas.width,canvas.height),d=pixels.data;for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){const n=(y*canvas.width+x)*4,r=d[n],g=d[n+1],b=d[n+2];if(!d[n+3]||r<g*1.45||r<b*1.3||r<55)continue;const nx=x/canvas.width,ny=y/canvas.height;const shoe=(nx>.53&&ny>.79)||(nx>.61&&ny>.53);if(!shoe&&(ny<.23||(nx>.7&&ny>.3&&ny<.53)||(nx<.3&&ny<.31)))continue;const kind=shoe?'shoes':'suit';if(v[kind]==='classic')continue;const color=item(kind,v[kind]).color,rgb=[1,3,5].map(n=>parseInt(color.slice(n,n+2),16)),light=r/Math.max(...rgb);d[n]=Math.min(255,rgb[0]*light);d[n+1]=Math.min(255,rgb[1]*light);d[n+2]=Math.min(255,rgb[2]*light);}c.putImageData(pixels,0,0);if(v.helmet!=='none'&&helmetFront&&helmetFront.naturalWidth){c.save();c.beginPath();c.rect(0,0,canvas.width,canvas.height);c.ellipse(365,200,125,108,0,0,Math.PI*2,true);c.clip('evenodd');c.drawImage(helmetArt(true,v),145,-35,420,420);c.restore();}artCache.set(key,canvas);return canvas;}
+function renderCharacter(image,v){
+ if(typeof document==='undefined'||!image.naturalWidth)return image;
+ v={...defaults,...v};if(v.helmet!=='none')loadHelmet(true);
+ const key='character:'+image.src+JSON.stringify([v.suit,v.shoes,v.helmet])+(helmetFront&&helmetFront.naturalWidth||0);
+ if(artCache.has(key))return artCache.get(key);
+ const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+ const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(image,0,0);
+ const pixels=c.getImageData(0,0,canvas.width,canvas.height),d=pixels.data;
+ const colors=Object.fromEntries(['suit','shoes'].map(kind=>[kind,[1,3,5].map(n=>parseInt(item(kind,v[kind]).color.slice(n,n+2),16))]));
+ for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){
+  const n=(y*canvas.width+x)*4,r=d[n],g=d[n+1],b=d[n+2];
+  if(!d[n+3]||r<g*1.45||r<b*1.3||r<55)continue;
+  const nx=x/canvas.width,ny=y/canvas.height;
+  const shoe=(nx>.55&&ny>.77)||(nx>.69&&ny>.51);
+  // Keep the face and both hands completely outside the fabric mask.
+  if(!shoe&&(ny<.15||(nx>.15&&nx<.42&&ny<.25)||(nx>.73&&ny>.30&&ny<.515)))continue;
+  const rgb=colors[shoe?'shoes':'suit'],light=r/255;
+  d[n]=rgb[0]*light;d[n+1]=rgb[1]*light;d[n+2]=rgb[2]*light;
+ }
+ c.putImageData(pixels,0,0);
+ if(v.helmet!=='none'&&helmetFront&&helmetFront.naturalWidth){
+  c.save();c.scale(canvas.width/1179,canvas.height/1334);
+  c.beginPath();c.rect(0,0,1179,1334);
+  // The open helmet follows the brow; its padding stays behind the face.
+  c.moveTo(302,105);c.bezierCurveTo(325,74,432,59,459,93);
+  c.bezierCurveTo(481,124,490,206,469,254);
+  c.bezierCurveTo(441,300,358,296,337,258);
+  c.bezierCurveTo(303,221,284,145,302,105);c.closePath();c.clip('evenodd');
+  c.drawImage(helmetArt(true,v),170,-17,365,280);c.restore();
+  // The hand rests in front of the helmet, just as it rests in front of the chin.
+  c.save();c.scale(canvas.width/1179,canvas.height/1334);c.beginPath();
+  c.moveTo(191,249);c.bezierCurveTo(198,194,275,204,324,231);
+  c.bezierCurveTo(349,247,396,277,383,310);c.lineTo(350,340);
+  c.lineTo(278,328);c.lineTo(201,289);c.closePath();c.clip();
+  c.drawImage(image,0,0,1179,1334);c.restore();
+ }
+ artCache.set(key,canvas);return canvas;
+}
+
 return {parsePlate,plateLevel,plateCanvas,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet};});

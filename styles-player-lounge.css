@@ -96,7 +96,7 @@
 
 /* One continuous panorama across all camera positions; no repeated crop seams. */
 .player-hall__spaces::before{content:"";position:absolute;left:-50%;top:0;width:150%;height:100%;background:var(--hall-panorama) center/100% 100% no-repeat;pointer-events:none}
-.player-hall__room{--hall-panorama:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v3.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v3.webp") type("image/webp"))}
+.player-hall__room{--hall-panorama:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v4.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v4.webp") type("image/webp"))}
 .player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:none}
 .player-hall__character-foreground{display:none}
 .lounge-table-foreground{background-image:var(--hall-panorama);background-size:300% 100%;background-position:left center}
@@ -204,7 +204,7 @@
 .player-hall__room[data-theme=midnight] .hall-cabinet-surface{filter:brightness(.35) saturate(.6)}
 
 /* Original table pixels occlude the seated character, including the complete rim and legs. */
-.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(8.709% 81.524%,9.622% 80.376%,12.911% 79.332%,15.834% 78.706%,16.017% 72.129%,16.565% 71.086%,18.575% 70.459%,22.412% 70.355%,24.787% 70.981%,24.970% 72.443%,23.873% 75.678%,28.989% 76.096%,29.537% 74.113%,30.816% 73.486%,35.384% 73.173%,37.942% 74.008%,37.942% 76.409%,41.230% 77.349%,48.356% 78.184%,53.837% 79.436%,56.577% 80.689%,57.674% 82.046%,56.760% 83.612%,54.933% 84.551%,54.385% 90.292%,53.289% 91.754%,51.096% 92.693%,50.914% 85.386%,17.296% 85.491%,16.931% 90.605%,15.834% 92.067%,13.642% 92.589%,14.373% 84.864%,11.267% 84.342%,9.257% 83.194%);z-index:2}
+.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(13% 76%,15% 75%,23% 74%,23% 69%,24% 68.6%,31% 68.6%,32% 70%,32% 74%,35% 74%,35% 71%,37% 70.5%,41% 71%,42% 74.5%,47% 75.2%,50% 76.6%,50% 79%,48% 80%,47% 87.3%,45% 87.3%,45% 80.3%,20% 80.3%,19% 88.3%,17% 88.3%,17% 80%,14% 79%);z-index:2}
 .player-hall__room[data-theme=midnight] .player-hall__character-foreground{filter:brightness(.35) saturate(.6)}
 
 /* Anchor each alpha-trimmed object to the perspective line of its shelf. */
@@ -230,3 +230,42 @@
 /* Return navigation remains available while viewing friends or the records board. */
 .player-hall-dialog .player-hall__room[data-space=lounge] .player-hall__lounge-return{display:grid;visibility:visible;opacity:1;right:12px;left:auto;z-index:12;pointer-events:auto}
 .player-hall-dialog .player-hall__room[data-space=lounge]:not([data-lounge-focus=""]) .player-hall__lounge-return{top:14%;bottom:auto}
+
+/* Two primary customization sections, with their own preview and equipment. */
+.garage-main-tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 18px 8px}
+.garage-main-tabs button{min-height:62px;border:1px solid #46515a;border-radius:18px;background:linear-gradient(145deg,#26323a,#172127);color:#bbc5cb;font-family:inherit;font-size:clamp(20px,3vw,27px);font-weight:700;line-height:1.2;cursor:pointer;box-shadow:inset 0 1px 0 #ffffff12}
+.garage-main-tabs button[aria-selected=true]{border-color:#d8b461;background:linear-gradient(135deg,#57492a,#292a21);color:#ffe3a0;box-shadow:inset 0 1px 0 #ffe6a244,0 3px 18px #0003}
+.garage-main-tabs button:focus-visible{outline:2px solid #ffe3a0;outline-offset:3px}
+.garage-character-stage{height:clamp(270px,43dvh,540px);display:flex;justify-content:center;padding:12px;box-sizing:border-box;background:radial-gradient(ellipse at 50% 70%,#30332b,transparent 65%)}
+.garage-character-stage canvas{height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 10px 14px #0008)}
+
+.player-hall-dialog .player-hall__lamp{left:12.5%;top:69.1%;width:8.5%;height:8.5%}
+
+/* Night lighting belongs to architectural strips and fixtures, not trophy outlines. */
+.hall-neon-lighting{display:none;position:absolute;left:-50%;top:0;width:150%;height:100%;pointer-events:none;z-index:0}
+.player-hall__room[data-theme=midnight] .hall-neon-lighting{display:block;background:radial-gradient(ellipse at 43% 30%,#9c80f225,transparent 15%),radial-gradient(ellipse at 55% 36%,#60d5e323,transparent 8%),radial-gradient(ellipse at 85% 37%,#728dff29,transparent 17%),radial-gradient(ellipse at 17% 37%,#b386da22,transparent 20%)}
+.hall-neon-lighting i{position:absolute;height:.22%;min-height:1px;border-radius:3px;background:var(--neon);box-shadow:0 0 3px var(--neon),0 3px 9px var(--neon)}
+.hall-neon-lighting i::after{content:"";position:absolute;left:-4%;right:-4%;top:2px;height:4cqh;background:linear-gradient(var(--neon),transparent);opacity:.22;filter:blur(5px)}
+.hall-neon-sconce{position:absolute;top:16.3%;width:.25%;height:7.5%;background:#80d7ef;border-radius:5px;box-shadow:0 0 4px #80d7ef,0 0 16px #4da5cba0}
+.hall-neon-sconce--left{left:6.9%}.hall-neon-sconce--right{left:96.2%;top:17.5%;background:#d6a2ed;box-shadow:0 0 4px #d6a2ed,0 0 16px #a16bc8a0}
+.player-hall__room[data-theme=midnight] .player-hall__spaces::after{background:transparent}
+.player-hall__room[data-theme=midnight] .player-hall__display-shelf>div{filter:none}
+.player-hall__room[data-theme=midnight] .player-hall__display-slot:has(.player-hall__cabinet-object)::before{background:linear-gradient(#94794e,#382e23);box-shadow:0 2px 4px #0008}
+.player-hall__room[data-theme=midnight] .player-hall__cabinet-object{filter:none}
+.player-hall__room[data-theme=midnight] .player-hall__cabinet-object img{filter:brightness(.76) saturate(.8) drop-shadow(1px 3px 2px #0008)}
+.player-hall__room[data-theme=midnight] .player-hall__character{filter:brightness(.52) saturate(.8)}
+.player-hall__room[data-theme=midnight] :is(.lounge-seat__character,.lounge-hands>img){filter:brightness(.5) saturate(.75)}
+.player-hall__room[data-theme=midnight] .player-hall__parked-kart{filter:brightness(.78) saturate(.95) drop-shadow(0 4px 5px #0008)}
+.player-hall__room[data-theme=midnight] .garage-shelf-art{filter:brightness(.76) saturate(.85)}
+.player-hall__room[data-theme=midnight] :is(.lounge-wall-board,.player-hall__house-map,.lounge-roster-entry,.lounge-live-retry,.player-hall__shelf-label,.player-hall__slot-add,.player-hall__slot-edit,.player-hall__lounge-arrow,.player-hall__lounge-return,.player-hall__space-arrow,.player-hall__camera-ui>button){border-color:#9b91b155!important;box-shadow:0 2px 6px #0008!important;color:#e4d9f0!important}
+.player-hall__room[data-theme=midnight] :is(.player-hall__garage-object--kart>span,.garage-house-passage>.garage-lock,.lounge-seat--playing .lounge-seat__status){border-color:#9b91b155;box-shadow:0 2px 6px #0008}
+.player-hall__room[data-theme=midnight] .player-hall__garage-scene::before{filter:brightness(.35) saturate(.6)}
+.player-hall__room[data-theme=midnight] .hall-neon-lighting{z-index:1}
+
+/* Detailed collection art also represents every workshop option. */
+.garage-option-art{display:flex;align-items:center;justify-content:center;width:100%;height:clamp(100px,17dvh,170px);margin:0 0 14px;border-radius:14px;background:radial-gradient(ellipse at 50% 85%,#0008,transparent 65%);overflow:visible}
+.garage-option-art canvas{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 4px #0009)}
+.garage-option-none{font-size:14px;color:#a7b0b4;border:1px dashed #7a858b66;border-radius:50%;width:80px;height:80px;display:flex;align-items:center;justify-content:center}
+.garage-option--locked .garage-option-art{opacity:.65}
+.garage-option button[data-choice]{height:auto;min-height:100%;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}
+.garage-option button[data-choice]>strong,.garage-option button[data-choice]>small{text-align:left}
