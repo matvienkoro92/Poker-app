@@ -2054,4 +2054,191 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "09.10.2026": [
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 8607,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 8,
+          "reward": 797,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 4,
+          "reward": 832,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 10,
+          "reward": 2687.97,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 19,
+          "reward": 2281.88,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 12,
+          "reward": 1428.36,
+          "points": 0
+        },
+        {
+          "nick": "Nikolay54rus",
+          "place": 28,
+          "reward": 828.12,
+          "points": 0
+        },
+        {
+          "nick": "Девственник",
+          "place": 44,
+          "reward": 589.06,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🏆SHR 1 MLN GTD🏆",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "butovskiy",
+          "place": 7,
+          "reward": 69324,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 8,
+          "reward": 27402.999999999996,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 87.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА МОК",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 5440,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 5200,
+          "points": 0
+        },
+        {
+          "nick": "Jirvlog",
+          "place": 4,
+          "reward": 2940,
+          "points": 0
+        },
+        {
+          "nick": "Мегалодон",
+          "place": 6,
+          "reward": 650,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 4225.95,
+          "points": 0
+        },
+        {
+          "nick": "Мегалодон",
+          "place": 3,
+          "reward": 758.12,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 5,
+          "reward": 36.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "A Аддоник А",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 14500,
+          "points": 0
+        },
+        {
+          "nick": "Мегалодон",
+          "place": 3,
+          "reward": 4900,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

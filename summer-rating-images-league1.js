@@ -1158,4 +1158,13 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-08-10-2026-league1-a-addonik-a-22h.jpg",
     "rating-compressed-preview/rating-08-10-2026-league1-night-magic-80k-23h.jpg"
   ]
+,
+  "09.10.2026": [
+    "rating-compressed-preview/rating-09-10-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-compressed-preview/rating-09-10-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-09-10-2026-league1-pyatnica-progressiv-18h.jpg",
+    "rating-compressed-preview/rating-09-10-2026-league1-shr-1-mln-gtd-18h.jpg",
+    "rating-compressed-preview/rating-09-10-2026-league1-pyatihatka-mok-20h.jpg",
+    "rating-compressed-preview/rating-09-10-2026-league1-a-addonik-a-22h.jpg"
+  ]
 };

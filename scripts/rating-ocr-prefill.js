@@ -64,6 +64,7 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/SHR\s+1\s+MLN\s+GTD/i.test(raw)) return "🏆SHR 1 MLN GTD🏆";
   let name = String(raw || "").trim();
   name = name.replace(/\s+/g, " ");
   if (/^Island bounty/i.test(name)) return "Island bounty🌴 20k";
@@ -487,6 +488,7 @@ async function parseOcrFile(file) {
   if (date === "06.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "06.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
   if (date === "08.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
+  if (date === "09.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
     // IMG_0037: Vision attached a stray K to GUCCI’s visible ID.
