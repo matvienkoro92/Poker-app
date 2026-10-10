@@ -14,7 +14,7 @@ test('every reward checks the exact club level and ignores race counters',()=>{
  for(const i of G.items.filter(i=>i.metric==='level'&&i.target>0)){
   assert.equal(G.catalog({level:i.target-1,best:999999,runs:9999,chips:999999}).find(x=>x.key===i.key).unlocked,false,i.key);
   assert.throws(()=>Garage.choose({[i.kind]:i.id},{stats:{level:i.target-1}}),/не открыта/);
-  assert.equal(Garage.choose({[i.kind]:i.id},{stats:{level:i.target}})[i.kind],i.id);
+  assert.equal(Garage.choose({[i.kind]:i.id,...(i.key==='patch:name'?{patchText:'Игрок21'}:{})},{stats:{level:i.target}})[i.kind],i.id);
  }
  assert.ok(G.catalog({level:100}).filter(i=>i.metric==='level').every(i=>i.unlocked));
  assert.equal(new Set(G.items.map(i=>i.key)).size,G.items.length);
@@ -52,3 +52,20 @@ test('new equipment survives server save and legacy trousers inherit the previou
 test('material unlocks use the approved round level thresholds',()=>{for(const [key,level] of [['upholstery:diamond',30],['upholstery:alcantara',40],['trim:black',50]]){assert.equal(G.catalog({level:level-1}).find(i=>i.key===key).unlocked,false);assert.equal(G.catalog({level}).find(i=>i.key===key).unlocked,true);const [kind,id]=key.split(':');assert.throws(()=>Garage.choose({...G.defaults,[kind]:id},{stats:{level:level-1}}),/не открыта/);assert.equal(Garage.choose({...G.defaults,[kind]:id},{stats:{level}})[kind],id);}});
 
 test('car badges require verified achievements and allow three different earned badges',()=>{const earnedBadges=['tournament-king','millionaire','rating-top10','day-hero'];assert.throws(()=>Garage.choose({badges:['millionaire'],earnedBadges},{stats:{level:100}}),/не заработан/);const look=Garage.choose({badges:earnedBadges.slice(0,3)},{stats:{level:0,earnedBadges}});assert.deepEqual(look.badges,earnedBadges.slice(0,3));assert.throws(()=>Garage.choose({badges:earnedBadges},{stats:{earnedBadges}}),/трёх/);assert.throws(()=>Garage.choose({badges:['millionaire','millionaire']},{stats:{earnedBadges}}),/разных/);assert.deepEqual(G.normalize({badges:['millionaire']},{}).badges,[]);assert.equal(G.catalog({level:100}).find(i=>i.key==='badge:millionaire').unlocked,false);});
+
+test('personal patch opens at level 20 and server accepts one word up to 12 characters',()=>{
+ assert.equal(G.catalog({level:19}).find(i=>i.key==='patch:name').unlocked,false);
+ assert.equal(G.catalog({level:20}).find(i=>i.key==='patch:name').unlocked,true);
+ for(const patchText of ['Игрок21','ABCDEFGHIJKL','Я','123'])assert.equal(Garage.choose({patch:'name',patchText},{stats:{level:20}}).patchText,patchText);
+ for(const patchText of ['', 'Два слова','ABCDEFGHIJKLM','<script>','Имя!'])assert.throws(()=>Garage.choose({patch:'name',patchText},{stats:{level:20}}),/одно слово/);
+ assert.throws(()=>Garage.choose({patch:'name',patchText:'Игрок'},{stats:{level:19}}),/не открыта/);
+});
+
+test('steering, turbine and exhaust choices persist and twin turbines require level 60',()=>{
+ const look={...G.defaults,steering:'formula',turbine:'twin',exhaust:'titanium'};
+ const saved=Garage.choose(look,{stats:{level:60}});
+ assert.deepEqual(Garage.view({garage:saved},{stats:{level:60}}).loadout,look);
+ assert.throws(()=>Garage.choose({...G.defaults,turbine:'twin'},{stats:{level:59}}),/не открыта/);
+ assert.equal(G.normalize(look,{level:0}).turbine,'classic');
+ for(const kind of ['steering','turbine','exhaust'])assert.equal(G.catalog({level:100}).filter(i=>i.kind===kind).length,3);
+});
