@@ -68,7 +68,8 @@
     "check:hero": "node scripts/check-hero-catalog.js",
     "smoke:startup-layout": "node scripts/smoke-startup-layout.js",
     "smoke:news-render": "node scripts/smoke-news-render.js",
-    "smoke:news-reactions": "node scripts/smoke-news-reactions.js"
+    "smoke:news-reactions": "node scripts/smoke-news-reactions.js",
+    "garage:3d": "esbuild scripts/garage-3d/viewer.mjs --bundle --minify --format=iife --outfile=app-garage-3d.js"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",

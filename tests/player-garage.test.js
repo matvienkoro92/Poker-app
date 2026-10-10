@@ -1,12 +1,12 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),G=require('../app-garage-catalog'),Garage=require('../lib/player-garage'),E=require('../app-monkey-race-engine'),{fixture}=require('./helpers/cooler-flight-fixture.cjs');
-test('closed cosmetics cannot be forged, base choices work without history',()=>{assert.deepEqual(G.normalize({},{}),G.defaults);assert.throws(()=>Garage.choose({paint:'champagne'},{stats:{level:49}}),/не открыта/);assert.throws(()=>Garage.choose({paint:'unknown'},{stats:{best:99999}}),/не открыта/);assert.equal(G.normalize({paint:'champagne'},{level:50},true).paint,'champagne');assert.throws(()=>G.normalize({number:'<x>'},{},true),/Номер/);assert.equal(G.normalize({number:'007'},{},true).number,'007');});
+test('closed cosmetics cannot be forged, base choices work without history',()=>{assert.deepEqual(G.normalize({},{}),G.defaults);assert.throws(()=>Garage.choose({paint:'champagne'},{stats:{level:49}}),/не открыта/);assert.throws(()=>Garage.choose({paint:'unknown'},{stats:{best:99999}}),/не открыта/);assert.equal(G.normalize({paint:'champagne'},{level:50},true).paint,'champagne');assert.throws(()=>G.normalize({number:'<x>'},{},true),/Номер/);assert.equal(G.normalize({number:'017'},{},true).number,'А017КМ');});
 test('earned equipment and targets normalize independently, stale unlocks fall back',()=>{const c=G.catalog({level:8});assert.ok(c.find(i=>i.key==='helmet:club').unlocked);assert.ok(c.find(i=>i.key==='shoes:ruby').unlocked);assert.equal(c.find(i=>i.key==='wheels:carbon').unlocked,false);assert.equal(G.normalize({paint:'champagne',target:'wheels:carbon'},{runs:0}).paint,'classic');assert.equal(G.normalize({target:'wheels:carbon'},{}).target,'wheels:carbon');});
 test('new players have free combinations and no race history requirement',()=>{
  const c=G.catalog({});
  assert.equal(c.filter(i=>i.kind==='paint'&&i.unlocked).length,3);
  assert.equal(c.filter(i=>i.kind==='light'&&i.unlocked).length,2);
- for(const paint of ['classic','ruby','midnight'])for(const light of ['cyan','amber'])assert.equal(G.normalize({paint,light,number:'007'},{},true).paint,paint);
+ for(const paint of ['classic','ruby','midnight'])for(const light of ['cyan','amber'])assert.equal(G.normalize({paint,light,number:'017'},{},true).paint,paint);
  assert.equal(c.find(i=>i.key==='wheels:silver').unlocked,false);
  assert.equal(G.catalog({level:2}).find(i=>i.key==='wheels:silver').unlocked,true);
 });
@@ -35,3 +35,15 @@ test('shelves mirror saved choices and unlocks at each level',()=>{
  assert.equal(slots.find(s=>s.kind==='wheels').next.target,30);
  assert.ok(G.shelfSlots({stats:{level:100}}).every(s=>s.owned===s.total&&!s.next));
 });
+
+test('paint covers front and side body without replacing the suit',()=>{
+ assert.equal(G.greenMaterial(120,350,450,600),'paint');
+ assert.equal(G.greenMaterial(330,420,450,600),'paint');
+ assert.equal(G.greenMaterial(195,230,450,600),'suit');
+ assert.equal(G.greenMaterial(750,445,1536,1024),'paint');
+ assert.equal(G.greenMaterial(750,225,1536,1024),'suit');
+ assert.equal(G.greenMaterial(750,775,1536,1024),'suit');
+ assert.equal(G.greenMaterial(750,225,1536,1024,'vehicle'),'paint');
+});
+
+test('RF plates validate format, migrate old numbers and gate rare combinations',()=>{assert.equal(G.normalize({number:'17'},{},true).number,'А017КМ');assert.deepEqual(G.parsePlate('a123bc','154'),{number:'А123ВС',region:'154'});for(const number of ['А000ВС','Д123ВС','А12ВС'])assert.throws(()=>G.normalize({number},{level:100},true),/Номер/);for(const region of ['0','000','1234','xx'])assert.throws(()=>G.normalize({region},{level:100},true),/Номер/);for(const [number,level] of [['А121КМ',10],['А200КМ',20],['А123АА',30],['А555КМ',50],['А007КМ',75],['А777АА',100]]){assert.equal(G.plateLevel(number),level);assert.throws(()=>Garage.choose({number},{stats:{level:level-1}}),/уровне/);assert.equal(G.normalize({number},{level},true).number,number);}assert.equal(G.normalize({number:'А777АА'},{level:0}).number,G.defaults.number);});

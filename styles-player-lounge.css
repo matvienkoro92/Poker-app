@@ -167,3 +167,42 @@
 .garage-house-passage>.garage-lock{display:grid;place-items:center;width:46px;height:46px;border:1px solid #d0b27188;border-radius:50%;background:#111b1bec;box-shadow:0 4px 15px #0009;font-size:24px}.garage-house-passage>strong,.garage-house-passage>small{padding:5px 8px;background:#111b1bf0;border:1px solid #b89a5755;border-radius:7px;text-align:center;line-height:1.3;font-size:10px}.garage-house-passage>small{color:#ccb88f;font-size:11px}
 .player-hall__room:not([data-space=garage]) .garage-house-passage{visibility:hidden}
 .player-hall__room[data-theme=midnight] .house-passage-art{filter:brightness(.35) saturate(.6)}
+
+/* Night lighting covers foreground art too; neon marks actual interaction targets. */
+.player-hall__room[data-theme=midnight] .lounge-table-foreground{filter:brightness(.35) saturate(.6)}
+.player-hall__room[data-theme=midnight] :is(.lounge-seat__character,.lounge-hands>img){filter:brightness(.5) saturate(.75) drop-shadow(0 0 3px #8972ff55)}
+.player-hall__room[data-theme=midnight] .player-hall__parked-kart{filter:brightness(.5) saturate(.8) drop-shadow(0 0 6px #9175ff77)}
+.player-hall__room[data-theme=midnight] :is(.lounge-wall-board,.player-hall__house-map,.lounge-roster-entry,.lounge-live-retry,.player-hall__shelf-label,.player-hall__slot-add,.player-hall__slot-edit,.player-hall__lounge-arrow,.player-hall__lounge-return,.player-hall__space-arrow,.player-hall__camera-ui>button){border:1px solid #a48bff!important;box-shadow:0 0 5px #b19aff99,0 0 15px #7856dd77,inset 0 0 8px #9e79ff22!important;color:#eee4ff!important}
+.player-hall__room[data-theme=midnight] .lounge-wall-board{border-radius:5px;background:#17132844}
+.player-hall__room[data-theme=midnight] .player-hall__house-map{background:#171426}
+.player-hall__room[data-theme=midnight] .player-hall__cabinet-object{filter:drop-shadow(0 0 4px #bba0ff) drop-shadow(0 0 9px #7951dd88)}
+.player-hall__room[data-theme=midnight] .player-hall__cabinet-object img{filter:brightness(.8) drop-shadow(0 0 2px #b99cff)}
+.player-hall__room[data-theme=midnight] .garage-shelf-inventory{background:linear-gradient(90deg,#0c1018,#191825 48%,#0c1018);border-color:#66517e;box-shadow:inset 0 0 24px #000,0 0 9px #8e6bce55}
+.player-hall__room[data-theme=midnight] .garage-shelf-part{border:1px solid #a48bff88;box-shadow:inset 0 0 7px #9775ff22,0 0 5px #926fff55;background:radial-gradient(ellipse at 50% 10%,#9471ed25,transparent 80%)}
+.player-hall__room[data-theme=midnight] .garage-shelf-art{filter:brightness(.75) drop-shadow(0 0 3px #9c7bff77)}
+.player-hall__room[data-theme=midnight] :is(.player-hall__garage-object--kart>span,.garage-house-passage>.garage-lock){border:1px solid #b095ff;box-shadow:0 0 6px #a182ff99,0 0 18px #7651da66;background:#171426ee;color:#eee4ff}
+.player-hall__room[data-theme=midnight] .lounge-seat--playing .lounge-seat__status{border:1px solid #b095ff;box-shadow:0 0 7px #9875ff88}
+
+.garage-preview--3d{position:relative;background:radial-gradient(ellipse at 50% 65%,#4c44372b,transparent 68%)}
+.garage-3d-stage{width:100%;height:280px;min-height:210px;touch-action:none;cursor:grab;display:flex;align-items:center;justify-content:center;color:#c6b792;font-size:12px;overflow:hidden;outline-offset:-4px}
+.garage-3d-stage:active{cursor:grabbing}.garage-3d-stage canvas{display:block;width:100%!important;height:100%!important;max-height:none!important}
+.player-hall__garage-panel .garage-orbit-hint{font-size:11px;color:#aab6bc;text-align:center;margin:0;padding:0 10px 10px}
+@media(min-width:700px){.garage-3d-stage{height:330px}}
+
+.garage-number{display:flex;flex-wrap:wrap;gap:12px;align-items:end;padding:18px}.garage-number label{display:grid;gap:8px}.garage-number input{width:155px;max-width:100%;text-transform:uppercase;background:#f5f5ef;color:#111;font-weight:800;letter-spacing:2px}.garage-number [data-plate-region]{width:90px}.garage-number span{font-size:12px;line-height:1.7;color:#aebbc2}.garage-plate-levels{padding:0 18px 20px;font-size:13px;line-height:1.8}.garage-plate-levels small{color:#aebbc2}
+
+/* Keep the illustrated cabinet; selected objects stand on its original shelves. */
+.player-hall__garage-scene::before{content:"";position:absolute;inset:0;background:url('./assets/player-hall/garage-empty-shelves-v1.webp') right center/300% 100% no-repeat;clip-path:polygon(26.7% 11.4%,85% 13.2%,85% 44.5%,26.7% 44%);pointer-events:none}
+.player-hall-dialog .garage-shelf-inventory,.player-hall__room[data-theme=midnight] .garage-shelf-inventory{left:27%;top:13%;width:57%;height:30%;background:none;border:0;box-shadow:none;display:block}
+.garage-shelf-grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:0 6%}
+.player-hall-dialog .garage-shelf-part,.player-hall__room[data-theme=midnight] .garage-shelf-part{padding:0 8% 2%;background:none;border:0;box-shadow:none;overflow:visible;justify-content:flex-end;min-width:0}
+.garage-shelf-part[data-hall-garage=helmet]{grid-area:1/1}.garage-shelf-part[data-hall-garage=wheels]{grid-area:1/2}.garage-shelf-part[data-hall-garage=paint]{grid-area:2/1}.garage-shelf-part[data-hall-garage=light]{grid-area:2/2}.garage-shelf-part[data-hall-garage=suit]{grid-area:3/1}.garage-shelf-part[data-hall-garage=shoes]{grid-area:3/2}
+.garage-shelf-art{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(1px 3px 2px #0009)}.garage-shelf-art canvas{width:auto;height:90%;max-width:100%;object-fit:contain}.garage-shelf-part[data-hall-garage=light] canvas{height:65%}.garage-shelf-part[data-hall-garage=suit] canvas,.garage-shelf-part[data-hall-garage=shoes] canvas{height:78%}
+.player-hall__room[data-theme=midnight] .garage-shelf-part:focus-visible,.garage-shelf-part:focus-visible{outline:1px solid #bea0ff;outline-offset:-3px}
+
+.hall-cabinet-surface{position:absolute;left:2.984%;top:37.056%;width:21.924%;height:3.132%;background:url("./assets/player-hall/hall-cabinet-no-handles-v1.webp") center/100% 100% no-repeat;pointer-events:none}
+.player-hall__room[data-theme=midnight] .hall-cabinet-surface{filter:brightness(.35) saturate(.6)}
+
+/* Original table pixels occlude the seated character, including the complete rim and legs. */
+.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(8.709% 81.524%,9.622% 80.376%,12.911% 79.332%,15.834% 78.706%,16.017% 72.129%,16.565% 71.086%,18.575% 70.459%,22.412% 70.355%,24.787% 70.981%,24.970% 72.443%,23.873% 75.678%,28.989% 76.096%,29.537% 74.113%,30.816% 73.486%,35.384% 73.173%,37.942% 74.008%,37.942% 76.409%,41.230% 77.349%,48.356% 78.184%,53.837% 79.436%,56.577% 80.689%,57.674% 82.046%,56.760% 83.612%,54.933% 84.551%,54.385% 90.292%,53.289% 91.754%,51.096% 92.693%,50.914% 85.386%,17.296% 85.491%,16.931% 90.605%,15.834% 92.067%,13.642% 92.589%,14.373% 84.864%,11.267% 84.342%,9.257% 83.194%);z-index:2}
+.player-hall__room[data-theme=midnight] .player-hall__character-foreground{filter:brightness(.35) saturate(.6)}

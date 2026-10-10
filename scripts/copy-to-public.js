@@ -96,6 +96,7 @@ const baseFiles = [
   'news-rating-snapshots.json',
   'club-cash-highlights.json',
   'sw.js',
+  'app-garage-3d.js',
 ];
 const cssPartFiles = fs
   .readdirSync(root)
