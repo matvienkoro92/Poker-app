@@ -101,21 +101,23 @@
 .player-hall__character-foreground{display:none}
 .lounge-table-foreground{background-image:var(--hall-panorama);background-size:300% 100%;background-position:left center}
 
-/* Table lamp cycles the three room lighting moods. */
-.player-hall-dialog .player-hall__lamp{position:absolute;left:12%;top:76%;width:8%;height:10%;padding:0;border:0;background:transparent;z-index:4;filter:drop-shadow(0 0 8px #ffcc7277)}
-.player-hall__lamp svg{width:100%;height:100%;overflow:visible}
-.player-hall__room[data-theme=emerald] .player-hall__spaces{filter:brightness(.94) saturate(.9)}
-.player-hall__room[data-theme=midnight] .player-hall__spaces{filter:brightness(.62) saturate(.75)}
-.player-hall__room[data-theme=emerald] .player-hall__lamp{filter:drop-shadow(0 0 12px #62ffb7)}
-.player-hall__room[data-theme=midnight] .player-hall__lamp{filter:drop-shadow(0 0 12px #95baff)}
+/* A table lamp with a contact shadow and a stable, generous touch target. */
+.player-hall-dialog .player-hall__lamp{position:absolute;left:12.5%;top:70.8%;width:10.4%;height:10%;min-width:44px;min-height:44px;padding:0;border:0;border-radius:4px;background:transparent;z-index:7;cursor:pointer;touch-action:manipulation;overflow:visible;filter:drop-shadow(2px 3px 2px #0007);-webkit-tap-highlight-color:transparent}
+.player-hall__lamp svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}
+.player-hall__lamp::after{content:"";position:absolute;inset:-10px}
+.player-hall__lamp:focus-visible{outline:2px solid #f4d69d;outline-offset:7px}
 .player-hall__room:not([data-space=hall]) .player-hall__lamp{display:none}
+.player-hall__spaces::after{content:"";position:absolute;left:-50%;top:0;width:150%;height:100%;pointer-events:none;z-index:8;background:transparent;transition:background .3s}
+.player-hall__room[data-theme=midnight]{--hall-glow:transparent}
+.player-hall__room[data-theme=midnight] .player-hall__spaces::before{filter:brightness(.35) saturate(.6)}
+.player-hall__room[data-theme=midnight] .player-hall__character{filter:brightness(.52) drop-shadow(1px 0 3px #8b69c855)}
+.player-hall__room[data-theme=midnight] .hall-lamp-shade{fill:#685b4c;stroke:#463b2c}
+.player-hall__room[data-theme=midnight] .hall-lamp-bulb{fill:#514638}
+.player-hall__room[data-theme=midnight] .player-hall__lamp{filter:brightness(.65) drop-shadow(2px 3px 2px #0009)}
+.player-hall__room[data-theme=midnight] .player-hall__spaces::after{background:radial-gradient(ellipse at 40% 36%,#7653df30,transparent 29%),radial-gradient(ellipse at 67% 48%,#3bbbed26,transparent 25%)}
+.player-hall__room[data-theme=midnight] .player-hall__display-shelf>div{filter:drop-shadow(0 2px 3px #8870ff99)}
+.player-hall__room[data-theme=midnight] .player-hall__display-slot:has(.player-hall__cabinet-object)::before{background:linear-gradient(#b6a1ff,#7353ce 40%,#271d48);box-shadow:0 1px 5px #a38bff,0 4px 13px #7851e9aa}
 .player-hall-dialog .player-hall__awards-open{position:absolute;right:20px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:10;width:48px;height:48px;border-radius:50%;padding:0;background:#192219ed;border:1px solid #d5b97d55;color:#e8d299;font-size:28px}
-
-.player-hall__spaces::after{content:"";position:absolute;left:-50%;top:0;width:150%;height:100%;pointer-events:none;z-index:8;mix-blend-mode:soft-light;background:transparent}
-.player-hall__room[data-theme=emerald] .player-hall__spaces::after{background:#19b76b70}
-.player-hall__room[data-theme=midnight] .player-hall__spaces::after{background:#294c9b70}
-
-.player-hall__lamp::after{content:"";position:absolute;inset:-8px}
 
 /* Keep award bases in contact with solid ledges and short contact shadows. */
 .player-hall__display-shelf--cups .player-hall__display-slot--0,
@@ -130,10 +132,10 @@
 .player-hall__display-slot .player-hall__slot-title{z-index:3}
 
 /* Framed house plan on the lounge wall. Full map loads only on opening. */
-.player-hall-dialog .player-hall__house-map{position:absolute;left:60%;top:29%;width:19%;padding:3px;border:2px solid #a78b48;border-radius:2px;background:#19251c;color:#f1dda3;box-shadow:0 3px 8px #0009;z-index:5;transform:rotate(-2deg)}
+.player-hall-dialog .player-hall__house-map{position:absolute;left:39.1%;top:27%;width:22%;padding:3px;border:2px solid #a78b48;border-radius:2px;background:#19251c;color:#f1dda3;box-shadow:0 3px 8px #0009;z-index:5;transform:none}
 .player-hall__house-map img{display:block;width:100%;height:auto}
 .player-hall__house-map span{display:block;font-size:clamp(9px,1.6vw,13px);line-height:1.4}
-.player-hall__room:not([data-space=hall]) .player-hall__house-map,.player-hall__room:not([data-camera=wide]) .player-hall__house-map{visibility:hidden}
+.player-hall__room:not([data-space=lounge]) .player-hall__house-map{visibility:hidden}
 .player-hall-detail.player-hall-map-dialog{width:min(1100px,96vw);max-width:96vw;padding:18px;box-sizing:border-box}
 .player-hall-map-dialog h2{padding-right:36px}
 .player-hall-map-scroll{overflow:auto;max-height:70dvh;touch-action:pan-x pan-y;border:1px solid #8c773f;border-radius:6px}
