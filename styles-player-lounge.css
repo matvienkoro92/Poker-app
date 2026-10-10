@@ -117,7 +117,6 @@
 .player-hall__room[data-theme=midnight] .player-hall__spaces::after{background:radial-gradient(ellipse at 40% 36%,#7653df30,transparent 29%),radial-gradient(ellipse at 67% 48%,#3bbbed26,transparent 25%)}
 .player-hall__room[data-theme=midnight] .player-hall__display-shelf>div{filter:drop-shadow(0 2px 3px #8870ff99)}
 .player-hall__room[data-theme=midnight] .player-hall__display-slot:has(.player-hall__cabinet-object)::before{background:linear-gradient(#b6a1ff,#7353ce 40%,#271d48);box-shadow:0 1px 5px #a38bff,0 4px 13px #7851e9aa}
-.player-hall-dialog .player-hall__awards-open{position:absolute;right:20px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:10;width:48px;height:48px;border-radius:50%;padding:0;background:#192219ed;border:1px solid #d5b97d55;color:#e8d299;font-size:28px}
 
 /* Keep award bases in contact with solid ledges and short contact shadows. */
 .player-hall__display-shelf--cups .player-hall__display-slot--0,
