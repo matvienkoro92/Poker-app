@@ -295,3 +295,19 @@
 .garage-customizer-layout[data-category=car] .garage-3d-stage{flex:1;min-height:270px;height:100%}
 .garage-customizer-layout[data-category=car] .garage-orbit-hint{font-size:12px;line-height:1.4;text-align:center;padding:8px;margin:0}
 @media(max-width:480px){.garage-customizer-layout[data-category=car]{grid-template-columns:94px minmax(0,1fr);gap:6px;padding:8px}.garage-customizer-layout[data-category=car]>.garage-categories{gap:5px;max-height:390px}.garage-customizer-layout[data-category=car]>.garage-categories button{min-height:34px;font-size:12px;padding:8px 6px;border-radius:11px}.garage-customizer-layout[data-category=car] .garage-3d-stage{min-height:260px}.garage-customizer-layout[data-category=car] .garage-orbit-hint{font-size:10px;padding:6px 2px}}
+
+/* Fill the two right niches while keeping each trophy base and caption fixed. */
+.player-hall-dialog .player-hall__display-shelf--cups .player-hall__display-slot--3 .player-hall__cabinet-object,
+.player-hall-dialog .player-hall__display-shelf--cups .player-hall__display-slot--4 .player-hall__cabinet-object{height:100%}
+
+/* Shelf edges follow the perspective baked into the garage backdrop. */
+.hall-neon-lighting i:has(.hall-neon-shelf-line)::after{display:none}
+.hall-neon-shelf-line{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 3px var(--neon)) drop-shadow(0 4px 8px var(--neon))}
+.hall-neon-shelf-line path{fill:none;stroke:var(--neon);stroke-width:2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+
+/* Reflected shelf light is clipped to the award, leaving the surrounding air dark. */
+.hall-award-reflection{display:none}
+.player-hall__room[data-theme=midnight] .player-hall__display-slot{--award-light:#ac8dff}
+.player-hall__room[data-theme=midnight] .player-hall__display-shelf--cups :is(.player-hall__display-slot--3,.player-hall__display-slot--4){--award-light:#65d8ed}
+.player-hall__room[data-theme=midnight] .player-hall__cabinet-object img{filter:brightness(1.04) saturate(.98) drop-shadow(1px 3px 2px #0009)}
+.player-hall__room[data-theme=midnight] .player-hall__cabinet-object .hall-award-reflection{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;mask-image:var(--award-mask);mask-size:contain;mask-repeat:no-repeat;mask-position:center bottom;background:linear-gradient(0deg,var(--award-light) 0%,transparent 72%),linear-gradient(90deg,var(--award-light),transparent 23%,transparent 80%,var(--award-light));opacity:.4;mix-blend-mode:screen}
