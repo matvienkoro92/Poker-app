@@ -255,6 +255,29 @@ function makeModel(scene,look){
    }
   }
  }
+
+ // Street optics: housings, individual lenses, mounting brackets and light signatures.
+ for(const [id,d]of Object.entries(G.streetHeadlights)){
+  const group=new T.Group();car.add(group);hardware.headlights[id]=group;
+  const beam=material(d.color,.12,.22);beam.emissive.set(d.color);beam.emissiveIntensity=d.smoke?.35:1.1;
+  const lensMat=material(d.smoke?'#1c3348':'#83b6d5',.45,.12);
+  for(const sign of [-1,1]){
+   const z=sign*.72,x=2.57-.28*(z/1.1)**2+.07,y=1.075;
+   const casing=rounded(.47,.25,.10,.04,kitDark,x,y,z,group);casing.rotation.y=Math.PI/2;
+   for(const zz of [-.18,.18]){mesh(new T.BoxGeometry(.10,.07,.035),kitMetal,x-.035,y-.15,z+zz,group);const bolt=mesh(new T.CylinderGeometry(.012,.012,.018,12),gold,x+.02,y-.13,z+zz,group);bolt.rotation.z=Math.PI/2;}
+   if(d.shape==='bar'){for(const [dy,w,h]of [[.035,.41,.025],[-.045,.33,.012]]){const strip=rounded(w,h,.014,.006,beam,x+.064,y+dy,z,group);strip.rotation.y=Math.PI/2;strip.castShadow=false;}continue;}
+   if(d.shape==='square'){const glass=rounded(.37,.17,.024,.015,beam,x+.065,y,z,group);glass.rotation.y=Math.PI/2;for(let n=0;n<7;n++)mesh(new T.BoxGeometry(.006,.16,.004),lensMat,x+.082,y,z-.15+n*.05,group);continue;}
+   const radius=d.count===3?.062:d.count===2?.087:.106;
+   for(let n=0;n<d.count;n++){
+    const zz=z+(n-(d.count-1)/2)*(d.count===3?.14:.205);
+    const cup=mesh(new T.CylinderGeometry(radius+.014,radius+.02,.09,d.shape==='hex'?6:40),black,x+.035,y,zz,group);cup.rotation.z=Math.PI/2;
+    const outer=mesh(new T.TorusGeometry(radius,.009,8,d.shape==='hex'?6:48),beam,x+.09,y,zz,group);outer.rotation.y=Math.PI/2;outer.castShadow=false;
+    const lens=mesh(new T.SphereGeometry(1,24,16),d.projector?lensMat:beam,x+.077,y,zz,group);lens.scale.set(.018,radius*.74,radius*.74);lens.castShadow=false;
+    if(d.projector){const core=mesh(new T.SphereGeometry(1,16,12),beam,x+.092,y,zz,group);core.scale.set(.006,radius*.31,radius*.31);}
+    if(d.cross||d.guard)for(const slope of [-1,1])tube([[x+.11,y-radius*.74,zz-slope*radius*.74],[x+.115,y,zz],[x+.11,y+radius*.74,zz+slope*radius*.74]],.009,kitDark,group);
+   }
+  }
+ }
  // Fenders follow the unsprung wheels, retaining tyre clearance at every ride height.
  const wheelFenders={};
  for(const style of ['club','sport','rally','chrome']){
@@ -276,7 +299,7 @@ function makeModel(scene,look){
 
  // Swept compound curvature keeps the screen ahead of the steering wheel.
  hardware.windshield={};
- for(const [style,height,tint,opacity] of [['deflector',.30,'#b6e3eb',.18],['sport',.59,'#a9d5e7',.23],['touring',.88,'#c1e3ed',.17],['smoke',.70,'#455f7a',.40],['iridium',.82,'#8b8dc3',.30]]){
+ for(const [style,height,tint,opacity] of [['deflector',.30,'#b6e3eb',.18],['sport',.59,'#a9d5e7',.23],['touring',.88,'#c1e3ed',.17],['smoke',.70,'#455f7a',.40],['iridium',.82,'#8b8dc3',.30],['highClear',1.15,'#c5e8ef',.18],['highSmoke',1.28,'#597187',.38],['grandTour',1.50,'#b8e0e9',.20],['highIridium',1.40,'#9d91ce',.30]]){
   const group=new T.Group();car.add(group);hardware.windshield[style]=group;
   function point(u,t){const width=.92*(1-.13*t),arch=1-u*u;return [1.97+.23*arch-height*.32*t,1.50+height*t*(.84+.16*arch),u*width];}
   const verts=[],indices=[],cols=40,rows=16;
@@ -285,7 +308,7 @@ function makeModel(scene,look){
   const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(verts,3));geo.setIndex(indices);geo.computeVertexNormals();
   const glass=new T.MeshPhysicalMaterial({color:tint,metalness:.05,roughness:.075,transparent:true,opacity,depthWrite:false,side:T.DoubleSide,clearcoat:1,clearcoatRoughness:.06,envMapIntensity:.65});
   const pane=mesh(geo,glass,0,0,0,group);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=3;
-  const frame=style==='smoke'?kitDark:kitMetal;
+  const frame=['smoke','highSmoke'].includes(style)?kitDark:kitMetal;
   for(const t of [0,1])tube(Array.from({length:41},(_,i)=>point(-1+i/20,t)),t===0?.017:.009,frame,group);
   for(const u of [-1,1]){
    tube(Array.from({length:17},(_,i)=>point(u,i/16)),.011,frame,group);
@@ -327,7 +350,7 @@ function makeModel(scene,look){
  back.geometry.dispose();back.geometry=new T.ExtrudeGeometry(shape,{depth:.025,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:.008,bevelThickness:.008,curveSegments:24});
  mat.map?.dispose();mat.map=new T.CanvasTexture(G.badgeCanvas(id,v));mat.map.colorSpace=T.SRGBColorSpace;mat.map.anisotropy=16;mat.emissive.set('#ffffff');mat.emissiveMap=mat.map;mat.emissiveIntensity=.12;mat.userData.badge=badgeKey;mat.needsUpdate=true;});paint.color.set(G.item('paint',v.paint).color);felt.color.copy(paint.color).multiplyScalar(.45);rim.color.set(G.item('wheels',v.wheels).color);
  if(wheelStyle!==v.wheels){for(const spoke of spokes){spoke.removeFromParent();spoke.geometry.dispose();}spokes.length=0;car.updateMatrixWorld(true);for(const {wheelGroup,x,out,sign} of wheelSpecs)for(const points of G.wheelDesign(v.wheels)){const path=new T.CatmullRomCurve3(points.map(([xx,yy])=>new T.Vector3(xx,yy,sign*(.25+.025*(1-Math.hypot(xx,yy)/.51)))));const spoke=mesh(new T.TubeGeometry(path,20,({bronzeSix:.024,deepFive:.038,muscleFive:.045,triBlade:.065,turbofan:.024,splitY:.018,concaveTen:.018}[v.wheels]||(['fiveSpoke','legend'].includes(v.wheels)?.023:.009)),8,false),rim,0,0,0,wheelGroup);spokes.push(spoke);}wheelStyle=v.wheels;}
- gold.color.set(G.item('trim',v.trim).color);if(leather.userData.style!==v.upholstery){leather.map?.dispose();leather.map=new T.CanvasTexture(G.upholsteryCanvas(v.upholstery));leather.map.colorSpace=T.SRGBColorSpace;leather.map.wrapS=leather.map.wrapT=T.RepeatWrapping;leather.map.repeat.set(12,2);leather.color.set('#ffffff');leather.roughness=v.upholstery==='alcantara'?.9:.38;leather.userData.style=v.upholstery;leather.needsUpdate=true;}G.chipPalette(v.chips).forEach((color,n)=>{chipMats[n].color.set(color);chipMats[n].roughness=v.chips==='ceramic'?.25:.55;});chipEdges.forEach(o=>o.visible=v.chips!=='ceramic');chipTops.forEach(({mat,n})=>{if(mat.userData.style===v.chips)return;mat.map?.dispose();mat.map=new T.CanvasTexture(G.chipCanvas(v.chips,n));mat.map.colorSpace=T.SRGBColorSpace;mat.map.anisotropy=8;mat.userData.style=v.chips;mat.needsUpdate=true;});cardMats.forEach((m,n)=>{if(m.userData.style===v.cards)return;m.map?.dispose();m.map=new T.CanvasTexture(G.cardCanvas(v.cards,n));m.map.colorSpace=T.SRGBColorSpace;m.map.anisotropy=16;m.userData.style=v.cards;m.needsUpdate=true;});spokes.forEach(o=>o.visible=true);faces.forEach(o=>o.visible=true);light.color.set(G.item('light',v.light).color);light.emissive.copy(light.color);fanMetal.color.copy(light.color).multiplyScalar(.075);fanMetal.emissive.copy(light.color);fanMetal.emissiveIntensity=.045;if(numberMat.userData.number!==v.number+v.region){numberMat.map?.dispose();numberMat.map=new T.CanvasTexture(G.plateCanvas(v));numberMat.userData.number=v.number+v.region;numberMat.needsUpdate=true;}}
+ gold.color.set(G.item('trim',v.trim).color);gold.roughness=['brushedSteel','gunmetal','satinNickel'].includes(v.trim)?.48:['cobalt','anodizedRed','champagne'].includes(v.trim)?.3:.135;gold.metalness=.95;if(leather.userData.style!==v.upholstery){leather.map?.dispose();leather.map=new T.CanvasTexture(G.upholsteryCanvas(v.upholstery));leather.map.colorSpace=T.SRGBColorSpace;leather.map.wrapS=leather.map.wrapT=T.RepeatWrapping;leather.map.repeat.set(12,2);leather.color.set('#ffffff');leather.roughness=['alcantara','blueSuede','greenSuede'].includes(v.upholstery)?.95:v.upholstery==='carbonWeave'?.28:.38;leather.userData.style=v.upholstery;leather.needsUpdate=true;}G.chipPalette(v.chips).forEach((color,n)=>{chipMats[n].color.set(color);chipMats[n].roughness=v.chips==='ceramic'?.25:.55;});chipEdges.forEach(o=>o.visible=v.chips!=='ceramic');chipTops.forEach(({mat,n})=>{if(mat.userData.style===v.chips)return;mat.map?.dispose();mat.map=new T.CanvasTexture(G.chipCanvas(v.chips,n));mat.map.colorSpace=T.SRGBColorSpace;mat.map.anisotropy=8;mat.userData.style=v.chips;mat.needsUpdate=true;});cardMats.forEach((m,n)=>{if(m.userData.style===v.cards)return;m.map?.dispose();m.map=new T.CanvasTexture(G.cardCanvas(v.cards,n));m.map.colorSpace=T.SRGBColorSpace;m.map.anisotropy=16;m.userData.style=v.cards;m.needsUpdate=true;});spokes.forEach(o=>o.visible=true);faces.forEach(o=>o.visible=true);light.color.set(G.item('light',v.light).color);light.emissive.copy(light.color);fanMetal.color.copy(light.color).multiplyScalar(.075);fanMetal.emissive.copy(light.color);fanMetal.emissiveIntensity=.045;if(numberMat.userData.number!==v.number+v.region){numberMat.map?.dispose();numberMat.map=new T.CanvasTexture(G.plateCanvas(v));numberMat.userData.number=v.number+v.region;numberMat.needsUpdate=true;}}
  const fanGlow=new T.PointLight(light.color,.45,2,2);fanGlow.position.set(-1.9,2,.48);sprungBody.add(fanGlow);
  const oldUpdate=update;function updateLit(v){oldUpdate(v);fanGlow.color.copy(light.color);}
  updateLit(look);return {car,update:updateLit};

@@ -113,3 +113,12 @@ test('street wheel designs differ and hardware choices save independently',()=>{
  for(const [kind,id]of Object.entries({brakes:'ceramic',nitrous:'twin',seat:'carbon',tow:'red'}))assert.equal(Garage.view({garage:look},{stats:{level:100}}).loadout[kind],id);
  assert.throws(()=>Garage.choose({brakes:'ceramic'},{stats:{level:10}}),/не открыта/);
 });
+test('street headlights unlock and persist independently of underglow',()=>{
+ assert.equal(Object.keys(G.streetHeadlights).length,8);
+ for(const [id,d]of Object.entries(G.streetHeadlights)){
+  assert.throws(()=>Garage.choose({headlights:id},{stats:{level:d.target-1}}),/не открыта/);
+  const saved=Garage.choose({headlights:id,light:'amber'},{stats:{level:d.target}});
+  const restored=Garage.view({garage:saved},{stats:{level:d.target}}).loadout;
+  assert.equal(restored.headlights,id);assert.equal(restored.light,'amber');
+ }
+});
