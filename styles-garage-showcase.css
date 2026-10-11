@@ -18,3 +18,26 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 .garage-showcase--news .garage-showcase__news-copy>.garage-showcase__badges{grid-column:2;grid-row:1/3;justify-content:flex-end}
 .garage-showcase--news .garage-showcase__news-copy>b{grid-column:1/-1;grid-row:3;font-size:11px}
 @media(min-width:600px){.garage-showcase--news .garage-showcase__news-stage{max-height:240px;aspect-ratio:2.2}.garage-showcase--news .garage-showcase__news-art{height:100%;width:76%;object-fit:contain;object-position:left bottom}.garage-showcase--news .garage-showcase__news-copy>strong{font-size:17px}}
+/* News keeps the result first; a hero gets a larger saved-look scene. */
+.garage-showcase--news:not(.garage-showcase--day-hero) .garage-showcase__news-open{grid-template-columns:52% minmax(0,1fr);gap:8px;padding:8px}
+.garage-showcase--news:not(.garage-showcase--day-hero) .garage-showcase__news-stage{aspect-ratio:1.45;border:0;min-height:110px}
+.garage-showcase--news:not(.garage-showcase--day-hero) .garage-showcase__news-copy{display:flex;flex-direction:column;align-items:flex-start;padding:0;gap:6px}
+.garage-showcase--news:not(.garage-showcase--day-hero) .garage-showcase__news-copy>strong{font-size:13px}
+.garage-showcase--news .garage-showcase__news-character{z-index:0;right:0;bottom:10%;width:31%;height:90%}
+.garage-showcase--day-hero .garage-showcase__news-open{border-color:#d6af63a8;background:radial-gradient(ellipse at 62% 45%,#a7883933,transparent 65%),linear-gradient(120deg,#0b171d,#17242b)}
+.garage-showcase--day-hero .garage-showcase__news-stage{aspect-ratio:1.85}
+.garage-showcase--day-hero .garage-showcase__news-copy>small{color:#f2ce79}
+.garage-showcase-dialog{box-sizing:border-box;width:min(660px,calc(100vw - 20px));max-height:92dvh;padding:32px 10px 10px;border:1px solid #b89551;border-radius:22px;background:#0b141a;color:#f7ebd1;overflow:auto}
+.garage-showcase-dialog::backdrop{background:#000c}
+.garage-showcase-dialog__close{position:absolute;right:12px;top:3px;z-index:3;border:0;background:transparent;color:#ffe1a0;font-size:32px;cursor:pointer}
+.garage-showcase-dialog .garage-showcase--profile{margin:0;padding:16px;border:0;box-shadow:none}
+.garage-showcase__interactive{width:100%;height:100%;min-height:240px;touch-action:none;cursor:grab}
+.garage-showcase__interactive canvas{display:block;width:100%;height:100%}
+.garage-showcase-dialog .garage-showcase__stage{height:clamp(260px,45dvh,430px);aspect-ratio:auto}
+.garage-showcase-dialog .garage-showcase__stage--character{height:60dvh}
+.garage-rating-looks{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:12px 0 20px;padding:0 2px 6px}
+.garage-rating-looks:empty{display:none}
+.garage-rating-looks>.garage-showcase--news{flex:0 0 82%;margin:0;scroll-snap-align:start}
+.garage-rating-looks>.garage-showcase--news:empty{display:none}
+@media(min-width:700px){.garage-rating-looks>.garage-showcase--news{flex:0 0 calc((100% - 24px)/3)}.garage-rating-looks .garage-showcase__news-open{grid-template-columns:1fr!important}.garage-rating-looks .garage-showcase__news-stage{aspect-ratio:1.8!important}}
+.garage-rating-looks>.garage-showcase--news[data-rating-look]:empty:not([hidden]){display:block;min-height:1px}

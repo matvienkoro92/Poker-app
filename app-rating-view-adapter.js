@@ -3019,12 +3019,14 @@ function initWinterRating() {
         if (rows1.length >= 3) {
           podiumLeague1El.removeAttribute("hidden");
           podiumLeague1El.innerHTML = buildSpringTop3PodiumHtml(rows1, "");
+          if (window.pokerMountRatingLooks) window.pokerMountRatingLooks(podiumLeague1El, rows1);
         } else { podiumLeague1El.setAttribute("hidden", ""); podiumLeague1El.innerHTML = ""; }
       }
       if (podiumLeague2El) {
         if (rows2.length >= 3) {
           podiumLeague2El.removeAttribute("hidden");
           podiumLeague2El.innerHTML = buildSpringTop3PodiumHtml(rows2, "");
+          if (window.pokerMountRatingLooks) window.pokerMountRatingLooks(podiumLeague2El, rows2);
         } else { podiumLeague2El.setAttribute("hidden", ""); podiumLeague2El.innerHTML = ""; }
       }
     } else {
@@ -3032,6 +3034,7 @@ function initWinterRating() {
       if (rowsForPodium.length >= 3 && podiumEl) {
         podiumEl.removeAttribute("hidden");
         podiumEl.innerHTML = buildSpringTop3PodiumHtml(rowsForPodium, "Рейтинг Зимы");
+        if (window.pokerMountRatingLooks) window.pokerMountRatingLooks(podiumEl, rowsForPodium);
       } else if (podiumEl) {
         podiumEl.setAttribute("hidden", "");
         podiumEl.innerHTML = "";

@@ -24,3 +24,12 @@ test('garage showcase exposes only the public saved outfit, never friends or int
 
 test('showcase reads saved cosmetics without loading friends, lounge presence or writing room state',async()=>{const profile={accountId:'ID123456',nick:'Unbound',bound:false,level:0};let reads=0;const stub=mock('lib/player-hall.js',{'./club-social':{memberProfile:async id=>{assert.equal(id,profile.accountId);return profile;},redis:async commands=>{reads++;assert.equal(commands.length,3);assert.ok(commands.every(c=>c[0]==='GET'));assert.equal(commands[0][1],'poker_app:player_hall:ID123456');return [JSON.stringify({garage:{paint:'champagne',badges:['millionaire']}}),'{}','{}'];}},'./player-lounge':{read(){throw Error('must not load lounge');}}});const v=await stub.showcase(profile.accountId,false);assert.equal(reads,1);assert.equal(v.garage.loadout.paint,'classic');assert.equal(v.garage.loadout.badges.length,0);assert.equal(v.customized,true);});
 test('admin showcase resolves the exact target and never invokes save',async()=>{let target;const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:true,body:{action:'showcase',targetId:'tg_123'}})},'../account-id':{resolveAccountId:async id=>{assert.equal(id,'tg_123');return 'ID2';}},'../player-hall':{showcase:async(id,self)=>{target=id;assert.equal(self,false);return {accountId:id};},save(){throw Error('must not save');}}});const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);assert.equal(target,'ID2');assert.equal(res.code,200);assert.equal(res.body.showcase.accountId,'ID2');});
+
+test('ordinary members cannot inspect or mutate admin-only hall data',async()=>{
+ for(const action of ['showcase','get','save','presence']){
+  let inspected=false;
+  const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:false,body:{action,targetId:'ID2'}})},'../account-id':{resolveAccountId:async()=> 'ID2'},'../player-hall':{showcase:async(id,self)=>{inspected=true;assert.equal(id,'ID2');assert.equal(self,false);return {accountId:id};},read(){throw Error('private read');},save(){throw Error('private mutation');}}});
+  const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);
+  assert.equal(res.code,403);assert.equal(inspected,false);
+ }
+});

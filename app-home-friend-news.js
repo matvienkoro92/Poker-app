@@ -2714,7 +2714,7 @@
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
-      "</span>" + (!ticker && typeof window.pokerGarageNewsShowcaseHtml === "function" ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId) : "") + feedbackParts.comments + "</span>";
+      "</span>" + (!ticker && typeof window.pokerGarageNewsShowcaseHtml === "function" ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId, {featured:isDayHero}) : "") + feedbackParts.comments + "</span>";
   }
 
   function modalEventsHtml(rows) {
