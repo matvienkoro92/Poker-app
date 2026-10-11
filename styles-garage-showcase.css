@@ -75,11 +75,12 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 #profilePublicRatingArt .garage-profile-character{position:absolute;inset:0;margin:auto;width:100%;height:94%;object-fit:contain;z-index:1;filter:drop-shadow(0 8px 6px #0006)}
 .garage-showcase--compact{padding:16px;border-color:#ac874b66;border-radius:18px;margin:16px 0;background:linear-gradient(135deg,#172329,#0c151c)}
 .garage-showcase--compact .garage-showcase__header strong{font-size:19px}
-.garage-showcase__collection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.garage-showcase__collection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:0}
 .garage-showcase__collection>button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;padding:12px;border:1px solid #d9b56a35;border-radius:12px;background:#08121980;color:#ffe1a0;text-align:left;font-family:inherit;cursor:pointer}
 .garage-showcase__collection strong{font-size:15px}
 .garage-showcase__collection small{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#aab6bf;font-size:11px}
 .garage-showcase__collection b{font-size:11px;font-weight:500;margin-top:5px}
-.garage-showcase__mini-car{display:block;width:100%;height:70px}
+.garage-showcase__mini-car{display:block;width:100%;height:120px}
 .garage-showcase__mini-car canvas{width:100%;height:100%;object-fit:contain}
-.garage-showcase__fabric{display:grid;place-items:center;align-self:center;width:64px;height:70px;border-radius:12px;background:linear-gradient(135deg,#ffffff20,transparent),var(--fabric);box-shadow:inset 0 0 0 1px #ffe1a033;color:#f1d595;font-size:32px}
+.garage-showcase__mini-suit{display:block;width:100%;height:120px}
+.garage-showcase__mini-suit canvas{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 4px #0007)}
