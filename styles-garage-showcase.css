@@ -41,3 +41,5 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 .garage-rating-looks>.garage-showcase--news:empty{display:none}
 @media(min-width:700px){.garage-rating-looks>.garage-showcase--news{flex:0 0 calc((100% - 24px)/3)}.garage-rating-looks .garage-showcase__news-open{grid-template-columns:1fr!important}.garage-rating-looks .garage-showcase__news-stage{aspect-ratio:1.8!important}}
 .garage-rating-looks>.garage-showcase--news[data-rating-look]:empty:not([hidden]){display:block;min-height:1px}
+
+.garage-showcase--news[data-showcase-news]:empty:not([hidden]){min-height:1px}

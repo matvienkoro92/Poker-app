@@ -2904,7 +2904,7 @@
     var template = document.createElement("template");
     template.innerHTML = html;
     function key(node) {
-      return node.nodeType === 1 ? node.getAttribute("data-home-news-event-id") || node.id || "" : "";
+      return node.nodeType === 1 ? node.getAttribute("data-home-news-event-id") || (node.hasAttribute("data-showcase-news") ? "showcase:" + node.getAttribute("data-showcase-news") : "") || node.id || "" : "";
     }
     function compatible(before, after) {
       return before && before.nodeType === after.nodeType && before.nodeName === after.nodeName && key(before) === key(after);
@@ -2927,6 +2927,13 @@
           if (current.nodeType === 3) {
             if (current.nodeValue !== desired.nodeValue) current.nodeValue = desired.nodeValue;
           } else if (current.nodeType === 1 && !current.isEqualNode(desired)) {
+            // Saved-look canvases are hydrated separately; a feed refresh must
+            // preserve their pixels, visibility and observer state.
+            if (current.hasAttribute("data-showcase-news")) {
+              current.className = desired.className;
+              cursor = current.nextSibling;
+              return;
+            }
             Array.prototype.slice.call(current.attributes).forEach(function (attr) {
               if (!desired.hasAttribute(attr.name) && !(attr.name === "open" && current.hasAttribute("data-month-ranking"))) current.removeAttribute(attr.name);
             });
