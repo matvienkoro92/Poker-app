@@ -387,3 +387,21 @@
 .garage-reward-complete{position:absolute;top:38%;left:10%;right:10%;display:flex;flex-direction:column;gap:1cqh;text-align:center;color:#e4cf99;font-size:1.3cqh}
 
 .garage-reward-slot{font:inherit;color:inherit;cursor:pointer;border:0;background:transparent;padding:0}.garage-reward-slot:focus-visible{outline:2px solid #eac979}.garage-reward-dialog{box-sizing:border-box;width:min(440px,calc(100vw - 32px));max-height:85dvh;overflow:auto;padding:26px;border:1px solid #c3a25c;border-radius:22px;background:#111c23;color:#f3e7c9;font:16px/1.5 Arial,sans-serif;text-align:center}.garage-reward-dialog::backdrop{background:#000b}.garage-reward-dialog h3{margin:8px 28px 16px;font-size:24px}.garage-reward-dialog canvas{display:block;width:100%;height:220px;object-fit:contain;margin:12px auto 20px}.garage-reward-dialog>button{position:absolute;right:12px;top:10px;border:0;background:transparent;color:#f3e7c9;font-size:30px;cursor:pointer}
+
+.garage-reward-label small.garage-reward-level{font-size:1.05cqh;line-height:1.25;font-weight:800;color:#ffe49a;text-shadow:0 1px 2px #000;letter-spacing:.02em}
+.garage-reward-label small.garage-reward-remaining{font-size:.72cqh;line-height:1.2;color:#f0e3c4}
+
+/* Keep the vehicle and a single row of choices visible together. */
+.player-hall-dialog .player-hall__garage-panel--workshop:has(.garage-workshop--fitted){overflow:hidden}
+.garage-workshop--fitted{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;box-sizing:border-box}
+.garage-workshop--fitted>.garage-workshop__header,.garage-workshop--fitted>.garage-workshop__footer{flex:none;position:relative}
+.garage-workshop--fitted>.garage-customizer-layout[data-category=car]{flex:1;min-height:0;overflow:hidden;padding-block:6px}
+.garage-workshop--fitted .garage-customizer-layout[data-category=car]>.garage-categories{min-height:0;max-height:100%}
+.garage-workshop--fitted .garage-customizer-layout[data-category=car] .garage-3d-stage{min-height:0;height:100%}
+.garage-workshop--fitted>.garage-options{display:flex;flex:none;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;align-items:stretch;height:clamp(170px,27dvh,240px);margin:0;padding:8px 12px;box-sizing:border-box}
+.garage-workshop--fitted .garage-option{flex:0 0 clamp(140px,38vw,185px);scroll-snap-align:start;padding:8px;overflow-y:auto}
+.garage-workshop--fitted .garage-option-art{height:clamp(65px,10dvh,100px);margin:0 0 3px}
+.garage-workshop--fitted .garage-option strong{font-size:12px}.garage-workshop--fitted .garage-option small,.garage-workshop--fitted .garage-option p{font-size:10px}
+.garage-workshop--fitted>.garage-progression{flex:none;max-height:55px;overflow-y:auto;margin:0 12px 4px}
+.garage-workshop--fitted>.garage-number,.garage-workshop--fitted>.garage-plate-levels{flex:none;max-height:130px;overflow:auto}
+.garage-workshop--fitted>.garage-workshop__footer{padding:7px 12px max(8px,env(safe-area-inset-bottom,0px))}

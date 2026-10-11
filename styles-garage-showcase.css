@@ -56,8 +56,16 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 .home-friend-news-modal__icon>.garage-showcase--inline{display:block;width:100%;height:auto;min-height:150px;margin:0!important;align-self:center}
 .garage-showcase--inline .garage-showcase__news-open{display:block!important;width:100%;height:auto;min-height:150px;padding:0!important;border:0!important;border-radius:0!important;background:none!important;overflow:hidden}
 .garage-showcase--inline .garage-showcase__news-stage{display:block;width:100%!important;height:clamp(150px,23vw,260px)!important;min-height:150px!important;max-height:none!important;aspect-ratio:auto!important;border:0!important;background:none!important}
-.garage-showcase--inline .garage-showcase__news-art{left:-4%;bottom:8%;width:108%;height:65%;object-fit:contain;object-position:center bottom;z-index:2}
-.garage-showcase--inline .garage-showcase__news-character{right:5%;bottom:28%;width:61%;height:72%;object-fit:contain;z-index:1}
+.garage-showcase--inline .garage-showcase__news-art{left:50%;transform:translateX(-50%);bottom:4%;width:108%;height:65%;object-fit:contain;object-position:center bottom;z-index:2}
+.garage-showcase--inline .garage-showcase__news-character{left:50%;right:auto;transform:translateX(-50%);bottom:24%;width:61%;height:72%;object-fit:contain;z-index:1}
 .garage-showcase--inline .garage-showcase__news-copy{display:none!important}
 .garage-showcase--inline .garage-showcase__news-open::after{content:'↗';position:absolute;right:6px;top:6px;font-size:16px;color:#e7c578}
 .garage-showcase--inline .garage-showcase__news-open:focus-visible{outline-offset:-3px}
+
+/* Fit the complete scene to short result rows as well as tall hero rows. */
+.home-friend-news-modal__icon:has(.garage-showcase--inline){container-type:size;min-height:0!important}
+.home-friend-news-modal__icon>.garage-showcase--inline{min-height:0;width:100%;max-height:100%}
+.garage-showcase--inline .garage-showcase__news-open{min-height:0;max-height:100%;display:flex!important;align-items:center;justify-content:center}
+.garage-showcase--inline .garage-showcase__news-stage{width:min(100cqw,81cqh,234px)!important;height:min(90cqh,260px)!important;min-height:0!important;flex:none}
+
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__item:has(.garage-showcase--inline) .home-friend-news-modal__day-hero{top:10px!important;left:10px!important;right:auto!important;bottom:auto!important}

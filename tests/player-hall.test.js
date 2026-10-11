@@ -33,3 +33,16 @@ test('ordinary members cannot inspect or mutate admin-only hall data',async()=>{
   assert.equal(res.code,403);assert.equal(inspected,false);
  }
 });
+
+test('occupied garage plate rejects the save and reports its owner',async()=>{
+ const garage=require('../app-garage-catalog').defaults;
+ const raw=JSON.stringify({version:0,nick:'waaar',items:[]});
+ let claims=0;
+ const hall=mock('lib/player-hall.js',{
+  './club-social':{memberProfile:async id=>id==='ID2'?{nick:'Владелец номера'}:{...profile,level:100},redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:null)},
+  './garage-plate-registry':{save:async(_redis,id,_raw,state)=>{claims++;assert.equal(id,'ID1');assert.equal(state.garage.number,garage.number);return {ok:false,owner:'ID2'};}},
+  './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
+ });
+ await assert.rejects(()=>hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garage}),e=>e.status===409&&/уже занят игроком Владелец номера/.test(e.message));
+ assert.equal(claims,1);
+});
