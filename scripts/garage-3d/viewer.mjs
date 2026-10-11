@@ -237,20 +237,29 @@ function makeModel(scene,look){
  const lampWhite=material('#b9e4f5',.28,.17);lampWhite.emissive.set('#b9e4f5');lampWhite.emissiveIntensity=1.8;
  const lampWarm=material('#ffdda0',.2,.2);lampWarm.emissive.set('#ffe0a8');lampWarm.emissiveIntensity=1.25;
 
- // Low full-width bumper shells, recessed intakes and separate splitter/diffuser.
- for(const kind of ['frontBumper','rearBumper'])for(const [id,width,depth]of [['streetLow',2.16,.30],['driftWide',2.48,.38],['trackGT',2.36,.44]]){
-  const group=new T.Group();car.add(group);hardware[kind][id]=group;const sign=kind==='frontBumper'?1:-1,x=sign*2.38;
-  rounded(depth,.12,width,.045,paint,x,.96,0,group);
-  rounded(depth,.12,width+.04,.035,paint,x,.49,0,group);
-  for(const z of [-width/2+.10,width/2-.10])rounded(depth,.43,.20,.055,paint,x,.72,z,group);
-  for(const z of [-.63,.63])rounded(depth,.42,.10,.025,paint,x,.73,z,group);
-  const grille=rounded(.035,.30,1.14,.04,black,x-sign*.12,.73,0,group);
-  for(let n=0;n<5;n++)rounded(.025,.012,1.10,.005,kitMetal,x+sign*.025,.61+n*.054,0,group);
-  for(const z of [-.86,.86]){rounded(.025,.28,.32,.035,black,x-sign*.13,.74,z,group);for(let n=0;n<3;n++)rounded(.03,.012,.29,.004,kitDark,x+sign*.04,.66+n*.075,z,group);}
-  rounded(depth+.18,.055,width+.18,.035,carbon,x+sign*.08,.40,0,group);
-  if(kind==='rearBumper'){for(let n=0;n<(id==='trackGT'?7:5);n++){const fin=rounded(depth+.18,.16,.035,.012,carbon,x+sign*.07,.42,(n-(id==='trackGT'?3:2))*.27,group);fin.rotation.z=sign*.14;}}
-  else if(id!=='streetLow')for(const z of [-width/2,width/2]){rounded(depth*.85,.20,.035,.02,carbon,x+sign*.08,.52,z,group);tube([[x+sign*.13,.42,z*.78],[x-sign*.05,.79,z*.78]],.012,kitMetal,group);}
-  for(const z of [-.70,.70]){rounded(.16,.23,.08,.018,kitDark,x-sign*.16,.96,z,group);const bolt=mesh(new T.CylinderGeometry(.014,.014,.025,12),kitMetal,x+sign*(depth/2+.015),.94,z,group);bolt.rotation.z=Math.PI/2;}
+ // Sculpted lower aprons follow the curved nose and leave the plate and lights clear.
+ for(const kind of ['frontBumper','rearBumper'])for(const [id,width,depth]of [['streetLow',2.10,.12],['driftWide',2.30,.16],['trackGT',2.22,.19]]){
+  const group=new T.Group();car.add(group);hardware[kind][id]=group;const sign=kind==='frontBumper'?1:-1;
+  const h=id==='trackGT'?.34:.29,cy=.59;
+  const shape=outline(width,h,.10);
+  for(const [z,w]of [[0,.94],[-.79,.32],[.79,.32]]){const hole=outline(w,.115,.045,T.Path);shape.holes.push(new T.Path(hole.getPoints(24).map(p=>new T.Vector2(p.x+z,p.y))));}
+  const geo=new T.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelSize:.025,bevelThickness:.018,bevelSegments:4,curveSegments:32});
+  const positions=geo.attributes.position;
+  for(let n=0;n<positions.count;n++){const z=positions.getX(n),y=positions.getY(n),thickness=positions.getZ(n);positions.setXYZ(n,sign*(2.43+thickness-.24*(z/(width/2))**2),cy+y,z);}
+  geo.computeVertexNormals();mesh(geo,paint,0,0,0,group);
+  // Dark recessed grille, with fine horizontal slats behind the openings.
+  for(const [z,w]of [[0,.94],[-.79,.32],[.79,.32]]){
+   const x=sign*(2.43-.24*(z/(width/2))**2);
+   rounded(.025,.14,w+.02,.04,black,x,cy,z,group);
+   for(const dy of [-.032,.012,.045])rounded(.012,.006,w-.035,.003,kitDark,x+sign*.022,cy+dy,z,group);
+  }
+  const edge=Array.from({length:41},(_,n)=>{const z=-width/2+n*width/40;return [sign*(2.44+depth+.045-.24*(z/(width/2))**2),cy-h/2-.025,z];});
+  tube(edge,id==='trackGT'?.028:.019,carbon,group);
+  const lipGeo=new T.BufferGeometry(),verts=[],indices=[];
+  for(const [x,y,z]of edge)verts.push(x,y,z,x-sign*.17,y+.005,z);
+  for(let n=0;n<40;n++){const k=n*2;indices.push(k,k+1,k+2,k+1,k+3,k+2);}lipGeo.setAttribute('position',new T.Float32BufferAttribute(verts,3));lipGeo.setIndex(indices);lipGeo.computeVertexNormals();mesh(lipGeo,carbon,0,0,0,group);
+  if(kind==='rearBumper')for(let n=0;n<(id==='trackGT'?5:3);n++){const z=(n-(id==='trackGT'?2:1))*.30;const fin=rounded(.24,.075,.014,.008,carbon,-2.48,cy-h/2-.035,z,group);fin.rotation.z=-.12;}
+  else if(id==='trackGT')for(const z of [-.92,.92]){const fin=rounded(.18,.05,.018,.008,carbon,2.43,cy-h/2,z,group);fin.rotation.z=.08;}
  }
  hardware.headlights={};
  for(const style of ['round','projector','rally','matrix']){

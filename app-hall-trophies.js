@@ -4,7 +4,7 @@ var assets={
  monday:'./assets/player-hall/trophy-monday-v1.webp',
  tuesday:'./assets/player-hall/trophy-tuesday-v1.webp',
  wednesday:'./assets/player-hall/trophy-wednesday-v1.webp',
- thursday:'./assets/player-hall/trophy-thursday-v1.webp',
+ thursday:'./assets/player-hall/trophy-thursday-v2.webp',
  friday:'./assets/player-hall/trophy-friday-v1.webp',
  saturday:'./assets/player-hall/trophy-saturday-v1.webp',
  sunday:'./assets/player-hall/trophy-sunday-v1.webp',

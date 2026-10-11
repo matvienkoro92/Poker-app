@@ -288,13 +288,13 @@
 .garage-option--locked .garage-option-art{opacity:1}.garage-option--locked [data-choice]{cursor:pointer}.garage-option--locked:has([aria-pressed=true]){border-color:#d5ae60;background:#302b22}
 
 /* Vehicle controls stay beside the rotating model. */
-.garage-customizer-layout[data-category=car]{display:grid;grid-template-columns:clamp(104px,18%,168px) minmax(0,1fr);grid-template-areas:"controls preview";gap:12px;padding:12px 18px;align-items:stretch}
-.garage-customizer-layout[data-category=car]>.garage-categories{grid-area:controls;display:flex;flex-direction:column;gap:6px;padding:0;overflow-x:hidden;overflow-y:auto;max-height:520px;min-width:0;scrollbar-width:thin}
-.garage-customizer-layout[data-category=car]>.garage-categories button{flex:0 0 auto;width:100%;min-height:38px;border-radius:13px;padding:9px 8px;font-size:14px;line-height:1.2;white-space:normal;text-align:left}
-.garage-customizer-layout[data-category=car]>.garage-preview{grid-area:preview;min-width:0;display:flex;flex-direction:column;justify-content:center;margin:0;padding:0;overflow:hidden}
-.garage-customizer-layout[data-category=car] .garage-3d-stage{flex:1;min-height:270px;height:100%}
-.garage-customizer-layout[data-category=car] .garage-orbit-hint{font-size:12px;line-height:1.4;text-align:center;padding:8px;margin:0}
-@media(max-width:480px){.garage-customizer-layout[data-category=car]{grid-template-columns:94px minmax(0,1fr);gap:6px;padding:8px}.garage-customizer-layout[data-category=car]>.garage-categories{gap:5px;max-height:390px}.garage-customizer-layout[data-category=car]>.garage-categories button{min-height:34px;font-size:12px;padding:8px 6px;border-radius:11px}.garage-customizer-layout[data-category=car] .garage-3d-stage{min-height:260px}.garage-customizer-layout[data-category=car] .garage-orbit-hint{font-size:10px;padding:6px 2px}}
+.garage-customizer-layout:is([data-category=car],[data-category=character]){display:grid;grid-template-columns:clamp(104px,18%,168px) minmax(0,1fr);grid-template-areas:"controls preview";gap:12px;padding:12px 18px;align-items:stretch}
+.garage-customizer-layout:is([data-category=car],[data-category=character])>.garage-categories{grid-area:controls;display:flex;flex-direction:column;gap:6px;padding:0;overflow-x:hidden;overflow-y:auto;max-height:520px;min-width:0;scrollbar-width:thin}
+.garage-customizer-layout:is([data-category=car],[data-category=character])>.garage-categories button{flex:0 0 auto;width:100%;min-height:38px;border-radius:13px;padding:9px 8px;font-size:14px;line-height:1.2;white-space:normal;text-align:left}
+.garage-customizer-layout:is([data-category=car],[data-category=character])>.garage-preview{grid-area:preview;min-width:0;display:flex;flex-direction:column;justify-content:center;margin:0;padding:0;overflow:hidden}
+.garage-customizer-layout:is([data-category=car],[data-category=character]) .garage-3d-stage{flex:1;min-height:270px;height:100%}
+.garage-customizer-layout:is([data-category=car],[data-category=character]) .garage-orbit-hint{font-size:12px;line-height:1.4;text-align:center;padding:8px;margin:0}
+@media(max-width:480px){.garage-customizer-layout:is([data-category=car],[data-category=character]){grid-template-columns:94px minmax(0,1fr);gap:6px;padding:8px}.garage-customizer-layout:is([data-category=car],[data-category=character])>.garage-categories{gap:5px;max-height:390px}.garage-customizer-layout:is([data-category=car],[data-category=character])>.garage-categories button{min-height:34px;font-size:12px;padding:8px 6px;border-radius:11px}.garage-customizer-layout:is([data-category=car],[data-category=character]) .garage-3d-stage{min-height:260px}.garage-customizer-layout:is([data-category=car],[data-category=character]) .garage-orbit-hint{font-size:10px;padding:6px 2px}}
 
 /* Fill the two right niches while keeping each trophy base and caption fixed. */
 .player-hall-dialog .player-hall__display-shelf--cups .player-hall__display-slot--3 .player-hall__cabinet-object,
@@ -395,9 +395,9 @@
 .player-hall-dialog .player-hall__garage-panel--workshop:has(.garage-workshop--fitted){overflow:hidden}
 .garage-workshop--fitted{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;box-sizing:border-box}
 .garage-workshop--fitted>.garage-workshop__header,.garage-workshop--fitted>.garage-workshop__footer{flex:none;position:relative}
-.garage-workshop--fitted>.garage-customizer-layout[data-category=car]{flex:1;min-height:0;overflow:hidden;padding-block:6px}
-.garage-workshop--fitted .garage-customizer-layout[data-category=car]>.garage-categories{min-height:0;max-height:100%}
-.garage-workshop--fitted .garage-customizer-layout[data-category=car] .garage-3d-stage{min-height:0;height:100%}
+.garage-workshop--fitted>.garage-customizer-layout:is([data-category=car],[data-category=character]){flex:1;min-height:0;overflow:hidden;padding-block:6px}
+.garage-workshop--fitted .garage-customizer-layout:is([data-category=car],[data-category=character])>.garage-categories{min-height:0;max-height:100%}
+.garage-workshop--fitted .garage-customizer-layout:is([data-category=car],[data-category=character]) .garage-3d-stage{min-height:0;height:100%}
 .garage-workshop--fitted>.garage-options{display:flex;flex:none;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;align-items:flex-start;height:auto;max-height:clamp(170px,27dvh,240px);margin:0;padding:8px 12px;box-sizing:border-box}
 .garage-workshop--fitted .garage-option{flex:0 0 clamp(140px,38vw,185px);scroll-snap-align:start;padding:8px;max-height:calc(clamp(170px,27dvh,240px) - 16px);overflow-y:auto}
 .garage-workshop--fitted .garage-option-art{height:clamp(65px,10dvh,100px);margin:0 0 3px}
@@ -426,3 +426,19 @@
 .player-hall__room[data-space=garage][data-garage-vehicle="1"] .garage-locked-vehicle{display:block}
 
 .garage-character-stage>canvas{display:block;width:100%;height:100%;min-height:0;object-fit:contain}
+
+.garage-reward-heading{position:absolute;left:8%;right:8%;top:1%;z-index:3;padding:.45cqh .8cqh;border:1px solid #b99a5b70;border-radius:.5cqh;background:#111a1ee8;color:#ffe4a7;text-align:center;font-size:1.25cqh;font-weight:700;line-height:1.2;box-shadow:0 .2cqh .6cqh #0006;pointer-events:none}
+
+/* Wardrobe shares the garage's controls-left, preview-right composition. */
+.garage-customizer-layout[data-category=character]>.garage-character-stage{grid-area:preview;height:100%;min-height:0;min-width:0;padding:6px;overflow:hidden}
+.garage-customizer-layout[data-category=character]>.garage-character-stage>canvas{flex:1;width:100%;height:100%;min-height:0;object-fit:contain}
+.garage-workshop--fitted>.garage-visor-tabs{flex:none;gap:8px;padding:4px 12px}
+.garage-workshop--fitted>.garage-visor-tabs button{padding:7px 10px;font-size:12px;border-radius:10px}
+
+/* Mystery vehicle: hide all identity and ground the silhouette on the floor. */
+.garage-locked-vehicle{left:-20%;top:44%;width:116%;isolation:isolate}
+.garage-locked-vehicle::before{content:"";position:absolute;z-index:-1;left:6%;right:3%;bottom:6%;height:12%;border-radius:50%;background:radial-gradient(ellipse,#000b 15%,#0006 48%,transparent 72%);transform:rotate(3deg);pointer-events:none}
+.garage-locked-vehicle>img{filter:brightness(0) drop-shadow(0 5px 2px #0009)}
+.garage-locked-vehicle>button{left:50%;top:49%;padding:10px;border:0;border-radius:50%;background:#0b1117a6;box-shadow:0 2px 12px #0005}
+.player-hall__room[data-garage-vehicle="1"] .garage-vehicle-switch>span{font-size:0;background:transparent;border:0;padding:0;min-width:30px}
+.player-hall__room[data-garage-vehicle="1"] .garage-vehicle-switch small{font-size:11px}
