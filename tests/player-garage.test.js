@@ -14,7 +14,7 @@ test('every reward checks the exact club level and ignores race counters',()=>{
  for(const i of G.items.filter(i=>i.metric==='level'&&i.target>0)){
   assert.equal(G.catalog({level:i.target-1,best:999999,runs:9999,chips:999999}).find(x=>x.key===i.key).unlocked,false,i.key);
   assert.throws(()=>Garage.choose({[i.kind]:i.id},{stats:{level:i.target-1}}),/не открыта/);
-  assert.equal(Garage.choose({[i.kind]:i.id,...(i.key==='patch:name'?{patchText:'Игрок21'}:{})},{stats:{level:i.target}})[i.kind],i.id);
+  assert.equal(Garage.choose({[i.kind]:i.id,...(i.key==='patch:name'?{patchText:'Игрок21'}:i.key==='vinyl:name'?{vinylText:'Манки21'}:{})},{stats:{level:i.target}})[i.kind],i.id);
  }
  assert.ok(G.catalog({level:100}).filter(i=>i.metric==='level').every(i=>i.unlocked));
  assert.equal(new Set(G.items.map(i=>i.key)).size,G.items.length);
@@ -79,7 +79,7 @@ test('expanded catalogue has regular milestones and rejects every locked part',(
  for(let n=1;n<levels.length;n++)assert.ok(levels[n]-levels[n-1]<=5,'empty progression gap at '+levels[n]);
  for(const level of [25,50,75,100])assert.ok(levelItems.filter(i=>i.target>level-25&&i.target<=level).length>=15);
  for(const kind of ['mirrors','frontBumper','rearBumper','sideSkirts','suspension','spoiler','headlights','fenders','windshield']){assert.ok(G.catalog({level:0}).filter(i=>i.kind===kind&&i.unlocked).length===1);assert.ok(G.catalog({level:100}).filter(i=>i.kind===kind&&i.unlocked).length>=5);}
- for(const i of levelItems){const look={[i.kind]:i.id,...(i.key==='patch:name'?{patchText:'Игрок21'}:{})};const saved=Garage.choose(look,{stats:{level:i.target}});assert.equal(Garage.view({garage:saved},{stats:{level:i.target}}).loadout[i.kind],i.id);}
+ for(const i of levelItems){const look={[i.kind]:i.id,...(i.key==='patch:name'?{patchText:'Игрок21'}:i.key==='vinyl:name'?{vinylText:'Манки21'}:{})};const saved=Garage.choose(look,{stats:{level:i.target}});assert.equal(Garage.view({garage:saved},{stats:{level:i.target}}).loadout[i.kind],i.id);}
  assert.notDeepEqual(G.wheelDesign('fiveSpoke'),G.wheelDesign('splitSix'));
  assert.notDeepEqual(G.chipPalette('noir'),G.chipPalette('legend'));
 });
@@ -95,12 +95,21 @@ test('reward shelves prioritize a locked level target and replace earned rewards
  assert.deepEqual(G.rewardShelfSlots({stats:{level:100},loadout:garage.loadout}),[]);
 });
 
-test('ten vinyl designs unlock progressively and persist in saved loadouts',()=>{
+test('vinyl designs unlock progressively and persist in saved loadouts',()=>{
  const designs=G.items.filter(i=>i.kind==='vinyl'&&i.id!=='none');
- assert.equal(designs.length,10);
+ assert.equal(designs.length,28);
  assert.equal(G.normalize({}, {level:0}).vinyl,'none');
  for(const design of designs){
   assert.equal(G.normalize({vinyl:design.id},{level:design.target}).vinyl,design.id);
-  assert.equal(G.normalize({vinyl:design.id},{level:design.target-1}).vinyl,'none');
+  if(design.target>0)assert.equal(G.normalize({vinyl:design.id},{level:design.target-1}).vinyl,'none');
  }
+});
+
+test('custom vinyl validates and persists its word',()=>{const look=Garage.choose({vinyl:'name',vinylText:'Манки21'},{stats:{level:0}});assert.equal(Garage.view({garage:look},{stats:{level:0}}).loadout.vinylText,'Манки21');for(const vinylText of ['', 'два слова', '<script>', '12345678901234567'])assert.throws(()=>Garage.choose({vinyl:'name',vinylText},{stats:{level:100}}),/Винил/);});
+test('street wheel designs differ and hardware choices save independently',()=>{
+ const ids=['bronzeSix','deepFive','crossMesh','splitY','concaveTen','muscleFive','turbofan','triBlade','rallyMulti','splitStar'];
+ assert.equal(new Set(ids.map(id=>JSON.stringify(G.wheelDesign(id)))).size,10);
+ const look=Garage.choose({wheels:'bronzeSix',brakes:'ceramic',nitrous:'twin',seat:'carbon',tow:'red'},{stats:{level:100}});
+ for(const [kind,id]of Object.entries({brakes:'ceramic',nitrous:'twin',seat:'carbon',tow:'red'}))assert.equal(Garage.view({garage:look},{stats:{level:100}}).loadout[kind],id);
+ assert.throws(()=>Garage.choose({brakes:'ceramic'},{stats:{level:10}}),/не открыта/);
 });

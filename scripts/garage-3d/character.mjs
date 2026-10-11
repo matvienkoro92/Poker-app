@@ -1,0 +1,37 @@
+import * as T from '../../vendor/three/three.module.min.js';
+window.pokerCreateCharacter3D=function(host,look,state={}){
+ const G=window.PokerGarage,scene=new T.Scene(),root=new T.Group();scene.add(root);
+ const renderer=new T.WebGLRenderer({alpha:true,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;host.append(renderer.domElement);renderer.domElement.setAttribute('role','img');renderer.domElement.setAttribute('aria-label','3D-персонаж: потяните, чтобы повернуть');
+ const camera=new T.PerspectiveCamera(34,1,.1,40);scene.add(new T.HemisphereLight('#dcecff','#50402b',2));for(const [x,y,z,p]of [[3,6,5,4],[-3,3,-3,3]]){const l=new T.DirectionalLight('#fff0dd',p);l.position.set(x,y,z);scene.add(l);}
+ const fabricCanvas=document.createElement('canvas');fabricCanvas.width=fabricCanvas.height=128;const fc=fabricCanvas.getContext('2d');fc.fillStyle='#999999';fc.fillRect(0,0,128,128);for(let y=0;y<128;y+=2){fc.fillStyle=y%4?'#808080':'#b0b0b0';fc.fillRect(0,y,128,1);}for(let x=0;x<128;x+=3){fc.fillStyle='#888888';fc.fillRect(x,0,1,128);}const fabric=new T.CanvasTexture(fabricCanvas);fabric.wrapS=fabric.wrapT=T.RepeatWrapping;fabric.repeat.set(8,8);
+ const mat=(color,metalness=0,roughness=.7)=>new T.MeshStandardMaterial({color,metalness,roughness});
+ const fur=mat('#32251d'),skin=mat('#96715a'),black=mat('#11161b'),white=mat('#e0dfd4'),gold=mat('#d9ac4c',.8,.25),suit=mat('#a22c3b'),pants=mat('#171b20'),shoe=mat('#171b20'),visor=mat('#826222',.9,.18);
+ for(const m of [suit,pants,black]){m.bumpMap=fabric;m.bumpScale=.012;}
+ function ell(m,x,y,z,a,b,c,parent=root){const mesh=new T.Mesh(new T.SphereGeometry(1,40,28),m);mesh.position.set(x,y,z);mesh.scale.set(a,b,c);parent.add(mesh);return mesh;}
+ function link(m,a,b,r1,r2=r1){const start=new T.Vector3(...a),end=new T.Vector3(...b),v=end.clone().sub(start);const mesh=new T.Mesh(r1>.1?new T.CapsuleGeometry((r1+r2)/2,Math.max(.01,v.length()-(r1+r2)),10,32):new T.CylinderGeometry(r2,r1,v.length(),16),m);mesh.position.copy(start.add(end).multiplyScalar(.5));mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.normalize());root.add(mesh);return mesh;}
+ // Separate limbs and clothing volumes form a model visible from every side.
+ ell(pants,0,1.64,0,.47,.36,.26);ell(suit,0,2.32,0,.59,.65,.32);ell(black,0,2.35,.29,.27,.49,.055);
+ for(const s of [-1,1]){
+  link(pants,[s*.27,1.67,0],[s*.29,.92,.015],.23,.25);ell(pants,s*.29,.92,.015,.23,.24,.24);link(pants,[s*.29,.94,.015],[s*.32,.28,0],.16,.22);
+  link(white,[s*.45,1.55,.03],[s*.48,.36,.03],.025,.032);
+  ell(shoe,s*.32,.18,.15,.22,.19,.39);ell(white,s*.32,.075,.15,.235,.065,.40);ell(white,s*.32,.27,.12,.135,.08,.20);
+  for(let n=0;n<5;n++)link(white,[s*.32-.10,.29,.08+n*.04],[s*.32+.10,.29,.08+n*.04],.009);
+  ell(suit,s*.55,2.63,0,.26,.27,.29);link(suit,[s*.57,2.63,0],[s*.76,2.12,.02],.19,.23);ell(suit,s*.76,2.12,.02,.19,.20,.20);link(suit,[s*.76,2.12,.02],[s*.88,1.65,.08],.13,.18);link(white,[s*.71,2.6,.15],[s*.99,1.72,.15],.035);
+  ell(black,s*.88,1.67,.08,.145,.09,.15);ell(fur,s*.89,1.48,.10,.16,.22,.12);for(let n=0;n<4;n++)ell(skin,s*(.79+n*.065),1.36,.15,.035,.13,.045);ell(skin,s*.75,1.48,.20,.06,.12,.06);
+ }
+ ell(fur,0,3.04,0,.25,.27,.24);ell(fur,0,3.39,0,.36,.43,.31);for(const s of [-1,1]){ell(skin,s*.36,3.40,.01,.12,.17,.09);ell(fur,s*.36,3.40,.065,.065,.10,.035);ell(skin,s*.15,3.43,.258,.15,.12,.075);ell(black,s*.14,3.44,.32,.045,.035,.02);ell(white,s*.13,3.45,.335,.009,.01,.006);ell(fur,s*.15,3.53,.28,.18,.05,.07);}
+ ell(skin,0,3.23,.27,.26,.18,.13);ell(skin,0,3.34,.34,.14,.08,.08);ell(black,0,3.17,.375,.17,.017,.018);ell(skin,0,3.13,.36,.17,.035,.025);
+ const helmetGroup=new T.Group();root.add(helmetGroup);ell(black,0,3.51,-.02,.41,.42,.35,helmetGroup);ell(gold,0,3.64,.015,.07,.30,.36,helmetGroup);for(const s of [-1,1]){ell(black,s*.32,3.29,.015,.10,.31,.24,helmetGroup);ell(gold,s*.39,3.43,.07,.025,.05,.05,helmetGroup);}
+ const shield=ell(visor,0,3.44,.27,.38,.19,.14,helmetGroup);
+ // Fabric texture, seams, pockets and a stitched patch make the jacket legible.
+ for(const s of [-1,1]){link(black,[s*.28,2.88,.25],[s*.10,2.58,.33],.035);link(black,[s*.30,2.28,.30],[s*.39,2.09,.26],.018);}
+ for(let n=0;n<6;n++)ell(gold,0,2.03+n*.14,.35,.015,.015,.01);
+ const patchCanvas=document.createElement('canvas');patchCanvas.width=512;patchCanvas.height=256;const ctx=patchCanvas.getContext('2d'),patchTex=new T.CanvasTexture(patchCanvas);patchTex.colorSpace=T.SRGBColorSpace;const patch=new T.Mesh(new T.PlaneGeometry(.28,.12),new T.MeshStandardMaterial({map:patchTex,roughness:.9}));patch.position.set(-.27,2.46,.317);root.add(patch);
+ const check=new T.Group();for(let y=0;y<3;y++)for(let x=0;x<5;x++){const square=new T.Mesh(new T.PlaneGeometry(.048,.048),(x+y)%2?black:white);square.position.set(-.36+x*.048,2.62+y*.048,.318);check.add(square);}root.add(check);
+ function update(v){suit.color.set(G.item('suit',v.suit).color);pants.color.set(G.item('pants',v.pants).color);shoe.color.set(G.item('shoes',v.shoes).color);helmetGroup.visible=v.helmet!=='none';shield.position.y=v.visor==='open'?3.71:3.44;shield.rotation.x=v.visor==='open'?-.8:0;patch.visible=v.patch!=='none';ctx.fillStyle='#22282b';ctx.fillRect(0,0,512,256);ctx.strokeStyle='#c9af74';ctx.lineWidth=12;ctx.strokeRect(8,8,496,240);ctx.fillStyle='#eee0b5';ctx.font='bold 72px Arial';ctx.textAlign='center';ctx.fillText(v.patch==='name'?v.patchText||'ВАШНИК':v.patch==='sevenTwo'?'7♠ 2♥':'A♠ A♥',256,150,460);patchTex.needsUpdate=true;}
+ update(look);state.yaw??=0;state.pitch??=.07;let drag=null,raf,disposed=false;
+ function fit(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}const observer=new ResizeObserver(fit);observer.observe(host);fit();
+ const down=e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY};host.setPointerCapture(e.pointerId);e.preventDefault();};const move=e=>{if(!drag||drag.id!==e.pointerId)return;state.yaw-=(e.clientX-drag.x)*.012;state.pitch=Math.max(-.3,Math.min(.5,state.pitch+(e.clientY-drag.y)*.006));drag.x=e.clientX;drag.y=e.clientY;};const up=()=>{drag=null;};const key=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){state.yaw+=e.key==='ArrowLeft'?.15:-.15;e.preventDefault();}};host.addEventListener('pointerdown',down);host.addEventListener('pointermove',move);host.addEventListener('pointerup',up);host.addEventListener('pointercancel',up);host.addEventListener('keydown',key);
+ function dispose(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);observer.disconnect();for(const [n,f]of [['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',up],['keydown',key]])host.removeEventListener(n,f);const mats=new Set();scene.traverse(o=>{o.geometry?.dispose();if(o.material)mats.add(o.material);});for(const m of mats)m.dispose();patchTex.dispose();fabric.dispose();renderer.dispose();renderer.domElement.remove();}
+ function tick(){if(disposed)return;if(!host.isConnected||(host.closest('dialog')&&!host.closest('dialog').open)){dispose();return;}const d=Math.max(7.3,2.6/camera.aspect);camera.position.set(Math.sin(state.yaw)*Math.cos(state.pitch)*d,1.95+Math.sin(state.pitch)*d,Math.cos(state.yaw)*Math.cos(state.pitch)*d);camera.lookAt(0,1.95,0);renderer.render(scene,camera);host.dataset.yaw=String(state.yaw);raf=requestAnimationFrame(tick);}tick();return {update,dispose,state};
+};
