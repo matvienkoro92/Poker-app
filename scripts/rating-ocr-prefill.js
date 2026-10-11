@@ -64,6 +64,7 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/^Mystic\s+Bounty.*50k/i.test(raw)) return "Mystic Bounty🥊 50k";
   if (/SHR\s+1\s+MLN\s+GTD/i.test(raw)) return "🏆SHR 1 MLN GTD🏆";
   let name = String(raw || "").trim();
   name = name.replace(/\s+/g, " ");
@@ -489,8 +490,11 @@ async function parseOcrFile(file) {
   if (date === "06.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
   if (date === "08.10.2026" && !blue && time === "17:00" && buyin === 50) title = "Сат на Пятак";
   if (date === "09.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
+  if (date === "10.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   // Visually verified ID labels that Vision prefixed or distorted.
   tokens.forEach((token) => {
+    // IMG_0143: the avatar adds a stray K before Nast’ko’s visible ID.
+    if (date === "10.10.2026" && time === "17:00" && !blue && token.text === "KID:121231") token.text = "ID:121231";
     // IMG_0037: Vision attached a stray K to GUCCI’s visible ID.
     if (date === "08.10.2026" && time === "20:00" && !blue && token.text === "KID:642453") token.text = "ID:642453";
     if (date === "02.10.2026" && time === "12:00" && token.text === "yID:173085") token.text = "ID:173085";
