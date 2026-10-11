@@ -41,11 +41,11 @@
 .lounge-seat--occupied.lounge-seat--2 .lounge-seat__name{order:-1;margin-bottom:.5cqh}
 /* Live players use independent seated bodies, the actual table and hand layers. */
 .player-hall-dialog .lounge-seat--playing{overflow:visible}
-.lounge-seat__character,.lounge-hands>img{position:absolute;left:50%;bottom:-5cqh;width:155%;height:auto;max-width:none;transform:translateX(-50%);filter:drop-shadow(0 .45cqh .25cqh #0005)}
+.lounge-seat__character,.lounge-hands>img{position:absolute;left:50%;bottom:-7cqh;width:155%;height:auto;max-width:none;transform:translateX(-50%);filter:drop-shadow(0 .45cqh .25cqh #0005)}
 .lounge-table-foreground{position:absolute;inset:0;background:inherit;clip-path:polygon(14% 44.2%,38% 43.6%,63% 43.6%,81% 44.6%,88% 47.5%,84% 50.1%,84% 58%,17% 58%,17% 50.1%,12% 47.5%);z-index:4;pointer-events:none}
 .lounge-hands{position:absolute;width:16%;height:13%;z-index:5;pointer-events:none}
-.lounge-hands--left{clip-path:polygon(0% 58%,45% 58%,45% 83%,0% 83%)}
-.lounge-hands--right{clip-path:polygon(55% 58%,100% 58%,100% 83%,55% 83%)}
+.lounge-hands--left{clip-path:polygon(19% 64%,32% 64%,42% 68%,46% 73%,44% 78%,36% 77.5%,27% 74%,22% 72%)}
+.lounge-hands--right{clip-path:polygon(55% 67%,67% 64%,77% 65%,81% 71%,73% 75.5%,61% 78%,54% 76%)}
 .lounge-hands.lounge-seat--3,.lounge-hands.lounge-seat--4,.lounge-seat--3,.lounge-seat--4{top:36%}
 .lounge-seat--playing .lounge-seat__name{position:absolute;bottom:-4.6cqh;left:50%;transform:translateX(-50%);order:0!important;margin:0!important;max-width:120%;z-index:6;font-size:.82cqh}
 .lounge-seat__status{position:absolute;top:-2.2cqh;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:.35cqh;white-space:nowrap;max-width:160%;padding:.35cqh .5cqh;background:#12261bf0;border:1px solid #70b18a66;border-radius:4px;color:#e4f0d7;font-size:.92cqh;line-height:1.2;z-index:6;box-shadow:0 2px 5px #0005}
@@ -83,8 +83,8 @@
 
 /* Only confirmed live players occupy chairs. Keep identities above the table. */
 .player-hall-dialog .lounge-seat[hidden]{display:none}
-.player-hall-dialog .lounge-seat--playing{z-index:5}
-.lounge-seat--playing .lounge-seat__character{clip-path:inset(0 0 25% 0)}
+.player-hall-dialog .lounge-seat--playing{z-index:3}
+.lounge-seat--playing .lounge-seat__character{clip-path:none}
 .lounge-seat--playing .lounge-seat__name{top:-4cqh;bottom:auto;font-size:1.05cqh;max-width:140%}
 .lounge-seat--playing .lounge-seat__status{top:-7cqh}
 .lounge-seat--3.lounge-seat--playing .lounge-seat__name,.lounge-seat--4.lounge-seat--playing .lounge-seat__name{top:-8cqh}
@@ -338,3 +338,9 @@
 .garage-shelf-part[data-hall-garage=suit] canvas{height:81%;margin-top:7%}
 
 .garage-progression{margin:8px 18px 14px;padding:12px 14px;background:#18232c;border:1px solid #44505a;border-radius:12px;color:#d4dce2;font-size:13px}.garage-progression summary{cursor:pointer;font-weight:700;color:#e9cd8a}.garage-progression-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #ffffff12}.garage-progression-row strong{flex:0 0 46px;color:#e9cd8a}.garage-progression-row span{line-height:1.6}.garage-progression p{color:#aebbc5;line-height:1.5}
+
+/* The seated character opens their own wardrobe from the hall. */
+.player-hall-dialog .player-hall__character-hit{position:absolute;left:14%;top:41%;width:48%;height:34%;z-index:3;background:transparent;border:0;padding:0;cursor:pointer;clip-path:polygon(24% 0,62% 0,66% 25%,100% 53%,100% 84%,72% 100%,0 100%,0 44%,20% 26%)}
+.player-hall-dialog .player-hall__character-label{position:absolute;left:61%;top:56%;z-index:3;display:flex;flex-direction:column;gap:.3cqh;padding:.8cqh 1cqh;border:1px solid #c8ac6d80;border-radius:2cqh;background:#192318eb;color:#eddfbc;box-shadow:0 .3cqh .8cqh #0006;cursor:pointer;min-height:0;font-size:1.15cqh;white-space:nowrap}
+.player-hall__character-label b{color:#e8ca82}.player-hall__character-label small{font-size:.85cqh;color:#bfb99f}
+.player-hall__room:not([data-space=hall]) :is(.player-hall__character-hit,.player-hall__character-label){display:none}
