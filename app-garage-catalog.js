@@ -167,7 +167,7 @@ function cardCanvas(id,n){
   if(n){x.moveTo(0,.42);x.bezierCurveTo(-.12,.24,-.53,-.02,-.42,-.29);x.bezierCurveTo(-.33,-.53,-.08,-.48,0,-.28);x.bezierCurveTo(.08,-.48,.33,-.53,.42,-.29);x.bezierCurveTo(.53,-.02,.12,.24,0,.42);}
   else{x.moveTo(0,-.48);x.bezierCurveTo(-.12,-.29,-.51,-.04,-.40,.20);x.bezierCurveTo(-.30,.42,-.09,.29,0,.15);x.bezierCurveTo(.09,.29,.30,.42,.40,.20);x.bezierCurveTo(.51,-.04,.12,-.29,0,-.48);x.closePath();x.moveTo(-.13,.46);x.quadraticCurveTo(0,.26,0,.12);x.quadraticCurveTo(0,.26,.13,.46);}
   x.closePath();x.fill();x.restore();}
- for(const flip of [false,true]){x.save();if(flip){x.translate(256,360);x.rotate(Math.PI);}x.fillStyle=ink;x.textAlign='center';x.textBaseline='alphabetic';x.font='bold 43px Arial';x.fillText(rank,34,54);pip(34,77,27);x.restore();}
+ for(const flip of [false,true]){x.save();if(flip){x.translate(256,360);x.rotate(Math.PI);}x.fillStyle=ink;x.textAlign='center';x.textBaseline='alphabetic';x.font='bold 56px Arial';x.fillText(rank,40,64);pip(40,88,31);x.restore();}
  if(rank==='A')pip(128,180,123);
  else if(['K','Q','J','10'].includes(rank)){x.fillStyle=ink;x.textAlign='center';x.font='bold 112px Georgia';x.fillText(rank,128,218);pip(128,110,45);pip(128,267,45,true);}
  else{const points=rank==='7'?[[86,105],[170,105],[86,180],[170,180],[86,255],[170,255],[128,141]]:[[128,114],[128,246]];for(const [px,py]of points)pip(px,py,rank==='7'?43:68,py>180);}
