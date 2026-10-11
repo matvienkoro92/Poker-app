@@ -1034,8 +1034,22 @@ if (chatUserModalEl) {
   function closeChatUserModalNews() {
     if (modalNewsDialog) modalNewsDialog.hidden = true;
   }
-  function revealChatUserModal(seq) {
+  var chatUserModalStyleReady = null;
+  function revealChatUserModal(seq, stylesReady) {
     if (seq !== chatUserModalOpenSeq || !chatUserModalUserId) return;
+    if (!stylesReady && typeof window.pokerEnsureStyleDomains === "function") {
+      if (!chatUserModalStyleReady) {
+        chatUserModalStyleReady = Promise.resolve(window.pokerEnsureStyleDomains(["chat", "profile"])).catch(function (error) {
+          chatUserModalStyleReady = null;
+          throw error;
+        });
+      }
+      chatUserModalStyleReady.then(function () { revealChatUserModal(seq, true); }).catch(function () {
+        if (seq !== chatUserModalOpenSeq) return;
+        if (typeof window.pokerShowToast === "function") window.pokerShowToast("Не удалось загрузить оформление профиля. Попробуйте ещё раз.");
+      });
+      return;
+    }
     if (chatUserModalAffinitySeq !== seq && !chatUserModalEl.classList.contains("chat-user-modal--appearance-editor")) {
       chatUserModalAffinitySeq = seq;
       if (typeof window.pokerRecordFriendInteraction === "function") window.pokerRecordFriendInteraction(chatUserModalUserId, "profile");
