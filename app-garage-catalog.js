@@ -104,9 +104,17 @@ function renderCharacter(image,v){
   // Hide the exposed outer ear beneath the shell without touching the face or hand.
   c.save();c.globalCompositeOperation='destination-out';c.beginPath();c.ellipse(216,151,33,63,0,0,Math.PI*2);c.fill();c.restore();
   // Match the seated head tilt with the frontal shell instead of cutting a side-view helmet.
-  c.translate(375,145);c.rotate(-.16);
+  c.translate(383,145);c.rotate(.12);
   // Both visor states share a frontal shell and the same head registration.
-  c.drawImage(helmetArt(true,v,true),-195,-185,390,350);c.restore();
+  c.drawImage(helmetArt(true,v,true),-190,-185,380,350);c.restore();
+  // The right collar occludes the shell tip where it meets the shoulder.
+  c.save();c.scale(canvas.width/1179,image.naturalHeight/1334);c.beginPath();
+  c.moveTo(545,224);c.lineTo(580,240);c.lineTo(535,320);c.lineTo(500,350);
+  c.quadraticCurveTo(525,320,540,275);c.closePath();c.clip();
+  const collar=document.createElement('canvas');collar.width=140;collar.height=160;
+  const collarX=480*image.naturalWidth/1179,collarY=210*image.naturalHeight/1334;
+  collar.getContext('2d').putImageData(body,-collarX,-collarY);
+  c.drawImage(collar,480,210,140*1179/image.naturalWidth,160*1334/image.naturalHeight);c.restore();
   // The hand rests in front of the helmet, just as it rests in front of the chin.
   c.save();c.scale(canvas.width/1179,image.naturalHeight/1334);c.beginPath();
   c.moveTo(191,249);c.bezierCurveTo(198,194,275,204,324,231);

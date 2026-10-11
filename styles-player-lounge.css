@@ -162,7 +162,7 @@
 .garage-shelf-art{display:flex;align-items:center;justify-content:center;flex:1;min-height:0;width:80%;filter:drop-shadow(2px 3px 2px #0009)}.garage-shelf-art svg,.garage-shelf-art img{display:block;max-height:100%;height:100%;width:100%;object-fit:contain}.garage-shelf-part>strong{font-size:1.8cqw;line-height:1.2;text-align:center}.garage-shelf-part>small{font-size:1.6cqw;color:#b6b9b1;line-height:1.2}.garage-shelf-part>.garage-shelf-next{color:#c4a979;font-size:1.5cqw}.garage-shelf-empty{font-size:8cqw;color:#9c9584;opacity:.6}
 .player-hall__room:not([data-space=garage]) .garage-shelf-inventory{visibility:hidden}
 
-.house-passage-art{position:absolute;left:-50%;top:0;width:150%;height:100%;background:url('./assets/player-hall/house-passage-v3.webp') center/100% 100% no-repeat;clip-path:polygon(60.1% 1%,72% 1%,72% 54%,60.1% 54%);pointer-events:none;z-index:0}
+.house-passage-art{position:absolute;left:-50%;top:0;width:150%;height:100%;background:url('./assets/player-hall/house-passage-v3.webp') center/100% 100% no-repeat;clip-path:polygon(60.1% 1%,72% 1%,72% 62%,60.1% 62%);mask-image:linear-gradient(to bottom,#000 46%,transparent 62%);-webkit-mask-image:linear-gradient(to bottom,#000 46%,transparent 62%);pointer-events:none;z-index:0}
 .player-hall-dialog .garage-house-passage{position:absolute;left:-17%;top:16%;width:32%;height:36%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:8px;background:transparent;border:0;z-index:4;cursor:pointer;touch-action:manipulation;color:#efdab2}
 .garage-house-passage>.garage-lock{display:grid;place-items:center;width:46px;height:46px;border:1px solid #d0b27188;border-radius:50%;background:#111b1bec;box-shadow:0 4px 15px #0009;font-size:24px}.garage-house-passage>strong,.garage-house-passage>small{padding:5px 8px;background:#111b1bf0;border:1px solid #b89a5755;border-radius:7px;text-align:center;line-height:1.3;font-size:10px}.garage-house-passage>small{color:#ccb88f;font-size:11px}
 .player-hall__room:not([data-space=garage]) .garage-house-passage{visibility:hidden}
@@ -279,7 +279,7 @@
 .player-hall__display-shelf--achievements .player-hall__slot-title{height:3.8cqh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:visible;font-size:.9cqh}
 .player-hall__display-shelf--achievements .player-hall__slot-title>span{display:block;overflow:visible;text-overflow:clip;white-space:normal}
 /* Move the parked car along its forward diagonal, with its menu hotspot. */
-.player-hall__parked-kart{left:42.5%;top:43%}
+.player-hall__parked-kart{left:42.5%;top:43%;transform:scale(1.3);transform-origin:50% 80%}
 .player-hall__garage-object--kart{left:-18%;top:44.5%}
 
 .garage-visor-tabs{display:flex;gap:10px;padding:0 20px 16px}.garage-visor-tabs button{flex:1;padding:12px;border:1px solid #49535a;border-radius:16px;background:#1b252c;color:#c3cbd1;font-family:inherit;font-size:16px;font-weight:600}.garage-visor-tabs button[aria-pressed="true"]{border-color:#d9b666;background:#332f23;color:#ffe3a3}.garage-visor-tabs button:disabled{opacity:.45}
@@ -313,7 +313,7 @@
 .player-hall__room[data-theme=midnight] .player-hall__cabinet-object .hall-award-reflection{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;mask-image:var(--award-mask);mask-size:contain;mask-repeat:no-repeat;mask-position:center bottom;background:linear-gradient(0deg,var(--award-light) 0%,transparent 72%),linear-gradient(90deg,var(--award-light),transparent 23%,transparent 80%,var(--award-light));opacity:.4;mix-blend-mode:screen}
 
 /* A softly lit physical rocker on the wall beneath the right trophy cabinet. */
-.player-hall-dialog .hall-wall-switch{position:absolute;left:66.5%;top:48%;width:3.8%;height:3.4%;padding:.45cqh;border:1px solid #b89e6f;border-radius:.4cqh;background:linear-gradient(125deg,#706145,#272a29 45%,#938066);box-shadow:0 .2cqh .3cqh #000b,0 0 .7cqh #e7ca7b66;z-index:5;transform:skewY(-3deg);cursor:pointer}
+.player-hall-dialog .hall-wall-switch{position:absolute;left:66.5%;top:49%;width:3.4%;height:2.8%;padding:.45cqh;border:1px solid #b89e6f;border-radius:.4cqh;background:linear-gradient(125deg,#706145,#272a29 45%,#938066);box-shadow:0 .2cqh .3cqh #000b,0 0 .7cqh #e7ca7b66;z-index:5;transform:skewY(-3deg);cursor:pointer}
 .hall-wall-switch__rocker{display:block;position:relative;width:100%;height:100%;border:1px solid #131818;border-radius:.2cqh;background:linear-gradient(#b4b6a6,#656f68 45%,#303a35 49%,#839185);box-shadow:inset 0 1px #f5efd080}
 .hall-wall-switch__rocker i{position:absolute;left:35%;top:19%;width:30%;height:8%;border-radius:2px;background:#ffe3a0;box-shadow:0 0 4px #ffdc86}
 .hall-wall-switch[aria-pressed=true]{box-shadow:0 .2cqh .3cqh #000b,0 0 .8cqh #82dce980}
@@ -340,7 +340,15 @@
 .garage-progression{margin:8px 18px 14px;padding:12px 14px;background:#18232c;border:1px solid #44505a;border-radius:12px;color:#d4dce2;font-size:13px}.garage-progression summary{cursor:pointer;font-weight:700;color:#e9cd8a}.garage-progression-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #ffffff12}.garage-progression-row strong{flex:0 0 46px;color:#e9cd8a}.garage-progression-row span{line-height:1.6}.garage-progression p{color:#aebbc5;line-height:1.5}
 
 /* The seated character opens their own wardrobe from the hall. */
-.player-hall-dialog .player-hall__character-hit{position:absolute;left:14%;top:41%;width:48%;height:34%;z-index:3;background:transparent;border:0;padding:0;cursor:pointer;clip-path:polygon(24% 0,62% 0,66% 25%,100% 53%,100% 84%,72% 100%,0 100%,0 44%,20% 26%)}
+.player-hall-dialog .player-hall__character-hit{position:absolute;left:14%;top:41%;width:48%;height:22%;z-index:3;background:transparent;border:0;padding:0;cursor:pointer;clip-path:polygon(24% 0,62% 0,66% 25%,100% 53%,100% 84%,72% 100%,0 100%,0 44%,20% 26%)}
 .player-hall-dialog .player-hall__character-label{position:absolute;left:61%;top:56%;z-index:3;display:flex;flex-direction:column;gap:.3cqh;padding:.8cqh 1cqh;border:1px solid #c8ac6d80;border-radius:2cqh;background:#192318eb;color:#eddfbc;box-shadow:0 .3cqh .8cqh #0006;cursor:pointer;min-height:0;font-size:1.15cqh;white-space:nowrap}
 .player-hall__character-label b{color:#e8ca82}.player-hall__character-label small{font-size:.85cqh;color:#bfb99f}
 .player-hall__room:not([data-space=hall]) :is(.player-hall__character-hit,.player-hall__character-label){display:none}
+
+/* Compact upgrade cards: two per row, with height determined by their contents. */
+.garage-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow-x:visible;scroll-snap-type:none;align-items:start}
+.garage-option{min-width:0;padding:10px;height:auto;box-sizing:border-box}
+.player-hall-dialog .garage-option>button[data-choice]{height:auto;min-height:0;gap:6px}
+.garage-option-art{height:clamp(90px,13dvh,130px);margin:0 0 4px}
+.garage-option p{margin:6px 0}.garage-option strong{line-height:1.25}
+@media(min-width:720px){.garage-options{grid-template-columns:repeat(3,minmax(0,1fr))}}
