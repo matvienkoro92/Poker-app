@@ -30,7 +30,7 @@ test('shelves mirror saved choices and unlocks at each level',()=>{
  assert.equal(slots.find(s=>s.kind==='helmet').next.target,3);
  slots=G.shelfSlots({stats:{level:25},loadout:{helmet:'night',wheels:'carbon'}});
  assert.equal(slots.find(s=>s.kind==='helmet').empty,false);
- assert.equal(slots.find(s=>s.kind==='helmet').next,null);
+ assert.equal(slots.find(s=>s.kind==='helmet').next.target,40);
  assert.equal(slots.find(s=>s.kind==='wheels').selected.id,'carbon');
  assert.equal(slots.find(s=>s.kind==='wheels').next.target,30);
  assert.ok(G.shelfSlots({stats:{level:100}}).every(s=>s.owned===s.total&&!s.next));
@@ -68,4 +68,18 @@ test('steering, turbine and exhaust choices persist and twin turbines require le
  assert.throws(()=>Garage.choose({...G.defaults,turbine:'twin'},{stats:{level:59}}),/не открыта/);
  assert.equal(G.normalize(look,{level:0}).turbine,'classic');
  for(const kind of ['steering','turbine','exhaust'])assert.equal(G.catalog({level:100}).filter(i=>i.kind===kind).length,3);
+});
+
+test('body hardware and lifted suspension survive server save',()=>{const look={...G.defaults,mirrors:'club',frontBumper:'sport',rearBumper:'club',sideSkirts:'sport',suspension:'high'};const saved=Garage.choose(look,{stats:{level:55}});for(const key of ['mirrors','frontBumper','rearBumper','sideSkirts','suspension'])assert.equal(Garage.view({garage:saved},{stats:{level:55}}).loadout[key],look[key]);assert.equal(G.normalize({},{}).suspension,'standard');assert.throws(()=>Garage.choose({...look,suspension:'invalid'},{stats:{level:55}}),/не открыта/);});
+
+test('expanded catalogue has regular milestones and rejects every locked part',()=>{
+ const levelItems=G.items.filter(i=>i.metric==='level');
+ assert.ok(levelItems.length>=130);
+ const levels=[...new Set(levelItems.map(i=>i.target))].sort((a,b)=>a-b);
+ for(let n=1;n<levels.length;n++)assert.ok(levels[n]-levels[n-1]<=5,'empty progression gap at '+levels[n]);
+ for(const level of [25,50,75,100])assert.ok(levelItems.filter(i=>i.target>level-25&&i.target<=level).length>=15);
+ for(const kind of ['mirrors','frontBumper','rearBumper','sideSkirts','suspension','spoiler','headlights','fenders','windshield']){assert.ok(G.catalog({level:0}).filter(i=>i.kind===kind&&i.unlocked).length===1);assert.ok(G.catalog({level:100}).filter(i=>i.kind===kind&&i.unlocked).length>=5);}
+ for(const i of levelItems){const look={[i.kind]:i.id,...(i.key==='patch:name'?{patchText:'Игрок21'}:{})};const saved=Garage.choose(look,{stats:{level:i.target}});assert.equal(Garage.view({garage:saved},{stats:{level:i.target}}).loadout[i.kind],i.id);}
+ assert.notDeepEqual(G.wheelDesign('fiveSpoke'),G.wheelDesign('splitSix'));
+ assert.notDeepEqual(G.chipPalette('noir'),G.chipPalette('legend'));
 });
