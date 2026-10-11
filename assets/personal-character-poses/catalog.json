@@ -1,0 +1,399 @@
+[
+  {
+    "id": "alena",
+    "original": "assets/club-news-personal/alena-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/alena-news-cutout.webp",
+      "seated": "assets/personal-character-poses/alena-seated-v1.webp",
+      "standing": "assets/personal-character-poses/alena-standing-v1.webp"
+    }
+  },
+  {
+    "id": "aspirin",
+    "original": "assets/club-news-personal/aspirin-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/aspirin-news-cutout.webp",
+      "seated": "assets/personal-character-poses/aspirin-seated-v1.webp",
+      "standing": "assets/personal-character-poses/aspirin-standing-v1.webp"
+    }
+  },
+  {
+    "id": "aza",
+    "original": "assets/club-news-personal/aza-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/aza-news-cutout.webp",
+      "seated": "assets/personal-character-poses/aza-seated-v1.webp",
+      "standing": "assets/personal-character-poses/aza-standing-v1.webp"
+    }
+  },
+  {
+    "id": "babnik",
+    "original": "assets/club-news-personal/babnik-news-cutout-rose.webp",
+    "images": {
+      "original": "assets/club-news-personal/babnik-news-cutout-rose.webp",
+      "seated": "assets/personal-character-poses/babnik-seated-v1.webp",
+      "standing": "assets/personal-character-poses/babnik-standing-v1.webp"
+    }
+  },
+  {
+    "id": "babyshark",
+    "original": "assets/club-news-personal/babyshark-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/babyshark-news-cutout.webp",
+      "seated": "assets/personal-character-poses/babyshark-seated-v1.webp",
+      "standing": "assets/personal-character-poses/babyshark-standing-v1.webp"
+    }
+  },
+  {
+    "id": "bardur",
+    "original": "assets/club-news-personal/bardur-news-cutout-display-v1.webp",
+    "images": {
+      "original": "assets/club-news-personal/bardur-news-cutout-display-v1.webp",
+      "seated": "assets/personal-character-poses/bardur-seated-v1.webp",
+      "standing": "assets/personal-character-poses/bardur-standing-v1.webp"
+    }
+  },
+  {
+    "id": "bublik-rnd",
+    "original": "assets/club-news-personal/bublik-rnd-personal-v2.webp",
+    "images": {
+      "original": "assets/club-news-personal/bublik-rnd-personal-v2.webp",
+      "seated": "assets/personal-character-poses/bublik-rnd-seated-v1.webp",
+      "standing": "assets/personal-character-poses/bublik-rnd-standing-v1.webp"
+    }
+  },
+  {
+    "id": "cooler",
+    "original": "assets/club-news-personal/cooler-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/cooler-news-cutout.webp",
+      "seated": "assets/personal-character-poses/cooler-seated-v1.webp",
+      "standing": "assets/personal-character-poses/cooler-standing-v1.webp"
+    }
+  },
+  {
+    "id": "emil",
+    "original": "assets/club-news-personal/emil-news-cutout-v3.webp",
+    "images": {
+      "original": "assets/club-news-personal/emil-news-cutout-v3.webp",
+      "seated": "assets/personal-character-poses/emil-seated-v1.webp",
+      "standing": "assets/personal-character-poses/emil-standing-v1.webp"
+    }
+  },
+  {
+    "id": "evgen1722",
+    "original": "assets/club-news-personal/evgen1722-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/evgen1722-news-cutout.webp",
+      "seated": "assets/personal-character-poses/evgen1722-seated-v1.webp",
+      "standing": "assets/personal-character-poses/evgen1722-standing-v1.webp"
+    }
+  },
+  {
+    "id": "fishkopcheny",
+    "original": "assets/club-news-personal/fishkopcheny-coach-card.webp",
+    "images": {
+      "original": "assets/club-news-personal/fishkopcheny-coach-card.webp",
+      "seated": "assets/personal-character-poses/fishkopcheny-seated-v1.webp",
+      "standing": "assets/personal-character-poses/fishkopcheny-standing-v1.webp"
+    }
+  },
+  {
+    "id": "gucci",
+    "original": "assets/club-news-personal/gucci-finalist-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/gucci-finalist-cutout.webp",
+      "seated": "assets/personal-character-poses/gucci-seated-v1.webp",
+      "standing": "assets/personal-character-poses/gucci-standing-v1.webp"
+    }
+  },
+  {
+    "id": "hakas",
+    "original": "assets/club-news-personal/hakas-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/hakas-news-cutout.webp",
+      "seated": "assets/personal-character-poses/hakas-seated-v1.webp",
+      "standing": "assets/personal-character-poses/hakas-standing-v1.webp"
+    }
+  },
+  {
+    "id": "jeweler",
+    "original": "assets/club-news-personal/jeweler-personal-v1.webp",
+    "images": {
+      "original": "assets/club-news-personal/jeweler-personal-v1.webp",
+      "seated": "assets/personal-character-poses/jeweler-seated-v1.webp",
+      "standing": "assets/personal-character-poses/jeweler-standing-v1.webp"
+    }
+  },
+  {
+    "id": "khervam",
+    "original": "assets/club-news-personal/khervam-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/khervam-news-cutout.webp",
+      "seated": "assets/personal-character-poses/khervam-seated-v1.webp",
+      "standing": "assets/personal-character-poses/khervam-standing-v1.webp"
+    }
+  },
+  {
+    "id": "ksyukha",
+    "original": "assets/club-news-personal/ksyukha-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/ksyukha-news-cutout.webp",
+      "seated": "assets/personal-character-poses/ksyukha-seated-v1.webp",
+      "standing": "assets/personal-character-poses/ksyukha-standing-v1.webp"
+    }
+  },
+  {
+    "id": "luck-is-suck",
+    "original": "assets/club-news-personal/luck-is-suck-personal-cutout.webp",
+    "seated": "assets/personal-character-poses/luck-is-suck-seated-v2.webp",
+    "images": {
+      "original": "assets/club-news-personal/luck-is-suck-personal-cutout.webp",
+      "seated": "assets/personal-character-poses/luck-is-suck-seated-v2.webp",
+      "standing": "assets/personal-character-poses/luck-is-suck-standing-v1.webp"
+    }
+  },
+  {
+    "id": "milkyway",
+    "original": "assets/club-news-personal/milkyway-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/milkyway-news-cutout.webp",
+      "seated": "assets/personal-character-poses/milkyway-seated-v1.webp",
+      "standing": "assets/personal-character-poses/milkyway-standing-v1.webp"
+    }
+  },
+  {
+    "id": "missclick",
+    "original": "assets/club-news-personal/missclick-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/missclick-news-cutout.webp",
+      "seated": "assets/personal-character-poses/missclick-seated-v1.webp",
+      "standing": "assets/personal-character-poses/missclick-standing-v1.webp"
+    }
+  },
+  {
+    "id": "morf",
+    "original": "assets/club-news-personal/morf-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/morf-news-cutout.webp",
+      "seated": "assets/personal-character-poses/morf-seated-v1.webp",
+      "standing": "assets/personal-character-poses/morf-standing-v1.webp"
+    }
+  },
+  {
+    "id": "mrfox",
+    "original": "assets/club-news-personal/mrfox-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/mrfox-news-cutout.webp",
+      "seated": "assets/personal-character-poses/mrfox-seated-v1.webp",
+      "standing": "assets/personal-character-poses/mrfox-standing-v1.webp"
+    }
+  },
+  {
+    "id": "nakurikota",
+    "original": "assets/club-news-personal/nakurikota-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/nakurikota-news-cutout.webp",
+      "seated": "assets/personal-character-poses/nakurikota-seated-v1.webp",
+      "standing": "assets/personal-character-poses/nakurikota-standing-v1.webp"
+    }
+  },
+  {
+    "id": "nikola233",
+    "original": "assets/club-news-personal/nikola233-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/nikola233-news-cutout.webp",
+      "seated": "assets/personal-character-poses/nikola233-seated-v1.webp",
+      "standing": "assets/personal-character-poses/nikola233-standing-v1.webp"
+    }
+  },
+  {
+    "id": "palach",
+    "original": "assets/club-news-personal/palach-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/palach-news-cutout.webp",
+      "seated": "assets/personal-character-poses/palach-seated-v1.webp",
+      "standing": "assets/personal-character-poses/palach-standing-v1.webp"
+    }
+  },
+  {
+    "id": "paparabotaet",
+    "original": "assets/club-news-personal/paparabotaet-personal-cutout-v2.webp",
+    "images": {
+      "original": "assets/club-news-personal/paparabotaet-personal-cutout-v2.webp",
+      "seated": "assets/personal-character-poses/paparabotaet-seated-v1.webp",
+      "standing": "assets/personal-character-poses/paparabotaet-standing-v1.webp"
+    }
+  },
+  {
+    "id": "pokermanki",
+    "original": "assets/club-news-personal/pokermanki-news-cutout-v4.webp",
+    "images": {
+      "original": "assets/club-news-personal/pokermanki-news-cutout-v4.webp",
+      "seated": "assets/personal-character-poses/pokermanki-seated-v1.webp",
+      "standing": "assets/personal-character-poses/pokermanki-standing-v1.webp"
+    }
+  },
+  {
+    "id": "porquinho",
+    "original": "assets/club-news-personal/porquinho-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/porquinho-news-cutout.webp",
+      "seated": "assets/personal-character-poses/porquinho-seated-v1.webp",
+      "standing": "assets/personal-character-poses/porquinho-standing-v1.webp"
+    }
+  },
+  {
+    "id": "proxor",
+    "original": "assets/club-news-personal/proxor-personal-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/proxor-personal-cutout.webp",
+      "seated": "assets/personal-character-poses/proxor-seated-v1.webp",
+      "standing": "assets/personal-character-poses/proxor-standing-v1.webp"
+    }
+  },
+  {
+    "id": "prushnik",
+    "original": "assets/club-news-personal/prushnik-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/prushnik-news-cutout.webp",
+      "seated": "assets/personal-character-poses/prushnik-seated-v1.webp",
+      "standing": "assets/personal-character-poses/prushnik-standing-v1.webp"
+    }
+  },
+  {
+    "id": "pryanik",
+    "original": "assets/club-news-personal/pryanik-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/pryanik-news-cutout.webp",
+      "seated": "assets/personal-character-poses/pryanik-seated-v1.webp",
+      "standing": "assets/personal-character-poses/pryanik-standing-v1.webp"
+    }
+  },
+  {
+    "id": "redrocket",
+    "original": "assets/club-news-personal/redrocket-monkey-personal-v1.webp",
+    "images": {
+      "original": "assets/club-news-personal/redrocket-monkey-personal-v1.webp",
+      "seated": "assets/personal-character-poses/redrocket-seated-v1.webp",
+      "standing": "assets/personal-character-poses/redrocket-standing-v1.webp"
+    }
+  },
+  {
+    "id": "rybnadzor",
+    "original": "assets/club-news-personal/rybnadzor-big-fish-transparent-v2.webp",
+    "images": {
+      "original": "assets/club-news-personal/rybnadzor-big-fish-transparent-v2.webp",
+      "seated": "assets/personal-character-poses/rybnadzor-seated-v1.webp",
+      "standing": "assets/personal-character-poses/rybnadzor-standing-v1.webp"
+    }
+  },
+  {
+    "id": "sarmat",
+    "original": "assets/club-news-personal/sarmat-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/sarmat-news-cutout.webp",
+      "seated": "assets/personal-character-poses/sarmat-seated-v1.webp",
+      "standing": "assets/personal-character-poses/sarmat-standing-v1.webp"
+    }
+  },
+  {
+    "id": "shark-eyed",
+    "original": "assets/club-news-personal/shark-eyed-personal-v1.webp",
+    "images": {
+      "original": "assets/club-news-personal/shark-eyed-personal-v1.webp",
+      "seated": "assets/personal-character-poses/shark-eyed-seated-v1.webp",
+      "standing": "assets/personal-character-poses/shark-eyed-standing-v1.webp"
+    }
+  },
+  {
+    "id": "shkarubo",
+    "original": "assets/club-news-personal/shkarubo-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/shkarubo-news-cutout.webp",
+      "seated": "assets/personal-character-poses/shkarubo-seated-v1.webp",
+      "standing": "assets/personal-character-poses/shkarubo-standing-v1.webp"
+    }
+  },
+  {
+    "id": "shtukatur",
+    "original": "assets/club-news-personal/shtukatur-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/shtukatur-news-cutout.webp",
+      "seated": "assets/personal-character-poses/shtukatur-seated-v1.webp",
+      "standing": "assets/personal-character-poses/shtukatur-standing-v1.webp"
+    }
+  },
+  {
+    "id": "smile",
+    "original": "assets/club-news-personal/smile-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/smile-news-cutout.webp",
+      "seated": "assets/personal-character-poses/smile-seated-v1.webp",
+      "standing": "assets/personal-character-poses/smile-standing-v1.webp"
+    }
+  },
+  {
+    "id": "viktor",
+    "original": "assets/club-news-personal/viktor-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/viktor-news-cutout.webp",
+      "seated": "assets/personal-character-poses/viktor-seated-v1.webp",
+      "standing": "assets/personal-character-poses/viktor-standing-v1.webp"
+    }
+  },
+  {
+    "id": "waaar",
+    "original": "assets/club-news-personal/waaar-news-cutout-v3.webp",
+    "images": {
+      "original": "assets/club-news-personal/waaar-news-cutout-v3.webp",
+      "seated": "assets/personal-character-poses/waaar-seated-v1.webp",
+      "standing": "assets/personal-character-poses/waaar-standing-v1.webp"
+    }
+  },
+  {
+    "id": "wildboar",
+    "original": "assets/club-news-personal/wildboar-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/wildboar-news-cutout.webp",
+      "seated": "assets/personal-character-poses/wildboar-seated-v1.webp",
+      "standing": "assets/personal-character-poses/wildboar-standing-v1.webp"
+    }
+  },
+  {
+    "id": "winifly",
+    "original": "assets/club-news-personal/winifly-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/winifly-news-cutout.webp",
+      "seated": "assets/personal-character-poses/winifly-seated-v1.webp",
+      "standing": "assets/personal-character-poses/winifly-standing-v1.webp"
+    }
+  },
+  {
+    "id": "zagrebnagreb",
+    "original": "assets/club-news-personal/zagrebnagreb-news-cutout.webp",
+    "images": {
+      "original": "assets/club-news-personal/zagrebnagreb-news-cutout.webp",
+      "seated": "assets/personal-character-poses/zagrebnagreb-seated-v1.webp",
+      "standing": "assets/personal-character-poses/zagrebnagreb-standing-v1.webp"
+    }
+  },
+  {
+    "id": "zalupa",
+    "original": "assets/club-news-personal/zalupa-personal-light-v1.webp",
+    "images": {
+      "original": "assets/club-news-personal/zalupa-personal-light-v1.webp",
+      "seated": "assets/personal-character-poses/zalupa-seated-v1.webp",
+      "standing": "assets/personal-character-poses/zalupa-standing-v1.webp"
+    }
+  },
+  {
+    "id": "kriak",
+    "original": "assets/summer-rating-player-kriak.webp",
+    "images": {
+      "original": "assets/summer-rating-player-kriak.webp",
+      "seated": "assets/personal-character-poses/kriak-seated-v1.webp",
+      "standing": "assets/personal-character-poses/kriak-standing-v1.webp"
+    }
+  }
+]
