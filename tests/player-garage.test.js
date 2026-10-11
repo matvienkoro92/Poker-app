@@ -83,3 +83,14 @@ test('expanded catalogue has regular milestones and rejects every locked part',(
  assert.notDeepEqual(G.wheelDesign('fiveSpoke'),G.wheelDesign('splitSix'));
  assert.notDeepEqual(G.chipPalette('noir'),G.chipPalette('legend'));
 });
+
+test('reward shelves prioritize a locked level target and replace earned rewards',()=>{
+ const garage={stats:{level:10},loadout:{target:'windshield:iridium'}};
+ const slots=G.rewardShelfSlots(garage);assert.equal(slots.length,4);
+ assert.equal(slots[0].selected.key,'windshield:iridium');assert.equal(slots[0].isTarget,true);
+ assert.equal(slots[0].remaining,84);assert.equal(new Set(slots.map(s=>s.selected.key)).size,4);
+ assert.ok(slots.every(s=>s.selected.metric==='level'&&s.selected.target>10));
+ const unlocked=slots[1].selected;garage.stats.level=unlocked.target;
+ assert.ok(G.rewardShelfSlots(garage).every(s=>s.selected.key!==unlocked.key));
+ assert.deepEqual(G.rewardShelfSlots({stats:{level:100},loadout:garage.loadout}),[]);
+});

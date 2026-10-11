@@ -10,7 +10,7 @@ test('announcement includes total, quantities, values and tournament description
  const {buildRaffleAnnouncement}=require('../lib/raffle-group-notifications');
  const text=buildRaffleAnnouncement({title:'Розыгрыш',groups:[{count:5,prize:'Беккинг-билет 1 000 ₽ — Меджик 18:00 МСК'}]});
  assert.match(text,/Общая сумма: 5\s000 ₽/);assert.match(text,/5 бил. по 1\s000 ₽/);assert.match(text,/Меджик 18:00 МСК/);
- assert.match(text,/Розыгрыш\n\n<b>Общая сумма: 5\s000 ₽<\/b>\n\n•/);
+ assert.match(text,/^🎟\n<b>Розыгрыш<\/b>\n\n<b>Общая сумма: 5\s000 ₽<\/b>\n\n•/);
 });
 
 const { createRaffleCompletedGroupNotifier, buildRaffleCompletedAnnouncement } = require('../lib/raffle-group-notifications');
