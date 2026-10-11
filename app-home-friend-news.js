@@ -2636,11 +2636,13 @@
       : "";
     if (personalArt.indexOf("/cooler-news-cutout.webp") !== -1) visualFallbackUrl = avatar;
     if (visualFallbackUrl === visualUrl) visualFallbackUrl = avatar && avatar !== visualUrl ? avatar : "";
-    var visual = visualUrl
+    var inlineLook = !ticker && !isLastLonger && typeof window.pokerGarageNewsShowcaseHtml === "function"
+      ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId, {featured:isDayHero,inline:true}) : "";
+    var visual = inlineLook || (visualUrl
       ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '"' +
         (visualFallbackUrl ? ' data-news-image-fallback="' + esc(visualFallbackUrl) + '"' : '') +
         ' alt="" loading="lazy" decoding="async">'
-      : eventIconSvg(row.type);
+      : eventIconSvg(row.type));
     var playerStyle = row && row.playerAccent && row.playerRgb
       ? ' style="--friend-news-accent:' + esc(row.playerAccent) + ';--friend-news-rgb:' + esc(row.playerRgb) + '"'
       : "";
@@ -2706,7 +2708,7 @@
       (shareToken ? ' data-home-news-share-token="' + esc(shareToken) + '"' : "") + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
-      '" aria-hidden="' + (!ticker && isDayHero ? 'false' : 'true') + '">' + visual +
+      '" aria-hidden="' + (inlineLook || (!ticker && isDayHero) ? 'false' : 'true') + '">' + visual +
       (!ticker && isDayHero && !isLastLonger ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
@@ -2714,7 +2716,7 @@
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
-      "</span>" + (!ticker && typeof window.pokerGarageNewsShowcaseHtml === "function" ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId, {featured:isDayHero}) : "") + feedbackParts.comments + "</span>";
+      "</span>" + feedbackParts.comments + "</span>";
   }
 
   function modalEventsHtml(rows) {
