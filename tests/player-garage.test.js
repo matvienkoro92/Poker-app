@@ -86,11 +86,21 @@ test('expanded catalogue has regular milestones and rejects every locked part',(
 
 test('reward shelves prioritize a locked level target and replace earned rewards',()=>{
  const garage={stats:{level:10},loadout:{target:'windshield:iridium'}};
- const slots=G.rewardShelfSlots(garage);assert.equal(slots.length,4);
+ const slots=G.rewardShelfSlots(garage);assert.equal(slots.length,9);
  assert.equal(slots[0].selected.key,'windshield:iridium');assert.equal(slots[0].isTarget,true);
- assert.equal(slots[0].remaining,84);assert.equal(new Set(slots.map(s=>s.selected.key)).size,4);
+ assert.equal(slots[0].remaining,84);assert.equal(new Set(slots.map(s=>s.selected.key)).size,9);
  assert.ok(slots.every(s=>s.selected.metric==='level'&&s.selected.target>10));
  const unlocked=slots[1].selected;garage.stats.level=unlocked.target;
  assert.ok(G.rewardShelfSlots(garage).every(s=>s.selected.key!==unlocked.key));
  assert.deepEqual(G.rewardShelfSlots({stats:{level:100},loadout:garage.loadout}),[]);
+});
+
+test('ten vinyl designs unlock progressively and persist in saved loadouts',()=>{
+ const designs=G.items.filter(i=>i.kind==='vinyl'&&i.id!=='none');
+ assert.equal(designs.length,10);
+ assert.equal(G.normalize({}, {level:0}).vinyl,'none');
+ for(const design of designs){
+  assert.equal(G.normalize({vinyl:design.id},{level:design.target}).vinyl,design.id);
+  assert.equal(G.normalize({vinyl:design.id},{level:design.target-1}).vinyl,'none');
+ }
 });

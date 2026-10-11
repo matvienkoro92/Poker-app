@@ -48,3 +48,13 @@ test("992854 fixed level 17 applies to raffles and spins under either identity",
   assert.equal(playerDailyPokerLevelError("ID319715", "524129", 1), null);
   assert.equal(playerDailyPokerLevelError("ID813235", "923321", 1), null);
 });
+
+test("LiveStarsPro must reach level 12 for both raffles and spins", () => {
+  for (const check of [playerRaffleLevelError, playerDailyPokerLevelError]) {
+    for (const [account, poker] of [["ID305462", "other"], ["other", "291360"]]) {
+      assert.equal(check(account, poker, 7).accessLevel, 12);
+      assert.equal(check(account, poker, 11).accessLevel, 12);
+      assert.equal(check(account, poker, 12), null);
+    }
+  }
+});
