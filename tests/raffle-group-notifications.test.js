@@ -72,7 +72,7 @@ test('winners have safe mentions, ready players first and a separated reminder',
     { name: 'Готов & игрок', userId: '34', winnerReady: true },
   ] });
   assert.match(text, /&lt;Итоги&gt;/);
-  assert.match(text, /• Готов &amp; игрок — <a href="tg:\/\/user\?id=34">Готов &amp; игрок<\/a> ✅\n\n• Ожидает — @waiting\n\nНажмите «Готов», чтобы забрать билет\./);
+  assert.match(text, /✅ Готов &amp; игрок — <a href="tg:\/\/user\?id=34">Готов &amp; игрок<\/a>\nГотов\n\n⏳ Ожидает — @waiting\nНе готов\n\nНажмите «Готов», чтобы забрать билет\./);
 });
 test('ready changes edit the saved message and preserve its button', async () => {
   const store = new Map(), edits = []; let sends = 0;
@@ -93,7 +93,7 @@ test('ready changes edit the saved message and preserve its button', async () =>
   await notify(raffle);
   assert.equal(sends, 1); assert.equal(edits.length, 1);
   assert.equal(edits[0].messageId, 75); assert.equal(edits[0].chatId, '-1001');
-  assert.match(edits[0].text, /@player ✅/); assert.doesNotMatch(edits[0].text, /Нажмите/);
+  assert.match(edits[0].text, /✅ Игрок — @player\nГотов/); assert.doesNotMatch(edits[0].text, /Нажмите/);
   assert.equal(edits[0].buttonText, 'Посмотреть розыгрыш');
   await notify(raffle);
   assert.equal(edits.length, 1);
@@ -108,13 +108,13 @@ test('reroll retains unclaimed players separately and marks replacement winners'
     { name: 'Пятый', telegramUsername: 'fifth', winnerReady: true },
   ] });
   assert.match(text, /Победителей: 3/);
-  assert.match(text, /• Пятый — @fifth ✅\n\nПобедители реролла:\n• Второй — @second ✅\n\n• Третий — @third/);
-  assert.match(text, /Не забрали билет:\n• Первый — @first ❌ — не забрал\n• Четвертый — @fourth ❌ — не забрал/);
+  assert.match(text, /✅ Пятый — @fifth\nГотов\n\nПобедители реролла:\n✅ Второй — @second\nГотов\n\n⏳ Третий — @third/);
+  assert.match(text, /Не забрали билет:\n❌ Первый — @first\nНе забрал\n❌ Четвертый — @fourth\nНе забрал/);
   assert.match(text, /\n\nНажмите «Готов»/);
 });
 test('no reminder remains when all tickets expired', () => {
   const text = buildRaffleCompletedAnnouncement({ winners: [{ name: 'Игрок', winnerReadyState: 'burned' }] });
-  assert.match(text, /❌ — не забрал/);
+  assert.match(text, /❌ Игрок\nНе забрал/);
   assert.match(text, /Победителей: 0/);
   assert.doesNotMatch(text, /Нажмите «Готов»/);
 });
@@ -126,9 +126,9 @@ test('Poker21 IDs appear for original, reroll and unclaimed players before statu
     { name: 'Третий', telegramUsername: 'third', p21Id: '54321', winnerReadyExpired: true },
     { name: 'Без ID', telegramUsername: 'no_id' },
   ] });
-  assert.match(text, /@first · ID 12345 ✅/);
+  assert.match(text, /✅ Первый — @first · ID 12345\nГотов/);
   assert.match(text, /@second · ID 67890/);
-  assert.match(text, /@third · ID 54321 ❌/);
+  assert.match(text, /❌ Третий — @third · ID 54321\nНе забрал/);
   assert.doesNotMatch(text, /@no_id · ID/);
 });
 
@@ -159,7 +159,7 @@ test('readiness and seating countdowns use deadlines and disappear when resolved
   assert.equal(winnerCountdown({ ...winner, winnerReadyExpired: true }, now), '');
   const cash = { ...winner, winnerReady: true, cashSeatingMonitor: {status:'pending', issuedAt:'2026-10-10T09:58:00Z'} };
   assert.equal(winnerCountdown(cash, now), '⏳ сесть за стол: 8 мин');
-  assert.match(buildRaffleCompletedAnnouncement({ winners: [cash] }, now), /✅ · ⏳ сесть за стол: 8 мин/);
+  assert.match(buildRaffleCompletedAnnouncement({ winners: [cash] }, now), /✅ Игрок\nГотов · сесть за стол: 8 мин/);
   for (const status of ['seated', 'returned', 'returning']) {
     assert.equal(winnerCountdown({ ...cash, cashSeatingMonitor: {...cash.cashSeatingMonitor, status} }, now), '');
   }
@@ -189,9 +189,9 @@ test('cash group post distinguishes readiness from actual seating', () => {
     {name:'Ждём',winnerReady:true,winnerStatus:'ok',cashSeatingMonitor:{status:'pending',issuedAt:'2026-10-10T10:00:00Z'}},
     {name:'Не сел',winnerReady:true,winnerStatus:'ok',cashSeatingMonitor:{status:'returned'}},
   ]}, Date.parse('2026-10-10T10:02:00Z'));
-  assert.match(text,/• Сел ✅ · сел 🪑/);
-  assert.match(text,/• Ждём ✅ · 🔵 ожидаем посадку · ⏳ сесть за стол: 8 мин/);
-  assert.match(text,/• Не сел ❌ — не сел за 10 минут/);
+  assert.match(text,/✅ Сел\nГотов · сел 🪑/);
+  assert.match(text,/🔵 Ждём\nГотов · ожидаем посадку · сесть за стол: 8 мин/);
+  assert.match(text,/❌ Не сел\nНе сел за 10 минут/);
 });
 
 test('cash start names the destination and totals bare numeric buy-ins', () => {
