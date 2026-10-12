@@ -3036,3 +3036,7 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-news-sng-archive { overflow:hidden; border:1px solid #a58139; border-radius:24px; background:#0b1015; color:#f7dea1; }
 .home-news-sng-archive .sng-champions-modal__completed-option { cursor:default; }
 .home-news-sng-archive > .home-news-achievement__list { margin:0 16px 12px; }
+
+/* Hero of the day belongs beside the player's name. */
+body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__day-hero--inline{position:static!important;display:inline-flex!important;flex:none!important;align-items:center;justify-content:center;vertical-align:middle;width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;max-width:none!important;margin:0 0 0 8px!important;padding:5px 8px!important;transform:none!important;font-size:9px!important;line-height:1.2!important;white-space:nowrap!important;border-radius:8px!important;box-shadow:0 1px 5px #0007!important}
+body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__day-hero--inline::before,body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__day-hero--inline::after{display:none!important}

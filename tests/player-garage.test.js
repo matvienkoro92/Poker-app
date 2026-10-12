@@ -122,3 +122,13 @@ test('street headlights unlock and persist independently of underglow',()=>{
   assert.equal(restored.headlights,id);assert.equal(restored.light,'amber');
  }
 });
+
+test('fashion separates and accessories save independently and preserve legacy trousers',()=>{
+ const look={...G.defaults,suit:'velvetDinner',pants:'washedJeans',shoes:'brownLoafers',glasses:'roundGold',watch:'roseDress',necklace:'silverTag'};
+ const saved=Garage.choose(look,{stats:{level:75}});
+ for(const kind of ['suit','pants','shoes','glasses','watch','necklace'])assert.equal(Garage.view({garage:saved},{stats:{level:75}}).loadout[kind],look[kind]);
+ assert.equal(G.normalize({suit:'leatherBiker'},{level:0},true).pants,G.defaults.pants);
+ assert.equal(G.normalize({suit:'ruby'},{level:5},true).pants,'ruby');
+ for(const kind of ['glasses','watch','necklace'])assert.equal(G.normalize({},{} )[kind],'none');
+ assert.throws(()=>Garage.choose({...look,watch:'greenDiver'},{stats:{level:0}}),/не открыта/);
+});

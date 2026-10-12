@@ -2685,6 +2685,7 @@
         ' → ' + esc(formatRub(row.lastLongerPayout)) + ' · ' + esc(String(row.lastLongerParticipants)) + ' уч.</span>'
       : row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
       ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
+        (!ticker && isDayHero && !isLastLonger ? '<span class="home-friend-news-modal__day-hero home-friend-news-modal__day-hero--inline">ГЕРОЙ ДНЯ</span>' : '') +
         (row.type === "birthday" ? profileMetaHtml : "") +
         (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
         poker21LinkedHtml + titleAmountHtml + '</span>' +
@@ -2709,7 +2710,7 @@
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
       ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
       '" aria-hidden="' + (inlineLook || (!ticker && isDayHero) ? 'false' : 'true') + '">' + visual +
-      (!ticker && isDayHero && !isLastLonger ? '<span class="home-friend-news-modal__day-hero">ГЕРОЙ ДНЯ</span>' : "") + "</span>" +
+      "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
         '<span data-home-news-read-id="' + esc(row.id) + '">' + structuredText + "</span>" +

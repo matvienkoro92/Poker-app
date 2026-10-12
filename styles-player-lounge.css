@@ -79,7 +79,7 @@
 .lounge-table-foreground{clip-path:polygon(16% 49.4%,40% 49%,64% 49.3%,82% 50.4%,89% 52.5%,86% 55%,86% 66.5%,16% 66.5%,16% 55%,14% 52.5%)}
 .player-hall-dialog .lounge-roster-entry{top:74%}
 .player-hall-dialog .lounge-live-retry,.lounge-room-note{top:83%}
-.player-hall__room[data-space=lounge] .player-hall__lounge-return{top:74%}
+.player-hall__room[data-space=lounge] .player-hall__lounge-return{top:62%}
 
 /* Only confirmed live players occupy chairs. Keep identities above the table. */
 .player-hall-dialog .lounge-seat[hidden]{display:none}
@@ -373,7 +373,6 @@
 .player-hall-dialog .lounge-seat--3.lounge-seat--playing,.player-hall-dialog .lounge-seat--4.lounge-seat--playing{z-index:5}
 .lounge-hands.lounge-seat--3,.lounge-hands.lounge-seat--4{z-index:6}
 .lounge-chair-foreground{z-index:5}
-.player-hall-dialog .player-hall__house-map{top:16%;left:80%;width:12%}
 .lounge-hands.lounge-seat--0,.lounge-hands.lounge-seat--1,.lounge-hands.lounge-seat--2{z-index:4}
 .lounge-chair-foreground{clip-path:polygon(0% 56%,30% 56%,30% 66%,70% 66%,70% 56%,100% 56%,100% 72%,0% 72%)}
 
@@ -422,12 +421,12 @@
 .garage-locked-vehicle>img{display:block;width:100%;filter:drop-shadow(0 12px 9px #0009)}
 .garage-locked-vehicle>button{position:absolute;left:48%;top:44%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:5px;padding:14px 20px;border:1px solid #ad9254;border-radius:18px;background:#0a1015db;color:#e5cc92;cursor:pointer}
 .garage-locked-vehicle .garage-lock{font-size:38px}.garage-locked-vehicle strong{font-size:13px}
-.player-hall__room[data-garage-vehicle="1"] .player-hall__parked-kart,.player-hall__room[data-garage-vehicle="1"] .player-hall__garage-object--kart{visibility:hidden}
-.player-hall__room[data-space=garage][data-garage-vehicle="1"] .garage-locked-vehicle{display:block}
+.player-hall__room[data-garage-vehicle]:not([data-garage-vehicle="0"]) .player-hall__parked-kart,.player-hall__room[data-garage-vehicle]:not([data-garage-vehicle="0"]) .player-hall__garage-object--kart{visibility:hidden}
+.player-hall__room[data-space=garage][data-garage-vehicle]:not([data-garage-vehicle="0"]) .garage-locked-vehicle{display:block}
 
 .garage-character-stage>canvas{display:block;width:100%;height:100%;min-height:0;object-fit:contain}
 
-.garage-reward-heading{position:absolute;left:8%;right:8%;top:1%;z-index:3;padding:.45cqh .8cqh;border:1px solid #b99a5b70;border-radius:.5cqh;background:#111a1ee8;color:#ffe4a7;text-align:center;font-size:1.25cqh;font-weight:700;line-height:1.2;box-shadow:0 .2cqh .6cqh #0006;pointer-events:none}
+.garage-reward-heading{position:absolute;left:8%;right:8%;top:0;transform:rotate(6deg);transform-origin:center;z-index:3;padding:.45cqh .8cqh;border:1px solid #b99a5b70;border-radius:.5cqh;background:#111a1ee8;color:#ffe4a7;text-align:center;font-size:1.25cqh;font-weight:700;line-height:1.2;box-shadow:0 .2cqh .6cqh #0006;pointer-events:none}
 
 /* Wardrobe shares the garage's controls-left, preview-right composition. */
 .garage-customizer-layout[data-category=character]>.garage-character-stage{grid-area:preview;height:100%;min-height:0;min-width:0;padding:6px;overflow:hidden}
@@ -440,5 +439,36 @@
 .garage-locked-vehicle::before{content:"";position:absolute;z-index:-1;left:6%;right:3%;bottom:6%;height:12%;border-radius:50%;background:radial-gradient(ellipse,#000b 15%,#0006 48%,transparent 72%);transform:rotate(3deg);pointer-events:none}
 .garage-locked-vehicle>img{filter:brightness(0) drop-shadow(0 5px 2px #0009)}
 .garage-locked-vehicle>button{left:50%;top:49%;padding:10px;border:0;border-radius:50%;background:#0b1117a6;box-shadow:0 2px 12px #0005}
-.player-hall__room[data-garage-vehicle="1"] .garage-vehicle-switch>span{font-size:0;background:transparent;border:0;padding:0;min-width:30px}
-.player-hall__room[data-garage-vehicle="1"] .garage-vehicle-switch small{font-size:11px}
+.player-hall__room[data-garage-vehicle]:not([data-garage-vehicle="0"]) .garage-vehicle-switch>span{font-size:0;background:#10191ee8;border:1px solid #aa8c4c80;padding:7px 12px;min-width:30px}
+.player-hall__room[data-garage-vehicle]:not([data-garage-vehicle="0"]) .garage-vehicle-switch small{font-size:11px}
+
+/* Locked cars share the kart's floor plane and an elevated three-quarter camera. */
+.garage-locked-vehicle{left:-15%;top:auto;bottom:25%;width:90%;transform:none}
+.garage-locked-vehicle::before{left:10%;right:8%;bottom:14%;height:12%;transform:rotate(16deg)}
+
+/* Navigation and the caption share one flow, outside the moving garage panorama. */
+.player-hall__camera-ui .garage-vehicle-switch{position:static;flex:none;max-width:100%;margin:0 0 8px;pointer-events:auto;gap:12px}
+.player-hall__camera-ui .garage-vehicle-switch>span{min-width:130px}
+.player-hall__camera-ui .garage-vehicle-switch button{position:static;flex:none;width:42px;height:42px;padding:0;font-size:30px}
+.player-hall__camera-ui .garage-vehicle-switch small{margin-top:0;color:#f4dfad;font-size:12px;font-weight:600}
+.player-hall__room[data-garage-vehicle]:not([data-garage-vehicle="0"]) .player-hall__camera-ui .garage-vehicle-switch>span{min-width:30px}
+
+/* The friends' records fill the framed wall board like an honours display. */
+.player-hall-dialog .lounge-wall-board{padding:1cqh 1.4cqh;gap:.5cqh;background:radial-gradient(ellipse at 18% 12%,#b9904820,transparent 65%),linear-gradient(125deg,#0b1717b3,#07101170)}
+.lounge-wall-board>span:first-child{font-size:.8cqh;letter-spacing:.2em;color:#d8b973}
+.lounge-wall-board>strong{font-size:1.8cqh;line-height:1.15;color:#ffe4a5;text-shadow:0 2px 8px #000}
+.lounge-wall-board>small{font-size:.8cqh;line-height:1.2;color:#c1b697}
+.lounge-wall-board>small:last-child{align-self:flex-end;margin-top:.2cqh;color:#e4c47d}
+.lounge-wall-row{min-height:2cqh;gap:.7cqh;padding:.2cqh .5cqh;border-bottom:1px solid #c4a25c30;background:linear-gradient(90deg,#cfad6220,transparent);font-size:1.12cqh;line-height:1.25}
+.lounge-wall-row>b{display:grid;place-items:center;flex:none;width:1.65cqh;height:1.65cqh;border:1px solid #cfae67;border-radius:50%;background:radial-gradient(circle at 30% 20%,#ffe5a2,#a47933);box-shadow:0 1px 5px #0008,inset 0 0 0 2px #33240f55;color:#30220e;font-size:.95cqh}
+.lounge-wall-row~.lounge-wall-row>b{background:radial-gradient(circle at 30% 20%,#edf1f2,#7e8c94);border-color:#b6c2c8;color:#243038}
+.lounge-wall-row~.lounge-wall-row~.lounge-wall-row>b{background:radial-gradient(circle at 30% 20%,#e7b88b,#885634);border-color:#bf906a;color:#362111}
+.lounge-wall-row>em{font-size:1.15cqh;font-weight:700;letter-spacing:.025em;color:#ffe2a0;text-shadow:0 1px 4px #000}
+
+/* Each shelf has its own perspective; lower shelves are nearly level. */
+.garage-reward-shelf .garage-shelf-deck--middle{transform:skewY(1.15deg)}
+.garage-reward-shelf .garage-shelf-deck--bottom{transform:skewY(.15deg)}
+.garage-reward-slot:nth-of-type(n+4):nth-of-type(-n+6) .garage-shelf-art canvas{transform:rotateY(-9deg) skewY(1.15deg)}
+.garage-reward-slot:nth-of-type(n+4):nth-of-type(-n+6) .garage-reward-label{transform:skewY(1.15deg)}
+.garage-reward-slot:nth-of-type(n+7) .garage-shelf-art canvas{transform:rotateY(-9deg) skewY(.15deg)}
+.garage-reward-slot:nth-of-type(n+7) .garage-reward-label{transform:skewY(.15deg)}
