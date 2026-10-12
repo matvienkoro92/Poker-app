@@ -52,7 +52,7 @@ function makeModel(scene,look){
   // Curved diagonal cuts run across the tread, with fine raised sidewall rings.
   for(let n=0;n<28;n++){const a=n*Math.PI/14;const points=Array.from({length:17},(_,j)=>{const q=j/16,zz=-.205+q*.41,r=.799-.044*Math.pow(Math.abs(zz)/.205,3),aa=a+.13*Math.sin(q*Math.PI);return new T.Vector3(x+Math.sin(aa)*r,.81+Math.cos(aa)*r,z+zz);});mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),20,.0045,5,false),black);}
   for(const side of [-1,1])for(const radius of [.625,.654,.681])torus(radius,.0035,black,x,.81,z+side*.244);
-  cylinder(.566,.04,rim,x,.81,out,'z');cylinder(.515,.045,black,x,.81,out+sign*.022,'z');
+  // Open rim: brake rotor and caliper remain visible through the spokes.
   torus(.548,.023,rim,x,.81,out+sign*.035);torus(.505,.016,rim,x,.81,out+sign*.043);
   cylinder(.14,.045,black,x,.81,out+sign*.045,'z');torus(.14,.012,rim,x,.81,out+sign*.069);
   const emblem=spade(.20,rim,x,.80,out+sign*.075,sign<0);faces.push(emblem);
@@ -101,6 +101,16 @@ function makeModel(scene,look){
  steeringTube(steeringVariants.formula,[[-.48,-.26],[-.54,.17],[-.40,.27],[-.27,.14],[.27,.14],[.40,.27],[.54,.17],[.48,-.26],[.32,-.28],[.24,-.12],[-.24,-.12],[-.32,-.28]],.065,steeringLeather);
  mesh(new T.BoxGeometry(.60,.23,.065),black,0,0,0,steeringVariants.formula);for(const sign of [-1,1]){mesh(new T.SphereGeometry(.035,12,8),light,sign*.25,.055,.06,steeringVariants.formula);mesh(new T.BoxGeometry(.08,.29,.025),rim,sign*.37,0,-.07,steeringVariants.formula);}
  for(const id of ['sport','formula']){const hub=mesh(new T.CylinderGeometry(.15,.15,.07,48),rim,0,0,.035,steeringVariants[id]);hub.rotation.x=Math.PI/2;mesh(new T.CircleGeometry(.13,48),black,0,0,.078,steeringVariants[id]);spade(.25,rim,0,-.018,.09,false,steeringVariants[id]);}
+ for(const [id,d] of Object.entries(G.steeringDesigns)){
+ const g=new T.Group();steering.add(g);steeringVariants[id]=g;
+ const m=material(d.color,id==='woodHeritage'?.3:.55,.35);
+ if(d.shape==='round')mesh(new T.TorusGeometry(.53,.065,16,80),m,0,0,0,g);
+ else if(d.shape==='flat')steeringTube(g,[[-.32,-.40],[.32,-.40],[.51,-.12],[.48,.23],[.27,.46],[0,.53],[-.27,.46],[-.48,.23],[-.51,-.12]],.065,m);
+ else tube([[-.48,.24,0],[-.52,-.22,0],[0,-.39,0],[.52,-.22,0],[.48,.24,0]],.065,m,g);
+ for(let n=0;n<d.spokes;n++){const a=n*Math.PI*2/d.spokes;const sp=mesh(new T.BoxGeometry(.39,.065,.05),rim,Math.cos(a)*.25,Math.sin(a)*.25,.015,g);sp.rotation.z=a;}
+ const hub=mesh(new T.CylinderGeometry(.15,.15,.075,40),black,0,0,.05,g);hub.rotation.x=Math.PI/2;spade(.23,rim,0,-.015,.095,false,g);
+ mesh(new T.BoxGeometry(.045,.09,.025),material('#ed5555',.1,.6),0,.51,.06,g);
+ }
  // Machined hub fasteners, leather grips and a center marker distinguish finished wheels.
  const stitch=material('#b9ab8a',.15,.8),grip=material('#171c20',.02,.85);
  for(const [id,g] of Object.entries(steeringVariants)){
@@ -288,6 +298,17 @@ function makeModel(scene,look){
   const lensMat=material(d.smoke?'#1c3348':'#83b6d5',.45,.12);
   for(const sign of [-1,1]){
    const z=sign*.72,x=2.57-.28*(z/1.1)**2+.07,y=1.075;
+   if(d.shape==='sportHousing'){
+    const profile=new T.Shape();profile.moveTo(-.29,.12);profile.lineTo(.23,.09);profile.quadraticCurveTo(.32,.02,.26,-.13);profile.lineTo(-.25,-.14);profile.closePath();
+    const housing=mesh(new T.ExtrudeGeometry(profile,{depth:.09,bevelEnabled:true,bevelSize:.018,bevelThickness:.018,bevelSegments:3,steps:1}),kitDark,x+.02,y,z,group);housing.rotation.y=Math.PI/2;
+    for(let n=0;n<2;n++){const zz=z+(n-.5)*.24;const lens=mesh(new T.SphereGeometry(1,24,16),lensMat,x+.13,y,zz,group);lens.scale.set(.022,.067,.067);
+     if(d.signature==='rings'){const ring=mesh(new T.TorusGeometry(.086,.010,10,48),beam,x+.155,y,zz,group);ring.rotation.y=Math.PI/2;}
+     if(d.signature==='doubleL')tube([[x+.155,y+.075,zz-.085],[x+.155,y-.075,zz-.085],[x+.155,y-.075,zz+.075]],.012,beam,group);
+     if(d.signature==='pixels')for(let k=0;k<3;k++)mesh(new T.BoxGeometry(.014,.026,.026),beam,x+.155,y+.09,zz-.055+k*.055,group);
+    }
+    if(d.signature==='arc')tube([[x+.155,y-.09,z-.25],[x+.155,y+.10,z-.25],[x+.155,y+.12,z],[x+.155,y+.07,z+.25]],.012,beam,group);
+    continue;
+   }
    const casing=rounded(.47,.25,.10,.04,kitDark,x,y,z,group);casing.rotation.y=Math.PI/2;
    for(const zz of [-.18,.18]){mesh(new T.BoxGeometry(.10,.07,.035),kitMetal,x-.035,y-.15,z+zz,group);const bolt=mesh(new T.CylinderGeometry(.012,.012,.018,12),gold,x+.02,y-.13,z+zz,group);bolt.rotation.z=Math.PI/2;}
    if(['doubleU','brow','triBeam'].includes(d.shape)){
@@ -340,7 +361,7 @@ function makeModel(scene,look){
   for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const k=j*(cols+1)+i;indices.push(k,k+1,k+cols+1,k+1,k+cols+2,k+cols+1);}
   const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(verts,3));geo.setIndex(indices);geo.computeVertexNormals();
   const glass=new T.MeshPhysicalMaterial({color:tint,metalness:.05,roughness:.075,transparent:true,opacity,depthWrite:false,side:T.DoubleSide,clearcoat:1,clearcoatRoughness:.06,envMapIntensity:.65});
-  const pane=mesh(geo,glass,0,0,0,group);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=3;
+  group.userData.glass=glass;group.userData.originalTint={color:tint,opacity};const pane=mesh(geo,glass,0,0,0,group);pane.castShadow=false;pane.receiveShadow=false;pane.renderOrder=3;
   const frame=['smoke','highSmoke'].includes(style)?kitDark:kitMetal;
   for(const t of [0,1])tube(Array.from({length:41},(_,i)=>point(-1+i/20,t)),t===0?.017:.009,frame,group);
   for(const u of [-1,1]){
@@ -372,11 +393,31 @@ function makeModel(scene,look){
  }
 
 
- hardware.brakes={};for(const id of ['stock','red','gold','ceramic']){const group=new T.Group();car.add(group);hardware.brakes[id]=group;const caliper=material(G.item('brakes',id).color,.35,.4),disc=material(id==='ceramic'?'#4b5055':'#9aa2a9',.65,.4);for(const x of [-1.72,1.72])for(const sign of [-1,1]){const rotor=mesh(new T.CylinderGeometry(.45,.45,.025,48),disc,x,.81,sign*1.56,group);rotor.rotation.x=Math.PI/2;const brake=mesh(new T.BoxGeometry(.14,.40,.065),caliper,x+.31,.81,sign*1.59,group);for(let n=0;n<16;n++){const a=n*Math.PI/8;const hole=mesh(new T.CircleGeometry(.016,8),black,x+Math.sin(a)*.36,.81+Math.cos(a)*.36,sign*1.58,group);if(sign<0)hole.rotation.y=Math.PI;}}}
- hardware.nitrous={};for(const id of ['blue','twin']){const group=new T.Group();car.add(group);hardware.nitrous[id]=group;const color=material(G.item('nitrous',id).color,.55,.3);for(let n=0;n<(id==='twin'?2:1);n++){const bottle=mesh(new T.CapsuleGeometry(.13,.48,8,24),color,-1.17,1.64,n*.37-.18,group);bottle.rotation.z=Math.PI/2;const valve=mesh(new T.CylinderGeometry(.045,.045,.09,16),gold,-.80,1.64,n*.37-.18,group);valve.rotation.z=Math.PI/2;for(const xx of [-1.36,-1.04]){const strap=mesh(new T.TorusGeometry(.14,.014,8,32),kitMetal,xx,1.64,n*.37-.18,group);strap.rotation.y=Math.PI/2;}}}
- hardware.seat={};for(const id of ['red','carbon']){const group=new T.Group();car.add(group);hardware.seat[id]=group;const cloth=material(G.item('seat',id).color,.05,.9);const back=mesh(new T.BoxGeometry(.15,.78,.72),cloth,-.82,1.54,0,group);back.rotation.z=-.16;mesh(new T.BoxGeometry(.70,.12,.72),cloth,-.50,1.15,0,group);for(const sign of [-1,1]){mesh(new T.BoxGeometry(.32,.62,.10),cloth,-.70,1.48,sign*.36,group);mesh(new T.BoxGeometry(.025,.40,.07),gold,-.71,1.65,sign*.14,group);}}
- hardware.tow={};for(const id of ['red','gold']){const group=new T.Group();car.add(group);hardware.tow[id]=group;const m=material(G.item('tow',id).color,.5,.3);mesh(new T.BoxGeometry(.18,.08,.10),m,2.47,.61,.54,group);const ring=mesh(new T.TorusGeometry(.12,.025,12,32),m,2.62,.60,.54,group);ring.rotation.y=Math.PI/2;}
- function update(v){updateVinyl(v);const lift={standard:0,raised:.20,comfort:.12,high:.38,rally:.48,extreme:.60}[v.suspension]||0;stockHeadlights.forEach(o=>o.visible=!v.headlights||v.headlights==='classic');for(const [id,parts] of Object.entries(wheelFenders))for(const part of parts){part.visible=v.fenders===id;if(id==='club')part.userData.shell.color.set(G.item('paint',v.paint).color);}springSteel.color.set(G.item('suspension',v.suspension).color);sprungBody.position.y=lift;springs.visible=lift>0;suspensionUnits.forEach(({coil,rod,upper})=>{coil.scale.y=1+lift/.415;rod.scale.y=1+lift/.28;rod.position.y=.34+lift/2;upper.position.y=.47+lift;});for(const [kind,variants] of Object.entries(hardware))for(const [id,group] of Object.entries(variants))group.visible=v[kind]===id;Object.entries(steeringVariants).forEach(([id,g])=>g.visible=id===(v.steering||'classic'));Object.entries(exhaustGroups).forEach(([id,g])=>g.visible=id===(v.exhaust||'classic'));boostHousing.visible=v.turbine==='boost';const twin=['twin','twinBig'].includes(v.turbine),largeTwin=v.turbine==='twinBig',fanScale=largeTwin?.90:twin?.52:v.turbine==='boost'?.96:.90;turbineGroup.scale.set(fanScale/1.24,fanScale/.86,fanScale/.95);turbineGroup.position.set(tx,ty+(largeTwin?.06:twin?-.20:-.04),twin?(largeTwin?-.70:-.44):0);secondTurbine.visible=twin;secondTurbine.scale.copy(turbineGroup.scale);secondTurbine.position.set(tx,ty+(largeTwin?.06:-.20),largeTwin?.70:.44);const badges=v.badges||[];badgeSupports.forEach(o=>o.visible=!badges.length);plaqueMaterials.forEach(m=>m.userData.plane.visible=!badges.length);carBadges.forEach(({group,mat,back,n})=>{const id=badges[n];group.visible=!!id;const badgeKey=id+':'+(v.prizeTotal||0);if(!id||mat.userData.badge===badgeKey)return;const shape=new T.Shape(),unit=.65/512;const point=(x,y)=>[(x-256)*unit,(256-y)*unit];
+ hardware.brakes={};for(const id of ['stock','red','gold','ceramic']){const group=new T.Group();car.add(group);hardware.brakes[id]=group;const caliper=material(id==='stock'?'#626e79':id==='red'?'#ef3543':id==='gold'?'#eab638':'#e6cc62',.35,.32),disc=material(id==='ceramic'?'#747a80':'#b8c1c8',.7,.32);
+ for(const {wheelGroup,sign} of wheelSpecs){const assembly=new T.Group();wheelGroup.add(assembly);group.userData.brakeAssemblies??=[];group.userData.brakeAssemblies.push(assembly);
+ const rotor=mesh(new T.CylinderGeometry(.435,.435,.025,64),disc,0,0,sign*.195,assembly);rotor.rotation.x=Math.PI/2;
+ const block=rounded(.16,.34,.08,.04,caliper,.32,.015,sign*.225,assembly);
+ for(let n=0;n<24;n++){const a=n*Math.PI/12;for(const radius of [.30,.37]){const hole=mesh(new T.CircleGeometry(.012,8),black,Math.sin(a)*radius,Math.cos(a)*radius,sign*.21,assembly);if(sign<0)hole.rotation.y=Math.PI;}}
+ }
+ }
+
+ hardware.nitrous={};for(const id of ['blue','twin','triple']){const group=new T.Group();car.add(group);hardware.nitrous[id]=group;const color=material(G.item('nitrous',id).color,.55,.25),count=id==='triple'?3:id==='twin'?2:1;
+ for(let n=0;n<count;n++){const z=(n-(count-1)/2)*.37;const bottle=mesh(new T.CapsuleGeometry(.13,.48,12,32),color,-1.17,1.64,z,group);bottle.rotation.z=Math.PI/2;const valve=mesh(new T.CylinderGeometry(.045,.045,.09,20),kitMetal,-.80,1.64,z,group);valve.rotation.z=Math.PI/2;
+ mesh(new T.BoxGeometry(.025,.025,.13),material('#c43a43',.4,.4),-.75,1.69,z,group);
+ const gauge=mesh(new T.CylinderGeometry(.042,.042,.025,24),kitMetal,-.80,1.73,z+.055,group);const face=mesh(new T.CircleGeometry(.034,24),material('#f2ecdc',.1,.6),-.80,1.744,z+.055,group);face.rotation.x=-Math.PI/2;
+ for(const xx of [-1.36,-1.04]){const strap=mesh(new T.TorusGeometry(.14,.017,10,40),kitMetal,xx,1.64,z,group);strap.rotation.y=Math.PI/2;mesh(new T.BoxGeometry(.055,.025,.065),kitMetal,xx,1.79,z,group);}
+ mesh(new T.BoxGeometry(.23,.013,.13),black,-1.18,1.775,z,group);tube([[-.78,1.64,z],[-.64,1.62,z],[-.62,1.47,z+.05]],.012,black,group);
+ }}
+ hardware.seat={};for(const id of ['red','carbon']){const group=new T.Group();car.add(group);hardware.seat[id]=group;const cloth=material(G.item('seat',id).color,.05,.85),shellMat=material(id==='carbon'?'#29313a':'#151a21',.45,.35),pad=material('#172029',.03,.95);
+ const shape=new T.Shape();shape.moveTo(-.27,-.40);shape.lineTo(-.43,.10);shape.lineTo(-.34,.28);shape.lineTo(-.24,.36);shape.lineTo(-.22,.64);shape.quadraticCurveTo(0,.77,.22,.64);shape.lineTo(.24,.36);shape.lineTo(.34,.28);shape.lineTo(.43,.10);shape.lineTo(.27,-.40);shape.closePath();
+ for(const side of [-1,1]){const hole=new T.Path();hole.absellipse(side*.115,.48,.065,.035,0,Math.PI*2,true);shape.holes.push(hole);}
+ const back=mesh(new T.ExtrudeGeometry(shape,{depth:.065,bevelEnabled:true,bevelSize:.02,bevelThickness:.02,bevelSegments:3,steps:1}),shellMat,-.82,1.58,0,group);back.rotation.y=Math.PI/2;back.rotation.z=-.12;
+ rounded(.095,.60,.43,.055,cloth,-.72,1.55,0,group);rounded(.65,.14,.65,.08,shellMat,-.44,1.18,0,group);rounded(.50,.07,.43,.035,pad,-.40,1.28,0,group);
+ for(const sign of [-1,1]){const bolster=rounded(.26,.52,.13,.055,cloth,-.64,1.51,sign*.30,group);bolster.rotation.z=-.25;rounded(.60,.19,.11,.045,cloth,-.44,1.30,sign*.30,group);tube([[-.68,1.99,sign*.12],[-.60,1.56,sign*.12],[-.25,1.32,sign*.12]],.022,material('#c1a268',.1,.75),group);mesh(new T.BoxGeometry(.65,.035,.045),kitMetal,-.44,1.09,sign*.25,group);}
+ rounded(.10,.025,.13,.015,kitMetal,-.26,1.35,0,group);
+ for(let n=0;n<5;n++)tube([[-.66,1.38+n*.09,-.18],[-.66,1.38+n*.09,.18]],.004,kitMetal,group);
+ }
+ function update(v){updateVinyl(v);const tint=G.glassTints[v.glassTint]||G.glassTints.original;for(const g of Object.values(hardware.windshield)){const original=g.userData.originalTint;g.userData.glass.color.set(tint.opacity===null?original.color:tint.color);g.userData.glass.opacity=tint.opacity??original.opacity;}const lift={standard:0,raised:.20,comfort:.12,high:.38,rally:.48,extreme:.60}[v.suspension]||0;stockHeadlights.forEach(o=>o.visible=!v.headlights||v.headlights==='classic');for(const [id,parts] of Object.entries(wheelFenders))for(const part of parts){part.visible=v.fenders===id;if(id==='club')part.userData.shell.color.set(G.item('paint',v.paint).color);}springSteel.color.set(G.item('suspension',v.suspension).color);sprungBody.position.y=lift;springs.visible=lift>0;suspensionUnits.forEach(({coil,rod,upper})=>{coil.scale.y=1+lift/.415;rod.scale.y=1+lift/.28;rod.position.y=.34+lift/2;upper.position.y=.47+lift;});for(const [kind,variants] of Object.entries(hardware))for(const [id,group] of Object.entries(variants))group.visible=v[kind]===id;for(const [id,g]of Object.entries(hardware.brakes))for(const a of g.userData.brakeAssemblies||[])a.visible=(v.brakes||'stock')===id;Object.entries(steeringVariants).forEach(([id,g])=>g.visible=id===(v.steering||'classic'));Object.entries(exhaustGroups).forEach(([id,g])=>g.visible=id===(v.exhaust||'classic'));boostHousing.visible=v.turbine==='boost';const twin=['twin','twinBig'].includes(v.turbine),largeTwin=v.turbine==='twinBig',fanScale=largeTwin?.90:twin?.52:v.turbine==='boost'?.96:.90;turbineGroup.scale.set(fanScale/1.24,fanScale/.86,fanScale/.95);turbineGroup.position.set(tx,ty+(largeTwin?.06:twin?-.20:-.04),twin?(largeTwin?-.70:-.44):0);secondTurbine.visible=twin;secondTurbine.scale.copy(turbineGroup.scale);secondTurbine.position.set(tx,ty+(largeTwin?.06:-.20),largeTwin?.70:.44);const badges=v.badges||[];badgeSupports.forEach(o=>o.visible=!badges.length);plaqueMaterials.forEach(m=>m.userData.plane.visible=!badges.length);carBadges.forEach(({group,mat,back,n})=>{const id=badges[n];group.visible=!!id;const badgeKey=id+':'+(v.prizeTotal||0);if(!id||mat.userData.badge===badgeKey)return;const shape=new T.Shape(),unit=.65/512;const point=(x,y)=>[(x-256)*unit,(256-y)*unit];
  if(id==='millionaire'||id==='day-hero'){shape.absarc(0,0,204*unit,0,Math.PI*2,false);}
  else if(id==='rating-top10'){for(let j=0;j<6;j++){const a=j*Math.PI/3-Math.PI/2,p=point(256+Math.cos(a)*215,256+Math.sin(a)*215);j?shape.lineTo(...p):shape.moveTo(...p);}shape.closePath();}
  else{shape.moveTo(...point(80,88));shape.quadraticCurveTo(...point(256,0),...point(432,88));shape.lineTo(...point(420,296));shape.quadraticCurveTo(...point(390,400),...point(256,465));shape.quadraticCurveTo(...point(122,400),...point(92,296));shape.closePath();}

@@ -443,7 +443,7 @@
 .player-hall__room[data-garage-vehicle]:not([data-garage-vehicle="0"]) .garage-vehicle-switch small{font-size:11px}
 
 /* Locked cars share the kart's floor plane and an elevated three-quarter camera. */
-.garage-locked-vehicle{left:-37.5%;top:auto;bottom:25%;width:135%;transform:none}
+.garage-locked-vehicle{left:-13%;top:auto;bottom:19%;width:101.25%;transform:none}
 .garage-locked-vehicle::before{left:10%;right:8%;bottom:14%;height:12%;transform:rotate(16deg)}
 
 /* Navigation and the caption share one flow, outside the moving garage panorama. */

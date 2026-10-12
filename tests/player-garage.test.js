@@ -67,7 +67,7 @@ test('steering, turbine and exhaust choices persist and twin turbines require le
  assert.deepEqual(Garage.view({garage:saved},{stats:{level:60}}).loadout,look);
  assert.throws(()=>Garage.choose({...G.defaults,turbine:'twin'},{stats:{level:59}}),/не открыта/);
  assert.equal(G.normalize(look,{level:0}).turbine,'classic');
- for(const kind of ['steering','turbine','exhaust'])assert.equal(G.catalog({level:100}).filter(i=>i.kind===kind).length,kind==='turbine'?4:3);
+ for(const kind of ['steering','turbine','exhaust'])assert.equal(G.catalog({level:100}).filter(i=>i.kind===kind).length,kind==='turbine'?4:kind==='steering'?9:3);
 });
 
 test('body hardware and lifted suspension survive server save',()=>{const look={...G.defaults,mirrors:'club',frontBumper:'sport',rearBumper:'club',sideSkirts:'sport',suspension:'high'};const saved=Garage.choose(look,{stats:{level:55}});for(const key of ['mirrors','frontBumper','rearBumper','sideSkirts','suspension'])assert.equal(Garage.view({garage:saved},{stats:{level:55}}).loadout[key],look[key]);assert.equal(G.normalize({},{}).suspension,'standard');assert.throws(()=>Garage.choose({...look,suspension:'invalid'},{stats:{level:55}}),/не открыта/);});
@@ -109,12 +109,12 @@ test('custom vinyl validates and persists its word',()=>{const look=Garage.choos
 test('street wheel designs differ and hardware choices save independently',()=>{
  const ids=['bronzeSix','deepFive','crossMesh','splitY','concaveTen','muscleFive','turbofan','triBlade','rallyMulti','splitStar'];
  assert.equal(new Set(ids.map(id=>JSON.stringify(G.wheelDesign(id)))).size,10);
- const look=Garage.choose({wheels:'bronzeSix',brakes:'ceramic',nitrous:'twin',seat:'carbon',tow:'red'},{stats:{level:100}});
- for(const [kind,id]of Object.entries({brakes:'ceramic',nitrous:'twin',seat:'carbon',tow:'red'}))assert.equal(Garage.view({garage:look},{stats:{level:100}}).loadout[kind],id);
+ const look=Garage.choose({wheels:'bronzeSix',brakes:'ceramic',nitrous:'twin',seat:'carbon'},{stats:{level:100}});
+ for(const [kind,id]of Object.entries({brakes:'ceramic',nitrous:'twin',seat:'carbon'}))assert.equal(Garage.view({garage:look},{stats:{level:100}}).loadout[kind],id);
  assert.throws(()=>Garage.choose({brakes:'ceramic'},{stats:{level:10}}),/не открыта/);
 });
 test('street headlights unlock and persist independently of underglow',()=>{
- assert.equal(Object.keys(G.streetHeadlights).length,12);
+ assert.equal(Object.keys(G.streetHeadlights).length,16);
  for(const [id,d]of Object.entries(G.streetHeadlights)){
   assert.throws(()=>Garage.choose({headlights:id},{stats:{level:d.target-1}}),/не открыта/);
   const saved=Garage.choose({headlights:id,light:'amber'},{stats:{level:d.target}});
