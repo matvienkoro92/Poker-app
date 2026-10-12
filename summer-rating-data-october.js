@@ -2510,4 +2510,219 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "11.10.2026": [
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 3,
+          "reward": 2223,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "хер вам)))))",
+          "place": 2,
+          "reward": 8598,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "Rebuy Evening",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 4400,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "zagrebnagreb",
+          "place": 1,
+          "reward": 2450,
+          "points": 0
+        },
+        {
+          "nick": "Jirvlog",
+          "place": 2,
+          "reward": 1790,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "fomichga",
+          "place": 1,
+          "reward": 12240,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 6650,
+          "points": 0
+        },
+        {
+          "nick": "Мажор))",
+          "place": 3,
+          "reward": 1780,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 6,
+          "reward": 540,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 4,
+          "reward": 370,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🏆Волшебный Пятак🏆",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 179700,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 3,
+          "reward": 27500,
+          "points": 0
+        },
+        {
+          "nick": "MissClick",
+          "place": 6,
+          "reward": 8800,
+          "points": 0
+        },
+        {
+          "nick": "Мажор))",
+          "place": 9,
+          "reward": 4800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 17,
+          "reward": 13279,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "roma1233",
+          "place": 4,
+          "reward": 4077.38,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 7,
+          "reward": 1223.12,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 4721.88,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 3,
+          "reward": 527.5,
+          "points": 0
+        },
+        {
+          "nick": "fomichga",
+          "place": 5,
+          "reward": 470.62,
+          "points": 0
+        },
+        {
+          "nick": "Jirvlog",
+          "place": 7,
+          "reward": 237.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 3,
+          "reward": 18037,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

@@ -60,10 +60,12 @@ function buyinFromText(text) {
 }
 
 function isDateTime(text) {
-  return String(text || "").match(/(\d{2})\/(\d{2})\s+(\d{1,2}:\d{2})/);
+  return String(text || "").match(/(\d{2})\/(\d{2})\s*(\d{1,2}:\d{2})/);
 }
 
 function normalizeName(raw) {
+  if (/GRAND\s+KNOCKOUT/i.test(raw)) return "🥊GRAND KNOCKOUT🥊";
+  if (/Волшебный\s+Пятак/i.test(raw)) return "🏆Волшебный Пятак🏆";
   if (/^Mystic\s+Bounty.*50k/i.test(raw)) return "Mystic Bounty🥊 50k";
   if (/SHR\s+1\s+MLN\s+GTD/i.test(raw)) return "🏆SHR 1 MLN GTD🏆";
   let name = String(raw || "").trim();
