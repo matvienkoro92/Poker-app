@@ -26,3 +26,6 @@ tmp/
 
 # Private identity audit snapshots and repair backups
 output/profile-consistency/
+
+# Local backup archives must not enter Git or automatic snapshots
+backups/

@@ -14,3 +14,17 @@ test('playing friends outside pinned seats appear without displacing a playing p
  assert.deepEqual(Array.from(context.window.PokerLounge.activeSeats(data)),['ID6','ID2',null,null,null]);
  const html=context.window.PokerLounge.scene(data,false);assert.ok(html.includes('live-seated-cooler-fast-v2.webp'));assert.equal((html.match(/lounge-seat--occupied/g)||[]).length,2);assert.deepEqual(data.seats,['ID1','ID2',null,null,null]);
 });
+
+test('character preloading starts once and does not create occupied seats',()=>{
+ const vm=require('node:vm'),fs=require('node:fs'),images=[];
+ const context={window:{},Image:class {constructor(){images.push(this);}}};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../app-player-lounge.js'),'utf8'),context);
+ const lounge=context.window.PokerLounge;
+ lounge.preloadCharacters();lounge.preloadCharacters();
+ assert.equal(images.length,1);
+ lounge.preloadCharacters({friends:[{presence:{status:'playing',characterId:'cooler'}},{presence:{status:'away',characterId:'babnik'}}]});
+ lounge.preloadCharacters({friends:[{presence:{status:'playing',characterId:'cooler'}}]});
+ assert.equal(images.length,2);
+ assert.ok(images.every(image=>image.src.includes('-fast-v2.webp')));
+ assert.ok(!lounge.scene({friends:[{accountId:'ID1',presence:{status:'checking'}}]},true).includes('lounge-seat--occupied'));
+});

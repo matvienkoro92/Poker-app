@@ -1200,14 +1200,17 @@ function refreshProfilePublicShowcaseContent(profileData) {
 }
 
 function loadProfilePublicShowcaseInitial() {
-  profilePublicShowcaseInitialPending = true;
+  // Render known identity and wardrobe without waiting for the account request.
+  profilePublicShowcaseInitialPending = false;
+  var known = typeof pokerReadProfileUserInfoSessionCache === "function" ? pokerReadProfileUserInfoSessionCache() : null;
+  refreshProfilePublicShowcase(known);
+  setProfilePublicShowcaseLoading(false, { force: true });
   if (typeof loadCurrentProfileUserInfo !== "function") {
     refreshProfilePublicShowcase();
     profilePublicShowcaseInitialPending = false;
     setProfilePublicShowcaseLoading(false, { force: true });
     return;
   }
-  setProfilePublicShowcaseLoading(true);
   loadCurrentProfileUserInfo()
     .then(function (data) {
       refreshProfilePublicShowcase(data && data.ok ? data : null);

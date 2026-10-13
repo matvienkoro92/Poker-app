@@ -204,7 +204,10 @@
 .player-hall__room[data-theme=midnight] .hall-cabinet-surface{filter:brightness(.35) saturate(.6)}
 
 /* Original table pixels occlude the seated character, including the complete rim and legs. */
-.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(13% 76%,15% 75%,23% 74%,23% 69%,24% 68.6%,31% 68.6%,32% 70%,32% 74%,35% 74%,35% 71%,37% 70.5%,41% 71%,42% 74.5%,47% 75.2%,50% 76.6%,50% 79%,48% 80%,47% 87.3%,45% 87.3%,45% 80.3%,20% 80.3%,19% 88.3%,17% 88.3%,17% 80%,14% 79%);z-index:2}
+.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(13% 76%,15% 75%,23% 74%,23% 69%,24% 68.6%,31% 68.6%,32% 70%,32% 74%,35% 74%,35% 71%,37% 70.5%,41% 71%,42% 74.5%,47% 75.2%,50% 76.6%,50% 79%,48% 80%,47% 87.3%,45% 87.3%,45% 80.3%,20% 80.3%,19% 88.3%,17% 88.3%,17% 80%,14% 79%);z-index:2;transform:translateX(46.5%) scale(.65);transform-origin:31.5% 88.3%}
+.player-hall__scene::before{content:"";position:absolute;left:9.7046%;top:66.9078%;width:42.1941%;height:22.302%;background:url('./assets/player-hall/hall-table-clean-plate-v1.webp') center/100% 100% no-repeat;pointer-events:none}
+.player-hall-dialog .player-hall__lamp{left:65.65%;top:76.925%;width:6.76%;height:6.5%;min-width:0;min-height:0}
+.player-hall__room[data-theme=midnight] .player-hall__scene::before{filter:brightness(.35) saturate(.6)}
 .player-hall__room[data-theme=midnight] .player-hall__character-foreground{filter:brightness(.35) saturate(.6)}
 
 /* Anchor each alpha-trimmed object to the perspective line of its shelf. */
@@ -489,3 +492,8 @@
 /* The hall and wardrobe use one pose and the same independent garment layers. */
 .player-hall__scene>.player-hall__character--wardrobe{left:5%;top:40%;width:65%;height:51%;object-position:center bottom;filter:drop-shadow(0 7px 6px #0007)}
 .player-hall__room[data-theme=midnight] .player-hall__character--wardrobe{filter:brightness(.52) saturate(.8) drop-shadow(0 7px 6px #0007)}
+
+/* Hidden adjacent garage surfaces load when that room is selected. */
+.player-hall__room:not([data-space=garage]) .player-hall__garage-scene::before{background-image:none}
+/* The entry preview shares the current room image and its browser cache. */
+.player-hall-entry__art{background-image:image-set(url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.avif') type('image/avif'),url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.webp') type('image/webp'))}

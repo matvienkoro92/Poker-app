@@ -177,3 +177,24 @@ test('removed striped collection cannot be selected and old saved pieces fall ba
  for(const kind of ['suit','pants','shoes']){assert.equal(G.items.some(i=>i.key===kind+':collection_sailor'),false);assert.throws(()=>Garage.choose({[kind]:'collection_sailor'},{stats:{level:100}}),/не открыта/);assert.equal(G.normalize({[kind]:'collection_sailor'},{level:100})[kind],G.defaults[kind]);}
  assert.equal(G.outfitSets.some(s=>s.id==='sailor'),false);
 });
+
+test('summer separates and hats save independently at their exact levels',()=>{
+ for(const [level,suit,pants,hat]of [[0,'palmTank','sandShorts','strawSun'],[5,'flamingoTank','oceanShorts','duckBucket'],[10,'bananaTank','flamingoShorts','propellerCap']]){
+  const look={...G.defaults,suit,pants,hat};
+  const saved=Garage.choose(look,{stats:{level}});
+  assert.equal(saved.suit,suit);assert.equal(saved.pants,pants);assert.equal(saved.hat,hat);
+  if(level)assert.throws(()=>Garage.choose(look,{stats:{level:level-1}}),/не открыта/);
+ }
+ assert.equal(G.normalize({}, {level:0}).hat,'none');
+});
+
+test('13 hairstyles and five physiques persist without changing clothes or trusting forged IDs',()=>{
+ assert.equal(G.hairStyles.length,13);assert.equal(G.bodyTypes.length,5);
+ for(const [hair]of G.hairStyles)for(const [body]of G.bodyTypes){
+  const saved=Garage.choose({...G.defaults,hair,body,suit:'palmTank',pants:'sandShorts'},{stats:{level:0}});
+  assert.equal(saved.hair,hair);assert.equal(saved.body,body);assert.equal(saved.suit,'palmTank');assert.equal(saved.pants,'sandShorts');
+ }
+ for(const kind of ['hair','body'])assert.throws(()=>Garage.choose({...G.defaults,[kind]:'forged'},{stats:{level:100}}),/не открыта/);
+ const old=G.normalize({suit:'classic'},{level:0});assert.equal(old.hair,'hairNatural');assert.equal(old.body,'bodyNormal');
+ for(const hat of ['pokerFlatCap','pokerClassicCap'])assert.equal(Garage.choose({...G.defaults,hat},{stats:{level:0}}).hat,hat);
+});

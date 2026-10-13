@@ -314,6 +314,24 @@ function pokerApplyProfileUserInfo(data) {
     pokerSetProfileSubscriptionStatus(data);
   } catch (eSubStatus) {}
 }
+function pokerFetchProfileUserInfo(url) {
+  var controller = typeof AbortController === "function" ? new AbortController() : null;
+  var timer;
+  var deadline = new Promise(function (_, reject) {
+    timer = setTimeout(function () {
+      if (controller) controller.abort();
+      reject(new Error("Profile request timed out"));
+    }, 10000);
+  });
+  return Promise.race([
+    fetch(url, controller ? { signal: controller.signal } : {}).then(function (r) {
+      if (!r.ok) throw new Error("Profile request failed");
+      return r.json();
+    }),
+    deadline
+  ]).finally(function () { clearTimeout(timer); });
+}
+
 function loadCurrentProfileUserInfo() {
   var now = Date.now();
   if (pokerProfileUserInfoCache && now - pokerProfileUserInfoCacheAt < POKER_PROFILE_USER_INFO_CACHE_MS) {
@@ -336,8 +354,7 @@ function loadCurrentProfileUserInfo() {
     pokerProfileUserInfoCache = cachedInfo;
     pokerProfileUserInfoCacheAt = Date.now();
     pokerApplyProfileUserInfo(cachedInfo);
-    pokerProfileUserInfoPromise = fetch(base + "/api/users" + authQWithHint)
-      .then(function (r) { return r.json(); })
+    pokerProfileUserInfoPromise = pokerFetchProfileUserInfo(base + "/api/users" + authQWithHint)
       .then(function (data) {
         pokerProfileUserInfoCache = data || null;
         pokerProfileUserInfoCacheAt = Date.now();
@@ -353,8 +370,7 @@ function loadCurrentProfileUserInfo() {
       });
     return Promise.resolve(cachedInfo);
   }
-  pokerProfileUserInfoPromise = fetch(base + "/api/users" + authQWithHint)
-    .then(function (r) { return r.json(); })
+  pokerProfileUserInfoPromise = pokerFetchProfileUserInfo(base + "/api/users" + authQWithHint)
     .then(function (data) {
       pokerProfileUserInfoCache = data || null;
       pokerProfileUserInfoCacheAt = Date.now();
