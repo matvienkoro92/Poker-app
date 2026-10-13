@@ -2,7 +2,7 @@
   'use strict';
   var dialog,detail,data,selection,busy=false,generation=0,request=0,tab='room',filter='all',camera='wide',space='hall',garageFocus='',garageVehicle=0,editingShelf=null,loungeFocus='',loungeDraft=null,hallReturn=null,loungeLive=null;
   var labels={cups:'Кубки',achievements:'Достижения',seasons:'Сезоны'};
-  function adminVisible(){return !!(window.__pokerTelegramAuth&&window.__pokerTelegramAuth.adminAccess===true);}
+  function adminVisible(){return !!(window.PokerGarage&&window.PokerGarage.canAccessHall(window.__pokerTelegramAuth));}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function money(n){return Number(n).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';}
   var trophyArt={

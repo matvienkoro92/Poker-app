@@ -46,3 +46,16 @@ test('occupied garage plate rejects the save and reports its owner',async()=>{
  await assert.rejects(()=>hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garage}),e=>e.status===409&&/уже занят игроком Владелец номера/.test(e.message));
  assert.equal(claims,1);
 });
+
+test('Polina pilot can use the hall without being an administrator; save stays scoped to self',async()=>{
+ const {hasPlayerHallPilotAccess}=require('../lib/player-hall-access'),G=require('../app-garage-catalog');
+ for(const identity of [{telegramUsername:'polyapineapple'},{pwaUsername:'@Polyapineapple'}])assert.equal(hasPlayerHallPilotAccess(identity),true);
+ for(const identity of [null,{telegramUsername:'someone'},{telegramUsername:'polyapineapple',vkId:1}])assert.equal(hasPlayerHallPilotAccess(identity),false);
+ assert.equal(G.canAccessHall({status:'verified',user:{username:'polyapineapple'}}),true);
+ assert.equal(G.canAccessHall({status:'loading',user:{username:'polyapineapple'}}),false);
+ assert.equal(G.canAccessHall({status:'verified',user:{username:'someone'}}),false);
+ let savedTo;
+ const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID_POLINA',admin:false,hallAccess:true,body:{action:'save',targetId:'ID_OTHER'}})},'../account-id':{resolveAccountId:async()=>{throw Error('Must not resolve save target');}},'../player-hall':{save:async id=>{savedTo=id;return {};}}});
+ const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};
+ await handler({},res);assert.equal(res.code,200);assert.equal(savedTo,'ID_POLINA');
+});
