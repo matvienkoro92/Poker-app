@@ -950,10 +950,8 @@ select {
 }
 html.app--telegram-miniapp {
   --tg-ui-top-clearance: max(
-    12px,
-    env(safe-area-inset-top, 0px),
-    var(--app-top-from-tg, 0px),
-    var(--tg-content-safe-area-inset-top, 0px)
+    var(--app-top-from-tg, 60px),
+    calc(max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px)) + max(52px, var(--tg-content-safe-area-inset-top, 0px)) + 8px)
   );
 }
 html.app--telegram-miniapp .app {
@@ -994,8 +992,8 @@ html.app-view-raffles-html-scroll #app.app {
   flex-shrink: 0;
 }
 /*
- * Telegram: contentSafeAreaInset.top уже отступ до контента от верха WebView.
- * Не смешивать с env(safe-area-inset-top) в max() — иначе после viewportChanged появляется лишний «второй» зазор.
+ * Telegram: общий отступ учитывает системную область и кнопки клиента.
+ * Все экраны используют одну переменную, включая фиксированные панели.
  */
 html.app--tg-content-inset .app {
   padding-top: var(--tg-ui-top-clearance, max(12px, var(--app-top-from-tg, 48px))) !important;

@@ -868,6 +868,16 @@ function profilePublicShowcaseSyncArtContent(nick, opts) {
   if (!artWrap || !artImg) return;
   var avatarWrap = document.getElementById("profilePublicHeroAvatar");
   var showcase = document.getElementById("profilePublicShowcase");
+  // The saved wardrobe owns this portrait. Never flash the older rating art while it loads.
+  var savedCharacter = window.__pokerTelegramAuth?.adminAccess === true && typeof window.pokerMountGarageShowcase === "function";
+  artWrap.classList.toggle("garage-profile-character-pending", savedCharacter);
+  if (savedCharacter) {
+    profilePublicShowcaseArtSeq += 1;
+    profilePublicShowcaseHideArt(artImg);
+    artWrap.hidden = false;
+    if (avatarWrap) avatarWrap.hidden = true;
+    return;
+  }
   if (showcase && showcase.dataset.portrait === "avatar") {
     profilePublicShowcaseArtSeq += 1;
     profilePublicShowcaseHideArt(artImg);

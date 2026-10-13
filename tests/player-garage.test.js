@@ -134,8 +134,8 @@ test('fashion separates and accessories save independently and preserve legacy t
 });
 
 test('collections persist three independent pieces and derive the bonus from the worn set',()=>{
- assert.equal(G.seasonalCollections.length,12);
- assert.equal(G.items.filter(i=>i.collection).length,36);
+ assert.equal(G.seasonalCollections.length,11);
+ assert.equal(G.items.filter(i=>i.collection).length,33);
  for(const set of G.outfitSets){
   const p=G.collectionProgress(set,{}, {level:100});
   assert.equal(p.owned,3);
@@ -156,7 +156,7 @@ test('collections persist three independent pieces and derive the bonus from the
 });
 
 test('seasonal reward pacing offers early variety and goals across the full level range',()=>{
- const expected={tropical:0,flamingo:5,snow:10,pajama:15,sailor:20,duck:25,rain:35,icecream:45,banana:55,ski:65,holiday:80,space:90};
+ const expected={tropical:0,flamingo:5,snow:10,pajama:15,duck:25,rain:35,icecream:45,banana:55,ski:65,holiday:80,space:90};
  for(const set of G.seasonalCollections){
   const p=G.collectionProgress(G.outfitSets.find(s=>s.id===set.id),{},{});
   assert.equal(p.target,expected[set.id]);
@@ -171,4 +171,9 @@ test('seasonal reward pacing offers early variety and goals across the full leve
  for(const [key,level]of Object.entries(old))assert.ok(G.catalog({level}).find(i=>i.key===key).unlocked);
  assert.equal(G.catalog({level:99}).find(i=>i.key==='suit:legend').unlocked,false);
  assert.equal(G.catalog({level:100}).find(i=>i.key==='suit:legend').unlocked,true);
+});
+
+test('removed striped collection cannot be selected and old saved pieces fall back',()=>{
+ for(const kind of ['suit','pants','shoes']){assert.equal(G.items.some(i=>i.key===kind+':collection_sailor'),false);assert.throws(()=>Garage.choose({[kind]:'collection_sailor'},{stats:{level:100}}),/не открыта/);assert.equal(G.normalize({[kind]:'collection_sailor'},{level:100})[kind],G.defaults[kind]);}
+ assert.equal(G.outfitSets.some(s=>s.id==='sailor'),false);
 });

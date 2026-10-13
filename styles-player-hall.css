@@ -15,8 +15,8 @@
 .player-hall-dialog--immersive .player-hall__tabs{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:20px;right:20px;margin:0;z-index:10;border:1px solid #dcc29733;border-radius:16px;padding:4px;gap:0;background:#111911b8;backdrop-filter:blur(16px);justify-content:space-around}
 .player-hall-dialog--immersive .player-hall__tabs button{padding:12px 8px;border:0;border-radius:12px;font-size:12px}
 .player-hall-dialog--immersive .player-hall__tabs button[aria-pressed=true]{background:#d3b78322;color:#f6dfae}
-.player-hall__room{height:100%;width:100%;aspect-ratio:auto;border-radius:0;background:#191610;box-shadow:none}
-.player-hall__scene{position:absolute;inset:0;background:url('./assets/player-hall/lounge-room-v4.webp') center/100% 100%;transform-origin:50% 50%;transition:transform 850ms cubic-bezier(.22,.7,.16,1);will-change:transform}
+.player-hall__room{container-type:size;height:100%;width:100%;aspect-ratio:auto;border-radius:0;background:#191610;box-shadow:none}
+.player-hall__scene{position:absolute;width:max(100cqw,57.142857cqh);height:max(100cqh,175cqw);left:calc((100% - max(100cqw,57.142857cqh))/2);top:calc((100% - max(100cqh,175cqw))/2);background:url('./assets/player-hall/lounge-room-v4.webp') center/100% 100%;transform-origin:50% 50%;transition:transform 850ms cubic-bezier(.22,.7,.16,1);will-change:transform}
 .player-hall__room:after{inset:0;background:linear-gradient(var(--hall-glow,transparent),transparent 75%);z-index:4}
 .player-hall__room[data-camera=cabinet] .player-hall__scene{transform:translate(-40%,25%) scale(1.8)}
 .player-hall__room[data-camera=shelves] .player-hall__scene{transform:translate(45%,22%) scale(2.2)}
@@ -66,6 +66,9 @@
 .player-hall__locked img{filter:brightness(.15) grayscale(1);opacity:.55}.player-hall__locked progress{width:100%;accent-color:#c9ab6b;height:5px}.player-hall__locked small{display:block;color:#b9ad95;font-size:10px;margin-top:7px}
 .player-hall__section-panel{position:absolute;z-index:5;left:0;right:0;bottom:calc(79px + env(safe-area-inset-bottom,0px));max-height:40%;overflow:auto;padding:14px 18px;background:#101910ef;border-top:1px solid #d9bb7440;backdrop-filter:blur(14px);box-sizing:border-box}
 .player-hall__section-panel>header{display:flex;justify-content:space-between;align-items:center;gap:8px}.player-hall__section-panel>header h3{margin:0;font-size:17px;color:#ead8b3}.player-hall__section-panel>header button{font-size:10px;padding:7px}.player-hall__section-panel .player-hall__award-section>h3{display:none}.player-hall__section-panel .player-hall__collection{display:flex;gap:10px;overflow-x:auto;padding:12px 0 6px;scroll-snap-type:x proximity}.player-hall__section-panel article{flex:0 0 130px;scroll-snap-align:start;padding:10px}.player-hall__section-panel .player-hall__trophy img{height:70px}.player-hall__section-panel .player-hall__collection-title{font-size:11px}.player-hall__section-panel .player-hall__collection article>p{font-size:10px}
+
+/* Keep the shelf control inside the visible crop on tall phones. */
+.player-hall__hotspot--shelves{left:max(6%,calc((100% - 100cqw)/2 + 12px))}
 /* Racing lounge and adjacent garage. */
 .player-hall-entry__art{background-image:url('./assets/player-hall/racing-lounge-v5.webp')}
 .player-hall__spaces{position:absolute;inset:0;transition:transform 900ms cubic-bezier(.22,.7,.16,1)}

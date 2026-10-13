@@ -1,6 +1,6 @@
 // Shell/layout helpers: Telegram/PWA viewport, tabbar padding, profile keyboard cleanup, and Telegram boot.
 
-/** Верхний отступ #app: PWA — только CSS; в Telegram — contentSafeAreaInset; в обычном браузере — без лишних +52px под шапку TG */
+/** Верхний отступ #app: PWA — только CSS; в Telegram — системная область + кнопки клиента; в обычном браузере — без лишних +52px под шапку TG */
 function pokerApplyAppTopPadding() {
   var root = document.documentElement;
   var standalone =
@@ -29,22 +29,19 @@ function pokerApplyAppTopPadding() {
     }
   } catch (eTgMini) {}
   var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  if (
-    tw &&
-    tw.contentSafeAreaInset != null &&
-    typeof tw.contentSafeAreaInset.top === "number" &&
-    tw.contentSafeAreaInset.top > 0
-  ) {
+  if (root.classList.contains("app--telegram-miniapp")) {
+    // Device status bar and Telegram controls occupy separate areas.
+    var deviceTop = Math.max(0, Number(tw && tw.safeAreaInset && tw.safeAreaInset.top) || 0);
+    var contentTop = Math.max(0, Number(tw && tw.contentSafeAreaInset && tw.contentSafeAreaInset.top) || 0);
+    // Keep controls clear while the client is still reporting zero/missing insets.
+    var px = Math.ceil(deviceTop + Math.max(52, contentTop) + 8);
     root.classList.add("app--tg-content-inset");
-    /* Без +8: иначе после стабилизации viewport отступ заметно растёт относительно первого кадра */
-    var px = Math.max(12, Math.round(tw.contentSafeAreaInset.top));
     root.style.setProperty("--app-top-from-tg", px + "px");
     root.style.removeProperty("--app-extra-top-for-ui");
     return;
   }
   root.classList.remove("app--tg-content-inset");
   root.style.removeProperty("--app-top-from-tg");
-  /* Mini App без contentSafeAreaInset.top: не оставлять :root +52px — иначе огромный зазор под «шапку» */
   root.style.setProperty("--app-extra-top-for-ui", "12px");
 }
 
@@ -123,7 +120,7 @@ function pokerApplyTelegramTopClearance() {
     ) || 0;
   } catch (eTgTop) {}
   var clearance = Math.max(12, tgTop);
-  if (appEl) appEl.style.paddingTop = clearance + "px";
+  if (appEl) appEl.style.setProperty("padding-top", "var(--tg-ui-top-clearance, " + clearance + "px)", "important");
   if (activeHeader && viewName !== "chat") {
     activeHeader.style.marginTop = "0";
     activeHeader.style.marginBottom = "12px";
