@@ -1186,4 +1186,10 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-11-10-2026-league1-pyatihatka-ko-20h.jpg",
     "rating-compressed-preview/rating-11-10-2026-league1-nlh-knockout-220k-21h.jpg"
   ]
+,
+  "12.10.2026": [
+    "rating-compressed-preview/rating-12-10-2026-league1-turnir-ponedelnika-18h.jpg",
+    "rating-compressed-preview/rating-12-10-2026-league1-pyatihatka-ko-20h.jpg",
+    "rating-compressed-preview/rating-12-10-2026-league1-a-addonik-a-22h.jpg"
+  ]
 };

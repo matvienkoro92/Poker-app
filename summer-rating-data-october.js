@@ -2725,4 +2725,163 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "12.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Zeus",
+          "place": 1,
+          "reward": 5452.61,
+          "points": 0
+        },
+        {
+          "nick": "Odna.pluha",
+          "place": 2,
+          "reward": 1825.08,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 3,
+          "reward": 8.74,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "BOTEZGAMBIT",
+          "place": 3,
+          "reward": 890,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 2,
+          "reward": 23040,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 10,
+          "reward": 18010,
+          "points": 0
+        },
+        {
+          "nick": "Damir86rus",
+          "place": 4,
+          "reward": 14450,
+          "points": 0
+        },
+        {
+          "nick": "BOTEZGAMBIT",
+          "place": 8,
+          "reward": 13980,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 7,
+          "reward": 1810,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 22600.21,
+          "points": 0
+        },
+        {
+          "nick": "roma1233",
+          "place": 8,
+          "reward": 3360.78,
+          "points": 0
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 12,
+          "reward": 1687.5,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 3,
+          "reward": 1598.59,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 25,
+          "reward": 350,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 1,
+          "reward": 7130,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 4560,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 5,
+          "reward": 1550,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "A Аддоник А",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MORPEH",
+          "place": 2,
+          "reward": 11800,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

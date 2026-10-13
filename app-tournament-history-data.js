@@ -452,6 +452,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             34480
           ]
         ]
+      ],
+      [
+        "12.10.2026",
+        [
+          [
+            2,
+            "cadillac",
+            23040
+          ]
+        ]
       ]
     ]
   },
