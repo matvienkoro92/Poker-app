@@ -132,3 +132,43 @@ test('fashion separates and accessories save independently and preserve legacy t
  for(const kind of ['glasses','watch','necklace'])assert.equal(G.normalize({},{} )[kind],'none');
  assert.throws(()=>Garage.choose({...look,watch:'greenDiver'},{stats:{level:0}}),/не открыта/);
 });
+
+test('collections persist three independent pieces and derive the bonus from the worn set',()=>{
+ assert.equal(G.seasonalCollections.length,12);
+ assert.equal(G.items.filter(i=>i.collection).length,36);
+ for(const set of G.outfitSets){
+  const p=G.collectionProgress(set,{}, {level:100});
+  assert.equal(p.owned,3);
+  const saved=Garage.choose(set.pieces,{stats:{level:p.target}});
+  assert.equal(G.activeOutfit(saved,{level:p.target}).id,set.id);
+  assert.equal(G.collectionProgress(set,saved,{level:p.target}).worn,3);
+  assert.equal(G.activeOutfit({...saved,shoes:'unknown'}),null);
+  if(p.target){
+   assert.throws(()=>Garage.choose(set.pieces,{stats:{level:p.target-1}}),/не открыта/);
+   assert.equal(G.activeOutfit(saved,{level:p.target-1}),null);
+  }
+ }
+ // Adding a forged bonus field cannot award an effect or persist extra state.
+ const mixed=Garage.choose({...G.defaults,suit:'collection_tropical',bonus:'snow'},{stats:{level:100}});
+ assert.equal(G.activeOutfit(mixed),null);
+ assert.equal(mixed.bonus,undefined);
+ for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind))assert.ok(G.outfitSets.some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
+});
+
+test('seasonal reward pacing offers early variety and goals across the full level range',()=>{
+ const expected={tropical:0,flamingo:5,snow:10,pajama:15,sailor:20,duck:25,rain:35,icecream:45,banana:55,ski:65,holiday:80,space:90};
+ for(const set of G.seasonalCollections){
+  const p=G.collectionProgress(G.outfitSets.find(s=>s.id===set.id),{},{});
+  assert.equal(p.target,expected[set.id]);
+  const levels=Object.fromEntries(['suit','pants','shoes'].map(k=>[k,G.items.find(i=>i.key===k+':collection_'+set.id).target]));
+  assert.equal(levels.shoes,Math.max(0,p.target-2));assert.equal(levels.pants,Math.max(0,p.target-1));assert.equal(levels.suit,p.target);
+  if(p.target){assert.equal(G.collectionProgress(p,{}, {level:p.target-1}).owned,2);assert.equal(G.collectionProgress(p,{}, {level:p.target-2}).owned,1);}
+ }
+ for(const season of ['Лето','Пляж','Зима','Весёлое'])assert.ok(G.seasonalCollections.some(s=>s.season===season&&s.target<=20),season);
+ for(const [lo,hi] of [[1,25],[26,50],[51,75],[76,100]])assert.ok(G.seasonalCollections.filter(s=>s.target>=lo&&s.target<=hi).length>=2);
+ // Legacy unlocks retain their availability, including rare level 100 cosmetics.
+ const old={'shoes:combatBlack':16,'shoes:desertSand':30,'pants:navyPinstripe':35,'shoes:hikingBrown':50,'pants:grayPlaid':50,'shoes:onyx':28};
+ for(const [key,level]of Object.entries(old))assert.ok(G.catalog({level}).find(i=>i.key===key).unlocked);
+ assert.equal(G.catalog({level:99}).find(i=>i.key==='suit:legend').unlocked,false);
+ assert.equal(G.catalog({level:100}).find(i=>i.key==='suit:legend').unlocked,true);
+});

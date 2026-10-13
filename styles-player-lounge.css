@@ -472,3 +472,20 @@
 .garage-reward-slot:nth-of-type(n+4):nth-of-type(-n+6) .garage-reward-label{transform:skewY(1.15deg)}
 .garage-reward-slot:nth-of-type(n+7) .garage-shelf-art canvas{transform:rotateY(-9deg) skewY(.15deg)}
 .garage-reward-slot:nth-of-type(n+7) .garage-reward-label{transform:skewY(.15deg)}
+
+/* The 3D snapshot supplies its own night lighting; keep the neon floor spill bright. */
+.player-hall__room[data-theme=midnight] .player-hall__parked-kart[data-vehicle-renderer="3d"]{filter:drop-shadow(0 4px 5px #0008)}
+
+/* Wardrobe collections share the existing cloth atlas; no extra image downloads. */
+.garage-collection-filters{display:flex;gap:7px;overflow-x:auto;padding:10px 12px;flex-shrink:0}
+.garage-collection-filters button{flex:none;border:1px solid #48565d;border-radius:20px;padding:7px 13px;color:#bdc8ce;background:#19242a;font:inherit;font-size:13px}
+.garage-collection-filters button[aria-pressed=true]{border-color:#d7b566;color:#ffe6aa;background:#383324}
+.garage-set-art{display:flex;align-items:center;gap:3px;padding:12px!important;box-sizing:border-box}
+.garage-set-art canvas{width:32%!important;height:100%!important;min-width:0;object-fit:contain}
+.garage-set-bonus{display:block;color:#f5d68e;font-size:13px;margin:8px 0}
+.garage-set-card>p{font-size:11px;line-height:1.45;color:#aab7bf;margin:8px 10px}
+.garage-item-collection{display:block;font-size:11px;color:#d5bd84;margin:5px 0}
+.garage-set-explanation{margin:6px 14px 12px;color:#aebbc2;font-size:12px;line-height:1.5}
+.garage-character-stage{position:relative}
+.garage-outfit-label{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);max-width:90%;width:max-content;border:1px solid #b99d55;border-radius:14px;background:#101b21e8;color:#f4d991;font-size:11px;padding:6px 11px;text-align:center;pointer-events:none}
+.garage-set-options{min-height:230px}

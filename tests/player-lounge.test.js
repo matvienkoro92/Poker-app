@@ -12,5 +12,5 @@ test('playing friends outside pinned seats appear without displacing a playing p
  const vm=require('node:vm'),fs=require('node:fs'),context={window:{}};vm.runInNewContext(fs.readFileSync(require.resolve('../app-player-lounge.js'),'utf8'),context);
  const data={seats:['ID1','ID2',null,null,null],friends:[{accountId:'ID1',presence:{status:'away'}},{accountId:'ID2',presence:{status:'playing'}},{accountId:'ID6',presence:{status:'playing',characterId:'cooler'}}]};
  assert.deepEqual(Array.from(context.window.PokerLounge.activeSeats(data)),['ID6','ID2',null,null,null]);
- const html=context.window.PokerLounge.scene(data,false);assert.ok(html.includes('live-seated-cooler-v1.webp'));assert.equal((html.match(/lounge-seat--occupied/g)||[]).length,2);assert.deepEqual(data.seats,['ID1','ID2',null,null,null]);
+ const html=context.window.PokerLounge.scene(data,false);assert.ok(html.includes('live-seated-cooler-fast-v2.webp'));assert.equal((html.match(/lounge-seat--occupied/g)||[]).length,2);assert.deepEqual(data.seats,['ID1','ID2',null,null,null]);
 });
