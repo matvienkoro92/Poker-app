@@ -198,3 +198,52 @@ test('13 hairstyles and five physiques persist without changing clothes or trust
  const old=G.normalize({suit:'classic'},{level:0});assert.equal(old.hair,'hairNatural');assert.equal(old.body,'bodyNormal');
  for(const hat of ['pokerFlatCap','pokerClassicCap'])assert.equal(Garage.choose({...G.defaults,hat},{stats:{level:0}}).hat,hat);
 });
+
+test('helmet milestones select distinct models while keeping saved IDs and unlock levels',()=>{
+ const expected=[['club',3],['ruby',15],['night',25],['silver',40],['emerald',60],['legend',95]];
+ assert.equal(G.items.filter(i=>i.kind==='helmet'&&i.id!=='none').length,6);
+ assert.equal(new Set(Object.values(G.helmetModels)).size,5);
+ for(const [helmet,level]of expected){
+  const i=G.items.find(i=>i.kind==='helmet'&&i.id===helmet);assert.equal(i.target,level);
+  for(const visor of ['open','closed'])assert.equal(Garage.choose({...G.defaults,helmet,visor},{stats:{level}}).helmet,helmet);
+  assert.throws(()=>Garage.choose({...G.defaults,helmet},{stats:{level:level-1}}),/не открыта/);
+ }
+ const fs=require('fs'),path=require('path');
+ for(const model of Object.values(G.helmetModels))for(const visor of ['open','closed']){
+  const file=path.join(__dirname,'../assets/player-hall/helmets',model+'-'+visor+'-v1.webp');
+  assert.ok(fs.statSync(file).size<100000,'Helmet sprite must stay below 100 KB');
+ }
+});
+
+test('prestige watches and rings have exact level gates and save independently',()=>{
+ for(const [id,[,level]]of Object.entries(G.prestigeWatches)){
+  assert.throws(()=>Garage.choose({watch:id},{stats:{level:level-1}}),/не открыта/);
+  assert.equal(Garage.choose({watch:id},{stats:{level}}).watch,id);
+ }
+ for(const [id,[,level]]of Object.entries(G.ringDesigns)){
+  assert.throws(()=>Garage.choose({ring:id},{stats:{level:level-1}}),/не открыта/);
+  const look=Garage.choose({ring:id,necklace:'goldChain',watch:'steelBlue'},{stats:{level}});
+  assert.equal(look.ring,id);assert.equal(look.necklace,'goldChain');assert.equal(look.watch,'steelBlue');
+ }
+ assert.equal(G.normalize({},{}).ring,'none');
+ assert.equal(G.normalize({ring:'diamondKing'},{level:10}).ring,'none');
+});
+test('legacy garment rewards keep their IDs and use distinct real models',()=>{
+ for(const [kind,models]of Object.entries(G.rewardFashionModels)){
+  assert.equal(new Set(Object.values(models)).size,Object.keys(models).length);
+  for(const [id,base]of Object.entries(models)){
+   assert.ok(G.fashionRows[kind].some(row=>row[0]===base));
+   const reward=G.items.find(i=>i.kind===kind&&i.id===id);assert.ok(reward);
+   assert.equal(G.normalize({[kind]:id},{level:reward.target},true)[kind],id);
+  }
+ }
+});
+test('prestige watch sprites stay small and every model has its own file',()=>{
+ const fs=require('node:fs'),path=require('node:path'),hashes=new Set();
+ for(const id of Object.keys(G.prestigeWatches)){
+  const file=path.join(__dirname,'../assets/player-hall/wardrobe/summer',id+'.webp'),bytes=fs.readFileSync(file);
+  assert.ok(bytes.length<100000,id+' sprite exceeds 100 KB');
+  hashes.add(require('node:crypto').createHash('sha256').update(bytes).digest('hex'));
+ }
+ assert.equal(hashes.size,Object.keys(G.prestigeWatches).length);
+});

@@ -219,6 +219,7 @@ function copyReferencedAssets() {
   }
   addWardrobeAssets('player-hall/wardrobe/summer');
   addWardrobeAssets('player-hall/wardrobe/items');
+  addWardrobeAssets('player-hall/helmets');
   // Rating preview URLs are assembled at runtime, so static scanning misses them.
   for (const rel of Array.from(refs)) {
     if (!/(?:^|\/)rating-\d{2}-\d{2}-\d{4}[^/]*\.(?:png|jpe?g|webp|avif)$/i.test(rel)) continue;
