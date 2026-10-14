@@ -91,6 +91,7 @@
       "app-chat-keyboard-dock-viewport-events.js",
       "app-chat-keyboard-dock.js",
       "app-chat-view-glue.js",
+      "app-hall-table.js",
       "app-player-hall.js"
     ],
     "rating": [
@@ -144,6 +145,7 @@
       "app-visitor-id.module.mjs",
       "app-cashout.js",
       "app-portrait-effects.js",
+      "app-hall-table.js",
       "app-player-hall.js"
     ],
     "push": [

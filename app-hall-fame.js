@@ -1100,13 +1100,15 @@ function hallFishLevelRowHtml(row, rank, extraClass) {
   var podiumClass = levelDesign && rank >= 1 && rank <= 3 ? " hall-fish-level-row--podium hall-fish-level-row--place-" + rank : "";
   var sticky = !!(extraClass && extraClass.indexOf("--sticky") !== -1);
   if (sticky) sub = [p21Id ? "ID " + p21Id : "", city].filter(Boolean).join(" · ");
+  var garageMedia = levelDesign && userId && typeof window.pokerGarageHallMediaHtml === "function"
+    ? window.pokerGarageHallMediaHtml(userId) : "";
   var xp = row && row.levelXp;
   var xpTarget = row && row.levelXpTarget;
   var hasXp = levelDesign && xp != null && xpTarget != null && isFinite(xp) && isFinite(xpTarget) && xp >= 0 && xpTarget > 0;
   var xpHtml = hasXp ? '<span class="hall-fish-level-row__xp-track" role="meter" aria-label="Опыт до следующего уровня" aria-valuemin="0" aria-valuemax="' + xpTarget + '" aria-valuenow="' + Math.min(xp, xpTarget) + '"><span style="width:' + Math.min(100, 100 * xp / xpTarget) + '%"></span></span><span class="hall-fish-level-row__xp-label">' + Math.floor(xp).toLocaleString("ru-RU") + ' / ' + Math.floor(xpTarget).toLocaleString("ru-RU") + '</span>' : '';
   return '<button type="button" class="hall-fish-level-row hall-fish-level-row--player' + (extraClass ? " " + hallFishEsc(extraClass) : "") + (levelDesign ? " hall-fish-level-row--premium" : "") + podiumClass + '" data-user-id="' + hallFishEsc(userId) + '" data-user-name="' + hallFishEsc(name) + '" data-user-level="' + hallFishEsc(row && row.level) + '" aria-label="Открыть профиль ' + hallFishEsc(name) + '">' +
     '<span class="hall-fish-level-row__rank">' + (podiumClass ? '<span class="hall-fish-level-row__crown" aria-hidden="true">♛</span>' : '') + hallFishEsc(rank) + '</span>' +
-    '<span class="hall-fish-level-row__media hall-fish-level-row__media--' + hallFishEsc(image.kind) + '"><img src="' + hallFishEsc(image.src) + '" alt="" loading="lazy" decoding="async"></span>' +
+    (garageMedia || '<span class="hall-fish-level-row__media hall-fish-level-row__media--' + hallFishEsc(image.kind) + '"><img src="' + hallFishEsc(image.src) + '" alt="" loading="lazy" decoding="async"></span>' ) +
     '<span class="hall-fish-level-row__main"><span class="hall-fish-level-row__headline">' + (sticky ? '<span class="hall-fish-level-row__you">Вы</span>' : '') + '<span class="hall-fish-level-row__name">' + hallFishEsc(row && row.name || "—") + '</span>' +
     (rank === 1 && levelDesign && !sticky ? '<span class="hall-fish-level-row__leader">♛ Лидер клуба</span>' : '') + '</span>' +
     (sub ? '<span class="hall-fish-level-row__tg">' + hallFishEsc(sub) + '</span>' : '') +
@@ -2526,6 +2528,7 @@ function hallFishSetModalState(message, rows, currentIds) {
   }
   if (body) body.innerHTML = rows ? hallFishRenderRows(rows, currentIds) : hallFishRenderLevelSkeleton();
   if (rows) hallFishPrefetchTopProfiles(rows);
+  if (body && window.pokerHydrateGarageHall) window.pokerHydrateGarageHall(body);
   modal.hidden = false;
   if (document.body) document.body.classList.add("player-crm-dialog-modal-open");
 }
@@ -3080,6 +3083,7 @@ function initHallFishRatingModal() {
     var results = body && body.querySelector("[data-hall-fish-level-results]");
     var count = body && body.querySelector("[data-hall-fish-level-search-count]");
     if (results) results.innerHTML = hallFishRenderLevelResults(filteredRows, hallFishLevelCurrentIds, hallFishLevelSearchQuery);
+    if (results && window.pokerHydrateGarageHall) window.pokerHydrateGarageHall(results);
     if (count) count.textContent = hallFishLevelSearchQuery ? "Найдено: " + filteredRows.length : "Игроков: " + rows.length;
   });
   document.addEventListener("click", function (e) {

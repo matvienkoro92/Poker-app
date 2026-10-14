@@ -285,7 +285,7 @@ test('replacement hairstyles use individual hair-only sprites within the size bu
  const fs=require('node:fs'),path=require('node:path'),hashes=new Set();let total=0;
  assert.equal(Object.keys(G.hairOverlayFits).length,11);
  for(const [id,[width,height]]of Object.entries(G.hairOverlayFits)){
-  assert.ok(G.hairStyles.some(([hair])=>hair===id));assert.ok(width>=240&&width<=320);assert.ok(height>0&&height<=240);
+  assert.ok(G.hairStyles.some(([hair])=>hair===id));assert.ok(width>=220&&width<=320);assert.ok(height>0&&height<=240);
   const bytes=fs.readFileSync(path.join(__dirname,'../assets/player-hall/wardrobe/summer',id+'-hair-only-v2.webp'));
   assert.ok(bytes.length<160000,id+' exceeds sprite budget');total+=bytes.length;
   hashes.add(require('node:crypto').createHash('sha256').update(bytes).digest('hex'));

@@ -61,3 +61,15 @@ test('Polina pilot can use the hall without being an administrator; save stays s
 });
 
 test('Qweenpoker hall pilot access requires verified identity and grants no VK access',()=>{const G=require('../app-garage-catalog');const {hasPlayerHallPilotAccess}=require('../lib/player-hall-access');assert.equal(G.canAccessHall({status:'verified',user:{username:'@Qweenpoker'}}),true);assert.equal(G.canAccessHall({status:'loading',user:{username:'Qweenpoker'}}),false);assert.equal(G.canAccessHall({status:'verified',authMethod:'vk',user:{username:'Qweenpoker'}}),false);assert.equal(hasPlayerHallPilotAccess({telegramUsername:'Qweenpoker',vkId:1}),false);});
+
+test('table XP comes from the same verified profile status as the leaderboard',async()=>{
+ const cached={nickname:'Игрок',totalCounter:{fee:345678,mttCount:20,mttFirstCount:2}};
+ const social=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:'123'},{result:'Игрок'}]}});
+ const p=await social.memberProfile('ID1');
+ const expected=require('../lib/chat-profile-status').pokerProfileStatusFromCachedProfile(cached,{pokerPlusLinked:true});
+ assert.equal(p.levelProgress.xp,Math.floor(expected.points-expected.levelStart));
+ assert.equal(p.levelProgress.target,expected.nextStart-expected.levelStart);
+ assert.equal(p.level,expected.level);
+ const unbound=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:null},{result:'Гость'}]}});
+ assert.equal((await unbound.memberProfile('ID2')).levelProgress,null);
+});
