@@ -170,7 +170,7 @@ function initRafflesActiveViewRuntime(opts) {
     }
     if (raffleAccessLevelNote) {
       var accessText = typeof raffleAccessLevelText === "function" ? raffleAccessLevelText(raffle) : "для всех";
-      raffleAccessLevelNote.textContent = "Доступ: " + accessText;
+      raffleAccessLevelNote.textContent = (isCashPrize && raffle.daily ? "Розыгрыш на видео-столы Poker21. " : "") + "Доступ: " + accessText;
       raffleAccessLevelNote.hidden = false;
       raffleAccessLevelNote.setAttribute("aria-hidden", "false");
     }
