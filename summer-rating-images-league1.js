@@ -1192,4 +1192,10 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-12-10-2026-league1-pyatihatka-ko-20h.jpg",
     "rating-compressed-preview/rating-12-10-2026-league1-a-addonik-a-22h.jpg"
   ]
+,
+  "13.10.2026": [
+    "rating-compressed-preview/rating-13-10-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-13-10-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-13-10-2026-league1-pyatihatka-mok-20h.jpg"
+  ]
 };

@@ -2884,4 +2884,183 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "13.10.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PlayerIniLwJ",
+          "place": 3,
+          "reward": 4820,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 3,
+          "reward": 5431,
+          "points": 0
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 0,
+          "reward": 315,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Евгений.А",
+          "place": 1,
+          "reward": 11907.5,
+          "points": 0
+        },
+        {
+          "nick": "мистерFox",
+          "place": 2,
+          "reward": 6120,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 4,
+          "reward": 1330,
+          "points": 0
+        },
+        {
+          "nick": "Марс",
+          "place": 5,
+          "reward": 600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Вторника",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AliPetuhov",
+          "place": 1,
+          "reward": 37300,
+          "points": 0
+        },
+        {
+          "nick": "doss93",
+          "place": 2,
+          "reward": 22300,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 10400,
+          "points": 0
+        },
+        {
+          "nick": "VICTORINOX",
+          "place": 4,
+          "reward": 8900,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 5,
+          "reward": 7400,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА МОК",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 26035,
+          "points": 0
+        },
+        {
+          "nick": "PlayerA2BA07",
+          "place": 5,
+          "reward": 2160,
+          "points": 0
+        },
+        {
+          "nick": "Pentagrammall",
+          "place": 3,
+          "reward": 1135,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 300",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 2,
+          "reward": 14219,
+          "points": 0
+        },
+        {
+          "nick": "butovskiy",
+          "place": 11,
+          "reward": 650,
+          "points": 0
+        },
+        {
+          "nick": "Malek3084",
+          "place": 12,
+          "reward": 650,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 2433.75,
+          "points": 0
+        },
+        {
+          "nick": "Мегалодон",
+          "place": 5,
+          "reward": 837.5,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

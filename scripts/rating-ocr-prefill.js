@@ -494,6 +494,8 @@ async function parseOcrFile(file) {
   if (date === "09.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "10.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   // Visually verified ID labels that Vision prefixed or distorted.
+  if (date === "13.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
+  if (date === "13.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   tokens.forEach((token) => {
     // IMG_0143: the avatar adds a stray K before Nast’ko’s visible ID.
     if (date === "10.10.2026" && time === "17:00" && !blue && token.text === "KID:121231") token.text = "ID:121231";
@@ -531,6 +533,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_0516 visibly shows zero rank; Vision omitted the digit.
+    if (date === "13.10.2026" && blue && time === "15:00" && playerId === "3123964" && reward === 3.15) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
     // IMG_9599: visually verified seventh place; Vision omitted the digit.
     if (date === "26.09.2026" && !blue && time === "21:00" && playerId === "491163" && reward === 335) {
       place = 7;
