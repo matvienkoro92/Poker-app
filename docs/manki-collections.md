@@ -117,3 +117,55 @@ ID и уровни наград сохранены. Очки уже имеют �
 Daytona — белый хронограф/чёрный безель; Day-Date — золото/зелёный циферблат;
 Royal Mechanics — бочкообразный скелетон/каучук; Diamond Royal — платина/камни.
 Файлы: `assets/player-hall/wardrobe/summer/{rolexSubmariner,rolexGMT,rolexDaytona,rolexDayDate,royalSkeleton,diamondRoyal}.webp`.
+
+Бритая голова использует `wardrobe/summer/shavedHead-v2.webp`: imagegen edit
+исходного фрагмента головы с запросом убрать волосы на скальпе и верхних
+висках, сохранить форму головы, выражение, уши и бороду. В рендерере заменяется
+только верхняя область головы; глаза, нос, рот и борода берутся из исходных
+пикселей персонажа. Большая отдельная накладка `hairBald.webp` больше не используется.
+
+### Подборка брендовой одежды (14.10.2026)
+
+Витрина одежды сокращена со 103 старых вариантов до 34 базовых и 12 новых
+брендовых моделей. Убраны сезонные пёстрые наборы, повторяющиеся цветовые
+награды и часть неудачных силуэтов. Старые ID остаются в серверном каталоге
+для совместимости: уже надетая вещь показывается владельцу и сохраняется.
+Новые вещи доступны в общих подкатегориях и открываются по клубному уровню:
+
+| Уровень | Модель |
+| --- | --- |
+| 5 | Stüssy Basic Tee |
+| 10 | Nike Club Joggers |
+| 15 | Jordan Brooklyn Fleece |
+| 25 | Ralph Lauren Iconic Polo |
+| 30 | Jordan 1 Black Toe |
+| 35 | Stone Island Cargo |
+| 40 | Stone Island Overshirt |
+| 65 | Moncler Maya |
+| 70 | Gucci GG Gabardine |
+| 75 | Gucci Web Cardigan |
+| 90 | Louis Vuitton Varsity |
+| 95 | Louis Vuitton LV Trainer |
+
+Это игровые адаптации реальных моделей, а не продуктовые фотографии.
+Изображения созданы встроенным imagegen: отдельный запрос на каждую вещь,
+фронтальная поза по исходному слою гардероба, прозрачный фон, без рук/головы
+для закрытой одежды; у поло и футболки — открытые предплечья. Для брюк —
+пояс до щиколоток без обуви, для обуви — две стопы с одинаковой высотой подошв.
+Общие ограничения промптов: сохранить геометрию исходного слоя, целый подол,
+нормальную посадку, небольшие знаки бренда, без посторонних предметов и фона.
+Финальные ресурсы: `assets/player-hall/wardrobe/branded/*-v1.webp`.
+
+Официальные референсы:
+- [Stüssy Basic Tee](https://www.stussy.com/products/1905000-basic-stussy-tee-black)
+- [Jordan Brooklyn Fleece](https://www.nike.com/t/jordan-brooklyn-fleece-mens-oversized-pullover-hoodie-ujOtKJXL/IV4902-047)
+- [Nike Club Joggers](https://www.nike.com/t/club-mens-joggers-UaoROJ9O/FN3787-407)
+- [Ralph Lauren Iconic Mesh Polo](https://www.ralphlauren.com/men-clothing-polo-shirts/the-iconic-mesh-polo-shirt/0038887964.html)
+- [Jordan 1 Black Toe](https://www.nike.com/launch/t/air-jordan-1-retro-black-toe)
+- [Stone Island Cargo](https://www.stoneisland.com/en-us/collection/pants-and-shorts/regular-tapered-fit-cargo-pants-with-drawstring-waistband-3100031-stretch-organic-cotton-twill-L1S153100031S0A10V0029.html)
+- [Stone Island Overshirt](https://www.stoneisland.com/en-us/collection/shirts/regular-fit-zipper-up-overshirt-with-pocket-1200008-brushed-organic-cotton-canvas-old-effect-L1S151200008S00WNV015G.html)
+- [Moncler Maya](https://www.moncler.com/en-us/men/outerwear/short-down-jackets/moncler-maya-hooded-short-down-jacket-black-L20911A5360068950999.html)
+- [Gucci GG Gabardine](https://www.gucci.com/us/en/pr/men/ready-to-wear-for-men/pants-and-shorts-for-men/long-pants-for-men/gg-cottton-gabardine-pant-p-814642ZARW14440)
+- [Gucci Web Cardigan](https://www.gucci.com/us/en/pr/men/ready-to-wear-for-men/knitwear-for-men/cardigans-for-men/wool-knit-cardigan-with-web-p-814529XKEJV4060)
+- [LV Varsity](https://us.louisvuitton.com/eng-us/products/varsity-blouson-nvprod7590021v/1AK6M3)
+- [LV Trainer](https://us.louisvuitton.com/eng-us/products/lv-trainer-sneaker-nvprod6150003v/1AHTD7)

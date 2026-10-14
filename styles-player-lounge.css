@@ -204,7 +204,7 @@
 .player-hall__room[data-theme=midnight] .hall-cabinet-surface{filter:brightness(.35) saturate(.6)}
 
 /* Original table pixels occlude the seated character, including the complete rim and legs. */
-.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(13% 76%,15% 75%,23% 74%,23% 69%,24% 68.6%,31% 68.6%,32% 70%,32% 74%,35% 74%,35% 71%,37% 70.5%,41% 71%,42% 74.5%,47% 75.2%,50% 76.6%,50% 79%,48% 80%,47% 87.3%,45% 87.3%,45% 80.3%,20% 80.3%,19% 88.3%,17% 88.3%,17% 80%,14% 79%);z-index:2;transform:translateX(46.5%) scale(.65);transform-origin:31.5% 88.3%}
+.player-hall__character-foreground{display:block;background-image:var(--hall-panorama);background-size:300% 100%;background-position:center center;clip-path:polygon(13% 76%,15% 75%,23% 74%,23% 69%,24% 68.6%,31% 68.6%,32% 70%,32% 74%,35% 74%,35% 71%,37% 70.5%,41% 71%,42% 74.5%,47% 75.2%,50% 76.6%,50% 79%,48% 80%,47% 87.3%,45% 87.3%,45% 80.3%,20% 80.3%,19% 88.3%,17% 88.3%,17% 80%,14% 79%);z-index:2;transform:translateX(47%) scale(.85);transform-origin:31.5% 88.3%}
 .player-hall__scene::before{content:"";position:absolute;left:9.7046%;top:66.9078%;width:42.1941%;height:22.302%;background:url('./assets/player-hall/hall-table-clean-plate-v1.webp') center/100% 100% no-repeat;pointer-events:none}
 .player-hall-dialog .player-hall__lamp{left:65.65%;top:76.925%;width:6.76%;height:6.5%;min-width:0;min-height:0}
 .player-hall__room[data-theme=midnight] .player-hall__scene::before{filter:brightness(.35) saturate(.6)}
@@ -497,3 +497,14 @@
 .player-hall__room:not([data-space=garage]) .player-hall__garage-scene::before{background-image:none}
 /* The entry preview shares the current room image and its browser cache. */
 .player-hall-entry__art{background-image:image-set(url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.avif') type('image/avif'),url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.webp') type('image/webp'))}
+
+.garage-workshop__footer .garage-notice--warning{color:#fff1c4;background:#623716;border:2px solid #ffbd52;border-radius:12px;padding:12px 14px;font-weight:700;line-height:1.45;box-shadow:0 0 16px #ffb23b30}
+
+.garage-subcategories{display:flex;flex:none;gap:8px;overflow-x:auto;padding:9px 12px;scrollbar-width:thin;border-bottom:1px solid #ffffff12}
+.player-hall-dialog .garage-subcategories button{flex:none;white-space:nowrap;padding:8px 13px;border-radius:20px;font-size:14px;color:#cbd3d8;background:#1c282f}
+.player-hall-dialog .garage-subcategories button[aria-pressed=true]{color:#fff0c2;border-color:#d7b368;background:#554a2b}
+
+.garage-body-preview{flex:none;padding:8px 12px;background:#26312b;border-top:1px solid #c6ad6740}
+.garage-body-preview>div{display:flex;gap:8px}
+.player-hall-dialog .garage-body-preview button{padding:7px 12px;font-size:14px}
+.garage-body-preview p{margin:7px 0 0;color:#e9d8ac;font-size:12px;line-height:1.4}

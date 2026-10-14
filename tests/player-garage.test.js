@@ -247,3 +247,36 @@ test('prestige watch sprites stay small and every model has its own file',()=>{
  }
  assert.equal(hashes.size,Object.keys(G.prestigeWatches).length);
 });
+
+test('wardrobe filters classify summer, legacy rewards and seasonal model variants',()=>{
+ assert.equal(G.wardrobeSubcategory('suit','palmTank'),'tanks');
+ assert.equal(G.wardrobeSubcategory('suit','acesTee'),'tees');
+ assert.equal(G.wardrobeSubcategory('suit','charcoalHoodie'),'knits');
+ assert.equal(G.wardrobeSubcategory('suit','midnight'),'blazers');
+ assert.equal(G.wardrobeSubcategory('pants','sandShorts'),'shorts');
+ assert.equal(G.wardrobeSubcategory('pants','washedJeans'),'jeans');
+ for(const i of G.items.filter(i=>['suit','pants'].includes(i.kind)))assert.ok(G.wardrobeSubcategories[i.kind][G.wardrobeSubcategory(i.kind,i.id)],i.key);
+});
+
+test('curated brand rewards have explicit gates and retain legacy saved clothing',()=>{
+ const rows=Object.entries(G.brandedPieces);assert.equal(rows.length,12);
+ for(const [id,[kind,, ,level,category]]of rows){
+  assert.ok(G.curatedWardrobeItem(G.item(kind,id)));
+  assert.throws(()=>Garage.choose({[kind]:id},{stats:{level:level-1}}),/не открыта/);
+  assert.equal(Garage.choose({[kind]:id},{stats:{level}})[kind],id);
+  if(kind!=='shoes')assert.equal(G.wardrobeSubcategory(kind,id),category);
+ }
+ assert.equal(G.curatedWardrobeItem(G.item('suit','collection_duck')),false);
+ assert.equal(G.normalize({suit:'collection_duck'},{level:100},true).suit,'collection_duck');
+ assert.equal(G.curatedWardrobeItem(G.item('suit','charcoalHoodie')),true);
+});
+
+test('brand wardrobe sprites are distinct and stay below the per-item budget',()=>{
+ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),hashes=new Set();let total=0;
+ for(const id of Object.keys(G.brandedPieces)){
+  const bytes=fs.readFileSync(path.join(__dirname,'../assets/player-hall/wardrobe/branded',id+'-v1.webp'));
+  assert.ok(bytes.length<160000,id+' exceeds sprite budget');total+=bytes.length;
+  hashes.add(crypto.createHash('sha256').update(bytes).digest('hex'));
+ }
+ assert.equal(hashes.size,12);assert.ok(total<1500000);
+});
