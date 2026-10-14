@@ -508,3 +508,7 @@
 .garage-body-preview>div{display:flex;gap:8px}
 .player-hall-dialog .garage-body-preview button{padding:7px 12px;font-size:14px}
 .garage-body-preview p{margin:7px 0 0;color:#e9d8ac;font-size:12px;line-height:1.4}
+
+.garage-option .garage-option-availability{display:block;color:#91d6a8;font-size:12px;line-height:1.4;margin-top:5px}
+
+.garage-categories-hint{display:block;position:sticky;top:0;z-index:1;flex:none;padding:7px 4px 10px;background:#10191f;color:#e6c782;font-size:12px;line-height:1.35;text-align:center}
