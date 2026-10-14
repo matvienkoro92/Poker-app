@@ -512,3 +512,12 @@
 .garage-option .garage-option-availability{display:block;color:#91d6a8;font-size:12px;line-height:1.4;margin-top:5px}
 
 .garage-categories-hint{display:block;position:sticky;top:0;z-index:1;flex:none;padding:7px 4px 10px;background:#10191f;color:#e6c782;font-size:12px;line-height:1.35;text-align:center}
+
+.garage-wheel-color{display:flex;flex:none;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 12px;background:#1b282e;border-top:1px solid #ffffff15}
+.garage-wheel-color label{display:flex;align-items:center;gap:8px;color:#e5d4ab;font-size:13px}
+.garage-wheel-color input[type=color]{width:48px;height:38px;padding:2px;border:1px solid #b89a5f;border-radius:8px;background:#111b22;cursor:pointer}
+.garage-wheel-color input[data-wheel-hex]{width:88px;padding:9px 7px;border:1px solid #71818b;border-radius:8px;background:#10191f;color:#fff;font:14px monospace}
+.garage-wheel-color input[aria-invalid=true]{border-color:#ff8d6d}
+.player-hall-dialog .garage-wheel-color button{font-size:12px;padding:8px 10px}
+.garage-tint-hint{flex:none;padding:10px 12px;background:#26312b;color:#e9d8ac;font-size:12px;line-height:1.4}
+.player-hall-dialog .garage-tint-hint button{margin-left:6px;font-size:12px;padding:6px 9px}

@@ -280,3 +280,28 @@ test('brand wardrobe sprites are distinct and stay below the per-item budget',()
  }
  assert.equal(hashes.size,12);assert.ok(total<1500000);
 });
+
+test('replacement hairstyles use individual hair-only sprites within the size budget',()=>{
+ const fs=require('node:fs'),path=require('node:path'),hashes=new Set();let total=0;
+ assert.equal(Object.keys(G.hairOverlayFits).length,11);
+ for(const [id,[width,height]]of Object.entries(G.hairOverlayFits)){
+  assert.ok(G.hairStyles.some(([hair])=>hair===id));assert.ok(width>=240&&width<=320);assert.ok(height>0&&height<=240);
+  const bytes=fs.readFileSync(path.join(__dirname,'../assets/player-hall/wardrobe/summer',id+'-hair-only-v2.webp'));
+  assert.ok(bytes.length<160000,id+' exceeds sprite budget');total+=bytes.length;
+  hashes.add(require('node:crypto').createHash('sha256').update(bytes).digest('hex'));
+ }
+ assert.equal(hashes.size,11);assert.ok(total<1500000);
+});
+
+test('custom wheel paint persists independently of wheel geometry and accepts any RGB color',()=>{
+ for(const color of ['#000000','#ffffff','#A1B2C3','#ff00ff','#00ff00']){
+  const look=Garage.choose({wheels:'classic',wheelColor:color},{stats:{level:0}});
+  assert.equal(look.wheelColor,color.toLowerCase());assert.equal(look.wheels,'classic');assert.equal(G.wheelPaintColor(look),color.toLowerCase());
+ }
+ assert.equal(G.normalize({},{}).wheelColor,'');
+ assert.equal(G.wheelPaintColor({...G.defaults,wheelColor:''}),G.item('wheels','classic').color);
+ assert.throws(()=>Garage.choose({wheelColor:'red'},{stats:{level:100}}),/HEX/);
+ assert.throws(()=>Garage.choose({wheelColor:'#12345g'},{stats:{level:100}}),/HEX/);
+ assert.equal(G.normalize({wheelColor:'bad'},{}).wheelColor,'');
+ assert.throws(()=>Garage.choose({wheels:'legend',wheelColor:'#ff00ff'},{stats:{level:0}}),/не открыта/);
+});

@@ -49,7 +49,7 @@ test('occupied garage plate rejects the save and reports its owner',async()=>{
 
 test('Polina pilot can use the hall without being an administrator; save stays scoped to self',async()=>{
  const {hasPlayerHallPilotAccess}=require('../lib/player-hall-access'),G=require('../app-garage-catalog');
- for(const identity of [{telegramUsername:'polyapineapple'},{pwaUsername:'@Polyapineapple'}])assert.equal(hasPlayerHallPilotAccess(identity),true);
+ for(const identity of [{telegramUsername:'polyapineapple'},{pwaUsername:'@Polyapineapple'},{telegramUsername:'Qweenpoker'},{pwaUsername:'@qweenpoker'}])assert.equal(hasPlayerHallPilotAccess(identity),true);
  for(const identity of [null,{telegramUsername:'someone'},{telegramUsername:'polyapineapple',vkId:1}])assert.equal(hasPlayerHallPilotAccess(identity),false);
  assert.equal(G.canAccessHall({status:'verified',user:{username:'polyapineapple'}}),true);
  assert.equal(G.canAccessHall({status:'loading',user:{username:'polyapineapple'}}),false);
@@ -59,3 +59,5 @@ test('Polina pilot can use the hall without being an administrator; save stays s
  const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};
  await handler({},res);assert.equal(res.code,200);assert.equal(savedTo,'ID_POLINA');
 });
+
+test('Qweenpoker hall pilot access requires verified identity and grants no VK access',()=>{const G=require('../app-garage-catalog');const {hasPlayerHallPilotAccess}=require('../lib/player-hall-access');assert.equal(G.canAccessHall({status:'verified',user:{username:'@Qweenpoker'}}),true);assert.equal(G.canAccessHall({status:'loading',user:{username:'Qweenpoker'}}),false);assert.equal(G.canAccessHall({status:'verified',authMethod:'vk',user:{username:'Qweenpoker'}}),false);assert.equal(hasPlayerHallPilotAccess({telegramUsername:'Qweenpoker',vkId:1}),false);});
