@@ -1,0 +1,17 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "assets/player-hall/standing-monkey-v1.webp",
+  "purpose": "Texture references for a reconstructed rotating character; inferred views, not original hidden-side artwork.",
+  "assets": [
+    {
+      "file": "club-rear-v1.png",
+      "view": "rear",
+      "prompt": "Use case: identity-preserve. Asset type: rear-view texture reference for the exact same realistic chimpanzee game character. Input image is the identity, proportions, clothing and pose reference. Generate ONE full body orthographic BACK VIEW of this identical chimpanzee, turned exactly 180 degrees, with same relaxed upright standing pose, arms hanging at sides, hands and shoes visible, same camera height and same image-relative proportions. Portrait 2:3 canvas, head top at 1% of height, shoe soles at 98%, center body at x=50%. Match source body silhouette proportions and hand/foot positions as closely as possible. Same detailed dark brown and grey shaggy fur, ears seen from behind. Exact same racing varsity jacket with black leather sleeves, white racing stripes, black ribbed cuffs and waistband, BUT replace all source red accents with dark emerald GREEN (#17683d), including the jacket panels, trouser stripes and shoe accents. Same black loose joggers with realistic fabric folds, side white stripes with green accents. Same black and white high top sneakers, seen FROM BEHIND, white layered soles, black heel collars. Jacket back has a plain green central panel and natural seams, no giant graphics, no checkerboard patch on back, no front buttons on back, no face on back. Photorealistic richly detailed material matching original, neutral soft studio illumination, no cast floor shadows. Transparent background, no scenery, no floor, no stars, no text, no UI, no panels. This is one single rear-view full-body character only."
+    },
+    {
+      "file": "club-side-v1.png",
+      "view": "side",
+      "prompt": "Use case: identity-preserve. Create one strict orthographic RIGHT-FACING SIDE PROFILE of this exact same realistic chimpanzee character from reference 1, clothed consistently with the GREEN rear view reference 2. This will be a SIDE TEXTURE for a 3D model, not a new design. Entire body from head to soles, portrait 2:3 image, top hair at 1% height, soles at 98%, body vertically centered x=50%. Match the source’s exact proportional anatomy, long arms, head size, torso length, trouser length and shoe height. Character looks to the RIGHT, exact 90 degree profile, no three-quarter view. One eye visible, projecting chimp muzzle, actual ear, forehead and brow shape, detailed dark brown/grey fur, individual hairs. SAME green racing varsity jacket with black sleeves and broad white side sleeve stripe with spade emblem, loose black trousers with green and white outer side stripe, same black and white basketball high-top sneakers with green accents and white soles. Arms relaxed straight down matching the references. Preserve realistic wrinkles, seams, black ribbed cuffs, natural hand and finger anatomy, authentic muzzle and chin. Neutral soft studio lighting, photorealistic texture matching input. Real transparent background, no floor, no shadows, no stars, no labels, no UI, no extra poses, no accessories. Strict side view only. References show the SAME character front and back; generate the missing side view."
+    }
+  ]
+}

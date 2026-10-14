@@ -1,3 +1,5 @@
+import {createCharacterStudy} from './character-reconstruction.mjs';
+window.pokerCreateReferenceCharacter3D=createCharacterStudy;
 import './character.mjs';
 import {sportBrakes,paintBrakePreview} from './sport-brakes.mjs';
 window.pokerPaintBrakePreview=paintBrakePreview;
