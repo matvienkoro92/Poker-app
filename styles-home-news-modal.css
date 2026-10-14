@@ -3037,10 +3037,14 @@ body .home-friend-news-modal--club .home-friend-news-event--birthday .home-frien
 .home-news-sng-archive .sng-champions-modal__completed-option { cursor:default; }
 .home-news-sng-archive > .home-news-achievement__list { margin:0 16px 12px; }
 
-/* Hero of the day belongs beside the player's name. */
+/* Hero of the day sits below the reward in the upper right. */
 body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__day-hero--inline{position:static!important;display:inline-flex!important;flex:none!important;align-items:center;justify-content:center;vertical-align:middle;width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;max-width:none!important;margin:0 0 0 8px!important;padding:5px 8px!important;transform:none!important;font-size:9px!important;line-height:1.2!important;white-space:nowrap!important;border-radius:8px!important;box-shadow:0 1px 5px #0007!important}
 body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__day-hero--inline::before,body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__day-hero--inline::after{display:none!important}
 
 /* Owner decision: cover the affected result card with a visible status. */
 .home-friend-news-event--disqualified { position: relative; isolation: isolate; }
 .home-news-disqualified-stamp { position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(25, 4, 8, .68); color: #ff535d; text-shadow: 0 2px 8px #000; font-size: clamp(20px, 5.8vw, 38px); font-weight: 900; text-transform: uppercase; text-align: center; letter-spacing: .02em; pointer-events: none; border: 3px solid #e83b4c; border-radius: inherit; box-sizing: border-box; }
+
+body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__hero-reward{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-end;gap:5px;margin-left:auto;align-self:flex-start}
+body .home-friend-news-modal .home-friend-news-modal__item .home-friend-news-modal__hero-reward .home-friend-news-modal__day-hero--inline{margin:0!important;padding:5px 9px!important;border:1px solid #fff1a3!important;background:linear-gradient(135deg,#fff09a,#ffc42e 60%,#ff9f18)!important;color:#382100!important;font-weight:950!important;text-shadow:0 1px #ffffff70!important;box-shadow:0 0 14px #ffc43e80,inset 0 1px #fff8!important}
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__item:has(.home-friend-news-modal__hero-reward) .home-friend-news-modal__player-title{padding-right:0}

@@ -89,5 +89,5 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 /* Full-height foreground character with the garage-angle car behind their feet. */
 .garage-showcase--inline .garage-showcase__news-stage{width:100%!important;height:min(94cqh,320px)!important;position:relative}
 .garage-showcase--inline .garage-showcase__news-character{left:0;right:auto;top:0;bottom:auto;transform:none;width:82%;height:100%;object-fit:contain;object-position:center bottom;z-index:2}
-.garage-showcase--inline .garage-showcase__news-art{left:auto;right:0;top:auto;bottom:0;transform:none;width:88%;height:35%;object-fit:contain;object-position:right bottom;z-index:1}
+.garage-showcase--inline .garage-showcase__news-art{left:auto;right:0;top:auto;bottom:0;transform:scale(1.5);transform-origin:right bottom;width:88%;height:35%;object-fit:contain;object-position:right bottom;z-index:1}
 .garage-showcase--inline .garage-showcase__news-stage::after{content:none}
