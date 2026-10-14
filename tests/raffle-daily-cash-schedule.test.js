@@ -4,7 +4,7 @@ const mod=new Module(filename,module);mod.filename=filename;mod.paths=Module._no
 mod._compile(fs.readFileSync(filename,'utf8')+'\nmodule.exports.testCash={DAILY_CASH_SERIES,dailyCashSeriesForDraw,dailyCashTemplateWithSeries,normalizeDailyCashRaffleInPlace,raffleAllResultBatchesDrawn,raffleDrawLifecycleNeedsSettlement};',filename);
 const {DAILY_CASH_SERIES:series,normalizeDailyCashRaffleInPlace:normalize}=mod.exports.testCash;
 function raffle(s){return {id:'test',status:'active',title:'old',totalWinners:10,groups:[{count:5,prize:'1000 ₽'},{count:5,prize:'1000 ₽'}],participants:[{accountId:'A'}],winners:[],endDate:'2026-09-07T17:15:00.000Z',resultBatches:[{time:'10:45'},{time:'17:45'}],recurrence:{type:'daily',seriesId:s.seriesId,startTime:'20:16',template:{prizeKind:'cash'}}};}
-test('cash draws have one prize group with requested amounts and times',()=>{assert.equal(series[0].resultTime,'10:40');assert.equal(series[0].totalWinners,20);assert.equal(series[0].groups[0].count,20);assert.equal(series[1].resultTime,'17:30');assert.equal(series[1].totalWinners,5);assert.equal(series[1].groups.length,1);assert.equal(series[1].groups[0].count,5);assert.equal(series[1].resultBatches,undefined);});
+test('cash draws have one prize group with requested amounts and times',()=>{assert.equal(series[0].resultTime,'10:40');assert.equal(series[0].totalWinners,15);assert.equal(series[0].groups[0].count,15);assert.equal(series[1].resultTime,'17:30');assert.equal(series[1].totalWinners,5);assert.equal(series[1].groups.length,1);assert.equal(series[1].groups[0].count,5);assert.equal(series[1].resultBatches,undefined);});
 test('pending raffle migrates once, retaining participants and replacing split draw',()=>{const r=raffle(series[1]);assert.equal(normalize(r),true);assert.equal(r.totalWinners,mod.exports.testCash.dailyCashSeriesForDraw(series[1],r.endDate).totalWinners);assert.equal(r.resultBatches,undefined);assert.equal(r.participants[0].accountId,'A');assert.equal(new Date(r.endDate).getUTCHours(),14);assert.equal(new Date(r.endDate).getUTCMinutes(),30);assert.equal(normalize(r),false);});
 test('completed or partly drawn raffles keep their existing prizes',()=>{for(const partial of [false,true]){const r=raffle(series[1]);if(partial)r.resultBatches[0].drawnAt='2026-09-06T07:45:00Z';else r.status='drawn';const before=JSON.stringify(r);assert.equal(normalize(r),false);assert.equal(JSON.stringify(r),before);}});
 
@@ -15,7 +15,7 @@ test('both series keep ordinary cash prizes on every day of the week',()=>{
  for(let day=4;day<=11;day++)for(const entry of series){
   const draw=choose(entry,`2026-10-${String(day).padStart(2,'0')}T14:30:00Z`);
   assert.equal(draw,entry);assert.doesNotMatch(draw.title,/видео/);
-  assert.equal(draw.groups[0].count,entry.key==='cash_5_10'?20:5);
+  assert.equal(draw.groups[0].count,entry.key==='cash_5_10'?15:5);
   assert.match(draw.groups[0].prize,entry.key==='cash_5_10'?/200 ₽ на кеш 5\/10/:/1000 ₽ на кеш 20\/40/);
  }
 });
@@ -48,4 +48,10 @@ test('manual additions also survive the daily template',()=>{
   const r=raffle(series[1]);r.prizesUpdatedAt='2026-10-06T13:11:00Z';
   r.groups.push({count:1,prize:'Беккинг-байин 2000 ₽ на видеостол'});r.totalWinners=11;
   const before=JSON.stringify(r);assert.equal(normalize(r),false);assert.equal(JSON.stringify(r),before);
+});
+
+test('daily 5/10 draws and their recurrence templates use fifteen prizes',()=>{
+ for(const count of [20,15]){const r=raffle(series[0]);r.prizesUpdatedAt='2026-10-14T10:00:00Z';r.recurrence.startTime=series[0].startTime;r.title=count+' байинов по 200р на кеш 5/10';r.totalWinners=count;r.groups=[{count,prize:'Беккинг-байин 200 ₽ на кеш 5/10',accessLevel:1}];r.recurrence.template.totalWinners=20;
+ const deadline=r.endDate;assert.equal(normalize(r),true);assert.equal(r.totalWinners,15);assert.equal(r.groups[0].count,15);assert.equal(r.groups[0].count*200,3000);assert.equal(r.recurrence.template.totalWinners,15);assert.equal(r.recurrence.template.groups[0].count,15);assert.equal(r.endDate,deadline);assert.deepEqual(r.participants,[{accountId:'A'}]);assert.equal(normalize(r),false);
+ }
 });
