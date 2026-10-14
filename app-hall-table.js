@@ -1,13 +1,15 @@
 (function () {
   'use strict';
-  var audio;
+  var audio,cardGame,cardAccount;
+  function game(){var auth=window.__pokerTelegramAuth||{},account=String(auth.accountId||auth.id||auth.user?.id||"guest");if(!cardGame||cardAccount!==account){cardAccount=account;var storage;try{storage=window.localStorage;}catch(_){storage={getItem:function(){return null;},setItem:function(){}};}cardGame=window.PokerHallCardPick.create({storage:storage,account:account});}return cardGame;}
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   window.pokerHallTableHtml = function (hall) {
     var p = hall.levelProgress || {}, level = Math.max(0, Number(hall.garage && hall.garage.stats && hall.garage.stats.level) || 0);
-    return '<div class="hall-table" data-table-level="' + level + '" data-table-xp="' + esc(p.xp == null ? '' : p.xp) + '" data-table-target="' + esc(p.target == null ? '' : p.target) + '">' +
+    return '<div class="hall-table" data-card-effect="'+(window.PokerHallCardPick&&game().effect()?.id||'')+'" data-table-level="' + level + '" data-table-xp="' + esc(p.xp == null ? '' : p.xp) + '" data-table-target="' + esc(p.target == null ? '' : p.target) + '">' +
       '<button type="button" class="hall-table__glass" data-table-action="glass" aria-label="Коснуться стакана — звон льда" title="Звон льда"><span class="hall-table__liquid" aria-hidden="true"></span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></button>' +
-      '<button type="button" class="hall-table__chips" data-table-action="chips" aria-label="Фишки — прогресс уровня" title="Ваш уровень"><span class="hall-table__stack" aria-hidden="true">' + Array.from({length:7}, function (_, i) { return '<i style="--chip:' + i + '"></i>'; }).join('') + '</span></button>' +
-      '<button type="button" class="hall-table__deck" data-table-action="prediction" aria-label="Вытянуть покерное предсказание" title="Покерное предсказание"><span aria-hidden="true">♠</span></button>' +
+      '<button type="button" class="hall-table__chips" data-table-action="chips" aria-label="Фишки Poker21 — прогресс уровня" title="Ваш уровень"><span class="hall-table__stack" aria-hidden="true">' + Array.from({length:5}, function (_, i) { return '<i style="--chip:' + i + '"></i>'; }).join('') + '</span></button>' +
+      '<button type="button" class="hall-table__deck" data-table-action="chest" aria-label="Открыть шкатулку — выбрать одну из трёх карт" title="Три карты Манки"><span aria-hidden="true">♠</span></button>' +
+      '<button type="button" class="hall-table__prediction-link" data-table-action="prediction" aria-label="Покерное предсказание">♠ Предсказание</button>'+
       '<span class="hall-table__hint">Коснитесь предметов</span><span class="hall-table__status" role="status"></span></div>';
   };
   function animate(node, frames, duration, delay) {
@@ -28,6 +30,7 @@
       });
     } catch (_) {}
   }
+  function chipClack(delay){try{var Context=window.AudioContext||window.webkitAudioContext;if(!Context)return;if(!audio)audio=new Context();if(audio.state==='suspended')audio.resume().catch(function(){});var buffer=audio.createBuffer(1,Math.floor(audio.sampleRate*.045),audio.sampleRate),samples=buffer.getChannelData(0);for(var i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*Math.exp(-i/(audio.sampleRate*.008));var source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain();source.buffer=buffer;filter.type='bandpass';filter.frequency.value=1450;filter.Q.value=.8;gain.gain.value=.045;source.connect(filter);filter.connect(gain);gain.connect(audio.destination);source.start(audio.currentTime+(delay||0));source.onended=function(){source.disconnect();filter.disconnect();gain.disconnect();};}catch(_){}}
   function panel(title, content, kind) {
     var d = document.createElement('dialog'); d.className = 'hall-table-dialog hall-table-dialog--' + kind;
     d.setAttribute('aria-labelledby', 'hallTableTitle');
@@ -35,13 +38,22 @@
     document.body.appendChild(d); d.querySelector('button').onclick = function () { d.close(); };
     d.addEventListener('click', function (e) { if (e.target === d) { var r = d.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close(); } });
     d.addEventListener('close', function () { d.remove(); }, {once:true}); d.showModal();
-    animate(d, [{opacity:0,transform:'translateY(12px) rotate(-2deg)'},{opacity:1,transform:'translateY(0) rotate(0)'}], 360);
+    animate(d, [{opacity:0,transform:'translateY(12px) rotate(-2deg)'},{opacity:1,transform:'translateY(0) rotate(0)'}], 360);return d;
+  }
+  async function prediction(){if(typeof window.getPokerDailyPredictionForToday!=='function'&&window.pokerEnsureLazyDomains)await window.pokerEnsureLazyDomains(['learning'],{scripts:true,styles:false});if(typeof window.getPokerDailyPredictionForToday!=='function')throw Error('prediction_unavailable');return window.getPokerDailyPredictionForToday();}
+  function openChest(table){
+    if(!window.PokerHallCardPick)return;
+    var g=game(),state=g.state(),d=panel('Три карты Манки','<div class="hall-card-chest" aria-hidden="true"><i></i><span>♠</span></div><p class="hall-card-instruction">Угадай, где туз. Один выбор в день.</p><div class="hall-card-hand">'+[0,1,2].map(function(i){return '<button type="button" class="hall-pick-card" data-pick-card="'+i+'" aria-label="Выбрать карту '+(i+1)+'"><span class="hall-pick-card__back">♠</span><span class="hall-pick-card__face"></span></button>';}).join('')+'</div><p class="hall-card-result" role="status" aria-live="polite"></p><small>Туз открывает оформление столика до конца дня.<br>Другие карты — покерное предсказание.</small>','cards');
+    function reveal(result,animateCards){d.classList.add('hall-card-picked');d.querySelectorAll('[data-pick-card]').forEach(function(card,i){card.disabled=true;card.classList.toggle('hall-pick-card--chosen',i===result.choice);var face=card.querySelector('.hall-pick-card__face');face.textContent=i===result.ace?'A ♠':i<result.ace?'K ♦':'Q ♥';if(i!==result.ace)face.classList.add('hall-pick-card__face--red');card.setAttribute('aria-label',(i===result.choice?'Ваш выбор: ':'')+face.textContent);if(animateCards)animate(card,[{transform:'rotateY(90deg)'},{transform:'rotateY(0)'}],450,i*90);});d.querySelector('.hall-card-instruction').textContent=result.won?'Туз найден!':'Сегодня туз оказался в другой карте.';var output=d.querySelector('.hall-card-result');if(result.won){output.textContent=result.reward.title+' · '+result.reward.text;document.querySelectorAll('.hall-table').forEach(function(t){t.dataset.cardEffect=result.reward.id;});}else{output.textContent='Открываем предсказание…';prediction().then(function(text){if(d.isConnected)output.textContent=text;}).catch(function(){if(d.isConnected)output.textContent='Манки советует сегодня беречь терпение: хорошая карта любит выдержку.';});}}
+    d.addEventListener('click',function(e){var card=e.target.closest('[data-pick-card]');if(!card||card.disabled)return;reveal(g.choose(Number(card.dataset.pickCard)),true);});
+    if(state.choice!==null)reveal(g.choose(state.choice),false);
   }
   document.addEventListener('click', async function (event) {
     var button = event.target.closest('[data-table-action]'); if (!button || button.disabled) return;
     var table = button.closest('.hall-table'), hall = button.closest('.player-hall-dialog'), action = button.dataset.tableAction;
     if (!hall || !hall.open) return;
     event.preventDefault(); event.stopPropagation();
+    if(action==='chest'){animate(button,[{transform:'rotateX(0)'},{transform:'rotateX(-28deg)'},{transform:'rotateX(0)'}],450);openChest(table);return;}
     if (action === 'glass') {
       if (button._lastClink && Date.now() - button._lastClink < 1150) return; button._lastClink = Date.now(); clink();
       animate(button.querySelector('.hall-table__liquid'), [
@@ -67,15 +79,18 @@
     if (action === 'chips') {
       button.disabled = true;
       button.querySelectorAll('i').forEach(function (chip, n) {
-        var side = n % 2 ? -1 : 1;
-        animate(chip, [
-          {transform:'translate(' + side * 24 + '%,-180%) rotate(' + side * 12 + 'deg)',opacity:0},
-          {transform:'translate(' + side * -6 + '%,15%) rotate(' + side * -3 + 'deg)',opacity:1,offset:.62},
-          {transform:'translate(' + side * 3 + '%,-8%) rotate(1deg)',opacity:1,offset:.82},
-          {transform:'translate(0,0) rotate(0)',opacity:1}
-        ], 460, n * 45);
+        var side=n%2?-1:1,delay=(4-n)*65;
+        animate(chip,[
+          {transform:'translate(0,0) rotate(0) scaleY(1)'},
+          {transform:'translate('+side*12+'%,-80%) rotate('+side*9+'deg) scaleY(1.15)',offset:.25},
+          {transform:'translate('+side*26+'%,-170%) rotate('+side*18+'deg) scaleY(1.7)',offset:.48},
+          {transform:'translate('+side*4+'%,8%) rotate('+side*-4+'deg) scaleY(.88)',offset:.78},
+          {transform:'translate(0,-12%) rotate(2deg) scaleY(1.06)',offset:.9},
+          {transform:'translate(0,0) rotate(0) scaleY(1)'}
+        ],900+n*45,delay);
+        chipClack((delay+(900+n*45)*.78)/1000);
       });
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) await new Promise(function (resolve) { setTimeout(resolve, 800); });
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) await new Promise(function(resolve){setTimeout(resolve,1250);});
       button.disabled = false;
       if (!button.isConnected || !hall.open) return;
       var level = Number(table.dataset.tableLevel), xp = table.dataset.tableXp, target = Number(table.dataset.tableTarget), known = xp !== '' && target > 0;

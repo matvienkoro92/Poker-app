@@ -4,7 +4,8 @@ import * as T from '../../vendor/three/three.module.min.js';
 export function sportSeat(id){
  const group=new T.Group();group.name='sport-seat-'+id;
  const mat=(color,roughness=.8,metalness=0)=>new T.MeshPhysicalMaterial({color,roughness,metalness,clearcoat:metalness?.4:.08});
- const cloth=mat(id==='red'?'#a91e32':'#303943'),insert=mat('#151b22'),shell=mat('#10151c',.32,.35),thread=mat(id==='red'?'#e26970':'#89959f'),metal=mat('#acb5be',.28,.85),belt=mat('#cfb579',.95),dark=mat('#070b10');
+ const comfort=id==='emerald',ivory=id==='ivory',palette={red:['#a91e32','#151b22','#e26970'],carbon:['#303943','#151b22','#89959f'],emerald:['#146453','#124336','#c7b574'],ivory:['#d8c8a6','#847352','#f6e7bd']}[id]||['#303943','#151b22','#89959f'];
+ const cloth=mat(palette[0],comfort?.55:.8),insert=mat(palette[1],comfort?.52:.8),shell=mat('#10151c',.32,.35),thread=mat(palette[2]),metal=mat('#acb5be',.28,.85),belt=mat('#cfb579',.95),dark=mat('#070b10');
  const weave=document.createElement('canvas');weave.width=weave.height=64;const ctx=weave.getContext('2d');ctx.fillStyle='#30343b';ctx.fillRect(0,0,64,64);for(let y=0;y<64;y+=8)for(let x=0;x<64;x+=8){ctx.fillStyle=(x+y)%16?'#121820':'#626973';ctx.fillRect(x,y,7,3);ctx.fillStyle='#252b33';ctx.fillRect(x,y+4,3,4);}const texture=new T.CanvasTexture(weave);texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(3,5);texture.colorSpace=T.SRGBColorSpace;shell.map=texture;shell.bumpMap=texture;shell.bumpScale=.004;
  const add=(geo,m,x=0,y=0,z=0,parent=group)=>{const mesh=new T.Mesh(geo,m);mesh.position.set(x,y,z);mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);return mesh;};
  const rounded=(w,h,d,r,m,x,y,z,parent=group)=>{const shape=new T.Shape(),a=-w/2,b=-h/2;r=Math.min(r,w/2,h/2,d/2);shape.moveTo(a+r,b);shape.lineTo(a+w-r,b);shape.quadraticCurveTo(a+w,b,a+w,b+r);shape.lineTo(a+w,b+h-r);shape.quadraticCurveTo(a+w,b+h,a+w-r,b+h);shape.lineTo(a+r,b+h);shape.quadraticCurveTo(a,b+h,a,b+h-r);shape.lineTo(a,b+r);shape.quadraticCurveTo(a,b,a+r,b);const mesh=add(new T.ExtrudeGeometry(shape,{depth:d-2*r,bevelEnabled:true,bevelSize:r,bevelThickness:r,bevelSegments:4,curveSegments:12}),m,x,y,z-d/2+r,parent);return mesh;};
@@ -23,12 +24,19 @@ export function sportSeat(id){
  // Metal-lined harness slots remain open through the composite shell.
  const x=sign*.135;for(const y of [1.235,1.345])rounded(.16,.014,.022,.004,metal,x,y,.015,back);for(const xx of [x-.08,x+.08])rounded(.014,.12,.022,.004,metal,xx,1.29,.015,back);
  }
- rounded(.77,.16,.80,.055,shell,0,.12,.32);rounded(.49,.13,.60,.045,insert,0,.235,.36);
- for(const sign of [-1,1]){const bolster=rounded(.16,.26,.74,.055,cloth,sign*.325,.28,.35);bolster.rotation.z=-sign*.12;line([[sign*.26,.37,.03],[sign*.26,.40,.31],[sign*.26,.37,.66]],.005,thread);rounded(.075,.075,.82,.015,metal,sign*.28,-.015,.34);for(const z of [.02,.65]){rounded(.13,.09,.12,.015,shell,sign*.28,-.055,z);add(new T.CylinderGeometry(.022,.022,.015,12),metal,sign*.28,-.002,z);}}
+ // Raise the whole cushion above the surrounding table deck (world y=1.43).
+ const seatBase=rounded(comfort?.86:.77,.18,.84,.055,shell,0,.38,.34);seatBase.name='seat-base';
+ const cushion=rounded(comfort?.61:.54,.17,ivory?.74:.67,.05,insert,0,.535,.39);cushion.name='seat-cushion';
+ rounded(.54,.15,.17,.045,cloth,0,.52,.77);
+ for(const x of [-.28,.28])rounded(.07,.30,.65,.018,metal,x,.16,.34);
+ for(const z of [.20,.33,.46,.59])line([[-.23,.625,z],[0,.635,z+.015],[.23,.625,z]],.003,thread);
+ if(comfort){for(const sign of [-1,1]){rounded(.14,.13,.64,.04,cloth,sign*.45,.65,.32);rounded(.045,.23,.10,.01,metal,sign*.45,.48,.16);}for(let y=.45;y<1.1;y+=.15)for(const x of [-.1,.1])line([[x-.1,y,.18],[x,y+.07,.18],[x+.1,y,.18]],.003,thread,back);}
+ if(ivory){rounded(.47,.10,.22,.035,cloth,0,.56,.86);line([[-.24,.62,.88],[0,.64,.90],[.24,.62,.88]],.004,thread);}
+ for(const sign of [-1,1]){const bolster=rounded(.16,.26,.74,.055,cloth,sign*(comfort?.365:.325),.54,.39);bolster.rotation.z=-sign*.12;line([[sign*.26,.63,.03],[sign*.26,.66,.35],[sign*.26,.63,.73]],.005,thread);rounded(.075,.075,.82,.015,metal,sign*.28,-.015,.34);for(const z of [.02,.65]){rounded(.13,.09,.12,.015,shell,sign*.28,-.055,z);add(new T.CylinderGeometry(.022,.022,.015,12),metal,sign*.28,-.002,z);}}
  for(let y=.30;y<1.08;y+=.11)line([[-.19,y,.16],[0,y-.015,.17],[.19,y,.16]],.0025,thread,back);
  // Flat webbing instead of ropes, with a four-point cam-lock buckle.
- for(const sign of [-1,1]){const points=[[sign*.135,1.50,-.13],[sign*.135,1.15,-.03],[sign*.13,.78,.08],[sign*.10,.40,.36]];const vertices=[],indices=[];points.forEach(([x,y,z],n)=>{vertices.push(x-.033,y,z,x+.033,y,z);if(n)indices.push(n*2-2,n*2-1,n*2,n*2-1,n*2+1,n*2);});const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.setIndex(indices);geo.computeVertexNormals();const web=belt.clone();web.side=T.DoubleSide;add(geo,web);const lap=rounded(.27,.055,.025,.008,belt,sign*.18,.38,.42);lap.rotation.z=-sign*.20;}
- const lock=add(new T.CylinderGeometry(.065,.065,.035,24),metal,0,.40,.45);lock.rotation.x=Math.PI/2;const release=add(new T.CylinderGeometry(.037,.037,.04,24),mat('#b52332',.4),0,.40,.47);release.rotation.x=Math.PI/2;
+ for(const sign of [-1,1]){const points=[[sign*.135,1.50,-.13],[sign*.135,1.15,-.03],[sign*.13,.78,.08],[sign*.10,.66,.40]];const vertices=[],indices=[];points.forEach(([x,y,z],n)=>{vertices.push(x-.033,y,z,x+.033,y,z);if(n)indices.push(n*2-2,n*2-1,n*2,n*2-1,n*2+1,n*2);});const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.setIndex(indices);geo.computeVertexNormals();const web=belt.clone();web.side=T.DoubleSide;add(geo,web);const lap=rounded(.27,.055,.025,.008,belt,sign*.18,.64,.45);lap.rotation.z=-sign*.20;}
+ const lock=add(new T.CylinderGeometry(.065,.065,.035,24),metal,0,.66,.48);lock.rotation.x=Math.PI/2;const release=add(new T.CylinderGeometry(.037,.037,.04,24),mat('#b52332',.4),0,.66,.50);release.rotation.x=Math.PI/2;
  return group;
 }
 

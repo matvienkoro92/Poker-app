@@ -318,3 +318,7 @@ test('plate feedback reports exact gate and supplies a currently valid example',
  assert.equal(G.plateAvailability('A121KM','54',10).allowed,true);
  const invalid=G.plateAvailability('000','x',0);assert.equal(invalid.allowed,false);assert.equal(invalid.requiredLevel,null);assert.equal(invalid.example.region,'54');
 });
+
+test('wheel diameter and formula wings persist independently with level gates',()=>{
+ const look=Garage.choose({wheelSize:'max',wheels:'bronzeSix',frontBumper:'formulaPro'},{stats:{level:65}});assert.equal(look.wheelSize,'max');assert.equal(look.frontBumper,'formulaPro');assert.equal(look.wheels,'bronzeSix');assert.equal(Garage.choose({}, {stats:{level:0}}).wheelSize,'standard');assert.throws(()=>Garage.choose({wheelSize:'large'},{stats:{level:19}}));assert.throws(()=>Garage.choose({frontBumper:'formula'},{stats:{level:34}}));
+});
