@@ -39,7 +39,7 @@ function paintSavedVehicle(canvas,look,options){
    if(world&&world.getAnimations().some(a=>a.playState==='running')){canvas._vehicleTimer=setTimeout(render,150);return;}
    if(savedVehicleCache.has(key)){apply(savedVehicleCache.get(key));return;}
    const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;width:900px;height:600px;pointer-events:none';document.body.append(host);let viewer;
-   try{viewer=window.pokerCreateGarage3D(host,look,{yaw:side?0:.9,pitch:side?0:.30,manual:true,snapshotOnly:true,night});const image=viewer.snapshot();if(trim)trimShelfArt(image);savedVehicleCache.set(key,image);while(savedVehicleCache.size>3)savedVehicleCache.delete(savedVehicleCache.keys().next().value);apply(image);}
+   try{viewer=window.pokerCreateGarage3D(host,look,{yaw:side?0:.9,pitch:side?0:.30,manual:true,snapshotOnly:true,night});const image=viewer.snapshot();if(trim)trimShelfArt(image);savedVehicleCache.set(key,image);while(savedVehicleCache.size>24)savedVehicleCache.delete(savedVehicleCache.keys().next().value);apply(image);}
    catch(error){console.warn('Saved vehicle render failed',error);}
    finally{if(viewer)viewer.dispose();host.remove();}
   };
