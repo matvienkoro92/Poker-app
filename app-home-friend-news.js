@@ -2611,6 +2611,10 @@
 
   function eventHtml(row, ticker, isDayHero, clubTicker, artOccurrence) {
     var isLastLonger = row && row._eventKind === "self-bet-result";
+    var disqualifiedDay = eventDayKey(row && row.at).split("-").reverse().join(".");
+    var disqualifiedNames = (window.POKER_CLUB_NEWS_DATA || {}).disqualifications || {};
+    var isDisqualified = (disqualifiedNames[disqualifiedDay] || []).indexOf(String(row && row.actorNick || "").toLocaleLowerCase("ru").replace(/\s+/g, "")) !== -1;
+    if (isDisqualified) isDayHero = false;
     var timeLabel = row.type === "birthday" && Number(row.upcomingDays) > 0
       ? "через " + Number(row.upcomingDays) + " дн."
       : relativeTime(row.at);
@@ -2702,6 +2706,7 @@
     var shareToken = ticker ? "" : clubNewsEventShareToken(feedbackId);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
+      (isDisqualified ? " home-friend-news-event--disqualified" : "") +
       (isLastLonger ? " home-friend-news-event--last-longer" : "") +
       (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
@@ -2717,7 +2722,7 @@
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
-      "</span>" + feedbackParts.comments + "</span>";
+      "</span>" + feedbackParts.comments + (isDisqualified ? '<span class="home-news-disqualified-stamp">Дисквалифицирован</span>' : "") + "</span>";
   }
 
   function modalEventsHtml(rows) {
