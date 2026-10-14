@@ -4576,3 +4576,32 @@ html body #chatUserModal .chat-user-modal__friend-msg {
   grid-row: 4;
   margin-top: 0;
 }
+/* Keep identity clear; all profile actions sit in their own block below the level. */
+#chatUserModal .chat-user-modal__top{display:block;padding-right:36px;grid-template-columns:none}
+#chatUserModal .chat-user-modal__header{display:block}
+#chatUserModal .chat-user-modal__header>.chat-user-modal__avatar-wrap{display:none!important}
+#chatUserModal .chat-user-modal__profile-actions{box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);width:100%;transform:none;gap:10px;margin:14px 0;padding:14px;border:1px solid #aa8a484d;border-radius:16px;background:linear-gradient(135deg,#1c252c,#10171e);justify-self:stretch}
+#chatUserModal.chat-user-modal--self .chat-user-modal__profile-actions{display:none}
+#chatUserModal .chat-user-modal__profile-actions>.social-button{width:100%;min-height:44px;margin:0}
+#chatUserModal .chat-user-modal__profile-actions .chat-user-modal__write-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:10px}
+#chatUserModal .chat-user-modal__profile-actions .chat-user-modal__friend-buttons{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+#chatUserModal .chat-user-modal__profile-actions .chat-user-modal__friend-btn,#chatUserModal .chat-user-modal__profile-actions .chat-user-modal__remove-friend{grid-column:auto;min-height:44px}
+#chatUserModal .chat-user-modal__profile-actions .chat-user-modal__block-btn{grid-column:2;min-height:44px}
+#chatUserModal .chat-user-modal__profile-actions .chat-user-modal__friend-msg{display:block;margin-top:8px;text-align:center}
+[data-theme="light"] #chatUserModal .chat-user-modal__profile-actions{background:#f6f1e8;border-color:#cbb78d}
+html body #chatUserModal .chat-user-modal__top{display:block!important;grid-template-columns:none!important}
+html body #chatUserModal .chat-user-modal__profile-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;justify-self:stretch;gap:10px;padding:14px}
+html body #chatUserModal .chat-user-modal__profile-actions .chat-user-modal__write-row{display:grid!important;grid-template-columns:minmax(0,1fr) 44px;gap:10px}
+html body #chatUserModal .chat-user-modal__profile-actions .chat-user-modal__friend-row{display:block!important}
+html body #chatUserModal .chat-user-modal__profile-actions .chat-user-modal__friend-buttons{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+html body #chatUserModal .chat-user-modal__profile-actions button{grid-row:auto!important;grid-column:auto!important;width:100%;min-height:44px!important;margin:0}
+html body #chatUserModal .chat-user-modal__profile-actions .chat-user-modal__copy-profile-btn{width:44px!important;min-width:44px!important;order:0}
+html body #chatUserModal .chat-user-modal__profile-actions .chat-user-modal__friend-msg{text-align:center;grid-row:auto;order:0}
+html body #chatUserModal.chat-user-modal--self .chat-user-modal__profile-actions{display:none!important}
+#chatUserModal .chat-user-modal__status-title::before{content:none!important;display:none!important}
+#chatUserModal .chat-user-modal__level-fish,#chatUserModal .chat-user-modal__title-fish,#chatUserModal .chat-user-modal__status-fish{display:none!important}
+#chatUserModal .chat-user-modal__status-nick{margin:0 0 8px;color:#ffe1a0;font-size:clamp(20px,4vw,28px);font-weight:800;line-height:1.2;overflow-wrap:anywhere}
+#chatUserModal .chat-user-modal__status-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px;margin-bottom:6px}
+#chatUserModal .chat-user-modal__status-heading .chat-user-modal__status-title{position:static;min-height:0;margin:0;padding:0;font-size:13px;line-height:1.2}
+#chatUserModal .chat-user-modal__status-heading .chat-user-modal__level-text{margin:0;padding:0;font-size:clamp(32px,7vw,44px);line-height:1.1}
+#chatUserModal .chat-user-modal__status-heading .chat-user-modal__level-rest{font-size:16px}

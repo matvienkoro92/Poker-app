@@ -5,13 +5,13 @@
   window.pokerHallTableHtml = function (hall) {
     var p = hall.levelProgress || {}, level = Math.max(0, Number(hall.garage && hall.garage.stats && hall.garage.stats.level) || 0);
     return '<div class="hall-table" data-table-level="' + level + '" data-table-xp="' + esc(p.xp == null ? '' : p.xp) + '" data-table-target="' + esc(p.target == null ? '' : p.target) + '">' +
-      '<button type="button" class="hall-table__glass" data-table-action="glass" aria-label="Коснуться стакана — звон льда" title="Звон льда"><span class="hall-table__liquid" aria-hidden="true"></span><i aria-hidden="true"></i><i aria-hidden="true"></i></button>' +
+      '<button type="button" class="hall-table__glass" data-table-action="glass" aria-label="Коснуться стакана — звон льда" title="Звон льда"><span class="hall-table__liquid" aria-hidden="true"></span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></button>' +
       '<button type="button" class="hall-table__chips" data-table-action="chips" aria-label="Фишки — прогресс уровня" title="Ваш уровень"><span class="hall-table__stack" aria-hidden="true">' + Array.from({length:7}, function (_, i) { return '<i style="--chip:' + i + '"></i>'; }).join('') + '</span></button>' +
       '<button type="button" class="hall-table__deck" data-table-action="prediction" aria-label="Вытянуть покерное предсказание" title="Покерное предсказание"><span aria-hidden="true">♠</span></button>' +
       '<span class="hall-table__hint">Коснитесь предметов</span><span class="hall-table__status" role="status"></span></div>';
   };
-  function animate(node, frames, duration) {
-    if (node && node.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) node.animate(frames, { duration: duration, easing: 'cubic-bezier(.2,.7,.3,1)' });
+  function animate(node, frames, duration, delay) {
+    if (node && node.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) node.animate(frames, { duration: duration, delay: delay || 0, easing: 'cubic-bezier(.2,.7,.3,1)' });
   }
   function clink() {
     try {
@@ -43,12 +43,41 @@
     if (!hall || !hall.open) return;
     event.preventDefault(); event.stopPropagation();
     if (action === 'glass') {
-      if (button._lastClink && Date.now() - button._lastClink < 650) return; button._lastClink = Date.now(); clink();
-      animate(button.querySelector('.hall-table__liquid'), [{transform:'rotate(0)'},{transform:'rotate(9deg)'},{transform:'rotate(-6deg)'},{transform:'rotate(3deg)'},{transform:'rotate(0)'}], 850);
-      button.querySelectorAll('i').forEach(function (ice, n) { animate(ice, [{transform:'translate(0,0) rotate(15deg)'},{transform:'translate(' + (n ? -3 : 3) + 'px,-2px) rotate(35deg)'},{transform:'translate(0,0) rotate(15deg)'}], 650); }); return;
+      if (button._lastClink && Date.now() - button._lastClink < 1150) return; button._lastClink = Date.now(); clink();
+      animate(button.querySelector('.hall-table__liquid'), [
+        {transform:'translateY(0) rotate(0) scale(1)',opacity:.5},
+        {transform:'translateY(-20%) rotate(18deg) scale(1.12,1.5)',opacity:1,offset:.18},
+        {transform:'translateY(12%) rotate(-14deg) scale(1.08,1.25)',opacity:.9,offset:.4},
+        {transform:'translateY(-8%) rotate(8deg) scale(1.05,1.15)',opacity:.8,offset:.64},
+        {transform:'translateY(0) rotate(-3deg) scale(1)',opacity:.65,offset:.82},
+        {transform:'translateY(0) rotate(0) scale(1)',opacity:.5}
+      ], 1250);
+      button.querySelectorAll('i').forEach(function (ice, n) {
+        var direction = n % 2 ? -1 : 1;
+        animate(ice, [
+          {transform:'translate(0,0) rotate(15deg)',opacity:.5},
+          {transform:'translate(' + direction * 85 + '%,-70%) rotate(' + direction * 65 + 'deg)',opacity:1,offset:.18},
+          {transform:'translate(' + direction * -65 + '%,35%) rotate(' + direction * -35 + 'deg)',opacity:.95,offset:.42},
+          {transform:'translate(' + direction * 35 + '%,-25%) rotate(' + direction * 35 + 'deg)',opacity:.85,offset:.65},
+          {transform:'translate(' + direction * -12 + '%,10%) rotate(7deg)',opacity:.7,offset:.83},
+          {transform:'translate(0,0) rotate(15deg)',opacity:.5}
+        ], 1100 + n * 65);
+      }); return;
     }
     if (action === 'chips') {
-      button.querySelectorAll('i').forEach(function (chip, n) { animate(chip, [{transform:'translateY(' + (-24 - n * 4) + 'px)',opacity:0},{transform:'translateY(0)',opacity:1}], 260 + n * 55); });
+      button.disabled = true;
+      button.querySelectorAll('i').forEach(function (chip, n) {
+        var side = n % 2 ? -1 : 1;
+        animate(chip, [
+          {transform:'translate(' + side * 24 + '%,-180%) rotate(' + side * 12 + 'deg)',opacity:0},
+          {transform:'translate(' + side * -6 + '%,15%) rotate(' + side * -3 + 'deg)',opacity:1,offset:.62},
+          {transform:'translate(' + side * 3 + '%,-8%) rotate(1deg)',opacity:1,offset:.82},
+          {transform:'translate(0,0) rotate(0)',opacity:1}
+        ], 460, n * 45);
+      });
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) await new Promise(function (resolve) { setTimeout(resolve, 800); });
+      button.disabled = false;
+      if (!button.isConnected || !hall.open) return;
       var level = Number(table.dataset.tableLevel), xp = table.dataset.tableXp, target = Number(table.dataset.tableTarget), known = xp !== '' && target > 0;
       panel('Уровень ' + level, known ? '<p>Опыт до следующего уровня</p><progress max="' + target + '" value="' + Math.min(target, Number(xp)) + '"></progress><strong class="hall-table-dialog__xp">' + Number(xp).toLocaleString('ru-RU') + ' / ' + target.toLocaleString('ru-RU') + '</strong><p>До уровня ' + (level + 1) + ' осталось ' + Math.max(0, target - Number(xp)).toLocaleString('ru-RU') + ' опыта.</p>' : '<p>' + (target === 0 && xp !== '' ? 'Максимальный уровень клуба достигнут.' : 'Играйте в клубе и собирайте опыт — ваша стопка растёт вместе с уровнем.') + '</p>', 'level'); return;
     }

@@ -35,7 +35,7 @@
           </div>
           <div class="chat-user-modal__top" data-chat-user-profile-panel="main">
             <div class="chat-user-modal__header">
-              <div class="chat-user-modal__avatar-wrap">
+              <div class="chat-user-modal__avatar-wrap" hidden aria-hidden="true">
                 <img id="chatUserModalAvatar" class="chat-user-modal__avatar" alt="" style="display: none;" />
                 <span id="chatUserModalAvatarPlaceholder" class="chat-user-modal__avatar chat-user-modal__avatar--placeholder" aria-hidden="true"></span>
               </div>
@@ -54,22 +54,7 @@
                 <p class="chat-user-modal__last-seen" id="chatUserModalLastSeen" hidden></p>
               </div>
             </div>
-            <div class="chat-user-modal__top-actions">
-              <div class="chat-user-modal__write-row">
-                <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
-                <button type="button" class="chat-user-modal__copy-profile-btn" id="chatUserModalCopyProfileBtn" aria-label="Скопировать ссылку на профиль" title="Скопировать ссылку на профиль">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
-                </button>
-              </div>
-              <div class="chat-user-modal__friend-row">
-                <div class="chat-user-modal__friend-buttons">
-                  <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить</button>
-                  <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
-                  <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блок</button>
-                </div>
-                <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
-              </div>
-            </div>
+
           </div>
           <div class="chat-user-modal__hero" data-chat-user-profile-panel="main">
             <div class="chat-user-modal__rating-art" id="chatUserModalRatingArt" hidden>
@@ -91,8 +76,11 @@
                 </div>
               </div>
               <section class="chat-user-modal__status" aria-labelledby="chatUserModalStatusTitle">
-                <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Текущий уровень</h4>
-                <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — / 100</p>
+                <p class="chat-user-modal__status-nick" id="chatUserModalStatusNick"></p>
+                <div class="chat-user-modal__status-heading">
+                  <h4 class="chat-user-modal__status-title" id="chatUserModalStatusTitle">Текущий уровень:</h4>
+                  <p class="chat-user-modal__level-text" id="chatUserModalLevelText">Уровень — / 100</p>
+                </div>
                 <div class="chat-user-modal__status-scale" id="chatUserModalStatusScale" style="--status-value: 0;">
                   <span class="chat-user-modal__status-card">2</span>
                   <div class="chat-user-modal__status-track"><div class="chat-user-modal__status-fill"></div><span class="chat-user-modal__status-fish" aria-hidden="true"><img class="chat-user-modal__status-fish-img" src="./assets/profile-status-fish-level-01.png" alt="" /></span></div>
@@ -102,6 +90,22 @@
               </section>
             </div>
           </div>
+            <div class="chat-user-modal__top-actions chat-user-modal__profile-actions" data-chat-user-profile-panel="main" aria-label="Действия с игроком">
+              <div class="chat-user-modal__write-row">
+                <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
+                <button type="button" class="chat-user-modal__copy-profile-btn" id="chatUserModalCopyProfileBtn" aria-label="Скопировать ссылку на профиль" title="Скопировать ссылку на профиль">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+                </button>
+              </div>
+              <div class="chat-user-modal__friend-row">
+                <div class="chat-user-modal__friend-buttons">
+                  <button type="button" class="chat-user-modal__friend-btn" id="chatUserModalAddFriend">Добавить</button>
+                  <button type="button" class="chat-user-modal__remove-friend" id="chatUserModalRemoveFriend" style="display: none;">Удалить из друзей</button>
+                  <button type="button" class="chat-user-modal__block-btn" id="chatUserModalBlockBtn">Блок</button>
+                </div>
+                <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
+              </div>
+            </div>
           <div class="chat-user-modal__rating-tabs" id="chatUserModalRatingTabs" data-chat-user-profile-panel="main" hidden>
             <button type="button" class="chat-user-modal__rating-tab" id="chatUserModalRatingTab">
               <span class="chat-user-modal__rating-tab-icon" aria-hidden="true">

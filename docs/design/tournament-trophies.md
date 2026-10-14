@@ -4,6 +4,8 @@ Only tournament results with place 1 use the new trophies. Other result awards r
 
 | Event | Trophy design |
 | --- | --- |
+| Аддоник / Аддонник | Rising ruby chip tower, sculpted gold spade and ceremonial bowl |
+| Rebuy / Ребайник | Two cast circular arrows around a sapphire poker chip |
 | Monday / Меджик | Emerald crystal spade in golden magical crescent arms |
 | Tuesday / Тракторист | Steering wheel, tractor emblem, gear wreath and tire supports |
 | Wednesday / Счастливый косарь | Ruble coin and emerald four-leaf clover |
@@ -20,3 +22,5 @@ Only tournament results with place 1 use the new trophies. Other result awards r
 | Freeroll | Open treasure chest with chips and emerald spade |
 
 Aliases normalize case, emoji, punctuation and ё. Specific tournament identities take precedence over weekday words (e.g. Saturday Freeroll uses the treasure chest). Historical external tournament names receive a stable individually engraved vector trophy with a name-derived enamel, crest and silhouette. A date or prize amount does not change a tournament's design. Raster assets are transparent WebP files, with no baked-in live text or prize amounts.
+
+Addon and rebuy awards use dedicated SVG assets with transparent backgrounds; live captions and prize amounts remain in the UI.

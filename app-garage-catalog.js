@@ -250,7 +250,21 @@ function ringArt(id){
  }
  wardrobeCrops.set(key,c);return c;
 }
-function paintWardrobePreview(canvas,kind,look){if(!fashionRows[kind]||fashionIndex(kind,look[kind])<0&&look[kind]!=='none')return false;const paint=()=>{if(!canvas.isConnected)return;canvas.width=canvas.height=512;const x=canvas.getContext('2d');if(look[kind]==='none'){x.fillStyle='#acb8c1';x.textAlign='center';x.font='28px Arial';x.fillText(item(kind,'none').title,256,265);return;}const art=kind==='ring'?ringArt(look[kind]):kind==='necklace'?necklaceArt(look[kind]):fashionArt(kind,look[kind]);if(!art)return;const scale=Math.min(450/art.width,450/art.height);x.drawImage(art,(512-art.width*scale)/2,(512-art.height*scale)/2,art.width*scale,art.height*scale);};loadWardrobe({[kind]:look[kind]}).then(paint).catch(()=>{});return true;}
+let hairPreviewSourcePromise=null;
+function loadHairPreviewSource(){
+ if(!hairPreviewSourcePromise)hairPreviewSourcePromise=new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{hairPreviewSourcePromise=null;reject(Error('Не удалось загрузить примерку причёски'));};im.src='./assets/player-hall/standing-monkey-v1.webp';});
+ return hairPreviewSourcePromise;
+}
+function paintHairPreview(canvas,hair){
+ Promise.all([loadHairPreviewSource(),loadWardrobe({hair})]).then(([source])=>{
+  if(!canvas.isConnected)return;
+  const art=renderCharacter(source,{...defaults,hair}),headroom=art.height-source.naturalHeight;
+  canvas.width=canvas.height=512;const x=canvas.getContext('2d'),height=320+headroom,scale=.9;
+  // Equal face size and chin baseline; tall hairstyles use the space above it.
+  x.drawImage(art,300,0,424,height,(512-424*scale)/2,480-height*scale,424*scale,height*scale);
+ }).catch(()=>{});
+}
+function paintWardrobePreview(canvas,kind,look){if(kind==='hair'){paintHairPreview(canvas,look.hair);return true;}if(!fashionRows[kind]||fashionIndex(kind,look[kind])<0&&look[kind]!=='none')return false;const paint=()=>{if(!canvas.isConnected)return;canvas.width=canvas.height=512;const x=canvas.getContext('2d');if(look[kind]==='none'){x.fillStyle='#acb8c1';x.textAlign='center';x.font='28px Arial';x.fillText(item(kind,'none').title,256,265);return;}const art=kind==='ring'?ringArt(look[kind]):kind==='necklace'?necklaceArt(look[kind]):fashionArt(kind,look[kind]);if(!art)return;const scale=Math.min(450/art.width,450/art.height);x.drawImage(art,(512-art.width*scale)/2,(512-art.height*scale)/2,art.width*scale,art.height*scale);};loadWardrobe({[kind]:look[kind]}).then(paint).catch(()=>{});return true;}
 const footwearFits=new WeakMap();
 function footwearFit(art){if(!art.getContext){const cached=wardrobeCrops.get('foot-canvas:'+art.src);if(cached)return footwearFit(cached);const c=document.createElement('canvas');c.width=art.naturalWidth;c.height=art.naturalHeight;c.getContext('2d').drawImage(art,0,0);wardrobeCrops.set('foot-canvas:'+art.src,c);return footwearFit(c);}if(footwearFits.has(art))return footwearFits.get(art);const d=art.getContext('2d').getImageData(0,0,art.width,art.height).data,half=art.width/2,feet=[];for(let foot=0;foot<2;foot++){let left=art.width,right=0,top=art.height,bottom=0;for(let y=0;y<art.height;y++)for(let x=Math.ceil(foot*half);x<Math.floor((foot+1)*half);x++)if(d[(y*art.width+x)*4+3]>40){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}let sum=0,count=0;for(let y=top;y<top+(bottom-top)*.18;y++)for(let x=left;x<=right;x++)if(d[(y*art.width+x)*4+3]>80){sum+=x;count++;}feet.push({left,top,width:right-left+1,height:bottom-top+1,ankle:count?sum/count:(left+right)/2});}footwearFits.set(art,feet);return feet;}
 // Only exposed summer silhouettes use body variants; winter clothing is pixel-identical.
@@ -315,7 +329,13 @@ function paintFashion(c,image,look,standing){
   c.save();c.beginPath();c.rect(210,1250,600,110);c.clip();c.shadowColor='#05080bc0';c.shadowBlur=9;c.shadowOffsetY=6;c.drawImage(pants,246,690,536,height);c.restore();
   c.drawImage(pants,246,690,536,height);
  }
- if(top){c.drawImage(top,132,220,760,540);c.save();c.beginPath();c.moveTo(375,0);c.lineTo(644,0);c.lineTo(682,222);c.quadraticCurveTo(634,280,568,295);c.lineTo(475,294);c.quadraticCurveTo(390,285,346,223);c.closePath();c.clip();if(look.helmet!=='none'){c.beginPath();c.rect(0,0,1024,220);c.clip();}c.drawImage(image,0,0,1024,1536);c.restore();}
+ if(top){c.drawImage(top,132,220,760,540);c.save();c.beginPath();c.moveTo(375,0);c.lineTo(644,0);c.lineTo(682,222);c.quadraticCurveTo(634,280,568,295);c.lineTo(475,294);c.quadraticCurveTo(390,285,346,223);c.closePath();c.clip();if(look.helmet!=='none'){c.beginPath();c.rect(0,0,1024,220);c.clip();}else{
+  // Restore the beard contour, not the old jacket collar underneath it.
+  c.beginPath();c.moveTo(375,0);c.lineTo(644,0);c.lineTo(654,180);
+  c.quadraticCurveTo(642,224,610,247);c.quadraticCurveTo(585,276,544,296);
+  c.quadraticCurveTo(514,310,484,295);c.quadraticCurveTo(443,277,414,248);
+  c.quadraticCurveTo(385,220,370,183);c.closePath();c.clip();
+ }c.drawImage(image,0,0,1024,1536);c.restore();}
  // Hands remain in front of cuffs, independent of the selected sleeve.
  if(top){for(const points of [[[155,740],[239,737],[271,803],[277,876],[250,925],[185,913],[141,853]],[[785,738],[866,741],[881,855],[845,925],[782,914],[748,858],[757,802]]]){c.save();c.beginPath();points.forEach(([x,y],n)=>n?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.clip();if(summerPieces[look.suit]&&/(Tank|Tee)$/.test(look.suit)){for(let y=738;y<760;y++){c.globalAlpha=(y-738)/22;c.drawImage(image,0,y*image.naturalHeight/1536,image.naturalWidth,image.naturalHeight/1536,0,y,1024,1);}c.globalAlpha=1;c.beginPath();c.rect(0,760,1024,776);c.clip();c.drawImage(image,0,0,1024,1536);}else c.drawImage(image,0,0,1024,1536);c.restore();}}
  c.restore();

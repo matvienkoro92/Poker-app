@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400">
+<defs>
+ <linearGradient id="gold"><stop stop-color="#705020"/><stop offset=".2" stop-color="#f1cf7c"/><stop offset=".37" stop-color="#fff2c3"/><stop offset=".55" stop-color="#ad7930"/><stop offset=".78" stop-color="#e6bc65"/><stop offset="1" stop-color="#76501c"/></linearGradient>
+ <linearGradient id="edge" x2=".2" y2="1"><stop stop-color="#fff0c0"/><stop offset=".4" stop-color="#c29445"/><stop offset="1" stop-color="#604019"/></linearGradient>
+ <linearGradient id="blue" x2=".7" y2="1"><stop stop-color="#4f8dbd"/><stop offset=".4" stop-color="#183d65"/><stop offset="1" stop-color="#09182f"/></linearGradient>
+ <radialGradient id="enamel" cx=".3" cy=".2"><stop stop-color="#437dae"/><stop offset=".6" stop-color="#163555"/><stop offset="1" stop-color="#081527"/></radialGradient>
+ <linearGradient id="base" x2=".2" y2="1"><stop stop-color="#3e4853"/><stop offset=".45" stop-color="#121b28"/><stop offset="1" stop-color="#070c15"/></linearGradient>
+ <filter id="shadow" x="-.3" y="-.3" width="1.6" height="1.7"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity=".45"/></filter>
+</defs>
+<g filter="url(#shadow)">
+<!-- Two cast circular arrows: the tournament's second chance. -->
+<path d="M81 184A88 88 0 0 1 206 74L194 96A63 63 0 0 0 105 179L121 165L116 214L69 208Z" fill="url(#gold)" stroke="#d8b16a" stroke-width="2"/>
+<path d="M239 137A88 88 0 0 1 114 247L126 225A63 63 0 0 0 215 142L199 156L204 107L251 113Z" fill="url(#gold)" stroke="#d8b16a" stroke-width="2"/>
+<path d="M82 161A80 80 0 0 1 198 79M238 163A80 80 0 0 1 122 242" fill="none" stroke="#fff0bb" stroke-width="2" opacity=".75"/>
+<!-- Blue inlay and central chip with milled rim. -->
+<circle cx="160" cy="161" r="59" fill="url(#edge)" stroke="#f5d798" stroke-width="2"/>
+<circle cx="160" cy="161" r="52" fill="url(#blue)" stroke="#081627" stroke-width="2"/>
+<circle cx="160" cy="161" r="47" fill="none" stroke="#d4bd86" stroke-width="7" stroke-dasharray="11 18"/>
+<circle cx="160" cy="161" r="37" fill="url(#enamel)" stroke="#c3a76e" stroke-width="1.5"/>
+<path d="M160 131C150 144 134 152 136 164C138 175 151 178 157 170L153 185H167L163 170C169 178 182 175 184 164C186 152 170 144 160 131Z" fill="url(#gold)" stroke="#ecd392" stroke-width="1"/>
+<path d="M121 133A47 47 0 0 1 178 117" fill="none" stroke="#bfe6ff" stroke-width="2" opacity=".5"/>
+<!-- Split enamel pedestal beneath the orbit. -->
+<path d="M135 243Q160 263 185 243L181 290H199L214 316H106L121 290H139Z" fill="url(#gold)" stroke="#d7b06b" stroke-width="2"/>
+<path d="M151 262H169V291H151Z" fill="url(#blue)" stroke="#c9a664"/>
+<ellipse cx="160" cy="312" rx="55" ry="9" fill="url(#edge)"/>
+<path d="M109 316H211L228 359H92Z" fill="url(#base)" stroke="url(#gold)" stroke-width="5"/>
+<path d="M98 359H222L230 374H90Z" fill="url(#gold)"/>
+<path d="M108 329H212L216 350H104Z" fill="#0b1422" stroke="#bd9851" stroke-width="1.5"/>
+<path d="M145 339A15 8 0 1 1 171 343M171 343L172 335M171 343L162 341" fill="none" stroke="#cfb376" stroke-width="1.5"/>
+<path d="M108 318H211M98 361H222" stroke="#ffebaf" stroke-width="2" opacity=".7"/>
+</g></svg>

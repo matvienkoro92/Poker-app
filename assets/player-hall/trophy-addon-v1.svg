@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400">
+<defs>
+ <linearGradient id="gold"><stop stop-color="#674212"/><stop offset=".18" stop-color="#b8832e"/><stop offset=".36" stop-color="#fff0bb"/><stop offset=".51" stop-color="#d6a348"/><stop offset=".68" stop-color="#9a6321"/><stop offset=".86" stop-color="#ffe7a0"/><stop offset="1" stop-color="#78501c"/></linearGradient>
+ <linearGradient id="edge" x2="0" y2="1"><stop stop-color="#fff3bf"/><stop offset=".27" stop-color="#e5be6b"/><stop offset=".62" stop-color="#916022"/><stop offset="1" stop-color="#422b14"/></linearGradient>
+ <linearGradient id="red" x2=".6" y2="1"><stop stop-color="#b74450"/><stop offset=".45" stop-color="#671a2b"/><stop offset="1" stop-color="#270d18"/></linearGradient>
+ <linearGradient id="base" x2=".2" y2="1"><stop stop-color="#39404b"/><stop offset=".45" stop-color="#111722"/><stop offset="1" stop-color="#070b12"/></linearGradient>
+ <radialGradient id="face" cx=".35" cy=".2"><stop stop-color="#853549"/><stop offset=".6" stop-color="#471829"/><stop offset="1" stop-color="#190c17"/></radialGradient>
+ <filter id="shadow" x="-.3" y="-.2" width="1.6" height="1.5"><feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity=".45"/></filter>
+ <g id="chip"><path d="M113 0H207V12C203 28 117 28 113 12Z" fill="url(#red)" stroke="#d6af63" stroke-width="1.5"/><path d="M121 6V18M141 11V23M179 11V23M199 6V18" stroke="#f0d99c" stroke-width="5"/><ellipse cx="160" cy="0" rx="47" ry="13" fill="url(#face)" stroke="url(#edge)" stroke-width="3"/><ellipse cx="160" cy="0" rx="31" ry="8" fill="#441323" stroke="#bc9452" stroke-width="1"/><path d="M120-6L130-3M144-12L147-8M176-12L173-8M200-6L190-3M124 7L134 4M195 8L185 4" stroke="#ead5a3" stroke-width="4"/></g>
+</defs>
+<g filter="url(#shadow)">
+<!-- Swept handles and a weighted gold bowl. -->
+<path d="M104 167C20 136 43 250 120 252M216 167C300 136 277 250 200 252" fill="none" stroke="url(#gold)" stroke-width="16"/>
+<path d="M101 169C43 151 58 228 113 239M219 169C277 151 262 228 207 239" fill="none" stroke="#ffdf8b" stroke-width="2"/>
+<path d="M94 166Q160 183 226 166L212 231Q196 261 174 266V294H195L214 316H106L125 294H146V266Q124 261 108 231Z" fill="url(#gold)" stroke="#e9c47a" stroke-width="2"/>
+<path d="M119 187Q160 198 201 187L190 226Q160 251 130 226Z" fill="url(#red)" stroke="#edc576" stroke-width="2"/>
+<path d="M148 213H172M160 201V225" stroke="#ffe3a0" stroke-width="5" stroke-linecap="round"/>
+<!-- Three ascending chip tiers, topped with a sculpted spade. -->
+<use href="#chip" y="153"/><use href="#chip" y="135"/><use href="#chip" y="117"/>
+<g transform="translate(160 80) scale(.78)"><path d="M0-49C-14-29-40-13-36 5C-33 22-12 25-4 12L-9 36H9L4 12C12 25 33 22 36 5C40-13 14-29 0-49Z" fill="url(#gold)" stroke="#f9da93" stroke-width="2"/><path d="M-1-37C-14-22-29-12-28 0" fill="none" stroke="#fff1c3" stroke-width="2" opacity=".7"/></g>
+<!-- Obsidian plinth with inset gold plaque. -->
+<path d="M109 315H211L228 359H92Z" fill="url(#base)" stroke="url(#gold)" stroke-width="5"/>
+<path d="M98 359H222L230 374H90Z" fill="url(#gold)"/>
+<path d="M108 329H212L216 350H104Z" fill="#0b1018" stroke="#bd9851" stroke-width="1.5"/>
+<path d="M135 339H185M160 333V345" stroke="#c9a764" stroke-width="1"/>
+<path d="M108 318H211M98 361H222" stroke="#ffebaf" stroke-width="2" opacity=".7"/>
+</g></svg>

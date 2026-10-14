@@ -122,6 +122,7 @@ if (chatUserModalEl) {
   }
   var modalLevelFish = document.getElementById("chatUserModalLevelFish");
   var modalLevelText = document.getElementById("chatUserModalLevelText");
+  var modalStatusNick = document.getElementById("chatUserModalStatusNick");
   var modalRespectOpenVoters = document.getElementById("chatUserModalRespectOpenVoters");
   var modalRespectVal = document.getElementById("chatUserModalRespectVal");
   var modalGender = document.getElementById("chatUserModalGender");
@@ -3130,6 +3131,7 @@ if (chatUserModalEl) {
     var safeFallbackName = hidePrivateTelegramLabel(fallbackName);
     var titleDisp = contactNm || ratingNick || peerChatDisp || (chatUserModalPeerLogin !== "TG скрыт" ? chatUserModalPeerLogin : "") || safeFallbackName || "Игрок";
     if (modalTitle) modalTitle.textContent = titleDisp;
+    if (modalStatusNick) modalStatusNick.textContent = ratingNick || titleDisp;
     chatUserModalUserName = titleDisp;
     if (modalAvatar) modalAvatar.alt = titleDisp;
     if (modalAvatarPlaceholder && (!modalAvatar || modalAvatar.style.display === "none")) {
@@ -3421,6 +3423,7 @@ if (chatUserModalEl) {
     if (modalRemoveFriend) modalRemoveFriend.style.display = "none";
     if (modalVerifiedBadge) modalVerifiedBadge.classList.add("chat-user-modal__verified--hidden");
     if (modalTitle) modalTitle.textContent = userName;
+    if (modalStatusNick) modalStatusNick.textContent = userName;
     if (modalAvatar && modalAvatarPlaceholder) {
       applyChatUserModalBaseAvatar(avatarUrl, id, userName);
     }

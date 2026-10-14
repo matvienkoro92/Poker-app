@@ -1,6 +1,8 @@
 (function(root,factory){var api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.PokerHallTrophies=api;})(typeof window==='object'?window:globalThis,function(){
 'use strict';
 var assets={
+ addon:'./assets/player-hall/trophy-addon-v1.svg',
+ rebuy:'./assets/player-hall/trophy-rebuy-v1.svg',
  monday:'./assets/player-hall/trophy-monday-v1.webp',
  tuesday:'./assets/player-hall/trophy-tuesday-v1.webp',
  wednesday:'./assets/player-hall/trophy-wednesday-v1.webp',
@@ -17,7 +19,7 @@ var assets={
  freeroll:'./assets/player-hall/trophy-freeroll-v1.webp'
 };
 function key(name){return String(name||'').normalize('NFKC').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/g,' ').trim();}
-function family(name){var n=key(name);if(/месяц/.test(n))return 'month';if(/fantastic/.test(n))return 'fantastic';if(/big boss/.test(n))return 'boss';if(/пятихат/.test(n))return 'fivehundred';if(/crazy/.test(n))return 'crazy';if(/freeroll|фриролл/.test(n))return 'freeroll';if(/четверг/.test(n))return 'thursday';if(/понедельник|monday|меджик/.test(n))return 'monday';if(/вторник|трактор/.test(n))return 'tuesday';if(/сред|косарь/.test(n))return 'wednesday';if(/пятниц/.test(n))return 'friday';if(/суббот|saturday/.test(n))return 'saturday';if(/воскрес/.test(n))return 'sunday';if(/классическ|classic/.test(n))return 'classic';return '';}
+function family(name){var n=key(name);if(/аддон|адоник|адонник|addon|add on/.test(n))return 'addon';if(/rebuy|re buy|ребай/.test(n))return 'rebuy';if(/месяц/.test(n))return 'month';if(/fantastic/.test(n))return 'fantastic';if(/big boss/.test(n))return 'boss';if(/пятихат/.test(n))return 'fivehundred';if(/crazy/.test(n))return 'crazy';if(/freeroll|фриролл/.test(n))return 'freeroll';if(/четверг/.test(n))return 'thursday';if(/понедельник|monday|меджик/.test(n))return 'monday';if(/вторник|трактор/.test(n))return 'tuesday';if(/сред|косарь/.test(n))return 'wednesday';if(/пятниц/.test(n))return 'friday';if(/суббот|saturday/.test(n))return 'saturday';if(/воскрес/.test(n))return 'sunday';if(/классическ|classic/.test(n))return 'classic';return '';}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c];});}
 // Historic and external events also receive their own stable engraved trophy.
 // The name controls the enamel, silhouette, crest and engraving; dates do not.

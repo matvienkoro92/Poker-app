@@ -92,6 +92,7 @@
       "app-chat-keyboard-dock.js",
       "app-chat-view-glue.js",
       "app-hall-table.js",
+      "app-garage-radio.js",
       "app-player-hall.js"
     ],
     "rating": [
@@ -146,6 +147,7 @@
       "app-cashout.js",
       "app-portrait-effects.js",
       "app-hall-table.js",
+      "app-garage-radio.js",
       "app-player-hall.js"
     ],
     "push": [
