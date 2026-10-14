@@ -521,3 +521,10 @@
 .player-hall-dialog .garage-wheel-color button{font-size:12px;padding:8px 10px}
 .garage-tint-hint{flex:none;padding:10px 12px;background:#26312b;color:#e9d8ac;font-size:12px;line-height:1.4}
 .player-hall-dialog .garage-tint-hint button{margin-left:6px;font-size:12px;padding:6px 9px}
+
+.garage-plate-check{padding:12px 14px;margin:8px 12px;border:1px solid #b89a5f55;border-radius:12px;background:#17232a;font-size:13px;line-height:1.5}
+.garage-plate-check p{margin:0 0 7px;font-weight:700}
+.garage-plate-check--available{color:#9ce4b2}
+.garage-plate-check--blocked{color:#ffd078}
+.garage-plate-check>span{display:block;color:#d0dce3}
+.player-hall-dialog .garage-plate-check button{margin-top:8px;padding:7px 12px;font-size:12px}

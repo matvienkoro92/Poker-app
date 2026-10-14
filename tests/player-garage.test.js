@@ -305,3 +305,16 @@ test('custom wheel paint persists independently of wheel geometry and accepts an
  assert.equal(G.normalize({wheelColor:'bad'},{}).wheelColor,'');
  assert.throws(()=>Garage.choose({wheels:'legend',wheelColor:'#ff00ff'},{stats:{level:0}}),/не открыта/);
 });
+
+test('plate feedback reports exact gate and supplies a currently valid example',()=>{
+ for(const level of [0,9,10,19,20,29,30,49,50,74,75,99,100]){
+  const info=G.plateAvailability('А777АА','154',level);
+  assert.equal(info.requiredLevel,100);assert.equal(info.allowed,level>=100);
+  assert.ok(G.plateLevel(info.example.number)<=level);
+  assert.equal(G.normalize(info.example,{level},true).number,info.example.number);
+  assert.equal(info.example.region,'154');
+ }
+ const mirrored=G.plateAvailability('A121KM','54',9);assert.equal(mirrored.requiredLevel,10);assert.equal(mirrored.allowed,false);
+ assert.equal(G.plateAvailability('A121KM','54',10).allowed,true);
+ const invalid=G.plateAvailability('000','x',0);assert.equal(invalid.allowed,false);assert.equal(invalid.requiredLevel,null);assert.equal(invalid.example.region,'54');
+});
