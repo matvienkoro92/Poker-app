@@ -5,7 +5,7 @@ const vm=require('node:vm');
 async function create(look={}){
  const listeners={},frames=[],meshes=[];
  class Resource{dispose(){this.disposed=true;}}
- class Geometry extends Resource{constructor(){super();this.attributes={};}setAttribute(k,v){this.attributes[k]=v;}setIndex(){}computeVertexNormals(){}}
+ class Geometry extends Resource{constructor(){super();this.attributes={};}setAttribute(k,v){this.attributes[k]=v;}setIndex(indices){this.indices=indices;}computeVertexNormals(){}}
  class Group{constructor(){this.rotation={set:(...v)=>this.angles=v};}add(m){meshes.push(m);}}
  class Renderer extends Resource{constructor(){super();this.domElement={setAttribute(){},remove(){}};}setPixelRatio(){}setSize(){}render(){}forceContextLoss(){}}
  const pixels=new Uint8ClampedArray(1024*1536*4).fill(255),draws=[];
@@ -37,3 +37,7 @@ test('watch close-up faces the wrist and restores the previous orbit on exit',as
 });
 
 test('helmet replaces exposed ears with a closed head volume; hands have their own UV material region',async()=>{const bare=await create(),helmet=await create({helmet:'silver'});assert.equal(helmet.meshes.length,bare.meshes.length-2);const head=helmet.meshes.find(m=>m.geometry.attributes.surface.array[0]===6);assert.equal(head.material.uniforms.helmetOn.value,1);const hands=helmet.meshes.filter(m=>m.geometry.attributes.surface.array[0]===3);assert.equal(hands.length,12);assert.ok(hands.every(m=>m.geometry.attributes.bodyUv.itemSize===2));bare.viewer.dispose();helmet.viewer.dispose();});
+
+test('idle animation advances but stops during wrist inspection and drag',async()=>{const v=await create(),uniforms=v.meshes[0].material.uniforms;v.frames.at(-1)(1000);assert.equal(uniforms.idleTime.value,1);assert.equal(uniforms.idleStrength.value,1);v.viewer.setFocus('watch');v.frames.at(-1)(1500);assert.equal(uniforms.idleStrength.value,0);v.viewer.setFocus('full');v.listeners.pointerdown({pointerId:1,clientX:0,clientY:0,preventDefault(){}});v.frames.at(-1)(2000);assert.equal(uniforms.idleStrength.value,0);v.viewer.dispose();});
+
+test('each body segment has finite geometry and closed end caps',async()=>{const v=await create();for(const mesh of v.meshes){const geo=mesh.geometry,n=geo.attributes.position.array.length/3;assert.ok(geo.attributes.position.array.every(Number.isFinite));assert.ok(geo.indices.includes(n-1));assert.ok(geo.indices.includes(n-2));assert.ok(geo.indices.every(i=>i>=0&&i<n));assert.equal(geo.attributes.uv.array.length,n*2);}v.viewer.dispose();});

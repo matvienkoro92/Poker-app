@@ -427,3 +427,12 @@
 .garage-radio>strong{display:block;text-align:center;font-size:15px;color:#ffe5a4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .garage-radio__controls{display:grid;grid-template-columns:44px 1fr 44px;gap:7px;margin-top:9px}.garage-radio .garage-radio__controls button{min-height:44px;padding:5px;border:1px solid #8e784a;border-radius:6px;background:linear-gradient(#414440,#202422);color:#ffe4a6;font-size:13px}.garage-radio__controls button:disabled{opacity:.4}.garage-radio__controls button[aria-pressed=true]{border-color:#91d8ae;box-shadow:inset 0 0 9px #42ad6540}.garage-radio__volume{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:6px}.garage-radio__volume input{min-width:0;flex:1;accent-color:#eac777;height:32px}.garage-radio__volume output{width:34px;text-align:right}.garage-radio>small{display:block;min-height:14px;font-size:11px;text-align:center;color:#bcb9ab}.garage-radio button:focus-visible,.garage-radio input:focus-visible,.garage-radio-object:focus-visible{outline:2px solid #ffe5a4;outline-offset:3px}
 @media(max-height:620px){.garage-radio{bottom:62px;padding:8px 12px}.garage-radio__volume input{height:26px}}
+
+/* Contact shadow sits behind the feet, not behind the entire silhouette. */
+.garage-radio-object::before{content:"";position:absolute;z-index:-1;left:6%;right:2%;bottom:1%;height:22%;border-radius:50%;background:radial-gradient(ellipse at center,#110a05cc 0%,#170c0780 36%,#21100635 62%,transparent 76%);transform:skewX(-20deg) rotate(7deg);filter:blur(3px);pointer-events:none}
+.garage-radio-object::after{content:"";position:absolute;z-index:-1;left:13%;right:10%;bottom:3%;height:8%;border-radius:50%;background:#110b07a8;filter:blur(2px);transform:rotate(7deg);pointer-events:none}
+.player-hall-dialog .garage-radio__back{display:block;width:auto;min-height:44px;padding:7px 14px;margin:-4px 0 8px;border:1px solid #c2a464;border-radius:22px;background:#18221bed;color:#ffe2a3;font-size:14px;font-weight:700;position:static;box-shadow:none}
+.player-hall__room[data-garage-focus=radio] .player-hall__camera-ui{display:none}
+/* Full-size locked cars extend to 81% of the scene: keep the stereo below them. */
+.player-hall__room[data-garage-vehicle="1"] .garage-radio-object{left:71%;top:82%;width:18%}
+.player-hall__room[data-garage-vehicle="2"] .garage-radio-object{left:72%;top:82.5%;width:17%}
