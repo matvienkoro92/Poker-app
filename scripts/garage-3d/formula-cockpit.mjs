@@ -2,9 +2,11 @@ import * as T from '../../vendor/three/three.module.min.js';
 export function formulaCockpit({paint,carbon,metal}){
  const group=new T.Group();group.name='formula-cockpit';
  function tube(points,r,mat,name){const mesh=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),40,r,10,false),mat);mesh.name=name;mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);return mesh;}
- tube([[-1.03,1.47,-.49],[-.97,1.98,-.46],[-.38,2.03,-.43],[.38,1.96,-.29],[.60,1.87,0],[.38,1.96,.29],[-.38,2.03,.43],[-.97,1.98,.46],[-1.03,1.47,.49]],.043,carbon,'halo-ring');
- tube([[.60,1.87,0],[.69,1.56,0],[.78,1.22,0]],.038,metal,'halo-pillar');
- tube([[-1.25,1.4,-.29],[-1.27,2.12,-.23],[-1.22,2.22,0],[-1.27,2.12,.23],[-1.25,1.4,.29]],.048,carbon,'roll-hoop');
+ // The upper halo clears the shoulder-to-wheel corridor; only its rear
+ // mounts descend beside the seat. The front pillar lands beyond the wheel.
+ tube([[-1.03,1.47,-.64],[-.99,2.48,-.64],[-.38,2.55,-.65],[.53,2.49,-.46],[1.00,2.40,0],[.53,2.49,.46],[-.38,2.55,.65],[-.99,2.48,.64],[-1.03,1.47,.64]],.043,carbon,'halo-ring');
+ tube([[1.00,2.40,0],[1.13,1.93,0],[1.22,1.44,0]],.038,metal,'halo-pillar');
+ tube([[-1.25,1.4,-.34],[-1.27,2.53,-.28],[-1.22,2.65,0],[-1.27,2.53,.28],[-1.25,1.4,.34]],.048,carbon,'roll-hoop');
  for(const sign of [-1,1])for(const y of [.67,.94])tube([[1.19,y,sign*.34],[1.92,y-.12,sign*1.24],[2.22,y,sign*.31]],.024,carbon,'front-wishbone');
  const engine=new T.Group();engine.name='formula-engine-cover';
  const positions=[],indices=[],sections=[[-2.43,.98,.18,.10],[-2.12,1.18,.32,.26],[-1.64,1.37,.42,.40],[-1.26,1.40,.41,.44],[-.99,1.26,.32,.25]],sides=32;
