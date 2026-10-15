@@ -15,3 +15,14 @@ shirt cuffs are separate wrist-bound meshes for jacket outfits.
 
 Run `npm run garage:3d` after editing the modules. Relevant checks:
 `node --test tests/character-volume.test.js tests/character-rig.test.js tests/wrist-watch.test.js tests/player-garage.test.js`.
+
+Open limbs use smooth anatomical sections without garment folds. Side fur and
+hand colors are authored rather than projecting narrow photograph strips around
+the limb. Low-top sneakers use a shallow vamp joined to the ankle; laces follow
+that surface. Front lapels come from the wardrobe texture to avoid duplicate
+flat panels over the garment. `scripts/smoke-character-quality.cjs` renders the
+mobile editor in a T-shirt and shorts from the front and side.
+
+Fur shading uses continuous object-space noise, blended into the front portrait;
+forearms have authored elbow, muscle and wrist sections. Finger tips curve toward
+the palm. The quality smoke captures front, three-quarter, side and back views.

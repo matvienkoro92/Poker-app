@@ -18,8 +18,8 @@ export async function createCharacterStudy(host,look,state={}){
 #include <common>
 #include <skinning_pars_vertex>
 attribute vec2 bodyUv;attribute float surface;attribute float frontWeight;attribute vec2 rearUv;attribute vec2 profileUv;
-varying vec2 vBodyUv;varying float vSurface;varying vec2 vRearUv;varying vec2 vProfileUv;varying vec2 vUv;varying float vFront;varying vec3 vNormal;
-void main(){vBodyUv=bodyUv;vSurface=surface;vUv=uv;vRearUv=rearUv;vProfileUv=profileUv;vFront=frontWeight;
+varying vec3 vRestPosition;varying vec2 vBodyUv;varying float vSurface;varying vec2 vRearUv;varying vec2 vProfileUv;varying vec2 vUv;varying float vFront;varying vec3 vNormal;
+void main(){vRestPosition=position;vBodyUv=bodyUv;vSurface=surface;vUv=uv;vRearUv=rearUv;vProfileUv=profileUv;vFront=frontWeight;
 #include <skinbase_vertex>
 #include <beginnormal_vertex>
 #include <skinnormal_vertex>
@@ -27,7 +27,17 @@ vNormal=normalMatrix*objectNormal;
 #include <begin_vertex>
 #include <skinning_vertex>
 gl_Position=projectionMatrix*modelViewMatrix*vec4(transformed,1.);
-}`,fragmentShader:`uniform vec3 helmetColor;uniform vec3 helmetStripe;uniform float helmetOn;uniform float shorts;uniform float sleeveEnd;uniform float club;uniform sampler2D portrait;uniform sampler2D rear;uniform sampler2D profile;uniform vec3 jacketColor;uniform vec3 pantsColor;uniform vec3 shoeColor;varying vec2 vBodyUv;varying float vSurface;varying vec2 vRearUv;varying vec2 vProfileUv;varying vec2 vUv;varying float vFront;varying vec3 vNormal;vec3 tint(vec3 c,float y){if(c.g>c.r*1.20&&c.g>c.b*1.15){vec3 target=y>.83?shoeColor:y>.46?pantsColor:jacketColor;float lum=dot(c,vec3(.2126,.7152,.0722));return target*clamp(lum/.13,.12,2.); }return c;}vec3 dressed(vec3 c,float y,float x){
+}`,fragmentShader:`uniform vec3 helmetColor;uniform vec3 helmetStripe;uniform float helmetOn;uniform float shorts;uniform float sleeveEnd;uniform float club;uniform sampler2D portrait;uniform sampler2D rear;uniform sampler2D profile;uniform vec3 jacketColor;uniform vec3 pantsColor;uniform vec3 shoeColor;varying vec3 vRestPosition;varying vec2 vBodyUv;varying float vSurface;varying vec2 vRearUv;varying vec2 vProfileUv;varying vec2 vUv;varying float vFront;varying vec3 vNormal;float hash3(vec3 p){p=fract(p*.1031);p+=dot(p,p.yzx+33.33);return fract((p.x+p.y)*p.z);}
+float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash3(i),hash3(i+vec3(1,0,0)),f.x),mix(hash3(i+vec3(0,1,0)),hash3(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash3(i+vec3(0,0,1)),hash3(i+vec3(1,0,1)),f.x),mix(hash3(i+vec3(0,1,1)),hash3(i+vec3(1,1,1)),f.x),f.y),f.z);}
+vec3 furColor(){
+ // Object-space noise keeps fur continuous around the limb and through rotation.
+ vec3 p=vRestPosition;
+ float tufts=noise3(p*vec3(38.,13.,38.));
+ float strands=noise3(p*vec3(145.,25.,145.));
+ float broad=noise3(p*vec3(7.,10.,7.));
+ return mix(vec3(.018,.012,.008),vec3(.075,.047,.028),.48*tufts+.32*strands+.20*broad);
+}
+vec3 tint(vec3 c,float y){if(c.g>c.r*1.20&&c.g>c.b*1.15){vec3 target=y>.83?shoeColor:y>.46?pantsColor:jacketColor;float lum=dot(c,vec3(.2126,.7152,.0722));return target*clamp(lum/.13,.12,2.); }return c;}vec3 dressed(vec3 c,float y,float x){
  if(vSurface>8.5)return vec3(.85,.86,.84);
  if(vSurface>7.5){float tread=.90+.055*sin(x*460.)*sin(y*900.);return vec3(.78,.79,.77)*tread;}
  if(vSurface>4.5&&vSurface<5.5){float sole=smoothstep(.968,.978,y);float upperPanel=smoothstep(.90,.92,y)*(1.-smoothstep(.94,.96,y));vec3 leather=mix(shoeColor*.82,shoeColor*.64,upperPanel);float stitch=1.-.12*exp(-pow((y-.945)/.0025,2.));return mix(leather*stitch,vec3(.78,.79,.77),sole);}
@@ -35,17 +45,21 @@ gl_Position=projectionMatrix*modelViewMatrix*vec4(transformed,1.);
  float arm=step(1.5,vSurface)*(1.-step(2.5,vSurface));
  float legs=step(3.5,vSurface)*(1.-step(4.5,vSurface));
  if(vSurface>5.5&&vSurface<6.5&&helmetOn>.5){float stripe=1.-smoothstep(.017,.024,abs(x-.505));vec3 shell=mix(helmetColor,helmetStripe,stripe);float visorBand=smoothstep(.045,.055,y)*(1.-smoothstep(.098,.112,y))*smoothstep(-.65,.15,vFront);shell=mix(shell,vec3(.025,.035,.045),visorBand);float vent=step(.105,y)*(1.-step(.155,y))*(1.-smoothstep(.08,.11,abs(x-.505)));return shell*(1.-vent*.38);}
- if(vSurface>2.5&&vSurface<3.5){return texture2D(portrait,vUv).rgb;}
+ if(vSurface>2.5&&vSurface<3.5){
+ float pores=noise3(vRestPosition*95.);
+ float backOfHand=(1.-smoothstep(.50,.53,y));
+ return mix(vec3(.32,.19,.125)*(.87+.20*pores),furColor(),backOfHand*.8);
+ }
  if((legs>.5&&shorts>.5&&y>.65)||(arm>.5&&y>sleeveEnd)){
   // Photograph projection on the sides stretches a narrow strip into bands.
   // Use directional fur shading there; keep the portrait on the front only.
-  float grain=fract(sin(dot(vec2(x*230.,y*900.),vec2(12.9898,78.233)))*43758.5453);
-  float strands=.90+.10*sin(x*1700.+sin(y*65.)*2.);
-  return vec3(.135,.105,.083)*strands*(.88+.24*grain);
+  return furColor();
  }
  if(vSurface<1.5||(arm>.5&&y<sleeveEnd)){float weave=.81+.008*sin(y*85.)*sin(x*110.);float seam=1.-.10*exp(-pow((x-.505)/.003,2.));float fabricShade=clamp(dot(c,vec3(.2126,.7152,.0722))/.075,.85,1.22);return jacketColor*weave*seam*fabricShade;}
- if(legs>.5&&y<(shorts>.5?.65:.85)){float fold=.83+.025*sin(x*44.+y*14.);float inseam=1.-.09*exp(-pow((abs(x-.5)-.07)/.008,2.));fold*=inseam;return pantsColor*fold*clamp(dot(c,vec3(.2126,.7152,.0722))/.35,.9,1.12);}return c;
-}void main(){vec4 a=texture2D(portrait,vUv);vec3 b=tint(texture2D(rear,vRearUv).rgb,1.-vUv.y);vec3 s=tint(texture2D(profile,vProfileUv).rgb,1.-vUv.y);b=dressed(b,vBodyUv.y,vBodyUv.x);s=dressed(s,vBodyUv.y,vBodyUv.x);float f=smoothstep(.38,.86,vFront)*a.a;float shoe=step(4.5,vSurface)*(1.-step(5.5,vSurface));float sole=step(7.5,vSurface);f*=1.-max(shoe,sole);vec3 n=normalize(vNormal);vec3 lamp=normalize(vec3(-.55,.85,1.));float light=.62+.34*max(0.,dot(n,lamp))+.09*max(0.,dot(n,normalize(vec3(.7,.2,-1.))));float underArm=exp(-pow((abs(vBodyUv.x-.5)-.19)/.025,2.))*exp(-pow((vBodyUv.y-.30)/.11,2.));float collar=exp(-pow((vBodyUv.y-.192)/.018,2.))*exp(-pow((vBodyUv.x-.5)/.09,2.));light*=1.-.13*underArm-.12*collar;vec3 color=mix(b,a.rgb,f);float sideAmount=(1.-smoothstep(.05,.72,abs(vFront)))*step(5.5,vSurface)*(1.-step(6.5,vSurface))*(1.-helmetOn);color=mix(color,s,sideAmount)*light;float hardSurface=step(4.5,vSurface)*(1.-step(6.5,vSurface));float gloss=mix(.025,.16,hardSurface);float highlight=pow(max(0.,dot(reflect(-lamp,n),vec3(0.,0.,1.))),mix(14.,48.,hardSurface));float rim=pow(1.-abs(n.z),3.)*.045;color+=vec3(1.,.90,.75)*(highlight*gloss+rim);gl_FragColor=vec4(color,1.);
+ if(legs>.5&&y<(shorts>.5?.65:.85)){float fold=.83+.025*sin(x*44.+y*14.);float inseam=1.-.09*exp(-pow((abs(x-.5)-.07)/.008,2.));fold*=inseam;return pantsColor*fold;}return c;
+}void main(){vec4 a=texture2D(portrait,vUv);vec3 b=tint(texture2D(rear,vRearUv).rgb,1.-vUv.y);vec3 s=tint(texture2D(profile,vProfileUv).rgb,1.-vUv.y);b=dressed(b,vBodyUv.y,vBodyUv.x);s=dressed(s,vBodyUv.y,vBodyUv.x);float f=smoothstep(.38,.86,vFront)*a.a;float shoe=step(4.5,vSurface)*(1.-step(5.5,vSurface));float sole=step(7.5,vSurface);float bareArm=step(1.5,vSurface)*(1.-step(2.5,vSurface))*step(sleeveEnd,vBodyUv.y);
+ float bareLeg=step(3.5,vSurface)*(1.-step(4.5,vSurface))*shorts*step(.65,vBodyUv.y);
+ f*=1.-max(max(shoe,sole),max(bareArm,bareLeg)*.45);vec3 n=normalize(vNormal);vec3 lamp=normalize(vec3(-.55,.85,1.));float light=.62+.34*max(0.,dot(n,lamp))+.09*max(0.,dot(n,normalize(vec3(.7,.2,-1.))));float underArm=exp(-pow((abs(vBodyUv.x-.5)-.19)/.025,2.))*exp(-pow((vBodyUv.y-.30)/.11,2.));float collar=exp(-pow((vBodyUv.y-.192)/.018,2.))*exp(-pow((vBodyUv.x-.5)/.09,2.));light*=1.-.13*underArm-.12*collar;vec3 color=mix(b,a.rgb,f);float sideAmount=(1.-smoothstep(.05,.72,abs(vFront)))*step(5.5,vSurface)*(1.-step(6.5,vSurface))*(1.-helmetOn);color=mix(color,s,sideAmount)*light;float hardSurface=step(4.5,vSurface)*(1.-step(6.5,vSurface));float gloss=mix(.025,.16,hardSurface);float highlight=pow(max(0.,dot(reflect(-lamp,n),vec3(0.,0.,1.))),mix(14.,48.,hardSurface));float rim=pow(1.-abs(n.z),3.)*.045;color+=vec3(1.,.90,.75)*(highlight*gloss+rim);gl_FragColor=vec4(color,1.);
 #include <colorspace_fragment>
 }`});
  const root=new T.Group(),geometries=[],rig=createCharacterRig(root);
@@ -82,18 +96,19 @@ gl_Position=projectionMatrix*modelViewMatrix*vec4(transformed,1.);
  }
  // Each arm, cuff and hand is separate from the jacket body.
  for(const side of [-1,1]){const mirror=keys=>side<0?keys:keys.map(([y,l,r,d,z])=>[y,1-r,1-l,d,z||0]);
-  part(mirror([[.175,.318,.363,.065],[.20,.26,.35,.13],[.255,.22,.328,.145],[.32,.185,.303,.125],[.37,.174,.270,.112],[.43,.151,.244,.103],[.475,.145,.234,.105],[.49,.153,.23,.085]]),{z:-.025,folds:.025,rings:100,surface:2});
-  part(mirror([[.466,.151,.233,.105],[.48,.146,.233,.11],[.495,.151,.229,.092]]),{folds:.025,rings:22,surface:2});
+  part(mirror([[.175,.318,.363,.065],[.20,.26,.35,.13],[.255,.22,.328,.145],[.305,.194,.305,.121,.005],[.34,.185,.283,.103,-.018],[.375,.170,.272,.132,.004],[.41,.153,.256,.128,.018],[.455,.149,.241,.100,.018],[.49,.158,.230,.079,.010]]),{z:-.025,folds:.025,rings:100,surface:2});
+  if(!tee&&!tank)part(mirror([[.466,.151,.233,.105],[.48,.146,.233,.11],[.495,.151,.229,.092]]),{folds:.025,rings:22,surface:2});
+  else part(mirror(tank?[[.185,.280,.357,.125],[.19,.276,.354,.127]]:[[.279,.205,.317,.143],[.288,.201,.314,.144]]),{z:-.025,rings:8,surface:2});
   if(club)part(mirror([[.491,.156,.227,.084],[.500,.159,.225,.080]]),{z:.005,rings:8,surface:9});
-  part(mirror([[.478,.168,.221,.055],[.493,.151,.23,.08],[.525,.146,.251,.09],[.535,.153,.247,.085],[.548,.166,.241,.065],[.553,.184,.231,.025]]),{z:.035,rings:60,folds:.018,surface:3});
+  part(mirror([[.478,.168,.221,.055],[.493,.151,.23,.08],[.515,.151,.241,.082],[.531,.153,.245,.086],[.545,.165,.241,.066],[.553,.184,.231,.025]]),{z:.035,rings:60,folds:.018,surface:3});
   // Four rounded finger tips and the opposed thumb provide the profile anatomy.
-  for(let n=0;n<4;n++){const l=.166+n*.019,top=.540+n*.002,length=[.039,.046,.043,.034][n];part(mirror([[top,l,l+.019,.024,0],[top+length*.35,l-.001,l+.020,.027,.004],[top+length*.72,l+.001,l+.018,.021,.012],[top+length,l+.005,l+.014,.007,.006]]),{z:.07,rings:22,sides:24,surface:3});}
+  for(let n=0;n<4;n++){const l=.166+n*.019,top=.540+n*.002,length=[.039,.046,.043,.034][n];part(mirror([[top,l,l+.019,.024,0],[top+length*.35,l-.001,l+.020,.025,.008],[top+length*.72,l+.001,l+.018,.021,.026],[top+length,l+.005,l+.014,.007,.035]]),{z:.07,rings:22,sides:24,surface:3});}
   part(mirror([[.525,.239,.252,.018],[.541,.239,.267,.032],[.562,.239,.262,.026],[.57,.244,.252,.006]]),{z:.11,rings:20,sides:30,surface:3});
  }
  // Pelvis and two independent trouser legs.
- part([[.454,.36,.65,.17],[.48,.303,.70,.24],[.53,.29,.713,.25],[.58,.30,.70,.23],[.595,.46,.54,.09],[.608,.495,.505,.003]],{z:-.035,folds:.025,surface:4});
+ part([[.454,.36,.65,.17],[.48,.313,.69,.205],[.53,.30,.703,.215],[.58,.31,.69,.205],[.595,.46,.54,.09],[.608,.495,.505,.003]],{z:-.035,folds:.025,surface:4});
  for(const side of [-1,1]){const mirror=keys=>side<0?keys:keys.map(([y,l,r,d,z])=>[y,1-r,1-l,d,z||0]);
-  part(mirror([[.55,.296,.50,.20],[.61,.283,.468,.205],[.68,shorts?.302:.271,shorts?.428:.44,shorts?.14:.19],[.72,shorts?.292:.262,shorts?.416:.432,shorts?.155:.19],[.77,shorts?.286:.247,shorts?.396:.41,shorts?.135:.175],[.81,shorts?.289:.248,shorts?.379:.393,shorts?.10:.16],[.826,shorts?.28:.254,shorts?.375:.39,shorts?.11:.155],[.843,.283,.372,.105]]),{z:-.01,folds:.012,rings:110,surface:4});
+  part(mirror([[.55,.296,.50,.20],[.61,.283,.468,.205],[.68,shorts?.302:.271,shorts?.428:.44,shorts?.14:.19],[.72,shorts?.292:.262,shorts?.416:.432,shorts?.155:.19],[.77,shorts?.286:.247,shorts?.396:.41,shorts?.135:.175],[.81,shorts?.289:.248,shorts?.379:.393,shorts?.10:.16],[.826,shorts?.28:.254,shorts?.375:.39,shorts?.11:.155],[.843,.283,.372,.105],[.884,.295,.365,.085],[.920,.302,.356,.075]]),{z:-.01,folds:.012,rings:110,surface:4});
   // Low-top sneakers: rounded toe, shallow vamp and a separate heel collar.
   // The old upper rose to mid-shin, producing a triangular boot in profile.
   part(mirror([[.893,.304,.352,.075,-.015],[.908,.284,.373,.12,.015],[.929,.269,.386,.215,.095],[.950,.263,.389,.275,.145],[.963,.265,.387,.281,.15],[.972,.272,.380,.267,.15]]),{z:.015,rings:54,surface:5});

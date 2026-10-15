@@ -14,11 +14,7 @@ export function addCharacterTailoring(rig,look,G){
  const jacket=['classic','ruby','midnight'].includes(look.suit);
  if(jacket){
   for(const sign of [-1,1]){
-   const points=[[sign*.12,1.15,.205],[sign*.28,.99,.272],[sign*.20,.82,.29],[sign*.27,.72,.285],[sign*.075,.35,.265],[sign*.10,.83,.285]];
-   panel(points,cloth,1);seam(points.slice(0,5),edge,1,.004);
-   // Flap pockets and their stitching sit above the jacket surface.
-   panel([[sign*.24,.22,.267],[sign*.39,.24,.248],[sign*.39,.17,.253],[sign*.24,.15,.271]],cloth,1);
-   seam([[sign*.24,.15,.272],[sign*.39,.17,.254]],edge,1);
+   // The front wardrobe texture supplies lapels and pocket flaps.
    seam([[sign*.20,1.05,-.207],[sign*.35,.82,-.254],[sign*.38,.38,-.244],[sign*.30,.14,-.201]],edge,1,.0025);
   }
   seam([[0,1.14,-.19],[0,.80,-.281],[0,.31,-.255],[0,.13,-.218]],edge,1,.003);
@@ -27,10 +23,11 @@ export function addCharacterTailoring(rig,look,G){
  // Separate soles are paired with a shaped toe cap, tongue and actual laces.
  for(const sign of [-1,1]){
   const x=sign*.45;
-  panel([[x-.065,-1.34,.185],[x+.065,-1.34,.185],[x+.075,-1.60,.34],[x-.075,-1.60,.34]],leather,5);
-  for(let n=0;n<6;n++){const y=-1.39-n*.035,z=.225+n*.023;seam([[x-.067,y,z],[x,y-.015,z+.013],[x+.067,y-.022,z]],rubber,5,.005);seam([[x+.067,y,z+.001],[x,y-.015,z+.014],[x-.067,y-.022,z+.001]],rubber,5,.005);}
-  seam([[x-.135,-1.78,.10],[x-.145,-1.78,.30],[x,-1.78,.445],[x+.145,-1.78,.30],[x+.135,-1.78,.10]],dark,5,.007);
-  seam([[x-.10,-1.42,-.075],[x,-1.40,-.09],[x+.10,-1.42,-.075]],leather,5,.008);
+  // Details follow the shallow vamp rather than floating up the shin.
+  panel([[x-.064,-1.54,.17],[x+.064,-1.54,.17],[x+.077,-1.69,.365],[x-.077,-1.69,.365]],leather,5);
+  for(let n=0;n<5;n++){const y=-1.56-n*.026,z=.205+n*.032;seam([[x-.062,y,z],[x,y-.008,z+.010],[x+.062,y-.014,z]],rubber,5,.0035);seam([[x+.062,y,z+.001],[x,y-.008,z+.011],[x-.062,y-.014,z+.001]],rubber,5,.0035);}
+  seam([[x-.115,-1.77,.21],[x-.11,-1.77,.35],[x,-1.77,.439],[x+.11,-1.77,.35],[x+.115,-1.77,.21]],leather,5,.003);
+  seam([[x-.08,-1.55,-.07],[x,-1.52,-.087],[x+.08,-1.55,-.07]],dark,5,.006);
  }
  return {dispose(){geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
 }
