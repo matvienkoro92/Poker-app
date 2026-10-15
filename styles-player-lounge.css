@@ -601,3 +601,11 @@
 .garage-workshop__header [data-garage-defaults]{display:grid;place-items:center;cursor:pointer}
 .garage-workshop__header [data-garage-defaults] svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .garage-workshop__header [data-garage-defaults]:focus-visible{outline:2px solid #ffe2a1;outline-offset:3px}
+/* Wheel color is a card in the fixed-height option rail, never an extra row. */
+.garage-workshop--car .garage-options>.garage-wheel-color{display:flex;flex-direction:column;align-items:stretch;gap:7px;padding:9px;scroll-snap-align:start}
+.garage-workshop--car .garage-options>.garage-wheel-color label{display:flex;align-items:center;gap:5px;min-width:0;color:#e5d4ab;font-size:10px;line-height:1.2}
+.garage-workshop--car .garage-options>.garage-wheel-color input[type=color]{flex:none;width:37px;height:35px;margin-left:auto;padding:2px}
+.garage-workshop--car .garage-options>.garage-wheel-color input[data-wheel-hex]{box-sizing:border-box;flex:1;min-width:0;width:0;padding:7px 4px;font-size:11px}
+.player-hall-dialog .garage-workshop--car .garage-options>.garage-wheel-color button{margin-top:auto;width:100%;min-height:28px;padding:5px 3px;font-size:10px;line-height:1.2;white-space:normal}
+/* Routine status announcements no longer occupy vehicle preview height. */
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car>.garage-workshop__footer>p[role="status"]{position:absolute;display:block;inline-size:1px;block-size:1px;min-block-size:0;max-block-size:1px;padding:0;margin:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

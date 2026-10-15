@@ -3,13 +3,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {create,parseLimit,matches} = require('../lib/table-subscriptions');
 const base = {deskId:'1',deskName:'Классика',leagueId:'184691',unionId:'7158',groupId:'680649',playType:'PLO6',blindAnnotation:'5/10',playerCount:2,pos:{pos1:123,pos2:456}};
-function fixture(push,deliverNative) {
-  const db = new Map(), sets = new Map(), sorted = new Map(), calls = [], commandsLog = [];
+function fixture(push,deliverNative,getLinkedUsers) {
+  const db = new Map(), sets = new Map(), sorted = new Map(), hashes = new Map(), calls = [], commandsLog = [];
   let tables = [], fail = false, deliveryFail = false;
   const redis = {isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,key,...args])=>{
     commandsLog.push([cmd,key,...args]);
     let result = null;
     if (cmd === 'GET') result = db.get(key)||null;
+    else if(cmd==='HSET'){const hash=hashes.get(key)||new Map();result=0;for(let i=0;i<args.length;i+=2){if(!hash.has(args[i]))result++;hash.set(args[i],args[i+1]);}hashes.set(key,hash);}
     else if (cmd === 'SET') { if (!(args.includes('NX') && db.has(key))) {db.set(key,args[0]); result='OK';} }
     else if (cmd === 'DEL') result = Number(db.delete(key));
     else if (cmd === 'SADD') {const s=sets.get(key)||new Set();s.add(args[0]);sets.set(key,s);result=1;}
@@ -23,7 +24,7 @@ function fixture(push,deliverNative) {
     else throw new Error(cmd);
     return {result};
   })};
-  const service = create({redis,namespace:'test',push,deliverNative,getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
+  const service = create({redis,namespace:'test',push,deliverNative,getLinkedUsers,getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
   const callback = async (action,user=42,type='private',finish=true) => {
     const update=a=>({callback_query:{id:'cb',data:'club:sub:'+a,from:{id:user},message:{message_id:1,chat:{id:type==='private'?user:-1,type}}}});
     const result=await service.handle(update(action));
@@ -290,4 +291,19 @@ test('native subscriptions baseline, ownership and delivery bypass the bot',asyn
  assert.equal((await f.service.poll()).sent,0);
  f.setTables([base]);await f.service.poll();f.setTables([base,{...base,deskId:'2'}]);await f.service.poll();assert.equal(delivered.length,2);
  await f.service.manageNative('app:account','delete',null,saved.id);assert.equal((await f.service.list('app:account')).length,0);
+});
+
+
+test('linked bot and app lists expose the same subscriptions and delete across both stores',async()=>{
+ const linked=async user=>['42','app:account'].includes(user)?['42','app:account']:[];
+ const f=fixture(null,async()=>{},linked);await f.callback('add:PLO6:any');
+ const legacy=(await f.service.list('42'))[0];
+ const native=await f.service.manageNative('app:account','create',{kind:'player',playerId:'123',selectedGames:[],selectedLimits:[],deliveryAccountId:'account',pushEnabled:true,botEnabled:false});
+ assert.deepEqual((await f.service.linkedList('42')).map(s=>s.id),(await f.service.linkedList('app:account')).map(s=>s.id));
+ assert.equal((await f.service.linkedList('42')).length,2);assert.equal((await f.service.linkedList('99')).length,0);
+ await f.service.deleteLinked('99',native.id);assert.equal((await f.service.list('app:account')).length,1);
+ await f.callback('list');assert.match(f.calls.at(-1).body.text,/123/);assert.match(f.calls.at(-1).body.text,/PLO6/);
+ await f.callback('delete:'+native.id);assert.equal((await f.service.list('app:account')).length,0);
+ await f.service.deleteLinked('app:account',legacy.id);assert.equal((await f.service.linkedList('42')).length,0);
+ await f.callback('delete:'+native.id);assert.match(f.calls.at(-1).body.text,/пока нет/);
 });
