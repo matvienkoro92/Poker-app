@@ -417,7 +417,7 @@
 .hall-table__stack>i::after{inset:16% 20%;border:1px solid #c9a85e;background:radial-gradient(ellipse at 38% 24%,#576b6e,#223740 60%,#11242e);box-shadow:inset 0 0 0 1px #06131a,inset 0 1px 2px #fff2}
 .hall-table__stack>i:last-child::after{content:"♠";color:#e5d8b2;text-shadow:0 1px 1px #000;font-size:1.25cqh}
 /* A physical stereo belongs to the scene; controls appear only after zooming in. */
-.player-hall-dialog .garage-radio-object{position:absolute;z-index:4;left:72%;top:82.5%;width:17%;aspect-ratio:3/2;min-height:44px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;cursor:pointer;isolation:isolate;filter:none}
+.player-hall-dialog .garage-radio-object{position:absolute;z-index:4;left:-10%;top:65.5%;width:23%;aspect-ratio:3/2;min-height:44px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;cursor:pointer;isolation:isolate;filter:none}
 .garage-radio-object img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 .garage-radio-object span{position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);white-space:nowrap;padding:4px 7px;border:1px solid #b59853a0;border-radius:12px;background:#141c18ce;color:#f6db9b;font-size:10px}
 .player-hall__room[data-garage-focus=radio] .player-hall__spaces{transform:translate(var(--radio-pan-x,-65%),var(--radio-pan-y,-20%)) scale(2.3);transform-origin:var(--radio-origin,92% 73%)}

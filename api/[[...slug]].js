@@ -12,6 +12,7 @@ const pathSegment = (req) => {
 const path = require("path");
 const handlersDir = path.join(__dirname, "..", "lib", "api-handlers");
 const handlers = {
+  "table-alert-settings": () => require(path.join(handlersDir, "table-alert-settings.js")),
   "cron-table-subscriptions": () => require(path.join(handlersDir, "cron-table-subscriptions.js")),
   "monkey-race": () => require(path.join(handlersDir, "monkey-race.js")),
   "cooler-flight": () => require(path.join(handlersDir, "cooler-flight.js")),

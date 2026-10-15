@@ -201,8 +201,8 @@ test('13 hairstyles and five physiques persist without changing clothes or trust
 
 test('helmet milestones select distinct models while keeping saved IDs and unlock levels',()=>{
  const expected=[['club',3],['ruby',15],['night',25],['silver',40],['emerald',60],['legend',95]];
- assert.equal(G.items.filter(i=>i.kind==='helmet'&&i.id!=='none').length,6);
- assert.equal(new Set(Object.values(G.helmetModels)).size,5);
+ assert.equal(G.items.filter(i=>i.kind==='helmet'&&i.id!=='none').length,8);
+ assert.equal(new Set(Object.values(G.helmetModels)).size,7);
  for(const [helmet,level]of expected){
   const i=G.items.find(i=>i.kind==='helmet'&&i.id===helmet);assert.equal(i.target,level);
   for(const visor of ['open','closed'])assert.equal(Garage.choose({...G.defaults,helmet,visor},{stats:{level}}).helmet,helmet);
@@ -322,3 +322,5 @@ test('plate feedback reports exact gate and supplies a currently valid example',
 test('wheel diameter and formula wings persist independently with level gates',()=>{
  const look=Garage.choose({wheelSize:'max',wheels:'bronzeSix',frontBumper:'formulaPro'},{stats:{level:65}});assert.equal(look.wheelSize,'max');assert.equal(look.frontBumper,'formulaPro');assert.equal(look.wheels,'bronzeSix');assert.equal(Garage.choose({}, {stats:{level:0}}).wheelSize,'standard');assert.throws(()=>Garage.choose({wheelSize:'large'},{stats:{level:19}}));assert.throws(()=>Garage.choose({frontBumper:'formula'},{stats:{level:34}}));
 });
+
+test('Formula collection starts above level fifty and tyre choices save independently',()=>{for(const [kind,id,level]of [['frontBumper','formula',55],['tyreWidth','wide',52],['tyreWidth','ultra',72],['tyres','soft',55],['tyres','wet',76],['helmet','formulaCrimson',54],['helmet','formulaGold',74],['rearBumper','formulaPro',78],['spoiler','formulaPro',85],['sideSkirts','formula',58],['frontBumper','formulaElite',82]]){assert.ok(level>50);assert.throws(()=>Garage.choose({[kind]:id},{stats:{level:level-1}}));assert.equal(Garage.choose({[kind]:id},{stats:{level}})[kind],id);}const look=Garage.choose({tyreWidth:'ultra',tyres:'wet',wheelSize:'max',wheels:'bronzeSix'},{stats:{level:100}});assert.equal(look.tyreWidth,'ultra');assert.equal(look.tyres,'wet');assert.equal(look.wheelSize,'max');});

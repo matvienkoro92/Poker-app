@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {create,parseLimit,matches} = require('../lib/table-subscriptions');
 const base = {deskId:'1',deskName:'Классика',leagueId:'184691',unionId:'7158',groupId:'680649',playType:'PLO6',blindAnnotation:'5/10',playerCount:2,pos:{pos1:123,pos2:456}};
-function fixture(push) {
+function fixture(push,deliverNative) {
   const db = new Map(), sets = new Map(), sorted = new Map(), calls = [], commandsLog = [];
   let tables = [], fail = false, deliveryFail = false;
   const redis = {isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,key,...args])=>{
@@ -23,7 +23,7 @@ function fixture(push) {
     else throw new Error(cmd);
     return {result};
   })};
-  const service = create({redis,namespace:'test',push,getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
+  const service = create({redis,namespace:'test',push,deliverNative,getTables:async()=>{if(fail)throw Error('upstream');return structuredClone(tables);},getNames:async()=>new Map([['123','Ник <&>']]),send:async(method,body)=>{calls.push({method,body});if(deliveryFail && method==='sendMessage')return {ok:false,error_code:500};return {ok:true,result:{username:'TestBot'}};}});
   const callback = async (action,user=42,type='private',finish=true) => {
     const update=a=>({callback_query:{id:'cb',data:'club:sub:'+a,from:{id:user},message:{message_id:1,chat:{id:type==='private'?user:-1,type}}}});
     const result=await service.handle(update(action));
@@ -276,3 +276,18 @@ test('limit categories include their boundaries and all higher limits without ch
 });
 
 test('home notification deep links open the requested settings wizard without subscribing',async()=>{const f=fixture();await f.message('/start tablesub_game');assert.match(f.calls.at(-1).body.text,/Выберите виды игры/);assert.equal((await f.service.list('42')).length,0);await f.message('/start tablesub_player');assert.match(f.calls.at(-1).body.text,/ник|ID/i);assert.equal((await f.service.list('42')).length,0);});
+
+
+test('native subscriptions baseline, ownership and delivery bypass the bot',async()=>{
+ const delivered=[];const f=fixture(null,async(sub,table,id)=>delivered.push({sub,table,id}));
+ const sub={kind:'game',mode:'selected',selectedGames:['PLO6'],selectedLimits:['low'],minPlayers:1,deliveryAccountId:'account',pushEnabled:true,botEnabled:false};
+ f.setTables([base]);const saved=await f.service.manageNative('app:account','create',sub);
+ assert.deepEqual(saved.seen,['184691:7158:680649:1']);assert.equal((await f.service.poll()).sent,0);
+ await assert.rejects(f.service.manageNative('app:other','delete',null,saved.id),/не найдена/);
+ await assert.rejects(f.service.manageNative('app:account','create',sub),/уже есть/);
+ f.setTables([base,{...base,deskId:'2'}]);assert.equal((await f.service.poll(undefined,{games:[{game:'PLO6',limit:{small:5,big:10}}]})).sent,1);
+ assert.equal(delivered.length,1);assert.equal(f.calls.length,0);
+ assert.equal((await f.service.poll()).sent,0);
+ f.setTables([base]);await f.service.poll();f.setTables([base,{...base,deskId:'2'}]);await f.service.poll();assert.equal(delivered.length,2);
+ await f.service.manageNative('app:account','delete',null,saved.id);assert.equal((await f.service.list('app:account')).length,0);
+});
