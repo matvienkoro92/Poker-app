@@ -609,3 +609,23 @@
 .player-hall-dialog .garage-workshop--car .garage-options>.garage-wheel-color button{margin-top:auto;width:100%;min-height:28px;padding:5px 3px;font-size:10px;line-height:1.2;white-space:normal}
 /* Routine status announcements no longer occupy vehicle preview height. */
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--car>.garage-workshop__footer>p[role="status"]{position:absolute;display:block;inline-size:1px;block-size:1px;min-block-size:0;max-block-size:1px;padding:0;margin:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* Compact vehicle controls leave more room above them for the studio. */
+.garage-workshop--car .garage-car-families{padding:5px 8px}
+.garage-workshop--car .garage-car-families button{padding:7px 2px}
+.garage-workshop--fitted.garage-workshop--car .garage-customizer-layout[data-category=car]>.garage-categories{min-height:66px;gap:4px;padding-top:4px;padding-bottom:20px}
+.player-hall-dialog .garage-workshop--car .garage-customizer-layout[data-category=car]>.garage-categories button{min-height:60px;padding:4px 3px;gap:3px}
+.garage-workshop--car .garage-category-icon{width:34px;height:34px}
+.garage-workshop--car .garage-category-icon svg{width:21px;height:21px}
+.garage-workshop--car .garage-customizer-layout[data-category=car]::after{padding:2px 12px;font-size:10px;line-height:14px}
+.garage-workshop--fitted.garage-workshop--car>.garage-options{height:clamp(138px,20dvh,180px);max-height:20dvh;min-height:128px;padding-block:6px}
+@media(max-height:620px){.garage-workshop--fitted.garage-workshop--car>.garage-options{min-height:110px}.player-hall-dialog .garage-workshop--car .garage-customizer-layout[data-category=car]>.garage-categories button{min-height:51px}.garage-workshop--car .garage-category-icon{width:29px;height:29px}}
+/* Frame the wardrobe walls and mid-rug standing position, not the foreground floor. */
+.garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-character-stage{background-position:center 65%;background-size:cover}
+.garage-workshop--fitted.garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-categories{min-height:66px;padding:4px 8px;gap:4px}
+.player-hall-dialog .garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-categories button{min-height:60px;padding:4px 3px;gap:3px}
+.garage-workshop--wardrobe .garage-category-icon{width:34px;height:34px}.garage-workshop--wardrobe .garage-category-icon svg{width:21px;height:21px}
+.garage-workshop--fitted.garage-workshop--wardrobe>.garage-options{height:clamp(138px,20dvh,180px);max-height:20dvh;min-height:128px;padding-block:6px}
+.garage-workshop--wardrobe>.garage-visor-tabs{padding:4px 12px}.garage-workshop--wardrobe>.garage-visor-tabs button{min-height:27px;padding:4px 10px}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe>.garage-workshop__footer>p[role="status"]{position:absolute;display:block;inline-size:1px;block-size:1px;min-block-size:0;max-block-size:1px;padding:0;margin:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.garage-workshop--wardrobe .garage-body-hotspots [data-kind=helmet]{top:20%;right:5%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=suit]{top:35%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=pants]{top:58%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=watch]{top:48%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=shoes]{bottom:17%}
+@media(max-height:620px){.garage-workshop--fitted.garage-workshop--wardrobe>.garage-options{min-height:110px}.player-hall-dialog .garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-categories button{min-height:51px}.garage-workshop--wardrobe .garage-category-icon{width:29px;height:29px}}

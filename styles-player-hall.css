@@ -470,3 +470,40 @@
 
 /* Keep larger plaques and collection access, restore the original room artwork. */
 .player-hall__display-shelf--museum::before,.player-hall__display-shelf--museum::after{display:none}
+/* Touch feedback is CSS driven, including WebViews without Element.animate. */
+.player-hall-dialog .hall-table__glass{overflow:visible;-webkit-tap-highlight-color:transparent}
+.hall-table__glass>i{width:23%;height:22%;opacity:.85;border:1px solid #effcffcc;background:linear-gradient(135deg,#fff9,#c6ecf877 45%,#fff2 48%,#ecfbff88);box-shadow:inset 1px 1px #ffffffcc,0 1px 3px #4c270077;will-change:transform}
+.hall-table__glass>i:nth-of-type(2){width:21%;height:20%}.hall-table__glass>i:nth-of-type(3){width:22%;height:21%}
+.hall-table__glass--clink>i{animation:hall-ice-clink 1.3s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--ice,0)*60ms)}
+.hall-table__glass>i:nth-of-type(2){--ice:1;--ice-x:-1}.hall-table__glass>i:nth-of-type(3){--ice:2}.hall-table__glass>i{--ice-x:1}
+.hall-table__glass--clink .hall-table__liquid{animation:hall-liquid-slosh 1.3s ease-out}
+@keyframes hall-ice-clink{0%,100%{transform:translate(0,0) rotate(15deg)}20%{transform:translate(calc(var(--ice-x)*70%),-95%) rotate(70deg)}45%{transform:translate(calc(var(--ice-x)*-60%),40%) rotate(-28deg)}68%{transform:translate(calc(var(--ice-x)*25%),-30%) rotate(37deg)}85%{transform:translate(-10%,10%) rotate(7deg)}}
+@keyframes hall-liquid-slosh{0%,100%{transform:rotate(0) scale(1);opacity:.5}20%{transform:rotate(12deg) scale(1.1,1.7);opacity:.95}45%{transform:rotate(-10deg) scale(1.1,1.3);opacity:.8}70%{transform:rotate(5deg) scale(1.05,1.2);opacity:.65}}
+.player-hall-dialog .hall-table__chips{top:69.7%;width:8.7%;height:5.3%}
+.hall-table__stack>i{height:40%;bottom:calc(var(--chip)*7%);border:0;background:none;box-shadow:none;border-radius:50%;isolation:auto;transform-origin:50% 80%}
+.hall-table__stack>i::after,.hall-table__stack>i:last-child::after{display:none}
+.hall-table__stack>i::before{top:46%;height:65%;border:1px solid #561819;background:linear-gradient(90deg,#0008,transparent 45%,#0008),repeating-linear-gradient(90deg,#99252e 0 13%,#e5dfbd 13% 23%,#1b2527 23% 38%,#e5dfbd 38% 47%,#99252e 47% 62%);box-shadow:0 2px 2px #0008}
+.hall-chip-face{position:absolute;z-index:1;inset:0;display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 1px 0 #2b080c)}
+.hall-table-dialog--cards{width:min(430px,calc(100% - 24px));padding:30px 18px 22px;background:radial-gradient(ellipse at 50% 25%,#40544550,transparent 65%),linear-gradient(145deg,#26251c,#101d21 65%)}
+.hall-table-dialog--cards .hall-table-dialog__suit{display:none}.hall-table-dialog--cards h2{margin:12px 0;font-size:25px}.hall-card-instruction{font-size:15px!important;color:#ead49d!important}
+.hall-card-hand{gap:10px;perspective:1100px;padding:14px 3px 20px}
+.hall-table-dialog--cards .hall-pick-card{--tilt:calc((var(--card) - 1)*5deg);transform:rotate(var(--tilt));aspect-ratio:2/3;overflow:visible;border:0;background:transparent;box-shadow:none;opacity:1;transition:transform .3s,opacity .3s}
+.hall-pick-card__inner{position:absolute;inset:0;display:block;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.25,1)}
+.hall-table-dialog--cards .hall-pick-card__back,.hall-table-dialog--cards .hall-pick-card__face{display:flex;flex-direction:column;align-items:center;justify-content:center;position:absolute;inset:0;border:1px solid #cfb271;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 8px 16px #0008}
+.hall-pick-card__back{background:repeating-linear-gradient(45deg,#122e29 0 5px,#23433a 5px 6px);outline:1px solid #e4c47a66;outline-offset:-7px;gap:9px}
+.hall-pick-card__back b{font-size:42px;font-weight:400;color:#e6c77d}.hall-pick-card__back small{font-size:7px;letter-spacing:1.4px;color:#e1c997}
+.hall-table-dialog--cards .hall-pick-card__face{transform:rotateY(180deg);background:radial-gradient(ellipse at 30% 10%,#fffdf4,#e7ddc3);color:#142828;font-size:40px}
+.hall-table-dialog--cards .hall-pick-card__face--red{color:#a42c37}
+.hall-pick-card--revealed .hall-pick-card__inner{transform:rotateY(180deg)}
+.hall-card-corner{position:absolute;top:7px;left:8px;display:grid;font-size:20px;line-height:1;font-weight:800}.hall-card-corner small{font-size:14px}.hall-card-corner--bottom{top:auto;left:auto;bottom:7px;right:8px;transform:rotate(180deg)}
+.hall-card-hand[data-phase=shuffle] .hall-pick-card{animation:hall-card-shuffle 1s ease-in-out both;animation-delay:calc(var(--card)*35ms)}
+@keyframes hall-card-shuffle{0%{transform:translateY(24px) rotate(0);opacity:0}25%{opacity:1;transform:translateX(calc((1 - var(--card))*80%)) rotate(calc((var(--card) - 1)*-9deg))}55%{transform:translateX(calc((var(--card) - 1)*15%)) rotate(var(--tilt))}100%{transform:rotate(var(--tilt));opacity:1}}
+.hall-table-dialog--cards .hall-pick-card--chosen{transform:translateY(-10px) rotate(0);filter:drop-shadow(0 0 8px #e7bb6366)}
+.hall-card-hand[data-phase=done] .hall-pick-card:not(.hall-pick-card--chosen){opacity:.65}
+.hall-card-result{padding:12px;border:1px solid #cdb57440;border-radius:12px;background:#0a151970;min-height:3em;box-sizing:border-box}.hall-card-result:empty{visibility:hidden}.hall-card-result strong,.hall-card-result span{display:block}.hall-card-result strong{color:#ffe29a;margin-bottom:7px}
+.hall-card-rules{display:grid;gap:7px;border-top:1px solid #cfaf6333;padding-top:13px;color:#bfc6b6;font-size:12px;line-height:1.5}.hall-card-rules strong{color:#e4d1a6;font-size:13px}.hall-card-won .hall-card-result{border-color:#e5bd63;background:#76612c33;box-shadow:0 0 20px #e3b94f22}
+@media(prefers-reduced-motion:reduce){.hall-table__glass--clink>i,.hall-table__glass--clink .hall-table__liquid,.hall-card-hand[data-phase=shuffle] .hall-pick-card{animation:none}.hall-pick-card__inner{transition:none}}
+.hall-table__stack>i{--chip-dir:1}.hall-table__stack>i:nth-child(even){--chip-dir:-1}
+.hall-table__chips--shuffle .hall-table__stack>i{animation:hall-chip-shuffle 1.05s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc((3 - var(--chip))*65ms)}
+@keyframes hall-chip-shuffle{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(calc(var(--chip-dir)*18%),-90%) rotate(calc(var(--chip-dir)*12deg))}48%{transform:translate(calc(var(--chip-dir)*35%),-190%) rotate(calc(var(--chip-dir)*24deg))}78%{transform:translate(0,10%) rotate(-3deg)}90%{transform:translate(0,-15%) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.hall-table__chips--shuffle .hall-table__stack>i{animation:none}}

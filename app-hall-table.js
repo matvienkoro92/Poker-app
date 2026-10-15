@@ -7,7 +7,7 @@
     var p = hall.levelProgress || {}, level = Math.max(0, Number(hall.garage && hall.garage.stats && hall.garage.stats.level) || 0);
     return '<div class="hall-table" data-card-effect="'+(window.PokerHallCardPick&&game().effect()?.id||'')+'" data-table-level="' + level + '" data-table-xp="' + esc(p.xp == null ? '' : p.xp) + '" data-table-target="' + esc(p.target == null ? '' : p.target) + '">' +
       '<button type="button" class="hall-table__glass" data-table-action="glass" aria-label="Коснуться стакана — звон льда" title="Звон льда"><span class="hall-table__liquid" aria-hidden="true"></span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></button>' +
-      '<button type="button" class="hall-table__chips" data-table-action="chips" aria-label="Фишки Poker21 — прогресс уровня" title="Ваш уровень"><span class="hall-table__stack" aria-hidden="true">' + Array.from({length:5}, function (_, i) { return '<i style="--chip:' + i + '"></i>'; }).join('') + '</span></button>' +
+      '<button type="button" class="hall-table__chips" data-table-action="chips" aria-label="Фишки Poker21 — прогресс уровня" title="Ваш уровень"><span class="hall-table__stack" aria-hidden="true">' + Array.from({length:4}, function (_, i) { return '<i style="--chip:' + i + '"><svg class="hall-chip-face" viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="50" cy="50" r="48" fill="#9c252d" stroke="#240e12" stroke-width="3"/><circle cx="50" cy="50" r="42" fill="none" stroke="#e8dfbd" stroke-width="10" stroke-dasharray="13 20"/><circle cx="50" cy="50" r="32" fill="#172226" stroke="#d6b369" stroke-width="2"/><text x="50" y="47" text-anchor="middle" fill="#ffe4a2" font-family="Arial" font-size="15" font-weight="900">POKER</text><text x="50" y="68" text-anchor="middle" fill="#fff0bd" font-family="Arial" font-size="25" font-weight="900">21</text></svg></i>'; }).join('') + '</span></button>' +
       '<button type="button" class="hall-table__deck" data-table-action="chest" aria-label="Открыть шкатулку — выбрать одну из трёх карт" title="Три карты Манки"><span aria-hidden="true">♠</span></button>' +
       '<button type="button" class="hall-table__prediction-link" data-table-action="prediction" aria-label="Покерное предсказание">♠ Предсказание</button>'+
       '<span class="hall-table__hint">Коснитесь предметов</span><span class="hall-table__status" role="status"></span></div>';
@@ -43,10 +43,14 @@
   async function prediction(){if(typeof window.getPokerDailyPredictionForToday!=='function'&&window.pokerEnsureLazyDomains)await window.pokerEnsureLazyDomains(['learning'],{scripts:true,styles:false});if(typeof window.getPokerDailyPredictionForToday!=='function')throw Error('prediction_unavailable');return window.getPokerDailyPredictionForToday();}
   function openChest(table){
     if(!window.PokerHallCardPick)return;
-    var g=game(),state=g.state(),d=panel('Три карты Манки','<div class="hall-card-chest" aria-hidden="true"><i></i><span>♠</span></div><p class="hall-card-instruction">Угадай, где туз. Один выбор в день.</p><div class="hall-card-hand">'+[0,1,2].map(function(i){return '<button type="button" class="hall-pick-card" data-pick-card="'+i+'" aria-label="Выбрать карту '+(i+1)+'"><span class="hall-pick-card__back">♠</span><span class="hall-pick-card__face"></span></button>';}).join('')+'</div><p class="hall-card-result" role="status" aria-live="polite"></p><small>Туз открывает оформление столика до конца дня.<br>Другие карты — покерное предсказание.</small>','cards');
-    function reveal(result,animateCards){d.classList.add('hall-card-picked');d.querySelectorAll('[data-pick-card]').forEach(function(card,i){card.disabled=true;card.classList.toggle('hall-pick-card--chosen',i===result.choice);var face=card.querySelector('.hall-pick-card__face');face.textContent=i===result.ace?'A ♠':i<result.ace?'K ♦':'Q ♥';if(i!==result.ace)face.classList.add('hall-pick-card__face--red');card.setAttribute('aria-label',(i===result.choice?'Ваш выбор: ':'')+face.textContent);if(animateCards)animate(card,[{transform:'rotateY(90deg)'},{transform:'rotateY(0)'}],450,i*90);});d.querySelector('.hall-card-instruction').textContent=result.won?'Туз найден!':'Сегодня туз оказался в другой карте.';var output=d.querySelector('.hall-card-result');if(result.won){output.textContent=result.reward.title+' · '+result.reward.text;document.querySelectorAll('.hall-table').forEach(function(t){t.dataset.cardEffect=result.reward.id;});}else{output.textContent='Открываем предсказание…';prediction().then(function(text){if(d.isConnected)output.textContent=text;}).catch(function(){if(d.isConnected)output.textContent='Манки советует сегодня беречь терпение: хорошая карта любит выдержку.';});}}
-    d.addEventListener('click',function(e){var card=e.target.closest('[data-pick-card]');if(!card||card.disabled)return;reveal(g.choose(Number(card.dataset.pickCard)),true);});
-    if(state.choice!==null)reveal(g.choose(state.choice),false);
+    var g=game(),state=g.state(),busy=false,reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var d=panel('Три карты Манки','<p class="hall-card-instruction">Перемешиваем колоду…</p><div class="hall-card-hand" data-phase="shuffle">'+[0,1,2].map(function(i){return '<button type="button" class="hall-pick-card" style="--card:'+i+'" data-pick-card="'+i+'" disabled aria-label="Выбрать карту '+(i+1)+'"><span class="hall-pick-card__inner"><span class="hall-pick-card__back"><small>TWO ACES</small><b>♠</b><small>POKER21</small></span><span class="hall-pick-card__face"></span></span></button>';}).join('')+'</div><p class="hall-card-result" role="status" aria-live="polite"></p><div class="hall-card-rules"><strong>Найдите туза</strong><span>Одна попытка в день. Туз — оформление столика до конца дня; король или дама — предсказание.</span></div>','cards');
+    var cards=Array.from(d.querySelectorAll('[data-pick-card]')),hand=d.querySelector('.hall-card-hand'),output=d.querySelector('.hall-card-result');
+    function delay(ms){return new Promise(function(resolve){setTimeout(resolve,reduced?0:ms);});}
+    function showFace(card,index,result){var ace=index===result.ace,other=[0,1,2].filter(function(i){return i!==result.ace;}).indexOf(index),rank=ace?'A':other===0?'K':'Q',suit=ace?'♠':other===0?'♦':'♥',face=card.querySelector('.hall-pick-card__face');face.classList.toggle('hall-pick-card__face--red',!ace);face.innerHTML='<span class="hall-card-corner">'+rank+'<small>'+suit+'</small></span><b>'+suit+'</b><span class="hall-card-corner hall-card-corner--bottom">'+rank+'<small>'+suit+'</small></span>';card.setAttribute('aria-label',(index===result.choice?'Ваш выбор: ':'')+rank+' '+suit);card.classList.add('hall-pick-card--revealed');}
+    async function reveal(result,animated){busy=true;hand.dataset.phase='reveal';cards.forEach(function(card,i){card.disabled=true;card.classList.toggle('hall-pick-card--chosen',i===result.choice);});d.querySelector('.hall-card-instruction').textContent='Ваш выбор сделан';showFace(cards[result.choice],result.choice,result);if(animated)await delay(650);if(!d.isConnected)return;for(var i=0;i<3;i++)if(i!==result.choice){showFace(cards[i],i,result);if(animated)await delay(160);}if(!d.isConnected)return;hand.dataset.phase='done';d.classList.add(result.won?'hall-card-won':'hall-card-lost');d.querySelector('.hall-card-instruction').textContent=result.won?'Туз ваш!':'Туз был рядом';if(result.won){output.innerHTML='<strong>'+esc(result.reward.title)+'</strong><span>'+esc(result.reward.text)+'</span>';document.querySelectorAll('.hall-table').forEach(function(t){t.dataset.cardEffect=result.reward.id;});}else{output.textContent='Ваша карта принесла предсказание…';try{var text=await prediction();if(d.isConnected)output.textContent=text;}catch(_){if(d.isConnected)output.textContent='Манки советует сегодня беречь терпение: хорошая карта любит выдержку.';}}var rules=d.querySelector('.hall-card-rules');rules.innerHTML='<strong>Выбор сохранён</strong><span>Завтра можно снова найти туза. Сегодня результат уже не изменится.</span>';}
+    d.addEventListener('click',function(e){var card=e.target.closest('[data-pick-card]');if(!card||card.disabled||busy)return;reveal(g.choose(Number(card.dataset.pickCard)),true);});
+    if(state.choice!==null){reveal(g.choose(state.choice),false);}else{setTimeout(function(){if(!d.isConnected)return;hand.dataset.phase='ready';cards.forEach(function(c){c.disabled=false;});d.querySelector('.hall-card-instruction').textContent='Выберите одну из трёх карт';},reduced?0:1100);}
   }
   document.addEventListener('click', async function (event) {
     var button = event.target.closest('[data-table-action]'); if (!button || button.disabled) return;
@@ -55,43 +59,15 @@
     event.preventDefault(); event.stopPropagation();
     if(action==='chest'){animate(button,[{transform:'rotateX(0)'},{transform:'rotateX(-28deg)'},{transform:'rotateX(0)'}],450);openChest(table);return;}
     if (action === 'glass') {
-      if (button._lastClink && Date.now() - button._lastClink < 1150) return; button._lastClink = Date.now(); clink();
-      animate(button.querySelector('.hall-table__liquid'), [
-        {transform:'translateY(0) rotate(0) scale(1)',opacity:.5},
-        {transform:'translateY(-20%) rotate(18deg) scale(1.12,1.5)',opacity:1,offset:.18},
-        {transform:'translateY(12%) rotate(-14deg) scale(1.08,1.25)',opacity:.9,offset:.4},
-        {transform:'translateY(-8%) rotate(8deg) scale(1.05,1.15)',opacity:.8,offset:.64},
-        {transform:'translateY(0) rotate(-3deg) scale(1)',opacity:.65,offset:.82},
-        {transform:'translateY(0) rotate(0) scale(1)',opacity:.5}
-      ], 1250);
-      button.querySelectorAll('i').forEach(function (ice, n) {
-        var direction = n % 2 ? -1 : 1;
-        animate(ice, [
-          {transform:'translate(0,0) rotate(15deg)',opacity:.5},
-          {transform:'translate(' + direction * 85 + '%,-70%) rotate(' + direction * 65 + 'deg)',opacity:1,offset:.18},
-          {transform:'translate(' + direction * -65 + '%,35%) rotate(' + direction * -35 + 'deg)',opacity:.95,offset:.42},
-          {transform:'translate(' + direction * 35 + '%,-25%) rotate(' + direction * 35 + 'deg)',opacity:.85,offset:.65},
-          {transform:'translate(' + direction * -12 + '%,10%) rotate(7deg)',opacity:.7,offset:.83},
-          {transform:'translate(0,0) rotate(15deg)',opacity:.5}
-        ], 1100 + n * 65);
-      }); return;
+      if (button._lastClink && Date.now() - button._lastClink < 1150) return; button._lastClink = Date.now(); clink();button.classList.remove('hall-table__glass--clink');void button.offsetWidth;button.classList.add('hall-table__glass--clink');setTimeout(function(){button.classList.remove('hall-table__glass--clink');},1500);
+      return;
     }
     if (action === 'chips') {
       button.disabled = true;
-      button.querySelectorAll('i').forEach(function (chip, n) {
-        var side=n%2?-1:1,delay=(4-n)*65;
-        animate(chip,[
-          {transform:'translate(0,0) rotate(0) scaleY(1)'},
-          {transform:'translate('+side*12+'%,-80%) rotate('+side*9+'deg) scaleY(1.15)',offset:.25},
-          {transform:'translate('+side*26+'%,-170%) rotate('+side*18+'deg) scaleY(1.7)',offset:.48},
-          {transform:'translate('+side*4+'%,8%) rotate('+side*-4+'deg) scaleY(.88)',offset:.78},
-          {transform:'translate(0,-12%) rotate(2deg) scaleY(1.06)',offset:.9},
-          {transform:'translate(0,0) rotate(0) scaleY(1)'}
-        ],900+n*45,delay);
-        chipClack((delay+(900+n*45)*.78)/1000);
-      });
+      button.classList.remove('hall-table__chips--shuffle');void button.offsetWidth;button.classList.add('hall-table__chips--shuffle');
+      button.querySelectorAll('i').forEach(function(chip,n){chipClack(((3-n)*65+850)/1000);});
       if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) await new Promise(function(resolve){setTimeout(resolve,1250);});
-      button.disabled = false;
+      button.disabled = false;button.classList.remove('hall-table__chips--shuffle');
       if (!button.isConnected || !hall.open) return;
       var level = Number(table.dataset.tableLevel), xp = table.dataset.tableXp, target = Number(table.dataset.tableTarget), known = xp !== '' && target > 0;
       panel('Уровень ' + level, known ? '<p>Опыт до следующего уровня</p><progress max="' + target + '" value="' + Math.min(target, Number(xp)) + '"></progress><strong class="hall-table-dialog__xp">' + Number(xp).toLocaleString('ru-RU') + ' / ' + target.toLocaleString('ru-RU') + '</strong><p>До уровня ' + (level + 1) + ' осталось ' + Math.max(0, target - Number(xp)).toLocaleString('ru-RU') + ' опыта.</p>' : '<p>' + (target === 0 && xp !== '' ? 'Максимальный уровень клуба достигнут.' : 'Играйте в клубе и собирайте опыт — ваша стопка растёт вместе с уровнем.') + '</p>', 'level'); return;
