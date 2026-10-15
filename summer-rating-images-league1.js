@@ -1198,4 +1198,12 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-13-10-2026-league1-new-hot-pko-2-3-15h.jpg",
     "rating-compressed-preview/rating-13-10-2026-league1-pyatihatka-mok-20h.jpg"
   ]
+,
+  "14.10.2026": [
+    "rating-compressed-preview/rating-14-10-2026-league1-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-14-10-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-14-10-2026-league1-schastlivyj-kosar-18h.jpg",
+    "rating-compressed-preview/rating-14-10-2026-league1-freeroll-500k-dr-18h.jpg",
+    "rating-compressed-preview/rating-14-10-2026-league1-pyatihatka-ko-20h.jpg"
+  ]
 };

@@ -3063,4 +3063,165 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "14.10.2026": [
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Откотика_Я",
+          "place": 1,
+          "reward": 12098,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 6200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Odna.pluha",
+          "place": 2,
+          "reward": 7280,
+          "points": 0
+        },
+        {
+          "nick": "Анубис",
+          "place": 5,
+          "reward": 890,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Счастливый Косарь",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 1,
+          "reward": 83250,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 2,
+          "reward": 12800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "FREEROLL 500K dR",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 130000,
+          "points": 0
+        },
+        {
+          "nick": "Asta002",
+          "place": 19,
+          "reward": 2000,
+          "points": 0
+        },
+        {
+          "nick": "Сергей",
+          "place": 32,
+          "reward": 1000,
+          "points": 0
+        },
+        {
+          "nick": "AKARMARA",
+          "place": 44,
+          "reward": 1000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 4,
+          "reward": 4038.28,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 7,
+          "reward": 1373.59,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 6,
+          "reward": 1234.99,
+          "points": 0
+        },
+        {
+          "nick": "OMGRaise27",
+          "place": 12,
+          "reward": 217.19,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Анубис",
+          "place": 1,
+          "reward": 3693.77,
+          "points": 0
+        },
+        {
+          "nick": "Imnotpro",
+          "place": 3,
+          "reward": 863.12,
+          "points": 0
+        },
+        {
+          "nick": "Y-gin",
+          "place": 4,
+          "reward": 690,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

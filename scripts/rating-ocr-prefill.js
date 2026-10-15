@@ -64,6 +64,7 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/^FREEROLL\s*500K/i.test(raw)) return "FREEROLL 500K dR";
   if (/GRAND\s+KNOCKOUT/i.test(raw)) return "🥊GRAND KNOCKOUT🥊";
   if (/Волшебный\s+Пятак/i.test(raw)) return "🏆Волшебный Пятак🏆";
   if (/^Mystic\s+Bounty.*50k/i.test(raw)) return "Mystic Bounty🥊 50k";
