@@ -2422,9 +2422,6 @@ function initRaffles() {
           totalPrize,
           prizeTopPillsHtml
         );
-        var videoTableNotice = isCashPrize && raffle.daily
-          ? '<div class="raffles-ticket-registration-warning" role="note"><span><strong>На видео-столы.</strong> В этом ежедневном розыгрыше разыгрываются беккинг-байины на видео-столы Poker21.</span></div>'
-          : "";
         var ticketRegistrationWarning = !isCashPrize && !trainingCard
           ? '<div class="raffles-ticket-registration-warning" role="note"><span><strong>Важно:</strong> если вы уже зарегистрированы в турнире, не участвуйте в розыгрыше билета на него. Второй билет выдать невозможно — не забирайте возможность у игроков, у которых билета ещё нет.</span><button type="button" class="raffles-ticket-registration-warning__rules" data-raffles-help-open>Все правила</button></div>'
           : "";
@@ -2448,7 +2445,6 @@ function initRaffles() {
           headHtml +
           titleHtml +
           detailPillsHtml +
-          videoTableNotice +
           '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
           factsHtml +
           "</span>" +
