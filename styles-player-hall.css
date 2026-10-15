@@ -467,3 +467,6 @@
 .hall-table__stack>i{height:34%;bottom:calc(var(--chip)*14%);z-index:calc(var(--chip) + 1);isolation:isolate;border:1px solid #b7863f;border-radius:50%;background:#7a1517;box-shadow:0 2px 0 #190c0b,0 3px 0 #a98340;transform-origin:50% 65%}
 .hall-table__stack>i::before{z-index:0;left:0;right:0;top:48%;height:60%;border-radius:0 0 48% 48%;border:1px solid #ad8648;background:linear-gradient(90deg,#0008,transparent 45%,#0009),repeating-linear-gradient(90deg,#9b2022 0 18%,#b29456 18% 21%,#17191a 21% 39%,#b29456 39% 42%,#ac2828 42% 60%);box-shadow:0 1px 1px #0009}
 .hall-table__stack>i::after,.hall-table__stack>i:last-child::after{content:"";position:absolute;z-index:1;inset:0;border:1px solid #c8ab67;border-radius:50%;background:#771416 url('./assets/app-boot-poker21-plus-chip.webp') center/100% 100% no-repeat;box-shadow:inset 0 1px 0 #ffe6b360;line-height:1}
+
+/* Keep larger plaques and collection access, restore the original room artwork. */
+.player-hall__display-shelf--museum::before,.player-hall__display-shelf--museum::after{display:none}

@@ -274,3 +274,5 @@ test('limit categories include their boundaries and all higher limits without ch
  sub.selectedLimits=['high'];assert.equal(hit('50/100'),1);assert.equal(hit('1000/2000'),1);assert.equal(hit('25/50'),0);
  sub.selectedLimits=['5/10'];assert.equal(hit('5/10'),1);assert.equal(hit('3/6'),0);
 });
+
+test('home notification deep links open the requested settings wizard without subscribing',async()=>{const f=fixture();await f.message('/start tablesub_game');assert.match(f.calls.at(-1).body.text,/Выберите виды игры/);assert.equal((await f.service.list('42')).length,0);await f.message('/start tablesub_player');assert.match(f.calls.at(-1).body.text,/ник|ID/i);assert.equal((await f.service.list('42')).length,0);});
