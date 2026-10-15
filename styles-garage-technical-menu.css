@@ -35,3 +35,11 @@
 .player-hall-dialog .garage-workshop--fitted :is(.garage-car-families button,.garage-categories button,.garage-option-action,.garage-workshop__footer button):focus-visible{outline:2px solid #ffdf96;outline-offset:-4px}
 @media(hover:hover){.player-hall-dialog .garage-workshop--fitted :is(.garage-car-families button,.garage-categories button,.garage-workshop__footer button):hover{filter:brightness(1.16)}}
 @media(prefers-reduced-motion:reduce){.player-hall-dialog .garage-workshop--fitted :is(.garage-car-families button,.garage-categories button){transition:none}}
+/* Clearer category controls without changing the compact menu footprint. */
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories button{gap:5px;color:#c8d2ce}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories .garage-category-icon{background:transparent;border:0;box-shadow:none;display:grid;place-items:center}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories .garage-category-icon svg{width:24px;height:24px;stroke-width:1.65}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories button[aria-pressed=true] .garage-category-icon{background:transparent;border:0;box-shadow:none;color:#ffe6a7}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories button::after{opacity:.35;width:4px;height:12px;top:50%}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories button[aria-pressed=true]::after{opacity:.8}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--car .garage-categories button[aria-pressed=true]::before{inset:1.5px;background:radial-gradient(ellipse at 50% 0,#c9b46b29,transparent 80%),linear-gradient(145deg,#294336,#10221d)}

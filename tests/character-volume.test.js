@@ -6,11 +6,12 @@ async function create(look={}){
  const listeners={},frames=[],meshes=[],state={};
  const actual=await import('../vendor/three/three.module.min.js');
  const {createCharacterRig}=await import('../scripts/garage-3d/character-rig.mjs');
+ const {characterShape}=await import('../scripts/garage-3d/character-shape.mjs');
  const pixels=new Uint8ClampedArray(1024*1536*4).fill(255),draws=[];
  const context={drawImage(...v){draws.push(v);},getImageData(){return {data:pixels};}};
  const host={isConnected:true,clientWidth:300,clientHeight:600,dataset:{},append(){},setPointerCapture(){},addEventListener(k,v){listeners[k]=v;},removeEventListener(k){delete listeners[k];}};
  class Renderer{constructor(){this.domElement={setAttribute(){},remove(){}};}setPixelRatio(){}setSize(){}render(scene){meshes.length=0;scene.traverse(o=>{if(o.isSkinnedMesh&&o.geometry.getAttribute('surface')){o.geometry.indices=Array.from(o.geometry.index.array);meshes.push(o);}});}dispose(){}forceContextLoss(){}}
- const scope={createCharacterRig,addCharacterTailoring:()=>({dispose(){}}),T:{...actual,WebGLRenderer:Renderer},Image:class{async decode(){}},document:{createElement(){return {getContext(){return context;}};}},window:{PokerGarage:{loadWardrobe:async()=>{},loadHelmet:()=>({naturalWidth:500}),renderCharacter:()=>({width:1024,height:1600}),item:()=>({color:'#123456'}),wardrobeSubcategory:(_,v)=>v==='sandShorts'?'shorts':'all'}},devicePixelRatio:1,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){frames.push(fn);return frames.length;},cancelAnimationFrame(){}};
+ const scope={createCharacterRig,characterShape,addCharacterHair:()=>({dispose(){}}),addCharacterTailoring:()=>({dispose(){}}),T:{...actual,WebGLRenderer:Renderer},Image:class{async decode(){}},document:{createElement(){return {getContext(){return context;}};}},window:{PokerGarage:{loadWardrobe:async()=>{},loadHelmet:()=>({naturalWidth:500}),renderCharacter:()=>({width:1024,height:1600}),item:()=>({color:'#123456'}),wardrobeSubcategory:(_,v)=>v==='sandShorts'?'shorts':'all'}},devicePixelRatio:1,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){frames.push(fn);return frames.length;},cancelAnimationFrame(){}};
  let source=fs.readFileSync('scripts/garage-3d/character-reconstruction.mjs','utf8').replace(/^import .*\n/gm,'').replace('export async function','async function');
  vm.runInNewContext(source+'\nthis.factory=createCharacterStudy;',scope);
  const viewer=await scope.factory(host,{helmet:'none',...look},state);
@@ -49,3 +50,11 @@ test('separate sneaker soles stay narrower than old photo extrusion',async()=>{c
 test('torso normals face outward rather than lighting the inside of the jacket',async()=>{const v=await create();const torso=v.meshes.find(m=>m.geometry.getAttribute('surface').getX(0)===1),p=torso.geometry.getAttribute('position'),n=torso.geometry.getAttribute('normal');const ring=35*81,front=ring+20,back=ring+60;assert.ok(n.getZ(front)>0);assert.ok(n.getZ(back)<0);assert.ok(p.getZ(front)>p.getZ(back));v.viewer.dispose();});
 
 test('jacket cuffs are separate volumes bound to the wrists',async()=>{const v=await create({suit:'classic'});const cuffs=v.meshes.filter(m=>m.geometry.getAttribute('surface').getX(0)===9);assert.equal(cuffs.length,2);for(const cuff of cuffs)assert.ok(cuff.geometry.getAttribute('skinWeight').array.some(w=>w>0));v.viewer.dispose();});
+
+test('body selection changes torso and limb volumes while keeping wrist and foot registration',async()=>{
+ const normal=await create(),slim=await create({body:'bodySlim'}),beast=await create({body:'bodyBeast'}),belly=await create({body:'bodyBelly'});
+ const box=(v,surface)=>{const m=v.meshes.find(m=>m.geometry.getAttribute('surface').getX(0)===surface);m.geometry.computeBoundingBox();return m.geometry.boundingBox;};
+ assert.ok(box(slim,1).max.x<box(normal,1).max.x);assert.ok(box(beast,1).max.x>box(normal,1).max.x);assert.ok(box(belly,1).max.z>box(normal,1).max.z);
+ for(const v of [slim,beast,belly])assert.deepEqual(box(v,5),box(normal,5));
+ for(const v of [normal,slim,beast,belly])v.viewer.dispose();
+});

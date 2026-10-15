@@ -36,6 +36,12 @@ export function sportSeat(id){
  // Flat webbing instead of ropes, with a four-point cam-lock buckle.
  for(const sign of [-1,1]){const points=[[sign*.135,1.50,-.13],[sign*.135,1.15,-.03],[sign*.13,.78,.08],[sign*.10,.66,.40]];const vertices=[],indices=[];points.forEach(([x,y,z],n)=>{vertices.push(x-.033,y,z,x+.033,y,z);if(n)indices.push(n*2-2,n*2-1,n*2,n*2-1,n*2+1,n*2);});const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.setIndex(indices);geo.computeVertexNormals();const web=belt.clone();web.side=T.DoubleSide;add(geo,web);const lap=rounded(.27,.055,.025,.008,belt,sign*.18,.64,.45);lap.rotation.z=-sign*.20;}
  const lock=add(new T.CylinderGeometry(.065,.065,.035,24),metal,0,.66,.48);lock.rotation.x=Math.PI/2;const release=add(new T.CylinderGeometry(.037,.037,.04,24),mat('#b52332',.4),0,.66,.50);release.rotation.x=Math.PI/2;
+ // The lower shell is the floor contact, rather than the deleted pedestal.
+ // Normalize the complete chair so its shell underside rests at local y=0.
+ group.updateMatrixWorld(true);
+ const underside=new T.Box3().setFromObject(seatBase).min.y;
+ for(const child of group.children)child.position.y-=underside;
+ group.userData.floorContact=0;
  return group;
 }
 

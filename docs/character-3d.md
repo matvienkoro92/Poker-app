@@ -26,3 +26,11 @@ mobile editor in a T-shirt and shorts from the front and side.
 Fur shading uses continuous object-space noise, blended into the front portrait;
 forearms have authored elbow, muscle and wrist sections. Finger tips curve toward
 the palm. The quality smoke captures front, three-quarter, side and back views.
+
+`character-shape.mjs` deforms the torso, abdomen, arms and legs for all five
+body choices before skin binding, while keeping footwear registration fixed.
+`character-hair.mjs` creates head-bound volumes for selected hairstyles; the
+head shader removes the old painted crown and rear hair. Natural hair retains
+the portrait texture, and headgear suppresses the additional hair volumes.
+The quality smoke accepts `CHARACTER_LOOK` (JSON) and `CHARACTER_LABEL` for
+comparing body and hair choices without overwriting other captured variants.
