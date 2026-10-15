@@ -67,7 +67,7 @@ test('steering, turbine and exhaust choices persist and twin turbines require le
  assert.deepEqual(Garage.view({garage:saved},{stats:{level:60}}).loadout,look);
  assert.throws(()=>Garage.choose({...G.defaults,turbine:'twin'},{stats:{level:59}}),/не открыта/);
  assert.equal(G.normalize(look,{level:0}).turbine,'classic');
- for(const kind of ['steering','turbine','exhaust'])assert.equal(G.catalog({level:100}).filter(i=>i.kind===kind).length,kind==='turbine'?4:kind==='steering'?9:3);
+ for(const kind of ['steering','turbine','exhaust'])assert.equal(G.catalog({level:100}).filter(i=>i.kind===kind).length,kind==='turbine'?5:kind==='steering'?9:3);
 });
 
 test('body hardware and lifted suspension survive server save',()=>{const look={...G.defaults,mirrors:'club',frontBumper:'sport',rearBumper:'club',sideSkirts:'sport',suspension:'high'};const saved=Garage.choose(look,{stats:{level:55}});for(const key of ['mirrors','frontBumper','rearBumper','sideSkirts','suspension'])assert.equal(Garage.view({garage:saved},{stats:{level:55}}).loadout[key],look[key]);assert.equal(G.normalize({},{}).suspension,'standard');assert.throws(()=>Garage.choose({...look,suspension:'invalid'},{stats:{level:55}}),/не открыта/);});

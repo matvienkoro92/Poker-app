@@ -629,3 +629,13 @@
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe>.garage-workshop__footer>p[role="status"]{position:absolute;display:block;inline-size:1px;block-size:1px;min-block-size:0;max-block-size:1px;padding:0;margin:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .garage-workshop--wardrobe .garage-body-hotspots [data-kind=helmet]{top:20%;right:5%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=suit]{top:35%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=pants]{top:58%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=watch]{top:48%}.garage-workshop--wardrobe .garage-body-hotspots [data-kind=shoes]{bottom:17%}
 @media(max-height:620px){.garage-workshop--fitted.garage-workshop--wardrobe>.garage-options{min-height:110px}.player-hall-dialog .garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-categories button{min-height:51px}.garage-workshop--wardrobe .garage-category-icon{width:29px;height:29px}}
+
+/* Keep the garage title, vehicle plate and hint in one compact stack. */
+.player-hall__room[data-space=garage][data-garage-focus=""] .player-hall__camera-ui{gap:3px}
+.player-hall__room[data-space=garage][data-garage-focus=""] .player-hall__camera-ui .garage-vehicle-switch{margin:0}
+
+/* Join the reward nameplate to the shelf beam with square, covered ends. */
+.garage-reward-shelf .garage-reward-heading{left:1%;right:1%;transform:skewY(6deg);transform-origin:left center;border-radius:0;border-left:0;border-right:0;background:linear-gradient(#202827,#101819);box-shadow:inset 0 1px #e3c47a18,0 2px 3px #0008}
+.garage-reward-shelf .garage-reward-heading::before,.garage-reward-shelf .garage-reward-heading::after{content:"";position:absolute;top:-1px;bottom:-1px;width:2.5%;background:linear-gradient(90deg,#111718,#4b4940,#171e1e);border:1px solid #706044;box-sizing:border-box}
+.garage-reward-shelf .garage-reward-heading::before{left:-1.5%}
+.garage-reward-shelf .garage-reward-heading::after{right:-1.5%}
