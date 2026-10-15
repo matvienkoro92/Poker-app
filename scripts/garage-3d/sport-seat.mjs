@@ -24,11 +24,10 @@ export function sportSeat(id){
  // Metal-lined harness slots remain open through the composite shell.
  const x=sign*.135;for(const y of [1.235,1.345])rounded(.16,.014,.022,.004,metal,x,y,.015,back);for(const xx of [x-.08,x+.08])rounded(.014,.12,.022,.004,metal,xx,1.29,.015,back);
  }
- // Raise the whole cushion above the surrounding table deck (world y=1.43).
- const seatBase=rounded(comfort?.86:.77,.18,.84,.055,shell,0,.38,.34);seatBase.name='seat-base';
- const cushion=rounded(comfort?.61:.54,.17,ivory?.74:.67,.05,insert,0,.535,.39);cushion.name='seat-cushion';
+ // A thin lower shell supports the cushion without a tall pedestal.
+ const seatBase=rounded(comfort?.86:.77,.045,.84,.012,shell,0,.435,.34);seatBase.name='seat-base';
+ const cushion=rounded(comfort?.61:.54,.12,ivory?.74:.67,.03,insert,0,.535,.39);cushion.name='seat-cushion';
  rounded(.54,.15,.17,.045,cloth,0,.52,.77);
- for(const x of [-.28,.28])rounded(.07,.30,.65,.018,metal,x,.16,.34);
  for(const z of [.20,.33,.46,.59])line([[-.23,.625,z],[0,.635,z+.015],[.23,.625,z]],.003,thread);
  if(comfort){for(const sign of [-1,1]){rounded(.14,.13,.64,.04,cloth,sign*.45,.65,.32);rounded(.045,.23,.10,.01,metal,sign*.45,.48,.16);}for(let y=.45;y<1.1;y+=.15)for(const x of [-.1,.1])line([[x-.1,y,.18],[x,y+.07,.18],[x+.1,y,.18]],.003,thread,back);}
  if(ivory){rounded(.47,.10,.22,.035,cloth,0,.56,.86);line([[-.24,.62,.88],[0,.64,.90],[.24,.62,.88]],.004,thread);}

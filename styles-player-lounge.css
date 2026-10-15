@@ -589,3 +589,15 @@
 .garage-workshop--fitted.garage-workshop--car .garage-customizer-layout[data-category=car]>.garage-categories{position:relative;padding-bottom:24px}
 .garage-workshop--car .garage-customizer-layout[data-category=car]::after{content:"Листайте вправо →";grid-area:controls;align-self:end;justify-self:stretch;position:relative;z-index:2;padding:4px 12px;background:#101a20;color:#edcf8f;text-align:right;font-size:11px;line-height:16px;white-space:nowrap;pointer-events:none}
 .garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-character-stage{background-position:center calc(100% + clamp(18px,3dvh,32px))}
+/* Keep the preview notice in a stable two-line slot across item selections. */
+.player-hall-dialog .garage-workshop--fitted>.garage-workshop__footer>p[role="status"]{display:block;box-sizing:border-box;block-size:58px;min-block-size:58px;max-block-size:58px;overflow:auto;overscroll-behavior:contain;margin:0 0 8px;padding:9px 12px;border:1px solid transparent;border-radius:9px;font-size:13px;line-height:1.45;overflow-wrap:anywhere;scrollbar-width:thin}
+.player-hall-dialog .garage-workshop--fitted>.garage-workshop__footer>p[role="status"]:empty{display:block;visibility:hidden}
+/* Main sections keep the car's detail menu short and focused. */
+.garage-workshop--fitted.garage-workshop--car>.garage-customizer-layout[data-category=car]{grid-template-rows:minmax(120px,1fr) auto auto;grid-template-areas:"preview" "families" "controls"}
+.garage-car-families{grid-area:families;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:7px 8px;background:#101b21;border-top:1px solid #c2a35c40}
+.garage-car-families button{min-width:0;padding:9px 2px;border:1px solid #82959f30;border-radius:10px;background:#1b2830;color:#c1ccd1;font-family:inherit;font-size:11px;font-weight:700;line-height:1.2;cursor:pointer}
+.garage-car-families button[aria-pressed=true]{border-color:#edc875;background:linear-gradient(#68542d,#342c1d);color:#ffe3a0;box-shadow:inset 0 1px #ffe9ab24}
+.garage-car-families button:focus-visible{outline:2px solid #ffe2a1;outline-offset:2px}
+.garage-workshop__header [data-garage-defaults]{display:grid;place-items:center;cursor:pointer}
+.garage-workshop__header [data-garage-defaults] svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.garage-workshop__header [data-garage-defaults]:focus-visible{outline:2px solid #ffe2a1;outline-offset:3px}
