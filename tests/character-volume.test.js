@@ -3,15 +3,14 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 async function create(look={}){
- const listeners={},frames=[],meshes=[];
- class Resource{dispose(){this.disposed=true;}}
- class Geometry extends Resource{constructor(){super();this.attributes={};}setAttribute(k,v){this.attributes[k]=v;}setIndex(indices){this.indices=indices;}computeVertexNormals(){}}
- class Group{constructor(){this.rotation={set:(...v)=>this.angles=v};}add(m){meshes.push(m);}}
- class Renderer extends Resource{constructor(){super();this.domElement={setAttribute(){},remove(){}};}setPixelRatio(){}setSize(){}render(){}forceContextLoss(){}}
+ const listeners={},frames=[],meshes=[],state={};
+ const actual=await import('../vendor/three/three.module.min.js');
+ const {createCharacterRig}=await import('../scripts/garage-3d/character-rig.mjs');
  const pixels=new Uint8ClampedArray(1024*1536*4).fill(255),draws=[];
  const context={drawImage(...v){draws.push(v);},getImageData(){return {data:pixels};}};
  const host={isConnected:true,clientWidth:300,clientHeight:600,dataset:{},append(){},setPointerCapture(){},addEventListener(k,v){listeners[k]=v;},removeEventListener(k){delete listeners[k];}};
- const state={},scope={T:{CanvasTexture:Resource,Color:class{},ShaderMaterial:class extends Resource{constructor(v){super();Object.assign(this,v);}},Group,BufferGeometry:Geometry,Float32BufferAttribute:class{constructor(array,size){this.array=array;this.itemSize=size;}},Mesh:class{constructor(geometry,material){this.geometry=geometry;this.material=material;}},Scene:class{add(){}},WebGLRenderer:Renderer,OrthographicCamera:class{constructor(){this.position={set(){}};}updateProjectionMatrix(){}}},Image:class{async decode(){}},document:{createElement(){return {getContext(){return context;}};}},window:{PokerGarage:{loadWardrobe:async()=>{},loadHelmet:()=>({naturalWidth:500}),renderCharacter:()=>({width:1024,height:1600}),item:()=>({color:'#123456'}),wardrobeSubcategory:(_,v)=>v==='sandShorts'?'shorts':'all'}},devicePixelRatio:1,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){frames.push(fn);return frames.length;},cancelAnimationFrame(){}};
+ class Renderer{constructor(){this.domElement={setAttribute(){},remove(){}};}setPixelRatio(){}setSize(){}render(scene){meshes.length=0;scene.traverse(o=>{if(o.isSkinnedMesh&&o.geometry.getAttribute('surface')){o.geometry.indices=Array.from(o.geometry.index.array);meshes.push(o);}});}dispose(){}forceContextLoss(){}}
+ const scope={createCharacterRig,addCharacterTailoring:()=>({dispose(){}}),T:{...actual,WebGLRenderer:Renderer},Image:class{async decode(){}},document:{createElement(){return {getContext(){return context;}};}},window:{PokerGarage:{loadWardrobe:async()=>{},loadHelmet:()=>({naturalWidth:500}),renderCharacter:()=>({width:1024,height:1600}),item:()=>({color:'#123456'}),wardrobeSubcategory:(_,v)=>v==='sandShorts'?'shorts':'all'}},devicePixelRatio:1,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){frames.push(fn);return frames.length;},cancelAnimationFrame(){}};
  let source=fs.readFileSync('scripts/garage-3d/character-reconstruction.mjs','utf8').replace(/^import .*\n/gm,'').replace('export async function','async function');
  vm.runInNewContext(source+'\nthis.factory=createCharacterStudy;',scope);
  const viewer=await scope.factory(host,{helmet:'none',...look},state);
@@ -27,7 +26,7 @@ test('headroom keeps portrait body registration and selected shorts narrow calve
  const long=await create(),short=await create({pants:'sandShorts'});
  assert.equal(long.draws[0][2],-64);
  assert.equal(short.meshes[0].material.uniforms.shorts.value,1);
- assert.notDeepEqual(short.meshes.at(-2).geometry.attributes.position.array,long.meshes.at(-2).geometry.attributes.position.array);
+ assert.notDeepEqual(short.meshes.filter(m=>m.geometry.attributes.surface.array[0]===4).at(-1).geometry.attributes.position.array,long.meshes.filter(m=>m.geometry.attributes.surface.array[0]===4).at(-1).geometry.attributes.position.array);
  long.viewer.dispose();short.viewer.dispose();
 });
 test('detached viewer releases its pointer listeners',async()=>{const v=await create();v.host.isConnected=false;v.frames.at(-1)(20);assert.equal(Object.keys(v.listeners).length,0);});
@@ -41,3 +40,12 @@ test('helmet replaces exposed ears with a closed head volume; hands have their o
 test('idle animation advances but stops during wrist inspection and drag',async()=>{const v=await create(),uniforms=v.meshes[0].material.uniforms;v.frames.at(-1)(1000);assert.equal(uniforms.idleTime.value,1);assert.equal(uniforms.idleStrength.value,1);v.viewer.setFocus('watch');v.frames.at(-1)(1500);assert.equal(uniforms.idleStrength.value,0);v.viewer.setFocus('full');v.listeners.pointerdown({pointerId:1,clientX:0,clientY:0,preventDefault(){}});v.frames.at(-1)(2000);assert.equal(uniforms.idleStrength.value,0);v.viewer.dispose();});
 
 test('each body segment has finite geometry and closed end caps',async()=>{const v=await create();for(const mesh of v.meshes){const geo=mesh.geometry,n=geo.attributes.position.array.length/3;assert.ok(geo.attributes.position.array.every(Number.isFinite));assert.ok(geo.indices.includes(n-1));assert.ok(geo.indices.includes(n-2));assert.ok(geo.indices.every(i=>i>=0&&i<n));assert.equal(geo.attributes.uv.array.length,n*2);}v.viewer.dispose();});
+
+
+test('all anatomical segments share a skeleton with normalized joint weights',async()=>{const v=await create();const skeleton=v.meshes[0].skeleton;assert.ok(skeleton.bones.length>=19);for(const mesh of v.meshes){assert.ok(mesh.isSkinnedMesh);assert.equal(mesh.skeleton,skeleton);const weights=mesh.geometry.getAttribute('skinWeight');for(let i=0;i<weights.count;i++){const sum=weights.getX(i)+weights.getY(i)+weights.getZ(i)+weights.getW(i);assert.ok(Math.abs(sum-1)<1e-6);}}v.viewer.dispose();});
+
+test('separate sneaker soles stay narrower than old photo extrusion',async()=>{const v=await create();const soles=v.meshes.filter(m=>m.geometry.getAttribute('surface').getX(0)===8);assert.equal(soles.length,2);for(const sole of soles){sole.geometry.computeBoundingBox();const box=sole.geometry.boundingBox;assert.ok(box.max.x-box.min.x<.34);assert.ok(box.max.y-box.min.y<.11);}v.viewer.dispose();});
+
+test('torso normals face outward rather than lighting the inside of the jacket',async()=>{const v=await create();const torso=v.meshes.find(m=>m.geometry.getAttribute('surface').getX(0)===1),p=torso.geometry.getAttribute('position'),n=torso.geometry.getAttribute('normal');const ring=35*81,front=ring+20,back=ring+60;assert.ok(n.getZ(front)>0);assert.ok(n.getZ(back)<0);assert.ok(p.getZ(front)>p.getZ(back));v.viewer.dispose();});
+
+test('jacket cuffs are separate volumes bound to the wrists',async()=>{const v=await create({suit:'classic'});const cuffs=v.meshes.filter(m=>m.geometry.getAttribute('surface').getX(0)===9);assert.equal(cuffs.length,2);for(const cuff of cuffs)assert.ok(cuff.geometry.getAttribute('skinWeight').array.some(w=>w>0));v.viewer.dispose();});
