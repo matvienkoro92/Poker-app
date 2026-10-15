@@ -3,7 +3,7 @@ const groups={chassis:'Корпус',brakes:'Тормоза',nitrous:'Закис
 const wheelDiameters={standard:16,large:18,max:20};
 // Explicit unlock levels: free personalisation, frequent early rewards, rare prestige finishes.
 const items=[
-['chassis','classic','Клубный корпус','#186943',0],['chassis','formula','Formula Monocoque · сужающийся корпус','#a62d3b',90],
+['chassis','classic','Клубный корпус','#186943',0],['chassis','formula','Formula Monocoque · сужающийся корпус','#a62d3b',75],
 ['paint','classic','Клубный зелёный','#186943',0],['paint','ruby','Красный ривер','#a62d3b',0],['paint','midnight','Ночной стол','#42518d',0],['paint','pearl','Жемчужный стол','#dce3e8',10],['paint','champagne','Золотой натс','#c9a551',50],['paint','royal','Королевский фиолетовый','#925bc5',75],['paint','legend','Легенда клуба','#e7c780',100],
 ['wheels','classic','Золотая пика','#dab56a',0],['wheels','silver','Серебряный круг','#dce5ec',2],['wheels','carbon','Карбон 21','#687887',15],['wheels','onyx','Чёрная пика','#303742',30],
 ['light','cyan','Лазурь','#39dfed',0],['light','amber','Янтарь','#ffb54f',0],['light','violet','Неоновая ночь','#c087ff',8],['light','ice','Ледяной свет','#b9ecff',40],['light','red','Красный импульс','#ff334b',5],['light','emerald','Изумрудный неон','#35ef8a',12],['light','orange','Огненный оранжевый','#ff702e',18],['light','blue','Электрик','#4083ff',20],['light','pink','Розовый флеш','#ff5cce',30],

@@ -507,3 +507,20 @@
 .hall-table__chips--shuffle .hall-table__stack>i{animation:hall-chip-shuffle 1.05s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc((3 - var(--chip))*65ms)}
 @keyframes hall-chip-shuffle{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(calc(var(--chip-dir)*18%),-90%) rotate(calc(var(--chip-dir)*12deg))}48%{transform:translate(calc(var(--chip-dir)*35%),-190%) rotate(calc(var(--chip-dir)*24deg))}78%{transform:translate(0,10%) rotate(-3deg)}90%{transform:translate(0,-15%) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.hall-table__chips--shuffle .hall-table__stack>i{animation:none}}
+/* Animation temporarily disables repeat clicks, without fading the objects. */
+.player-hall-dialog .hall-table button[data-table-action]:disabled{opacity:1}
+
+.hall-card-coupons{width:100%;margin-top:14px;padding-top:12px;border-top:1px solid #c8a85e40}
+.hall-card-coupons p{padding:10px;border:1px solid #c8a85e55;border-radius:10px;background:#142126;line-height:1.5;font-size:13px}
+.hall-card-coupons small{overflow-wrap:anywhere;user-select:all;color:#ead19a}
+.hall-card-rules input[data-coupon-code]{display:block;box-sizing:border-box;width:100%;margin:7px 0;padding:10px;font-size:14px}
+
+/* The chest opens on its hinge; three cards stay flat in its dark tray. */
+.player-hall-dialog .hall-table__deck>.hall-chest-interior,.player-hall-dialog .hall-table__deck>.hall-chest-lid{box-sizing:border-box;position:absolute;left:2%;top:0;width:96%;height:62%;border:1px solid #d0ad64;border-radius:4px;box-shadow:none;opacity:0;transition:opacity .12s,transform .32s ease;pointer-events:none}
+.player-hall-dialog .hall-table__deck>.hall-chest-interior{display:flex;align-items:center;justify-content:center;gap:5%;padding:3% 7%;background:#141211;transform:skewY(-4deg);box-shadow:inset 0 2px 5px #000}
+.hall-chest-interior>i{display:grid;place-items:center;box-sizing:border-box;width:25%;height:88%;border:1px solid #d2b36d;border-radius:2px;background:repeating-linear-gradient(45deg,#17282a 0 2px,#304344 2px 3px);color:#eed18b;font-style:normal;font-size:1cqh;box-shadow:0 1px 0 #ebdab0}
+.player-hall-dialog .hall-table__deck>.hall-chest-lid{display:grid;place-items:center;background:linear-gradient(145deg,#34352d,#111b1e);color:#d8b56d;font-size:1.5cqh;transform-origin:50% 0;transform:perspective(160px) skewY(-4deg) rotateX(0deg);backface-visibility:visible;z-index:2}
+.player-hall-dialog .hall-table__deck--open>.hall-chest-interior,.player-hall-dialog .hall-table__deck--open>.hall-chest-lid,.player-hall-dialog .hall-table__deck:focus-visible>.hall-chest-interior,.player-hall-dialog .hall-table__deck:focus-visible>.hall-chest-lid{opacity:1}
+.player-hall-dialog .hall-table__deck--open>.hall-chest-lid,.player-hall-dialog .hall-table__deck:focus-visible>.hall-chest-lid{transform:perspective(160px) skewY(-4deg) rotateX(110deg)}
+@media(hover:hover){.player-hall-dialog .hall-table__deck:hover>.hall-chest-interior,.player-hall-dialog .hall-table__deck:hover>.hall-chest-lid{opacity:1}.player-hall-dialog .hall-table__deck:hover>.hall-chest-lid{transform:perspective(160px) skewY(-4deg) rotateX(110deg)}}
+@media(prefers-reduced-motion:reduce){.player-hall-dialog .hall-table__deck>.hall-chest-interior,.player-hall-dialog .hall-table__deck>.hall-chest-lid{transition:none}}

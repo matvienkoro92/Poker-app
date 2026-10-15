@@ -89,7 +89,7 @@ export function makeModel(scene,look){
   const group=new T.Group();group.position.set((n-1)*.70+.05,1.00,sign*1.365);if(sign<0)group.rotation.y=Math.PI;car.add(group);
   // The alpha-cut face defines the badge silhouette; a circular backing showed through shields.
   const back=mesh(new T.BoxGeometry(.1,.1,.025),gold,0,0,0,group);
-  const mat=new T.MeshStandardMaterial({transparent:true,alphaTest:.15,metalness:.05,roughness:.75,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});const face=mesh(new T.PlaneGeometry(.65,.65),mat,0,0,.035,group);face.castShadow=false;face.receiveShadow=false;carBadges.push({group,mat,back,n});
+  const mat=new T.MeshStandardMaterial({transparent:true,alphaTest:.15,metalness:.05,roughness:.75,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});const face=mesh(new T.PlaneGeometry(.65,.65,32,8),mat,0,0,.047,group);face.castShadow=false;face.receiveShadow=false;carBadges.push({group,mat,back,n});
  }
  for(const sign of [-1,1])for(const x of [-.54,.64])for(const y of [.78,1.10]){const rivet=cylinder(.014,.018,gold,x,y,sign*1.35,'z');}
  const deckDecorStart=car.children.length;
