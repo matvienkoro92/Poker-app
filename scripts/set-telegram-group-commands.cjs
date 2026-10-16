@@ -12,8 +12,6 @@ if (envPath) {
 }
 const commands=[
   {command:'pulse',description:'Меню клуба'},
-  {command:'tables',description:'Столы сейчас'},
-  {command:'subscriptions',description:'Оповещения об игроке или столе'},
 ];
 async function main() {
   if (!process.argv.includes('--apply')) { console.log(JSON.stringify(commands,null,2)); return; }
