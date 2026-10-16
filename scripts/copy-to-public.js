@@ -220,6 +220,8 @@ function copyReferencedAssets() {
   addWardrobeAssets('player-hall/wardrobe/summer');
   addWardrobeAssets('player-hall/wardrobe/branded');
   addWardrobeAssets('player-hall/wardrobe/items');
+  addWardrobeAssets('player-hall/wardrobe/icons');
+  addWardrobeAssets('player-hall/garage-icons');
   addWardrobeAssets('player-hall/helmets');
   // Sculpted wardrobe geometry and albedo URLs are assembled at runtime.
   addWardrobeAssets('player-hall/character-3d/sculpt');

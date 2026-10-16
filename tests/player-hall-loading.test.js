@@ -10,7 +10,7 @@ test('hall request starts alongside CSS and does not wait for the race garage', 
   let stylesReady;
   const ctx = vm.createContext({
     adminVisible: () => true, loungeLive: null, detail: null,
-    dialog: {open: true}, request: 0, generation: 0,
+    dialog: {open: true, classList:{add(){},remove(...names){calls.push(names.join(','));}}}, request: 0, generation: 0,
     warmRoomArt: () => calls.push('art'),
     window: {pokerEnsureLazyDomains: () => new Promise(resolve => { stylesReady = resolve; })},
     pokerSocialRequest: async route => { calls.push(route); return {hall: {featured: []}}; },
@@ -19,8 +19,8 @@ test('hall request starts alongside CSS and does not wait for the race garage', 
   });
   vm.runInContext(code, ctx);
   const done = ctx.open('');
-  assert.deepEqual(calls, ['art', 'player-hall']);
+  assert.deepEqual(calls, ['player-hall-dialog--immersive,player-hall-dialog--picker', 'art', 'player-hall']);
   stylesReady();
   await done;
-  assert.deepEqual(calls, ['art', 'player-hall', 'render']);
+  assert.deepEqual(calls, ['player-hall-dialog--immersive,player-hall-dialog--picker', 'art', 'player-hall', 'render']);
 });

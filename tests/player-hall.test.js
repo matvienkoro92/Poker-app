@@ -40,7 +40,7 @@ test('occupied garage plate rejects the save and reports its owner',async()=>{
  let claims=0;
  const hall=mock('lib/player-hall.js',{
   './club-social':{memberProfile:async id=>id==='ID2'?{nick:'Владелец номера'}:{...profile,level:100},redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:null)},
-  './garage-plate-registry':{save:async(_redis,id,_raw,state)=>{claims++;assert.equal(id,'ID1');assert.equal(state.garage.number,garage.number);return {ok:false,owner:'ID2'};}},
+  './garage-plate-registry':{plateKey:require('../lib/garage-plate-registry').plateKey,save:async(_redis,id,_raw,state)=>{claims++;assert.equal(id,'ID1');assert.equal(state.garage.number,garage.number);return {ok:false,owner:'ID2'};}},
   './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
  });
  await assert.rejects(()=>hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garage}),e=>e.status===409&&/уже занят игроком Владелец номера/.test(e.message));
@@ -72,4 +72,31 @@ test('table XP comes from the same verified profile status as the leaderboard',a
  assert.equal(p.level,expected.level);
  const unbound=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:null},{result:'Гость'}]}});
  assert.equal((await unbound.memberProfile('ID2')).levelProgress,null);
+});
+
+for(const existing of [null,{number:'А123ВС',region:'54',chassis:'aeroPrototype',paint:'champagne',hair:'hairNatural'}]){
+ test('character save ignores occupied and supplied vehicle plates '+(existing?'with an existing car':'before any car save'),async()=>{
+  let raw=JSON.stringify({version:0,nick:'waaar',items:[],...(existing?{garage:existing}:{})}),claimed=0;
+  const hall=mock('lib/player-hall.js',{
+   './club-social':{memberProfile:async()=>({...profile,level:100}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:c[0]==='EVAL'?(raw=c[5],1):null)},
+   './garage-plate-registry':{plateKey:require('../lib/garage-plate-registry').plateKey,save:async()=>{claimed++;return {ok:false,owner:'ID2'};}},
+   './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
+  });
+  const G=require('../app-garage-catalog');
+  const result=await hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garageScope:'character',garage:{...G.defaults,hair:'hairBuzz',number:'А777АА',region:'77'}});
+  const saved=JSON.parse(raw);assert.equal(result.version,1);assert.equal(claimed,0);assert.equal(saved.garage.hair,'hairBuzz');
+  for(const key of ['number','region','chassis','paint'])assert.equal(saved.garage[key],existing?.[key]);
+ });
+}
+test('saving vehicle settings preserves the saved character and does not reclaim an unchanged plate',async()=>{
+ const G=require('../app-garage-catalog'),old={...G.defaults,hair:'hairBuzz',body:'bodyNormal',suit:'palmTank'};
+ let raw=JSON.stringify({version:0,nick:'waaar',items:[],garage:old}),claimed=0;
+ const hall=mock('lib/player-hall.js',{
+  './club-social':{memberProfile:async()=>profile,redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:c[0]==='EVAL'?(raw=c[5],1):null)},
+  './garage-plate-registry':{plateKey:require('../lib/garage-plate-registry').plateKey,save:async()=>{claimed++;return {ok:false,owner:'ID2'};}},
+  './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
+ });
+ await hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garageScope:'vehicle',garage:{...G.defaults,vinylText:'TEST'}});
+ const saved=JSON.parse(raw).garage;assert.equal(claimed,0);assert.equal(saved.vinylText,'TEST');
+ for(const key of G.characterFields)assert.equal(saved[key],old[key]);
 });

@@ -235,6 +235,14 @@ function pokerApplyBottomTabbarPad() {
     var h = Math.round(rect.height);
     if (h < 36 || h > 240) return;
     root.style.setProperty("--app-bottom-tabbar-height", h + "px");
+    if (document.body.getAttribute("data-view") === "home") {
+      var homeScroll = document.querySelector("#app > .card > .card__content");
+      if (homeScroll) {
+        var overlap = Math.max(0, homeScroll.getBoundingClientRect().bottom - rect.top);
+        root.style.setProperty("--app-home-bottom-pad", Math.ceil(overlap + 8) + "px");
+      }
+    }
+
     var pad = Math.min(h + tabbarGapPx, 220);
     var prev = pokerApplyBottomTabbarPad._lastPad;
     if (prev != null && Math.abs(pad - prev) < 1) return;

@@ -8,7 +8,6 @@
     return '<div class="hall-table" data-card-effect="'+(window.PokerHallCardPick&&game().effect()?.id||'')+'" data-table-level="' + level + '" data-table-xp="' + esc(p.xp == null ? '' : p.xp) + '" data-table-target="' + esc(p.target == null ? '' : p.target) + '">' +
       '<button type="button" class="hall-table__glass" data-table-action="glass" aria-label="Коснуться стакана — звон льда" title="Звон льда"><span class="hall-table__liquid" aria-hidden="true"></span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></button>' +
       '<button type="button" class="hall-table__chips" data-table-action="chips" aria-label="Фишки Poker21 — прогресс уровня" title="Ваш уровень"><span class="hall-table__stack" aria-hidden="true">' + Array.from({length:4}, function (_, i) { return '<i style="--chip:' + i + '"><svg class="hall-chip-face" viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="50" cy="50" r="48" fill="#9c252d" stroke="#240e12" stroke-width="3"/><circle cx="50" cy="50" r="42" fill="none" stroke="#e8dfbd" stroke-width="10" stroke-dasharray="13 20"/><circle cx="50" cy="50" r="32" fill="#172226" stroke="#d6b369" stroke-width="2"/><text x="50" y="47" text-anchor="middle" fill="#ffe4a2" font-family="Arial" font-size="15" font-weight="900">POKER</text><text x="50" y="68" text-anchor="middle" fill="#fff0bd" font-family="Arial" font-size="25" font-weight="900">21</text></svg></i>'; }).join('') + '</span></button>' +
-      '<button type="button" class="hall-table__deck" data-table-action="chest" aria-label="Открыть шкатулку — выбрать одну из трёх карт" title="Три карты Манки" aria-expanded="false"><span class="hall-chest-interior" aria-hidden="true"><i>♠</i><i>♠</i><i>♠</i></span><span class="hall-chest-lid" aria-hidden="true">♠</span></button>' +
       '<button type="button" class="hall-table__prediction-link" data-table-action="prediction" aria-label="Покерное предсказание">♠ Предсказание</button>'+
       '<span class="hall-table__hint">Коснитесь предметов</span><span class="hall-table__status" role="status"></span></div>';
   };
@@ -58,7 +57,7 @@
     var table = button.closest('.hall-table'), hall = button.closest('.player-hall-dialog'), action = button.dataset.tableAction;
     if (!hall || !hall.open) return;
     event.preventDefault(); event.stopPropagation();
-    if(action==='chest'){if(window.matchMedia('(hover: none)').matches&&!button.classList.contains('hall-table__deck--open')){button.classList.add('hall-table__deck--open');button.setAttribute('aria-expanded','true');return;}button.disabled=true;try{await openChest(table);}finally{button.disabled=false;}return;}
+    if(action==='chest')return; // Chest interactions are temporarily disabled.
     if (action === 'glass') {
       if (button._lastClink && Date.now() - button._lastClink < 1150) return; button._lastClink = Date.now(); clink();button.classList.remove('hall-table__glass--clink');void button.offsetWidth;button.classList.add('hall-table__glass--clink');setTimeout(function(){button.classList.remove('hall-table__glass--clink');},1500);
       return;

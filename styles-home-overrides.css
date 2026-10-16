@@ -6382,3 +6382,16 @@ html body .bottom-nav .bottom-nav__badge {
 @media (min-width:390px) and (max-width:440px) {
  #app.app.app--view-home .home-daily-deal-hero__image {top:-36.2px!important;}
 }
+
+/* Use the actual overlap with the fixed menu once, including its device safe area. */
+html body[data-view="home"] #app.app > .card > .card__content{
+ padding-bottom:var(--app-home-bottom-pad,calc(var(--app-bottom-tabbar-height,90px) + 8px))!important;
+ scroll-padding-bottom:var(--app-home-bottom-pad,calc(var(--app-bottom-tabbar-height,90px) + 8px))!important;
+}
+html body[data-view="home"] #app.app > .card > .card__content > .view--active[data-view="home"]{
+ padding-bottom:0!important;
+ margin-bottom:0!important;
+}
+/* The private villa uses a dedicated vector instead of the shared card sprite. */
+html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__icon::before{display:none}
+html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{display:block;width:30px;height:30px}

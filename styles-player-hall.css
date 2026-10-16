@@ -8,11 +8,11 @@
 .player-hall-entry__art{background-image:url('./assets/player-hall/lounge-room-v4.webp')}
 .player-hall-dialog{width:min(620px,100%);max-width:620px;max-height:100dvh;min-height:100dvh;margin:0 auto;padding:22px;border-radius:0;border:0}
 .player-hall-dialog--immersive{padding:0;overflow:hidden;height:100dvh;background:#18140f}
-.player-hall-dialog--immersive .player-hall__header{position:absolute;z-index:10;top:0;left:0;right:0;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 8px;margin:0;background:linear-gradient(#080b09b8,transparent)}
+.player-hall-dialog--immersive .player-hall__header{position:absolute;z-index:10;top:0;left:0;right:0;padding:calc(18px + var(--hall-safe-top,0px)) 20px 8px;margin:0;background:linear-gradient(#080b09b8,transparent)}
 .player-hall-dialog--immersive .player-hall__header .player-hall__kicker{display:none}
 .player-hall-dialog--immersive .player-hall__header h2{font-size:18px;text-shadow:0 2px 8px #000}
 .player-hall-dialog--immersive .player-hall__header>button{background:#14191080;border-color:#ead5ae33;backdrop-filter:blur(8px)}
-.player-hall-dialog--immersive .player-hall__tabs{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:20px;right:20px;margin:0;z-index:10;border:1px solid #dcc29733;border-radius:16px;padding:4px;gap:0;background:#111911b8;backdrop-filter:blur(16px);justify-content:space-around}
+.player-hall-dialog--immersive .player-hall__tabs{position:absolute;bottom:calc(20px + var(--hall-safe-bottom,0px));left:20px;right:20px;margin:0;z-index:10;border:1px solid #dcc29733;border-radius:16px;padding:4px;gap:0;background:#111911b8;backdrop-filter:blur(16px);justify-content:space-around}
 .player-hall-dialog--immersive .player-hall__tabs button{padding:12px 8px;border:0;border-radius:12px;font-size:12px}
 .player-hall-dialog--immersive .player-hall__tabs button[aria-pressed=true]{background:#d3b78322;color:#f6dfae}
 .player-hall__room{container-type:size;height:100%;width:100%;aspect-ratio:auto;border-radius:0;background:#191610;box-shadow:none}
@@ -20,12 +20,12 @@
 .player-hall__room:after{inset:0;background:linear-gradient(var(--hall-glow,transparent),transparent 75%);z-index:4}
 .player-hall__room[data-camera=cabinet] .player-hall__scene{transform:translate(-40%,25%) scale(1.8)}
 .player-hall__room[data-camera=shelves] .player-hall__scene{transform:translate(45%,22%) scale(2.2)}
-.player-hall__owner{position:absolute;top:calc(80px + env(safe-area-inset-top,0px));left:20px;right:20px;margin:0;pointer-events:none;z-index:5;transition:opacity .25s;text-shadow:0 2px 8px #000}
+.player-hall__owner{position:absolute;top:calc(80px + var(--hall-safe-top,0px));left:20px;right:20px;margin:0;pointer-events:none;z-index:5;transition:opacity .25s;text-shadow:0 2px 8px #000}
 .player-hall__owner h3{font-size:25px;color:#fff0d1;margin:6px 0;max-width:100%}
 .player-hall__owner p{font-size:11px;color:#e0cfaf}
 .player-hall__owner .player-hall__kicker{color:#d6b781}
 .player-hall__room:not([data-camera=wide]) .player-hall__owner{opacity:0}
-.player-hall__camera-ui{position:absolute;bottom:calc(91px + env(safe-area-inset-bottom,0px));left:14px;right:14px;text-align:center;z-index:6;display:grid;justify-items:center;gap:8px;text-shadow:0 2px 8px #000}
+.player-hall__camera-ui{position:absolute;bottom:calc(91px + var(--hall-safe-bottom,0px));left:14px;right:14px;text-align:center;z-index:6;display:grid;justify-items:center;gap:8px;text-shadow:0 2px 8px #000}
 .player-hall__camera-ui p{margin:0;color:#f2e3c5;font-size:14px}
 .player-hall__camera-ui>span{font-size:11px;color:#d3c7ad}
 .player-hall-dialog .player-hall__camera-ui button{background:#111911c9;backdrop-filter:blur(10px);font-size:12px;border-radius:30px;padding:11px 17px}
@@ -45,8 +45,8 @@
 .player-hall__empty{inset:44% 54% auto 8%;font-size:10px;background:#132016b0;padding:10px;border-radius:7px}
 @media(prefers-reduced-motion:reduce){.player-hall__scene{transition:none}.player-hall__owner{transition:none}}
 
-.player-hall__camera-ui{inset:0;padding:0 14px calc(91px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:flex-end;pointer-events:none;z-index:11;box-sizing:border-box}
-.player-hall-dialog .player-hall__camera-ui button{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));left:20px;width:40px;height:40px;padding:0;border-radius:50%;font-size:24px;pointer-events:auto}
+.player-hall__camera-ui{inset:0;padding:0 14px calc(91px + var(--hall-safe-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:flex-end;pointer-events:none;z-index:11;box-sizing:border-box}
+.player-hall-dialog .player-hall__camera-ui button{position:absolute;top:calc(18px + var(--hall-safe-top,0px));left:20px;width:40px;height:40px;padding:0;border-radius:50%;font-size:24px;pointer-events:auto}
 .player-hall-dialog--immersive:has(.player-hall__room:not([data-camera=wide])) .player-hall__header h2{margin-left:52px}
 .player-hall-dialog--immersive .player-hall__header{pointer-events:none}
 .player-hall-dialog--immersive .player-hall__header>button{pointer-events:auto}
@@ -64,7 +64,7 @@
 .player-hall__header>div{flex:1}.player-hall__settings-open{font-size:19px!important}
 .player-hall__award-section>h3{font-size:19px;color:#ead8b3;margin:23px 0 12px}.player-hall__award-section h3 small,.player-hall__section-panel h3 small{font-size:12px;font-weight:400;color:#b8aa8e;margin-left:8px}
 .player-hall__locked img{filter:brightness(.15) grayscale(1);opacity:.55}.player-hall__locked progress{width:100%;accent-color:#c9ab6b;height:5px}.player-hall__locked small{display:block;color:#b9ad95;font-size:10px;margin-top:7px}
-.player-hall__section-panel{position:absolute;z-index:5;left:0;right:0;bottom:calc(79px + env(safe-area-inset-bottom,0px));max-height:40%;overflow:auto;padding:14px 18px;background:#101910ef;border-top:1px solid #d9bb7440;backdrop-filter:blur(14px);box-sizing:border-box}
+.player-hall__section-panel{position:absolute;z-index:5;left:0;right:0;bottom:calc(79px + var(--hall-safe-bottom,0px));max-height:40%;overflow:auto;padding:14px 18px;background:#101910ef;border-top:1px solid #d9bb7440;backdrop-filter:blur(14px);box-sizing:border-box}
 .player-hall__section-panel>header{display:flex;justify-content:space-between;align-items:center;gap:8px}.player-hall__section-panel>header h3{margin:0;font-size:17px;color:#ead8b3}.player-hall__section-panel>header button{font-size:10px;padding:7px}.player-hall__section-panel .player-hall__award-section>h3{display:none}.player-hall__section-panel .player-hall__collection{display:flex;gap:10px;overflow-x:auto;padding:12px 0 6px;scroll-snap-type:x proximity}.player-hall__section-panel article{flex:0 0 130px;scroll-snap-align:start;padding:10px}.player-hall__section-panel .player-hall__trophy img{height:70px}.player-hall__section-panel .player-hall__collection-title{font-size:11px}.player-hall__section-panel .player-hall__collection article>p{font-size:10px}
 
 /* Keep the shelf control inside the visible crop on tall phones. */
@@ -79,7 +79,7 @@
 .player-hall-dialog .player-hall__space-arrow{position:absolute;z-index:7;top:55%;display:grid;justify-items:center;gap:4px;padding:9px 8px;background:#142014c9;border:1px solid #d5b97d55;border-radius:25px;backdrop-filter:blur(10px);box-shadow:0 3px 12px #0006}
 .player-hall__space-arrow b{font-size:24px;line-height:1}.player-hall__space-arrow span{font-size:9px}.player-hall__space-arrow--right{right:12px}.player-hall__space-arrow--left{left:12px}
 .player-hall__room[data-space=hall] .player-hall__space-arrow--left,.player-hall__room[data-space=garage] .player-hall__space-arrow--right,.player-hall__room:not([data-camera=wide]) .player-hall__space-arrow,.player-hall__room[data-space=garage]:not([data-garage-focus=""]) .player-hall__space-arrow{display:none}
-.player-hall__owner{top:calc(82px + env(safe-area-inset-top,0px));left:26px;max-width:calc(100% - 78px);background:#102017eb}
+.player-hall__owner{top:calc(82px + var(--hall-safe-top,0px));left:26px;max-width:calc(100% - 78px);background:#102017eb}
 .player-hall__hotspot--cabinet{left:52%;top:18%;width:29%;height:9%}
 .player-hall__hotspot--seasons{left:52%;top:45%;width:29%;height:9%}
 .player-hall__hotspot--shelves{left:max(6%,calc((100% - 100cqw)/2 + 12px));top:33%;width:40%;height:8%}
@@ -162,16 +162,16 @@
 /* Camera transform and origin animate together via Web Animations. */
 .player-hall__spaces{transition:none}
 /* Reachable navigation on every view, including long award collections. */
-.player-hall-dialog{position:fixed;inset:0;height:100dvh;min-height:0;max-height:100dvh;overscroll-behavior:contain;padding:0 20px calc(24px + env(safe-area-inset-bottom,0px))}
-.player-hall-dialog:not(.player-hall-dialog--immersive) .player-hall__header{position:sticky;top:0;z-index:20;margin:0 -20px 16px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px;background:#171a18;align-items:center}
+.player-hall-dialog{position:fixed;inset:0;height:100dvh;min-height:0;max-height:100dvh;overscroll-behavior:contain;padding:0 20px calc(24px + var(--hall-safe-bottom,0px))}
+.player-hall-dialog:not(.player-hall-dialog--immersive) .player-hall__header{position:sticky;top:0;z-index:20;margin:0 -20px 16px;padding:calc(14px + var(--hall-safe-top,0px)) 16px 14px;background:#171a18;align-items:center}
 .player-hall__header>button{min-width:44px;min-height:44px}
 .player-hall-dialog .player-hall__back{font-size:24px}
 .player-hall-dialog--immersive{padding:0}
-.player-hall-dialog--immersive .player-hall__header{align-items:flex-start;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 16px;background:linear-gradient(#080b09b8,transparent)}
+.player-hall-dialog--immersive .player-hall__header{align-items:flex-start;padding:calc(14px + var(--hall-safe-top,0px)) 16px 16px;background:linear-gradient(#080b09b8,transparent)}
 .player-hall__identity{margin:5px 0 0;display:grid;gap:3px;text-shadow:0 2px 5px #000;font-size:11px;line-height:1.4;color:#e0cfaf;overflow-wrap:anywhere}
 .player-hall__identity strong{font-size:14px;color:#fff0d1;font-weight:500}
 .player-hall-dialog--immersive:has(.player-hall__room:not([data-camera=wide])) .player-hall__identity{margin-left:52px}
-.player-hall-detail{position:fixed;inset:0;margin:auto;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)}
+.player-hall-detail{position:fixed;inset:0;margin:auto;max-height:calc(100dvh - var(--hall-safe-top,0px) - var(--hall-safe-bottom,0px) - 24px)}
 .player-hall__detail-close{position:sticky;top:0;z-index:10;min-width:44px;min-height:44px;background:#20231f!important}
 .player-hall__scene,.player-hall__garage-scene{background-image:url('./assets/player-hall/lounge-garage-panorama-v10.webp')}
 .player-hall-entry__art{background-image:url('./assets/player-hall/lounge-garage-panorama-v10.webp')}
@@ -292,7 +292,7 @@
 .garage-next strong{font-size:14px;color:#e9dbc0}
 .garage-next p{font-size:11px;line-height:1.4;color:#aab4ba;margin:7px 0}
 .garage-next small{display:block;margin-top:6px;font-size:10px;color:#c8b68f}
-.garage-workshop__footer{position:sticky;bottom:0;background:#111a22fa;border-top:1px solid #ffffff12;padding:10px 18px calc(14px + env(safe-area-inset-bottom,0px));z-index:3}
+.garage-workshop__footer{position:sticky;bottom:0;background:#111a22fa;border-top:1px solid #ffffff12;padding:10px 18px calc(14px + var(--hall-safe-bottom,0px));z-index:3}
 .garage-workshop__footer p{font-size:11px;line-height:1.4;color:#aeb8bf;margin:0 0 8px}
 .garage-workshop__footer>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .player-hall-dialog .garage-workshop__footer button{font-size:12px;min-height:42px;padding:10px 8px;border-radius:10px;border:1px solid #ffffff25;background:#202b34;color:#d1d8db}
@@ -326,7 +326,7 @@
 .player-hall-dialog:not(.player-hall-dialog--immersive) [data-hall-close],
 .player-hall-dialog:has(.player-hall__section-panel) .player-hall__header [data-hall-close]{display:none}
 .player-hall-dialog--picker{padding-bottom:0}
-.player-hall__picker-actions{position:sticky;bottom:0;z-index:21;margin:16px -20px 0;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#171a18;border-top:1px solid #d9bb7440}
+.player-hall__picker-actions{position:sticky;bottom:0;z-index:21;margin:16px -20px 0;padding:12px 20px calc(12px + var(--hall-safe-bottom,0px));background:#171a18;border-top:1px solid #d9bb7440}
 .player-hall__picker-actions>div{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .player-hall__picker-actions button{min-height:48px}
 .player-hall__picker-actions p:empty{display:none}
@@ -399,7 +399,7 @@
 .player-hall__room[data-camera=table] .player-hall__character-label{display:none}
 .player-hall-dialog .hall-table-camera{font-size:13px;padding:9px 16px;background:#1d211bd9;border:1px solid #d7b46c80;backdrop-filter:blur(8px)}
 .player-hall__room[data-camera=wide] .hall-table__hint{display:none}
-.player-hall-dialog .player-hall__camera-ui .hall-table-camera{top:auto;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:auto;min-width:110px;height:40px;border-radius:24px;padding:8px 16px;font-size:13px}
+.player-hall-dialog .player-hall__camera-ui .hall-table-camera{top:auto;bottom:calc(32px + var(--hall-safe-bottom,0px));left:50%;transform:translateX(-50%);width:auto;min-width:110px;height:40px;border-radius:24px;padding:8px 16px;font-size:13px}
 .player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){left:auto;right:5%;transform:none}
 .player-hall-dialog .hall-table__chips{top:69.3%;height:5.7%}
 .player-hall__room[data-camera=table] .player-hall__empty{display:none}
@@ -527,4 +527,18 @@
 @media(prefers-reduced-motion:reduce){.player-hall-dialog .hall-table__deck>.hall-chest-interior,.player-hall-dialog .hall-table__deck>.hall-chest-lid{transition:none}}
 .player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){min-width:78px;height:30px;padding:5px 11px;font-size:11px;border-radius:18px}
 /* Keep the table shortcut above the bottom edge of the room. */
-.player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+.player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){bottom:calc(72px + var(--hall-safe-bottom,0px))}
+
+/* Dialogs escape the app shell, so inherit Telegram's device and control clearance explicitly. */
+.player-hall-dialog,.player-hall-detail{
+ --hall-safe-top:max(env(safe-area-inset-top,0px),var(--app-top-from-tg,0px));
+ --hall-safe-bottom:max(env(safe-area-inset-bottom,0px),var(--app-bottom-nav-inset-tg,0px),var(--tg-content-safe-area-inset-bottom,0px));
+}
+.player-hall__header{box-sizing:border-box;min-width:0}
+.player-hall__header h2{min-width:0;overflow-wrap:anywhere;line-height:1.2}
+.player-hall__header>div{min-width:0}
+.player-hall-dialog:not(.player-hall-dialog--immersive)>[role=status],
+.player-hall-dialog:not(.player-hall-dialog--immersive)>[role=alert]{position:static;margin:20px 0;line-height:1.5;overflow-wrap:anywhere}
+
+.player-hall-dialog.player-hall-dialog--pending [data-hall-close]{display:block}
+.player-hall-dialog--pending .player-hall__header h2{flex:1}
