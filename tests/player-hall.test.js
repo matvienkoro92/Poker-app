@@ -47,20 +47,20 @@ test('occupied garage plate rejects the save and reports its owner',async()=>{
  assert.equal(claims,1);
 });
 
-test('Polina pilot can use the hall without being an administrator; save stays scoped to self',async()=>{
- const {hasPlayerHallPilotAccess}=require('../lib/player-hall-access'),G=require('../app-garage-catalog');
- for(const identity of [{telegramUsername:'polyapineapple'},{pwaUsername:'@Polyapineapple'},{telegramUsername:'Qweenpoker'},{pwaUsername:'@qweenpoker'}])assert.equal(hasPlayerHallPilotAccess(identity),true);
- for(const identity of [null,{telegramUsername:'someone'},{telegramUsername:'polyapineapple',vkId:1}])assert.equal(hasPlayerHallPilotAccess(identity),false);
- assert.equal(G.canAccessHall({status:'verified',user:{username:'polyapineapple'}}),true);
- assert.equal(G.canAccessHall({status:'loading',user:{username:'polyapineapple'}}),false);
- assert.equal(G.canAccessHall({status:'verified',user:{username:'someone'}}),false);
- let savedTo;
- const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID_POLINA',admin:false,hallAccess:true,body:{action:'save',targetId:'ID_OTHER'}})},'../account-id':{resolveAccountId:async()=>{throw Error('Must not resolve save target');}},'../player-hall':{save:async id=>{savedTo=id;return {};}}});
+test('pilot usernames cannot bypass admin-only access',async()=>{
+ const G=require('../app-garage-catalog');
+ for(const username of ['polyapineapple','Qweenpoker'])assert.equal(G.canAccessHall({status:'verified',user:{username}}),false);
+ assert.equal(G.canAccessHall({adminAccess:true}),true);
+ const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:false,hallAccess:true,body:{action:'save'}})},'../player-hall':{save(){throw Error('must not save');}}});
  const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};
- await handler({},res);assert.equal(res.code,200);assert.equal(savedTo,'ID_POLINA');
+ await handler({},res);assert.equal(res.code,403);
 });
-
-test('Qweenpoker hall pilot access requires verified identity and grants no VK access',()=>{const G=require('../app-garage-catalog');const {hasPlayerHallPilotAccess}=require('../lib/player-hall-access');assert.equal(G.canAccessHall({status:'verified',user:{username:'@Qweenpoker'}}),true);assert.equal(G.canAccessHall({status:'loading',user:{username:'Qweenpoker'}}),false);assert.equal(G.canAccessHall({status:'verified',authMethod:'vk',user:{username:'Qweenpoker'}}),false);assert.equal(hasPlayerHallPilotAccess({telegramUsername:'Qweenpoker',vkId:1}),false);});
+test('admin hall uses level one even when the profile level is higher',async()=>{
+ const hall=mock('lib/player-hall.js',{'./club-social':{memberProfile:async()=>({...profile,level:100}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?'{}':c[0]==='SMEMBERS'?[]:null)},'./player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}});
+ const data=await hall.read('ID1',true);assert.equal(data.garage.stats.level,1);
+ const G=require('../app-garage-catalog');
+ await assert.rejects(()=>hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garage:{...G.defaults,chassis:'aeroPrototype'}}),e=>e.status===400);
+});
 
 test('table XP comes from the same verified profile status as the leaderboard',async()=>{
  const cached={nickname:'Игрок',totalCounter:{fee:345678,mttCount:20,mttFirstCount:2}};

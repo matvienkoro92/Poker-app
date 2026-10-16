@@ -2975,24 +2975,8 @@ if (chatUserModalEl) {
     var action = toast.querySelector(".achievement-earned-toast__action");
     if (action) action.addEventListener("click", function () {
       toast.remove();
-      var profileNav = document.querySelector('[data-view-target="profile"]');
-      if (profileNav) profileNav.click();
-      else if (typeof setView === "function") setView("profile");
-      var attempts = 0;
-      var openAchievements = function () {
-        if (typeof setProfileTab === "function") {
-          setProfileTab("achievements");
-          return;
-        }
-        var tab = document.querySelector('[data-profile-tab="achievements"]');
-        if (tab) {
-          tab.click();
-          return;
-        }
-        attempts += 1;
-        if (attempts < 20) setTimeout(openAchievements, 100);
-      };
-      openAchievements();
+      var hallNav = document.querySelector('[data-view-target="player-hall"]');
+      if (hallNav) hallNav.click();
     });
     var close = toast.querySelector(".achievement-earned-toast__close");
     if (close) close.addEventListener("click", function () { toast.remove(); });

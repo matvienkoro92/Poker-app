@@ -400,6 +400,7 @@
 .player-hall-dialog .hall-table-camera{font-size:13px;padding:9px 16px;background:#1d211bd9;border:1px solid #d7b46c80;backdrop-filter:blur(8px)}
 .player-hall__room[data-camera=wide] .hall-table__hint{display:none}
 .player-hall-dialog .player-hall__camera-ui .hall-table-camera{top:auto;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:auto;min-width:110px;height:40px;border-radius:24px;padding:8px 16px;font-size:13px}
+.player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){left:auto;right:5%;transform:none}
 .player-hall-dialog .hall-table__chips{top:69.3%;height:5.7%}
 .player-hall__room[data-camera=table] .player-hall__empty{display:none}
 /* Bright translucent facets make the ice movement visible at room scale. */
@@ -524,3 +525,6 @@
 .player-hall-dialog .hall-table__deck--open>.hall-chest-lid,.player-hall-dialog .hall-table__deck:focus-visible>.hall-chest-lid{transform:perspective(160px) skewY(-4deg) rotateX(110deg)}
 @media(hover:hover){.player-hall-dialog .hall-table__deck:hover>.hall-chest-interior,.player-hall-dialog .hall-table__deck:hover>.hall-chest-lid{opacity:1}.player-hall-dialog .hall-table__deck:hover>.hall-chest-lid{transform:perspective(160px) skewY(-4deg) rotateX(110deg)}}
 @media(prefers-reduced-motion:reduce){.player-hall-dialog .hall-table__deck>.hall-chest-interior,.player-hall-dialog .hall-table__deck>.hall-chest-lid{transition:none}}
+.player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){min-width:78px;height:30px;padding:5px 11px;font-size:11px;border-radius:18px}
+/* Keep the table shortcut above the bottom edge of the room. */
+.player-hall-dialog .player-hall__camera-ui .hall-table-camera:not(.hall-table-camera--back){bottom:calc(72px + env(safe-area-inset-bottom,0px))}

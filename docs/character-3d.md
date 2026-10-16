@@ -1,36 +1,82 @@
-# Wardrobe character
+# Sculpted wardrobe character
 
-The browser character is assembled by `scripts/garage-3d/character-reconstruction.mjs`.
-A shared 29-bone skeleton (`character-rig.mjs`) binds anatomy, clothing, hands,
-fingers and sneakers using normalized, blended weights. Wrist accessories attach
-to bones while preserving their rest-pose positions. Idle movement eases to the
-rest pose during drag, watch inspection and reduced-motion mode; feet remain planted.
+The live renderer is `scripts/garage-3d/character-sculpted-view.mjs`; its model is
+built by `character-atelier.mjs`. `character-reconstruction.mjs` is a compatibility
+export. The former front/rear/profile photograph projection is no longer used.
 
-The original wardrobe canvas supplies the front appearance. The existing rear
-and profile assets remain texture sources; unseen surfaces receive garment color,
-fabric shading and authored geometry. This remains an approximation of unseen
-anatomy, rather than a scanned character. `character-tailoring.mjs` supplies lapels,
-pockets, seams, tongue panels and laces. Sneakers have separate beveled soles;
-shirt cuffs are separate wrist-bound meshes for jacket outfits.
+Anatomy is authored as implicit surfaces in `scripts/generate-character-sculpt.py`:
+cranium and jaw, a facial mask with actual eye sockets and nostril cavities, and
+joined hands with curved phalanges. Cloth is also sculpted: shoulder/sleeve junctions
+and the trouser fork are continuous surfaces. Hidden limbs are omitted underneath
+clothing, preventing fur from intersecting the garment. All surfaces bind to the
+shared skeleton in `character-rig.mjs`. A restrained resting pose affects the arms
+and head while keeping the legs and shoes planted.
 
-Run `npm run garage:3d` after editing the modules. Relevant checks:
-`node --test tests/character-volume.test.js tests/character-rig.test.js tests/wrist-watch.test.js tests/player-garage.test.js`.
+The eight glasses families have real frames, lenses, bridges and temples. Five
+headwear families are authored by `character-headwear.mjs`. Hairstyles attach to
+the head, with separate tapered dreadlocks and textured fibers. Watches and rings
+remain wrist/hand-bound. Necklaces use interlocked links; opening a helmet visor
+reveals the actual facial mesh. Helmet shells conceal the ears.
 
-Open limbs use smooth anatomical sections without garment folds. Side fur and
-hand colors are authored rather than projecting narrow photograph strips around
-the limb. Low-top sneakers use a shallow vamp joined to the ankle; laces follow
-that surface. Front lapels come from the wardrobe texture to avoid duplicate
-flat panels over the garment. `scripts/smoke-character-quality.cjs` renders the
-mobile editor in a T-shirt and shorts from the front and side.
+The viewer uses a 30° perspective lens with framed orbit and wrist inspection.
+Materials use physical scene lighting, ACES exposure, a studio reflection
+environment and soft shadows. Fur has a tileable albedo and surface strands;
+facial skin has an albedo and micro-normal detail. The original wardrobe artwork
+is retained only as a transparent ink decal over the actual shirt. Sewing and
+patch pockets conform to the cloth surface. Sewn hems replace the raw cloth edges
+with matching clipping in the color and shadow passes. Sneakers have longitudinal lasts,
+flat registration against layered rubber soles, eyelets, curved laces and stitching.
 
-Fur shading uses continuous object-space noise, blended into the front portrait;
-forearms have authored elbow, muscle and wrist sections. Finger tips curve toward
-the palm. The quality smoke captures front, three-quarter, side and back views.
+## Assets and reproducible authoring
 
-`character-shape.mjs` deforms the torso, abdomen, arms and legs for all five
-body choices before skin binding, while keeping footwear registration fixed.
-`character-hair.mjs` creates head-bound volumes for selected hairstyles; the
-head shader removes the old painted crown and rear hair. Natural hair retains
-the portrait texture, and headgear suppresses the additional hair volumes.
-The quality smoke accepts `CHARACTER_LOOK` (JSON) and `CHARACTER_LABEL` for
-comparing body and hair choices without overwriting other captured variants.
+Production meshes and textures live in
+`assets/player-hall/character-3d/sculpt/`. The selected anatomy, tee and shorts use
+less than 2.5 MB of raw mesh data. Other garments load when selected. Buffer data
+are cached between wardrobe changes; each mounted instance owns its GPU geometry,
+materials and textures and releases them on disposal.
+
+To re-author the geometry, run the generator with Python and NumPy, then the
+vendored meshoptimizer simplifier (1.3.0, MIT):
+
+```sh
+python3 scripts/generate-character-sculpt.py
+node scripts/optimize-character-sculpt.mjs
+npm run garage:3d
+```
+
+The generator also accepts mesh names to rebuild selected assets. For example:
+`python3 scripts/generate-character-sculpt.py head face`. Ordinary app builds use
+the saved binary assets and require neither Python nor a modelling application.
+The simplifier keeps a relative error limit of 0.003, preserves normals and removes
+zero-volume opposite triangle pairs before compacting buffers. See the
+[meshoptimizer API](https://github.com/zeux/meshoptimizer/blob/master/js/README.md#simplifier).
+
+The two albedo textures were produced with the built-in ImageGen tool. Exact
+prompts, asset paths and geometry budgets are recorded in
+[the asset manifest](../assets/player-hall/character-3d/sculpt/manifest.json).
+Both selected textures are saved in this repository; no runtime external service
+is required. `scripts/copy-to-public.js` explicitly includes dynamic mesh URLs and
+albedo textures in the deployable build.
+
+## Verification
+
+```sh
+node --test tests/character-volume.test.js tests/character-rig.test.js tests/character-hair.test.js tests/character-eyewear.test.js tests/wrist-watch.test.js tests/player-garage.test.js
+node scripts/smoke-sculpted-character.cjs
+node scripts/smoke-character-quality.cjs
+```
+
+`CHARACTER_LOOK` supplies a JSON loadout; `CHARACTER_LABEL` separates captured
+variants. The studio smoke supports `CHARACTER_VIEWS=front,quarter,side,back`.
+`CHARACTER_DETAIL=1` gives full-height captures in the mobile wardrobe smoke;
+`CHARACTER_HD=1` uses the production pixel density of 2×;
+`CHARACTER_SNAPSHOT=1` freezes animation and captures exact orbit angles using the
+same production renderer. Leave it unset to exercise pointer dragging.
+The production renderer's `snapshotOnly` state renders the same mesh/material
+pipeline without running a continuous animation loop during studio inspection.
+
+Checks cover actual anatomy and garment topology, normalized skin weights, camera
+orbit and wrist focus restoration, body deformation, hidden-limb clipping, mobile
+asset budgets, headwear attachment, helmet/visor behavior and resource disposal.
+Always inspect front, three-quarter, side and rear images; passing tests alone is
+not a visual quality gate.

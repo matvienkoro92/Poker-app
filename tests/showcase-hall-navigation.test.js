@@ -50,5 +50,5 @@ test('table camera has a labeled return button using the bottom navigation style
   const html = context.cameraUI();
   assert.match(html, /hall-table-camera--back/);
   assert.match(html, /data-hall-camera="wide"/);
-  assert.match(html, /← В зал/);
+  assert.match(html, /← Домой/);
 });

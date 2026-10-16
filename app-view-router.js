@@ -1826,6 +1826,25 @@ navItems.forEach(function (item) {
   item.addEventListener("click", function (e) {
     var target = item.dataset.viewTarget;
     if (target) {
+      if (target === "player-hall") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (item.disabled) return;
+        item.disabled = true;
+        Promise.resolve().then(async function () {
+          if (typeof window.pokerEnsureLazyDomains === "function") {
+            await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
+          }
+          if (!window.PokerGarage || !window.PokerGarage.canAccessHall(window.__pokerTelegramAuth)) {
+            throw new Error("Зал пока доступен участникам тестирования");
+          }
+          if (typeof window.pokerOpenPlayerHall !== "function") throw new Error("Не удалось открыть зал. Попробуйте ещё раз.");
+          await window.pokerOpenPlayerHall();
+        }).catch(function (error) {
+          window.alert(error.message || "Не удалось открыть зал. Попробуйте ещё раз.");
+        }).finally(function () { item.disabled = false; });
+        return;
+      }
       if (target === "player-crm" && typeof pokerOpenPlayerCrmFromHome === "function") {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -2439,3 +2458,18 @@ document.addEventListener("click", function (event) {
   event.preventDefault();
   setView(tab.dataset.viewTarget);
 });
+
+// Keep the private house entry out of the ordinary member navigation.
+(function () {
+  function syncHouseNav() {
+    var label = document.getElementById('bottomNavHandsLabel');
+    var button = label && label.closest('button');
+    if (!button) return;
+    var admin = window.__pokerTelegramAuth?.adminAccess === true;
+    button.dataset.viewTarget = admin ? 'player-hall' : 'my-summary';
+    label.textContent = admin ? 'Дом' : 'Раздачи';
+  }
+  window.addEventListener('poker-telegram-auth', syncHouseNav);
+  window.addEventListener('poker-admin-access', syncHouseNav);
+  syncHouseNav();
+})();

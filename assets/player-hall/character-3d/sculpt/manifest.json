@@ -1,0 +1,101 @@
+{
+  "version": 2,
+  "geometry": "Authored implicit surfaces; conforming marching tetrahedra; meshoptimizer 1.3.0 simplification",
+  "runtime": "Three.js skinned meshes, physical lighting, no photographic body projection",
+  "meshes": [
+    {
+      "file": "head.bin",
+      "bytes": 432116,
+      "vertices": 9002,
+      "triangles": 18000,
+      "relativeError": 0.0011450888123363256,
+      "sha256": "3784ca468cac853800420487037d9d94e6ea2754733dbc500f7a5cc713e2aa0c"
+    },
+    {
+      "file": "face.bin",
+      "bytes": 432548,
+      "vertices": 9020,
+      "triangles": 18000,
+      "relativeError": 0.0010916771134361625,
+      "sha256": "a387cc076e7bd4b81bdb1952870dadb67b9d5fa65e6b4bc3fecd1f8c388b487a"
+    },
+    {
+      "file": "hand-left.bin",
+      "bytes": 288020,
+      "vertices": 5999,
+      "triangles": 11998,
+      "relativeError": 0.0010911074932664633,
+      "sha256": "52cb60485b273d3442d304344675f75671faa9e3112bd3dac203ca27f2514d27"
+    },
+    {
+      "file": "hand-right.bin",
+      "bytes": 288068,
+      "vertices": 6000,
+      "triangles": 12000,
+      "relativeError": 0.0010917704785242677,
+      "sha256": "f814e1aa60c9d02d2876b6b40b6d7a96ec5b57ce12b224b75c03df66075a6ca6"
+    },
+    {
+      "file": "shirt-tee.bin",
+      "bytes": 527972,
+      "vertices": 10999,
+      "triangles": 21994,
+      "relativeError": 0.0010357857681810856,
+      "sha256": "50a53308c24727ea999a74a0a1cebcb86ab3e31a43ec35417984412764157888"
+    },
+    {
+      "file": "shirt-jacket.bin",
+      "bytes": 671924,
+      "vertices": 13998,
+      "triangles": 27992,
+      "relativeError": 0.0009155605803243816,
+      "sha256": "f4deed9129976e8ff5ea2ad4aee9b1ae3ca1172c0f1c4a30ad24813ed85b1eea"
+    },
+    {
+      "file": "shirt-tank.bin",
+      "bytes": 431924,
+      "vertices": 9000,
+      "triangles": 17988,
+      "relativeError": 0.0013146338751539588,
+      "sha256": "68566e0ac77415bb820d16aa5bde3b894bc57ef95e3b8894f76244ab53b1bcce"
+    },
+    {
+      "file": "shorts.bin",
+      "bytes": 432068,
+      "vertices": 9001,
+      "triangles": 17998,
+      "relativeError": 0.0013810042291879654,
+      "sha256": "7aaba876977a4b6f2d9bcee0fb55933be865240b994ed958fb3419be6f936922"
+    },
+    {
+      "file": "pants.bin",
+      "bytes": 576116,
+      "vertices": 12002,
+      "triangles": 24000,
+      "relativeError": 0.0008456525974906981,
+      "sha256": "7bc8501cd2b168af24e46e68627a8cd3693261a8855c22e2b77c1b5ae16fe6eb"
+    },
+    {
+      "file": "helmet-shell.bin",
+      "bytes": 473684,
+      "vertices": 9868,
+      "triangles": 19732,
+      "relativeError": 0.002012314973399043,
+      "sha256": "1e903c8141630d2729355621136f4eb3a5d7e7d8a3375b7b55e4c8fd5c3e9b81"
+    }
+  ],
+  "textures": [
+    {
+      "file": "fur-albedo-v1.webp",
+      "tool": "built-in image_gen.imagegen",
+      "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable PBR albedo texture for a real-time 3D chimpanzee's arms, legs and cheek fur. Create one perfectly square 1024x1024 close-up texture swatch filling the entire canvas edge to edge: dense fine dark umber chimpanzee fur, predominantly short downward-growing individual brown-black hairs, subtle grey-brown occasional strands, overlapping irregular organic micro-clumps. Photograph-like strand detail, non-repetitive, rich fine texture. Uniform flat diffuse illumination with NO directional highlights, NO specular spots, NO cast shadows, NO large dark/light gradients. This must be a color/albedo map rather than a rendered furry object. Mid-dark chocolate charcoal brown palette, overall approximate sRGB #47392e with slight natural variation. All four edges must tile seamlessly. No skin, no face, no limbs, no animal silhouette, no clothing, no border, no text, no labels, no collage.",
+      "bytes": 335932
+    },
+    {
+      "file": "skin-albedo-v1.webp",
+      "tool": "built-in image_gen.imagegen",
+      "prompt": "Use case: photorealistic-natural. Asset type: square tileable PBR skin albedo texture swatch for an adult chimpanzee 3D facial mask and hands. One seamless 1024x1024 surface sample fills the entire frame edge to edge, no animal shape or face. Warm muted taupe brown chimpanzee facial skin, approximately sRGB #95745d; realistic extremely fine pores, tiny irregular creases, subtle natural brown mottling and dermal color variation, leathery yet supple, premium realistic game character texture. No large wrinkles, no hair, no facial features, no eyes, no nose, no mouth, no ears. Flat evenly diffuse illumination, no cast shadows, no highlights, no light gradient, no borders or text. All edges tile seamlessly.",
+      "bytes": 321158
+    }
+  ]
+}

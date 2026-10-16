@@ -152,7 +152,7 @@ test('collections persist three independent pieces and derive the bonus from the
  const mixed=Garage.choose({...G.defaults,suit:'collection_tropical',bonus:'snow'},{stats:{level:100}});
  assert.equal(G.activeOutfit(mixed),null);
  assert.equal(mixed.bonus,undefined);
- for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind))assert.ok(G.outfitSets.some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
+ for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind&&i.id!==G.defaults[kind]))assert.ok(G.outfitSets.some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
 });
 
 test('seasonal reward pacing offers early variety and goals across the full level range',()=>{
@@ -189,13 +189,13 @@ test('summer separates and hats save independently at their exact levels',()=>{
 });
 
 test('13 hairstyles and five physiques persist without changing clothes or trusting forged IDs',()=>{
- assert.equal(G.hairStyles.length,13);assert.equal(G.bodyTypes.length,5);
+ assert.equal(G.hairStyles.length,13);assert.deepEqual(G.bodyTypes,[['bodySlim','Худой'],['bodyNormal','Спортивный'],['bodyBelly','Толстый']]);
  for(const [hair]of G.hairStyles)for(const [body]of G.bodyTypes){
   const saved=Garage.choose({...G.defaults,hair,body,suit:'palmTank',pants:'sandShorts'},{stats:{level:0}});
   assert.equal(saved.hair,hair);assert.equal(saved.body,body);assert.equal(saved.suit,'palmTank');assert.equal(saved.pants,'sandShorts');
  }
  for(const kind of ['hair','body'])assert.throws(()=>Garage.choose({...G.defaults,[kind]:'forged'},{stats:{level:100}}),/не открыта/);
- const old=G.normalize({suit:'classic'},{level:0});assert.equal(old.hair,'hairNatural');assert.equal(old.body,'bodyNormal');
+ const old=G.normalize({suit:'classic'},{level:0});assert.equal(old.hair,'hairNatural');assert.equal(old.body,'bodySlim');
  for(const hat of ['pokerFlatCap','pokerClassicCap'])assert.equal(Garage.choose({...G.defaults,hat},{stats:{level:0}}).hat,hat);
 });
 
@@ -259,7 +259,7 @@ test('wardrobe filters classify summer, legacy rewards and seasonal model varian
 });
 
 test('curated brand rewards have explicit gates and retain legacy saved clothing',()=>{
- const rows=Object.entries(G.brandedPieces);assert.equal(rows.length,12);
+ const rows=Object.entries(G.brandedPieces);assert.equal(rows.length,24);
  for(const [id,[kind,, ,level,category]]of rows){
   assert.ok(G.curatedWardrobeItem(G.item(kind,id)));
   assert.throws(()=>Garage.choose({[kind]:id},{stats:{level:level-1}}),/не открыта/);
@@ -278,7 +278,7 @@ test('brand wardrobe sprites are distinct and stay below the per-item budget',()
   assert.ok(bytes.length<160000,id+' exceeds sprite budget');total+=bytes.length;
   hashes.add(crypto.createHash('sha256').update(bytes).digest('hex'));
  }
- assert.equal(hashes.size,12);assert.ok(total<1500000);
+ assert.equal(hashes.size,Object.keys(G.brandedPieces).length);assert.ok(total<Object.keys(G.brandedPieces).length*125000);
 });
 
 test('replacement hairstyles use individual hair-only sprites within the size budget',()=>{
@@ -324,3 +324,38 @@ test('wheel diameter and formula wings persist independently with level gates',(
 });
 
 test('Formula collection starts above level fifty and tyre choices save independently',()=>{for(const [kind,id,level]of [['frontBumper','formula',55],['tyreWidth','wide',52],['tyreWidth','ultra',72],['tyres','soft',55],['tyres','wet',76],['helmet','formulaCrimson',54],['helmet','formulaGold',74],['rearBumper','formulaPro',78],['spoiler','formulaPro',85],['sideSkirts','formula',58],['frontBumper','formulaElite',82]]){assert.ok(level>50);assert.throws(()=>Garage.choose({[kind]:id},{stats:{level:level-1}}));assert.equal(Garage.choose({[kind]:id},{stats:{level}})[kind],id);}const look=Garage.choose({tyreWidth:'ultra',tyres:'wet',wheelSize:'max',wheels:'bronzeSix'},{stats:{level:100}});assert.equal(look.tyreWidth,'ultra');assert.equal(look.tyres,'wet');assert.equal(look.wheelSize,'max');});
+
+ test('new character and reset baseline are slim in boxers without clothes or accessories',()=>{
+ const look=G.normalize({}, {level:0});
+ assert.equal(look.body,'bodySlim');assert.equal(look.suit,'none');assert.equal(look.pants,'boxers');assert.equal(look.shoes,'none');
+ for(const kind of ['hat','helmet','glasses','watch','ring','necklace','patch'])assert.equal(look[kind],'none');
+ const reset=Garage.choose({...G.defaults},{stats:{level:0}});
+ for(const kind of ['body','suit','pants','shoes'])assert.equal(reset[kind],look[kind]);
+ });
+
+test('chassis round trips restore each car configuration without aero parts leaking',()=>{
+ const snapshots={};const classic=G.normalize({paint:'ruby',wheels:'silver',frontBumper:'none'},{level:100});
+ let look=G.switchChassis(classic,'formula',snapshots);
+ look={...look,paint:'pearl',wheels:'bronzeSix',tyres:'standard',wheelColor:'#ab1234',badges:[]};
+ const formula={...look,badges:look.badges.slice()};
+ look=G.switchChassis(look,'aeroPrototype',snapshots);
+ assert.equal(look.frontBumper,'none');assert.equal(look.tyres,'standard');
+ look={...look,paint:'midnight',wheelSize:'max'};const aero={...look};
+ look=G.switchChassis(look,'formula',snapshots);assert.deepEqual(look,formula);
+ look=G.switchChassis(look,'aeroPrototype',snapshots);assert.deepEqual(look,aero);
+ look=G.switchChassis(look,'classic',snapshots);assert.deepEqual(look,classic);
+ look=G.switchChassis(look,'formula',snapshots);assert.deepEqual(look,formula);
+});
+
+test('returning to a chassis preserves later tuning and current character settings',()=>{
+ const snapshots={};let look=G.normalize({}, {level:100});
+ look=G.switchChassis(look,'formula',snapshots);look.frontBumper='formulaPro';look.spoiler='formula';look.badges=['hero'];
+ look=G.switchChassis(look,'aeroPrototype',snapshots);look.suit='palmTank';look.badges.push('winner');
+ look=G.switchChassis(look,'formula',snapshots);
+ assert.equal(look.frontBumper,'formulaPro');assert.equal(look.spoiler,'formula');assert.equal(look.suit,'palmTank');assert.deepEqual(look.badges,['hero']);
+});
+
+test('choosing a bare chassis never installs aero hardware or changes running gear',()=>{
+ for(const chassis of ['formula','aeroPrototype']){const look={...G.defaults,wheels:'bronzeSix',tyres:'wet',seat:'none',turbine:'classic',steering:'classic'};const next=G.switchChassis(look,chassis,{});for(const key of ['frontBumper','rearBumper','sideSkirts','spoiler','fenders','wheels','tyres','seat','turbine','steering'])assert.equal(next[key],look[key],chassis+': '+key);}
+ const fitted={...G.defaults,chassis:'formula',frontBumper:'formulaPro',spoiler:'formula'};const next=G.switchChassis(fitted,'aeroPrototype',{});assert.equal(next.frontBumper,'formulaPro');assert.equal(next.spoiler,'formula');
+});

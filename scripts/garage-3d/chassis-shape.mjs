@@ -1,5 +1,8 @@
 import * as T from '../../vendor/three/three.module.min.js';
-export function chassisWidth(x){if(x<-.65){const rear=Math.max(0,Math.min(1,(-x-.65)/1.95));return 1.10-.66*rear*rear*(3-2*rear);}const t=Math.max(0,Math.min(1,(x+.65)/2.25));return 1.10-.68*t*t*(3-2*t);}
+// Sidepod shoulders stay nearly parallel around the cockpit, then taper
+// independently into the rear gearbox and the long, narrow nose.
+export function chassisWidth(x){const sections=[[-2.6,.22],[-1.8,.42],[-1.3,.76],[-.65,.94],[-.1,.91],[.35,.68],[.8,.30],[1.25,.19],[1.65,.17]];if(x<=sections[0][0])return sections[0][1];for(let i=1;i<sections.length;i++){const [end,width]=sections[i],[start,previous]=sections[i-1];if(x<=end){const t=(x-start)/(end-start),smooth=t*t*(3-2*t);return previous+(width-previous)*smooth;}}return sections.at(-1)[1];}
+
 // Reversible chassis-space deformation; running gear and cockpit controls keep
 // their own dimensions. Every supported finish follows the same body contour.
 export function chassisShape(car,excluded=[]){

@@ -221,6 +221,11 @@ function copyReferencedAssets() {
   addWardrobeAssets('player-hall/wardrobe/branded');
   addWardrobeAssets('player-hall/wardrobe/items');
   addWardrobeAssets('player-hall/helmets');
+  // Sculpted wardrobe geometry and albedo URLs are assembled at runtime.
+  addWardrobeAssets('player-hall/character-3d/sculpt');
+  for (const name of ['head', 'face', 'hand-left', 'hand-right', 'shirt-tee', 'shirt-jacket', 'shirt-tank', 'shorts', 'pants', 'helmet-shell']) {
+    refs.add('player-hall/character-3d/sculpt/' + name + '.bin');
+  }
   // Rating preview URLs are assembled at runtime, so static scanning misses them.
   for (const rel of Array.from(refs)) {
     if (!/(?:^|\/)rating-\d{2}-\d{2}-\d{4}[^/]*\.(?:png|jpe?g|webp|avif)$/i.test(rel)) continue;

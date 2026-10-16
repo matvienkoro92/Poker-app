@@ -9,7 +9,7 @@ function profileEscapeHtml(value) {
 function setProfileTab(tab) {
   var root = document.getElementById("profileView");
   var tabs = document.querySelectorAll("[data-profile-tab]");
-  var activeTab = tab === "poker21" || tab === "achievements" || tab === "friends" ? tab : "club";
+  var activeTab = tab === "poker21" || tab === "friends" ? tab : "club";
   if (root) {
     root.classList.toggle("profile-view--tab-poker21", activeTab === "poker21");
     root.classList.toggle("profile-view--tab-club", activeTab === "club");
@@ -33,7 +33,6 @@ function setProfileTab(tab) {
     } catch (eLazyPpProfile) {}
   }
   if (activeTab === "poker21") initProfilePoker21Tabs();
-  if (activeTab === "achievements") refreshProfileAchievementsShowcase();
   if (activeTab === "club") setTimeout(refreshProfileOwnWall, 0);
 }
 
@@ -476,7 +475,6 @@ function initProfileTabs() {
   initProfilePoker21Tabs();
   initProfilePublicCardButton();
   initProfilePublicShowcase();
-  initProfileAchievementsShowcase();
   initProfileOwnWall();
   setProfileTab("club");
   if (typeof initProfilePokerPlus === "function") {
@@ -2027,16 +2025,7 @@ function initProfileAchievementsShowcase() {
       }
     });
   }
-  var idle = window.requestIdleCallback || function (callback) {
-    return window.setTimeout(callback, 1800);
-  };
-  idle(function () {
-    try {
-      var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      if (connection && (connection.saveData || /(^|-)2g$/i.test(String(connection.effectiveType || "")))) return;
-    } catch (eProfileAchievementsConnection) {}
-    refreshProfileAchievementsShowcase();
-  }, { timeout: 5000 });
+
 }
 
 function syncProfileStatusVisibility(isVerified) {
@@ -3411,45 +3400,6 @@ function initProfileRespectVotersButton() {
   });
 }
 
-// Check earned achievements independently of opening the profile view.
-(function () {
-  var running = false;
-  var scheduled = null;
-  var lastCheckAt = 0;
-  function check() {
-    if (document.hidden || running) return;
-    var auth = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "";
-    if (!auth || auth === "?initData=" || /guestDeviceId/i.test(auth)) return;
-    if (Date.now() - lastCheckAt < 5 * 60 * 1000) return;
-    running = true;
-    profileEnsureLazyScriptDomains(["profile"]).then(function () {
-      return typeof loadCurrentProfileUserInfo === "function" ? loadCurrentProfileUserInfo() : null;
-    }).then(function (data) {
-      if (auth !== (typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "")) return;
-      if (!data || !data.ok || !profileAchievementUserIdFromData(data)) return;
-      return ensureProfileAchievementsBuilder().then(function (ready) {
-        if (!ready || document.hidden) return;
-        return window.pokerBuildProfileAchievements({
-          ratingNick: profileAchievementRatingNickFromData(data),
-          profileData: data,
-          userId: profileAchievementUserIdFromData(data),
-          isSelfProfile: true,
-        }).then(function (result) {
-          lastCheckAt = Date.now();
-          writeProfileAchievementsCache(data, result);
-        });
-      });
-    }).catch(function () {}).finally(function () { running = false; });
-  }
-  function schedule() {
-    clearTimeout(scheduled);
-    scheduled = setTimeout(check, 1500);
-  }
-  window.addEventListener("poker-telegram-auth", function () { lastCheckAt = 0; schedule(); });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) schedule(); });
-  window.addEventListener("focus", schedule);
-  schedule();
-}());
 
 (function () {
   function attachNameFit() {
