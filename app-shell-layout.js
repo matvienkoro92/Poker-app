@@ -238,7 +238,7 @@ function pokerApplyBottomTabbarPad() {
     if (document.body.getAttribute("data-view") === "home") {
       var homeScroll = document.querySelector("#app > .card > .card__content");
       if (homeScroll) {
-        var overlap = Math.max(0, homeScroll.getBoundingClientRect().bottom - rect.top);
+        var overlap = Math.min(h, Math.max(0, homeScroll.getBoundingClientRect().bottom - rect.top));
         root.style.setProperty("--app-home-bottom-pad", Math.ceil(overlap + 8) + "px");
       }
     }
@@ -748,6 +748,9 @@ setTimeout(pokerApplyBottomTabbarPad, 400);
     if (typeof pokerApplyBottomTabbarPad === "function") pokerApplyBottomTabbarPad();
   });
   ro.observe(nav);
+  /* Поздняя загрузка CSS меняет scrollport даже при прежней высоте меню. */
+  var content = document.querySelector("#app > .card > .card__content");
+  if (content) ro.observe(content);
 })();
 /* iOS PWA: поздняя стабилизация — пересчёт --pwa-ios-tabbar-pad-bottom */
 (function pokerPwaIosBottomNavGapBurst() {

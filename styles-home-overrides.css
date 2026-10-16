@@ -6392,6 +6392,13 @@ html body[data-view="home"] #app.app > .card > .card__content > .view--active[da
  padding-bottom:0!important;
  margin-bottom:0!important;
 }
+/* Clearance is supplied by the scrollport; the footer needs no second spacer. */
+html body[data-view="home"] #app.app .card__footer--home{
+ padding-bottom:0;
+}
+html body[data-view="home"] #homeFooter .footer-visitors:has(.footer-visitors__version:empty){
+ display:none;
+}
 /* The private villa uses a dedicated vector instead of the shared card sprite. */
 html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__icon::before{display:none}
 html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{display:block;width:30px;height:30px}

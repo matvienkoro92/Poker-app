@@ -5,7 +5,7 @@ const vm = require('node:vm');
 
 test('hall request starts alongside CSS and does not wait for the race garage', async () => {
   const source = fs.readFileSync('app-player-hall.js', 'utf8');
-  const code = source.slice(source.indexOf('  async function open('), source.indexOf('  function mountEntry('));
+  const code = source.slice(source.indexOf('  function villaLoadingMarkup('), source.indexOf('  function mountEntry('));
   const calls = [];
   let stylesReady;
   const ctx = vm.createContext({

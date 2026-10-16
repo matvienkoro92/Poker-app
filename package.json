@@ -21,6 +21,8 @@
     "build:season-archive": "node scripts/copy-season-archive.js",
     "smoke": "node scripts/smoke-checks.js",
     "smoke:browser": "node scripts/smoke-browser.js",
+    "smoke:wardrobe-fit": "node scripts/smoke-wardrobe-fit.cjs && node scripts/smoke-wardrobe-mobile.cjs",
+    "audit:wardrobe": "node scripts/audit-wardrobe-fit.cjs",
     "smoke:nav": "node scripts/smoke-navigation.js",
     "smoke:visual": "node scripts/smoke-visual.js",
     "smoke:css": "node scripts/smoke-css-loading.js",

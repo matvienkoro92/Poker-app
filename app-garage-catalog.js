@@ -274,7 +274,7 @@ function fashionIndex(kind,id){if(rewardFashionModels[kind]?.[id])return 100;ret
 const wardrobeAssetPaths={suit:'./assets/player-hall/wardrobe/suit-v1.webp',pants:'./assets/player-hall/wardrobe/pants-v1.webp',shoes:'./assets/player-hall/wardrobe/shoes-v1.webp',accessories:'./assets/player-hall/wardrobe/accessories-v1.webp'};
 function wardrobeSourceFor(kind,id){if(kind==='body')return 'summer-bodyBase'+({bodySlim:'Slim',bodyNormal:'Normal',bodyBelly:'Belly'}[id]||'Slim')+'-v3';if(kind==='hair'&&hairOverlayFits[id])return 'summer-'+id+'-hair-only-v2';if(brandedPieces[id]?.[0]===kind)return 'brand-'+id;if(kind==='hair'&&id==='hairBald')return 'summer-shavedHead-v2';id=rewardFashionModels[kind]?.[id]||id;if(summerPieces[id]?.[0]===kind)return 'summer-'+id;const base=seasonalItems.get(kind+':'+id)?.base||id;if(['suit','pants','shoes','glasses','watch'].includes(kind)&&fashionRows[kind]?.some(row=>row[0]===base))return 'item-'+kind+'-'+base;return ['glasses','watch'].includes(kind)?'accessories':kind;}
 function wardrobeImage(kind,id){const name=wardrobeSourceFor(kind,id);if((!name.startsWith('summer-')&&!name.startsWith('item-')&&!name.startsWith('brand-')&&!['suit','pants','shoes','accessories'].includes(name))||typeof Image==='undefined')return null;const previous=wardrobeImages.get(name);if(!previous||(previous.complete&&!previous.naturalWidth)){const image=new Image();wardrobeImages.set(name,image);image.src=(name.startsWith('brand-')?'./assets/player-hall/wardrobe/branded/'+name.slice(6)+'-v1.webp?fit=66':name.startsWith('summer-')?'./assets/player-hall/wardrobe/summer/'+name.slice(7)+'.webp'+(name==='summer-riverTee'?'?collar=82':''):name.startsWith('item-')?'./assets/player-hall/wardrobe/items/'+name.slice(5).replace('-','/').replace('suit/varsityCream','suit/varsityCream-club-v2')+'.webp'+(name==='item-pants-blackDenim'?'?hem=79':''):wardrobeAssetPaths[name])+(previous?(name.startsWith('brand-')||name==='item-pants-blackDenim'||name==='summer-riverTee'?'&':'?')+'retry='+Date.now():'');}return wardrobeImages.get(name);}
-function loadWardrobe(look){const kinds=look?['suit','pants','shoes','glasses','watch','hat','hair','body'].filter(k=>fashionIndex(k,look[k])>=0&&(k!=='hair'||!look.suit||look.hair!=='hairNatural'&&(!look.hat||look.hat==='none')&&(!look.helmet||look.helmet==='none'))):['suit','pants','shoes','glasses'];const sources=kinds.map(k=>wardrobeSourceFor(k,look&&look[k]));if(look?.hair&&look.hair!=='hairNatural'&&(!look.hat||look.hat==='none')&&(!look.helmet||look.helmet==='none'))sources.push('summer-shavedHead-v2');if(look?.watch&&look.watch!=='none')sources.push(wornWatchSource(look.watch));if(look?.ring&&look.ring!=='none')sources.push('summer-ring-photo-'+look.ring+'-v2');if(look?.detailHand)sources.push('summer-hand-detail-v2');return Promise.all([...new Set(sources)].map(kind=>{const im=wardrobeImage(kind);if(!im||im.naturalWidth)return Promise.resolve();if(im.complete)return Promise.reject(Error('Не удалось загрузить гардероб'));return new Promise((resolve,reject)=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',()=>reject(Error('Не удалось загрузить гардероб')),{once:true});});}));}
+function loadWardrobe(look){const kinds=look?['suit','pants','shoes','glasses','watch','hat','hair','body'].filter(k=>fashionIndex(k,look[k])>=0&&(k!=='hair'||!look.suit||look.hair!=='hairNatural'&&(!look.hat||look.hat==='none')&&(!look.helmet||look.helmet==='none'))):['suit','pants','shoes','glasses'];const sources=kinds.map(k=>wardrobeSourceFor(k,look&&look[k]));if(look?.hair&&look.hair!=='hairNatural'&&(!look.hat||look.hat==='none')&&(!look.helmet||look.helmet==='none'))sources.push('summer-shavedHead-v2');if(look?.watch==='carbonChrono')sources.push(wornWatchSource(look.watch));if(look?.ring&&look.ring!=='none')sources.push('summer-ring-photo-'+look.ring+'-v2');if(look?.detailHand)sources.push('summer-hand-detail-v2');return Promise.all([...new Set(sources)].map(kind=>{const im=wardrobeImage(kind);if(!im||im.naturalWidth)return Promise.resolve();if(im.complete)return Promise.reject(Error('Не удалось загрузить гардероб'));return new Promise((resolve,reject)=>{im.addEventListener('load',resolve,{once:true});im.addEventListener('error',()=>reject(Error('Не удалось загрузить гардероб')),{once:true});});}));}
 function fashionArt(kind,id){if(kind==='body'){const base=wardrobeImage(kind,id);if(!base?.naturalWidth)return null;const key='body-crop-v3:'+id;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);const crop=document.createElement('canvas');crop.width=760;crop.height=540;crop.getContext('2d').drawImage(base,132,220,760,540,0,0,760,540);wardrobeCrops.set(key,crop);return crop;}if(rewardFashionModels[kind]?.[id])return fashionArt(kind,rewardFashionModels[kind][id]);if(summerPieces[id]?.[0]===kind){const im=wardrobeImage(kind,id);return im?.naturalWidth?im:null;}if(seasonalItems.has(kind+':'+id))return seasonalArt(kind,id);let index=fashionIndex(kind,id);if(index<0)return null;if(['suit','pants','shoes','glasses','watch'].includes(kind)){const im=wardrobeImage(kind,id);if(!im?.naturalWidth)return null;const key='item:'+kind+':'+id;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);const art=document.createElement('canvas');art.width=im.naturalWidth;art.height=im.naturalHeight;art.getContext('2d').drawImage(im,0,0);wardrobeCrops.set(key,art);return art;}const image=wardrobeImage(kind);if(!image?.naturalWidth)return null;const key=kind+':'+id;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);if(kind==='watch')index+=8;const accessory=['glasses','watch'].includes(kind),row=Math.floor(index/4),bounds=accessory?[0,.215,.373,.669,1]:[0,1/3,2/3,1],w=image.naturalWidth/4,sy=image.naturalHeight*bounds[row],h=image.naturalHeight*(bounds[row+1]-bounds[row]),c=document.createElement('canvas');c.width=Math.round(w);c.height=Math.round(h);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(image,index%4*w,sy,w,h,0,0,c.width,c.height);const data=x.getImageData(0,0,c.width,c.height).data,seen=new Uint8Array(c.width*c.height),components=[];for(let pos=0;pos<seen.length;pos++){if(seen[pos]||data[pos*4+3]<=48)continue;const todo=[pos];seen[pos]=1;let left=c.width,top=c.height,right=-1,bottom=-1,count=0;const members=[];while(todo.length){const n=todo.pop(),xx=n%c.width,y=Math.floor(n/c.width);count++;members.push(n);left=Math.min(left,xx);right=Math.max(right,xx);top=Math.min(top,y);bottom=Math.max(bottom,y);for(const next of [xx? n-1:-1,xx<c.width-1?n+1:-1,y?n-c.width:-1,y<c.height-1?n+c.width:-1])if(next>=0&&!seen[next]&&data[next*4+3]>48){seen[next]=1;todo.push(next);}}components.push({left,top,right,bottom,count,members});}components.sort((a,b)=>b.count-a.count);const keep=components.filter(p=>p.count>=(components[0]?.count||0)*(kind==='shoes'?.15:.25));if(keep.length){const retained=new Uint8Array(seen.length);for(const p of keep)for(const n of p.members)retained[n]=1;const clean=x.getImageData(0,0,c.width,c.height);for(let n=0;n<retained.length;n++)if(!retained[n])clean.data[n*4+3]=0;x.putImageData(clean,0,0);const left=Math.min(...keep.map(p=>p.left)),top=Math.min(...keep.map(p=>p.top)),right=Math.max(...keep.map(p=>p.right)),bottom=Math.max(...keep.map(p=>p.bottom)),pixels=x.getImageData(left,top,right-left+1,bottom-top+1);c.width=pixels.width;c.height=pixels.height;c.getContext('2d').putImageData(pixels,0,0);}wardrobeCrops.set(key,c);return c;}
 function necklaceArt(id,nickname){
  const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d'),col=item('necklace',id).color,large=['acesPendant','spadeDiamond','crownPendant','poker21Pendant','nicknameBling'].includes(id);
@@ -339,60 +339,60 @@ function footwearFit(art){if(!art.getContext){const cached=wardrobeCrops.get('fo
 function bodyTopArt(top,look){
  if(!top||look.suit==='none')return null;
  const body=fashionArt('body',look.body);if(!body)return null;
- const key='body-top-v3:'+look.body+':'+look.suit;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);
+ const key='body-top-v5:'+look.body+':'+look.suit;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);
  const layer=document.createElement('canvas');layer.width=760;layer.height=look.body==='bodyBelly'?600:540;const x=layer.getContext('2d');if(/(Tank|Tee)$/.test(look.suit))x.drawImage(body,0,0);
  const cloth=document.createElement('canvas');cloth.width=760;cloth.height=540;const g=cloth.getContext('2d');g.drawImage(top,0,0,760,540);
  const tank=look.suit.endsWith('Tank'),tee=look.suit.endsWith('Tee');
  if(tank||tee){
   // Discard photographed arms and neck from the item; the selected base supplies them.
   g.globalCompositeOperation='destination-in';g.beginPath();
-  const outline=tee?[[.25,0],[.75,0],[.98,.45],[.80,.53],[.77,.73],[.82,1],[.18,1],[.23,.73],[.20,.53],[.02,.45]]:[[.34,0],[.66,0],[.75,.28],[.73,.65],[.75,1],[.25,1],[.27,.65],[.25,.28]];
-  outline.forEach(([xx,yy],n)=>n?g.lineTo(xx*760,yy*540):g.moveTo(xx*760,yy*540));g.closePath();g.fill();
-  g.globalCompositeOperation='destination-out';g.beginPath();g.moveTo(275,0);g.lineTo(485,0);g.bezierCurveTo(479,43,455,88,380,tank?100:42);g.bezierCurveTo(305,88,281,43,275,0);g.closePath();g.fill();g.globalCompositeOperation='source-over';
+  if(tank){
+   g.moveTo(258,0);g.lineTo(502,0);g.bezierCurveTo(505,64,541,112,566,151);
+   g.bezierCurveTo(550,210,549,300,555,351);g.quadraticCurveTo(559,455,570,540);
+   g.lineTo(190,540);g.quadraticCurveTo(201,455,205,351);
+   g.bezierCurveTo(211,300,210,210,194,151);g.bezierCurveTo(219,112,255,64,258,0);
+  }else{
+   g.moveTo(190,0);g.lineTo(570,0);g.quadraticCurveTo(666,96,745,243);
+   g.lineTo(608,286);g.quadraticCurveTo(578,335,585,394);g.lineTo(623,540);
+   g.lineTo(137,540);g.lineTo(175,394);g.quadraticCurveTo(182,335,152,286);
+   g.lineTo(15,243);g.quadraticCurveTo(94,96,190,0);
+  }
+  g.closePath();g.fill();
+  g.globalCompositeOperation='destination-out';g.beginPath();g.moveTo(275,0);g.lineTo(485,0);
+  g.bezierCurveTo(479,tank?62:28,455,tank?100:42,380,tank?100:42);
+  g.bezierCurveTo(305,tank?100:42,281,tank?62:28,275,0);g.closePath();g.fill();g.globalCompositeOperation='source-over';
   if(tee){g.clearRect(0,290,130,250);g.clearRect(630,290,130,250);}
  }
- // Fit fabric around the torso, leaving wrist attachment coordinates unchanged.
- for(let row=0;row<540;row++){
-  const t=row/539,factor=look.body==='bodySlim'?.86:look.body==='bodyBelly'?1.10+.43*Math.sin(Math.PI*t*.65):1.03;
+ // Warp the torso continuously: belly length and width share one source mapping.
+ // Sleeves keep their original registration; only the front panel gains room.
+ const belly=look.body==='bodyBelly',height=belly?600:540;
+ // Locate the garment's own hem instead of stretching transparent catalogue padding.
+ const clothPixels=g.getImageData(0,0,760,540).data;
+ let sourceHem=539;
+ if(belly){for(let y=539;y>=300;y--){let coverage=0;for(let xx=240;xx<520;xx++)if(clothPixels[(y*760+xx)*4+3]>80)coverage++;if(coverage>40){sourceHem=y;break;}}}
+ const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
+ for(let row=0;row<height;row++){
+  const lower=smooth((row-170)/(height-170));
+  const sourceRow=belly?row-(height-1-sourceHem)*smooth((row-180)/(height-180)):row;
+  const factor=look.body==='bodySlim'?.90:belly?1.08+.52*lower:1.05;
   const left=380-140*factor,right=380+140*factor;
-  x.drawImage(cloth,0,row,160,1,0,row,160,1);
-  x.drawImage(cloth,160,row,80,1,160,row,left-160,1);
-  x.drawImage(cloth,240,row,280,1,left,row,right-left,1);
-  x.drawImage(cloth,520,row,80,1,right,row,600-right,1);
-  x.drawImage(cloth,600,row,160,1,600,row,160,1);
+  // Keep the sleeve pixels and exposed wrists out of the belly deformation.
+  if(row<540){x.drawImage(cloth,0,row,160,1,0,row,160,1);x.drawImage(cloth,600,row,160,1,600,row,160,1);}
+  x.drawImage(cloth,160,sourceRow,80,1,160,row,left-160,1.15);
+  x.drawImage(cloth,240,sourceRow,280,1,left,row,right-left,1.15);
+  x.drawImage(cloth,520,sourceRow,80,1,right,row,600-right,1.15);
  }
- if(look.body==='bodyBelly'){
-  const original=document.createElement('canvas');original.width=760;original.height=600;original.getContext('2d').drawImage(layer,0,0);
-  x.clearRect(100,300,560,300);
-  x.drawImage(original,100,300,560,240,100,300,560,300);
-  x.clearRect(0,540,190,60);x.clearRect(570,540,190,60);
- }
+ if(top._wristWindows)layer._wristWindows=top._wristWindows;
  wardrobeCrops.set(key,layer);return layer;
 }
 const exposedWristFits=new WeakMap();
 function fitExposedWrists(top,look){
  if(!top||look.body==='bodyBeast'||/(Tank|Tee)$/.test(look.suit))return top;
  if(exposedWristFits.has(top))return exposedWristFits.get(top);
- const raw=document.createElement('canvas');raw.width=760;raw.height=540;const r=raw.getContext('2d',{willReadFrequently:true});r.drawImage(top,0,0,760,540,0,0,760,540);
+ const raw=document.createElement('canvas');raw.width=760;raw.height=540;const r=raw.getContext('2d',{willReadFrequently:true});r.drawImage(top,0,0,760,540);
  const result=document.createElement('canvas');result.width=760;result.height=540;const x=result.getContext('2d');x.drawImage(raw,0,0);
- const pixels=r.getImageData(0,0,760,540).data;
- if(!/(Tank|Tee)$/.test(look.suit)){
-  for(const side of [0,1]){const start=side?575:0,end=side?760:185;let last=300;
-   for(let yy=300;yy<540;yy++)for(let xx=side?610:0;xx<(side?760:150);xx++)if(pixels[(yy*760+xx)*4+3]>40)last=Math.max(last,yy);
-   x.clearRect(start,300,end-start,240);
-   for(let y=300;y<540;y++){const sy=300+(y-300)*(last-300)/239,scan=Math.floor(sy);let left=-1,right=-1;for(let xx=side?759:0;side?xx>=575:xx<=184;xx+=side?-1:1){if(pixels[(scan*760+xx)*4+3]>40){if(left<0)left=xx;right=xx;}else if(left>=0)break;}if(left<0)continue;if(left>right)[left,right]=[right,left];
-    const t=((y-300)/239)**2,width=right-left+1,center=(left+right)/2,w=width*(1-t)+76*t,cx=center*(1-t)+(side?694:69)*t;x.drawImage(raw,left,sy,width,1,cx-w/2,y,w,1.2);
-   }
-  }
- }else{
- for(let y=360;y<540;y++)for(const side of [0,1]){
-  let left=-1,right=-1;const start=side?759:0,end=side?575:185,step=side?-1:1;
-  for(let xx=start;side?xx>=end:xx<=end;xx+=step){const opaque=pixels[(y*760+xx)*4+3]>40;if(opaque){if(left<0)left=xx;right=xx;}else if(left>=0)break;}
-  if(left<0)continue;if(left>right)[left,right]=[right,left];
-  const t=((y-360)/179)**2,width=right-left+1,center=(left+right)/2,target=side?694:69,w=width*(1-t)+76*t,cx=center*(1-t)+target*t;
-  x.clearRect(left-1,y,width+2,1);x.drawImage(raw,left,y,width,1,cx-w/2,y,w,1);
- }
- }
+ // The item artwork already registers its sleeves to the shared wrists.
+ // Re-stretching a rectangular sleeve region introduced steps and detached cuffs.
  // Ghost-mannequin cuff interiors must reveal the actual wrist underneath.
  if(['navyBusiness','charcoalBusiness','navyBlazer','sovietShearling'].includes(look.suit)){
   const p=x.getImageData(0,0,760,540).data;
@@ -400,10 +400,7 @@ function fitExposedWrists(top,look){
    if(r>l&&b>t){x.save();x.globalCompositeOperation='destination-out';x.beginPath();const fur=look.suit==='sovietShearling';const opening={x:(l+r)/2,y:fur?b-9:(t+b)/2,rx:(r-l)*.39,ry:fur?6:Math.max(3,(b-t)*.22),side};(result._wristWindows||(result._wristWindows=[])).push(opening);x.ellipse(opening.x,opening.y,opening.rx,opening.ry,0,0,Math.PI*2);x.fill();x.restore();}
   }
  }
- // Fit every tank and tee hem to the waist while preserving the exposed arms.
- if(/(Tank|Tee)$/.test(look.suit)&&look.body!=='bodyBeast'){const lower=document.createElement('canvas');lower.width=760;lower.height=540;const lx=lower.getContext('2d',{willReadFrequently:true});lx.drawImage(result,0,0);const pixels=lx.getImageData(0,0,760,540).data;for(let y=330;y<540;y++){let left=380,right=380;if(pixels[(y*760+380)*4+3]<30)continue;while(left>130&&pixels[(y*760+left-1)*4+3]>30)left--;while(right<640&&pixels[(y*760+right+1)*4+3]>30)right++;left=Math.max(0,left-2);right=Math.min(759,right+2);const t=(y-330)/210,sourceWidth=right-left+1,width=sourceWidth*(1-(look.suit.endsWith('Tee')?(look.body==='bodyBelly'?.32:.16):(look.body==='bodyBelly'?.40:.25))*t*t),center=(left+right)/2;x.clearRect(left,y,sourceWidth,1);x.drawImage(lower,left,y,sourceWidth,1,center-width/2,y,width,1);}}
 
- if(top.height>540){const upper=x.getImageData(0,0,760,540);result.height=top.height;const rx=result.getContext('2d');rx.putImageData(upper,0,0);rx.drawImage(top,0,540,760,top.height-540,0,540,760,top.height-540);}
  exposedWristFits.set(top,result);return result;
 }
 const pantsWaistSpans=new WeakMap();
@@ -427,7 +424,7 @@ function paintFashion(c,image,look,standing){
  if(!standing)return;
  c.save();c.scale(c.canvas.width/1024,image.naturalHeight/1536);
  const erase=(points)=>{c.save();c.globalCompositeOperation='destination-out';c.beginPath();points.forEach(([x,y],n)=>n?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.restore();};
- const pants=fashionArt('pants',look.pants),top=fitExposedWrists(bodyTopArt(fashionArt('suit',look.suit),look),look),shoes=fashionArt('shoes',look.shoes),shoeBase=rewardFashionModels.shoes[look.shoes]||seasonalItems.get('shoes:'+look.shoes)?.base||look.shoes;
+ const pants=fashionArt('pants',look.pants),top=bodyTopArt(fitExposedWrists(fashionArt('suit',look.suit),look),look),shoes=fashionArt('shoes',look.shoes),shoeBase=rewardFashionModels.shoes[look.shoes]||seasonalItems.get('shoes:'+look.shoes)?.base||look.shoes;
  const waistY=look.body==='bodyBelly'?780:summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
  const highBoot=['combatBlack','hikingBrown','canvasHigh','suedeChelsea','jordanBlackToe','jordanChicago','valenki'].includes(shoeBase),lowShoe=['blackOxford','brownLoafers','burgundyBrogue','ivoryLow','greenCourt','nikeAirForceWhite','nikeDunkPanda','gucciAce','pradaAmericaCup'].includes(shoeBase);
  const angledSneaker=['nikeAirForceWhite','nikeDunkPanda','jordanChicago','gucciAce','balenciagaTrack','pradaAmericaCup'].includes(shoeBase);
@@ -437,7 +434,7 @@ function paintFashion(c,image,look,standing){
  if(top&&!/(Tank|Tee)$/.test(look.suit)){c.save();c.beginPath();c.rect(145,680,140,120);c.rect(740,680,145,120);c.clip();c.drawImage(image,0,0,1024,1536);c.restore();}
  if(top&&look.pants==='boxers')c.drawImage(image,300*image.naturalWidth/1024,640*image.naturalHeight/1536,420*image.naturalWidth/1024,215*image.naturalHeight/1536,300,640,420,215);
  if(pants){const hem=['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?1079:1295;erase([[300,waistY],[728,waistY],[798,hem],[224,hem]]);}
- if(shoes)c.clearRect(142,1260,746,276);
+ if(shoes)c.clearRect(142,1511-shoeHeight,746,shoeHeight+25);
  // Footwear sits behind the trouser hem, including when it is the original pair.
  if(shoes){for(const [n,foot]of footwearFit(shoes).entries()){const scale=shoeHeight/foot.height,widthScale=scale*(angledSneaker?1.10:1)*(shoeBase==='valenki'?1.55:['blackOxford','brownLoafers','burgundyBrogue'].includes(shoeBase)?1.25:1),ankle=pants&&!['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?trouserAnkles(pants,look)[n]:n?684:340,left=ankle-(foot.ankle-foot.left)*widthScale,width=foot.width*widthScale;c.save();c.globalCompositeOperation='destination-over';c.translate(left+width*.5,1509);c.scale(1,.12);const ground=c.createRadialGradient(0,0,0,0,0,width*.65);ground.addColorStop(0,'#0009');ground.addColorStop(1,'#0000');c.fillStyle=ground;c.beginPath();c.arc(0,0,width*.65,0,Math.PI*2);c.fill();c.restore();c.save();if(angledSneaker){c.translate(ankle,1511-shoeHeight+16);c.rotate((n?-1:1)*Math.PI/18);c.translate(-ankle,-(1511-shoeHeight+16));}if(shoeBase==='valenki'){for(let row=0;row<shoeHeight;row++){const t=row/shoeHeight,source=t<.62?t/.62*.72:.72+(t-.62)/.38*.28,f=Math.max(0,Math.min(1,(t-.55)/.45)),flare=1+.40*f*f*(3-2*f),rowWidth=width*flare,rowLeft=ankle-(foot.ankle-foot.left)*widthScale*flare;c.drawImage(shoes,foot.left,foot.top+source*(foot.height-1),foot.width,1,rowLeft,1511-shoeHeight+row,rowWidth,1.2);}}else c.drawImage(shoes,foot.left,foot.top,foot.width,foot.height,left,1511-shoeHeight,width,shoeHeight);c.restore();}}
  if(originalCuffs){for(const [left,width]of [[267,166],[596,166]])c.drawImage(originalCuffs,left,0,width,80,left,1190,width,bottom-1190);}
@@ -468,7 +465,7 @@ function paintFashion(c,image,look,standing){
  if(top){for(const points of [[[155,740],[239,737],[271,803],[277,876],[250,925],[185,913],[141,853]],[[785,738],[866,741],[881,855],[845,925],[782,914],[748,858],[757,802]]]){c.save();c.beginPath();points.forEach(([x,y],n)=>n?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.clip();if(summerPieces[look.suit]&&/(Tank|Tee)$/.test(look.suit)){for(let y=738;y<760;y++){c.globalAlpha=(y-738)/22;c.drawImage(image,0,y*image.naturalHeight/1536,image.naturalWidth,image.naturalHeight/1536,0,y,1024,1);}c.globalAlpha=1;c.beginPath();c.rect(0,760,1024,776);c.clip();c.drawImage(image,0,0,1024,1536);}else{c.drawImage(image,0,0,1024,1536);}c.restore();}}
  c.restore();
 }
-function paintAccessories(c,image,look,standing,detailScale=1){c.save();c.scale(c.canvas.width/(standing?1024:1179),image.naturalHeight*detailScale/(standing?1536:1334));const glasses=fashionArt('glasses',look.glasses),watch=fashionArt('watch',look.watch);if(glasses&&(look.helmet==='none'||look.visor!=='closed')){c.save();c.translate(standing?518:399,standing?123:127);if(!standing)c.rotate(-.22);const frameWidth={sportMirror:207,aviatorGold:211,wayfarerBlack:212,roundGold:193,rimlessSilver:207,tortoise:209,ovalBlack:200,browline:211}[look.glasses]||180,scale=Math.min(frameWidth/glasses.width,77/glasses.height)*.88,w=glasses.width*scale,h=glasses.height*scale;c.shadowColor='#100b0860';c.shadowBlur=2;c.shadowOffsetY=1;c.drawImage(glasses,-w/2,-h/2,w,h);c.restore();}const wornWatch=standing&&look.watch!=='none'?wardrobeImage(wornWatchSource(look.watch)):null;if(wornWatch?.naturalWidth){c.save();if(look.watch==='carbonChrono'){c.shadowColor='#130c0790';c.shadowBlur=1.1;c.shadowOffsetY=1;}c.drawImage(wornWatch,760,716,130,98);c.restore();}else if(watch){c.save();const wrist=standing?{x:826,y:757,angle:.24,width:64}:{x:978,y:434,angle:-.35,width:68};c.translate(wrist.x,wrist.y);c.rotate(wrist.angle);c.transform(1,-.09,.08,.83,0,0);
+function paintAccessories(c,image,look,standing,detailScale=1){c.save();c.scale(c.canvas.width/(standing?1024:1179),image.naturalHeight*detailScale/(standing?1536:1334));const glasses=fashionArt('glasses',look.glasses),watch=fashionArt('watch',look.watch);if(glasses&&(look.helmet==='none'||look.visor!=='closed')){c.save();c.translate(standing?518:399,standing?123:127);if(!standing)c.rotate(-.22);const frameWidth={sportMirror:207,aviatorGold:211,wayfarerBlack:212,roundGold:193,rimlessSilver:207,tortoise:209,ovalBlack:200,browline:211}[look.glasses]||180,scale=Math.min(frameWidth/glasses.width,77/glasses.height)*.88,w=glasses.width*scale,h=glasses.height*scale;c.shadowColor='#100b0860';c.shadowBlur=2;c.shadowOffsetY=1;c.drawImage(glasses,-w/2,-h/2,w,h);c.restore();}const wornWatch=standing&&look.watch==='carbonChrono'?wardrobeImage(wornWatchSource(look.watch)):null;if(wornWatch?.naturalWidth){c.save();if(look.watch==='carbonChrono'){c.shadowColor='#130c0790';c.shadowBlur=1.1;c.shadowOffsetY=1;}c.drawImage(wornWatch,760,716,130,98);c.restore();}else if(watch){c.save();const wrist=standing?(detailScale>1?{x:826,y:757,angle:.24,width:64}:({bodySlim:{x:826,y:757,angle:.24,width:64},bodyNormal:{x:828,y:760,angle:.24,width:66},bodyBelly:{x:846,y:766,angle:.20,width:72}}[look.body]||{x:826,y:757,angle:.24,width:64})):{x:978,y:434,angle:-.35,width:68};c.translate(wrist.x,wrist.y);c.rotate(wrist.angle);c.transform(1,-.09,.08,.83,0,0);
 const leather=['roseDress','bronzePilot','squareDress'].includes(look.watch),gold=['goldClassic','rolexDayDate','royalSkeleton'].includes(look.watch),half=wrist.width/2;
 c.save();c.beginPath();c.moveTo(-half,0);c.quadraticCurveTo(0,-15,half,0);c.quadraticCurveTo(half+1,7,half-4,14);c.quadraticCurveTo(0,1,-half+4,14);c.quadraticCurveTo(-half-1,7,-half,0);c.closePath();c.shadowColor='#100803b0';c.shadowBlur=1.8;c.shadowOffsetY=1.5;const bandShade=c.createLinearGradient(-half,0,half,0);for(const [at,col]of leather?[[0,'#160d09'],[.22,'#493025'],[.45,'#735141'],[.7,'#42291e'],[1,'#130b08']]:[[0,gold?'#51401b':'#3d4449'],[.22,gold?'#d3ad61':'#aeb9bf'],[.47,gold?'#f1d693':'#e3e9ed'],[.72,gold?'#ae843b':'#8a969e'],[1,gold?'#493417':'#333b40']])bandShade.addColorStop(at,col);c.fillStyle=bandShade;c.fill();c.shadowBlur=0;c.clip();
 if(leather){c.strokeStyle='#ac806170';c.lineWidth=.45;c.setLineDash([1.6,1.1]);for(const y of [-5,6]){c.beginPath();c.moveTo(-half,y+4);c.quadraticCurveTo(0,y-3,half,y+4);c.stroke();}c.setLineDash([]);}else{for(let x=-half+3;x<half;x+=4.2){c.strokeStyle='#18202b70';c.lineWidth=.65;c.beginPath();c.moveTo(x,-12);c.lineTo(x-1.2,12);c.stroke();c.strokeStyle='#ffffff55';c.lineWidth=.35;c.beginPath();c.moveTo(x+.8,-12);c.lineTo(x-.4,12);c.stroke();}c.strokeStyle='#202a3460';c.lineWidth=.5;for(const y of [-3,3]){c.beginPath();c.moveTo(-half,y+3);c.quadraticCurveTo(0,y-3,half,y+3);c.stroke();}}
@@ -583,6 +580,9 @@ function renderCharacter(image,v,detailScale=1){
   c.putImageData(body,0,80);c.translate(0,80);
   if(standing){
    c.save();c.scale(canvas.width/1024,image.naturalHeight/1536);
+   // Bare ears must stay inside the helmet shell rather than protrude beside it.
+   c.save();c.globalCompositeOperation='destination-out';c.beginPath();
+   c.ellipse(366,111,38,59,0,0,Math.PI*2);c.ellipse(658,111,38,59,0,0,Math.PI*2);c.fill();c.restore();
    // A frontal shell has a real transparent face opening; no polygon cuts through its rim.
    c.drawImage(helmetArt(true,v,true),340,-55,350,350);c.restore();
   }else{
@@ -642,6 +642,8 @@ function renderCharacter(image,v,detailScale=1){
  if(detailScale>1){const headroom=canvas.height-image.naturalHeight,enlarged=document.createElement('canvas');enlarged.width=canvas.width*detailScale;enlarged.height=canvas.height*detailScale;const enlargedContext=enlarged.getContext('2d');enlargedContext.imageSmoothingQuality='high';enlargedContext.drawImage(canvas,0,0,enlarged.width,enlarged.height);canvas=enlarged;c=enlargedContext;if(headroom)c.translate(0,headroom*detailScale);}
  if(standing&&detailScale>1){const hand=wardrobeImage('summer-hand-detail-v2');if(hand?.naturalWidth){c.save();c.scale(detailScale,detailScale);c.clearRect(720,765,200,195);for(let row=0;row<220;row++){c.globalAlpha=Math.min(1,row/12);c.drawImage(hand,0,(90+row)*hand.naturalHeight/310,hand.naturalWidth,hand.naturalHeight/310,720,740+row,200,1.2);}c.restore();}}
  paintAccessories(c,image,v,standing,detailScale);
+ // Full-size fitting renders must not accumulate indefinitely while browsing clothes.
+ while(artCache.size>=12)artCache.delete(artCache.keys().next().value);
  artCache.set(key,canvas);return canvas;
 }
 
