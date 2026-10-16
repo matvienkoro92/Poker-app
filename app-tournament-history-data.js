@@ -907,6 +907,21 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             4600
           ]
         ]
+      ],
+      [
+        "15.10.2026",
+        [
+          [
+            1,
+            "Zeus",
+            39450
+          ],
+          [
+            2,
+            "WildBoar",
+            11440
+          ]
+        ]
       ]
     ]
   },

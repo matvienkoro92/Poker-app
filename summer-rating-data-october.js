@@ -3224,4 +3224,183 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "15.10.2026": [
+    {
+      "time": "08:00",
+      "name": "Island bounty🌴 20k",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Откотика_Я",
+          "place": 3,
+          "reward": 2994,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "A Аддоник А",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "PLOtnik",
+          "place": 1,
+          "reward": 7900,
+          "points": 0
+        },
+        {
+          "nick": "Анубис",
+          "place": 2,
+          "reward": 3840,
+          "points": 0
+        },
+        {
+          "nick": "Nast'ko",
+          "place": 3,
+          "reward": 1000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 1,
+          "reward": 14200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Baldendi",
+          "place": 1,
+          "reward": 11150,
+          "points": 0
+        },
+        {
+          "nick": "Y-gin",
+          "place": 3,
+          "reward": 1320,
+          "points": 0
+        },
+        {
+          "nick": "Zeus",
+          "place": 4,
+          "reward": 820,
+          "points": 0
+        },
+        {
+          "nick": "Odna.pluha",
+          "place": 5,
+          "reward": 650,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Zeus",
+          "place": 1,
+          "reward": 39450,
+          "points": 0
+        },
+        {
+          "nick": "WildBoar",
+          "place": 2,
+          "reward": 11440,
+          "points": 0
+        },
+        {
+          "nick": "Imnotpro",
+          "place": 7,
+          "reward": 6980,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 4,
+          "reward": 3510,
+          "points": 0
+        },
+        {
+          "nick": "Local",
+          "place": 8,
+          "reward": 1500,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MoW3R",
+          "place": 1,
+          "reward": 22522.72,
+          "points": 0
+        },
+        {
+          "nick": "🦈Shark-Eyed🦈",
+          "place": 5,
+          "reward": 4697.19,
+          "points": 0
+        },
+        {
+          "nick": "Y-gin",
+          "place": 3,
+          "reward": 4568.74,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 6,
+          "reward": 2437.48,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 8,
+          "reward": 1877.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Night magic 80K 🌘",
+      "buyin": 20000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "nachyn",
+          "place": 4,
+          "reward": 5150,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

@@ -1206,4 +1206,10 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-14-10-2026-league1-freeroll-500k-dr-18h.jpg",
     "rating-compressed-preview/rating-14-10-2026-league1-pyatihatka-ko-20h.jpg"
   ]
+,
+  "15.10.2026": [
+    "rating-compressed-preview/rating-15-10-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-15-10-2026-league1-pyatihatka-ko-20h.jpg",
+    "rating-compressed-preview/rating-15-10-2026-league1-night-magic-80k-23h.jpg"
+  ]
 };
