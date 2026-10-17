@@ -656,8 +656,8 @@
 @media(max-width:680px){.garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-character-stage{background-image:linear-gradient(0deg,#0c151a99,transparent 25%),url('./assets/player-hall/wardrobe-studio-mobile-v1.webp')}}
 
 /* Motorcycles are shorter than the cars and share their contact plane. */
-.player-hall__room[data-garage-vehicle="3"] .garage-locked-vehicle{left:6%;width:64%;bottom:19%}
-.player-hall__room[data-garage-vehicle="4"] .garage-locked-vehicle{left:9%;width:57%;bottom:19%}
+.player-hall__room[data-garage-vehicle="3"] .garage-locked-vehicle{left:0%;width:62%;bottom:27%}
+.player-hall__room[data-garage-vehicle="4"] .garage-locked-vehicle{left:3%;width:55%;bottom:27%}
 .player-hall__room:is([data-garage-vehicle="3"],[data-garage-vehicle="4"]) .garage-locked-vehicle::before{bottom:0;height:9%;transform:rotate(12deg)}
 
 /* Leave the straw crown below the display-case edge while keeping the feet grounded. */
@@ -666,3 +666,6 @@
 /* Only wallpaper pixels are replaced; the original lights, frames and shelf rails show through. */
 .hall-trophy-wallpaper{position:absolute;left:-.105485%;top:5.54551%;width:37.5%;height:57.98674%;background:url('./assets/player-hall/trophy-wallpaper-solid-v1.webp') center/100% 100% no-repeat;pointer-events:none}
 .player-hall__room[data-theme=midnight] .hall-trophy-wallpaper{filter:brightness(.35) saturate(.6)}
+
+/* Align motorcycles with the car parking plane and leave the radio in the foreground. */
+.player-hall__room:is([data-garage-vehicle="3"],[data-garage-vehicle="4"]) .garage-locked-vehicle{transform:perspective(900px) rotateY(-18deg) rotate(3deg);transform-origin:50% 85%}
