@@ -74,6 +74,7 @@ function normalizeName(raw) {
   if (/^Island bounty/i.test(name)) return "Island bounty🌴 20k";
   if (/^Bounty\s*200.*40K/i.test(name)) return "Bounty 200🥊 40K GTD";
   if (/^Crazy knock/i.test(name)) return "Crazy knock🥊";
+  if (/ПЯТИХАТКА\s*МОК/i.test(name)) return "ПЯТИХАТКА МОК";
   if (/ПЯТИХАТКА\s*КО/i.test(name)) return "ПЯТИХАТКА КО";
   if (/^OK\b/i.test(name) || /^ОК\b/i.test(name)) return "OK🎰";
   if (/^OKTI$/i.test(name)) return "OK🎰";
@@ -484,6 +485,8 @@ async function parseOcrFile(file) {
     if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
+  // Owner confirmed 300 for October 16; the blue 20K header is a starting stack.
+  if (date === "16.10.2026" && blue && time === "12:00" && /PLO5.*30k/i.test(title)) buyin = 300;
   if (blue && date === "05.10.2026" && time === "09:00" && /^Crazy knock/i.test(title)) buyin = 200;
   if (date === "01.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА КО";
   if (date === "02.10.2026" && !blue && time === "20:00") title = "ПЯТИХАТКА МОК";

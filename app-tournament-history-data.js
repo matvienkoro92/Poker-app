@@ -1202,6 +1202,21 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             43014.61
           ]
         ]
+      ],
+      [
+        "16.10.2026",
+        [
+          [
+            2,
+            "MORPEH",
+            26493.36
+          ],
+          [
+            3,
+            "komAsoer",
+            13116.05
+          ]
+        ]
       ]
     ]
   },

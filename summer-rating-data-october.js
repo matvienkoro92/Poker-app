@@ -3403,4 +3403,145 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "16.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Jeweler",
+          "place": 1,
+          "reward": 9606.73,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 2,
+          "reward": 4100.62,
+          "points": 0
+        },
+        {
+          "nick": "OMGRaise27",
+          "place": 5,
+          "reward": 114.37,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV🏃 PLO5 🥊 30k🥊",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "BOB06747",
+          "place": 3,
+          "reward": 4751,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "GhooSt",
+          "place": 1,
+          "reward": 11810,
+          "points": 0
+        },
+        {
+          "nick": "Nast'ko",
+          "place": 2,
+          "reward": 3310,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MORPEH",
+          "place": 2,
+          "reward": 26493.36,
+          "points": 0
+        },
+        {
+          "nick": "komAsoer",
+          "place": 3,
+          "reward": 13116.05,
+          "points": 0
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 4,
+          "reward": 6599.06,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 7,
+          "reward": 5284.21,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 14,
+          "reward": 2422.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА МОК",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 11237.5,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 4,
+          "reward": 1220,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Damir86rus",
+          "place": 2,
+          "reward": 3574.68,
+          "points": 0
+        },
+        {
+          "nick": "fomichga",
+          "place": 4,
+          "reward": 972.5,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
