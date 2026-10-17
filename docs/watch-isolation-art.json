@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Edit target: extract ONLY the watch and its visible bracelet/strap from this image as a high-quality game overlay. Preserve this exact watch identity, case shape, dial design, hands, materials and the current three-quarter worn perspective. Remove ALL skin, hair, hand, arm, sleeve, black cuff and background. Those removed areas must be fully transparent, including underneath the curved strap. Keep only the actual watch case plus the short visible front/side strap that wraps horizontally around a wrist. Center the watch assembly, use a compact natural worn curve; do NOT turn into long vertical product strap, no mannequin, no shadows baked into transparent background. Crisp detailed premium photorealistic cutout; no new logos or text.",
+  "assets": [
+    "assets/player-hall/wardrobe/summer/worn-watch-rolexSubmariner-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-rolexGMT-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-rolexDaytona-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-rolexDayDate-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-royalSkeleton-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-diamondRoyal-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-steelBlue-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-roseDress-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-carbonChrono-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-goldClassic-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-squareDress-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-greenDiver-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-smartBlack-isolated-v3.webp",
+    "assets/player-hall/wardrobe/summer/worn-watch-bronzePilot-isolated-v3.webp"
+  ]
+}

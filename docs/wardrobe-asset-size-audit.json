@@ -1,6 +1,6 @@
 {
-  "beforeBytes": 5446594,
-  "totalBytes": 3780408,
+  "beforeBytes": 6271218,
+  "totalBytes": 4605032,
   "files": [
     {
       "file": "assets/player-hall/wardrobe/summer/poker21RedTank-print-v2.webp",
@@ -469,6 +469,104 @@
       "bytes": 52906,
       "width": 900,
       "height": 313,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-bronzePilot-isolated-v3.webp",
+      "bytes": 65434,
+      "width": 640,
+      "height": 372,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-carbonChrono-isolated-v3.webp",
+      "bytes": 60148,
+      "width": 640,
+      "height": 395,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-diamondRoyal-isolated-v3.webp",
+      "bytes": 92400,
+      "width": 640,
+      "height": 382,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-goldClassic-isolated-v3.webp",
+      "bytes": 54802,
+      "width": 640,
+      "height": 370,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-greenDiver-isolated-v3.webp",
+      "bytes": 53372,
+      "width": 640,
+      "height": 379,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-rolexDayDate-isolated-v3.webp",
+      "bytes": 63668,
+      "width": 640,
+      "height": 359,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-rolexDaytona-isolated-v3.webp",
+      "bytes": 60168,
+      "width": 640,
+      "height": 376,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-rolexGMT-isolated-v3.webp",
+      "bytes": 59662,
+      "width": 640,
+      "height": 373,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-rolexSubmariner-isolated-v3.webp",
+      "bytes": 57290,
+      "width": 640,
+      "height": 362,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-roseDress-isolated-v3.webp",
+      "bytes": 54600,
+      "width": 640,
+      "height": 360,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-royalSkeleton-isolated-v3.webp",
+      "bytes": 69156,
+      "width": 640,
+      "height": 347,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-smartBlack-isolated-v3.webp",
+      "bytes": 24416,
+      "width": 640,
+      "height": 329,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-squareDress-isolated-v3.webp",
+      "bytes": 52044,
+      "width": 640,
+      "height": 299,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/worn-watch-steelBlue-isolated-v3.webp",
+      "bytes": 57464,
+      "width": 640,
+      "height": 381,
       "alpha": true
     }
   ]

@@ -131,3 +131,6 @@
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) 38px;grid-template-areas:"preview" "families"}
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-customizer-layout[data-category=character]>.garage-categories{display:none}
 .garage-workshop--wardrobe[data-wardrobe-focus=outfits] .garage-body-hotspots{display:none}
+/* Keep all six wardrobe labels readable on phones. */
+@media(max-width:480px){.player-hall-dialog .garage-workshop--fitted .garage-wardrobe-families{grid-template-columns:repeat(3,minmax(0,1fr));height:74px;min-height:74px;max-height:74px}.player-hall-dialog .garage-workshop--fitted .garage-wardrobe-families button{font-size:11px}}
+@media(max-width:480px){.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) 74px 61px}.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) 74px}}
