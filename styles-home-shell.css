@@ -875,3 +875,9 @@ html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn
   content: none !important;
   display: none !important;
 }
+
+/* One menu surface; remove nested rectangular header and identity backplates. */
+html body #app.app > .card > .card__header.card__header--admin-shortcuts,
+html body #app.app > .card > .card__header.card__header--admin-shortcuts :is(.header-profile-summary,.header-admin-shortcuts,.header-actions,.header-actions__row,.header-menu-shell){background:transparent!important;box-shadow:none!important}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-profile-summary{border:0!important}
+#app .card__header .header-crm-shortcut__logo{clip-path:circle(48% at 50% 48%);background:transparent}

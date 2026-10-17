@@ -5,6 +5,7 @@
   var crmAccessProbeKey = "";
   var visitorsAdminCheckPromise = null;
   var visitorsAdminCheckLastAt = 0;
+  var visitorsAdminCheckKey = "";
   var visitorsAdminCheckLastResult = false;
   var reportAccessProbeState = "idle";
   var reportAccessProbeKey = "";
@@ -142,10 +143,11 @@
     var btn = document.getElementById("adminCrmBtn");
     var menuBtn = document.getElementById("headerCrmBtn");
     if (!btn && !menuBtn) return;
-    setCrmButtonAllowed(menuBtn, false);
-    setCrmButtonAllowed(btn, false);
-    syncHeaderAdminShortcuts();
     var url = buildCrmAccessProbeUrl();
+    var allowedForSession = !!url && crmAccessProbeState === "allowed" && crmAccessProbeKey === url;
+    setCrmButtonAllowed(menuBtn, allowedForSession);
+    setCrmButtonAllowed(btn, allowedForSession);
+    syncHeaderAdminShortcuts();
     if (url && crmAccessProbeState === "allowed" && crmAccessProbeKey === url) {
       setCrmButtonAllowed(menuBtn, true);
       setCrmButtonAllowed(btn, true);
@@ -246,18 +248,22 @@
         if (typeof setView === "function") setView("raffles", { raffleCompletedTarget: true });
       });
     }
-    if (reportBtn) {
+    var accessQuery = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+    var accessBase = getApiBase();
+    var hasCredential = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+    var sameAdminSession = hasCredential && visitorsAdminCheckKey === accessBase + accessQuery && visitorsAdminCheckLastResult;
+    var sameReportSession = hasCredential && reportAccessProbeState === "allowed" && reportAccessProbeKey === accessBase + "/api/admin-report-shifts" + accessQuery + "&access=1";
+    if (reportBtn && !sameReportSession) {
       reportBtn.hidden = true;
       reportBtn.classList.add("header-admin-report--hidden");
       reportBtn.setAttribute("aria-hidden", "true");
       reportBtn.disabled = true;
     }
-    if (bonusAdminBtn) {
+    if (bonusAdminBtn && !sameAdminSession) {
       bonusAdminBtn.hidden = true;
       bonusAdminBtn.setAttribute("aria-hidden", "true");
     }
-    setCrmButtonAllowed(crmMenuBtn, false);
-    syncHeaderAdminShortcuts();
+    syncCrmButtonAccess();
     function showKeyboardLabOnly() {
       if (homeFooterVersion) homeFooterVersion.setAttribute("hidden", "hidden");
       renderHomeAdminIdentityStatus(true);
@@ -413,7 +419,11 @@
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     var now = Date.now();
-    if (visitorsAdminCheckPromise) return;
+    var adminKey = base + q;
+    if (sameAdminSession) showAdminUi();
+    if (visitorsAdminCheckPromise && visitorsAdminCheckKey === adminKey) return;
+    if (visitorsAdminCheckKey === adminKey && now - visitorsAdminCheckLastAt < 30000) return;
+    visitorsAdminCheckKey = adminKey;
     visitorsAdminCheckLastAt = now;
     visitorsAdminCheckPromise = fetch(base + "/api/visitors-list" + q + "&adminCheck=1")
       .then(function (r) { return r.json(); })
