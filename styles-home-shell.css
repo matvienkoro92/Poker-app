@@ -797,3 +797,81 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-statu
   outline-offset: 3px;
 }
 #app .card__header :is(#headerCrmBtn, #headerReportsShortcutBtn, #headerBalancesShortcutBtn, #headerRafflesShortcutBtn)[hidden] { display: none !important; }
+
+/* Admin tools share one row with the menu; owner identity sits just above. */
+html body #app.app > .card > .card__header.card__header--admin-shortcuts {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 4px 6px !important;
+  align-items: center !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts > .logo,
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-profile-summary {
+  display: none !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts > .header-admin-shortcuts {
+  position: static !important;
+  transform: none !important;
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-wrap: nowrap !important;
+  justify-content: flex-end !important;
+  min-width: 0;
+  gap: 4px !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-actions,
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-actions__row {
+  display: contents !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-menu-shell {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0 !important;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm .header-profile-summary {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm > .header-admin-shortcuts,
+html body #app.app > .card > .card__header.card__header--owner-crm .header-menu-shell {
+  grid-row: 2;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  height: 42px !important;
+  margin-right: auto !important;
+}
+#app .card__header .header-crm-shortcut__logo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-status__fish {
+  display: none !important;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn::before,
+html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn::after {
+  content: none !important;
+  display: none !important;
+}

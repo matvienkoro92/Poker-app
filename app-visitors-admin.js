@@ -194,7 +194,10 @@
     rafflesShortcut.hidden = !showRaffles;
     wrap.hidden = !ownerSeesCrm && !showReport && !showBalances && !showRaffles;
     var header = wrap.closest ? wrap.closest(".card__header") : null;
-    if (header) header.classList.toggle("card__header--admin-shortcuts", ownerSeesCrm || !wrap.hidden);
+    if (header) {
+      header.classList.toggle("card__header--admin-shortcuts", ownerSeesCrm || !wrap.hidden);
+      header.classList.toggle("card__header--owner-crm", ownerSeesCrm);
+    }
     wrap.classList.toggle("header-admin-shortcuts--with-crm", ownerSeesCrm);
     if (crmBtn) crmBtn.classList.toggle("header-crm-shortcut--compact", ownerSeesCrm && (showReport || showBalances));
   }
