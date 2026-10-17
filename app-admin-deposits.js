@@ -20,15 +20,17 @@
     document.body.appendChild(dialog); host=dialog.querySelector('main'); editor=dialog.querySelector('.deposits__editor'); status=dialog.querySelector('[role="status"]');
     dialog.addEventListener('click',onClick); dialog.addEventListener('submit',onSubmit);
     dialog.addEventListener('input',function(e){
+      if(e.target.closest('[data-form="create"]'))syncCreateValidity();
       if (e.target.matches('[data-dep-search]')) { query=e.target.value; renderCards(); }
     });
+    dialog.addEventListener('change',function(e){if(e.target.closest('[data-form="create"]'))syncCreateValidity();});
     dialog.addEventListener('cancel',function(e){ if (busy) {e.preventDefault();return;} if(editing){e.preventDefault();closeEditor();} });
     dialog.addEventListener('close',function(event){if(event.target!==dialog)return;clearInterval(timer);clearInterval(ageTimer);document.body.classList.remove('deposits-open');generation++;if(opener)opener.focus();});
   }
   function setBusy(value) {
     busy=value; dialog.setAttribute('aria-busy',String(value));
     dialog.querySelectorAll('button').forEach(function(b){ b.disabled=value || b.dataset.unavailable==='true'; });
-    var retry=dialog.querySelector('.deposits__retry'); retry.hidden=!pending;
+    var retry=dialog.querySelector('.deposits__retry'); retry.hidden=!pending;syncCreateValidity();
   }
   async function api(body) {
     var payload=typeof pokerGuestOrAuthedPostBody === 'function' ? pokerGuestOrAuthedPostBody(body) : body;
@@ -105,7 +107,7 @@
       if(!editorPopup){editorPopup=document.createElement('dialog');editorPopup.className='deposits__popup';editorPopup.setAttribute('aria-labelledby','depositEditorTitle');dialog.appendChild(editorPopup);editorPopup.addEventListener('cancel',function(event){event.preventDefault();event.stopPropagation();if(!busy)closeEditor();});editorPopup.addEventListener('click',function(event){if(event.target===editorPopup&&!busy){var rect=editorPopup.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closeEditor();}});}
       var previousStatus=editorPopup.querySelector('.deposits__popup-status');if(previousStatus)previousStatus.remove();editorPopup.appendChild(editor);editorPopup.appendChild(dialog.querySelector('.deposits__retry'));host.hidden=false;dialog.querySelector('.deposits__toolbar').hidden=false;if(!editorPopup.open)editorPopup.showModal();
     }else{host.hidden=true;dialog.querySelector('.deposits__toolbar').hidden=true;editor.scrollIntoView({block:'start'});}
-    var focus=editor.querySelector('textarea,input,button');if(focus)focus.focus();
+    syncCreateValidity();var focus=editor.querySelector('textarea,input,button');if(focus)focus.focus();
   }
   function closeEditor() {dialog.classList.remove('deposits--form-open');var wasPopup=editorPopup&&editorPopup.open;if(wasPopup){editorPopup.close();dialog.querySelector('.deposits__shell').appendChild(editor);dialog.querySelector('.deposits__shell').insertBefore(dialog.querySelector('.deposits__retry'),host);}editing=false;editor.hidden=true;host.hidden=false;dialog.querySelector('.deposits__toolbar').hidden=false;if(!wasPopup)dialog.scrollTop=0;else if(popupOpener&&popupOpener.isConnected)popupOpener.focus({preventScroll:true});}
   function newEntry() {
@@ -114,9 +116,10 @@
   }
   function field(label,name,value,extra) {return '<label>'+label+'<input name="'+name+'" value="'+esc(value)+'" '+(extra||'')+'></label>';}
   var depositRooms=[['P21','Покер21'],['X','Хпокер'],['Supr','Супрема'],['PP','PPpoker']];
-  function roomFields(parsed){return '<fieldset class="deposits__rooms"><legend>Рум</legend>'+depositRooms.map(function(r){return '<label><input type="radio" name="room" value="'+r[0]+'" required'+(parsed.room===r[0]?' checked':'')+'><span>'+r[1]+'</span></label>';}).join('')+'</fieldset>'+field('ID игрока в руме','playerId',parsed.playerId||'','required maxlength="64" autocomplete="off"');}
+  function syncCreateValidity(){var form=editor&&editor.querySelector('[data-form="create"]');if(!form)return;var room=form.querySelector('[name="room"]:checked'),id=form.querySelector('[name="playerId"]'),submit=form.querySelector('[type="submit"]');if(submit)submit.disabled=busy||!room||!id||!/^[a-zA-Z0-9_-]{1,64}$/.test(id.value.trim());}
+  function roomFields(parsed){return '<fieldset class="deposits__rooms"><legend>Рум</legend>'+depositRooms.map(function(r){return '<label><input type="radio" name="room" value="'+r[0]+'" required'+(parsed.room===r[0]?' checked':'')+'><span>'+r[1]+'</span></label>';}).join('')+'</fieldset>';}
   function review(parsed) {
-    showEditor('Проверьте реквизиты','<form data-form="create"><p class="deposits__intro">Это сумма вывода. Проведённые на эти реквизиты депозиты будут уменьшать остаток.</p>'+(parsed.warnings.length?'<div class="deposits__warning">'+parsed.warnings.map(esc).join('<br>')+'</div>':'<div class="deposits__recognized">'+icon('check')+' Данные распознаны. Проверьте перед сохранением.</div>')+'<input type="hidden" name="paymentType" value="'+(parsed.paymentType==='usdt'?'usdt':'bank')+'"><div class="deposits__form-grid">'+(parsed.paymentType==='usdt'?field('USDT · кошелёк','wallet',parsed.wallet||'','required maxlength="100" autocomplete="off"')+field('Сеть USDT','network',parsed.network||'','required placeholder="TRC20" maxlength="20"')+field('Получатель · необязательно','recipient',parsed.recipient||'','maxlength="180"'):field('Получатель','recipient',parsed.recipient,'required maxlength="180" autocomplete="off"')+field('Банк','bank',parsed.bank,'maxlength="180" autocomplete="off"')+field('Номер карты','card',parsed.card,'inputmode="numeric" maxlength="32" autocomplete="off"')+field('Телефон / СБП','phone',parsed.phone,'type="tel" maxlength="32" autocomplete="off"'))+'</div>'+field('Сумма к выплате, ₽','total',inputMoney(parsed.amount),'required inputmode="decimal" autocomplete="off"')+roomFields(parsed)+field('Заметка · необязательно','note','','maxlength="500" placeholder="Например, ник игрока"')+'<input name="rawText" type="hidden" value="'+esc(parsed.rawText)+'"><div class="deposits__form-actions"><button type="button" class="deposits__secondary" data-dep="back-parse">Назад к сообщению</button><button type="submit" class="deposits__primary">Создать карточку '+icon('check')+'</button></div></form>');
+    showEditor('Проверьте реквизиты','<form data-form="create"><p class="deposits__intro">Это сумма вывода. Проведённые на эти реквизиты депозиты будут уменьшать остаток.</p>'+(parsed.warnings.length?'<div class="deposits__warning">'+parsed.warnings.map(esc).join('<br>')+'</div>':'<div class="deposits__recognized">'+icon('check')+' Данные распознаны. Проверьте перед сохранением.</div>')+'<input type="hidden" name="paymentType" value="'+(parsed.paymentType==='usdt'?'usdt':'bank')+'"><div class="deposits__form-grid">'+(parsed.paymentType==='usdt'?field('USDT · кошелёк','wallet',parsed.wallet||'','required maxlength="100" autocomplete="off"')+field('Сеть USDT','network',parsed.network||'','required placeholder="TRC20" maxlength="20"')+field('Получатель · необязательно','recipient',parsed.recipient||'','maxlength="180"'):field('Получатель','recipient',parsed.recipient,'required maxlength="180" autocomplete="off"')+field('Банк','bank',parsed.bank,'maxlength="180" autocomplete="off"')+field('Номер карты','card',parsed.card,'inputmode="numeric" maxlength="32" autocomplete="off"')+field('Телефон / СБП','phone',parsed.phone,'type="tel" maxlength="32" autocomplete="off"'))+'</div><div class="deposits__form-grid">'+field('Сумма к выплате, ₽','total',inputMoney(parsed.amount),'required inputmode="decimal" autocomplete="off"')+field('ID игрока в руме','playerId',parsed.playerId||'','required maxlength="64" autocomplete="off" pattern="[a-zA-Z0-9_-]{1,64}"')+'</div>'+roomFields(parsed)+field('Заметка · необязательно','note','','maxlength="500" placeholder="Например, ник игрока"')+'<input name="rawText" type="hidden" value="'+esc(parsed.rawText)+'"><div class="deposits__form-actions"><button type="button" class="deposits__secondary" data-dep="back-parse">Назад к сообщению</button><button type="submit" class="deposits__primary">Создать карточку '+icon('check')+'</button></div></form>');
   }
   async function copy(value) {
     try {
@@ -158,6 +161,8 @@
     var values=Object.fromEntries(new FormData(form).entries()), type=form.dataset.form;
     if(type==='parse'){review(parser.parse(values.raw));return;}
     if(type==='create'){
+      if(!['P21','X','Supr','PP'].includes(values.room)||!/^[a-zA-Z0-9_-]{1,64}$/.test(String(values.playerId||'').trim())){tell('Выберите рум и укажите ID игрока.',true);return;}
+      values.playerId=values.playerId.trim();
       var total=parser.money(values.total);if(!total){tell('Укажите корректную сумму к выплате.',true);return;}
       values.total=total;await save({action:'create',entry:values});
     }else if(type==='confirm-reservation'||type==='release-reservation'){await save({action:type,entryId:form.dataset.entry,reservationId:form.dataset.reservation});

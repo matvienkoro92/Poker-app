@@ -217,3 +217,37 @@ test('bare player ID and phone stay separate instead of forming a bank card',()=
  assert.equal(parser.parse('2202 2002 1234 5678').card,'2202200212345678');
  assert.equal(parser.parse('2202200212345678').card,'2202200212345678');
 });
+
+test('polite imperative withdrawal request separates amount, card and player ID',()=>{
+ const p=parser.parse('Выведите пожалуйста 3500 на 2204 1801 2754 7347 id 253005Ъ');
+ assert.equal(p.amount,350000);assert.equal(p.card,'2204180127547347');assert.equal(p.playerId,'253005');
+ assert.equal(parser.parse('Выведите, пожалуйста, 3500 на карту').amount,350000);
+});
+
+test('known standalone club IDs separate adjacent amount and player ID before card detection',()=>{
+ for(const [club,room] of Object.entries({'758417':'P21','1786376':'X','19645':'Supr','1004444':'PP'})){
+  const p=parser.parse('Вывод 11000 '+club+' 415678 переводить на сбер 89001848485');
+  assert.equal(p.amount,1100000);assert.equal(p.room,room);assert.equal(p.playerId,'415678');assert.equal(p.phone,'+79001848485');assert.equal(p.card,'');
+ }
+ assert.equal(parser.parse('ID 17584172').room,'');
+ assert.equal(parser.parse('Вывод 3500 на 2204 1801 2754 7347 id 253005').card,'2204180127547347');
+});
+
+test('sentence context recognizes alternative banks and a local ten-digit mobile number',()=>{
+ const p=parser.parse('Вывод нужен 16к на сбер и т банк 9091849816, спасибо');
+ assert.equal(p.amount,1600000);assert.equal(p.phone,'+79091849816');assert.equal(p.card,'');assert.equal(p.bank,'сбер / т банк');
+ assert.equal(parser.parse('Вывод 16к ID 9091849816').phone,'');
+ assert.equal(parser.parse('Вывод 16к на сбер 9091849816').phone,'+79091849816');
+});
+
+test('bare six-digit player ID before club is distinct from usual withdrawal amounts',()=>{
+ const p=parser.parse('4000, 676837, 758417 ОЗОН БАНК 89831399622');
+ assert.equal(p.amount,400000);assert.equal(p.playerId,'676837');assert.equal(p.room,'P21');assert.equal(p.phone,'+79831399622');assert.equal(p.card,'');assert.equal(p.bank,'ОЗОН БАНК');
+ for(const amount of ['4000','50000','100000']){const parsed=parser.parse(amount+', 676837, 758417 ОЗОН БАНК 89831399622');assert.equal(parsed.amount,Number(amount)*100);assert.equal(parsed.playerId,'676837');}
+ assert.equal(parser.parse('4000, 758417 ОЗОН БАНК 89831399622').playerId,'');
+});
+
+test('polite withdrawal with from-ID and recipient initial recognizes all fields',()=>{
+ const p=parser.parse('Ясно извините!выведите пожалуйста 6000 с 778130 на +79967261926 Т банк Мария К.');
+ assert.equal(p.amount,600000);assert.equal(p.playerId,'778130');assert.equal(p.recipient,'Мария К.');assert.equal(p.phone,'+79967261926');assert.equal(p.bank,'Т банк');assert.equal(p.card,'');
+});

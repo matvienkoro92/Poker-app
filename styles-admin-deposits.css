@@ -370,3 +370,15 @@ body.deposits-open {overflow:hidden;}
 .deposits__balances--reserved .deposits__remaining>strong,.deposits__balances--reserved .deposits__frozen>strong{font-size:clamp(15px,2.5vw,28px);letter-spacing:-.3px}
 .deposits__balances--reserved .deposits__remaining>span,.deposits__balances--reserved .deposits__frozen>span{font-size:12px}
 @media(max-width:760px){.deposits__balances--reserved{gap:5px}.deposits__balances .deposits__frozen{padding:8px 4px}.deposits__balances--reserved .deposits__remaining>span,.deposits__balances--reserved .deposits__frozen>span{font-size:9px}.deposits__balances--reserved .deposits__remaining>strong,.deposits__balances--reserved .deposits__frozen>strong{font-size:clamp(13px,3.6vw,22px)}}
+/* Compact review: paired fields on mobile, with room and ID required. */
+.deposits [data-form=create] .deposits__form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+.deposits [data-form=create] label{min-width:0;margin-bottom:12px;font-size:12px}
+.deposits [data-form=create] input{min-height:44px;padding:10px 12px;margin-top:6px;border-radius:10px;font-size:16px}
+.deposits [data-form=create] [name=total]{min-height:44px;padding:10px 12px;font-size:22px}
+.deposits [data-form=create] .deposits__intro{font-size:12px;line-height:1.5;margin-bottom:14px}
+.deposits [data-form=create] .deposits__recognized,.deposits [data-form=create] .deposits__warning{padding:10px 12px;margin-bottom:14px;font-size:12px}
+.deposits [data-form=create] .deposits__rooms{margin-bottom:14px;gap:6px}
+.deposits [data-form=create] .deposits__rooms input{margin:0;padding:0}
+.deposits [data-form=create] .deposits__rooms span{font-size:11px}
+.deposits [data-form=create] .deposits__form-actions{margin-top:16px}
+.deposits [data-form=create] .deposits__form-grid>label:has([name=wallet]){grid-column:1/-1}

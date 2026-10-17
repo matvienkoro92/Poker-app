@@ -68,8 +68,12 @@ async function main(){
    assert.equal(await page.locator('[name="recipient"]').inputValue(),'Иван Петров');
    assert.equal(await page.locator('[name="total"]').inputValue(),'15000');
    assert.equal(await page.locator('[name="paymentLink"]').count(),0);
+   assert.equal(await page.locator('[data-form="create"] button[type="submit"]').isDisabled(),true);
    await page.locator('[name="room"][value="P21"]').check();
+   assert.equal(await page.locator('[data-form="create"] button[type="submit"]').isDisabled(),true);
    await page.locator('[name="playerId"]').fill('123456');
+   assert.equal(await page.locator('[data-form="create"] button[type="submit"]').isEnabled(),true);
+   await page.screenshot({path:path.join(output,width+'-compact-review.png')});
    // Second viewport uses another payee so both records remain visible.
    if(width===1280){await page.locator('[name="recipient"]').fill('Анна Смирнова');await page.locator('[name="phone"]').fill('+79135554433');}
    await page.locator('[data-form="create"] button[type="submit"]').click();
