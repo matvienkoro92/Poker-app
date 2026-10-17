@@ -248,7 +248,7 @@ const rewardFashionModels={
 // Every themed outfit has independently selectable, unique wardrobe pieces.
 const themedOutfits=[
  {id:'fisherman',title:'Рыбак · Последний заброс',level:40,color:'#6f7954',description:'Панама с приманками, рыбацкий жилет, сапоги и поплавок'},
- {id:'bath',title:'Банный магнат · Пар — мой банк',level:45,color:'#1f6a50',description:'Халат с короной, войлочная шапка, тапочки и кулон-тазик'},
+ {id:'bath',hidden:true,title:'Банный магнат · Пар — мой банк',level:45,color:'#1f6a50',description:'Халат с короной, войлочная шапка, тапочки и кулон-тазик'},
  {id:'garden',title:'Дачный император · Властелин кабачков',level:50,color:'#934145',description:'Жилет с семенами, шляпа с сеткой, заплатки и кабачок'},
  {id:'space',title:'Космонавт · Олл-ин на орбите',level:55,color:'#edede2',description:'Скафандр, открытый шлем, лунные ботинки и спутник'},
  {id:'enduro',title:'Эндуро-райдер · Ривер по бездорожью',level:60,color:'#e4782f',description:'Мотозащита, шлем с козырьком, очки и мотоботы'}
@@ -257,6 +257,7 @@ const themedKinds=['suit','pants','shoes','hat','glasses','necklace','watch','br
 const themedPieceNames={suit:'Верх',pants:'Брюки',shoes:'Обувь',hat:'Головной убор',glasses:'Очки',necklace:'Кулон',watch:'Часы',bracelet:'Браслет',gloves:'Перчатки'};
 const themedPieces=new Map();
 for(const outfit of themedOutfits){outfit.pieces={};for(const kind of themedKinds){
+ if(outfit.id==='space'&&kind==='glasses'){outfit.pieces.glasses='none';continue;}
  const id='outfit_'+outfit.id+'_'+kind;outfit.pieces[kind]=id;themedPieces.set(id,{outfit:outfit.id,kind});
  summerPieces[id]=[kind,themedPieceNames[kind]+' · '+outfit.title.split(' · ')[0],outfit.color,outfit.level];
  items.push({kind,id,title:summerPieces[id][1],color:outfit.color,target:outfit.level,metric:'level',key:kind+':'+id,outfit:outfit.id});
@@ -303,6 +304,7 @@ function wardrobeSubcategory(kind,id){
 }
 const retiredWardrobeIds=new Set(['classic','bananaTank','flamingoTank','bananaBluffTee','flamingoShorts','velvetDinner','sandPuffer','corduroyBrown','brownLeather','grayPlaid','silverTech','greenCourt','burgundyBrogue','denimTrucker','suedeCamel','utilitySage','corduroyShirt','emeraldBomber']);
 function curatedWardrobeItem(i){
+ if(i.id.startsWith('outfit_bath_'))return false;
  if(!['suit','pants','shoes'].includes(i.kind))return true;
  if(brandedPieces[i.id])return true;
  return !i.id.startsWith('collection_')&&!rewardFashionModels[i.kind]?.[i.id]&&!retiredWardrobeIds.has(i.id);
@@ -380,10 +382,18 @@ function footwearFit(art){if(!art.getContext){const cached=wardrobeCrops.get('fo
 const fittedTankFrames={bodySlim:{x:334,y:296,width:356,height:458},bodyNormal:{x:312,y:296,width:400,height:466},bodyBelly:{x:274,y:298,width:476,height:520}};
 function fittedTankPanel(image,body){
  const key='fitted-tank-panel-v4:'+image.src+':'+body;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);
- const column={bodySlim:0,bodyNormal:1,bodyBelly:2}[body]??1,w=Math.floor(image.naturalWidth/3),source=document.createElement('canvas');source.width=w;source.height=image.naturalHeight;
- const x=source.getContext('2d',{willReadFrequently:true});x.drawImage(image,column*w,0,w,image.naturalHeight,0,0,w,image.naturalHeight);
- const data=x.getImageData(0,0,w,source.height).data;let l=w,t=source.height,r=0,b=0;
- for(let y=0;y<source.height;y++)for(let xx=0;xx<w;xx++)if(data[(y*w+xx)*4+3]>80){l=Math.min(l,xx);r=Math.max(r,xx);t=Math.min(t,y);b=Math.max(b,y);}
+ // The three silhouettes are not always centered in equal atlas columns.
+ const column={bodySlim:0,bodyNormal:1,bodyBelly:2}[body]??1,source=document.createElement('canvas');source.width=image.naturalWidth;source.height=image.naturalHeight;
+ const x=source.getContext('2d',{willReadFrequently:true});x.drawImage(image,0,0);
+ const w=source.width,data=x.getImageData(0,0,w,source.height).data,seen=new Uint8Array(w*source.height),parts=[];
+ for(let pos=0;pos<seen.length;pos++){
+  if(seen[pos]||data[pos*4+3]<=80)continue;
+  const queue=[pos];seen[pos]=1;let l=w,t=source.height,r=0,b=0,count=0;
+  while(queue.length){const n=queue.pop(),xx=n%w,y=Math.floor(n/w);count++;l=Math.min(l,xx);r=Math.max(r,xx);t=Math.min(t,y);b=Math.max(b,y);
+   for(const next of [xx?n-1:-1,xx<w-1?n+1:-1,y?n-w:-1,y<source.height-1?n+w:-1])if(next>=0&&!seen[next]&&data[next*4+3]>80){seen[next]=1;queue.push(next);}
+  }parts.push({l,t,r,b,count});
+ }
+ const silhouettes=parts.sort((a,b)=>b.count-a.count).slice(0,3).sort((a,b)=>a.l-b.l),{l,t,r,b}=silhouettes[column];
  const art=document.createElement('canvas');art.width=Math.max(1,r-l+1);art.height=Math.max(1,b-t+1);const c=art.getContext('2d');c.drawImage(source,l,t,art.width,art.height,0,0,art.width,art.height);
  // The far side of the neck opening is behind the actual neck, never painted over it.
  c.save();c.scale(art.width,art.height);c.globalCompositeOperation='destination-out';c.beginPath();c.moveTo(.20,0);c.lineTo(.80,0);c.bezierCurveTo(.75,.11,.70,.23,.50,.23);c.bezierCurveTo(.30,.23,.25,.11,.20,0);c.closePath();c.fill();c.restore();
@@ -395,7 +405,7 @@ function fittedTankTopArt(look){
  const layer=document.createElement('canvas');layer.width=760;layer.height=look.body==='bodyBelly'?600:540;const c=layer.getContext('2d');
  c.drawImage(base,132,220,760,layer.height,0,0,760,layer.height);
  // Base underwear stays behind the selected trousers, never on top of them.
- c.clearRect(120,410,520,layer.height-410);
+ c.clearRect(180,410,400,layer.height-410);
  const fit=fittedTankFrames[look.body]||fittedTankFrames.bodyNormal,art=fittedTankPanel(image,look.body);
  const taper={bodySlim:.20,bodyNormal:.20,bodyBelly:.10}[look.body]||.20;
  for(let row=0;row<fit.height;row++){
@@ -447,12 +457,14 @@ function bodyTopArt(top,look){
   const lower=smooth((row-170)/(height-170));
   const slimTee=tee&&look.body==='bodySlim';
   const shoulderBlend=slimTee?1-smooth(row/300):0;
-  const sourceRow=belly?row-(height-1-sourceHem)*smooth((row-180)/(height-180)):row+32*shoulderBlend;
+  // Lower tee shoulders onto the same anatomy as knitwear, keeping the hem fixed.
+  const shoulderDrop=tee?20*(1-smooth(row/400)):0;
+  const sourceRow=(belly?row-(height-1-sourceHem)*smooth((row-180)/(height-180)):row)-shoulderDrop;
   const factor=look.body==='bodySlim'?(.90+.14*shoulderBlend-(tank ? .10*smooth((row-330)/210) : 0)):belly?1.08+.52*lower:1.05;
   const left=380-140*factor,right=380+140*factor;
   const sideEase=belly&&tee?36*smooth((row-160)/150):0,outerLeft=160-sideEase,outerRight=600+sideEase;
   // Keep the sleeve pixels and exposed wrists out of the belly deformation.
-  if(row<540){const inset=10*shoulderBlend;x.drawImage(cloth,0,slimTee?sourceRow:row,160,1,inset,row,160-inset,slimTee?1.15:1);x.drawImage(cloth,600,slimTee?sourceRow:row,160,1,600,row,160-inset,slimTee?1.15:1);}
+  if(row<540){const inset=10*shoulderBlend;x.drawImage(cloth,0,tee?sourceRow:row,160,1,inset,row,160-inset,slimTee?1.15:1);x.drawImage(cloth,600,tee?sourceRow:row,160,1,600,row,160-inset,slimTee?1.15:1);}
   x.drawImage(cloth,160,sourceRow,80,1,outerLeft,row,left-outerLeft,1.15);
   x.drawImage(cloth,240,sourceRow,280,1,left,row,right-left,1.15);
   x.drawImage(cloth,520,sourceRow,80,1,right,row,outerRight-right,1.15);
@@ -501,7 +513,7 @@ function paintFashion(c,image,look,standing){
  c.save();c.scale(c.canvas.width/1024,image.naturalHeight/1536);
  const erase=(points)=>{c.save();c.globalCompositeOperation='destination-out';c.beginPath();points.forEach(([x,y],n)=>n?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.restore();};
  const pants=fashionArt('pants',look.pants),top=bodyTopArt(fitExposedWrists(fashionArt('suit',look.suit),look),look),shoes=fashionArt('shoes',look.shoes),shoeBase=rewardFashionModels.shoes[look.shoes]||seasonalItems.get('shoes:'+look.shoes)?.base||look.shoes;
- const waistY=look.body==='bodyBelly'?780:summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
+ const waistY=look.suit==='none'?(look.body==='bodyBelly'?760:640):look.body==='bodyBelly'?780:summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
  const highBoot=['combatBlack','hikingBrown','canvasHigh','suedeChelsea','jordanBlackToe','jordanChicago','valenki'].includes(shoeBase),lowShoe=['blackOxford','brownLoafers','burgundyBrogue','ivoryLow','greenCourt','nikeAirForceWhite','nikeDunkPanda','gucciAce','pradaAmericaCup'].includes(shoeBase);
  const angledSneaker=['nikeAirForceWhite','nikeDunkPanda','jordanChicago','gucciAce','balenciagaTrack','pradaAmericaCup'].includes(shoeBase);
  const themedShoe=themedPieces.get(look.shoes)?.outfit;
@@ -510,7 +522,8 @@ function paintFashion(c,image,look,standing){
  if(top)c.clearRect(112,/(Tank|Tee)$/.test(look.suit)?220:200,800,/(Tank|Tee)$/.test(look.suit)?540:560);
  if(top&&!/(Tank|Tee)$/.test(look.suit)){c.save();c.beginPath();c.rect(100,680,200,120);c.rect(724,680,216,120);c.clip();c.drawImage(image,0,0,1024,1536);c.restore();}
  if(top&&look.pants==='boxers')c.drawImage(image,300*image.naturalWidth/1024,640*image.naturalHeight/1536,420*image.naturalWidth/1024,215*image.naturalHeight/1536,300,640,420,215);
- if(fittedTankIds.has(look.suit)&&pants)c.clearRect(252,630,520,200);
+ // Clear only the waist: the wider rectangle cut through both bare arms.
+ if(fittedTankIds.has(look.suit)&&pants)c.clearRect(312,630,400,200);
  if(pants){const hem=['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?1079:1295;erase([[300,waistY],[728,waistY],[798,hem],[224,hem]]);}
  if(shoes)c.clearRect(142,1511-shoeHeight,746,shoeHeight+25);
  // Footwear sits behind the trouser hem, including when it is the original pair.
@@ -603,7 +616,7 @@ function paintAccessories(c,image,look,standing,detailScale=1){c.save();c.scale(
   c.save();c.translate(wrist,735);c.rotate(side?-.06:.06);c.drawImage(gloves,part.left,part.top,part.width,part.height,-(part.ankle-part.left)*scale,0,part.width*scale,height);c.restore();
  }}
 }
-const glasses=fashionArt('glasses',look.glasses),watch=fashionArt('watch',look.watch);if(glasses&&(look.helmet==='none'||look.visor!=='closed')){c.save();c.translate(standing?518:399,standing?123:127);if(!standing)c.rotate(-.22);const frameWidth={sportMirror:207,aviatorGold:211,wayfarerBlack:212,roundGold:193,rimlessSilver:207,tortoise:209,ovalBlack:200,browline:211}[look.glasses]||180,scale=Math.min(frameWidth/glasses.width,77/glasses.height)*.88,w=glasses.width*scale,h=glasses.height*scale;c.shadowColor='#100b0860';c.shadowBlur=2;c.shadowOffsetY=1;c.drawImage(glasses,-w/2,-h/2,w,h);c.restore();}const wornWatch=standing&&look.watch!=='none'&&!themedPieces.has(look.watch)?wardrobeImage(wornWatchSource(look.watch)):null;if(wornWatch?.naturalWidth){c.save();if(look.watch==='carbonChrono'){c.shadowColor='#130c0790';c.shadowBlur=1.1;c.shadowOffsetY=1;}const fit=characterJewelryFit(look.body);const ww=fit.width,wh=ww*wornWatch.naturalHeight/wornWatch.naturalWidth;c.translate(fit.x,fit.y);c.rotate(fit.angle);c.scale(1,.82);c.shadowColor='#160c0880';c.shadowBlur=1.5;c.shadowOffsetY=1.5;c.drawImage(wornWatch,-ww/2,-wh/2,ww,wh);c.restore();}else if(watch){c.save();const wrist=standing?characterJewelryFit(look.body):{x:978,y:434,angle:-.35,width:68};c.translate(wrist.x,wrist.y);c.rotate(wrist.angle);c.transform(1,-.09,.08,.83,0,0);
+const glasses=fashionArt('glasses',look.glasses),watch=fashionArt('watch',look.watch);if(glasses&&look.hat!=='outfit_space_hat'&&(look.helmet==='none'||look.visor!=='closed')){c.save();const enduroGoggles=standing&&look.hat==='outfit_enduro_hat'&&look.glasses==='outfit_enduro_glasses';c.translate(standing?(enduroGoggles?512:518):399,standing?(enduroGoggles?95:123):127);if(!standing)c.rotate(-.22);const frameWidth={sportMirror:207,aviatorGold:211,wayfarerBlack:212,roundGold:193,rimlessSilver:207,tortoise:209,ovalBlack:200,browline:211}[look.glasses]||180,scale=enduroGoggles?Math.min(280/glasses.width,145/glasses.height):Math.min(frameWidth/glasses.width,77/glasses.height)*.88,w=glasses.width*scale,h=glasses.height*scale;c.shadowColor='#100b0860';c.shadowBlur=2;c.shadowOffsetY=1;c.drawImage(glasses,-w/2,-h/2,w,h);c.restore();}const wornWatch=standing&&look.watch!=='none'&&!themedPieces.has(look.watch)?wardrobeImage(wornWatchSource(look.watch)):null;if(wornWatch?.naturalWidth){c.save();if(look.watch==='carbonChrono'){c.shadowColor='#130c0790';c.shadowBlur=1.1;c.shadowOffsetY=1;}const fit=characterJewelryFit(look.body);const ww=fit.width,wh=ww*wornWatch.naturalHeight/wornWatch.naturalWidth;c.translate(fit.x,fit.y);c.rotate(fit.angle);c.scale(1,.82);c.shadowColor='#160c0880';c.shadowBlur=1.5;c.shadowOffsetY=1.5;c.drawImage(wornWatch,-ww/2,-wh/2,ww,wh);c.restore();}else if(watch){c.save();const wrist=standing?characterJewelryFit(look.body):{x:978,y:434,angle:-.35,width:68};c.translate(wrist.x,wrist.y);c.rotate(wrist.angle);c.transform(1,-.09,.08,.83,0,0);
 const leather=['roseDress','bronzePilot','squareDress'].includes(look.watch),gold=['goldClassic','rolexDayDate','royalSkeleton'].includes(look.watch)||themedPieces.get(look.watch)?.outfit==='bath',half=wrist.width/2;
 c.save();c.beginPath();c.moveTo(-half,0);c.quadraticCurveTo(0,-15,half,0);c.quadraticCurveTo(half+1,7,half-4,14);c.quadraticCurveTo(0,1,-half+4,14);c.quadraticCurveTo(-half-1,7,-half,0);c.closePath();c.shadowColor='#100803b0';c.shadowBlur=1.8;c.shadowOffsetY=1.5;const bandShade=c.createLinearGradient(-half,0,half,0);for(const [at,col]of leather?[[0,'#160d09'],[.22,'#493025'],[.45,'#735141'],[.7,'#42291e'],[1,'#130b08']]:[[0,gold?'#51401b':'#3d4449'],[.22,gold?'#d3ad61':'#aeb9bf'],[.47,gold?'#f1d693':'#e3e9ed'],[.72,gold?'#ae843b':'#8a969e'],[1,gold?'#493417':'#333b40']])bandShade.addColorStop(at,col);c.fillStyle=bandShade;c.fill();c.shadowBlur=0;c.clip();
 const themeWatch=themedPieces.get(look.watch)?.outfit;if(themeWatch&&themeWatch!=='bath'){c.fillStyle={space:'#d7d9d4',enduro:'#22292b',fisherman:'#4d5942',garden:'#75533a'}[themeWatch];c.fill();}
