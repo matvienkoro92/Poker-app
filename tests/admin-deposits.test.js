@@ -146,3 +146,16 @@ test('room and player ID persist while older payout cards remain readable',()=>{
  delete state.entries[0].room;delete state.entries[0].playerId;
  assert.equal(view(state).entries[0].remaining,1500000);
 });
+test('manager statistics attribute reserved deposits to the taker, track returns separately and reconcile with totals',()=>{
+ let state=create();const id=requestId(1);
+ state=applyOperation(state,{action:'reserve',requestId:requestId(70),entryId:id,amount:500000},'taker',1000,'Первый менеджер').state;
+ state=applyOperation(state,{action:'confirm-reservation',requestId:requestId(71),entryId:id,reservationId:requestId(70)},'confirmer',2000,'Подтверждающий').state;
+ state=applyOperation(state,{action:'return',requestId:requestId(72),entryId:id,amount:200000},'second',3000,'Второй менеджер').state;
+ state=applyOperation(state,{action:'reserve',requestId:requestId(73),entryId:id,amount:100000},'second',4000,'Второй менеджер').state;
+ let stats=view(state).statistics;assert.equal(stats.managers.length,2);
+ const first=stats.managers.find(m=>m.id==='taker'),second=stats.managers.find(m=>m.id==='second');
+ assert.equal(first.deposits,500000);assert.equal(first.destinations[0].amount,500000);assert.equal(second.deposits,0);assert.equal(second.returned,200000);assert.equal(second.reserved,100000);
+ assert.equal(stats.managers.reduce((s,m)=>s+m.deposits,0),stats.deposits);assert.equal(stats.managers.reduce((s,m)=>s+m.returned,0),stats.returned);
+ state=applyOperation(state,{action:'void',requestId:requestId(74),entryId:id,paymentId:requestId(71)},'confirmer').state;
+ stats=view(state).statistics;assert.equal(stats.deposits,0);assert.equal(stats.managers.some(m=>m.id==='taker'),false);
+});

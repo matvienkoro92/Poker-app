@@ -293,3 +293,36 @@ body.deposits-open {overflow:hidden;}
 .deposits__rooms input:checked+span{background:#e9c88325;border-color:var(--dep-gold);color:var(--dep-gold)}
 .deposits__rooms input:focus-visible+span{outline:2px solid var(--dep-gold);outline-offset:3px}
 .deposits__room-identity{font-size:11px;color:var(--dep-gold);overflow-wrap:anywhere;margin:0 0 10px}
+.deposits__managers{margin-top:24px;padding-top:24px;border-top:1px solid #e9c88355}
+.deposits__manager{margin-top:14px;padding:0 16px 14px;border:1px solid var(--dep-line);border-radius:14px;background:#ffffff03;min-width:0}
+.deposits .deposits__manager>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;color:var(--dep-gold);font-size:15px;font-weight:700}
+.deposits__manager>summary span{overflow-wrap:anywhere}.deposits__manager>summary strong{white-space:nowrap}.deposits__manager>summary::before{content:'▸';font-size:12px}.deposits__manager[open]>summary::before{content:'▾'}
+.deposits__manager>summary span{margin-right:auto}
+.deposits__manager-reserved{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--dep-muted);padding-top:10px}
+/* Free funds lead; frozen funds are a separate, equally legible balance. */
+.deposits__remaining>span{font-size:15px;font-weight:650;color:var(--dep-cream)}
+.deposits__frozen{display:grid;gap:5px;padding:12px;border:1px solid #e9c88340;border-radius:10px;background:#e9c8830b;color:var(--dep-gold)}
+.deposits__frozen>span{font-size:14px;font-weight:650}
+.deposits__reservation-summary .deposits__frozen>strong{font-size:26px;font-weight:750;line-height:1.2;overflow-wrap:anywhere}
+.deposits__balance-explanation{margin:5px 0 0;font-size:12px;line-height:1.55;color:var(--dep-muted);overflow-wrap:anywhere}
+@media(max-width:760px){
+  .deposits__remaining>span{font-size:13px}
+  .deposits__remaining>strong{font-size:26px}
+  .deposits__frozen{padding:10px 8px}
+  .deposits__frozen>span{font-size:12px}
+  .deposits__reservation-summary .deposits__frozen>strong{font-size:22px}
+  .deposits__balance-explanation{font-size:11px}
+}
+.deposits__paid{display:block}
+.deposits__paid>span{white-space:nowrap;font-size:clamp(8px,2.45vw,12px);letter-spacing:-.15px}
+/* Bank names and wallet icons share a recognizable accent. */
+.deposits__bank--tbank{color:#ffdd2d}
+.deposits__bank--sber{color:#42d36b}
+.deposits__bank--alfa,.deposits__bank--mts{color:#ff626a}
+.deposits__bank--vtb,.deposits__bank--gazprom{color:#65aaff}
+.deposits__bank--raiffeisen{color:#ffed38}
+.deposits__bank--ozon{color:#5b9dff}
+.deposits__bank--yandex{color:#ffdc48}
+.deposits__bank--sovcom{color:#85b8ff}
+.deposits__bank--rshb{color:#72c879}
+.deposits__bank--psb{color:#ff9859}

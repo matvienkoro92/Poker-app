@@ -119,8 +119,10 @@ async function main(){
    assert.equal(view(state).entries[0].remaining,1400000);
    assert.equal(view(state).statistics.returned,100000);
    assert.equal(view(state).statistics.deposits,0);
-   assert.equal(await page.locator('.deposits__statistics dl>div').count(),5);
-   await page.locator('.deposits__statistics').scrollIntoViewIfNeeded();
+   assert.equal(await page.locator('.deposits__statistics > dl>div').count(),5);
+   assert.equal(await page.locator('.deposits__manager').count(),1);
+   assert.match(await page.locator('.deposits__manager .deposits__returns-total').innerText(),/1.*000/);
+   await page.locator('.deposits__managers').scrollIntoViewIfNeeded();
    await page.screenshot({path:path.join(output,width+'-statistics.png')});
    await current.locator('.deposits__returns summary').click();
    await current.locator('[data-dep="void-return"]').click();
