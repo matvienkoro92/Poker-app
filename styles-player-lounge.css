@@ -659,3 +659,6 @@
 .player-hall__room[data-garage-vehicle="3"] .garage-locked-vehicle{left:6%;width:64%;bottom:19%}
 .player-hall__room[data-garage-vehicle="4"] .garage-locked-vehicle{left:9%;width:57%;bottom:19%}
 .player-hall__room:is([data-garage-vehicle="3"],[data-garage-vehicle="4"]) .garage-locked-vehicle::before{bottom:0;height:9%;transform:rotate(12deg)}
+
+/* Leave the straw crown below the display-case edge while keeping the feet grounded. */
+.player-hall__scene>.player-hall__character--wardrobe[data-wardrobe-hat="strawSun"]{top:42%;height:49%}
