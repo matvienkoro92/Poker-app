@@ -26,7 +26,7 @@
     var identified=Array.from(new Set(clubIds.map(function(id){return clubRooms[id];}).filter(Boolean).concat(room?[room]:[])));
     if(identified.length>1){room='';warnings.push('Название рума и ID клуба не совпадают. Выберите рум вручную.');}else if(identified.length===1)room=identified[0];
     var idBefore=playerText.match(/(?:^|\n)[ \t]*(\d{1,64})[ \t]+(?:айди|ID)(?=[ \t]*(?:\n|$|[,;]))/i);
-    var idMatch=playerText.match(/(?:\bID|айди|ид игрока)[ \t]*[:#—-]?[ \t]*([a-zA-Z0-9_-]{1,64})/i);
+    var idMatch=playerText.match(/(?:\bID|айди|ид игрока|мой(?:[ \t]+(?:айди|ID))?)[ \t]*[:#—-]?[ \t]*([a-zA-Z0-9_-]{1,64})/i);
     var playerId=idBefore?idBefore[1]:idMatch&&!/^(?:USDT|TRON|TRC20)$/i.test(idMatch[1])?idMatch[1]:'';
     var paymentType=/\bUSDT\b/i.test(text)?'usdt':'bank';
     var network=/TRC[ -]?20|\bTron\b/i.test(text)?'TRC20':'';
@@ -36,19 +36,27 @@
     var paymentLink = safeLink((links[0] || '').replace(/[),.;]+$/, ''));
     var cleaned = text.replace(/https?:\/\/\S+/g, '').replace(wallet,'');
     var cards = cleaned.match(/(?<!\d)(?:\d[ -]?){15,18}\d(?!\d)/g) || [];
+    cards = cards.filter(function(v){var groups=v.trim().split(/[ -]+/);return groups.length===1||!groups.some(function(g){return /^(?:7|8)\d{10}$/.test(g);});});
     cards = cards.map(function(v) { return v.replace(/\D/g, ''); }).filter(function(v) { return v.length >= 16 && v.length <= 19; });
     var card = cards[0] || '';
     var noCards = cleaned; cards.forEach(function(v) { noCards = noCards.replace(new RegExp(v.split('').join('[ -]?')), ''); });
     var phones = noCards.match(/(?<!\d)(?:\+?7|8)[ (.-]*\d{3}[ ).-]*\d{3}[ .-]*\d{2}[ .-]*\d{2}(?!\d)/g) || [];
     var phone = phones[0] ? '+7' + phones[0].replace(/\D/g, '').slice(1) : '';
+    if(!playerId&&!card&&phones.length===1){var pair=playerText.match(/(?:^|\n|[,;])[ \t]*(\d{2,10})[ \t]+((?:\+?7|8)[ (.-]*\d{3}[ ).-]*\d{3}[ .-]*\d{2}[ .-]*\d{2})(?!\d)/);if(pair)playerId=pair[1];}
     var bankMatch = cleaned.match(/(?:банк\s*[:—-]\s*)([^\n,;]+)/i);
-    var known = cleaned.match(/(?:Т[ -]?Банк|Тинькофф|Сбербанк|Сбер|Альфа[ -]?(?:Банк)?|ВТБ|Газпромбанк|Райффайзен(?:банк)?|Озон[ -]?Банк|Ozon[ -]?Банк|Яндекс[ -]?Банк|Совкомбанк|Россельхозбанк|ПСБ|МТС[ -]?Банк|Банк\s+Санкт[ -]Петербург)/i);
+    var known = cleaned.match(/(?:ЮMoney|Ю[ -]?мани|YooMoney|Ингосстрахбанк|Инго(?:банк)?|Т[ -]?Банк|Тинькофф|Сбербанк|Сбер|Альфа[ -]?(?:Банк)?|ВТБ|Газпромбанк|Райффайзен(?:банк)?|Озон[ -]?Банк|Ozon[ -]?Банк|Яндекс[ -]?Банк|Совкомбанк|Россельхозбанк|ПСБ|МТС[ -]?Банк|Банк\s+Санкт[ -]Петербург)/i);
     var bank = bankMatch ? bankMatch[1].trim() : known ? known[0] : '';
     var nameMatch = cleaned.match(/(?:получатель|фио|владелец|имя)\s*[:—-]\s*([^\n,;]+)/i);
     var recipient = nameMatch ? nameMatch[1].trim() : '';
     if (!recipient) {
       var lines = cleaned.split(/\n/).map(function(s) { return s.trim(); });
       recipient = lines.find(function(line) { return /^(?:[А-ЯЁ][а-яё]+\s+){1,2}(?:[А-ЯЁ][а-яё]+|[А-ЯЁ]\.?)$/.test(line) && line !== bank; }) || '';
+    }
+    if (!recipient && phones.length===1) {
+      var afterPhone=cleaned.slice(cleaned.indexOf(phones[0])+phones[0].length).trim();
+      if(known&&afterPhone.indexOf(known[0])===0)afterPhone=afterPhone.slice(known[0].length).trim();
+      var trailingName=afterPhone.match(/^([А-ЯЁ][а-яё]+(?:[ \t]+[А-ЯЁ][а-яё]+){0,2})[ \t]*[.,;]?(?:\n|$)/);
+      if(trailingName)recipient=trailingName[1];
     }
     if (!recipient && known) {
       var nameText=cleaned; phones.forEach(function(v){nameText=nameText.replace(v,'');});
@@ -60,6 +68,10 @@
     if (!amounts.length) {
       re = /(?<![\d.,])(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)\s*(?:₽|руб\.?|р\.?)(?![а-яё])/gi;
       while ((match = re.exec(noCards.replace(/(?:\+?7|8)[ (.-]*\d{3}[ ).-]*\d{3}[ .-]*\d{2}[ .-]*\d{2}/g, ' ')))) { var m = money(match[1]); if (m) amounts.push(m); }
+    }
+    if(!amounts.length){
+      var leading=text.match(/^[ \t]*(\d{1,8}(?:[.,]\d{1,2})?[кk]?)[ \t]*(?:[,;\n]|$)/i);
+      if(leading&&!clubRooms[leading[1]]&&leading[1]!==playerId&&/(?:клуб|банк)/i.test(text.slice(leading[0].length))){var leadingAmount=money(leading[1]);if(leadingAmount)amounts.push(leadingAmount);}
     }
     amounts = Array.from(new Set(amounts));
     if (cards.length > 1 || phones.length > 1) warnings.push('В тексте несколько реквизитов. Проверьте выбранный номер.');

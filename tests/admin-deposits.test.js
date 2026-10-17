@@ -196,3 +196,24 @@ test('recognizes compact rouble suffix after phone without consuming phone digit
  assert.equal(parser.parse('3000р.').amount,300000);
  assert.equal(parser.parse('3000реквизит').amount,null);
 });
+
+test('single recipient name after inline phone is recognized without taking the greeting',()=>{
+ const p=parser.parse('Добрый день вывод 4000руб id 347414 Тинькофф +79213169590 Вадим');
+ assert.equal(p.recipient,'Вадим');assert.equal(p.amount,400000);assert.equal(p.playerId,'347414');assert.equal(p.phone,'+79213169590');
+ assert.equal(parser.parse('Добрый день вывод 4000руб id 347414 Тинькофф +79213169590').recipient,'');
+ assert.equal(parser.parse('Здравствуйте, можно вывести 8000\n+79253239894 Тинькофф Саян Баирович').recipient,'Саян Баирович');
+});
+
+test('unlabelled leading amount is distinct from club, player and phone numbers',()=>{
+ const p=parser.parse('4000, клуб 758417, мой 892420, банк Инго, 89233283889');
+ assert.equal(p.amount,400000);assert.equal(p.playerId,'892420');assert.equal(p.room,'P21');assert.equal(p.bank,'Инго');assert.equal(p.phone,'+79233283889');
+ assert.equal(parser.parse('758417, клуб 758417').amount,null);
+ assert.equal(parser.parse('89233283889, банк Инго').amount,null);
+});
+
+test('bare player ID and phone stay separate instead of forming a bank card',()=>{
+ const p=parser.parse('Можно плиз вывести 3к\n642453 89600989957 только юмани');
+ assert.equal(p.amount,300000);assert.equal(p.playerId,'642453');assert.equal(p.phone,'+79600989957');assert.equal(p.card,'');assert.equal(p.bank,'юмани');
+ assert.equal(parser.parse('2202 2002 1234 5678').card,'2202200212345678');
+ assert.equal(parser.parse('2202200212345678').card,'2202200212345678');
+});

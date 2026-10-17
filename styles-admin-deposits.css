@@ -362,3 +362,11 @@ body.deposits-open {overflow:hidden;}
 .deposits__stat-row>.deposits__manager-split{grid-column:1/-1;margin:4px 0 0}
 /* Full-page forms keep their own title and close control. */
 .deposits--form-open .deposits__header{display:none}
+.deposits__balances{margin:18px 0 14px}
+.deposits__balances--reserved{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
+.deposits__balances .deposits__remaining{margin:0;justify-content:center;min-width:0}
+.deposits__balances .deposits__reservation-summary{margin:0;min-width:0}
+.deposits__balances .deposits__frozen{padding:10px 8px;height:100%;align-content:center}
+.deposits__balances--reserved .deposits__remaining>strong,.deposits__balances--reserved .deposits__frozen>strong{font-size:clamp(15px,2.5vw,28px);letter-spacing:-.3px}
+.deposits__balances--reserved .deposits__remaining>span,.deposits__balances--reserved .deposits__frozen>span{font-size:12px}
+@media(max-width:760px){.deposits__balances--reserved{gap:5px}.deposits__balances .deposits__frozen{padding:8px 4px}.deposits__balances--reserved .deposits__remaining>span,.deposits__balances--reserved .deposits__frozen>span{font-size:9px}.deposits__balances--reserved .deposits__remaining>strong,.deposits__balances--reserved .deposits__frozen>strong{font-size:clamp(13px,3.6vw,22px)}}
