@@ -10,7 +10,7 @@ async function main(){
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch();
  try{
   for(const width of [320,390,1280]){
-   state=applyOperation(null,{action:'create',requestId:require('node:crypto').randomUUID(),entry:{recipient:'Мария Смирнова',bank:'Т-банк',phone:'+79998887766',total:2200000}},'Тестовый администратор').state;
+   state=applyOperation(null,{action:'create',requestId:require('node:crypto').randomUUID(),entry:{room:'P21',playerId:'111',recipient:'Мария Смирнова',bank:'Т-банк',phone:'+79998887766',total:2200000}},'Тестовый администратор').state;
    const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
    await context.route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/))/,r=>r.fulfill({status:503,body:'{}',contentType:'application/json'}));
    await context.route('**/api/**',async route=>{
@@ -18,7 +18,7 @@ async function main(){
     if(url.includes('/api/admin-menu-access'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,token:'test-token',expiresIn:86400})});
     if(url.includes('/api/admin-deposits')){
      if(body.action!=='list')state=applyOperation(state,body,'Тестовый администратор').state;
-     if(lose&&body.action==='payment'){lose=false;return route.abort();}
+     if(lose&&body.action==='confirm-reservation'){lose=false;return route.abort();}
      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state)})});
     }
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,allowed:true,isAdmin:true,entries:[],events:[],levelRows:[],participants:[],winners:[]})});
@@ -44,19 +44,23 @@ async function main(){
    await page.locator('#headerDepositsShortcutBtn').click();
    await page.locator('#adminMenuPasswordInput').fill('1234');await page.locator('#adminMenuPasswordSubmit').click();
    await page.locator('dialog.deposits[open]').waitFor();
-   await page.locator('[data-filter="totals"]').waitFor();
+   await page.locator('[data-filter="active"]').waitFor();
+   await page.locator('.deposits__bottom-totals').waitFor();
+   assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','archive']);
+   assert.equal(await page.locator('[data-filter="totals"]').count(),0);
+   assert.ok(await page.locator('.deposits__bottom-totals').evaluate(e=>e.previousElementSibling.classList.contains('deposits__cards')));
+   await page.locator('[data-filter="done"]').click();
    assert.equal(await page.locator('.deposits__totals').count(),0);
-   await page.locator('[data-filter="totals"]').click();
-   await page.locator('.deposits__totals').waitFor();
-   assert.equal(await page.locator('.deposits__search').isVisible(),false);
-   assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','totals','archive']);
    await page.locator('[data-filter="active"]').click();
-   assert.equal(await page.locator('.deposits__totals').count(),0);
+   await page.locator('.deposits__bottom-totals').waitFor();
    await page.locator('.deposits__toolbar [data-dep="new"]').click();
    await page.locator('[name="raw"]').fill('Иван Петров\nСбербанк\n+7 999 123-45-67\nСумма: 15 000 ₽\nhttps://bank.example/pay');
    await page.locator('[data-form="parse"] button[type="submit"]').click();
    assert.equal(await page.locator('[name="recipient"]').inputValue(),'Иван Петров');
    assert.equal(await page.locator('[name="total"]').inputValue(),'15000');
+   assert.equal(await page.locator('[name="paymentLink"]').count(),0);
+   await page.locator('[name="room"][value="P21"]').check();
+   await page.locator('[name="playerId"]').fill('123456');
    // Second viewport uses another payee so both records remain visible.
    if(width===1280){await page.locator('[name="recipient"]').fill('Анна Смирнова');await page.locator('[name="phone"]').fill('+79135554433');}
    await page.locator('[data-form="create"] button[type="submit"]').click();
@@ -67,29 +71,77 @@ async function main(){
    assert.ok(await page.locator('.deposits').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'No horizontal overflow at '+width);
    await page.screenshot({path:path.join(output,width+'-list.png')});
    assert.equal(await page.locator('.deposits').evaluate(el=>el.scrollWidth>el.clientWidth+1),false,'Dialog has no horizontal overflow');
-   const current=page.locator('.deposits__card').first();await current.locator('[data-dep="payment"]').click();
-   await page.locator('[data-dep="preset"][data-amount="500000"]').click();
-   assert.match(await page.locator('[data-dep-after]').innerText(),/10.*000/);
+   const reservationCard=page.locator('.deposits__card').first();
+   await reservationCard.locator('[data-dep="reserve"]').click();
+   await page.locator('[data-form="reserve"] [name="amount"]').fill('1000');
+   await page.locator('[data-form="reserve"] button[type="submit"]').click();
+   await page.locator('[data-dep="copy-reserved"]').waitFor();
+   assert.equal(view(state).entries[0].reserved,100000);
+   await page.locator('[data-dep="editor-close"]').first().click();
+   await page.screenshot({path:path.join(output,width+'-reserved.png')});
+   await reservationCard.locator('[data-dep="confirm-reservation"]').click();
+   await page.locator('[data-form="confirm-reservation"] button[type="submit"]').click();
+   await page.locator('.deposits__card').first().waitFor();
+   assert.equal(view(state).entries[0].paid,100000);
+   await reservationCard.locator('summary').first().click();
+   await reservationCard.locator('[data-dep="void"]').click();
+   await page.locator('[data-form="void"] button[type="submit"]').click();
+   await reservationCard.locator('[data-dep="reserve"]').click();
+   await page.locator('[data-form="reserve"] [name="amount"]').fill('15000');
+   await page.locator('[data-form="reserve"] button[type="submit"]').click();
+   await page.locator('[data-dep="copy-reserved"]').waitFor();
+   await page.locator('[data-dep="editor-close"]').first().click();
+   assert.equal(await reservationCard.locator('[data-dep="reserve"]').isDisabled(),true);
+   await reservationCard.locator('[data-dep="release-reservation"]').click();
+   await page.locator('[data-form="release-reservation"] button[type="submit"]').click();
+   await page.locator('.deposits__card').first().waitFor();
+   assert.equal(view(state).entries[0].available,1500000);
+   const current=page.locator('.deposits__card').first();
+   assert.equal(await current.locator('[data-dep="payment"]').count(),0);
+   assert.equal(await current.locator('.deposits__card-actions button').count(),1);
+   await current.locator('[data-dep="reserve"]').click();
+   await page.locator('[data-form="reserve"] [name="amount"]').fill('5000');
+   await page.locator('[data-form="reserve"] button[type="submit"]').click();
+   await page.locator('[data-dep="copy-reserved"]').waitFor();
+   await page.locator('[data-dep="editor-close"]').first().click();
+   await current.locator('[data-dep="confirm-reservation"]').click();
    await page.screenshot({path:path.join(output,width+'-payment.png')});
-   lose=true;await page.locator('[data-form="payment"] button[type="submit"]').click();
+   lose=true;await page.locator('[data-form="confirm-reservation"] button[type="submit"]').click();
    await page.locator('.deposits__retry:not([hidden])').waitFor();await page.locator('[data-dep="retry"]').click();
-   await page.locator('.deposits__card').first().waitFor();assert.equal(state.entries[0].payments.length,1,'Lost-response retry is idempotent');
+   await page.locator('.deposits__card').first().waitFor();assert.equal(state.entries[0].payments.filter(p=>!p.voidedAt).length,1,'Lost-response retry is idempotent');
    await current.locator('summary').first().click();await current.locator('[data-dep="void"]').click();await page.locator('[data-form="void"] button[type="submit"]').click();
    await page.locator('.deposits__card').first().waitFor();assert.equal(view(state).entries[0].remaining,1500000);
+   await current.locator('[data-dep="return"]').click();
+   await page.locator('[data-form="return"] [name="amount"]').fill('1000');
+   await page.locator('[data-form="return"] [name="note"]').fill('Игрок попросил вернуть в кассу');
+   await page.locator('[data-form="return"] button[type="submit"]').click();
+   await page.locator('.deposits__card').first().waitFor();
+   assert.equal(view(state).entries[0].remaining,1400000);
+   assert.equal(view(state).statistics.returned,100000);
+   assert.equal(view(state).statistics.deposits,0);
+   assert.equal(await page.locator('.deposits__statistics dl>div').count(),5);
+   await page.locator('.deposits__statistics').scrollIntoViewIfNeeded();
+   await page.screenshot({path:path.join(output,width+'-statistics.png')});
+   await current.locator('.deposits__returns summary').click();
+   await current.locator('[data-dep="void-return"]').click();
+   await page.locator('[data-form="void-return"] button[type="submit"]').click();
+   await page.locator('.deposits__card').first().waitFor();
+   assert.equal(view(state).entries[0].remaining,1500000);
    await page.locator('[data-dep="close"]').click();
    // This guest-mode fixture manually exposes the admin controls after identity refresh.
    await page.evaluate(()=>{document.getElementById('headerAdminShortcuts').hidden=false;document.getElementById('headerDepositsShortcutBtn').hidden=false;});
    await page.locator('#headerDepositsShortcutBtn').click();
    assert.equal(await page.locator('#adminMenuPasswordModal').isVisible(),false,'Password remembered');
    await page.locator('dialog.deposits[open]').waitFor();
-   await page.locator('[data-filter="totals"]').waitFor();
+   await page.locator('[data-filter="active"]').waitFor();
+   await page.locator('.deposits__bottom-totals').waitFor();
+   assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','archive']);
+   assert.equal(await page.locator('[data-filter="totals"]').count(),0);
+   assert.ok(await page.locator('.deposits__bottom-totals').evaluate(e=>e.previousElementSibling.classList.contains('deposits__cards')));
+   await page.locator('[data-filter="done"]').click();
    assert.equal(await page.locator('.deposits__totals').count(),0);
-   await page.locator('[data-filter="totals"]').click();
-   await page.locator('.deposits__totals').waitFor();
-   assert.equal(await page.locator('.deposits__search').isVisible(),false);
-   assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','totals','archive']);
    await page.locator('[data-filter="active"]').click();
-   assert.equal(await page.locator('.deposits__totals').count(),0);await page.locator('[data-dep="close"]').click();
+   await page.locator('.deposits__bottom-totals').waitFor();await page.locator('[data-dep="close"]').click();
    assert.deepEqual(errors,[]);await context.close();
   }
   console.log('Passed: mobile/desktop header targets, pasted text review, shared records, deposits, preview, lost response retry, undo, remembered password.');

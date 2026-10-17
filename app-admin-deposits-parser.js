@@ -16,6 +16,10 @@
   }
   function parse(raw) {
     var text = String(raw || '').trim().slice(0, 5000), warnings = [];
+    var roomMatch=text.match(/(?:рум|room)\s*[:—-]?\s*(P21|Покер21|Poker21|X(?:[ -]?poker)?|Хпокер|Supr(?:ema)?|Супрема|PP(?:poker)?)(?=\s|[,;]|$)/i);
+    var room=roomMatch?(/^(?:p21|покер21|poker21)$/i.test(roomMatch[1])?'P21':/^(?:x|xpoker|x-poker|хпокер)$/i.test(roomMatch[1])?'X':/^(?:supr|suprema|супрема)$/i.test(roomMatch[1])?'Supr':'PP'):'';
+    var idMatch=text.match(/(?:\bID|айди|ид игрока)\s*[:#—-]?\s*([a-zA-Z0-9_-]{1,64})/i);
+    var playerId=idMatch?idMatch[1]:'';
     var links = text.match(/https:\/\/[^\s<>]+/gi) || [];
     var paymentLink = safeLink((links[0] || '').replace(/[),.;]+$/, ''));
     var cleaned = text.replace(/https?:\/\/\S+/g, '');
@@ -34,7 +38,12 @@
       var lines = cleaned.split(/\n/).map(function(s) { return s.trim(); });
       recipient = lines.find(function(line) { return /^(?:[А-ЯЁ][а-яё]+\s+){1,2}(?:[А-ЯЁ][а-яё]+|[А-ЯЁ]\.?)$/.test(line) && line !== bank; }) || '';
     }
-    var amounts = [], re = /(?:сумма|вывод|выплатить|к выплате|остаток)\s*[:—=-]?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)(?![\d.,])(?:\s*(?:₽|руб\.?|р\.?))?/gi, match;
+    if (!recipient && known) {
+      var nameText=cleaned; phones.forEach(function(v){nameText=nameText.replace(v,'');});
+      nameText=nameText.replace(known[0],'');
+      recipient=nameText.split(/\n/).map(function(line){return line.trim().replace(/^[,;:—-]+\s*|[,;]+$/g,'');}).find(function(line){return /^(?:[А-ЯЁ][а-яё]+\s+){1,2}(?:[А-ЯЁ][а-яё]+|[А-ЯЁ]\.?)$/.test(line);})||'';
+    }
+    var amounts = [], re = /(?:сумма|вывести|вывод|выплатить|к выплате|остаток)\s*[:—=-]?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)(?![\d.,])(?:\s*(?:₽|руб\.?|р\.?))?/gi, match;
     while ((match = re.exec(cleaned))) { var n = money(match[1]); if (n) amounts.push(n); }
     if (!amounts.length) {
       re = /(?<![\d.,])(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)\s*(?:₽|руб\.?)(?![а-я])/gi;
@@ -47,7 +56,7 @@
     if (!recipient) warnings.push('Укажите получателя — имя не распознано.');
     if (amounts.length === 0) warnings.push('Укажите сумму к выплате — она не распознана.');
     if (!bank) warnings.push('Проверьте банк — он не распознан.');
-    return {card:card, phone:phone, bank:bank, recipient:recipient, paymentLink:paymentLink,
+    return {card:card, phone:phone, bank:bank, recipient:recipient, room:room, playerId:playerId, paymentLink:paymentLink,
       amount:amounts.length === 1 ? amounts[0] : null, rawText:text, warnings:warnings};
   }
   return {parse:parse, money:money, safeLink:safeLink};
