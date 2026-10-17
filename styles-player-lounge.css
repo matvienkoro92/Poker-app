@@ -662,3 +662,7 @@
 
 /* Leave the straw crown below the display-case edge while keeping the feet grounded. */
 .player-hall__scene>.player-hall__character--wardrobe[data-wardrobe-hat="strawSun"]{top:42%;height:49%}
+
+/* Only wallpaper pixels are replaced; the original lights, frames and shelf rails show through. */
+.hall-trophy-wallpaper{position:absolute;left:-.105485%;top:5.54551%;width:37.5%;height:57.98674%;background:url('./assets/player-hall/trophy-wallpaper-solid-v1.webp') center/100% 100% no-repeat;pointer-events:none}
+.player-hall__room[data-theme=midnight] .hall-trophy-wallpaper{filter:brightness(.35) saturate(.6)}

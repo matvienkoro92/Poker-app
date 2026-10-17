@@ -471,8 +471,8 @@
 .hall-table__stack>i::before{z-index:0;left:0;right:0;top:48%;height:60%;border-radius:0 0 48% 48%;border:1px solid #ad8648;background:linear-gradient(90deg,#0008,transparent 45%,#0009),repeating-linear-gradient(90deg,#9b2022 0 18%,#b29456 18% 21%,#17191a 21% 39%,#b29456 39% 42%,#ac2828 42% 60%);box-shadow:0 1px 1px #0009}
 .hall-table__stack>i::after,.hall-table__stack>i:last-child::after{content:"";position:absolute;z-index:1;inset:0;border:1px solid #c8ab67;border-radius:50%;background:#771416 url('./assets/app-boot-poker21-plus-chip.webp') center/100% 100% no-repeat;box-shadow:inset 0 1px 0 #ffe6b360;line-height:1}
 
-/* Quiet solid-color display backs keep the patterned wall behind the trophies hidden. */
-.player-hall__display-shelf--museum::before,.player-hall__display-shelf--museum::after{display:block;background:#15241f;border:1px solid #b99a5b80;box-shadow:inset 0 1px 0 #e7cb8530,inset 0 12px 22px #e2c47b0c,inset 0 -12px 24px #0005,0 3px 7px #0007}
+/* The original room artwork supplies shelves and frames; only its wallpaper is retouched. */
+.player-hall__display-shelf--museum::before,.player-hall__display-shelf--museum::after{display:none}
 /* Touch feedback is CSS driven, including WebViews without Element.animate. */
 .player-hall-dialog .hall-table__glass{overflow:visible;-webkit-tap-highlight-color:transparent}
 .hall-table__glass>i{width:23%;height:22%;opacity:.85;border:1px solid #effcffcc;background:linear-gradient(135deg,#fff9,#c6ecf877 45%,#fff2 48%,#ecfbff88);box-shadow:inset 1px 1px #ffffffcc,0 1px 3px #4c270077;will-change:transform}
