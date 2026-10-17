@@ -407,13 +407,14 @@ function fittedTankTopArt(look){
  const layer=document.createElement('canvas');layer.width=760;layer.height=look.body==='bodyBelly'?600:540;const c=layer.getContext('2d');
  c.drawImage(base,132,220,760,layer.height,0,0,760,layer.height);
  // Base underwear stays behind the selected trousers, never on top of them.
- c.clearRect(180,410,400,layer.height-410);
- const fit=fittedTankFrames[look.body]||fittedTankFrames.bodyNormal,art=fittedTankPanel(image,look.body);
- const taper={bodySlim:.20,bodyNormal:.20,bodyBelly:.10}[look.body]||.20;
+ const underwearTop=look.body==='bodyBelly'?530:410;
+ c.clearRect(look.body==='bodyBelly'?100:180,underwearTop,look.body==='bodyBelly'?560:400,layer.height-underwearTop);
+ const baseFit=fittedTankFrames[look.body]||fittedTankFrames.bodyNormal,fit=look.body==='bodyBelly'?{...baseFit,height:baseFit.height-86}:baseFit,art=fittedTankPanel(image,look.body);
+ const taper={bodySlim:.20,bodyNormal:.20,bodyBelly:0}[look.body]??.20;
  for(let row=0;row<fit.height;row++){
   // The strap ends follow the actual shoulder silhouette, with no exposed gap or floating fabric.
   c.globalCompositeOperation=row<150?'source-atop':'source-over';
-  const t=row/(fit.height-1),u=Math.max(0,Math.min(1,(t-.52)/.48)),width=fit.width*(1-taper*u*u*(3-2*u));
+  const t=row/(fit.height-1),u=Math.max(0,Math.min(1,(t-.52)/.48)),width=fit.width*(1-taper*u*u*(3-2*u))*(look.body==='bodyBelly'?1+.12*u:1);
   c.drawImage(art,0,row*art.height/fit.height,art.width,art.height/fit.height,fit.x-132+(fit.width-width)/2,fit.y-220+row,width,1.15);
  }
  wardrobeCrops.set(key,layer);return layer;
@@ -424,7 +425,8 @@ function bodyTopArt(top,look){
  if(!top||look.suit==='none')return null;
  const body=fashionArt('body',look.body);if(!body)return null;
  const key='body-top-v9:'+look.body+':'+look.suit;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);
- const layer=document.createElement('canvas');layer.width=760;layer.height=look.body==='bodyBelly'?600:540;const x=layer.getContext('2d');if(/(Tank|Tee)$/.test(look.suit))x.drawImage(body,0,0);
+ const layer=document.createElement('canvas');layer.width=760;layer.height=look.body==='bodyBelly'?600:540;const x=layer.getContext('2d');if(/(Tank|Tee)$/.test(look.suit)){const base=wardrobeImage('body',look.body);x.drawImage(base,132,220,760,layer.height,0,0,760,layer.height);}
+ if(look.body==='bodyBelly'&&look.suit.endsWith('Tee'))x.clearRect(100,530,560,70);
  const cloth=document.createElement('canvas');cloth.width=760;cloth.height=540;const g=cloth.getContext('2d');g.drawImage(top,0,0,760,540);
  const tank=look.suit.endsWith('Tank'),tee=look.suit.endsWith('Tee');
  // Keep exposed arms, but never paste the base boxer waistband over fitted trousers.
@@ -451,7 +453,7 @@ function bodyTopArt(top,look){
  }
  // Warp the torso continuously: belly length and width share one source mapping.
  // Sleeves keep their original registration; only the front panel gains room.
- const belly=look.body==='bodyBelly',height=belly?600:540;
+ const belly=look.body==='bodyBelly',height=belly?(tee?510:600):540;
  // Locate the garment's own hem instead of stretching transparent catalogue padding.
  const clothPixels=belly?g.getImageData(0,0,760,540).data:null;
  let sourceHem=539;
@@ -464,11 +466,11 @@ function bodyTopArt(top,look){
   // Raise tee shoulders to the body contour while keeping the hem fixed.
   const shoulderDrop=tee?-12*(1-smooth(row/400)):0;
   const sourceRow=(belly?row-(height-1-sourceHem)*smooth((row-180)/(height-180)):row)-shoulderDrop;
-  const factor=look.body==='bodySlim'?(.90+.14*shoulderBlend-(tank ? .10*smooth((row-330)/210) : 0)):belly?1.08+.52*lower:1.05;
+  const factor=look.body==='bodySlim'?(.90+.14*shoulderBlend-(tank ? .10*smooth((row-330)/210) : 0)):belly?1.08+.68*lower:1.05;
   const left=380-140*factor,right=380+140*factor;
-  const sideEase=belly&&tee?36*smooth((row-160)/150):0,outerLeft=160-sideEase,outerRight=600+sideEase;
+  const sideEase=belly&&tee?36*smooth((row-280)/120):0,outerLeft=160-sideEase,outerRight=600+sideEase;
   // Keep the sleeve pixels and exposed wrists out of the belly deformation.
-  if(row<540){const inset=10*shoulderBlend;x.drawImage(cloth,0,tee?sourceRow:row,160,1,inset,row,160-inset,slimTee?1.15:1);x.drawImage(cloth,600,tee?sourceRow:row,160,1,600,row,160-inset,slimTee?1.15:1);}
+  if(row<540){const inset=tee?(belly?40:64)*smooth(row/180):10*shoulderBlend;x.drawImage(cloth,0,tee?sourceRow:row,160,1,inset,row,160-inset,slimTee?1.15:1);x.drawImage(cloth,600,tee?sourceRow:row,160,1,600,row,160-inset,slimTee?1.15:1);}
   x.drawImage(cloth,160,sourceRow,80,1,outerLeft,row,left-outerLeft,1.15);
   x.drawImage(cloth,240,sourceRow,280,1,left,row,right-left,1.15);
   x.drawImage(cloth,520,sourceRow,80,1,right,row,outerRight-right,1.15);
@@ -517,7 +519,7 @@ function paintFashion(c,image,look,standing){
  c.save();c.scale(c.canvas.width/1024,image.naturalHeight/1536);
  const erase=(points)=>{c.save();c.globalCompositeOperation='destination-out';c.beginPath();points.forEach(([x,y],n)=>n?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.restore();};
  const pants=fashionArt('pants',look.pants),top=bodyTopArt(fitExposedWrists(fashionArt('suit',look.suit),look),look),shoes=fashionArt('shoes',look.shoes),shoeBase=rewardFashionModels.shoes[look.shoes]||seasonalItems.get('shoes:'+look.shoes)?.base||look.shoes;
- const waistY=look.suit==='none'?(look.body==='bodyBelly'?760:640):look.body==='bodyBelly'?780:summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
+ const waistY=look.suit==='none'?(look.body==='bodyBelly'?760:640):look.body==='bodyBelly'?(/(Tank|Tee)$/.test(look.suit)?750:780):summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
  const highBoot=['combatBlack','hikingBrown','canvasHigh','suedeChelsea','jordanBlackToe','jordanChicago','valenki'].includes(shoeBase),lowShoe=['blackOxford','brownLoafers','burgundyBrogue','ivoryLow','greenCourt','nikeAirForceWhite','nikeDunkPanda','gucciAce','pradaAmericaCup'].includes(shoeBase);
  const angledSneaker=['nikeAirForceWhite','nikeDunkPanda','jordanChicago','gucciAce','balenciagaTrack','pradaAmericaCup'].includes(shoeBase);
  const themedShoe=themedPieces.get(look.shoes)?.outfit;
@@ -527,7 +529,8 @@ function paintFashion(c,image,look,standing){
  if(top&&!/(Tank|Tee)$/.test(look.suit)){c.save();c.beginPath();c.rect(100,680,200,120);c.rect(724,680,216,120);c.clip();c.drawImage(image,0,0,1024,1536);c.restore();}
  if(top&&look.pants==='boxers')c.drawImage(image,300*image.naturalWidth/1024,640*image.naturalHeight/1536,420*image.naturalWidth/1024,215*image.naturalHeight/1536,300,640,420,215);
  // Clear only the waist: the wider rectangle cut through both bare arms.
- if(fittedTankIds.has(look.suit)&&pants)c.clearRect(312,630,400,200);
+ if(fittedTankIds.has(look.suit)&&pants&&look.body!=='bodyBelly')c.clearRect(312,630,400,200);
+ if(pants&&look.body==='bodyBelly'&&/(Tank|Tee)$/.test(look.suit))c.clearRect(250,750,524,110);
  if(pants){const hem=['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?1079:1295;erase([[300,waistY],[728,waistY],[798,hem],[224,hem]]);}
  if(shoes)c.clearRect(142,1511-shoeHeight,746,shoeHeight+25);
  // Footwear sits behind the trouser hem, including when it is the original pair.
@@ -586,7 +589,7 @@ function characterJewelryFit(body,side=1,kind='watch'){
  let left=.29,right=.82;
  if(hand?.naturalWidth){let pixels=handContourCache.get(hand);if(!pixels){const cv=document.createElement('canvas');cv.width=hand.width;cv.height=hand.height;const cx=cv.getContext('2d',{willReadFrequently:true});cx.drawImage(hand,0,0);pixels=cx.getImageData(0,0,cv.width,cv.height).data;handContourCache.set(hand,pixels);}const y=Math.round(hand.height*.37);let l=hand.width,r=0;for(let x=0;x<hand.width;x++)if(pixels[(y*hand.width+x)*4+3]>210){l=Math.min(l,x);r=Math.max(r,x);}if(r>l){left=l/hand.width;right=r/hand.width;}}
  const center=(left+right)/2;
- return {x:fit.x+fit.width*(side?center:1-center),y:fit.y+fit.height*.37-(kind==='watch'?10:0),width:fit.width*(right-left),angle:side?-.22:.22};
+ return {x:fit.x+fit.width*(side?center:1-center)+(kind==='watch'?3:0),y:fit.y+fit.height*.37-(kind==='watch'?15:0),width:fit.width*(right-left),angle:side?-.22:.22};
 }
 function paintWrappedBand(c,fit,height,color,silver=false,texture=null){
  c.save();c.translate(fit.x,fit.y);c.rotate(fit.angle);c.globalCompositeOperation='source-atop';
