@@ -1,6 +1,6 @@
 {
-  "beforeBytes": 5014862,
-  "totalBytes": 3348676,
+  "beforeBytes": 5446594,
+  "totalBytes": 3780408,
   "files": [
     {
       "file": "assets/player-hall/wardrobe/summer/poker21RedTank-print-v2.webp",
@@ -420,6 +420,55 @@
       "bytes": 5460,
       "width": 128,
       "height": 42,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_gloves-worn-v2.webp",
+      "bytes": 64686,
+      "width": 900,
+      "height": 318,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_hat-worn-v2.webp",
+      "bytes": 61894,
+      "width": 500,
+      "height": 397,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_gloves-worn-v2.webp",
+      "bytes": 65424,
+      "width": 900,
+      "height": 365,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_gloves-worn-v2.webp",
+      "bytes": 67332,
+      "width": 900,
+      "height": 368,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_gloves-worn-v2.webp",
+      "bytes": 49886,
+      "width": 900,
+      "height": 310,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_hat-worn-v2.webp",
+      "bytes": 69604,
+      "width": 500,
+      "height": 460,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_gloves-worn-v2.webp",
+      "bytes": 52906,
+      "width": 900,
+      "height": 313,
       "alpha": true
     }
   ]

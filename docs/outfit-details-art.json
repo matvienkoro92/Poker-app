@@ -1,0 +1,24 @@
+{
+  "tool": "built-in image_gen",
+  "gloves": {
+    "reference": "output/wardrobe-fit/hands-pose-reference.png",
+    "pose": "Two relaxed hanging chimpanzee hands; backs forward, curled fingers pointing down and inward, thumbs toward the center. Gloves cover every finger. Transparent isolated pair, photorealistic materials, short fitted cuffs.",
+    "variants": {
+      "bath": "ivory terry cloth sauna gloves, short snug cuff edged with gold thread",
+      "space": "white and orange astronaut pressure gloves, articulated fingers, compact black joint panels, no exposed skin",
+      "enduro": "black charcoal and burnt orange motocross gloves, small knuckle protectors, flexible fingers",
+      "fisherman": "olive green waterproof fishing gloves, textured rubber palms, tiny orange stitching",
+      "garden": "beige gardening gloves with moss-green rubber fingertips, stitched canvas backs"
+    }
+  },
+  "hats": [
+    {
+      "asset": "assets/player-hall/wardrobe/summer/outfit_bath_hat-worn-v2.webp",
+      "prompt": "Edit this felt sauna crown hat into a worn-on-head game sprite. Preserve ivory felt wool texture, five playful crown points, dark emerald pompoms and fine gold stitched borders. Critical camera: straight-on front at eye level, looking slightly DOWN at the hat, not up inside it. The bottom front brim is a shallow curved narrow gold line, NO visible large dark oval interior, NO hollow bucket mouth facing viewer. Crown is rounded in 3D as if fitted tightly around a chimpanzee skull. Rear rim sits hidden behind head. Isolate ONLY the hat, no head, no skin, fully transparent background. Premium photorealistic wardrobe art, symmetric subtle natural fabric folds."
+    },
+    {
+      "asset": "assets/player-hall/wardrobe/summer/outfit_garden_hat-worn-v2.webp",
+      "prompt": "Edit this gardener straw hat sprite for wearing on a chimpanzee head seen straight-on at eye level. Keep woven straw crown, tomato and pumpkin band, tasteful mesh mosquito veil. Correct perspective: camera slightly ABOVE brim, brim shallow curved across forehead; do NOT show broad underside or hollow oval mouth. Veil is sparse very fine dark gray translucent net hanging from left and right edges down to jaw, open transparent central face window, no opaque white panel, no thick bar across eyes or nose. Premium photorealistic game wardrobe art, convincing rounded crown and curved brim. Isolate hat and net only on fully transparent background, no head or mannequin."
+    }
+  ]
+}
