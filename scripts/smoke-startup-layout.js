@@ -55,12 +55,13 @@ async function main() {
             crm.hidden = !owner; crm.disabled = !owner; crm.classList.toggle("header-crm-btn--hidden", !owner);
             crm.setAttribute("aria-hidden", String(!owner));
             header.classList.toggle("card__header--admin-shortcuts", shortcuts);
+            header.classList.toggle("card__header--owner-crm", owner);
             const group = document.getElementById("headerAdminShortcuts");
             group.hidden = !shortcuts; group.classList.toggle("header-admin-shortcuts--with-crm", owner);
             for (const id of ["headerDepositsShortcutBtn", "headerReportsShortcutBtn", "headerRafflesShortcutBtn"]) document.getElementById(id).hidden = !shortcuts;
             document.getElementById("headerBalancesShortcutBtn").hidden = !shortcuts;
             document.getElementById("headerGreeting").textContent = "ОченьДлинноеИмяИгрока";
-            const elements = [header.querySelector(".logo--welcome"), group, header.querySelector(".header-actions")];
+            const elements = [header.querySelector(".logo--welcome"), group, header.querySelector(".header-menu-shell"), header.querySelector(".header-profile-summary")];
             const rect = element => { const r = element.getBoundingClientRect(); return { name: element.id || element.className, x: r.x, y: r.y, right: r.right, bottom: r.bottom, width: r.width, height: r.height }; };
             return { header: rect(header), children: elements.filter(e => e.getBoundingClientRect().width > 0).map(rect),
               greeting: rect(document.getElementById("headerGreeting")), summary: rect(header.querySelector(".header-profile-summary")),
@@ -75,7 +76,12 @@ async function main() {
               assert.equal(overlaps, false, "Header overlap: " + JSON.stringify({ width, view, mode, child, other }));
             }
           }
-          if (view === "home") assert.ok(geometry.greeting.width > 0 && geometry.greeting.right <= geometry.menu.x + 1, "Greeting remains visible before menu: " + JSON.stringify({width,view,mode,geometry}));
+          if (view === "home" && mode === "ordinary") assert.ok(geometry.greeting.width > 0 && geometry.greeting.right <= geometry.menu.x + 1, "Greeting remains visible before menu: " + JSON.stringify({width,view,mode,geometry}));
+          if (view === "home" && mode !== "ordinary") {
+            const dock = geometry.children.find(c => c.name === "headerAdminShortcuts");
+            assert.ok(Math.abs((dock.y + dock.height / 2) - (geometry.menu.y + geometry.menu.height / 2)) < 2, "Menu shares the tools row");
+            if (mode === "owner") assert.ok(geometry.greeting.width > 0 && geometry.summary.bottom <= dock.y + 2, "Owner identity sits directly above tools");
+          }
           records.push({ width, view, mode, geometry });
           if (mode === "owner") await page.screenshot({ path: path.join(output, width + "-" + view + ".png") });
         }

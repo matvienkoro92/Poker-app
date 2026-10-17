@@ -32,18 +32,54 @@ html body #app.app #headerAdminShortcuts #headerDepositsShortcutBtn svg {color:#
 html body #app.app #headerAdminShortcuts #headerReportsShortcutBtn svg {color:#9ad1ff;}
 html body #app.app #headerAdminShortcuts #headerBalancesShortcutBtn svg {color:#e8cb85;}
 html body #app.app #headerAdminShortcuts #headerRafflesShortcutBtn svg {color:#c8abff;}
-html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts,
-  html body:not([data-view="chat"]) #app.app > .card > .card__header.card__header--admin-shortcuts:has(> .header-admin-shortcuts--with-crm) {
-    flex-wrap:wrap !important; gap:10px !important;
-  }
-  html body #app.app > .card > .card__header #headerAdminShortcuts:not([hidden]) {
-    order:10 !important;flex:1 0 100% !important;width:100%;box-sizing:border-box;
-  }
-  html body #app.app #headerAdminShortcuts > button:not([hidden]) {
-    flex:1 1 0 !important;width:auto !important;min-width:0 !important;height:62px !important;
-  }
-  html body #app.app #headerAdminShortcuts > button span,
-  html body #app.app #headerAdminShortcuts > button b {font-size:11px !important;}
+/* One outlined work row; profile identity hugs its top edge. */
+html[data-theme] body #app.app > .card > .card__header.card__header.card__header--admin-shortcuts {
+  display:grid !important; grid-template-columns:minmax(0,1fr) 52px !important;
+  grid-template-rows:auto 72px !important; gap:0 !important; align-items:center !important;
+  position:relative; padding:0 !important; border:0 !important; border-radius:0 !important;
+  background:transparent !important; box-shadow:none !important; min-height:0 !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts::before {
+  content:""; position:absolute; inset:auto 0 0; height:72px; box-sizing:border-box;
+  border:1px solid #77613b; border-radius:20px; pointer-events:none;
+  background:linear-gradient(150deg,#242323,#0b0d10 70%); box-shadow:inset 0 1px #ffe9b31c;
+  z-index:0;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts > .logo {display:none !important;}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts #headerAdminShortcuts:not([hidden]) {
+  grid-column:1; grid-row:2 !important; order:0 !important; width:auto !important;
+  min-width:0; flex:none !important; align-items:center !important;
+  padding:4px !important; border:0 !important; border-radius:0; background:transparent !important; box-shadow:none !important;
+}
+html body #app.app #headerAdminShortcuts > button:not([hidden]) {
+  flex:1 1 0 !important; width:auto !important; min-width:0 !important; height:64px !important;
+}
+html body #app.app #headerAdminShortcuts > button span,
+html body #app.app #headerAdminShortcuts > button b {font-size:11px !important;}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-actions,
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-actions__row {display:contents !important;}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-menu-shell {
+  grid-column:2; grid-row:2 !important; align-self:center; justify-self:center;
+  margin:0 6px 0 0 !important; position:relative; z-index:3;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts #headerMoreMenuBtn {
+  width:44px !important; min-width:44px !important; height:52px !important;
+  padding:10px !important; border:0 !important; border-radius:13px !important;
+  background:transparent !important; box-shadow:none !important;
+}
+html body #app.app > .card > .card__header.card__header--admin-shortcuts .header-profile-summary {
+  grid-column:1/-1; grid-row:1; flex:none !important; max-width:none !important;
+  flex-direction:row !important; align-items:baseline !important; justify-content:flex-end !important;
+  gap:4px !important; margin:0 8px 4px !important; padding:0 !important; min-height:0 !important;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn {
+  height:64px !important; min-height:64px !important; flex:0 0 48px !important;
+  width:48px !important; min-width:48px !important; margin:0 !important; align-self:center;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+}
+html body #app.app > .card > .card__header.card__header--owner-crm #headerCrmBtn .header-crm-shortcut__logo {
+  width:42px; height:42px; display:block; margin:0; object-fit:contain;
+}
 body.deposits-open {overflow:hidden;}
 .deposits {
   --dep-gold:#e9c883;--dep-cream:#f6ead2;--dep-muted:#a9a9a4;--dep-line:#e6c98a25;--dep-mint:#9be6c3;

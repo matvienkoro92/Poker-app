@@ -20,14 +20,19 @@ async function main(){
      if(lose&&body.action==='payment'){lose=false;return route.abort();}
      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state)})});
     }
-    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,entries:[],events:[],levelRows:[],participants:[],winners:[]})});
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,allowed:true,isAdmin:true,entries:[],events:[],levelRows:[],participants:[],winners:[]})});
    });
    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.addInitScript(()=>sessionStorage.setItem('poker_pwa_guest_session','1'));
    await page.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'networkidle'});
    await page.locator('#appBootOverlay').waitFor({state:'hidden',timeout:30000});
    await page.evaluate(()=>{
-    const group=document.getElementById('headerAdminShortcuts');group.hidden=false;group.classList.add('header-admin-shortcuts--with-crm');group.closest('.card__header').classList.add('card__header--admin-shortcuts');
+    window.getApiBase=function(){return location.origin;};
+    window.pokerApiHasCredential=function(){return true;};
+    window.pokerRafflesApiQueryLeading=function(){return '?fixture=1';};
+    window.__pokerTelegramAuth={status:'verified',adminAccess:true,user:{id:388008256}};
+    window.dispatchEvent(new Event('poker-admin-access'));
+    const group=document.getElementById('headerAdminShortcuts');group.hidden=false;group.classList.add('header-admin-shortcuts--with-crm');group.closest('.card__header').classList.add('card__header--admin-shortcuts','card__header--owner-crm');
     for(const b of group.querySelectorAll('button')){b.hidden=false;b.disabled=false;b.removeAttribute('aria-hidden');b.classList.remove('header-crm-btn--hidden');}
     document.getElementById('headerGreeting').textContent='ПокерМанки';
    });
@@ -58,7 +63,10 @@ async function main(){
    await page.locator('.deposits__card').first().waitFor();assert.equal(state.entries[0].payments.length,1,'Lost-response retry is idempotent');
    await current.locator('summary').first().click();await current.locator('[data-dep="void"]').click();await page.locator('[data-form="void"] button[type="submit"]').click();
    await page.locator('.deposits__card').first().waitFor();assert.equal(view(state).entries[0].remaining,1500000);
-   await page.locator('[data-dep="close"]').click();await page.locator('#headerDepositsShortcutBtn').click();
+   await page.locator('[data-dep="close"]').click();
+   // This guest-mode fixture manually exposes the admin controls after identity refresh.
+   await page.evaluate(()=>{document.getElementById('headerAdminShortcuts').hidden=false;document.getElementById('headerDepositsShortcutBtn').hidden=false;});
+   await page.locator('#headerDepositsShortcutBtn').click();
    assert.equal(await page.locator('#adminMenuPasswordModal').isVisible(),false,'Password remembered');
    await page.locator('dialog.deposits[open]').waitFor();await page.locator('[data-dep="close"]').click();
    assert.deepEqual(errors,[]);await context.close();
