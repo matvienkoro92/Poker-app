@@ -32,10 +32,12 @@ test('review count mirrors to navigation even before summary mounts and clears a
  const code=source.slice(source.indexOf('  function renderReviewUnread(count)'),source.indexOf('  var reviewUnreadRequest'));
  const badge=id=>({id,hidden:true,textContent:'',setAttribute(k,v){this[k]=v},classList:{toggle(k,v){this[k]=v}}});
  const nav=badge('bottomNavReviewUnread'),card=badge('');let badges=[nav];
- const context={document:{querySelectorAll:()=>badges}};
+ const context={window:{},document:{querySelectorAll:()=>badges}};
  vm.runInNewContext(code,context);
  context.renderReviewUnread(6);assert.equal(nav.textContent,'6');assert.equal(nav.hidden,false);
  badges=[nav,card];context.renderReviewUnread(5);assert.equal(nav.textContent,card.textContent);
  context.renderReviewUnread(120);assert.equal(nav.textContent,'99+');assert.equal(card.textContent,'99+');
+ context.window.__pokerTelegramAuth={adminAccess:true};
+ context.renderReviewUnread(4);assert.equal(nav.hidden,true);assert.equal(nav.classList['bottom-nav__badge--on'],false);assert.equal(card.hidden,false);
  context.renderReviewUnread(0);assert.equal(nav.hidden,true);assert.equal(card.hidden,true);assert.equal(nav.classList['bottom-nav__badge--on'],false);
 });

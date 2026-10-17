@@ -152,10 +152,11 @@
   function renderReviewUnread(count) {
     count = Math.max(0, Number(count) || 0);
     document.querySelectorAll("[data-summary-review-unread], #bottomNavReviewUnread").forEach(function (badge) {
-      badge.hidden = count === 0;
+      var villa = badge.id === "bottomNavReviewUnread" && window.__pokerTelegramAuth?.adminAccess === true;
+      badge.hidden = villa || count === 0;
       badge.textContent = count > 99 ? "99+" : String(count);
       badge.setAttribute("aria-label", "Непросмотренных тем: " + count);
-      if (badge.id === "bottomNavReviewUnread") badge.classList.toggle("bottom-nav__badge--on", count > 0);
+      if (badge.id === "bottomNavReviewUnread") badge.classList.toggle("bottom-nav__badge--on", !villa && count > 0);
     });
   }
 

@@ -2479,6 +2479,8 @@ document.addEventListener("click", function (event) {
     var admin = window.__pokerTelegramAuth?.adminAccess === true;
     button.dataset.viewTarget = admin ? 'player-hall' : 'my-summary';
     label.textContent = admin ? 'Вилла' : 'Раздачи';
+    var badge = document.getElementById('bottomNavReviewUnread');
+    if (admin && badge) { badge.hidden = true; badge.classList.remove('bottom-nav__badge--on'); }
     var icon = button.querySelector('.bottom-nav__line-icon');
     if (icon) {
       if (!originalIcon) originalIcon = icon.outerHTML;
