@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),G=require('../app-garage-catalog'),Garage=require('../lib/player-garage'),E=require('../app-monkey-race-engine'),{fixture}=require('./helpers/cooler-flight-fixture.cjs');
-test('closed cosmetics cannot be forged, base choices work without history',()=>{assert.deepEqual(G.normalize({},{}),G.defaults);assert.throws(()=>Garage.choose({paint:'champagne'},{stats:{level:49}}),/не открыта/);assert.throws(()=>Garage.choose({paint:'unknown'},{stats:{best:99999}}),/не открыта/);assert.equal(G.normalize({paint:'champagne'},{level:50},true).paint,'champagne');assert.throws(()=>G.normalize({number:'<x>'},{},true),/Номер/);assert.equal(G.normalize({number:'017'},{},true).number,'А017КМ');});
-test('earned equipment and targets normalize independently, stale unlocks fall back',()=>{const c=G.catalog({level:8});assert.ok(c.find(i=>i.key==='helmet:club').unlocked);assert.ok(c.find(i=>i.key==='shoes:ruby').unlocked);assert.equal(c.find(i=>i.key==='wheels:carbon').unlocked,false);assert.equal(G.normalize({paint:'champagne',target:'wheels:carbon'},{runs:0}).paint,'classic');assert.equal(G.normalize({target:'wheels:carbon'},{}).target,'wheels:carbon');});
+test('closed cosmetics cannot be forged, base choices work without history',()=>{assert.deepEqual(G.normalize({},{}),G.defaults);assert.throws(()=>Garage.choose({paint:'champagne'},{stats:{level:39}}),/не открыта/);assert.throws(()=>Garage.choose({paint:'unknown'},{stats:{best:99999}}),/не открыта/);assert.equal(G.normalize({paint:'champagne'},{level:40},true).paint,'champagne');assert.throws(()=>G.normalize({number:'<x>'},{},true),/Номер/);assert.equal(G.normalize({number:'017'},{},true).number,'А017КМ');});
+test('earned equipment and targets normalize independently, stale unlocks fall back',()=>{const c=G.catalog({level:6});assert.ok(c.find(i=>i.key==='helmet:club').unlocked);assert.ok(c.find(i=>i.key==='shoes:ruby').unlocked);assert.equal(c.find(i=>i.key==='wheels:carbon').unlocked,false);assert.equal(G.normalize({paint:'champagne',target:'wheels:carbon'},{runs:0}).paint,'classic');assert.equal(G.normalize({target:'wheels:carbon'},{}).target,'wheels:carbon');});
 test('new players have free combinations and no race history requirement',()=>{
  const c=G.catalog({});
  assert.equal(c.filter(i=>i.kind==='paint'&&i.unlocked).length,3);
@@ -27,12 +27,12 @@ test('shelves mirror saved choices and unlocks at each level',()=>{
  assert.equal(slots.find(s=>s.kind==='paint').selected.id,'ruby');
  assert.equal(slots.find(s=>s.kind==='paint').owned,3);
  assert.equal(slots.find(s=>s.kind==='helmet').empty,true);
- assert.equal(slots.find(s=>s.kind==='helmet').next.target,3);
+ assert.equal(slots.find(s=>s.kind==='helmet').next.target,1);
  slots=G.shelfSlots({stats:{level:25},loadout:{helmet:'night',wheels:'carbon'}});
  assert.equal(slots.find(s=>s.kind==='helmet').empty,false);
- assert.equal(slots.find(s=>s.kind==='helmet').next.target,40);
+ assert.equal(slots.find(s=>s.kind==='helmet').next.target,28);
  assert.equal(slots.find(s=>s.kind==='wheels').selected.id,'carbon');
- assert.equal(slots.find(s=>s.kind==='wheels').next.target,30);
+ assert.equal(slots.find(s=>s.kind==='wheels').next.target,28);
  assert.ok(G.shelfSlots({stats:{level:100}}).every(s=>s.owned===s.total&&!s.next));
 });
 
@@ -49,16 +49,16 @@ test('paint covers front and side body without replacing the suit',()=>{
 test('RF plates validate format, migrate old numbers and gate rare combinations',()=>{assert.equal(G.normalize({number:'17'},{},true).number,'А017КМ');assert.deepEqual(G.parsePlate('a123bc','154'),{number:'А123ВС',region:'154'});for(const number of ['А000ВС','Д123ВС','А12ВС'])assert.throws(()=>G.normalize({number},{level:100},true),/Номер/);for(const region of ['0','000','1234','xx'])assert.throws(()=>G.normalize({region},{level:100},true),/Номер/);for(const [number,level] of [['А121КМ',10],['А200КМ',20],['А123АА',30],['А555КМ',50],['А007КМ',75],['А777АА',100]]){assert.equal(G.plateLevel(number),level);assert.throws(()=>Garage.choose({number},{stats:{level:level-1}}),/уровне/);assert.equal(G.normalize({number},{level},true).number,number);}assert.equal(G.normalize({number:'А777АА'},{level:0}).number,G.defaults.number);});
 test('visor position survives saved garage loadouts and old profiles default to open',()=>{const saved=Garage.choose({...G.defaults,helmet:'club',visor:'closed'},{stats:{level:10}});assert.equal(saved.visor,'closed');assert.equal(Garage.view({garage:saved},{stats:{level:10}}).loadout.visor,'closed');assert.equal(G.normalize({helmet:'club'},{level:10}).visor,'open');assert.equal(G.normalize({visor:'invalid'},{}).visor,'open');});
 test('new equipment survives server save and legacy trousers inherit the previous suit',()=>{assert.equal(G.normalize({suit:'midnight'},{level:100}).pants,'midnight');const look={...G.defaults,trim:'chrome',upholstery:'diamond',cards:'sevenTwo',chips:'tournament',suit:'ruby',pants:'midnight',patch:'name',patchText:'ПокерМанки'};const saved=Garage.choose(look,{stats:{level:100}});assert.deepEqual(Garage.view({garage:saved},{stats:{level:100}}).loadout,saved);for(const k of ['trim','upholstery','cards','chips','pants','patch'])assert.equal(saved[k],look[k]);assert.equal(saved.patchText,'ПокерМанки');assert.throws(()=>Garage.choose(look,{stats:{level:1}}),/не открыта/);assert.equal(G.normalize({...G.defaults,patchText:'<script>\u0000'},{}).patchText,'script');assert.equal(G.shelfSlots({stats:{level:100},loadout:saved}).length,6);});
-test('material unlocks use the approved round level thresholds',()=>{for(const [key,level] of [['upholstery:diamond',30],['upholstery:alcantara',40],['trim:black',50]]){assert.equal(G.catalog({level:level-1}).find(i=>i.key===key).unlocked,false);assert.equal(G.catalog({level}).find(i=>i.key===key).unlocked,true);const [kind,id]=key.split(':');assert.throws(()=>Garage.choose({...G.defaults,[kind]:id},{stats:{level:level-1}}),/не открыта/);assert.equal(Garage.choose({...G.defaults,[kind]:id},{stats:{level}})[kind],id);}});
+test('material unlocks use the revised early progression thresholds',()=>{for(const [key,level] of [['upholstery:diamond',18],['upholstery:alcantara',28],['trim:black',40]]){assert.equal(G.catalog({level:level-1}).find(i=>i.key===key).unlocked,false);assert.equal(G.catalog({level}).find(i=>i.key===key).unlocked,true);const [kind,id]=key.split(':');assert.throws(()=>Garage.choose({...G.defaults,[kind]:id},{stats:{level:level-1}}),/не открыта/);assert.equal(Garage.choose({...G.defaults,[kind]:id},{stats:{level}})[kind],id);}});
 
 test('car badges require verified achievements and allow three different earned badges',()=>{const earnedBadges=['tournament-king','millionaire','rating-top10','day-hero'];assert.throws(()=>Garage.choose({badges:['millionaire'],earnedBadges},{stats:{level:100}}),/не заработан/);const look=Garage.choose({badges:earnedBadges.slice(0,3)},{stats:{level:0,earnedBadges}});assert.deepEqual(look.badges,earnedBadges.slice(0,3));assert.throws(()=>Garage.choose({badges:earnedBadges},{stats:{earnedBadges}}),/трёх/);assert.throws(()=>Garage.choose({badges:['millionaire','millionaire']},{stats:{earnedBadges}}),/разных/);assert.deepEqual(G.normalize({badges:['millionaire']},{}).badges,[]);assert.equal(G.catalog({level:100}).find(i=>i.key==='badge:millionaire').unlocked,false);});
 
-test('personal patch opens at level 20 and server accepts one word up to 12 characters',()=>{
- assert.equal(G.catalog({level:19}).find(i=>i.key==='patch:name').unlocked,false);
- assert.equal(G.catalog({level:20}).find(i=>i.key==='patch:name').unlocked,true);
- for(const patchText of ['Игрок21','ABCDEFGHIJKL','Я','123'])assert.equal(Garage.choose({patch:'name',patchText},{stats:{level:20}}).patchText,patchText);
- for(const patchText of ['', 'Два слова','ABCDEFGHIJKLM','<script>','Имя!'])assert.throws(()=>Garage.choose({patch:'name',patchText},{stats:{level:20}}),/одно слово/);
- assert.throws(()=>Garage.choose({patch:'name',patchText:'Игрок'},{stats:{level:19}}),/не открыта/);
+test('personal patch opens at level 10 and server accepts one word up to 12 characters',()=>{
+ assert.equal(G.catalog({level:9}).find(i=>i.key==='patch:name').unlocked,false);
+ assert.equal(G.catalog({level:10}).find(i=>i.key==='patch:name').unlocked,true);
+ for(const patchText of ['Игрок21','ABCDEFGHIJKL','Я','123'])assert.equal(Garage.choose({patch:'name',patchText},{stats:{level:10}}).patchText,patchText);
+ for(const patchText of ['', 'Два слова','ABCDEFGHIJKLM','<script>','Имя!'])assert.throws(()=>Garage.choose({patch:'name',patchText},{stats:{level:10}}),/одно слово/);
+ assert.throws(()=>Garage.choose({patch:'name',patchText:'Игрок'},{stats:{level:9}}),/не открыта/);
 });
 
 test('steering, turbine and exhaust choices persist and twin turbines require level 60',()=>{
@@ -152,7 +152,7 @@ test('collections persist three independent pieces and derive the bonus from the
  const mixed=Garage.choose({...G.defaults,suit:'collection_tropical',bonus:'snow'},{stats:{level:100}});
  assert.equal(G.activeOutfit(mixed),null);
  assert.equal(mixed.bonus,undefined);
- for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind&&i.id!==G.defaults[kind]))assert.ok(G.outfitSets.some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
+ for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind&&i.id!==G.defaults[kind]))assert.ok([...G.outfitSets,...G.themedOutfits].some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
 });
 
 test('seasonal reward pacing offers early variety and goals across the full level range',()=>{
@@ -179,7 +179,7 @@ test('removed striped collection cannot be selected and old saved pieces fall ba
 });
 
 test('summer separates and hats save independently at their exact levels',()=>{
- for(const [level,suit,pants,hat]of [[0,'palmTank','sandShorts','strawSun'],[5,'flamingoTank','oceanShorts','duckBucket'],[10,'bananaTank','flamingoShorts','propellerCap']]){
+ for(const [level,suit,pants,hat]of [[0,'palmTank','sandShorts','strawSun'],[2,'flamingoTank','oceanShorts','duckBucket'],[4,'bananaTank','flamingoShorts','propellerCap']]){
   const look={...G.defaults,suit,pants,hat};
   const saved=Garage.choose(look,{stats:{level}});
   assert.equal(saved.suit,suit);assert.equal(saved.pants,pants);assert.equal(saved.hat,hat);
@@ -199,8 +199,8 @@ test('13 hairstyles and five physiques persist without changing clothes or trust
  for(const hat of ['pokerFlatCap','pokerClassicCap'])assert.equal(Garage.choose({...G.defaults,hat},{stats:{level:0}}).hat,hat);
 });
 
-test('helmet milestones select distinct models while keeping saved IDs and unlock levels',()=>{
- const expected=[['club',3],['ruby',15],['night',25],['silver',40],['emerald',60],['legend',95]];
+test('helmet milestones keep saved IDs and use revised unlock levels',()=>{
+ const expected=[['club',1],['ruby',7],['night',14],['silver',28],['emerald',60],['legend',95]];
  assert.equal(G.items.filter(i=>i.kind==='helmet'&&i.id!=='none').length,8);
  assert.equal(new Set(Object.values(G.helmetModels)).size,7);
  for(const [helmet,level]of expected){
@@ -320,7 +320,7 @@ test('plate feedback reports exact gate and supplies a currently valid example',
 });
 
 test('wheel diameter and formula wings persist independently with level gates',()=>{
- const look=Garage.choose({wheelSize:'max',wheels:'bronzeSix',frontBumper:'formulaPro'},{stats:{level:65}});assert.equal(look.wheelSize,'max');assert.equal(look.frontBumper,'formulaPro');assert.equal(look.wheels,'bronzeSix');assert.equal(Garage.choose({}, {stats:{level:0}}).wheelSize,'standard');assert.throws(()=>Garage.choose({wheelSize:'large'},{stats:{level:19}}));assert.throws(()=>Garage.choose({frontBumper:'formula'},{stats:{level:34}}));
+ const look=Garage.choose({wheelSize:'max',wheels:'bronzeSix',frontBumper:'formulaPro'},{stats:{level:65}});assert.equal(look.wheelSize,'max');assert.equal(look.frontBumper,'formulaPro');assert.equal(look.wheels,'bronzeSix');assert.equal(Garage.choose({}, {stats:{level:0}}).wheelSize,'standard');assert.throws(()=>Garage.choose({wheelSize:'large'},{stats:{level:9}}));assert.throws(()=>Garage.choose({frontBumper:'formula'},{stats:{level:34}}));
 });
 
 test('Formula collection starts above level fifty and tyre choices save independently',()=>{for(const [kind,id,level]of [['frontBumper','formula',55],['tyreWidth','wide',52],['tyreWidth','ultra',72],['tyres','soft',55],['tyres','wet',76],['helmet','formulaCrimson',54],['helmet','formulaGold',74],['rearBumper','formulaPro',78],['spoiler','formulaPro',85],['sideSkirts','formula',58],['frontBumper','formulaElite',82]]){assert.ok(level>50);assert.throws(()=>Garage.choose({[kind]:id},{stats:{level:level-1}}));assert.equal(Garage.choose({[kind]:id},{stats:{level}})[kind],id);}const look=Garage.choose({tyreWidth:'ultra',tyres:'wet',wheelSize:'max',wheels:'bronzeSix'},{stats:{level:100}});assert.equal(look.tyreWidth,'ultra');assert.equal(look.tyres,'wet');assert.equal(look.wheelSize,'max');});

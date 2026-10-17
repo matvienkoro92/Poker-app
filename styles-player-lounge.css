@@ -315,8 +315,8 @@
 .player-hall__room[data-theme=midnight] .player-hall__cabinet-object img{filter:brightness(1.04) saturate(.98) drop-shadow(1px 3px 2px #0009)}
 .player-hall__room[data-theme=midnight] .player-hall__cabinet-object .hall-award-reflection{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;mask-image:var(--award-mask);mask-size:contain;mask-repeat:no-repeat;mask-position:center bottom;background:linear-gradient(0deg,var(--award-light) 0%,transparent 72%),linear-gradient(90deg,var(--award-light),transparent 23%,transparent 80%,var(--award-light));opacity:.4;mix-blend-mode:screen}
 
-/* A softly lit physical rocker on the wall beneath the right trophy cabinet. */
-.player-hall-dialog .hall-wall-switch{position:absolute;left:66.5%;top:49%;width:3.4%;height:2.8%;padding:.45cqh;border:1px solid #b89e6f;border-radius:.4cqh;background:linear-gradient(125deg,#706145,#272a29 45%,#938066);box-shadow:0 .2cqh .3cqh #000b,0 0 .7cqh #e7ca7b66;z-index:5;transform:skewY(-3deg);cursor:pointer}
+/* The rocker sits on the door jamb, to the right of the lower tournament plaque. */
+.player-hall-dialog .hall-wall-switch{position:absolute;left:78%;top:47%;width:3.4%;height:2.8%;padding:.45cqh;border:1px solid #b89e6f;border-radius:.4cqh;background:linear-gradient(125deg,#706145,#272a29 45%,#938066);box-shadow:0 .2cqh .3cqh #000b,0 0 .7cqh #e7ca7b66;z-index:5;transform:skewY(-3deg);cursor:pointer}
 .hall-wall-switch__rocker{display:block;position:relative;width:100%;height:100%;border:1px solid #131818;border-radius:.2cqh;background:linear-gradient(#b4b6a6,#656f68 45%,#303a35 49%,#839185);box-shadow:inset 0 1px #f5efd080}
 .hall-wall-switch__rocker i{position:absolute;left:35%;top:19%;width:30%;height:8%;border-radius:2px;background:#ffe3a0;box-shadow:0 0 4px #ffdc86}
 .hall-wall-switch[aria-pressed=true]{box-shadow:0 .2cqh .3cqh #000b,0 0 .8cqh #82dce980}
@@ -578,13 +578,13 @@
 .garage-workshop--wardrobe>.garage-workshop__header>div{padding-left:7px}.garage-workshop--wardrobe .garage-outfit-label{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;pointer-events:none}
 .garage-workshop--wardrobe>.garage-visor-tabs{padding:6px 12px;background:#101a20;gap:0}.garage-workshop--wardrobe>.garage-visor-tabs button{flex:1;border-radius:20px;min-height:31px;padding:5px 10px;font-size:12px}.garage-workshop--wardrobe>.garage-visor-tabs button[aria-pressed=true]{border-color:#d7b46b;background:linear-gradient(#6b582d,#342e1c);color:#ffe2a1}
 .garage-workshop--wardrobe .garage-body-hotspots{position:absolute;inset:0;pointer-events:none}.player-hall-dialog .garage-workshop--wardrobe .garage-body-hotspots button{position:absolute;pointer-events:auto;min-height:28px;padding:5px 10px;border:1px solid #e0c48150;border-radius:20px;background:#0c171bd4;color:#e7dfc9;font-size:10px;line-height:1.2;box-shadow:0 2px 6px #0008;white-space:nowrap}.garage-body-hotspots button::after{content:"";position:absolute;top:50%;width:18px;height:1px;background:#b99b5b;right:-19px}.garage-body-hotspots i{position:absolute;top:calc(50% - 3px);right:-25px;width:6px;height:6px;border-radius:50%;background:#ffdfa0;box-shadow:0 0 5px 2px #d5b46d77}.garage-body-hotspots [data-kind=helmet]{right:7%;top:11%}.garage-body-hotspots [data-kind=suit]{left:6%;top:30%}.garage-body-hotspots [data-kind=pants]{left:8%;top:60%}.garage-body-hotspots [data-kind=watch]{right:3%;top:51%}.garage-body-hotspots [data-kind=shoes]{left:6%;bottom:8%}.garage-body-hotspots :is([data-kind=helmet],[data-kind=watch])::after{left:-19px;right:auto}.garage-body-hotspots :is([data-kind=helmet],[data-kind=watch]) i{left:-25px;right:auto}
-.garage-workshop--wardrobe:is([data-wardrobe-focus=watch],[data-wardrobe-focus=ring]) .garage-body-hotspots{display:none}
+.garage-workshop--wardrobe:is([data-wardrobe-focus=bracelet],[data-wardrobe-focus=watch],[data-wardrobe-focus=ring]) .garage-body-hotspots{display:none}
 @media(max-width:350px){.player-hall-dialog .garage-workshop--wardrobe .garage-body-hotspots button{font-size:9px;padding:4px 7px}}
 .garage-character-3d:active~.garage-body-hotspots{opacity:0;pointer-events:none}
 
 .player-hall-dialog .garage-workshop__footer p.garage-notice--warning{color:#ffe29a;font-weight:700;font-size:13px;line-height:1.45;background:#65502255;border:1px solid #e4bd6170;border-radius:9px;padding:9px 12px;margin:0 0 8px;text-shadow:0 1px 2px #0008}
 
-.player-hall-dialog .garage-watch-back{display:none;position:absolute;z-index:6;top:74px;left:12px;min-height:40px;padding:8px 14px;border:1px solid #d1ac6599;border-radius:24px;background:#14201df2;color:#ffe0a0;font-size:13px;font-weight:700;box-shadow:0 3px 8px #0007}.garage-workshop--wardrobe:is([data-wardrobe-focus=watch],[data-wardrobe-focus=ring],[data-wardrobe-focus=watch-full],[data-wardrobe-focus=ring-full]) .garage-watch-back{display:block}
+.player-hall-dialog .garage-watch-back{display:none;position:absolute;z-index:6;top:74px;left:12px;min-height:40px;padding:8px 14px;border:1px solid #d1ac6599;border-radius:24px;background:#14201df2;color:#ffe0a0;font-size:13px;font-weight:700;box-shadow:0 3px 8px #0007}.garage-workshop--wardrobe:is([data-wardrobe-focus=bracelet],[data-wardrobe-focus=watch],[data-wardrobe-focus=ring],[data-wardrobe-focus=bracelet-full],[data-wardrobe-focus=watch-full],[data-wardrobe-focus=ring-full]) .garage-watch-back{display:block}
 
 .garage-workshop--fitted.garage-workshop--car .garage-customizer-layout[data-category=car]>.garage-categories{position:relative;padding-bottom:24px}
 .garage-workshop--car .garage-customizer-layout[data-category=car]::after{content:"Листайте вправо →";grid-area:controls;align-self:end;justify-self:stretch;position:relative;z-index:2;padding:4px 12px;background:#101a20;color:#edcf8f;text-align:right;font-size:11px;line-height:16px;white-space:nowrap;pointer-events:none}
@@ -651,3 +651,11 @@
 /* Save feedback lives on the preview hint line, without growing the footer. */
 .player-hall-dialog .garage-workshop--fitted .garage-save-status{box-sizing:border-box;margin:0;max-height:32px;overflow:auto;overscroll-behavior:contain;overflow-wrap:anywhere;line-height:1.3;pointer-events:auto}
 .player-hall-dialog .garage-workshop--fitted .garage-save-status.garage-notice--warning{color:#ffd078}
+
+/* Decode the lighter studio image while the Villa is opening. */
+@media(max-width:680px){.garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-character-stage{background-image:linear-gradient(0deg,#0c151a99,transparent 25%),url('./assets/player-hall/wardrobe-studio-mobile-v1.webp')}}
+
+/* Motorcycles are shorter than the cars and share their contact plane. */
+.player-hall__room[data-garage-vehicle="3"] .garage-locked-vehicle{left:6%;width:64%;bottom:19%}
+.player-hall__room[data-garage-vehicle="4"] .garage-locked-vehicle{left:9%;width:57%;bottom:19%}
+.player-hall__room:is([data-garage-vehicle="3"],[data-garage-vehicle="4"]) .garage-locked-vehicle::before{bottom:0;height:9%;transform:rotate(12deg)}

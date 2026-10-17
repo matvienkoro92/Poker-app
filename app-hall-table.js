@@ -52,7 +52,7 @@
     d.addEventListener('click',async function(e){if(e.target.closest('[data-coupon-redeem]')){var status=d.querySelector('[data-coupon-status]'),id=d.querySelector('[data-coupon-code]').value.trim();try{var check=await pokerSocialRequest('hall-card-pick',{action:'inspect',couponId:id});if(check.coupon.redeemedAt||Date.now()>=check.coupon.expiresAt)throw Error('Купон уже использован или истёк');if(!window.confirm('Выдать «'+check.coupon.prize.title+'» игроку '+check.coupon.accountId+'?\n'+check.coupon.prize.text+'\nПогасить купон после выдачи?'))return;await pokerSocialRequest('hall-card-pick',{action:'redeem',couponId:id});status.textContent='Купон погашен. Повторная выдача невозможна.';}catch(err){status.textContent=err.message||'Не удалось погасить купон';}return;}if(e.target.closest('[data-card-replay]')&&!busy&&g.canReplay()){try{await g.restart();d.close();d.remove();openChest(table);}catch(err){output.textContent=err.message||'Не удалось начать новую попытку';}return;}var card=e.target.closest('[data-pick-card]');if(!card||card.disabled||busy)return;busy=true;card.disabled=true;try{await reveal(await g.choose(Number(card.dataset.pickCard)),true);}catch(err){busy=false;cards.forEach(function(c){c.disabled=false;});output.textContent=err.message||'Не удалось сохранить выбор. Повторите попытку.';}});
     if(state.choice!==null){reveal(state,false);}else{setTimeout(function(){if(!d.isConnected)return;hand.dataset.phase='ready';cards.forEach(function(c){c.disabled=false;});d.querySelector('.hall-card-instruction').textContent=remote.admin?'Тест администратора · выберите карту':'Выберите одну из трёх карт';},reduced?0:1100);}
   }
-  document.addEventListener('click', async function (event) {
+  async function handleTableAction(event) {
     var button = event.target.closest('[data-table-action]'); if(!button){document.querySelectorAll('.hall-table__deck--open').forEach(function(box){box.classList.remove('hall-table__deck--open');box.setAttribute('aria-expanded','false');});return;}if(button.disabled)return;
     var table = button.closest('.hall-table'), hall = button.closest('.player-hall-dialog'), action = button.dataset.tableAction;
     if (!hall || !hall.open) return;
@@ -66,7 +66,7 @@
       button.disabled = true;
       button.classList.remove('hall-table__chips--shuffle');void button.offsetWidth;button.classList.add('hall-table__chips--shuffle');
       button.querySelectorAll('i').forEach(function(chip,n){chipClack(((3-n)*65+850)/1000);});
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) await new Promise(function(resolve){setTimeout(resolve,1250);});
+      await new Promise(function(resolve){setTimeout(resolve,window.matchMedia('(prefers-reduced-motion: reduce)').matches?220:1250);});
       button.disabled = false;button.classList.remove('hall-table__chips--shuffle');
       if (!button.isConnected || !hall.open) return;
       var level = Number(table.dataset.tableLevel), xp = table.dataset.tableXp, target = Number(table.dataset.tableTarget), known = xp !== '' && target > 0;
@@ -85,6 +85,32 @@
       status.textContent = ''; panel('Ваша карта на сегодня', '<p class="hall-table-dialog__prediction">' + esc(text) + '</p><small>Завтра колода приготовит новое предсказание.</small>', 'prediction');
     } catch (_) { if (button.isConnected) status.textContent = 'Не удалось вытянуть карту. Нажмите на колоду ещё раз.'; }
     finally { button.disabled = false; }
+  }
+  // WebViews can suppress the compatibility click after a touch on a transformed scene.
+  // Handle a real tap directly, without also handling the generated click.
+  var tableTouch;
+  document.addEventListener('touchstart',function(event){
+    var button=event.target.closest&&event.target.closest('[data-table-action="glass"],[data-table-action="chips"]');
+    var point=event.touches.length===1&&event.touches[0];
+    tableTouch=button&&point?{button:button,x:point.clientX,y:point.clientY,moved:false}:null;
+  },{passive:true,capture:true});
+  document.addEventListener('touchmove',function(event){
+    if(!tableTouch)return;var point=event.touches[0];
+    if(!point||event.touches.length!==1||Math.abs(point.clientX-tableTouch.x)>12||Math.abs(point.clientY-tableTouch.y)>12)tableTouch.moved=true;
+  },{passive:true,capture:true});
+  document.addEventListener('touchcancel',function(){tableTouch=null;},{passive:true,capture:true});
+  document.addEventListener('touchend',function(event){
+    var touch=tableTouch;tableTouch=null;
+    if(!touch||touch.moved||event.touches.length||!touch.button.isConnected)return;
+    var point=event.changedTouches[0],rect=touch.button.getBoundingClientRect();
+    if(!point||point.clientX<rect.left||point.clientX>rect.right||point.clientY<rect.top||point.clientY>rect.bottom)return;
+    event.preventDefault();touch.button._tableTouchHandledAt=Date.now();
+    handleTableAction(event);
+  },{passive:false,capture:true});
+  document.addEventListener('click',function(event){
+    var button=event.target.closest&&event.target.closest('[data-table-action]');
+    if(button&&event.detail!==0&&Date.now()-(button._tableTouchHandledAt||0)<900){event.preventDefault();return;}
+    handleTableAction(event);
   });
   ['poker-telegram-auth','poker-auth-changed'].forEach(function (name) { window.addEventListener(name, function () { document.querySelectorAll('.hall-table-dialog').forEach(function (d) { d.close(); }); }); });
 })();

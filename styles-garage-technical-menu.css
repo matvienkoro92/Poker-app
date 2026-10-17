@@ -62,7 +62,7 @@
 .garage-category-icon img{display:block;width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 2px 2px #0005);opacity:.72}
 .garage-categories button[aria-pressed=true] .garage-category-icon img{opacity:1;filter:drop-shadow(0 0 5px #e7c26e40)}
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) auto auto;grid-template-areas:"preview" "families" "controls"}
-.garage-wardrobe-families{grid-template-columns:repeat(4,minmax(0,1fr));padding:5px 8px}
+.garage-wardrobe-families{grid-template-columns:repeat(5,minmax(0,1fr));padding:5px 8px}
 .player-hall-dialog .garage-workshop--fitted .garage-wardrobe-families button{padding:8px 2px;font-size:11px;min-height:28px}
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-categories{min-height:61px;justify-content:center;padding:4px 8px;gap:10px}
 .player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe .garage-customizer-layout[data-category=character]>.garage-categories button{flex-basis:66px;width:66px;min-height:53px;font-size:10px;gap:3px;padding:4px 3px}
@@ -125,3 +125,9 @@
 .player-hall-dialog .garage-category-icon svg[data-garage-icon-fallback]{display:none}
 .player-hall-dialog .garage-category-icon--fallback img[data-garage-wardrobe-icon]{display:none}
 .player-hall-dialog .garage-category-icon--fallback svg[data-garage-icon-fallback]{display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-options{flex:0 0 clamp(174px,23dvh,210px);height:clamp(174px,23dvh,210px);max-height:none}
+.player-hall-dialog .garage-workshop--wardrobe[data-wardrobe-focus=outfits] .garage-option-art{height:clamp(72px,10dvh,96px);min-height:0}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) 38px;grid-template-areas:"preview" "families"}
+.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-customizer-layout[data-category=character]>.garage-categories{display:none}
+.garage-workshop--wardrobe[data-wardrobe-focus=outfits] .garage-body-hotspots{display:none}

@@ -209,7 +209,24 @@ export function makeModel(scene,look){
  for(const y of [.635,1.225]){const points=Array.from({length:65},(_,n)=>{const z=-1.04+n*2.08/64;return new T.Vector3(2.57-.28*(z/1.1)**2,y,z);});mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),80,.034,12,false),gold);}
  for(const sign of [-1,1]){const z=sign*1.0,x=2.57-.28*(z/1.1)**2;const bandCurve=new T.CatmullRomCurve3([new T.Vector3(x-.04,.635,z),new T.Vector3(x+.05,.78,z),new T.Vector3(x+.065,1.12,z),new T.Vector3(x-.04,1.25,z)]);mesh(new T.TubeGeometry(bandCurve,32,.065,12,false),gold);for(const y of [.91,1.065]){const points=Array.from({length:16},(_,n)=>{const z=sign*(.51+n*.41/15);return new T.Vector3(2.57-.28*(z/1.1)**2+.018,y,z);});stockHeadlights.push(mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.017,8,false),light));}}
  // Shared card artwork keeps the option cards, garage and model in sync.
- const cardPartsStart=car.children.length;const cardMats=[];for(let n=0;n<2;n++){const map=new T.CanvasTexture(G.cardCanvas(look.cards,n));map.colorSpace=T.SRGBColorSpace;map.anisotropy=16;const mat=new T.MeshBasicMaterial({map,transparent:true,toneMapped:false});cardMats.push(mat);const x=1.65+n*.035,z=n?.20:-.20;const angle=n?-.20:.16;const backing=rounded(.49,.012,.68,.025,material('#ddd9cf',0,.86),x,1.474+n*.018,z);backing.rotation.y=angle;const card=mesh(new T.PlaneGeometry(.50,.67),mat,x,1.482+n*.018,z);card.rotation.x=-Math.PI/2;card.rotation.z=-angle;card.castShadow=false;card.receiveShadow=false;}
+ const cardPartsStart=car.children.length;
+ const cardMats=[];
+ for(let n=0;n<2;n++){
+  const group=new T.Group();group.name='hood-playing-card-'+n;
+  group.position.set(1.66+n*.08,1.495+n*.014,n?.23:-.23);
+  group.rotation.set(-Math.PI/2,0,n?-.18:.18);car.add(group);
+  const shape=outline(.54,.76,.035);
+  const paperGeo=new T.ExtrudeGeometry(shape,{depth:.004,bevelEnabled:false,curveSegments:10});
+  paperGeo.translate(0,0,-.004);
+  const paper=mesh(paperGeo,new T.MeshStandardMaterial({color:'#e1d8c4',roughness:.94,metalness:0}),0,0,0,group);
+  paper.castShadow=false;paper.receiveShadow=false;
+  const map=new T.CanvasTexture(G.cardCanvas(look.cards,n));map.colorSpace=T.SRGBColorSpace;map.anisotropy=16;
+  const mat=new T.MeshBasicMaterial({map,transparent:true,alphaTest:.1,toneMapped:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
+  mat.userData.style=look.cards;cardMats.push(mat);
+  const face=mesh(new T.PlaneGeometry(.54,.76),mat,0,0,.0015,group);
+  face.name='printed-card-face-'+n;face.castShadow=false;face.receiveShadow=false;
+ }
+
 
 
  const looseCards=car.children.slice(cardPartsStart);

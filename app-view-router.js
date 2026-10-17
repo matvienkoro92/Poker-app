@@ -1831,6 +1831,11 @@ navItems.forEach(function (item) {
         e.stopImmediatePropagation();
         if (item.disabled) return;
         item.disabled = true;
+        item.classList.add("bottom-nav__item--opening");
+        item.setAttribute("aria-busy", "true");
+        var villaLabel = item.querySelector(".bottom-nav__label");
+        var villaLabelText = villaLabel && villaLabel.textContent;
+        if (villaLabel) villaLabel.textContent = "Открываем…";
         Promise.resolve().then(async function () {
           if (typeof window.pokerEnsureLazyDomains === "function") {
             await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
@@ -1842,7 +1847,12 @@ navItems.forEach(function (item) {
           await window.pokerOpenPlayerHall();
         }).catch(function (error) {
           window.alert(error.message || "Не удалось открыть зал. Попробуйте ещё раз.");
-        }).finally(function () { item.disabled = false; });
+        }).finally(function () {
+          item.disabled = false;
+          item.classList.remove("bottom-nav__item--opening");
+          item.removeAttribute("aria-busy");
+          if (villaLabel && villaLabel.textContent === "Открываем…") villaLabel.textContent = villaLabelText;
+        });
         return;
       }
       if (target === "player-crm" && typeof pokerOpenPlayerCrmFromHome === "function") {

@@ -44,10 +44,10 @@ const { chromium } = require('playwright');
           checked++;
         }
       }
-      assert.equal(checked, 12);
+      assert.equal(checked, 14);
       assert.deepEqual(errors, []);
       await page.close();
-      console.log('PASS all 12 wardrobe icons: ' + (failImages ? '404 uses visible vector fallback' : 'images load and vectors stay hidden'));
+      console.log('PASS all 14 wardrobe icons: ' + (failImages ? '404 uses visible vector fallback' : 'images load and vectors stay hidden'));
     }
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

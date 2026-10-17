@@ -1,0 +1,419 @@
+{
+  "beforeBytes": 4906230,
+  "totalBytes": 3240044,
+  "files": [
+    {
+      "file": "assets/player-hall/wardrobe/summer/poker21RedTank-print-v2.webp",
+      "bytes": 153788,
+      "width": 798,
+      "height": 712,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/acesIvoryTank-print-v2.webp",
+      "bytes": 141368,
+      "width": 798,
+      "height": 712,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/acesGoldTank-print-v2.webp",
+      "bytes": 137194,
+      "width": 798,
+      "height": 712,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/poker21BlackTank-print-v2.webp",
+      "bytes": 130680,
+      "width": 798,
+      "height": 712,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/enduro-locked-v1.webp",
+      "bytes": 115806,
+      "width": 900,
+      "height": 771,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/braceletGoldChain.webp",
+      "bytes": 112942,
+      "width": 768,
+      "height": 251,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/braceletSilverChain.webp",
+      "bytes": 99254,
+      "width": 768,
+      "height": 249,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/harley-locked-v1.webp",
+      "bytes": 82950,
+      "width": 900,
+      "height": 640,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_suit.webp",
+      "bytes": 79346,
+      "width": 460,
+      "height": 427,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_suit.webp",
+      "bytes": 73994,
+      "width": 424,
+      "height": 384,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_suit.webp",
+      "bytes": 73828,
+      "width": 461,
+      "height": 409,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_gloves.webp",
+      "bytes": 69690,
+      "width": 410,
+      "height": 398,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_gloves.webp",
+      "bytes": 69620,
+      "width": 417,
+      "height": 384,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_suit.webp",
+      "bytes": 66216,
+      "width": 465,
+      "height": 425,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_hat.webp",
+      "bytes": 64966,
+      "width": 434,
+      "height": 398,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/braceletGoldCuff.webp",
+      "bytes": 62562,
+      "width": 768,
+      "height": 314,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_suit.webp",
+      "bytes": 62522,
+      "width": 466,
+      "height": 445,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_gloves.webp",
+      "bytes": 61762,
+      "width": 386,
+      "height": 353,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_shoes.webp",
+      "bytes": 59204,
+      "width": 307,
+      "height": 376,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_hat.webp",
+      "bytes": 58276,
+      "width": 367,
+      "height": 411,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_shoes.webp",
+      "bytes": 54212,
+      "width": 413,
+      "height": 353,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_shoes.webp",
+      "bytes": 53774,
+      "width": 398,
+      "height": 355,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_shoes.webp",
+      "bytes": 53096,
+      "width": 432,
+      "height": 299,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_watch.webp",
+      "bytes": 52286,
+      "width": 299,
+      "height": 388,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_hat.webp",
+      "bytes": 52116,
+      "width": 404,
+      "height": 402,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_watch.webp",
+      "bytes": 52060,
+      "width": 276,
+      "height": 412,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_gloves.webp",
+      "bytes": 52024,
+      "width": 454,
+      "height": 328,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/braceletSilverCuff.webp",
+      "bytes": 51896,
+      "width": 768,
+      "height": 245,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_bracelet.webp",
+      "bytes": 50470,
+      "width": 440,
+      "height": 244,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_gloves.webp",
+      "bytes": 49570,
+      "width": 414,
+      "height": 334,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_pants.webp",
+      "bytes": 48890,
+      "width": 261,
+      "height": 444,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe-studio-mobile-v1.webp",
+      "bytes": 48112,
+      "width": 768,
+      "height": 1152,
+      "alpha": false
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_hat.webp",
+      "bytes": 46798,
+      "width": 418,
+      "height": 371,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_watch.webp",
+      "bytes": 44208,
+      "width": 275,
+      "height": 404,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_watch.webp",
+      "bytes": 43910,
+      "width": 283,
+      "height": 390,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_hat.webp",
+      "bytes": 42972,
+      "width": 448,
+      "height": 314,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_bracelet.webp",
+      "bytes": 41970,
+      "width": 439,
+      "height": 200,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_glasses.webp",
+      "bytes": 41706,
+      "width": 437,
+      "height": 213,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_bracelet.webp",
+      "bytes": 41626,
+      "width": 423,
+      "height": 227,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_pants.webp",
+      "bytes": 41548,
+      "width": 216,
+      "height": 412,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_watch.webp",
+      "bytes": 40498,
+      "width": 298,
+      "height": 390,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_pants.webp",
+      "bytes": 39700,
+      "width": 263,
+      "height": 423,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_pants.webp",
+      "bytes": 37760,
+      "width": 218,
+      "height": 410,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_bracelet.webp",
+      "bytes": 33064,
+      "width": 404,
+      "height": 210,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_glasses.webp",
+      "bytes": 32902,
+      "width": 433,
+      "height": 214,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_bracelet.webp",
+      "bytes": 32274,
+      "width": 390,
+      "height": 219,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_pants.webp",
+      "bytes": 32022,
+      "width": 220,
+      "height": 439,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_space_necklace.webp",
+      "bytes": 31720,
+      "width": 302,
+      "height": 388,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_shoes.webp",
+      "bytes": 30114,
+      "width": 325,
+      "height": 408,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_necklace.webp",
+      "bytes": 28592,
+      "width": 347,
+      "height": 391,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_necklace.webp",
+      "bytes": 28346,
+      "width": 318,
+      "height": 365,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_bath_glasses.webp",
+      "bytes": 26626,
+      "width": 421,
+      "height": 167,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_glasses.webp",
+      "bytes": 26566,
+      "width": 454,
+      "height": 203,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_enduro_necklace.webp",
+      "bytes": 22948,
+      "width": 284,
+      "height": 385,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_garden_glasses.webp",
+      "bytes": 20086,
+      "width": 393,
+      "height": 166,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/summer/outfit_fisherman_necklace.webp",
+      "bytes": 18718,
+      "width": 275,
+      "height": 380,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/icons/gloves-v1.webp",
+      "bytes": 7660,
+      "width": 128,
+      "height": 118,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/icons/outfits-v1.webp",
+      "bytes": 5776,
+      "width": 128,
+      "height": 122,
+      "alpha": true
+    },
+    {
+      "file": "assets/player-hall/wardrobe/icons/bracelet-v1.webp",
+      "bytes": 5460,
+      "width": 128,
+      "height": 42,
+      "alpha": true
+    }
+  ]
+}
