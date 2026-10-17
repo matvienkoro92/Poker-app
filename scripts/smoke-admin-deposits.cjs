@@ -53,6 +53,15 @@ async function main(){
    assert.equal(await page.locator('.deposits__totals').count(),0);
    await page.locator('[data-filter="active"]').click();
    await page.locator('.deposits__bottom-totals').waitFor();
+   await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedPaymentLink=text;}}}));
+   await page.locator('[data-dep="payment-form"][data-provider="prodamus"]').click();
+   await page.locator('[data-dep="copy-payment-link"][data-option="0"]').click();
+   assert.equal(await page.evaluate(()=>window.__copiedPaymentLink),'https://payform.ru/4jah7zO/');
+   await page.locator('[data-dep="copy-payment-link"][data-option="1"]').click();
+   assert.equal(await page.evaluate(()=>window.__copiedPaymentLink),'https://payform.ru/8tah7Dv/');
+   assert.equal(view(state).paymentForms.providers[0].total,null);
+   await page.screenshot({path:path.join(output,width+'-prodamus.png')});
+   await page.locator('[data-dep="editor-close"]').first().click();
    await page.locator('.deposits__header [data-dep="new"]').click();
    await page.locator('[name="raw"]').fill('Вывод 15к\nС покер 21\n655861 айди\nUSDT\nTSaMfZDt41PKCjk5oxcNWBdCXZH8V8HDRe\nTron TRC20');
    await page.locator('[data-form="parse"] button[type="submit"]').click();
