@@ -89,7 +89,7 @@ async function main() {
     const replacement = "<" + block[1] + (block[2] || "") + ">" + result.code + "</" + block[1] + ">";
     compactHtml = compactHtml.slice(0, block.index) + replacement + compactHtml.slice(block.index + block[0].length);
   }
-  fs.writeFileSync(htmlPath, compactHtml);
+  fs.writeFileSync(htmlPath, require("./version-entry-assets").versionEntryAssets(compactHtml, output));
   console.log(JSON.stringify({ minifiedMiB: +(before / 1048576).toFixed(2), resultMiB: +(after / 1048576).toFixed(2), savedMiB: +((before - after) / 1048576).toFixed(2) }));
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });
