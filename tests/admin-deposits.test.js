@@ -55,7 +55,7 @@ function apiSetup(){
   const mod={exports:{}};
   vm.runInNewContext(fs.readFileSync(require.resolve('../lib/api-handlers/admin-deposits'),'utf8'),{
     module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,
-    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):null
+    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):null
   });
   async function call(body,user='admin-a',scope='deposits'){
     const res={statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(value){this.data=value;return this;},end(){return this;}};
@@ -273,4 +273,11 @@ test('only owner can delete a payout; removed rows and statistics disappear whil
  assert.equal(state.entries[0].deletedBy,'388008256');assert.equal(state.entries[0].deletedAt,12345);
  assert.throws(()=>applyOperation(state,{action:'reserve',requestId:requestId(101),entryId:requestId(1),amount:100},'admin-a'),/удалён/);
  assert.equal(applyOperation(state,{action:'create',requestId:requestId(102),entry},'admin-a').state.entries.length,2);
+});
+
+test('second verified owner account receives deletion permission, managers do not',async()=>{
+ const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
+ assert.equal((await a.call({action:'list'},'5053253480')).data.permissions.canDelete,true);
+ assert.equal((await a.call({action:'list'},'admin-b')).data.permissions.canDelete,false);
+ assert.equal((await a.call({action:'delete',requestId:requestId(110),entryId:requestId(1)},'5053253480')).statusCode,200);
 });
