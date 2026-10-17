@@ -14,7 +14,13 @@ test('achievement progress includes locked awards with real counters',()=>{const
 
 test('two shelves allow five earned awards each and preserve empty positions',()=>{const items=[...Array.from({length:6},(_,n)=>({id:'c'+n,kind:'cups'})),...Array.from({length:5},(_,n)=>({id:'a'+n,kind:'achievements'}))];const shelves={cups:['c0','c1','c2','c3','c4'],achievements:['a0','a1','a2','a3','a4']};const good={featured:[...shelves.cups,...shelves.achievements],shelves,theme:'walnut',goal:'wins'};assert.deepEqual(H.selection(good,items,stats),good);assert.throws(()=>H.selection({...good,featured:[...good.featured,'c5']},items,stats),/пяти/);assert.throws(()=>H.selection({...good,shelves:{...shelves,achievements:['c0',null,null,null,null]}},items,stats),/Неверные/);const sparse={...good,featured:['c0','a0'],shelves:{cups:[null,'c0',null,null,null],achievements:[null,null,null,'a0',null]}};assert.deepEqual(H.selection(sparse,items,stats),sparse);});
 
-test('hall API rejects non-admin reads and writes before loading player data',async()=>{for(const action of ['get','save','presence','showcase']){let accessed=false;const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:false,body:{action}})},'../account-id':{resolveAccountId:async()=>{accessed=true;}},'../player-hall':{read:async()=>{accessed=true;},save:async()=>{accessed=true;}}});const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);assert.equal(res.code,403);assert.equal(accessed,false);}});
+test('signed-in members can open save and inspect villas without admin privileges',async()=>{
+ for(const action of ['get','save','showcase','presence']){
+  let accessed=false;const method=action==='get'?'read':action;
+  const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:false,body:{action,targetId:'ID2'}})},'../account-id':{resolveAccountId:async()=> 'ID2'},'../player-hall':{[method]:async(id)=>{accessed=true;assert.equal(id,action==='save'?'ID1':'ID2');return {accountId:id};}},'../lounge-presence':{read:async()=>{accessed=true;return {};}}});
+  const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);assert.equal(res.code,200);assert.equal(accessed,true);
+ }
+});
 
 test('hall includes February tournament wins beyond friend-news retention',()=>{const archive=require('../lib/player-hall-tournament-results.json');const feed=require('../lib/friend-tournament-results.json');const list=H.catalog({accountId:'ID1',nick:'ПокерМанки',bound:true},[],archive,{},[]);const old=list.filter(i=>i.kind==='cups'&&i.history.date.startsWith('2026-02')&&i.history.results[0].reward>=250000);assert.ok(old.length>0);assert.ok(old.every(i=>!feed.some(r=>r.tournamentId===i.history.tournamentId)));});
 
@@ -25,14 +31,6 @@ test('garage showcase exposes only the public saved outfit, never friends or int
 test('showcase reads saved cosmetics without loading friends, lounge presence or writing room state',async()=>{const profile={accountId:'ID123456',nick:'Unbound',bound:false,level:0};let reads=0;const stub=mock('lib/player-hall.js',{'./club-social':{memberProfile:async id=>{assert.equal(id,profile.accountId);return profile;},redis:async commands=>{reads++;assert.equal(commands.length,3);assert.ok(commands.every(c=>c[0]==='GET'));assert.equal(commands[0][1],'poker_app:player_hall:ID123456');return [JSON.stringify({garage:{paint:'champagne',badges:['millionaire']}}),'{}','{}'];}},'./player-lounge':{read(){throw Error('must not load lounge');}}});const v=await stub.showcase(profile.accountId,false);assert.equal(reads,1);assert.equal(v.garage.loadout.paint,'classic');assert.equal(v.garage.loadout.badges.length,0);assert.equal(v.customized,true);});
 test('admin showcase resolves the exact target and never invokes save',async()=>{let target;const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:true,body:{action:'showcase',targetId:'tg_123'}})},'../account-id':{resolveAccountId:async id=>{assert.equal(id,'tg_123');return 'ID2';}},'../player-hall':{showcase:async(id,self)=>{target=id;assert.equal(self,false);return {accountId:id};},save(){throw Error('must not save');}}});const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);assert.equal(target,'ID2');assert.equal(res.code,200);assert.equal(res.body.showcase.accountId,'ID2');});
 
-test('ordinary members cannot inspect or mutate admin-only hall data',async()=>{
- for(const action of ['showcase','get','save','presence']){
-  let inspected=false;
-  const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:false,body:{action,targetId:'ID2'}})},'../account-id':{resolveAccountId:async()=> 'ID2'},'../player-hall':{showcase:async(id,self)=>{inspected=true;assert.equal(id,'ID2');assert.equal(self,false);return {accountId:id};},read(){throw Error('private read');},save(){throw Error('private mutation');}}});
-  const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);
-  assert.equal(res.code,403);assert.equal(inspected,false);
- }
-});
 
 test('occupied garage plate rejects the save and reports its owner',async()=>{
  const garage=require('../app-garage-catalog').defaults;
@@ -47,14 +45,10 @@ test('occupied garage plate rejects the save and reports its owner',async()=>{
  assert.equal(claims,1);
 });
 
-test('pilot usernames cannot bypass admin-only access',async()=>{
- const G=require('../app-garage-catalog');
- for(const username of ['polyapineapple','Qweenpoker'])assert.equal(G.canAccessHall({status:'verified',user:{username}}),false);
- assert.equal(G.canAccessHall({adminAccess:true}),true);
- const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:false,hallAccess:true,body:{action:'save'}})},'../player-hall':{save(){throw Error('must not save');}}});
- const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};
- await handler({},res);assert.equal(res.code,403);
+test('villa UI is available to verified members and admins but not guests',()=>{
+ const G=require('../app-garage-catalog');assert.equal(G.canAccessHall({status:'verified'}),true);assert.equal(G.canAccessHall({adminAccess:true}),true);assert.equal(G.canAccessHall(null),false);assert.equal(G.canAccessHall({status:'guest'}),false);
 });
+
 test('hall defaults to level one; admins can use their real profile level',async()=>{
  const hall=mock('lib/player-hall.js',{'./club-social':{memberProfile:async()=>({...profile,level:100}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?'{}':c[0]==='SMEMBERS'?[]:null)},'./player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}});
  const data=await hall.read('ID1',true);assert.equal(data.garage.stats.level,1);

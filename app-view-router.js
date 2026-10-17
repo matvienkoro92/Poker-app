@@ -1841,7 +1841,7 @@ navItems.forEach(function (item) {
             await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
           }
           if (!window.PokerGarage || !window.PokerGarage.canAccessHall(window.__pokerTelegramAuth)) {
-            throw new Error("Зал пока доступен участникам тестирования");
+            throw new Error("Войдите в аккаунт, чтобы открыть виллу");
           }
           if (typeof window.pokerOpenPlayerHall !== "function") throw new Error("Не удалось открыть зал. Попробуйте ещё раз.");
           await window.pokerOpenPlayerHall();
@@ -2469,14 +2469,14 @@ document.addEventListener("click", function (event) {
   setView(tab.dataset.viewTarget);
 });
 
-// Keep the private house entry out of the ordinary member navigation.
+// Show the villa to every signed-in player.
 (function () {
   var originalIcon;
   function syncHouseNav() {
     var label = document.getElementById('bottomNavHandsLabel');
     var button = label && label.closest('button');
     if (!button) return;
-    var admin = window.__pokerTelegramAuth?.adminAccess === true;
+    var admin = window.__pokerTelegramAuth?.adminAccess === true || window.__pokerTelegramAuth?.status === 'verified';
     button.dataset.viewTarget = admin ? 'player-hall' : 'my-summary';
     label.textContent = admin ? 'Вилла' : 'Раздачи';
     var badge = document.getElementById('bottomNavReviewUnread');
