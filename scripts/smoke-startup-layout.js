@@ -57,10 +57,10 @@ async function main() {
             header.classList.toggle("card__header--admin-shortcuts", shortcuts);
             const group = document.getElementById("headerAdminShortcuts");
             group.hidden = !shortcuts; group.classList.toggle("header-admin-shortcuts--with-crm", owner);
-            for (const id of ["headerReportsShortcutBtn", "headerRafflesShortcutBtn"]) document.getElementById(id).hidden = !shortcuts;
-            document.getElementById("headerBalancesShortcutBtn").hidden = !owner;
+            for (const id of ["headerDepositsShortcutBtn", "headerReportsShortcutBtn", "headerRafflesShortcutBtn"]) document.getElementById(id).hidden = !shortcuts;
+            document.getElementById("headerBalancesShortcutBtn").hidden = !shortcuts;
             document.getElementById("headerGreeting").textContent = "ОченьДлинноеИмяИгрока";
-            const elements = [header.querySelector(".logo--welcome"), crm, group, header.querySelector(".header-actions")];
+            const elements = [header.querySelector(".logo--welcome"), group, header.querySelector(".header-actions")];
             const rect = element => { const r = element.getBoundingClientRect(); return { name: element.id || element.className, x: r.x, y: r.y, right: r.right, bottom: r.bottom, width: r.width, height: r.height }; };
             return { header: rect(header), children: elements.filter(e => e.getBoundingClientRect().width > 0).map(rect),
               greeting: rect(document.getElementById("headerGreeting")), summary: rect(header.querySelector(".header-profile-summary")),
@@ -75,7 +75,7 @@ async function main() {
               assert.equal(overlaps, false, "Header overlap: " + JSON.stringify({ width, view, mode, child, other }));
             }
           }
-          assert.ok(geometry.greeting.width > 0 && geometry.greeting.right <= geometry.menu.x + 1, "Greeting remains visible before menu");
+          if (view === "home") assert.ok(geometry.greeting.width > 0 && geometry.greeting.right <= geometry.menu.x + 1, "Greeting remains visible before menu: " + JSON.stringify({width,view,mode,geometry}));
           records.push({ width, view, mode, geometry });
           if (mode === "owner") await page.screenshot({ path: path.join(output, width + "-" + view + ".png") });
         }

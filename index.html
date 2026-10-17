@@ -422,6 +422,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
     <link rel="stylesheet" href="./styles-home-overrides.css?v=20261001-daily-gap-17" />
+    <link rel="stylesheet" href="./styles-admin-deposits.css?v=20261017-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=20261012-hero-label-1" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=20260919-no-bottom-glow-1" />
     <link rel="preload" as="image" href="./assets/home-tournament-pokermanki-magic-head-mask.svg" />
@@ -731,6 +732,8 @@
           <div class="logo__subtitle">Poker Club</div>
         </div>
           </button>
+
+          <div class="header-admin-shortcuts" id="headerAdminShortcuts" aria-label="Админские разделы" hidden>
           <button
         type="button"
         class="header-icon-btn header-crm-shortcut header-crm-btn header-crm-btn--hidden"
@@ -751,7 +754,10 @@
         </svg>
         <span class="header-crm-shortcut__label">CRM</span>
           </button>
-          <div class="header-admin-shortcuts" id="headerAdminShortcuts" aria-label="Админские разделы" hidden>
+        <button type="button" class="header-icon-btn header-admin-shortcut" id="headerDepositsShortcutBtn" title="Депозиты и выводы" aria-label="Открыть депозиты и выводы" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7h18v14H3zM3 11h18M7 16h3M12 2v5m-3-3 3 3 3-3" /></svg>
+          <span>Депозиты</span>
+        </button>
         <button type="button" class="header-icon-btn header-admin-shortcut" id="headerReportsShortcutBtn" title="Отчёты" aria-label="Открыть отчёты" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2Z" />
@@ -1669,7 +1675,9 @@
     <script defer src="./app-home-daily-total.js?v=4.003"></script>
     <script src="./asset-runtime-config.js?v=4.002"></script>
     <script defer src="./app-home-media.js?v=4.002"></script>
-    <script defer src="./app-admin-menu-password.js?v=4.002"></script>
+    <script defer src="./app-admin-menu-password.js?v=20261017-deposits-1"></script>
+    <script defer src="./app-admin-deposits-parser.js?v=20261017-1"></script>
+    <script defer src="./app-admin-deposits.js?v=20261017-1"></script>
     <script defer src="./app-lazy-loader.js?v=20261002-coolershan-v2"></script>
     <script defer src="./app-home-planner-access.js?v=4.002"></script>
     <script defer src="./app-home-planner-runtime.js?v=4.002"></script>
@@ -1850,7 +1858,7 @@
     <script defer src="./app-shell-bootstrap.js?v=4.002"></script>
     <script defer src="./app.js?v=4.002"></script>
     <script defer src="./app-section-views.js?v=20260918-hide-view-stats-1"></script>
-    <script defer src="./app-visitors-admin.js?v=20261002-owner-games-1"></script>
+    <script defer src="./app-visitors-admin.js?v=20261017-deposits-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-reports" src="./app-admin-reports.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-formatters.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="player-crm" src="./app-player-crm-periods.js?v=4.002"></script>

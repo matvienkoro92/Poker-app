@@ -186,11 +186,13 @@
     var balanceBtn = document.getElementById("adminBonusBalancesHeaderBtn");
     var showReport = !!(reportBtn && !reportBtn.hidden && !reportBtn.disabled);
     var showBalances = !!(balanceBtn && !balanceBtn.hidden);
+    var depositShortcut = document.getElementById("headerDepositsShortcutBtn");
+    if (depositShortcut) depositShortcut.hidden = !showReport;
     var showRaffles = ownerSeesCrm || showReport || showBalances;
     reportShortcut.hidden = !showReport;
     balanceShortcut.hidden = !showBalances;
     rafflesShortcut.hidden = !showRaffles;
-    wrap.hidden = !showReport && !showBalances && !showRaffles;
+    wrap.hidden = !ownerSeesCrm && !showReport && !showBalances && !showRaffles;
     var header = wrap.closest ? wrap.closest(".card__header") : null;
     if (header) header.classList.toggle("card__header--admin-shortcuts", ownerSeesCrm || !wrap.hidden);
     wrap.classList.toggle("header-admin-shortcuts--with-crm", ownerSeesCrm);

@@ -1,15 +1,17 @@
 (function () {
   "use strict";
 
+  var DEPOSITS_SELECTOR = "#headerDepositsShortcutBtn";
   var CRM_SELECTOR = '[data-crm-open="player-crm"], #adminCrmBtn';
   var CALCULATIONS_SELECTOR = '[data-admin-report-tab="calculations"], [data-admin-report-tab="cash-total"]';
   var ADMIN_SELECTOR = "#adminReportBtn, #adminBonusBalancesHeaderBtn, #headerReportsShortcutBtn, #headerBalancesShortcutBtn";
-  var PROTECTED_SELECTOR = ADMIN_SELECTOR + ", " + CRM_SELECTOR + ", " + CALCULATIONS_SELECTOR;
+  var PROTECTED_SELECTOR = ADMIN_SELECTOR + ", " + DEPOSITS_SELECTOR + ", " + CRM_SELECTOR + ", " + CALCULATIONS_SELECTOR;
   var bypassTargets = typeof WeakSet === "function" ? new WeakSet() : null;
   var pendingTarget = null;
   var submitting = false;
 
   function scopeForTarget(target) {
+    if (target && target.matches && target.matches(DEPOSITS_SELECTOR)) return "deposits";
     if (target && target.matches && target.matches(CALCULATIONS_SELECTOR)) return "calculations";
     if (target && target.matches && target.matches(CRM_SELECTOR)) return "crm";
     return "admin";
@@ -75,6 +77,7 @@
   }
 
   function titleForScope(scope) {
+    if (scope === "deposits") return "Пароль для депозитов";
     if (scope === "crm") return "Пароль для CRM";
     if (scope === "calculations") return "Пароль для закрытой вкладки";
     return "Введите пароль";
