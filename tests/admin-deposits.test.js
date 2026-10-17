@@ -251,3 +251,12 @@ test('polite withdrawal with from-ID and recipient initial recognizes all fields
  const p=parser.parse('Ясно извините!выведите пожалуйста 6000 с 778130 на +79967261926 Т банк Мария К.');
  assert.equal(p.amount,600000);assert.equal(p.playerId,'778130');assert.equal(p.recipient,'Мария К.');assert.equal(p.phone,'+79967261926');assert.equal(p.bank,'Т банк');assert.equal(p.card,'');
 });
+
+test('deposit destination room is separate from withdrawal room and survives confirmation',async()=>{
+ const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
+ const reserve={action:'reserve',requestId:requestId(95),entryId:requestId(1),amount:100000,depositorId:'456789',depositorRoom:'X'};
+ const saved=await a.call(reserve);assert.equal(saved.statusCode,200);assert.equal(saved.data.entries[0].reservations[0].depositorRoom,'X');assert.equal(saved.data.entries[0].room,'P21');
+ const confirmed=await a.call({action:'confirm-reservation',requestId:requestId(96),entryId:requestId(1),reservationId:requestId(95)});assert.equal(confirmed.data.entries[0].payments[0].depositorRoom,'X');
+ assert.equal((await a.call({...reserve,requestId:requestId(97),depositorRoom:'bad'})).statusCode,400);
+ assert.equal((await a.call({...reserve,requestId:requestId(98),depositorId:''})).statusCode,400);
+});

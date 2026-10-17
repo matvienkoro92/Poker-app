@@ -382,3 +382,16 @@ body.deposits-open {overflow:hidden;}
 .deposits [data-form=create] .deposits__rooms span{font-size:11px}
 .deposits [data-form=create] .deposits__form-actions{margin-top:16px}
 .deposits [data-form=create] .deposits__form-grid>label:has([name=wallet]){grid-column:1/-1}
+/* Compact creation and refresh controls replace the full-width toolbar. */
+.deposits__toolbar:empty{display:none}
+.deposits__header-tools{display:flex;align-items:stretch;gap:8px;flex-shrink:0}
+.deposits .deposits__header-tools>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:auto;min-width:76px;height:auto;min-height:68px;margin:0;padding:9px 8px;background:#e9c88308;border:1px solid #dfc58a55;border-radius:14px;color:var(--dep-gold)}
+.deposits__header-tools>button span{font-size:10px;line-height:1.2;font-weight:650;white-space:nowrap}
+.deposits__header-tools>button svg{width:25px;height:25px}
+@media(max-width:760px){
+ .deposits__header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 10px;padding-bottom:16px}
+ .deposits__heading{grid-column:1;grid-row:1}
+ .deposits__header>.deposits__close{grid-column:2;grid-row:1}
+ .deposits__header-tools{grid-column:1/-1;grid-row:2}
+ .deposits .deposits__header-tools>button{min-height:62px;min-width:82px}
+}
