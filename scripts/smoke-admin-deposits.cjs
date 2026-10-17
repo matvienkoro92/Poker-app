@@ -9,7 +9,8 @@ async function main(){
  const server=http.createServer((req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname;const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));if(!file.startsWith(root+path.sep)){res.writeHead(403);return res.end();}fs.readFile(file,(e,b)=>{res.writeHead(e?404:200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream'});res.end(e?'':b);});});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch();
  try{
-  for(const width of [390,1280]){
+  for(const width of [320,390,1280]){
+   state=applyOperation(null,{action:'create',requestId:require('node:crypto').randomUUID(),entry:{recipient:'Мария Смирнова',bank:'Т-банк',phone:'+79998887766',total:2200000}},'Тестовый администратор').state;
    const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
    await context.route(/^https?:\/\/(?!127\.0\.0\.1(?::|\/))/,r=>r.fulfill({status:503,body:'{}',contentType:'application/json'}));
    await context.route('**/api/**',async route=>{
@@ -60,6 +61,10 @@ async function main(){
    if(width===1280){await page.locator('[name="recipient"]').fill('Анна Смирнова');await page.locator('[name="phone"]').fill('+79135554433');}
    await page.locator('[data-form="create"] button[type="submit"]').click();
    await page.locator('.deposits__card').first().waitFor();
+   assert.equal(await page.locator('.deposits__card').count(),2,'Two payout cards visible');
+   const columns=await page.locator('.deposits__cards').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length);
+   assert.equal(columns,2,'Payout cards stay in two columns at '+width);
+   assert.ok(await page.locator('.deposits').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'No horizontal overflow at '+width);
    await page.screenshot({path:path.join(output,width+'-list.png')});
    assert.equal(await page.locator('.deposits').evaluate(el=>el.scrollWidth>el.clientWidth+1),false,'Dialog has no horizontal overflow');
    const current=page.locator('.deposits__card').first();await current.locator('[data-dep="payment"]').click();

@@ -232,3 +232,35 @@ body.deposits-open {overflow:hidden;}
 @media(prefers-reduced-motion:reduce) {.deposits * {transition:none !important;scroll-behavior:auto !important;}}
 
 .deposits__search[hidden]{display:none}
+
+/* Keep two compact payout cards per row on phones as well as desktop. */
+@media(max-width:760px){
+  .deposits__shell{padding-inline:12px}
+  .deposits__cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+  .deposits__card{padding:12px 10px;border-radius:15px}
+  .deposits__card-head{flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .deposits__bank{gap:5px;font-size:11px;overflow-wrap:anywhere}
+  .deposits__bank svg{width:17px;height:17px}
+  .deposits__badge{font-size:9px;padding:4px 6px}
+  .deposits__card h3{font-size:16px;line-height:1.25;margin-bottom:8px}
+  .deposits .deposits__numbers button{font-size:12px;letter-spacing:0;gap:4px;min-width:0;word-break:break-word}
+  .deposits__numbers svg{width:13px;height:13px}
+  .deposits__note{font-size:11px}
+  .deposits__remaining{margin:14px 0 10px;gap:5px}
+  .deposits__remaining span{font-size:10px}
+  .deposits__remaining strong{font-size:23px;letter-spacing:-.5px;overflow-wrap:anywhere}
+  .deposits__paid{flex-direction:column;gap:4px;font-size:10px;margin:8px 0 12px}
+  .deposits__card-actions{gap:7px}
+  .deposits__card-actions :is(.deposits__primary,.deposits__secondary){min-height:44px!important;font-size:11px!important;padding:8px 5px;gap:5px;border-radius:9px;white-space:normal;line-height:1.25}
+  .deposits__card-actions svg{width:16px;height:16px}
+  .deposits__history{font-size:11px;margin-top:12px;padding-top:6px}
+  .deposits__card-foot{flex-wrap:wrap;gap:5px}
+  .deposits .deposits__card-foot button{font-size:11px}
+  .deposits__transaction{flex-wrap:wrap;gap:6px}
+  .deposits__transaction strong{font-size:15px}
+  .deposits__link{font-size:11px;flex-wrap:wrap;gap:4px}
+}
+@media(max-width:760px){
+  .deposits__filters nav{flex-wrap:wrap}
+  .deposits__filters nav button{flex:1 1 auto;padding:10px 7px;font-size:12px}
+}
