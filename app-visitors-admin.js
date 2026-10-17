@@ -145,14 +145,14 @@
     setCrmButtonAllowed(menuBtn, false);
     setCrmButtonAllowed(btn, false);
     syncHeaderAdminShortcuts();
-    if (crmAccessProbeState === "allowed") {
+    var url = buildCrmAccessProbeUrl();
+    if (url && crmAccessProbeState === "allowed" && crmAccessProbeKey === url) {
       setCrmButtonAllowed(menuBtn, true);
       setCrmButtonAllowed(btn, true);
       syncHeaderAdminShortcuts();
       return;
     }
-    var url = buildCrmAccessProbeUrl();
-    if (!url || crmAccessProbeState === "pending") return;
+    if (!url || (crmAccessProbeState === "pending" && crmAccessProbeKey === url)) return;
     if (crmAccessProbeState === "denied" && crmAccessProbeKey === url) return;
     crmAccessProbeState = "pending";
     crmAccessProbeKey = url;
@@ -161,6 +161,7 @@
         return r.ok ? r.json() : null;
       })
       .then(function (data) {
+        if (buildCrmAccessProbeUrl() !== url) return;
         crmAccessProbeState = data && data.ok ? "allowed" : "denied";
         setCrmButtonAllowed(menuBtn, crmAccessProbeState === "allowed");
         setCrmButtonAllowed(btn, crmAccessProbeState === "allowed");
@@ -330,13 +331,6 @@
     }
     function verifyReportUiAccess() {
       if (!reportBtn) return;
-      try {
-        if (window.location && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
-          window.__pokerAdminReportAccessVerified = true;
-          showReportUi();
-          return;
-        }
-      } catch (eHost) {}
       var reportBase = getApiBase();
       if (!reportBase || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
         window.__pokerAdminReportAccessVerified = false;
@@ -360,6 +354,8 @@
           return response.json();
         })
         .then(function (data) {
+          var currentQuery = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+          if (currentQuery !== reportQuery) return;
           var allowed = !!(data && data.ok && data.allowed === true);
           reportAccessProbeState = allowed ? "allowed" : "denied";
           window.__pokerAdminReportAccessVerified = allowed;
@@ -413,34 +409,17 @@
     if (typeof pokerShouldShowHomeTopVersionForSpecialUser === "function" && pokerShouldShowHomeTopVersionForSpecialUser()) {
       showKeyboardLabOnly();
     }
-    if (pokerIsKnownClientReportUser()) {
-      window.__pokerAdminReportAccessVerified = true;
-      reportAccessProbeState = "allowed";
-      showReportUi();
-    }
-    if (pokerIsKnownClientAdmin()) {
-      showAdminUi();
-      return;
-    } else {
-      if (pokerIsKnownClientBonusAdmin()) showBonusAdminUi();
-    }
     var base = getApiBase();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     var q = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
     var now = Date.now();
     if (visitorsAdminCheckPromise) return;
-    if (visitorsAdminCheckLastAt && now - visitorsAdminCheckLastAt < 15000) {
-      if (visitorsAdminCheckLastResult) showAdminUi();
-      else {
-        renderHomeAdminIdentityStatus(false);
-        syncCrmButtonAccess();
-      }
-      return;
-    }
     visitorsAdminCheckLastAt = now;
     visitorsAdminCheckPromise = fetch(base + "/api/visitors-list" + q + "&adminCheck=1")
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        var currentQuery = typeof pokerRafflesApiQueryLeading === "function" ? pokerRafflesApiQueryLeading() : "?initData=";
+        if (currentQuery !== q) return;
         visitorsAdminCheckLastResult = !!(data && data.ok && data.isAdmin);
         if (visitorsAdminCheckLastResult) showAdminUi();
       })
