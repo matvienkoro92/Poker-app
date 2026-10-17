@@ -28,7 +28,7 @@ test('achievement metrics distinguish verified money totals from award counts',(
 
 test('garage showcase exposes only the public saved outfit, never friends or internal progress',()=>{const d={profile:{accountId:'ID123456',nick:'Игрок',name:'Имя'},saved:{garage:{paint:'ruby',badges:['millionaire']},version:4,items:[{private:true}]},garage:{stats:{level:100,earnedBadges:['millionaire']},friendBest:{name:'Secret',best:9}}};const v=H.showcaseView(d,false);assert.deepEqual(Object.keys(v).sort(),['accountId','customized','garage','name','nick','self','version']);assert.deepEqual(Object.keys(v.garage),['loadout']);assert.equal(v.garage.loadout.paint,'ruby');assert.deepEqual(v.garage.loadout.badges,['millionaire']);assert.equal(v.self,false);assert.equal(v.customized,true);assert.equal(H.showcaseView({...d,saved:{}},true).customized,false);});
 
-test('showcase reads saved cosmetics without loading friends, lounge presence or writing room state',async()=>{const profile={accountId:'ID123456',nick:'Unbound',bound:false,level:0};let reads=0;const stub=mock('lib/player-hall.js',{'./club-social':{memberProfile:async id=>{assert.equal(id,profile.accountId);return profile;},redis:async commands=>{reads++;assert.equal(commands.length,3);assert.ok(commands.every(c=>c[0]==='GET'));assert.equal(commands[0][1],'poker_app:player_hall:ID123456');return [JSON.stringify({garage:{paint:'champagne',badges:['millionaire']}}),'{}','{}'];}},'./player-lounge':{read(){throw Error('must not load lounge');}}});const v=await stub.showcase(profile.accountId,false);assert.equal(reads,1);assert.equal(v.garage.loadout.paint,'classic');assert.equal(v.garage.loadout.badges.length,0);assert.equal(v.customized,true);});
+test('showcase reads saved cosmetics without loading friends, lounge presence or writing room state',async()=>{const profile={accountId:'ID123456',nick:'Unbound',bound:false,level:0};let reads=0;const stub=mock('lib/player-hall.js',{'./club-social':{memberProfile:async id=>{assert.equal(id,profile.accountId);return profile;},redis:async commands=>{reads++;assert.equal(commands.length,3);assert.ok(commands.every(c=>c[0]==='GET'));assert.equal(commands[0][1],'poker_app:player_hall:ID123456');return [JSON.stringify({garage:{paint:'champagne',badges:['millionaire']}}),'{}','{}'];}},'./player-lounge':{read(){throw Error('must not load lounge');}}});const v=await stub.showcase(profile.accountId,false);assert.equal(reads,1);assert.equal(v.garage.loadout.paint,'champagne');assert.equal(v.garage.loadout.badges.length,0);assert.equal(v.customized,true);});
 test('admin showcase resolves the exact target and never invokes save',async()=>{let target;const handler=mock('lib/api-handlers/player-hall.js',{'../club-social':{context:async()=>({accountId:'ID1',admin:true,body:{action:'showcase',targetId:'tg_123'}})},'../account-id':{resolveAccountId:async id=>{assert.equal(id,'tg_123');return 'ID2';}},'../player-hall':{showcase:async(id,self)=>{target=id;assert.equal(self,false);return {accountId:id};},save(){throw Error('must not save');}}});const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};await handler({},res);assert.equal(target,'ID2');assert.equal(res.code,200);assert.equal(res.body.showcase.accountId,'ID2');});
 
 
@@ -49,12 +49,16 @@ test('villa UI is available to verified members and admins but not guests',()=>{
  const G=require('../app-garage-catalog');assert.equal(G.canAccessHall({status:'verified'}),true);assert.equal(G.canAccessHall({adminAccess:true}),true);assert.equal(G.canAccessHall(null),false);assert.equal(G.canAccessHall({status:'guest'}),false);
 });
 
-test('hall defaults to level one; admins can use their real profile level',async()=>{
- const hall=mock('lib/player-hall.js',{'./club-social':{memberProfile:async()=>({...profile,level:100}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?'{}':c[0]==='SMEMBERS'?[]:null)},'./player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}});
- const data=await hall.read('ID1',true);assert.equal(data.garage.stats.level,1);
- const admin=await hall.read('ID1',true,true);assert.equal(admin.garage.stats.level,100);assert.equal(admin.levelProgress.level,100);
+test('every player uses the real profile level for villa clothing and vehicle unlocks',async()=>{
  const G=require('../app-garage-catalog');
- await assert.rejects(()=>hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garage:{...G.defaults,chassis:'aeroPrototype'}}),e=>e.status===400);
+ for(const level of [1,10,29,60,100]){
+  const hall=mock('lib/player-hall.js',{'./club-social':{memberProfile:async()=>({...profile,level,levelProgress:{xp:17,target:100}}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?'{}':c[0]==='SMEMBERS'?[]:null)},'./player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}});
+  for(const self of [true,false]){const data=await hall.read('ID1',self);assert.equal(data.garage.stats.level,level);assert.equal(data.levelProgress.level,level);assert.equal(data.levelProgress.xp,17);
+   for(const item of data.garage.catalog.filter(i=>i.metric==='level'))assert.equal(item.unlocked,level>=item.target,item.key);
+  }
+  const item=G.items.find(i=>!G.characterFields.includes(i.kind)&&i.metric==='level'&&i.target===level);
+  if(item)assert.equal(G.normalize({[item.kind]:item.id},{level},true)[item.kind],item.id);
+ }
 });
 
 test('table XP comes from the same verified profile status as the leaderboard',async()=>{

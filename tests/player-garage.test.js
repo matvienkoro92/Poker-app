@@ -261,7 +261,7 @@ test('wardrobe filters classify summer, legacy rewards and seasonal model varian
 test('curated brand rewards have explicit gates and retain legacy saved clothing',()=>{
  const rows=Object.entries(G.brandedPieces);assert.equal(rows.length,24);
  for(const [id,[kind,, ,level,category]]of rows){
-  assert.ok(G.curatedWardrobeItem(G.item(kind,id)));
+  assert.equal(G.curatedWardrobeItem(G.item(kind,id)),!G.temporarilyHiddenWardrobeItem(G.item(kind,id)));
   assert.throws(()=>Garage.choose({[kind]:id},{stats:{level:level-1}}),/не открыта/);
   assert.equal(Garage.choose({[kind]:id},{stats:{level}})[kind],id);
   if(kind!=='shoes')assert.equal(G.wardrobeSubcategory(kind,id),category);
@@ -358,4 +358,13 @@ test('returning to a chassis preserves later tuning and current character settin
 test('choosing a bare chassis never installs aero hardware or changes running gear',()=>{
  for(const chassis of ['formula','aeroPrototype']){const look={...G.defaults,wheels:'bronzeSix',tyres:'wet',seat:'none',turbine:'classic',steering:'classic'};const next=G.switchChassis(look,chassis,{});for(const key of ['frontBumper','rearBumper','sideSkirts','spoiler','fenders','wheels','tyres','seat','turbine','steering'])assert.equal(next[key],look[key],chassis+': '+key);}
  const fitted={...G.defaults,chassis:'formula',frontBumper:'formulaPro',spoiler:'formula'};const next=G.switchChassis(fitted,'aeroPrototype',{});assert.equal(next.frontBumper,'formulaPro');assert.equal(next.spoiler,'formula');
+});
+
+test('saved vehicle stays identical across clients with different current unlock levels',()=>{
+ const saved=Garage.choose({...G.defaults,chassis:'aeroPrototype',paint:'champagne'},{stats:{level:100}});
+ const desktop=Garage.view({garage:saved},{stats:{level:100}}),telegram=Garage.view({garage:saved},{stats:{level:1}});
+ assert.deepEqual(telegram.loadout,desktop.loadout);
+ assert.equal(telegram.catalog.find(i=>i.kind==='chassis'&&i.id==='aeroPrototype').unlocked,false);
+ assert.throws(()=>Garage.choose(saved,{stats:{level:1}}),/не открыта/);
+ assert.equal(G.savedLoadout(telegram.loadout,telegram.stats).chassis,'aeroPrototype');
 });

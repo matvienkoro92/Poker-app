@@ -345,7 +345,7 @@
 /* The seated character opens their own wardrobe from the hall. */
 .player-hall-dialog .player-hall__character-hit{position:absolute;left:14%;top:41%;width:48%;height:22%;z-index:3;background:transparent;border:0;padding:0;cursor:pointer;clip-path:polygon(24% 0,62% 0,66% 25%,100% 53%,100% 84%,72% 100%,0 100%,0 44%,20% 26%)}
 .player-hall-dialog .player-hall__character-label{position:absolute;left:61%;top:56%;z-index:3;display:flex;flex-direction:column;gap:.3cqh;padding:.8cqh 1cqh;border:1px solid #c8ac6d80;border-radius:2cqh;background:#192318eb;color:#eddfbc;box-shadow:0 .3cqh .8cqh #0006;cursor:pointer;min-height:0;font-size:1.15cqh;white-space:nowrap}
-.player-hall__character-label b{color:#e8ca82}.player-hall__character-label small{font-size:.85cqh;color:#bfb99f}
+.player-hall__character-label b{color:#e8ca82}.player-hall__character-label small{font-size:clamp(12px,1.25cqh,18px);font-weight:750;color:#e8d7ac}
 .player-hall__room:not([data-space=hall]) :is(.player-hall__character-hit,.player-hall__character-label){display:none}
 
 /* Compact upgrade cards: two per row, with height determined by their contents. */
