@@ -108,6 +108,8 @@ async function main(){
    await page.locator('[data-form="reserve"] [name="depositorId"]').fill('987654321');
    await page.locator('[data-form="reserve"] button[type="submit"]').click();
    await page.locator('[data-dep="copy-reserved"]').waitFor();
+   await page.locator('[data-dep="copy-reserved"]').click();
+   assert.equal((await page.evaluate(()=>window.__copiedPaymentLink)).replace(/[\u00a0\u202f]/g,' '),['1 000 ₽',state.entries[0].recipient,state.entries[0].bank,state.entries[0].phone].join('\n'));
    assert.equal(view(state).entries[0].reserved,100000);
    await page.locator('[data-dep="editor-close"]').first().click();
    await page.screenshot({path:path.join(output,width+'-reserved.png')});

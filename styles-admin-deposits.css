@@ -409,3 +409,15 @@ body.deposits-open {overflow:hidden;}
 .deposits__filters{margin-top:10px;margin-bottom:12px;gap:10px}
 @media(max-width:760px){.deposits__filters{margin-top:10px;gap:10px}}
 .deposits .deposits__card-foot .deposits__delete{color:#ff929b}
+.deposits .deposits__heading>.deposits__header-status{margin:4px 0 0;min-height:0;font-size:9px;line-height:1.35;font-weight:400;letter-spacing:0}
+.deposits--form-open .deposits__header-status{display:none}
+.deposits .deposits__header-tools>.deposits__brand{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px!important}
+.deposits .deposits__header-tools>.deposits__brand .deposits__create-icons{display:flex;align-items:center;justify-content:center;gap:1px;line-height:1}
+.deposits__create-icons>b{font-size:15px;font-weight:500}
+.deposits .deposits__header-tools>.deposits__brand .deposits__create-icons svg{width:20px;height:20px}
+.deposits .deposits__header-tools>.deposits__brand .deposits__create-caption{display:block;font-size:8px;line-height:1;font-weight:650}
+.deposits__age{flex-direction:column;align-items:flex-end;gap:3px}
+.deposits__age>.deposits__age-clock{display:flex;align-items:center;gap:4px;color:#c1c4bf;font-size:12px;line-height:1.2}
+.deposits__age-clock>span{color:var(--dep-gold)}
+.deposits__entry-author{font-size:9px;line-height:1.2;color:var(--dep-muted);font-weight:400}
+@media(max-width:760px){.deposits__age>.deposits__age-clock{font-size:9px}.deposits__entry-author{font-size:8px}}
