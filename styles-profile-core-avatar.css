@@ -170,7 +170,7 @@
 .profile-tabs {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 12px 0 18px;
   padding: 4px;
@@ -277,7 +277,7 @@
 }
 @media (max-width: 360px) {
   .profile-tabs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 5px;
     padding: 3px;
   }

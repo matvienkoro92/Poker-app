@@ -55,9 +55,10 @@ test('pilot usernames cannot bypass admin-only access',async()=>{
  const res={status(n){this.code=n;return this;},json(d){this.body=d;return this;}};
  await handler({},res);assert.equal(res.code,403);
 });
-test('admin hall uses level one even when the profile level is higher',async()=>{
+test('hall defaults to level one; admins can use their real profile level',async()=>{
  const hall=mock('lib/player-hall.js',{'./club-social':{memberProfile:async()=>({...profile,level:100}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?'{}':c[0]==='SMEMBERS'?[]:null)},'./player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}});
  const data=await hall.read('ID1',true);assert.equal(data.garage.stats.level,1);
+ const admin=await hall.read('ID1',true,true);assert.equal(admin.garage.stats.level,100);assert.equal(admin.levelProgress.level,100);
  const G=require('../app-garage-catalog');
  await assert.rejects(()=>hall.save('ID1',{version:0,featured:[],theme:'walnut',goal:'wins',garage:{...G.defaults,chassis:'aeroPrototype'}}),e=>e.status===400);
 });

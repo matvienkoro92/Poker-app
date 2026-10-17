@@ -305,7 +305,12 @@ function wardrobeSubcategory(kind,id){
  return null;
 }
 const retiredWardrobeIds=new Set(['classic','bananaTank','flamingoTank','bananaBluffTee','flamingoShorts','velvetDinner','sandPuffer','corduroyBrown','brownLeather','grayPlaid','silverTech','greenCourt','burgundyBrogue','denimTrucker','suedeCamel','utilitySage','corduroyShirt','emeraldBomber']);
+function temporarilyHiddenWardrobeItem(i){
+ const base=rewardFashionModels[i.kind]?.[i.id]||seasonalItems.get(i.kind+':'+i.id)?.base||i.id;
+ return i.kind==='suit'&&base.endsWith('Tee');
+}
 function curatedWardrobeItem(i){
+ if(temporarilyHiddenWardrobeItem(i))return false;
  if(i.id.startsWith('outfit_bath_'))return false;
  if(!['suit','pants','shoes'].includes(i.kind))return true;
  if(brandedPieces[i.id])return true;
@@ -1062,4 +1067,4 @@ function drawUpgradePreview(canvas,kind,look){if(['headlights','chips','cards','
 }
 
 function canAccessHall(auth){return auth?.adminAccess===true;}
-return {themedOutfits,outfitLoadout,outfitSelected,characterFields,switchChassis,characterBasePath,chipEdgeColor,compatiblePart,fitChassisParts,wheelDiameters,plateAvailability,wheelPaintColor,hairOverlayFits,brandedPieces,curatedWardrobeItem,wardrobeSubcategories,wardrobeSubcategory,rewardFashionModels,prestigeWatches,ringDesigns,ringArt,helmetModels,canAccessHall,hairStyles,bodyTypes,outfitSets,seasonalCollections,collectionProgress,activeOutfit,glassTints,steeringDesigns,fashionRows,fashionIndex,fashionArt,loadWardrobe,paintWardrobePreview,streetHeadlights,vinylCanvas,rewardShelfSlots,wheelDesign,wheelFaceCanvas,drawWheelPreview,badgePlaqueCanvas,chipCanvas,badgeCanvas,badgeDefinitions,cardCanvas,chipPalette,upholsteryCanvas,patchCanvas,drawUpgradePreview,parsePlate,plateLevel,plateCanvas,characterHandFit,characterJewelryFit,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet,helmetArt};});
+return {temporarilyHiddenWardrobeItem,themedOutfits,outfitLoadout,outfitSelected,characterFields,switchChassis,characterBasePath,chipEdgeColor,compatiblePart,fitChassisParts,wheelDiameters,plateAvailability,wheelPaintColor,hairOverlayFits,brandedPieces,curatedWardrobeItem,wardrobeSubcategories,wardrobeSubcategory,rewardFashionModels,prestigeWatches,ringDesigns,ringArt,helmetModels,canAccessHall,hairStyles,bodyTypes,outfitSets,seasonalCollections,collectionProgress,activeOutfit,glassTints,steeringDesigns,fashionRows,fashionIndex,fashionArt,loadWardrobe,paintWardrobePreview,streetHeadlights,vinylCanvas,rewardShelfSlots,wheelDesign,wheelFaceCanvas,drawWheelPreview,badgePlaqueCanvas,chipCanvas,badgeCanvas,badgeDefinitions,cardCanvas,chipPalette,upholsteryCanvas,patchCanvas,drawUpgradePreview,parsePlate,plateLevel,plateCanvas,characterHandFit,characterJewelryFit,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet,helmetArt};});
