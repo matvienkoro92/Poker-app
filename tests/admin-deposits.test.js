@@ -159,3 +159,40 @@ test('manager statistics attribute reserved deposits to the taker, track returns
  state=applyOperation(state,{action:'void',requestId:requestId(74),entryId:id,paymentId:requestId(71)},'confirmer').state;
  stats=view(state).statistics;assert.equal(stats.deposits,0);assert.equal(stats.managers.some(m=>m.id==='taker'),false);
 });
+
+test('depositor ID survives reservation confirmation and API retry',async()=>{
+ const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
+ const reserve={action:'reserve',requestId:requestId(80),entryId:requestId(1),amount:100000,depositorId:'9007199254740993123'};
+ const saved=await a.call(reserve);assert.equal(saved.data.entries[0].reservations[0].depositorId,reserve.depositorId);
+ const confirmed=await a.call({action:'confirm-reservation',requestId:requestId(81),entryId:requestId(1),reservationId:requestId(80)});
+ assert.equal(confirmed.data.entries[0].payments[0].depositorId,reserve.depositorId);
+ assert.equal((await a.call({...reserve,requestId:requestId(82),depositorId:'<invalid>'})).statusCode,400);
+});
+
+test('USDT withdrawal recognizes thousands, preceding ID and wallet and saves without bank details',()=>{
+ const raw='Вывод 15к\nС покер 21\n655861 айди\nUSDT\nTSaMfZDt41PKCjk5oxcNWBdCXZH8V8HDRe\nTron TRC20';
+ const p=parser.parse(raw);assert.equal(p.amount,1500000);assert.equal(p.playerId,'655861');assert.equal(p.room,'P21');assert.equal(p.paymentType,'usdt');assert.equal(p.network,'TRC20');assert.equal(p.wallet,'TSaMfZDt41PKCjk5oxcNWBdCXZH8V8HDRe');assert.deepEqual(p.warnings,[]);
+ const create={action:'create',requestId:requestId(90),entry:{...p,total:p.amount}};
+ const state=applyOperation(null,create,'admin-a').state;assert.equal(state.entries[0].wallet,p.wallet);assert.equal(state.entries[0].recipient,'ID 655861');assert.equal(view(state).entries[0].remaining,1500000);
+ assert.throws(()=>applyOperation(state,{...create,requestId:requestId(91)},'admin-b'),/уже есть/);
+ assert.throws(()=>applyOperation(null,{...create,entry:{...create.entry,wallet:'bad-address'}},'admin-a'),/кошелёк/);
+ assert.equal(parser.money('15к'),1500000);assert.equal(parser.money('1,5k'),150000);
+ assert.equal(parser.parse('айди\nUSDT').playerId,'');
+});
+
+test('club IDs identify four rooms without replacing the player ID',()=>{
+ for(const [club,room] of Object.entries({'758417':'P21','1786376':'X','19645':'Supr','1004444':'PP'})){
+  const p=parser.parse('айди клуба '+club+'\n655861 айди\nВывод 15к');assert.equal(p.room,room);assert.equal(p.playerId,'655861');assert.equal(p.amount,1500000);
+  assert.equal(parser.parse('ID клуба: '+club).playerId,'');assert.equal(parser.parse(club).room,room);
+ }
+ assert.equal(parser.parse('Хпокер\nID: 123456').room,'X');
+ assert.equal(parser.parse('ППпокер').room,'PP');
+ const conflict=parser.parse('Хпокер\nайди клуба 19645');assert.equal(conflict.room,'');assert.ok(conflict.warnings.some(w=>w.includes('не совпадают')));
+});
+test('recognizes compact rouble suffix after phone without consuming phone digits',()=>{
+ const p=parser.parse('Айди клуба 758417 мой айди 603371 банк газпромбанк 89834425169  3000р');
+ assert.equal(p.amount,300000);assert.equal(p.room,'P21');assert.equal(p.playerId,'603371');assert.equal(p.bank,'газпромбанк');assert.equal(p.phone,'+79834425169');
+ assert.equal(parser.parse('+79991234567 3000р').amount,300000);
+ assert.equal(parser.parse('3000р.').amount,300000);
+ assert.equal(parser.parse('3000реквизит').amount,null);
+});

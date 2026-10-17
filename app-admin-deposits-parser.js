@@ -6,9 +6,10 @@
   'use strict';
   function money(value) {
     var text = String(value == null ? '' : value).replace(/[\s\u00a0\u202f]/g, '').replace(',', '.');
+    var multiplier=/[кk]$/i.test(text)?1000:1;text=text.replace(/[кk]$/i,'');
     if (!/^\d+(?:\.\d{1,2})?$/.test(text)) return null;
     var parts = text.split('.');
-    var amount = Number(parts[0]) * 100 + Number((parts[1] || '').padEnd(2, '0'));
+    var amount = (Number(parts[0]) * 100 + Number((parts[1] || '').padEnd(2, '0')))*multiplier;
     return Number.isSafeInteger(amount) && amount > 0 && amount <= 10000000000 ? amount : null;
   }
   function safeLink(value) {
@@ -16,13 +17,24 @@
   }
   function parse(raw) {
     var text = String(raw || '').trim().slice(0, 5000), warnings = [];
-    var roomMatch=text.match(/(?:рум|room)\s*[:—-]?\s*(P21|Покер21|Poker21|X(?:[ -]?poker)?|Хпокер|Supr(?:ema)?|Супрема|PP(?:poker)?)(?=\s|[,;]|$)/i);
-    var room=roomMatch?(/^(?:p21|покер21|poker21)$/i.test(roomMatch[1])?'P21':/^(?:x|xpoker|x-poker|хпокер)$/i.test(roomMatch[1])?'X':/^(?:supr|suprema|супрема)$/i.test(roomMatch[1])?'Supr':'PP'):'';
-    var idMatch=text.match(/(?:\bID|айди|ид игрока)\s*[:#—-]?\s*([a-zA-Z0-9_-]{1,64})/i);
-    var playerId=idMatch?idMatch[1]:'';
+    var clubRooms={'758417':'P21','1786376':'X','19645':'Supr','1004444':'PP'};
+    var clubPattern=/(?:(?:айди|ID)[ \t]*(?:клуба|клуб|club)|(?:клуба?|club)[ \t]*(?:(?:айди|ID))?)[ \t]*[:#№—-]?[ \t]*(\d+)(?!\d)|(\d+)[ \t]+(?:айди|ID)[ \t]+(?:клуба|club)/gi;
+    var clubIds=[],playerText=text.replace(clubPattern,function(all,after,before){clubIds.push(after||before);return ' ';});
+    if(clubRooms[text.trim()]){clubIds.push(text.trim());playerText='';}
+    var roomMatch=text.match(/(?:^|[\s,:;])(P21|Покер[ -]*21|Poker[ -]*21|X(?:[ -]?poker)?|Х[ -]?покер|Supr(?:ema)?|Супрема|PP(?:poker)?|ПП[ -]?покер)(?=\s|[,;.]|$)/i);
+    var room=roomMatch?(/^(?:p21|покер21|poker21)$/i.test(roomMatch[1].replace(/[\s-]/g,''))?'P21':/^(?:x|xpoker|хпокер)$/i.test(roomMatch[1].replace(/[\s-]/g,''))?'X':/^(?:supr|suprema|супрема)$/i.test(roomMatch[1])?'Supr':'PP'):'';
+    var identified=Array.from(new Set(clubIds.map(function(id){return clubRooms[id];}).filter(Boolean).concat(room?[room]:[])));
+    if(identified.length>1){room='';warnings.push('Название рума и ID клуба не совпадают. Выберите рум вручную.');}else if(identified.length===1)room=identified[0];
+    var idBefore=playerText.match(/(?:^|\n)[ \t]*(\d{1,64})[ \t]+(?:айди|ID)(?=[ \t]*(?:\n|$|[,;]))/i);
+    var idMatch=playerText.match(/(?:\bID|айди|ид игрока)[ \t]*[:#—-]?[ \t]*([a-zA-Z0-9_-]{1,64})/i);
+    var playerId=idBefore?idBefore[1]:idMatch&&!/^(?:USDT|TRON|TRC20)$/i.test(idMatch[1])?idMatch[1]:'';
+    var paymentType=/\bUSDT\b/i.test(text)?'usdt':'bank';
+    var network=/TRC[ -]?20|\bTron\b/i.test(text)?'TRC20':'';
+    var walletMatch=text.match(/(?:^|\s)(T[1-9A-HJ-NP-Za-km-z]{33})(?=\s|$)/);
+    var wallet=walletMatch?walletMatch[1]:'';
     var links = text.match(/https:\/\/[^\s<>]+/gi) || [];
     var paymentLink = safeLink((links[0] || '').replace(/[),.;]+$/, ''));
-    var cleaned = text.replace(/https?:\/\/\S+/g, '');
+    var cleaned = text.replace(/https?:\/\/\S+/g, '').replace(wallet,'');
     var cards = cleaned.match(/(?<!\d)(?:\d[ -]?){15,18}\d(?!\d)/g) || [];
     cards = cards.map(function(v) { return v.replace(/\D/g, ''); }).filter(function(v) { return v.length >= 16 && v.length <= 19; });
     var card = cards[0] || '';
@@ -43,20 +55,22 @@
       nameText=nameText.replace(known[0],'');
       recipient=nameText.split(/\n/).map(function(line){return line.trim().replace(/^[,;:—-]+\s*|[,;]+$/g,'');}).find(function(line){return /^(?:[А-ЯЁ][а-яё]+\s+){1,2}(?:[А-ЯЁ][а-яё]+|[А-ЯЁ]\.?)$/.test(line);})||'';
     }
-    var amounts = [], re = /(?:сумма|вывести|вывод|выплатить|к выплате|остаток)\s*[:—=-]?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)(?![\d.,])(?:\s*(?:₽|руб\.?|р\.?))?/gi, match;
+    var amounts = [], re = /(?:сумма|вывести|вывод|выплатить|к выплате|остаток)\s*[:—=-]?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?[ \t]*[кk]?)(?![\d.,])(?:\s*(?:₽|руб\.?|р\.?))?/gi, match;
     while ((match = re.exec(cleaned))) { var n = money(match[1]); if (n) amounts.push(n); }
     if (!amounts.length) {
-      re = /(?<![\d.,])(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)\s*(?:₽|руб\.?)(?![а-я])/gi;
-      while ((match = re.exec(noCards))) { var m = money(match[1]); if (m) amounts.push(m); }
+      re = /(?<![\d.,])(\d[\d \u00a0\u202f]*(?:[.,]\d{1,2})?)\s*(?:₽|руб\.?|р\.?)(?![а-яё])/gi;
+      while ((match = re.exec(noCards.replace(/(?:\+?7|8)[ (.-]*\d{3}[ ).-]*\d{3}[ .-]*\d{2}[ .-]*\d{2}/g, ' ')))) { var m = money(match[1]); if (m) amounts.push(m); }
     }
     amounts = Array.from(new Set(amounts));
     if (cards.length > 1 || phones.length > 1) warnings.push('В тексте несколько реквизитов. Проверьте выбранный номер.');
     if (amounts.length > 1) warnings.push('Найдено несколько сумм. Укажите нужную сумму к выплате.');
-    if (!card && !phone && !paymentLink) warnings.push('Номер или ссылка не распознаны. Заполните реквизит вручную.');
-    if (!recipient) warnings.push('Укажите получателя — имя не распознано.');
+    if (paymentType==='usdt'&&!wallet) warnings.push('Укажите USDT-кошелёк.');
+    if (paymentType==='usdt'&&!network) warnings.push('Укажите сеть USDT.');
+    if (paymentType!=='usdt' && !card && !phone && !paymentLink) warnings.push('Номер или ссылка не распознаны. Заполните реквизит вручную.');
+    if (paymentType!=='usdt'&&!recipient) warnings.push('Укажите получателя — имя не распознано.');
     if (amounts.length === 0) warnings.push('Укажите сумму к выплате — она не распознана.');
-    if (!bank) warnings.push('Проверьте банк — он не распознан.');
-    return {card:card, phone:phone, bank:bank, recipient:recipient, room:room, playerId:playerId, paymentLink:paymentLink,
+    if (paymentType!=='usdt'&&!bank) warnings.push('Проверьте банк — он не распознан.');
+    return {paymentType:paymentType,wallet:wallet,network:network,card:card, phone:phone, bank:bank, recipient:recipient, room:room, playerId:playerId, paymentLink:paymentLink,
       amount:amounts.length === 1 ? amounts[0] : null, rawText:text, warnings:warnings};
   }
   return {parse:parse, money:money, safeLink:safeLink};

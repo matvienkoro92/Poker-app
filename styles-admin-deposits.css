@@ -334,3 +334,31 @@ body.deposits-open {overflow:hidden;}
 .deposits__card-head{padding-right:100px;min-height:20px}
 .deposits__bank{min-width:0;overflow-wrap:anywhere}
 @media(max-width:760px){.deposits__age{right:10px;top:12px;font-size:9px}.deposits__card-head{padding-right:62px}.deposits__bank{font-size:10px}.deposits__bank svg{width:14px;height:14px}}
+.deposits__popup{width:min(420px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 32px);padding:20px;border:1px solid #a78d58;border-radius:20px;background:#141a1f;color:var(--dep-cream);overflow:auto;box-shadow:0 20px 80px #000a}
+.deposits__popup::backdrop{background:#0306099c;backdrop-filter:blur(3px)}
+.deposits__popup .deposits__editor{padding:0;margin:0;max-width:none}
+.deposits__popup .deposits__editor-top{gap:10px;margin-bottom:14px}
+.deposits__popup .deposits__eyebrow{display:none}
+.deposits__popup .deposits__editor h3{font-size:22px}
+.deposits__popup .deposits__editor-top>button{width:36px;height:36px;min-height:36px;border-radius:10px}
+.deposits__popup .deposits__intro{font-size:13px;line-height:1.5;margin-bottom:16px}
+.deposits__popup .deposits__editor label{margin-bottom:14px}
+.deposits__popup .deposits__editor [name=amount]{min-height:60px;padding:12px;font-size:26px}
+.deposits__popup .deposits__hint{font-size:11px;line-height:1.5;margin:12px 0}
+.deposits__popup .deposits__recipient-preview{padding:14px;margin-bottom:16px}
+.deposits__popup .deposits__recipient-preview h4{font-size:18px}
+.deposits__reservation-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.deposits__reservation-actions button{display:flex;align-items:center;justify-content:center;min-width:0;min-height:46px;margin:0;border-radius:10px;border:1px solid;padding:8px 5px;font-weight:700;line-height:1.25;text-align:center;text-decoration:none}
+.deposits__reservation-actions .deposits__confirm{background:#17452e;border-color:#49a776;color:#c1f5d8}
+.deposits__reservation-actions .deposits__cancel{background:#4b2227;border-color:#be626b;color:#ffd3d7}
+.deposits__reservation-actions .deposits__confirm:hover{background:#215d3f}
+.deposits__reservation-actions .deposits__cancel:hover{background:#643039}
+/* Report-style totals with manager shares directly under each metric. */
+.deposits__manager-split{display:flex;flex-wrap:wrap;gap:6px 18px;margin:8px 0 12px;color:var(--dep-muted);font-size:12px;line-height:1.5}
+.deposits__manager-split>span{display:inline-flex;gap:8px;align-items:baseline;min-width:0}
+.deposits__manager-split>span>span{overflow-wrap:anywhere}
+.deposits__manager-split b{color:var(--dep-cream);font-size:12px;white-space:nowrap}
+.deposits__statistics dl>.deposits__stat-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+.deposits__stat-row>.deposits__manager-split{grid-column:1/-1;margin:4px 0 0}
+/* Full-page forms keep their own title and close control. */
+.deposits--form-open .deposits__header{display:none}
