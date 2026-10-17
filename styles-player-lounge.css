@@ -669,3 +669,21 @@
 
 /* Align motorcycles with the car parking plane and leave the radio in the foreground. */
 .player-hall__room:is([data-garage-vehicle="3"],[data-garage-vehicle="4"]) .garage-locked-vehicle{transform:perspective(900px) rotateY(-18deg) rotate(3deg);transform-origin:50% 85%}
+
+/* Compact highlighted identity sits directly above each seated head. */
+.player-hall-dialog .lounge-seat--playing .lounge-seat__status{top:1cqh;left:50%;right:auto;transform:translate(-50%,-100%);max-width:145%;gap:.12cqh;padding:.3cqh .55cqh;border:1px solid #dfbd72;border-radius:5px;background:#11251bf5;color:#fff0c5;font-size:.92cqh;font-weight:700;box-shadow:0 2px 6px #000b,0 0 5px #dfbd7233}
+.player-hall-dialog .lounge-seat--playing .lounge-seat__status>strong{display:block;max-width:100%;font-size:1.05cqh;line-height:1.15;font-weight:800;color:#ffe1a0;text-shadow:0 1px 2px #000}
+.player-hall-dialog .lounge-seat--playing>.lounge-seat__name{display:none}
+.player-hall-dialog .lounge-seat--playing:is(.lounge-seat--0,.lounge-seat--1,.lounge-seat--2) .lounge-seat__status{top:4.5cqh}
+/* User-controlled neon stays luminous against the dark room. */
+.player-hall__room[data-theme=midnight] .hall-neon-lighting{filter:brightness(var(--hall-neon-brightness,1.4));opacity:var(--hall-neon-opacity,1)}
+.hall-neon-lighting i{box-shadow:0 0 4px var(--neon),0 0 12px var(--neon),0 3px 22px var(--neon)}
+.hall-light-menu{width:min(360px,calc(100vw - 32px));box-sizing:border-box;padding:24px;color:#f4e5c4;background:#142027;border:1px solid #ac955d;border-radius:18px}
+.hall-light-menu h2{margin:0 36px 22px 0;font-size:22px}
+.hall-light-menu .hall-light-toggle{width:100%;min-height:46px;border:1px solid #dac083;border-radius:10px;background:#344438;color:#ffe5ad;font-size:15px}
+.hall-light-slider{display:block;margin-top:24px;font-size:15px}.hall-light-slider output{float:right;color:#99e5f2;font-variant-numeric:tabular-nums}.hall-light-slider input{display:block;width:100%;margin:14px 0 0;min-height:32px;accent-color:#8adaed}
+/* Warm yellow strip follows the small table's front underside. */
+.hall-table__neon,.hall-table__neon-spill{display:none;pointer-events:none}
+.player-hall__room[data-theme=midnight] .hall-table__neon{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible;opacity:var(--hall-neon-opacity,1);filter:brightness(var(--hall-neon-brightness,1.4)) drop-shadow(0 0 3px #ffd52e) drop-shadow(0 2px 8px #ffbd17)}
+.hall-table__neon path{fill:none;stroke:#ffe66b;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.player-hall__room[data-theme=midnight] .hall-table__neon-spill{display:block;position:absolute;left:22%;top:78%;width:23%;height:9%;z-index:1;border-radius:50%;background:radial-gradient(ellipse at 50% 15%,#ffd42d60,#ffbf1920 45%,transparent 72%);filter:blur(5px) brightness(var(--hall-neon-brightness,1.4));opacity:var(--hall-neon-opacity,1)}

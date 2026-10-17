@@ -598,9 +598,9 @@ window.pokerCreateGarage3D=function(host,look,state={}){
  const underLights=[];for(const x of [-1.15,1.15])for(const z of [-.68,.68]){const lamp=new T.SpotLight(glowMat.uniforms.color.value,3.5,3.4,Math.PI*.42,.9,1.5);lamp.position.set(x,.36,z);lamp.target.position.set(x,0,z);scene.add(lamp,lamp.target);underLights.push(lamp);}
 
  const room=host.closest('.player-hall__room');state.night??=room?.dataset.theme==='midnight';
- function setNight(night){state.night=!!night;for(const light of scene.children){if(light.isHemisphereLight)light.intensity=night?.26:1.25;if(light.isDirectionalLight){light.userData.dayIntensity??=light.intensity;light.intensity=light.userData.dayIntensity*(night?.13:1);}}scene.environmentIntensity=night?.24:1.5;glowMat.uniforms.strength.value=night?1.35:.95;}
+ function setNight(night){state.night=!!night;for(const light of scene.children){if(light.isHemisphereLight)light.intensity=night?.26:1.25;if(light.isDirectionalLight){light.userData.dayIntensity??=light.intensity;light.intensity=light.userData.dayIntensity*(night?.13:1);}}scene.environmentIntensity=night?.24:1.5;const neon=state.neon??window.pokerGarageNeonBrightness?.()??1.5;glowMat.uniforms.strength.value=(night?2.1:.95)*neon;underLights.forEach(l=>{l.intensity=3.5*neon*(night?1.6:1);});}
  setNight(state.night);
- const onRoomLight=event=>{if(room)setNight(room.dataset.theme==='midnight');};window.addEventListener('poker-garage-lighting',onRoomLight);
+ const onRoomLight=event=>{if(room){state.neon=window.pokerGarageNeonBrightness?.()??1.5;setNight(room.dataset.theme==='midnight');}};window.addEventListener('poker-garage-lighting',onRoomLight);
  let viewBounds=null;
  function frameModel(){
   if(!viewBounds){viewBounds=new T.Box3();model.car.updateWorldMatrix(true,true);const walk=o=>{if(!o.visible)return;if(o.geometry){o.geometry.computeBoundingBox();viewBounds.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}for(const child of o.children)walk(child);};walk(model.car);}

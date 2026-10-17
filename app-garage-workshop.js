@@ -38,8 +38,9 @@ function releaseSavedVehicleViewer(){savedVehicleViewer?.dispose();savedVehicleV
 function scheduleSavedVehicle(){if(savedVehicleScheduled||!savedVehicleJobs.length)return;savedVehicleScheduled=true;requestAnimationFrame(()=>setTimeout(()=>{savedVehicleScheduled=false;const job=savedVehicleJobs.shift();if(job)job();scheduleSavedVehicle();},0));}
 function paintSavedVehicle(canvas,look,options){
  if(!canvas)return;const side=options?.side===true,trim=side||options?.trim===true,night=options?.night??(canvas.closest('.player-hall__room')?.dataset.theme==='midnight');
+ const neon=window.pokerGarageNeonBrightness?.()??1.5;
  const characterKeys=new Set(['suit','pants','shoes','helmet','visor','patch','patchText','hair','body','hat','glasses','watch','necklace','ring','bracelet','gloves','belt','target']);
- const vehicle=Object.fromEntries(Object.keys(look).sort().filter(k=>!characterKeys.has(k)).map(k=>[k,look[k]]));const key='vehicle:'+garageRendererRevision+':'+JSON.stringify(vehicle)+(side?':side':'')+(trim?':trim':'')+(night?':night':'');
+ const vehicle=Object.fromEntries(Object.keys(look).sort().filter(k=>!characterKeys.has(k)).map(k=>[k,look[k]]));const key='vehicle:'+garageRendererRevision+':'+JSON.stringify(vehicle)+(side?':side':'')+(trim?':trim':'')+(night?':night':'')+':neon:'+neon;
  if(canvas.dataset.vehicleRenderer==='3d'&&canvas.dataset.vehicleLoadout===key)return;
  const revision=(canvas._vehicleRevision||0)+1;canvas._vehicleRevision=revision;
  clearTimeout(canvas._vehicleTimer);
@@ -64,8 +65,8 @@ function paintSavedVehicle(canvas,look,options){
     if(savedVehicleCache.has(key)){apply(savedVehicleCache.get(key));return;}
     clearTimeout(savedVehicleIdle);
     try{
-     if(!savedVehicleViewer){savedVehicleHost=document.createElement('div');savedVehicleHost.style.cssText='position:fixed;left:-10000px;top:0;width:900px;height:600px;pointer-events:none';document.body.append(savedVehicleHost);savedVehicleViewer=window.pokerCreateGarage3D(savedVehicleHost,look,{yaw:side?0:.9,pitch:side?0:.30,manual:true,snapshotOnly:true,night});if(!savedVehicleViewer)throw Error('3D-просмотр недоступен');}
-     else{savedVehicleViewer.update(look);savedVehicleViewer.state.yaw=side?0:.9;savedVehicleViewer.state.pitch=side?0:.30;savedVehicleViewer.setNight(night);}
+     if(!savedVehicleViewer){savedVehicleHost=document.createElement('div');savedVehicleHost.style.cssText='position:fixed;left:-10000px;top:0;width:900px;height:600px;pointer-events:none';document.body.append(savedVehicleHost);savedVehicleViewer=window.pokerCreateGarage3D(savedVehicleHost,look,{yaw:side?0:.9,pitch:side?0:.30,manual:true,snapshotOnly:true,night,neon});if(!savedVehicleViewer)throw Error('3D-просмотр недоступен');}
+     else{savedVehicleViewer.update(look);savedVehicleViewer.state.yaw=side?0:.9;savedVehicleViewer.state.pitch=side?0:.30;savedVehicleViewer.state.neon=neon;savedVehicleViewer.setNight(night);}
      const image=savedVehicleViewer.snapshot();if(trim)trimShelfArt(image);remember(image);apply(image);window.pokerGaragePreviewCache.write(key,image);
     }catch(error){releaseSavedVehicleViewer();failed();console.warn('Saved vehicle render failed',error);}
     finally{savedVehicleIdle=setTimeout(releaseSavedVehicleViewer,8000);}
