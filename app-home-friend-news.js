@@ -3044,15 +3044,13 @@
         }).join('') + '</ul>';
       }
       var leadNick = post.kind === "record" || post.kind === "weekly" ? first.top[0].nick : first.nick;
-      var personalArt = clubNewsPersonalArt(leadNick);
       var profile = clubProfileForNick(leadNick);
-      var playerImage = personalArt || (profile && profile.avatar) || clubNewsFallbackAvatar(leadNick);
-      var playerHtml = '<div class="home-news-achievement__player' + (personalArt ? ' is-personal' : '') + '"><img src="' + esc(playerImage) + '" alt="' + esc(leadNick) + '" loading="lazy"></div>';
-      var image = newsArt[post.kind];
+      var playerHtml = typeof window.pokerGarageNewsShowcaseHtml === 'function'
+        ? window.pokerGarageNewsShowcaseHtml({type:'achievement'}, profile && profile.id, {inline:true,nick:leadNick}) : '';
       var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
-      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__art"><img src="./assets/' + image + '" alt="" aria-hidden="true" loading="lazy"></div><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
+      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
         '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
-        '</details>' + (['personal','series','milestone'].includes(post.kind) && typeof window.pokerGarageNewsShowcaseHtml === 'function' ? window.pokerGarageNewsShowcaseHtml({type:'achievement'}, profile && profile.id) : '') + '</article>' };
+        '</details>' + '' + '</article>' };
     }).filter(Boolean);
   }
 

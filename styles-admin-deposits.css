@@ -230,3 +230,5 @@ body.deposits-open {overflow:hidden;}
   .deposits__retry {flex-direction:column;align-items:stretch;}
 }
 @media(prefers-reduced-motion:reduce) {.deposits * {transition:none !important;scroll-behavior:auto !important;}}
+
+.deposits__search[hidden]{display:none}

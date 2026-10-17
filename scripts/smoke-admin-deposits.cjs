@@ -43,6 +43,14 @@ async function main(){
    await page.locator('#headerDepositsShortcutBtn').click();
    await page.locator('#adminMenuPasswordInput').fill('1234');await page.locator('#adminMenuPasswordSubmit').click();
    await page.locator('dialog.deposits[open]').waitFor();
+   await page.locator('[data-filter="totals"]').waitFor();
+   assert.equal(await page.locator('.deposits__totals').count(),0);
+   await page.locator('[data-filter="totals"]').click();
+   await page.locator('.deposits__totals').waitFor();
+   assert.equal(await page.locator('.deposits__search').isVisible(),false);
+   assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','totals','archive']);
+   await page.locator('[data-filter="active"]').click();
+   assert.equal(await page.locator('.deposits__totals').count(),0);
    await page.locator('.deposits__toolbar [data-dep="new"]').click();
    await page.locator('[name="raw"]').fill('Иван Петров\nСбербанк\n+7 999 123-45-67\nСумма: 15 000 ₽\nhttps://bank.example/pay');
    await page.locator('[data-form="parse"] button[type="submit"]').click();
@@ -68,7 +76,15 @@ async function main(){
    await page.evaluate(()=>{document.getElementById('headerAdminShortcuts').hidden=false;document.getElementById('headerDepositsShortcutBtn').hidden=false;});
    await page.locator('#headerDepositsShortcutBtn').click();
    assert.equal(await page.locator('#adminMenuPasswordModal').isVisible(),false,'Password remembered');
-   await page.locator('dialog.deposits[open]').waitFor();await page.locator('[data-dep="close"]').click();
+   await page.locator('dialog.deposits[open]').waitFor();
+   await page.locator('[data-filter="totals"]').waitFor();
+   assert.equal(await page.locator('.deposits__totals').count(),0);
+   await page.locator('[data-filter="totals"]').click();
+   await page.locator('.deposits__totals').waitFor();
+   assert.equal(await page.locator('.deposits__search').isVisible(),false);
+   assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','totals','archive']);
+   await page.locator('[data-filter="active"]').click();
+   assert.equal(await page.locator('.deposits__totals').count(),0);await page.locator('[data-dep="close"]').click();
    assert.deepEqual(errors,[]);await context.close();
   }
   console.log('Passed: mobile/desktop header targets, pasted text review, shared records, deposits, preview, lost response retry, undo, remembered password.');
