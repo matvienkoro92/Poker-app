@@ -381,7 +381,7 @@ function paintWardrobePreview(canvas,kind,look){if(kind==='hair'){paintHairPrevi
 const footwearFits=new WeakMap();
 function footwearFit(art){if(!art.getContext){const cached=wardrobeCrops.get('foot-canvas:'+art.src);if(cached)return footwearFit(cached);const c=document.createElement('canvas');c.width=art.naturalWidth;c.height=art.naturalHeight;c.getContext('2d').drawImage(art,0,0);wardrobeCrops.set('foot-canvas:'+art.src,c);return footwearFit(c);}if(footwearFits.has(art))return footwearFits.get(art);const d=art.getContext('2d').getImageData(0,0,art.width,art.height).data,half=art.width/2,feet=[];for(let foot=0;foot<2;foot++){let left=art.width,right=0,top=art.height,bottom=0;for(let y=0;y<art.height;y++)for(let x=Math.ceil(foot*half);x<Math.floor((foot+1)*half);x++)if(d[(y*art.width+x)*4+3]>40){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}let sum=0,count=0;for(let y=top;y<top+(bottom-top)*.18;y++)for(let x=left;x<=right;x++)if(d[(y*art.width+x)*4+3]>80){sum+=x;count++;}feet.push({left,top,width:right-left+1,height:bottom-top+1,ankle:count?sum/count:(left+right)/2});}footwearFits.set(art,feet);return feet;}
 // Each tank owns three separately drawn fits; panel artwork is never stretched between physiques.
-const fittedTankFrames={bodySlim:{x:334,y:260,width:356,height:494},bodyNormal:{x:312,y:260,width:400,height:502},bodyBelly:{x:274,y:262,width:476,height:556}};
+const fittedTankFrames={bodySlim:{x:334,y:220,width:356,height:534},bodyNormal:{x:312,y:220,width:400,height:542},bodyBelly:{x:274,y:222,width:476,height:596}};
 function fittedTankPanel(image,body){
  const key='fitted-tank-panel-v4:'+image.src+':'+body;if(wardrobeCrops.has(key))return wardrobeCrops.get(key);
  // The three silhouettes are not always centered in equal atlas columns.
@@ -411,6 +411,8 @@ function fittedTankTopArt(look){
  const fit=fittedTankFrames[look.body]||fittedTankFrames.bodyNormal,art=fittedTankPanel(image,look.body);
  const taper={bodySlim:.20,bodyNormal:.20,bodyBelly:.10}[look.body]||.20;
  for(let row=0;row<fit.height;row++){
+  // The strap ends follow the actual shoulder silhouette, with no exposed gap or floating fabric.
+  c.globalCompositeOperation=row<150?'source-atop':'source-over';
   const t=row/(fit.height-1),u=Math.max(0,Math.min(1,(t-.52)/.48)),width=fit.width*(1-taper*u*u*(3-2*u));
   c.drawImage(art,0,row*art.height/fit.height,art.width,art.height/fit.height,fit.x-132+(fit.width-width)/2,fit.y-220+row,width,1.15);
  }
@@ -459,8 +461,8 @@ function bodyTopArt(top,look){
   const lower=smooth((row-170)/(height-170));
   const slimTee=tee&&look.body==='bodySlim';
   const shoulderBlend=slimTee?1-smooth(row/300):0;
-  // Lower tee shoulders onto the same anatomy as knitwear, keeping the hem fixed.
-  const shoulderDrop=tee?20*(1-smooth(row/400)):0;
+  // Raise tee shoulders to the body contour while keeping the hem fixed.
+  const shoulderDrop=tee?-12*(1-smooth(row/400)):0;
   const sourceRow=(belly?row-(height-1-sourceHem)*smooth((row-180)/(height-180)):row)-shoulderDrop;
   const factor=look.body==='bodySlim'?(.90+.14*shoulderBlend-(tank ? .10*smooth((row-330)/210) : 0)):belly?1.08+.52*lower:1.05;
   const left=380-140*factor,right=380+140*factor;
