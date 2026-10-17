@@ -21,7 +21,7 @@
 
   function readCachedAccess(scope) {
     try {
-      var parsed = JSON.parse(sessionStorage.getItem(cacheKey(scope)) || "null");
+      var parsed = JSON.parse(localStorage.getItem(cacheKey(scope)) || "null");
       if (!parsed || !parsed.token || Number(parsed.expiresAt || 0) <= Date.now()) return null;
       return parsed;
     } catch (error) {
@@ -36,9 +36,9 @@
 
   function writeCachedAccess(scope, token, expiresIn) {
     try {
-      sessionStorage.setItem(cacheKey(scope), JSON.stringify({
+      localStorage.setItem(cacheKey(scope), JSON.stringify({
         token: String(token || ""),
-        expiresAt: Date.now() + Math.max(60, Number(expiresIn) || 1800) * 1000,
+        expiresAt: Date.now() + Math.max(60, Number(expiresIn) || 86400) * 1000,
       }));
     } catch (error) {}
   }
