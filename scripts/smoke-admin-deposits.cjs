@@ -45,6 +45,11 @@ async function main(){
    await page.locator('#adminMenuPasswordInput').fill('1234');await page.locator('#adminMenuPasswordSubmit').click();
    await page.locator('dialog.deposits[open]').waitFor();
    await page.locator('[data-filter="active"]').waitFor();
+   const tools=await page.locator('.deposits__header-tools>button').evaluateAll(buttons=>buttons.map(b=>{const r=b.getBoundingClientRect();return {width:r.width,height:r.height,y:r.y};}));
+   assert.equal(tools[0].width,tools[1].width);assert.equal(tools[0].height,tools[1].height);assert.equal(tools[0].y,tools[1].y);
+   assert.equal(await page.locator('#depositsTitle').textContent(),'Депозиты и выводы');
+   await page.locator('.deposits__header').screenshot({path:path.join(output,width+'-deposit-header.png')});
+
    await page.locator('.deposits__bottom-totals').waitFor();
    assert.deepEqual(await page.locator('.deposits__filters nav button').evaluateAll(bs=>bs.map(b=>b.dataset.filter)),['active','done','archive']);
    assert.equal(await page.locator('[data-filter="totals"]').count(),0);
