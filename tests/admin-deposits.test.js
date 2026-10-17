@@ -55,7 +55,7 @@ function apiSetup(){
   const mod={exports:{}};
   vm.runInNewContext(fs.readFileSync(require.resolve('../lib/api-handlers/admin-deposits'),'utf8'),{
     module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,
-    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):null
+    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):null
   });
   async function call(body,user='admin-a',scope='deposits'){
     const res={statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(value){this.data=value;return this;},end(){return this;}};
@@ -259,4 +259,18 @@ test('deposit destination room is separate from withdrawal room and survives con
  const confirmed=await a.call({action:'confirm-reservation',requestId:requestId(96),entryId:requestId(1),reservationId:requestId(95)});assert.equal(confirmed.data.entries[0].payments[0].depositorRoom,'X');
  assert.equal((await a.call({...reserve,requestId:requestId(97),depositorRoom:'bad'})).statusCode,400);
  assert.equal((await a.call({...reserve,requestId:requestId(98),depositorId:''})).statusCode,400);
+});
+
+test('only owner can delete a payout; removed rows and statistics disappear while audit survives',async()=>{
+ const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
+ const operation={action:'delete',requestId:requestId(100),entryId:requestId(1)};
+ assert.equal((await a.call(operation,'admin-b')).statusCode,403);
+ assert.equal((await a.call({action:'list'},'admin-b')).data.permissions.canDelete,false);
+ const deleted=await a.call(operation,'388008256');assert.equal(deleted.statusCode,200);assert.equal(deleted.data.entries.length,0);assert.equal(deleted.data.totals.total,0);
+ assert.equal((await a.call(operation,'388008256')).statusCode,200);
+ let state=create();assert.throws(()=>applyOperation(state,operation,'admin-a'),/главному/);
+ state=applyOperation(state,operation,'388008256',12345,'Владелец',{canDelete:true}).state;
+ assert.equal(state.entries[0].deletedBy,'388008256');assert.equal(state.entries[0].deletedAt,12345);
+ assert.throws(()=>applyOperation(state,{action:'reserve',requestId:requestId(101),entryId:requestId(1),amount:100},'admin-a'),/удалён/);
+ assert.equal(applyOperation(state,{action:'create',requestId:requestId(102),entry},'admin-a').state.entries.length,2);
 });

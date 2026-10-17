@@ -17,9 +17,9 @@ async function main(){
     const url=route.request().url(), body=route.request().postDataJSON()||{};
     if(url.includes('/api/admin-menu-access'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,token:'test-token',expiresIn:86400})});
     if(url.includes('/api/admin-deposits')){
-     if(body.action!=='list')state=applyOperation(state,body,'Тестовый администратор').state;
+     if(body.action!=='list')state=applyOperation(state,body,'Тестовый администратор',Date.now(),'Владелец',{canDelete:true}).state;
      if(lose&&body.action==='confirm-reservation'){lose=false;return route.abort();}
-     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state)})});
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state),permissions:{canDelete:true}})});
     }
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,allowed:true,isAdmin:true,entries:[],events:[],levelRows:[],participants:[],winners:[]})});
    });
@@ -185,6 +185,12 @@ async function main(){
    assert.equal(await page.locator('.deposits__totals').count(),0);
    await page.locator('[data-filter="active"]').click();
    await page.locator('.deposits__bottom-totals').waitFor();await page.locator('[data-dep="close"]').click();
+   await page.locator('#headerDepositsShortcutBtn').click();
+   await page.locator('.deposits__card [data-dep="delete"]').first().click();
+   await page.locator('[data-form="delete"] button[type="submit"]').click();
+   await page.waitForFunction(()=>document.querySelectorAll('.deposits__card').length===1);
+   assert.equal(view(state).entries.length,1);
+   await page.locator('[data-dep="close"]').click();
    assert.deepEqual(errors,[]);await context.close();
   }
   console.log('Passed: mobile/desktop header targets, pasted text review, shared records, deposits, preview, lost response retry, undo, remembered password.');
