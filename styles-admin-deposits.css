@@ -326,3 +326,11 @@ body.deposits-open {overflow:hidden;}
 .deposits__bank--sovcom{color:#85b8ff}
 .deposits__bank--rshb{color:#72c879}
 .deposits__bank--psb{color:#ff9859}
+.deposits__age{display:inline-flex;align-items:center;gap:4px;margin-left:auto;color:#c1c4bf;font-size:12px;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap}
+.deposits__age>span{color:var(--dep-gold);font-size:15px}
+@media(max-width:760px){.deposits__card-head{gap:5px}.deposits__age{font-size:10px}.deposits__age>span{font-size:12px}.deposits__bank{gap:4px}}
+.deposits__card{position:relative}
+.deposits__age{position:absolute;right:26px;top:26px}
+.deposits__card-head{padding-right:100px;min-height:20px}
+.deposits__bank{min-width:0;overflow-wrap:anywhere}
+@media(max-width:760px){.deposits__age{right:10px;top:12px;font-size:9px}.deposits__card-head{padding-right:62px}.deposits__bank{font-size:10px}.deposits__bank svg{width:14px;height:14px}}
