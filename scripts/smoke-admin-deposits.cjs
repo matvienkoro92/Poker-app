@@ -91,6 +91,18 @@ async function main(){
    assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
    await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
    await page.locator('.deposits__popup [data-dep="channel-new"][data-direction="income"]').click();
+   const knownPlayer=Object.entries(require('../rating-player-id-map.json'))[0];
+   const searchForm=page.locator('[data-form="channel-operation"]');
+   await searchForm.locator('[data-player-query]').fill(knownPlayer[1]);
+   await searchForm.locator('[data-dep="pick-player"][data-player-id="'+knownPlayer[0]+'"]').click();
+   assert.equal(await searchForm.locator('[name="playerId"]').inputValue(),knownPlayer[0]);
+   assert.equal(await searchForm.locator('[name="room"][value="P21"]').isChecked(),true);
+   await searchForm.locator('[data-dep="split-add"]').click();
+   const secondPart=searchForm.locator('[data-allocation]').nth(1);
+   await secondPart.locator('[data-player-query]').fill(knownPlayer[0]);
+   await secondPart.locator('[data-dep="pick-player"][data-player-id="'+knownPlayer[0]+'"]').click();
+   assert.equal(await secondPart.locator('[name="playerId_1"]').inputValue(),knownPlayer[0]);
+   await secondPart.locator('[data-dep="split-remove"]').click();
    await page.locator('[data-form="channel-operation"] [name="amount"]').fill('2500');
    await page.locator('[data-form="channel-operation"] [name="room"][value="X"]').check();
    await page.locator('[data-form="channel-operation"] [name="playerId"]').fill('654321');

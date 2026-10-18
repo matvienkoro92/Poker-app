@@ -505,3 +505,17 @@ test('payment summary counts confirmed payments by taker and channels without bo
  assert.equal(ctx.paymentFormsTotals(forms).withdrawals,1000);assert.equal(ctx.paymentFormsTotals(forms).deposits,1300);
  ctx.matchesPaymentManager=()=>true;assert.equal(ctx.paymentFormsTotals(forms).withdrawals,1500);assert.equal(ctx.paymentFormsTotals(forms).deposits,1800);
 });
+
+test('player directory keeps room identities separate and recent depositors independent of recipients',()=>{
+ const {depositPlayerDirectory}=require('../lib/deposit-player-directory');
+ const state={entries:[{room:'X',playerId:'999',recipient:'Получатель',payments:[{depositorRoom:'X',depositorId:'123',createdAt:10},{createdAt:20,allocations:[{depositorRoom:'P21',depositorId:'123',amount:100},{depositorRoom:'X',depositorId:'456',amount:100}]},{depositorRoom:'X',depositorId:'bad',createdAt:99,voidedAt:100}]},{room:'X',playerId:'deleted',recipient:'Удалён',deletedAt:1}],channelOperations:[{room:'X',playerId:'123',direction:'income',createdAt:30,channelId:'runex'},{room:'X',playerId:'bonusOnly',direction:'income',createdAt:99,channelId:'bonuses'},{room:'X',playerId:'cancelled',direction:'income',createdAt:99,voidedAt:100,channelId:'other'}]};
+ const rows=depositPlayerDirectory(state),find=(room,id)=>rows.find(p=>p.room===room&&p.playerId===id);
+ assert.equal(rows[0].room,'X');assert.equal(rows[0].playerId,'123');assert.equal(rows[0].lastUsedAt,30);assert.equal(rows[0].name,'');assert.equal(find('X','999').name,'Получатель');assert.equal(find('P21','123').lastUsedAt,20);assert.equal(find('X','456').lastUsedAt,20);
+ for(const id of ['bad','deleted','bonusOnly','cancelled'])assert.ok(!find('X',id));
+ assert.ok(rows.some(r=>r.room==='P21'&&r.nick));
+});
+
+test('player suggestions search nickname name and partial ID and show only recent on empty query',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:[{room:'X',playerId:'4110862',name:'Иван',lastUsedAt:20},{room:'P21',playerId:'123',nick:'Туз',lastUsedAt:0}]}};
+ vm.createContext(ctx);vm.runInContext(fn,ctx);assert.equal(ctx.playerChoices('').length,1);assert.equal(ctx.playerChoices('1086')[0].playerId,'4110862');assert.equal(ctx.playerChoices('ИВАН')[0].room,'X');assert.equal(ctx.playerChoices('туз')[0].room,'P21');assert.equal(ctx.playerChoices('missing').length,0);
+});
