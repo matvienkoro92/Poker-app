@@ -395,3 +395,10 @@ test('withdrawal summary filters cards by operational creation date and reconcil
  assert.equal(w.total,entry.total);assert.equal(w.paid,350000);assert.equal(w.returned,100000);assert.equal(w.total,w.paid+w.returned+w.remaining);
  assert.equal(view(state,now,{preset:'custom',from:'2026-10-17',to:'2026-10-17'}).statistics.withdrawals.total,0);
 });
+
+test('today report follows Novosibirsk 06:00 boundary',()=>{
+ const {statisticsRange}=require('../lib/admin-deposits');
+ const before=statisticsRange({preset:'today'},Date.parse('2026-10-17T22:59:59Z'));
+ const after=statisticsRange({preset:'today'},Date.parse('2026-10-17T23:00:00Z'));
+ assert.equal(before.from,'2026-10-17');assert.equal(after.from,'2026-10-18');assert.equal(after.start,Date.parse('2026-10-17T23:00:00Z'));assert.equal(after.end,Date.parse('2026-10-18T23:00:00Z'));
+});

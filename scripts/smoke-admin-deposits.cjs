@@ -206,8 +206,8 @@ async function main(){
    await page.locator('[data-form="statistics-period"] button[type="submit"]').click();
    await page.waitForFunction(()=>document.querySelector('.deposits__statistics').textContent.includes('2020-01-01'));
    assert.match(await page.locator('.deposits__report-group--returns .deposits__report-row').first().innerText(),/0/);
-   await page.locator('[data-dep="statistics-period"][data-period="all"]').click();
-   await page.waitForFunction(()=>document.querySelector('[data-period="all"]').getAttribute('aria-pressed')==='true');
+   await page.locator('[data-dep="statistics-period"][data-period="today"]').click();
+   await page.waitForFunction(()=>document.querySelector('[data-period="today"]').getAttribute('aria-pressed')==='true');
    await page.locator('.deposits__statistics').scrollIntoViewIfNeeded();
    await page.screenshot({path:path.join(output,width+'-statistics.png')});
    await current.locator('.deposits__returns summary').click();

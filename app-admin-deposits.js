@@ -2,7 +2,7 @@
   'use strict';
   var parser = window.pokerDepositParser, dialog, host, editor, status, opener, editorPopup, popupOpener;
   var data = {entries:[], totals:{total:0,paid:0,remaining:0}}, loaded = false, busy = false;
-  var statisticsPeriod={preset:'all'};
+  var statisticsPeriod={preset:'today'};
   var filter = 'active', query = '', pending = null, editing = false, timer, ageTimer, generation = 0;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   function money(n) { return (Number(n || 0)/100).toLocaleString('ru-RU',{maximumFractionDigits:2}) + ' ₽'; }
@@ -71,7 +71,7 @@
   async function open(target) {
     if(!window.pokerHasAdminMenuAccess('deposits'))return;
     ensure(); if(dialog.open)return;dialog.classList.remove('deposits--form-open'); opener=target;editing=false;editor.hidden=true;host.hidden=false;dialog.querySelector('.deposits__toolbar').hidden=false;
-    loaded=false; data={entries:[],totals:{total:0,paid:0,remaining:0}};
+    statisticsPeriod={preset:'today'};loaded=false; data={entries:[],totals:{total:0,paid:0,remaining:0}};
     dialog.showModal();document.body.classList.add('deposits-open');render();await refresh(false);
     clearInterval(ageTimer);ageTimer=setInterval(function(){if(document.visibilityState==='visible')updateCardTimers();},1000);
     clearInterval(timer);timer=setInterval(function(){if(document.visibilityState==='visible')refresh(true);},30000);
@@ -89,7 +89,7 @@
   function openChannel(id){var channel=channelInfo(id);if(!channel)return;var rows=(data.channelOperations||[]).filter(function(r){return r.channelId===id;}).slice().reverse();showPopup(channel.name,'<p class="deposits__hint">Сегодня с 06:00 по Новосибирску · ручной учёт фактических операций</p><div class="deposits__channel-totals"><span>Приход <b>'+money(channel.total||0)+'</b></span><span>Вывод <b>'+money(channel.outgoing)+'</b></span></div><div class="deposits__payment-options"><button type="button" class="deposits__confirm" data-dep="channel-new" data-channel="'+esc(id)+'" data-direction="income">+ Приход</button>'+(!channel.manualEntry?'<button type="button" class="deposits__cancel" data-dep="channel-new" data-channel="'+esc(id)+'" data-direction="outgoing">− Вывод</button>':'')+'</div><h4>Журнал операций</h4>'+channelHistoryHtml(id));}
   function channelEditor(id,direction){var channel=channelInfo(id);if(!channel)return;showPopup((direction==='income'?'Приход · ':'Вывод · ')+channel.name,'<form data-form="channel-operation" data-channel="'+esc(id)+'" data-direction="'+esc(direction)+'">'+field('Сумма, ₽','amount','','required inputmode="decimal"')+(direction==='income'?allocationEditor({channel:true}):roomFields({room:''},'room','Рум игрока')+field('ID игрока','playerId','','required maxlength="64" pattern="[a-zA-Z0-9_-]{1,64}"'))+field('Комментарий · необязательно','note','','maxlength="300"')+'<p class="deposits__hint">Записывайте только фактически полученные или выплаченные деньги.</p><button type="submit" class="deposits__primary deposits__wide">Записать '+(direction==='income'?'приход':'вывод')+'</button></form>');editor.querySelector('[name="amount"]').focus();}
   function managerAmounts(managers,key,destination){return '<div class="deposits__manager-split">'+managers.map(function(m){var d=destination&&(m.destinations||[]).find(function(row){return row.id===destination;}),value=destination?(d?d.amount:null):m[key];return '<span data-manager="'+esc(m.id)+'"><span>'+esc(m.name)+'</span><b>'+(value===null?'—':money(value))+'</b></span>';}).join('')+'</div>';}
-  function statisticsControls(){return '<div class="deposits__periods">'+[['all','За всё время'],['week','Текущая неделя'],['previous-week','Прошлая неделя'],['custom','По датам']].map(function(item){return '<button type="button" data-dep="statistics-period" data-period="'+item[0]+'" aria-pressed="'+(statisticsPeriod.preset===item[0])+'">'+(item[0]==='custom'?icon('calendar'):'')+item[1]+'</button>';}).join('')+'</div>';}
+  function statisticsControls(){return '<div class="deposits__periods">'+[['today','Сегодня'],['week','Текущая неделя'],['previous-week','Прошлая неделя'],['custom','По датам']].map(function(item){return '<button type="button" data-dep="statistics-period" data-period="'+item[0]+'" aria-pressed="'+(statisticsPeriod.preset===item[0])+'">'+(item[0]==='custom'?icon('calendar'):'')+item[1]+'</button>';}).join('')+'</div>';}
   function statisticsHtml(){
     var stats=data.statistics||{deposits:0,returned:0,destinations:[],managers:[]},managers=stats.managers||[],period=stats.period||{},periodLabel=period.from?period.from+' — '+period.to+' · 06:00–06:00 · Новосибирск':'За всё время';
     var withdrawals=stats.withdrawals||{total:0,remaining:0,paid:0,returned:0,reserved:0};
