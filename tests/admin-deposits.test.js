@@ -379,3 +379,11 @@ test('every income channel supports exact split amounts, retry and audited cance
   state=applyOperation(state,{action:'void-channel-operation',requestId:requestId('cancel_'+channelId),operationId:body.requestId},'admin-a').state;assert.equal(view(state).statistics.deposits,0);
  }
 });
+
+test('statistics display Anna and Vika by account ID even for old saved names',()=>{
+ const state=create();state.entries[0].payments=[{id:'anna-old',amount:10000,createdBy:'tg_2144406710',createdByName:'aany92',createdAt:1},{id:'vika-old',amount:20000,createdBy:'tg_1897001087',createdByName:'Администратор',createdAt:2}];
+ const managers=view(state).statistics.managers;
+ assert.equal(managers.find(m=>m.id==='tg_2144406710').name,'Аня');assert.equal(managers.find(m=>m.id==='tg_1897001087').name,'Вика');
+ const saved=applyOperation(null,{action:'create',entry,requestId:requestId(780)},'tg_2144406710',Date.now(),'aany92').state;
+ assert.equal(saved.entries[0].createdByName,'Аня');
+});

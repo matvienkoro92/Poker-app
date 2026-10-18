@@ -73,6 +73,7 @@ async function main(){
      const form=page.locator('[data-form="channel-operation"]');await form.locator('[name="amount"]').fill('100');await form.locator('[name="room"][value="X"]').check();await form.locator('[name="playerId"]').fill('111');
      await form.locator('[data-dep="split-add"]').click();await form.locator('[name="allocationAmount"]').fill('40');await form.locator('[name="allocationAmount_1"]').fill('60');await form.locator('[name="room_1"][value="PP"]').check();await form.locator('[name="playerId_1"]').fill('222');await form.locator('button[type="submit"]').click();
      await page.locator('.deposits__channel-history').waitFor();assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);assert.equal(state.channelOperations.at(-1).allocations.length,2);
+     if(channel==='prodamus'){await page.locator('[data-dep="editor-close"]').first().click();await page.locator('[data-provider="prodamus"]').click();assert.equal(await page.locator('[data-dep="copy-payment-link"]').count(),2);assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);}
      await page.locator('.deposits__popup [data-dep="channel-void"]').first().click();await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();await page.locator('.deposits__channel-history').waitFor();await page.locator('[data-dep="editor-close"]').first().click();
    }}
    assert.equal(await page.locator('.deposits__payment-form').count(),6);
@@ -194,9 +195,9 @@ async function main(){
    assert.equal(view(state).entries[0].remaining,1400000);
    assert.equal(view(state).statistics.returned,100000);
    assert.equal(view(state).statistics.deposits,0);
-   assert.equal(await page.locator('.deposits__statistics > dl>div').count(),view(state).statistics.destinations.length);
-   assert.equal(await page.locator('.deposits__statistics > .deposits__manager-split').first().locator('[data-manager]').count(),1);
-   assert.match(await page.locator('.deposits__statistics > .deposits__returns-total').first().innerText(),/1.*000/);
+   assert.equal(await page.locator('.deposits__statistics .deposits__report-detail dl>div').count(),view(state).statistics.destinations.length);
+   assert.equal(await page.locator('.deposits__report-managers [data-manager]').count(),1);
+   assert.match(await page.locator('.deposits__report-group--returns .deposits__report-row').first().innerText(),/1.*000/);
    await page.locator('[data-dep="statistics-period"][data-period="week"]').click();
    await page.waitForFunction(()=>document.querySelector('[data-period="week"]').getAttribute('aria-pressed')==='true');
    await page.locator('[data-dep="statistics-period"][data-period="custom"]').click();
@@ -204,7 +205,7 @@ async function main(){
    await page.locator('[data-form="statistics-period"] [name="to"]').fill('2020-01-01');
    await page.locator('[data-form="statistics-period"] button[type="submit"]').click();
    await page.waitForFunction(()=>document.querySelector('.deposits__statistics').textContent.includes('2020-01-01'));
-   assert.match(await page.locator('.deposits__statistics > .deposits__returns-total').first().innerText(),/0/);
+   assert.match(await page.locator('.deposits__report-group--returns .deposits__report-row').first().innerText(),/0/);
    await page.locator('[data-dep="statistics-period"][data-period="all"]').click();
    await page.waitForFunction(()=>document.querySelector('[data-period="all"]').getAttribute('aria-pressed')==='true');
    await page.locator('.deposits__statistics').scrollIntoViewIfNeeded();
