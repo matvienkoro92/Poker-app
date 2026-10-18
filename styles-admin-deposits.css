@@ -502,3 +502,6 @@ body.deposits-open {overflow:hidden;}
 .deposits__payment-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px}
 .deposits__payment-heading h3{margin:0}
 .deposits .deposits__payment-heading select{width:auto;min-width:76px;min-height:32px;padding:5px 9px;border:1px solid #dfc58a55;border-radius:9px;background:#171d21;color:var(--dep-gold);font-size:12px}
+
+.deposits__payment-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 0;padding:12px;border:1px solid #dfc58a40;border-radius:12px;background:#d7bd7908}
+.deposits__payment-summary>div{display:grid;gap:4px;min-width:0}.deposits__payment-summary dt{font-size:11px;color:var(--dep-muted)}.deposits__payment-summary dd{margin:0;font-size:16px;font-weight:750;color:var(--dep-gold);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}

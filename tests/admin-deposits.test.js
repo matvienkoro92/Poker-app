@@ -497,3 +497,11 @@ test('payment manager filter separates verified accounts, periods and voids with
  ctx.paymentManager='1897001087';const v=ctx.filteredPaymentForms().providers[0];assert.equal(v.total,200);assert.equal(v.outgoing,50);assert.equal(data.paymentForms.providers[0].total,300);
  assert.equal(ctx.matchesPaymentManager({createdBy:'tg_2144406710'}),false);
 });
+
+test('payment summary counts confirmed payments by taker and channels without bonuses or transfers',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8');const fn=source.slice(source.indexOf('  function paymentFormsTotals('),source.indexOf('  function paymentFormsTotalsHtml('));
+ const forms={period:{start:10,end:20},providers:[{id:'runex',total:200},{id:'prodamus',total:100},{id:'transfer',total:999},{id:'bonuses',total:999}]};
+ const ctx={data:{entries:[{reservations:[{id:'r',createdBy:'anna'}],payments:[{amount:1000,createdAt:10,createdBy:'vika',reservationId:'r'},{amount:500,createdAt:15,createdBy:'vika'},{amount:999,createdAt:20,createdBy:'anna'},{amount:999,createdAt:15,voidedAt:16}]}]},matchesPaymentManager:r=>r.createdBy==='anna'};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ assert.equal(ctx.paymentFormsTotals(forms).withdrawals,1000);assert.equal(ctx.paymentFormsTotals(forms).deposits,1300);
+ ctx.matchesPaymentManager=()=>true;assert.equal(ctx.paymentFormsTotals(forms).withdrawals,1500);assert.equal(ctx.paymentFormsTotals(forms).deposits,1800);
+});
