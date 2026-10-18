@@ -19,7 +19,7 @@ async function main(){
     if(url.includes('/api/admin-deposits')){
      if(body.action!=='list')state=applyOperation(state,body,'Тестовый администратор',Date.now(),'Владелец',{canDelete:true}).state;
      if(lose&&body.action==='confirm-reservation'){lose=false;return route.abort();}
-     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state),permissions:{canDelete:true}})});
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state,Date.now(),body.statisticsPeriod),permissions:{canDelete:true}})});
     }
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,allowed:true,isAdmin:true,entries:[],events:[],levelRows:[],participants:[],winners:[]})});
    });
@@ -67,7 +67,12 @@ async function main(){
    assert.equal(view(state).paymentForms.providers[0].total,null);
    await page.screenshot({path:path.join(output,width+'-prodamus.png')});
    await page.locator('[data-dep="editor-close"]').first().click();
-   assert.equal(await page.locator('.deposits__payment-form').count(),5);
+   assert.equal(await page.locator('.deposits__payment-form').count(),6);
+   assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
+   await page.locator('.deposits__payment-form--outgoing').click();
+   assert.equal(await page.locator('[data-form="channel-operation"]').getAttribute('data-channel'),'exchip');
+   assert.equal(await page.locator('[data-form="channel-operation"]').getAttribute('data-direction'),'outgoing');
+   await page.locator('[data-dep="editor-close"]').first().click();
    await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
    await page.locator('[data-dep="channel-new"][data-direction="income"]').click();
    await page.locator('[data-form="channel-operation"] [name="amount"]').fill('2500');
@@ -180,6 +185,16 @@ async function main(){
    assert.equal(await page.locator('.deposits__statistics > dl>div').count(),7);
    assert.equal(await page.locator('.deposits__statistics > .deposits__manager-split').first().locator('[data-manager]').count(),1);
    assert.match(await page.locator('.deposits__statistics > .deposits__returns-total').first().innerText(),/1.*000/);
+   await page.locator('[data-dep="statistics-period"][data-period="week"]').click();
+   await page.waitForFunction(()=>document.querySelector('[data-period="week"]').getAttribute('aria-pressed')==='true');
+   await page.locator('[data-dep="statistics-period"][data-period="custom"]').click();
+   await page.locator('[data-form="statistics-period"] [name="from"]').fill('2020-01-01');
+   await page.locator('[data-form="statistics-period"] [name="to"]').fill('2020-01-01');
+   await page.locator('[data-form="statistics-period"] button[type="submit"]').click();
+   await page.waitForFunction(()=>document.querySelector('.deposits__statistics').textContent.includes('2020-01-01'));
+   assert.match(await page.locator('.deposits__statistics > .deposits__returns-total').first().innerText(),/0/);
+   await page.locator('[data-dep="statistics-period"][data-period="all"]').click();
+   await page.waitForFunction(()=>document.querySelector('[data-period="all"]').getAttribute('aria-pressed')==='true');
    await page.locator('.deposits__statistics').scrollIntoViewIfNeeded();
    await page.screenshot({path:path.join(output,width+'-statistics.png')});
    await current.locator('.deposits__returns summary').click();

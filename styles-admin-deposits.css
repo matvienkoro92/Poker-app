@@ -431,3 +431,16 @@ body.deposits-open {overflow:hidden;}
 .deposits__channel-row small{font-size:10px;color:var(--dep-muted)}
 .deposits__channel-row.is-void{opacity:.5}
 .deposits__channel-row.is-void>strong{text-decoration:line-through}
+
+.deposits__periods{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}.deposits__periods button{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border:1px solid #61543a;border-radius:12px;background:#171c20;color:#eee3ca;font:inherit;font-size:13px;cursor:pointer}.deposits__periods button[aria-pressed="true"]{background:#e7c678;color:#211a0c}.deposits__periods svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}.deposits__date-range{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.deposits__date-range input{min-width:0;color-scheme:dark}
+
+.deposits__filters nav [data-filter="active"] span {color:#ffe08a;opacity:1;font-weight:800;text-shadow:0 0 10px rgba(255,208,103,.25);}
+
+.deposits .deposits__payment-form{border-color:#b99a5e66;background:linear-gradient(155deg,#343127,#242621 35%,#171b1d);box-shadow:inset 0 1px 0 #fff0c42b,inset 0 -2px 0 #0005,0 3px 0 #080b0d,0 6px 12px #0003;text-shadow:0 1px 1px #0008;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.deposits .deposits__payment-form:hover{border-color:#efd18ca6;background:linear-gradient(155deg,#40392a,#242821 50%,#1a2021)}
+.deposits .deposits__payment-form:active{transform:translateY(2px);box-shadow:inset 0 1px 3px #0005,0 1px 0 #080b0d}
+.deposits .deposits__payment-form:focus-visible{outline:2px solid #ffe08a;outline-offset:3px}
+.deposits .deposits__payment-form--outgoing{border-color:#cf82766b;background:linear-gradient(155deg,#49302f,#302327 45%,#211e23);box-shadow:inset 0 1px 0 #ffd2c92b,inset 0 -2px 0 #0005,0 3px 0 #150d10,0 6px 12px #0003}
+.deposits .deposits__payment-form--outgoing strong{color:#ffe1d9}.deposits .deposits__payment-form--outgoing span{color:#efa99c}
+.deposits .deposits__payment-form--outgoing:hover{border-color:#e5a095;background:linear-gradient(155deg,#573735,#39292d 50%,#282026)}
+@media(prefers-reduced-motion:reduce){.deposits .deposits__payment-form{transition:none}}
