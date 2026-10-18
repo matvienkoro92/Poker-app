@@ -412,3 +412,23 @@ test('player report separates room IDs, attributes splits, matches known report 
  assert.equal(players.reduce((s,p)=>s+p.deposits,0),stats.deposits);assert.equal(players.reduce((s,p)=>s+p.withdrawals,0),stats.outgoing);assert.ok(!players.some(p=>p.playerId==='bad'));
  assert.equal(view(state,Date.now(),{preset:'today'}).statistics.players.length,0);
 });
+
+test('Vika operations remain attributed by verified account ID despite generic display name',()=>{
+ const body={action:'channel-operation',requestId:requestId(790),channelId:'prodamus',direction:'income',room:'X',playerId:'123',amount:250000};
+ const state=applyOperation(null,body,'tg_1897001087',Date.now(),'Администратор').state;
+ assert.equal(state.channelOperations[0].createdByName,'Вика');const managers=view(state).statistics.managers;assert.equal(managers.find(m=>m.id==='tg_1897001087').deposits,250000);assert.equal(managers[0].name,'Вика');
+});
+
+test('report always shows Anna and Vika and hides unrelated zero columns',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function reportManagers('),source.indexOf('  function managerAmounts('));const context={};vm.createContext(context);vm.runInContext(fn,context);
+ const rows=context.reportManagers([{id:'tg_2144406710',name:'aany92',deposits:1000},{id:'tg_388008256',name:'Администратор',deposits:0,outgoing:1}]);
+ assert.deepEqual(Array.from(rows,m=>m.name),['Аня','Вика']);assert.equal(rows[0].deposits,1000);assert.equal(rows[1].deposits,0);
+ const vika=context.reportManagers([{id:'tg_1897001087',name:'Администратор',deposits:3000}]);assert.equal(vika[1].name,'Вика');assert.equal(vika[1].deposits,3000);
+});
+
+test('room summary adds player deposits and withdrawals within each room',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function roomStatisticsHtml('),source.indexOf('  function playerStatisticsHtml('));
+ const ctx={depositRooms:[['P21','Покер21'],['X','Хпокер']],esc:String,money:n=>String(n)};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ const html=ctx.roomStatisticsHtml([{room:'P21',deposits:100,withdrawals:200},{room:'P21',deposits:50,withdrawals:30},{room:'X',deposits:20,withdrawals:10}]);
+ assert.match(html,/Покер21<\/th><td>150<\/td><td>230<\/td>/);assert.match(html,/Хпокер<\/th><td>20<\/td><td>10<\/td>/);
+});
