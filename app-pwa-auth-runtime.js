@@ -1029,9 +1029,10 @@
   function openSharedAccountAuthFlow(opts) {
     try {
       var forceOverlay = !!(opts && opts.forceOverlay === true);
+      if (forceOverlay) { openOverlayAuthEntryScreen(); return; }
       var wtg = getTelegramWebAppNow();
       if (wtg && wtg.initData) { runVerifyFlow(); return; }
-      if (forceOverlay || shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();
+      if (shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();
       else { resetBannerForPwaLogin(); mountTelegramLoginWidgetForPwa();
         if (banner) { banner.classList.remove("auth-banner--hidden"); try { banner.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (eScroll) {} } }
     } catch (eOpenPwaLogin) {}

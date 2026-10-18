@@ -136,9 +136,6 @@ function initPwaAuthOverlayRuntime(ctx) {
         window.__pokerTelegramAuth = { status: "no_telegram", user: null, error: null };
       }
     } catch (eAuthReset) {}
-    try {
-      if (typeof setView === "function") setView("home");
-    } catch (eSetViewAuth) {}
     hideLegacyInlineAuthUi();
     setPwaAuthScreenNotice("");
     var screen = pwaAuthScreenEl();

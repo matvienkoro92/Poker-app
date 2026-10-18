@@ -3,7 +3,7 @@
   var dialog,detail,data,selection,busy=false,generation=0,request=0,tab='room',filter='all',camera='wide',space='hall',garageFocus='',garageVehicle=0,editingShelf=null,loungeFocus='',loungeDraft=null,hallReturn=null,loungeLive=null;
   var labels={cups:'Кубки',achievements:'Достижения',seasons:'Сезоны'};
   function adminVisible(){return true;}
-  function guestMode(){var auth=window.__pokerTelegramAuth;return !(auth&&(auth.adminAccess===true||auth.status==='verified'||auth.status==='dev_skip'));}
+  function guestMode(){var auth=window.__pokerTelegramAuth;if(auth&&(auth.adminAccess===true||auth.status==='verified'||auth.status==='dev_skip'))return false;try{if(typeof pokerReadPwaTgSessionToken==='function'&&pokerReadPwaTgSessionToken()||typeof pokerReadPwaVkSessionToken==='function'&&pokerReadPwaVkSessionToken())return false;if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData)return false;}catch(e){}return !!(auth&&['guest','no_telegram','no_init_data','invalid'].includes(auth.status));}
   function guestHall(){return {guest:true,self:false,name:'Гость',wins:0,items:[],featured:[],theme:'walnut',goal:'wins',themes:[],goals:[],achievementProgress:[],levelProgress:{level:0,xp:0,target:1},garage:{stats:{level:0},loadout:null},lounge:{available:true,friends:[],seats:[]}};}
   function registerGuest(){if(dialog&&dialog.open)dialog.close();if(window.__pokerOpenLogin)window.__pokerOpenLogin({forceOverlay:true});}
 
