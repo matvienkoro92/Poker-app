@@ -520,3 +520,47 @@ test('player suggestions search nickname name and partial ID and show only recen
  const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:[{room:'X',playerId:'4110862',name:'Иван',lastUsedAt:20},{room:'P21',playerId:'123',nick:'Туз',lastUsedAt:0}]}};
  vm.createContext(ctx);vm.runInContext(fn,ctx);assert.equal(ctx.playerChoices('').length,1);assert.equal(ctx.playerChoices('1086')[0].playerId,'4110862');assert.equal(ctx.playerChoices('ИВАН')[0].room,'X');assert.equal(ctx.playerChoices('туз')[0].room,'P21');assert.equal(ctx.playerChoices('missing').length,0);
 });
+
+test('Cooler Russian alias preserves Poker21 nickname and ID and is searchable',()=>{
+ const rows=require('../lib/deposit-player-directory').depositPlayerDirectory({});
+ const cooler=rows.find(p=>p.room==='P21'&&p.playerId==='286730');assert.equal(cooler.nick,'Coo1er91');assert.ok(cooler.aliases.includes('Кулер'));assert.ok(cooler.aliases.includes('NeCoo1er91'));
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:rows}};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ for(const query of ['кулер','КУЛ','Coo1er91','286730'])assert.ok(ctx.playerChoices(query).some(p=>p.playerId==='286730'&&p.room==='P21'));
+});
+
+test('all report nicknames and confirmed aliases remain searchable without merging IDs',()=>{
+ const rows=require('../lib/deposit-player-directory').depositPlayerDirectory({}),source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:rows}};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ for(const row of rows)for(const query of [row.nick,...row.aliases].filter(Boolean)){
+  assert.ok(ctx.playerChoices(query).some(p=>p.room===row.room&&p.playerId===row.playerId),query+' → '+row.playerId);
+ }
+ for(const [query,id] of [['кулер','286730'],['ваар','590773'],['Pryanik','398176'],['бабник','256073'],['babnik','256073'],['pokermanki','208238'],['муж на час','512401'],['emil13','124128'],['  Coo1er 91!! ','286730']])assert.ok(ctx.playerChoices(query).some(p=>p.playerId===id),query);
+ const frank=ctx.playerChoices('4ezzi');assert.ok(frank.some(p=>p.playerId==='720457'));assert.ok(frank.some(p=>p.playerId==='2188305'));
+ assert.equal(ctx.playerChoices('несуществующийигрок123').length,0);
+});
+
+test('saved player accounts share nick across rooms, persist without payments and reject conflicting links',()=>{
+ const body={action:'save-player-account',requestId:requestId(970),profileKey:'P21|286730',room:'X',playerId:'445566',nick:'Кулер'};
+ let state=applyOperation(null,body,'manager',1000,'Вика').state;
+ let result=view(state),account=result.playerDirectory.find(p=>p.room==='X'&&p.playerId==='445566');
+ assert.equal(account.profileKey,'P21|286730');assert.equal(account.nick,'Coo1er91');assert.ok(account.aliases.includes('Кулер'));assert.equal(result.statistics.deposits,0);assert.equal(result.channelOperations.length,0);
+ assert.equal(state.playerAccounts[0].createdBy,'manager');assert.equal(applyOperation(state,body,'manager',1001,'Вика').duplicate,true);
+ state=applyOperation(state,{...body,requestId:requestId(971)},'manager',1002,'Вика').state;assert.equal(state.playerAccounts.length,1);
+ assert.throws(()=>applyOperation(state,{...body,requestId:requestId(972),profileKey:'P21|398176'},'other',1003),e=>e.status===409);
+ assert.throws(()=>applyOperation(state,{...body,requestId:requestId(973),room:'P21',playerId:'398176'},'other',1003),e=>e.status===409);
+ state=applyOperation(state,{action:'save-player-account',requestId:requestId(974),room:'PP',playerId:'new123',nick:'Новый игрок'},'manager',1004).state;
+ assert.equal(view(state).playerDirectory.find(p=>p.room==='PP'&&p.playerId==='new123').nick,'Новый игрок');
+ state=applyOperation(state,{...body,requestId:requestId(975),profileKey:'PP|new123',room:'Supr',playerId:'new456'},'manager',1005).state;
+ assert.equal(view(state).playerDirectory.find(p=>p.room==='Supr'&&p.playerId==='new456').nick,'Новый игрок');
+ assert.throws(()=>applyOperation(state,{...body,requestId:requestId(976),profileKey:'X|absent'},'manager',1006));
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:view(state).playerDirectory}};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ assert.ok(ctx.playerChoices('кулер').some(p=>p.room==='P21'&&p.playerId==='286730'));assert.ok(ctx.playerChoices('кулер').some(p=>p.room==='X'&&p.playerId==='445566'));
+});
+
+test('API persists account links and forwards transfer names and owner edit versions',async()=>{
+ const api=apiSetup();let response=await api.call({action:'save-player-account',requestId:requestId(980),profileKey:'P21|286730',room:'X',playerId:'445566',nick:'Кулер'});
+ assert.equal(response.statusCode,200);assert.equal(response.data.playerDirectory.find(p=>p.room==='X'&&p.playerId==='445566').profileKey,'P21|286730');
+ response=await api.call({action:'transfer',requestId:requestId(981),playerName:'Кулер',fromRoom:'P21',fromPlayerId:'286730',toRoom:'X',toPlayerId:'445566',amount:10000});assert.equal(response.statusCode,200);assert.ok(response.data.channelOperations.every(r=>r.playerName==='Кулер'));
+ await api.call({action:'channel-operation',requestId:requestId(982),channelId:'runex',direction:'income',room:'X',playerId:'445566',amount:10000});
+ response=await api.call({action:'edit-channel-operation',requestId:requestId(983),operationId:requestId(982),editVersion:0,room:'X',playerId:'445566',amount:20000},'388008256');
+ assert.equal(response.statusCode,200);assert.equal(response.data.statistics.deposits,20000);
+});
