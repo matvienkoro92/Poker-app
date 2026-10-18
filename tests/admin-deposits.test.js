@@ -432,3 +432,27 @@ test('room summary adds player deposits and withdrawals within each room',()=>{
  const html=ctx.roomStatisticsHtml([{room:'P21',deposits:100,withdrawals:200},{room:'P21',deposits:50,withdrawals:30},{room:'X',deposits:20,withdrawals:10}]);
  assert.match(html,/Покер21<\/th><td>150<\/td><td>230<\/td>/);assert.match(html,/Хпокер<\/th><td>20<\/td><td>10<\/td>/);
 });
+
+test('copied report groups payment providers once and reconciles deposit categories',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8');
+ const fn=source.slice(source.indexOf('  function reportCopyText('),source.indexOf('  function statisticsHtml('));
+ const context={money:n=>(Number(n||0)/100).toLocaleString('ru-RU')+' ₽'};vm.createContext(context);vm.runInContext(fn,context);
+ const stats={deposits:6800000,destinations:[{id:'withdrawals',amount:3800000},{id:'payment-links',amount:null},{id:'prodamus',title:'Продамус',amount:700000},{id:'runex',amount:2300000},{id:'exchip',amount:0},{id:'r-crypto',amount:0},{id:'other',amount:0},{id:'transfer',amount:0},{id:'all-friends',amount:null}],cashWithdrawals:3600000,returned:100000,exchipWithdrawals:100,managers:[{reserved:0}]};
+ const plain=s=>s.replace(/\u00a0/g,' ');
+ assert.equal(plain(context.reportCopyText(stats)), 'Отчёт\nЗа всё время · включая архив\n\nВся детализация отчёта:\nДепозит: 68 000 ₽\nНа выводы: 38 000 ₽\nВ платёжки: 7 000 ₽\n  - Продамус: 7 000 ₽\nРунекс: 23 000 ₽\nЭксчип бот: 0 ₽\nР Крипта: 0 ₽\nДругое: 0 ₽\nПеревод: 0 ₽\n\nВыводы Эксчип: 1 ₽\nВывод снятия с кассы: 36 000 ₽\nВозвраты в кассу: 1 000 ₽\nЗаморожено: 0 ₽');
+ stats.destinations.push({id:'future-provider',title:'Новый сервис',amount:20000});stats.deposits+=20000;
+ assert.match(plain(context.reportCopyText(stats)),/В платёжки: 7 200 ₽\n  - Продамус: 7 000 ₽\n  - Новый сервис: 200 ₽/);
+ stats.otherCategories=[{title:'Наличные\nв клубе',amount:10000}];
+ assert.match(context.reportCopyText(stats),/  - Наличные в клубе: 100 ₽/);
+});
+
+test('other comment categories use only confirmed income in selected period',()=>{
+ const now=Date.parse('2026-10-18T10:00:00Z');let state={entries:[],channelOperations:[],requests:[]};
+ for(const [i,note,direction,at] of [[1,'Наличные','income',now],[2,'Наличные','income',now],[3,'Старое','income',now-86400000],[4,'Расход','outgoing',now],[5,'Отменено','income',now],[6,'','income',now]]){
+  state=applyOperation(state,{action:'channel-operation',requestId:requestId(800+i),channelId:'other',direction,room:'P21',playerId:'123',amount:10000,note},'admin-a',at).state;
+ }
+ state.channelOperations.find(r=>r.note==='Отменено').voidedAt=now;
+ const stats=view(state,now,{preset:'today'}).statistics;
+ assert.deepEqual(stats.otherCategories,[{title:'Наличные',amount:20000},{title:'Без комментария',amount:10000}]);
+ assert.equal(stats.otherCategories.reduce((s,r)=>s+r.amount,0),stats.destinations.find(r=>r.id==='other').amount);
+});

@@ -97,6 +97,18 @@
   function statisticsControls(){return '<div class="deposits__periods">'+[['today','Сегодня'],['week','Текущая неделя'],['previous-week','Прошлая неделя'],['custom','По датам']].map(function(item){return '<button type="button" data-dep="statistics-period" data-period="'+item[0]+'" aria-pressed="'+(statisticsPeriod.preset===item[0])+'">'+(item[0]==='custom'?icon('calendar'):'')+item[1]+'</button>';}).join('')+'</div>';}
   function roomStatisticsHtml(players){var rooms=depositRooms.map(function(room){return {id:room[0],title:room[1],deposits:0,withdrawals:0};});players.forEach(function(p){var room=rooms.find(function(r){return r.id===p.room;});if(!room){room={id:p.room,title:p.room||'Рум не указан',deposits:0,withdrawals:0};rooms.push(room);}room.deposits+=p.deposits;room.withdrawals+=p.withdrawals;});return '<section class="deposits__rooms-report"><h4>По румам</h4><table><thead><tr><th>Рум</th><th>Депозиты</th><th>Выводы</th></tr></thead><tbody>'+rooms.map(function(room){return '<tr><th scope="row">'+esc(room.title)+'</th><td>'+money(room.deposits)+'</td><td>'+money(room.withdrawals)+'</td></tr>';}).join('')+'</tbody></table></section>';}
   function playerStatisticsHtml(players){return '<details class="deposits__players-report"><summary><span>По игрокам</span></summary>'+roomStatisticsHtml(players)+'<p>Подтверждённые оплаты за выбранный период. Выводы — фактически оплаченные.</p>'+(players.length?'<div class="deposits__players-scroll"><table><thead><tr><th>Игрок / рум</th><th>Депозиты</th><th>Выводы</th></tr></thead><tbody class="deposits__players-total"><tr><th>Итого</th><td>'+money(players.reduce(function(s,p){return s+p.deposits;},0))+'</td><td>'+money(players.reduce(function(s,p){return s+p.withdrawals;},0))+'</td></tr></tbody><tbody>'+players.map(function(p){var room=depositRooms.find(function(r){return r[0]===p.room;});return '<tr><th scope="row">'+(p.nick?'<b>'+esc(p.nick)+'</b>':'')+'<span>'+esc(room?room[1]:p.room||'Рум не указан')+'</span><small>'+(p.playerId?'ID '+esc(p.playerId):'ID не указан')+'</small></th><td>'+money(p.deposits)+'</td><td>'+money(p.withdrawals)+'</td></tr>';}).join('')+'</tbody></table></div>':'<p>Операций за этот период нет.</p>')+'</details>';}
+  function reportCopyText(stats){
+    var period=stats.period||{},rows=stats.destinations||[];
+    function amount(id){var row=rows.find(function(d){return d.id===id;});return row&&row.amount||0;}
+    var separate=['withdrawals','payment-links','runex','exchip','r-crypto','other','transfer'];
+    var providers=rows.filter(function(d){return separate.indexOf(d.id)<0&&d.amount!==null;});
+    var lines=['Отчёт',period.from?period.from+' — '+period.to+' · 06:00–06:00 · Новосибирск · включая архив':'За всё время · включая архив','','Вся детализация отчёта:','Депозит: '+money(stats.deposits),'На выводы: '+money(amount('withdrawals')),'В платёжки: '+money(providers.reduce(function(sum,d){return sum+d.amount;},0))];
+    providers.forEach(function(d){lines.push('  - '+d.title+': '+money(d.amount));});
+    lines.push('Рунекс: '+money(amount('runex')),'Эксчип бот: '+money(amount('exchip')),'Р Крипта: '+money(amount('r-crypto')),'Другое: '+money(amount('other')));
+    (stats.otherCategories||[]).forEach(function(d){lines.push('  - '+d.title.replace(/\s+/g,' ')+': '+money(d.amount));});
+    lines.push('Перевод: '+money(amount('transfer')),'','Выводы Эксчип: '+money(stats.exchipWithdrawals),'Вывод снятия с кассы: '+money(stats.cashWithdrawals),'Возвраты в кассу: '+money(stats.returned),'Заморожено: '+money((stats.managers||[]).reduce(function(sum,m){return sum+(m.reserved||0);},0)));
+    return lines.join('\n');
+  }
   function statisticsHtml(){
     var stats=data.statistics||{deposits:0,returned:0,destinations:[],managers:[]},managers=reportManagers(stats.managers||[]),period=stats.period||{},periodLabel=period.from?period.from+' — '+period.to+' · 06:00–06:00 · Новосибирск':'За всё время';
     var withdrawals=stats.withdrawals||{total:0,remaining:0,paid:0,returned:0,reserved:0};
@@ -184,7 +196,7 @@
       if(b.dataset.period==='custom'){var period=data.statistics&&data.statistics.period||{},today=new Date(Date.now()+3600000).toISOString().slice(0,10);showPopup('Период статистики','<form data-form="statistics-period"><div class="deposits__date-range">'+field('С даты','from',period.from||today,'type="date" required')+field('По дату включительно','to',period.to||today,'type="date" required')+'</div><p class="deposits__hint">С 06:00 первого дня до 06:00 дня после последней даты · Новосибирск</p><button type="submit" class="deposits__primary deposits__wide">Показать</button></form>');}
       else {statisticsPeriod={preset:b.dataset.period};await refresh(false);}
     }
-    else if(action==='report-copy')await copy('Отчёт\n'+host.querySelector('.deposits__crm-report>p').textContent+'\n'+Array.from(host.querySelectorAll('[data-report-body] summary,[data-report-body] .deposits__report-row,[data-report-body] .deposits__stat-row')).map(function(row){var value=row.querySelector('strong,dd');return row.firstElementChild.textContent+': '+(value?value.textContent:'');}).join('\n'));
+    else if(action==='report-copy')await copy(reportCopyText(data.statistics||{}));
     else if(action==='refresh')await refresh(false);
     else if(action==='retry'&&pending)await save(pending);
     else if(action==='unlock'){dialog.close();document.getElementById('headerDepositsShortcutBtn').click();}
