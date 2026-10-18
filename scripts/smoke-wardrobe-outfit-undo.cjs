@@ -3,6 +3,12 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 (async()=>{const b=await chromium.launch();try{const p=await b.newPage({viewport:{width:390,height:844},isMobile:true});const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('https://wardrobe.test/**',r=>{const f=path.join(process.cwd(),new URL(r.request().url()).pathname);return fs.existsSync(f)&&fs.statSync(f).isFile()?r.fulfill({path:f}):r.fulfill({contentType:'text/html',body:'<body></body>'});});await p.goto('https://wardrobe.test/');await p.setContent('<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#10191e;font-family:Arial}dialog.player-hall-dialog{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0}.player-hall__section-panel{position:absolute!important;inset:0!important;max-height:none!important;margin:0!important;padding:0!important}</style><dialog class="player-hall-dialog"><section class="player-hall__section-panel"><div class="garage-workshop" data-focus="suit"></div></section></dialog>');for(const file of ['styles-base.css','styles-player-hall.css','styles-player-lounge.css','styles-garage-technical-menu.css'])await p.addStyleTag({path:file});for(const file of ['app-garage-catalog.js','app-garage-workshop.js'])await p.addScriptTag({path:file});await p.evaluate(()=>document.querySelector('dialog').showModal());fs.mkdirSync('output/wardrobe-audit/mobile',{recursive:true});let checks=0;
 
 await p.evaluate(()=>{const root=document.querySelector('.garage-workshop');root.dataset.focus='outfits';window.saved=null;window.before={...PokerGarage.defaults,body:'bodyBelly',watch:'goldClassic',bracelet:'braceletGoldChain'};pokerMountGarageWorkshop(root,{stats:{level:100},loadout:window.before},true,async value=>{window.saved=value;return{loadout:value};});});
+const list=p.locator('.garage-options');
+await p.locator('[data-options-scroll="next"]').click();await p.waitForTimeout(400);
+assert.ok(await list.evaluate(el=>el.scrollLeft)>0,'next arrow reaches later level items');
+const scrolled=await list.evaluate(el=>el.scrollLeft);
+await p.locator('[data-options-scroll="prev"]').click();await p.waitForTimeout(400);
+assert.ok(await list.evaluate(el=>el.scrollLeft)<scrolled,'previous arrow returns to earlier items');
 await p.locator('[data-choice="outfits:fisherman"]').click();
 await p.locator('[data-choice="outfits:space"]').click();
 await p.locator('[data-outfit-remove]').click();
