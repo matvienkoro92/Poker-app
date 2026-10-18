@@ -301,9 +301,10 @@ test('manual channel API retries after lost response keep one entry',async()=>{
 });
 
 test('transfer saves both room accounts atomically, retries once and cancels both sides',()=>{
- const body={action:'transfer',requestId:requestId(700),fromRoom:'P21',fromPlayerId:'123',toRoom:'X',toPlayerId:'456',amount:125050,note:'Между румами'};
+ const body={action:'transfer',requestId:requestId(700),playerName:'Пряник',fromRoom:'P21',fromPlayerId:'123',toRoom:'X',toPlayerId:'456',amount:125050,note:'Между румами'};
  const now=Date.now();const state=applyOperation(null,body,'admin-a',now).state;
  assert.equal(state.channelOperations.length,2);
+ assert.ok(state.channelOperations.every(r=>r.playerName==='Пряник'));
  assert.deepEqual(state.channelOperations.map(r=>[r.room,r.playerId,r.direction,r.amount]),[['P21','123','outgoing',125050],['X','456','income',125050]]);
  assert.equal(applyOperation(state,body,'admin-a',now).state.channelOperations.length,2);
  const result=view(state,now),channel=result.paymentForms.providers.find(p=>p.id==='transfer');
