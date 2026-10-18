@@ -357,3 +357,25 @@ test('reserve without identity requires depositor room and ID only on payment co
  assert.equal(saved.entries[0].payments[0].depositorId,'123353');assert.equal(saved.entries[0].payments[0].depositorRoom,'X');
  assert.equal(applyOperation(saved,body,'admin-a').state.entries[0].payments.length,1);
 });
+
+test('split payment confirms once with exact allocation total and cancels as one payment',()=>{
+ const id=requestId(1),reserveId=requestId(750);let state=create();state=applyOperation(state,{action:'reserve',requestId:reserveId,entryId:id,amount:100000},'admin-a').state;
+ const confirm={action:'confirm-reservation',requestId:requestId(751),entryId:id,reservationId:reserveId,allocations:[{depositorId:'111',depositorRoom:'P21',amount:40000},{depositorId:'222',depositorRoom:'X',amount:60000}]};
+ assert.throws(()=>applyOperation(state,{...confirm,allocations:[{...confirm.allocations[0],amount:1},confirm.allocations[1]]},'admin-a'),/совпадать/);
+ assert.throws(()=>applyOperation(state,{...confirm,allocations:[{...confirm.allocations[0],depositorRoom:''},confirm.allocations[1]]},'admin-a'),/рум/);
+ assert.throws(()=>applyOperation(state,{...confirm,allocations:[{...confirm.allocations[0],depositorId:''},confirm.allocations[1]]},'admin-a'),/ID/);
+ state=applyOperation(state,confirm,'admin-a').state;
+ assert.deepEqual(state.entries[0].payments[0].allocations,confirm.allocations);assert.equal(view(state).statistics.deposits,100000);
+ assert.equal(applyOperation(state,confirm,'admin-a').state.entries[0].payments.length,1);
+ state=applyOperation(state,{action:'void',requestId:requestId(752),entryId:id,paymentId:confirm.requestId},'admin-a').state;assert.equal(view(state).statistics.deposits,0);assert.equal(view(state).entries[0].remaining,entry.total);
+});
+
+test('every income channel supports exact split amounts, retry and audited cancellation',()=>{
+ for(const channelId of ['prodamus','runex','exchip','r-crypto','other']){
+  const body={action:'channel-operation',requestId:requestId('split_'+channelId),channelId,direction:'income',amount:100000,allocations:[{depositorId:'11',depositorRoom:'P21',amount:30000},{depositorId:'22',depositorRoom:'PP',amount:70000}]};
+  let state=applyOperation(null,body,'admin-a').state;assert.deepEqual(state.channelOperations[0].allocations,body.allocations);assert.equal(view(state).statistics.deposits,100000);assert.equal(view(state).paymentForms.providers.find(p=>p.id===channelId).total,100000);
+  assert.equal(applyOperation(state,body,'admin-a').state.channelOperations.length,1);
+  assert.throws(()=>applyOperation(null,{...body,amount:99999},'admin-a'),/совпадать/);
+  state=applyOperation(state,{action:'void-channel-operation',requestId:requestId('cancel_'+channelId),operationId:body.requestId},'admin-a').state;assert.equal(view(state).statistics.deposits,0);
+ }
+});

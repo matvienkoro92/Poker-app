@@ -67,6 +67,14 @@ async function main(){
    assert.equal(view(state).paymentForms.providers[0].total,null);
    await page.screenshot({path:path.join(output,width+'-prodamus.png')});
    await page.locator('[data-dep="editor-close"]').first().click();
+   if(process.env.SMOKE_SPLIT_CHANNELS){for(const channel of ['prodamus','runex','exchip','r-crypto','other']){
+     if(channel==='prodamus')await page.locator('.deposits__provider-income').click();
+     else {await page.locator('[data-dep="payment-form"][data-provider="'+channel+'"]').click();await page.locator('.deposits__popup [data-dep="channel-new"][data-direction="income"]').click();}
+     const form=page.locator('[data-form="channel-operation"]');await form.locator('[name="amount"]').fill('100');await form.locator('[name="room"][value="X"]').check();await form.locator('[name="playerId"]').fill('111');
+     await form.locator('[data-dep="split-add"]').click();await form.locator('[name="allocationAmount"]').fill('40');await form.locator('[name="allocationAmount_1"]').fill('60');await form.locator('[name="room_1"][value="PP"]').check();await form.locator('[name="playerId_1"]').fill('222');await form.locator('button[type="submit"]').click();
+     await page.locator('.deposits__channel-history').waitFor();assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);assert.equal(state.channelOperations.at(-1).allocations.length,2);
+     await page.locator('.deposits__popup [data-dep="channel-void"]').first().click();await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();await page.locator('.deposits__channel-history').waitFor();await page.locator('[data-dep="editor-close"]').first().click();
+   }}
    assert.equal(await page.locator('.deposits__payment-form').count(),6);
    assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
    await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
@@ -75,12 +83,12 @@ async function main(){
    await page.locator('[data-form="channel-operation"] [name="room"][value="X"]').check();
    await page.locator('[data-form="channel-operation"] [name="playerId"]').fill('654321');
    await page.locator('[data-form="channel-operation"] button[type="submit"]').click();
-   await page.locator('.deposits__channel-row').waitFor();
+   await page.locator('.deposits__channel-row').first().waitFor();
    assert.match(await page.locator('.deposits__channel-history').innerText(),/654321/);
    assert.equal(view(state).statistics.deposits,250000);
    await page.locator('[data-dep="channel-void"]').click();
    await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();
-   await page.locator('.deposits__channel-row.is-void').waitFor();
+   await page.locator('.deposits__channel-row.is-void').first().waitFor();
    assert.equal(view(state).statistics.deposits,0);
    await page.locator('[data-dep="editor-close"]').first().click();
    await page.locator('.deposits__header [data-dep="new"]').click();
@@ -130,11 +138,20 @@ async function main(){
    assert.equal(await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').getAttribute('required'),'');
    await page.locator('[data-form="confirm-reservation"] [name="depositorRoom"][value="X"]').check();
    await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').fill('987654321');
+   if(process.env.SMOKE_SPLIT_PAYMENT){
+     await page.locator('[data-dep="split-add"]').click();
+     await page.locator('[name="allocationAmount"]').fill('400');
+     await page.locator('[name="allocationAmount_1"]').fill('600');
+     await page.locator('[name="depositorRoom_1"][value="PP"]').check();
+     await page.locator('[name="depositorId_1"]').fill('second123');
+   }
+
    await page.locator('[data-form="confirm-reservation"] button[type="submit"]').click();
    await page.locator('.deposits__card').first().waitFor();
    assert.equal(view(state).entries[0].paid,100000);
-   assert.equal(state.entries[0].payments[0].depositorId,'987654321');
-   assert.equal(state.entries[0].payments[0].depositorRoom,'X');
+   assert.equal(process.env.SMOKE_SPLIT_PAYMENT?state.entries[0].payments[0].allocations[0].depositorId:state.entries[0].payments[0].depositorId,'987654321');
+   assert.equal(process.env.SMOKE_SPLIT_PAYMENT?state.entries[0].payments[0].allocations[0].depositorRoom:state.entries[0].payments[0].depositorRoom,'X');
+   if(process.env.SMOKE_SPLIT_PAYMENT)assert.equal(state.entries[0].payments[0].allocations[1].depositorRoom,'PP');
    assert.equal(state.entries[0].room,'P21');
    await reservationCard.locator('summary').first().click();
    await reservationCard.locator('[data-dep="void"]').click();
