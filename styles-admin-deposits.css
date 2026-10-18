@@ -452,7 +452,7 @@ body.deposits-open {overflow:hidden;}
 .deposits .deposits__payment-form--transfer span{color:#ead994}
 .deposits .deposits__payment-form--transfer:hover{border-color:#f5e4a0;background:linear-gradient(155deg,#756c3d,#514c30 50%,#39382a)}
 
-.deposits__transfer-route{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:10px;align-items:start}.deposits__transfer-route section{min-width:0}.deposits__transfer-route h4{color:#fff1b5;margin:8px 0}.deposits__transfer-arrow{align-self:center;text-align:center;color:#ead994;font-size:26px}.deposits__transfer-route .deposits__rooms{display:flex;flex-wrap:wrap}
+.deposits__transfer-route{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:10px;align-items:start}.deposits__transfer-route section{min-width:0}.deposits__transfer-route h4{color:#fff1b5;margin:8px 0}.deposits__transfer-arrow{align-self:center;text-align:center;color:#ead994;font-size:26px}.deposits__transfer-route .deposits__rooms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.deposits__transfer-route .deposits__rooms span{font-size:10px;padding:7px 2px;white-space:nowrap}
 @media(max-width:480px){.deposits__transfer-route{grid-template-columns:minmax(0,1fr)}.deposits__transfer-arrow{transform:rotate(90deg)}}
 
 .deposits__statistics dl>.deposits__stat-row{padding:8px 0;gap:2px 8px}
