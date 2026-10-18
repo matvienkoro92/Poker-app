@@ -316,3 +316,12 @@ test('transfer saves both room accounts atomically, retries once and cancels bot
  assert.throws(()=>applyOperation(null,{...body,toRoom:''},'admin-a'),/рум/);
  assert.throws(()=>applyOperation(null,{...body,toPlayerId:''},'admin-a'),/ID/);
 });
+
+test('cash withdrawal statistic counts placed totals including archive, with Exchip outgoing separate',()=>{
+ let state=create();state.entries[0].archived=true;
+ state=applyOperation(state,{action:'channel-operation',requestId:requestId(710),channelId:'exchip',direction:'outgoing',room:'X',playerId:'77',amount:12300},'admin-a').state;
+ const stats=view(state).statistics;
+ assert.equal(stats.cashWithdrawals,entry.total);assert.equal(stats.exchipWithdrawals,12300);
+ state.entries[0].deletedAt=Date.now();assert.equal(view(state).statistics.cashWithdrawals,0);
+ state.channelOperations[0].voidedAt=Date.now();assert.equal(view(state).statistics.exchipWithdrawals,0);
+});

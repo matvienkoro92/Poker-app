@@ -3044,11 +3044,13 @@
         }).join('') + '</ul>';
       }
       var leadNick = post.kind === "record" || post.kind === "weekly" ? first.top[0].nick : first.nick;
+      var prominentNick = post.kind !== 'weekly' ? leadNick : '';
+      if (prominentNick && lead.indexOf(prominentNick) === 0) lead = lead.slice(prominentNick.length).replace(/^\s*[—·]\s*/, '');
       var profile = clubProfileForNick(leadNick);
       var playerHtml = typeof window.pokerGarageNewsShowcaseHtml === 'function'
         ? window.pokerGarageNewsShowcaseHtml({type:'achievement'}, profile && profile.id, {inline:true,nick:leadNick}) : '';
       var label = post.kind === 'weekly' || post.kind === 'record' ? period(first) : 'Турнирные достижения';
-      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__copy"><small>' + esc(label) + '</small><h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
+      return { date: post.date, html: '<article class="home-friend-news-modal__editorial home-news-achievement" data-club-achievement="' + esc(post.id) + '"><div class="home-news-achievement__preview"><div class="home-news-achievement__copy"><small>' + esc(label) + '</small>' + (prominentNick ? '<div class="home-news-achievement__nick">' + esc(prominentNick) + '</div>' : '') + '<h3>' + esc(titles[post.kind]) + '</h3><p class="home-news-achievement__lead">' + esc(lead) + '</p></div>' + playerHtml + '</div>' +
         '<details data-month-ranking="' + esc(post.id) + '"><summary>' + (post.kind === 'record' ? 'Топ-5 недели' : 'Посмотреть результаты') + '<span aria-hidden="true">⌄</span></summary>' + detail +
         '</details>' + '' + '</article>' };
     }).filter(Boolean);
