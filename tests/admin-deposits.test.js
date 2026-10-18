@@ -390,18 +390,18 @@ test('statistics display Anna and Vika by account ID even for old saved names',(
 });
 
 test('withdrawal summary filters cards by operational creation date and reconciles current statuses',()=>{
- let state=create();state.entries[0].createdAt=Date.parse('2026-10-17T23:00:00Z');
+ let state=create();state.entries[0].createdAt=Date.parse('2026-10-18T03:00:00Z');
  state.entries[0].payments=[{id:'paid',amount:350000,createdAt:Date.parse('2026-10-18T10:00:00Z')}];state.entries[0].returns=[{id:'returned',amount:100000,createdAt:Date.parse('2026-10-18T11:00:00Z')}];state.entries[0].archived=true;
  const now=Date.parse('2026-10-18T12:00:00Z');const w=view(state,now,{preset:'custom',from:'2026-10-18',to:'2026-10-18'}).statistics.withdrawals;
  assert.equal(w.total,entry.total);assert.equal(w.paid,350000);assert.equal(w.returned,100000);assert.equal(w.total,w.paid+w.returned+w.remaining);
  assert.equal(view(state,now,{preset:'custom',from:'2026-10-17',to:'2026-10-17'}).statistics.withdrawals.total,0);
 });
 
-test('today report follows Novosibirsk 06:00 boundary',()=>{
+test('today report follows Moscow 06:00 boundary',()=>{
  const {statisticsRange}=require('../lib/admin-deposits');
- const before=statisticsRange({preset:'today'},Date.parse('2026-10-17T22:59:59Z'));
- const after=statisticsRange({preset:'today'},Date.parse('2026-10-17T23:00:00Z'));
- assert.equal(before.from,'2026-10-17');assert.equal(after.from,'2026-10-18');assert.equal(after.start,Date.parse('2026-10-17T23:00:00Z'));assert.equal(after.end,Date.parse('2026-10-18T23:00:00Z'));
+ const before=statisticsRange({preset:'today'},Date.parse('2026-10-18T02:59:59Z'));
+ const after=statisticsRange({preset:'today'},Date.parse('2026-10-18T03:00:00Z'));
+ assert.equal(before.from,'2026-10-17');assert.equal(after.from,'2026-10-18');assert.equal(after.start,Date.parse('2026-10-18T03:00:00Z'));assert.equal(after.end,Date.parse('2026-10-19T03:00:00Z'));
 });
 
 test('player report separates room IDs, attributes splits, matches known report nicknames and reconciles totals',()=>{
@@ -477,7 +477,7 @@ test('only owner edits channel records with audit, retry protection and recalcul
 });
 
 test('bonus accruals are separate from money, filtered by date, editable and cancellable',()=>{
- const now=Date.parse('2026-10-19T00:00:00Z'),body={action:'channel-operation',requestId:requestId(950),channelId:'bonuses',direction:'income',room:'X',playerId:'123',amount:50000,note:'Акция'};
+ const now=Date.parse('2026-10-19T03:00:00Z'),body={action:'channel-operation',requestId:requestId(950),channelId:'bonuses',direction:'income',room:'X',playerId:'123',amount:50000,note:'Акция'};
  let state=applyOperation(null,body,'manager',now).state;
  const stats=view(state,now,{preset:'today'}).statistics;
  assert.equal(stats.bonuses,50000);assert.equal(stats.deposits,0);assert.equal(stats.outgoing,0);assert.equal(stats.players.length,0);assert.equal(stats.managers.length,0);assert.ok(!stats.destinations.some(d=>d.id==='bonuses'));
