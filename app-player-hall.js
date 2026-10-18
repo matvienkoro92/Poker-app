@@ -3,7 +3,7 @@
   var dialog,detail,data,selection,busy=false,generation=0,request=0,tab='room',filter='all',camera='wide',space='hall',garageFocus='',garageVehicle=0,editingShelf=null,loungeFocus='',loungeDraft=null,hallReturn=null,loungeLive=null;
   var labels={cups:'Кубки',achievements:'Достижения',seasons:'Сезоны'};
   function adminVisible(){return true;}
-  function guestMode(){return !(window.PokerGarage&&window.PokerGarage.canAccessHall(window.__pokerTelegramAuth));}
+  function guestMode(){var auth=window.__pokerTelegramAuth;return !(auth&&(auth.adminAccess===true||auth.status==='verified'||auth.status==='dev_skip'));}
   function guestHall(){return {guest:true,self:false,name:'Гость',wins:0,items:[],featured:[],theme:'walnut',goal:'wins',themes:[],goals:[],achievementProgress:[],levelProgress:{level:0,xp:0,target:1},garage:{stats:{level:0},loadout:null},lounge:{available:true,friends:[],seats:[]}};}
   function registerGuest(){if(dialog&&dialog.open)dialog.close();if(window.__pokerOpenLogin)window.__pokerOpenLogin({forceOverlay:true});}
 

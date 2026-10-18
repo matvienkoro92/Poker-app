@@ -6,15 +6,15 @@ function initPwaAuthOverlayRuntime(ctx) {
   }
 
   function pwaAuthScreenEl() {
-    return runtime.pwaAuthScreenEl || document.getElementById("pwaAuthScreen");
+    return (typeof runtime.pwaAuthScreenEl === "function" ? runtime.pwaAuthScreenEl() : runtime.pwaAuthScreenEl) || document.getElementById("pwaAuthScreen");
   }
 
   function pwaAuthLoginMountEl() {
-    return runtime.pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    return (typeof runtime.pwaAuthLoginMountEl === "function" ? runtime.pwaAuthLoginMountEl() : runtime.pwaAuthLoginMountEl) || document.getElementById("pwaAuthLoginMount");
   }
 
   function identifyingMiniEl() {
-    return runtime.identifyingMiniEl || document.getElementById("authIdentifyingMini");
+    return (typeof runtime.identifyingMiniEl === "function" ? runtime.identifyingMiniEl() : runtime.identifyingMiniEl) || document.getElementById("authIdentifyingMini");
   }
 
   function showPwaAuthScreen() {
