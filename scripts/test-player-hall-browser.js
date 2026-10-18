@@ -10,13 +10,19 @@ await page.setContent('<meta name="viewport" content="width=device-width,initial
 await page.evaluate(()=>{window.__pokerTelegramAuth={adminAccess:true};window.pokerSocialRequest=async(_,b)=>{const r=await fetch('/api/player-hall',{method:'POST',body:JSON.stringify(b)}),d=await r.json();if(!r.ok)throw Error(d.error);return d;};window.pokerGetSummerRatingPlayerArt=()=>({src:'/assets/club-news-personal/pokermanki-news-cutout-v4.webp'});});if(process.env.HALL_LIGHTING_ONLY)await page.evaluate(()=>{window.PokerGarage={canAccessHall:()=>true};});await page.addScriptTag({path:path.join(root,'app-player-hall.js')});if(process.env.HALL_LIGHTING_ONLY)await page.evaluate(()=>window.pokerOpenPlayerHall());else await page.locator('[data-hall-entry]').click();await page.locator('.player-hall__room').waitFor();await page.locator('.player-hall__room').evaluate(async room=>{var url=getComputedStyle(room.querySelector('.player-hall__scene')).backgroundImage.match(/url\(["']?(.*?)["']?\)/)[1];var image=new Image();image.src=url;await image.decode();});if(!process.env.HALL_LIGHTING_ONLY){await page.locator('.player-hall__room img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));assert.equal(await page.locator('.player-hall__character').count(),1);assert.equal(await page.locator('.player-hall__scene > .player-hall__character').count(),1);assert.ok(await page.locator('.player-hall__character').evaluate(img=>img.complete&&img.naturalWidth>1000));assert.equal(await page.locator('.player-hall__art-fallback').count(),0);}fs.mkdirSync('output/player-hall',{recursive:true});
 if(process.env.HALL_LIGHTING_ONLY){
 await page.addStyleTag({path:path.join(root,'styles-player-lounge.css')});
+assert.equal(await page.locator('.hall-scene-neon--lamps').isVisible(),false);
+await page.locator('[data-hall-light]').click();
+assert.equal(await page.locator('.hall-scene-neon--lamps').isVisible(),true);
 await page.locator('[data-hall-neon="lamps"]').evaluate(el=>{el.value='85';el.dispatchEvent(new Event('input',{bubbles:true}));});
 assert.equal(await page.locator('#hallNeonValue-lamps').innerText(),'85%');
 await page.screenshot({path:'output/player-hall/lighting-hall.png'});
 await page.locator('[data-hall-space="garage"]').click();await page.waitForTimeout(1150);
 await page.locator('[data-hall-neon="garage"]').evaluate(el=>{el.value='120';el.dispatchEvent(new Event('input',{bubbles:true}));});
 assert.equal(await page.locator('#hallNeonValue-garage').innerText(),'120%');
-await page.locator('[data-hall-light]').click();assert.equal(await page.locator('.player-hall__room').getAttribute('data-theme'),'midnight');
+assert.equal(await page.locator('.hall-scene-neon--garage').isVisible(),true);
+await page.locator('[data-hall-light]').click();assert.equal(await page.locator('.player-hall__room').getAttribute('data-theme'),'walnut');
+assert.equal(await page.locator('.hall-scene-neon--garage').isVisible(),false);
+await page.locator('[data-hall-light]').click();
 await page.waitForTimeout(250);assert.ok(calls.some(c=>c.action==='save'&&c.theme==='midnight'));
 await page.screenshot({path:'output/player-hall/lighting-garage.png'});
 assert.equal(await page.locator('.hall-light-menu[open]').count(),0);assert.deepEqual(errors,[]);
