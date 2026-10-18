@@ -564,3 +564,15 @@ test('API persists account links and forwards transfer names and owner edit vers
  response=await api.call({action:'edit-channel-operation',requestId:requestId(983),operationId:requestId(982),editVersion:0,room:'X',playerId:'445566',amount:20000},'388008256');
  assert.equal(response.statusCode,200);assert.equal(response.data.statistics.deposits,20000);
 });
+
+test('X-Poker export IDs get their real room instead of a generated Poker21 identity',()=>{
+ const {depositPlayerDirectory,knownPlayerNick}=require('../lib/deposit-player-directory'),source=require('../lib/deposit-xpoker-players.json').players;
+ const rows=depositPlayerDirectory({});assert.equal(Object.keys(source).length,115);
+ for(const [id,nick] of Object.entries(source)){assert.ok(rows.some(p=>p.room==='X'&&p.playerId===id&&p.nick===nick),id);assert.ok(!rows.some(p=>p.room==='P21'&&p.playerId===id),'false P21 '+id);}
+ assert.ok(rows.some(p=>p.room==='P21'&&p.playerId==='398176'&&p.nick==='Пряник'));assert.ok(rows.some(p=>p.room==='X'&&p.playerId==='2728933'&&p.aliases.includes('Пряник')));
+ assert.equal(knownPlayerNick('P21','2728933'),'');assert.equal(knownPlayerNick('X','2728933'),'pryanik2la');
+ const legacy=depositPlayerDirectory({playerAccounts:[{profileKey:'P21|2728933',room:'X',playerId:'extra123',nick:'pryanik2la',createdAt:100}]});
+ assert.equal(legacy.find(p=>p.room==='X'&&p.playerId==='extra123').profileKey,'X|2728933');assert.ok(!legacy.some(p=>p.room==='P21'&&p.playerId==='2728933'));
+ const sourceJs=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=sourceJs.slice(sourceJs.indexOf('  function playerChoices('),sourceJs.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:rows}};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ assert.ok(ctx.playerChoices('butovskiy').some(p=>p.room==='X'&&p.playerId==='4127179'));
+});
