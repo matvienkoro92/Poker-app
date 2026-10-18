@@ -334,3 +334,14 @@ test('bank withdrawal accepts an empty recipient and still validates payment det
  const parsed=parser.parse('Т-банк 8-999-999-8855 Сумма 1 ID 123353 Покер21');
  assert.ok(!parsed.warnings.some(w=>/получател/i.test(w)));
 });
+
+test('Prodamus manual income updates provider and statistics once and supports cancellation',()=>{
+ const now=Date.now(),body={action:'channel-operation',requestId:requestId(730),channelId:'prodamus',direction:'income',room:'P21',playerId:'777',amount:150000};
+ const state=applyOperation(null,body,'anna',now).state;
+ const result=view(state,now);assert.equal(result.paymentForms.providers.filter(p=>p.id==='prodamus').length,1);assert.equal(result.paymentForms.providers.find(p=>p.id==='prodamus').total,150000);assert.equal(result.statistics.deposits,150000);
+ assert.equal(applyOperation(state,body,'anna',now).state.channelOperations.length,1);
+ assert.throws(()=>applyOperation(null,{...body,direction:'outgoing'},'anna',now),/только приход/);
+ const cancelled=applyOperation(state,{action:'void-channel-operation',requestId:requestId(731),operationId:body.requestId},'anna',now+1).state;
+ assert.equal(view(cancelled,now+1).statistics.deposits,0);
+ assert.equal(view(state,now+86400000).paymentForms.providers.find(p=>p.id==='prodamus').total,null);
+});
