@@ -402,3 +402,13 @@ test('today report follows Novosibirsk 06:00 boundary',()=>{
  const after=statisticsRange({preset:'today'},Date.parse('2026-10-17T23:00:00Z'));
  assert.equal(before.from,'2026-10-17');assert.equal(after.from,'2026-10-18');assert.equal(after.start,Date.parse('2026-10-17T23:00:00Z'));assert.equal(after.end,Date.parse('2026-10-18T23:00:00Z'));
 });
+
+test('player report separates room IDs, attributes splits, matches known report nicknames and reconciles totals',()=>{
+ let state=create();state.entries[0].playerId='108754';state.entries[0].payments=[{id:'payment',amount:100000,createdAt:1,allocations:[{depositorId:'108754',depositorRoom:'P21',amount:30000},{depositorId:'108754',depositorRoom:'X',amount:70000}]}];
+ state.channelOperations=[{id:'manual',channelId:'prodamus',direction:'income',room:'Supr',playerId:'456',amount:20000,createdAt:2},{id:'cancelled',channelId:'runex',direction:'income',room:'X',playerId:'bad',amount:900000,createdAt:2,voidedAt:3},{id:'out',channelId:'exchip',direction:'outgoing',room:'X',playerId:'108754',amount:10000,createdAt:2},{id:'transfer',channelId:'transfer',transferId:'internal',direction:'income',room:'P21',playerId:'108754',amount:50000,createdAt:2}];
+ const stats=view(state).statistics,players=stats.players;
+ assert.equal(players.find(p=>p.room==='P21'&&p.playerId==='108754').nick,'Sobyanin');assert.equal(players.find(p=>p.room==='X'&&p.playerId==='108754').nick,'');
+ assert.equal(players.find(p=>p.room==='P21'&&p.playerId==='108754').withdrawals,100000);
+ assert.equal(players.reduce((s,p)=>s+p.deposits,0),stats.deposits);assert.equal(players.reduce((s,p)=>s+p.withdrawals,0),stats.outgoing);assert.ok(!players.some(p=>p.playerId==='bad'));
+ assert.equal(view(state,Date.now(),{preset:'today'}).statistics.players.length,0);
+});
