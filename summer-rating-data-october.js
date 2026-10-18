@@ -3544,4 +3544,426 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "17.10.2026": [
+    {
+      "time": "08:00",
+      "name": "OK🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Local",
+          "place": 1,
+          "reward": 7677.67,
+          "points": 0
+        },
+        {
+          "nick": "mr.Freeman",
+          "place": 2,
+          "reward": 2723.28,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "New - Hot PKO 2/3",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "pryanik2la",
+          "place": 4,
+          "reward": 6795.999999999999,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Jeweler",
+          "place": 5,
+          "reward": 5520,
+          "points": 0
+        },
+        {
+          "nick": "RS888",
+          "place": 4,
+          "reward": 982.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Потяни 21",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 1,
+          "reward": 9600,
+          "points": 0
+        },
+        {
+          "nick": "Andrei350",
+          "place": 3,
+          "reward": 4000,
+          "points": 0
+        },
+        {
+          "nick": "Ouninpohja",
+          "place": 5,
+          "reward": 1800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 5,
+          "reward": 7020,
+          "points": 0
+        },
+        {
+          "nick": "Пряник",
+          "place": 4,
+          "reward": 3860,
+          "points": 0
+        },
+        {
+          "nick": "Tanechka",
+          "place": 7,
+          "reward": 1497.5,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 9,
+          "reward": 1150,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 6,
+          "reward": 1110,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "MaxVerstappen",
+          "place": 1,
+          "reward": 6657.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Y-gin",
+          "place": 1,
+          "reward": 5439.38,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 2,
+          "reward": 1577.5,
+          "points": 0
+        },
+        {
+          "nick": "Палач",
+          "place": 7,
+          "reward": 395,
+          "points": 0
+        },
+        {
+          "nick": "MaxVerstappen",
+          "place": 4,
+          "reward": 107.5,
+          "points": 0
+        },
+        {
+          "nick": "GhooSt",
+          "place": 8,
+          "reward": 33.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Magic 🎯500🎯120K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 640,
+          "points": 0
+        },
+        {
+          "nick": "Olegan393",
+          "place": 9,
+          "reward": 120,
+          "points": 0
+        }
+      ]
+    }
+  ]
+,
+  "18.10.2026": [
+    {
+      "time": "00:00",
+      "name": "S.Bounty 2/3 🥊 120k",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 3,
+          "reward": 6147,
+          "points": 0
+        },
+        {
+          "nick": "CCCP",
+          "place": 0,
+          "reward": 300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Freedom",
+          "place": 1,
+          "reward": 4750,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 12200,
+          "points": 0
+        },
+        {
+          "nick": "Пряник",
+          "place": 4,
+          "reward": 4900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "🏃DV MAIN 700K🏃",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 13,
+          "reward": 5550,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 20,
+          "reward": 4500,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 3370,
+          "points": 0
+        },
+        {
+          "nick": "Киса",
+          "place": 3,
+          "reward": 1110,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Tanechka",
+          "place": 3,
+          "reward": 1567.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Воскресный турнир 🏆",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Aza32",
+          "place": 2,
+          "reward": 47787.5,
+          "points": 0
+        },
+        {
+          "nick": "Надзор",
+          "place": 3,
+          "reward": 19083.2,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 11,
+          "reward": 4281.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "outsider",
+          "place": 17,
+          "reward": 13949,
+          "points": 0
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 34,
+          "reward": 2926,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 3794.37,
+          "points": 0
+        },
+        {
+          "nick": "Девственник",
+          "place": 15,
+          "reward": 243.75,
+          "points": 0
+        },
+        {
+          "nick": "Nast'ko",
+          "place": 12,
+          "reward": 110.94,
+          "points": 0
+        },
+        {
+          "nick": "OMGRaise27",
+          "place": 16,
+          "reward": 31.25,
+          "points": 0
+        },
+        {
+          "nick": "тыква",
+          "place": 10,
+          "reward": 31.24,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 4,
+          "reward": 1309.06,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "NLH KNOCKOUT 220k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Вадим",
+          "place": 18,
+          "reward": 1672,
+          "points": 0
+        },
+        {
+          "nick": "cap888881",
+          "place": 12,
+          "reward": 1224,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

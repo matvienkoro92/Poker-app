@@ -64,6 +64,7 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/СУПЕР\s+ПЯТИХАТКА/i.test(raw)) return "СУПЕР ПЯТИХАТКА";
   if (/^FREEROLL\s*500K/i.test(raw)) return "FREEROLL 500K dR";
   if (/GRAND\s+KNOCKOUT/i.test(raw)) return "🥊GRAND KNOCKOUT🥊";
   if (/Волшебный\s+Пятак/i.test(raw)) return "🏆Волшебный Пятак🏆";
@@ -639,6 +640,10 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
 
+    // IMG_0726: the seventh-place digit is visible but omitted by Vision.
+    if (playerId === "501327" && date === "17.10.2026" && time === "20:00" && reward === 1497.5) { place = 7; needsPlaceCheck = false; }
+    // IMG_0752 explicitly displays 0 for CCCP; preserve it without awarding place points.
+    if (playerId === "3255450" && date === "18.10.2026" && time === "00:00" && reward === 3) { place = 0; needsPlaceCheck = false; }
     if (playerId === "4302724" && date === "01.10.2026" && time === "13:00") { place = 0; needsPlaceCheck = false; }
     if (date === "02.10.2026" && playerId === "173085" && time === "12:00") { place = 3; needsPlaceCheck = false; }
     if (date === "02.10.2026" && playerId === "679591" && time === "18:00") { place = 7; needsPlaceCheck = false; }

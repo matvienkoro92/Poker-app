@@ -1217,4 +1217,21 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-16-10-2026-league1-pyatnica-progressiv-18h.jpg",
     "rating-compressed-preview/rating-16-10-2026-league1-pyatihatka-mok-20h.jpg"
   ]
+,
+  "17.10.2026": [
+    "rating-compressed-preview/rating-17-10-2026-league1-new-hot-pko-2-3-15h.jpg",
+    "rating-compressed-preview/rating-17-10-2026-league1-potyani-21-18h.jpg",
+    "rating-compressed-preview/rating-17-10-2026-league1-super-pyatihatka-20h.jpg",
+    "rating-compressed-preview/rating-17-10-2026-league1-magic-500-120k-22h.jpg"
+  ]
+,
+  "18.10.2026": [
+    "rating-compressed-preview/rating-18-10-2026-league1-s-bounty-2-3-120k-00h.jpg",
+    "rating-compressed-preview/rating-18-10-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-18-10-2026-league1-dv-main-700k-13h.jpg",
+    "rating-compressed-preview/rating-18-10-2026-league1-voskresnyj-turnir-18h.jpg",
+    "rating-compressed-preview/rating-18-10-2026-league1-grand-knockout-18h.jpg",
+    "rating-compressed-preview/rating-18-10-2026-league1-pyatihatka-ko-20h.jpg",
+    "rating-compressed-preview/rating-18-10-2026-league1-nlh-knockout-220k-21h.jpg"
+  ]
 };
