@@ -299,3 +299,20 @@ test('manual channel API retries after lost response keep one entry',async()=>{
  a.lose();assert.equal((await a.call(op)).statusCode,503);const retry=await a.call(op);assert.equal(retry.statusCode,200);assert.equal(retry.data.channelOperations.length,1);assert.equal(retry.data.channelOperations[0].playerId,'789123');
  assert.equal((await a.call({...op,requestId:requestId(126),playerId:''})).statusCode,400);
 });
+
+test('transfer saves both room accounts atomically, retries once and cancels both sides',()=>{
+ const body={action:'transfer',requestId:requestId(700),fromRoom:'P21',fromPlayerId:'123',toRoom:'X',toPlayerId:'456',amount:125050,note:'Между румами'};
+ const now=Date.now();const state=applyOperation(null,body,'admin-a',now).state;
+ assert.equal(state.channelOperations.length,2);
+ assert.deepEqual(state.channelOperations.map(r=>[r.room,r.playerId,r.direction,r.amount]),[['P21','123','outgoing',125050],['X','456','income',125050]]);
+ assert.equal(applyOperation(state,body,'admin-a',now).state.channelOperations.length,2);
+ const result=view(state,now),channel=result.paymentForms.providers.find(p=>p.id==='transfer');
+ assert.equal(channel.total,125050);assert.equal(channel.outgoing,125050);
+ assert.equal(result.statistics.deposits,0);assert.equal(result.statistics.outgoing,0);
+ const cancelled=applyOperation(state,{action:'void-channel-operation',operationId:state.channelOperations[0].id,requestId:requestId(701)},'admin-a',now+1).state;
+ assert.ok(cancelled.channelOperations.every(r=>r.voidedAt));
+ assert.equal(view(cancelled,now+1).paymentForms.providers.find(p=>p.id==='transfer').total,0);
+ assert.throws(()=>applyOperation(null,{...body,toRoom:'P21',toPlayerId:'123'},'admin-a'),/должны отличаться/);
+ assert.throws(()=>applyOperation(null,{...body,toRoom:''},'admin-a'),/рум/);
+ assert.throws(()=>applyOperation(null,{...body,toPlayerId:''},'admin-a'),/ID/);
+});

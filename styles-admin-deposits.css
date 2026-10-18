@@ -446,3 +446,11 @@ body.deposits-open {overflow:hidden;}
 @media(prefers-reduced-motion:reduce){.deposits .deposits__payment-form{transition:none}}
 
 .deposits__periods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.deposits__periods button{min-width:0;padding:9px 5px;font-size:clamp(10px,2.6vw,13px);line-height:1.25}.deposits__periods svg{flex-shrink:0;width:15px;height:15px}
+
+.deposits .deposits__payment-form--transfer{border-color:#e8d68b99;background:linear-gradient(155deg,#655d35,#47432b 45%,#303025);box-shadow:inset 0 1px 0 #fff5c345,inset 0 -2px 0 #0004,0 3px 0 #16170e,0 6px 12px #0003}
+.deposits .deposits__payment-form--transfer strong{color:#fff1b5}
+.deposits .deposits__payment-form--transfer span{color:#ead994}
+.deposits .deposits__payment-form--transfer:hover{border-color:#f5e4a0;background:linear-gradient(155deg,#756c3d,#514c30 50%,#39382a)}
+
+.deposits__transfer-route{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:10px;align-items:start}.deposits__transfer-route section{min-width:0}.deposits__transfer-route h4{color:#fff1b5;margin:8px 0}.deposits__transfer-arrow{align-self:center;text-align:center;color:#ead994;font-size:26px}.deposits__transfer-route .deposits__rooms{display:flex;flex-wrap:wrap}
+@media(max-width:480px){.deposits__transfer-route{grid-template-columns:minmax(0,1fr)}.deposits__transfer-arrow{transform:rotate(90deg)}}
