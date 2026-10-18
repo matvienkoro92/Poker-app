@@ -88,7 +88,7 @@ test('reservations freeze shared available funds until confirmation or release',
  assert.throws(()=>applyOperation(state,{...reserve,requestId:requestId(11)},'admin-b'),/доступного/);
  assert.throws(()=>applyOperation(state,{action:'payment',requestId:requestId(12),entryId:requestId(1),amount:600000},'admin-b'),/больше/);
  assert.throws(()=>applyOperation(state,{action:'adjust',requestId:requestId(13),entryId:requestId(1),total:900000,reason:'test'},'admin-b'),/меньше/);
- const confirm={action:'confirm-reservation',requestId:requestId(14),entryId:requestId(1),reservationId:requestId(10)};
+ const confirm={action:'confirm-reservation',depositorId:'player123',depositorRoom:'P21',requestId:requestId(14),entryId:requestId(1),reservationId:requestId(10)};
  state=applyOperation(state,confirm,'admin-b').state;
  assert.equal(view(state).entries[0].paid,1000000);assert.equal(view(state).entries[0].reserved,0);assert.equal(view(state).entries[0].available,500000);
  assert.equal(applyOperation(state,confirm,'admin-b').duplicate,true);
@@ -103,7 +103,7 @@ test('API reserves atomically across administrators and confirms after lost resp
  const results=await Promise.all([a.call({...reserve,requestId:requestId(20)}),a.call({...reserve,requestId:requestId(21)},'admin-b')]);
  assert.deepEqual(results.map(r=>r.statusCode).sort(),[200,409]);
  const list=await a.call({action:'list'}),r=list.data.entries[0].reservations[0];
- a.lose();const confirm={action:'confirm-reservation',requestId:requestId(22),entryId:requestId(1),reservationId:r.id};
+ a.lose();const confirm={action:'confirm-reservation',depositorId:'player123',depositorRoom:'P21',requestId:requestId(22),entryId:requestId(1),reservationId:r.id};
  assert.equal((await a.call(confirm)).statusCode,503);
  const retry=await a.call(confirm);assert.equal(retry.statusCode,200);assert.equal(retry.data.entries[0].paid,1000000);assert.equal(retry.data.entries[0].payments.length,1);
 });
@@ -149,7 +149,7 @@ test('room and player ID persist while older payout cards remain readable',()=>{
 test('manager statistics attribute reserved deposits to the taker, track returns separately and reconcile with totals',()=>{
  let state=create();const id=requestId(1);
  state=applyOperation(state,{action:'reserve',requestId:requestId(70),entryId:id,amount:500000},'taker',1000,'Первый менеджер').state;
- state=applyOperation(state,{action:'confirm-reservation',requestId:requestId(71),entryId:id,reservationId:requestId(70)},'confirmer',2000,'Подтверждающий').state;
+ state=applyOperation(state,{action:'confirm-reservation',depositorId:'player123',depositorRoom:'P21',requestId:requestId(71),entryId:id,reservationId:requestId(70)},'confirmer',2000,'Подтверждающий').state;
  state=applyOperation(state,{action:'return',requestId:requestId(72),entryId:id,amount:200000},'second',3000,'Второй менеджер').state;
  state=applyOperation(state,{action:'reserve',requestId:requestId(73),entryId:id,amount:100000},'second',4000,'Второй менеджер').state;
  let stats=view(state).statistics;assert.equal(stats.managers.length,2);
@@ -164,7 +164,7 @@ test('depositor ID survives reservation confirmation and API retry',async()=>{
  const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
  const reserve={action:'reserve',requestId:requestId(80),entryId:requestId(1),amount:100000,depositorId:'9007199254740993123'};
  const saved=await a.call(reserve);assert.equal(saved.data.entries[0].reservations[0].depositorId,reserve.depositorId);
- const confirmed=await a.call({action:'confirm-reservation',requestId:requestId(81),entryId:requestId(1),reservationId:requestId(80)});
+ const confirmed=await a.call({action:'confirm-reservation',depositorRoom:'P21',requestId:requestId(81),entryId:requestId(1),reservationId:requestId(80)});
  assert.equal(confirmed.data.entries[0].payments[0].depositorId,reserve.depositorId);
  assert.equal((await a.call({...reserve,requestId:requestId(82),depositorId:'<invalid>'})).statusCode,400);
 });
@@ -344,4 +344,16 @@ test('Prodamus manual income updates provider and statistics once and supports c
  const cancelled=applyOperation(state,{action:'void-channel-operation',requestId:requestId(731),operationId:body.requestId},'anna',now+1).state;
  assert.equal(view(cancelled,now+1).statistics.deposits,0);
  assert.equal(view(state,now+86400000).paymentForms.providers.find(p=>p.id==='prodamus').total,null);
+});
+
+test('reserve without identity requires depositor room and ID only on payment confirmation',()=>{
+ const id=requestId(1),reserveId=requestId(740);let state=create();
+ state=applyOperation(state,{action:'reserve',requestId:reserveId,entryId:id,amount:50000},'admin-a').state;
+ assert.equal(state.entries[0].reservations[0].depositorId,'');
+ const confirm={action:'confirm-reservation',requestId:requestId(741),entryId:id,reservationId:reserveId};
+ assert.throws(()=>applyOperation(state,confirm,'admin-a'),/рум/);
+ assert.throws(()=>applyOperation(state,{...confirm,depositorRoom:'X'},'admin-a'),/ID/);
+ const body={...confirm,depositorRoom:'X',depositorId:'123353'};const saved=applyOperation(state,body,'admin-a').state;
+ assert.equal(saved.entries[0].payments[0].depositorId,'123353');assert.equal(saved.entries[0].payments[0].depositorRoom,'X');
+ assert.equal(applyOperation(saved,body,'admin-a').state.entries[0].payments.length,1);
 });

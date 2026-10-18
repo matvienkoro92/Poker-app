@@ -67,10 +67,10 @@ async function main(){
    assert.equal(view(state).paymentForms.providers[0].total,null);
    await page.screenshot({path:path.join(output,width+'-prodamus.png')});
    await page.locator('[data-dep="editor-close"]').first().click();
-   assert.equal(await page.locator('.deposits__payment-form').count(),5);
+   assert.equal(await page.locator('.deposits__payment-form').count(),6);
    assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
    await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
-   await page.locator('[data-dep="channel-new"][data-direction="income"]').click();
+   await page.locator('.deposits__popup [data-dep="channel-new"][data-direction="income"]').click();
    await page.locator('[data-form="channel-operation"] [name="amount"]').fill('2500');
    await page.locator('[data-form="channel-operation"] [name="room"][value="X"]').check();
    await page.locator('[data-form="channel-operation"] [name="playerId"]').fill('654321');
@@ -119,9 +119,6 @@ async function main(){
    assert.equal(await page.locator('.deposits__popup[open]').count(),1);
    assert.equal(await page.locator('.deposits__content').isVisible(),true);
    await page.locator('[data-form="reserve"] [name="amount"]').fill('1000');
-   await page.locator('[data-form="reserve"] [name="depositorId"]').fill('987654321');
-   await page.locator('[data-form="reserve"] [name="depositorRoom"][value="X"]').check();
-   await page.locator('[data-form="reserve"] [name="depositorId"]').fill('987654321');
    await page.locator('[data-form="reserve"] button[type="submit"]').click();
    await page.locator('[data-dep="copy-reserved"]').waitFor();
    await page.locator('[data-dep="copy-reserved"]').click();
@@ -130,6 +127,9 @@ async function main(){
    await page.locator('[data-dep="editor-close"]').first().click();
    await page.screenshot({path:path.join(output,width+'-reserved.png')});
    await reservationCard.locator('[data-dep="confirm-reservation"]').click();
+   assert.equal(await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').getAttribute('required'),'');
+   await page.locator('[data-form="confirm-reservation"] [name="depositorRoom"][value="X"]').check();
+   await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').fill('987654321');
    await page.locator('[data-form="confirm-reservation"] button[type="submit"]').click();
    await page.locator('.deposits__card').first().waitFor();
    assert.equal(view(state).entries[0].paid,100000);
@@ -143,8 +143,6 @@ async function main(){
    assert.equal(await page.locator('.deposits__popup[open]').count(),1);
    assert.equal(await page.locator('.deposits__content').isVisible(),true);
    await page.locator('[data-form="reserve"] [name="amount"]').fill('15000');
-   await page.locator('[data-form="reserve"] [name="depositorRoom"][value="X"]').check();
-   await page.locator('[data-form="reserve"] [name="depositorId"]').fill('987654321');
    await page.locator('[data-form="reserve"] button[type="submit"]').click();
    await page.locator('[data-dep="copy-reserved"]').waitFor();
    await page.locator('[data-dep="editor-close"]').first().click();
@@ -158,12 +156,13 @@ async function main(){
    assert.equal(await current.locator('.deposits__card-actions button').count(),1);
    await current.locator('[data-dep="reserve"]').click();
    await page.locator('[data-form="reserve"] [name="amount"]').fill('5000');
-   await page.locator('[data-form="reserve"] [name="depositorRoom"][value="X"]').check();
-   await page.locator('[data-form="reserve"] [name="depositorId"]').fill('987654321');
    await page.locator('[data-form="reserve"] button[type="submit"]').click();
    await page.locator('[data-dep="copy-reserved"]').waitFor();
    await page.locator('[data-dep="editor-close"]').first().click();
    await current.locator('[data-dep="confirm-reservation"]').click();
+   assert.equal(await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').getAttribute('required'),'');
+   await page.locator('[data-form="confirm-reservation"] [name="depositorRoom"][value="X"]').check();
+   await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').fill('987654321');
    await page.screenshot({path:path.join(output,width+'-payment.png')});
    lose=true;await page.locator('[data-form="confirm-reservation"] button[type="submit"]').click();
    await page.locator('.deposits__retry:not([hidden])').waitFor();await page.locator('[data-dep="retry"]').click();
@@ -178,7 +177,7 @@ async function main(){
    assert.equal(view(state).entries[0].remaining,1400000);
    assert.equal(view(state).statistics.returned,100000);
    assert.equal(view(state).statistics.deposits,0);
-   assert.equal(await page.locator('.deposits__statistics > dl>div').count(),7);
+   assert.equal(await page.locator('.deposits__statistics > dl>div').count(),view(state).statistics.destinations.length);
    assert.equal(await page.locator('.deposits__statistics > .deposits__manager-split').first().locator('[data-manager]').count(),1);
    assert.match(await page.locator('.deposits__statistics > .deposits__returns-total').first().innerText(),/1.*000/);
    await page.locator('[data-dep="statistics-period"][data-period="week"]').click();
