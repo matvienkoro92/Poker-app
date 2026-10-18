@@ -488,3 +488,12 @@ test('bonus accruals are separate from money, filtered by date, editable and can
  state=applyOperation(state,{action:'void-channel-operation',requestId:requestId(952),operationId:requestId(950)},'manager',now+2).state;
  assert.equal(view(state).statistics.bonuses,0);assert.equal(state.channelOperations[0].edits[0].before.amount,50000);
 });
+
+test('payment manager filter separates verified accounts, periods and voids without changing all totals',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function matchesPaymentManager('),source.indexOf('  function paymentFormsHtml('));
+ const data={paymentForms:{period:{start:10,end:20},providers:[{id:'runex',total:300,outgoing:50}]},channelOperations:[{channelId:'runex',direction:'income',amount:100,createdBy:'tg_2144406710',createdAt:10},{channelId:'runex',direction:'income',amount:200,createdBy:'1897001087',createdAt:11},{channelId:'runex',direction:'outgoing',amount:50,createdBy:'tg_1897001087',createdAt:12},{channelId:'runex',direction:'income',amount:999,createdBy:'tg_1897001087',createdAt:20},{channelId:'runex',direction:'income',amount:999,createdBy:'tg_1897001087',createdAt:12,voidedAt:13}]};
+ const ctx={data,paymentManager:'all'};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ assert.equal(ctx.filteredPaymentForms(),data.paymentForms);ctx.paymentManager='2144406710';assert.equal(ctx.filteredPaymentForms().providers[0].total,100);
+ ctx.paymentManager='1897001087';const v=ctx.filteredPaymentForms().providers[0];assert.equal(v.total,200);assert.equal(v.outgoing,50);assert.equal(data.paymentForms.providers[0].total,300);
+ assert.equal(ctx.matchesPaymentManager({createdBy:'tg_2144406710'}),false);
+});
