@@ -43,5 +43,29 @@ await p.locator('[data-rakeback-shared-row][data-rakeback-kind="base"] [data-rak
 await p.waitForTimeout(7300);
 await p.evaluate(()=>tab.loadSharedDraft({force:true}));
 assert.equal(await p.locator('[data-rakeback-shared-row]').count(),0);
+// Saving only a percentage for an existing player must persist defaults,
+// without adding an empty report or losing a draft on rejected saves.
+await p.evaluate(()=>tab.setRoom('X'));
+for (const playerId of ['2354339','2313932']) {
+  await p.locator('#adminReportRakebackAddBtn').click();
+  const row=p.locator('[data-rakeback-shared-row]').first();
+  await row.locator('[data-rakeback-player-id]').fill(playerId);
+  await row.locator('[data-rakeback-percent]').fill('55');
+  await p.evaluate(()=>window.rejectSave=true);
+  await row.locator('[data-rakeback-save]').click();
+  await p.waitForTimeout(150);
+  assert.equal(await row.locator('[data-rakeback-player-id]').inputValue(),playerId);
+  assert.equal(await row.getAttribute('data-rakeback-saved'),'0');
+  await p.evaluate(()=>window.rejectSave=false);
+  await row.locator('[data-rakeback-save]').click();
+  await p.waitForTimeout(150);
+  assert.equal(await p.locator('[data-rakeback-shared-row]').count(),0);
+  await p.evaluate(()=>tab.loadSharedDraft({force:true}));
+  const defaults=await p.evaluate(id=>window.saved.filter(r=>r.room==='X'&&r.playerId===id),playerId);
+  assert.equal(defaults.length,1);
+  assert.equal(defaults[0].percent,55);
+  assert.equal(defaults[0].carryForward,true);
+  assert.equal(defaults[0].rake,0);
+}
 console.log('PASS: add, save, reload, failed refresh, edit backup, dirty refresh, unconfirmed save, retry, 15% discount, addon delta, rooms, failed deletion rollback, confirmed deletion');
 }finally{await browser.close()}})();

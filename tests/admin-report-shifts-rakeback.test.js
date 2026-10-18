@@ -172,3 +172,24 @@ test("Sunday reconciliation selects Vika even when Anya report is first", async 
     if (previousToken == null) delete process.env.UPSTASH_REDIS_REST_TOKEN; else process.env.UPSTASH_REDIS_REST_TOKEN = previousToken;
   }
 });
+
+test("permanently deleted templates cannot return from last week's paid rows", () => {
+  const previousWeek = _test.currentReportWeekStartMs() - 7 * 24 * 60 * 60 * 1000 + 12 * 60 * 60 * 1000;
+  const deleted = { room: "X", playerId: "2354339" };
+  const history = {
+    ...deleted, groupId: "paid-last-week", rake: 1000, percent: 55,
+    amount: 550, saved: true, accounted: true, reportId: "old-report",
+    createdAt: previousWeek, entryAddedAt: previousWeek, standardAt: previousWeek,
+  };
+  const active = { ...history, playerId: "2313932", groupId: "active-player" };
+  const draft = _test.ensureCurrentWeekRakebackCarryForwardRows({
+    rows: [history, active], deletedTemplates: [deleted], deletedRows: [],
+  });
+  assert.ok(draft.rows.some(row => row.groupId === history.groupId), "retain paid history");
+  assert.ok(!draft.rows.some(row => row.playerId === deleted.playerId && row.carryForward));
+  assert.ok(draft.rows.some(row => row.playerId === active.playerId && row.carryForward));
+  assert.deepEqual(draft.deletedTemplates, [deleted]);
+  const reloaded = _test.ensureCurrentWeekRakebackCarryForwardRows(draft);
+  assert.ok(!reloaded.rows.some(row => row.playerId === deleted.playerId && row.carryForward));
+  assert.deepEqual(reloaded.deletedTemplates, [deleted]);
+});

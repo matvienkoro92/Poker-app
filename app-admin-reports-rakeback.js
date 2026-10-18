@@ -751,8 +751,12 @@
     var hasRakebackValue = hasRakebackDomValue(row);
     var negativeField = getRakebackNegativeField(row);
     if (saveBtn) {
+      var canSaveDefaults = kind === "base" && !hasRakeInputValue &&
+        row.getAttribute("data-rakeback-persisted") !== "1" &&
+        parseNumber(percentInput && percentInput.value) > 0;
       saveBtn.hidden = saved;
-      saveBtn.disabled = !!busy || !!negativeField || !hasRakeInputValue || !hasPercentInputValue || !hasRakebackValue;
+      saveBtn.disabled = !!busy || !!negativeField || (!canSaveDefaults &&
+        (!hasRakeInputValue || !hasPercentInputValue || !hasRakebackValue));
     }
     if (editBtn) {
       editBtn.hidden = !saved;
@@ -3534,11 +3538,12 @@
           deleteRowKeys: [getEmptyGroupTemplateServerKey(room, playerId)],
           skipRender: options.skipRender === true,
         }).then(function (ok) {
-          if (ok) return;
+          if (ok) return true;
           sharedRows = previousRows;
           if (sourceRow) setTemplateDefaultSaved(sourceRow, !!existingDefault, existingDefault && existingDefault.percent, !!(existingDefault && existingDefault.discount15), existingDefault && (existingDefault.color || existingDefault.rowColor || existingDefault.highlightColor));
           if (!options.skipRender) render();
           setStatus("Не удалось сохранить процент", true);
+          return false;
         });
       }
 
@@ -3877,6 +3882,30 @@
               return;
             }
             if (!rakeInput || !String(rakeInput.value || "").trim()) {
+              // An empty new base row can save player defaults, just like a
+              // template row. It must not create a zero-rake report entry.
+              if (saveRow.getAttribute("data-rakeback-kind") !== "addon" &&
+                  saveRow.getAttribute("data-rakeback-persisted") !== "1" &&
+                  percentInput && String(percentInput.value || "").trim() &&
+                  parseNumber(percentInput.value) > 0 && !getRakebackNegativeField(saveRow)) {
+                var defaultsLocalKey = getSharedDomRowLocalKey(saveRow);
+                var defaultsRoomInput = saveRow.querySelector("[data-rakeback-room]");
+                var defaultsDiscountInput = saveRow.querySelector("[data-rakeback-discount15]");
+                saveTemplateRowDefaults(
+                  normalizeRoom(defaultsRoomInput && defaultsRoomInput.value ? defaultsRoomInput.value : activeRoom),
+                  String(idInput.value).trim(), parseNumber(percentInput.value),
+                  !!(defaultsDiscountInput && defaultsDiscountInput.checked),
+                  { skipRender: true, color: saveRow.getAttribute("data-rakeback-row-color") }
+                ).then(function (ok) {
+                  if (!ok) return;
+                  sharedRows = mergeSharedRowsFromDom({ includeEmptyUnsaved: true }).filter(function (item) {
+                    return getSharedRowLocalKey(item) !== defaultsLocalKey;
+                  });
+                  writePendingRakebackRows(sharedRows);
+                  render();
+                });
+                return;
+              }
               setStatus("Заполните рейк", true);
               if (rakeInput && typeof rakeInput.focus === "function") rakeInput.focus();
               return;
