@@ -439,7 +439,7 @@ test('copied report groups payment providers once and reconciles deposit categor
  const context={money:n=>(Number(n||0)/100).toLocaleString('ru-RU')+' ₽'};vm.createContext(context);vm.runInContext(fn,context);
  const stats={deposits:6800000,destinations:[{id:'withdrawals',amount:3800000},{id:'payment-links',amount:null},{id:'prodamus',title:'Продамус',amount:700000},{id:'runex',amount:2300000},{id:'exchip',amount:0},{id:'r-crypto',amount:0},{id:'other',amount:0},{id:'transfer',amount:0},{id:'all-friends',amount:null}],cashWithdrawals:3600000,returned:100000,exchipWithdrawals:100,managers:[{reserved:0}]};
  const plain=s=>s.replace(/\u00a0/g,' ');
- assert.equal(plain(context.reportCopyText(stats)), 'Отчёт\nЗа всё время · включая архив\n\nВся детализация отчёта:\nДепозит: 68 000 ₽\nНа выводы: 38 000 ₽\nВ платёжки: 7 000 ₽\n  - Продамус: 7 000 ₽\nРунекс: 23 000 ₽\nЭксчип бот: 0 ₽\nР Крипта: 0 ₽\nДругое: 0 ₽\nПеревод: 0 ₽\n\nВыводы Эксчип: 1 ₽\nВывод снятия с кассы: 36 000 ₽\nВозвраты в кассу: 1 000 ₽\nЗаморожено: 0 ₽');
+ assert.equal(plain(context.reportCopyText(stats)), 'Отчёт\nЗа всё время · включая архив\n\nВся детализация отчёта:\nДепозит: 68 000 ₽\nНа выводы: 38 000 ₽\nВ платёжки: 7 000 ₽\n  - Продамус: 7 000 ₽\nРунекс: 23 000 ₽\nЭксчип бот: 0 ₽\nР Крипта: 0 ₽\nДругое: 0 ₽\nПеревод: 0 ₽\n\nВыводы Эксчип: 1 ₽\nВывод снятия с кассы: 36 000 ₽\nВозвраты в кассу: 1 000 ₽\nБонусы: 0 ₽\nЗаморожено: 0 ₽');
  stats.destinations.push({id:'future-provider',title:'Новый сервис',amount:20000});stats.deposits+=20000;
  assert.match(plain(context.reportCopyText(stats)),/В платёжки: 7 200 ₽\n  - Продамус: 7 000 ₽\n  - Новый сервис: 200 ₽/);
  stats.otherCategories=[{title:'Наличные\nв клубе',amount:10000}];
@@ -455,4 +455,36 @@ test('other comment categories use only confirmed income in selected period',()=
  const stats=view(state,now,{preset:'today'}).statistics;
  assert.deepEqual(stats.otherCategories,[{title:'Наличные',amount:20000},{title:'Без комментария',amount:10000}]);
  assert.equal(stats.otherCategories.reduce((s,r)=>s+r.amount,0),stats.destinations.find(r=>r.id==='other').amount);
+});
+
+test('only owner edits channel records with audit, retry protection and recalculated reports',()=>{
+ const at=Date.now(),original={action:'channel-operation',requestId:requestId(901),channelId:'runex',direction:'income',room:'X',playerId:'2000',amount:411086200,note:'ошибка'};
+ let state=applyOperation(null,original,'vika',at,'Вика').state;
+ const edit={action:'edit-channel-operation',requestId:requestId(902),operationId:requestId(901),editVersion:0,amount:200000,room:'X',playerId:'4110862',note:'Исправлено'};
+ assert.throws(()=>applyOperation(state,edit,'manager',at),e=>e.status===403);
+ state=applyOperation(state,edit,'owner',at+1,'Владелец',{canDelete:true}).state;
+ const row=state.channelOperations[0];assert.equal(row.playerId,'4110862');assert.equal(row.amount,200000);assert.equal(row.createdBy,'vika');assert.equal(row.createdAt,at);
+ assert.equal(row.edits[0].before.amount,411086200);assert.equal(row.edits[0].before.playerId,'2000');assert.equal(row.edits[0].by,'owner');
+ assert.equal(view(state).statistics.deposits,200000);assert.equal(view(state).statistics.players[0].playerId,'4110862');
+ assert.equal(applyOperation(state,edit,'owner',at+2,'Владелец',{canDelete:true}).duplicate,true);
+ assert.throws(()=>applyOperation(state,{...edit,requestId:requestId(903)},'owner',at+2,'Владелец',{canDelete:true}),e=>e.status===409);
+ const split={...edit,requestId:requestId(904),editVersion:1,allocations:[{amount:100000,depositorRoom:'X',depositorId:'4110862'},{amount:100000,depositorRoom:'P21',depositorId:'123'}]};
+ state=applyOperation(state,split,'owner',at+3,'Владелец',{canDelete:true}).state;assert.equal(view(state).statistics.players.length,2);
+ assert.throws(()=>applyOperation(state,{...edit,requestId:requestId(905),editVersion:2,amount:0},'owner',at+4,'Владелец',{canDelete:true}));
+ state=applyOperation(state,{action:'void-channel-operation',requestId:requestId(906),operationId:requestId(901)},'owner',at+4).state;
+ assert.throws(()=>applyOperation(state,{...edit,requestId:requestId(907),editVersion:2},'owner',at+5,'Владелец',{canDelete:true}),e=>e.status===409);
+});
+
+test('bonus accruals are separate from money, filtered by date, editable and cancellable',()=>{
+ const now=Date.parse('2026-10-19T00:00:00Z'),body={action:'channel-operation',requestId:requestId(950),channelId:'bonuses',direction:'income',room:'X',playerId:'123',amount:50000,note:'Акция'};
+ let state=applyOperation(null,body,'manager',now).state;
+ const stats=view(state,now,{preset:'today'}).statistics;
+ assert.equal(stats.bonuses,50000);assert.equal(stats.deposits,0);assert.equal(stats.outgoing,0);assert.equal(stats.players.length,0);assert.equal(stats.managers.length,0);assert.ok(!stats.destinations.some(d=>d.id==='bonuses'));
+ assert.equal(view(state,now+86400000,{preset:'today'}).statistics.bonuses,0);
+ assert.equal(view(state,now).paymentForms.providers.find(p=>p.id==='bonuses').total,50000);
+ assert.throws(()=>applyOperation(null,{...body,direction:'outgoing'},'manager',now));
+ state=applyOperation(state,{action:'edit-channel-operation',requestId:requestId(951),operationId:requestId(950),editVersion:0,room:'P21',playerId:'321',amount:25000,note:'Исправлено'},'owner',now+1,'Владелец',{canDelete:true}).state;
+ assert.equal(view(state).statistics.bonuses,25000);assert.equal(view(state).statistics.deposits,0);
+ state=applyOperation(state,{action:'void-channel-operation',requestId:requestId(952),operationId:requestId(950)},'manager',now+2).state;
+ assert.equal(view(state).statistics.bonuses,0);assert.equal(state.channelOperations[0].edits[0].before.amount,50000);
 });

@@ -76,7 +76,18 @@ async function main(){
      if(channel==='prodamus'){await page.locator('[data-dep="editor-close"]').first().click();await page.locator('[data-provider="prodamus"]').click();assert.equal(await page.locator('[data-dep="copy-payment-link"]').count(),2);assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);}
      await page.locator('.deposits__popup [data-dep="channel-void"]').first().click();await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();await page.locator('.deposits__channel-history').waitFor();await page.locator('[data-dep="editor-close"]').first().click();
    }}
-   assert.equal(await page.locator('.deposits__payment-form').count(),6);
+   assert.equal(await page.locator('.deposits__payment-form').count(),7);
+   const pair=page.locator('.deposits__payment-provider--pair');
+   const transferBounds=await pair.locator('[data-provider="transfer"]').boundingBox(),bonusBounds=await pair.locator('[data-provider="bonuses"]').boundingBox();
+   assert.ok(transferBounds.x+transferBounds.width<=bonusBounds.x);assert.ok(Math.abs(transferBounds.y-bonusBounds.y)<2);
+   await pair.locator('[data-provider="bonuses"]').click();
+   await page.locator('[data-dep="bonus-new"]').click();
+   const bonusForm=page.locator('[data-form="channel-operation"]');
+   await bonusForm.locator('[name="amount"]').fill('500');await bonusForm.locator('[name="room"][value="X"]').check();await bonusForm.locator('[name="playerId"]').fill('123');
+   await bonusForm.locator('button[type="submit"]').click();await page.locator('.deposits__channel-history').waitFor();
+   assert.equal(view(state).statistics.bonuses,50000);assert.equal(view(state).statistics.deposits,0);
+   await page.locator('[data-dep="channel-void"]').click();await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();await page.locator('.deposits__channel-row.is-void').waitFor();
+   assert.equal(view(state).statistics.bonuses,0);await page.locator('[data-dep="editor-close"]').first().click();
    assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
    await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
    await page.locator('.deposits__popup [data-dep="channel-new"][data-direction="income"]').click();
@@ -87,6 +98,17 @@ async function main(){
    await page.locator('.deposits__channel-row').first().waitFor();
    assert.match(await page.locator('.deposits__channel-history').innerText(),/654321/);
    assert.equal(view(state).statistics.deposits,250000);
+   await page.locator('[data-dep="channel-edit"]').click();
+   const editForm=page.locator('[data-form="edit-channel-operation"]');
+   await editForm.locator('[name="amount"]').fill('2000');
+   await editForm.locator('[name="room"][value="P21"]').check();
+   await editForm.locator('[name="playerId"]').fill('4110862');
+   await editForm.locator('[name="note"]').fill('Исправление');
+   await editForm.locator('button[type="submit"]').click();
+   await page.locator('.deposits__channel-history').waitFor();
+   assert.equal(view(state).statistics.deposits,200000);
+   assert.match(await page.locator('.deposits__channel-history').innerText(),/4110862/);
+   assert.match(await page.locator('.deposits__channel-history').innerText(),/История изменений/);
    await page.locator('[data-dep="channel-void"]').click();
    await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();
    await page.locator('.deposits__channel-row.is-void').first().waitFor();
