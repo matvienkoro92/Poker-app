@@ -325,3 +325,12 @@ test('cash withdrawal statistic counts placed totals including archive, with Exc
  state.entries[0].deletedAt=Date.now();assert.equal(view(state).statistics.cashWithdrawals,0);
  state.channelOperations[0].voidedAt=Date.now();assert.equal(view(state).statistics.exchipWithdrawals,0);
 });
+
+test('bank withdrawal accepts an empty recipient and still validates payment details',()=>{
+ const body={action:'create',requestId:requestId(720),entry:{...entry,recipient:''}};
+ const state=applyOperation(null,body,'admin-a').state;
+ assert.equal(state.entries[0].recipient,'');assert.equal(view(state).entries[0].total,entry.total);
+ assert.throws(()=>applyOperation(null,{...body,entry:{...body.entry,phone:'',card:'',paymentLink:''}},'admin-a'),/карту, телефон/);
+ const parsed=parser.parse('Т-банк 8-999-999-8855 Сумма 1 ID 123353 Покер21');
+ assert.ok(!parsed.warnings.some(w=>/получател/i.test(w)));
+});

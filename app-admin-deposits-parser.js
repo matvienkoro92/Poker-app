@@ -100,7 +100,6 @@
     if (paymentType==='usdt'&&!wallet) warnings.push('Укажите USDT-кошелёк.');
     if (paymentType==='usdt'&&!network) warnings.push('Укажите сеть USDT.');
     if (paymentType!=='usdt' && !card && !phone && !paymentLink) warnings.push('Номер или ссылка не распознаны. Заполните реквизит вручную.');
-    if (paymentType!=='usdt'&&!recipient) warnings.push('Укажите получателя — имя не распознано.');
     if (amounts.length === 0) warnings.push('Укажите сумму к выплате — она не распознана.');
     if (paymentType!=='usdt'&&!bank) warnings.push('Проверьте банк — он не распознан.');
     return {paymentType:paymentType,wallet:wallet,network:network,card:card, phone:phone, bank:bank, recipient:recipient, room:room, playerId:playerId, paymentLink:paymentLink,
