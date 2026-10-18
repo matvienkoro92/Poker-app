@@ -387,3 +387,11 @@ test('statistics display Anna and Vika by account ID even for old saved names',(
  const saved=applyOperation(null,{action:'create',entry,requestId:requestId(780)},'tg_2144406710',Date.now(),'aany92').state;
  assert.equal(saved.entries[0].createdByName,'Аня');
 });
+
+test('withdrawal summary filters cards by operational creation date and reconciles current statuses',()=>{
+ let state=create();state.entries[0].createdAt=Date.parse('2026-10-17T23:00:00Z');
+ state.entries[0].payments=[{id:'paid',amount:350000,createdAt:Date.parse('2026-10-18T10:00:00Z')}];state.entries[0].returns=[{id:'returned',amount:100000,createdAt:Date.parse('2026-10-18T11:00:00Z')}];state.entries[0].archived=true;
+ const now=Date.parse('2026-10-18T12:00:00Z');const w=view(state,now,{preset:'custom',from:'2026-10-18',to:'2026-10-18'}).statistics.withdrawals;
+ assert.equal(w.total,entry.total);assert.equal(w.paid,350000);assert.equal(w.returned,100000);assert.equal(w.total,w.paid+w.returned+w.remaining);
+ assert.equal(view(state,now,{preset:'custom',from:'2026-10-17',to:'2026-10-17'}).statistics.withdrawals.total,0);
+});
