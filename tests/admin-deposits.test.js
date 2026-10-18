@@ -123,7 +123,7 @@ test('deposit statistics retain archived payments, exclude pending reservations 
  let state=create();state=applyOperation(state,{action:'payment',requestId:requestId(40),entryId:requestId(1),amount:1000000},'admin-a').state;
  state=applyOperation(state,{action:'return',requestId:requestId(41),entryId:requestId(1),amount:500000},'admin-a').state;
  state=applyOperation(state,{action:'archive',requestId:requestId(42),entryId:requestId(1)},'admin-a').state;
- const data=view(state);assert.equal(data.totals.paid,0);assert.equal(data.statistics.deposits,1000000);assert.equal(data.statistics.returned,500000);assert.equal(data.statistics.destinations[0].amount,1000000);assert.ok(data.statistics.destinations.slice(1).every(d=>d.amount===null));
+ const data=view(state);assert.equal(data.totals.paid,0);assert.equal(data.statistics.deposits,1000000);assert.equal(data.statistics.returned,500000);assert.equal(data.statistics.destinations[0].amount,1000000);assert.ok(data.statistics.destinations.filter(d=>['payment-links','all-friends'].includes(d.id)).every(d=>d.amount===null));
 });
 test('API simultaneous return and reservation cannot overspend and return retries count once',async()=>{
  const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
@@ -280,4 +280,22 @@ test('second verified owner account receives deletion permission, managers do no
  assert.equal((await a.call({action:'list'},'5053253480')).data.permissions.canDelete,true);
  assert.equal((await a.call({action:'list'},'admin-b')).data.permissions.canDelete,false);
  assert.equal((await a.call({action:'delete',requestId:requestId(110),entryId:requestId(1)},'5053253480')).statusCode,200);
+});
+
+test('manual channels keep income and outgoing with room, player and manager and audited cancellation',()=>{
+ let state=create();const op={action:'channel-operation',requestId:requestId(120),channelId:'runex',direction:'income',amount:400000,room:'X',playerId:'123456'};
+ const now=Date.parse('2026-10-18T08:00:00+07:00');state=applyOperation(state,op,'admin-a',now,'Аня').state;
+ state=applyOperation(state,{...op,requestId:requestId(121),direction:'outgoing',amount:100000},'admin-b',now,'Вика').state;
+ let data=view(state,now);assert.equal(data.channelOperations.length,2);assert.equal(data.statistics.deposits,400000);assert.equal(data.statistics.outgoing,100000);assert.equal(data.paymentForms.providers.find(p=>p.id==='runex').total,400000);assert.equal(data.paymentForms.providers.find(p=>p.id==='runex').outgoing,100000);
+ assert.equal(data.statistics.managers.find(m=>m.id==='admin-a').deposits,400000);assert.equal(data.statistics.managers.find(m=>m.id==='admin-b').outgoing,100000);
+ assert.equal(applyOperation(state,op,'admin-a').duplicate,true);
+ assert.throws(()=>applyOperation(state,{...op,requestId:requestId(122),room:''},'admin-a'),/рум/);
+ assert.throws(()=>applyOperation(state,{...op,requestId:requestId(122),channelId:'bad'},'admin-a'),/направление/);
+ state=applyOperation(state,{action:'void-channel-operation',requestId:requestId(123),operationId:requestId(120)},'admin-a',now).state;
+ data=view(state,now);assert.equal(data.statistics.deposits,0);assert.equal(data.channelOperations.length,2);assert.equal(data.paymentForms.providers.find(p=>p.id==='runex').total,0);
+});
+test('manual channel API retries after lost response keep one entry',async()=>{
+ const a=apiSetup(),op={action:'channel-operation',requestId:requestId(125),channelId:'exchip',direction:'outgoing',amount:100000,room:'PP',playerId:'789123'};
+ a.lose();assert.equal((await a.call(op)).statusCode,503);const retry=await a.call(op);assert.equal(retry.statusCode,200);assert.equal(retry.data.channelOperations.length,1);assert.equal(retry.data.channelOperations[0].playerId,'789123');
+ assert.equal((await a.call({...op,requestId:requestId(126),playerId:''})).statusCode,400);
 });
