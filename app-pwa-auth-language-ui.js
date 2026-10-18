@@ -173,7 +173,7 @@
     setText("homeFooterNoteText", t.footerNote);
     setText("bottomNavHomeLabel", t.navHome);
     setText("bottomNavClubNewsLabel", locale === "en" ? "Club\nwins" : "Победы\nклуба");
-    setText("bottomNavHandsLabel", (window.__pokerTelegramAuth?.adminAccess === true || window.__pokerTelegramAuth?.status === 'verified') ? (locale === "en" ? "Villa" : "Вилла") : (locale === "en" ? "Hands" : "Раздачи"));
+    setText("bottomNavHandsLabel", (locale === "en" ? "Villa" : "Вилла"));
     setText("bottomNavDownloadLabel", t.navDownload);
     setText("bottomNavCashoutLabel", t.navCashout);
     setText("bottomNavProfileLabel", t.navProfile);

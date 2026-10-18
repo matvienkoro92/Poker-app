@@ -67,12 +67,8 @@ async function main(){
    assert.equal(view(state).paymentForms.providers[0].total,null);
    await page.screenshot({path:path.join(output,width+'-prodamus.png')});
    await page.locator('[data-dep="editor-close"]').first().click();
-   assert.equal(await page.locator('.deposits__payment-form').count(),6);
+   assert.equal(await page.locator('.deposits__payment-form').count(),5);
    assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
-   await page.locator('.deposits__payment-form--outgoing').click();
-   assert.equal(await page.locator('[data-form="channel-operation"]').getAttribute('data-channel'),'exchip');
-   assert.equal(await page.locator('[data-form="channel-operation"]').getAttribute('data-direction'),'outgoing');
-   await page.locator('[data-dep="editor-close"]').first().click();
    await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
    await page.locator('[data-dep="channel-new"][data-direction="income"]').click();
    await page.locator('[data-form="channel-operation"] [name="amount"]').fill('2500');

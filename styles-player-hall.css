@@ -549,9 +549,9 @@
 @keyframes hall-table-tap-feedback{0%,100%{opacity:1}45%{opacity:.55}}
 @media(prefers-reduced-motion:reduce){.hall-table__glass--clink,.hall-table__chips--shuffle{animation:hall-table-tap-feedback .2s ease-out}}
 
-.player-hall__spaces>.garage-vehicle-loading{position:absolute;left:45%;top:49%;width:35%;min-height:56px;z-index:3;padding:12px;border:1px solid #c7a75c80;border-radius:14px;background:#09141de8;color:#f8dfaa;font-family:inherit;font-size:14px;font-weight:700;line-height:1.4;text-align:center;box-shadow:0 8px 24px #0006}
-.player-hall__spaces>.garage-vehicle-loading[hidden],.player-hall__room:not([data-space="garage"]) .garage-vehicle-loading{display:none}
+.player-hall__room>.garage-vehicle-loading{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);width:min(290px,82%);min-height:76px;z-index:15;padding:18px 16px;border:2px solid #ffe1a0;border-radius:18px;background:linear-gradient(145deg,#f8dc98,#d9ae5e);color:#291d0d;font-family:inherit;font-size:18px;font-weight:800;line-height:1.4;text-align:center;box-shadow:0 12px 32px #0009,0 0 20px #edc57533}
+.player-hall__room>.garage-vehicle-loading[hidden],.player-hall__room:not([data-space="garage"]) .garage-vehicle-loading{display:none}
 .garage-vehicle-loading:disabled{opacity:1;cursor:wait}
-.garage-vehicle-loading[data-state="loading"]::before{content:"";display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid #e9c67a44;border-top-color:#e9c67a;border-radius:50%;vertical-align:-2px;animation:garage-car-loading-spin .9s linear infinite}
+.garage-vehicle-loading[data-state="loading"]::before{content:"";display:inline-block;width:17px;height:17px;margin-right:10px;border:3px solid #53391633;border-top-color:#533916;border-radius:50%;vertical-align:-2px;animation:garage-car-loading-spin .9s linear infinite}
 @keyframes garage-car-loading-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.garage-vehicle-loading[data-state="loading"]::before{animation:none}}

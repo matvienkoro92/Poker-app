@@ -444,3 +444,5 @@ body.deposits-open {overflow:hidden;}
 .deposits .deposits__payment-form--outgoing strong{color:#ffe1d9}.deposits .deposits__payment-form--outgoing span{color:#efa99c}
 .deposits .deposits__payment-form--outgoing:hover{border-color:#e5a095;background:linear-gradient(155deg,#573735,#39292d 50%,#282026)}
 @media(prefers-reduced-motion:reduce){.deposits .deposits__payment-form{transition:none}}
+
+.deposits__periods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.deposits__periods button{min-width:0;padding:9px 5px;font-size:clamp(10px,2.6vw,13px);line-height:1.25}.deposits__periods svg{flex-shrink:0;width:15px;height:15px}

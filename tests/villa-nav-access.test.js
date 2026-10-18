@@ -1,14 +1,18 @@
 'use strict';
 const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
 const source = fs.readFileSync('app-view-router.js','utf8');
-const code = source.slice(source.indexOf('// Show the villa to every signed-in player.'));
-test('villa navigation updates for an ordinary player after delayed authentication', () => {
+const code = source.slice(source.indexOf('// The villa includes a read-only preview for guests.'));
+test('villa navigation stays available to guests and verified players', () => {
   const events = {}, button = {dataset:{},querySelector:()=>null};
   const label = {textContent:'Раздачи',closest:()=>button};
   const badge = {hidden:false,classList:{remove(){}}};
   const window = {__pokerTelegramAuth:{status:'unknown'},addEventListener:(name,fn)=>{events[name]=fn;}};
   vm.runInNewContext(code,{window,document:{getElementById:id=>id==='bottomNavHandsLabel'?label:badge}});
-  assert.equal(button.dataset.viewTarget,'my-summary');
+  assert.equal(button.dataset.viewTarget,'player-hall');
+  assert.equal(label.textContent,'Вилла');
+  window.__pokerTelegramAuth={status:'guest'};
+  events['poker-telegram-auth']();
+  assert.equal(button.dataset.viewTarget,'player-hall');
   window.__pokerTelegramAuth = {status:'verified',adminAccess:false};
   events['poker-telegram-auth']();
   assert.equal(button.dataset.viewTarget,'player-hall');

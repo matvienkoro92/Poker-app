@@ -6,7 +6,7 @@ for(const fails of [false,true])test('Villa tap responds synchronously and resto
  let click,resolve,reject,opens=0;const classes=new Set(),attrs=new Map(),label={textContent:'Вилла'};
  const item={dataset:{viewTarget:'player-hall'},disabled:false,classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)},setAttribute:(k,v)=>attrs.set(k,v),removeAttribute:k=>attrs.delete(k),querySelector:()=>label,addEventListener:(_,fn)=>click=fn};
  const pending=new Promise((a,b)=>{resolve=a;reject=b;});const alerts=[];
- vm.runInNewContext(code,{navItems:[item],window:{pokerEnsureLazyDomains:()=>pending, PokerGarage:{canAccessHall:()=>true},pokerOpenPlayerHall:async()=>{opens++;},alert:x=>alerts.push(x)}});
+ vm.runInNewContext(code,{navItems:[item],window:{pokerEnsureLazyDomains:()=>pending, __pokerTelegramAuth:{status:'guest'},PokerGarage:{canAccessHall:()=>false},pokerOpenPlayerHall:async()=>{opens++;},alert:x=>alerts.push(x)}});
  click({preventDefault(){},stopImmediatePropagation(){}});
  assert.equal(item.disabled,true);assert.equal(attrs.get('aria-busy'),'true');assert.equal(label.textContent,'Открываем…');assert.ok(classes.has('bottom-nav__item--opening'));
  click({preventDefault(){},stopImmediatePropagation(){}});await flush();assert.equal(opens,0);

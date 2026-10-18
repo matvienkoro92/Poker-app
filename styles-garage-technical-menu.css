@@ -134,3 +134,9 @@
 /* Keep all six wardrobe labels readable on phones. */
 @media(max-width:480px){.player-hall-dialog .garage-workshop--fitted .garage-wardrobe-families{grid-template-columns:repeat(3,minmax(0,1fr));height:74px;min-height:74px;max-height:74px}.player-hall-dialog .garage-workshop--fitted .garage-wardrobe-families button{font-size:11px}}
 @media(max-width:480px){.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) 74px 61px}.player-hall-dialog .garage-workshop--fitted.garage-workshop--wardrobe[data-wardrobe-focus=outfits]>.garage-customizer-layout[data-category=character]{grid-template-rows:minmax(120px,1fr) 74px}}
+
+/* The unlock level and lock form one badge, never independent overlapping layers. */
+.player-hall-dialog .garage-workshop--fitted .garage-option--locked button[data-choice]::after{content:none}
+.player-hall-dialog .garage-workshop--fitted .garage-option-level{display:inline-flex;align-items:center;justify-content:center;gap:3px;right:3px;bottom:2px;max-width:calc(100% - 6px);box-sizing:border-box;padding:3px 5px;font:700 10px/1.2 Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-hall-dialog .garage-workshop--fitted .garage-option-level>span{font-size:10px;line-height:1}
+.player-hall-dialog .garage-workshop--wardrobe .garage-wardrobe-filter .garage-category-filter{position:static;flex:1;min-width:0;max-width:190px;width:auto;min-height:30px;height:30px;padding:4px 28px 4px 10px;border:1px solid #9b875c88;border-radius:9px;background:#17262d;color:#f3dfb4;font:400 12px/1.3 Arial,sans-serif}

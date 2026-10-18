@@ -1840,9 +1840,6 @@ navItems.forEach(function (item) {
           if (typeof window.pokerEnsureLazyDomains === "function") {
             await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
           }
-          if (!window.PokerGarage || !window.PokerGarage.canAccessHall(window.__pokerTelegramAuth)) {
-            throw new Error("Войдите в аккаунт, чтобы открыть виллу");
-          }
           if (typeof window.pokerOpenPlayerHall !== "function") throw new Error("Не удалось открыть зал. Попробуйте ещё раз.");
           await window.pokerOpenPlayerHall();
         }).catch(function (error) {
@@ -2469,23 +2466,22 @@ document.addEventListener("click", function (event) {
   setView(tab.dataset.viewTarget);
 });
 
-// Show the villa to every signed-in player.
+// The villa includes a read-only preview for guests.
 (function () {
   var originalIcon;
   function syncHouseNav() {
     var label = document.getElementById('bottomNavHandsLabel');
     var button = label && label.closest('button');
     if (!button) return;
-    var admin = window.__pokerTelegramAuth?.adminAccess === true || window.__pokerTelegramAuth?.status === 'verified';
-    button.dataset.viewTarget = admin ? 'player-hall' : 'my-summary';
-    label.textContent = admin ? 'Вилла' : 'Раздачи';
+    button.dataset.viewTarget = 'player-hall';
+    label.textContent = 'Вилла';
     var badge = document.getElementById('bottomNavReviewUnread');
-    if (admin && badge) { badge.hidden = true; badge.classList.remove('bottom-nav__badge--on'); }
+    if (badge) { badge.hidden = true; badge.classList.remove('bottom-nav__badge--on'); }
     var icon = button.querySelector('.bottom-nav__line-icon');
     if (icon) {
       if (!originalIcon) originalIcon = icon.outerHTML;
       var villaIcon = '<svg class="bottom-nav__line-icon" viewBox="0 0 24 24" fill="none" stroke="#e8bd67" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14V6h11v8M2 6h13M14 9h7v5M13 9h9"/><path d="M6 14V9h4v5M17 11h2"/><path d="M3 16h18v5H3z" fill="#163d43" stroke="#86c9c8"/><path d="M6 18.5c1-.8 2 .8 3 0s2 .8 3 0 2 .8 3 0 2 .8 3 0" stroke="#b6e5df" stroke-width="1"/><path d="M5 4h7M19 7V5"/></svg>';
-      icon.outerHTML = admin ? villaIcon : originalIcon;
+      icon.outerHTML = villaIcon;
     }
   }
   window.addEventListener('poker-telegram-auth', syncHouseNav);
