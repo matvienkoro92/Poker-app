@@ -391,6 +391,21 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 
 .evening-reference__character-hint {margin:0;padding-top:.4cqw;color:#ffe5ac;font:600 2.6cqw/1.35 Arial,sans-serif;}
 
+/* Extend the room's dark top edge through Telegram's reserved control area. */
+html.app--telegram-miniapp:has(body[data-view="download"] .download-page--active[data-download-page="main"] .evening-reference),
+html.app--telegram-miniapp body[data-view="download"]:has(.download-page--active[data-download-page="main"] .evening-reference) {
+  background:#070707!important;
+}
+html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .evening-reference) {
+  width:100%!important;
+  max-width:100%!important;
+  padding-inline:0!important;
+  background:#070707!important;
+}
+html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .evening-reference) > .bg-gradient {
+  display:none!important;
+}
+
 /* The Telegram shell already reserves the status bar and native controls.
    Keep the scene heading close to that boundary without adding safe area twice. */
 @container play-screen (max-width:680px) {
