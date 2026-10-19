@@ -390,3 +390,15 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 .evening-cooler-speech .evening-cooler-speech__actions button:first-child {background:#ecac39!important;}
 
 .evening-reference__character-hint {margin:0;padding-top:.4cqw;color:#ffe5ac;font:600 2.6cqw/1.35 Arial,sans-serif;}
+
+/* The Telegram shell already reserves the status bar and native controls.
+   Keep the scene heading close to that boundary without adding safe area twice. */
+@container play-screen (max-width:680px) {
+ html.app--telegram-miniapp body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {
+  top:2%!important;
+ }
+ html.app--telegram-miniapp body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.home-tournament-history,.home-last-longer-dock) {
+  top:calc(2% + 3cqw)!important;
+  transform:none!important;
+ }
+}

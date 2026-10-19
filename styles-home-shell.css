@@ -798,6 +798,11 @@ html body:not([data-view="chat"]) #app.app > .card > .card__header .header-statu
 }
 #app .card__header :is(#headerCrmBtn, #headerReportsShortcutBtn, #headerBalancesShortcutBtn, #headerRafflesShortcutBtn)[hidden] { display: none !important; }
 
+/* The shared menu belongs only to Home, including when admin dock rules apply. */
+html body[data-view]:not([data-view="home"]) #app.app#app > .card > .card__header.card__header {
+  display: none !important;
+}
+
 /* Admin tools share one row with the menu; owner identity sits just above. */
 html body #app.app > .card > .card__header.card__header--admin-shortcuts {
   display: grid !important;
