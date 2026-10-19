@@ -4,9 +4,9 @@ const {snapshot,eligible,mergeReturns}=require('../lib/deposit-raffle-prizes');
 const period={start:Date.parse('2026-10-20T03:00:00Z'),end:Date.parse('2026-10-21T03:00:00Z')};
 const winner=(extra={})=>({userId:'1',p21Id:'123',name:'Игрок',winnerStatus:'ok',winnerSeatStatus:'seated',winnerStatusAt:'2026-10-20T08:00:00Z',prize:'1000 ₽',...extra});
 const raffle=(w,extra={})=>({id:'r',prizeKind:'cash',title:'Кеш',winners:[w],...extra});
-test('only issued seated ticket and 1000 cash winners enter editable rows; previous outcomes preserved',()=>{
+test('all issued prizes are listed but only seated winners are editable; previous outcomes preserved',()=>{
  const rows=snapshot([raffle(winner({winnerCashoutStatus:'plus',winnerCashoutAmount:3500,winnerCashoutAt:'2026-10-20T09:00:00Z',winnerCashoutBy:'tg_2144406710'})),raffle(winner({winnerStatus:'fail'}),{id:'fail'}),raffle(winner({winnerSeatStatus:'not_seated'}),{id:'no-seat'}),raffle(winner({prize:'2000 ₽'}),{id:'2000'}),raffle(winner({prize:'Билет 2000 ₽'}),{id:'ticket',prizeKind:'ticket'}),raffle(winner({winnerStatusAt:'2026-10-20T02:59:59Z'}),{id:'yesterday'})],period);
- assert.deepEqual(rows.rows.map(r=>r.raffleId),['r','ticket']);assert.equal(rows.returned,350000);assert.equal(rows.returns.length,1);assert.equal(rows.rows[0].amount,350000);
+ assert.deepEqual(rows.rows.map(r=>r.raffleId),['r','no-seat','ticket']);assert.equal(rows.rows.find(r=>r.raffleId==='no-seat').editable,false);assert.equal(rows.returned,350000);assert.equal(rows.returns.length,1);assert.equal(rows.rows[0].amount,350000);
  const view={statistics:{returned:10000,managers:[{id:'tg_2144406710',returned:10000}]}};mergeReturns(view,rows);assert.equal(view.statistics.returned,360000);assert.equal(view.statistics.managers[0].returned,360000);
 });
 test('auto debited unseated winners are read-only issue/return operations and counted once',()=>{
