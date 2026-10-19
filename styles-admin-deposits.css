@@ -507,3 +507,5 @@ body.deposits-open {overflow:hidden;}
 .deposits__payment-summary>div{display:grid;gap:4px;min-width:0}.deposits__payment-summary dt{font-size:11px;color:var(--dep-muted)}.deposits__payment-summary dd{margin:0;font-size:16px;font-weight:750;color:var(--dep-gold);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 
 .deposits__player-picker{display:grid;gap:5px;margin-bottom:10px}.deposits__player-picker>label{display:grid;gap:5px;font-size:12px;color:var(--dep-gold)}.deposits__player-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.deposits .deposits__player-choices>button{display:grid;gap:3px;min-width:0;min-height:44px;padding:7px;text-align:left;border:1px solid #dfc58a40;border-radius:8px;background:#d7bd7908;color:var(--dep-cream)}.deposits__player-choices b{font-size:11px;overflow-wrap:anywhere}.deposits__player-choices small{font-size:9px;color:var(--dep-muted);overflow-wrap:anywhere}
+
+.deposits__transfer-route .deposits__rooms label[hidden]{display:none!important}

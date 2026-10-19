@@ -301,11 +301,11 @@ test('manual channel API retries after lost response keep one entry',async()=>{
 });
 
 test('transfer saves both room accounts atomically, retries once and cancels both sides',()=>{
- const body={action:'transfer',requestId:requestId(700),playerName:'Пряник',fromRoom:'P21',fromPlayerId:'123',toRoom:'X',toPlayerId:'456',amount:125050,note:'Между румами'};
+ const body={action:'transfer',requestId:requestId(700),playerName:'Пряник',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom:'X',toPlayerId:'2728933',amount:125050,note:'Между румами'};
  const now=Date.now();const state=applyOperation(null,body,'admin-a',now).state;
  assert.equal(state.channelOperations.length,2);
  assert.ok(state.channelOperations.every(r=>r.playerName==='Пряник'));
- assert.deepEqual(state.channelOperations.map(r=>[r.room,r.playerId,r.direction,r.amount]),[['P21','123','outgoing',125050],['X','456','income',125050]]);
+ assert.deepEqual(state.channelOperations.map(r=>[r.room,r.playerId,r.direction,r.amount]),[['P21','398176','outgoing',125050],['X','2728933','income',125050]]);
  assert.equal(applyOperation(state,body,'admin-a',now).state.channelOperations.length,2);
  const result=view(state,now),channel=result.paymentForms.providers.find(p=>p.id==='transfer');
  assert.equal(channel.total,125050);assert.equal(channel.outgoing,125050);
@@ -313,7 +313,7 @@ test('transfer saves both room accounts atomically, retries once and cancels bot
  const cancelled=applyOperation(state,{action:'void-channel-operation',operationId:state.channelOperations[0].id,requestId:requestId(701)},'admin-a',now+1).state;
  assert.ok(cancelled.channelOperations.every(r=>r.voidedAt));
  assert.equal(view(cancelled,now+1).paymentForms.providers.find(p=>p.id==='transfer').total,0);
- assert.throws(()=>applyOperation(null,{...body,toRoom:'P21',toPlayerId:'123'},'admin-a'),/должны отличаться/);
+ assert.throws(()=>applyOperation(null,{...body,toRoom:'P21',toPlayerId:'123'},'admin-a'),/разные румы/);
  assert.throws(()=>applyOperation(null,{...body,toRoom:''},'admin-a'),/рум/);
  assert.throws(()=>applyOperation(null,{...body,toPlayerId:''},'admin-a'),/ID/);
 });
@@ -559,7 +559,7 @@ test('saved player accounts share nick across rooms, persist without payments an
 test('API persists account links and forwards transfer names and owner edit versions',async()=>{
  const api=apiSetup();let response=await api.call({action:'save-player-account',requestId:requestId(980),profileKey:'P21|286730',room:'X',playerId:'445566',nick:'Кулер'});
  assert.equal(response.statusCode,200);assert.equal(response.data.playerDirectory.find(p=>p.room==='X'&&p.playerId==='445566').profileKey,'P21|286730');
- response=await api.call({action:'transfer',requestId:requestId(981),playerName:'Кулер',fromRoom:'P21',fromPlayerId:'286730',toRoom:'X',toPlayerId:'445566',amount:10000});assert.equal(response.statusCode,200);assert.ok(response.data.channelOperations.every(r=>r.playerName==='Кулер'));
+ response=await api.call({action:'transfer',requestId:requestId(981),playerName:'Кулер',profileKey:'P21|286730',fromRoom:'P21',fromPlayerId:'286730',toRoom:'X',toPlayerId:'445566',amount:10000});assert.equal(response.statusCode,200);assert.ok(response.data.channelOperations.every(r=>r.playerName==='Coo1er91'));
  await api.call({action:'channel-operation',requestId:requestId(982),channelId:'runex',direction:'income',room:'X',playerId:'445566',amount:10000});
  response=await api.call({action:'edit-channel-operation',requestId:requestId(983),operationId:requestId(982),editVersion:0,room:'X',playerId:'445566',amount:20000},'388008256');
  assert.equal(response.statusCode,200);assert.equal(response.data.statistics.deposits,20000);
@@ -567,12 +567,41 @@ test('API persists account links and forwards transfer names and owner edit vers
 
 test('X-Poker export IDs get their real room instead of a generated Poker21 identity',()=>{
  const {depositPlayerDirectory,knownPlayerNick}=require('../lib/deposit-player-directory'),source=require('../lib/deposit-xpoker-players.json').players;
- const rows=depositPlayerDirectory({});assert.equal(Object.keys(source).length,115);
+ const rows=depositPlayerDirectory({});assert.equal(Object.keys(source).length,138);
  for(const [id,nick] of Object.entries(source)){assert.ok(rows.some(p=>p.room==='X'&&p.playerId===id&&p.nick===nick),id);assert.ok(!rows.some(p=>p.room==='P21'&&p.playerId===id),'false P21 '+id);}
  assert.ok(rows.some(p=>p.room==='P21'&&p.playerId==='398176'&&p.nick==='Пряник'));assert.ok(rows.some(p=>p.room==='X'&&p.playerId==='2728933'&&p.aliases.includes('Пряник')));
  assert.equal(knownPlayerNick('P21','2728933'),'');assert.equal(knownPlayerNick('X','2728933'),'pryanik2la');
  const legacy=depositPlayerDirectory({playerAccounts:[{profileKey:'P21|2728933',room:'X',playerId:'extra123',nick:'pryanik2la',createdAt:100}]});
- assert.equal(legacy.find(p=>p.room==='X'&&p.playerId==='extra123').profileKey,'X|2728933');assert.ok(!legacy.some(p=>p.room==='P21'&&p.playerId==='2728933'));
+ assert.equal(legacy.find(p=>p.room==='X'&&p.playerId==='extra123').profileKey,'P21|398176');assert.ok(!legacy.some(p=>p.room==='P21'&&p.playerId==='2728933'));
  const sourceJs=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=sourceJs.slice(sourceJs.indexOf('  function playerChoices('),sourceJs.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:rows}};vm.createContext(ctx);vm.runInContext(fn,ctx);
  assert.ok(ctx.playerChoices('butovskiy').some(p=>p.room==='X'&&p.playerId==='4127179'));
+});
+
+test('Russian Lucky pronunciation finds both Lucky accounts and related nicknames without merging them',()=>{
+ const rows=require('../lib/deposit-player-directory').depositPlayerDirectory({}),source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:rows}};vm.createContext(ctx);vm.runInContext(fn,ctx);
+ for(const query of ['лаки','ЛАКИ']){const found=ctx.playerChoices(query);for(const id of ['140093','425586'])assert.ok(found.some(p=>p.room==='P21'&&p.playerId===id),query+' '+id);assert.ok(found.some(p=>p.playerId==='948204'));}
+ for(const query of ['лак из сак','лакисак']){const found=ctx.playerChoices(query);assert.ok(found.some(p=>p.room==='P21'&&p.playerId==='936923'));assert.ok(found.some(p=>p.room==='X'&&p.playerId==='3019341'));}
+ assert.ok(ctx.playerChoices('лакибум').some(p=>p.playerId==='948204'));
+});
+
+test('transfers reject another player and same room even when the submitted name matches',()=>{
+ const body={action:'transfer',requestId:requestId(990),profileKey:'P21|398176',playerName:'Пряник',fromRoom:'P21',fromPlayerId:'398176',toRoom:'X',toPlayerId:'2728933',amount:10000};
+ const valid=applyOperation(null,body,'manager').state;
+ assert.ok(valid.channelOperations.every(r=>r.profileKey==='P21|398176'));
+ assert.throws(()=>applyOperation(null,{...body,toRoom:'P21',toPlayerId:'256073'},'manager'),/разные румы/);
+ assert.throws(()=>applyOperation(null,{...body,toPlayerId:'3019341'},'manager'),/одного игрока/);
+ assert.throws(()=>applyOperation(null,{...body,toPlayerId:'unknown123'},'manager'),/одного игрока/);
+ assert.throws(()=>applyOperation(null,{...body,profileKey:'P21|286730'},'manager'),/одного игрока/);
+ assert.throws(()=>applyOperation(null,{...body,profileKey:''},'manager'),/одного игрока/);
+ const state=applyOperation(null,{action:'save-player-account',requestId:requestId(991),profileKey:'P21|398176',room:'PP',playerId:'pp123'},'manager').state;
+ assert.equal(applyOperation(state,{...body,toRoom:'PP',toPlayerId:'pp123'},'manager').state.channelOperations.length,2);
+});
+
+test('latest X-Poker week adds new IDs and retains older club accounts',()=>{
+ const source=require('../lib/deposit-xpoker-players.json'),rows=require('../lib/deposit-player-directory').depositPlayerDirectory({});
+ assert.equal(source.sources.length,2);assert.equal(source.sources[1].period,'2026-10-12 — 2026-10-18');
+ for(const [id,nick] of [['4110862','Киборг'],['3683162','Бабник'],['2299644','PokerMonkeyX'],['2577836','Masikk'],['2728933','pryanik2la']]){
+  assert.equal(source.players[id],nick);assert.ok(rows.some(r=>r.room==='X'&&r.playerId===id&&r.nick===nick));assert.ok(!rows.some(r=>r.room==='P21'&&r.playerId===id));
+ }
+ assert.ok(rows.some(r=>r.room==='P21'&&r.playerId==='256073'&&r.nick==='Бабник'));
 });
