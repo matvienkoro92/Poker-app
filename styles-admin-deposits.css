@@ -513,3 +513,8 @@ body.deposits-open {overflow:hidden;}
 .deposits__payment-provider--prodamus{gap:4px}.deposits .deposits__payment-provider--prodamus>.deposits__payment-form{min-height:48px;padding:7px 5px}
 .deposits__prodamus-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.deposits .deposits__prodamus-links>button{min-width:0;min-height:26px;padding:3px 2px;border:1px solid #dfc58a55;border-radius:7px;background:#d7bd7910;color:var(--dep-gold);font:inherit;font-size:10px;line-height:18px;white-space:nowrap;cursor:pointer}
 @media(max-width:350px){.deposits .deposits__payment-provider--prodamus>.deposits__payment-form{padding-bottom:20px}.deposits .deposits__prodamus-links>button{font-size:9px}}
+.deposits .deposits__prodamus-links>button.is-copied{color:#c4efcc;border-color:#8cbe9970;background:#29473688;font-size:clamp(5px,7.5cqw,8px);letter-spacing:-.3px;overflow:hidden}
+.deposits__prodamus-links{container-type:inline-size}
+.deposits .deposits__prodamus-main{cursor:pointer;gap:5px}.deposits .deposits__prodamus-title,.deposits .deposits__prodamus-history{border:0;padding:0;background:none;color:inherit;font:inherit;cursor:pointer;max-width:100%}.deposits .deposits__prodamus-history{font-size:8px;line-height:14px;text-decoration:underline;color:var(--dep-gold)}
+/* Keep the identity row on the page background; the dock owns its rounded surface. */
+html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__header.card__header--admin-shortcuts{background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
