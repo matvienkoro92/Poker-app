@@ -660,3 +660,15 @@ test('USDT paste recognizes Cyrillic TRC20 and standalone 10k, preserving an inc
  const p=parser.parse('T'+'A'.repeat(33)+'\nТрц20\n10к\n20к');assert.equal(p.amount,null);assert.ok(p.warnings.some(w=>/несколько сумм/.test(w)));
  const state=applyOperation(null,{action:'create',requestId:requestId(1401),entry:{room:'X',playerId:'123',paymentType:'usdt',wallet:'T'+'A'.repeat(33),network:'Трц20',total:1000000}},'manager').state;assert.equal(state.entries[0].network,'TRC20');
 });
+
+test('transfer accepts an older selected account key after a confirmed reverse link without permitting another player',()=>{
+ const link={action:'save-player-account',requestId:requestId(1500),profileKey:'X|4302724',room:'P21',playerId:'302631',nick:'RedRocket🚀',confirmSamePlayer:true};
+ const state=applyOperation(null,link,'manager',1000).state;assert.equal(view(state).playerDirectory.find(p=>p.room==='P21'&&p.playerId==='302631').profileKey,'X|4302724');
+ const transfer={action:'transfer',requestId:requestId(1501),profileKey:'P21|302631',fromRoom:'P21',fromPlayerId:'302631',toRoom:'X',toPlayerId:'4302724',amount:240000};
+ const saved=applyOperation(state,transfer,'manager',1001);assert.equal(saved.state.channelOperations.length,2);assert.ok(saved.state.channelOperations.every(r=>r.profileKey==='X|4302724'));assert.equal(applyOperation(saved.state,transfer,'manager',1002).duplicate,true);
+ assert.throws(()=>applyOperation(state,{...transfer,profileKey:'P21|839673'},'manager',1002),/одного игрока/);assert.throws(()=>applyOperation(state,{...transfer,toPlayerId:'2728933'},'manager',1002),/одного игрока/);
+});
+test('API accepts a previously selected player after linking their account from the other room',async()=>{
+ const api=apiSetup();const linked=await api.call({action:'save-player-account',requestId:requestId(1510),profileKey:'X|4302724',room:'P21',playerId:'302631',nick:'RedRocket🚀',confirmSamePlayer:true});assert.equal(linked.statusCode,200);
+ const response=await api.call({action:'transfer',requestId:requestId(1511),profileKey:'P21|302631',fromRoom:'P21',fromPlayerId:'302631',toRoom:'X',toPlayerId:'4302724',amount:240000});assert.equal(response.statusCode,200);assert.equal(response.data.channelOperations.length,2);
+});
