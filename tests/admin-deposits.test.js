@@ -44,7 +44,7 @@ test('total adjustments are audited and cannot undercut paid funds',()=>{
   assert.equal(view(state).entries[0].remaining,500000);assert.equal(state.entries[0].changes[0].before,1500000);
   assert.throws(()=>applyOperation(state,{action:'create',requestId:requestId(4),entry},'admin-a'),/уже есть/);
 });
-function apiSetup(){
+function apiSetup(prizeSnapshot={rows:[],operations:[],returns:[],returned:0}){
   let stored='',offline=false,unknown=false;
   const redis={isConfigured:()=>true,pipeline:async commands=>{
     if(offline)throw Error('offline');
@@ -54,8 +54,8 @@ function apiSetup(){
   }};
   const mod={exports:{}};
   vm.runInNewContext(fs.readFileSync(require.resolve('../lib/api-handlers/admin-deposits'),'utf8'),{
-    module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,
-    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):id==='../deposit-player-recents'?require('../lib/deposit-player-recents'):null
+    module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,setTimeout,clearTimeout,
+    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):id==='../deposit-player-recents'?require('../lib/deposit-player-recents'):id==='../deposit-raffle-prizes'?{...require('../lib/deposit-raffle-prizes'),loadSnapshot:async()=>prizeSnapshot}:null
   });
   async function call(body,user='admin-a',scope='deposits'){
     const res={statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(value){this.data=value;return this;},end(){return this;}};
@@ -636,4 +636,19 @@ test('API persists the Exchip reservation channel',async()=>{
  const api=apiSetup(),created=await api.call({action:'create',requestId:requestId(1210),entry});const entryId=created.data.entries[0].id;
  const reserve=await api.call({action:'reserve',requestId:requestId(1211),entryId,amount:10000,reservationChannel:'exchip'});assert.equal(reserve.data.entries[0].reservations[0].channelId,'exchip');
  const paid=await api.call({action:'confirm-reservation',requestId:requestId(1212),entryId,reservationId:requestId(1211)});assert.equal(paid.statusCode,200);assert.equal(paid.data.statistics.deposits,0);assert.equal(paid.data.statistics.exchipWithdrawals,10000);
+});
+
+test('raffle returns read the source once per report and never create duplicate financial operations',async()=>{
+ const source={rows:[{key:'r:initial_0',kind:'ticket'}],operations:[],returns:[{amount:250000,createdBy:'tg_2144406710'}],returned:250000},api=apiSetup(source);
+ const first=await api.call({action:'list'});assert.equal(first.statusCode,200);assert.equal(first.data.statistics.returned,250000);assert.equal(first.data.statistics.deposits,0);assert.equal(first.data.channelOperations.length,0);
+ const again=await api.call({action:'list'});assert.equal(again.data.statistics.returned,250000);source.returned=300000;source.returns[0].amount=300000;
+ const updated=await api.call({action:'list'});assert.equal(updated.data.statistics.returned,300000);assert.equal(updated.data.channelOperations.length,0);assert.equal(updated.data.entries.length,0);
+ const separate=await api.call({action:'raffle-prizes'});assert.equal(separate.statusCode,200);assert.equal(separate.data.rows.length,1);assert.equal(separate.data.returned,300000);
+});
+
+test('X-Poker allows transfers between distinct saved players without merging profiles or counting deposits',()=>{
+ const body={action:'transfer',requestId:requestId(1300),profileKey:'P21|398176',fromRoom:'X',fromPlayerId:'2728933',toRoom:'X',toPlayerId:'3019341',amount:200000};
+ const result=applyOperation(null,body,'manager',1000).state,rows=result.channelOperations;assert.equal(rows.length,2);assert.equal(rows[0].direction,'outgoing');assert.equal(rows[1].direction,'income');assert.equal(rows[0].profileKey,'P21|398176');assert.equal(rows[1].profileKey,'P21|936923');assert.equal(rows[0].counterpartyId,'3019341');assert.equal(rows[1].playerName,'Luck_is_Suck');assert.equal(view(result).statistics.deposits,0);assert.equal(view(result).statistics.outgoing,0);assert.equal(applyOperation(result,body,'manager',1001).duplicate,true);
+ assert.throws(()=>applyOperation(null,{...body,toPlayerId:'2728933'},'manager'),/разных отправителя/);assert.throws(()=>applyOperation(null,{...body,toPlayerId:'unknown'},'manager'),/сохранённых отправителя/);assert.throws(()=>applyOperation(null,{...body,profileKey:'P21|839673'},'manager'),/сохранённых отправителя/);
+ const cancelled=applyOperation(result,{action:'void-channel-operation',requestId:requestId(1301),operationId:rows[0].id},'manager',1002).state;assert.ok(cancelled.channelOperations.every(r=>r.voidedAt));
 });

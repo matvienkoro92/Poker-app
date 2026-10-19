@@ -110,7 +110,7 @@ async function main(){
    assert.equal(await transferForm.locator('[name="fromRoom"][value="P21"]').isChecked(),true);
    assert.equal(await transferForm.locator('[name="playerName"]').inputValue(),'Пряник');
    assert.equal(await transferForm.locator('[name="toPlayerId"]').inputValue(),'');
-   assert.equal(await transferForm.locator('[data-transfer-side="to"]').count(),0);
+   assert.equal(await transferForm.locator('[data-transfer-side="to"]').isVisible(),false);
    assert.equal(await transferForm.locator('[name="toRoom"][value="P21"]').isDisabled(),true);
    assert.equal(await transferForm.locator('[name="toRoom"][value="P21"]').isVisible(),false);
    await transferForm.locator('[name="toRoom"][value="X"]').check();
