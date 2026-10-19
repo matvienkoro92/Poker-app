@@ -23,3 +23,9 @@ test('loader reads date index including the Moscow cutoff and propagates storage
  vm.runInNewContext(fs.readFileSync(require.resolve('../lib/deposit-raffle-prizes'),'utf8'),{module,exports:module.exports,require:id=>id==='./redis'?redis:require('../lib/raffle-stats-index')});
  const result=await module.exports.loadSnapshot(period);assert.equal(result.rows.length,1);assert.ok(calls.some(c=>c[1]==='poker_app:raffle_stats_day:v3:2026-10-21'));offline=true;await assert.rejects(()=>module.exports.loadSnapshot(period),/offline/);
 });
+
+test('issued tickets are considered seated and allow direct outcome entry',()=>{
+ const {issuedTicketIsSeated}=require('../lib/deposit-raffle-prizes'),w=winner({winnerSeatStatus:''}),r=raffle(w,{prizeKind:'ticket'});assert.equal(issuedTicketIsSeated(r,w),true);const row=snapshot([r],period).rows[0];assert.equal(row.editable,true);assert.equal(row.seatStatus,'seated');assert.equal(snapshot([r],period).returned,0);
+ assert.equal(issuedTicketIsSeated(raffle(w),w),false);assert.equal(issuedTicketIsSeated(r,{...w,winnerSeatStatus:'not_seated'}),false);assert.equal(issuedTicketIsSeated(r,{...w,winnerStatus:'fail'}),false);assert.equal(issuedTicketIsSeated(r,{...w,cashSeatingMonitor:{status:'returned'}}),false);
+ w.winnerSeatStatus='seated';w.winnerCashoutStatus='plus';w.winnerCashoutAmount=6500;w.winnerCashoutAt='2026-10-20T08:00:00Z';assert.equal(snapshot([r],period).returned,650000);
+});

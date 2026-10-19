@@ -191,7 +191,7 @@ async function main(){
    assert.equal(await page.locator('[name="total"]').inputValue(),'15000');
    assert.equal(await page.locator('[name="playerId"]').inputValue(),'655861');
    assert.equal(await page.locator('[name="room"][value="P21"]').isChecked(),true);
-   assert.equal(await page.locator('[name="wallet"]').inputValue(),'TSaMfZDt41PKCjk5oxcNWBdCXZH8V8HDRe');
+   assert.equal(await page.locator('[name="phone"]').inputValue(),'TSaMfZDt41PKCjk5oxcNWBdCXZH8V8HDRe');
    assert.equal(await page.locator('[name="bank"]').count(),0);
    await page.screenshot({path:path.join(output,width+'-usdt-review.png')});
    await page.locator('[data-dep="back-parse"]').click();

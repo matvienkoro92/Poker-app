@@ -652,3 +652,11 @@ test('X-Poker allows transfers between distinct saved players without merging pr
  assert.throws(()=>applyOperation(null,{...body,toPlayerId:'2728933'},'manager'),/разных отправителя/);assert.throws(()=>applyOperation(null,{...body,toPlayerId:'unknown'},'manager'),/сохранённых отправителя/);assert.throws(()=>applyOperation(null,{...body,profileKey:'P21|839673'},'manager'),/сохранённых отправителя/);
  const cancelled=applyOperation(result,{action:'void-channel-operation',requestId:requestId(1301),operationId:rows[0].id},'manager',1002).state;assert.ok(cancelled.channelOperations.every(r=>r.voidedAt));
 });
+
+test('USDT paste recognizes Cyrillic TRC20 and standalone 10k, preserving an incomplete wallet for correction',()=>{
+ const wallet='TLg9d2ny6aTH71rSqiayjBWwKvnWsq7x',parsed=parser.parse(wallet+'\nТрц20\u00a0\n10к');assert.equal(wallet.length,32);assert.equal(parsed.paymentType,'usdt');assert.equal(parsed.network,'TRC20');assert.equal(parsed.amount,1000000);assert.equal(parsed.wallet,wallet);assert.ok(parsed.warnings.some(w=>/32.*34/.test(w)));
+ assert.throws(()=>applyOperation(null,{action:'create',requestId:requestId(1400),entry:{...parsed,room:'X',playerId:'123',total:parsed.amount}},'manager'),/32.*34/);
+ for(const spelling of ['ТРЦ-20','трс20','TRC20','Tron','Трон']){const p=parser.parse('T'+'A'.repeat(33)+'\n'+spelling+'\n10k');assert.equal(p.paymentType,'usdt');assert.equal(p.network,'TRC20');assert.equal(p.amount,1000000);assert.equal(p.warnings.length,0);}
+ const p=parser.parse('T'+'A'.repeat(33)+'\nТрц20\n10к\n20к');assert.equal(p.amount,null);assert.ok(p.warnings.some(w=>/несколько сумм/.test(w)));
+ const state=applyOperation(null,{action:'create',requestId:requestId(1401),entry:{room:'X',playerId:'123',paymentType:'usdt',wallet:'T'+'A'.repeat(33),network:'Трц20',total:1000000}},'manager').state;assert.equal(state.entries[0].network,'TRC20');
+});

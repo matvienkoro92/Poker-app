@@ -12,6 +12,7 @@
     var amount = (Number(parts[0]) * 100 + Number((parts[1] || '').padEnd(2, '0')))*multiplier;
     return Number.isSafeInteger(amount) && amount > 0 && amount <= 10000000000 ? amount : null;
   }
+  function walletError(value){var wallet=String(value||'').trim();if(!wallet)return 'Укажите USDT-кошелёк.';if(wallet.length<34)return 'Не хватает '+(34-wallet.length)+' символов. USDT-кошелёк TRC20: получено '+wallet.length+', нужно 34.';if(wallet.length>34)return 'USDT-кошелёк TRC20: лишние символы, получено '+wallet.length+', нужно 34.';if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(wallet))return 'USDT-кошелёк TRC20 содержит недопустимые символы. Проверьте адрес у игрока.';return '';}
   function safeLink(value) {
     try { var u = new URL(String(value || '').trim()); return u.protocol === 'https:' ? u.href : ''; } catch(e) { return ''; }
   }
@@ -35,10 +36,10 @@
     if(!playerId){var afterClub=text.match(/(?<![a-zA-Zа-яА-ЯёЁ0-9])(?:758417|1786376|19645|1004444)[ ,;\n]+(\d{6,10})(?!\d)/);if(afterClub&&Number(afterClub[1])>100000&&!/^(?:7|8)\d{10}$/.test(afterClub[1])&&!clubRooms[afterClub[1]])playerId=afterClub[1];}
     if(!playerId){var beforeClub=text.match(/(?<![a-zA-Zа-яА-ЯёЁ0-9])(\d{6,10})[ ,;\n]+(?:758417|1786376|19645|1004444)(?!\d)/);if(beforeClub&&Number(beforeClub[1])>100000&&!clubRooms[beforeClub[1]]&&!/^(?:7|8)\d{10}$/.test(beforeClub[1]))playerId=beforeClub[1];}
     if(!playerId){var fromId=playerText.match(/(?:^|[\s!.,;])с[ \t]+(\d{2,10})[ \t]+на(?=\s)/i);if(fromId&&!clubRooms[fromId[1]])playerId=fromId[1];}
-    var paymentType=/\bUSDT\b/i.test(text)?'usdt':'bank';
-    var network=/TRC[ -]?20|\bTron\b/i.test(text)?'TRC20':'';
-    var walletMatch=text.match(/(?:^|\s)(T[1-9A-HJ-NP-Za-km-z]{33})(?=\s|$)/);
+    var network=/(?:TRC|ТРЦ|ТРС)[ -]?20|\bTron\b|Трон/i.test(text)?'TRC20':'';
+    var walletMatch=text.match(/(?:^|[\s:])(T[a-zA-Z0-9]{24,49})(?=[\s,;.]|$)/);
     var wallet=walletMatch?walletMatch[1]:'';
+    var paymentType=/\bUSDT\b|юсдт|усдт/i.test(text)||network||wallet?'usdt':'bank';
     var links = text.match(/https:\/\/[^\s<>]+/gi) || [];
     var paymentLink = safeLink((links[0] || '').replace(/[),.;]+$/, ''));
     var cleaned = text.replace(/https?:\/\/\S+/g, '').replace(wallet,'').replace(knownClubPattern,' [клуб] ');
@@ -85,6 +86,10 @@
       while ((match = re.exec(noCards.replace(/(?:\+?7|8)[ (.-]*\d{3}[ ).-]*\d{3}[ .-]*\d{2}[ .-]*\d{2}/g, ' ')))) { var m = money(match[1]); if (m) amounts.push(m); }
     }
     if(!amounts.length){
+      re=/^[ \t]*((?:\d{1,3}(?: \d{3})+|\d+)(?:[.,]\d{1,2})?[ \t]*[кk])[ \t]*[.!]?[ \t]*$/gim;
+      while((match=re.exec(cleaned))){var compactAmount=money(match[1]);if(compactAmount)amounts.push(compactAmount);}
+    }
+    if(!amounts.length){
       var leading=text.match(/^[ \t]*((?:\d{1,3}(?: \d{3})+|\d{1,8})(?:[.,]\d{1,2})?[кk]?)[ \t]*(?:[,;\n]|$)/i);
       if(leading&&!clubRooms[leading[1]]&&leading[1]!==playerId&&/(?:клуб|банк)/i.test(text.slice(leading[0].length))){var leadingAmount=money(leading[1]);if(leadingAmount)amounts.push(leadingAmount);}
     }
@@ -97,7 +102,7 @@
     }
     if (cards.length > 1 || phones.length > 1) warnings.push('В тексте несколько реквизитов. Проверьте выбранный номер.');
     if (amounts.length > 1) warnings.push('Найдено несколько сумм. Укажите нужную сумму к выплате.');
-    if (paymentType==='usdt'&&!wallet) warnings.push('Укажите USDT-кошелёк.');
+    if(paymentType==='usdt'&&walletError(wallet))warnings.push(walletError(wallet));
     if (paymentType==='usdt'&&!network) warnings.push('Укажите сеть USDT.');
     if (paymentType!=='usdt' && !card && !phone && !paymentLink) warnings.push('Номер или ссылка не распознаны. Заполните реквизит вручную.');
     if (amounts.length === 0) warnings.push('Укажите сумму к выплате — она не распознана.');
@@ -105,5 +110,5 @@
     return {paymentType:paymentType,wallet:wallet,network:network,card:card, phone:phone, bank:bank, recipient:recipient, room:room, playerId:playerId, paymentLink:paymentLink,
       amount:amounts.length === 1 ? amounts[0] : null, rawText:rawText, warnings:warnings};
   }
-  return {parse:parse, money:money, safeLink:safeLink};
+  return {parse:parse, money:money, safeLink:safeLink,walletError:walletError};
 });
