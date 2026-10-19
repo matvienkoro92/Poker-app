@@ -1,5 +1,13 @@
 // View router: tab navigation, view switching, route clicks, and active-view classes.
 
+function pokerSyncHomeHeaderVisibility(viewName) {
+  document.querySelectorAll('#app > .card > .card__header').forEach(function (header) {
+    header.hidden = viewName !== 'home';
+    if (viewName === 'home') header.style.removeProperty('display');
+    else header.style.setProperty('display', 'none', 'important');
+  });
+}
+
 // Простая навигация по разделам (вкладки внизу)
 const navItems = document.querySelectorAll("[data-view-target]:not(.bonus-game-back)");
 const footer = document.querySelector(".card__footer");
@@ -850,6 +858,7 @@ function pokerShowViewLoadingShell(viewName) {
   var body = document.body;
   if (body) {
     body.setAttribute("data-view", viewName || "");
+    pokerSyncHomeHeaderVisibility(viewName);
     body.setAttribute("data-poker-loading-view", viewName || "");
     body.classList.add("poker-view-section-loading");
     body.classList.remove("poker-view-section-load-error");
@@ -1095,6 +1104,7 @@ function setView(viewName, navOpts) {
   if (document.body) {
     pokerClearBodyDocumentScrollLockInline();
     document.body.setAttribute("data-view", viewName || "");
+    pokerSyncHomeHeaderVisibility(viewName);
     pokerSyncViewHtmlScrollClasses(viewName);
     document.body.classList.remove("view--active");
     document.documentElement.classList.remove("view--active");

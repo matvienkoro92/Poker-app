@@ -44,7 +44,7 @@
   function isKnownAdminUser(user) {
     if (!user) return false;
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
-    if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+    if (id === "388008256" || id === "5053253480" || id === "2144406710" || id === "1897001087") return true;
     var username = user.username != null ? String(user.username).replace(/^@+/, "").trim().toLowerCase() : "";
     if (username === "roman1_matvienko") return true;
     var email = user.email != null ? String(user.email).trim().toLowerCase() : "";
@@ -54,7 +54,7 @@
   function isKnownReportUser(user) {
     if (!user) return false;
     var id = user.id != null ? String(user.id).replace(/^tg_/, "").trim() : "";
-    if (id === "388008256" || id === "2144406710" || id === "1897001087") return true;
+    if (id === "388008256" || id === "5053253480" || id === "2144406710" || id === "1897001087") return true;
     var names = [user.username, user.telegramUsername, user.pwaUsername];
     for (var i = 0; i < names.length; i++) {
       var username = names[i] != null ? String(names[i]).replace(/^@+/, "").trim().toLowerCase() : "";

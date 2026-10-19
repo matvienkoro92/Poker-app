@@ -68,3 +68,14 @@ test("Telegram login endpoint cannot exchange stale initData for a fresh PWA ses
     else process.env.TELEGRAM_BOT_TOKEN = original;
   }
 });
+
+test("second owner Telegram account has admin, reports and bonus access by numeric ID", () => {
+  const owner = { id: 5053253480, memberId: "tg_5053253480", username: "renamed_owner" };
+  const auth = authRequired({ query: {} }, { pwaSession: signPwaSession(owner, bot) }, bot, { adminOnly: true });
+  assert.equal(auth.ok, true);
+  assert.equal(isAdminReportIdentity(auth.identity, auth.memberId), true);
+  assert.equal(isBonusAdminIdentity(auth.identity, auth.memberId), true);
+  const ordinary = { id: 123456, username: "roman1787443" };
+  assert.equal(isAdminIdentity(ordinary, "tg_123456"), false);
+  assert.equal(isAdminReportIdentity(ordinary, "tg_123456"), false);
+});
