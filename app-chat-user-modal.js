@@ -190,18 +190,16 @@ if (chatUserModalEl) {
   var modalRespectHint = document.getElementById("chatUserModalRespectHint");
   var modalRespectControl = chatUserModalEl.querySelector(".chat-user-modal__respect-control");
   var modalRespectActions = chatUserModalEl.querySelector(".chat-user-modal__respect-actions");
+  // Pause this card's achievement presentation only; shared calculations stay active.
   function startChatUserModalAchievementsLoad() {
-    if (chatUserModalAchievementsStarted || typeof chatUserModalAchievementsLoader !== "function") return;
-    chatUserModalAchievementsStarted = true;
-    Promise.resolve(chatUserModalAchievementsLoader()).catch(function () {});
+    return;
   }
   function setChatUserModalAchievementsLoader(loader) {
-    chatUserModalAchievementsLoader = typeof loader === "function" ? loader : null;
+    chatUserModalAchievementsLoader = null;
     chatUserModalAchievementsStarted = false;
-    if (chatUserModalProfileTab === "achievements") startChatUserModalAchievementsLoad();
   }
   function setChatUserModalProfileTab(tab) {
-    chatUserModalProfileTab = tab === "achievements" ? "achievements" : "main";
+    chatUserModalProfileTab = "main";
     chatUserModalEl.querySelectorAll("[data-chat-user-profile-panel]").forEach(function (panel) {
       panel.classList.toggle(
         "chat-user-modal__profile-panel--tab-hidden",
@@ -791,29 +789,9 @@ if (chatUserModalEl) {
     if (modalNewsList) modalNewsList.innerHTML = "";
     closeChatUserModalNews();
   }
+  // The player wall is paused: do not fetch events, posts or feedback.
   function loadChatUserModalNews(identity) {
-    var seq = ++chatUserModalNewsSeq;
-    showChatUserModalNewsLoading();
-    loadChatUserModalWall(seq, identity);
-    if (typeof window.pokerGetPlayerNews !== "function") {
-      renderChatUserModalWall();
-      return;
-    }
-    var cachedRows = typeof window.pokerReadCachedPlayerNews === "function"
-      ? window.pokerReadCachedPlayerNews(identity)
-      : [];
-    applyChatUserModalNewsRows(cachedRows, seq);
-    Promise.resolve(window.pokerGetPlayerNews(identity, {
-      onUpdate: function (rows) {
-        applyChatUserModalNewsRows(rows, seq);
-      },
-    })).then(function (rows) {
-      if (seq !== chatUserModalNewsSeq) return;
-      if (!applyChatUserModalNewsRows(rows, seq)) renderChatUserModalWall();
-      loadChatUserModalNewsFeedback();
-    }).catch(function () {
-      if (seq === chatUserModalNewsSeq) renderChatUserModalWall();
-    });
+    resetChatUserModalNews();
   }
   function renderChatUserModalNewsRows() {
     renderChatUserModalWall();
@@ -1023,14 +1001,7 @@ if (chatUserModalEl) {
     });
   }
   function openChatUserModalNews() {
-    if (!modalNewsDialog) return;
-    if (modalNewsTitle) modalNewsTitle.textContent = "Стена · " + String(chatUserModalRatingNick || chatUserModalUserName || "игрок");
-    // Keep the full event dialog outside the scrollable profile card.
-    // Otherwise mobile WebKit positions and clips the fixed dialog inside that card.
-    if (modalNewsDialog.parentNode !== document.body) document.body.appendChild(modalNewsDialog);
-    modalNewsDialog.hidden = false;
-    renderChatUserModalWall();
-    if (modalNewsFullList) modalNewsFullList.scrollTop = 0;
+    closeChatUserModalNews();
   }
   function closeChatUserModalNews() {
     if (modalNewsDialog) modalNewsDialog.hidden = true;

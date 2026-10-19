@@ -98,8 +98,8 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 .garage-showcase__character-modes button:focus-visible{outline:2px solid #ffe2a1;outline-offset:3px}
 
 /* The public player card shares the saved profile character and collection. */
-#chatUserModalRatingArt.garage-profile-character-pending > :not(.garage-profile-character),
-#chatUserModalRatingArt.garage-profile-character-ready > :not(.garage-profile-character) {display:none!important}
+#chatUserModalRatingArt.garage-profile-character-pending > :not(.garage-profile-character):not(.profile-villa-entry),
+#chatUserModalRatingArt.garage-profile-character-ready > :not(.garage-profile-character):not(.profile-villa-entry) {display:none!important}
 html body #chatUserModal #chatUserModalRatingArt {
  position:relative;background:none!important;overflow:hidden;
 }

@@ -29,10 +29,6 @@
         <div class="chat-user-modal__backdrop"></div>
         <div class="chat-user-modal__inner">
           <button type="button" class="chat-user-modal__close" aria-label="Закрыть">×</button>
-          <div class="chat-user-modal__profile-tabs" role="tablist" aria-label="Разделы профиля игрока">
-            <button type="button" class="chat-user-modal__profile-tab chat-user-modal__profile-tab--active" id="chatUserModalProfileTabMain" role="tab" aria-selected="true" data-chat-user-profile-tab="main">Профиль</button>
-            <button type="button" class="chat-user-modal__profile-tab" id="chatUserModalProfileTabAchievements" role="tab" aria-selected="false" data-chat-user-profile-tab="achievements">Достижения</button>
-          </div>
           <div class="chat-user-modal__top" data-chat-user-profile-panel="main">
             <div class="chat-user-modal__header">
               <div class="chat-user-modal__avatar-wrap" hidden aria-hidden="true">
@@ -89,6 +85,18 @@
               </section>
             </div>
           </div>
+          <div class="chat-user-modal__rating-tabs" id="chatUserModalRatingTabs" data-chat-user-profile-panel="main" hidden>
+            <button type="button" class="chat-user-modal__rating-tab" id="chatUserModalRatingTab">
+              <span class="chat-user-modal__rating-tab-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"></path><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"></path></svg>
+              </span>
+              <span class="chat-user-modal__rating-tab-copy">
+                <span class="chat-user-modal__rating-tab-main">Общий выигрыш в турнирах <span class="chat-user-modal__rating-tab-sum" id="chatUserModalRatingTabSum" hidden></span></span>
+                <span class="chat-user-modal__rating-tab-more">Подробнее <span aria-hidden="true">›</span></span>
+              </span>
+            </button>
+            <div class="profile-prize-details" id="chatUserModalTournamentDetails" aria-live="polite"></div>
+          </div>
             <div class="chat-user-modal__top-actions chat-user-modal__profile-actions" data-chat-user-profile-panel="main" aria-label="Действия с игроком">
               <div class="chat-user-modal__write-row">
                 <button type="button" class="chat-user-modal__write-btn" id="chatUserModalWriteBtn">Написать</button>
@@ -105,18 +113,6 @@
                 <span class="chat-user-modal__friend-msg" id="chatUserModalFriendMsg" aria-live="polite"></span>
               </div>
             </div>
-          <div class="chat-user-modal__rating-tabs" id="chatUserModalRatingTabs" data-chat-user-profile-panel="main" hidden>
-            <button type="button" class="chat-user-modal__rating-tab" id="chatUserModalRatingTab">
-              <span class="chat-user-modal__rating-tab-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"></path><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6"></path></svg>
-              </span>
-              <span class="chat-user-modal__rating-tab-copy">
-                <span class="chat-user-modal__rating-tab-main">Общий выигрыш в турнирах <span class="chat-user-modal__rating-tab-sum" id="chatUserModalRatingTabSum" hidden></span></span>
-                <span class="chat-user-modal__rating-tab-more">Подробнее <span aria-hidden="true">›</span></span>
-              </span>
-            </button>
-            <div class="profile-prize-details" id="chatUserModalTournamentDetails" aria-live="polite"></div>
-          </div>
           <section class="chat-user-modal__news" id="chatUserModalNews" data-chat-user-profile-panel="main" hidden>
             <div class="chat-user-modal__news-heading">
               <span>Стена</span>
