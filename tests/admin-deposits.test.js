@@ -621,3 +621,19 @@ test('API forwards explicit same-player confirmation for differently named room 
  assert.equal((await api.call(body)).statusCode,409);
  const response=await api.call({...body,confirmSamePlayer:true});assert.equal(response.statusCode,200);assert.equal(response.data.playerDirectory.find(p=>p.room==='X'&&p.playerId==='4307998').profileKey,'P21|839673');assert.equal(response.data.channelOperations.length,0);
 });
+
+test('Exchip reservation freezes part of a withdrawal and settles without creating a deposit',()=>{
+ let state=applyOperation(null,{action:'create',requestId:requestId(1200),entry},'manager',1000).state;const id=state.entries[0].id;
+ const reserve={action:'reserve',requestId:requestId(1201),entryId:id,amount:200000,reservationChannel:'exchip'};
+ state=applyOperation(state,reserve,'manager',1001).state;assert.equal(view(state).entries[0].available,1300000);assert.equal(view(state).entries[0].reserved,200000);assert.equal(view(state).statistics.deposits,0);assert.equal(applyOperation(state,reserve,'manager',1002).duplicate,true);
+ assert.throws(()=>applyOperation(state,{...reserve,requestId:requestId(1202),amount:1400000},'other',1003),e=>e.status===409);
+ const confirm={action:'confirm-reservation',requestId:requestId(1203),entryId:id,reservationId:reserve.requestId};state=applyOperation(state,confirm,'manager',1004).state;const result=view(state,1005);
+ assert.equal(result.entries[0].paid,200000);assert.equal(result.entries[0].reserved,0);assert.equal(result.entries[0].available,1300000);assert.equal(result.statistics.deposits,0);assert.equal(result.statistics.outgoing,200000);assert.equal(result.statistics.exchipWithdrawals,200000);assert.equal(result.statistics.players.find(p=>p.playerId===entry.playerId).withdrawals,200000);assert.ok(result.statistics.players.every(p=>p.deposits===0));assert.equal(result.statistics.managers[0].deposits,0);assert.equal(result.paymentForms.providers.find(p=>p.id==='exchip').outgoing,200000);assert.equal(applyOperation(state,confirm,'manager',1005).duplicate,true);
+ state=applyOperation(state,{action:'void',requestId:requestId(1204),entryId:id,paymentId:confirm.requestId},'manager',1006).state;assert.equal(view(state).entries[0].available,1500000);assert.equal(view(state).statistics.exchipWithdrawals,0);
+ state=applyOperation(state,{...reserve,requestId:requestId(1205)},'manager',1007).state;state=applyOperation(state,{action:'release-reservation',requestId:requestId(1206),entryId:id,reservationId:requestId(1205)},'manager',1008).state;assert.equal(view(state).entries[0].available,1500000);assert.equal(view(state).entries[0].paid,0);
+});
+test('API persists the Exchip reservation channel',async()=>{
+ const api=apiSetup(),created=await api.call({action:'create',requestId:requestId(1210),entry});const entryId=created.data.entries[0].id;
+ const reserve=await api.call({action:'reserve',requestId:requestId(1211),entryId,amount:10000,reservationChannel:'exchip'});assert.equal(reserve.data.entries[0].reservations[0].channelId,'exchip');
+ const paid=await api.call({action:'confirm-reservation',requestId:requestId(1212),entryId,reservationId:requestId(1211)});assert.equal(paid.statusCode,200);assert.equal(paid.data.statistics.deposits,0);assert.equal(paid.data.statistics.exchipWithdrawals,10000);
+});
