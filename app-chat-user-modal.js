@@ -1198,6 +1198,8 @@ if (chatUserModalEl) {
     var hasNick = !!chatUserModalRatingNick;
     var ratingHidden = chatUserModalHideCompetitiveStats || !hasNick;
     if (modalRatingTabs) modalRatingTabs.hidden = ratingHidden;
+    var details = document.getElementById("chatUserModalTournamentDetails");
+    if (details) details.textContent = "";
     if (modalRatingTabSum) {
       var cacheKey = chatUserModalRatingTotalCacheKey(chatUserModalRatingNick);
       modalRatingTabSum.textContent = hasNick
@@ -1290,6 +1292,15 @@ if (chatUserModalEl) {
   }
 
   function syncChatUserModalRatingArt(nick) {
+    if (window.PokerGarage?.canAccessHall(window.__pokerTelegramAuth) && typeof window.pokerMountGarageShowcase === "function") {
+      hideChatUserModalRatingArtImg();
+      if (modalRatingArt) {
+        modalRatingArt.hidden = false;
+        modalRatingArt.classList.add("garage-profile-character-pending");
+      }
+      if (modalHero) modalHero.classList.add("chat-user-modal__hero--art");
+      return Promise.resolve(false);
+    }
     var art = null;
     if (nick && typeof window.pokerGetSummerRatingPlayerArt === "function") {
       art = window.pokerGetSummerRatingPlayerArt(nick);
@@ -1413,7 +1424,7 @@ if (chatUserModalEl) {
     var seq = chatUserModalRatingTotalSeq;
     if (!chatUserModalRatingTotalRequests[cacheKey]) {
       var ready = typeof window.pokerEnsureScriptDomains === "function"
-        ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-summer"]))
+        ? Promise.resolve(window.pokerEnsureScriptDomains(["rating-common", "rating-winter", "rating-spring", "rating-summer"]))
         : Promise.resolve(false);
       chatUserModalRatingTotalRequests[cacheKey] = ready.then(function () {
         var text = chatUserModalRatingTotalRewardText(ratingNick);
@@ -1436,6 +1447,20 @@ if (chatUserModalEl) {
         modalRatingTab.setAttribute("aria-label", text
           ? "Призовые в турнирах " + text + ". Подробнее"
           : "Призовые в турнирах. Подробнее");
+      }
+      var details = document.getElementById("chatUserModalTournamentDetails");
+      if (details && typeof getWinterRatingPlayerSummary === "function") {
+        var rows = getWinterRatingPlayerSummary(ratingNick, { season: "summer" });
+        var best = 0, podium = [{count:0,reward:0},{count:0,reward:0},{count:0,reward:0}];
+        rows.forEach(function (row) {
+          var reward = Number(row.reward) || 0, place = Number(row.place);
+          best = Math.max(best, reward);
+          if (place >= 1 && place <= 3) { podium[place - 1].count++; podium[place - 1].reward += reward; }
+        });
+        var money = function (value) { return Math.round(value).toLocaleString("ru-RU"); };
+        details.innerHTML = '<span class="profile-prize-best">Топ призовых за 1 турнир <b>' + money(best) + ' ₽</b></span><span class="profile-prize-podium">' + podium.map(function (row, index) {
+          return '<span class="profile-prize-place"><b>' + (index + 1) + ' место</b><span><strong>' + row.count + '</strong><small>раз</small></span><span><strong>' + money(row.reward) + '</strong><small>призовые, ₽</small></span></span>';
+        }).join('') + '</span>';
       }
       return text;
     });

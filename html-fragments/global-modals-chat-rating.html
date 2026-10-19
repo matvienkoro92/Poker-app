@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <div class="chat-user-modal" id="chatUserModal" aria-hidden="true" role="dialog" aria-labelledby="chatUserModalTitle" aria-label="Карточка пользователя">
+      <div class="chat-user-modal" id="chatUserModal" aria-hidden="true" role="dialog" aria-label="Карточка пользователя">
         <div class="chat-user-modal__backdrop"></div>
         <div class="chat-user-modal__inner">
           <button type="button" class="chat-user-modal__close" aria-label="Закрыть">×</button>
@@ -42,9 +42,8 @@
               <div class="chat-user-modal__title-block">
                 <div class="chat-user-modal__title-row">
                   <h3 class="chat-user-modal__title" id="chatUserModalTitle"></h3>
-                  <span class="chat-user-modal__verified chat-user-modal__verified--hidden" id="chatUserModalVerifiedBadge" title="PokerPlus verified" aria-label="PokerPlus verified">✓</span>
+                  <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
                 </div>
-                <p class="chat-user-modal__login-sub" id="chatUserModalLoginSub" hidden></p>
                 <div class="chat-user-modal__profile-badges">
                   <p class="chat-user-modal__gender" id="chatUserModalGender" hidden></p>
                   <p class="chat-user-modal__birth-badge" id="chatUserModalBirthBadge" hidden></p>
@@ -116,6 +115,7 @@
                 <span class="chat-user-modal__rating-tab-more">Подробнее <span aria-hidden="true">›</span></span>
               </span>
             </button>
+            <div class="profile-prize-details" id="chatUserModalTournamentDetails" aria-live="polite"></div>
           </div>
           <section class="chat-user-modal__news" id="chatUserModalNews" data-chat-user-profile-panel="main" hidden>
             <div class="chat-user-modal__news-heading">

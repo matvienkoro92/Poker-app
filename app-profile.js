@@ -1352,13 +1352,13 @@ function applyProfileAchievementsResultContent(result) {
   var total = document.getElementById("profileRatingTotal");
   var achievements = document.getElementById("profileAchievementsList");
   var ranks = document.getElementById("profileSeasonRanks");
-  if (!showcase || !achievements || !ranks || !result) return false;
+  if (!result || (!total && !showcase)) return false;
   if (total) total.innerHTML = result.totalRewardHtml
     ? renderProfileRatingTotalCards(profileRatingTotalTextFromHtml(result.totalRewardHtml))
     : renderProfileRatingTotalState("empty");
-  achievements.innerHTML = result.achievementsHtml || "";
-  ranks.innerHTML = result.ranksHtml || "";
-  showcase.hidden = false;
+  if (achievements) achievements.innerHTML = result.achievementsHtml || "";
+  if (ranks) ranks.innerHTML = result.ranksHtml || "";
+  if (showcase) showcase.hidden = false;
   return true;
 }
 
@@ -1909,7 +1909,7 @@ function refreshProfileAchievementsShowcase(profileData) {
   var total = document.getElementById("profileRatingTotal");
   var achievements = document.getElementById("profileAchievementsList");
   var ranks = document.getElementById("profileSeasonRanks");
-  if (!showcase || !achievements || !ranks) return Promise.resolve(false);
+  if (!total && !showcase) return Promise.resolve(false);
   if (profileAchievementsShowcasePromise) return profileAchievementsShowcasePromise;
   var seq = ++profileAchievementsShowcaseSeq;
   var dataReady = profileData && profileData.ok
@@ -1957,11 +1957,11 @@ function refreshProfileAchievementsShowcase(profileData) {
       if (!fastRatingRendered && total) total.innerHTML = renderProfileRatingTotalState(
         profileAchievementsRetryCount < PROFILE_ACHIEVEMENTS_RETRY_MAX ? "loading" : "error"
       );
-      achievements.innerHTML =
+      if (achievements) achievements.innerHTML =
         '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
           "Идет загрузка достижений..." +
         "</div>";
-      ranks.innerHTML =
+      if (ranks) ranks.innerHTML =
         '<div class="chat-user-modal__achievements-loading" role="status" aria-live="polite">' +
           "Идет загрузка истории сезонов..." +
         "</div>";
@@ -1981,7 +1981,7 @@ function refreshProfileAchievementsShowcase(profileData) {
 }
 
 function initProfileAchievementsShowcase() {
-  var showcase = document.getElementById("profileAchievementsShowcase");
+  var showcase = document.getElementById("profileAchievementsShowcase") || document.getElementById("profileRatingTotal");
   var profileView = document.getElementById("profileView");
   if (!showcase || !profileView) return;
   if (showcase.dataset.bound !== "1") {

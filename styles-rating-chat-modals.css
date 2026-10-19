@@ -4605,3 +4605,18 @@ html body #chatUserModal.chat-user-modal--self .chat-user-modal__profile-actions
 #chatUserModal .chat-user-modal__status-heading .chat-user-modal__status-title{position:static;min-height:0;margin:0;padding:0;font-size:13px;line-height:1.2}
 #chatUserModal .chat-user-modal__status-heading .chat-user-modal__level-text{margin:0;padding:0;font-size:clamp(32px,7vw,44px);line-height:1.1}
 #chatUserModal .chat-user-modal__status-heading .chat-user-modal__level-rest{font-size:16px}
+
+/* The hero contains the player identity; remove the duplicate header and its gap. */
+html body #chatUserModal .chat-user-modal__top {
+  display: none !important;
+}
+
+/* Public tournament results sit below the player's collection. */
+#chatUserModalRatingTabs {container-type:inline-size;}
+#chatUserModalTournamentDetails {display:block;margin:12px 0;color:#e8dfca;}
+#chatUserModalTournamentDetails .profile-prize-best {display:flex;justify-content:space-between;gap:12px;padding:10px;border:1px solid #b9a16a40;border-radius:10px;font-size:13px;}
+#chatUserModalTournamentDetails .profile-prize-podium {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px;}
+#chatUserModalTournamentDetails .profile-prize-place {display:grid;gap:6px;padding:10px 6px;min-width:0;border:1px solid #aa803b;border-radius:12px;background:#171b20;}
+#chatUserModalTournamentDetails strong,#chatUserModalTournamentDetails small {display:block;}
+#chatUserModalTournamentDetails strong {font-size:clamp(11px,3.3cqw,22px);}
+#chatUserModalTournamentDetails small {font-size:10px;color:#aeb8c4;}

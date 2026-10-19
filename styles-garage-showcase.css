@@ -96,3 +96,14 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 .garage-showcase__character-modes button{padding:9px 15px;border:1px solid #b8955170;border-radius:10px;background:#0a1319;color:#b8c7ca;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .garage-showcase__character-modes button[aria-pressed=true]{background:linear-gradient(135deg,#e8cc8b,#b89551);color:#1b1a15}
 .garage-showcase__character-modes button:focus-visible{outline:2px solid #ffe2a1;outline-offset:3px}
+
+/* The public player card shares the saved profile character and collection. */
+#chatUserModalRatingArt.garage-profile-character-pending > :not(.garage-profile-character),
+#chatUserModalRatingArt.garage-profile-character-ready > :not(.garage-profile-character) {display:none!important}
+html body #chatUserModal #chatUserModalRatingArt {
+ position:relative;background:none!important;overflow:hidden;
+}
+#chatUserModalRatingArt .garage-profile-character {
+ position:absolute;inset:0;margin:auto;width:100%;height:94%;object-fit:contain;z-index:1;filter:drop-shadow(0 8px 6px #0006);
+}
+#chatUserModalRatingArt.garage-profile-character-pending:not(.garage-profile-character-ready) .garage-profile-character {visibility:hidden}
