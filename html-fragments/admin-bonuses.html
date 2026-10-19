@@ -1,18 +1,13 @@
 <div class="view" data-view="admin-bonuses">
-  <section class="admin-bonuses" aria-labelledby="adminBonusesTitle">
+  <section class="admin-bonuses" aria-label="Бонусные балансы">
     <header class="admin-bonuses__header">
       <button type="button" class="bonus-game-back admin-bonuses__back" data-view-target="home" aria-label="На главную">←</button>
-      <div class="admin-bonuses__heading">
-        <p class="admin-bonuses__eyebrow">Админка</p>
-        <h2 class="admin-bonuses__title" id="adminBonusesTitle">Бонусные балансы</h2>
+      <div class="admin-bonuses__tabs" role="tablist" aria-label="Раздел бонусных балансов">
+        <button type="button" class="admin-bonuses__tab admin-bonuses__tab--active" data-admin-bonuses-tab="balances" role="tab" aria-selected="true">Балансы</button>
+        <button type="button" class="admin-bonuses__tab" data-admin-bonuses-tab="issues" role="tab" aria-selected="false">Кому выдано</button>
       </div>
-      <button type="button" class="admin-bonuses__refresh" id="adminBonusesRefreshBtn">Обновить</button>
     </header>
-
-    <div class="admin-bonuses__tabs" role="tablist" aria-label="Раздел бонусных балансов">
-      <button type="button" class="admin-bonuses__tab admin-bonuses__tab--active" data-admin-bonuses-tab="balances" role="tab" aria-selected="true">Балансы</button>
-      <button type="button" class="admin-bonuses__tab" data-admin-bonuses-tab="issues" role="tab" aria-selected="false">Кому выдано</button>
-    </div>
+    <button type="button" class="admin-bonuses__refresh" id="adminBonusesRefreshBtn">Обновить</button>
 
     <div class="admin-bonuses__tab-panel" data-admin-bonuses-panel="balances">
     <div class="admin-bonuses__filters">

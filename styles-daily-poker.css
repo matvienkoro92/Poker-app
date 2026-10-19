@@ -4325,3 +4325,6 @@
   align-items: stretch;
 }
 #app .daily-poker .daily-poker__result-copy { width: 100%; }
+
+.admin-bonuses__header{grid-template-columns:44px minmax(0,1fr);gap:8px;margin-bottom:8px}.admin-bonuses__header>.admin-bonuses__back{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;max-height:44px}.admin-bonuses__header>.admin-bonuses__tabs{margin:0;min-width:0;padding:3px}.admin-bonuses__header .admin-bonuses__tab{min-width:0;padding:4px 6px;font-size:12px}
+#adminBonusesRefreshBtn{width:100%;margin:0 0 10px}
