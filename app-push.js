@@ -732,8 +732,10 @@ function initProfileChatPush() {
     var button = document.createElement("button");
     button.id = "pokerAppUpdateButton";
     button.type = "button";
-    button.textContent = "Доступно обновление · Обновить";
-    button.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:2147483647;padding:10px 16px;border-radius:20px;background:#f5cb67;color:#17120b;border:1px solid #ac853b;font:600 13px sans-serif;max-width:90vw";
+    button.textContent = "↻ Обновить";
+    button.setAttribute("aria-label", "Доступно обновление приложения. Обновить");
+    button.title = "Доступно обновление приложения";
+    button.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:2147483647;box-sizing:border-box;width:auto!important;min-width:0!important;height:30px!important;min-height:30px!important;max-height:30px!important;padding:5px 10px!important;border-radius:12px;background:#f5cb67;color:#17120b;border:1px solid #ac853b;font:600 11px/18px sans-serif!important;white-space:nowrap!important;max-width:90vw";
     button.addEventListener("click", function () {
       button.disabled = true;
       button.textContent = "Обновляем…";
