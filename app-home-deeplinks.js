@@ -131,6 +131,10 @@ function pokerInitHomeDeepLinks(opts) {
       var refSplit = pokerSplitReferralStartParam(startParam);
       if (refSplit && refSplit.routeStartParam) startParam = refSplit.routeStartParam;
     }
+    if(startParam==='admin_deposits'){
+      openHomeModalDeepLink(function(){return typeof window.pokerOpenDepositsDeepLink==='function'&&window.pokerOpenDepositsDeepLink();});
+      return;
+    }
     var tournamentBetMatch = startParam.match(/^tournament_bet_(tb_[a-z0-9_:-]+)$/i);
     if (startParam === "tournament_bet" || tournamentBetMatch) {
       openHomeModalDeepLink(function () {

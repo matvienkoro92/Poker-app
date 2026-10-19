@@ -37,12 +37,12 @@ test('group ignores unrelated commands and never forwards messages to Salebot',a
  commands.handle=async()=>{replies++;return true};global.fetch=async()=>{forwards++;throw Error('unexpected request')};
  t.after(()=>{commands.handle=oldHandle;global.fetch=oldFetch;});
  const handler=require('../lib/api-handlers/telegram-bot-webhook');
- for(const text of ['привет','/start','/tables','/schedule','/pulse']){
+ for(const text of ['привет','/start','/tables','/schedule','/pulse','выводы','/withdrawals@Poker_dvatuza_bot']){
  const res={setHeader(){},status(){return this},json(v){this.body=v;return this}};
  await handler({method:'POST',headers:{'x-telegram-bot-api-secret-token':'policy-test'},body:{message:{text,chat:{id:-100456,type:'supergroup'},from:{id:42}}}},res);
  assert.equal(res.body.ok,true);
  }
- assert.equal(replies,1);assert.equal(forwards,0);assert.ok(protectedIds.has('-100456'));
+ assert.equal(replies,3);assert.equal(forwards,0);assert.ok(protectedIds.has('-100456'));
 });
 
 

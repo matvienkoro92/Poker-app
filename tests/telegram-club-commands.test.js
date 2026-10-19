@@ -128,3 +128,8 @@ test('unreachable schedule recipient gets a private start link and start opens t
  assert.match(calls.at(-1).p.reply_markup.inline_keyboard[0][0].url,/start=schedule$/);
  assert.equal(c.command({message:{text:'/start schedule',chat:{type:'private'}}}),'schedule:0');
 });
+
+test('withdrawal commands accept Russian text and addressed bot commands',()=>{
+ for(const text of ['выводы','/выводы','/withdrawals','/withdrawals@Poker_dvatuza_bot'])assert.equal(c.command({message:{text}}),'withdrawals:0');
+ assert.equal(c.command({message:{text:'/withdrawals@SomeoneElseBot'}}),null);
+});

@@ -41,7 +41,8 @@ async function main(){
    const sizes=await page.locator('#headerAdminShortcuts button').evaluateAll(bs=>bs.map(b=>({width:b.getBoundingClientRect().width,height:b.getBoundingClientRect().height})));
    for(const s of sizes){assert.ok(s.width>=44&&s.height>=44,'Large header targets: '+JSON.stringify(s));}
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
-   await page.locator('#headerDepositsShortcutBtn').click();
+   await page.waitForFunction(()=>typeof window.__pokerApplyStartAppDeepLink==='function');
+   await page.evaluate(()=>window.__pokerApplyStartAppDeepLink('admin_deposits'));
    await page.locator('#adminMenuPasswordInput').fill('1234');await page.locator('#adminMenuPasswordSubmit').click();
    await page.locator('dialog.deposits[open]').waitFor();
    await page.locator('[data-filter="active"]').waitFor();

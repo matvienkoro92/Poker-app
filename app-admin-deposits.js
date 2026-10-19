@@ -298,5 +298,6 @@
       await save({action:'adjust',entryId:form.dataset.entry,total:sum,reason:values.reason});
     }else if(type==='void')await save({action:'void',entryId:form.dataset.entry,paymentId:form.dataset.payment});
   }
+  window.pokerOpenDepositsDeepLink=function(){var target=document.getElementById('headerDepositsShortcutBtn');if(!target||target.hidden||target.disabled)return false;target.click();return true;};
   document.addEventListener('click',function(event){var target=event.target.closest('#headerDepositsShortcutBtn');if(target&&!target.hidden&&!target.disabled)open(target);});
 })();
