@@ -60,10 +60,16 @@ async function main(){
    await page.locator('[data-filter="active"]').click();
    await page.locator('.deposits__bottom-totals').waitFor();
    await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedPaymentLink=text;}}}));
+   const quickLinks=page.locator('.deposits__prodamus-links');
+   assert.equal(await quickLinks.locator('button').count(),2);
+   assert.equal(await page.locator('.deposits__payment-form-hint').count(),0);
+   await quickLinks.locator('[data-option="0"]').click();assert.equal(await page.evaluate(()=>window.__copiedPaymentLink),'https://payform.ru/4jah7zO/');
+   await quickLinks.locator('[data-option="1"]').click();assert.equal(await page.evaluate(()=>window.__copiedPaymentLink),'https://payform.ru/8tah7Dv/');
+   assert.equal(await page.locator('.deposits__popup[open]').count(),0);
    await page.locator('[data-dep="payment-form"][data-provider="prodamus"]').click();
-   await page.locator('[data-dep="copy-payment-link"][data-option="0"]').click();
+   await page.locator('.deposits__popup [data-dep="copy-payment-link"][data-option="0"]').click();
    assert.equal(await page.evaluate(()=>window.__copiedPaymentLink),'https://payform.ru/4jah7zO/');
-   await page.locator('[data-dep="copy-payment-link"][data-option="1"]').click();
+   await page.locator('.deposits__popup [data-dep="copy-payment-link"][data-option="1"]').click();
    assert.equal(await page.evaluate(()=>window.__copiedPaymentLink),'https://payform.ru/8tah7Dv/');
    assert.equal(view(state).paymentForms.providers[0].total,null);
    await page.screenshot({path:path.join(output,width+'-prodamus.png')});
@@ -74,7 +80,7 @@ async function main(){
      const form=page.locator('[data-form="channel-operation"]');await form.locator('[name="amount"]').fill('100');await form.locator('[name="room"][value="X"]').check();await form.locator('[name="playerId"]').fill('111');
      await form.locator('[data-dep="split-add"]').click();await form.locator('[name="allocationAmount"]').fill('40');await form.locator('[name="allocationAmount_1"]').fill('60');await form.locator('[name="room_1"][value="PP"]').check();await form.locator('[name="playerId_1"]').fill('222');await form.locator('button[type="submit"]').click();
      await page.locator('.deposits__channel-history').waitFor();assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);assert.equal(state.channelOperations.at(-1).allocations.length,2);
-     if(channel==='prodamus'){await page.locator('[data-dep="editor-close"]').first().click();await page.locator('[data-provider="prodamus"]').click();assert.equal(await page.locator('[data-dep="copy-payment-link"]').count(),2);assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);}
+     if(channel==='prodamus'){await page.locator('[data-dep="editor-close"]').first().click();await page.locator('[data-provider="prodamus"]').click();assert.equal(await page.locator('.deposits__popup [data-dep="copy-payment-link"]').count(),2);assert.match(await page.locator('.deposits__channel-history').innerText(),/222/);}
      await page.locator('.deposits__popup [data-dep="channel-void"]').first().click();await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();await page.locator('.deposits__channel-history').waitFor();await page.locator('[data-dep="editor-close"]').first().click();
    }}
    assert.equal(await page.locator('.deposits__payment-form').count(),7);

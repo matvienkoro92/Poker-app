@@ -509,3 +509,7 @@ body.deposits-open {overflow:hidden;}
 .deposits__player-picker{display:grid;gap:5px;margin-bottom:10px}.deposits__player-picker>label{display:grid;gap:5px;font-size:12px;color:var(--dep-gold)}.deposits__player-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.deposits .deposits__player-choices>button{display:grid;gap:3px;min-width:0;min-height:44px;padding:7px;text-align:left;border:1px solid #dfc58a40;border-radius:8px;background:#d7bd7908;color:var(--dep-cream)}.deposits__player-choices b{font-size:11px;overflow-wrap:anywhere}.deposits__player-choices small{font-size:9px;color:var(--dep-muted);overflow-wrap:anywhere}
 
 .deposits__transfer-route .deposits__rooms label[hidden]{display:none!important}
+
+.deposits__payment-provider--prodamus{gap:4px}.deposits .deposits__payment-provider--prodamus>.deposits__payment-form{min-height:48px;padding:7px 5px}
+.deposits__prodamus-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.deposits .deposits__prodamus-links>button{min-width:0;min-height:26px;padding:3px 2px;border:1px solid #dfc58a55;border-radius:7px;background:#d7bd7910;color:var(--dep-gold);font:inherit;font-size:10px;line-height:18px;white-space:nowrap;cursor:pointer}
+@media(max-width:350px){.deposits .deposits__payment-provider--prodamus>.deposits__payment-form{padding-bottom:20px}.deposits .deposits__prodamus-links>button{font-size:9px}}
