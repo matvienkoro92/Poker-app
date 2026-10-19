@@ -592,7 +592,7 @@ test('transfers reject another player and same room even when the submitted name
  assert.throws(()=>applyOperation(null,{...body,toPlayerId:'3019341'},'manager'),/одного игрока/);
  assert.throws(()=>applyOperation(null,{...body,toPlayerId:'unknown123'},'manager'),/одного игрока/);
  assert.throws(()=>applyOperation(null,{...body,profileKey:'P21|286730'},'manager'),/одного игрока/);
- assert.throws(()=>applyOperation(null,{...body,profileKey:''},'manager'),/одного игрока/);
+ assert.equal(applyOperation(null,{...body,profileKey:''},'manager').state.channelOperations.length,2);
  const state=applyOperation(null,{action:'save-player-account',requestId:requestId(991),profileKey:'P21|398176',room:'PP',playerId:'pp123'},'manager').state;
  assert.equal(applyOperation(state,{...body,toRoom:'PP',toPlayerId:'pp123'},'manager').state.channelOperations.length,2);
 });
@@ -671,4 +671,16 @@ test('transfer accepts an older selected account key after a confirmed reverse l
 test('API accepts a previously selected player after linking their account from the other room',async()=>{
  const api=apiSetup();const linked=await api.call({action:'save-player-account',requestId:requestId(1510),profileKey:'X|4302724',room:'P21',playerId:'302631',nick:'RedRocket🚀',confirmSamePlayer:true});assert.equal(linked.statusCode,200);
  const response=await api.call({action:'transfer',requestId:requestId(1511),profileKey:'P21|302631',fromRoom:'P21',fromPlayerId:'302631',toRoom:'X',toPlayerId:'4302724',amount:240000});assert.equal(response.statusCode,200);assert.equal(response.data.channelOperations.length,2);
+});
+
+
+test('transfer resolves saved sender when the name field has lost its selection',()=>{
+ let state=applyOperation(null,{action:'save-player-account',requestId:requestId(1520),room:'P21',playerId:'482282',nick:'хер вам)))))'},'manager',1000).state;
+ state=applyOperation(state,{action:'save-player-account',requestId:requestId(1521),profileKey:'P21|482282',room:'X',playerId:'3973346',confirmSamePlayer:true},'manager',1001).state;
+ const body={action:'transfer',requestId:requestId(1522),profileKey:'',fromRoom:'P21',fromPlayerId:'482282',toRoom:'X',toPlayerId:'3973346',amount:360000};
+ const result=applyOperation(state,body,'manager',1002).state;
+ assert.equal(result.channelOperations.length,2);assert.ok(result.channelOperations.every(r=>r.profileKey==='P21|482282'));assert.equal(view(result).statistics.deposits,0);
+ assert.throws(()=>applyOperation(state,{...body,toPlayerId:'3019341'},'manager',1002),/одного игрока/);
+ assert.throws(()=>applyOperation(state,{...body,profileKey:'P21|839673'},'manager',1002),/одного игрока/);
+ assert.throws(()=>applyOperation(state,{...body,fromPlayerId:'unknown'},'manager',1002),/одного игрока/);
 });
