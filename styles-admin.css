@@ -5148,3 +5148,8 @@ button.admin-report-rakeback-summary__row:focus-visible {
 .admin-report-rakeback-period__tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 .admin-report-rakeback-period__tabs button{white-space:nowrap;min-width:0;padding-left:2px;padding-right:2px}.rakeback-period-short{display:none}
 @media(max-width:600px){.admin-report-rakeback-period__tabs{gap:3px}.admin-report-rakeback-period__tabs button{font-size:8px}.rakeback-period-full{display:none}.rakeback-period-short{display:inline}}
+
+#adminReportModal.admin-report--rakeback-only .admin-report-date{display:none}
+#adminReportModal.admin-report--rakeback-only .admin-report-rakeback-period{margin-top:0;margin-right:44px}
+#adminReportModal.admin-report--rakeback-only #adminReportModalClose{top:calc(env(safe-area-inset-top,0px) + 15px);right:12px;width:36px;height:36px;min-width:36px;min-height:36px;padding:0;z-index:5;font-size:25px}
+@media(max-width:360px){#adminReportModal.admin-report--rakeback-only .admin-report-rakeback-period__tabs{gap:2px}#adminReportModal.admin-report--rakeback-only .admin-report-rakeback-period__tabs button{font-size:7px;padding-left:0;padding-right:0}}
