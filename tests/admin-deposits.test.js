@@ -605,3 +605,19 @@ test('latest X-Poker week adds new IDs and retains older club accounts',()=>{
  }
  assert.ok(rows.some(r=>r.room==='P21'&&r.playerId==='256073'&&r.nick==='Бабник'));
 });
+
+test('different room nicknames can be explicitly linked without changing money or overriding another profile',()=>{
+ const link={action:'save-player-account',requestId:requestId(1100),profileKey:'P21|839673',room:'X',playerId:'4307998',nick:'SantaClauS'};
+ assert.throws(()=>applyOperation(null,link,'manager'),/Подтвердите/);
+ const result=applyOperation(null,{...link,confirmSamePlayer:true},'manager',1000,'Аня');
+ const account=view(result.state).playerDirectory.find(p=>p.room==='X'&&p.playerId==='4307998');assert.equal(account.profileKey,'P21|839673');assert.ok(account.aliases.includes('✴️ВадиМ✴'));assert.equal(result.state.playerAccounts[0].previousNick,'✴️ВадиМ✴');assert.equal(view(result.state).statistics.deposits,0);assert.equal(result.state.channelOperations?.length||0,0);
+ const transfer={action:'transfer',requestId:requestId(1101),profileKey:'P21|839673',fromRoom:'P21',fromPlayerId:'839673',toRoom:'X',toPlayerId:'4307998',amount:200000};assert.equal(applyOperation(result.state,transfer,'manager').state.channelOperations.length,2);
+ assert.throws(()=>applyOperation(result.state,{...link,requestId:requestId(1102),profileKey:'P21|398176',confirmSamePlayer:true},'other'),/другим игроком/);
+ const linkedGroup={...link,requestId:requestId(1103),profileKey:'P21|839673',room:'X',playerId:'2728933',confirmSamePlayer:true};assert.throws(()=>applyOperation(null,linkedGroup,'manager'),/Подтвердите/);
+});
+
+test('API forwards explicit same-player confirmation for differently named room accounts',async()=>{
+ const api=apiSetup(),body={action:'save-player-account',requestId:requestId(1110),profileKey:'P21|839673',room:'X',playerId:'4307998',nick:'SantaClauS'};
+ assert.equal((await api.call(body)).statusCode,409);
+ const response=await api.call({...body,confirmSamePlayer:true});assert.equal(response.statusCode,200);assert.equal(response.data.playerDirectory.find(p=>p.room==='X'&&p.playerId==='4307998').profileKey,'P21|839673');assert.equal(response.data.channelOperations.length,0);
+});

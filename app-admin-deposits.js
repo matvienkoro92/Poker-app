@@ -236,7 +236,7 @@
       return true;
     }catch(e){tell('Не удалось скопировать. Выделите номер в карточке вручную.',true);}
   }
-  async function savePlayerAccount(picker,overrideSide){
+  async function savePlayerAccount(picker,overrideSide,confirmedSignature){
     var side=overrideSide||picker.dataset.transferSide,scope=picker.closest('[data-allocation]')||picker.closest('form');
     var id=scope.querySelector(side?'[name="'+side+'PlayerId"]':'[name^="depositorId"],[name^="playerId"]');
     var room=Array.from(scope.querySelectorAll('input[type="radio"]')).find(function(r){return r.checked&&(!side||r.name===side+'Room');});
@@ -244,8 +244,10 @@
     if(!id||!room||!id.value.trim()||(!base&&!query)){tell('Выберите игрока или укажите ник, рум и ID.',true);return;}
     if(!base&&playerChoices(query).length){tell('Сначала выберите нужного игрока из результатов поиска.',true);return;}
     var operation={action:'save-player-account',requestId:picker.dataset.saveRequest||uid(),profileKey:picker.dataset.profileKey||'',room:room.value,playerId:id.value.trim(),nick:base&&(base.nick||base.name)||query};
+    var target=(data.playerDirectory||[]).find(function(p){return p.room===operation.room&&p.playerId===operation.playerId;}),confirmation=JSON.stringify({profileKey:operation.profileKey,room:operation.room,playerId:operation.playerId});
+    if(target&&base&&target.profileKey!==base.profileKey){if(confirmedSignature!==confirmation){var box=picker.querySelector('[data-account-link-confirm]');if(!box){box=document.createElement('div');box.setAttribute('data-account-link-confirm','');picker.appendChild(box);}box.innerHTML='<p class="deposits__hint">'+esc(target.nick||target.name)+' · '+esc(target.room)+' · ID '+esc(target.playerId)+' и '+esc(base.nick||base.name)+' — аккаунты одного игрока? Подтвердите связь только после проверки.</p><button type="button" class="deposits__secondary" data-dep="confirm-account-link" data-side="'+esc(side||'')+'" data-signature="'+esc(confirmation)+'">Да, это один игрок · сохранить связь</button>';return;}operation.confirmSamePlayer=true;}
     var signature=JSON.stringify(Object.assign({},operation,{requestId:''}));if(picker.dataset.saveSignature!==signature){operation.requestId=uid();picker.dataset.saveSignature=signature;picker.dataset.saveRequest=operation.requestId;}
-    setBusy(true);try{data=await api(operation);var saved=(data.playerDirectory||[]).find(function(p){return p.room===operation.room&&p.playerId===operation.playerId;});if(saved)picker.dataset.profileKey=saved.profileKey;if(scope.dataset.form==='transfer')syncTransferAccounts(scope);picker.querySelector('[data-player-caption]').textContent='Сохранено: '+operation.room+' · ID '+operation.playerId;tell('Аккаунт игрока сохранён. Теперь доступен в поиске.');}catch(error){handleError(error);}finally{setBusy(false);}
+    setBusy(true);try{data=await api(operation);var saved=(data.playerDirectory||[]).find(function(p){return p.room===operation.room&&p.playerId===operation.playerId;});if(saved)picker.dataset.profileKey=saved.profileKey;var confirmationBox=picker.querySelector('[data-account-link-confirm]');if(confirmationBox)confirmationBox.remove();if(scope.dataset.form==='transfer')syncTransferAccounts(scope);picker.querySelector('[data-player-caption]').textContent='Сохранено: '+operation.room+' · ID '+operation.playerId;tell('Аккаунт игрока сохранён. Теперь доступен в поиске.');}catch(error){handleError(error);}finally{setBusy(false);}
   }
   async function onClick(event) {
     var b=event.target.closest('[data-dep]');if(!b||busy)return;
@@ -256,6 +258,7 @@
     else if(action==='transfer-history')openChannel('transfer');
     else if(action==='save-transfer-from-account')await savePlayerAccount(b.closest('form').querySelector('[data-player-picker]'),'from');
     else if(action==='save-transfer-account')await savePlayerAccount(b.closest('form').querySelector('[data-player-picker]'),'to');
+    else if(action==='confirm-account-link')await savePlayerAccount(b.closest('[data-player-picker]'),b.dataset.side||undefined,b.dataset.signature);
     else if(action==='save-player-account')await savePlayerAccount(b.closest('[data-player-picker]')||b.closest('[data-allocation]').querySelector('[data-player-picker]'));
     else if(action==='pick-player'){
       var picker=b.closest('[data-player-picker]'),allocation=b.closest('[data-allocation]'),side=picker.dataset.transferSide,scope=allocation||b.closest('form');
@@ -309,7 +312,7 @@
     var values=Object.fromEntries(new FormData(form).entries()), type=form.dataset.form;
     if(type==='quick-income'){quickIncome(values.quickText);return;}
     if(type==='statistics-period'){if(values.from>values.to){tell('Проверьте порядок дат.',true);return;}statisticsPeriod={preset:'custom',from:values.from,to:values.to};closeEditor();await refresh(false);return;}
-    if(type==='transfer'){var transferAmount=parser.money(values.amount);if(!transferAmount){tell('Укажите корректную сумму.',true);return;}await save({action:'transfer',profileKey:form.querySelector('[data-player-picker]').dataset.profileKey||'',playerName:values.playerName,amount:transferAmount,fromRoom:values.fromRoom,toRoom:values.toRoom,fromPlayerId:values.fromPlayerId,toPlayerId:values.toPlayerId,note:values.note});return;}
+    if(type==='transfer'){var accountSides=['from','to'].map(function(side){return (data.playerDirectory||[]).find(function(p){return p.room===values[side+'Room']&&p.playerId===String(values[side+'PlayerId']||'').trim();});});if(accountSides.some(function(p){return !p;})){tell('Сначала сохраните ID '+(!accountSides[0]?'отправителя слева':'получателя справа')+' за выбранным игроком.',true);return;}if(accountSides[0].profileKey!==accountSides[1].profileKey){tell('Эти ID ещё не связаны. Нажмите «Сохранить ID» справа и подтвердите, что это один игрок.',true);return;}var transferAmount=parser.money(values.amount);if(!transferAmount){tell('Укажите корректную сумму.',true);return;}await save({action:'transfer',profileKey:form.querySelector('[data-player-picker]').dataset.profileKey||'',playerName:values.playerName,amount:transferAmount,fromRoom:values.fromRoom,toRoom:values.toRoom,fromPlayerId:values.fromPlayerId,toPlayerId:values.toPlayerId,note:values.note});return;}
     if(type==='edit-channel-operation'){var editAmount=parser.money(values.amount);if(!editAmount){tell('Укажите корректную сумму.',true);return;}var editParts=readPaymentAllocations(form,editAmount);if(editParts===null)return;await save({action:type,operationId:form.dataset.operation,channelId:form.dataset.channel,editVersion:Number(form.dataset.version),amount:editAmount,room:values.room,playerId:values.playerId,note:values.note,...(editParts?{allocations:editParts}:{})});return;}
     if(type==='channel-operation'){var channelAmount=parser.money(values.amount);if(!channelAmount){tell('Укажите корректную сумму.',true);return;}var channelParts=readPaymentAllocations(form,channelAmount);if(channelParts===null)return;await save({action:type,channelId:form.dataset.channel,direction:form.dataset.direction,amount:channelAmount,room:values.room,playerId:values.playerId,note:values.note,...(channelParts?{allocations:channelParts}:{})});return;}
     if(type==='void-channel-operation'){await save({action:type,operationId:form.dataset.operation,channelId:form.dataset.channel});return;}
