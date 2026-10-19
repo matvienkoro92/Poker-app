@@ -19,7 +19,7 @@ async function main(){
     if(url.includes('/api/admin-deposits')){
      if(body.action!=='list')state=applyOperation(state,body,'Тестовый администратор',Date.now(),'Владелец',{canDelete:true}).state;
      if(lose&&body.action==='confirm-reservation'){lose=false;return route.abort();}
-     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state,Date.now(),body.statisticsPeriod),permissions:{canDelete:true}})});
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,...view(state,Date.now(),body.statisticsPeriod),recentPlayers:require('../lib/deposit-player-recents').recentPlayers(state,'Тестовый администратор'),permissions:{canDelete:true}})});
     }
     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,allowed:true,isAdmin:true,entries:[],events:[],levelRows:[],participants:[],winners:[]})});
    });
@@ -59,6 +59,18 @@ async function main(){
    assert.equal(await page.locator('.deposits__totals').count(),0);
    await page.locator('[data-filter="active"]').click();
    await page.locator('.deposits__bottom-totals').waitFor();
+   if(process.env.SMOKE_DEPOSIT_AUTOMATION){
+   const quick=page.locator('[data-form="quick-income"]');await quick.locator('input').fill('деп Пряник Х 2000 Рунекс');await quick.locator('button').click();
+   let form=page.locator('[data-form="channel-operation"]');await form.waitFor();assert.equal(await form.locator('[name="amount"]').inputValue(),'2000');assert.equal(await form.locator('[name="playerId"]').inputValue(),'2728933');assert.equal(await form.locator('[name="room"][value="X"]').isChecked(),true);assert.equal((state.channelOperations||[]).length,0);
+   await form.locator('[type="submit"]').click();await page.locator('.deposits__channel-history [data-dep="channel-repeat"]').waitFor();assert.equal(state.channelOperations.length,1);
+   await page.locator('[data-dep="channel-repeat"]').click();form=page.locator('[data-form="channel-operation"]');await form.waitFor();assert.equal(await form.locator('[name="amount"]').inputValue(),'2000');assert.equal(await form.locator('[name="playerId"]').inputValue(),'2728933');assert.equal(state.channelOperations.length,1);
+   await form.locator('[type="submit"]').click();await page.locator('.deposits__channel-history [data-dep="channel-repeat"]').first().waitFor();assert.equal(state.channelOperations.length,2);
+   await page.locator('[data-dep="editor-close"]').first().click();await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
+   form=page.locator('[data-form="channel-operation"]');await form.locator('[data-dep="pick-player"][data-player-id="2728933"]').click();assert.equal(await form.locator('[name="playerId"]').inputValue(),'2728933');assert.equal(await form.locator('[name="room"][value="X"]').isChecked(),true);
+   await form.locator('[data-dep="pick-player"][data-player-id="398176"]').click();assert.equal(await form.locator('[name="playerId"]').inputValue(),'398176');assert.equal(await form.locator('[name="room"][value="P21"]').isChecked(),true);
+   await page.screenshot({path:path.join(output,width+'-deposit-automation.png')});await page.locator('[data-dep="editor-close"]').first().click();
+   assert.deepEqual(errors,[]);await context.close();console.log('Automation OK '+width);continue;
+   }
    await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedPaymentLink=text;}}}));
    const quickLinks=page.locator('.deposits__prodamus-links');
    assert.equal(await quickLinks.locator('button').count(),2);

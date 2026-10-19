@@ -55,7 +55,7 @@ function apiSetup(){
   const mod={exports:{}};
   vm.runInNewContext(fs.readFileSync(require.resolve('../lib/api-handlers/admin-deposits'),'utf8'),{
     module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,
-    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):null
+    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):id==='../deposit-player-recents'?require('../lib/deposit-player-recents'):null
   });
   async function call(body,user='admin-a',scope='deposits'){
     const res={statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(value){this.data=value;return this;},end(){return this;}};
@@ -518,7 +518,7 @@ test('player directory keeps room identities separate and recent depositors inde
 
 test('player suggestions search nickname name and partial ID and show only recent on empty query',()=>{
  const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function playerChoices('),source.indexOf('  function playerChoicesHtml('));const ctx={data:{playerDirectory:[{room:'X',playerId:'4110862',name:'Иван',lastUsedAt:20},{room:'P21',playerId:'123',nick:'Туз',lastUsedAt:0}]}};
- vm.createContext(ctx);vm.runInContext(fn,ctx);assert.equal(ctx.playerChoices('').length,1);assert.equal(ctx.playerChoices('1086')[0].playerId,'4110862');assert.equal(ctx.playerChoices('ИВАН')[0].room,'X');assert.equal(ctx.playerChoices('туз')[0].room,'P21');assert.equal(ctx.playerChoices('missing').length,0);
+ ctx.data.recentPlayers=[ctx.data.playerDirectory[0]];vm.createContext(ctx);vm.runInContext(fn,ctx);assert.equal(ctx.playerChoices('').length,1);assert.equal(ctx.playerChoices('1086')[0].playerId,'4110862');assert.equal(ctx.playerChoices('ИВАН')[0].room,'X');assert.equal(ctx.playerChoices('туз')[0].room,'P21');assert.equal(ctx.playerChoices('missing').length,0);
 });
 
 test('Cooler Russian alias preserves Poker21 nickname and ID and is searchable',()=>{
