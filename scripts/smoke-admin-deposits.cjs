@@ -113,7 +113,7 @@ async function main(){
    await transferForm.locator('[name="fromRoom"][value="X"]').check();
    await transferForm.locator('[name="fromPlayerId"]').fill('445566');
    await transferForm.locator('[name="amount"]').fill('1234');
-   await senderPicker.locator('[data-dep="save-player-account"]').click();
+   await transferForm.locator('[data-dep="save-transfer-from-account"]').click();
    await page.waitForFunction(()=>document.querySelector('[data-transfer-side="from"] [data-player-caption]').textContent.includes('Сохранено'));
    assert.equal(await transferForm.locator('[name="amount"]').inputValue(),'1234');
    await senderPicker.locator('[data-player-query]').fill('кулер');
