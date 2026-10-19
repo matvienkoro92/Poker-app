@@ -464,6 +464,9 @@ body.deposits-open {overflow:hidden;}
 .deposits .deposits__provider-income{min-height:32px;padding:6px 10px;border:1px solid #8cbe9970;border-radius:9px;background:#29473688;color:#c4efcc;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 
 .deposits__allocation+.deposits__allocation{margin-top:16px;padding-top:14px;border-top:1px solid var(--dep-line)}
+.deposits .deposits__account-save {margin-bottom:10px;}
+.deposits .deposits__account-save>label {margin-bottom:0;}
+.deposits .deposits__account-save>.deposits__text-button {margin:2px 0 0;padding:4px 0;}
 
 .deposits__payment-form-hint{font-size:11px;color:#ead994;font-weight:500}
 

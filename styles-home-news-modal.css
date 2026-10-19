@@ -2677,6 +2677,7 @@ body .home-friend-news-modal--club .home-friend-news-modal__day-events .home-fri
 @media(max-width:390px){.home-friend-news-modal__cash-group--featured .cash-monthly-value{font-size:17px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured)>summary{grid-template-columns:38px minmax(0,1fr) auto 22px;gap:1px 4px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-icon{width:38px}.home-friend-news-modal__cash-group--monthly:not(.home-friend-news-modal__cash-group--featured) .cash-monthly-value{font-size:13px}}
 
 .home-friend-news-modal.home-friend-news-modal--club {
+  top: calc(max(12px, env(safe-area-inset-top, 0px), var(--tg-ui-top-clearance, 0px), var(--app-top-from-tg, 0px)) + 8px);
   bottom: var(--app-bottom-tabbar-height, 80px);
   padding: 0;
   align-items: stretch;
