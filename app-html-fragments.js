@@ -1104,13 +1104,20 @@
     if (!modal) return false;
     bindAdminReportShellModal();
     syncAdminReportShellAccess();
+    var reportButton = document.getElementById("adminReportBtn");
+    var rakebackOnly = !!(reportButton && reportButton.dataset.openRakeback === "1");
+    if (reportButton) delete reportButton.dataset.openRakeback;
+    modal.classList.toggle("admin-report--rakeback-only", rakebackOnly);
+    modal.setAttribute("aria-label", rakebackOnly ? "Рейкбек" : "Отчёт за смену");
+    var reportDate = document.getElementById("adminReportDate");
+    if (rakebackOnly && reportDate) reportDate.textContent = "Рейкбек";
     modal.setAttribute("aria-hidden", "false");
     if (document.documentElement) document.documentElement.classList.add("admin-report-modal-open");
     if (document.body) {
       document.body.classList.add("admin-report-modal-open");
       document.body.style.overflow = "hidden";
     }
-    var initialTab = shouldOpenAdminReportRakebackByDefault() ? "rakeback" : "form";
+    var initialTab = rakebackOnly || shouldOpenAdminReportRakebackByDefault() ? "rakeback" : "form";
     setAdminReportShellTab(initialTab);
     if (initialTab === "rakeback") openAdminReportRakebackShell().catch(function () {});
     return true;

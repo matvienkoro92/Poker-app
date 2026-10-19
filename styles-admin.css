@@ -5141,3 +5141,10 @@ button.admin-report-rakeback-summary__row:focus-visible {
 #trackingLinksJourneyMore { margin: 12px 0; }
 #trackingLinksVisitorsModal .share-stats-admin-modal__box,
 #trackingLinksAdminModal .share-stats-admin-modal__box { background-color: var(--bg, #0f172a); }
+
+#adminReportModal.admin-report--rakeback-only .admin-report-tabs{display:none}
+#adminReportModal.admin-report--rakeback-only .admin-report-date{margin-bottom:6px;color:#ffe7ad;font-size:20px;font-weight:800}
+
+.admin-report-rakeback-period__tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
+.admin-report-rakeback-period__tabs button{white-space:nowrap;min-width:0;padding-left:2px;padding-right:2px}.rakeback-period-short{display:none}
+@media(max-width:600px){.admin-report-rakeback-period__tabs{gap:3px}.admin-report-rakeback-period__tabs button{font-size:8px}.rakeback-period-full{display:none}.rakeback-period-short{display:inline}}

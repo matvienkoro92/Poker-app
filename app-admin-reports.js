@@ -3891,6 +3891,10 @@ function initAdminReportModal() {
   }
   function openModal() {
     if (!syncAdminReportButtonVisibility()) return false;
+    var rakebackOnly = btn.dataset.openRakeback === "1" || (modal.getAttribute("aria-hidden") === "false" && modal.classList.contains("admin-report--rakeback-only"));
+    delete btn.dataset.openRakeback;
+    modal.classList.toggle("admin-report--rakeback-only", rakebackOnly);
+    modal.setAttribute("aria-label", rakebackOnly ? "Рейкбек" : "Отчёт за смену");
     modal.setAttribute("aria-hidden", "false");
     if (document.documentElement) document.documentElement.classList.add("admin-report-modal-open");
     if (document.body) {
@@ -3903,11 +3907,11 @@ function initAdminReportModal() {
     editingReport = null;
     if (submitBtn) submitBtn.textContent = "Отправить отчёт";
     var info = getShiftReportDateInfo();
-    if (dateEl) dateEl.textContent = formatAdminReportDateLabel(info.label);
+    if (dateEl) dateEl.textContent = rakebackOnly ? "Рейкбек" : formatAdminReportDateLabel(info.label);
     if (!rakebackModule) applySavedRakebackSortMode();
     if (calculationsModule) calculationsModule.reset();
     else resetCalculationsHydration();
-    var initialTab = shouldOpenRakebackByDefault() ? "rakeback" : "form";
+    var initialTab = rakebackOnly || shouldOpenRakebackByDefault() ? "rakeback" : "form";
     setActiveTab(initialTab);
     fillReportForm(null, { skipRakeback: true });
     if (initialTab === "rakeback") openLazyRakebackModule();

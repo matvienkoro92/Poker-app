@@ -231,7 +231,7 @@
     if (reportsShortcutBtn && reportsShortcutBtn.dataset.adminShortcutBound !== "1") {
       reportsShortcutBtn.dataset.adminShortcutBound = "1";
       reportsShortcutBtn.addEventListener("click", function () {
-        if (reportBtn && !reportBtn.hidden && !reportBtn.disabled) reportBtn.click();
+        if (reportBtn && !reportBtn.hidden && !reportBtn.disabled) { reportBtn.dataset.openRakeback = "1"; reportBtn.click(); }
       });
     }
     if (balancesShortcutBtn && balancesShortcutBtn.dataset.adminShortcutBound !== "1") {
