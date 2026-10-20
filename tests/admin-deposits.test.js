@@ -693,3 +693,9 @@ test('player operation search finds linked Russian nicknames and handles all-tim
  data.statistics.period={start:null,end:null};assert.equal(context.dayPlayerOperations('пряник').length,2);
  data.statistics.period={start:3000,end:4000};context.renderDayPlayerOperations('пряник');assert.match(host.innerHTML,/За выбранный период операций нет/);assert.match(host.innerHTML,/Найдено операций: 2/);assert.match(host.innerHTML,/МСК/);
 });
+
+test('player operation results separate withdrawal recipient from depositor and keep aliases hidden',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),code=source.slice(source.indexOf('  function dayPlayerOperations('),source.indexOf('  function renderDayPlayerOperations('));
+ const data={statistics:{period:{start:null,end:null}},playerDirectory:[{room:'P21',playerId:'286730',nick:'Coo1er91',name:'Coo1er91',aliases:['Кулер','NeCoo1er91']},{room:'P21',playerId:'563356',nick:'Штукатур',name:'Штукатур',aliases:[]}],entries:[{room:'P21',playerId:'286730',createdAt:1000,total:1000000,payments:[{depositorRoom:'P21',depositorId:'563356',createdAt:2000,amount:350000}]}]};
+ const c={data,channelInfo:()=>null};vm.createContext(c);vm.runInContext(code,c);const row=c.dayPlayerOperations('Кулер')[0];assert.equal(row.identity,'Получатель: Кулер · Покер21 · ID 286730 / Депозит внёс: Штукатур · Покер21 · ID 563356');assert.equal(c.dayPlayerOperations('NeCoo1er91').length,2);assert.equal(c.dayPlayerOperations('Штукатур').length,1);assert.ok(!row.identity.includes('NeCoo1er91'));
+});

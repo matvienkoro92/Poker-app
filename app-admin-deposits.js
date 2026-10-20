@@ -104,24 +104,31 @@
     var terms=String(search||'').toLocaleLowerCase('ru-RU').replace(/ё/g,'е').replace(/@/g,'').trim().split(/\s+/).filter(Boolean);
     if(!terms.length)return [];
     var period=data.statistics&&data.statistics.period||{},rows=[];
-    function add(record,label,identity){
+    function add(record,label,identity,display){
       if(record.voidedAt)return;
       var at=typeof record.createdAt==='number'?record.createdAt:Date.parse(record.createdAt);
       if(!Number.isFinite(at)||!allTime&&((period.start!=null&&at<period.start)||(period.end!=null&&at>=period.end)))return;
       var text=identity.toLocaleLowerCase('ru-RU').replace(/ё/g,'е').replace(/@/g,'');
-      if(terms.every(function(term){return text.indexOf(term)!==-1;}))rows.push({label:label,identity:identity,amount:record.amount||record.total||0,at:at});
+      if(terms.every(function(term){return text.indexOf(term)!==-1;}))rows.push({label:label,identity:display||identity,amount:record.amount||record.total||0,at:at});
     }
     function identity(record){
       var ids=[record.playerId,record.depositorId].concat((record.allocations||[]).map(function(a){return a.depositorId||a.playerId;})).filter(Boolean).map(String);
       var aliases=(data.playerDirectory||[]).filter(function(p){return ids.includes(String(p.playerId))||record.profileKey&&p.profileKey===record.profileKey;});
       return [record.playerName,record.nick,record.name,record.recipient,record.depositorId,record.playerId].concat(aliases.map(function(p){return [p.name,p.nick,p.playerName,p.playerId].concat(p.aliases||[]).filter(Boolean).join(' ');})).filter(Boolean).join(' · ');
     }
-    (data.channelOperations||[]).forEach(function(r){add(r,(r.direction==='outgoing'?'Вывод':'Приход')+' · '+((channelInfo(r.channelId)||{}).name||r.channelId),identity(r));});
+    function accountLabel(room,id){
+      var player=(data.playerDirectory||[]).find(function(p){return p.room===room&&String(p.playerId)===String(id);}),name=player&&((player.aliases||[]).find(function(a){return /[а-яё]/i.test(a);})||player.nick||player.name),roomName=({P21:'Покер21',X:'Хпокер',PP:'PPpoker',Supr:'Супрема'})[room]||room||'';
+      return [name,roomName,id?'ID '+id:''].filter(Boolean).join(' · ');
+    }
+    function display(record){
+      return (record.allocations||[{room:record.depositorRoom||record.room,playerId:record.depositorId||record.playerId}]).map(function(a){return accountLabel(a.depositorRoom||a.room,a.depositorId||a.playerId);}).filter(Boolean).join('; ');
+    }
+    (data.channelOperations||[]).forEach(function(r){add(r,(r.direction==='outgoing'?'Вывод':'Приход')+' · '+((channelInfo(r.channelId)||{}).name||r.channelId),identity(r),display(r));});
     (data.entries||[]).forEach(function(e){
-      var who=identity(e);add(e,'Заявка на вывод',who);
-      (e.payments||[]).forEach(function(r){add(r,'Выплата · '+(r.channelId||'касса'),who+' · '+identity(r));});
-      (e.returns||[]).forEach(function(r){add(r,'Возврат в кассу',who+' · '+identity(r));});
-      (e.reservations||[]).filter(function(r){return !r.confirmedAt&&!r.releasedAt;}).forEach(function(r){add(r,'Резерв',who+' · '+identity(r));});
+      var who=identity(e),recipient=display(e);add(e,'Заявка на вывод',who,'Получатель: '+recipient);
+      (e.payments||[]).forEach(function(r){var payer=display(r);add(r,'Выплата · '+(r.channelId||'касса'),who+' · '+identity(r),'Получатель: '+recipient+(payer?' / Депозит внёс: '+payer:''));});
+      (e.returns||[]).forEach(function(r){add(r,'Возврат в кассу',who+' · '+identity(r),'Получатель: '+recipient);});
+      (e.reservations||[]).filter(function(r){return !r.confirmedAt&&!r.releasedAt;}).forEach(function(r){var payer=display(r);add(r,'Резерв',who+' · '+identity(r),'Получатель: '+recipient+(payer?' / Депозит вносит: '+payer:''));});
     });
     return rows.sort(function(a,b){return b.at-a.at;});
   }
