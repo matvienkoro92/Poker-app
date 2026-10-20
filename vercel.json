@@ -119,6 +119,7 @@
     }
   },
   "crons": [
+    { "path": "/api/cron-deposit-notifications", "schedule": "* * * * *" },
     { "path": "/api/cron-table-subscriptions", "schedule": "*/3 * * * *" },
     { "path": "/api/cron-cooler-flight", "schedule": "*/5 * * * *" },
     { "path": "/api/cron-club-menu-idle", "schedule": "* * * * *" },

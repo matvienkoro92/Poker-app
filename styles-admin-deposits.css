@@ -597,7 +597,7 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__payment-form--transfer{border-color:#b9a86880;background:linear-gradient(145deg,#4c5033,#2e382b);box-shadow:inset 0 1px 0 #fff2,0 2px 5px #0002}
 .deposits .deposits__payment-provider--grouped{padding:0;border:0;background:none;box-shadow:none}
 .deposits .deposits__payment-forms~.deposits__filters{margin:16px 0 12px}
-.deposits .deposits__payment-forms~.deposits__cards>.deposits__card{background:linear-gradient(145deg,#171d21,#10161b);border-color:#aeb7ba26;box-shadow:none}
+.deposits .deposits__payment-forms~.deposits__cards>.deposits__card:not(.deposits__card--active):not(.deposits__card--frozen){background:linear-gradient(145deg,#171d21,#10161b);border-color:#aeb7ba26;box-shadow:none}
 .deposits .deposits__payment-forms~.deposits__bottom-totals{border-color:#aeb7ba26;background:#0c1318}
 @media(max-width:480px){
  .deposits .deposits__payment-forms{padding:10px;border-radius:15px}
@@ -607,3 +607,12 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
  .deposits .deposits__payment-provider--pair .deposits__payment-form strong{font-size:clamp(8px,2.4vw,10px)}
  .deposits .deposits__payment-provider--pair .deposits__payment-form span{font-size:8px}
 }
+
+/* Available payouts stay prominent; fully reserved balances use a cool card treatment. */
+.deposits__card--active{background:linear-gradient(145deg,#2b2b23,#171c1e);border-color:#dfc58a80;box-shadow:inset 0 1px 0 #ffedbd20,0 0 18px #dfc58a0c}
+.deposits__card--active .deposits__remaining strong{color:#ffe3a0}
+.deposits__card--frozen{background:linear-gradient(145deg,#202f3d,#141e29);border-color:#8ab8d780;box-shadow:inset 0 0 0 1px #9bcae412}
+.deposits__frozen-status{margin:0 0 14px;padding:8px 10px;border:1px solid #8ab8d74d;border-radius:9px;background:#8ab8d714;color:#c1e2f5;font-size:11px;font-weight:700;line-height:1.4}
+.deposits__card--frozen .deposits__frozen{border-color:#8ab8d766;background:#8ab8d70d}
+.deposits__card--frozen .deposits__frozen strong{color:#c1e2f5}
+@media(max-width:760px){.deposits__frozen-status{margin-bottom:10px;padding:6px 7px;font-size:10px}}

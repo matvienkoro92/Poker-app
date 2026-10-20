@@ -81,6 +81,7 @@ async function main(){
    assert.equal(await quickLinks.locator('[data-option="0"]').innerText(),'✓ Скопировано');
    assert.equal(await quickLinks.locator('[data-option="1"]').innerText(),'✓ Скопировано');
    assert.equal(await page.locator('.deposits__popup[open]').count(),0);
+   await page.locator('[data-dep="payment-form"][data-provider="prodamus"]').click();
    await page.locator('[data-dep="prodamus-history"]').click();
    await page.locator('#depositEditorTitle').filter({hasText:'Продамус · Журнал операций'}).waitFor();
    assert.equal(await page.locator('[data-form="channel-operation"]').count(),0);
@@ -117,8 +118,9 @@ async function main(){
    assert.equal(await transferForm.locator('[name="toPlayerId"]').inputValue(),'2728933');
    await transferForm.locator('[name="fromRoom"][value="X"]').check();
    assert.equal(await transferForm.locator('[name="fromPlayerId"]').inputValue(),'2728933');
-   assert.equal(await transferForm.locator('[name="toRoom"]:checked').count(),0);
-   assert.equal(await transferForm.locator('[name="toRoom"][value="X"]').isDisabled(),true);
+   assert.equal(await transferForm.locator('[name="toRoom"][value="X"]').isChecked(),true);
+   assert.equal(await transferForm.locator('[data-transfer-side="to"]').isVisible(),true);
+   assert.equal(await transferForm.locator('[name="toRoom"][value="X"]').isDisabled(),false);
    await transferForm.locator('[name="toRoom"][value="P21"]').check();
    assert.equal(await transferForm.locator('[name="toPlayerId"]').inputValue(),'398176');
    await senderPicker.locator('[data-player-query]').fill('кулер');
@@ -138,7 +140,7 @@ async function main(){
    assert.equal(await transferForm.locator('[name="toRoom"][value="P21"]').isDisabled(),true);
    await page.locator('[data-dep="editor-close"]').first().click();
    await pair.locator('[data-provider="bonuses"]').click();
-   await page.locator('[data-dep="bonus-new"]').click();
+   await page.locator('[data-dep="bonus-new"][data-direction="income"]').click();
    const bonusForm=page.locator('[data-form="channel-operation"]');
    await bonusForm.locator('[name="amount"]').fill('500');await bonusForm.locator('[name="room"][value="X"]').check();await bonusForm.locator('[name="playerId"]').fill('123');
    await bonusForm.locator('button[type="submit"]').click();await page.locator('.deposits__channel-history').waitFor();
@@ -146,6 +148,7 @@ async function main(){
    await page.locator('[data-dep="channel-void"]').click();await page.locator('[data-form="void-channel-operation"] button[type="submit"]').click();await page.locator('.deposits__channel-row.is-void').waitFor();
    assert.equal(view(state).statistics.bonuses,0);await page.locator('[data-dep="editor-close"]').first().click();
    assert.equal(await page.evaluate(()=>document.querySelector('.deposits__payment-forms').compareDocumentPosition(document.querySelector('.deposits__filters'))&Node.DOCUMENT_POSITION_FOLLOWING),4);
+   await page.locator('[data-dep="payment-form"][data-provider="runex"]').click();
    await page.locator('[data-dep="runex-history"]').click();
    await page.locator('.deposits__popup [data-dep="channel-new"][data-direction="outgoing"]').waitFor();
    await page.locator('[data-dep="editor-close"]').first().click();
@@ -216,7 +219,7 @@ async function main(){
    assert.ok(await page.locator('.deposits').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'No horizontal overflow at '+width);
    await page.screenshot({path:path.join(output,width+'-list.png')});
    assert.equal(await page.locator('.deposits').evaluate(el=>el.scrollWidth>el.clientWidth+1),false,'Dialog has no horizontal overflow');
-   const reservationCard=page.locator('.deposits__card').first();
+   const reservationCard=page.locator('.deposits__card[data-entry="'+state.entries[0].id+'"]');
    await reservationCard.locator('[data-dep="reserve"]').click();
    assert.equal(await page.locator('.deposits__popup[open]').count(),1);
    assert.equal(await page.locator('.deposits__content').isVisible(),true);
@@ -258,13 +261,15 @@ async function main(){
    await page.locator('[data-dep="copy-reserved"]').waitFor();
    await page.locator('[data-dep="editor-close"]').first().click();
    assert.equal(await reservationCard.locator('[data-dep="reserve"]').isDisabled(),true);
+   assert.equal(await reservationCard.locator('[data-dep="reserve-exchip"]').isDisabled(),true);
    await reservationCard.locator('[data-dep="release-reservation"]').click();
    await page.locator('[data-form="release-reservation"] button[type="submit"]').click();
    await page.locator('.deposits__card').first().waitFor();
    assert.equal(view(state).entries[0].available,1500000);
-   const current=page.locator('.deposits__card').first();
+   const current=reservationCard;
    assert.equal(await current.locator('[data-dep="payment"]').count(),0);
-   assert.equal(await current.locator('.deposits__card-actions button').count(),1);
+   assert.equal(await current.locator('[data-dep="reserve"]').count(),1);
+   assert.equal(await current.locator('[data-dep="reserve-exchip"]').count(),1);
    await current.locator('[data-dep="reserve"]').click();
    await page.locator('[data-form="reserve"] [name="amount"]').fill('5000');
    await page.locator('[data-form="reserve"] button[type="submit"]').click();
@@ -306,11 +311,11 @@ async function main(){
    assert.equal(await page.locator('.deposits__report-all-details').evaluate(el=>el.open),true);
    await page.locator('.deposits__players-report>summary').click();
    if(!await page.locator('.deposits__report-deposit').evaluate(el=>el.open))await page.locator('.deposits__report-deposit>summary').click();
-   await page.locator('.deposits__refresh').click();
+   await page.locator('.deposits__header .deposits__refresh').click();
    await page.waitForFunction(()=>!document.querySelector('.deposits__refresh').disabled);
    for(const selector of ['.deposits__report-all-details','.deposits__players-report','.deposits__report-deposit'])assert.equal(await page.locator(selector).evaluate(el=>el.open),true,'refresh keeps disclosure open');
    await page.locator('.deposits__players-report>summary').click();
-   await page.locator('.deposits__refresh').click();
+   await page.locator('.deposits__header .deposits__refresh').click();
    await page.waitForFunction(()=>!document.querySelector('.deposits__refresh').disabled);
    assert.equal(await page.locator('.deposits__players-report').evaluate(el=>el.open),false,'refresh keeps disclosure closed');
    assert.equal(await page.locator('.deposits__players-scroll>table>tbody:not(.deposits__players-total)>tr').count(),view(state).statistics.players.length);

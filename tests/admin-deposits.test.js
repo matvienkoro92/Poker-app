@@ -44,24 +44,24 @@ test('total adjustments are audited and cannot undercut paid funds',()=>{
   assert.equal(view(state).entries[0].remaining,500000);assert.equal(state.entries[0].changes[0].before,1500000);
   assert.throws(()=>applyOperation(state,{action:'create',requestId:requestId(4),entry},'admin-a'),/уже есть/);
 });
-function apiSetup(prizeSnapshot={rows:[],operations:[],returns:[],returned:0}){
-  let stored='',offline=false,unknown=false;
+function apiSetup(prizeSnapshot={rows:[],operations:[],returns:[],returned:0},sources={}){
+  let stored='',offline=false,unknown=false;const notificationEvents=[];
   const redis={isConfigured:()=>true,pipeline:async commands=>{
     if(offline)throw Error('offline');
     return commands.map(c=>{if(c[0]==='GET')return{result:stored||null};if(c[0]==='EVAL'){
-      if(stored!==c[4])return{result:0};stored=c[5];if(unknown){unknown=false;throw Error('lost response');}return{result:1};
+      const args=c.slice(3+Number(c[2]));if(stored!==args[0])return{result:0};stored=args[1];if(args[2])notificationEvents.push(JSON.parse(args[3]));if(unknown){unknown=false;throw Error('lost response');}return{result:1};
     }throw Error('unexpected command');});
   }};
   const mod={exports:{}};
   vm.runInNewContext(fs.readFileSync(require.resolve('../lib/api-handlers/admin-deposits'),'utf8'),{
     module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,setTimeout,clearTimeout,
-    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):id==='../deposit-player-recents'?require('../lib/deposit-player-recents'):id==='../deposit-raffle-prizes'?{...require('../lib/deposit-raffle-prizes'),loadSnapshot:async()=>prizeSnapshot}:null
+    require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):id==='../deposit-player-recents'?require('../lib/deposit-player-recents'):id==='../deposit-raffle-prizes'?{...require('../lib/deposit-raffle-prizes'),loadSnapshot:sources.raffles||async function(){return prizeSnapshot;}}:id==='../deposit-player-notifications'?require('../lib/deposit-player-notifications'):id==='../deposit-spin-returns'?{...require('../lib/deposit-spin-returns'),loadSnapshot:sources.spins||async function(){return {rows:[],returns:[],returned:0};}}:null
   });
   async function call(body,user='admin-a',scope='deposits'){
     const res={statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(value){this.data=value;return this;},end(){return this;}};
     await mod.exports({method:'POST',body:{...body,user,accessToken:tokens.signAccessToken(scope,user,'test-secret')}},res);return res;
   }
-  return{call,fail:()=>offline=true,lose:()=>unknown=true};
+  return{call,notificationEvents,fail:()=>offline=true,lose:()=>unknown=true};
 }
 test('API requires admin identity and the separate deposit password token',async()=>{
   const a=apiSetup();assert.equal((await a.call({action:'list'},'player')).statusCode,403);
@@ -730,4 +730,26 @@ test('sponsored raffle bonus debit reduces net bonuses and never becomes a cash 
 test('bonus debit permits sponsorship without a prior journal accrual but rejects splits and invalid sums',()=>{
  const op={action:'channel-operation',requestId:requestId(1510),channelId:'bonuses',direction:'outgoing',room:'P21',playerId:'123',amount:10000};const s=applyOperation(null,op,'manager').state;assert.equal(view(s).statistics.bonuses,-10000);assert.equal(view(s).statistics.outgoing,0);
  assert.throws(()=>applyOperation(null,{...op,allocations:[]},'manager'),/одного игрока/);for(const amount of [0,-1,1.5])assert.throws(()=>applyOperation(null,{...op,amount},'manager'));
+});
+
+test('report starts both return sources together and combines totals after both complete',async()=>{
+ let finishRaffles,finishSpins;const started=[];
+ const api=apiSetup(undefined,{raffles:()=>{started.push('raffles');return new Promise(r=>finishRaffles=r);},spins:()=>{started.push('spins');return new Promise(r=>finishSpins=r);}});
+ const request=api.call({action:'list'});for(let i=0;i<10;i++)await Promise.resolve();
+ assert.deepEqual(started,['raffles','spins']);
+ finishRaffles({returns:[],returned:10000});finishSpins({returns:[],returned:20000});
+ const response=await request;assert.equal(response.statusCode,200);assert.equal(response.data.statistics.returned,30000);
+ assert.equal(response.data.statistics.spinReturnsAvailable,true);assert.equal(response.data.raffleReturnsAvailable,true);
+});
+test('one failed return source leaves other totals available and marks the report incomplete',async()=>{
+ const api=apiSetup(undefined,{raffles:async()=>{throw Error('offline');},spins:async()=>({returns:[],returned:20000})});
+ const response=await api.call({action:'list'});assert.equal(response.statusCode,200);assert.equal(response.data.statistics.returned,20000);assert.equal(response.data.raffleReturnsAvailable,false);assert.equal(response.data.statistics.spinReturnsAvailable,true);
+});
+
+test('withdrawal notifications are committed with the ledger, and retry after a lost response queues one event',async()=>{
+ const api=apiSetup(),request={action:'create',requestId:requestId(9901),entry};api.lose();
+ assert.equal((await api.call(request)).statusCode,503);
+ assert.equal(api.notificationEvents.length,1);assert.match(api.notificationEvents[0].text,/Заявка на вывод принята/);
+ assert.equal((await api.call(request)).statusCode,200);assert.equal(api.notificationEvents.length,1);
+ const bad={action:'payment',entryId:request.requestId,requestId:requestId(9902),amount:entry.total+1};assert.equal((await api.call(bad)).statusCode,409);assert.equal(api.notificationEvents.length,1);
 });
