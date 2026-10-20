@@ -684,3 +684,12 @@ test('transfer resolves saved sender when the name field has lost its selection'
  assert.throws(()=>applyOperation(state,{...body,profileKey:'P21|839673'},'manager',1002),/одного игрока/);
  assert.throws(()=>applyOperation(state,{...body,fromPlayerId:'unknown'},'manager',1002),/одного игрока/);
 });
+
+test('player operation search finds linked Russian nicknames and handles all-time and older operations',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),code=source.slice(source.indexOf('  function dayPlayerOperations('),source.indexOf('  function openDayPlayerSearch('));
+ const host={innerHTML:''},data={statistics:{period:{start:2000,end:3000}},playerDirectory:view({entries:[]}).playerDirectory,channelOperations:[{room:'X',playerId:'2728933',direction:'income',channelId:'runex',createdAt:1000,amount:200000},{room:'P21',playerId:'398176',direction:'income',channelId:'runex',createdAt:2200,amount:100000},{room:'P21',playerId:'398176',createdAt:2300,voidedAt:2400,amount:1000}],entries:[]};
+ const context={data,channelInfo:()=>null,editorPopup:{querySelector:()=>host},esc:String,money:String};vm.createContext(context);vm.runInContext(code,context);
+ assert.equal(context.dayPlayerOperations('пряник').length,1);assert.equal(context.dayPlayerOperations('пряник',true).length,2);assert.equal(context.dayPlayerOperations('2728933',true).length,1);assert.equal(context.dayPlayerOperations('несуществующий',true).length,0);
+ data.statistics.period={start:null,end:null};assert.equal(context.dayPlayerOperations('пряник').length,2);
+ data.statistics.period={start:3000,end:4000};context.renderDayPlayerOperations('пряник');assert.match(host.innerHTML,/За выбранный период операций нет/);assert.match(host.innerHTML,/Найдено операций: 2/);assert.match(host.innerHTML,/МСК/);
+});

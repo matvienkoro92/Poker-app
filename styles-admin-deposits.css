@@ -572,3 +572,38 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__payment-actions {display:grid;grid-template-columns:44px minmax(76px,1fr);align-items:center;}
 .deposits .deposits__payment-actions [data-payment-period] {grid-column:2;grid-row:2;max-width:190px;width:100%;}
 .deposits .deposits__payment-actions [data-payment-manager] {grid-column:2;grid-row:1;width:100%;}
+
+
+/* A compact, highlighted payment panel above the quieter withdrawal journal. */
+.deposits .deposits__payment-forms{padding:12px;margin:0 0 14px;border:1px solid #c4a36555;border-radius:18px;background:linear-gradient(145deg,#cfac6310,#12191b 65%);box-shadow:inset 0 1px 0 #ffe6af0d,0 8px 24px #0002}
+.deposits .deposits__payment-heading{gap:10px;margin-bottom:5px;flex-wrap:wrap}
+.deposits .deposits__payment-heading h3{font-size:16px;letter-spacing:-.3px}
+.deposits .deposits__payment-actions{display:grid;grid-template-columns:36px minmax(66px,90px) minmax(100px,150px) 36px;gap:6px;max-width:100%;min-width:0}
+.deposits .deposits__payment-actions [data-payment-manager],.deposits .deposits__payment-actions [data-payment-period]{grid-column:auto;grid-row:auto;min-width:0;max-width:none;width:100%;height:36px;min-height:36px;padding:5px 7px;border-radius:10px;border-color:#c5aa7040;background:#0c1318;color:#dfd7c6;font-size:11px}
+.deposits .deposits__payment-actions>button,.deposits .deposits__payment-actions>.deposits__refresh{display:grid;place-items:center;box-sizing:border-box;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;max-height:36px;padding:0;border:1px solid #c5aa7055;border-radius:10px;background:linear-gradient(150deg,#c4a3651c,#10171b);color:#e6ca8f;box-shadow:inset 0 1px 0 #fff1;cursor:pointer}
+.deposits .deposits__payment-actions svg{width:19px;height:19px}
+.deposits .deposits__payment-forms>p{margin:0 0 9px;font-size:10px;color:#9b9e97}
+.deposits .deposits__payment-form-grid{gap:7px}
+.deposits .deposits__payment-form{min-height:80px;gap:5px;padding:10px 7px;border-radius:13px;border-color:#bba36b50;background:linear-gradient(145deg,#34362d,#1a2424);box-shadow:inset 0 1px 0 #fff1,0 2px 5px #0002;text-shadow:none}
+.deposits .deposits__payment-form:hover{border-color:#e2c4849c;background:linear-gradient(145deg,#414234,#202d2b)}
+.deposits .deposits__payment-form strong{font-size:13px;line-height:1.2;color:#f5ead0}
+.deposits .deposits__payment-form span{font-size:11px;line-height:1.35;color:#d8be83}
+.deposits .deposits__prodamus-title{min-height:0!important}
+.deposits .deposits__payment-provider--prodamus>.deposits__payment-form{min-height:48px;padding:7px 5px}
+.deposits .deposits__prodamus-links>button{min-height:28px;border-radius:9px;background:linear-gradient(145deg,#be9b4f22,#101b20);border-color:#c4a36555;font-weight:650}
+.deposits .deposits__payment-provider--pair .deposits__payment-form{padding:8px 3px;gap:4px}
+.deposits .deposits__payment-provider--pair .deposits__payment-form strong{font-size:11px}
+.deposits .deposits__payment-provider--pair .deposits__payment-form span{font-size:9px}
+.deposits .deposits__payment-form--transfer{border-color:#b9a86880;background:linear-gradient(145deg,#4c5033,#2e382b);box-shadow:inset 0 1px 0 #fff2,0 2px 5px #0002}
+.deposits .deposits__payment-provider--grouped{padding:0;border:0;background:none;box-shadow:none}
+.deposits .deposits__payment-forms~.deposits__filters{margin:16px 0 12px}
+.deposits .deposits__payment-forms~.deposits__cards>.deposits__card{background:linear-gradient(145deg,#171d21,#10161b);border-color:#aeb7ba26;box-shadow:none}
+.deposits .deposits__payment-forms~.deposits__bottom-totals{border-color:#aeb7ba26;background:#0c1318}
+@media(max-width:480px){
+ .deposits .deposits__payment-forms{padding:10px;border-radius:15px}
+ .deposits .deposits__payment-actions{width:100%;grid-template-columns:36px minmax(56px,.7fr) minmax(100px,1.3fr) 36px;gap:5px}
+ .deposits .deposits__payment-form{min-height:84px;padding:8px 4px}
+ .deposits .deposits__payment-form strong{font-size:12px}
+ .deposits .deposits__payment-provider--pair .deposits__payment-form strong{font-size:clamp(8px,2.4vw,10px)}
+ .deposits .deposits__payment-provider--pair .deposits__payment-form span{font-size:8px}
+}
