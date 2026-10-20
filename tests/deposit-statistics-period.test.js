@@ -46,3 +46,17 @@ test('yesterday follows the Moscow business cutoff and payment forms use the sel
  assert.equal(result.paymentForms.period.start,after.start);assert.equal(result.paymentForms.period.end,after.end);
  assert.equal(result.paymentForms.providers.find(p=>p.id==='runex').total,12300);
 });
+
+test('channel journal filters by the selected period and manager, including exact cutoff boundaries',()=>{
+ const fs=require('node:fs'),vm=require('node:vm');
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits'),'utf8');
+ const start=Date.parse('2026-10-20T03:00:00Z'),end=start+86400000;
+ const context={data:{paymentForms:{period:{start,end}}}};
+ vm.createContext(context);
+ vm.runInContext(source.match(/  function matchesPaymentPeriod\(row\)\{[^\n]+/)[0],context);
+ for(const [createdAt,expected] of [[start-1,false],[start,true],[end-1,true],[end,false]])assert.equal(context.matchesPaymentPeriod({createdAt}),expected);
+ context.data.paymentForms.period={start:null,end:null};assert.equal(context.matchesPaymentPeriod({createdAt:start-1}),true);
+ delete context.data.paymentForms;context.data.statistics={period:{start,end}};assert.equal(context.matchesPaymentPeriod({createdAt:end}),false);
+ const journal=source.match(/  function channelHistoryHtml\(id\)\{[^\n]+/)[0];
+ assert.match(journal,/matchesPaymentManager\(r\)&&matchesPaymentPeriod\(r\)/);
+});
