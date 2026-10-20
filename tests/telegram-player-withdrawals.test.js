@@ -10,7 +10,7 @@ test('command is private, exact and accepts the own bot mention',()=>{
 });
 test('only own open Poker21 withdrawals are shown without payment details',()=>{
  const text=pages({entries:[entry,{...entry,playerId:'999999'},{...entry,room:'X'},{...entry,deletedAt:1},{...entry,archived:true},{...entry,total:30000}]},'208238').join('\n');
- assert.equal((text.match(/Актуальная заявка/g)||[]).length,1);assert.match(text,/Выплачено по заявке: 300 ₽/);assert.match(text,/Осталось по заявке: 700 ₽/);assert.doesNotMatch(text,/999999/);assert.doesNotMatch(text,/По Х-покеру данных/);
+ assert.equal((text.match(/Актуальная заявка/g)||[]).length,1);assert.match(text,/Выплачено по заявке: 300/);assert.match(text,/Осталось по заявке: 700/);assert.doesNotMatch(text,/999999/);assert.doesNotMatch(text,/По Х-покеру данных/);
  assert.match(pages({entries:[]},'208238')[0],/Актуальных выводов по вашим связанным аккаунтам нет/);
  assert.throws(()=>pages({},'208238'));
  assert.ok(pages({entries:Array.from({length:100},()=>entry)},'208238').every(p=>p.length<4096));
@@ -43,4 +43,15 @@ test('all rooms use explicit links in either direction and reject ambiguous or u
  assert.doesNotMatch(text,/unlinked|Х-покер · ID 208238/);
  const conflict=pages({entries,playerAccounts:[...linked,{profileKey:'P21|999999',room:'X',playerId:'2299644'}]},'208238').join('\n');
  assert.doesNotMatch(conflict,/2299644|supr1|pp1/);
+});
+
+test('withdrawal includes dated payment breakdown and excludes cancelled payments and internal details',()=>{
+ const e={...entry,payments:[{amount:20000,createdAt:Date.parse('2026-10-20T19:00:00Z'),note:'secret',paymentSource:'owner'}, {amount:10000,createdAt:Date.parse('2026-10-20T18:30:00Z')},{amount:9000,createdAt:Date.parse('2026-10-20T19:01:00Z'),voidedAt:1}]};
+ const text=pages({entries:[e]},'208238').join('\n');
+ assert.match(text,/Выплачено по заявке: 300/);
+ assert.match(text,/Платежи:\n1\. 20.10, 21:30:00 МСК — 100\n2\. 20.10, 22:00:00 МСК — 200/);
+ assert.doesNotMatch(text,/secret|owner|90|₽/);
+ assert.match(pages({entries:[{...entry,payments:[]}]},'208238')[0],/Платежей пока нет/);
+ const many={...entry,total:1000000,payments:Array.from({length:150},()=>({amount:100,createdAt:entry.createdAt}))};
+ const result=pages({entries:[many]},'208238');assert.ok(result.length>1);assert.ok(result.every(p=>p.length<4096));assert.match(result.join('\n'),/150\./);
 });
