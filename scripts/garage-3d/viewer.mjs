@@ -16,12 +16,12 @@ import {sportSeat,paintSeatPreview} from './sport-seat.mjs';
 window.pokerPaintSeatPreview=paintSeatPreview;
 import * as T from '../../vendor/three/three.module.min.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-export function makeModel(scene,look){
+export function makeModel(scene,look,options={}){
  const G=window.PokerGarage,car=new T.Group();scene.add(car);car.scale.set(1.24,.86,.95);
  const material=(color,metalness,roughness)=>new T.MeshPhysicalMaterial({color,metalness,roughness,clearcoat:metalness>.3?.65:.12,clearcoatRoughness:.12});
  const paint=material(G.item('paint',look.paint).color,.55,.24),felt=material(G.item('paint',look.paint).color,0,.93),gold=material('#e5aa28',1,.135),rubber=material('#171a1e',.04,.76),rim=material(G.wheelPaintColor(look),.86,.25),black=material('#0d1417',.35,.3),leather=material('#060809',.12,.36),light=material(G.item('light',look.light).color,.45,.2),fanMetal=material('#123e47',.86,.22);
  light.emissive.copy(light.color);light.emissiveIntensity=2.0;
- function mesh(geometry,mat,x=0,y=0,z=0,parent=car){const o=new T.Mesh(geometry,mat);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
+ function mesh(geometry,mat,x=0,y=0,z=0,parent=car){if(options.prepareGeometry){const next=options.prepareGeometry(geometry);if(next!==geometry){geometry.dispose();geometry=next;}}const o=new T.Mesh(geometry,mat);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
  const box=(w,h,d,m,x,y,z)=>mesh(new T.BoxGeometry(w,h,d),m,x,y,z);
  function cylinder(r,h,m,x,y,z,axis='y'){const o=mesh(new T.CylinderGeometry(r,r,h,64),m,x,y,z);if(axis==='z')o.rotation.x=Math.PI/2;if(axis==='x')o.rotation.z=Math.PI/2;return o;}
  function torus(r,t,m,x,y,z,axis='z'){const o=mesh(new T.TorusGeometry(r,t,12,80),m,x,y,z);if(axis==='y')o.rotation.x=Math.PI/2;if(axis==='x')o.rotation.y=Math.PI/2;return o;}
