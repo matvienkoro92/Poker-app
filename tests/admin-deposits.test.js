@@ -483,7 +483,7 @@ test('bonus accruals are separate from money, filtered by date, editable and can
  assert.equal(stats.bonuses,50000);assert.equal(stats.deposits,0);assert.equal(stats.outgoing,0);assert.equal(stats.players.length,0);assert.equal(stats.managers.length,0);assert.ok(!stats.destinations.some(d=>d.id==='bonuses'));
  assert.equal(view(state,now+86400000,{preset:'today'}).statistics.bonuses,0);
  assert.equal(view(state,now).paymentForms.providers.find(p=>p.id==='bonuses').total,50000);
- assert.throws(()=>applyOperation(null,{...body,direction:'outgoing'},'manager',now));
+ assert.equal(view(applyOperation(null,{...body,direction:'outgoing'},'manager',now).state).statistics.bonuses,-50000);
  state=applyOperation(state,{action:'edit-channel-operation',requestId:requestId(951),operationId:requestId(950),editVersion:0,room:'P21',playerId:'321',amount:25000,note:'Исправлено'},'owner',now+1,'Владелец',{canDelete:true}).state;
  assert.equal(view(state).statistics.bonuses,25000);assert.equal(view(state).statistics.deposits,0);
  state=applyOperation(state,{action:'void-channel-operation',requestId:requestId(952),operationId:requestId(950)},'manager',now+2).state;
@@ -698,4 +698,36 @@ test('player operation results separate withdrawal recipient from depositor and 
  const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),code=source.slice(source.indexOf('  function dayPlayerOperations('),source.indexOf('  function renderDayPlayerOperations('));
  const data={statistics:{period:{start:null,end:null}},playerDirectory:[{room:'P21',playerId:'286730',nick:'Coo1er91',name:'Coo1er91',aliases:['Кулер','NeCoo1er91']},{room:'P21',playerId:'563356',nick:'Штукатур',name:'Штукатур',aliases:[]}],entries:[{room:'P21',playerId:'286730',createdAt:1000,total:1000000,payments:[{depositorRoom:'P21',depositorId:'563356',createdAt:2000,amount:350000}]}]};
  const c={data,channelInfo:()=>null};vm.createContext(c);vm.runInContext(code,c);const row=c.dayPlayerOperations('Кулер')[0];assert.equal(row.identity,'Получатель: Кулер · Покер21 · ID 286730 / Депозит внёс: Штукатур · Покер21 · ID 563356');assert.equal(c.dayPlayerOperations('NeCoo1er91').length,2);assert.equal(c.dayPlayerOperations('Штукатур').length,1);assert.ok(!row.identity.includes('NeCoo1er91'));
+});
+
+test('owner pays a reserved withdrawal without creating any player deposit; retry and void are safe',()=>{
+ let s=applyOperation(null,{action:'create',requestId:requestId(1400),entry:{...entry,total:7500000}},'tg_2144406710',1000).state;
+ const id=requestId(1400);s=applyOperation(s,{action:'reserve',requestId:requestId(1401),entryId:id,amount:7500000},'tg_2144406710',1001).state;
+ const operation={action:'confirm-reservation',requestId:requestId(1402),entryId:id,reservationId:requestId(1401),paymentSource:'owner'};
+ s=applyOperation(s,operation,'tg_2144406710',1002).state;let v=view(s,1003);
+ assert.equal(v.entries[0].remaining,0);assert.equal(v.entries[0].reserved,0);assert.equal(v.entries[0].paid,7500000);assert.equal(v.entries[0].payments[0].paymentSource,'owner');assert.equal(v.statistics.ownerPaid,7500000);assert.equal(v.statistics.outgoing,7500000);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.destinations.find(d=>d.id==='withdrawals').amount,0);assert.equal(v.statistics.managers[0].deposits,0);assert.equal(v.statistics.managers[0].ownerPaid,7500000);assert(v.statistics.players.every(p=>p.deposits===0));assert.equal(v.statistics.players.find(p=>p.playerId===entry.playerId).withdrawals,7500000);assert.equal(s.channelOperations?.length||0,0);
+ assert.equal(applyOperation(s,operation,'tg_2144406710',1004).duplicate,true);assert.equal(s.entries[0].payments.length,1);
+ s=applyOperation(s,{action:'void',requestId:requestId(1403),entryId:id,paymentId:requestId(1402)},'tg_2144406710',1005).state;v=view(s,1006);assert.equal(v.entries[0].remaining,7500000);assert.equal(v.statistics.ownerPaid,0);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.outgoing,0);
+});
+test('owner source rejects player allocations and cannot relabel an Exchip payment',()=>{
+ let s=create();s=applyOperation(s,{action:'reserve',requestId:requestId(1410),entryId:requestId(1),amount:100000},'manager').state;
+ const op={action:'confirm-reservation',requestId:requestId(1411),entryId:requestId(1),reservationId:requestId(1410),paymentSource:'owner'};
+ assert.throws(()=>applyOperation(s,{...op,depositorId:'123',depositorRoom:'P21'},'manager'),/не указывайте/);assert.throws(()=>applyOperation(s,{...op,allocations:[]},'manager'),/не указывайте/);
+ s=create();s=applyOperation(s,{action:'reserve',requestId:requestId(1412),entryId:requestId(1),amount:100000,reservationChannel:'exchip'},'manager').state;assert.throws(()=>applyOperation(s,{...op,reservationId:requestId(1412)},'manager'),/Эксчип/);
+});
+test('API carries the owner source through confirmation',async()=>{
+ const api=apiSetup();await api.call({action:'create',requestId:requestId(1420),entry});await api.call({action:'reserve',requestId:requestId(1421),entryId:requestId(1420),amount:1500000});const r=await api.call({action:'confirm-reservation',requestId:requestId(1422),entryId:requestId(1420),reservationId:requestId(1421),paymentSource:'owner'});assert.equal(r.statusCode,200);assert.equal(r.data.entries[0].remaining,0);assert.equal(r.data.entries[0].payments[0].paymentSource,'owner');assert.equal(r.data.statistics.deposits,0);assert.equal(r.data.statistics.ownerPaid,1500000);
+});
+
+test('sponsored raffle bonus debit reduces net bonuses and never becomes a cash withdrawal',()=>{
+ const now=Date.parse('2026-10-19T04:00Z');const credit={action:'channel-operation',requestId:requestId(1500),channelId:'bonuses',direction:'income',room:'P21',playerId:'875394',amount:500000,note:'Призы'};
+ let s=applyOperation(null,credit,'tg_2144406710',now).state;const debit={...credit,requestId:requestId(1501),direction:'outgoing',amount:120000,note:'На розыгрыш за свой счёт'};s=applyOperation(s,debit,'tg_2144406710',now+1).state;
+ let v=view(s,now+2,{preset:'today'}),provider=v.paymentForms.providers.find(p=>p.id==='bonuses');assert.equal(v.statistics.bonuses,380000);assert.equal(v.statistics.bonusDebits,120000);assert.equal(provider.total,380000);assert.equal(provider.outgoing,120000);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.outgoing,0);assert.equal(v.statistics.players.length,0);assert.equal(v.statistics.managers.length,0);assert.equal(v.entries.length,0);assert.equal(applyOperation(s,debit,'tg_2144406710',now+3).duplicate,true);
+ s=applyOperation(s,{action:'edit-channel-operation',requestId:requestId(1502),operationId:requestId(1501),editVersion:0,room:'X',playerId:'123',amount:150000,note:'Уточнено'},'owner',now+4,'Владелец',{canDelete:true}).state;assert.equal(s.channelOperations[1].direction,'outgoing');assert.equal(view(s,now+5,{preset:'today'}).statistics.bonuses,350000);
+ s=applyOperation(s,{action:'void-channel-operation',requestId:requestId(1503),operationId:requestId(1501)},'tg_2144406710',now+6).state;assert.equal(view(s,now+7,{preset:'today'}).statistics.bonuses,500000);assert.equal(view(s,now+7,{preset:'today'}).statistics.bonusDebits,0);
+ assert.equal(view(s,now+864e5,{preset:'today'}).statistics.bonuses,0);
+});
+test('bonus debit permits sponsorship without a prior journal accrual but rejects splits and invalid sums',()=>{
+ const op={action:'channel-operation',requestId:requestId(1510),channelId:'bonuses',direction:'outgoing',room:'P21',playerId:'123',amount:10000};const s=applyOperation(null,op,'manager').state;assert.equal(view(s).statistics.bonuses,-10000);assert.equal(view(s).statistics.outgoing,0);
+ assert.throws(()=>applyOperation(null,{...op,allocations:[]},'manager'),/одного игрока/);for(const amount of [0,-1,1.5])assert.throws(()=>applyOperation(null,{...op,amount},'manager'));
 });
