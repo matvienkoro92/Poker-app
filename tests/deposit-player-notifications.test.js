@@ -68,11 +68,13 @@ test('pending events are delivered in queue order so a payment follows creation'
 test('notification has a bold two-line heading and blank lines between detail blocks',async()=>{
  const result=event(entry({playerId:'208238',total:100000,createdAt:Date.parse('2026-10-20T18:17:45Z')}),'create');
  const heading='Заявка на вывод принята в работу: 1\u00a0000 ₽\nPoker21 · ID 208238';
- assert.equal(result.text,heading+'\n\nЗаявка от 20.10, 21:17:45 МСК\nОперация: 20.10, 15:00:00 МСК\n\nСумма вывода: 1\u00a0000 ₽\nВыплачено по заявке: 0 ₽\nОсталось по заявке: 1\u00a0000 ₽');
- assert.deepEqual(result.entities,[{type:'bold',offset:0,length:heading.length}]);
+ assert.equal(result.text.split('\n\n❗')[0],heading+'\n\nЗаявка от 20.10, 21:17:45 МСК\nОперация: 20.10, 15:00:00 МСК\n\nСумма вывода: 1\u00a0000 ₽\nВыплачено по заявке: 0 ₽\nОсталось по заявке: 1\u00a0000 ₽');
+ assert.deepEqual(result.entities[0],{type:'bold',offset:0,length:heading.length});
+ const note=result.entities[1];assert.equal(note.type,'bold');assert.match(result.text.slice(note.offset,note.offset+note.length),/^❗.*вернуть фишки.*менеджеру/);
  const m=mocked({forward:'208238'});m.events.set('evt',JSON.stringify(result));await m.api.deliver('evt','token',now);
  assert.deepEqual(m.sends[0].entities,result.entities);
  assert.equal(m.sends[0].text,result.text);
+ assert.deepEqual(m.sends[0].reply_markup,result.reply_markup);
 });
 
 test('partial payout uses the same bold heading and spaced blocks as creation',()=>{
@@ -80,6 +82,14 @@ test('partial payout uses the same bold heading and spaced blocks as creation',(
  const e=entry({playerId:'208238',total:100000,createdAt,payments:[{id:'payment_123456789',amount:30000}]});
  const result=eventForOperation({entries:[e]},{action:'payment',entryId:e.id,requestId:'payment_123456789'},paidAt);
  const heading='Выплачено: 300 ₽\nPoker21 · ID 208238';
- assert.equal(result.text,heading+'\n\nЗаявка от 20.10, 21:17:45 МСК\nОперация: 20.10, 21:22:11 МСК\n\nСумма вывода: 1\u00a0000 ₽\nВыплачено по заявке: 300 ₽\nОсталось по заявке: 700 ₽');
- assert.deepEqual(result.entities,[{type:'bold',offset:0,length:heading.length}]);
+ assert.equal(result.text.split('\n\n❗')[0],heading+'\n\nЗаявка от 20.10, 21:17:45 МСК\nОперация: 20.10, 21:22:11 МСК\n\nСумма вывода: 1\u00a0000 ₽\nВыплачено по заявке: 300 ₽\nОсталось по заявке: 700 ₽');
+ assert.deepEqual(result.entities[0],{type:'bold',offset:0,length:heading.length});
+ const note=result.entities[1];assert.equal(note.type,'bold');assert.match(result.text.slice(note.offset,note.offset+note.length),/^❗.*вернуть фишки.*менеджеру/);
+});
+
+
+test('closed and cancelled withdrawals do not suggest cancelling again',()=>{
+ for(const e of [entry({payments:[{id:'operation_123456',amount:1000000}]}),entry({deletedAt:now})]){
+  const result=event(e,e.deletedAt?'delete':'payment');assert.doesNotMatch(result.text,/❗/);assert.equal(result.reply_markup,undefined);
+ }
 });

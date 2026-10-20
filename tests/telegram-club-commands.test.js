@@ -133,3 +133,13 @@ test('withdrawal commands accept Russian text and addressed bot commands',()=>{
  for(const text of ['выводы','/выводы','/withdrawals','/withdrawals@Poker_dvatuza_bot'])assert.equal(c.command({message:{text}}),'withdrawals:0');
  assert.equal(c.command({message:{text:'/withdrawals@SomeoneElseBot'}}),null);
 });
+
+test('withdrawal manager button resolves the current shift without replacing the withdrawal',async t=>{
+ const old=global.fetch;t.after(()=>global.fetch=old);const calls=[];
+ global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ await c.handle({callback_query:{id:'wm',data:'club:withdrawal-manager',message:{chat:{id:1,type:'private'},message_id:42}}},'test');
+ assert.ok(!calls.some(x=>x.url.endsWith('/editMessageText')));
+ const sent=calls.find(x=>x.url.endsWith('/sendMessage'));
+ assert.equal(sent.p.reply_to_message_id,42);
+ assert.equal(sent.p.reply_markup.inline_keyboard[0][0].url,'https://t.me/'+c.currentManager().username);
+});
