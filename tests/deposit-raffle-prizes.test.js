@@ -29,3 +29,14 @@ test('issued tickets are considered seated and allow direct outcome entry',()=>{
  assert.equal(issuedTicketIsSeated(raffle(w),w),false);assert.equal(issuedTicketIsSeated(r,{...w,winnerSeatStatus:'not_seated'}),false);assert.equal(issuedTicketIsSeated(r,{...w,winnerStatus:'fail'}),false);assert.equal(issuedTicketIsSeated(r,{...w,cashSeatingMonitor:{status:'returned'}}),false);
  w.winnerSeatStatus='seated';w.winnerCashoutStatus='plus';w.winnerCashoutAmount=6500;w.winnerCashoutAt='2026-10-20T08:00:00Z';assert.equal(snapshot([r],period).returned,650000);
 });
+
+test('daily list follows the raffle day, not a later prize confirmation; cash returns retain their accounting date',()=>{
+ const old=raffle(winner({winnerCashoutStatus:'plus',winnerCashoutAmount:500,winnerCashoutAt:'2026-10-20T09:00:00Z'}),{id:'old',endDate:'2026-10-19T12:00:00Z'});
+ const today=raffle(winner({winnerStatusAt:'2026-10-21T05:00:00Z'}),{id:'today',endDate:'2026-10-20T12:00:00Z'});
+ const before=raffle(winner(),{id:'before',endDate:'2026-10-20T02:59:59Z'});
+ const atStart=raffle(winner(),{id:'start',endDate:'2026-10-20T03:00:00Z'});
+ const atEnd=raffle(winner(),{id:'end',endDate:'2026-10-21T03:00:00Z'});
+ const result=snapshot([old,today,before,atStart,atEnd],period);
+ assert.deepEqual(result.rows.map(r=>r.raffleId),['today','start']);
+ assert.equal(result.returned,50000);
+});
