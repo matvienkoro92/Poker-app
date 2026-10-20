@@ -768,3 +768,22 @@ test('manual SBP phone formats normalize identically in parser and create API',(
   assert.equal(parser.phoneError(''),'');
   assert.equal(parser.normalizePhone(''),'');
 });
+
+test('first withdrawal atomically links the room account before notification and retry preserves it',()=>{
+ const notification=require('../lib/deposit-player-notifications');
+ const op={action:'create',requestId:requestId('first_link'),entry:{...entry,room:'X',playerId:'2299644',linkPoker21Id:'208238',confirmAccountLink:true}};
+ const result=applyOperation(null,op,'admin-a');
+ assert.equal(notification.poker21Anchor(result.state,{room:'X',playerId:'2299644'}),'208238');
+ const event=notification.eventForOperation(result.state,op);assert.equal(event.playerId,'2299644');assert.match(event.text,/Заявка на вывод принята в работу/);
+ assert.equal(notification.poker21Anchor(result.state,event),'208238');
+ const retry=applyOperation(result.state,op,'admin-a');assert.equal(retry.duplicate,true);assert.equal(retry.state.playerAccounts.length,1);
+ assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,confirmAccountLink:false}},'admin-a'),/Подтвердите/);
+ assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,linkPoker21Id:'missing'}},'admin-a'),/не найден/);
+});
+test('an isolated saved room account can be linked on its first withdrawal but another player cannot be overwritten',()=>{
+ const input={revision:0,requests:[],entries:[],playerAccounts:[{profileKey:'X|2299644',room:'X',playerId:'2299644',nick:'PokerMonkeyX'}]};
+ const op={action:'create',requestId:requestId('existing_link'),entry:{...entry,room:'X',playerId:'2299644',linkPoker21Id:'208238',confirmAccountLink:true}};
+ const result=applyOperation(input,op,'admin-a');assert.equal(result.state.playerAccounts[0].profileKey,'P21|208238');
+ input.playerAccounts[0].profileKey='P21|839673';
+ assert.throws(()=>applyOperation(input,op,'admin-a'),/другим игроком/);
+});
