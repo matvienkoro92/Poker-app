@@ -1,6 +1,7 @@
 import * as T from '../../vendor/three/three.module.min.js';
-import {BUILDINGS,CLUB,PORT,HOME,PICKUP,ROAD_X,ROAD_Z,SOLIDS,VILLA,START} from './world.mjs';
+import {BUILDINGS,CLUB,PORT,HOME,PICKUP,ROAD_X,ROAD_Z,SOLIDS,VILLA,START,ISLAND,landAt} from './world.mjs';
 import {createOwnedKart} from './vehicle.mjs';
+import {buildIsland} from './island.mjs';
 import {buildVilla} from './villa.mjs';
 import {buildSculptedCharacter} from '../garage-3d/character-atelier.mjs';
 const PI=Math.PI;
@@ -21,7 +22,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const box=(color,x,y,z,w,h,d,ry=0)=>batch('box',color,x,y,z,w,h,d,ry);
  const cylinder=(color,x,y,z,r,h,ry=0,rz=0)=>batch('cyl',color,x,y,z,r,h,r,ry,rz);
  function label(text,x,y,z,w=8,h=2,ry=0,bg='#123b3e',fg='#f2d294'){
-  const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,1024,256);ctx.strokeStyle=fg;ctx.lineWidth=8;ctx.strokeRect(12,12,1000,232);ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 105px Arial';ctx.fillText(text,512,137,950);const map=new T.CanvasTexture(c);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;textures.push(map);const m=new T.MeshStandardMaterial({map,emissive:'#ffffff',emissiveMap:map,emissiveIntensity:.3,roughness:.7});const mesh=new T.Mesh(new T.PlaneGeometry(w,h),m);mesh.position.set(x,y,z);mesh.rotation.y=ry;scene.add(mesh);dynamic.push(mesh);return mesh;
+  const c=document.createElement('canvas');c.width=Array.from(text).length<=2?256:1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,256);ctx.strokeStyle=fg;ctx.lineWidth=8;ctx.strokeRect(12,12,c.width-24,232);ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=c.width===256?'180px Georgia':'800 105px Arial';ctx.fillText(text,c.width/2,137,c.width-60);const map=new T.CanvasTexture(c);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;textures.push(map);const m=new T.MeshStandardMaterial({map,emissive:'#ffffff',emissiveMap:map,emissiveIntensity:.3,roughness:.7});const mesh=new T.Mesh(new T.PlaneGeometry(w,h),m);mesh.position.set(x,y,z);mesh.rotation.y=ry;scene.add(mesh);dynamic.push(mesh);return mesh;
  }
  function groundTexture(kind){const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=kind==='road'?'#4a5154':'#c7bca7';ctx.fillRect(0,0,256,256);let seed=77;for(let i=0;i<12000;i++){seed=(seed*1664525+1013904223)>>>0;ctx.fillStyle=seed%2?'#ffffff0a':'#0000000c';ctx.fillRect(seed%256,(seed>>>8)%256,1,1);}if(kind==='pave'){ctx.strokeStyle='#968e7d66';ctx.lineWidth=2;for(let i=0;i<256;i+=32){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,256);ctx.moveTo(0,i);ctx.lineTo(256,i);ctx.stroke();}}const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.colorSpace=T.SRGBColorSpace;t.repeat.set(kind==='road'?4:36,kind==='road'?45:36);textures.push(t);return t;}
  const pave=new T.Mesh(new T.PlaneGeometry(232,220),new T.MeshStandardMaterial({map:groundTexture('pave'),roughness:1}));pave.rotation.x=-PI/2;pave.position.set(6,-.04,-10);pave.receiveShadow=true;scene.add(pave);dynamic.push(pave);
@@ -50,15 +51,15 @@ export async function createCityScene(canvas,onProgress,garage={}){
  // Port buildings, shipping yard, crane, quay and water.
  box('#768f8e',PORT.x,5,PORT.z,PORT.w,10,PORT.d);box('#566e70',PORT.x,10.2,PORT.z,PORT.w+1,.45,PORT.d+1);box('#3c5556',85,2.6,-57.8,8,5.2,.2);label('PORT 21 · СКЛАД 04',85,7.5,-57.7,17,2);
  for(const [i,z]of [-33,-14].entries()){const x=i===1?88:89,w=i===1?12:10,d=i===2?13:10;box(['#9a5147','#2a7377','#b28d4d'][i],x,2,z,w,4,d);for(let xx=x-w/2+.5;xx<x+w/2;xx+=.8)box('#b7b0a0',xx,2,z+d/2+.02,.08,3.6,.04);}
- for(let z=-100;z<=83;z+=5){cylinder('#536c6d',118.5,.8,z,.09,1.6);box('#657b79',118.5,1.4,z+2.5,.1,.09,5);}
+ for(let z=-100;z<=83;z+=5){if(z>61&&z<78)continue;cylinder('#536c6d',118.5,.8,z,.09,1.6);box('#657b79',118.5,1.4,z+2.5,.1,.09,5);}
  box('#bcaa8b',120,.04,-8,4,.6,220);box('#4e7174',123,-1.2,-8,2,3,222);
  for(const x of [108,117]){cylinder('#d4a257',x,10,-98,.6,20);box('#d4a257',x,15,-95,.55,.5,17);}box('#d4a257',112.5,20,-99,15,.8,1);box('#617a7a',112.5,17,-88,.1,6,.1);
  const seaGeo=new T.PlaneGeometry(440,550,40,35);seaGeo.rotateX(-PI/2);const sea=new T.Mesh(seaGeo,new T.MeshStandardMaterial({color:'#368b91',roughness:.27,metalness:.42,transparent:true,opacity:.92}));sea.position.set(344,-.8,-30);scene.add(sea);dynamic.push(sea);const seaPos=seaGeo.attributes.position,seaBase=Float32Array.from(seaPos.array);
- for(let i=0;i<16;i++){const x=151+(i%5)*21,z=-95+Math.floor(i/5)*61;box('#dbe4ce',x,1,z,2,.5,6);box('#436b77',x,1.7,z-1,1.5,1.2,2);cylinder('#cbb993',x,4,z,.06,6);}
+ for(let i=0;i<16;i++){const x=151+(i%5)*21,z=-95+Math.floor(i/5)*61;if(landAt(x,z))continue;box('#dbe4ce',x,1,z,2,.5,6);box('#436b77',x,1.7,z-1,1.5,1.2,2);cylinder('#cbb993',x,4,z,.06,6);}
  // Park at the southwest. Repeated palms and café objects share instanced geometry.
  box('#8d9c76',-47,.03,55,20,.1,13);box('#85a47e',31,.03,54,31,.1,12);
  function palm(x,z,height=8){cylinder('#8d6b45',x,height*.48,z,.22,height*.96,0,.07);for(let i=0;i<7;i++){const a=i*PI*2/7;batch('ball','#476f4a',x+Math.sin(a)*1.7,height,z+Math.cos(a)*1.7,2.6,.24,.65,a,.18);batch('ball','#68834d',x+Math.sin(a)*3.3,height-.5,z+Math.cos(a)*3.3,1.7,.2,.5,a,-.2);}}
- for(let z=-97;z<90;z+=21){for(const x of [11,60,94])if(!(x===94&&z<-45)&&!BUILDINGS.some(b=>Math.abs(x-b.x)<b.w/2+2&&Math.abs(z-b.z)<b.d/2+2))palm(x,z,7+Math.sin(z)*1.5);}
+ for(let z=-97;z<90;z+=21){for(const x of [11,60,94])if(!(x===94&&z<-45)&&!(Math.abs(x-VILLA.x)<VILLA.w/2+4&&Math.abs(z-VILLA.z)<VILLA.d/2+4)&&!BUILDINGS.some(b=>Math.abs(x-b.x)<b.w/2+2&&Math.abs(z-b.z)<b.d/2+2))palm(x,z,7+Math.sin(z)*1.5);}
  for(const [x,z]of [[-54,14],[-53,45],[-53,60],[-14,54],[18,53],[42,54],[-51,-64],[53,-88]])palm(x,z,8);
  for(let z=-97;z<84;z+=27){for(const x of [-10,82]){cylinder('#496465',x,3.4,z,.09,6.8);box('#496465',x+1,6.7,z,2,.12,.12);batch('box','#ffe1a3',x+1.7,6.62,z,.65,.12,.35,0,0,true);}}
  for(const x of [-48,-18,25,46]){box('#745b48',x,.7,54,4,.2,1);box('#745b48',x,1.1,54.5,4,.8,.12);for(const xx of [-1.5,1.5])box('#3c5555',x+xx,.35,54,.12,.7,.7);}
@@ -67,8 +68,10 @@ export async function createCityScene(canvas,onProgress,garage={}){
  // Distant skyline and sunset disc remain scenery outside the collision boundary.
  for(let i=0;i<30;i++){const h=12+(i*13%37);box('#a8afa9',-170+i*12,h/2,-150,7+(i%3)*3,h,12);}
  batch('ball','#ffdfaa',140,45,-170,13,13,13,0,0,true);
+ road(106.5,70,23,14);
+ const island=buildIsland({scene,box,cylinder,batch,label,textures});
  // Commit all static architecture to material/shape batches.
- buildVilla({box,cylinder,batch,label});
+ const villa=buildVilla({box,cylinder,batch,label,scene,textures});
  const staticMeshes=[];for(const b of batches.values()){const mesh=new T.InstancedMesh(geos[b.type],mat(b.color,b.emissive),b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);staticMeshes.push(mesh);}
  onProgress('Манки выходит в город…');
  const look=garage.owner?garage.look:{...window.PokerGarage.defaults,body:'bodyNormal',suit:'emeraldBomber',pants:'blackDenim',shoes:'ivoryLow',helmet:'none',hair:'hairNatural',patch:'aces',glasses:'none'};
@@ -101,9 +104,9 @@ export async function createCityScene(canvas,onProgress,garage={}){
   marker.visible=!!objective.target&&s.missionActive;const target=objective.target;if(target){marker.position.set(target.x,0,target.z);arrow.position.y=3.2+Math.sin(s.time*2.8)*.28;arrow.rotation.y=s.time*.8;}ring.material.opacity=.6+Math.sin(s.time*2)*.2;
   if(frameCount++%3===0){for(let i=0;i<seaPos.count;i++)seaPos.setY(i,seaBase[i*3+1]+Math.sin(seaBase[i*3]*.12+s.time*.65)*.18+Math.cos(seaBase[i*3+2]*.15+s.time*.5)*.1);seaPos.needsUpdate=true;}
   // Camera stays outside solids. Building ray hits shorten the arm instead of clipping.
-  rayOrigin.set(pos.x,s.driving?1.6:1.55,pos.z);const length=s.driving?orbit.distance+3.5:orbit.distance;desired.set(pos.x-Math.sin(orbit.yaw)*length,rayOrigin.y+1.8+orbit.pitch*5,pos.z-Math.cos(orbit.yaw)*length);const direction=desired.clone().sub(rayOrigin);cameraRay.set(rayOrigin,direction.clone().normalize());cameraRay.far=direction.length();let arm=1;for(const solid of SOLIDS){const h=BUILDINGS.find(b=>Math.abs(b.x-(solid.minX+solid.maxX)/2)<.1&&Math.abs(b.z-(solid.minZ+solid.maxZ)/2)<.1)?.h||7;let enter=0,exit=1;for(const [origin,delta,min,max]of [[rayOrigin.x,direction.x,solid.minX,solid.maxX],[rayOrigin.z,direction.z,solid.minZ,solid.maxZ],[rayOrigin.y,direction.y,0,h]]){if(Math.abs(delta)<.00001){if(origin<min||origin>max){enter=2;break;}}else{const a=(min-origin)/delta,b=(max-origin)/delta;enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));}}if(enter<=exit&&enter>0)arm=Math.min(arm,enter);}if(arm<1)desired.copy(rayOrigin).addScaledVector(direction,Math.max(.12,arm-.05));camera.position.lerp(desired,1-Math.exp(-dt*9));lookAt.copy(rayOrigin);lookAt.y+=s.driving?.1:.15;camera.lookAt(lookAt);
-  if(intro){camera.position.set(65,24,78);camera.lookAt(98,2,40);}
-  sun.target.position.set(pos.x,0,pos.z);sun.position.set(pos.x-40,70,pos.z-35);renderer.render(scene,camera);perfTime+=dt;
+  rayOrigin.set(pos.x,s.driving?1.6:1.55,pos.z);island.update(pos,dt);const indoors=villa.update(pos,dt,intro);const length=indoors?(s.driving?6.2:4.4):s.driving?orbit.distance+3.5:orbit.distance;desired.set(pos.x-Math.sin(orbit.yaw)*length,rayOrigin.y+(indoors?1.15:1.8)+orbit.pitch*(indoors?2:5),pos.z-Math.cos(orbit.yaw)*length);const direction=desired.clone().sub(rayOrigin);cameraRay.set(rayOrigin,direction.clone().normalize());cameraRay.far=direction.length();let arm=1;for(const solid of SOLIDS){const h=solid.h??(BUILDINGS.find(b=>Math.abs(b.x-(solid.minX+solid.maxX)/2)<.1&&Math.abs(b.z-(solid.minZ+solid.maxZ)/2)<.1)?.h||7);let enter=0,exit=1;for(const [origin,delta,min,max]of [[rayOrigin.x,direction.x,solid.minX,solid.maxX],[rayOrigin.z,direction.z,solid.minZ,solid.maxZ],[rayOrigin.y,direction.y,0,h]]){if(Math.abs(delta)<.00001){if(origin<min||origin>max){enter=2;break;}}else{const a=(min-origin)/delta,b=(max-origin)/delta;enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));}}if(enter<=exit&&enter>0)arm=Math.min(arm,enter);}if(arm<1)desired.copy(rayOrigin).addScaledVector(direction,Math.max(.12,arm-.05));camera.position.lerp(desired,1-Math.exp(-dt*9));lookAt.copy(rayOrigin);lookAt.y+=s.driving?.1:.15;camera.lookAt(lookAt);
+  if(intro){camera.position.set(VILLA.x-58,36,VILLA.z+64);camera.lookAt(VILLA.x-6,2,VILLA.z-12);}
+  hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:2.35,4,dt);sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:3,4,dt);sun.target.position.set(pos.x,0,pos.z);sun.position.set(pos.x-40,70,pos.z-35);renderer.render(scene,camera);perfTime+=dt;
  }
- camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};
+ camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,get villa(){return {...villa.status,gate:island.status};},get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};
 }

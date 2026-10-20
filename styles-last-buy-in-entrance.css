@@ -48,3 +48,5 @@ body:has(#gameEntrance:not([hidden])),body:has(#scoreSelect:not([hidden])){overf
 .map-node.villa-map-node{text-decoration:none;color:#ffe5a7;z-index:4}.villa-map-node small{background:#213d35ed!important;color:#ffe4a4!important}
 
 [data-city-admin-entry][hidden]{display:none!important}
+
+.chapter-city-map .map-node.villa-map-node{width:28px;height:28px;font-size:18px;z-index:6}.chapter-city-map .villa-map-node small{left:-5px;top:50%;transform:translate(-100%,-50%);max-width:68px;white-space:nowrap}
