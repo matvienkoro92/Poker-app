@@ -37,3 +37,12 @@ test('deposits, payment forms and CRM share the exact 06:00 Moscow business day'
   assert.equal(today.from,mskDateKeyFromMs(now));assert.equal(today.start,forms.period.start);assert.equal(today.end,forms.period.end);assert.equal(forms.period.timeZone,'Europe/Moscow');
  }
 });
+
+test('yesterday follows the Moscow business cutoff and payment forms use the selected range',()=>{
+ const before=statisticsRange({preset:'yesterday'},Date.parse('2026-10-20T02:59:59Z'));
+ const after=statisticsRange({preset:'yesterday'},Date.parse('2026-10-20T03:00:00Z'));
+ assert.equal(before.from,'2026-10-18');assert.equal(after.from,'2026-10-19');
+ const result=view({entries:[],channelOperations:[{channelId:'runex',direction:'income',amount:12300,createdAt:after.start},{channelId:'runex',direction:'income',amount:99900,createdAt:after.end}]},Date.parse('2026-10-20T04:00:00Z'),{preset:'yesterday'});
+ assert.equal(result.paymentForms.period.start,after.start);assert.equal(result.paymentForms.period.end,after.end);
+ assert.equal(result.paymentForms.providers.find(p=>p.id==='runex').total,12300);
+});
