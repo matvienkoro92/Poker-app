@@ -787,3 +787,13 @@ test('an isolated saved room account can be linked on its first withdrawal but a
  input.playerAccounts[0].profileKey='P21|839673';
  assert.throws(()=>applyOperation(input,op,'admin-a'),/другим игроком/);
 });
+
+test('selected player persists with the first withdrawal even without the separate save button',()=>{
+ const op={action:'create',requestId:requestId('selected_profile'),entry:{...entry,room:'X',playerId:'2299644',selectedProfileKey:'P21|208238',confirmAccountLink:true}};
+ const {state}=applyOperation(null,op,'admin-a');
+ const n=require('../lib/deposit-player-notifications'),event=n.eventForOperation(state,op);
+ assert.equal(n.poker21Anchor(state,event),'208238');
+ assert.equal(state.playerAccounts.find(p=>p.room==='X'&&p.playerId==='2299644').profileKey,'P21|208238');
+ assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,confirmAccountLink:false}},'admin-a'),/Подтвердите/);
+ assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,selectedProfileKey:'P21|missing'}},'admin-a'),/не найден/);
+});

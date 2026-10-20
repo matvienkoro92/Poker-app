@@ -25,3 +25,15 @@ test('withdrawal review includes player search, link saving, room and ID in the 
  const scope=html.split('data-withdrawal-player>')[1].split('</fieldset></div>')[0];
  assert.match(scope,/data-player-picker/);assert.match(scope,/name="room"/);assert.match(scope,/name="playerId"/);
 });
+
+test('withdrawal submission includes the selected profile and requires confirmation for a new room ID',()=>{
+ const picker={dataset:{profileKey:'P21|208238'}},checkbox={checked:true};
+ const c={data:{playerDirectory:[]},tell:()=>{}};vm.createContext(c);
+ vm.runInContext(source.slice(source.indexOf('  function withdrawalPlayerLink('),source.indexOf('  function reservedCopyText(')),c);
+ const form={querySelector:s=>s==='[data-player-picker]'?picker:checkbox},values={room:'X',playerId:'2299644'};
+ assert.equal(c.withdrawalPlayerLink(form,values),true);assert.equal(values.selectedProfileKey,'P21|208238');assert.equal(values.confirmAccountLink,true);
+ checkbox.checked=false;assert.equal(c.withdrawalPlayerLink(form,{room:'X',playerId:'2299644'}),false);
+ c.data.playerDirectory=[{room:'X',playerId:'2299644',profileKey:'P21|208238'}];
+ assert.equal(c.withdrawalPlayerLink(form,{room:'X',playerId:'2299644'}),true);
+ assert.match(source,/if\(!withdrawalPlayerLink\(form,values\)\)return;\s+values.total=total;await save/);
+});
