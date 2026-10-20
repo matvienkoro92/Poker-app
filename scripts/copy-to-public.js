@@ -71,6 +71,7 @@ const baseFiles = [
   'app-city-launch.js',
   'app-city-access.js',
   'styles-city-game.css',
+  'styles-city-radio.css',
   'cooler-flight-play.html',
   'app-last-buy-in-engine.js',
   'app-last-buy-in-game.js',

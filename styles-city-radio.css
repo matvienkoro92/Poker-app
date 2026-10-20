@@ -1,0 +1,10 @@
+.city-stereo-dialog {max-width:440px;max-height:90dvh;overflow:auto;}
+.city-stereo-dialog > img {display:block;width:100%;max-height:220px;object-fit:contain;margin:12px 0;}
+.city-stereo-dialog [data-city-radio-close] {float:right;width:40px;min-height:40px;padding:4px;}
+.city-stereo-dialog .garage-radio {display:grid;gap:14px;clear:both;}
+.city-stereo-dialog .garage-radio__controls {display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:8px;}
+.city-stereo-dialog .garage-radio__controls button {margin:0;padding:10px 5px;min-width:0;font-size:14px;}
+.city-stereo-dialog .garage-radio__volume {display:grid;grid-template-columns:auto minmax(0,1fr) 42px;align-items:center;gap:10px;}
+.city-stereo-dialog input {min-width:0;width:100%;accent-color:#e2b86c;}
+.city-stereo-dialog [data-radio-track] {color:#ffe0a0;}
+.city-stereo-dialog [data-radio-status] {color:#b6c5bf;min-height:2.6em;}

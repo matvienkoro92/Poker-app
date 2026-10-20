@@ -2,6 +2,7 @@
 export const CLUB={x:-24,z:-23,w:30,d:24};
 export const PORT={x:86,z:-70,w:22,d:24};
 export const VILLA={x:98,z:147,w:32,d:44};
+export const GARAGE_RADIO={x:95.8,z:159.2};
 export const VILLA_ENTRY={x:81,z:147};
 export const START={x:87,z:150};
 export const CAR_START={x:87,z:160,yaw:-Math.PI/2};

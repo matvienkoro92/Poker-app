@@ -15,7 +15,7 @@ export function buildEstate({scene,box:rawBox,cylinder:rawCylinder,batch:rawBatc
  for(let z=119;z<158;z+=6){rawBox('#636d66',35.1,.132,z,.35,.008,2.5);rawBox('#879184',44.9,.132,z,.035,.009,4);}
  for(let z=111;z<159;z+=7)rawBox('#e8d7ac',40,.13,z,.1,.015,3);for(let x=43;x<75;x+=7)rawBox('#e8d7ac',x,.13,105,3,.015,.1);
  for(const [px,pz]of [[27,126],[24,146],[36,174],[62,184],[88,188],[122,144]])outdoors.palm(px,pz,7);
- for(const [px,pz]of [[49,126],[46,144],[49,169],[67,178],[92,177],[117,170]])outdoors.shrub(px,pz,1.3);
+ for(const [px,pz]of [[51,126],[51,144],[51,169],[67,178],[92,177],[117,170]])outdoors.shrub(px,pz,1.3);
  for(const [px,pz]of [[26,120],[30,163],[54,183]])outdoors.tree(px,pz,5.5);
  for(let i=0;i<16;i++){const a=.15+i*.13,px=PENINSULA.x+Math.cos(a)*(PENINSULA.rx-1),pz=PENINSULA.z+Math.sin(a)*(PENINSULA.rz-1);if(px>92&&px<117&&pz>174&&pz<190)continue;outdoors.rock(px,pz,.6+i%3*.35);}
  for(const pz of [115,137,160]){rawCylinder('#43564c',34,3.2,pz,.08,6.4);rawBox('#43564c',35,6.35,pz,2,.1,.1);rawBatch('box','#ffe0a0',35.7,6.25,pz,.55,.1,.3,0,0,true);}

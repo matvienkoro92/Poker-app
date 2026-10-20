@@ -55,6 +55,26 @@ export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
   for(let j=0;j<3;j++){const px=x-.6+j*.55;B('gold',px,3,2.25,.045,.55,.045);ring('gold',px,3.3,2.25,.075);}
  }
  for(let i=0;i<3;i++)B('cream',17,1.83+i*.04,2.12,.8,.035,.48);
+ // Black-and-brass cassette deck sits on the service bench, matching the villa preview.
+ const radioX=12.2,radioY=2.18,radioZ=2.12;
+ part('soft','dark',radioX,radioY,radioZ,1.85,.88,.52);
+ for(const side of [-1,1]){
+  const x=radioX+side*.59;
+  part('cyl','gold',x,radioY-.03,radioZ+.28,.3,.035,.3,Math.PI/2);
+  part('cyl','rubber',x,radioY-.03,radioZ+.31,.26,.025,.26,Math.PI/2);
+  S('dark',x,radioY-.03,radioZ+.34,.12,.12,.045);
+  for(let j=-4;j<=4;j++)B('dark',x+j*.05,radioY-.03,radioZ+.33,.013,.42,.012);
+  B('gold',radioX+side*.8,radioY+.65,radioZ,.065,.43,.06);
+  C('gold',radioX+side*.65,radioY+.49,radioZ,.085,.07);
+ }
+ B('rubber',radioX,radioY+.84,radioZ,1.65,.1,.1);
+ B('gold',radioX,radioY+.27,radioZ+.285,1.58,.12,.025);
+ B('dark',radioX,radioY+.27,radioZ+.305,1.49,.08,.018);
+ for(let j=-6;j<=6;j++)B('cream',radioX+j*.1,radioY+.27,radioZ+.32,.008,.045,.008);
+ B('gold',radioX,radioY-.02,radioZ+.285,.45,.35,.035);B('rubber',radioX,radioY-.02,radioZ+.31,.39,.28,.02);
+ for(const dx of [-.11,.11])ring('gold',radioX+dx,radioY-.01,radioZ+.33,.065);
+ for(let j=0;j<5;j++)B('gold',radioX-.18+j*.09,radioY-.29,radioZ+.31,.065,.065,.04);
+ B('light',radioX+.19,radioY+.13,radioZ+.33,.045,.02,.01);
  // Sauna: slatted seats with visible gaps, bucket staves, ladle, thermometer and folded towels.
  for(const z of [-11,-9,-7])for(let x=-20.5;x<-18.1;x+=.18)B('deck',x,1.32,z,.14,.05,1.8);
  for(let i=0;i<12;i++){const a=i*Math.PI/6;B('deck',-18.9+Math.sin(a)*.23,1.56,-7+Math.cos(a)*.23,.055,.44,.055);}
