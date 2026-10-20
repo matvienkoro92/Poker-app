@@ -12,6 +12,22 @@
     var amount = (Number(parts[0]) * 100 + Number((parts[1] || '').padEnd(2, '0')))*multiplier;
     return Number.isSafeInteger(amount) && amount > 0 && amount <= 10000000000 ? amount : null;
   }
+  function normalizePhone(value) {
+    var raw=String(value==null?'':value).trim();
+    if(!raw)return '';
+    if(!/^\+?[\d\s().\-–—]+$/.test(raw))return '';
+    var digits=raw.replace(/\D/g,'');
+    if(digits.length===10&&digits[0]==='9'&&raw[0]!=='+')return '+7'+digits;
+    return /^[78]\d{10}$/.test(digits)?'+7'+digits.slice(1):'';
+  }
+  function phoneError(value) {
+    var raw=String(value==null?'':value).trim();
+    if(!raw||normalizePhone(raw))return '';
+    if(!/^\+?[\d\s().\-–—]+$/.test(raw))return 'В телефоне допустимы цифры, +, пробелы, скобки и дефисы.';
+    var digits=raw.replace(/\D/g,''),expected=digits[0]==='9'?10:11;
+    if(digits.length!==expected)return 'В телефоне '+digits.length+' цифр, нужно '+expected+'. Пример: +7 (999) 123-45-67.';
+    return 'Начните номер с +7, 7, 8 или введите 10 цифр с 9.';
+  }
   function walletError(value){var wallet=String(value||'').trim();if(!wallet)return 'Укажите USDT-кошелёк.';if(wallet.length<34)return 'Не хватает '+(34-wallet.length)+' символов. USDT-кошелёк TRC20: получено '+wallet.length+', нужно 34.';if(wallet.length>34)return 'USDT-кошелёк TRC20: лишние символы, получено '+wallet.length+', нужно 34.';if(!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(wallet))return 'USDT-кошелёк TRC20 содержит недопустимые символы. Проверьте адрес у игрока.';return '';}
   function safeLink(value) {
     try { var u = new URL(String(value || '').trim()); return u.protocol === 'https:' ? u.href : ''; } catch(e) { return ''; }
@@ -110,5 +126,5 @@
     return {paymentType:paymentType,wallet:wallet,network:network,card:card, phone:phone, bank:bank, recipient:recipient, room:room, playerId:playerId, paymentLink:paymentLink,
       amount:amounts.length === 1 ? amounts[0] : null, rawText:rawText, warnings:warnings};
   }
-  return {parse:parse, money:money, safeLink:safeLink,walletError:walletError};
+  return {parse:parse, money:money, safeLink:safeLink,walletError:walletError,normalizePhone:normalizePhone,phoneError:phoneError};
 });

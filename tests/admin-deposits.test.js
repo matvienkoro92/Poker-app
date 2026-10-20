@@ -753,3 +753,18 @@ test('withdrawal notifications are committed with the ledger, and retry after a 
  assert.equal((await api.call(request)).statusCode,200);assert.equal(api.notificationEvents.length,1);
  const bad={action:'payment',entryId:request.requestId,requestId:requestId(9902),amount:entry.total+1};assert.equal((await api.call(bad)).statusCode,409);assert.equal(api.notificationEvents.length,1);
 });
+
+test('manual SBP phone formats normalize identically in parser and create API',()=>{
+  for(const phone of ['7999-999-8877','+7 (999) 999-88-77','8 (999) 999-88-77','9999998877','7\u00a0999\u202f999–88—77']){
+    assert.equal(parser.phoneError(phone),'');
+    assert.equal(parser.normalizePhone(phone),'+79999998877');
+    const result=applyOperation(null,{action:'create',requestId:requestId(1),entry:{...entry,phone}},'admin-a');
+    assert.equal(result.state.entries[0].phone,'+79999998877');
+  }
+  for(const phone of ['8999998877','799999988777','+7abc9999998877','+9999998877']){
+    assert.ok(parser.phoneError(phone));
+    assert.throws(()=>applyOperation(null,{action:'create',requestId:requestId(1),entry:{...entry,phone}},'admin-a'));
+  }
+  assert.equal(parser.phoneError(''),'');
+  assert.equal(parser.normalizePhone(''),'');
+});
