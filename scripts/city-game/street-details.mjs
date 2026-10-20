@@ -1,14 +1,17 @@
+import {venueForBuilding} from './district-plan.mjs';
 import {BUILDINGS,ROAD_X,ROAD_Z} from './world.mjs';
 // Street furniture remains on pavements and inside building footprints: no new invisible obstacles.
 export function dressStreets({box,cylinder,batch,label}){
  for(const [index,b]of BUILDINGS.entries()){
   const z=b.z+b.d/2+.24;
+  if(!venueForBuilding(b)){
   // Stone portal, recessed door, bell panel, address enamel, awning with individual seams.
   for(const side of [-1,1]){box('#c6b99c',b.x+side*1.22,1.6,z,.18,3.2,.24);box('#656b62',b.x+side*1.22,.13,z,.28,.26,.42);}
   box('#c6b99c',b.x,3.25,z,2.65,.18,.25);box('#c5a774',b.x,1.45,z+.12,.035,2.65,.035);
   box('#263c38',b.x+1.55,1.48,z,.22,.38,.06);for(let i=0;i<4;i++)batch('ball','#c5a774',b.x+1.55,1.36+i*.07,z+.04,.022,.022,.015);
   label(String(10+index*2),b.x-1.65,2.4,z+.05,.52,.42,0,'#183d36','#efd8a4');
   for(let i=-3;i<=3;i++){batch('box',i%2?'#475c50':'#d1b78a',b.x+i*.4,3.28,z+.7,.39,.09,1.45,0,-.13);}
+  }
   // Drainpipes, brackets, ventilation slots and balcony planter boxes.
   for(const side of [-1,1]){const x=b.x+side*(b.w/2-.5);cylinder('#55645e',x,b.h/2,z,.055,b.h);for(let y=1;y<b.h;y+=2.8)box('#a8a58d',x,y,z+.04,.16,.05,.12);}
   for(let i=-1;i<=1;i++){

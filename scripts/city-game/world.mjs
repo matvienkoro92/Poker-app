@@ -1,3 +1,5 @@
+import {buildingSolids,districtTrees} from './district-plan.mjs';
+import {estateFeatures} from './estate-plan.mjs';
 // Metres. Shared by collision, rendering, route guidance and tests.
 export const CLUB={x:-24,z:-23,w:30,d:24};
 export const PORT={x:86,z:-70,w:22,d:24};
@@ -40,12 +42,12 @@ export const BUILDINGS=[
 ];
 const villaRect=(x,z,w,d,h=5.4)=>{const p=villaPoint(x,z);return {...rect(p.x,p.z,d,w),h};};
 const rect=(x,z,w,d)=>({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});
-export const SOLIDS=[...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
- {...rect(68,133,6.8,6.8),h:1.8},{...rect(69,145,5.4,1.5),h:1.4},{...rect(69,172,5.4,1.5),h:1.4},
+export const SOLIDS=[...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
+ {...rect(68,133,6.8,6.8),h:1.8},
  // Mainland estate fence, with one ten-metre opening towards the promenade.
- {...rect(53,136,.45,38),h:2.1},{...rect(53,169,.45,8),h:2.1},
- {...rect(86,117,66,.45),h:2.1},{...rect(77.25,173,48.5,.45),h:2.1},{...rect(111.75,173,14.5,.45),h:2.1},{...rect(119,145,.45,56),h:1.2},
-...BUILDINGS.map(b=>rect(b.x,b.z,b.w,b.d)),rect(PORT.x,PORT.z,PORT.w,PORT.d),
+ {...rect(53,136,.65,38),h:3.1},{...rect(53,169,.65,8),h:3.1},
+ {...rect(86,117,66,.65),h:3.1},{...rect(77.25,173,48.5,.45),h:2.7},{...rect(111.75,173,14.5,.45),h:2.7},{...rect(119,145,.45,56),h:2.2},
+...BUILDINGS.flatMap(buildingSolids),rect(PORT.x,PORT.z,PORT.w,PORT.d),
  // Club is a traversable room, with a six-metre opening towards the street.
  rect(-39,-23,.65,24),rect(-9,-23,.65,24),rect(-24,-35,30,.65),rect(-33,-11,12,.65),rect(-15,-11,12,.65),
  rect(-32,-28,9,2),rect(-17,-27,4,5),

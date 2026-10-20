@@ -20,7 +20,7 @@ export function createOutdoors(scene,textures){
  const geos={trunk,frond,crown,branch:new T.CylinderGeometry(1,1.25,1,8),leaf:leafGeometry,rock:new T.IcosahedronGeometry(1,1)},bins=new Map(),dummy=new T.Object3D();
  function add(kind,material,x,y,z,sx,sy,sz,rx=0,ry=0,rz=0){const key=kind+material;if(!bins.has(key))bins.set(key,{kind,material,items:[]});bins.get(key).items.push([x,y,z,sx,sy,sz,rx,ry,rz]);}
  function palm(x,z,h=7){const bend=rnd()*6.28;add('trunk','trunk',x,0,z,h,h,h,0,bend,0);const cx=x+Math.cos(bend)*h*.08,cz=z-Math.sin(bend)*h*.08;for(let i=0;i<13;i++){const a=i*2.399+Math.sin(x+z),length=(i<9?3.4:2.4)*(h/7)*(.88+rnd()*.2);add('frond','leaf',cx,h-.16,cz,length,length,length,0,a,i<9?-.07:.55);}for(let i=0;i<3;i++)add('rock','trunk',cx+Math.sin(i*2)*.2,h-.28,cz+Math.cos(i*2)*.2,.16,.2,.16);}
- function shrub(x,z,s=1){for(let i=0;i<3;i++){const a=i*2.399;foliage(x+Math.sin(a)*s*.28,.5*s+(i%2)*.15,z+Math.cos(a)*s*.28,s*.52);}}
+ function shrub(x,z,s=1,base=0){for(let i=0;i<3;i++){const a=i*2.399;foliage(x+Math.sin(a)*s*.28,.5*s+(i%2)*.15+base,z+Math.cos(a)*s*.28,s*.52);}}
  function branch(a,b,r){const start=new T.Vector3(...a),end=new T.Vector3(...b),v=end.clone().sub(start),mid=start.add(end).multiplyScalar(.5),q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),v.clone().normalize()),rotation=new T.Euler().setFromQuaternion(q);add('branch','trunk',mid.x,mid.y,mid.z,r,v.length(),r,rotation.x,rotation.y,rotation.z);}
  function foliage(x,y,z,s=1){
   // Solid overlapping leaflets need neither transparent cards nor distance-dependent swaps.

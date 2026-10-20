@@ -42,7 +42,7 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  for(const x of [-21.5,-6.8,3.2,20.5]){B('dark',x,2.65,16.45,.65,5.3,.65);sconce(x,2.9,16.84);}
  // Two real open portals, with a rolled-up garage shutter and dark lintels.
  for(const x of [-3.2,3.2,7.1,20])B('gold',x,2.4,16.36,.12,4.8,.12);B('dark',0,4.9,16.35,6.5,.7,.6);B('dark',13.5,5,16.35,13,.8,.7);for(let i=0;i<5;i++)B('dark',13.5,4.75+i*.09,16.6,12.6,.045,.25);
- sign('TWO ACES · ВИЛЛА',-12.5,4.88,16.52,13,.65);sign('МАНКИCAR · TWO ACES',13.5,5.02,16.74,11,.55);
+ B('dark',-12.5,4.88,16.49,13.5,.85,.12);sign('TWO ACES · ВИЛЛА',-12.5,4.88,16.56,13,.65);sign('МАНКИCAR · TWO ACES',13.5,5.02,16.74,11,.55);
  // Wood-paneled partitions leave the original broad room openings clear.
  for(const [x,z,w,d]of [[6,4,.35,6],[6,14,.35,4],[-6,2.5,.35,5],[-6,14,.35,4],[-18,1,8,.35],[-9,1,2,.35],[9.5,1,3,.35],[19.5,1,5,.35]]){B('wood',x,2.45,z,w,4.9,d);B('gold',x,1.05,z,w+.03,.04,d+.03);B('gold',x,4.7,z,w+.06,.05,d+.06);}
  // Central trophy wall, green inset and the villa's recognizable club chair.
@@ -77,7 +77,7 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  for(let i=0;i<4;i++){C('rubber',21,.23+i*.43,9,.58,.38);ring('rubber',21,.42+i*.43,9,.49,Math.PI/2);ring('gold',21,.43+i*.43,9,.3,Math.PI/2);}plant(7.3,2.7,.8);
  // Billiards and bar. Pockets, balls and cues remain legible at walking distance.
  B('wood',14,1.2,-7,8.4,.55,4.4);B('gold',14,1.48,-7,8.5,.08,4.5);B('felt',14,1.55,-7,7.8,.08,3.8);for(const x of [10.5,17.5])for(const z of [-8.6,-5.4]){B('wood',x,.55,z,.35,1.1,.35);C('rubber',x,1.61,z,.18,.02);}for(let i=0;i<8;i++)S(i%2?'cream':'red',12+(i%3)*.4,1.7,-7+Math.floor(i/3)*.35,.11,.11,.11);B('wood',14,1.68,-6.1,5,.04,.04,.15);
- B('wood',20,1.1,-10.5,2.2,2.2,7);B('stone',20,2.26,-10.5,2.5,.12,7.3);for(let i=0;i<8;i++)C(i%2?'green':'gold',20,2.5,-13+i*.6,.1,.45);for(const z of [-12,-9])stool(17.6,z);chair(11,-2.4,.7,-Math.PI/3);chair(16,-2.4,.7,Math.PI/3);C('dark',13.5,.65,-2.5,.8,.12);sign('СВОИ · БИЛЬЯРД И БАР',14,4.15,-15.5,12,.85);
+ B('wood',20,1.1,-10.5,2.2,2.2,7);B('stone',20,2.26,-10.5,2.5,.12,7.3);for(let i=0;i<8;i++)C(i%2?'green':'gold',20,2.5,-13+i*.6,.1,.45);for(const z of [-12,-9])stool(17.6,z);chair(11,-2.4,.7,-Math.PI/3);chair(16,-2.4,.7,Math.PI/3);C('dark',13.5,.65,-2.5,.8,.12);
  // Sauna glazing, timber bench and gym equipment on the opposite side.
  B('wood',-18,2.4,-12.5,6,4.8,.3);B('wood',-21,2.4,-8,.3,4.8,9);B('glass',-15,2.2,-8,.1,4.4,9);B('gold',-15,4.4,-8,.13,.07,9);for(const z of [-11,-9,-7])B('wood',-19.4,.65,z,2.4,1.3,1.85);C('dark',-16.7,.65,-11,.6,1.3);for(let i=0;i<8;i++)S('stone',-16.7+Math.sin(i)*.35,1.42,-11+Math.cos(i)*.35,.2,.13,.2);
  for(const x of [-11,-8]){B('rubber',x,.12,-8,1.7,.22,5);B('dark',x,.7,-8,1.3,.24,2.8);for(const s of [-1,1])B('dark',x+s*.8,1.8,-9.8,.08,2.8,.08);B('gold',x,2.8,-9.8,1.9,.09,.09);for(const s of [-1,1])ring('rubber',x+s*.8,2.8,-9.8,.35,0,Math.PI/2);}
