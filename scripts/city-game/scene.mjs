@@ -4,6 +4,7 @@ import {createOwnedKart} from './vehicle.mjs';
 import {createOutdoors} from './outdoors.mjs';
 import {buildEstate} from './estate.mjs';
 import {buildIsland} from './island.mjs';
+import {dressStreets} from './street-details.mjs';
 import {buildVilla} from './villa.mjs';
 import {buildSculptedCharacter} from '../garage-3d/character-atelier.mjs';
 const PI=Math.PI;
@@ -47,6 +48,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
   if(b.name)label(b.name,b.x,4.2,frontZ+.2,Math.min(b.w-2,16),1.2);
   for(const sign of [-1,1]){box('#83918b',b.x+sign*(b.w/2-.12),b.h+.45,b.z,.18,.9,b.d);box('#83918b',b.x,b.h+.45,b.z+sign*(b.d/2-.12),b.w,.9,.18);}for(let i=0;i<2;i++){box('#7b8781',b.x-3+i*6,b.h+.75,b.z,2,1.5,2);box('#43524f',b.x-3+i*6,b.h+1.54,b.z,2.08,.08,2.08);}
  }
+ dressStreets({box,cylinder,batch,label});
  onProgress('Открываем TWO ACES…');
  // The starting club is an actual walkable interior, open roof for the follow camera.
  box('#234d49',-24,.13,-23,30,.25,24);for(const [x,z,w,d]of [[-39,-23,.55,24],[-9,-23,.55,24],[-24,-35,30,.55],[-33,-11,12,.55],[-15,-11,12,.55]]){box('#1c4945',x,3.6,z,w,7.2,d);box('#d4ae62',x,7.3,z,w+.1,.25,d+.1);}
@@ -83,9 +85,10 @@ export async function createCityScene(canvas,onProgress,garage={}){
  buildIsland({scene,box,cylinder,batch,label,textures,outdoors});
  const estate=buildEstate({scene,box,cylinder,batch,label,textures,outdoors});
  // Commit all static architecture to material/shape batches.
- const villa=buildVilla({box,cylinder,batch,label,scene,textures});
+ const villa=buildVilla({box,cylinder,batch,label,scene,textures,hall:garage.hall});
  outdoors.flush();
  const staticMeshes=[];for(const b of batches.values()){const mesh=new T.InstancedMesh(geos[b.type],mat(b.color,b.emissive),b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);staticMeshes.push(mesh);}
+ await villa.ready;
  onProgress('Манки выходит в город…');
  const look=garage.owner?garage.look:{...window.PokerGarage.defaults,body:'bodyNormal',suit:'emeraldBomber',pants:'blackDenim',shoes:'ivoryLow',helmet:'none',hair:'hairNatural',patch:'aces',glasses:'none'};
  const hero=await buildSculptedCharacter(window.PokerGarage,look);const avatar=new T.Group();hero.root.scale.setScalar(.57);hero.root.position.y=1.08;avatar.add(hero.root);scene.add(avatar);disposers.push(()=>hero.dispose());
@@ -121,5 +124,5 @@ export async function createCityScene(canvas,onProgress,garage={}){
   if(intro){camera.position.set(VILLA.x-58,36,VILLA.z+64);camera.lookAt(VILLA.x-6,2,VILLA.z-12);}
   sky.position.copy(camera.position);hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:1.8,4,dt);sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:2.5,4,dt);sun.target.position.set(pos.x,0,pos.z);sun.position.set(pos.x-40,70,pos.z-35);renderer.render(scene,camera);perfTime+=dt;
  }
- camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,get villa(){return {...villa.status,gate:estate.status};},get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};
+ camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,get villa(){return {...villa.status,gate:estate.status};},get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;villa.root.userData.disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};
 }

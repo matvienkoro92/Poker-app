@@ -1,23 +1,28 @@
 import * as T from '../../vendor/three/three.module.min.js';
 import {VILLA,villaPoint,villaInteriorAt} from './world.mjs';
+import {furnishVilla} from './villa-details.mjs';
 import {villaMaterials} from './villa-materials.mjs';
 // The existing coastal villa is built as actual rooms, with an exterior roof.
-export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder,batch}){
+export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder,batch,hall}){
  const worldBox=(c,x,y,z,...args)=>rawBox(c,x+VILLA.x-98,y,z+VILLA.z-40,...args),worldCylinder=(c,x,y,z,...args)=>rawCylinder(c,x+VILLA.x-98,y,z+VILLA.z-40,...args);
  const root=new T.Group();root.name='Two Aces villa';root.position.set(VILLA.x,0,VILLA.z);root.rotation.y=-Math.PI/2;scene.add(root);
  const m=villaMaterials(textures),bins=new Map(),geos={box:new T.BoxGeometry(1,1,1),cyl:new T.CylinderGeometry(1,1,1,20),ball:new T.SphereGeometry(1,16,10),torus:new T.TorusGeometry(1,.12,8,24)},dummy=new T.Object3D();
  // Rounded timber/leather pieces keep a furniture silhouette instead of stacked cubes.
  const soft=new T.BoxGeometry(1,1,1,4,4,4),points=soft.attributes.position;
  for(let i=0;i<points.count;i++){const p=new T.Vector3().fromBufferAttribute(points,i),core=p.clone().clampScalar(-.38,.38),edge=p.sub(core).normalize().multiplyScalar(.12).add(core);points.setXYZ(i,edge.x,edge.y,edge.z);}soft.computeVertexNormals();geos.soft=soft;
+ // Curved pointed leaves replace the old inflated oval foliage.
+ const leafPositions=[],leafUV=[];
+ for(let i=0;i<10;i++){const a=i/10,b=(i+1)/10;const edge=t=>[Math.sin(t*Math.PI)*.48,t,Math.sin(t*Math.PI)*.19];const p=edge(a),q=edge(b);leafPositions.push(-p[0],p[1],p[2],-q[0],q[1],q[2],q[0],q[1],q[2],-p[0],p[1],p[2],q[0],q[1],q[2],p[0],p[1],p[2]);leafUV.push(0,a,0,b,1,b,0,a,1,b,1,a);}
+ geos.leaf=new T.BufferGeometry();geos.leaf.setAttribute('position',new T.Float32BufferAttribute(leafPositions,3));geos.leaf.setAttribute('uv',new T.Float32BufferAttribute(leafUV,2));geos.leaf.computeVertexNormals();m.green.side=T.DoubleSide;
  function part(kind,material,x,y,z,w,h,d,rx=0,ry=0,rz=0){const key=kind+material;if(!bins.has(key))bins.set(key,{kind,material,items:[]});bins.get(key).items.push([x,y,z,w,h,d,rx,ry,rz]);}
  const B=(a,x,y,z,w,h,d,ry=0)=>part('box',a,x,y,z,w,h,d,0,ry);
  const C=(a,x,y,z,r,h)=>part('cyl',a,x,y,z,r,h,r);
  const S=(a,x,y,z,w,h,d)=>part('ball',a,x,y,z,w,h,d);
  const ring=(a,x,y,z,r,rx=0,ry=0)=>part('torus',a,x,y,z,r,r,r,rx,ry);
  const sign=(text,x,y,z,w,h=.8)=>{const p=villaPoint(x,z);const mesh=label(text,p.x,y,p.z,w,h,-Math.PI/2,'#172b25','#d4b775');return mesh;};
- function floor(kind,x,z,w,d,repeat=5){const map=m[kind].map.clone();map.repeat.set(w/repeat,d/repeat);map.needsUpdate=true;textures.push(map);const material=m[kind].clone();material.map=map;const mesh=new T.Mesh(new T.PlaneGeometry(w,d),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(x,kind==='rug'?.075:kind==='wood'?.045:kind==='deck'?.055:.025,z);mesh.receiveShadow=true;root.add(mesh);}
+ function floor(kind,x,z,w,d,repeat=5){const map=m[kind].map.clone();map.repeat.set(kind==='rug'?1:w/repeat,kind==='rug'?1:d/repeat);map.needsUpdate=true;textures.push(map);const material=m[kind].clone();material.map=map;const mesh=new T.Mesh(new T.PlaneGeometry(w,d),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(x,kind==='rug'?.075:kind==='wood'?.045:kind==='deck'?.055:.025,z);mesh.receiveShadow=true;root.add(mesh);}
  function frame(x,y,z,w,h){B('gold',x,y-h/2,z,w,.045,.08);B('gold',x,y+h/2,z,w,.045,.08);for(const s of [-1,1])B('gold',x+s*w/2,y,z,.045,h,.08);}
- function plant(x,z,scale=1){C('dark',x,.4*scale,z,.48*scale,.8*scale);C('gold',x,.8*scale,z,.49*scale,.06);for(let i=0;i<8;i++){const a=i*Math.PI/4;part('ball','green',x+Math.sin(a)*.42*scale,1.35*scale,z+Math.cos(a)*.42*scale,.15*scale,.85*scale,.32*scale,.35*Math.cos(a),a,.35*Math.sin(a));}}
+ function plant(x,z,scale=1){C('dark',x,.4*scale,z,.48*scale,.8*scale);C('gold',x,.8*scale,z,.49*scale,.06);for(let i=0;i<8;i++){const a=i*Math.PI/4;part('leaf','green',x,.72*scale,z,.65*scale,(1.25+(i%3)*.22)*scale,.7*scale,.48,a,.12*Math.sin(a));C('green',x+Math.sin(a)*.08,.93*scale,z+Math.cos(a)*.08,.018*scale,.7*scale);}}
  function sconce(x,y,z,ry=0){B('dark',x,y,z,.24,1,.18,ry);B('light',x,y,z+.1,.1,.7,.13,ry);B('gold',x,y-.45,z,.35,.07,.3,ry);B('gold',x,y+.45,z,.35,.07,.3,ry);}
  function stool(x,z){C('gold',x,.47,z,.08,.85);C('dark',x,.1,z,.45,.12);S('leather',x,.95,z,.53,.18,.53);ring('gold',x,.42,z,.32,Math.PI/2);}
  function trophy(x,y,z,s=1){B('dark',x,y,z,.5*s,.18*s,.4*s);C('gold',x,y+.28*s,z,.08*s,.4*s);part('cyl','gold',x,y+.64*s,z,.28*s,.4*s,.28*s);ring('gold',x-.28*s,y+.66*s,z,.15*s);ring('gold',x+.28*s,y+.66*s,z,.15*s);}
@@ -42,7 +47,7 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  for(const [x,z,w,d]of [[6,4,.35,6],[6,14,.35,4],[-6,2.5,.35,5],[-6,14,.35,4],[-18,1,8,.35],[-9,1,2,.35],[9.5,1,3,.35],[19.5,1,5,.35]]){B('wood',x,2.45,z,w,4.9,d);B('gold',x,1.05,z,w+.03,.04,d+.03);B('gold',x,4.7,z,w+.06,.05,d+.06);}
  // Central trophy wall, green inset and the villa's recognizable club chair.
  B('wood',0,2.5,.3,6.4,5,.35);for(const x of [-3.1,-2.2,2.2,3.1]){B('gold',x,2.5,.51,.04,4.7,.04);}B('gold',0,4.9,.55,6.4,.08,.08);B('felt',0,3,.51,4.1,2.7,.06);frame(0,3,.56,4.2,2.8);sign('♠',0,3,.61,2,1.9);
- for(const side of [-1,1]){B('dark',side*2.65,2.45,.55,1.25,4.6,.3);for(let i=0;i<3;i++){const y=.9+i*1.35;B('wood',side*2.65,y,.78,1.28,.12,.8);B('light',side*2.65,y+.12,1.04,1.1,.025,.04);trophy(side*2.65,y+.2,.85,.8);}}
+ for(const side of [-1,1]){B('dark',side*2.65,2.45,.55,1.25,4.6,.3);for(let i=0;i<3;i++){const y=.9+i*1.35;B('wood',side*2.65,y,.78,1.28,.12,.8);B('light',side*2.65,y+.12,1.04,1.1,.025,.04);}}
  floor('rug',0,8.7,8.8,12.7,12);chair(0,6,.95);C('dark',0,.48,9.6,.12,.9);C('gold',0,.94,9.6,1.32,.13);C('dark',0,1.02,9.6,1.24,.06);C('gold',.25,1.14,9.7,.17,.2);C('glass',-.4,1.19,9.5,.14,.3);plant(-4,5);plant(4,5);
  // Framed wall panels, raised leather piping and carved joinery match the achievement hall.
  for(const side of [-1,1]){const wallX=side*5.8;for(const zz of [3.5,13.6]){B('gold',wallX,2.4,zz,.05,4.3,.05);B('gold',wallX,1.05,zz,.08,.05,2.5);}B('wood',wallX,.38,8,.16,.65,12.5);}
@@ -55,7 +60,7 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  for(let i=0;i<3;i++){B('cream',-14.65+i*.65,1.53,9,.52,.02,.78,.08*i);sign(i===1?'♥':'♠',-14.65+i*.65,1.55,8.98,.35,.4).rotation.set(-Math.PI/2,0,Math.PI/2);}
  B('felt',-14,3.2,1.22,10,2.7,.08);frame(-14,3.2,1.28,10.2,2.9);sign('СВОИ · POKER21',-14,3.3,1.34,8,1);for(const x of [-20,-8]){sconce(x,3.3,1.27);plant(x,3);}
  // Lounge with a soft sectional, cushions, a coffee table and a working kitchen island.
- B('cream',0,.56,-8,7,1.05,2.8);B('cream',0,1.1,-9.25,7.2,1.5,.5);for(const x of [-3.5,3.5])B('cream',x,.96,-8,.6,1.1,2.8);for(const x of [-2.2,0,2.2]){S('cream',x,.99,-7.9,1.04,.16,1.15);B(x?'felt':'leather',x,1.35,-8.8,.8,.7,.22,.1*x);}
+ part('soft','cream',0,.56,-8,7,1.05,2.8);part('soft','cream',0,1.1,-9.25,7.2,1.5,.5);for(const x of [-3.5,3.5])B('cream',x,.96,-8,.6,1.1,2.8);for(const x of [-2.2,0,2.2]){S('cream',x,.99,-7.9,1.04,.16,1.15);B(x?'felt':'leather',x,1.35,-8.8,.8,.7,.22,.1*x);}
  C('dark',0,.55,-4.6,1.7,.14);C('gold',0,.48,-4.6,1.74,.06);C('gold',0,.25,-4.6,.16,.45);C('gold',0,.66,-4.6,.1,.14);
  for(const x of [-4,-2,0,2]){B('wood',x,1,-14.45,1.95,2,1.7);B('gold',x,1.2,-13.56,.6,.035,.07);}B('stone',-1,2.06,-14.4,8,.12,1.95);B('dark',-3,2.14,-14.3,1.5,.05,1);B('dark',1.4,2.14,-14.3,1.3,.05,1);for(const x of [-3.4,-2.6])for(const z of [-14.6,-14])C('rubber',x,2.18,z,.23,.03);
  // Faucet, backsplash, upper cupboards and under-cabinet lighting.
@@ -96,8 +101,9 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  // Ceiling structure remains above the camera; lit pendants give each room a scale.
  for(const x of [-20,-6,6,21])B('wood',x,5.05,0,.22,.3,31.5);
  for(const [x,z]of [[0,8],[-14,9],[14,9],[14,-7],[0,-7]]){C('dark',x,4.4,z,.025,1.2);part('cyl','dark',x,3.9,z,.64,.2,.64);part('cyl','light',x,3.78,z,.5,.025,.5);const light=new T.PointLight('#ffd69a',17,12,2);light.position.set(x,3.6,z);root.add(light);}
+ const awards=furnishVilla({root,B,C,S,ring,part,m,textures,hall});
  for(const [key,b]of bins){const mesh=new T.InstancedMesh(geos[b.kind],m[b.material],b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,w,h,d,rx,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(w,h,d);dummy.rotation.set(rx,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.name='Villa '+key;mesh.castShadow=b.material!=='glass'&&b.material!=='light';mesh.receiveShadow=true;mesh.computeBoundingSphere();root.add(mesh);}
  // Existing pier and yacht remain connected to the ocean terrace.
  worldBox('#8f7856',133,.12,57,22,.28,2.8);for(let x=124;x<145;x+=2.5)worldBox('#69543d',x,-.9,57,.3,2.1,2.8);batch('ball','#d8ded2',149+VILLA.x-98,.6,57+VILLA.z-40,3,.9,8.5);worldBox('#f0ebd8',149,1.35,56,4.6,.6,11);worldBox('#b5c3bd',149,2.1,55,3.6,1.2,4.5);worldBox('#3f666c',149,2.6,56.3,3.8,.7,.12);worldBox('#ece4ca',149,3.05,55,4.2,.18,5);worldCylinder('#c7cbbb',149,4.1,54.5,.05,2.1);
- let alpha=1,inside=false;return {root,roof,update(position,dt,intro=false){inside=!intro&&villaInteriorAt(position,inside?.65:0);alpha=T.MathUtils.damp(alpha,inside?0:1,9,dt);roof.visible=alpha>.015;roofMaterial.opacity=alpha;roofMaterial.depthWrite=alpha>.95;return inside;},get status(){return {inside,roofVisible:roof.visible,roofOpacity:alpha};}};
+ let alpha=1,inside=false;return {root,roof,ready:awards.ready,update(position,dt,intro=false){inside=!intro&&villaInteriorAt(position,inside?.65:0);alpha=T.MathUtils.damp(alpha,inside?0:1,9,dt);roof.visible=alpha>.015;roofMaterial.opacity=alpha;roofMaterial.depthWrite=alpha>.95;return inside;},get status(){return {inside,roofVisible:roof.visible,roofOpacity:alpha,awards:awards.count};}};
 }

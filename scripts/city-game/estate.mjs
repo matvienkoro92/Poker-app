@@ -8,6 +8,11 @@ export function buildEstate({scene,box:rawBox,cylinder:rawCylinder,batch:rawBatc
  outdoors.lawnRect(69,114,98,58,.018);
  rawBox('#a1947b',69,-.02,114,98,.04,58);
  rawBox('#787f77',40,.06,132.5,11,.12,55);rawBox('#787f77',56,.06,105,43,.12,11);rawBox('#787f77',72,.06,89,11,.12,38);rawBox('#b8b097',48,.07,160,16,.14,10);
+ outdoors.asphalt(40,132.5,11,55);outdoors.asphalt(56,105,43,11);outdoors.asphalt(72,89,11,38);
+ outdoors.paving(32.8,139,2.8,43,.075);outdoors.paving(47.2,139,2.8,43,.075);
+ for(const x of [34.2,45.8]){rawBox('#c3bea6',x,.09,139,.22,.18,43);rawBox('#4b5651',x+(x<40?.2:-.2),.128,139,.055,.012,43);}
+ // Subtle lane-edge repairs and expansion cuts keep the approach from reading as a flat plane.
+ for(let z=119;z<158;z+=6){rawBox('#636d66',35.1,.132,z,.35,.008,2.5);rawBox('#879184',44.9,.132,z,.035,.009,4);}
  for(let z=111;z<159;z+=7)rawBox('#e8d7ac',40,.13,z,.1,.015,3);for(let x=43;x<75;x+=7)rawBox('#e8d7ac',x,.13,105,3,.015,.1);
  for(const [px,pz]of [[27,126],[24,146],[36,174],[62,184],[88,188],[122,144]])outdoors.palm(px,pz,7);
  for(const [px,pz]of [[49,126],[46,144],[49,169],[67,178],[92,177],[117,170]])outdoors.shrub(px,pz,1.3);
