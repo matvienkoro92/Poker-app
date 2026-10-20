@@ -135,6 +135,15 @@ function pokerInitHomeDeepLinks(opts) {
       openHomeModalDeepLink(function(){return typeof window.pokerOpenDepositsDeepLink==='function'&&window.pokerOpenDepositsDeepLink();});
       return;
     }
+    if (startParam === "villa" || startParam === "player_hall" || startParam === "garage") {
+      openHomeModalDeepLink(function () {
+        var open = startParam === "garage" ? window.pokerOpenPlayerGarage : window.pokerOpenPlayerHall;
+        if (typeof open !== "function") return false;
+        open();
+        return true;
+      }, ["profile"]);
+      return;
+    }
     var tournamentBetMatch = startParam.match(/^tournament_bet_(tb_[a-z0-9_:-]+)$/i);
     if (startParam === "tournament_bet" || tournamentBetMatch) {
       openHomeModalDeepLink(function () {

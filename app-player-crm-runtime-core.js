@@ -1695,6 +1695,12 @@
 
   var CRM_LINK_TARGETS = [
     { key: "home", label: "Главная", view: "home", startapp: "home" },
+    { key: "villa", label: "Вилла", view: "home", startapp: "villa" },
+    { key: "garage", label: "Гараж", view: "home", startapp: "garage" },
+    { key: "news", label: "Новости", view: "home", startapp: "news" },
+    { key: "club-news", label: "Новости клуба", view: "home", startapp: "club_news" },
+    { key: "friend-news", label: "Новости друзей", view: "profile", startapp: "friend_news" },
+    { key: "profile-friends", label: "Друзья", view: "profile", startapp: "profile_friends" },
     { key: "raffles", label: "Розыгрыши", view: "raffles", startapp: "raffles" },
     { key: "tournament-bet", label: "Ставка на себя", view: "home", startapp: "tournament_bet" },
     { key: "club-guestbook-reviews", label: "Отзывы", view: "home", startapp: "club_guestbook_reviews" },
@@ -1726,6 +1732,7 @@
     { key: "hall-of-fame-legends", label: "Зал славы · Легенды", view: "hall-of-fame", startapp: "hall_fame_legends" },
     { key: "hall-of-fame-cups", label: "Зал славы · Кубки", view: "hall-of-fame", startapp: "hall_fame_cups" },
     { key: "hall-of-fame-photos", label: "Зал славы · Фото", view: "hall-of-fame", startapp: "hall_fame_photos" },
+    { key: "hall-of-fame-achievements", label: "Зал славы · Достижения", view: "hall-of-fame", startapp: "hall_fame_achievements" },
     { key: "hall-of-fame-shame", label: "Зал славы · Доска позора", view: "hall-of-fame", startapp: "hall_fame_shame" },
     { key: "streams", label: "Стримы", view: "streams", startapp: "streams" },
     { key: "streams-delayed", label: "Стримы · отложенные", view: "streams", startapp: "streams_delayed" },
@@ -1740,7 +1747,8 @@
     { key: "schedule", label: "Расписание", view: "schedule", startapp: "schedule" },
     { key: "bonus-game", label: "Игра · Найди туза", view: "bonus-game", startapp: "bonus_game" },
     { key: "plasterer-game", label: "Игра · Переедь Штукатура", view: "plasterer-game", startapp: "plasterer_game" },
-    { key: "cooler-game", label: "Игра · Кулер", view: "cooler-game", startapp: "cooler_game" }
+    { key: "cooler-game", label: "Игра · Кулер", view: "cooler-game", startapp: "cooler_game" },
+    { key: "cooler-flight", label: "Игра · Кулер · полёт", view: "cooler-flight", startapp: "cooler_flight" }
   ];
 
   function crmLinkTargetByKey(key) {
