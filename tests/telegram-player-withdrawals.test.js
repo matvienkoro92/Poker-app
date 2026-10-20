@@ -4,7 +4,7 @@ const {pages}=require('../lib/telegram-player-withdrawals');
 const commands=require('../lib/telegram-club-commands');
 const entry={id:'a',room:'P21',playerId:'208238',total:100000,payments:[{amount:30000}],createdAt:Date.parse('2026-10-20T18:17:45Z')};
 test('command is private, exact and accepts the own bot mention',()=>{
- for(const text of ['/вывод','/вывод@Poker_dvatuza_bot','/выводы'])assert.equal(commands.command({message:{text,chat:{type:'private'}}}),'player-withdrawals');
+ for(const text of ['/вывод','/вывод@Poker_dvatuza_bot','/выводы','/withdrawals','/withdrawals@Poker_dvatuza_bot'])assert.equal(commands.command({message:{text,chat:{type:'private'}}}),'player-withdrawals');
  for(const text of ['/вывод@Other_bot','/вывод 208238'])assert.equal(commands.command({message:{text,chat:{type:'private'}}}),null);
  assert.equal(commands.command({message:{text:'/вывод',chat:{type:'group'}}}),null);
 });
