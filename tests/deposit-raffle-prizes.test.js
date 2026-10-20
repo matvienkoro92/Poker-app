@@ -40,3 +40,16 @@ test('daily list follows the raffle day, not a later prize confirmation; cash re
  assert.deepEqual(result.rows.map(r=>r.raffleId),['today','start']);
  assert.equal(result.returned,50000);
 });
+
+test('daytime cash 5/10 prizes have a separate tab and share return accounting',()=>{
+ const seated=winner({prize:'Беккинг-байин 200 ₽ на кеш 5/10',winnerCashoutStatus:'plus',winnerCashoutAmount:750,winnerCashoutAt:'2026-10-20T09:00:00Z'});
+ const returned=winner({prize:'200 ₽',winnerSeatStatus:'not_seated',cashSeatingMonitor:{status:'returned',amount:200,returnedAt:'2026-10-20T09:00:00Z'}});
+ const pending=winner({prize:'200 ₽',winnerSeatStatus:'not_seated'});
+ const result=snapshot([raffle(seated,{id:'day'}),raffle(returned,{id:'returned'}),raffle(pending,{id:'pending'}),raffle(winner(),{id:'evening'})],period);
+ assert.equal(eligible(raffle(seated),seated),true);
+ assert.deepEqual(result.rows.map(r=>[r.raffleId,r.kind,r.editable]),[['day','cash_5_10',true],['pending','cash_5_10',false],['evening','cash',true]]);
+ assert.equal(result.operations[0].kind,'cash_5_10');
+ assert.equal(result.operations[0].issueAmount,20000);
+ assert.equal(result.returned,95000);
+ const view={statistics:{returned:0,managers:[]}};mergeReturns(view,result);assert.equal(view.statistics.returned,95000);
+});
