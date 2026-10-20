@@ -1,5 +1,5 @@
 .home-jackpot-guide{display:block;min-width:0;margin:24px 0 30px;padding:0;background:none;border:0;isolation:isolate}
-.home-jackpot-guide__monkey{display:block;width:100%;min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;transform-origin:50% 65%;transition:transform .3s ease;box-shadow:none}
+.home-jackpot-guide button.home-jackpot-guide__monkey{display:block;width:100%;min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;transform-origin:50% 65%;transition:transform .3s ease;box-shadow:none}
 .home-jackpot-guide__monkey img{display:block;width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 10px 15px #0004);pointer-events:none}
 .home-jackpot-guide__monkey:hover{transform:translateY(-3px)}
 .home-jackpot-guide__copy{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 3% 0;text-align:left}
@@ -17,3 +17,13 @@
 .jackpot-guide-dialog__intro,.jackpot-guide-dialog dd,.jackpot-guide-dialog__note{color:#b4bbb9;font-size:14px;line-height:1.55}.jackpot-guide-dialog dl{margin:20px 0}.jackpot-guide-dialog dl>div{padding:16px 0;border-top:1px solid #d6b57926}.jackpot-guide-dialog dt{font-weight:700;color:#f4dfac}.jackpot-guide-dialog dt span{display:block;margin-top:7px;font-size:16px;letter-spacing:.04em;color:#d8e3da}.jackpot-guide-dialog dd{margin:8px 0 0}.jackpot-guide-dialog__note{padding:12px;border:1px solid #d6b57926;border-radius:10px;font-size:12px}
 @media(prefers-reduced-motion:reduce){.home-jackpot-guide__monkey{transition:none}.home-jackpot-guide__monkey.is-greeting{animation:none}.home-jackpot-guide__monkey:hover{transform:none}}
 @media(max-width:360px){.home-jackpot-guide__eyebrow{font-size:8px;letter-spacing:.09em}.home-jackpot-guide__copy{gap:8px}.home-jackpot-guide__open{gap:8px;font-size:11px;padding:7px 10px}.jackpot-guide-dialog{padding:18px}.jackpot-guide-dialog h2{font-size:21px}}
+.jackpot-guide-dialog--poster{display:flex;flex-direction:column;width:min(1000px,calc(100vw - 24px));height:min(90dvh,1200px);max-height:90dvh;padding:18px;overflow:hidden}
+.jackpot-guide-dialog--poster:not([open]){display:none}
+.jackpot-guide-dialog--poster header{flex-shrink:0;align-items:center;gap:12px;margin-bottom:14px}
+.jackpot-guide-dialog--poster h2{font-size:clamp(17px,4vw,25px)}
+.jackpot-guide-dialog__tools{display:flex;align-items:center;gap:8px;margin-left:auto}
+.jackpot-guide-dialog header .jackpot-guide-dialog__zoom{width:auto;padding:0 10px;font-size:12px;white-space:nowrap}
+.jackpot-guide-dialog__poster-scroll{min-height:0;min-width:0;flex:1;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y pinch-zoom;border-radius:12px;background:#06111c}
+.jackpot-guide-dialog__poster{display:block;width:100%;height:auto;max-width:none}
+.jackpot-guide-dialog.is-zoomed .jackpot-guide-dialog__poster{width:max(100%,1000px)}
+@media(max-width:360px){.jackpot-guide-dialog--poster{padding:12px}.jackpot-guide-dialog--poster header{gap:6px}.jackpot-guide-dialog__tools{gap:5px}.jackpot-guide-dialog--poster header button{width:36px;height:40px}.jackpot-guide-dialog header .jackpot-guide-dialog__zoom{padding:0 7px;font-size:11px}}
