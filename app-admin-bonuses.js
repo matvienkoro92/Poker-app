@@ -194,7 +194,13 @@
         buyin: item.buyin,
         label: time + " · " + item.title + " · " + item.buyin,
       };
-    })).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
+    })).concat([{
+      id: "bonus-debit|turbina500",
+      title: "Турбина500",
+      time: "",
+      buyin: "500₽",
+      label: "Турбина500 · 500₽",
+    }]).sort(function (a, b) { return a.time.localeCompare(b.time) || a.title.localeCompare(b.title); });
   }
 
   function populateTournamentOptions() {
