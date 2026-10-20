@@ -1,0 +1,6 @@
+Mode: built-in image_gen; transparent_background=true.
+Input: user attachment «Снимок экрана 2026-10-21 в 00.29.26.png».
+Output: assets/home-jackpot-combinations-cutout-v1.webp (alpha preserved; WebP optimization with sharp).
+
+Final prompt:
+Use case: background-extraction. Edit target: supplied image. Remove ONLY the surrounding airport environment, airplane, sky, clouds, vegetation, architecture and floor. Output an actual transparent alpha background, not a checkerboard illustration. Preserve the existing foreground faithfully: the complete central chimpanzee in green tracksuit and shoes, both open metal suitcases and their banknotes, the circular gold conveyor platform with its three projecting conveyor belts and three gold combination plaques. Preserve existing text, objects, lighting, pose, identity and geometry as closely as possible; do not add promotional text or any new elements. Clean detailed cutout edges, all foreground fully visible, minimal transparent padding. This is solely background removal of the provided composition.

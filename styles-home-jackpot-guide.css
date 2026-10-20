@@ -1,0 +1,19 @@
+.home-jackpot-guide{display:block;min-width:0;margin:24px 0 30px;padding:0;background:none;border:0;isolation:isolate}
+.home-jackpot-guide__monkey{display:block;width:100%;min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;transform-origin:50% 65%;transition:transform .3s ease;box-shadow:none}
+.home-jackpot-guide__monkey img{display:block;width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 10px 15px #0004);pointer-events:none}
+.home-jackpot-guide__monkey:hover{transform:translateY(-3px)}
+.home-jackpot-guide__copy{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 3% 0;text-align:left}
+.home-jackpot-guide__eyebrow{display:block;margin-bottom:5px;color:#b8a47c;font-size:9px;font-weight:650;letter-spacing:.16em}
+.home-jackpot-guide h2{margin:0;color:#f2ddb0;font-size:clamp(16px,3.8vw,26px);font-weight:700;line-height:1.2;letter-spacing:-.025em}
+.home-jackpot-guide__open{flex-shrink:0;display:inline-flex;align-items:center;gap:14px;min-height:40px;padding:8px 13px;background:#e1c3860a;color:#eddbb3;border:1px solid #d6b57966;border-radius:11px;font:inherit;font-size:12px;cursor:pointer}
+.home-jackpot-guide__open:hover{background:#e1c38620;border-color:#e1c386}
+.home-jackpot-guide button:focus-visible,.jackpot-guide-dialog button:focus-visible{outline:2px solid #f4dfac;outline-offset:4px}
+.home-jackpot-guide__monkey.is-greeting{animation:jackpot-monkey-greeting .8s ease-in-out}
+@keyframes jackpot-monkey-greeting{0%,100%{transform:translateY(0)}45%{transform:translateY(-5px)}}
+.jackpot-guide-dialog{box-sizing:border-box;width:min(560px,calc(100vw - 24px));max-height:85dvh;padding:24px;border:1px solid #b99a5d80;border-radius:22px;background:#131b20;color:#eae2d1;font-family:inherit;overflow:auto;overscroll-behavior:contain}
+.jackpot-guide-dialog::backdrop{background:#05090dcc;backdrop-filter:blur(7px)}
+.jackpot-guide-dialog header{display:flex;gap:12px;align-items:start}.jackpot-guide-dialog header p{margin:0 0 7px;color:#bca97e;font-size:10px;letter-spacing:.12em}.jackpot-guide-dialog h2{margin:0;color:#f4dfac;font-size:24px;line-height:1.15}
+.jackpot-guide-dialog header button{flex-shrink:0;margin-left:auto;width:44px;height:44px;border:1px solid #d6b57955;border-radius:12px;background:none;color:#f4dfac;font:inherit;font-size:28px;cursor:pointer}
+.jackpot-guide-dialog__intro,.jackpot-guide-dialog dd,.jackpot-guide-dialog__note{color:#b4bbb9;font-size:14px;line-height:1.55}.jackpot-guide-dialog dl{margin:20px 0}.jackpot-guide-dialog dl>div{padding:16px 0;border-top:1px solid #d6b57926}.jackpot-guide-dialog dt{font-weight:700;color:#f4dfac}.jackpot-guide-dialog dt span{display:block;margin-top:7px;font-size:16px;letter-spacing:.04em;color:#d8e3da}.jackpot-guide-dialog dd{margin:8px 0 0}.jackpot-guide-dialog__note{padding:12px;border:1px solid #d6b57926;border-radius:10px;font-size:12px}
+@media(prefers-reduced-motion:reduce){.home-jackpot-guide__monkey{transition:none}.home-jackpot-guide__monkey.is-greeting{animation:none}.home-jackpot-guide__monkey:hover{transform:none}}
+@media(max-width:360px){.home-jackpot-guide__eyebrow{font-size:8px;letter-spacing:.09em}.home-jackpot-guide__copy{gap:8px}.home-jackpot-guide__open{gap:8px;font-size:11px;padding:7px 10px}.jackpot-guide-dialog{padding:18px}.jackpot-guide-dialog h2{font-size:21px}}
