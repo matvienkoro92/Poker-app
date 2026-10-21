@@ -907,4 +907,16 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-18-10-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-18-10-2026-league2-ok-21h.jpg"
   ]
+,
+  "19.10.2026": [
+    "rating-compressed-preview/rating-19-10-2026-league2-ok-08h.jpg",
+    "rating-compressed-preview/rating-19-10-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-19-10-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-19-10-2026-league2-ok-21h.jpg"
+  ],
+  "20.10.2026": [
+    "rating-compressed-preview/rating-20-10-2026-league2-deep-night-15k-02h.jpg",
+    "rating-compressed-preview/rating-20-10-2026-league2-addonik-a-10h.jpg",
+    "rating-compressed-preview/rating-20-10-2026-league2-turnir-vtornika-18h.jpg"
+  ]
 };

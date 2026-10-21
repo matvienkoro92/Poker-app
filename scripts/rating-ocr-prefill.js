@@ -64,6 +64,13 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/Lucky\s+Slot/i.test(raw) && /333K/i.test(raw)) return "Lucky Slot 333K";
+  if (/BLACKOUT/i.test(raw) && /220K/i.test(raw)) return "BLACKOUT 220K";
+  if (/Deep\s+Night/i.test(raw) && /15K/i.test(raw)) return "✨Deep Night 15k ✨";
+  if (/DV\s+Turbo/i.test(raw) && /50K/i.test(raw)) return "DV Turbo 500🏆 50K";
+  if (/Black\s+Magic/i.test(raw) && /500K/i.test(raw)) return "Black Magic 500K";
+  if (/Black\s+Magic/i.test(raw) && /120K/i.test(raw)) return "Black Magic 120K";
+  if (/Super\s+KO\s+2\/3/i.test(raw) && /120K/i.test(raw)) return "Super KO 2/3 120K";
   if (/СУПЕР\s+ПЯТИХАТКА/i.test(raw)) return "СУПЕР ПЯТИХАТКА";
   if (/^FREEROLL\s*500K/i.test(raw)) return "FREEROLL 500K dR";
   if (/GRAND\s+KNOCKOUT/i.test(raw)) return "🥊GRAND KNOCKOUT🥊";
@@ -486,6 +493,23 @@ async function parseOcrFile(file) {
     if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
+  // October 19 entry fees confirmed by the owner; blue headers show starting stacks.
+  if (date === "19.10.2026" && blue) {
+    const confirmed = {
+      "18:00|Lucky Slot 333K": 2000,
+      "21:00|BLACKOUT 220K": 1100
+    }[`${time}|${title}`];
+    if (confirmed) buyin = confirmed;
+  }
+  // October 20 entry fees confirmed by the owner; blue headers show starting stacks.
+  if (date === "20.10.2026" && blue) {
+    const confirmed = {
+      "00:00|Super KO 2/3 120K": 1500,
+      "18:00|Black Magic 500K": 1000,
+      "22:00|Black Magic 120K": 500
+    }[`${time}|${title}`];
+    if (confirmed) buyin = confirmed;
+  }
   // Owner confirmed 300 for October 16; the blue 20K header is a starting stack.
   if (date === "16.10.2026" && blue && time === "12:00" && /PLO5.*30k/i.test(title)) buyin = 300;
   if (blue && date === "05.10.2026" && time === "09:00" && /^Crazy knock/i.test(title)) buyin = 200;
@@ -501,6 +525,7 @@ async function parseOcrFile(file) {
   // Visually verified ID labels that Vision prefixed or distorted.
   if (date === "13.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "13.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (date === "20.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   tokens.forEach((token) => {
     // IMG_0143: the avatar adds a stray K before Nast’ko’s visible ID.
     if (date === "10.10.2026" && time === "17:00" && !blue && token.text === "KID:121231") token.text = "ID:121231";
@@ -538,6 +563,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_0944 visibly shows sixth place; Vision omitted the digit.
+    if (date === "19.10.2026" && blue && time === "10:00" && playerId === "3019341" && reward === 31.13) {
+      place = 6;
+      needsPlaceCheck = false;
+    }
     // IMG_0516 visibly shows zero rank; Vision omitted the digit.
     if (date === "13.10.2026" && blue && time === "15:00" && playerId === "3123964" && reward === 3.15) {
       place = 0;
