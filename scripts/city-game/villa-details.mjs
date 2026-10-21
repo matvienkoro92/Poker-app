@@ -1,5 +1,7 @@
 import * as T from '../../vendor/three/three.module.min.js';
 import {selectedVillaAwards,villaAwardArt} from './villa-awards.mjs';
+import {furnishPokerTable} from './poker-table-props.mjs';
+import {trophyRelief} from './trophy-relief.mjs';
 // Small static pieces use the villa's existing instance bins and materials.
 export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
  // One instanced soft-contact layer grounds furniture without extra shadow lights.
@@ -25,16 +27,8 @@ export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
  B('leather',.46,1.083,9.3,.56,.065,.42,.12);B('cream',.46,1.085,9.3,.5,.04,.39,.12);
  B('felt',.43,1.125,9.3,.57,.035,.43,.12);B('gold',.43,1.148,9.3,.25,.008,.02,.12);
  C('cream',-.46,1.067,9.75,.2,.025);C('cream',-.46,1.16,9.75,.105,.17);C('dark',-.46,1.25,9.75,.08,.008);ring('cream',-.34,1.18,9.75,.065);
- // Poker room: individually edged chips, dealer puck, card indices and rail stitching.
- for(let i=0;i<8;i++){
-  const a=i*Math.PI/4,x=-14+Math.sin(a)*3.5,z=9+Math.cos(a)*1.8;
-  for(let stack=0;stack<3;stack++)for(let k=0;k<5+stack;k++){
-   C(['cream','red','dark'][stack],x+stack*.25,1.57+k*.045,z,.115,.038);
-   for(let j=0;j<4;j++){const q=j*Math.PI/2;B('gold',x+stack*.25+Math.sin(q)*.09,1.59+k*.045,z+Math.cos(q)*.09,.035,.008,.035);}
-  }
- }
- C('cream',-11.3,1.55,8.2,.24,.035);C('dark',-11.3,1.572,8.2,.18,.008);
- for(let i=0;i<5;i++){const x=-15.4+i*.6;B('cream',x,1.54,9.15,.48,.016,.72);B(i%2?'red':'dark',x-.13,1.551,8.94,.06,.004,.1);B(i%2?'red':'dark',x+.13,1.551,9.35,.06,.004,.1);}
+ // Shared detailed cards, patterned backs and denomination chip stacks.
+ furnishPokerTable(root,textures);
  for(let i=0;i<64;i++){const a=i*Math.PI*2/64;S('gold',-14+Math.sin(a)*4.5,1.46,9+Math.cos(a)*2.56,.018,.01,.018);}
  // Bar back: bottle shoulders, stoppers, labels, mirrored niches, stemware and cue rack.
  for(const y of [2.65,3.65]){
@@ -83,14 +77,16 @@ export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
  for(let i=0;i<3;i++)B('cream',-19.3,1.38+i*.09,-10.6,.8,.08,.5);
  // The real award pixels from the application's catalog, framed by physical display bases.
  const awards=selectedVillaAwards(hall),loader=new T.TextureLoader();
- const pending=awards.map(async(item,index)=>{
+ const load=()=>Promise.all(awards.map(async(item,index)=>{
   const source=villaAwardArt(item,window.PokerHallTrophies);if(!source)return;
   const x=index<3?-2.65:2.65,y=.9+(index%3)*1.35;
   try{const map=await loader.loadAsync(source);if(root.userData.disposed){map.dispose();return;}map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;textures.push(map);
    const ratio=map.image.width/map.image.height,w=Math.min(.98,.91*ratio),h=w/ratio;
-   const art=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map,transparent:true,alphaTest:.08,roughness:.38,metalness:.08,side:T.DoubleSide}));art.name='Owned award '+item.id;art.position.set(x,y+.27+h/2,1.02);root.add(art);
-   const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');g.fillStyle='#151e1b';g.fillRect(0,0,512,128);g.strokeStyle='#c9ab70';g.strokeRect(3,3,506,122);g.fillStyle='#ffe3a0';g.font='600 24px sans-serif';g.textAlign='center';g.fillText(item.title||item.name||item.history?.tournament||'Награда',256,54,470);g.font='18px sans-serif';g.fillText(item.origin||'Коллекция игрока',256,91,470);const plaque=new T.CanvasTexture(c);plaque.colorSpace=T.SRGBColorSpace;textures.push(plaque);const plate=new T.Mesh(new T.PlaneGeometry(1.1,.275),new T.MeshStandardMaterial({map:plaque,roughness:.4,metalness:.2}));plate.position.set(x,y-.15,1.2);root.add(plate);
+   const art=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map,transparent:true,alphaTest:.08,roughness:.38,metalness:.08,side:T.DoubleSide}));art.name='Owned award '+item.id;art.position.set(x,y+.27+h/2,1.12);root.add(art);
+   const relief=trophyRelief(map,w,h);if(relief){relief.position.copy(art.position);root.add(relief);}
+   const back=new T.Mesh(art.geometry,art.material);back.position.set(x,art.position.y,1.035);back.rotation.y=Math.PI;root.add(back);
+   const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');g.fillStyle='#b49b60';g.fillRect(0,0,512,128);g.strokeStyle='#c9ab70';g.strokeRect(3,3,506,122);g.fillStyle='#211e17';g.font='600 24px sans-serif';g.textAlign='center';g.fillText(item.title||item.name||item.history?.tournament||'Награда',256,54,470);g.font='18px sans-serif';g.fillText(item.origin||'Коллекция игрока',256,91,470);const plaque=new T.CanvasTexture(c);plaque.colorSpace=T.SRGBColorSpace;textures.push(plaque);B('gold',x,y-.15,1.19,1.12,.29,.045);const plate=new T.Mesh(new T.PlaneGeometry(1.08,.26),new T.MeshStandardMaterial({map:plaque,roughness:.45,metalness:.25}));plate.position.set(x,y-.15,1.22);root.add(plate);
   }catch(_){/* An empty display is preferable to inventing an earned award. */}
- });
- return {ready:Promise.all(pending),count:awards.length};
+ }));
+ return {load,count:awards.length};
 }

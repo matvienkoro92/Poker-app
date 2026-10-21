@@ -229,6 +229,15 @@ function copyReferencedAssets() {
       else if (entry.name.endsWith('.webp')) refs.add(child);
     }
   }
+  // glTF models refer to their buffers and PBR maps with relative URIs.
+  function addInteriorAssets(rel) {
+    for (const entry of fs.readdirSync(path.join(assetDir, rel), { withFileTypes: true })) {
+      const child = path.posix.join(rel, entry.name);
+      if (entry.isDirectory()) addInteriorAssets(child);
+      else if (/\.(?:gltf|bin|jpg|webp|json)$/i.test(entry.name)) refs.add(child);
+    }
+  }
+  if (fs.existsSync(path.join(assetDir, 'city-interior'))) addInteriorAssets('city-interior');
   addWardrobeAssets('player-hall/wardrobe/summer');
   addWardrobeAssets('player-hall/wardrobe/branded');
   addWardrobeAssets('player-hall/wardrobe/items');

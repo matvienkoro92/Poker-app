@@ -1,0 +1,35 @@
+{
+  "asset": "coffee_table_round_01",
+  "author": {
+    "Ulan Cabanilla": "All"
+  },
+  "source": "https://polyhaven.com/a/coffee_table_round_01",
+  "license": "CC0-1.0",
+  "files": {
+    "include": {
+      "textures/coffee_table_round_01_diff_1k.jpg": {
+        "size": 447037,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/coffee_table_round_01/coffee_table_round_01_diff_1k.jpg",
+        "md5": "601977ab1b864988194728e1dda076a8"
+      },
+      "textures/coffee_table_round_01_arm_1k.jpg": {
+        "size": 721708,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/coffee_table_round_01/coffee_table_round_01_arm_1k.jpg",
+        "md5": "b44425836ab0c932fe4ff136ce6f2fe8"
+      },
+      "coffee_table_round_01.bin": {
+        "size": 131112,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/coffee_table_round_01/coffee_table_round_01.bin",
+        "md5": "a664b067fa0ae9b6e0a8fa5878986816"
+      },
+      "textures/coffee_table_round_01_nor_gl_1k.jpg": {
+        "size": 260520,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/coffee_table_round_01/coffee_table_round_01_nor_gl_1k.jpg",
+        "md5": "81a9885a83ff0b259514e8bce38b6b69"
+      }
+    },
+    "size": 2776,
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/coffee_table_round_01/coffee_table_round_01_1k.gltf",
+    "md5": "fa8772e8942e1863230b6745105c9a8e"
+  }
+}

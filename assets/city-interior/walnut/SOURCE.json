@@ -1,0 +1,25 @@
+{
+  "asset": "european_walnut_veneer_05",
+  "authors": {
+    "Jenelle van Heerden": "All"
+  },
+  "source": "https://polyhaven.com/a/european_walnut_veneer_05",
+  "license": "CC0-1.0",
+  "files": {
+    "european_walnut_veneer_05_diff_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/european_walnut_veneer_05/european_walnut_veneer_05_diff_1k.jpg",
+      "md5": "4e3684dd122be2618b6d10a1a4002349",
+      "size": 491549
+    },
+    "european_walnut_veneer_05_nor_gl_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/european_walnut_veneer_05/european_walnut_veneer_05_nor_gl_1k.jpg",
+      "md5": "2f583cefdd6d59c53fef7ad3e4ec02af",
+      "size": 391580
+    },
+    "european_walnut_veneer_05_rough_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/european_walnut_veneer_05/european_walnut_veneer_05_rough_1k.jpg",
+      "md5": "9a43bc928c47220a361f49cfcba666f0",
+      "size": 499199
+    }
+  }
+}
