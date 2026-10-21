@@ -1,2 +1,17 @@
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),scenes=require('../app-last-buy-in-victory-scenes');
-test('every completed mission has its own finished illustration and a concrete outcome',()=>{assert.equal(scenes.length,12);assert.equal(new Set(scenes.map(s=>s.art)).size,12);assert.equal(scenes[0].frames.length,1);for(const s of scenes){assert.ok(s.alt.length>25);assert.ok(s.frames.length>=1&&s.frames.length<=2);for(const f of s.frames)assert.ok(f.speaker&&f.text);assert.ok(fs.existsSync(s.art),s.art);}assert.match(scenes[1].frames[0].text,/Опечатка снята/);assert.match(scenes[1].frames[1].text,/Ваар/);assert.match(scenes[2].frames[1].text,/Мисслик/);assert.match(scenes[3].frames[1].text,/Эмил/);});
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const chapters=require('../app-last-buy-in-chapters'),scenes=require('../app-last-buy-in-victory-scenes');
+test('every mission has a readable preview, an outcome and existing art',()=>{
+ assert.equal(scenes.length,chapters.length);
+ for(let i=0;i<chapters.length;i++){
+  const c=chapters[i];assert.ok(c.before&&c.after&&c.goal&&c.quote);
+  assert.ok(c.previewFrames.length>=1&&c.previewFrames.length<=2);
+  assert.equal(scenes[i].art,c.outroArt);assert.equal(scenes[i].frames,c.outroFrames);
+  for(const after of [false,true])for(const f of after?c.outroFrames:c.previewFrames){
+   assert.ok(f.speaker&&f.text);assert.ok(f.text.length<=225,'Overlong scene: '+i);assert.ok(fs.existsSync(f.art||(after?c.outroArt:c.previewArt)),c.title);
+  }
+ }
+});
+test('outcomes use the canonical chapter text, including late campaign additions',()=>{
+ for(let i=0;i<chapters.length;i++)assert.equal(scenes[i].frames[0].text,chapters[i].after);
+ for(const id of [12,13,14])assert.ok(scenes[id].art&&scenes[id].frames.length);
+});

@@ -52,3 +52,10 @@ body:has(#gameEntrance:not([hidden])),body:has(#scoreSelect:not([hidden])){overf
 .chapter-city-map .map-node.villa-map-node{width:28px;height:28px;font-size:18px;z-index:6}.chapter-city-map .villa-map-node small{left:-5px;top:50%;transform:translate(-100%,-50%);max-width:68px;white-space:nowrap}
 
 .chapter-city-map .villa-map-node small{left:50%;top:auto;bottom:calc(100% + 3px);transform:translateX(-50%)}
+
+/* Reserve a separate menu area so neither label covers the poster characters. */
+@media(max-aspect-ratio:1/1){
+ .entrance-poster{inset:0 0 auto;width:100%;height:calc(100% - 126px - env(safe-area-inset-bottom));object-fit:contain;object-position:center top}
+ .game-entrance:after{display:none}
+ .entrance-choices{bottom:calc(12px + env(safe-area-inset-bottom));gap:5px}
+}
