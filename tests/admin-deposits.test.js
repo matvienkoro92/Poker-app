@@ -798,3 +798,18 @@ test('selected player persists with the first withdrawal even without the separa
  assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,confirmAccountLink:false}},'admin-a'),/Подтвердите/);
  assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,selectedProfileKey:'P21|missing'}},'admin-a'),/не найден/);
 });
+
+test('explicit other-player transfers support same and different rooms without merging identities',()=>{
+ for(const [n,toRoom,toPlayerId] of [[0,'P21','936923'],[1,'X','3019341']]) {
+ const body={action:'transfer',requestId:requestId(1600+n),recipientMode:'other',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom,toPlayerId,amount:200000};
+ const state=applyOperation(null,body,'manager',1000).state,rows=state.channelOperations;
+ assert.equal(rows.length,2);assert.equal(rows[0].profileKey,'P21|398176');assert.equal(rows[1].profileKey,'P21|936923');assert.equal(rows[1].playerName,'Luck_is_Suck');assert.equal(rows[0].amount,rows[1].amount);assert.equal(view(state).statistics.deposits,0);assert.equal(applyOperation(state,body,'manager',1001).duplicate,true);
+ assert.throws(()=>applyOperation(null,{...body,toPlayerId:'unknown'},'manager'),/сохранённых/);
+ }
+ assert.throws(()=>applyOperation(null,{action:'transfer',requestId:requestId(1603),recipientMode:'other',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom:'P21',toPlayerId:'398176',amount:100},'manager'),/разных отправителя/);
+});
+
+test('API forwards explicit other-player recipient mode',async()=>{
+ const api=apiSetup();const response=await api.call({action:'transfer',requestId:requestId(1604),recipientMode:'other',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom:'P21',toPlayerId:'936923',amount:10000});
+ assert.equal(response.statusCode,200);assert.equal(response.data.channelOperations.length,2);assert.equal(response.data.channelOperations[1].profileKey,'P21|936923');
+});
