@@ -128,6 +128,8 @@
     trackingLinksError: "",
     trackingLinksRequestSeq: 0,
     trackingLinksTab: "own",
+    trackingLinksGroup: "all",
+    trackingLinksSort: "totalClicks",
     linkDetailsId: "",
     linkDetailsVisitors: [],
     linkDetailsVisitorsLoading: false,
@@ -2175,7 +2177,6 @@
     renderCrmLinkPreview();
     var el = document.getElementById("playerCrmLinksList");
     var summary = document.getElementById("playerCrmLinksSummary");
-    var builder = document.getElementById("playerCrmLinksBuilder");
     if (!el) return;
     var activeTab = state.trackingLinksTab === "broadcasts" ? "broadcasts" : "own";
     document.querySelectorAll("[data-crm-links-tab]").forEach(function (tab) {
@@ -2183,17 +2184,32 @@
       tab.classList.toggle("player-crm__links-tab--active", active);
       tab.setAttribute("aria-selected", active ? "true" : "false");
     });
-    if (builder) builder.hidden = false;
     var allLinks = Array.isArray(state.trackingLinks) ? state.trackingLinks.slice() : [];
     var links = allLinks.filter(function (link) {
       var params = crmLinkParams(link);
       var isBroadcast = params.created_from === "crm_broadcast" || /^CRM\s+crm_/i.test(String(link && link.label || ""));
       return activeTab === "broadcasts" ? isBroadcast : !isBroadcast;
     });
+    var groupSelect = document.getElementById("playerCrmLinksGroup");
+    var sources = Array.from(new Set(links.map(function (link) { return String(crmLinkParams(link).utm_source || "").trim(); }).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
+    if (groupSelect) {
+      groupSelect.innerHTML = '<option value="all">Все группы</option><optgroup label="Куда ведёт"><option value="type:website">Сайт</option><option value="type:telegram">Telegram</option></optgroup><optgroup label="Источник">' + sources.map(function(source){return '<option value="source:'+esc(source)+'">'+esc(source)+'</option>';}).join("") + '<option value="none">Без источника</option></optgroup>';
+      groupSelect.value = state.trackingLinksGroup;
+      if (!groupSelect.value) { state.trackingLinksGroup = "all"; groupSelect.value = "all"; }
+    }
+    links = links.filter(function(link) {
+      var params = crmLinkParams(link), group = state.trackingLinksGroup, source = String(params.utm_source || "").trim();
+      return group === "all" || (group === "none" && !source) || group === "type:" + params.link_type || group === "source:" + source;
+    });
+    var sortSelect = document.getElementById("playerCrmLinksSort");
+    if (sortSelect) sortSelect.value = state.trackingLinksSort;
     links.sort(function (a, b) {
-      var clicksDifference = crmLinkMetric(b, "totalClicks") - crmLinkMetric(a, "totalClicks");
-      if (clicksDifference) return clicksDifference;
-      return (Date.parse(b && b.createdAt || "") || 0) - (Date.parse(a && a.createdAt || "") || 0);
+      var sort = state.trackingLinksSort;
+      var dates = (Date.parse(b && b.createdAt || "") || 0) - (Date.parse(a && a.createdAt || "") || 0);
+      if (sort === "name") return crmLinkTitle(a).localeCompare(crmLinkTitle(b), "ru") || dates;
+      if (sort === "newest") return dates;
+      if (sort === "oldest") return -dates;
+      return crmLinkMetric(b, sort) - crmLinkMetric(a, sort) || dates;
     });
     if (summary) summary.textContent = activeTab === "broadcasts"
       ? intFmt(links.length) + " ссылок из рассылок"
@@ -2208,11 +2224,11 @@
     }
     if (!links.length) {
       el.innerHTML = '<div class="player-crm__notice">' + (activeTab === "broadcasts"
-        ? "В рассылках пока нет ссылок."
-        : "Пока нет своих ссылок. Создай первую и выбери раздел, куда должен приходить лид.") + "</div>";
+        ? "В этой группе нет ссылок из рассылок."
+        : "В этой группе пока нет ссылок. Выбери другую группу или создай ссылку.") + "</div>";
       return;
     }
-    el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Ссылки по убыванию переходов">' + links.map(function (link) {
+    el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link) {
       var url = crmLinkUrl(link), id = esc(link.id || ""), type = crmLinkParams(link).link_type;
       var channel = type === "website" ? "Сайт" : type ? "Telegram" : "Ссылка";
       var metrics = [["totalClicks", "Переходы"], ["uniqueClicks", "Посетители"], ["activeVisitors", "С действиями"], ["actionEvents", "Действия"]];
@@ -2221,6 +2237,7 @@
         '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
         '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
         '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '</dd></div>'; }).join("") + '</dl>' +
+        '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Общая сводка по ссылке</summary><div data-crm-link-preview-body></div></details>' +
         '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">Параметры</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>С действиями</dt><dd>Сколько из этих посетителей открыли раздел или совершили другое отслеживаемое действие. Не означает «онлайн сейчас».</dd></div><div><dt>Действия</dt><dd>Общее число отслеживаемых действий этих посетителей. Один посетитель может совершить много действий.</dd></div></dl></details>';
 
@@ -2343,6 +2360,24 @@
     return null;
   }
 
+  function crmLinkAggregateHtml(data) {
+    function value(key) { return data[key] == null ? '—' : intFmt(data[key]); }
+    var items = [['Посетители', value('visitors')], ['Новые регистрации', value('registrations')], ['С действиями', value('activeVisitors')], ['Всего действий', value('activityCount')], ['Участники розыгрышей', value('raffleParticipants')], ['Участий в розыгрышах', value('raffleCount')], ['Крутили покер дня', value('spinners')], ['Всего круток', value('spinCount')], ['С привязкой Poker21', value('poker21Linked')], ['Подписаны на бота', value('botSubscribers')], ['В Telegram-чате', value('playersChatSubscribers')], ['Вносили депозит', value('depositors')], ['Число пополнений', value('depositCount')], ['Сумма депозитов', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽']];
+    var unknown = []; if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
+    return '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '') + '<p class="crm-link-overview__note">По всей сохранённой истории ссылки, а не только по открытым карточкам. Аккаунт на нескольких устройствах считается один раз. Подписки — по последней проверке; неизвестные статусы не считаются отказами.</p>';
+  }
+
+  function loadCrmLinkPreview(details) {
+    if (details.dataset.previewLoading || details.dataset.previewLoaded) return;
+    details.dataset.previewLoading = '1';
+    var target = details.querySelector('[data-crm-link-preview-body]'), id = details.getAttribute('data-crm-link-preview'), q = authQuerySafe();
+    target.innerHTML = '<p role="status">Считаем общую сводку…</p>';
+    fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&period=all&id=' + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data.ok || !data.summary) throw new Error('summary');
+      target.innerHTML = crmLinkAggregateHtml(data.summary); details.dataset.previewLoaded = '1';
+    }).catch(function () { target.innerHTML = '<p role="status">Сводка не загрузилась. Закройте и откройте её, чтобы повторить.</p>'; }).finally(function () { delete details.dataset.previewLoading; });
+  }
+
   function crmLinkSummaryHtml() {
     var periods = [["all", "Всё время"], ["today", "Сегодня · МСК"], ["7", "7 дней"], ["30", "30 дней"]];
     var html = '<div class="player-crm__form-grid"><label><span>Период воронки</span><select id="playerCrmLinkSummaryPeriod">' + periods.map(function (p) {
@@ -2353,11 +2388,8 @@
     var data = state.linkSummary;
     if (!data) return html;
     function percent(value) { return value == null ? '—' : Number(value).toFixed(1) + '%'; }
-    var items = [["Посетители", intFmt(data.visitors)], ["Новые регистрации", intFmt(data.registrations)],
-      ["Вернувшиеся игроки", intFmt(data.returning)], ["С целевыми действиями", intFmt(data.engaged)],
-      ["Сделали первый депозит", intFmt(data.firstDepositors)], ["Сделали депозит", intFmt(data.depositors)], ["Сумма депозитов", intFmt(data.depositAmount) + ' ₽'],
-      ["Конверсия в регистрацию", percent(data.registrationConversion)], ["Конверсия в депозит", percent(data.depositConversion)]];
-    return html + '<div class="player-crm__link-detail-grid">' + items.map(function (item) {
+    var items = [["Вернувшиеся игроки", intFmt(data.returning)], ["Сделали первый депозит", intFmt(data.firstDepositors)], ["Конверсия в регистрацию", percent(data.registrationConversion)], ["Конверсия в депозит", percent(data.depositConversion)]];
+    return html + crmLinkAggregateHtml(data) + '<div class="player-crm__link-detail-grid">' + items.map(function (item) {
       return '<div class="player-crm__link-detail-item"><small>' + esc(item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>';
     }).join('') + '</div><p class="player-crm__detail-muted">Воронка по сохранённой истории: аккаунты объединены между устройствами; гости считаются отдельно. За период считаются посетители и события этого периода. Регистрации и депозиты относятся к первой ссылке привлечения. Целевые действия: регистрация, привязка игрового ID, участие, заявка, подписка или депозит; открытие экрана не считается. Первый депозит определяется по доступным записям CRM. Сумма депозитов — не доход клуба. Факт начала игры пока не отслеживается. Исключение своих переходов работает для подтверждённого аккаунта.</p>';
   }
@@ -5256,10 +5288,25 @@
         sendCrmSectionData(sendSection.getAttribute("data-crm-send-section") || state.tab);
         return;
       }
+      var preview = e.target.closest('.crm-link-overview summary');
+      if (preview) { loadCrmLinkPreview(preview.closest('[data-crm-link-preview]')); return; }
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
       if (linksRefresh) {
         if (state.linkDetailsId) loadCrmLinkSummary();
         loadCrmTrackingLinks();
+        return;
+      }
+      if (e.target.closest("[data-crm-links-create-toggle]")) {
+        var linkBuilder = document.getElementById("playerCrmLinksBuilder");
+        var linkAdd = document.querySelector(".player-crm__links-add");
+        if (linkBuilder) {
+          linkBuilder.hidden = !linkBuilder.hidden;
+          if (linkAdd) linkAdd.setAttribute("aria-expanded", String(!linkBuilder.hidden));
+          if (!linkBuilder.hidden) {
+            var firstField = linkBuilder.querySelector("select, input");
+            if (firstField) firstField.focus();
+          } else if (linkAdd) linkAdd.focus();
+        }
         return;
       }
       var linksTab = e.target.closest("[data-crm-links-tab]");
@@ -5711,6 +5758,13 @@
       });
     });
     root.addEventListener("change", function (e) {
+      if (e.target.id === "playerCrmLinksGroup" || e.target.id === "playerCrmLinksSort") {
+        if (e.target.id === "playerCrmLinksGroup") state.trackingLinksGroup = e.target.value;
+        else state.trackingLinksSort = e.target.value;
+        renderCrmTrackingLinks();
+        return;
+      }
+
       if (e.target.closest("[data-crm-modal-period]")) {
         state.period = e.target.value || "30";
         if (state.period === "custom") setDefaultDates();

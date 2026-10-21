@@ -3264,7 +3264,7 @@ button.player-crm__stat:focus-visible,
 }
 .player-crm__links-tabs {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 40px;
   gap: 6px;
   padding: 5px;
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -4173,3 +4173,51 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
 .player-crm__link-help{margin:8px 0 20px;border:1px solid #ffffff12;border-radius:12px;padding:12px 16px;color:#9faabd;font-size:12px;line-height:1.55}.player-crm__link-help summary{cursor:pointer;color:#d6c18f;font-weight:600}.player-crm__link-help dl{margin:14px 0 0;display:grid;gap:12px}.player-crm__link-help dt{color:#e4d5b4;font-weight:650}.player-crm__link-help dd{margin:3px 0 0;max-width:680px}
 .crm-journeys{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:14px;margin:12px 0 20px}.crm-journey{min-width:0;border:1px solid #bda0672b;border-radius:14px;background:linear-gradient(125deg,#19212c,#101722);padding:16px}.crm-journey header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}.crm-journey header strong{color:#eddbb4;font-size:15px;overflow-wrap:anywhere}.crm-journey header small{display:block;margin-top:5px;color:#8290a3;font:10px/1.4 ui-monospace,monospace;overflow-wrap:anywhere}.crm-journey__level{flex-shrink:0;border:1px solid #bda06745;background:#bda06712;border-radius:7px;padding:5px 8px;color:#e6c788;font-size:11px}.crm-journey dl{margin:0}.crm-journey dl>div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid #ffffff09}.crm-journey dt{color:#bac3d0;font-size:12px}.crm-journey dt small{display:block;margin-top:3px;font-size:10px;color:#7c8b9d}.crm-journey dd{margin:0;flex-shrink:0}.crm-journey__status{font-size:11px;font-weight:650;padding:3px 7px;border-radius:5px;white-space:nowrap}.crm-journey__status--yes{background:#51b98714;color:#7cdaa6}.crm-journey__status--no{background:#d66c7410;color:#dc8d94}.crm-journey__status--unknown{color:#8c98a9;background:#ffffff06}.crm-journey__deposit dd{color:#edce8b;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}.crm-journey details{margin-top:12px;padding-top:12px;border-top:1px solid #ffffff10;font-size:11px;color:#aeb8c5}.crm-journey summary{cursor:pointer;color:#dcc28c}.crm-journey ol{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}.crm-journey li{display:grid;gap:3px}.crm-journey time{font-size:10px;color:#7c8b9d}
 .crm-journey__count{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:#e5d2a5}.crm-journey__poker-id{display:inline-block;max-width:150px;overflow-wrap:anywhere;padding:4px 7px;border:1px solid #66bd8c25;border-radius:6px;background:#51b98710;color:#8fd5ac;font:650 12px/1.4 ui-monospace,monospace}.crm-journey dl>.crm-journey__activity{display:block;padding:4px 0 12px;border-top:0}.crm-journey__activity ul{list-style:none;margin:0;padding:9px 11px;display:grid;gap:7px;background:#080e184d;border-radius:8px}.crm-journey__activity li{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:11px;color:#919fb1}.crm-journey__activity b{flex-shrink:0;font-variant-numeric:tabular-nums;color:#d5dbe4}.crm-journey__deposit dd{text-align:right}.crm-journey__deposit-count{display:block;margin-top:4px;font-size:10px;font-weight:400;color:#8d9aad}
+.crm-link-overview{grid-column:1/-1;font-size:12px;color:#b5c0cf;border-top:1px solid #ffffff0a;padding-top:12px}.crm-link-overview summary{cursor:pointer;color:#dcc48d;font-weight:650}.crm-link-overview__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:14px 0}.crm-link-overview__grid>div{padding:12px;background:#080e1866;border:1px solid #ffffff0a;border-radius:9px;display:grid;gap:6px}.crm-link-overview__grid small{font-size:10px;color:#98a6b8}.crm-link-overview__grid strong{font-size:20px;color:#edcf8f;font-variant-numeric:tabular-nums}.crm-link-overview__note,.crm-link-overview__unknown{font-size:11px;line-height:1.5;color:#8f9daf}.crm-link-overview__unknown{color:#c7ad82}
+
+.player-crm__links-add {
+  display: grid;
+  place-items: center;
+  min-height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 211, 104, .6);
+  border-radius: 7px;
+  background: linear-gradient(180deg, #ffe18c, #dda93e);
+  color: #111827;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1;
+  font-size: 28px;
+  cursor: pointer;
+}
+.player-crm__links-add[aria-expanded="true"] { box-shadow: inset 0 0 0 2px #fff0bb; }
+.player-crm__links-builder[hidden] { display: none !important; }
+.player-crm__links-builder-close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 25px;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+/* Dense link previews; full statistics remain expandable. */
+.player-crm__links-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.player-crm__links-filters label{display:grid;gap:4px;min-width:0;font-size:11px;color:#9ca9ba}
+.player-crm__links-filters select{width:100%;min-width:0;min-height:36px;padding:6px 8px;border:1px solid #ffffff20;border-radius:8px;background:#111a26;color:#e8dbbf;font:inherit;font-size:12px}
+.player-crm__link-list{gap:7px}
+.player-crm__link-card{grid-template-columns:minmax(0,1fr);gap:7px;padding:10px 12px;border-radius:10px}
+.player-crm .player-crm__link-title{font-size:13px;line-height:1.25}
+.player-crm__link-identity{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.player-crm__link-meta{margin:0;font-size:10px;gap:5px}
+.player-crm__link-channel{font-size:9px;padding:1px 5px}
+.player-crm__link-code{display:none}
+.player-crm__link-metrics{padding:5px 0;border-radius:6px}
+.player-crm__link-metrics>div{gap:1px}
+.player-crm__link-metrics dt{font-size:9px}
+.player-crm__link-metrics dd{font-size:16px}
+.player-crm__link-actions{gap:6px;padding-top:0;border:0}
+.player-crm .player-crm__link-actions button{min-height:28px;padding:4px 8px;font-size:10px;border-radius:5px}
+.player-crm__link-card .crm-link-overview{padding:0;border:0;background:none}
+.player-crm__link-card .crm-link-overview>summary{padding:2px 0;font-size:10px}
