@@ -67,3 +67,30 @@ test('event scope permits only messages in the configured club group',async t=>{
  assert.equal((await send('-100123','sendPhoto','cooler-winner')).ok,false);
  assert.equal(sends,4);
 });
+
+test('membership, promotion, join request and reaction events are recognized as group updates',()=>{
+ for(const type of ['my_chat_member','chat_member','chat_join_request','message_reaction','message_reaction_count','edited_business_message']){
+  assert.equal(policy.groupMessage({[type]:{chat:{id:-100456,type:'supergroup'}}}).chat.id,-100456);
+  assert.equal(policy.groupMessage({[type]:{chat:{id:42,type:'private'}}}),null);
+  assert.equal(policy.groupMessage({[type]:{chat:{id:-100789,type:'channel'}}}),null);
+ }
+});
+
+test('bot promotion and membership changes stay silent and never reach Salebot',async t=>{
+ fail=false;
+ process.env.TELEGRAM_BOT_WEBHOOK_SECRET='policy-test';
+ process.env.TELEGRAM_SALEBOT_FORWARD_URL='https://example.invalid/salebot';
+ process.env.TELEGRAM_BOT_TOKEN='test';
+ const commands=require('../lib/telegram-club-commands');
+ const oldHandle=commands.handle,oldFetch=global.fetch;let replies=0,externalCalls=0;
+ commands.handle=async()=>{replies++;return true;};
+ global.fetch=async()=>{externalCalls++;throw Error('Unexpected outbound request');};
+ t.after(()=>{commands.handle=oldHandle;global.fetch=oldFetch;});
+ const handler=require('../lib/api-handlers/telegram-bot-webhook');
+ for(const type of ['my_chat_member','chat_member','chat_join_request','message_reaction','message_reaction_count']){
+  const res={setHeader(){},status(){return this;},json(body){this.body=body;return this;}};
+  await handler({method:'POST',headers:{'x-telegram-bot-api-secret-token':'policy-test'},body:{[type]:{chat:{id:-100456,type:'supergroup'},from:{id:42},old_chat_member:{status:'member'},new_chat_member:{status:'administrator',user:{id:43}}}}},res);
+  assert.equal(res.body.ok,true);assert.equal(res.body.skipped,true);
+ }
+ assert.equal(replies,0);assert.equal(externalCalls,0);assert.ok(protectedIds.has('-100456'));
+});

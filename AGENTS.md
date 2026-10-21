@@ -12,6 +12,11 @@
   character and ticket pixels instead of regenerating or blurring them.
 
 - Do not run `git push` unless the user explicitly asks for it in the current conversation.
+- Telegram group messages must stay limited to the owner's explicitly approved club commands
+  and notification scenarios. Giving the bot administrator rights must not enable new
+  greetings, campaigns, or automatic replies. Do not forward group membership, role-change,
+  join-request, or reaction updates to Salebot. Add future sending scenarios only when the
+  owner explicitly requests them; preserve the allowlist in `lib/telegram-group-policy.js`.
 - Summer rating top-3 character art sizes are controlled by inline CSS variables from
   `summerRatingTop3ArtSizeStyle()` in `app-rating-view-adapter.js`. Do not tune those
   sizes via the older hard-coded background layers in `styles-rating-late.css`.
