@@ -1,0 +1,7 @@
+{
+  "source": "https://github.com/hayeah/playing-cards-assets",
+  "upstream": "vector-playing-cards (public domain, per upstream README)",
+  "repositoryLicense": "MIT; see LICENSE",
+  "derivatives": "Five SVG faces rasterized to 768\u00d71088 WebP, quality 92. Originals archived in output/city-interior/card-sources.",
+  "runtimeBytes": 532170
+}

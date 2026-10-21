@@ -8,6 +8,7 @@ import {buildEstate} from './estate.mjs';
 import {buildIsland} from './island.mjs';
 import {dressStreets} from './street-details.mjs';
 import {buildVilla} from './villa.mjs';
+import {createAwardInteraction} from './award-interaction.mjs';
 import {buildSculptedCharacter} from '../garage-3d/character-atelier.mjs';
 const PI=Math.PI;
 export async function createCityScene(canvas,onProgress,garage={}){
@@ -92,6 +93,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const estate=buildEstate({scene,box,cylinder,batch,label,textures,outdoors});
  // Commit all static architecture to material/shape batches.
  const villa=buildVilla({box,cylinder,batch,label,scene,textures,hall:garage.hall});
+ const awards=createAwardInteraction({root:villa.root,scene,camera,canvas});
  outdoors.flush();
  const staticMeshes=[];for(const b of batches.values()){const mesh=new T.InstancedMesh(geos[b.type],mat(b.color,b.emissive),b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);staticMeshes.push(mesh);}
  await villa.ready;
@@ -138,5 +140,5 @@ export async function createCityScene(canvas,onProgress,garage={}){
   if(intro){camera.position.set(VILLA.x-58,36,VILLA.z+64);camera.lookAt(VILLA.x-6,2,VILLA.z-12);}
   sky.position.copy(camera.position);hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:1.8,4,dt);sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:2.5,4,dt);const shadowStep=84/1024,shadowX=Math.round(pos.x/shadowStep)*shadowStep,shadowZ=Math.round(pos.z/shadowStep)*shadowStep;sun.target.position.set(shadowX,0,shadowZ);sun.position.set(shadowX-40,70,shadowZ-35);renderer.render(scene,camera);perfTime+=dt;
  }
- camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,get villa(){return {...villa.status,gate:estate.status};},get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;villa.root.userData.disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};
+ camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,awards,get villa(){return {...villa.status,gate:estate.status};},get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;villa.root.userData.disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};
 }

@@ -278,6 +278,9 @@
     "coolerFlight": [
       "app-cooler-flight-engine.js",
       "app-cooler-flight.js"
+    ],
+    "billiards": [
+      "app-billiards.js"
     ]
   }
 }

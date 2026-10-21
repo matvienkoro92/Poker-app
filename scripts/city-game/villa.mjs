@@ -4,6 +4,7 @@ import {furnishVilla} from './villa-details.mjs';
 import {villaMaterials} from './villa-materials.mjs';
 import {loadHallFurniture} from './interior-assets.mjs';
 import {finishHall} from './hall-finishes.mjs';
+import {finishSideRooms} from './side-room-finishes.mjs';
 import {createInteriorProximity} from './interior-proximity.mjs';
 // The existing coastal villa is built as actual rooms, with an exterior roof.
 export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder,batch,hall}){
@@ -33,7 +34,7 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  const piece=(geo,mat,px,py,pz,sx,sy,sz)=>{const c=Math.cos(angle),sn=Math.sin(angle);part(geo,mat,x+(px*c+pz*sn)*scale,py*scale,z+(-px*sn+pz*c)*scale,sx*scale,sy*scale,sz*scale,0,angle);};
  piece('soft','leather',0,.5,0,2.1,.35,1.95);piece('soft','leather',0,1.24,-.73,2.25,1.55,.55);for(const s of [-1,1]){piece('soft','leather',s*1.02,.86,0,.5,.65,1.98);piece('ball','leather',s*1.02,.94,.79,.3,.3,.31);for(const z1 of [-.65,.65])piece('cyl','wood',s*.82,.16,z1,.11,.3,.11);for(let j=0;j<6;j++)piece('ball','gold',s*1.07,.6+j*.15,.97,.026,.026,.026);}for(let y=.9;y<=1.8;y+=.3)for(let xx=-.7;xx<=.71;xx+=.35)piece('ball','leather',xx,y,-.44,.035,.035,.018);
  return null;}
- B('dark',0,-.16,0,44.8,.3,32.8);floor('stone',0,0,44,32,4);floor('wood',0,-8,11.5,15.5,4);floor('wood',14,-7.5,15,15,4);floor('deck',0,-18.5,44,5,3);
+ B('dark',0,-.16,0,44.8,.3,32.8);floor('stone',0,0,44,32,4);floor('deck',0,-18.5,44,5,3);
  // Perimeter follows the shared collision plan; clerestory glass and brass trim.
  for(const [x,z,w,d]of [[-22,0,.55,32],[22,0,.55,32],[-13,-16,18,.55],[13,-16,18,.55],[-12.5,16,19,.55],[5,16,4,.55],[21,16,2,.55]]){if(Math.abs(x)===22){B('plaster',x,2.05,z,w,4.1,d);B('plaster',x,5.15,z,w,.5,d);}else if(z===-16||(z===16&&w>15)){B('plaster',x,.4,z,w,.8,d);B('plaster',x,5.1,z,w,.6,d);}else B('plaster',x,2.7,z,w,5.4,d);B('dark',x,.4,z,w+.09,.8,d+.09);B('gold',x,1.05,z,w+.1,.04,d+.1);B('dark',x,5.35,z,w+.25,.24,d+.25);}
  // Side façades have high glazing, deep pilasters, planting and stone bases.
@@ -60,10 +61,11 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  // Garage picture frames and a service bench, as in the original panorama.
  for(const zz of [5.5,12.5]){B('dark',21.6,3,zz,.08,2.35,2.8);B('gold',21.52,4.17,zz,.08,.05,2.9);B('gold',21.52,1.82,zz,.08,.05,2.9);for(const edge of [-1,1])B('gold',21.52,3,zz+edge*1.43,.08,2.35,.05);}
  // Private poker room: oval felt, padded rail, cupholders, cards and chip stacks.
- floor('rug',-14,8.6,13,12.4,13);C('dark',-14,.55,9,.6,1.1);part('cyl','gold',-14,1.19,9,4.7,.22,2.75);part('cyl','leather',-14,1.34,9,4.65,.22,2.7);part('cyl','felt',-14,1.47,9,4.16,.08,2.2);
- for(let i=0;i<8;i++){const a=i*Math.PI/4,x=-14+Math.sin(a)*5.1,z=9+Math.cos(a)*3.7;chair(x,z,.55,a+Math.PI);C('gold',-14+Math.sin(a)*4.35,1.49,9+Math.cos(a)*2.4,.13,.025);}
+ floor('rug',-14,8.6,13,12.4,13);before=mark();C('dark',-14,.55,9,.6,1.1);part('cyl','gold',-14,1.19,9,4.7,.22,2.75);part('cyl','leather',-14,1.34,9,4.65,.22,2.7);part('cyl','felt',-14,1.47,9,4.16,.08,2.2);
+ const legacyPokerTable=ranges(before),legacyPokerChairs=[],legacyPokerCups=[];
+ for(let i=0;i<8;i++){const a=i*Math.PI/4,x=-14+Math.sin(a)*5.1,z=9+Math.cos(a)*3.7;const chairStart=mark();chair(x,z,.55,a+Math.PI);legacyPokerChairs.push(...ranges(chairStart));const cupStart=mark();C('gold',-14+Math.sin(a)*4.35,1.49,9+Math.cos(a)*2.4,.13,.025);legacyPokerCups.push(...ranges(cupStart));}
 
- for(const x of [-20,-8]){sconce(x,3.3,1.27);plant(x,3);}
+ const legacyRoomPlants=[];for(const x of [-20,-8]){sconce(x,3.3,1.27);before=mark();plant(x,3);legacyRoomPlants.push(...ranges(before));}
  // Lounge with a soft sectional, cushions, a coffee table and a working kitchen island.
  part('soft','cream',0,.56,-8,7,1.05,2.8);part('soft','cream',0,1.1,-9.25,7.2,1.5,.5);for(const x of [-3.5,3.5])B('cream',x,.96,-8,.6,1.1,2.8);for(const x of [-2.2,0,2.2]){S('cream',x,.99,-7.9,1.04,.16,1.15);B(x?'felt':'leather',x,1.35,-8.8,.8,.7,.22,.1*x);}
  C('dark',0,.55,-4.6,1.7,.14);C('gold',0,.48,-4.6,1.74,.06);C('gold',0,.25,-4.6,.16,.45);C('gold',0,.66,-4.6,.1,.14);
@@ -72,14 +74,15 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  C('gold',1.9,2.4,-14.8,.04,.6);B('gold',1.7,2.69,-14.8,.4,.05,.05);B('stone',-1,2.85,-15.65,8,1.45,.09);B('wood',-1,4.15,-15.25,8,1.2,.8);B('light',-1,3.51,-15,7.7,.035,.05);B('stone',0,1.52,-11.8,7,.17,1.4);B('wood',0,.78,-11.9,6.5,1.45,1);for(const x of [-2,0,2])stool(x,-10.6);
  // Garage: stone floor, inset bay markings, tool drawers, real display objects.
  for(const x of [10,18]){for(const s of [-1,1])B('gold',x+s*3.2,.055,9,.055,.025,12.5);for(const z of [2.8,15.2])B('gold',x,.055,z,6.4,.025,.055);}
- const spade=sign('♠',18,.07,9,2.2,2.2);spade.rotation.set(-Math.PI/2,0,Math.PI/2);
- B('wood',14,2.35,1.45,13,4.6,.45);for(const x of [8.8,12.2,15.6,19]){B('stone',x,3.1,1.73,3.15,2.8,.04);B('gold',x-1.59,3.1,1.79,.035,2.8,.05);}for(const x of [8.8,12.2,15.6,19]){B('dark',x,.85,2,3.2,1.6,.75);for(let y=.45;y<1.6;y+=.35){B('rubber',x,y,2.4,3,.025,.04);B('gold',x,y+.13,2.45,1.1,.035,.06);}B('stone',x,1.72,2.1,3.25,.12,1);for(const y of [2.45,3.7]){B('wood',x,y,1.95,3.25,.1,.9);B('light',x,y+.08,2.37,3.05,.035,.04);}}
+
+ before=mark();B('wood',14,2.35,1.45,13,4.6,.45);for(const x of [8.8,12.2,15.6,19]){B('stone',x,3.1,1.73,3.15,2.8,.04);B('gold',x-1.59,3.1,1.79,.035,2.8,.05);}for(const x of [8.8,12.2,15.6,19]){B('dark',x,.85,2,3.2,1.6,.75);for(let y=.45;y<1.6;y+=.35){B('rubber',x,y,2.4,3,.025,.04);B('gold',x,y+.13,2.45,1.1,.035,.06);}B('stone',x,1.72,2.1,3.25,.12,1);for(const y of [2.45,3.7]){B('wood',x,y,1.95,3.25,.1,.9);B('light',x,y+.08,2.37,3.05,.035,.04);}}
+ const legacyBench=ranges(before);
  // Helmets, steering wheel, polished cup, oil cans and tools on illuminated shelves.
- for(const x of [8.4,10,18.2,19.5]){S(x<12?'red':'dark',x,2.95,2,.42,.43,.39);B('rubber',x,2.95,2.34,.66,.2,.04);B('gold',x,3.28,2.15,.045,.04,.45);}
- ring('dark',12.2,4.2,2.18,.49);for(let i=0;i<3;i++){const a=i*Math.PI*2/3;B('gold',12.2+Math.sin(a)*.24,4.2+Math.cos(a)*.24,2.2,.08,.52,.06,-a);}C('gold',15.6,3.9,2.1,.18,.3);trophy(15.6,2.58,2.03,.85);
- for(let i=0;i<8;i++){B(i%2?'red':'dark',8+i*.42,1.93,2.14,.23,.34,.23);B('gold',8+i*.42,2.13,2.14,.09,.08,.1);}
- B('red',20.8,.85,5,1.5,1.65,1.1);for(let y=.25;y<1.6;y+=.22)B('gold',20.8,y,5.57,1.2,.035,.05);
- for(let i=0;i<4;i++){C('rubber',21,.23+i*.43,9,.58,.38);ring('rubber',21,.42+i*.43,9,.49,Math.PI/2);ring('gold',21,.43+i*.43,9,.3,Math.PI/2);}plant(7.3,2.7,.8);
+ before=mark();for(const x of [8.4,10,18.2,19.5]){S(x<12?'red':'dark',x,2.95,2,.42,.43,.39);B('rubber',x,2.95,2.34,.66,.2,.04);B('gold',x,3.28,2.15,.045,.04,.45);}
+ const legacyHelmets=ranges(before);
+ before=mark();B('red',20.8,.85,5,1.5,1.65,1.1);for(let y=.25;y<1.6;y+=.22)B('gold',20.8,y,5.57,1.2,.035,.05);
+ const legacyToolCart=ranges(before);before=mark();
+ for(let i=0;i<4;i++){C('rubber',21,.23+i*.43,9,.58,.38);ring('rubber',21,.42+i*.43,9,.49,Math.PI/2);ring('gold',21,.43+i*.43,9,.3,Math.PI/2);}const legacyTyres=ranges(before);before=mark();plant(7.3,2.7,.8);legacyRoomPlants.push(...ranges(before));
  // Billiards and bar. Pockets, balls and cues remain legible at walking distance.
  B('wood',14,1.2,-7,8.4,.55,4.4);B('gold',14,1.48,-7,8.5,.08,4.5);B('felt',14,1.55,-7,7.8,.08,3.8);for(const x of [10.5,17.5])for(const z of [-8.6,-5.4]){B('wood',x,.55,z,.35,1.1,.35);C('rubber',x,1.61,z,.18,.02);}for(let i=0;i<8;i++)S(i%2?'cream':'red',12+(i%3)*.4,1.7,-7+Math.floor(i/3)*.35,.11,.11,.11);B('wood',14,1.68,-6.1,5,.04,.04,.15);
  B('wood',20,1.1,-10.5,2.2,2.2,7);B('stone',20,2.26,-10.5,2.5,.12,7.3);for(let i=0;i<8;i++)C(i%2?'green':'gold',20,2.5,-13+i*.6,.1,.45);for(const z of [-12,-9])stool(17.6,z);chair(11,-2.4,.7,-Math.PI/3);chair(16,-2.4,.7,Math.PI/3);C('dark',13.5,.65,-2.5,.8,.12);
@@ -91,7 +94,9 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  // Pool with coping and tile lines, hot tub, loungers, dining and perimeter planting.
  B('cream',8,.07,-18,15,.14,4.2);B('water',8,.16,-18,14,.09,3.35);for(const x of [1,15])B('stone',x,.24,-18,.35,.15,4.3);for(const z of [-16.1,-19.9])B('stone',8,.24,z,14,.15,.35);for(let x=2;x<15;x++)B('cream',x,.18,-18,.025,.015,3.2);
  C('stone',-16,.25,-18,2.1,.5);C('water',-16,.52,-18,1.75,.06);ring('cream',-16,.55,-18,1.9,Math.PI/2);B('wood',-6,.8,-18,6, .18,2.2);for(const x of [-8,-4])for(const z of [-18.7,-17.3])B('dark',x,.4,z,.09,.8,.09);for(const x of [-9.6,-2.4]){B('cream',x,.5,-18,.9,.2,1.7);B('wood',x,.9,-18.7,.9,.8,.12);}for(const x of [18,20.5]){B('wood',x,.35,-18,1.8,.2,3.3);B('cream',x,.53,-18,1.6,.16,3);B('cream',x,.86,-19.25,1.6,.7,.2);}
- for(const x of [-21,21])for(const z of [-14,13])plant(x,z,1.25);for(const x of [-5,5])plant(x,14,1.1);for(const x of [-21,-10,0,10,21])plant(x,-20.6,.8);
+ for(const x of [-21,21])for(const z of [-14,13]){before=mark();plant(x,z,1.25);if(z===13)legacyRoomPlants.push(...ranges(before));}
+ before=mark();for(const x of [-5,5])plant(x,14,1.1);const legacyEntryPlants=ranges(before);
+ for(const x of [-21,-10,0,10,21])plant(x,-20.6,.8);
  for(const x of [-22,22]){B('dark',x,1,-18.5,.08,1.4,4.7);B('gold',x,1.7,-18.5,.1,.06,4.7);}
  // Covered entrance, driveway pavers and lanterns. Doorways stay at ground level.
  B('stone',0,-.015,18,7,.06,4);B('gold',0,.025,18,5,.025,3.5);B('dark',0,.04,18,4.8,.02,3.3);const entrance=sign('♠',0,.06,18,1.5,1.5);entrance.rotation.set(-Math.PI/2,0,Math.PI/2);
@@ -105,14 +110,15 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  for(const z of [-16.6,16.6]){B('dark',0,5.55,z,45,.27,.35);B('gold',0,5.4,z,45,.045,.3);}for(const x of [-22.5,22.5])B('dark',x,5.55,0,.3,.27,33.5);
  // Ceiling structure remains above the camera; lit pendants give each room a scale.
  for(const x of [-20,-6,6,21])B('wood',x,5.05,0,.22,.3,31.5);
- let legacyPendant=[];
- for(const [x,z]of [[0,8],[-14,9],[14,9],[14,-7],[0,-7]]){const pendantStart=mark();C('dark',x,4.4,z,.025,1.2);part('cyl','dark',x,3.9,z,.64,.2,.64);part('cyl','light',x,3.78,z,.5,.025,.5);if(x===0&&z===8)legacyPendant=ranges(pendantStart);const light=new T.PointLight('#ffd69a',17,12,2);light.position.set(x,3.6,z);root.add(light);}
+ let legacyPendant=[],legacyRoomPendants=[];
+ for(const [x,z]of [[0,8],[-14,9],[14,9],[14,-7],[0,-7]]){const pendantStart=mark();C('dark',x,4.4,z,.025,1.2);part('cyl','dark',x,3.9,z,.64,.2,.64);part('cyl','light',x,3.78,z,.5,.025,.5);if(x===0&&z===8)legacyPendant=ranges(pendantStart);if(z===9)legacyRoomPendants.push(...ranges(pendantStart));const light=new T.PointLight('#ffd69a',17,12,2);light.position.set(x,3.6,z);root.add(light);}
  // One focused shadow light gives the sample hall depth without lighting every room.
  const hallKey=new T.SpotLight('#ffe3ba',65,17,Math.PI/3,.7,1.7);hallKey.position.set(-3,4.8,11);hallKey.target.position.set(0,.5,6.5);hallKey.castShadow=true;hallKey.shadow.mapSize.set(512,512);hallKey.shadow.bias=-.0004;hallKey.shadow.normalBias=.025;root.add(hallKey,hallKey.target);
  const hallFinish=finishHall(root,m,textures);
+ finishSideRooms(root,m,textures);
  const awards=furnishVilla({root,B,C,S,ring,part,m,textures,hall});
  for(const [key,b]of bins){const mesh=new T.InstancedMesh(geos[b.kind],m[b.material],b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,w,h,d,rx,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(w,h,d);dummy.rotation.set(rx,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.name='Villa '+key;mesh.castShadow=b.material!=='glass'&&b.material!=='light';mesh.receiveShadow=true;mesh.computeBoundingSphere();root.add(mesh);}
- const loadFurniture=()=>loadHallFurniture(root,textures,m).then(result=>{if(root.userData.disposed)return;for(const range of [...(result.chair?legacyChair:[]),...(result.table?legacyTable:[]),...(result.plant?legacyPlants:[]),...(result.pendant?legacyPendant:[])]){const mesh=root.children.find(o=>o.name==='Villa '+range.key);if(!mesh)continue;dummy.scale.setScalar(0);dummy.updateMatrix();for(let i=range.start;i<range.end;i++)mesh.setMatrixAt(i,dummy.matrix);mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();}root.userData.authoredFurniture=result;});
+ const loadFurniture=()=>loadHallFurniture(root,textures,m).then(result=>{if(root.userData.disposed)return;for(const range of [...legacyPokerTable,...legacyPokerCups,...legacyBench,...legacyTyres,...(result.chair?[...legacyChair,...legacyPokerChairs]:[]),...(result.table?legacyTable:[]),...(result.plant?[...legacyPlants,...legacyEntryPlants,...legacyRoomPlants]:[]),...(result.pendant?[...legacyPendant,...legacyRoomPendants]:[]),...(result.toolCart?legacyToolCart:[]),...(result.helmets?legacyHelmets:[])]){const mesh=root.children.find(o=>o.name==='Villa '+range.key);if(!mesh)continue;dummy.scale.setScalar(0);dummy.updateMatrix();for(let i=range.start;i<range.end;i++)mesh.setMatrixAt(i,dummy.matrix);mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();}root.userData.authoredFurniture=result;});
  // Existing pier and yacht remain connected to the ocean terrace.
  worldBox('#8f7856',133,.12,57,22,.28,2.8);for(let x=124;x<145;x+=2.5)worldBox('#69543d',x,-.9,57,.3,2.1,2.8);batch('ball','#d8ded2',149+VILLA.x-98,.6,57+VILLA.z-40,3,.9,8.5);worldBox('#f0ebd8',149,1.35,56,4.6,.6,11);worldBox('#b5c3bd',149,2.1,55,3.6,1.2,4.5);worldBox('#3f666c',149,2.6,56.3,3.8,.7,.12);worldBox('#ece4ca',149,3.05,55,4.2,.18,5);worldCylinder('#c7cbbb',149,4.1,54.5,.05,2.1);
  const interior=createInteriorProximity(()=>Promise.all([awards.load(),loadFurniture(),hallFinish.userData.loadArt()]),{x:VILLA.x,z:VILLA.z,disposed:()=>!!root.userData.disposed});

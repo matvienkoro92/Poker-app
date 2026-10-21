@@ -84,6 +84,10 @@
     "cooler-flight": {
       "owner": "cooler-flight",
       "scope": "flight arcade, duel lobby and leaderboard"
+    },
+    "billiards": {
+      "owner": "billiards",
+      "scope": "standalone online billiards room, game controls and invitation lobby"
     }
   },
   "domains": {
@@ -217,6 +221,9 @@
     ],
     "cooler-flight": [
       "styles-cooler-flight.css"
+    ],
+    "billiards": [
+      "styles-billiards.css"
     ]
   },
   "views": {

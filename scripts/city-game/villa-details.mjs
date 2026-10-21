@@ -2,6 +2,7 @@ import * as T from '../../vendor/three/three.module.min.js';
 import {selectedVillaAwards,villaAwardArt} from './villa-awards.mjs';
 import {furnishPokerTable} from './poker-table-props.mjs';
 import {trophyRelief} from './trophy-relief.mjs';
+import {awardPlaque} from './award-plaque.mjs';
 // Small static pieces use the villa's existing instance bins and materials.
 export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
  // One instanced soft-contact layer grounds furniture without extra shadow lights.
@@ -20,15 +21,12 @@ export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
   }
  }
  for(let x=-3;x<=3;x+=.12)B('wood',x,4.66,.57,.035,.3,.04);
- // Black and white marble inlay with restrained bronze accents at the wall.
- for(const x of [-4.6,4.6])B('gold',x,.064,8,.025,.015,13.5);
- for(const z of [1.35,14.75])B('gold',0,.064,z,9.2,.015,.025);
- // Tabletop: leather-bound club books, coasters, porcelain espresso and a folded paper.
- B('leather',.46,1.083,9.3,.56,.065,.42,.12);B('cream',.46,1.085,9.3,.5,.04,.39,.12);
- B('felt',.43,1.125,9.3,.57,.035,.43,.12);B('gold',.43,1.148,9.3,.25,.008,.02,.12);
- C('cream',-.46,1.067,9.75,.2,.025);C('cream',-.46,1.16,9.75,.105,.17);C('dark',-.46,1.25,9.75,.08,.008);ring('cream',-.34,1.18,9.75,.065);
+ // Keep the walking floor clear of thin overlapping inlay strips.
+ // The preview's black-and-gold serving tray, paired cut-glass tumblers and amber drink.
+ B('dark',0,1.07,9.6,.96,.055,.5);for(const x of [-.48,.48])B('gold',x,1.11,9.6,.025,.08,.52);for(const z of [9.35,9.85])B('gold',0,1.11,z,.98,.08,.025);
+ for(const x of [-.26,.26]){C('gold',x,1.115,9.6,.13,.025);C('glass',x,1.25,9.6,.125,.25);C(x<0?'red':'dark',x,1.18,9.6,.106,.1);ring('gold',x,1.375,9.6,.124,Math.PI/2);for(let j=0;j<12;j++){const a=j*Math.PI/6;B('gold',x+Math.sin(a)*.12,1.25,9.6+Math.cos(a)*.12,.009,.21,.009,a);}}
  // Shared detailed cards, patterned backs and denomination chip stacks.
- furnishPokerTable(root,textures);
+ const pokerProps=furnishPokerTable(root,textures);
  for(let i=0;i<64;i++){const a=i*Math.PI*2/64;S('gold',-14+Math.sin(a)*4.5,1.46,9+Math.cos(a)*2.56,.018,.01,.018);}
  // Bar back: bottle shoulders, stoppers, labels, mirrored niches, stemware and cue rack.
  for(const y of [2.65,3.65]){
@@ -42,13 +40,6 @@ export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
  for(const x of [-3.6,-.4,2.3]){B('cream',x,2.7,-15.57,.2,.26,.035);B('dark',x-.045,2.7,-15.54,.02,.06,.01);B('dark',x+.045,2.7,-15.54,.02,.06,.01);}
  for(let i=0;i<4;i++)C('cream',-.7,2.15+i*.04,-14.1,.24,.025);
  B('deck',.2,2.15,-14.05,.8,.035,.5);S('dark',2.2,2.36,-14.2,.25,.24,.23);ring('gold',2.2,2.65,-14.2,.18);C('gold',2.2,2.6,-14.2,.12,.035);
- // Garage: pegboard holes, labelled drawers, hanging spanners and folded mechanic's cloths.
- for(const x of [8.8,12.2,15.6,19]){
-  for(let dx=-1.3;dx<1.4;dx+=.3)for(let y=2.05;y<4.4;y+=.3)C('dark',x+dx,y,1.78,.017,.012);
-  for(let j=0;j<4;j++){B('cream',x-1+j*.65,.75,2.46,.27,.12,.012);B('dark',x-1+j*.65,.75,2.47,.18,.025,.012);}
-  for(let j=0;j<3;j++){const px=x-.6+j*.55;B('gold',px,3,2.25,.045,.55,.045);ring('gold',px,3.3,2.25,.075);}
- }
- for(let i=0;i<3;i++)B('cream',17,1.83+i*.04,2.12,.8,.035,.48);
  // Black-and-brass cassette deck sits on the service bench, matching the villa preview.
  const radioX=12.2,radioY=2.18,radioZ=2.12;
  part('soft','dark',radioX,radioY,radioZ,1.85,.88,.52);
@@ -77,16 +68,17 @@ export function furnishVilla({root,B,C,S,ring,part,m,textures,hall}){
  for(let i=0;i<3;i++)B('cream',-19.3,1.38+i*.09,-10.6,.8,.08,.5);
  // The real award pixels from the application's catalog, framed by physical display bases.
  const awards=selectedVillaAwards(hall),loader=new T.TextureLoader();
- const load=()=>Promise.all(awards.map(async(item,index)=>{
+ const load=()=>Promise.all([pokerProps.load(),...awards.map(async(item,index)=>{
   const source=villaAwardArt(item,window.PokerHallTrophies);if(!source)return;
   const x=index<3?-2.65:2.65,y=.9+(index%3)*1.35;
   try{const map=await loader.loadAsync(source);if(root.userData.disposed){map.dispose();return;}map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;textures.push(map);
-   const ratio=map.image.width/map.image.height,w=Math.min(.98,.91*ratio),h=w/ratio;
+   const ratio=map.image.width/map.image.height,w=Math.min(.98,.75*ratio),h=w/ratio;
    const art=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map,transparent:true,alphaTest:.08,roughness:.38,metalness:.08,side:T.DoubleSide}));art.name='Owned award '+item.id;art.position.set(x,y+.27+h/2,1.12);root.add(art);
-   const relief=trophyRelief(map,w,h);if(relief){relief.position.copy(art.position);root.add(relief);}
-   const back=new T.Mesh(art.geometry,art.material);back.position.set(x,art.position.y,1.035);back.rotation.y=Math.PI;root.add(back);
-   const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');g.fillStyle='#b49b60';g.fillRect(0,0,512,128);g.strokeStyle='#c9ab70';g.strokeRect(3,3,506,122);g.fillStyle='#211e17';g.font='600 24px sans-serif';g.textAlign='center';g.fillText(item.title||item.name||item.history?.tournament||'Награда',256,54,470);g.font='18px sans-serif';g.fillText(item.origin||'Коллекция игрока',256,91,470);const plaque=new T.CanvasTexture(c);plaque.colorSpace=T.SRGBColorSpace;textures.push(plaque);B('gold',x,y-.15,1.19,1.12,.29,.045);const plate=new T.Mesh(new T.PlaneGeometry(1.08,.26),new T.MeshStandardMaterial({map:plaque,roughness:.45,metalness:.25}));plate.position.set(x,y-.15,1.22);root.add(plate);
+   const record={item,source,target:art};art.userData.awardRecord=record;(root.userData.awardTargets||=[]).push(record);root.userData.awardTargets.sort((a,b)=>awards.indexOf(a.item)-awards.indexOf(b.item));
+   const relief=trophyRelief(map,w,h);if(relief){relief.position.copy(art.position);relief.userData.awardRecord=record;root.add(relief);}
+   const back=new T.Mesh(art.geometry,art.material);back.position.set(x,art.position.y,1.035);back.rotation.y=Math.PI;back.userData.awardRecord=record;root.add(back);
+   const plate=awardPlaque(item,textures);plate.position.set(x,y-.12,1.34);plate.userData.awardRecord=record;root.add(plate);
   }catch(_){/* An empty display is preferable to inventing an earned award. */}
- }));
+ })]);
  return {load,count:awards.length};
 }

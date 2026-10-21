@@ -14,3 +14,9 @@ test('villa cup art is resolved by the same tournament catalog as the applicatio
  assert.equal(villaAwardArt({id:'tournament-king',kind:'achievements'},catalog),'./assets/achievement-trophy-king-v1.webp');
  assert.equal(villaAwardArt({id:'unrecognized',kind:'achievements'},catalog),'');
 });
+
+test('cup labels name the actual tournament and separate result from date',async()=>{
+ const {villaAwardCaption}=await import('../scripts/city-game/villa-awards.mjs');
+ assert.deepEqual(villaAwardCaption({kind:'cups',title:'Кубок победы',history:{tournament:'Турнир Месяца',date:'2026-09-27T18:00:00',results:[{place:1}]}}),{title:'Турнир Месяца',description:'1 место · 27.09.2026'});
+ assert.deepEqual(villaAwardCaption({title:'Король турниров',condition:'Занять первое место в турнире'}),{title:'Король турниров',description:'Занять первое место в турнире'});
+});

@@ -2798,6 +2798,16 @@
       "consumedBy": [
         "app-cooler-flight.js"
       ]
+    },
+    {
+      "name": "__THREE__",
+      "domain": "billiards",
+      "exportedBy": [
+        "app-billiards.js"
+      ],
+      "consumedBy": [
+        "app-billiards.js"
+      ]
     }
   ]
 }

@@ -1,0 +1,57 @@
+{
+  "asset": "tool_cart",
+  "authors": {
+    "Savva Zakharov": "All"
+  },
+  "source": "https://polyhaven.com/a/tool_cart",
+  "license": "CC0-1.0",
+  "files": {
+    "tool_cart_1k.gltf": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/tool_cart/tool_cart_1k.gltf",
+      "md5": "ee595e0f3abd65a685266c11574cbc2f",
+      "size": 2744,
+      "include": {
+        "textures/tool_cart_nor_gl_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tool_cart/tool_cart_nor_gl_1k.jpg",
+          "md5": "fa4ff0ac0b68c52b3a51ed09ec77ce98",
+          "size": 817628
+        },
+        "textures/tool_cart_diff_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tool_cart/tool_cart_diff_1k.jpg",
+          "md5": "ef4fa51d6dec090496d15e25ad913422",
+          "size": 711555
+        },
+        "textures/tool_cart_arm_1k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tool_cart/tool_cart_arm_1k.jpg",
+          "md5": "8996b43bbe3bace46e822b8856e2f0a0",
+          "size": 744873
+        },
+        "tool_cart.bin": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/tool_cart/tool_cart.bin",
+          "md5": "10b9d918d7ba72cd7b91b3cd2b784abd",
+          "size": 895660
+        }
+      }
+    },
+    "textures/tool_cart_nor_gl_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tool_cart/tool_cart_nor_gl_1k.jpg",
+      "md5": "fa4ff0ac0b68c52b3a51ed09ec77ce98",
+      "size": 817628
+    },
+    "textures/tool_cart_diff_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tool_cart/tool_cart_diff_1k.jpg",
+      "md5": "ef4fa51d6dec090496d15e25ad913422",
+      "size": 711555
+    },
+    "textures/tool_cart_arm_1k.jpg": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/tool_cart/tool_cart_arm_1k.jpg",
+      "md5": "8996b43bbe3bace46e822b8856e2f0a0",
+      "size": 744873
+    },
+    "tool_cart.bin": {
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/tool_cart/tool_cart.bin",
+      "md5": "10b9d918d7ba72cd7b91b3cd2b784abd",
+      "size": 895660
+    }
+  }
+}

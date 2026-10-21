@@ -1,0 +1,57 @@
+{
+  "asset": "ratchet_wrench",
+  "authors": {
+    "John Hutcheson": "All"
+  },
+  "source": "https://polyhaven.com/a/ratchet_wrench",
+  "license": "CC0-1.0",
+  "files": {
+    "ratchet_wrench_1k.gltf": {
+      "include": {
+        "textures/ratchet_wrench_nor_gl_1k.jpg": {
+          "size": 388724,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ratchet_wrench/ratchet_wrench_nor_gl_1k.jpg",
+          "md5": "9e5b7767e4f286b76b9ba0d6c8f8e692"
+        },
+        "ratchet_wrench.bin": {
+          "size": 219816,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/ratchet_wrench/ratchet_wrench.bin",
+          "md5": "021dc261c222c50e5e07963d0cb7fa7a"
+        },
+        "textures/ratchet_wrench_arm_1k.jpg": {
+          "size": 622307,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ratchet_wrench/ratchet_wrench_arm_1k.jpg",
+          "md5": "647ec2fe71b5f0d2749cf22b83e9e09b"
+        },
+        "textures/ratchet_wrench_diff_1k.jpg": {
+          "size": 286148,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ratchet_wrench/ratchet_wrench_diff_1k.jpg",
+          "md5": "92bda4c684ff4ceb5a15f8a5200d17dd"
+        }
+      },
+      "size": 2788,
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/ratchet_wrench/ratchet_wrench_1k.gltf",
+      "md5": "a402821ab94f6dcfdbf240a06da47ac8"
+    },
+    "textures/ratchet_wrench_nor_gl_1k.jpg": {
+      "size": 388724,
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ratchet_wrench/ratchet_wrench_nor_gl_1k.jpg",
+      "md5": "9e5b7767e4f286b76b9ba0d6c8f8e692"
+    },
+    "ratchet_wrench.bin": {
+      "size": 219816,
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/ratchet_wrench/ratchet_wrench.bin",
+      "md5": "021dc261c222c50e5e07963d0cb7fa7a"
+    },
+    "textures/ratchet_wrench_arm_1k.jpg": {
+      "size": 622307,
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ratchet_wrench/ratchet_wrench_arm_1k.jpg",
+      "md5": "647ec2fe71b5f0d2749cf22b83e9e09b"
+    },
+    "textures/ratchet_wrench_diff_1k.jpg": {
+      "size": 286148,
+      "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/ratchet_wrench/ratchet_wrench_diff_1k.jpg",
+      "md5": "92bda4c684ff4ceb5a15f8a5200d17dd"
+    }
+  }
+}
