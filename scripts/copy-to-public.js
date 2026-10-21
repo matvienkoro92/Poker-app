@@ -64,6 +64,9 @@ function scriptFilesFromJsManifest() {
 
 const baseFiles = [
   'index.html',
+  'link-stats.html',
+  'app-link-stats.js',
+  'styles-link-stats.css',
   'daily-poker-invite.html',
   'last-buy-in.html',
   'city-play.html',

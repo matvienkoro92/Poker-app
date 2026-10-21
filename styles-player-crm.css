@@ -4245,3 +4245,12 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
 .crm-players-matrix summary,.crm-link-extra>summary{cursor:pointer;color:#dfc58b}
 .crm-link-extra{margin:8px 0}
 .crm-players-matrix tbody tr:nth-child(even)>*{background:#151f2c}
+
+.crm-category-access{padding:12px;border:1px solid #c5a46140;border-radius:10px;background:#111b27}
+.crm-category-access[hidden]{display:none}
+.crm-category-access h4{margin:0;color:#e5cd9b}
+.crm-category-access label{display:grid;gap:5px;margin:10px 0}
+.crm-category-access input{box-sizing:border-box;width:100%;min-width:0;font:inherit;padding:8px;color:#e6eaf0;background:#0c1420;border:1px solid #ffffff20;border-radius:6px}
+.crm-category-access__grant{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ffffff14}
+.crm-category-access__grant button{font:inherit;padding:5px 8px;background:transparent;color:#d69b9b;border:1px solid #d69b9b50;border-radius:5px;cursor:pointer}
+.player-crm__links-add[hidden],.player-crm__links-filters label[hidden],[data-crm-category-access-open][hidden]{display:none!important}

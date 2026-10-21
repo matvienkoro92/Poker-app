@@ -305,13 +305,21 @@
               <label>Сортировка<select id="playerCrmLinksSort">
                 <option value="totalClicks">Больше переходов</option>
                 <option value="uniqueClicks">Больше посетителей</option>
-                <option value="activeVisitors">Больше людей с действиями</option>
-                <option value="actionEvents">Больше действий</option>
+                <option value="activeVisitors">Больше открывавших разделы</option>
+                <option value="actionEvents">Больше открытий</option>
                 <option value="newest">Сначала новые</option>
                 <option value="oldest">Сначала старые</option>
                 <option value="name">По названию А–Я</option>
               </select></label>
             </div>
+            <button type="button" class="player-crm__ghost-btn" data-crm-category-access-open>Доступ к категории</button>
+            <section class="crm-category-access" id="playerCrmCategoryAccess" hidden aria-label="Персональный доступ к категории">
+              <h4>Доступ к категории <span data-access-category></span></h4>
+              <p class="player-crm__detail-muted">Получатель ссылки увидит только статистику этой категории. Каждый доступ можно отозвать отдельно.</p>
+              <label>Получатель<input id="playerCrmCategoryAccessName" maxlength="80" placeholder="Имя или название партнёра"></label>
+              <button type="button" class="player-crm__primary-btn" data-crm-category-access-create>Создать персональную ссылку</button>
+              <div data-access-result role="status"></div><div data-access-list></div>
+            </section>
             <div class="player-crm__links-list" id="playerCrmLinksList"></div>
           </div>
         </section>

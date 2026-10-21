@@ -2174,6 +2174,7 @@
     return id ? buildCrmLinkUrl("ref_" + id, crmLinkParams(link).link_type) : "";
   }
 
+  function crmLinkIsBroadcast(link) {return crmLinkParams(link).created_from==='crm_broadcast'||/^CRM\s+crm_/i.test(String(link&&link.label||''));}
   function renderCrmTrackingLinks() {
     renderCrmLinkTargetOptions();
     renderCrmLinkPreview();
@@ -2186,13 +2187,19 @@
       tab.classList.toggle("player-crm__links-tab--active", active);
       tab.setAttribute("aria-selected", active ? "true" : "false");
     });
+    var ownOnly=activeTab==='own';
+    var categoryControl=document.getElementById('playerCrmLinksCategory');if(categoryControl)categoryControl.parentElement.hidden=!ownOnly;
+    var accessOpen=document.querySelector('[data-crm-category-access-open]');if(accessOpen)accessOpen.hidden=!ownOnly;
+    var accessPanel=document.getElementById('playerCrmCategoryAccess');if(accessPanel&&!ownOnly)accessPanel.hidden=true;
+    var addLink=document.querySelector('.player-crm__links-add');if(addLink)addLink.hidden=!ownOnly;
+    var builder=document.getElementById('playerCrmLinksBuilder');if(builder&&!ownOnly){builder.hidden=true;if(addLink)addLink.setAttribute('aria-expanded','false');}
     var allLinks = Array.isArray(state.trackingLinks) ? state.trackingLinks.slice() : [];
     var links = allLinks.filter(function (link) {
       var params = crmLinkParams(link);
       var isBroadcast = params.created_from === "crm_broadcast" || /^CRM\s+crm_/i.test(String(link && link.label || ""));
       return activeTab === "broadcasts" ? isBroadcast : !isBroadcast;
     });
-    var categories = Array.from(new Set(allLinks.map(function(link){return String(crmLinkParams(link).category || "").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
+    var categories = Array.from(new Set(allLinks.filter(function(link){return !crmLinkIsBroadcast(link);}).map(function(link){return String(crmLinkParams(link).category || "").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
     var categoryChoices = categories.map(function(category){return '<option value="'+esc(category)+'">'+esc(category)+'</option>';}).join("");
     var categoryList = document.getElementById("playerCrmLinkCategories");
     if (categoryList) categoryList.innerHTML = categoryChoices;
@@ -2202,7 +2209,7 @@
       categorySelect.value = state.trackingLinksCategory;
       if (!categorySelect.value) { state.trackingLinksCategory = "all"; categorySelect.value = "all"; }
     }
-    links = links.filter(function(link){var category=String(crmLinkParams(link).category||"").trim();return state.trackingLinksCategory==="all"||(state.trackingLinksCategory==="none"&&!category)||state.trackingLinksCategory==="category:"+category;});
+    links = links.filter(function(link){var category=String(crmLinkParams(link).category||"").trim();return !ownOnly||state.trackingLinksCategory==="all"||(state.trackingLinksCategory==="none"&&!category)||state.trackingLinksCategory==="category:"+category;});
     var groupSelect = document.getElementById("playerCrmLinksGroup");
     var sources = Array.from(new Set(links.map(function (link) { return String(crmLinkParams(link).utm_source || "").trim(); }).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
     if (groupSelect) {
@@ -2244,17 +2251,45 @@
     el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link) {
       var url = crmLinkUrl(link), id = esc(link.id || ""), type = crmLinkParams(link).link_type;
       var channel = type === "website" ? "Сайт" : type ? "Telegram" : "Ссылка";
-      var metrics = [["totalClicks", "Переходы"], ["uniqueClicks", "Посетители"], ["activeVisitors", "С действиями"], ["actionEvents", "Действия"]];
+      var metrics = [["totalClicks", "Переходы"], ["uniqueClicks", "Посетители"], ["activeVisitors", "Открывали"], ["actionEvents", "Открытия"]];
       return '<article class="player-crm__link-card" role="listitem">' +
         '<div class="player-crm__link-identity"><button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + esc(crmLinkTitle(link)) + '</button>' +
         '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
         (crmLinkParams(link).category ? '<span class="player-crm__link-category">'+esc(crmLinkParams(link).category)+'</span>' : '') + '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
         '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '</dd></div>'; }).join("") + '</dl>' +
-        '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' +
-        '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Общая сводка по ссылке</summary><div data-crm-link-preview-body></div></details>' +
-        '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">По игрокам</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
-    }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>С действиями</dt><dd>Сколько из этих посетителей открыли раздел или совершили другое отслеживаемое действие. Не означает «онлайн сейчас».</dd></div><div><dt>Действия</dt><dd>Общее число отслеживаемых действий этих посетителей. Один посетитель может совершить много действий.</dd></div></dl></details>';
+        (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
+        (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Общая сводка по ссылке</summary><div data-crm-link-preview-body></div></details>' : '') +
+        '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">'+(ownOnly?'По игрокам':'Отклик')+'</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
+    }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Открывали</dt><dd>Посетители с зарегистрированными событиями навигации.</dd></div><div><dt>Открытия</dt><dd>События навигации, включая загрузку раздела и нажатия переходов. Крутки и прочие действия считаются отдельно в подробной истории.</dd></div></dl></details>';
 
+  }
+
+  function crmAccessCategory() {
+    if(state.trackingLinksTab==='broadcasts')return '';
+    return String(state.trackingLinksCategory || '').indexOf('category:') === 0 ? state.trackingLinksCategory.slice(9) : '';
+  }
+  async function crmCategoryAccessRequest(body) {
+    var url = getApiBaseSafe() + '/api/tracking-category-access';
+    var response = body ? await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(postBodySafe(body))}) : await fetch(url + authQuerySafe() + (authQuerySafe().indexOf('?')>=0?'&':'?') + 'category=' + encodeURIComponent(crmAccessCategory()));
+    var data = await response.json();
+    if (!response.ok || !data.ok) throw Error(data.error || 'Не удалось загрузить доступы');
+    return data;
+  }
+  async function renderCrmCategoryAccess() {
+    var panel=document.getElementById('playerCrmCategoryAccess'),category=crmAccessCategory();
+    if (!panel || panel.hidden) return;
+    panel.querySelector('[data-access-category]').textContent=category || 'не выбрана';
+    panel.querySelector('[data-crm-category-access-create]').disabled=!category;
+    var list=panel.querySelector('[data-access-list]');
+    if (!category) {list.textContent='Выберите конкретную категорию в фильтре выше.';return;}
+    list.textContent='Загрузка доступов…';
+    try {var data=await crmCategoryAccessRequest();if(category!==crmAccessCategory())return;list.innerHTML=data.grants.map(function(grant){return '<div class="crm-category-access__grant"><span>'+esc(grant.name)+'</span><button type="button" data-crm-category-access-revoke="'+esc(grant.id)+'">Отозвать</button></div>';}).join('') || '<p>Выданных доступов пока нет.</p>';}catch(error){list.textContent=error.message;}
+  }
+  async function createCrmCategoryAccess(button) {
+    var panel=button.closest('.crm-category-access'),result=panel.querySelector('[data-access-result]'),category=crmAccessCategory(),name=document.getElementById('playerCrmCategoryAccessName').value.trim();
+    if (!category || !name) {result.textContent='Выберите категорию и укажите получателя.';return;}
+    button.disabled=true;result.textContent='Создаём доступ…';
+    try {var data=await crmCategoryAccessRequest({action:'create',category:category,name:name});var url=new URL('./link-stats.html',window.location.href);url.hash=data.token;result.innerHTML='<p>Скопируйте ссылку для '+esc(name)+'. По ней доступен только просмотр.</p><input readonly aria-label="Персональная ссылка доступа" value="'+esc(url.href)+'"><button type="button" class="player-crm__ghost-btn" data-crm-link-copy="'+esc(url.href)+'">Копировать</button>';renderCrmCategoryAccess();}catch(error){result.textContent=error.message;}finally{button.disabled=false;}
   }
 
   function saveCrmLinkCategory(button) {
@@ -2391,9 +2426,11 @@
 
   function crmLinkAggregateHtml(data) {
     function value(key) { return data[key] == null ? '—' : intFmt(data[key]); }
-    var items = [['Посетители', value('visitors')], ['Новые регистрации', value('registrations')], ['С действиями', value('activeVisitors')], ['Всего действий', value('activityCount')], ['Участники розыгрышей', value('raffleParticipants')], ['Участий в розыгрышах', value('raffleCount')], ['Крутили покер дня', value('spinners')], ['Всего круток', value('spinCount')], ['С привязкой Poker21', value('poker21Linked')], ['Подписаны на бота', value('botSubscribers')], ['В Telegram-чате', value('playersChatSubscribers')], ['Вносили депозит', value('depositors')], ['Число пополнений', value('depositCount')], ['Сумма депозитов', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽']];
-    var unknown = []; if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
-    return '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
+    var items = [['С историей', value('visitors')], ['Новые регистрации', value('registrations')], ['С действиями', value('activeVisitors')], ['Всего действий', value('activityCount')], ['Участники розыгрышей', value('raffleParticipants')], ['Участий в розыгрышах', value('raffleCount')], ['Крутили покер дня', value('spinners')], ['Всего круток', value('spinCount')], ['С привязкой Poker21', value('poker21Linked')], ['Подписаны на бота', value('botSubscribers')], ['В Telegram-чате', value('playersChatSubscribers')], ['Вносили депозит', value('depositors')], ['Число пополнений', value('depositCount')], ['Подтверждённые депозиты', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽']];
+    var unknown = []; if(data.depositUnknown)unknown.push('депозиты — '+intFmt(data.depositUnknown)); if(data.registrationUnknown)unknown.push('дата регистрации — '+intFmt(data.registrationUnknown)); if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
+    if(data.depositHistoryLimited)unknown.push('полная история депозитов CRM');
+    var coverage=data.coverage,notice=data.coverageUnavailable?'Полноту старой истории проверить не удалось.':coverage&&coverage.visitorsWithoutJourney?'Без подробной истории: '+intFmt(coverage.visitorsWithoutJourney)+' из '+intFmt(coverage.trackedVisitors)+' посетителей. Итоги ниже — только по сохранённой истории.':'';
+    return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
   }
 
   function loadCrmLinkPreview(details) {
@@ -2454,14 +2491,14 @@
     var activityNames = {section_opened:'Открытия разделов',hero_activity:'Действия с героем',raffle_joined:'Участия в розыгрышах',daily_poker_spin:'Крутки покера дня',registration_completed:'Регистрация',poker21_linked:'Привязка Poker21',sng_joined:'Записи в турнир',subscription_enabled:'Включения подписки',push_enabled:'Включения уведомлений',news_read:'Прочтения новостей',friend_news_read:'Новости друзей',news_comment_created:'Комментарии к новостям',news_shared:'Поделился новостью',news_link_copied:'Копирования ссылки на новость',telegram_linked:'Привязка Telegram',email_linked:'Привязка почты',private_cash_applied:'Заявки в кеш',club_choice_voted:'Голосования'};
     var breakdown = steps.activityBreakdown || [];
     var eventNames = { session_started: 'Вход в приложение', referral_opened: 'Переход по ссылке', section_opened: 'Открыл раздел', registration_completed: 'Зарегистрировался', poker21_linked: 'Привязал Poker21', raffle_joined: 'Участвовал в розыгрыше', daily_poker_spin: 'Крутил покер дня', sng_joined: 'Записался в турнир', subscription_enabled: 'Включил подписку', deposit_confirmed: 'Подтверждён депозит' };
-    return '<article class="crm-journey"><header><div><strong>' + esc(row.nick || (row.accountId ? 'Игрок' : 'Посетитель без регистрации')) + '</strong><small>' + esc(row.accountId || row.actor) + (row.pokerId ? ' · Poker21: ' + esc(row.pokerId) : '') + '</small></div><span class="crm-journey__level">Уровень ' + esc(steps.heroLevel == null ? '—' : steps.heroLevel) + '</span></header><dl>' + fields.map(function (field) { var value = unavailable ? null : field[1], content = field[2] === 'number' ? numeric(value) : field[2] === 'poker' && value === true && (steps.pokerId || row.pokerId) ? '<code class="crm-journey__poker-id">ID ' + esc(steps.pokerId || row.pokerId) + '</code>' : yesNo(value); return '<div><dt>' + field[0] + (field[0] === 'Регистрация' && row.status === 'returning' ? '<small>Была до перехода</small>' : '') + '</dt><dd>' + content + '</dd></div>' + (field[0] === 'Действия после перехода' && breakdown.length ? '<div class="crm-journey__activity"><ul>' + breakdown.map(function (item) { return '<li><span>' + esc(activityNames[item.type] || 'Другие действия') + (item.type === 'section_opened' && item.section ? ' · ' + esc(sections[item.section] || 'Раздел приложения') : '') + '</span><b>' + esc(intFmt(item.count)) + '</b></li>'; }).join('') + '</ul></div>' : ''); }).join('') + '<div class="crm-journey__deposit"><dt>Депозиты по ссылке<small>Подтверждённые в CRM</small></dt><dd>' + (unavailable ? '—' : esc(new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(steps.depositAmount || 0)) + ' ₽' + '<small class="crm-journey__deposit-count">Пополнений: ' + esc(intFmt(steps.depositCount || 0)) + '</small>') + '</dd></div></dl>' +
+    return '<article class="crm-journey"><header><div><strong>' + esc(row.nick || (row.accountId ? 'Игрок' : 'Посетитель без регистрации')) + '</strong><small>' + esc(row.accountId || row.actor) + (row.pokerId ? ' · Poker21: ' + esc(row.pokerId) : '') + '</small></div><span class="crm-journey__level">Уровень ' + esc(steps.heroLevel == null ? '—' : steps.heroLevel) + '</span></header><dl>' + fields.map(function (field) { var value = unavailable ? null : field[1], content = field[2] === 'number' ? numeric(value) : field[2] === 'poker' && value === true && (steps.pokerId || row.pokerId) ? '<code class="crm-journey__poker-id">ID ' + esc(steps.pokerId || row.pokerId) + '</code>' : yesNo(value); return '<div><dt>' + field[0] + (field[0] === 'Регистрация' && row.status === 'returning' ? '<small>Была до перехода</small>' : '') + '</dt><dd>' + content + '</dd></div>' + (field[0] === 'Действия после перехода' && breakdown.length ? '<div class="crm-journey__activity"><ul>' + breakdown.map(function (item) { return '<li><span>' + esc(activityNames[item.type] || 'Другие действия') + (item.type === 'section_opened' && item.section ? ' · ' + esc(sections[item.section] || 'Раздел приложения') : '') + '</span><b>' + esc(intFmt(item.count)) + '</b></li>'; }).join('') + '</ul></div>' : ''); }).join('') + '<div class="crm-journey__deposit"><dt>Депозиты по ссылке<small>Учтённые в платёжках</small></dt><dd>' + (unavailable ? '—' : (steps.depositAmount==null?'—':esc(new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(steps.depositAmount))) + ' ₽' + '<small class="crm-journey__deposit-count">Пополнений: ' + (steps.depositCount==null?'—':esc(intFmt(steps.depositCount))) + '</small>') + '</dd></div></dl>' +
       (steps.events && steps.events.length ? '<details><summary>Последние действия</summary><ol>' + steps.events.map(function (event) { return '<li><time>' + esc(dateTime(new Date(event.at).toISOString())) + '</time><span>' + esc(eventNames[event.type] || (/^hero_/.test(event.type) ? 'Действие с героем' : 'Действие в приложении')) + (event.section ? ' · ' + esc(({home:'Главная',profile:'Профиль',raffles:'Розыгрыши',daily_poker:'Покер дня',rating:'Рейтинг',club_chat:'Чат',games:'Игры',cashout:'Вывод',my_summary:'Моя сводка'})[event.section] || 'Раздел приложения') : '') + '</span></li>'; }).join('') + '</ol></details>' : '') + '</article>';
   }
 
   function crmLinkPlayersMatrixHtml(rows) {
     var status = function(value){return '<span class="crm-journey__status crm-journey__status--'+(value===true?'yes':value===false?'no':'unknown')+'">'+(value===true?'Да':value===false?'Нет':'—')+'</span>';};
     var number = function(value){return value==null?'—':esc(intFmt(value));};
-    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(row.steps?esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount||0)):'—')+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
+    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':row.status==='unknown'?'<small>Дата неизвестна</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(row.steps?esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount||0)):'—')+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
   }
 
   function renderCrmLinkDetailsModal() {
@@ -2486,8 +2523,8 @@
       ["Создана · МСК", dateTime(link.createdAt)],
       ["Всего переходов", intFmt(crmLinkMetric(link, "totalClicks"))],
       ["Уникальные посетители", intFmt(crmLinkMetric(link, "uniqueClicks"))],
-      ["Посетители с действиями", intFmt(crmLinkMetric(link, "activeVisitors"))],
-      ["Всего действий", intFmt(crmLinkMetric(link, "actionEvents"))]
+      ["Открывали разделы", intFmt(crmLinkMetric(link, "activeVisitors"))],
+      ["События навигации", intFmt(crmLinkMetric(link, "actionEvents"))]
     ];
     [
       ["Категория", params.category || "Без категории"],
@@ -2529,6 +2566,8 @@
       (state.linkParticipantsNext != null || state.linkParticipantsError ? '<button type="button" class="player-crm__ghost-btn" data-crm-participants-more' + (state.linkParticipantsLoading ? ' disabled' : '') + '>' + (state.linkParticipantsError ? 'Повторить' : 'Ещё участники') + '</button>' : '') +
       '<details class="crm-link-extra"><summary>Журнал переходов и действий</summary>' + visitorsHtml + '</details>' +
       "</div>";
+    if(crmLinkIsBroadcast(link))bodyEl.innerHTML='<div class="player-crm__modal-content"><h4>Отклик на рассылку</h4><p class="player-crm__detail-muted">Переходы и открытия после этого сообщения.</p>'+visitorsHtml+'</div>';
+    var titleEl=document.getElementById('playerCrmLinkDetailsTitle');if(titleEl)titleEl.textContent=crmLinkIsBroadcast(link)?'Отклик на рассылку':'По игрокам';
     var periodEl = bodyEl.querySelector('#playerCrmLinkSummaryPeriod');
     if (periodEl) periodEl.onchange = function () { state.linkSummaryPeriod = this.value; loadCrmLinkSummary(); };
     var excludeEl = bodyEl.querySelector('#playerCrmLinkExcludeSelf');
@@ -2587,8 +2626,7 @@
     }
     var q = authQuerySafe();
     var sep = q.indexOf("?") >= 0 ? "&" : "?";
-    loadCrmLinkParticipants(requestSeq);
-    loadCrmLinkSummary();
+    if(!crmLinkIsBroadcast(findCrmTrackingLink(id))){loadCrmLinkParticipants(requestSeq);loadCrmLinkSummary();}
     fetch(base + "/api/tracking-links" + q + sep + "id=" + encodeURIComponent(id) + "&visitors=1")
       .then(function (r) { return r.json(); })
       .then(function (data) {
@@ -5328,7 +5366,7 @@
       if (preview) { loadCrmLinkPreview(preview.closest('[data-crm-link-preview]')); return; }
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
       if (linksRefresh) {
-        if (state.linkDetailsId) loadCrmLinkSummary();
+        if (state.linkDetailsId&&!crmLinkIsBroadcast(findCrmTrackingLink(state.linkDetailsId))) loadCrmLinkSummary();
         loadCrmTrackingLinks();
         return;
       }
@@ -5345,6 +5383,13 @@
         }
         return;
       }
+      if (e.target.closest('[data-crm-category-access-open]')) {
+        var accessPanel=document.getElementById('playerCrmCategoryAccess');accessPanel.hidden=!accessPanel.hidden;renderCrmCategoryAccess();return;
+      }
+      var accessCreate=e.target.closest('[data-crm-category-access-create]');
+      if (accessCreate) {createCrmCategoryAccess(accessCreate);return;}
+      var accessRevoke=e.target.closest('[data-crm-category-access-revoke]');
+      if (accessRevoke) {accessRevoke.disabled=true;crmCategoryAccessRequest({action:'revoke',id:accessRevoke.getAttribute('data-crm-category-access-revoke')}).then(renderCrmCategoryAccess).catch(function(error){accessRevoke.disabled=false;document.querySelector('[data-access-result]').textContent=error.message;});return;}
       var categorySave = e.target.closest("[data-crm-link-category-save]");
       if (categorySave) { saveCrmLinkCategory(categorySave); return; }
       var linksTab = e.target.closest("[data-crm-links-tab]");
@@ -5801,6 +5846,8 @@
         else if (e.target.id === "playerCrmLinksCategory") state.trackingLinksCategory = e.target.value;
         else state.trackingLinksSort = e.target.value;
         renderCrmTrackingLinks();
+        var accessResult=document.querySelector("[data-access-result]");if(accessResult)accessResult.textContent="";
+        renderCrmCategoryAccess();
         return;
       }
 
