@@ -81,6 +81,7 @@
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.0",
     "esbuild": "0.28.2",
+    "fengari": "^0.1.5",
     "playwright": "1.62.1",
     "sharp": "^0.35.4"
   },

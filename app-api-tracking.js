@@ -136,23 +136,24 @@ function pokerApplyTrackingLinkLanding(ctx) {
   };
   setTimeout(applyLanding, 80);
 }
+var pokerTrackingEventThrottle = {};
 function recordTrackingLinkHit(ref) {
   if (!ref) return;
   var slug = ref.replace(/^ref_/, "");
+  var visitorId = getVisitorId();
   try {
     var cachedContext = pokerGetTrackingLinkContext();
-    if (sessionStorage.getItem("poker_track_ref_" + slug) && cachedContext && cachedContext.ref === ref) {
+    if (sessionStorage.getItem("poker_track_ref_" + slug) === visitorId && cachedContext && cachedContext.ref === ref) {
       pokerApplyTrackingLinkLanding(cachedContext);
       return;
     }
   } catch (e) {}
   var base = getApiBase();
   if (!base) return;
-  var visitorId = getVisitorId();
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   var initData = tg && tg.initData ? tg.initData : "";
   try {
-    fetch(base + "/api/tracking-link-hit", {
+    var hitRequest = fetch(base + "/api/tracking-link-hit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ref: ref, visitor_id: visitorId, initData: initData || undefined }),
@@ -172,15 +173,16 @@ function recordTrackingLinkHit(ref) {
         }
         if (data && data.recorded) {
           try {
-            sessionStorage.setItem("poker_track_ref_" + slug, "1");
+            sessionStorage.setItem("poker_track_ref_" + slug, visitorId);
           } catch (e2) {}
         }
       })
       .catch(function () {});
+    pokerTrackingEventThrottle.__hitPending = hitRequest;
+    hitRequest.finally(function () { if (pokerTrackingEventThrottle.__hitPending === hitRequest) pokerTrackingEventThrottle.__hitPending = null; });
   } catch (e3) {}
 }
 
-var pokerTrackingEventThrottle = {};
 /** События после перехода по ref_-ссылке (см. sessionStorage poker_session_tracking_ref). */
 function trackLinkSessionEvent(action, detail) {
   if (!action) return;
@@ -196,7 +198,7 @@ function trackLinkSessionEvent(action, detail) {
     var visitorId = getVisitorId();
     var tgEv = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     var initDataEv = tgEv && tgEv.initData ? tgEv.initData : "";
-    fetch(base + "/api/tracking-link-event", {
+    Promise.resolve(pokerTrackingEventThrottle.__hitPending).then(function () { return fetch(base + "/api/tracking-link-event", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -206,7 +208,7 @@ function trackLinkSessionEvent(action, detail) {
         detail: detail ? String(detail).slice(0, 200) : undefined,
         initData: initDataEv || undefined,
       }),
-    }).catch(function () {});
+    }); }).catch(function () {});
   } catch (e) {}
 }
 

@@ -2212,20 +2212,18 @@
         : "Пока нет своих ссылок. Создай первую и выбери раздел, куда должен приходить лид.") + "</div>";
       return;
     }
-    el.innerHTML = "<div class=\"player-crm__source-table-wrap\"><table class=\"player-crm__source-table player-crm__links-table\"><thead><tr>" +
-      "<th>Название</th><th>Раздел</th><th title=\"По убыванию\">Клики ↓</th><th>Уник.</th><th>Активн.</th><th>Событий</th>" +
-      "</tr></thead><tbody>" + links.map(function (link) {
-        var url = crmLinkUrl(link);
-        return "<tr>" +
-          "<td><button type=\"button\" class=\"player-crm__table-link\" data-crm-link-details=\"" + esc(link.id || "") + "\">" + esc(crmLinkTitle(link)) + "</button><br><span class=\"player-crm__detail-muted\">ref_" + esc(link.id || "") + "</span></td>" +
-          "<td>" + esc(crmLinkTargetLabel(link)) + (crmLinkParams(link).link_type ? "<br><span class=\"player-crm__detail-muted\">" + (crmLinkParams(link).link_type === "website" ? "Сайт" : "Telegram-миниапп") + "</span>" : "") + "</td>" +
-          "<td>" + esc(intFmt(crmLinkMetric(link, "totalClicks"))) + "</td>" +
-          "<td>" + esc(intFmt(crmLinkMetric(link, "uniqueClicks"))) + "</td>" +
-          "<td>" + esc(intFmt(crmLinkMetric(link, "activeVisitors"))) + "</td>" +
-          "<td>" + esc(intFmt(crmLinkMetric(link, "actionEvents"))) + "</td>" +
-          "</tr><tr class=\"player-crm__links-controls\"><td colspan=\"6\"><span class=\"player-crm__links-action-row\"><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-link-details=\"" + esc(link.id || "") + "\">Параметры</button><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать</button><button type=\"button\" class=\"player-crm__danger-btn\" data-crm-link-delete=\"" + esc(link.id || "") + "\">Удалить</button></span></td>" +
-        "</tr>";
-      }).join("") + "</tbody></table></div>";
+    el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Ссылки по убыванию переходов">' + links.map(function (link) {
+      var url = crmLinkUrl(link), id = esc(link.id || ""), type = crmLinkParams(link).link_type;
+      var channel = type === "website" ? "Сайт" : type ? "Telegram" : "Ссылка";
+      var metrics = [["totalClicks", "Переходы"], ["uniqueClicks", "Посетители"], ["activeVisitors", "С действиями"], ["actionEvents", "Действия"]];
+      return '<article class="player-crm__link-card" role="listitem">' +
+        '<div class="player-crm__link-identity"><button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + esc(crmLinkTitle(link)) + '</button>' +
+        '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
+        '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
+        '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '</dd></div>'; }).join("") + '</dl>' +
+        '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">Параметры</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
+    }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>С действиями</dt><dd>Сколько из этих посетителей открыли раздел или совершили другое отслеживаемое действие. Не означает «онлайн сейчас».</dd></div><div><dt>Действия</dt><dd>Общее число отслеживаемых действий этих посетителей. Один посетитель может совершить много действий.</dd></div></dl></details>';
+
   }
 
   function loadCrmTrackingLinks() {
@@ -2387,6 +2385,18 @@
       });
   }
 
+  function crmLinkJourneyHtml(row) {
+    var steps = row.steps || {}, unavailable = !row.steps, yesNo = function (value) { return '<span class="crm-journey__status crm-journey__status--' + (value === true ? 'yes' : value === false ? 'no' : 'unknown') + '">' + (value === true ? '✓ Да' : value === false ? '✕ Нет' : '— Неизвестно') + '</span>'; };
+    var numeric = function (value) { return value == null ? '<span class="crm-journey__status crm-journey__status--unknown">—</span>' : '<span class="crm-journey__count">' + esc(intFmt(value)) + '</span>'; };
+    var fields = [['Переходы по ссылке', steps.visitCount, 'number'], ['Действия после перехода', steps.activityCount, 'number'], ['Регистрация', steps.registered], ['Участия в розыгрышах', steps.raffleCount, 'number'], ['Крутки покера дня', steps.spinCount, 'number'], ['Привязан Poker21', steps.poker21, 'poker'], ['Подписка на бота', steps.bot], ['Telegram-чат игроков', steps.playersChat]];
+    var sections = {home:'Главная',profile:'Профиль',raffles:'Розыгрыши',daily_poker:'Покер дня',rating:'Рейтинг',club_chat:'Чат',games:'Игры',cashout:'Вывод',my_summary:'Моя сводка'};
+    var activityNames = {section_opened:'Открытия разделов',hero_activity:'Действия с героем',raffle_joined:'Участия в розыгрышах',daily_poker_spin:'Крутки покера дня',registration_completed:'Регистрация',poker21_linked:'Привязка Poker21',sng_joined:'Записи в турнир',subscription_enabled:'Включения подписки',push_enabled:'Включения уведомлений',news_read:'Прочтения новостей',friend_news_read:'Новости друзей',news_comment_created:'Комментарии к новостям',news_shared:'Поделился новостью',news_link_copied:'Копирования ссылки на новость',telegram_linked:'Привязка Telegram',email_linked:'Привязка почты',private_cash_applied:'Заявки в кеш',club_choice_voted:'Голосования'};
+    var breakdown = steps.activityBreakdown || [];
+    var eventNames = { session_started: 'Вход в приложение', referral_opened: 'Переход по ссылке', section_opened: 'Открыл раздел', registration_completed: 'Зарегистрировался', poker21_linked: 'Привязал Poker21', raffle_joined: 'Участвовал в розыгрыше', daily_poker_spin: 'Крутил покер дня', sng_joined: 'Записался в турнир', subscription_enabled: 'Включил подписку', deposit_confirmed: 'Подтверждён депозит' };
+    return '<article class="crm-journey"><header><div><strong>' + esc(row.nick || (row.accountId ? 'Игрок' : 'Посетитель без регистрации')) + '</strong><small>' + esc(row.accountId || row.actor) + (row.pokerId ? ' · Poker21: ' + esc(row.pokerId) : '') + '</small></div><span class="crm-journey__level">Уровень ' + esc(steps.heroLevel == null ? '—' : steps.heroLevel) + '</span></header><dl>' + fields.map(function (field) { var value = unavailable ? null : field[1], content = field[2] === 'number' ? numeric(value) : field[2] === 'poker' && value === true && (steps.pokerId || row.pokerId) ? '<code class="crm-journey__poker-id">ID ' + esc(steps.pokerId || row.pokerId) + '</code>' : yesNo(value); return '<div><dt>' + field[0] + (field[0] === 'Регистрация' && row.status === 'returning' ? '<small>Была до перехода</small>' : '') + '</dt><dd>' + content + '</dd></div>' + (field[0] === 'Действия после перехода' && breakdown.length ? '<div class="crm-journey__activity"><ul>' + breakdown.map(function (item) { return '<li><span>' + esc(activityNames[item.type] || 'Другие действия') + (item.type === 'section_opened' && item.section ? ' · ' + esc(sections[item.section] || 'Раздел приложения') : '') + '</span><b>' + esc(intFmt(item.count)) + '</b></li>'; }).join('') + '</ul></div>' : ''); }).join('') + '<div class="crm-journey__deposit"><dt>Депозиты по ссылке<small>Подтверждённые в CRM</small></dt><dd>' + (unavailable ? '—' : esc(new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(steps.depositAmount || 0)) + ' ₽' + '<small class="crm-journey__deposit-count">Пополнений: ' + esc(intFmt(steps.depositCount || 0)) + '</small>') + '</dd></div></dl>' +
+      (steps.events && steps.events.length ? '<details><summary>Последние действия</summary><ol>' + steps.events.map(function (event) { return '<li><time>' + esc(dateTime(new Date(event.at).toISOString())) + '</time><span>' + esc(eventNames[event.type] || (/^hero_/.test(event.type) ? 'Действие с героем' : 'Действие в приложении')) + (event.section ? ' · ' + esc(({home:'Главная',profile:'Профиль',raffles:'Розыгрыши',daily_poker:'Покер дня',rating:'Рейтинг',club_chat:'Чат',games:'Игры',cashout:'Вывод',my_summary:'Моя сводка'})[event.section] || 'Раздел приложения') : '') + '</span></li>'; }).join('') + '</ol></details>' : '') + '</article>';
+  }
+
   function renderCrmLinkDetailsModal() {
     var modal = document.getElementById("playerCrmLinkDetailsModal");
     var subtitleEl = document.getElementById("playerCrmLinkDetailsSubtitle");
@@ -2444,13 +2454,10 @@
         return "<div class=\"player-crm__link-detail-item\"><small>" + esc(item[0]) + "</small><strong>" + esc(item[1]) + "</strong></div>";
       }).join("") + "</div>" +
       "<p class=\"player-crm__detail-muted\">Показатели за всё время. Посетители с действиями — те, у кого зафиксированы события после перехода.</p>" +
-      '<h4 class="player-crm__edit-title">Участники по ссылке</h4>' +
-      '<p class="player-crm__detail-muted">Зарегистрированные аккаунты с подтверждённым переходом. Новые регистрации отмечены отдельно.</p>' +
-      '<div class="player-crm__source-table-wrap"><table class="player-crm__source-table"><thead><tr><th>Игрок</th><th>ID клуба</th><th>Игровой ID</th><th>Уровень</th><th>Регистрация</th></tr></thead><tbody>' +
-      (state.linkParticipants || []).filter(function (r) { return r.accountId; }).map(function (r) {
-        return '<tr><td>' + esc(r.nick || 'Игрок') + '</td><td>' + esc(r.accountId) + '</td><td>' + esc(r.pokerId || '—') + '</td><td>' + esc(r.level == null ? '—' : r.level) + '</td><td>' + esc(r.status === 'new' ? 'После перехода' : r.status === 'returning' ? 'До перехода' : 'Дата неизвестна') + '</td></tr>';
-      }).join('') + '</tbody></table></div>' +
-      '<p class="player-crm__detail-muted">' + (state.linkParticipantsLoading ? 'Загружаем участников…' : state.linkParticipantsError ? 'Не удалось загрузить участников.' : !(state.linkParticipants || []).some(function (r) { return r.accountId; }) ? 'На загруженных страницах нет подтверждённых аккаунтов. Старые анонимные переходы нельзя связать с регистрацией задним числом.' : '') + '</p>' +
+      '<h4 class="player-crm__edit-title">Путь посетителей по ссылке</h4>' +
+      '<p class="player-crm__detail-muted">Для повторяемых действий показано количество. Зелёное «Да» — зафиксировано, красное «Нет» — не зафиксировано. Серое «Неизвестно» — проверить не удалось. Подписки и уровень показываются на текущий момент. Депозиты относятся к первому источнику привлечения.</p>' +
+      '<div class="crm-journeys">' + (state.linkParticipants || []).map(crmLinkJourneyHtml).join('') + '</div>' +
+      '<p class="player-crm__detail-muted">' + (state.linkParticipantsLoading ? 'Загружаем участников…' : state.linkParticipantsError ? 'Не удалось загрузить участников.' : !(state.linkParticipants || []).length ? 'Подробного пути посетителей пока нет. Старые анонимные переходы нельзя связать с регистрацией задним числом.' : '') + '</p>' +
       (state.linkParticipantsNext != null || state.linkParticipantsError ? '<button type="button" class="player-crm__ghost-btn" data-crm-participants-more' + (state.linkParticipantsLoading ? ' disabled' : '') + '>' + (state.linkParticipantsError ? 'Повторить' : 'Ещё участники') + '</button>' : '') +
       "<h4 class=\"player-crm__edit-title\">Переходы и действия</h4>" + visitorsHtml +
       "</div>";
