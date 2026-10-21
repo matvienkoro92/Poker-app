@@ -11,7 +11,7 @@ test('all payment sources have identical player-facing messages, including parti
 });
 test('only completed positive payouts create notifications',()=>{
  const e=entry({reservations:[{id:'operation_123456',amount:200000}],payments:[{id:'operation_123456',amount:300000}]});
- for(const action of ['create','reserve','release-reservation','void','return','void-return','adjust','delete','archive','channel-operation'])assert.equal(event(e,action),null,action);
+ for(const action of ['reserve','release-reservation','void','return','void-return','adjust','delete','archive','channel-operation'])assert.equal(event(e,action),null,action);
  for(const action of ['payment','confirm-reservation']){
   assert.ok(event(e,action));
   for(const payment of [{amount:0},{amount:-100},{amount:100,voidedAt:now}])assert.equal(event(entry({payments:[{id:'operation_123456',...payment}]}),action),null);
@@ -61,7 +61,7 @@ test('pending events are delivered in queue order so a payment follows creation'
 
 
 test('queued intermediate events are discarded, including legacy events without action',async()=>{
- for(const fields of [{text:'Подготовка выплаты отменена: 4 000 ₽'},{text:'Сумма подготовлена: 4 000 ₽'},{text:'Заявка на вывод принята в работу: 4 000 ₽'},{action:'release-reservation',text:'Выплачено: 100 ₽'}]){
+ for(const fields of [{text:'Подготовка выплаты отменена: 4 000 ₽'},{text:'Сумма подготовлена: 4 000 ₽'},{action:'release-reservation',text:'Выплачено: 100 ₽'}]){
   const m=mocked();m.events.set('evt',JSON.stringify({...entry(),id:'evt',...fields}));
   await m.api.retryPending('token',now);assert.equal(m.sends.length,0);assert.equal(m.events.size,0);
  }
@@ -81,5 +81,12 @@ test('partial payout uses the same bold heading and spaced blocks as creation',(
 test('closed and cancelled withdrawals do not suggest cancelling again',()=>{
  for(const e of [entry({payments:[{id:'operation_123456',amount:1000000}]})]){
   const result=event(e,'payment');assert.doesNotMatch(result.text,/❗/);assert.equal(result.reply_markup,undefined);
+ }
+});
+
+test('creation remains enabled and queued creation is delivered',async()=>{
+ const result=event(entry(),'create');assert.match(result.text,/Заявка на вывод принята в работу:/);
+ for(const action of [undefined,'create']){
+  const m=mocked();m.events.set('evt',JSON.stringify({...result,action}));await m.api.retryPending('token',now);assert.equal(m.sends.length,1);
  }
 });

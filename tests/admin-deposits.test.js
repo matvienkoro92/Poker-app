@@ -748,12 +748,12 @@ test('one failed return source leaves other totals available and marks the repor
 
 test('withdrawal notifications are committed with the ledger, and retry after a lost response queues one event',async()=>{
  const api=apiSetup(),created={action:'create',requestId:requestId(9901),entry};
- assert.equal((await api.call(created)).statusCode,200);assert.equal(api.notificationEvents.length,0);
+ assert.equal((await api.call(created)).statusCode,200);assert.equal(api.notificationEvents.length,1);
  const request={action:'payment',entryId:created.requestId,requestId:requestId(9902),amount:entry.total};api.lose();
  assert.equal((await api.call(request)).statusCode,503);
- assert.equal(api.notificationEvents.length,1);assert.match(api.notificationEvents[0].text,/Выплачено:/);
- assert.equal((await api.call(request)).statusCode,200);assert.equal(api.notificationEvents.length,1);
- const bad={action:'payment',entryId:created.requestId,requestId:requestId(9903),amount:entry.total+1};assert.equal((await api.call(bad)).statusCode,409);assert.equal(api.notificationEvents.length,1);
+ assert.equal(api.notificationEvents.length,2);assert.match(api.notificationEvents[1].text,/Выплачено:/);
+ assert.equal((await api.call(request)).statusCode,200);assert.equal(api.notificationEvents.length,2);
+ const bad={action:'payment',entryId:created.requestId,requestId:requestId(9903),amount:entry.total+1};assert.equal((await api.call(bad)).statusCode,409);assert.equal(api.notificationEvents.length,2);
 });
 
 test('manual SBP phone formats normalize identically in parser and create API',()=>{
@@ -776,7 +776,7 @@ test('first withdrawal atomically links the room account before notification and
  const op={action:'create',requestId:requestId('first_link'),entry:{...entry,room:'X',playerId:'2299644',linkPoker21Id:'208238',confirmAccountLink:true}};
  const result=applyOperation(null,op,'admin-a');
  assert.equal(notification.poker21Anchor(result.state,{room:'X',playerId:'2299644'}),'208238');
- assert.equal(notification.eventForOperation(result.state,op),null);
+ assert.equal(notification.eventForOperation(result.state,op).action,'create');
  const retry=applyOperation(result.state,op,'admin-a');assert.equal(retry.duplicate,true);assert.equal(retry.state.playerAccounts.length,1);
  assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,confirmAccountLink:false}},'admin-a'),/Подтвердите/);
  assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,linkPoker21Id:'missing'}},'admin-a'),/не найден/);
@@ -793,7 +793,7 @@ test('selected player persists with the first withdrawal even without the separa
  const op={action:'create',requestId:requestId('selected_profile'),entry:{...entry,room:'X',playerId:'2299644',selectedProfileKey:'P21|208238',confirmAccountLink:true}};
  const {state}=applyOperation(null,op,'admin-a');
  const n=require('../lib/deposit-player-notifications'),event=n.eventForOperation(state,op);
- assert.equal(event,null);assert.equal(n.poker21Anchor(state,{room:op.entry.room,playerId:op.entry.playerId}),'208238');
+ assert.equal(event.action,'create');assert.equal(n.poker21Anchor(state,{room:op.entry.room,playerId:op.entry.playerId}),'208238');
  assert.equal(state.playerAccounts.find(p=>p.room==='X'&&p.playerId==='2299644').profileKey,'P21|208238');
  assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,confirmAccountLink:false}},'admin-a'),/Подтвердите/);
  assert.throws(()=>applyOperation(null,{...op,entry:{...op.entry,selectedProfileKey:'P21|missing'}},'admin-a'),/не найден/);
