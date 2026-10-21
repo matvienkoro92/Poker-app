@@ -9,7 +9,7 @@ test('hall request starts alongside CSS and does not wait for the race garage', 
   const calls = [];
   let stylesReady;
   const ctx = vm.createContext({
-    adminVisible: () => true, loungeLive: null, detail: null,
+    adminVisible: () => true, guestMode: () => false, loungeLive: null, detail: null,
     dialog: {open: true, classList:{add(){},remove(...names){calls.push(names.join(','));}}}, request: 0, generation: 0,
     warmRoomArt: () => calls.push('art'),
     window: {pokerEnsureLazyDomains: () => new Promise(resolve => { stylesReady = resolve; })},
