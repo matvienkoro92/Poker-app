@@ -129,6 +129,7 @@
     trackingLinksRequestSeq: 0,
     trackingLinksTab: "own",
     trackingLinksGroup: "all",
+    trackingLinksCategory: "all",
     trackingLinksSort: "totalClicks",
     linkDetailsId: "",
     linkDetailsVisitors: [],
@@ -2111,13 +2112,14 @@
       target_startapp: target.startapp,
       target_label: target.label,
       utm_source: crmLinkFieldValue("playerCrmLinkSource"),
+      category: crmLinkFieldValue("playerCrmLinkCategory").slice(0,80),
       created_from: "dashboard_links",
       created_at_client: new Date().toISOString()
     });
   }
 
   function clearCrmLinkForm() {
-    ["playerCrmLinkLabel", "playerCrmLinkSource"].forEach(function (id) {
+    ["playerCrmLinkLabel", "playerCrmLinkSource", "playerCrmLinkCategory"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.value = "";
     });
@@ -2190,6 +2192,17 @@
       var isBroadcast = params.created_from === "crm_broadcast" || /^CRM\s+crm_/i.test(String(link && link.label || ""));
       return activeTab === "broadcasts" ? isBroadcast : !isBroadcast;
     });
+    var categories = Array.from(new Set(allLinks.map(function(link){return String(crmLinkParams(link).category || "").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
+    var categoryChoices = categories.map(function(category){return '<option value="'+esc(category)+'">'+esc(category)+'</option>';}).join("");
+    var categoryList = document.getElementById("playerCrmLinkCategories");
+    if (categoryList) categoryList.innerHTML = categoryChoices;
+    var categorySelect = document.getElementById("playerCrmLinksCategory");
+    if (categorySelect) {
+      categorySelect.innerHTML = '<option value="all">Все категории</option><option value="none">Без категории</option>' + categories.map(function(category){return '<option value="category:'+esc(category)+'">'+esc(category)+'</option>';}).join("");
+      categorySelect.value = state.trackingLinksCategory;
+      if (!categorySelect.value) { state.trackingLinksCategory = "all"; categorySelect.value = "all"; }
+    }
+    links = links.filter(function(link){var category=String(crmLinkParams(link).category||"").trim();return state.trackingLinksCategory==="all"||(state.trackingLinksCategory==="none"&&!category)||state.trackingLinksCategory==="category:"+category;});
     var groupSelect = document.getElementById("playerCrmLinksGroup");
     var sources = Array.from(new Set(links.map(function (link) { return String(crmLinkParams(link).utm_source || "").trim(); }).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
     if (groupSelect) {
@@ -2235,12 +2248,28 @@
       return '<article class="player-crm__link-card" role="listitem">' +
         '<div class="player-crm__link-identity"><button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + esc(crmLinkTitle(link)) + '</button>' +
         '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
-        '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
+        (crmLinkParams(link).category ? '<span class="player-crm__link-category">'+esc(crmLinkParams(link).category)+'</span>' : '') + '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
         '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '</dd></div>'; }).join("") + '</dl>' +
+        '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' +
         '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Общая сводка по ссылке</summary><div data-crm-link-preview-body></div></details>' +
-        '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">Параметры</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
+        '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">По игрокам</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>С действиями</dt><dd>Сколько из этих посетителей открыли раздел или совершили другое отслеживаемое действие. Не означает «онлайн сейчас».</dd></div><div><dt>Действия</dt><dd>Общее число отслеживаемых действий этих посетителей. Один посетитель может совершить много действий.</dd></div></dl></details>';
 
+  }
+
+  function saveCrmLinkCategory(button) {
+    var editor = button.closest('.crm-link-category-editor'), input = editor.querySelector('[data-crm-link-category-value]'), status = editor.querySelector('[data-crm-link-category-status]');
+    var id = button.getAttribute('data-crm-link-category-save'), category = input.value.trim();
+    button.disabled = true; input.disabled = true; status.textContent = 'Сохраняем…';
+    fetch(getApiBaseSafe() + '/api/tracking-links', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(postBodySafe({action:'set-category',id:id,category:category}))})
+      .then(function(response){return response.json();})
+      .then(function(result){
+        if (!result || !result.ok) throw new Error(result && result.error || 'Не удалось сохранить категорию');
+        var link = findCrmTrackingLink(id);
+        if (link) { if (!link.params) link.params = {}; link.params.category = result.category; }
+        renderCrmTrackingLinks();
+      }).catch(function(error){status.textContent = error.message || 'Не удалось сохранить категорию';})
+      .finally(function(){button.disabled=false;input.disabled=false;});
   }
 
   function loadCrmTrackingLinks() {
@@ -2364,7 +2393,7 @@
     function value(key) { return data[key] == null ? '—' : intFmt(data[key]); }
     var items = [['Посетители', value('visitors')], ['Новые регистрации', value('registrations')], ['С действиями', value('activeVisitors')], ['Всего действий', value('activityCount')], ['Участники розыгрышей', value('raffleParticipants')], ['Участий в розыгрышах', value('raffleCount')], ['Крутили покер дня', value('spinners')], ['Всего круток', value('spinCount')], ['С привязкой Poker21', value('poker21Linked')], ['Подписаны на бота', value('botSubscribers')], ['В Telegram-чате', value('playersChatSubscribers')], ['Вносили депозит', value('depositors')], ['Число пополнений', value('depositCount')], ['Сумма депозитов', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽']];
     var unknown = []; if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
-    return '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '') + '<p class="crm-link-overview__note">По всей сохранённой истории ссылки, а не только по открытым карточкам. Аккаунт на нескольких устройствах считается один раз. Подписки — по последней проверке; неизвестные статусы не считаются отказами.</p>';
+    return '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
   }
 
   function loadCrmLinkPreview(details) {
@@ -2429,6 +2458,12 @@
       (steps.events && steps.events.length ? '<details><summary>Последние действия</summary><ol>' + steps.events.map(function (event) { return '<li><time>' + esc(dateTime(new Date(event.at).toISOString())) + '</time><span>' + esc(eventNames[event.type] || (/^hero_/.test(event.type) ? 'Действие с героем' : 'Действие в приложении')) + (event.section ? ' · ' + esc(({home:'Главная',profile:'Профиль',raffles:'Розыгрыши',daily_poker:'Покер дня',rating:'Рейтинг',club_chat:'Чат',games:'Игры',cashout:'Вывод',my_summary:'Моя сводка'})[event.section] || 'Раздел приложения') : '') + '</span></li>'; }).join('') + '</ol></details>' : '') + '</article>';
   }
 
+  function crmLinkPlayersMatrixHtml(rows) {
+    var status = function(value){return '<span class="crm-journey__status crm-journey__status--'+(value===true?'yes':value===false?'no':'unknown')+'">'+(value===true?'Да':value===false?'Нет':'—')+'</span>';};
+    var number = function(value){return value==null?'—':esc(intFmt(value));};
+    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(row.steps?esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount||0)):'—')+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
+  }
+
   function renderCrmLinkDetailsModal() {
     var modal = document.getElementById("playerCrmLinkDetailsModal");
     var subtitleEl = document.getElementById("playerCrmLinkDetailsSubtitle");
@@ -2455,6 +2490,7 @@
       ["Всего действий", intFmt(crmLinkMetric(link, "actionEvents"))]
     ];
     [
+      ["Категория", params.category || "Без категории"],
       ["Источник", params.utm_source],
       ["Канал", params.utm_medium],
       ["Кампания", params.utm_campaign],
@@ -2480,18 +2516,18 @@
       : "<div class=\"player-crm__notice\">Переходов пока нет.</div>";
     bodyEl.innerHTML = "<div class=\"player-crm__modal-content\">" +
       "<div class=\"player-crm__broadcast-actions\"><button type=\"button\" class=\"player-crm__primary-btn\" data-crm-link-copy=\"" + esc(url) + "\">Копировать ссылку</button><button type=\"button\" class=\"player-crm__ghost-btn\" data-crm-links-refresh>Обновить список</button></div>" +
-      '<h4 class="player-crm__edit-title">Эффективность ссылки</h4>' + crmLinkSummaryHtml() +
+      '<details class="crm-link-extra"><summary>Общая сводка и параметры ссылки</summary>' + crmLinkSummaryHtml() +
       '<h4 class="player-crm__edit-title">Параметры и общие счётчики · всё время</h4>' +
       "<div class=\"player-crm__link-detail-grid\">" + detailItems.map(function (item) {
         return "<div class=\"player-crm__link-detail-item\"><small>" + esc(item[0]) + "</small><strong>" + esc(item[1]) + "</strong></div>";
       }).join("") + "</div>" +
       "<p class=\"player-crm__detail-muted\">Показатели за всё время. Посетители с действиями — те, у кого зафиксированы события после перехода.</p>" +
-      '<h4 class="player-crm__edit-title">Путь посетителей по ссылке</h4>' +
+      '</details><h4 class="player-crm__edit-title">По игрокам</h4>' +
       '<p class="player-crm__detail-muted">Для повторяемых действий показано количество. Зелёное «Да» — зафиксировано, красное «Нет» — не зафиксировано. Серое «Неизвестно» — проверить не удалось. Подписки и уровень показываются на текущий момент. Депозиты относятся к первому источнику привлечения.</p>' +
-      '<div class="crm-journeys">' + (state.linkParticipants || []).map(crmLinkJourneyHtml).join('') + '</div>' +
+      crmLinkPlayersMatrixHtml(state.linkParticipants || []) +
       '<p class="player-crm__detail-muted">' + (state.linkParticipantsLoading ? 'Загружаем участников…' : state.linkParticipantsError ? 'Не удалось загрузить участников.' : !(state.linkParticipants || []).length ? 'Подробного пути посетителей пока нет. Старые анонимные переходы нельзя связать с регистрацией задним числом.' : '') + '</p>' +
       (state.linkParticipantsNext != null || state.linkParticipantsError ? '<button type="button" class="player-crm__ghost-btn" data-crm-participants-more' + (state.linkParticipantsLoading ? ' disabled' : '') + '>' + (state.linkParticipantsError ? 'Повторить' : 'Ещё участники') + '</button>' : '') +
-      "<h4 class=\"player-crm__edit-title\">Переходы и действия</h4>" + visitorsHtml +
+      '<details class="crm-link-extra"><summary>Журнал переходов и действий</summary>' + visitorsHtml + '</details>' +
       "</div>";
     var periodEl = bodyEl.querySelector('#playerCrmLinkSummaryPeriod');
     if (periodEl) periodEl.onchange = function () { state.linkSummaryPeriod = this.value; loadCrmLinkSummary(); };
@@ -5309,6 +5345,8 @@
         }
         return;
       }
+      var categorySave = e.target.closest("[data-crm-link-category-save]");
+      if (categorySave) { saveCrmLinkCategory(categorySave); return; }
       var linksTab = e.target.closest("[data-crm-links-tab]");
       if (linksTab) {
         state.trackingLinksTab = linksTab.getAttribute("data-crm-links-tab") === "broadcasts" ? "broadcasts" : "own";
@@ -5758,8 +5796,9 @@
       });
     });
     root.addEventListener("change", function (e) {
-      if (e.target.id === "playerCrmLinksGroup" || e.target.id === "playerCrmLinksSort") {
+      if (e.target.id === "playerCrmLinksGroup" || e.target.id === "playerCrmLinksSort" || e.target.id === "playerCrmLinksCategory") {
         if (e.target.id === "playerCrmLinksGroup") state.trackingLinksGroup = e.target.value;
+        else if (e.target.id === "playerCrmLinksCategory") state.trackingLinksCategory = e.target.value;
         else state.trackingLinksSort = e.target.value;
         renderCrmTrackingLinks();
         return;
