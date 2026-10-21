@@ -4,23 +4,18 @@ const {eventForOperation,poker21Anchor}=require('../lib/deposit-player-notificat
 const now=Date.parse('2026-10-20T12:00Z');
 const entry=(extra={})=>({id:'withdrawal_123456789',room:'P21',playerId:'123456',total:1000000,payments:[],reservations:[],createdAt:now,...extra});
 function event(e,action,extra={}){return eventForOperation({entries:[e]},{action,entryId:e.id,requestId:action==='create'?e.id:'operation_123456',...extra},now);}
-test('creation shows withdrawal amount and balance without bank, owner, manager or internal comments',()=>{
- const result=event(entry({recipient:'Тайный получатель',bank:'Тайный банк',card:'1234567890123456',note:'Эксчип, оплачено владельцем'}),'create');
- assert.match(result.text,/Заявка на вывод принята в работу: 10\s000 ₽/);assert.match(result.text,/Осталось по заявке: 10\s000 ₽/);
- assert.doesNotMatch(result.text,/Тайный|1234567890123456|эксчип|владельц/i);
-});
 test('all payment sources have identical player-facing messages, including partial and final payouts',()=>{
  const messages=['player','owner','exchip'].map(source=>event(entry({payments:[{id:'operation_123456',amount:300000,paymentSource:source,channelId:source,note:'служебное'}]}),'confirm-reservation').text);
  assert.equal(new Set(messages).size,1);assert.match(messages[0],/Выплачено: 3\s000 ₽/);assert.match(messages[0],/Осталось по заявке: 7\s000 ₽/);
  assert.match(event(entry({payments:[{id:'operation_123456',amount:1000000}]}),'payment').text,/Вывод закрыт/);
 });
-test('reservation, release, void, return, correction and cancellation have factual messages',()=>{
- const e=entry({reservations:[{id:'reserve_1',amount:200000,channelId:'exchip'}],payments:[{id:'payment_1',amount:300000,voidedAt:now}],returns:[{id:'return_1',amount:100000,voidedAt:now}]});
- for(const [action,extra,pattern] of [['release-reservation',{reservationId:'reserve_1'},/Подготовка выплаты отменена/],['void',{paymentId:'payment_1'},/Выплата отменена/],['return',{requestId:'return_1'},/отмечен возврат в кассу/],['void-return',{returnId:'return_1'},/Возврат в кассу отменён/],['adjust',{},/Сумма заявки.*изменена/],['delete',{},/Заявка на вывод отменена/]]){
-  const result=event(e,action,extra);assert.match(result.text,pattern);assert.doesNotMatch(result.text,/эксчип|владельц|служебное/i);
+test('only completed positive payouts create notifications',()=>{
+ const e=entry({reservations:[{id:'operation_123456',amount:200000}],payments:[{id:'operation_123456',amount:300000}]});
+ for(const action of ['create','reserve','release-reservation','void','return','void-return','adjust','delete','archive','channel-operation'])assert.equal(event(e,action),null,action);
+ for(const action of ['payment','confirm-reservation']){
+  assert.ok(event(e,action));
+  for(const payment of [{amount:0},{amount:-100},{amount:100,voidedAt:now}])assert.equal(event(entry({payments:[{id:'operation_123456',...payment}]}),action),null);
  }
- assert.equal(event(e,'reserve',{requestId:'reserve_1'}),null);
- assert.equal(event(e,'archive'),null);assert.equal(event(e,'channel-operation'),null);
 });
 test('other rooms require explicit saved account links, never matching nicknames or numeric IDs',()=>{
  assert.equal(poker21Anchor({},entry({room:'X'})),'');
@@ -28,7 +23,7 @@ test('other rooms require explicit saved account links, never matching nicknames
  state.playerAccounts.push({profileKey:'P21|111111',room:'X',playerId:'123456'});assert.equal(poker21Anchor(state,entry({room:'X'})),'');
 });
 function mocked({binding='ID123456',forward='123456',primary='tg_42',aliases=['tg_42'],owners={tg_42:'ID123456'},sendResults=[{ok:true}]}={}){
- const mod={exports:{}},events=new Map([['evt',JSON.stringify({...entry(),id:'evt',text:'Вывод'})]]),locks=new Map(),calls=[],sends=[];
+ const mod={exports:{}},events=new Map([['evt',JSON.stringify({...entry(),id:'evt',text:'Выплачено: 100 ₽'})]]),locks=new Map(),calls=[],sends=[];
  const redis={pipeline:async commands=>commands.map(c=>{calls.push(c);let result=null;
   if(c[0]==='HGET'){if(c[1].endsWith('accounts_by_user_id'))result=binding;else if(c[1]==='poker_app:pokerplus_user_ids')result=forward;else if(c[1]==='poker_app:id_to_user')result=primary;else if(c[1]==='poker_app:visitor_dt_ids')result=owners[c[2]];else result=events.get(c[2])||null;}
   else if(c[0]==='SMEMBERS')result=aliases;
@@ -60,21 +55,16 @@ test('Telegram errors retain the event for retry; blocked bots and missing bindi
 });
 
 test('pending events are delivered in queue order so a payment follows creation',async()=>{
- const m=mocked();m.events.set('evt2',JSON.stringify({...entry(),id:'evt2',text:'Выплачено'}));
- const result=await m.api.retryPending('token',now);assert.equal(result.sent,2);assert.deepEqual(m.sends.map(s=>s.text),['Вывод','Выплачено']);
+ const m=mocked();m.events.set('evt2',JSON.stringify({...entry(),id:'evt2',text:'Выплачено: 200 ₽'}));
+ const result=await m.api.retryPending('token',now);assert.equal(result.sent,2);assert.deepEqual(m.sends.map(s=>s.text),['Выплачено: 100 ₽','Выплачено: 200 ₽']);
 });
 
 
-test('notification has a bold two-line heading and blank lines between detail blocks',async()=>{
- const result=event(entry({playerId:'208238',total:100000,createdAt:Date.parse('2026-10-20T18:17:45Z')}),'create');
- const heading='Заявка на вывод принята в работу: 1\u00a0000 ₽\nPoker21 · ID 208238';
- assert.equal(result.text.split('\n\n❗')[0],heading+'\n\nЗаявка от 20.10, 21:17:45 МСК\nОперация: 20.10, 15:00:00 МСК\n\nСумма вывода: 1\u00a0000 ₽\nВыплачено по заявке: 0 ₽\nОсталось по заявке: 1\u00a0000 ₽');
- assert.deepEqual(result.entities[0],{type:'bold',offset:0,length:heading.length});
- const note=result.entities[1];assert.equal(note.type,'bold');assert.match(result.text.slice(note.offset,note.offset+note.length),/^❗.*вернуть фишки.*менеджеру/);
- const m=mocked({forward:'208238'});m.events.set('evt',JSON.stringify(result));await m.api.deliver('evt','token',now);
- assert.deepEqual(m.sends[0].entities,result.entities);
- assert.equal(m.sends[0].text,result.text);
- assert.deepEqual(m.sends[0].reply_markup,result.reply_markup);
+test('queued intermediate events are discarded, including legacy events without action',async()=>{
+ for(const fields of [{text:'Подготовка выплаты отменена: 4 000 ₽'},{text:'Сумма подготовлена: 4 000 ₽'},{text:'Заявка на вывод принята в работу: 4 000 ₽'},{action:'release-reservation',text:'Выплачено: 100 ₽'}]){
+  const m=mocked();m.events.set('evt',JSON.stringify({...entry(),id:'evt',...fields}));
+  await m.api.retryPending('token',now);assert.equal(m.sends.length,0);assert.equal(m.events.size,0);
+ }
 });
 
 test('partial payout uses the same bold heading and spaced blocks as creation',()=>{
@@ -89,7 +79,7 @@ test('partial payout uses the same bold heading and spaced blocks as creation',(
 
 
 test('closed and cancelled withdrawals do not suggest cancelling again',()=>{
- for(const e of [entry({payments:[{id:'operation_123456',amount:1000000}]}),entry({deletedAt:now})]){
-  const result=event(e,e.deletedAt?'delete':'payment');assert.doesNotMatch(result.text,/❗/);assert.equal(result.reply_markup,undefined);
+ for(const e of [entry({payments:[{id:'operation_123456',amount:1000000}]})]){
+  const result=event(e,'payment');assert.doesNotMatch(result.text,/❗/);assert.equal(result.reply_markup,undefined);
  }
 });
