@@ -813,3 +813,25 @@ test('API forwards explicit other-player recipient mode',async()=>{
  const api=apiSetup();const response=await api.call({action:'transfer',requestId:requestId(1604),recipientMode:'other',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom:'P21',toPlayerId:'936923',amount:10000});
  assert.equal(response.statusCode,200);assert.equal(response.data.channelOperations.length,2);assert.equal(response.data.channelOperations[1].profileKey,'P21|936923');
 });
+
+test('automatic recipient mode transfers across players without linking their profiles',()=>{
+ const body={action:'transfer',requestId:requestId(1700),recipientMode:'auto',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom:'X',toPlayerId:'3019341',amount:200000};
+ const result=applyOperation(null,body,'manager',1000),rows=result.state.channelOperations;
+ assert.equal(rows.length,2);assert.equal(rows[0].profileKey,'P21|398176');assert.equal(rows[1].profileKey,'P21|936923');assert.equal(rows[1].transferKind,'player');
+ assert.equal(rows[0].amount,rows[1].amount);assert.equal(view(result.state).statistics.deposits,0);
+ assert.equal(applyOperation(result.state,body,'manager',1001).duplicate,true);
+ assert.throws(()=>applyOperation(null,{...body,toPlayerId:'missing'},'manager'),/сохранённых/);
+});
+test('automatic recipient mode preserves own-account transfers and supports same-room peers',()=>{
+ const own={action:'transfer',requestId:requestId(1701),recipientMode:'auto',profileKey:'P21|398176',fromRoom:'P21',fromPlayerId:'398176',toRoom:'X',toPlayerId:'2728933',amount:200000};
+ const rows=applyOperation(null,own,'manager').state.channelOperations;
+ assert(rows.every(r=>r.profileKey==='P21|398176'));assert.equal(rows[0].transferKind,undefined);
+ const peer=applyOperation(null,{...own,requestId:requestId(1702),toRoom:'P21',toPlayerId:'936923'},'manager').state.channelOperations;
+ assert.equal(peer[1].profileKey,'P21|936923');
+ assert.throws(()=>applyOperation(null,{...own,toRoom:'P21',toPlayerId:'398176'},'manager'),/разных отправителя/);
+});
+test('transfer editor defaults to automatic ID matching instead of requiring identity merging',()=>{
+ const source=require('node:fs').readFileSync(require.resolve('../app-admin-deposits.js'),'utf8');
+ assert.match(source,/<select name="transferRecipient"><option value="auto">/);
+ assert(!source.includes('Эти ID ещё не связаны.'));
+});

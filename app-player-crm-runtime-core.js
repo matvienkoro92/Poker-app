@@ -3379,6 +3379,7 @@
     if (heavyMode === "players") {
       heavyUrl += "&page=" + encodeURIComponent(options.page || 1) + "&limit=100";
     }
+    if (heavyMode === "send") heavyUrl += "&compact=1";
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timeoutId = controller ? setTimeout(function () {
       try { controller.abort(); } catch (eAbort) {}
@@ -3387,7 +3388,7 @@
     return fetch(heavyUrl, controller ? { signal: controller.signal } : undefined)
       .then(function (r) {
         return r.json().then(function (data) {
-          data = data || {};
+          data = expandCrmAudience(data || {});
           data.__httpOk = r.ok;
           data.__status = r.status;
           return data;
@@ -3585,13 +3586,25 @@
     if (state.tab === "links" && !state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
   }
 
+  function expandCrmAudience(data) {
+    if (!data || !Array.isArray(data.playerFields) || !Array.isArray(data.players)) return data;
+    var allowed = ["id", "accountId", "name", "handle", "dtId", "telegramIds", "pokerPlusUserId", "channels", "deposits", "lastMessageDays", "lastDepositDays", "lastTouchDays", "touches", "appBlocked", "crm"];
+    data.players = data.players.map(function (row) {
+      var player = {};
+      data.playerFields.forEach(function (key, index) { if (allowed.indexOf(key) >= 0) player[key] = row[index]; });
+      return player;
+    });
+    delete data.playerFields;
+    return data;
+  }
+
   function fetchBroadcastAudience() {
     var key = broadcastAudiencePeriodKey();
     var base = getApiBaseSafe();
     if (!base) return Promise.resolve(false);
     var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timeoutId;
-    var request = fetch(base + "/api/player-crm" + crmQuery({ mode: "send" }), {
+    var request = fetch(base + "/api/player-crm" + crmQuery({ mode: "send" }) + "&compact=1", {
       cache: "no-store",
       signal: controller ? controller.signal : undefined
     }).then(function (response) {
@@ -3605,6 +3618,7 @@
       }, 30000);
     });
     var pending = Promise.race([request, deadline]).then(function (data) {
+      data = expandCrmAudience(data);
       if (!data || data.ok === false || !Array.isArray(data.players)) throw new Error("broadcast-audience");
       if (state.broadcastAudiencePrefetchPromise !== pending || broadcastAudiencePeriodKey() !== key) return false;
       state.broadcastPlayers = data.players;
@@ -3622,28 +3636,6 @@
     });
     state.broadcastAudiencePrefetchPromise = pending;
     return pending;
-  }
-
-  function prefetchBroadcastAudience() {
-    if (state.crmError || state.broadcastAudienceLoadedAt || state.broadcastAudiencePrefetchPromise) return;
-    var key = broadcastAudiencePeriodKey();
-    var cached = readBroadcastAudienceCache(key);
-    if (cached) {
-      state.broadcastPlayers = cached.players;
-      state.broadcastAudienceLoadedAt = Number(cached.savedAt) || Date.now();
-      state.broadcastAudiencePeriodKey = key;
-      return;
-    }
-    return fetchBroadcastAudience();
-  }
-
-  function scheduleBroadcastAudiencePrefetch() {
-    var run = function () { prefetchBroadcastAudience(); };
-    if (typeof window.requestIdleCallback === "function") {
-      window.requestIdleCallback(run, { timeout: 1200 });
-    } else {
-      window.setTimeout(run, 250);
-    }
   }
 
   function crmDataRequestKey() {
@@ -3777,7 +3769,6 @@
         state.loaded = true;
         renderActiveTab();
         loadActiveTabData();
-        if (state.tab !== "broadcast") scheduleBroadcastAudiencePrefetch();
         if (state.loadPending || crmDataRequestKey() !== requestKey) {
           state.loadPending = false;
           return loadCrmData("data");

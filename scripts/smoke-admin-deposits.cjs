@@ -105,6 +105,21 @@ async function main(){
    assert.ok(transferBounds.x+transferBounds.width<=bonusBounds.x);assert.ok(Math.abs(transferBounds.y-bonusBounds.y)<2);
    await pair.locator('[data-provider="transfer"]').click();
    const transferForm=page.locator('[data-form="transfer"]'),senderPicker=transferForm.locator('[data-transfer-side="from"]');
+   assert.equal(await transferForm.locator('[name="transferRecipient"]').inputValue(),'auto');
+   if(process.env.SMOKE_TRANSFER_AUTO==='1'){
+    await senderPicker.locator('[data-player-query]').fill('пряник');
+    await senderPicker.locator('[data-dep="pick-player"][data-player-id="398176"]').click();
+    await transferForm.locator('[name="toRoom"][value="X"]').check();
+    await transferForm.locator('[name="toPlayerId"]').fill('3019341');
+    await transferForm.locator('[name="amount"]').fill('2000');
+    await transferForm.locator('button[type="submit"]').click();
+    await page.locator('.deposits__popup .deposits__channel-history').waitFor();
+    const rows=state.channelOperations.filter(r=>r.transferId);
+    assert.equal(rows.length,2);assert.equal(rows[0].profileKey,'P21|398176');assert.equal(rows[1].profileKey,'P21|936923');assert.equal(rows[0].amount,200000);assert.equal(rows[1].amount,200000);
+    await page.screenshot({path:path.join(output,width+'-auto-player-transfer.png')});
+    assert.deepEqual(errors,[]);await context.close();continue;
+   }
+   await transferForm.locator('[name="transferRecipient"]').selectOption('self');
    await senderPicker.locator('[data-player-query]').fill('пряник');
    await senderPicker.locator('[data-dep="pick-player"][data-player-id="398176"]').click();
    assert.equal(await transferForm.locator('[name="fromPlayerId"]').inputValue(),'398176');
