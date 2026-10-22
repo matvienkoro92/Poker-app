@@ -1,0 +1,12 @@
+export function mountResultPanel(dock,restart){
+ const panel=document.createElement('section');panel.id='matchResult';panel.hidden=true;panel.setAttribute('role','status');panel.innerHTML='<small>ПАРТИЯ ЗАВЕРШЕНА</small><h2></h2><p></p><button type="button" class="primary"></button><span></span>';dock.append(panel);panel.querySelector('button').onclick=restart;
+ return {render(s,{mode,player,series,tableView}){
+  const finished=!!mode&&s.winner!==null&&!s.moving;panel.hidden=!finished||!tableView;document.body.classList.toggle('billiards-finished',finished);
+  if(!finished)return;
+  const training=mode==='training',won=s.winner===player,complete=series.target===3&&series.winner!==null;
+  panel.querySelector('small').textContent=complete?'СЕРИЯ ЗАВЕРШЕНА':'ПАРТИЯ ЗАВЕРШЕНА';
+  panel.querySelector('h2').textContent=training?'Сторона '+(s.winner+1)+' победила!':won?(complete?'Вы выиграли серию!':'Вы победили!'):'Победил '+(mode==='solo'?'компьютер':'соперник');
+  panel.querySelector('p').textContent='Счёт партии: '+s.scores[player]+' : '+s.scores[1-player]+(series.target===3?' · Серия: '+series.wins[player]+' : '+series.wins[1-player]:'');
+  const owner=mode!=='online'||player===0,button=panel.querySelector('button');button.hidden=!owner;button.textContent=series.target===3?(complete?'Начать новую серию':'Начать следующую партию'):'Начать новую партию';panel.querySelector('span').textContent=owner?'': 'Следующую партию запускает создатель комнаты.';
+ }};
+}

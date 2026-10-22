@@ -1,3 +1,4 @@
+import {mountResultPanel} from './result-panel.mjs';
 import {createGame,step,shoot,action,validState} from './engine.mjs';
 import {createSession} from './network.mjs';
 import {createRoom} from './room.mjs';
@@ -20,6 +21,7 @@ const shotTools=mountShotTools({adjust:delta=>{angle=Math.atan2(Math.sin(angle+d
 const turnGuide=mountTurnGuide();
 const rulesUI=mountRules({move:value=>move(value),room});
 const tableDock=document.createElement('section');tableDock.id='tableDock';tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
+const resultPanel=mountResultPanel(tableDock,()=>$('again').click());
 let initialEntry=new URLSearchParams(location.search).get('mode')||'lobby';
 try{if(parent!==window&&window.frameElement?.dataset.billiardsEntry)initialEntry=window.frameElement.dataset.billiardsEntry;}catch{}
 if(!['tables','cues','lobby'].includes(initialEntry))initialEntry='lobby';
@@ -82,6 +84,7 @@ function frame(now){
  $('trainingControls').hidden=mode!=='training';const repeatAvailable=training.inspect().available;$('restoreShot').disabled=$('repeatShot').disabled=!repeatAvailable;
  $('again').hidden=mode!=='training'&&(state.winner===null||player!==0);$('again').textContent=mode==='training'?'Новая расстановка':series.target===3?(series.winner!==null?'Новая серия до 3 побед':'Следующая партия'):'Новая партия';
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';
+ resultPanel.render(state,{mode,player,series,tableView});
  shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});if(tableView)room?.render(display,angle,can&&!state.inHand&&!state.pending);raf=requestAnimationFrame(frame);
 }
 const controlsObserver=new ResizeObserver(()=>{const height=tableDock.getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');if(tableView)room?.setView('table');}});controlsObserver.observe(tableDock);

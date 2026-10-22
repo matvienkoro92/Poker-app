@@ -317,3 +317,6 @@ body.billiards-table-view #tableDock .fine-aim button{width:34px;flex:0 0 34px;m
 body.billiards-table-view #tableDock .shot-tools>#spinButton{width:58px;min-width:58px;max-width:58px;flex:0 0 58px;min-height:38px;font-size:10px}
 body.billiards-table-view #tableDock .shot-controls .primary{min-width:58px;min-height:40px}
 @media(max-width:350px){body.billiards-table-view #tableDock #game{column-gap:5px}body.billiards-table-view #tableDock .fine-aim button{width:29px;flex-basis:29px}body.billiards-table-view #tableDock .shot-tools>#spinButton{width:52px;min-width:52px;max-width:52px;flex-basis:52px}body.billiards-table-view #tableDock .shot-controls .primary{min-width:50px}}
+
+body.billiards-finished #tableDock :is(#game,#decisionOpen,#penaltyConfirm,#turnGuide){display:none}
+#matchResult{text-align:center;padding:8px 8px 10px}#matchResult small{font-size:10px;letter-spacing:1.8px;color:#d8bc78}#matchResult h2{margin:5px 0;font-size:25px;color:#ffe3a1}#matchResult p{margin:6px 0 12px;color:#d4dfd3;font-size:14px}#matchResult button{width:min(400px,100%);min-height:48px;font-size:16px;border-radius:13px;background:linear-gradient(135deg,#f2dca4,#c59b4e);box-shadow:0 0 18px #edca6433}#matchResult span{display:block;font-size:13px;color:#c4d2c6}
