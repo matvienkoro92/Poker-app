@@ -75,6 +75,7 @@ const baseFiles = [
   'app-billiards-replay-worker.js',
   'app-billiards-access.js',
   'app-billiards-overlay.js',
+  'app-villa-darts.js',
   'styles-billiards.css',
   'app-city-game.js',
   'app-city-launch.js',
