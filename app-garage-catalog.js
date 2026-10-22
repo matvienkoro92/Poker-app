@@ -68,6 +68,7 @@ const fashionRows={
  watch:[['steelBlue','Сталь · синий циферблат','#627f99'],['roseDress','Розовое золото','#bc9475'],['carbonChrono','Карбоновый хронограф','#30353b'],['goldClassic','Золотая классика','#d0af65'],['squareDress','Прямоугольная классика','#d2d5d1'],['greenDiver','Зелёный дайвер','#477a65'],['smartBlack','Смарт-часы','#262c32'],['bronzePilot','Бронзовый пилот','#a78352']],
  necklace:[['silverChain','Серебряная цепь','#c7d1da'],['goldChain','Золотая цепь','#d8b15c'],['blackBeads','Чёрные бусины','#33363c'],['goldPendant','Золотой кулон','#d8b15c'],['silverTag','Серебряный жетон','#c7d1da'],['pearl','Жемчужное ожерелье','#eee6d5'],['acesPendant','Два туза · золото','#e5bd62'],['spadeDiamond','Бриллиантовая пика','#dce9f0'],['crownPendant','Корона чемпиона','#e5bd62'],['poker21Pendant','POKER21 · лёд','#dce9f0'],['nicknameBling','Блинг с вашим ником','#e5bd62']]
 };
+fashionRows.shoes.push(['redMoccasins','Красные мокасины','#c92732']);
 fashionRows.belt=[];fashionRows.gloves=[];fashionRows.bracelet=[];fashionRows.hat=[];fashionRows.hair=[];fashionRows.body=[];
 const prestigeWatches={rolexSubmariner:['Rolex · Submariner',30,'#aab6be'],rolexGMT:['Rolex · GMT-Master II Pepsi',45,'#3c6092'],rolexDaytona:['Rolex · Daytona Panda',60,'#e1e4e5'],rolexDayDate:['Rolex · Day-Date President',75,'#d6b05a'],royalSkeleton:['Скелетон · Royal Mechanics',85,'#bd8668'],diamondRoyal:['Diamond Royal · Платина',100,'#d8e6ef']};
 const ringDesigns={silverSpade:['Перстень · Серебряная пика',5,'#c6d3df','spade'],clubSignet:['Печатка · Poker21',15,'#b4bec6','club'],goldAces:['Перстень · Золотые тузы',30,'#d5ad55','aces'],rubyLion:['Перстень · Рубиновая корона',45,'#d7a95c','ruby'],emeraldCrown:['Перстень · Изумрудная корона',65,'#d8b15c','emerald'],diamondKing:['Перстень · Бриллиантовый король',90,'#e1eaf3','diamond']};
@@ -161,7 +162,7 @@ const seasonalCollections=[
 // Each collection takes at most two club levels to finish (shoes → trousers → top).
 for(const set of seasonalCollections){set.pieceLevels={shoes:Math.max(0,set.target-2),pants:Math.max(0,set.target-1),suit:set.target};}
 // Published old rewards only move earlier, so previously available clothes stay available.
-const wardrobeLevelAdjustments={'shoes:combatBlack':8,'shoes:desertSand':12,'pants:navyPinstripe':24,'shoes:hikingBrown':30,'pants:grayPlaid':38,'shoes:onyx':14};
+const wardrobeLevelAdjustments={'shoes:redMoccasins':1,'shoes:combatBlack':8,'shoes:desertSand':12,'pants:navyPinstripe':24,'shoes:hikingBrown':30,'pants:grayPlaid':38,'shoes:onyx':14};
 for(const i of items)if(Object.hasOwn(wardrobeLevelAdjustments,i.key))i.target=wardrobeLevelAdjustments[i.key];
 const seasonalItems=new Map();
 for(const set of seasonalCollections)for(const kind of ['suit','pants','shoes']){
@@ -557,7 +558,7 @@ function paintFashion(c,image,look,standing){
  const erase=(points)=>{c.save();c.globalCompositeOperation='destination-out';c.beginPath();points.forEach(([x,y],n)=>n?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.restore();};
  const pants=fashionArt('pants',look.pants),top=bodyTopArt(fitExposedWrists(fashionArt('suit',look.suit),look),look),shoes=fashionArt('shoes',look.shoes),shoeBase=rewardFashionModels.shoes[look.shoes]||seasonalItems.get('shoes:'+look.shoes)?.base||look.shoes;
  const waistY=look.suit==='none'?(look.body==='bodyBelly'?760:640):look.body==='bodyBelly'?(/(Tank|Tee)$/.test(look.suit)?750:780):summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
- const highBoot=['combatBlack','hikingBrown','canvasHigh','suedeChelsea','jordanBlackToe','jordanChicago','valenki'].includes(shoeBase),lowShoe=['blackOxford','brownLoafers','burgundyBrogue','ivoryLow','greenCourt','nikeAirForceWhite','nikeDunkPanda','gucciAce','pradaAmericaCup'].includes(shoeBase);
+ const highBoot=['combatBlack','hikingBrown','canvasHigh','suedeChelsea','jordanBlackToe','jordanChicago','valenki'].includes(shoeBase),lowShoe=['blackOxford','brownLoafers','redMoccasins','burgundyBrogue','ivoryLow','greenCourt','nikeAirForceWhite','nikeDunkPanda','gucciAce','pradaAmericaCup'].includes(shoeBase);
  const angledSneaker=['nikeAirForceWhite','nikeDunkPanda','jordanChicago','gucciAce','balenciagaTrack','pradaAmericaCup'].includes(shoeBase);
  const themedShoe=themedPieces.get(look.shoes)?.outfit;
  const shoeHeight=(themedShoe?({fisherman:275,bath:150,garden:180,space:265,enduro:300}[themedShoe]):shoeBase==='valenki'?198:highBoot?238:lowShoe?196:216)*(angledSneaker?1.08:1),jeans=['indigoJeans','washedJeans','blackDenim'].includes(look.pants),bottom=(themedShoe&&['fisherman','space','enduro'].includes(themedShoe)?1511-shoeHeight+45:shoes?(shoeBase==='valenki'?1352:highBoot?1312:lowShoe?1356:1338):1322)+(jeans?(shoes&&highBoot&&shoeBase!=='valenki'?36:12):['navyPinstripe','navyBusinessPants','charcoalBusinessPants'].includes(look.pants)?(shoes&&highBoot&&shoeBase!=='valenki'?42:20):0);
@@ -572,7 +573,7 @@ function paintFashion(c,image,look,standing){
  const taperBareAnkles=look.body==='bodyBelly'&&(!pants||['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants));
  if(shoes)c.clearRect(142,1511-shoeHeight-(taperBareAnkles?55:0),746,shoeHeight+25+(taperBareAnkles?55:0));
  // Footwear sits behind the trouser hem, including when it is the original pair.
- if(shoes){for(const [n,foot]of footwearFit(shoes).entries()){const scale=shoeHeight/foot.height,widthScale=scale*(angledSneaker?1.10:1)*(shoeBase==='valenki'?1.55:['blackOxford','brownLoafers','burgundyBrogue'].includes(shoeBase)?1.25:1),ankle=pants&&!['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?trouserAnkles(pants,look)[n]:n?684:340,left=ankle-(foot.ankle-foot.left)*widthScale,width=foot.width*widthScale;
+ if(shoes){for(const [n,foot]of footwearFit(shoes).entries()){const scale=shoeHeight/foot.height,widthScale=scale*(angledSneaker?1.10:1)*(shoeBase==='valenki'?1.55:['blackOxford','brownLoafers','redMoccasins','burgundyBrogue'].includes(shoeBase)?1.25:1),ankle=pants&&!['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?trouserAnkles(pants,look)[n]:n?684:340,left=ankle-(foot.ankle-foot.left)*widthScale,width=foot.width*widthScale;
  if(taperBareAnkles){
   // Taper the actual leg texture into the shoe opening instead of a horizontal cut.
   for(let row=0;row<75;row++){const t=Math.min(1,row/65),blend=t*t*(3-2*t),w=220*(1-.42*blend),y=1511-shoeHeight-55+row;

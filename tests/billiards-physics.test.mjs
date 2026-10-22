@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createGame,shoot,step,validState} from '../scripts/billiards/engine.mjs';
-import {tableGeometry,tableSpec} from '../scripts/billiards/table-geometry.mjs';
+import {tableGeometry,tableSpec,pocketAt} from '../scripts/billiards/table-geometry.mjs';
 import {clothStep,cushionImpact,strikeSpin,validSpin} from '../scripts/billiards/spin-physics.mjs';
 const energy=b=>(b.vx**2+b.vy**2)/2+.2*((b.rollX||0)**2+(b.rollY||0)**2+(b.side||0)**2);
 function sparse(discipline='pool8'){const s=createGame({discipline});s.breakPending=false;s.balls.forEach(b=>{b.pocket=b.id!==0&&b.id!==1;});Object.assign(s.balls[0],{x:300,y:250});Object.assign(s.balls.find(b=>b.id===1),{x:350,y:250});return s;}
@@ -15,3 +15,12 @@ test('same relative side-pocket miss is rejected by Russian jaws but accepted in
 test('hard pocket-jaw miss cannot tunnel through a cushion',()=>{const {b,s}=pocketRun('pyramid',1,tableGeometry('pyramid').pockets[1].mouth/2+tableGeometry('pyramid').r*.5,1);assert.equal(b.pocket,false);assert.ok(b.y>=0&&b.y<=500);assert.ok(s.contacts.rails+s.contacts.jaws>0);});
 
 test('WPA corner and side facing angles are 142 and 104 degrees',()=>{const g=tableGeometry('pool8'),corner=g.rails[6],side=g.rails[8],angle=rail=>Math.acos((rail.b[0]-rail.a[0])/Math.hypot(rail.b[0]-rail.a[0],rail.b[1]-rail.a[1]))*180/Math.PI;assert.ok(Math.abs(angle(corner)-142)<1e-8);assert.ok(Math.abs(angle(side)-104)<1e-8);});
+
+test('all pockets drop a slow ball once its centre crosses the support lip, but not while supported',()=>{for(const discipline of ['pool8','pyramid']){const g=tableGeometry(discipline);for(const p of g.pockets){const at=depth=>({x:p.center[0]-p.n[0]*depth,y:p.center[1]-p.n[1]*depth});assert.equal(pocketAt(at(p.shelf-.05),g),-1,discipline+': supported '+p.index);assert.equal(pocketAt(at(p.shelf+.05),g),p.index,discipline+': over lip '+p.index);for(const lip of p.lip){const depth=-((lip[0]-p.center[0])*p.n[0]+(lip[1]-p.center[1])*p.n[1]);assert.ok(Math.abs(depth-p.shelf)<1e-8);}}}});
+test('a nearly stopped ball over the lip falls in the actual simulation for every pocket',()=>{
+ for(const discipline of ['pool8','pyramid'])for(let index=0;index<6;index++){
+  const s=createGame({discipline});s.breakPending=false;assert.ok(shoot(s,0,.1,{callBall:1,callPocket:index}));s.firstHit=1;
+  s.balls.forEach(b=>b.pocket=b.id!==1&&b.id!==2);const g=tableGeometry(s),p=g.pockets[index],ball=s.balls.find(b=>b.id===1),other=s.balls.find(b=>b.id===2);
+  Object.assign(ball,{x:p.center[0]-p.n[0]*(p.shelf+.05),y:p.center[1]-p.n[1]*(p.shelf+.05),vx:0,vy:0});Object.assign(other,{x:500,y:250,vx:20,vy:0});step(s);assert.equal(ball.pocket,true,discipline+': '+index);
+ }
+});

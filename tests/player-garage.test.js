@@ -152,7 +152,7 @@ test('collections persist three independent pieces and derive the bonus from the
  const mixed=Garage.choose({...G.defaults,suit:'collection_tropical',bonus:'snow'},{stats:{level:100}});
  assert.equal(G.activeOutfit(mixed),null);
  assert.equal(mixed.bonus,undefined);
- for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind&&i.id!==G.defaults[kind]))assert.ok([...G.outfitSets,...G.themedOutfits].some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
+ for(const kind of ['suit','pants','shoes'])for(const i of G.items.filter(i=>i.kind===kind&&i.id!==G.defaults[kind]&&i.key!=='shoes:redMoccasins'))assert.ok([...G.outfitSets,...G.themedOutfits].some(s=>s.pieces[kind]===i.id),'Uncurated garment: '+i.key);
 });
 
 test('seasonal reward pacing offers early variety and goals across the full level range',()=>{
@@ -368,3 +368,5 @@ test('saved vehicle stays identical across clients with different current unlock
  assert.throws(()=>Garage.choose(saved,{stats:{level:1}}),/не открыта/);
  assert.equal(G.savedLoadout(telegram.loadout,telegram.stats).chassis,'aeroPrototype');
 });
+
+test('red moccasins unlock at level one and persist as independent footwear',()=>{assert.equal(G.catalog({level:0}).find(i=>i.key==='shoes:redMoccasins').unlocked,false);assert.equal(G.catalog({level:1}).find(i=>i.key==='shoes:redMoccasins').unlocked,true);assert.equal(G.normalize({shoes:'redMoccasins'},{level:1},true).shoes,'redMoccasins');});

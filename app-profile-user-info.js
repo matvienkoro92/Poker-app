@@ -211,6 +211,8 @@ function pokerSetProfileSubscriptionItem(kind, checked, handle, url) {
 }
 function pokerSetProfileSubscriptionStatus(status) {
   var data = status && status.telegramSubscriptions ? status.telegramSubscriptions : status || {};
+  window.__pokerProfileChannelSubscribed=data.channelSubscribed===true?true:data.channelSubscriptionKnown===true&&data.channelSubscribed===false?false:null;
+  window.dispatchEvent(new Event('poker-profile-subscriptions'));
   pokerSetProfileSubscriptionItem(
     "bot",
     data.botSubscribed === true,
@@ -272,6 +274,7 @@ function pokerWriteProfileUserInfoSessionCache(data) {
 window.pokerWriteCurrentProfileUserInfoCache = pokerWriteProfileUserInfoSessionCache;
 
 function pokerClearProfileUserInfoCache() {
+  window.__pokerProfileChannelSubscribed=null;window.dispatchEvent(new Event('poker-profile-subscriptions'));
   pokerProfileUserInfoCache = null;
   pokerProfileUserInfoCacheAt = 0;
   try {

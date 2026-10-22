@@ -99,3 +99,10 @@ test('saving vehicle settings preserves the saved character and does not reclaim
  const saved=JSON.parse(raw).garage;assert.equal(claimed,0);assert.equal(saved.vinylText,'TEST');
  for(const key of G.characterFields)assert.equal(saved[key],old[key]);
 });
+
+test('selected transport accepts basic bicycle, scooter and kart but rejects locked vehicles',()=>{
+ const good={featured:[],theme:'walnut',goal:'wins'};
+ for(const selectedTransport of ['kart','bicycle','scooter'])assert.equal(H.selection({...good,selectedTransport},[],{}).selectedTransport,selectedTransport);
+ for(const selectedTransport of ['shelby','bmw','harley',5,null,{}])assert.throws(()=>H.selection({...good,selectedTransport},[],{}),/транспорт/);
+ assert.equal(Object.hasOwn(H.selection(good,[],{}),'selectedTransport'),false);
+});

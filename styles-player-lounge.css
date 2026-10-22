@@ -740,3 +740,8 @@
 .player-hall__room[data-garage-vehicle="5"] .garage-car-label,.player-hall__room[data-garage-vehicle="6"] .garage-car-label{display:none}
 .player-hall__room .garage-basic-vehicle{aspect-ratio:1.6}
 .player-hall__room .garage-basic-vehicle>img{height:100%;object-fit:contain}
+/* Match the parked vehicles' direction without mirroring labels. */
+.player-hall__room .garage-basic-vehicle>img{transform:scaleX(-1)}
+.garage-vehicle-switch{flex-wrap:wrap}
+.garage-vehicle-switch .garage-vehicle-use{flex:0 0 100%;width:100%;min-height:36px;margin-top:6px;padding:8px 12px;border:1px solid #d6b677;border-radius:10px;background:#e4c68b;color:#17251d;font-size:12px;font-weight:700;white-space:nowrap}
+.garage-vehicle-switch .garage-vehicle-use:disabled{background:#19372d;color:#e4c68b;opacity:1;border-color:#917a4c}

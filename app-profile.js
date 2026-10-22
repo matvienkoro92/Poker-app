@@ -979,6 +979,7 @@ function profilePublicShowcaseSyncKnownArt(data) {
 }
 
 var profileReviewInviteState = { linked: false };
+window.addEventListener('poker-profile-subscriptions',function(){profileReviewInviteRender();});
 
 function profileReviewInviteRender() {
   var update = function () { return profileReviewInviteRenderContent(); };
@@ -990,14 +991,15 @@ function profileReviewInviteRenderContent() {
   if (!invite) return;
   var push = window.__pokerProfilePushInviteStatus;
   var needsPush = !!push && !push.enabled;
-  invite.hidden = !profileReviewInviteState.linked;
+  invite.hidden = !profileReviewInviteState.linked || (!needsPush && window.__pokerProfileChannelSubscribed!==false);
   invite.dataset.inviteMode = needsPush ? "push" : "channel";
   invite.classList.toggle("profile-review-invite--push", needsPush);
-  invite.querySelector(".profile-review-invite__icon").textContent = needsPush ? "♧" : "📣";
-  invite.querySelector(".profile-review-invite__copy strong").textContent = needsPush ? "Включите пуш, чтобы получать уведомления" : "Подпишитесь на канал";
-  invite.querySelector(".profile-review-invite__copy > span").textContent = "";
+  invite.querySelector(".profile-review-invite__icon").textContent = needsPush ? "♧" : "➤";
+  invite.querySelector(".profile-review-invite__copy strong").textContent = needsPush ? "Включите пуш, чтобы получать уведомления" : "Подпишитесь на канал клуба";
+  invite.querySelector(".profile-review-invite__copy > span").hidden = needsPush;
+  invite.querySelector(".profile-review-invite__copy > span").textContent = needsPush ? "" : "Новости клуба, турниры и важные объявления";
   var link = document.getElementById("profileReviewInviteBtn");
-  link.textContent = needsPush ? "Включить →" : "@dva_tuza_club ↗";
+  link.textContent = needsPush ? "Включить →" : "Подписаться на канал ↗";
   link.href = needsPush ? "#profileChatPushRow" : "https://t.me/Dva_tuza_club";
   if (needsPush) { link.removeAttribute("target"); link.setAttribute("role", "button"); }
   else { link.target = "_blank"; link.removeAttribute("role"); }
