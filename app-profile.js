@@ -978,7 +978,7 @@ function profilePublicShowcaseSyncKnownArt(data) {
   }
 }
 
-var profileReviewInviteState = { loading: false, loaded: false, linked: false, hasReview: false };
+var profileReviewInviteState = { linked: false };
 
 function profileReviewInviteRender() {
   var update = function () { return profileReviewInviteRenderContent(); };
@@ -990,49 +990,22 @@ function profileReviewInviteRenderContent() {
   if (!invite) return;
   var push = window.__pokerProfilePushInviteStatus;
   var needsPush = !!push && !push.enabled;
-  invite.hidden = !profileReviewInviteState.linked || (!needsPush && !(profileReviewInviteState.loaded && !profileReviewInviteState.hasReview));
-  invite.dataset.inviteMode = needsPush ? "push" : "review";
+  invite.hidden = !profileReviewInviteState.linked;
+  invite.dataset.inviteMode = needsPush ? "push" : "channel";
   invite.classList.toggle("profile-review-invite--push", needsPush);
-  invite.querySelector(".profile-review-invite__icon").textContent = needsPush ? "♧" : "🏆";
-  invite.querySelector(".profile-review-invite__copy strong").textContent = needsPush ? "Включите пуш, чтобы получать уведомления" : "Оставьте для клуба отзыв или предложение/идею.";
+  invite.querySelector(".profile-review-invite__icon").textContent = needsPush ? "♧" : "📣";
+  invite.querySelector(".profile-review-invite__copy strong").textContent = needsPush ? "Включите пуш, чтобы получать уведомления" : "Подпишитесь на канал";
   invite.querySelector(".profile-review-invite__copy > span").textContent = "";
-  document.getElementById("profileReviewInviteBtn").textContent = needsPush ? "Включить →" : "Перейти к отзывам";
+  var link = document.getElementById("profileReviewInviteBtn");
+  link.textContent = needsPush ? "Включить →" : "@dva_tuza_club ↗";
+  link.href = needsPush ? "#profileChatPushRow" : "https://t.me/Dva_tuza_club";
+  if (needsPush) { link.removeAttribute("target"); link.setAttribute("role", "button"); }
+  else { link.target = "_blank"; link.removeAttribute("role"); }
 }
 
-function profileReviewInviteSync(linked, force) {
-  var wasLinked = profileReviewInviteState.linked;
+function profileReviewInviteSync(linked) {
   profileReviewInviteState.linked = linked === true;
-  if (!profileReviewInviteState.linked) {
-    profileReviewInviteState.loaded = true;
-    profileReviewInviteState.hasReview = false;
-    profileReviewInviteRender();
-    return;
-  }
-  if (!wasLinked) profileReviewInviteState.loaded = false;
-  if (profileReviewInviteState.loading || (profileReviewInviteState.loaded && !force)) {
-    profileReviewInviteRender();
-    return;
-  }
-  var base = typeof getApiBase === "function" ? getApiBase() : "";
-  var body = typeof pokerApiAuthJsonBody === "function" ? pokerApiAuthJsonBody({ action: "list" }) : { action: "list" };
-  profileReviewInviteState.loading = true;
-  fetch(base + "/api/club-guestbook", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  }).then(function (response) {
-    return response.json().then(function (data) {
-      if (!response.ok || !data || !data.ok) throw new Error(data && data.error || "Ошибка");
-      profileReviewInviteState.loaded = true;
-      profileReviewInviteState.linked = data.canPost === true;
-      profileReviewInviteState.hasReview = data.hasReview === true;
-    });
-  }).catch(function () {
-    profileReviewInviteState.loaded = false;
-  }).finally(function () {
-    profileReviewInviteState.loading = false;
-    profileReviewInviteRender();
-  });
+  profileReviewInviteRender();
 }
 
 function profilePublicShowcaseApplyStatus(status) {
@@ -1230,19 +1203,26 @@ function initProfilePublicShowcase() {
     reviewInviteBtn.dataset.profileReviewInviteBound = "1";
     var invitePanel = document.getElementById("profileReviewInvite");
     if (invitePanel) invitePanel.addEventListener("click", function (event) {
-      if (invitePanel.dataset.inviteMode === "push" && !event.target.closest("button")) reviewInviteBtn.click();
+      if (invitePanel.dataset.inviteMode === "push" && !event.target.closest("button, a")) reviewInviteBtn.click();
     });
-    reviewInviteBtn.addEventListener("click", function () {
+    reviewInviteBtn.addEventListener("click", function (event) {
       var invite = document.getElementById("profileReviewInvite");
       if (invite && invite.dataset.inviteMode === "push") {
+        event.preventDefault();
         var row = document.getElementById("profileChatPushRow");
         if (row) { row.scrollIntoView({ behavior: "smooth", block: "center" }); var toggle = document.getElementById("profileChatPushToggle"); if (toggle) toggle.focus({ preventScroll: true }); }
         return;
       }
-      if (typeof window.pokerOpenClubGuestbook === "function") window.pokerOpenClubGuestbook("review");
-      else {
-        var openButton = document.getElementById("clubGuestbookOpenBtn");
-        if (openButton) openButton.click();
+      var telegram = window.Telegram && window.Telegram.WebApp;
+      if (telegram && typeof telegram.openTelegramLink === "function") {
+        event.preventDefault();
+        telegram.openTelegramLink(reviewInviteBtn.href);
+      }
+    });
+    reviewInviteBtn.addEventListener("keydown", function (event) {
+      if (event.key === " " && invitePanel && invitePanel.dataset.inviteMode === "push") {
+        event.preventDefault();
+        reviewInviteBtn.click();
       }
     });
   }
@@ -1288,16 +1268,7 @@ function initProfilePublicShowcase() {
         profilePublicShowcaseSyncArt(profilePublicShowcaseLatestRatingNick);
       }
     });
-    window.addEventListener("poker-club-guestbook-review-created", function () {
-      profileReviewInviteState.loaded = true;
-      profileReviewInviteState.hasReview = true;
-      profileReviewInviteRender();
-    });
-    window.addEventListener("poker-club-guestbook-review-state", function (event) {
-      profileReviewInviteState.loaded = true;
-      profileReviewInviteState.hasReview = !!(event && event.detail && event.detail.hasReview);
-      profileReviewInviteRender();
-    });
+
   }
 }
 

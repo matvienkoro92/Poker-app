@@ -29,11 +29,11 @@ hashes.meta={abc='metadata'}
 `;
 function run(code){const L=lauxlib.luaL_newstate();lualib.luaL_openlibs(L);try{const status=lauxlib.luaL_dostring(L,to_luastring(harness+code));assert.equal(status,lua.LUA_OK,status===lua.LUA_OK?'':to_jsstring(lua.lua_tostring(L,-1)));}finally{lua.lua_close(L);}}
 test('historical active identities outside registered visitors are excluded with their events; stale unique cache is ignored',()=>run(`
-for i=1,32 do redis.call('SADD','users','u'..i);redis.call('SADD','active','u'..i);redis.call('HSET','details','u'..i,cjson.encode({total=i==1 and 184 or 1})) end
+for i=1,32 do redis.call('SADD','users','u'..i);redis.call('SADD','active','u'..i);redis.call('HSET','details','u'..i,cjson.encode({total=i==1 and 184 or 2,counts={['view:home']=1,['view:rating']=1}})) end
 for i=33,34 do redis.call('SADD','active','u'..i);redis.call('HSET','details','u'..i,cjson.encode({total=100})) end
 hashes.unique={abc=7}
 local s=execute(SUMMARY,summaryKeys,{})
-assert(s[1]==32 and s[2]==32 and s[3]==215)
+assert(s[1]==32 and s[2]==32 and s[3]==246)
 `));
 test('unique count is repaired from visitor membership while repeated hits retain one visitor',()=>run(`
 assert(execute(HIT,hitKeys,{'abc','u1','entry'})==1)
@@ -49,7 +49,7 @@ assert(ints.events==nil and sets.active==nil)
 execute(HIT,hitKeys,{'abc','u1','entry'})
 for i=1,100 do assert(execute(EVENT,eventKeys,{'abc','u1','open:home','now','detail'})==1) end
 local s=execute(SUMMARY,summaryKeys,{})
-assert(s[1]==1 and s[2]==1 and s[3]==100)
+assert(s[1]==1 and s[2]==0 and s[3]==100)
 local d=cjson.decode(hashes.details.u1)
 assert(d.counts['open:home']==100 and #d.samples==25 and d.lastAt=='now')
 assert(ints.events==100 and hashes.by['open:home']==100)
@@ -61,4 +61,24 @@ assert(execute(EVENT,eventKeys,{'abc','u1','open:home','now',''})==0)
 redis.call('SADD','users','u1');redis.call('SADD','active','u1');redis.call('HSET','details','u1','bad-json')
 local s=execute(SUMMARY,summaryKeys,{})
 assert(s[1]==1 and s[2]==0 and s[3]==0)
+`));
+
+test('active visitors must open two distinct sections; landing and click events cannot count as a second section',()=>run(`
+execute(HIT,hitKeys,{'abc','u1','entry'})
+for _,action in ipairs({'landing:home','open:home','view:home','view:home','open:rating','deep:vl_reviews_nikolay','view:unknown'}) do
+ execute(EVENT,eventKeys,{'abc','u1',action,'now',''})
+end
+local s=execute(SUMMARY,summaryKeys,{})
+assert(s[1]==1 and s[2]==0 and s[3]==7)
+execute(EVENT,eventKeys,{'abc','u1','view:rating','now',''})
+s=execute(SUMMARY,summaryKeys,{})
+assert(s[1]==1 and s[2]==1 and s[3]==8)
+execute(HIT,hitKeys,{'abc','u2','entry'})
+execute(EVENT,eventKeys,{'abc','u2','view:daily-poker','now',''})
+execute(EVENT,eventKeys,{'abc','u2','view:daily_poker','now',''})
+s=execute(SUMMARY,summaryKeys,{})
+assert(s[1]==2 and s[2]==1 and s[3]==10)
+execute(EVENT,eventKeys,{'abc','u2','view:profile','now',''})
+s=execute(SUMMARY,summaryKeys,{})
+assert(s[2]==2 and s[3]==11)
 `));

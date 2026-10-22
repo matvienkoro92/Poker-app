@@ -17,3 +17,14 @@ test('a missing referral event is not replaced with an invented visit; other cam
 });
 
 test('one raffle is one participation even if repeated on another device',()=>{const f=m.eventFlags([{id:'join-device-a',type:'raffle_joined',section:'raffle_123',at:1200,authenticated:true,ref:'aaaaaaaa'},{id:'join-device-b',type:'raffle_joined',section:'raffle_123',at:1300,authenticated:true,ref:'aaaaaaaa'}],row,'aaaaaaaa');assert.equal(f.raffleCount,1);});
+
+test('active visitors require two different real sections from this link after arrival',()=>{
+ const event=(id,section,extra={})=>({id,type:'section_opened',section,ref:'aaaaaaaa',at:1200,...extra});
+ const one=[event('one','home'),event('repeat','home'),{id:'spin',type:'daily_poker_spin',authenticated:true,ref:'aaaaaaaa',at:1200}];
+ assert.equal(m.eventFlags(one,row,'aaaaaaaa').activeVisitor,false);
+ assert.equal(m.eventFlags(one,row,'aaaaaaaa').sectionCount,1);
+ assert.equal(m.eventFlags([...one,event('foreign','rating',{ref:'bbbbbbbb'}),event('before','profile',{at:900}),event('missing','unknown')],row,'aaaaaaaa').activeVisitor,false);
+ const active=m.eventFlags([...one,event('two','rating')],row,'aaaaaaaa');
+ assert.equal(active.activeVisitor,true);assert.equal(active.sectionCount,2);
+ assert.equal(m.eventFlags([event('a','daily-poker'),event('b','daily_poker')],row,'aaaaaaaa').activeVisitor,false);
+});

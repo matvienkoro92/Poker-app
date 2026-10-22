@@ -2175,6 +2175,47 @@
   }
 
   function crmLinkIsBroadcast(link) {return crmLinkParams(link).created_from==='crm_broadcast'||/^CRM\s+crm_/i.test(String(link&&link.label||''));}
+  var crmLinkMetricDescriptions = {
+    totalClicks: 'Сколько раз открыли эту ссылку. Повторные переходы одного посетителя тоже учитываются.',
+    uniqueClicks: 'Сколько разных посетителей открыло ссылку. Считаем по идентификаторам браузеров и аккаунтов: один человек на разных устройствах иногда может учитываться несколько раз.',
+    activeVisitors: 'Сколько посетителей после перехода по ссылке открыли минимум 2 разных раздела приложения. Например: Главную и Розыгрыши, Рейтинг и Профиль. Повторные открытия одного раздела, крутки и нажатия кнопок сами по себе не делают посетителя активным. Каждый посетитель считается один раз.',
+    actionEvents: 'Сколько всего раз посетители открывали разделы приложения и нажимали кнопки перехода после открытия ссылки. Например: 3 посетителя сделали по 2 перехода — здесь будет 6. Это не число людей. Крутки и участия в розыгрышах показаны отдельно в истории игрока.',
+    visitors: 'Сколько посетителей этой ссылки имеют сохранённую подробную историю. Старые переходы без такой истории сюда не входят.',
+    registrations: 'Сколько посетителей зарегистрировались после первого перехода по ссылке. Те, у кого аккаунт уже был, новыми регистрациями не считаются.',
+    activityCount: 'Общее число сохранённых действий после перехода по ссылке: открытия разделов, крутки, участия в розыгрышах и другие действия. Один посетитель может совершить много действий.',
+    raffleParticipants: 'Сколько разных посетителей успешно вступили хотя бы в один розыгрыш после перехода по ссылке. Простое открытие раздела «Розыгрыши» не считается участием.',
+    raffleCount: 'Число успешных участий в розыгрышах после перехода по ссылке. Участие одного игрока в одном розыгрыше считается один раз, даже с разных устройств.',
+    spinners: 'Сколько разных посетителей успешно сыграли хотя бы одну раздачу в «Покере дня» после перехода по ссылке.',
+    spinCount: 'Сколько успешных раздач сыграно в «Покере дня» после перехода по ссылке. Один игрок может дать несколько круток; открытие экрана без игры не учитывается.',
+    poker21Linked: 'Сколько посетителей имеют привязанный игровой аккаунт Poker21. Привязка могла существовать ещё до перехода по ссылке.',
+    botSubscribers: 'Сколько посетителей имеют подтверждённый доступ к Telegram-боту. Нажатие ссылки на бота само по себе не подтверждает подписку. Если статус проверить не удалось, он не включается в подтверждённое число.',
+    playersChatSubscribers: 'Сколько посетителей подтверждённо состоят в Telegram-чате игроков. Переход по приглашению и заявка на вступление ещё не считаются членством. Непроверенные статусы не включаются в число.',
+    depositors: 'Сколько разных посетителей внесли подтверждённый депозит после первого перехода. Депозиты относятся к первому источнику прихода и учитываются по доступным платёжным данным.',
+    depositCount: 'Количество подтверждённых пополнений после первого перехода. Несколько пополнений одного игрока считаются отдельно. Они относятся к первому источнику прихода.',
+    depositAmount: 'Общая сумма подтверждённых депозитов в рублях после первого перехода. Сумма берётся из доступных платёжных данных и относится к первому источнику прихода.',
+    registered: 'Есть ли у посетителя подтверждённый аккаунт. Пометка «Была до перехода» означает, что он зарегистрировался раньше и не является новой регистрацией по этой ссылке.'
+  };
+  function crmLinkMetricHelp(key, label) {
+    if(!crmLinkMetricDescriptions[key])return '';
+    return '<button type="button" class="crm-metric-help" data-crm-metric-help="'+esc(key)+'" data-crm-metric-label="'+esc(label)+'" aria-label="Что означает: '+esc(label)+'" aria-haspopup="dialog">?</button>';
+  }
+  function showCrmLinkMetricHelp(button) {
+    var text=crmLinkMetricDescriptions[button.dataset.crmMetricHelp];
+    if(!text)return;
+    var help=document.getElementById('crmMetricHelpDialog');
+    if(!help){
+      help=document.createElement('dialog');help.id='crmMetricHelpDialog';help.className='crm-metric-help-dialog';
+      help.setAttribute('aria-labelledby','crmMetricHelpTitle');help.setAttribute('aria-describedby','crmMetricHelpText');
+      help.innerHTML='<header><h3 id="crmMetricHelpTitle"></h3><form method="dialog"><button type="submit" aria-label="Закрыть пояснение">×</button></form></header><p id="crmMetricHelpText"></p>';
+      help.addEventListener('keydown',function(event){if(event.key==='Escape')event.stopPropagation();});
+      help.addEventListener('click',function(event){var rect=help.getBoundingClientRect();if(event.target===help&&(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom))help.close();});
+      document.body.appendChild(help);
+    }
+    help.querySelector('h3').textContent=button.dataset.crmMetricLabel;
+    help.querySelector('p').textContent=text;
+    if(!help.open)help.showModal();
+  }
+
   function renderCrmTrackingLinks() {
     renderCrmLinkTargetOptions();
     renderCrmLinkPreview();
@@ -2251,16 +2292,16 @@
     el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link) {
       var url = crmLinkUrl(link), id = esc(link.id || ""), type = crmLinkParams(link).link_type;
       var channel = type === "website" ? "Сайт" : type ? "Telegram" : "Ссылка";
-      var metrics = [["totalClicks", "Переходы"], ["uniqueClicks", "Посетители"], ["activeVisitors", "Открывали"], ["actionEvents", "Открытия"]];
+      var metrics = [["totalClicks", "Переходы по ссылке", "Включая повторные переходы"], ["uniqueClicks", "Посетители", "По браузерам и устройствам"], ["activeVisitors", "Активные посетители", "Открыли минимум 2 разных раздела"], ["actionEvents", "Всего открытий и нажатий", "Все открытия разделов и нажатия"]];
       return '<article class="player-crm__link-card" role="listitem">' +
         '<div class="player-crm__link-identity"><button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + esc(crmLinkTitle(link)) + '</button>' +
         '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
         (crmLinkParams(link).category ? '<span class="player-crm__link-category">'+esc(crmLinkParams(link).category)+'</span>' : '') + '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
-        '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '</dd></div>'; }).join("") + '</dl>' +
+        '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + crmLinkMetricHelp(metric[0],metric[1]) + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '<small class="player-crm__link-metric-hint">' + metric[2] + '</small></dd></div>'; }).join("") + '</dl>' +
         (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
         (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Общая сводка по ссылке</summary><div data-crm-link-preview-body></div></details>' : '') +
         '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">'+(ownOnly?'По игрокам':'Отклик')+'</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
-    }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Открывали</dt><dd>Посетители с зарегистрированными событиями навигации.</dd></div><div><dt>Открытия</dt><dd>События навигации, включая загрузку раздела и нажатия переходов. Крутки и прочие действия считаются отдельно в подробной истории.</dd></div></dl></details>';
+    }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
 
   }
 
@@ -2426,11 +2467,11 @@
 
   function crmLinkAggregateHtml(data) {
     function value(key) { return data[key] == null ? '—' : intFmt(data[key]); }
-    var items = [['С историей', value('visitors')], ['Новые регистрации', value('registrations')], ['С действиями', value('activeVisitors')], ['Всего действий', value('activityCount')], ['Участники розыгрышей', value('raffleParticipants')], ['Участий в розыгрышах', value('raffleCount')], ['Крутили покер дня', value('spinners')], ['Всего круток', value('spinCount')], ['С привязкой Poker21', value('poker21Linked')], ['Подписаны на бота', value('botSubscribers')], ['В Telegram-чате', value('playersChatSubscribers')], ['Вносили депозит', value('depositors')], ['Число пополнений', value('depositCount')], ['Подтверждённые депозиты', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽']];
+    var items = [['С историей', value('visitors'), 'visitors'], ['Новые регистрации', value('registrations'), 'registrations'], ['Активные посетители', value('activeVisitors'), 'activeVisitors'], ['Всего действий', value('activityCount'), 'activityCount'], ['Участники розыгрышей', value('raffleParticipants'), 'raffleParticipants'], ['Участий в розыгрышах', value('raffleCount'), 'raffleCount'], ['Крутили покер дня', value('spinners'), 'spinners'], ['Всего круток', value('spinCount'), 'spinCount'], ['С привязкой Poker21', value('poker21Linked'), 'poker21Linked'], ['Подписаны на бота', value('botSubscribers'), 'botSubscribers'], ['В Telegram-чате', value('playersChatSubscribers'), 'playersChatSubscribers'], ['Вносили депозит', value('depositors'), 'depositors'], ['Число пополнений', value('depositCount'), 'depositCount'], ['Подтверждённые депозиты', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽', 'depositAmount']];
     var unknown = []; if(data.depositUnknown)unknown.push('депозиты — '+intFmt(data.depositUnknown)); if(data.registrationUnknown)unknown.push('дата регистрации — '+intFmt(data.registrationUnknown)); if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
     if(data.depositHistoryLimited)unknown.push('полная история депозитов CRM');
     var coverage=data.coverage,notice=data.coverageUnavailable?'Полноту старой истории проверить не удалось.':coverage&&coverage.visitorsWithoutJourney?'Без подробной истории: '+intFmt(coverage.visitorsWithoutJourney)+' из '+intFmt(coverage.trackedVisitors)+' посетителей. Итоги ниже — только по сохранённой истории.':'';
-    return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
+    return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + crmLinkMetricHelp(item[2],item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
   }
 
   function loadCrmLinkPreview(details) {
@@ -2523,8 +2564,8 @@
       ["Создана · МСК", dateTime(link.createdAt)],
       ["Всего переходов", intFmt(crmLinkMetric(link, "totalClicks"))],
       ["Уникальные посетители", intFmt(crmLinkMetric(link, "uniqueClicks"))],
-      ["Открывали разделы", intFmt(crmLinkMetric(link, "activeVisitors"))],
-      ["События навигации", intFmt(crmLinkMetric(link, "actionEvents"))]
+      ["Активные посетители", intFmt(crmLinkMetric(link, "activeVisitors"))],
+      ["Всего открытий и нажатий", intFmt(crmLinkMetric(link, "actionEvents"))]
     ];
     [
       ["Категория", params.category || "Без категории"],
@@ -5282,6 +5323,8 @@
     if (!root || root.dataset.crmBound === "1") return;
     root.dataset.crmBound = "1";
     root.addEventListener("click", function (e) {
+      var metricHelp=e.target.closest('[data-crm-metric-help]');
+      if(metricHelp){e.preventDefault();showCrmLinkMetricHelp(metricHelp);return;}
       var periodButton = e.target.closest("[data-crm-period-tab]");
       if (periodButton) {
         state.period = periodButton.getAttribute("data-crm-period-tab") || "all";

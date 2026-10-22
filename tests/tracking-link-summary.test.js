@@ -48,3 +48,11 @@ test('confirmed payment ledger replaces manual CRM duplicates and preserves unkn
  const flags=require('../lib/tracking-link-milestones').eventFlags(verified.events,verified,'aaaaaaaa');assert.equal(flags.depositAmount,120.5);assert.equal(flags.depositCount,1);
  const unknown=row({paymentDepositsAvailable:false,paymentDeposits:[]});const unavailable=summarize([unknown],'aaaaaaaa',0,'');assert.equal(unavailable.depositAmount,null);assert.equal(unavailable.depositCount,null);assert.equal(unavailable.depositUnknown,1);assert.equal(require('../lib/tracking-link-milestones').eventFlags(unknown.events,unknown,'aaaaaaaa').depositAmount,null);
 });
+
+test('active visitor aggregate counts people who opened two distinct sections, independently of action totals',()=>{
+ const event=(id,section,extra={})=>({id,type:'section_opened',section,ref:'aaaaaaaa',at,...extra});
+ const records=[row({events:[event('home','home'),event('repeat','home')]}),row({accountId:'ID654321',events:[event('home2','home'),event('rating','rating')]}),row({accountId:'ID111111',events:[{id:'spin',type:'daily_poker_spin',ref:'aaaaaaaa',at,authenticated:true}]})];
+ const data=summarize(records,'aaaaaaaa',0,'');assert.equal(data.activeVisitors,1);assert.equal(data.visitors,3);assert.equal(data.activityCount,5);assert.equal(data.spinCount,1);
+ const period=row({events:[event('old','home',{at:at-10000}),event('current','rating')]});
+ assert.equal(summarize([period],'aaaaaaaa',at-1000,'').activeVisitors,0);
+});
