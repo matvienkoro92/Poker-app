@@ -71,3 +71,12 @@ function decision(s,a){const d=s.pending;if(!d||s.moving||s.winner!==null)return
 }
 export function action(s,player,a){if(!s.rulesVersion)return legacy.action(s,player,a);if(player!==s.turn||!a||typeof a!=='object')return false;if(a.type==='decision')return decision(s,a);if(a.type==='shot')return shoot(s,a.angle,a.power,a);if(a.type==='place')return placeCue(s,a.x,a.y);return false;}
 export function validState(s){if(!s?.rulesVersion)return legacy.validState(s);return s.rulesVersion===2&&DISCIPLINES.includes(s.discipline)&&[0,1].includes(s.turn)&&Array.isArray(s.balls)&&s.balls.length===16&&new Set(s.balls.map(b=>b.id)).size===16&&s.balls.every(b=>Number.isInteger(b.id)&&b.id>=0&&b.id<16&&[b.x,b.y,b.vx,b.vy].every(Number.isFinite)&&['rollX','rollY','side'].every(k=>b[k]===undefined||Number.isFinite(b[k]))&&Math.abs(b.x)<2000&&Math.abs(b.y)<2000&&typeof b.pocket==='boolean')&&Array.isArray(s.groups)&&s.groups.length===2&&s.groups.every(g=>g===null||g===0||g===1)&&Array.isArray(s.scores)&&s.scores.length===2&&s.scores.every(n=>Number.isInteger(n)&&n>=0&&n<=16)&&Array.isArray(s.captured)&&s.captured.length===2&&s.captured.every(a=>Array.isArray(a)&&a.every(n=>Number.isInteger(n)&&n>=0&&n<16))&&(s.winner===null||s.winner===0||s.winner===1)&&typeof s.message==='string'&&s.message.length<250;}
+
+// A shot-clock expiry is a foul, adjudicated by the server using the room clock.
+export function expireTurn(s){
+ if(s.winner!==null||s.moving)return false;
+ const offender=s.turn;s.turn=1-offender;s.pending=null;
+ if(s.discipline==='pyramid'){const illegalBreak=!!s.breakPending;s.breakPending=false;s.pending={type:'pyramid-foul',offender,illegalBreak};}
+ else{s.inHand=true;s.handZone=s.breakPending?'head':'any';s.cueId=0;}
+ s.message='Время на ход вышло · фол · ход соперника';return true;
+}

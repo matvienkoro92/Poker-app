@@ -166,7 +166,7 @@ const skins=Object.freeze([
   "body": "#c8b78d",
   "description": "Светлый лак · золотая окантовка",
   "ornament": 3,
-  "image": "./assets/player-hall/billiards-table-ivory-v2.webp"
+  "image": "./assets/player-hall/billiards-table-ivory-v3.webp"
  },
  {
   "id": "imperialRuby",

@@ -46,6 +46,20 @@ async function main(){
    await page.locator('#adminMenuPasswordInput').fill('1234');await page.locator('#adminMenuPasswordSubmit').click();
    await page.locator('dialog.deposits[open]').waitFor();
    await page.locator('[data-filter="active"]').waitFor();
+   if(process.env.SMOKE_DEPOSIT_TIPS){
+    const buttons=await page.locator('.deposits__payment-actions>button').evaluateAll(bs=>bs.map(b=>({id:b.dataset.dep,x:b.getBoundingClientRect().x,right:b.getBoundingClientRect().right})));
+    assert.equal(buttons[0].id,'tips');assert.equal(buttons[1].id,'raffle-prizes');assert.ok(buttons[0].right<=buttons[1].x);
+    assert.equal(await page.locator('dialog.deposits').evaluate(el=>el.scrollWidth>el.clientWidth+1),false);
+    await page.locator('.deposits__payment-forms').screenshot({path:path.join(output,width+'-tips-button.png')});
+    await page.locator('[data-dep="tips"]').click();await page.locator('[data-dep="tip-new"]').click();
+    const form=page.locator('[data-form="tip"]');await form.locator('[name="playerName"]').fill('Тест чаевых');await form.locator('[name="playerId"]').fill('111');await form.locator('[name="amount"]').fill('100');
+    await form.locator('[name="entryId"]').selectOption(state.entries[0].id);
+    await form.screenshot({path:path.join(output,width+'-tips-form.png')});
+    await form.locator('[type="submit"]').click();await page.locator('[data-dep="tip-void"]').waitFor();
+    assert.equal(state.tips.length,1);assert.equal(state.tips[0].amount,10000);assert.equal(state.tips[0].entryId,state.entries[0].id);
+    await page.locator('[data-dep="tip-void"]').click();await page.locator('[data-form="void-tip"] [type="submit"]').click();await page.getByText('Тест чаевых · 100 ₽ · Отменено',{exact:true}).waitFor();
+    assert.ok(state.tips[0].voidedAt);assert.deepEqual(errors,[]);await context.close();continue;
+   }
    const tools=await page.locator('.deposits__header-tools>button').evaluateAll(buttons=>buttons.map(b=>{const r=b.getBoundingClientRect();return {width:r.width,height:r.height,y:r.y};}));
    assert.equal(tools[0].width,tools[1].width);assert.equal(tools[0].height,tools[1].height);assert.equal(tools[0].y,tools[1].y);
    assert.equal(await page.locator('#depositsTitle').textContent(),'Депозиты и выводы');

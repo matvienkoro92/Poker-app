@@ -4,7 +4,7 @@ export function turnGuidance(s,{player,ready,call={},placing=false,penaltyPickin
  if(s.moving)return {kind:'waiting',title:'Шары в движении',detail:'Дождитесь остановки шаров.'};
  const mine=s.turn===player;
  if(!mine)return {kind:'waiting',title:'Ход соперника',detail:s.pending?'Соперник выбирает продолжение партии.':s.breakPending?'Соперник разбивает. Дождитесь его удара.':'Вам пока ничего нажимать не нужно — дождитесь удара.'};
- if(s.pending&&penaltyPicking)return {kind:'mine',title:'Выберите штрафной шар',detail:'Нажмите на любой оставшийся шар на столе — вы заберёте его себе.'};
+ if(s.pending&&(penaltyPicking||s.pending.type==='pyramid-foul'))return {kind:'mine',title:'ШТРАФ сопернику — заберите шар',detail:'Нажмите на любой оставшийся шар на столе — вы заберёте его себе.'};
  if(s.pending)return {kind:'mine',title:'Ваше решение',detail:'Откройте «Выбрать продолжение» и решите, как играть дальше.'};
  if(s.inHand||placing)return {kind:'mine',title:'Ваш ход',detail:'Коснитесь свободного места на столе, чтобы поставить биток.'};
  if(s.breakPending)return {kind:'mine',title:'Ваш ход · вы разбиваете',detail:'Прицельтесь кием, выберите силу и нажмите «Удар».'};

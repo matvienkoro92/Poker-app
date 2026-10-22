@@ -83,7 +83,7 @@ function paintPreview(root,cue,nick){
   frame.dataset.previewCue=cue.id;frame.dataset.nick=nick||'';frame.replaceChildren();
   const lean=document.createElement('div');lean.className='billiards-cue-preview__lean';
   const image=document.createElement('img');image.src=cue.art;image.alt='Выбранный кий «'+cue.name+'», прислонённый к столу';image.draggable=false;lean.append(image);
-  const slippers=document.createElement('img');slippers.src='./assets/player-hall/billiards-club-slippers-v1.png';slippers.alt='Тапочки клуба «2 туза»';slippers.style.cssText='position:absolute;left:22%;top:84%;width:20%;height:10%;object-fit:fill;pointer-events:none';frame.append(slippers);
+  const slippers=document.createElement('img');slippers.src='./assets/player-hall/billiards-club-slippers-v2.png';slippers.alt='Тапочки клуба «2 туза»';slippers.style.cssText='position:absolute;left:22%;top:84%;width:20%;height:12%;object-fit:contain;pointer-events:none';frame.append(slippers);
   if(cue.named&&nick){const label=document.createElement('small');label.className='billiards-cue-preview__name';label.textContent=nick;lean.append(label);}frame.append(lean);
  }
  function fit(){if(!root.isConnected){root._billiardsCueObserver?.disconnect();delete root._billiardsCueObserver;return;}const layer=Array.from(root.children).find(c=>c.classList.contains('billiards-cue-preview'));if(!layer)return;const scale=Math.max(root.clientWidth/1122,root.clientHeight/1402);layer.style.width=(1122*scale)+'px';layer.style.height=(1402*scale)+'px';}
