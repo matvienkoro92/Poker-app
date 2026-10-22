@@ -295,3 +295,25 @@ body.billiards-table-view .billiards :is(input,textarea){-webkit-user-select:tex
 .table-penalty-dialog #penaltyPick{width:100%;min-height:50px;font-size:16px;border-radius:13px;background:linear-gradient(135deg,#f0d99b,#c59a4a);box-shadow:inset 0 1px #fff6,0 4px 14px #0003}
 .table-penalty-dialog #decisionButtons:empty{display:none}
 .table-penalty-dialog #decisionButtons button{min-height:44px;font-size:13px}
+
+/* Reserve one measured dock beneath the table for every inline notice/action. */
+#tableDock{display:none}
+body.billiards-table-view #tableDock{position:absolute;z-index:5;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:7px;max-height:45dvh;overflow:auto;padding:8px 12px max(8px,env(safe-area-inset-bottom));background:#11261ff5;border:1px solid #b99c6555;border-radius:16px 16px 0 0}
+body.billiards-table-view #tableDock #game{position:static;inset:auto;transform:none;width:100%;max-height:none;overflow:visible;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none;flex-shrink:0}
+body.billiards-table-view #tableDock .turn-guide{position:static;inset:auto;transform:none;width:100%;max-width:none;box-sizing:border-box;margin:0;flex-shrink:0}
+body.billiards-table-view #tableDock #decisionOpen{position:static;inset:auto;transform:none;align-self:center;width:auto;max-width:100%;min-height:36px;height:auto;padding:7px 16px;flex:0 0 auto}
+body.billiards-table-view #tableDock #penaltyConfirm{position:static;inset:auto;transform:none;width:100%;box-sizing:border-box;flex-shrink:0;margin:0}
+body:has(#penaltyConfirm:not([hidden])) #tableDock #game{display:none}
+
+body.billiards-penalty-picking #tableDock #game{display:none}
+
+/* One continuous shot row: spin, aim left/right, power, shoot. */
+body.billiards-table-view #tableDock #game{grid-template-columns:auto minmax(0,1fr);column-gap:8px}
+body.billiards-table-view #tableDock .shot-tools{grid-column:1;gap:5px;align-self:center}
+body.billiards-table-view #tableDock .shot-controls{grid-column:2;gap:7px;align-self:center}
+body.billiards-table-view #tableDock .fine-aim{gap:4px}
+body.billiards-table-view #tableDock .fine-aim small{display:none}
+body.billiards-table-view #tableDock .fine-aim button{width:34px;flex:0 0 34px;min-height:38px}
+body.billiards-table-view #tableDock .shot-tools>#spinButton{width:58px;min-width:58px;max-width:58px;flex:0 0 58px;min-height:38px;font-size:10px}
+body.billiards-table-view #tableDock .shot-controls .primary{min-width:58px;min-height:40px}
+@media(max-width:350px){body.billiards-table-view #tableDock #game{column-gap:5px}body.billiards-table-view #tableDock .fine-aim button{width:29px;flex-basis:29px}body.billiards-table-view #tableDock .shot-tools>#spinButton{width:52px;min-width:52px;max-width:52px;flex-basis:52px}body.billiards-table-view #tableDock .shot-controls .primary{min-width:50px}}

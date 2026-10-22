@@ -582,3 +582,18 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 /* Only the visible table-entry button is clickable, not a large invisible rectangle. */
 .player-hall-dialog .villa-billiards-table{top:80%;left:50%;width:max-content;max-width:calc(100% - 24px);height:auto;transform:translate(-50%,-100%);z-index:3;padding:0}
 .player-hall-dialog .villa-billiards-skins,.player-hall-dialog .villa-billiards-cues{z-index:5}
+
+/* Equipment is a native dialog over the existing room, without a game iframe. */
+.hall-equipment{box-sizing:border-box;width:min(1050px,calc(100vw - 16px));height:calc(100dvh - 24px);max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid #c2a664;border-radius:22px;background:#10251e;color:#f5e6c4;overflow:hidden}
+.hall-equipment[open]{display:flex;flex-direction:column}.hall-equipment::backdrop{background:#0009}
+.hall-equipment>header{position:static;display:flex;align-items:center;justify-content:space-between;padding:18px 20px;background:#1b3027;border-bottom:1px solid #d6b46a33;flex-shrink:0}
+.hall-equipment h2{margin:4px 0;font-size:25px}.hall-equipment header small{color:#d8b96f;letter-spacing:2px;font-size:10px}
+.hall-equipment header button{width:42px;height:42px;border-radius:12px;background:#20372c;border:1px solid #b69a5d;color:inherit;font-size:20px}
+.hall-equipment>[data-level]{margin:12px 18px;font-size:13px;color:#dfc991}
+.hall-equipment__list{flex:1 1 0;min-height:0;overflow:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:max-content;align-content:start;gap:12px;padding:0 12px 12px}
+.hall-equipment__list>button{min-width:0;display:flex;flex-direction:column;align-items:stretch;padding:0 0 14px;border:1px solid #b69a5d55;border-radius:16px;overflow:hidden;background:#0a1b16;color:inherit;text-align:left;font:inherit}
+.hall-equipment__list img{width:100%;height:190px;object-fit:cover;display:block}.hall-equipment__list img.is-cue{object-fit:contain;height:245px;padding:14px;box-sizing:border-box}
+.hall-equipment__list strong{font-size:16px;padding:10px 12px 4px}.hall-equipment__list small{font-size:12px;line-height:1.4;color:#bdcbbf;padding:0 12px}.hall-equipment__list span{color:#e6c77e;font-size:13px;padding:12px 12px 0;margin-top:auto}
+.hall-equipment__list>button[aria-pressed=true]{border-color:#e6c77e;box-shadow:inset 0 0 0 1px #e6c77e}.hall-equipment__list>button:disabled{opacity:.55}
+.hall-equipment>footer{flex-shrink:0;padding:12px 16px 16px;border-top:1px solid #d6b46a33;background:#10251e}.hall-equipment footer button{width:100%;min-height:46px;border:1px solid #f1d28a;border-radius:13px;background:linear-gradient(135deg,#efd596,#bd9346);color:#17271d;font-size:17px;font-weight:750}.hall-equipment footer small{display:block;margin-top:8px;color:#adbbb0;font-size:11px}.hall-equipment [data-status]:empty{display:none}
+@media(min-width:720px){.hall-equipment__list{grid-template-columns:repeat(3,minmax(0,1fr))}}

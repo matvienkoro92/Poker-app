@@ -45,6 +45,7 @@ export function mountRules({move,room}){
   $('decisionDialog').classList.toggle('table-penalty-dialog',tablePenalty);
   $('decisionOk').hidden=tablePenalty;
   if(tablePenalty){const copy=decisionCopy(s,true);$('decisionExplanation').textContent=copy.reason+'\n\nНажмите на шар на столе, чтобы забрать его себе. Затем выберите: продолжить игру или передать ход.';}
+  document.body.classList.toggle('billiards-penalty-picking',tableView&&tablePenalty&&!$('decisionDialog').open);
   const pickedPenalty=s.pending?.type==='pyramid-foul'&&can&&$('penaltyBall').value!=='';
   penaltyConfirm.hidden=!tableView||!pickedPenalty||$('decisionDialog').open;
   if(!penaltyConfirm.hidden){const ball=$('penaltyBall').value;penaltyConfirm.querySelector('[data-penalty-play]').textContent='Забрать '+(ball==='0'?'цветной шар':'шар № '+ball)+' и продолжить';}

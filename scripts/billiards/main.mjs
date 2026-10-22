@@ -19,6 +19,7 @@ let heroSource=window;try{if(parent!==window&&parent.location.origin===location.
 const shotTools=mountShotTools({adjust:delta=>{angle=Math.atan2(Math.sin(angle+delta),Math.cos(angle+delta));}});
 const turnGuide=mountTurnGuide();
 const rulesUI=mountRules({move:value=>move(value),room});
+const tableDock=document.createElement('section');tableDock.id='tableDock';tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
 let initialEntry=new URLSearchParams(location.search).get('mode')||'lobby';
 try{if(parent!==window&&window.frameElement?.dataset.billiardsEntry)initialEntry=window.frameElement.dataset.billiardsEntry;}catch{}
 if(!['tables','cues','lobby'].includes(initialEntry))initialEntry='lobby';
@@ -83,7 +84,7 @@ function frame(now){
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';
  shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});if(tableView)room?.render(display,angle,can&&!state.inHand&&!state.pending);raf=requestAnimationFrame(frame);
 }
-const controlsObserver=new ResizeObserver(()=>{const height=$('game').getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');}});controlsObserver.observe($('game'));
+const controlsObserver=new ResizeObserver(()=>{const height=tableDock.getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');if(tableView)room?.setView('table');}});controlsObserver.observe(tableDock);
 openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
 raf=requestAnimationFrame(frame);
