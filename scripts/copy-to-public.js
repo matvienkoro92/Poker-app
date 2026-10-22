@@ -72,6 +72,7 @@ const baseFiles = [
   'city-play.html',
   'billiards-play.html',
   'app-billiards.js',
+  'app-billiards-access.js',
   'styles-billiards.css',
   'app-city-game.js',
   'app-city-launch.js',
