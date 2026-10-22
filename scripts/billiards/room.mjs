@@ -25,20 +25,25 @@ export function createRoom(canvas){
  mesh(new T.PlaneGeometry(28,8),m.deck,0,-.03,-14,-Math.PI/2);box(15,.15,4.6,m.cream,0,.03,-14);box(14.2,.1,3.8,m.water,0,.13,-14);for(const x of [-7.4,7.4])box(.2,.2,4.6,m.gold,x,.15,-14);mesh(new T.PlaneGeometry(220,160),new T.MeshStandardMaterial({color:'#237b8b',metalness:.4,roughness:.2}),0,-.4,-97,-Math.PI/2);
  for(const x of [-9,9]){box(1.5,.25,3,m.cream,x,.3,-14);box(1.5,.8,.2,m.wood,x,.7,-15.3);const pot=mesh(new T.CylinderGeometry(.5,.4,.8,24),m.dark,x,.4,-9);for(let i=0;i<9;i++){const leaf=mesh(new T.SphereGeometry(.35,10,8),m.green,x+Math.sin(i*2)*.45,1.3+(i%3)*.35,-9+Math.cos(i*2)*.4);leaf.scale.set(.5,2.2,.3);leaf.rotation.z=Math.sin(i)*.55;}}
  // Deterministic woven cloth and polished walnut: textures stay sharp at grazing angles.
- function surfaceTexture(kind){const c=document.createElement('canvas');c.width=c.height=1024;const g=c.getContext('2d');let seed=71;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};g.fillStyle=kind==='cloth'?'#17634f':'#382016';g.fillRect(0,0,1024,1024);for(let i=0;i<18000;i++){const x=random()*1024,y=random()*1024;g.strokeStyle=kind==='cloth'?(i%2?'#ffffff0a':'#00000012'):(i%2?'#d6a26d24':'#100a062b');g.lineWidth=kind==='cloth'?.6:random()*2+.3;g.beginPath();g.moveTo(x,y);g.lineTo(x+(kind==='cloth'?2:60+random()*180),y+(kind==='cloth'?2:Math.sin(x*.01)*4));g.stroke();}const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());textures.push(t);return t;}
- const cloth=surfaceTexture('cloth');m.felt=new T.MeshStandardMaterial({map:cloth,bumpMap:cloth,bumpScale:.008,roughness:.94,color:'#b0d9c4'});
- const walnut=surfaceTexture('wood');m.wood=new T.MeshPhysicalMaterial({map:walnut,roughness:.28,clearcoat:.65,clearcoatRoughness:.22});
- const tableMetal=m.gold.clone(),tableBody=m.dark.clone();let selectedTableSkin=null;
- function neutralSurface(material,brightness){
-  if(!material.map)return null;
-  if(!material.userData.originalMap)material.userData.originalMap=material.map;
-  if(!material.userData.neutralMap){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle='#b7b7b7';g.fillRect(0,0,512,512);const image=material.userData.originalMap.image;if(image){g.filter='grayscale(1) brightness('+brightness+')';g.drawImage(image,0,0,512,512);}const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.copy(material.userData.originalMap.repeat);t.anisotropy=Math.min(16,renderer.capabilities.getMaxAnisotropy());textures.push(t);material.userData.neutralMap=t;}
-  return material.userData.neutralMap;
+ function surfaceTexture(kind){
+  const c=document.createElement('canvas');c.width=c.height=1024;const g=c.getContext('2d');
+  g.fillStyle='#eeeeee';g.fillRect(0,0,1024,1024);
+  if(kind==='cloth'){
+   // Uniform worsted weave: no baked lighting, stains or large-scale noise.
+   for(let i=0;i<1024;i+=4){g.fillStyle='#e7e7e7';g.fillRect(i,0,1,1024);g.fillStyle='#f4f4f4';g.fillRect(0,i,1024,1);}
+  }else{
+   // Subtle continuous grain, rather than overlapping scratch-like strokes.
+   for(let y=0;y<1024;y+=3){g.strokeStyle=y%9?'#e9e9e9':'#e1e1e1';g.lineWidth=.7;g.beginPath();g.moveTo(0,y);for(let x=0;x<=1024;x+=16)g.lineTo(x,y+Math.sin(x*.012+y*.025)*1.3);g.stroke();}
+  }
+  const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=Math.min(16,renderer.capabilities.getMaxAnisotropy());textures.push(t);return t;
  }
+ const cloth=surfaceTexture('cloth');cloth.repeat.set(4,4);m.felt=new T.MeshStandardMaterial({map:cloth,bumpMap:cloth,bumpScale:.00012,roughness:.92,color:'#17634f'});
+ const walnut=surfaceTexture('wood');m.wood=new T.MeshPhysicalMaterial({map:walnut,bumpMap:walnut,bumpScale:.00015,color:'#382016',roughness:.28,clearcoat:.65,clearcoatRoughness:.22});
+ const tableMetal=m.gold.clone(),tableBody=m.dark.clone();let selectedTableSkin=null;
  function setTableSkin(s){
   selectedTableSkin=s;const level=s.level||0,ornament=s.ornament||0;
-  m.felt.color.set(s.felt);m.felt.map=neutralSurface(m.felt,3);m.felt.needsUpdate=true;
-  m.wood.map=neutralSurface(m.wood,2.7);m.wood.color.set(s.wood);m.wood.roughness=level<10?.72:level<25?.4:level<50?.26:.16;m.wood.clearcoat=level<10?.06:level<25?.3:level<50?.65:1;m.wood.needsUpdate=true;
+  m.felt.color.set(s.felt);m.felt.map=cloth;m.felt.needsUpdate=true;
+  m.wood.map=walnut;m.wood.color.set(s.wood);m.wood.roughness=level<10?.72:level<25?.4:level<50?.26:.16;m.wood.clearcoat=level<10?.06:level<25?.3:level<50?.65:1;m.wood.needsUpdate=true;
   tableMetal.color.set(s.metal);tableMetal.metalness=level<10?0:.86;tableMetal.roughness=level<10?.8:level<30?.4:.2;
   tableBody.color.set(s.body);tableBody.map=level<15?m.wood.map:null;tableBody.roughness=level<10?.8:level<30?.4:.22;tableBody.needsUpdate=true;
   skinInlays.visible=ornament>0;for(const decoration of skinInlays.children)decoration.visible=ornament>=decoration.userData.tier;
@@ -47,8 +52,8 @@ export function createRoom(canvas){
  const materialLoader=new T.TextureLoader();
  function detailedSurface(file,material,{repeat=1,bump=.004,preserveColor=false}={}){materialLoader.load(file,t=>{if(disposed){t.dispose();return;}t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(repeat,repeat);t.anisotropy=Math.min(16,renderer.capabilities.getMaxAnisotropy());textures.push(t);material.map=t;material.bumpMap=t;material.bumpScale=bump;if(file.includes('cloth')){const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');x.fillStyle='#155b43';x.fillRect(0,0,512,512);x.globalAlpha=.16;x.filter='blur(1px)';x.drawImage(t.image,0,0,512,512);const quiet=new T.CanvasTexture(c);quiet.colorSpace=T.SRGBColorSpace;quiet.wrapS=quiet.wrapT=T.RepeatWrapping;quiet.repeat.copy(t.repeat);quiet.anisotropy=t.anisotropy;textures.push(quiet);material.map=quiet;}if(!preserveColor)material.color.set(file.includes('floor')?'#b0a89c':'#ffffff');if(material===m.felt||material===m.wood){material.userData.originalMap=material.map;material.userData.neutralMap=null;}if(selectedTableSkin)setTableSkin(selectedTableSkin);material.needsUpdate=true;},undefined,()=>{});}
  detailedSurface('./assets/player-hall/billiards-floor-v2.webp',floorMat,{repeat:6,bump:.001});
- detailedSurface('./assets/player-hall/billiards-cloth-v2.webp',m.felt,{repeat:2,bump:.00035});
- detailedSurface('./assets/player-hall/billiards-walnut-v2.webp',m.wood,{repeat:1,bump:.001});
+
+
  const pocketLeather=new T.MeshPhysicalMaterial({color:'#15100c',roughness:.82,clearcoat:.08}),pocketDepth=new T.MeshStandardMaterial({color:'#020403',roughness:1});
  // A black-and-brass pool table with six recessed pockets and separate cushions.
  roundedBox(10.9,.6,5.9,tableBody,0,1.75,0,.16);roundedBox(10.95,.045,5.95,tableMetal,0,1.95,0,.16);roundedBox(10.7,.28,5.7,m.wood,0,2.1,0,.12);box(10,.08,5,m.felt,0,2.23,0);

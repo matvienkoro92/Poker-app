@@ -28,6 +28,10 @@ const equipment=mountCues({source:heroSource,room});
 const roomToolbar=document.createElement('nav');roomToolbar.className='room-toolbar';roomToolbar.setAttribute('aria-label','Настройки бильярдной');roomToolbar.append($('cueButton'),$('tableSkinButton'),$('rulesButton'));document.querySelector('main').append(roomToolbar);
 let entryOpened=false,currentEntry='';
 function openEntry(entry){if(!['tables','cues','lobby'].includes(entry)||mode!==null||entryOpened&&currentEntry===entry)return;entryOpened=true;currentEntry=entry;for(const d of document.querySelectorAll('dialog[open]'))d.close();setView(false);$('lobby').hidden=entry!=='lobby';if(entry==='tables')tableSkins.open();if(entry==='cues')equipment.open();}
+// Equipment opened from the villa is a separate window; closing it returns there.
+for(const dialog of [$('cueDialog'),document.querySelector('.table-skin-dialog')])dialog.addEventListener('close',()=>{
+ if(parent!==window&&['tables','cues'].includes(initialEntry)&&currentEntry===initialEntry)parent.postMessage({type:'p21-billiards-close'},location.origin);
+});
 window.addEventListener('message',event=>{if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-open-entry')openEntry(event.data.entry);});
 
 async function request(body){let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin;const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Сервер недоступен. Попробуйте снова.');return d;}
@@ -58,7 +62,8 @@ $('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('roomCode'
 $('resumeTable').onclick=()=>setView(true);$('view').onclick=()=>setView(!tableView);$('power').oninput=()=>{$('powerValue').textContent=$('power').value+'%';};$('shoot').onclick=()=>move({type:'shot',angle,power:Number($('power').value)/100,...rulesUI.options(state),spin:shotTools.value()});$('again').onclick=()=>mode==='training'?startTraining():mode==='solo'?solo(true):net?.move(null,true);$('modes').onclick=()=>{stop();status('Выберите одиночную партию или игру с другом.');};
 let dragging=false;
 function aim(e){if(!tableView||!online||state.turn!==player||state.moving||state.winner!==null)return;const p=room.point(e.clientX,e.clientY);if(!p)return;if(rulesUI.isPlacing(state)||state.breakPending&&e.shiftKey){if(e.type==='pointerdown'){move({type:'place',x:p.x,y:p.y});rulesUI.placed();}return;}if(e.type==='pointerdown'&&rulesUI.chooseCue(state,p))return;const id=rulesUI.options(state).cueId,b=state.balls.find(b=>b.id===id&&!b.pocket);if(!b)return;if(Math.hypot(p.x-b.x,p.y-b.y)<18)return;angle=Math.atan2(b.y-p.y,b.x-p.x);}
-$('room').onpointerdown=e=>{dragging=true;$('room').setPointerCapture(e.pointerId);aim(e);};$('room').onpointermove=e=>{if(dragging)aim(e);};$('room').onpointerup=$('room').onpointercancel=()=>dragging=false;
+$('room').onselectstart=$('room').oncontextmenu=e=>e.preventDefault();
+$('room').onpointerdown=e=>{e.preventDefault();window.getSelection()?.removeAllRanges();dragging=true;$('room').setPointerCapture(e.pointerId);aim(e);};$('room').onpointermove=e=>{if(dragging)aim(e);};$('room').onpointerup=$('room').onpointercancel=()=>dragging=false;
 $('closeRules').onclick=()=>$('rules').close();$('back').onclick=()=>{stop();if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);else location.assign('./');};
 function frame(now){
  const dt=Math.min((now-last)/1000,.1);last=now;
@@ -79,7 +84,7 @@ function frame(now){
  shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});if(tableView)room?.render(display,angle,can&&!state.inHand&&!state.pending);raf=requestAnimationFrame(frame);
 }
 const controlsObserver=new ResizeObserver(()=>{const height=$('game').getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');}});controlsObserver.observe($('game'));
-openEntry(initialEntry);if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
+openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
 raf=requestAnimationFrame(frame);
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.

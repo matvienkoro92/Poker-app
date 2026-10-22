@@ -265,3 +265,33 @@ body.billiards-table-view #cueButton .room-control__label{display:none}
 body.billiards-table-view #cueButton .room-control__value{font:inherit;color:inherit}
 body:has(#lobby:not([hidden])) .room-toolbar,body:not(.billiards-table-view):has(dialog[open]) .room-toolbar{display:none}
 @media(max-width:350px){body:not(.billiards-table-view) .billiards>header{gap:6px;padding:8px}body:not(.billiards-table-view) .billiards>header h1{font-size:16px}body:not(.billiards-table-view) .billiards>header small{font-size:6px}body:not(.billiards-table-view) #back{font-size:11px;padding:8px 6px}body:not(.billiards-table-view) #view{font-size:12px;padding:8px}.room-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 62px;gap:5px}.room-control__value{font-size:12px}}
+
+/* Independent equipment windows, with a definite scroll viewport on iOS. */
+.table-skin-dialog[open]{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);inset:0;margin:auto}
+.table-skin-dialog .table-skin-list{flex:1 1 0;min-height:0}
+body:not(.billiards-entry-ready) .billiards{visibility:hidden}
+
+#penaltyConfirm{position:absolute;z-index:5;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(420px,calc(100% - 32px));display:grid;gap:7px;padding:10px;border-radius:16px;background:#10251df5;border:1px solid #e7c77c;box-shadow:0 0 24px #f3ca6555,0 5px 22px #0008}
+#penaltyConfirm button{width:100%;min-height:46px;font-size:14px;font-weight:750}
+#penaltyConfirm .primary{box-shadow:0 0 16px #f3ca6570}
+body:has(#penaltyConfirm:not([hidden])) #game{visibility:hidden}
+body:has(#penaltyConfirm:not([hidden])) #decisionOpen{bottom:145px}
+.room-toolbar #cueButton .room-control__label{display:none}
+
+/* Aim and spin precede a full-width power control. */
+body.billiards-table-view .game{grid-template-columns:minmax(0,1fr)}
+body.billiards-table-view .shot-tools,body.billiards-table-view .shot-controls{grid-column:1/-1;min-width:0}
+body.billiards-table-view .shot-tools{justify-content:flex-start;gap:10px}
+body.billiards-table-view .shot-controls label{min-width:0;flex:1}
+
+/* Table gestures control the cue instead of selecting nearby interface text. */
+body.billiards-table-view .billiards{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body.billiards-table-view .billiards :is(input,textarea){-webkit-user-select:text;user-select:text}
+#room{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+.table-penalty-dialog{width:min(430px,calc(100% - 24px));padding:20px;border-radius:22px;background:linear-gradient(145deg,#1d372c,#0e211b);box-shadow:0 18px 64px #0009}
+.table-penalty-dialog #decisionExplanation{font-size:14px;line-height:1.55;margin:14px 0;color:#d5dfd2}
+.table-penalty-dialog #decisionPanel{border:0;margin:0;padding:0}
+.table-penalty-dialog #penaltyPick{width:100%;min-height:50px;font-size:16px;border-radius:13px;background:linear-gradient(135deg,#f0d99b,#c59a4a);box-shadow:inset 0 1px #fff6,0 4px 14px #0003}
+.table-penalty-dialog #decisionButtons:empty{display:none}
+.table-penalty-dialog #decisionButtons button{min-height:44px;font-size:13px}
