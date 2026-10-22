@@ -17,7 +17,7 @@ let state=createGame(),canonical=state,player=0,online=false,net=null,angle=0,ta
 let opponentAim=null,botPlan=null,shownAim=null,renderedCue='';
 let turnSeconds=null,turnDeadline=null,localClockKey='';
 let series=createMatch(),canonicalSeries=series;const training=createTraining();
-const replayPlayer=createReplayPlayer();let replayStart=0;
+const replayPlayer=createReplayPlayer();let replayStart=0,replayAwaiting=false;
 let room;
 try{room=createRoom($('room'));}catch(_){$('connection').textContent='Не удалось открыть 3D. Попробуйте обновить страницу в браузере.';$('create').disabled=$('join').disabled=$('solo').disabled=$('training').disabled=true;}
 let heroSource=window;try{if(parent!==window&&parent.location.origin===location.origin)heroSource=parent;}catch{}
@@ -58,7 +58,7 @@ function adopt(d){
  if(d.ready){$('lobby').hidden=true;$('game').hidden=!tableView;$('matchMode').textContent='ПАРТИЯ С ДРУГОМ · ОНЛАЙН';}else {lobby.waiting();if(!d.challengeSent)status('Ожидаем подключения друга'+(d.turnSeconds?' · '+d.turnSeconds+' с на ход':''));}
  if(d.revision===revision)return;
  revision=d.revision;canonical=d.state;canonicalSeries=d.match||createMatch();playback=d.playback;series=playback?.matchBefore?structuredClone(playback.matchBefore):structuredClone(canonicalSeries);
- if(playback&&validState(playback.before)&&Date.now()+clockOffset<playback.startedAt+playback.durationMs){state=structuredClone(playback.before);replayStart=performance.now()+playback.startedAt-(Date.now()+clockOffset);replayPlayer.start(playback);}else{replayPlayer.clear();state=canonical;series=structuredClone(canonicalSeries);playback=null;}
+ if(playback&&validState(playback.before)&&(wasReady||Date.now()+clockOffset<playback.startedAt+playback.durationMs)){state=structuredClone(playback.before);replayStart=performance.now()+playback.startedAt-(Date.now()+clockOffset);replayAwaiting=true;replayPlayer.start(playback);}else{replayPlayer.clear();state=canonical;series=structuredClone(canonicalSeries);playback=null;}
 
  if(d.ready&&!wasReady)setView(true);
  acc=0;last=performance.now();
@@ -93,10 +93,15 @@ function frame(now){
  if(mode==='solo'||mode==='training'){
   acc+=dt;while(acc>=1/120&&state.moving){step(state);acc-=1/120;}if(!state.moving)acc=0;
   if(mode==='solo'&&state.turn===1&&!state.moving&&state.winner===null){if(!botAt){botPlan=botMove(state);botAt=now+(botPlan?.type==='shot'?1400:650);}if(now>=botAt){if(botPlan)action(state,1,botPlan);botAt=0;botPlan=null;}}else{botAt=0;botPlan=null;}
- }else if(playback&&now>=replayStart){
+ }else if(playback&&replayPlayer.inspect().ready){
+  // Start from the first frame only after the worker has prepared the track.
+  // Network and calculation time must never consume the visible shot.
+  if(replayAwaiting){replayStart=Math.max(now,replayStart);replayAwaiting=false;}
+  if(now>=replayStart){
   if(state.shot===playback.before.shot&&!state.moving){playback.move?action(state,state.turn,playback.move):shoot(state,playback.angle,playback.power);}
   const elapsed=now-replayStart;
   if(replayPlayer.sample(elapsed,state)&&elapsed>=playback.durationMs){state=canonical;series=structuredClone(canonicalSeries);playback=null;replayPlayer.clear();}
+  }
  }
 
  if(mode==='solo')recordWin(series,state.winner);if(mode==='training')player=state.turn;
