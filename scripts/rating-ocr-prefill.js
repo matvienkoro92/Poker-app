@@ -64,6 +64,9 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/First\s+Blood/i.test(raw) && /15K/i.test(raw)) return "First Blood 15K";
+  if (/BLACKOUT/i.test(raw) && /300K/i.test(raw)) return "BLACKOUT 300K";
+  if (/Hyper\s+Turbo/i.test(raw) && /40K/i.test(raw)) return "Hyper Turbo 40K";
   if (/Lucky\s+Slot/i.test(raw) && /333K/i.test(raw)) return "Lucky Slot 333K";
   if (/BLACKOUT/i.test(raw) && /220K/i.test(raw)) return "BLACKOUT 220K";
   if (/Deep\s+Night/i.test(raw) && /15K/i.test(raw)) return "✨Deep Night 15k ✨";
@@ -501,6 +504,15 @@ async function parseOcrFile(file) {
     }[`${time}|${title}`];
     if (confirmed) buyin = confirmed;
   }
+  // October 21 entry fees confirmed by the owner; blue headers show starting stacks.
+  if (date === "21.10.2026" && blue) {
+    const confirmed = {
+      "06:00|First Blood 15K": 200,
+      "18:00|BLACKOUT 300K": 2000,
+      "20:00|Hyper Turbo 40K": 600
+    }[`${time}|${title}`];
+    if (confirmed) buyin = confirmed;
+  }
   // October 20 entry fees confirmed by the owner; blue headers show starting stacks.
   if (date === "20.10.2026" && blue) {
     const confirmed = {
@@ -527,6 +539,8 @@ async function parseOcrFile(file) {
   if (date === "13.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "20.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   tokens.forEach((token) => {
+    // IMG_1023: the avatar obscures the ID prefix; the visible ID is 2491095.
+    if (date === "21.10.2026" && blue && time === "20:00" && token.text === "YTD: 2491095") token.text = "ID: 2491095";
     // IMG_0143: the avatar adds a stray K before Nast’ko’s visible ID.
     if (date === "10.10.2026" && time === "17:00" && !blue && token.text === "KID:121231") token.text = "ID:121231";
     // IMG_0037: Vision attached a stray K to GUCCI’s visible ID.
