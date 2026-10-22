@@ -17,6 +17,7 @@ export function mountCues({source,room,openInitially=false}){
  function apply(cue){selected=cue;room?.setCue(cue,hero?.nick||'');$('cueButton').textContent='Кий · '+cue.name;}
  function render(){
   const focused=document.activeElement?.dataset?.cue;
+  $('cueSave').disabled=loading;
   $('cueHero').textContent=loading?'Получаем уровень героя…':hero?'Ваш герой · уровень '+hero.level:'Базовый кий доступен всем';
   $('cueList').replaceChildren();
   CUES.forEach((cue,index)=>{const unlocked=!!hero&&hero.level>=cue.level||cue.level===0,card=document.createElement('button');card.type='button';card.className='cue-card';card.dataset.cue=cue.id;card.setAttribute('aria-pressed',String(selected.id===cue.id));card.disabled=!unlocked||loading;
@@ -28,6 +29,7 @@ export function mountCues({source,room,openInitially=false}){
   if(focused){const card=Array.from($('cueList').children).find(c=>c.dataset.cue===focused);if(card&&!card.disabled)card.focus({preventScroll:true});}
  }
  async function refresh(){if(loading)return;loading=true;render();$('cueError').textContent='';try{if(typeof source.pokerSocialRequest!=='function')throw Error('Откройте бильярд из своего дома, чтобы получить уровень героя.');const result=await source.pokerSocialRequest('player-hall',{action:'get'});hero=heroFromHall(result.hall);let saved;try{saved=localStorage.getItem(key());}catch{}apply(availableCue(saved,hero.level));}catch(error){hero=null;apply(CUES[0]);$('cueError').textContent=error.message||'Не удалось загрузить героя.';}finally{loading=false;render();}}
+ $('cueSave').onclick=()=>{if(loading)return;try{if(hero)localStorage.setItem(key(),selected.id);apply(selected);dialog.close();}catch{$('cueError').textContent='Не удалось сохранить выбор в браузере. Разрешите хранение данных и попробуйте ещё раз.';}};
  $('cueRetry').onclick=refresh;$('cueClose').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
  $('cueButton').onclick=()=>{dialog.showModal();refresh();};apply(CUES[0]);render();refresh();if(openInitially)dialog.showModal();
  return {inspect:()=>({selected:selected.id,level:hero?.level??null,nick:hero?.nick||'',loading})};

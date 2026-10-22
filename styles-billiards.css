@@ -19,3 +19,51 @@ select{display:block;width:100%;min-height:38px;margin-top:5px;padding:7px 9px;b
 .potted-ball.invalid-eight{border:2px solid #e56868;box-shadow:0 0 7px #e5686880}
 body.billiards-table-view .game .players{display:none}
 .shot-tools{display:flex;align-items:center;justify-content:space-between;gap:9px;margin:8px 0}.shot-tools>button{font-size:10px;padding:7px 9px;min-height:34px;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fine-aim{display:flex;align-items:center;gap:7px}.fine-aim button{font-size:22px;width:33px;min-height:34px;padding:0}.fine-aim small{font-size:8px;text-align:center;line-height:1.35;color:#cbbd9d}#tableDimensions{display:block;font-size:8px;color:#a6bcb0;margin:-3px 0 8px}#lastShotSummary{display:block;font-size:8px;color:#c4b997;margin:7px 0}.spin-dialog{width:min(390px,calc(100% - 24px));text-align:center;max-height:90dvh;overflow:auto}.spin-dialog h2{margin:0;font-size:23px}.spin-dialog p{font-size:11px;text-align:left}.spin-dialog label{display:block;text-align:left;margin:13px 0;font-size:12px}.spin-dialog output{float:right;color:#e8c785}.spin-dialog input[type=range]{display:block;width:100%;accent-color:#d9b56b;margin-top:9px}.spin-dialog>button{width:100%}.spin-pad{position:relative;touch-action:none;width:180px;height:180px;border-radius:50%;margin:18px auto;background:radial-gradient(circle at 32% 25%,#fff 0%,#f8f2db 35%,#c3bc9e 75%,#766f59 100%);box-shadow:inset -5px -9px 20px #4b462d50,0 10px 25px #0007;cursor:crosshair;user-select:none}.spin-cross{position:absolute;inset:7%;border:1px dashed #55685855;border-radius:50%;background:linear-gradient(transparent calc(50% - .5px),#526b5c66 50%,transparent calc(50% + .5px)),linear-gradient(90deg,transparent calc(50% - .5px),#526b5c66 50%,transparent calc(50% + .5px))}#spinDot{position:absolute;z-index:1;left:50%;top:50%;width:14px;height:14px;transform:translate(-50%,-50%);border:2px solid white;border-radius:50%;background:#a83030;box-shadow:0 1px 5px #0008}.spin-pad small{position:absolute;left:0;right:0;font-size:9px;color:#354b40;pointer-events:none}.spin-top{top:14px}.spin-bottom{bottom:14px}#spinLabel{display:block;color:#f4d593;font-size:13px}
+.series-score{display:block!important;color:#f1d08c!important;font-size:11px!important;line-height:1.5;padding:6px 9px;margin:0 0 9px;border:1px solid #d6b46a40;border-radius:8px;background:#0002}.series-score[hidden]{display:none!important}.training-controls{display:flex;gap:8px;margin:9px 0}.training-controls button{flex:1;min-width:0;font-size:11px;min-height:38px;padding:7px 9px}#training{background:#19372d;color:#e6d4a7;border-color:#a88b4b80}#raceTo{min-height:36px}
+
+.cue-dialog__footer{position:sticky;bottom:-18px;z-index:2;background:#11211d;padding:12px 0 18px;border-top:1px solid #d6b46a33;display:grid;gap:8px}.cue-dialog__footer button{width:100%}.cue-dialog__footer small{font-size:10px;color:#aab7af}
+
+.settings-label{font-size:12px;margin:12px 0 6px}.settings-buttons{display:flex;gap:8px;flex-wrap:wrap}.settings-buttons button{flex:1 1 140px;font-size:12px;padding:10px;line-height:1.35;background:#0d1c1a;border-color:#6e7e70}.settings-buttons button[aria-pressed=true]{background:#d7b46a;color:#20271e;border-color:#f3d58e;font-weight:750;box-shadow:inset 0 0 0 1px #f3d58e}
+
+/* The game fills the screen; controls form a compact dock over the room. */
+body.billiards-table-view{background:#18251f}
+body.billiards-table-view #room{position:absolute;inset:0;width:100%;height:100%}
+body.billiards-table-view header{padding:8px;background:linear-gradient(#101c18e8,transparent)}
+body.billiards-table-view header h1{font-size:16px}
+body.billiards-table-view header small{display:none}
+body.billiards-table-view header button{min-height:36px;font-size:12px;padding:6px 10px}
+body.billiards-table-view .game{left:0;right:0;bottom:0;transform:none;width:100%;padding:8px 12px max(8px,env(safe-area-inset-bottom));border-radius:16px 16px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;max-height:45dvh;overflow:auto}
+body.billiards-table-view #matchMode,body.billiards-table-view #matchDiscipline,body.billiards-table-view #hint,body.billiards-table-view #lastShotSummary{display:none}
+body.billiards-table-view #status{grid-column:1/-1;font-size:13px;line-height:1.3}
+body.billiards-table-view #placeBreak{grid-column:1/-1;width:auto;margin:0;min-height:27px;padding:3px 8px}
+body.billiards-table-view .shot-tools{margin:0;gap:5px}
+body.billiards-table-view .shot-tools>button{min-height:32px;padding:4px 6px;font-size:10px}
+body.billiards-table-view .fine-aim{gap:3px}
+body.billiards-table-view .fine-aim button{min-height:32px;width:27px}
+body.billiards-table-view .fine-aim small{font-size:7px}
+body.billiards-table-view .shot-controls{border:0;padding:0;gap:8px}
+body.billiards-table-view .shot-controls .primary{min-width:64px;min-height:39px;padding:6px;font-size:14px;border-radius:9px}
+body.billiards-table-view .shot-controls input{margin:10px 0 6px}
+body.billiards-table-view .shot-controls label{font-size:9px}
+body.billiards-table-view .call-controls,body.billiards-table-view #decisionPanel,body.billiards-table-view .training-controls,body.billiards-table-view #cuePickHint,body.billiards-table-view #again,body.billiards-table-view #seriesScore{grid-column:1/-1;margin:2px 0}
+body.billiards-table-view .call-controls{margin:0;gap:3px 8px}
+body.billiards-table-view .call-controls select{min-height:28px;padding:3px 6px;margin-top:2px}
+body.billiards-table-view .training-controls button{min-height:29px;padding:4px 7px}
+body.billiards-table-view .ball-shelves{top:65px}
+body.billiards-table-view .cue-button,body.billiards-table-view .rules-button{top:auto;bottom:calc(var(--billiards-controls-height,150px) + 8px);min-height:28px;font-size:10px;padding:5px 8px}
+body.billiards-table-view .cue-button{left:8px;right:auto}
+body.billiards-table-view .rules-button{right:8px}
+.game>#modes{display:none}
+
+@media(max-height:560px){body.billiards-table-view .ball-shelves{inset:58px 8px auto}.ball-shelf{min-height:70px}}
+/* Two wooden ball racks share the cabinet wall on the right of the table. */
+body.billiards-table-view .ball-shelves{inset:76px 7px auto auto;width:55px;display:flex;flex-direction:column;gap:14px;padding:8px 4px;background:linear-gradient(90deg,#28170ff5,#63452bf2 12%,#302016f5 50%,#67472cf2 88%,#23160ff5);border:1px solid #a98147;border-radius:4px;box-shadow:2px 5px 12px #0009,inset 0 0 0 2px #110d0977}
+body.billiards-table-view .ball-shelf{position:relative;width:100%;min-height:105px;padding:5px 1px 8px;border:0;border-bottom:4px solid #9a713d;border-radius:1px;background:repeating-linear-gradient(0deg,#1a130e00 0 26px,#aa81484d 27px,#2b1b0e 30px),linear-gradient(90deg,#100e0be8,#392b1ce8,#100e0be8);box-shadow:0 3px 0 #1c120c,inset 0 1px 4px #0009}
+body.billiards-table-view .ball-shelf.active{border-bottom-color:#e2bd70;box-shadow:0 3px 0 #1c120c,inset 0 0 0 1px #d4b37588}
+body.billiards-table-view .ball-shelf>strong{font-size:8px;line-height:1.25;color:#f2d598;overflow-wrap:normal;word-break:normal}
+body.billiards-table-view .ball-shelf>small{font-size:7px;margin:4px 0}
+body.billiards-table-view .ball-shelf>b{font-size:9px}
+body.billiards-table-view .shelf-balls{display:grid;grid-template-columns:repeat(2,16px);gap:5px 3px;min-height:30px;align-content:start;margin:5px 0}
+body.billiards-table-view .shelf-balls .potted-ball{width:16px;height:16px;font-size:7px;box-shadow:0 3px 2px #0009}
+@media(min-width:700px){body.billiards-table-view .ball-shelves{width:76px;right:12px}body.billiards-table-view .ball-shelf>strong{font-size:10px}body.billiards-table-view .shelf-balls{grid-template-columns:repeat(3,16px)}}
+@media(max-height:560px){body.billiards-table-view .ball-shelves{top:54px;gap:7px;width:70px;padding:4px}body.billiards-table-view .ball-shelf{min-height:65px;padding:3px 0}body.billiards-table-view .ball-shelf>small{display:none}body.billiards-table-view .shelf-balls{min-height:16px;margin:3px 0;grid-template-columns:repeat(3,14px)}body.billiards-table-view .shelf-balls .potted-ball{width:14px;height:14px}}

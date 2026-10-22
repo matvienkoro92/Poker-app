@@ -27,3 +27,12 @@
 .jackpot-guide-dialog__poster{display:block;width:100%;height:auto;max-width:none}
 .jackpot-guide-dialog.is-zoomed .jackpot-guide-dialog__poster{width:max(100%,1000px)}
 @media(max-width:360px){.jackpot-guide-dialog--poster{padding:12px}.jackpot-guide-dialog--poster header{gap:6px}.jackpot-guide-dialog__tools{gap:5px}.jackpot-guide-dialog--poster header button{width:36px;height:40px}.jackpot-guide-dialog header .jackpot-guide-dialog__zoom{padding:0 7px;font-size:11px}}
+
+.home-jackpot-guide button.home-jackpot-guide__monkey{position:relative}
+.home-jackpot-guide__arcs{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1}
+.home-jackpot-guide__arcs text{fill:#e5c887;font:600 43px system-ui,sans-serif;paint-order:stroke;stroke:#0b1010;stroke-width:5px;stroke-linejoin:round;letter-spacing:.3px}
+.home-jackpot-guide__arcs .home-jackpot-guide__tournaments{fill:#fff0b8;font-weight:900;text-decoration:underline;text-decoration-color:#e8bd61;text-decoration-thickness:3px}
+.home-jackpot-guide__conditions{margin:8px 3% 0;text-align:center;color:#e7d6b3;font-size:clamp(11px,2.8vw,16px);line-height:1.55}
+.home-jackpot-guide__conditions p{margin:4px 0}
+.home-jackpot-guide__conditions strong{color:#f6dfa5;white-space:nowrap;font-weight:650}
+.home-jackpot-guide__conditions p+p{font-size:.9em;color:#bfb59f}
