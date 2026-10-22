@@ -1,3 +1,4 @@
+import {paintEquipmentButton} from './equipment-button.mjs';
 // Cosmetic equipment only: physics, aim guide and network actions never depend on cues.
 import cueCatalog from '../../app-billiards-cues.js';
 export const CUES=cueCatalog.cues;
@@ -6,7 +7,7 @@ export function heroFromHall(hall){if(!hall?.self||!hall.accountId)throw Error('
 export function mountCues({source,room,openInitially=false}){
  const $=id=>document.getElementById(id),dialog=$('cueDialog');let hero=null,selected=CUES[0],loading=false;
  function key(){return 'p21:billiards:cue:v1:'+hero.accountId;}
- function apply(cue){selected=cue;room?.setCue(cue,hero?.nick||'');$('cueButton').textContent='Кий · '+cue.name;cueCatalog.paintPreview(document.querySelector('main'),cue,hero?.nick||'');}
+ function apply(cue){selected=cue;room?.setCue(cue,hero?.nick||'');paintEquipmentButton($('cueButton'),'Кий',cue.name);cueCatalog.paintPreview(document.querySelector('main'),cue,hero?.nick||'');}
  function render(){
   const focused=document.activeElement?.dataset?.cue;
   $('cueSave').disabled=loading;
@@ -23,6 +24,7 @@ export function mountCues({source,room,openInitially=false}){
  async function refresh(){if(loading)return;loading=true;render();$('cueError').textContent='';try{if(typeof source.pokerSocialRequest!=='function')throw Error('Откройте бильярд из своего дома, чтобы получить уровень героя.');const result=await source.pokerSocialRequest('player-hall',{action:'get'});hero=heroFromHall(result.hall);let saved;try{saved=localStorage.getItem(key());}catch{}apply(availableCue(saved,hero.level));}catch(error){hero=null;apply(CUES[0]);$('cueError').textContent=error.message||'Не удалось загрузить героя.';}finally{loading=false;render();}}
  $('cueSave').onclick=()=>{if(loading)return;try{if(hero)localStorage.setItem(key(),selected.id);apply(selected);if(parent!==window)parent.postMessage({type:'p21-billiards-cue-saved'},location.origin);dialog.close();}catch{$('cueError').textContent='Не удалось сохранить выбор в браузере. Разрешите хранение данных и попробуйте ещё раз.';}};
  $('cueRetry').onclick=refresh;$('cueClose').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
- $('cueButton').onclick=()=>{dialog.showModal();refresh();};apply(CUES[0]);render();refresh();if(openInitially)dialog.showModal();
- return {inspect:()=>({selected:selected.id,level:hero?.level??null,nick:hero?.nick||'',loading})};
+ function open(){if(!dialog.open)dialog.showModal();refresh();}
+ $('cueButton').onclick=open;apply(CUES[0]);render();refresh();if(openInitially)open();
+ return {open,inspect:()=>({selected:selected.id,level:hero?.level??null,nick:hero?.nick||'',loading})};
 }

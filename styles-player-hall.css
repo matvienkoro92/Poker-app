@@ -579,3 +579,6 @@
 .billiards-cue-preview__lean>img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;filter:drop-shadow(2px 2px 2px #0008)}
 .billiards-cue-preview__name{position:absolute;z-index:2;bottom:16%;left:50%;transform:translateX(-50%) rotate(-90deg);font:700 5px/1 sans-serif;letter-spacing:.1px;white-space:nowrap;color:#211a0c;background:#d6b56b;padding:2px;border-radius:1px;max-width:70px;overflow:hidden}
 body.billiards-table-view .billiards-cue-preview{display:none}
+/* Only the visible table-entry button is clickable, not a large invisible rectangle. */
+.player-hall-dialog .villa-billiards-table{top:80%;left:50%;width:max-content;max-width:calc(100% - 24px);height:auto;transform:translate(-50%,-100%);z-index:3;padding:0}
+.player-hall-dialog .villa-billiards-skins,.player-hall-dialog .villa-billiards-cues{z-index:5}

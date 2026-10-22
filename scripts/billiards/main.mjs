@@ -3,6 +3,7 @@ import {createSession} from './network.mjs';
 import {createRoom} from './room.mjs';
 import {botMove} from './solo.mjs';
 import {mountTableSkins} from './table-skins.mjs';
+import {mountTurnGuide} from './turn-guide.mjs';
 import {mountCues} from './cues.mjs';
 import {mountRules} from './rules-ui.mjs';
 import {mountShotTools} from './shot-tools.mjs';
@@ -16,12 +17,19 @@ let room;
 try{room=createRoom($('room'));}catch(_){$('connection').textContent='Не удалось открыть 3D. Попробуйте обновить страницу в браузере.';$('create').disabled=$('join').disabled=$('solo').disabled=$('training').disabled=true;}
 let heroSource=window;try{if(parent!==window&&parent.location.origin===location.origin)heroSource=parent;}catch{}
 const shotTools=mountShotTools({adjust:delta=>{angle=Math.atan2(Math.sin(angle+delta),Math.cos(angle+delta));}});
+const turnGuide=mountTurnGuide();
 const rulesUI=mountRules({move:value=>move(value),room});
-const cueEntry=new URLSearchParams(location.search).get('mode')==='cues';
-const tableEntry=new URLSearchParams(location.search).get('mode')==='tables';
-if(cueEntry||tableEntry)$('lobby').hidden=true;
-const tableSkins=mountTableSkins({source:heroSource,room,openInitially:tableEntry});
-const equipment=mountCues({source:heroSource,room,openInitially:cueEntry});
+let initialEntry=new URLSearchParams(location.search).get('mode')||'lobby';
+try{if(parent!==window&&window.frameElement?.dataset.billiardsEntry)initialEntry=window.frameElement.dataset.billiardsEntry;}catch{}
+if(!['tables','cues','lobby'].includes(initialEntry))initialEntry='lobby';
+if(initialEntry!=='lobby')$('lobby').hidden=true;
+const tableSkins=mountTableSkins({source:heroSource,room});
+const equipment=mountCues({source:heroSource,room});
+const roomToolbar=document.createElement('nav');roomToolbar.className='room-toolbar';roomToolbar.setAttribute('aria-label','Настройки бильярдной');roomToolbar.append($('cueButton'),$('tableSkinButton'),$('rulesButton'));document.querySelector('main').append(roomToolbar);
+let entryOpened=false,currentEntry='';
+function openEntry(entry){if(!['tables','cues','lobby'].includes(entry)||mode!==null||entryOpened&&currentEntry===entry)return;entryOpened=true;currentEntry=entry;for(const d of document.querySelectorAll('dialog[open]'))d.close();setView(false);$('lobby').hidden=entry!=='lobby';if(entry==='tables')tableSkins.open();if(entry==='cues')equipment.open();}
+window.addEventListener('message',event=>{if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-open-entry')openEntry(event.data.entry);});
+
 async function request(body){let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin;const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Сервер недоступен. Попробуйте снова.');return d;}
 const lobby=mountLobby({launch:choice=>$(choice).click(),back:()=>{stop();lobby.reset();$('lobby').hidden=true;setView(false);if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);}});
 function status(text){$('connection').textContent=text;}
@@ -68,9 +76,10 @@ function frame(now){
  $('trainingControls').hidden=mode!=='training';const repeatAvailable=training.inspect().available;$('restoreShot').disabled=$('repeatShot').disabled=!repeatAvailable;
  $('again').hidden=mode!=='training'&&(state.winner===null||player!==0);$('again').textContent=mode==='training'?'Новая расстановка':series.target===3?(series.winner!==null?'Новая серия до 3 побед':'Следующая партия'):'Новая партия';
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';
- shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});if(tableView)room?.render(display,angle,can&&!state.inHand&&!state.pending);raf=requestAnimationFrame(frame);
+ shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});if(tableView)room?.render(display,angle,can&&!state.inHand&&!state.pending);raf=requestAnimationFrame(frame);
 }
 const controlsObserver=new ResizeObserver(()=>{const height=$('game').getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');}});controlsObserver.observe($('game'));
+openEntry(initialEntry);if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
 raf=requestAnimationFrame(frame);
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.
