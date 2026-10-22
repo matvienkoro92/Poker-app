@@ -86,15 +86,15 @@ async function finishPassage(page, space) {
     await settleCamera(page);
 
     // A failed/slow room image must keep the garage visible and allow retry.
-    await page.route('**/billiards-ocean-v3.webp', route => route.abort());
+    await page.route('**/billiards-ocean-v5.webp', route => route.abort());
     await page.locator('[data-house-passage]').click();
     await page.waitForFunction(() => document.querySelector('[data-house-passage] small').textContent.includes('ещё раз'));
     assert.equal(await page.locator('.player-hall__room').getAttribute('data-space'), 'garage');
     assert.equal(await page.locator('.player-hall__room').evaluate(el => el.inert), false);
-    await page.unroute('**/billiards-ocean-v3.webp');
+    await page.unroute('**/billiards-ocean-v5.webp');
     let releaseArt;
     const artGate = new Promise(resolve => { releaseArt = resolve; });
-    await page.route('**/billiards-ocean-v3.webp', async route => { await artGate; await route.fulfill({ path: path.join(root, 'assets/player-hall/billiards-ocean-v3.webp') }); });
+    await page.route('**/billiards-ocean-v5.webp', async route => { await artGate; await route.fulfill({ path: path.join(root, 'assets/player-hall/billiards-ocean-v5.webp') }); });
     await page.locator('[data-house-passage]').click();
     assert.equal(await page.locator('.player-hall__room').getAttribute('data-space'), 'garage');
     assert.equal(await page.locator('.player-hall__passage-camera').count(), 0);
@@ -114,6 +114,15 @@ async function finishPassage(page, space) {
     await finishPassage(page, 'billiards');
     assert.equal(await page.locator('.billiards-shell').count(), 0, 'passage opens room, not game');
     await page.screenshot({ path: path.join(output, 'villa-room-mobile.png') });
+
+    await page.locator('[data-billiards-play=cues]').click();
+    const cueFrame = page.frameLocator('.billiards-shell iframe');
+    await cueFrame.locator('#cueDialog[open]').waitFor();
+    await cueFrame.locator('#cueHero').filter({hasText:'уровень 75'}).waitFor();
+    assert.equal(await cueFrame.locator('[data-cue=ruby]').isDisabled(),false);
+    assert.equal(await cueFrame.locator('[data-cue=signature]').isDisabled(),true);
+    await cueFrame.locator('#back').evaluate(el=>el.click());
+    await page.waitForFunction(() => !document.querySelector('.billiards-shell'));
 
     await page.locator('[data-billiards-play=solo]').click();
     const frame = page.frameLocator('.billiards-shell iframe');
