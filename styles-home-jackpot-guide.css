@@ -36,3 +36,9 @@
 .home-jackpot-guide__conditions p{margin:4px 0}
 .home-jackpot-guide__conditions strong{color:#f6dfa5;white-space:nowrap;font-weight:650}
 .home-jackpot-guide__conditions p+p{font-size:.9em;color:#bfb59f}
+/* Schedule and payouts share one compact row below the artwork. */
+.home-jackpot-guide__conditions{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:5px 14px;text-align:left}
+.home-jackpot-guide__conditions .home-jackpot-guide__schedule{margin:0;min-width:0}
+.home-jackpot-guide__conditions .home-jackpot-guide__open{grid-column:2;grid-row:1;gap:7px;white-space:nowrap;font-size:12px}
+.home-jackpot-guide__conditions .home-jackpot-guide__bank{grid-column:1/-1;margin:0;font-size:.9em;color:#bfb59f}
+@media(max-width:360px){.home-jackpot-guide__conditions{gap:5px 9px;margin-inline:1%}.home-jackpot-guide__conditions .home-jackpot-guide__open{padding:7px 9px;font-size:11px}}

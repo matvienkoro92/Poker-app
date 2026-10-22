@@ -1088,9 +1088,7 @@ function drawUpgradePreview(canvas,kind,look){if(['headlights','chips','cards','
 }
 
 function canEnterVilla(auth){
- if(!auth||!['verified','dev_skip'].includes(auth.status)&&auth.adminAccess!==true)return false;
- const id=String(auth.user?.id||auth.id||'').replace(/^tg_/,''),name=String(auth.user?.username||auth.telegramUsername||auth.pwaUsername||'').replace(/^@+/,'').trim().toLowerCase();
- return ['388008256','5053253480'].includes(id)||['roman1787443','roman1_matvienko','matvienkoro92@gmail.com','matvienko.r2@yandex.ru'].includes(name);
+ return !!auth&&(['verified','dev_skip'].includes(auth.status)||auth.adminAccess===true);
 }
 function canAccessHall(auth){return auth?.adminAccess===true||auth?.status==='verified';}
 return {savedLoadout,temporarilyHiddenWardrobeItem,themedOutfits,outfitLoadout,outfitSelected,characterFields,switchChassis,characterBasePath,chipEdgeColor,compatiblePart,fitChassisParts,wheelDiameters,plateAvailability,wheelPaintColor,hairOverlayFits,brandedPieces,curatedWardrobeItem,wardrobeSubcategories,wardrobeSubcategory,rewardFashionModels,prestigeWatches,ringDesigns,ringArt,helmetModels,canAccessHall,canEnterVilla,hairStyles,bodyTypes,outfitSets,seasonalCollections,collectionProgress,activeOutfit,glassTints,steeringDesigns,fashionRows,fashionIndex,fashionArt,loadWardrobe,paintWardrobePreview,streetHeadlights,vinylCanvas,rewardShelfSlots,wheelDesign,wheelFaceCanvas,drawWheelPreview,badgePlaqueCanvas,chipCanvas,badgeCanvas,badgeDefinitions,cardCanvas,chipPalette,upholsteryCanvas,patchCanvas,drawUpgradePreview,parsePlate,plateLevel,plateCanvas,characterHandFit,characterJewelryFit,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet,helmetArt};});

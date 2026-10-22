@@ -222,3 +222,12 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .cue-card{background:linear-gradient(145deg,#172e25,#091711);border-radius:14px}
 .cue-card strong{font-size:14px}.cue-card small{font-size:12px}.cue-card__state{font-size:13px}
 @media(max-width:520px){.cue-card .cue-card__art{width:100%;height:270px}}
+/* Let the table collection use the available screen width. */
+.table-skin-dialog[open]{width:min(1100px,calc(100vw - 12px));max-width:none;max-height:calc(100dvh - 16px);margin:auto;border-radius:18px}
+.table-skin-dialog .table-skin-list{padding:12px;gap:12px}
+body:has(.table-skin-dialog[open]) :is(.cue-button,.rules-button,.table-skin-button){display:none}
+@media(min-width:720px){.table-skin-dialog .table-skin-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1050px){.table-skin-dialog .table-skin-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* Center the setup menu vertically as well as horizontally. */
+#lobby.lobby-wizard{top:50%;bottom:auto;transform:translate(-50%,-50%);max-height:calc(100dvh - 32px)}
+@media(max-height:560px){#lobby.lobby-wizard{top:50%;bottom:auto;max-height:calc(100dvh - 20px)}}
