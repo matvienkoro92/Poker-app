@@ -1,5 +1,5 @@
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#142622;color:#f5e6c4;font:15px system-ui,sans-serif}.billiards{position:relative;height:100dvh}canvas{display:block;width:100%;height:100%;touch-action:none}button,input{font:inherit}button{min-height:42px;border:1px solid #a68b55;border-radius:10px;background:#20332fe8;color:#f5e6c4;padding:9px 14px;cursor:pointer}button:disabled{opacity:.4;cursor:default}button:focus-visible,input:focus-visible{outline:2px solid #ffdc89;outline-offset:3px}header{position:absolute;inset:env(safe-area-inset-top,0px) 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:linear-gradient(#111e1cf0,#111e1c00);pointer-events:none}header>*{pointer-events:auto}header h1{font-size:24px;margin:0}header small{font-size:9px;letter-spacing:1.2px}.panel{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(430px,calc(100% - 24px));padding:20px;border:1px solid #b99c65;border-radius:18px;background:#142622ed;box-shadow:0 15px 45px #0007;backdrop-filter:blur(12px)}.panel h2{margin:0;font-size:23px}.panel p{font-size:13px;line-height:1.4;color:#d6c9ab}.panel>button{width:100%;margin:5px 0}.primary{background:#d7b46a;color:#20271e;font-weight:750}.panel label{display:block;margin:12px 0 6px;font-size:12px}input:not([type=range]):not([type=checkbox]){display:block;width:100%;min-height:44px;border:1px solid #6e7e70;border-radius:8px;background:#0d1c1a;color:#fff3d0;padding:10px;margin-top:6px;text-transform:uppercase;letter-spacing:3px}#invite{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}#roomCode{letter-spacing:2px;font-size:20px}.players{display:flex;gap:10px;justify-content:space-between;margin-bottom:8px;font-size:12px}.players .active{color:#ffda83;font-weight:800}.game{padding:12px 16px;width:min(540px,calc(100% - 24px))}.game>strong{font-size:14px}.game p{margin:5px 0;min-height:18px}.shot-controls{display:flex;align-items:end;gap:14px}.shot-controls label{flex:1}.shot-controls input{width:100%;accent-color:#d7b46a;display:block}.shot-controls output{float:right}.shot-controls button{margin-bottom:6px;min-width:95px}.rules-button{position:absolute;right:12px;top:85px;font-size:12px;min-height:34px}dialog{width:min(460px,calc(100% - 24px));max-height:85dvh;overflow:auto;border:1px solid #b99c65;background:#142622;color:#f5e6c4;border-radius:18px;padding:22px;line-height:1.5}dialog::backdrop{background:#000a}dialog p{font-size:14px}[hidden]{display:none!important}@media(max-width:480px){header h1{font-size:18px}header small{font-size:7px}header{padding:8px;gap:5px}header button{padding:7px 10px;font-size:12px}.panel{padding:16px}#invite{flex-wrap:wrap}}@media(max-height:560px){#lobby{max-height:calc(100dvh - 75px);overflow:auto}.game{left:auto;right:10px;transform:none;width:300px}header small{display:none}}
-body{background:#181e19 url('./assets/player-hall/billiards-ocean-v8.webp') center/cover no-repeat}#room{visibility:hidden}body.billiards-table-view #room{visibility:visible}.billiards-online-label{margin:14px 0 7px;padding-top:12px;border-top:1px solid #c3a36940}#matchMode{display:block;font-size:9px;letter-spacing:1px;color:#d7b46a;margin-bottom:9px}#modes{position:absolute;right:12px;top:7px;font-size:10px;min-height:28px;padding:5px 8px}#lobby{max-height:calc(100dvh - 155px);overflow:auto}
+body{background:#181e19 url('./assets/player-hall/billiards-table-classic-v2.webp') center/cover no-repeat}#room{visibility:hidden}body.billiards-table-view #room{visibility:visible}.billiards-online-label{margin:14px 0 7px;padding-top:12px;border-top:1px solid #c3a36940}#matchMode{display:block;font-size:9px;letter-spacing:1px;color:#d7b46a;margin-bottom:9px}#modes{position:absolute;right:12px;top:7px;font-size:10px;min-height:28px;padding:5px 8px}#lobby{max-height:calc(100dvh - 155px);overflow:auto}
 .game>#modes{position:static;display:block;width:auto;min-height:28px;margin:7px auto 0;padding:4px 12px;border-color:#a68b554d;background:transparent;color:#cabb9d;font-size:11px}
 body.billiards-table-view #room{position:absolute;top:70px;height:calc(100% - var(--billiards-controls-height,230px) - 85px)}
 body.billiards-table-view .rules-button{top:auto;bottom:calc(var(--billiards-controls-height,230px) + 15px)}
@@ -122,3 +122,103 @@ body.billiards-table-view .fine-aim{flex-shrink:0}
 /* Center both captured-ball racks within the playable area. */
 body.billiards-table-view .ball-shelves{top:66px;bottom:calc(var(--billiards-controls-height,150px) + 12px);align-items:center}
 @media(max-height:560px){body.billiards-table-view .ball-shelves{top:58px;bottom:calc(var(--billiards-controls-height,150px) + 8px)}}
+/* Quiet club styling for the three-step game setup. */
+#lobby.lobby-wizard{border:1px solid #a58b595c;border-radius:22px;background:linear-gradient(150deg,#1d302bec,#0d1c18f5);box-shadow:0 24px 70px #0009,inset 0 1px #fff1;backdrop-filter:blur(18px);width:min(420px,calc(100% - 28px))}
+#lobby .lobby-wizard__heading{position:relative;gap:12px;padding:18px 16px 17px;border:0;background:linear-gradient(120deg,#49685420,transparent)}
+#setupBack{width:34px;min-width:34px;min-height:34px;height:34px;border-radius:50%;padding:0;font-size:20px;background:#ffffff05;border-color:#c1aa704d;color:#efddad}
+#lobby .lobby-wizard__heading>div:not(.setup-step-track){min-width:0}
+#setupProgress{position:absolute;top:16px;right:17px;font-size:9px;color:#9eafa1;letter-spacing:.04em}
+.setup-brand{display:block;font-size:8px!important;letter-spacing:.16em;color:#bca674!important;margin:1px 0 6px}
+#lobby .lobby-wizard__heading h2{font-size:21px;font-weight:650;letter-spacing:-.025em;line-height:1.2;margin:0}
+.setup-step-track{position:absolute;left:16px;right:16px;bottom:0;display:flex;gap:5px;height:2px}
+.setup-step-track i{height:2px;flex:1;background:#cbb37820;border-radius:2px}
+.setup-step-track i.is-current{background:#e0c48a;box-shadow:0 0 8px #d0b57030}
+.setup-step-track i.is-done{background:#789a79}
+#lobby .lobby-wizard__content{padding:12px 12px 4px}
+#lobby #modeButtons{gap:7px;margin:0}
+#lobby .wizard-options .mode-card{display:flex;align-items:center;gap:11px;min-height:57px;padding:10px 11px;border:1px solid #b8b99f20;border-radius:12px;background:#09171366;box-shadow:none;text-align:left;transition:border-color .15s,background .15s}
+.mode-card__icon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#c2d6c309;color:#95b29f;flex-shrink:0}
+.mode-card__icon svg{width:23px;height:23px}
+.mode-card__copy{display:grid;gap:4px;min-width:0;flex:1}
+#lobby .mode-card__copy strong{font-size:13px;font-weight:650;color:#e8e9d7;line-height:1.2}
+#lobby .mode-card__copy small{font-size:10px;color:#9cac9f;line-height:1.35}
+.mode-card__check{width:19px;height:19px;flex-shrink:0;display:grid;place-items:center;font-size:11px;color:transparent;border:1px solid #a6b29b40;border-radius:50%}
+#lobby .wizard-options .mode-card[aria-pressed=true]{background:linear-gradient(110deg,#b8aa6625,#5d836b18);border-color:#d4b77d9c;box-shadow:inset 3px 0 #c6ab72}
+#lobby .mode-card[aria-pressed=true] .mode-card__icon{background:#d7bb7520;color:#ead197}
+#lobby .mode-card[aria-pressed=true] .mode-card__copy strong{color:#f4e4b7}
+#lobby .mode-card[aria-pressed=true] .mode-card__check{background:#d9bf83;border-color:#d9bf83;color:#1b3025}
+#lobby .lobby-wizard__footer{border:0;padding:10px 12px 12px;background:transparent}
+#lobby .lobby-wizard__footer button{min-height:43px;border-radius:11px;border:1px solid #e4cc97;background:linear-gradient(110deg,#e5d0a1,#c4a56b);color:#1b2a22;font-size:14px;letter-spacing:.01em;box-shadow:inset 0 1px #fff5,0 4px 12px #0002}
+#lobby .settings-buttons:not(#modeButtons) button{border-radius:11px;border-color:#b8b99f30;background:#0c1d177d;line-height:1.4}
+#lobby .settings-buttons:not(#modeButtons) button[aria-pressed=true]{background:linear-gradient(120deg,#b8aa6630,#5d836b20);color:#f4e4b7;border-color:#d4b77d9c;box-shadow:inset 3px 0 #c6ab72}
+@media(max-width:350px){#lobby .mode-card__copy strong{font-size:12px}#lobby .mode-card__copy small{font-size:9px}#lobby .wizard-options .mode-card{gap:8px;padding:9px;min-height:54px}#setupProgress{font-size:8px}}
+@media(max-height:560px){#lobby #modeButtons{grid-template-columns:repeat(2,minmax(0,1fr))}#lobby .mode-card__copy small{font-size:9px}.mode-card__check{display:none}#lobby .lobby-wizard__heading{padding:12px 14px}#setupProgress{top:11px}}
+/* Shared, readable choice cards across every setup step. */
+#lobby .lobby-wizard__heading h2{font-size:23px}
+#lobby .mode-card__copy strong{font-size:15px}
+#lobby .mode-card__copy small{font-size:12px;line-height:1.4}
+#lobby .wizard-options .mode-card{min-height:63px}
+#lobby .settings-label{margin:6px 2px 10px;font-size:13px;font-weight:600;color:#b9c7b9;letter-spacing:.025em}
+#lobby #disciplineLabel{display:none}
+#lobby #disciplineButtons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 18px}
+#lobby #disciplineButtons button{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-height:107px;text-align:left;padding:14px;font-size:15px;font-weight:650;line-height:1.4}
+#lobby #disciplineButtons button::before{content:'8';display:grid;place-items:center;width:29px;height:29px;border-radius:50%;border:5px solid #17241f;background:#e9e2c8;color:#18261e;font-size:13px;box-shadow:0 0 0 1px #bea56f60}
+#lobby #disciplineButtons button[data-value=pyramid]::before{content:'●';background:#efe8cf;color:#c9b36e;border-color:#d7d2bd;font-size:9px}
+#lobby .settings-buttons:not(#modeButtons) button{transition:background .15s,border-color .15s,box-shadow .15s;border-color:#b8b99f30;box-shadow:inset 0 1px #ffffff05}
+#lobby .settings-buttons:not(#modeButtons) button[aria-pressed=true]{border-color:#d4b77d9c;background:linear-gradient(120deg,#b8aa6630,#5d836b20);box-shadow:inset 3px 0 #c6ab72,inset 0 1px #ffffff0a}
+#lobby #ballSetButtons{gap:8px}
+#lobby #ballSetButtons button{min-height:53px;padding:12px 14px;text-align:left;font-size:14px;font-weight:550}
+#lobby #ballSetButtons button:only-child{cursor:default}
+#lobby #disciplineInfo{margin:14px 0 10px;padding:12px 14px;border:1px solid #c6ab7225;border-radius:11px;background:#07150f45;color:#c5cfbf;font-size:13px;line-height:1.55}
+#lobby #tableDimensions{margin:0 3px 8px;font-size:11px;color:#95aa9a;line-height:1.6}
+#lobby #formatButtons{gap:9px;margin:2px 0}
+#lobby #formatButtons button{display:flex;align-items:center;gap:14px;min-height:77px;padding:13px 15px;text-align:left}
+.format-card__number{display:grid;place-items:center;flex:0 0 39px;height:39px;border:1px solid #c9b37b45;border-radius:12px;color:#e1c58b;background:#c6ab720a;font-size:23px;font-weight:600}
+#formatButtons button>span:last-child{display:grid;gap:5px}
+#formatButtons strong{font-size:16px;font-weight:650}
+#formatButtons small{font-size:12px;color:#9eafa1;line-height:1.4}
+#lobby .lobby-wizard__footer button{min-height:47px;font-size:16px}
+#lobby #setupTrainingNote,#lobby #setupHostRules,#lobby #setupWaiting p{font-size:14px;line-height:1.6;color:#c5cfbf}
+#lobby #setupCode{font-size:14px;color:#c5cfbf}
+#lobby #code{min-height:50px;border-radius:12px;font-size:16px;border-color:#c9b37b55}
+#lobby button:active:not(:disabled){filter:brightness(1.1)}
+@media(max-width:350px){#lobby .mode-card__copy strong{font-size:14px}#lobby .mode-card__copy small{font-size:11px}#lobby #disciplineButtons button{font-size:14px;padding:12px}}
+@media(max-height:560px){#lobby .wizard-options .mode-card{min-height:57px}#lobby #disciplineButtons button{min-height:80px;flex-direction:row;align-items:center}#lobby #disciplineButtons{margin-bottom:10px}#lobby #disciplineInfo{margin:9px 0;padding:9px 12px}}
+/* Wider fine-aim targets use the free space beside the effect control. */
+body.billiards-table-view .game{grid-template-columns:minmax(212px,1.45fr) minmax(0,1fr)}
+body.billiards-table-view .fine-aim button{width:54px;flex:0 0 54px}
+body.billiards-table-view .shot-tools>#spinButton{font-size:9px;white-space:nowrap}
+@media(max-width:369px){body.billiards-table-view .game{grid-template-columns:minmax(0,1fr)}body.billiards-table-view .shot-tools,body.billiards-table-view .shot-controls{grid-column:1/-1}}
+.table-skin-button{position:absolute;top:126px;left:12px;max-width:70%;font-size:12px;z-index:2}
+body:has(#lobby:not([hidden])) .table-skin-button,body.billiards-table-view .table-skin-button{display:none}
+.table-skin-dialog{width:min(670px,calc(100% - 24px));padding:18px;background:linear-gradient(145deg,#20332f,#0b1716)}
+.table-skin-dialog h2{margin:3px 0;font-size:24px}.table-skin-dialog .cue-dialog__heading small{color:#d6b46a;font-size:9px;letter-spacing:1.5px}
+.table-skin-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.table-skin-card{display:flex;flex-direction:column;gap:9px;overflow:hidden;text-align:left;padding:0 0 13px;background:#0b1b16;border-color:#b89d6338}
+.table-skin-card img{width:100%;height:150px;object-fit:cover;object-position:center 66%}
+.table-skin-card strong,.table-skin-card small,.table-skin-card>span{margin:0 12px}
+.table-skin-card strong{font-size:15px;line-height:1.3}.table-skin-card small{font-size:11px;color:#b3c2b7;line-height:1.4}.table-skin-card>span{font-size:12px;color:#e3c585;margin-top:auto}
+.table-skin-card[aria-pressed=true]{border-color:#e0c17d;box-shadow:inset 0 0 0 1px #e0c17d}.table-skin-card:disabled{opacity:.55}
+@media(max-width:350px){.table-skin-list{gap:8px}.table-skin-card strong{font-size:13px}.table-skin-card img{height:125px}}
+/* The growing collection scrolls independently of Save and Close. */
+.table-skin-dialog[open]{display:flex;flex-direction:column;max-height:90dvh;overflow:hidden;padding:0}
+.table-skin-dialog .cue-dialog__heading{position:static;flex-shrink:0;padding:16px 18px;background:#182c24}
+.table-skin-dialog>[data-hero]{flex-shrink:0;margin:12px 18px 0;font-size:13px;color:#dec991}
+.table-skin-dialog .table-skin-list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#927b49 #11231b;margin:0;padding:16px;align-items:stretch}
+.table-skin-dialog>[data-error]{margin:0 18px;font-size:12px;color:#e6b3a4}
+.table-skin-dialog>[data-error]:empty{display:none}
+.table-skin-dialog .cue-dialog__footer{position:static;flex-shrink:0;padding:12px 16px 16px}
+.table-skin-card img{flex-shrink:0}
+.table-skin-dialog .table-skin-list{grid-auto-rows:max-content;align-content:start}
+.table-skin-dialog .table-skin-card{min-height:265px}
+/* Cue position follows the room image's cover transform, including narrow screens. */
+.billiards-cue-preview{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+.billiards-cue-preview__lean{position:absolute;left:70%;top:43%;width:3.2%;height:40%;transform:rotate(-11deg);transform-origin:50% 100%}
+.billiards-cue-preview__lean::after{content:'';position:absolute;left:20%;right:0;bottom:-.2%;height:1.5%;background:#0009;border-radius:50%;filter:blur(2px)}
+.billiards-cue-preview__lean>img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;filter:drop-shadow(2px 2px 2px #0008)}
+.billiards-cue-preview__name{position:absolute;z-index:2;bottom:16%;left:50%;transform:translateX(-50%) rotate(-90deg);font:700 5px/1 sans-serif;letter-spacing:.1px;white-space:nowrap;color:#211a0c;background:#d6b56b;padding:2px;border-radius:1px;max-width:70px;overflow:hidden}
+body.billiards-table-view .billiards-cue-preview{display:none}
+.cue-card .cue-card__art{display:block;width:100%;height:270px;object-fit:contain;background:none;padding:12px 8px;filter:drop-shadow(3px 4px 4px #0007)}
+.cue-card{background:linear-gradient(145deg,#172e25,#091711);border-radius:14px}
+.cue-card strong{font-size:14px}.cue-card small{font-size:12px}.cue-card__state{font-size:13px}
+@media(max-width:520px){.cue-card .cue-card__art{width:100%;height:270px}}

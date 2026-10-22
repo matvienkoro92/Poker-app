@@ -2,6 +2,7 @@ import {createGame,step,shoot,action,validState} from './engine.mjs';
 import {createSession} from './network.mjs';
 import {createRoom} from './room.mjs';
 import {botMove} from './solo.mjs';
+import {mountTableSkins} from './table-skins.mjs';
 import {mountCues} from './cues.mjs';
 import {mountRules} from './rules-ui.mjs';
 import {mountShotTools} from './shot-tools.mjs';
@@ -17,7 +18,9 @@ let heroSource=window;try{if(parent!==window&&parent.location.origin===location.
 const shotTools=mountShotTools({adjust:delta=>{angle=Math.atan2(Math.sin(angle+delta),Math.cos(angle+delta));}});
 const rulesUI=mountRules({move:value=>move(value),room});
 const cueEntry=new URLSearchParams(location.search).get('mode')==='cues';
-if(cueEntry)$('lobby').hidden=true;
+const tableEntry=new URLSearchParams(location.search).get('mode')==='tables';
+if(cueEntry||tableEntry)$('lobby').hidden=true;
+const tableSkins=mountTableSkins({source:heroSource,room,openInitially:tableEntry});
 const equipment=mountCues({source:heroSource,room,openInitially:cueEntry});
 async function request(body){let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin;const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Сервер недоступен. Попробуйте снова.');return d;}
 const lobby=mountLobby({launch:choice=>$(choice).click(),back:()=>{stop();lobby.reset();$('lobby').hidden=true;setView(false);if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);}});
