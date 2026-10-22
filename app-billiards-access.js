@@ -9,7 +9,7 @@
     var result=await response.json();
     if(!response.ok||!result.allowed)throw Error(result.error||'Бильярдная временно закрыта.');
 
-    var script=document.createElement('script');script.src='app-billiards.js?v=4.020.1.30-room-v3';script.onload=function(){document.querySelector('main').hidden=false;};document.body.appendChild(script);
+    var script=document.createElement('script');script.src='app-billiards.js?v=4.020.1.31-room-v3';script.onload=function(){document.querySelector('main').hidden=false;};document.body.appendChild(script);
   }catch(_){
     document.body.innerHTML='<main class="panel"><h1>Бильярдная временно закрыта</h1><p>Доступ временно ограничен.</p><button id="closedBack" type="button">← На виллу</button></main>';
     document.getElementById('closedBack').onclick=function(){if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);else location.href='./';};
