@@ -391,7 +391,21 @@ body.billiards-table-view #tableDock :is(.call-controls,.training-controls){posi
 body.billiards-table-view #tableDock :is(#turnGuide,#decisionOpen){position:absolute;left:10px;right:10px;bottom:calc(100% + 6px);width:auto}
 body.billiards-table-view #tableDock #penaltyConfirm{position:absolute;left:0;right:0;bottom:0;max-height:45dvh;overflow:auto}
 body.billiards-table-view #tableDock #matchResult{position:absolute;left:0;right:0;bottom:0;background:#11261ff5;border-radius:16px 16px 0 0}
-.billiards>header #turnClock{display:block;margin-top:3px;font-size:10px;line-height:12px;white-space:nowrap}
+.billiards>header #turnClock{display:block;margin-top:5px;font-size:16px;line-height:20px;font-weight:750;white-space:nowrap}
 .billiards>header #turnClock[hidden]{display:none}
 
 .billiards-cloth-brand{position:absolute;left:31%;top:48%;width:38%;height:6%;display:flex;align-items:center;justify-content:center;font:600 1em Georgia,serif;color:#fff;opacity:.13;transform:perspective(400px) rotateX(48deg);pointer-events:none;user-select:none;white-space:nowrap}
+
+/* Break placement must not add a second row inside the single-row shot dock. */
+body.billiards-table-view #tableDock #placeBreak{position:absolute;left:10px;right:10px;bottom:calc(100% + 6px);width:calc(100% - 20px);margin:0;min-height:32px;background:#20392ff5}
+body.billiards-table-view #tableDock #game{grid-template-rows:40px}
+body.billiards-table-view #tableDock .shot-tools,body.billiards-table-view #tableDock .shot-controls{grid-row:1}
+body.billiards-table-view #tableDock .shot-controls{padding-top:0;border-top:0}
+body.billiards-table-view #tableDock .shot-controls label{margin:0}
+
+/* Table actions share the top-right corner, leaving the shot dock clear. */
+body.billiards-table-view #view{display:none}
+body.billiards-table-view .billiards>header{padding-right:156px}
+body.billiards-table-view .room-toolbar{position:absolute;z-index:4;top:calc(env(safe-area-inset-top,0px) + 8px);right:8px;left:auto;transform:none;width:auto;display:flex;align-items:center;gap:6px;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none}
+body.billiards-table-view .room-toolbar :is(.cue-button,.rules-button){position:static;inset:auto;max-width:none;min-height:36px;padding:7px 10px;font-size:12px}
+@media(max-width:350px){body.billiards-table-view .billiards>header{padding-right:134px}body.billiards-table-view .room-toolbar :is(.cue-button,.rules-button){padding:6px 8px;font-size:11px}}

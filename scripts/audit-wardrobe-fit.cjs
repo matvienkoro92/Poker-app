@@ -20,16 +20,17 @@ const output=path.resolve('output/wardrobe-audit',process.env.AUDIT_RUN||'curren
  {id:'tee',title:'Футболка, джинсы, кеды',look:{suit:'riverTee',pants:'washedJeans',shoes:'canvasHigh',hair:'hairAfro',glasses:'wayfarerBlack',watch:'rolexGMT',necklace:'acesPendant'}}
  ];
  const allowed=process.env.AUDIT_KINDS?.split(',');
+ const auditPants=process.env.AUDIT_PANTS||'blackDenim';
  for(const [kind,items]of Object.entries(groups)){if(allowed&&!allowed.includes(kind))continue;
-  for(let start=0;start<items.length;start+=6){const batch=items.slice(start,start+6);const rows=await page.evaluate(async({kind,batch})=>{
+  for(let start=0;start<items.length;start+=6){const batch=items.slice(start,start+6);const rows=await page.evaluate(async({kind,batch,auditPants})=>{
    const G=PokerGarage,source=new Image();source.src=G.characterBasePath;await source.decode();const rows=[];
    for(const item of batch){const images=[];
-    for(const [body]of G.bodyTypes){const look={...G.defaults,body,suit:'stussyBasicTee',pants:'blackDenim',shoes:'none',helmet:'none',...(kind==='combinations'||kind==='visor'?item.look:{[kind]:item.id})};await G.loadWardrobe(look);if(look.helmet!=='none')await G.loadHelmet(true,look.visor,true,look.helmet).decode();const art=G.renderCharacter(source,look),extra=art.height-source.naturalHeight;
+    for(const [body]of G.bodyTypes){const look={...G.defaults,body,suit:'stussyBasicTee',pants:auditPants,shoes:'none',helmet:'none',...(kind==='combinations'||kind==='visor'?item.look:{[kind]:item.id})};await G.loadWardrobe(look);if(look.helmet!=='none')await G.loadHelmet(true,look.visor,true,look.helmet).decode();const art=G.renderCharacter(source,look),extra=art.height-source.naturalHeight;
      const box=kind==='combinations'?[0,0,1024,art.height]:kind==='suit'?[100,180+extra,820,760]:kind==='pants'?[180,590+extra,670,780]:kind==='shoes'?[120,1130+extra,790,410]:['hat','hair','helmet','visor','glasses'].includes(kind)?[280,0,470,390+extra]:['watch','ring'].includes(kind)?[715,650+extra,200,290]:[300,240+extra,440,490];
      const c=document.createElement('canvas');c.width=240;c.height=Math.round(240*box[3]/box[2]);c.getContext('2d').drawImage(art,...box,0,0,c.width,c.height);images.push({body,src:c.toDataURL('image/webp',.9)});
     }rows.push({kind,...item,images});
    }return rows;
-  },{kind,batch});
+  },{kind,batch,auditPants});
   const sheet=kind+'-'+(start/6+1)+'.png';records.push(...rows.map(({images,...r})=>({...r,sheet})));
   const cards=rows.map(row=>'<article><h3>'+row.id+' · '+row.title+'</h3><div>'+row.images.map(im=>'<figure><img src="'+im.src+'"><figcaption>'+im.body+'</figcaption></figure>').join('')+'</div></article>').join('');
   await page.setContent('<meta charset="utf-8"><style>body{margin:0;padding:14px;background:#182127;color:#ead9b5;font:12px Arial}h3{font-size:13px;margin:8px}article{border-bottom:1px solid #65705e;padding:4px 0}article>div{display:flex}figure{margin:0 5px;text-align:center}img{width:240px;max-height:260px;object-fit:contain}figcaption{margin:3px}</style>'+cards);await page.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(i=>i.decode())));await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,sheet),fullPage:true});

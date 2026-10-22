@@ -572,30 +572,34 @@ function paintFashion(c,image,look,standing){
  if(pants&&look.body==='bodyBelly'&&/(Tank|Tee)$/.test(look.suit))c.clearRect(250,750,524,110);
  if(pants){const hem=['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?1079:1295;erase([[300,waistY],[728,waistY],[798,hem],[224,hem]]);}
  const taperBareAnkles=look.body==='bodyBelly'&&(!pants||['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants));
- if(shoes)c.clearRect(142,1511-shoeHeight-(taperBareAnkles?55:0),746,shoeHeight+25+(taperBareAnkles?55:0));
+ if(shoes)c.clearRect(142,1511-shoeHeight-55,746,shoeHeight+80);
  // Footwear sits behind the trouser hem, including when it is the original pair.
  if(shoes){for(const [n,foot]of footwearFit(shoes).entries()){const scale=shoeHeight/foot.height,widthScale=scale*(angledSneaker?1.10:1)*(shoeBase==='valenki'?1.55:['blackOxford','brownLoafers','redMoccasins','burgundyBrogue'].includes(shoeBase)?1.25:1),ankle=pants&&!['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?trouserAnkles(pants,look)[n]:n?684:340,left=ankle-(foot.ankle-foot.left)*widthScale,width=foot.width*widthScale;
- if(dressShoe){
-  // Continue the calf into the collar, beneath the shoe's upper and heel rim.
-  const shoeTop=1511-shoeHeight;
-  c.save();c.beginPath();c.moveTo(ankle-110,shoeTop-55);c.lineTo(ankle+110,shoeTop-55);c.lineTo(ankle+width*.17,shoeTop+12);c.lineTo(ankle+width*.17,shoeTop+75);c.lineTo(ankle-width*.17,shoeTop+75);c.lineTo(ankle-width*.17,shoeTop+12);c.closePath();c.clip();
-  for(let row=0;row<130;row++){const t=Math.min(1,row/120),w=look.body==='bodyBelly'?220*(1-.42*t):220,y=shoeTop-55+row;
-   c.drawImage(image,(ankle-110)*image.naturalWidth/1024,y*image.naturalHeight/1536,220*image.naturalWidth/1024,image.naturalHeight/1536,ankle-w/2,y,w,1.2);
-  }
- c.restore();
- }else if(taperBareAnkles){
-  // Taper the actual leg texture into the shoe opening instead of a horizontal cut.
-  for(let row=0;row<75;row++){const t=Math.min(1,row/65),blend=t*t*(3-2*t),w=220*(1-.42*blend),y=1511-shoeHeight-55+row;
-   c.drawImage(image,(ankle-110)*image.naturalWidth/1024,y*image.naturalHeight/1536,220*image.naturalWidth/1024,image.naturalHeight/1536,ankle-w/2,y,w,1.15);
+ // A worn shoe needs an ankle inside its opening, behind the tongue and rim.
+ // Sample above the erased foot so the extension always contains calf texture.
+ const shoeTop=1511-shoeHeight,openCollar=!themedShoe&&shoeBase!=='valenki';
+ {
+  const sample=document.createElement('canvas');sample.width=1024;sample.height=1536;
+  const sx=sample.getContext('2d',{willReadFrequently:true});sx.drawImage(image,0,0,1024,1536);
+  const sourceY=Math.floor(shoeTop-56),pixels=sx.getImageData(0,sourceY,1024,1).data;
+  let skinLeft=Math.max(0,Math.floor(ankle-120)),skinRight=Math.min(1023,Math.ceil(ankle+120));
+  while(skinLeft<skinRight&&pixels[skinLeft*4+3]<128)skinLeft++;
+  while(skinRight>skinLeft&&pixels[skinRight*4+3]<128)skinRight--;
+  const skinWidth=skinRight-skinLeft+1,center=(skinLeft+skinRight)/2;
+  const depth=openCollar?shoeHeight*(dressShoe?.35:.28):35;
+  const neckWidth=Math.min(width*.40,look.body==='bodyBelly'?100:86);
+  for(let row=0;row<56+depth;row++){
+   const t=Math.min(1,row/65),blend=t*t*(3-2*t),w=skinWidth+(neckWidth-skinWidth)*blend,y=shoeTop-55+row,cx=center+(ankle-center)*blend;
+   c.drawImage(sample,skinLeft,sourceY-Math.min(25,Math.floor(row*.2)),skinWidth,1,cx-w/2,y,w,1.2);
   }
  }
  c.save();c.globalCompositeOperation='destination-over';c.translate(left+width*.5,1509);c.scale(1,.12);const ground=c.createRadialGradient(0,0,0,0,0,width*.65);ground.addColorStop(0,'#0009');ground.addColorStop(1,'#0000');c.fillStyle=ground;c.beginPath();c.arc(0,0,width*.65,0,Math.PI*2);c.fill();c.restore();c.save();if(angledSneaker){c.translate(ankle,1511-shoeHeight+16);c.rotate((n?-1:1)*Math.PI/18);c.translate(-ankle,-(1511-shoeHeight+16));}if(shoeBase==='valenki'){for(let row=0;row<shoeHeight;row++){const t=row/shoeHeight,source=t<.62?t/.62*.72:.72+(t-.62)/.38*.28,f=Math.max(0,Math.min(1,(t-.55)/.45)),flare=1+.40*f*f*(3-2*f),rowWidth=width*flare,rowLeft=ankle-(foot.ankle-foot.left)*widthScale*flare;c.drawImage(shoes,foot.left,foot.top+source*(foot.height-1),foot.width,1,rowLeft,1511-shoeHeight+row,rowWidth,1.2);}}else {
  let shoeArt=shoes,sourceLeft=foot.left,sourceTop=foot.top;
- if(dressShoe){
-  const key='worn-collar-v1:'+look.shoes+':'+n;
+ if(openCollar){
+  const key='worn-collar-v2:'+look.shoes+':'+n;
   shoeArt=wardrobeCrops.get(key);
   if(!shoeArt){shoeArt=document.createElement('canvas');shoeArt.width=foot.width;shoeArt.height=foot.height;const g=shoeArt.getContext('2d');g.drawImage(shoes,foot.left,foot.top,foot.width,foot.height,0,0,foot.width,foot.height);
-   const cx=foot.ankle-foot.left,w=foot.width*.18,h=foot.height;g.globalCompositeOperation='destination-out';g.beginPath();g.moveTo(cx-w*.55,h*.045);g.bezierCurveTo(cx-w,h*.06,cx-w,h*.19,cx-w*.75,h*.29);g.quadraticCurveTo(cx,h*.34,cx+w*.75,h*.29);g.bezierCurveTo(cx+w,h*.19,cx+w,h*.06,cx+w*.55,h*.045);g.closePath();g.fill();wardrobeCrops.set(key,shoeArt);
+   const cx=foot.ankle-foot.left,w=foot.width*(dressShoe?.21:.20),h=foot.height;g.globalCompositeOperation='destination-out';g.beginPath();g.moveTo(cx-w*.55,h*.045);g.bezierCurveTo(cx-w,h*.06,cx-w,h*.19,cx-w*.75,h*(dressShoe?.29:.23));g.quadraticCurveTo(cx,h*(dressShoe?.34:.27),cx+w*.75,h*(dressShoe?.29:.23));g.bezierCurveTo(cx+w,h*.19,cx+w,h*.06,cx+w*.55,h*.045);g.closePath();g.fill();wardrobeCrops.set(key,shoeArt);
   }sourceLeft=sourceTop=0;
  }
  c.drawImage(shoeArt,sourceLeft,sourceTop,foot.width,foot.height,left,1511-shoeHeight,width,shoeHeight);

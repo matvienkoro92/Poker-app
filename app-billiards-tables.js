@@ -10,7 +10,8 @@ const skins=Object.freeze([
   "body": "#8b6d47",
   "description": "Матовый дуб · зелёное сукно",
   "ornament": 0,
-  "image": "./assets/player-hall/billiards-table-classic-v3.webp"
+  "image": "./assets/player-hall/billiards-table-classic-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-classic-v3-thumb.webp"
  },
  {
   "id": "oak",
@@ -22,7 +23,8 @@ const skins=Object.freeze([
   "body": "#9b7549",
   "description": "Медовый дуб · кожаные лузы",
   "ornament": 0,
-  "image": "./assets/player-hall/billiards-table-oak-v3.webp"
+  "image": "./assets/player-hall/billiards-table-oak-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-oak-v3-thumb.webp"
  },
  {
   "id": "walnut",
@@ -34,7 +36,8 @@ const skins=Object.freeze([
   "body": "#593a25",
   "description": "Орех · стальные детали",
   "ornament": 0,
-  "image": "./assets/player-hall/billiards-table-walnut-v3.webp"
+  "image": "./assets/player-hall/billiards-table-walnut-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-walnut-v3-thumb.webp"
  },
  {
   "id": "sport",
@@ -46,7 +49,8 @@ const skins=Object.freeze([
   "body": "#283134",
   "description": "Бирюзовое сукно · графит",
   "ornament": 0,
-  "image": "./assets/player-hall/billiards-table-sport-v3.webp"
+  "image": "./assets/player-hall/billiards-table-sport-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-sport-v3-thumb.webp"
  },
  {
   "id": "midnight",
@@ -58,7 +62,8 @@ const skins=Object.freeze([
   "body": "#242d32",
   "description": "Тёмный орех · никель · перламутр",
   "ornament": 1,
-  "image": "./assets/player-hall/billiards-table-midnight-v3.webp"
+  "image": "./assets/player-hall/billiards-table-midnight-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-midnight-v3-thumb.webp"
  },
  {
   "id": "ocean",
@@ -70,7 +75,8 @@ const skins=Object.freeze([
   "body": "#122237",
   "description": "Синее сукно · тёмный лак · платина",
   "ornament": 1,
-  "image": "./assets/player-hall/billiards-table-ocean-v3.webp"
+  "image": "./assets/player-hall/billiards-table-ocean-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-ocean-v3-thumb.webp"
  },
  {
   "id": "silver",
@@ -82,7 +88,8 @@ const skins=Object.freeze([
   "body": "#7d898d",
   "description": "Серый ясень · сатиновый хром",
   "ornament": 1,
-  "image": "./assets/player-hall/billiards-table-silver-v3.webp"
+  "image": "./assets/player-hall/billiards-table-silver-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-silver-v3-thumb.webp"
  },
  {
   "id": "carbon",
@@ -94,7 +101,8 @@ const skins=Object.freeze([
   "body": "#17272c",
   "description": "Карбон · титан · серебряный кант",
   "ornament": 1,
-  "image": "./assets/player-hall/billiards-table-carbon-v3.webp"
+  "image": "./assets/player-hall/billiards-table-carbon-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-carbon-v3-thumb.webp"
  },
  {
   "id": "bronze",
@@ -106,7 +114,8 @@ const skins=Object.freeze([
   "body": "#4c3020",
   "description": "Дымчатый орех · бронза",
   "ornament": 2,
-  "image": "./assets/player-hall/billiards-table-bronze-v3.webp"
+  "image": "./assets/player-hall/billiards-table-bronze-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-bronze-v3-thumb.webp"
  },
  {
   "id": "obsidian",
@@ -118,7 +127,8 @@ const skins=Object.freeze([
   "body": "#13171c",
   "description": "Рояльный лак · серебряная инкрустация",
   "ornament": 2,
-  "image": "./assets/player-hall/billiards-table-obsidian-v3.webp"
+  "image": "./assets/player-hall/billiards-table-obsidian-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-obsidian-v3-thumb.webp"
  },
  {
   "id": "ruby",
@@ -130,7 +140,8 @@ const skins=Object.freeze([
   "body": "#25131a",
   "description": "Бордовое сукно · махагон · золото",
   "ornament": 2,
-  "image": "./assets/player-hall/billiards-table-ruby-v3.webp"
+  "image": "./assets/player-hall/billiards-table-ruby-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-ruby-v3-thumb.webp"
  },
  {
   "id": "sapphire",
@@ -142,7 +153,8 @@ const skins=Object.freeze([
   "body": "#13192c",
   "description": "Сапфир · платина · двойной кант",
   "ornament": 3,
-  "image": "./assets/player-hall/billiards-table-sapphire-v3.webp"
+  "image": "./assets/player-hall/billiards-table-sapphire-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-sapphire-v3-thumb.webp"
  },
  {
   "id": "emerald",
@@ -154,7 +166,8 @@ const skins=Object.freeze([
   "body": "#132d20",
   "description": "Зелёный лак · золотая геометрия",
   "ornament": 3,
-  "image": "./assets/player-hall/billiards-table-emerald-v3.webp"
+  "image": "./assets/player-hall/billiards-table-emerald-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-emerald-v3-thumb.webp"
  },
  {
   "id": "ivory",
@@ -166,7 +179,8 @@ const skins=Object.freeze([
   "body": "#c8b78d",
   "description": "Светлый лак · золотая окантовка",
   "ornament": 3,
-  "image": "./assets/player-hall/billiards-table-ivory-v3.webp"
+  "image": "./assets/player-hall/billiards-table-ivory-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-ivory-v3-thumb.webp"
  },
  {
   "id": "imperialRuby",
@@ -178,7 +192,8 @@ const skins=Object.freeze([
   "body": "#371722",
   "description": "Винный лак · золотая маркетри",
   "ornament": 4,
-  "image": "./assets/player-hall/billiards-table-imperialRuby-v3.webp"
+  "image": "./assets/player-hall/billiards-table-imperialRuby-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-imperialRuby-v3-thumb.webp"
  },
  {
   "id": "platinum",
@@ -190,7 +205,8 @@ const skins=Object.freeze([
   "body": "#728392",
   "description": "Перламутр · карбон · платина",
   "ornament": 4,
-  "image": "./assets/player-hall/billiards-table-platinum-v3.webp"
+  "image": "./assets/player-hall/billiards-table-platinum-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-platinum-v3-thumb.webp"
  },
  {
   "id": "royal",
@@ -202,7 +218,8 @@ const skins=Object.freeze([
   "body": "#0b1712",
   "description": "Изумруд · рояльный лак · золото",
   "ornament": 4,
-  "image": "./assets/player-hall/billiards-table-royal-v3.webp"
+  "image": "./assets/player-hall/billiards-table-royal-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-royal-v3-thumb.webp"
  },
  {
   "id": "crown",
@@ -214,7 +231,8 @@ const skins=Object.freeze([
   "body": "#171820",
   "description": "Королевский фиолетовый · золотое ар-деко",
   "ornament": 5,
-  "image": "./assets/player-hall/billiards-table-crown-v3.webp"
+  "image": "./assets/player-hall/billiards-table-crown-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-crown-v3-thumb.webp"
  },
  {
   "id": "celestial",
@@ -226,7 +244,8 @@ const skins=Object.freeze([
   "body": "#101c34",
   "description": "Ночной синий · платина · сапфиры",
   "ornament": 5,
-  "image": "./assets/player-hall/billiards-table-celestial-v3.webp"
+  "image": "./assets/player-hall/billiards-table-celestial-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-celestial-v3-thumb.webp"
  },
  {
   "id": "sovereign",
@@ -238,7 +257,8 @@ const skins=Object.freeze([
   "body": "#151f18",
   "description": "Слоновая кость · золотая филигрань",
   "ornament": 6,
-  "image": "./assets/player-hall/billiards-table-sovereign-v3.webp"
+  "image": "./assets/player-hall/billiards-table-sovereign-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-sovereign-v3-thumb.webp"
  },
  {
   "id": "legend",
@@ -250,7 +270,8 @@ const skins=Object.freeze([
   "body": "#eadbbc",
   "description": "Чёрный лак · золото · драгоценные акценты",
   "ornament": 7,
-  "image": "./assets/player-hall/billiards-table-legend-v3.webp"
+  "image": "./assets/player-hall/billiards-table-legend-v3.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-legend-v3-thumb.webp"
  }
 ].map(Object.freeze));
 function available(id,level){return skins.find(s=>s.id===id&&Number.isFinite(level)&&level>=s.level)||skins[0];}
