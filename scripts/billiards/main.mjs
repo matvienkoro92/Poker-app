@@ -6,6 +6,7 @@ import {mountCues} from './cues.mjs';
 import {mountRules} from './rules-ui.mjs';
 import {mountShotTools} from './shot-tools.mjs';
 import {createMatch,recordWin,nextMatch} from './match.mjs';
+import {mountLobby} from './lobby.mjs';
 import {createTraining} from './training.mjs';
 const $=id=>document.getElementById(id);
 let state=createGame(),canonical=state,player=0,online=false,net=null,angle=0,tableView=false,last=performance.now(),acc=0,raf=0,revision=-1,playback=null,clockOffset=0,connectionError='',mode=null,botAt=0;
@@ -19,6 +20,7 @@ const cueEntry=new URLSearchParams(location.search).get('mode')==='cues';
 if(cueEntry)$('lobby').hidden=true;
 const equipment=mountCues({source:heroSource,room,openInitially:cueEntry});
 async function request(body){let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin;const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Сервер недоступен. Попробуйте снова.');return d;}
+const lobby=mountLobby({launch:choice=>$(choice).click(),back:()=>{stop();lobby.reset();$('lobby').hidden=true;setView(false);}});
 function status(text){$('connection').textContent=text;}
 function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').textContent=value?'В комнату':'К столу';}
 function stop(){training.clear();online=false;mode=null;botAt=0;playback=null;net?.close();net=null;connectionError='';$('create').disabled=$('join').disabled=false;$('lobby').hidden=false;$('game').hidden=true;setView(false);$('lobby').hidden=false;}
@@ -31,7 +33,7 @@ function adopt(d){
  if(!validState(d.state))return;
  connectionError='';clockOffset=d.serverNow-Date.now();player=d.player;online=d.ready;$('roomCode').textContent=d.roomId;$('invite').hidden=d.player!==0;$('create').disabled=$('join').disabled=false;
  if(d.challengeSent)status('Вызов отправлен в чат игроков · ждём соперника');
- if(d.ready){$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ПАРТИЯ С ДРУГОМ · ОНЛАЙН';}else if(!d.challengeSent)status('Комната '+d.roomId+' · ждём друга');
+ if(d.ready){$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ПАРТИЯ С ДРУГОМ · ОНЛАЙН';}else {lobby.waiting();if(!d.challengeSent)status('Комната '+d.roomId+' · ждём друга');}
  if(d.revision===revision)return;
  revision=d.revision;canonical=d.state;canonicalSeries=d.match||createMatch();playback=d.playback;series=playback?.matchBefore?structuredClone(playback.matchBefore):structuredClone(canonicalSeries);
  if(playback&&validState(playback.before)&&Date.now()+clockOffset<playback.startedAt+playback.durationMs){state=structuredClone(playback.before);playback.move?action(state,state.turn,playback.move):shoot(state,playback.angle,playback.power);const elapsed=Math.max(0,Date.now()+clockOffset-playback.startedAt);for(let i=0;i<Math.floor(elapsed/1000*120)&&state.moving;i++)step(state);}else{state=canonical;series=structuredClone(canonicalSeries);playback=null;}
@@ -56,10 +58,10 @@ function frame(now){
  if(mode==='solo')recordWin(series,state.winner);if(mode==='training')player=state.turn;
  const can=online&&state.turn===player&&!state.moving&&state.winner===null;
  const turnLabel=mode==='training'?'Сторона '+(state.turn+1):state.turn===player?'Ваш ход':mode==='solo'?'Ход компьютера':'Ход друга';
- $('status').textContent=mode==='training'&&state.winner!==null?'Сторона '+(state.winner+1)+' выиграла партию':mode!=='training'&&series.winner!==null&&state.winner!==null?(series.winner===player?'Вы выиграли '+(series.target===3?'серию':'партию'):'Победил '+(mode==='solo'?'компьютер':'друг')):state.moving?'Шары в движении':state.winner!==null?(state.winner===player?'Вы выиграли партию':mode==='solo'?'Победил компьютер':'Победил друг'):state.pending?((state.turn===player?'Ваш выбор':'Выбор соперника')+' · '+state.message):state.inHand?(turnLabel+' · биток с руки'+(state.handZone==='head'?' из дома':'')):state.breakPending?(state.turn===player?'Вы разбиваете пирамиду':mode==='solo'?'Компьютер разбивает пирамиду':'Друг разбивает пирамиду'):turnLabel;
+ $('status').textContent=mode==='training'&&state.winner!==null?'Сторона '+(state.winner+1)+' выиграла партию':mode!=='training'&&series.winner!==null&&state.winner!==null?(series.winner===player?'Вы выиграли '+(series.target===3?'серию':'партию'):'Победил '+(mode==='solo'?'компьютер':'друг')):state.moving?'Шары в движении':state.winner!==null?(state.winner===player?'Вы выиграли партию':mode==='solo'?'Победил компьютер':'Победил друг'):state.pending?(state.turn===player?'Выберите продолжение партии':'Ждём решения соперника'):state.inHand?(turnLabel+' · биток с руки'+(state.handZone==='head'?' из дома':'')):state.breakPending?(state.turn===player?'Вы разбиваете пирамиду':mode==='solo'?'Компьютер разбивает пирамиду':'Друг разбивает пирамиду'):turnLabel;
  $('hint').textContent=connectionError||(!online?'':state.winner!==null?'Партия завершена':state.moving?'Дождитесь остановки шаров':state.turn!==player?(mode==='solo'?'Ход компьютера':'Ход друга'):state.inHand?'Ваш ход · коснитесь свободного места для битка':tableView?'Ваш ход · вращайте кий за заднюю часть и выберите силу':'Нажмите «К столу», чтобы сделать удар');
  for(let i=0;i<2;i++){const g=state.groups[i];$('p'+(i+1)).textContent=(mode==='training'?'Сторона '+(i+1):i===player?'Вы':mode==='solo'?'Компьютер':'Друг')+' · '+(state.discipline==='pyramid'?'пирамида':g===null?'стол открыт':g===0?'сплошные':'полосатые')+' · '+state.scores[i]+'/'+(state.discipline==='pyramid'?8:7);$('p'+(i+1)).className=state.turn===i?'active':'';}
- $('seriesScore').hidden=mode==='training'||!online;$('seriesScore').textContent=series.target===3?'До 3 побед · Вы '+series.wins[player]+' : '+series.wins[1-player]+' '+(mode==='solo'?'Компьютер':'Друг')+' · партия '+series.round:'Одна партия';
+ $('seriesScore').hidden=mode==='training'||!online||series.target===1;$('seriesScore').textContent=series.target===3?'До 3 побед · Вы '+series.wins[player]+' : '+series.wins[1-player]+' '+(mode==='solo'?'Компьютер':'Друг')+' · партия '+series.round:'Одна партия';
  $('trainingControls').hidden=mode!=='training';const repeatAvailable=training.inspect().available;$('restoreShot').disabled=$('repeatShot').disabled=!repeatAvailable;
  $('again').hidden=mode!=='training'&&(state.winner===null||player!==0);$('again').textContent=mode==='training'?'Новая расстановка':series.target===3?(series.winner!==null?'Новая серия до 3 побед':'Следующая партия'):'Новая партия';
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';

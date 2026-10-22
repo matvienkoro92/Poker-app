@@ -733,3 +733,10 @@
 .garage-wardrobe-filter .garage-category-filter{position:static;flex:1;min-width:0;max-width:190px;width:auto;min-height:30px;height:30px;padding:4px 28px 4px 10px;border:1px solid #9b875c88;border-radius:9px;background:#17262d;color:#f3dfb4;font:inherit;font-size:12px}
 
 .player-hall-dialog .hall-scene-neon:hover,.player-hall-dialog .hall-scene-neon:focus-within{opacity:1;background:#142027a6}
+.player-hall__room[data-garage-vehicle="5"] .garage-locked-vehicle,.player-hall__room[data-garage-vehicle="6"] .garage-locked-vehicle{width:72%;left:2%;bottom:24%}
+.player-hall__room[data-garage-vehicle="5"] .player-hall__camera-ui .garage-vehicle-switch>span,.player-hall__room[data-garage-vehicle="6"] .player-hall__camera-ui .garage-vehicle-switch>span{font-size:12px}
+.player-hall__room .garage-basic-vehicle>img{filter:drop-shadow(0 8px 5px #0007)}
+.garage-basic-vehicle__label{position:absolute;left:50%;bottom:0;transform:translateX(-50%);padding:5px 10px;border:1px solid #b89a6066;border-radius:8px;background:#13201be6;color:#e9d7b0;font-size:11px;white-space:nowrap}
+.player-hall__room[data-garage-vehicle="5"] .garage-car-label,.player-hall__room[data-garage-vehicle="6"] .garage-car-label{display:none}
+.player-hall__room .garage-basic-vehicle{aspect-ratio:1.6}
+.player-hall__room .garage-basic-vehicle>img{height:100%;object-fit:contain}

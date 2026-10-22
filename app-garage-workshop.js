@@ -40,20 +40,20 @@ function paintSavedVehicle(canvas,look,options){
  if(!canvas)return;const side=options?.side===true,trim=side||options?.trim===true,night=options?.night??(canvas.closest('.player-hall__room')?.dataset.theme==='midnight');
  const neon=window.pokerGarageNeonBrightness?.()??1.5;
  const characterKeys=new Set(['suit','pants','shoes','helmet','visor','patch','patchText','hair','body','hat','glasses','watch','necklace','ring','bracelet','gloves','belt','target']);
- const vehicle=Object.fromEntries(Object.keys(look).sort().filter(k=>!characterKeys.has(k)).map(k=>[k,look[k]]));const key='vehicle:'+garageRendererRevision+':'+JSON.stringify(vehicle)+(side?':side':'')+(trim?':trim':'')+(night?':night':'')+':neon:'+neon;
+ const vehicle=Object.fromEntries(Object.keys(look).sort().filter(k=>!characterKeys.has(k)).map(k=>[k,look[k]]));const geometryKey='vehicle:'+garageRendererRevision+':'+JSON.stringify(vehicle)+(side?':side':'')+(trim?':trim':''),lightingOnly=canvas.dataset.vehicleRenderer==='3d'&&canvas.dataset.vehicleGeometry===geometryKey;const key=geometryKey+(night?':night':'')+':neon:'+neon;
  if(canvas.dataset.vehicleRenderer==='3d'&&canvas.dataset.vehicleLoadout===key)return;
  const revision=(canvas._vehicleRevision||0)+1;canvas._vehicleRevision=revision;
  clearTimeout(canvas._vehicleTimer);
  const current=()=>canvas.isConnected&&canvas._vehicleRevision===revision;
  let loading;
- if(canvas.classList.contains('player-hall__parked-kart')){
+ if(!lightingOnly&&canvas.classList.contains('player-hall__parked-kart')){
   const loadingHost=canvas.closest('.player-hall__room')||canvas.parentElement;
   loading=loadingHost.querySelector('.garage-vehicle-loading');
   if(!loading){loading=document.createElement('button');loading.type='button';loading.className='garage-vehicle-loading';loading.setAttribute('role','status');loadingHost.appendChild(loading);}
   loading.hidden=false;loading.disabled=true;loading.textContent='Загружаем машину…';loading.dataset.state='loading';canvas.setAttribute('aria-busy','true');
  }
  const failed=()=>{if(!current())return;canvas.setAttribute('aria-busy','false');if(loading){loading.disabled=false;loading.textContent='Не удалось загрузить · Повторить';loading.dataset.state='error';loading.onclick=()=>paintSavedVehicle(canvas,look,options);}};
- const apply=image=>{if(!current())return;canvas.width=image.width;canvas.height=image.height;canvas.getContext('2d').drawImage(image,0,0);canvas.dataset.vehicleRenderer='3d';canvas.dataset.vehicleLoadout=key;canvas.setAttribute('aria-busy','false');if(loading)loading.hidden=true;};
+ const apply=image=>{if(!current())return;if(canvas.width!==image.width)canvas.width=image.width;if(canvas.height!==image.height)canvas.height=image.height;canvas.getContext('2d').drawImage(image,0,0);canvas.dataset.vehicleRenderer='3d';canvas.dataset.vehicleLoadout=key;canvas.dataset.vehicleGeometry=geometryKey;canvas.setAttribute('aria-busy','false');if(loading)loading.hidden=true;};
  if(savedVehicleCache.has(key)){apply(savedVehicleCache.get(key));return;}
  const remember=image=>{savedVehicleCache.set(key,image);while(savedVehicleCache.size>24)savedVehicleCache.delete(savedVehicleCache.keys().next().value);};
  // Fetch the renderer while checking persistent cache instead of waiting for storage first.
@@ -67,8 +67,8 @@ function paintSavedVehicle(canvas,look,options){
     clearTimeout(savedVehicleIdle);
     try{
      if(!savedVehicleViewer){savedVehicleHost=document.createElement('div');savedVehicleHost.style.cssText='position:fixed;left:-10000px;top:0;width:900px;height:600px;pointer-events:none';document.body.append(savedVehicleHost);savedVehicleViewer=window.pokerCreateGarage3D(savedVehicleHost,look,{yaw:side?0:.9,pitch:side?0:.30,manual:true,snapshotOnly:true,night,neon});if(!savedVehicleViewer)throw Error('3D-просмотр недоступен');}
-     else{savedVehicleViewer.update(look);savedVehicleViewer.state.yaw=side?0:.9;savedVehicleViewer.state.pitch=side?0:.30;savedVehicleViewer.state.neon=neon;savedVehicleViewer.setNight(night);}
-     const image=savedVehicleViewer.snapshot();if(trim)trimShelfArt(image);remember(image);apply(image);window.pokerGaragePreviewCache.write(key,image);
+     else{if(savedVehicleViewer._vehicleGeometry!==geometryKey)savedVehicleViewer.update(look);savedVehicleViewer.state.yaw=side?0:.9;savedVehicleViewer.state.pitch=side?0:.30;savedVehicleViewer.state.neon=neon;savedVehicleViewer.setNight(night);}
+     savedVehicleViewer._vehicleGeometry=geometryKey;const image=savedVehicleViewer.snapshot();if(trim)trimShelfArt(image);remember(image);apply(image);if(!lightingOnly)window.pokerGaragePreviewCache.write(key,image);
     }catch(error){releaseSavedVehicleViewer();failed();console.warn('Saved vehicle render failed',error);}
     finally{savedVehicleIdle=setTimeout(releaseSavedVehicleViewer,8000);}
    };
