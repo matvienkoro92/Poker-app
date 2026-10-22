@@ -560,6 +560,7 @@ function paintFashion(c,image,look,standing){
  const waistY=look.suit==='none'?(look.body==='bodyBelly'?760:640):look.body==='bodyBelly'?(/(Tank|Tee)$/.test(look.suit)?750:780):summerPieces[look.suit]&&look.suit.endsWith('Tank')?720:690;
  const highBoot=['combatBlack','hikingBrown','canvasHigh','suedeChelsea','jordanBlackToe','jordanChicago','valenki'].includes(shoeBase),lowShoe=['blackOxford','brownLoafers','redMoccasins','burgundyBrogue','ivoryLow','greenCourt','nikeAirForceWhite','nikeDunkPanda','gucciAce','pradaAmericaCup'].includes(shoeBase);
  const angledSneaker=['nikeAirForceWhite','nikeDunkPanda','jordanChicago','gucciAce','balenciagaTrack','pradaAmericaCup'].includes(shoeBase);
+ const dressShoe=['blackOxford','brownLoafers','redMoccasins','burgundyBrogue'].includes(shoeBase);
  const themedShoe=themedPieces.get(look.shoes)?.outfit;
  const shoeHeight=(themedShoe?({fisherman:275,bath:150,garden:180,space:265,enduro:300}[themedShoe]):shoeBase==='valenki'?198:highBoot?238:lowShoe?196:216)*(angledSneaker?1.08:1),jeans=['indigoJeans','washedJeans','blackDenim'].includes(look.pants),bottom=(themedShoe&&['fisherman','space','enduro'].includes(themedShoe)?1511-shoeHeight+45:shoes?(shoeBase==='valenki'?1352:highBoot?1312:lowShoe?1356:1338):1322)+(jeans?(shoes&&highBoot&&shoeBase!=='valenki'?36:12):['navyPinstripe','navyBusinessPants','charcoalBusinessPants'].includes(look.pants)?(shoes&&highBoot&&shoeBase!=='valenki'?42:20):0);
  let originalCuffs=null;if(shoes&&!pants&&look.body!=='bodyBelly'){originalCuffs=document.createElement('canvas');originalCuffs.width=1024;originalCuffs.height=80;originalCuffs.getContext('2d').drawImage(c.canvas,0,1190*c.canvas.width/1024,c.canvas.width,80*c.canvas.width/1024,0,0,1024,80);}
@@ -574,13 +575,31 @@ function paintFashion(c,image,look,standing){
  if(shoes)c.clearRect(142,1511-shoeHeight-(taperBareAnkles?55:0),746,shoeHeight+25+(taperBareAnkles?55:0));
  // Footwear sits behind the trouser hem, including when it is the original pair.
  if(shoes){for(const [n,foot]of footwearFit(shoes).entries()){const scale=shoeHeight/foot.height,widthScale=scale*(angledSneaker?1.10:1)*(shoeBase==='valenki'?1.55:['blackOxford','brownLoafers','redMoccasins','burgundyBrogue'].includes(shoeBase)?1.25:1),ankle=pants&&!['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)?trouserAnkles(pants,look)[n]:n?684:340,left=ankle-(foot.ankle-foot.left)*widthScale,width=foot.width*widthScale;
- if(taperBareAnkles){
+ if(dressShoe){
+  // Continue the calf into the collar, beneath the shoe's upper and heel rim.
+  const shoeTop=1511-shoeHeight;
+  c.save();c.beginPath();c.moveTo(ankle-110,shoeTop-55);c.lineTo(ankle+110,shoeTop-55);c.lineTo(ankle+width*.17,shoeTop+12);c.lineTo(ankle+width*.17,shoeTop+75);c.lineTo(ankle-width*.17,shoeTop+75);c.lineTo(ankle-width*.17,shoeTop+12);c.closePath();c.clip();
+  for(let row=0;row<130;row++){const t=Math.min(1,row/120),w=look.body==='bodyBelly'?220*(1-.42*t):220,y=shoeTop-55+row;
+   c.drawImage(image,(ankle-110)*image.naturalWidth/1024,y*image.naturalHeight/1536,220*image.naturalWidth/1024,image.naturalHeight/1536,ankle-w/2,y,w,1.2);
+  }
+ c.restore();
+ }else if(taperBareAnkles){
   // Taper the actual leg texture into the shoe opening instead of a horizontal cut.
   for(let row=0;row<75;row++){const t=Math.min(1,row/65),blend=t*t*(3-2*t),w=220*(1-.42*blend),y=1511-shoeHeight-55+row;
    c.drawImage(image,(ankle-110)*image.naturalWidth/1024,y*image.naturalHeight/1536,220*image.naturalWidth/1024,image.naturalHeight/1536,ankle-w/2,y,w,1.15);
   }
  }
- c.save();c.globalCompositeOperation='destination-over';c.translate(left+width*.5,1509);c.scale(1,.12);const ground=c.createRadialGradient(0,0,0,0,0,width*.65);ground.addColorStop(0,'#0009');ground.addColorStop(1,'#0000');c.fillStyle=ground;c.beginPath();c.arc(0,0,width*.65,0,Math.PI*2);c.fill();c.restore();c.save();if(angledSneaker){c.translate(ankle,1511-shoeHeight+16);c.rotate((n?-1:1)*Math.PI/18);c.translate(-ankle,-(1511-shoeHeight+16));}if(shoeBase==='valenki'){for(let row=0;row<shoeHeight;row++){const t=row/shoeHeight,source=t<.62?t/.62*.72:.72+(t-.62)/.38*.28,f=Math.max(0,Math.min(1,(t-.55)/.45)),flare=1+.40*f*f*(3-2*f),rowWidth=width*flare,rowLeft=ankle-(foot.ankle-foot.left)*widthScale*flare;c.drawImage(shoes,foot.left,foot.top+source*(foot.height-1),foot.width,1,rowLeft,1511-shoeHeight+row,rowWidth,1.2);}}else c.drawImage(shoes,foot.left,foot.top,foot.width,foot.height,left,1511-shoeHeight,width,shoeHeight);c.restore();}}
+ c.save();c.globalCompositeOperation='destination-over';c.translate(left+width*.5,1509);c.scale(1,.12);const ground=c.createRadialGradient(0,0,0,0,0,width*.65);ground.addColorStop(0,'#0009');ground.addColorStop(1,'#0000');c.fillStyle=ground;c.beginPath();c.arc(0,0,width*.65,0,Math.PI*2);c.fill();c.restore();c.save();if(angledSneaker){c.translate(ankle,1511-shoeHeight+16);c.rotate((n?-1:1)*Math.PI/18);c.translate(-ankle,-(1511-shoeHeight+16));}if(shoeBase==='valenki'){for(let row=0;row<shoeHeight;row++){const t=row/shoeHeight,source=t<.62?t/.62*.72:.72+(t-.62)/.38*.28,f=Math.max(0,Math.min(1,(t-.55)/.45)),flare=1+.40*f*f*(3-2*f),rowWidth=width*flare,rowLeft=ankle-(foot.ankle-foot.left)*widthScale*flare;c.drawImage(shoes,foot.left,foot.top+source*(foot.height-1),foot.width,1,rowLeft,1511-shoeHeight+row,rowWidth,1.2);}}else {
+ let shoeArt=shoes,sourceLeft=foot.left,sourceTop=foot.top;
+ if(dressShoe){
+  const key='worn-collar-v1:'+look.shoes+':'+n;
+  shoeArt=wardrobeCrops.get(key);
+  if(!shoeArt){shoeArt=document.createElement('canvas');shoeArt.width=foot.width;shoeArt.height=foot.height;const g=shoeArt.getContext('2d');g.drawImage(shoes,foot.left,foot.top,foot.width,foot.height,0,0,foot.width,foot.height);
+   const cx=foot.ankle-foot.left,w=foot.width*.18,h=foot.height;g.globalCompositeOperation='destination-out';g.beginPath();g.moveTo(cx-w*.55,h*.045);g.bezierCurveTo(cx-w,h*.06,cx-w,h*.19,cx-w*.75,h*.29);g.quadraticCurveTo(cx,h*.34,cx+w*.75,h*.29);g.bezierCurveTo(cx+w,h*.19,cx+w,h*.06,cx+w*.55,h*.045);g.closePath();g.fill();wardrobeCrops.set(key,shoeArt);
+  }sourceLeft=sourceTop=0;
+ }
+ c.drawImage(shoeArt,sourceLeft,sourceTop,foot.width,foot.height,left,1511-shoeHeight,width,shoeHeight);
+ }c.restore();}}
  if(originalCuffs){for(const [left,width]of [[267,166],[596,166]])c.drawImage(originalCuffs,left,0,width,80,left,1190,width,bottom-1190);}
  if(pants&&['sandShorts','oceanShorts','flamingoShorts'].includes(look.pants)){
   const fitted=document.createElement('canvas');fitted.width=1024;fitted.height=1536;paintFittedPants(fitted.getContext('2d'),pants,look,waistY,1079-waistY,.60);c.drawImage(fitted,0,0);c.canvas._pantsRepairLayer=fitted;

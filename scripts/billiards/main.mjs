@@ -24,7 +24,7 @@ let heroSource=window;try{if(parent!==window&&parent.location.origin===location.
 const shotTools=mountShotTools({adjust:delta=>{angle=Math.atan2(Math.sin(angle+delta),Math.cos(angle+delta));}});
 const turnGuide=mountTurnGuide();
 const rulesUI=mountRules({move:value=>move(value),room});
-const tableDock=document.createElement('section');tableDock.id='tableDock';tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
+const tableDock=document.createElement('section');tableDock.id='tableDock';document.querySelector('.billiards>header>div').append($('turnClock'));tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
 const resultPanel=mountResultPanel(tableDock,()=>$('again').click());
 let initialEntry=new URLSearchParams(location.search).get('mode')||'lobby';
 try{if(parent!==window&&window.frameElement?.dataset.billiardsEntry)initialEntry=window.frameElement.dataset.billiardsEntry;}catch{}
@@ -103,9 +103,12 @@ function frame(now){
  if(mode==='solo'&&turnSeconds){const key=[state.shot,state.turn,!!state.pending].join(':');if(state.moving){turnDeadline=null;localClockKey='';}else if(state.winner!==null)turnDeadline=null;else if(key!==localClockKey){localClockKey=key;turnDeadline=Date.now()+turnSeconds*1000;}else if(turnDeadline&&Date.now()>=turnDeadline){expireTurn(state);localClockKey='';}}
  const remaining=turnDeadline?Math.max(0,Math.ceil((turnDeadline-(Date.now()+(mode==='online'?clockOffset:0)))/1000)):null;
  $('turnClock').hidden=!tableView||remaining===null||state.moving||state.winner!==null;
- $('turnClock').textContent=remaining===null?'':'На ход: '+remaining+' с · лимит '+turnSeconds+' с';
+ $('turnClock').textContent=remaining===null?'':remaining+' с · лимит '+turnSeconds+' с';
  const can=online&&!playback&&state.turn===player&&!state.moving&&state.winner===null&&(remaining===null||remaining>0);
  const turnLabel=mode==='training'?'Сторона '+(state.turn+1):state.turn===player?'Ваш ход':mode==='solo'?'Ход компьютера':'Ход друга';
+ const heading=document.querySelector('.billiards>header h1'),headingState=!mode||!tableView?'room':!online?'waiting':state.winner!==null?'finished':mode==='training'?'training':state.turn===player?'mine':'opponent';
+ const headingText={room:'Бильярдная',waiting:'Ждём соперника',finished:'Партия завершена',training:'Тренировка',mine:'Ваш ход',opponent:'Ход соперника'}[headingState];
+ if(heading&&heading.dataset.turn!==headingState){heading.dataset.turn=headingState;heading.textContent=headingText;}
  $('status').textContent=mode==='training'&&state.winner!==null?'Сторона '+(state.winner+1)+' выиграла партию':mode!=='training'&&series.winner!==null&&state.winner!==null?(series.winner===player?'Вы выиграли '+(series.target===3?'серию':'партию'):'Победил '+(mode==='solo'?'компьютер':'друг')):state.moving?'Шары в движении':state.winner!==null?(state.winner===player?'Вы выиграли партию':mode==='solo'?'Победил компьютер':'Победил друг'):state.pending?(state.turn===player?'Выберите продолжение партии':'Ждём решения соперника'):state.inHand?(turnLabel+' · биток с руки'+(state.handZone==='head'?' из дома':'')):state.breakPending?(state.turn===player?'Вы разбиваете пирамиду':mode==='solo'?'Компьютер разбивает пирамиду':'Друг разбивает пирамиду'):turnLabel;
  $('hint').textContent=connectionError||(!online?'':state.winner!==null?'Партия завершена':state.moving?'Дождитесь остановки шаров':state.turn!==player?(mode==='solo'?'Ход компьютера':'Ход друга'):state.inHand?'Ваш ход · коснитесь свободного места для битка':tableView?'Ваш ход · вращайте кий за заднюю часть и выберите силу':'Нажмите «К столу», чтобы сделать удар');
  for(let i=0;i<2;i++){const g=state.groups[i];$('p'+(i+1)).textContent=(mode==='training'?'Сторона '+(i+1):i===player?'Вы':mode==='solo'?'Компьютер':'Друг')+' · '+(state.discipline==='pyramid'?'пирамида':g===null?'стол открыт':g===0?'сплошные':'полосатые')+' · '+state.scores[i]+'/'+(state.discipline==='pyramid'?8:7);$('p'+(i+1)).className=state.turn===i?'active':'';}
@@ -127,5 +130,5 @@ openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');if(
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
 raf=requestAnimationFrame(frame);
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.
-window.PokerBilliards={inspect:()=>({mode,ready:online,tableView,equipment:equipment.inspect(),rules:rulesUI.inspect(),shotTools:shotTools.inspect(),training:training.inspect(),turnSeconds,turnDeadline,replay:replayPlayer.inspect(),shownAim:shownAim?{...shownAim}:null,series:structuredClone(series),angle,state:structuredClone(state)})};
+window.PokerBilliards={inspect:()=>({mode,ready:online,tableView,equipment:equipment.inspect(),rules:rulesUI.inspect(),shotTools:shotTools.inspect(),training:training.inspect(),turnSeconds,turnDeadline,replay:replayPlayer.inspect(),graphics:room?.inspect(),shownAim:shownAim?{...shownAim}:null,series:structuredClone(series),angle,state:structuredClone(state)})};
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);controlsObserver.disconnect();stop();replayPlayer.dispose();room?.dispose();});

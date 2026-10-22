@@ -599,3 +599,5 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 @media(min-width:720px){.hall-equipment__list{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 .billiards-shell--overlay,.billiards-shell--overlay::backdrop{background:transparent}
+
+.billiards-cloth-brand{position:absolute;left:31%;top:48%;width:38%;height:6%;display:flex;align-items:center;justify-content:center;font:600 1em Georgia,serif;color:#fff;opacity:.13;transform:perspective(400px) rotateX(48deg);pointer-events:none;user-select:none;white-space:nowrap}
