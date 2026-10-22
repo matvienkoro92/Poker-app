@@ -4,7 +4,7 @@ const {skins}=require('../app-billiards-tables.js');
 (async()=>{
  let original=0,preview=0;
  for(const skin of skins){
-  const input=path.resolve(skin.image),output=input.replace(/\.webp$/,'-thumb.webp');
+  const input=path.resolve(skin.image),output=skin.thumbnail?path.resolve(skin.thumbnail):input.replace(/\.webp$/,'-thumb.webp');
   const result=await sharp(input).resize({width:480,withoutEnlargement:true}).webp({quality:75,effort:5}).toFile(output);
   original+=(await fs.stat(input)).size;preview+=result.size;
  }

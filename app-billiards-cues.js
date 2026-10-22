@@ -7,7 +7,7 @@ const cues=Object.freeze([
   "color": "#dec18d",
   "grip": "#62452e",
   "metal": "#b6a38a",
-  "art": "./assets/player-hall/billiards-cue-maple-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-maple-v3.webp"
  },
  {
   "id": "walnut",
@@ -16,7 +16,7 @@ const cues=Object.freeze([
   "color": "#633a23",
   "grip": "#453024",
   "metal": "#d5ae60",
-  "art": "./assets/player-hall/billiards-cue-walnut-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-walnut-v3.webp"
  },
  {
   "id": "aces",
@@ -25,7 +25,7 @@ const cues=Object.freeze([
   "color": "#124e3c",
   "grip": "#173c30",
   "metal": "#e7bb61",
-  "art": "./assets/player-hall/billiards-cue-aces-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-aces-v3.webp"
  },
  {
   "id": "ocean",
@@ -34,7 +34,7 @@ const cues=Object.freeze([
   "color": "#226b96",
   "grip": "#203f56",
   "metal": "#cad7df",
-  "art": "./assets/player-hall/billiards-cue-ocean-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-ocean-v3.webp"
  },
  {
   "id": "carbon",
@@ -43,7 +43,7 @@ const cues=Object.freeze([
   "color": "#242b30",
   "grip": "#161d21",
   "metal": "#d6dee3",
-  "art": "./assets/player-hall/billiards-cue-carbon-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-carbon-v3.webp"
  },
  {
   "id": "ruby",
@@ -52,7 +52,7 @@ const cues=Object.freeze([
   "color": "#6d1726",
   "grip": "#3c1720",
   "metal": "#edbf65",
-  "art": "./assets/player-hall/billiards-cue-ruby-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-ruby-v3.webp"
  },
  {
   "id": "signature",
@@ -62,7 +62,7 @@ const cues=Object.freeze([
   "grip": "#171b1a",
   "metal": "#e5bf68",
   "named": true,
-  "art": "./assets/player-hall/billiards-cue-signature-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-signature-v3.webp"
  },
  {
   "id": "sovereign",
@@ -71,7 +71,7 @@ const cues=Object.freeze([
   "color": "#122d27",
   "grip": "#12201c",
   "metal": "#f4cc71",
-  "art": "./assets/player-hall/billiards-cue-sovereign-v2.webp"
+  "art": "./assets/player-hall/billiards-cue-sovereign-v3.webp"
  }
 ].map(Object.freeze));
 function available(id,level){return cues.find(c=>c.id===id&&Number.isFinite(level)&&level>=c.level)||cues[0];}
