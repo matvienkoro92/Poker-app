@@ -8,6 +8,17 @@ function setup(){const calls=[],store=new Map();let badLedger=false;const module
  return {...module.exports,calls,store,fail:()=>badLedger=true};
 }
 function message(actor=388008256,chatId=-123,title='Админка покер'){return {message:{message_id:4,text:'/withdrawals',from:{id:actor},chat:{id:chatId,type:'supergroup',title}}};}
+test('work duration uses original creation time despite partial payments and is recalculated on refresh',()=>{
+ const now=Date.parse('2026-10-22T00:05:00Z'),createdAt=now-(26*60+3)*60000-17000;
+ const state={entries:[entry({createdAt}),entry({id:'fresh',createdAt:now-30000}),entry({id:'missing'}),entry({id:'future',createdAt:now+60000})]};
+ const text=withdrawalPages(state,now).join('\n');
+ assert.match(text,/В работе: 1 д 2 ч 3 мин/);
+ assert.match(text,/В работе: меньше минуты/);
+ assert.match(text,/В работе: неизвестно/);
+ assert.doesNotMatch(text,/-1 мин|NaN/);
+ assert.match(withdrawalPages(state,now+3600000).join('\n'),/В работе: 1 д 3 ч 3 мин/);
+ assert.match(withdrawalPages({entries:[entry({createdAt:now-3600000})]},now)[0],/В работе: 1 ч\n/);
+});
 test('withdrawal report uses shared balances, excludes closed archive and deleted cards and escapes labels',()=>{
  const text=withdrawalPages({entries:[entry(),entry({id:'b',total:50000,room:'X',payments:[],returns:[],reservations:[]}),entry({archived:true}),entry({deletedAt:1}),entry({total:30000,reservations:[]})]}).join('\n').replace(/\u00a0/g,' ');
  assert.match(text,/Выводы в работе: 2/);assert.match(text,/Осталось выплатить: <b>1 200 ₽/);assert.match(text,/Доступно: 1 050 ₽/);assert.match(text,/Заморожено: 150 ₽/);assert.match(text,/Покер21: 1 · 700 ₽/);assert.match(text,/Хпокер: 1 · 500 ₽/);assert.match(text,/Игрок &lt;a&gt;/);assert.match(text,/Остаток: <b>700 ₽/);
