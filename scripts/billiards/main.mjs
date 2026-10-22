@@ -65,7 +65,7 @@ function frame(now){
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';
  shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});if(tableView)room?.render(display,angle,can&&!state.inHand&&!state.pending);raf=requestAnimationFrame(frame);
 }
-const controlsObserver=new ResizeObserver(()=>{const height=$('game').getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');if(tableView)room?.setView('table');}});controlsObserver.observe($('game'));
+const controlsObserver=new ResizeObserver(()=>{const height=$('game').getBoundingClientRect().height;if(height){document.body.style.setProperty('--billiards-controls-height',Math.ceil(height)+'px');}});controlsObserver.observe($('game'));
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
 raf=requestAnimationFrame(frame);
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.
