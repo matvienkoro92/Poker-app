@@ -2756,6 +2756,17 @@
         if (artSlug) artOccurrenceBySlug[artSlug] = artOccurrence + 1;
         return eventHtml(row, false, row === dayHero, false, artOccurrence);
       }).join("");
+      var dayTotalHtml = "";
+      if (newsModalMode === "club" && clubNewsTab === "wins") {
+        var totalRows = clubWinsDayTab === "heroes" ? clubEvents.filter(function (row) {
+          return eventDayKey(row && row.at) === group.day;
+        }) : group.rows;
+        var dayTotal = totalRows.reduce(function (sum, row) {
+          var amount = Number(row && row.prizeAmount);
+          return sum + (Number.isFinite(amount) && amount > 0 ? Math.round(amount * 100) : 0);
+        }, 0) / 100;
+        if (dayTotal > 0) dayTotalHtml = '<div class="home-friend-news-modal__day-total"><span>Общий выигрыш за день</span><strong>' + esc(dayTotal.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽") + '</strong></div>';
+      }
       return '<section class="home-friend-news-modal__day-group">' +
         (newsModalMode === "club" && groupIndex === 0 ? clubWinsDayTabsHtml() : "") +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) +
@@ -2763,6 +2774,7 @@
         '<div class="home-friend-news-modal__day-events">' +
           dayEventsHtml +
         "</div>" +
+        dayTotalHtml +
       "</section>";
     }).join("");
   }
@@ -3056,6 +3068,20 @@
     }).filter(Boolean);
   }
 
+  function clubPinnedRankingsHtml() {
+    var data = (window.POKER_CLUB_NEWS_DATA || {}).allTimeSummary;
+    if (!data || !data.topTotals || !data.topTotals.length) return "";
+    function ranking(title, rows, single) {
+      return '<details data-month-ranking="all-time-' + (single ? 'wins' : 'totals') + '"><summary>' + title + '<span aria-hidden="true">⌄</span></summary><ol class="home-news-achievement__list">' + rows.map(function (row) {
+        return '<li><b>' + esc(row.nick + ' — ' + Number(row.reward).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₽') + '</b>' +
+          (single ? '<small>' + esc(row.date + ' · ' + row.tournament + ' · ' + row.place + '-е место') + '</small>' : '') + '</li>';
+      }).join('') + '</ol></details>';
+    }
+    return '<aside class="home-friend-news-modal__editorial home-news-achievement home-news-pinned-rankings" aria-label="Закреплённая статистика клуба"><small>📌 ЗАКРЕПЛЕНО · ' + esc(data.from + ' — ' + data.to) + '</small><h3>Топ-10 заносов клуба</h3><p class="home-news-achievement__lead">За весь доступный период турнирных отчётов</p>' +
+      ranking('Топ-10 по общей сумме призовых', data.topTotals, false) +
+      ranking('Топ-10 разовых заносов', data.topWins, true) + '</aside>';
+  }
+
   function clubSeptemberResultsHtml() {
     var summary = (window.POKER_CLUB_NEWS_DATA || {}).monthlySummaries;
     var data = summary && summary["2026-09"];
@@ -3120,7 +3146,7 @@
           '<p>Победители прошлого лидерборда Poker21: <b>ПокерМанки — 250 000 ₽</b>, <b>Ваар — 150 000 ₽</b>, <b>Кулер — 100 000 ₽</b>. Поздравляем чемпионов и желаем удачи участникам нового сезона!</p></article>' }
       ];
       editorialPosts = editorialPosts.concat(clubAchievementPosts(), clubSngWinnerPosts(clubSngNewsRows)).sort(function (a, b) { return b.date.localeCompare(a.date); });
-      patchNewsList(list, clubTabs + editorialPosts.map(function (post) {
+      patchNewsList(list, clubTabs + clubPinnedRankingsHtml() + editorialPosts.map(function (post) {
         return '<section class="home-friend-news-modal__day-group"><div class="home-friend-news-modal__date"><span>' +
           esc(eventDateLabel(post.date, true)) + '</span></div>' + post.html + '</section>';
       }).join(''));

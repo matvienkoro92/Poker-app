@@ -3061,3 +3061,24 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 
 /* Club news opens from bottom navigation without a separate title bar. */
 body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__header{display:none}
+.home-friend-news-modal__day-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 12px;
+  padding: 16px;
+  border-top: 1px solid rgba(211, 178, 105, 0.3);
+  border-radius: 12px;
+  background: rgba(211, 178, 105, 0.08);
+  font-size: 14px;
+}
+
+.home-friend-news-modal__day-total strong {
+  color: #d3b269;
+  font-size: 22px;
+  white-space: nowrap;
+}
+.home-news-pinned-rankings { margin: 12px 0 20px; }
+.home-news-pinned-rankings details + details { margin-top: 10px; }
