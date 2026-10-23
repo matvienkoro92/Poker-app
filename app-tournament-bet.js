@@ -439,6 +439,18 @@
     var button = document.querySelector("[data-tournament-bet-open]");
     var hasEvent = typeof window.pokerTournamentBetMatchesHome === "function" && window.pokerTournamentBetMatchesHome(data);
     homePlaqueHasActiveEvent = hasEvent;
+    var strip = document.querySelector("[data-last-longer-strip]");
+    if (strip && !(data && data.createdByPlayer)) {
+      strip.hidden = !hasEvent;
+      strip.dataset.eventId = hasEvent ? data.id : "";
+      if (hasEvent) {
+        var stripCount = Math.max(0, Number(data.participantsCount) || 0);
+        var stripWord = stripCount % 100 >= 11 && stripCount % 100 <= 14 ? "участников" : stripCount % 10 === 1 ? "участник" : stripCount % 10 >= 2 && stripCount % 10 <= 4 ? "участника" : "участников";
+        strip.querySelector("[data-last-longer-strip-bank]").textContent = "Банк " + rub(data.bank);
+        strip.querySelector("[data-last-longer-strip-players]").textContent = stripCount + " " + stripWord;
+        strip.setAttribute("aria-label", "Ласт-лонгер к турниру вечера. Банк " + rub(data.bank) + ", " + stripCount + " " + stripWord + ". Открыть регистрацию");
+      }
+    }
     if (!selectionOnly) homePlaqueLastRefreshAt = Date.now();
     if (button) {
       button.classList.toggle("home-last-longer-dock--unannounced", !hasEvent);
@@ -763,6 +775,12 @@
   }
 
   document.addEventListener("click", function (event) {
+    var strip = event.target && event.target.closest ? event.target.closest("[data-last-longer-strip]") : null;
+    if (strip && !strip.hidden && strip.dataset.eventId) {
+      event.preventDefault();
+      window.pokerOpenTournamentBetDeepLink(strip.dataset.eventId);
+      return;
+    }
     var trigger = event.target && event.target.closest ? event.target.closest("[data-tournament-bet-open]") : null;
     if (!trigger) return;
     event.preventDefault();
