@@ -74,7 +74,7 @@ async function finishPassage(page, space) {
     await page.locator('[data-hall-space="lounge"]').click();
     await page.locator('[data-hall-map]').click();
     await page.waitForFunction(() => document.querySelector('.player-hall-map-scroll img')?.naturalWidth > 0);
-    assert.ok((await page.locator('.player-hall-map-scroll img').getAttribute('src')).endsWith('coastal-house-map-v7.webp'));
+    assert.ok((await page.locator('.player-hall-map-scroll img').getAttribute('src')).endsWith('coastal-house-map-v8.webp'));
     assert.ok(!(await page.locator('.player-hall-map-scroll img').getAttribute('alt')).includes('лестница наверх'));
     await page.screenshot({ path: path.join(output, 'villa-map-mobile.png') });
     await page.locator('[data-hall-detail-close]').click();

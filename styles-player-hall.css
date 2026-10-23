@@ -609,24 +609,11 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .villa-billiards-living span,.villa-living-return span{font-size:11px}
 .villa-living-stage{position:absolute;inset:0;z-index:10;background:#191b18; background-size:cover;background-position:center;visibility:hidden;pointer-events:none;overflow:hidden}
 .player-hall__room:not([data-space=living]):not([data-living-transition])>.villa-living-stage{display:none}
-.player-hall__room[data-space=living] .villa-living-stage{background-image:url('./assets/player-hall/villa-living-kitchen-v3.webp');visibility:visible;pointer-events:auto}
+.player-hall__room[data-space=living] .villa-living-stage{background-image:url('./assets/player-hall/villa-living-games-v5.webp');visibility:visible;pointer-events:auto}
 .player-hall__room[data-space=living]>:not(.villa-living-stage){visibility:hidden;pointer-events:none}
-.player-hall__room[data-living-transition]>.villa-living-stage{background-image:url('./assets/player-hall/villa-living-kitchen-v3.webp');visibility:visible}
+.player-hall__room[data-living-transition]>.villa-living-stage{background-image:url('./assets/player-hall/villa-living-games-v5.webp');visibility:visible}
 .player-hall__room[data-living-transition]>.villa-billiards-stage{visibility:visible}
 
-.living-chess-board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border:3px solid #29190e;outline:1px solid #c6a369;aspect-ratio:1;align-self:center}
-.living-chess-square{display:grid;place-items:center;font-style:normal;min-width:0;min-height:0;overflow:visible}
-.living-chess-square.light{background:#ceb087}.living-chess-square.dark{background:#60412c}
-.living-chess-square b{font-family:Georgia,'Times New Roman',serif;font-size:clamp(9px,2.8cqw,16px);line-height:1;font-weight:400;text-shadow:0 1px 0 #a38a6c,1px 3px 2px #0009;transform:scaleY(1.35)}
-.living-chess-square b.ivory{color:#fff0cf}.living-chess-square b.ebony{color:#1c120b}
-.living-backgammon-board{position:relative;aspect-ratio:1;border:4px solid #3b2513;outline:1px solid #bd985c;background:#c3a078;align-self:center;overflow:hidden}
-.living-bg-point{position:absolute;left:calc(var(--point)*8.333%);width:8.333%;height:45%;font-style:normal}
-.living-bg-point::before{content:'';position:absolute;inset:0;background:#6b3023;clip-path:polygon(0 0,100% 0,50% 100%)}
-.living-bg-point.light::before{background:#efe0bd}.living-bg-point.upper{top:0}.living-bg-point.lower{bottom:0;transform:rotate(180deg)}
-.living-checker{position:absolute;top:calc(var(--checker)*17%);left:-5%;width:110%;aspect-ratio:1;border-radius:50%;border:1px solid #6e4c29;box-shadow:0 2px 0 #422c1b,1px 3px 2px #0006}
-.living-checker.ivory{background:radial-gradient(circle at 35% 25%,#fff4d9,#c8af81)}.living-checker.ebony{background:radial-gradient(circle at 35% 25%,#7b452d,#2e180e)}
-.living-bg-bar{position:absolute;left:49%;top:0;bottom:0;width:3%;background:#4c2c17;box-shadow:1px 0 1px #0009}
-.living-dice{position:absolute;top:44%;left:20%;font-size:12px;line-height:1;color:#fff9e6;text-shadow:1px 2px 1px #271609}
 .player-hall-dialog .living-darts-wall{position:absolute;left:12px;top:25%;z-index:3;display:grid;justify-items:center;gap:6px;padding:9px;border:1px solid #b99657;border-radius:10px;background:linear-gradient(100deg,#321e13ed,#513521f2);box-shadow:3px 6px 12px #0007;color:#f3e4c5}
 .living-darts-wall i{display:block;width:54px;aspect-ratio:1;border:5px solid #292e26;border-radius:50%;background:radial-gradient(circle,#ba4035 0 5%,#336b4b 6% 12%,transparent 13% 48%,#b04b36 49% 54%,transparent 55% 78%,#377856 79% 85%,#171e19 86%),repeating-conic-gradient(from -9deg,#e4d8b8 0 18deg,#212a23 18deg 36deg);box-shadow:0 0 0 1px #c5ac78,2px 3px 5px #0008}
 .living-darts-wall span{font-size:11px}
@@ -645,12 +632,27 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 @media(max-height:620px){.villa-darts__board{width:min(100%,270px)}.villa-darts{padding:12px}.villa-darts__scores{margin:7px 0}.villa-darts__scores strong{font-size:21px}}
 @media(prefers-reduced-motion:reduce){.villa-darts__flying.is-flying{animation-duration:.01s}}
 
-/* One selected board rests on the photographed round marble tabletop. */
-.living-round-artframe{position:absolute;left:50%;top:50%;width:max(100cqw,80.0285cqh);height:max(100cqh,124.9554cqw);transform:translate(-50%,-50%);pointer-events:none}
-.living-round-board{position:absolute;left:36.8%;top:65.1%;width:21%;aspect-ratio:1;transform:translate(-50%,-50%) perspective(800px) rotateX(70deg);transform-style:preserve-3d;pointer-events:none}
-.living-round-board>.living-chess-board,.living-round-board>.living-backgammon-board{position:absolute;inset:0;width:100%;height:100%;box-shadow:0 3px 0 #352312,0 5px 4px #0007;visibility:hidden;opacity:0;transform:translateY(8%) scale(.9);transition:opacity .35s,transform .6s cubic-bezier(.2,.7,.2,1),visibility .6s}
-.living-round-board[data-game=chess]>.living-chess-board,.living-round-board[data-game=backgammon]>.living-backgammon-board{visibility:visible;opacity:1;transform:translateY(0) scale(1)}
-.living-round-controls{position:absolute;z-index:4;left:50%;bottom:calc(20px + var(--hall-safe-bottom,0px));transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:7px;width:max-content;max-width:calc(100% - 24px);padding:7px;border:1px solid #b79a5b55;border-radius:18px;background:#14251df2;box-shadow:0 5px 20px #0006}
-.player-hall-dialog .living-round-controls button{padding:9px 13px;min-height:40px;border:1px solid #a78a51;border-radius:12px;background:#22362b;color:#efdfba;font-size:12px}
-.player-hall-dialog .living-round-controls button[aria-pressed=true]{background:linear-gradient(120deg,#e8d09a,#b28a43);color:#18251c;font-weight:700}
-@media(prefers-reduced-motion:reduce){.living-round-board>.living-chess-board,.living-round-board>.living-backgammon-board{transition:none}}
+/* Hit areas share the room image's cover geometry, including cropped mobile views. */
+.living-table-artframe{position:absolute;left:50%;top:50%;width:max(100cqw,80.0285cqh);height:max(100cqh,124.9554cqw);transform:translate(-50%,-50%);pointer-events:none}
+.player-hall-dialog .living-game-case{position:absolute;top:53.8%;width:23%;height:7%;padding:0;border:1px solid transparent;border-radius:10px;background:transparent;pointer-events:auto;cursor:pointer;color:#fff0cf}
+.player-hall-dialog .living-game-case--chess{left:24%}.player-hall-dialog .living-game-case--backgammon{left:54%}
+.living-game-case span{position:absolute;left:50%;bottom:-16px;transform:translateX(-50%);padding:6px 10px;border:1px solid #b79a5b99;border-radius:9px;background:#14251de8;white-space:nowrap;font-size:11px;box-shadow:0 3px 10px #0005}
+.player-hall-dialog .living-game-case:hover,.player-hall-dialog .living-game-case:focus-visible{outline:2px solid #e5c987;outline-offset:3px;background:#ffe5a51a}
+.living-game-menus{position:absolute;z-index:4;left:12px;right:12px;bottom:calc(18px + var(--hall-safe-bottom,0px));display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;pointer-events:none}
+.living-game-menu{max-width:250px;padding:12px;border:1px solid #b79a5b88;border-radius:16px;background:#14251df2;box-shadow:0 5px 20px #0006;color:#efdfba;pointer-events:auto}
+.living-game-menu--chess{justify-self:start}.living-game-menu--nards{justify-self:end}.living-game-menu h3{margin:0 0 4px;font-size:16px}.living-game-menu p{min-height:30px;margin:0 0 8px;color:#cfbd94;font-size:11px;line-height:1.4}
+.player-hall-dialog .living-game-menu button{display:block;width:100%;min-height:44px;padding:8px;margin-top:5px;border:1px solid #a78a51;border-radius:10px;background:#22362b;color:#efdfba;font-size:12px}.player-hall-dialog .living-game-menu button:focus-visible{outline:2px solid #f2d395;outline-offset:3px}.living-game-menu--chess button{background:linear-gradient(120deg,#e8d09a,#b28a43)!important;color:#18251c!important}
+@media(max-width:360px){.living-game-menus{left:8px;right:8px;gap:8px}.living-game-menu{padding:9px}}
+@media(max-height:500px) and (min-width:600px){.living-game-menu{padding:8px;max-width:185px}.living-game-menu p{display:none}.living-game-menu--nards{display:grid;grid-template-columns:1fr 1fr;gap:5px}.living-game-menu--nards h3{grid-column:1/-1}.living-game-menu button{margin-top:0!important}}
+.player-hall-dialog .living-equipment-entry{min-height:32px!important;padding:5px!important;font-size:11px!important;background:#423623!important;color:#f3dca7!important}
+.player-hall-dialog .living-game-case .living-case-art{position:absolute;inset:0 0 auto;height:64%;padding:0;border:2px ridge #a37a43;border-radius:2px;background-size:100% 100%;transform:none;clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);box-shadow:0 3px 0 #352419;pointer-events:none}
+.player-hall-dialog .living-game-case .living-case-coins{position:absolute;left:auto;right:-7%;top:6%;bottom:auto;padding:0;border:0;background:none;box-shadow:none;transform:none;display:flex;gap:3px;pointer-events:none}.living-case-coins i{display:block;width:clamp(12px,2.7cqw,24px);aspect-ratio:1;border-radius:50%;background-size:cover;border:1px solid #9a7744;box-shadow:0 2px 1px #0009}
+
+.living-game-case .living-case-art[hidden],.living-game-case .living-case-coins[hidden]{display:none!important}
+.player-hall-dialog .living-game-case .living-chess-case-art{position:absolute;inset:0 0 auto;height:64%;padding:0;border:2px ridge #b39358;border-radius:2px;background-size:100% 100%;transform:none;clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);box-shadow:0 3px 0 #352419;pointer-events:none}
+.player-hall-dialog .living-game-case .living-chess-figures{position:absolute;left:-7%;right:auto;top:-14%;bottom:auto;display:flex;gap:2px;padding:0;border:0;background:none;box-shadow:none;transform:none;pointer-events:none}.living-chess-figures img{width:clamp(14px,3cqw,28px);height:clamp(22px,4.5cqw,42px);filter:drop-shadow(0 2px 1px #0008)}
+.living-game-case .living-chess-case-art[hidden],.living-game-case .living-chess-figures[hidden]{display:none!important}
+/* Short phones keep the tabletop targets above the two editor menus. */
+@media(max-width:420px){.villa-living-stage .villa-billiards-heading{right:12px;min-width:0}.villa-living-stage .villa-billiards-heading strong{font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}}
+@media(max-height:650px){.player-hall-dialog .villa-living-return{top:39%;font-size:21px;padding:8px;border-radius:18px}.villa-living-return span{font-size:10px}}
+@media(max-width:420px) and (max-height:700px){.living-game-menu{padding:9px}.living-game-menu h3{font-size:14px}.living-game-menu p{display:none}.player-hall-dialog .living-game-menu button{font-size:11px;padding:7px;min-height:40px}.living-game-menus{gap:8px}}

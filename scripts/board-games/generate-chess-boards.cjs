@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('fs'),path=require('path'),{BOARDS}=require('../../lib/chess-equipment');
+for(const b of BOARDS.filter(b=>b.image)){
+ const metal=b.id==='ice-crystal'?'#c2e2f4':'#d7b365';
+ const defs=`<defs><linearGradient id="rim" x2="1" y2="1"><stop stop-color="${metal}"/><stop offset=".22" stop-color="${b.frame}"/><stop offset=".48" stop-color="${metal}"/><stop offset=".65" stop-color="${b.frame}"/><stop offset="1" stop-color="${metal}"/></linearGradient><pattern id="grain" width="120" height="90" patternUnits="userSpaceOnUse"><path d="M-10 8Q40 30 130 12M-10 42Q60 15 130 50M-10 70Q35 90 130 66" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/><path d="M-10 25Q75 45 130 25M-10 85Q30 55 130 87" fill="none" stroke="#000" stroke-opacity=".12"/></pattern></defs>`;
+ let squares='';for(let y=0;y<8;y++)for(let x=0;x<8;x++)squares+=`<rect x="${64+x*112}" y="${64+y*112}" width="112" height="112" fill="${(x+y)%2?b.dark:b.light}"/>`;
+ let ornaments='';for(let i=0;i<4;i++){let side='';for(let x=96;x<960;x+=56)side+=b.id==='ice-crystal'?`<path d="M${x} 20l12 12-12 12-12-12z"/>`:`<path d="M${x-22} 32q11-20 22 0t22 0m-22 0q-8 18-16 4m16-4q8 18 16 4"/>`;ornaments+=`<g transform="rotate(${i*90} 512 512)" fill="none" stroke="${metal}" stroke-opacity=".8" stroke-width="2.3">${side}</g>`;}
+ const texture=b.id==='marble-brass'?'<path d="M64 280Q320 430 540 180T960 370M64 760Q380 560 600 800T960 690" fill="none" stroke="#d3c4a7" stroke-width="4" opacity=".3"/>':b.id==='ice-crystal'?'<path d="M64 64L960 960M64 400L624 960M400 64L960 624" stroke="#ffffff" opacity=".13" stroke-width="5"/>':'<rect x="64" y="64" width="896" height="896" fill="url(#grain)"/>';
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" preserveAspectRatio="none">${defs}<rect width="1024" height="1024" rx="22" fill="${b.frame}"/><rect x="8" y="8" width="1008" height="1008" rx="15" fill="none" stroke="url(#rim)" stroke-width="12"/>${ornaments}${squares}${texture}<rect x="59" y="59" width="906" height="906" fill="none" stroke="${metal}" stroke-width="5"/><rect x="3" y="3" width="1018" height="1018" rx="20" fill="none" stroke="#17100b" stroke-width="6"/></svg>`;
+ fs.writeFileSync(path.resolve(__dirname,'../..',b.image),svg);
+}
