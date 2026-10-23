@@ -6,27 +6,45 @@ const fs = require("node:fs");
 
 function setup() {
   const members = new Set();
+  const otherMembers = new Set();
   const messages = [];
   let reachable = true, groupId = "";
   const pipeline = async (commands) => commands.map(([cmd, key, id]) => {
-    if (cmd === "SISMEMBER") return { result: Number(members.has(id)) };
-    if (cmd === "SADD") members.add(id);
-    if (cmd === "SREM") members.delete(id);
+    const selected = key === "poker_app:tournament_bet_subscribers" ? members : otherMembers;
+    if (cmd === "SISMEMBER") return { result: Number(selected.has(id)) };
+    if (cmd === "SADD") selected.add(id);
+    if (cmd === "SREM") selected.delete(id);
     return { result: 1 };
   });
   const deps = {
     "./telegram-group-policy": { eventChatId: async () => groupId },
-    "./redis": { pipeline, sscanall: async () => [...members] },
+    "./redis": { pipeline, sscanall: async (key) => [...(key === "poker_app:tournament_bet_subscribers" ? members : otherMembers)] },
     "./account-id": { getPreferredUserIdByDtId: async () => "tg_42" },
     "./telegram-participation-gate": { canReachTelegramBot: async () => reachable },
     "./telegram-bot-send": { sendTelegramMessage: async (token, msg) => { messages.push(msg); return { ok: true }; } },
-    "./bot-subscription-events": { hasAnyBotSubscription: async () => false, recordBotSubscriptionTransition: async () => {} },
+    "./bot-subscription-events": { BOT_SUBSCRIPTION_SET_KEYS: require('../lib/bot-subscription-events').BOT_SUBSCRIPTION_SET_KEYS, hasAnyBotSubscription: async () => false, recordBotSubscriptionTransition: async () => {} },
   };
   const context = { module: { exports: {} }, require: (id) => deps[id], process: { env: {} }, URL, console };
   vm.runInNewContext(fs.readFileSync(require.resolve("../lib/tournament-bet-subscriptions"), "utf8"), context);
-  return { api: context.module.exports, members, messages, setReachable: (value) => { reachable = value; }, setGroup: (id) => {groupId = id;} };
+  return { api: context.module.exports, members, otherMembers, messages, setReachable: (value) => { reachable = value; }, setGroup: (id) => {groupId = id;} };
 }
 const auth = { ok: true, memberId: "tg_123", identity: { id: 123 } };
+
+test("owner launch reaches all bot subscription categories once plus the group", async () => {
+  const { api, members, otherMembers, messages, setGroup } = setup();
+  members.add('123'); otherMembers.add('123'); otherMembers.add('456'); otherMembers.add('-999');
+  setGroup('-1001227353220');
+  await api.notify({ id: 'tb_owner', title: 'Magic', stakePrice: 500 }, 'token');
+  assert.deepEqual(messages.map(msg => msg.chat_id), ['-1001227353220', '123', '456']);
+  assert.ok(messages.every(msg => msg.buttonUrl.includes('tournament_bet_tb_owner')));
+});
+
+test("player-created event keeps its dedicated subscription audience", async () => {
+  const { api, otherMembers, messages } = setup();
+  otherMembers.add('456');
+  await api.notify({ id: 'tb_player', title: 'Magic', stakePrice: 500, createdByPlayer: true }, 'token');
+  assert.equal(messages.length, 0);
+});
 
 test("subscription persists, is idempotent, and can be disabled", async () => {
   const { api, members } = setup();
