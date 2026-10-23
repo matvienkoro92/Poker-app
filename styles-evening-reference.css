@@ -468,3 +468,19 @@ body[data-view="download"] #app.app .evening-villa-games > button::after {
 .evening-villa-game-dialog__actions { display: flex; gap: 10px; margin-top: 18px; }
 .evening-villa-game-dialog button { flex: 1; min-height: 44px; border: 1px solid #b3955c; border-radius: 12px; background: #243b30; color: #ffe4a7; font: 700 14px Arial,sans-serif; }
 .evening-villa-game-dialog [data-villa-game-confirm] { background: #e2c17e; color: #17251d; }
+
+/* Game groups need readable characters rather than the old portal's scaled slot. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-villa-games {
+  left: 1%;
+  width: 72%;
+  top: 23%;
+  transform: translateY(var(--evening-scene-drop, 0px)) !important;
+  translate: none;
+}
+@container play-screen (min-aspect-ratio:3/5) {
+  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-villa-games {
+    top: calc(100% - 106cqw);
+    transform: none !important;
+  }
+}
+.evening-villa-games > button { bottom: 16%; }
