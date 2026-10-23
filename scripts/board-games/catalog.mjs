@@ -1,0 +1,3 @@
+export const BOARDS=[{id:'walnut',name:'Тёплый орех',light:'#ddc49a',dark:'#715039',frame:'#422a1c'},{id:'ivory',name:'Слоновая кость',light:'#f1ead7',dark:'#8d947f',frame:'#4d594c'},{id:'ocean',name:'Океан',light:'#d5e5e7',dark:'#376875',frame:'#183d48'},{id:'emerald',name:'Изумруд',light:'#d9d6ae',dark:'#2a6953',frame:'#153e30'}];
+export const PIECES=[{id:'classic',name:'Классика'},{id:'royal',name:'Королевские'},{id:'minimal',name:'Минимализм'},{id:'onyx',name:'Оникс'}];
+export const CHECKERS=[{id:'classic',name:'Дерево',white:'#f6e4c1',black:'#492c1b'},{id:'pearl',name:'Перламутр',white:'#f1f1e6',black:'#374655'},{id:'jade',name:'Нефрит',white:'#e4ecd3',black:'#175b42'},{id:'ruby',name:'Рубин',white:'#f6d7c2',black:'#7d2234'}];

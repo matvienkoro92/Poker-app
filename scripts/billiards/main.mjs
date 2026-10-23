@@ -1,3 +1,5 @@
+import {mountShotAudio} from './shot-audio.mjs';
+import {createAimSmoother} from './aim-smoothing.mjs';
 import {mountRanking} from './ranking-ui.mjs';
 import {mountMatchup} from './matchup-ui.mjs';
 import {mountSettlement} from './settlement-ui.mjs';
@@ -19,6 +21,7 @@ const $=id=>document.getElementById(id);
 let state=createGame(),canonical=state,player=0,online=false,net=null,angle=0,tableView=false,last=performance.now(),acc=0,raf=0,revision=-1,playback=null,clockOffset=0,connectionError='',mode=null,botAt=0;
 let playerProfiles=[null,null];const matchup=mountMatchup();
 let spectating=false;
+const aimSmoother=createAimSmoother();const shotAudio=mountShotAudio();
 let opponentAim=null,botPlan=null,shownAim=null,renderedCue='';
 let turnSeconds=null,turnDeadline=null,localClockKey='';
 let series=createMatch(),canonicalSeries=series;const training=createTraining();
@@ -51,8 +54,8 @@ async function request(body){let source=window;try{if(parent!==window&&parent.lo
 mountRanking(request);
 const lobby=mountLobby({launch:choice=>$(choice).click(),back:()=>{stop();lobby.reset();$('lobby').hidden=true;setView(false);if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);}});
 function status(text){$('connection').textContent=text;}
-function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').hidden=value;$('view').textContent=mode?'Вернуться к игре':'К столу';$('resumeGame').hidden=!mode||value;if(mode)$('game').hidden=!value;}
-function stop(){settlement.close();replayPlayer.clear();opponentAim=null;botPlan=null;shownAim=null;turnSeconds=null;turnDeadline=null;localClockKey='';training.clear();online=false;mode=null;botAt=0;playback=null;net?.close();net=null;connectionError='';$('create').disabled=$('join').disabled=false;$('lobby').hidden=false;$('game').hidden=true;setView(false);$('lobby').hidden=false;}
+function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;if(value)roomToolbar.prepend($('back'));else document.querySelector('.billiards>header').prepend($('back'));room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').hidden=value;$('view').textContent=mode?'Вернуться к игре':'К столу';$('resumeGame').hidden=!mode||value;if(mode)$('game').hidden=!value;}
+function stop(){shotAudio.reset();aimSmoother.reset();settlement.close();replayPlayer.clear();opponentAim=null;botPlan=null;shownAim=null;turnSeconds=null;turnDeadline=null;localClockKey='';training.clear();online=false;mode=null;botAt=0;playback=null;net?.close();net=null;connectionError='';$('create').disabled=$('join').disabled=false;$('lobby').hidden=false;$('game').hidden=true;setView(false);$('lobby').hidden=false;}
 function solo(next=false){if(!room)return;recordWin(series,state.winner);const previous=next&&mode==='solo'&&state.winner!==null?state:null,nextSeries=previous?nextMatch(series):createMatch(rulesUI.settings().raceTo),settings=previous?{discipline:previous.discipline,color:previous.color,breaker:1-(previous.breaker||0)}:rulesUI.settings();stop();mode='solo';series=nextSeries;canonicalSeries=series;state=createGame({...settings,seed:Math.floor(Math.random()*4294967296)});rulesUI.reset();shotTools.reset();canonical=state;player=0;online=true;angle=0;acc=0;state.message=state.turn===0?'Вы разбиваете пирамиду · биток можно передвинуть внутри дома':'Компьютер разбивает пирамиду';$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ОДИНОЧНАЯ ПАРТИЯ · КОМПЬЮТЕР';turnSeconds=rulesUI.settings().turnSeconds;turnDeadline=Date.now()+turnSeconds*1000;setView(true);last=performance.now();}
 function startTraining(){if(!room)return;stop();mode='training';state=createGame({...rulesUI.settings(),seed:Math.floor(Math.random()*4294967296)});canonical=state;series=createMatch();rulesUI.reset();shotTools.reset();player=0;online=true;angle=0;acc=0;$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ТРЕНИРОВКА · ВЫ УПРАВЛЯЕТЕ ОБЕИМИ СТОРОНАМИ';setView(true);last=performance.now();}
 function move(value){if(spectating)return;if(mode==='training')return training.move(state,value,{angle,power:Number($('power').value),rules:rulesUI.options(state),spin:shotTools.value()});if(mode==='solo')return action(state,player,value);return net?.move(value);}
@@ -128,11 +131,12 @@ function frame(now){
  $('trainingControls').hidden=mode!=='training';const repeatAvailable=training.inspect().available;$('restoreShot').disabled=$('repeatShot').disabled=!repeatAvailable;
  $('again').hidden=mode!=='training'&&(state.winner===null||player!==0);$('again').textContent=mode==='training'?'Новая расстановка':series.target===3?(series.winner!==null?'Новая серия до 3 побед':'Следующая партия'):'Новая партия';
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';
- settlement.render();matchup.render({state,profiles:mode==='solo'?[{name:equipment.inspect().nick||'Вы'},null]:playerProfiles,player,mode,tableView,ready:online});
+ shotAudio.observe(state,tableView);settlement.render();matchup.render({state,profiles:mode==='solo'?[{name:equipment.inspect().nick||'Вы'},null]:playerProfiles,player,mode,tableView,ready:online});
  resultPanel.render(state,{mode:spectating?null:mode,player,series,tableView});
  shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});const strikePreview=playback&&Date.now()+clockOffset<playback.startedAt?{...playback.move,angle:playback.angle,cueStyle:playback.cueStyle,nick:playback.nick}:null;
  const remote=(mode==='online'&&state.turn!==player||spectating)&&opponentAim?.player===state.turn&&opponentAim.shot===state.shot?opponentAim:null;
- shownAim=strikePreview||(mode==='solo'&&state.turn===1&&botPlan?.type==='shot'?{...botPlan,cueStyle:'maple'}:remote);
+ const smoothRemote=remote?{...remote,angle:aimSmoother.sample([state.turn,state.shot,remote.cueId,remote.cueStyle].join(':'),remote.angle,dt)}:null;if(!remote||strikePreview)aimSmoother.reset();
+ shownAim=strikePreview||(mode==='solo'&&state.turn===1&&botPlan?.type==='shot'?{...botPlan,cueStyle:'maple'}:smoothRemote);
  const ownCue=equipment.inspect(),cueStyle=CUES.find(c=>c.id===(shownAim?.cueStyle||ownCue.selected))||CUES[0],cueNick=shownAim?shownAim.nick||'Соперник':ownCue.nick,cueKey=cueStyle.id+':'+cueNick;
  if(renderedCue!==cueKey){room?.setCue(cueStyle,cueNick);renderedCue=cueKey;}
  const aimState=shownAim?{...display,cueId:shownAim.cueId??0}:display;
@@ -146,4 +150,4 @@ const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-
 raf=requestAnimationFrame(frame);
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.
 window.PokerBilliards={inspect:()=>({mode,spectating,ready:online,tableView,equipment:equipment.inspect(),rules:rulesUI.inspect(),shotTools:shotTools.inspect(),training:training.inspect(),turnSeconds,turnDeadline,replay:replayPlayer.inspect(),graphics:room?.inspect(),shownAim:shownAim?{...shownAim}:null,series:structuredClone(series),angle,state:structuredClone(state)})};
-window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);controlsObserver.disconnect();matchupObserver.disconnect();stop();replayPlayer.dispose();room?.dispose();});
+window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);controlsObserver.disconnect();matchupObserver.disconnect();stop();shotAudio.dispose();replayPlayer.dispose();room?.dispose();});

@@ -7,6 +7,7 @@
     "@capacitor/android": "^8.5.0",
     "@capacitor/core": "^8.5.0",
     "@vercel/blob": "^2.3.3",
+    "chess.js": "1.4.0",
     "web-push": "^3.6.7"
   },
   "scripts": {
@@ -75,7 +76,8 @@
     "race:3d": "esbuild scripts/stadium-race/main.mjs --bundle --minify --format=iife --outfile=app-last-buy-in-race-3d.js",
     "garage:3d": "esbuild scripts/garage-3d/viewer.mjs --bundle --minify --format=iife --outfile=app-garage-3d.js",
     "city:build": "esbuild scripts/city-game/main.mjs --bundle --minify --format=iife --outfile=app-city-game.js",
-    "billiards:build": "esbuild scripts/billiards/main.mjs --bundle --minify --format=iife --outfile=app-billiards.js && esbuild scripts/billiards/replay-worker.mjs --bundle --minify --format=iife --outfile=app-billiards-replay-worker.js"
+    "billiards:build": "esbuild scripts/billiards/main.mjs --bundle --minify --format=iife --outfile=app-billiards.js && esbuild scripts/billiards/replay-worker.mjs --bundle --minify --format=iife --outfile=app-billiards-replay-worker.js",
+    "board-games:build": "esbuild scripts/board-games/main.mjs --bundle --minify --format=iife --outfile=app-board-games.js && esbuild scripts/board-games/bot-worker.mjs --bundle --minify --format=iife --outfile=app-board-games-worker.js"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",

@@ -131,6 +131,8 @@ function pokerInitHomeDeepLinks(opts) {
       var refSplit = pokerSplitReferralStartParam(startParam);
       if (refSplit && refSplit.routeStartParam) startParam = refSplit.routeStartParam;
     }
+    var boardLink=/^board_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
+    if(boardLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('chess',boardLink[2],!!boardLink[1]);},['profile']);return;}
     var billiardsWatch=/^billiards_watch_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(billiardsWatch){openHomeModalDeepLink(function(){return typeof window.pokerOpenBilliardsInvite==='function'&&window.pokerOpenBilliardsInvite(billiardsWatch[1],true);},['profile']);return;}
     var billiardsInvite=/^billiards_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);

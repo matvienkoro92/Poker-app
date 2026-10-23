@@ -17,6 +17,7 @@ const handlers = {
   "table-alert-settings": () => require(path.join(handlersDir, "table-alert-settings.js")),
   "cron-table-subscriptions": () => require(path.join(handlersDir, "cron-table-subscriptions.js")),
   "monkey-race": () => require(path.join(handlersDir, "monkey-race.js")),
+  "board-games": () => require(path.join(handlersDir, "board-games.js")),
   "billiards": () => require(path.join(handlersDir, "billiards.js")),
   "cooler-flight": () => require(path.join(handlersDir, "cooler-flight.js")),
   "starting-hands": () => require(path.join(handlersDir, "starting-hands.js")),
