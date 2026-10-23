@@ -656,3 +656,21 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 @media(max-width:420px){.villa-living-stage .villa-billiards-heading{right:12px;min-width:0}.villa-living-stage .villa-billiards-heading strong{font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}}
 @media(max-height:650px){.player-hall-dialog .villa-living-return{top:39%;font-size:21px;padding:8px;border-radius:18px}.villa-living-return span{font-size:10px}}
 @media(max-width:420px) and (max-height:700px){.living-game-menu{padding:9px}.living-game-menu h3{font-size:14px}.living-game-menu p{display:none}.player-hall-dialog .living-game-menu button{font-size:11px;padding:7px;min-height:40px}.living-game-menus{gap:8px}}
+
+.player-hall-dialog .villa-billiards-share {
+  position: absolute;
+  z-index: 5;
+  right: 12px;
+  bottom: calc(22px + var(--hall-safe-bottom, 0px));
+  max-width: calc(100% - 108px);
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #c6a467;
+  border-radius: 18px;
+  background: #17251df2;
+  color: #f5e6c4;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px #0008;
+}
+.player-hall-dialog .villa-billiards-share:focus-visible { outline: 2px solid #ffe3a1; outline-offset: 3px; }

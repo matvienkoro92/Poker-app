@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 var dialog,state,kind='game',generation=0,searchVersion=0,busy=false;
-var games={NLH:'Холдем',PLO4:'PLO4',PLO5:'PLO5',PLO6:'PLO6',Durak:'Дурак',TwentyOne:'21',OFC:'OFC',Ceka:'Сека'};
+var games={NLH:'Холдем',PLO4:'PLO4',PLO5:'PLO5',PLO6:'PLO6',PLOHiLo:'Омаха хай-лоу',Durak:'Дурак',TwentyOne:'21',OFC:'OFC',Ceka:'Сека'};
 function esc(v){return window.pokerSocialEscape(v);}
 function api(body){return window.pokerSocialRequest('table-alert-settings',body);}
 function status(text){dialog.querySelector('[data-alert-status]').textContent=text||'';}

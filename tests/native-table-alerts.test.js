@@ -9,3 +9,11 @@ test('invalid filters, time and player ID are rejected',()=>{for(const change of
 test('player alerts can combine games and limits and never expose delivery identity',()=>{const s=normalize({...input,kind:'player',playerId:'123',nick:'Ник'},'a');assert.equal(s.playerId,'123');assert.equal(publicSubscription(s).deliveryAccountId,undefined);assert.equal(publicSubscription(s).telegramChatId,undefined);});
 
  test('legacy bot subscriptions expose their Telegram channel and effective push preference',()=>{const sub={id:'12345678',kind:'game',game:'PLO6',mode:'any'};assert.equal(publicSubscription(sub).botEnabled,true);assert.equal(publicSubscription(sub).pushEnabled,false);assert.equal(publicSubscription(sub,true).pushEnabled,true);});
+
+test('Omaha hi-lo has its own subscription filter, separate from high-only PLO',()=>{
+ const sub=normalize({...input,selectedGames:['PLOHiLo'],minPlayers:1},'a');
+ const table={deskId:'1',leagueId:'184691',playType:'PLO Hi-Lo',blindAnnotation:'5/10',playerCount:3};
+ for(const playType of ['PLO Hi-Lo','PLOHiLo','PLO4 Hi/Lo','PLO5 HiLo','PLO6 Hi-Lo','Omaha Hi-Lo','PLO8','HiLo'])assert.equal(matches(sub,[{...table,playType}]).length,1,playType);
+ for(const playType of ['PLO4','PLO5','PLO6','NLH','MTT PLO Hi-Lo'])assert.equal(matches(sub,[{...table,playType}]).length,0,playType);
+ const highOnly=normalize({...input,minPlayers:1},'a');assert.equal(matches(highOnly,[table]).length,0);
+});

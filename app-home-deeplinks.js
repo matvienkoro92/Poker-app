@@ -133,6 +133,10 @@ function pokerInitHomeDeepLinks(opts) {
     }
     var boardLink=/^board_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(boardLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('chess',boardLink[2],!!boardLink[1]);},['profile']);return;}
+    if(startParam==='billiards'){
+      openHomeModalDeepLink(function(){return typeof window.pokerOpenBilliardsRoom==='function'&&window.pokerOpenBilliardsRoom();},['profile']);
+      return;
+    }
     var billiardsWatch=/^billiards_watch_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(billiardsWatch){openHomeModalDeepLink(function(){return typeof window.pokerOpenBilliardsInvite==='function'&&window.pokerOpenBilliardsInvite(billiardsWatch[1],true);},['profile']);return;}
     var billiardsInvite=/^billiards_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
