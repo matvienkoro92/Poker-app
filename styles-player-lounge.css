@@ -754,3 +754,7 @@
 .player-hall__camera-ui .garage-vehicle-switch>button.garage-vehicle-use:disabled{background:#d9bd7f;color:#17251d;border-color:#f2daa0;opacity:1}
 .player-hall__camera-ui .garage-vehicle-switch>button.garage-vehicle-use:focus-visible{outline:2px solid #fff1c7;outline-offset:3px}
 .player-hall__room[data-space=garage][data-garage-focus=""] .player-hall__camera-ui .garage-vehicle-switch{display:grid}
+
+/* Guests can inspect the base character and navigate the villa. */
+.player-hall-dialog--guest .player-hall__character-hit,.player-hall-dialog--guest .player-hall__character-label{display:block}
+.player-hall-dialog--guest .player-hall__guest-banner{top:78%;padding:8px 12px;gap:4px}

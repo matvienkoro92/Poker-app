@@ -27,7 +27,10 @@ async function main() {
       legalComments: "inline", sourcefile: name,
     });
     if (result.warnings.length) throw new Error(name + ": " + result.warnings.map(w => w.text).join("; "));
-    if (name.endsWith(".js")) new vm.Script(result.code, { filename: name });
+    if (name.endsWith(".js")) {
+      const checked = name === "app-game-participation.js" ? (await transform(result.code, {loader:"js",format:"cjs"})).code : result.code;
+      new vm.Script(checked, { filename: name });
+    }
     const inputBytes = Buffer.byteLength(source);
     const outputBytes = Buffer.byteLength(result.code);
     before += inputBytes;

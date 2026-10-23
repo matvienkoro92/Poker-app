@@ -674,3 +674,18 @@ body.billiards-table-view .billiards-cue-preview{display:none}
   box-shadow: 0 4px 14px #0008;
 }
 .player-hall-dialog .villa-billiards-share:focus-visible { outline: 2px solid #ffe3a1; outline-offset: 3px; }
+
+/* Keep the room passage above the tabletop and focus one game at a time. */
+.player-hall-dialog .villa-living-return{top:36%;right:14px;font-size:20px;padding:7px 10px;border-radius:18px}
+.player-hall-dialog .villa-living-return span{font-size:10px}
+.villa-living-stage .living-game-menus{display:none}
+.living-board-focus{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px 18px;background:radial-gradient(ellipse,#654526,#14231cfb 75%);color:#f5e6c4;overflow:auto;animation:living-board-in .35s ease-out}
+.living-board-focus h2{margin:0;font-size:24px}
+.player-hall-dialog .living-board-focus button{flex-shrink:0;width:min(420px,100%);min-height:44px;padding:10px;border:1px solid #b79a5b;border-radius:12px;background:#182c22;color:#f5e6c4;font-size:15px}
+.living-top-board{width:min(460px,100%,52vh);flex-shrink:0;filter:drop-shadow(0 12px 14px #0008)}
+.living-top-chess{display:block;width:100%;aspect-ratio:1;object-fit:contain}
+.living-top-nards{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:1fr 1fr;gap:12% 1%;aspect-ratio:1.15;padding:5%;border:12px ridge #9e7542;border-radius:6px;background:linear-gradient(90deg,#ad8154 49%,#52351f 49%,#52351f 51%,#ad8154 51%)}
+.living-top-point{background:#482b20;clip-path:polygon(0 0,100% 0,50% 100%)}
+.living-top-point:nth-child(even){background:#e9c894}.living-top-point:nth-child(n+13){transform:rotate(180deg)}
+@keyframes living-board-in{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.living-board-focus{animation:none}}

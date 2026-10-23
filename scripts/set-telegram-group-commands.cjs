@@ -12,6 +12,9 @@ if (envPath) {
 }
 const commands=[
   {command:'pulse',description:'Меню клуба'},
+  {command:'nards',description:'Нарды — соперник из чата'},
+  {command:'chess',description:'Шахматы — соперник из чата'},
+  {command:'billiards',description:'Бильярд — соперник из чата'},
 ];
 async function main() {
   if (!process.argv.includes('--apply')) { console.log(JSON.stringify(commands,null,2)); return; }
@@ -24,14 +27,16 @@ async function main() {
     return result.result;
   }
   if ((await call('getMe',{})).username !== 'Poker_dvatuza_bot') throw new Error('Unexpected bot');
-  for (const type of ['all_group_chats','all_chat_administrators']) {
+  for (const type of ['all_group_chats','all_chat_administrators','all_private_chats']) {
     for (const language_code of ['','ru','en']) {
       const scope={type};
-      await call('setMyCommands',{commands,scope,language_code});
+      let targetCommands=commands;
+      if(type==='all_private_chats'){let existing=await call('getMyCommands',{scope,language_code});if(!existing.length)existing=await call('getMyCommands',{scope:{type:'default'},language_code:''});targetCommands=[...existing.filter(c=>!commands.some(game=>game.command===c.command)),...commands];}
+      await call('setMyCommands',{commands:targetCommands,scope,language_code});
       const saved=await call('getMyCommands',{scope,language_code});
-      if (JSON.stringify(saved)!==JSON.stringify(commands)) throw new Error('Command verification failed');
+      if (JSON.stringify(saved)!==JSON.stringify(targetCommands)) throw new Error('Command verification failed');
     }
   }
-  console.log('Group command menus updated and verified; private commands unchanged.');
+  console.log('Group and private command menus updated and verified.');
 }
 main().catch(()=>{console.error('Could not update group commands.');process.exitCode=1;});

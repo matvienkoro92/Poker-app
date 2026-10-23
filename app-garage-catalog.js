@@ -1111,7 +1111,7 @@ function drawUpgradePreview(canvas,kind,look){if(['headlights','chips','cards','
 }
 
 function canEnterVilla(auth){
- return !!auth&&(['verified','dev_skip'].includes(auth.status)||auth.adminAccess===true);
+ return !!auth&&(['verified','dev_skip','guest','no_telegram','no_init_data','invalid'].includes(auth.status)||auth.adminAccess===true);
 }
 function canAccessHall(auth){return auth?.adminAccess===true||auth?.status==='verified';}
 return {savedLoadout,temporarilyHiddenWardrobeItem,themedOutfits,outfitLoadout,outfitSelected,characterFields,switchChassis,characterBasePath,chipEdgeColor,compatiblePart,fitChassisParts,wheelDiameters,plateAvailability,wheelPaintColor,hairOverlayFits,brandedPieces,curatedWardrobeItem,wardrobeSubcategories,wardrobeSubcategory,rewardFashionModels,prestigeWatches,ringDesigns,ringArt,helmetModels,canAccessHall,canEnterVilla,hairStyles,bodyTypes,outfitSets,seasonalCollections,collectionProgress,activeOutfit,glassTints,steeringDesigns,fashionRows,fashionIndex,fashionArt,loadWardrobe,paintWardrobePreview,streetHeadlights,vinylCanvas,rewardShelfSlots,wheelDesign,wheelFaceCanvas,drawWheelPreview,badgePlaqueCanvas,chipCanvas,badgeCanvas,badgeDefinitions,cardCanvas,chipPalette,upholsteryCanvas,patchCanvas,drawUpgradePreview,parsePlate,plateLevel,plateCanvas,characterHandFit,characterJewelryFit,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet,helmetArt};});

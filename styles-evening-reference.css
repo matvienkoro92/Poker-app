@@ -484,11 +484,13 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
   }
 }
 .evening-villa-games > button { bottom: 16%; }
-/* Backgammon sits closer to the viewer than billiards and chess. */
+/* Separate the three unoccupied game tables and their click targets. */
+.evening-villa-games > [data-evening-villa-game=billiards] { left: 0; width: 48%; clip-path: polygon(0 0,100% 0,100% 45%,78% 65%,78% 100%,0 100%); }
 .evening-villa-games > [data-evening-villa-game=nards] {
-  left: 32%;
-  width: 42%;
-  top: 30%;
-  bottom: -2%;
+  left: 37%;
+  width: 34%;
+  top: 45%;
+  bottom: 0;
   z-index: 2;
 }
+.evening-villa-games > [data-evening-villa-game=chess] { left: 70%; width: 30%; }

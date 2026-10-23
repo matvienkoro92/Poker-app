@@ -3,7 +3,8 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const G=require('../app-garage-catalog');
 test('villa admits ordinary authenticated players across identities without granting administrator privileges',()=>{
  for(const auth of [{status:'verified',user:{id:123}},{status:'verified',user:{id:2144406710}},{status:'verified',user:{username:'polyapineapple'}},{status:'verified',vkId:42},{status:'dev_skip'},{adminAccess:true}])assert.equal(G.canEnterVilla(auth),true);
- for(const auth of [null,{}, {status:'guest'},{status:'guest',user:{id:388008256}},{status:'no_init_data'},{status:'invalid'}])assert.equal(G.canEnterVilla(auth),false);
+ for(const auth of [null,{}, {status:'unknown'}])assert.equal(G.canEnterVilla(auth),false);
+ for(const status of ['guest','no_telegram','no_init_data','invalid']){assert.equal(G.canEnterVilla({status}),true);assert.equal(G.canAccessHall({status}),false);}
  assert.equal(G.canAccessHall({status:'verified',user:{id:123}}),true);
 });
 function handlerFor(auth,methods){const context={module:{exports:{}},console,require:name=>name==='../club-social'?{context:async()=>auth}:name==='../account-id'?{resolveAccountId:async id=>id}:name==='../player-hall'?methods:{}};vm.runInNewContext(fs.readFileSync('lib/api-handlers/player-hall.js','utf8'),context);return context.module.exports;}

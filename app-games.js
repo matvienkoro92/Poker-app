@@ -733,9 +733,11 @@ function initCoolerGame() {
   retryBtn.style.display = "none";
 }
 
-document.getElementById("coolerGameCards")?.addEventListener("click", (e) => {
+document.getElementById("coolerGameCards")?.addEventListener("click", async (e) => {
   const card = e.target.closest(".bonus-card");
   if (!card || card.classList.contains("bonus-card--revealed")) return;
+  if(!await (await import("./app-game-participation.js")).ensureGameParticipation())return;
+  if(card.classList.contains("bonus-card--revealed"))return;
   const resultEl = document.getElementById("coolerGameResult");
   const retryBtn = document.getElementById("coolerGameRetry");
   if (!resultEl || !retryBtn) return;

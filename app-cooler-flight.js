@@ -102,6 +102,7 @@
     ensureLoop();
   }
   async function startSolo() {
+    if(!await (await import('./app-game-participation.js')).ensureGameParticipation())return;
     if (phase === 'loading') return;
     if(missionTarget){generation++;status('Доставь билеты · 70 ворот');countdownSolo(210070,'');return;}
     var g = ++generation; phase = 'loading'; panel('<span class="flight-tag">КУЛЕР ПРОГРЕВАЕТ ВЕНТИЛЯТОР</span><h2>Готовимся к полёту…</h2>');
@@ -110,6 +111,7 @@
       status('Результат будет проверен и сохранён в топ клуба.'); countdownSolo(d.seed, d.runId);
     } catch (e) {
       if (g !== generation || !active()) return;
+      if(e.status===401||e.status===403){phase='ready';ready();status(e.message);return;}
       status(e.status === 401 ? 'Тренировка. Войдите в аккаунт для топа клуба и дуэлей.' : 'Тренировка: сервер недоступен. Рекорд сохранится на этом устройстве.');
       countdownSolo((Math.random() * 4294967296) >>> 0, '');
     }
@@ -357,11 +359,13 @@
     req.then(function(){return api('room',{roomId:roomId});}).then(function(d){if(g===generation&&active()){adoptRoom(d);if(phase==='playing')status('Дуэль с '+d.opponentName);}}).catch(function(e){if(g===generation&&active())status(e.message);}).finally(function(){if(g===generation&&active()){polling=false;if(room&&!room.expired)roomTimer=setTimeout(pollRoom,phase==='playing'||phase==='spectating'?250:500);}});
   }
   async function createRoom() {
+    if(!await (await import("./app-game-participation.js")).ensureGameParticipation())return;
     abandon();stopPolling();duelStarted=false;room=null;var g=++generation;phase='loading';panel('<h2>Создаём дуэль…</h2>');
     try { var d=await api('create');if(g!==generation||!active())return;adoptRoom(d);status('Дуэль без ставок. Приглашение действует 2 часа.');pollRoom(); }
     catch(e){if(g!==generation||!active())return;ready();status(e.message);}
   }
   async function rematch() {
+    if(!await (await import("./app-game-participation.js")).ensureGameParticipation())return;
     if(!room || room.expired){createRoom();return;}
     if(room.rematchReady){status('Ждём, когда друг нажмёт «Повторить».');return;}
     var g=generation;
@@ -370,6 +374,7 @@
   }
   function parseRoom(value){var m=String(value||'').match(/(?:coolerDuel=|cooler_duel_)([a-f0-9]{12})/i);if(m)return m[1].toLowerCase();return /^[a-f0-9]{12}$/i.test(String(value||'').trim())?String(value).trim().toLowerCase():'';}
   async function joinRoom(code) {
+    if(!await (await import("./app-game-participation.js")).ensureGameParticipation())return;
     code=parseRoom(code);if(!code){status('Вставьте ссылку или 12-значный код дуэли.');return;}
     abandon();stopPolling();duelStarted=false;var g=++generation;phase='loading';panel('<h2>Подключаемся к другу…</h2>');
     try{var d=await api('join',{roomId:code});if(g!==generation||!active())return;adoptRoom(d);pollRoom();}

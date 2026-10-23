@@ -31,11 +31,11 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:manager','club:schedule:0']);
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:manager','club:game:nards','club:game:chess','club:game:billiards','club:schedule:0']);
  assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
- assert.equal(buttons.length,8);
+ assert.equal(buttons.length,11);
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
- assert.deepEqual(buttons.slice(-4,-1),[
+ assert.deepEqual(buttons.slice(-7,-4),[
   {text:'📋 Ссылка',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
   {text:'✉️ Написать менеджеру',style:'success',callback_data:'club:manager'},
   {text:'📋 Ссылка на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
@@ -142,4 +142,14 @@ test('withdrawal manager button resolves the current shift without replacing the
  const sent=calls.find(x=>x.url.endsWith('/sendMessage'));
  assert.equal(sent.p.reply_to_message_id,42);
  assert.equal(sent.p.reply_markup.inline_keyboard[0][0].url,'https://t.me/'+c.currentManager().username);
+});
+
+test('game commands work in private and group chats with matching links',async()=>{
+ const original=global.fetch,calls=[];global.fetch=async(url,options)=>{calls.push(JSON.parse(options.body));return {json:async()=>({ok:true,result:{message_id:12}})};};
+ try{for(const type of ['private','group'])for(const [ru,en] of [['нарды','nards'],['шахматы','chess'],['бильярд','billiards']]){
+  const update={message:{chat:{id:type==='group'?-1:1,type},message_id:8,text:'/'+ru+'@Poker_dvatuza_bot'}};
+  assert.equal(c.command(update),'game:'+en);assert.equal(c.command({message:{...update.message,text:'/'+en}}),'game:'+en);
+  assert.equal(c.command({message:{...update.message,text:'/'+ru+'@other_bot'}}),null);
+  await c.handle(update,'test');const sent=calls.at(-1);assert.equal(sent.chat_id,update.message.chat.id);assert.match(sent.text,/бросьте вызов в чат/);assert.equal(sent.reply_markup.inline_keyboard[0][0].url,'https://t.me/Poker_dvatuza_bot/DvaTuza?startapp='+en);
+ }}finally{global.fetch=original;}
 });
