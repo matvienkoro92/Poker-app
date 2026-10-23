@@ -835,3 +835,13 @@ test('transfer editor defaults to automatic ID matching instead of requiring ide
  assert.match(source,/<select name="transferRecipient"><option value="auto">/);
  assert(!source.includes('Эти ID ещё не связаны.'));
 });
+
+test('Allfriends pays a reserved withdrawal without creating any player deposit; retry and void are safe',()=>{
+ let s=applyOperation(null,{action:'create',requestId:requestId(1400),entry:{...entry,total:7500000}},'tg_2144406710',1000).state;
+ const id=requestId(1400);s=applyOperation(s,{action:'reserve',requestId:requestId(1401),entryId:id,amount:7500000},'tg_2144406710',1001).state;
+ const operation={action:'confirm-reservation',requestId:requestId(1402),entryId:id,reservationId:requestId(1401),paymentSource:'allfriends'};
+ s=applyOperation(s,operation,'tg_2144406710',1002).state;let v=view(s,1003);
+ assert.equal(v.entries[0].remaining,0);assert.equal(v.entries[0].reserved,0);assert.equal(v.entries[0].paid,7500000);assert.equal(v.entries[0].payments[0].paymentSource,'allfriends');assert.equal(v.statistics.allfriendsPaid,7500000);assert.equal(v.statistics.outgoing,7500000);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.destinations.find(d=>d.id==='withdrawals').amount,0);assert.equal(v.statistics.managers[0].deposits,0);assert.equal(v.statistics.managers[0].allfriendsPaid,7500000);assert(v.statistics.players.every(p=>p.deposits===0));assert.equal(v.statistics.players.find(p=>p.playerId===entry.playerId).withdrawals,7500000);assert.equal(s.channelOperations?.length||0,0);
+ assert.equal(applyOperation(s,operation,'tg_2144406710',1004).duplicate,true);assert.equal(s.entries[0].payments.length,1);
+ s=applyOperation(s,{action:'void',requestId:requestId(1403),entryId:id,paymentId:requestId(1402)},'tg_2144406710',1005).state;v=view(s,1006);assert.equal(v.entries[0].remaining,7500000);assert.equal(v.statistics.allfriendsPaid,0);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.outgoing,0);
+});
