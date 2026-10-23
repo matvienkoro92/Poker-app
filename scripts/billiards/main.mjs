@@ -18,6 +18,7 @@ import {createMatch,recordWin,nextMatch} from './match.mjs';
 import {mountLobby} from './lobby.mjs';
 import {createTraining} from './training.mjs';
 const $=id=>document.getElementById(id);
+let chosenStake=0,wager=null,currentRoomId='',leaving=false;
 let state=createGame(),canonical=state,player=0,online=false,net=null,angle=0,tableView=false,last=performance.now(),acc=0,raf=0,revision=-1,playback=null,clockOffset=0,connectionError='',mode=null,botAt=0;
 let playerProfiles=[null,null];const matchup=mountMatchup();
 let spectating=false;
@@ -41,20 +42,40 @@ if(initialEntry!=='lobby')$('lobby').hidden=true;
 const tableSkins=mountTableSkins({source:heroSource,room});
 const equipment=mountCues({source:heroSource,room});
 const roomToolbar=document.createElement('nav');roomToolbar.className='room-toolbar';roomToolbar.setAttribute('aria-label','Настройки бильярдной');roomToolbar.append($('cueButton'),$('tableSkinButton'),$('rulesButton'));document.querySelector('main').append(roomToolbar);
-const settlement=mountSettlement(roomToolbar,()=>({state,player,mode,ready:online,playback,tableView}),value=>{move(value);if(mode==='solo'&&value.type==='draw-offer')action(state,1,{type:'draw-accept'});});
+const settlement=mountSettlement(roomToolbar,()=>({state,player,mode,ready:online,playback,tableView,wager}),value=>{move(value);if(mode==='solo'&&value.type==='draw-offer')action(state,1,{type:'draw-accept'});});
 let entryOpened=false,currentEntry='';
 function openEntry(entry){if(!['tables','cues','lobby'].includes(entry)||mode!==null||entryOpened&&currentEntry===entry)return;entryOpened=true;currentEntry=entry;for(const d of document.querySelectorAll('dialog[open]'))d.close();setView(false);$('lobby').hidden=entry!=='lobby';if(entry==='tables')tableSkins.open();if(entry==='cues')equipment.open();}
 // Equipment opened from the villa is a separate window; closing it returns there.
 for(const dialog of [$('cueDialog'),document.querySelector('.table-skin-dialog')])dialog.addEventListener('close',()=>{
  if(parent!==window&&['tables','cues'].includes(initialEntry)&&currentEntry===initialEntry)parent.postMessage({type:'p21-billiards-close'},location.origin);
 });
-window.addEventListener('message',event=>{if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-open-entry')openEntry(event.data.entry);});
+window.addEventListener('message',event=>{if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-request-close'){leaveGame(true);return;}if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-open-entry')openEntry(event.data.entry);});
 
 async function request(body){let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin,sentAt=Date.now();const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(Number.isFinite(d.serverNow))d.clockSample=d.serverNow-(sentAt+Date.now())/2;if(!r.ok||!d.ok)throw Error(d.error||'Сервер недоступен. Попробуйте снова.');return d;}
 mountRanking(request);
-const lobby=mountLobby({launch:choice=>$(choice).click(),back:()=>{stop();lobby.reset();$('lobby').hidden=true;setView(false);if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);}});
+const lobby=mountLobby({launch:(choice,settings)=>{chosenStake=settings?.stake||0;$(choice).click();},back:()=>leaveGame(true)});
+const wagerNotice=document.createElement('p');wagerNotice.id='wagerNotice';wagerNotice.hidden=true;$('setupWaiting').prepend(wagerNotice);
+const cancelWaiting=document.createElement('button');cancelWaiting.type='button';cancelWaiting.textContent='Отменить игру и вернуть фишки';cancelWaiting.hidden=true;$('setupWaiting').append(cancelWaiting);cancelWaiting.onclick=()=>leaveGame(false);
+function clearCreateRequest(){try{sessionStorage.removeItem('billiards-wager-create');}catch{}}
+function newCreateRequest(){return 'bw_'+Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join('');}
+function createRequest(){try{let key=sessionStorage.getItem('billiards-wager-create');if(!key){key=newCreateRequest();sessionStorage.setItem('billiards-wager-create',key);}return key;}catch{return newCreateRequest();}}
+async function leaveGame(exit){
+ if(leaving)return;leaving=true;
+ try{
+  if(!wager&&mode==='online'&&chosenStake&&!currentRoomId){let requestId='';try{requestId=sessionStorage.getItem('billiards-wager-create')||'';}catch{}if(requestId){await request({action:'cancel',requestId});clearCreateRequest();}}
+  if(wager&&currentRoomId&&!['paid','refunded','cancelled'].includes(wager.status)&&!spectating){
+   const waiting=['waiting','funding_host','funding_guest'].includes(wager.status);
+   if(!window.confirm(waiting?'Отменить игру и вернуть ставку?':'Выйти и сдаться? Банк получит соперник за вычетом комиссии 10%.'))return;
+   if(waiting){await request({action:'cancel',roomId:currentRoomId});clearCreateRequest();}
+   else {await net?.move({type:'resign'});if(!['paid','refunded'].includes(wager?.status))throw Error('Завершение матча ещё обрабатывается. Дождитесь подтверждения.');}
+  }
+  stop();wager=null;currentRoomId='';lobby.reset();
+  if(exit){$('lobby').hidden=true;setView(false);if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);else location.assign('./');}
+  else status('Выберите режим игры.');
+ }catch(e){status(e.message);}finally{leaving=false;}
+}
 function status(text){$('connection').textContent=text;}
-function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;if(value)roomToolbar.prepend($('back'));else document.querySelector('.billiards>header').prepend($('back'));room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').hidden=value;$('view').textContent=mode?'Вернуться к игре':'К столу';$('resumeGame').hidden=!mode||value;if(mode)$('game').hidden=!value;}
+function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;if(value)roomToolbar.prepend($('back'));else document.querySelector('.billiards>header').prepend($('back'));room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').hidden=value;$('view').textContent=mode?'Вернуться к игре':'Сыграть';$('resumeGame').hidden=!mode||value;if(mode)$('game').hidden=!value;}
 function stop(){shotAudio.reset();aimSmoother.reset();settlement.close();replayPlayer.clear();opponentAim=null;botPlan=null;shownAim=null;turnSeconds=null;turnDeadline=null;localClockKey='';training.clear();online=false;mode=null;botAt=0;playback=null;net?.close();net=null;connectionError='';$('create').disabled=$('join').disabled=false;$('lobby').hidden=false;$('game').hidden=true;setView(false);$('lobby').hidden=false;}
 function solo(next=false){if(!room)return;recordWin(series,state.winner);const previous=next&&mode==='solo'&&state.winner!==null?state:null,nextSeries=previous?nextMatch(series):createMatch(rulesUI.settings().raceTo),settings=previous?{discipline:previous.discipline,color:previous.color,breaker:1-(previous.breaker||0)}:rulesUI.settings();stop();mode='solo';series=nextSeries;canonicalSeries=series;state=createGame({...settings,seed:Math.floor(Math.random()*4294967296)});rulesUI.reset();shotTools.reset();canonical=state;player=0;online=true;angle=0;acc=0;state.message=state.turn===0?'Вы разбиваете пирамиду · биток можно передвинуть внутри дома':'Компьютер разбивает пирамиду';$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ОДИНОЧНАЯ ПАРТИЯ · КОМПЬЮТЕР';turnSeconds=rulesUI.settings().turnSeconds;turnDeadline=Date.now()+turnSeconds*1000;setView(true);last=performance.now();}
 function startTraining(){if(!room)return;stop();mode='training';state=createGame({...rulesUI.settings(),seed:Math.floor(Math.random()*4294967296)});canonical=state;series=createMatch();rulesUI.reset();shotTools.reset();player=0;online=true;angle=0;acc=0;$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ТРЕНИРОВКА · ВЫ УПРАВЛЯЕТЕ ОБЕИМИ СТОРОНАМИ';setView(true);last=performance.now();}
@@ -62,6 +83,10 @@ function move(value){if(spectating)return;if(mode==='training')return training.m
 function restoreTraining(replay){if(mode!=='training')return;const saved=replay?training.replay():training.restore();if(!saved)return;state=saved.state;canonical=state;player=state.turn;angle=saved.controls.angle;$('power').value=saved.controls.power;$('powerValue').textContent=saved.controls.power+'%';rulesUI.restoreControls(saved.controls.rules);shotTools.restore(saved.controls.spin);acc=0;last=performance.now();botAt=0;}
 
 function adopt(d){
+ if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status('Игра отменена. Ставки возвращены на баланс Poker21.');return;}
+ wager=d.wager||null;currentRoomId=d.roomId||'';
+ if(wager){clearCreateRequest();wagerNotice.textContent='Ставка каждого — '+wager.stake.toLocaleString('ru-RU')+' фишек. Банк — '+wager.bank.toLocaleString('ru-RU')+'. Комиссия — 10%. Победителю — '+wager.payout.toLocaleString('ru-RU')+' фишек.';}
+ wagerNotice.hidden=!wager;cancelWaiting.hidden=!wager||d.ready;
  if(!validState(d.state))return;if(Array.isArray(d.playerProfiles))playerProfiles=d.playerProfiles;opponentAim=d.aim||null;turnSeconds=d.turnSeconds||null;turnDeadline=d.turnDeadline||null;
  const wasReady=online;connectionError='';if(!playback)clockOffset=d.clockSample??d.serverNow-Date.now();spectating=d.spectator===true;document.body.classList.toggle('billiards-spectator',spectating);if(spectating)document.querySelector('.billiards>header small').textContent='ПРОСМОТР ПАРТИИ';player=spectating?0:d.player;online=d.ready;$('roomCode').textContent=d.roomId;$('inviteLink').value='https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards_'+d.roomId;$('invite').hidden=d.player!==0;$('create').disabled=$('join').disabled=false;
  if(d.challengeSent)status('Вызов отправлен в чат игроков · ждём соперника');
@@ -76,9 +101,9 @@ function adopt(d){
 let joinPreviewBusy=false;
 async function previewJoin(code){
  if(joinPreviewBusy)return;joinPreviewBusy=true;
- try{const info=await request({action:'preview',roomId:code});let dialog=$('joinConfirmation');if(!dialog){dialog=document.createElement('dialog');dialog.id='joinConfirmation';dialog.className='cue-dialog';dialog.innerHTML='<h2>Приглашение в бильярд</h2><p data-invite-info></p><button data-accept class="primary">Принять приглашение</button><button data-cancel>Отмена</button>';document.querySelector('main').append(dialog);}dialog.querySelector('[data-invite-info]').textContent=(info.discipline==='pyramid'?'Русский бильярд':'Американский пул')+' · '+(info.raceTo===3?'До 3 побед':'Одна партия')+' · '+(info.turnSeconds?info.turnSeconds+' секунд каждому на ход':'Без ограничения времени');dialog.querySelector('[data-accept]').onclick=()=>{dialog.close();$('code').value=code;start(false,false,true);};dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();dialog.showModal();}catch(e){status(e.message);}finally{joinPreviewBusy=false;}
+ try{const info=await request({action:'preview',roomId:code});let dialog=$('joinConfirmation');if(!dialog){dialog=document.createElement('dialog');dialog.id='joinConfirmation';dialog.className='cue-dialog';dialog.innerHTML='<h2>Приглашение в бильярд</h2><p data-invite-info></p><button data-accept class="primary">Принять приглашение</button><button data-cancel>Отмена</button>';document.querySelector('main').append(dialog);}dialog.querySelector('[data-invite-info]').textContent=(info.discipline==='pyramid'?'Русский бильярд':'Американский пул')+' · '+(info.raceTo===3?'До 3 побед':'Одна партия')+' · '+(info.turnSeconds?info.turnSeconds+' секунд каждому на ход':'Без ограничения времени')+(info.wager?' · Ставка каждого: '+info.wager.stake+' фишек. Банк: '+info.wager.bank+'. Комиссия 10%, победителю '+info.wager.payout+' фишек. При входе ставка спишется с Poker21.':' · На интерес');dialog.querySelector('[data-accept]').onclick=()=>{dialog.close();$('code').value=code;start(false,false,true);};dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();dialog.showModal();}catch(e){status(e.message);}finally{joinPreviewBusy=false;}
 }
-function start(host,challenge=false,confirmed=false){const code=$('code').value.toUpperCase().replace(/\s/g,'');if(!host&&!/^[A-HJ-NP-Z2-9]{10}$/.test(code)){status('Введите код из 10 символов, который прислал друг.');return;}if(!host&&!confirmed){previewJoin(code);return;}stop();mode='online';revision=-1;$('create').disabled=$('join').disabled=true;status(host?'Создаём комнату…':'Подключаемся…');net=createSession({request,getAim:()=>{if(!online||state.turn!==player||state.moving||state.pending||state.inHand||playback)return null;const cue=equipment.inspect();return {angle,cueId:rulesUI.options(state).cueId,shot:state.shot,cueStyle:cue.selected,nick:cue.nick};},onUpdate:adopt,onError(message,fatal){connectionError=message;online=false;status(message);if(fatal){$('create').disabled=$('join').disabled=false;}else $('hint').textContent=message;}});net.start(host,code,{...rulesUI.settings(),challenge});}
+function start(host,challenge=false,confirmed=false){const code=$('code').value.toUpperCase().replace(/\s/g,'');if(!host&&!/^[A-HJ-NP-Z2-9]{10}$/.test(code)){status('Введите код из 10 символов, который прислал друг.');return;}if(!host&&!confirmed){previewJoin(code);return;}stop();mode='online';revision=-1;$('create').disabled=$('join').disabled=true;status(host?'Создаём комнату…':'Подключаемся…');net=createSession({request,getAim:()=>{if(!online||state.turn!==player||state.moving||state.pending||state.inHand||playback)return null;const cue=equipment.inspect();return {angle,cueId:rulesUI.options(state).cueId,shot:state.shot,cueStyle:cue.selected,nick:cue.nick};},onUpdate:adopt,onError(message,fatal){connectionError=message;online=false;status(message);if(fatal){$('create').disabled=$('join').disabled=false;}else $('hint').textContent=message;}});net.start(host,code,{...rulesUI.settings(),challenge,...(host&&!challenge&&chosenStake?{stake:chosenStake,requestId:createRequest()}:{} )});}
 $('challenge').onclick=()=>{if($('create').disabled)return;start(true,true);};
 $('solo').onclick=()=>solo();$('training').onclick=startTraining;$('restoreShot').onclick=()=>restoreTraining(false);$('repeatShot').onclick=()=>restoreTraining(true);$('create').onclick=()=>start(true);$('join').onclick=()=>start(false);$('code').onkeydown=e=>{if(e.key==='Enter')start(false);};
 $('inviteLink').onclick=()=>{$('inviteLink').select();};
@@ -92,12 +117,12 @@ $('shareInvite').onclick=async()=>{
  }catch(e){if(e.name!=='AbortError')status('Не удалось открыть отправку. Скопируйте пригласительную ссылку.');}
 };
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('roomCode').textContent);status('Код скопирован — отправьте его другу.');}catch(_){status('Код комнаты: '+$('roomCode').textContent);}};
-$('resumeTable').onclick=()=>setView(true);$('view').onclick=()=>setView(!tableView);$('power').oninput=()=>{$('powerValue').textContent=$('power').value+'%';};$('shoot').onclick=()=>move({type:'shot',angle,power:Number($('power').value)/100,...rulesUI.options(state),spin:shotTools.value()});$('again').onclick=()=>mode==='training'?startTraining():mode==='solo'?solo(true):net?.move(null,true);$('modes').onclick=()=>{stop();status('Выберите одиночную партию или игру с другом.');};
+$('resumeTable').onclick=()=>setView(true);$('view').onclick=()=>setView(!tableView);$('power').oninput=()=>{$('powerValue').textContent=$('power').value+'%';};$('shoot').onclick=()=>move({type:'shot',angle,power:Number($('power').value)/100,...rulesUI.options(state),spin:shotTools.value()});$('again').onclick=()=>mode==='training'?startTraining():mode==='solo'?solo(true):net?.move(null,true);$('modes').onclick=()=>leaveGame(false);
 let dragging=false;
 function aim(e){if(spectating||!tableView||!online||state.turn!==player||state.moving||state.winner!==null)return;const p=room.point(e.clientX,e.clientY);if(!p)return;if(rulesUI.isPlacing(state)||state.breakPending&&e.shiftKey){if(e.type==='pointerdown'){move({type:'place',x:p.x,y:p.y});rulesUI.placed();}return;}if(e.type==='pointerdown'&&rulesUI.chooseCue(state,p))return;const id=rulesUI.options(state).cueId,b=state.balls.find(b=>b.id===id&&!b.pocket);if(!b)return;if(Math.hypot(p.x-b.x,p.y-b.y)<18)return;angle=Math.atan2(b.y-p.y,b.x-p.x);}
 $('room').onselectstart=$('room').oncontextmenu=e=>e.preventDefault();
 $('room').onpointerdown=e=>{e.preventDefault();window.getSelection()?.removeAllRanges();dragging=true;$('room').setPointerCapture(e.pointerId);aim(e);};$('room').onpointermove=e=>{if(dragging)aim(e);};$('room').onpointerup=$('room').onpointercancel=()=>dragging=false;
-$('closeRules').onclick=()=>$('rules').close();$('back').onclick=()=>{stop();if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);else location.assign('./');};
+$('closeRules').onclick=()=>$('rules').close();$('back').onclick=()=>leaveGame(true);
 function frame(now){
  const dt=Math.min((now-last)/1000,.1);last=now;
  if(mode==='solo'||mode==='training'){
@@ -129,10 +154,10 @@ function frame(now){
  for(let i=0;i<2;i++){const g=state.groups[i];$('p'+(i+1)).textContent=(mode==='training'?'Сторона '+(i+1):i===player?'Вы':mode==='solo'?'Компьютер':'Друг')+' · '+(state.discipline==='pyramid'?'пирамида':g===null?'стол открыт':g===0?'сплошные':'полосатые')+' · '+state.scores[i]+'/'+(state.discipline==='pyramid'?8:7);$('p'+(i+1)).className=state.turn===i?'active':'';}
  $('seriesScore').hidden=mode==='training'||!online||series.target===1;$('seriesScore').textContent=series.target===3?'До 3 побед · Вы '+series.wins[player]+' : '+series.wins[1-player]+' '+(mode==='solo'?'Компьютер':'Друг')+' · партия '+series.round:'Одна партия';
  $('trainingControls').hidden=mode!=='training';const repeatAvailable=training.inspect().available;$('restoreShot').disabled=$('repeatShot').disabled=!repeatAvailable;
- $('again').hidden=mode!=='training'&&(state.winner===null||player!==0);$('again').textContent=mode==='training'?'Новая расстановка':series.target===3?(series.winner!==null?'Новая серия до 3 побед':'Следующая партия'):'Новая партия';
+ $('again').hidden=!!(wager&&wager.status!=='playing')||mode!=='training'&&(state.winner===null||player!==0);$('again').textContent=mode==='training'?'Новая расстановка':series.target===3?(series.winner!==null?'Новая серия до 3 побед':'Следующая партия'):'Новая партия';
  if(mode==='training')$('hint').textContent=state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново';else if(state.winner!==null&&mode==='online'&&player!==0)$('hint').textContent='Продолжение запускает создатель комнаты';
  shotAudio.observe(state,tableView);settlement.render();matchup.render({state,profiles:mode==='solo'?[{name:equipment.inspect().nick||'Вы'},null]:playerProfiles,player,mode,tableView,ready:online});
- resultPanel.render(state,{mode:spectating?null:mode,player,series,tableView});
+ resultPanel.render(state,{mode:spectating?null:mode,player,series,tableView,wager});
  shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});const strikePreview=playback&&Date.now()+clockOffset<playback.startedAt?{...playback.move,angle:playback.angle,cueStyle:playback.cueStyle,nick:playback.nick}:null;
  const remote=(mode==='online'&&state.turn!==player||spectating)&&opponentAim?.player===state.turn&&opponentAim.shot===state.shot?opponentAim:null;
  const smoothRemote=remote?{...remote,angle:aimSmoother.sample([state.turn,state.shot,remote.cueId,remote.cueStyle].join(':'),remote.angle,dt)}:null;if(!remote||strikePreview)aimSmoother.reset();

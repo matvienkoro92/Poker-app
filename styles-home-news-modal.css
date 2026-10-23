@@ -321,7 +321,8 @@ body:has(.home-friend-news-modal--club:not([hidden])) .bottom-nav {
   margin: 10px 0 20px;
 }
 
-.home-friend-news-modal__list .home-friend-news-modal__date {
+.home-friend-news-modal__list .home-friend-news-modal__date,
+.home-friend-news-modal__list .home-friend-news-modal__day-total {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3061,23 +3062,15 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 
 /* Club news opens from bottom navigation without a separate title bar. */
 body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__header{display:none}
-.home-friend-news-modal__day-total {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-  margin-top: 12px;
-  padding: 16px;
-  border-top: 1px solid rgba(211, 178, 105, 0.3);
-  border-radius: 12px;
-  background: rgba(211, 178, 105, 0.08);
-  font-size: 14px;
+.home-friend-news-modal__list .home-friend-news-modal__day-total {
+  display: block;
+  margin: -4px 0 12px;
+  padding: 0 8px;
+  line-height: 1.5;
 }
 
 .home-friend-news-modal__day-total strong {
-  color: #d3b269;
-  font-size: 22px;
+  font: inherit;
   white-space: nowrap;
 }
 .home-news-pinned-rankings { margin: 12px 0 20px; }

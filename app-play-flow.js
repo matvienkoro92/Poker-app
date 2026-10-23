@@ -276,3 +276,35 @@
   else connect();
   new MutationObserver(connect).observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+(function initEveningVillaGames(){
+  var dialog=null,selected='',source=null;
+  document.addEventListener('click',function(event){
+    var trigger=event.target.closest&&event.target.closest('[data-evening-villa-game]');
+    if(!trigger)return;
+    var game=trigger.dataset.eveningVillaGame;
+    if(!['billiards','nards','chess'].includes(game))return;
+    event.preventDefault();selected=game;source=trigger;
+    if(!dialog){
+      dialog=document.createElement('dialog');dialog.className='evening-villa-game-dialog';
+      dialog.setAttribute('aria-labelledby','eveningVillaGameTitle');
+      dialog.innerHTML='<h2 id="eveningVillaGameTitle"></h2><p data-villa-game-description></p><p data-villa-game-error role="status"></p><div class="evening-villa-game-dialog__actions"><button type="button" data-villa-game-confirm>Перейти</button><button type="button" data-villa-game-cancel>Остаться</button></div>';
+      document.body.appendChild(dialog);
+      dialog.querySelector('[data-villa-game-cancel]').onclick=function(){dialog.close();};
+      dialog.addEventListener('close',function(){if(source&&source.isConnected)source.focus({preventScroll:true});});
+      dialog.querySelector('[data-villa-game-confirm]').onclick=async function(){
+        var button=this;button.disabled=true;
+        try{
+          if(typeof window.pokerEnsureLazyDomains==='function')await window.pokerEnsureLazyDomains(['profile'],{styles:true,scripts:true});
+          if(typeof window.pokerOpenVillaGameRoom!=='function')throw Error('Не удалось загрузить комнату. Попробуйте ещё раз.');
+          dialog.close();await window.pokerOpenVillaGameRoom(selected);
+        }catch(e){dialog.querySelector('[data-villa-game-error]').textContent=e.message||'Не удалось открыть комнату.';if(!dialog.open)dialog.showModal();}
+        finally{button.disabled=false;}
+      };
+    }
+    dialog.querySelector('h2').textContent=game==='billiards'?'Перейти в бильярдную?':game==='nards'?'Перейти в гостиную для игры в нарды?':'Перейти в гостиную для игры в шахматы?';
+    dialog.querySelector('[data-villa-game-description]').textContent='Откроется игровая комната на вашей вилле.';
+    dialog.querySelector('[data-villa-game-error]').textContent='';
+    dialog.showModal();
+  });
+})();

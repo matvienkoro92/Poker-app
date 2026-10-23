@@ -96,6 +96,7 @@ test("new participant notifies existing event players once, without section subs
   assert.match(messages[0].text.replace(/\u00a0/g, " "), /Общий банк теперь: 9 500 ₽/);
   assert.match(messages[0].text.replace(/\u00a0/g, " "), /Сумма ставки: 1 300 ₽/);
   assert.match(messages[0].text, /Событие — турнир «Magic MKO»/);
+  assert.match(messages[0].text, /Участники:\n1\. ID000001\n2\. ID000002\n3\. ID000004\n4\. New Nick\n\n✅/);
   assert.equal(new URL(messages[0].buttonUrl).searchParams.get("startapp"), "tournament_bet_tb_join");
 });
 

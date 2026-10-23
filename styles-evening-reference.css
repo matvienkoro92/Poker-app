@@ -417,3 +417,38 @@ html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-pag
   transform:none!important;
  }
 }
+
+/* Replace only the left portal; the tournament and its players keep their art. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-villa-games {
+  mask: none;
+  -webkit-mask: none;
+  pointer-events: auto !important;
+}
+.evening-villa-games > img { display: block; width: 100%; height: auto; pointer-events: none; }
+.evening-villa-games > button {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ffe4a7;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: auto;
+}
+.evening-villa-games > [data-evening-villa-game=billiards] { left: 0; width: 44%; }
+.evening-villa-games > [data-evening-villa-game=nards] { left: 44%; }
+.evening-villa-games > [data-evening-villa-game=chess] { left: 72%; }
+.evening-villa-games > button span { padding: .8cqw 1.2cqw; border: 1px solid #b59150; border-radius: 12px; background: #15231ee8; font: 700 2.5cqw/1.1 Arial,sans-serif; white-space: nowrap; }
+.evening-villa-games > button:focus-visible { outline: 2px solid #ffe4a7; outline-offset: 2px; border-radius: 12px; }
+.evening-villa-game-dialog { width: min(360px,calc(100% - 32px)); padding: 22px; border: 1px solid #c3a05d; border-radius: 20px; background: #13251f; color: #f5e5c2; }
+.evening-villa-game-dialog::backdrop { background: #000a; }
+.evening-villa-game-dialog h2 { margin: 0 0 14px; font-size: 19px; }
+.evening-villa-game-dialog p { font-size: 14px; line-height: 1.5; }
+.evening-villa-game-dialog__actions { display: flex; gap: 10px; margin-top: 18px; }
+.evening-villa-game-dialog button { flex: 1; min-height: 44px; border: 1px solid #b3955c; border-radius: 12px; background: #243b30; color: #ffe4a7; font: 700 14px Arial,sans-serif; }
+.evening-villa-game-dialog [data-villa-game-confirm] { background: #e2c17e; color: #17251d; }

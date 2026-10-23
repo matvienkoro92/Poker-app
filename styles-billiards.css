@@ -457,3 +457,24 @@ body.billiards-table-view .billiards>header h1[data-turn]{font-weight:800;border
 body.billiards-table-view .billiards>header h1[data-turn=mine]{color:#e0ffea;background:#15553f;border-color:#83efaf;box-shadow:0 0 12px #64e79b40}
 body.billiards-table-view .billiards>header h1[data-turn=opponent]{color:#fff0c6;background:#694718;border-color:#ffd16e;box-shadow:0 0 12px #ffcb5c40}
 body.billiards-table-view .billiards>header #turnClock{padding:4px 8px;border:1px solid #f5cc72;border-radius:9px;background:#352b18;color:#ffe59b;font-weight:850;text-shadow:0 1px 2px #000;box-shadow:0 0 10px #f5cc7230}
+
+/* Put multiplayer choices first and separate solo practice below them. */
+#lobby .wizard-options .mode-card--social {
+  border-color: #c6a46780;
+  background: linear-gradient(110deg, #b99a4d24, #193b2e75);
+}
+#lobby .mode-card--social .mode-card__icon {
+  background: #d7bb751c;
+  color: #ead197;
+}
+#lobby .mode-card--social .mode-card__copy strong { color: #f4e4b7; }
+#lobby #modeButtons [data-mode=solo] { margin-top: 22px; }
+@media(max-height:560px) {
+  #lobby #modeButtons [data-mode=join] { grid-column: 1 / -1; }
+  #lobby #modeButtons [data-mode=solo],
+  #lobby #modeButtons [data-mode=training] { margin-top: 16px; }
+}
+#setupWager #wagerAmount { text-transform: none; letter-spacing: normal; }
+#setupWager label small { display: block; margin-top: 10px; line-height: 1.5; color: #d6c9ab; }
+#lobby #wagerError { color: #ffc5a4; }
+#wagerNotice { padding: 12px; border: 1px solid #c6a46780; border-radius: 12px; background: #b99a4d18; }
