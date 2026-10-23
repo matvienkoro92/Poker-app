@@ -440,6 +440,22 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
   justify-content: center;
   pointer-events: auto;
 }
+/* Theme button surfaces must never cover the game illustration. */
+body[data-view="download"] #app.app .evening-villa-games > button,
+body[data-view="download"] #app.app .evening-villa-games > button:is(:hover,:active,:focus) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+body[data-view="download"] #app.app .evening-villa-games > button::before,
+body[data-view="download"] #app.app .evening-villa-games > button::after {
+  display: none !important;
+  content: none !important;
+}
 .evening-villa-games > [data-evening-villa-game=billiards] { left: 0; width: 44%; }
 .evening-villa-games > [data-evening-villa-game=nards] { left: 44%; }
 .evening-villa-games > [data-evening-villa-game=chess] { left: 72%; }
