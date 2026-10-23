@@ -987,6 +987,21 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             11440
           ]
         ]
+      ],
+      [
+        "22.10.2026",
+        [
+          [
+            2,
+            "YuraK700",
+            8520
+          ],
+          [
+            3,
+            "cadillac",
+            10110
+          ]
+        ]
       ]
     ]
   },

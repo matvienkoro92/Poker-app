@@ -64,6 +64,10 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/DV\s+Bounty/i.test(raw) && /100K/i.test(raw)) return "DV 🏃 Bounty 🥊 100k";
+  if (/Black\s+Magic/i.test(raw) && /60K/i.test(raw)) return "Black Magic 60K";
+  if (/Prime\s+Magic/i.test(raw) && /500K/i.test(raw)) return "Prime Magic 500K";
+  if (/Lucky\s+Slot/i.test(raw) && /177K/i.test(raw)) return "Lucky Slot 177K";
   if (/First\s+Blood/i.test(raw) && /15K/i.test(raw)) return "First Blood 15K";
   if (/BLACKOUT/i.test(raw) && /300K/i.test(raw)) return "BLACKOUT 300K";
   if (/Hyper\s+Turbo/i.test(raw) && /40K/i.test(raw)) return "Hyper Turbo 40K";
@@ -504,6 +508,15 @@ async function parseOcrFile(file) {
     }[`${time}|${title}`];
     if (confirmed) buyin = confirmed;
   }
+  // October 22 entry fees confirmed by the owner; blue headers show starting stacks.
+  if (date === "22.10.2026" && blue) {
+    const confirmed = {
+      "14:00|Black Magic 60K": 1500,
+      "18:00|Prime Magic 500K": 7500,
+      "20:00|Lucky Slot 177K": 1000
+    }[`${time}|${title}`];
+    if (confirmed) buyin = confirmed;
+  }
   // October 21 entry fees confirmed by the owner; blue headers show starting stacks.
   if (date === "21.10.2026" && blue) {
     const confirmed = {
@@ -577,6 +590,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_1089 visibly shows a zero rank for Lorenco.
+    if (date === "22.10.2026" && blue && time === "13:00" && playerId === "3106349" && reward === 2.65) {
+      place = 0;
+      needsPlaceCheck = false;
+    }
     // IMG_0944 visibly shows sixth place; Vision omitted the digit.
     if (date === "19.10.2026" && blue && time === "10:00" && playerId === "3019341" && reward === 31.13) {
       place = 6;

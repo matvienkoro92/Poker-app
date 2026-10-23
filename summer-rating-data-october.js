@@ -4686,4 +4686,185 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "22.10.2026": [
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 10,
+          "reward": 4078,
+          "points": 0
+        },
+        {
+          "nick": "Lorenco",
+          "place": 0,
+          "reward": 265,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Black Magic 60K",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Откотика_Я",
+          "place": 3,
+          "reward": 22341,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 3,
+          "reward": 1840,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 5,
+          "reward": 670,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 10110,
+          "points": 0
+        },
+        {
+          "nick": "YuraK700",
+          "place": 2,
+          "reward": 8520,
+          "points": 0
+        },
+        {
+          "nick": "Марс",
+          "place": 6,
+          "reward": 790,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Prime Magic 500K",
+      "buyin": 7500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "butovskiy",
+          "place": 2,
+          "reward": 196869,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 3,
+          "reward": 135208,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 16635.57,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 2700,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 7,
+          "reward": 682.03,
+          "points": 0
+        },
+        {
+          "nick": "shnshn",
+          "place": 12,
+          "reward": 350,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 177K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 6,
+          "reward": 9731,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 1,
+          "reward": 23844,
+          "points": 0
+        },
+        {
+          "nick": "PlayerTsDKEC",
+          "place": 5,
+          "reward": 4073.27,
+          "points": 0
+        },
+        {
+          "nick": "EvgenDerby",
+          "place": 2,
+          "reward": 3494.16,
+          "points": 0
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 3,
+          "reward": 1430,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
