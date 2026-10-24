@@ -84,7 +84,5 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 .nards-dice-sample i{padding:7px;gap:3px}.nards-dice-sample[data-size=small] i{padding:5px;gap:2px}
 @media(max-width:420px){.nards-editor-tabs button{font-size:12px;padding:9px 3px}.nards-dice-sample i{padding:6px}}
 
-.equipment-section-share{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin:12px 0 16px}.equipment-section-share label{display:grid;gap:5px;min-width:0;font-size:12px;color:#d5c59e}.equipment-section-share input{width:100%;min-width:0;min-height:44px;font-size:12px}.equipment-section-share button{min-height:44px}.equipment-section-share p{grid-column:1/-1;margin:0;font-size:12px;color:#aee4c8}.equipment-section-share p:empty{display:none}
-@media(max-width:420px){.equipment-section-share{grid-template-columns:1fr}.equipment-section-share button{width:100%}}
 
 .host-equipment-note{font-size:12px;color:#d4c398;text-align:center;margin:5px 0 10px}

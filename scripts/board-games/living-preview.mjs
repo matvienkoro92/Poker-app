@@ -1,4 +1,4 @@
-import {NARDS_BOARDS,CHECKERS,BOARDS,PIECES} from './catalog.mjs';
+import {NARDS_BOARDS,CHECKERS,BOARDS,PIECES,NARDS_INTERIORS} from './catalog.mjs';
 import {createBackgammon} from './backgammon.mjs';
 import {pieceSVG,pieceNames} from './pieces.mjs';
 
@@ -29,7 +29,7 @@ export function paint(root,game,equipment={}){
       root.style.setProperty('--preview-'+side,set[side]);
       root.style.setProperty('--preview-'+side+'-art',set[side+'Art']?'url("'+set[side+'Art']+'")':'none');
     }
-    const state=createBackgammon('short');
+    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);const state=createBackgammon('short');
     for(let row=0;row<2;row++)for(let col=0;col<12;col++){
       const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
       point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;
@@ -39,6 +39,21 @@ export function paint(root,game,equipment={}){
     }
     const bar=document.createElement('span');bar.className='living-preview-bar';surface.append(bar);
   }
-  root.replaceChildren(surface);
+  if(!chess){
+    const box=document.createElement('div'),base=document.createElement('div'),lid=document.createElement('div'),front=document.createElement('div'),back=document.createElement('div'),hinge=document.createElement('i');
+    box.className='living-nards-case';base.className='living-nards-half living-nards-base living-preview-surface living-preview-nards';lid.className='living-nards-lid';front.className='living-nards-half living-nards-front living-preview-surface living-preview-nards';back.className='living-nards-back';hinge.className='living-nards-hinge';
+    base.style.backgroundImage=front.style.backgroundImage=surface.style.backgroundImage;
+    back.style.backgroundImage=board.cover?'url("'+board.cover+'")':'none';back.setAttribute('aria-hidden','true');
+    if(!board.cover)back.innerHTML='<span>♜<small>TWO ACES</small></span>';
+    for(const point of [...surface.children]){if(point.classList.contains('living-preview-bar'))continue;const col=Number(point.style.gridColumn);if(col>7){point.style.gridColumn=col-7;base.append(point);}else front.append(point);}
+    lid.append(front,back);box.append(base,lid,hinge);root.replaceChildren(box);
+    root.dataset.openLabel=root.getAttribute('aria-label');setClosed(root,root.classList.contains('is-closed'));
+  }else root.replaceChildren(surface);
   return {board:board.name,pieces:set.name};
+}
+
+export function setClosed(root,closed){
+ root.classList.toggle('is-closed',!!closed);
+ root.setAttribute('data-closed',String(!!closed));
+ if(root.dataset.openLabel)root.setAttribute('aria-label',closed?'Нарды закрыты · '+(root.dataset.board||''):root.dataset.openLabel);
 }

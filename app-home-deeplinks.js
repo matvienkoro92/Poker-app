@@ -140,12 +140,13 @@ function pokerInitHomeDeepLinks(opts) {
       });
       return;
     }
+    if(startParam==='games_hall'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('nards');},['profile']);return;}
     var nardsAppearance=/^nards_appearance_(outside|inside|pieces|dice)$/.exec(startParam);
     if(nardsAppearance){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('long',null,false,nardsAppearance[1]);},['profile']);return;}
     var boardLink=/^board_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(boardLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('chess',boardLink[2],!!boardLink[1]);},['profile']);return;}
     if(startParam==='nards'||startParam==='chess'){
-      openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames(startParam==='chess'?'chess':'short');},['profile']);
+      openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames(startParam==='chess'?'chess':'long');},['profile']);
       return;
     }
     if(startParam==='billiards'){

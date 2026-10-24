@@ -752,5 +752,35 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 @keyframes living-overhead-arrive{from{opacity:0;transform:scale(.88) perspective(1000px) rotateX(20deg)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.living-board-focus--table::before{animation:none}}
 
+/* Nards close along the centre hinge; the chosen carved exterior is the reverse face. */
+.living-nards-case{position:relative;aspect-ratio:1.1;perspective:1100px;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.4,0,.2,1)}
+.living-nards-half{position:absolute;top:0;width:50%;height:100%;aspect-ratio:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:1fr 1fr;background-size:200% 100%;backface-visibility:hidden}
+.living-nards-base{left:50%;background-position:right center}
+.living-nards-lid{position:absolute;left:0;top:0;width:50%;height:100%;transform-origin:right center;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.4,0,.2,1);z-index:2}
+.living-nards-front{left:0;width:100%;background-position:left center;transform:translateZ(1px)}
+.living-nards-back{position:absolute;inset:0;transform:rotateY(180deg) translateZ(3px);backface-visibility:hidden;background-color:var(--preview-frame);background-size:cover;background-position:center;border:5px ridge #967347;border-radius:5px;box-sizing:border-box;box-shadow:inset 0 0 12px #0008,0 5px 8px #0006;display:grid;place-items:center;color:#dfc18b}
+.living-nards-back>span{text-align:center;font-size:52px}.living-nards-back small{display:block;font-size:12px;letter-spacing:2px}
+.living-nards-hinge{position:absolute;left:calc(50% - 3px);top:1%;width:6px;height:98%;z-index:3;pointer-events:none;background:linear-gradient(90deg,#352219,#b79559,#362117);border-radius:3px}
+.living-top-board.is-closed .living-nards-case{transform:translateX(-25%)}
+.living-top-board.is-closed .living-nards-lid{transform:rotateY(180deg)}
+@media(prefers-reduced-motion:reduce){.living-nards-case,.living-nards-lid{transition:none}}
+
+/* Nards game choices are the primary row; case and styling controls sit below. */
+.living-board-focus--table[data-game=nards] .living-focus-play{bottom:80px}
+.living-board-focus--table[data-game=nards] .living-focus-tools{bottom:22px}
+.player-hall-dialog .living-board-focus[data-game=nards] .living-focus-play button{min-height:48px;background:linear-gradient(135deg,#f2d492,#d2a44c);color:#272015;border:1px solid #ffe8b1;font-weight:800;box-shadow:0 4px 0 #704e25,0 6px 18px #0007;text-shadow:none}
+.player-hall-dialog .living-board-focus[data-game=nards] .living-focus-play button:hover{background:linear-gradient(135deg,#ffe5aa,#e7b956)}
+.player-hall-dialog .living-board-focus[data-game=nards] .living-focus-play button:active{transform:translateY(2px);box-shadow:0 2px 0 #704e25}
+
 /* Games temporarily locked in the villa. */
 .player-hall-dialog .living-game-case:disabled,.player-hall-dialog .living-darts-wall:disabled{cursor:not-allowed;opacity:.7;pointer-events:none}
+
+/* Show feedback for the entire wait while opening the tabletop. */
+.player-hall-dialog .living-game-case[aria-busy=true]{opacity:1;cursor:progress;pointer-events:auto}
+.living-game-case[aria-busy=true]>span:last-child{display:flex;align-items:center;gap:7px;color:#ffe5a1;border-color:#edcc7b}
+.living-game-case[aria-busy=true]>span:last-child::before{content:'';width:12px;height:12px;border:2px solid #e8c87855;border-top-color:#ffe5a1;border-radius:50%;animation:living-case-loading .8s linear infinite}
+@keyframes living-case-loading{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.living-game-case[aria-busy=true]>span:last-child::before{animation:none}}
+
+.player-hall-dialog .villa-living-share{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:4;min-height:44px;padding:10px 16px;border:1px solid #d5b76c;border-radius:12px;background:#263d30f2;color:#fff0c6;box-shadow:0 3px 12px #0007;font-size:12px;cursor:pointer}
+.player-hall-dialog .villa-living-share:focus-visible{outline:2px solid #ffe5a1;outline-offset:3px}
