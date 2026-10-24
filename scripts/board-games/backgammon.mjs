@@ -16,12 +16,37 @@ function applyStep(s,m){const p=s.turn,sgn=sign(p);if(m.from===-1)s.bar[p]--;els
 // Enumerate legal continuations so partial moves cannot evade the maximum-dice rule.
 export function turnSequences(s){if(s.winner!==null||s.phase!=='moving')return [];const memo=new Map();function walk(v){if(!v.dice.length)return [[]];const key=JSON.stringify([v.points,v.bar,v.off,v.dice,v.headTaken]);if(memo.has(key))return memo.get(key);let all=[];for(const die of new Set(v.dice))for(const m of rawMoves(v,die)){const next={...v,points:[...v.points],bar:[...v.bar],off:[...v.off],dice:[...v.dice]};applyStep(next,m);for(const rest of walk(next))all.push([m,...rest]);}if(!all.length)all=[[]];const max=Math.max(...all.map(a=>a.length));all=all.filter(a=>a.length===max);if(max===1&&new Set(v.dice).size>1){const high=Math.max(...all.map(a=>a[0].die));all=all.filter(a=>a[0].die===high);}memo.set(key,all);return all;}return walk(s);}
 export function backgammonLegal(s){const found=new Map();for(const seq of turnSequences(s))if(seq.length)found.set(JSON.stringify(seq[0]),seq[0]);return [...found.values()];}
+// Clickable destinations for consecutive steps by one checker, all drawn from legal full turns.
+export function backgammonDestinations(s){
+ const found=new Map();
+ for(const sequence of turnSequences(s)){
+  const path=[],next={...s,points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice]};
+  for(const step of sequence){
+   if(path.length&&(path.at(-1).to===24||step.from!==path.at(-1).to))break;
+   path.push(step);applyStep(next,step);
+   const move=path.length===1?{...step}:{from:path[0].from,to:step.to,die:path.reduce((n,m)=>n+m.die,0),path:path.map(m=>({...m}))};
+   const key=JSON.stringify([move.from,move.to,next.points,next.bar,next.off,[...next.dice].sort(),next.headTaken]);
+   if(!found.has(key))found.set(key,move);
+  }
+ }
+ return [...found.values()];
+}
 function endTurn(s){s.stepUndo=[];s.turns[s.turn]++;s.turn=1-s.turn;s.ply++;s.phase='roll';s.dice=[];s.headTaken=0;s.drawOffer=null;s.message='Бросьте кости';}
 export function backgammonRoll(s,player,dice){if(s.winner!==null||!['opening','roll'].includes(s.phase)||s.phase!=='opening'&&player!==s.turn||!Array.isArray(dice)||dice.length!==2||dice.some(n=>!Number.isInteger(n)||n<1||n>6))return false;
  s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(s.phase==='opening'){if(dice[0]===dice[1]){s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.opening=false;}
  s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){endTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
 }
-export function backgammonMove(s,player,m){if(s.winner!==null||player!==s.turn||s.phase!=='moving')return false;const legal=backgammonLegal(s).find(v=>v.from===m.from&&v.to===m.to&&v.die===m.die);if(!legal)return false;(s.stepUndo||=[]).push({turn:s.turn,ply:s.ply,rollCount:s.rollCount,points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice],headTaken:s.headTaken,lastMove:s.lastMove?{...s.lastMove}:null,movesLength:s.moves.length});applyStep(s,legal);s.lastMove={...legal,player};s.moves.push({...s.lastMove,roll:[...s.roll]});if(s.off[player]===15){s.winner=player;s.endReason='borne-off';s.phase='finished';s.scores[player]=1;s.message='Все 15 шашек выведены';}else if(!s.dice.length||!backgammonLegal(s).length)endTurn(s);return true;}
+export function backgammonMove(s,player,m){
+ if(m.path!==undefined){
+  if(!Array.isArray(m.path)||m.path.length<2||m.path.length>4)return false;
+  const valid=backgammonDestinations(s).find(v=>v.path&&v.from===m.from&&v.to===m.to&&v.die===m.die&&JSON.stringify(v.path)===JSON.stringify(m.path));
+  if(!valid)return false;
+  const next=structuredClone(s);
+  for(const step of valid.path)if(!backgammonMove(next,player,step))return false;
+  next.lastMove={from:valid.from,to:valid.to,die:valid.die,path:valid.path,player};
+  Object.assign(s,next);return true;
+ }
+if(s.winner!==null||player!==s.turn||s.phase!=='moving')return false;const legal=backgammonLegal(s).find(v=>v.from===m.from&&v.to===m.to&&v.die===m.die);if(!legal)return false;(s.stepUndo||=[]).push({turn:s.turn,ply:s.ply,rollCount:s.rollCount,points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice],headTaken:s.headTaken,lastMove:s.lastMove?{...s.lastMove}:null,movesLength:s.moves.length});applyStep(s,legal);s.lastMove={...legal,player};s.moves.push({...s.lastMove,roll:[...s.roll]});if(s.off[player]===15){s.winner=player;s.endReason='borne-off';s.phase='finished';s.scores[player]=1;s.message='Все 15 шашек выведены';}else if(!s.dice.length||!backgammonLegal(s).length)endTurn(s);return true;}
 
 export function canUndoBackgammon(s,player=s.turn){const last=s.stepUndo?.at(-1);return s.discipline!=='chess'&&s.winner===null&&s.phase==='moving'&&player===s.turn&&!!last&&last.turn===s.turn&&last.ply===s.ply&&last.rollCount===s.rollCount;}
 export function undoBackgammonStep(s,player){if(!canUndoBackgammon(s,player))return false;const last=s.stepUndo.pop();for(const field of ['points','bar','off','dice'])s[field]=[...last[field]];s.headTaken=last.headTaken;s.lastMove=last.lastMove?{...last.lastMove}:null;s.moves.length=last.movesLength;return true;}

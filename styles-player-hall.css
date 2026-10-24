@@ -787,3 +787,11 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 
 .living-preview-checker::after{content:'';position:absolute;inset:0;border:clamp(1px,.3cqw,3px) solid #fff2d5;border-radius:50%;box-shadow:0 0 0 1px #655033;pointer-events:none}
 .living-preview-checker.is-black::after{border-color:#101e29;box-shadow:0 0 0 1px #d9e3e6}
+
+/* The lounge's folding board has the same carved pockets and storage as the live table. */
+.living-preview-well{position:absolute;left:2%;top:3px;width:96%;aspect-ratio:1;border-radius:50%;border:1px solid #352012;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 55% 58%,#2d1a0f66 0 50%,#8c613e88 75%,#2a180fdd 88%);box-shadow:inset 0 2px 3px #130a08b3,inset 0 -1px 1px #ffe3adbb,0 1px #d9b47c88}
+.living-preview-point.is-bottom .living-preview-well{top:auto;bottom:3px}
+.living-nards-front{padding-left:clamp(14px,3cqw,24px)}.living-nards-base{padding-right:clamp(14px,3cqw,24px)}
+.living-nards-storage{position:absolute;top:3px;bottom:3px;width:clamp(13px,2.8cqw,22px);display:flex;flex-direction:column;padding:3px 2px;border:2px ridge #ae8650;border-radius:6px;background:linear-gradient(90deg,#24170f,#825c35 40%,#342013);box-shadow:inset 2px 0 3px #000b,inset -1px 0 2px #0009;z-index:3;box-sizing:border-box}
+.living-nards-front>.living-nards-storage{left:1px}.living-nards-base>.living-nards-storage{right:1px}
+.living-nards-storage strong{font:700 8px/12px system-ui;color:#f4dba4;text-align:center}.living-nards-storage .nards-storage-slots{display:flex;flex:1;flex-direction:column;justify-content:space-between;gap:2px;padding:2px 0;min-height:0}.living-nards-storage .nards-storage-slots i{position:relative;display:block;flex:1;min-height:2px;max-height:8px;border:1px solid #1e120a;border-radius:50%;background:radial-gradient(ellipse,#1a1009 20%,#3a2414 75%,#a97e49);box-shadow:inset 0 1px 2px #000c,0 1px #dbb77777}

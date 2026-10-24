@@ -6,7 +6,7 @@ assert.equal(await p.locator('[data-living-menu=chess]').isDisabled(),true);for(
  assert.equal(await board.getAttribute('data-board'),game==='nards'?'compass':'marble-brass');
  assert.equal(await board.getAttribute('data-pieces'),game==='nards'?'brass':'arabesque');
  assert.equal(await board.locator(game==='nards'?'.living-preview-checker':'.piece').count(),game==='nards'?30:32);
- if(game==='nards'){
+ if(game==='nards'){assert.equal(await board.locator('.living-preview-well').count(),24);assert.equal(await board.locator('.living-nards-storage').count(),2);assert.equal(await board.locator('.nards-storage-slots i').count(),30);
   const long=p.locator('.living-focus-play [data-living-game=long]'),short=p.locator('.living-focus-play [data-living-game=short]');
   const longBox=await long.boundingBox(),shortBox=await short.boundingBox(),toolsBox=await p.locator('.living-focus-tools').boundingBox();
   assert.ok(longBox.x<shortBox.x);assert.ok(longBox.y+longBox.height<toolsBox.y);assert.equal(Math.round(longBox.y),Math.round(shortBox.y));
@@ -21,6 +21,7 @@ assert.equal(await p.locator('[data-living-menu=chess]').isDisabled(),true);for(
   await p.locator('[data-living-board-flip]').click();await p.waitForTimeout(600);assert.notEqual(await board.evaluate(e=>getComputedStyle(e).transform),before);
   await p.locator('[data-living-board-flip]').click();await p.waitForTimeout(600);assert.equal(await p.locator('[data-living-board-flip]').getAttribute('aria-pressed'),'false');
  }
+ fs.mkdirSync('output/nards-slots',{recursive:true});if(game==='nards')await board.screenshot({path:'output/nards-slots/lounge-board.png'});
  await p.screenshot({path:'output/shared-games/living-'+game+'-top.png'});
  await p.route('**/board-games-play.html?**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><body></body>'}));
  await p.locator('.living-board-focus [data-living-equipment]').click();

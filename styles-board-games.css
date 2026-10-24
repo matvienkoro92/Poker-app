@@ -107,3 +107,20 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 /* Recessed lanes and external storage troughs; logical points and hit targets are unchanged. */
 .nards-table{display:grid;grid-template-columns:clamp(12px,2.8vw,24px) minmax(0,1fr) clamp(12px,2.8vw,24px);gap:3px;align-items:stretch}.nards-table .nards-board{min-width:0}.nards-storage{display:flex;flex-direction:column;gap:5px;min-width:0;padding:5px 2px;border:1px solid #987449;border-radius:7px;background:linear-gradient(90deg,#281b13,#715136 45%,#362219);box-shadow:inset 2px 0 4px #000b,inset -1px 0 2px #ffe7a755,0 2px 2px #0006}.nards-storage strong{font-size:9px;text-align:center;color:#ffe8ba;line-height:13px}.nards-storage-slots{display:flex;flex-direction:column;justify-content:space-between;flex:1;gap:3px;min-height:0;padding:3px 0}.nards-storage-slots i{display:block;min-height:3px;flex:1;max-height:10px;border-radius:2px;border:1px solid #23160f;background:#493120;box-shadow:inset 0 1px 2px #0009,0 1px #c29b6644}.nards-storage[data-side=white] .nards-storage-slots{flex-direction:column-reverse}.nards-storage[data-side=white] .is-filled{background:linear-gradient(#fff4d9,#d8c49e);border-color:#f4ddb0}.nards-storage[data-side=black] .is-filled{background:linear-gradient(#344956,#0d1923);border-color:#8096a2}
 .nards-board .point{border-radius:7px;background-image:linear-gradient(90deg,#20110720,transparent 18%,transparent 82%,#fff0c818);box-shadow:inset 1px 0 2px #2b170d33,inset -1px 0 1px #fff1c52b}.nards-board .point::before{inset:15px 10% 16%}.nards-board .point.bottom::before{inset:16% 10% 15px}.nards-board[data-mural=true] .point::before{opacity:.9}.nards-board[data-mural=true] .point.light-point::before{opacity:.83}
+
+/* Round carved landing pockets stay beneath the moving checkers. */
+.nards-board .nards-landing-well{position:absolute;left:3%;top:15px;width:94%;aspect-ratio:1;border:1px solid #29180fe0;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 55% 58%,#28170d66 0 46%,#6b472c55 68%,#b6905b88 78%,#2b190dd9 88%);box-shadow:inset 0 3px 5px #140b0799,inset 0 -1px 1px #ffe4aeaa,0 1px 1px #f8d99e66}
+.nards-board .point.bottom .nards-landing-well{top:auto;bottom:15px}
+.nards-table{grid-template-columns:clamp(16px,4vw,28px) minmax(0,1fr) clamp(16px,4vw,28px);gap:4px}
+.nards-storage{border:2px ridge #ad8955;border-radius:9px;padding:5px 2px;background:linear-gradient(90deg,#21130d,#8e653c 30%,#6e482c 66%,#24160e);box-shadow:inset 2px 0 3px #000b,inset -2px 0 3px #0009,0 2px 3px #0009}
+.nards-storage-slots i{position:relative;border-radius:50%;border:1px solid #160e09;background:radial-gradient(ellipse,#170f09 20%,#3c2515 75%,#aa8151);box-shadow:inset 0 2px 3px #000c,0 1px #e5c58b77}
+.nards-storage-slots .is-filled{background:#24170f!important;border-color:#20130c!important}
+.nards-stored-edge{position:absolute;inset:10% 4%;border-radius:50%;background:linear-gradient(#fff8e7 0%,#f3dfb5 40%,#b29561 60%,#ffefd0 100%);border:1px solid #d8c395;box-shadow:0 1px 1px #000c,inset 0 1px #fff9}
+.nards-storage[data-side=black] .nards-stored-edge{background:linear-gradient(#6b8390,#172c38 45%,#080f15 60%,#364e5b);border-color:#7a929d}
+
+/* Explicit track sizing avoids Safari shrinking the aspect-ratio board to its contents. */
+.nards-table .nards-board{width:100%;grid-column:2;grid-row:1;align-self:start}
+#nardsStoreLeft{grid-column:1;grid-row:1}
+#nardsStoreRight{grid-column:3;grid-row:1}
+
+.board-dice-stage[data-can-roll=true] .dice-flight{pointer-events:auto;cursor:pointer}
