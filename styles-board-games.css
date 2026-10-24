@@ -124,3 +124,14 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 #nardsStoreRight{grid-column:3;grid-row:1}
 
 .board-dice-stage[data-can-roll=true] .dice-flight{pointer-events:auto;cursor:pointer}
+
+/* Keep turn and clock together directly below the playing surface. */
+#game .turn-line{flex-wrap:nowrap;width:min(580px,100%);margin:6px auto 8px;gap:6px}
+#game .turn-line #turnText{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;padding:4px 8px;font-size:13px;line-height:1.35;border-radius:8px;box-shadow:none}
+#game .turn-line #clock{flex-shrink:0;white-space:nowrap;padding:4px 7px;font-size:12px;line-height:1.45;border-radius:8px}
+
+.result-summary{margin:auto;width:min(440px,calc(100% - 28px));max-height:calc(100dvh - 40px);text-align:center;border:2px solid #d5b76d;padding:28px 22px;box-shadow:0 18px 70px #0009}
+.result-summary::backdrop{background:#05140ed9}
+.result-summary h2{font-size:clamp(22px,5vw,30px);overflow-wrap:anywhere;color:#ffe5a0}
+.result-summary p{font-size:17px;margin:16px 0 22px}
+.result-summary button{min-width:140px}

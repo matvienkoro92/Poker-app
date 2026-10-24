@@ -11,7 +11,21 @@ test('chess clocks preserve each balance, add increment once and reset on rematc
 test('all advertised chess controls are accepted; unlimited has no deadline',async()=>{const TC=require('../lib/chess-time-controls');for(const control of TC.controls){const f=fixture();let r=await f.service.call('host',{action:'create',discipline:'chess',timeControl:control.id});r=await f.service.call('guest',{action:'join',roomId:r.roomId});assert.equal(r.timeControl.id,control.id);assert.equal(r.turnDeadline,control.seconds?10000+control.seconds*1000:null);if(!control.seconds){f.advance(3600000);r=await f.service.call('host',{action:'room',roomId:r.roomId});assert.equal(r.state.winner,null);}}const f=fixture();await assert.rejects(f.service.call('host',{action:'create',discipline:'chess',timeControl:'fake'}),e=>e.status===400);});
 test('online first-step undo is server validated and never extends the deadline',async()=>{const f=fixture();let r=await pair(f,'short');const id=r.roomId;r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'roll'}});const initial=structuredClone(r.state),deadline=r.turnDeadline,E=await import('../scripts/board-games/engine.mjs');f.advance(2000);r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'move',...E.legalMoves(r.state)[0]}});const movedRevision=r.revision;await assert.rejects(f.service.call('guest',{action:'move',roomId:id,revision:r.revision,move:{type:'undo-step'}}),e=>e.status===400);f.advance(2000);r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'undo-step',dice:[6,6],points:[]}});assert.deepEqual(r.state,initial);assert.equal(r.turnDeadline,deadline);await assert.rejects(f.service.call('host',{action:'move',roomId:id,revision:movedRevision,move:{type:'undo-step'}}),e=>e.status===409);});
 
-for(const discipline of ['short','long'])test(discipline+' offers only 15, 30 or 45 seconds for new rooms',async()=>{
- for(const seconds of [undefined,15,30,45]){const f=fixture(),created=await f.service.call('host',{action:'create',discipline,turnSeconds:seconds});assert.equal(created.turnSeconds,seconds??30);const joined=await f.service.call('guest',{action:'join',roomId:created.roomId});assert.equal(joined.turnDeadline-joined.serverNow,(seconds??30)*1000);}
- for(const turnSeconds of [0,60,90,180,'30'])await assert.rejects(fixture().service.call('host',{action:'create',discipline,turnSeconds}),e=>e.status===400);
+for(const discipline of ['short','long'])test(discipline+' offers only 15, 30, 45 or 60 seconds for new rooms',async()=>{
+ for(const seconds of [undefined,15,30,45,60]){const f=fixture(),created=await f.service.call('host',{action:'create',discipline,turnSeconds:seconds});assert.equal(created.turnSeconds,seconds??30);const joined=await f.service.call('guest',{action:'join',roomId:created.roomId});assert.equal(joined.turnDeadline-joined.serverNow,90000);}
+ for(const turnSeconds of [0,90,180,'30'])await assert.rejects(fixture().service.call('host',{action:'create',discipline,turnSeconds}),e=>e.status===400);
+});
+
+for(const discipline of ['short','long'])test(discipline+' first turn per player lasts 90 seconds then returns to the selected limit',async()=>{
+ const f=fixture(),E=await import('../scripts/board-games/engine.mjs');let r=await pair(f,discipline);const roomId=r.roomId;
+ assert.equal(r.turnDeadline-r.serverNow,90000);
+ for(let completed=0;completed<2;completed++){
+  const who=r.state.turn===0?'host':'guest';
+  r=await f.service.call(who,{action:'move',roomId,revision:r.revision,move:{type:'roll'}});
+  assert.equal(r.turnDeadline-r.serverNow,90000);
+  const p=r.state.turn;
+  while(r.state.turn===p){f.advance(1000);const deadline=r.turnDeadline;r=await f.service.call(p===0?'host':'guest',{action:'move',roomId,revision:r.revision,move:{type:'move',...E.legalMoves(r.state)[0]}});if(r.state.turn===p)assert.equal(r.turnDeadline,deadline);}
+  assert.equal(r.turnDeadline-r.serverNow,completed===0?90000:30000);
+ }
+ r=await f.service.call('host',{action:'move',roomId,revision:r.revision,move:{type:'roll'}});assert.equal(r.turnDeadline-r.serverNow,30000);
 });

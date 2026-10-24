@@ -478,3 +478,7 @@ body.billiards-table-view .billiards>header #turnClock{padding:4px 8px;border:1p
 #setupWager label small { display: block; margin-top: 10px; line-height: 1.5; color: #d6c9ab; }
 #lobby #wagerError { color: #ffc5a4; }
 #wagerNotice { padding: 12px; border: 1px solid #c6a46780; border-radius: 12px; background: #b99a4d18; }
+
+/* Player cards come first; turn and clock sit beneath them. */
+body.billiards-table-view .billiards-matchup{top:calc(env(safe-area-inset-top,0px) + 52px)}
+body.billiards-table-view .billiards>header{top:var(--billiards-status-top,calc(env(safe-area-inset-top,0px) + 108px))}

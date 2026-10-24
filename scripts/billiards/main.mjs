@@ -174,8 +174,27 @@ function frame(now){
  const aimState=shownAim?{...display,cueId:shownAim.cueId??0}:display;
  if(tableView)room?.render(aimState,shownAim?.angle??angle,!state.moving&&!state.inHand&&!state.pending&&state.winner===null&&(can||!!shownAim));raf=requestAnimationFrame(frame);
 }
-const matchupObserver=new ResizeObserver(()=>{if(!tableView||matchup.element.hidden)return;const top=Math.ceil(matchup.element.getBoundingClientRect().bottom+8)+'px';if(document.body.style.getPropertyValue('--billiards-top-height')!==top){document.body.style.setProperty('--billiards-top-height',top);room?.setView('table');}});matchupObserver.observe(matchup.element);
-const controlsObserver=new ResizeObserver(()=>{const height=tableDock.getBoundingClientRect().height;if(height){const next=Math.ceil(height)+'px';if(document.body.style.getPropertyValue('--billiards-controls-height')!==next){document.body.style.setProperty('--billiards-controls-height',next);if(tableView)room?.setView('table');}}});controlsObserver.observe(tableDock);
+const matchupObserver=new ResizeObserver(()=>{
+ if(!tableView||matchup.element.hidden)return;
+ const header=document.querySelector('.billiards>header'),cardsBottom=matchup.element.getBoundingClientRect().bottom,statusTop=Math.ceil(cardsBottom+6)+'px';
+ if(document.body.style.getPropertyValue('--billiards-status-top')!==statusTop)document.body.style.setProperty('--billiards-status-top',statusTop);
+ const top=Math.ceil(Math.max(cardsBottom,header.getBoundingClientRect().bottom)+8)+'px';
+ if(document.body.style.getPropertyValue('--billiards-top-height')!==top){document.body.style.setProperty('--billiards-top-height',top);room?.setView('table');}
+});matchupObserver.observe(matchup.element);matchupObserver.observe(document.querySelector('.billiards>header'));
+
+function reserveTableControls(){
+ const dock=tableDock.getBoundingClientRect();if(!dock.height)return;
+ let top=dock.top;
+ for(const el of tableDock.querySelectorAll('#turnGuide,#decisionOpen,#penaltyConfirm,#matchResult,#cuePickHint,.call-controls,.training-controls,#placeBreak')){
+  const box=el.getBoundingClientRect();if(box.width&&box.height)top=Math.min(top,box.top);
+ }
+ const next=Math.ceil(dock.bottom-top)+'px';
+ if(document.body.style.getPropertyValue('--billiards-controls-height')!==next){document.body.style.setProperty('--billiards-controls-height',next);if(tableView)room?.setView('table');}
+}
+const controlsObserver=new ResizeObserver(reserveTableControls);
+controlsObserver.observe(tableDock);
+for(const el of tableDock.querySelectorAll('#turnGuide,#decisionOpen,#penaltyConfirm,#matchResult,#cuePickHint,.call-controls,.training-controls,#placeBreak'))controlsObserver.observe(el);
+
 openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
 const watchCode=new URLSearchParams(location.search).get('watch');if(/^[A-HJ-NP-Z2-9]{10}$/.test(watchCode||'')){stop();spectating=true;mode='spectator';revision=-1;net=createSession({request,onUpdate:adopt,onError(message){connectionError=message;status(message);}});net.start(false,watchCode,{watch:true});$('lobby').hidden=true;}
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
