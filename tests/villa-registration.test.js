@@ -18,7 +18,7 @@ test('registered villa visitors keep their hero before garage catalog loads',()=
 test('pending identity and saved accounts are never rendered as villa guests',()=>{
  const source=fs.readFileSync('app-player-hall.js','utf8'),fn=source.match(/function guestMode\(\)\{[^\n]+\}/)[0];
  for(const auth of [null,{status:'unknown'},{status:'verifying'},{status:'network'}])assert.equal(vm.runInNewContext('('+fn+')()',{window:{__pokerTelegramAuth:auth}}),false);
- for(const tokenReader of ['pokerReadPwaTgSessionToken','pokerReadPwaVkSessionToken'])assert.equal(vm.runInNewContext('('+fn+')()',{window:{__pokerTelegramAuth:{status:'no_telegram'}},[tokenReader]:()=> 'saved-session'}),false);
+ for(const tokenReader of ['pokerReadPwaTgSessionToken','pokerReadPwaVkSessionToken','pokerReadEmailPwaSessionToken'])assert.equal(vm.runInNewContext('('+fn+')()',{window:{__pokerTelegramAuth:{status:'no_telegram'}},[tokenReader]:()=> 'saved-session'}),false);
  assert.equal(vm.runInNewContext('('+fn+')()',{window:{__pokerTelegramAuth:{status:'unknown'},Telegram:{WebApp:{initData:'signed-data'}}}}),false);
 });
 test('forced villa registration opens overlay even inside Telegram without restarting verification',()=>{
@@ -28,4 +28,9 @@ test('forced villa registration opens overlay even inside Telegram without resta
  vm.createContext(ctx);vm.runInContext(source.slice(start,end),ctx);ctx.openSharedAccountAuthFlow({forceOverlay:true});
  assert.equal(overlays,1);assert.equal(verifications,0);
  ctx.openSharedAccountAuthFlow();assert.equal(verifications,1);
+});
+
+test('villa guest detection respects the existing request credentials for all login providers',()=>{
+ const source=fs.readFileSync('app-player-hall.js','utf8'),fn=source.match(/function guestMode\(\)\{[^\n]+\}/)[0];
+ for(const credentials of [{pwaSession:'email-session'},{pwaSession:'telegram-session'},{pwaVkSession:'vk-session'},{initData:'signed-data'}])assert.equal(vm.runInNewContext('('+fn+')()',{window:{__pokerTelegramAuth:{status:'no_telegram'}},pokerApiAuthJsonBody:()=>credentials}),false);
 });
