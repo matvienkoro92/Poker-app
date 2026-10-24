@@ -13,7 +13,7 @@ const {chromium}=require('playwright');
   await page.locator('#equipment[open]').waitFor();
   assert.equal(await page.locator('[data-nards-tab]').count(),4);
   await page.getByRole('tab',{name:'Внутри',exact:true}).click();
-  assert.equal(await page.locator('#nardsInteriors button').count(),13);
+  assert.equal(await page.locator('#nardsInteriors button').count(),15);
   await page.locator('#nardsInteriors [data-item=ocean]').click();
   await page.screenshot({path:'/private/tmp/nards-inside-mobile.png',fullPage:true});
   await page.locator('[data-nards-tab=pieces]').click();

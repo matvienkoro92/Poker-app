@@ -21,11 +21,18 @@ for(const b of NARDS_INTERIORS){
   const quote=b.id==='emil-respect'?'<g fill="'+b.dark+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="600"><text x="915" y="455">Как покериста тебя</text><text x="915" y="486">уважаю ✊🏾,</text><text x="915" y="517">но нарды не потянешь</text><text x="915" y="552" font-size="18">(с) Эмиль</text></g>':'<use href="#inlay" x="725" y="310" opacity=".34"/>';
   base='<defs><g id="inlay">'+portrait+'</g><linearGradient id="wood" x2="1" y2="1"><stop stop-color="'+b.light+'"/><stop offset="1" stop-color="'+b.accent+'"/></linearGradient></defs><rect width="1200" height="1000" fill="url(#wood)"/><path d="M10 10H1190V990H10Z" fill="none" stroke="'+b.dark+'" stroke-opacity=".35" stroke-width="3"/><use href="#inlay" x="95" y="310" opacity=".34"/>'+quote;
  }
+ if(b.revision===2){
+  const encoded=fs.readFileSync(path.join(out,'illustration-'+b.art+'.webp')).toString('base64');
+  const artwork='<g id="half-mural"><image href="data:image/webp;base64,'+encoded+'" x="24" y="80" width="534" height="840" preserveAspectRatio="xMidYMid slice"/></g>';
+  const lines=b.id==='emil-respect'?['Как покериста тебя','уважаю ✊🏾 ,','но нарды не потянешь']:b.id==='cooler-tears'?['Это не слёзы.','Это плохие зарики.']:b.quote?['За этой доской','решаю я.']:[];
+  const inscription=x=>!lines.length?'':'<g class="board-quote" fill="'+b.dark+'" font-family="Arial,sans-serif" font-weight="700" text-anchor="middle"><rect x="'+(x-245)+'" y="453" width="490" height="108" rx="12" fill="'+b.accent+'" fill-opacity=".94"/>'+lines.map((line,i)=>'<text x="'+x+'" y="'+(477+i*25)+'" font-size="23">'+line+'</text>').join('')+'<text x="'+x+'" y="550" font-size="16">'+(b.id==='emil-respect'?'(с) ':'')+b.signature+'</text></g>';
+  base='<defs>'+artwork+'</defs><rect width="1200" height="1000" fill="'+b.light+'"/><g opacity=".82"><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
+ }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';
  let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?1000:0,tip=row?560:440;points+='<path d="M'+(x+3)+' '+y+'H'+(x+w-3)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" fill-opacity=".88" stroke="'+gold+'" stroke-opacity=".35" stroke-width="1.5"/>';}
  const bar='<rect x="582" width="36" height="1000" fill="'+b.frame+'"/><path d="M596 0V1000M604 0V1000" stroke="'+gold+'" stroke-opacity=".45"/>';
- fs.writeFileSync(path.join(out,'inside-'+b.id+'-surface.svg'),svg(base));
- fs.writeFileSync(path.join(out,'inside-'+b.id+'.svg'),svg(base+points+bar));
+ fs.writeFileSync(path.join(out,path.basename(b.surface)),svg(base));
+ fs.writeFileSync(path.join(out,path.basename(b.preview)),svg(base+points+bar));
 }
 console.log('Generated '+NARDS_INTERIORS.length+' nards interiors and previews');
 

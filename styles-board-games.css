@@ -86,3 +86,7 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 
 
 .host-equipment-note{font-size:12px;color:#d4c398;text-align:center;margin:5px 0 10px}
+
+/* Illustrated interiors keep the points crisp while letting the full mural show through. */
+.nards-board[data-mural=true] .point::before{opacity:.82}
+.nards-board[data-mural=true] .point.light-point::before{opacity:.68}
