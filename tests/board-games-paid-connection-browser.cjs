@@ -10,7 +10,7 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
   }
   const file=path.join(process.cwd(),u.pathname);return fs.existsSync(file)&&fs.statSync(file).isFile()?route.fulfill({path:file}):route.fulfill({status:404});
  });return p;}
- const room=await f.service.call('m1',{action:'create',discipline:kind,turnSeconds:60,stake:300,requestId:'board_connection_300',raceTo:1,timeControl:kind==='chess'?'blitz-3-2':undefined}),host=await player('m1'),guest=await player('m2');
+ const room=await f.service.call('m1',{action:'create',discipline:kind,turnSeconds:kind==='chess'?60:30,stake:300,requestId:'board_connection_300',raceTo:1,timeControl:kind==='chess'?'blitz-3-2':undefined}),host=await player('m1'),guest=await player('m2');
  for(const p of [host,guest]){await p.goto('http://paid-board.test/board-games-play.html?game='+kind+'&room='+room.roomId);await p.locator('#confirm[open] [data-yes]').click();await p.waitForFunction(()=>PokerBoardGames.inspect().mode==='online');}
  for(const p of [host,guest])await p.waitForFunction(()=>PokerBoardGames.inspect().ready);
  assert.equal(f.balances.get('p1'),9700);assert.equal(f.balances.get('p2'),9700);
