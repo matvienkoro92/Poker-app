@@ -65,3 +65,18 @@ test('chat challenge stakes survive preview, join and payout without duplicate d
  const done=await f.call('m2','move',room.roomId,{revision:joined.revision,move:{type:'resign'}});
  assert.equal(done.wager.status,'paid');assert.equal(f.balances.get('p1'),10400);assert.equal(f.changes.length,3);
 });
+
+test('live paid table polls do not contend with wallet locks; settlement remains protected',async()=>{
+ const f=fixture(),r=await f.create(300);await f.call('m2','join',r.roomId);
+ f.locks.add(r.roomId);
+ try {
+  const views=await Promise.all([f.call('m1','room',r.roomId),f.call('m2','room',r.roomId),f.call('viewer','watch',r.roomId)]);
+  for(const v of views){assert.equal(v.ready,true);assert.equal(v.wager.stake,300);assert.equal(v.wager.status,'playing');}
+  assert.equal(f.changes.length,2);
+  await assert.rejects(f.call('outsider','room',r.roomId),e=>e.status===403);
+  const raw=f.rooms.get(r.roomId);raw.state.winner=0;raw.match.winner=0;
+  await assert.rejects(f.call('m1','room',r.roomId),e=>e.status===409);
+  assert.equal(f.changes.length,2);
+ } finally {f.locks.delete(r.roomId);}
+ const done=await f.call('m1','room',r.roomId);assert.equal(done.wager.status,'paid');assert.equal(done.wager.payout,540);assert.equal(f.changes.length,3);
+});

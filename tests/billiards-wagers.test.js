@@ -8,7 +8,7 @@ function fixture(){
  const service=createWagers({base,store,loadRoom:storage.load,now:()=>time,createRoom:async(m,b,i,id)=>{if(!rooms.has(id))await roomFactory({...storage,random:()=>id,create:async(code,r)=>{r.wagered=true;return storage.create(code,r);}}).call(m,b,i);},resolve:async m=>({accountId:'ID00000'+m.slice(-1),poker21Id:'p'+m.slice(-1)}),balance:async id=>balances.get(id),change:async op=>{if(orders.has(op.idempotencyKey)){assert.deepEqual(orders.get(op.idempotencyKey),op);return;}assert.ok(balances.get(op.userId)+op.chips>=0);orders.set(op.idempotencyKey,structuredClone(op));balances.set(op.userId,balances.get(op.userId)+op.chips);changes.push(op);if(failAfterChange){failAfterChange=false;resolving=true;} }});
  const create=(stake=100,requestId='request_0000000001')=>service.call('m1',{action:'create',stake,requestId,discipline:'pool8',raceTo:1});
  const call=(member,action,id,extra={})=>service.call(member,{action,roomId:id,...extra});
- return {service,create,call,rooms,journals,orders,balances,changes,advance:()=>{time+=7200001;},failWriteAfterDebit:()=>{failAfterChange=true;}};
+ return {service,create,call,rooms,journals,orders,balances,changes,locks,advance:()=>{time+=7200001;},failWriteAfterDebit:()=>{failAfterChange=true;}};
 }
 test('host and guest stakes are charged once; winner receives 90% of bank once',async()=>{
  const f=fixture(),r=await f.create();assert.equal(r.wager.stake,100);assert.equal(f.balances.get('p1'),9900);
@@ -71,4 +71,19 @@ test('chat challenge stakes survive preview, join and payout without duplicate d
  const joined=await f.call('m2','join',room.roomId);await f.call('m2','join',room.roomId);assert.equal(f.balances.get('p2'),9500);
  const done=await f.call('m2','move',room.roomId,{revision:joined.revision,move:{type:'resign'}});
  assert.equal(done.wager.status,'paid');assert.equal(f.balances.get('p1'),10400);assert.equal(f.changes.length,3);
+});
+
+test('live paid table polls do not contend with wallet locks; settlement remains protected',async()=>{
+ const f=fixture(),r=await f.create(300);await f.call('m2','join',r.roomId);
+ f.locks.add(r.roomId);
+ try {
+  const views=await Promise.all([f.call('m1','room',r.roomId),f.call('m2','room',r.roomId),f.call('viewer','watch',r.roomId)]);
+  for(const v of views){assert.equal(v.ready,true);assert.equal(v.wager.stake,300);assert.equal(v.wager.status,'playing');}
+  assert.equal(f.changes.length,2);
+  await assert.rejects(f.call('outsider','room',r.roomId),e=>e.status===403);
+  const raw=f.rooms.get(r.roomId);raw.state.winner=0;raw.match.winner=0;
+  await assert.rejects(f.call('m1','room',r.roomId),e=>e.status===409);
+  assert.equal(f.changes.length,2);
+ } finally {f.locks.delete(r.roomId);}
+ const done=await f.call('m1','room',r.roomId);assert.equal(done.wager.status,'paid');assert.equal(done.wager.payout,540);assert.equal(f.changes.length,3);
 });
