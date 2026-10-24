@@ -689,3 +689,65 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-top-point:nth-child(even){background:#e9c894}.living-top-point:nth-child(n+13){transform:rotate(180deg)}
 @keyframes living-board-in{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.living-board-focus{animation:none}}
+
+/* Restore distant-room detail without touching any selected table pixels.
+   The mask uses the same source ratio and cover transform as every table skin;
+   it ends before the far table rail, including on narrow mobile viewports. */
+.villa-billiards-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: url('./assets/player-hall/billiards-distant-room-hd-v1.webp') center/cover no-repeat;
+  -webkit-mask: url('./assets/player-hall/billiards-distant-room-mask-v1.svg') center/cover no-repeat;
+  mask: url('./assets/player-hall/billiards-distant-room-mask-v1.svg') center/cover no-repeat;
+}
+
+/* The camera arrives above the actual selected tabletop, rather than a menu card. */
+.living-board-focus--table{justify-content:flex-start;gap:10px;padding:calc(18px + var(--hall-safe-top,0px)) 14px 22px;background:radial-gradient(ellipse at 50% 45%,#66422477,transparent 65%),repeating-linear-gradient(91deg,#382314 0,#442b19 3px,#3c2617 5px,#302013 9px);animation:living-table-arrive .45s ease-out}
+.living-board-focus--table header{align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-right:4px;padding-top:42px}
+.player-hall-dialog .living-board-focus--table header button{width:auto;min-height:44px;padding:8px 14px;font-size:13px}
+.living-board-focus--table h2{font-size:23px;text-shadow:0 2px 4px #000}
+.living-focus-set{margin:0;color:#e0cda4;text-align:center;font-size:12px;min-height:18px}
+.living-top-table{flex:1;min-height:0;align-self:stretch;display:flex;align-items:center;justify-content:center;perspective:900px}
+.living-board-focus--table .living-top-board{width:min(100%,480px,calc(100dvh - 330px));padding:12px;border:2px solid #9e7946;border-radius:18px;background:repeating-linear-gradient(92deg,#4f311d 0 2px,#68452b 3px 4px,#50321e 5px 9px);box-shadow:0 12px 0 #21150d,0 25px 35px #0009;filter:none;transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+.living-board-focus--table .living-top-board.is-flipped{transform:rotate(180deg)}
+.living-preview-surface{position:relative;overflow:hidden;border:8px solid var(--preview-frame);border-radius:5px;box-sizing:border-box;background:var(--preview-light);box-shadow:inset 0 0 8px #0005}
+.living-preview-nards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) 5% repeat(6,minmax(0,1fr));grid-template-rows:1fr 1fr;aspect-ratio:1.1;border-image:var(--preview-carving) 120 stretch;background-image:linear-gradient(#ffffff08,#0000000d),repeating-linear-gradient(89deg,transparent 0 5px,#48290f13 6px 7px)}
+.living-preview-point{position:relative;display:flex;flex-direction:column;align-items:center;min-width:0;padding-top:3px;box-sizing:border-box}
+.living-preview-point::before{content:'';position:absolute;inset:0 1px 14%;background:var(--preview-dark);clip-path:polygon(0 0,100% 0,50% 100%)}
+.living-preview-point.is-light::before{background:color-mix(in srgb,var(--preview-light) 80%,white)}
+.living-preview-point.is-bottom{flex-direction:column-reverse;padding:0 0 3px}
+.living-preview-point.is-bottom::before{inset:14% 1px 0;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.living-preview-checker{position:relative;z-index:1;display:block;width:96%;aspect-ratio:1;flex-shrink:0;border-radius:50%;box-sizing:border-box;border:1px solid #37261b;background-image:var(--preview-white-art),radial-gradient(circle at 35% 28%,#fff7dd,var(--preview-white) 65%,#9c825a);background-size:cover;background-position:center;box-shadow:inset 0 0 0 2px #ddc99a66,0 1px 2px #0008}
+.living-preview-checker.is-black{background-image:var(--preview-black-art),radial-gradient(circle at 35% 28%,#95755b,var(--preview-black) 65%,#17100b)}
+.living-preview-bar{grid-column:7;grid-row:1/3;background:var(--preview-frame);box-shadow:inset 2px 0 3px #ffffff20,inset -2px 0 3px #0005}
+.living-preview-chess{aspect-ratio:1;background-size:100% 100%;padding:0}
+.living-preview-chess[data-collection=true]{padding:7.5%;border:0}
+.living-preview-squares{height:100%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr))}
+.living-preview-square{display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;background:var(--preview-light)}
+.living-preview-square.is-dark{background:var(--preview-dark)}
+.living-preview-chess[data-collection=true] .living-preview-square{background:transparent}
+.living-preview-square .piece{display:block;width:95%;height:95%;fill:#f5e7c8;stroke:#51351f;stroke-width:1.5;filter:drop-shadow(0 2px 1px #0007);transition:transform .55s}
+.living-preview-square .piece.black{fill:#322b26;stroke:#d6b77c}
+.living-top-board.is-flipped .living-preview-square .piece{transform:rotate(180deg)}
+.living-focus-tools,.living-focus-play{display:flex;gap:8px;align-self:stretch;justify-content:center}
+.player-hall-dialog .living-focus-tools button,.player-hall-dialog .living-focus-play button{width:auto;flex:1;max-width:240px;font-size:13px;padding:10px 7px}
+.player-hall-dialog .living-focus-tools [aria-pressed=true]{border-color:#f0cf83;box-shadow:inset 0 0 0 1px #d4b470}
+@keyframes living-table-arrive{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.living-board-focus--table{animation:none}.living-board-focus--table .living-top-board,.living-preview-square .piece{transition:none}}
+@media(max-height:650px){.living-board-focus--table{gap:5px;padding-bottom:10px}.living-board-focus--table header{padding-top:42px}.living-board-focus--table h2{font-size:18px}.living-board-focus--table .living-top-board{width:min(100%,380px,calc(100dvh - 260px));padding:8px}.living-focus-set{font-size:10px}}
+
+/* Continue the living-room camera above the same walnut table and armchairs. */
+.living-board-focus--table{background:#2b2118;isolation:isolate;overflow:hidden}
+.living-board-focus--table::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(#00000018,#00000008),url('./assets/player-hall/living-table-overhead-v1.webp') center/cover no-repeat;animation:living-overhead-arrive .7s cubic-bezier(.2,.7,.2,1)}
+.living-board-focus--table header{position:relative;z-index:2}
+.living-board-focus--table h2{background:#17231bc9;padding:7px 12px;border-radius:10px}
+.living-focus-set{align-self:center;position:relative;z-index:2;padding:5px 10px;border-radius:12px;background:#17231bdf}
+.living-board-focus--table .living-top-table{position:absolute;top:24%;left:4%;width:92%;height:43%;min-height:0}
+.living-board-focus--table .living-top-board{width:min(100%,480px,calc(43dvh - 18px));padding:0;border:0;border-radius:5px;background:none;box-shadow:0 7px 10px #0008;filter:none}
+.living-board-focus--table .living-focus-tools{position:absolute;left:14px;right:14px;bottom:76px;z-index:2}
+.living-board-focus--table .living-focus-play{position:absolute;left:14px;right:14px;bottom:22px;z-index:2}
+.living-board-focus--table header button,.living-board-focus--table .living-focus-tools button,.living-board-focus--table .living-focus-play button{box-shadow:0 4px 12px #0007;background:#17251eef}
+@keyframes living-overhead-arrive{from{opacity:0;transform:scale(.88) perspective(1000px) rotateX(20deg)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.living-board-focus--table::before{animation:none}}

@@ -15,7 +15,18 @@ test('tips link to withdrawals without changing payable balances; retries and ca
  assert.equal(report.statistics.tips,0);assert.equal(report.entries[0].tipAmount,0);assert.equal(report.tips[0].voidedBy,actor);
 });
 test('tips reject another player, missing withdrawal, invalid amounts and allow separate removal',()=>{
- for(const patch of [{playerId:'456'},{room:'X'},{entryId:'missing'},{amount:0},{amount:1.1},{playerName:''}])assert.throws(()=>applyOperation(base,{...op,...patch},actor,now));
+ for(const patch of [{playerId:'456'},{room:'X'},{entryId:'missing'},{amount:0},{amount:1.1},{playerId:''},{room:'bad'}])assert.throws(()=>applyOperation(base,{...op,...patch},actor,now));
  const s=applyOperation(base,{...op,entryId:''},actor,now).state;
  assert.equal(s.tips[0].entryId,'');assert.equal(view(s,now,{preset:'all'}).entries[0].tipAmount,0);
+});
+
+test('tips accept omitted or blank name and expose the exact room and ID in player search',()=>{
+ for(const playerName of [undefined,'','   ']){
+  const result=applyOperation(base,{...op,playerName},actor,now),report=view(result.state,now,{preset:'all'});
+  assert.equal(result.state.tips[0].playerName,'');assert.equal(report.statistics.tips,10000);
+  assert.ok(report.playerDirectory.some(p=>p.room==='P21'&&p.playerId==='123'));
+ }
+ const result=applyOperation(null,{...op,playerName:'',room:'PP',playerId:'tip_only_991',entryId:''},actor,now),report=view(result.state,now,{preset:'all'});
+ assert.ok(report.playerDirectory.some(p=>p.room==='PP'&&p.playerId==='tip_only_991'));
+ assert.ok(!report.playerDirectory.some(p=>p.room==='P21'&&p.playerId==='tip_only_991'));
 });

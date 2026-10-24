@@ -72,6 +72,7 @@ const baseFiles = [
   'city-play.html',
   'board-games-play.html',
   'app-board-games.js',
+  'app-living-board-preview.js',
   'app-board-games-worker.js',
   'styles-board-games.css',
   'styles-board-lobby.css',

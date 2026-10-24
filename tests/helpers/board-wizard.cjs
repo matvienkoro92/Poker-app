@@ -1,0 +1,4 @@
+async function modeStep(page){for(let i=0;i<4&&!await page.locator('#boardSetupMode').isVisible();i++)await page.locator('#boardSetupBack').click();}
+async function settings(page,mode='solo'){await modeStep(page);await page.locator('[data-mode='+mode+']').click();for(let i=0;i<4&&!await page.locator('#boardSetupFormat').isVisible();i++)await page.locator('#boardSetupNext').click();}
+async function launch(page,mode){const selected=await page.locator('[data-mode='+mode+']').getAttribute('aria-pressed');if(!await page.locator('#boardSetupFormat').isVisible()||selected!=='true')await settings(page,mode);await page.locator('#boardSetupNext').click();await page.waitForFunction(expected=>PokerBoardGames.inspect().mode===expected,['solo','training'].includes(mode)?mode:'online');}
+module.exports={settings,launch};

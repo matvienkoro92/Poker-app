@@ -51,7 +51,7 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 
 /* Supplied transparent artwork, positioned as independent layers. */
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
- --evening-background:url('./assets/evening-two-aces-room-v2.webp');
+ --evening-background:url('./assets/evening-games-arcades-v1.webp');
 }
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art {display:block!important;position:absolute;pointer-events:none;object-fit:contain;max-width:none!important;}
 .evening-reference__art--portal-top {left:10%;top:30%;width:54%;height:auto;z-index:2;}
@@ -469,28 +469,36 @@ body[data-view="download"] #app.app .evening-villa-games > button::after {
 .evening-villa-game-dialog button { flex: 1; min-height: 44px; border: 1px solid #b3955c; border-radius: 12px; background: #243b30; color: #ffe4a7; font: 700 14px Arial,sans-serif; }
 .evening-villa-game-dialog [data-villa-game-confirm] { background: #e2c17e; color: #17251d; }
 
-/* Game groups need readable characters rather than the old portal's scaled slot. */
-body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-villa-games {
-  left: 1%;
-  width: 72%;
-  top: 23%;
-  transform: translateY(var(--evening-scene-drop, 0px)) !important;
-  translate: none;
+/* Game furniture is integrated into three architectural alcoves in the backdrop.
+   Match live labels and full-alcove hit targets to that same composition. */
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference {
+  background: linear-gradient(#00000020,#00000020), var(--evening-background) center/100% 100% no-repeat !important;
 }
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-villa-games {
+  left: 0; width: 76%; top: 25.3%; height: 21%; z-index: 2;
+  transform: none !important; translate: none;
+}
+.evening-villa-games > button { top: 0; bottom: 0; width: 32%; clip-path: none; }
+.evening-villa-games > [data-evening-villa-game=billiards] { left: 1%; width: 32%; }
+.evening-villa-games > [data-evening-villa-game=nards] { left: 34%; width: 32%; }
+.evening-villa-games > [data-evening-villa-game=chess] { left: 67%; width: 32%; }
+.evening-villa-games > button span {
+  position: absolute; top: 4%; padding: 0; border: 0; border-radius: 0;
+  background: transparent; font: 700 2.4cqw/1.2 Arial,sans-serif;
+  text-shadow: 0 1px 3px #000;
+}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__art--portal-side {
+  left: 74%; top: 26%; width: 28%; height: 24% !important;
+  object-fit: fill; transform: none !important; translate: none;
+}
+/* Keep the live tournament card above the alcove signs on shorter screens. */
 @container play-screen (min-aspect-ratio:3/5) {
-  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-villa-games {
-    top: calc(100% - 106cqw);
-    transform: none !important;
+  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > .evening-reference__ticket {
+    top: 2% !important;
   }
 }
-.evening-villa-games > button { bottom: 16%; }
-/* Separate the three unoccupied game tables and their click targets. */
-.evening-villa-games > [data-evening-villa-game=billiards] { left: 0; width: 48%; clip-path: polygon(0 0,100% 0,100% 45%,78% 65%,78% 100%,0 100%); }
-.evening-villa-games > [data-evening-villa-game=nards] {
-  left: 37%;
-  width: 34%;
-  top: 45%;
-  bottom: 0;
-  z-index: 2;
+@container play-screen (min-aspect-ratio:3/5) {
+  body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.evening-reference > :is(.home-tournament-history,.home-last-longer-dock) {
+    top: 2% !important;
+  }
 }
-.evening-villa-games > [data-evening-villa-game=chess] { left: 70%; width: 30%; }

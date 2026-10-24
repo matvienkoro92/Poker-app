@@ -631,3 +631,21 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 @media(max-width:480px){.deposits .deposits__payment-actions>button,.deposits .deposits__payment-actions>.deposits__refresh{width:32px!important;min-width:32px!important}}
 
 .deposits [data-form="tip"] select{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:44px;margin:8px 0 16px;padding:10px;border:1px solid #c5aa7055;border-radius:12px;background:#0c1318;color:#dfd7c6;font:inherit}
+
+/* Make payout comments readable even in compact two-column mobile cards. */
+.deposits__card .deposits__note {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #f1bf60;
+  border-radius: 8px;
+  background: #f1bf601a;
+  color: #ffe2a3;
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .deposits__card .deposits__note { font-size: 15px; padding: 9px 8px; }
+}

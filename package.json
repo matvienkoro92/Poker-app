@@ -77,7 +77,7 @@
     "garage:3d": "esbuild scripts/garage-3d/viewer.mjs --bundle --minify --format=iife --outfile=app-garage-3d.js",
     "city:build": "esbuild scripts/city-game/main.mjs --bundle --minify --format=iife --outfile=app-city-game.js",
     "billiards:build": "esbuild scripts/billiards/main.mjs --bundle --minify --format=iife --outfile=app-billiards.js && esbuild scripts/billiards/replay-worker.mjs --bundle --minify --format=iife --outfile=app-billiards-replay-worker.js",
-    "board-games:build": "node scripts/board-games/generate-chess-boards.cjs && node scripts/board-games/generate-chess-piece-previews.mjs && esbuild scripts/board-games/main.mjs --bundle --minify --format=iife --outfile=app-board-games.js && esbuild scripts/board-games/bot-worker.mjs --bundle --minify --format=iife --outfile=app-board-games-worker.js"
+    "board-games:build": "node scripts/board-games/generate-chess-boards.cjs && node scripts/board-games/generate-chess-piece-previews.mjs && esbuild scripts/board-games/main.mjs --bundle --minify --format=iife --outfile=app-board-games.js && esbuild scripts/board-games/bot-worker.mjs --bundle --minify --format=iife --outfile=app-board-games-worker.js && esbuild scripts/board-games/living-preview.mjs --bundle --minify --format=iife --global-name=PokerLivingBoardPreview --outfile=app-living-board-preview.js"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
