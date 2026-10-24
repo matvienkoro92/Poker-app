@@ -751,3 +751,6 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-board-focus--table header button,.living-board-focus--table .living-focus-tools button,.living-board-focus--table .living-focus-play button{box-shadow:0 4px 12px #0007;background:#17251eef}
 @keyframes living-overhead-arrive{from{opacity:0;transform:scale(.88) perspective(1000px) rotateX(20deg)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.living-board-focus--table::before{animation:none}}
+
+/* Games temporarily locked in the villa. */
+.player-hall-dialog .living-game-case:disabled,.player-hall-dialog .living-darts-wall:disabled{cursor:not-allowed;opacity:.7;pointer-events:none}

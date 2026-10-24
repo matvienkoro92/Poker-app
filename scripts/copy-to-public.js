@@ -249,7 +249,7 @@ function copyReferencedAssets() {
     for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
       const child = path.posix.join(rel, entry.name);
       if (entry.isDirectory()) addWardrobeAssets(child);
-      else if (entry.name.endsWith('.webp')) refs.add(child);
+      else if (entry.name.endsWith('.webp') || (child.startsWith('board-games/nards/') && entry.name.endsWith('.svg'))) refs.add(child);
     }
   }
   // glTF models refer to their buffers and PBR maps with relative URIs.

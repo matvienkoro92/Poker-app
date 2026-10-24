@@ -30,5 +30,5 @@ test('only the active player shares a finite aim; cosmetic updates never advance
  const sent=await service.call('h',{action:'room',roomId:h.roomId,aim});assert.equal(sent.aim.angle,.6);assert.equal(sent.revision,g.revision);assert.equal(sent.turnDeadline,g.turnDeadline);
  const received=await service.call('g',{action:'room',roomId:h.roomId,aim:{...aim,angle:1}});assert.deepEqual(received.aim,sent.aim);
  for(const change of [{angle:NaN},{cueId:200},{shot:999},{angle:10}]){await service.call('h',{action:'room',roomId:h.roomId,aim:{...aim,...change}});assert.deepEqual(data.get(h.roomId).aim,sent.aim);}
- const shot=await service.call('h',{action:'move',roomId:h.roomId,revision:g.revision,aim,move:{type:'shot',angle:.6,power:.5}});assert.equal(shot.playback.cueStyle,'ruby');assert.equal(shot.playback.startedAt,1350);assert.equal(shot.revision,g.revision+1);
+ const shot=await service.call('h',{action:'move',roomId:h.roomId,revision:g.revision,aim,move:{type:'shot',angle:.6,power:.5}});assert.equal(shot.playback.cueStyle,'maple');assert.equal(shot.playback.startedAt,1350);assert.equal(shot.revision,g.revision+1);
 });

@@ -5,9 +5,10 @@ export const CUES=cueCatalog.cues;
 export const availableCue=cueCatalog.available;
 export function heroFromHall(hall){if(!hall?.self||!hall.accountId)throw Error('Не удалось получить вашего героя.');const level=Number(hall.garage?.stats?.level);if(!Number.isFinite(level)||level<0)throw Error('Уровень героя пока недоступен.');return {accountId:String(hall.accountId),level:Math.floor(level),nick:String(hall.nick||hall.name||'Герой').trim().slice(0,28)};}
 export function mountCues({source,room,openInitially=false}){
- const $=id=>document.getElementById(id),dialog=$('cueDialog');let hero=null,selected=CUES[0],loading=false;
+ const $=id=>document.getElementById(id),dialog=$('cueDialog');let hero=null,selected=CUES[0],loading=false,roomCue=null,roomNick='';
  function key(){return 'p21:billiards:cue:v1:'+hero.accountId;}
- function apply(cue){selected=cue;room?.setCue(cue,hero?.nick||'');paintEquipmentButton($('cueButton'),'Кий',cue.name);cueCatalog.paintPreview(document.querySelector('main'),cue,hero?.nick||'');}
+ function paint(){const cue=roomCue||selected,nick=roomCue?roomNick:hero?.nick||'';room?.setCue(cue,nick);paintEquipmentButton($('cueButton'),roomCue?'Кий хозяина':'Кий',cue.name);$('cueButton').disabled=!!roomCue;$('cueButton').title=roomCue?'В этой комнате используется инвентарь хозяина':'';cueCatalog.paintPreview(document.querySelector('main'),cue,nick);}
+ function apply(cue){selected=cue;paint();}
  function render(){
   const focused=document.activeElement?.dataset?.cue;
   $('cueSave').disabled=loading;
@@ -24,7 +25,7 @@ export function mountCues({source,room,openInitially=false}){
  async function refresh(){if(loading)return;loading=true;render();$('cueError').textContent='';try{if(typeof source.pokerSocialRequest!=='function')throw Error('Откройте бильярд из своего дома, чтобы получить уровень героя.');const result=await source.pokerSocialRequest('player-hall',{action:'get'});hero=heroFromHall(result.hall);let saved;try{saved=localStorage.getItem(key());}catch{}apply(availableCue(saved,hero.level));}catch(error){hero=null;apply(CUES[0]);$('cueError').textContent=error.message||'Не удалось загрузить героя.';}finally{loading=false;render();}}
  $('cueSave').onclick=()=>{if(loading)return;try{if(hero)localStorage.setItem(key(),selected.id);apply(selected);if(parent!==window)parent.postMessage({type:'p21-billiards-cue-saved'},location.origin);dialog.close();}catch{$('cueError').textContent='Не удалось сохранить выбор в браузере. Разрешите хранение данных и попробуйте ещё раз.';}};
  $('cueRetry').onclick=refresh;$('cueClose').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
- function open(){if(!dialog.open)dialog.showModal();refresh();}
- $('cueButton').onclick=open;apply(CUES[0]);render();refresh();if(openInitially)open();
- return {open,inspect:()=>({selected:selected.id,level:hero?.level??null,nick:hero?.nick||'',loading})};
+ function open(){if(roomCue)return false;if(!dialog.open)dialog.showModal();refresh();}
+ $('cueButton').onclick=open;apply(CUES[0]);render();const ready=refresh();if(openInitially)open();
+ return {open,ready,setRoomEquipment(id,nick){roomCue=CUES.find(c=>c.id===id)||CUES[0];roomNick=String(nick||'').slice(0,28);if(dialog.open)dialog.close();paint();},clearRoomEquipment(){roomCue=null;roomNick='';paint();},inspect:()=>({selected:(roomCue||selected).id,personalSelected:selected.id,level:hero?.level??null,nick:roomCue?roomNick:hero?.nick||'',loading,shared:!!roomCue})};
 }

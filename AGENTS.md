@@ -34,3 +34,5 @@
   subsequent edits require it. Verify the generated news date/count and summer exclusion
   for September, then commit/push when authorized. Report actual timings; do not promise
   a fixed completion time for ambiguous screenshots or deployment.
+
+- Every two-player game uses a server-validated snapshot of the room creator's equipment for both players and spectators. Guests must not overwrite it or save the host's equipment as their own. Restore personal equipment after leaving. This applies to billiards, chess, backgammon and future online darts; keep darts closed until explicitly reopened.

@@ -53,3 +53,38 @@
 .nards-board .point:focus-visible{outline:2px solid #9ad7c0;outline-offset:-2px;z-index:5}
 @media(min-width:600px){.nards-board .point .number{height:14px;font-size:10px;min-width:21px}.move-target{min-width:27px;height:27px;font-size:12px}.nards-board .checker-count{font-size:11px;padding:3px 4px}}
 @media(prefers-reduced-motion:reduce){.nards-board .checker,.nards-board .point{transition:none}}
+
+/* Nards editor: independent exterior, playing surface and equipment. */
+.nards-editor-tabs{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:6px;margin:16px 0;position:sticky;top:-1px;z-index:3;background:#193329;padding:8px 0}
+.nards-editor-tabs button{min-width:0;padding:10px 5px;font-size:13px;border-radius:12px;min-height:44px}
+.nards-editor-tabs [aria-selected=true]{background:#e6c578;color:#1b261e;border-color:#f5dea1;box-shadow:0 3px 12px #0004}
+#nardsEquipment [hidden]{display:none!important}
+#nardsInteriors img{aspect-ratio:1.2;object-fit:fill;border:3px solid #b99a5566}
+.nards-preview-classic{width:48%;flex-shrink:0}
+.nards-dice-sample{display:flex;gap:12px;justify-content:center;margin:10px 0 14px}
+.nards-dice-sample i{display:grid;place-items:center;font-style:normal;font-size:40px;line-height:1;width:52px;height:52px;border-radius:12px;color:var(--sample-pip);background:linear-gradient(145deg,#fff5,transparent),var(--sample-face);border:2px solid var(--sample-edge);box-shadow:inset 0 0 0 2px #fff2,0 4px 0 var(--sample-edge),0 7px 10px #0005;transform:rotate(-9deg)}
+.nards-dice-sample i+i{transform:rotate(12deg)}
+.dice-collection{grid-template-columns:repeat(2,minmax(0,1fr))}
+.nards-board[data-interior]{background-image:var(--nards-surface);background-size:100% 100%;background-color:var(--inside-light)}
+.nards-board[data-interior] .point::before{background:var(--inside-dark);opacity:.9}
+.nards-board[data-interior] .point.light-point::before{background:var(--inside-accent);opacity:.8}
+body[data-nards-dice] .dice-cube{--die-face:var(--nards-die-face);--die-edge:var(--nards-die-edge);--die-pip:var(--nards-die-pip)}
+body[data-nards-dice] .cube-face i{background:radial-gradient(circle at 55% 70%,var(--die-pip),var(--die-pip) 75%)}
+body[data-nards-dice] .die{background:var(--nards-die-face);border-color:var(--nards-die-edge);color:var(--nards-die-pip)}
+@media(max-width:420px){.nards-equipment-preview{gap:10px;padding:10px}.nards-equipment-preview strong{font-size:15px}.nards-equipment-preview p{font-size:11px}.nards-equipment-preview .checker{width:30px}.nards-editor-tabs button{font-size:12px}.nards-dice-sample{gap:8px}.nards-dice-sample i{width:42px;height:42px;font-size:32px}}
+
+/* Static material patterns and independent die size; no persistent animation. */
+body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ffffff00 45%,#00000018),var(--nards-die-surface);background-color:var(--die-face)}
+.nards-dice-size{display:flex;gap:8px;margin:8px 0 16px}.nards-dice-size button{flex:1;min-height:44px}.nards-dice-size [aria-pressed=true]{background:#e5c477;color:#17271e;border-color:#f7dfa1}
+.nards-dice-sample i{grid-template:repeat(3,1fr)/repeat(3,1fr);gap:9%;padding:12%;background:linear-gradient(135deg,#ffffff44,transparent 60%),var(--sample-surface);background-color:var(--sample-face)}
+.nards-dice-sample i b{width:100%;height:100%;border-radius:50%;background:var(--sample-pip);box-shadow:inset 0 1px 1px #0007}
+.nards-dice-sample[data-size=small] i{width:34px;height:34px;box-shadow:inset 0 0 0 1px #fff2,0 3px 0 var(--sample-edge),0 5px 8px #0005}
+
+.nards-editor-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.nards-dice-sample i{padding:7px;gap:3px}.nards-dice-sample[data-size=small] i{padding:5px;gap:2px}
+@media(max-width:420px){.nards-editor-tabs button{font-size:12px;padding:9px 3px}.nards-dice-sample i{padding:6px}}
+
+.equipment-section-share{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin:12px 0 16px}.equipment-section-share label{display:grid;gap:5px;min-width:0;font-size:12px;color:#d5c59e}.equipment-section-share input{width:100%;min-width:0;min-height:44px;font-size:12px}.equipment-section-share button{min-height:44px}.equipment-section-share p{grid-column:1/-1;margin:0;font-size:12px;color:#aee4c8}.equipment-section-share p:empty{display:none}
+@media(max-width:420px){.equipment-section-share{grid-template-columns:1fr}.equipment-section-share button{width:100%}}
+
+.host-equipment-note{font-size:12px;color:#d4c398;text-align:center;margin:5px 0 10px}

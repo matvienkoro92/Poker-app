@@ -140,6 +140,8 @@ function pokerInitHomeDeepLinks(opts) {
       });
       return;
     }
+    var nardsAppearance=/^nards_appearance_(outside|inside|pieces|dice)$/.exec(startParam);
+    if(nardsAppearance){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('long',null,false,nardsAppearance[1]);},['profile']);return;}
     var boardLink=/^board_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(boardLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('chess',boardLink[2],!!boardLink[1]);},['profile']);return;}
     if(startParam==='nards'||startParam==='chess'){

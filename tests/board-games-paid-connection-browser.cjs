@@ -1,12 +1,12 @@
 'use strict';
 const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),assert=require('node:assert/strict'),fixture=require('./helpers/board-wager-fixture.cjs');
-(async()=>{const browser=await chromium.launch();try{for(const kind of ['chess','short','long']){
- const f=fixture(),errors=[],polls={m1:0,m2:0},faults={m1:[],m2:[]};
+(async()=>{const browser=await chromium.launch();try{for(const kind of (process.env.NARDS_ONLY?['short','long']:['chess','short','long'])){
+ const f=fixture(),errors=[],polls={m1:0,m2:0},faults={m1:[],m2:[]},holdNext={};
  async function player(member){const p=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:2});p.on('pageerror',e=>errors.push(e.message));await p.route('http://paid-board.test/**',async route=>{
   const u=new URL(route.request().url());if(u.pathname==='/api/billiards')return route.fulfill({json:{ok:true}});
   if(u.pathname==='/api/board-games'){const body=route.request().postDataJSON();if(body.action==='access')return route.fulfill({json:{ok:true,allowed:true,equipment:{},level:0}});
    if(body.action==='room'){polls[member]++;const status=faults[member].shift();if(status)return route.fulfill({status,json:{ok:false,error:status===409?'Комната обновляется':'Временная ошибка сервера'}});}
-   try{return route.fulfill({json:await f.service.call(member,body)});}catch(e){return route.fulfill({status:e.status||503,json:{ok:false,error:e.message}});}
+   try{const result=await f.service.call(member,body);if(body.action==='room'&&holdNext[member]){const hold=holdNext[member];delete holdNext[member];hold.captured();await hold.wait;if(hold.fail)return route.fulfill({status:503,json:{ok:false,error:'Запоздалая ошибка комнаты'}});}return route.fulfill({json:result});}catch(e){return route.fulfill({status:e.status||503,json:{ok:false,error:e.message}});}
   }
   const file=path.join(process.cwd(),u.pathname);return fs.existsSync(file)&&fs.statSync(file).isFile()?route.fulfill({path:file}):route.fulfill({status:404});
  });return p;}
@@ -19,6 +19,7 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
  if(kind==='chess'){await host.locator('[data-square=e2]').click();await host.locator('[data-square=e4]').click();await guest.waitForFunction(()=>PokerBoardGames.inspect().state.ply===1);assert.match(await guest.locator('#clock').innerText(),/Белые.*Чёрные/);}
  else{const current=(await host.evaluate(()=>PokerBoardGames.inspect().state.turn))===0?host:guest;const count=await current.evaluate(()=>PokerBoardGames.inspect().state.rollCount||0);await current.locator('#roll').click();await current.waitForFunction(before=>(PokerBoardGames.inspect().state.rollCount||0)>before,count);await current.waitForFunction(()=>!document.querySelector('.board-dice-stage.is-rolling'));assert.equal(await current.locator('.dice-cube').count(),2);}
  await host.waitForTimeout(1500);for(const p of [host,guest])assert.equal(await p.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0,'Idle board must not keep animating');
- await guest.locator('[data-resign]').click();await guest.locator('#confirm [data-yes]').click();for(const p of [host,guest])await p.waitForFunction(()=>PokerBoardGames.inspect().wager?.status==='paid');
- assert.equal(f.balances.get('p1'),10240);assert.equal(f.balances.get('p2'),9700);assert.equal(f.changes.length,3);assert.deepEqual(errors,[]);for(const p of [host,guest])await p.close();console.log('PASS '+kind+': two mobile players, 300-chip stakes, recovery, real move/dice, idle animations stop, single 540-chip payout');
+ let release,capture;const captured=new Promise(r=>capture=r),wait=new Promise(r=>release=r);holdNext.m2={captured:capture,wait,fail:kind==='long'};await captured;
+ await guest.locator('[data-resign]').click();await guest.locator('#confirm [data-yes]').click();await guest.waitForFunction(()=>PokerBoardGames.inspect().wager?.status==='paid');release();await guest.waitForTimeout(200);assert.equal(await guest.evaluate(()=>PokerBoardGames.inspect().wager?.status),'paid','An old room response must not revert the paid bank');assert.equal(await guest.locator('#connection').innerText(),'','An old failed poll must not report an outage after payout');for(const p of [host,guest])await p.waitForFunction(()=>PokerBoardGames.inspect().wager?.status==='paid');
+ assert.equal(f.balances.get('p1'),10240);assert.equal(f.balances.get('p2'),9700);assert.equal(f.changes.length,3);const paidPolls={...polls};await host.waitForTimeout(2200);assert.deepEqual(polls,paidPolls,'A settled paid match must stop polling');assert.deepEqual(errors,[]);for(const p of [host,guest])await p.close();console.log('PASS '+kind+': two mobile players, 300-chip stakes, recovery, real move/dice, idle animations stop, single 540-chip payout');
  }}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -5,7 +5,7 @@ export function diceFaces(top){const front=[1,2,3,4,5,6].find(n=>n!==top&&n!==7-
 function face(name,value){const el=document.createElement('span');el.className='cube-face cube-face--'+name;el.dataset.value=value;for(const pos of spots[value]){const dot=document.createElement('i');dot.style.gridArea=Math.ceil(pos/3)+' / '+((pos-1)%3+1);el.append(dot);}return el;}
 export function createDiceView(container,onSettled){
  const layer=document.createElement('div');layer.className='board-dice-stage';layer.hidden=true;layer.setAttribute('aria-label','Кости на доске');container.append(layer);
- let lastWidth=0,lastFlipped=null;let key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[];
+ let lastWidth=0,lastFlipped=null,lastScale=1;let key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[];
  function cancel(){epoch++;clearTimeout(timer);for(const a of animations)a.cancel();animations=[];rolling=false;layer.classList.remove('is-rolling');}
  function reset(){cancel();lastFlipped=null;key='';context='';initialized=false;dice=[];layer.replaceChildren();layer.hidden=true;}
  function settle(notify=true){if(!rolling)return;cancel();if(notify)onSettled();}
@@ -14,11 +14,11 @@ export function createDiceView(container,onSettled){
   if(options.context!==context){reset();context=options.context;}
   if(state.roll.length!==2){cancel();key='';layer.replaceChildren();layer.hidden=true;initialized=true;return false;}
   const next=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()));
-  const flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
+  const scale=options.size==='small'?.72:1,flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped||lastScale!==scale);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
   const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
   cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;
-  const box=container.getBoundingClientRect(),size=Math.max(26,Math.min(46,box.width*.091)),width=box.width,height=box.height;
-  lastWidth=width;lastFlipped=flipped;const roller=[0,1].includes(state.rollPlayer)?state.rollPlayer:state.turn,right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
+  const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
+  lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=[0,1].includes(state.rollPlayer)?state.rollPlayer:state.turn,right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
   state.roll.forEach((value,i)=>{
    const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube'+(i?' dice-cube--amber':'');shadow.className='dice-ground-shadow';cube.dataset.value=value;cube.setAttribute('role','img');cube.setAttribute('aria-label','Кость '+(i+1)+': '+value);for(const [side,n]of Object.entries(diceFaces(value)))cube.append(face(side,n));flight.append(cube);layer.append(shadow,flight);dice.push(cube);
    const x=width*(right?(i?.80:.64):(i?.36:.20))-size/2,y=height*.5-size/2,twist=i?13:-12,rest='rotateX(-58deg) rotateY('+twist+'deg)';flight.style.transform='translate3d('+x+'px,'+y+'px,0)';cube.style.transform=rest;shadow.style.transform='translate('+x+'px,'+(y+size*.64)+'px) scale(1)';
