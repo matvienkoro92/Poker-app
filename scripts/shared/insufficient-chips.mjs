@@ -1,0 +1,12 @@
+export function showInsufficientChips(message){
+ if(!/недостаточно фишек/i.test(String(message||'')))return false;
+ const existing=document.querySelector('.game-insufficient-chips');if(existing?.open)return true;
+ const dialog=document.createElement('dialog');dialog.className='game-insufficient-chips';dialog.setAttribute('role','alertdialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','insufficientChipsTitle');dialog.setAttribute('aria-describedby','insufficientChipsNote');
+ dialog.style.cssText='width:min(390px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;margin:auto;padding:28px 24px;border:2px solid #f5c665;border-radius:22px;background:linear-gradient(145deg,#343221,#15271e);color:#fff0c6;box-shadow:0 20px 80px #000c;font:16px/1.5 system-ui,sans-serif;text-align:center';
+ const style=document.createElement('style');style.textContent='.game-insufficient-chips::backdrop{background:#030b08c9}.game-insufficient-chips button:focus-visible{outline:3px solid #fff0b3;outline-offset:4px}';
+ const icon=document.createElement('div');icon.textContent='!';icon.setAttribute('aria-hidden','true');icon.style.cssText='display:grid;place-items:center;width:54px;height:54px;margin:0 auto 16px;border:2px solid #ffd979;border-radius:50%;background:#a67a2444;color:#ffdb7f;font-size:32px;font-weight:800';
+ const title=document.createElement('h2');title.id='insufficientChipsTitle';title.textContent='На данную партию недостаточно фишек';title.style.cssText='margin:0 0 14px;color:#ffdb7f;font-size:23px;line-height:1.25';
+ const note=document.createElement('p');note.id='insufficientChipsNote';note.textContent=String(message).replace(/^.*?недостаточно фишек[.!]?\s*/i,'')||'Пополните фишки в Poker21 или выберите меньшую ставку.';note.style.cssText='margin:0 0 22px;color:#f8e9c6';
+ const close=document.createElement('button');close.type='button';close.textContent='Понятно';close.style.cssText='width:100%;min-height:48px;padding:10px 16px;border:1px solid #ffe5a1;border-radius:12px;background:linear-gradient(135deg,#ffe1a0,#d4a94f);color:#18291f;font:700 17px system-ui;cursor:pointer';close.onclick=()=>dialog.close();
+ const previous=document.activeElement;dialog.addEventListener('close',()=>{dialog.remove();if(previous?.isConnected)previous.focus({preventScroll:true});},{once:true});dialog.append(style,icon,title,note,close);document.body.append(dialog);dialog.showModal();close.focus();return true;
+}

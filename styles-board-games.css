@@ -90,3 +90,8 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 /* Illustrated interiors keep the points crisp while letting the full mural show through. */
 .nards-board[data-mural=true] .point::before{opacity:.82}
 .nards-board[data-mural=true] .point.light-point::before{opacity:.68}
+
+/* Paid results and the player's turn remain prominent without continuous animation. */
+.board-wager-notice[data-status=paid],.board-wager-notice[data-status=refunded]{padding:18px 20px;border:2px solid #ffe3a0;border-radius:16px;background:linear-gradient(130deg,#ffe4a3,#d5ae58);color:#17291f;font-size:clamp(16px,2.2vw,20px);font-weight:800;line-height:1.5;box-shadow:0 4px 22px #e9bd523d,inset 0 1px #fff8}
+#turnText[data-mine=true]{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:2px solid #c1ffe0;border-radius:14px;background:linear-gradient(130deg,#a8f0c9,#5bcb99);color:#092b1c;font-size:clamp(19px,2.7vw,24px);font-weight:850;line-height:1.25;box-shadow:0 3px 18px #55dfa438}
+#turnText[data-mine=true]::before{content:'➜';font-size:1.1em}
