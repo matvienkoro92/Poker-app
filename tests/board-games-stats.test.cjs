@@ -21,27 +21,37 @@ local script=${JSON.stringify(stats.CAS)}
 local function run(expected,room) KEYS={'room'} ARGV={expected,cjson.encode(room),'stats:',12345} return assert(load(script))() end
 local room={id='ABCDEFGHJK',revision=1,players={'host','guest'},playerProfiles={{name='Первый',accountId='ID123456'},{name='Второй',accountId='ID654321'}},match={number=1,round=1},state={winner=0,discipline='chess',scores={8,3}}}
 strings.room=cjson.encode({revision=0})
-local function player(d,id) return cjson.decode(hashes['stats:'..d..':players'][id]) end
+local function player(d,id) return cjson.decode(hashes['stats:'..d..':free:players'][id]) end
 `;
 function run(code){const L=lauxlib.luaL_newstate();lualib.luaL_openlibs(L);try{const status=lauxlib.luaL_dostring(L,to_luastring(harness+code));assert.equal(status,lua.LUA_OK,status===lua.LUA_OK?'':to_jsstring(lua.lua_tostring(L,-1)));}finally{lua.lua_close(L);}}
 test('actual Redis CAS counts each finished rack once and rejects stale room revisions',()=>run(`
-assert(run(9,room)==0);assert(hashes['stats:chess:players']==nil)
+assert(run(9,room)==0);assert(hashes['stats:chess:free:players']==nil)
 assert(run(0,room)==1);assert(player('chess','ID123456').wins==1);assert(player('chess','ID654321').losses==1)
-assert(run(0,room)==0);room.revision=2;assert(run(1,room)==1);assert(player('chess','ID123456').wins==1);assert(#lists['stats:chess:history:ID123456']==1)
+assert(run(0,room)==0);room.revision=2;assert(run(1,room)==1);assert(player('chess','ID123456').wins==1);assert(#lists['stats:chess:free:history:ID123456']==1)
 room.match.round=2;room.revision=3;room.state.winner=1;room.state.endReason='resign';assert(run(2,room)==1)
 assert(player('chess','ID123456').losses==1);assert(player('chess','ID654321').wins==1)
-local count=0 for _ in pairs(zsets['stats:chess:ranking']) do count=count+1 end assert(count==2)
+local count=0 for _ in pairs(zsets['stats:chess:free:ranking']) do count=count+1 end assert(count==2)
 `));
 test('draws, new series and disciplines are independent; unfinished games are excluded',()=>run(`
-room.state.winner=nil;assert(run(0,room)==1);assert(hashes['stats:chess:players']==nil)
+room.state.winner=nil;assert(run(0,room)==1);assert(hashes['stats:chess:free:players']==nil)
 room.revision=2;room.state.winner='draw';assert(run(1,room)==1);local p=player('chess','ID123456');assert(p.draws==1 and p.wins==0 and p.losses==0)
 room.match.number=2;room.revision=3;room.state.winner=0;assert(run(2,room)==1);assert(player('chess','ID123456').wins==1)
 room.state.discipline='short';room.revision=4;assert(run(3,room)==1);assert(player('short','ID123456').wins==1);assert(player('chess','ID123456').played==2)
 `));
 test('same canonical account is excluded and history stays bounded',()=>run(`
-room.playerProfiles[2].accountId='ID123456';assert(run(0,room)==1);assert(hashes['stats:chess:players']==nil)
+room.playerProfiles[2].accountId='ID123456';assert(run(0,room)==1);assert(hashes['stats:chess:free:players']==nil)
 room.playerProfiles[2].accountId='ID654321'
 for i=2,26 do room.revision=i;room.match.round=i;assert(run(i-1,room)==1) end
-assert(#lists['stats:chess:history:ID123456']==20);assert(player('chess','ID123456').wins==25)
+assert(#lists['stats:chess:free:history:ID123456']==20);assert(player('chess','ID123456').wins==25)
 `));
-test('ranking API returns public stats and separate personal rank/history without account IDs',async()=>{const calls=[];const value=JSON.stringify({name:'Первый',wins:5,losses:2,draws:1,rankMember:'999999999997:ID123456'});const result=await stats.read({discipline:'chess',accountId:'ID123456',commands:async rows=>{calls.push(rows);return calls.length===1?[['999999999997:ID123456'],value,[]]:calls.length===2?[value]:[0];}});assert.equal(result.self.rank,1);assert.equal(result.self.winRate,63);assert.equal(result.ranking[0].self,true);assert.equal(JSON.stringify(result).includes('ID123456'),false);await assert.rejects(stats.read({discipline:'other'}),e=>e.status===400);});
+test('ranking API returns public stats and separate personal rank/history without account IDs',async()=>{const calls=[];const value=JSON.stringify({name:'Первый',wins:5,losses:2,draws:1,rankMember:'999999999997:ID123456'});const result=await stats.read({migration:false,discipline:'chess',accountId:'ID123456',commands:async rows=>{calls.push(rows);return calls.length===1?[['999999999997:ID123456'],value,[]]:calls.length===2?[value]:[0];}});assert.equal(result.self.rank,1);assert.equal(result.self.winRate,63);assert.equal(result.ranking[0].self,true);assert.equal(JSON.stringify(result).includes('ID123456'),false);await assert.rejects(stats.read({discipline:'other'}),e=>e.status===400);});
+
+test('paid and free results, ranking and histories are recorded independently in the Redis transaction',()=>run(`
+assert(run(0,room)==1)
+room.revision=2;room.match.round=2;room.wagered=true;room.state.winner=1;assert(run(1,room)==1)
+assert(player('chess','ID123456').wins==1 and player('chess','ID123456').losses==0)
+local paid=cjson.decode(hashes['stats:chess:paid:players']['ID123456']);assert(paid.wins==0 and paid.losses==1)
+assert(#lists['stats:chess:free:history:ID123456']==1 and #lists['stats:chess:paid:history:ID123456']==1)
+assert(cjson.decode(lists['stats:chess:paid:history:ID123456'][1]).mode=='paid')
+room.revision=3;assert(run(2,room)==1);assert(cjson.decode(hashes['stats:chess:paid:players']['ID123456']).played==1)
+`));

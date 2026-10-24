@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
-const {NARDS_INTERIORS}=require('../../lib/nards-equipment');
+const {NARDS_INTERIORS,DESIGN_CHECKERS}=require('../../lib/nards-equipment');
 (async()=>{
 const out=path.join(__dirname,'../../assets/board-games/nards');
 fs.mkdirSync(out,{recursive:true});
@@ -21,15 +21,15 @@ for(const b of NARDS_INTERIORS){
   const quote=b.id==='emil-respect'?'<g fill="'+b.dark+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="600"><text x="915" y="455">Как покериста тебя</text><text x="915" y="486">уважаю ✊🏾,</text><text x="915" y="517">но нарды не потянешь</text><text x="915" y="552" font-size="18">(с) Эмиль</text></g>':'<use href="#inlay" x="725" y="310" opacity=".34"/>';
   base='<defs><g id="inlay">'+portrait+'</g><linearGradient id="wood" x2="1" y2="1"><stop stop-color="'+b.light+'"/><stop offset="1" stop-color="'+b.accent+'"/></linearGradient></defs><rect width="1200" height="1000" fill="url(#wood)"/><path d="M10 10H1190V990H10Z" fill="none" stroke="'+b.dark+'" stroke-opacity=".35" stroke-width="3"/><use href="#inlay" x="95" y="310" opacity=".34"/>'+quote;
  }
- if(b.revision===2){
+ if(b.revision>=2){
   const encoded=fs.readFileSync(path.join(out,'illustration-'+b.art+'.webp')).toString('base64');
   const artwork='<g id="half-mural"><image href="data:image/webp;base64,'+encoded+'" x="24" y="80" width="534" height="840" preserveAspectRatio="xMidYMid slice"/></g>';
   const lines=b.id==='emil-respect'?['Как покериста тебя','уважаю ✊🏾 ,','но нарды не потянешь']:b.id==='cooler-tears'?['Это не слёзы.','Это плохие зарики.']:b.quote?['За этой доской','решаю я.']:[];
-  const inscription=x=>!lines.length?'':'<g class="board-quote" fill="'+b.dark+'" font-family="Arial,sans-serif" font-weight="700" text-anchor="middle"><rect x="'+(x-245)+'" y="453" width="490" height="108" rx="12" fill="'+b.accent+'" fill-opacity=".94"/>'+lines.map((line,i)=>'<text x="'+x+'" y="'+(477+i*25)+'" font-size="23">'+line+'</text>').join('')+'<text x="'+x+'" y="550" font-size="16">'+(b.id==='emil-respect'?'(с) ':'')+b.signature+'</text></g>';
-  base='<defs>'+artwork+'</defs><rect width="1200" height="1000" fill="'+b.light+'"/><g opacity=".82"><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
+  const inscription=x=>!lines.length?'':'<g class="board-quote" fill="'+b.dark+'" fill-opacity=".86" stroke="'+b.accent+'" stroke-opacity=".32" stroke-width=".8" paint-order="stroke" font-family="Georgia,serif" font-weight="600" text-anchor="middle"><path d="M'+(x-100)+' 452H'+(x+100)+'M'+(x-55)+' 582H'+(x+55)+'" fill="none" stroke="'+b.dark+'" stroke-opacity=".35" stroke-width="1"/>'+lines.map((line,i)=>'<text x="'+x+'" y="'+(477+i*31)+'" font-size="32">'+line+'</text>').join('')+'<text x="'+x+'" y="568" font-size="18">'+(b.id==='emil-respect'?'(с) ':'')+b.signature+'</text></g>';
+  base='<defs>'+artwork+'</defs><rect width="1200" height="1000" fill="'+b.light+'"/><g opacity=".34"><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><rect width="1200" height="1000" fill="#332319" fill-opacity=".12"/><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
  }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';
- let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?1000:0,tip=row?560:440;points+='<path d="M'+(x+3)+' '+y+'H'+(x+w-3)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" fill-opacity=".88" stroke="'+gold+'" stroke-opacity=".35" stroke-width="1.5"/>';}
+ let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?1000:0,tip=row?590:410;points+='<path d="M'+(x+w*.1)+' '+y+'H'+(x+w*.9)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" fill-opacity=".88" stroke="'+gold+'" stroke-opacity=".35" stroke-width="1.5"/>';}
  const bar='<rect x="582" width="36" height="1000" fill="'+b.frame+'"/><path d="M596 0V1000M604 0V1000" stroke="'+gold+'" stroke-opacity=".45"/>';
  fs.writeFileSync(path.join(out,path.basename(b.surface)),svg(base));
  fs.writeFileSync(path.join(out,path.basename(b.preview)),svg(base+points+bar));
@@ -45,9 +45,9 @@ const checkerArt={waaar:'waaar-master',cooler:'cooler-tears',emil:'emil-respect'
 for(const [id,art]of Object.entries(checkerArt)){
  const image=(await require('sharp')(path.join(out,'illustration-'+art+'.webp')).resize(192,192).webp({quality:70,effort:6}).toBuffer()).toString('base64');
  for(const side of ['white','black']){
-  const light=side==='white',rim=light?'#edd5a3':'#24302c',edge=light?'#ac7c39':'#111a17',metal=light?'#87602c':'#dbb875';
-  const body='<defs><radialGradient id="rim"><stop stop-color="'+rim+'"/><stop offset=".8" stop-color="'+rim+'"/><stop offset="1" stop-color="'+metal+'"/></radialGradient><clipPath id="portrait"><circle cx="100" cy="100" r="76"/></clipPath></defs><circle cx="100" cy="103" r="96" fill="'+edge+'"/><circle cx="100" cy="98" r="94" fill="url(#rim)" stroke="'+metal+'" stroke-width="3"/><image href="data:image/webp;base64,'+image+'" x="12" y="10" width="176" height="176" clip-path="url(#portrait)"/><circle cx="100" cy="98" r="80" fill="none" stroke="'+metal+'" stroke-width="5"/><circle cx="100" cy="98" r="88" fill="none" stroke="'+rim+'" stroke-width="3" stroke-dasharray="2 6"/>';
-  fs.writeFileSync(path.join(out,'designer-'+id+'-'+side+'.svg'),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">'+body+'</svg>');
+  const light=side==='white',rim=light?'#fff1d5':'#101e29',edge=light?'#ac7c39':'#111a17',metal=light?'#87602c':'#dbb875';
+  const body='<defs><radialGradient id="rim"><stop stop-color="'+rim+'"/><stop offset=".8" stop-color="'+rim+'"/><stop offset="1" stop-color="'+metal+'"/></radialGradient><clipPath id="portrait"><circle cx="100" cy="98" r="60"/></clipPath></defs><circle cx="100" cy="103" r="96" fill="'+edge+'"/><circle cx="100" cy="98" r="94" fill="url(#rim)" stroke="'+metal+'" stroke-width="3"/><image href="data:image/webp;base64,'+image+'" x="34" y="32" width="132" height="132" clip-path="url(#portrait)"/><circle cx="100" cy="98" r="65" fill="none" stroke="'+metal+'" stroke-width="5"/><circle cx="100" cy="98" r="88" fill="none" stroke="'+rim+'" stroke-width="3" stroke-dasharray="2 6"/>';
+  fs.writeFileSync(path.join(out,path.basename(DESIGN_CHECKERS.find(c=>c.id===id)[side+'Art'])),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">'+body+'</svg>');
  }
 }
 

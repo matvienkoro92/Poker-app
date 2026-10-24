@@ -784,3 +784,6 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 
 .player-hall-dialog .villa-living-share{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:4;min-height:44px;padding:10px 16px;border:1px solid #d5b76c;border-radius:12px;background:#263d30f2;color:#fff0c6;box-shadow:0 3px 12px #0007;font-size:12px;cursor:pointer}
 .player-hall-dialog .villa-living-share:focus-visible{outline:2px solid #ffe5a1;outline-offset:3px}
+
+.living-preview-checker::after{content:'';position:absolute;inset:0;border:clamp(1px,.3cqw,3px) solid #fff2d5;border-radius:50%;box-shadow:0 0 0 1px #655033;pointer-events:none}
+.living-preview-checker.is-black::after{border-color:#101e29;box-shadow:0 0 0 1px #d9e3e6}
