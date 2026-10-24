@@ -9,13 +9,14 @@ function harness(remote) {
   let requests = 0, reloads = 0;
   const context = {
     navigator: {}, URL, AbortController, Promise, Date,
+    MutationObserver: class { observe() {} disconnect() {} },
     setTimeout() { return 1; }, clearTimeout() {}, setInterval(fn) { intervals.push(fn); },
     fetch: async () => { requests++; if (remote instanceof Error) throw remote; return { ok: true, json: async () => remote }; },
     window: { location: { reload() { reloads++; } }, addEventListener(n, f) { listeners[n] = f; } },
     document: { hidden: false, baseURI: 'https://example.test/', documentElement: { getAttribute: () => 'current' },
-      getElementById: id => buttons.find(b => b.id === id),
-      createElement: () => ({ style: {}, addEventListener(n, fn) { this[n] = fn; } }),
-      body: { appendChild(b) { buttons.push(b); } }, addEventListener(n, f) { listeners[n] = f; } }
+      getElementById: id => buttons.find(b => b.id === id), querySelectorAll: () => [],
+      createElement: () => ({ style: {}, setAttribute() {}, addEventListener(n, fn) { this[n] = fn; } }),
+      body: { appendChild(b) { if (!buttons.includes(b)) buttons.push(b); b.parentNode=this; } }, addEventListener(n, f) { listeners[n] = f; } }
   };
   vm.runInNewContext(updater, context);
   return { context, buttons, intervals, listeners, requests: () => requests, reloads: () => reloads };

@@ -1,3 +1,4 @@
+import {ensureGameVersion} from '../shared/game-version.mjs';
 import {showInsufficientChips} from '../shared/insufficient-chips.mjs';
 import {mobileGraphics,createFrameBudget} from './render-budget.mjs';
 import {ensureGameParticipation} from '../shared/game-participation.mjs';
@@ -54,7 +55,7 @@ for(const dialog of [$('cueDialog'),document.querySelector('.table-skin-dialog')
 });
 window.addEventListener('message',event=>{if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-request-close'){leaveGame(true);return;}if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-open-entry')openEntry(event.data.entry);});
 
-async function request(body){let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin,sentAt=Date.now();const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(Number.isFinite(d.serverNow))d.clockSample=d.serverNow-(sentAt+Date.now())/2;if(!r.ok||!d.ok){const e=Error(d.error||'Сервер недоступен. Попробуйте снова.');e.status=r.status;throw e;}return d;}
+async function request(body){if(['create','join','rematch','challenge'].includes(body.action)&&!await ensureGameVersion({roomId:body.roomId}))throw Error('Обновляем игру. Повторите вход после обновления.');let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin,sentAt=Date.now();const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:AbortSignal.timeout(10000)});const d=await r.json();if(d.ready&&!online&&!await ensureGameVersion({roomId:d.roomId,watch:d.spectator===true}))throw Error('Обновляем игру.');if(Number.isFinite(d.serverNow))d.clockSample=d.serverNow-(sentAt+Date.now())/2;if(!r.ok||!d.ok){const e=Error(d.error||'Сервер недоступен. Попробуйте снова.');e.status=r.status;throw e;}return d;}
 mountRanking(request);
 const lobby=mountLobby({launch:(choice,settings)=>{chosenStake=settings?.stake||0;$(choice).click();},back:()=>leaveGame(true)});
 const wagerNotice=document.createElement('p');wagerNotice.id='wagerNotice';wagerNotice.hidden=true;$('setupWaiting').prepend(wagerNotice);

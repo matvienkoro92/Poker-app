@@ -342,6 +342,14 @@ try {
 } catch (_) {}
 const releaseHtml = path.join(publicDir, 'index.html');
 fs.writeFileSync(releaseHtml, fs.readFileSync(releaseHtml, 'utf8').replace('<html ', '<html data-release-id="' + releaseId + '" '));
+// Stamp standalone game pages and every entry stylesheet/script with this exact release.
+for (const gamePage of ['board-games-play.html', 'billiards-play.html']) {
+  const file = path.join(publicDir, gamePage);
+  let html = fs.readFileSync(file, 'utf8').replace('<html ', '<html data-release-id="' + releaseId + '" ');
+  html = html.replace(/((?:src|href)=["'])([^"']+\.(?:js|css))(?:\?[^"']*)?(["'])/g, (all, prefix, asset, quote) =>
+    /^(?:https?:)?\/\//.test(asset) ? all : prefix + asset + '?release=' + releaseId + quote);
+  fs.writeFileSync(file, html);
+}
 fs.writeFileSync(path.join(publicDir, 'app-release.json'), JSON.stringify({ releaseId, whatsNew: releaseWhatsNew }));
 const releaseWorker = path.join(publicDir, 'sw.js');
 fs.appendFileSync(releaseWorker, '\n// Release: ' + releaseId + '\n');
