@@ -64,6 +64,10 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/Black\s+Magic/i.test(raw) && /80K/i.test(raw)) return "Black Magic 80K";
+  if (/Black\s+Friday/i.test(raw) && /400K/i.test(raw)) return "Black Friday 400K";
+  if (/Prime\s+PKO/i.test(raw) && /1M/i.test(raw)) return "Prime PKO 1M";
+  if (/Hot\s+Bounty\s+2\/3/i.test(raw) && /40K/i.test(raw)) return "Hot Bounty 2/3 40K";
   if (/DV\s+Bounty/i.test(raw) && /100K/i.test(raw)) return "DV 🏃 Bounty 🥊 100k";
   if (/Black\s+Magic/i.test(raw) && /60K/i.test(raw)) return "Black Magic 60K";
   if (/Prime\s+Magic/i.test(raw) && /500K/i.test(raw)) return "Prime Magic 500K";
@@ -505,6 +509,18 @@ async function parseOcrFile(file) {
     const confirmed = {
       "18:00|Lucky Slot 333K": 2000,
       "21:00|BLACKOUT 220K": 1100
+    }[`${time}|${title}`];
+    if (confirmed) buyin = confirmed;
+  }
+  // October 23 entry fees confirmed by the owner; blue headers show starting stacks.
+  if (date === "23.10.2026" && blue) {
+    const confirmed = {
+      "10:00|DV Turbo 500🏆 50K": 500,
+      "16:00|Hot Bounty 2/3 40K": 900,
+      "18:00|Black Friday 400K": 1000,
+      "18:00|Prime PKO 1M": 10000,
+      "22:00|Black Magic 120K": 1000,
+      "23:00|Black Magic 80K": 1200
     }[`${time}|${title}`];
     if (confirmed) buyin = confirmed;
   }

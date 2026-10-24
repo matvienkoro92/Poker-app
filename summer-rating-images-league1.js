@@ -1271,4 +1271,16 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-22-10-2026-league1-lucky-slot-177k-20h.jpg",
     "rating-compressed-preview/rating-22-10-2026-league1-turbina-500s-pko-2-3-22h.jpg"
   ]
+,
+  "23.10.2026": [
+    "rating-compressed-preview/rating-23-10-2026-league1-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-hot-bounty-2-3-40k-16h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-pyatnica-progressiv-18h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-black-friday-400k-18h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-prime-pko-1m-18h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-super-pyatihatka-20h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-turbina-500s-pko-2-3-22h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-black-magic-120k-22h.jpg",
+    "rating-compressed-preview/rating-23-10-2026-league1-black-magic-80k-23h.jpg"
+  ]
 };

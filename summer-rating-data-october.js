@@ -4867,4 +4867,323 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "23.10.2026": [
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Freedom",
+          "place": 3,
+          "reward": 2219,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "🦈Shark-Eyed🦈",
+          "place": 1,
+          "reward": 5727.47,
+          "points": 0
+        },
+        {
+          "nick": "Local",
+          "place": 3,
+          "reward": 565,
+          "points": 0
+        },
+        {
+          "nick": "Boba7575",
+          "place": 10,
+          "reward": 26.64,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "kriak",
+          "place": 1,
+          "reward": 5693.6,
+          "points": 0
+        },
+        {
+          "nick": "Irakli",
+          "place": 5,
+          "reward": 711.25,
+          "points": 0
+        },
+        {
+          "nick": "хрен",
+          "place": 7,
+          "reward": 110,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 3,
+          "reward": 7553,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "Hot Bounty 2/3 40K",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "H744HH",
+          "place": 2,
+          "reward": 11901,
+          "points": 0
+        },
+        {
+          "nick": "AKARMARA",
+          "place": 4,
+          "reward": 5257,
+          "points": 0
+        },
+        {
+          "nick": "Asta002",
+          "place": 3,
+          "reward": 3765.9999999999995,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 1,
+          "reward": 41211.93,
+          "points": 0
+        },
+        {
+          "nick": "ИЮЛЬ",
+          "place": 2,
+          "reward": 26892.88,
+          "points": 0
+        },
+        {
+          "nick": "nachyn",
+          "place": 4,
+          "reward": 11141.51,
+          "points": 0
+        },
+        {
+          "nick": "FrankL",
+          "place": 3,
+          "reward": 7107.19,
+          "points": 0
+        },
+        {
+          "nick": "Nast'ko",
+          "place": 5,
+          "reward": 6346.8,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Black Friday 400K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 5,
+          "reward": 21481,
+          "points": 0
+        },
+        {
+          "nick": "komAsoer",
+          "place": 11,
+          "reward": 2398,
+          "points": 0
+        },
+        {
+          "nick": "pryanik2la",
+          "place": 48,
+          "reward": 1576,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Prime PKO 1M",
+      "buyin": 10000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 4,
+          "reward": 162953,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 33855,
+          "points": 0
+        },
+        {
+          "nick": "svini_pups",
+          "place": 4,
+          "reward": 1425,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "RS888",
+          "place": 1,
+          "reward": 6192.27,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 1965.47,
+          "points": 0
+        },
+        {
+          "nick": "Local",
+          "place": 3,
+          "reward": 790.55,
+          "points": 0
+        },
+        {
+          "nick": "RedRocket🚀",
+          "place": 18,
+          "reward": 214.69,
+          "points": 0
+        },
+        {
+          "nick": "svini_pups",
+          "place": 21,
+          "reward": 203.75,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 16385.74,
+          "points": 0
+        },
+        {
+          "nick": "бурят",
+          "place": 3,
+          "reward": 2051.64,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "EnergetikTournament",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Local",
+          "place": 1,
+          "reward": 6100,
+          "points": 0
+        },
+        {
+          "nick": "Tanechka",
+          "place": 2,
+          "reward": 2900,
+          "points": 0
+        },
+        {
+          "nick": "Pekan31",
+          "place": 3,
+          "reward": 2200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Black Magic 120K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Simba33",
+          "place": 2,
+          "reward": 25477,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Black Magic 80K",
+      "buyin": 1200,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 3,
+          "reward": 6360,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
