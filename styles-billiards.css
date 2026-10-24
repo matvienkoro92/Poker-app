@@ -482,3 +482,13 @@ body.billiards-table-view .billiards>header #turnClock{padding:4px 8px;border:1p
 /* Player cards come first; turn and clock sit beneath them. */
 body.billiards-table-view .billiards-matchup{top:calc(env(safe-area-inset-top,0px) + 52px)}
 body.billiards-table-view .billiards>header{top:var(--billiards-status-top,calc(env(safe-area-inset-top,0px) + 108px))}
+
+/* The final twenty seconds stand out without continuous animation. */
+body.billiards-table-view .billiards>header #turnClock[data-time-warning=warning],body.billiards-table-view .billiards>header #turnClock[data-time-warning=urgent]{font-size:18px;line-height:1.35;padding:6px 10px;border:2px solid #ffe282;background:#75501a;color:#fff3be;box-shadow:0 0 12px #ffcc5c55}
+body.billiards-table-view .billiards>header #turnClock[data-time-warning=urgent]{background:#7e241c;border-color:#ff9b7d;color:#fff0d8;box-shadow:0 0 15px #ff61445c}
+@media(max-width:350px){body.billiards-table-view .billiards>header #turnClock[data-time-warning]{font-size:15px;padding:5px 7px}}
+
+.active-game-resume{padding:16px;margin:0 0 16px;border:2px solid #8de3ae;border-radius:16px;background:#153e2fee;text-align:center;color:#f5e6c5}
+.active-game-resume strong{display:block;font-size:17px}.active-game-resume p{margin:7px 0 12px;font-size:13px}.active-game-resume button{width:100%;min-height:46px;font-size:16px}
+
+.connection-recovery{padding:8px 10px;margin:6px auto;border:1px solid #ecc46b;border-radius:10px;background:#4c3b1cf2;color:#ffe7a6;text-align:center;font-size:12px;line-height:1.35}

@@ -6,3 +6,7 @@ export function paintStorage(element,player,count=0){
  for(let i=0;i<15;i++){const slot=document.createElement('i');slot.className=i<count?'is-filled':'';if(i<count){const edge=document.createElement('span');edge.className='nards-stored-edge';slot.append(edge);}slots.append(slot);}
  element.append(number,slots);
 }
+
+export function createPointBlade(preview=false){const blade=document.createElement('span');blade.className=preview?'living-preview-blade':'nards-point-blade';blade.setAttribute('aria-hidden','true');blade.innerHTML='<svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="2,1 98,1 50,98" vector-effect="non-scaling-stroke"/></svg>';return blade;}
+
+export function createSurfaceHalf(side){const half=document.createElement('span');half.className='nards-half-art is-'+side;half.setAttribute('aria-hidden','true');return half;}

@@ -795,3 +795,19 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-nards-storage{position:absolute;top:3px;bottom:3px;width:clamp(13px,2.8cqw,22px);display:flex;flex-direction:column;padding:3px 2px;border:2px ridge #ae8650;border-radius:6px;background:linear-gradient(90deg,#24170f,#825c35 40%,#342013);box-shadow:inset 2px 0 3px #000b,inset -1px 0 2px #0009;z-index:3;box-sizing:border-box}
 .living-nards-front>.living-nards-storage{left:1px}.living-nards-base>.living-nards-storage{right:1px}
 .living-nards-storage strong{font:700 8px/12px system-ui;color:#f4dba4;text-align:center}.living-nards-storage .nards-storage-slots{display:flex;flex:1;flex-direction:column;justify-content:space-between;gap:2px;padding:2px 0;min-height:0}.living-nards-storage .nards-storage-slots i{position:relative;display:block;flex:1;min-height:2px;max-height:8px;border:1px solid #1e120a;border-radius:50%;background:radial-gradient(ellipse,#1a1009 20%,#3a2414 75%,#a97e49);box-shadow:inset 0 1px 2px #000c,0 1px #dbb77777}
+
+.living-preview-point::before{display:none}
+.living-preview-blade{position:absolute;inset:8px 22% 30%;z-index:0;pointer-events:none}
+.living-preview-blade svg{display:block;width:100%;height:100%;overflow:visible}
+.living-preview-blade polygon{fill:var(--preview-dark);stroke:#f2d59b;stroke-width:1;stroke-linejoin:round}
+.living-preview-point.is-light .living-preview-blade polygon{fill:var(--preview-light);stroke:#3d2c1c}
+.living-preview-point.is-bottom .living-preview-blade{inset:30% 22% 8px;transform:rotate(180deg)}
+.living-preview-well{border:1px solid #342516;background:radial-gradient(ellipse at 50% 62%,#a28f6e 0 48%,#766044 72%,#3b291a 85%,#d9b87d 100%);box-shadow:inset 0 3px 4px #241407b3,inset 0 -1px 1px #e9ce9b,0 1px #f8d99e}
+.living-preview-checker{background-image:linear-gradient(#fff3cd20,#fff3cd20),var(--preview-white-art),radial-gradient(circle at 35% 28%,#fffdf1,var(--preview-white) 65%,#e4c58a)}
+.living-preview-checker.is-black{background-image:linear-gradient(#05121a70,#05121a70),var(--preview-black-art),radial-gradient(circle at 35% 28%,#465764,var(--preview-black) 65%,#06121c)}
+.living-preview-checker::after{border-width:clamp(2px,.45cqw,4px);border-color:#fff8de}
+.living-preview-checker.is-black::after{border-color:#071522;box-shadow:0 0 0 1px #e2f1f6}
+
+.living-nards-half{background-size:100% 100%;background-position:center;background-repeat:no-repeat}
+/* Storage is outside the illustration's playable half. */
+.living-nards-half{background-origin:content-box;background-clip:content-box}

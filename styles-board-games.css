@@ -135,3 +135,34 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 .result-summary h2{font-size:clamp(22px,5vw,30px);overflow-wrap:anywhere;color:#ffe5a0}
 .result-summary p{font-size:17px;margin:16px 0 22px}
 .result-summary button{min-width:140px}
+
+/* The final twenty seconds stand out without continuous animation. */
+#game .turn-line #clock[data-time-warning=warning],#game .turn-line #clock[data-time-warning=urgent]{font-size:18px;line-height:1.35;padding:6px 10px;border:2px solid #ffe282;background:#75501a;color:#fff3be;box-shadow:0 0 12px #ffcc5c55}
+#game .turn-line #clock[data-time-warning=urgent]{background:#7e241c;border-color:#ff9b7d;color:#fff0d8;box-shadow:0 0 15px #ff61445c}
+@media(max-width:350px){#game .turn-line #clock[data-time-warning]{font-size:15px;padding:5px 7px}}
+
+.active-game-resume{padding:16px;margin:0 0 16px;border:2px solid #8de3ae;border-radius:16px;background:#153e2fee;text-align:center;color:#f5e6c5}
+.active-game-resume strong{display:block;font-size:17px}.active-game-resume p{margin:7px 0 12px;font-size:13px}.active-game-resume button{width:100%;min-height:46px;font-size:16px}
+
+.connection-recovery{padding:8px 10px;margin:6px auto;border:1px solid #ecc46b;border-radius:10px;background:#4c3b1cf2;color:#ffe7a6;text-align:center;font-size:12px;line-height:1.35}
+
+/* Opaque inlaid points and deep wells stay separate from the full-colour artwork. */
+.nards-board .point::before{display:none}
+.nards-point-blade{position:absolute;inset:24px 22% 30%;z-index:0;pointer-events:none}
+.nards-point-blade svg{display:block;width:100%;height:100%;overflow:visible}
+.nards-point-blade polygon{fill:var(--inside-dark,var(--nards-dark,#294936));stroke:#f2d59b;stroke-width:1.2;stroke-linejoin:round}
+.light-point .nards-point-blade polygon{fill:var(--inside-accent,#f6dfaa);stroke:#3d2c1c}
+.point.bottom .nards-point-blade{inset:30% 22% 24px;transform:rotate(180deg)}
+.nards-board .nards-landing-well{left:2%;width:96%;border:2px solid #342516;background:radial-gradient(ellipse at 50% 62%,#a28f6e 0 48%,#766044 72%,#3b291a 85%,#d9b87d 100%);box-shadow:inset 0 4px 5px #241407b3,inset 0 -2px 1px #e9ce9b,0 1px 1px #f8d99e}
+.checker{background-image:linear-gradient(#fff3cd20,#fff3cd20),var(--checker-white-art),radial-gradient(circle at 35% 28%,#fffdf1,var(--checker-white) 65%,#e4c58a)}
+.checker.black{background-image:linear-gradient(#05121a70,#05121a70),var(--checker-black-art),radial-gradient(circle at 35% 28%,#465764,var(--checker-black) 65%,#06121c)}
+.checker::after{border:clamp(3px,.65cqw,6px) solid #fff8de;box-shadow:0 0 0 1px #73532b,inset 0 0 0 1px #c09b62}
+.checker.black::after{border-color:#071522;box-shadow:0 0 0 1px #e2f1f6,inset 0 0 0 1px #577b90}
+
+/* Each half owns its own centered, proportionate artwork, independent of the hinge width. */
+.nards-board[data-interior]{background-image:none}
+.nards-half-art{position:relative;grid-row:1 / 3;min-width:0;min-height:0;background-position:center;background-repeat:no-repeat;background-size:100% 100%;pointer-events:none;z-index:0}
+.nards-half-art.is-left{grid-column:1 / 7;background-image:var(--nards-left-surface)}
+.nards-half-art.is-right{grid-column:8 / 14;background-image:var(--nards-right-surface)}
+.nards-board .point{z-index:1}
+.nards-board .bar{z-index:2}

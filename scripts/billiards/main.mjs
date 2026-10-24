@@ -1,3 +1,6 @@
+import {mountConnectionNotice} from '../shared/connection-notice.mjs';
+import {mountGameResume} from '../shared/game-resume.mjs';
+import {mountTurnWarning} from '../shared/turn-warning.mjs';
 import {ensureGameVersion} from '../shared/game-version.mjs';
 import {showInsufficientChips} from '../shared/insufficient-chips.mjs';
 import {mobileGraphics,createFrameBudget} from './render-budget.mjs';
@@ -37,6 +40,8 @@ let heroSource=window;try{if(parent!==window&&parent.location.origin===location.
 const shotTools=mountShotTools({adjust:delta=>{angle=Math.atan2(Math.sin(angle+delta),Math.cos(angle+delta));}});
 const turnGuide=mountTurnGuide();
 const rulesUI=mountRules({move:value=>move(value),room});
+const connectionNotice=mountConnectionNotice(document.querySelector('.billiards>header'));
+const clockWarning=mountTurnWarning($('turnClock'));
 const tableDock=document.createElement('section');tableDock.id='tableDock';document.querySelector('.billiards>header>div').append($('turnClock'));tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
 const resultPanel=mountResultPanel(tableDock,()=>$('again').click());
 let initialEntry=new URLSearchParams(location.search).get('mode')||'lobby';
@@ -86,7 +91,7 @@ async function startTraining(){if(!await ensureGameParticipation())return;if(!ro
 function move(value){if(spectating)return;if(mode==='training')return training.move(state,value,{angle,power:Number($('power').value),rules:rulesUI.options(state),spin:shotTools.value()});if(mode==='solo')return action(state,player,value);return net?.move(value);}
 function restoreTraining(replay){if(mode!=='training')return;const saved=replay?training.replay():training.restore();if(!saved)return;state=saved.state;canonical=state;player=state.turn;angle=saved.controls.angle;$('power').value=saved.controls.power;$('powerValue').textContent=saved.controls.power+'%';rulesUI.restoreControls(saved.controls.rules);shotTools.restore(saved.controls.spin);acc=0;last=performance.now();botAt=0;}
 
-function adopt(d){
+function adopt(d){connectionNotice.update(d.connection,d.player);
  if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status('Игра отменена. Ставки возвращены на баланс Poker21.');return;}
  wager=d.wager||null;currentRoomId=d.roomId||'';
  if(wager){clearCreateRequest();wagerNotice.textContent='Ставка каждого — '+wager.stake.toLocaleString('ru-RU')+' фишек. Банк — '+wager.bank.toLocaleString('ru-RU')+'. Комиссия — 10%. Победителю — '+wager.payout.toLocaleString('ru-RU')+' фишек.';}
@@ -151,6 +156,7 @@ function frame(now){
  const remaining=turnDeadline?Math.max(0,Math.ceil((turnDeadline-(Date.now()+(['online','spectator'].includes(mode)?clockOffset:0)))/1000)):null;
  $('turnClock').hidden=!tableView||remaining===null||state.moving||state.winner!==null;
  paintText($('turnClock'),remaining===null?'':remaining+' с · лимит '+turnSeconds+' с');
+ clockWarning.update({seconds:remaining,active:!$('turnClock').hidden,sound:!spectating&&online&&state.turn===player,key:[currentRoomId,state.shot,state.turn,!!state.pending].join(':')});
  const can=!spectating&&online&&!playback&&state.turn===player&&!state.moving&&state.winner===null&&(remaining===null||remaining>0);
  const turnLabel=mode==='training'?'Сторона '+(state.turn+1):state.turn===player?'Ваш ход':mode==='solo'?'Ход компьютера':'Ход друга';
  const heading=document.querySelector('.billiards>header h1'),headingState=!mode||!tableView?'room':spectating?'spectator':!online?'waiting':state.winner!==null?'finished':mode==='training'?'training':state.turn===player?'mine':'opponent';
@@ -195,10 +201,10 @@ const controlsObserver=new ResizeObserver(reserveTableControls);
 controlsObserver.observe(tableDock);
 for(const el of tableDock.querySelectorAll('#turnGuide,#decisionOpen,#penaltyConfirm,#matchResult,#cuePickHint,.call-controls,.training-controls,#placeBreak'))controlsObserver.observe(el);
 
-openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
+openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');mountGameResume({container:$('setupMode').parentElement,request,resume:async code=>{$('code').value=code;await start(false,false,true);}});if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
 const watchCode=new URLSearchParams(location.search).get('watch');if(/^[A-HJ-NP-Z2-9]{10}$/.test(watchCode||'')){stop();spectating=true;mode='spectator';revision=-1;net=createSession({request,onUpdate:adopt,onError(message){connectionError=message;status(message);}});net.start(false,watchCode,{watch:true});$('lobby').hidden=true;}
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
 raf=requestAnimationFrame(frame);
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.
 window.PokerBilliards={inspect:()=>({mode,spectating,ready:online,tableView,equipment:equipment.inspect(),rules:rulesUI.inspect(),shotTools:shotTools.inspect(),training:training.inspect(),turnSeconds,turnDeadline,replay:replayPlayer.inspect(),graphics:room?.inspect(),tableEquipment:tableSkins.inspect(),hostEquipment:sharedEquipment?{cue:equipment.inspect().selected,table:tableSkins.inspect().selected}:null,shownAim:shownAim?{...shownAim}:null,series:structuredClone(series),angle,state:structuredClone(state)})};
-window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);controlsObserver.disconnect();matchupObserver.disconnect();stop();shotAudio.dispose();replayPlayer.dispose();room?.dispose();});
+window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clockWarning.dispose();controlsObserver.disconnect();matchupObserver.disconnect();stop();shotAudio.dispose();replayPlayer.dispose();room?.dispose();});
