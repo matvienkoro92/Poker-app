@@ -62,3 +62,13 @@ test('lost create response can be cancelled by its request id; late retries cann
  const f=fixture();await f.create();await f.service.call('m1',{action:'cancel',requestId:'request_0000000001'});assert.equal(f.balances.get('p1'),10000);await assert.rejects(f.create());assert.equal(f.balances.get('p1'),10000);
  const g=fixture();await g.service.call('m1',{action:'cancel',requestId:'request_0000000001'});await assert.rejects(g.create());assert.equal(g.changes.length,0);
 });
+
+test('chat challenge stakes survive preview, join and payout without duplicate debits',async()=>{
+ const f=fixture(),body={action:'create',challenge:true,stake:500,requestId:'challenge_request_0001',discipline:'pool8',raceTo:1};
+ const room=await f.service.call('m1',body);await f.service.call('m1',body);
+ assert.equal(f.balances.get('p1'),9500);
+ const preview=await f.call('m2','preview',room.roomId);assert.equal(preview.wager.stake,500);assert.equal(preview.wager.payout,900);
+ const joined=await f.call('m2','join',room.roomId);await f.call('m2','join',room.roomId);assert.equal(f.balances.get('p2'),9500);
+ const done=await f.call('m2','move',room.roomId,{revision:joined.revision,move:{type:'resign'}});
+ assert.equal(done.wager.status,'paid');assert.equal(f.balances.get('p1'),10400);assert.equal(f.changes.length,3);
+});

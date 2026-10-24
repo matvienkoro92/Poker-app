@@ -1,0 +1,91 @@
+/* Shared visual language of the billiards setup wizard. */
+.settings-label{font-size:12px;margin:12px 0 6px}
+.settings-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.settings-buttons button{flex:1 1 140px;font-size:12px;padding:10px;line-height:1.35;background:#0d1c1a;border-color:#6e7e70}
+.settings-buttons button[aria-pressed=true]{background:#d7b46a;color:#20271e;border-color:#f3d58e;font-weight:750;box-shadow:inset 0 0 0 1px #f3d58e}
+#lobby .board-lobby-wizard{top:85px;bottom:max(12px,env(safe-area-inset-bottom));max-height:none;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.lobby-wizard__heading{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #d6b46a33;flex-shrink:0}
+.lobby-wizard__heading button{min-width:38px;padding:5px;font-size:22px}
+.lobby-wizard__heading small{font-size:10px;color:#c9b784}
+.lobby-wizard__heading h2{font-size:20px;margin:3px 0}
+.lobby-wizard__content{padding:8px 16px 16px;overflow:auto;min-height:0;flex:1}
+.lobby-wizard__footer{padding:14px 16px;border-top:1px solid #d6b46a44;background:#10201c;flex-shrink:0}
+.lobby-wizard__footer button{width:100%;min-height:44px}
+.wizard-options{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0}
+.wizard-options button{width:100%;min-height:44px;text-align:left}
+#lobby .settings-buttons button{min-width:0}
+#lobby .board-lobby-wizard{top:58px;bottom:8px;width:min(580px,calc(100% - 24px))}
+.lobby-wizard__heading{padding:8px 14px}
+.lobby-wizard__footer{padding:8px 14px}
+.wizard-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+#lobby .board-lobby-wizard{top:85px;bottom:auto;height:auto;max-height:calc(100dvh - 100px)}
+#lobby .lobby-wizard__content{flex:0 1 auto;padding:8px 14px 4px}
+#lobby .lobby-wizard__heading{padding:10px 14px}
+#lobby .lobby-wizard__footer{padding:10px 14px;border-top:1px solid #d6b46a33}
+#lobby .wizard-options{gap:8px;margin:8px 0}
+#lobby .wizard-options button{min-height:40px;padding:8px 10px}
+#lobby .board-lobby-wizard{top:58px;bottom:auto;max-height:calc(100dvh - 66px)}
+/* Quiet club styling for the three-step game setup. */
+#lobby .board-lobby-wizard{border:1px solid #a58b595c;border-radius:22px;background:linear-gradient(150deg,#1d302bec,#0d1c18f5);box-shadow:0 24px 70px #0009,inset 0 1px #fff1;backdrop-filter:blur(18px);width:min(420px,calc(100% - 28px))}
+#lobby .lobby-wizard__heading{position:relative;gap:12px;padding:18px 16px 17px;border:0;background:linear-gradient(120deg,#49685420,transparent)}
+#lobby .lobby-wizard__heading>div:not(.setup-step-track){min-width:0}
+.setup-brand{display:block;font-size:8px!important;letter-spacing:.16em;color:#bca674!important;margin:1px 0 6px}
+#lobby .lobby-wizard__heading h2{font-size:21px;font-weight:650;letter-spacing:-.025em;line-height:1.2;margin:0}
+.setup-step-track{position:absolute;left:16px;right:16px;bottom:0;display:flex;gap:5px;height:2px}
+.setup-step-track i{height:2px;flex:1;background:#cbb37820;border-radius:2px}
+.setup-step-track i.is-current{background:#e0c48a;box-shadow:0 0 8px #d0b57030}
+.setup-step-track i.is-done{background:#789a79}
+#lobby .lobby-wizard__content{padding:12px 12px 4px}
+#lobby .wizard-options .mode-card{display:flex;align-items:center;gap:11px;min-height:57px;padding:10px 11px;border:1px solid #b8b99f20;border-radius:12px;background:#09171366;box-shadow:none;text-align:left;transition:border-color .15s,background .15s}
+.mode-card__icon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#c2d6c309;color:#95b29f;flex-shrink:0}
+.mode-card__icon svg{width:23px;height:23px}
+.mode-card__copy{display:grid;gap:4px;min-width:0;flex:1}
+#lobby .mode-card__copy strong{font-size:13px;font-weight:650;color:#e8e9d7;line-height:1.2}
+#lobby .mode-card__copy small{font-size:10px;color:#9cac9f;line-height:1.35}
+.mode-card__check{width:19px;height:19px;flex-shrink:0;display:grid;place-items:center;font-size:11px;color:transparent;border:1px solid #a6b29b40;border-radius:50%}
+#lobby .wizard-options .mode-card[aria-pressed=true]{background:linear-gradient(110deg,#b8aa6625,#5d836b18);border-color:#d4b77d9c;box-shadow:inset 3px 0 #c6ab72}
+#lobby .mode-card[aria-pressed=true] .mode-card__icon{background:#d7bb7520;color:#ead197}
+#lobby .mode-card[aria-pressed=true] .mode-card__copy strong{color:#f4e4b7}
+#lobby .mode-card[aria-pressed=true] .mode-card__check{background:#d9bf83;border-color:#d9bf83;color:#1b3025}
+#lobby .lobby-wizard__footer{border:0;padding:10px 12px 12px;background:transparent}
+#lobby .lobby-wizard__footer button{min-height:43px;border-radius:11px;border:1px solid #e4cc97;background:linear-gradient(110deg,#e5d0a1,#c4a56b);color:#1b2a22;font-size:14px;letter-spacing:.01em;box-shadow:inset 0 1px #fff5,0 4px 12px #0002}
+#lobby .settings-buttons:not(#modeButtons) button{border-radius:11px;border-color:#b8b99f30;background:#0c1d177d;line-height:1.4}
+#lobby .settings-buttons:not(#modeButtons) button[aria-pressed=true]{background:linear-gradient(120deg,#b8aa6630,#5d836b20);color:#f4e4b7;border-color:#d4b77d9c;box-shadow:inset 3px 0 #c6ab72}
+#lobby .mode-card__copy strong{font-size:12px}
+#lobby .mode-card__copy small{font-size:9px}
+#lobby .wizard-options .mode-card{gap:8px;padding:9px;min-height:54px}
+#lobby .mode-card__copy small{font-size:9px}
+.mode-card__check{display:none}
+#lobby .lobby-wizard__heading{padding:12px 14px}
+/* Shared, readable choice cards across every setup step. */
+#lobby .lobby-wizard__heading h2{font-size:23px}
+#lobby .mode-card__copy strong{font-size:15px}
+#lobby .mode-card__copy small{font-size:12px;line-height:1.4}
+#lobby .wizard-options .mode-card{min-height:63px}
+#lobby .settings-label{margin:6px 2px 10px;font-size:13px;font-weight:600;color:#b9c7b9;letter-spacing:.025em}
+#lobby .settings-buttons:not(#modeButtons) button{transition:background .15s,border-color .15s,box-shadow .15s;border-color:#b8b99f30;box-shadow:inset 0 1px #ffffff05}
+#lobby .settings-buttons:not(#modeButtons) button[aria-pressed=true]{border-color:#d4b77d9c;background:linear-gradient(120deg,#b8aa6630,#5d836b20);box-shadow:inset 3px 0 #c6ab72,inset 0 1px #ffffff0a}
+.format-card__number{display:grid;place-items:center;flex:0 0 39px;height:39px;border:1px solid #c9b37b45;border-radius:12px;color:#e1c58b;background:#c6ab720a;font-size:23px;font-weight:600}
+#lobby .lobby-wizard__footer button{min-height:47px;font-size:16px}
+#lobby .mode-card__copy strong{font-size:14px}
+#lobby .mode-card__copy small{font-size:11px}
+#lobby .wizard-options .mode-card{min-height:57px}
+/* Center the setup menu vertically as well as horizontally. */
+#lobby .board-lobby-wizard{top:50%;bottom:auto;transform:translate(-50%,-50%);max-height:calc(100dvh - 32px)}
+#lobby .board-lobby-wizard{top:50%;bottom:auto;max-height:calc(100dvh - 20px)}
+/* Room decoration stays behind the menu and never crosses its controls. */
+#lobby .board-lobby-wizard{z-index:4}
+.lobby-wizard__footer .billiards-ranking-entry{width:100%;margin-top:7px;min-height:36px}
+/* Put multiplayer choices first and separate solo practice below them. */
+#lobby .wizard-options .mode-card--social{
+  border-color: #c6a46780;
+  background: linear-gradient(110deg, #b99a4d24, #193b2e75);
+}
+#lobby .mode-card--social .mode-card__icon{
+  background: #d7bb751c;
+  color: #ead197;
+}
+#lobby .mode-card--social .mode-card__copy strong{ color: #f4e4b7; }
+#lobby{max-width:660px}#lobby>header{padding-top:6px}.board-lobby-wizard{position:relative!important;inset:auto!important;transform:none!important;width:min(420px,100%)!important;margin:20px auto 14px;max-height:calc(100dvh - 145px)!important}.board-lobby-wizard .lobby-preview{padding:12px 8px}.board-lobby-wizard .lobby-preview>span{display:none}.board-lobby-wizard .lobby-preview strong{font-size:24px}.board-lobby-wizard .lobby-preview p{line-height:1.5}.board-lobby-wizard .setup{display:grid;border:0;background:none;box-shadow:none;padding:14px 0}.board-lobby-wizard .join{display:block;padding:0;border:0;background:none;box-shadow:none}.board-lobby-wizard .format-card__number{flex-shrink:0}.board-lobby-wizard #boardFormatButtons button{display:flex;align-items:center;gap:10px}.board-lobby-wizard #boardFormatButtons strong,.board-lobby-wizard #boardFormatButtons small{display:block}.board-lobby-wizard .discipline-tabs{flex-wrap:wrap}.board-lobby-wizard .discipline-tabs button{flex:1}.board-lobby-wizard #boardWagerTerms{font-size:12px;line-height:1.5;color:#d6c69d}.board-lobby-footer{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}#boardSetupError:empty{display:none}.board-wager-notice{padding:12px;border:1px solid #cbb07177;border-radius:12px;background:#1c3227;color:#f2dba8;font-size:13px;line-height:1.5}#gameWagerNotice{margin:8px 0}#boardSetupFormat .setup label[hidden]{display:none!important}
+
+#lobby .mode-card__copy{min-width:0}#lobby .mode-card__copy small{letter-spacing:normal;line-height:1.35}#lobby .mode-card__copy strong{overflow-wrap:anywhere}
