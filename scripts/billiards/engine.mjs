@@ -15,19 +15,20 @@ export function createGame(options={}){
  const order=Array.from({length:15},(_,i)=>i+1);for(let i=14;i>0;i--){const j=Math.floor(rand()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
  if(discipline==='pool8'){const at=order.indexOf(8);[order[4],order[at]]=[8,order[4]];const solid=order.find(n=>n<8),stripe=order.find(n=>n>8);for(const [id,index]of [[solid,10],[stripe,14]]){const old=order.indexOf(id);[order[index],order[old]]=[id,order[index]];}}
  const balls=[{id:0,x:230,y:250,vx:0,vy:0,pocket:false}];let i=0;for(let row=0;row<5;row++)for(let j=0;j<=row;j++)balls.push({id:order[i++],x:750+row*(2*r+.05)*Math.sqrt(3)/2,y:250+(j-row/2)*(2*r+.05),vx:0,vy:0,pocket:false});
- return {rulesVersion:2,discipline,color,seed:Number(options.seed)||1,balls,turn:options.breaker===1?1:0,breaker:options.breaker===1?1:0,cueId:0,groups:[null,null],scores:[0,0],captured:[[],[]],moving:false,inHand:false,handZone:null,winner:null,shot:0,breakPending:true,message:'Разбой из дома · можно передвинуть биток',firstHit:null,sunk:[],scratch:false,pending:null};
+ return {rulesVersion:2,discipline,color,seed:Number(options.seed)||1,balls,turn:options.breaker===1?1:0,breaker:options.breaker===1?1:0,cueId:0,groups:[null,null],scores:[0,0],captured:[[],[]],moving:false,inHand:false,handZone:null,winner:null,shot:0,breakPending:true,message:'Разбой из дома · можно передвинуть биток',firstHit:null,sunk:[],scratch:false,pending:null,missedTurns:[0,0]};
 }
 function playable(s){return !s.moving&&s.winner===null&&!s.pending;}
 export function placeCue(s,x,y){if(!s.rulesVersion)return legacy.placeCue(s,x,y);const r=radius(s),cue=cueBall(s);if(!playable(s)||(!s.inHand&&!s.breakPending)||!cue||![x,y].every(Number.isFinite)||x<r||x>W-r||y<r||y>H-r||(s.handZone==='head'||s.breakPending)&&x>=250||s.balls.some(b=>b.id!==cue.id&&!b.pocket&&Math.hypot(b.x-x,b.y-y)<r*2+.05)||POCKETS.some(p=>Math.hypot(p[0]-x,p[1]-y)<25))return false;Object.assign(cue,{x,y,vx:0,vy:0,pocket:false});s.nextHeadShot=s.handZone==='head';s.inHand=false;s.handZone=null;clearSpin(cue);s.message='Биток установлен · можно бить';return true;}
 function onRail(b,r){const sides=[];if(b.x<=r+.2)sides.push(0);if(b.x>=W-r-.2)sides.push(1);if(b.y<=r+.2)sides.push(2);if(b.y>=H-r-.2)sides.push(3);return sides;}
 export function legalTargets(s){if(s.discipline==='pyramid')return s.balls.filter(b=>!b.pocket&&b.id!==(s.cueId??0));const g=s.groups[s.turn],own=s.balls.filter(b=>b.id&&b.id!==8&&!b.pocket&&(g===null||group(b.id)===g));if(g===null&&[0,1].some(gr=>!s.balls.some(b=>!b.pocket&&group(b.id)===gr)))return [...own,...s.balls.filter(b=>b.id===8&&!b.pocket)];return own.length?own:s.balls.filter(b=>b.id===8&&!b.pocket);}
 export function shoot(s,angle,power,options={}){
- if(!s.rulesVersion)return legacy.shoot(s,angle,power);
+ if(!s.rulesVersion){const ok=legacy.shoot(s,angle,power);if(ok){s.missedTurns??=[0,0];s.missedTurns[s.turn]=0;}return ok;}
  if(!validSpin(options.spin)||!playable(s)||s.inHand||![angle,power].every(Number.isFinite)||power<.05||power>1)return false;
  const cueId=s.discipline==='pyramid'&&!s.breakPending?(options.cueId??s.cueId):0,cue=s.balls.find(b=>b.id===cueId&&!b.pocket);if(!cue||s.breakPending&&cue.x>=250)return false;
  s.cueId=cueId;const targets=legalTargets(s).map(b=>b.id),isBreak=s.breakPending;
  const safety=options.safety===true;
  if(s.discipline==='pool8'&&!isBreak&&!safety&&(!targets.includes(options.callBall)||!Number.isInteger(options.callPocket)||options.callPocket<0||options.callPocket>5))return false;
+ s.missedTurns??=[0,0];s.missedTurns[s.turn]=0;
  s.headShot=!!s.nextHeadShot||isBreak;s.nextHeadShot=false;s.headExited=cue.x>=250;s.illegalHead=false;s.lastShooter=s.turn;
  s.call=isBreak?null:{ball:options.callBall,pocket:options.callPocket,safety};s.legalFirst=isBreak?s.balls.filter(b=>b.id).map(b=>b.id):targets;s.eightReady=s.discipline==='pool8'&&targets.includes(8);
  Object.assign(cue,{vx:Math.cos(angle)*(180+power*1250),vy:Math.sin(angle)*(180+power*1250)});s.spin=options.spin?{x:options.spin.x,y:options.spin.y}:{x:0,y:0};strikeSpin(cue,angle,180+power*1250,s.spin);s.contacts={balls:0,rails:0,jaws:0};s.moving=true;s.firstHit=null;s.sunk=[];s.pots=[];s.scratch=false;s.railAfter=false;s.breakRails=[];s.breakCross=[];s.tracks=Object.fromEntries(s.balls.map(b=>[b.id,{rails:[],cross:false,frozen:onRail(b,radius(s))}]));s.pyramidLegal=false;s.wasBreak=isBreak;s.breakPending=false;s.shot++;s.message='Шары в движении';return true;
@@ -70,14 +71,16 @@ function decision(s,a){const d=s.pending;if(!d||s.moving||s.winner!==null)return
  if(d.type==='pool-break'){const choices=d.illegal?['accept',...(d.foul?['hand']:[]),'rerack-self','rerack-opponent']:d.eight?['accept','rerack-self']:['accept','hand'];if(!choices.includes(a.choice))return false;const chooser=s.turn;s.pending=null;if(a.choice.startsWith('rerack')){rerack(s,a.choice==='rerack-self'?chooser:1-chooser);return true;}if((a.choice==='hand'||d.eight&&d.foul)||s.balls.find(b=>b.id===0).pocket){s.inHand=true;s.handZone='head';s.cueId=0;}s.message=s.inHand?'Разбой · установите биток в доме':'Стол открыт · выберите заказ';return true;}
  if(d.type==='pyramid-foul'){if(!['play','pass',...(d.illegalBreak?['rerack-self','rerack-opponent']:[])].includes(a.choice))return false;const b=s.balls.find(b=>b.id===a.ballId&&!b.pocket);if(!b)return false;const chooser=s.turn;b.pocket=true;s.captured[chooser].push(b.id);s.scores=s.captured.map(a=>a.length);s.pending=null;if(s.scores[chooser]>=8){win(s,chooser);return true;}if(a.choice.startsWith('rerack')){rerack(s,a.choice==='rerack-self'?chooser:1-chooser,true);return true;}s.turn=a.choice==='pass'?d.offender:chooser;s.cueId=s.balls.find(b=>!b.pocket)?.id??0;s.message='Штрафной шар снят · выберите любой биток';return true;}return false;
 }
-export function action(s,player,a){if(a&&SETTLEMENT_ACTIONS.includes(a.type))return settle(s,player,a);if(!s.rulesVersion)return legacy.action(s,player,a);if(player!==s.turn||!a||typeof a!=='object')return false;if(a.type==='decision')return decision(s,a);if(a.type==='shot')return shoot(s,a.angle,a.power,a);if(a.type==='place')return placeCue(s,a.x,a.y);return false;}
+export function action(s,player,a){if(a&&SETTLEMENT_ACTIONS.includes(a.type))return settle(s,player,a);if(!s.rulesVersion)return a?.type==='shot'&&player===s.turn?shoot(s,a.angle,a.power,a):legacy.action(s,player,a);if(player!==s.turn||!a||typeof a!=='object')return false;if(a.type==='decision')return decision(s,a);if(a.type==='shot')return shoot(s,a.angle,a.power,a);if(a.type==='place')return placeCue(s,a.x,a.y);return false;}
 export function validState(s){if(!s?.rulesVersion)return legacy.validState(s);return s.rulesVersion===2&&DISCIPLINES.includes(s.discipline)&&[0,1].includes(s.turn)&&Array.isArray(s.balls)&&s.balls.length===16&&new Set(s.balls.map(b=>b.id)).size===16&&s.balls.every(b=>Number.isInteger(b.id)&&b.id>=0&&b.id<16&&[b.x,b.y,b.vx,b.vy].every(Number.isFinite)&&['rollX','rollY','side'].every(k=>b[k]===undefined||Number.isFinite(b[k]))&&Math.abs(b.x)<2000&&Math.abs(b.y)<2000&&typeof b.pocket==='boolean')&&Array.isArray(s.groups)&&s.groups.length===2&&s.groups.every(g=>g===null||g===0||g===1)&&Array.isArray(s.scores)&&s.scores.length===2&&s.scores.every(n=>Number.isInteger(n)&&n>=0&&n<=16)&&Array.isArray(s.captured)&&s.captured.length===2&&s.captured.every(a=>Array.isArray(a)&&a.every(n=>Number.isInteger(n)&&n>=0&&n<16))&&(s.winner===null||s.winner===0||s.winner===1||s.winner==='draw')&&typeof s.message==='string'&&s.message.length<250;}
 
-// A shot-clock expiry is a foul, adjudicated by the server using the room clock.
+// Timeout skips are counted per player, separately from billiards fouls.
 export function expireTurn(s){
  if(s.winner!==null||s.moving)return false;
- const offender=s.turn;s.turn=1-offender;s.pending=null;
- if(s.discipline==='pyramid'){const illegalBreak=!!s.breakPending;s.breakPending=false;s.pending={type:'pyramid-foul',offender,illegalBreak};}
- else{s.inHand=true;s.handZone=s.breakPending?'head':'any';s.cueId=0;}
- s.message='Время на ход вышло · фол · ход соперника';return true;
+ const offender=s.turn;s.missedTurns??=[0,0];const missed=++s.missedTurns[offender];s.pending=null;s.drawOffer=null;
+ if(missed>=3){s.winner=1-offender;s.endReason='timeout-skips';s.message='Три пропуска хода подряд · поражение';return true;}
+ s.turn=1-offender;
+ // A pocketed cue must still be placed legally by the incoming player.
+ const cue=s.balls.find(b=>b.id===(s.cueId??0));if(cue?.pocket){s.cueId=0;s.inHand=true;s.handZone=s.breakPending?'head':'any';}
+ s.message='Время вышло · пропуск '+missed+' из 3 · ход соперника';return true;
 }
