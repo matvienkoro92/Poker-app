@@ -55,3 +55,14 @@ assert(#lists['stats:chess:free:history:ID123456']==1 and #lists['stats:chess:pa
 assert(cjson.decode(lists['stats:chess:paid:history:ID123456'][1]).mode=='paid')
 room.revision=3;assert(run(2,room)==1);assert(cjson.decode(hashes['stats:chess:paid:players']['ID123456']).played==1)
 `));
+
+test('head-to-head totals survive bounded history, use opponent IDs and ignore duplicate room writes',()=>run(`
+for i=1,26 do room.revision=i;room.match.round=i;room.state.winner=i%2;assert(run(i-1,room)==1) end
+local key='stats:chess:free:rivals:ID123456'
+local a=cjson.decode(hashes[key]['ID654321']);assert(a.wins==13 and a.losses==13 and a.draws==0)
+local b=cjson.decode(hashes['stats:chess:free:rivals:ID654321']['ID123456']);assert(b.wins==13 and b.losses==13)
+room.revision=27;assert(run(26,room)==1);a=cjson.decode(hashes[key]['ID654321']);assert(a.wins+a.losses==26)
+room.match.round=27;room.revision=28;room.playerProfiles[2].accountId='ID777777';room.playerProfiles[2].name='Второй';room.state.winner='draw';assert(run(27,room)==1)
+local other=cjson.decode(hashes[key]['ID777777']);assert(other.draws==1 and other.wins==0)
+a=cjson.decode(hashes[key]['ID654321']);assert(a.wins+a.losses==26)
+`));

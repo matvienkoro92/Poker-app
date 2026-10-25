@@ -1,0 +1,7 @@
+export function paintRivalries(container,data){
+ container.replaceChildren();container.classList.add('game-rivalries');const heading=document.createElement('h3');heading.textContent='Личные встречи';container.append(heading);
+ const note=document.createElement('p');note.className='game-rivalries-note';note.textContent=(data.rivalriesScope?data.rivalriesScope+' ':'')+'Счёт партий: ваши победы : победы соперника. Ничьи отдельно.';container.append(note);
+ if(data.rivalriesIncomplete){const coverage=document.createElement('p');coverage.className='game-rivalries-note';coverage.textContent=data.rivalriesPending?'Восстановление старых встреч продолжается. Обновите статистику, чтобы увидеть следующие результаты.':'Восстановлено '+(data.rivalriesCounted||0)+' из '+(data.rivalriesTotal??data.self?.played??0)+' партий. Старые партии без сохранившихся данных о сопернике в счёт не включены.';container.append(coverage);}
+ for(const rival of data.rivalries||[]){const row=document.createElement('div');row.className='game-rivalry-row';const name=document.createElement('span'),score=document.createElement('strong'),draws=document.createElement('small');name.textContent=rival.name;score.textContent=rival.wins+' : '+rival.losses;draws.textContent='Ничьи: '+rival.draws;row.append(name,score,draws);container.append(row);}
+ if(!data.rivalries?.length){const empty=document.createElement('p');empty.className='game-rivalries-note';empty.textContent='Здесь появится счёт встреч с каждым соперником.';container.append(empty);}
+}

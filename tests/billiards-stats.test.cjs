@@ -45,3 +45,14 @@ for i=2,26 do room.revision=i;room.match.round=i;assert(run(i-1,room)==1) end
 assert(#lists['stats:pyramid:history:ID123456']==20);assert(player('pyramid','ID123456').wins==25)
 `));
 test('ranking API returns public stats and separate personal rank/history without account IDs',async()=>{const calls=[];const value=JSON.stringify({name:'Первый',wins:5,losses:2,draws:1,rankMember:'999999999997:ID123456'});const result=await stats.read({discipline:'pyramid',accountId:'ID123456',commands:async rows=>{calls.push(rows);return calls.length===1?[['999999999997:ID123456'],value,[]]:calls.length===2?[value]:[0];}});assert.equal(result.self.rank,1);assert.equal(result.self.winRate,63);assert.equal(result.ranking[0].self,true);assert.equal(JSON.stringify(result).includes('ID123456'),false);await assert.rejects(stats.read({discipline:'other'}),e=>e.status===400);});
+
+test('head-to-head totals survive bounded history, use opponent IDs and ignore duplicate room writes',()=>run(`
+for i=1,26 do room.revision=i;room.match.round=i;room.state.winner=i%2;assert(run(i-1,room)==1) end
+local key='stats:pyramid:rivals:ID123456'
+local a=cjson.decode(hashes[key]['ID654321']);assert(a.wins==13 and a.losses==13 and a.draws==0)
+local b=cjson.decode(hashes['stats:pyramid:rivals:ID654321']['ID123456']);assert(b.wins==13 and b.losses==13)
+room.revision=27;assert(run(26,room)==1);a=cjson.decode(hashes[key]['ID654321']);assert(a.wins+a.losses==26)
+room.match.round=27;room.revision=28;room.playerProfiles[2].accountId='ID777777';room.playerProfiles[2].name='Второй';room.state.winner='draw';assert(run(27,room)==1)
+local other=cjson.decode(hashes[key]['ID777777']);assert(other.draws==1 and other.wins==0)
+a=cjson.decode(hashes[key]['ID654321']);assert(a.wins+a.losses==26)
+`));
