@@ -30,7 +30,7 @@ for(const b of NARDS_INTERIORS){
   base='<defs>'+artwork+'<linearGradient id="quote-shade" x2="0" y2="1"><stop stop-color="#160f0b" stop-opacity="0"/><stop offset=".2" stop-color="#160f0b" stop-opacity=".78"/><stop offset=".8" stop-color="#160f0b" stop-opacity=".78"/><stop offset="1" stop-color="#160f0b" stop-opacity="0"/></linearGradient></defs><rect width="1200" height="1000" fill="'+b.light+'"/><g><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
  }
  if(b.splitArt){
-  base=['left','right'].map((side,i)=>{const encoded=fs.readFileSync(path.join(out,'illustration-'+b.art+'-'+side+'.webp')).toString('base64');return '<image href="data:image/webp;base64,'+encoded+'" x="'+(i?618:0)+'" y="0" width="582" height="1000" preserveAspectRatio="none"/>';}).join('');
+  base=['left','right'].map((side,i)=>{const encoded=fs.readFileSync(path.join(out,'illustration-'+b.art+'-'+side+'.webp')).toString('base64');return '<image href="data:image/webp;base64,'+encoded+'" x="'+(i?618:0)+'" y="0" width="582" height="1000" preserveAspectRatio="xMidYMid slice"/>';}).join('');
  }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';
  let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?946:54,gap=[50.3,54.5,60.1,60.1,54.5,50.3][i%6],reach=54+446*(1-gap/100),tip=row?1000-reach:reach;points+='<path d="M'+(x+w*.22)+' '+y+'H'+(x+w*.78)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" stroke="'+(i%2?b.dark:gold)+'" stroke-width="2"/><ellipse cx="'+(x+w/2)+'" cy="'+y+'" rx="'+(w*.46)+'" ry="46" fill="#9a8663" stroke="#342516" stroke-width="4"/>';}
@@ -39,9 +39,9 @@ for(const b of NARDS_INTERIORS){
   const sharp=require('sharp'),normalize=require('../../lib/nards-challenge-art').supportedImages;
   const raster=await sharp(Buffer.from(await normalize(svg(base)))).resize(1200,1000).png().toBuffer();
   await sharp(raster).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b.surface)));
-  for(const [side,x]of [['left',0],['right',618]])await sharp(raster).extract({left:x,top:0,width:582,height:1000}).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b[side+'Surface'])));
+  for(const [side,x]of [['left',0],['right',618]]){const panel=b.splitArt?sharp(path.join(out,'illustration-'+b.art+'-'+side+'.webp')):sharp(raster).extract({left:x,top:0,width:582,height:1000});await panel.webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b[side+'Surface'])));}
   const preview=Buffer.from(await normalize(svg(base+(b.revision>=2?'':points)+bar)));
-  await sharp(preview).resize(480,400).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));
+  if(b.splitArt){const panels=await Promise.all(['left','right'].map(side=>sharp(path.join(out,'illustration-'+b.art+'-'+side+'.webp')).resize(228,524,{fit:'cover'}).toBuffer()));await sharp({create:{width:480,height:524,channels:3,background:b.frame}}).composite([{input:panels[0],left:0,top:0},{input:panels[1],left:252,top:0}]).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));}else await sharp(preview).resize(480,400).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));
  }else{
  fs.writeFileSync(path.join(out,path.basename(b.surface)),svg(base));
  for(const [side,x]of [['left',0],['right',618]])fs.writeFileSync(path.join(out,path.basename(b[side+'Surface'])),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+x+' 0 582 1000" preserveAspectRatio="xMidYMid meet">'+base+'</svg>');
