@@ -66,6 +66,7 @@ const baseFiles = [
   'index.html',
   'link-stats.html',
   'app-link-stats.js',
+  'app-admin-game-stats.js',
   'styles-link-stats.css',
   'daily-poker-invite.html',
   'last-buy-in.html',
