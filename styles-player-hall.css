@@ -811,3 +811,7 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-nards-half{background-size:100% 100%;background-position:center;background-repeat:no-repeat}
 /* Storage is outside the illustration's playable half. */
 .living-nards-half{background-origin:content-box;background-clip:content-box}
+
+/* Match the live board: point tips shorten toward each half's center. */
+.living-preview-blade{bottom:var(--nards-tip-gap,30%)}
+.living-preview-point.is-bottom .living-preview-blade{top:var(--nards-tip-gap,30%)}

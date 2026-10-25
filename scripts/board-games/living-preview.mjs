@@ -34,7 +34,7 @@ export function paint(root,game,equipment={}){
     for(let row=0;row<2;row++)for(let col=0;col<12;col++){
       const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
       point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;
-      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.append(createPointBlade(true),createLandingWell(true));
+      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[29,35,43,43,35,29][col%6]+'%');if(!(inside.revision>=2))point.append(createPointBlade(true),createLandingWell(true));
       for(let i=0;i<Math.abs(n);i++){const coin=document.createElement('i');coin.className='living-preview-checker'+(n<0?' is-black':'');coin.setAttribute('aria-label',n<0?'Чёрная фишка':'Белая фишка');point.append(coin);}
       surface.append(point);
     }

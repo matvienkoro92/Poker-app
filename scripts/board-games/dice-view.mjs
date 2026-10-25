@@ -1,3 +1,4 @@
+import {createDiceMesh,DICE_REST_X,DICE_REST_Y} from './dice-mesh.mjs';
 // Visual-only dice. Values always come from the accepted game state.
 const spots={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 export const DICE_DURATION=1180;
@@ -15,15 +16,19 @@ export function createDiceView(container,onSettled){
   if(state.roll.length!==2){cancel();key='';layer.replaceChildren();layer.hidden=true;initialized=true;return false;}
   const next=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()));
   const scale=options.size==='small'?.72:1,flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped||lastScale!==scale);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
-  const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // A mobile viewport update must not cancel a throw already in flight.
+  if(next===key&&rolling){mark(state);return false;}
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden;
+  const duration=reduced?320:DICE_DURATION;
   cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;
   const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
   lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=[0,1].includes(state.rollPlayer)?state.rollPlayer:state.turn,right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
   state.roll.forEach((value,i)=>{
-   const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube'+(i?' dice-cube--amber':'');shadow.className='dice-ground-shadow';cube.dataset.value=value;cube.setAttribute('role','img');cube.setAttribute('aria-label','Кость '+(i+1)+': '+value);for(const [side,n]of Object.entries(diceFaces(value)))cube.append(face(side,n));flight.append(cube);layer.append(shadow,flight);dice.push(cube);
-   const x=width*(right?(i?.80:.64):(i?.36:.20))-size/2,y=height*.5-size/2,twist=i?13:-12,rest='rotateX(-58deg) rotateY('+twist+'deg)';flight.style.transform='translate3d('+x+'px,'+y+'px,0)';cube.style.transform=rest;shadow.style.transform='translate('+x+'px,'+(y+size*.64)+'px) scale(1)';
+   const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube'+(i?' dice-cube--amber':'');shadow.className='dice-ground-shadow';cube.dataset.value=value;cube.setAttribute('role','img');cube.setAttribute('aria-label','Кость '+(i+1)+': '+value);for(const [side,n]of Object.entries(diceFaces(value)))cube.append(face(side,n));flight.append(cube);layer.append(shadow,flight);dice.push(cube);const mesh=createDiceMesh(cube,diceFaces(value),size);
+   const x=width*(right?(i?.80:.64):(i?.36:.20))-size/2,y=height*.5-size/2;flight.style.transform='translate3d('+x+'px,'+y+'px,0)';cube.style.transform='none';mesh.draw(DICE_REST_X,DICE_REST_Y,i?.14:-.12);shadow.style.transform='translate('+x+'px,'+(y+size*.64)+'px) scale(1)';
    if(!animate)return;
-   const startX=width*(right?1.08:-.14)+i*size*1.1,startY=height*.18,sign=i?1:-1;
+   const startX=reduced?x:width*(right?.94:.06)+i*size*.35,startY=reduced?y+88:height*.18,sign=i?1:-1;
    const frames=[
     {offset:0,x:startX,y:startY-100},
     {offset:.29,x:x+(right?1:-1)*width*.07,y:y-10},
@@ -33,19 +38,14 @@ export function createDiceView(container,onSettled){
     {offset:.87,x:x+sign*size*.06,y:y+1},
     {offset:1,x,y}
    ];
-   const timing={duration:DICE_DURATION+i*95,easing:'linear',fill:'none'};
-   animations.push(flight.animate(frames.map(f=>({offset:f.offset,transform:'translate3d('+f.x+'px,'+f.y+'px,0)',easing:f.offset===0?'cubic-bezier(.42,0,.8,.48)':f.offset===.29||f.offset===.62?'cubic-bezier(.16,.75,.4,1)':'cubic-bezier(.45,0,.8,.5)'})),timing));
-   animations.push(cube.animate([
-    {offset:0,transform:'rotateX(-610deg) rotateY('+(i?810:-720)+'deg) rotateZ('+(sign*190)+'deg)'},
-    {offset:.29,transform:'rotateX(-280deg) rotateY('+(i?410:-310)+'deg) rotateZ('+(sign*80)+'deg)'},
-    {offset:.62,transform:'rotateX(-125deg) rotateY(70deg) rotateZ('+(twist+sign*35)+'deg)'},
-    {offset:.87,transform:'rotateX(-53deg) rotateY(15deg) rotateZ('+(twist-sign*4)+'deg)'},
-    {offset:1,transform:rest}
-   ],timing));
-   animations.push(shadow.animate(frames.map((f,j)=>({offset:f.offset,transform:'translate('+f.x+'px,'+(y+size*.64)+'px) scale('+([.35,1,.64,1,.86,1,1][j])+')',opacity:[0,.4,.16,.4,.25,.4,.4][j],filter:'blur('+([12,2,8,2,4,2,2][j])+'px)'})),timing));
+   const timing={duration:duration+i*(reduced?25:95),easing:'linear',fill:'none'};
+   const path=reduced?[{offset:0,x,y:y-12},{offset:1,x,y}]:frames;
+   animations.push(flight.animate(path.map(f=>({offset:f.offset,transform:'translate3d('+f.x+'px,'+f.y+'px,0)',easing:f.offset===0?'cubic-bezier(.42,0,.8,.48)':f.offset===.29||f.offset===.62?'cubic-bezier(.16,.75,.4,1)':'cubic-bezier(.45,0,.8,.5)'})),timing));
+   if(!reduced)animations.push(mesh.animate(i,timing.duration));
+   animations.push(shadow.animate(frames.map((f,j)=>({offset:f.offset,transform:'translate('+f.x+'px,'+(y+size*.64)+'px) scale('+([.35,1,.64,1,.86,1,1][j])+')',opacity:[0,.85,.24,.85,.45,.85,.85][j]})),timing));
   });
   mark(state);
-  if(animate){rolling=true;layer.classList.add('is-rolling');const token=epoch;timer=setTimeout(()=>{if(token===epoch)settle();},DICE_DURATION+115);}
+  if(animate){rolling=true;layer.classList.add('is-rolling');const token=epoch;timer=setTimeout(()=>{if(token===epoch)settle();},duration+(reduced?45:115));}
   return animate;
  }
  function mark(state){const remaining=[...state.dice],double=state.roll[0]===state.roll[1];for(const cube of dice){const at=remaining.indexOf(Number(cube.dataset.value));cube.classList.toggle('is-spent',!rolling&&state.phase!=='opening'&&(double?state.dice.length===0:at<0));if(at>=0)remaining.splice(at,1);}}

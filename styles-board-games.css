@@ -166,3 +166,223 @@ body[data-nards-dice] .cube-face{background:linear-gradient(135deg,#ffffff55,#ff
 .nards-half-art.is-right{grid-column:8 / 14;background-image:var(--nards-right-surface)}
 .nards-board .point{z-index:1}
 .nards-board .bar{z-index:2}
+
+/* One continuous frame encloses the playing field and both bear-off troughs. */
+.nards-table{grid-template-columns:clamp(13px,3.4vw,22px) minmax(0,1fr) clamp(13px,3.4vw,22px);gap:3px;border:8px solid var(--nards-frame,#422a1c);border-radius:6px;background:var(--nards-frame,#422a1c);box-shadow:0 7px 0 #21140e,0 14px 26px #0008}
+.nards-table:not([data-skin=classic]){border-image-source:var(--nards-carving);border-image-slice:120;border-image-repeat:stretch}
+.nards-table .nards-board{border:0;border-image:none;border-radius:0;box-shadow:none}
+.nards-table .nards-storage{margin:0;border-width:1px;border-radius:4px;padding:3px 1px;box-shadow:inset 2px 0 3px #000b,inset -1px 0 2px #ffe7a755}
+/* A continuous surface avoids the vertical stripes and seams across the mural. */
+.nards-board .point{background:none;border-radius:0;box-shadow:none}
+.nards-board .point.selected{box-shadow:inset 0 0 0 3px #ffdf66}
+
+.nards-half-art{background-color:var(--inside-light,var(--nards-light,#ddc49a))}
+
+/* Keep the 3D hierarchy unflattened in mobile Safari; shadows live on the board. */
+.board-dice-stage.is-rolling{filter:none}
+.dice-flight,.dice-cube{transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
+.cube-face{-webkit-backface-visibility:hidden;border-radius:14%;border-color:var(--die-edge);box-shadow:inset 0 0 0 1px #ffffff75,inset 2px 2px 4px #ffffff45,inset -2px -3px 5px #00000036}
+body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#ffffff6b,transparent 58%),linear-gradient(145deg,#ffffff22,transparent 45%,#0000002b),var(--nards-die-surface);background-color:var(--die-face)}
+.cube-face i,body[data-nards-dice] .cube-face i{width:90%;height:90%;background:radial-gradient(circle at 62% 72%,color-mix(in srgb,var(--die-pip) 75%,white),var(--die-pip) 65%);box-shadow:inset 0 1px 2px #000b,0 1px 0 #ffffff75}
+.cube-face::after{content:'';position:absolute;inset:4%;border:1px solid #ffffff24;border-radius:11%;pointer-events:none}
+.dice-ground-shadow{background:radial-gradient(ellipse,#140c08b3,transparent 72%);filter:none}
+
+/* A continuous rounded mesh replaces the six disconnected CSS panels. */
+.dice-cube>.cube-face{display:none}
+.dice-solid{position:absolute;left:-50%;top:-50%;width:200%;height:200%;pointer-events:none}
+.dice-cube.is-spent .dice-solid{filter:brightness(.6)}
+
+/* Tight contact shadow plus a soft cast shadow attach the dice to the inlay. */
+.dice-ground-shadow{width:calc(var(--cube-size)*1.25);height:calc(var(--cube-size)*.65);margin-left:calc(var(--cube-size)*-.025);margin-top:calc(var(--cube-size)*.1);background:radial-gradient(ellipse at 48% 45%,#170e0799 0%,#1c100974 30%,#2213093d 52%,transparent 74%);opacity:.85}
+.nards-board .nards-landing-well{display:none}
+
+/* Slim edge strips and shallow carved scallops instead of round sockets. */
+.nards-half-art{background-size:cover}
+.nards-board .point{padding-top:12px}
+.nards-board .point.bottom{padding-top:0;padding-bottom:12px}
+.nards-board .point .number{top:0;height:10px;min-width:15px;font-size:8px;background:#352b2199;box-shadow:none}
+.nards-board .point.bottom .number{top:auto;bottom:0}
+.nards-landing-notch{position:absolute;left:3%;top:11px;width:94%;height:clamp(5px,1.6vw,8px);z-index:0;pointer-events:none}
+.nards-landing-notch svg{display:block;width:100%;height:100%;overflow:visible}
+.notch-recess{fill:#5e43272e}
+.notch-edge{fill:none;stroke:#64482c;stroke-width:1.15;vector-effect:non-scaling-stroke}
+.notch-highlight{fill:none;stroke:#fff1c6b3;stroke-width:1;vector-effect:non-scaling-stroke}
+.point.bottom .nards-landing-notch{top:auto;bottom:11px;transform:rotate(180deg)}
+.nards-point-blade{top:19px}
+.point.bottom .nards-point-blade{top:30%;bottom:19px}
+
+/* Scallops open toward the checker stacks and belong to a continuous carved rail. */
+.nards-landing-notch{left:0;top:10px;width:100%;height:clamp(8px,2.6vw,13px)}
+.notch-inlay{fill:color-mix(in srgb,var(--inside-light,#cdbb8b) 70%,#805328)}
+.notch-grain{fill:none;stroke:#f8d89955;stroke-width:.65;vector-effect:non-scaling-stroke}
+.notch-edge{stroke:#62401f;stroke-width:1.5}
+.notch-inner{fill:none;stroke:#a47a43;stroke-width:.7;vector-effect:non-scaling-stroke}
+.notch-highlight{stroke:#ffedbdc9;stroke-width:1.2}
+.notch-rim{fill:none;stroke:#fff0c28c;stroke-width:.7;vector-effect:non-scaling-stroke}
+.point.bottom .nards-landing-notch{top:auto;bottom:10px;transform:rotate(180deg)}
+.nards-board .point{padding-top:12px}
+.nards-board .point.bottom{padding-top:0;padding-bottom:12px}
+.nards-point-blade{top:24px}
+.point.bottom .nards-point-blade{top:30%;bottom:24px}
+
+/* The carved rail meets the outer frame without a spare coordinate band. */
+.nards-landing-notch{top:0}
+.point.bottom .nards-landing-notch{top:auto;bottom:0}
+.nards-board .point{padding-top:2px}
+.nards-board .point.bottom{padding-top:0;padding-bottom:2px}
+.nards-point-blade{top:14px}
+.point.bottom .nards-point-blade{top:30%;bottom:14px}
+
+/* Overlapping carved segments form an uninterrupted rail; points grow out of it. */
+.nards-landing-notch{left:-.5px;width:calc(100% + 1px)}
+.notch-inlay{fill:color-mix(in srgb,var(--nards-light,#cdbb8b) 72%,var(--nards-frame,#805328))}
+.notch-edge{stroke:color-mix(in srgb,var(--nards-frame,#62401f) 80%,#34210e)}
+.notch-inner{stroke:var(--nards-dark,#a47a43)}
+.notch-highlight{stroke:color-mix(in srgb,var(--nards-light,#ffedbd) 65%,white)}
+.notch-ornament{display:none;fill:none;stroke:var(--nards-dark,#73502a);stroke-width:.7;vector-effect:non-scaling-stroke}
+.nards-board[data-skin=cedar] .notch-ornament--leaf,.nards-board[data-skin=wolves] .notch-ornament--leaf{display:block}
+.nards-board[data-skin=imperial] .notch-ornament--royal,.nards-board[data-skin=compass] .notch-ornament--royal{display:block}
+.nards-board[data-skin=club-aces] .notch-ornament--club,.nards-board[data-skin=club-night] .notch-ornament--club{display:block}
+.nards-board[data-skin=club-night] .notch-highlight{stroke:#c3d7e8}
+.nards-point-blade{inset:0 0 30%}
+.point.bottom .nards-point-blade{inset:30% 0 0}
+.nards-point-blade .point-inlay{fill:var(--inside-dark,var(--nards-dark,#294936));stroke:var(--inside-accent,#f2d59b);stroke-width:1.1;stroke-linejoin:round}
+.light-point .nards-point-blade .point-inlay{fill:var(--inside-accent,#f6dfaa);stroke:var(--inside-dark,#3d2c1c)}
+
+/* Full-field illustrations stay unobstructed; medallion interiors keep their points. */
+.nards-board[data-mural=true] .nards-point-blade{display:none}
+
+/* Bear-off recesses are cut into slim carved side stiles of the same board. */
+.nards-table{grid-template-columns:clamp(14px,3.8vw,23px) minmax(0,1fr) clamp(14px,3.8vw,23px);column-gap:0;border-left-width:4px;border-right-width:4px}
+.nards-table .nards-storage{position:relative;border:0;border-left:2px solid var(--nards-frame,#422a1c);border-right:2px solid var(--nards-frame,#422a1c);border-radius:0;padding:3px 1px;background:linear-gradient(90deg,#0005,transparent 28%,#ffffff16 50%,#0004),color-mix(in srgb,var(--nards-light,#bc9d67) 35%,var(--nards-frame,#422a1c));box-shadow:inset 1px 0 1px #f7d89d66,inset -1px 0 2px #0008}
+.nards-table:not([data-skin=classic]) .nards-storage{border-image-source:var(--nards-carving);border-image-slice:120;border-image-width:0 2px;border-image-repeat:stretch}
+.nards-table .nards-storage strong{font-size:8px;line-height:11px;color:#ffe9bd;text-shadow:0 1px 1px #0009}
+.nards-table .nards-storage-slots{gap:3px;padding:2px 0}
+.nards-table .nards-storage-slots i{border-color:#25180e99;box-shadow:inset 0 1px 2px #000c,0 1px #e5c58b77}
+
+/* Point tips recede toward the center of each half. */
+.nards-point-blade{bottom:var(--nards-tip-gap,30%)}
+.point.bottom .nards-point-blade{top:var(--nards-tip-gap,30%);bottom:0}
+
+/* Continuous six-lane rails: one silhouette and one relief across the entire row. */
+.nards-carved-rail{position:relative;grid-row:1;align-self:start;min-width:0;height:clamp(8px,2.6vw,13px);z-index:1;pointer-events:none}
+.nards-carved-rail.is-left{grid-column:1 / 7}
+.nards-carved-rail.is-right{grid-column:8 / 14}
+.nards-carved-rail.is-bottom{grid-row:2;align-self:end;transform:rotate(180deg)}
+.nards-carved-rail svg{display:block;width:100%;height:100%;overflow:visible}
+.rail-cut-shadow,.rail-cut-light,.rail-cut-inner,.rail-scroll path,.rail-grain{fill:none;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.rail-cut-shadow{stroke:color-mix(in srgb,var(--nards-frame,#51351f) 80%,black);stroke-width:2}
+.rail-cut-light{stroke:color-mix(in srgb,var(--nards-light,#d3be8f) 65%,white);stroke-width:1}
+.rail-cut-inner{stroke:var(--nards-dark,#73502f);stroke-width:.7}
+.rail-scroll{stroke:var(--nards-dark,#73502f);stroke-width:.65}
+.rail-scroll .rail-leaf,.rail-scroll .rail-gem{display:none}
+.rail-grain{stroke:#ffe7b54d;stroke-width:.5}
+.nards-board[data-skin=classic] .rail-wood{fill:var(--nards-light,#ddc49a)}
+.nards-board[data-skin=classic] .rail-scroll{display:none}
+.nards-board[data-skin=cedar] .rail-scroll .rail-leaf,.nards-board[data-skin=wolves] .rail-scroll .rail-leaf{display:block}
+.nards-board[data-skin=imperial] .rail-scroll .rail-gem,.nards-board[data-skin=compass] .rail-scroll .rail-gem{display:block}
+.nards-board .point{z-index:auto;isolation:auto}
+.nards-board .checker{z-index:2}
+
+/* Individually cut bear-off pockets, with a bevel, a dark floor and edge-on checkers. */
+.nards-table .nards-storage{padding:3px 1px;background:linear-gradient(90deg,#160c0899,transparent 20%,#fff1c524 48%,transparent 78%,#160c08b3),repeating-linear-gradient(88deg,#ffe0a50a 0 1px,transparent 1px 4px),color-mix(in srgb,var(--nards-light,#c5a16b) 42%,var(--nards-frame,#422a1c));box-shadow:inset 1px 0 #ffe2a985,inset -1px 0 #160b09c9}
+.nards-table .nards-storage strong{position:relative;padding:2px 0;margin-bottom:1px;border-top:1px solid #ffe0a766;border-bottom:1px solid #170d0aa6;background:linear-gradient(#ffffff12,#0003);font-size:8px;line-height:10px;box-shadow:0 1px #ffe0a733}
+.nards-table .nards-storage-slots{gap:3px;padding:2px 0 3px}
+.nards-table .nards-storage-slots i{flex:1;max-height:none;min-height:4px;border-radius:3px;border:0;background:linear-gradient(90deg,#190d08,#4c301c 17%,#24140d 40%,#160c08 75%,#624125);box-shadow:inset 0 2px 2px #080504e6,inset 1px 0 1px #080504cc,inset -1px 0 1px #a67c3f55,0 1px 0 #ffe0a68c}
+.nards-table .nards-storage-slots i::before{content:'';position:absolute;inset:1px;border:1px solid #09060580;border-radius:2px;pointer-events:none}
+.nards-table .nards-storage-slots i::after{content:'';position:absolute;bottom:-2px;left:calc(50% - 1px);width:2px;height:1px;background:#f3d19d80;box-shadow:0 1px #100a07}
+.nards-table .nards-storage-slots .is-filled{background:linear-gradient(90deg,#150b07,#342015 40%,#130b08)!important}
+.nards-table .nards-stored-edge{inset:28% 0 24%;border-radius:3px;border:1px solid #94713e;background:linear-gradient(#fff7df 0%,#ead6a8 22%,#b89860 38%,#f9e9bd 53%,#ddc18a 72%,#8b693c 100%);box-shadow:0 2px 2px #000b,inset 0 1px #fff8,0 -1px #120a08}
+.nards-table .nards-stored-edge::after{content:'';position:absolute;inset:32% 0;border-top:1px solid #8e6d3b99;border-bottom:1px solid #fff2cc99;border-radius:2px}
+.nards-table .nards-storage[data-side=black] .nards-stored-edge{border-color:#77959c;background:linear-gradient(#9bb2b9,#344e59 23%,#102530 42%,#617e89 54%,#203b48 73%,#07121a);box-shadow:0 2px 2px #000c,inset 0 1px #c7e1e480,0 -1px #0c0807}
+.nards-table .nards-storage[data-side=black] .nards-stored-edge::after{border-top-color:#07151fcc;border-bottom-color:#8aabb6b3}
+
+/* Edge-on checkers are thin solid discs, with a flat rim rather than a padded face. */
+.nards-table .nards-stored-edge{inset:38% 0 36%;min-height:2px;border:0;border-top:1px solid #fff2cb;border-bottom:1px solid #87663c;border-radius:1px;background:linear-gradient(#e7d2a3 0 45%,#bca06c 46% 65%,#ddc18d 66%);box-shadow:0 1px 1px #000b,0 -1px #130b08}
+.nards-table .nards-stored-edge::after{inset:45% 0 auto;height:1px;border:0;border-radius:0;background:#987b4b88}
+.nards-table .nards-storage[data-side=black] .nards-stored-edge{border:0;border-top:1px solid #91a9ae;border-bottom:1px solid #08151d;border-radius:1px;background:linear-gradient(#45616b 0 42%,#152b36 43% 65%,#324b57 66%);box-shadow:0 1px 1px #000c,0 -1px #0c0807}
+.nards-table .nards-storage[data-side=black] .nards-stored-edge::after{border:0;background:#081923a6}
+
+/* Let the mobile nards board use the side gutters, retaining a 2px screen margin. */
+@media(max-width:600px){
+ #boardArea:has(#nardsBoard:not([hidden])){--board-edge-outset:8px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset))}
+}
+@media(max-width:350px){#boardArea:has(#nardsBoard:not([hidden])){--board-edge-outset:4px}}
+
+/* Remove the bulky outer carving; the integrated side recesses form the edge. */
+.nards-table,.nards-table:not([data-skin=classic]){border:0;border-image:none;border-radius:2px;box-shadow:0 0 0 1px #d1b87966,0 3px 10px #0005}
+
+/* Clock and match format share one compact line above the board. */
+.board-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;width:min(580px,100%);margin:7px auto 5px;min-height:25px}
+#game .board-meta #series{flex:1;min-width:0;margin:0;text-align:right;font-size:clamp(9px,2.65vw,12px);line-height:1.25}
+#game .board-meta #clock{flex-shrink:0;white-space:nowrap;padding:3px 5px;border-radius:6px;font-size:clamp(9px,2.55vw,11px);line-height:1.3}
+#game .board-meta #clock[data-time-warning]{font-size:clamp(10px,2.8vw,13px);border-width:1px;padding:3px 5px}
+#game .board-meta:not(:has(#clock)) #series,#game .board-meta:has(#clock[hidden]) #series{text-align:center}
+
+/* Turn status and the roll action share one row directly under the board. */
+#game .turn-line #roll{min-height:32px;padding:5px 12px;border-radius:8px;white-space:nowrap;font-size:13px;line-height:1.35}
+#gameControls>nav:not(:has(button:not([hidden]))){display:none}
+
+/* One restrained control family for the in-game menu and turn actions. */
+#game{--game-control-height:42px;--game-control-radius:10px;--game-control-border:#bca26870;--game-control-bg:linear-gradient(180deg,#263d30,#172e24)}
+#game .game-toolbar{gap:4px;margin-bottom:7px}
+#game .game-toolbar button,#gameControls nav button,#game .turn-line #roll,#game .turn-line #turnText{box-sizing:border-box;height:var(--game-control-height);min-height:var(--game-control-height);border:1px solid var(--game-control-border);border-radius:var(--game-control-radius);background:var(--game-control-bg);color:#eedbb1;font-weight:650;line-height:1.2;letter-spacing:.05px;box-shadow:inset 0 1px #ffffff08,0 2px 5px #0002}
+#game .game-toolbar button{padding:0 3px;font-size:11px}
+#game .game-toolbar button:disabled,#gameControls nav button:disabled{opacity:.38}
+#game .turn-line{gap:8px;margin:10px auto 8px}
+#game .turn-line #turnText,#game .turn-line #roll{display:flex;align-items:center;justify-content:center;flex:1 1 0;min-width:0;max-width:none;margin:0;padding:0 8px;font-size:13px;white-space:nowrap}
+#game .turn-line #turnText[data-mine=true]{background:linear-gradient(180deg,#34533d,#233d2d);border-color:#b4bd817d;color:#f0e5c4;box-shadow:inset 0 1px #ffffff0d,0 2px 5px #0002}
+#game .turn-line #turnText::before{display:none}
+#game .turn-line #roll{background:linear-gradient(180deg,#d8bd7a,#bea060);border-color:#e6cb8f;color:#253225;box-shadow:inset 0 1px #fff5,0 2px 5px #0003}
+#gameControls nav{gap:8px}
+#gameControls nav button{flex:1 1 140px;padding:0 10px;font-size:12px}
+#gameControls #history{padding:0;border-radius:var(--game-control-radius);border-color:var(--game-control-border);background:#14291f;box-shadow:inset 0 1px #ffffff05}
+#gameControls #history>summary{display:flex;align-items:center;min-height:var(--game-control-height);padding:0 13px;color:#eedbb1;font-size:12px;font-weight:650;cursor:pointer;list-style:none}
+#gameControls #history>summary::-webkit-details-marker{display:none}
+#gameControls #history>summary::before{content:'›';margin-right:9px;color:#c6ab6c;font-size:19px;line-height:1;transition:transform .15s}
+#gameControls #history[open]>summary::before{transform:rotate(90deg)}
+
+/* Information reads as information; only actionable controls look pressable. */
+#game .turn-line{justify-content:space-between;gap:12px;margin:9px auto 6px;padding:0 2px}
+#game .turn-line #turnText,#game .turn-line #turnText[data-mine=true],#game .turn-line #turnText[data-mine=false]{flex:1 1 auto;justify-content:flex-start;height:auto;min-height:32px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#d5decb;font-size:13px;font-weight:600}
+#game .turn-line #turnText[data-mine=true]{color:#cfdfb7}
+#game .turn-line #turnText::before{content:'';display:block;width:6px;height:6px;flex-shrink:0;margin-right:8px;border-radius:50%;background:#afbc9c;font-size:0}
+#game .turn-line #turnText[data-mine=true]::before{background:#b6ce8d;box-shadow:0 0 0 3px #b6ce8d12}
+#game .turn-line #roll{flex:0 1 50%;height:38px;min-height:38px;font-size:12px}
+
+/* Match context is a quiet single strip with a distinct clock at the left. */
+#game .board-meta{box-sizing:border-box;min-height:36px;gap:10px;padding:6px 0;margin:3px auto 6px;border-bottom:1px solid #cfb5742b}
+#game .board-meta #clock,#game .board-meta #clock[data-time-warning]{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 0;border:0;border-right:1px solid #cdb27140;border-radius:0;background:none;box-shadow:none;font-size:11px;font-weight:650;line-height:1.3;letter-spacing:0;color:#e5cd96}
+#game .board-meta #clock::before{content:'';box-sizing:border-box;display:inline-block;width:11px;height:11px;flex-shrink:0;border:1.3px solid currentColor;border-radius:50%;background:linear-gradient(currentColor,currentColor) 50% 30% / 1px 4px no-repeat,linear-gradient(currentColor,currentColor) 65% 60% / 3px 1px no-repeat;opacity:.8}
+#game .board-meta #series{color:#c4cbb9;font-size:clamp(9px,2.6vw,11px);font-weight:450;letter-spacing:.05px}
+#game .board-meta #clock[data-time-warning=warning]{color:#f0cd83}
+#game .board-meta #clock[data-time-warning=urgent]{color:#ffad91}
+#game .matchup{gap:7px;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr)}
+#game .matchup>[data-player]{padding:8px;border-radius:11px;border-color:#bca26838;background:#142b22;box-shadow:inset 0 1px #ffffff05}
+#game .matchup>[data-player].active{border-color:#baa36a99;background:linear-gradient(125deg,#2b4432,#1e3528)}
+#game .matchup i{flex-basis:25px;height:25px;border-color:#bda36388;background:#6b5a3459;color:#dfc994;font-size:12px}
+#game .matchup strong{color:#e7ddc2;font-size:12px;font-weight:650;line-height:15px}
+#game .matchup small{margin-top:2px;color:#a9b8a9;font-size:9px}
+#game .matchup>b{color:#8e977f;font-size:9px;font-weight:400}
+#game .game-toolbar{margin-bottom:8px}
+#game .game-toolbar button{height:36px;min-height:36px;background:linear-gradient(#21382b,#192e23);font-weight:550;font-size:11px;border-color:#bca2684d}
+@media(max-width:350px){#game .board-meta{gap:6px}#game .board-meta #clock{font-size:10px;padding-right:6px}#game .matchup strong{font-size:11px}}
+
+/* Keep the move hint and bear-off score on one line on narrow phones. */
+#gameControls #hint{font-size:clamp(8px,2.55vw,12px);line-height:1.4;white-space:nowrap;letter-spacing:-.1px;margin:12px 0 7px;min-height:17px}
+
+/* Turn information belongs to the clock; the throw is the sole full-width action. */
+#game .board-clock{display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex-shrink:0;padding-right:10px;border-right:1px solid #cdb27130}
+#game .board-meta #clock{border-right:0;padding-right:0}
+#game .board-clock #turnText{display:flex;align-items:center;gap:5px;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;font-size:10px;font-weight:550;line-height:1.2;color:#acbaa9;white-space:nowrap}
+#game .board-clock #turnText[data-mine=true]{color:#d3dcb4}
+#game .board-clock #turnText::before{content:'';display:block;flex-shrink:0;width:4px;height:4px;border-radius:50%;background:currentColor;font-size:0}
+#game .turn-line #roll{flex:1 1 100%;width:100%;height:42px;min-height:42px}
+#game .turn-line:not(:has(#roll:not([hidden]))):not(:has(#turnText)){display:none}
+#game .matchup>[data-player].my-turn{border-color:#dbc17c;box-shadow:inset 0 0 0 1px #dcc47d24,0 0 12px #c6ae4e14;animation:turn-card-arrival 1s ease-out 1}
+#game .matchup>[data-player].my-turn small{color:#dfcf98}
+@keyframes turn-card-arrival{0%{box-shadow:inset 0 0 0 1px #ffe3a1bb,0 0 18px #f1d27c66}100%{box-shadow:inset 0 0 0 1px #dcc47d24,0 0 12px #c6ae4e14}}
+.nards-board .checker.is-movable:not(.is-picked){outline:1px solid #f3d995;outline-offset:1px;box-shadow:0 0 0 2px #d6c37f28,0 2px 3px #0006}
+@media(max-width:600px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:8px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset));padding:0}}
+@media(max-width:350px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:4px}}
+#game .board-meta .board-clock #clock,#game .board-meta .board-clock #clock[data-time-warning]{border-right:0;padding-right:0}

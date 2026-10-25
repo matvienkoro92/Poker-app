@@ -29,11 +29,11 @@ for(const b of NARDS_INTERIORS){
   base='<defs>'+artwork+'</defs><rect width="1200" height="1000" fill="'+b.light+'"/><g><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
  }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';
- let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?946:54,tip=row?680:320;points+='<path d="M'+(x+w*.22)+' '+y+'H'+(x+w*.78)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" stroke="'+(i%2?b.dark:gold)+'" stroke-width="2"/><ellipse cx="'+(x+w/2)+'" cy="'+y+'" rx="'+(w*.46)+'" ry="46" fill="#9a8663" stroke="#342516" stroke-width="4"/>';}
+ let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?946:54,gap=[29,35,43,43,35,29][i%6],reach=54+446*(1-gap/100),tip=row?1000-reach:reach;points+='<path d="M'+(x+w*.22)+' '+y+'H'+(x+w*.78)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" stroke="'+(i%2?b.dark:gold)+'" stroke-width="2"/><ellipse cx="'+(x+w/2)+'" cy="'+y+'" rx="'+(w*.46)+'" ry="46" fill="#9a8663" stroke="#342516" stroke-width="4"/>';}
  const bar='<rect x="582" width="36" height="1000" fill="'+b.frame+'"/><path d="M596 0V1000M604 0V1000" stroke="'+gold+'" stroke-opacity=".45"/>';
  fs.writeFileSync(path.join(out,path.basename(b.surface)),svg(base));
  for(const [side,x]of [['left',0],['right',618]])fs.writeFileSync(path.join(out,path.basename(b[side+'Surface'])),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+x+' 0 582 1000" preserveAspectRatio="xMidYMid meet">'+base+'</svg>');
- fs.writeFileSync(path.join(out,path.basename(b.preview)),svg(base+points+bar));
+ fs.writeFileSync(path.join(out,path.basename(b.preview)),svg(base+(b.revision>=2?'':points)+bar));
 }
 console.log('Generated '+NARDS_INTERIORS.length+' nards interiors and previews');
 
