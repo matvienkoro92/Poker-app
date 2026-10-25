@@ -858,3 +858,19 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 /* Closed case on the table: the selected exterior covers the baked-in playing field. */
 .player-hall-dialog .living-game-case .living-case-art.is-closed-cover{display:block;overflow:hidden;inset:0 0 auto;height:64%;border:2px ridge #9a713e;border-radius:2px;background-size:100% 100%;background-position:center;clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);box-shadow:inset 0 0 0 1px #e0bb7633,0 3px 0 #352419}
 .player-hall-dialog .living-game-case .living-case-art.is-closed-cover::after{content:'';position:absolute;inset:3%;border:1px solid #e2bb7855;box-shadow:inset 0 1px 3px #0004;pointer-events:none}
+
+/* The villa displays the long-nards starting heads, with all fifteen discs spread out. */
+.living-preview-point.has-stack{container-type:size}
+.living-preview-point.has-stack>.living-preview-checker{position:absolute;left:2%;top:calc(2px + var(--stack-index)*min(96cqw,(190cqh - 2px - 96cqw)/var(--stack-steps)));margin:0}
+.living-preview-point.has-stack.is-bottom>.living-preview-checker{top:auto;bottom:calc(2px + var(--stack-index)*min(96cqw,(190cqh - 2px - 96cqw)/var(--stack-steps)))}
+
+/* Game dialogs are top-layer elements: the app's padding does not move their iframes.
+   Keep the whole embedded viewport below Telegram's native Close/menu controls. */
+.app--telegram-miniapp .billiards-shell{
+ --game-shell-top:var(--app-top-from-tg,calc(var(--tg-safe-area-inset-top,0px) + max(52px,var(--tg-content-safe-area-inset-top,0px)) + 8px));
+ --game-shell-bottom:max(var(--tg-safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px));
+ top:var(--game-shell-top);bottom:var(--game-shell-bottom);
+ left:max(var(--tg-safe-area-inset-left,0px),var(--tg-content-safe-area-inset-left,0px));
+ right:max(var(--tg-safe-area-inset-right,0px),var(--tg-content-safe-area-inset-right,0px));
+ width:auto;height:calc(100dvh - var(--game-shell-top) - var(--game-shell-bottom));
+}

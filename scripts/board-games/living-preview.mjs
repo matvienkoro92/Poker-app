@@ -30,12 +30,12 @@ export function paint(root,game,equipment={}){
       root.style.setProperty('--preview-'+side,set[side]);
       root.style.setProperty('--preview-'+side+'-art',set[side+'Art']?'url("'+set[side+'Art']+'")':'none');
     }
-    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('short');
+    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('long');
     for(let row=0;row<2;row++)for(let col=0;col<12;col++){
       const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
-      point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;
+      point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;point.classList.toggle('has-stack',Math.abs(n)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(n)-1));
       point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');if(!(inside.revision>=2)){const blade=createPointBlade();blade.className='living-preview-blade';point.append(blade);}
-      for(let i=0;i<Math.abs(n);i++){const coin=document.createElement('i');coin.className='living-preview-checker'+(n<0?' is-black':'');coin.setAttribute('aria-label',n<0?'Чёрная фишка':'Белая фишка');point.append(coin);}
+      for(let i=0;i<Math.abs(n);i++){const coin=document.createElement('i');coin.className='living-preview-checker'+(n<0?' is-black':'');coin.style.setProperty('--stack-index',i);coin.setAttribute('aria-label',n<0?'Чёрная фишка':'Белая фишка');point.append(coin);}
       surface.append(point);
     }
     const bar=document.createElement('span');bar.className='living-preview-bar';surface.append(bar);
