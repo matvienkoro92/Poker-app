@@ -8,7 +8,8 @@
     "@capacitor/core": "^8.5.0",
     "@vercel/blob": "^2.3.3",
     "chess.js": "1.4.0",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "sharp": "^0.35.4"
   },
   "scripts": {
     "store:prepare": "node scripts/prepare-store-build.js",
@@ -84,8 +85,7 @@
     "@capacitor/cli": "^8.5.0",
     "esbuild": "0.28.2",
     "fengari": "^0.1.5",
-    "playwright": "1.62.1",
-    "sharp": "^0.35.4"
+    "playwright": "1.62.1"
   },
   "overrides": {
     "@capacitor/assets": {
