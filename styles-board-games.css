@@ -472,3 +472,6 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .nards-board .point.selected{background:none;box-shadow:none}
 .nards-board .point.selected .number{background:#352b2199;color:#f5e5c4;box-shadow:none}
 .nards-board .point .checker.is-picked{outline:2px solid #fff2a6;outline-offset:2px;box-shadow:0 0 0 4px #d6aa4280,0 0 13px #ffe292b3,0 3px 4px #0007;filter:brightness(1.16)}
+
+/* Bearing off is the primary action, after deselection and undo. */
+#gameControls nav #bearOff{background:linear-gradient(180deg,#dfc482,#bfa061);border-color:#eed398;color:#243023;font-weight:750;box-shadow:inset 0 1px #fff6,0 2px 5px #0003}
