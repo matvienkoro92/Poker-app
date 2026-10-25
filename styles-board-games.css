@@ -386,3 +386,51 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 @media(max-width:600px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:8px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset));padding:0}}
 @media(max-width:350px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:4px}}
 #game .board-meta .board-clock #clock,#game .board-meta .board-clock #clock[data-time-warning]{border-right:0;padding-right:0}
+
+/* A taller live board gives the lanes 20% more vertical room at the same width. */
+.nards-table .nards-board{aspect-ratio:11 / 12}
+
+/* Show every checker; crowded lanes overlap evenly without overflowing their half. */
+.nards-board .point.has-stack{container-type:size}
+.nards-board .point.has-stack>.checker{position:absolute;left:4.5%;top:calc(2px + var(--stack-index)*min(91cqw,(var(--stack-space,100cqh) - 2px - 91cqw)/var(--stack-steps)));margin:0}
+.nards-board .point.has-stack.bottom>.checker{top:auto;bottom:calc(2px + var(--stack-index)*min(91cqw,(var(--stack-space,100cqh) - 2px - 91cqw)/var(--stack-steps)))}
+
+/* A narrow recessed joint identifies the two carved leaves without altering the artwork. */
+.nards-cover-joint{position:relative;display:block;overflow:hidden;border-radius:9px}
+.nards-cover-joint>img{display:block;width:100%;height:auto;margin:0!important;border:0!important;border-radius:inherit}
+.nards-cover-joint::after{content:'';position:absolute;top:2%;bottom:2%;left:calc(50% - 2px);width:4px;background:linear-gradient(90deg,#f1c78c66,#271309d9 30%,#0d0805ed 60%,#dfb47980);box-shadow:-1px 0 2px #1c0e0780,1px 0 1px #ffe0ac40;pointer-events:none}
+.nards-equipment-preview>.nards-cover-joint{width:48%;max-width:220px;flex-shrink:0}
+.collection .nards-cover-joint{width:100%;margin-bottom:7px}
+
+/* One live game-board preview across the interior, checker and dice tabs. */
+#nardsPreview.has-live-board{display:block;padding:10px;margin:10px 0 16px}
+.editor-board{position:relative;container-type:inline-size;width:100%;pointer-events:none}
+.editor-board .editor-store-left{grid-column:1;grid-row:1}
+.editor-board .editor-store-right{grid-column:3;grid-row:1}
+.editor-board .nards-board{grid-column:2;grid-row:1}
+.editor-board .editor-dice{inset:0}
+.editor-board-caption{margin:10px 0 0!important;font-size:11px!important;line-height:1.5;color:#c4cbb9!important}
+#nardsPreview .editor-board .checker{width:91%;margin:0}
+
+
+/* Sculpted discs: broad medallions, a bevelled metal rim and a solid side wall. */
+.checker{--disc-color:var(--checker-white,#f6e4c1);--disc-art:var(--checker-white-art,none);--disc-rim:#c8a465;--disc-side:#95703e;--disc-shine:#ffffff9c}
+.checker.black{--disc-color:var(--checker-black,#1e303b);--disc-art:var(--checker-black-art,none);--disc-rim:#8babb0;--disc-side:#07151e;--disc-shine:#c4e5ed55}
+.checker,.nards-board .checker{border:1px solid var(--disc-rim);background-image:radial-gradient(ellipse at 28% 15%,var(--disc-shine),transparent 45%),var(--disc-art),radial-gradient(circle at 35% 25%,color-mix(in srgb,var(--disc-color) 65%,white),var(--disc-color) 62%,color-mix(in srgb,var(--disc-color) 60%,black));background-size:100% 100%,125% 125%,100% 100%;background-position:center;background-repeat:no-repeat;box-shadow:inset 0 1px 1px #fff8,inset 0 -1px 1px #0006,0 1px 0 var(--disc-side),0 2px 0 var(--disc-side),0 3px 2px #0008,1px 4px 4px #0004}
+.checker::before{content:'';position:absolute;inset:9%;border-radius:50%;border:1px solid color-mix(in srgb,var(--disc-rim) 60%,transparent);background:radial-gradient(ellipse at 30% 13%,#ffffff38,transparent 46%);box-shadow:inset 0 1px 1px #0005,0 1px #fff3;pointer-events:none}
+.checker::after,.checker.black::after{content:'';position:absolute;inset:1px;border:1px solid var(--disc-rim);border-top-color:color-mix(in srgb,var(--disc-rim) 45%,white);border-left-color:color-mix(in srgb,var(--disc-rim) 65%,white);border-bottom-color:color-mix(in srgb,var(--disc-rim) 65%,black);border-radius:50%;box-shadow:inset 0 0 0 1px #ffffff1c;pointer-events:none}
+.checker.black,.nards-board .checker.black{background-image:radial-gradient(ellipse at 28% 15%,#d0e9f138,transparent 45%),linear-gradient(#05172455,#05172455),var(--disc-art),radial-gradient(circle at 35% 25%,#48616b,var(--disc-color) 65%,#06111a);background-size:100% 100%,100% 100%,125% 125%,100% 100%}
+
+/* Quiet wooden storage: shallow transverse grooves instead of black padded pockets. */
+.nards-table .nards-storage-slots i,.nards-table .nards-storage-slots .is-filled{border:0;border-radius:1px;background:linear-gradient(180deg,#0d0a075c,transparent 28%,#e9cb8c0a 75%,#f6d99b30),color-mix(in srgb,var(--nards-light,#bca16e) 28%,var(--nards-frame,#4d3824))!important;box-shadow:inset 0 1px 1px #100b0999,inset 1px 0 1px #100b0966,0 1px #f3d99e45}
+.nards-table .nards-storage-slots i::before{inset:1px 0;border:0;border-top:1px solid #190f0833;border-radius:0}
+.nards-table .nards-storage-slots i::after{display:none}
+.nards-table .nards-stored-edge{inset:37% 0 34%;border:0;border-radius:1px;background:linear-gradient(#f1dfba 0 23%,#c5ab7c 24% 74%,#8b7049 75%);box-shadow:0 1px 1px #110b0880}
+.nards-table .nards-stored-edge::after{display:none}
+.nards-table .nards-storage[data-side=black] .nards-stored-edge{border:0;background:linear-gradient(#62645e 0 23%,#292f2b 24% 74%,#111813 75%);box-shadow:0 1px 1px #080b0880}
+
+/* Solid carved discs: a broad readable face and one restrained bevel. */
+.checker,.nards-board .checker{--disc-rim:#c9b38a;--disc-side:#8c714b;border:1px solid #aa9069;background-image:radial-gradient(ellipse at 28% 15%,#ffffff38,transparent 55%),var(--disc-art),radial-gradient(circle at 35% 25%,#f5e9d0,var(--disc-color) 70%);background-size:100% 100%,118% 118%,100% 100%;box-shadow:inset 0 1px 1px #fff7,inset 0 -1px 1px #72573655,0 1px 0 #b99c6a,0 2px 0 #8c714b,0 3px 2px #19100766}
+.checker.black,.nards-board .checker.black{--disc-rim:#676c60;--disc-side:#141e18;border-color:#444e41;background-image:radial-gradient(ellipse at 28% 15%,#e7e7c71f,transparent 55%),linear-gradient(#101c1866,#101c1866),var(--disc-art),radial-gradient(circle at 35% 25%,#525b49,var(--disc-color) 70%);background-size:100% 100%,100% 100%,118% 118%,100% 100%;box-shadow:inset 0 1px 1px #d5dccf55,inset 0 -1px 1px #050a07aa,0 1px 0 #303b2d,0 2px 0 #141e18,0 3px 2px #080d0866}
+.checker::before{display:none}
+.checker::after,.checker.black::after{inset:2px;border:1px solid color-mix(in srgb,var(--disc-rim) 65%,transparent);border-radius:50%;background:none;box-shadow:inset 0 1px #ffffff24;pointer-events:none}

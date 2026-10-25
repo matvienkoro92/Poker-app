@@ -1,4 +1,4 @@
-import {createLandingWell,createPointBlade,paintStorage} from './nards-carving.mjs';
+import {createCarvedRail,createPointBlade,paintStorage} from './nards-carving.mjs';
 import {NARDS_BOARDS,CHECKERS,BOARDS,PIECES,NARDS_INTERIORS} from './catalog.mjs';
 import {createBackgammon} from './backgammon.mjs';
 import {pieceSVG,pieceNames} from './pieces.mjs';
@@ -7,7 +7,7 @@ export function paint(root,game,equipment={}){
   const chess=game==='chess';
   const board=(chess?BOARDS:NARDS_BOARDS).find(b=>b.id===(chess?equipment.board:equipment.nardsBoard))||(chess?BOARDS:NARDS_BOARDS)[0];
   const set=(chess?PIECES:CHECKERS).find(s=>s.id===(chess?equipment.pieces:equipment.checkers))||(chess?PIECES:CHECKERS)[0];
-  root.dataset.board=board.id;root.dataset.pieces=set.id;
+  root.dataset.board=board.id;for(const [key,value]of Object.entries({light:board.light,dark:board.dark,frame:board.frame}))root.style.setProperty('--nards-'+key,value);root.dataset.pieces=set.id;
   root.classList.toggle('living-top-board--chess',chess);
   root.setAttribute('aria-label',(chess?'Шахматы':'Нарды')+' · '+board.name+' · '+set.name+' · вид сверху');
   for(const [key,value]of Object.entries({light:board.light,dark:board.dark,frame:board.frame}))root.style.setProperty('--preview-'+key,value);
@@ -30,11 +30,11 @@ export function paint(root,game,equipment={}){
       root.style.setProperty('--preview-'+side,set[side]);
       root.style.setProperty('--preview-'+side+'-art',set[side+'Art']?'url("'+set[side+'Art']+'")':'none');
     }
-    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);const state=createBackgammon('short');
+    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('short');
     for(let row=0;row<2;row++)for(let col=0;col<12;col++){
       const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
       point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;
-      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[29,35,43,43,35,29][col%6]+'%');if(!(inside.revision>=2))point.append(createPointBlade(true),createLandingWell(true));
+      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');if(!(inside.revision>=2)){const blade=createPointBlade();blade.className='living-preview-blade';point.append(blade);}
       for(let i=0;i<Math.abs(n);i++){const coin=document.createElement('i');coin.className='living-preview-checker'+(n<0?' is-black':'');coin.setAttribute('aria-label',n<0?'Чёрная фишка':'Белая фишка');point.append(coin);}
       surface.append(point);
     }
@@ -47,6 +47,7 @@ export function paint(root,game,equipment={}){
     back.style.backgroundImage=board.cover?'url("'+board.cover+'")':'none';back.setAttribute('aria-hidden','true');
     if(!board.cover)back.innerHTML='<span>♜<small>TWO ACES</small></span>';
     for(const point of [...surface.children]){if(point.classList.contains('living-preview-bar'))continue;const col=Number(point.style.gridColumn);if(col>7){point.style.gridColumn=col-7;base.append(point);}else front.append(point);}
+    for(const half of [front,base])for(const bottom of [false,true]){const rail=createCarvedRail(half===front?'left':'right',bottom);half.append(rail);}
     const leftStorage=document.createElement('aside'),rightStorage=document.createElement('aside');leftStorage.className=rightStorage.className='living-nards-storage';paintStorage(leftStorage,1,0);paintStorage(rightStorage,0,0);front.append(leftStorage);base.append(rightStorage);
     lid.append(front,back);box.append(base,lid,hinge);root.replaceChildren(box);
     root.dataset.openLabel=root.getAttribute('aria-label');setClosed(root,root.classList.contains('is-closed'));
