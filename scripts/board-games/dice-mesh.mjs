@@ -15,7 +15,7 @@ function rgb(value,fallback){const m=value.trim().match(/^#([\da-f]{6}|[\da-f]{3
 export function createDiceMesh(cube,faces,size){
  const canvas=document.createElement('canvas');canvas.className='dice-solid';canvas.setAttribute('aria-hidden','true');cube.append(canvas);
  const ratio=Math.min(devicePixelRatio||1,3),extent=size*2;canvas.width=canvas.height=Math.ceil(extent*ratio);const ctx=canvas.getContext('2d');
- const style=getComputedStyle(cube),base=rgb(style.getPropertyValue('--die-face'),[245,230,196]),pip=style.getPropertyValue('--die-pip').trim()||'#24201b';
+ const style=getComputedStyle(cube),base=rgb(style.getPropertyValue('--die-face'),[245,230,196]).map(c=>Math.min(255,c*1.14)),pip=style.getPropertyValue('--die-pip').trim()||'#24201b';
  function draw(rx=DICE_REST_X,ry=DICE_REST_Y,rz=-.12,contact=1){
   const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
   const rotate=([x,y,z])=>{const a=x*cy+z*sy,c=z*cy-x*sy,b=y*cx-c*sx,d=y*sx+c*cx;return [a*cz-b*sz,a*sz+b*cz,d];};
