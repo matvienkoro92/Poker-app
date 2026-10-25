@@ -520,3 +520,5 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .nards-board .checker,.collection .checker{filter:brightness(1.1)}
 .nards-board .point .checker.is-picked{filter:brightness(1.276)}
 .nards-point-blade{filter:brightness(.81)}
+
+#game .board-meta .board-clock #clock[data-time-warning=urgent]{font-size:clamp(14px,4vw,19px);font-weight:850;padding:6px 7px;border:1px solid #ff9d7e;border-radius:8px;background:#70271f;color:#fff0dc;box-shadow:0 0 8px #ff764426;white-space:nowrap}

@@ -498,3 +498,4 @@ body.billiards-table-view .billiards>header #turnClock[data-time-warning=urgent]
 .game-rivalries-note{font-size:11px!important;line-height:1.5;color:#afbfac!important;margin:5px 0 10px!important}
 .game-rivalry-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #c7ae6c24;font-size:12px}
 .game-rivalry-row>span{overflow-wrap:anywhere}.game-rivalry-row>strong{font-variant-numeric:tabular-nums;color:#f0d99d}.game-rivalry-row>small{font-size:10px;color:#b2c1ac;letter-spacing:0}
+body.billiards-table-view .billiards>header #turnClock[data-time-warning=urgent]{font-size:clamp(20px,5vw,25px);font-weight:850}
