@@ -522,3 +522,8 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .nards-point-blade{filter:brightness(.81)}
 
 #game .board-meta .board-clock #clock[data-time-warning=urgent]{font-size:clamp(14px,4vw,19px);font-weight:850;padding:6px 7px;border:1px solid #ff9d7e;border-radius:8px;background:#70271f;color:#fff0dc;box-shadow:0 0 8px #ff764426;white-space:nowrap}
+
+.matchup:has(>.head-to-head){grid-template-columns:minmax(0,1fr) clamp(48px,13vw,72px) minmax(0,1fr)}
+.matchup>.head-to-head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;color:#e7d19a;font-family:inherit}
+.matchup>.head-to-head>strong{display:block;font-size:clamp(11px,3.3vw,15px);line-height:1.2;color:#ffe0a0;white-space:nowrap}
+.matchup>.head-to-head>small{font-size:8px;line-height:1.2;color:#bcc8b7;white-space:nowrap}
