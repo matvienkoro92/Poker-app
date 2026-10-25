@@ -5186,4 +5186,177 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "24.10.2026": [
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 5185.82,
+          "points": 0
+        },
+        {
+          "nick": "kriak",
+          "place": 2,
+          "reward": 2193.33,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 14000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Нокаут прогрессив🚀",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "kriak",
+          "place": 3,
+          "reward": 11744.92,
+          "points": 0
+        },
+        {
+          "nick": "MTTwnik",
+          "place": 5,
+          "reward": 4946.09,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 4,
+          "reward": 1062.49,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 19,
+          "reward": 275,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "ПСИХ",
+          "place": 2,
+          "reward": 690,
+          "points": 0
+        },
+        {
+          "nick": "Tanechka",
+          "place": 6,
+          "reward": 180,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 1,
+          "reward": 31130,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 3,
+          "reward": 6025,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 6,
+          "reward": 800,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 5105.94,
+          "points": 0
+        },
+        {
+          "nick": "EvgenDerby",
+          "place": 3,
+          "reward": 1000,
+          "points": 0
+        },
+        {
+          "nick": "Tanechka",
+          "place": 5,
+          "reward": 820,
+          "points": 0
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 4,
+          "reward": 267.5,
+          "points": 0
+        },
+        {
+          "nick": "tatarin_1",
+          "place": 7,
+          "reward": 26.87,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Black Magic 120K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Kvits010",
+          "place": 5,
+          "reward": 1894.0000000000002,
+          "points": 0
+        },
+        {
+          "nick": "Lorenco",
+          "place": 12,
+          "reward": 185,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

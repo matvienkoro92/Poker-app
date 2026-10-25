@@ -64,6 +64,9 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/Fresh\s+Bounty/i.test(raw) && /20K/i.test(raw)) return "Fresh Bounty 20K";
+  if (/PLO5\s+Bounty/i.test(raw) && /30K/i.test(raw)) return "PLO5 Bounty 30K";
+  if (/Lucky\s+Slot/i.test(raw) && /77K/i.test(raw) && !/177K|777K/i.test(raw)) return "Lucky Slot 77K";
   if (/Black\s+Magic/i.test(raw) && /80K/i.test(raw)) return "Black Magic 80K";
   if (/Black\s+Friday/i.test(raw) && /400K/i.test(raw)) return "Black Friday 400K";
   if (/Prime\s+PKO/i.test(raw) && /1M/i.test(raw)) return "Prime PKO 1M";
@@ -567,6 +570,7 @@ async function parseOcrFile(file) {
   if (date === "13.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "13.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "20.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (date === "24.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Нокаут прогрессив🚀";
   tokens.forEach((token) => {
     // IMG_1023: the avatar obscures the ID prefix; the visible ID is 2491095.
     if (date === "21.10.2026" && blue && time === "20:00" && token.text === "YTD: 2491095") token.text = "ID: 2491095";
