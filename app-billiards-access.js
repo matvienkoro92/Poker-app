@@ -15,7 +15,7 @@
     var result=await response.json();
     if(!response.ok||!result.allowed){var denied=Error(result.error||'Бильярдная временно закрыта.');denied.authRequired=response.status===401||response.status===403;throw denied;}
 
-    var script=document.createElement('script');script.src='app-billiards.js?v=20261026-idle-audio-5';script.onload=function(){loading.remove();document.querySelector('main').hidden=false;};script.onerror=function(){loading.querySelector('p').textContent='Не удалось загрузить игру. Попробуйте открыть снова.';};document.body.appendChild(script);
+    var script=document.createElement('script');script.src='app-billiards.js?v=20261026-fee-five-6';script.onload=function(){loading.remove();document.querySelector('main').hidden=false;};script.onerror=function(){loading.querySelector('p').textContent='Не удалось загрузить игру. Попробуйте открыть снова.';};document.body.appendChild(script);
   }catch(error){
     document.body.innerHTML='<main class="panel"><h1>Бильярдная временно закрыта</h1><p>Доступ временно ограничен.</p><button id="closedBack" type="button">← На виллу</button></main>';
     if(error.authRequired){document.querySelector('main h1').textContent='Вход для зарегистрированных игроков';document.querySelector('main p').textContent='Зарегистрируйтесь и войдите в аккаунт, чтобы играть в бильярд.';}
