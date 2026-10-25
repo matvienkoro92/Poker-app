@@ -35,9 +35,19 @@ for(const b of NARDS_INTERIORS){
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';
  let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?946:54,gap=[50.3,54.5,60.1,60.1,54.5,50.3][i%6],reach=54+446*(1-gap/100),tip=row?1000-reach:reach;points+='<path d="M'+(x+w*.22)+' '+y+'H'+(x+w*.78)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" stroke="'+(i%2?b.dark:gold)+'" stroke-width="2"/><ellipse cx="'+(x+w/2)+'" cy="'+y+'" rx="'+(w*.46)+'" ry="46" fill="#9a8663" stroke="#342516" stroke-width="4"/>';}
  const bar='<rect x="582" width="36" height="1000" fill="'+b.frame+'"/><path d="M596 0V1000M604 0V1000" stroke="'+gold+'" stroke-opacity=".45"/>';
+ if(b.art){
+  const sharp=require('sharp'),normalize=require('../../lib/nards-challenge-art').supportedImages;
+  const raster=await sharp(Buffer.from(await normalize(svg(base)))).resize(1200,1000).png().toBuffer();
+  await sharp(raster).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b.surface)));
+  for(const [side,x]of [['left',0],['right',618]])await sharp(raster).extract({left:x,top:0,width:582,height:1000}).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b[side+'Surface'])));
+  const preview=Buffer.from(await normalize(svg(base+(b.revision>=2?'':points)+bar)));
+  await sharp(preview).resize(480,400).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));
+ }else{
  fs.writeFileSync(path.join(out,path.basename(b.surface)),svg(base));
  for(const [side,x]of [['left',0],['right',618]])fs.writeFileSync(path.join(out,path.basename(b[side+'Surface'])),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+x+' 0 582 1000" preserveAspectRatio="xMidYMid meet">'+base+'</svg>');
  fs.writeFileSync(path.join(out,path.basename(b.preview)),svg(base+(b.revision>=2?'':points)+bar));
+ }
+
 }
 console.log('Generated '+NARDS_INTERIORS.length+' nards interiors and previews');
 

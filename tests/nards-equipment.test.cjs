@@ -3,12 +3,18 @@ test('every new checker has two distinct lightweight vector assets',()=>{assert.
 test('small dice are independent of material and safely persisted without a level requirement',()=>{for(const d of N.NARDS_DICE){const equipment=N.cleanNards({nardsDice:d.id,nardsDiceSize:'small'},50);assert.equal(equipment.nardsDice,d.id);assert.equal(equipment.nardsDiceSize,'small');}assert.equal(N.cleanNards({nardsDiceSize:'small'},1).nardsDiceSize,'small');for(const value of [null,{},'giant',1])assert.equal(N.cleanNards({nardsDiceSize:value},1).nardsDiceSize,'standard');});
 test('new collections keep server level locks and reset unavailable choices',()=>{assert.equal(N.NARDS_DICE.length,11);for(const c of N.DESIGN_CHECKERS){assert.equal(N.cleanNards({checkers:c.id},50).checkers,c.id);if(c.level>1)assert.equal(N.cleanNards({checkers:c.id},1).checkers,'classic');}assert.equal(N.cleanNards({nardsDice:'galaxy'},1).nardsDice,'classic');});
 
-test('the six original interiors are available at level one, illustrated sets obey their levels',()=>{for(const id of ['classic','mosaic','jade','noir','frost'])assert.equal(N.cleanNards({nardsInterior:id},1).nardsInterior,id);for(const b of N.NARDS_INTERIORS.filter(b=>b.art)){assert.equal(N.cleanNards({nardsInterior:b.id},b.level).nardsInterior,b.id);if(b.level>1)assert.equal(N.cleanNards({nardsInterior:b.id},b.level-1).nardsInterior,'manki-villa');for(const file of [b.preview,b.surface]){const svg=fs.readFileSync(file,'utf8');assert.ok(svg.includes('data:image/webp;base64,'));assert.doesNotMatch(svg,/<script|<animate/);assert.ok(Buffer.byteLength(svg)<1500000);}}});
-
-test('full board murals reflect the picture across the hinge and repeat readable captions',()=>{for(const b of N.NARDS_INTERIORS.filter(b=>b.revision>=2&&!b.splitArt)){const svg=fs.readFileSync(b.surface,'utf8');assert.match(svg,/transform="translate\(1200 0\) scale\(-1 1\)"/);assert.equal((svg.match(/href="#half-mural"/g)||[]).length,2);if(b.quote){assert.equal((svg.match(/class="board-quote"/g)||[]).length,2);assert.equal((svg.match(new RegExp(b.signature,'g'))||[]).length,2);}}});
+test('the six original interiors are available at level one, illustrated sets obey their levels',()=>{for(const id of ['classic','mosaic','jade','noir','frost'])assert.equal(N.cleanNards({nardsInterior:id},1).nardsInterior,id);for(const b of N.NARDS_INTERIORS.filter(b=>b.art)){assert.equal(N.cleanNards({nardsInterior:b.id},b.level).nardsInterior,b.id);if(b.level>1)assert.equal(N.cleanNards({nardsInterior:b.id},b.level-1).nardsInterior,'manki-villa');for(const file of [b.preview,b.surface]){assert.ok(fs.readFileSync(file).length<300000);}}});
 
 test('six club backgrounds unlock at level one and default to PokerManki villa without replacing saved choices',()=>{
  const added=N.NARDS_INTERIORS.filter(b=>b.splitArt);assert.equal(added.length,6);assert.equal(N.cleanNards({},1).nardsInterior,'manki-villa');assert.ok(!N.NARDS_INTERIORS.some(b=>b.id==='ocean'));
  for(const b of added){assert.equal(b.level,1);assert.equal(N.cleanNards({nardsInterior:b.id},1).nardsInterior,b.id);for(const side of ['leftSurface','rightSurface'])assert.ok(fs.existsSync(b[side]));}
  assert.equal(N.cleanNards({nardsInterior:'classic'},1).nardsInterior,'classic');
+});
+
+test('illustrated previews and gameplay panels have mobile size budgets',async()=>{
+ const sharp=require('sharp');
+ for(const b of N.NARDS_INTERIORS.filter(b=>b.art)){
+  const preview=await sharp(b.preview).metadata();assert.equal(preview.format,'webp');assert.equal(preview.width,480);assert.ok(fs.statSync(b.preview).size<70000,b.id+' thumbnail too large');
+  for(const side of ['leftSurface','rightSurface']){const m=await sharp(b[side]).metadata();assert.equal(m.width,582);assert.equal(m.height,1000);assert.ok(fs.statSync(b[side]).size<150000,b.id+' panel too large');}
+ }
 });
