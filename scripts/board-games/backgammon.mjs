@@ -33,7 +33,7 @@ export function backgammonDestinations(s){
 }
 function endTurn(s){s.stepUndo=[];s.turns[s.turn]++;s.turn=1-s.turn;s.ply++;s.phase='roll';s.dice=[];s.headTaken=0;s.drawOffer=null;s.message='Бросьте кости';}
 export function backgammonRoll(s,player,dice){if(s.winner!==null||!['opening','roll'].includes(s.phase)||s.phase!=='opening'&&player!==s.turn||!Array.isArray(dice)||dice.length!==2||dice.some(n=>!Number.isInteger(n)||n<1||n>6))return false;
- s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(s.phase==='opening'){if(dice[0]===dice[1]){s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.opening=false;}
+ s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(s.phase==='opening'){if(dice[0]===dice[1]){s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.rollPlayer=s.turn;s.opening=false;}
  s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){endTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
 }
 export function backgammonMove(s,player,m){

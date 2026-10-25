@@ -2,6 +2,7 @@ import {createDiceMesh,DICE_REST_X,DICE_REST_Y} from './dice-mesh.mjs';
 // Visual-only dice. Values always come from the accepted game state.
 const spots={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 export const DICE_DURATION=1180;
+export function diceOwner(state){return state.phase==='moving'?state.turn:([0,1].includes(state.rollPlayer)?state.rollPlayer:state.turn);}
 export function diceFaces(top){const front=[1,2,3,4,5,6].find(n=>n!==top&&n!==7-top),right=[1,2,3,4,5,6].find(n=>![top,7-top,front,7-front].includes(n));return {top,bottom:7-top,front,back:7-front,right,left:7-right};}
 function face(name,value){const el=document.createElement('span');el.className='cube-face cube-face--'+name;el.dataset.value=value;for(const pos of spots[value]){const dot=document.createElement('i');dot.style.gridArea=Math.ceil(pos/3)+' / '+((pos-1)%3+1);el.append(dot);}return el;}
 export function createDiceView(container,onSettled,onThrow=()=>{}){
@@ -14,7 +15,7 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
   if(!state||state.discipline==='chess'){reset();return false;}
   if(options.context!==context){reset();context=options.context;}
   if(state.roll.length!==2){cancel();key='';layer.replaceChildren();layer.hidden=true;initialized=true;return false;}
-  const next=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()));
+  const next=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()))+':'+diceOwner(state);
   const scale=options.size==='small'?.72:1,flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped||lastScale!==scale);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
   // A mobile viewport update must not cancel a throw already in flight.
   if(next===key&&rolling){mark(state);return false;}
@@ -23,7 +24,7 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
   const duration=reduced?320:DICE_DURATION;
   cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;
   const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
-  lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=[0,1].includes(state.rollPlayer)?state.rollPlayer:state.turn,right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
+  lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=diceOwner(state),right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
   state.roll.forEach((value,i)=>{
    const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube'+(i?' dice-cube--amber':'');shadow.className='dice-ground-shadow';cube.dataset.value=value;cube.setAttribute('role','img');cube.setAttribute('aria-label','Кость '+(i+1)+': '+value);for(const [side,n]of Object.entries(diceFaces(value)))cube.append(face(side,n));flight.append(cube);layer.append(shadow,flight);dice.push(cube);const mesh=createDiceMesh(cube,diceFaces(value),size);
    const x=width*(right?(i?.80:.64):(i?.36:.20))-size/2,y=height*.5-size/2;flight.style.transform='translate3d('+x+'px,'+y+'px,0)';cube.style.transform='none';mesh.draw(DICE_REST_X,DICE_REST_Y,i?.14:-.12);shadow.style.transform='translate('+x+'px,'+(y+size*.64)+'px) scale(1)';
