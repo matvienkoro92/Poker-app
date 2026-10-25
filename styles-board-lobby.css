@@ -94,3 +94,5 @@
 #lobby .board-lobby-wizard #boardSetupBack{min-width:72px;padding:7px 9px;font-size:12px;white-space:nowrap}
 .board-setup-actions{display:grid;grid-template-columns:minmax(85px,.7fr) minmax(0,1.3fr);gap:8px}
 #lobby .board-setup-actions #boardSetupBackFooter{background:#1a3025;color:#e6d4af;border:1px solid #bda16a70;box-shadow:inset 0 1px #ffffff08}
+
+#lobby .board-timeout-note{margin:8px 0 0;padding:10px 12px;border-left:2px solid #c6aa69;border-radius:0 8px 8px 0;background:#c6aa690b;color:#ddc99d;font-size:12px;line-height:1.5}

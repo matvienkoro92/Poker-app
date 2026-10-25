@@ -37,7 +37,7 @@ test('pulse opens commands and correct download and club links',async t=>{
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
  assert.deepEqual(buttons.slice(-7,-4),[
   {text:'📋 Ссылка',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
-  {text:'✉️ Написать менеджеру',style:'success',callback_data:'club:manager'},
+  {text:'💳 Пополнить счёт',style:'success',callback_data:'club:manager'},
   {text:'📋 Ссылка на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
  ]);
 });
@@ -153,3 +153,5 @@ test('game commands work in private and group chats with matching links',async()
   await c.handle(update,'test');const sent=calls.at(-1);assert.equal(sent.chat_id,update.message.chat.id);assert.match(sent.text,/бросьте вызов в чат/);assert.equal(sent.reply_markup.inline_keyboard[0][0].url,'https://t.me/Poker_dvatuza_bot/DvaTuza?startapp='+en);
  }}finally{global.fetch=original;}
 });
+
+test('each bot game menu has a back button returning to the club menu',async t=>{const old=global.fetch,sent=[];global.fetch=async(url,options)=>{sent.push(JSON.parse(options.body));return {json:async()=>({ok:true,result:{message_id:99}})};};t.after(()=>{global.fetch=old;});for(const game of ['nards','chess','billiards'])await c.handle({message:{message_id:3,chat:{id:42,type:'private'},from:{id:42}}},'test','game:'+game);assert.equal(sent.length,3);for(const message of sent){assert.equal(message.reply_markup.inline_keyboard.length,2);assert.equal(message.reply_markup.inline_keyboard[1][0].callback_data,'club:pulse');assert.equal(message.reply_markup.inline_keyboard[1][0].text,'⬅️ Назад');}});

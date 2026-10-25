@@ -6,6 +6,7 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  $('lobby').insertBefore(wizard,preview);
  $('boardSetupDiscipline').append($('disciplines'),preview);
  $('boardSetupFormat').append(setup);
+ const timeoutNote=document.createElement('p');timeoutNote.id='boardTimeoutNote';timeoutNote.className='board-timeout-note';timeoutNote.textContent='Если время на ход закончится, вам будет засчитано поражение.';$('boardSetupFormat').append(timeoutNote);
  $('boardSetupJoin').append(joinCard);
  oldLaunch.remove();$('join').hidden=true;$('raceTo').closest('label').hidden=true;
  const icons={solo:'<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 9h.01M16 9h.01M9 12h6"/>',friend:'<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0112 0v3M16 5a3 3 0 010 6M18 15a5 5 0 013 4v2"/>',find:'<circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/>',challenge:'<path d="M21 11a8 8 0 01-8 8H5l-3 3V11a9 9 0 0118 0zM8 10h8M8 14h5"/>',training:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>',join:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m8 9-2 3 2 3m10-6 2 3-2 3"/>'};
@@ -16,7 +17,7 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  $('boardSetupTitle').textContent={Mode:'Режим игры',Wager:'Вход 0 или на фишки',Discipline:'Дисциплина',Format:'Формат матча',Join:'Присоединиться к игре'}[current];$('boardSetupProgress').textContent='Шаг '+(step+1)+' из '+stages().length;
  wizard.querySelector('.setup-step-track').innerHTML=stages().map((_,i)=>'<i class="'+(i===step?'is-current':i<step?'is-done':'')+'"></i>').join('');for(const b of $('boardModeButtons').children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
  $('boardSetupNext').textContent=step<stages().length-1?'Далее →':({solo:'Начать игру',training:'Начать тренировку',friend:'Создать комнату',challenge:'Отправить вызов в чат',find:'Найти соперника',join:'Присоединиться'})[mode];
- $('boardFormatButtons').hidden=training;$('difficulty').closest('label').hidden=!solo;$('sideLabel').hidden=!solo&&!training;$('turnTimeLabel').hidden=training||getKind()==='chess';$('chessTimeLabel').hidden=training||getKind()!=='chess';$('boardSetupError').textContent='';}
+ $('boardFormatButtons').hidden=training;$('difficulty').closest('label').hidden=!solo;$('sideLabel').hidden=!solo&&!training;$('turnTimeLabel').hidden=training||getKind()==='chess';timeoutNote.hidden=training||getKind()==='chess';$('chessTimeLabel').hidden=training||getKind()!=='chess';$('boardSetupError').textContent='';}
  $('boardWagerModes').onclick=e=>{const b=e.target.closest('[data-wager]');if(!b)return;wagerMode=b.dataset.wager;for(const c of $('boardWagerModes').children)c.setAttribute('aria-pressed',String(c===b));$('boardWagerAmountLabel').hidden=$('boardWagerTerms').hidden=wagerMode!=='chips';};
  $('boardWagerAmount').oninput=()=>{$('boardSetupError').textContent='';};
  $('boardFormatButtons').onclick=e=>{const b=e.target.closest('[data-format]');if(!b)return;$('raceTo').value=b.dataset.format;for(const c of $('boardFormatButtons').children)c.setAttribute('aria-pressed',String(c===b));};
