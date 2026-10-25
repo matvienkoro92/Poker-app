@@ -854,3 +854,7 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-preview-checker.is-black{--disc-rim:#676c60;--disc-side:#141e18;border-color:#444e41;background-image:radial-gradient(ellipse at 28% 15%,#e7e7c71f,transparent 55%),linear-gradient(#101c1866,#101c1866),var(--disc-art),radial-gradient(circle at 35% 25%,#525b49,var(--disc-color) 70%);background-size:100% 100%,100% 100%,118% 118%,100% 100%;box-shadow:inset 0 1px 1px #d5dccf55,inset 0 -1px 1px #050a07aa,0 1px 0 #303b2d,0 2px 0 #141e18,0 3px 2px #080d0866}
 .living-preview-checker::before{display:none}
 .living-preview-checker::after,.living-preview-checker.is-black::after{inset:2px;border:1px solid color-mix(in srgb,var(--disc-rim) 65%,transparent);border-radius:50%;background:none;box-shadow:inset 0 1px #ffffff24;pointer-events:none}
+
+/* Closed case on the table: the selected exterior covers the baked-in playing field. */
+.player-hall-dialog .living-game-case .living-case-art.is-closed-cover{display:block;overflow:hidden;inset:0 0 auto;height:64%;border:2px ridge #9a713e;border-radius:2px;background-size:100% 100%;background-position:center;clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);box-shadow:inset 0 0 0 1px #e0bb7633,0 3px 0 #352419}
+.player-hall-dialog .living-game-case .living-case-art.is-closed-cover::after{content:'';position:absolute;inset:3%;border:1px solid #e2bb7855;box-shadow:inset 0 1px 3px #0004;pointer-events:none}

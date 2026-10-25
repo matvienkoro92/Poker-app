@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createTurnStartNotifier} from '../scripts/shared/turn-start-sound.mjs';
+test('notifies once on entry and once each time the opponent hands back the turn',()=>{let n=0;const sound=createTurnStartNotifier(()=>n++),update=mine=>sound.update({context:'room:1',active:true,mine});update(true);for(let i=0;i<100;i++)update(true);assert.equal(n,1);update(false);update(false);update(true);assert.equal(n,2);});
+test('disconnects, spectators and training do not create repeat notifications',()=>{let n=0;const sound=createTurnStartNotifier(()=>n++);sound.update({context:'room:1',active:true,mine:true});sound.update({context:'room:1',active:false,mine:false});sound.update({context:'room:1',active:true,mine:true});assert.equal(n,1);sound.update({context:'training',active:false,mine:true});assert.equal(n,1);});
+test('a new round or a new session may announce the initial turn again',()=>{let n=0;const sound=createTurnStartNotifier(()=>n++);sound.update({context:'room:1',active:true,mine:true});sound.update({context:'room:2',active:true,mine:true});assert.equal(n,2);sound.reset();sound.update({context:'room:2',active:true,mine:true});assert.equal(n,3);});

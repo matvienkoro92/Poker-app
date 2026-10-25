@@ -23,9 +23,9 @@ for(const b of NARDS_INTERIORS){
  }
  if(b.revision>=2){
   const encoded=fs.readFileSync(path.join(out,'illustration-'+b.art+'.webp')).toString('base64');
-  const artwork='<g id="half-mural"><image href="data:image/webp;base64,'+encoded+'" x="24" y="80" width="534" height="840" preserveAspectRatio="xMidYMid slice"/></g>';
+  const artwork='<g id="half-mural"><image href="data:image/webp;base64,'+encoded+'" x="0" y="0" width="582" height="1000" preserveAspectRatio="xMidYMid slice"/></g>';
   const lines=b.id==='emil-respect'?['Как покериста тебя','уважаю ✊🏾 ,','но нарды не потянешь']:b.id==='cooler-tears'?['Это не слёзы.','Это плохие зарики.']:b.quote?['За этой доской','решаю я.']:[];
-  const inscription=x=>!lines.length?'':'<g class="board-quote" fill="'+b.accent+'" fill-opacity="1" stroke="'+b.dark+'" stroke-opacity=".95" stroke-width="2" paint-order="stroke" font-family="Georgia,serif" font-weight="600" text-anchor="middle"><path d="M'+(x-100)+' 452H'+(x+100)+'M'+(x-55)+' 582H'+(x+55)+'" fill="none" stroke="'+b.dark+'" stroke-opacity=".35" stroke-width="1"/>'+lines.map((line,i)=>'<text x="'+x+'" y="'+(477+i*31)+'" font-size="32">'+line+'</text>').join('')+'<text x="'+x+'" y="568" font-size="18">'+(b.id==='emil-respect'?'(с) ':'')+b.signature+'</text></g>';
+  const inscription=x=>!lines.length?'':'<g class="board-quote" transform="translate(0 180)" fill="'+b.accent+'" fill-opacity="1" stroke="'+b.dark+'" stroke-opacity=".95" stroke-width="2" paint-order="stroke" font-family="Georgia,serif" font-weight="600" text-anchor="middle"><path d="M'+(x-100)+' 452H'+(x+100)+'M'+(x-55)+' 582H'+(x+55)+'" fill="none" stroke="'+b.dark+'" stroke-opacity=".35" stroke-width="1"/>'+lines.map((line,i)=>'<text x="'+x+'" y="'+(477+i*31)+'" font-size="32">'+line+'</text>').join('')+'<text x="'+x+'" y="568" font-size="18">'+(b.id==='emil-respect'?'(с) ':'')+b.signature+'</text></g>';
   base='<defs>'+artwork+'</defs><rect width="1200" height="1000" fill="'+b.light+'"/><g><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
  }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';

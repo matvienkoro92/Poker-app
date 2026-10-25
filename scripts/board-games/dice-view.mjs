@@ -4,7 +4,7 @@ const spots={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 export const DICE_DURATION=1180;
 export function diceFaces(top){const front=[1,2,3,4,5,6].find(n=>n!==top&&n!==7-top),right=[1,2,3,4,5,6].find(n=>![top,7-top,front,7-front].includes(n));return {top,bottom:7-top,front,back:7-front,right,left:7-right};}
 function face(name,value){const el=document.createElement('span');el.className='cube-face cube-face--'+name;el.dataset.value=value;for(const pos of spots[value]){const dot=document.createElement('i');dot.style.gridArea=Math.ceil(pos/3)+' / '+((pos-1)%3+1);el.append(dot);}return el;}
-export function createDiceView(container,onSettled){
+export function createDiceView(container,onSettled,onThrow=()=>{}){
  const layer=document.createElement('div');layer.className='board-dice-stage';layer.hidden=true;layer.setAttribute('aria-label','Кости на доске');container.append(layer);
  let lastWidth=0,lastFlipped=null,lastScale=1;let key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[];
  function cancel(){epoch++;clearTimeout(timer);for(const a of animations)a.cancel();animations=[];rolling=false;layer.classList.remove('is-rolling');}
@@ -45,7 +45,7 @@ export function createDiceView(container,onSettled){
    animations.push(shadow.animate(frames.map((f,j)=>({offset:f.offset,transform:'translate('+f.x+'px,'+(y+size*.64)+'px) scale('+([.35,1,.64,1,.86,1,1][j])+')',opacity:[0,.85,.24,.85,.45,.85,.85][j]})),timing));
   });
   mark(state);
-  if(animate){rolling=true;layer.classList.add('is-rolling');const token=epoch;timer=setTimeout(()=>{if(token===epoch)settle();},duration+(reduced?45:115));}
+  if(animate){onThrow();rolling=true;layer.classList.add('is-rolling');const token=epoch;timer=setTimeout(()=>{if(token===epoch)settle();},duration+(reduced?45:115));}
   return animate;
  }
  function mark(state){const remaining=[...state.dice],double=state.roll[0]===state.roll[1];for(const cube of dice){const at=remaining.indexOf(Number(cube.dataset.value));cube.classList.toggle('is-spent',!rolling&&state.phase!=='opening'&&(double?state.dice.length===0:at<0));if(at>=0)remaining.splice(at,1);}}

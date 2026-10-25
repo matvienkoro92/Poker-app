@@ -434,3 +434,41 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .checker.black,.nards-board .checker.black{--disc-rim:#676c60;--disc-side:#141e18;border-color:#444e41;background-image:radial-gradient(ellipse at 28% 15%,#e7e7c71f,transparent 55%),linear-gradient(#101c1866,#101c1866),var(--disc-art),radial-gradient(circle at 35% 25%,#525b49,var(--disc-color) 70%);background-size:100% 100%,100% 100%,118% 118%,100% 100%;box-shadow:inset 0 1px 1px #d5dccf55,inset 0 -1px 1px #050a07aa,0 1px 0 #303b2d,0 2px 0 #141e18,0 3px 2px #080d0866}
 .checker::before{display:none}
 .checker::after,.checker.black::after{inset:2px;border:1px solid color-mix(in srgb,var(--disc-rim) 65%,transparent);border-radius:50%;background:none;box-shadow:inset 0 1px #ffffff24;pointer-events:none}
+
+/* Keep the board visible while collections swipe horizontally beneath it. */
+#equipment[open]:has(#nardsEquipment:not([hidden])){display:flex;flex-direction:column;max-height:calc(100dvh - 12px);padding:12px;overflow:auto}
+#equipment:has(#nardsEquipment:not([hidden]))>header{margin-bottom:5px;flex-shrink:0}
+#equipment:has(#nardsEquipment:not([hidden]))>header h2{font-size:18px}
+#equipment:has(#nardsEquipment:not([hidden]))>header+p{display:none}
+#equipment:has(#nardsEquipment:not([hidden])) #equipmentLevel{font-size:10px;margin:0 0 4px}
+#nardsEquipment .nards-editor-tabs{position:static;margin:0 0 7px;padding:0;gap:5px}
+#nardsEquipment .nards-editor-tabs button{min-height:35px;padding:6px 3px;font-size:11px;border-radius:9px}
+#nardsPreview.has-live-board{padding:6px;margin:0 0 8px}
+#nardsPreview .editor-board{width:min(100%,36dvh);margin:auto}
+#nardsPreview .editor-board-caption{margin:5px 0 0!important;font-size:9px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nardsEquipment [role=tabpanel]>h3{font-size:12px;margin:0 0 5px}
+#nardsEquipment [role=tabpanel]>p{display:none}
+#nardsEquipment .collection{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;overscroll-behavior-x:contain;touch-action:pan-x;scrollbar-width:thin;scrollbar-color:#ae945b55 transparent;padding:3px 2px 7px;margin:0;-webkit-overflow-scrolling:touch}
+#nardsEquipment .collection>button{flex:0 0 108px;min-width:108px;scroll-snap-align:start;padding:5px;font-size:10px;line-height:1.25;border-radius:9px}
+#nardsEquipment .collection img{height:65px;width:100%;aspect-ratio:auto;object-fit:contain;margin:0 0 4px}
+#nardsEquipment .collection small{font-size:8px;margin-top:3px}
+#nardsEquipment .checker-collection .checker{width:27px;height:27px;margin:3px 4px 6px}
+#nardsEquipment .dice-collection .nards-dice-sample{gap:6px;margin:3px 0 6px}
+#nardsEquipment .dice-collection .nards-dice-sample i{width:27px;height:27px;font-size:20px;padding:4px;border-radius:7px}
+#nardsEquipment .nards-dice-size{margin:0 0 5px;gap:6px}
+#nardsEquipment .nards-dice-size button{min-height:29px;padding:3px 8px;font-size:10px}
+#equipment:has(#nardsEquipment:not([hidden])) #equipmentStatus:empty{display:none}
+#equipment:has(#nardsEquipment:not([hidden])) #saveEquipment{min-height:37px;flex-shrink:0;margin-top:8px;padding:6px 12px;font-size:12px}
+@media(max-height:650px){#nardsPreview .editor-board{width:min(100%,29dvh)}#nardsEquipment .collection img{height:48px}#nardsEquipment .collection>button{flex-basis:96px;min-width:96px}}
+
+/* Remaining move values sit under the match label, opposite the turn status. */
+.board-meta-details{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-end;gap:5px}
+#game .board-meta-details #series{flex:none;width:100%}
+.remaining-dice{display:flex;align-items:center;justify-content:flex-end;gap:5px;min-height:21px}
+.remaining-die{box-sizing:border-box;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);width:21px;height:21px;gap:2px;padding:4px;border:1px solid #d8bd80;border-radius:5px;background:#eddbaf;box-shadow:inset 0 1px #fff6,0 1px 2px #0003}
+.remaining-die i{display:block;width:3px;height:3px;border-radius:50%;background:#334332;align-self:center;justify-self:center}
+
+/* Selection marks the checker itself, leaving the illustrated lane untouched. */
+.nards-board .point.selected{background:none;box-shadow:none}
+.nards-board .point.selected .number{background:#352b2199;color:#f5e5c4;box-shadow:none}
+.nards-board .point .checker.is-picked{outline:2px solid #fff2a6;outline-offset:2px;box-shadow:0 0 0 4px #d6aa4280,0 0 13px #ffe292b3,0 3px 4px #0007;filter:brightness(1.16)}
