@@ -29,3 +29,9 @@ for(const discipline of ['short','long'])test(discipline+' first turn per player
  }
  r=await f.service.call('host',{action:'move',roomId,revision:r.revision,move:{type:'roll'}});assert.equal(r.turnDeadline-r.serverNow,30000);
 });
+for(const discipline of ['short','long'])test(discipline+': timeout hands over a fresh clock; repeated polls do not count again; third own skip records one loss',async()=>{
+ const f=fixture();let r=await pair(f,discipline);for(let i=0;i<5;i++){
+  f.advance(91000);r=await f.service.call('host',{action:'room',roomId:r.roomId});const snapshot=structuredClone(r.state.missedTurns);const repeat=await f.service.call('guest',{action:'room',roomId:r.roomId});assert.deepEqual(repeat.state.missedTurns,snapshot);
+  if(i<4){assert.equal(r.state.winner,null);assert.ok(r.turnDeadline);assert.deepEqual(r.match.wins,[0,0]);}else{assert.equal(r.state.winner,1);assert.equal(r.state.endReason,'timeout-skips');assert.equal(r.turnDeadline,null);assert.deepEqual(r.match.wins,[0,1]);}
+ }
+});

@@ -6,7 +6,7 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  $('lobby').insertBefore(wizard,preview);
  $('boardSetupDiscipline').append($('disciplines'),preview);
  $('boardSetupFormat').append(setup);
- const timeoutNote=document.createElement('p');timeoutNote.id='boardTimeoutNote';timeoutNote.className='board-timeout-note';timeoutNote.textContent='Если время на ход закончится, вам будет засчитано поражение.';$('boardSetupFormat').append(timeoutNote);
+ const timeoutNote=document.createElement('p');timeoutNote.id='boardTimeoutNote';timeoutNote.className='board-timeout-note';timeoutNote.textContent='Если время закончится, ход перейдёт сопернику. Три пропуска подряд — поражение. Завершённый ход сбрасывает пропуски.';$('boardSetupFormat').append(timeoutNote);
  $('boardSetupJoin').append(joinCard);
  oldLaunch.remove();$('join').hidden=true;$('raceTo').closest('label').hidden=true;
  const icons={solo:'<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M8 20h8M12 16v4M8 9h.01M16 9h.01M9 12h6"/>',friend:'<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0112 0v3M16 5a3 3 0 010 6M18 15a5 5 0 013 4v2"/>',find:'<circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/>',challenge:'<path d="M21 11a8 8 0 01-8 8H5l-3 3V11a9 9 0 0118 0zM8 10h8M8 14h5"/>',training:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>',join:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m8 9-2 3 2 3m10-6 2 3-2 3"/>'};

@@ -1,4 +1,4 @@
-export function createBackgammon(discipline='short'){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
+export function createBackgammon(discipline='short'){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
 const sign=p=>p===0?1:-1;
 export const progress=(s,p,i)=>s.discipline==='long'?(i-(p===0?0:12)+24)%24:p===0?i:23-i;
 const index=(s,p,n)=>s.discipline==='long'?(n+(p===0?0:12))%24:p===0?n:23-n;
@@ -31,10 +31,10 @@ export function backgammonDestinations(s){
  }
  return [...found.values()];
 }
-function endTurn(s){s.stepUndo=[];s.turns[s.turn]++;s.turn=1-s.turn;s.ply++;s.phase='roll';s.dice=[];s.headTaken=0;s.drawOffer=null;s.message='Бросьте кости';}
+export function endBackgammonTurn(s,timeout=false){s.missedTurns??=[0,0];if(!timeout)s.missedTurns[s.turn]=0;s.stepUndo=[];s.turns[s.turn]++;s.turn=1-s.turn;s.ply++;s.phase='roll';s.dice=[];s.headTaken=0;s.drawOffer=null;s.message='Бросьте кости';}
 export function backgammonRoll(s,player,dice){if(s.winner!==null||!['opening','roll'].includes(s.phase)||s.phase!=='opening'&&player!==s.turn||!Array.isArray(dice)||dice.length!==2||dice.some(n=>!Number.isInteger(n)||n<1||n>6))return false;
  s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(s.phase==='opening'){if(dice[0]===dice[1]){s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.rollPlayer=s.turn;s.opening=false;}
- s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){endTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
+ s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){endBackgammonTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
 }
 export function backgammonMove(s,player,m){
  if(m.path!==undefined){
@@ -46,7 +46,7 @@ export function backgammonMove(s,player,m){
   next.lastMove={from:valid.from,to:valid.to,die:valid.die,path:valid.path,player};
   Object.assign(s,next);return true;
  }
-if(s.winner!==null||player!==s.turn||s.phase!=='moving')return false;const legal=backgammonLegal(s).find(v=>v.from===m.from&&v.to===m.to&&v.die===m.die);if(!legal)return false;(s.stepUndo||=[]).push({turn:s.turn,ply:s.ply,rollCount:s.rollCount,points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice],headTaken:s.headTaken,lastMove:s.lastMove?{...s.lastMove}:null,movesLength:s.moves.length});applyStep(s,legal);s.lastMove={...legal,player};s.moves.push({...s.lastMove,roll:[...s.roll]});if(s.off[player]===15){s.winner=player;s.endReason='borne-off';s.phase='finished';s.scores[player]=1;s.message='Все 15 шашек выведены';}else if(!s.dice.length||!backgammonLegal(s).length)endTurn(s);return true;}
+if(s.winner!==null||player!==s.turn||s.phase!=='moving')return false;const legal=backgammonLegal(s).find(v=>v.from===m.from&&v.to===m.to&&v.die===m.die);if(!legal)return false;(s.stepUndo||=[]).push({turn:s.turn,ply:s.ply,rollCount:s.rollCount,points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice],headTaken:s.headTaken,lastMove:s.lastMove?{...s.lastMove}:null,movesLength:s.moves.length});applyStep(s,legal);s.lastMove={...legal,player};s.moves.push({...s.lastMove,roll:[...s.roll]});if(s.off[player]===15){s.winner=player;s.endReason='borne-off';s.phase='finished';s.scores[player]=1;s.message='Все 15 шашек выведены';}else if(!s.dice.length||!backgammonLegal(s).length)endBackgammonTurn(s);return true;}
 
 export function canUndoBackgammon(s,player=s.turn){const last=s.stepUndo?.at(-1);return s.discipline!=='chess'&&s.winner===null&&s.phase==='moving'&&player===s.turn&&!!last&&last.turn===s.turn&&last.ply===s.ply&&last.rollCount===s.rollCount;}
 export function undoBackgammonStep(s,player){if(!canUndoBackgammon(s,player))return false;const last=s.stepUndo.pop();for(const field of ['points','bar','off','dice'])s[field]=[...last[field]];s.headTaken=last.headTaken;s.lastMove=last.lastMove?{...last.lastMove}:null;s.moves.length=last.movesLength;return true;}
