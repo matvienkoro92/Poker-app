@@ -38,7 +38,7 @@
       if (auth && (auth.status === 'verified' || auth.status === 'dev_skip') && user) identity = String(user.memberId || user.id || 'guest');
     } catch (_) {}
     var hash = 0; for (var i = 0; i < identity.length; i++) hash = (Math.imul(hash, 31) + identity.charCodeAt(i)) >>> 0;
-    return 'cooler-flight-v3-best-' + hash;
+    return 'cooler-flight-v10-best-' + hash;
   }
   function readBest() { bestKey = storageKey(); try { best = Math.max(0, Math.min(10000, Number(localStorage.getItem(bestKey)) || 0)); } catch (_) { best = 0; } }
   var chipLines = ['ОПА!', 'НИХ@Я!', 'Пошла отмазка!', 'Сюда', 'Сюдааааа!', 'Попалася рыбешка', 'Банк растёт!', 'Вот это занос!', 'Фишечку сюда!', 'Плюс в копилку!', 'Дядя в деле!', 'Лови натс!', 'Хорошо пошла!', 'Ещё одну!', 'Забираем банк!', 'Манки, банк не твой!', 'Натс в кармане!', 'Блефую на высоте!', 'Фишка к фишке — яхта!', 'Ривер, не подведи!', 'Вода есть, денег нет!', 'Кулер заряжен!', 'Это вам не лимп!', 'Лечу на банкролле!', 'Опять доехал!', 'Дядя забирает!', 'Не коллируй стену!', 'Олл-ин на взлёт!', 'Рыба, заходи!', 'Где мой рейкбек?', 'Натс не жмёт!', 'Манки, учи чарты!', 'Переехал дисперсию!', 'Вскрываем небеса!', 'Занос без пересадки!'];
@@ -412,17 +412,18 @@
       } else {await navigator.clipboard.writeText(text+'\n'+url);status(invite?'Приглашение скопировано. Отправьте другу.':'Результат и ссылка скопированы.');}
     }catch(e){if(e.name!=='AbortError')status('Скопируйте ссылку: '+url);}
   }
-  async function showTop() {
+  async function showTop(archive) {
+    archive=archive===true;
     if(phase==='playing'||phase==='paused'||phase==='waiting'||phase==='countdown'){status('Завершите полёт или отмените дуэль, чтобы открыть топ.');return;}
     var g=++generation;phase='top';panel('<h2>Рекорды клуба</h2><p>Загружаем…</p>'+button('back','Вернуться',true));
     try{
-      var d=await api('leaderboard');if(g!==generation||!active()||phase!=='top')return;
-      panel('<span class="flight-tag">ПРОВЕРЕННЫЕ ПОЛЁТЫ</span><h2>Рекорды клуба</h2>'+dailyBoard(d.daily)+'<h2>За всё время</h2>'+(d.rows.length?'<ol>'+d.rows.map(function(r){return '<li class="'+(r.mine?'flight-mine':'')+'"><b>'+r.place+'</b><span>'+esc(r.name)+(r.mine?' · ты':'')+'</span><strong>'+r.score+'</strong></li>';}).join('')+'</ol>':'<p>Здесь пока пусто.<br>Стань первым Кулером в топе!</p>')+(d.place?'<p>Твоё место: '+d.place+' · Рекорд: '+d.best+'</p>':'')+button('back','Вернуться к полёту',true));
+      var d=await api('leaderboard',{archive:archive===true});if(g!==generation||!active()||phase!=='top')return;
+      panel('<span class="flight-tag">'+(archive?'ПРЕЖНИЕ ПРАВИЛА':'ТИЛЬТ-ЗОНА · НОВЫЙ РЕЙТИНГ')+'</span><h2>'+(archive?'Архив рекордов':'Рекорды клуба')+'</h2>'+(archive?'':dailyBoard(d.daily))+'<h2>'+(archive?'До Тильт-зоны':'Новый сезон')+'</h2>'+(d.rows.length?'<ol>'+d.rows.map(function(r){return '<li class="'+(r.mine?'flight-mine':'')+'"><b>'+r.place+'</b><span>'+esc(r.name)+(r.mine?' · ты':'')+'</span><strong>'+r.score+'</strong></li>';}).join('')+'</ol>':'<p>Здесь пока пусто.<br>Стань первым Кулером в топе!</p>')+(d.place?'<p>Твоё место: '+d.place+' · Рекорд: '+d.best+'</p>':'')+button(archive?'top-current':'top-archive',archive?'Новый рейтинг':'Архив прежних рекордов',true)+button('back','Вернуться к полёту',true));
     }catch(e){if(g===generation&&active())panel('<h2>Топ пока недоступен</h2><p>'+esc(e.message)+'</p>'+button('back','Вернуться',true));}
   }
   function action(a) {
     if(a==='close-result'){resultClosed=true;ui.overlay.hidden=true;ui.hint.textContent='Коснись поля, чтобы открыть результат';return;}
-    if(a==='start')startSolo();else if(a==='resume')resume();else if(a==='create')createRoom();else if(a==='rematch')rematch();
+    if(a==='top-archive')showTop(true);else if(a==='top-current')showTop(false);else if(a==='start')startSolo();else if(a==='resume')resume();else if(a==='create')createRoom();else if(a==='rematch')rematch();
     else if(a==='join'){var el=document.getElementById('coolerFlightRoomCode');joinRoom(el?el.value:'');}
     else if(a==='invite')share(true);else if(a==='share')share(false);else if(a==='card')downloadCard();else if(a==='save')submit();
     else if(a==='cancel'||a==='back'||a==='quit'){abandon();generation++;stopPolling();room=null;duelStarted=false;status('');ready();}

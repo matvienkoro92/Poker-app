@@ -5,16 +5,16 @@ const crypto = require('node:crypto');
 const Engine = require('../../app-cooler-flight-engine');
 function fixture(options={}) {
   const race=!!options.race,engine=race?require('../../app-monkey-race-engine'):Engine;
-  const strings = new Map(), hashes = new Map(), top = new Map(), boards=new Map();
+  const strings = new Map(), hashes = new Map(), top = new Map(), legacyTop=new Map(), boards=new Map();
   let now = Date.now(), configured = true;
-  function ranked(k) { return [...(k && k.includes(':daily:') ? boards.get(k)||new Map() : top).entries()].sort((a,b) => b[1]-a[1] || b[0].localeCompare(a[0])); }
+  function ranked(k) { return [...(k && k.includes(':daily:') ? boards.get(k)||new Map() : !race&&k==='poker_app:cooler_flight:v3:top'?legacyTop:top).entries()].sort((a,b) => b[1]-a[1] || b[0].localeCompare(a[0])); }
   function command(c) {
     const [op,k,...args] = c;
     if(op==='GET')return strings.get(k)||null;
     if(op==='SET'){strings.set(k,args[0]);return 'OK';}
     if(op==='ZREVRANGE')return ranked(k).slice(Number(args[0]),Number(args[1])+1).flatMap(([id,score])=>[id,String(score)]);
-    if(op==='ZREVRANK'){const at=ranked().findIndex(([id])=>id===args[0]);return at<0?null:at;}
-    if(op==='ZSCORE')return top.has(args[0])?String(top.get(args[0])):null;
+    if(op==='ZREVRANK'){const at=ranked(k).findIndex(([id])=>id===args[0]);return at<0?null:at;}
+    if(op==='ZSCORE'){const board=!race&&k==='poker_app:cooler_flight:v3:top'?legacyTop:top;return board.has(args[0])?String(board.get(args[0])):null;}
     if(op==='ZRANGEBYSCORE')return [...(boards.get(k)||new Map()).entries()].filter(([_,value])=>value<=Number(args[1])).sort((a,b)=>a[1]-b[1]).slice(0,100).map(([id])=>id);
     if(op==='HGETALL')return Object.fromEntries(hashes.get(k)||[]);
     if(op==='HMGET')return args.map(id=>(hashes.get(k)||new Map()).get(id)||null);
@@ -49,7 +49,7 @@ function fixture(options={}) {
       if(k.includes("redis.call('DEL',KEYS[1])")){
         const raw=strings.get(keys[0]);if(!raw)return 0;const r=JSON.parse(raw);if(r.member!==values[0])return -1;
         strings.delete(keys[0]);strings.set(keys[1],values[1]);
-        if(Number(values[2])>=0){top.set(values[0],Math.max(top.get(values[0])||0,Number(values[2])));if(!hashes.has(keys[3]))hashes.set(keys[3],new Map());hashes.get(keys[3]).set(values[0],values[3]);}
+        if(Number(values[2])>=0){const board=!race&&keys[2]==='poker_app:cooler_flight:v3:top'?legacyTop:top;board.set(values[0],Math.max(board.get(values[0])||0,Number(values[2])));if(!hashes.has(keys[3]))hashes.set(keys[3],new Map());hashes.get(keys[3]).set(values[0],values[3]);}
         if(race&&keys.length===5&&Number(values[2])>=0){const st=JSON.parse(strings.get(keys[4])||'{}'),p=JSON.parse(values[1]);strings.set(keys[4],JSON.stringify({best:Math.max(st.best||0,Number(values[2])),runs:(st.runs||0)+1,chips:(st.chips||0)+(p.perfect||0)}));}
         if(keys.length>=7 && Number(values[2])>0 && now<Number(values[4])){
           if(!boards.has(keys[4]))boards.set(keys[4],new Map());const board=boards.get(keys[4]);const previous=Math.max(0,...board.values());if(keys.length===8 && Number(values[2])>Math.floor(previous/100000000)){if(!hashes.has(keys[7]))hashes.set(keys[7],new Map());hashes.get(keys[7]).set(r.id,values[6]);}const value=Number(values[2])*100000000+Number(values[4])-now;
@@ -75,7 +75,7 @@ function fixture(options={}) {
     await context.module.exports({method:'POST',body,testPlayer:player,testIdentity:identity},{setHeader(){},status(n){statusCode=n;return this;},json(d){data=JSON.parse(JSON.stringify(d));return this;},end(){return this;}});
     return {status:statusCode,data};
   }
-  return {request,strings,top,hashes,boards,setTime:value=>{now=value;},advance:ms=>{now+=ms;},setConfigured:v=>{configured=v;}};
+  return {request,strings,top,legacyTop,hashes,boards,setTime:value=>{now=value;},advance:ms=>{now+=ms;},setConfigured:v=>{configured=v;}};
 }
 function fly(seed,until=1100){
   const s=Engine.create(seed),taps=[];

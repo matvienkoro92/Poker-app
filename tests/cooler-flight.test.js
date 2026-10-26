@@ -165,3 +165,11 @@ test('an existing v9 duel retains identical rules for its guest',async()=>{
  const ownKey=prefix+'run:'+host.runId,run=JSON.parse(f.strings.get(ownKey));run.version=9;f.strings.set(ownKey,JSON.stringify(run));
  const guest=(await f.request({action:'join',roomId:host.roomId},'Bob')).data;assert.equal(guest.version,9);assert.equal(JSON.parse(f.strings.get(prefix+'run:'+guest.runId)).version,9);
 });
+
+test('new tilt leaderboard starts empty while old records stay in a separate archive',async()=>{
+ const f=fixture();f.legacyTop.set('Alice',800);f.hashes.set('poker_app:cooler_flight:v3:names',new Map([['Alice','Кулер']]));
+ const current=(await f.request({action:'leaderboard'})).data;assert.equal(current.rows.length,0);assert.equal(current.best,0);assert.equal(current.place,null);
+ const archive=(await f.request({action:'leaderboard',archive:true})).data;assert.equal(archive.rows[0].score,800);assert.equal(archive.best,800);assert.equal(archive.place,1);
+ const run=(await f.request({action:'start'})).data,{s,taps}=fly(run.seed);f.advance(s.tick*1000/60+1000);assert.equal((await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps})).status,200);
+ assert.equal(f.top.get('Alice'),s.score);assert.equal(f.legacyTop.get('Alice'),800);
+});
