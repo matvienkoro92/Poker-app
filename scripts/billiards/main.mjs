@@ -47,7 +47,7 @@ const connectionNotice=mountConnectionNotice(document.querySelector('.billiards>
 const clockWarning=mountTurnWarning($('turnClock'));
 const turnStartSound=mountTurnStartSound();
 mountSoundSettings([document.querySelector('main.billiards>header')]);
-const tableDock=document.createElement('section');tableDock.id='tableDock';document.querySelector('.billiards>header>div').append($('turnClock'));tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
+const tableDock=document.createElement('section');tableDock.id='tableDock';$('turnGuide').append($('turnClock'));tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
 const resultPanel=mountResultPanel(tableDock,()=>$('again').click());
 let initialEntry=new URLSearchParams(location.search).get('mode')||'lobby';
 try{if(parent!==window&&window.frameElement?.dataset.billiardsEntry)initialEntry=window.frameElement.dataset.billiardsEntry;}catch{}
@@ -57,6 +57,7 @@ const tableSkins=mountTableSkins({source:heroSource,room});
 const equipment=mountCues({source:heroSource,room});
 const roomToolbar=document.createElement('nav');roomToolbar.className='room-toolbar';roomToolbar.setAttribute('aria-label','Настройки бильярдной');roomToolbar.append($('cueButton'),$('tableSkinButton'),$('rulesButton'));document.querySelector('main').append(roomToolbar);
 const settlement=mountSettlement(roomToolbar,()=>({state,player,mode,ready:online,playback,tableView,wager}),value=>{move(value);if(mode==='solo'&&value.type==='draw-offer')action(state,1,{type:'draw-accept'});});
+const leftRail=document.createElement('aside');leftRail.id='tableLeftRail';leftRail.setAttribute('aria-label','Шары и управление партией');document.querySelector('main').append(leftRail);
 let entryOpened=false,currentEntry='';
 function openEntry(entry){if(!['tables','cues','lobby'].includes(entry)||mode!==null||entryOpened&&currentEntry===entry)return;entryOpened=true;currentEntry=entry;for(const d of document.querySelectorAll('dialog[open]'))d.close();setView(false);$('lobby').hidden=entry!=='lobby';if(entry==='tables')tableSkins.open();if(entry==='cues')equipment.open();}
 // Equipment opened from the villa is a separate window; closing it returns there.
@@ -89,7 +90,7 @@ async function leaveGame(exit){
  }catch(e){status(e.message);}finally{leaving=false;}
 }
 function status(text){showInsufficientChips(text);$('connection').textContent=text;}
-function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;if(value)roomToolbar.prepend($('back'));else document.querySelector('.billiards>header').prepend($('back'));room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').hidden=value;$('view').textContent=mode?'Вернуться к игре':'Сыграть';$('resumeGame').hidden=!mode||value;if(mode)$('game').hidden=!value;}
+function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;if(value){leftRail.append($('ballShelves'),roomToolbar);matchup.element.prepend($('back'));$('back').textContent='←';roomToolbar.append(document.querySelector('[data-sound-settings]'));}else{document.querySelector('main').append($('ballShelves'),roomToolbar);document.querySelector('.billiards>header').prepend($('back'));$('back').textContent='← Вилла';document.querySelector('.billiards>header').append(document.querySelector('[data-sound-settings]'));}room?.setView(value?'table':'room');document.body.classList.toggle('billiards-table-view',value);$('view').hidden=value;$('view').textContent=mode?'Вернуться к игре':'Сыграть';$('resumeGame').hidden=!mode||value;if(mode)$('game').hidden=!value;}
 function stop(){turnStartSound.reset();connectionGeneration++;sharedEquipment=null;tableSkins.clearRoomEquipment();equipment.clearRoomEquipment();renderedCue='';shotAudio.reset();aimSmoother.reset();settlement.close();replayPlayer.clear();opponentAim=null;botPlan=null;shownAim=null;turnSeconds=null;turnDeadline=null;localClockKey='';training.clear();online=false;mode=null;botAt=0;playback=null;net?.close();net=null;connectionError='';$('create').disabled=$('join').disabled=false;$('lobby').hidden=false;$('game').hidden=true;setView(false);$('lobby').hidden=false;}
 async function solo(next=false){if(!await ensureGameParticipation())return;if(!room)return;recordWin(series,state.winner);const previous=next&&mode==='solo'&&state.winner!==null?state:null,nextSeries=previous?nextMatch(series):createMatch(rulesUI.settings().raceTo),settings=previous?{discipline:previous.discipline,color:previous.color,breaker:1-(previous.breaker||0)}:rulesUI.settings();stop();mode='solo';series=nextSeries;canonicalSeries=series;state=createGame({...settings,seed:Math.floor(Math.random()*4294967296)});rulesUI.reset();shotTools.reset();canonical=state;player=0;online=true;angle=0;acc=0;state.message=state.turn===0?'Вы разбиваете пирамиду · биток можно передвинуть внутри дома':'Компьютер разбивает пирамиду';$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ОДИНОЧНАЯ ПАРТИЯ · КОМПЬЮТЕР';turnSeconds=rulesUI.settings().turnSeconds;turnDeadline=Date.now()+turnSeconds*1000;setView(true);last=performance.now();}
 async function startTraining(){if(!await ensureGameParticipation())return;if(!room)return;stop();mode='training';state=createGame({...rulesUI.settings(),seed:Math.floor(Math.random()*4294967296)});canonical=state;series=createMatch();rulesUI.reset();shotTools.reset();player=0;online=true;angle=0;acc=0;$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ТРЕНИРОВКА · ВЫ УПРАВЛЯЕТЕ ОБЕИМИ СТОРОНАМИ';setView(true);last=performance.now();}
@@ -164,7 +165,7 @@ function frame(now){
  if(uiKey!==lastUiKey){
  lastUiKey=uiKey;
  $('turnClock').hidden=!tableView||remaining===null||state.moving||state.winner!==null;
- paintText($('turnClock'),remaining===null?'':remaining+' с · лимит '+turnSeconds+' с');
+ paintText($('turnClock'),remaining===null?'':remaining+' с');
  clockWarning.update({seconds:remaining,active:!$('turnClock').hidden,sound:!spectating&&online&&state.turn===player,key:[currentRoomId,state.shot,state.turn,!!state.pending].join(':')});
 
  if(!state.moving&&!playback)turnStartSound.update({context:[currentRoomId,mode,series.number,series.round].join(':'),active:!!mode&&online&&!spectating&&mode!=='training'&&state.winner===null,mine:state.turn===player});
@@ -196,7 +197,7 @@ const matchupObserver=new ResizeObserver(()=>{
  if(!tableView||matchup.element.hidden)return;
  const header=document.querySelector('.billiards>header'),cardsBottom=matchup.element.getBoundingClientRect().bottom,statusTop=Math.ceil(cardsBottom+6)+'px';
  if(document.body.style.getPropertyValue('--billiards-status-top')!==statusTop)document.body.style.setProperty('--billiards-status-top',statusTop);
- const top=Math.ceil(Math.max(cardsBottom,header.getBoundingClientRect().bottom)+8)+'px';
+ const top=Math.ceil(cardsBottom+6)+'px';
  if(document.body.style.getPropertyValue('--billiards-top-height')!==top){document.body.style.setProperty('--billiards-top-height',top);room?.setView('table');}
 });matchupObserver.observe(matchup.element);matchupObserver.observe(document.querySelector('.billiards>header'));
 

@@ -15,7 +15,7 @@ export function mountTurnGuide(){
  const banner=document.createElement('aside');banner.id='turnGuide';banner.className='turn-guide';banner.hidden=true;banner.setAttribute('role','status');banner.setAttribute('aria-live','polite');banner.innerHTML='<strong></strong><span></span>';document.querySelector('main').append(banner);
  const title=banner.querySelector('strong'),detail=banner.querySelector('span'),$=id=>document.getElementById(id);
  const text=(node,value)=>{if(node.textContent!==value)node.textContent=value;};
- return {render(s,context){const visible=(context.mode==='online'||context.penaltyPicking)&&context.tableView,guide=visible?turnGuidance(s,context):null;banner.hidden=!guide;
+ return {render(s,context){const visible=(['online','solo','training','spectator'].includes(context.mode)||context.penaltyPicking)&&context.tableView,guide=visible?turnGuidance(s,context.mode==='spectator'?{...context,player:-1}:context):null;banner.hidden=!guide;
   if(guide){banner.dataset.kind=guide.kind;text(title,guide.title);text(detail,guide.detail);if(s.winner===null)text($('status'),guide.title);}
   const waiting=context.mode==='online'&&s.winner===null&&(!context.ready||s.turn!==context.player);
   text($('shoot'),waiting?'Ждите':'Удар');$('shoot').title=waiting?(!context.ready?'Дождитесь восстановления связи.':'Сейчас ход соперника. Дождитесь своего хода.'):'Сделать удар';
