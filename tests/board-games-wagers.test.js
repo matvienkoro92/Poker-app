@@ -89,3 +89,8 @@ test('timeout skips leave the bank untouched until the third own miss',async()=>
  const f=fixture(),r=await f.create();await f.call('m2','join',r.roomId);
  for(let n=0;n<5;n++){f.elapse(91000);const view=await f.call('m1','room',r.roomId);if(n<4){assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.equal(f.changes.length,2);}else{assert.equal(view.state.endReason,'timeout-skips');assert.equal(view.wager.status,'paid');assert.equal(f.changes.length,3);assert.equal(view.wager.payout,190);}}
 });
+test('mars reaches three-point target and pays the fixed bank exactly once',async()=>{
+ const f=fixture(),r=await f.service.call('m1',{action:'create',discipline:'long',raceTo:3,stake:100,requestId:'mars_match_00001'});await f.call('m2','join',r.roomId);const room=f.rooms.get(r.roomId),s=room.state;
+ room.match.wins=[1,0];room.match.round=2;room.match.creditedRound=1;s.points.fill(0);s.points[23]=1;s.points[20]=-15;s.off=[14,0];s.turn=0;s.turns=[2,2];s.phase='moving';s.opening=false;s.roll=[1,2];s.dice=[1];
+ const done=await f.call('m1','move',r.roomId,{revision:room.revision,move:{type:'move',from:23,to:24,die:1}});assert.equal(done.state.winKind,'mars');assert.deepEqual(done.match.wins,[3,0]);assert.equal(done.match.winner,0);assert.equal(done.wager.status,'paid');assert.equal(done.wager.payout,190);await f.call('m1','room',r.roomId);assert.equal(f.changes.length,3);
+});

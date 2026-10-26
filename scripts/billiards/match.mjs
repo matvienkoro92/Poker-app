@@ -1,4 +1,4 @@
 export function createMatch(target=1,number=1){if(target!==1&&target!==3)throw Error('Выберите одну партию или серию до 3 побед.');return {target,wins:[0,0],round:1,creditedRound:0,winner:null,number};}
 // One settled rack is credited once, including retries, polling and repeated renders.
-export function recordWin(match,winner){if(![0,1,'draw'].includes(winner)||match.winner!==null||match.creditedRound===match.round)return false;if(winner!=='draw')match.wins[winner]++;match.creditedRound=match.round;if(match.wins[winner]>=match.target)match.winner=winner;return true;}
+export function recordWin(match,winner,points=1){if(![0,1,'draw'].includes(winner)||match.winner!==null||match.creditedRound===match.round)return false;if(winner!=='draw')match.wins[winner]+=Number.isInteger(points)&&points>=1&&points<=3?points:1;match.creditedRound=match.round;if(match.wins[winner]>=match.target)match.winner=winner;return true;}
 export function nextMatch(match){if(match.creditedRound!==match.round)throw Error('Сначала завершите партию.');if(match.winner!==null)return createMatch(match.target,match.number+1);return {...match,wins:[...match.wins],round:match.round+1};}
