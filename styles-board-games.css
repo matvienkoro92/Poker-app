@@ -532,3 +532,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .board-action-icons #scoreHelp{flex-direction:column;gap:1px}
 #game .board-action-icons #scoreHelp>small{font-size:8px;line-height:9px;color:inherit}
 #scoreHelpDialog #scoreHelpMatch{padding:10px 12px;border:1px solid #d0b47466;border-radius:10px;background:#203b2c;color:#ffe3a2;font-size:16px;font-weight:750}
+
+#game .matchup [data-player]>div{flex:1}
+#game .player-roll-total{flex-shrink:0;align-self:flex-start;margin-left:auto;padding-top:1px;color:#f0d795;font-size:12px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:350px){#game .player-roll-total{font-size:10px}#game .matchup>[data-player]{gap:4px;padding:7px 5px}}

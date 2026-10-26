@@ -1,4 +1,4 @@
-export function createBackgammon(discipline='short'){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
+export function createBackgammon(discipline='short'){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,rollTotals:[0,0],missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
 export function backgammonWinPoints(s,winner){
  const loser=1-winner;if(s.off[loser]>0)return {points:1,kind:'single'};
  const opponent=v=>v*(loser===0?1:-1)>0;
@@ -40,6 +40,7 @@ export function backgammonDestinations(s){
 export function endBackgammonTurn(s,timeout=false){s.missedTurns??=[0,0];if(!timeout)s.missedTurns[s.turn]=0;s.stepUndo=[];s.turns[s.turn]++;s.turn=1-s.turn;s.ply++;s.phase='roll';s.dice=[];s.headTaken=0;s.drawOffer=null;s.message='Бросьте кости';}
 export function backgammonRoll(s,player,dice){if(s.winner!==null||!['opening','roll'].includes(s.phase)||s.phase!=='opening'&&player!==s.turn||!Array.isArray(dice)||dice.length!==2||dice.some(n=>!Number.isInteger(n)||n<1||n>6))return false;
  s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(s.phase==='opening'){if(dice[0]===dice[1]){s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.rollPlayer=s.turn;s.opening=false;}
+ if(!Array.isArray(s.rollTotals))s.rollTotals=[0,0];s.rollTotals[s.turn]=(Number(s.rollTotals[s.turn])||0)+dice[0]+dice[1];
  s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){endBackgammonTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
 }
 export function backgammonMove(s,player,m){
