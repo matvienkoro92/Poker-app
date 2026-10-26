@@ -94,3 +94,18 @@ test('mars reaches three-point target and pays the fixed bank exactly once',asyn
  room.match.wins=[1,0];room.match.round=2;room.match.creditedRound=1;s.points.fill(0);s.points[23]=1;s.points[20]=-15;s.off=[14,0];s.turn=0;s.turns=[2,2];s.phase='moving';s.opening=false;s.roll=[1,2];s.dice=[1];
  const done=await f.call('m1','move',r.roomId,{revision:room.revision,move:{type:'move',from:23,to:24,die:1}});assert.equal(done.state.winKind,'mars');assert.deepEqual(done.match.wins,[3,0]);assert.equal(done.match.winner,0);assert.equal(done.wager.status,'paid');assert.equal(done.wager.payout,190);await f.call('m1','room',r.roomId);assert.equal(f.changes.length,3);
 });
+
+test('reload recovers the exact paid room without another debit or client settings',async()=>{
+ const f=fixture();const created=await f.create(2000);
+ const recovered=await f.service.call('m1',{action:'recover-create',requestId:'request_0000000001'});
+ assert.equal(recovered.roomId,created.roomId);assert.equal(recovered.wager.stake,2000);assert.equal(f.balances.get('p1'),8000);
+ assert.equal(f.changes.length,2);
+ await f.service.call('m1',{action:'recover-create',requestId:'request_0000000001'});assert.equal(f.changes.length,2);
+ const other=await f.service.call('m2',{action:'recover-create',requestId:'request_0000000001'});assert.equal(other.pending,true);
+});
+test('reload reconciles an uncertain debit once and restores cancellation safely',async()=>{
+ const f=fixture();f.failWriteAfterDebit();await assert.rejects(f.create(),/write failed/);
+ const restored=await f.service.call('m1',{action:'recover-create',requestId:'request_0000000001'});assert.ok(restored.roomId);assert.equal(f.balances.get('p1'),9900);assert.equal(f.changes.length,1);
+ await f.service.call('m1',{action:'cancel',requestId:'request_0000000001'});
+ const cancelled=await f.service.call('m1',{action:'recover-create',requestId:'request_0000000001'});assert.equal(cancelled.cancelled,true);assert.equal(f.balances.get('p1'),10000);
+});
