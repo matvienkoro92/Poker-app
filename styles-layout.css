@@ -1592,3 +1592,9 @@ html.app-view-my-summary-html-scroll body[data-view="my-summary"] #app.app .card
   padding-left: max(8px, env(safe-area-inset-left, 0px)) !important;
   padding-right: max(8px, env(safe-area-inset-right, 0px)) !important;
 }
+
+/* Hidden section loaders must release their animated compositor layers. */
+.app-boot-overlay--hidden *,
+.app-boot-overlay--hidden *::before,
+.app-boot-overlay--hidden *::after{animation:none!important}
+.app-boot-overlay.app-boot-overlay--hidden{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}

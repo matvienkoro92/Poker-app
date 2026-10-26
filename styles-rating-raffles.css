@@ -319,7 +319,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
     inset 0 -3px 0 rgba(161, 73, 0, 0.28);
   text-shadow: 0 1px 0 rgba(255, 246, 214, 0.58);
-  animation: raffle-subscribe-glow 2.2s ease-in-out infinite;
+  animation: raffle-subscribe-glow 2.2s ease-in-out 1;
 }
 .raffles-hero__share-row .raffles-subscribe-btn:not([data-subscribed="1"]):not(:disabled)::after,
 .raffle-invite-wide-row .raffles-subscribe-btn:not([data-subscribed="1"]):not(:disabled)::after {
@@ -332,7 +332,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
   opacity: 0;
   pointer-events: none;
-  animation: raffle-subscribe-shine 2.8s ease-in-out infinite;
+  animation: raffle-subscribe-shine 2.8s ease-in-out 1;
 }
 .raffles-hero__share-row .raffles-subscribe-btn:not([data-subscribed="1"]):not(:disabled):hover,
 .raffle-invite-wide-row .raffles-subscribe-btn:not([data-subscribed="1"]):not(:disabled):hover {
@@ -373,7 +373,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
     inset 0 -3px 0 rgba(161, 73, 0, 0.28) !important;
   text-shadow: 0 1px 0 rgba(255, 246, 214, 0.58);
-  animation: raffle-subscribe-glow 2.2s ease-in-out infinite;
+  animation: raffle-subscribe-glow 2.2s ease-in-out 1;
 }
 
 .raffles-hero__share-btn--primary:not(:disabled)::after,
@@ -395,7 +395,7 @@ body[data-view="raffles"] .raffles-hero .bonus-game-back.raffles-hero__back:hove
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
   opacity: 0;
   pointer-events: none;
-  animation: raffle-subscribe-shine 2.8s ease-in-out infinite;
+  animation: raffle-subscribe-shine 2.8s ease-in-out 1;
 }
 
 .raffles-hero__share-btn:hover {
@@ -2017,7 +2017,7 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   overflow: hidden;
   transform: translateY(18px);
   transition: transform 0.18s, opacity 0.18s, filter 0.18s;
-  animation: raffles-active-cta-glow 1.9s ease-in-out infinite;
+  animation: raffles-active-cta-glow 1.9s ease-in-out 1;
 }
 .raffles-active-chooser__cta:not(.raffles-active-chooser__cta--joined)::after {
   content: "";
@@ -2029,7 +2029,7 @@ body[data-view="raffles"] .raffles-panel--active:has(.raffles-active-chooser--hi
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
   opacity: 0;
   pointer-events: none;
-  animation: raffles-active-cta-sheen 2.7s ease-in-out infinite;
+  animation: raffles-active-cta-sheen 2.7s ease-in-out 1;
 }
 .raffles-active-chooser__cta:disabled {
   cursor: wait;
@@ -4578,7 +4578,7 @@ body.raffles-help-modal-open .bottom-nav {
   font-weight: 950;
   text-shadow: 0 1px 0 rgba(255, 246, 214, 0.42);
   letter-spacing: 0.03em;
-  animation: raffle-join-gold-pulse 2.4s ease-in-out infinite;
+  animation: raffle-join-gold-pulse 2.4s ease-in-out 1;
 }
 .raffle-join-invite-row .primary-button.raffle-join-toggle-btn:not(.raffle-join-toggle-btn--leave)::after {
   content: "";
@@ -4588,7 +4588,7 @@ body.raffles-help-modal-open .bottom-nav {
   width: 48%;
   transform: skewX(-18deg);
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
-  animation: raffle-join-gold-sheen 3s ease-in-out infinite;
+  animation: raffle-join-gold-sheen 3s ease-in-out 1;
   pointer-events: none;
 }
 .raffle-join-invite-row .primary-button.raffle-join-toggle-btn:not(.raffle-join-toggle-btn--leave):hover:not(:disabled) {

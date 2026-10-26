@@ -20,5 +20,5 @@ test('manual channel totals reset at 06:00, exclude cancellations, and separate 
  const operations=[{channelId:'runex',direction:'income',amount:100000,createdAt:period.start},{channelId:'runex',direction:'outgoing',amount:30000,createdAt:period.start},{channelId:'runex',direction:'income',amount:500000,createdAt:period.start-1},{channelId:'runex',direction:'income',amount:600000,createdAt:period.start,voidedAt:now}];
  const rows=paymentForms(now,undefined,operations).providers;
  assert.equal(rows.find(p=>p.id==='runex').total,100000);assert.equal(rows.find(p=>p.id==='runex').outgoing,30000);assert.equal(rows.find(p=>p.id==='prodamus').total,null);
- assert.deepEqual(rows.filter(p=>p.manual).map(p=>p.name),['Рунекс','Эксчип','Р Крипта','Другое','Перевод','Бонусы']);
+ assert.deepEqual(rows.filter(p=>p.manual).map(p=>p.name),['Рунекс','Эксчип','Роман Крипта','Другое','Перевод','Бонусы']);
 });

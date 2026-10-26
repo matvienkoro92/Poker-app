@@ -9,14 +9,15 @@
   var previousY = 270, previousDistance = 0, drawOffset = 0;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var ultraReady=false,ultraPilot=new Image();
-  ultraPilot.onload=function(){if(ultraPilot.decode)ultraPilot.decode().then(function(){ultraReady=true;}).catch(function(){});else ultraReady=true;};
+  ultraPilot.onload=function(){if(ultraPilot.decode)ultraPilot.decode().then(function(){ultraReady=true;ensureLoop();}).catch(function(){});else ultraReady=true;ensureLoop();};
   ultraPilot.src='./assets/cooler-flight/cooler-pilot-ultra-v3.webp';
   var turboReady=false, turboPilot=new Image();
-  turboPilot.onload=function(){if(turboPilot.decode)turboPilot.decode().then(function(){turboReady=true;}).catch(function(){});else turboReady=true;};
+  turboPilot.onload=function(){if(turboPilot.decode)turboPilot.decode().then(function(){turboReady=true;ensureLoop();}).catch(function(){});else turboReady=true;ensureLoop();};
   turboPilot.src='./assets/cooler-flight/cooler-pilot-turbo-v1.webp';
   var pilot = new Image(), monkey = new Image();
   pilot.src = './assets/cooler-flight/cooler-pilot-v1.webp';
   monkey.src = './assets/pokermanki-animation-head.webp';
+  [pilot,monkey].forEach(function(image){image.addEventListener('load',ensureLoop);});
   window.addEventListener('message',function(e){if(missionTarget&&e.origin===location.origin&&e.source===parent&&e.data?.type==='cooler-mission-retry')continueMission();});
   function continueMission(){
     if(!missionTarget||!state||state.alive||phase!=='over')return;
@@ -79,7 +80,7 @@
     ui.overlay.hidden = false; ui.overlay.dataset.kind = kind || '';
     ui.overlay.dataset.layout = kind === 'ready' && mode === 'solo' && !missionTarget ? 'solo-intro' : '';
     ui.panel.innerHTML = ((kind === 'result' || kind === 'spectator') ? '<button class="cooler-flight__close" data-flight-action="close-result" aria-label="Закрыть меню результата">×</button>' : '') + html; ui.pause.hidden = true;
-    if((kind === 'result' || kind === 'spectator') && resultClosed)ui.overlay.hidden = true;
+    if((kind === 'result' || kind === 'spectator') && resultClosed)ui.overlay.hidden = true;ensureLoop();
   }
   function prizeRules(){return '<p><b>Каждый день — билет победителю!</b><br>Набери больше всех фишек к 17:00 МСК. В будни — билет на турнир вечера, в субботу и воскресенье — билет за 500 ₽. После 17:00 начинается новый круг.</p><p>Засчитывается лучший завершённый полёт в аккаунте. При равенстве побеждает более ранний результат. Тренировка без сохранения не участвует.</p>';}
   function dailyBoard(d){if(!d)return '';return '<h2>Билет дня</h2><p>'+esc(d.prize)+' · до 17:00 МСК '+esc(d.date)+'</p>'+ (d.rows.length?'<ol>'+d.rows.map(function(r){return '<li><b>'+r.place+'</b><span>'+esc(r.name)+(r.mine?' · ты':'')+'</span><strong>'+r.score+'</strong></li>';}).join('')+'</ol>':'<p>Новый круг: стань первым!</p>')+'<h2>Победители</h2>'+(d.winners.length?'<ol>'+d.winners.map(function(w){return '<li><span>'+esc(w.date)+' · '+esc(w.name)+'<br>'+esc(w.prize)+'</span><strong>'+w.score+'</strong></li>';}).join('')+'</ol>':'<p>Здесь появятся победители ежедневных кругов.</p>');}
@@ -92,7 +93,7 @@
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + prizeRules() + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
-  function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
+  function ensureLoop() { if (ui && state && !document.hidden && !raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
   function begin(seed, id, version) {
     if (!active()) return;
     resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed,version); previousY=state.y;previousDistance=state.distance;phase = 'playing'; taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0; accumulator = 0; lastTime = 0; pendingFlap = true;
@@ -355,7 +356,7 @@
     if(toastUntil&&time>toastUntil){ui.toast.textContent='';toastUntil=0;}
     if(!reducedMotion.matches)particles.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.2;p.life--;});
     particles=particles.filter(function(p){return p.life>0;});draw();
-    if(!document.hidden)raf=requestAnimationFrame(frame);
+    if(!raf&&!document.hidden&&(['playing','countdown','spectating'].includes(phase)||(!reducedMotion.matches&&particles.length)||toastUntil))raf=requestAnimationFrame(frame);
   }
   function stopPolling(){if(roomTimer)clearTimeout(roomTimer);roomTimer=0;polling=false;}
   function abandon(){if(runId&&mode==='duel'&&phase!=='over')api('abandon',{runId:runId}).catch(function(){});runId='';}

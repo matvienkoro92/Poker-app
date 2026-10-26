@@ -1,5 +1,5 @@
 /* Raffles CSS entrypoint. */
-@import url("./styles-rating-raffles.css?v=4.002");
+@import url("./styles-rating-raffles.css?v=20261026-villa-idle-1");
 
 /* First-load placeholders; refreshed results remain visible. */
 .raffles--initial-loading .raffles-hero dd,

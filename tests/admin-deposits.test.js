@@ -88,7 +88,7 @@ test('reservations freeze shared available funds until confirmation or release',
  assert.throws(()=>applyOperation(state,{...reserve,requestId:requestId(11)},'admin-b'),/доступного/);
  assert.throws(()=>applyOperation(state,{action:'payment',requestId:requestId(12),entryId:requestId(1),amount:600000},'admin-b'),/больше/);
  assert.throws(()=>applyOperation(state,{action:'adjust',requestId:requestId(13),entryId:requestId(1),total:900000,reason:'test'},'admin-b'),/меньше/);
- const confirm={action:'confirm-reservation',depositorId:'player123',depositorRoom:'P21',requestId:requestId(14),entryId:requestId(1),reservationId:requestId(10)};
+ const confirm={action:'confirm-reservation',amount:1000000,depositorId:'player123',depositorRoom:'P21',requestId:requestId(14),entryId:requestId(1),reservationId:requestId(10)};
  state=applyOperation(state,confirm,'admin-b').state;
  assert.equal(view(state).entries[0].paid,1000000);assert.equal(view(state).entries[0].reserved,0);assert.equal(view(state).entries[0].available,500000);
  assert.equal(applyOperation(state,confirm,'admin-b').duplicate,true);
@@ -103,7 +103,7 @@ test('API reserves atomically across administrators and confirms after lost resp
  const results=await Promise.all([a.call({...reserve,requestId:requestId(20)}),a.call({...reserve,requestId:requestId(21)},'admin-b')]);
  assert.deepEqual(results.map(r=>r.statusCode).sort(),[200,409]);
  const list=await a.call({action:'list'}),r=list.data.entries[0].reservations[0];
- a.lose();const confirm={action:'confirm-reservation',depositorId:'player123',depositorRoom:'P21',requestId:requestId(22),entryId:requestId(1),reservationId:r.id};
+ a.lose();const confirm={action:'confirm-reservation',amount:1000000,depositorId:'player123',depositorRoom:'P21',requestId:requestId(22),entryId:requestId(1),reservationId:r.id};
  assert.equal((await a.call(confirm)).statusCode,503);
  const retry=await a.call(confirm);assert.equal(retry.statusCode,200);assert.equal(retry.data.entries[0].paid,1000000);assert.equal(retry.data.entries[0].payments.length,1);
 });
@@ -149,7 +149,7 @@ test('room and player ID persist while older payout cards remain readable',()=>{
 test('manager statistics attribute reserved deposits to the taker, track returns separately and reconcile with totals',()=>{
  let state=create();const id=requestId(1);
  state=applyOperation(state,{action:'reserve',requestId:requestId(70),entryId:id,amount:500000},'taker',1000,'Первый менеджер').state;
- state=applyOperation(state,{action:'confirm-reservation',depositorId:'player123',depositorRoom:'P21',requestId:requestId(71),entryId:id,reservationId:requestId(70)},'confirmer',2000,'Подтверждающий').state;
+ state=applyOperation(state,{action:'confirm-reservation',amount:500000,depositorId:'player123',depositorRoom:'P21',requestId:requestId(71),entryId:id,reservationId:requestId(70)},'confirmer',2000,'Подтверждающий').state;
  state=applyOperation(state,{action:'return',requestId:requestId(72),entryId:id,amount:200000},'second',3000,'Второй менеджер').state;
  state=applyOperation(state,{action:'reserve',requestId:requestId(73),entryId:id,amount:100000},'second',4000,'Второй менеджер').state;
  let stats=view(state).statistics;assert.equal(stats.managers.length,2);
@@ -164,7 +164,7 @@ test('depositor ID survives reservation confirmation and API retry',async()=>{
  const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
  const reserve={action:'reserve',requestId:requestId(80),entryId:requestId(1),amount:100000,depositorId:'9007199254740993123'};
  const saved=await a.call(reserve);assert.equal(saved.data.entries[0].reservations[0].depositorId,reserve.depositorId);
- const confirmed=await a.call({action:'confirm-reservation',depositorRoom:'P21',requestId:requestId(81),entryId:requestId(1),reservationId:requestId(80)});
+ const confirmed=await a.call({action:'confirm-reservation',amount:100000,depositorRoom:'P21',requestId:requestId(81),entryId:requestId(1),reservationId:requestId(80)});
  assert.equal(confirmed.data.entries[0].payments[0].depositorId,reserve.depositorId);
  assert.equal((await a.call({...reserve,requestId:requestId(82),depositorId:'<invalid>'})).statusCode,400);
 });
@@ -256,7 +256,7 @@ test('deposit destination room is separate from withdrawal room and survives con
  const a=apiSetup();await a.call({action:'create',requestId:requestId(1),entry});
  const reserve={action:'reserve',requestId:requestId(95),entryId:requestId(1),amount:100000,depositorId:'456789',depositorRoom:'X'};
  const saved=await a.call(reserve);assert.equal(saved.statusCode,200);assert.equal(saved.data.entries[0].reservations[0].depositorRoom,'X');assert.equal(saved.data.entries[0].room,'P21');
- const confirmed=await a.call({action:'confirm-reservation',requestId:requestId(96),entryId:requestId(1),reservationId:requestId(95)});assert.equal(confirmed.data.entries[0].payments[0].depositorRoom,'X');
+ const confirmed=await a.call({action:'confirm-reservation',amount:100000,requestId:requestId(96),entryId:requestId(1),reservationId:requestId(95)});assert.equal(confirmed.data.entries[0].payments[0].depositorRoom,'X');
  assert.equal((await a.call({...reserve,requestId:requestId(97),depositorRoom:'bad'})).statusCode,400);
  assert.equal((await a.call({...reserve,requestId:requestId(98),depositorId:''})).statusCode,400);
 });
@@ -351,7 +351,7 @@ test('reserve without identity requires depositor room and ID only on payment co
  const id=requestId(1),reserveId=requestId(740);let state=create();
  state=applyOperation(state,{action:'reserve',requestId:reserveId,entryId:id,amount:50000},'admin-a').state;
  assert.equal(state.entries[0].reservations[0].depositorId,'');
- const confirm={action:'confirm-reservation',requestId:requestId(741),entryId:id,reservationId:reserveId};
+ const confirm={action:'confirm-reservation',amount:50000,requestId:requestId(741),entryId:id,reservationId:reserveId};
  assert.throws(()=>applyOperation(state,confirm,'admin-a'),/рум/);
  assert.throws(()=>applyOperation(state,{...confirm,depositorRoom:'X'},'admin-a'),/ID/);
  const body={...confirm,depositorRoom:'X',depositorId:'123353'};const saved=applyOperation(state,body,'admin-a').state;
@@ -361,7 +361,7 @@ test('reserve without identity requires depositor room and ID only on payment co
 
 test('split payment confirms once with exact allocation total and cancels as one payment',()=>{
  const id=requestId(1),reserveId=requestId(750);let state=create();state=applyOperation(state,{action:'reserve',requestId:reserveId,entryId:id,amount:100000},'admin-a').state;
- const confirm={action:'confirm-reservation',requestId:requestId(751),entryId:id,reservationId:reserveId,allocations:[{depositorId:'111',depositorRoom:'P21',amount:40000},{depositorId:'222',depositorRoom:'X',amount:60000}]};
+ const confirm={action:'confirm-reservation',amount:100000,requestId:requestId(751),entryId:id,reservationId:reserveId,allocations:[{depositorId:'111',depositorRoom:'P21',amount:40000},{depositorId:'222',depositorRoom:'X',amount:60000}]};
  assert.throws(()=>applyOperation(state,{...confirm,allocations:[{...confirm.allocations[0],amount:1},confirm.allocations[1]]},'admin-a'),/совпадать/);
  assert.throws(()=>applyOperation(state,{...confirm,allocations:[{...confirm.allocations[0],depositorRoom:''},confirm.allocations[1]]},'admin-a'),/рум/);
  assert.throws(()=>applyOperation(state,{...confirm,allocations:[{...confirm.allocations[0],depositorId:''},confirm.allocations[1]]},'admin-a'),/ID/);
@@ -440,7 +440,7 @@ test('copied report groups payment providers once and reconciles deposit categor
  const context={money:n=>(Number(n||0)/100).toLocaleString('ru-RU')+' ₽'};vm.createContext(context);vm.runInContext(fn,context);
  const stats={deposits:6800000,destinations:[{id:'withdrawals',amount:3800000},{id:'payment-links',amount:null},{id:'prodamus',title:'Продамус',amount:700000},{id:'runex',amount:2300000},{id:'exchip',amount:0},{id:'r-crypto',amount:0},{id:'other',amount:0},{id:'transfer',amount:0},{id:'all-friends',amount:null}],cashWithdrawals:3600000,returned:100000,exchipWithdrawals:100,managers:[{reserved:0}]};
  const plain=s=>s.replace(/\u00a0/g,' ');
- assert.equal(plain(context.reportCopyText(stats)), 'Отчёт\nЗа всё время · включая архив\n\nВся детализация отчёта:\nДепозит: 68 000 ₽\nНа выводы: 38 000 ₽\nВ платёжки: 7 000 ₽\n  - Продамус: 7 000 ₽\nРунекс: 23 000 ₽\nЭксчип бот: 0 ₽\nР Крипта: 0 ₽\nДругое: 0 ₽\nПеревод: 0 ₽\n\nВыводы Эксчип: 1 ₽\nВывод снятия с кассы: 36 000 ₽\nЧаевые: 0 ₽\nВсего снято с чаевыми: 36 000 ₽\nВозвраты в кассу: 1 000 ₽\nБонусы: 0 ₽\nЗаморожено: 0 ₽');
+ assert.equal(plain(context.reportCopyText(stats)), 'Отчёт\nЗа всё время · включая архив\n\nВся детализация отчёта:\nДепозит: 68 000 ₽\nНа выводы: 38 000 ₽\nВ платёжки: 7 000 ₽\n  - Продамус: 7 000 ₽\nРунекс: 23 000 ₽\nЭксчип бот: 0 ₽\nРоман Крипта: 0 ₽\nДругое: 0 ₽\nПеревод: 0 ₽\n\nВыводы Эксчип: 1 ₽\nВывод снятия с кассы: 36 000 ₽\nЧаевые: 0 ₽\nВсего снято с чаевыми: 36 000 ₽\nВозвраты в кассу: 1 000 ₽\nБонусы: 0 ₽\nЗаморожено: 0 ₽');
  stats.destinations.push({id:'future-provider',title:'Новый сервис',amount:20000});stats.deposits+=20000;
  assert.match(plain(context.reportCopyText(stats)),/В платёжки: 7 200 ₽\n  - Продамус: 7 000 ₽\n  - Новый сервис: 200 ₽/);
  stats.otherCategories=[{title:'Наличные\nв клубе',amount:10000}];
@@ -627,7 +627,7 @@ test('Exchip reservation freezes part of a withdrawal and settles without creati
  const reserve={action:'reserve',requestId:requestId(1201),entryId:id,amount:200000,reservationChannel:'exchip'};
  state=applyOperation(state,reserve,'manager',1001).state;assert.equal(view(state).entries[0].available,1300000);assert.equal(view(state).entries[0].reserved,200000);assert.equal(view(state).statistics.deposits,0);assert.equal(applyOperation(state,reserve,'manager',1002).duplicate,true);
  assert.throws(()=>applyOperation(state,{...reserve,requestId:requestId(1202),amount:1400000},'other',1003),e=>e.status===409);
- const confirm={action:'confirm-reservation',requestId:requestId(1203),entryId:id,reservationId:reserve.requestId};state=applyOperation(state,confirm,'manager',1004).state;const result=view(state,1005);
+ const confirm={action:'confirm-reservation',amount:200000,requestId:requestId(1203),entryId:id,reservationId:reserve.requestId};state=applyOperation(state,confirm,'manager',1004).state;const result=view(state,1005);
  assert.equal(result.entries[0].paid,200000);assert.equal(result.entries[0].reserved,0);assert.equal(result.entries[0].available,1300000);assert.equal(result.statistics.deposits,0);assert.equal(result.statistics.outgoing,200000);assert.equal(result.statistics.exchipWithdrawals,200000);assert.equal(result.statistics.players.find(p=>p.playerId===entry.playerId).withdrawals,200000);assert.ok(result.statistics.players.every(p=>p.deposits===0));assert.equal(result.statistics.managers[0].deposits,0);assert.equal(result.paymentForms.providers.find(p=>p.id==='exchip').outgoing,200000);assert.equal(applyOperation(state,confirm,'manager',1005).duplicate,true);
  state=applyOperation(state,{action:'void',requestId:requestId(1204),entryId:id,paymentId:confirm.requestId},'manager',1006).state;assert.equal(view(state).entries[0].available,1500000);assert.equal(view(state).statistics.exchipWithdrawals,0);
  state=applyOperation(state,{...reserve,requestId:requestId(1205)},'manager',1007).state;state=applyOperation(state,{action:'release-reservation',requestId:requestId(1206),entryId:id,reservationId:requestId(1205)},'manager',1008).state;assert.equal(view(state).entries[0].available,1500000);assert.equal(view(state).entries[0].paid,0);
@@ -635,7 +635,7 @@ test('Exchip reservation freezes part of a withdrawal and settles without creati
 test('API persists the Exchip reservation channel',async()=>{
  const api=apiSetup(),created=await api.call({action:'create',requestId:requestId(1210),entry});const entryId=created.data.entries[0].id;
  const reserve=await api.call({action:'reserve',requestId:requestId(1211),entryId,amount:10000,reservationChannel:'exchip'});assert.equal(reserve.data.entries[0].reservations[0].channelId,'exchip');
- const paid=await api.call({action:'confirm-reservation',requestId:requestId(1212),entryId,reservationId:requestId(1211)});assert.equal(paid.statusCode,200);assert.equal(paid.data.statistics.deposits,0);assert.equal(paid.data.statistics.exchipWithdrawals,10000);
+ const paid=await api.call({action:'confirm-reservation',amount:10000,requestId:requestId(1212),entryId,reservationId:requestId(1211)});assert.equal(paid.statusCode,200);assert.equal(paid.data.statistics.deposits,0);assert.equal(paid.data.statistics.exchipWithdrawals,10000);
 });
 
 test('raffle returns read the source once per report and never create duplicate financial operations',async()=>{
@@ -703,7 +703,7 @@ test('player operation results separate withdrawal recipient from depositor and 
 test('owner pays a reserved withdrawal without creating any player deposit; retry and void are safe',()=>{
  let s=applyOperation(null,{action:'create',requestId:requestId(1400),entry:{...entry,total:7500000}},'tg_2144406710',1000).state;
  const id=requestId(1400);s=applyOperation(s,{action:'reserve',requestId:requestId(1401),entryId:id,amount:7500000},'tg_2144406710',1001).state;
- const operation={action:'confirm-reservation',requestId:requestId(1402),entryId:id,reservationId:requestId(1401),paymentSource:'owner'};
+ const operation={action:'confirm-reservation',amount:7500000,requestId:requestId(1402),entryId:id,reservationId:requestId(1401),paymentSource:'owner'};
  s=applyOperation(s,operation,'tg_2144406710',1002).state;let v=view(s,1003);
  assert.equal(v.entries[0].remaining,0);assert.equal(v.entries[0].reserved,0);assert.equal(v.entries[0].paid,7500000);assert.equal(v.entries[0].payments[0].paymentSource,'owner');assert.equal(v.statistics.ownerPaid,7500000);assert.equal(v.statistics.outgoing,7500000);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.destinations.find(d=>d.id==='withdrawals').amount,0);assert.equal(v.statistics.managers[0].deposits,0);assert.equal(v.statistics.managers[0].ownerPaid,7500000);assert(v.statistics.players.every(p=>p.deposits===0));assert.equal(v.statistics.players.find(p=>p.playerId===entry.playerId).withdrawals,7500000);assert.equal(s.channelOperations?.length||0,0);
  assert.equal(applyOperation(s,operation,'tg_2144406710',1004).duplicate,true);assert.equal(s.entries[0].payments.length,1);
@@ -711,12 +711,12 @@ test('owner pays a reserved withdrawal without creating any player deposit; retr
 });
 test('owner source rejects player allocations and cannot relabel an Exchip payment',()=>{
  let s=create();s=applyOperation(s,{action:'reserve',requestId:requestId(1410),entryId:requestId(1),amount:100000},'manager').state;
- const op={action:'confirm-reservation',requestId:requestId(1411),entryId:requestId(1),reservationId:requestId(1410),paymentSource:'owner'};
+ const op={action:'confirm-reservation',amount:100000,requestId:requestId(1411),entryId:requestId(1),reservationId:requestId(1410),paymentSource:'owner'};
  assert.throws(()=>applyOperation(s,{...op,depositorId:'123',depositorRoom:'P21'},'manager'),/не указывайте/);assert.throws(()=>applyOperation(s,{...op,allocations:[]},'manager'),/не указывайте/);
  s=create();s=applyOperation(s,{action:'reserve',requestId:requestId(1412),entryId:requestId(1),amount:100000,reservationChannel:'exchip'},'manager').state;assert.throws(()=>applyOperation(s,{...op,reservationId:requestId(1412)},'manager'),/Эксчип/);
 });
 test('API carries the owner source through confirmation',async()=>{
- const api=apiSetup();await api.call({action:'create',requestId:requestId(1420),entry});await api.call({action:'reserve',requestId:requestId(1421),entryId:requestId(1420),amount:1500000});const r=await api.call({action:'confirm-reservation',requestId:requestId(1422),entryId:requestId(1420),reservationId:requestId(1421),paymentSource:'owner'});assert.equal(r.statusCode,200);assert.equal(r.data.entries[0].remaining,0);assert.equal(r.data.entries[0].payments[0].paymentSource,'owner');assert.equal(r.data.statistics.deposits,0);assert.equal(r.data.statistics.ownerPaid,1500000);
+ const api=apiSetup();await api.call({action:'create',requestId:requestId(1420),entry});await api.call({action:'reserve',requestId:requestId(1421),entryId:requestId(1420),amount:1500000});const r=await api.call({action:'confirm-reservation',amount:1500000,requestId:requestId(1422),entryId:requestId(1420),reservationId:requestId(1421),paymentSource:'owner'});assert.equal(r.statusCode,200);assert.equal(r.data.entries[0].remaining,0);assert.equal(r.data.entries[0].payments[0].paymentSource,'owner');assert.equal(r.data.statistics.deposits,0);assert.equal(r.data.statistics.ownerPaid,1500000);
 });
 
 test('sponsored raffle bonus debit reduces net bonuses and never becomes a cash withdrawal',()=>{
@@ -839,9 +839,63 @@ test('transfer editor defaults to automatic ID matching instead of requiring ide
 test('Allfriends pays a reserved withdrawal without creating any player deposit; retry and void are safe',()=>{
  let s=applyOperation(null,{action:'create',requestId:requestId(1400),entry:{...entry,total:7500000}},'tg_2144406710',1000).state;
  const id=requestId(1400);s=applyOperation(s,{action:'reserve',requestId:requestId(1401),entryId:id,amount:7500000},'tg_2144406710',1001).state;
- const operation={action:'confirm-reservation',requestId:requestId(1402),entryId:id,reservationId:requestId(1401),paymentSource:'allfriends'};
+ const operation={action:'confirm-reservation',amount:7500000,requestId:requestId(1402),entryId:id,reservationId:requestId(1401),paymentSource:'allfriends'};
  s=applyOperation(s,operation,'tg_2144406710',1002).state;let v=view(s,1003);
  assert.equal(v.entries[0].remaining,0);assert.equal(v.entries[0].reserved,0);assert.equal(v.entries[0].paid,7500000);assert.equal(v.entries[0].payments[0].paymentSource,'allfriends');assert.equal(v.statistics.allfriendsPaid,7500000);assert.equal(v.statistics.outgoing,7500000);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.destinations.find(d=>d.id==='withdrawals').amount,0);assert.equal(v.statistics.managers[0].deposits,0);assert.equal(v.statistics.managers[0].allfriendsPaid,7500000);assert(v.statistics.players.every(p=>p.deposits===0));assert.equal(v.statistics.players.find(p=>p.playerId===entry.playerId).withdrawals,7500000);assert.equal(s.channelOperations?.length||0,0);
  assert.equal(applyOperation(s,operation,'tg_2144406710',1004).duplicate,true);assert.equal(s.entries[0].payments.length,1);
  s=applyOperation(s,{action:'void',requestId:requestId(1403),entryId:id,paymentId:requestId(1402)},'tg_2144406710',1005).state;v=view(s,1006);assert.equal(v.entries[0].remaining,7500000);assert.equal(v.statistics.allfriendsPaid,0);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.outgoing,0);
+});
+
+test('withdrawal summary includes owner and AllFriends with a visible breakdown, without adding them to player deposits',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function paymentFormsTotals('),source.indexOf('  function prodamusProviderHtml('));
+ const forms={period:{start:10,end:20,timeZone:'Europe/Moscow'},providers:[{id:'runex',total:200},{id:'transfer',total:999},{id:'bonuses',total:999}]};
+ const ctx={data:{entries:[{reservations:[{id:'owner-reservation',createdBy:'anna'}],payments:[
+  {amount:1000,createdAt:10,createdBy:'anna'},
+  {amount:2000,createdAt:11,createdBy:'vika',reservationId:'owner-reservation',paymentSource:'owner'},
+  {amount:3000,createdAt:12,createdBy:'anna',paymentSource:'allfriends'},
+  {amount:4000,createdAt:12,createdBy:'vika',paymentSource:'allfriends'},
+  {amount:99999,createdAt:13,createdBy:'anna',channelId:'exchip'},
+  {amount:99999,createdAt:13,createdBy:'anna',paymentSource:'owner',voidedAt:14},
+  {amount:99999,createdAt:20,createdBy:'anna',paymentSource:'allfriends'},
+  {amount:99999,createdAt:9,createdBy:'anna',paymentSource:'owner'}
+ ]}]},matchesPaymentManager:r=>r.createdBy==='anna',esc:s=>s,money:n=>String(n)};
+ vm.createContext(ctx);vm.runInContext(fn,ctx);
+ const selected=ctx.paymentFormsTotals(forms);assert.equal(selected.withdrawals,6000);assert.equal(selected.deposits,1200);assert.equal(JSON.stringify(selected.sources),JSON.stringify({player:1000,owner:2000,allfriends:3000}));
+ const html=ctx.paymentFormsTotalsHtml(forms);assert.match(html,/Пришло на выводы<\/dt><dd>6000/);assert.match(html,/От игроков<\/span><b>1000/);assert.match(html,/Владелец<\/span><b>2000/);assert.match(html,/AllFriends<\/span><b>3000/);
+ ctx.matchesPaymentManager=()=>true;assert.equal(ctx.paymentFormsTotals(forms).withdrawals,10000);assert.equal(ctx.paymentFormsTotals(forms).deposits,1200);
+});
+
+test('reservation confirmation validates the bound reservation amount for all payment sources',()=>{
+ for(const source of ['player','owner','allfriends','exchip']){
+  let state=applyOperation(null,{action:'create',requestId:requestId(1700),entry:{...entry,total:5000000}},'manager').state;
+  state=applyOperation(state,{action:'reserve',requestId:requestId(1701),entryId:requestId(1700),amount:5000000,...(source==='exchip'?{reservationChannel:'exchip'}:{})},'manager').state;
+  const operation={action:'confirm-reservation',requestId:requestId(1702),entryId:requestId(1700),reservationId:requestId(1701),...(source==='player'?{depositorId:'865851',depositorRoom:'P21'}:source==='exchip'?{}:{paymentSource:source})};
+  const before=JSON.stringify(state);assert.throws(()=>applyOperation(state,operation,'manager'),/устарела/);
+  for(const amount of [300000,0,-1,5000000.1,'5000000',null])assert.throws(()=>applyOperation(state,{...operation,amount},'manager'),/не совпадает/);
+  assert.equal(JSON.stringify(state),before);assert.equal(view(state).entries[0].reserved,5000000);
+  const confirmed=applyOperation(state,{...operation,amount:5000000},'manager');assert.equal(view(confirmed.state).entries[0].paid,5000000);
+  assert.equal(applyOperation(confirmed.state,{...operation,amount:5000000},'manager').duplicate,true);
+ }
+});
+test('API rejects 3000 against a 50000 reservation and confirming another withdrawal leaves it frozen',async()=>{
+ const api=apiSetup();const large=requestId(1710),small=requestId(1711),rLarge=requestId(1712),rSmall=requestId(1713);
+ await api.call({action:'create',requestId:large,entry:{...entry,total:5000000}});await api.call({action:'create',requestId:small,entry:{...entry,playerId:'973892',phone:'+79998887755',total:300000}});
+ await api.call({action:'reserve',requestId:rLarge,entryId:large,amount:5000000});await api.call({action:'reserve',requestId:rSmall,entryId:small,amount:300000});
+ const base={action:'confirm-reservation',depositorId:'865851',depositorRoom:'P21'};
+ const wrong=await api.call({...base,requestId:requestId(1714),entryId:large,reservationId:rLarge,amount:300000});assert.equal(wrong.statusCode,409);
+ const oldClient=await api.call({...base,requestId:requestId(1715),entryId:large,reservationId:rLarge});assert.equal(oldClient.statusCode,409);
+ const result=await api.call({...base,requestId:requestId(1716),entryId:small,reservationId:rSmall,amount:300000});assert.equal(result.statusCode,200);
+ const untouched=result.data.entries.find(e=>e.id===large),paid=result.data.entries.find(e=>e.id===small);assert.equal(untouched.reserved,5000000);assert.equal(untouched.paid,0);assert.equal(paid.paid,300000);assert.equal(paid.payments.length,1);
+});
+
+test('API tips cashouts forward manager and source room, reject overspending and preserve lost-response idempotency',async()=>{
+ const api=apiSetup();const received=await api.call({action:'tip',requestId:requestId(1800),amount:100000,room:'P21',playerId:'111',playerName:'Даритель'});assert.equal(received.statusCode,200);assert.equal(received.data.currentActor,'admin-a');
+ const forbidden=await api.call({action:'tip-cashout',requestId:requestId(1801),managerId:'admin-a',tipRoom:'P21',room:'X',playerId:'222',amount:60000},'admin-b');assert.equal(forbidden.statusCode,403);
+ const base={action:'tip-cashout',managerId:'admin-a',tipRoom:'P21',room:'X',playerId:'222',amount:60000};
+ const parallel=await Promise.all([api.call({...base,requestId:requestId(1802)}),api.call({...base,requestId:requestId(1803)})]);assert.deepEqual(parallel.map(r=>r.statusCode).sort(),[200,409]);const saved=parallel.find(r=>r.statusCode===200);assert.equal(saved.data.tipCashouts[0].tipRoom,'P21');assert.equal(saved.data.tipCashouts[0].room,'X');assert.equal(saved.data.tipAccounts[0].balance,40000);
+ api.lose();const last={...base,requestId:requestId(1804),amount:40000};assert.equal((await api.call(last)).statusCode,503);const retry=await api.call(last);assert.equal(retry.statusCode,200);assert.equal(retry.data.tipCashouts.length,2);assert.equal(retry.data.statistics.deposits,100000);assert.equal(retry.data.tipAccounts[0].balance,0);assert.equal(api.notificationEvents.length,0);
+});
+
+test('payment form deposit total includes tips cashouts once and respects period and manager filter',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),code=source.slice(source.indexOf('  function matchesPaymentManager('),source.indexOf('  function paymentFormsTotalsHtml('));const c={paymentManager:'all',data:{entries:[],channelOperations:[],tipCashouts:[{amount:60000,createdAt:15,managerId:'tg_1897001087'},{amount:20000,createdAt:15,managerId:'tg_2144406710'},{amount:90000,createdAt:15,managerId:'tg_1897001087',voidedAt:16},{amount:70000,createdAt:20,managerId:'tg_1897001087'}]}};vm.createContext(c);vm.runInContext(code,c);const forms={period:{start:10,end:20},providers:[]};assert.equal(c.paymentFormsTotals(forms).deposits,80000);assert.equal(c.paymentFormsTotals(forms).withdrawals,0);c.paymentManager='1897001087';assert.equal(c.paymentFormsTotals(forms).deposits,60000);c.paymentManager='2144406710';assert.equal(c.paymentFormsTotals(forms).deposits,20000);
 });

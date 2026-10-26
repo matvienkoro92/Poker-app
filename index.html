@@ -309,6 +309,13 @@
         visibility: hidden;
         pointer-events: none;
       }
+
+/* Hidden section loaders must release their animated compositor layers. */
+.app-boot-overlay--hidden *,
+.app-boot-overlay--hidden *::before,
+.app-boot-overlay--hidden *::after{animation:none!important}
+.app-boot-overlay.app-boot-overlay--hidden{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
       @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
         .app-boot-overlay {
           background: rgba(15, 23, 42, 0.9);
@@ -401,7 +408,7 @@
         }, { once: true });
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=4.020.1.14" />
+    <link rel="stylesheet" href="./styles.css?v=20261026-idle-gpu-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-info-modals" data-poker-lazy-position="source" href="./styles-home-info-modals.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="editor-planner" data-poker-lazy-position="source" href="./styles-home-planner-modal.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="chat cashout profile hall player-crm admin-bonuses learning rating-common" data-poker-lazy-position="source" href="./styles-section-layout.css?v=1" />
@@ -417,17 +424,17 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="cooler-flight" href="./styles-cooler-flight.css?v=6" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="learning" href="./styles-learning-games.css?v=4.002" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="daily-poker learning admin admin-bonuses" href="./styles-daily-poker.css?v=4.023" />
-    <link type="application/poker-lazy-style" data-poker-lazy-domain="raffles" href="./styles-raffles.css?v=4.002" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="raffles" href="./styles-raffles.css?v=20261026-villa-idle-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.024" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
     <link rel="stylesheet" href="./styles-home-overrides.css?v=20261001-daily-gap-17" />
-    <link rel="stylesheet" href="./styles-admin-deposits.css?v=20261024-visible-comments-1" />
+    <link rel="stylesheet" href="./styles-admin-deposits.css?v=20261026-withdrawal-sources-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=4.020.1.13" />
     <link rel="stylesheet" href="./styles-home-jackpot-guide.css?v=5" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=20260919-no-bottom-glow-1" />
     <link rel="preload" as="image" href="./assets/home-tournament-pokermanki-magic-head-mask.svg" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20260930-play-flow-2" />
+    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20261026-idle-gpu-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-hall.css?v=20261026-villa-ranking-5" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-hall-achievements.css?v=20261011-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-lounge.css?v=4.020.1.31" />
@@ -1689,7 +1696,7 @@
     <script defer src="./app-admin-menu-password.js?v=20261017-deposits-1"></script>
     <script defer src="./app-admin-deposits-parser.js?v=20261017-1"></script>
     <script defer src="./deposit-quick-input.js"></script>
-    <script defer src="./app-admin-deposits.js?v=20261024-tip-id-search-1"></script>
+    <script defer src="./app-admin-deposits.js?v=20261027-tips-ledger-1"></script>
     <script defer src="./app-lazy-loader.js?v=20261002-coolershan-v2"></script>
     <script defer src="./app-home-planner-access.js?v=4.002"></script>
     <script defer src="./app-home-planner-runtime.js?v=4.002"></script>
@@ -1723,7 +1730,7 @@
     <script defer src="./app-player-hall-equipment.js?v=1"></script>
     <script defer src="./app-garage-catalog.js?v=4.020.1.31"></script>
     <script defer src="./app-garage-showcase.js?v=4.020.1.13"></script>
-    <script defer src="./app-garage-workshop.js?v=20261018-unlock-badge-10"></script>
+    <script defer src="./app-garage-workshop.js?v=20261026-villa-idle-1"></script>
     <script defer src="./app-profile-appearance.js?v=4.020.1.31"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-lounge-live.js?v=20261009-presence-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-player-lounge.js?v=20261014-selected-preload-1"></script>
@@ -1827,9 +1834,9 @@
     <script defer src="./app-referrals-menu.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="monkey-race" src="./app-monkey-race-engine.js?v=5"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="monkey-race" src="./app-monkey-race.js?v=20261009-garage-39"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="monkey-race" src="./app-monkey-race.js?v=20261026-villa-idle-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="cooler-flight" src="./app-cooler-flight-engine.js?v=11"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="cooler-flight" src="./app-cooler-flight.js?v=20261026-compact-intro-12"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="cooler-flight" src="./app-cooler-flight.js?v=20261026-villa-idle-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="learning" src="./app-games.js?v=20261015-predictions-2"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="daily-poker learning" src="./app-daily-poker.js?v=20260918-review-activity-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-bonuses" src="./app-admin-bonuses.js?v=20260918-review-activity-audit-2"></script>

@@ -649,3 +649,8 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 @media (max-width: 760px) {
   .deposits__card .deposits__note { font-size: 15px; padding: 9px 8px; }
 }
+
+.deposits__payment-summary>div{align-content:start}
+.deposits__payment-sources{display:grid;font-weight:400;gap:4px;margin-top:4px;font-size:11px;line-height:1.4;color:var(--dep-muted)}
+.deposits__payment-sources>span{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px}
+.deposits__payment-sources b{font-weight:600;color:var(--dep-text,#e7eddb);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
