@@ -51,6 +51,7 @@ const autoRollController=createAutoRollController(()=>send({type:'roll'}));
 function paintAutoRoll(){const button=$('autoRoll');button.setAttribute('aria-pressed',String(autoRollEnabled));button.title=button.ariaLabel='Авто-бросок '+(autoRollEnabled?'включён':'выключен');}
 $('autoRoll').onclick=()=>{autoRollEnabled=!autoRollEnabled;try{localStorage.setItem('p21-nards-auto-roll',autoRollEnabled?'1':'0');}catch{}autoRollController.reset();paintAutoRoll();renderControls();};paintAutoRoll();
 mountSoundSettings([document.querySelector('#game .game-toolbar'),document.querySelector('#lobby>header')]);
+$('scoreHelp').onclick=()=>{setText('scoreHelpMatch',(series.target===3?'Матч до 3 очков':'Одна партия')+' · Счёт: '+series.wins.join(' : '));setText('scoreHelpKoks',kind==='long'?'Кокс — 3 очка. Соперник не вывел ни одной шашки и хотя бы одна его шашка осталась в начальной четверти.':'Кокс — 3 очка. Соперник не вывел ни одной шашки и у него осталась шашка на баре или в доме победителя.');if(!$('scoreHelpDialog').open)$('scoreHelpDialog').showModal();};
 const boardDice=createDiceView($('boardArea'),()=>{if(!state||!mode)return;renderBoard();renderControls();scheduleBot();},()=>diceRollSound.play());
 boardDice.element.onclick=()=>{if(!$('roll').hidden&&!$('roll').disabled)$('roll').click();};
 
