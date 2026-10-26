@@ -527,3 +527,5 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .matchup>.head-to-head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;color:#e7d19a;font-family:inherit}
 .matchup>.head-to-head>strong{display:block;font-size:clamp(11px,3.3vw,15px);line-height:1.2;color:#ffe0a0;white-space:nowrap}
 .matchup>.head-to-head>small{font-size:8px;line-height:1.2;color:#bcc8b7;white-space:nowrap}
+.board-score-explanation{padding:12px 14px;margin:12px 0;border:1px solid #bca36b55;border-radius:12px;background:#12291f;color:#d8dec9;font-size:12px;line-height:1.5}
+.board-score-explanation summary{cursor:pointer;color:#f4dca0;font-weight:700;min-height:24px}.board-score-explanation p{margin:10px 0 0}.board-score-explanation strong{color:#f2e2bb}
