@@ -87,14 +87,14 @@
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
     if(missionTarget){panel('<span class="flight-tag">МИССИЯ · КУЛЕРШАН</span><h2>Воздушная доставка</h2><p>Пройди 70 ворот и доставь билеты в TWO ACES. Касайся поля, чтобы подняться; отпускай, чтобы снижаться.</p>'+button('start','Полетели →'),'ready');return;}
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко. После 70 ворот — движущиеся проходы, после 100 — узкие ворота. Дальше каждые 20 ворот становится сложнее.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + prizeRules() + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
   function ensureLoop() { if (!raf && active()) { lastTime = 0; raf = requestAnimationFrame(frame); } }
-  function begin(seed, id) {
+  function begin(seed, id, version) {
     if (!active()) return;
-    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed); previousY=state.y;previousDistance=state.distance;phase = 'playing'; taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0; accumulator = 0; lastTime = 0; pendingFlap = true;
+    resultClosed = false; soloCountdown = null; runId = id || ''; state = E.create(seed,version); previousY=state.y;previousDistance=state.distance;phase = 'playing'; taps = []; particles = []; lastScore = 0; chipStreak=0;lastChipGate=-2;chipSpeech='';chipSpeechUntil=0; accumulator = 0; lastTime = 0; pendingFlap = true;
     ui.overlay.hidden = true; ui.pause.hidden = mode === 'duel'; ui.toast.textContent = ''; ui.canvas.focus({ preventScroll: true });
     window.scrollTo(0, 0);
     var shell = document.querySelector('.card'); if (shell) shell.scrollTop = 0;
@@ -108,7 +108,7 @@
     var g = ++generation; phase = 'loading'; panel('<span class="flight-tag">КУЛЕР ПРОГРЕВАЕТ ВЕНТИЛЯТОР</span><h2>Готовимся к полёту…</h2>');
     try {
       var d = await api('start'); if (g !== generation || !active()) return;
-      status('Результат будет проверен и сохранён в топ клуба.'); countdownSolo(d.seed, d.runId);
+      status('Результат будет проверен и сохранён в топ клуба.'); countdownSolo(d.seed, d.runId,d.version);
     } catch (e) {
       if (g !== generation || !active()) return;
       if(e.status===401||e.status===403){phase='ready';ready();status(e.message);return;}
@@ -116,8 +116,8 @@
       countdownSolo((Math.random() * 4294967296) >>> 0, '');
     }
   }
-  function countdownSolo(seed, id) {
-    soloCountdown = { seed: seed, id: id, end: performance.now() + 3000 };
+  function countdownSolo(seed, id, version) {
+    soloCountdown = { seed: seed, id: id, version:version, end: performance.now() + 3000 };
     phase = 'countdown';panel('<span class="flight-tag">КУЛЕР ГОТОВ</span><h2>Приготовься!</h2><div class="flight-score" data-flight-countdown>3</div><p>Нажимай на поле, чтобы взлететь.</p>');ensureLoop();
   }
   function flap() {
@@ -246,16 +246,16 @@
     if(!o._art || o._artReady !== ready){
       var art=document.createElement('canvas'),scale=Math.min(2,window.devicePixelRatio||1);art.width=86*scale;art.height=E.FLOOR*scale;
       var main=ctx;ctx=art.getContext('2d');ctx.scale(scale,scale);ctx.translate(12,0);
-      drawObstacleArt({x:0,width:o.width,center:o.center,gap:o.gap,variant:o.variant,id:o.id});ctx=main;o._art=art;o._artReady=ready;
+      drawObstacleArt({x:0,width:o.width,center:o.center,gap:o.gap,variant:o.variant,id:o.id});ctx=main;o._art=art;o._artReady=ready;o._artCenter=o.center;
     }
     var x=o.x+drawOffset;
-    ctx.drawImage(o._art,x-12,0,86,E.FLOOR);
+    if(o.sway){var ratio=o._art.height/E.FLOOR,top=o._artCenter-o.gap/2,bottom=o._artCenter+o.gap/2,liveTop=o.center-o.gap/2,liveBottom=o.center+o.gap/2;ctx.drawImage(o._art,0,0,o._art.width,top*ratio,x-12,0,86,liveTop);ctx.drawImage(o._art,0,bottom*ratio,o._art.width,(E.FLOOR-bottom)*ratio,x-12,liveBottom,86,E.FLOOR-liveBottom);}else ctx.drawImage(o._art,x-12,0,86,E.FLOOR);
     if(!o.collected){ctx.beginPath();ctx.arc(x+o.width/2,o.center,12,0,Math.PI*2);ctx.fillStyle=o.life?'#e74c70':'#edc05f';ctx.fill();ctx.strokeStyle='#fff2bd';ctx.lineWidth=3;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#674114';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(o.life?'♥':'1',x+o.width/2,o.center+4);}
   }
   function opponentFlight() {
     var remote=room && room.opponent;if(!remote || !Array.isArray(remote.taps))return null;
     var now=performance.now();
-    if(!remote._flight){remote._flight=E.create(room.seed);remote._time=now;remote._acc=0;remote._previousY=remote._flight.y;remote._previousDistance=0;}
+    if(!remote._flight){remote._flight=E.create(room.seed,room.version);remote._time=now;remote._acc=0;remote._previousY=remote._flight.y;remote._previousDistance=0;}
     remote._acc+=Math.min(100,now-remote._time);remote._time=now;
     var target=Math.max(0,remote.tick-18);
     if(remote._controlsSource!==remote.taps){remote._controlsSource=remote.taps;remote._controls=new Set(remote.taps);}
@@ -310,8 +310,8 @@
   function frame(time) {
     raf=0;if(!active())return;
     var delta=lastTime?Math.min(100,time-lastTime):0;lastTime=time;
-    if(phase==='countdown'&&soloCountdown){var remaining=Math.min(3,Math.ceil((soloCountdown.end-time)/1000));if(remaining<=0){var start=soloCountdown;if(start.resume)resumeMissionFlight();else begin(start.seed,start.id);}else{var number=ui.panel.querySelector('[data-flight-countdown]');if(number)number.textContent=remaining;}}
-    if(phase==='countdown'&&room&&room.startAt){var left=Math.ceil((room.startAt-(Date.now()+clockOffset))/1000);if(left<=0&&!duelStarted){duelStarted=true;status('Дуэль началась!');begin(room.seed,room.runId);}else if(left>0){var count=ui.panel.querySelector('[data-flight-countdown]');if(count)count.textContent=left;}}
+    if(phase==='countdown'&&soloCountdown){var remaining=Math.min(3,Math.ceil((soloCountdown.end-time)/1000));if(remaining<=0){var start=soloCountdown;if(start.resume)resumeMissionFlight();else begin(start.seed,start.id,start.version);}else{var number=ui.panel.querySelector('[data-flight-countdown]');if(number)number.textContent=remaining;}}
+    if(phase==='countdown'&&room&&room.startAt){var left=Math.ceil((room.startAt-(Date.now()+clockOffset))/1000);if(left<=0&&!duelStarted){duelStarted=true;status('Дуэль началась!');begin(room.seed,room.runId,room.version);}else if(left>0){var count=ui.panel.querySelector('[data-flight-countdown]');if(count)count.textContent=left;}}
     if(phase==='playing') {
       accumulator+=delta;
       while(accumulator>=1000/60&&state.alive){
@@ -319,7 +319,7 @@
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
         var previousPasses=state.passes;var previousLives=state.lives,previousRevives=state.revives;var wasSmall=pilotSize(state)===61;previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
         if(missionTarget && state.passes>=missionTarget){phase='over';pendingFlap=false;ui.pause.hidden=true;parent.postMessage({type:'cooler-mission-win',score:state.score*100+state.passes*25,hits:state.revives},location.origin);break;}
-        var hint = missionTarget ? 'Ворота '+state.passes+'/70' : 'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ '+state.lives:'');
+        var hint = missionTarget ? 'Ворота '+state.passes+'/70' : (state.version>=10&&state.passes>=70?'Тильт-зона '+(Math.floor((state.passes-70)/20)+1)+' · ':'')+'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ '+state.lives:'');
         if(ui.hint.textContent !== hint)ui.hint.textContent = hint;if(missionTarget)ui.score.textContent=state.passes+'/70';
         if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=missionTarget ? state.passes+'/70' : state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
         if(state.lives>previousLives){chipSpeech='Вторая жизнь!';chipSpeechUntil=time+2000;ui.toast.textContent='♥ Дополнительная жизнь';toastUntil=time+2000;}

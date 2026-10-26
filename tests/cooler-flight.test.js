@@ -9,7 +9,7 @@ test('replay rejects fabricated duration, reordered taps, taps after collision a
 });
 test('simulation keeps generating reachable-sized gaps and stops at the ceiling or felt',()=>{
   const s=E.create(8);while(s.alive)E.step(s,false);assert.ok(s.y+E.RADIUS>E.FLOOR);const a=E.create(8);while(a.alive)E.step(a,a.tick%7===0);assert.ok(a.y-E.RADIUS<24);
-  const hard=E.create(812);hard.passes=100;E.step(hard,false);assert.equal(hard.obstacles[0].gap,148);assert.ok(hard.obstacles[0].center>=180 && hard.obstacles[0].center<=350);
+  const hard=E.create(812,9);hard.passes=100;E.step(hard,false);assert.equal(hard.obstacles[0].gap,148);assert.ok(hard.obstacles[0].center>=180 && hard.obstacles[0].center<=350);
 });
 test('server requires identity, binds a run to its owner, verifies score and consumes once',async()=>{
   const f=fixture();assert.equal((await f.request({action:'start'},'')).status,401);
@@ -132,12 +132,36 @@ test('gate 50 replaces its chip with one extra life, consumed only once',()=>{
   s.tick=s.invulnerableUntil;s.y=10;E.step(s,false);assert.equal(s.alive,false);
   const old=E.create(9,6);old.nextId=49;old.spawnDistance=236;old.lastCenter=270;E.step(old,false);assert.equal(old.obstacles[0].life,false);
 });
-test('70 and 100 gates increase speed and gate 100 grants a second extra life',()=>{
-  function speed(passes,version){const s=E.create(1,version);s.passes=passes;E.step(s,false);return s.distance;}
+test('legacy v9 keeps its speed boosts and second life at 100',()=>{
+  function speed(passes,version=9){const s=E.create(1,version);s.passes=passes;E.step(s,false);return s.distance;}
   assert.equal(speed(69),4.85);assert.ok(Math.abs(speed(70)-5.45)<1e-9);assert.ok(Math.abs(speed(100)-6.05)<1e-9);assert.equal(speed(100,7),4.85);
-  const s=E.create(9);s.passes=99;s.nextId=99;s.spawnDistance=236;s.lastCenter=270;s.lives=1;E.step(s,false);
+  const s=E.create(9,9);s.passes=99;s.nextId=99;s.spawnDistance=236;s.lastCenter=270;s.lives=1;E.step(s,false);
   const heart=s.obstacles.find(o=>o.id===99);assert.equal(heart.life,true);heart.x=s.x-heart.width/2+6.05;s.y=heart.center;s.vy=0;E.step(s,false);assert.equal(s.lives,2);assert.equal(s.score,0);
   s.y=10;E.step(s,false);assert.equal(s.lives,1);assert.equal(s.alive,true);
   s.tick=s.invulnerableUntil;s.y=10;E.step(s,false);assert.equal(s.lives,0);assert.equal(s.alive,true);
   s.tick=s.invulnerableUntil;s.y=10;E.step(s,false);assert.equal(s.alive,false);
+});
+
+test('tilt zone keeps old physics before gate 70 and preserves v9 replay',()=>{
+ const a=E.create(134,9),b=E.create(134);for(let i=0;i<1000&&a.alive;i++){const tap=i%30===0;E.step(a,tap);E.step(b,tap);assert.equal(a.y,b.y);assert.equal(a.distance,b.distance);assert.deepEqual(a.obstacles,b.obstacles);}
+ const s=E.create(1,9),taps=[];while(s.alive){const tap=s.tick%30===0;if(tap)taps.push(s.tick);E.step(s,tap);}assert.deepEqual(E.replay(1,taps,s.tick,9),s);
+});
+test('late difficulty increases after 100, 120 and 200 without granting a life at 100',()=>{
+ const samples=[69,70,99,100,120,200,400].map(p=>{const s=E.create(812);s.passes=p;s.nextId=101;s.spawnDistance=236;s.lastCenter=270;E.step(s,false);return s;});
+ for(let i=1;i<samples.length;i++){assert.ok(samples[i].distance>=samples[i-1].distance);assert.ok(samples[i].obstacles[0].gap<=samples[i-1].obstacles[0].gap);}
+ assert.ok(samples[4].distance>samples[3].distance);assert.ok(samples[5].distance>samples[4].distance);
+ const s=E.create(9);s.passes=99;s.nextId=99;s.spawnDistance=236;s.lastCenter=270;E.step(s,false);assert.equal(s.obstacles[0].life,false);
+});
+test('moving gaps are deterministic, stay inside the field and move smoothly',()=>{
+ for(const passes of [70,100,200,800])for(const seed of [0,1,44,812]){
+ const s=E.create(seed);s.passes=passes;s.nextId=100;s.spawnDistance=236;s.lastCenter=270;s.invulnerableUntil=1000;
+ let previous=null,moved=false;for(let tick=0;tick<60;tick++){E.step(s,false);const o=s.obstacles.find(v=>v.id===100);assert.ok(o);assert.ok(o.gap>=104);assert.ok(o.center-o.gap/2>=36);assert.ok(o.center+o.gap/2<=E.FLOOR-12);if(previous!==null){assert.ok(Math.abs(o.center-previous)<1);moved||=Math.abs(o.center-previous)>.001;}previous=o.center;}assert.ok(moved);
+ }
+});
+
+test('an existing v9 duel retains identical rules for its guest',async()=>{
+ const f=fixture(),host=(await f.request({action:'create'})).data,prefix='poker_app:cooler_flight:v3:';
+ const roomKey=prefix+'room:'+host.roomId,old=JSON.parse(f.strings.get(roomKey));old.version=9;f.strings.set(roomKey,JSON.stringify(old));
+ const ownKey=prefix+'run:'+host.runId,run=JSON.parse(f.strings.get(ownKey));run.version=9;f.strings.set(ownKey,JSON.stringify(run));
+ const guest=(await f.request({action:'join',roomId:host.roomId},'Bob')).data;assert.equal(guest.version,9);assert.equal(JSON.parse(f.strings.get(prefix+'run:'+guest.runId)).version,9);
 });

@@ -4,10 +4,10 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 9, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 10, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed, version) {
-    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 || version === 8 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
+    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 || version === 8 || version === 9 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
       lives: 0, invulnerableUntil: 0, revives: 0, score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
   }
   function step(s, flap) {
@@ -18,9 +18,12 @@
     s.stage = 1 + Math.floor(s.passes / 5);
     var speed = Math.min(s.version >= 6 ? 4.85 : 4.3, (s.version < 5 ? 2.1 : 2.35) + (s.stage - 1) * 0.25);
     if(s.version>=8)speed+=s.passes>=100?1.2:s.passes>=70?.6:0;
+    var pressure=s.version>=10?Math.max(0,Math.floor((s.passes-70)/20)+1):0;
+    if(pressure)speed=Math.min(7.6,5.25+pressure*.22);
     s.distance += speed; s.spawnDistance += speed;
     if (!s.nextId || s.spawnDistance >= 236) {
       var gap = Math.max(148, (s.version < 5 ? 260 : 244) - (s.stage - 1) * 16);
+      if(pressure)gap=Math.max(104,148-pressure*3-(s.passes>=100&&s.nextId%3===2?10:0));
       var roll = random(s);
       var center = s.nextId ? Math.max(180, Math.min(350, s.lastCenter + (roll * 2 - 1) * 55)) : 180 + roll * 170;
       if(s.version >= 5){
@@ -31,12 +34,14 @@
       }
       s.lastCenter = center;
       s.obstacles.push({ id: s.nextId++, x: s.nextId === 1 ? 450 : WIDTH + 80, width: 62,
-        center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && (s.nextId === 50 || s.version >= 8 && s.nextId === 100), variant: Math.floor(random(s) * 3) });
+        center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && (s.nextId === 50 || s.version >= 8 && s.version < 10 && s.nextId === 100), variant: Math.floor(random(s) * 3) });
+      if(pressure){var gate=s.obstacles[s.obstacles.length-1];gate.baseCenter=center;gate.sway=Math.min(24,8+pressure*2);gate.swayPhase=roll*Math.PI*2;gate.swayRate=.022+Math.min(pressure,10)*.001;}
       s.spawnDistance = 0;
     }
     var radius = s.version >= 6 && s.passes >= (s.version >= 9 ? 25 : 30) ? 24 : 48;
     s.obstacles.forEach(function (o) {
       o.x -= speed;
+      if(o.sway){var low=36+o.gap/2,high=FLOOR-12-o.gap/2;o.center=Math.max(low,Math.min(high,o.baseCenter+Math.sin(s.tick*o.swayRate+o.swayPhase)*o.sway));}
       if (!o.collected && Math.hypot(s.x - (o.x + o.width / 2), s.y - o.center) < 58) { o.collected = true; if(o.life)s.lives++;else {s.score++; s.perfect++;} }
       var dx = Math.max(o.x - 8 - s.x, 0, s.x - (o.x + o.width + 8));
       var top = o.center - o.gap / 2, bottom = o.center + o.gap / 2;
