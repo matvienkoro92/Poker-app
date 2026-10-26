@@ -75,3 +75,21 @@ body[data-view="cooler-flight"] .app { padding: max(24px, env(safe-area-inset-to
 
 .cooler-flight__panel { position: relative; }
 .cooler-flight__close { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: transparent; color: #cce5d8; font-size: 28px; line-height: 1; border-radius: 50%; }
+
+/* Instruction/result menus must scroll by touch without moving the flight canvas. */
+.cooler-flight__panel{min-height:0;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+.cooler-flight__arena .cooler-flight__panel,.cooler-flight__arena .cooler-flight__panel *{touch-action:pan-y!important}
+
+/* Keep the solo introduction and its launch button on one mobile screen. */
+.cooler-flight__overlay[data-layout="solo-intro"]{padding:12px}
+.cooler-flight__overlay[data-layout="solo-intro"] .cooler-flight__panel{padding:14px 12px}
+.cooler-flight__overlay[data-layout="solo-intro"] h2{font-size:18px;line-height:1.15;margin:6px 0 8px}
+.cooler-flight__overlay[data-layout="solo-intro"] p{font-size:11.5px;line-height:1.35;margin:8px 0}
+.cooler-flight__overlay[data-layout="solo-intro"] .flight-tag{font-size:9px;letter-spacing:1.5px}
+.cooler-flight__overlay[data-layout="solo-intro"] .flight-button{min-height:44px;font-size:14px;padding:9px 12px;margin-top:8px}
+@media(max-height:650px){
+ .cooler-flight__overlay[data-layout="solo-intro"]{padding:8px}
+ .cooler-flight__overlay[data-layout="solo-intro"] .cooler-flight__panel{padding:10px}
+ .cooler-flight__overlay[data-layout="solo-intro"] h2{font-size:16px;line-height:1.12;margin:4px 0 6px}
+ .cooler-flight__overlay[data-layout="solo-intro"] p{font-size:10px;line-height:1.25;margin:6px 0}
+}

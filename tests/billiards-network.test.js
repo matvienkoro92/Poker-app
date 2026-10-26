@@ -19,3 +19,10 @@ test('server restores each existing participant from watch link without admittin
   const d=await service.call(member,{action:'watch',roomId:'ABCDEFGHJK'});assert.equal(d.player,player);assert.equal(d.spectator,player<0);assert.equal(d.equipmentSource,'host');
  }
 });
+test('background sessions keep a light heartbeat and resume polling promptly without stale aim',async t=>{
+ const {createSession}=await import('../scripts/billiards/network.mjs'),prior=global.document;
+ const listeners=new Map(),calls=[];global.document={hidden:false,addEventListener:(n,f)=>listeners.set(n,f),removeEventListener:n=>listeners.delete(n)};
+ t.mock.timers.enable({apis:['setTimeout']});
+ const session=createSession({request:async body=>{calls.push(body);return {roomId:'ABCDEFGHJK',revision:1,ready:true};},getAim:()=>({angle:1}),onUpdate(){},onError:assert.fail});
+ try{await session.start(true,'');t.mock.timers.tick(150);await new Promise(setImmediate);assert.ok(calls.at(-1).aim);document.hidden=true;t.mock.timers.tick(650);await new Promise(setImmediate);assert.equal(calls.at(-1).aim,undefined);const count=calls.length;t.mock.timers.tick(1999);await new Promise(setImmediate);assert.equal(calls.length,count);t.mock.timers.tick(1);await new Promise(setImmediate);assert.equal(calls.length,count+1);document.hidden=false;listeners.get('visibilitychange')();t.mock.timers.tick(0);await new Promise(setImmediate);assert.ok(calls.at(-1).aim);}finally{session.close();assert.equal(listeners.size,0);t.mock.timers.reset();global.document=prior;}
+});

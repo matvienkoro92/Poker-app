@@ -1,3 +1,4 @@
+import {createFrameLoop} from '../shared/frame-loop.mjs';
 import {mountSoundSettings} from '../shared/sound-settings.mjs';
 import {mountTurnStartSound} from '../shared/turn-start-sound.mjs';
 import {mountConnectionNotice} from '../shared/connection-notice.mjs';
@@ -28,9 +29,9 @@ import {mountLobby} from './lobby.mjs';
 import {createTraining} from './training.mjs';
 const $=id=>document.getElementById(id);
 let chosenStake=0,wager=null,currentRoomId='',leaving=false,connectionGeneration=0,sharedEquipment=null;
-let state=createGame(),canonical=state,player=0,online=false,net=null,angle=0,tableView=false,last=performance.now(),acc=0,raf=0,revision=-1,playback=null,clockOffset=0,connectionError='',mode=null,botAt=0;
+let state=createGame(),canonical=state,player=0,online=false,net=null,angle=0,tableView=false,last=performance.now(),acc=0,revision=-1,playback=null,clockOffset=0,connectionError='',mode=null,botAt=0;
 let playerProfiles=[null,null];const matchup=mountMatchup();
-let spectating=false;
+let spectating=false,frameLoop=null,uiEpoch=0,lastUiKey='',cachedDisplay=null;
 const aimSmoother=createAimSmoother();const shotAudio=mountShotAudio();
 let opponentAim=null,botPlan=null,shownAim=null,renderedCue='';
 let turnSeconds=null,turnDeadline=null,localClockKey='';
@@ -92,10 +93,10 @@ function setView(value){if(mode===null)$('lobby').hidden=!value;tableView=value;
 function stop(){turnStartSound.reset();connectionGeneration++;sharedEquipment=null;tableSkins.clearRoomEquipment();equipment.clearRoomEquipment();renderedCue='';shotAudio.reset();aimSmoother.reset();settlement.close();replayPlayer.clear();opponentAim=null;botPlan=null;shownAim=null;turnSeconds=null;turnDeadline=null;localClockKey='';training.clear();online=false;mode=null;botAt=0;playback=null;net?.close();net=null;connectionError='';$('create').disabled=$('join').disabled=false;$('lobby').hidden=false;$('game').hidden=true;setView(false);$('lobby').hidden=false;}
 async function solo(next=false){if(!await ensureGameParticipation())return;if(!room)return;recordWin(series,state.winner);const previous=next&&mode==='solo'&&state.winner!==null?state:null,nextSeries=previous?nextMatch(series):createMatch(rulesUI.settings().raceTo),settings=previous?{discipline:previous.discipline,color:previous.color,breaker:1-(previous.breaker||0)}:rulesUI.settings();stop();mode='solo';series=nextSeries;canonicalSeries=series;state=createGame({...settings,seed:Math.floor(Math.random()*4294967296)});rulesUI.reset();shotTools.reset();canonical=state;player=0;online=true;angle=0;acc=0;state.message=state.turn===0?'Вы разбиваете пирамиду · биток можно передвинуть внутри дома':'Компьютер разбивает пирамиду';$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ОДИНОЧНАЯ ПАРТИЯ · КОМПЬЮТЕР';turnSeconds=rulesUI.settings().turnSeconds;turnDeadline=Date.now()+turnSeconds*1000;setView(true);last=performance.now();}
 async function startTraining(){if(!await ensureGameParticipation())return;if(!room)return;stop();mode='training';state=createGame({...rulesUI.settings(),seed:Math.floor(Math.random()*4294967296)});canonical=state;series=createMatch();rulesUI.reset();shotTools.reset();player=0;online=true;angle=0;acc=0;$('lobby').hidden=true;$('game').hidden=false;$('matchMode').textContent='ТРЕНИРОВКА · ВЫ УПРАВЛЯЕТЕ ОБЕИМИ СТОРОНАМИ';setView(true);last=performance.now();}
-function move(value){if(spectating)return;if(mode==='training')return training.move(state,value,{angle,power:Number($('power').value),rules:rulesUI.options(state),spin:shotTools.value()});if(mode==='solo')return action(state,player,value);return net?.move(value);}
+function move(value){if(spectating)return;if(value?.type==='shot'){last=performance.now();acc=0;}frameLoop?.wake();if(mode==='training')return training.move(state,value,{angle,power:Number($('power').value),rules:rulesUI.options(state),spin:shotTools.value()});if(mode==='solo')return action(state,player,value);return net?.move(value);}
 function restoreTraining(replay){if(mode!=='training')return;const saved=replay?training.replay():training.restore();if(!saved)return;state=saved.state;canonical=state;player=state.turn;angle=saved.controls.angle;$('power').value=saved.controls.power;$('powerValue').textContent=saved.controls.power+'%';rulesUI.restoreControls(saved.controls.rules);shotTools.restore(saved.controls.spin);acc=0;last=performance.now();botAt=0;}
 
-function adopt(d){connectionNotice.update(d.connection,d.player);
+function adopt(d){frameLoop?.wake();connectionNotice.update(d.connection,d.player);
  if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status('Игра отменена. Ставки возвращены на баланс Poker21.');return;}
  wager=d.wager||null;currentRoomId=d.roomId||'';
  if(wager){clearCreateRequest();wagerNotice.textContent='Ставка каждого — '+wager.stake.toLocaleString('ru-RU')+' фишек. Банк — '+wager.bank.toLocaleString('ru-RU')+'. Комиссия — '+(wager?.feePercent??5)+'%. Победителю — '+wager.payout.toLocaleString('ru-RU')+' фишек.';}
@@ -139,7 +140,7 @@ $('closeRules').onclick=()=>$('rules').close();$('back').onclick=()=>leaveGame(t
 function paintText(node,value){if(node.textContent!==value)node.textContent=value;}
 const frameBudget=createFrameBudget(mobileGraphics().fps);
 function frame(now){
- if(!frameBudget.ready(now,{hidden:document.hidden,active:state.moving||!!playback||dragging||!!shownAim})){if(document.hidden)last=now;raf=requestAnimationFrame(frame);return;}
+ if(!frameBudget.ready(now,{hidden:document.hidden,active:!!mode&&(state.moving||!!playback||dragging||!!shownAim)})){if(document.hidden)last=now;return;}
  const dt=Math.min((now-last)/1000,.1);last=now;
  if(mode==='solo'||mode==='training'){
   acc+=dt;while(acc>=1/120&&state.moving){step(state);acc-=1/120;}if(!state.moving)acc=0;
@@ -158,10 +159,14 @@ function frame(now){
  if(mode==='solo')recordWin(series,state.winner);if(mode==='training')player=state.turn;
  if(mode==='solo'&&turnSeconds){const key=[state.shot,state.turn,!!state.pending].join(':');if(state.moving){turnDeadline=null;localClockKey='';}else if(state.winner!==null)turnDeadline=null;else if(key!==localClockKey){localClockKey=key;turnDeadline=Date.now()+turnSeconds*1000;}else if(turnDeadline&&Date.now()>=turnDeadline){expireTurn(state);localClockKey='';}}
  const remaining=turnDeadline?Math.max(0,Math.ceil((turnDeadline-(Date.now()+(['online','spectator'].includes(mode)?clockOffset:0)))/1000)):null;
+ const can=!spectating&&online&&!playback&&state.turn===player&&!state.moving&&state.winner===null&&(remaining===null||remaining>0);
+ const uiKey=JSON.stringify([[state.seed,state.discipline,state.color,state.shot,state.turn,state.cueId,state.moving,state.winner,state.pending,state.inHand,state.handZone,state.breakPending,state.groups,state.scores,state.captured,state.missedTurns,state.drawOffer,state.drawOffered,state.lastShot,state.balls.map(b=>[b.id,b.pocket])],mode,online,tableView,spectating,!!playback,player,remaining,turnSeconds,series,wager,connectionError,playerProfiles,uiEpoch,innerWidth,innerHeight,rulesUI.inspect(),rulesUI.isPlacing(state),rulesUI.isChoosingPenalty(),shotTools.inspect(),training.inspect().available]);
+ if(uiKey!==lastUiKey){
+ lastUiKey=uiKey;
  $('turnClock').hidden=!tableView||remaining===null||state.moving||state.winner!==null;
  paintText($('turnClock'),remaining===null?'':remaining+' с · лимит '+turnSeconds+' с');
  clockWarning.update({seconds:remaining,active:!$('turnClock').hidden,sound:!spectating&&online&&state.turn===player,key:[currentRoomId,state.shot,state.turn,!!state.pending].join(':')});
- const can=!spectating&&online&&!playback&&state.turn===player&&!state.moving&&state.winner===null&&(remaining===null||remaining>0);
+
  if(!state.moving&&!playback)turnStartSound.update({context:[currentRoomId,mode,series.number,series.round].join(':'),active:!!mode&&online&&!spectating&&mode!=='training'&&state.winner===null,mine:state.turn===player});
  const turnLabel=mode==='training'?'Сторона '+(state.turn+1):state.turn===player?'Ваш ход':mode==='solo'?'Ход компьютера':'Ход друга';
  const heading=document.querySelector('.billiards>header h1'),headingState=!mode||!tableView?'room':spectating?'spectator':!online?'waiting':state.winner!==null?'finished':mode==='training'?'training':state.turn===player?'mine':'opponent';
@@ -176,14 +181,16 @@ function frame(now){
  if(mode==='training')paintText($('hint'),state.moving?'Наблюдайте удар или верните исходную позицию':'Без компьютера: управляйте обеими сторонами и пробуйте удар заново');else if(state.winner!==null&&mode==='online'&&player!==0)paintText($('hint'),'Продолжение запускает создатель комнаты');
  shotAudio.observe(state,tableView);settlement.render();matchup.render({state,profiles:mode==='solo'?[{name:equipment.inspect().nick||'Вы'},null]:playerProfiles,player,mode,tableView,ready:online});
  resultPanel.render(state,{mode:spectating?null:mode,player,series,tableView,wager});
- shotTools.render(state,can&&tableView);const display=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});const strikePreview=playback&&Date.now()+clockOffset<playback.startedAt?{...playback.move,angle:playback.angle,cueStyle:playback.cueStyle,nick:playback.nick}:null;
+ shotTools.render(state,can&&tableView);cachedDisplay=rulesUI.render(state,{player,mode,tableView,can});turnGuide.render(state,{player,mode,tableView,ready:online,call:rulesUI.options(state),placing:rulesUI.isPlacing(state),penaltyPicking:rulesUI.isChoosingPenalty()});}
+ const display={...state,cueId:cachedDisplay?.cueId??state.cueId,selectedTarget:cachedDisplay?.selectedTarget};
+ const strikePreview=playback&&Date.now()+clockOffset<playback.startedAt?{...playback.move,angle:playback.angle,cueStyle:playback.cueStyle,nick:playback.nick}:null;
  const remote=(mode==='online'&&state.turn!==player||spectating)&&opponentAim?.player===state.turn&&opponentAim.shot===state.shot?opponentAim:null;
  const smoothRemote=remote?{...remote,angle:aimSmoother.sample([state.turn,state.shot,remote.cueId,remote.cueStyle].join(':'),remote.angle,dt)}:null;if(!remote||strikePreview)aimSmoother.reset();
  shownAim=strikePreview||(mode==='solo'&&state.turn===1&&botPlan?.type==='shot'?{...botPlan,cueStyle:'maple'}:smoothRemote);
  const ownCue=equipment.inspect(),cueStyle=CUES.find(c=>c.id===(sharedEquipment?ownCue.selected:shownAim?.cueStyle||ownCue.selected))||CUES[0],cueNick=sharedEquipment?ownCue.nick:shownAim?shownAim.nick||'Соперник':ownCue.nick,cueKey=cueStyle.id+':'+cueNick;
  if(renderedCue!==cueKey){room?.setCue(cueStyle,cueNick);renderedCue=cueKey;}
  const aimState=shownAim?{...display,cueId:shownAim.cueId??0}:display;
- if(tableView)room?.render(aimState,shownAim?.angle??angle,!state.moving&&!state.inHand&&!state.pending&&state.winner===null&&(can||!!shownAim));raf=requestAnimationFrame(frame);
+ if(tableView)room?.render(aimState,shownAim?.angle??angle,!state.moving&&!state.inHand&&!state.pending&&state.winner===null&&(can||!!shownAim));
 }
 const matchupObserver=new ResizeObserver(()=>{
  if(!tableView||matchup.element.hidden)return;
@@ -213,7 +220,12 @@ for(const el of tableDock.querySelectorAll('#turnGuide,#decisionOpen,#penaltyCon
 openEntry(initialEntry);document.body.classList.add('billiards-entry-ready');mountGameResume({container:$('setupMode').parentElement,request,resume:async code=>{$('code').value=code;await start(false,false,true);}});if(parent!==window)parent.postMessage({type:'p21-billiards-ready'},location.origin);
 const watchCode=new URLSearchParams(location.search).get('watch');if(/^[A-HJ-NP-Z2-9]{10}$/.test(watchCode||'')){stop();spectating=true;mode='spectator';revision=-1;net=createSession({request,onUpdate:adopt,onError(message){connectionError=message;status(message);}});net.start(false,watchCode,{watch:true});$('lobby').hidden=true;}
 const inviteCode=new URLSearchParams(location.search).get('room');if(/^[A-HJ-NP-Z2-9]{10}$/.test(inviteCode||'')){$('code').value=inviteCode;start(false);}
-raf=requestAnimationFrame(frame);
+frameLoop=createFrameLoop(frame,{active:()=>!!mode&&(state.moving||!!playback||dragging||aimSmoother.moving)});
+const wakeFrame=()=>frameLoop.wake(),invalidateUi=()=>{uiEpoch++;frameLoop.wake();};
+for(const event of ['pointerdown','pointerup','click','input','change','keydown','close'])document.addEventListener(event,invalidateUi,true);
+document.addEventListener('pointermove',wakeFrame,true);window.addEventListener('resize',invalidateUi);
+const visibilityFrame=()=>{frameLoop.pause();last=performance.now();if(!document.hidden){uiEpoch++;frameLoop.wake();}};
+document.addEventListener('visibilitychange',visibilityFrame);frameLoop.wake();
 // Every new party starts with discipline and ball-set selection, including the solo shortcut.
 window.PokerBilliards={inspect:()=>({mode,spectating,ready:online,tableView,equipment:equipment.inspect(),rules:rulesUI.inspect(),shotTools:shotTools.inspect(),training:training.inspect(),turnSeconds,turnDeadline,replay:replayPlayer.inspect(),graphics:room?.inspect(),tableEquipment:tableSkins.inspect(),hostEquipment:sharedEquipment?{cue:equipment.inspect().selected,table:tableSkins.inspect().selected}:null,shownAim:shownAim?{...shownAim}:null,series:structuredClone(series),angle,state:structuredClone(state)})};
-window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clockWarning.dispose();controlsObserver.disconnect();matchupObserver.disconnect();stop();shotAudio.dispose();replayPlayer.dispose();room?.dispose();});
+window.addEventListener('pagehide',()=>{frameLoop?.dispose();for(const event of ['pointerdown','pointerup','click','input','change','keydown','close'])document.removeEventListener(event,invalidateUi,true);document.removeEventListener('pointermove',wakeFrame,true);document.removeEventListener('visibilitychange',visibilityFrame);window.removeEventListener('resize',invalidateUi);clockWarning.dispose();controlsObserver.disconnect();matchupObserver.disconnect();stop();shotAudio.dispose();replayPlayer.dispose();room?.dispose();});

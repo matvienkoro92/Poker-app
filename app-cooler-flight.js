@@ -77,6 +77,7 @@
   function button(action, label, secondary) { return '<button type="button" class="flight-button' + (secondary ? ' flight-button--secondary' : '') + '" data-flight-action="' + action + '">' + label + '</button>'; }
   function panel(html, kind) {
     ui.overlay.hidden = false; ui.overlay.dataset.kind = kind || '';
+    ui.overlay.dataset.layout = kind === 'ready' && mode === 'solo' && !missionTarget ? 'solo-intro' : '';
     ui.panel.innerHTML = ((kind === 'result' || kind === 'spectator') ? '<button class="cooler-flight__close" data-flight-action="close-result" aria-label="Закрыть меню результата">×</button>' : '') + html; ui.pause.hidden = true;
     if((kind === 'result' || kind === 'spectator') && resultClosed)ui.overlay.hidden = true;
   }
@@ -87,7 +88,7 @@
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
     if(missionTarget){panel('<span class="flight-tag">МИССИЯ · КУЛЕРШАН</span><h2>Воздушная доставка</h2><p>Пройди 70 ворот и доставь билеты в TWO ACES. Касайся поля, чтобы подняться; отпускай, чтобы снижаться.</p>'+button('start','Полетели →'),'ready');return;}
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко. После 70 ворот — доставка банкролла: крыши, мост, сейф и шторм. Каждый участок требует своего ритма, новый круг становится сложнее.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2>' + prizeRules() + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + prizeRules() + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
