@@ -7,13 +7,6 @@ function pokerApplyAppTopPadding() {
     (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
     (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) ||
     !!(window.navigator && window.navigator.standalone);
-  if (standalone) {
-    root.classList.remove("app--telegram-miniapp");
-    root.classList.remove("app--tg-content-inset");
-    root.style.removeProperty("--app-top-from-tg");
-    root.style.removeProperty("--app-extra-top-for-ui");
-    return;
-  }
   try {
     var twMini = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     var twPlatform = String(twMini && twMini.platform || "").trim().toLowerCase();
@@ -28,6 +21,13 @@ function pokerApplyAppTopPadding() {
       root.classList.remove("app--telegram-miniapp");
     }
   } catch (eTgMini) {}
+  if (standalone && !hasTelegramContext) {
+    root.classList.remove("app--telegram-miniapp");
+    root.classList.remove("app--tg-content-inset");
+    root.style.removeProperty("--app-top-from-tg");
+    root.style.removeProperty("--app-extra-top-for-ui");
+    return;
+  }
   var tw = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (root.classList.contains("app--telegram-miniapp")) {
     // Device status bar and Telegram controls occupy separate areas.
