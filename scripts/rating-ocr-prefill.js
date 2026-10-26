@@ -107,6 +107,7 @@ function normalizeName(raw) {
   if (/^Super\s+Sat\s+5/i.test(name)) return "Super Sat 5🎫";
   if (/^DV\s+Rebuy$/i.test(name)) return "DV Rebuy";
   if (/^DV\s+Turbo\s+500/i.test(name)) return "DV Turbo 500🏆 50K";
+  if (/^700K.*DV\s+Main/i.test(name)) return "🏃DV MAIN 700K🏃";
   if (/^(?:\d+[.]?\s*)?DV\s+MAIN\s+700K/i.test(name)) return "🏃DV MAIN 700K🏃";
   if (/^HR\s+5000.*200K/i.test(name)) return "HR 5000🥊 200K";
   if (/^Magic.*500.*120K/i.test(name)) return "Magic 🎯500🎯120K";

@@ -946,4 +946,11 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-24-10-2026-league2-tournament-plo6-20h.jpg",
     "rating-compressed-preview/rating-24-10-2026-league2-ok-21h.jpg"
   ]
+,
+  "25.10.2026": [
+    "rating-compressed-preview/rating-25-10-2026-league2-first-blood-15k-06h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league2-ok-10h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league2-tournament-plo6-20h.jpg"
+  ]
 };

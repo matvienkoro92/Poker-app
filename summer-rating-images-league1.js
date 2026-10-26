@@ -1290,4 +1290,12 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-24-10-2026-league1-super-pyatihatka-20h.jpg",
     "rating-compressed-preview/rating-24-10-2026-league1-black-magic-120k-22h.jpg"
   ]
+,
+  "25.10.2026": [
+    "rating-compressed-preview/rating-25-10-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league1-dv-main-700k-13h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league1-volshebnyj-pyatak-18h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league1-pyatihatka-ko-20h.jpg",
+    "rating-compressed-preview/rating-25-10-2026-league1-turbina-500s-pko-2-3-23h.jpg"
+  ]
 };

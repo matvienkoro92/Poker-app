@@ -5359,4 +5359,199 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "25.10.2026": [
+    {
+      "time": "06:00",
+      "name": "First Blood 15K",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 2,
+          "reward": 3300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "бурят",
+          "place": 1,
+          "reward": 5516.88,
+          "points": 0
+        },
+        {
+          "nick": "Local",
+          "place": 2,
+          "reward": 3103.12,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 3,
+          "reward": 786.25,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 5,
+          "reward": 162.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 13000,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 5900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "🏃DV MAIN 700K🏃",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 106033,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Local",
+          "place": 1,
+          "reward": 10210,
+          "points": 0
+        },
+        {
+          "nick": "svar01",
+          "place": 2,
+          "reward": 8675,
+          "points": 0
+        },
+        {
+          "nick": "IIIIII",
+          "place": 4,
+          "reward": 1440,
+          "points": 0
+        },
+        {
+          "nick": "бурят",
+          "place": 5,
+          "reward": 990,
+          "points": 0
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 3,
+          "reward": 685,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🏆Волшебный Пятак🏆",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Local",
+          "place": 2,
+          "reward": 188150,
+          "points": 0
+        },
+        {
+          "nick": "ICEGG",
+          "place": 6,
+          "reward": 8800,
+          "points": 0
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 4,
+          "reward": 7100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 1100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "ПЯТИХАТКА КО",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 1,
+          "reward": 22933.8,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 5,
+          "reward": 3316.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 2,
+          "reward": 4012.89,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
