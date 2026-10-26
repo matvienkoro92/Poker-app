@@ -66,3 +66,11 @@ room.match.round=27;room.revision=28;room.playerProfiles[2].accountId='ID777777'
 local other=cjson.decode(hashes[key]['ID777777']);assert(other.draws==1 and other.wins==0)
 a=cjson.decode(hashes[key]['ID654321']);assert(a.wins+a.losses==26)
 `));
+
+test('rival points count mars and koks once while games remain single victories',()=>run(`
+room.state.discipline='long';room.state.winPoints=2;assert(run(0,room)==1)
+room.revision=2;room.match.round=2;room.state.winner=1;room.state.winPoints=3;assert(run(1,room)==1)
+room.revision=3;assert(run(2,room)==1)
+local a=cjson.decode(hashes['stats:long:free:rivals:ID123456']['ID654321'])
+assert(a.wins==1 and a.losses==1 and a.pointsWon==2 and a.pointsLost==3)
+`));
