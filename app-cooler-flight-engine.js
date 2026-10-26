@@ -4,12 +4,14 @@
   else root.CoolerFlightEngine = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  var VERSION = 10, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
+  var VERSION = 11, WIDTH = 390, HEIGHT = 600, FLOOR = 548, MAX_TICKS = 36000;
   function random(s) { s.random = (Math.imul(s.random, 1664525) + 1013904223) >>> 0; return s.random / 4294967296; }
   function create(seed, version) {
-    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 || version === 8 || version === 9 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
+    return { version: version === 3 || version === 4 || version === 5 || version === 6 || version === 7 || version === 8 || version === 9 || version === 10 ? version : VERSION, seed: seed >>> 0, random: seed >>> 0, tick: 0, y: 270, vy: 0, x: 94,
       lives: 0, invulnerableUntil: 0, revives: 0, score: 0, passes: 0, stage: 1, perfect: 0, alive: true, obstacles: [], nextId: 0, spawnDistance: 0, distance: 0, lastFlap: -20 };
   }
+  var ROUTES=['Крыши клуба','Нырок под мост','Коридор сейфа','Шторм над набережной'];
+  function routeAt(passes){if(passes<70)return null;var n=passes-70;return {index:Math.floor(n/20)%4,name:ROUTES[Math.floor(n/20)%4],gate:n%20,lap:Math.floor(n/80)+1};}
   function step(s, flap) {
     if (!s.alive) return s;
     if (flap && s.tick - s.lastFlap >= 7) { s.vy = s.version === 3 ? -4.6 : s.version === 4 ? -4.75 : -4.8; s.lastFlap = s.tick; }
@@ -21,7 +23,8 @@
     var pressure=s.version>=10?Math.max(0,Math.floor((s.passes-70)/20)+1):0;
     if(pressure)speed=Math.min(7.6,5.25+pressure*.22);
     s.distance += speed; s.spawnDistance += speed;
-    if (!s.nextId || s.spawnDistance >= 236) {
+    var route=s.version>=11?routeAt(s.nextId):null,spacing=route?(route.index===1?260:route.index===2?(route.gate%3===0?286:202):236):236;
+    if (!s.nextId || s.spawnDistance >= spacing) {
       var gap = Math.max(148, (s.version < 5 ? 260 : 244) - (s.stage - 1) * 16);
       if(pressure)gap=Math.max(104,148-pressure*3-(s.passes>=100&&s.nextId%3===2?10:0));
       var roll = random(s);
@@ -32,10 +35,15 @@
         else {var direction = s.nextId % 4 < 2 ? 1 : -1;var change=48 + roll * (s.stage < 4 ? 42 : 27);center=s.lastCenter+direction*change;if(center<low||center>high)center=s.lastCenter-direction*change;}
         center=Math.max(low,Math.min(high,center));
       }
+      if(route){
+        var target=route.index===0?270+Math.sin(route.gate*Math.PI/3)*90:route.index===1?285+Math.sin(route.gate*Math.PI/10)*115:route.index===2?240+(Math.floor(route.gate/3)%2)*70:center;
+        center=Math.max(low,Math.min(high,s.lastCenter+Math.max(-65,Math.min(65,target-s.lastCenter))));
+      }
       s.lastCenter = center;
       s.obstacles.push({ id: s.nextId++, x: s.nextId === 1 ? 450 : WIDTH + 80, width: 62,
         center: center, gap: gap, scored: false, collected: false, life: s.version >= 7 && (s.nextId === 50 || s.version >= 8 && s.version < 10 && s.nextId === 100), variant: Math.floor(random(s) * 3) });
-      if(pressure){var gate=s.obstacles[s.obstacles.length-1];gate.baseCenter=center;gate.sway=Math.min(24,8+pressure*2);gate.swayPhase=roll*Math.PI*2;gate.swayRate=.022+Math.min(pressure,10)*.001;}
+      if(pressure&&(!route||route.index===3)){var gate=s.obstacles[s.obstacles.length-1];gate.baseCenter=center;gate.sway=Math.min(24,8+pressure*2);gate.swayPhase=roll*Math.PI*2;gate.swayRate=.022+Math.min(pressure,10)*.001;}
+      if(route)s.obstacles[s.obstacles.length-1].route=route.index;
       s.spawnDistance = 0;
     }
     var radius = s.version >= 6 && s.passes >= (s.version >= 9 ? 25 : 30) ? 24 : 48;
@@ -71,5 +79,5 @@
     if (s.alive || s.tick !== ticks || at !== taps.length) throw new Error('Flight has not ended at the supplied frame');
     return s;
   }
-  return { VERSION: VERSION, WIDTH: WIDTH, HEIGHT: HEIGHT, FLOOR: FLOOR, MAX_TICKS: MAX_TICKS, RADIUS: 48, create: create, step: step, replay: replay };
+  return { VERSION: VERSION, WIDTH: WIDTH, HEIGHT: HEIGHT, FLOOR: FLOOR, MAX_TICKS: MAX_TICKS, RADIUS: 48, routeAt:routeAt, create: create, step: step, replay: replay };
 });

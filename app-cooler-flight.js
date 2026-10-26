@@ -87,7 +87,7 @@
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься'; ui.score.textContent = '0'; ui.best.textContent = best;
     ui.hint.textContent = 'Нажал — взлетел · Отпустил — снижаешься';
     if(missionTarget){panel('<span class="flight-tag">МИССИЯ · КУЛЕРШАН</span><h2>Воздушная доставка</h2><p>Пройди 70 ворот и доставь билеты в TWO ACES. Касайся поля, чтобы подняться; отпускай, чтобы снижаться.</p>'+button('start','Полетели →'),'ready');return;}
-    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко. После 70 ворот — движущиеся проходы, после 100 — узкие ворота. Дальше каждые 20 ворот становится сложнее.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
+    if (mode === 'solo') panel('<span class="flight-tag">БЕЗЛИМИТНЫЕ ПОПЫТКИ</span><h2>Помоги Кулеру набить банкролл и не разбиться об натс ПокерМанки</h2><p>Собирай фишки между стенами: одна фишка — одно очко. После 70 ворот — доставка банкролла: крыши, мост, сейф и шторм. Каждый участок требует своего ритма, новый круг становится сложнее.</p>' + prizeRules() + button('start', 'Полетели →'), 'ready');
     else panel('<span class="flight-tag">ИГРА НА ДВОИХ</span><h2>Кто набьёт больше?</h2>' + prizeRules() + button('create', 'Создать дуэль') + '<label>Код дуэли<input id="coolerFlightRoomCode" placeholder="Вставь код или ссылку" autocomplete="off" maxlength="300"></label>' + button('join', 'Присоединиться', true), 'ready');
     ensureLoop();
   }
@@ -241,6 +241,25 @@
 
     ctx.restore();
   }
+  var routeBackdrops=[];
+  function drawRoute(distance){
+    var route=state.version>=11&&E.routeAt(state.passes);if(!route)return;
+    var colors=['#263552','#143f49','#473c29','#202b4b'];
+    if(!routeBackdrops[route.index]){
+      var art=document.createElement('canvas');art.width=390;art.height=600;var g=art.getContext('2d');
+      var gradient=g.createLinearGradient(0,100,0,E.FLOOR);gradient.addColorStop(0,colors[route.index]);gradient.addColorStop(1,'#091b24');g.fillStyle=gradient;g.fillRect(0,100,390,E.FLOOR-100);
+      g.fillStyle='#e9d49a22';
+      if(route.index===0){for(var i=0;i<9;i++){var h=55+(i*37)%115;g.fillRect(i*48,470-h,44,h);g.beginPath();g.moveTo(i*48-4,470-h);g.lineTo(i*48+22,448-h);g.lineTo(i*48+48,470-h);g.fill();}}
+      if(route.index===1){g.fillRect(0,160,390,18);g.lineWidth=18;g.strokeStyle='#e9d49a22';g.beginPath();g.arc(195,440,270,Math.PI,0);g.stroke();g.fillRect(15,178,18,320);g.fillRect(357,178,18,320);}
+      if(route.index===2){g.strokeStyle='#d8b76b38';g.lineWidth=4;for(var i=0;i<4;i++){g.strokeRect(25+i*6,175+i*6,340-i*12,300-i*12);}g.beginPath();g.arc(195,320,70,0,Math.PI*2);g.stroke();}
+      if(route.index===3){g.fillStyle='#bec7ec24';for(var i=0;i<6;i++){g.beginPath();g.ellipse(i*82,166+(i%2)*25,70,24,0,0,Math.PI*2);g.fill();}}
+      routeBackdrops[route.index]=art;
+    }
+    ctx.drawImage(routeBackdrops[route.index],0,0);
+    if(route.index===3&&!reducedMotion.matches){ctx.strokeStyle='#c0d5ed25';ctx.lineWidth=1;ctx.beginPath();for(var i=0;i<18;i++){var x=(i*29+distance*.3)%410,y=205+(i*47+distance*1.8)%300;ctx.moveTo(x,y);ctx.lineTo(x-5,y+13);}ctx.stroke();}
+    ctx.fillStyle='#f5dfa6';ctx.textAlign='center';ctx.font='bold 12px sans-serif';ctx.fillText(route.name.toUpperCase()+' · КРУГ '+route.lap,195,119);
+    for(var i=0;i<4;i++){ctx.fillStyle=i===route.index?'#ebc77e':'#c7cbbc38';ctx.fillRect(135+i*31,128,25,3);}
+  }
   function drawObstacle(o) {
     var ready = monkey.complete && monkey.naturalWidth;
     if(!o._art || o._artReady !== ready){
@@ -290,6 +309,7 @@
     drawOffset=phase==='playing'?(state.distance-previousDistance)*(1-blend):0;
     var renderY=phase==='playing'?previousY+(state.y-previousY)*blend:state.y;
     var d=phase==='playing'?state.distance-drawOffset:0;
+    drawRoute(d);
     for(var i=0;i<9;i++){var x=(i*63-d*.35)%570;if(x<0)x+=570;ctx.globalAlpha=.12;ctx.fillStyle='#f4d18b';ctx.font='22px serif';ctx.textAlign='center';ctx.fillText(i%2?'♠':'♦',x-80,390+(i%3)*17);ctx.globalAlpha=1;}
     if(room && phase === 'playing' && room.opponent && !room.opponent.finished){
       var hologram=opponentFlight();if(hologram){var ownFlight=state;state=hologram;drawPilot(ownFlight.x+26,room.opponent._renderY,pilotSize(state),true);opponentName(ownFlight.x+26,room.opponent._renderY);state=ownFlight;}
@@ -319,14 +339,15 @@
         if(doFlap){taps.push(state.tick);tone(460,.065);pendingFlap=false;}
         var previousPasses=state.passes;var previousLives=state.lives,previousRevives=state.revives;var wasSmall=pilotSize(state)===61;previousY=state.y;previousDistance=state.distance;E.step(state,doFlap);accumulator-=1000/60;
         if(missionTarget && state.passes>=missionTarget){phase='over';pendingFlap=false;ui.pause.hidden=true;parent.postMessage({type:'cooler-mission-win',score:state.score*100+state.passes*25,hits:state.revives},location.origin);break;}
-        var hint = missionTarget ? 'Ворота '+state.passes+'/70' : (state.version>=10&&state.passes>=70?'Тильт-зона '+(Math.floor((state.passes-70)/20)+1)+' · ':'')+'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот'+(state.lives?' · ♥ '+state.lives:'');
+        var hint = missionTarget ? 'Ворота '+state.passes+'/70' : (state.version>=11&&state.passes>=70?E.routeAt(state.passes).name+' · До следующего участка: '+(20-(state.passes-70)%20)+' ворот':(state.version>=10&&state.passes>=70?'Тильт-зона '+(Math.floor((state.passes-70)/20)+1)+' · ':'')+'Этап ' + state.stage + ' · Следующий после ' + (5 - state.passes % 5) + ' ворот')+(state.lives?' · ♥ '+state.lives:'');
         if(ui.hint.textContent !== hint)ui.hint.textContent = hint;if(missionTarget)ui.score.textContent=state.passes+'/70';
         if(state.score!==lastScore){lastScore=state.score;ui.score.textContent=missionTarget ? state.passes+'/70' : state.score;tone(880,.13);collectedChip(time);ui.toast.textContent='+1 фишка · Собрано: '+state.score;toastUntil=time+1000;}
         if(state.lives>previousLives){chipSpeech='Вторая жизнь!';chipSpeechUntil=time+2000;ui.toast.textContent='♥ Дополнительная жизнь';toastUntil=time+2000;}
         if(state.revives>previousRevives){chipSpeech='Ещё живём!';chipSpeechUntil=time+2000;}
         if(!wasSmall && pilotSize(state)===61){chipSpeech='Уменьшаемся!';chipSpeechUntil=time+2000;}
         if(state.version>=8 && previousPasses<70 && state.passes>=70){chipSpeech='Е@ааать, ускоряемся!';chipSpeechUntil=time+2500;}
-        if(state.version>=8 && previousPasses<100 && state.passes>=100){chipSpeech='Ну все пи@да!';chipSpeechUntil=time+2500;}
+        if(state.version>=11&&state.passes>=70&&Math.floor((previousPasses-70)/20)!==Math.floor((state.passes-70)/20)){chipSpeech=E.routeAt(state.passes).name;chipSpeechUntil=time+2200;}
+        if(state.version<11 && state.version>=8 && previousPasses<100 && state.passes>=100){chipSpeech='Ну все пи@да!';chipSpeechUntil=time+2500;}
       }
       if(!state.alive)finish();
     }
@@ -429,7 +450,7 @@
     else if(a==='cancel'||a==='back'||a==='quit'){abandon();generation++;stopPolling();room=null;duelStarted=false;status('');ready();}
   }
   function cleanup() {
-    abandon();generation++;stopPolling();if(raf)cancelAnimationFrame(raf);raf=0;if(state)state.obstacles=[];particles=[];soloCountdown=null;room=null;phase='ready';pendingFlap=false;duelStarted=false;pendingResult=null;
+    abandon();generation++;stopPolling();if(raf)cancelAnimationFrame(raf);raf=0;if(state)state.obstacles=[];particles=[];soloCountdown=null;room=null;phase='ready';pendingFlap=false;duelStarted=false;pendingResult=null;routeBackdrops=[];
   }
   window.initCoolerFlight=function(){
     var canvas=document.getElementById('coolerFlightCanvas');if(!canvas)return;

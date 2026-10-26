@@ -147,14 +147,14 @@ test('tilt zone keeps old physics before gate 70 and preserves v9 replay',()=>{
  const s=E.create(1,9),taps=[];while(s.alive){const tap=s.tick%30===0;if(tap)taps.push(s.tick);E.step(s,tap);}assert.deepEqual(E.replay(1,taps,s.tick,9),s);
 });
 test('late difficulty increases after 100, 120 and 200 without granting a life at 100',()=>{
- const samples=[69,70,99,100,120,200,400].map(p=>{const s=E.create(812);s.passes=p;s.nextId=101;s.spawnDistance=236;s.lastCenter=270;E.step(s,false);return s;});
+ const samples=[69,70,99,100,120,200,400].map(p=>{const s=E.create(812,10);s.passes=p;s.nextId=101;s.spawnDistance=236;s.lastCenter=270;E.step(s,false);return s;});
  for(let i=1;i<samples.length;i++){assert.ok(samples[i].distance>=samples[i-1].distance);assert.ok(samples[i].obstacles[0].gap<=samples[i-1].obstacles[0].gap);}
  assert.ok(samples[4].distance>samples[3].distance);assert.ok(samples[5].distance>samples[4].distance);
- const s=E.create(9);s.passes=99;s.nextId=99;s.spawnDistance=236;s.lastCenter=270;E.step(s,false);assert.equal(s.obstacles[0].life,false);
+ const s=E.create(9);s.passes=99;s.nextId=99;s.spawnDistance=300;s.lastCenter=270;E.step(s,false);assert.equal(s.obstacles[0].life,false);
 });
 test('moving gaps are deterministic, stay inside the field and move smoothly',()=>{
  for(const passes of [70,100,200,800])for(const seed of [0,1,44,812]){
- const s=E.create(seed);s.passes=passes;s.nextId=100;s.spawnDistance=236;s.lastCenter=270;s.invulnerableUntil=1000;
+ const s=E.create(seed,10);s.passes=passes;s.nextId=100;s.spawnDistance=236;s.lastCenter=270;s.invulnerableUntil=1000;
  let previous=null,moved=false;for(let tick=0;tick<60;tick++){E.step(s,false);const o=s.obstacles.find(v=>v.id===100);assert.ok(o);assert.ok(o.gap>=104);assert.ok(o.center-o.gap/2>=36);assert.ok(o.center+o.gap/2<=E.FLOOR-12);if(previous!==null){assert.ok(Math.abs(o.center-previous)<1);moved||=Math.abs(o.center-previous)>.001;}previous=o.center;}assert.ok(moved);
  }
 });
@@ -172,4 +172,18 @@ test('new tilt leaderboard starts empty while old records stay in a separate arc
  const archive=(await f.request({action:'leaderboard',archive:true})).data;assert.equal(archive.rows[0].score,800);assert.equal(archive.best,800);assert.equal(archive.place,1);
  const run=(await f.request({action:'start'})).data,{s,taps}=fly(run.seed);f.advance(s.tick*1000/60+1000);assert.equal((await f.request({action:'finish',runId:run.runId,ticks:s.tick,taps})).status,200);
  assert.equal(f.top.get('Alice'),s.score);assert.equal(f.legacyTop.get('Alice'),800);
+});
+
+test('bankroll route cycles four sectors and its next lap preserves increasing pressure',()=>{
+ assert.equal(E.routeAt(69),null);assert.equal(E.routeAt(70).index,0);assert.equal(E.routeAt(90).index,1);assert.equal(E.routeAt(110).index,2);assert.equal(E.routeAt(130).index,3);assert.equal(E.routeAt(150).index,0);assert.equal(E.routeAt(150).lap,2);
+ for(let gate=70;gate<230;gate++){
+  const s=E.create(812);s.passes=gate;s.nextId=gate;s.spawnDistance=300;s.lastCenter=270;s.invulnerableUntil=1000;E.step(s,false);
+  const o=s.obstacles[0];assert.equal(o.route,E.routeAt(gate).index);assert.ok(o.gap>=104);assert.ok(Math.abs(o.center-270)<=90);assert.equal(!!o.sway,o.route===3);
+ }
+});
+test('sector gates create a slalom, a low bridge route and tightly grouped vault locks',()=>{
+ function gates(first){const s=E.create(812);s.passes=first;s.nextId=first;s.lastCenter=270;const result=[];for(let n=0;n<12;n++){s.spawnDistance=300;s.alive=true;s.invulnerableUntil=99999;const before=s.nextId;E.step(s,false);const o=s.obstacles.find(v=>v.id===before);result.push(o.baseCenter||o.center);s.obstacles=[];}return result;}
+ const roofs=gates(70);assert.ok(Math.max(...roofs)-Math.min(...roofs)>140);
+ const bridge=gates(90);assert.ok(Math.max(...bridge)>380);assert.ok(bridge[10]<bridge[5]);
+ const vault=gates(110);assert.equal(vault[0],vault[1]);assert.equal(vault[1],vault[2]);assert.notEqual(vault[2],vault[4]);
 });
