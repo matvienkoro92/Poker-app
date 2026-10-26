@@ -539,8 +539,8 @@ body.billiards-table-view #tableLeftRail #shelf0{order:0}
 body.billiards-table-view #tableLeftRail #shelf1{order:2}
 body.billiards-table-view #tableLeftRail .room-toolbar{position:static;inset:auto;order:1;flex:none;gap:7px;pointer-events:auto}
 body.billiards-table-view #tableLeftRail .ball-shelf{flex:1 1 0;min-height:0;display:flex;flex-direction:column;padding:5px 2px}
-body.billiards-table-view #tableLeftRail .shelf-balls{flex:1;min-height:0;grid-template-columns:repeat(2,11px);grid-auto-rows:11px;gap:4px 2px;margin:5px 0}
-body.billiards-table-view #tableLeftRail .shelf-balls .potted-ball{width:11px;height:11px;font-size:6px}
+body.billiards-table-view #tableLeftRail .shelf-balls{flex:1;min-height:0;grid-template-columns:18px;grid-auto-rows:18px;gap:4px;margin:5px 0}
+body.billiards-table-view #tableLeftRail .shelf-balls .potted-ball{width:18px;height:18px;font-size:8px}
 @media(max-height:560px){body.billiards-table-view #tableLeftRail{gap:4px}body.billiards-table-view #tableLeftRail .room-toolbar{gap:4px}body.billiards-table-view #tableLeftRail .ball-shelf>small{display:none}}
 
 /* A smaller notice keeps more vertical space available for the table. */
@@ -576,3 +576,7 @@ body.billiards-table-view .billiards-matchup .is-active strong{color:#fff4cd}
 body.billiards-table-view .billiards-matchup .is-active small{color:#ffe5a0;font-weight:700}
 body.billiards-table-view .billiards-matchup .is-active small::before{content:'●';color:#c3ff9e;margin-right:3px;font-size:7px}
 body.billiards-table-view .billiards-matchup .is-active .billiards-matchup__avatar{border-color:#ffe29b;background:linear-gradient(145deg,#c29d46,#675326);color:#fff8de;box-shadow:0 0 6px #f3ce6555}
+
+/* Keep a full rack inside the panel when more than four balls are scored. */
+body.billiards-table-view #tableLeftRail .shelf-balls:has(.potted-ball:nth-child(5)){grid-template-columns:repeat(2,13px);grid-auto-rows:13px;gap:4px 2px}
+body.billiards-table-view #tableLeftRail .shelf-balls:has(.potted-ball:nth-child(5)) .potted-ball{width:13px;height:13px;font-size:7px}
