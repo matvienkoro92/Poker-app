@@ -72,6 +72,7 @@ const baseFiles = [
   'last-buy-in.html',
   'city-play.html',
   'board-games-play.html',
+  'app-game-viewport.js',
   'app-board-games.js',
   'app-living-board-preview.js',
   'app-board-games-worker.js',

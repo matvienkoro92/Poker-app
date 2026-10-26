@@ -194,6 +194,10 @@ const matchupObserver=new ResizeObserver(()=>{
 });matchupObserver.observe(matchup.element);matchupObserver.observe(document.querySelector('.billiards>header'));
 
 function reserveTableControls(){
+ if(spectating){
+  if(document.body.style.getPropertyValue('--billiards-controls-height')!=='0px'){document.body.style.setProperty('--billiards-controls-height','0px');if(tableView)room?.setView('table');}
+  return;
+ }
  const dock=tableDock.getBoundingClientRect();if(!dock.height)return;
  let top=dock.top;
  for(const el of tableDock.querySelectorAll('#turnGuide,#decisionOpen,#penaltyConfirm,#matchResult,#cuePickHint,.call-controls,.training-controls,#placeBreak')){
