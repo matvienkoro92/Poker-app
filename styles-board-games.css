@@ -600,3 +600,13 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 /* Shading is baked into static SVG shapes rather than live blur filters. */
 .piece.detailed{filter:none!important;overflow:visible}
 .square .piece.detailed{width:98%;height:98%}
+
+/* Flat, high-contrast standard chess sets and a clean club board. */
+.chess-board:not([data-collection=true]){border-width:2px;border-radius:1px;box-shadow:0 2px 8px #0004}
+.chess-board:not([data-collection=true]) .coordinate{color:var(--dark);opacity:1;letter-spacing:0}
+.chess-board:not([data-collection=true]) .square.dark .coordinate{color:var(--light)}
+.piece.flat{--piece-fill:#f9f9f7;--piece-stroke:#555650;filter:none!important;transform:none}
+.piece.flat.black{--piece-fill:#555552;--piece-stroke:#333431}
+.piece.flat path,.piece.flat circle{stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.piece.flat [fill="none"]{fill:none}
+.square .piece.flat{width:96%;height:96%}

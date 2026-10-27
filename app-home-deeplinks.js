@@ -140,6 +140,9 @@ function pokerInitHomeDeepLinks(opts) {
       });
       return;
     }
+    var createGame=/^create_(billiards|chess|short|long)$/.exec(startParam);
+    if(createGame){openHomeModalDeepLink(function(){return createGame[1]==='billiards'?typeof window.pokerOpenBilliardsInvite==='function'&&window.pokerOpenBilliardsInvite('',false,true):typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames(createGame[1],null,false,null,false,true);},['profile']);return;}
+    if(startParam==='games_chess'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('chess');},['profile']);return;}
     if(startParam==='games_hall'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('nards');},['profile']);return;}
     var nardsAppearance=/^nards_appearance_(outside|inside|pieces|dice)$/.exec(startParam);
     if(nardsAppearance){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('long',null,false,nardsAppearance[1]);},['profile']);return;}
