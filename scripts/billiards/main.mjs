@@ -213,7 +213,10 @@ function reserveTableControls(){
   return;
  }
  const dock=tableDock.getBoundingClientRect();if(!dock.height)return;
- const next=Math.ceil(dock.height)+'px';
+ let top=dock.top;
+ // Inline placement/training actions also have to clear the rendered table.
+ for(const el of tableDock.querySelectorAll('.call-controls,.training-controls,#placeBreak,#cuePickHint,#decisionOpen,#matchResult')){const box=el.getBoundingClientRect();if(box.width&&box.height)top=Math.min(top,box.top);}
+ const next=Math.ceil(dock.bottom-top)+'px';
  if(document.body.style.getPropertyValue('--billiards-controls-height')!==next){document.body.style.setProperty('--billiards-controls-height',next);if(tableView)refreshTableLayout();}
 }
 const controlsObserver=new ResizeObserver(reserveTableControls);

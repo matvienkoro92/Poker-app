@@ -84,7 +84,7 @@
       var telegram=!!(tg&&(tg.initData||tg.initDataUnsafe&&(tg.initDataUnsafe.user||tg.initDataUnsafe.start_param)||platform&&platform!=='unknown'));
       if(!telegram)return;
       var safe=tg.safeAreaInset||{},content=tg.contentSafeAreaInset||{},top=Math.ceil((Number(safe.top)||0)+Math.max(52,Number(content.top)||0)+8),bottom=Math.max(Number(safe.bottom)||0,Number(content.bottom)||0);
-      shell.style.top=top+'px';shell.style.bottom=bottom+'px';shell.style.left=Math.max(Number(safe.left)||0,Number(content.left)||0)+'px';shell.style.right=Math.max(Number(safe.right)||0,Number(content.right)||0)+'px';shell.style.width='auto';shell.style.height='calc(100dvh - '+top+'px - '+bottom+'px)';
+      shell.style.top=top+'px';shell.style.bottom=bottom+'px';shell.style.left=Math.max(Number(safe.left)||0,Number(content.left)||0)+'px';shell.style.right=Math.max(Number(safe.right)||0,Number(content.right)||0)+'px';shell.style.width='auto';shell.style.height=Math.max(1,Math.min(innerHeight,window.visualViewport?.height||innerHeight)-top-bottom)+'px';
     }
     fit();var events=['safeAreaChanged','contentSafeAreaChanged','viewportChanged','fullscreenChanged'];events.forEach(function(event){try{tg&&tg.onEvent&&tg.onEvent(event,fit);}catch{}});window.addEventListener('resize',fit);
     shell.addEventListener('close',function(){window.removeEventListener('resize',fit);events.forEach(function(event){try{tg&&tg.offEvent&&tg.offEvent(event,fit);}catch{}});},{once:true});

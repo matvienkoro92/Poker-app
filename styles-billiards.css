@@ -630,3 +630,14 @@ body.billiards-table-view #tableDock #penaltyConfirm details{position:absolute;l
 
 /* Leave room for phone status indicators even when the webview reports no inset. */
 body.billiards-table-view .billiards-matchup{top:calc(max(32px,var(--billiards-safe-top,env(safe-area-inset-top,0px)),env(safe-area-inset-top,0px)) + 8px)}
+
+/* Fit the visible iframe, and reserve the entire compact controls panel. */
+.billiards{height:var(--billiards-viewport-height,100%)}
+html.billiards-embedded body.billiards-table-view .billiards-matchup{top:8px}
+body.billiards-table-view{--billiards-dock-height:calc(84px + env(safe-area-inset-bottom,0px))}
+body.billiards-table-view #tableDock{display:grid;grid-template-rows:minmax(0,1fr) 40px;gap:2px;padding:3px 8px max(4px,env(safe-area-inset-bottom,0px));overflow:visible;border-radius:12px 12px 0 0;border-top:1px solid #b99c6555}
+body.billiards-table-view #tableDock #turnGuide{position:static;inset:auto;width:100%;min-height:0;max-height:34px;margin:0;padding:0 4px;border:0;background:none;grid-row:1;align-self:center}
+body.billiards-table-view #tableDock #turnGuide>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.billiards-table-view #tableDock #game{grid-row:2;height:40px;min-height:0}
+body.billiards-penalty-picking #tableDock #turnGuide{grid-row:1/-1;max-height:none}
+body.billiards-table-view #tableDock #decisionOpen{bottom:calc(100% + 4px)}
