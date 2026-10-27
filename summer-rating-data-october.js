@@ -5795,6 +5795,20 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 3,
+          "reward": 20006,
+          "points": 0
+        }
+      ]
     }
   ]
 };
