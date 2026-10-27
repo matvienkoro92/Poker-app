@@ -562,6 +562,14 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #chessEquipment .piece-set-sample .piece{height:100%;width:48%}
 #equipment[data-kind=chess] #saveEquipment{position:sticky;bottom:-1px;width:100%;margin-top:8px;z-index:2}
 
+/* Chess shares the nards toolbar, status row and compact action buttons. */
+#game[data-kind=chess] .board-clock{min-width:0;flex:1;border-right:0}
+#game[data-kind=chess] .board-clock #clock{font-size:10px;white-space:normal;line-height:1.4}
+#game[data-kind=chess] .board-meta-details{flex:0 0 auto}
+#game[data-kind=chess] #series{display:none}
+#game[data-kind=chess] #gameControls #hint{white-space:normal;font-size:11px;line-height:1.4}
+#game[data-kind=chess] #gameControls nav:empty{display:none}
+
 #game .board-action-icons [data-game-reactions]{flex-direction:column;gap:1px}
 #game .board-action-icons [data-game-reactions]>span{font-size:18px;line-height:17px}
 #game .board-action-icons [data-game-reactions]>small{font-size:7px;line-height:9px;color:inherit}
