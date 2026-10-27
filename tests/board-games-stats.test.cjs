@@ -74,3 +74,11 @@ room.revision=3;assert(run(2,room)==1)
 local a=cjson.decode(hashes['stats:long:free:rivals:ID123456']['ID654321'])
 assert(a.wins==1 and a.losses==1 and a.pointsWon==2 and a.pointsLost==3)
 `));
+test('darts records its own rating and history uses dart totals rather than match points',()=>{run(`
+room.state.discipline='darts';room.state.scores={1,0};room.state.totals={540,420}
+assert(run(0,room)==1)
+assert(player('darts','ID123456').wins==1)
+local history=cjson.decode(lists['stats:darts:free:history:ID123456'][1])
+assert(history.score[1]==540 and history.score[2]==420)
+assert(run(0,room)==0)
+`);});

@@ -163,7 +163,7 @@ for (const file of toCopy) {
   if (!fs.existsSync(src)) {
     throw new Error('Missing static file referenced for build: ' + file);
   }
-  fs.copyFileSync(src, path.join(publicDir, file));
+  if(file==='app-villa-darts.js'){require('esbuild').buildSync({entryPoints:[src],outfile:path.join(publicDir,file),bundle:true,platform:'browser',format:'iife',globalName:'PokerDarts',footer:{js:'globalThis.PokerDarts=PokerDarts;'},target:'es2020'});}else fs.copyFileSync(src, path.join(publicDir, file));
   console.log('Copied:', file);
 }
 

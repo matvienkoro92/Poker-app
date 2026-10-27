@@ -561,3 +561,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #chessEquipment .piece-set-sample{height:135px;margin:0 0 6px}
 #chessEquipment .piece-set-sample .piece{height:100%;width:48%}
 #equipment[data-kind=chess] #saveEquipment{position:sticky;bottom:-1px;width:100%;margin-top:8px;z-index:2}
+
+#game .board-action-icons [data-game-reactions]{flex-direction:column;gap:1px}
+#game .board-action-icons [data-game-reactions]>span{font-size:18px;line-height:17px}
+#game .board-action-icons [data-game-reactions]>small{font-size:7px;line-height:9px;color:inherit}

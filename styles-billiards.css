@@ -580,3 +580,6 @@ body.billiards-table-view .billiards-matchup .is-active .billiards-matchup__avat
 /* Keep a full rack inside the panel when more than four balls are scored. */
 body.billiards-table-view #tableLeftRail .shelf-balls:has(.potted-ball:nth-child(5)){grid-template-columns:repeat(2,13px);grid-auto-rows:13px;gap:4px 2px}
 body.billiards-table-view #tableLeftRail .shelf-balls:has(.potted-ball:nth-child(5)) .potted-ball{width:13px;height:13px;font-size:7px}
+
+body.billiards-table-view .room-toolbar [data-game-reactions]{font-size:0!important;width:34px;height:34px;min-height:34px;padding:0}
+body.billiards-table-view .room-toolbar [data-game-reactions]::after{content:'🎃';font-size:18px}
