@@ -92,3 +92,22 @@ test('cron fallback restores only due menus when delayed delivery is unavailable
   assert.deepEqual(edited,[42]);
   assert.ok(values.has('poker_app:telegram:club_menu:-100:44'));
 });
+
+
+test('all game ratings cancel an existing menu reset and stay visible after its deadline', async t => {
+  values.clear();due.clear();
+  const originalRead=require('../lib/telegram-game-rankings').read,oldFetch=global.fetch;
+  require('../lib/telegram-game-rankings').read=async()=>'<b>Рейтинг</b>\nВаше место: 1';
+  const calls=[];
+  global.fetch=async(url,options)=>{calls.push({url,body:JSON.parse(options.body)});return {ok:true,json:async()=>({ok:true,result:{message_id:42}})};};
+  t.after(()=>{require('../lib/telegram-game-rankings').read=originalRead;global.fetch=oldFetch;});
+  for(const action of ['rating:billiards','rating:long','rating:short']){
+    await idle.arm(message,'menu');const timer=saved();calls.length=0;
+    await club.handle({callback_query:{id:'callback',data:'club:'+action,message,from:{id:123}}},'bot');
+    assert.equal(values.has('poker_app:telegram:club_menu:-100:42'),false);
+    assert.equal(due.has('-100:42'),false);
+    assert.equal(await idle.restore(timer.id,timer.revision,async()=>{throw Error('Rating must stay visible');},timer.dueAt+1),false);
+    assert.equal(calls.filter(c=>c.url.includes('/v2/publish/')).length,0);
+    assert.equal(calls.find(c=>c.url.endsWith('/editMessageText')).body.text,'<b>Рейтинг</b>\nВаше место: 1');
+  }
+});
