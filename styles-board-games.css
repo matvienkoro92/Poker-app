@@ -594,3 +594,9 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .board-action-icons [data-game-reactions]>.reaction-pumpkin{display:block;font-size:20px;line-height:20px}
 #gameControls #history{min-width:0;max-width:100%}
 #gameControls #history>div{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;font-variant-numeric:tabular-nums}
+/* A throw must not widen the page, including during viewport resize. Clip keeps 3D descendants unflattened. */
+.board-dice-stage{overflow:clip}
+
+/* Shading is baked into static SVG shapes rather than live blur filters. */
+.piece.detailed{filter:none!important;overflow:visible}
+.square .piece.detailed{width:98%;height:98%}

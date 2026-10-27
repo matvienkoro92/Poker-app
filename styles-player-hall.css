@@ -913,3 +913,9 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .villa-darts__stake{display:block;font-size:13px}.villa-darts__stake input,.villa-darts__waiting input{display:block;box-sizing:border-box;width:100%;min-height:44px;background:#142c21;color:#f5e8c9;border:1px solid #8a825c;border-radius:10px;padding:10px;margin:8px 0;font:inherit}.villa-darts__stake small{display:block;font-size:11px;line-height:1.6;color:#c3cdbd}.villa-darts__waiting{padding:20px 0;line-height:1.6}.villa-darts__waiting strong{display:block;font-size:26px;letter-spacing:3px}.villa-darts__waiting button{margin:8px 5px 0 0}.villa-darts .board-replay{margin:12px 0;padding:12px;border:1px solid #b0915760;border-radius:12px}.villa-darts .board-replay button{margin:4px}.villa-darts .board-replay p{font-size:12px;line-height:1.5}
 .villa-darts__game .villa-darts__toolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}.villa-darts__game .villa-darts__toolbar button{flex:0 0 auto;white-space:nowrap;min-height:38px}
 @media(min-height:621px) and (max-height:900px){.villa-darts__game .villa-darts__board{width:min(100%,270px)}.villa-darts__game .villa-darts__gesture{width:min(100%,270px)}.villa-darts__game .villa-darts__scores{margin:6px 0}.villa-darts__game .villa-darts__series{margin:7px 0}.villa-darts__game .villa-darts__feedback{margin:3px 0}}
+
+/* Keep the chess launch action attached to the actual board, independent of the chair/background. */
+.living-board-focus--table[data-game=chess] .living-chess-table-stack{position:relative;flex:none;width:min(100%,480px,calc(43dvh - 18px))}
+.living-board-focus--table[data-game=chess] .living-chess-table-stack .living-top-board{width:100%}
+.living-board-focus--table[data-game=chess] .living-chess-table-stack .living-focus-play{top:calc(100% + 10px);bottom:auto;left:0;right:0}
+.living-board-focus--table[data-game=chess] .living-focus-tools{bottom:22px}

@@ -11,7 +11,7 @@ function* calculate(playback){
  return {times:new Float32Array(times),values:new Float32Array(values),ballCount:state.balls.length,durationMs:ticks/120*1000,final:state};
 }
 export function buildReplay(playback){const work=calculate(playback);let result;do{result=work.next();}while(!result.done);return result.value;}
-export async function buildReplayAsync(playback){const work=calculate(playback);let result;do{result=work.next();if(!result.done)await new Promise(resolve=>setTimeout(resolve,0));}while(!result.done);return result.value;}
+export async function buildReplayAsync(playback,{isCancelled=()=>false}={}){const work=calculate(playback);let result;do{if(isCancelled())return null;result=work.next();if(!result.done)await new Promise(resolve=>setTimeout(resolve,0));}while(!result.done);return result.value;}
 export function sampleReplay(track,elapsed,state){
  const t=Math.max(0,Math.min(elapsed,track.durationMs)),times=track.times;
  let lo=0,hi=times.length-1;while(lo+1<hi){const mid=(lo+hi)>>1;if(times[mid]<=t)lo=mid;else hi=mid;}

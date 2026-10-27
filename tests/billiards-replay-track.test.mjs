@@ -14,3 +14,5 @@ for(const discipline of ['pyramid','pool8'])test(`compact ${discipline} replay a
 test('fallback calculation yields to the UI between small physics batches',async()=>{
  let yielded=false;setTimeout(()=>{yielded=true;},0);const track=await buildReplayAsync({before:createGame({seed:12}),move:{type:'shot',angle:0,power:.8}});assert.equal(yielded,true);assert.equal(track.final.moving,false);
 });
+
+test('cancelled fallback stops before any further physics work',async()=>{assert.equal(await buildReplayAsync(null,{isCancelled:()=>true}),null);});

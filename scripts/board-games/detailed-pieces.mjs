@@ -1,0 +1,22 @@
+// Static, shaded Staunton silhouettes: no canvas loop, external textures or live filters.
+let serial=0;
+const palettes={
+ classic:{w:['#fff9e9','#eedcba','#af8b58','#624a2d','#fff7dd'],b:['#a69776','#514b3d','#181e1b','#d2b880','#ead5a6']},
+ royal:{w:['#fff9df','#ead5a2','#a68543','#7d5d2b','#fff1bd'],b:['#ab8660','#51392b','#1b1a18','#d9b76a','#f2d38d']},
+ onyx:{w:['#f5ffff','#d7e8e7','#7d9c9f','#486970','#ffffff'],b:['#668b99','#254552','#0b202b','#a0c2cc','#d3edf1']}
+};
+export function detailedPiece(type,color,style){const material=palettes[style];if(!material)return null;const [light,mid,dark,edge,glint]=material[color==='b'?'b':'w'],id='chess-piece-'+(++serial),body='url(#'+id+'-body)',base='url(#'+id+'-base)';
+ const path=(d,fill=body,stroke=edge,width=1.25)=>'<path d="'+d+'" style="fill:'+fill+';stroke:'+stroke+';stroke-width:'+width+';stroke-linejoin:round;stroke-linecap:round"/>';
+ const ellipse=(cx,cy,rx,ry,fill=body,stroke=edge,width=1)=>'<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" style="fill:'+fill+';stroke:'+stroke+';stroke-width:'+width+'"/>';
+ const line=(d,stroke=glint,width=1,opacity=.65)=>'<path d="'+d+'" style="fill:none;stroke:'+stroke+';stroke-width:'+width+';stroke-linecap:round;opacity:'+opacity+'"/>';
+ const foot=(narrow=false)=>{const left=narrow?23:18,right=80-left;return path('M'+(left+5)+' 77Q40 73 '+(right-5)+' 77L'+right+' 86Q40 93 '+left+' 86Z',base)+ellipse(40,86,(right-left)/2,4.3,base)+line('M'+(left+3)+' 85Q40 90 '+(right-3)+' 85',glint,1.15,.75)+line('M'+(left+7)+' 79Q40 76 '+(right-7)+' 79',glint,.9,.55);};
+ const collar=(y,width=16)=>ellipse(40,y,width,3.1,base)+line('M'+(42-width)+' '+(y-1)+'Q40 '+(y-4)+' '+(38+width)+' '+(y-1));
+ let sculpt='';
+ if(type==='p')sculpt=ellipse(40,34,11,11.5)+ellipse(36.5,30,3.1,4.2,glint,'none',0)+path('M34 46Q35 56 31 66L27 74Q40 79 53 74L49 66Q45 56 46 46Z')+collar(47,12)+collar(74,15)+line('M36 52Q36 62 32 69',glint,1.5,.5)+foot(true);
+ else if(type==='r')sculpt=path('M22 14H31V23H36V14H44V23H49V14H58V33L53 38H27L22 33Z')+path('M28 38H52L50 61L55 74Q40 79 25 74L30 61Z')+collar(38,15)+line('M32 42 31 61 28 70',glint,1.6,.55)+line('M25 18V30L30 34',glint,1,.75)+line('M49 43 48 62',dark,1.2,.65)+collar(74,17)+foot();
+ else if(type==='b')sculpt=path('M40 7C33 15 24 21 25 32Q26 40 35 44L30 49H50L45 44Q57 37 55 28C54 20 45 12 40 7Z')+line('M43 16 34 32',dark,3.1,.95)+line('M45 17 37 31',glint,.85,.85)+path('M34 51Q36 64 28 74Q40 79 52 74Q44 64 46 51Z')+collar(50,14)+line('M37 55Q36 65 32 71',glint,1.4,.6)+collar(74,16)+foot();
+ else if(type==='n')sculpt=path('M24 73Q23 60 35 51C43 45 45 37 41 30L30 40 18 35 24 22 38 10 42 20C55 22 62 35 60 49L57 72Z')+path('M38 11 34 25 28 30',mid,edge,.9)+path('M47 25Q58 35 53 51L49 63 48 72',dark,edge,.8)+line('M46 29 51 33M49 36 54 39M49 43 53 46M47 50 51 53M45 58 49 61',glint,.9,.65)+line('M36 44Q50 44 44 57L36 69',glint,1.7,.65)+ellipse(34,28,1.8,2.1,dark,'none',0)+ellipse(33.6,27.4,.65,.7,glint,'none',0)+line('M20 34 28 35 35 31',dark,1,.8)+collar(74,18)+foot();
+ else if(type==='q')sculpt=ellipse(40,12,3.4,3.5,base)+path('M23 45 17 23 29 34 40 18 51 34 63 23 57 45Q40 51 23 45Z')+ellipse(17,21,3.1,3.2,base)+ellipse(63,21,3.1,3.2,base)+path('M29 51H51Q46 62 50 69L54 74Q40 80 26 74L30 69Q34 62 29 51Z')+collar(47,17)+collar(53,13)+line('M33 57Q36 63 32 71',glint,1.5,.6)+line('M23 29 27 41M40 25V42M57 29 53 41',glint,1,.6)+collar(74,17)+foot();
+ else sculpt=path('M36 5H44V13H52V21H44V29H36V21H28V13H36Z',base)+line('M38 8V17H31M40 17H49M40 18V26',glint,1,.7)+path('M26 33Q31 27 40 32Q49 27 54 33C61 42 51 48 49 52H31C29 48 19 42 26 33Z')+path('M32 55H48Q44 64 50 72L54 76Q40 81 26 76L30 72Q36 64 32 55Z')+collar(53,16)+line('M29 35Q26 41 33 46',glint,1.5,.65)+line('M36 59Q35 67 31 72',glint,1.5,.6)+collar(76,18)+foot();
+ return '<svg viewBox="0 0 80 96" class="piece detailed '+style+(color==='b'?' black':'')+'" aria-hidden="true"><defs><linearGradient id="'+id+'-body" x1="0%" y1="0%" x2="100%" y2="12%"><stop stop-color="'+dark+'"/><stop offset=".28" stop-color="'+mid+'"/><stop offset=".43" stop-color="'+light+'"/><stop offset=".58" stop-color="'+mid+'"/><stop offset="1" stop-color="'+dark+'"/></linearGradient><linearGradient id="'+id+'-base" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="'+light+'"/><stop offset=".4" stop-color="'+mid+'"/><stop offset="1" stop-color="'+dark+'"/></linearGradient></defs>'+ellipse(40,91,27,3.7,'#00000030','none',0)+sculpt+'</svg>';
+}
