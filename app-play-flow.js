@@ -65,12 +65,12 @@
     var target=event.target.closest && event.target.closest('.evening-reference__cooler-hit');
     if(!target || coolerSpeechTimer)return;
     event.preventDefault();closeCooler();coolerTarget=target;target.setAttribute('aria-expanded','true');
-    var scene=target.parentElement,art=scene.querySelector('img.evening-reference__art--portal-side');if(!art)return;
-    coolerPose=art.cloneNode(false);coolerPose.classList.add('evening-cooler-pose');coolerPose.src=greetingArt;scene.appendChild(coolerPose);
+    var scene=target.parentElement,art=scene.querySelector('img.evening-reference__art--portal-side');if(!art&&!scene.classList.contains('underwater-play'))return;
+    if(art){coolerPose=art.cloneNode(false);coolerPose.classList.add('evening-cooler-pose');coolerPose.src=greetingArt;scene.appendChild(coolerPose);}
     coolerSpeech=document.createElement('div');coolerSpeech.className='evening-cooler-speech';coolerSpeech.setAttribute('role','dialog');coolerSpeech.setAttribute('aria-label','Кулер приглашает в Кулершан');coolerSpeech.setAttribute('aria-live','polite');document.body.appendChild(coolerSpeech);
-    inviteCooler();var pose=coolerPose;function showPose(){if(coolerPose===pose){scene.classList.add('evening-cooler-active');pose.classList.add('evening-cooler-pose--visible');}}if(pose.complete && pose.naturalWidth)showPose();else pose.addEventListener('load',showPose,{once:true});
+    inviteCooler();var pose=coolerPose;function showPose(){if(coolerPose===pose){scene.classList.add('evening-cooler-active');pose.classList.add('evening-cooler-pose--visible');}}if(pose?.complete && pose.naturalWidth)showPose();else if(pose)pose.addEventListener('load',showPose,{once:true});
     coolerSpeech.querySelector('button').focus({preventScroll:true});
-    [greetingArt,hurtArt,angryArt].forEach(function(src){var image=new Image();image.src=src;});
+    (art?[greetingArt,hurtArt,angryArt]:[]).forEach(function(src){var image=new Image();image.src=src;});
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape' && coolerSpeech){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});}});
   window.addEventListener('resize',positionCoolerSpeech);
@@ -131,6 +131,7 @@
     var scene = flow && flow.querySelector(".evening-reference");
     var chair = scene && scene.querySelector(".evening-reference__art--chair-center");
     var invite = scene && scene.querySelector(".home-tournament-share");
+    if(scene?.classList.contains('underwater-play'))return;
     if (!chair || !invite || !chair.complete || !chair.naturalWidth) return;
     var sceneRect = scene.getBoundingClientRect();
     if (!sceneRect.width) return;
@@ -148,6 +149,7 @@
     var scene = flow.querySelector(".evening-reference");
     var table = scene && scene.querySelector(".evening-reference__art--table");
     var cat = scene && scene.querySelector(".evening-vpn-cat");
+    if(scene?.classList.contains('underwater-play'))return;
     if (!table || !cat || !table.complete || !table.naturalWidth) return;
     var sceneRect = scene.getBoundingClientRect();
     var tableRect = table.getBoundingClientRect();
