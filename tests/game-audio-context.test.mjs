@@ -11,5 +11,6 @@ test('effects share one stream, suspend in silence, wake for sounds and wait for
  let release;playGameAudio(a,done=>release=done);await Promise.resolve();assert.equal(resumed,1);assert.ok(release);
  t.mock.timers.tick(2000);assert.equal(suspended,1);release();t.mock.timers.tick(601);assert.equal(suspended,2);
  document.hidden=true;let played=false;playGameAudio(a,()=>played=true);assert.equal(played,false);assert.equal(resumed,1);
+ document.hidden=false;a.state='interrupted';let recovered=false;playGameAudio(a,done=>{recovered=true;done();});await Promise.resolve();assert.equal(recovered,true);assert.equal(resumed,2);
  }finally{t.mock.timers.reset();globalThis.window=oldWindow;globalThis.document=oldDocument;}
 });

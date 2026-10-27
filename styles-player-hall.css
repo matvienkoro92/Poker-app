@@ -609,9 +609,9 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .villa-billiards-living span,.villa-living-return span{font-size:11px}
 .villa-living-stage{position:absolute;inset:0;z-index:10;background:#191b18; background-size:cover;background-position:center;visibility:hidden;pointer-events:none;overflow:hidden}
 .player-hall__room:not([data-space=living]):not([data-living-transition])>.villa-living-stage{display:none}
-.player-hall__room[data-space=living] .villa-living-stage{background-image:url('./assets/player-hall/villa-living-games-v5.webp');visibility:visible;pointer-events:auto}
+.player-hall__room[data-space=living] .villa-living-stage{background-image:url('./assets/player-hall/villa-living-games-v6.webp');visibility:visible;pointer-events:auto}
 .player-hall__room[data-space=living]>:not(.villa-living-stage){visibility:hidden;pointer-events:none}
-.player-hall__room[data-living-transition]>.villa-living-stage{background-image:url('./assets/player-hall/villa-living-games-v5.webp');visibility:visible}
+.player-hall__room[data-living-transition]>.villa-living-stage{background-image:url('./assets/player-hall/villa-living-games-v6.webp');visibility:visible}
 .player-hall__room[data-living-transition]>.villa-billiards-stage{visibility:visible}
 
 .player-hall-dialog .living-darts-wall{position:absolute;left:12px;top:25%;z-index:3;display:grid;justify-items:center;gap:6px;padding:9px;border:1px solid #b99657;border-radius:10px;background:linear-gradient(100deg,#321e13ed,#513521f2);box-shadow:3px 6px 12px #0007;color:#f3e4c5}
@@ -925,3 +925,27 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 
 .living-board-focus--table[data-game=chess] .living-focus-play{flex-wrap:wrap}
 .player-hall-dialog .living-board-focus[data-game=chess] .living-focus-play>button{flex:1 1 140px;min-width:0;font-size:13px}
+
+/* Full closed-case renders share the room camera instead of flattening lid textures. */
+.player-hall-dialog .living-game-case .living-case-art.is-rendered-case{inset:0;display:block;width:100%;height:100%;padding:0;border:0;border-radius:0;transform:none;clip-path:none;background-color:transparent;background-size:contain;background-position:center bottom;background-repeat:no-repeat;box-shadow:none;filter:drop-shadow(0 3px 2px #21120780)}
+.player-hall-dialog .living-game-case .living-case-art.is-rendered-case::after{content:none}
+
+/* Keep all four nards actions attached to the board instead of the screen edge. */
+.living-board-focus--table[data-game=nards] .living-nards-table-stack{position:relative;flex:none;width:min(100%,480px,calc(43dvh - 18px))}
+.living-board-focus--table[data-game=nards] .living-nards-table-stack .living-top-board{width:100%}
+.living-board-focus--table[data-game=nards] .living-nards-actions{position:absolute;top:calc(100% + 12px);left:0;right:0;display:grid;gap:12px}
+.living-board-focus--table[data-game=nards] .living-nards-actions :is(.living-focus-play,.living-focus-tools){position:static;inset:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.player-hall-dialog .living-board-focus[data-game=nards] .living-nards-actions button{width:100%;min-width:0;padding:8px 5px;font-size:12px}
+
+/* A finite hinge fold: Safari keeps both lid faces in the same 3D space. */
+.living-nards-case{transform:translateX(0);transition:none;-webkit-transform-style:preserve-3d}
+.living-nards-lid{transform:rotateY(0deg);transition:none;-webkit-transform-style:preserve-3d}
+.living-nards-front,.living-nards-back{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.living-nards-lid::after{content:'';position:absolute;top:0;right:0;bottom:0;width:3px;background:var(--preview-frame,#59351e);transform:rotateY(90deg);transform-origin:right center;pointer-events:none}
+
+/* The piece grid follows the exact inner field of each carved board. */
+.living-preview-chess{position:relative}
+.living-preview-chess[data-collection=true]{padding:0!important;background-color:transparent;border:0}
+.living-preview-chess .living-preview-squares{position:absolute;inset:0;height:auto;grid-template-rows:repeat(8,minmax(0,1fr))}
+.living-preview-chess[data-collection=true] .living-preview-squares{inset:var(--preview-chess-inset,6.25%)}
+.living-preview-square{overflow:hidden;aspect-ratio:1}

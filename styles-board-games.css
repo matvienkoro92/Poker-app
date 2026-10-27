@@ -610,3 +610,6 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .piece.flat path,.piece.flat circle{stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .piece.flat [fill="none"]{fill:none}
 .square .piece.flat{width:96%;height:96%}
+
+/* Keep both setup and match controls below phone status indicators. */
+@media(max-width:600px){main{padding-top:calc(var(--game-safe-top,max(40px,env(safe-area-inset-top,0px))) + 8px)}}
