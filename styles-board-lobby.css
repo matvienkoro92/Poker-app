@@ -96,3 +96,8 @@
 #lobby .board-setup-actions #boardSetupBackFooter{background:#1a3025;color:#e6d4af;border:1px solid #bda16a70;box-shadow:inset 0 1px #ffffff08}
 
 #lobby .board-timeout-note{margin:8px 0 0;padding:10px 12px;border-left:2px solid #c6aa69;border-radius:0 8px 8px 0;background:#c6aa690b;color:#ddc99d;font-size:12px;line-height:1.5}
+
+/* Lead with the club challenge; separate local play from online modes. */
+#boardModeButtons .mode-card--local{margin-top:16px}
+#lobby #boardModeButtons .mode-card--featured[aria-pressed=true]{border-color:#e8c780;background:linear-gradient(125deg,#c7ab6638,#31523b55);box-shadow:inset 3px 0 #e1c07a}
+#lobby #boardModeButtons .mode-card--featured .mode-card__icon{color:#f0d38d;background:#d5b76e1c}

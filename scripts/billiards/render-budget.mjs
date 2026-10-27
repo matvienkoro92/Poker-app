@@ -4,5 +4,5 @@ export function mobileGraphics({width=globalThis.innerWidth,height=globalThis.in
 }
 export function createFrameBudget(fps){
  let next=0;
- return {ready(now,{hidden=false,active=true}={}){if(hidden){next=0;return false;}if(now+.5<next)return false;const interval=1000/(active?fps:15);next=now+interval-(Math.max(0,now-next)%interval);return true;}};
+ return {reset(){next=0;},ready(now,{hidden=false,active=true}={}){if(hidden){next=0;return false;}if(now+.5<next)return false;const interval=1000/(active?fps:15);next=now+interval-(Math.max(0,now-next)%interval);return true;}};
 }

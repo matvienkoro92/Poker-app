@@ -7,21 +7,22 @@ export function diceFaces(top){const front=[1,2,3,4,5,6].find(n=>n!==top&&n!==7-
 function face(name,value){const el=document.createElement('span');el.className='cube-face cube-face--'+name;el.dataset.value=value;for(const pos of spots[value]){const dot=document.createElement('i');dot.style.gridArea=Math.ceil(pos/3)+' / '+((pos-1)%3+1);el.append(dot);}return el;}
 export function createDiceView(container,onSettled,onThrow=()=>{}){
  const layer=document.createElement('div');layer.className='board-dice-stage';layer.hidden=true;layer.setAttribute('aria-label','Кости на доске');container.append(layer);
- let lastWidth=0,lastFlipped=null,lastScale=1;let key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[];
+ let lastWidth=0,lastFlipped=null,lastScale=1;let key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[],pending=[];
  function cancel(){epoch++;clearTimeout(timer);for(const a of animations)a.cancel();animations=[];rolling=false;layer.classList.remove('is-rolling');}
- function reset(){cancel();lastFlipped=null;key='';context='';initialized=false;dice=[];layer.replaceChildren();layer.hidden=true;}
- function settle(notify=true){if(!rolling)return;cancel();if(notify)onSettled();}
+ function reset(){pending=[];cancel();lastFlipped=null;key='';context='';initialized=false;dice=[];layer.replaceChildren();layer.hidden=true;}
+ function settle(notify=true){if(!rolling)return;cancel();if(!notify||document.hidden)pending=[];if(notify&&pending.length){const next=pending.shift();update(next.state,next.options);}if(notify)onSettled();}
  function update(state,options={}){
   if(!state||state.discipline==='chess'){reset();return false;}
   if(options.context!==context){reset();context=options.context;}
   if(state.roll.length!==2){cancel();key='';layer.replaceChildren();layer.hidden=true;initialized=true;return false;}
   const next=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()))+':'+diceOwner(state);
+  if(rolling&&next!==key){if(!pending.some(item=>item.key===next)){pending.push({key:next,state:structuredClone(state),options:{...options}});if(pending.length>8)pending.shift();}return false;}
   const scale=options.size==='small'?.72:1,flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped||lastScale!==scale);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
   // A mobile viewport update must not cancel a throw already in flight.
   if(next===key&&rolling){mark(state);return false;}
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden;
-  const duration=reduced?320:DICE_DURATION;
+  const duration=reduced?900:DICE_DURATION;
   cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;
   const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
   lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=diceOwner(state),right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
@@ -29,9 +30,10 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
    const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube'+(i?' dice-cube--amber':'');shadow.className='dice-ground-shadow';cube.dataset.value=value;cube.setAttribute('role','img');cube.setAttribute('aria-label','Кость '+(i+1)+': '+value);for(const [side,n]of Object.entries(diceFaces(value)))cube.append(face(side,n));flight.append(cube);layer.append(shadow,flight);dice.push(cube);const mesh=createDiceMesh(cube,diceFaces(value),size);
    const x=width*(right?(i?.80:.64):(i?.36:.20))-size/2,y=height*.5-size/2;flight.style.transform='translate3d('+x+'px,'+y+'px,0)';cube.style.transform='none';mesh.draw(DICE_REST_X,DICE_REST_Y,i?.14:-.12);shadow.style.transform='translate('+x+'px,'+(y+size*.64)+'px) scale(1)';
    if(!animate)return;
-   const startX=reduced?x:width*(right?.94:.06)+i*size*.35,startY=reduced?y+88:height*.18,sign=i?1:-1;
+   const clampX=v=>Math.max(size*.5+3,Math.min(width-size*1.5-3,v)),clampY=v=>Math.max(size*.5+3,Math.min(height-size*1.5-3,v));
+   const startX=clampX(reduced?x+(i?1:-1)*size*.3:width*(right?.90:.10)+(right?-1:1)*i*size*.5),startY=clampY(height*.18-100),sign=i?1:-1;
    const frames=[
-    {offset:0,x:startX,y:startY-100},
+    {offset:0,x:startX,y:startY},
     {offset:.29,x:x+(right?1:-1)*width*.07,y:y-10},
     {offset:.46,x:x+sign*size*.52,y:y-size*1.35},
     {offset:.62,x:x+sign*size*.27,y:y+2},
@@ -40,10 +42,12 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
     {offset:1,x,y}
    ];
    const timing={duration:duration+i*(reduced?25:95),easing:'linear',fill:'none'};
-   const path=reduced?[{offset:0,x,y:y-12},{offset:1,x,y}]:frames;
+   const path=(reduced?[{offset:0,x:startX,y:y-size*.9},{offset:.4,x:x+sign*size*.15,y:y-size*.28},{offset:.72,x,y:y+1},{offset:1,x,y}]:frames).map(f=>({...f,x:clampX(f.x),y:clampY(f.y)}));
    animations.push(flight.animate(path.map(f=>({offset:f.offset,transform:'translate3d('+f.x+'px,'+f.y+'px,0)',easing:f.offset===0?'cubic-bezier(.42,0,.8,.48)':f.offset===.29||f.offset===.62?'cubic-bezier(.16,.75,.4,1)':'cubic-bezier(.45,0,.8,.5)'})),timing));
-   if(!reduced)animations.push(mesh.animate(i,timing.duration));
-   animations.push(shadow.animate(frames.map((f,j)=>({offset:f.offset,transform:'translate('+f.x+'px,'+(y+size*.64)+'px) scale('+([.35,1,.64,1,.86,1,1][j])+')',opacity:[0,.85,.24,.85,.45,.85,.85][j]})),timing));
+   // Reduced motion keeps a short 3D tumble instead of a flat, unrotated drop.
+   animations.push(mesh.animate(i,timing.duration,reduced?.6:1));
+   const shadowScale=reduced?[.7,.9,1,1]:[.35,1,.64,1,.86,1,1],shadowOpacity=reduced?[.35,.6,.85,.85]:[0,.85,.24,.85,.45,.85,.85];
+   animations.push(shadow.animate(path.map((f,j)=>({offset:f.offset,transform:'translate('+f.x+'px,'+(y+size*.64)+'px) scale('+shadowScale[j]+')',opacity:shadowOpacity[j]})),timing));
   });
   mark(state);
   if(animate){onThrow();rolling=true;layer.classList.add('is-rolling');const token=epoch;timer=setTimeout(()=>{if(token===epoch)settle();},duration+(reduced?45:115));}
@@ -51,5 +55,5 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
  }
  function mark(state){const remaining=[...state.dice],double=state.roll[0]===state.roll[1];for(const cube of dice){const at=remaining.indexOf(Number(cube.dataset.value));cube.classList.toggle('is-spent',!rolling&&state.phase!=='opening'&&(double?state.dice.length===0:at<0));if(at>=0)remaining.splice(at,1);}}
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{if(!rolling&&!layer.hidden&&Math.abs(container.getBoundingClientRect().width-lastWidth)>1)onSettled();}).observe(container);
- return {update,reset,settle,replay(){cancel();key='';initialized=true;},get busy(){return rolling;},element:layer};
+ return {update,reset,settle,replay(){pending=[];cancel();key='';initialized=true;},get busy(){return rolling;},get pending(){return pending.length;},element:layer};
 }
