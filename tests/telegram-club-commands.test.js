@@ -31,8 +31,8 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:manager','club:game:nards','club:game:chess','club:game:billiards','club:schedule:0']);
- assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza']);
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:manager','club:schedule:0']);
+ assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=nards','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=chess','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards']);
  assert.equal(buttons.length,11);
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
  assert.deepEqual(buttons.slice(-7,-4),[

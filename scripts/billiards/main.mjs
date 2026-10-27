@@ -1,3 +1,4 @@
+import {mountClothGuidance} from './cloth-guidance.mjs';
 import {createReactionPocketPicker} from './reaction-pocket-picker.mjs';
 import billiardsReactionTurn from '../../lib/billiards-reaction-turn.js';
 import {mountGameReactions} from '../shared/game-reactions.mjs';
@@ -50,6 +51,7 @@ const connectionNotice=mountConnectionNotice(document.querySelector('.billiards>
 const clockWarning=mountTurnWarning($('turnClock'));
 const turnStartSound=mountTurnStartSound();
 mountSoundSettings([document.querySelector('main.billiards>header')]);
+const clothGuidance=mountClothGuidance({room:()=>room});
 const reactionPocketPicker=createReactionPocketPicker({project:i=>room?.projectPocket(i),turn:()=>billiardsReactionTurn({state:['online','spectator'].includes(mode)?canonical:state,match:['online','spectator'].includes(mode)?canonicalSeries:series})});
 const gameReactions=mountGameReactions({container:document.querySelector('main.billiards>header'),request,chooseTarget:()=>{if(!tableView)setView(true);return reactionPocketPicker.pick();},projectTarget:event=>Number.isInteger(event?.pocket)?room?.projectPocket(event.pocket):null,context:()=>({active:!!mode&&state?.winner===null&&(mode==='solo'||mode==='training'||online),online:mode==='online'||mode==='spectator',spectator:spectating,roomId:currentRoomId,player,playerNames:mode==='training'?['Сторона 1','Сторона 2']:playerProfiles.map((p,i)=>p?.name||(i===player?(mode==='solo'?equipment.inspect().nick||'Вы':'Вы'):'Соперник')),reactionTurn:billiardsReactionTurn({state:['online','spectator'].includes(mode)?canonical:state,match:['online','spectator'].includes(mode)?canonicalSeries:series})})});
 const tableDock=document.createElement('section');tableDock.id='tableDock';$('turnGuide').append($('turnClock'));tableDock.append($('turnGuide'),$('game'),$('decisionOpen'),$('penaltyConfirm'));document.querySelector('main').append(tableDock);
@@ -139,7 +141,7 @@ $('shareInvite').onclick=async()=>{
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('roomCode').textContent);status('Код скопирован — отправьте его другу.');}catch(_){status('Код комнаты: '+$('roomCode').textContent);}};
 $('resumeTable').onclick=()=>setView(true);$('view').onclick=()=>setView(!tableView);$('power').oninput=()=>{$('powerValue').textContent=$('power').value+'%';};$('shoot').onclick=()=>move({type:'shot',angle,power:Number($('power').value)/100,...rulesUI.options(state),spin:shotTools.value()});$('again').onclick=async()=>{if(mode==='training')return startTraining();if(mode==='solo')return solo(true);if(await ensureGameParticipation())net?.move(null,true);};$('modes').onclick=()=>leaveGame(false);
 let dragging=false;
-function aim(e){if(playback||spectating||!tableView||!online||state.turn!==player||state.moving||state.winner!==null)return;const p=room.point(e.clientX,e.clientY);if(!p)return;if(rulesUI.isPlacing(state)||state.breakPending&&e.shiftKey){if(e.type==='pointerdown'){move({type:'place',x:p.x,y:p.y});rulesUI.placed();}return;}if(e.type==='pointerdown'&&rulesUI.chooseCue(state,p))return;const id=rulesUI.options(state).cueId,b=state.balls.find(b=>b.id===id&&!b.pocket);if(!b)return;if(Math.hypot(p.x-b.x,p.y-b.y)<18)return;angle=Math.atan2(b.y-p.y,b.x-p.x);}
+function aim(e){if(playback||spectating||!tableView||!online||state.turn!==player||state.moving||state.winner!==null)return;const p=room.point(e.clientX,e.clientY);if(!p)return;if(rulesUI.isPlacing(state)||state.breakPending&&e.shiftKey){if(e.type==='pointerdown'){if(move({type:'place',x:p.x,y:p.y})!==false)rulesUI.placed();}return;}if(e.type==='pointerdown'&&state.breakPending){const cue=state.balls.find(b=>b.id===0&&!b.pocket);if(cue&&Math.hypot(p.x-cue.x,p.y-cue.y)<22){rulesUI.togglePlacement();return;}}if(e.type==='pointerdown'&&rulesUI.chooseCue(state,p))return;const id=rulesUI.options(state).cueId,b=state.balls.find(b=>b.id===id&&!b.pocket);if(!b)return;if(Math.hypot(p.x-b.x,p.y-b.y)<18)return;angle=Math.atan2(b.y-p.y,b.x-p.x);}
 $('room').onselectstart=$('room').oncontextmenu=e=>e.preventDefault();
 $('room').onpointerdown=e=>{e.preventDefault();window.getSelection()?.removeAllRanges();dragging=true;$('room').setPointerCapture(e.pointerId);aim(e);};$('room').onpointermove=e=>{if(dragging)aim(e);};$('room').onpointerup=$('room').onpointercancel=()=>dragging=false;
 $('closeRules').onclick=()=>$('rules').close();$('back').onclick=()=>leaveGame(true);
@@ -196,7 +198,8 @@ function frame(now){reactionPocketPicker.update();gameReactions.refresh();
  const ownCue=equipment.inspect(),cueStyle=CUES.find(c=>c.id===(sharedEquipment?ownCue.selected:shownAim?.cueStyle||ownCue.selected))||CUES[0],cueNick=sharedEquipment?ownCue.nick:shownAim?shownAim.nick||'Соперник':ownCue.nick,cueKey=cueStyle.id+':'+cueNick;
  if(renderedCue!==cueKey){room?.setCue(cueStyle,cueNick);renderedCue=cueKey;}
  const aimState=shownAim?{...display,cueId:shownAim.cueId??0}:display;
- if(tableView)room?.render(aimState,shownAim?.angle??angle,!state.moving&&!state.inHand&&!state.pending&&state.winner===null&&(can||!!shownAim));
+ if(tableView)room?.render(aimState,shownAim?.angle??angle,!state.moving&&!state.inHand&&!state.pending&&!rulesUI.isPlacing(state)&&state.winner===null&&(can||!!shownAim));
+ clothGuidance.render(state,{active:tableView,can,placing:rulesUI.isPlacing(state),cueId:rulesUI.options(state).cueId});
 }
 function refreshTableLayout(){if(!tableView)return;room?.setView('table');frameBudget.reset();frameLoop?.wake();}
 const matchupObserver=new ResizeObserver(()=>{
@@ -213,10 +216,7 @@ function reserveTableControls(){
   return;
  }
  const dock=tableDock.getBoundingClientRect();if(!dock.height)return;
- let top=dock.top;
- // Inline placement/training actions also have to clear the rendered table.
- for(const el of tableDock.querySelectorAll('.call-controls,.training-controls,#placeBreak,#cuePickHint,#decisionOpen,#matchResult')){const box=el.getBoundingClientRect();if(box.width&&box.height)top=Math.min(top,box.top);}
- const next=Math.ceil(dock.bottom-top)+'px';
+ const next=Math.ceil(dock.height)+'px';
  if(document.body.style.getPropertyValue('--billiards-controls-height')!==next){document.body.style.setProperty('--billiards-controls-height',next);if(tableView)refreshTableLayout();}
 }
 const controlsObserver=new ResizeObserver(reserveTableControls);

@@ -7,7 +7,8 @@
     try {
       var frame = window.frameElement;
       var top = frame ? frame.getBoundingClientRect().top : 0;
-      var mobile = parent.innerWidth <= 600;
+      var platform=String(parent.Telegram?.WebApp?.platform||'').toLowerCase();
+      var mobile=['ios','android','android_x'].includes(platform)||!['tdesktop','macos','windows','linux'].includes(platform)&&parent.innerWidth<=600;
       document.documentElement.style.setProperty('--game-safe-top', Math.max(0, (mobile ? 40 : 0) - top) + 'px');
     } catch (_) {
       document.documentElement.style.removeProperty('--game-safe-top');
