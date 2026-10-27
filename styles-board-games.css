@@ -613,3 +613,16 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 
 /* Keep both setup and match controls below phone status indicators. */
 @media(max-width:600px){main{padding-top:calc(var(--game-safe-top,max(40px,env(safe-area-inset-top,0px))) + 8px)}}
+
+/* Show the selected board and complete selected piece set at the dialog width. */
+#chessEquipment .chess-equipment-preview{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:0;border:0;background:none}
+#chessEquipment .chess-preview-board{flex:none;width:100%;max-width:none;aspect-ratio:1;background-size:100% 100%;border:2px solid var(--frame);overflow:hidden}
+#chessEquipment .chess-preview-board[data-collection=true]{border:0;background-color:transparent}
+.chess-preview-position{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr))}
+.chess-preview-board[data-collection=true] .chess-preview-position{inset:var(--chess-preview-inset,6.25%)}
+.chess-preview-cell{display:grid;place-items:center;min-width:0;min-height:0;background:var(--light);overflow:hidden}
+.chess-preview-cell.is-dark{background:var(--dark)}
+.chess-preview-board[data-collection=true] .chess-preview-cell{background:transparent}
+#chessEquipment .chess-preview-cell .piece{display:block;width:96%;height:96%;margin:0}
+#chessEquipment .chess-equipment-preview strong{font-size:15px}
+#chessEquipment .chess-equipment-preview p{font-size:12px}

@@ -677,3 +677,5 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
  .deposits__popup [data-form="transfer"] .deposits__text-button{font-size:10px;line-height:1.2;min-height:24px;padding:4px 0;margin:0}
  .deposits__popup [data-form="transfer"] .deposits__primary{min-height:40px;padding:8px;font-size:16px}
 }
+
+.deposits__withdrawal-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:auto}

@@ -949,3 +949,8 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-preview-chess .living-preview-squares{position:absolute;inset:0;height:auto;grid-template-rows:repeat(8,minmax(0,1fr))}
 .living-preview-chess[data-collection=true] .living-preview-squares{inset:var(--preview-chess-inset,6.25%)}
 .living-preview-square{overflow:hidden;aspect-ratio:1}
+
+/* Keep chess controls together in two rows directly beneath the board. */
+.living-board-focus--table[data-game=chess] .living-chess-actions{position:absolute;top:calc(100% + 10px);left:0;right:0;display:grid;gap:10px}
+.living-board-focus--table[data-game=chess] .living-chess-actions :is(.living-focus-play,.living-focus-tools){position:static;inset:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.player-hall-dialog .living-board-focus[data-game=chess] .living-chess-actions button{width:100%;min-width:0;padding:8px 5px;font-size:12px}
