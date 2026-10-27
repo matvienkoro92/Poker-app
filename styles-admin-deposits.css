@@ -671,7 +671,7 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
  .deposits__transfer-route .deposits__rooms span{font-size:10px;padding:6px 0}
  .deposits__popup [data-form="transfer"] .deposits__player-picker{position:relative;gap:3px;margin:0 0 4px}
  .deposits__popup [data-form="transfer"] .deposits__player-choices{display:none;position:absolute;z-index:20;top:100%;left:0;right:0;max-height:160px;overflow:auto;grid-template-columns:1fr;background:#172028;border:1px solid #927e50;border-radius:8px;padding:4px;box-shadow:0 8px 20px #0009}
- .deposits__popup [data-form="transfer"] .deposits__player-picker:focus-within .deposits__player-choices:not(:empty){display:grid}
+ .deposits__popup [data-form="transfer"] .deposits__player-picker:focus-within .deposits__player-choices:not(:empty),.deposits__popup [data-form="transfer"] .deposits__player-picker.is-searching .deposits__player-choices:not(:empty){display:grid}
  .deposits__popup [data-form="transfer"] .deposits__hint{font-size:10px;line-height:1.25;margin:0}
  .deposits__popup [data-form="transfer"]>p.deposits__hint{display:none}
  .deposits__popup [data-form="transfer"] .deposits__text-button{font-size:10px;line-height:1.2;min-height:24px;padding:4px 0;margin:0}
