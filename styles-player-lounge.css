@@ -760,7 +760,7 @@
 .player-hall-dialog--guest .player-hall__guest-banner{top:78%;padding:8px 12px;gap:4px}
 
 /* Separate, readable directions from the garage into the two game rooms. */
-.player-hall-dialog .garage-game-passages{position:absolute;left:-17%;top:7%;width:32%;height:auto;display:flex;flex-direction:column;gap:22px;z-index:4}
+.player-hall-dialog .garage-game-passages{position:absolute;left:-17%;top:18%;width:32%;height:auto;display:flex;flex-direction:column;gap:22px;z-index:4}
 .player-hall-dialog .garage-game-passages>button{position:static;display:flex;flex:0 0 auto;flex-direction:column;align-items:center;justify-content:center;gap:7px;width:100%;height:auto;min-height:44px;padding:5px 2px;border:0;background:transparent;color:#fff0c6;cursor:pointer;touch-action:manipulation}
 .player-hall-dialog .garage-game-passages .garage-lock{display:grid;place-items:center;width:46px;height:46px;border:1px solid #efd082;border-radius:50%;background:linear-gradient(145deg,#395348,#20382e);box-shadow:0 3px 12px #0008,inset 0 1px #fff3;font-size:24px;color:#ffe5a1}
 .player-hall-dialog .garage-game-passages strong{padding:6px 9px;border:1px solid #d5b76c;border-radius:8px;background:linear-gradient(145deg,#3c5140f5,#263a2df5);color:#fff0c6;text-align:center;line-height:1.35;font-size:11px;box-shadow:0 3px 9px #0007}

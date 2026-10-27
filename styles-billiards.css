@@ -585,6 +585,25 @@ body.billiards-table-view #tableLeftRail .shelf-balls:has(.potted-ball:nth-child
 /* Keep reactions on the visible table rail alongside sound and rules. */
 body.billiards-table-view .room-toolbar [data-game-reactions]{font-size:0!important;width:34px;height:34px;min-height:34px;padding:0}
 body.billiards-table-view .room-toolbar [data-game-reactions]::after{content:'🎃';font-size:18px}
+/* Player cards: stable score badges and a silver turn indicator on graphite. */
+body.billiards-table-view .billiards-matchup{gap:6px;grid-template-columns:28px minmax(0,1fr) 16px minmax(0,1fr)}
+body.billiards-table-view .billiards-matchup>[data-side]{position:relative;min-height:48px;padding:7px 6px;gap:5px;border:1px solid #c6cbd640;border-radius:13px;background:linear-gradient(145deg,#292c32f5,#171a20fa);box-shadow:inset 0 1px #ffffff09,0 4px 12px #0003;backdrop-filter:blur(10px)}
+body.billiards-table-view .billiards-matchup>[data-side].is-active{border-color:#d7dde8b8;background:linear-gradient(120deg,#41464ff5,#292e36fa 78%);box-shadow:inset 0 1px #ffffff24,0 4px 12px #0003}
+body.billiards-table-view .billiards-matchup>[data-side].is-active::after{content:'';position:absolute;left:-1px;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:#e5eaf2}
+body.billiards-table-view .billiards-matchup__avatar{flex:0 0 24px;width:24px;height:24px;border:1px solid #b5bdcd55;background:linear-gradient(145deg,#424750,#252a32);box-shadow:inset 0 1px #ffffff14;color:#e5e9f1;font-size:13px;font-weight:750}
+body.billiards-table-view .billiards-matchup .is-active .billiards-matchup__avatar{border-color:#e1e6f0b8;background:linear-gradient(145deg,#7a8493,#4b5463);box-shadow:inset 0 1px #ffffff30;color:#ffffff}
+body.billiards-table-view .billiards-matchup__identity{flex:1;min-width:0}
+body.billiards-table-view .billiards-matchup strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(11px,1.5vw,13px);line-height:16px;font-weight:750;letter-spacing:.1px;color:#f1f3f7}
+body.billiards-table-view .billiards-matchup small{margin-top:2px;font-size:9px;line-height:12px;font-weight:500;color:#a6aeba;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.billiards-table-view .billiards-matchup .is-active strong{color:#ffffff}
+body.billiards-table-view .billiards-matchup .is-active small{color:#dfe5ef;font-weight:600}
+body.billiards-table-view .billiards-matchup .is-active small::before{color:#dfe6f2;font-size:6px;margin-right:4px}
+body.billiards-table-view .billiards-matchup__score{flex:0 0 auto;min-width:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;align-self:stretch;padding:2px 3px;border:1px solid #cbd3df26;border-radius:8px;background:#0a0d1280;font-variant-numeric:tabular-nums}
+body.billiards-table-view .billiards-matchup__score b{font-size:16px;line-height:18px;font-weight:750;color:#f6f8fc}
+body.billiards-table-view .billiards-matchup__score em{font-style:normal;font-size:7px;line-height:9px;letter-spacing:.4px;color:#969fad}
+body.billiards-table-view .billiards-matchup .is-active .billiards-matchup__score{border-color:#e1e8f64d;background:#c4d0e71a}
+body.billiards-table-view .billiards-matchup__vs{font:600 9px/1 system-ui,sans-serif;letter-spacing:.6px;color:#9ba5b5}
+@media(max-width:380px){body.billiards-table-view .billiards-matchup{left:6px;right:6px;gap:4px;grid-template-columns:24px minmax(0,1fr) 12px minmax(0,1fr)}body.billiards-table-view .billiards-matchup>[data-side]{padding:6px 5px;gap:4px;min-height:44px;border-radius:11px}body.billiards-table-view .billiards-matchup__avatar{flex-basis:20px;width:20px;height:20px;font-size:11px}body.billiards-table-view .billiards-matchup strong{font-size:10px;line-height:14px}body.billiards-table-view .billiards-matchup small{font-size:8px;line-height:10px}body.billiards-table-view .billiards-matchup__score{min-width:22px;padding:1px 3px}body.billiards-table-view .billiards-matchup__score b{font-size:13px;line-height:16px}body.billiards-table-view .billiards-matchup__score em{font-size:6px;line-height:8px}}
 
 /* Quiet, static shot controls: matching materials and clear touch feedback. */
 body.billiards-table-view #tableDock :is(#spinButton,#aimLeft,#aimRight){display:flex;align-items:center;justify-content:center;height:40px;min-height:40px;padding:0;border:1px solid #b99d625c;border-radius:11px;background:linear-gradient(145deg,#29463d,#162e28);color:#eddbb1;box-shadow:inset 0 1px #ffffff12,0 2px 4px #0003;touch-action:manipulation}
@@ -600,3 +619,14 @@ body.billiards-table-view #tableDock :is(#spinButton,#aimLeft,#aimRight):disable
 
 /* Table mode never reveals the decorative room photo between rendered frames. */
 body.billiards-table-view{background:#171e19}
+
+/* Every turn state uses the same shot-row footprint beneath the table. */
+body.billiards-table-view #tableDock #penaltyConfirm{top:0;bottom:0;height:100%;max-height:100%;padding:2px 4px max(2px,env(safe-area-inset-bottom,0px));grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:12px minmax(0,1fr);gap:2px 4px;overflow:visible;border-radius:16px 16px 0 0}
+body.billiards-table-view #tableDock .penalty-confirm__heading{grid-column:1/-1;min-height:0;padding:0 3px;line-height:12px}
+body.billiards-table-view #tableDock .penalty-confirm__heading small{font-size:8px}
+body.billiards-table-view #tableDock .penalty-confirm__heading strong{font-size:10px}
+body.billiards-table-view #tableDock #penaltyConfirm>button{width:100%;height:100%;min-height:0;min-width:0;padding:2px 4px;font-size:10px;line-height:1.15;border-radius:8px}
+body.billiards-table-view #tableDock #penaltyConfirm details{position:absolute;left:4px;right:4px;bottom:calc(100% + 4px);padding:3px 6px;border:1px solid #c5aa7066;border-radius:10px;background:#13261ff5}
+
+/* Leave room for phone status indicators even when the webview reports no inset. */
+body.billiards-table-view .billiards-matchup{top:calc(max(32px,var(--billiards-safe-top,env(safe-area-inset-top,0px)),env(safe-area-inset-top,0px)) + 8px)}

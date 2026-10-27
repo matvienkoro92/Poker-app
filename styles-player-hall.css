@@ -919,3 +919,6 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-board-focus--table[data-game=chess] .living-chess-table-stack .living-top-board{width:100%}
 .living-board-focus--table[data-game=chess] .living-chess-table-stack .living-focus-play{top:calc(100% + 10px);bottom:auto;left:0;right:0}
 .living-board-focus--table[data-game=chess] .living-focus-tools{bottom:22px}
+
+/* Cover the villa beyond Telegram safe-area margins while a match is open. */
+.billiards-shell--playing,.billiards-shell--playing::backdrop{background:#171e19}
