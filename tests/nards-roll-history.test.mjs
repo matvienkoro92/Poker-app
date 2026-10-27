@@ -1,0 +1,5 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createBackgammon,backgammonRoll,backgammonRollHistory,backgammonMove,backgammonLegal} from '../scripts/board-games/backgammon.mjs';
+for(const kind of ['short','long'])test(kind+': logs opening ties and each accepted throw once, independent of checker moves',()=>{const s=createBackgammon(kind);assert.equal(backgammonRoll(s,0,[3,3]),true);assert.equal(backgammonRoll(s,0,[6,1]),true);assert.deepEqual(s.rollHistory.map(r=>r.dice),[[3,3],[6,1]]);assert.equal(s.rollHistory[0].opening,true);const m=backgammonLegal(s)[0];assert.ok(m);backgammonMove(s,s.turn,m);assert.equal(s.rollHistory.length,2);assert.equal(backgammonRoll(s,s.turn,[7,2]),false);assert.equal(s.rollHistory.length,2);});
+test('legacy move history collapses the individual checker steps',()=>{const s={moves:[{player:0,roll:[6,1]},{player:0,roll:[6,1]},{player:1,roll:[4,4]},{player:1,roll:[4,4]}]};assert.deepEqual(backgammonRollHistory(s).map(r=>r.dice),[[6,1],[4,4]]);});

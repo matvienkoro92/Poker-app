@@ -573,3 +573,24 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .board-action-icons [data-game-reactions]{flex-direction:column;gap:1px}
 #game .board-action-icons [data-game-reactions]>span{font-size:18px;line-height:17px}
 #game .board-action-icons [data-game-reactions]>small{font-size:7px;line-height:9px;color:inherit}
+
+#game .board-action-icons [data-sound-settings]{flex-direction:column;gap:1px;font-size:0!important}
+#game .board-action-icons [data-sound-settings]::before{content:'♫';font-size:18px;line-height:17px}
+#game .board-action-icons [data-sound-settings]::after{content:'Звук';font-size:8px;line-height:9px}
+
+/* Static vector controls keep the action strip crisp at mobile scale. */
+#game .board-action-icons{gap:6px}
+#game .board-action-icons>button{flex-direction:column;gap:3px;width:38px;height:42px;min-height:42px;padding:4px 2px;border-color:#b9a16a66;border-radius:10px;background:linear-gradient(160deg,#294333,#172d23);color:#e8d4a3;box-shadow:inset 0 1px #f7e5b515,0 2px 3px #0002}
+#game .board-action-icons .board-action-icon{display:block;width:20px;height:20px;flex:none}
+#game .board-action-icons>button>small,#game .board-action-icons #autoRoll>small,#game .board-action-icons #scoreHelp>small,#game .board-action-icons [data-game-reactions]>small{font:500 7px/9px system-ui;letter-spacing:0;color:inherit}
+#game .board-action-icons>button:not(:disabled):hover{border-color:#e5c781;background:linear-gradient(160deg,#35513e,#21392b)}
+#game .board-action-icons>button:focus-visible{outline:2px solid #f4d590;outline-offset:2px}
+#game .board-action-icons>button:disabled{opacity:.35;box-shadow:inset 0 1px #f7e5b508}
+#game .board-action-icons #autoRoll[aria-pressed=true]{background:linear-gradient(145deg,#f1d699,#c5a565);border-color:#f9dfa6;color:#253426;box-shadow:inset 0 1px #fff8,0 2px 4px #0003}
+#game .board-action-icons [data-sound-settings]::before{content:'';width:20px;height:20px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='black' stroke-width='1.65' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 4 6 8H3v8h3l5 4V4ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+#game .board-action-icons [data-sound-settings]::after{font:500 7px/9px system-ui}
+@media(max-width:350px){#game .board-action-icons{gap:4px}#game .board-action-icons>button{width:32px;height:39px;min-height:39px}#game .board-action-icons .board-action-icon{width:18px;height:18px}}
+
+#game .board-action-icons [data-game-reactions]>.reaction-pumpkin{display:block;font-size:20px;line-height:20px}
+#gameControls #history{min-width:0;max-width:100%}
+#gameControls #history>div{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;font-variant-numeric:tabular-nums}
