@@ -271,8 +271,10 @@ function copyReferencedAssets() {
   addWardrobeAssets('player-hall/helmets');
   // Carved boards and checker URLs are built from validated catalogue IDs.
   addWardrobeAssets('board-games/nards');
-  for (const id of ['carved-walnut','marble-brass','ice-crystal','imperial-palace']) refs.add('board-games/chess/' + id + '-board.svg');
-  for (const id of ['staunton','arabesque','crystal','regalia']) for (const type of ['king-white','knight-black']) refs.add('board-games/chess/' + id + '-' + type + '.svg');
+  addWardrobeAssets('board-games/chess/sculpted-v2');
+  const chessEquipment = require('../lib/chess-equipment');
+  for (const board of chessEquipment.BOARDS) if (board.image) refs.add(board.image.replace(/^\.\/assets\//, ''));
+  for (const item of chessEquipment.PIECES.filter(item => item.level > 1)) for (const type of ['king-white','knight-black']) refs.add('board-games/chess/' + item.id + '-' + type + '.svg');
   // Sculpted wardrobe geometry and albedo URLs are assembled at runtime.
   addWardrobeAssets('player-hall/character-3d/sculpt');
   for (const name of ['head', 'face', 'hand-left', 'hand-right', 'shirt-tee', 'shirt-jacket', 'shirt-tank', 'shorts', 'pants', 'helmet-shell']) {

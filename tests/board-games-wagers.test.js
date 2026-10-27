@@ -109,3 +109,7 @@ test('reload reconciles an uncertain debit once and restores cancellation safely
  await f.service.call('m1',{action:'cancel',requestId:'request_0000000001'});
  const cancelled=await f.service.call('m1',{action:'recover-create',requestId:'request_0000000001'});assert.equal(cancelled.cancelled,true);assert.equal(f.balances.get('p1'),10000);
 });
+
+test('2000-chip participant reentry is identified and never debited twice',async()=>{
+ const f=fixture(),host=await f.create(2000);await f.call('m2','join',host.roomId);const before=f.changes.length;for(const member of ['m1','m2']){const preview=await f.call(member,'preview',host.roomId);assert.equal(preview.participant,true);await f.call(member,'join',host.roomId);}assert.equal(f.changes.length,before);assert.equal(f.balances.get('p1'),8000);assert.equal(f.balances.get('p2'),8000);assert.equal((await f.call('m3','preview',host.roomId)).participant,false);
+});

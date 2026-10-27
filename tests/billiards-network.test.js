@@ -26,3 +26,13 @@ test('background sessions keep a light heartbeat and resume polling promptly wit
  const session=createSession({request:async body=>{calls.push(body);return {roomId:'ABCDEFGHJK',revision:1,ready:true};},getAim:()=>({angle:1}),onUpdate(){},onError:assert.fail});
  try{await session.start(true,'');t.mock.timers.tick(150);await new Promise(setImmediate);assert.ok(calls.at(-1).aim);document.hidden=true;t.mock.timers.tick(650);await new Promise(setImmediate);assert.equal(calls.at(-1).aim,undefined);const count=calls.length;t.mock.timers.tick(1999);await new Promise(setImmediate);assert.equal(calls.length,count);t.mock.timers.tick(1);await new Promise(setImmediate);assert.equal(calls.length,count+1);document.hidden=false;listeners.get('visibilitychange')();t.mock.timers.tick(0);await new Promise(setImmediate);assert.ok(calls.at(-1).aim);}finally{session.close();assert.equal(listeners.size,0);t.mock.timers.reset();global.document=prior;}
 });
+test('lost join response restores the existing room without repeating admission',async()=>{
+ const {createSession}=await import('../scripts/billiards/network.mjs'),calls=[],updates=[],errors=[];
+ const session=createSession({request:async b=>{calls.push(b.action);if(b.action==='join')throw Object.assign(Error('Lost response after payment'),{status:503});return {roomId:'ABCDEFGHJK',revision:1,ready:true,player:1};},onUpdate:d=>updates.push(d),onError:e=>errors.push(e)});
+ try{await session.start(false,'ABCDEFGHJK');assert.deepEqual(calls,['join','room']);assert.equal(updates[0].ready,true);assert.deepEqual(errors,[]);}finally{session.close();}
+});
+test('failure from a poll started before a confirmed move cannot report a new outage',async t=>{
+ const {createSession}=await import('../scripts/billiards/network.mjs');t.mock.timers.enable({apis:['setTimeout']});let rejectPoll;const errors=[];
+ const session=createSession({request:async b=>b.action==='room'?new Promise((_,reject)=>{rejectPoll=reject;}):{roomId:'ABCDEFGHJK',revision:b.action==='move'?2:1,ready:true},onUpdate(){},onError:e=>errors.push(e)});
+ try{await session.start(true,'');t.mock.timers.tick(150);await new Promise(setImmediate);await session.move({type:'shot'});rejectPoll(Object.assign(Error('Old failed request'),{status:503}));await new Promise(setImmediate);assert.deepEqual(errors,[]);}finally{session.close();t.mock.timers.reset();}
+});

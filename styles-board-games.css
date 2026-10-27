@@ -9,7 +9,7 @@
 .checker-collection{grid-template-columns:repeat(2,minmax(0,1fr))}.checker-collection button{padding:10px;font-size:12px}.checker-collection .checker{display:inline-block;width:44px;height:44px;margin:3px 3px 8px}.nards-equipment-preview{display:flex;gap:14px;align-items:center;padding:12px;margin:12px 0 18px;border:1px solid #bea26366;border-radius:14px;background:#0c1d17}.nards-equipment-preview>img{width:48%;max-width:220px;border-radius:9px}.nards-equipment-preview>div{flex:1;min-width:0}.nards-equipment-preview strong{font-size:17px}.nards-equipment-preview p{font-size:12px;margin:7px 0}.nards-equipment-preview .checker{display:inline-block;width:38px;margin:4px}
 .nards-board:not([data-skin=classic]){background-image:repeating-linear-gradient(89deg,#44220b08 0 1px,transparent 1px 7px),linear-gradient(color-mix(in srgb,var(--nards-light) 94%,transparent),color-mix(in srgb,var(--nards-light) 94%,transparent)),var(--nards-carving);background-size:auto,auto,cover;background-position:center}
 /* Chess collections keep the live square grid and legal move highlights. */
-.chess-board[data-collection=true]{border-width:12px;border-image-source:var(--chess-art);border-image-slice:6.25%;border-image-repeat:stretch;box-shadow:0 7px 0 #21140e,0 15px 28px #0008}
+.chess-board[data-collection=true]{border-width:var(--chess-frame-size,12px);border-image-source:var(--chess-art);border-image-slice:var(--chess-frame-slice,6.25%);border-image-repeat:stretch;box-shadow:0 7px 0 #21140e,0 15px 28px #0008}
 .chess-board[data-collection=true] .square{background-image:repeating-linear-gradient(87deg,#ffffff0b 0 1px,transparent 1px 8px),linear-gradient(115deg,#ffffff18,transparent 40%,#00000015)}
 .chess-board[data-material=marble-brass] .square{background-image:linear-gradient(35deg,transparent 42%,#c6ba9c44 43%,transparent 45%),linear-gradient(125deg,transparent 65%,#ffffff33 66%,transparent 69%)}
 .chess-board[data-material=ice-crystal] .square{background-image:linear-gradient(135deg,#ffffff44,transparent 45%,#8ac7e333);box-shadow:inset 0 0 0 1px #e5f4ff26}
@@ -536,3 +536,28 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .matchup [data-player]>div{flex:1}
 #game .player-roll-total{flex-shrink:0;align-self:flex-start;margin-left:auto;padding-top:1px;color:#f0d795;font-size:12px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:350px){#game .player-roll-total{font-size:10px}#game .matchup>[data-player]{gap:4px;padding:7px 5px}}
+
+/* Sculpted sprites keep material detail without SVG lighting or filter chains. */
+.piece.sculpted{filter:none!important;overflow:visible}
+.collection .piece-set-sample .piece.sculpted{width:48%;height:110px}
+
+/* Independent horizontal chess collections; preview and save remain in view. */
+.chess-equipment-tabs{display:flex;gap:7px;margin:8px 0 12px}
+.chess-equipment-tabs>button{flex:1;min-height:38px;padding:7px 12px}
+.chess-equipment-tabs>button[aria-selected=true]{background:#d3b571;color:#17291f;border-color:#f0d394;font-weight:750}
+#chessEquipment .collection{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:clamp(150px,43vw,220px);gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding:3px 2px 9px;margin:0;scrollbar-width:thin;scrollbar-color:#b79b5f #142a21}
+#chessEquipment .collection>button{scroll-snap-align:start;min-width:0;white-space:normal}
+.chess-slider-heading{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+.chess-slider-heading h3{font-size:15px;margin:0}
+.chess-slider-heading>span{display:flex;gap:5px}
+.chess-slider-heading button{min-height:30px;width:32px;padding:0;font-size:23px;line-height:1}
+.chess-slider-hint{display:block;font-size:10px;margin:4px 0 10px;color:#b9ba9d}
+#equipment[data-kind=chess]>p:not(#equipmentLevel){display:none}
+#equipment[data-kind=chess] #equipmentLevel{font-size:10px;margin:0 0 8px}
+#chessEquipment .chess-equipment-preview{padding:8px;gap:10px;margin:0 0 8px}
+#chessEquipment .chess-preview-board{flex-basis:34%;max-width:145px}
+#chessEquipment .chess-equipment-preview strong{font-size:13px}
+#chessEquipment .chess-equipment-preview p{font-size:10px;margin:4px 0}
+#chessEquipment .piece-set-sample{height:135px;margin:0 0 6px}
+#chessEquipment .piece-set-sample .piece{height:100%;width:48%}
+#equipment[data-kind=chess] #saveEquipment{position:sticky;bottom:-1px;width:100%;margin-top:8px;z-index:2}

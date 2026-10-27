@@ -654,3 +654,26 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits__payment-sources{display:grid;font-weight:400;gap:4px;margin-top:4px;font-size:11px;line-height:1.4;color:var(--dep-muted)}
 .deposits__payment-sources>span{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px}
 .deposits__payment-sources b{font-weight:600;color:var(--dep-text,#e7eddb);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+/* Compact transfer console: both accounts stay visible on a phone. */
+@media(max-width:600px){
+ .deposits__popup:has([data-form="transfer"]){width:calc(100vw - 20px);padding:12px;max-height:calc(100dvh - 20px)}
+ .deposits__popup [data-form="transfer"]{display:grid;gap:7px}
+ .deposits__popup [data-form="transfer"] label{margin:0;font-size:11px;gap:3px}
+ .deposits__popup [data-form="transfer"] input:not([type=radio]),.deposits__popup [data-form="transfer"] select{min-height:34px;padding:6px 8px;font-size:16px;margin:0}
+ .deposits__transfer-route{grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr);gap:5px}
+ .deposits__transfer-route>section{padding:6px;border:1px solid #c4a35c40;border-radius:10px;background:#0b111833}
+ .deposits__transfer-route h4{font-size:13px;margin:0 0 6px}
+ .deposits__transfer-arrow{font-size:18px}
+ .deposits__transfer-route section>label{grid-template-rows:auto auto;gap:4px;font-size:10px;line-height:13px}
+ .deposits__transfer-route .deposits__rooms{gap:2px;margin:4px 0 7px}
+ .deposits__transfer-route .deposits__rooms legend{font-size:10px}
+ .deposits__transfer-route .deposits__rooms span{font-size:10px;padding:6px 0}
+ .deposits__popup [data-form="transfer"] .deposits__player-picker{position:relative;gap:3px;margin:0 0 4px}
+ .deposits__popup [data-form="transfer"] .deposits__player-choices{display:none;position:absolute;z-index:20;top:100%;left:0;right:0;max-height:160px;overflow:auto;grid-template-columns:1fr;background:#172028;border:1px solid #927e50;border-radius:8px;padding:4px;box-shadow:0 8px 20px #0009}
+ .deposits__popup [data-form="transfer"] .deposits__player-picker:focus-within .deposits__player-choices:not(:empty){display:grid}
+ .deposits__popup [data-form="transfer"] .deposits__hint{font-size:10px;line-height:1.25;margin:0}
+ .deposits__popup [data-form="transfer"]>p.deposits__hint{display:none}
+ .deposits__popup [data-form="transfer"] .deposits__text-button{font-size:10px;line-height:1.2;min-height:24px;padding:4px 0;margin:0}
+ .deposits__popup [data-form="transfer"] .deposits__primary{min-height:40px;padding:8px;font-size:16px}
+}

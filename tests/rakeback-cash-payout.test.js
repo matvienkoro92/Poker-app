@@ -18,7 +18,7 @@ test('concurrent and repeated clicks credit exactly once, even after row amount 
 });
 test('over-limit, zero, unsaved and non-Poker21 rows cannot pay',async()=>{
   let count=0;const deps=fixture(async()=>{count++;});
-  for(const [r,a] of [[row,1001],[row,0],[row,-1],[{...row,saved:false},500],[{...row,room:'X'},500]]) await assert.rejects(pay(r,a,'admin',deps));
+  for(const [r,a] of [[row,5001],[row,0],[row,-1],[{...row,saved:false},500],[{...row,room:'X'},500]]) await assert.rejects(pay(r,a,'admin',deps));
   assert.equal(count,0);
 });
 test('uncertain remote result retains permanent reservation and never retries transfer',async()=>{
@@ -33,4 +33,8 @@ test('batch status uses one MGET for all requested rows', async () => {
     return [{result:[JSON.stringify({status:'paid'}),null]}];
   });
   assert.equal(calls,1);assert.deepEqual(result,[{status:'paid'},null]);
+});
+
+test('cash rakeback admits up to 5000 inclusive and still credits only once',async()=>{
+ for(const amount of [1001,2000,4999,5000]){let count=0;const deps=fixture(async input=>{count++;assert.equal(input.chips,amount);return {operation:{orderId:'order'}};});const result=await pay(row,amount,'admin',deps);assert.equal(result.status,'paid');await pay(row,amount,'admin',deps);assert.equal(count,1);}
 });

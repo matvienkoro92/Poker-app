@@ -873,10 +873,10 @@
     var amount = Number(row.getAttribute("data-rakeback-amount-value"));
     button.hidden = !room || room.value !== "P21";
     button.disabled = button.dataset.paymentChecked !== "1" || button.dataset.paymentState === "paid" || button.dataset.paymentState === "processing" ||
-      row.getAttribute("data-rakeback-saved") !== "1" || !(amount > 0 && amount <= 1000);
+      row.getAttribute("data-rakeback-saved") !== "1" || !(amount > 0 && amount <= 5000);
     button.title = button.dataset.paymentState === "paid" ? "Уже выдано в кассу" :
       button.dataset.paymentState === "processing" ? "Выдача обрабатывается; повтор запрещён" :
-      amount > 1000 ? "Выдача недоступна: рейкбек больше 1000 ₽" : "Выдать рейкбек в кассу Poker21 один раз";
+      amount > 5000 ? "Выдача недоступна: рейкбек больше 5000 ₽" : "Выдать рейкбек в кассу Poker21 один раз";
   }
   function requestCashPayout(row, action) {
     return requestJson(getApiBaseSafe() + "/api/admin-report-shifts", {
@@ -906,7 +906,7 @@
     var rows = Array.prototype.slice.call(document.querySelectorAll("[data-rakeback-shared-row]")).filter(function(row) {
       var button = row.querySelector("[data-rakeback-cash-pay]");
       var amount = Number(row.getAttribute("data-rakeback-amount-value"));
-      return button && !button.hidden && button.dataset.paymentState !== "paid" && amount > 0 && amount <= 1000 &&
+      return button && !button.hidden && button.dataset.paymentState !== "paid" && amount > 0 && amount <= 5000 &&
         row.getAttribute("data-rakeback-saved") === "1" && row.getClientRects().length > 0;
     }).slice(0, 500);
     if (!rows.length) return;

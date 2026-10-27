@@ -120,6 +120,17 @@ async function main(){
    await pair.locator('[data-provider="transfer"]').click();
    const transferForm=page.locator('[data-form="transfer"]'),senderPicker=transferForm.locator('[data-transfer-side="from"]');
    assert.equal(await transferForm.locator('[name="transferRecipient"]').inputValue(),'auto');
+   if(process.env.SMOKE_TRANSFER_LAYOUT==='1'){
+    if(width<600)await page.setViewportSize({width,height:844});
+    await transferForm.locator('[name="transferRecipient"]').selectOption('other');
+    await transferForm.locator('[name="amount"]').fill('2000');
+    await page.evaluate(()=>document.activeElement.blur());
+    const layout=await transferForm.evaluate(form=>{const popup=form.closest('dialog'),a=form.querySelector('.deposits__transfer-route>section:first-child').getBoundingClientRect(),b=form.querySelector('.deposits__transfer-route>section:last-child').getBoundingClientRect();return {scroll:popup.scrollHeight,visible:popup.clientHeight,from:a.x,to:b.x};});
+    if(width<600){assert.ok(layout.scroll<=layout.visible+2,'Transfer form must fit one phone screen: '+JSON.stringify(layout));assert.ok(layout.to>layout.from,'Both accounts must be side by side');}
+    await page.screenshot({path:path.join(output,width+'-transfer-one-screen.png')});
+    await context.close();continue;
+   }
+
    if(process.env.SMOKE_TRANSFER_AUTO==='1'){
     await senderPicker.locator('[data-player-query]').fill('пряник');
     await senderPicker.locator('[data-dep="pick-player"][data-player-id="398176"]').click();
@@ -148,7 +159,7 @@ async function main(){
    await transferForm.locator('[name="fromRoom"][value="X"]').check();
    assert.equal(await transferForm.locator('[name="fromPlayerId"]').inputValue(),'2728933');
    assert.equal(await transferForm.locator('[name="toRoom"][value="X"]').isChecked(),true);
-   assert.equal(await transferForm.locator('[data-transfer-side="to"]').isVisible(),true);
+   assert.equal(await transferForm.locator('[data-transfer-side="to"]').isVisible(),false);
    assert.equal(await transferForm.locator('[name="toRoom"][value="X"]').isDisabled(),false);
    await transferForm.locator('[name="toRoom"][value="P21"]').check();
    assert.equal(await transferForm.locator('[name="toPlayerId"]').inputValue(),'398176');
@@ -264,6 +275,7 @@ async function main(){
    assert.equal(await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').getAttribute('required'),'');
    await page.locator('[data-form="confirm-reservation"] [name="depositorRoom"][value="X"]').check();
    await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').fill('987654321');
+
    if(process.env.SMOKE_SPLIT_PAYMENT){
      await page.locator('[data-dep="split-add"]').click();
      await page.locator('[name="allocationAmount"]').fill('400');
@@ -308,6 +320,7 @@ async function main(){
    assert.equal(await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').getAttribute('required'),'');
    await page.locator('[data-form="confirm-reservation"] [name="depositorRoom"][value="X"]').check();
    await page.locator('[data-form="confirm-reservation"] [name="depositorId"]').fill('987654321');
+
    await page.screenshot({path:path.join(output,width+'-payment.png')});
    lose=true;await page.locator('[data-form="confirm-reservation"] button[type="submit"]').click();
    await page.locator('.deposits__retry:not([hidden])').waitFor();await page.locator('[data-dep="retry"]').click();

@@ -5,7 +5,7 @@ const paint=source.slice(source.indexOf('window.pokerPaintGarageRoom='),source.i
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 function setup(){
  const counts={shelf:0,vehicle:0,character:0},frames=[];
- const room={clientWidth:390,dataset:{space:'garage'},style:{setProperty(){}}};
+ const room={clientWidth:390,dataset:{space:'garage'},style:{getPropertyValue(){return '';},setProperty(){}}};
  const shelf={},character={isConnected:true,dataset:{},style:{}},canvas={};
  const world={isConnected:true,offsetWidth:780,closest:()=>room,getAnimations:()=>[],querySelector:s=>s==='.garage-shelf-inventory'?shelf:s==='.player-hall__character'?character:canvas};
  const window={pokerGarageShelf:()=>{counts.shelf++;return 'shelf';}};
@@ -28,4 +28,8 @@ test('garage canvas work waits for camera animation and unchanged shelves and ch
 });
 test('leaving garage cancels delayed canvas work',async()=>{
  const s=setup();s.paint(s.world,{loadout:{},stats:{level:0}});s.room.dataset.space='hall';s.frames.shift()();await flush();assert.equal(s.counts.shelf,0);assert.equal(s.counts.vehicle,0);
+});
+
+test('bicycles, scooters and locked vehicles never prepare the hidden kart',async()=>{
+ for(const vehicle of ['5','6','1','2','3','4']){const s=setup();s.room.dataset.garageVehicle=vehicle;s.paint(s.world,{loadout:{},stats:{level:76}});s.frames.shift()();await flush();assert.equal(s.counts.vehicle,0);assert.equal(s.counts.shelf,1);}
 });

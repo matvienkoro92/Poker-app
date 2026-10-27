@@ -14,7 +14,7 @@ export function paint(root,game,equipment={}){
   root.style.setProperty('--preview-carving',board.cover?'url("'+board.cover+'")':'none');
   const surface=document.createElement('div');surface.className='living-preview-surface '+(chess?'living-preview-chess':'living-preview-nards');
   if(chess){
-    if(board.image){surface.style.backgroundImage='url("'+board.image+'")';surface.dataset.collection='true';}
+    if(board.image){surface.style.backgroundImage='url("'+board.image+'")';surface.dataset.collection='true';if(board.frameSlice)surface.style.padding=board.frameSlice+'%';}
     const grid=document.createElement('div');grid.className='living-preview-squares';
     const order=['r','n','b','q','k','b','n','r'];
     for(let row=0;row<8;row++)for(let col=0;col<8;col++){

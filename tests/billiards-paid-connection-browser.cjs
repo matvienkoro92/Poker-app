@@ -11,7 +11,7 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
   const file=path.join(process.cwd(),u.pathname);return fs.existsSync(file)&&fs.statSync(file).isFile()?route.fulfill({path:file}):route.fulfill({status:404});
  });return p;}
  const room=await f.create(300),host=await player('m1'),guest=await player('m2');
- for(const p of [host,guest]){await p.goto('http://paid.test/billiards-play.html?room='+room.roomId);await p.locator('[data-accept]').click();}
+ for(const p of [host,guest]){await p.goto('http://paid.test/billiards-play.html?room='+room.roomId);if(p===guest)await p.locator('[data-accept]').click();}
  for(const p of [host,guest])await p.waitForFunction(()=>PokerBilliards.inspect().ready);
  assert.equal(f.balances.get('p1'),9700);assert.equal(f.balances.get('p2'),9700);
  const before={...polls};f.locks.add(room.roomId);
@@ -21,8 +21,9 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
  }finally{f.locks.delete(room.roomId);}
  faults.m1=[409,409];faults.m2=[503];await host.waitForTimeout(2800);
  for(const p of [host,guest]){assert.equal(await p.evaluate(()=>PokerBilliards.inspect().ready),true);assert.doesNotMatch(await p.locator('#connection').innerText(),/ошибка|обновляется/);}
+ await guest.evaluate(()=>{window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}));window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));window.dispatchEvent(new Event('online'));});await guest.waitForTimeout(900);assert.equal(await guest.evaluate(()=>PokerBilliards.inspect().ready),true);await guest.reload();await guest.waitForFunction(()=>PokerBilliards.inspect().ready);assert.equal(await guest.locator('#joinConfirmation[open]').count(),0);assert.equal(f.balances.get('p2'),9700);
  await guest.locator('[data-resign]').click();await guest.locator('.billiards-settlement-dialog [data-confirm]').click();
  await host.waitForFunction(()=>PokerBilliards.inspect().state.winner===0);await guest.waitForFunction(()=>PokerBilliards.inspect().state.winner===0);
- assert.equal(f.journals.get(room.roomId).status,'paid');assert.equal(f.balances.get('p1'),10240);assert.equal(f.balances.get('p2'),9700);assert.equal(f.changes.length,3);assert.deepEqual(errors,[]);
- console.log('PASS two mobile players: 300-chip stakes, concurrent polls, temporary 409/503 recovery and single 540-chip payout');
+ assert.equal(f.journals.get(room.roomId).status,'paid');assert.equal(f.balances.get('p1'),10270);assert.equal(f.balances.get('p2'),9700);assert.equal(f.changes.length,3);assert.deepEqual(errors,[]);
+ console.log('PASS two mobile players: 300-chip stakes, concurrent polls, temporary 409/503 recovery and single 570-chip payout');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

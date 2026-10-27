@@ -600,7 +600,7 @@ Poker21 operator API. It is not callable by ordinary players.
 the backend calls `getPlayerGroupData` and rejects the request unless the
 returned member belongs to that exact group. Production for «Два туза» uses
 group `758417`. `POKERPLUS_CHIPS_MAX_ABS` controls the maximum absolute amount
-of a single operation (default `1000`).
+of a single operation (default `5000`).
 
 Operator calls use separate `POKERPLUS_OPERATOR_MERCHANT_ID` and
 `POKERPLUS_OPERATOR_SECRET_KEY` variables and a separate cached token. The

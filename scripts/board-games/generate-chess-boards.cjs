@@ -1,6 +1,7 @@
 'use strict';
 const fs=require('fs'),path=require('path'),{BOARDS}=require('../../lib/chess-equipment');
 for(const b of BOARDS.filter(b=>b.image)){
+ if(['celtic-oak','ebony-arabesque','royal-rosewood'].includes(b.id)){fs.writeFileSync(path.resolve(__dirname,'../..',b.image),require('./carved-chess-board.cjs')(b));continue;}
  const metal=b.id==='ice-crystal'?'#c2e2f4':'#d7b365';
  const defs=`<defs><linearGradient id="rim" x2="1" y2="1"><stop stop-color="${metal}"/><stop offset=".22" stop-color="${b.frame}"/><stop offset=".48" stop-color="${metal}"/><stop offset=".65" stop-color="${b.frame}"/><stop offset="1" stop-color="${metal}"/></linearGradient><pattern id="grain" width="120" height="90" patternUnits="userSpaceOnUse"><path d="M-10 8Q40 30 130 12M-10 42Q60 15 130 50M-10 70Q35 90 130 66" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/><path d="M-10 25Q75 45 130 25M-10 85Q30 55 130 87" fill="none" stroke="#000" stroke-opacity=".12"/></pattern></defs>`;
  let squares='';for(let y=0;y<8;y++)for(let x=0;x<8;x++)squares+=`<rect x="${64+x*112}" y="${64+y*112}" width="112" height="112" fill="${(x+y)%2?b.dark:b.light}"/>`;

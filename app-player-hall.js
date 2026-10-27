@@ -96,7 +96,7 @@
   var livingPreviewReady=null,livingFocusRequest=0;
   function ensureLivingPreview(){
     if(window.PokerLivingBoardPreview)return Promise.resolve();
-    if(!livingPreviewReady)livingPreviewReady=new Promise(function(resolve,reject){var script=document.createElement('script');script.src='./app-living-board-preview.js?v=20261026-nards-points-9';script.onload=resolve;script.onerror=function(){livingPreviewReady=null;script.remove();reject(Error('Не удалось загрузить игровой набор. Попробуйте ещё раз.'));};document.head.appendChild(script);});
+    if(!livingPreviewReady)livingPreviewReady=new Promise(function(resolve,reject){var script=document.createElement('script');script.src='./app-living-board-preview.js?v=20261027-carved-art-12';script.onload=resolve;script.onerror=function(){livingPreviewReady=null;script.remove();reject(Error('Не удалось загрузить игровой набор. Попробуйте ещё раз.'));};document.head.appendChild(script);});
     return livingPreviewReady;
   }
   function repaintLivingFocus(){

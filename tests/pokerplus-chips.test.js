@@ -108,3 +108,12 @@ test("the same payment key always derives the same 20-digit Poker21 order ID", (
   assert.equal(first, second);
   assert.notEqual(first, chipsHandler.poker21OrderId("payment:pay_123457"));
 });
+
+test('default service limit accepts 5000 and rejects 5001 before any payment',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),source=fs.readFileSync(require.resolve('../lib/api-handlers/pokerplus-chips'),'utf8');
+ const limit=source.match(/const MAX_ABS_CHIPS = [^;]+;/)[0],validation=source.slice(source.indexOf('function requestedChips('),source.indexOf('async function requireExpectedGroupMember'));
+ const context={process:{env:{}}};vm.createContext(context);vm.runInContext(limit+validation,context);
+ for(const amount of [1001,2000,4999,5000])assert.equal(context.requestedChips(amount),amount);
+ for(const amount of [5001,10000])assert.throws(()=>context.requestedChips(amount),/per-operation limit/);
+ for(const amount of [0,NaN,Infinity])assert.throws(()=>context.requestedChips(amount));
+});
