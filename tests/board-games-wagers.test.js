@@ -116,3 +116,26 @@ test('2000-chip participant reentry is identified and never debited twice',async
 test('darts uses the same exactly-once stakes, whole-series surrender and draw refunds',async()=>{
  for(const draw of [false,true]){const f=fixture();let r=await f.service.call('m1',{action:'create',discipline:'darts',raceTo:3,stake:100,requestId:'darts_request_0001',equipment:{dartsBoard:'night',dartsDart:'red'}});r=await f.call('m2','join',r.roomId);assert.equal(r.equipment.dartsBoard,'night');if(draw){r=await f.call('m1','move',r.roomId,{revision:r.revision,move:{type:'draw-offer'}});r=await f.call('m2','move',r.roomId,{revision:r.revision,move:{type:'draw-accept'}});assert.equal(r.wager.status,'refunded');assert.equal(f.balances.get('p1'),10000);assert.equal(f.balances.get('p2'),10000);}else{r=await f.call('m2','move',r.roomId,{revision:r.revision,move:{type:'resign'}});assert.equal(r.match.winner,0);assert.equal(r.wager.status,'paid');assert.equal(f.balances.get('p1'),10090);assert.equal(f.balances.get('p2'),9900);}const count=f.changes.length;await f.call('m1','room',r.roomId);await f.service.sweep();assert.equal(f.changes.length,count);}
 });
+
+for(const [kind,multiplier] of [['single',1],['mars',1.5],['koks',2]])test('nards maximum escrow and '+kind+' settlement return unused funds once',async()=>{
+ const f=fixture(),r=await f.service.call('m1',{action:'create',discipline:'long',stake:100,requestId:'multiplier_request_01',marsMultiplier:1.5,koksMultiplier:2});
+ assert.equal(r.wager.reservedStake,200);assert.equal(f.balances.get('p1'),9800);
+ const preview=await f.call('m2','preview',r.roomId);assert.equal(preview.wager.marsMultiplier,1.5);
+ f.balances.set('p2',150);await assert.rejects(f.call('m2','join',r.roomId),/200 фишек/);assert.equal(f.rooms.get(r.roomId).players[1],null);f.balances.set('p2',10000);
+ await f.call('m2','join',r.roomId,{marsMultiplier:10});assert.equal(f.balances.get('p2'),9800);
+ const raw=f.rooms.get(r.roomId);raw.state.winner=0;raw.state.endReason='borne-off';raw.state.winKind=kind;raw.match.winner=0;
+ const done=await f.call('m1','room',r.roomId);assert.equal(done.wager.status,'paid');assert.equal(done.wager.settledStake,100*multiplier);assert.equal(done.wager.payout,190*multiplier);
+ assert.equal(f.balances.get('p1'),10000+90*multiplier);assert.equal(f.balances.get('p2'),10000-100*multiplier);
+ const count=f.changes.length;await f.service.sweep();await f.call('m1','room',r.roomId);assert.equal(f.changes.length,count);
+});
+test('cancel returns all maximum escrow; invalid multipliers never debit',async()=>{
+ const f=fixture();for(const v of ['2',0,11,Infinity,1.234])await assert.rejects(f.service.call('m1',{action:'create',discipline:'short',stake:100,requestId:'invalid_multiplier_01',koksMultiplier:v}));assert.equal(f.changes.length,0);
+ const r=await f.service.call('m1',{action:'create',discipline:'short',stake:101,requestId:'cancel_multiplier_01',marsMultiplier:1.5});assert.equal(r.wager.reservedStake,152);await f.call('m1','cancel',r.roomId);assert.equal(f.balances.get('p1'),10000);
+});
+test('maximum escrow checks host balance and cannot change on retry',async()=>{
+ const f=fixture(),body={action:'create',discipline:'short',stake:100,requestId:'fixed_multiplier_0001',marsMultiplier:1.5,koksMultiplier:2};f.balances.set('p1',199);await assert.rejects(f.service.call('m1',body),/200 фишек/);assert.equal(f.changes.length,0);f.balances.set('p1',10000);await f.service.call('m1',body);await assert.rejects(f.service.call('m1',{...body,koksMultiplier:3}),/Параметры/);assert.equal(f.balances.get('p1'),9800);
+});
+test('lost unused-reserve checkpoint resumes without duplicate refunds or prize',async()=>{
+ const f=fixture(),r=await f.service.call('m1',{action:'create',discipline:'short',stake:100,requestId:'resume_multiplier_01',marsMultiplier:1.5,koksMultiplier:2});await f.call('m2','join',r.roomId);
+ const raw=f.rooms.get(r.roomId);raw.match.winner=0;raw.state.winner=0;raw.state.endReason='borne-off';raw.state.winKind='mars';f.failWriteAfterDebit();await assert.rejects(f.call('m1','room',r.roomId),/write failed/);await f.service.sweep();assert.equal(f.balances.get('p1'),10135);assert.equal(f.balances.get('p2'),9850);assert.equal(f.journals.get(r.roomId).status,'paid');
+});

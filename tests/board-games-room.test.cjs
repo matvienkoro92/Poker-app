@@ -35,3 +35,15 @@ for(const discipline of ['short','long'])test(discipline+': timeout hands over a
   if(i<4){assert.equal(r.state.winner,null);assert.ok(r.turnDeadline);assert.deepEqual(r.match.wins,[0,0]);}else{assert.equal(r.state.winner,1);assert.equal(r.state.endReason,'timeout-skips');assert.equal(r.turnDeadline,null);assert.deepEqual(r.match.wins,[0,1]);}
  }
 });
+
+test('host undo preference is authoritative, visible before joining and preserved on rematch',async()=>{
+ for(const discipline of ['short','long']){const f=fixture();let r=await f.service.call('host',{action:'create',discipline,allowUndo:false});const id=r.roomId;
+ assert.equal((await f.service.call('guest',{action:'preview',roomId:id})).allowUndo,false);
+ r=await f.service.call('guest',{action:'join',roomId:id,allowUndo:true});assert.equal(r.state.allowUndo,false);
+ r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'roll'}});const E=await import('../scripts/board-games/engine.mjs');
+ r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'move',...E.legalMoves(r.state)[0]}});
+ await assert.rejects(f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'undo-step',allowUndo:true}}),e=>e.status===400);
+ r=await f.service.call('guest',{action:'move',roomId:id,revision:r.revision,move:{type:'resign'}});r=await f.service.call('host',{action:'rematch',roomId:id,revision:r.revision,allowUndo:true});assert.equal(r.state.allowUndo,false);
+ }
+ await assert.rejects(fixture().service.call('host',{action:'create',discipline:'long',allowUndo:'no'}),e=>e.status===400);
+});
