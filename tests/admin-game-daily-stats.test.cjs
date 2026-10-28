@@ -16,3 +16,7 @@ test('server rejects non-admin stats requests before reading any archive',async(
  const service=require('../lib/board-games-service'),oldCommands=service.commands;let reads=0;service.commands=async()=>{reads++;return [['0',[]]];};
  try{const handler=require(path),call=async()=>{const res={code:200,status(n){this.code=n;return this;},json(value){this.value=value;return this;}};await handler({},res);return res;};assert.equal((await call()).code,403);assert.equal(reads,0);admin=true;const allowed=await call();assert.equal(allowed.code,200);assert.equal(allowed.value.ok,true);assert.equal(reads,1);}finally{social.context=old;service.commands=oldCommands;delete require.cache[path];}
 });
+test('rake comes only from a confirmed payout and keeps a stable match identity',async()=>{
+ const page=await stats.read({cursor:'1:0',commands:async rows=>rows.map(([op])=>op==='HSCAN'?['0',[room+':1:1',JSON.stringify({finishedAt:time}),room+':1:2',JSON.stringify({finishedAt:time})]]:JSON.stringify({stake:2000,status:'paid',commission:200,finishedAt:time}))});
+ assert.equal(page.records.length,2);assert.equal(page.records[0].rake,200);assert.equal(page.records[0].rakeId,page.records[1].rakeId);assert.equal(page.records[0].rakeDay,'2026-10-26');
+});

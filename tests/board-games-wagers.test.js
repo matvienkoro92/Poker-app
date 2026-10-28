@@ -139,3 +139,13 @@ test('lost unused-reserve checkpoint resumes without duplicate refunds or prize'
  const f=fixture(),r=await f.service.call('m1',{action:'create',discipline:'short',stake:100,requestId:'resume_multiplier_01',marsMultiplier:1.5,koksMultiplier:2});await f.call('m2','join',r.roomId);
  const raw=f.rooms.get(r.roomId);raw.match.winner=0;raw.state.winner=0;raw.state.endReason='borne-off';raw.state.winKind='mars';f.failWriteAfterDebit();await assert.rejects(f.call('m1','room',r.roomId),/write failed/);await f.service.sweep();assert.equal(f.balances.get('p1'),10135);assert.equal(f.balances.get('p2'),9850);assert.equal(f.journals.get(r.roomId).status,'paid');
 });
+test('stakes use single transfers up to 5000 and retain retry amounts',async()=>{
+ for(const [stake,parts] of [[2000,[-2000]],[5000,[-5000]],[7000,[-5000,-2000]]]){
+  const f=fixture({chunkSize:5000});await f.create(stake);
+  assert.deepEqual(f.changes.map(op=>op.chips),parts);
+  await f.create(stake);assert.equal(f.changes.length,parts.length);
+ }
+ const f=fixture({chunkSize:5000});f.failWriteAfterDebit();
+ await assert.rejects(f.create(2000),/write failed/);
+ await f.create(2000);assert.deepEqual(f.changes.map(op=>op.chips),[-2000]);
+});
