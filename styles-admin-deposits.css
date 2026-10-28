@@ -703,3 +703,6 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .admin-game-stats .admin-game-stats__refresh:disabled{opacity:.5;cursor:wait}
 
 .admin-game-stats .admin-game-stats__totals{white-space:nowrap;font-size:clamp(8px,2.45vw,13px);line-height:1.5;letter-spacing:-.15px}
+
+/* Crypto payouts stay visually distinct across the entire card. */
+.deposits .deposits__cards>.deposits__card.deposits__card--crypto{background:linear-gradient(145deg,#382b21,#27221d);border-color:#d99a5d88;box-shadow:inset 0 1px 0 #ffc9951c}
