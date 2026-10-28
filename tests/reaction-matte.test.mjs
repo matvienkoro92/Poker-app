@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createReactionMatte} from '../scripts/shared/reaction-matte.mjs';
+function image(size,background=63){const data=new Uint8ClampedArray(size*size*4);for(let i=0;i<data.length;i+=4){data[i]=data[i+1]=data[i+2]=background;data[i+3]=255;}return {data};}
+function set(p,size,x,y,c){const i=(y*size+x)*4;p.data[i]=c[0];p.data[i+1]=c[1];p.data[i+2]=c[2];}
+function alpha(p,size,x,y){return p.data[(y*size+x)*4+3];}
+test('removes the edge-connected backdrop while retaining enclosed grey character details',()=>{const size=7,p=image(size);for(let x=1;x<6;x++){set(p,size,x,1,[200,90,20]);set(p,size,x,5,[200,90,20]);}for(let y=1;y<6;y++){set(p,size,1,y,[200,90,20]);set(p,size,5,y,[200,90,20]);}createReactionMatte(size,size)(p,63);assert.equal(alpha(p,size,0,0),0);assert.equal(alpha(p,size,3,3),255);assert.equal(alpha(p,size,1,1),255);});
+test('compression variations do not punch flashing holes inside the character',()=>{const matte=createReactionMatte(5,5);for(const shade of [63,70,60,80,64]){const p=image(5);for(let y=1;y<4;y++)for(let x=1;x<4;x++)set(p,5,x,y,[200,120,30]);set(p,5,2,2,[shade,shade,shade]);matte(p,63);assert.equal(alpha(p,5,2,2),255);assert.equal(alpha(p,5,0,0),0);}});
+test('each frame computes its own silhouette without leaving a previous-frame trail',()=>{const matte=createReactionMatte(5,5),one=image(5);set(one,5,2,2,[250,90,20]);matte(one,63);assert.equal(alpha(one,5,2,2),255);const two=image(5);matte(two,63);assert.equal(alpha(two,5,2,2),0);});
