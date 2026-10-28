@@ -633,3 +633,8 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .matchup>[data-player]>i{width:25px;grid-column:1;grid-row:1}
 #game .matchup>[data-player]>div{grid-column:2;grid-row:1}
 #game .matchup .player-roll-total{grid-column:2;grid-row:2;margin-left:0;padding-top:0}
+
+.game-rivalry-scores{display:flex;flex-direction:column;gap:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.game-rivalry-scores>strong{color:#f0d99d;font-size:12px}
+.game-rivalry-scores>small{color:#c8d3bf;font-size:11px;letter-spacing:0}
+@media(max-width:350px){.game-rivalry-row{gap:6px}.game-rivalry-scores>strong{font-size:11px}}

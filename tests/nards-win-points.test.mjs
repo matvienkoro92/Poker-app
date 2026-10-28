@@ -14,3 +14,7 @@ test('three-point match credits mars and koks once and finishes as soon as targe
 test('short koks includes a checker on the bar, but any borne-off checker makes the result single',async()=>{
  const {backgammonWinPoints}=await import('../scripts/board-games/backgammon.mjs'),s=createGame('short');s.points.fill(0);s.points[10]=-14;s.bar[1]=1;assert.deepEqual(backgammonWinPoints(s,0),{points:3,kind:'koks'});s.off[1]=1;assert.deepEqual(backgammonWinPoints(s,0),{points:1,kind:'single'});
 });
+for(const discipline of ['short','long'])for(const player of [0,1])test(discipline+': resignation awards koks even after bearing off',()=>{
+ const s=createGame(discipline);s.off[player]=1;
+ assert.ok(action(s,player,{type:'resign'}));assert.equal(s.winner,1-player);assert.equal(s.endReason,'resign');assert.equal(s.winKind,'koks');assert.equal(s.winPoints,3);assert.equal(s.scores[1-player],3);
+});

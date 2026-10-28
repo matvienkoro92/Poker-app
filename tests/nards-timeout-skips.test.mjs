@@ -3,14 +3,15 @@ import assert from 'node:assert/strict';
 import {progress} from '../scripts/board-games/backgammon.mjs';
 import {createGame,action,expireTurn,legalMoves} from '../scripts/board-games/engine.mjs';
 for(const kind of ['short','long']){
- test(kind+': timeout rolls and completes turns without a skip defeat',()=>{
+ test(kind+': first two timeouts autoplay; third loses',()=>{
   const s=createGame(kind);
-  for(let n=0;n<6;n++){
+  for(let n=0;n<4;n++){
    const ply=s.ply,before=s.moves.length;
    assert.equal(expireTurn(s,()=>[6,1]),true);
    assert.equal(s.winner,null);assert.equal(s.ply,ply+1);assert.ok(s.moves.length>before);
    assert.equal(s.phase,'roll');assert.deepEqual(s.dice,[]);assert.deepEqual(s.stepUndo,[]);
   }
+  assert.deepEqual(s.missedTurns,[2,2]);const before=s.moves.length;expireTurn(s,()=>[6,1]);assert.equal(s.winner,1);assert.equal(s.endReason,'timeout-skips');assert.equal(s.moves.length,before);
  });
  test(kind+': timeout finishes remaining dice without rerolling or moving the opponent',()=>{
   const s=createGame(kind);action(s,0,{type:'roll'},[6,1]);
@@ -38,8 +39,10 @@ for(const kind of ['short','long']){
   const s=createGame(kind);s.points.fill(0);s.points[23]=1;s.points[10]=-15;s.off=[14,0];s.turns=[2,2];s.phase='moving';s.opening=false;s.dice=[1];s.roll=[1,2];
   expireTurn(s);assert.equal(s.winner,0);assert.equal(s.endReason,'borne-off');assert.ok(s.winPoints>=2);assert.equal(expireTurn(s),false);
  });
- test(kind+': old skip counters cannot cause an automatic defeat',()=>{
-  const s=createGame(kind);s.missedTurns=[2,2];expireTurn(s,()=>[6,1]);assert.equal(s.winner,null);assert.equal(s.missedTurns[0],0);
+ test(kind+': completing a manual turn resets its own streak',()=>{
+  const s=createGame(kind);s.missedTurns=[2,1];action(s,0,{type:'roll'},[6,1]);
+  while(s.turn===0)action(s,0,{type:'move',...legalMoves(s)[0]});
+  assert.deepEqual(s.missedTurns,[0,1]);expireTurn(s,()=>[6,1]);assert.equal(s.winner,null);assert.deepEqual(s.missedTurns,[0,2]);
  });
 }
 

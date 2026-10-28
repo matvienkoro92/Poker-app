@@ -87,7 +87,7 @@ test('already started old-rate payouts resume the exact journal amount',async()=
 });
 test('automatic timeout turns leave the bank untouched while the game is unfinished',async()=>{
  const f=fixture(),r=await f.create();await f.call('m2','join',r.roomId);
- for(let n=0;n<5;n++){f.elapse(91000);const view=await f.call('m1','room',r.roomId);assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.equal(f.changes.length,2);assert.notEqual(view.state.endReason,'timeout-skips');}
+ for(let n=0;n<4;n++){f.elapse(91000);const view=await f.call('m1','room',r.roomId);assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.equal(f.changes.length,2);assert.notEqual(view.state.endReason,'timeout-skips');}
 });
 test('mars reaches three-point target and pays the fixed bank exactly once',async()=>{
  const f=fixture(),r=await f.service.call('m1',{action:'create',discipline:'long',raceTo:3,stake:100,requestId:'mars_match_00001'});await f.call('m2','join',r.roomId);const room=f.rooms.get(r.roomId),s=room.state;
@@ -148,4 +148,10 @@ test('stakes use single transfers up to 5000 and retain retry amounts',async()=>
  const f=fixture({chunkSize:5000});f.failWriteAfterDebit();
  await assert.rejects(f.create(2000),/write failed/);
  await f.create(2000);assert.deepEqual(f.changes.map(op=>op.chips),[-2000]);
+});
+for(const discipline of ['short','long'])test(discipline+': resignation is koks and pays its multiplier exactly once',async()=>{
+ const f=fixture();let r=await f.service.call('m1',{action:'create',discipline,stake:100,requestId:'resign_koks_request_01',marsMultiplier:1.5,koksMultiplier:2});r=await f.call('m2','join',r.roomId);
+ const done=await f.call('m2','move',r.roomId,{revision:r.revision,move:{type:'resign'}});
+ assert.equal(done.state.winKind,'koks');assert.equal(done.state.winPoints,3);assert.equal(done.state.scores[0],3);assert.equal(done.match.winner,0);assert.equal(done.wager.settledStake,200);assert.equal(done.wager.payout,380);assert.equal(f.balances.get('p1'),10180);assert.equal(f.balances.get('p2'),9800);
+ const count=f.changes.length;await f.call('m1','room',r.roomId);assert.equal(f.changes.length,count);
 });

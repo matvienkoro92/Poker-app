@@ -30,7 +30,7 @@ for(const discipline of ['short','long'])test(discipline+' first turn per player
  r=await f.service.call('host',{action:'move',roomId,revision:r.revision,move:{type:'roll'}});assert.equal(r.turnDeadline-r.serverNow,30000);
 });
 for(const discipline of ['short','long'])test(discipline+': timeout completes a legal turn once and gives the opponent a fresh clock',async()=>{
- const f=fixture();let r=await pair(f,discipline);for(let i=0;i<5;i++){
+ const f=fixture();let r=await pair(f,discipline);for(let i=0;i<4;i++){
   const before=r.state.moves.length;f.advance(91000);r=await f.service.call('host',{action:'room',roomId:r.roomId});
   assert.ok(r.state.moves.length>before);assert.equal(r.state.winner,null);assert.ok(r.turnDeadline);assert.deepEqual(r.match.wins,[0,0]);
   const repeat=await f.service.call('guest',{action:'room',roomId:r.roomId});assert.deepEqual(repeat.state,r.state);assert.equal(repeat.turnDeadline,r.turnDeadline);
