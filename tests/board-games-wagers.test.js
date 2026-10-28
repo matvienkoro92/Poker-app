@@ -155,3 +155,7 @@ for(const discipline of ['short','long'])test(discipline+': resignation is koks 
  assert.equal(done.state.winKind,'koks');assert.equal(done.state.winPoints,3);assert.equal(done.state.scores[0],3);assert.equal(done.match.winner,0);assert.equal(done.wager.settledStake,200);assert.equal(done.wager.payout,380);assert.equal(f.balances.get('p1'),10180);assert.equal(f.balances.get('p2'),9800);
  const count=f.changes.length;await f.call('m1','room',r.roomId);assert.equal(f.changes.length,count);
 });
+test('chess reserves exactly one stake even if nards multipliers are supplied',async()=>{
+ const f=fixture();let r=await f.service.call('m1',{action:'create',discipline:'chess',stake:100,requestId:'chess_no_reserve_001',marsMultiplier:2,koksMultiplier:3});
+ assert.equal(r.wager.reservedStake,100);assert.equal(f.balances.get('p1'),9900);r=await f.call('m2','join',r.roomId);assert.equal(f.balances.get('p2'),9900);assert.equal(r.wager.bank,200);
+});
