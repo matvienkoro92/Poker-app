@@ -266,7 +266,7 @@
     if(stats.raffleReturnsAvailable===false)lines.push('Возвраты розыгрышей не загружены — итог возвратов неполный.');
     return lines.join('\n');
   }
-  async function loadGameStatistics(container){try{await import('./app-admin-game-stats.js?v=20261028-week-default-1');if(container.isConnected)await window.PokerAdminGameStats.open(function(body){return api(body);},{container:container});}catch(error){if(container.isConnected)container.textContent='Не удалось загрузить статистику игр.';}}
+  async function loadGameStatistics(container){try{await import('./app-admin-game-stats.js?v=20261029-period-fetch-1');if(container.isConnected)await window.PokerAdminGameStats.open(function(body){return api(body);},{container:container});}catch(error){if(container.isConnected)container.textContent='Не удалось загрузить статистику игр.';}}
   function statisticsHtml(){
     var stats=data.statistics||{deposits:0,returned:0,destinations:[],managers:[]},managers=reportManagers(stats.managers||[]),period=stats.period||{},periodLabel=period.from?period.from+' — '+period.to+' · 06:00–06:00 · Москва':'За всё время';
     function destination(id){return (stats.destinations||[]).find(function(d){return d.id===id;})||{amount:null};}

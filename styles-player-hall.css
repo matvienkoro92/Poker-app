@@ -963,3 +963,16 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 
 /* Center small detail sheets inside the usable area; constrain tall ones below native controls. */
 html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats){top:var(--tg-ui-top-clearance,0px);bottom:0;margin:auto;max-height:calc(100dvh - var(--tg-ui-top-clearance,0px) - 24px)}
+
+/* Game report period and manual refresh controls. */
+.admin-game-stats .admin-game-stats__controls{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin:18px 0}
+.admin-game-stats .admin-game-stats__period{display:flex;flex-direction:column;gap:6px;min-width:150px;flex:1;max-width:240px;font:500 12px/1.3 system-ui,sans-serif;color:#bdb79f}
+.admin-game-stats .admin-game-stats__period select,.admin-game-stats .admin-game-stats__refresh{box-sizing:border-box;min-height:44px;margin:0;border:1px solid #c5aa7059;border-radius:12px;padding:10px 14px;background:linear-gradient(180deg,#24251e,#171b18);color:#f3e3bd;font:600 14px/1.4 system-ui,sans-serif;box-shadow:inset 0 1px 0 #ffffff08;cursor:pointer}
+.admin-game-stats .admin-game-stats__refresh{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(180deg,#e9ca82,#c6a359);border-color:#edd493;color:#292315;transition:filter .15s,transform .15s}
+.admin-game-stats .admin-game-stats__refresh span{font-size:22px;line-height:1}
+.admin-game-stats .admin-game-stats__refresh:hover:not(:disabled){filter:brightness(1.08)}
+.admin-game-stats .admin-game-stats__refresh:active:not(:disabled){transform:translateY(1px)}
+.admin-game-stats .admin-game-stats__controls :is(select,button):focus-visible{outline:2px solid #ffe4a2;outline-offset:3px}
+.admin-game-stats .admin-game-stats__refresh:disabled{opacity:.5;cursor:wait}
+
+.admin-game-stats .admin-game-stats__totals{white-space:nowrap;font-size:clamp(8px,2.45vw,13px);line-height:1.5;letter-spacing:-.15px}
