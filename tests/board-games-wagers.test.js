@@ -85,9 +85,9 @@ test('already started old-rate payouts resume the exact journal amount',async()=
  const f=fixture(),r=await f.create();await f.call('m2','join',r.roomId);const w=f.journals.get(r.roomId);w.status='paying';w.winner=0;w.operations.prize={index:0,amount:180,done:0};
  const done=await f.call('m1','room',r.roomId);assert.equal(done.wager.payout,180);assert.equal(done.wager.feePercent,10);assert.equal(f.balances.get('p1'),10080);
 });
-test('timeout skips leave the bank untouched until the third own miss',async()=>{
+test('automatic timeout turns leave the bank untouched while the game is unfinished',async()=>{
  const f=fixture(),r=await f.create();await f.call('m2','join',r.roomId);
- for(let n=0;n<5;n++){f.elapse(91000);const view=await f.call('m1','room',r.roomId);if(n<4){assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.equal(f.changes.length,2);}else{assert.equal(view.state.endReason,'timeout-skips');assert.equal(view.wager.status,'paid');assert.equal(f.changes.length,3);assert.equal(view.wager.payout,190);}}
+ for(let n=0;n<5;n++){f.elapse(91000);const view=await f.call('m1','room',r.roomId);assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.equal(f.changes.length,2);assert.notEqual(view.state.endReason,'timeout-skips');}
 });
 test('mars reaches three-point target and pays the fixed bank exactly once',async()=>{
  const f=fixture(),r=await f.service.call('m1',{action:'create',discipline:'long',raceTo:3,stake:100,requestId:'mars_match_00001'});await f.call('m2','join',r.roomId);const room=f.rooms.get(r.roomId),s=room.state;
