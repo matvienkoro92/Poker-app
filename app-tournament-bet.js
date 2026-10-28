@@ -528,6 +528,17 @@
     }
   }
 
+  async function postWithLockRetry(url, options, onBusy) {
+    for (var attempt = 0; ; attempt++) {
+      var response = await fetch(url, options);
+      if (response.status !== 409 || attempt >= 5) return response;
+      var data = await response.clone().json().catch(function () { return {}; });
+      if (data.code !== "EVENT_BUSY") return response;
+      if (onBusy) onBusy();
+      await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+    }
+  }
+
   function post(payload, pendingText) {
     var postAuthGeneration = authGeneration;
     if (loadPromise) {
@@ -538,11 +549,11 @@
     loading = true;
     setStatus(pendingText || "Сохраняю…", "loading");
     if (state && state.id && payload.action !== "create" && payload.action !== "create_player" && !payload.eventId) payload.eventId = state.id;
-    return fetch(baseUrl() + API_PATH, {
+    return postWithLockRetry(baseUrl() + API_PATH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(authBody(payload)),
-    }).then(function (response) {
+    }, function () { setStatus("Событие занято. Жду завершения обновления…", "loading"); }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (postAuthGeneration !== authGeneration) return null;
         if (!response.ok || !data.ok) throw new Error(data.error || "Не удалось выполнить действие");
