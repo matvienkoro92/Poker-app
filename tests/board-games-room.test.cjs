@@ -48,3 +48,14 @@ test('host undo preference is authoritative, visible before joining and preserve
  }
  await assert.rejects(fixture().service.call('host',{action:'create',discipline:'long',allowUndo:'no'}),e=>e.status===400);
 });
+
+test('closed darts rooms reject fast reads and moves before changing the room',async()=>{
+ const f=fixture(),r=await pair(f,'darts'),before=structuredClone(f.rooms.get(r.roomId));
+ for(const action of ['preview','watch','room','move','rematch'])await assert.rejects(f.service.call('host',{action,roomId:r.roomId,revision:r.revision,denyDarts:true,move:{type:'resign'}}),e=>e.status===403);
+ assert.deepEqual(f.rooms.get(r.roomId),before);
+});
+test('move folds connection protection changes into its single revision CAS',async()=>{
+ const rooms=new Map();let writes=0;const service=require('../lib/board-games-room')({now:()=>10000,random:()=> 'ABCDEFGHJK',profile:async()=>({level:1}),load:async id=>structuredClone(rooms.get(id)),create:async(id,r)=>{rooms.set(id,structuredClone(r));return true;},presence:async()=>[10000,10000],cas:async(id,rev,r)=>{writes++;if(rooms.get(id).revision!==rev)return false;rooms.set(id,structuredClone(r));return true;}});
+ let r=await service.call('host',{action:'create',discipline:'chess'});r=await service.call('guest',{action:'join',roomId:r.roomId});const raw=rooms.get(r.roomId);delete raw.connectionProtection;writes=0;
+ const moved=await service.call('host',{action:'move',roomId:r.roomId,revision:r.revision,move:{type:'move',from:'e2',to:'e4'}});assert.equal(writes,1);assert.equal(moved.state.ply,1);assert.ok(rooms.get(r.roomId).connectionProtection);
+});
