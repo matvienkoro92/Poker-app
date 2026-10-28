@@ -20,3 +20,7 @@ The Celtic oak, ebony dragons and royal rosewood frames were generated as origin
 References researched for wood carving and motifs:
 - https://lionlaurel.com/products/chess-set-square-wooden-design-with-bronze-legs-1
 - https://www.etsy.com/listing/1735449332/premium-fire-dragons-chess-board-carved
+
+## Mobile silhouette sizing
+
+The sprite preparation script normalizes each role to an explicit silhouette box before adding 256×256 padding: king 160×232, queen 156×220, bishop 144×202, knight 178×204, rook 154×180 and pawn 112×144. This intentionally gives sculptures broader bases at small sizes and separates pawns from bishops. All feet share y=240. Live squares use the full sprite size; applying another 90% inset made the original narrow silhouettes too small. Rebuild all six collections together after changing these dimensions.
