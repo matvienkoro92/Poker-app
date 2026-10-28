@@ -389,11 +389,12 @@
     if (!data.id || data.status === "cancelled" || data.status === "settled" || (data.status !== "open" && !(data.entries && data.entries.length))) {
       if (!createTab) return "";
       var tournaments = eveningTournaments();
-      var first = tournaments[0] || null;
+      var today = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Moscow", weekday: "short" }).format(new Date()));
+      var first = tournaments.find(function (item) { return Number(item.weekday) === today; }) || tournaments[0] || null;
       return '<form class="tournament-bet-modal__admin" data-tournament-bet-create>' +
         '<h3>Создать событие</h3><label><span>Турнир вечера</span><select name="tournamentId" data-tournament-bet-tournament required>' +
           '<option value="">Выберите турнир</option>' + tournaments.map(function (item, index) {
-            return '<option value="' + esc(item.id) + '"' + (index === 0 ? ' selected' : '') + '>' +
+            return '<option value="' + esc(item.id) + '"' + (first && String(item.id) === String(first.id) ? ' selected' : '') + '>' +
               esc(item.day + " · " + item.name + (item.buyin ? " · " + item.buyin : "")) + '</option>';
           }).join("") + '</select></label>' +
         '<div data-tournament-bet-banner-preview>' + tournamentBannerHtml(first, true) + '</div>' +
