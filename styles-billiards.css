@@ -652,3 +652,23 @@ body.billiards-table-view #tableDock #turnGuide>span{display:none}
 body.billiards-table-view #tableDock #turnGuide{background:none;border:0;box-shadow:none;padding:0;pointer-events:none}
 body.billiards-table-view #turnGuide>strong:not(#turnClock),body.billiards-table-view #turnGuide>span{display:none}
 #tableLeftRail #watchShot{position:static;min-width:0;width:100%;padding:0;aspect-ratio:1;border-radius:50%;font-size:22px}
+
+/* Keep the two call steps below “Your turn”, inside the reserved dock. */
+body.billiards-table-view.billiards-pool-calling #tableDock #turnGuide>strong:not(#turnClock),body.billiards-table-view.billiards-pool-calling #tableDock #turnGuide>span{display:block}
+body.billiards-table-view.billiards-pool-calling #tableDock #turnGuide>span{white-space:normal;font-size:10px;line-height:12px}
+
+/* The active player's countdown sits between their name and score. */
+body.billiards-table-view .billiards-matchup #turnClock{flex:0 0 auto;display:flex;align-items:center;justify-content:center;align-self:center;min-width:30px;margin:0;padding:4px 3px;border:0;border-radius:6px;background:#10161f80;color:#e7eef6;font:750 12px/1.2 system-ui,sans-serif;letter-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:visible}
+body.billiards-table-view .billiards-matchup #turnClock[hidden]{display:none}
+body.billiards-table-view .billiards-matchup #turnClock[data-time-warning=warning]{color:#ffd064;background:#70521d55}
+body.billiards-table-view .billiards-matchup #turnClock[data-time-warning=urgent]{color:#ffb29b;background:#7e241c88}
+body.billiards-table-view .billiards-matchup #turnClock::before{display:none}
+body.billiards-table-view{--billiards-dock-height:calc(52px + env(safe-area-inset-bottom,0px))}
+body.billiards-table-view #tableDock{grid-template-rows:40px;gap:0}
+body.billiards-table-view #tableDock #game{grid-row:1}
+body.billiards-table-view #tableDock #turnGuide{display:none}
+body.billiards-table-view.billiards-pool-calling{--billiards-dock-height:calc(78px + env(safe-area-inset-bottom,0px))}
+body.billiards-table-view.billiards-pool-calling #tableDock{grid-template-rows:26px 40px;gap:2px}
+body.billiards-table-view.billiards-pool-calling #tableDock #turnGuide{display:block;max-height:26px;grid-row:1}
+body.billiards-table-view.billiards-pool-calling #tableDock #game{grid-row:2}
+@media(max-width:380px){body.billiards-table-view .billiards-matchup #turnClock{min-width:25px;font-size:10px;padding:3px 2px}body.billiards-table-view .billiards-matchup>[data-side]{gap:3px}}

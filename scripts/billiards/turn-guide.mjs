@@ -8,7 +8,7 @@ export function turnGuidance(s,{player,ready,call={},placing=false,penaltyPickin
  if(s.pending)return {kind:'mine',title:'Ваше решение',detail:'Откройте «Выбрать продолжение» и решите, как играть дальше.'};
  if(s.inHand||placing)return {kind:'mine',title:'Ваш ход',detail:'Коснитесь свободного места на столе, чтобы поставить биток.'};
  if(s.breakPending)return {kind:'mine',title:'Ваш ход · вы разбиваете',detail:'Прицельтесь кием, выберите силу и нажмите «Удар».'};
- if(s.discipline==='pool8'&&!call.safety&&(call.callBall===null||call.callPocket===null))return {kind:'mine',title:'Ваш ход',detail:'Выберите шар и лузу, затем прицельтесь и нажмите «Удар».'};
+ if(s.discipline==='pool8'&&!call.safety&&(call.callBall===null||call.callPocket===null))return {kind:'mine',title:'Ваш ход',detail:call.callPocket===null?'Выберите лузу':'Выберите шар, который забьёте в эту лузу'};
  return {kind:'mine',title:'Ваш ход',detail:'Прицельтесь кием, выберите силу и нажмите «Удар».'};
 }
 export function mountTurnGuide(){

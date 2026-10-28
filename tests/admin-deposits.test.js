@@ -915,3 +915,25 @@ test('full-history returns have enough time to load while daily reports retain t
  assert.equal(response.data.statistics.spinReturnsAvailable,false);
  await api.call({action:'list',includeReturns:true});assert.deepEqual(started,['raffles','spins']);
  });
+
+test('partial Exchip confirmation keeps the unpaid balance reserved and retries exactly once',()=>{
+ let state=create();const reserve={action:'reserve',requestId:requestId(1800),entryId:requestId(1),amount:1000000,reservationChannel:'exchip'};
+ state=applyOperation(state,reserve,'manager',1000).state;
+ const part={action:'confirm-reservation',requestId:requestId(1801),entryId:requestId(1),reservationId:reserve.requestId,amount:300001,expectedReservationAmount:1000000};
+ state=applyOperation(state,part,'manager',1001).state;
+ let result=view(state,1002);assert.equal(result.entries[0].paid,300001);assert.equal(result.entries[0].reserved,699999);assert.equal(result.entries[0].available,500000);assert.equal(result.statistics.deposits,0);assert.equal(result.statistics.exchipWithdrawals,300001);
+ assert.equal(state.entries[0].reservations[0].originalAmount,1000000);assert.equal(state.entries[0].reservations[0].confirmedAt,undefined);assert.equal(applyOperation(state,part,'manager',1003).duplicate,true);
+ assert.throws(()=>applyOperation(state,{...part,requestId:requestId(1802)},'other',1004),/брони изменилась/);
+ const final={...part,requestId:requestId(1803),amount:699999,expectedReservationAmount:699999};state=applyOperation(state,final,'manager',1005).state;
+ result=view(state,1006);assert.equal(result.entries[0].paid,1000000);assert.equal(result.entries[0].reserved,0);assert.equal(result.entries[0].available,500000);assert.equal(result.statistics.exchipWithdrawals,1000000);assert.equal(state.entries[0].reservations[0].confirmedAt,1005);
+});
+test('partial Exchip payment validates amount and a fresh reservation snapshot through the API',async()=>{
+ const api=apiSetup(),id=requestId(1810),reservationId=requestId(1811);
+ await api.call({action:'create',requestId:id,entry});await api.call({action:'reserve',requestId:reservationId,entryId:id,amount:1000000,reservationChannel:'exchip'});
+ const part={action:'confirm-reservation',requestId:requestId(1812),entryId:id,reservationId,amount:300000,expectedReservationAmount:1000000};
+ for(const amount of [0,-1,1000001,1.5])assert.equal((await api.call({...part,amount})).statusCode,409);
+ const result=await api.call(part);assert.equal(result.statusCode,200);assert.equal(result.data.entries[0].reserved,700000);assert.equal(result.data.statistics.exchipWithdrawals,300000);assert.equal(result.data.statistics.deposits,0);
+ assert.equal((await api.call(part)).data.entries[0].paid,300000);
+ assert.equal((await api.call({...part,requestId:requestId(1813)})).statusCode,409);
+ const released=await api.call({action:'release-reservation',requestId:requestId(1814),entryId:id,reservationId});assert.equal(released.data.entries[0].reserved,0);assert.equal(released.data.entries[0].available,1200000);assert.equal(released.data.entries[0].paid,300000);
+});
