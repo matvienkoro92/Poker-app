@@ -221,7 +221,7 @@ html.app--tg-content-inset body[data-view="chat"] {
 
 html.app--telegram-miniapp body[data-view="chat"],
 html.poker-telegram-miniapp body[data-view="chat"] {
-  --chat-telegram-native-close-clearance: clamp(56px, 15vw, 72px);
+  --chat-telegram-native-close-clearance: var(--tg-ui-top-clearance, max(56px, env(safe-area-inset-top, 0px)));
   --chat-thread-header-safe-top: var(--chat-telegram-native-close-clearance);
 }
 

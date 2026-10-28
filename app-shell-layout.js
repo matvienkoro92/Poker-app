@@ -13,8 +13,10 @@ function pokerApplyAppTopPadding() {
     var hasTelegramContext = !!(twMini && (
       (twMini.initData && String(twMini.initData).trim() !== "") ||
       (twMini.initDataUnsafe && (twMini.initDataUnsafe.user || twMini.initDataUnsafe.start_param)) ||
-      (twPlatform && twPlatform !== "unknown")
+      (twPlatform && twPlatform !== "unknown") ||
+      root.dataset && root.dataset.telegramPlatform
     ));
+    if (!hasTelegramContext && root.dataset && root.dataset.telegramPlatform) hasTelegramContext = true;
     if (hasTelegramContext) {
       root.classList.add("app--telegram-miniapp");
     } else {
@@ -34,7 +36,12 @@ function pokerApplyAppTopPadding() {
     var deviceTop = Math.max(0, Number(tw && tw.safeAreaInset && tw.safeAreaInset.top) || 0);
     var contentTop = Math.max(0, Number(tw && tw.contentSafeAreaInset && tw.contentSafeAreaInset.top) || 0);
     // Keep controls clear while the client is still reporting zero/missing insets.
-    var px = Math.ceil(deviceTop + Math.max(52, contentTop) + 8);
+    var platform = String(tw && tw.platform || root.dataset && root.dataset.telegramPlatform || '').toLowerCase();
+    var desktop = /^(tdesktop|macos|windows|linux|web|weba|webk)$/.test(platform);
+    var toolbar = contentTop > 0 ? contentTop : desktop ? 0 : 52;
+    var px = Math.ceil(deviceTop + toolbar + (deviceTop || toolbar ? 8 : 0));
+    root.style.setProperty('--tg-toolbar-clearance', toolbar + 'px');
+    root.style.setProperty('--tg-toolbar-gap', deviceTop || toolbar ? '8px' : '0px');
     root.classList.add("app--tg-content-inset");
     root.style.setProperty("--app-top-from-tg", px + "px");
     root.style.removeProperty("--app-extra-top-for-ui");

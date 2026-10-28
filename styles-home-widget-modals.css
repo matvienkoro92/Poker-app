@@ -7073,7 +7073,7 @@ body.club-choice-vote-open {
   html.app--telegram-miniapp .club-choice-vote-modal.sng-champions-modal,
   html.poker-telegram-miniapp .club-choice-vote-modal.sng-champions-modal {
     align-items: flex-start;
-    --sng-safe-top: max(8px, env(safe-area-inset-top, 0px), var(--tg-content-safe-area-inset-top, 0px));
+    --sng-safe-top: max(8px, var(--tg-ui-top-clearance, env(safe-area-inset-top, 0px)));
     padding-top: var(--sng-safe-top) !important;
   }
 
@@ -10288,3 +10288,7 @@ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) :is(.sng-champions-modal
 .sng-champions-modal__playing-tools--series > .sng-champions-modal__playing-btn {
   justify-self: end;
 }
+
+/* Top-layer widgets use the same measured Telegram boundary as section pages. */
+html.app--telegram-miniapp .club-choice-vote-modal:not(.club-choice-vote-modal--embedded){padding-top:max(8px,var(--tg-ui-top-clearance,0px))!important}
+html.app--telegram-miniapp .club-choice-vote-modal:not(.club-choice-vote-modal--embedded)>.club-choice-vote-modal__panel{max-height:calc(100dvh - max(8px,var(--tg-ui-top-clearance,0px)) - 18px)}

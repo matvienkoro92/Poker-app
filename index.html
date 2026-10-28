@@ -22,6 +22,42 @@
         }
       })();
     </script>
+    <script id="telegram-viewport-critical">
+      (function () {
+        var root = document.documentElement;
+        try {
+          var params = new URLSearchParams(location.hash.slice(1));
+          var stored = JSON.parse(sessionStorage.getItem('__telegram__initParams') || '{}');
+          var platform = params.get('tgWebAppPlatform') || stored.tgWebAppPlatform || '';
+          var nativeBridge = window.TelegramWebviewProxy && typeof window.TelegramWebviewProxy.postEvent === 'function';
+          if (!platform && !params.has('tgWebAppData') && !nativeBridge) return;
+          root.dataset.telegramPlatform = platform || 'mobile';
+          root.classList.add('app--telegram-miniapp', 'app--tg-content-inset');
+          var desktop = /^(tdesktop|macos|windows|linux|web|weba|webk)$/.test(platform);
+          root.style.setProperty('--tg-toolbar-clearance', desktop ? '0px' : '52px');
+          root.style.setProperty('--tg-toolbar-gap', desktop ? '0px' : '8px');
+          root.style.setProperty('--app-top-from-tg', desktop ? '0px' : '60px');
+        } catch (error) {}
+      })();
+    </script>
+    <style id="telegram-viewport-critical-style">
+      html.app--telegram-miniapp {
+        --tg-ui-top-clearance: max(var(--app-top-from-tg, 0px), calc(max(env(safe-area-inset-top, 0px), var(--tg-safe-area-inset-top, 0px)) + var(--tg-toolbar-clearance, 0px) + var(--tg-toolbar-gap, 0px)));
+        --tg-modal-top-safe: var(--tg-ui-top-clearance);
+      }
+      html.app--telegram-miniapp #app.app { padding-top: var(--tg-ui-top-clearance) !important; }
+    </style>
+    <script id="home-image-recovery-critical">
+      document.addEventListener('error', function (event) {
+        var img = event.target;
+        if (!img || !img.matches || !img.matches('img.home-lounge-art') || img.dataset.imageRetried) return;
+        img.dataset.imageRetried = '1';
+        var source = img.getAttribute('src').split('?')[0];
+        img.removeAttribute('srcset');
+        if (!/-560\.webp$/.test(source)) source = source.replace(/\.webp$/, '-560.webp');
+        img.src = source + '?retry=1';
+      }, true);
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#05070d" />
@@ -1854,7 +1890,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="rating-common" src="./app-rating-week-tops.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="hall" src="./app-hall-fame.js?v=4.020.1.13"></script>
-    <script defer src="./app-shell-layout.js?v=4.004"></script>
+    <script defer src="./app-shell-layout.js?v=20261028-telegram-insets-1"></script>
     <script defer src="./app-navigation-scroll.js?v=20261004-game-return-2"></script>
     <script defer src="./app-html-fragments.js?v=20261002-coolershan-v2"></script>
     <script defer src="./app-webview-keyboard.js?v=4.002"></script>

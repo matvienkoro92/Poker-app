@@ -1,0 +1,6 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const source=fs.readFileSync(require.resolve('../app-billiards-overlay.js'),'utf8');
+function fixture(embedded){const values=new Map(),events={};const window={visualViewport:{height:400,addEventListener(name,fn){events.visual=fn;}},addEventListener(name,fn){events.resize=fn;}};const ctx={window,parent:embedded?{}:window,innerHeight:740,document:{documentElement:{style:{setProperty:(key,value)=>values.set(key,value)},classList:{add(){}}}},location:{search:''},URLSearchParams};vm.createContext(ctx);vm.runInContext(source,ctx);return{ctx,events,values};}
+test('embedded game fills its iframe even when WebKit visual viewport is stale',()=>{const h=fixture(true);assert.equal(h.values.get('--billiards-viewport-height'),'740px');h.ctx.innerHeight=790;h.events.resize();assert.equal(h.values.get('--billiards-viewport-height'),'790px');});
+test('standalone game still follows the visible viewport',()=>{const h=fixture(false);assert.equal(h.values.get('--billiards-viewport-height'),'400px');h.ctx.window.visualViewport.height=680;h.events.visual();assert.equal(h.values.get('--billiards-viewport-height'),'680px');});

@@ -423,3 +423,7 @@ body[data-view="download"] .play-flow__panel {isolation:isolate;}
 
 /* Scene breakpoints follow the app panel, including in a wide desktop window. */
 .play-flow__panel { container: play-screen / size; }
+
+/* The full-screen entrance still starts below Telegram's native toolbar. */
+html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single){padding-top:var(--tg-ui-top-clearance,0px)!important}
+html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single)>.card{height:calc(100dvh - var(--tg-ui-top-clearance,0px) - var(--app-bottom-tabbar-height,56px))!important;max-height:calc(100dvh - var(--tg-ui-top-clearance,0px) - var(--app-bottom-tabbar-height,56px))!important}
