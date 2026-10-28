@@ -75,12 +75,24 @@ export function action(s,player,a){if(a&&SETTLEMENT_ACTIONS.includes(a.type))ret
 export function validState(s){if(!s?.rulesVersion)return legacy.validState(s);return s.rulesVersion===2&&DISCIPLINES.includes(s.discipline)&&[0,1].includes(s.turn)&&Array.isArray(s.balls)&&s.balls.length===16&&new Set(s.balls.map(b=>b.id)).size===16&&s.balls.every(b=>Number.isInteger(b.id)&&b.id>=0&&b.id<16&&[b.x,b.y,b.vx,b.vy].every(Number.isFinite)&&['rollX','rollY','side'].every(k=>b[k]===undefined||Number.isFinite(b[k]))&&Math.abs(b.x)<2000&&Math.abs(b.y)<2000&&typeof b.pocket==='boolean')&&Array.isArray(s.groups)&&s.groups.length===2&&s.groups.every(g=>g===null||g===0||g===1)&&Array.isArray(s.scores)&&s.scores.length===2&&s.scores.every(n=>Number.isInteger(n)&&n>=0&&n<=16)&&Array.isArray(s.captured)&&s.captured.length===2&&s.captured.every(a=>Array.isArray(a)&&a.every(n=>Number.isInteger(n)&&n>=0&&n<16))&&(s.winner===null||s.winner===0||s.winner===1||s.winner==='draw')&&typeof s.message==='string'&&s.message.length<250;}
 
 // Timeout skips are counted per player, separately from billiards fouls.
-export function expireTurn(s){
+export function expireTurn(s,onAutoShot=()=>{}){
  if(s.winner!==null||s.moving)return false;
  const offender=s.turn;s.missedTurns??=[0,0];const missed=++s.missedTurns[offender];s.pending=null;s.drawOffer=null;
  if(missed>=3){s.winner=1-offender;s.endReason='timeout-skips';s.message='Три пропуска хода подряд · поражение';return true;}
- s.turn=1-offender;
- // A pocketed cue must still be placed legally by the incoming player.
- const cue=s.balls.find(b=>b.id===(s.cueId??0));if(cue?.pocket){s.cueId=0;s.inHand=true;s.handZone=s.breakPending?'head':'any';}
- s.message='Время вышло · пропуск '+missed+' из 3 · ход соперника';return true;
+ // Prepare a legal weak shot without using the player's power slider.
+ let cue=cueBall(s);
+ if(!cue||cue.pocket){s.cueId=0;cue=cueBall(s);s.inHand=true;s.handZone=s.breakPending?'head':'any';}
+ if(s.inHand){
+  let placed=false;const r=radius(s);
+  for(let x=30;x<W-r&&!placed;x+=25)for(let y=30;y<H-r&&!placed;y+=25)placed=placeCue(s,x,y);
+  if(!placed){s.turn=1-offender;return true;}
+ }
+ const targets=legalTargets(s),target=targets.reduce((best,b)=>!best||Math.hypot(b.x-cue.x,b.y-cue.y)<Math.hypot(best.x-cue.x,best.y-cue.y)?b:best,null);
+ const move={type:'shot',cueId:cue.id,angle:target?Math.atan2(target.y-cue.y,target.x-cue.x):0,power:.05,safety:true};
+ onAutoShot(move);
+ const played=shoot(s,move.angle,move.power,move);
+ // shoot() resets manual activity; an automatic shot must preserve the streak.
+ s.missedTurns[offender]=missed;
+ if(!played)s.turn=1-offender;
+ return true;
 }

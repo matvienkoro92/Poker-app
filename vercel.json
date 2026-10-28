@@ -114,7 +114,7 @@
       "maxDuration": 60
     },
     "api/[[...slug]].js": {
-      "includeFiles": "{html-fragments/schedule.html,assets/board-games/nards/**}",
+      "includeFiles": "{html-fragments/schedule.html,assets/board-games/nards/**,assets/player-hall/billiards-table-*.webp,assets/player-hall/billiards-cue-*.webp,assets/player-hall/billiards-club-slippers-v3.webp}",
       "maxDuration": 60
     }
   },

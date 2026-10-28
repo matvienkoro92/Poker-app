@@ -85,5 +85,5 @@ test('already started old-rate payouts resume the exact journal amount',async()=
 });
 test('timeout skips do not settle the bank until third own skip and are counted once per deadline',async()=>{
  const f=fixture(),r=await f.create();await f.call('m2','join',r.roomId);
- for(let n=0;n<5;n++){f.elapse(61000);const view=await f.call('m1','room',r.roomId),repeat=await f.call('m2','room',r.roomId);assert.deepEqual(view.state.missedTurns,repeat.state.missedTurns);if(n<4){assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.ok(view.turnDeadline);assert.equal(f.changes.length,2);}else{assert.equal(view.state.endReason,'timeout-skips');assert.equal(view.wager.status,'paid');assert.equal(view.turnDeadline,null);assert.equal(view.wager.payout,190);assert.equal(f.changes.length,3);}}
+ for(let n=0;n<5;n++){f.elapse(90000);const view=await f.call('m1','room',r.roomId),repeat=await f.call('m2','room',r.roomId);assert.deepEqual(view.state.missedTurns,repeat.state.missedTurns);if(n<4){assert.equal(view.state.winner,null);assert.equal(view.wager.status,'playing');assert.ok(view.turnDeadline);assert.equal(f.changes.length,2);}else{assert.equal(view.state.endReason,'timeout-skips');assert.equal(view.wager.status,'paid');assert.equal(view.turnDeadline,null);assert.equal(view.wager.payout,190);assert.equal(f.changes.length,3);}}
 });
