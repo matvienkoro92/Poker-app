@@ -20,3 +20,7 @@ test('rake comes only from a confirmed payout and keeps a stable match identity'
  const page=await stats.read({cursor:'1:0',commands:async rows=>rows.map(([op])=>op==='HSCAN'?['0',[room+':1:1',JSON.stringify({finishedAt:time}),room+':1:2',JSON.stringify({finishedAt:time})]]:JSON.stringify({stake:2000,status:'paid',commission:200,finishedAt:time}))});
  assert.equal(page.records.length,2);assert.equal(page.records[0].rake,200);assert.equal(page.records[0].rakeId,page.records[1].rakeId);assert.equal(page.records[0].rakeDay,'2026-10-26');
 });
+test('legacy series reuse one wager read per room for classification and rake',async()=>{
+ const calls=[];const page=await stats.read({cursor:'9:0',commands:async rows=>{calls.push(...rows);return rows.map(([op])=>op==='HSCAN'?['0',[room+':1:1',JSON.stringify({finishedAt:time}),room+':1:2',JSON.stringify({finishedAt:time})]]:JSON.stringify({stake:300,status:'paid',commission:30,finishedAt:time}));}});
+ assert.equal(page.records.length,2);assert.equal(page.records[0].rake,30);assert.equal(calls.filter(r=>r[0]==='GET').length,1);
+});

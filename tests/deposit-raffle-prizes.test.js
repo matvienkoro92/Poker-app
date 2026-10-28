@@ -53,3 +53,8 @@ test('daytime cash 5/10 prizes have a separate tab and share return accounting',
  assert.equal(result.returned,95000);
  const view={statistics:{returned:0,managers:[]}};mergeReturns(view,result);assert.equal(view.statistics.returned,95000);
 });
+
+test('all-time fallback reads bounded pages, deduplicates IDs and never uses blocked LRANGE 0 -1',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),calls=[],mod={exports:{}},ids=Array.from({length:501},(_,i)=>'r'+i);ids[500]='r0';const redis={pipeline:async commands=>{calls.push(...commands);return commands.map(command=>{const [op,key,a,b]=command;return {result:op==='GET'?null:op==='LLEN'?ids.length:op==='LRANGE'?ids.slice(a,b+1):op==='MGET'?command.slice(1).map(id=>JSON.stringify(raffle(winner(),{id}))):null};});}};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/deposit-raffle-prizes'),'utf8'),{module:mod,exports:mod.exports,require:id=>id==='./redis'?redis:require('../lib/raffle-stats-index')});const result=await mod.exports.loadSnapshot({start:null,end:null});assert.equal(result.rows.length,500);const pages=calls.filter(c=>c[0]==='LRANGE');assert.deepEqual(pages.map(c=>Array.from(c.slice(2))),[[0,499],[500,999]]);assert.ok(!calls.some(c=>c[0]==='LRANGE'&&c[3]===-1));
+});

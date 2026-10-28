@@ -45,7 +45,7 @@ test('total adjustments are audited and cannot undercut paid funds',()=>{
   assert.throws(()=>applyOperation(state,{action:'create',requestId:requestId(4),entry},'admin-a'),/уже есть/);
 });
 function apiSetup(prizeSnapshot={rows:[],operations:[],returns:[],returned:0},sources={}){
-  let stored='',offline=false,unknown=false;const notificationEvents=[];
+  let stored='',offline=false,unknown=false;const notificationEvents=[],timerDelays=[];
   const redis={isConfigured:()=>true,pipeline:async commands=>{
     if(offline)throw Error('offline');
     return commands.map(c=>{if(c[0]==='GET')return{result:stored||null};if(c[0]==='EVAL'){
@@ -54,14 +54,14 @@ function apiSetup(prizeSnapshot={rows:[],operations:[],returns:[],returned:0},so
   }};
   const mod={exports:{}};
   vm.runInNewContext(fs.readFileSync(require.resolve('../lib/api-handlers/admin-deposits'),'utf8'),{
-    module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,setTimeout,clearTimeout,
+    module:mod,exports:mod.exports,process:{env:{BOT_TOKEN:'test-secret'}},console,setTimeout:(...args)=>{timerDelays.push(args[1]);return setTimeout(...args);},clearTimeout,
     require:id=>id==='../redis'?redis:id==='../api-auth'?{setCors(){},parseBody:r=>r.body,authRequired:(r,b)=>b.user==='admin-a'||b.user==='admin-b'||b.user==='388008256'||b.user==='5053253480'?{ok:true,memberId:b.user}:{ok:false,status:403}}:id==='../admin-menu-access-token'?tokens:id==='../admin-deposits'?require('../lib/admin-deposits'):id==='../deposit-player-recents'?require('../lib/deposit-player-recents'):id==='../deposit-raffle-prizes'?{...require('../lib/deposit-raffle-prizes'),loadSnapshot:sources.raffles||async function(){return prizeSnapshot;}}:id==='../deposit-player-notifications'?require('../lib/deposit-player-notifications'):id==='../deposit-spin-returns'?{...require('../lib/deposit-spin-returns'),loadSnapshot:sources.spins||async function(){return {rows:[],returns:[],returned:0};}}:null
   });
   async function call(body,user='admin-a',scope='deposits'){
     const res={statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(value){this.data=value;return this;},end(){return this;}};
     await mod.exports({method:'POST',body:{...body,user,accessToken:tokens.signAccessToken(scope,user,'test-secret')}},res);return res;
   }
-  return{call,notificationEvents,fail:()=>offline=true,lose:()=>unknown=true};
+  return{call,notificationEvents,timerDelays,fail:()=>offline=true,lose:()=>unknown=true};
 }
 test('API requires admin identity and the separate deposit password token',async()=>{
   const a=apiSetup();assert.equal((await a.call({action:'list'},'player')).statusCode,403);
@@ -640,9 +640,9 @@ test('API persists the Exchip reservation channel',async()=>{
 
 test('raffle returns read the source once per report and never create duplicate financial operations',async()=>{
  const source={rows:[{key:'r:initial_0',kind:'ticket'}],operations:[],returns:[{amount:250000,createdBy:'tg_2144406710'}],returned:250000},api=apiSetup(source);
- const first=await api.call({action:'list'});assert.equal(first.statusCode,200);assert.equal(first.data.statistics.returned,250000);assert.equal(first.data.statistics.deposits,0);assert.equal(first.data.channelOperations.length,0);
- const again=await api.call({action:'list'});assert.equal(again.data.statistics.returned,250000);source.returned=300000;source.returns[0].amount=300000;
- const updated=await api.call({action:'list'});assert.equal(updated.data.statistics.returned,300000);assert.equal(updated.data.channelOperations.length,0);assert.equal(updated.data.entries.length,0);
+ const first=await api.call({action:'list',includeReturns:true});assert.equal(first.statusCode,200);assert.equal(first.data.statistics.returned,250000);assert.equal(first.data.statistics.deposits,0);assert.equal(first.data.channelOperations.length,0);
+ const again=await api.call({action:'list',includeReturns:true});assert.equal(again.data.statistics.returned,250000);source.returned=300000;source.returns[0].amount=300000;
+ const updated=await api.call({action:'list',includeReturns:true});assert.equal(updated.data.statistics.returned,300000);assert.equal(updated.data.channelOperations.length,0);assert.equal(updated.data.entries.length,0);
  const separate=await api.call({action:'raffle-prizes'});assert.equal(separate.statusCode,200);assert.equal(separate.data.rows.length,1);assert.equal(separate.data.returned,300000);
 });
 
@@ -735,7 +735,7 @@ test('bonus debit permits sponsorship without a prior journal accrual but reject
 test('report starts both return sources together and combines totals after both complete',async()=>{
  let finishRaffles,finishSpins;const started=[];
  const api=apiSetup(undefined,{raffles:()=>{started.push('raffles');return new Promise(r=>finishRaffles=r);},spins:()=>{started.push('spins');return new Promise(r=>finishSpins=r);}});
- const request=api.call({action:'list'});for(let i=0;i<10;i++)await Promise.resolve();
+ const request=api.call({action:'list',includeReturns:true});for(let i=0;i<10;i++)await Promise.resolve();
  assert.deepEqual(started,['raffles','spins']);
  finishRaffles({returns:[],returned:10000});finishSpins({returns:[],returned:20000});
  const response=await request;assert.equal(response.statusCode,200);assert.equal(response.data.statistics.returned,30000);
@@ -743,7 +743,7 @@ test('report starts both return sources together and combines totals after both 
 });
 test('one failed return source leaves other totals available and marks the report incomplete',async()=>{
  const api=apiSetup(undefined,{raffles:async()=>{throw Error('offline');},spins:async()=>({returns:[],returned:20000})});
- const response=await api.call({action:'list'});assert.equal(response.statusCode,200);assert.equal(response.data.statistics.returned,20000);assert.equal(response.data.raffleReturnsAvailable,false);assert.equal(response.data.statistics.spinReturnsAvailable,true);
+ const response=await api.call({action:'list',includeReturns:true});assert.equal(response.statusCode,200);assert.equal(response.data.statistics.returned,20000);assert.equal(response.data.raffleReturnsAvailable,false);assert.equal(response.data.statistics.spinReturnsAvailable,true);
 });
 
 test('withdrawal notifications are committed with the ledger, and retry after a lost response queues one event',async()=>{
@@ -899,3 +899,19 @@ test('API tips cashouts forward manager and source room, reject overspending and
 test('payment form deposit total includes tips cashouts once and respects period and manager filter',()=>{
  const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),code=source.slice(source.indexOf('  function matchesPaymentManager('),source.indexOf('  function paymentFormsTotalsHtml('));const c={paymentManager:'all',data:{entries:[],channelOperations:[],tipCashouts:[{amount:60000,createdAt:15,managerId:'tg_1897001087'},{amount:20000,createdAt:15,managerId:'tg_2144406710'},{amount:90000,createdAt:15,managerId:'tg_1897001087',voidedAt:16},{amount:70000,createdAt:20,managerId:'tg_1897001087'}]}};vm.createContext(c);vm.runInContext(code,c);const forms={period:{start:10,end:20},providers:[]};assert.equal(c.paymentFormsTotals(forms).deposits,80000);assert.equal(c.paymentFormsTotals(forms).withdrawals,0);c.paymentManager='1897001087';assert.equal(c.paymentFormsTotals(forms).deposits,60000);c.paymentManager='2144406710';assert.equal(c.paymentFormsTotals(forms).deposits,20000);
 });
+
+test('manager payment-form Exchip withdrawals include confirmed reservations, with taker attribution and no cancelled duplicates',()=>{
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),code=source.slice(source.indexOf('  function matchesPaymentManager('),source.indexOf('  function paymentFormsTotalsHtml('));const c={paymentManager:'anna',data:{paymentForms:{period:{start:10,end:20},providers:[{id:'exchip',outgoing:900,total:0}]},channelOperations:[{channelId:'exchip',direction:'outgoing',amount:100,createdAt:15,createdBy:'anna'}],entries:[{reservations:[{id:'r',createdBy:'anna'}],payments:[{id:'p',reservationId:'r',channelId:'exchip',amount:500,createdAt:15,createdBy:'vika'},{id:'void',channelId:'exchip',amount:700,createdAt:15,createdBy:'anna',voidedAt:16},{id:'later',channelId:'exchip',amount:1000,createdAt:20,createdBy:'anna'},{id:'other',channelId:'exchip',amount:300,createdAt:15,createdBy:'vika'}]}]}};vm.createContext(c);vm.runInContext(code,c);assert.equal(c.filteredPaymentForms().providers[0].outgoing,600);c.paymentManager='vika';assert.equal(c.filteredPaymentForms().providers[0].outgoing,300);c.paymentManager='all';assert.equal(c.filteredPaymentForms().providers[0].outgoing,900);
+});
+
+test('full-history returns have enough time to load while daily reports retain their short deadlines',async()=>{
+ const all=apiSetup();await all.call({action:'list',includeReturns:true,statisticsPeriod:{preset:'all'}});assert.deepEqual(all.timerDelays,[10000,10000]);const day=apiSetup();await day.call({action:'list',includeReturns:true,statisticsPeriod:{preset:'today'}});assert.deepEqual(day.timerDelays,[3000,5000]);
+});
+
+ test('payment panel does not read raffle or spin history until a report requests returns',async()=>{
+ const started=[];const api=apiSetup(undefined,{raffles:async()=>{started.push('raffles');return {returns:[],returned:0};},spins:async()=>{started.push('spins');return {returns:[],returned:0};}});
+ const response=await api.call({action:'list'});
+ assert.equal(response.statusCode,200);assert.deepEqual(started,[]);assert.deepEqual(api.timerDelays,[]);
+ assert.equal(response.data.statistics.spinReturnsAvailable,false);
+ await api.call({action:'list',includeReturns:true});assert.deepEqual(started,['raffles','spins']);
+ });

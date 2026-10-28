@@ -4,8 +4,8 @@
   var data = {entries:[], totals:{total:0,paid:0,remaining:0}}, loaded = false, busy = false;
   var statisticsPeriod={preset:'today'}, disclosureState=new Map(), paymentManager='all';
   var rafflePrizes=null,rafflePrizeTab='ticket',rafflePrizeQuery='',spinReturns=null,popupVersion=0,reservationConfirmation=null;
-  var statisticsOpen=false;
-  var filter = 'active', query = '', pending = null, editing = false, timer, ageTimer, generation = 0;
+  var statisticsOpen=false,gameStatisticsContainer=null;
+  var filter = 'active', query = '', pending = null, editing = false, ageTimer, generation = 0;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   function money(n) { return (Number(n || 0)/100).toLocaleString('ru-RU',{maximumFractionDigits:2}) + ' ₽'; }
   function inputMoney(n) { return n ? String(n/100).replace('.',',') : ''; }
@@ -34,7 +34,7 @@
     dialog.addEventListener('focusout',function(e){if(e.target.matches('[data-form="create"] [name="phone"][type="tel"]')){var normalized=parser.normalizePhone(e.target.value);if(normalized)e.target.value=normalized;syncCreateValidity();}});
     dialog.addEventListener('change',function(e){if(e.target.matches('[name="paymentSource"]')){syncOwnerPaymentSource(e.target.closest('form'));return;}if(e.target.matches('[data-payment-period]')){var trigger=document.createElement('button');trigger.dataset.dep='statistics-period';trigger.dataset.period=e.target.value;onClick({target:trigger});e.target.value=statisticsPeriod.preset;return;}if(e.target.matches('[data-payment-manager]')){paymentManager=e.target.value;render();return;}if(e.target.matches('[name="fromRoom"],[name="toRoom"],[name="transferRecipient"]'))syncTransferAccounts(e.target.closest('form'));if(e.target.matches('input[type="radio"]'))syncAllocationAccount(e.target);if(e.target.closest('[data-form="create"]'))syncCreateValidity();});
     dialog.addEventListener('cancel',function(e){ if (busy) {e.preventDefault();return;} if(editing){e.preventDefault();closeEditor();} });
-    dialog.addEventListener('close',function(event){if(event.target!==dialog)return;clearInterval(timer);clearInterval(ageTimer);document.body.classList.remove('deposits-open');generation++;if(opener)opener.focus();});
+    dialog.addEventListener('close',function(event){if(event.target!==dialog)return;clearInterval(ageTimer);document.body.classList.remove('deposits-open');generation++;gameStatisticsContainer=null;if(opener)opener.focus();});
   }
   function setBusy(value) {
     busy=value; dialog.setAttribute('aria-busy',String(value));
@@ -44,6 +44,7 @@
   async function api(body) {
     var payload=typeof pokerGuestOrAuthedPostBody === 'function' ? pokerGuestOrAuthedPostBody(body) : body;
     payload.statisticsPeriod=statisticsPeriod;
+    payload.includeReturns=statisticsOpen;
     payload.accessToken=window.pokerAdminMenuAccessToken('deposits');
     var controller=new AbortController(), timeout=setTimeout(function(){controller.abort();},15000);
     try {
@@ -61,7 +62,7 @@
     } else tell(error.name==='AbortError'?'Ответ не получен. Проверьте соединение и повторите.':error.message || 'Нет соединения. Повторите попытку.',true);
   }
   async function refresh(silent) {
-    if(busy || (silent && editing))return;
+    if(busy || (silent && (editing || statisticsOpen)) || !dialog.open)return;
     setBusy(true); var stamp=generation;
     if(!silent)tell('Обновляем общий журнал…');
     try {var result=await api({action:'list'});if(stamp!==generation)return;data=result;loaded=true;render();if(!silent)tell('Данные обновлены · '+date(Date.now()));}
@@ -79,10 +80,9 @@
   async function open(target) {
     if(!window.pokerHasAdminMenuAccess('deposits'))return;
     ensure(); if(dialog.open)return;dialog.classList.remove('deposits--form-open'); opener=target;editing=false;editor.hidden=true;host.hidden=false;dialog.querySelector('.deposits__toolbar').hidden=false;
-    disclosureState.clear();setStatisticsPeriod({preset:'today'});loaded=false; data={entries:[],totals:{total:0,paid:0,remaining:0}};
+    disclosureState.clear();statisticsOpen=false;gameStatisticsContainer=null;setStatisticsPeriod({preset:'today'});loaded=false; data={entries:[],totals:{total:0,paid:0,remaining:0}};
     dialog.showModal();document.body.classList.add('deposits-open');render();await refresh(false);
     clearInterval(ageTimer);ageTimer=setInterval(function(){if(document.visibilityState==='visible')updateCardTimers();},1000);
-    clearInterval(timer);timer=setInterval(function(){if(document.visibilityState==='visible')refresh(true);},60000);
   }
   function disclosureKey(el){var card=el.closest('[data-entry]');return (card?'entry:'+card.dataset.entry:'report')+':'+(el.className||el.querySelector('summary')?.textContent||'details');}
   function rememberDisclosures(){host.querySelectorAll('details').forEach(function(el){disclosureState.set(disclosureKey(el),el.open);});}
@@ -92,11 +92,11 @@
     var counts={active:0,done:0,archive:0};data.entries.forEach(function(e){counts[e.archived?'archive':e.remaining>0?'active':'done']++;});
     host.innerHTML=(filter==='active'?paymentFormsHtml():'')+'<div class="deposits__filters"><nav aria-label="Состояние выводов">'+[['active','Выводы в работе'],['done','Закрытые'],['archive','Архив']].map(function(t){return '<button type="button" data-dep="filter" data-filter="'+t[0]+'" aria-pressed="'+(filter===t[0])+'">'+t[1]+' <span>'+counts[t[0]]+'</span>'+'</button>';}).join('')+'</nav><label class="deposits__search"><span class="deposits__sr">Поиск по получателю, банку или номеру</span><input data-dep-search type="search" placeholder="Имя, банк или номер…" value="'+esc(query)+'"></label></div><div class="deposits__cards"></div>';
     renderCards();
-    if(statisticsOpen&&data.permissions&&data.permissions.canDelete){host.innerHTML='<button type="button" class="deposits__secondary" data-dep="statistics-close">← К платёжкам</button>'+statisticsHtml()+'<section data-games-statistics></section>';loadGameStatistics(host.querySelector('[data-games-statistics]'));}
+    if(statisticsOpen&&data.permissions&&data.permissions.canDelete){host.innerHTML='<button type="button" class="deposits__secondary" data-dep="statistics-close">← К платёжкам</button>'+statisticsHtml();if(!gameStatisticsContainer){gameStatisticsContainer=document.createElement('section');gameStatisticsContainer.setAttribute('data-games-statistics','');host.appendChild(gameStatisticsContainer);loadGameStatistics(gameStatisticsContainer);}else host.appendChild(gameStatisticsContainer);}
     restoreDisclosures();scrollState.forEach(function(s){s.el.scrollTop=s.top;});
   }
   function matchesPaymentManager(row){return paymentManager==='all'||String(row.createdBy||'').replace(/^tg_/,'')===paymentManager;}
-  function filteredPaymentForms(){var forms=data.paymentForms;if(!forms||paymentManager==='all')return forms;return Object.assign({},forms,{providers:forms.providers.map(function(p){var rows=(data.channelOperations||[]).filter(function(r){return r.channelId===p.id&&!r.voidedAt&&matchesPaymentManager(r)&&r.createdAt>=forms.period.start&&r.createdAt<forms.period.end;});return Object.assign({},p,{total:rows.filter(function(r){return r.direction==='income'||p.id==='bonuses';}).reduce(function(sum,r){return sum+(r.direction==='outgoing'?-r.amount:r.amount);},0),outgoing:rows.filter(function(r){return r.direction==='outgoing';}).reduce(function(sum,r){return sum+r.amount;},0)});})});}
+  function filteredPaymentForms(){var forms=data.paymentForms;if(!forms||paymentManager==='all')return forms;return Object.assign({},forms,{providers:forms.providers.map(function(p){var rows=(data.channelOperations||[]).filter(function(r){return r.channelId===p.id&&!r.voidedAt&&matchesPaymentManager(r)&&r.createdAt>=forms.period.start&&r.createdAt<forms.period.end;});return Object.assign({},p,{total:rows.filter(function(r){return r.direction==='income'||p.id==='bonuses';}).reduce(function(sum,r){return sum+(r.direction==='outgoing'?-r.amount:r.amount);},0),outgoing:rows.filter(function(r){return r.direction==='outgoing';}).reduce(function(sum,r){return sum+r.amount;},0)+(p.id==='exchip'?(data.entries||[]).reduce(function(total,e){return total+(e.payments||[]).filter(function(r){if(r.voidedAt||r.channelId!=='exchip'||r.createdAt<forms.period.start||r.createdAt>=forms.period.end)return false;var reservation=r.reservationId&&(e.reservations||[]).find(function(x){return x.id===r.reservationId;});return matchesPaymentManager(reservation||r);}).reduce(function(sum,r){return sum+r.amount;},0);},0):0)});})});}
   function paymentFormsTotals(forms){
     var sources={player:0,owner:0,allfriends:0};
     (data.entries||[]).forEach(function(entry){(entry.payments||[]).forEach(function(p){
@@ -183,7 +183,7 @@
     editorPopup.querySelectorAll('[data-prize-search-text]').forEach(function(row){var text=row.dataset.prizeSearchText.toLocaleLowerCase('ru-RU').replace(/ё/g,'е');row.hidden=!terms.every(function(term){return text.indexOf(term)!==-1;});if(!row.hidden)visible++;});
     var empty=editorPopup.querySelector('[data-prize-search-empty]');if(empty)empty.hidden=!terms.length||visible>0;
   }
-  function renderRafflePrizes(){if(rafflePrizeTab==='spins'){renderSpinReturns();return;}var s=rafflePrizes||{rows:[],operations:[]};showPopup('Розыгрыши (отдельно)','<p class="deposits__hint">Выбранный период отчёта · 06:00–06:00 МСК. Отметки сохраняются в исходных розыгрышах.</p><nav class="deposits__prize-tabs">'+[['ticket','Билетеры'],['cash','Кеш · 1 000 ₽'],['cash_5_10','Кеш 5/10 · дневной'],['spins','Крутки']].map(function(tab){return '<button type="button" class="deposits__secondary" data-dep="raffle-prize-tab" data-tab="'+tab[0]+'" aria-pressed="'+(rafflePrizeTab===tab[0])+'">'+tab[1]+'</button>';}).join('')+'</nav><input type="search" class="deposits__prize-search" data-raffle-prize-search aria-label="Поиск по имени, нику или ID" placeholder="Имя, ник или ID игрока" value="'+esc(rafflePrizeQuery)+'" autocomplete="off"><p class="deposits__hint" data-prize-search-empty hidden>Ничего не найдено.</p><section data-prize-active>'+rafflePrizeRows(s.rows.filter(function(r){return r.kind===rafflePrizeTab;}),false)+'</section><h4>Выдача / возврат · не сели</h4><section data-prize-operations>'+rafflePrizeRows((s.operations||[]).filter(function(r){return r.kind===rafflePrizeTab;}),true,s.rows.filter(function(r){return r.kind===rafflePrizeTab;}).length)+'</section>');filterRafflePrizeRows();}
+  function renderRafflePrizes(){if(rafflePrizeTab==='spins'){renderSpinReturns();return;}var s=rafflePrizes||{rows:[],operations:[]};showPopup('Розыгрыши (отдельно)','<button type="button" class="deposits__secondary" data-dep="raffle-prizes">Обновить</button><p class="deposits__hint">Выбранный период отчёта · 06:00–06:00 МСК. Отметки сохраняются в исходных розыгрышах.</p><nav class="deposits__prize-tabs">'+[['ticket','Билетеры'],['cash','Кеш · 1 000 ₽'],['cash_5_10','Кеш 5/10 · дневной'],['spins','Крутки']].map(function(tab){return '<button type="button" class="deposits__secondary" data-dep="raffle-prize-tab" data-tab="'+tab[0]+'" aria-pressed="'+(rafflePrizeTab===tab[0])+'">'+tab[1]+'</button>';}).join('')+'</nav><input type="search" class="deposits__prize-search" data-raffle-prize-search aria-label="Поиск по имени, нику или ID" placeholder="Имя, ник или ID игрока" value="'+esc(rafflePrizeQuery)+'" autocomplete="off"><p class="deposits__hint" data-prize-search-empty hidden>Ничего не найдено.</p><section data-prize-active>'+rafflePrizeRows(s.rows.filter(function(r){return r.kind===rafflePrizeTab;}),false)+'</section><h4>Выдача / возврат · не сели</h4><section data-prize-operations>'+rafflePrizeRows((s.operations||[]).filter(function(r){return r.kind===rafflePrizeTab;}),true,s.rows.filter(function(r){return r.kind===rafflePrizeTab;}).length)+'</section>');filterRafflePrizeRows();}
   async function openRafflePrizes(){
     rafflePrizeQuery='';if(rafflePrizeTab==='spins'){await openSpinReturns();return;}
     showPopup('Розыгрыши (отдельно)','<p class="deposits__hint">Загрузка…</p>');var version=popupVersion,stamp=generation;
@@ -194,7 +194,7 @@
     var s=spinReturns||{rows:[],returns:[]},fmt=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     var rows=s.rows.filter(function(r){return paymentManager==='all'||String(r.issueManager).replace(/^tg_/,'')===paymentManager||String(r.createdBy).replace(/^tg_/,'')===paymentManager;});
     var returned=(s.returns||[]).filter(function(r){return paymentManager==='all'||String(r.createdBy).replace(/^tg_/,'')===paymentManager;}).reduce(function(sum,r){return sum+r.amount;},0);
-    var html='<p class="deposits__hint">Выбранный период · 06:00–06:00 МСК. '+(s.period&&s.period.start!==null?esc(fmt.format(s.period.start)+' — '+fmt.format(s.period.end)):'Все даты')+'</p><nav class="deposits__prize-tabs">';
+    var html='<button type="button" class="deposits__secondary" data-dep="spin-returns">Обновить</button><p class="deposits__hint">Выбранный период · 06:00–06:00 МСК. '+(s.period&&s.period.start!==null?esc(fmt.format(s.period.start)+' — '+fmt.format(s.period.end)):'Все даты')+'</p><nav class="deposits__prize-tabs">';
     html+=[['ticket','Билетеры'],['cash','Кеш · 1 000 ₽'],['cash_5_10','Кеш 5/10 · дневной'],['spins','Крутки']].map(function(tab){return '<button type="button" class="deposits__secondary" data-dep="raffle-prize-tab" data-tab="'+tab[0]+'" aria-pressed="'+(tab[0]==='spins')+'">'+tab[1]+'</button>';}).join('');
     html+='</nav><p class="deposits__intro">Возвраты за период: <strong>'+money(returned)+'</strong></p><p class="deposits__hint">Выдачи бонусов для круток и их возвраты. Укажите сумму, которую игрок уже вернул в кассу. Изменение заменяет предыдущую отметку.</p><input type="search" class="deposits__prize-search" data-raffle-prize-search aria-label="Поиск по имени, нику или ID" placeholder="Имя, ник или ID игрока" value="'+esc(rafflePrizeQuery)+'"><p data-prize-search-empty class="deposits__hint" hidden>Ничего не найдено.</p><section>';
     html+=rows.map(function(r){return '<article class="deposits__prize-row deposits__prize-row--compact" data-prize-search-text="'+esc([r.name,r.playerId,r.title].join(' '))+'"><div class="deposits__prize-line"><strong>'+esc(r.name||r.playerId)+'</strong><button type="button" class="deposits__secondary" data-dep="spin-return-edit" data-spin-key="'+esc(r.key)+'">'+(r.outcome?'Изменить возврат':'Указать возврат')+'</button></div><small>'+esc(r.playerId?'ID '+r.playerId+' · ':'')+esc(r.title)+' · Выдано '+money(r.issuedAmount)+' · '+esc(fmt.format(new Date(r.issuedAt)))+'</small><small>'+(r.outcome?'Возврат '+money(r.amount)+(r.returnedAt?' · '+esc(fmt.format(new Date(r.returnedAt))):''):'Возврат не отмечен')+'</small></article>';}).join('');
@@ -266,7 +266,7 @@
     if(stats.raffleReturnsAvailable===false)lines.push('Возвраты розыгрышей не загружены — итог возвратов неполный.');
     return lines.join('\n');
   }
-  async function loadGameStatistics(container){try{await import('./app-admin-game-stats.js?v=20261028-1');if(container.isConnected)await window.PokerAdminGameStats.open(function(body){return api(body);},{container:container});}catch(error){if(container.isConnected)container.textContent='Не удалось загрузить статистику игр.';}}
+  async function loadGameStatistics(container){try{await import('./app-admin-game-stats.js?v=20261028-week-default-1');if(container.isConnected)await window.PokerAdminGameStats.open(function(body){return api(body);},{container:container});}catch(error){if(container.isConnected)container.textContent='Не удалось загрузить статистику игр.';}}
   function statisticsHtml(){
     var stats=data.statistics||{deposits:0,returned:0,destinations:[],managers:[]},managers=reportManagers(stats.managers||[]),period=stats.period||{},periodLabel=period.from?period.from+' — '+period.to+' · 06:00–06:00 · Москва':'За всё время';
     function destination(id){return (stats.destinations||[]).find(function(d){return d.id===id;})||{amount:null};}
@@ -410,8 +410,9 @@
     var action=b.dataset.dep, cardNode=b.closest('[data-entry]');
     if(pending&&!['retry','close','editor-close','unlock'].includes(action)){tell('Сначала проверьте результат предыдущей операции кнопкой «Проверить и повторить». Другую оплату пока открыть нельзя.',true);return;}
     var e=cardNode?data.entries.find(function(e){return e.id===cardNode.dataset.entry;}):null;
-    if(action==='statistics-open'){if(data.permissions&&data.permissions.canDelete){statisticsOpen=true;render();}return;}
-    if(action==='statistics-close'){statisticsOpen=false;render();return;}
+    if(action==='game-statistics-open'){if(gameStatisticsContainer){gameStatisticsContainer.textContent='Загрузка статистики игр…';await loadGameStatistics(gameStatisticsContainer);}return;}
+    if(action==='statistics-open'){if(data.permissions&&data.permissions.canDelete){statisticsOpen=true;await refresh(false);}return;}
+    if(action==='statistics-close'){statisticsOpen=false;gameStatisticsContainer=null;render();return;}
     if(action==='close')dialog.close();
     else if(action==='editor-close')closeEditor();
     else if(action==='transfer-history')openChannel('transfer');
@@ -456,7 +457,7 @@
     else if(action==='bonus-new')bonusEditor(b.dataset.direction);
     else if(action==='channel-edit'){var editRow=(data.channelOperations||[]).find(function(r){return r.id===b.dataset.operation;});if(editRow&&data.permissions&&data.permissions.canDelete)editChannel(editRow);}
     else if(action==='report-copy')await copy(reportCopyText(data.statistics||{}));
-    else if(action==='refresh')await refresh(false);
+    else if(action==='refresh'){gameStatisticsContainer=null;await refresh(false);}
     else if(action==='retry'&&pending)await save(pending);
     else if(action==='unlock'){dialog.close();document.getElementById('headerDepositsShortcutBtn').click();}
     else if(action==='filter'){filter=b.dataset.filter;render();}
