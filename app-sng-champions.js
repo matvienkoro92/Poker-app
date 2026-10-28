@@ -164,6 +164,7 @@
     modal.classList.add("club-choice-vote-modal--open");
     document.body.classList.add("club-choice-vote-open");
     activeTabManual = false;
+    if (/^battle-number:/.test(tournamentId)) activeTab = "signup";
     tournamentDetailOpen = !!tournamentId;
     if (tournamentId) activeTournamentId = tournamentId;
     startBracketTimerRefresh();
@@ -209,6 +210,20 @@
   }
 
   function fetchState() {
+    if (/^battle-number:\d+$/.test(activeTournamentId)) {
+      var requestedNumber = activeTournamentId.split(":")[1];
+      return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (!data || !data.ok) throw new Error(data && data.error || "Ошибка загрузки турнира");
+          var target = (data.tournaments || []).find(function (item) {
+            return new RegExp("^\\s*" + requestedNumber + "(?:[-–]?\\s*(?:й|ый|ой))?\\s*СНГ", "i").test(item.title || "");
+          });
+          if (!target) throw new Error("4-й СНГ-баттл пока не опубликован");
+          activeTournamentId = target.id;
+          return fetchState();
+        });
+    }
     var selected = activeTournamentId ? "&tournamentId=" + encodeURIComponent(activeTournamentId) : "";
     return fetch(baseUrl() + API_PATH + apiAuthQuery("?") + selected + "&_t=" + Date.now(), { cache: "no-store" }).then(function (res) {
       return res.json();
@@ -259,6 +274,7 @@
     fetchState()
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
+        updateFourthBattlePanel(data);
         state = data;
         activeTournamentId = data.tournamentId || activeTournamentId;
         rememberStateRevision(data);
@@ -2068,6 +2084,21 @@
     });
   }
 
+  function updateFourthBattlePanel(data) {
+    var target = (data && data.tournaments || []).find(function (item) {
+      return /^\s*4(?:[-–]?\s*(?:й|ый|ой))?\s*СНГ/i.test(item.title || "");
+    });
+    if (!target) return;
+    document.querySelectorAll("[data-sng-four-players]").forEach(function (el) {
+      el.textContent = String(target.approved || 0) + "/" + String(target.capacity || 32);
+    });
+    document.querySelectorAll("[data-sng-four-buyin]").forEach(function (el) { el.textContent = formatHomeMoney(target.buyIn); });
+    document.querySelectorAll("[data-sng-four-cta]").forEach(function (el) {
+      var canJoin = target.status === "open" && Number(target.approved || 0) < Number(target.capacity || 32);
+      el.textContent = target.myEntryStatus === "approved" ? "Вы записаны" : canJoin ? "Записаться" : target.status === "draft" ? "Скоро" : "Смотреть";
+    });
+  }
+
   var homeTournamentId = "";
   function updateHomePlaque() {
     if (!state) return;
@@ -2768,7 +2799,7 @@
         var trigger = event.target && event.target.closest ? event.target.closest("[data-sng-open], #sngChampionsOpen") : null;
         if (!trigger) return;
         activeTournamentId = "";
-        openModal();
+        openModal(trigger.getAttribute("data-sng-open") || "");
       });
     }
     if (!document.documentElement.dataset.sngChampionsPlaqueObserverBound && window.MutationObserver) {
@@ -2789,6 +2820,17 @@
         }
       }).observe(document.body, { childList: true, subtree: true });
     }
+    function refreshFourthBattlePanel() {
+      fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
+        .then(function (res) { return res.json(); })
+        .then(function (data) { if (data && data.ok) updateFourthBattlePanel(data); })
+        .catch(function () {});
+    }
+    refreshFourthBattlePanel();
+    window.addEventListener("online", refreshFourthBattlePanel);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") refreshFourthBattlePanel();
+    });
     var homeRefreshRetry = null;
     function refreshHomeBanner(attempt, usePreload) {
       window.clearTimeout(homeRefreshRetry);

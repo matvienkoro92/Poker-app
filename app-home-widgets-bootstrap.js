@@ -159,10 +159,10 @@
     return loadingByDomain[domain];
   }
 
-  function callReadyOpener(config) {
+  function callReadyOpener(config, trigger) {
     var opener = config && window[config.opener];
     if (typeof opener === "function" && opener !== config.stub) {
-      return opener();
+      return opener(trigger && trigger.getAttribute("data-sng-open") || undefined);
     }
     return null;
   }
@@ -184,7 +184,7 @@
       setBusy(trigger, true, config);
       return ensureDomain(config.domain)
         .then(function () {
-          return callReadyOpener(config) !== null;
+          return callReadyOpener(config, trigger) !== null;
         })
         .catch(function (err) {
           if (typeof console !== "undefined" && console.warn) console.warn("home widget style load", err);
@@ -200,7 +200,7 @@
     window.__pokerHomeWidgetOpening = key;
     return ensureDomain(config.domain)
       .then(function () {
-        var opened = callReadyOpener(config);
+        var opened = callReadyOpener(config, trigger);
         if (opened === null) showLoadError();
         return opened !== null;
       })
