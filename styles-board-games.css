@@ -607,7 +607,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .chess-board:not([data-collection=true]) .square.dark .coordinate{color:var(--light)}
 .piece.flat{--piece-fill:#f9f9f7;--piece-stroke:#555650;filter:none!important;transform:none}
 .piece.flat.black{--piece-fill:#555552;--piece-stroke:#333431}
-.piece.flat path,.piece.flat circle{stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.piece.flat path,.piece.flat circle{stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
 .piece.flat [fill="none"]{fill:none}
 .square .piece.flat{width:96%;height:96%}
 
@@ -641,3 +641,12 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 
 /* Sculptures already include safe padding and a shared baseline in their atlas. */
 .square .piece.sculpted{width:100%;height:100%}
+
+/* Fine outlines and restrained interior marks for the classic Staunton set. */
+.piece.flat.classic{--piece-fill:#faf9f3;--piece-stroke:#414941}
+.piece.flat.classic.black{--piece-fill:#343c36;--piece-stroke:#17241d}
+.piece.flat.classic path,.piece.flat.classic circle{stroke-width:1.15}
+.piece.flat.classic .piece-detail{fill:none;stroke-width:.85;opacity:.7}
+.piece.flat.classic.black .piece-detail{stroke:#b5bfae;opacity:.65}
+.piece.flat.classic .piece-eye{fill:var(--piece-stroke);stroke:none}
+.piece.flat.classic.black .piece-eye{fill:#d3d9c9}
