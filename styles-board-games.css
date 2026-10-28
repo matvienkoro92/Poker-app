@@ -538,7 +538,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 @media(max-width:350px){#game .player-roll-total{font-size:10px}#game .matchup>[data-player]{gap:4px;padding:7px 5px}}
 
 /* Sculpted sprites keep material detail without SVG lighting or filter chains. */
-.piece.sculpted{filter:none!important;overflow:visible}
+.piece.sculpted{filter:drop-shadow(0 0 .35px #241b12b3)!important;overflow:visible}
 .collection .piece-set-sample .piece.sculpted{width:48%;height:110px}
 
 /* Independent horizontal chess collections; preview and save remain in view. */
@@ -547,6 +547,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .chess-equipment-tabs>button[aria-selected=true]{background:#d3b571;color:#17291f;border-color:#f0d394;font-weight:750}
 #chessEquipment .collection{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:clamp(150px,43vw,220px);gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding:3px 2px 9px;margin:0;scrollbar-width:thin;scrollbar-color:#b79b5f #142a21}
 #chessEquipment .collection>button{scroll-snap-align:start;min-width:0;white-space:normal}
+#chessEquipment #boards .sample-board,#chessEquipment #boards img{width:80%;margin-inline:auto;margin-bottom:8px}
 .chess-slider-heading{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
 .chess-slider-heading h3{font-size:15px;margin:0}
 .chess-slider-heading>span{display:flex;gap:5px}
@@ -599,7 +600,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 
 /* Shading is baked into static SVG shapes rather than live blur filters. */
 .piece.detailed{filter:none!important;overflow:visible}
-.square .piece.detailed{width:98%;height:98%}
+.square .piece.detailed{width:86%;height:86%}
 
 /* Flat, high-contrast standard chess sets and a clean club board. */
 .chess-board:not([data-collection=true]){border-width:2px;border-radius:1px;box-shadow:0 2px 8px #0004}
@@ -609,7 +610,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .piece.flat.black{--piece-fill:#555552;--piece-stroke:#333431}
 .piece.flat path,.piece.flat circle{stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
 .piece.flat [fill="none"]{fill:none}
-.square .piece.flat{width:96%;height:96%}
+.square .piece.flat{width:86%;height:86%}
 
 /* Keep both setup and match controls below phone status indicators. */
 @media(max-width:600px){main{padding-top:calc(var(--game-safe-top,max(40px,env(safe-area-inset-top,0px))) + 8px)}}
@@ -623,7 +624,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .chess-preview-cell{display:grid;place-items:center;min-width:0;min-height:0;background:var(--light);overflow:hidden}
 .chess-preview-cell.is-dark{background:var(--dark)}
 .chess-preview-board[data-collection=true] .chess-preview-cell{background:transparent}
-#chessEquipment .chess-preview-cell .piece{display:block;width:96%;height:96%;margin:0}
+#chessEquipment .chess-preview-cell .piece{display:block;width:86%;height:86%;margin:0}
 #chessEquipment .chess-equipment-preview strong{font-size:15px}
 #chessEquipment .chess-equipment-preview p{font-size:12px}
 /* Reserve the full score column; player cards must never overlap it. */
@@ -639,8 +640,8 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .game-rivalry-scores>small{color:#c8d3bf;font-size:11px;letter-spacing:0}
 @media(max-width:350px){.game-rivalry-row{gap:6px}.game-rivalry-scores>strong{font-size:11px}}
 
-/* Sculptures already include safe padding and a shared baseline in their atlas. */
-.square .piece.sculpted{width:100%;height:100%}
+/* Every set keeps a 7% cell gutter, in addition to its artwork padding. */
+.square .piece.sculpted{width:86%;height:86%}
 
 /* Fine outlines and restrained interior marks for the classic Staunton set. */
 .piece.flat.classic{--piece-fill:#faf9f3;--piece-stroke:#414941}
@@ -650,3 +651,8 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .piece.flat.classic.black .piece-detail{stroke:#b5bfae;opacity:.65}
 .piece.flat.classic .piece-eye{fill:var(--piece-stroke);stroke:none}
 .piece.flat.classic.black .piece-eye{fill:#d3d9c9}
+
+/* Pin the SVG to an inset rectangle: intrinsic tall SVG ratios must not stretch
+   a grid row or push a sculpture's foot down to the next square. */
+.square>.piece,#chessEquipment .chess-preview-cell>.piece{position:absolute;inset:7%;width:86%;height:86%;min-width:0;min-height:0;margin:0}
+.chess-preview-cell{position:relative}

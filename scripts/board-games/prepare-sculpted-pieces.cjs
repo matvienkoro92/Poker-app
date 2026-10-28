@@ -1,15 +1,16 @@
 'use strict';
 // Prepare the generated sheets for small board cells, with a common foot line.
 const sharp=require('sharp'),fs=require('fs'),path=require('path');
-const styles=process.argv.slice(2),types=['k','q','b','n','r','p'];
+const args=process.argv.slice(2),pawnsOnly=args.includes('--pawns-only'),styles=args.filter(arg=>!arg.startsWith('--')),types=['k','q','b','n','r','p'];
 // Broad bases remain readable at phone size. Pawns must be clearly shorter than bishops.
-const sizes={k:[160,232],q:[156,220],b:[144,202],n:[178,204],r:[154,180],p:[112,144]};
+const sizes={k:[160,232],q:[156,220],b:[144,202],n:[178,204],r:[154,180],p:[124,174]};
 (async()=>{for(const style of styles){
  const input=path.resolve('output/imagegen/chess-pieces-v2',style+'.png');
  const meta=await sharp(input).metadata(),dir=path.resolve('assets/board-games/chess/sculpted-v2');
  if(!meta.hasAlpha)throw Error('Transparent source required: '+style);
  fs.mkdirSync(dir,{recursive:true});
  for(let col=0;col<6;col++){
+  if(pawnsOnly&&types[col]!=='p')continue;
   // Sheets are composed by an artist: the gap between sides can sit off centre.
   // Find that gap rather than clipping crowns at the mathematical half-height.
   const left=Math.round(col*meta.width/6),columnWidth=Math.round((col+1)*meta.width/6)-left;
@@ -28,12 +29,14 @@ const sizes={k:[160,232],q:[156,220],b:[144,202],n:[178,204],r:[154,180],p:[112,
   const cell=await sharp(input).extract({left:x,top:y,width:right-x,height:bottom-y}).toBuffer();
   // Normalize the silhouette itself, before adding transparent padding. The former
   // fit-inside pass left narrow sculptures occupying less than half a square.
-  const [width,height]=sizes[type];
-  const image=await sharp(cell).trim({threshold:8}).resize(width,height,{fit:'fill'}).toBuffer();
+  const [targetWidth,targetHeight]=sizes[type];
+  // Pawn heads and tapered stems must keep their source aspect ratio.
+  const prepared=await sharp(cell).trim({threshold:8}).resize(targetWidth,targetHeight,{fit:type==='p'?'inside':'fill'}).toBuffer({resolveWithObject:true});
+  const image=prepared.data,{width,height}=prepared.info;
   await sharp({create:{width:256,height:256,channels:4,background:{r:0,g:0,b:0,alpha:0}}})
    .composite([{input:image,left:Math.floor((256-width)/2),top:240-height}])
    .webp({quality:94,alphaQuality:100,effort:6}).toFile(path.join(dir,style+'-'+color+'-'+type+'.webp'));
  }
  }
- console.log(style+': 12 alpha sprites');
+ console.log(style+': '+(pawnsOnly?'2 pawn':'12')+' alpha sprites');
 }})().catch(e=>{console.error(e);process.exitCode=1});

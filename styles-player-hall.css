@@ -728,7 +728,7 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-preview-square{display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;background:var(--preview-light)}
 .living-preview-square.is-dark{background:var(--preview-dark)}
 .living-preview-chess[data-collection=true] .living-preview-square{background:transparent}
-.living-preview-square .piece{display:block;width:95%;height:95%;fill:#f5e7c8;stroke:#51351f;stroke-width:1.5;filter:drop-shadow(0 2px 1px #0007);transition:transform .55s}
+.living-preview-square .piece{display:block;width:86%;height:86%;fill:#f5e7c8;stroke:#51351f;stroke-width:1.5;filter:none;transition:transform .55s}
 .living-preview-square .piece.black{fill:#322b26;stroke:#d6b77c}
 .living-top-board.is-flipped .living-preview-square .piece{transform:rotate(180deg)}
 .living-focus-tools,.living-focus-play{display:flex;gap:8px;align-self:stretch;justify-content:center}
@@ -954,3 +954,9 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 .living-board-focus--table[data-game=chess] .living-chess-actions{position:absolute;top:calc(100% + 10px);left:0;right:0;display:grid;gap:10px}
 .living-board-focus--table[data-game=chess] .living-chess-actions :is(.living-focus-play,.living-focus-tools){position:static;inset:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .player-hall-dialog .living-board-focus[data-game=chess] .living-chess-actions button{width:100%;min-width:0;padding:8px 5px;font-size:12px}
+
+.living-preview-square{position:relative}
+.living-preview-square>.piece{position:absolute;inset:7%;width:86%;height:86%;min-width:0;min-height:0;margin:0}
+
+/* Match the restrained silhouette edge used by the live carved sets. */
+.living-preview-square .piece.sculpted{filter:drop-shadow(0 0 .35px #241b12b3)}

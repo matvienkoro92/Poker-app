@@ -16,7 +16,7 @@ const {chromium}=require('playwright');
     await page.setViewportSize({width,height:844});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     const square=await page.locator('#chessBoard [data-square=e1]').boundingBox(),piece=await page.locator('#chessBoard [data-square=e1] .piece').boundingBox();
-    assert.ok(Math.abs(square.width-piece.width)<1,'Sculptures use the full cell; atlas supplies padding');
+    assert.ok(Math.abs(square.width*.86-piece.width)<1,'Sculptures keep a seven-percent gutter on every side');
     await page.locator('#chessBoard').screenshot({path:'output/chess-carved-preview/fit-'+id+'-'+width+'.png'});
    }
    await page.setViewportSize({width:390,height:844});

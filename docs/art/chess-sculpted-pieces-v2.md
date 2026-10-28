@@ -23,4 +23,8 @@ References researched for wood carving and motifs:
 
 ## Mobile silhouette sizing
 
-The sprite preparation script normalizes each role to an explicit silhouette box before adding 256×256 padding: king 160×232, queen 156×220, bishop 144×202, knight 178×204, rook 154×180 and pawn 112×144. This intentionally gives sculptures broader bases at small sizes and separates pawns from bishops. All feet share y=240. Live squares use the full sprite size; applying another 90% inset made the original narrow silhouettes too small. Rebuild all six collections together after changing these dimensions.
+The sprite preparation script normalizes each role to an explicit silhouette box before adding 256×256 padding: king 160×232, queen 156×220, bishop 144×202, knight 178×204, rook 154×180 and pawn up to 124×174 (fit inside, preserving source aspect ratio). This intentionally gives sculptures broader bases at small sizes and separates pawns from bishops. All feet share y=240. Live squares, equipment previews and living-room previews use an 86% SVG box, leaving a 7% gutter on all four sides. The broader normalized silhouettes keep carved sets readable inside this gutter. Rebuild all six collections together after changing these dimensions.
+
+Use `--pawns-only` with the six style names to rebuild just the pawn sprites without touching the other roles. Pawn alpha bounds are measured after resizing; centering and the y=240 baseline use the actual resized dimensions.
+
+Carved sets use a static radial contact shadow at the shared y=240 foot line, with role-specific width and a narrow contact core. A 0.35 CSS-pixel silhouette shadow adds a restrained edge on both square colors. Shadows remain within the existing SVG and cell gutters; there is no animation or render loop.
