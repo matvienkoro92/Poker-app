@@ -571,6 +571,7 @@ async function parseOcrFile(file) {
   if (date === "13.10.2026" && !blue && time === "20:00" && buyin === 500) title = "ПЯТИХАТКА МОК";
   if (date === "13.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "20.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
+  if (date === "27.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "24.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Нокаут прогрессив🚀";
   tokens.forEach((token) => {
     // IMG_1023: the avatar obscures the ID prefix; the visible ID is 2491095.
