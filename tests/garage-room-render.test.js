@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('app-garage-workshop.js','utf8');
-const paint=source.slice(source.indexOf('window.pokerPaintGarageRoom='),source.indexOf('window.pokerMountGarageWorkshop='));
+const paint=source.slice(source.indexOf('const hallCharacterArtCache='),source.indexOf('window.pokerMountGarageWorkshop='));
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 function setup(){
  const counts={shelf:0,vehicle:0,character:0},frames=[];

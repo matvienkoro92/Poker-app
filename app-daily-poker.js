@@ -1,6 +1,11 @@
 (function () {
   var dailyPokerState = {
     status: null,
+    initialized: false,
+    statusRequest: 0,
+    sessionEpoch: 0,
+    identity: "",
+    lastStatusAt: 0,
     serverDeltaMs: 0,
     timer: null,
     revealing: false,
@@ -12,6 +17,23 @@
     reminderSubscribed: false,
   };
 
+  var sharedTable=null, tableAnchor=null;
+  window.pokerMountDailyPokerTable=function(host){
+    if(!sharedTable){
+      sharedTable=document.querySelector('[data-view="daily-poker"] .daily-poker__table');
+      if(!sharedTable)throw Error('Не найден игровой стол');
+      tableAnchor=document.createComment('daily poker table home');
+      sharedTable.parentNode.insertBefore(tableAnchor,sharedTable);
+    }
+    if(host){if(sharedTable.parentNode!==host)host.replaceChildren(sharedTable);}
+    else if(tableAnchor&&sharedTable.parentNode!==tableAnchor.parentNode)tableAnchor.after(sharedTable);
+  };
+  function syncHomeStatus(){
+    var el=$("homeDailyPokerStatus"),status=dailyPokerState.status;
+    if(!el||!status)return;
+    el.textContent=status.canPlay?availableStatusText(status):status.nextFreeAttemptAt?countdownStatusText(status):hasCredential()?'Раздача недоступна':'Войдите, чтобы сыграть';
+    el.classList.toggle('is-available',!!status.canPlay);
+  }
   var DAILY_POKER_START_PROMPT = "Нажмите на кнопку «Раздать», чтобы начать";
   var DAILY_POKER_INVITE_TEXT = "В клубе Два туза можно крутить 1 раздачу в день бесплатно и выиграть билет на турнир от 300 ₽ до 10 000 ₽";
   var DAILY_POKER_AUTH_ERROR_TEXT = "Авторизация не подтвердилась. Войдите заново через профиль или откройте мини-приложение из Telegram.";
@@ -91,6 +113,36 @@
 
   function hasCredential() {
     return typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
+  }
+
+  function dailyPokerIdentity(){
+    if(!hasCredential())return 'guest';
+    var user=typeof getPokerResolvedTelegramUser==='function'?getPokerResolvedTelegramUser():null;
+    user=user||window.__pokerTelegramAuth&&window.__pokerTelegramAuth.user;
+    if(user&&user.id!=null)return 'user:'+String(user.id);
+    var credentials=authBody({});
+    return String(credentials.pwaSession||credentials.pwaVkSession||credentials.initData||'authenticated');
+  }
+
+  function dailyPokerHistoryKey(){
+    var user=typeof getPokerResolvedTelegramUser==='function'?getPokerResolvedTelegramUser():null;
+    user=user||window.__pokerTelegramAuth&&window.__pokerTelegramAuth.user;
+    return hasCredential()&&user&&user.id!=null?'p21:daily-poker:last-hand:'+String(user.id):'';
+  }
+  function rememberDailyPokerHand(result){
+    var key=dailyPokerHistoryKey();if(!key)return;
+    try{sessionStorage.setItem(key,JSON.stringify({at:Date.now(),holeCards:result.holeCards,boardCards:result.boardCards,handName:result.handName,reward:result.reward,ticketlessStreakAward:result.ticketlessStreakAward,nextFreeAttemptAt:result.nextFreeAttemptAt}));}catch(e){}
+  }
+  function restoreDailyPokerHand(status){
+    var key=dailyPokerHistoryKey();if(!key||status.canPlay||dailyPokerState.stagedDealResult||dailyPokerState.revealing)return;
+    try{
+      var hand=JSON.parse(sessionStorage.getItem(key)||'null');
+      if(!hand||Date.now()-hand.at>86400000||hand.at>Date.now()||!Array.isArray(hand.holeCards)||hand.holeCards.length!==2||!Array.isArray(hand.boardCards)||hand.boardCards.length!==5||!status.nextFreeAttemptAt||Date.parse(hand.nextFreeAttemptAt)!==Date.parse(status.nextFreeAttemptAt))return;
+      var hole=$("dailyPokerHoleCards"),board=$("dailyPokerBoardCards");
+      if(hole)hole.innerHTML=hand.holeCards.map(function(card){return cardHtml(card,false,false);}).join('');
+      if(board)board.innerHTML=boardHtml(hand.boardCards,5);
+      setResultText(formatResultLine(hand),false);
+    }catch(e){}
   }
 
   function setLiveText(el, text) {
@@ -446,6 +498,8 @@
   }
 
   function renderHeroStats(data) {
+    var homeWon=$("homeDailyPokerWon");
+    if(homeWon&&data&&data.totalPrizeRubles!=null&&Number.isFinite(Number(data.totalPrizeRubles)))homeWon.innerHTML='Выиграно <strong>'+esc(formatRubles(data.totalPrizeRubles))+'</strong>';
     var uniqueEl = $("dailyPokerTotalUniquePlayers");
     var spinsEl = $("dailyPokerTotalSpins");
     var prizeEl = $("dailyPokerTotalPrize");
@@ -571,9 +625,11 @@
 
   function updateTimer() {
     if (typeof document !== "undefined" && (
-      document.hidden || !document.querySelector('[data-view="daily-poker"].view--active')
+      document.hidden || !document.querySelector('[data-view="daily-poker"].view--active, [data-view="home"].view--active')
     )) return;
+    syncHomeStatus();
     var status = dailyPokerState.status || {};
+    if(status.nextFreeAttemptAt&&!status.canPlay&&!dailyPokerState.stagedDealResult&&!dailyPokerState.revealing&&Date.parse(status.nextFreeAttemptAt)<=currentServerMs()&&Date.now()-dailyPokerState.lastStatusAt>30000)loadStatus();
     if (!dailyPokerState.status) {
       var resultEl = $("dailyPokerResult");
       var current = resultEl ? String(resultEl.textContent || "").trim() : "";
@@ -591,6 +647,7 @@
   function syncStatus(data) {
     if (!data) return;
     dailyPokerState.status = data;
+    syncHomeStatus();
     setSubscribeRequirementsVisible(!!(data.subscriptionRequired || isDailyPokerRequirementCode(data.code)));
     if (Object.prototype.hasOwnProperty.call(data, "dailyPokerReminderSubscribed")) {
       setReminderButtonState(!!data.dailyPokerReminderSubscribed, false);
@@ -606,12 +663,12 @@
     if (playBtn) {
       playBtn.hidden = !!(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       playBtn.disabled = !data.canPlay || dailyPokerState.revealing;
-      playBtn.textContent = "Раздать";
+      playBtn.textContent = playBtn.closest('.home-daily-poker')?"Сыграть раздачу":"Раздать";
     }
     if (extraBtn) {
       extraBtn.hidden = !(data.baseAttemptUsedToday && data.attemptsLeft > 0);
       extraBtn.disabled = !data.canPlay || dailyPokerState.revealing;
-      extraBtn.textContent = "Раздать";
+      extraBtn.textContent = extraBtn.closest('.home-daily-poker')?"Ещё раздача":"Раздать";
     }
     updateTimer();
     syncStartPrompt(data);
@@ -890,6 +947,7 @@
   }
 
   function revealCards(result, triggerBtn) {
+    rememberDailyPokerHand(result);
     var hole = $("dailyPokerHoleCards");
     var board = $("dailyPokerBoardCards");
     dailyPokerState.stagedDealResult = result || {};
@@ -1158,6 +1216,8 @@
   }
 
   function loadStatus() {
+    var request=++dailyPokerState.statusRequest,epoch=dailyPokerState.sessionEpoch;
+    dailyPokerState.lastStatusAt=Date.now();
     var base = apiBase();
     if (!base || !hasCredential()) {
       showLoginRequiredMessage("Войдите в аккаунт, чтобы сыграть в Раздачу дня.");
@@ -1168,11 +1228,18 @@
       .then(readJson)
       .then(function (data) {
         if (!data || data.ok === false) throw new Error(data && data.error ? data.error : "status failed");
+        if(request!==dailyPokerState.statusRequest||epoch!==dailyPokerState.sessionEpoch)return false;
         syncStatus(data);
+        restoreDailyPokerHand(data);
         return true;
       })
       .catch(function (err) {
+        if(request!==dailyPokerState.statusRequest||epoch!==dailyPokerState.sessionEpoch)return false;
         showMessage(errorTextFrom(err, POKER_NET_ERR), true);
+        var result=$("dailyPokerResult");
+        if(result)result.insertAdjacentHTML('beforeend','<button type="button" class="daily-poker__login-btn" data-daily-poker-status-retry>Проверить ещё раз</button>');
+        var homeStatus=$("homeDailyPokerStatus");
+        if(homeStatus)homeStatus.textContent='Не удалось проверить доступность';
         return false;
       });
   }
@@ -1188,6 +1255,8 @@
       showLoginRequiredMessage("Войдите в аккаунт, чтобы сыграть.");
       return;
     }
+    var epoch=dailyPokerState.sessionEpoch;
+    dailyPokerState.statusRequest++;
     dailyPokerState.revealing = true;
     spendAttemptImmediately();
     setBusy(true);
@@ -1209,6 +1278,7 @@
         });
       })
       .then(function (data) {
+        if(epoch!==dailyPokerState.sessionEpoch)return;
         clearOptimisticSpend();
         if (typeof pokerTrackAnalyticsEvent === "function") {
           pokerTrackAnalyticsEvent("daily_poker_spin", { event_id: "evt_daily_" + String(playIdempotencyKey).replace(/[^a-zA-Z0-9_-]/g, "_") });
@@ -1216,6 +1286,7 @@
         revealCards(data, evt && evt.currentTarget);
       })
       .catch(function (err) {
+        if(epoch!==dailyPokerState.sessionEpoch)return;
         resetManualDeal();
         dailyPokerState.revealing = false;
         setBusy(false);
@@ -1271,15 +1342,36 @@
   }
 
   window.initDailyPoker = function () {
+    if(document.querySelector('[data-view="daily-poker"].view--active'))window.pokerMountDailyPokerTable(null);
+    if(dailyPokerState.initialized){
+      bind();
+      if(!dailyPokerState.stagedDealResult&&!dailyPokerState.revealing&&Date.now()-dailyPokerState.lastStatusAt>30000)loadStatus();
+      if(document.querySelector('[data-view="daily-poker"].view--active'))loadWinners();
+      updateTimer();return;
+    }
+    dailyPokerState.initialized=true;
+    dailyPokerState.identity=dailyPokerIdentity();
     resetManualDeal();
     bind();
     dailyPokerWinnersExpanded = false;
     renderEmptyCards();
+    setBusy(true);
     setResultPrompt(DAILY_POKER_START_PROMPT, [], false);
     setWinnersMessage("Загружаем победителей…");
-    loadWinners();
+    if(document.querySelector('[data-view="daily-poker"].view--active'))loadWinners();
     loadStatus();
     if (dailyPokerState.timer) clearInterval(dailyPokerState.timer);
     dailyPokerState.timer = setInterval(updateTimer, 1000);
   };
+  document.addEventListener('click',function(e){if(e.target.closest('[data-daily-poker-status-retry]'))loadStatus();});
+  window.addEventListener('poker-telegram-auth',function(){
+    if(!dailyPokerState.initialized)return;
+    var identity=dailyPokerIdentity();
+    if(identity===dailyPokerState.identity)return;
+    dailyPokerState.identity=identity;
+    dailyPokerState.sessionEpoch++;dailyPokerState.statusRequest++;
+    dailyPokerState.status=null;dailyPokerState.revealing=false;
+    clearOptimisticSpend();resetManualDeal();renderEmptyCards();setBusy(true);
+    setResultPrompt('Проверяем доступность раздачи…',[],false);loadStatus();
+  });
 })();

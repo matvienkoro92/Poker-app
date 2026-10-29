@@ -92,11 +92,11 @@
 .lounge-seat__status>strong,.lounge-hands>.lounge-seat__name{display:none}
 
 /* Prefer the compact detailed panorama; WebP remains the fallback. */
-.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v2.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v2.webp") type("image/webp"))}
+.player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:url("./assets/player-hall/friends-hall-garage-panorama-v2.webp")}
 
 /* One continuous panorama across all camera positions; no repeated crop seams. */
 .player-hall__spaces::before{content:"";position:absolute;left:-50%;top:0;width:150%;height:100%;background:var(--hall-panorama) center/100% 100% no-repeat;pointer-events:none}
-.player-hall__room{--hall-panorama:image-set(url("./assets/player-hall/friends-hall-garage-panorama-v5-hd.avif") type("image/avif"),url("./assets/player-hall/friends-hall-garage-panorama-v5-hd.webp") type("image/webp"))}
+.player-hall__room{--hall-panorama:url("./assets/player-hall/friends-hall-garage-panorama-v5-hd.webp")}
 .player-hall__lounge-scene,.player-hall__scene,.player-hall__garage-scene{background-image:none}
 .player-hall__character-foreground{display:none}
 .lounge-table-foreground{background-image:var(--hall-panorama);background-size:300% 100%;background-position:left center}
@@ -496,7 +496,7 @@
 /* Hidden adjacent garage surfaces load when that room is selected. */
 .player-hall__room:not([data-space=garage]) .player-hall__garage-scene::before{background-image:none}
 /* The entry preview shares the current room image and its browser cache. */
-.player-hall-entry__art{background-image:image-set(url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.avif') type('image/avif'),url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.webp') type('image/webp'))}
+.player-hall-entry__art{background-image:url('./assets/player-hall/friends-hall-garage-panorama-v5-hd.webp')}
 
 .garage-workshop__footer .garage-notice--warning{color:#fff1c4;background:#623716;border:2px solid #ffbd52;border-radius:12px;padding:12px 14px;font-weight:700;line-height:1.45;box-shadow:0 0 16px #ffb23b30}
 

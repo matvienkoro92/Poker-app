@@ -662,3 +662,5 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .nards-table .nards-storage strong{padding:4px 0;font-size:12px;line-height:15px;font-variant-numeric:tabular-nums;color:#fff4ce;background:#1b241e;border:1px solid #d3b978;border-radius:3px;box-shadow:0 1px 3px #0009;text-shadow:0 1px 2px #000}
 .nards-table .nards-stored-edge{inset:15% 0;min-height:5px;border-radius:3px;border:1px solid #b5955c;border-top-color:#fff9dd;background:linear-gradient(#fffce9,#ecdbad 38%,#b99c65 58%,#f5e7bd);box-shadow:0 2px 3px #000c,inset 0 1px #fff9}
 .nards-table .nards-storage[data-side=black] .nards-stored-edge{border:1px solid #a1b8ac;border-top-color:#d4e0ce;border-bottom-color:#263d32;border-radius:3px;background:linear-gradient(#71877a,#3f5347 35%,#192c23 58%,#435a4b);box-shadow:0 2px 3px #000e,inset 0 1px #c5d4b966}
+
+#gameWagerNotice.board-wager-notice--compact{padding:7px 9px;font-size:clamp(8px,2.6vw,12px);line-height:1.5;letter-spacing:-.15px}#gameWagerNotice.board-wager-notice--compact>span{display:block;white-space:nowrap}

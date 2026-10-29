@@ -7,7 +7,7 @@ const context = { cleanSentencePart: value => value.trim().replace(/[.!?]+$/g, '
 vm.createContext(context);
 vm.runInContext(source.slice(source.indexOf('  function dailyPokerWinShareText('), source.indexOf('  // Snapshot the live table')), context);
 test('win caption uses the actual reward instead of repeating the in-game notification', () => {
-  assert.equal(context.dailyPokerWinShareText({ handName: 'Сет', reward: { grantsExtraAttempt: true, message: 'Сет! Ты получаешь еще одну попытку сегодня.' } }), 'Мой выигрыш в раздаче дня клуба «Два туза»: Сет. Мой приз — ещё одна попытка сегодня. Попробуйте тоже бесплатно!');
+  assert.equal(context.dailyPokerWinShareText({ handName: 'Сет', reward: { grantsExtraAttempt: true, message: 'Сет! Ты получаешь еще одну попытку сегодня.' } }), '♠ Сет в «Раздаче дня»!\nМой выигрыш: ещё одна попытка сегодня.\nСыграй бесплатно в клубе «Два туза» ↓');
 });
 test('win caption includes combined bonuses and streak tickets', () => {
   const text = context.dailyPokerWinShareText({ handName: 'Флеш', reward: { bonusAmount: 50, grantsExtraAttempt: true }, ticketlessStreakAward: { amount: 300 } });

@@ -1843,23 +1843,27 @@ navItems.forEach(function (item) {
         item.disabled = true;
         item.classList.add("bottom-nav__item--opening");
         item.setAttribute("aria-busy", "true");
-        var villaLabel = item.querySelector(".bottom-nav__label");
-        var villaLabelText = villaLabel && villaLabel.textContent;
-        if (villaLabel) villaLabel.textContent = "Открываем…";
+        var attempt = item._villaOpenAttempt = (item._villaOpenAttempt || 0) + 1;
+        var shell = typeof window.pokerShowVillaLoading === "function" ? window.pokerShowVillaLoading() : null;
+        function finishOpening() {
+          if (item._villaOpenAttempt !== attempt) return;
+          item.disabled = false;
+          item.classList.remove("bottom-nav__item--opening");
+          item.removeAttribute("aria-busy");
+        }
+        if (shell) shell.addEventListener("close", finishOpening, { once: true });
         Promise.resolve().then(async function () {
           if (typeof window.pokerEnsureLazyDomains === "function") {
             await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
           }
-          if (typeof window.pokerOpenPlayerHall !== "function") throw new Error("Не удалось открыть зал. Попробуйте ещё раз.");
+          if (shell && !shell.open) return;
+          if (typeof window.pokerOpenPlayerHall !== "function") throw new Error("Не удалось открыть виллу. Попробуйте ещё раз.");
           await window.pokerOpenPlayerHall();
         }).catch(function (error) {
-          window.alert(error.message || "Не удалось открыть зал. Попробуйте ещё раз.");
-        }).finally(function () {
-          item.disabled = false;
-          item.classList.remove("bottom-nav__item--opening");
-          item.removeAttribute("aria-busy");
-          if (villaLabel && villaLabel.textContent === "Открываем…") villaLabel.textContent = villaLabelText;
-        });
+          var message = error.message || "Не удалось открыть виллу. Попробуйте ещё раз.";
+          if (shell && typeof window.pokerFailVillaLoading === "function") window.pokerFailVillaLoading(shell, message);
+          else window.alert(message);
+        }).finally(finishOpening);
         return;
       }
       if (target === "player-crm" && typeof pokerOpenPlayerCrmFromHome === "function") {

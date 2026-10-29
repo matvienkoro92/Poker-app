@@ -1,0 +1,43 @@
+/* A live daily deal on home, with the original server-controlled game table. */
+#app .home-daily-poker{position:relative;isolation:isolate;box-sizing:border-box;width:100%;margin:20px 0 24px;padding:18px 16px 14px;border:1px solid #b59a5b80;border-radius:26px;background:radial-gradient(ellipse at 70% 30%,#213b2d66,transparent 65%),linear-gradient(145deg,#171d19,#0a100e 75%);color:#f6ebce;box-shadow:inset 0 1px 0 #ffe6a316,0 12px 28px #0003;container-type:inline-size;overflow:hidden}
+.home-daily-poker__brand{display:flex;justify-content:space-between;color:#baad8e;font:500 10px/1.4 Arial,sans-serif;margin-bottom:14px}
+.home-daily-poker__header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.home-daily-poker__header p{margin:0 0 5px;color:#b8c9b7;font:700 9px/1.4 Arial,sans-serif;letter-spacing:1.4px}
+#app .home-daily-poker__header h2{margin:0;color:#ffe3a0;font:800 clamp(24px,7cqw,38px)/1.1 Arial,sans-serif;letter-spacing:-.7px;text-align:left}
+.home-daily-poker__header button{flex:none;width:44px;height:44px;padding:0;border:1px solid #bfa56b55;border-radius:50%;background:#f1d39308;color:#e4ce9c;font:24px/1 Arial,sans-serif;cursor:pointer}
+.home-daily-poker__prize{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 15px;font:500 11px/1.4 Arial,sans-serif;color:#aabcae}
+.home-daily-poker__prize>span{color:#e4d9bc;white-space:nowrap}.home-daily-poker__prize strong{color:#ffdd87;font-size:16px}
+.home-daily-poker__loading{display:grid;place-content:center;min-height:265px;margin:0;text-align:center;font:14px/1.4 Arial,sans-serif;color:#d5c39a}
+#app .home-daily-poker .daily-poker__table{position:relative;display:grid;grid-template-columns:1fr 1.35fr;grid-template-areas:"board board" "hole deal";align-items:center;gap:18px 12px;box-sizing:border-box;aspect-ratio:auto;width:100%;height:auto;min-height:290px;margin:0;padding:35px 18px 28px;border:1px solid #c9a65e;border-radius:44% / 18%;background:#083521 url('./assets/daily-poker-table-felt-v2.webp') center/100% 100% no-repeat;box-shadow:0 8px 15px #0006;overflow:visible;transform:none}
+#app .home-daily-poker .daily-poker__table::before,#app .home-daily-poker .daily-poker__table::after{display:none;content:none}
+#app .home-daily-poker .daily-poker__zone{position:static;inset:auto;width:auto;height:auto;transform:none;display:flex;flex-direction:column;align-items:center;gap:7px;margin:0;padding:0;background:none;border:0}
+#app .home-daily-poker .daily-poker__zone--board{grid-area:board}#app .home-daily-poker .daily-poker__zone--hole{grid-area:hole}
+#app .home-daily-poker .daily-poker__zone-label{font:600 9px/1.2 Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;color:#c7caac;margin:0;padding:0;background:none;border:0;text-shadow:0 1px 2px #000}
+#app .home-daily-poker .daily-poker__cards{display:flex;justify-content:center;align-items:center;gap:6px;width:auto;height:auto;margin:0;padding:0;perspective:600px}
+#app .home-daily-poker .daily-poker-card{position:relative;flex:none;box-sizing:border-box;width:clamp(30px,12cqw,62px);height:auto;aspect-ratio:5/7.2;margin:0;border-radius:6px;box-shadow:0 3px 5px #0006;transform:none;rotate:none;translate:none;overflow:hidden}
+#app .home-daily-poker .daily-poker-card:not(.daily-poker-card--back){background:linear-gradient(120deg,#fffdf3,#e6e0ce);border:1px solid #fff9e5;color:#19201d}
+#app .home-daily-poker .daily-poker-card--suit-hearts,#app .home-daily-poker .daily-poker-card--suit-diamonds{color:#bd2327!important}
+#app .home-daily-poker .daily-poker-card--back{background:#592520 url('./assets/daily-poker-card-back-red.jpg') center/100% 100%;border:2px solid #ece0b9}
+#app .home-daily-poker .daily-poker-card--back::before,#app .home-daily-poker .daily-poker-card--back::after{display:none}
+#app .home-daily-poker .daily-poker-card__rank{position:absolute;left:4px;top:3px;font:800 clamp(12px,4.1cqw,21px)/1 Arial,sans-serif}
+#app .home-daily-poker .daily-poker-card__corner-suit{position:absolute;left:4px;top:22px;font:12px/1 Arial,sans-serif}
+#app .home-daily-poker .daily-poker-card__suit{position:absolute;left:50%;top:61%;transform:translate(-50%,-50%);font:clamp(19px,7cqw,33px)/1 Georgia,serif}
+#app .home-daily-poker .daily-poker__table-deal{grid-area:deal;position:static;inset:auto;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:8px;width:auto;max-width:none;height:auto;transform:none;margin:0;padding:0;background:none}
+#app .home-daily-poker .daily-poker__play-btn,#app .home-daily-poker [data-home-daily-retry]{position:static;box-sizing:border-box;min-width:0;min-height:44px;width:100%;margin:0;padding:10px 7px;border:1px solid #ffe6a7;border-radius:12px;background:linear-gradient(#ffe4a2,#d4a852);box-shadow:inset 0 1px 0 #fff4d9,0 3px 8px #0004;color:#20271a;font:800 clamp(11px,3.4cqw,17px)/1.2 Arial,sans-serif;letter-spacing:0;text-shadow:none;transform:none;cursor:pointer}
+#app .home-daily-poker .daily-poker__play-btn::before,#app .home-daily-poker .daily-poker__play-btn::after{display:none}
+#app .home-daily-poker .daily-poker__play-btn:disabled{opacity:.5;cursor:default}
+#app .home-daily-poker .daily-poker__result{position:static;inset:auto;box-sizing:border-box;width:100%;min-height:0;max-height:none;max-width:none;margin:0;padding:0;background:none;border:0;box-shadow:none;color:#f4e5b8;font:500 11px/1.4 Arial,sans-serif;text-align:center;overflow-wrap:anywhere;transform:none}
+#app .home-daily-poker .daily-poker__result-primary{font:inherit;white-space:normal}#app .home-daily-poker .daily-poker__result-nowrap{white-space:normal}
+#app .home-daily-poker .daily-poker__result--prompt{display:none}
+#app .home-daily-poker .daily-poker__result--error{color:#ffd2c4}
+#app .home-daily-poker .daily-poker__login-btn,#app .home-daily-poker .daily-poker__win-share{position:static;display:block;width:100%;min-height:36px;margin:6px 0 0;padding:6px;border:1px solid #ceb16d80;border-radius:8px;background:#18291e;color:#f6dda0;font:600 11px/1.3 Arial,sans-serif;transform:none;cursor:pointer}
+#app .home-daily-poker [hidden]{display:none!important}
+.home-daily-poker__footer{display:flex;flex-direction:column;align-items:center;gap:7px;margin:15px 0 0;font:500 11px/1.4 Arial,sans-serif;text-align:center;color:#b8b499}
+#homeDailyPokerStatus{min-height:16px}.home-daily-poker__footer .is-available{color:#95dfaa}#homeDailyPokerWon{font-size:10px;color:#a89e87}#homeDailyPokerWon strong{color:#ddcc9f}
+.home-daily-rules{position:fixed;box-sizing:border-box;inset:max(16px,var(--tg-ui-top-clearance,0px)) 12px max(16px,var(--tg-safe-area-inset-bottom,0px));width:min(440px,calc(100vw - 24px));height:fit-content;max-height:calc(100dvh - max(16px,var(--tg-ui-top-clearance,0px)) - 32px);margin:auto;padding:22px;border:1px solid #baa06480;border-radius:22px;background:#14231b;color:#f1e6c9;font:14px/1.5 Arial,sans-serif;overflow:auto}
+.home-daily-rules::backdrop{background:#030806bd;backdrop-filter:blur(5px)}.home-daily-rules header{display:flex;align-items:center;justify-content:space-between;gap:12px}.home-daily-rules h2{font-size:23px;margin:0}.home-daily-rules button{min-height:44px;padding:10px;border:1px solid #b69b5a80;border-radius:10px;background:#243c2b;color:#f6dfa6;font:inherit;cursor:pointer}.home-daily-rules ul{padding-left:19px}.home-daily-rules li{margin:9px 0}.home-daily-rules header button{min-width:44px;font-size:24px}
+@media(prefers-reduced-motion:reduce){.home-daily-poker .daily-poker-card{animation:none!important}}
+@media(max-width:360px){#app .home-daily-poker{padding:15px 10px}.home-daily-poker__prize{font-size:10px}#app .home-daily-poker .daily-poker__table{padding:30px 12px 24px;gap:16px 9px;min-height:270px}}
+#app .home-daily-poker .daily-poker__zone-label::before,#app .home-daily-poker .daily-poker__zone-label::after{display:none;content:none}
+#app .home-daily-poker .daily-poker__zone-label{position:static;inset:auto;width:auto;max-width:none;height:auto;transform:none;translate:none}
+#app .home-daily-poker .daily-poker__cards{position:static;inset:auto;transform:none;translate:none}
