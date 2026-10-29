@@ -39,7 +39,7 @@ export function expireTurn(s,rollDice=()=>[1+Math.floor(Math.random()*6),1+Math.
  finish(s,winner,'timeout');return true;
 }
 export function action(s,player,m,dice){if(![0,1].includes(player)||!m||s.winner!==null)return false;
- if(m.type==='resign'){finish(s,1-player,'resign');if(['short','long'].includes(s.discipline)){s.winKind='koks';s.winPoints=3;s.scores[1-player]=3;s.phase='finished';s.dice=[];s.stepUndo=[];}return true;}
+ if(m.type==='resign'){const nards=['short','long'].includes(s.discipline),kind=m.resignKind??'koks';if(nards&&!['single','mars','koks'].includes(kind))return false;finish(s,1-player,'resign');if(nards){s.winKind=kind;s.winPoints=kind==='koks'?3:kind==='mars'?2:1;s.scores[1-player]=s.winPoints;s.phase='finished';s.dice=[];s.stepUndo=[];}return true;}
  if(m.type==='draw-offer'){if(s.drawOffer!==null||s.drawUsed[player])return false;s.drawOffer=player;s.drawUsed[player]=true;return true;}
  if(['draw-accept','draw-decline'].includes(m.type)){if(s.drawOffer===null||s.drawOffer===player)return false;if(m.type==='draw-accept')finish(s,'draw','agreement');else s.drawOffer=null;return true;}
  if(m.type==='draw-claim'&&s.discipline==='chess'&&s.turn===player&&(claimable(s)||m.move&&canClaimMove(s,m.move))){finish(s,'draw','claim');return true;}
