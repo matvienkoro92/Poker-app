@@ -968,6 +968,7 @@ function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
 }
 
 function setView(viewName, navOpts) {
+  if (viewName === "download" && window.pokerVillaDialog && window.pokerVillaDialog.open) window.pokerVillaDialog.close();
   navOpts = navOpts || {};
   if (
     viewName === "player-crm" &&
