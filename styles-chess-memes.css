@@ -1,0 +1,14 @@
+/* Shared meme cast, with unmistakable ivory/charcoal team bases and role badges. */
+.piece.meme-piece{display:inline-flex;position:relative;align-items:center;justify-content:center;border:2px solid #fff5d4;border-radius:27%;background:linear-gradient(145deg,#fff9e8,#d3c5a3);box-shadow:0 2px 2px #0005;overflow:hidden;isolation:isolate}
+.piece.meme-piece.black{border-color:#242b38;background:linear-gradient(145deg,#536071,#131b28);box-shadow:0 0 0 1px #a2aec1,0 2px 2px #0008}
+.meme-piece img{display:block;width:94%;height:94%;object-fit:contain;pointer-events:none;filter:none}
+.meme-piece.black img{filter:saturate(.7) brightness(.85)}
+.meme-piece__role{position:absolute;right:0;bottom:0;display:grid;place-items:center;min-width:35%;height:36%;padding:0 2px;border-radius:5px 0 0 0;background:#fff5d4;color:#19212c;font:900 clamp(10px,2.6vw,20px)/1 Georgia,serif}
+.black .meme-piece__role{background:#151f30;color:#fff3cf}
+.square .meme-piece-video{position:absolute;inset:9%;width:82%;height:82%;pointer-events:none;z-index:3;object-fit:contain}
+.square.meme-animating .meme-piece img{visibility:hidden}
+.square.meme-animating .meme-piece__role{z-index:4}
+.square .meme-piece-video{width:94%;height:94%;inset:3%}
+.meme-piece.black .meme-piece-video{filter:saturate(.7) brightness(.85)}
+.living-preview-square>.meme-piece{width:88%;height:88%}
+.living-preview-square .meme-piece__role{font-size:clamp(7px,1.4vw,15px)}

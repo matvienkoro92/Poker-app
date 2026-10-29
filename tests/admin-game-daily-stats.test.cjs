@@ -38,3 +38,8 @@ test('one-time backfill indexes older dates but excludes them before journal rea
  const commands=async rows=>{calls.push(...rows);return rows.map(([op])=>op==='GET'?null:op==='HSCAN'?['0',[room+':1:1',JSON.stringify({finishedAt:old})]]:1);};
  const page=await stats.read({commands,period:'7',now});assert.deepEqual(page.records,[]);assert.equal(page.preparing,true);assert.ok(calls.some(r=>r[0]==='ZADD'));assert.ok(calls.some(r=>r[0]==='SET'&&r[1].endsWith(':by-time-ready')));assert.equal(calls.filter(r=>r[0]==='GET').length,1);
 });
+test('current month starts at midnight in Novosibirsk and omits rake lookups when requested',async()=>{
+ const index=require('../lib/admin-game-period-index'),previous=index.page,calls=[];let range;
+ index.page=async options=>{range=options;return {scan:['0',[room+':1:1',JSON.stringify({finishedAt:Date.parse('2026-09-30T16:59:59Z')}),room+':1:2',JSON.stringify({finishedAt:Date.parse('2026-09-30T17:00:00Z')}),room+':1:3',JSON.stringify({finishedAt:Date.parse('2026-10-29T01:00:00Z')})]],mode:'range'};};
+ try{const page=await stats.read({commands:async rows=>{calls.push(...rows);return [];},cursor:'1:0',period:'month',includeRake:false,now:Date.parse('2026-10-29T02:00:00Z')});assert.equal(range.start,Date.parse('2026-09-30T17:00:00Z'));assert.equal(page.records.length,2);assert.ok(page.records.every(r=>r.paid&&!Object.hasOwn(r,'rake')));assert.equal(calls.length,0);}finally{index.page=previous;}
+});

@@ -67,3 +67,6 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play > .evening-vpn-cat{left:3%!important}
 body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play > .evening-vpn-cat::before{content:"";display:block!important;position:absolute;left:-12%;top:auto;bottom:4%;width:125%;height:50%;border:0;border-radius:0;background:url('./assets/play-underwater/cat-bed-v1.webp') center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 3px 3px #00101590);transform:none}
 @media(max-height:620px) and (min-width:600px){body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play > .underwater-foreground{top:51%;height:42%}body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play > .underwater-cooler-hit{top:52%}}
+
+/* Dim only the lounge background; live controls and foreground retain their colors. */
+html body[data-view="download"] #app.app:not(#evening-unused):has(.underwater-play){background-color:rgb(75% 75% 75%)!important;background-blend-mode:multiply!important}

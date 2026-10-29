@@ -1,0 +1,29 @@
+.game-chat{position:fixed;z-index:12000;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:min(390px,calc(100vw - 24px));height:min(470px,65dvh);display:flex;flex-direction:column;box-sizing:border-box;border:1px solid #b89a60;border-radius:18px;background:#10251ffb;color:#f5e6c5;box-shadow:0 12px 40px #0008;font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+.game-chat[hidden]{display:none}
+.game-chat header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #b89a6044}
+.game-chat header button{min-width:40px;min-height:36px;padding:4px;font-size:24px}
+.game-chat__messages{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px;scrollbar-width:thin}
+.game-chat__message{width:fit-content;max-width:92%;margin:0 0 10px;padding:8px 11px;border-radius:12px;background:#243c32;overflow-wrap:anywhere}
+.game-chat__message.is-mine{margin-left:auto;background:#3c4932}
+.game-chat__message strong{font-size:12px;color:#e3c98c}
+.game-chat__message p{margin:4px 0;white-space:pre-wrap}
+.game-chat__message small{font-size:11px;color:#c2c4af}
+.game-chat__message button{display:block;margin-top:5px;min-height:32px;padding:4px 10px}
+.game-chat__status{margin:0;padding:0 12px;font-size:12px;color:#f2d498}
+.game-chat__status:not(:empty){padding-bottom:8px}
+.game-chat form{display:flex;gap:8px;align-items:end;padding:10px;border-top:1px solid #b89a6044}
+.game-chat form[hidden]{display:none}
+.game-chat__label{display:block!important;flex:1;min-width:0;margin:0!important;font-size:11px}
+.game-chat input{display:block;box-sizing:border-box;width:100%;min-width:0;min-height:44px;margin-top:3px;padding:8px 10px;border:1px solid #b89a6066;border-radius:10px;background:#091c16;color:#fff1ce;font:16px system-ui}
+.game-chat form button{min-height:44px;padding:8px 12px;font-size:13px;white-space:nowrap}
+.game-chat button{border:1px solid #b89a6077;border-radius:10px;background:#233c2d;color:#f5e6c5;cursor:pointer}
+[data-game-chat][hidden]{display:none!important}
+body.billiards-table-view .room-toolbar [data-game-chat]{position:relative;font-size:0!important;width:34px;height:34px;min-height:34px;padding:0}
+body.billiards-table-view .room-toolbar [data-game-chat]::before{content:'💬';font-size:18px}
+body.billiards-table-view .room-toolbar [data-game-chat]:not([data-unread=""])::after{content:attr(data-unread);position:absolute;right:-5px;top:-5px;min-width:15px;border-radius:8px;background:#e6c77e;color:#15251e;font:bold 10px/15px system-ui}
+/* Isolate the panel from the billiards scene's generic header/input rules. */
+.game-chat>header{position:static;inset:auto;flex:0 0 auto;pointer-events:auto;background:#162c23;transform:none;width:auto}
+.game-chat input[name="message"]{text-transform:none;letter-spacing:normal}
+#boardActionIcons [data-game-chat]{position:relative;font-size:0!important}
+#boardActionIcons [data-game-chat]::before{content:'💬';font-size:20px}
+#boardActionIcons [data-game-chat]:not([data-unread=""])::after{content:attr(data-unread);position:absolute;right:-4px;top:-4px;min-width:15px;border-radius:8px;background:#e6c77e;color:#15251e;font:bold 10px/15px system-ui}

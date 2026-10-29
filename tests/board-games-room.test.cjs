@@ -59,3 +59,19 @@ test('move folds connection protection changes into its single revision CAS',asy
  let r=await service.call('host',{action:'create',discipline:'chess'});r=await service.call('guest',{action:'join',roomId:r.roomId});const raw=rooms.get(r.roomId);delete raw.connectionProtection;writes=0;
  const moved=await service.call('host',{action:'move',roomId:r.roomId,revision:r.revision,move:{type:'move',from:'e2',to:'e4'}});assert.equal(writes,1);assert.equal(moved.state.ply,1);assert.ok(rooms.get(r.roomId).connectionProtection);
 });
+
+test('black creator retains ownership while guest moves first, clocks and rematch follow colors',async()=>{
+ const f=fixture();let r=await f.service.call('host',{action:'create',discipline:'chess',side:'1',timeControl:'blitz-5-3'});const id=r.roomId;
+ assert.equal((await f.service.call('guest',{action:'preview',roomId:id})).hostColor,'black');
+ r=await f.service.call('guest',{action:'join',roomId:id});assert.equal(r.player,1);assert.equal(r.state.whitePlayer,1);assert.equal(r.state.turn,1);
+ await assert.rejects(f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'move',from:'e2',to:'e4'}}),e=>e.status===400);
+ f.advance(1000);r=await f.service.call('guest',{action:'move',roomId:id,revision:r.revision,move:{type:'move',from:'e2',to:'e4'}});assert.equal(r.state.turn,0);assert.deepEqual(r.clockRemaining,[300000,302000]);
+ r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'move',from:'e7',to:'e5'}});assert.equal(r.state.turn,1);
+ r=await f.service.call('host',{action:'move',roomId:id,revision:r.revision,move:{type:'resign'}});assert.equal(r.state.winner,1);
+ const {chessPGN}=await import('../scripts/board-games/chess.mjs');const pgn=chessPGN(r.state,['Host','Guest']);assert.match(pgn,/White "Guest"/);assert.match(pgn,/Black "Host"/);assert.match(pgn,/Result "1-0"/);
+ r=await f.service.call('host',{action:'rematch',roomId:id,revision:r.revision});assert.equal(r.state.whitePlayer,1);assert.equal(r.state.turn,1);assert.equal(r.player,0);
+});
+test('random chess color is assigned by server and invalid choices are rejected',async()=>{
+ for(const whitePlayer of [0,1]){let saved;const service=require('../lib/board-games-room')({randomSide:()=>whitePlayer,profile:async()=>({name:'Host'}),create:async(id,r)=>{saved=r;return true;}});const r=await service.call('host',{action:'create',discipline:'chess',side:'random'});assert.equal(r.state.whitePlayer,whitePlayer);assert.equal(saved.players[0],'host');}
+ await assert.rejects(fixture().service.call('host',{action:'create',discipline:'chess',side:'blue'}),e=>e.status===400);
+});

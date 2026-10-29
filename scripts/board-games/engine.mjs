@@ -3,7 +3,7 @@ import {Chess} from 'chess.js';
 import {createChess,chessMove,chessLegal,claimable,canClaimMove} from './chess.mjs';
 import {createBackgammon,backgammonMove,backgammonRoll,backgammonLegal,undoBackgammonStep,endBackgammonTurn,progress} from './backgammon.mjs';
 export const DISCIPLINES=['chess','short','long','darts'];
-export function createGame(discipline='chess',options={}){if(!DISCIPLINES.includes(discipline))throw Error('Неизвестная игра');return discipline==='darts'?createDarts(options):discipline==='chess'?createChess():createBackgammon(discipline,options);}
+export function createGame(discipline='chess',options={}){if(!DISCIPLINES.includes(discipline))throw Error('Неизвестная игра');return discipline==='darts'?createDarts(options):discipline==='chess'?createChess(undefined,options.whitePlayer??0):createBackgammon(discipline,options);}
 export function legalMoves(s){return s.discipline==='darts'?[]:s.discipline==='chess'?chessLegal(s):backgammonLegal(s);}
 export function finish(s,winner,reason){s.winner=winner;s.endReason=reason;s.drawOffer=null;if(winner!=='draw')s.scores[winner]=1;}
 export function expireTurn(s,rollDice=()=>[1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]){
@@ -34,7 +34,7 @@ export function expireTurn(s,rollDice=()=>[1+Math.floor(Math.random()*6),1+Math.
   return true;
  }
  const winner=1-s.turn;
- const c=new Chess(s.fen),color=winner===0?'w':'b',material=c.board().flat().filter(p=>p&&p.color===color&&p.type!=='k');
+ const c=new Chess(s.fen),color=winner===(s.whitePlayer??0)?'w':'b',material=c.board().flat().filter(p=>p&&p.color===color&&p.type!=='k');
  if(!material.length||c.isInsufficientMaterial()){finish(s,'draw','timeout-material');return true;}
  finish(s,winner,'timeout');return true;
 }

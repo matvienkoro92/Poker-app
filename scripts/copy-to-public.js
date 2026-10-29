@@ -271,6 +271,7 @@ function copyReferencedAssets() {
   addWardrobeAssets('player-hall/helmets');
   // Carved boards and checker URLs are built from validated catalogue IDs.
   addWardrobeAssets('board-games/nards');
+  addWardrobeAssets('board-games/previews');
   addWardrobeAssets('board-games/chess/sculpted-v2');
   const chessEquipment = require('../lib/chess-equipment');
   for (const board of chessEquipment.BOARDS) if (board.image) refs.add(board.image.replace(/^\.\/assets\//, ''));

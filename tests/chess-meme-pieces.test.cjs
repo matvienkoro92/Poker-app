@@ -1,0 +1,7 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+test('meme chess is available at level one without changing default or host ownership',async()=>{
+ const {cleanChess,PIECES}=require('../lib/chess-equipment');assert.equal(cleanChess({}).pieces,'classic');assert.equal(cleanChess({pieces:'meme-reactions'},1).pieces,'meme-reactions');assert.ok(PIECES.find(p=>p.id==='meme-reactions'));
+ const rooms=new Map(),service=require('../lib/board-games-room')({profile:async m=>({name:m,level:1}),load:async id=>structuredClone(rooms.get(id)),create:async(id,r)=>{rooms.set(id,structuredClone(r));return true;},cas:async(id,rev,r)=>{rooms.set(id,structuredClone(r));return true;}});
+ const r=await service.call('host',{action:'create',discipline:'chess',equipment:{pieces:'meme-reactions'}});const joined=await service.call('guest',{action:'join',roomId:r.roomId,equipment:{pieces:'classic'}});assert.equal(joined.equipment.pieces,'meme-reactions');assert.equal((await service.call('viewer',{action:'watch',roomId:r.roomId})).equipment.pieces,'meme-reactions');
+ const {pieceSVG}=await import('../scripts/board-games/pieces.mjs');const clips=new Set();for(const type of ['p','r','n','b','q','k']){const white=pieceSVG(type,'w','meme-reactions'),black=pieceSVG(type,'b','meme-reactions');assert.match(white,/meme-piece white/);assert.match(black,/meme-piece black/);clips.add(white.match(/data-meme="([^"]+)"/)[1]);}assert.equal(clips.size,6);assert.match(pieceSVG('p','w','meme-reactions'),/mexican-mem1/);
+});

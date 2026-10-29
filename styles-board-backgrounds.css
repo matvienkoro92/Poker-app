@@ -1,0 +1,15 @@
+/* Five static, CSS-only room finishes: no downloads, decoding or animation loops. */
+body[data-game-background=emerald]{--game-bg-base:#0c1d17;--game-bg-glow:#385540;--game-bg-edge:#132e27;--game-bg-line:#cfb78008}
+body[data-game-background=sapphire]{--game-bg-base:#0a1422;--game-bg-glow:#29465c;--game-bg-edge:#112d40;--game-bg-line:#a3c9ed09}
+body[data-game-background=burgundy]{--game-bg-base:#200e17;--game-bg-glow:#623244;--game-bg-edge:#351827;--game-bg-line:#e3c3a409}
+body[data-game-background=walnut]{--game-bg-base:#201811;--game-bg-glow:#67513a;--game-bg-edge:#382b1e;--game-bg-line:#edcf9e0b}
+body[data-game-background=graphite]{--game-bg-base:#11151a;--game-bg-glow:#44494d;--game-bg-edge:#242b2e;--game-bg-line:#dfc68e0a}
+body[data-game-background]:has(#game:not([hidden])){background:radial-gradient(ellipse at 15% 0,var(--game-bg-glow),transparent 65%),radial-gradient(ellipse at 100% 70%,var(--game-bg-edge),transparent 70%),repeating-linear-gradient(135deg,transparent 0 35px,var(--game-bg-line) 36px,transparent 37px 72px),var(--game-bg-base)!important;background-attachment:scroll}
+#gameBackground{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+#gameBackground .board-action-icon{width:20px;height:20px;flex:none}
+#gameBackground small{font:500 7px/9px system-ui;letter-spacing:0}
+#game .game-toolbar #gameBackground{width:40px;min-width:40px;min-height:38px;padding:4px;border-radius:10px}
+#gameBackground[data-theme=sapphire]{color:#bad8ee}
+#gameBackground[data-theme=burgundy]{color:#ebbdc9}
+#gameBackground[data-theme=walnut]{color:#e6c993}
+#gameBackground[data-theme=graphite]{color:#d8cfb3}

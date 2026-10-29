@@ -101,3 +101,35 @@
 #boardModeButtons .mode-card--local{margin-top:16px}
 #lobby #boardModeButtons .mode-card--featured[aria-pressed=true]{border-color:#e8c780;background:linear-gradient(125deg,#c7ab6638,#31523b55);box-shadow:inset 3px 0 #e1c07a}
 #lobby #boardModeButtons .mode-card--featured .mode-card__icon{color:#f0d38d;background:#d5b76e1c}
+
+/* Chess and nards use the same compact villa panel as the billiards wizard. */
+html.board-villa-overlay{background:transparent}
+html.board-villa-overlay body:not(:has(#game:not([hidden]))){background:transparent!important}
+body:has(#lobby:not([hidden])) main{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(var(--game-safe-top,env(safe-area-inset-top,0px)) + 12px) 0 max(12px,env(safe-area-inset-bottom));box-sizing:border-box}
+#lobby:not([hidden]){width:100%;max-width:none}
+#lobby>header{display:none}
+#lobby .board-lobby-wizard{position:relative!important;inset:auto!important;transform:none!important;margin:0 auto;width:min(420px,calc(100% - 32px))!important;max-height:calc(100dvh - var(--game-safe-top,env(safe-area-inset-top,0px)) - 24px)!important;border:1px solid #9c926557;border-radius:22px;background:linear-gradient(140deg,#263d32f7,#10211dfc);backdrop-filter:none;box-shadow:0 12px 38px #0007}
+#lobby .lobby-wizard__heading{padding:18px 16px 20px;gap:12px}
+#lobby .board-lobby-wizard #boardSetupBack{min-width:34px;width:34px;height:34px;min-height:34px;padding:0;border-radius:50%;font-size:24px;line-height:1;background:#ffffff05;border-color:#cbb57c55;color:#efd293}
+#boardSetupProgress{position:absolute;right:16px;top:16px;font-size:9px!important;letter-spacing:.02em;color:#b5c2b0!important}
+#lobby .setup-brand{font-size:8px!important;margin-bottom:7px;padding-right:65px}
+#lobby .lobby-wizard__heading h2{font-size:23px;font-weight:750}
+#lobby .setup-step-track{height:2px;left:16px;right:16px}
+#lobby .lobby-wizard__content{padding:10px 12px 4px;overflow:auto;flex:1 1 auto}
+#lobby #boardModeButtons{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
+#lobby #boardModeButtons .mode-card{min-height:61px;padding:10px 11px;border-radius:12px}
+#lobby .mode-card__copy strong{font-size:15px;font-weight:750}
+#lobby .mode-card__copy small{font-size:12px;color:#a8baaa}
+#lobby .mode-card__icon{width:32px;height:32px;border-radius:10px}
+#lobby #boardModeButtons .mode-card--local[data-mode=solo]{margin-top:12px}
+#lobby .lobby-wizard__footer{padding:12px;border:0;background:transparent}
+#lobby .board-setup-actions:has(#boardSetupBackFooter[hidden]){grid-template-columns:1fr}
+#lobby .board-setup-actions button,#lobby .board-ranking-entry{min-height:44px;border-radius:11px;font-size:15px}
+#lobby .board-ranking-entry{display:block;width:100%;margin-top:8px;background:linear-gradient(110deg,#e5d0a1,#c4a56b);color:#1b2a22;border-color:#e4cc97;font-weight:500}
+#lobby .board-lobby-footer{margin:10px 0 0;gap:6px;align-items:center}
+#lobby .board-lobby-footer button{width:auto;min-height:30px;padding:5px 8px;font-size:10px;background:transparent;border-color:#a5905b44}
+#lobby .board-lobby-footer a{font-size:9px;color:#a5af9e}
+@media(max-height:620px) and (min-width:500px){#lobby #boardModeButtons{grid-template-columns:1fr 1fr}#lobby #boardModeButtons .mode-card--local[data-mode=solo]{margin-top:0}}
+#lobby .board-lobby-footer button{color:#d6c9a5}
+#lobby #boardModeButtons .mode-card--local{margin-top:0}
+#lobby #boardModeButtons .mode-card--local[data-mode=solo]{margin-top:12px}
