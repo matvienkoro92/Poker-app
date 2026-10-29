@@ -508,6 +508,7 @@ async function parseOcrFile(file) {
     if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
+  if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   // October 19 entry fees confirmed by the owner; blue headers show starting stacks.
   if (date === "19.10.2026" && blue) {
     const confirmed = {

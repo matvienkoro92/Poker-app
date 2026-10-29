@@ -6088,4 +6088,219 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "28.10.2026": [
+    {
+      "time": "02:00",
+      "name": "✨Deep Night 15k ✨",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 1450,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 5,
+          "reward": 2500,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 1,
+          "reward": 14760,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Потяни 21",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FreshMeat",
+          "place": 2,
+          "reward": 8500,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Счастливый Косарь",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 1,
+          "reward": 86000,
+          "points": 0
+        },
+        {
+          "nick": "Аспирин",
+          "place": 4,
+          "reward": 18700,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "BLACKOUT 300K",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 69198,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 16,
+          "reward": 749,
+          "points": 0
+        },
+        {
+          "nick": "Waaarr",
+          "place": 0,
+          "reward": 700,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "6otanik",
+          "place": 1,
+          "reward": 2605,
+          "points": 0
+        },
+        {
+          "nick": "BabyShark",
+          "place": 2,
+          "reward": 1995,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "fomichga",
+          "place": 1,
+          "reward": 22960,
+          "points": 0
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 15150,
+          "points": 0
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 4,
+          "reward": 9082.5,
+          "points": 0
+        },
+        {
+          "nick": "Lorenco",
+          "place": 7,
+          "reward": 480,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Pekan31",
+          "place": 1,
+          "reward": 3293.29,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 2,
+          "reward": 1705.78,
+          "points": 0
+        },
+        {
+          "nick": "RS888",
+          "place": 3,
+          "reward": 1212.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 16556.9,
+          "points": 0
+        },
+        {
+          "nick": "IRIHKA",
+          "place": 3,
+          "reward": 5573.51,
+          "points": 0
+        },
+        {
+          "nick": "BabyShark",
+          "place": 5,
+          "reward": 857.08,
+          "points": 0
+        },
+        {
+          "nick": "Monfokon",
+          "place": 17,
+          "reward": 137.48,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

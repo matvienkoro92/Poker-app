@@ -847,6 +847,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             25200
           ]
         ]
+      ],
+      [
+        "28.10.2026",
+        [
+          [
+            1,
+            "Rifa",
+            86000
+          ]
+        ]
       ]
     ]
   },
