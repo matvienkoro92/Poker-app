@@ -1,0 +1,46 @@
+{
+  "status": "integrated",
+  "reference": "Турнир вечера и игры клуба.png",
+  "slots": {
+    "background": {
+      "purpose": "Фон комнаты без текста и элементов управления",
+      "optional": true
+    },
+    "tournament": {
+      "purpose": "Центральная сцена карты с персонажами и проёмом пики, без названия, времени, сумм и кнопки",
+      "selector": "[data-play-art-slot=tournament]",
+      "fit": "contain",
+      "preferred": "PNG/WebP с прозрачностью"
+    },
+    "billiards": {
+      "purpose": "Бильярд без подписи",
+      "selector": "[data-play-art-slot=billiards]",
+      "fit": "cover",
+      "preferredAspectRatio": "3:4"
+    },
+    "nards": {
+      "purpose": "Нарды без подписи",
+      "selector": "[data-play-art-slot=nards]",
+      "fit": "cover",
+      "preferredAspectRatio": "3:4"
+    },
+    "chess": {
+      "purpose": "Шахматы без подписи",
+      "selector": "[data-play-art-slot=chess]",
+      "fit": "cover",
+      "preferredAspectRatio": "3:4"
+    }
+  },
+  "liveFields": [
+    "tournamentDayHomeName",
+    "data-home-ticket-time",
+    "tournamentDayBuyin",
+    "tournamentDayGuarantee"
+  ],
+  "actions": [
+    "data-play-next",
+    "data-evening-villa-game"
+  ],
+  "integration": "Replace the tournament panel contents when artwork is ready; preserve the existing Poker21 panel, tournament updates, entry checks and game navigation.",
+  "delivery": "Responsive WebP variants; live tournament fields; source PNGs excluded from runtime"
+}

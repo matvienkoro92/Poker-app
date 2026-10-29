@@ -6428,3 +6428,11 @@ html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{di
 .home-last-longer-strip__copy b { color: #ffe0a0; }
 .home-last-longer-strip__arrow { flex: 0 0 auto; font-size: 22px; }
 .app.app--view-home .home-last-longer-strip:focus-visible { outline: 2px solid #ffe0a0; outline-offset: 3px; }
+
+/* Keep the daily-deal character proportional on tablet and desktop layouts. */
+@media (min-width:681px){
+ #app.app.app--view-home .home-daily-deal-hero__image{height:145%!important;top:-40px!important;right:-10px!important;transform:none!important;}
+}
+
+/* Softer character lighting without the strong amber cast. */
+#app.app.app--view-home .home-daily-deal-hero__image{filter:saturate(.72) brightness(.88) contrast(.96);}

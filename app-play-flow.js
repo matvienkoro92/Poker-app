@@ -4,6 +4,8 @@
   var flow = null;
   var observer = null;
   var sceneObserver = null;
+  var sizeFrame = 0;
+  function scheduleSize(){if(sizeFrame)return;sizeFrame=requestAnimationFrame(function(){sizeFrame=0;size();});}
   var touchStart = null;
   var lastSwipeAt = 0;
   var dragFrame = 0, dragTrack = null, dragPosition = 0;
@@ -62,10 +64,10 @@
       }else{var play=choice.dataset.coolerChoice==='play';var target=coolerTarget;closeCooler();if(play && typeof window.setView==='function')window.setView('cooler-flight');else if(target)target.focus({preventScroll:true});}
       return;
     }
-    var target=event.target.closest && event.target.closest('.evening-reference__cooler-hit');
+    var target=event.target.closest && event.target.closest('.evening-reference__cooler-hit, [data-play-cooler]');
     if(!target || coolerSpeechTimer)return;
     event.preventDefault();closeCooler();coolerTarget=target;target.setAttribute('aria-expanded','true');
-    var scene=target.parentElement,art=scene.querySelector('img.evening-reference__art--portal-side');if(!art&&!scene.classList.contains('underwater-play'))return;
+    var scene=target.parentElement,art=scene.querySelector('img.evening-reference__art--portal-side');if(!art&&!scene.classList.contains('underwater-play')&&!scene.classList.contains('play-card'))return;
     if(art){coolerPose=art.cloneNode(false);coolerPose.classList.add('evening-cooler-pose');coolerPose.src=greetingArt;scene.appendChild(coolerPose);}
     coolerSpeech=document.createElement('div');coolerSpeech.className='evening-cooler-speech';coolerSpeech.setAttribute('role','dialog');coolerSpeech.setAttribute('aria-label','Кулер приглашает в Кулершан');coolerSpeech.setAttribute('aria-live','polite');document.body.appendChild(coolerSpeech);
     inviteCooler();var pose=coolerPose;function showPose(){if(coolerPose===pose){scene.classList.add('evening-cooler-active');pose.classList.add('evening-cooler-pose--visible');}}if(pose?.complete && pose.naturalWidth)showPose();else if(pose)pose.addEventListener('load',showPose,{once:true});
@@ -187,17 +189,17 @@
     if (observer) observer.disconnect();
     if (sceneObserver) sceneObserver.disconnect();
     if (window.ResizeObserver) {
-      observer = new ResizeObserver(size);
+      observer = new ResizeObserver(scheduleSize);
       observer.observe(flow);
     }
     var scene = flow.querySelector(".tournament-day-home-dual--tournament-focus");
     if (scene) {
-      sceneObserver = new MutationObserver(size);
+      sceneObserver = new MutationObserver(scheduleSize);
       sceneObserver.observe(scene, { attributes: true, attributeFilter: ["data-tournament-character"] });
     }
     flow.querySelectorAll('img').forEach(function(image){
-      image.loading='eager';image.decoding='async';
-      if(typeof image.decode==='function')image.decode().catch(function(){});
+      var deferred=!!image.closest('.play-card-games');image.loading=deferred?'lazy':'eager';image.decoding='async';
+      if(!deferred&&typeof image.decode==='function')image.decode().catch(function(){});
     });
     size();
     show(flow.dataset.playPanel);
@@ -266,7 +268,7 @@
     if (touchStart && touchStart.dragging) show(touchStart.flow.dataset.playPanel);
     touchStart = null;
   }, { passive: true });
-  window.addEventListener("resize", size);
+  window.addEventListener("resize", scheduleSize);
   document.addEventListener("keydown", function (event) {
     if (!event.target.closest || !event.target.closest("[data-play-flow]")) return;
     if (event.key === "ArrowRight") show("poker21");

@@ -2638,11 +2638,11 @@ function updateTournamentDayBlock() {
     }
     var homeBuyin = document.getElementById("tournamentDayBuyin");
     var scheduleBuyin = document.getElementById("scheduleTournamentDayBuyin");
-    if (homeBuyin) homeBuyin.textContent = detailBuyinStr;
+    if (homeBuyin) homeBuyin.textContent = homeBuyin.closest('.play-card') ? String(detailBuyinStr).replace(/(\d)\s*₽/g, '$1 ₽') : detailBuyinStr;
     if (scheduleBuyin) scheduleBuyin.textContent = currentBuyinStr;
     var homeGuarantee = document.getElementById("tournamentDayGuarantee");
     var scheduleGuarantee = document.getElementById("scheduleTournamentDayGuarantee");
-    if (homeGuarantee) homeGuarantee.textContent = detailGuaranteeStr;
+    if (homeGuarantee) homeGuarantee.textContent = homeGuarantee.closest('.play-card') ? String(detailGuaranteeStr).replace(/(\d)\s*₽/g, '$1 ₽') : detailGuaranteeStr;
     if (scheduleGuarantee) scheduleGuarantee.textContent = currentGuaranteeStr;
     var detailTimerLabel = detailState.label ? detailState.label : "Старт через: ";
     var detailTimerStr = formatCountdownDiff(detailState.target - n);

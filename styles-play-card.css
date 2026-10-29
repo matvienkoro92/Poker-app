@@ -1,0 +1,73 @@
+/* One responsive layered composition; tournament values remain live HTML. */
+body[data-view=download] #app.app .play-flow:has(.play-card-layout){background:#05251d}
+body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tournament:has(.play-card-layout){align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;background:#05251d image-set(url('./assets/play-card/room-480.webp') 1x,url('./assets/play-card/room-800.webp') 2x) center top/cover no-repeat;scrollbar-width:none}
+body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tournament:has(.play-card-layout)::-webkit-scrollbar{display:none}
+.play-card-layout{box-sizing:border-box;position:relative;display:block;width:min(100%,590px)!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:8px 8px 20px!important;background:none!important;color:#06251c;font-family:Arial,system-ui,sans-serif;container-type:inline-size;flex-shrink:0;isolation:isolate;overflow:visible!important}
+.play-card-layout *{box-sizing:border-box}
+.play-card-layout .play-card{position:relative;display:block;width:100%;aspect-ratio:.79;padding:0;border:0;border-radius:0;background:none;box-shadow:none;isolation:isolate;overflow:visible}
+.play-card__portal{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;z-index:0}
+.play-card-layout .play-card__header{position:absolute;inset:6% 7% auto 27%;z-index:5;display:block;margin:0;padding:0;background:none;transform:rotate(4deg);transform-origin:left top;pointer-events:none}
+.play-card-layout .play-card__header h1{margin:0;color:#032820!important;-webkit-text-fill-color:#032820!important;background:none!important;filter:none!important;font:900 min(10cqw,58px)/1 Impact,'Arial Narrow',sans-serif;letter-spacing:-.02em;white-space:nowrap;text-shadow:none}
+.play-card__session{display:flex;align-items:baseline;justify-content:space-between;gap:5px;margin-top:5px;border-top:1px solid #f4470b;padding-top:4px;font-size:clamp(11px,3.5cqw,21px);line-height:1.1}
+.play-card-layout .play-card__session strong{min-width:0;color:#082b21;font-weight:800;overflow-wrap:anywhere}.play-card__session time{flex:none;color:#ef440d;font-weight:900;white-space:nowrap}
+.play-card__manki{position:absolute;left:46%;top:27%;width:42%;height:48%;object-fit:contain;object-position:center bottom;z-index:2;pointer-events:none}
+.play-card-layout .play-card__cooler{display:block;position:absolute;left:15%;top:30%;width:50%;height:48%;padding:0;margin:0;border:0;border-radius:0;background:none;box-shadow:none;z-index:3;cursor:pointer;overflow:visible}
+.play-card__cooler img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.play-card-layout .play-card__terms{position:absolute;z-index:4;left:22%;right:16%;top:78%;display:grid;grid-template-columns:.85fr 1.45fr;margin:0;text-align:center;gap:5px;transform:rotate(-.4deg)}
+.play-card__terms>div+div{border-left:1px solid #163c2b}.play-card__terms dt{font-size:min(3.2cqw,19px);line-height:1.1;font-weight:800;color:#082b21}.play-card__terms dd{margin:2px 0 0;font-size:min(6.4cqw,38px);font-weight:900;color:#ef450c;line-height:1.1;white-space:nowrap}
+.play-card-layout .play-card__play{position:absolute;z-index:6;left:17%;right:15%;bottom:3.8%;display:block;height:9.3%;width:68%;padding:0;border:0;border-radius:999px;background:none;box-shadow:none;cursor:pointer;min-height:0}
+.play-card__play img{display:block;width:100%;height:100%;object-fit:fill}
+.play-card-games{margin-top:8px}.play-card-layout .play-card-games h2{display:block;margin:0 0 8px;padding:0;background:none;line-height:1}.play-card-games h2 img{display:block;width:100%;height:auto}
+.play-card-games__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.play-card-layout .play-card-games__grid button{display:block;min-width:0;min-height:0;padding:0;margin:0;border:0;border-radius:14px;aspect-ratio:.51;background:none;box-shadow:none;cursor:pointer;overflow:hidden}.play-card-games__grid img{display:block;width:100%;height:100%;object-fit:fill}
+.play-card-extras{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}.play-card-layout .play-card-extras button{padding:6px 9px;min-height:32px;font-size:11px;color:#e9d5a1;border:1px solid #719d7980;border-radius:9px;background:#072b22d9;cursor:pointer}
+.play-card-layout button:focus-visible{outline:3px solid #fff0a9;outline-offset:2px}.play-card-layout button:active{filter:brightness(.92)}
+@media(min-width:700px){.play-card-layout{padding:12px 12px 24px!important}.play-card-games__grid{gap:10px}}
+
+/* The room fills the entire viewport, including Telegram's safe insets.
+   Card layout uses only the available content area; short screens can scroll. */
+html:has(body[data-view=download] .play-card-layout),
+body[data-view=download]:has(.play-card-layout){background:#05251d image-set(url('./assets/play-card/room-480.webp') 1x,url('./assets/play-card/room-800.webp') 2x) center top/cover no-repeat!important;min-height:100dvh}
+body[data-view=download] #app.app:has(.play-card-layout),
+body[data-view=download] #app.app:not(#evening-unused) .play-flow:has(.play-card-layout),
+body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tournament:has(.play-card-layout){background:transparent!important}
+.play-card-layout{padding-bottom:42px!important}
+.play-card-layout .play-card__play{border-radius:999px}
+
+/* Match the reference with live lettering rather than stretching raster text. */
+.play-card-layout .play-card__play{display:grid;place-items:center;border:1px solid #fff4b0;background:linear-gradient(180deg,#ffe89a 0%,#ffc43d 35%,#ff9b12 75%,#ffb62d 100%);box-shadow:0 0 0 1px #593619,0 0 0 2px #eaa64b,inset 0 2px 3px #fff9d9,inset 0 -2px 3px #c77204}
+.play-card__play>span{color:#051c12;font:900 min(4.5cqw,26px)/1 Arial,system-ui,sans-serif;white-space:nowrap}
+.play-card__play b{font-size:1.4em;line-height:.6;vertical-align:-.06em;margin-left:4px}
+.play-card-layout .play-card-games h2{display:flex;align-items:center;gap:10px;margin:0 0 10px;color:#fffdf4;font:800 min(4.1cqw,24px)/1.2 Arial,system-ui,sans-serif;letter-spacing:.02em;white-space:nowrap;text-shadow:0 1px 2px #0008}
+.play-card-games h2::before,.play-card-games h2::after{content:'';height:1px;background:#c6973e;flex:1}
+.play-card-games{margin-top:12px}
+.play-card-layout .play-card-games__grid button{display:flex;flex-direction:column;aspect-ratio:.51;border:1px solid #458e7d;background:#032c21;border-radius:12px}
+.play-card-games__art{position:relative;display:block;width:100%;flex:1;min-height:0;overflow:hidden}
+.play-card-games__grid .play-card-games__art img{position:absolute;top:0;left:50%;width:100%;height:auto;min-height:125%;object-fit:cover;object-position:center top;transform:translateX(-50%)}
+.play-card-games__label{display:grid;place-items:center;flex:0 0 19%;width:100%;min-height:30px;border-top:1px solid #448877;background:linear-gradient(135deg,#0b3d2e,#00261d);color:#fffdf4;font:800 min(4.8cqw,28px)/1 Arial,system-ui,sans-serif;text-shadow:0 2px 3px #0009}
+.play-card__session{margin-top:3px;border-top:0;padding-top:0;gap:10px}
+.play-card__session strong,.play-card__session time{padding-top:4px;border-top:1px solid #ef480c}
+.play-card__session strong{flex:1}
+
+/* The reference separates the game row with a clean dark-green band. */
+.play-card-games{margin-top:0;margin-left:-8px;margin-right:-8px;padding:14px 8px 0;background:#04291f}
+.play-card-layout .play-card-games h2{color:#fffdf4!important;-webkit-text-fill-color:#fffdf4!important;background:none!important;filter:none!important}
+.play-card-games__grid .play-card-games__art img{top:-2%;width:108%;min-height:128%}
+@media(min-width:700px){.play-card-games{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}}
+@container (max-width:280px){.play-card-layout .play-card__terms{top:77%}.play-card__terms dd{margin-top:1px}}
+
+/* Reference proportions: inset card, smaller Cooler, calmer spacing. */
+.play-card-layout .play-card{width:96%;margin:0 auto}
+.play-card-layout .play-card__cooler{left:19%;top:36%;width:43%;height:42%}
+.play-card-layout .play-card__terms{left:23%;right:16%;top:79%}
+.play-card-layout .play-card__terms dt{line-height:1.05}
+.play-card-layout .play-card__terms dd{margin-top:3px;line-height:1.05;font-size:min(6cqw,35px)}
+.play-card-layout .play-card__play{left:17%;right:15%;bottom:3%;height:9.3%}
+.play-card-games{padding-top:10px}
+.play-card-layout .play-card-games h2{margin-bottom:8px;font-size:min(3.9cqw,23px)}
+.play-card-layout .play-card__play{bottom:2.5%;height:8.8%}
+/* Both pages already have explicit forward/back actions. */
+.play-flow:has(.play-card-layout) .play-flow__nav{display:none}
+
+/* Cooler leads in front; Manki follows close behind, with separate hands. */
+.play-card-layout .play-card__cooler{left:21%}
+.play-card-layout .play-card__manki{left:40%}
