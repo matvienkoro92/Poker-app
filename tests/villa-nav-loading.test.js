@@ -21,3 +21,9 @@ test('closing arrival before the lazy scripts finish does not reopen the villa',
  vm.runInNewContext(code,{navItems:[item],window:{pokerShowVillaLoading:()=>shell,pokerEnsureLazyDomains:()=>pending,pokerOpenPlayerHall:async()=>{opens++;},alert(){}}});
  click({preventDefault(){},stopImmediatePropagation(){}});shell.open=false;closed();assert.equal(item.disabled,false);resolve();await flush();await flush();assert.equal(opens,0);
 });
+test('explicit Play navigation closes the villa before selecting the page',()=>{
+ let click,selected;const shell={open:true,close(){this.open=false;}};
+ const item={dataset:{viewTarget:'download'},getAttribute:()=>null,addEventListener:(_,fn)=>{click=fn;}};
+ vm.runInNewContext(code,{navItems:[item],window:{pokerVillaDialog:shell},setView:(name)=>{assert.equal(shell.open,false);selected=name;}});
+ click({});assert.equal(selected,'download');
+});

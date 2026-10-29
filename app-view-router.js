@@ -968,7 +968,6 @@ function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
 }
 
 function setView(viewName, navOpts) {
-  if (viewName === "download" && window.pokerVillaDialog && window.pokerVillaDialog.open) window.pokerVillaDialog.close();
   navOpts = navOpts || {};
   if (
     viewName === "player-crm" &&
@@ -1873,6 +1872,8 @@ navItems.forEach(function (item) {
         pokerOpenPlayerCrmFromHome();
         return;
       }
+      // Close the villa only on explicit navigation, never during lazy view refreshes.
+      if (target === "download" && window.pokerVillaDialog && window.pokerVillaDialog.open) window.pokerVillaDialog.close();
       var downloadPage = target === "download" ? item.getAttribute("data-download-page") || item.getAttribute("data-download-page-target") || "main" : "";
       if (downloadPage) setView(target, { downloadPage: downloadPage });
       else setView(target);
