@@ -71,8 +71,6 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-ref
 /* Dim only the lounge background; live controls and foreground retain their colors. */
 html body[data-view="download"] #app.app:not(#evening-unused):has(.underwater-play){background-color:rgb(75% 75% 75%)!important;background-blend-mode:multiply!important}
 
-/* Own an opaque backdrop so a previously composited villa can never show through.
-   Avoid background-attachment:fixed, which can retain an old layer in iOS WebViews. */
-html body[data-view="download"] #app.app:not(#evening-unused):has(.underwater-play){background-attachment:scroll!important}
-body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play{background:linear-gradient(rgb(0 0 0 / 25%),rgb(0 0 0 / 25%)),image-set(url('./assets/play-underwater/lounge-floor-v3-480.webp') 1x,url('./assets/play-underwater/lounge-floor-v3-720.webp') 2x) center top/cover no-repeat #033640!important;isolation:isolate}
-@media(min-width:700px){body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play{background-image:linear-gradient(rgb(0 0 0 / 25%),rgb(0 0 0 / 25%)),url('./assets/play-underwater/lounge-floor-v3-851.webp')!important}}
+/* The opaque app background continues behind Telegram and the scene. */
+html body[data-view="download"] #app.app:not(#evening-unused):has(.underwater-play){background-attachment:scroll!important;isolation:isolate}
+body[data-view="download"] #app.app:not(#evening-unused) .play-flow .evening-reference.underwater-play.underwater-play{background:transparent!important;isolation:isolate}
