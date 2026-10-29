@@ -46,3 +46,26 @@ body[data-game-background] #gameBackground[data-theme]{color:var(--ui-text)}
 body[data-game-background] #gameControls #history>summary{color:var(--ui-text)}
 body[data-game-background] #gameControls #history>summary::before{color:var(--ui-accent)}
 body[data-game-background] #gameControls #history>summary:focus-visible{outline:2px solid var(--ui-accent);outline-offset:2px;border-radius:11px}
+
+/* Use the selected palette for every UI panel, including end-of-game screens. */
+body[data-game-background] :is(#boardGames .card,dialog,.game-chat,.board-score-explanation,.board-wager-notice:not([data-status=paid]):not([data-status=refunded]),.connection-recovery,.billiards-ranking__metrics>div,.game-rivalries){
+ background:linear-gradient(145deg,var(--ui-top),var(--ui-bottom));
+ border-color:color-mix(in srgb,var(--ui-accent) 45%,transparent);color:var(--ui-text);
+}
+body[data-game-background] :is(#boardGames .card,dialog,.game-chat,.game-rivalries) :is(h2,h3,strong){color:var(--ui-text)}
+body[data-game-background] :is(#boardGames .card,dialog,.game-chat,.game-rivalries) :is(p,small){color:var(--ui-muted)}
+body[data-game-background] :is(dialog,.game-chat) button{background:linear-gradient(145deg,var(--ui-top),var(--ui-bottom));color:var(--ui-text);border-color:color-mix(in srgb,var(--ui-accent) 55%,transparent)}
+body[data-game-background] :is(dialog,.game-chat) :is(button.primary,button[aria-pressed=true],button[aria-selected=true]){background:var(--ui-accent);color:var(--ui-bottom);border-color:var(--ui-accent)}
+body[data-game-background] :is(dialog,.game-chat) :is(input:not([type=range]):not([type=checkbox]),select){background:var(--ui-bottom);color:var(--ui-text);border-color:color-mix(in srgb,var(--ui-accent) 45%,transparent)}
+body[data-game-background] :is(.game-chat>header,.cue-dialog__heading,.cue-dialog__footer,.table-skin-dialog .cue-dialog__heading){background:var(--ui-bottom);border-color:color-mix(in srgb,var(--ui-accent) 35%,transparent)}
+body[data-game-background] .game-chat .game-chat__message{background:var(--ui-top);color:var(--ui-text)}
+body[data-game-background] .game-chat .game-chat__message.is-mine{background:var(--ui-active)}
+body[data-game-background] :is(#scoreHelpMatch,.board-score-explanation,#ownStats,.billiards-ranking__row.is-self){background:var(--ui-bottom);color:var(--ui-text);border-color:var(--ui-accent)}
+body[data-game-background] #boardGames :is(#series,#turnText,#hint,#history>div,.board-meta){color:var(--ui-muted)}
+body[data-game-background] #boardGames .board-wager-notice:is([data-status=paid],[data-status=refunded]){background:linear-gradient(130deg,var(--ui-text),var(--ui-accent));color:var(--ui-bottom);border-color:var(--ui-accent)}
+body[data-game-background] #boardGames .board-action-icons #autoRoll[aria-pressed=true]{background:var(--ui-accent);color:var(--ui-bottom);border-color:var(--ui-text)}
+
+#game[data-kind=chess] .board-action-icons>#gameBackground{width:38px;height:38px;min-width:38px;min-height:38px;flex:0 0 38px;padding:4px;border-radius:8px}
+#game[data-kind=chess] .board-action-icons>[data-game-reactions]{order:0;margin-right:0}
+#game[data-kind=chess] .board-action-icons>[data-sound-settings]{width:38px;height:38px;min-width:38px;min-height:38px;flex:0 0 38px;padding:4px;border-radius:8px;margin-right:auto}
+#game[data-kind=chess] .board-action-icons{width:100%;margin-left:0}

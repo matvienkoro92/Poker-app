@@ -1016,3 +1016,16 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .has-continuous-backdrop{background-size:var(--continuous-backdrop-size)!important;background-position:var(--continuous-backdrop-position)!important;background-repeat:no-repeat!important}
 .has-continuous-backdrop-pseudo::before{background-size:var(--continuous-backdrop-size)!important;background-position:var(--continuous-backdrop-position)!important;background-repeat:no-repeat!important}
 .player-hall-dialog--immersive::after{background:transparent}
+
+/* Fit the chess preview inside the tabletop's actual usable rectangle,
+   rather than sizing it from the full Telegram viewport height. */
+.living-board-focus--table[data-game=chess] .living-top-table{container-type:size}
+.living-board-focus--table[data-game=chess] .living-chess-table-stack{width:min(88cqw,76cqh,480px)}
+
+/* The board preview has its own return-to-living-room control. */
+.player-hall-dialog:has(.living-board-focus) .player-hall__header [data-hall-close]{display:none}
+
+.living-board-focus--table[data-game=chess] .living-top-table{top:18%}
+
+.living-board-focus--table[data-game=nards] .living-top-table{top:18%;container-type:size}
+.living-board-focus--table[data-game=nards] .living-nards-table-stack{width:min(88cqw,76cqh,480px)}

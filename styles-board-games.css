@@ -378,7 +378,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .board-clock #turnText[data-mine=true]{color:#d3dcb4}
 #game .board-clock #turnText::before{content:'';display:block;flex-shrink:0;width:4px;height:4px;border-radius:50%;background:currentColor;font-size:0}
 #game .turn-line #roll{flex:1 1 100%;width:100%;height:42px;min-height:42px}
-#game .turn-line:not(:has(#roll:not([hidden]))):not(:has(#turnText)){display:none}
+#game[data-kind=chess] .turn-line:not(:has(#roll:not([hidden]))):not(:has(#turnText)){display:none}
 #game .matchup>[data-player].my-turn{border-color:#dbc17c;box-shadow:inset 0 0 0 1px #dcc47d24,0 0 12px #c6ae4e14;animation:turn-card-arrival 1s ease-out 1}
 #game .matchup>[data-player].my-turn small{color:#dfcf98}
 @keyframes turn-card-arrival{0%{box-shadow:inset 0 0 0 1px #ffe3a1bb,0 0 18px #f1d27c66}100%{box-shadow:inset 0 0 0 1px #dcc47d24,0 0 12px #c6ae4e14}}
@@ -673,3 +673,50 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 
 /* Keep queued moves distinct from the last move and selected piece. */
 #chessBoard .square.premove{box-shadow:inset 0 0 0 4px #a970ff;background-image:linear-gradient(#9755df88,#9755df88)}
+
+#game[data-kind=short] .player-clock,#game[data-kind=long] .player-clock{font-size:clamp(30px,8vw,40px);line-height:1.1;margin-top:5px;color:var(--ui-text,#f5e6c5);font-weight:800;letter-spacing:.02em}
+#game .player-clock.is-waiting{visibility:hidden}
+#game .player-clock[data-time-warning=warning]{color:#ffcf70}
+#game .player-clock[data-time-warning=urgent]{color:#ffad91}
+
+/* Turn and time already belong to the player cards; keep move dice at left. */
+#game:is([data-kind=short],[data-kind=long]) #boardClock{display:none}
+#game:is([data-kind=short],[data-kind=long]) .board-meta-details{width:100%;flex-basis:100%}
+#game:is([data-kind=short],[data-kind=long]) #remainingDice{justify-content:flex-start;margin-left:0;margin-right:auto}
+
+#game:is([data-kind=short],[data-kind=long]) .matchup>[data-player]{position:relative;padding-bottom:7px}
+#game:is([data-kind=short],[data-kind=long]) .matchup .player-roll-total{position:absolute;right:8px;top:7px;bottom:auto;grid-column:auto;grid-row:auto;margin:0;padding:0;font-size:11px;line-height:14px}
+#game:is([data-kind=short],[data-kind=long]) .player-clock{font-size:clamp(22px,6vw,26px);line-height:1.1;margin-top:4px}
+
+#game:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div>strong{padding-right:32px}
+
+/* Reserve a fixed label row above move dice, independent of turn or roll. */
+#game:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div>small{display:none}
+#game:is([data-kind=short],[data-kind=long]) .board-meta-tools{position:relative;padding-top:15px;min-height:57px}
+#game:is([data-kind=short],[data-kind=long]) .board-meta-tools>#turnText{position:absolute;left:0;top:0;height:13px;max-width:100%;padding:0;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;background:none;box-shadow:none;font-size:10px;line-height:13px;font-weight:500;color:var(--ui-muted,#b3c7b8)}
+#game:is([data-kind=short],[data-kind=long]) .board-meta-tools>#turnText::before{content:'●';font-size:7px;margin-right:5px;color:var(--ui-accent,#d9c28b)}
+
+/* Keep nickname and countdown on one compact line. */
+#game:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div{display:flex;align-items:center;gap:5px;padding-right:0;min-width:0}
+#game:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div>strong{flex:1;min-width:0;padding-right:0;display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+#game:is([data-kind=short],[data-kind=long]) .matchup .player-clock{flex:none;margin:0;font-size:19px;line-height:23px;letter-spacing:0}
+#game:is([data-kind=short],[data-kind=long]) .matchup .player-clock.is-waiting{display:none}
+#game:is([data-kind=short],[data-kind=long]) .matchup>[data-player]{min-height:61px;padding-top:21px;padding-bottom:8px}
+#game:is([data-kind=short],[data-kind=long]) .matchup .player-roll-total{top:4px;right:7px;font-size:10px;line-height:12px}
+
+/* Roll totals sit outside the cards, aligned to each player's outer edge. */
+#game:is([data-kind=short],[data-kind=long]) .matchup{padding-bottom:17px}
+#game:is([data-kind=short],[data-kind=long]) .matchup>[data-player]{padding-top:8px;padding-bottom:8px;min-height:48px;overflow:visible}
+#game:is([data-kind=short],[data-kind=long]) .matchup .player-roll-total{top:calc(100% + 4px);bottom:auto;right:auto;left:0;font-size:10px;line-height:12px;color:var(--ui-muted,#b3c7b8)}
+#game:is([data-kind=short],[data-kind=long]) .matchup>[data-player="1"] .player-roll-total{left:auto;right:0}
+
+/* Match label shares the reserved caption line immediately above the icons. */
+#game:is([data-kind=short],[data-kind=long]) .board-meta-details{position:relative;gap:0}
+#game:is([data-kind=short],[data-kind=long]) .board-meta #series{position:absolute;z-index:1;top:0;right:0;width:auto;max-width:calc(100% - 110px);margin:0;line-height:13px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#game:is([data-kind=short],[data-kind=long]) .board-meta-tools>#turnText{max-width:105px}
+
+/* Reserve the roll-button slot even while it is hidden between throws. */
+#game:is([data-kind=short],[data-kind=long])>.turn-line{display:flex;box-sizing:border-box;height:48px;min-height:48px;margin:6px auto 4px;padding:0;align-items:center}
+#game:is([data-kind=short],[data-kind=long])>.turn-line #roll{height:42px;min-height:42px;width:100%;flex:1}
+#game:is([data-kind=short],[data-kind=long]) #gameControls>#hint,
+#game:is([data-kind=short],[data-kind=long]) #gameControls>#dice{display:none}

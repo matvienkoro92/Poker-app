@@ -1,0 +1,16 @@
+const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch({args:['--enable-unsafe-swiftshader']});try{const p=await b.newPage({viewport:{width:390,height:844}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('http://cue-room.test/**',r=>{if(new URL(r.request().url()).pathname==='/api/billiards')return r.fulfill({json:{ok:true,allowed:true}});const f=path.join(process.cwd(),new URL(r.request().url()).pathname);return fs.existsSync(f)&&fs.statSync(f).isFile()?r.fulfill({path:f}):r.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body></body>'});});await p.goto('http://cue-room.test/fixture');for(const css of ['styles-base.css','styles-player-hall.css','styles-player-lounge.css'])await p.addStyleTag({url:'http://cue-room.test/'+css});for(const js of ['app-garage-catalog.js','app-billiards-tables.js','app-billiards-cues.js','app-player-hall-equipment.js'])await p.addScriptTag({url:'http://cue-room.test/'+js});await p.evaluate(()=>{window.__pokerTelegramAuth={status:'verified',id:'123456789'};window.pokerEnsureLazyDomains=async()=>{};window.pokerSocialRequest=async(resource)=>resource==='board-games'?{equipment:{nardsBoard:'compass',checkers:'brass',board:'marble-brass',pieces:'arabesque'}}:({hall:{accountId:'room-owner',name:'Герой',nick:'ПокерМанки',self:true,billiardsAccess:true,livingAccess:true,adminGameAccess:true,featured:[],items:[],themes:[],goals:[],achievementProgress:[],wins:3,theme:'walnut',garage:{stats:{level:80},loadout:{...PokerGarage.defaults}},levelProgress:{xp:100,target:200}}});localStorage.setItem('p21:billiards:cue:v1:room-owner','ruby');});await p.addScriptTag({url:'http://cue-room.test/app-player-hall.js'});await p.evaluate(()=>window.pokerOpenVillaGameRoom('nards'));await p.waitForSelector('.player-hall__room[data-space=living]');
+await p.evaluate(()=>{document.documentElement.style.setProperty('--app-top-from-tg','104px');document.documentElement.classList.add('app--telegram-miniapp');});
+await p.locator('[data-living-menu=chess]').click();await p.waitForSelector('.living-board-focus[data-game=chess]');await p.waitForTimeout(800);
+assert.equal(await p.locator('.player-hall__header [data-hall-close]').isVisible(),false);
+assert.equal(await p.locator('[data-living-focus-close]').isVisible(),true);
+for(const [width,height]of [[320,568],[390,844],[440,956],[844,390]]){
+ await p.setViewportSize({width,height});await p.waitForTimeout(200);
+ const board=await p.locator('.living-top-board').boundingBox(),table=await p.locator('.living-top-table').boundingBox();
+ assert.ok(board.x>=table.x&&board.x+board.width<=table.x+table.width+1);
+ assert.ok(board.y>=table.y&&board.y+board.height<=table.y+table.height+1,'Board exceeds tabletop at '+width+'x'+height);
+ assert.ok(Math.abs(board.width-board.height)<2);
+ if(width===390)await p.screenshot({path:'/tmp/living-chess-table-fitted.png'});
+}
+assert.deepEqual(errors,[]);console.log('PASS chess board fits tabletop in Telegram at 320/390/440 and landscape');
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
