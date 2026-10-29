@@ -11,7 +11,7 @@ const {chromium,webkit}=require('playwright'),fs=require('fs'),path=require('pat
  const terms=await page.locator('.play-card__terms').boundingBox(),button=await page.locator('.play-card__play').boundingBox();assert.ok(terms.y+terms.height<=button.y+1,'terms overlap CTA '+width+' '+JSON.stringify({terms,button,root:await page.locator('.play-card').boundingBox()}));
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.locator('[data-evening-villa-game=chess]').scrollIntoViewIfNeeded();let game=await page.locator('[data-evening-villa-game=chess]').boundingBox();assert.ok(game.y+game.height<=navBox.y+2,'game card inaccessible');
- await page.locator('.play-card-extras').scrollIntoViewIfNeeded();const extras=await page.locator('.play-card-extras').boundingBox();assert.ok(extras.y+extras.height<=navBox.y+2,'extras inaccessible');
+ assert.equal(await page.locator('.play-card-extras').isVisible(),false);
  await panel.evaluate(el=>el.scrollTop=0);if(width===390&&engine===chromium)await page.screenshot({path:'/tmp/play-reference-'+mode+'.png'});
- assert.deepEqual(errors,[]);console.log(engine.name()+' '+mode+' '+width+'x'+height+': PASS safe areas, full background, sums/CTA separation, reachable games and extras');await page.close();
+ assert.deepEqual(errors,[]);console.log(engine.name()+' '+mode+' '+width+'x'+height+': PASS safe areas, full background, sums/CTA separation, reachable games, hidden secondary actions');await page.close();
  }}finally{await browser.close();}}})().catch(e=>{console.error(e);process.exitCode=1;});

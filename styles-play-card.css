@@ -71,3 +71,8 @@ body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tourna
 /* Cooler leads in front; Manki follows close behind, with separate hands. */
 .play-card-layout .play-card__cooler{left:21%}
 .play-card-layout .play-card__manki{left:40%}
+
+/* Temporarily hide the secondary tournament actions and lower the composition. */
+.play-card-layout .play-card-extras{display:none}
+.play-card-layout{padding-top:18px!important}
+@media(min-width:700px){.play-card-layout{padding-top:24px!important}}
