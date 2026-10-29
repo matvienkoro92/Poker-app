@@ -1,0 +1,30 @@
+'use strict';
+const {chromium,webkit}=require('playwright'),fs=require('fs'),path=require('path'),assert=require('node:assert/strict');
+(async()=>{fs.mkdirSync('output/villa-telegram',{recursive:true});for(const engine of [chromium,webkit].filter(e=>!process.env.VILLA_LAYOUT_ENGINE||e.name()===process.env.VILLA_LAYOUT_ENGINE)){const browser=await engine.launch();try{for(const [width,height] of [[390,844],[440,956],[844,390]].filter(([w])=>!process.env.VILLA_LAYOUT_WIDTH||w===Number(process.env.VILLA_LAYOUT_WIDTH))){
+ const p=await browser.newPage({viewport:{width,height},isMobile:true,hasTouch:true,deviceScaleFactor:1}),errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.route('http://hall.test/**',r=>{const u=new URL(r.request().url()),f=path.join(process.cwd(),u.pathname);if(fs.existsSync(f)&&fs.statSync(f).isFile())return r.fulfill({path:f});return r.fulfill({contentType:'text/html',body:'<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><button data-player-hall-open>Вилла</button></body></html>'});});
+ await p.goto('http://hall.test/');
+ for(const file of ['styles.css','styles-player-hall.css','styles-hall-achievements.css','styles-player-lounge.css','styles-garage-technical-menu.css'])await p.addStyleTag({url:'http://hall.test/'+file});
+ await p.addScriptTag({path:'app-garage-catalog.js'});
+ await p.evaluate(()=>{document.documentElement.classList.add('app--telegram-miniapp');for(const [k,v]of Object.entries({'--app-top-from-tg':'104px','--tg-ui-top-clearance':'112px','--tg-safe-area-inset-top':'54px','--tg-safe-area-inset-bottom':'34px','--tg-content-safe-area-inset-top':'50px'}))document.documentElement.style.setProperty(k,v);window.Telegram={WebApp:{platform:'ios',initData:'test',safeAreaInset:{top:54,bottom:34},contentSafeAreaInset:{top:50,bottom:0}}};PokerGarage.canAccessHall=()=>true;window.pokerEnsureLazyDomains=async()=>{};
+ const ids=['millionaire','win-100','win-50'],items=ids.map((id,i)=>({id,kind:'achievements',title:['Миллионер клуба','Занос от 100к','Занос от 50 до 100к'][i],metric:{value:i?3:3943757.46,unit:i?'count':'rub'},origin:'Клуб',condition:'Достижение',unlocked:true}));
+ window.pokerSocialRequest=async(service,args)=>service==='board-games'?{equipment:{}}:{hall:{accountId:'me',name:'ПокерМанки',nick:'ПокерМанки',self:true,character:'monkey',selectedTransport:'bicycle',featured:ids,items,themes:[],goals:[],achievementProgress:items,wins:14,theme:'walnut',livingAccess:true,billiardsAccess:true,lounge:{available:true,seats:[null,null,null,null,null],friends:[],liveAvailable:false},garage:{stats:{level:77},loadout:{...PokerGarage.defaults}},levelProgress:{level:77,xp:57562,target:60000}}};});
+ for(const file of ['app-hall-card-pick.js','app-hall-table.js','app-player-lounge.js','app-garage-workshop.js','app-garage-radio.js','app-player-hall.js','app-billiards-cues.js','app-billiards-tables.js','app-player-hall-equipment.js'])await p.addScriptTag({path:file});
+ await p.locator('[data-player-hall-open]').click();await p.locator('.player-hall__room').waitFor();
+ const prefix=engine.name()+'-'+width;let count=0;
+ async function shot(name){await p.waitForTimeout(180);await p.screenshot({path:`output/villa-telegram/${prefix}-${name}.png`});count++;}
+ async function click(sel){await p.locator(sel).first().click();await p.waitForTimeout(1150);}
+ async function room(name){await shot(name);const r=await p.locator('.player-hall__room').boundingBox();if(height>width){assert.ok(r.y>=111, name+' overlaps Telegram toolbar');assert.ok(r.y+r.height<=height-33,name+' overlaps bottom safe area');}else assert.ok(await p.locator('.player-hall-dialog').evaluate(e=>e.scrollHeight>e.clientHeight),'landscape room cannot scroll');}
+ await room('home');if(height>width)assert.ok((await p.locator('.player-hall__display-shelf--achievements').boundingBox()).y>=112,'achievements under Telegram controls');
+ await click('[data-hall-camera=table]');await room('table');await click('[data-hall-camera=wide]');
+ await click('[data-hall-edit=achievements]');await shot('achievement-picker');await click('[data-hall-picker-back]');
+ await click('[data-hall-garage=hair]:visible');await shot('wardrobe');await click('[data-garage-close]');
+ await click('[data-hall-space=lounge]:visible');await room('friends');await click('[data-hall-space=hall]:visible');
+ await click('[data-hall-space=garage]:visible');await room('garage');await click('[data-hall-garage=radio]:visible');await shot('radio');await click('.garage-radio__back');if(height>width)assert.ok((await p.locator('.garage-shelf-inventory').boundingBox()).y>=112,'garage rewards under Telegram controls');
+ const nav=await p.locator('.garage-vehicle-switch').boundingBox();assert.ok(nav.height<=80,'vehicle controls expanded into a sheet');if(height>width)assert.ok(nav.y+nav.height<=height-33,'vehicle controls clipped');
+ await click('[data-garage-vehicle=next]');await room('scooter');
+ await click('[data-hall-space=living]:visible');await room('living');
+ assert.ok(await p.locator('[data-villa-darts]').isDisabled(),'darts must stay closed');
+ await click('[data-living-menu=chess]');await p.locator('.living-board-focus').waitFor();await shot('chess');await click('[data-living-focus-close]');await click('[data-living-menu=nards]');await p.locator('.living-board-focus').waitFor();await shot('nards');await click('[data-living-focus-close]');await click('[data-hall-space=billiards]:visible');await room('billiards');for(const entry of ['tables','cues']){await click('[data-billiards-play='+entry+']');await shot(entry);const box=await p.locator('.hall-equipment[open]').boundingBox();assert.ok(box.y>=112&&box.y+box.height<=height-34,'equipment outside Telegram safe area');await click('.hall-equipment[open] [data-close]');}
+ console.log(prefix+': '+count+' screens checked; errors: '+JSON.stringify(errors));assert.deepEqual(errors,[]);await p.close();
+}}finally{await browser.close();}}})().catch(e=>{console.error(e);process.exitCode=1});

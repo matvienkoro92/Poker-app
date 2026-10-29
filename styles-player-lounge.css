@@ -769,3 +769,6 @@
 .player-hall-dialog .garage-game-passages button:focus-visible{outline:2px solid #ffe5a1;outline-offset:3px;border-radius:10px}
 .garage-house-passage small:empty{display:none}
 .player-hall__room:not([data-space=garage]) .garage-game-passages,.player-hall__room[data-passage-transition] .garage-game-passages{visibility:hidden}
+
+/* The vehicle switcher is a single compact row, never an opaque bottom sheet. */
+.player-hall-dialog .player-hall__camera-ui .garage-vehicle-switch{height:auto;min-height:0;max-height:80px;padding:0;border:0;background:transparent;box-shadow:none;align-self:center}

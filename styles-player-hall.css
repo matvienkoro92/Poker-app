@@ -976,3 +976,24 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .admin-game-stats .admin-game-stats__refresh:disabled{opacity:.5;cursor:wait}
 
 .admin-game-stats .admin-game-stats__totals{white-space:nowrap;font-size:clamp(8px,2.45vw,13px);line-height:1.5;letter-spacing:-.15px}
+
+/* Telegram's toolbar belongs to the viewport, outside the villa's usable room.
+   Size every room from that same safe rectangle, including container-query art. */
+.player-hall-dialog,.player-hall-detail,.hall-equipment{
+ --hall-safe-top:max(env(safe-area-inset-top,0px),var(--app-top-from-tg,0px),var(--tg-ui-top-clearance,0px));
+ --hall-safe-bottom:max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px),var(--app-bottom-nav-inset-tg,0px),var(--tg-content-safe-area-inset-bottom,0px));
+}
+.player-hall-dialog--immersive{--villa-room-top:var(--hall-safe-top,0px);--villa-room-bottom:var(--hall-safe-bottom,0px);background:#191610 url('./assets/player-hall/lounge-garage-panorama-v12.webp') left top/300% 300% no-repeat}
+.player-hall-dialog--immersive>.player-hall__room{position:absolute;top:var(--villa-room-top,0px);bottom:var(--villa-room-bottom,0px);left:0;right:0;height:auto;width:100%;min-height:0}
+.player-hall-dialog--immersive .player-hall__room{--hall-safe-top:0px;--hall-safe-bottom:0px}
+.player-hall-dialog--immersive::after{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--villa-room-bottom,0px);background:#191610;pointer-events:none}
+/* Short landscape WebViews must scroll the room instead of cropping its shelves. */
+@media(orientation:landscape) and (max-height:620px){
+ .player-hall-dialog--immersive{overflow-y:auto}
+ .player-hall-dialog--immersive>.player-hall__room{bottom:auto;height:max(640px,min(175vw,1085px))}
+ .player-hall-dialog--immersive::after{display:none}
+}
+
+/* Equipment and detail dialogs are siblings of the villa, so inset them too. */
+.hall-equipment{position:fixed;top:calc(var(--hall-safe-top,0px) + 8px);bottom:calc(var(--hall-safe-bottom,0px) + 8px);left:0;right:0;margin:0 auto;height:calc(100dvh - var(--hall-safe-top,0px) - var(--hall-safe-bottom,0px) - 16px);max-height:calc(100dvh - var(--hall-safe-top,0px) - var(--hall-safe-bottom,0px) - 16px)}
+.player-hall-detail{top:calc(var(--hall-safe-top,0px) + 12px);bottom:calc(var(--hall-safe-bottom,0px) + 12px);height:fit-content}
