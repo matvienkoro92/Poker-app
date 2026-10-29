@@ -8,7 +8,7 @@ var POKER_STATIC_OLD_CACHES = ["poker-static-v96", "poker-static-v95", "poker-st
 var POKER_PUBLIC_API_CACHE = "poker-public-api-v1";
 var POKER_PUBLIC_API_OLD_CACHES = [];
 var POKER_CHAT_NOTIFY_AUDIO = "./assets/chat-message-notify.mp3?v=20260505";
-var POKER_SW_BUILD = "4.020.1.32";
+var POKER_SW_BUILD = "4.020.1.33";
 
 self.addEventListener("install", function (e) {
   e.waitUntil(
