@@ -1,0 +1,21 @@
+'use strict';
+const {chromium}=require('playwright'),fs=require('fs'),assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch();try{
+ const page=await browser.newPage({viewport:{width:390,height:844}});
+ await page.setContent('<style>html,body{margin:0}dialog{position:fixed;inset:0;margin:0;border:0;max-width:none;max-height:none}iframe{width:100%;height:100%;border:0}</style><dialog><iframe></iframe></dialog>');
+ const source=fs.readFileSync('app-player-hall.js','utf8');
+ const backdrop=source.slice(source.indexOf('  var backdropImages='),source.indexOf('  var backdropFrame='));
+ const fit=source.slice(source.indexOf('  function fitTelegramGameShell('),source.indexOf('  function adminGames('));
+ const frame=page.frames()[1];await frame.addStyleTag({content:fs.readFileSync('styles-billiards.css','utf8')});
+ await frame.evaluate(()=>document.body.style.backgroundImage='url("https://example.invalid/room-with-chandelier.webp")');
+ await page.evaluate(()=>{window.Telegram={WebApp:{platform:'ios',safeAreaInset:{top:44,bottom:20},contentSafeAreaInset:{top:52},onEvent(){},offEvent(){}}};document.querySelector('dialog').showModal();});
+ await page.addScriptTag({content:backdrop+fit+';fitTelegramGameShell(document.querySelector("dialog"));'});
+ await page.waitForFunction(()=>document.querySelector('dialog').style.backgroundImage.includes('chandelier'));
+ await frame.evaluate(()=>document.body.classList.add('billiards-table-view'));
+ await page.waitForFunction(()=>getComputedStyle(document.querySelector('dialog')).backgroundImage.includes('billiards-floor-v2.webp'));
+ assert.match(await frame.evaluate(()=>getComputedStyle(document.body).backgroundImage),/billiards-floor-v2.webp/);
+ assert.equal(await page.locator('dialog').evaluate(el=>getComputedStyle(el).paddingTop),'104px');
+ await frame.evaluate(()=>document.body.classList.remove('billiards-table-view'));
+ await page.waitForFunction(()=>document.querySelector('dialog').style.backgroundImage.includes('chandelier'));
+ console.log('PASS Telegram table hides room art in safe areas, retains native button clearance, and restores room art on exit');
+ }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

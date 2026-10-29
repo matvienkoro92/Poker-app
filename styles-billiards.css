@@ -688,3 +688,42 @@ body.billiards-table-view #tableLeftRail .room-toolbar [data-game-chat]::before{
 
 /* Native text stays crisp independently of the WebGL render scale; retain the subdued ink. */
 .billiards-cloth-hint{color:rgba(255,248,220,.38);white-space:pre-line;text-shadow:none;filter:none;backdrop-filter:none;font-synthesis:none}
+
+/* Continue the table's stone floor through Telegram's native-control area.
+   The parent shell shares this backdrop via continueBackdrop(). */
+body.billiards-table-view{background-image:linear-gradient(#17150f55,#17150f55),url('./assets/player-hall/billiards-floor-v2.webp')!important}
+
+/* Training actions occupy their own reserved dock row, below the table. */
+body.billiards-table-view:has(#trainingControls:not([hidden])){--billiards-dock-height:calc(90px + env(safe-area-inset-bottom,0px))}
+body.billiards-table-view #tableDock:has(#trainingControls:not([hidden])){grid-template-rows:40px 32px;gap:4px}
+body.billiards-table-view #tableDock #trainingControls{position:static;inset:auto;grid-column:1/-1;grid-row:2;display:flex;margin:0;padding:0;background:none;border-radius:0}
+body.billiards-table-view #tableDock #trainingControls[hidden]{display:none}
+body.billiards-table-view #tableDock #trainingControls button{height:32px;min-height:32px;padding:4px 8px;font-size:11px}
+body.billiards-table-view #tableDock #trainingControls #again{grid-column:auto;margin:0;font-size:10px;line-height:1.15}
+
+/* A shared room palette ties the player cards, dock and side controls together. */
+body.billiards-table-view[data-game-background]{background-image:linear-gradient(color-mix(in srgb,var(--ui-bottom) 55%,transparent),color-mix(in srgb,var(--ui-bottom) 55%,transparent)),url('./assets/player-hall/billiards-floor-v2.webp')!important}
+body[data-game-background].billiards-table-view .billiards-matchup>[data-side]{background:linear-gradient(145deg,var(--ui-top),var(--ui-bottom));border-color:color-mix(in srgb,var(--ui-accent) 40%,transparent)}
+body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active{background:linear-gradient(125deg,var(--ui-active),var(--ui-top));border-color:var(--ui-accent);box-shadow:inset 0 1px #ffffff24,0 4px 12px #0003}
+body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active::after{background:var(--ui-accent)}
+body[data-game-background].billiards-table-view .billiards-matchup .billiards-matchup__avatar{background:var(--ui-top);border-color:var(--ui-accent);color:var(--ui-text)}
+body[data-game-background].billiards-table-view .billiards-matchup strong,
+body[data-game-background].billiards-table-view .billiards-matchup__score b{color:var(--ui-text)}
+body[data-game-background].billiards-table-view .billiards-matchup small,
+body[data-game-background].billiards-table-view .billiards-matchup__score em{color:var(--ui-muted)}
+body[data-game-background].billiards-table-view #tableDock{background:var(--ui-bottom);border-color:color-mix(in srgb,var(--ui-accent) 40%,transparent)}
+body[data-game-background].billiards-table-view :is(#tableDock button:not(.primary),#tableLeftRail .room-toolbar button){background:linear-gradient(145deg,var(--ui-top),var(--ui-bottom));border-color:var(--ui-accent);color:var(--ui-text);box-shadow:inset 0 1px #ffffff25,0 2px 5px #0005}
+body[data-game-background].billiards-table-view #tableDock .primary{background:linear-gradient(145deg,var(--ui-text),var(--ui-accent));border-color:var(--ui-accent);color:var(--ui-bottom)}
+body[data-game-background].billiards-table-view #tableLeftRail .room-toolbar #gameBackground{display:flex;flex-direction:column;gap:1px;font-size:10px;padding:3px!important}
+body[data-game-background].billiards-table-view #gameBackground .board-action-icon{width:18px;height:18px}
+body[data-game-background].billiards-table-view #gameBackground small{font-size:7px;line-height:8px}
+
+/* Club-style player cards; the turn marker also works for spectators. */
+body[data-game-background].billiards-table-view .billiards-matchup>[data-side]{border-radius:15px;border-color:color-mix(in srgb,var(--ui-accent) 55%,transparent);background:linear-gradient(145deg,var(--ui-top),var(--ui-bottom));box-shadow:inset 0 1px #ffffff28,inset 0 -2px #0005,0 4px 10px #0005}
+body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active{border:2px solid var(--ui-accent);background:linear-gradient(125deg,color-mix(in srgb,var(--ui-accent) 27%,var(--ui-top)),var(--ui-bottom));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ui-accent) 32%,transparent),inset 0 1px #fff5,0 0 13px color-mix(in srgb,var(--ui-accent) 28%,transparent),0 4px 10px #0005}
+body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active::after{content:'ХОДИТ';position:absolute;inset:-9px 8px auto auto;width:auto;height:auto;bottom:auto;left:auto;padding:3px 7px;border-radius:5px;background:var(--ui-accent);color:var(--ui-bottom);font:800 7px/1.2 system-ui;letter-spacing:.8px;box-shadow:0 1px 4px #0004}
+body[data-game-background].billiards-table-view .billiards-matchup .is-active .billiards-matchup__avatar{background:linear-gradient(135deg,var(--ui-text),var(--ui-accent));border-color:var(--ui-text);color:var(--ui-bottom);box-shadow:0 0 0 2px color-mix(in srgb,var(--ui-accent) 28%,transparent)}
+body[data-game-background].billiards-table-view .billiards-matchup__score{border:1px solid color-mix(in srgb,var(--ui-accent) 35%,transparent);background:color-mix(in srgb,var(--ui-bottom) 80%,black);border-radius:9px}
+body[data-game-background].billiards-table-view .billiards-matchup .is-active .billiards-matchup__score{border-color:var(--ui-accent);background:color-mix(in srgb,var(--ui-top) 80%,black)}
+body[data-game-background].billiards-table-view .billiards-matchup .is-active .billiards-matchup__score b,
+body[data-game-background].billiards-table-view .billiards-matchup .is-active small{color:var(--ui-accent)}
