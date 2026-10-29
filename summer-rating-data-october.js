@@ -6301,6 +6301,26 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "18:00",
+      "name": "FREEROLL 500K",
+      "buyin": 0,
+      "league": 2,
+      "players": [
+        {
+          "nick": "outsider",
+          "place": 9,
+          "reward": 7500,
+          "points": 0
+        },
+        {
+          "nick": "Откотика_Я",
+          "place": 34,
+          "reward": 2000,
+          "points": 0
+        }
+      ]
     }
   ]
 };

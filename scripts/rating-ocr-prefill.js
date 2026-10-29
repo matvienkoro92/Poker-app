@@ -509,6 +509,7 @@ async function parseOcrFile(file) {
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
+  if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   // October 19 entry fees confirmed by the owner; blue headers show starting stacks.
   if (date === "19.10.2026" && blue) {
     const confirmed = {
@@ -760,7 +761,7 @@ async function parseOcrFile(file) {
     date,
     time,
     name: title,
-    league: inferLeague(buyin),
+    league: (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) ? 2 : inferLeague(buyin),
     buyin,
     blue,
     rows: visibleRows
@@ -771,7 +772,7 @@ function formatDraft(tournaments) {
   return tournaments.map((tournament) => {
     const comments = [];
     if (tournament.time.includes("?") || tournament.date.includes("?")) comments.push("# TODO: проверить дату/время");
-    if (!tournament.buyin) comments.push("# TODO: проверить buyin и лигу");
+    if (!tournament.buyin && !(tournament.date === "28.10.2026" && tournament.league === 2 && /FREEROLL/i.test(tournament.name))) comments.push("# TODO: проверить buyin и лигу");
     if (!tournament.name || tournament.name === "TODO") comments.push("# TODO: проверить название турнира");
     const lines = [
       ...comments,
