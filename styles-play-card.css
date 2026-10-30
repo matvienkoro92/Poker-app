@@ -85,3 +85,10 @@ body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tourna
 
 /* Telegram needs slightly less space above the card than the browser layout. */
 html.app--telegram-miniapp .play-card-layout{padding-top:calc(clamp(24px,4dvh,34px) - 7px)!important}
+
+/* Fit the complete card and game row to the space above the navigation. */
+body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tournament:has(.play-card-layout){container-type:size}
+body[data-view=download] .play-flow__panel--tournament .play-card-layout{width:min(100%,590px,calc((100cqh - 54px)*.49))!important;padding-top:10px!important;padding-bottom:10px!important}
+/* Arial is wider than Impact on Android; reserve space for the full title. */
+.play-card-layout .play-card__header h1{font-size:min(6.8cqw,40px);font-family:Arial,system-ui,sans-serif;letter-spacing:-.04em}
+@media(max-height:480px) and (orientation:landscape){body[data-view=download] .play-flow__panel--tournament .play-card-layout{width:min(100%,360px)!important}}
