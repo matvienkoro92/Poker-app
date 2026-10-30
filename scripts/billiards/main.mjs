@@ -1,3 +1,4 @@
+import {gameSpinRewardText} from '../shared/game-spin-reward.mjs';
 import {prepareGameJoin} from '../shared/game-admission.mjs';
 import {mountGameBackground} from '../board-games/backgrounds.mjs';
 import {mountGameChat} from '../shared/game-chat.mjs';
@@ -112,7 +113,7 @@ let rematchReady=[false,false];
 function adopt(d){rematchReady=d.rematchReady||[false,false];gameChat.observe(d);gameReactions.observe(d);frameLoop?.wake();connectionNotice.update(d.connection,d.player);
  if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status('Игра отменена. Ставки возвращены на баланс Poker21.');return;}
  wager=d.wager||null;currentRoomId=d.roomId||'';
- if(wager){clearCreateRequest();wagerNotice.textContent='Ставка каждого — '+wager.stake.toLocaleString('ru-RU')+' фишек. Банк — '+wager.bank.toLocaleString('ru-RU')+'. Комиссия — '+(wager?.feePercent??5)+'%. Победителю — '+wager.payout.toLocaleString('ru-RU')+' фишек.';}
+ if(wager){clearCreateRequest();wagerNotice.textContent='Ставка каждого — '+wager.stake.toLocaleString('ru-RU')+' фишек. Банк — '+wager.bank.toLocaleString('ru-RU')+'. Комиссия — '+(wager?.feePercent??5)+'%. Победителю — '+wager.payout.toLocaleString('ru-RU')+' фишек.';const spinReward=gameSpinRewardText(wager);if(spinReward)wagerNotice.textContent+=' '+spinReward;}
  wagerNotice.hidden=!wager;cancelWaiting.hidden=!wager||d.ready;
  if(!validState(d.state))return;const equipmentKey=JSON.stringify(d.equipment||{table:'classic',cue:'maple'})+':'+(d.equipmentOwner||'');if(sharedEquipment!==equipmentKey){sharedEquipment=equipmentKey;tableSkins.setRoomEquipment(d.equipment?.table||'classic');equipment.setRoomEquipment(d.equipment?.cue||'maple',d.equipmentOwner||d.playerProfiles?.[0]?.name||'');renderedCue='';}if(Array.isArray(d.playerProfiles))playerProfiles=d.playerProfiles;opponentAim=d.aim||null;turnSeconds=d.turnSeconds||null;turnDeadline=d.turnDeadline||null;
  const wasReady=online;connectionError='';if(!playback)clockOffset=d.clockSample??d.serverNow-Date.now();spectating=d.spectator===true;if(mode==='spectator'&&!spectating&&(d.player===0||d.player===1))mode='online';document.body.classList.toggle('billiards-spectator',spectating);document.querySelector('.billiards>header small').textContent=spectating?'ПРОСМОТР ПАРТИИ':'TWO ACES · ВИЛЛА У ОКЕАНА';player=spectating?0:d.player;online=d.ready;$('roomCode').textContent=d.roomId;$('inviteLink').value='https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards_'+d.roomId;$('invite').hidden=d.player!==0;$('create').disabled=$('join').disabled=false;

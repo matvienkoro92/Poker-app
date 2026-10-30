@@ -91,7 +91,7 @@ test('expired room with an already completed draw still grants both spins',async
 test('reward wording follows server confirmation and does not promise rewards on cancellation',async()=>{
  const {gameSpinRewardText}=await import('../scripts/shared/game-spin-reward.mjs');
  assert.equal(gameSpinRewardText({status:'paid'}),'');
- assert.match(gameSpinRewardText({status:'playing',freeSpinReward:{granted:false}}),/каждому \+1/);
+ assert.match(gameSpinRewardText({stake:300,status:'playing',freeSpinReward:{granted:false}}),/каждый игрок получит 1/);
  assert.match(gameSpinRewardText({status:'paid',freeSpinReward:{granted:true}}),/Каждому начислена 1/);
  assert.equal(gameSpinRewardText({status:'refunded',freeSpinReward:{granted:false}}),'');
 });
