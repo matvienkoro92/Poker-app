@@ -130,7 +130,7 @@ for(const [kind,multiplier] of [['single',1],['mars',1.5],['koks',2]])test('nard
 });
 test('cancel returns all maximum escrow; invalid multipliers never debit',async()=>{
  const f=fixture();for(const v of ['2',0,11,Infinity,1.234])await assert.rejects(f.service.call('m1',{action:'create',discipline:'short',stake:100,requestId:'invalid_multiplier_01',koksMultiplier:v}));assert.equal(f.changes.length,0);
- const r=await f.service.call('m1',{action:'create',discipline:'short',stake:101,requestId:'cancel_multiplier_01',marsMultiplier:1.5});assert.equal(r.wager.reservedStake,152);await f.call('m1','cancel',r.roomId);assert.equal(f.balances.get('p1'),10000);
+ const r=await f.service.call('m1',{action:'create',discipline:'short',stake:101,requestId:'cancel_multiplier_01',marsMultiplier:1.5,koksMultiplier:2});assert.equal(r.wager.reservedStake,202);await f.call('m1','cancel',r.roomId);assert.equal(f.balances.get('p1'),10000);
 });
 test('maximum escrow checks host balance and cannot change on retry',async()=>{
  const f=fixture(),body={action:'create',discipline:'short',stake:100,requestId:'fixed_multiplier_0001',marsMultiplier:1.5,koksMultiplier:2};f.balances.set('p1',199);await assert.rejects(f.service.call('m1',body),/200 фишек/);assert.equal(f.changes.length,0);f.balances.set('p1',10000);await f.service.call('m1',body);await assert.rejects(f.service.call('m1',{...body,koksMultiplier:3}),/Параметры/);assert.equal(f.balances.get('p1'),9800);
