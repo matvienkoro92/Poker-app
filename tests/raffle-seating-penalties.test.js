@@ -28,3 +28,11 @@ test('unavailable penalty storage cannot silently grant admission',async()=>{
   await assert.rejects(penaltyCount(async()=>[{error:'offline'}],'ID123','456'),/штрафы/);
   await assert.rejects(recordPenalty(async()=>[{error:'offline'}],winner('one')),/not saved/);
 });
+
+test('owner-cancelled penalty cannot be restored by replaying its cash return',async()=>{
+  const redis=fixture(),w=winner('cancelled');
+  w.cashSeatingMonitor.penaltyCancelledAt='2026-10-30T12:00:00.000Z';
+  await recordPenalty(redis,w);
+  assert.equal(await penaltyCount(redis,'ID123','456'),0);
+  assert.equal(requiredLevel(10,0,await penaltyCount(redis,'ID123','456')),10);
+});
