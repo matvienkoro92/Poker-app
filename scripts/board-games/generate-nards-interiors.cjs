@@ -5,6 +5,14 @@ const {NARDS_INTERIORS,DESIGN_CHECKERS}=require('../../lib/nards-equipment');
 const out=path.join(__dirname,'../../assets/board-games/nards');
 fs.mkdirSync(out,{recursive:true});
 for(const b of NARDS_INTERIORS){
+ // This skin is supplied as a complete two-panel painting, including its lettering.
+ if(b.id==='monfokon'){
+  const sharp=require('sharp'),source=path.join(out,'illustration-monfokon-board-v5.webp');
+  await sharp(source).resize(1200,1000).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b.surface)));
+  for(const [side,left]of [['left',0],['right',618]])await sharp(source).extract({left,top:0,width:582,height:1000}).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b[side+'Surface'])));
+  await sharp(source).resize(480,400).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));
+  continue;
+ }
  const gold=b.accent;
  const star=(cx,cy,r,n=8)=>Array.from({length:n*2},(_,i)=>{const a=i*Math.PI/n-Math.PI/2,d=i%2?r*.43:r;return (cx+Math.cos(a)*d).toFixed(2)+','+(cy+Math.sin(a)*d).toFixed(2);}).join(' ');
  let pattern='',ornament='';
