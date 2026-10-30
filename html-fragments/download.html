@@ -6,7 +6,7 @@
 <section class="play-card-layout" aria-label="Турнир вечера и игры клуба">
   <article class="play-card" aria-labelledby="playCardTitle">
     <img class="play-card__portal" src="./assets/play-card/portal-480.webp" srcset="./assets/play-card/portal-480.webp 480w, ./assets/play-card/portal-800.webp 800w" sizes="(min-width:700px) 560px, 96vw" width="800" height="1200" alt="" decoding="async" fetchpriority="high" />
-    <header class="play-card__header"><h1 id="playCardTitle">ТУРНИР ВЕЧЕРА</h1><div class="play-card__session"><strong id="tournamentDayHomeName">Мэджик</strong><time data-home-ticket-time>18:00 МСК</time></div></header>
+    <header class="play-card__header"><h1 id="playCardTitle">ТУРНИР ВЕЧЕРА</h1><div class="play-card__session"><strong id="tournamentDayHomeName">Мэджик</strong><time data-home-ticket-time>18:00 МСК</time></div><nav class="play-card-extras" aria-label="Ещё о турнире"><button type="button" data-tournament-bet-open><span class="play-card-extras__icon" aria-hidden="true">♠</span><span>Ластлонгер</span></button><button type="button" id="homeTournamentHistoryOpen"><span class="play-card-extras__icon" aria-hidden="true">♛</span><span data-home-tournament-history-label>Победители</span></button></nav></header>
     <img class="play-card__manki" src="./assets/play-card/manki-480.webp" srcset="./assets/play-card/manki-480.webp 480w, ./assets/play-card/manki-800.webp 800w" sizes="(min-width:700px) 230px, 39vw" alt="" decoding="async" />
     <button class="play-card__cooler" type="button" data-play-cooler aria-label="Поговорить с Кулером"><img src="./assets/play-card/cooler-480.webp" srcset="./assets/play-card/cooler-480.webp 480w, ./assets/play-card/cooler-800.webp 800w" sizes="(min-width:700px) 280px, 47vw" width="480" height="720" alt="" decoding="async" /></button>
     <dl class="play-card__terms"><div><dt>Вход</dt><dd id="tournamentDayBuyin">—</dd></div><div><dt>Призы</dt><dd id="tournamentDayGuarantee">—</dd></div></dl>
@@ -20,7 +20,6 @@
     </nav>
   </section>
   <span id="tournamentDayTimer" hidden></span><span id="tournamentDayTimerLabel" hidden></span>
-  <nav class="play-card-extras" aria-label="Ещё о турнире"><button type="button" id="homeTournamentHistoryOpen" hidden><span data-home-tournament-history-label>Победители</span></button><button type="button" data-tournament-bet-open>Ласт-лонгер</button><button type="button" id="homeTournamentShareBtn">Позвать друга</button></nav>
 </section>
 
                   </div>
