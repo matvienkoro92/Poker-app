@@ -76,3 +76,12 @@ body[data-view=download] #app.app:not(#evening-unused) .play-flow__panel--tourna
 .play-card-layout .play-card-extras{display:none}
 .play-card-layout{padding-top:18px!important}
 @media(min-width:700px){.play-card-layout{padding-top:24px!important}}
+
+/* Move the scene down into the spare space instead of leaving a large footer gap. */
+.play-card-layout{padding-top:clamp(24px,4dvh,34px)!important;padding-bottom:14px!important}
+
+/* Crop the baked-in caption divider out of the nards illustration. */
+.play-card-games__grid [data-evening-villa-game=nards] .play-card-games__art img{min-height:134%;width:112%}
+
+/* Telegram needs slightly less space above the card than the browser layout. */
+html.app--telegram-miniapp .play-card-layout{padding-top:calc(clamp(24px,4dvh,34px) - 7px)!important}

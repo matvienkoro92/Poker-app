@@ -11,9 +11,10 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
  const positions=await page.evaluate(()=>{
  const roll=document.querySelector('#roll'),history=document.querySelector('#history'),ys=[];
  for(const hidden of [true,false,true]){roll.hidden=hidden;ys.push(history.getBoundingClientRect().top);}
- return ys;
+ roll.hidden=true;for(const id of ['clearSelection','bearOff'])document.getElementById(id).hidden=false;ys.push(history.getBoundingClientRect().top);return ys;
  });assert.ok(Math.max(...positions)-Math.min(...positions)<1,kind+' '+width+' history moved '+positions);
  }
+ const actionsBox=await page.locator('#nardsMoveActions').boundingBox(),wager=await page.locator('#gameControls').boundingBox();assert.ok(actionsBox.y+actionsBox.height<=wager.y+2);assert.equal(await page.locator('#clearSelection').evaluate(el=>el.parentElement.id),'nardsMoveActions');
  assert.equal(await page.locator('#hint').isVisible(),false);assert.equal(await page.locator('#dice').isVisible(),false);
  console.log('PASS '+kind+' history stays fixed as roll button appears/disappears at 320/390/440');
  }finally{await browser.close();}}})().catch(e=>{console.error(e);process.exitCode=1;});

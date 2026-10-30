@@ -1029,3 +1029,6 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 
 .living-board-focus--table[data-game=nards] .living-top-table{top:18%;container-type:size}
 .living-board-focus--table[data-game=nards] .living-nards-table-stack{width:min(88cqw,76cqh,480px)}
+
+/* Open nards fill the tabletop with a small rim, staying centred in both axes. */
+.living-board-focus--table[data-game=nards] .living-nards-table-stack{width:min(96cqw,100cqh,680px)}
