@@ -1041,3 +1041,22 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .living-board-focus--table[data-game=nards] .living-top-table{top:var(--living-tabletop-top,24%);height:var(--living-tabletop-height,43%)}
 .living-board-focus--table[data-game=nards] .living-nards-table-stack{position:static;width:min(94cqw,100cqh,680px)}
 .living-board-focus--table[data-game=nards] .living-nards-actions{top:calc(100% + 12px);bottom:auto;left:50%;right:auto;width:min(94cqw,100cqh,680px);transform:translateX(-50%)}
+
+/* A small brass-framed tablet rests on the upper armchair. */
+.living-board-focus--table[data-game=nards]>.living-focus-set{display:none}
+.living-board-focus--table[data-game=nards]>header{position:absolute;left:10px;top:8px;right:auto;padding:0;z-index:4}
+.player-hall-dialog .living-board-focus[data-game=nards]>header>[data-living-focus-close]{width:36px;min-height:36px;padding:4px;font-size:20px}
+.living-rating-tablet{position:absolute;z-index:3;left:50%;bottom:calc(100% - var(--living-tabletop-top,24%) + 8px);width:min(72%,360px);aspect-ratio:2.55;box-sizing:border-box;padding:5px;border:1px solid #c8a866;border-radius:12px;background:linear-gradient(130deg,#79542e,#281d15 32%,#805d33 65%,#322419);box-shadow:0 5px 8px #0009,inset 0 0 0 2px #1b1711,inset 0 0 0 3px #bca16b;transform:translateX(-50%) rotate(1deg);color:#f4e4bd}
+.living-rating-screen{height:100%;box-sizing:border-box;display:grid;grid-template-rows:10px 14px 14px minmax(30px,1fr) 14px;gap:2px;padding:4px 6px;border:1px solid #8f8055;border-radius:7px;background:radial-gradient(ellipse at top,#244437,#0a211b 85%);font:10px/1.1 Arial,system-ui,sans-serif;text-shadow:none}
+.living-rating-title{text-align:center;font-size:9px;letter-spacing:.12em;color:#e6c77c}
+.living-rating-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.player-hall-dialog .living-rating-tabs button{min-height:0;min-width:0;padding:1px 4px;border:1px solid #74846a66;border-radius:4px;background:#132d24;color:#c7cbbb;font:700 9px/1 Arial,system-ui,sans-serif;box-shadow:none}
+.player-hall-dialog .living-rating-tabs button[aria-pressed=true]{background:#e2c17e;color:#15281f;border-color:#ffe1a1}
+.living-rating-leaders{min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:1px;align-items:center}
+.living-rating-row{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:4px;font-size:10px;line-height:1}
+.living-rating-row>b{color:#e7c277;text-align:center}.living-rating-row>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.living-rating-row>strong{font-size:9px;color:#f5e3b8}.living-rating-row small{font-size:8px;font-weight:400;color:#b0c3af}.living-rating-row.is-self{color:#ffe29a}
+.player-hall-dialog .living-board-focus button.living-rating-footer{display:flex;align-items:center;justify-content:space-between;gap:4px;min-height:0;min-width:0;padding:2px 0 0;border:0;border-top:1px solid #b99d5b66;border-radius:0;background:none;color:#edcf8a;font:700 9px/1 Arial,system-ui,sans-serif;box-shadow:none;white-space:nowrap}
+.living-rating-empty,.living-rating-leaders>[data-living-rating-retry]{grid-row:1/-1;text-align:center;font-size:10px;line-height:1.2}
+.player-hall-dialog .living-rating-leaders>[data-living-rating-retry]{min-height:0;padding:0;border:0;background:none;color:#edcf8a;font-size:10px}
+@media(min-width:700px){.living-rating-screen{grid-template-rows:12px 17px 17px minmax(36px,1fr) 16px;gap:3px;padding:5px 9px}.living-rating-title,.player-hall-dialog .living-rating-tabs button,.player-hall-dialog .living-board-focus button.living-rating-footer{font-size:10px}.living-rating-row{font-size:12px}.living-rating-row>strong{font-size:11px}}
+@media(max-height:650px){.living-board-focus--table[data-game=nards]{overflow-y:auto}.living-rating-tablet{top:calc(var(--living-tabletop-top,24%) + var(--living-tabletop-height,43%) + 140px);bottom:auto}}
