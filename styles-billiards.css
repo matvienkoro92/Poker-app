@@ -734,3 +734,4 @@ body[data-game-background].billiards-table-view #matchResult button{background:l
 body[data-game-background].billiards-table-view #tableDock :is(#penaltyConfirm,.call-controls){background:var(--ui-bottom);color:var(--ui-text);border-color:var(--ui-accent)}
 body[data-game-background].billiards-table-view #tableLeftRail .ball-shelf{background:color-mix(in srgb,var(--ui-bottom) 92%,transparent);border-color:color-mix(in srgb,var(--ui-accent) 60%,transparent)}
 body[data-game-background].billiards-table-view #tableLeftRail .ball-shelf :is(strong,small,b){color:var(--ui-text)}
+.billiards-ranking__row{grid-template-columns:24px minmax(0,1fr) 30px 30px 30px 40px}
