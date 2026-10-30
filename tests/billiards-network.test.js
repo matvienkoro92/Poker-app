@@ -42,3 +42,11 @@ test('return cancels a frozen read, adopts a fresh snapshot and rejects the late
  let reads=0,release,oldSignal;const session=createSession({request:async(body,signal)=>{if(body.action==='room'&&++reads===1){oldSignal=signal;return new Promise(resolve=>{release=()=>resolve({roomId:'ABCDEFGHJK',revision:1});});}return {roomId:'ABCDEFGHJK',revision:reads?3:1};},onUpdate:d=>updates.push(d.revision),onError:e=>errors.push(e)});
  try{await session.start(true,'');t.mock.timers.tick(150);await new Promise(setImmediate);document.hidden=true;listeners.get('visibilitychange')();document.hidden=false;listeners.get('visibilitychange')();assert.equal(oldSignal.aborted,true);t.mock.timers.tick(0);await new Promise(setImmediate);assert.equal(updates.at(-1),3);release();await new Promise(setImmediate);assert.deepEqual(updates,[1,3]);assert.deepEqual(errors,[]);}finally{session.close();t.mock.timers.reset();global.document=prior;}
 });
+test('confirmed cancellation is sent with admission, never with a spectator request',async()=>{
+ const {createSession}=await import('../scripts/billiards/network.mjs');
+ for(const watch of [false,true]){
+  const calls=[],cancelCreatedRoom={family:'board-games',roomId:'BCDEFGHJKL'};
+  const session=createSession({request:async body=>{calls.push(body);return {roomId:'ABCDEFGHJK',revision:1,spectator:watch};},onUpdate(){},onError(e){assert.fail(e);}});
+  try{await session.start(false,'ABCDEFGHJK',{cancelCreatedRoom,watch});assert.deepEqual(calls[0],watch?{action:'watch',roomId:'ABCDEFGHJK'}:{action:'join',roomId:'ABCDEFGHJK',cancelCreatedRoom});}finally{session.close();}
+ }
+});
