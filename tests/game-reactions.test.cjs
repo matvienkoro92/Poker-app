@@ -27,3 +27,7 @@ test('chess reactions require a valid square and preserve it for both players',a
  for(const square of [undefined,'a0','i4','e9','e4"]'])await assert.rejects(send({...f,body:{...f.body,square}}),e=>e.status===400);
  const result=await send({...f,body:{...f.body,square:'e4'}});assert.equal(result.reaction.square,'e4');assert.equal((await read({...f,roomId:f.body.roomId}))[0].square,'e4');
 });
+
+test('bat reaction is allowlisted for all supported game families',async()=>{
+ for(const family of ['board-games','billiards']){const f=fixture();const result=await send({...f,family,body:{...f.body,clip:'bat'}});assert.equal(result.reaction.clip,'bat');assert.equal((await read({...f,family,roomId:f.body.roomId}))[0].clip,'bat');}
+});
