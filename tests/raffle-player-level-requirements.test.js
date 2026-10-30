@@ -58,3 +58,15 @@ test("LiveStarsPro must reach level 12 for both raffles and spins", () => {
     }
   }
 });
+
+test('owner raises h4pok and Anton51G by three levels for raffles and spins',()=>{
+  for(const [accountId,poker21Id]of [['ID739054','119747'],['ID980494','414811']]){
+    assert.equal(playerRaffleRequiredLevel(accountId,poker21Id),4);
+    for(const check of [playerRaffleLevelError,playerDailyPokerLevelError]){
+      assert.equal(check(accountId,'',3).accessLevel,4);
+      assert.equal(check('',poker21Id,3).accessLevel,4);
+      assert.equal(check(accountId,poker21Id,4),null);
+      assert.equal(check(accountId,poker21Id,8),null);
+    }
+  }
+});
