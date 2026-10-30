@@ -6323,4 +6323,119 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "29.10.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 8000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 1440,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 43800,
+          "points": 0
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 11390,
+          "points": 0
+        },
+        {
+          "nick": "EnotSimuran",
+          "place": 2,
+          "reward": 7350,
+          "points": 0
+        },
+        {
+          "nick": "kriak",
+          "place": 5,
+          "reward": 2500,
+          "points": 0
+        },
+        {
+          "nick": "Dins",
+          "place": 11,
+          "reward": 1160,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 40137.5,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "PLOtnik",
+          "place": 3,
+          "reward": 1576.09,
+          "points": 0
+        },
+        {
+          "nick": "тыква",
+          "place": 2,
+          "reward": 1172.5,
+          "points": 0
+        },
+        {
+          "nick": "Анубис",
+          "place": 4,
+          "reward": 538.75,
+          "points": 0
+        },
+        {
+          "nick": "FreshMeat",
+          "place": 8,
+          "reward": 177.19,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
