@@ -1100,3 +1100,11 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .living-rating-tablet:not(.is-expanded){top:calc(var(--living-tabletop-top,24%) - 100px);height:204px}
 .living-rating-tablet.is-expanded{top:calc(50% + var(--app-top-from-tg,0px)/2);height:min(76dvh,calc(100dvh - var(--app-top-from-tg,0px) - 24px),680px)}
 @media(max-height:650px){.living-rating-tablet:not(.is-expanded){top:8px;right:3%;width:min(150px,42vw);height:174px;z-index:3}}
+
+/* A landscape tablet stands in its own space above the board. */
+.living-board-focus--table[data-game=nards] .living-top-table{top:var(--living-board-top,42%);height:var(--living-board-height,36%)}
+.living-rating-tablet:not(.is-expanded){left:50%;right:auto;top:var(--living-tabletop-top,12%);width:min(76%,300px);height:142px;padding:8px 12px;border:2px solid #666d70;border-radius:15px;background:linear-gradient(125deg,#687175 0%,#202629 8%,#090d10 48%,#414b51 98%);box-shadow:0 14px 14px #0009,inset 0 0 0 2px #080b0d,inset 0 1px 1px #c3cbcc;transform:translateX(-50%) perspective(900px) rotateX(-9deg);z-index:3}
+.living-rating-tablet:not(.is-expanded)::before{content:'';position:absolute;left:4px;top:50%;width:3px;height:3px;border-radius:50%;background:#142838;box-shadow:0 0 0 1px #000}
+.living-rating-tablet:not(.is-expanded)::after{left:32%;right:32%;bottom:-12px;height:12px;transform:skewX(-12deg);background:linear-gradient(#363d41,#141b1e);box-shadow:0 6px 7px #0008}
+.living-rating-tablet:not(.is-expanded) .living-rating-screen{grid-template-rows:12px 15px 15px 10px minmax(0,1fr) 16px;gap:2px;padding:5px 7px;border-color:#526366;border-radius:5px;background:linear-gradient(145deg,#173c35,#091f1d)}
+@media(max-height:650px){.living-board-focus--table[data-game=nards]{overflow-y:auto}.living-board-focus--table[data-game=nards] .living-top-table{min-height:180px}}
