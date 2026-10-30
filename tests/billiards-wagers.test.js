@@ -32,7 +32,7 @@ test('draw refunds both stakes without commission',async()=>{
 });
 test('race to three does not pay after a rack but resignation settles the whole match',async()=>{
  const f=fixture(),r=await f.service.call('m1',{action:'create',stake:101,requestId:'request_0000000002',raceTo:3,discipline:'pool8'});await f.call('m2','join',r.roomId);let raw=f.rooms.get(r.roomId);raw.state.winner=0;const rack=await f.call('m1','room',r.roomId);assert.equal(rack.wager.status,'playing');assert.equal(f.changes.length,2);
- const next=await f.call('m1','rematch',r.roomId,{revision:rack.revision});const done=await f.call('m1','move',r.roomId,{revision:next.revision,move:{type:'resign'}});assert.equal(done.wager.status,'paid');assert.equal(done.wager.winner,1);assert.equal(done.wager.payout,191);
+ const proposal=await f.call('m1','rematch',r.roomId,{revision:rack.revision});assert.equal(proposal.state.winner,0);const next=await f.call('m2','rematch',r.roomId,{revision:proposal.revision});const done=await f.call('m1','move',r.roomId,{revision:next.revision,move:{type:'resign'}});assert.equal(done.wager.status,'paid');assert.equal(done.wager.winner,1);assert.equal(done.wager.payout,191);
 });
 test('stake inputs, changed retry parameters and cancellation after admission are rejected',async()=>{
  const f=fixture();for(const stake of [-1,99,100.5,'100',Infinity])await assert.rejects(f.create(stake));const r=await f.create();await assert.rejects(f.create(200),/Параметры/);await f.call('m2','join',r.roomId);await assert.rejects(f.call('m1','cancel',r.roomId),/Друг уже подключился/);
