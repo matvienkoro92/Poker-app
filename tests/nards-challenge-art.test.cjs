@@ -10,3 +10,10 @@ test('invite art uses the room host snapshot for both leaves, checkers and dice'
  assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('#374655'));assert.ok(svg.includes('width="40"'));
  const basic=art.svgFor({state:{discipline:'long'},equipment:{...equipment,nardsInterior:'classic'}});assert.notEqual(svg,basic);
 });
+
+test('Monfokon hides the same point overlays in challenge artwork as in the editor',()=>{
+ const painted=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'monfokon'}});
+ const classic=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'classic'}});
+ const triangles=svg=>(svg.match(/Q[^"<>]+Z" fill=/g)||[]).length;
+ assert.equal(triangles(painted),0);assert.equal(triangles(classic),24);
+});
