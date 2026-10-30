@@ -6436,6 +6436,38 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "15:00",
+      "name": "Lucky Slot 77K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бардюр",
+          "place": 3,
+          "reward": 7402,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 5424,
+          "points": 0
+        },
+        {
+          "nick": "Рыбнадзор",
+          "place": 9,
+          "reward": 1468,
+          "points": 0
+        },
+        {
+          "nick": "butovskiy",
+          "place": 15,
+          "reward": 677,
+          "points": 0
+        }
+      ]
     }
   ]
 };
