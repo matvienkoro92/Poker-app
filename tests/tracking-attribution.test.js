@@ -150,3 +150,17 @@ test('historical own source is recovered from durable events without accepting a
  const actor='ID888999';h(P+'contexts').set(actor,JSON.stringify({first:{ref:'cccccccc',at:1000},last:{ref:'cccccccc',at:3000}}));h(P+'accounts').set(actor,'1');s(P+'members:aaaaaaaa').add(actor);h(P+'events:'+actor).set('old-own',JSON.stringify({id:'old-own',ref:'aaaaaaaa',type:'referral_opened',at:2000,authenticated:true}));
  const row=(await attribution.readJourneys('aaaaaaaa')).rows.find(r=>r.actor===actor);assert.equal(row.context.first.ref,'aaaaaaaa');assert.equal(row.context.first.at,2000);
 });
+
+test('older confirmed activity prevents a later login from being counted as a new registration', async () => {
+ const account='ID818181',ref='dddddddd',first=Date.now()-1000,login=first+100;
+ h('poker_app:track_links:meta').set(ref,JSON.stringify({label:'History test'}));
+ h(P+'contexts').set(account,JSON.stringify({first:{ref,at:first},last:{ref,at:first}}));
+ s(P+'members:'+ref).add(account);h(P+'accounts').set(account,'1');
+ h('poker_app:telegram_login_at').set(account,String(login));
+ h(require('../lib/tracking-registration-status').ACCOUNT_KNOWN_AT).set(account,String(first-86400000));
+ const row=(await attribution.readJourneys(ref)).rows.find(r=>r.actor===account);
+ assert.equal(row.registrationAt,login,'actual stored login timestamp is not rewritten');
+ assert.equal(row.status,'returning','an older proven participant cannot become a new acquisition');
+ const timeline=await attribution.readTimeline(ref,account);
+ assert.equal(timeline.events.some(e=>e.verified&&e.type==='registration_completed'),false,'do not invent a later signup milestone');
+});

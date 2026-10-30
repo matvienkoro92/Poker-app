@@ -366,6 +366,10 @@ class MemoryRedis {
       }
       if (String(command[1]).includes("guarded-write-v1")) {
         const commands = JSON.parse(args[0]);
+        if (this.failBusinessCommit && commands.some(c => c[0] === "HSETNX" && String(c[2]).startsWith("evt_business_"))) {
+          this.failBusinessCommit = false;
+          return { error: "injected_business_commit_failure" };
+        }
         const locks = JSON.parse(args[1]);
         const balances = JSON.parse(args[2]);
         const guards = JSON.parse(args[5] || "[]");
@@ -518,6 +522,7 @@ class MemoryRedis {
     }
     if (cmd === "SISMEMBER") return this.result(this.s(key).has(String(command[2])) ? 1 : 0);
     if (cmd === "SMEMBERS") return this.result(Array.from(this.s(key)));
+    if (cmd === "SUNION") return this.result([...new Set(command.slice(1).flatMap(k => [...this.s(k)]))]);
     if (cmd === "SSCAN") {
       const cursor = Math.max(0, parseInt(command[2], 10) || 0);
       const countIndex = command.findIndex((value) => String(value).toUpperCase() === "COUNT");
@@ -1705,6 +1710,9 @@ async function testRaffleJoinLeave(redis) {
     { id: 1001, memberId: "mail_ID100001", username: "player" },
     BOT_TOKEN
   );
+  redis.h("poker_app:attribution:v1:contexts").set("ID100001", JSON.stringify({
+    first: { ref: "aaaaaaaa", at: Date.now() - 1000 }, last: { ref: "aaaaaaaa", at: Date.now() - 1000 },
+  }));
   const raffle = {
     id: "contract_raffle",
     title: "Contract raffle",
@@ -1735,10 +1743,26 @@ async function testRaffleJoinLeave(redis) {
   assert.strictEqual(r.statusCode, 401, "raffle invalid auth does not fall back to guest");
   assert.strictEqual(r.body.code, "AUTH_INVALID", "raffle invalid auth returns auth-invalid code");
 
+  redis.failBusinessCommit = true;
+  await assert.rejects(() => call(raffles, req("POST", {}, { pwaSession: linkedAccountToken, action: "join", raffleId: "contract_raffle", deviceId: "dev-contract-device-1" })), error => error.error === "redis_error");
+  assert.equal(JSON.parse(redis.kv.get("poker_app:raffle:contract_raffle")).participants.length, 0);
+  assert.equal(redis.h("poker_app:attribution:v1:events:ID100001").size, 0);
   r = await call(raffles, req("POST", {}, { pwaSession: linkedAccountToken, action: "join", raffleId: "contract_raffle", deviceId: "dev-contract-device-1" }));
   assert.strictEqual(r.statusCode, 200, "raffle join succeeds");
   assert.strictEqual(r.body.raffle.participants.length, 1, "join adds participant");
   assert.strictEqual(r.body.raffle.participants[0].accountId, "ID100001", "join stores account id");
+  const joinedEvents = redis.h("poker_app:attribution:v1:events:ID100001");
+  assert.equal(joinedEvents.size, 1, "participation tracked without a browser analytics request");
+  const joinedEvent = JSON.parse([...joinedEvents.values()][0]);
+  assert.equal(joinedEvent.type, "raffle_joined"); assert.equal(joinedEvent.section, "contract_raffle");
+  const analyticsDay = require(path.join(root, "lib/player-crm-utils")).mskDateKeyFromMs(joinedEvent.at);
+  assert.equal(redis.h("poker_app:analytics:v1:events:day:" + analyticsDay).size, 1, "general analytics shares the transaction");
+  r = await call(raffles, req("POST", {}, { pwaSession: linkedAccountToken, action: "join", raffleId: "contract_raffle", deviceId: "dev-contract-device-1" }));
+  assert.equal(r.body.alreadyJoined, true); assert.equal(joinedEvents.size, 1, "retry cannot duplicate participation");
+  const analytics = loadHandler("analytics");
+  const legacy = await call(analytics, req("POST", {}, { pwaSession: linkedAccountToken, type: "raffle_joined", installation_id: "ins_legacy_browser", session_id: "ses_legacy_browser", event_id: "evt_legacy_browser" }));
+  assert.equal(legacy.body.reason, "server_recorded_event"); assert.equal(joinedEvents.size, 1);
+
 
   redis.h("poker_app:raffle_devices:contract_raffle").delete("dev-contract-device-1");
   r = await call(raffles, req("POST", {}, {
@@ -4657,6 +4681,9 @@ async function testDailyPokerLevelPayout(redis) {
   redis.h("poker_app:visitor_dt_ids").set("tg_1001", id);
   redis.h("poker_app:id_to_user").set(id, "tg_1001");
   redis.h("poker_app:pokerplus_user_ids").set(id, "P21-1001");
+  redis.h("poker_app:attribution:v1:contexts").set(id, JSON.stringify({
+    first: { ref: "aaaaaaaa", at: Date.now() - 1000 }, last: { ref: "aaaaaaaa", at: Date.now() - 1000 },
+  }));
   const previous = new Date(Date.now() - 86400000).toISOString();
   const savedRandomInt = crypto.randomInt;
   try {
@@ -4679,6 +4706,15 @@ async function testDailyPokerLevelPayout(redis) {
       };
       const before = Number(redis.h("poker_app:bonus_balances").get(id) || 0);
       const body = { deviceId: "contract-device-123456", pwaSession: s.user, idempotencyKey: "level-payout-" + level + "-" + handRank, playerLevel: 100, ticketlessStreakEligible: true };
+      const events = redis.h("poker_app:attribution:v1:events:" + id), beforeEvents = events.size;
+      if (beforeEvents === 0) {
+        redis.failBusinessCommit = true;
+        await assert.rejects(() => call(promo, req("POST", { path: "daily-poker/play" }, { ...body, idempotencyKey: "failed-business-event" })), error => error.error === "redis_error");
+        assert.equal(events.size, 0, "failed transaction cannot leave an event");
+        assert.equal(redis.l("poker_app:daily_poker_games_user:" + id).length, 0, "failed tracking cannot spend a spin");
+        assert.equal(Number(redis.h("poker_app:bonus_balances").get(id) || 0), before);
+        seed = seedStart;
+      }
       const result = await call(promo, req("POST", { path: "daily-poker/play" }, body));
       assert.strictEqual(result.statusCode, 200, JSON.stringify(result.body));
       assert.strictEqual(result.body.handRank, handRank, "deterministic hand fixture");
@@ -4692,6 +4728,13 @@ async function testDailyPokerLevelPayout(redis) {
       const replay = await call(promo, req("POST", { path: "daily-poker/play" }, body));
       assert.strictEqual(replay.body.idempotentReplay, true);
       assert.strictEqual(Number(redis.h("poker_app:bonus_balances").get(id) || 0), result.body.bonusBalance, "retry never credits the reward twice");
+      assert.equal(events.size, beforeEvents + 1, "server records spin exactly once without browser analytics");
+      assert.equal(JSON.parse([...events.values()].at(-1)).type, "daily_poker_spin");
+      const spin = JSON.parse([...events.values()].at(-1));
+      const day = require(path.join(root, "lib/player-crm-utils")).mskDateKeyFromMs(spin.at);
+      assert.ok(redis.h("poker_app:analytics:v1:events:day:" + day).has(spin.id));
+      const legacy = await call(loadHandler("analytics"), req("POST", {}, { pwaSession: s.user, type: "daily_poker_spin", installation_id: "ins_legacy_browser", session_id: "ses_legacy_browser", event_id: "evt_legacy_spin" }));
+      assert.equal(legacy.body.reason, "server_recorded_event"); assert.equal(events.size, beforeEvents + 1);
     }
     const credits = redis.l("poker_app:bonus_ledger_all").map(key => JSON.parse(redis.kv.get("poker_app:bonus_ledger:" + key)));
     assert.strictEqual(credits.filter(row => row.source === "daily_poker_ticketless_streak").length, 1, "only eligible completion produces a streak ledger entry");

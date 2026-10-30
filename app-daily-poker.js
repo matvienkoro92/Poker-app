@@ -1280,9 +1280,6 @@
       .then(function (data) {
         if(epoch!==dailyPokerState.sessionEpoch)return;
         clearOptimisticSpend();
-        if (typeof pokerTrackAnalyticsEvent === "function") {
-          pokerTrackAnalyticsEvent("daily_poker_spin", { event_id: "evt_daily_" + String(playIdempotencyKey).replace(/[^a-zA-Z0-9_-]/g, "_") });
-        }
         revealCards(data, evt && evt.currentTarget);
       })
       .catch(function (err) {
