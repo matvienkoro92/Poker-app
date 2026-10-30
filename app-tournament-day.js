@@ -56,9 +56,9 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
     name: "Нокаут",
     buyin: "500₽",
-    guarantee: "150 000₽",
+    guarantee: "200 000₽",
     banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Нокаут — вход 500₽, гарантия 150 000₽",
+    bannerAlt: "Poker21 Нокаут — вход 500₽, гарантия 200 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   },
@@ -183,7 +183,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
     "name": "Нокаут",
     "buyin": "500₽",
     "rebuy": "Не указано",
-    "guarantee": "150 000₽",
+    "guarantee": "200 000₽",
     "hour": 18,
     "minute": 0,
     "durationMinutes": 180,
