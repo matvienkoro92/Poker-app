@@ -10,6 +10,8 @@ for(const [width,height]of [[320,568],[390,844],[440,956],[844,390]]){
  assert.ok(board.x>=table.x&&board.x+board.width<=table.x+table.width+1);
  assert.ok(board.y>=table.y&&board.y+board.height<=table.y+table.height+1,'Board exceeds tabletop at '+width+'x'+height);
  assert.ok(board.width>0&&board.height>0);
+ const actions=await p.locator('.living-nards-actions').boundingBox();assert.ok(actions.y>=table.y+table.height+10,'buttons must sit below the tabletop');assert.ok(board.x>table.x&&board.x+board.width<table.x+table.width,'board needs side insets');
+ const backdrop=await p.locator('.player-hall-dialog').boundingBox(),scale=Math.max(backdrop.width/1122,backdrop.height/1402),imageHeight=1402*scale,imageTop=backdrop.y+(backdrop.height-imageHeight)/2;assert.ok(Math.abs(table.y-(imageTop+imageHeight*.25))<2,'table must follow the photographed tabletop, including Telegram safe area');assert.ok(actions.y>=imageTop+imageHeight*.675,'buttons must be below the photographed table edge');
  if(width===390)await p.screenshot({path:'/tmp/living-nards-table-fitted.png'});
 }
 assert.deepEqual(errors,[]);console.log('PASS nards board fits tabletop in Telegram at 320/390/440 and landscape');

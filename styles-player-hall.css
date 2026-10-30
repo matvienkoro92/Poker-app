@@ -1036,3 +1036,8 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 /* Compact passage buttons between the living room and billiards room. */
 .player-hall-dialog :is(.villa-billiards-living,.villa-living-return){gap:2px;padding:6px 9px;border-radius:17px;font-size:19px;line-height:1.1}
 .player-hall-dialog :is(.villa-billiards-living,.villa-living-return) span{font-size:10px;line-height:1.2}
+
+/* Align the open nards with the photographed tabletop; controls sit below it. */
+.living-board-focus--table[data-game=nards] .living-top-table{top:var(--living-tabletop-top,24%);height:var(--living-tabletop-height,43%)}
+.living-board-focus--table[data-game=nards] .living-nards-table-stack{position:static;width:min(94cqw,100cqh,680px)}
+.living-board-focus--table[data-game=nards] .living-nards-actions{top:calc(100% + 12px);bottom:auto;left:50%;right:auto;width:min(94cqw,100cqh,680px);transform:translateX(-50%)}
