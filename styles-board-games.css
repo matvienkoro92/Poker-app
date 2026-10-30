@@ -728,3 +728,9 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #nardsMoveActions{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:42px}
 #nardsMoveActions:not(:has(button:not([hidden]))){display:none}
 #game #nardsMoveActions>button{flex:1;min-width:0;height:42px;min-height:42px;padding:5px 8px;font-size:12px;font-weight:650;color:var(--ui-text,#f5e6c5);border:1px solid var(--ui-accent,#b4965a);border-radius:12px;background:linear-gradient(145deg,var(--ui-top,#304e3e),var(--ui-bottom,#192f25))}
+
+/* Spectators see checker colors below each nickname, alongside the clock. */
+#game[data-spectator=true]:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:5px;row-gap:1px;flex:1}
+#game[data-spectator=true]:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div>strong{grid-column:1;grid-row:1}
+#game[data-spectator=true]:is([data-kind=short],[data-kind=long]) .matchup [data-player]>div>small{display:block;grid-column:1;grid-row:2;font-size:10px;line-height:12px;letter-spacing:0;color:var(--ui-muted,#b3c7b8);font-weight:400}
+#game[data-spectator=true]:is([data-kind=short],[data-kind=long]) .matchup .player-clock{grid-column:2;grid-row:1/3}

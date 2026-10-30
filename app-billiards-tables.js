@@ -75,8 +75,8 @@ const skins=Object.freeze([
   "body": "#122237",
   "description": "Синее сукно · тёмный лак · платина",
   "ornament": 1,
-  "image": "./assets/player-hall/billiards-table-ocean-v4.webp",
-  "thumbnail": "./assets/player-hall/billiards-table-ocean-v3-thumb.webp"
+  "image": "./assets/player-hall/billiards-table-ocean-v5.webp",
+  "thumbnail": "./assets/player-hall/billiards-table-ocean-v5-thumb.webp"
  },
  {
   "id": "silver",

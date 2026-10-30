@@ -1032,3 +1032,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 
 /* Open nards fill the tabletop with a small rim, staying centred in both axes. */
 .living-board-focus--table[data-game=nards] .living-nards-table-stack{width:min(96cqw,100cqh,680px)}
+
+/* Compact passage buttons between the living room and billiards room. */
+.player-hall-dialog :is(.villa-billiards-living,.villa-living-return){gap:2px;padding:6px 9px;border-radius:17px;font-size:19px;line-height:1.1}
+.player-hall-dialog :is(.villa-billiards-living,.villa-living-return) span{font-size:10px;line-height:1.2}
