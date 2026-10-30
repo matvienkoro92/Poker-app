@@ -738,3 +738,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 /* Monfokon is a complete painting: preserve its lettering and clear the point inlays. */
 .nards-board[data-interior=monfokon] .nards-point-blade{display:none}
 .nards-board[data-interior=monfokon] .nards-half-art{background-size:100% 100%}
+
+/* Opposite-tone silhouette rims keep every material readable on either square. */
+.chess-board .square>.piece:not(.black),#chessEquipment .piece:not(.black),#moveAnimation>.piece:not(.black){filter:drop-shadow(-.8px 0 0 #17221e) drop-shadow(.8px 0 0 #17221e) drop-shadow(0 -.8px 0 #17221e) drop-shadow(0 .8px 0 #17221e)!important}
+.chess-board .square>.piece.black,#chessEquipment .piece.black,#moveAnimation>.piece.black{filter:drop-shadow(-.8px 0 0 #fff1ce) drop-shadow(.8px 0 0 #fff1ce) drop-shadow(0 -.8px 0 #fff1ce) drop-shadow(0 .8px 0 #fff1ce) drop-shadow(0 1px .6px #17221e)!important}

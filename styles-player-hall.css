@@ -1060,3 +1060,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .player-hall-dialog .living-rating-leaders>[data-living-rating-retry]{min-height:0;padding:0;border:0;background:none;color:#edcf8a;font-size:10px}
 @media(min-width:700px){.living-rating-screen{grid-template-rows:12px 17px 17px minmax(36px,1fr) 16px;gap:3px;padding:5px 9px}.living-rating-title,.player-hall-dialog .living-rating-tabs button,.player-hall-dialog .living-board-focus button.living-rating-footer{font-size:10px}.living-rating-row{font-size:12px}.living-rating-row>strong{font-size:11px}}
 @media(max-height:650px){.living-board-focus--table[data-game=nards]{overflow-y:auto}.living-rating-tablet{top:calc(var(--living-tabletop-top,24%) + var(--living-tabletop-height,43%) + 140px);bottom:auto}}
+
+/* Use the same light/dark silhouette separation as the live chessboard. */
+.living-preview-square>.piece:not(.black){filter:drop-shadow(-.8px 0 0 #17221e) drop-shadow(.8px 0 0 #17221e) drop-shadow(0 -.8px 0 #17221e) drop-shadow(0 .8px 0 #17221e)!important}
+.living-preview-square>.piece.black{filter:drop-shadow(-.8px 0 0 #fff1ce) drop-shadow(.8px 0 0 #fff1ce) drop-shadow(0 -.8px 0 #fff1ce) drop-shadow(0 .8px 0 #fff1ce) drop-shadow(0 1px .6px #17221e)!important}

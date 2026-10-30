@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),sharp=require('sharp'),art=require('../lib/chess-challenge-art');
 test('chess invitation uses the selected board and the same piece sprites as the preview',async()=>{
  const view={state:{discipline:'chess',whitePlayer:0},equipment:{board:'marble-brass',pieces:'arabesque'}};
- const svg=await art.svgFor(view);assert.equal((svg.match(/data-piece=/g)||[]).length,32);assert.ok(!svg.includes('./assets/'));assert.ok(!svg.includes('https://'));
+ const svg=await art.svgFor(view);assert.equal((svg.match(/data-piece=/g)||[]).length,32);assert.equal((svg.match(/filter="url\(#chess-contrast-/g)||[]).length,32);assert.ok(svg.includes('#fff1ce'));assert.ok(svg.includes('#17221e'));assert.ok(!svg.includes('./assets/'));assert.ok(!svg.includes('https://'));
  const photo=await art.render(view),meta=await sharp(photo).metadata();assert.equal(meta.width,900);assert.equal(meta.height,900);assert.equal(meta.format,'jpeg');assert.ok(photo.length<1024*1024);
  const changed=await art.render({...view,equipment:{board:'ocean',pieces:'classic-navy'}});assert.notDeepEqual(photo,changed);
  const stats=await sharp(photo).stats();assert.ok(stats.channels.some(c=>c.stdev>30));require('fs').writeFileSync('/tmp/chess-host-equipment-preview.jpg',photo);
