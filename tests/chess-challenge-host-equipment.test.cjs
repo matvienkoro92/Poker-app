@@ -1,0 +1,12 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto'),path=require('node:path');
+test('published chess photo exactly matches the validated host room board and pieces, not later personal equipment',async()=>{
+ const rooms=new Map(),host={board:'ebony-arabesque',pieces:'prison-wardens'},identity={id:7};
+ const base=require('../lib/board-games-room')({profile:async()=>({name:'Создатель',accountId:'ID123456',level:100}),load:async id=>structuredClone(rooms.get(id)),create:async(id,r)=>{rooms.set(id,structuredClone(r));return true;},cas:async()=>true});
+ const room=await base.call('host',{action:'create',discipline:'chess',equipment:host,side:'1'},identity);assert.equal(room.equipment.board,host.board);assert.equal(room.equipment.pieces,host.pieces);
+ const expected=await require('../lib/chess-challenge-art').render(room),sent=[],mod={exports:{}};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/board-games-challenge'),'utf8'),{module:mod,FormData,Blob,AbortSignal,console,require:id=>id==='./game-challenge-standing'?async()=> 'Рейтинг':id==='./tracking-link-milestones'?{playersGroup:async()=>'-10042'}:id==='./telegram-group-policy'?{guardedFetch:async(url,options)=>{sent.push({url,form:options.body});return {ok:true,json:async()=>({ok:true,result:{message_id:7}})};}}:require(require.resolve(id,{paths:[path.resolve('lib')]}))});
+ await mod.exports({member:'host',identity,roomId:room.roomId,token:'fixture',commands:async rows=>rows.map(()=>1),service:{call:async(member,body,receivedIdentity)=>{assert.equal(receivedIdentity,identity);return base.call(member,{...body,equipment:{board:'walnut',pieces:'classic'}},receivedIdentity);}}});
+ await assert.rejects(mod.exports({member:'host',identity,discipline:'long',roomId:room.roomId,token:'fixture',commands:async rows=>rows.map(()=>1),service:base}),e=>e.status===409&&/не совпадает/.test(e.message));
+ assert.equal(sent.length,1);assert.match(sent[0].url,/sendPhoto$/);const actual=Buffer.from(await sent[0].form.get('photo').arrayBuffer());assert.equal(crypto.createHash('sha256').update(actual).digest('hex'),crypto.createHash('sha256').update(expected).digest('hex'));assert.match(sent[0].form.get('caption'),/Доска: Драконы эбена\nФигуры: Заключённые и надзиратели/);assert.deepEqual(rooms.get(room.roomId).equipment,room.equipment);fs.writeFileSync('/tmp/chess-custom-host-challenge.jpg',actual);
+});
