@@ -1338,6 +1338,7 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-30-10-2026-league1-blackout-220k-21h.jpg",
     "rating-compressed-preview/rating-30-10-2026-league1-turbina-500s-pko-2-3-22h.jpg",
     "rating-compressed-preview/rating-30-10-2026-league1-black-friday-450k-18h.jpg",
-    "rating-compressed-preview/rating-30-10-2026-league1-lucky-slot-222k-20h.jpg"
+    "rating-compressed-preview/rating-30-10-2026-league1-lucky-slot-222k-20h.jpg",
+    "rating-compressed-preview/rating-30-10-2026-league1-friday-event-pppoker.jpg"
   ]
 };

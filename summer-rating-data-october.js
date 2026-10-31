@@ -6664,6 +6664,20 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "—",
+      "name": "🏆FRIDAY EVENT",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 156400,
+          "points": 0
+        }
+      ]
     }
   ]
 };
