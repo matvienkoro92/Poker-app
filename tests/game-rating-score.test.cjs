@@ -6,7 +6,7 @@ test('rating balances winning proportion with evidence from completed games',()=
  assert.ok(score({wins:20,losses:0})>score({wins:1,losses:0}));
  assert.ok(score({wins:10,losses:1})>score({wins:10,losses:20}));
  assert.ok(score({wins:10,draws:1})>score({wins:10,losses:1}));
- for(let w=0;w<20;w++)for(let l=0;l<20;l++)for(let d=0;d<4;d++){const stats={wins:w,losses:l,draws:d},n=score(stats);assert.ok(Number.isFinite(n)&&n>=0);assert.ok(score({...stats,wins:w+1})>n);assert.ok(score({...stats,losses:l+1})<=n);assert.ok(score({...stats,draws:d+1})>n);if(w+d)assert.ok(score({wins:w*2,losses:l*2,draws:d*2})>n);}
+ for(let w=0;w<20;w++)for(let l=0;l<20;l++)for(let d=0;d<4;d++){const stats={wins:w,losses:l,draws:d},n=score(stats);assert.ok(Number.isFinite(n)&&n>=0);assert.ok(score({...stats,wins:w+1})>n);assert.ok(score({...stats,losses:l+1})<=n);assert.equal(score({...stats,draws:d+1}),n);if(w)assert.ok(score({wins:w*2,losses:l*2,draws:d*2})>n);}
 });
 test('zero-game users stay unranked and ties are deterministic without changing counters',()=>{
  const input=[{id:'A',wins:20,losses:5,draws:0},{id:'B',wins:100,losses:900,draws:0},{id:'C',wins:20,losses:5,draws:0},{id:'D',wins:0,losses:0,draws:0}],before=structuredClone(input);
@@ -14,3 +14,5 @@ test('zero-game users stay unranked and ties are deterministic without changing 
 });
 
 test('larger winning record matters more than a short unbeaten streak',()=>{assert.ok(score({wins:10,losses:10})>score({wins:5,losses:0}));assert.ok(score({wins:17,losses:16,draws:2})>score({wins:8,losses:1,draws:1}));assert.equal(score({wins:10,losses:0}),500);assert.equal(score({wins:0,losses:100}),0);});
+
+test('draws alone stay unranked and do not change weighted scores',()=>{assert.equal(score({wins:0,losses:0,draws:100}),0);assert.deepEqual(rankPlayers([{id:'draws',wins:0,losses:0,draws:100}]),[]);assert.equal(score({wins:2,losses:1,weightedWins:3,weightedLosses:2,weightedDraws:100}),score({wins:2,losses:1,weightedWins:3,weightedLosses:2}));});

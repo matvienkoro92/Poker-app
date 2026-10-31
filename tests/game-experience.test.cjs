@@ -1,8 +1,8 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{lua,lauxlib,lualib,to_luastring,to_jsstring}=require('fengari'),xp=require('../lib/game-experience');
 function room(stake=0,winner=0){return {id:'ABCDEFGHJK',gameXpVersion:1,gameXpActions:[2,3],gameXpStake:stake,wagered:stake>0,players:['a','b'],playerProfiles:[{accountId:'ID123456'},{accountId:'ID654321'}],match:{number:1,round:1},state:{winner,discipline:'chess'}};}
-test('agreed XP table, draws equal defeats, original stake and one reward per round',()=>{
- for(const [stake,win,loss]of [[0,60,30],[100,200,100],[300,200,100],[499,200,100],[500,400,200],[1000,400,200]])for(const winner of [0,1,'draw']){const r=room(stake,winner);r.reservedStake=2000;xp.prepare(r);assert.deepEqual(r.gameExperience.perPlayer,[0,1].map(i=>winner===i?win:loss));assert.equal(r.gameExperience.granted,true);}
+test('agreed XP table, draws earn no XP, original stake and one reward per round',()=>{
+ for(const [stake,win,loss]of [[0,60,30],[100,200,100],[300,200,100],[499,200,100],[500,400,200],[1000,400,200]])for(const winner of [0,1,'draw']){const r=room(stake,winner);r.reservedStake=2000;xp.prepare(r);assert.deepEqual(r.gameExperience.perPlayer,[0,1].map(i=>winner==='draw'?0:winner===i?win:loss));assert.equal(r.gameExperience.granted,winner!=='draw');}
  for(const patch of [{gameXpVersion:undefined},{gameXpActions:[1,0]},{players:['a',null]},{state:{winner:0,discipline:'darts'}},{playerProfiles:[{accountId:'ID123456'},{accountId:'ID123456'}]}]){const r={...room(),...patch};xp.prepare(r);assert.ok(!r.gameExperience?.granted);}
  const r=room();xp.prepare(r);const original=r.gameExperience;r.state.winner=1;xp.prepare(r);assert.equal(r.gameExperience,original);r.match.round=2;xp.prepare(r);assert.notEqual(r.gameExperience,original);
 });
@@ -45,4 +45,13 @@ hashes['${xp.TOTALS}'].ID654321='0'
 assert(run(0,room)==1)
 assert(tonumber(hashes['${xp.TOTALS}'].ID123456)==160)
 assert(tonumber(hashes['${xp.TOTALS}'].ID654321)==30)
+`));
+for(const family of ['board-games','billiards'])test(family+': drawn CAS never awards XP even with a stale positive reward',()=>run(family,`
+room.gameXpVersion=1
+room.state.winner='draw'
+room.gameExperience={event='ABCDEFGHJK:1:1',granted=true,perPlayer={60,30}}
+assert(run(0,room)==1)
+assert(hashes['${xp.TOTALS}']==nil)
+assert(hashes['poker_app:pokerplus_profiles']==nil)
+assert(hashes['${xp.RECEIPTS}']==nil)
 `));

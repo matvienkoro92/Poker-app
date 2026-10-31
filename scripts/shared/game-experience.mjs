@@ -1,5 +1,5 @@
 import rules from '../../lib/game-experience-rules.js';
-export function gameExperiencePreview(stake=0){const {participation,win}=rules.rewards(stake);return 'Опыт герою за партию: победа +'+win+', поражение или ничья +'+participation+'. Нужны игровые ходы обоих участников. В матче — за каждую партию; бронь не учитывается.';}
+export function gameExperiencePreview(stake=0){const {participation,win}=rules.rewards(stake);return 'Опыт герою за партию: победа +'+win+', поражение +'+participation+', ничья +0. Нужны игровые ходы обоих участников. В матче — за каждую партию; бронь не учитывается.';}
 const announced=new Set();
 export function paintGameExperience(container,reward,player){
  let card=container.querySelector('.game-experience');
