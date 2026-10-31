@@ -103,6 +103,7 @@ function initProfilePokerPlus() {
   var POKERPLUS_AUTO_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000;
   var pokerPlusStatsVisibilityToOthers = { cash: false, mtt: false, sng: false };
   var pokerPlusProfileLinked = false;
+  var pokerPlusGameExperience = 0;
   var pokerPlusProfileLoading = false;
   var pokerPlusAutoRefreshPromise = null;
   var pokerPlusActiveLoadPromise = null;
@@ -563,10 +564,10 @@ function initProfilePokerPlus() {
   function updateProfileStatusTextVisibility() {
     var statusSection = document.getElementById("profileStatusSection");
     if (statusSection && statusSection.classList) {
-      statusSection.classList.toggle("profile-status--unlinked", !pokerPlusProfileLinked);
+      statusSection.classList.toggle("profile-status--unlinked", !pokerPlusProfileLinked && !pokerPlusGameExperience);
     }
     var canRenderUnlinkedStatus = !pokerPlusProfileLinked && !pokerPlusProfileLoading && typeof setProfileStatusUnlinked === "function";
-    if (canRenderUnlinkedStatus) setProfileStatusUnlinked();
+    if (canRenderUnlinkedStatus) { if(pokerPlusGameExperience>0&&typeof setProfileStatusFromProfile==="function")setProfileStatusFromProfile({gameExperience:pokerPlusGameExperience},false);else setProfileStatusUnlinked(); }
     if (profileStatusTitle) profileStatusTitle.hidden = !!pokerPlusProfileLoading;
     if (!pokerPlusProfileLinked && !canRenderUnlinkedStatus && profileStatusTitle) profileStatusTitle.textContent = "Привяжите аккаунт";
     if (profileStatusProgressText) profileStatusProgressText.hidden = !!pokerPlusProfileLoading || (!pokerPlusProfileLinked && !canRenderUnlinkedStatus);
@@ -1630,6 +1631,7 @@ function initProfilePokerPlus() {
   }
 
   function renderProfile(profile, linked) {
+    pokerPlusGameExperience=Math.max(0,Number(profile&&profile.gameExperience)||0);
     var p = profile && typeof profile === "object" ? profile : null;
     if (linked && p && p.statsPending && pokerPlusProfileHasOnlyZeroStats(p)) {
       p = pokerPlusProfileWithoutStats(p);
@@ -1864,6 +1866,14 @@ function initProfilePokerPlus() {
       loadProfile(true).catch(function () {});
     }, 250);
   }
+
+  var gameExperienceEvents = new Set();
+  window.addEventListener("message", function (event) {
+    if (event.origin !== location.origin || event.data?.type !== "p21-game-experience-earned" || !event.data.event || gameExperienceEvents.has(event.data.event)) return;
+    // Treat this as cache invalidation only; XP always comes from the server.
+    gameExperienceEvents.add(event.data.event);
+    Promise.resolve(pokerPlusActiveLoadPromise).catch(function () {}).then(function () { return loadProfile(false, {silent:true}); }).catch(function () {});
+  });
 
   function loadProfile(refresh, options) {
     options = options || {};

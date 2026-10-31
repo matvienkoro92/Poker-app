@@ -2947,6 +2947,7 @@ function pokerProfileStatusFromProfile(profile, linked) {
   var sngCount = Math.max(sngCountRaw, sngItm, sngFirst);
   var points =
     fee +
+    pokerProfileRakeNumber(profile && profile.gameExperience) +
     mttCount * 300 +
     Math.max(0, mttItm - mttFirst) * 700 +
     mttFirst * 3000 +
@@ -3167,7 +3168,7 @@ function ensureProfilePointsInfoModal() {
         '<button type="button" class="profile-points-info-modal__close" aria-label="Закрыть" data-profile-points-info-close>×</button>' +
       "</header>" +
       '<div class="profile-points-info-modal__body">' +
-        '<p class="profile-points-info-modal__lead">Уровень считается за всё время по привязанному профилю Poker21.</p>' +
+        '<p class="profile-points-info-modal__lead">Уровень складывается из опыта Poker21 и завершённых онлайн-партий в нарды, шахматы и бильярд.</p>' +
         '<ul class="profile-points-info-modal__list">' +
           "<li><strong>Кеш:</strong> 1 очко за 1 ₽ рейка.</li>" +
           "<li><strong>MTT:</strong> 300 очков за участие.</li>" +
@@ -3177,6 +3178,10 @@ function ensureProfilePointsInfoModal() {
           "<li><strong>SNG ITM:</strong> 140 очков, если попал в призы.</li>" +
           "<li><strong>Победа в SNG:</strong> 400 очков вместо ITM-бонуса.</li>" +
           "<li><strong>Привязка Poker21:</strong> 500 очков.</li>" +
+          "<li><strong>Бесплатные онлайн-игры:</strong> победа — 60 опыта, поражение или ничья — 30.</li>" +
+          "<li><strong>Ставка до 499 фишек:</strong> победа — 200 опыта, поражение или ничья — 100.</li>" +
+          "<li><strong>Ставка от 500 фишек:</strong> победа — 400 опыта, поражение или ничья — 200.</li>" +
+          "<li>Берётся исходная ставка без брони и множителей. Опыт за каждую партию в матче, без повторной награды за итог матча. Только игры между разными аккаунтами, в которых оба сделали игровые ходы. Тренировка, компьютер и отмена опыта не дают.</li>" +
         "</ul>" +
         '<h4 class="profile-points-info-modal__subtitle">Сколько очков нужно на уровень</h4>' +
         '<ul class="profile-points-info-modal__level-list">' +
