@@ -10,6 +10,7 @@ function normalizeWinterNick(n) {
   n = n != null ? String(n).trim() : "";
   if (!n) return n;
   var lower = n.toLowerCase();
+  if (["mrrebuy", "coo1er91", "necoo1er91", "кулер"].indexOf(lower) !== -1) return "Coo1er91";
   if (lower === "pryanik2la") return "Пряник";
   if (lower === "фокс") return "Фокс";
   if (/^wa{3,5}r+$/.test(lower)) return "Waaar";

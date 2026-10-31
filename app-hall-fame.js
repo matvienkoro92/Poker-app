@@ -1749,9 +1749,13 @@ function hallFishReferralsRows(data) {
   }));
 }
 
+function hallFishDayHeroPrize() {
+  return hallFishActiveDayHeroMonth === "10.2026" ? "35 000" : (hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all" ? "25 000" : "15 000");
+}
+
 function hallFishAchievementSpecs(data) {
   var septemberAward = hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all";
-  var heroPrize = septemberAward ? "25 000" : "15 000";
+  var heroPrize = hallFishDayHeroPrize();
   return [
     { key: "dayHero", title: "Герой дня (" + heroPrize + "р)", sectionTitle: "Герой дня", description: "", awardText: "Награду " + heroPrize + " ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» " + (septemberAward ? "в сентябре." : "за выбранный месяц."), rows: data && data.dayHero },
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
@@ -1846,7 +1850,7 @@ function hallFishAchievementTrophyHtml(spec) {
   }[spec.key];
   if (!art) return '<span class="hall-fish-trophy-fallback">' + hallFishEsc(spec.title) + '</span>';
   return '<img class="hall-fish-trophy-art" src="' + art + '" width="420" height="420" alt="' + hallFishEsc(spec.title) + '" decoding="async">' +
-    (spec.key === "dayHero" ? '<span class="hall-fish-trophy-prize" aria-hidden="true">' + (hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all" ? "25 000" : "15 000") + ' ₽</span>' : '');
+    (spec.key === "dayHero" ? '<span class="hall-fish-trophy-prize" aria-hidden="true">' + hallFishDayHeroPrize() + ' ₽</span>' : '');
 }
 
 function hallFishRenderAchievementRows(data) {

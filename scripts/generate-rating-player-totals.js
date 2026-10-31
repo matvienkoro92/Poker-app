@@ -27,6 +27,7 @@ sources.forEach((file) => {
 function normalizeNick(value) {
   const original = value == null ? "" : String(value).trim();
   const lower = original.toLowerCase();
+  if (["mrrebuy", "coo1er91", "necoo1er91", "кулер"].indexOf(lower) !== -1) return "Coo1er91";
   if (lower === "pryanik2la") return "Пряник";
   if (lower === "фокс") return "Фокс";
   if (/^wa{3,5}r+$/.test(lower)) return "Waaar";
@@ -81,6 +82,7 @@ const output =
   "  var totals = " + JSON.stringify(sortedTotals) + ";\n" +
   "  window.pokerGetRatingPlayerTotalRewardFast = function (nick) {\n" +
   "    var key = String(nick || \"\").trim().toLocaleLowerCase(\"ru\");\n" +
+  "    if ([\"mrrebuy\",\"necoo1er91\",\"кулер\"].indexOf(key) !== -1) key = \"coo1er91\";\n" +
   "    return Number(totals[key]) || 0;\n" +
   "  };\n" +
   "}());\n";
