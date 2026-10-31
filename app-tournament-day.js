@@ -63,14 +63,14 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     bannerHeight: 915
   },
   {
-    name: "Турнир пятихатка Мэджик",
-    buyin: "500₽",
-    guarantee: "120 000₽",
+    name: "Фаст трек ПКО",
+    buyin: "1 000₽",
+    guarantee: "150 000₽",
     hour: 20,
     minute: 0,
     time: "20:00 МСК",
     banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Турнир пятихатка Мэджик — вход 500₽, гарантия 120 000₽",
+    bannerAlt: "Poker21 Фаст трек ПКО — вход 1 000₽, гарантия 150 000₽",
     bannerWidth: 640,
     bannerHeight: 915
   }
@@ -193,10 +193,10 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
   {
     "repeat": "weekly",
     "category": "Турнир дня",
-    "name": "Турнир пятихатка Мэджик",
-    "buyin": "500₽",
+    "name": "Фаст трек ПКО",
+    "buyin": "1 000₽",
     "rebuy": "Не указано",
-    "guarantee": "120 000₽",
+    "guarantee": "150 000₽",
     "hour": 20,
     "minute": 0,
     "durationMinutes": 180,
