@@ -3933,6 +3933,23 @@ body.tournament-bet-modal-open {
   display: none;
 }
 
+.app.app--view-home .tournament-day-home-wrap--tournament-day .home-tournament-detail__media--gallery {
+  display: flex;
+  aspect-ratio: 1;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.app.app--view-home .home-tournament-detail__media--gallery .home-tournament-detail__img {
+  position: relative;
+  inset: auto;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  scroll-snap-align: start;
+}
+
 .app.app--view-home .tournament-day-home-wrap--tournament-day .home-tournament-detail__content {
   width: 100%;
   padding: 14px 16px;
@@ -6462,4 +6479,53 @@ html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{di
  left:58.75%!important;top:14.7%!important;
  width:27%!important;height:21.6%!important;font-size:18cqw!important;
  border-width:3px!important;
+}
+
+/* Saturday's supplied posters retain their full square composition. */
+.app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--square-banners {
+  height: auto;
+  aspect-ratio: 1;
+}
+.app.app--view-home #homeTournamentWeekList .home-tournament-week-row--square-banners > :not(.home-tournament-square-gallery) {
+  display: none;
+}
+.home-tournament-square-gallery {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  touch-action: pan-x pan-y;
+}
+.home-tournament-square-gallery img {
+  display: block;
+  flex: 0 0 100%;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  scroll-snap-align: start;
+}
+
+.app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--story-banners {
+  aspect-ratio: 941 / 1672;
+}
+.home-tournament-week-row--story-banners .home-tournament-square-gallery,
+.home-tournament-week-row--story-banners .home-tournament-square-gallery img {
+  aspect-ratio: 941 / 1672;
+}
+.home-tournament-banner-format {
+  display: block;
+  margin: 12px auto;
+  text-align: center;
+  color: #ffe2a6;
+}
+.home-tournament-banner-format[hidden] { display: none; }
+.home-tournament-banner-format select {
+  padding: 8px 12px;
+  border: 1px solid #b78a3c;
+  border-radius: 10px;
+  background: #171107;
+  color: #ffe2a6;
+  font: inherit;
 }

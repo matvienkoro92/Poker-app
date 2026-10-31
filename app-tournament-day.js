@@ -3,7 +3,6 @@ var HOME_TOURNAMENT_TUESDAY_BANNER_FILE = "home-tournament-card-tuesday-9x10.web
 var HOME_TOURNAMENT_WEDNESDAY_BANNER_FILE = "home-tournament-card-wednesday-9x10.webp";
 var HOME_TOURNAMENT_THURSDAY_BANNER_FILE = "home-tournament-card-thursday-9x10.webp";
 var HOME_TOURNAMENT_FRIDAY_BANNER_FILE = "home-tournament-card-friday-9x10.webp";
-var HOME_TOURNAMENT_SATURDAY_BANNER_FILE = "home-tournament-card-saturday-9x10.webp";
 var HOME_TOURNAMENT_SUNDAY_BANNER_FILE = "home-tournament-card-sunday-9x10.webp";
 var HOME_TOURNAMENT_MONTH_KNOCKOUT_1M_BANNER_FILE = "home-tournament-month-knockout-1m-2026-07-19-light-v1.webp";
 
@@ -66,13 +65,15 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     name: "Фаст трек ПКО",
     buyin: "1 000₽",
     guarantee: "150 000₽",
-    hour: 20,
+    hour: 18,
     minute: 0,
-    time: "20:00 МСК",
-    banner: HOME_TOURNAMENT_SATURDAY_BANNER_FILE,
-    bannerAlt: "Poker21 Фаст трек ПКО — вход 1 000₽, гарантия 150 000₽",
-    bannerWidth: 640,
-    bannerHeight: 915
+    time: "18:00 МСК",
+    banner: "home-tournament-saturday-fast-track-square-1.webp",
+    banners: [1, 2, 3].map(function (n) { return "home-tournament-saturday-fast-track-square-" + n + ".webp"; }),
+    storyBanners: [1, 2, 3].map(function (n) { return "home-tournament-saturday-fast-track-story-" + n + ".webp"; }),
+    bannerAlt: "Фаст трек ПКО — суббота, 18:00 МСК, вход 1 000 ₽, гарантия 150 000 ₽, уровни по 8 минут",
+    bannerWidth: 1000,
+    bannerHeight: 1000
   }
 ];
 
@@ -197,7 +198,7 @@ var POKER_FULL_TOURNAMENT_SCHEDULE = [
     "buyin": "1 000₽",
     "rebuy": "Не указано",
     "guarantee": "150 000₽",
-    "hour": 20,
+    "hour": 18,
     "minute": 0,
     "durationMinutes": 180,
     "priority": 90,
@@ -1056,10 +1057,28 @@ function initHomeTournamentNotifyControls() {
 function renderHomeTournamentWeekList(activeWeekday) {
   var el = document.getElementById("homeTournamentWeekList");
   if (!el) return;
+  var formatSelect = document.getElementById("homeTournamentBannerFormat");
+  if (!formatSelect) {
+    var formatLabel = document.createElement("label");
+    formatLabel.className = "home-tournament-banner-format";
+    formatLabel.textContent = "Формат баннера ";
+    formatSelect = document.createElement("select");
+    formatSelect.id = "homeTournamentBannerFormat";
+    [["square", "Квадрат"], ["story", "Сторис"]].forEach(function (entry) {
+      var option = document.createElement("option");
+      option.value = entry[0]; option.textContent = entry[1];
+      formatSelect.appendChild(option);
+    });
+    formatSelect.addEventListener("change", function () { renderHomeTournamentWeekList(6); });
+    formatLabel.appendChild(formatSelect);
+    el.insertAdjacentElement("afterend", formatLabel);
+  }
+  formatSelect.parentElement.hidden = Number(activeWeekday) !== 6;
+  var storyFormat = formatSelect.value === "story";
   var signature = HOME_TOURNAMENT_WEEK_ORDER.map(function (dow) {
     var entry = pokerGetHomeTournamentItem(dow, new Date()) || {};
     return [dow, entry.name, entry.buyin, entry.guarantee, entry.banner].join("|");
-  }).join(";");
+  }).join(";") + "|" + storyFormat;
 
   function selectTournament(dow) {
     var selected = pokerGetHomeTournamentItem(dow, new Date()) || {};
@@ -1171,6 +1190,23 @@ function renderHomeTournamentWeekList(activeWeekday) {
     row.appendChild(posterWrap);
     row.appendChild(day);
     row.appendChild(main);
+    if (item.banners && item.banners.length) {
+      row.classList.add("home-tournament-week-row--square-banners");
+      if (storyFormat && item.storyBanners) row.classList.add("home-tournament-week-row--story-banners");
+      var gallery = document.createElement("span");
+      gallery.className = "home-tournament-square-gallery";
+      gallery.setAttribute("aria-label", "Баннеры турнира — листайте влево");
+      (storyFormat && item.storyBanners ? item.storyBanners : item.banners).forEach(function (file, index) {
+        var image = document.createElement("img");
+        image.src = getHomeTournamentBannerUrl(file);
+        image.alt = item.bannerAlt + " — " + (index + 1) + " из " + item.banners.length;
+        image.width = storyFormat ? 941 : item.bannerWidth;
+        image.height = storyFormat ? 1672 : item.bannerHeight;
+        image.loading = dow === activeWeekday ? "eager" : "lazy";
+        gallery.appendChild(image);
+      });
+      row.appendChild(gallery);
+    }
     row.addEventListener("pointerenter", function () {
       if (item.banner) preloadHomeTournamentBanner(item.banner, "high");
     });
@@ -1204,6 +1240,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
 
     var swipeStartX = null;
     el.addEventListener("pointerdown", function (event) {
+      if (event.target.closest(".home-tournament-square-gallery")) { swipeStartX = null; return; }
       if (el.closest("[data-play-flow]")) return;
       swipeStartX = event.clientX;
     });
@@ -2709,6 +2746,25 @@ function updateTournamentDayBlock() {
       homeTournamentDetail.classList.toggle("home-tournament-detail--no-banner", !hasDetailBanner);
     }
     if (homeTrophyMedia) {
+      var galleryFiles = detailState.t.banners || [];
+      var galleryKey = galleryFiles.join("|");
+      homeTrophyMedia.classList.toggle("home-tournament-detail__media--gallery", galleryFiles.length > 1);
+      if (homeTrophyMedia.dataset.galleryKey !== galleryKey) {
+        homeTrophyMedia.dataset.galleryKey = galleryKey;
+        homeTrophyMedia.scrollLeft = 0;
+        homeTrophyMedia.querySelectorAll("[data-tournament-gallery-extra]").forEach(function (img) { img.remove(); });
+        galleryFiles.slice(1).forEach(function (file, index) {
+          var img = document.createElement("img");
+          img.className = "home-tournament-detail__img";
+          img.setAttribute("data-tournament-gallery-extra", "");
+          img.src = getHomeTournamentBannerUrl(file);
+          img.alt = (detailState.t.bannerAlt || "Турнир дня") + " — баннер " + (index + 2);
+          img.width = 1000;
+          img.height = 1000;
+          img.loading = "lazy";
+          homeTrophyMedia.appendChild(img);
+        });
+      }
       homeTrophyMedia.hidden = !hasDetailBanner;
       homeTrophyMedia.style.removeProperty("background-image");
       if (hasDetailBanner && detailState.t.bannerWidth && detailState.t.bannerHeight) {
