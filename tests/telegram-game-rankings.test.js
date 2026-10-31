@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const club=require('../lib/telegram-club-commands'),rankings=require('../lib/telegram-game-rankings'),policy=require('../lib/telegram-group-policy');
 test('only the four approved exact ranking commands are accepted, including bot mentions',()=>{for(const [text,action]of [['/рейтинг шахматы','rating:chess'],['/рейтинг бильярд','rating:billiards'],['/рейтинг нарды длинные','rating:long'],['/рейтинг@Poker_dvatuza_bot нарды короткие','rating:short']]){for(const type of ['private','supergroup'])assert.equal(club.command({message:{text,chat:{type}}}),action);assert.equal(policy.isGameRatingAction(action),true);}for(const text of ['/рейтинг@other_bot бильярд','рейтинг бильярд','/рейтинг бильярд extra'])assert.equal(club.command({message:{text}}),null);assert.equal(policy.isGameRatingAction('rating:other'),false);});
-test('top ten is bounded, names escaped, requester rank shown even outside the top',()=>{const raw={};for(let i=0;i<15;i++)raw['ID'+String(100000+i)]=JSON.stringify({name:i===0?'<Первый>':'Игрок '+i,wins:30-i,losses:i,draws:0});const players=rankings.combine([raw]);const text=rankings.format('long',players,'ID100014');assert.equal(text.split('\n').filter(l=>/^\d+\./.test(l)).length,10);assert.ok(text.includes('&lt;Первый&gt;'));assert.ok(text.includes('Ваше место: <b>15</b>'));assert.ok(!text.includes('ID100014'));assert.ok(text.includes(require('../lib/game-rating-score').paidFormula));assert.ok(text.includes(require('../lib/game-rating-score').paidExplanation));});
+test('top ten is bounded, names escaped, requester rank shown even outside the top',()=>{const raw={};for(let i=0;i<15;i++)raw['ID'+String(100000+i)]=JSON.stringify({name:i===0?'<Первый>':'Игрок '+i,wins:30-i,losses:i,draws:0});const players=rankings.combine([raw]);const text=rankings.format('long',players,'ID100014');assert.equal(text.split('\n').filter(l=>/^\d+\./.test(l)).length,10);assert.ok(text.includes('&lt;Первый&gt;'));assert.ok(text.includes('Ваше место: <b>15</b>'));assert.ok(!text.includes('ID100014'));assert.ok(text.includes(require('../lib/game-rating-score').paidFormula));assert.ok(text.includes('• <b>Win</b> — количество побед.'));});
 test('combines buckets by account, keeps duplicate names as separate people and deterministic tie order',()=>{const rows=rankings.combine([{ID1:JSON.stringify({name:'Один',wins:3,losses:1,updatedAt:2}),ID2:JSON.stringify({name:'Один',wins:5,losses:2})},{ID1:JSON.stringify({name:'Новое имя',wins:2,losses:1,draws:1,updatedAt:4})}]);assert.equal(rows.length,2);assert.equal(rows[0].id,'ID2');const combined=rows.find(row=>row.id==='ID1');assert.equal(combined.wins,5);assert.equal(combined.name,'Новое имя');assert.ok(rankings.format('billiards',rows,'').endsWith('Ваше место: привяжите аккаунт в клубном приложении.'));});
 test('billiards reads separate paid/free result snapshots across both disciplines',async()=>{
  const result=(paid,winner)=>JSON.stringify({finishedAt:10,room:{wagered:paid,state:{winner},playerProfiles:[{accountId:'ID100001',name:'Игрок'},{accountId:'ID100002',name:'Другой'}]}});
@@ -41,4 +41,13 @@ test('ranking lines use games:wins/losses without a draw counter',()=>{
  assert.ok(text.includes('Игрок</b> — 45:20/25 - рейтинг <b>100.00</b>'));
  assert.ok(text.includes('Ваше место: <b>1</b> · 45:20/25 - рейтинг <b>100.00</b>'));
  assert.ok(!text.includes(' · И '));
+});
+
+test('paid Telegram top ten contains only the requested short formula description',()=>{
+ const text=rankings.format('long',[],'','paid');
+ assert.ok(text.includes('<b>Рейтинг = 100 × (Win × К)² / (Win × К + Loss × К + 10)</b>'));
+ assert.ok(text.includes('• <b>Loss</b> — количество поражений.'));
+ assert.ok(text.includes('• <b>К = √(вход / 100)</b>.'));
+ assert.ok(text.includes('• В квадрат возводится всё произведение <b>(Win × К)</b>.'));
+ assert.ok(!text.includes('Порк'));assert.ok(!text.includes('сглаживает'));assert.ok(!text.includes('марс'));
 });
