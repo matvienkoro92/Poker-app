@@ -742,3 +742,11 @@ body[data-game-background].billiards-table-view #tableLeftRail .ball-shelf :is(s
 
 .billiards-ranking__row{grid-template-columns:22px minmax(0,1fr) 26px 26px 26px minmax(64px,max-content)}
  .billiards-ranking__metrics strong{font-size:clamp(14px,4.3vw,20px);overflow-wrap:anywhere}
+
+.game-viewers{margin:3px 0;text-align:right}.game-viewers>button{min-height:26px;padding:3px 8px;border:1px solid #bba46666;border-radius:9px;background:#18352bd9;color:#e8dcae;font:600 11px/1.4 system-ui;cursor:pointer}.game-viewers-dialog{width:min(360px,calc(100vw - 28px));max-height:80dvh;overflow:auto;padding:20px;border:1px solid #c7ab69;border-radius:18px;background:#19382b;color:#f5e8c9;box-shadow:0 16px 50px #0008}.game-viewers-dialog::backdrop{background:#0009}.game-viewers-dialog h2{margin:0 0 12px;font-size:20px}.game-viewers-dialog p{font-size:13px}.game-viewers-dialog ul{margin:12px 0;padding-left:20px;overflow-wrap:anywhere}.game-viewers-dialog li{padding:4px 0;font-size:14px}.game-viewers-dialog>button{width:100%;min-height:42px;margin-top:12px;border:1px solid #e5c87e;border-radius:10px;background:#e8ce8c;color:#193026;font:700 14px system-ui;cursor:pointer}
+
+.billiards-matchup>.game-viewers{grid-column:1/-1;justify-self:end;margin:0}
+
+.billiards-matchup .game-viewers>button{pointer-events:auto}
+
+.board-replay{padding:14px;margin:0 0 14px;border:1px solid #e8c77e;border-radius:16px;background:#203a2bf2}.board-replay>div{display:flex;gap:10px;flex-wrap:wrap}.board-replay button{flex:1;min-width:130px;min-height:48px;background:linear-gradient(135deg,#ffe2a0,#ceaa58);color:#193025;font-weight:800;border-color:#ffe5ad}.board-replay p{margin:10px 0 0;color:#efdfb6;font-size:13px}.replay-stake-dialog{width:min(400px,calc(100vw - 28px));border:2px solid #ebc875}.replay-stake-dialog button{margin:8px 8px 0 0}.replay-stake-dialog label{margin:12px 0}

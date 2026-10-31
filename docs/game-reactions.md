@@ -61,3 +61,5 @@
 canvas-фильтром. Прозрачное WebP-превью находится в `assets/game-reactions/bat.webp`.
 Видео: `assets/game-reactions/light-v1/bat.mp4`. Исходный MOV не изменяется.
 Проверка воспроизведения: `REACTION_CLIP=bat node tests/game-reactions-browser.cjs`.
+
+Реакция `ghost` («👻 Привидение Poker21») доступна в шахматах, обоих видах нард и бильярде. Сжатый H.264 MP4: 192×188, 3,87 с, около 73 КБ вместо исходных 12 МБ; миниатюра WebP, фон удаляется общим механизмом реакций.

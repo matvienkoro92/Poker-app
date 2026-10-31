@@ -20,7 +20,7 @@ function paymentFixture(){
   const poker={hasPokerPlusOperatorConfig:()=>true,getGroupMemberData:async()=>({groupId:'test-club',nickname:'Player'}),changeGroupMemberChips:async input=>{calls.push(input);return input;}};
   const apiAuth={setCors(){},parseBody:req=>req.body,authRequired:()=>({ok:true,memberId:'admin'})};
   const mod={exports:{}};
-  vm.runInNewContext(source,{module:mod,process:{env:{POKERPLUS_CHIPS_MAX_ABS:'1000',POKERPLUS_GROUP_ID:'test-club'}},console,require:name=>name==='../redis'?redis:name==='../pokerplus'?poker:name==='../api-auth'?apiAuth:require(name)});
+  vm.runInNewContext(source,{module:mod,process:{env:{POKERPLUS_CHIPS_MAX_ABS:'1000',POKERPLUS_GROUP_ID:'test-club'}},console,require:name=>name==='../redis'?redis:name==='../pokerplus'?poker:name==='../api-auth'?apiAuth:name==='../pokerplus-transfer-limit'?require('../lib/pokerplus-transfer-limit'):require(name)});
   return{handler:mod.exports,calls};
 }
 test('video-table payout completes once and repeated checkmark replays without a second transfer',async()=>{
@@ -30,15 +30,15 @@ test('video-table payout completes once and repeated checkmark replays without a
 });
 test('HTTP chip-change endpoint rejects a client-supplied allowance without transferring funds',async()=>{
   const h=paymentFixture();let status,payload;const res={status(value){status=value;return this;},json(value){payload=value;return this;}};
-  await h.handler({method:'POST',headers:{},body:{action:'change',userId:'778130',chips:2000,videoTableRafflePrize:true,idempotencyKey:'client-key'}},res);
+  await h.handler({method:'POST',headers:{},body:{action:'change',userId:'778130',chips:5001,videoTableRafflePrize:true,idempotencyKey:'client-key'}},res);
   assert.equal(status,400);assert.match(payload.error,/per-operation limit/);assert.equal(h.calls.length,0);
 });
-test('trusted timeout can return the 2000 prize once; HTTP cannot opt in',async()=>{
+test('trusted timeout returns 2000 once; ordinary authorized HTTP returns also fit the 5000 limit',async()=>{
   const h=paymentFixture();const input={userId:'778130',chips:-2000,videoTableRaffleReturn:true,idempotencyKey:'video-timeout-return'};
   assert.equal((await h.handler.processDirectChange(input)).operation.status,'completed');
   assert.equal((await h.handler.processDirectChange(input)).idempotentReplay,true);
   assert.equal(h.calls.length,1);assert.equal(h.calls[0].chips,-2000);
   let status;const res={status(value){status=value;return this;},json(){return this;}};
   await h.handler({method:'POST',headers:{},body:{action:'change',...input,idempotencyKey:'http-return'}},res);
-  assert.equal(status,400);assert.equal(h.calls.length,1);
+  assert.equal(status,200);assert.equal(h.calls.length,2);
 });

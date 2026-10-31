@@ -27,3 +27,5 @@ body.billiards-table-view .room-toolbar [data-game-chat]:not([data-unread=""])::
 #boardActionIcons [data-game-chat]{position:relative;font-size:0!important}
 #boardActionIcons [data-game-chat]::before{content:'💬';font-size:20px}
 #boardActionIcons [data-game-chat]:not([data-unread=""])::after{content:attr(data-unread);position:absolute;right:-4px;top:-4px;min-width:15px;border-radius:8px;background:#e6c77e;color:#15251e;font:bold 10px/15px system-ui}
+
+.game-chat__read-only{margin:0;padding:10px 12px;border-top:1px solid #b89a6044;background:#19392c;color:#e5d6ae;font-size:12px;line-height:1.5}.game-chat__read-only[hidden]{display:none}#game:is([data-kind=short],[data-kind=long])[data-spectator=true] #boardActionIcons>:not([data-game-chat]){display:none!important}

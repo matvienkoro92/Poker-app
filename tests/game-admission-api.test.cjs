@@ -16,6 +16,7 @@ function fixture(family,blocked=false,fail=false,returning=false,subscriptionsUn
    return admission;
   },inspect:async()=>({ok:true,conflict:{roomId:'BCDEFGHJKL',canCancel:true}})})};
   if(name==='../active-game')return {remember:async()=>{}};
+  if(name==='../game-viewers')return async()=>({count:0});
   if(name==='../game-reactions')return {read:async()=>[]};
   if(name==='../board-games-challenge'||name==='../billiards-challenge-accepted'||name==='../game-result-notification')return async()=>{};
   if(name==='../game-request-time')return require('../lib/game-request-time');
@@ -43,3 +44,5 @@ for(const family of ['board-games','billiards']){
   const f=fixture(family);const preview=await f.call('admission');assert.equal(preview.data.conflict.canCancel,true);await f.call('watch');assert.equal(f.calls.includes('guard'),false);
  });
 }
+
+for(const family of ['board-games','billiards'])test(family+': paid replay acceptance uses admission guard; decline does not reserve',async()=>{const yes=fixture(family);assert.equal((await yes.call('replay-answer',{accept:true,offerId:'offer'})).status,200);assert.ok(yes.calls.includes('guard'));assert.ok(yes.calls.indexOf('release')<yes.calls.indexOf('response'));const no=fixture(family);assert.equal((await no.call('replay-answer',{accept:false,offerId:'offer'})).status,200);assert.ok(!no.calls.includes('guard'));});

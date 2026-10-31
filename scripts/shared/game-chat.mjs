@@ -2,11 +2,12 @@
 export function mountGameChat({container,request}){
  const button=document.createElement('button');button.type='button';button.dataset.gameChat='';button.textContent='Чат';button.hidden=true;button.setAttribute('aria-expanded','false');container.append(button);
  const panel=document.createElement('section');panel.className='game-chat';panel.hidden=true;panel.setAttribute('aria-label','Чат партии');
- panel.innerHTML='<header><strong>Чат партии</strong><button type="button" data-chat-close aria-label="Закрыть чат">×</button></header><div class="game-chat__messages" role="log" aria-live="polite" aria-relevant="additions"></div><p class="game-chat__status" role="status"></p><form><label class="game-chat__label">Сообщение<input name="message" maxlength="1000" autocomplete="off" enterkeyhint="send" placeholder="Написать сопернику…"></label><button type="submit">Отправить</button></form>';
+ panel.innerHTML='<header><strong>Чат партии</strong><button type="button" data-chat-close aria-label="Закрыть чат">×</button></header><div class="game-chat__messages" role="log" aria-live="polite" aria-relevant="additions"></div><p class="game-chat__status" role="status"></p><p class="game-chat__read-only" hidden>Вы смотрите чат игроков. Писать могут только участники партии.</p><form><label class="game-chat__label">Сообщение<input name="message" maxlength="1000" autocomplete="off" enterkeyhint="send" placeholder="Написать сопернику…"></label><button type="submit">Отправить</button></form>';
  document.body.append(panel);
  const log=panel.querySelector('[role=log]'),form=panel.querySelector('form'),input=form.elements.message,status=panel.querySelector('[role=status]');
  let roomId='',player=-1,epoch=0,timer=0,reading=false,opened=false,unread=0,initialized=false,cursor=0,failures=0,disposed=false;
- let readFlight=null;
+ let readFlight=null;const readOnlyNote=panel.querySelector('.game-chat__read-only');
+ function paintAccess(){const readOnly=player<0;form.hidden=readOnly;input.disabled=readOnly;form.querySelector('[type=submit]').disabled=readOnly;readOnlyNote.hidden=!readOnly;}
  const entries=new Map();
  const label=()=>{button.textContent='Чат'+(unread?' · '+unread:'');button.dataset.unread=unread||'';button.setAttribute('aria-label','Чат партии'+(unread?', непрочитанных: '+unread:''));};
  function paintEntry(entry){
@@ -55,7 +56,7 @@ export function mountGameChat({container,request}){
  panel.addEventListener('keydown',e=>{if(e.key==='Escape'){toggle(false);button.focus();}});
  function cancelRead(){if(readFlight){readFlight.cancelled=true;readFlight.controller.abort();readFlight=null;}reading=false;}
  function reset(){cancelRead();epoch++;roomId='';player=-1;reading=false;initialized=false;cursor=0;failures=unread=0;clearTimeout(timer);entries.clear();log.replaceChildren();input.value='';status.textContent='';toggle(false);button.hidden=true;label();}
- function observe(view){if(!view.roomId)return;if(view.roomId!==roomId){reset();roomId=view.roomId;player=view.spectator?-1:view.player;button.hidden=false;form.hidden=player<0;schedule(0);}else if(view.player!==undefined){player=view.spectator?-1:view.player;form.hidden=player<0;}}
+ function observe(view){if(!view.roomId)return;if(view.roomId!==roomId){reset();roomId=view.roomId;player=!view.spectator&&[0,1].includes(view.player)?view.player:-1;button.hidden=false;paintAccess();schedule(0);}else if(view.player!==undefined){player=!view.spectator&&[0,1].includes(view.player)?view.player:-1;paintAccess();}}
  function visibility(){clearTimeout(timer);cancelRead();if(!document.hidden)schedule(0);}
  document.addEventListener('visibilitychange',visibility);
  const hide=()=>{clearTimeout(timer);cancelRead();};window.addEventListener('pagehide',hide);window.addEventListener('pageshow',visibility);window.addEventListener('online',visibility);

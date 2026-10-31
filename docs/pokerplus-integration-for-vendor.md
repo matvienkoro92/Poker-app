@@ -599,8 +599,10 @@ Poker21 operator API. It is not callable by ordinary players.
 `POKERPLUS_GROUP_ID` is mandatory for money operations. Before changing chips,
 the backend calls `getPlayerGroupData` and rejects the request unless the
 returned member belongs to that exact group. Production for «Два туза» uses
-group `758417`. `POKERPLUS_CHIPS_MAX_ABS` controls the maximum absolute amount
-of a single operation (default `5000`).
+group `758417`. The maximum absolute amount of a single operation is `5000`, shared by the
+operator API, games and tournament bets through `lib/pokerplus-transfer-limit.js`.
+The retired `POKERPLUS_CHIPS_MAX_ABS` setting is ignored. In-progress transfers
+retain their original chunk size for safe retries.
 
 Operator calls use separate `POKERPLUS_OPERATOR_MERCHANT_ID` and
 `POKERPLUS_OPERATOR_SECRET_KEY` variables and a separate cached token. The
@@ -652,7 +654,7 @@ Poker21 operation service before saving the issued status. The immutable key is
 `raffle:<raffleId>:winner:<winnerReadySlotId>:cash-prize`, so retries and double
 clicks cannot pay twice. The winner must have a numeric Poker21 ID, the prize
 text must contain an unambiguous ruble amount, the player must belong to group
-`758417`, and the amount must fit the global `1000` limit. Private-cash reserve
+`758417`, and the amount must fit the global `5000` limit. Private-cash reserve
 prizes are excluded because their fulfillment is a seat reservation rather
 than a balance credit. A completed Poker21 payout cannot be unchecked or
 changed to «Отказано» from the raffle UI.
