@@ -377,7 +377,7 @@
     }
     return true;
   }
-  function reservedCopyText(entry,reservation){var name=String(entry.recipient||'').trim();if(/^(?:нет|не указан[ао]?|получатель не указан|[-—]|ID\s+\S+)$/i.test(name))name='';return [money(reservation.amount),name,entry.bank,entry.wallet,entry.network,entry.card,entry.phone,entry.paymentLink].filter(Boolean).join('\n');}
+  function reservedCopyText(entry,reservation){if(entry.paymentType==='usdt'||/^USDT$/i.test(String(entry.bank||'').trim()))return String(entry.wallet||'').trim();var name=String(entry.recipient||'').trim();if(/^(?:нет|не указан[ао]?|получатель не указан|[-—]|ID\s+\S+)$/i.test(name))name='';return [money(reservation.amount),name,entry.bank,entry.wallet,entry.network,entry.card,entry.phone,entry.paymentLink].filter(Boolean).join('\n');}
   async function copy(value,quiet) {
     try {
       if(navigator.clipboard && navigator.clipboard.writeText)await navigator.clipboard.writeText(value);
