@@ -193,7 +193,7 @@ function showResultSummary(finished){
  if(!finished){if(dialog.open)dialog.close();return;}
  const key=JSON.stringify([roomId,series.number,series.round,state.winner,state.endReason]);
  dialog.querySelector('h2').textContent=$('result').querySelector('h2').textContent;
- dialog.querySelector('p').textContent=$('result').querySelector('p').textContent+(!wager?.freeSpinReward?.granted&&gameSpinRewardText(wager)?' '+gameSpinRewardText(wager):'');paintGameSpinReward(dialog,wager);paintGameExperience(dialog,mode==='online'&&!spectator?gameExperience:null,player);
+ dialog.querySelector('p').textContent=$('result').querySelector('p').textContent+(!wager?.freeSpinReward?.granted&&gameSpinRewardText(wager)?' '+gameSpinRewardText(wager):'');paintGameSpinReward(dialog,spectator?null:wager,roomId+':'+series.number+':'+player);paintGameExperience(dialog,mode==='online'&&!spectator?gameExperience:null,player);
  if(key!==resultSummaryKey){resultSummaryKey=key;if(!dialog.open)dialog.showModal();}
 }
 let headToHead=null,headToHeadKey='';
