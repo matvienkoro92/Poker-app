@@ -11,7 +11,7 @@ for(const family of ['board-games','billiards'])test(family+': actual CAS awards
 room.gameXpVersion=1
 room.gameExperience={event='ABCDEFGHJK:1:1',granted=true,perPlayer={60,30}}
 hashes['${xp.TOTALS}']={ID123456='2980'}
-hashes['poker_app:pokerplus_profiles']={ID123456=cjson.encode({nickname='Player',totalCounter={}})}
+hashes['poker_app:pokerplus_profiles']={ID123456='{"nickname":"Player","totalCounter":{},"optional":null,"pair":[null,null]}'}
 assert(run(0,room)==1)
 assert(tonumber(hashes['${xp.TOTALS}'].ID123456)==3040)
 assert(tonumber(hashes['${xp.TOTALS}'].ID654321)==30)
@@ -20,13 +20,29 @@ local saved={gameExperience=cjson.decode(hashes['${xp.RECEIPTS}']['${family}:ABC
 assert(saved.gameExperience.progress[1].before.level==1)
 assert(saved.gameExperience.progress[1].after.level==2)
 assert(saved.gameExperience.progress[1].after.points==3040)
-assert(cjson.decode(hashes['poker_app:pokerplus_profiles'].ID123456).gameExperience==3040)
+assert(string.find(hashes['poker_app:pokerplus_profiles'].ID123456,'"gameExperience":3040',1,true))
 room.revision=2
 assert(run(1,room)==1)
 assert(tonumber(hashes['${xp.TOTALS}'].ID123456)==3040)
 assert(run(1,room)==0)
-KEYS={'poker_app:pokerplus_profiles','${xp.TOTALS}'};ARGV={'ID123456',cjson.encode({nickname='Refreshed',gameExperience=999999})}
+KEYS={'poker_app:pokerplus_profiles','${xp.TOTALS}'};ARGV={'ID123456','{"nickname":"Refreshed","gameExperience":999999,"optional":null,"pair":[null,null]}' }
 assert(assert(load(${JSON.stringify(xp.SAVE_PROFILE)}))()==3040)
-assert(cjson.decode(hashes['poker_app:pokerplus_profiles'].ID123456).gameExperience==3040)
+assert(string.find(hashes['poker_app:pokerplus_profiles'].ID123456,'"optional":null',1,true))
+assert(string.find(hashes['poker_app:pokerplus_profiles'].ID123456,'"pair":[null,null]',1,true))
+assert(string.find(hashes['poker_app:pokerplus_profiles'].ID123456,'"gameExperience":3040',1,true))
 `));
 test('server level includes game XP without altering poker counters',()=>{const status=require('../lib/chat-profile-status').pokerProfileStatusFromCachedProfile({gameExperience:3000,totalCounter:{mttCount:1}},{pokerPlusLinked:false});assert.equal(status.points,3300);assert.equal(status.level,2);assert.equal(status.counters.breakdown.games,3000);});
+for(const family of ['board-games','billiards'])test(family+': invalid second balance cannot partially grant XP to the first player',()=>run(family,`
+room.gameXpVersion=1
+room.gameExperience={event='ABCDEFGHJK:1:1',granted=true,perPlayer={60,30}}
+hashes['${xp.TOTALS}']={ID123456='100',ID654321='invalid'}
+local ok=pcall(function() run(0,room) end)
+assert(not ok)
+assert(hashes['${xp.TOTALS}'].ID123456=='100')
+assert(hashes['poker_app:pokerplus_profiles']==nil)
+assert(hashes['${xp.RECEIPTS}']==nil)
+hashes['${xp.TOTALS}'].ID654321='0'
+assert(run(0,room)==1)
+assert(tonumber(hashes['${xp.TOTALS}'].ID123456)==160)
+assert(tonumber(hashes['${xp.TOTALS}'].ID654321)==30)
+`));
