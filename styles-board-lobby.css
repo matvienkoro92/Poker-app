@@ -133,3 +133,5 @@ body:has(#lobby:not([hidden])) main{min-height:100dvh;display:flex;align-items:c
 #lobby .board-lobby-footer button{color:#d6c9a5}
 #lobby #boardModeButtons .mode-card--local{margin-top:0}
 #lobby #boardModeButtons .mode-card--local[data-mode=solo]{margin-top:12px}
+
+#lobby .pending-game-create{display:grid;gap:8px;width:100%;min-width:0;padding:12px;border:1px solid #b4965a80;border-radius:14px;background:#142d24}#lobby .pending-game-create strong{font-size:13px}#lobby .pending-game-create button{width:100%;white-space:normal;font-size:12px}

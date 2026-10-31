@@ -86,3 +86,32 @@ test('successful rematch remembers both players and releases both admission lock
  await admission.remember({roomId:old.id,player:0,spectator:false,state:{winner:null}});await admission.release();
  for(const id of ['ID123456','ID654321']){assert.equal(JSON.parse(f.db.get('poker_app:game-admission:v1:'+id)).roomId,old.id);assert.ok(!f.db.has('poker_app:game-admission:v1:lock:'+id));}
 });
+test('settled paid rooms never block new games, including refunded draws in a series',async()=>{
+ for(const family of ['board-games','billiards'])for(const status of ['paid','refunded','cancelled']){
+  const f=fixture(),r=f.add(family,status!=='cancelled');r.wagered=true;
+  if(status==='refunded'){r.state.winner='draw';r.match={target:3,winner:null};}
+  f.db.set('poker_app:'+family+':v1:'+r.id,JSON.stringify(r));f.db.set('poker_app:'+family+':v1:wager:'+r.id,JSON.stringify({status}));
+  assert.equal((await f.guard.inspect(f.args)).conflict,null);
+  const admission=await f.guard.begin({...f.args,body:{action:'create'}});await admission.release();assert.equal(f.refunds.length,0);
+ }
+});
+test('unsettled paid rooms keep blocking, missing journals do not disable protection',async()=>{
+ for(const status of ['waiting','playing','paying','refunding',null]){
+  const f=fixture(),r=f.add('billiards',true);r.wagered=true;f.db.set('poker_app:billiards:v1:'+r.id,JSON.stringify(r));
+  if(status)f.db.set('poker_app:billiards:v1:wager:'+r.id,JSON.stringify({status}));
+  await assert.rejects(f.guard.begin(f.args),e=>e.code==='ACTIVE_GAME_STARTED');assert.equal(f.refunds.length,0);
+ }
+});
+test('returning to an existing seat is allowed even with another old active pointer; strangers remain blocked',async()=>{
+ const f=fixture();f.add('billiards',true);const target='BCDEFGHJKL';
+ f.db.set('poker_app:board-games:v1:'+target,JSON.stringify({players:['other','host'],state:{winner:null}}));
+ const admission=await f.guard.begin(f.args);await admission.release();assert.equal(f.refunds.length,0);
+ f.db.set('poker_app:board-games:v1:'+target,JSON.stringify({players:['other',null],state:{winner:null}}));
+ await assert.rejects(f.guard.begin(f.args),e=>e.code==='ACTIVE_GAME_STARTED');
+});
+test('temporary opponent admission lock is not reported as another active game',async()=>{
+ const f=fixture(true),old=f.add('board-games',true);old.state.winner=0;old.match.winner=0;f.db.set('poker_app:board-games:v1:'+old.id,JSON.stringify(old));
+ f.db.set('poker_app:game-admission:v1:lock:ID654321','other request');
+ await assert.rejects(f.guard.begin({...f.args,body:{action:'rematch',roomId:old.id}}),e=>e.code==='GAME_ADMISSION_BUSY');
+ assert.equal(f.db.has('poker_app:game-admission:v1:lock:ID123456'),false);
+});

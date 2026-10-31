@@ -12,6 +12,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
   const target=await service.call('other',{action:'create',discipline:'chess',timeControl:'blitz-5-3'});
   db.set('poker_app:active-game:board-games:host',own.roomId);
   const commands=async rows=>rows.map(([op,key,...args])=>{
+   if(op==='GET')return key.startsWith('poker_app:board-games:v1:')?JSON.stringify(rooms.get(key.slice('poker_app:board-games:v1:'.length)))||null:db.get(key)||null;
    if(op==='HGET')return key==='poker_app:id_to_user'?'host':null;
    if(op==='SSCAN')return ['0',[]];
    if(op==='MGET')return [key,...args].map(k=>k.startsWith('poker_app:board-games:v1:')?JSON.stringify(rooms.get(k.slice('poker_app:board-games:v1:'.length)))||null:db.get(k)||null);
