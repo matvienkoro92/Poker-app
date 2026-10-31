@@ -9,3 +9,9 @@ export function gameSpinRewardText(wager){
  if(['refunded','cancelled'].includes(wager.status))return '';
  return gameSpinRewardPreview(wager.stake,match?3:1);
 }
+export function paintGameSpinReward(container,wager){
+ let block=container.querySelector('.game-spin-reward');
+ if(!wager?.freeSpinReward?.granted){if(block)block.hidden=true;return;}
+ if(!block){block=document.createElement('div');block.className='game-spin-reward';const title=document.createElement('strong'),note=document.createElement('small');title.textContent='+1 бесплатная крутка';block.append(title,note);container.append(block);}
+ block.hidden=false;const note=block.querySelector('small'),text=gameSpinRewardText(wager);if(note.textContent!==text)note.textContent=text;
+}

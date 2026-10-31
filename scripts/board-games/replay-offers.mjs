@@ -11,5 +11,5 @@ export function mountReplayOffers({after,context,request,update,openRoom,confirm
  if(active&&offer.from!==c.player&&seen!==offer.id){seen=offer.id;answer(offer);}
  if(offer?.status==='ready'&&offer.roomId&&!opening){opening=true;Promise.resolve().then(()=>openRoom(offer.roomId,c.roomId)).catch(e=>error(e.message)).finally(()=>{opening=false;});}
  }
- return {render};
+ return {render,element:root};
 }

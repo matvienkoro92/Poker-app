@@ -42,6 +42,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
   assert.equal(credited.size,2);assert.deepEqual(errors,[]);assert.match(await page.getByText('Каждому начислена 1 бесплатная крутка',{exact:false}).filter({visible:true}).first().innerText(),raceTo===3?/за весь матч/:/за эту партию/);
   const dialog=page.locator('dialog[open]').last();
   if(await dialog.count()){const bounds=await dialog.boundingBox();assert.ok(bounds.x>=0&&bounds.x+bounds.width<=391,'Result leaves mobile viewport');}
+  if(!billiards){if(await page.locator('#resultSummary[open]').count())await page.locator('#resultSummary [data-close]').click();const summary=await page.locator('#boardSettlement').boundingBox(),board=await page.locator('#boardArea').boundingBox();assert.ok(summary&&board&&summary.y+summary.height<=board.y+1,'Settlement and replay controls must be above the board');assert.equal(await page.locator('#boardSettlement .board-replay').count(),1);}
   await page.close();console.log('PASS '+discipline+' '+raceTo+': both players credited after settlement; reward shown in mobile result');
  }}}finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
