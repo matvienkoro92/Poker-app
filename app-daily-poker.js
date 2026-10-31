@@ -644,9 +644,32 @@
     syncStartPrompt(status);
   }
 
+  function syncSpinsCounter(data) {
+    var el = $("dailyPokerAttemptsLeft");
+    if (!el) return;
+    var count = data && Number(data.attemptsLeft);
+    var text = "Круток осталось: " + (data && Number.isFinite(count) ? Math.max(0, Math.floor(count)) : "—");
+    if (el.textContent !== text) el.textContent = text;
+  }
+
+  function showSpinsHelp() {
+    var dialog = document.getElementById("dailyPokerSpinsHelp");
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.id = "dailyPokerSpinsHelp";
+      dialog.className = "daily-poker-spins-help";
+      dialog.setAttribute("aria-labelledby", "dailyPokerSpinsHelpTitle");
+      dialog.innerHTML = '<h2 id="dailyPokerSpinsHelpTitle">Как заработать крутки</h2><p><strong>Одна бесплатная крутка — каждые 24 часа.</strong> Отсчёт начинается после использования бесплатной крутки.</p><p>Играйте в нарды, шахматы или бильярд со ставкой от <strong>300 фишек с каждого игрока</strong>.</p><p>За завершённую разовую партию <strong>оба игрока получают по 1 бесплатной крутке</strong>, в том числе при ничьей.</p><p>Если создан матч на очки или до нескольких побед — по одной крутке за весь матч. За отменённые и незавершённые игры крутки не начисляются.</p><button type="button">Понятно</button>';
+      dialog.querySelector("button").onclick = function () { dialog.close(); };
+      document.body.appendChild(dialog);
+    }
+    if (!dialog.open) dialog.showModal();
+  }
+
   function syncStatus(data) {
     if (!data) return;
     dailyPokerState.status = data;
+    syncSpinsCounter(data);
     syncHomeStatus();
     setSubscribeRequirementsVisible(!!(data.subscriptionRequired || isDailyPokerRequirementCode(data.code)));
     if (Object.prototype.hasOwnProperty.call(data, "dailyPokerReminderSubscribed")) {
@@ -691,6 +714,7 @@
     next.attemptsLeft = Math.max(0, attemptsLeft - 1);
     next.canPlay = next.attemptsLeft > 0 && status.canPlay !== false;
     dailyPokerState.status = next;
+    syncSpinsCounter(next);
     syncStartPrompt(next);
   }
 
@@ -1312,6 +1336,7 @@
     var notifyBtn = $("dailyPokerNotifyBtn");
     var copyBtn = $("dailyPokerCopyLinkBtn");
     var winnersList = $("dailyPokerWinnersList");
+    syncSpinsCounter(dailyPokerState.status);
     if (playBtn && playBtn.dataset.dailyPokerBound !== "1") {
       playBtn.dataset.dailyPokerBound = "1";
       playBtn.addEventListener("click", play);
@@ -1360,14 +1385,14 @@
     if (dailyPokerState.timer) clearInterval(dailyPokerState.timer);
     dailyPokerState.timer = setInterval(updateTimer, 1000);
   };
-  document.addEventListener('click',function(e){if(e.target.closest('[data-daily-poker-status-retry]'))loadStatus();});
+  document.addEventListener('click',function(e){if(e.target.closest('[data-daily-poker-status-retry]'))loadStatus();if(e.target.closest('[data-daily-poker-spins-info]'))showSpinsHelp();});
   window.addEventListener('poker-telegram-auth',function(){
     if(!dailyPokerState.initialized)return;
     var identity=dailyPokerIdentity();
     if(identity===dailyPokerState.identity)return;
     dailyPokerState.identity=identity;
     dailyPokerState.sessionEpoch++;dailyPokerState.statusRequest++;
-    dailyPokerState.status=null;dailyPokerState.revealing=false;
+    dailyPokerState.status=null;syncSpinsCounter(null);dailyPokerState.revealing=false;
     clearOptimisticSpend();resetManualDeal();renderEmptyCards();setBusy(true);
     setResultPrompt('Проверяем доступность раздачи…',[],false);loadStatus();
   });
