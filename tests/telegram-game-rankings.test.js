@@ -6,8 +6,8 @@ test('combines buckets by account, keeps duplicate names as separate people and 
 test('billiards reads separate paid/free result snapshots across both disciplines',async()=>{
  const result=(paid,winner)=>JSON.stringify({finishedAt:10,room:{wagered:paid,state:{winner},playerProfiles:[{accountId:'ID100001',name:'Игрок'},{accountId:'ID100002',name:'Другой'}]}});
  const commands=async rows=>rows.map(([cmd,key])=>cmd==='HGET'?'ID100001':key.includes('pyramid')?{a:result(true,0),b:result(false,1)}:{c:result(true,0)});
- const paid=await rankings.read({commands,game:'billiards',telegramId:123,resolveAccount:async id=>id});assert.ok(paid.includes('Партии на фишки'));assert.ok(paid.includes('Ваше место: <b>1</b> · 2 / 0'));
- const free=await rankings.read({commands,game:'billiards',mode:'free',telegramId:123,resolveAccount:async id=>id});assert.ok(free.includes('Бесплатные партии'));assert.ok(free.includes('Ваше место: <b>2</b> · 0 / 1'));
+ const paid=await rankings.read({commands,game:'billiards',telegramId:123,resolveAccount:async id=>id});assert.ok(paid.includes('Партии на фишки'));assert.ok(paid.includes('Ваше место: <b>1</b> · 2:2/0'));
+ const free=await rankings.read({commands,game:'billiards',mode:'free',telegramId:123,resolveAccount:async id=>id});assert.ok(free.includes('Бесплатные партии'));assert.ok(free.includes('Ваше место: <b>2</b> · 1:0/1'));
 });
 test('ranking replies work in private and group chats with a top ten and the requester last',async t=>{const original=rankings.read,oldFetch=global.fetch;const players=Array.from({length:12},(_,i)=>({id:'ID'+i,name:'Игрок '+i,wins:20-i,losses:i,draws:0,rank:i+1}));rankings.read=async({game})=>rankings.format(game,players,'ID11');const sent=[];global.fetch=async(url,options)=>{sent.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true,result:{message_id:50}})};};t.after(()=>{rankings.read=original;global.fetch=oldFetch;});for(const [type,command]of [['private','/рейтинг бильярд'],['supergroup','/рейтинг нарды длинные'],['supergroup','/рейтинг нарды короткие']])assert.equal(await club.handle({message:{message_id:5,text:command,chat:{id:type==='private'?42:-123,type},from:{id:42}}},'test'),true);assert.equal(sent.length,3);for(const message of sent){assert.equal(message.parse_mode,'HTML');assert.equal(message.reply_to_message_id,5);assert.equal(message.text.split('\n').filter(l=>/^\d+\./.test(l)).length,10);assert.ok(message.text.split('\n').at(-1).includes('Ваше место: <b>12</b>'));}});
 
@@ -17,7 +17,7 @@ test('nards rankings load only the selected bucket, with paid as default',async(
  const stats=require('../lib/board-games-stats'),old=stats.migrateLegacy;stats.migrateLegacy=async()=>{};
  try{for(const game of ['chess','long','short'])for(const mode of ['paid','free']){
  const commands=async rows=>rows.map(([cmd,key])=>{if(cmd==='HGET')return 'ID100001';if(key.endsWith(':results')){assert.equal(mode,'paid');return {};}assert.equal(key,`poker_app:board-games:stats:v2:${game}:${mode}:players`);return {ID100001:JSON.stringify({name:'Игрок',wins:mode==='paid'?7:2,losses:0})};});
- const text=await rankings.read({commands,game,...(mode==='free'?{mode}:{}),telegramId:1,resolveAccount:async id=>id});assert.ok(text.includes(mode==='paid'?'7 / 0':'2 / 0'));
+ const text=await rankings.read({commands,game,...(mode==='free'?{mode}:{}),telegramId:1,resolveAccount:async id=>id});assert.ok(text.includes(mode==='paid'?'7:7/0':'2:2/0'));
  }}finally{stats.migrateLegacy=old;}
 });
 test('command starts paid and callback edits the same message between free and paid rankings',async t=>{
@@ -33,4 +33,12 @@ test('command starts paid and callback edits the same message between free and p
  }
  }
  for(const bad of ['rating:long:other','rating:darts:paid','rating:long:free:extra'])assert.equal(policy.isGameRatingAction(bad),false);
+});
+
+test('ranking lines use games:wins/losses without a draw counter',()=>{
+ const row={id:'A',name:'Игрок',rank:1,wins:20,losses:25,draws:9,ratingScore:100};
+ const text=rankings.format('chess',[row],'A');
+ assert.ok(text.includes('Игрок</b> — 45:20/25 - рейтинг <b>100.00</b>'));
+ assert.ok(text.includes('Ваше место: <b>1</b> · 45:20/25 - рейтинг <b>100.00</b>'));
+ assert.ok(!text.includes(' · И '));
 });
