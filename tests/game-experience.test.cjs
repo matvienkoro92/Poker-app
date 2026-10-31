@@ -15,7 +15,8 @@ hashes['poker_app:pokerplus_profiles']={ID123456=cjson.encode({nickname='Player'
 assert(run(0,room)==1)
 assert(tonumber(hashes['${xp.TOTALS}'].ID123456)==3040)
 assert(tonumber(hashes['${xp.TOTALS}'].ID654321)==30)
-local saved=cjson.decode(strings.room)
+assert(strings.room==ARGV[2])
+local saved={gameExperience=cjson.decode(hashes['${xp.RECEIPTS}']['${family}:ABCDEFGHJK:1:1'])}
 assert(saved.gameExperience.progress[1].before.level==1)
 assert(saved.gameExperience.progress[1].after.level==2)
 assert(saved.gameExperience.progress[1].after.points==3040)
