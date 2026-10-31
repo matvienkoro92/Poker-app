@@ -1377,6 +1377,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             7107.19
           ]
         ]
+      ],
+      [
+        "30.10.2026",
+        [
+          [
+            1,
+            "BlackJackovich",
+            47597.35
+          ]
+        ]
       ]
     ]
   },

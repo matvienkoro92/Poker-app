@@ -511,6 +511,10 @@ async function parseOcrFile(file) {
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   if (date === "29.10.2026" && blue && time === "15:00" && title === "Lucky Slot 77K") buyin = 500;
+  // Entry fees confirmed by the owner for the remaining October 29–30 cards.
+  if (blue && date === "29.10.2026" && time === "11:00" && /Black Magic/i.test(title)) { title = "Black Magic 50K"; buyin = 500; }
+  if (blue && date === "30.10.2026" && time === "18:00" && /Black Friday/i.test(title)) { title = "Black Friday 450K"; buyin = 1500; }
+  if (blue && date === "30.10.2026" && time === "20:00" && /Lucky Slot/i.test(title)) { title = "Lucky Slot 222K"; buyin = 1000; }
   // October 19 entry fees confirmed by the owner; blue headers show starting stacks.
   if (date === "19.10.2026" && blue) {
     const confirmed = {

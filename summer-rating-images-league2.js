@@ -982,4 +982,10 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-29-10-2026-league2-magiya-traktorista-18h.jpg",
     "rating-compressed-preview/rating-29-10-2026-league2-ok-21h.jpg"
   ]
+,
+  "30.10.2026": [
+    "rating-compressed-preview/rating-30-10-2026-league2-addonik-a-10h.jpg",
+    "rating-compressed-preview/rating-30-10-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-30-10-2026-league2-tournament-plo6-20h.jpg"
+  ]
 };

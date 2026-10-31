@@ -6468,6 +6468,202 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "11:00",
+      "name": "Black Magic 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 14963,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "30.10.2026": [
+    {
+      "time": "10:00",
+      "name": "Аддоник А",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Pentagrammall",
+          "place": 1,
+          "reward": 5700,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 5,
+          "reward": 3000,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Shkarubo",
+          "place": 2,
+          "reward": 1560,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "BlackJackovich",
+          "place": 1,
+          "reward": 47597.35,
+          "points": 0
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 7,
+          "reward": 3693.28,
+          "points": 0
+        },
+        {
+          "nick": "Rifa",
+          "place": 10,
+          "reward": 3424.05,
+          "points": 0
+        },
+        {
+          "nick": "BabyShark",
+          "place": 25,
+          "reward": 837.5,
+          "points": 0
+        },
+        {
+          "nick": "fomichga",
+          "place": 19,
+          "reward": 830.62,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "бурят",
+          "place": 2,
+          "reward": 870,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "BLACKOUT 220K",
+      "buyin": 1100,
+      "league": 1,
+      "players": [
+        {
+          "nick": "butovskiy",
+          "place": 8,
+          "reward": 7081,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 14,
+          "reward": 315,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "BabyShark",
+          "place": 2,
+          "reward": 7702.03,
+          "points": 0
+        },
+        {
+          "nick": "cadillac",
+          "place": 5,
+          "reward": 990.83,
+          "points": 0
+        },
+        {
+          "nick": "pinachet",
+          "place": 14,
+          "reward": 774.95,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 479.57,
+          "points": 0
+        },
+        {
+          "nick": "komAsoer",
+          "place": 21,
+          "reward": 66.64,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Black Friday 450K",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 7,
+          "reward": 20892,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 222K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Freedom",
+          "place": 11,
+          "reward": 1662,
+          "points": 0
+        }
+      ]
     }
   ]
 };
