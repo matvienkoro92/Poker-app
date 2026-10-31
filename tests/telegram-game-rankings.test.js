@@ -64,3 +64,12 @@ test('nards use a points suffix and every game keeps the compact formula at the 
   assert.ok(text.includes('</b>\n• <b>Win</b>'));
  }
 });
+
+test('free rankings omit the explanatory paragraph for every game',()=>{
+ for(const game of ['short','long','billiards','chess']){
+  const text=rankings.format(game,[],'','free');
+  assert.ok(text.endsWith(require('../lib/game-rating-score').formula));
+  assert.ok(!text.includes(require('../lib/game-rating-score').explanation));
+  assert.ok(!text.includes('Число 10'));
+ }
+});
