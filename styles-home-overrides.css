@@ -6454,33 +6454,6 @@ html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{di
 /* Softer character lighting without the strong amber cast. */
 #app.app.app--view-home .home-daily-deal-hero__image{filter:saturate(.72) brightness(.88) contrast(.96);}
 
-/* Live, highlighted player-chat label replaces the old text baked into the plaque. */
-.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link[data-confirm-telegram-chat]::after {
- content:none!important;
-}
-.app.app--view-home .home-daily-shortcuts--lounge #homeMiniChatLabel {
- display:grid!important;place-items:center!important;position:absolute!important;
- left:5%!important;right:5%!important;top:79.1%!important;bottom:auto!important;
- width:90%!important;height:auto!important;min-height:34px!important;box-sizing:border-box;
- padding:5px 6px!important;border:2px solid #ffe6a1!important;border-radius:11px!important;
- background:linear-gradient(135deg,#ffe6a0,#dfac3f)!important;color:#142c23!important;
- box-shadow:0 0 16px #f9c44d66,inset 0 1px 0 #fff4c8!important;
- font-size:clamp(11px,8cqw,16px)!important;font-weight:900!important;line-height:1.15!important;
- text-align:center!important;text-shadow:none!important;white-space:normal!important;
- word-break:normal!important;overflow-wrap:normal!important;transform:none!important;
- z-index:3!important;pointer-events:none;
-}
-.app.app--view-home .home-daily-shortcuts--lounge {
- padding-bottom:24px!important;
-}
-
-/* Double the active raffle count and its circle around the same centre. */
-.app.app--view-home .home-daily-shortcuts--lounge #raffleActiveBadge:not(.feature__badge--hidden) {
- left:58.75%!important;top:14.7%!important;
- width:27%!important;height:21.6%!important;font-size:18cqw!important;
- border-width:3px!important;
-}
-
 /* Saturday's supplied posters retain their full square composition. */
 .app.app--view-home #homeTournamentWeekList > .home-tournament-week-row--square-banners {
   height: auto;
