@@ -1750,7 +1750,7 @@ function hallFishReferralsRows(data) {
 }
 
 function hallFishDayHeroPrize() {
-  return hallFishActiveDayHeroMonth === "10.2026" ? "35 000" : (hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all" ? "25 000" : "15 000");
+  return "35 000";
 }
 
 function hallFishAchievementSpecs(data) {
