@@ -1,0 +1,14 @@
+// Trace vector cutouts against the original table art; never repaint the table.
+// Guide profiles keep the edge search on each leg, away from the floor pattern.
+const sharp=require(process.cwd()+'/node_modules/sharp'),fs=require('fs'),tables=require(process.cwd()+'/app-billiards-tables.js').skins;
+const ys=[957,980,1005,1040,1080,1100,1120,1145];
+function interpolate(values,y,ys){let i=0;while(i<ys.length-2&&y>ys[i+1])i++;return values[i]+(values[i+1]-values[i])*(y-ys[i])/(ys[i+1]-ys[i]);}
+(async()=>{let css='';for(const skin of tables){const {data,info}=await sharp(skin.image).removeAlpha().raw().toBuffer({resolveWithObject:true});
+const ivory=skin.id==='ivory',rows=ivory?[990,1010,1040,1080,1110,1130,1150,1164]:ys,start=rows[0],end=rows[rows.length-1]+1;
+const block=['classic','oak','walnut','sport'].includes(skin.id);const timber=['classic','oak','walnut'].includes(skin.id);
+const left=ivory?[239,233,237,245,254,246,241,249]:timber?[293,293,294,294,294,295,295,296]:block?[290,290,290,291,293,294,295,299]:[298,292,292,299,308,301,304,309],right=ivory?[325,331,329,320,309,318,328,320]:timber?[367,367,367,366,366,365,359,350]:block?[376,375,373,371,370,369,367,366]:[373,380,381,375,365,373,370,366];
+function edge(prior,shift,side){let previous=prior[0]+shift;const points=[];for(let y=start;y<=end;y++){const p=interpolate(prior,y,rows)+shift;let best=previous,score=-Infinity;for(let x=Math.round(p-15);x<=p+15;x++){let contrast=0;for(let c=0;c<3;c++)contrast+=Math.abs(data[(y*info.width+x+2)*3+c]-data[(y*info.width+x-2)*3+c]);const value=contrast-.8*(x-p)**2-4*(x-previous)**2;if(value>score){score=value;best=x;}}previous=best;if((y-start)%3===0||y===end)points.push([best+side*.5,y]);}return points;}
+function leg(shift){const l=edge(left,shift,-1),r=edge(right,shift,1);return 'M'+l.concat(r.reverse()).map(p=>p.map(n=>+n.toFixed(1)).join(' ')).join('L')+'Z';}
+const body=ivory?'M380 557L742 557L995 787Q1008 800 1002 819L993 877Q990 914 969 928Q944 930 924 908L916 891H887L883 970L876 992H800L793 970H329L323 992H239L232 970L228 892H207L198 908Q188 932 159 928Q126 919 122 888L114 824Q109 804 121 788Z':'M380 584L727 584L900 812Q909 824 907 848L902 892L887 937L842 957H286L244 949Q225 942 224 915L218 854Q215 829 227 812Z';const svg='<svg xmlns="http://www.w3.org/2000/svg" width="1122" height="1402" viewBox="0 0 1122 1402"><defs><mask id="s" maskUnits="userSpaceOnUse" x="0" y="0" width="1122" height="1402"><path fill="white" d="M0 0H1122V1402H0Z"/><path fill="black" d="'+body+leg(0)+leg(ivory?554:447)+'"/></mask></defs><path fill="white" mask="url(#s)" d="M0 0H1122V1402H0Z"/></svg>';
+fs.writeFileSync('assets/player-hall/billiards-surround-masks/'+skin.id+'-v1.svg',svg);css+='.villa-billiards-stage[style*="billiards-table-'+skin.id+'-"]{--billiards-surround-mask:url(\'./assets/player-hall/billiards-surround-masks/'+skin.id+'-v1.svg\')}\n';}
+process.stdout.write(css);})();

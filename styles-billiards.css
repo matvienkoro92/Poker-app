@@ -788,12 +788,6 @@ body.billiards-super-shot #tableDock #hint{display:block!important;position:abso
 .wager-stake-card__summary b{display:block;margin-top:3px;font-size:13px;color:#f1dba3}
 .wager-stake-card>small{font-size:11px;line-height:1.5;letter-spacing:0;color:#aebeb2}
 /* A complete catalog cue stays recognizable even when the aiming butt leaves the viewport. */
-.billiards-cue-skin{display:none;pointer-events:none}
-body.billiards-table-view .billiards-cue-skin{position:absolute;z-index:5;top:calc(var(--billiards-safe-top,env(safe-area-inset-top,0px)) + 94px);right:12px;display:flex;flex-direction:column;align-items:center;gap:1px;width:140px;padding:4px 8px;border:1px solid #cab17250;border-radius:9px;background:#11271ee8;color:#e7d49f;box-shadow:0 2px 8px #0003}
-.billiards-cue-skin>span:first-child{position:relative;display:block;width:122px;height:13px;overflow:hidden}
-.billiards-cue-skin img{position:absolute;left:50%;top:50%;height:122px;width:auto;max-width:none;transform:translate(-50%,-50%) rotate(-90deg)}
-.billiards-cue-skin>span:last-child{max-width:100%;font-size:9px;line-height:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media(max-height:560px){body.billiards-table-view .billiards-cue-skin{top:calc(var(--billiards-safe-top,env(safe-area-inset-top,0px)) + 48px)}}
 
 .super-shot-reward{position:fixed;inset:0;z-index:350;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) 18px max(16px,env(safe-area-inset-bottom));background:rgba(0,9,7,.82);backdrop-filter:blur(3px);animation:super-reward-darken .55s ease both;overflow:auto}
 .super-shot-reward[hidden]{display:none!important}
