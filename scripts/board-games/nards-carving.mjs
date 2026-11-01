@@ -25,5 +25,5 @@ export function createCarvedRail(side,bottom=false){
 }
 
 export function decorateCenterSpine(bar){
- for(const top of [15,50,85]){const hinge=document.createElement('i');hinge.className='nards-center-hinge';hinge.style.top=top+'%';hinge.setAttribute('aria-hidden','true');bar.append(hinge);}
+ for(const top of [15,85]){const hinge=document.createElement('i');hinge.className='nards-center-hinge';hinge.style.top=top+'%';hinge.setAttribute('aria-hidden','true');bar.append(hinge);}
 }

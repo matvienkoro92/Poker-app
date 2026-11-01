@@ -8,7 +8,7 @@ test('each category contributes one monthly award rather than underlying wins',(
 });
 test('winner selection uses the selected month, includes game categories, and excludes unshown awards',()=>{
  const c=context(),data={king:[row('Old',8,'09.2026'),row('New',1)],goldenBall:[row('New',1)],billiardsKing:[row('New',2)],clubChoice:[row('Other',99)],sngChampion:[row('Other',99)]};
- assert.equal(c.hallFishPlayerMonthSpec(data,'10.2026').rows[0].nick,'New');assert.equal(c.hallFishPlayerMonthSpec(data,'10.2026').rows[0].value,3);assert.equal(c.hallFishPlayerMonthSpec(data,'09.2026').rows[0].nick,'Old');
+ assert.equal(c.hallFishPlayerMonthSpec(data,'10.2026').rows[0].nick,'New');assert.equal(c.hallFishPlayerMonthSpec(data,'10.2026').rows[0].value,2);assert.equal(c.hallFishPlayerMonthSpec(data,'09.2026').rows[0].nick,'Old');
  for(const month of ['11.2026','all'])assert.equal(c.hallFishPlayerMonthSpec(data,month).rows.length,0);
  assert.equal(c.hallFishPlayerMonthSpec({...data,pendingExtras:true},'10.2026').rows.length,0);
 });

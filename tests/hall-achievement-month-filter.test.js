@@ -11,7 +11,7 @@ test('month filter sits above trophies and applies to every award including late
   const filtered=c.hallFishAchievementRowsForMonth(spec,'10.2026');for(const row of filtered){if(spec.key!=='topWin')assert.equal(row.value,row.detailRows.length);assert.ok(row.detailRows.every(d=>d._monthKey==='10.2026'));}
   c.hallFishActiveAchievementTab=spec.key;const html=c.hallFishRenderAchievementRows(data);assert.ok(html.indexOf('class="hall-fish-day-hero-months ')<html.indexOf('class="hall-fish-achievement-tabs-shell"'));assert.match(html,/Месяц для всех ачивок/);assert.match(html,/10\.2026/);assert.equal(c.hallFishActiveDayHeroMonth,'10.2026');
  }
- const specs=c.hallFishAchievementSpecs(data);assert.equal(specs.length,9);for(const removed of ['clubChoice','sngChampion','viceChampion']){assert.ok(!specs.some(s=>s.key===removed));}
+ const specs=c.hallFishAchievementSpecs(data);assert.equal(specs.length,8);for(const removed of ['clubChoice','sngChampion','viceChampion','billiardsKing']){assert.ok(!specs.some(s=>s.key===removed));}
  assert.equal(c.hallFishAchievementRowsForMonth(specs.find(s=>s.key==='king'),'10.2026')[0].nick,'October');
  assert.equal(c.hallFishAchievementRowsForMonth(specs.find(s=>s.key==='big50'),'10.2026').length,0);
 });
