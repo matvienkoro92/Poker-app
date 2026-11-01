@@ -1922,7 +1922,7 @@ function hallFishPlayerMonthCardHtml(spec,active,data) {
   var period=month==='all'?'Выберите месяц':hallFishDayHeroMonthLabel(month)+' '+month.split('.')[1];
   var status=month==='all'?'Главная награда по итогам каждого месяца':data&&data.pendingExtras?'Считаем итоговые награды…':!leaders.length?'В этом месяце пока нет итоговых наград':leaders.length>1?'Совместное лидерство':month===hallFishCurrentAchievementMonth()?'Текущий лидер месяца':'Главная награда клуба';
   var crown='<svg viewBox="0 0 64 48" aria-hidden="true"><path d="m7 12 13 10L32 5l12 17 13-10-6 27H13Z" fill="currentColor"/><path d="M15 44h34" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="7" cy="9" r="4" fill="currentColor"/><circle cx="32" cy="4" r="4" fill="currentColor"/><circle cx="57" cy="9" r="4" fill="currentColor"/></svg>';
-  return '<button type="button" aria-label="Подробнее: Игрок месяца" data-hall-fish-achievement-tab="playerMonth" class="hall-fish-player-month'+(active==='playerMonth'?' hall-fish-player-month--active':'')+'">'+
+  return '<button type="button" aria-label="Выбрать награду: Игрок месяца" aria-pressed="'+(active==='playerMonth'?'true':'false')+'" data-hall-fish-achievement-tab="playerMonth" class="hall-fish-player-month'+(active==='playerMonth'?' hall-fish-player-month--active':'')+'">'+
     '<span class="hall-fish-player-month__copy"><span class="hall-fish-player-month__eyebrow">'+crown+hallFishEsc(period)+'</span><span class="hall-fish-player-month__title">Игрок<br>месяца</span><span class="hall-fish-player-month__status">'+hallFishEsc(status)+'</span><span class="hall-fish-player-month__rule">Больше всех итоговых<br>наград за месяц</span>'+(leaders.length?'<span class="hall-fish-player-month__awards">'+leaders[0].value+' из '+hallFishAchievementSpecs(data).length+' наград</span>':'')+'</span>'+
     '<span class="hall-fish-player-month__stage">'+(leaders.length>1?'<span class="hall-fish-player-month__joint">'+crown+'<span class="hall-fish-player-month__joint-names">'+leaders.map(function(row){return '<span title="'+hallFishEsc(row.nick)+'">'+hallFishEsc(row.nick)+'</span>';}).join('')+'</span></span>':leaders.length?hallFishAchievementLeaderHtml({rows:leaders}):'<span class="hall-fish-player-month__vacant">'+crown+'</span>')+'</span></button>';
 }
@@ -1962,7 +1962,7 @@ function hallFishRenderAchievementRows(data) {
       specs.map(function (spec) {
         if(spec.key==='playerMonth')return '<article class="hall-fish-achievement-card hall-fish-achievement-card--featured">'+hallFishPlayerMonthCardHtml(spec,active,data)+hallFishAchievementPreviewHtml(spec,data)+'</article>';
         var isActive = spec.key === active;
-        return '<article class="hall-fish-achievement-card"><button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" aria-label="Подробнее: ' + hallFishEsc(spec.sectionTitle||spec.title) + '">' + '<span class="hall-fish-achievement-trophy">'+hallFishAchievementTrophyHtml(spec)+'</span>'+hallFishAchievementLeaderHtml(spec)+'</button>'+hallFishAchievementPreviewHtml(spec,data)+'</article>';
+        return '<article class="hall-fish-achievement-card"><button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" aria-pressed="' + (isActive ? "true" : "false") + '" aria-label="Выбрать награду: ' + hallFishEsc(spec.sectionTitle||spec.title) + '">' + '<span class="hall-fish-achievement-trophy">'+hallFishAchievementTrophyHtml(spec)+'</span>'+hallFishAchievementLeaderHtml(spec)+'</button>'+hallFishAchievementPreviewHtml(spec,data)+'</article>';
       }).join("") +
     '</div>' +
     '</div>' +
@@ -3257,11 +3257,11 @@ function initHallFishRatingModal() {
     e.stopPropagation();
     var overviewBody=document.getElementById("hallFishRatingBody");
     if(!hallFishAchievementDetailsOpen)hallFishAchievementOverviewScroll=overviewBody?overviewBody.scrollTop:0;
-    hallFishAchievementDetailsOpen=true;
+    hallFishAchievementDetailsOpen=tab.classList.contains('hall-fish-achievement-preview__more');
     hallFishActiveAchievementTab = String(tab.getAttribute("data-hall-fish-achievement-tab") || "dayHero").trim() || "dayHero";
     if (hallFishAchievementRowsCache) hallFishSetAchievementState("", hallFishAchievementRowsCache);
     else openHallFishAchievementTab();
-    if(overviewBody){overviewBody.scrollTop=0;overviewBody.querySelector("[data-hall-fish-achievement-back]")?.focus({preventScroll:true});}
+    if(overviewBody){overviewBody.scrollTop=hallFishAchievementDetailsOpen?0:hallFishAchievementOverviewScroll;var focusTarget=hallFishAchievementDetailsOpen?overviewBody.querySelector('[data-hall-fish-achievement-back]'):overviewBody.querySelector('[data-hall-fish-achievement-tab="'+hallFishActiveAchievementTab+'"][aria-pressed]');focusTarget?.focus({preventScroll:true});}
   });
   document.addEventListener('click',function(e){var back=e.target&&e.target.closest?e.target.closest('[data-hall-fish-achievement-back]'):null;if(!back)return;e.preventDefault();hallFishAchievementDetailsOpen=false;hallFishSetAchievementState('',hallFishAchievementRowsCache);var body=document.getElementById('hallFishRatingBody');if(body){body.scrollTop=hallFishAchievementOverviewScroll;body.querySelector('.hall-fish-achievement-preview__more[data-hall-fish-achievement-tab="'+hallFishActiveAchievementTab+'"]')?.focus({preventScroll:true});}});
   document.addEventListener('change',function(e){
