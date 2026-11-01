@@ -1,0 +1,4 @@
+Built-in imagegen edit of billiards-distant-room-hd-v1.webp.
+Prompt: Preserve the exact 1122:1402 portrait composition, camera, room geometry, table silhouette and positions of lamps, furniture and people. Redraw distant ocean, sunset clouds, palms, pool water, wood, brass, bottles and glasses with sharp refined detail and deep focus. Add a deep burgundy and antique gold Persian woven carpet beneath the table extending forward, correct perspective and occlusion. Add restrained cream linen curtains drawn back at the far left window, keeping the sunset view open. No UI, buttons, lettering or watermark.
+Source generated PNG: /Users/kosmonavt/.codex/generated_images/01a191ca-e065-70b2-8825-956455f7a61d/exec-9c787d17-e798-4aa7-b961-5df7ba99a7e2.png
+Runtime: cover-aligned SVG mask exposes room and floor while retaining the chosen original table, cabinet and legs. Cue and controls remain independent live layers.

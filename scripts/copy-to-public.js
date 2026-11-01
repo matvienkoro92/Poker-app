@@ -78,6 +78,7 @@ const baseFiles = [
   'app-board-games-worker.js',
   'styles-board-games.css',
   'styles-board-lobby.css',
+  'styles-game-setup.css',
   'board-games-notices.txt',
   'billiards-play.html',
   'app-billiards.js',

@@ -84,3 +84,5 @@ export function setClosed(root,closed){
  root.setAttribute('data-closed',String(!!closed));
  if(root.dataset.openLabel)root.setAttribute('aria-label',closed?'Нарды закрыты · '+(root.dataset.board||''):root.dataset.openLabel);
 }
+
+export function boardCover(id){return NARDS_BOARDS.find(board=>board.id===id)?.cover||null;}

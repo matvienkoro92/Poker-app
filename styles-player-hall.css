@@ -692,15 +692,15 @@ body.billiards-table-view .billiards-cue-preview{display:none}
 
 /* Restore distant-room detail without touching any selected table pixels.
    The mask uses the same source ratio and cover transform as every table skin;
-   it ends before the far table rail, including on narrow mobile viewports. */
+   it excludes the selected tabletop, cabinet and legs while exposing the new floor. */
 .villa-billiards-stage::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: url('./assets/player-hall/billiards-distant-room-hd-v1.webp') center/cover no-repeat;
-  -webkit-mask: url('./assets/player-hall/billiards-distant-room-mask-v1.svg') center/cover no-repeat;
-  mask: url('./assets/player-hall/billiards-distant-room-mask-v1.svg') center/cover no-repeat;
+  background: url('./assets/player-hall/billiards-room-rug-curtains-v2.webp') center/cover no-repeat;
+  -webkit-mask: url('./assets/player-hall/billiards-room-surround-mask-v2.svg') center/cover no-repeat;
+  mask: url('./assets/player-hall/billiards-room-surround-mask-v2.svg') center/cover no-repeat;
 }
 
 /* The camera arrives above the actual selected tabletop, rather than a menu card. */
@@ -1108,3 +1108,28 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .living-rating-tablet:not(.is-expanded)::after{left:32%;right:32%;bottom:-12px;height:12px;transform:skewX(-12deg);background:linear-gradient(#363d41,#141b1e);box-shadow:0 6px 7px #0008}
 .living-rating-tablet:not(.is-expanded) .living-rating-screen{grid-template-rows:12px 15px 15px 10px minmax(0,1fr) 16px;gap:2px;padding:5px 7px;border-color:#526366;border-radius:5px;background:linear-gradient(145deg,#173c35,#091f1d)}
 @media(max-height:650px){.living-board-focus--table[data-game=nards]{overflow-y:auto}.living-board-focus--table[data-game=nards] .living-top-table{min-height:180px}}
+
+/* Use the catalog's complete carving in both the room and the folding lid. */
+.living-nards-back{background-size:contain;background-repeat:no-repeat}
+.player-hall-dialog .living-game-case .living-case-art.has-catalog-cover{inset:auto 2% 12%;width:96%;height:auto;aspect-ratio:1;transform:perspective(600px) rotateX(58deg);transform-origin:center bottom;background-size:100% 100%;background-position:center;border:3px ridge #9b774c;border-radius:4px;background-color:#4b301e;box-shadow:0 6px 0 #352317,0 10px 8px #0006;filter:none}
+/* The catalog cover is square: keep that physical shape when the case is shut. */
+.living-nards-lid{transition:transform .85s cubic-bezier(.4,0,.2,1),height .85s cubic-bezier(.4,0,.2,1),top .85s cubic-bezier(.4,0,.2,1)}
+.living-top-board.is-closed .living-nards-lid{height:55%;top:22.5%}
+.living-top-board.is-closed .living-nards-base{visibility:hidden}
+.living-top-board.is-closed .living-nards-hinge{top:23.5%;height:53%}
+
+/* Reserve the upper third for a single row of immediately applied equipment. */
+.hall-equipment.hall-equipment--strip{position:fixed;inset:max(8px,var(--hall-safe-top,env(safe-area-inset-top,0px))) 8px auto;margin:0 auto;width:calc(100vw - 16px);max-width:1050px;height:32dvh;max-height:32dvh;min-height:190px;border-radius:16px;background:#10251efa;box-shadow:0 4px 18px #0005}
+.hall-equipment--strip::backdrop{background:transparent}
+.hall-equipment--strip>header{padding:8px 12px;border:0}
+.hall-equipment--strip header small{display:none}.hall-equipment--strip h2{font-size:18px;margin:0}.hall-equipment--strip header button{width:30px;height:30px;font-size:16px}
+.hall-equipment--strip>[data-level]{font-size:10px;margin:0 12px 6px}
+.hall-equipment--strip .hall-equipment__list{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;padding:2px 10px 7px;align-items:stretch;scrollbar-width:thin;scrollbar-color:#a78c50 transparent}
+.hall-equipment--strip .hall-equipment__list>button{flex:0 0 132px;scroll-snap-align:start;min-height:0;padding:0 0 5px;border-radius:10px}
+.hall-equipment--strip .hall-equipment__list img{height:calc(32dvh - 118px);min-height:60px;max-height:135px;object-fit:cover;object-position:center 62%}
+.hall-equipment--strip .hall-equipment__list img.is-cue{object-fit:contain;padding:4px}
+.hall-equipment--strip .hall-equipment__list strong{padding:5px 7px 2px;font-size:11px;line-height:1.2}
+.hall-equipment--strip .hall-equipment__list small{display:none}
+.hall-equipment--strip .hall-equipment__list span{padding:2px 7px 0;font-size:10px;line-height:1.2}
+.hall-equipment--strip>footer{padding:0 12px 5px;min-height:14px;border:0}.hall-equipment--strip [data-status]{font-size:10px;margin:0}
+.player-hall-dialog.has-billiards-picker .villa-billiards-stage{top:calc(max(32dvh,190px) + max(8px,var(--hall-safe-top,env(safe-area-inset-top,0px))) + 8px)}

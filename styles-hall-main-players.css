@@ -2530,3 +2530,22 @@
 .hall-fish-achievement-month-picker select{display:block;width:100%;min-width:0;min-height:0;height:18px;padding:0 15px 0 0;border:0;border-radius:0;background:transparent;color:inherit;font-family:inherit;font-size:11px;font-weight:900;line-height:18px;box-shadow:none;cursor:pointer}
 .hall-fish-achievement-month-picker select option{color:#f8e0a3;background:#101725}
 .hall-fish-achievement-month-picker--active{background:linear-gradient(180deg,#ffe9a3,#e9a92f);color:#241500;border-color:#ffe7a3}
+
+/* A projected character with a light cone and a low elliptical emitter. */
+.hall-fish-achievement-leader{gap:5px;padding:3px 0 5px}
+.hall-fish-achievement-leader__hologram{height:118px;background:radial-gradient(ellipse at 50% 87%,#54e7ff26,transparent 58%);padding-bottom:10px;box-sizing:border-box}
+.hall-fish-achievement-leader__hologram::before{z-index:-1;inset:5% 3% 8%;border:0;border-radius:0;background:linear-gradient(180deg,#5eeaff00,#5eeaff09 48%,#5eeaff25);clip-path:polygon(16% 0,84% 0,100% 100%,0 100%);mask-image:linear-gradient(transparent,#000 25%)}
+.hall-fish-achievement-leader__hologram::after{content:"";position:absolute;z-index:4;left:9%;right:9%;bottom:2px;height:12px;border:1px solid #8cf3ffb3;border-radius:50%;background:radial-gradient(ellipse,#adffff70,#4ccbe52e 48%,#0c3c5070 70%);box-shadow:0 0 9px #40dcff66,inset 0 0 5px #9cf7ff88;pointer-events:none}
+.hall-fish-achievement-leader__hologram>img{position:relative;z-index:1;filter:grayscale(1) sepia(.65) hue-rotate(135deg) saturate(1.7) brightness(1.2) drop-shadow(0 0 3px #70eaff99);opacity:.94;mask-image:linear-gradient(#000 72%,#000c 87%,transparent 100%)}
+.hall-fish-achievement-leader__hologram .hall-fish-level-row__media{inset:0 0 10px;height:calc(100% - 10px);filter:grayscale(1) sepia(.65) hue-rotate(135deg) saturate(1.7) brightness(1.2) drop-shadow(0 0 3px #70eaff99);mask-image:linear-gradient(#000 72%,#000c 87%,transparent 100%)}
+.hall-fish-achievement-leader__hologram .hall-fish-level-row__media img{filter:none;opacity:1}
+.hall-fish-achievement-leader__name{color:#c5f8ff;font-size:12px;line-height:1.3;text-shadow:0 1px 3px #000,0 0 8px #43d9ff55}
+.hall-fish-achievement-leader__count{padding:3px 7px;border-radius:6px;background:#d8b96712;color:#f5d594;font-size:11px;line-height:1.2}
+.hall-fish-achievement-leader--empty{opacity:1}
+.hall-fish-achievement-leader--empty .hall-fish-achievement-leader__hologram{background:none}
+.hall-fish-achievement-leader--empty .hall-fish-achievement-leader__hologram::before{display:none}
+.hall-fish-achievement-leader--empty .hall-fish-achievement-leader__hologram::after{border-color:#72b4c138;box-shadow:none;background:#21445322}
+.hall-fish-achievement-leader--empty .hall-fish-achievement-leader__name{color:#839eaa;font-size:10px;font-weight:600;text-shadow:none}
+.hall-fish-hologram-vacant{position:absolute;inset:0 0 12px;display:grid;place-items:center;font-size:32px;font-weight:400;color:#7caab344}
+@media(max-width:600px){.hall-fish-achievement-leader__hologram{height:106px}.hall-fish-achievement-leader__name{font-size:11px}.hall-fish-achievement-leader__count{font-size:10px}}
+.hall-fish-achievement-leader:not(.hall-fish-achievement-leader--empty) .hall-fish-achievement-leader__name{width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

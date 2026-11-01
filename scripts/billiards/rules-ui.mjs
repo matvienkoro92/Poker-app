@@ -8,7 +8,7 @@ const paintText=(node,text)=>{if(node.textContent!==text)node.textContent=text;}
 export function mountRules({move,room}){
  let selectedCue=0,lastKey='',viewState=null,placing=false,decisionKey='',choosingPenalty=false,acknowledgement=null,directPenaltyKey='',callKey='';
  const poolFormat=document.createElement('label');poolFormat.id='poolFormatLabel';poolFormat.innerHTML='Формат американского пула<select id="poolFormat"><option value="free" selected>Без указания луз · по цветам</option><option value="called">С указанием шара и лузы</option></select><small>Сначала своя группа шаров, затем восьмёрка. Формат действует для обоих игроков.</small>';$('setupFormat').append(poolFormat);
- const goldenFormat=document.createElement('label');goldenFormat.id='goldenBallLabel';goldenFormat.innerHTML='Золотой шар<select id="goldenBall"><option value="off">Обычная игра</option><option value="on">Золотой шар · за 2 очка</option></select><small>Случайный золотой шар за правильное забитие даёт 2 очка. Победа — от 8 очков. Штрафной шар — 1 очко.</small>';$('setupFormat').append(goldenFormat);
+ const goldenFormat=document.createElement('label');goldenFormat.id='goldenBallLabel';goldenFormat.innerHTML='Золотой шар<select id="goldenBall"><option value="off">Обычная игра</option><option value="on">Золотой шар · за 2 очка</option></select><small>В игре сразу появляется случайный один золотой шар, который дает 2 очка, если его забить.</small>';$('setupFormat').append(goldenFormat);
  function settings(){return {goldenBall:$('discipline').value==='pyramid'&&$('goldenBall').value==='on',callPockets:$('poolFormat').value==='called',discipline:$('discipline').value,color:$('ballSet').value,raceTo:Number($('raceTo').value),turnSeconds:Number($('turnSeconds').value)};}
  function choiceButtons(id){const select=$(id);$(id+'Buttons').replaceChildren(...Array.from(select.options,option=>{const button=document.createElement('button');button.type='button';button.dataset.value=option.value;button.textContent=option.text;button.setAttribute('aria-pressed',String(select.value===option.value));button.onclick=()=>{select.value=option.value;select.dispatchEvent(new Event('change'));};return button;}));}
  function setup(){const russian=$('discipline').value==='pyramid';poolFormat.hidden=russian;goldenFormat.hidden=!russian;$('ballSet').replaceChildren(...(russian?[['yellow','Белые + жёлтый биток'],['red','Белые + красный биток']]:[['standard','Цветные: сплошные и полосатые']]).map(([value,text])=>new Option(text,value)));$('disciplineInfo').textContent=russian?'Свободная пирамида: первым набрать 8 шаров. После разбоя битком может быть любой шар.':'Пул «восьмёрка»: сначала своя группа, затем № 8. Формат с заказом лузы или без него выбирается перед игрой.';const t=tableSpec($('discipline').value);$('tableDimensions').textContent=t.name+' · шары '+t.ball+' мм · створы '+t.corner+' / '+t.side+' мм';choiceButtons('discipline');choiceButtons('ballSet');}
@@ -56,12 +56,13 @@ export function mountRules({move,room}){
    $('decisionTitle').textContent=acknowledgement.title;
    $('decisionExplanation').textContent=acknowledgement.reason+'\n\n'+acknowledgement.next;
    $('decisionPanel').hidden=true;$('decisionResolved').hidden=true;
-   $('decisionOk').textContent='ОК';$('decisionOk').classList.add('primary');
+   $('decisionOk').textContent='Понятно';$('decisionOk').classList.add('primary');
   }
   const tablePenalty=s.pending?.type==='pyramid-foul'&&can&&!acknowledgement;
   $('decisionDialog').classList.toggle('table-penalty-dialog',tablePenalty);if(directPenalty)$('decisionOpen').hidden=true;
   $('decisionOk').hidden=tablePenalty;
   if(tablePenalty){const copy=decisionCopy(s,true);$('decisionExplanation').textContent=copy.reason+'\n\nНажмите на шар на столе, чтобы забрать его себе. Затем выберите: продолжить игру или передать ход.';}
+  if(!tablePenalty){const explanation=$('decisionExplanation'),paragraphs=explanation.textContent.split(/\n\s*\n/);explanation.replaceChildren(...paragraphs.filter(Boolean).map((text,i)=>{const block=document.createElement('span');block.className=i?'decision-next':'decision-reason';block.textContent=text;return block;}));}
   document.body.classList.toggle('billiards-penalty-picking',tableView&&tablePenalty&&!$('decisionDialog').open);
   const pickedPenalty=s.pending?.type==='pyramid-foul'&&can&&$('penaltyBall').value!=='';
   penaltyConfirm.hidden=!tableView||!pickedPenalty||$('decisionDialog').open;penaltyConfirm.querySelector('[data-penalty-rerack]').hidden=!s.pending?.illegalBreak;

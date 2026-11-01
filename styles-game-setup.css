@@ -1,0 +1,91 @@
+/* One setup language for billiards, chess and both backgammon disciplines. */
+#lobby{--setup-gold:#e4c784;--setup-muted:#a8b9aa;--setup-ink:#f3e4be}
+#lobby.lobby-wizard,#lobby .board-lobby-wizard{border:1px solid #a58b595c;border-radius:22px;background:linear-gradient(145deg,#263b31fa,#10211bfc);box-shadow:0 15px 45px #0006;backdrop-filter:none}
+#lobby .lobby-wizard__heading{padding:18px 16px 20px;gap:12px;position:relative;border:0;background:transparent}
+#lobby .lobby-wizard__heading h2{font-size:23px;font-weight:750;line-height:1.2;letter-spacing:-.025em;color:var(--setup-ink)}
+#lobby .setup-brand{font-size:8px!important;letter-spacing:.16em;color:#c9ad72!important;margin:0 0 7px}
+#lobby :is(#setupProgress,#boardSetupProgress){position:absolute;top:14px;right:16px;font-size:9px!important;color:var(--setup-muted);letter-spacing:0}
+#lobby :is(#setupBack,#boardSetupBack){display:grid;place-items:center;flex:0 0 34px;width:34px;min-width:34px;height:34px;min-height:34px;padding:0;border:1px solid #c1aa7055;border-radius:50%;background:#ffffff05;color:#efddad;font-size:24px;line-height:1}
+#lobby .setup-step-track{height:2px;left:16px;right:16px;gap:5px}
+#lobby .lobby-wizard__content{padding:12px 12px 4px;overflow:auto;min-height:0}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons){display:grid;grid-template-columns:1fr;gap:8px;margin:0}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card{display:flex;align-items:center;gap:11px;width:100%;min-height:63px;margin:0;padding:11px;border:1px solid #b8b99f26;border-radius:12px;background:#09171377;box-shadow:none;text-align:left}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card--social{border-color:#c6a46780;background:linear-gradient(110deg,#b99a4d1c,#193b2e70)}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card[data-mode=solo]{margin-top:16px}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card__icon{width:32px;height:32px;display:grid;place-items:center;flex-shrink:0;border-radius:10px;background:#c2d6c309;color:#95b29f}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card--social .mode-card__icon{background:#d7bb751c;color:#ead197}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card__icon svg{width:23px;height:23px}
+#lobby .mode-card__copy{flex:1;min-width:0;display:grid;gap:4px}
+#lobby .mode-card__copy strong{font-size:15px;font-weight:750;line-height:1.2;color:var(--setup-ink);overflow-wrap:normal}
+#lobby .mode-card__copy small{font-size:12px;font-weight:400;line-height:1.35;letter-spacing:0;color:var(--setup-muted)}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card__check{display:grid;place-items:center;flex:0 0 19px;width:19px;height:19px;border:1px solid #a6b29b40;border-radius:50%;color:transparent;font-size:11px}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card[aria-pressed=true]{border-color:#e4c784;background:linear-gradient(125deg,#c7ab6638,#31523b55);box-shadow:inset 3px 0 #e1c07a}
+#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card[aria-pressed=true] .mode-card__check{background:#d9bf83;border-color:#d9bf83;color:#1b3025}
+#lobby .settings-label{margin:8px 2px 10px;font-size:16px;font-weight:750;color:var(--setup-ink);letter-spacing:0}
+#lobby .lobby-wizard__footer{padding:12px;border:0;background:transparent;flex-shrink:0}
+#lobby .lobby-wizard__footer button{min-height:46px;border-radius:11px;border:1px solid #e4cc97;background:linear-gradient(110deg,#e5d0a1,#c4a56b);color:#1b2a22;font-size:16px;line-height:1.3;box-shadow:inset 0 1px #fff5,0 4px 12px #0002}
+#lobby :is(.board-ranking-entry,.billiards-ranking-entry){width:100%;margin-top:7px}
+#lobby :is(#boardSetupBackFooter,#setupBackFooter){background:#193126;color:#e6d4af;border-color:#bda16a70}
+#lobby .wizard-step :is(input,select){font-family:inherit;text-transform:none;letter-spacing:0;font-size:16px}
+#lobby .wizard-step small{letter-spacing:0}
+@media(max-width:350px){#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card{gap:8px;padding:10px;min-height:60px}#lobby .mode-card__copy strong{font-size:14px}#lobby .mode-card__copy small{font-size:11px}}
+@media(max-height:600px){#lobby .settings-buttons:is(#modeButtons,#boardModeButtons){grid-template-columns:repeat(2,minmax(0,1fr))}#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card[data-mode=solo]{margin-top:0}#lobby .settings-buttons:is(#modeButtons,#boardModeButtons) .mode-card{min-height:62px;padding:8px;gap:7px}#lobby .mode-card__copy strong{font-size:13px}#lobby .mode-card__copy small{font-size:10px}#lobby .mode-card__check{display:none!important}}
+
+/* Match formats fit side by side on phones as well as larger screens. */
+#lobby :is(#formatButtons,#boardFormatButtons){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+#lobby :is(#formatButtons,#boardFormatButtons)>button{display:flex;align-items:center;gap:8px;min-width:0;width:100%;min-height:86px;padding:12px 9px;border-radius:12px;text-align:left;white-space:normal}
+#lobby :is(#formatButtons,#boardFormatButtons) .format-card__number{flex:0 0 28px;width:28px;height:34px;border-radius:9px;font-size:21px}
+#lobby :is(#formatButtons,#boardFormatButtons)>button>span:last-child{min-width:0}
+#lobby :is(#formatButtons,#boardFormatButtons) strong{display:block;font-size:13px;line-height:1.25;font-weight:750}
+#lobby :is(#formatButtons,#boardFormatButtons) small{display:block;margin-top:4px;font-size:10px;line-height:1.35;color:#a8b9aa}
+@media(max-width:350px){#lobby :is(#formatButtons,#boardFormatButtons)>button{padding:10px 7px;gap:6px}#lobby :is(#formatButtons,#boardFormatButtons) .format-card__number{flex-basis:22px;width:22px;font-size:18px}#lobby :is(#formatButtons,#boardFormatButtons) strong{font-size:12px}}
+
+/* Rule notices share the warm club palette and a clear next action. */
+#decisionDialog:not(.table-penalty-dialog){box-sizing:border-box;width:min(440px,calc(100vw - 28px));max-height:calc(100dvh - 40px);padding:22px;border:1px solid #c5a76288;border-radius:22px;background:linear-gradient(145deg,#294034,#10251d);color:#f6e7be;box-shadow:0 20px 65px #0009}
+#decisionDialog:not(.table-penalty-dialog)::backdrop{background:#07130db3;backdrop-filter:blur(5px)}
+#decisionDialog:not(.table-penalty-dialog) .cue-dialog__heading{display:flex;align-items:flex-start;gap:12px;margin:0 0 16px;padding:0;border:0;background:none}
+#decisionDialog:not(.table-penalty-dialog) .cue-dialog__heading>h2{margin:0;padding:0;border:0;background:none;color:#f6e7be;font-size:21px;font-weight:750;line-height:1.3;letter-spacing:-.025em}
+#decisionDialog:not(.table-penalty-dialog) .cue-dialog__heading>h2::before{content:'ПРАВИЛА ПАРТИИ';display:block;margin-bottom:8px;color:#c9ad72;font-size:9px;font-weight:650;letter-spacing:.16em}
+#decisionDialog:not(.table-penalty-dialog) #decisionExplanation{display:grid;gap:14px;margin:0 0 18px;white-space:normal;color:#c9d6ca;font-size:14px;line-height:1.6}
+#decisionDialog .decision-reason{display:block;padding:14px 15px;border:1px solid #c5a76230;border-radius:12px;background:#081e1666}
+#decisionDialog .decision-next{display:block;padding-left:12px;border-left:2px solid #d7bc7b;color:#ecdbb1;font-size:13px;line-height:1.55}
+#decisionDialog:not(.table-penalty-dialog) #decisionOk{width:100%;min-height:46px;margin:0;border:1px solid #f0d397;border-radius:12px;background:linear-gradient(110deg,#e9d3a0,#c4a263);color:#182b20;font-size:16px;font-weight:750;box-shadow:inset 0 1px #fff5}
+#decisionDialog:not(.table-penalty-dialog) #decisionClose{flex-shrink:0;width:30px;height:30px;min-height:30px;padding:0;border:1px solid #bfa36855;border-radius:50%;background:#ffffff06;color:#e8d6ab;font-size:16px}
+
+/* A quiet, compact scoreboard keeps attention on the table. */
+body.billiards-table-view .billiards-matchup{gap:6px}
+body.billiards-table-view .billiards-matchup>[data-side],body[data-game-background].billiards-table-view .billiards-matchup>[data-side]{min-height:40px;padding:6px 7px;gap:6px;border:1px solid #c7b78130;border-radius:11px;background:#13251fe8;box-shadow:none}
+body.billiards-table-view .billiards-matchup>[data-side].is-active,body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active{border:1px solid #d8bf7e88;background:linear-gradient(110deg,#314435ed,#15291fee);box-shadow:inset 2px 0 #d8bf7e}
+body.billiards-table-view .billiards-matchup>[data-side].is-active::after,body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active::after{display:none}
+body.billiards-table-view .billiards-matchup .billiards-matchup__avatar,body[data-game-background].billiards-table-view .billiards-matchup .is-active .billiards-matchup__avatar{flex:0 0 22px;width:22px;height:22px;border:1px solid #c8b27b66;background:#b4c5b012;color:#e2cf9c;font-size:12px;box-shadow:none}
+body.billiards-table-view .billiards-matchup strong{font-size:11px;line-height:14px;font-weight:700;color:#e8dfc9}
+body.billiards-table-view .billiards-matchup small,body[data-game-background].billiards-table-view .billiards-matchup .is-active small{font-size:8px;line-height:11px;font-weight:500;color:#a8b9a9}
+body.billiards-table-view .billiards-matchup .billiards-matchup__score,body[data-game-background].billiards-table-view .billiards-matchup .billiards-matchup__score{min-width:20px;padding:0 2px;border:0;border-radius:0;background:none;box-shadow:none}
+body.billiards-table-view .billiards-matchup__score b{font-size:17px;line-height:20px;color:#eed9a2}
+body.billiards-table-view .billiards-matchup__score em{display:none}
+body.billiards-table-view .billiards-matchup__vs{font-size:8px;letter-spacing:0;color:#91a294}
+body.billiards-table-view .billiards-matchup #turnClock{min-width:25px;padding:3px;font-size:10px;background:#081b1480;color:#d8e0cc}
+
+/* Turn duration and undo are one compact row in backgammon. */
+#lobby .setup-turn-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
+#lobby #boardSetupFormat .setup-turn-options label:not([hidden]){margin:0 0 14px;padding:12px;min-width:0;font-size:15px;grid-template-rows:40px 48px;align-content:start}
+#lobby #boardSetupFormat .setup-turn-options label small{grid-column:1/-1;font-size:11px}
+#lobby .setup-turn-options:has(#turnTimeLabel[hidden]){grid-template-columns:1fr}
+#lobby .setup-turn-options:has(#turnTimeLabel[hidden]):has(#allowUndoLabel[hidden]){display:none}
+
+/* One shared bonus switch and two multipliers, all in a single row. */
+#lobby #nardsWagerRules:not([hidden]){grid-template-columns:minmax(0,1.25fr) repeat(2,minmax(0,1fr));gap:7px}
+#lobby #boardSetupFormat #nardsWagerRules label:not([hidden]){padding:10px 8px;font-size:12px;line-height:1.3;gap:8px;grid-template-rows:48px 44px;align-content:start}
+#lobby #boardSetupFormat #nardsWagerRules label :is(select,input){height:44px;min-height:44px;padding:8px;font-size:15px}
+#lobby #nardsReserveNote{grid-column:1/-1;white-space:normal;margin:0 0 14px;padding:12px;font-size:12px;line-height:1.6}
+
+/* Keep the launch state visible while the server creates or recovers a room. */
+#lobby .board-lobby-wizard.is-loading> :not(.setup-loading){display:none!important}
+#lobby .setup-loading:not([hidden]){display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:300px;padding:36px 24px;text-align:center}
+#lobby .setup-loading h3{margin:0;font-size:23px;color:#f2e2b7}
+#lobby .setup-loading p{margin:0;font-size:14px;line-height:1.6;color:#cfddcb}
+#lobby .setup-loading small{font-size:12px;line-height:1.6;color:#9fb19f;letter-spacing:0}
+.setup-loading__spinner{width:42px;height:42px;border:3px solid #d8bd7926;border-top-color:#e6ca85;border-radius:50%;animation:setup-loading-spin 1s linear infinite}
+#lobby:has(.is-loading)>.pending-game-create{display:none}
+@keyframes setup-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.setup-loading__spinner{animation:none;border-style:dotted}}
