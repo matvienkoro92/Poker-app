@@ -2644,3 +2644,8 @@
 .hall-fish-player-month .hall-fish-player-month__awards{font-size:13px!important;line-height:1.35;padding:4px 7px!important}
 
 .home-player-month .hall-fish-player-month>.home-player-month__prize-bar{grid-column:1/-1;width:100%;box-sizing:border-box;margin:12px 0 0;padding:12px;border:0;border-radius:10px;background:linear-gradient(110deg,#65471966,#231b10cc);box-shadow:none}
+
+/* Home leader: larger character and compact awards action. */
+.home-player-month .hall-fish-achievement-leader__hologram{height:140px!important}
+.home-player-month__watch{display:inline-flex;align-items:center;justify-content:center;min-height:26px;margin:0;padding:4px 10px;border:1px solid #c6a458;border-radius:7px;background:#e7bd4b;color:#251900;font:inherit;font-size:11px;font-weight:800;line-height:1.3;cursor:pointer}
+.home-player-month__watch:focus-visible{outline:2px solid #ffe19a;outline-offset:3px}

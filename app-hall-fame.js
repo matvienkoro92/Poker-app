@@ -1926,8 +1926,10 @@ function hallFishRenderHomePlayerMonth(data) {
     var cardHtml = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data)
       .replace(/^<button type="button"/, '<div')
       .replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card')
-      .replace(/<\/button>$/, '</div>');
-    var prizeBarHtml = '<div class="home-player-month__prize-bar"><strong>Приз игроку месяца <span>до 50 000 ₽</span></strong><button type="button" class="home-player-month__more">Подробнее ↗</button></div>';
+      .replace(/<\/button>$/, '</div>')
+      .replace(/<span class="hall-fish-achievement-leader__count">[^<]*<\/span>/g, '')
+      .replace('</span><span class="hall-fish-player-month__stage">', '<button type="button" class="home-player-month__watch">Смотреть</button></span><span class="hall-fish-player-month__stage">');
+    var prizeBarHtml = '<div class="home-player-month__prize-bar"><strong>Приз игроку месяца <span>до 50 000 ₽</span></strong></div>';
     root.innerHTML = cardHtml.replace(/<\/div>$/, prizeBarHtml + '</div>');
 
   } finally { hallFishActiveDayHeroMonth = previous; }
@@ -1944,7 +1946,7 @@ function hallFishRefreshHomePlayerMonth() {
   if (!root) return;
   hallFishLoadAchievementRows().then(hallFishRenderHomePlayerMonth).catch(function() {
     var status = root.querySelector('[role="status"] .hall-fish-player-month__status');
-    if (status) status.textContent = 'Лидер временно недоступен. Нажмите «Подробнее»';
+    if (status) status.textContent = 'Лидер временно недоступен. Нажмите «Смотреть»';
   });
 }
 setTimeout(hallFishRefreshHomePlayerMonth, 0);
