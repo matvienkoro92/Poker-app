@@ -13565,3 +13565,7 @@ body[data-view="raffles"] .raffles-active-chooser__item--training
 .view[data-view="raffles"] #rafflesActiveChooser .raffles-active-chooser__item--simple button{position:static!important;inset:auto!important;transform:none!important;align-self:stretch!important}
 
 .view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-access{display:block;align-self:flex-start;position:static;box-sizing:border-box;max-width:100%;padding:6px 8px;border:1px solid #b89752;border-radius:8px;background:#251d19;color:#ffe0a0;font-size:12px;font-weight:600;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
+
+.view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-number{align-self:flex-end;color:#c9bbd7;font-size:10px;font-weight:500;line-height:1.2}
+.view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-amount{display:block;color:#ffda79;font-size:clamp(26px,7vw,38px);font-weight:950;line-height:1.15;letter-spacing:-.6px;text-shadow:0 2px 14px #efbc4925}
+.view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-title{min-height:0;font-size:14px;line-height:1.35}

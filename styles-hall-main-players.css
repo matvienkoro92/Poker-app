@@ -2637,3 +2637,10 @@
 .home-player-month__prize-bar>strong{min-width:0;font-size:13px;line-height:1.4}
 .home-player-month__prize-bar>strong>span{display:block;color:#ffda79;font-size:18px;font-weight:900;white-space:nowrap}
 .home-player-month__prize-bar .home-player-month__more{position:static;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:auto;min-height:40px;margin:0;padding:8px 12px;border-color:#e8bd56;background:#e7bd4b;color:#251900}
+
+/* Readable monthly leader copy on mobile. */
+.hall-fish-player-month .hall-fish-player-month__status{font-size:13px!important;line-height:1.35;padding:6px 9px!important}
+.hall-fish-player-month .hall-fish-player-month__rule{font-size:13px!important;line-height:1.4!important}
+.hall-fish-player-month .hall-fish-player-month__awards{font-size:13px!important;line-height:1.35;padding:4px 7px!important}
+
+.home-player-month .hall-fish-player-month>.home-player-month__prize-bar{grid-column:1/-1;width:100%;box-sizing:border-box;margin:12px 0 0;padding:12px;border:0;border-radius:10px;background:linear-gradient(110deg,#65471966,#231b10cc);box-shadow:none}

@@ -2425,10 +2425,24 @@ function initRaffles() {
         var trainingLessonCta = trainingCard
           ? '<button type="button" class="raffles-active-chooser__training-lesson" data-raffle-training-lessons><span>Бесплатный видео-урок от Николая</span><strong aria-hidden="true">›</strong></button>'
           : "";
+        var simpleTitle = activeRaffleShortTitle(raffle);
+        var backingCount = simpleTitle.match(/^(\d+)\s+беккинг-байин/i);
+        if (backingCount && totalPrize > 0) {
+          var buyinAmount = totalPrize / Number(backingCount[1]);
+          if (Number.isInteger(buyinAmount)) simpleTitle = simpleTitle.replace(/\s+на кеш$/i, '') + ' на кеш по ' + formatRaffleSum(buyinAmount);
+        }
+        var simpleAmountHtml = '';
+        if (!trainingCard) {
+          simpleAmountHtml = '<span class="raffles-simple-amount">' + escapeHtml(totalPrize > 0 ? formatRaffleSum(totalPrize) : 'Приз') + '</span>';
+          prizePanelHtml = prizePanelHtml.replace(/<span class="raffles-active-chooser__prize-amount">[^<]*<\/span>/, '');
+        }
+        var shortResults = resultsTimeText.replace(/^Итоги\s*:?\s*/i, '').replace(/\s*МСК\s*$/i, '');
+        [['понедельник','пн'],['вторник','вт'],['среду','ср'],['четверг','чт'],['пятницу','пт'],['субботу','сб'],['воскресенье','вс']].forEach(function(day) { shortResults = shortResults.replace(day[0], day[1]); });
         return '<article class="raffles-active-chooser__item raffles-active-chooser__item--simple' + (selected ? ' raffles-active-chooser__item--active' : '') + '" data-raffle-active-id="' + escapeHtml(id) + '">' +
-          '<h3 class="raffles-simple-title">' + escapeHtml(activeRaffleShortTitle(raffle)) + '</h3>' +
-          '<span class="raffles-simple-access">Доступ: ' + escapeHtml(raffleAccessLevelText(raffle)) + '</span>' +
-          '<div class="raffles-simple-meta">' + (resultsTimeText ? '<span>Итоги: ' + escapeHtml(resultsTimeText.replace(/^Итоги\s*:?\s*/i, '')) + '</span>' : '') + '<span>' + escapeHtml(participantCount + ' ' + participantWord) + '</span></div>' +
+          '<span class="raffles-simple-number">Розыгрыш ' + (index + 1) + '</span>' + simpleAmountHtml +
+          '<h3 class="raffles-simple-title">' + escapeHtml(simpleTitle) + '</h3>' +
+          '<span class="raffles-simple-access">Доступ: ' + escapeHtml(raffleAccessLevelCompactLines(raffle)[0] === 'ВСЕ' ? 'для всех' : 'уровень ' + raffleAccessLevelCompactLines(raffle)[0]) + '</span>' +
+          '<div class="raffles-simple-meta">' + (resultsTimeText ? '<span>Итоги: ' + escapeHtml(shortResults) + '</span>' : '') + '<span>' + escapeHtml(participantCount + ' ' + participantWord) + '</span></div>' +
           prizePanelHtml + trainingLessonCta + '</article>' + ticketRegistrationWarning;
 
       })

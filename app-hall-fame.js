@@ -1923,7 +1923,12 @@ function hallFishRenderHomePlayerMonth(data) {
   var previous = hallFishActiveDayHeroMonth;
   try {
     hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
-    root.innerHTML = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data).replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card') + '<div class="home-player-month__prize-bar"><strong>Приз игроку месяца <span>до 50 000 ₽</span></strong><button type="button" class="home-player-month__more">Подробнее ↗</button></div>';
+    var cardHtml = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data)
+      .replace(/^<button type="button"/, '<div')
+      .replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card')
+      .replace(/<\/button>$/, '</div>');
+    var prizeBarHtml = '<div class="home-player-month__prize-bar"><strong>Приз игроку месяца <span>до 50 000 ₽</span></strong><button type="button" class="home-player-month__more">Подробнее ↗</button></div>';
+    root.innerHTML = cardHtml.replace(/<\/div>$/, prizeBarHtml + '</div>');
 
   } finally { hallFishActiveDayHeroMonth = previous; }
 }
