@@ -14,6 +14,15 @@ test('invite art uses the room host snapshot for both leaves, checkers and dice'
 test('Monfokon hides the same point overlays in challenge artwork as in the editor',()=>{
  const painted=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'monfokon'}});
  const classic=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'classic'}});
- const triangles=svg=>(svg.match(/Q[^"<>]+Z" fill=/g)||[]).length;
+ const triangles=svg=>(svg.match(/data-detail="point-inlay"/g)||[]).length;
  assert.equal(triangles(painted),0);assert.equal(triangles(classic),24);
+});
+
+test('current case details survive rasterization and preserve the selected host design',async()=>{
+ const view={state:{discipline:'long'},equipment:{nardsBoard:'club-aces',nardsInterior:'club-obsidian',checkers:'jade',nardsDice:'jade'}};
+ const svg=art.svgFor(view);
+ for(const [detail,count] of [['case-carving',2],['scalloped-rail',4],['brass-hinge',2],['storage-well',30]])assert.equal((svg.match(new RegExp('data-detail="'+detail+'"','g'))||[]).length,count);
+ const photo=await art.render(view),sharp=require('sharp');
+ const carved=await sharp(photo).extract({left:15,top:0,width:860,height:18}).stats();
+ assert.ok(carved.channels.some(c=>c.stdev>20),'Carved rim must retain visible relief');
 });

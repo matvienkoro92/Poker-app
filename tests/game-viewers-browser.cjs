@@ -12,7 +12,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
     const url=new URL(route.request().url());if(url.pathname.startsWith('/api/')){
      const body=route.request().postDataJSON();requests.push({member,...body});
      if(url.pathname!=='/api/'+family||['access','participation','active','admission','version'].includes(body.action))return route.fulfill({json:{ok:true,allowed:true,level:100,active:null,conflict:null}});
-     try{const result=await f.service.call(member,body);if(['room','watch'].includes(body.action))result.viewers={count,...(body.includeViewers?{names:count?['<img src=x onerror=alert(1)>','Второй зритель']:[]}:{} )};return route.fulfill({json:result});}
+     try{const result=await f.service.call(member,body);if(['room','watch'].includes(body.action))result.viewers={count,...(body.includeViewers?{names:count?['<img src=x onerror=alert(1)>','Второй зритель']:[],players:count?[{name:'<img src=x onerror=alert(1)>',avatarUrl:'javascript:alert(1)',level:78,rating:{game:discipline,mode:'paid',rank:3,total:15,score:25.5}},{name:'Второй зритель',level:12,rating:{game:discipline,mode:'paid',rank:null,total:15,score:0}}]:[]}:{} )};return route.fulfill({json:result});}
      catch(e){return route.fulfill({status:e.status||503,json:{ok:false,error:e.message}});}
     }
     const file=path.join(process.cwd(),url.pathname);return fs.existsSync(file)&&fs.statSync(file).isFile()?route.fulfill({path:file}):route.fulfill({status:404});
@@ -22,7 +22,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
    
    await page.getByRole('button',{name:'Кто сейчас смотрит игру'}).waitFor();assert.match(await page.locator('.game-viewers').innerText(),/2/);
    await page.locator('.game-viewers>button').click();const dialog=page.locator('.game-viewers-dialog[open]');await dialog.getByText('Второй зритель').waitFor();
-   assert.equal(await dialog.locator('img').count(),0);assert.match(await dialog.innerText(),/<img src=x/);await dialog.getByRole('button',{name:'Закрыть'}).click();if(watch)await page.screenshot({path:'/tmp/viewers-'+discipline+'.png'});
+   assert.equal(await dialog.locator('img').count(),0);assert.match(await dialog.innerText(),/<img src=x/);assert.match(await dialog.innerText(),/Уровень 78/);assert.match(await dialog.innerText(),/№3 из 15/);assert.match(await dialog.innerText(),/пока без рейтинга/);await dialog.getByRole('button',{name:'Закрыть'}).click();if(watch)await page.screenshot({path:'/tmp/viewers-'+discipline+'.png'});
   }
   const viewer=pages[1];await viewer.waitForTimeout(1400);assert.equal(requests.filter(r=>r.member==='m3'&&r.viewerPresence==='active').length,1,'Heartbeat must not be written on every poll');
   assert.equal(requests.some(r=>r.member==='m1'&&r.viewerPresence==='active'),false);

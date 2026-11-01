@@ -59,3 +59,11 @@ test('cache reads avoid presence writes, and joining players disappear from the 
  room.playerProfiles[2].accountId='A';room.revision=2;strings.room=cjson.encode(room)
  assert(observe(1600,'','','','','',2).count==0);assert(writes==before)
 `));
+
+test('viewer detail lookup is opt-in and uses server identities rather than request fields',async()=>{
+ let lookups=0;
+ const observe=create({commands:async()=>[JSON.stringify({count:1,names:['Em13'],viewers:[{accountId:'ID123456',name:'Em13'}]})],resolveViewer:async()=>null,resolveDetails:async(viewers,{result})=>{lookups++;assert.equal(viewers[0].accountId,'ID123456');assert.equal(result.state.discipline,'long');return [{name:'Em13',level:78,rating:{game:'long',mode:'paid',rank:3,total:15,score:25}}];}});
+ const args={family:'board-games',member:'host',body:{action:'room'},result:{roomId:'ABCDEFGHJK',revision:1,state:{discipline:'long'}}};
+ assert.deepEqual(await observe(args),{count:1});assert.equal(lookups,0);
+ const data=await observe({...args,body:{...args.body,includeViewers:true,accountId:'fake'}});assert.equal(lookups,1);assert.equal(data.players[0].level,78);assert.equal(data.players[0].rating.rank,3);assert.ok(!JSON.stringify(data).includes('ID123456'));
+});

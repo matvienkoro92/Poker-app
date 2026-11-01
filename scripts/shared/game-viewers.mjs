@@ -7,7 +7,15 @@ export function mountGameViewers({anchor,container,request,context}){
   if(!data?.viewers||!data.roomId)return;
   room=data.roomId;if(root.hidden)root.hidden=false;const text='👁 Зрители: '+data.viewers.count;if(button.textContent!==text)button.textContent=text;
   if(dialog?.open&&Array.isArray(data.viewers.names)){
-   const names=data.viewers.names,key=JSON.stringify(names);if(list.dataset.names!==key){list.dataset.names=key;list.replaceChildren(...names.map(name=>{const li=document.createElement('li');li.textContent=name;return li;}));}
+   const names=data.viewers.names,players=Array.isArray(data.viewers.players)?data.viewers.players:names.map(name=>({name})),key=JSON.stringify(players);if(list.dataset.names!==key){list.dataset.names=key;list.replaceChildren(...players.map(viewer=>{
+    const li=document.createElement('li');li.className='game-viewer-card';
+    const avatar=document.createElement('span');avatar.className='game-viewer-avatar';avatar.textContent=Array.from(viewer.name||'?')[0];
+    if(typeof viewer.avatarUrl==='string'&&/^(\/api\/avatar\?|\.?\/assets\/|https:\/\/)/.test(viewer.avatarUrl)){const image=document.createElement('img');image.src=viewer.avatarUrl;image.alt='';image.loading='lazy';image.onerror=()=>image.remove();avatar.append(image);}
+    const copy=document.createElement('span'),name=document.createElement('strong');name.textContent=viewer.name;copy.append(name);
+    if(viewer.level!=null){const level=document.createElement('small');level.textContent='Уровень '+viewer.level;copy.append(level);}
+    if('rating' in viewer){const rating=document.createElement('small'),r=viewer.rating,title={long:'Длинные нарды',short:'Короткие нарды',chess:'Шахматы',billiards:'Бильярд'}[r?.game]||'Рейтинг';rating.textContent=r?title+' · '+(r.mode==='paid'?'на фишки':'бесплатно')+' · '+(r.rank?'№'+r.rank+' из '+r.total+' · '+Number(r.score).toLocaleString('ru-RU',{maximumFractionDigits:2})+' очк.':'пока без рейтинга'):'Рейтинг временно недоступен';copy.append(rating);}
+    li.append(avatar,copy);return li;
+   }));}
    const noteText=data.viewers.count?('Сейчас смотрят: '+data.viewers.count+(data.viewers.count>names.length?' · показаны первые '+names.length:'')):'Зрителей пока нет';if(note.textContent!==noteText)note.textContent=noteText;
   }
  }

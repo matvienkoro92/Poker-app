@@ -806,3 +806,10 @@ body.billiards-super-shot #tableDock #hint{display:block!important;position:abso
 .super-shot-reward__card{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .super-shot-reward__card button{position:sticky;bottom:0;z-index:1;min-height:44px;box-shadow:0 -8px 16px #102c24}
 @media(max-height:600px){.super-shot-reward__card{padding:14px 18px}.super-shot-reward__card img{width:56px;height:56px;margin:4px auto}.super-shot-reward__card h2{font-size:24px;margin:5px 0}.super-shot-reward__prizes{margin:10px 0 6px}.super-shot-reward__prizes b{padding:10px 6px}.super-shot-reward__card p{margin:6px 0;line-height:1.3}.super-shot-reward__card button{margin-top:8px;padding:11px}}
+
+.game-viewers-dialog ul{list-style:none;padding:0}
+.game-viewers-dialog .game-viewer-card{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #c7ab692b}
+.game-viewer-avatar{position:relative;display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;overflow:hidden;background:#385647;color:#ffe4a0;font-weight:800}
+.game-viewer-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.game-viewer-card>span:last-child{display:grid;gap:4px;min-width:0}
+.game-viewer-card small{font-size:12px;line-height:1.4;color:#c8c6ac}
