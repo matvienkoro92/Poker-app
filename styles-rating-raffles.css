@@ -13572,7 +13572,7 @@ body[data-view="raffles"] .raffles-active-chooser__item--training
 
 /* Raffle numbers sit just above each card's upper-right edge. */
 .view[data-view="raffles"] #rafflesActiveChooser{row-gap:28px;padding-top:18px}
-.view[data-view="raffles"] #rafflesActiveChooser>.raffles-active-chooser__item--simple{position:relative;overflow:visible}
+.view[data-view="raffles"] #rafflesActiveChooser>.raffles-active-chooser__item--simple{position:relative;overflow:visible!important}
 .view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-number{position:absolute;right:12px;bottom:calc(100% + 3px);margin:0;line-height:1.2;white-space:nowrap;pointer-events:none}
 
 .view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-access{border-color:#53c987;background:#123b29;color:#adf5c9}

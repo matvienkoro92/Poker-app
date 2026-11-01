@@ -2441,7 +2441,7 @@ function initRaffles() {
         return '<article class="raffles-active-chooser__item raffles-active-chooser__item--simple' + (selected ? ' raffles-active-chooser__item--active' : '') + '" data-raffle-active-id="' + escapeHtml(id) + '">' +
           '<span class="raffles-simple-number">Розыгрыш ' + (index + 1) + '</span>' + simpleAmountHtml +
           '<h3 class="raffles-simple-title">' + escapeHtml(simpleTitle) + '</h3>' +
-          '<span class="raffles-simple-access">Доступ: ' + escapeHtml(raffleAccessLevelCompactLines(raffle)[0] === 'ВСЕ' ? 'для всех' : 'уровень ' + raffleAccessLevelCompactLines(raffle)[0]) + (raffleAccessLevelCompactLines(raffle)[0] === '1+' ? '<small class="raffles-simple-access__note">Только регистрация</small>' : '') + '</span>' +
+          '<span class="raffles-simple-access">Доступ: ' + escapeHtml(raffleAccessLevelCompactLines(raffle)[0] === 'ВСЕ' ? 'для всех' : 'уровень ' + raffleAccessLevelCompactLines(raffle)[0]) + (raffleAccessLevelCompactLines(raffle)[0] === '1+' ? '<small class="raffles-simple-access__note">Достаточно зарегистрироваться</small>' : '') + '</span>' +
           '<div class="raffles-simple-meta"><span class="raffles-simple-countdown"><small>До итогов</small><strong data-raffle-active-timer="' + escapeHtml(endMs || 0) + '">' + escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || 'Завершён') : '—') + '</strong></span></div>' +
           '<button type="button" class="raffles-simple-participants" data-raffle-active-info-id="' + escapeHtml(id) + '" data-raffle-participants-open aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">Участники · ' + escapeHtml(participantCount) + '</button>' +
           prizePanelHtml + trainingLessonCta + '</article>' + ticketRegistrationWarning;
