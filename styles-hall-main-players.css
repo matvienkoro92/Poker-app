@@ -2607,3 +2607,13 @@
 .home-player-month .hall-fish-player-month{width:100%;min-height:165px!important;padding:14px 14px 42px!important}
 .home-player-month .hall-fish-player-month__rule{font-size:11px}
 .home-player-month__more{position:absolute;bottom:10px;left:16px;padding:6px 12px;border:1px solid #c6a458;border-radius:9px;background:#111822;color:#ffe1a0;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+
+.hall-fish-player-month__prize{display:grid;gap:5px;margin-top:6px;padding:10px 12px;border:1px solid #e8bd56;border-radius:12px;background:linear-gradient(135deg,#65471966,#231b10cc);color:#ffe8b1;font-size:12px;line-height:1.4;text-align:left;box-shadow:inset 0 0 18px #ffca4410}
+.hall-fish-player-month__prize>strong{color:#ffda79;font-size:13px}
+.hall-fish-player-month__prize b{color:#ffe087;font-weight:900;white-space:nowrap}
+.hall-fish-player-month__hero-prize{display:block;margin-top:3px;padding-top:7px;border-top:1px solid #c7a24c66}
+@media(max-width:420px){.hall-fish-player-month__prize{padding:8px;font-size:11px}}
+
+.home-player-month__more{top:auto;bottom:auto;position:relative;left:auto;display:inline-flex;margin:-38px 0 10px 16px;vertical-align:top}
+.home-player-month>.home-player-month__prize{margin:0 0 12px;width:100%;box-sizing:border-box;font-size:12px}
+.hall-fish-achievement-card--featured>.hall-fish-player-month__prize{margin:10px 0 0;box-sizing:border-box;width:100%}

@@ -1924,6 +1924,10 @@ function hallFishRenderHomePlayerMonth(data) {
   try {
     hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
     root.innerHTML = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data).replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card') + '<button type="button" class="home-player-month__more">Подробнее ↗</button>';
+    root.insertAdjacentHTML('beforeend', hallFishPlayerMonthPrizeHtml());
+    var prize = root.querySelector('.hall-fish-player-month__prize');
+    if (prize) { prize.classList.add('home-player-month__prize'); root.appendChild(prize); }
+
   } finally { hallFishActiveDayHeroMonth = previous; }
 }
 document.addEventListener('click', function(event) {
@@ -1934,6 +1938,8 @@ document.addEventListener('click', function(event) {
   navigateToHallFameSection('achievements');
 });
 setTimeout(function() { hallFishLoadAchievementRows().then(hallFishRenderHomePlayerMonth).catch(function() {}); }, 1200);
+
+function hallFishPlayerMonthPrizeHtml() { return '<span class="hall-fish-player-month__prize"><strong>Награда игроку месяца</strong><span>Бесплатные входы во все майны Poker21 на <b>20 000 ₽</b></span><span>Ещё <b>5 000 ₽</b> билетами</span><span class="hall-fish-player-month__hero-prize">Отдельно за ачивку «Герой дня за месяц» — <b>25 000 ₽</b></span></span>'; }
 
 function hallFishPlayerMonthCardHtml(spec,active,data) {
   var month=hallFishActiveDayHeroMonth,rows=spec.rows||[],leaders=rows.filter(function(row){return row.value===rows[0].value;});
@@ -1978,7 +1984,7 @@ function hallFishRenderAchievementRows(data) {
       '</div>' +
     '<div class="hall-fish-achievement-tabs hall-fish-achievement-tabs--trophies hall-fish-achievement-tabs--matrix" role="group" aria-label="Награды и топы по ачивкам">' +
       specs.map(function (spec) {
-        if(spec.key==='playerMonth')return '<article class="hall-fish-achievement-card hall-fish-achievement-card--featured">'+hallFishPlayerMonthCardHtml(spec,active,data)+hallFishAchievementPreviewHtml(spec,data)+'</article>';
+        if(spec.key==='playerMonth')return '<article class="hall-fish-achievement-card hall-fish-achievement-card--featured">'+hallFishPlayerMonthCardHtml(spec,active,data)+hallFishPlayerMonthPrizeHtml()+hallFishAchievementPreviewHtml(spec,data)+'</article>';
         var isActive = spec.key === active;
         return '<article class="hall-fish-achievement-card"><button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" aria-pressed="' + (isActive ? "true" : "false") + '" aria-label="Выбрать награду: ' + hallFishEsc(spec.sectionTitle||spec.title) + '">' + '<span class="hall-fish-achievement-trophy">'+hallFishAchievementTrophyHtml(spec)+'</span>'+hallFishAchievementLeaderHtml(spec)+'</button>'+hallFishAchievementPreviewHtml(spec,data)+'</article>';
       }).join("") +
