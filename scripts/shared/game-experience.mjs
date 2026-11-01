@@ -1,6 +1,7 @@
+import {playLevelLightning} from './level-lightning.mjs';
 import rules from '../../lib/game-experience-rules.js';
 export function gameExperiencePreview(stake=0){const {participation,win}=rules.rewards(stake);return 'Опыт герою: победа +'+win+', поражение +'+participation+'.';}
-const announced=new Set();
+const announced=new Set(),celebratedLevels=new Set();
 export function paintGameExperience(container,reward,player){
  let card=container.querySelector('.game-experience');
  if(!reward||![0,1].includes(player)){if(card)card.hidden=true;return;}
@@ -20,5 +21,6 @@ export function paintGameExperience(container,reward,player){
  track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax',String(max?100:size));track.setAttribute('aria-valuenow',String(max?100:current));
  label.textContent=max?'Достигнут максимальный уровень':current.toLocaleString('ru-RU')+' / '+size.toLocaleString('ru-RU')+' опыта';next.textContent=max?'Всего опыта: '+after.points.toLocaleString('ru-RU'):'До уровня '+(after.level+1)+': '+(after.nextStart-after.points).toLocaleString('ru-RU')+' опыта';card.append(level,track,label,next);
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){base.animate(crossed?[{width:from+'%'},{width:'100%',offset:.45},{width:'0%',offset:.46},{width:pct+'%'}]:[{width:from+'%'},{width:pct+'%'}],{duration:1400,easing:'ease-in-out'});gain.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:1400,easing:'ease-out'});title.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'ease-out'});}
+ if(after.level>before.level&&!celebratedLevels.has(key)){celebratedLevels.add(key);playLevelLightning(level);}
  if(!announced.has(key)){announced.add(key);if(parent!==window)parent.postMessage({type:'p21-game-experience-earned',event:reward.event,amount},location.origin);}
 }

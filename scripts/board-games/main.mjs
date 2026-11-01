@@ -1,3 +1,4 @@
+import {playVictoryConfetti} from '../shared/victory-confetti.mjs';
 import {createNardsFlair} from './nards-flair.mjs';
 import {mountResultProgress} from '../shared/result-progress.mjs';
 import {gameExperiencePreview,paintGameExperience} from '../shared/game-experience.mjs';
@@ -197,7 +198,7 @@ function showResultSummary(finished){
  const key=JSON.stringify([roomId,series.number,series.round,state.winner,state.endReason]);
  dialog.querySelector('h2').textContent=$('result').querySelector('h2').textContent;
  dialog.querySelector('p').textContent=$('result').querySelector('p').textContent+(!wager?.freeSpinReward?.granted&&gameSpinRewardText(wager)?' '+gameSpinRewardText(wager):'');paintGameSpinReward(dialog.querySelector('[data-result-spin]'),spectator?null:wager,roomId+':'+series.number+':'+player);resultProgress.render({key,event:roomId+':'+series.number+':'+series.round,discipline:kind,paid:!!wager,online:mode==='online'&&!spectator,draw:state.winner==='draw',matchPending:series.target>1&&series.winner===null,player,reward:mode==='online'&&!spectator?gameExperience:null});
- if(key!==resultSummaryKey){resultSummaryKey=key;if(!dialog.open)dialog.showModal();}
+ if(key!==resultSummaryKey){resultSummaryKey=key;if(!dialog.open)dialog.showModal();if(!spectator&&mode!=='training'&&state.winner===player)playVictoryConfetti(dialog);}
 }
 let headToHead=null,headToHeadKey='';
 function paintHeadToHead(){const el=$('matchup').querySelector(':scope>b');if(!el)return;if(mode!=='online'){el.classList.remove('head-to-head');el.textContent='VS';return;}el.classList.add('head-to-head');el.replaceChildren();const score=document.createElement('strong');score.textContent=headToHead?(headToHead.complete?'':'≈ ')+headToHead.wins.join(' : '):'— : —';el.append(score);const gamesLabel=document.createElement('small');gamesLabel.textContent='Партии';el.prepend(gamesLabel);const points=document.createElement('small');points.textContent='Очки '+(headToHead?(headToHead.points||headToHead.wins).join(' : '):'— : —');el.append(points);el.title='Общий счёт встреч · '+labels[kind]+' · бесплатные и на фишки';el.setAttribute('aria-label',headToHead?'Счёт личных встреч: '+headToHead.wins.join(' — ')+(headToHead.draws?', ничьих '+headToHead.draws:''):'Счёт личных встреч загружается');if(headToHead?.draws){const draws=document.createElement('small');draws.textContent='Ничьи: '+headToHead.draws;el.append(draws);}if(headToHead&&!headToHead.complete)el.title+=' · прежняя история уточняется';}
