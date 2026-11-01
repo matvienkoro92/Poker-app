@@ -2592,3 +2592,7 @@
 @media(max-width:600px){.hall-fish-player-month .hall-fish-achievement-leader__hologram::after{height:25px;bottom:-2px}}
 
 .hall-fish-player-month .hall-fish-achievement-leader__hologram .hall-fish-level-row__media{inset:0 0 14px;height:calc(100% - 14px)}
+
+.hall-fish-achievements .hall-fish-achievement-period{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) 36px}
+.hall-fish-period-copy{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:1px solid #b99b5888;border-radius:10px;background:#101725;color:#ffe1a0;font-size:23px;cursor:pointer}
+.hall-fish-period-copy:focus-visible{outline:2px solid #ffe1a0;outline-offset:2px}

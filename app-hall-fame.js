@@ -348,7 +348,7 @@ function hallFishAchievementShareUrl(key) {
 function hallFishAchievementKeyFromStartParam(startParam) {
   var value = String(startParam || "").trim();
   var match = value.match(/^hall_fame_achievements(?:_([A-Za-z0-9_-]+))?$/);
-  return match ? (match[1] || "big50") : "";
+  return match ? (/^period-/.test(match[1] || "") ? "dayHero" : (match[1] || "big50")) : "";
 }
 
 function resolveHallFameSectionFromStartParam(startParam) {
@@ -1857,7 +1857,7 @@ function hallFishDayHeroMonthFilterHtml(data) {
   return '<div class="hall-fish-day-hero-months hall-fish-achievement-period" role="group" aria-label="Месяц для всех ачивок">'+
    '<button type="button" class="hall-fish-day-hero-month'+(all?' hall-fish-day-hero-month--active':'')+'" data-hall-fish-day-hero-month="all" aria-pressed="'+all+'">За всё время</button>'+
    '<label class="hall-fish-achievement-month-picker'+(!all?' hall-fish-achievement-month-picker--active':'')+'"><span>Выбрать месяц</span><select data-hall-fish-achievement-month aria-label="Выбрать месяц ачивок">'+
-   (all?'<option value="" selected disabled>Выбрать месяц</option>':'')+keys.map(function(key){var label=hallFishDayHeroMonthLabel(key).replace(/\s+\d{4}$/,'')+' '+key.split('.')[1];return '<option value="'+hallFishEsc(key)+'"'+(key===hallFishActiveDayHeroMonth?' selected':'')+'>'+hallFishEsc(label)+'</option>';}).join('')+'</select></label></div>';
+   (all?'<option value="" selected disabled>Выбрать месяц</option>':'')+keys.map(function(key){var label=hallFishDayHeroMonthLabel(key).replace(/\s+\d{4}$/,'')+' '+key.split('.')[1];return '<option value="'+hallFishEsc(key)+'"'+(key===hallFishActiveDayHeroMonth?' selected':'')+'>'+hallFishEsc(label)+'</option>';}).join('')+'</select></label><button type="button" class="hall-fish-period-copy" data-hall-fish-period-copy aria-label="Скопировать ссылку на выбранный месяц" title="Скопировать ссылку">⧉</button></div>';
 
 }
 
@@ -3264,6 +3264,13 @@ function initHallFishRatingModal() {
     if(overviewBody){overviewBody.scrollTop=hallFishAchievementDetailsOpen?0:hallFishAchievementOverviewScroll;var focusTarget=hallFishAchievementDetailsOpen?overviewBody.querySelector('[data-hall-fish-achievement-back]'):overviewBody.querySelector('[data-hall-fish-achievement-tab="'+hallFishActiveAchievementTab+'"][aria-pressed]');focusTarget?.focus({preventScroll:true});}
   });
   document.addEventListener('click',function(e){var back=e.target&&e.target.closest?e.target.closest('[data-hall-fish-achievement-back]'):null;if(!back)return;e.preventDefault();hallFishAchievementDetailsOpen=false;hallFishSetAchievementState('',hallFishAchievementRowsCache);var body=document.getElementById('hallFishRatingBody');if(body){body.scrollTop=hallFishAchievementOverviewScroll;body.querySelector('.hall-fish-achievement-preview__more[data-hall-fish-achievement-tab="'+hallFishActiveAchievementTab+'"]')?.focus({preventScroll:true});}});
+  document.addEventListener('click', function(e) {
+    var button = e.target.closest && e.target.closest('[data-hall-fish-period-copy]');
+    if (!button) return;
+    e.preventDefault();
+    var period = hallFishActiveDayHeroMonth === 'all' ? 'all' : hallFishActiveDayHeroMonth.replace('.', '');
+    hallFameCopyUrlToClipboard(hallFishAchievementShareUrl('period-' + period));
+  });
   document.addEventListener('change',function(e){
     var select=e.target&&e.target.closest?e.target.closest('[data-hall-fish-achievement-month]'):null;
     if(!select||!/^\d{2}\.\d{4}$/.test(select.value))return;
@@ -3439,6 +3446,15 @@ function syncInitialHallFameSectionFromStartParam() {
   var section = resolveHallFameSectionFromStartParam(startParam) || window.__pendingHallFameSection || "";
   var achievementKey = hallFishAchievementKeyFromStartParam(startParam) || String(window.__pendingHallFishAchievementTab || "").trim();
   if (achievementKey) {hallFishActiveAchievementTab = achievementKey;hallFishAchievementDetailsOpen=true;}
+  var sharedPeriod = String(startParam).match(/^hall_fame_achievements_period-(all|\d{6})$/);
+  if (sharedPeriod) {
+    var period = sharedPeriod[1];
+    if (period === "all" || /^(0[1-9]|1[0-2])\d{4}$/.test(period)) {
+      hallFishActiveDayHeroMonth = period === "all" ? "all" : period.slice(0, 2) + "." + period.slice(2);
+      hallFishAchievementDetailsOpen = false;
+    }
+  }
+
   if (!section) return;
   var view = document.getElementById("hallOfFameView");
   if (!view || !view.classList.contains("view--active")) return;
