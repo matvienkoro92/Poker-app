@@ -2,12 +2,12 @@ import {playLevelLightning} from './level-lightning.mjs';
 import rules from '../../lib/game-experience-rules.js';
 export function gameExperiencePreview(stake=0){const {participation,win}=rules.rewards(stake);return 'Опыт герою: победа +'+win+', поражение +'+participation+'.';}
 const announced=new Set(),celebratedLevels=new Set();
-export function paintGameExperience(container,reward,player){
+export function paintGameExperience(container,reward,player,{replay=false}={}){
  let card=container.querySelector('.game-experience');
  if(!reward||![0,1].includes(player)){if(card)card.hidden=true;return;}
  if(!card){card=document.createElement('section');card.className='game-experience';card.setAttribute('aria-label','Опыт героя за партию');card.setAttribute('aria-live','polite');container.append(card);}
  card.hidden=false;const key=reward.event+':'+player+':'+!!reward.progress;
- if(card.dataset.event===key)return;card.dataset.event=key;
+ if(card.dataset.event===key&&!replay)return;card.dataset.event=key;
  for(const animation of card.getAnimations({subtree:true}))animation.cancel();
  card.replaceChildren();const title=document.createElement('strong');card.append(title);
  if(!reward.granted){title.textContent='Опыт за партию не начислен';const note=document.createElement('small');note.textContent=reward.reason||'Оба участника должны сделать игровые ходы.';card.append(note);return;}
@@ -19,8 +19,8 @@ export function paintGameExperience(container,reward,player){
  const size=after.nextStart-after.levelStart,current=after.points-after.levelStart,max=after.level===100,pct=max?100:Math.min(100,current/size*100),from=before.nextStart>before.levelStart?Math.min(100,(before.points-before.levelStart)/(before.nextStart-before.levelStart)*100):100,crossed=after.level!==before.level;
  base.style.width=pct+'%';gain.style.left=(crossed?0:from)+'%';gain.style.width=Math.max(0,pct-(crossed?0:from))+'%';
  track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax',String(max?100:size));track.setAttribute('aria-valuenow',String(max?100:current));
- label.textContent=max?'Достигнут максимальный уровень':current.toLocaleString('ru-RU')+' / '+size.toLocaleString('ru-RU')+' опыта';next.textContent=max?'Всего опыта: '+after.points.toLocaleString('ru-RU'):'До уровня '+(after.level+1)+': '+(after.nextStart-after.points).toLocaleString('ru-RU')+' опыта';card.append(level,track,label,next);
- if(!matchMedia('(prefers-reduced-motion: reduce)').matches){base.animate(crossed?[{width:from+'%'},{width:'100%',offset:.45},{width:'0%',offset:.46},{width:pct+'%'}]:[{width:from+'%'},{width:pct+'%'}],{duration:1400,easing:'ease-in-out'});gain.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:1400,easing:'ease-out'});title.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'ease-out'});}
+ label.textContent=max?'Достигнут максимальный уровень':current.toLocaleString('ru-RU')+' / '+size.toLocaleString('ru-RU')+' опыта';next.textContent=max?'Всего опыта: '+after.points.toLocaleString('ru-RU'):'До уровня '+(after.level+1)+': '+Math.ceil(after.nextStart-after.points).toLocaleString('ru-RU')+' опыта';card.append(level,track,label,next);
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){track.animate([{boxShadow:'inset 0 2px 5px #0008'},{boxShadow:'inset 0 2px 5px #0008,0 0 18px #7bff9a99',offset:.65},{boxShadow:'inset 0 2px 5px #0008'}],{duration:1800});base.animate(crossed?[{width:from+'%'},{width:'100%',offset:.45},{width:'0%',offset:.46},{width:pct+'%'}]:(replay?[{width:'0%'},{width:from+'%',offset:.65},{width:pct+'%'}]:[{width:from+'%'},{width:pct+'%'}]),{duration:replay?1800:1400,easing:'ease-in-out'});gain.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:1400,easing:'ease-out'});title.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'ease-out'});}
  if(after.level>before.level&&!celebratedLevels.has(key)){celebratedLevels.add(key);playLevelLightning(level);}
  if(!announced.has(key)){announced.add(key);if(parent!==window)parent.postMessage({type:'p21-game-experience-earned',event:reward.event,amount},location.origin);}
 }
