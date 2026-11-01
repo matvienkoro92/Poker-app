@@ -1,5 +1,9 @@
 // Shell/layout helpers: Telegram/PWA viewport, tabbar padding, profile keyboard cleanup, and Telegram boot.
 
+function pokerTelegramAllowsAutoFullscreen(tg) {
+  return /^(android|ios)$/.test(String(tg && tg.platform || '').trim().toLowerCase());
+}
+
 /** Верхний отступ #app: PWA — только CSS; в Telegram — системная область + кнопки клиента; в обычном браузере — без лишних +52px под шапку TG */
 function pokerApplyAppTopPadding() {
   var root = document.documentElement;
@@ -609,7 +613,7 @@ if (tg) {
   try {
     if (tg.setBackgroundColor) tg.setBackgroundColor(isLight ? "#fff7ed" : isGold ? "#05070d" : isNeon ? "#020611" : "#0f172a");
   } catch (eTgBg) {}
-  // По ссылке t.me/Poker_dvatuza_bot/DvaTuza всегда открываем в полный экран.
+  // Разворачиваем содержимое Mini App внутри окна клиента; fullscreen ниже — только на мобильных.
   // Повторные вызовы expand() с задержкой и при событиях помогают развернуть на части устройств.
   function tryExpand() {
     if (tg.expand) tg.expand();
@@ -656,10 +660,13 @@ if (tg) {
     tryExpand();
     document.removeEventListener("touchstart", expandOnFirstTouch);
   }, { once: true, passive: true, capture: true });
-  // Enter fullscreen once on launch; keep controls inside Telegram's safe areas.
+  // Only native mobile Telegram clients enter fullscreen automatically.
   var pokerFullscreenRequested = false;
+  if (!pokerTelegramAllowsAutoFullscreen(tg) && tg.isFullscreen && typeof tg.exitFullscreen === 'function') {
+    try { tg.exitFullscreen(); } catch (eDesktopFullscreen) {}
+  }
   function pokerEnterFullscreen() {
-    if (pokerFullscreenRequested || tg.isFullscreen || typeof tg.requestFullscreen !== "function") return;
+    if (!pokerTelegramAllowsAutoFullscreen(tg) || pokerFullscreenRequested || tg.isFullscreen || typeof tg.requestFullscreen !== "function") return;
     if (typeof tg.isVersionAtLeast === "function" && !tg.isVersionAtLeast("8.0")) return;
     pokerFullscreenRequested = true;
     try { tg.requestFullscreen(); } catch (eFullscreen) { pokerFullscreenRequested = false; }

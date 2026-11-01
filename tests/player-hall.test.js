@@ -63,13 +63,13 @@ test('every player uses the real profile level for villa clothing and vehicle un
 
 test('table XP comes from the same verified profile status as the leaderboard',async()=>{
  const cached={nickname:'Игрок',totalCounter:{fee:345678,mttCount:20,mttFirstCount:2}};
- const social=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:'123'},{result:'Игрок'}]}});
+ const social=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:'123'},{result:'Игрок'},{result:'0'}]}});
  const p=await social.memberProfile('ID1');
  const expected=require('../lib/chat-profile-status').pokerProfileStatusFromCachedProfile(cached,{pokerPlusLinked:true});
  assert.equal(p.levelProgress.xp,Math.floor(expected.points-expected.levelStart));
  assert.equal(p.levelProgress.target,expected.nextStart-expected.levelStart);
  assert.equal(p.level,expected.level);
- const unbound=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:null},{result:'Гость'}]}});
+ const unbound=mock('lib/club-social.js',{'./redis':{pipeline:async()=>[{result:JSON.stringify(cached)},{result:null},{result:'Гость'},{result:'0'}]}});
  assert.equal((await unbound.memberProfile('ID2')).levelProgress,null);
 });
 

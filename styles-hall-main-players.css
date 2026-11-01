@@ -2502,3 +2502,31 @@
 .hall-garage-stage { position: relative; display: block; width: 100%; height: 100%; isolation: isolate; }
 .hall-garage-character { position: absolute; left: 0; top: 0; width: 82%; height: 100%; object-fit: contain; object-position: center bottom; z-index: 2; }
 .hall-garage-car { position: absolute; right: 0; bottom: 0; width: 88%; height: 35%; object-fit: contain; object-position: right bottom; transform: scale(1.5); transform-origin: right bottom; z-index: 1; }
+
+/* All five club awards remain visible; each has the selected period's leader. */
+.hall-fish-achievement-tabs.hall-fish-achievement-tabs--matrix{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;overflow:visible;padding:12px;scroll-snap-type:none;background:transparent;border:0;border-radius:0;box-shadow:none}
+.hall-fish-achievement-tabs--matrix .hall-fish-achievement-tab{display:grid;grid-template-columns:53% 47%;align-items:center;min-width:0;width:100%;padding:6px 2px;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden}
+.hall-fish-achievement-tabs--matrix .hall-fish-achievement-tab--active{border:0;background:transparent;box-shadow:none}
+.hall-fish-achievement-trophy{display:block;position:relative;min-width:0;width:100%}
+.hall-fish-achievement-tabs--matrix .hall-fish-trophy-prize{font-size:clamp(7px,1vw,11px)}
+.hall-fish-achievement-leader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:2px;color:#b4f6ff;gap:3px}
+.hall-fish-achievement-leader__hologram{display:block;position:relative;isolation:isolate;width:100%;height:105px;background:radial-gradient(ellipse at 50% 95%,#56ddff3b,transparent 63%)}
+.hall-fish-achievement-leader__hologram::before{content:"";position:absolute;z-index:3;inset:7% 4% 0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#aff4ff20 3px 4px);mask-image:linear-gradient(transparent,#000 25%);border-bottom:2px solid #82eaff;border-radius:0 0 50% 50%}
+.hall-fish-achievement-leader__hologram img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:grayscale(1) sepia(1) hue-rotate(135deg) saturate(2.2) brightness(1.18) drop-shadow(0 0 5px #5edcff);opacity:.9}
+.hall-fish-achievement-leader__hologram .hall-fish-level-row__media{display:block;position:absolute;inset:0;width:100%;height:100%;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible;filter:grayscale(1) sepia(1) hue-rotate(135deg) saturate(2.2) brightness(1.18) drop-shadow(0 0 5px #5edcff)}
+.hall-fish-achievement-leader__hologram .hall-garage-car{display:none}.hall-fish-achievement-leader__hologram .hall-garage-character{left:0;width:100%;height:100%}
+.hall-fish-achievement-leader__name{display:block;max-width:100%;font-size:12px;line-height:1.15;font-weight:850;text-align:center;overflow-wrap:anywhere;white-space:normal;text-shadow:0 0 7px #39bce066}
+.hall-fish-achievement-leader__count{font-size:11px;font-weight:800;color:#ffe1a0;line-height:1.2}.hall-fish-achievement-leader--empty{opacity:.55}
+@media(max-width:600px){.hall-fish-achievement-tabs.hall-fish-achievement-tabs--matrix{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px}.hall-fish-achievement-leader__hologram{height:95px}.hall-fish-achievement-leader__name{font-size:10px}.hall-fish-achievement-leader__count{font-size:10px}.hall-fish-achievement-tabs-shell__hint{font-size:10px}}
+
+/* Keep the shared month filter compact above the award matrix. */
+.hall-fish-achievements .hall-fish-day-hero-months{align-items:center;align-self:start;gap:6px;padding:0 1px 3px;min-height:0;height:31px;box-sizing:border-box}
+.hall-fish-achievements .hall-fish-day-hero-month{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:28px;min-height:28px;max-height:28px;padding:0 10px;font-size:11px;line-height:1;border-radius:14px}
+
+.hall-fish-achievements .hall-fish-achievement-period{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:8px;height:auto;overflow:visible;padding:0 1px 4px}
+.hall-fish-achievement-period .hall-fish-day-hero-month{width:100%;height:36px;min-height:36px;max-height:36px;border-radius:12px}
+.hall-fish-achievement-month-picker{display:grid;grid-template-columns:1fr;align-content:center;min-width:0;height:36px;padding:2px 10px;box-sizing:border-box;border:1px solid #b99b5866;border-radius:12px;background:#080d19;color:#e9d299}
+.hall-fish-achievement-month-picker>span{font-size:9px;font-weight:700;line-height:11px}
+.hall-fish-achievement-month-picker select{display:block;width:100%;min-width:0;min-height:0;height:18px;padding:0 15px 0 0;border:0;border-radius:0;background:transparent;color:inherit;font-family:inherit;font-size:11px;font-weight:900;line-height:18px;box-shadow:none;cursor:pointer}
+.hall-fish-achievement-month-picker select option{color:#f8e0a3;background:#101725}
+.hall-fish-achievement-month-picker--active{background:linear-gradient(180deg,#ffe9a3,#e9a92f);color:#241500;border-color:#ffe7a3}

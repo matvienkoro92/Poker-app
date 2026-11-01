@@ -754,3 +754,36 @@ body[data-game-background].billiards-table-view #tableLeftRail .ball-shelf :is(s
 .game-experience{display:grid;gap:8px;margin:16px 0;padding:16px;border:1px solid #5cbd84;border-radius:16px;background:linear-gradient(135deg,#173b2d,#10271f);color:#ffe8a3;text-align:center}.game-experience__gain{font-size:24px!important;color:#74ef9b!important;text-shadow:0 0 16px #44dd7770}.game-experience>b{font-size:18px}.game-experience>span{font-size:14px;color:#fff0c8}.game-experience>small{font-size:13px;line-height:1.4;color:#c4dfc9}.game-experience__track{position:relative;height:18px;overflow:hidden;border:1px solid #c5a566;border-radius:20px;background:#081e17;box-shadow:inset 0 2px 5px #0008}.game-experience__track>i{position:absolute;inset:0 auto 0 0;border-radius:20px}.game-experience__base{background:linear-gradient(90deg,#a47b2d,#ffe59b)}.game-experience__added{background:linear-gradient(90deg,#39b96c,#8bffad);box-shadow:0 0 12px #5eff8e;transform-origin:left}
 
 .game-spin-reward{position:relative;overflow:hidden}.game-spin-reward__icon{display:block!important;font-size:36px;line-height:1.2;color:inherit!important}.game-spin-reward__claim{justify-self:center;min-width:170px;min-height:44px;margin:6px 0 0!important;border:1px solid #ffe3a1!important;border-radius:12px;background:linear-gradient(135deg,#ffe8a6,#d1a747)!important;color:#193026!important;font-weight:800!important}.game-spin-reward.is-claimed .game-spin-reward__claim{opacity:1;background:#284737!important;color:#a5efbc!important;border-color:#6cba87!important}.game-spin-reward.is-arriving{animation:game-spin-arrival .65s ease-out both}.game-spin-reward.is-arriving .game-spin-reward__icon{animation:game-spin-gift .9s ease-out both}.game-spin-reward.is-arriving>strong{animation:game-spin-glow 1.4s ease-out both}@keyframes game-spin-arrival{from{opacity:0;transform:translateY(14px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes game-spin-gift{0%{transform:scale(.4) rotate(-12deg)}60%{transform:scale(1.2) rotate(6deg)}100%{transform:scale(1) rotate(0)}}@keyframes game-spin-glow{0%,100%{text-shadow:none}45%{text-shadow:0 0 20px #ffe39a}}@media(prefers-reduced-motion:reduce){.game-spin-reward,.game-spin-reward>*{animation:none!important}}
+
+/* Super shot uses the existing 3D room, host equipment and native shot tools. */
+.super-shot-intro{position:fixed;inset:25% 5% auto;z-index:300;min-height:160px;display:grid;place-items:center;pointer-events:none;text-align:center;border-radius:24px;background:#09251de8;box-shadow:0 0 65px #ffcf5840;border:1px solid #e5bd66;font-size:clamp(24px,6vw,44px);font-weight:900;color:#ffdb76;animation:super-shot-reveal 1.8s ease both}
+.super-shot-intro[hidden],.super-shot-entry[hidden],.super-shot-exit[hidden]{display:none!important}
+.super-shot-entry,.super-shot-exit{width:100%;margin:8px 0;color:#ffdb76}
+.billiards-super-shot :is(#matchResult,#ballShelves,#unassignedTray,#decisionOpen,#penaltyConfirm,#callControls,#placeBreak,#cuePickHint,#turnGuide,#again,#watchShot,#seriesScore,.replay-offer,.game-experience,.super-shot-entry){display:none!important}
+@keyframes super-shot-reveal{0%{opacity:0;transform:scale(.7)}30%,80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.super-shot-intro{animation:none}}
+
+body.billiards-super-shot #tableDock .board-replay{display:none!important}
+body.billiards-super-shot #tableDock #game{display:grid!important;height:auto!important;grid-template-rows:40px 30px}
+body.billiards-super-shot #tableDock .super-shot-exit{display:block;grid-column:1/-1;grid-row:2;margin:2px 0 0;padding:3px 10px;min-height:28px;font-size:11px}
+body.billiards-super-shot #tableDock #hint{display:block!important;position:absolute;bottom:calc(100% + 6px);left:10px;right:10px;margin:0;padding:5px 9px;background:#11261fea;border-radius:9px;text-align:center;font-size:11px;line-height:1.35}
+
+.billiards-pot-flash{position:fixed;inset:12% 8% 8%;z-index:80;pointer-events:none;border-radius:28px;box-shadow:inset 0 0 70px #6ae6ffcc,0 0 25px #51d1ff80;animation:billiards-trophy-flash 1s ease-out both}.billiards-pot-flash[data-effect=super-gold]{box-shadow:inset 0 0 85px #ffe18c,0 0 35px #eeb94f99}.billiards-pot-flash[hidden]{display:none}.super-shot-progress{padding:12px;border:1px solid #c4a65c;border-radius:12px;color:#f6d98c}@keyframes billiards-trophy-flash{0%{opacity:0;transform:scale(.96)}25%{opacity:1}100%{opacity:0;transform:scale(1.03)}}@media(prefers-reduced-motion:reduce){.billiards-pot-flash{animation:none}}
+
+.cue-card[data-cue^="decisive"][aria-pressed="true"] :is(strong,small,.cue-card__name,.cue-card__state){color:#163328!important;text-shadow:none}
+
+/* Stake selection: compact cards and a clear amount field. */
+:is(#wagerModes,#boardWagerModes){display:grid;grid-template-columns:1fr 1fr;gap:10px}
+:is(#wagerModes,#boardWagerModes) button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:68px;padding:12px 16px;border-radius:16px;box-shadow:none}
+:is(#wagerModes,#boardWagerModes) button strong{font-size:16px;line-height:1.2}
+:is(#wagerModes,#boardWagerModes) button small{font-size:12px;font-weight:500;opacity:.7}
+.wager-stake-card:not([hidden]){display:grid;gap:12px;margin-top:16px;padding:18px;border:1px solid #d6bd7840;border-radius:18px;background:linear-gradient(145deg,#213b30,#12271f);box-shadow:0 8px 24px #0002}
+.wager-stake-card__title{font-size:13px;font-weight:700;color:#e6d7ae}
+.wager-stake-card__field{display:flex;align-items:center;gap:12px;padding:4px 16px;background:#0b2019;border:1px solid #bca36d70;border-radius:12px;transition:border-color .2s,box-shadow .2s}
+.wager-stake-card__field:focus-within{border-color:#f3d58b;box-shadow:0 0 0 3px #f3d58b18}
+.wager-stake-card__field input{appearance:textfield;-moz-appearance:textfield;min-width:0;width:100%;height:56px;margin:0;padding:0;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;color:#ffe5a4;font-size:28px;font-weight:800}
+.wager-stake-card__field input::-webkit-inner-spin-button,.wager-stake-card__field input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.wager-stake-card__unit{flex-shrink:0;font-size:13px;color:#b9c8bd}
+.wager-stake-card__summary{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:11px;color:#aebeb2}
+.wager-stake-card__summary b{display:block;margin-top:3px;font-size:13px;color:#f1dba3}
+.wager-stake-card>small{font-size:11px;line-height:1.5;letter-spacing:0;color:#aebeb2}

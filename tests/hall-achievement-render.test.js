@@ -16,6 +16,7 @@ test('achievement rows render for every tab with populated tournament data', () 
     const html = context.hallFishAchievementSectionHtml(spec.sectionTitle, data.dayHero.slice(0, 2), spec.description, spec.key, spec.awardText);
     assert.match(html, /hall-fish-achievement-row/);
   }
+  context.hallFishActiveDayHeroMonth='09.2026';
   const html = context.hallFishRenderAchievementRows(data);
   assert.match(html, /25 000 ₽/);
   assert.match(html, /hall-fish-achievement-row/);

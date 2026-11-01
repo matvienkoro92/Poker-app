@@ -73,8 +73,12 @@ const cues=Object.freeze([
   "metal": "#f4cc71",
   "art": "./assets/player-hall/billiards-cue-sovereign-v3.webp"
  }
+ ,{id:'decisive',name:'Решающий',level:0,superShotWins:1,color:'#122f39',grip:'#122126',metal:'#a7dfed',art:'./assets/player-hall/billiards-cue-decisive.webp'},
+ {id:'decisive-gold',name:'Решающий · Золото',level:0,superShotWins:10,color:'#c7982c',grip:'#2c2311',metal:'#ffe39a',art:'./assets/player-hall/billiards-cue-decisive-gold.webp'},
+ {id:'decisive-named',name:'Решающий · Легенда',level:0,superShotWins:25,named:true,effect:'super-gold',color:'#201733',grip:'#211d29',metal:'#f5d98f',art:'./assets/player-hall/billiards-cue-decisive-named.webp'}
 ].map(Object.freeze));
-function available(id,level){return cues.find(c=>c.id===id&&Number.isFinite(level)&&level>=c.level)||cues[0];}
+function unlocked(c,level,wins=0){return c.superShotWins?Number(wins)>=c.superShotWins:Number.isFinite(level)&&level>=c.level;}
+function available(id,level,wins=0){return cues.find(c=>c.id===id&&unlocked(c,level,wins))||cues[0];}
 function paintPreview(root,cue,nick){
  if(!root)return;
  let frame=Array.from(root.children).find(c=>c.classList.contains('billiards-cue-preview'));
@@ -90,5 +94,5 @@ function paintPreview(root,cue,nick){
  function fit(){if(!root.isConnected){root._billiardsCueObserver?.disconnect();delete root._billiardsCueObserver;return;}const layer=Array.from(root.children).find(c=>c.classList.contains('billiards-cue-preview'));if(!layer)return;const scale=Math.max(root.clientWidth/1122,root.clientHeight/1402);layer.style.fontSize=(64*scale)+'px';layer.style.width=(1122*scale)+'px';layer.style.height=(1402*scale)+'px';}
  fit();if(!root._billiardsCueObserver&&typeof ResizeObserver!=='undefined'){root._billiardsCueObserver=new ResizeObserver(fit);root._billiardsCueObserver.observe(root);}
 }
-return {cues,available,paintPreview};
+return {cues,available,unlocked,paintPreview};
 });

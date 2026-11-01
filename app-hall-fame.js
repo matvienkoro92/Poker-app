@@ -495,7 +495,8 @@ var hallFishProfileLoadingObserver = null;
 var hallFishProfileLoadingTimer = null;
 var hallFishActiveTab = "levels";
 var hallFishActiveAchievementTab = "dayHero";
-var hallFishActiveDayHeroMonth = "09.2026";
+function hallFishCurrentAchievementMonth(){var now=new Date();return String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();}
+var hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
 var hallFishLevelSearchQuery = "";
 var hallFishLevelVisibleCount = 20;
 var hallFishLevelCurrentIds = [];
@@ -1427,6 +1428,13 @@ function hallFishRowsWithRank(rows, limit) {
     });
 }
 
+function hallFishAchievementMonthKey(value) {
+  var text=String(value||'').trim(),m=text.match(/^(\d{2})\.(\d{4})$/);
+  if(m)return m[1]+'.'+m[2];
+  m=text.match(/^(\d{4})-(\d{2})(?:-|$)/);if(m)return m[2]+'.'+m[1];
+  m=text.match(/^\d{2}\.(\d{2})\.(\d{4})$/);return m?m[1]+'.'+m[2]:'';
+}
+
 function hallFishAggregateTournamentAchievements(levelRows) {
   var allRows = typeof pokerRatingAchievementAllTournamentRows === "function" ? pokerRatingAchievementAllTournamentRows() : [];
   var byNick = {};
@@ -1566,6 +1574,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
       var place = row && row.place ? String(row.place) + " место" : "";
       var tournament = String(row && row.tournamentLabel || "").trim();
       return {
+        _monthKey:hallFishAchievementMonthKey(row && row.date),_reward:Number(row && row.reward)||0,
         title: parts || "Турнир",
         meta: [place, tournament].filter(Boolean).join(" · "),
       };
@@ -1582,6 +1591,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
         ? pokerRatingAchievementMonthLabel(row && row.monthKey)
         : String(row && row.monthKey || "");
       return {
+        _monthKey:hallFishAchievementMonthKey(row && row.monthKey),_reward:Number(row && row.reward)||0,
         title: month ? "Месяц: " + month : "Месяц",
         meta: (row && row.place ? String(row.place) + " место" : "топ-3") + " · " + hallFishFormatRub(row && row.reward),
       };
@@ -1592,6 +1602,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
       return hallFishDateStamp(b && b.date) - hallFishDateStamp(a && a.date);
     }).map(function (row) {
       return {
+        _monthKey:hallFishAchievementMonthKey(row && row.date),_reward:Number(row && row.reward)||0,
         title: String((row && row.date) || "День"),
         meta: ["Лучший занос дня · " + hallFishFormatRub(row && row.reward), row && row.tournament].filter(Boolean).join(" · "),
       };
@@ -1600,13 +1611,13 @@ function hallFishAggregateTournamentAchievements(levelRows) {
   return {
     big50: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший выигрыш " + hallFishFormatRub(row.big50Best) : "", detailRows: tournamentDetails(row.big50Rows) });
-    })),
+    }), 0),
     big100: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.big100, tie: row.big100Best, valueText: row.big100 + " зан.", extraText: row.big100Best ? "лучший выигрыш " + hallFishFormatRub(row.big100Best) : "", detailRows: tournamentDetails(row.big100Rows) });
-    })),
+    }), 0),
     king: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.firstPlaces, tie: row.big100Best || row.big50Best, valueText: row.firstPlaces + " побед", extraText: "1 место в турнирах", detailRows: tournamentDetails(row.firstPlaceRows) });
-    })),
+    }), 0),
     dayHero: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.dayHero, tie: row.dayHeroReward, valueText: row.dayHero + " раз", extraText: "с 1 января 2026", detailRows: dayHeroDetails(row.dayHeroRows) });
     }), 0),
@@ -1622,10 +1633,10 @@ function hallFishAggregateTournamentAchievements(levelRows) {
     }, {}),
     monthChampion: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.monthChampion, tie: row.monthChampionBest, valueText: row.monthChampion + " раз", extraText: "топ-1 месяца по заносам", detailRows: monthChampionDetails(row.monthChampionRows) });
-    })),
+    }), 0),
     viceChampion: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.viceChampion, tie: row.viceChampionBest, valueText: row.viceChampion + " раз", extraText: "топ-2 месяца по заносам", detailRows: monthChampionDetails(row.viceChampionRows) });
-    })),
+    }), 0),
   };
 }
 
@@ -1662,6 +1673,7 @@ function hallFishAggregateClubChoiceRows(rows, levelRows) {
       var description = hallFishClubChoiceDescription(nick, monthKey, winner && winner.description);
       if (description && map[key].descriptions.indexOf(description) === -1) map[key].descriptions.push(description);
       map[key].detailRows.push({
+        _monthKey:hallFishAchievementMonthKey(monthKey),_votes:Number(winner && winner.votes)||0,_description:description,
         title: monthLabel ? monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1) : "Народный герой",
         meta: [
           "Топ" + (parseInt(winner && winner.place, 10) || 1),
@@ -1680,7 +1692,7 @@ function hallFishAggregateClubChoiceRows(rows, levelRows) {
       description: row.descriptions && row.descriptions.length ? row.descriptions.join("\n") : "",
       detailRows: row.detailRows,
     });
-  }));
+  }), 0);
 }
 
 function hallFishAggregateSngChampionRows(rows, levelRows) {
@@ -1716,9 +1728,10 @@ function hallFishAggregateSngChampionRows(rows, levelRows) {
       var completedAt = String((tournament && tournament.completedAt) || "").trim();
       var completedDate = completedAt ? new Date(completedAt) : null;
       var dateLabel = completedDate && !isNaN(completedDate.getTime())
-        ? completedDate.toLocaleDateString("ru-RU")
+        ? completedDate.toLocaleDateString("ru-RU", {timeZone:"Europe/Moscow"})
         : "";
       map[key].detailRows.push({
+        _monthKey:hallFishAchievementMonthKey(dateLabel),
         title: String((tournament && tournament.title) || "СНГ-баттл"),
         meta: [dateLabel, tournament && tournament.season].filter(Boolean).join(" · "),
       });
@@ -1730,7 +1743,7 @@ function hallFishAggregateSngChampionRows(rows, levelRows) {
       valueText: row.value + (row.value === 1 ? " победа" : row.value < 5 ? " победы" : " побед"),
       extraText: "Победитель СНГ-баттла",
     });
-  }));
+  }), 0);
 }
 
 function hallFishReferralsRows(data) {
@@ -1762,9 +1775,6 @@ function hallFishAchievementSpecs(data) {
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
     { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
-    { key: "viceChampion", title: "Вице-чемп", sectionTitle: "Вице-чемпион месяца", description: "Начисляется игроку, который занял топ-2 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.viceChampion },
-    { key: "clubChoice", title: "Народный герой", sectionTitle: "Народный герой", description: "Даётся победителям голосования клуба за достижение месяца. В топе учитывается количество побед и голоса.", rows: data && data.clubChoice },
-    { key: "sngChampion", title: "Победитель СНГ-баттла", sectionTitle: "Победитель СНГ-баттла", description: "Даётся за первое место в завершённом СНГ-баттле. Повторные победы одного игрока суммируются.", rows: data && data.sngChampion },
   ];
 }
 
@@ -1825,15 +1835,21 @@ function hallFishDayHeroMonthLabel(monthKey) {
 
 function hallFishDayHeroMonthFilterHtml(data) {
   var months = data && data.dayHeroMonths && typeof data.dayHeroMonths === "object" ? data.dayHeroMonths : {};
-  var keys = Object.keys(months).sort(function (a, b) {
+  var periods=Object.assign({},months);
+  hallFishAchievementSpecs(data).forEach(function(spec){(spec.rows||[]).forEach(function(row){(row.detailRows||[]).forEach(function(detail){if(detail._monthKey)periods[detail._monthKey]=true;});});});
+  var keys = Object.keys(periods).sort(function (a, b) {
     return hallFishDateStamp("01." + b) - hallFishDateStamp("01." + a);
   });
-  if (hallFishActiveDayHeroMonth !== "all" && keys.indexOf(hallFishActiveDayHeroMonth) === -1) hallFishActiveDayHeroMonth = "all";
-  return '<div class="hall-fish-day-hero-months" role="tablist" aria-label="Месяц ачивки Герой дня">' +
-    ["all"].concat(keys).map(function (key) {
-      var active = key === hallFishActiveDayHeroMonth;
-      return '<button type="button" class="hall-fish-day-hero-month' + (active ? " hall-fish-day-hero-month--active" : "") + '" data-hall-fish-day-hero-month="' + hallFishEsc(key) + '" role="tab" aria-selected="' + (active ? "true" : "false") + '">' + hallFishEsc(hallFishDayHeroMonthLabel(key)) + '</button>';
-    }).join("") + '</div>';
+  var current=hallFishCurrentAchievementMonth();
+  if(keys.indexOf(current)===-1)keys.push(current);
+  if(hallFishActiveDayHeroMonth!=='all'&&keys.indexOf(hallFishActiveDayHeroMonth)===-1)keys.push(hallFishActiveDayHeroMonth);
+  keys.sort(function(a,b){return hallFishDateStamp('01.'+b)-hallFishDateStamp('01.'+a);});
+  var all=hallFishActiveDayHeroMonth==='all';
+  return '<div class="hall-fish-day-hero-months hall-fish-achievement-period" role="group" aria-label="Месяц для всех ачивок">'+
+   '<button type="button" class="hall-fish-day-hero-month'+(all?' hall-fish-day-hero-month--active':'')+'" data-hall-fish-day-hero-month="all" aria-pressed="'+all+'">За всё время</button>'+
+   '<label class="hall-fish-achievement-month-picker'+(!all?' hall-fish-achievement-month-picker--active':'')+'"><span>Выбрать месяц</span><select data-hall-fish-achievement-month aria-label="Выбрать месяц ачивок">'+
+   (all?'<option value="" selected disabled>Выбрать месяц</option>':'')+keys.map(function(key){var label=hallFishDayHeroMonthLabel(key).replace(/\s+\d{4}$/,'')+' '+key.split('.')[1];return '<option value="'+hallFishEsc(key)+'"'+(key===hallFishActiveDayHeroMonth?' selected':'')+'>'+hallFishEsc(label)+'</option>';}).join('')+'</select></label></div>';
+
 }
 
 function hallFishAchievementTrophyHtml(spec) {
@@ -1853,39 +1869,50 @@ function hallFishAchievementTrophyHtml(spec) {
     (spec.key === "dayHero" ? '<span class="hall-fish-trophy-prize" aria-hidden="true">' + hallFishDayHeroPrize() + ' ₽</span>' : '');
 }
 
+function hallFishAchievementLeaderHtml(spec) {
+  var rows=hallFishActiveDayHeroMonth==='all'?(spec.rows||[]):hallFishAchievementRowsForMonth(spec,hallFishActiveDayHeroMonth),leader=rows[0];
+  if(!leader)return '<span class="hall-fish-achievement-leader hall-fish-achievement-leader--empty"><span class="hall-fish-achievement-leader__hologram" aria-hidden="true"></span><span class="hall-fish-achievement-leader__name">Пока нет наград</span></span>';
+  var image=hallFishLevelPlayerImage(leader),garage=leader.accountId&&typeof window.pokerGarageHallMediaHtml==='function'?window.pokerGarageHallMediaHtml(leader.accountId):'';
+  return '<span class="hall-fish-achievement-leader"><span class="hall-fish-achievement-leader__hologram">'+(garage||'<img src="'+hallFishEsc(image.src)+'" alt="" width="120" height="160" decoding="async">')+'</span><span class="hall-fish-achievement-leader__name">'+hallFishEsc(leader.nick||'Игрок')+'</span><span class="hall-fish-achievement-leader__count">'+hallFishEsc(leader.valueText||leader.value)+'</span></span>';
+}
+
+function hallFishAchievementRowsForMonth(spec,monthKey) {
+  return hallFishRowsWithRank((spec.rows||[]).map(function(row){
+    var details=(row.detailRows||[]).filter(function(d){return d._monthKey===monthKey;});
+    var rewards=details.map(function(d){return Number(d._reward)||0;}),sum=rewards.reduce(function(a,b){return a+b;},0),best=Math.max.apply(null,[0].concat(rewards));
+    var tie=spec.key==='dayHero'?sum:spec.key==='clubChoice'?details.reduce(function(a,d){return a+(Number(d._votes)||0);},0):best;
+    var extra=spec.key==='dayHero'?hallFishFormatRub(sum):['big50','big100'].indexOf(spec.key)!==-1?'лучший выигрыш '+hallFishFormatRub(best):spec.key==='clubChoice'?tie+' голосов':row.extraText;
+    return Object.assign({},row,{value:details.length,tie:tie,valueText:String(row.valueText||row.value).replace(/^\d+/,String(details.length)),extraText:extra,description:spec.key==='clubChoice'?details.map(function(d){return d._description||'';}).filter(Boolean).join('\n'):row.description,detailRows:details});
+  }),spec.key==='dayHero'?0:10);
+}
+
 function hallFishRenderAchievementRows(data) {
   var specs = hallFishAchievementSpecs(data);
-  var trophyOrder = ["dayHero", "king", "monthChampion", "big50", "big100", "clubChoice", "sngChampion", "viceChampion"];
+  var trophyOrder = ["dayHero", "king", "monthChampion", "big50", "big100"];
   specs.sort(function (a, b) { return trophyOrder.indexOf(a.key) - trophyOrder.indexOf(b.key); });
   var active = specs.some(function (spec) { return spec.key === hallFishActiveAchievementTab; })
     ? hallFishActiveAchievementTab
     : "dayHero";
   hallFishActiveAchievementTab = active;
   var activeSpec = specs.filter(function (spec) { return spec.key === active; })[0] || specs[0];
-  var monthFilter = "";
-  if (active === "dayHero") {
-    monthFilter = hallFishDayHeroMonthFilterHtml(data);
-    if (hallFishActiveDayHeroMonth !== "all") {
-      activeSpec = Object.assign({}, activeSpec, {
-        rows: data && data.dayHeroMonths && data.dayHeroMonths[hallFishActiveDayHeroMonth] || [],
-        sectionTitle: "Герой дня · " + hallFishDayHeroMonthLabel(hallFishActiveDayHeroMonth),
-      });
-    }
+  var monthFilter = hallFishDayHeroMonthFilterHtml(data);
+  if(hallFishActiveDayHeroMonth!=='all'){
+    activeSpec=Object.assign({},activeSpec,{rows:hallFishAchievementRowsForMonth(activeSpec,hallFishActiveDayHeroMonth),sectionTitle:activeSpec.sectionTitle+' · '+hallFishDayHeroMonthLabel(hallFishActiveDayHeroMonth)});
   }
-  return '<div class="hall-fish-achievements">' +
+  if(hallFishActiveDayHeroMonth==='all'&&active!=='dayHero')activeSpec=Object.assign({},activeSpec,{rows:(activeSpec.rows||[]).slice(0,10)});
+  return '<div class="hall-fish-achievements">' + monthFilter +
     '<div class="hall-fish-achievement-tabs-shell" aria-label="Фильтры топов по ачивкам">' +
       '<div class="hall-fish-achievement-tabs-shell__head">' +
         '<span class="hall-fish-achievement-tabs-shell__eyebrow">Награды клуба</span>' +
-        '<span class="hall-fish-achievement-tabs-shell__hint">Листайте вправо <span aria-hidden="true">→</span></span>' +
+        '<span class="hall-fish-achievement-tabs-shell__hint">Лидеры · ' + hallFishEsc(hallFishDayHeroMonthLabel(hallFishActiveDayHeroMonth)) + '</span>' +
       '</div>' +
-    '<div class="hall-fish-achievement-tabs hall-fish-achievement-tabs--trophies" role="tablist" aria-label="Топы по ачивкам">' +
+    '<div class="hall-fish-achievement-tabs hall-fish-achievement-tabs--trophies hall-fish-achievement-tabs--matrix" role="tablist" aria-label="Топы по ачивкам">' +
       specs.map(function (spec) {
         var isActive = spec.key === active;
-        return '<button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" role="tab" aria-selected="' + (isActive ? "true" : "false") + '">' + hallFishAchievementTrophyHtml(spec) + '</button>';
+        return '<button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" role="tab" aria-selected="' + (isActive ? "true" : "false") + '">' + '<span class="hall-fish-achievement-trophy">'+hallFishAchievementTrophyHtml(spec)+'</span>'+hallFishAchievementLeaderHtml(spec)+'</button>';
       }).join("") +
     '</div>' +
     '</div>' +
-    monthFilter +
     (data && data.pendingExtras && ["clubChoice", "referrals", "sngChampion"].indexOf(active) !== -1
       ? hallFishRenderAchievementSkeleton()
       : hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description, activeSpec.key, activeSpec.awardText)) +
@@ -2567,6 +2594,7 @@ function hallFishSetAchievementState(message, data) {
       if (strip) scrollPositions.push({ selector: selector, left: strip.scrollLeft });
     });
     body.innerHTML = data ? hallFishRenderAchievementRows(data) : hallFishRenderAchievementSkeleton();
+    if(window.pokerHydrateGarageHall)window.pokerHydrateGarageHall(body);
   }
   modal.hidden = false;
   if (body) {
@@ -3164,6 +3192,12 @@ function initHallFishRatingModal() {
     hallFishActiveAchievementTab = String(tab.getAttribute("data-hall-fish-achievement-tab") || "dayHero").trim() || "dayHero";
     if (hallFishAchievementRowsCache) hallFishSetAchievementState("", hallFishAchievementRowsCache);
     else openHallFishAchievementTab();
+  });
+  document.addEventListener('change',function(e){
+    var select=e.target&&e.target.closest?e.target.closest('[data-hall-fish-achievement-month]'):null;
+    if(!select||!/^\d{2}\.\d{4}$/.test(select.value))return;
+    hallFishActiveDayHeroMonth=select.value;
+    if(hallFishAchievementRowsCache)hallFishSetAchievementState('',hallFishAchievementRowsCache);else openHallFishAchievementTab();
   });
   document.addEventListener("click", function (e) {
     var month = e.target && e.target.closest ? e.target.closest("[data-hall-fish-day-hero-month]") : null;

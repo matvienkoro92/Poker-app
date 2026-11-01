@@ -55,3 +55,10 @@ assert(hashes['${xp.TOTALS}']==nil)
 assert(hashes['poker_app:pokerplus_profiles']==nil)
 assert(hashes['${xp.RECEIPTS}']==nil)
 `));
+test('series XP is awarded once for the match winner using participation across rounds',()=>{
+ const r=room(300,0);r.match={target:3,number:1,round:1,winner:null};xp.prepare(r);assert.equal(r.gameExperience,null);
+ r.match.round=4;r.match.winner=1;r.gameXpActions=[0,1];r.gameXpMatchActions=[2,0];xp.prepare(r);
+ assert.equal(r.gameExperience.event,r.id+':1:match');assert.deepEqual(r.gameExperience.perPlayer,[100,200]);assert.equal(r.gameExperience.granted,true);
+ const reward=r.gameExperience;xp.prepare(r);assert.equal(r.gameExperience,reward);
+ r.match={target:3,number:2,round:1,winner:null};r.gameXpMatchActions=[0,0];xp.prepare(r);assert.equal(r.gameExperience,null);
+});
