@@ -1,4 +1,4 @@
-import {createCarvedRail,createPointBlade,createSurfaceHalf,paintStorage} from './nards-carving.mjs';
+import {createCarvedRail,createPointBlade,createSurfaceHalf,paintStorage,decorateCenterSpine} from './nards-carving.mjs';
 import {createDiceMesh,DICE_REST_X,DICE_REST_Y} from './dice-mesh.mjs';
 import {diceFaces} from './dice-view.mjs';
 import {createBackgammon} from './backgammon.mjs';
@@ -13,11 +13,11 @@ export function paintEditorBoard(root,{board,inside,checkers,dice,size,kind}){
  field.append(createSurfaceHalf('left'),createSurfaceHalf('right'),createCarvedRail('left'),createCarvedRail('right'),createCarvedRail('left',true),createCarvedRail('right',true));
  const state=createBackgammon(kind==='short'?'short':'long');
  for(let row=0;row<2;row++)for(let col=0;col<12;col++){
-  const index=row===0?11-col:12+col,count=state.points[index],point=document.createElement('span');point.className='point'+(row?' bottom':'')+(col%2?' light-point':'');point.style.gridRow=row+1;point.style.gridColumn=col+1+(col>=6?1:0);point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');point.classList.toggle('has-stack',Math.abs(count)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(count)-1));point.style.setProperty('--stack-space',Math.abs(count)>5&&!state.points[23-index]?'190cqh':'100cqh');point.append(createPointBlade());
+  const index=row===0?11-col:12+col,count=state.points[index],point=document.createElement('span');point.className='point'+(row?' bottom':'')+(col%2?' light-point':'');point.style.gridRow=row+1;point.style.gridColumn=col+1+(col>=6?1:0);point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');point.classList.toggle('has-stack',Math.abs(count)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(count)-1));point.style.setProperty('--stack-space','100cqh');point.append(createPointBlade());
   const number=document.createElement('span');number.className='number';number.textContent=index+1;point.append(number);
   for(let i=0;i<Math.abs(count);i++){const coin=document.createElement('span');coin.className='checker'+(count<0?' black':'');coin.style.setProperty('--stack-index',i);point.append(coin);}field.append(point);
  }
- const bar=document.createElement('span');bar.className='bar';field.append(bar);
+ const bar=document.createElement('span');bar.className='bar';decorateCenterSpine(bar);field.append(bar);
  const stage=document.createElement('div');stage.className='board-dice-stage editor-dice';stage.style.setProperty('--cube-size',size==='small'?'5.8cqw':'8.1cqw');
  for(const [i,value]of [6,3].entries()){
   const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube';shadow.className='dice-ground-shadow';flight.style.left=(i?80:64)+'%';flight.style.top='50%';flight.style.transform='translate(-50%,-50%)';shadow.style.left=(i?80:64)+'%';shadow.style.top='50%';shadow.style.transform='translate(-50%,25%)';cube.style.setProperty('--die-face',dice.face);cube.style.setProperty('--die-edge',dice.edge);cube.style.setProperty('--die-pip',dice.pip);cube.setAttribute('aria-label','Кость: '+value);flight.append(cube);stage.append(shadow,flight);

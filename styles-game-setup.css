@@ -89,3 +89,36 @@ body.billiards-table-view .billiards-matchup #turnClock{min-width:25px;padding:3
 #lobby:has(.is-loading)>.pending-game-create{display:none}
 @keyframes setup-loading-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.setup-loading__spinner{animation:none;border-style:dotted}}
+
+/* Bearing off is the primary available move, wherever the action row is mounted. */
+body[data-game-background] #game #bearOff:not(:disabled),#game #bearOff:not(:disabled){border:1px solid #ffe3a0;background:linear-gradient(110deg,#f4dda5,#d5ad5f);color:#1b2c20;font-weight:800;box-shadow:inset 0 1px #fff9,0 3px 10px #0003}
+#game #bearOff:not(:disabled)::before{content:'↗';display:inline-block;margin-right:8px;font-weight:800}
+#game #bearOff:disabled{box-shadow:none;opacity:.4}
+
+#resultSummary{background:linear-gradient(145deg,#263d31,#10231b);border:1px solid #c7ad6d88;border-radius:22px;color:#f3e3bb;width:min(460px,calc(100vw - 24px));padding:24px;max-height:88dvh;overflow:auto}
+#resultSummary section>h2{margin:0 0 16px;font-size:24px;line-height:1.25}
+#resultSummary section>p{font-size:14px;line-height:1.6;color:#afc5b2}
+#resultSummary section>button{display:block;width:100%;min-height:46px;margin-top:20px;border:1px solid #efd595;border-radius:12px;background:linear-gradient(110deg,#ecd6a0,#c9a45f);color:#17291d;font-size:16px;font-weight:750}
+#resultSummary .game-spin-reward{margin:18px 0 0}
+#resultSummary [data-result-ranking]{margin-top:18px;padding:16px;border:1px solid #c8b27733;border-radius:14px;background:#0b201866;text-align:left}
+#resultSummary [data-result-ranking] small{font-size:10px;letter-spacing:.08em;color:#bfa96f}
+#resultSummary [data-result-ranking] h3{font-size:23px;margin:9px 0;color:#f1dfa4}
+#resultSummary [data-result-ranking] p{font-size:13px;line-height:1.5;color:#b7c8b5}
+.result-rank-ladder{position:relative;display:grid;gap:4px;overflow:hidden;margin-top:14px}
+.result-rank-row{position:relative;display:flex;align-items:center;gap:12px;height:40px;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:#ffffff06;font-size:12px;color:#b7c6b8}
+.result-rank-row.is-self{z-index:1;background:linear-gradient(110deg,#d2b97533,#697a4b22);color:#f5e3ac;box-shadow:inset 2px 0 #d9bd77;font-weight:750}
+.result-rank-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The result and XP are presented once, in the two-step summary dialog. */
+#boardGames #result:not([hidden]){display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%;max-width:580px;margin:12px auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+#boardGames #result>h2,#boardGames #result>p,#boardGames #result>.game-experience,#boardGames #result>.game-spin-reward{display:none!important}
+#boardGames #result>button{margin:0;min-height:40px;padding:9px 12px;font-size:12px}
+
+/* Settlement and the three follow-up actions form one card. */
+#boardSettlement:not([hidden]){box-sizing:border-box;max-width:580px;margin:14px auto;padding:16px;border:1px solid #cdb27577;border-radius:18px;background:linear-gradient(145deg,#233b2c,#10251d);box-shadow:none}
+body[data-game-background] #game #boardSettlement #gameWagerNotice{margin:0 0 14px;padding:0 0 14px;border:0;border-bottom:1px solid #d2bb7833;border-radius:0;background:none;box-shadow:none;color:#e6d7ae;font-size:14px;font-weight:500;line-height:1.6}
+#boardSettlement .board-replay{margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+#boardSettlement .board-replay>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#boardSettlement .board-replay [data-replay-new]{grid-column:1/-1}
+#boardSettlement .board-replay button{min-width:0;min-height:48px;padding:10px;font-size:13px;line-height:1.4;border-radius:11px}
+#boardSettlement .board-replay p{margin:12px 0 0;font-size:12px;line-height:1.5;color:#abbfac}

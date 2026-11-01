@@ -14,6 +14,7 @@ test('tournament tops do not wait for optional services and late extras respect 
     hallFishLoadRows: () => { calls.push('levels'); return levels.promise; },
     hallFishLoadClubChoiceAchievementRows: () => { calls.push('choice'); return extras.promise; },
     hallFishLoadReferralRows: () => { calls.push('referrals'); return Promise.resolve([]); },
+    hallFishLoadBilliardsAchievementRows: () => Promise.resolve({}),
     hallFishLoadSngChampionAchievementRows: () => { calls.push('sng'); return Promise.resolve([]); },
     hallFishAggregateTournamentAchievements: () => ({ dayHero: [{ nick: 'Winner' }] }),
     hallFishAggregateClubChoiceRows: rows => rows, hallFishAggregateSngChampionRows: rows => rows,

@@ -1424,7 +1424,7 @@ function hallFishRowsWithRank(rows, limit) {
     });
   if (limit !== 0) ranked = ranked.slice(0, Number(limit) > 0 ? Number(limit) : 10);
   return ranked.map(function (row, index) {
-      return Object.assign({ rank: index + 1 }, row);
+      return Object.assign({}, row, { rank: index + 1 });
     });
 }
 
@@ -1456,6 +1456,8 @@ function hallFishAggregateTournamentAchievements(levelRows) {
         profileCity: meta.profileCity,
         avatarUrl: meta.avatarUrl,
         level: meta.level,
+        topWin: 0,
+        topWinRows: [],
         big50: 0,
         big50Best: 0,
         big100: 0,
@@ -1482,6 +1484,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
     var item = entry(nick);
     if (!item) return;
     var reward = Number(row && row.reward) || 0;
+    if(reward>0){item.topWin=Math.max(item.topWin,reward);item.topWinRows.push(row);}
     if (reward >= 100000) {
       item.big100 += 1;
       if (reward > item.big100Best) item.big100Best = reward;
@@ -1609,6 +1612,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
     });
   }
   return {
+    topWin: hallFishRowsWithRank(list.map(function(row){return Object.assign({},row,{value:row.topWin,tie:0,valueText:hallFishFormatRub(row.topWin),extraText:"Самый крупный разовый выигрыш",detailRows:tournamentDetails(row.topWinRows)});}),0),
     big50: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший выигрыш " + hallFishFormatRub(row.big50Best) : "", detailRows: tournamentDetails(row.big50Rows) });
     }), 0),
@@ -1770,6 +1774,9 @@ function hallFishAchievementSpecs(data) {
   var septemberAward = hallFishActiveDayHeroMonth === "09.2026" || hallFishActiveDayHeroMonth === "all";
   var heroPrize = hallFishDayHeroPrize();
   return [
+    {key:"goldenBall",title:"Золотой шар",sectionTitle:"Золотой шар",description:"Количество успешных суперударов. В месячном зачёте учитываются попадания с момента запуска награды; прежние попадания сохранены за всё время.",rows:data&&data.goldenBall},
+    {key:"billiardsKing",title:"Король Бильярда",sectionTitle:"Король Бильярда",description:"Победы в онлайн-партиях по русскому бильярду и пулу на фишки. Бесплатные партии и ничьи не учитываются.",rows:data&&data.billiardsKing},
+    { key:"topWin",title:"Топ занос",sectionTitle:"Топ занос",description:"Самый крупный разовый выигрыш в турнире клуба за выбранный период. Сравнивается один лучший результат каждого игрока.",rows:data&&data.topWin },
     { key: "dayHero", title: "Герой дня (" + heroPrize + "р)", sectionTitle: "Герой дня", description: "", awardText: "Награду " + heroPrize + " ₽ получает игрок, который выиграл больше всех ачивок «Герой дня» " + (septemberAward ? "в сентябре." : "за выбранный месяц."), rows: data && data.dayHero },
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
@@ -1861,6 +1868,9 @@ function hallFishAchievementTrophyHtml(spec) {
     viceChampion: "./assets/achievement-trophy-vice-month-v1.webp",
     big50: "./assets/achievement-trophy-big50-v1.webp?v=20260908-2",
     big100: "./assets/achievement-trophy-big100-v1.webp?v=20260908-2",
+    topWin: "./assets/achievement-trophy-top-win-v1.webp",
+    goldenBall: "./assets/achievement-trophy-golden-ball-v1.webp",
+    billiardsKing: "./assets/achievement-trophy-billiards-king-v1.webp",
     clubChoice: "./assets/achievement-trophy-choice-v1.webp?v=20260908-2",
     sngChampion: "./assets/achievement-trophy-sng-v1.webp?v=20260908-2"
   }[spec.key];
@@ -1872,7 +1882,7 @@ function hallFishAchievementTrophyHtml(spec) {
 function hallFishAchievementLeaderHtml(spec) {
   var rows=hallFishActiveDayHeroMonth==='all'?(spec.rows||[]):hallFishAchievementRowsForMonth(spec,hallFishActiveDayHeroMonth),leader=rows[0];
   if(!leader)return '<span class="hall-fish-achievement-leader hall-fish-achievement-leader--empty"><span class="hall-fish-achievement-leader__hologram" aria-hidden="true"><span class="hall-fish-hologram-vacant">◇</span></span><span class="hall-fish-achievement-leader__name">Пока нет наград</span></span>';
-  var image=hallFishLevelPlayerImage(leader),garage=leader.accountId&&typeof window.pokerGarageHallMediaHtml==='function'?window.pokerGarageHallMediaHtml(leader.accountId):'';
+  var image=hallFishLevelPlayerImage(leader),garage=leader.accountId&&typeof window.pokerGarageHallMediaHtml==='function'?window.pokerGarageHallMediaHtml(leader.accountId,{characterOnly:true}):'';
   return '<span class="hall-fish-achievement-leader"><span class="hall-fish-achievement-leader__hologram">'+(garage||'<img src="'+hallFishEsc(image.src)+'" alt="" width="120" height="160" decoding="async">')+'</span><span class="hall-fish-achievement-leader__name">'+hallFishEsc(leader.nick||'Игрок')+'</span><span class="hall-fish-achievement-leader__count">'+hallFishEsc(leader.valueText||leader.value)+'</span></span>';
 }
 
@@ -1882,13 +1892,16 @@ function hallFishAchievementRowsForMonth(spec,monthKey) {
     var rewards=details.map(function(d){return Number(d._reward)||0;}),sum=rewards.reduce(function(a,b){return a+b;},0),best=Math.max.apply(null,[0].concat(rewards));
     var tie=spec.key==='dayHero'?sum:spec.key==='clubChoice'?details.reduce(function(a,d){return a+(Number(d._votes)||0);},0):best;
     var extra=spec.key==='dayHero'?hallFishFormatRub(sum):['big50','big100'].indexOf(spec.key)!==-1?'лучший выигрыш '+hallFishFormatRub(best):spec.key==='clubChoice'?tie+' голосов':row.extraText;
+    if(spec.key==='topWin')return Object.assign({},row,{value:best,tie:0,valueText:hallFishFormatRub(best),extraText:"Самый крупный разовый выигрыш",detailRows:details.slice().sort(function(a,b){return b._reward-a._reward;})});
     return Object.assign({},row,{value:details.length,tie:tie,valueText:String(row.valueText||row.value).replace(/^\d+/,String(details.length)),extraText:extra,description:spec.key==='clubChoice'?details.map(function(d){return d._description||'';}).filter(Boolean).join('\n'):row.description,detailRows:details});
   }),spec.key==='dayHero'?0:10);
 }
 
+// A monthly category winner earns one final award, regardless of the number of
+// underlying wins. Keep this separate from the source specs to avoid self-counting.
 function hallFishRenderAchievementRows(data) {
   var specs = hallFishAchievementSpecs(data);
-  var trophyOrder = ["dayHero", "king", "monthChampion", "big50", "big100"];
+  var trophyOrder = ["dayHero", "king", "monthChampion", "big50", "big100", "topWin", "goldenBall", "billiardsKing"];
   specs.sort(function (a, b) { return trophyOrder.indexOf(a.key) - trophyOrder.indexOf(b.key); });
   var active = specs.some(function (spec) { return spec.key === hallFishActiveAchievementTab; })
     ? hallFishActiveAchievementTab
@@ -1900,6 +1913,7 @@ function hallFishRenderAchievementRows(data) {
     activeSpec=Object.assign({},activeSpec,{rows:hallFishAchievementRowsForMonth(activeSpec,hallFishActiveDayHeroMonth),sectionTitle:activeSpec.sectionTitle+' · '+hallFishDayHeroMonthLabel(hallFishActiveDayHeroMonth)});
   }
   if(hallFishActiveDayHeroMonth==='all'&&active!=='dayHero')activeSpec=Object.assign({},activeSpec,{rows:(activeSpec.rows||[]).slice(0,10)});
+  if(active==='topWin')activeSpec=Object.assign({},activeSpec,{rows:(activeSpec.rows||[]).map(function(row){return Object.assign({},row,{detailRows:(row.detailRows||[]).filter(function(detail){return detail._reward===row.value;}).slice(0,1)});})});
   return '<div class="hall-fish-achievements">' + monthFilter +
     '<div class="hall-fish-achievement-tabs-shell" aria-label="Фильтры топов по ачивкам">' +
       '<div class="hall-fish-achievement-tabs-shell__head">' +
@@ -1913,7 +1927,7 @@ function hallFishRenderAchievementRows(data) {
       }).join("") +
     '</div>' +
     '</div>' +
-    (data && data.pendingExtras && ["clubChoice", "referrals", "sngChampion"].indexOf(active) !== -1
+    (data && data.pendingExtras && ["clubChoice", "referrals", "sngChampion", "goldenBall", "billiardsKing"].indexOf(active) !== -1
       ? hallFishRenderAchievementSkeleton()
       : hallFishAchievementSectionHtml(activeSpec.sectionTitle || activeSpec.title, activeSpec.rows, activeSpec.description, activeSpec.key, activeSpec.awardText)) +
   '</div>';
@@ -2908,6 +2922,13 @@ function hallFishEnsureLevelPlayerArtData() {
     .catch(function () { return typeof window.pokerGetSummerRatingPlayerArt === "function"; });
 }
 
+function hallFishLoadBilliardsAchievementRows() {
+  var base=hallFishGetApiBase();
+  var body=typeof pokerApiAuthJsonBody==='function'?pokerApiAuthJsonBody({action:'achievements'}):{action:'achievements'};
+  body.action='achievements';
+  return hallFishFetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw Error('Billiards achievements unavailable');return r.json();}).then(function(data){return data.ok?data:{};}).catch(function(){return {};});
+}
+
 function hallFishLoadAchievementRows() {
   if (hallFishAchievementRowsCache && hallFishAchievementRatingDataReady()) return Promise.resolve(hallFishAchievementRowsCache);
   if (hallFishAchievementRowsCache && !hallFishAchievementRatingDataReady()) hallFishAchievementRowsCache = null;
@@ -2915,7 +2936,7 @@ function hallFishLoadAchievementRows() {
   // Start independent network requests together. Tournament tops can be shown
   // before the optional choice/referral/SNG services have responded.
   var extrasReady = Promise.all([
-    hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows(), hallFishLoadSngChampionAchievementRows()
+    hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows(), hallFishLoadSngChampionAchievementRows(), hallFishLoadBilliardsAchievementRows()
   ]);
   hallFishAchievementRowsPromise = Promise.all([
     hallFishEnsureAchievementRatingData(),
@@ -2932,6 +2953,8 @@ function hallFishLoadAchievementRows() {
         clubChoice: hallFishAggregateClubChoiceRows(extras[0], levelRows),
         referrals: extras[1],
         sngChampion: hallFishAggregateSngChampionRows(extras[2], levelRows),
+        goldenBall: extras[3].goldenBall || [],
+        billiardsKing: extras[3].billiardsKing || [],
         pendingExtras: false
       });
       var modal = document.getElementById("hallFishRatingModal");

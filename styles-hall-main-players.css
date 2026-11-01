@@ -2549,3 +2549,9 @@
 .hall-fish-hologram-vacant{position:absolute;inset:0 0 12px;display:grid;place-items:center;font-size:32px;font-weight:400;color:#7caab344}
 @media(max-width:600px){.hall-fish-achievement-leader__hologram{height:106px}.hall-fish-achievement-leader__name{font-size:11px}.hall-fish-achievement-leader__count{font-size:10px}}
 .hall-fish-achievement-leader:not(.hall-fish-achievement-leader--empty) .hall-fish-achievement-leader__name{width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* The selected trophy glows clearly without bringing back card frames. */
+.hall-fish-achievement-tabs--matrix .hall-fish-achievement-tab[aria-selected=true]{background:radial-gradient(ellipse at 32% 48%,#ffcb4830,transparent 65%);box-shadow:none;border:0}
+.hall-fish-achievement-tabs--matrix .hall-fish-achievement-tab[aria-selected=true] .hall-fish-trophy-art{filter:brightness(1.25) saturate(1.12) drop-shadow(0 0 8px #ffd76899) drop-shadow(0 0 18px #fbb73555)}
+.hall-fish-achievement-tabs--matrix .hall-fish-achievement-tab[aria-selected=true] .hall-fish-achievement-leader__name{color:#fff2bc;text-shadow:0 0 8px #ffd45e88}
+.hall-fish-achievement-tabs--matrix .hall-fish-achievement-tab[aria-selected=true] .hall-fish-achievement-leader__count{background:#eec65c22;color:#fff1b8}

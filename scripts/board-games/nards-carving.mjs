@@ -23,3 +23,7 @@ export function createCarvedRail(side,bottom=false){
  rail.innerHTML='<svg viewBox="0 0 600 30" preserveAspectRatio="none"><defs><linearGradient id="'+id+'" x2="0" y2="1"><stop stop-color="var(--nards-light,#d3be8f)"/><stop offset=".4" stop-color="var(--nards-frame,#51351f)"/><stop offset=".63" stop-color="var(--nards-light,#d3be8f)"/><stop offset="1" stop-color="var(--nards-dark,#73502f)"/></linearGradient></defs><path class="rail-wood" fill="url(#'+id+')" d="'+curve+' L604 -2H-4Z"/><path class="rail-cut-shadow" d="'+curve+'"/><path class="rail-cut-light" transform="translate(0 2)" d="'+curve+'"/><path class="rail-cut-inner" transform="translate(0 -3)" d="'+curve+'"/><g class="rail-scroll">'+scroll+'</g><path class="rail-grain" d="M0 1H600M0 4H600"/></svg>';
  return rail;
 }
+
+export function decorateCenterSpine(bar){
+ for(const top of [15,50,85]){const hinge=document.createElement('i');hinge.className='nards-center-hinge';hinge.style.top=top+'%';hinge.setAttribute('aria-hidden','true');bar.append(hinge);}
+}

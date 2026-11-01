@@ -31,26 +31,20 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:manager','club:schedule:0']);
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:manager','club:menu','club:sub:menu','club:schedule:0']);
  assert.deepEqual(buttons.filter(b=>b.url).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=nards','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=chess','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards']);
  assert.equal(buttons.length,11);
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
- assert.deepEqual(buttons.slice(-7,-4),[
-  {text:'📋 Ссылка',copy_text:{text:'https://t.me/Poker_dvatuza_bot/DvaTuza'}},
-  {text:'💳 Пополнить счёт',style:'success',callback_data:'club:manager'},
-  {text:'📋 Ссылка на чат',copy_text:{text:'https://t.me/+snBngKmXYa1mYjky'}}
- ]);
+ assert.equal(buttons[0].callback_data,'club:manager');
+ assert.equal(buttons[1].copy_text.text,'https://t.me/+snBngKmXYa1mYjky');
+ assert.equal(buttons[2].text,'⬇️ Скачать Покер21');
 });
 
-test('schedule button edits the same message and returns to the root menu',async t=>{
+test('schedule sends white and black photos without old text pages',async t=>{
  const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
- global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
+ global.fetch=async(url,opts)=>{calls.push({url,p:opts.body instanceof FormData?opts.body:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
  await c.handle({callback_query:{id:'schedule',data:'club:schedule:0',message:{chat:{id:1},message_id:42}}},'test');
- const edit=calls.find(call=>call.url.endsWith('/editMessageText'));
- assert.ok(edit);assert.equal(edit.p.message_id,42);
- assert.match(edit.p.text,/РАСПИСАНИЕ ТУРНИРОВ/);
- assert.deepEqual(edit.p.reply_markup.inline_keyboard.at(-1),[{text:'⬅️ Назад',callback_data:'club:pulse'}]);
- assert.ok(!calls.some(call=>call.url.endsWith('/sendMessage')));
+ const album=calls.find(call=>call.url.endsWith('/sendMediaGroup'));assert.ok(album);assert.equal(JSON.parse(album.p.get('media')).length,2);assert.match(album.p.get('schedule0').name,/white/);assert.match(album.p.get('schedule1').name,/black/);assert.ok(!calls.some(call=>call.url.endsWith('/sendMessage')));
 });
 
 test('table rows stay compact with checkmarks and limits in the heading',()=>{
@@ -69,7 +63,7 @@ test('HTML is enabled and external names are escaped; page tags stay balanced',a
  assert.match(c.schedulePages()[0],/<b>Меджик/);
  const old=global.fetch;t.after(()=>global.fetch=old);let payload;
  global.fetch=async(url,opts)=>{payload=JSON.parse(opts.body);return {json:async()=>({ok:true})};};
- await c.handle({message:{text:'/расписание',chat:{id:1},message_id:5}},'test');
+ await c.handle({message:{text:'/pulse',chat:{id:1},message_id:5}},'test');
  assert.equal(payload.parse_mode,'HTML');
 });
 test('pulse shows links only for active raffles and open Last Longer',async t=>{
@@ -110,16 +104,9 @@ test('manager callback edits the same message and includes contact and back butt
  assert.equal(edit.p.reply_markup.inline_keyboard.at(-1)[0].callback_data,'club:pulse');
 });
 
-test('group schedule asks first, sends only to clicking user after yes and restores menu after no',async t=>{
- const old=global.fetch;t.after(()=>global.fetch=old);const calls=[];
- global.fetch=async(url,opts)=>{calls.push({url,p:JSON.parse(opts.body)});return {json:async()=>({ok:true})};};
- const update=action=>({callback_query:{id:'schedule',data:'club:'+action,from:{id:123},message:{chat:{id:-100,type:'supergroup'},message_id:42}}});
- await c.handle(update('schedule:0'),'test');
- assert.equal(calls.at(-1).p.text,'Отправить расписание в ЛС?');assert.ok(!calls.some(x=>x.url.endsWith('/sendMessage')));
- calls.length=0;await c.handle(update('schedule:send'),'test');
- const sent=calls.filter(x=>x.url.endsWith('/sendMessage'));assert.equal(sent.length,c.schedulePages().length);assert.ok(sent.every(x=>x.p.chat_id===123));
- assert.equal(calls.at(-1).p.message_id,42);
- calls.length=0;await c.handle(update('schedule:no'),'test');assert.equal(calls.at(-1).p.text,c.rootMenu().text);assert.ok(!calls.some(x=>x.url.endsWith('/sendMessage')));
+test('group schedule directly sends the requested two images',async t=>{
+ const old=global.fetch,calls=[];t.after(()=>global.fetch=old);global.fetch=async(url,opts)=>{calls.push({url,p:opts.body});return {json:async()=>({ok:true})};};
+ await c.handle({message:{text:'/schedule',chat:{id:-100,type:'supergroup'},message_id:42}},'test');assert.equal(calls.length,1);assert.ok(calls[0].url.endsWith('/sendMediaGroup'));assert.equal(calls[0].p.get('chat_id'),'-100');assert.equal(JSON.parse(calls[0].p.get('media')).length,2);
 });
 test('unreachable schedule recipient gets a private start link and start opens the schedule',async t=>{
  const old=global.fetch;t.after(()=>global.fetch=old);const calls=[];

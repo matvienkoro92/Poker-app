@@ -15,7 +15,7 @@ export function paintGameSpinReward(container,wager,rewardKey=''){
  const key=rewardKey||JSON.stringify([wager.stake,wager.freeSpinReward.matchTarget]);
  if(!block){block=document.createElement('div');block.className='game-spin-reward';block.setAttribute('role','status');block.innerHTML='<span class="game-spin-reward__icon" aria-hidden="true">🎁</span><strong>+1 бесплатная крутка</strong><small></small><button type="button" class="game-spin-reward__claim">Получить</button>';container.append(block);}
  block.hidden=false;
- const note=block.querySelector('small'),text=gameSpinRewardText(wager)+' Крутка уже начислена автоматически.';if(note.textContent!==text)note.textContent=text;
+ const note=block.querySelector('small'),text=gameSpinRewardText(wager);if(note.textContent!==text)note.textContent=text;
  if(block.dataset.reward===key)return;block.dataset.reward=key;
  const storageKey='p21-spin-reward-seen:'+key;let acknowledged=false;try{acknowledged=sessionStorage.getItem(storageKey)==='1';}catch{}
  const button=block.querySelector('button');
