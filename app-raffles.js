@@ -2425,43 +2425,12 @@ function initRaffles() {
         var trainingLessonCta = trainingCard
           ? '<button type="button" class="raffles-active-chooser__training-lesson" data-raffle-training-lessons><span>Бесплатный видео-урок от Николая</span><strong aria-hidden="true">›</strong></button>'
           : "";
-        return (
-          '<div class="raffles-active-chooser__item' +
-          (selected ? " raffles-active-chooser__item--active" : "") +
-          (isCashPrize ? " raffles-active-chooser__item--cash" : " raffles-active-chooser__item--ticket") +
-          (cardTheme === "knockout_ticket" ? " raffles-active-chooser__item--knockout" : "") +
-          (trainingCard ? " raffles-active-chooser__item--training" : "") +
-          '" role="button" tabindex="0" data-raffle-active-id="' +
-          escapeHtml(id) +
-          '" aria-selected="' +
-          (selected ? "true" : "false") +
-          '">' +
-          '<span class="raffles-active-chooser__art" aria-hidden="true"><span></span></span>' +
-          '<span class="raffles-active-chooser__body">' +
-          '<span class="raffles-active-chooser__content">' +
-          headHtml +
-          titleHtml +
-          detailPillsHtml +
-          '<span class="raffles-active-chooser__facts raffles-active-chooser__facts--with-participants">' +
-          factsHtml +
-          "</span>" +
-          "</span>" +
-          prizePanelHtml +
-          "</span>" +
-          trainingLessonCta +
-          '<button type="button" class="raffles-active-chooser__info-toggle' +
-          (infoOpen ? " raffles-active-chooser__info-toggle--open" : "") +
-          '" data-raffle-active-info-id="' +
-          escapeHtml(id) +
-          '" aria-expanded="' +
-          (infoOpen ? "true" : "false") +
-          '" aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">' +
-          '<span class="raffles-active-chooser__info-icon" aria-hidden="true">i</span>' +
-          activeRaffleInfoSummaryHtml(raffle) +
-          "</button>" +
-          "</div>" +
-          ticketRegistrationWarning
-        );
+        return '<article class="raffles-active-chooser__item raffles-active-chooser__item--simple' + (selected ? ' raffles-active-chooser__item--active' : '') + '" data-raffle-active-id="' + escapeHtml(id) + '">' +
+          '<h3 class="raffles-simple-title">' + escapeHtml(activeRaffleShortTitle(raffle)) + '</h3>' +
+          accessHtml +
+          '<div class="raffles-simple-meta">' + (resultsTimeText ? '<span>Итоги: ' + escapeHtml(resultsTimeText) + '</span>' : '') + '<span>' + escapeHtml(participantCount + ' ' + participantWord) + '</span></div>' +
+          prizePanelHtml + trainingLessonCta + '</article>' + ticketRegistrationWarning;
+
       })
       .join("");
     updateRafflesActiveChooserTimers();
