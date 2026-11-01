@@ -3068,8 +3068,24 @@
     }).filter(Boolean);
   }
 
+  var clubRankingsMonth = "";
+  document.addEventListener("change", function (event) {
+    if (!event.target.matches("[data-club-rankings-month]")) return;
+    clubRankingsMonth = event.target.value;
+    var card = event.target.closest(".home-news-pinned-rankings");
+    if (card) card.outerHTML = clubPinnedRankingsHtml();
+  });
+
   function clubPinnedRankingsHtml() {
-    var data = (window.POKER_CLUB_NEWS_DATA || {}).allTimeSummary;
+    var news = window.POKER_CLUB_NEWS_DATA || {};
+    var months = news.monthlySummaries || {};
+    if (clubRankingsMonth && !months[clubRankingsMonth]) clubRankingsMonth = "";
+    var data = clubRankingsMonth ? months[clubRankingsMonth] : news.allTimeSummary;
+    function monthLabel(month) { return new Date(month + "-02T12:00:00").toLocaleDateString("ru-RU", { month: "long", year: "numeric" }); }
+    var filter = '<label class="home-news-rankings-filter">Период <select data-club-rankings-month aria-label="Месяц рейтинга"><option value="">За всё время</option>' + Object.keys(months).sort().reverse().map(function (month) {
+      return '<option value="' + esc(month) + '"' + (month === clubRankingsMonth ? ' selected' : '') + '>' + esc(monthLabel(month)) + '</option>';
+    }).join('') + '</select></label>';
+
     if (!data || !data.topTotals || !data.topTotals.length) return "";
     function ranking(title, rows, single) {
       return '<details data-month-ranking="all-time-' + (single ? 'wins' : 'totals') + '"><summary>' + title + '<span aria-hidden="true">⌄</span></summary><ol class="home-news-achievement__list">' + rows.map(function (row) {
@@ -3077,7 +3093,7 @@
           (single ? '<small>' + esc(row.date + ' · ' + row.tournament + ' · ' + row.place + '-е место') + '</small>' : '') + '</li>';
       }).join('') + '</ol></details>';
     }
-    return '<aside class="home-friend-news-modal__editorial home-news-achievement home-news-pinned-rankings" aria-label="Закреплённая статистика клуба"><small>📌 ЗАКРЕПЛЕНО · ' + esc(data.from + ' — ' + data.to) + '</small><h3>Топ-10 заносов клуба</h3><p class="home-news-achievement__lead">За весь доступный период турнирных отчётов</p>' +
+    return '<aside class="home-friend-news-modal__editorial home-news-achievement home-news-pinned-rankings" aria-label="Закреплённая статистика клуба"><small>📌 ЗАКРЕПЛЕНО · ' + esc(clubRankingsMonth ? monthLabel(clubRankingsMonth) : data.from + ' — ' + data.to) + '</small><h3>Топ-10 заносов клуба</h3><p class="home-news-achievement__lead">' + esc(clubRankingsMonth ? 'Результаты за ' + monthLabel(clubRankingsMonth) : 'За весь доступный период турнирных отчётов') + '</p>' + filter +
       ranking('Топ-10 по общей сумме призовых', data.topTotals, false) +
       ranking('Топ-10 разовых заносов', data.topWins, true) + '</aside>';
   }

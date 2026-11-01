@@ -3075,3 +3075,6 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 }
 .home-news-pinned-rankings { margin: 12px 0 20px; }
 .home-news-pinned-rankings details + details { margin-top: 10px; }
+
+.home-news-rankings-filter { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; color: #f4dda5; }
+.home-news-rankings-filter select { min-width: 180px; max-width: 100%; padding: 12px 16px; border: 1px solid #8d7437; border-radius: 14px; background: #0c1117; color: #f4dda5; font: inherit; color-scheme: dark; }
