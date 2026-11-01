@@ -1924,18 +1924,25 @@ function hallFishRenderHomePlayerMonth(data) {
   try {
     hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
     var cardHtml = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data)
-      .replace(/^<button type="button"/, '<div')
+      .replace(/^<button type="button" aria-label="[^"]*" aria-pressed="[^"]*"/, '<div')
       .replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card')
+      .replace(/<span class="hall-fish-player-month__status">([^<]*)<\/span>/, '<h2 class="hall-fish-player-month__status">$1</h2>')
       .replace(/<\/button>$/, '</div>')
       .replace(/<span class="hall-fish-achievement-leader__count">[^<]*<\/span>/g, '')
       .replace('</span><span class="hall-fish-player-month__stage">', '<button type="button" class="home-player-month__watch">Смотреть</button></span><span class="hall-fish-player-month__stage">');
-    var prizeBarHtml = '<div class="home-player-month__prize-bar"><strong>Приз игроку месяца <span>до 50 000 ₽</span></strong></div>';
-    root.innerHTML = cardHtml.replace(/<\/div>$/, prizeBarHtml + '</div>');
+    var heading = cardHtml.match(/<h2 class="hall-fish-player-month__status">[^<]*<\/h2>/);
+    if (heading) cardHtml = cardHtml.replace(heading[0], '').replace(/(<div[^>]*>)/, '$1' + heading[0]);
+    cardHtml = cardHtml.replace(/<span class="hall-fish-player-month__awards">(\d+) из (\d+) наград<\/span><button type="button" class="home-player-month__watch">Смотреть<\/button>/,
+      function(_, count, total) {
+        var label = count === '1' ? 'награда' : Number(count) < 5 ? 'награды' : 'наград';
+        return '<span class="home-player-month__actions"><span class="hall-fish-player-month__awards"><b>' + count + '</b> ' + label + ' из ' + total + '</span><button type="button" class="home-player-month__watch">Смотреть</button></span>';
+      });
+    root.innerHTML = cardHtml.replace('<button type="button" class="home-player-month__watch">Смотреть</button>', '<button type="button" class="home-player-month__watch">Смотреть</button><span class="home-player-month__prize-caption">Приз до 50 000р</span>');
 
   } finally { hallFishActiveDayHeroMonth = previous; }
 }
 document.addEventListener('click', function(event) {
-  if (!event.target.closest || !event.target.closest('#homePlayerMonth')) return;
+  if (!event.target.closest || !event.target.closest('#homePlayerMonth .home-player-month__watch')) return;
   hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
   hallFishActiveAchievementTab = 'playerMonth';
   hallFishAchievementDetailsOpen = true;
