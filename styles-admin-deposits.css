@@ -714,3 +714,15 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__remaining>span,.deposits .deposits__remaining>strong{color:#72d99a}
 
 .deposits .deposits__usdt-rate{display:block;font-size:13px;line-height:1.4;color:var(--dep-muted);font-weight:500;overflow-wrap:anywhere}
+
+/* Keep paired payout cards level, including entries without a recipient name. */
+.deposits .deposits__cards{align-items:stretch}
+.deposits .deposits__card{display:flex;flex-direction:column}
+.deposits .deposits__card>h3{min-height:1.3em}
+.deposits .deposits__card>.deposits__card-foot{margin-top:10px;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.deposits .deposits__card-foot button{min-height:32px!important;margin:0!important;padding:5px 0!important;line-height:1.4}
+.deposits .deposits__withdrawal-actions{gap:2px;margin-left:auto}
+.deposits .deposits__history{margin-top:12px;padding-top:6px}
+.deposits .deposits__history>summary{min-height:32px;padding:6px 0}
+.deposits .deposits__card{padding-bottom:16px}
+.deposits .deposits__paid{margin-bottom:14px}
