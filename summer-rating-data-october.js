@@ -6680,4 +6680,163 @@ var SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE = {
       ]
     }
   ]
+,
+  "31.10.2026": [
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 15600,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 4200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Потяни 21",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "бурят",
+          "place": 4,
+          "reward": 2600,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Фаст-Трек",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 7,
+          "reward": 2475.01,
+          "points": 0
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 10,
+          "reward": 1525,
+          "points": 0
+        },
+        {
+          "nick": "MoW3R",
+          "place": 15,
+          "reward": 1171.48,
+          "points": 0
+        },
+        {
+          "nick": "Bylochka☺️",
+          "place": 14,
+          "reward": 1071.87,
+          "points": 0
+        },
+        {
+          "nick": "Prushnik",
+          "place": 21,
+          "reward": 115.62,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 1,
+          "reward": 44875,
+          "points": 0
+        },
+        {
+          "nick": "Евгений.А",
+          "place": 2,
+          "reward": 8000,
+          "points": 0
+        },
+        {
+          "nick": "BOTEZGAMBIT",
+          "place": 3,
+          "reward": 5400,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 5,
+          "reward": 975,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 40K",
+      "buyin": 600,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Jindaniels",
+          "place": 3,
+          "reward": 5679,
+          "points": 0
+        },
+        {
+          "nick": "asianflushie",
+          "place": 11,
+          "reward": 602,
+          "points": 0
+        },
+        {
+          "nick": "Ферапонт",
+          "place": 17,
+          "reward": 531,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "21:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 1,
+          "reward": 3837.82,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 1747.81,
+          "points": 0
+        },
+        {
+          "nick": "BiGMEN",
+          "place": 4,
+          "reward": 520,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
