@@ -1884,7 +1884,7 @@ function hallFishAchievementTrophyHtml(spec) {
 function hallFishAchievementLeaderHtml(spec) {
   var rows=hallFishActiveDayHeroMonth==='all'?(spec.rows||[]):hallFishAchievementRowsForMonth(spec,hallFishActiveDayHeroMonth),leader=rows[0];
   if(!leader)return '<span class="hall-fish-achievement-leader hall-fish-achievement-leader--empty"><span class="hall-fish-achievement-leader__hologram" aria-hidden="true"><span class="hall-fish-hologram-vacant">◇</span></span><span class="hall-fish-achievement-leader__name">Пока нет наград</span></span>';
-  var image=hallFishLevelPlayerImage(leader),garage=leader.accountId&&typeof window.pokerGarageHallMediaHtml==='function'?window.pokerGarageHallMediaHtml(leader.accountId,{characterOnly:true}):'';
+  var image=hallFishLevelPlayerImage(leader),garage=!spec.staticCharacter&&leader.accountId&&typeof window.pokerGarageHallMediaHtml==='function'?window.pokerGarageHallMediaHtml(leader.accountId,{characterOnly:true}):'';
   return '<span class="hall-fish-achievement-leader"><span class="hall-fish-achievement-leader__hologram">'+(garage||'<img src="'+hallFishEsc(image.src)+'" alt="" width="120" height="160" decoding="async">')+'</span><span class="hall-fish-achievement-leader__name">'+hallFishEsc(leader.nick||'Игрок')+'</span><span class="hall-fish-achievement-leader__count">'+hallFishEsc(leader.valueText||leader.value)+'</span></span>';
 }
 
@@ -1937,7 +1937,17 @@ document.addEventListener('click', function(event) {
   hallFishAchievementDetailsOpen = true;
   navigateToHallFameSection('achievements');
 });
-setTimeout(function() { hallFishLoadAchievementRows().then(hallFishRenderHomePlayerMonth).catch(function() {}); }, 1200);
+function hallFishRefreshHomePlayerMonth() {
+  var root = document.getElementById('homePlayerMonth');
+  if (!root) return;
+  hallFishLoadAchievementRows().then(hallFishRenderHomePlayerMonth).catch(function() {
+    var status = root.querySelector('[role="status"] .hall-fish-player-month__status');
+    if (status) status.textContent = 'Лидер временно недоступен. Нажмите «Подробнее»';
+  });
+}
+setTimeout(hallFishRefreshHomePlayerMonth, 0);
+window.addEventListener('online', hallFishRefreshHomePlayerMonth);
+
 
 function hallFishPlayerMonthPrizeHtml() { return '<span class="hall-fish-player-month__prize"><strong>Награда игроку месяца</strong><span>Бесплатные входы во все майны Poker21 на <b>20 000 ₽</b></span><span>Ещё <b>5 000 ₽</b> билетами</span><span class="hall-fish-player-month__hero-prize">Отдельно за ачивку «Герой дня за месяц» — <b>25 000 ₽</b></span></span>'; }
 
@@ -1947,8 +1957,8 @@ function hallFishPlayerMonthCardHtml(spec,active,data) {
   var status=month==='all'?'Главная награда по итогам каждого месяца':data&&data.pendingExtras?'Считаем итоговые награды…':!leaders.length?'В этом месяце пока нет итоговых наград':leaders.length>1?'Совместное лидерство':month===hallFishCurrentAchievementMonth()?'Текущий лидер месяца':'Главная награда клуба';
   var crown='<svg viewBox="0 0 64 48" aria-hidden="true"><path d="m7 12 13 10L32 5l12 17 13-10-6 27H13Z" fill="currentColor"/><path d="M15 44h34" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="7" cy="9" r="4" fill="currentColor"/><circle cx="32" cy="4" r="4" fill="currentColor"/><circle cx="57" cy="9" r="4" fill="currentColor"/></svg>';
   return '<button type="button" aria-label="Выбрать награду: Игрок месяца" aria-pressed="'+(active==='playerMonth'?'true':'false')+'" data-hall-fish-achievement-tab="playerMonth" class="hall-fish-player-month'+(active==='playerMonth'?' hall-fish-player-month--active':'')+'">'+
-    '<span class="hall-fish-player-month__copy"><span class="hall-fish-player-month__eyebrow">'+crown+hallFishEsc(period)+'</span><span class="hall-fish-player-month__title">Игрок<br>месяца</span><span class="hall-fish-player-month__status">'+hallFishEsc(status)+'</span><span class="hall-fish-player-month__rule">Больше всех итоговых<br>наград за месяц</span>'+(leaders.length?'<span class="hall-fish-player-month__awards">'+leaders[0].value+' из '+hallFishAchievementSpecs(data).length+' наград</span>':'')+'</span>'+
-    '<span class="hall-fish-player-month__stage">'+(leaders.length>1?'<span class="hall-fish-player-month__joint">'+crown+'<span class="hall-fish-player-month__joint-names">'+leaders.map(function(row){return '<span title="'+hallFishEsc(row.nick)+'">'+hallFishEsc(row.nick)+'</span>';}).join('')+'</span></span>':leaders.length?hallFishAchievementLeaderHtml({rows:leaders}):'<span class="hall-fish-player-month__vacant">'+crown+'</span>')+'</span></button>';
+    '<span class="hall-fish-player-month__copy"><span class="hall-fish-player-month__eyebrow">'+crown+hallFishEsc(period)+'</span><span class="hall-fish-player-month__title">'+hallFishEsc(month==='all'?'Игрок месяца':'Игрок '+['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1])+'</span><span class="hall-fish-player-month__status">'+hallFishEsc(status)+'</span><span class="hall-fish-player-month__rule">Больше всех итоговых<br>наград за месяц</span>'+(leaders.length?'<span class="hall-fish-player-month__awards">'+leaders[0].value+' из '+hallFishAchievementSpecs(data).length+' наград</span>':'')+'</span>'+
+    '<span class="hall-fish-player-month__stage">'+(leaders.length>1?'<span class="hall-fish-player-month__joint">'+crown+'<span class="hall-fish-player-month__joint-names">'+leaders.map(function(row){return '<span title="'+hallFishEsc(row.nick)+'">'+hallFishEsc(row.nick)+'</span>';}).join('')+'</span></span>':leaders.length?hallFishAchievementLeaderHtml({rows:leaders,staticCharacter:true}):'<span class="hall-fish-player-month__vacant">'+crown+'</span>')+'</span></button>';
 }
 
 function hallFishAchievementPreviewHtml(spec,data) {
