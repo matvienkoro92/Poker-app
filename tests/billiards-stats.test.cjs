@@ -56,3 +56,12 @@ room.match.round=27;room.revision=28;room.playerProfiles[2].accountId='ID777777'
 local other=cjson.decode(hashes[key]['ID777777']);assert(other.draws==1 and other.wins==0)
 a=cjson.decode(hashes[key]['ID654321']);assert(a.wins+a.losses==26)
 `));
+
+test('golden finish requires the legal winning pot and is recorded once',()=>run(`
+cjson.null='NULL';strings.room=cjson.encode({revision=0,state={winner=cjson.null,goldenBallOwner=cjson.null}});room.state.pending=cjson.null
+room.state.goldenBall=true;room.state.goldenBallId=7;room.state.goldenBallOwner=0;room.state.lastShot={player=0,potted={7}}
+assert(run(0,room)==1);assert(player('pyramid','ID123456').goldenFinishes==1)
+room.revision=2;assert(run(1,room)==1);assert(player('pyramid','ID123456').goldenFinishes==1)
+room.match.round=2;room.revision=3;room.state.endReason='resign';assert(run(2,room)==1);assert(player('pyramid','ID123456').goldenFinishes==1)
+room.match.round=3;room.revision=4;room.state.endReason=nil;room.state.lastShot.potted={4};assert(run(3,room)==1);assert(player('pyramid','ID123456').goldenFinishes==1)
+`));

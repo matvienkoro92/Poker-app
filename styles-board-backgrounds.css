@@ -1,25 +1,19 @@
-/* Five static, CSS-only room finishes: no downloads, decoding or animation loops. */
-body[data-game-background=emerald]{--game-bg-base:#0c1d17;--game-bg-glow:#385540;--game-bg-edge:#132e27;--game-bg-line:#cfb78008}
-body[data-game-background=sapphire]{--game-bg-base:#0a1422;--game-bg-glow:#29465c;--game-bg-edge:#112d40;--game-bg-line:#a3c9ed09}
-body[data-game-background=burgundy]{--game-bg-base:#200e17;--game-bg-glow:#623244;--game-bg-edge:#351827;--game-bg-line:#e3c3a409}
-body[data-game-background=walnut]{--game-bg-base:#201811;--game-bg-glow:#67513a;--game-bg-edge:#382b1e;--game-bg-line:#edcf9e0b}
-body[data-game-background=graphite]{--game-bg-base:#11151a;--game-bg-glow:#44494d;--game-bg-edge:#242b2e;--game-bg-line:#dfc68e0a}
-body[data-game-background]:has(#boardGames #game:not([hidden])){background:radial-gradient(ellipse at 15% 0,var(--game-bg-glow),transparent 65%),radial-gradient(ellipse at 100% 70%,var(--game-bg-edge),transparent 70%),repeating-linear-gradient(135deg,transparent 0 35px,var(--game-bg-line) 36px,transparent 37px 72px),var(--game-bg-base)!important;background-attachment:scroll}
+/* Three restrained finishes matching the approved in-game previews. */
+body[data-game-background=emerald]{--game-finish:radial-gradient(ellipse at 45% 0,#203c30,#0b1d17 78%)}
+body[data-game-background=walnut]{--game-finish:linear-gradient(#1d130fd9,#160f0ce8),url('./assets/city-interior/wood-floor/wood_floor_diff_1k.webp')}
+body[data-game-background=graphite]{--game-finish:radial-gradient(ellipse at 50% 0,#292d30,#111518 75%)}
+body[data-game-background]:has(#boardGames #game:not([hidden])){background:var(--game-finish)!important;background-size:cover!important;background-attachment:scroll}
 #gameBackground{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 #gameBackground .board-action-icon{width:20px;height:20px;flex:none}
 #gameBackground small{font:500 7px/9px system-ui;letter-spacing:0}
 #game .game-toolbar #gameBackground{width:40px;min-width:40px;min-height:38px;padding:4px;border-radius:10px}
-#gameBackground[data-theme=sapphire]{color:#bad8ee}
-#gameBackground[data-theme=burgundy]{color:#ebbdc9}
 #gameBackground[data-theme=walnut]{color:#e6c993}
 #gameBackground[data-theme=graphite]{color:#d8cfb3}
 
 /* The room finish also supplies the controls and player-card palette. */
-body[data-game-background=emerald]{--ui-top:#304e3e;--ui-bottom:#192f25;--ui-accent:#d9c28b;--ui-text:#f1e7cf;--ui-muted:#b3c7b8;--ui-active:#4b6242}
-body[data-game-background=sapphire]{--ui-top:#304e68;--ui-bottom:#182d43;--ui-accent:#9cc9ed;--ui-text:#e4f2ff;--ui-muted:#afc6d9;--ui-active:#3d6482}
-body[data-game-background=burgundy]{--ui-top:#64384e;--ui-bottom:#351e30;--ui-accent:#e6afc3;--ui-text:#ffebf1;--ui-muted:#d4b1c0;--ui-active:#804b61}
-body[data-game-background=walnut]{--ui-top:#69503a;--ui-bottom:#36291e;--ui-accent:#e4bd82;--ui-text:#fff0d8;--ui-muted:#d1bda3;--ui-active:#846542}
-body[data-game-background=graphite]{--ui-top:#444c57;--ui-bottom:#242a33;--ui-accent:#d3c39a;--ui-text:#f1eee5;--ui-muted:#bdc1c7;--ui-active:#5c6167}
+body[data-game-background=emerald]{--ui-top:#10251f;--ui-bottom:#10251f;--ui-active:#10251f;--ui-accent:#c4af78;--ui-text:#eee4cd;--ui-muted:#a1b9ab}
+body[data-game-background=walnut]{--ui-top:#211810;--ui-bottom:#211810;--ui-active:#211810;--ui-accent:#bd9a65;--ui-text:#eee4cd;--ui-muted:#b9ad99}
+body[data-game-background=graphite]{--ui-top:#15191c;--ui-bottom:#15191c;--ui-active:#15191c;--ui-accent:#b5a98b;--ui-text:#eee4cd;--ui-muted:#a5acaa}
 body[data-game-background] #game :is(.game-toolbar button,.board-action-icons>button,.game-controls nav button,#clearSelection,#roll,#history>button,.result button),
 body[data-game-background] #gameControls #history,
 body[data-game-background] #historyToggle{
@@ -69,3 +63,33 @@ body[data-game-background] #boardGames .board-action-icons #autoRoll[aria-presse
 #game[data-kind=chess] .board-action-icons>[data-game-reactions]{order:0;margin-right:0}
 #game[data-kind=chess] .board-action-icons>[data-sound-settings]{width:38px;height:38px;min-width:38px;min-height:38px;flex:0 0 38px;padding:4px;border-radius:8px;margin-right:auto}
 #game[data-kind=chess] .board-action-icons{width:100%;margin-left:0}
+
+/* Flat controls let the selected board remain the visual focus. */
+#boardGames #game{background:none!important;box-shadow:none!important;border:0!important}
+body[data-game-background] #game :is(.matchup>div,.game-toolbar button,.board-action-icons>button,#gameBackground,.game-viewers>button){background:var(--ui-top)!important;box-shadow:none!important;border-color:color-mix(in srgb,var(--ui-accent) 27%,transparent)!important;border-width:1px!important;border-radius:10px!important}
+body[data-game-background] #game .matchup .is-active{background:var(--ui-top)!important;box-shadow:inset 2px 0 var(--ui-accent)!important;border-color:color-mix(in srgb,var(--ui-accent) 60%,transparent)!important}
+body[data-game-background] #game .matchup .is-active::after{display:none!important}
+#game .matchup,#game .game-controls{background:transparent!important}
+#game .board-action-icons{border:0!important}
+
+/* Supplied onyx, graphite-bronze and burgundy artwork, with matching live controls. */
+body[data-game-background=onyx]{--game-finish:#0e0c0a;--game-header-art:url('./assets/board-games/backgrounds/onyx-v1.webp');--ui-top:#241e18;--ui-bottom:#100e0c;--ui-active:#4b1919;--ui-accent:#c59562;--ui-text:#f4e6ca;--ui-muted:#c1b9a9}
+body[data-game-background=graphite-bronze]{--game-finish:#141414;--game-header-art:url('./assets/board-games/backgrounds/graphite-bronze-v1.webp');--ui-top:#282725;--ui-bottom:#171817;--ui-active:#493d2a;--ui-accent:#d3ac68;--ui-text:#f4e8ce;--ui-muted:#c3c1b5}
+body[data-game-background=burgundy-club]{--game-finish:#260907;--game-header-art:url('./assets/board-games/backgrounds/burgundy-club-v1.webp');--ui-top:#421612;--ui-bottom:#210807;--ui-active:#654225;--ui-accent:#d5a46e;--ui-text:#f7e6c4;--ui-muted:#d6b9a4}
+body:is([data-game-background=onyx],[data-game-background=graphite-bronze],[data-game-background=burgundy-club]) #boardGames #game{position:relative;background-image:var(--game-header-art)!important;background-size:100% var(--game-header-art-height,260px)!important;background-position:center top!important;background-repeat:no-repeat!important}
+body:is([data-game-background=onyx],[data-game-background=graphite-bronze],[data-game-background=burgundy-club]) #game :is(.game-toolbar button,.board-action-icons>button,.game-viewers>button,.matchup>[data-player]){color:var(--ui-text)!important;border:1px solid color-mix(in srgb,var(--ui-accent) 70%,transparent)!important;background:linear-gradient(155deg,var(--ui-top),var(--ui-bottom))!important;box-shadow:inset 0 1px #ffffff10,0 2px 4px #0005!important}
+body:is([data-game-background=onyx],[data-game-background=graphite-bronze],[data-game-background=burgundy-club]) #game .matchup>[data-player].active{border-color:#e4bc7e!important;background:linear-gradient(110deg,var(--ui-active),var(--ui-bottom))!important;box-shadow:inset 3px 0 var(--ui-accent),inset 0 0 0 1px #e7c99033!important}
+body:is([data-game-background=onyx],[data-game-background=graphite-bronze],[data-game-background=burgundy-club]) #game .matchup>[data-player]>i{border-color:var(--ui-accent);background:var(--ui-bottom);color:var(--ui-text);box-shadow:inset 0 0 0 2px #fff1}
+body:is([data-game-background=onyx],[data-game-background=graphite-bronze],[data-game-background=burgundy-club]) #game .board-action-icons>button[aria-pressed=true]{background:linear-gradient(130deg,#f1d797,#c29d57)!important;border-color:#f6dea4!important;color:#211d12!important}
+body:is([data-game-background=onyx],[data-game-background=graphite-bronze],[data-game-background=burgundy-club]) #boardArea::before{content:'';position:absolute;left:0;right:0;top:-3px;height:1px;background:linear-gradient(90deg,transparent,var(--ui-accent),transparent);box-shadow:0 0 9px 1px color-mix(in srgb,var(--ui-accent) 40%,transparent);pointer-events:none;z-index:2}
+
+/* One inset action rail and softly lit player plaques, shared by nards themes. */
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .board-action-icons{gap:0;padding:4px 5px;border:1px solid color-mix(in srgb,var(--ui-accent) 48%,transparent)!important;border-radius:20px;background:linear-gradient(180deg,color-mix(in srgb,var(--ui-top) 72%,transparent),#080605d9);box-shadow:inset 0 1px #ffe5ac24,inset 0 -4px 12px #0005,0 3px 9px #0004}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .board-action-icons>button{position:relative;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;width:39px;flex:0 0 39px;height:43px;min-height:43px}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .board-action-icons>button:not([hidden])+button:not([hidden]){border-left:1px solid color-mix(in srgb,var(--ui-accent) 26%,transparent)!important}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .board-action-icons>button[aria-pressed=true]{border-radius:50%!important;background:radial-gradient(ellipse at 35% 20%,#fff3c7,#d4b979 75%)!important;color:#282014!important;box-shadow:inset 0 0 0 1px #fff3c9,0 0 12px #e5bf7159!important}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .board-action-icons>button[aria-pressed=true]{border-left-color:transparent!important}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .matchup>[data-player]{border-radius:12px!important;background:linear-gradient(125deg,#0c0908e8,color-mix(in srgb,var(--ui-bottom) 88%,transparent))!important;border:1px solid color-mix(in srgb,var(--ui-accent) 55%,transparent)!important;box-shadow:inset 0 1px #fff1,0 2px 7px #0005!important}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .matchup>[data-player].active{background:linear-gradient(120deg,color-mix(in srgb,var(--ui-active) 70%,#15100d),#17100de8)!important;border-color:#edd399!important;box-shadow:inset 0 0 0 1px #f8dc8d55,inset 0 1px 7px #ffdc9833,0 0 11px #deb16b40!important}
+body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .matchup>[data-player]>i{background:radial-gradient(circle at 35% 25%,#4c4930,#161d17)!important;border:1px solid #e0c57f;box-shadow:0 0 0 2px #100d09,inset 0 0 0 2px #fff1}
+@media(max-width:350px){body[data-game-background] #boardGames #game:is([data-kind=long],[data-kind=short]) .board-action-icons>button{width:34px;flex-basis:34px}}

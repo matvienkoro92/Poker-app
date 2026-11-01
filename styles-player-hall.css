@@ -1133,3 +1133,15 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .hall-equipment--strip .hall-equipment__list span{padding:2px 7px 0;font-size:10px;line-height:1.2}
 .hall-equipment--strip>footer{padding:0 12px 5px;min-height:14px;border:0}.hall-equipment--strip [data-status]{font-size:10px;margin:0}
 .player-hall-dialog.has-billiards-picker .villa-billiards-stage{top:calc(max(32dvh,190px) + max(8px,var(--hall-safe-top,env(safe-area-inset-top,0px))) + 8px)}
+
+/* Borne-off discs stand on edge: narrow rounded rims in matching carved grooves. */
+.nards-storage{--stored-face:var(--checker-white,#f5e6c5);--stored-rim:#b69a66}
+.nards-storage[data-side=black]{--stored-face:var(--checker-black,#234b3d);--stored-rim:#789184}
+.nards-table .nards-storage-slots i,.nards-table .nards-storage-slots i.is-filled,.living-nards-storage .nards-storage-slots i,.living-nards-storage .nards-storage-slots i.is-filled{position:relative;border:0;border-radius:0;background:transparent!important;box-shadow:none;overflow:visible}
+.nards-table .nards-storage-slots i::before,.living-nards-storage .nards-storage-slots i::before{content:'';position:absolute;inset:auto 2%;top:50%;height:38%;transform:translateY(-50%);border:1px solid #1a120c99;border-radius:50%;background:linear-gradient(#0e0b08bb,#24180e99 55%,#936d3f44);box-shadow:inset 0 2px 2px #080604cc,0 1px 0 #e8c68c66;pointer-events:none}
+.nards-table .nards-storage-slots i::after,.living-nards-storage .nards-storage-slots i::after{display:none}
+.nards-table .nards-storage .nards-stored-edge,.nards-table .nards-storage[data-side=black] .nards-stored-edge,.living-nards-storage .nards-stored-edge{position:absolute;inset:auto 6%;top:50%;height:28%;transform:translateY(-50%);border:1px solid var(--stored-rim);border-radius:45% / 65%;background:linear-gradient(180deg,color-mix(in srgb,var(--stored-face) 65%,white),var(--stored-face) 35%,color-mix(in srgb,var(--stored-face) 70%,black) 65%,var(--stored-face));box-shadow:0 2px 2px #0009,inset 0 1px #ffffff66;z-index:1}
+.nards-table .nards-storage .nards-stored-edge::before,.living-nards-storage .nards-stored-edge::before{content:'';position:absolute;inset:0 7% auto;height:35%;border-radius:50%;background:linear-gradient(#ffffff66,#ffffff08);pointer-events:none}
+.nards-table .nards-storage .nards-stored-edge::after,.nards-table .nards-storage[data-side=black] .nards-stored-edge::after,.living-nards-storage .nards-stored-edge::after{content:'';position:absolute;inset:55% 8% auto;height:1px;border:0;border-radius:50%;background:color-mix(in srgb,var(--stored-face) 60%,black);box-shadow:0 1px #ffffff22;pointer-events:none}
+
+.hall-equipment__rewards{display:grid;gap:6px;padding:0 16px 12px}.hall-equipment__rewards button{padding:10px;border:1px solid #c6a76566;border-radius:10px;background:#15372b;color:#f8dda2;font-size:12px}.hall-equipment__rewards button:disabled{opacity:.5}

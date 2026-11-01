@@ -86,7 +86,7 @@ for(const dialog of [$('cueDialog'),document.querySelector('.table-skin-dialog')
 window.addEventListener('message',event=>{if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-request-close'){leaveGame(true);return;}if(parent!==window&&event.source===parent&&event.origin===location.origin&&event.data?.type==='p21-billiards-open-entry')openEntry(event.data.entry);});
 
 async function request(body,signal){body=viewers.requestBody(body);if(['create','join','rematch','challenge'].includes(body.action)&&!await ensureGameVersion({roomId:body.roomId}))throw Error('Обновляем игру. Повторите вход после обновления.');let source=window;try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch(_){}const auth=source.pokerApiAuthJsonBody?.({})||{},base=source.getApiBase?.()||location.origin,sentAt=Date.now();const r=await fetch(base+'/api/billiards',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',cache:'no-store',body:JSON.stringify({...auth,...body}),signal:signal||AbortSignal.timeout(10000)});const d=await r.json();if(signal?.aborted)throw Error('Запрос отменён');if(d.ready&&!online&&!await ensureGameVersion({roomId:d.roomId,watch:d.spectator===true}))throw Error('Обновляем игру.');if(Number.isFinite(d.serverNow))d.clockSample=d.serverNow-(sentAt+Date.now())/2;if(!r.ok||!d.ok){const e=Error(d.error||'Сервер недоступен. Попробуйте снова.');e.status=r.status;e.code=d.code;throw e;}return d;}
-const superShot=mountSuperShot({request,enter(){angle=0;shotTools.reset();setView(true);},exit(){room?.setClothMessage('');lastUiKey='';uiEpoch++;},wake(){frameLoop?.wake();}});let superShotView=null;
+const superShot=mountSuperShot({request,hero:()=>playerProfiles?.[player]?.name||'Герой',enter(){angle=0;shotTools.reset();setView(true);},exit(){room?.setClothMessage('');lastUiKey='';uiEpoch++;},wake(){frameLoop?.wake();}});let superShotView=null;
 mountRanking(request);
 const lobby=mountLobby({launch:(choice,settings)=>{chosenStake=settings?.stake||0;$(choice).click();},back:()=>leaveGame(true)});
 const wagerNotice=document.createElement('p');wagerNotice.id='wagerNotice';wagerNotice.hidden=true;$('setupWaiting').prepend(wagerNotice);
@@ -160,7 +160,7 @@ function aim(e){if(superShot.active()){if(!superShot.canAim())return;const p=roo
 $('room').onselectstart=$('room').oncontextmenu=e=>e.preventDefault();
 $('room').onpointerdown=e=>{e.preventDefault();window.getSelection()?.removeAllRanges();dragging=true;$('room').setPointerCapture(e.pointerId);aim(e);};$('room').onpointermove=e=>{if(dragging)aim(e);};$('room').onpointerup=$('room').onpointercancel=()=>dragging=false;
 $('closeRules').onclick=()=>$('rules').close();$('back').onclick=()=>leaveGame(true);
-function decoratedCue(cue,own){return {...cue,effect:cue.effect||(sharedEquipment?roomCueEffect:own.effect)};}
+function decoratedCue(cue,own){return {...cue,effect:(sharedEquipment?roomCueEffect:own.effect)||cue.effect};}
 function paintText(node,value){if(node.textContent!==value)node.textContent=value;}
 const frameBudget=createFrameBudget(mobileGraphics().fps);
 function frame(now){reactionPocketPicker.update();gameReactions.refresh();

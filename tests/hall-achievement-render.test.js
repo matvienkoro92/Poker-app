@@ -19,7 +19,10 @@ test('achievement rows render for every tab with populated tournament data', () 
   context.hallFishActiveDayHeroMonth='09.2026';
   const html = context.hallFishRenderAchievementRows(data);
   assert.match(html, /25 000 ₽/);
-  assert.match(html, /hall-fish-achievement-row/);
+  assert.match(html, /hall-fish-achievement-preview/);
+  assert.doesNotMatch(html, /class="hall-fish-achievement-section"/);
+  context.hallFishAchievementDetailsOpen=true;
+  assert.match(context.hallFishRenderAchievementRows(data), /hall-fish-achievement-row/);
   const heroHtml = context.hallFishAchievementSectionHtml('Герой дня · Сентябрь', [
     { nick: 'Em13', telegram: '@Emil013', extraText: '54 149 ₽', value: 1, rank: 1 },
     { nick: 'FrankL', telegram: '@Drops2010', extraText: '42 830 ₽', value: 1, rank: 2 },

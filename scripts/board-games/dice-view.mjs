@@ -1,3 +1,4 @@
+import {goldenDouble} from './nards-flair.mjs';
 import {createDiceMesh,DICE_REST_X,DICE_REST_Y} from './dice-mesh.mjs';
 // Visual-only dice. Values always come from the accepted game state.
 const spots={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
@@ -7,10 +8,10 @@ export function diceFaces(top){const front=[1,2,3,4,5,6].find(n=>n!==top&&n!==7-
 function face(name,value){const el=document.createElement('span');el.className='cube-face cube-face--'+name;el.dataset.value=value;for(const pos of spots[value]){const dot=document.createElement('i');dot.style.gridArea=Math.ceil(pos/3)+' / '+((pos-1)%3+1);el.append(dot);}return el;}
 export function createDiceView(container,onSettled,onThrow=()=>{}){
  const layer=document.createElement('div');layer.className='board-dice-stage';layer.hidden=true;layer.setAttribute('aria-label','Кости на доске');container.append(layer);
- let lastWidth=0,lastFlipped=null,lastScale=1;let key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[],pending=[];
- function cancel(){epoch++;clearTimeout(timer);for(const a of animations)a.cancel();animations=[];rolling=false;layer.classList.remove('is-rolling');}
- function reset(){pending=[];cancel();lastFlipped=null;key='';context='';initialized=false;dice=[];layer.replaceChildren();layer.hidden=true;}
- function settle(notify=true){if(!rolling)return;cancel();if(!notify||document.hidden)pending=[];if(notify&&pending.length){const next=pending.shift();update(next.state,next.options);}if(notify)onSettled();}
+ let lastWidth=0,lastFlipped=null,lastScale=1;let celebrated='',key='',context='',initialized=false,rolling=false,epoch=0,timer=0,animations=[],dice=[],pending=[];
+ function cancel(){epoch++;clearTimeout(timer);for(const a of animations)a.cancel();animations=[];rolling=false;layer.classList.remove('is-rolling','golden-double-reveal');}
+ function reset(){celebrated='';pending=[];cancel();lastFlipped=null;key='';context='';initialized=false;dice=[];layer.replaceChildren();layer.hidden=true;}
+ function settle(notify=true){if(!rolling)return;cancel();if(notify&&!document.hidden&&layer.dataset.goldenDouble==='true'&&celebrated!==key){celebrated=key;goldenDouble(layer);}if(!notify||document.hidden)pending=[];if(notify&&pending.length){const next=pending.shift();update(next.state,next.options);}if(notify)onSettled();}
  function update(state,options={}){
   if(!state||state.discipline==='chess'){reset();return false;}
   if(options.context!==context){reset();context=options.context;}
@@ -23,7 +24,7 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden;
   const duration=reduced?900:DICE_DURATION;
-  cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;
+  cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;layer.dataset.goldenDouble=String(state.roll[0]===state.roll[1]);
   const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
   lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=diceOwner(state),right=(roller===0)!==flipped;layer.style.setProperty('--cube-size',size+'px');dice=[];
   state.roll.forEach((value,i)=>{
