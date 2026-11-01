@@ -1917,6 +1917,24 @@ function hallFishPlayerMonthSpec(data,monthKey) {
   return {key:'playerMonth',title:'Игрок месяца',sectionTitle:'Игрок месяца',description:'Одна итоговая награда за первое место в каждой категории ниже. Число побед внутри категории не увеличивает этот счёт. При равенстве количества наград — совместное лидерство.',rows:rows};
 }
 
+function hallFishRenderHomePlayerMonth(data) {
+  var root = document.getElementById('homePlayerMonth');
+  if (!root || !data) return;
+  var previous = hallFishActiveDayHeroMonth;
+  try {
+    hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
+    root.innerHTML = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data).replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card') + '<button type="button" class="home-player-month__more">Подробнее ↗</button>';
+  } finally { hallFishActiveDayHeroMonth = previous; }
+}
+document.addEventListener('click', function(event) {
+  if (!event.target.closest || !event.target.closest('#homePlayerMonth')) return;
+  hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
+  hallFishActiveAchievementTab = 'playerMonth';
+  hallFishAchievementDetailsOpen = true;
+  navigateToHallFameSection('achievements');
+});
+setTimeout(function() { hallFishLoadAchievementRows().then(hallFishRenderHomePlayerMonth).catch(function() {}); }, 1200);
+
 function hallFishPlayerMonthCardHtml(spec,active,data) {
   var month=hallFishActiveDayHeroMonth,rows=spec.rows||[],leaders=rows.filter(function(row){return row.value===rows[0].value;});
   var period=month==='all'?'Выберите месяц':hallFishDayHeroMonthLabel(month)+' '+month.split('.')[1];
@@ -2990,6 +3008,7 @@ function hallFishLoadAchievementRows() {
     var data = hallFishAggregateTournamentAchievements(levelRows);
     data.pendingExtras = true;
     hallFishAchievementRowsCache = data;
+    hallFishRenderHomePlayerMonth(data);
     extrasReady.then(function (extras) {
       Object.assign(data, {
         clubChoice: hallFishAggregateClubChoiceRows(extras[0], levelRows),
@@ -2999,6 +3018,7 @@ function hallFishLoadAchievementRows() {
         nardsKing: extras[4].nardsKing || [],
         pendingExtras: false
       });
+      hallFishRenderHomePlayerMonth(data);
       var modal = document.getElementById("hallFishRatingModal");
       if (hallFishAchievementRowsCache === data && modal && !modal.hidden && hallFishActiveTab === "achievements") {
         hallFishSetAchievementState("", data);
