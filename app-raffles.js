@@ -2427,8 +2427,8 @@ function initRaffles() {
           : "";
         return '<article class="raffles-active-chooser__item raffles-active-chooser__item--simple' + (selected ? ' raffles-active-chooser__item--active' : '') + '" data-raffle-active-id="' + escapeHtml(id) + '">' +
           '<h3 class="raffles-simple-title">' + escapeHtml(activeRaffleShortTitle(raffle)) + '</h3>' +
-          accessHtml +
-          '<div class="raffles-simple-meta">' + (resultsTimeText ? '<span>Итоги: ' + escapeHtml(resultsTimeText) + '</span>' : '') + '<span>' + escapeHtml(participantCount + ' ' + participantWord) + '</span></div>' +
+          '<span class="raffles-simple-access">Доступ: ' + escapeHtml(raffleAccessLevelText(raffle)) + '</span>' +
+          '<div class="raffles-simple-meta">' + (resultsTimeText ? '<span>Итоги: ' + escapeHtml(resultsTimeText.replace(/^Итоги\s*:?\s*/i, '')) + '</span>' : '') + '<span>' + escapeHtml(participantCount + ' ' + participantWord) + '</span></div>' +
           prizePanelHtml + trainingLessonCta + '</article>' + ticketRegistrationWarning;
 
       })

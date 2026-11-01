@@ -1923,10 +1923,7 @@ function hallFishRenderHomePlayerMonth(data) {
   var previous = hallFishActiveDayHeroMonth;
   try {
     hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
-    root.innerHTML = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data).replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card') + '<button type="button" class="home-player-month__more">Подробнее ↗</button>';
-    root.insertAdjacentHTML('beforeend', hallFishPlayerMonthPrizeHtml());
-    var prize = root.querySelector('.hall-fish-player-month__prize');
-    if (prize) { prize.classList.add('home-player-month__prize'); root.appendChild(prize); }
+    root.innerHTML = hallFishPlayerMonthCardHtml(hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth), '', data).replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card') + '<div class="home-player-month__prize-bar"><strong>Приз игроку месяца <span>до 50 000 ₽</span></strong><button type="button" class="home-player-month__more">Подробнее ↗</button></div>';
 
   } finally { hallFishActiveDayHeroMonth = previous; }
 }
@@ -1949,15 +1946,14 @@ setTimeout(hallFishRefreshHomePlayerMonth, 0);
 window.addEventListener('online', hallFishRefreshHomePlayerMonth);
 
 
-function hallFishPlayerMonthPrizeHtml() { return '<span class="hall-fish-player-month__prize"><strong>Награда игроку месяца</strong><span>Бесплатные входы во все майны Poker21 на <b>20 000 ₽</b></span><span>Ещё <b>5 000 ₽</b> билетами</span><span class="hall-fish-player-month__hero-prize">Отдельно за ачивку «Герой дня за месяц» — <b>25 000 ₽</b></span></span>'; }
 
 function hallFishPlayerMonthCardHtml(spec,active,data) {
   var month=hallFishActiveDayHeroMonth,rows=spec.rows||[],leaders=rows.filter(function(row){return row.value===rows[0].value;});
   var period=month==='all'?'Выберите месяц':hallFishDayHeroMonthLabel(month)+' '+month.split('.')[1];
-  var status=month==='all'?'Главная награда по итогам каждого месяца':data&&data.pendingExtras?'Считаем итоговые награды…':!leaders.length?'В этом месяце пока нет итоговых наград':leaders.length>1?'Совместное лидерство':month===hallFishCurrentAchievementMonth()?'Текущий лидер месяца':'Главная награда клуба';
+  var status=month==='all'?'Главная награда по итогам каждого месяца':data&&data.pendingExtras?'Считаем итоговые награды…':!leaders.length?'В этом месяце пока нет итоговых наград':leaders.length>1?'Совместное лидерство':month===hallFishCurrentAchievementMonth()?'Текущий лидер '+['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1]:'Главная награда клуба';
   var crown='<svg viewBox="0 0 64 48" aria-hidden="true"><path d="m7 12 13 10L32 5l12 17 13-10-6 27H13Z" fill="currentColor"/><path d="M15 44h34" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="7" cy="9" r="4" fill="currentColor"/><circle cx="32" cy="4" r="4" fill="currentColor"/><circle cx="57" cy="9" r="4" fill="currentColor"/></svg>';
   return '<button type="button" aria-label="Выбрать награду: Игрок месяца" aria-pressed="'+(active==='playerMonth'?'true':'false')+'" data-hall-fish-achievement-tab="playerMonth" class="hall-fish-player-month'+(active==='playerMonth'?' hall-fish-player-month--active':'')+'">'+
-    '<span class="hall-fish-player-month__copy"><span class="hall-fish-player-month__eyebrow">'+crown+hallFishEsc(period)+'</span><span class="hall-fish-player-month__title">'+hallFishEsc(month==='all'?'Игрок месяца':'Игрок '+['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1])+'</span><span class="hall-fish-player-month__status">'+hallFishEsc(status)+'</span><span class="hall-fish-player-month__rule">Больше всех итоговых<br>наград за месяц</span>'+(leaders.length?'<span class="hall-fish-player-month__awards">'+leaders[0].value+' из '+hallFishAchievementSpecs(data).length+' наград</span>':'')+'</span>'+
+    '<span class="hall-fish-player-month__copy"><span class="hall-fish-player-month__eyebrow">'+crown+hallFishEsc(period)+'</span><span class="hall-fish-player-month__status">'+hallFishEsc(status)+'</span><span class="hall-fish-player-month__rule">Больше всех итоговых<br>наград за месяц</span>'+(leaders.length?'<span class="hall-fish-player-month__awards">'+leaders[0].value+' из '+hallFishAchievementSpecs(data).length+' наград</span>':'')+'</span>'+
     '<span class="hall-fish-player-month__stage">'+(leaders.length>1?'<span class="hall-fish-player-month__joint">'+crown+'<span class="hall-fish-player-month__joint-names">'+leaders.map(function(row){return '<span title="'+hallFishEsc(row.nick)+'">'+hallFishEsc(row.nick)+'</span>';}).join('')+'</span></span>':leaders.length?hallFishAchievementLeaderHtml({rows:leaders,staticCharacter:true}):'<span class="hall-fish-player-month__vacant">'+crown+'</span>')+'</span></button>';
 }
 
@@ -1994,7 +1990,7 @@ function hallFishRenderAchievementRows(data) {
       '</div>' +
     '<div class="hall-fish-achievement-tabs hall-fish-achievement-tabs--trophies hall-fish-achievement-tabs--matrix" role="group" aria-label="Награды и топы по ачивкам">' +
       specs.map(function (spec) {
-        if(spec.key==='playerMonth')return '<article class="hall-fish-achievement-card hall-fish-achievement-card--featured">'+hallFishPlayerMonthCardHtml(spec,active,data)+hallFishPlayerMonthPrizeHtml()+hallFishAchievementPreviewHtml(spec,data)+'</article>';
+        if(spec.key==='playerMonth')return '<article class="hall-fish-achievement-card hall-fish-achievement-card--featured">'+hallFishPlayerMonthCardHtml(spec,active,data)+hallFishAchievementPreviewHtml(spec,data)+'</article>';
         var isActive = spec.key === active;
         return '<article class="hall-fish-achievement-card"><button type="button" class="hall-fish-achievement-tab' + (isActive ? " hall-fish-achievement-tab--active" : "") + '" data-hall-fish-achievement-tab="' + hallFishEsc(spec.key) + '" aria-pressed="' + (isActive ? "true" : "false") + '" aria-label="Выбрать награду: ' + hallFishEsc(spec.sectionTitle||spec.title) + '">' + '<span class="hall-fish-achievement-trophy">'+hallFishAchievementTrophyHtml(spec)+'</span>'+hallFishAchievementLeaderHtml(spec)+'</button>'+hallFishAchievementPreviewHtml(spec,data)+'</article>';
       }).join("") +
