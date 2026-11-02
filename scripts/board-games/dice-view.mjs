@@ -17,14 +17,16 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
   if(!state||state.discipline==='chess'){reset();return false;}
   if(options.context!==context){reset();context=options.context;}
   if(state.roll.length!==2){cancel();key='';layer.replaceChildren();layer.hidden=true;initialized=true;return false;}
-  const next=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()))+':'+diceOwner(state);
+  const rollKey=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()))+':'+diceOwner(state);
+  const next=rollKey+':'+state.roll.join('-');
+  const chainShift=state.variant==='crazy'&&key.startsWith(rollKey+':')&&next!==key;
   if(rolling&&next!==key){if(!pending.some(item=>item.key===next)){pending.push({key:next,state:structuredClone(state),options:{...options}});if(pending.length>8)pending.shift();}return false;}
   const scale=options.size==='small'?.72:1,flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped||lastScale!==scale);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
   // A mobile viewport update must not cancel a throw already in flight.
   if(next===key&&rolling){mark(state);return false;}
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden;
-  const duration=reduced?900:DICE_DURATION;
+  const duration=chainShift?(reduced?200:650):reduced?900:DICE_DURATION;
   cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;layer.dataset.gilded='false';layer.dataset.goldenDouble=String(!isOpeningThrow(state)&&state.roll[0]===state.roll[1]);
   const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
   lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=diceOwner(state),opening=isOpeningThrow(state);layer.style.setProperty('--cube-size',size+'px');dice=[];meshes=[];
@@ -33,6 +35,12 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
    const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube'+(i?' dice-cube--amber':'');shadow.className='dice-ground-shadow';cube.dataset.value=value;if(opening)cube.dataset.openingPlayer=String(i);cube.setAttribute('role','img');cube.setAttribute('aria-label',(opening?(i===0?'Белые':'Чёрные'):'Кость '+(i+1))+': '+value);for(const [side,n]of Object.entries(diceFaces(value)))cube.append(face(side,n));flight.append(cube);layer.append(shadow,flight);dice.push(cube);const mesh=createDiceMesh(cube,diceFaces(value),size);meshes.push(mesh);
    const x=width*(opening?(right?.72:.28):right?(i?.80:.64):(i?.36:.20))-size/2,y=height*.5-size/2;flight.style.transform='translate3d('+x+'px,'+y+'px,0)';cube.style.transform='none';mesh.draw(DICE_REST_X,DICE_REST_Y,i?.14:-.12);shadow.style.transform='translate('+x+'px,'+(y+size*.64)+'px) scale(1)';
    if(!animate)return;
+   if(chainShift){
+    const timing={duration:duration+i*35,easing:'ease-in-out'};
+    animations.push(mesh.animate(i,timing.duration,reduced?.15:.8));
+    if(!reduced)animations.push(flight.animate([{transform:'translate3d('+x+'px,'+y+'px,0)'},{transform:'translate3d('+x+'px,'+(y-size*.45)+'px,0)',offset:.45},{transform:'translate3d('+x+'px,'+y+'px,0)'}],timing));
+    return;
+   }
    const clampX=v=>Math.max(size*.5+3,Math.min(width-size*1.5-3,v)),clampY=v=>Math.max(size*.5+3,Math.min(height-size*1.5-3,v));
    const startX=clampX(reduced?x+(i?1:-1)*size*.3:width*(right?.90:.10)+(right?-1:1)*i*size*.5),startY=clampY(height*.18-100),sign=i?1:-1;
    const frames=[
