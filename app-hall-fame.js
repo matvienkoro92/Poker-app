@@ -677,7 +677,12 @@ function hallFishRefreshVisibleRows(rows) {
       return;
     }
     if (hallFishActiveTab === "achievements") {
-      hallFishAchievementRowsCache = null;
+      // Keep the same object while game requests are filling it: their repaint
+      // guard must still recognize the visible achievement data.
+      if (hallFishAchievementRowsCache && hallFishAchievementRowsCache.pendingExtras) {
+        Object.assign(hallFishAchievementRowsCache, hallFishAggregateTournamentAchievements(rows));
+        hallFishSetAchievementState("", hallFishAchievementRowsCache);
+      } else hallFishAchievementRowsCache = null;
       return;
     }
     if (hallFishActiveTab === "vote") return;
@@ -703,7 +708,7 @@ function hallFishFetchRows() {
     .then(function (data) {
       if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
       hallFishRatingRowsCache = hallFishRowsFromCrmData(data);
-      hallFishAchievementRowsCache = null;
+      if (!hallFishAchievementRowsCache || !hallFishAchievementRowsCache.pendingExtras) hallFishAchievementRowsCache = null;
       hallFishBirthdayRowsCache = null;
       hallFishWriteRowsSessionCache(hallFishRatingRowsCache);
       return hallFishRatingRowsCache;
