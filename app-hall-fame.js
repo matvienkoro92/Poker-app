@@ -1951,7 +1951,7 @@ document.addEventListener('click', function(event) {
   hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
   hallFishActiveAchievementTab = 'playerMonth';
   hallFishAchievementDetailsOpen = true;
-  navigateToHallFameSection('achievements');
+  openHallFishAchievementTab();
 });
 function hallFishRefreshHomePlayerMonth() {
   var root = document.getElementById('homePlayerMonth');
@@ -3026,6 +3026,7 @@ function hallFishLoadNardsAchievementRows() {
 
 function hallFishLoadAchievementRows() {
   if (hallFishAchievementRowsCache && hallFishAchievementRatingDataReady()) return Promise.resolve(hallFishAchievementRowsCache);
+  if (hallFishAchievementRowsCache && hallFishAchievementRowsCache.pendingExtras) return Promise.resolve(hallFishAchievementRowsCache);
   if (hallFishAchievementRowsCache && !hallFishAchievementRatingDataReady()) hallFishAchievementRowsCache = null;
   if (hallFishAchievementRowsPromise) return hallFishAchievementRowsPromise;
   // Each game category can finish independently of unrelated services.
@@ -3046,9 +3047,15 @@ function hallFishLoadAchievementRows() {
     data.pendingCategories = {goldenBall:true,nardsKing:true,playerMonth:true};
     hallFishAchievementRowsCache = data;
     function repaint() {
-      hallFishRenderHomePlayerMonth(data);
+      // A player-list refresh may invalidate the cache while this load is active.
+      // Recover that cache, but never overwrite a newer load.
+      if (hallFishAchievementRowsCache && hallFishAchievementRowsCache !== data) return;
+      hallFishAchievementRowsCache = data;
+      try { hallFishRenderHomePlayerMonth(data); } catch (error) { console.error('[achievement-home]', error); }
       var modal = document.getElementById("hallFishRatingModal");
-      if (hallFishAchievementRowsCache === data && modal && !modal.hidden && hallFishActiveTab === "achievements") hallFishSetAchievementState("", data);
+      if (modal && !modal.hidden && hallFishActiveTab === "achievements") {
+        try { hallFishSetAchievementState("", data); } catch (error) { console.error('[achievement-render]', error); }
+      }
     }
     function acceptCategory(key, result) {
       data[key] = result && result[key] || [];
@@ -3057,9 +3064,9 @@ function hallFishLoadAchievementRows() {
       data.pendingCategories.playerMonth = data.pendingExtras;
       repaint();
     }
+    billiardsReady.then(function(result){acceptCategory('goldenBall',result);},function(){acceptCategory('goldenBall',{});});
+    nardsReady.then(function(result){acceptCategory('nardsKing',result);},function(){acceptCategory('nardsKing',{});});
     repaint();
-    billiardsReady.then(function(result){acceptCategory('goldenBall',result);});
-    nardsReady.then(function(result){acceptCategory('nardsKing',result);});
     extrasReady.then(function (extras) {
       Object.assign(data, {
         clubChoice: hallFishAggregateClubChoiceRows(extras[0], levelRows),
