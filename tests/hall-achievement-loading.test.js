@@ -6,7 +6,7 @@ const source = fs.readFileSync(require.resolve('../app-hall-fame.js'), 'utf8');
 const code = source.slice(source.indexOf('function hallFishLoadAchievementRows()'), source.indexOf('function openHallFishAchievementTab()'));
 function deferred() { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
 test('tournament tops do not wait for optional services and late extras respect the active tab', async () => {
-  const rating = deferred(), levels = deferred(), extras = deferred(), calls = [];
+  const rating = deferred(), levels = deferred(), extras = deferred(), nards = deferred(), billiards = deferred(), calls = [];
   const c = {
     Promise, Object, hallFishAchievementRowsCache: null, hallFishAchievementRowsPromise: null,
     hallFishAchievementRatingDataReady: () => true,
@@ -14,7 +14,9 @@ test('tournament tops do not wait for optional services and late extras respect 
     hallFishLoadRows: () => { calls.push('levels'); return levels.promise; },
     hallFishLoadClubChoiceAchievementRows: () => { calls.push('choice'); return extras.promise; },
     hallFishLoadReferralRows: () => { calls.push('referrals'); return Promise.resolve([]); },
-    hallFishLoadBilliardsAchievementRows: () => Promise.resolve({}),
+    hallFishLoadBilliardsAchievementRows: () => billiards.promise,
+    hallFishLoadNardsAchievementRows: () => nards.promise,
+    hallFishRenderHomePlayerMonth: () => {},
     hallFishLoadSngChampionAchievementRows: () => { calls.push('sng'); return Promise.resolve([]); },
     hallFishAggregateTournamentAchievements: () => ({ dayHero: [{ nick: 'Winner' }] }),
     hallFishAggregateClubChoiceRows: rows => rows, hallFishAggregateSngChampionRows: rows => rows,
@@ -29,6 +31,15 @@ test('tournament tops do not wait for optional services and late extras respect 
   const data = await pending;
   assert.equal(data.dayHero[0].nick, 'Winner');
   assert.equal(data.pendingExtras, true);
+  nards.resolve({nardsKing:[{nick:'Nards winner'}]});
+  await new Promise(r => setImmediate(r));
+  assert.equal(data.nardsKing[0].nick, 'Nards winner');
+  assert.equal(data.pendingCategories.nardsKing, false);
+  assert.equal(data.pendingCategories.goldenBall, true);
+  assert.equal(data.pendingExtras, true);
+  billiards.resolve({goldenBall:[]});
+  await new Promise(r => setImmediate(r));
+  assert.equal(data.pendingExtras, false, 'unrelated services must not block monthly leader');
   extras.resolve([{ nick: 'Choice winner' }]);
   await new Promise(r => setImmediate(r));
   assert.equal(data.pendingExtras, false);

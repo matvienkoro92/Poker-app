@@ -1971,9 +1971,13 @@ function hallFishPlayerMonthCardHtml(spec,active,data) {
     '<span class="hall-fish-player-month__stage">'+(leaders.length>1?'<span class="hall-fish-player-month__joint">'+crown+'<span class="hall-fish-player-month__joint-names">'+leaders.map(function(row){return '<span title="'+hallFishEsc(row.nick)+'">'+hallFishEsc(row.nick)+'</span>';}).join('')+'</span></span>':leaders.length?hallFishAchievementLeaderHtml({rows:leaders,staticCharacter:true}):'<span class="hall-fish-player-month__vacant">'+crown+'</span>')+'</span></button>';
 }
 
+function hallFishAchievementPending(data,key) {
+  return !!(data && (data.pendingCategories ? data.pendingCategories[key] : data.pendingExtras && ['playerMonth','goldenBall','nardsKing'].indexOf(key)!==-1));
+}
+
 function hallFishAchievementPreviewHtml(spec,data) {
   var rows=spec.key==='playerMonth'||hallFishActiveDayHeroMonth==='all'?(spec.rows||[]):hallFishAchievementRowsForMonth(spec,hallFishActiveDayHeroMonth);
-  var pending=data&&data.pendingExtras&&['playerMonth','goldenBall','nardsKing'].indexOf(spec.key)!==-1;
+  var pending=hallFishAchievementPending(data,spec.key);
   return '<div class="hall-fish-achievement-preview"><span class="hall-fish-achievement-preview__label">Топ-3</span>'+
     (pending?'<p class="hall-fish-achievement-preview__empty">Загружаем результаты…</p>':rows.length?'<ol>'+rows.slice(0,3).map(function(row,index){return '<li><b>'+(index+1)+'</b><span title="'+hallFishEsc(row.nick||'Игрок')+'">'+hallFishEsc(row.nick||'Игрок')+'</span><strong>'+hallFishEsc(row.valueText||row.value)+'</strong></li>';}).join('')+'</ol>':'<p class="hall-fish-achievement-preview__empty">'+(spec.key==='playerMonth'&&hallFishActiveDayHeroMonth==='all'?'Выберите месяц':'Пока нет наград')+'</p>')+
     '<button type="button" class="hall-fish-achievement-preview__more" data-hall-fish-achievement-tab="'+hallFishEsc(spec.key)+'" aria-label="Подробнее: '+hallFishEsc(spec.sectionTitle||spec.title)+'">Подробнее <span aria-hidden="true">↗</span></button></div>';
@@ -1995,7 +1999,7 @@ function hallFishRenderAchievementRows(data) {
   }
   if(hallFishActiveDayHeroMonth==='all'&&active!=='dayHero')activeSpec=Object.assign({},activeSpec,{rows:(activeSpec.rows||[]).slice(0,10)});
   if(active==='topWin')activeSpec=Object.assign({},activeSpec,{rows:(activeSpec.rows||[]).map(function(row){return Object.assign({},row,{detailRows:(row.detailRows||[]).filter(function(detail){return detail._reward===row.value;}).slice(0,1)});})});
-  if(hallFishAchievementDetailsOpen)return '<div class="hall-fish-achievements hall-fish-achievements--detail"><button type="button" class="hall-fish-achievement-back" data-hall-fish-achievement-back>← К наградам</button>'+monthFilter+(data&&data.pendingExtras&&['playerMonth','goldenBall','nardsKing'].indexOf(active)!==-1?hallFishRenderAchievementSkeleton():hallFishAchievementSectionHtml(activeSpec.sectionTitle||activeSpec.title,activeSpec.rows,activeSpec.description,activeSpec.key,activeSpec.awardText))+'</div>';
+  if(hallFishAchievementDetailsOpen)return '<div class="hall-fish-achievements hall-fish-achievements--detail"><button type="button" class="hall-fish-achievement-back" data-hall-fish-achievement-back>← К наградам</button>'+monthFilter+(hallFishAchievementPending(data,active)?hallFishRenderAchievementSkeleton():hallFishAchievementSectionHtml(activeSpec.sectionTitle||activeSpec.title,activeSpec.rows,activeSpec.description,activeSpec.key,activeSpec.awardText))+'</div>';
   return '<div class="hall-fish-achievements">' + monthFilter +
     '<div class="hall-fish-achievement-tabs-shell" aria-label="Фильтры топов по ачивкам">' +
       '<div class="hall-fish-achievement-tabs-shell__head">' +
@@ -3019,10 +3023,11 @@ function hallFishLoadAchievementRows() {
   if (hallFishAchievementRowsCache && hallFishAchievementRatingDataReady()) return Promise.resolve(hallFishAchievementRowsCache);
   if (hallFishAchievementRowsCache && !hallFishAchievementRatingDataReady()) hallFishAchievementRowsCache = null;
   if (hallFishAchievementRowsPromise) return hallFishAchievementRowsPromise;
-  // Start independent network requests together. Tournament tops can be shown
-  // before the optional choice/referral/SNG services have responded.
+  // Each game category can finish independently of unrelated services.
+  var billiardsReady = hallFishLoadBilliardsAchievementRows();
+  var nardsReady = hallFishLoadNardsAchievementRows();
   var extrasReady = Promise.all([
-    hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows(), hallFishLoadSngChampionAchievementRows(), hallFishLoadBilliardsAchievementRows(), hallFishLoadNardsAchievementRows()
+    hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows(), hallFishLoadSngChampionAchievementRows()
   ]);
   hallFishAchievementRowsPromise = Promise.all([
     hallFishEnsureAchievementRatingData(),
@@ -3033,22 +3038,29 @@ function hallFishLoadAchievementRows() {
     var levelRows = parts[1];
     var data = hallFishAggregateTournamentAchievements(levelRows);
     data.pendingExtras = true;
+    data.pendingCategories = {goldenBall:true,nardsKing:true,playerMonth:true};
     hallFishAchievementRowsCache = data;
-    hallFishRenderHomePlayerMonth(data);
+    function repaint() {
+      hallFishRenderHomePlayerMonth(data);
+      var modal = document.getElementById("hallFishRatingModal");
+      if (hallFishAchievementRowsCache === data && modal && !modal.hidden && hallFishActiveTab === "achievements") hallFishSetAchievementState("", data);
+    }
+    function acceptCategory(key, result) {
+      data[key] = result && result[key] || [];
+      data.pendingCategories[key] = false;
+      data.pendingExtras = data.pendingCategories.goldenBall || data.pendingCategories.nardsKing;
+      data.pendingCategories.playerMonth = data.pendingExtras;
+      repaint();
+    }
+    repaint();
+    billiardsReady.then(function(result){acceptCategory('goldenBall',result);});
+    nardsReady.then(function(result){acceptCategory('nardsKing',result);});
     extrasReady.then(function (extras) {
       Object.assign(data, {
         clubChoice: hallFishAggregateClubChoiceRows(extras[0], levelRows),
         referrals: extras[1],
-        sngChampion: hallFishAggregateSngChampionRows(extras[2], levelRows),
-        goldenBall: extras[3].goldenBall || [],
-        nardsKing: extras[4].nardsKing || [],
-        pendingExtras: false
+        sngChampion: hallFishAggregateSngChampionRows(extras[2], levelRows)
       });
-      hallFishRenderHomePlayerMonth(data);
-      var modal = document.getElementById("hallFishRatingModal");
-      if (hallFishAchievementRowsCache === data && modal && !modal.hidden && hallFishActiveTab === "achievements") {
-        hallFishSetAchievementState("", data);
-      }
     }).catch(function () {});
     return data;
   }).finally(function () {
