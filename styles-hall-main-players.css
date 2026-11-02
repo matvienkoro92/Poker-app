@@ -2692,3 +2692,6 @@
 .hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar{width:clamp(90px,27vw,140px);height:clamp(90px,27vw,140px)!important;margin-inline:auto;padding:0!important;border-radius:50%;overflow:hidden;background:none}
 .hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar::before,.hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar::after{display:none}
 .hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar>img{width:100%!important;height:100%!important;max-width:none;object-fit:cover!important;object-position:center;border-radius:50%;filter:none;opacity:1}
+
+.home-player-month .hall-fish-player-month__copy{container-type:inline-size}
+.home-player-month .hall-fish-player-month .hall-fish-player-month__status{color:#171100!important;-webkit-text-fill-color:#171100!important;font-size:clamp(8px,5.6cqw,14px)!important;line-height:1.3;white-space:nowrap;text-shadow:none!important;letter-spacing:0}

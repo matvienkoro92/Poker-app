@@ -8,7 +8,7 @@ test('Russian and English commands and callbacks',()=>{
 });
 test('schedule uses application source and fits Telegram pages',()=>{
  const pages=c.schedulePages();assert.ok(pages.join('\n').includes('MAIN EVENT'));
- assert.ok(pages.join('\n').includes('14 сентября 2026'));
+ assert.ok(pages.join('\n').includes('время московское'));
  assert.ok(pages.every(p=>p.length<3600));
 });
 test('tables preserve scope, sorting, formats and SNG category',()=>{
