@@ -1172,3 +1172,6 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 /* Keep the rug and its cutout in the same camera coordinates as the table.
    The equipment strip shortens the stage, while the room art spans the dialog. */
 .villa-billiards-stage.has-continuous-backdrop::before{background-size:var(--continuous-backdrop-size);background-position:var(--continuous-backdrop-position);-webkit-mask-size:var(--continuous-backdrop-size);mask-size:var(--continuous-backdrop-size);-webkit-mask-position:var(--continuous-backdrop-position);mask-position:var(--continuous-backdrop-position);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+
+.admin-game-stats [data-date-field]:not([hidden]){display:grid;gap:6px;font-size:13px;min-width:130px;flex:1}
+.admin-game-stats [data-date-field] input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #a88c54;border-radius:10px;background:#090e15;color:#ffe8b7;font:inherit;color-scheme:dark}

@@ -117,10 +117,14 @@
   }
   function paymentFormsTotalsHtml(forms){
     var totals=paymentFormsTotals(forms),format=new Intl.DateTimeFormat('ru-RU',{timeZone:forms.period.timeZone||'Europe/Moscow',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),periodLabel=format.format(forms.period.start)+' — '+format.format(forms.period.end);
-    var sources=[['player','От игроков'],['owner','Владелец'],['allfriends','AllFriends']].map(function(row){return '<span><span>'+row[1]+'</span><b>'+money(totals.sources[row[0]])+'</b></span>';}).join('');
-    var balance=totals.allfriendsBalance,balanceText=balance>0?'AllFriends должны нам':balance<0?'Мы должны AllFriends':'Взаиморасчёты закрыты';
-    return '<dl class="deposits__payment-summary"><div><dt>Итого депозитов за '+esc(periodLabel)+'</dt><dd>'+money(totals.deposits)+'</dd></div><div><dt>Пришло на выводы</dt><dd>'+money(totals.withdrawals)+'<div class="deposits__payment-sources" aria-label="Состав поступлений на выводы">'+sources+'</div></dd></div><div><dt>Баланс AllFriends за выбранный период</dt><dd><div class="deposits__payment-sources"><span><span>Мы вывели им</span><b>'+money(totals.allfriendsSent)+'</b></span><span><span>Они вывели нам</span><b>'+money(totals.allfriendsReceived)+'</b></span></div><span>'+balanceText+'</span> <b>'+money(Math.abs(balance))+'</b><small class="deposits__hint">Из «Другое» учтены операции с отметкой AllFriends или явным упоминанием в комментарии.</small></dd></div></dl>';
+    var sources=[['player','От игроков'],['owner','Владелец'],['allfriends','AllFriends']].map(function(row){
+      var html='<span><span>'+row[1]+'</span><b>'+money(totals.sources[row[0]])+'</b></span>';
+      if(row[0]==='allfriends')html+='<span class="deposits__allfriends-out"><span>Уход им</span><b>−'+money(totals.allfriendsReceived)+'</b></span><span class="deposits__allfriends-total"><span>Итого</span><b>'+money(totals.allfriendsBalance)+'</b></span>';
+      return html;
+    }).join('');
+    return '<dl class="deposits__payment-summary"><div><dt>Итого депозитов за '+esc(periodLabel)+'</dt><dd>'+money(totals.deposits)+'</dd></div><div><dt>Пришло на выводы</dt><dd>'+money(totals.withdrawals)+'<div class="deposits__payment-sources" aria-label="Состав поступлений на выводы">'+sources+'</div></dd></div></dl>';
   }
+
   function prodamusProviderHtml(p){return '<div class="deposits__payment-provider deposits__payment-provider--prodamus"><div class="deposits__payment-form deposits__prodamus-main" data-dep="prodamus-income" data-provider="prodamus"><button type="button" class="deposits__prodamus-title" data-dep="payment-form" data-provider="prodamus"><strong>'+esc(p.name)+'</strong></button><span>'+(p.total===null?'Нет данных':money(p.total))+'</span></div><div class="deposits__prodamus-links">'+p.options.map(function(option,n){return '<button type="button" data-dep="copy-payment-link" data-provider="prodamus" data-option="'+n+'" aria-label="Скопировать ссылку на '+esc(money(option.amount))+'">'+money(option.amount)+'</button>';}).join('')+'</div></div>';}
   function runexProviderHtml(p){return '<div class="deposits__payment-provider"><div class="deposits__payment-form deposits__prodamus-main" data-dep="runex-income"><button type="button" class="deposits__prodamus-title" data-dep="payment-form" data-provider="runex"><strong>'+esc(p.name)+'</strong></button><span>Приход '+money(p.total)+'<br>Вывод '+money(p.outgoing)+'</span></div></div>';}
   function dayPlayerOperations(search,allTime){
@@ -272,7 +276,7 @@
     if(stats.raffleReturnsAvailable===false)lines.push('Возвраты розыгрышей не загружены — итог возвратов неполный.');
     return lines.join('\n');
   }
-  async function loadGameStatistics(container){try{await import('./app-admin-game-stats.js?v=20261029-period-fetch-1');if(container.isConnected)await window.PokerAdminGameStats.open(function(body){return api(body);},{container:container});}catch(error){if(container.isConnected)container.textContent='Не удалось загрузить статистику игр.';}}
+  async function loadGameStatistics(container){try{await import('./app-admin-game-stats.js?v=20261102-custom-period-1');if(container.isConnected)await window.PokerAdminGameStats.open(function(body){return api(body);},{container:container});}catch(error){if(container.isConnected)container.textContent='Не удалось загрузить статистику игр.';}}
   function statisticsHtml(){
     var stats=data.statistics||{deposits:0,returned:0,destinations:[],managers:[]},managers=reportManagers(stats.managers||[]),period=stats.period||{},periodLabel=period.from?period.from+' — '+period.to+' · 06:00–06:00 · Москва':'За всё время';
     function destination(id){return (stats.destinations||[]).find(function(d){return d.id===id;})||{amount:null};}

@@ -43,3 +43,9 @@ test('current month starts at midnight in Novosibirsk and omits rake lookups whe
  index.page=async options=>{range=options;return {scan:['0',[room+':1:1',JSON.stringify({finishedAt:Date.parse('2026-09-30T16:59:59Z')}),room+':1:2',JSON.stringify({finishedAt:Date.parse('2026-09-30T17:00:00Z')}),room+':1:3',JSON.stringify({finishedAt:Date.parse('2026-10-29T01:00:00Z')})]],mode:'range'};};
  try{const page=await stats.read({commands:async rows=>{calls.push(...rows);return [];},cursor:'1:0',period:'month',includeRake:false,now:Date.parse('2026-10-29T02:00:00Z')});assert.equal(range.start,Date.parse('2026-09-30T17:00:00Z'));assert.equal(page.records.length,2);assert.ok(page.records.every(r=>r.paid&&!Object.hasOwn(r,'rake')));assert.equal(calls.length,0);}finally{index.page=previous;}
 });
+test('custom dates include both full Novosibirsk days and reject invalid ranges',async()=>{
+ const calls=[],start=Date.parse('2026-10-31T17:00:00Z'),end=Date.parse('2026-11-02T16:59:59.999Z');
+ await stats.read({period:'custom',from:'2026-11-01',to:'2026-11-02',commands:async rows=>{calls.push(...rows);return rows.map(([op])=>op==='GET'?'1':op==='ZRANGEBYSCORE'?[]:null);}});
+ const query=calls.find(r=>r[0]==='ZRANGEBYSCORE');assert.equal(query[2],start);assert.equal(query[3],end);
+ for(const [from,to]of [['2026-02-30','2026-03-01'],['2026-11-03','2026-11-01'],['','2026-11-01']])await assert.rejects(stats.read({period:'custom',from,to,commands:async()=>{throw Error('Must not read archive');}}),e=>e.status===400);
+});

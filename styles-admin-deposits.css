@@ -726,3 +726,9 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__history>summary{min-height:32px;padding:6px 0}
 .deposits .deposits__card{padding-bottom:16px}
 .deposits .deposits__paid{margin-bottom:14px}
+
+.admin-game-stats [data-date-field]:not([hidden]){display:grid;gap:6px;font-size:13px;min-width:130px;flex:1}
+.admin-game-stats [data-date-field] input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #a88c54;border-radius:10px;background:#090e15;color:#ffe8b7;font:inherit;color-scheme:dark}
+
+.deposits__payment-sources>.deposits__allfriends-out{font-size:10px}
+.deposits__payment-sources>.deposits__allfriends-total{margin-top:2px;padding-top:5px;border-top:1px solid #bba36655}
