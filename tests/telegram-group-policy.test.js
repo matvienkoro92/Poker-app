@@ -37,12 +37,12 @@ test('group ignores unrelated commands and never forwards messages to Salebot',a
  commands.handle=async()=>{replies++;return true};global.fetch=async()=>{forwards++;throw Error('unexpected request')};
  t.after(()=>{commands.handle=oldHandle;global.fetch=oldFetch;});
  const handler=require('../lib/api-handlers/telegram-bot-webhook');
- for(const text of ['привет','/start','/tables','/schedule','/pulse','выводы','/withdrawals@Poker_dvatuza_bot']){
+ for(const text of ['привет','/start','/tables','/schedule','/schedule@Poker_dvatuza_bot','/schedule@other_bot','/pulse','выводы','/withdrawals@Poker_dvatuza_bot']){
  const res={setHeader(){},status(){return this},json(v){this.body=v;return this}};
  await handler({method:'POST',headers:{'x-telegram-bot-api-secret-token':'policy-test'},body:{message:{text,chat:{id:-100456,type:'supergroup'},from:{id:42}}}},res);
  assert.equal(res.body.ok,true);
  }
- assert.equal(replies,3);assert.equal(forwards,0);assert.ok(protectedIds.has('-100456'));
+ assert.equal(replies,5);assert.equal(forwards,0);assert.ok(protectedIds.has('-100456'));
 });
 
 
@@ -97,3 +97,9 @@ test('bot promotion and membership changes stay silent and never reach Salebot',
 
 test('challenge photos are allowed only for board invitations in the configured players group',async t=>{const milestones=require('../lib/tracking-link-milestones'),oldGroup=milestones.playersGroup,oldFetch=global.fetch;let sends=0;t.after(()=>{milestones.playersGroup=oldGroup;global.fetch=oldFetch;});milestones.playersGroup=async()=>'-100777';global.fetch=async()=>{sends++;return {ok:true};};await policy.protectGroup('-100777');await policy.protectGroup('-100778');for(const scope of ['board-games-challenge','billiards-challenge','board-games-challenge-accepted','game-result']){const send=(chat,method)=>policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:chat})},scope);assert.equal((await send('-100777','sendMessage')).ok,true);assert.equal((await send('-100778','sendMessage')).ok,false);assert.equal((await send('-100777','sendPhoto')).ok,['board-games-challenge','billiards-challenge'].includes(scope));assert.equal((await send('-100778','sendPhoto')).ok,false);assert.equal((await send('-100777','forwardMessage')).ok,false);}assert.equal(sends,6);});
 test('only the approved rating commands are dispatched in groups and none go to Salebot',async t=>{fail=false;process.env.TELEGRAM_BOT_WEBHOOK_SECRET='policy-test';process.env.TELEGRAM_BOT_TOKEN='test';const commands=require('../lib/telegram-club-commands'),handler=require('../lib/api-handlers/telegram-bot-webhook'),oldHandle=commands.handle,oldFetch=global.fetch;const actions=[];let forwarded=0;commands.handle=async(u,token,action)=>{actions.push(action);return true;};global.fetch=async()=>{forwarded++;throw Error('No external sends expected');};t.after(()=>{commands.handle=oldHandle;global.fetch=oldFetch;});for(const text of ['/рейтинг бильярд','/рейтинг нарды длинные','/рейтинг нарды короткие','/рейтинг шахматы','/рейтинг@other_bot бильярд']){const res={setHeader(){},status(){return this},json(body){this.body=body;return this}};await handler({method:'POST',headers:{'x-telegram-bot-api-secret-token':'policy-test'},body:{message:{text,chat:{id:-100456,type:'supergroup'},from:{id:42}}}},res);assert.equal(res.body.ok,true);}assert.deepEqual(actions,['rating:billiards','rating:long','rating:short','rating:chess']);assert.equal(forwarded,0);});
+
+test('schedule group allowlist accepts only direct commands to this bot',()=>{
+ for(const text of ['/schedule','/schedule@Poker_dvatuza_bot','/расписание@Poker_dvatuza_bot'])assert.equal(policy.isGroupScheduleCommand({message:{text}}),true);
+ for(const text of ['schedule','/schedule@other_bot','/schedule please','привет'])assert.equal(policy.isGroupScheduleCommand({message:{text}}),false);
+ assert.equal(policy.isGroupScheduleCommand({edited_message:{text:'/schedule'}}),false);
+});
