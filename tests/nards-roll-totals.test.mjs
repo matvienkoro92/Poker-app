@@ -10,6 +10,6 @@ test('roll totals follow the awarded opening player and add each roll once',()=>
 });
 test('normal doubles sum the two faces, and legacy states initialize safely',()=>{
  const s=createBackgammon('short');s.phase='roll';s.opening=false;s.turn=0;delete s.rollTotals;
- assert.equal(backgammonRoll(s,0,[6,6]),true);assert.deepEqual(s.rollTotals,[12,0]);
- s.phase='roll';s.turn=1;assert.equal(backgammonRoll(s,1,[3,5]),true);assert.deepEqual(s.rollTotals,[12,8]);
+ assert.equal(backgammonRoll(s,0,[6,6]),true);assert.deepEqual(s.rollTotals,[24,0]);
+ s.phase='roll';s.turn=1;assert.equal(backgammonRoll(s,1,[3,5]),true);assert.deepEqual(s.rollTotals,[24,8]);
 });

@@ -25,3 +25,16 @@ test('accepted billiards and chess invitations delete immediately; other discipl
   assert.equal(result,discipline!=='long');assert.equal(sent,discipline==='long'?0:1);
  }
 });
+test('accepted announcements last one hour, then expire without touching results',async()=>{
+ const f=fixture();await require('../lib/game-challenge-expiry').enqueueAccepted({...f,chatId:-10042,messageId:123,publishedAt:1000});
+ const send=async()=>({json:async()=>({ok:true})});
+ assert.deepEqual(await sweep({...f,token:'test',now:3600999,send}),{deleted:0,failed:0});
+ assert.deepEqual(await sweep({...f,token:'test',now:3601000,send}),{deleted:1,failed:0});
+});
+test('rating answer and command expire after ten minutes',async()=>{
+ const f=fixture(),expiry=require('../lib/game-challenge-expiry');
+ for(const messageId of [101,102])await expiry.enqueueRating({...f,chatId:-10042,messageId,publishedAt:1000});
+ const send=async()=>({json:async()=>({ok:true})});
+ assert.deepEqual(await sweep({...f,token:'test',now:600999,send}),{deleted:0,failed:0});
+ assert.deepEqual(await sweep({...f,token:'test',now:601000,send}),{deleted:2,failed:0});
+});

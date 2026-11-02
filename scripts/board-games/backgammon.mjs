@@ -41,7 +41,7 @@ export function endBackgammonTurn(s,timeout=false){s.missedTurns??=[0,0];if(!tim
 export function backgammonRoll(s,player,dice){if(s.winner!==null||!['opening','roll'].includes(s.phase)||s.phase!=='opening'&&player!==s.turn||!Array.isArray(dice)||dice.length!==2||dice.some(n=>!Number.isInteger(n)||n<1||n>6))return false;
  const opening=s.phase==='opening';s.rollHistory??=backgammonRollHistory(s);s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(opening){if(dice[0]===dice[1]){s.rollHistory.push({player:null,dice:[...dice],opening:true});s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.rollPlayer=s.turn;s.opening=false;}
  s.rollHistory.push({player:s.rollPlayer,dice:[...dice],opening});
- if(!Array.isArray(s.rollTotals))s.rollTotals=[0,0];s.rollTotals[s.turn]=(Number(s.rollTotals[s.turn])||0)+dice[0]+dice[1];
+ if(!Array.isArray(s.rollTotals))s.rollTotals=[0,0];s.rollTotals[s.turn]=(Number(s.rollTotals[s.turn])||0)+(dice[0]===dice[1]?dice[0]*4:dice[0]+dice[1]);
  s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){endBackgammonTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
 }
 export function backgammonMove(s,player,m){
@@ -61,3 +61,9 @@ export function undoBackgammonStep(s,player){if(!canUndoBackgammon(s,player))ret
 
 // Legacy rooms contain per-checker moves; collapse them into one entry per throw.
 export function backgammonRollHistory(s){if(Array.isArray(s.rollHistory))return s.rollHistory;const result=[];for(const m of s.moves||[]){if(!Array.isArray(m.roll)||m.roll.length!==2)continue;const prior=result.at(-1);if(!prior||prior.player!==m.player||prior.dice.some((n,i)=>n!==m.roll[i]))result.push({player:m.player,dice:[...m.roll]});}return result;}
+
+export function backgammonPipTotals(s,player){
+ const rolled=backgammonRollHistory(s).filter(row=>row.player===player).reduce((sum,row)=>sum+(row.dice[0]===row.dice[1]?row.dice[0]*4:row.dice[0]+row.dice[1]),0);
+ const moved=(s.moves||[]).filter(move=>move.player===player).reduce((sum,move)=>sum+(Number(move.die)||0),0);
+ return {rolled,moved};
+}
