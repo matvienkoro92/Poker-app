@@ -13,7 +13,7 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  $('disciplines').hidden=true;preview.hidden=true;
  $('lobby').append($('disciplines'),preview);
  $('boardSetupFormat').append(setup);
- const variantLabel=document.createElement('label');variantLabel.innerHTML='Формат нард<select id="nardsVariant"><option value="classic">Классические</option><option value="crazy">Бешеные</option></select><small>Бешеные: куши от выпавшего до 6:6 с первого броска. Невозможные ходы сгорают.</small>';variantLabel.hidden=getKind()!=='long';$('boardSetupFormat').prepend(variantLabel);
+ const variantLabel=document.createElement('label');variantLabel.innerHTML='Формат нард<select id="nardsVariant"><option value="classic">Классические</option><option value="crazy">Бешеные</option></select><small>Бешеные: куши от выпавшего до 6:6 с первого броска. Невозможные ходы сгорают. Партии не входят в рейтинг.</small>';variantLabel.hidden=getKind()!=='long';$('boardSetupFormat').prepend(variantLabel);
 
  const undoLabel=document.createElement('label');undoLabel.id='allowUndoLabel';undoLabel.innerHTML='Отмена хода<select id="allowUndo"><option value="yes" selected>Да</option><option value="no">Нет</option></select><small>Последнее перемещение можно отменить до конца своего хода.</small>';$('boardSetupFormat').append(undoLabel);
  const turnOptions=document.createElement('div');turnOptions.className='setup-turn-options';$('boardSetupFormat').insertBefore(turnOptions,undoLabel);turnOptions.append($('turnTimeLabel'),undoLabel);const undoHint=undoLabel.querySelector('small');undoHint.className='setup-undo-hint';turnOptions.after(undoHint);

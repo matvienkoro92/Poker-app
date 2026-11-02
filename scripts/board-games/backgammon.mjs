@@ -14,7 +14,7 @@ function rawMoves(s,die){const p=s.turn,sgn=sign(p),moves=[];if(s.bar[p]){const 
  for(let from=0;from<24;from++){if(s.points[from]*sgn<=0)continue;const n=progress(s,p,from),next=n+die;let to;
  if(next>=24){if(!home(s,p))continue;if(next>24&&s.points.some((v,i)=>v*sgn>0&&progress(s,p,i)<n))continue;to=24;}
  else{to=index(s,p,next);if(s.points[to]*sgn<-(s.discipline==='long'?0:1))continue;}
- if(s.discipline==='long'){const head=p===0?0:12,limit=s.turns[p]===0&&s.roll[0]===s.roll[1]&&[3,4,6].includes(s.roll[0])?2:1;if(from===head&&s.headTaken>=limit)continue;const points=[...s.points];points[from]-=sgn;if(to!==24)points[to]+=sgn;if(forbiddenBlock(s,p,points))continue;}
+ if(s.discipline==='long'){const head=p===0?0:12,limit=s.variant!=='crazy'&&s.turns[p]===0&&s.roll[0]===s.roll[1]&&[3,4,6].includes(s.roll[0])?2:1;if(from===head&&s.headTaken>=limit)continue;const points=[...s.points];points[from]-=sgn;if(to!==24)points[to]+=sgn;if(forbiddenBlock(s,p,points))continue;}
  moves.push({from,to,die});
  }return moves;
 }
@@ -39,7 +39,7 @@ export function backgammonDestinations(s){
 }
 function advanceCrazy(s){
  while(s.variant==='crazy'&&s.doubleQueue?.length){
-  const face=s.doubleQueue.shift();s.dice=Array(4).fill(face);s.roll=[face,face];
+  const face=s.doubleQueue.shift();s.dice=Array(4).fill(face);s.roll=[face,face];s.headTaken=0;
   if(backgammonLegal(s).length)return true;
   s.doubleQueue=[];return false;
  }
