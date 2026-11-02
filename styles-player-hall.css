@@ -1175,3 +1175,34 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 
 .admin-game-stats [data-date-field]:not([hidden]){display:grid;gap:6px;font-size:13px;min-width:130px;flex:1}
 .admin-game-stats [data-date-field] input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #a88c54;border-radius:10px;background:#090e15;color:#ffe8b7;font:inherit;color-scheme:dark}
+
+/* A complete room and rug below an independent table silhouette. */
+.villa-billiards-stage{background-image:url('./assets/player-hall/billiards-room-clean-rug-v3.webp')!important}
+.villa-billiards-stage::before{background-image:var(--billiards-table-art)!important}
+.villa-billiards-stage{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/classic-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-classic-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/classic-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-walnut-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/walnut-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-midnight-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/midnight-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-ruby-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/ruby-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-silver-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/silver-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-carbon-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/carbon-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-bronze-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/bronze-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-emerald-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/emerald-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-obsidian-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/obsidian-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-imperialRuby-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/imperialRuby-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-platinum-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/platinum-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-royal-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/royal-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-crown-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/crown-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-celestial-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/celestial-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-sovereign-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/sovereign-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-legend-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/legend-v1-table.svg')}
+
+.villa-billiards-stage[style*="billiards-table-sapphire-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/sapphire-v1-table.svg')}
+
+.villa-billiards-stage[style*="billiards-table-ivory-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/ivory-v1-table.svg')}
+
+.villa-billiards-stage[style*="billiards-table-oak-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/oak-v1-table.svg')}
+
+.villa-billiards-stage[style*="billiards-table-sport-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/sport-v1-table.svg')}
+
+.villa-billiards-stage[style*="billiards-table-ocean-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/ocean-v1-table.svg')}

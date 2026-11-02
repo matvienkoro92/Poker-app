@@ -2793,3 +2793,7 @@
 .hall-fish-win-summary>span{min-width:0;color:#c7bda6;font-size:11px;line-height:1.4}
 .hall-fish-win-summary strong{display:block;color:#ffda79;font-size:clamp(14px,3.5vw,20px);font-weight:900}
 @media(max-width:400px){.hall-fish-win-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.hall-fish-win-summary>span:first-child{grid-column:1/-1}}
+
+.hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__headline{justify-content:flex-start!important;align-items:flex-start!important;text-align:left!important;width:100%}
+.hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__name{margin-inline:0!important;text-align:left!important;align-self:flex-start!important}
+.hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__main{text-align:left!important;align-items:flex-start!important}

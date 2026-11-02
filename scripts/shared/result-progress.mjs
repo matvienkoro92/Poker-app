@@ -5,7 +5,7 @@ export function mountResultProgress(dialog,request){
  function text(tag,value,className){const node=document.createElement(tag);node.textContent=value;if(className)node.className=className;return node;}
  function paint(replay=false){
   if(second.hidden||!model)return;
-  if(model.reward){paintGameExperience(xp,model.reward,model.player,{replay});}else{xp.replaceChildren(text('p',model.draw?'За ничью опыт не начисляется.':model.matchPending?'Опыт начисляется после завершения всего матча.':model.online?'Опыт за эту партию не начислен.':'Опыт доступен в партиях с другими игроками.'));}
+  if(model.reward){paintGameExperience(xp,model.reward,model.player,{replay});}else{xp.replaceChildren(text('p',model.draw?'За ничью опыт не начисляется.':model.matchPending?'Опыт начисляется после завершения всего матча.':model.online?'Данные о начислении опыта ещё не получены. Обновите результат.':'Опыт доступен в партиях с другими игроками.'));}
   if(ranking.dataset.resultKey===key&&ranking._response===response&&ranking._failure===failure&&ranking.childNodes.length)return;ranking.dataset.resultKey=key;ranking._response=response;ranking._failure=failure;
   ranking.replaceChildren();if(!model.online){ranking.append(text('p','Рейтинг учитывает партии с другими игроками.'));return;}
   if(!response){ranking.append(text('p',failure?'Не удалось загрузить рейтинг.':'Загружаем место в рейтинге…'));if(failure){const retry=text('button','Повторить');retry.type='button';retry.onclick=()=>fetchRanking();ranking.append(retry);}return;}

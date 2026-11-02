@@ -3098,14 +3098,14 @@
       ranking('Топ-10 разовых заносов', data.topWins, true) + '</aside>';
   }
 
-  function clubSeptemberResultsHtml() {
+  function clubSeptemberResultsHtml(monthKey, monthLabel) {
     var summary = (window.POKER_CLUB_NEWS_DATA || {}).monthlySummaries;
-    var data = summary && summary["2026-09"];
+    var data = summary && summary[monthKey || "2026-09"];
     if (!data) return "";
     function rub(value) { return Number(value || 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽"; }
     function metric(value, label) { return '<div><strong>' + esc(value) + '</strong><span>' + esc(label) + '</span></div>'; }
     function leadersPreview() {
-      var art = { "ПокерМанки": "summer-rating-player-pokermanki-v3.webp", "Ваар": "summer-rating-player-waaar.webp", "Luck_is_Suck": "club-news-personal/luck-is-suck-personal-cutout.webp" };
+      var art = { "Em13!!": "sticker-previews/league1/em13-kubok-moy.webp", "ПокерМанки": "summer-rating-player-pokermanki-v3.webp", "Ваар": "summer-rating-player-waaar.webp", "Luck_is_Suck": "club-news-personal/luck-is-suck-personal-cutout.webp" };
       return '<div class="home-news-month-results__leaders"><small>ТОП-3 ПО СУММЕ ПРИЗОВЫХ</small><div class="home-news-month-results__podium">' + data.topTotals.slice(0, 3).map(function (player, index) {
         return '<div class="home-news-month-results__leader"><span class="home-news-month-results__place">' + (index + 1) + '</span>' +
           (art[player.nick] ? '<img src="./assets/' + art[player.nick] + '" alt="" aria-hidden="true" loading="lazy">' : '') +
@@ -3113,7 +3113,7 @@
       }).join('') + '</div><div class="home-news-month-results__best"><img src="./assets/achievement-trophy-big100-v1.webp?v=20261001-news" alt="" aria-hidden="true" onerror="this.onerror=null;this.src=\'./assets/home-tournament-trophy-button-v1.webp?v=20261001-news\'"><div><small>КРУПНЕЙШИЙ ЗАНОС</small><b>' + esc(data.topWins[0].nick) + '<strong>' + esc(rub(data.topWins[0].reward)) + '</strong></b></div></div></div>';
     }
     return '<article class="home-friend-news-modal__editorial home-news-month-results">' +
-      '<h3>Итоги сентября</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
+      '<h3>Итоги ' + esc(monthLabel || 'сентября') + '</h3><div class="home-news-month-results__total"><strong>' + esc(rub(data.totalReward)) + '</strong><span>Общий выигрыш в турнирах</span></div>' +
       '<p class="home-news-month-results__highlights">' + esc(data.firstPlaces) + ' побед · ' + esc(data.paidFinishes) + ' призовых финиша</p>' +
       leadersPreview() +
       '<div class="home-news-month-results__metrics">' + metric(data.big50, 'Заносов 50–99 тыс. ₽') + metric(data.big100, 'Заносов 100 тыс. ₽+') +
@@ -3148,6 +3148,7 @@
       loadClubSngWinnerNews();
       // Tournament winner posts are loaded from completed SNG results.
       var editorialPosts = [
+        { date: "2026-11-01T13:00:00", html: clubSeptemberResultsHtml("2026-10", "октября") },
         { date: "2026-10-01T13:00:00", html: clubSeptemberResultsHtml() },
         { date: "2026-10-01T12:00:00", html: '<aside class="home-friend-news-modal__hero-month-result" aria-label="Итоги Героя дня за сентябрь">' +
         '<img src="./assets/summer-rating-player-pokermanki-v3.webp" alt="ПокерМанки">' +
