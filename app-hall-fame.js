@@ -1935,8 +1935,6 @@ function hallFishRenderHomePlayerMonth(data) {
       .replace(/<\/button>$/, '</div>')
       .replace(/<span class="hall-fish-achievement-leader__count">[^<]*<\/span>/g, '')
       .replace('</span><span class="hall-fish-player-month__stage">', '<button type="button" class="home-player-month__watch">Смотреть</button></span><span class="hall-fish-player-month__stage">');
-    var heading = cardHtml.match(/<h2 class="hall-fish-player-month__status">[^<]*<\/h2>/);
-    if (heading) cardHtml = cardHtml.replace(heading[0], '').replace(/(<div[^>]*>)/, '$1' + heading[0]);
     cardHtml = cardHtml.replace(/<span class="hall-fish-player-month__awards">(\d+) из (\d+) наград<\/span><button type="button" class="home-player-month__watch">Смотреть<\/button>/,
       function(_, count, total) {
         var label = count === '1' ? 'награда' : Number(count) < 5 ? 'награды' : 'наград';
@@ -1950,7 +1948,7 @@ document.addEventListener('click', function(event) {
   if (!event.target.closest || !event.target.closest('#homePlayerMonth .home-player-month__watch')) return;
   hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
   hallFishActiveAchievementTab = 'playerMonth';
-  hallFishAchievementDetailsOpen = true;
+  hallFishAchievementDetailsOpen = false;
   openHallFishAchievementTab();
 });
 function hallFishRefreshHomePlayerMonth() {

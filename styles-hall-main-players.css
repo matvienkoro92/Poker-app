@@ -2654,7 +2654,7 @@
 .home-player-month .hall-fish-player-month .hall-fish-player-month__status{margin:0;padding:0!important;border:0;border-radius:0;background:transparent;color:#ffe7a5;font-size:clamp(16px,4vw,22px)!important;font-weight:900;line-height:1.2}
 
 /* Monthly leader uses live text and controls; only the player is artwork. */
-.home-player-month .hall-fish-player-month{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)!important;gap:10px 10px;padding:14px 14px!important;border-radius:16px!important;cursor:default}
+.home-player-month .hall-fish-player-month{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px 12px;padding:14px 14px!important;border-radius:16px!important;cursor:default}
 .home-player-month .hall-fish-player-month>.hall-fish-player-month__status{grid-column:1/-1;font-size:clamp(16px,4.2vw,22px)!important;line-height:1.2}
 .home-player-month .hall-fish-player-month__copy{gap:12px!important;align-self:center}
 .home-player-month .hall-fish-player-month .hall-fish-player-month__rule{font-size:clamp(11px,2.8vw,14px)!important;line-height:1.45!important}
@@ -2675,3 +2675,20 @@
 .home-player-month .hall-fish-achievement-leader__hologram--avatar{width:clamp(90px,27vw,140px);height:clamp(90px,27vw,140px)!important;margin-inline:auto;padding:0!important;border-radius:50%;overflow:hidden;background:none}
 .home-player-month .hall-fish-achievement-leader__hologram--avatar::before,.home-player-month .hall-fish-achievement-leader__hologram--avatar::after{display:none}
 .home-player-month .hall-fish-achievement-leader__hologram--avatar>img{width:100%!important;height:100%!important;max-width:none;object-fit:cover!important;object-position:center;border-radius:50%;filter:none;opacity:1}
+
+/* Keep all copy in the left half and the player in the right half. */
+.home-player-month .hall-fish-player-month__copy{grid-column:1;width:100%;min-width:0}
+.home-player-month .hall-fish-player-month__stage{grid-column:2;grid-row:1;width:100%;justify-self:center}
+.home-player-month .hall-fish-player-month .hall-fish-player-month__status{box-sizing:border-box;width:100%;padding:7px 9px!important;border:1px solid #f4d47d;border-radius:9px;background:linear-gradient(145deg,#f5d572,#e4b544);color:#251b08;font-size:clamp(13px,3.5vw,18px)!important;line-height:1.25}
+
+/* A single clean month control, with a clear selected value. */
+.hall-fish-achievements .hall-fish-achievement-month-picker{position:relative;height:48px;padding:6px 32px 6px 12px;border:1px solid #c8a761;border-radius:12px;background:#151e2d;color:#ffe8ad;gap:3px}
+.hall-fish-achievements .hall-fish-achievement-month-picker>span{font-size:10px;line-height:12px;font-weight:500;color:#bcb7a5}
+.hall-fish-achievements .hall-fish-achievement-month-picker select{appearance:none;-webkit-appearance:none;height:20px;padding:0!important;border:0!important;background:transparent!important;color:#ffe8ad!important;font-size:13px;line-height:20px;font-weight:800;box-shadow:none!important;outline-offset:3px}
+.hall-fish-achievements .hall-fish-achievement-month-picker::after{content:'';position:absolute;right:14px;top:21px;width:7px;height:7px;border-right:2px solid #e5c375;border-bottom:2px solid #e5c375;transform:rotate(45deg);pointer-events:none}
+.hall-fish-achievements .hall-fish-achievement-month-picker:focus-within{outline:2px solid #e5c375;outline-offset:2px}
+.hall-fish-achievements .hall-fish-player-month{outline:none;border:0!important;box-shadow:none!important}
+.hall-fish-achievements .hall-fish-player-month:focus-visible{outline:2px solid #c3a56b;outline-offset:2px;border-radius:12px!important}
+.hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar{width:clamp(90px,27vw,140px);height:clamp(90px,27vw,140px)!important;margin-inline:auto;padding:0!important;border-radius:50%;overflow:hidden;background:none}
+.hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar::before,.hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar::after{display:none}
+.hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar>img{width:100%!important;height:100%!important;max-width:none;object-fit:cover!important;object-position:center;border-radius:50%;filter:none;opacity:1}
