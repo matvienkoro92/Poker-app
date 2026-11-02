@@ -2694,4 +2694,8 @@
 .hall-fish-player-month .hall-fish-achievement-leader__hologram--avatar>img{width:100%!important;height:100%!important;max-width:none;object-fit:cover!important;object-position:center;border-radius:50%;filter:none;opacity:1}
 
 .home-player-month .hall-fish-player-month__copy{container-type:inline-size}
-.home-player-month .hall-fish-player-month .hall-fish-player-month__status{color:#171100!important;-webkit-text-fill-color:#171100!important;font-size:clamp(8px,5.6cqw,14px)!important;line-height:1.3;white-space:nowrap;text-shadow:none!important;letter-spacing:0}
+.home-player-month .hall-fish-player-month .hall-fish-player-month__status{color:#171100!important;-webkit-text-fill-color:#171100!important;font-size:clamp(16px,8cqw,22px)!important;line-height:1.2;white-space:normal;overflow-wrap:normal;text-transform:uppercase;text-shadow:none!important;letter-spacing:0}
+
+/* Secondary copy stays subordinate to the title within the left half. */
+.home-player-month .hall-fish-player-month .hall-fish-player-month__rule{font-size:clamp(10px,5.5cqw,13px)!important;line-height:1.35}
+.home-player-month .hall-fish-player-month .hall-fish-player-month__awards{font-size:clamp(10px,5cqw,12px)!important;line-height:1.3}
