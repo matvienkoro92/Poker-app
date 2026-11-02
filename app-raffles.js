@@ -3242,6 +3242,19 @@ function initRaffles() {
     var baseStr = (base || "").toString();
     var isLocal = /localhost|127\.0\.0\.1/i.test(hostname) || /localhost|127\.0\.0\.1/i.test(baseStr);
     var qLead = pokerRafflesApiQueryLeading();
+    var guestViewer = typeof pokerApiHasCredential === "function" && !pokerApiHasCredential();
+    if (guestViewer) qLead = '?guestDeviceId=' + encodeURIComponent(pokerGetRaffleStableDeviceId());
+    if (rafflesRoot) {
+      var loginArt=rafflesRoot.querySelector('.raffles-guest-login-art');
+      if (guestViewer && !loginArt) {
+        loginArt=document.createElement('button');loginArt.type='button';loginArt.className='raffles-guest-login-art';
+        loginArt.setAttribute('data-poker-login-action','1');
+        loginArt.innerHTML='<img src="./assets/profile-guest-pokermanki-v3.webp" alt=""><span>Войдите в аккаунт,<br>чтобы участвовать в розыгрышах</span>';
+        rafflesRoot.appendChild(loginArt);
+      }
+      if(loginArt)loginArt.hidden=!guestViewer;
+    }
+
     if (!isLocal && qLead === "?initData=" && !pokerCanSyncGuestProfileToServer()) {
       if (loadOptions.deadlineRefresh) rafflesDeadlineRefreshInFlight = false;
       return;
@@ -3292,9 +3305,7 @@ function initRaffles() {
       if (raffleEmpty) {
         if (raffleLoadErrorNeedsLogin(data)) {
           raffleEmpty.innerHTML =
-            "<span class=\"raffle-empty__title\">Войдите в аккаунт</span>" +
-            "<span class=\"raffle-empty__text\">Чтобы открыть розыгрыши и участвовать, войдите в аккаунт.</span>" +
-            "<button type=\"button\" class=\"profile-exit-btn\" data-poker-login-action=\"1\">Войти в аккаунт</button>";
+            '';
           raffleEmpty.classList.add("raffle-empty--login");
         } else {
           raffleEmpty.innerHTML = '<span>Не удалось загрузить розыгрыши.</span><button type="button" class="profile-exit-btn" data-raffles-list-retry>Повторить загрузку</button>';

@@ -183,6 +183,18 @@
     var balanceShortcut = document.getElementById("headerBalancesShortcutBtn");
     var rafflesShortcut = document.getElementById("headerRafflesShortcutBtn");
     if (!wrap || !reportShortcut || !balanceShortcut || !rafflesShortcut) return;
+    var authState = window.__pokerTelegramAuth || {};
+    var guestViewer = authState.status === "guest" ||
+      (typeof pokerReadPwaGuestMode === "function" && pokerReadPwaGuestMode()) ||
+      (typeof pokerApiHasCredential === "function" && !pokerApiHasCredential());
+    if (guestViewer) {
+      wrap.hidden = true;
+      wrap.querySelectorAll("button").forEach(function (button) { button.hidden = true; });
+      wrap.classList.remove("header-admin-shortcuts--with-crm");
+      var guestHeader = wrap.closest(".card__header");
+      if (guestHeader) guestHeader.classList.remove("card__header--admin-shortcuts", "card__header--owner-crm");
+      return;
+    }
     var ownerSeesCrm = crmAccessProbeState === "allowed";
     var crmBtn = document.getElementById("headerCrmBtn");
     var reportBtn = document.getElementById("adminReportBtn");

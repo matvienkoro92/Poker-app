@@ -13582,3 +13582,8 @@ body[data-view="raffles"] .raffles-active-chooser__item--training
 .raffles-simple-countdown>small{font-size:10px;color:#c9bbd7}
 .raffles-simple-countdown>strong{font-size:18px;line-height:1.3;font-weight:800;font-variant-numeric:tabular-nums}
 .view[data-view="raffles"] #rafflesActiveChooser .raffles-simple-participants{border:1px solid #bfa26a66;background:#17111e;color:#ead5a9;font-weight:700}
+
+.raffles-guest-login-art{position:relative;display:block;width:min(100%,300px);margin:24px auto 0;padding:0;border:0;background:none;cursor:pointer;color:#ffe3ad}
+.raffles-guest-login-art[hidden]{display:none}
+.raffles-guest-login-art img{display:block;width:100%;height:auto}
+.raffles-guest-login-art span{position:absolute;top:64%;left:9%;width:82%;font-size:clamp(13px,3.5vw,17px);font-weight:850;line-height:1.3;text-align:center;text-shadow:0 2px 6px #000}
