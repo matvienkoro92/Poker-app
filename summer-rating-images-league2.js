@@ -992,4 +992,11 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
   "31.10.2026": [
     "rating-compressed-preview/rating-31-10-2026-league2-ok-21h.jpg"
   ]
+,
+  "01.11.2026": [
+    "rating-compressed-preview/rating-01-11-2026-league2-first-blood-15k-06h.jpg",
+    "rating-compressed-preview/rating-01-11-2026-league2-turbina-200s-pko-2-3-08h.jpg",
+    "rating-compressed-preview/rating-01-11-2026-league2-ok-10h.jpg",
+    "rating-compressed-preview/rating-01-11-2026-league2-mok-17h.jpg"
+  ]
 };

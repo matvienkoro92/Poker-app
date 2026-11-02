@@ -13,6 +13,7 @@ const sources = [
   "summer-rating-data-august.js",
   "summer-rating-data-september.js",
   "summer-rating-data-october.js",
+  "summer-rating-data-november.js",
 ];
 const context = vm.createContext({
   window: {},
@@ -70,6 +71,7 @@ Object.keys(context.WINTER_RATING_BY_DATE || {}).forEach((date) => {
   context.SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE,
   context.SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE,
   context.SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE,
+  context.SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE,
 ].forEach(addTournamentMap);
 
 const sortedTotals = Object.keys(totals).sort((a, b) => a.localeCompare(b, "ru")).reduce((out, key) => {

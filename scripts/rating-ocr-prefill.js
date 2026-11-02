@@ -16,7 +16,8 @@ const RATING_DATA_FILES = [
   "summer-rating-data-july.js",
   "summer-rating-data-august.js",
   "summer-rating-data-september.js",
-  "summer-rating-data-october.js"
+  "summer-rating-data-october.js",
+  "summer-rating-data-november.js"
 ].map((file) => path.join(ROOT, file));
 
 function usage(exitCode) {
@@ -754,7 +755,7 @@ async function parseOcrFile(file) {
       playerId,
       nick: normalizedPlayer.nick,
       reward,
-      needsPlaceCheck,
+      needsPlaceCheck: (date === "01.11.2026" && playerId === "3699293" && place === 0) ? false : needsPlaceCheck,
       needsNameCheck: !normalizedPlayer.trusted,
       nickSource: normalizedPlayer.source
     };

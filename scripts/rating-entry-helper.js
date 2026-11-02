@@ -16,6 +16,7 @@ const DATA_FILES = [
   "summer-rating-data-august.js",
   "summer-rating-data-september.js",
   "summer-rating-data-october.js",
+  "summer-rating-data-november.js",
   "summer-rating-data.js",
   "spring-rating-images-league1.js",
   "spring-rating-images-league2.js",
@@ -36,6 +37,7 @@ const MONTH_FILES = {
   "07": { file: "summer-rating-data-july.js", varName: "SUMMER_RATING_TOURNAMENTS_JULY_BY_DATE", season: "summer" },
   "08": { file: "summer-rating-data-august.js", varName: "SUMMER_RATING_TOURNAMENTS_AUGUST_BY_DATE", season: "summer" },
   "10": { file: "summer-rating-data-october.js", varName: "SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE", season: "summer" },
+  "11": { file: "summer-rating-data-november.js", varName: "SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE", season: "summer" },
   "09": { file: "summer-rating-data-september.js", varName: "SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE", season: "summer" }
 };
 MONTH_FILES["03"].season = "spring";

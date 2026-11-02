@@ -5117,6 +5117,57 @@
       "source": "IMG_1537.PNG",
       "date": "31.10.2026",
       "importedAt": "2026-11-01T11:12:39.510Z"
+    },
+    "a834130e598b975b799a843fda6d8e4cd620dd9d2c1ba12454c378deb20e8003": {
+      "source": "IMG_1549.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "0ac9cb0d6817cb45f399a3ed769fefb9806a14a8cc69d69505de131c89a4de1f": {
+      "source": "IMG_1550.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "d79e1d40eae3f3c3b0b288402064aead76a0384c92c5d34dd11617a38a901078": {
+      "source": "IMG_1551.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "8eec2f65c6ad8775665085d1597a3742991d1293183048ac50ce0edacb32b618": {
+      "source": "IMG_1553.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "fd3387b013b0216e94bcee808f64514289ba7141fd13ef6ec88b007eceb4b692": {
+      "source": "IMG_1554.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "1cca3db2fa38e9394ec0f6c8ece024b130ac014d143a8bd98906026c710d5839": {
+      "source": "IMG_1555.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "045f1f8fc4074929df11528662a8b69a0122c0b5da80f7dbef62813eff24bfeb": {
+      "source": "IMG_1556.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "d3e5149094f742eca912324d4364fa8c9b44724b4ab0f3c9e3c2d8679f81c861": {
+      "source": "IMG_1557.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "5aa7d7bad122dc004b3d068413876d1a5533bd06b4a74bd6dc2dfdbc20694bd3": {
+      "source": "IMG_1558.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z"
+    },
+    "77ea19602e42398c6e11e2c3b36a4501f491bde53f7b10d320a87846b69c4a4e": {
+      "source": "output/rating-import-2026-11-02/source/IMG_1552.PNG",
+      "date": "01.11.2026",
+      "importedAt": "2026-11-02T03:47:33.889Z",
+      "duplicateOf": "IMG_1551.PNG"
     }
   }
 }

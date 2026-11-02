@@ -1180,6 +1180,7 @@ function getWinterRatingPlayerSummary(nick, options) {
   mergeWinterRatingDateMap(historyTournaments, tournamentsByDate);
   mergeWinterRatingDateMap(historyTournaments, typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {});
   mergeWinterRatingDateMap(historyTournaments, typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE : {});
+  mergeWinterRatingDateMap(historyTournaments, typeof SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE : {});
   tournamentsByDate = historyTournaments;
   var byDate = getRatingByDate();
   if (isSeasonal && typeof WINTER_RATING_BY_DATE !== "undefined") {
@@ -1307,6 +1308,7 @@ function pokerRatingAchievementTournamentRowsForSeason(seasonKey) {
   } else if (seasonKey === "history") {
     maps.push(typeof SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_SEPTEMBER_BY_DATE : {});
     maps.push(typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE : {});
+    maps.push(typeof SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE !== "undefined" ? SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE : {});
   }
   var rows = [];
   maps.forEach(function (map) {
@@ -2386,7 +2388,7 @@ function initWinterRating() {
       });
     }
     back.hidden = document.body.dataset.view !== "summer-rating";
-    back.textContent = window.__pokerSummerArchive ? (typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" && Object.keys(SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE).length ? "← Октябрь 2026" : "← Сентябрь 2026") : "Архив: лето 2026";
+    back.textContent = window.__pokerSummerArchive ? (typeof SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE !== "undefined" && Object.keys(SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE).length ? "← Ноябрь 2026" : typeof SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE !== "undefined" && Object.keys(SUMMER_RATING_TOURNAMENTS_OCTOBER_BY_DATE).length ? "← Октябрь 2026" : "← Сентябрь 2026") : "Архив: лето 2026";
   }
   try {
     var schedPrev = window.requestIdleCallback
