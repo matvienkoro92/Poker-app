@@ -2775,3 +2775,21 @@
 .hall-fish-player-month__winner-prize{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;margin:0;padding:10px 12px;border:1px solid #edc366;border-radius:10px;background:linear-gradient(115deg,#71501d66,#251d10);color:#ffe8af;font-size:12px;font-weight:750;text-align:center}
 .hall-fish-player-month__winner-prize strong{color:#ffda72;font-size:20px;font-weight:950;white-space:nowrap}
 .hall-fish-player-month__winner-prize>span{color:#f0d59c}
+
+/* A compact, consistent information panel below each achievement. */
+.hall-fish-achievements .hall-fish-achievement-card:not(.hall-fish-achievement-card--featured){align-self:stretch;padding-bottom:0;border-bottom:0;gap:6px}
+.hall-fish-achievements .hall-fish-achievement-card:not(.hall-fish-achievement-card--featured) .hall-fish-achievement-preview{flex:1;gap:7px;padding:10px 8px;border:1px solid #cab27626;border-radius:10px;background:linear-gradient(150deg,#20283988,#0a0e18aa)}
+.hall-fish-achievements .hall-fish-achievement-preview ol{gap:6px}
+.hall-fish-achievements .hall-fish-achievement-preview li{min-height:22px}
+.hall-fish-achievements .hall-fish-achievement-preview__label{font-size:9px;letter-spacing:1px;color:#baab85}
+.hall-fish-achievements .hall-fish-achievement-preview__more{margin-top:auto;min-height:30px;padding:4px 0;font-size:11px;color:#e6d3a5;background:none;box-shadow:none;border:0}
+.hall-fish-achievements .hall-fish-achievement-prize-caption{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 6px;margin:0 0 2px;padding:6px;border:1px solid #e8bb5955;border-radius:7px;background:linear-gradient(110deg,#95651e44,#49321533);white-space:normal;line-height:1.2}
+.hall-fish-achievement-prize-caption strong{color:#ffdc7e;font-size:14px;font-weight:900;white-space:nowrap}
+.hall-fish-achievement-prize-caption span{color:#eed9ac;font-size:10px;white-space:nowrap}
+
+.hall-fish-win-tops__column summary{cursor:pointer;color:#ffe09a;font-size:clamp(11px,2.8vw,16px);font-weight:800;line-height:1.35;min-height:32px}
+.hall-fish-win-tops__column[open] summary{margin-bottom:10px}
+.hall-fish-win-summary{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;padding:12px 10px;border:1px solid #dfbd6b44;border-radius:12px;background:#cda95109}
+.hall-fish-win-summary>span{min-width:0;color:#c7bda6;font-size:11px;line-height:1.4}
+.hall-fish-win-summary strong{display:block;color:#ffda79;font-size:clamp(14px,3.5vw,20px);font-weight:900}
+@media(max-width:400px){.hall-fish-win-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.hall-fish-win-summary>span:first-child{grid-column:1/-1}}
