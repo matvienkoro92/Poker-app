@@ -1885,7 +1885,7 @@ function hallFishAchievementLeaderHtml(spec) {
   var rows=hallFishActiveDayHeroMonth==='all'?(spec.rows||[]):hallFishAchievementRowsForMonth(spec,hallFishActiveDayHeroMonth),leader=rows[0];
   if(!leader)return '<span class="hall-fish-achievement-leader hall-fish-achievement-leader--empty"><span class="hall-fish-achievement-leader__hologram" aria-hidden="true"><span class="hall-fish-hologram-vacant">◇</span></span><span class="hall-fish-achievement-leader__name">Пока нет наград</span></span>';
   var image=hallFishLevelPlayerImage(leader),garage=!spec.staticCharacter&&leader.accountId&&typeof window.pokerGarageHallMediaHtml==='function'?window.pokerGarageHallMediaHtml(leader.accountId,{characterOnly:true}):'';
-  return '<span class="hall-fish-achievement-leader"><span class="hall-fish-achievement-leader__hologram">'+(garage||'<img src="'+hallFishEsc(image.src)+'" alt="" width="120" height="160" decoding="async">')+'</span><span class="hall-fish-achievement-leader__name">'+hallFishEsc(leader.nick||'Игрок')+'</span><span class="hall-fish-achievement-leader__count">'+hallFishEsc(leader.valueText||leader.value)+'</span></span>';
+  return '<span class="hall-fish-achievement-leader"><span class="hall-fish-achievement-leader__hologram'+(!garage&&image.kind==='avatar'?' hall-fish-achievement-leader__hologram--avatar':'')+'">'+(garage||'<img src="'+hallFishEsc(image.src)+'" alt="" width="120" height="160" decoding="async">')+'</span><span class="hall-fish-achievement-leader__name">'+hallFishEsc(leader.nick||'Игрок')+'</span><span class="hall-fish-achievement-leader__count">'+hallFishEsc(leader.valueText||leader.value)+'</span></span>';
 }
 
 function hallFishAchievementRowsForMonth(spec,monthKey) {

@@ -2670,3 +2670,8 @@
 .home-player-month__prize-bar>strong>span{font-size:clamp(18px,5vw,28px)}
 
 .home-player-month__prize-caption{display:block;margin-top:-3px;color:#ffda79;font-size:clamp(11px,2.8vw,14px);font-weight:750;line-height:1.4;white-space:nowrap}
+
+/* Ordinary portraits use a circular crop instead of a character podium. */
+.home-player-month .hall-fish-achievement-leader__hologram--avatar{width:clamp(90px,27vw,140px);height:clamp(90px,27vw,140px)!important;margin-inline:auto;padding:0!important;border-radius:50%;overflow:hidden;background:none}
+.home-player-month .hall-fish-achievement-leader__hologram--avatar::before,.home-player-month .hall-fish-achievement-leader__hologram--avatar::after{display:none}
+.home-player-month .hall-fish-achievement-leader__hologram--avatar>img{width:100%!important;height:100%!important;max-width:none;object-fit:cover!important;object-position:center;border-radius:50%;filter:none;opacity:1}
