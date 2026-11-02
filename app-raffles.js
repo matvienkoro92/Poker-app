@@ -2335,7 +2335,7 @@ function initRaffles() {
   function renderRafflesActiveChooser(activeList, activeId) {
     if (!rafflesActiveChooser) return;
     var list = Array.isArray(activeList) ? activeList : [];
-    var displayCount = list.length + 1;
+    var displayCount = list.length;
     if (!displayCount) {
       rafflesActiveChooser.innerHTML = "";
       rafflesActiveChooser.classList.add("raffles-active-chooser--hidden");
@@ -2438,16 +2438,20 @@ function initRaffles() {
         }
         var shortResults = resultsTimeText.replace(/^Итоги\s*:?\s*/i, '').replace(/\s*МСК\s*$/i, '');
         [['понедельник','пн'],['вторник','вт'],['среду','ср'],['четверг','чт'],['пятницу','пт'],['субботу','сб'],['воскресенье','вс']].forEach(function(day) { shortResults = shortResults.replace(day[0], day[1]); });
-        return '<article class="raffles-active-chooser__item raffles-active-chooser__item--simple' + (selected ? ' raffles-active-chooser__item--active' : '') + '" data-raffle-active-id="' + escapeHtml(id) + '">' +
+        return '<article class="raffles-active-chooser__item raffles-active-chooser__item--simple' + (list.length === 3 && !isCashPrize && !trainingCard ? ' raffles-active-chooser__item--horizontal-ticket' : '') + (selected ? ' raffles-active-chooser__item--active' : '') + '" data-raffle-active-id="' + escapeHtml(id) + '">' +
           '<span class="raffles-simple-number">Розыгрыш ' + (index + 1) + '</span>' + simpleAmountHtml +
           '<h3 class="raffles-simple-title">' + escapeHtml(simpleTitle) + '</h3>' +
           '<span class="raffles-simple-access">Доступ: ' + escapeHtml(raffleAccessLevelCompactLines(raffle)[0] === 'ВСЕ' ? 'для всех' : 'уровень ' + raffleAccessLevelCompactLines(raffle)[0]) + (raffleAccessLevelCompactLines(raffle)[0] === '1+' ? '<small class="raffles-simple-access__note">Достаточно зарегистрироваться</small>' : '') + '</span>' +
           '<div class="raffles-simple-meta"><span class="raffles-simple-countdown"><small>До итогов</small><strong data-raffle-active-timer="' + escapeHtml(endMs || 0) + '">' + escapeHtml(endDate ? (formatRaffleTimerValue(endDate) || 'Завершён') : '—') + '</strong></span></div>' +
-          '<button type="button" class="raffles-simple-participants" data-raffle-active-info-id="' + escapeHtml(id) + '" data-raffle-participants-open aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">Участники · ' + escapeHtml(participantCount) + '</button>' +
+          '<button type="button" class="raffles-simple-participants" data-raffle-active-info-id="' + escapeHtml(id) + '" data-raffle-participants-open aria-haspopup="dialog" aria-controls="raffleActiveInfoModal">' + 'Уч. · ' + escapeHtml(participantCount) + '</button>' +
           prizePanelHtml + trainingLessonCta + '</article>' + ticketRegistrationWarning;
 
       })
       .join("");
+    rafflesActiveChooser.querySelectorAll('.raffles-active-chooser__item--simple:not(.raffles-active-chooser__item--horizontal-ticket)').forEach(function(card){
+      var meta=card.querySelector('.raffles-simple-meta'),participants=card.querySelector('.raffles-simple-participants');
+      if(meta&&participants){meta.classList.add('raffles-simple-meta--with-participants');meta.appendChild(participants);}
+    });
     updateRafflesActiveChooserTimers();
     if (list.length) ensureRafflesActiveChooserTimer();
     else stopRafflesActiveChooserTimer();
@@ -3334,7 +3338,6 @@ function initRaffles() {
         bypassServerListCacheUntil = parseInt(window.__rafflesBypassServerListCacheUntil, 10) || 0;
       } catch (eBypassServerCache) {}
       var useActiveScope =
-        !isLocal &&
         !loadOptions.includeArchive;
       var bypassActiveScopeCache =
         useActiveScope &&
@@ -3347,7 +3350,7 @@ function initRaffles() {
         Date.now() +
         (useActiveScope ? "&scope=active" : "") +
         (bypassActiveScopeCache ? "&bypassListCache=1" : "") +
-        (isLocal ? "&demo=1" : "");
+        "";
       var pendingCompletedTarget = !loadOptions.includeArchive
         ? (readPendingCompletedRaffleId() || readPendingActiveRaffleId()) : "";
       var pendingCompletedFetch = pendingCompletedTarget

@@ -2743,3 +2743,35 @@
 .home-player-month .home-player-month__footer>span{font-size:10px;min-width:0}
 .home-player-month .home-player-month__footer .home-player-month__watch{min-height:40px;padding:7px 9px;font-size:clamp(11px,2.5vw,16px);white-space:nowrap}
 .home-player-month__name{padding:6px 9px;border:1px solid #c9974355;border-radius:7px;background:linear-gradient(100deg,#b8812945,#6a461b22);box-sizing:border-box;width:100%}
+
+/* Preserve player identity and fit XP totals on narrow screens. */
+@media(max-width:600px){
+ .hall-fish-modal__panel--levels .hall-fish-level-row--premium{grid-template-columns:28px 50px minmax(0,1fr) 88px;gap:7px;padding:9px 7px;min-height:86px;box-sizing:border-box}
+ .hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__media{width:50px;height:50px;justify-self:center}
+ .hall-fish-modal__panel--levels .hall-fish-level-row--podium:not(.hall-fish-level-row--sticky) .hall-fish-level-row__rank{width:28px;height:50px}
+ .hall-fish-modal__panel--levels .hall-fish-level-row__main{min-width:0}
+ .hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__name{font-size:14px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__tg{display:block;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .hall-fish-modal__panel--levels .hall-fish-level-row__headline{flex-direction:column;align-items:flex-start;gap:3px}
+ .hall-fish-modal__panel--levels .hall-fish-level-row__leader{font-size:9px;padding:2px 5px;max-width:100%;box-sizing:border-box}
+ .hall-fish-modal__panel--levels .hall-fish-level-row__xp-label{font-size:9px;white-space:nowrap}
+ .hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__level{font-size:22px}
+ .hall-fish-modal__panel--levels .hall-fish-level-row--premium .hall-fish-level-row__meta{font-size:10px}
+}
+
+.hall-fish-achievements .hall-fish-achievement-period{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) 48px;align-items:stretch}
+.hall-fish-achievements .hall-fish-achievement-period>.hall-fish-day-hero-month,
+.hall-fish-achievements .hall-fish-achievement-period>.hall-fish-achievement-month-picker,
+.hall-fish-achievements .hall-fish-achievement-period>.hall-fish-period-copy{box-sizing:border-box;height:48px;min-height:48px;max-height:48px;margin-block:0;align-self:stretch}
+.hall-fish-achievements .hall-fish-achievement-period>.hall-fish-period-copy{width:48px}
+
+.hall-fish-achievement-prize-caption{font-size:clamp(9px,2.25vw,12px);line-height:1.25;white-space:nowrap;letter-spacing:-.15px}
+@media(max-width:600px){
+ .hall-fish-achievements .hall-fish-achievement-preview li{display:grid!important;grid-template-columns:12px minmax(0,1fr) auto!important;align-items:center;gap:3px;font-size:10px}
+ .hall-fish-achievements .hall-fish-achievement-preview li>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .hall-fish-achievements .hall-fish-achievement-preview li>strong{grid-column:3!important;grid-row:auto!important;font-size:9px;white-space:nowrap}
+}
+
+.hall-fish-player-month__winner-prize{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;margin:0;padding:10px 12px;border:1px solid #edc366;border-radius:10px;background:linear-gradient(115deg,#71501d66,#251d10);color:#ffe8af;font-size:12px;font-weight:750;text-align:center}
+.hall-fish-player-month__winner-prize strong{color:#ffda72;font-size:20px;font-weight:950;white-space:nowrap}
+.hall-fish-player-month__winner-prize>span{color:#f0d59c}

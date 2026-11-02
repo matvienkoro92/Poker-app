@@ -17,3 +17,11 @@ test('failed cancellation deletion is due immediately and cron retries it; absen
  assert.deepEqual(await sweep({...f,token:'test',now:1,send:async()=>({json:async()=>({ok:true})})}),{deleted:1,failed:0});
  assert.equal(await require('../lib/game-challenge-expiry').cancel({family:'board-games',roomId:'ABCDEFGHJK',commands:async()=>[null],token:'test',send:async()=>{throw Error('Must not send');}}),false);
 });
+test('accepted billiards and chess invitations delete immediately; other disciplines stay unchanged',async()=>{
+ for(const [family,discipline] of [['billiards','pool8'],['board-games','chess'],['board-games','long']]){
+  const f=fixture();let sent=0;
+  const commands=async rows=>rows[0][0]==='GET'?[JSON.stringify({chat:-10042,messageId:99})]:f.commands(rows);
+  const result=await require('../lib/game-challenge-expiry').accepted({family,discipline,roomId:'ABCDEFGHJK',commands,token:'test',send:async()=>{sent++;return {json:async()=>({ok:true})};}});
+  assert.equal(result,discipline!=='long');assert.equal(sent,discipline==='long'?0:1);
+ }
+});
