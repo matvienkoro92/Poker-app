@@ -198,6 +198,14 @@
     window.__pokerHomeWidgetOpening = key;
     return ensureDomain(config.domain)
       .then(function () {
+        var skeleton = key === "hallFishPlayers" && document.querySelector(".hall-fish-modal--bootstrap-loading");
+        if (skeleton && skeleton.hidden) return false;
+        var requestedTab = skeleton && skeleton.dataset.requestedTab;
+        if (requestedTab === "achievements" && typeof window.openHallFishAchievementsModal === "function") {
+          delete skeleton.dataset.requestedTab;
+          window.openHallFishAchievementsModal();
+          return true;
+        }
         var opened = callReadyOpener(config, trigger);
         if (opened === null) showLoadError();
         return opened !== null;
@@ -273,6 +281,16 @@
   window.setInterval(refreshClubChoiceRoundBadge, 45000);
 
   document.addEventListener("click", onWidgetClick, true);
+  document.addEventListener("click", function (event) {
+    var tab = event.target.closest?.(".hall-fish-modal--bootstrap-loading [data-hall-fish-tab]");
+    if (!tab || hasReadyOpener(WIDGETS.hallFishPlayers)) return;
+    var modal = tab.closest(".hall-fish-modal--bootstrap-loading");
+    modal.dataset.requestedTab = tab.dataset.hallFishTab;
+    modal.querySelectorAll("[data-hall-fish-tab]").forEach(function (button) {
+      button.classList.toggle("hall-fish-modal__tab--active", button === tab);
+      button.setAttribute("aria-selected", String(button === tab));
+    });
+  });
   document.addEventListener("click", closeHallFishSkeleton);
   document.addEventListener("pointerover", onWidgetIntent, true);
   document.addEventListener("focusin", onWidgetIntent, true);
