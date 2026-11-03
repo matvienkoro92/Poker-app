@@ -15,7 +15,7 @@ export function paint(root,game,equipment={}){
   const chess=game==='chess';
   const board=(chess?BOARDS:NARDS_BOARDS).find(b=>b.id===(chess?equipment.board:equipment.nardsBoard))||(chess?BOARDS:NARDS_BOARDS)[0];
   const set=(chess?PIECES:CHECKERS).find(s=>s.id===(chess?equipment.pieces:equipment.checkers))||(chess?PIECES:CHECKERS)[0];
-  const paintKey=[game,board.id,set.id,equipment.nardsInterior].join(':');
+  const paintKey=[game,board.id,set.id,equipment.nardsInterior,equipment.nardsHome].join(':');
   if(root.dataset.paintKey===paintKey&&root.firstElementChild)return {board:board.name,pieces:set.name};
   root.dataset.board=board.id;for(const [key,value]of Object.entries({light:board.light,dark:board.dark,frame:board.frame}))root.style.setProperty('--nards-'+key,value);root.dataset.pieces=set.id;
   root.classList.toggle('living-top-board--chess',chess);
@@ -40,11 +40,11 @@ export function paint(root,game,equipment={}){
       root.style.setProperty('--preview-'+side,set[side]);
       root.style.setProperty('--preview-'+side+'-art',set[side+'Art']?'url("'+set[side+'Art']+'")':'none');
     }
-    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.bakedPoints=String(inside.hidePoints===true||inside.revision>=2);surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('long');
+    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.bakedPoints=String(!(equipment.nardsPoints ?? !(inside.hidePoints||inside.revision>=2)));surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('long');
     for(let row=0;row<2;row++)for(let col=0;col<12;col++){
       const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
       point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;point.classList.toggle('has-stack',Math.abs(n)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(n)-1));
-      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');if(!(inside.hidePoints===true||inside.revision>=2)){const blade=createPointBlade();blade.className='living-preview-blade';point.append(blade);}
+      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');if(surface.dataset.bakedPoints!=='true'){const blade=createPointBlade();blade.className='living-preview-blade';point.append(blade);}
       for(let i=0;i<Math.abs(n);i++){const coin=document.createElement('i');coin.className='living-preview-checker'+(n<0?' is-black':'');coin.style.setProperty('--stack-index',i);coin.setAttribute('aria-label',n<0?'Чёрная фишка':'Белая фишка');point.append(coin);}
       surface.append(point);
     }
@@ -59,7 +59,7 @@ export function paint(root,game,equipment={}){
     for(const point of [...surface.children]){if(point.classList.contains('living-preview-bar'))continue;const col=Number(point.style.gridColumn);if(col>7){point.style.gridColumn=col-7;base.append(point);}else front.append(point);}
     // Painted interiors already contain their carved point rims; a second rail misaligns the upper wells.
     if(surface.dataset.bakedPoints!=='true')for(const half of [front,base])for(const bottom of [false,true]){const rail=createCarvedRail(half===front?'left':'right',bottom);half.append(rail);}
-    const leftStorage=document.createElement('aside'),rightStorage=document.createElement('aside');leftStorage.className=rightStorage.className='living-nards-storage';paintStorage(leftStorage,1,0);paintStorage(rightStorage,0,0);front.append(leftStorage);base.append(rightStorage);
+    const leftStorage=document.createElement('aside'),rightStorage=document.createElement('aside');leftStorage.className=rightStorage.className='living-nards-storage';paintStorage(leftStorage,1,0,equipment.nardsHome);paintStorage(rightStorage,0,0,equipment.nardsHome);front.append(leftStorage);base.append(rightStorage);
     lid.append(front,back);box.append(base,lid,hinge);root.replaceChildren(box);
     root.dataset.openLabel=root.getAttribute('aria-label');setClosed(root,root.classList.contains('is-closed'));
   }else root.replaceChildren(surface);
