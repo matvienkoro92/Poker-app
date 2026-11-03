@@ -1870,8 +1870,8 @@ function hallFishAchievementTrophyHtml(spec, compact) {
   // Full asset paths are required by the static build's asset collector.
   var art = {
     dayHero: "./assets/achievement-trophy-day-hero-v1.webp?v=20260908-2",
-    king: "./assets/achievement-trophy-king-v1.webp?v=20260908-2",
-    monthChampion: "./assets/achievement-trophy-month-v1.webp?v=20260908-2",
+    king: "./assets/achievement-trophy-king-v2.webp",
+    monthChampion: "./assets/achievement-trophy-month-v2.webp",
     viceChampion: "./assets/achievement-trophy-vice-month-v1.webp",
     big50: "./assets/achievement-trophy-big50-v1.webp?v=20260908-2",
     big100: "./assets/achievement-trophy-big100-v1.webp?v=20260908-2",
