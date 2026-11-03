@@ -507,6 +507,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             14950
           ]
         ]
+      ],
+      [
+        "02.11.2026",
+        [
+          [
+            3,
+            "WiNifly",
+            10170
+          ]
+        ]
       ]
     ]
   },

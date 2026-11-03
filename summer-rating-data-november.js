@@ -181,4 +181,241 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "02.11.2026": [
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "мистерFox",
+          "place": 1,
+          "reward": 4984.62,
+          "points": 135
+        },
+        {
+          "nick": "GUCCI",
+          "place": 3,
+          "reward": 1036.25,
+          "points": 90
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 4,
+          "reward": 255,
+          "points": 70
+        },
+        {
+          "nick": "Jeweler",
+          "place": 8,
+          "reward": 33.75,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 7600,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Jeweler",
+          "place": 1,
+          "reward": 36816,
+          "points": 135
+        },
+        {
+          "nick": "ABevege",
+          "place": 6,
+          "reward": 3734.0000000000005,
+          "points": 50
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 8,
+          "reward": 3321,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "Hot Bounty 2/3 40K",
+      "buyin": 900,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 1,
+          "reward": 25839,
+          "points": 135
+        },
+        {
+          "nick": "хер вам)))))",
+          "place": 0,
+          "reward": 990,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Анубис",
+          "place": 3,
+          "reward": 1530,
+          "points": 90
+        },
+        {
+          "nick": "Baldendi",
+          "place": 5,
+          "reward": 850,
+          "points": 60
+        },
+        {
+          "nick": "Local",
+          "place": 4,
+          "reward": 282.5,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 3,
+          "reward": 10170,
+          "points": 90
+        },
+        {
+          "nick": "ПСИХ",
+          "place": 7,
+          "reward": 5100,
+          "points": 40
+        },
+        {
+          "nick": "бурят",
+          "place": 25,
+          "reward": 200,
+          "points": 0
+        },
+        {
+          "nick": "kriak",
+          "place": 13,
+          "reward": 100,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Lucky Slot 333K",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "пупсик",
+          "place": 3,
+          "reward": 26938,
+          "points": 90
+        },
+        {
+          "nick": "Freedom",
+          "place": 14,
+          "reward": 2578,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 15,
+          "reward": 2578,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 18,
+          "reward": 1846,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 10622.16,
+          "points": 110
+        },
+        {
+          "nick": "WiNifly",
+          "place": 3,
+          "reward": 3392.29,
+          "points": 90
+        },
+        {
+          "nick": "BlackJackovich",
+          "place": 6,
+          "reward": 2211.23,
+          "points": 50
+        },
+        {
+          "nick": "AgroMonkey",
+          "place": 20,
+          "reward": 58.28,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Black Magic 120K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Simba33",
+          "place": 1,
+          "reward": 36235,
+          "points": 135
+        },
+        {
+          "nick": "cadillac",
+          "place": 21,
+          "reward": 518,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };
