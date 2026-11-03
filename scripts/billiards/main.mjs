@@ -119,7 +119,14 @@ function move(value){if(spectating||viewingReplay)return;if(value?.type==='shot'
 function restoreTraining(replay){if(mode!=='training')return;const saved=replay?training.replay():training.restore();if(!saved)return;state=saved.state;canonical=state;player=state.turn;angle=saved.controls.angle;$('power').value=saved.controls.power;$('powerValue').textContent=saved.controls.power+'%';rulesUI.restoreControls(saved.controls.rules,state);shotTools.restore(saved.controls.spin);acc=0;last=performance.now();botAt=0;}
 
 let gameExperience=null;let rematchReady=[false,false];
-const rematchPrompt=mountRematchPrompt({context:()=>({online:mode==='online',spectator:spectating,finished:!!state&&state.winner!==null,wager,ready:rematchReady,player,key:[currentRoomId,series.number,series.round].join(':')}),accept:()=>$('again').onclick()});
+const rematchPrompt=mountRematchPrompt({context:()=>({online:mode==='online',spectator:spectating,finished:!!state&&state.winner!==null,wager,ready:rematchReady,player,key:[currentRoomId,series.number,series.round].join(':')}),accept:()=>requestRematch(true)});
+async function requestRematch(accept){
+ if(mode!=='online'||spectating||!net||!state||state.winner===null||rematchReady[player]||(rematchReady[1-player]===true)!==accept)return;
+ const connection=net,seed=state.seed;
+ if(await ensureGameParticipation()&&net===connection&&state?.seed===seed&&state.winner!==null){
+  return connection.move(null,true,accept);
+ }
+}
 function adopt(d){gameExperience=d.gameExperience||null;viewers.update(d);rematchReady=d.rematchReady||[false,false];gameChat.observe(d);gameReactions.observe(d);frameLoop?.wake();connectionNotice.update(d.connection,d.player);
  if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status('Игра отменена. Ставки возвращены на баланс Poker21.');return;}
  wager=d.wager||null;currentRoomId=d.roomId||'';
@@ -155,7 +162,7 @@ $('shareInvite').onclick=async()=>{
  }catch(e){if(e.name!=='AbortError')status('Не удалось открыть отправку. Скопируйте пригласительную ссылку.');}
 };
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('roomCode').textContent);status('Код скопирован — отправьте его другу.');}catch(_){status('Код комнаты: '+$('roomCode').textContent);}};
-$('resumeTable').onclick=()=>setView(true);$('view').onclick=()=>setView(!tableView);$('power').oninput=()=>{$('powerValue').textContent=$('power').value+'%';};$('shoot').onclick=()=>{if(superShot.active())return superShot.shoot({angle,power:Number($('power').value)/100,spin:shotTools.value()});return move({type:'shot',angle,power:Number($('power').value)/100,...rulesUI.options(state),spin:shotTools.value()});};$('again').onclick=async()=>{if(mode==='training')return startTraining();if(mode==='solo')return solo(true);if(await ensureGameParticipation())net?.move(null,true);};$('modes').onclick=()=>leaveGame(false);
+$('resumeTable').onclick=()=>setView(true);$('view').onclick=()=>setView(!tableView);$('power').oninput=()=>{$('powerValue').textContent=$('power').value+'%';};$('shoot').onclick=()=>{if(superShot.active())return superShot.shoot({angle,power:Number($('power').value)/100,spin:shotTools.value()});return move({type:'shot',angle,power:Number($('power').value)/100,...rulesUI.options(state),spin:shotTools.value()});};$('again').onclick=async()=>{if(mode==='training')return startTraining();if(mode==='solo')return solo(true);return requestRematch(rematchReady[1-player]===true);};$('modes').onclick=()=>leaveGame(false);
 let dragging=false;
 function aim(e){if(superShot.active()){if(!superShot.canAim())return;const p=room.point(e.clientX,e.clientY),cue=superShot.inspect().state?.balls.find(b=>b.id===0);if(p&&cue&&Math.hypot(p.x-cue.x,p.y-cue.y)>=18)angle=Math.atan2(cue.y-p.y,cue.x-p.x);return;}if(playback||spectating||!tableView||!online||state.turn!==player||state.moving||state.winner!==null)return;const p=room.point(e.clientX,e.clientY);if(!p)return;if(rulesUI.isPlacing(state)||state.breakPending&&e.shiftKey){if(e.type==='pointerdown'){if(move({type:'place',x:p.x,y:p.y})!==false)rulesUI.placed();}return;}if(e.type==='pointerdown'&&state.breakPending){const cue=state.balls.find(b=>b.id===0&&!b.pocket);if(cue&&Math.hypot(p.x-cue.x,p.y-cue.y)<22){rulesUI.togglePlacement();return;}}if(e.type==='pointerdown'&&rulesUI.chooseCue(state,p))return;if(!rulesUI.readyToAim(state))return;const id=rulesUI.options(state).cueId,b=state.balls.find(b=>b.id===id&&!b.pocket);if(!b)return;if(Math.hypot(p.x-b.x,p.y-b.y)<18)return;angle=Math.atan2(b.y-p.y,b.x-p.x);}
 $('room').onselectstart=$('room').oncontextmenu=e=>e.preventDefault();

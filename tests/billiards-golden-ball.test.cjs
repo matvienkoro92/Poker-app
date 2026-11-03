@@ -20,7 +20,7 @@ test('host setting and server target survive guests, spectators and rematch',asy
  const host=await base.call('a',{action:'create',discipline:'pyramid',goldenBall:true,goldenBallId:999});const id=host.state.goldenBallId;
  for(const [member,action]of [['b','join'],['c','watch']]){const v=await base.call(member,{action,roomId:host.roomId,goldenBall:false,goldenBallId:999});assert.equal(v.state.goldenBallId,id);assert.equal(v.state.goldenBall,true);}
  const r=rooms.get(host.roomId);r.state.winner=0;r.match.winner=0;r.match.wins=[1,0];r.match.creditedRound=r.match.round;
- await base.call('a',{action:'rematch',roomId:r.id,revision:r.revision});const current=rooms.get(r.id);const next=await base.call('b',{action:'rematch',roomId:r.id,revision:current.revision});assert.equal(next.state.goldenBall,true);assert.ok(next.state.goldenBallId>=1&&next.state.goldenBallId<=15);assert.equal(next.state.goldenBallOwner,null);assert.deepEqual(next.state.scores,[0,0]);
+ await base.call('a',{action:'rematch',roomId:r.id,revision:r.revision});const current=rooms.get(r.id);const next=await base.call('b',{action:'rematch',accept:true,roomId:r.id,revision:current.revision});assert.equal(next.state.goldenBall,true);assert.ok(next.state.goldenBallId>=1&&next.state.goldenBallId<=15);assert.equal(next.state.goldenBallOwner,null);assert.deepEqual(next.state.scores,[0,0]);
 });
 test('paid table stores the golden format in its durable wager settings',async()=>{
  const f=require('./helpers/billiards-wager-fixture.cjs')();

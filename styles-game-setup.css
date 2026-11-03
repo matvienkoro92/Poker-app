@@ -55,11 +55,12 @@
 /* A quiet, compact scoreboard keeps attention on the table. */
 body.billiards-table-view .billiards-matchup{gap:6px}
 body.billiards-table-view .billiards-matchup>[data-side],body[data-game-background].billiards-table-view .billiards-matchup>[data-side]{min-height:40px;padding:6px 7px;gap:6px;border:1px solid #c7b78130;border-radius:11px;background:#13251fe8;box-shadow:none}
-body.billiards-table-view .billiards-matchup>[data-side].is-active,body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active{border:1px solid #d8bf7e88;background:linear-gradient(110deg,#314435ed,#15291fee);box-shadow:inset 2px 0 #d8bf7e}
+body.billiards-table-view .billiards-matchup>[data-side].is-active,body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active{border:1px solid #ffda79;background:linear-gradient(110deg,#715224,#3b331d);box-shadow:inset 3px 0 #ffda79,0 0 10px #ffd26b66}
 body.billiards-table-view .billiards-matchup>[data-side].is-active::after,body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active::after{display:none}
 body.billiards-table-view .billiards-matchup .billiards-matchup__avatar,body[data-game-background].billiards-table-view .billiards-matchup .is-active .billiards-matchup__avatar{flex:0 0 22px;width:22px;height:22px;border:1px solid #c8b27b66;background:#b4c5b012;color:#e2cf9c;font-size:12px;box-shadow:none}
 body.billiards-table-view .billiards-matchup strong{font-size:11px;line-height:14px;font-weight:700;color:#e8dfc9}
 body.billiards-table-view .billiards-matchup small,body[data-game-background].billiards-table-view .billiards-matchup .is-active small{font-size:8px;line-height:11px;font-weight:500;color:#a8b9a9}
+body.billiards-table-view .billiards-matchup>[data-side].is-active small,body[data-game-background].billiards-table-view .billiards-matchup>[data-side].is-active small{color:#ffe6a0;font-weight:750}
 body.billiards-table-view .billiards-matchup .billiards-matchup__score,body[data-game-background].billiards-table-view .billiards-matchup .billiards-matchup__score{min-width:20px;padding:0 2px;border:0;border-radius:0;background:none;box-shadow:none}
 body.billiards-table-view .billiards-matchup__score b{font-size:17px;line-height:20px;color:#eed9a2}
 body.billiards-table-view .billiards-matchup__score em{display:none}
