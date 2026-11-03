@@ -2546,7 +2546,7 @@
 .hall-fish-achievement-leader--empty .hall-fish-achievement-leader__hologram::before{display:none}
 .hall-fish-achievement-leader--empty .hall-fish-achievement-leader__hologram::after{border-color:#72b4c138;box-shadow:none;background:#21445322}
 .hall-fish-achievement-leader--empty .hall-fish-achievement-leader__name{color:#839eaa;font-size:10px;font-weight:600;text-shadow:none}
-.hall-fish-hologram-vacant{position:absolute;inset:0 0 12px;display:grid;place-items:center;font-size:32px;font-weight:400;color:#7caab344}
+.hall-fish-hologram-vacant{position:absolute;inset:0 0 12px;display:grid;place-items:center;font-size:clamp(28px,8vw,46px);font-weight:800;color:#a0f0fa;text-shadow:0 0 5px #69dfef,0 0 16px #37b8dd99}
 @media(max-width:600px){.hall-fish-achievement-leader__hologram{height:106px}.hall-fish-achievement-leader__name{font-size:11px}.hall-fish-achievement-leader__count{font-size:10px}}
 .hall-fish-achievement-leader:not(.hall-fish-achievement-leader--empty) .hall-fish-achievement-leader__name{width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -2716,14 +2716,14 @@
 .hall-fish-win-tops__column p{font-size:11px;color:#8e9ba9}
 
 /* Premium monthly leader card, with an unframed portrait. */
-.home-player-month .hall-fish-player-month{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)!important;gap:12px;margin-top:10px;padding:16px!important;border:1px solid #c79a4a!important;border-radius:20px!important;background:radial-gradient(ellipse at 0 100%,#a16b2230,transparent 55%),linear-gradient(125deg,#231f19,#101114 55%,#211a10);box-shadow:inset 0 0 24px #e5ac3510!important}
+.home-player-month .hall-fish-player-month{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)!important;gap:12px;margin-top:16px;padding:16px!important;border:1px solid #c79a4a!important;border-radius:20px!important;background:radial-gradient(ellipse at 0 100%,#a16b2230,transparent 55%),linear-gradient(125deg,#231f19,#101114 55%,#211a10);box-shadow:inset 0 0 24px #e5ac3510!important}
 .home-player-month .hall-fish-player-month__stage{grid-column:1;grid-row:1;align-self:stretch;align-items:center;padding:0}
 .home-player-month .hall-fish-player-month__copy{grid-column:2;grid-row:1;gap:8px}
 .home-player-month .hall-fish-player-month__eyebrow,.home-player-month .hall-fish-achievement-leader__name{display:none!important}
-.home-player-month .hall-fish-player-month .hall-fish-player-month__status{padding:0!important;border:0;background:none;color:#fff0cb!important;-webkit-text-fill-color:initial!important;font-size:clamp(13px,5.2cqw,22px)!important;line-height:1.15}
+.home-player-month .hall-fish-player-month .hall-fish-player-month__status{padding:0!important;border:0;background:none;color:#fff0cb!important;-webkit-text-fill-color:initial!important;font-size:clamp(12px,4.8cqw,20px)!important;line-height:1.15}
 .home-player-month .hall-fish-player-month__status>span{display:block}
-.home-player-month .hall-fish-player-month__status>strong{display:block;color:#f4c86e;font-size:1.8em}
-.home-player-month__name{display:block;color:#fff0bc;font-size:clamp(13px,5.4cqw,22px);font-weight:900;overflow-wrap:anywhere}
+.home-player-month .hall-fish-player-month__status>strong{display:block;color:#f4c86e;font-size:1.7em}
+.home-player-month__name{display:block;color:#fff0bc;font-size:clamp(12px,5cqw,20px);font-weight:900;overflow-wrap:anywhere}
 .home-player-month__medals{display:flex;gap:3px;width:100%}
 .home-player-month__medal{display:flex;align-items:center;justify-content:center;flex:1;aspect-ratio:1;border:1px solid #56514b;border-radius:50%;background:#292827;color:#68635b;font-size:clamp(9px,4cqw,17px)}
 .home-player-month__medal>.hall-fish-trophy-art{display:block;width:88%;height:88%;object-fit:contain;transform:none;filter:grayscale(1);opacity:.45}
@@ -2742,9 +2742,9 @@
 .home-player-month .hall-fish-player-month__rule{display:none!important}
 .home-player-month .hall-fish-player-month__stage{grid-row:1/3}
 .home-player-month .home-player-month__footer{grid-column:2;grid-row:2;min-width:0;gap:6px;padding:8px;align-self:end}
-.home-player-month .home-player-month__footer strong{font-size:clamp(17px,4vw,28px);white-space:nowrap}
+.home-player-month .home-player-month__footer strong{font-size:clamp(16px,3.8vw,26px);white-space:nowrap}
 .home-player-month .home-player-month__footer>span{font-size:10px;min-width:0}
-.home-player-month .home-player-month__footer .home-player-month__watch{min-height:40px;padding:7px 9px;font-size:clamp(11px,2.5vw,16px);white-space:nowrap}
+.home-player-month .home-player-month__footer .home-player-month__watch{min-height:40px;padding:7px 9px;font-size:clamp(10px,2.3vw,15px);white-space:nowrap}
 .home-player-month__name{padding:6px 9px;border:1px solid #c9974355;border-radius:7px;background:linear-gradient(100deg,#b8812945,#6a461b22);box-sizing:border-box;width:100%}
 
 /* Preserve player identity and fit XP totals on narrow screens. */
@@ -2804,3 +2804,8 @@
 
 .hall-fish-achievement-card--featured .hall-fish-player-month__winner-prize{display:grid;justify-items:start;justify-content:start;width:fit-content;max-width:100%;box-sizing:border-box;text-align:left}
 .hall-fish-achievement-card--featured .hall-fish-player-month .hall-fish-achievement-leader__hologram:not(.hall-fish-achievement-leader__hologram--avatar){height:clamp(126px,32vw,185px)!important}
+
+button.home-player-month__medal{min-width:0;padding:0;cursor:pointer}
+button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-offset:2px}
+.hall-fish-achievement-detail-trophy{width:clamp(90px,24vw,135px);margin:8px auto}
+.hall-fish-achievement-caption{margin:0;text-align:center;color:#d8c69d;font-size:11px;font-weight:750;line-height:1.3}

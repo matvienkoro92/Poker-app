@@ -13597,7 +13597,7 @@ body[data-view="raffles"] .raffles-active-chooser__item--training
 .view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-active-chooser__item--horizontal-ticket .raffles-simple-participants{grid-column:2;grid-row:2}
 .view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-active-chooser__item--horizontal-ticket .raffles-active-chooser__prize-panel{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;margin:0!important;gap:8px}
 
-.view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-active-chooser__item--horizontal-ticket{order:2;grid-template-rows:auto auto auto auto!important;align-content:start!important}
+.view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-active-chooser__item--horizontal-ticket{order:-1;grid-template-rows:auto auto auto auto!important;align-content:start!important}
 .view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-ticket-registration-warning{order:3}
 .view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-active-chooser__item--horizontal-ticket .raffles-active-chooser__prize-panel{grid-row:4!important;min-height:0!important;height:auto!important}
 .view[data-view="raffles"] #rafflesActiveChooser.raffles-active-chooser--count-3>.raffles-active-chooser__item--horizontal-ticket .raffles-active-chooser__prize-panel>*{grid-column:auto!important;grid-row:auto!important;position:static!important;margin:0!important}
