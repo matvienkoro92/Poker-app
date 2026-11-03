@@ -62,12 +62,25 @@ function advanceCrazy(s){
  }
  return false;
 }
-export function endBackgammonTurn(s,timeout=false){s.missedTurns??=[0,0];if(!timeout)s.missedTurns[s.turn]=0;s.stepUndo=[];s.turns[s.turn]++;s.turn=1-s.turn;s.ply++;s.phase='roll';s.dice=[];s.headTaken=0;s.drawOffer=null;s.message='Бросьте кости';}
+export function endBackgammonTurn(s,timeout=false){
+ const extraRoll=s.variant==='six-one'&&s.phase==='moving'&&s.roll.includes(1)&&s.roll.includes(6);
+ s.missedTurns??=[0,0];
+ if(!timeout)s.missedTurns[s.turn]=0;
+ s.stepUndo=[];
+ s.turns[s.turn]++;
+ if(!extraRoll)s.turn=1-s.turn;
+ s.ply++;
+ s.phase='roll';
+ s.dice=[];
+ s.headTaken=0;
+ s.drawOffer=null;
+ s.message=extraRoll?'6–1 · Бросьте кости ещё раз':'Бросьте кости';
+}
 export function backgammonRoll(s,player,dice){if(s.winner!==null||!['opening','roll'].includes(s.phase)||s.phase!=='opening'&&player!==s.turn||!Array.isArray(dice)||dice.length!==2||dice.some(n=>!Number.isInteger(n)||n<1||n>6))return false;
  const opening=s.phase==='opening';s.rollHistory??=backgammonRollHistory(s);s.stepUndo=[];s.rollCount=(s.rollCount||0)+1;s.rollPlayer=player;s.roll=[...dice];if(opening){if(dice[0]===dice[1]){s.rollHistory.push({player:null,dice:[...dice],opening:true});s.message='Равные кости — бросьте ещё раз';return true;}s.turn=dice[0]>dice[1]?0:1;s.rollPlayer=s.turn;s.opening=false;}
  s.rollHistory.push({player:s.rollPlayer,dice:[...dice],opening});s.doubleQueue=s.variant==='crazy'&&dice[0]===dice[1]?Array.from({length:6-dice[0]},(_,i)=>dice[0]+i+1):[];
  if(!Array.isArray(s.rollTotals))s.rollTotals=[0,0];s.rollTotals[s.turn]=(Number(s.rollTotals[s.turn])||0)+(dice[0]===dice[1]?dice[0]*4:dice[0]+dice[1]);
- s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){s.doubleQueue=[];endBackgammonTurn(s);s.message='Нет допустимых ходов · ход соперника';}return true;
+ s.dice=dice[0]===dice[1]?Array(4).fill(dice[0]):[...dice];s.phase='moving';s.headTaken=0;s.message='Передвигайте шашки по выпавшим костям';if(!backgammonLegal(s).length){s.doubleQueue=[];const roller=s.turn;endBackgammonTurn(s);s.message=roller===s.turn?'Нет допустимых ходов · '+s.message:'Нет допустимых ходов · ход соперника';}return true;
 }
 export function backgammonMove(s,player,m){
  if(m.path!==undefined){
