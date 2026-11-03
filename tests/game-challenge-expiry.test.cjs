@@ -17,19 +17,19 @@ test('failed cancellation deletion is due immediately and cron retries it; absen
  assert.deepEqual(await sweep({...f,token:'test',now:1,send:async()=>({json:async()=>({ok:true})})}),{deleted:1,failed:0});
  assert.equal(await require('../lib/game-challenge-expiry').cancel({family:'board-games',roomId:'ABCDEFGHJK',commands:async()=>[null],token:'test',send:async()=>{throw Error('Must not send');}}),false);
 });
-test('accepted billiards and chess invitations delete immediately; other disciplines stay unchanged',async()=>{
- for(const [family,discipline] of [['billiards','pool8'],['board-games','chess'],['board-games','long']]){
+test('accepted billiards, chess and backgammon invitations delete immediately',async()=>{
+ for(const [family,discipline] of [['billiards','pool8'],['board-games','chess'],['board-games','long'],['board-games','short']]){
   const f=fixture();let sent=0;
   const commands=async rows=>rows[0][0]==='GET'?[JSON.stringify({chat:-10042,messageId:99})]:f.commands(rows);
   const result=await require('../lib/game-challenge-expiry').accepted({family,discipline,roomId:'ABCDEFGHJK',commands,token:'test',send:async()=>{sent++;return {json:async()=>({ok:true})};}});
-  assert.equal(result,discipline!=='long');assert.equal(sent,discipline==='long'?0:1);
+  assert.equal(result,true);assert.equal(sent,1);
  }
 });
-test('accepted announcements last one hour, then expire without touching results',async()=>{
+test('accepted announcements last five minutes, then expire without touching results',async()=>{
  const f=fixture();await require('../lib/game-challenge-expiry').enqueueAccepted({...f,chatId:-10042,messageId:123,publishedAt:1000});
  const send=async()=>({json:async()=>({ok:true})});
- assert.deepEqual(await sweep({...f,token:'test',now:3600999,send}),{deleted:0,failed:0});
- assert.deepEqual(await sweep({...f,token:'test',now:3601000,send}),{deleted:1,failed:0});
+ assert.deepEqual(await sweep({...f,token:'test',now:300999,send}),{deleted:0,failed:0});
+ assert.deepEqual(await sweep({...f,token:'test',now:301000,send}),{deleted:1,failed:0});
 });
 test('rating answer and command expire after ten minutes',async()=>{
  const f=fixture(),expiry=require('../lib/game-challenge-expiry');
