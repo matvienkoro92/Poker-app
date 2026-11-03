@@ -2481,7 +2481,7 @@
 .hall-fish-trophy-art { display: block; width: 100%; height: auto; filter: brightness(.85); }
 .hall-fish-achievement-tab--active .hall-fish-trophy-art { filter: brightness(1.12) drop-shadow(0 0 7px #ffcc5566); }
 .hall-fish-achievement-tabs--trophies .hall-fish-achievement-tab:focus-visible { outline: 2px solid #ffe09a; outline-offset: -2px; }
-.hall-fish-trophy-prize { position: absolute; left: 27%; width: 44%; top: 77%; height: 7.8%; display: grid; place-items: center; background: linear-gradient(#ffe58b,#f3ba3b); border-radius: 8px; color: #160e00; font-size: clamp(8px,1.4vw,15px); font-weight: 950; line-height: 1; text-shadow: none; }
+.hall-fish-trophy-prize { position: absolute; left: 34%; width: 32%; top: 81%; height: 7%; display: grid; place-items: center; background: transparent; color: #160e00; font-size: clamp(8px,1.4vw,15px); font-weight: 950; line-height: 1; text-shadow: none; }
 .hall-fish-trophy-fallback { display: grid; place-items: center; height: 100%; min-height: 90px; padding: 10px; color: #f5d99a; font-size: 12px; }
 .hall-fish-achievement-section { border-radius: 18px; padding: 16px; }
 .hall-fish-achievement-section__title { font-size: clamp(19px,2.7vw,27px); }
