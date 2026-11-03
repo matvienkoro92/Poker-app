@@ -1206,3 +1206,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .villa-billiards-stage[style*="billiards-table-sport-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/sport-v1-table.svg')}
 
 .villa-billiards-stage[style*="billiards-table-ocean-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/ocean-v1-table.svg')}
+
+body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus > header > [data-living-focus-close] {
+  visibility: hidden;
+}
