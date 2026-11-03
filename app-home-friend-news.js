@@ -3133,7 +3133,7 @@
     var clubTabs = newsModalMode === "club" ? clubNewsTabsHtml() : "";
     var achievementPromo = newsModalMode === "club" && clubNewsTab === "wins"
       ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
-          '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/home-news-day-hero-ape-v1.webp" alt="" aria-hidden="true" loading="lazy">' +
+          '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/achievement-trophy-day-hero-v2.webp" alt="" aria-hidden="true" loading="lazy">' +
           '<span class="home-friend-news-modal__achievement-promo-content"><b>ГЕРОЙ ДНЯ В ' + esc(clubHeroMonthPrepositionLabel().toUpperCase()) + '</b>' +
           '<strong>' + (clubCurrentHeroMonth().month === 11 && clubCurrentHeroMonth().year === 2026 ? '30 000' : clubCurrentHeroMonth().month === 10 && clubCurrentHeroMonth().year === 2026 ? '35 000' : clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
           '<small class="home-friend-news-modal__achievement-promo-leader">' + (heroStandings[0] ? 'Лидирует ' + clubHeroStandingHtml(heroStandings[0]) : 'Награда лидеру месяца') + '</small></span>' +

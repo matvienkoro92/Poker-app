@@ -1788,7 +1788,7 @@ function hallFishAchievementSpecs(data) {
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
-    { key: "monthChampion", title: "Чемп месяца", sectionTitle: "Чемпион месяца", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
+    { key: "monthChampion", title: "Скрудж Макдак", sectionTitle: "Скрудж Макдак", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
   ];
 }
 
@@ -1871,7 +1871,7 @@ function hallFishAchievementTrophyHtml(spec, compact) {
   var art = {
     dayHero: "./assets/achievement-trophy-day-hero-v2.webp",
     king: "./assets/achievement-trophy-king-v2.webp",
-    monthChampion: "./assets/achievement-trophy-month-v2.webp",
+    monthChampion: "./assets/achievement-trophy-month-v3.webp",
     viceChampion: "./assets/achievement-trophy-vice-month-v1.webp",
     big50: "./assets/achievement-trophy-big50-v1.webp?v=20260908-2",
     big100: "./assets/achievement-trophy-big100-v1.webp?v=20260908-2",

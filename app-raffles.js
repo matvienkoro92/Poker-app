@@ -2429,7 +2429,7 @@ function initRaffles() {
         var backingCount = simpleTitle.match(/^(\d+)\s+беккинг-байин/i);
         if (backingCount && totalPrize > 0) {
           var buyinAmount = totalPrize / Number(backingCount[1]);
-          if (Number.isInteger(buyinAmount)) simpleTitle = simpleTitle.replace(/\s+на кеш$/i, '') + ' на кеш по ' + formatRaffleSum(buyinAmount);
+          if (Number.isInteger(buyinAmount)) simpleTitle = simpleTitle.replace(/\s+на кеш$/i, '') + ' на столы Bonus Game по ' + formatRaffleSum(buyinAmount);
         }
         var simpleAmountHtml = '';
         if (!trainingCard) {

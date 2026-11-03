@@ -159,11 +159,11 @@ body:has(.home-friend-news-modal--club:not([hidden])) .bottom-nav {
 }
 .home-friend-news-modal__achievement-promo-art {
   position: absolute;
-  inset: auto auto -5% -2%;
+  inset: 4% auto auto 0;
   width: 25%;
-  height: 113%;
+  height: 92%;
   object-fit: contain;
-  object-position: left bottom;
+  object-position: center;
   pointer-events: none;
 }
 .home-friend-news-modal__achievement-promo-content {
