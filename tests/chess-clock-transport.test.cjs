@@ -20,7 +20,7 @@ test('last-minute clock charges thinking time, excluding four seconds of server 
   const r=await f.service.call('host',{action:'move',roomId:f.room.roomId,revision:f.room.revision,
    move:{type:'move',from:'e2',to:'e4'},[RECEIVED_AT]:received});
   assert.equal(r.clockRemaining[0],44000+increment,'only the real one second and a single increment');
-  assert.equal(r.turnDeadline-r.serverNow,45000,'opponent does not pay for preparing the prior move');
+  assert.equal(r.turnDeadline-r.serverNow,50000,'deadline includes the bounded wait for position delivery');
   assert.equal(r.state.turn,1);
  }
 });
@@ -67,7 +67,7 @@ test('API attaches trusted ingress time and stamps response after server work',a
  await module.exports({method:'POST',headers:{},body:{action:'move',roomId:f.room.roomId,revision:f.room.revision,
   serverReceivedAt:sent-99999,move:{type:'move',from:'e2',to:'e4'}}},res);
  assert.equal(data.serverReceivedAt,sent);assert.equal(data.serverNow,sent+4000);
- assert.equal(data.clockRemaining[0],44000);assert.equal(data.turnDeadline-data.serverNow,45000);
+ assert.equal(data.clockRemaining[0],44000);assert.equal(data.turnDeadline-data.serverNow,50000);
  const {clockSample}=await import('../scripts/board-games/clock-sync.mjs');
  assert.equal(clockSample(data,sent,f.now()).offset,0,'processing does not masquerade as clock skew');
 });
@@ -91,4 +91,17 @@ test('fresh clocks start after admission work and after rematch loading',async()
  r=await service.call('host',{action:'rematch',roomId:r.roomId,revision:r.revision});
  r=await service.call('guest',{action:'rematch',roomId:r.roomId,revision:r.revision});
  assert.equal(r.turnDeadline-r.serverNow,60000);
+});
+
+test('the active player gets at most five seconds of position delivery credit once per move',async()=>{
+ const f=await fixture();
+ const moved=await f.service.call('host',{action:'move',roomId:f.room.roomId,revision:f.room.revision,
+  move:{type:'move',from:'e2',to:'e4'}});
+ f.advance(6000);
+ const first=await f.service.call('guest',{action:'room',roomId:moved.roomId});
+ assert.equal(first.turnDeadline,moved.turnDeadline);
+ assert.equal(first.turnDeadline-first.serverNow,44000);
+ f.advance(1000);
+ const next=await f.service.call('guest',{action:'room',roomId:moved.roomId,sinceRevision:first.revision});
+ assert.equal(next.turnDeadline,first.turnDeadline);
 });
