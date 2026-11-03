@@ -6502,3 +6502,23 @@ html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{di
   color: #ffe2a6;
   font: inherit;
 }
+
+#headerNardsShortcut {
+  display: none;
+}
+#app.app--view-home .card__header:not(.card__header--admin-shortcuts) > #headerNardsShortcut:not([hidden]) {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  margin-right: auto;
+  padding: 0;
+  color: #f7d897;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  cursor: pointer;
+}
+html body:not([data-view="chat"]) #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) > .logo.logo--welcome {
+  flex: 0 1 auto !important;
+}

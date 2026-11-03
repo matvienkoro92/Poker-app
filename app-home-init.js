@@ -350,6 +350,22 @@
       applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "", level: 0 });
     };
   } catch (eResetExport) {}
+  var nardsShortcut = document.getElementById("headerNardsShortcut");
+  if (nardsShortcut) nardsShortcut.addEventListener("click", async function () {
+    nardsShortcut.disabled = true;
+    try {
+      if (typeof window.pokerOpenBoardGames !== "function" && typeof window.pokerEnsureLazyDomains === "function") {
+        await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
+      }
+      if (nardsShortcut.hidden) return;
+      if (typeof window.pokerOpenBoardGames === "function") window.pokerOpenBoardGames("long");
+      else window.location.assign("./board-games-play.html?family=nards&game=long");
+    } catch {
+      if (!nardsShortcut.hidden) window.location.assign("./board-games-play.html?family=nards&game=long");
+    } finally {
+      nardsShortcut.disabled = false;
+    }
+  });
   function applyStatus(data) {
     var hasAuthoritativeStatus = !!(data && data.ok);
     var linked = !!(hasAuthoritativeStatus && (data.pokerPlusVerified || data.p21Id));
@@ -362,6 +378,7 @@
       loadedStatus = true;
       showStatus = true;
     }
+    if (nardsShortcut) nardsShortcut.hidden = !(linked && level >= 1 && !isGuestAuthMode());
     syncHeaderPoker21State(linked, nickname);
     if (headerStatus) {
       headerStatus.classList.toggle("header-status--hidden", !showStatus);
