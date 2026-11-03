@@ -1,4 +1,4 @@
-export function createBackgammon(discipline='short',options={}){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,variant:discipline==='long'&&options.variant==='crazy'?'crazy':'classic',doubleQueue:[],allowUndo:options.allowUndo!==false,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,rollHistory:[],rollTotals:[0,0],missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
+export function createBackgammon(discipline='short',options={}){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,variant:discipline==='long'&&['crazy','six-one'].includes(options.variant)?options.variant:'classic',doubleQueue:[],allowUndo:options.allowUndo!==false,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,rollHistory:[],rollTotals:[0,0],missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
 export function backgammonWinPoints(s,winner){
  const loser=1-winner;if(s.off[loser]>0)return {points:1,kind:'single'};
  const opponent=v=>v*(loser===0?1:-1)>0;
@@ -10,6 +10,23 @@ export const progress=(s,p,i)=>s.discipline==='long'?(i-(p===0?0:12)+24)%24:p===
 const index=(s,p,n)=>s.discipline==='long'?(n+(p===0?0:12))%24:p===0?n:23-n;
 function home(s,p){return !s.bar[p]&&s.points.every((v,i)=>v*sign(p)<=0||progress(s,p,i)>=18);}
 function forbiddenBlock(s,p,points){for(let start=0;start<24;start++){const run=Array.from({length:6},(_,j)=>(start+j)%24);if(!run.every(i=>points[i]*sign(p)>0))continue;const steps=run.map(i=>progress(s,1-p,i));if(steps[5]-steps[0]!==5)continue;if(!s.off[1-p]&&!points.some((v,i)=>v*sign(1-p)>0&&progress(s,1-p,i)>steps[5]))return true;}return false;}
+function isCaftarTransfer(s,p,move){
+ return s.variant==='six-one'&&(move.die===1||move.die===6)&&move.to===index(s,p,24-move.die);
+}
+function caftarMoves(s){
+ if(s.variant!=='six-one')return [];
+ const p=s.turn,sgn=sign(p),from=index(s,p,0);
+ if(s.points[from]*sgn<=0)return [];
+ const moves=[];
+ for(const die of [1,6]){
+  if(!s.dice.includes(die))continue;
+  const to=index(s,p,24-die);
+  if(s.points[to]*sgn<0)continue;
+  const points=[...s.points];points[from]-=sgn;points[to]+=sgn;
+  if(!forbiddenBlock(s,p,points))moves.push({from,to,die});
+ }
+ return moves;
+}
 function rawMoves(s,die){const p=s.turn,sgn=sign(p),moves=[];if(s.bar[p]){const to=index(s,p,die-1);if(s.points[to]*sgn>=-1)moves.push({from:-1,to,die});return moves;}
  for(let from=0;from<24;from++){if(s.points[from]*sgn<=0)continue;const n=progress(s,p,from),next=n+die;let to;
  if(next>=24){if(!home(s,p))continue;if(next>24&&s.points.some((v,i)=>v*sgn>0&&progress(s,p,i)<n))continue;to=24;}
@@ -18,9 +35,9 @@ function rawMoves(s,die){const p=s.turn,sgn=sign(p),moves=[];if(s.bar[p]){const 
  moves.push({from,to,die});
  }return moves;
 }
-function applyStep(s,m){const p=s.turn,sgn=sign(p);if(m.from===-1)s.bar[p]--;else{s.points[m.from]-=sgn;if(s.discipline==='long'&&m.from===(p===0?0:12))s.headTaken++;}if(m.to===24)s.off[p]++;else{if(s.points[m.to]===-sgn){s.points[m.to]=0;s.bar[1-p]++;}s.points[m.to]+=sgn;}s.dice.splice(s.dice.indexOf(m.die),1);}
+function applyStep(s,m){const p=s.turn,sgn=sign(p);if(m.from===-1)s.bar[p]--;else{s.points[m.from]-=sgn;if(s.discipline==='long'&&m.from===index(s,p,0)&&!isCaftarTransfer(s,p,m))s.headTaken++;}if(m.to===24)s.off[p]++;else{if(s.points[m.to]===-sgn){s.points[m.to]=0;s.bar[1-p]++;}s.points[m.to]+=sgn;}s.dice.splice(s.dice.indexOf(m.die),1);}
 // Enumerate legal continuations so partial moves cannot evade the maximum-dice rule.
-export function turnSequences(s){if(s.winner!==null||s.phase!=='moving')return [];const memo=new Map();function walk(v){if(!v.dice.length)return [[]];const key=JSON.stringify([v.points,v.bar,v.off,v.dice,v.headTaken]);if(memo.has(key))return memo.get(key);let all=[];for(const die of new Set(v.dice))for(const m of rawMoves(v,die)){const next={...v,points:[...v.points],bar:[...v.bar],off:[...v.off],dice:[...v.dice]};applyStep(next,m);for(const rest of walk(next))all.push([m,...rest]);}if(!all.length)all=[[]];const max=Math.max(...all.map(a=>a.length));all=all.filter(a=>a.length===max);if(max===1&&new Set(v.dice).size>1){const high=Math.max(...all.map(a=>a[0].die));all=all.filter(a=>a[0].die===high);}memo.set(key,all);return all;}return walk(s);}
+export function turnSequences(s){if(s.winner!==null||s.phase!=='moving')return [];const memo=new Map();function walk(v){if(!v.dice.length)return [[]];const key=JSON.stringify([v.points,v.bar,v.off,v.dice,v.headTaken]);if(memo.has(key))return memo.get(key);let all=[];const transfers=caftarMoves(v);for(const m of (transfers.length?transfers:[...new Set(v.dice)].flatMap(die=>rawMoves(v,die)))){const next={...v,points:[...v.points],bar:[...v.bar],off:[...v.off],dice:[...v.dice]};applyStep(next,m);for(const rest of walk(next))all.push([m,...rest]);}if(!all.length)all=[[]];const max=Math.max(...all.map(a=>a.length));all=all.filter(a=>a.length===max);if(max===1&&new Set(v.dice).size>1){const high=Math.max(...all.map(a=>a[0].die));all=all.filter(a=>a[0].die===high);}memo.set(key,all);return all;}return walk(s);}
 export function backgammonLegal(s){const found=new Map();for(const seq of turnSequences(s))if(seq.length)found.set(JSON.stringify(seq[0]),seq[0]);return [...found.values()];}
 // Clickable destinations for consecutive steps by one checker, all drawn from legal full turns.
 export function backgammonDestinations(s){
