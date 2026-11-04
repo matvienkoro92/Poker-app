@@ -36,7 +36,7 @@ async function main() {
     for (const language_code of ['','ru','en']) {
       const scope={type};
       let targetCommands=commands;
-      if(type==='all_private_chats'){let existing=await call('getMyCommands',{scope,language_code});if(!existing.length)existing=await call('getMyCommands',{scope:{type:'default'},language_code:''});targetCommands=[...existing.filter(c=>!commands.some(game=>game.command===c.command)),...commands];}
+      if(type==='all_private_chats'){let existing=await call('getMyCommands',{scope,language_code});if(!existing.length)existing=await call('getMyCommands',{scope:{type:'default'},language_code:''});targetCommands=[{command:'create_game',description:'Создать игру'},...existing.filter(c=>c.command!=='create_game'&&!commands.some(game=>game.command===c.command)),...commands];}
       await call('setMyCommands',{commands:targetCommands,scope,language_code});
       const saved=await call('getMyCommands',{scope,language_code});
       if (JSON.stringify(saved)!==JSON.stringify(targetCommands)) throw new Error('Command verification failed');
