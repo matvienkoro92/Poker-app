@@ -289,6 +289,31 @@
     value.textContent = fmtPoints(total);
   }
 
+  function syncWelcomeTotals(data) {
+    var el = $("adminBonusesWelcomeTotals");
+    if (!el) return;
+    el.hidden = false;
+    if (!data || !data.available) {
+      el.textContent = "Статистика бонуса новичка временно недоступна.";
+      return;
+    }
+    var counts = data.counts;
+    var items = [
+      ["За регистрацию", counts.register],
+      ["За вступление в чат", counts.chat],
+      ["За подписку на канал", counts.channel],
+      ["За запуск бота", counts.bot],
+      ["За привязку Poker21", counts.poker],
+      ["Всего выдано бонусов на крутки", data.spinBonuses],
+      ["Начислено на бонусный баланс", fmtPoints(data.bonusRubles) + " ₽"]
+    ];
+    el.innerHTML = '<h3>Бонус новичка · выданные награды</h3><div class="admin-bonuses__activity-grid">' +
+      items.map(function (item) {
+        var value = typeof item[1] === "number" ? fmtPoints(item[1]) : item[1];
+        return "<div><span>" + esc(item[0]) + "</span><strong>" + esc(value) + "</strong></div>";
+      }).join("") + "</div>";
+  }
+
   function syncActivityTotals(data){
     var el=$('adminBonusesActivityTotals');if(!el)return;el.hidden=false;
     if(!data||!data.available){el.textContent='Итоги активности временно недоступны. Обновите список.';return;}
@@ -359,6 +384,7 @@
         syncShowAllButton(adminBonusesState.users.length, adminBonusesState.total);
         syncTotalDebited(adminBonusesState.totalDebited);
         syncTotalBalance(adminBonusesState.totalBalance);
+        syncWelcomeTotals(data.welcomeBonusTotals);
         syncActivityTotals(data.activityTotals);
         setStatus("Показано: " + adminBonusesState.users.length + " из " + adminBonusesState.total, false);
       })
