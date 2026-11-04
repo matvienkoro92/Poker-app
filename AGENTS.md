@@ -36,3 +36,13 @@
   a fixed completion time for ambiguous screenshots or deployment.
 
 - Every two-player game uses a server-validated snapshot of the room creator's equipment for both players and spectators. Guests must not overwrite it or save the host's equipment as their own. Restore personal equipment after leaving. This applies to billiards, chess, backgammon and future online darts; keep darts closed until explicitly reopened.
+
+- When the owner says «проверь оплаты и сверь» (including typos), open the
+  authorized Prodamus payment list at https://matro.payform.ru/paylist/.
+  Count successful payments and sum their gross amounts for the requested
+  period. Compare them with active Prodamus income records in «Депозиты» and
+  report both counts and totals, the difference, and unmatched payments where
+  identifiable. Use Moscow time and half-open shift windows: Anya 06:00–18:00,
+  Vika 18:00–02:00 the next day. If no period is given, use the last completed
+  shift and state its dates. If the cabinet or ledger is unavailable, state
+  which side could not be verified.
