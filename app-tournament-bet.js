@@ -449,7 +449,10 @@
         var stripWord = stripCount % 100 >= 11 && stripCount % 100 <= 14 ? "участников" : stripCount % 10 === 1 ? "участник" : stripCount % 10 >= 2 && stripCount % 10 <= 4 ? "участника" : "участников";
         strip.querySelector("[data-last-longer-strip-bank]").textContent = "Банк " + rub(data.bank);
         strip.querySelector("[data-last-longer-strip-players]").textContent = stripCount + " " + stripWord;
-        strip.setAttribute("aria-label", "Ласт-лонгер к турниру вечера. Банк " + rub(data.bank) + ", " + stripCount + " " + stripWord + ". Открыть регистрацию");
+        var stripStake = strip.querySelector("[data-last-longer-strip-stake]");
+        var stakeLabel = Number(data.stakePrice) > 0 ? "ставка " + rub(data.stakePrice) : "";
+        if (stripStake) stripStake.textContent = stakeLabel ? "* " + stakeLabel : "";
+        strip.setAttribute("aria-label", "Ласт-лонгер к турниру вечера. Банк " + rub(data.bank) + ", " + stripCount + " " + stripWord + (stakeLabel ? ". " + stakeLabel : "") + ". Открыть регистрацию");
       }
     }
     if (!selectionOnly) homePlaqueLastRefreshAt = Date.now();
