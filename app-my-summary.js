@@ -196,22 +196,60 @@
   var welcomePreview = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) &&
     new URLSearchParams(location.search).get("preview") === "welcome-bonus";
 
+  var headerBonus = document.getElementById("headerBonusBalance");
+  var headerBonusRequest = 0;
+  var headerBonusPreview = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) &&
+    new URLSearchParams(location.search).get("preview") === "header-bonus";
+
+  function showHeaderBonus(balance) {
+    if (!headerBonus || balance == null || !Number.isFinite(Number(balance))) return;
+    headerBonus.querySelector("strong").textContent = num(balance) + " ₽";
+    headerBonus.hidden = false;
+  }
+
+  function refreshHeaderBonus() {
+    if (!headerBonus) return;
+    var seq = ++headerBonusRequest;
+    if (headerBonusPreview) {
+      showHeaderBonus(400);
+      document.getElementById("headerGreeting")?.closest(".header-greeting-wrap")?.remove();
+      var previewName = document.getElementById("headerBonusPreviewName");
+      if (previewName) previewName.hidden = false;
+      return;
+    }
+    if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
+      headerBonus.hidden = true;
+      return;
+    }
+    request("user/bonus-balance").then(function (data) {
+      if (seq === headerBonusRequest) showHeaderBonus(data.bonusBalance);
+    }).catch(function () {});
+  }
+
+  window.addEventListener("poker-telegram-auth", function () {
+    if (headerBonus) headerBonus.hidden = true;
+    refreshHeaderBonus();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) refreshHeaderBonus();
+  });
+  refreshHeaderBonus();
+
   var welcomePreviewStep = 1;
-  if (welcomePreview && /^[1-6]$/.test(new URLSearchParams(location.search).get("step") || "")) {
+  if (welcomePreview && /^[1-5]$/.test(new URLSearchParams(location.search).get("step") || "")) {
     welcomePreviewStep = Number(new URLSearchParams(location.search).get("step"));
   }
 
   function renderWelcome(data) {
     welcomeStatus = data;
-    welcomeStrip.hidden = (welcomePreview && welcomePreviewStep === 6) || (!data.available && !data.guest);
+    welcomeStrip.hidden = (welcomePreview && welcomePreviewStep === 5) || (!data.available && !data.guest);
     if (!welcomeDialog.open) return;
     var steps = welcomeDialog.querySelector("[data-welcome-steps]");
     var previewSteps = [
       {label:"Зарегистрироваться", spins:1, raffleAccess:true},
       {label:"Вступить в чат", spins:3, locked:true},
       {label:"Подписаться на канал", spins:3, locked:true},
-      {label:"Запустить бота", spins:3, locked:true},
-      {label:"Привязать Poker21", amount:300, locked:true}
+      {label:"Привязать Poker21", amount:400, locked:true}
     ];
     var rows = (data.guest ? previewSteps : data.steps || []).map(function (step, index) {
       if (welcomePreview) step = Object.assign({}, step, {
@@ -221,11 +259,11 @@
       var reward = step.spins ? step.spins + (step.spins === 1 ? " крутка" : " крутки") : step.amount + " ₽";
       if (step.raffleAccess) reward += " и доступ к розыгрышу";
       var state = step.claimed ? "done" : step.locked || step.unavailable ? "locked" : "active";
-      var action = ["Зарегистрироваться", "Подписаться на чат", "Подписаться на канал", "Запустить бота", "Привязать Poker21"][index];
+      var action = ["Зарегистрироваться", "Подписаться на чат", "Подписаться на канал", "Привязать Poker21"][index];
       var button = "";
       if (state === "active" && welcomePreview) {
         button = '<button class="welcome-action" type="button" aria-disabled="true">' + action +
-          (index > 0 && index < 4 ? ' ↗' : ' →') + '</button>';
+          (index > 0 && index < 3 ? ' ↗' : ' →') + '</button>';
       } else if (state === "active" && step.url) {
         button = '<a class="welcome-action" href="' + esc(step.url) + '" target="_blank" rel="noopener">' + action + ' ↗</a>';
       } else if (state === "active" && data.guest) {
@@ -261,6 +299,7 @@
     request("user/welcome-bonus", claim ? {deviceId:deviceId} : undefined).then(function (data) {
       if (seq !== welcomeRequest) return;
       renderWelcome(data);
+      if (claim && data.bonusBalance != null) refreshHeaderBonus();
       if (claim && spin) request("promo/daily-poker/status").then(function (updated) {
         if (seq === welcomeRequest) { spin = updated; renderSpin(); }
       }).catch(function () {});

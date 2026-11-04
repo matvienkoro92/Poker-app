@@ -351,6 +351,9 @@
     };
   } catch (eResetExport) {}
   var nardsShortcut = document.getElementById("headerNardsShortcut");
+  var previewNardsShortcut = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) &&
+    new URLSearchParams(location.search).get("preview") === "header-bonus";
+  if (nardsShortcut && previewNardsShortcut) nardsShortcut.hidden = false;
   if (nardsShortcut) nardsShortcut.addEventListener("click", async function () {
     nardsShortcut.disabled = true;
     try {
@@ -378,7 +381,7 @@
       loadedStatus = true;
       showStatus = true;
     }
-    if (nardsShortcut) nardsShortcut.hidden = !(linked && level >= 1 && !isGuestAuthMode());
+    if (nardsShortcut) nardsShortcut.hidden = !(previewNardsShortcut || (linked && level >= 1 && !isGuestAuthMode()));
     syncHeaderPoker21State(linked, nickname);
     if (headerStatus) {
       headerStatus.classList.toggle("header-status--hidden", !showStatus);
