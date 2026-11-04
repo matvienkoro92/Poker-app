@@ -2227,7 +2227,7 @@ function initRaffles() {
       if (tg && tg.showAlert) tg.showAlert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
       else if (typeof alert === "function") alert(err || "Чтобы участвовать в розыгрышах, войдите в аккаунт.");
     } else if (data && (data.code === "SAME_IP" || data.code === "SAME_DEVICE")) {
-      if (tg && tg.showAlert) tg.showAlert(err + " Если это ошибка, перезайдите в мини-приложение и повторите попытку.");
+      if (tg && tg.showAlert) tg.showAlert(err);
     } else if (data && data.code === "INVALID_SERVER_RESPONSE") {
       if (tg && tg.showAlert) tg.showAlert(err + " Если повторяется — напишите администратору.");
     } else if (tg && tg.showAlert) {

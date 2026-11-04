@@ -465,7 +465,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="rating-common" href="./styles-rating.css?v=4.024" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
-    <link rel="stylesheet" href="./styles-home-overrides.css?v=20261103-nards-shortcut" />
+    <link rel="stylesheet" href="./styles-home-overrides.css?v=20261105-welcome-preview-step" />
     <link rel="stylesheet" href="./styles-admin-deposits.css?v=20261104-usdt-rate" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=4.020.1.13" />
     <link rel="stylesheet" href="./styles-home-jackpot-guide.css?v=5" />
@@ -1026,6 +1026,19 @@
           <span class="home-last-longer-strip__copy"><strong>Ласт-лонгер к турниру вечера</strong><span><b data-last-longer-strip-bank></b><span aria-hidden="true"> · </span><span data-last-longer-strip-players></span></span><span data-last-longer-strip-stake></span></span>
           <span class="home-last-longer-strip__arrow" aria-hidden="true">→</span>
         </button>
+        <button type="button" class="home-last-longer-strip" id="homeWelcomeBonus" hidden>
+          <span aria-hidden="true">🎁</span>
+          <span class="home-last-longer-strip__copy"><strong>Бонус новичка</strong><span>300 ₽ на бонусный баланс и до 10 круток</span></span>
+          <span class="home-last-longer-strip__arrow" aria-hidden="true">→</span>
+        </button>
+        <dialog id="homeWelcomeBonusDialog" aria-labelledby="homeWelcomeBonusTitle">
+          <form method="dialog"><button aria-label="Закрыть">×</button></form>
+          <span class="welcome-kicker">ПРИВЕТСТВЕННЫЙ БОНУС</span>
+          <h2 id="homeWelcomeBonusTitle">Бонус новичка</h2>
+          <p>Проходите шаги по порядку. За регистрацию — 1 крутка и доступ к розыгрышу по его условиям. Использовать крутки в «Раздаче дня» можно после привязки Poker21.</p>
+          <div data-welcome-steps></div>
+          <p data-welcome-message role="status"></p>
+        </dialog>
         <section id="homePlayerMonth" class="home-player-month" aria-label="Игрок месяца"><div class="hall-fish-player-month home-player-month__loading" role="status"><span class="hall-fish-player-month__copy"><span class="hall-fish-player-month__title">Игрок месяца</span><span class="hall-fish-player-month__status">Определяем текущего лидера…</span><span class="hall-fish-player-month__rule">Больше всех итоговых наград за месяц</span></span></div></section>
         <section class="home-alerts" aria-labelledby="homeAlertsTitle">
           <h2 class="home-club-achievements-title" id="homeAlertsTitle">Оповещения</h2>
@@ -1748,7 +1761,7 @@
     <script defer src="./app-home-data.js?v=1"></script>
     <script defer src="./app-friend-affinity.js?v=1"></script>
     <script defer src="./app-home-friend-news.js?v=20261012-hero-label-1"></script>
-    <script defer src="./app-my-summary.js?v=20261018-guest-villa-1"></script>
+    <script defer src="./app-my-summary.js?v=20261105-welcome-browser"></script>
     <script defer src="./app-club-social.js?v=1"></script>
     <script defer src="./app-table-alert-settings.js?v=20261015-shared-bot-subscriptions-1"></script>
     <link rel="stylesheet" href="./styles-table-alert-settings.css?v=20261015-player-help-1">
@@ -1871,7 +1884,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="cooler-flight" src="./app-cooler-flight-engine.js?v=11"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="cooler-flight" src="./app-cooler-flight.js?v=20261026-villa-idle-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="learning" src="./app-games.js?v=20261015-predictions-2"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="daily-poker learning" src="./app-daily-poker.js?v=20261029-inline-1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="daily-poker learning" src="./app-daily-poker.js?v=20261104-welcome-spins"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-bonuses" src="./app-admin-bonuses.js?v=20260918-review-activity-audit-2"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-subscribe.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-broadcast.js?v=20261010-all-active-5"></script>
@@ -1880,7 +1893,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-public.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-active-view.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-formatters.js?v=4.002"></script>
-    <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js?v=20261104-prize-refresh"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles.js?v=20261105-neutral-join"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="raffles" src="./app-raffles-share.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="video-lessons" src="./app-video-lessons-modals.js?v=4.002"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="equilator" src="./app-equilator.js?v=4.002"></script>

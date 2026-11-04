@@ -1,13 +1,14 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const daily=require('../lib/daily-poker'),activity=require('../lib/review-activity'),ledger=require('../lib/bonus-ledger');
+const {playerDailyPokerLevelError}=require('../lib/raffle-player-level-requirements');
 const source=fs.readFileSync(path.join(__dirname,'../lib/api-handlers/promo.js'),'utf8');
-function harness({free=false,special=false}={}){
+function harness({free=false,special=false,welcome=false}={}){
   const values=new Map(),locks=new Map(),writes=[];let balance=10,game=0;
   const now=new Date().toISOString(),state={baseAttemptUsed:!free,baseAttemptAt:free?'':now,extraAttemptGranted:false,extraAttemptUsed:false,ticketlessStreak:6,ticketlessStreakAt:now,updatedAt:now};
   values.set('state:ID1',JSON.stringify(state));
-  values.set(activity.stateKey('ID1'),JSON.stringify({...activity.emptyState(),actions:5,publicationActions:5,spinsEarned:1,spinsAvailable:1,bonusEarned:10}));
-  const ctx={...daily,...ledger,console,Date,JSON,Number,Math,String,
+  values.set(activity.stateKey('ID1'),JSON.stringify({...activity.emptyState(),actions:5,publicationActions:5,spinsEarned:1,spinsAvailable:welcome?0:1,welcomeSpins:welcome?3:0,bonusEarned:10}));
+  const ctx={...daily,...ledger,playerDailyPokerLevelError,console,Date,JSON,Number,Math,String,
     BOT_TOKEN:'test',DAILY_POKER_REQUIRED_CHANNEL:'test',ROMAN_DAILY_POKER_LIMIT:100,TICKETLESS_STREAK_MIN_LEVEL:1,
     reviewActivity:{...activity,readState:async()=>JSON.parse(values.get(activity.stateKey('ID1')))},
     accountIdFromAuth:async()=> 'ID1',rememberUsername:async()=>{},pokerPlusIdForAccount:async()=> '123',
@@ -35,6 +36,11 @@ function harness({free=false,special=false}={}){
       writes.push(commands);
       commands.forEach(([op,key,...args])=>{if(op==='SET')values.set(key,String(args[0]));if(op==='HSET'&&key==='poker_app:bonus_balances')balance=Number(args[1]);});
     },
+    require: name => {
+      assert.equal(name, '../business-event-tracking');
+      return {businessEventWrites:async()=>({commands:[],values:[]})};
+    },
+    isAdminIdentity:()=>false,
     apiError:(res,status,error,extra)=>res.status(status).json({error,...extra})
   };
   for(const name of ['DAILY_POKER_LOCK_PREFIX','DAILY_POKER_GAME_PREFIX','DAILY_POKER_GAMES_USER_PREFIX','DAILY_POKER_SPIN_COUNTS_PREFIX','DAILY_POKER_USERS_KEY','DAILY_POKER_PLAYED_COUNT_KEY','DAILY_POKER_LAST_GAME_AT_KEY','DAILY_POKER_TICKET_PREFIX','DAILY_POKER_TICKETS_USER_PREFIX','DAILY_POKER_TICKET_COUNT_KEY'])ctx[name]=name+':';
@@ -65,4 +71,18 @@ test('activity spins do not consume or extend special daily play allowances',asy
   assert.equal(r.body.attemptType,'activity');assert.equal(r.body.dailyGamesPlayed,1);
   const game=JSON.parse(h.values.get('DAILY_POKER_GAME_PREFIX:game1'));
   assert.equal(game.extra_attempt_granted,false);assert.equal(game.activity_extra_attempt_granted,true);
+});
+
+test('welcome spins pay a prize and preserve daily allowance and review earnings',async()=>{
+  const h=harness({special:true,welcome:true});
+  const first=await h.play('welcome');
+  assert.equal(first.statusCode,200);
+  assert.equal(first.body.attemptType,'welcome');
+  assert.equal(first.body.welcomeSpins,2);
+  assert.equal(first.body.dailyGamesPlayed,1);
+  assert.equal(first.body.bonusBalance,60);
+  assert.equal(first.body.activity.bonusEarned,10);
+  const replay=await h.play('welcome');
+  assert.equal(replay.body.idempotentReplay,true);
+  assert.equal(h.writes.length,1);
 });

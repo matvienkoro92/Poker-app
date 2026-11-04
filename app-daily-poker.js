@@ -280,6 +280,7 @@
   function availableStatusText(data) {
     if (!data) return "Проверяем доступность раздачи…";
     if (!data.canPlay) return "";
+    if(data.welcomeSpins>0)return 'Доступно попыток: '+Number(data.attemptsLeft)+' · за бонус новичка: '+Number(data.welcomeSpins);
     if(data.activity&&data.activity.spinsAvailable>0)return 'Доступно попыток: '+Number(data.attemptsLeft)+' · за активность: '+Number(data.activity.spinsAvailable);
     if (data.specialDailyLimit) return "Раздача доступна.";
     var attempts = Math.max(0, parseInt(data.attemptsLeft || "0", 10) || 0);

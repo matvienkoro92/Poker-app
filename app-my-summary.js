@@ -189,6 +189,103 @@
     var minutes = Math.ceil(remaining / 60000);
     return "Крутка через " + (minutes >= 60 ? Math.floor(minutes / 60) + " ч " : "") + minutes % 60 + " мин";
   }
+  var welcomeStrip = document.getElementById("homeWelcomeBonus");
+  var welcomeDialog = document.getElementById("homeWelcomeBonusDialog");
+  var welcomeStatus;
+  var welcomeRequest = 0;
+  var welcomePreview = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) &&
+    new URLSearchParams(location.search).get("preview") === "welcome-bonus";
+
+  var welcomePreviewStep = 1;
+  if (welcomePreview && /^[1-5]$/.test(new URLSearchParams(location.search).get("step") || "")) {
+    welcomePreviewStep = Number(new URLSearchParams(location.search).get("step"));
+  }
+
+  function renderWelcome(data) {
+    welcomeStatus = data;
+    welcomeStrip.hidden = !data.available && !data.guest;
+    if (!welcomeDialog.open) return;
+    var steps = welcomeDialog.querySelector("[data-welcome-steps]");
+    var previewSteps = [
+      {label:"Зарегистрироваться", spins:1, raffleAccess:true},
+      {label:"Вступить в чат", spins:3, locked:true},
+      {label:"Подписаться на канал", spins:3, locked:true},
+      {label:"Запустить бота", spins:3, locked:true},
+      {label:"Привязать Poker21", amount:300, locked:true}
+    ];
+    var rows = (data.guest ? previewSteps : data.steps || []).map(function (step, index) {
+      if (welcomePreview) step = Object.assign({}, step, {
+        claimed: index + 1 < welcomePreviewStep,
+        locked: index + 1 > welcomePreviewStep
+      });
+      var reward = step.spins ? step.spins + (step.spins === 1 ? " крутка" : " крутки") : step.amount + " ₽";
+      if (step.raffleAccess) reward += " и доступ к розыгрышу";
+      var state = step.claimed ? "done" : step.locked || step.unavailable ? "locked" : "active";
+      var action = ["Зарегистрироваться", "Подписаться на чат", "Подписаться на канал", "Запустить бота", "Привязать Poker21"][index];
+      var button = "";
+      if (state === "active" && welcomePreview) {
+        button = '<button class="welcome-action" type="button" aria-disabled="true">' + action +
+          (index > 0 && index < 4 ? ' ↗' : ' →') + '</button>';
+      } else if (state === "active" && step.url) {
+        button = '<a class="welcome-action" href="' + esc(step.url) + '" target="_blank" rel="noopener">' + action + ' ↗</a>';
+      } else if (state === "active" && (data.guest || step.amount)) {
+        button = '<button class="welcome-action" type="button" data-view-target="profile">' + action + ' →</button>';
+      }
+      var badge = step.claimed ? "Получено ✓" : step.unavailable ? "Недоступно" : step.locked ? "🔒" : "Текущий шаг";
+      return '<li class="welcome-step welcome-step--' + state + '"><span class="welcome-step-number">' + (index + 1) +
+        '</span><div class="welcome-step-copy"><strong>' + esc(step.label) + '</strong><small>' + esc(reward) +
+        '</small>' + button + '</div><span class="welcome-step-badge">' + badge + '</span></li>';
+    }).join("");
+    steps.innerHTML = '<ol class="welcome-steps">' + rows + '</ol>' +
+      (data.available && !data.guest && !welcomePreview ? '<button type="button" class="welcome-check" data-welcome-check>Проверить текущий шаг</button>' : "");
+    welcomeDialog.querySelector("[data-welcome-message]").textContent = data.message || "";
+  }
+  function refreshWelcome(claim) {
+    if (!welcomeStrip || !welcomeDialog) return;
+    if (welcomePreview) {
+      renderWelcome({guest:true,message:"Локальный предпросмотр. Начисления отключены."});
+      return;
+    }
+    var seq = ++welcomeRequest;
+    var button = welcomeDialog.querySelector("[data-welcome-check]");
+    if (button) button.disabled = true;
+    var deviceId = claim && typeof pokerGetRaffleStableDeviceId === "function" ? pokerGetRaffleStableDeviceId() : "";
+    request("user/welcome-bonus", claim ? {deviceId:deviceId} : undefined).then(function (data) {
+      if (seq !== welcomeRequest) return;
+      renderWelcome(data);
+      if (claim && spin) request("promo/daily-poker/status").then(function (updated) {
+        if (seq === welcomeRequest) { spin = updated; renderSpin(); }
+      }).catch(function () {});
+      if (claim && data.available === false && !data.message) {
+        welcomeDialog.querySelector("[data-welcome-message]").textContent = "Бонусы уже получены или недоступны.";
+      }
+    }).catch(function () {
+      if (seq !== welcomeRequest) return;
+      if (button) button.disabled = false;
+      if (welcomeDialog.open) welcomeDialog.querySelector("[data-welcome-message]").textContent = "Не удалось проверить бонус. Попробуйте ещё раз.";
+    });
+  }
+  if (welcomeStrip && welcomeDialog) {
+    welcomeStrip.addEventListener("click", function () {
+      welcomeDialog.showModal();
+      renderWelcome(welcomeStatus || {});
+      if (welcomeStatus && welcomeStatus.available) refreshWelcome(true);
+    });
+    welcomeDialog.addEventListener("click", function (event) {
+      if (event.target.closest("[data-welcome-check]")) refreshWelcome(true);
+      if (event.target.closest("[data-view-target]")) welcomeDialog.close();
+    });
+    window.addEventListener("poker-telegram-auth", function () {
+      welcomeStrip.hidden = true;
+      welcomeStatus = null;
+      if (welcomeDialog.open) welcomeDialog.close();
+      refreshWelcome(false);
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden && welcomeDialog.open && welcomeStatus && welcomeStatus.available) refreshWelcome(true);
+    });
+    refreshWelcome(false);
+  }
   function renderSpin() {
     if (!spin) return;
     put("bonus", '<strong class="summary-value">' + num(spin.bonusBalance) + '</strong><p class="summary-spin-status" role="status">' + esc(spinText()) + '</p>' + link("Бонусы и крутка", "daily-poker"));

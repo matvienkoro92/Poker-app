@@ -6522,3 +6522,87 @@ html body .bottom-nav [data-view-target="player-hall"] .bottom-nav__line-icon{di
 html body:not([data-view="chat"]) #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) > .logo.logo--welcome {
   flex: 0 1 auto !important;
 }
+
+#homeWelcomeBonusDialog {
+  width: min(90vw, 420px);
+  padding: 20px;
+  border: 1px solid #b68e49;
+  border-radius: 18px;
+  background: #12151d;
+  color: #ffe0a0;
+}
+#homeWelcomeBonusDialog::backdrop { background: rgb(0 0 0 / 68%); }
+#homeWelcomeBonusDialog form { float: right; }
+#homeWelcomeBonusDialog h2 { margin-top: 0; }
+#homeWelcomeBonusDialog a { color: inherit; }
+#homeWelcomeBonusDialog {
+  box-sizing: border-box;
+  width: min(calc(100vw - 24px), 470px);
+  max-height: min(90dvh, 760px);
+  padding: clamp(14px, 4vw, 24px);
+  background: radial-gradient(ellipse at top left, #3a2b20, #151822 55%);
+  box-shadow: 0 20px 70px #000a;
+}
+#homeWelcomeBonusDialog form button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #806438;
+  border-radius: 50%;
+  background: #191922;
+  color: #ffe0a0;
+  font-size: 20px;
+  cursor: pointer;
+}
+.welcome-kicker { color: #d0aa65; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+#homeWelcomeBonusDialog h2 { margin: 5px 0 8px; font-size: clamp(23px, 6vw, 30px); }
+#homeWelcomeBonusDialog p { font-size: 13px; line-height: 1.45; color: #ded0b5; }
+.welcome-steps { display: grid; gap: 7px; padding: 0; margin: 14px 0; list-style: none; }
+.welcome-step {
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #ffffff24;
+  border-radius: 11px;
+  background: #11141c;
+}
+.welcome-step--active { border-color: #bf914a; background: #2c251d; }
+.welcome-step--locked { color: #c2b9aa; }
+.welcome-step-number {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff12;
+  font-size: 12px;
+  font-weight: 800;
+}
+.welcome-step--active .welcome-step-number { background: #f3c875; color: #231608; }
+.welcome-step-copy { display: grid; gap: 3px; font-size: 13px; }
+.welcome-step-copy small, .welcome-step-badge { font-size: 11px; }
+.welcome-step-badge { color: #dfc38e; white-space: nowrap; }
+.welcome-step--done .welcome-step-badge { color: #a4dbac; }
+#homeWelcomeBonusDialog .welcome-action, .welcome-check {
+  width: fit-content;
+  margin-top: 5px;
+  padding: 8px 10px;
+  border: 1px solid #f5d391;
+  border-radius: 8px;
+  background: linear-gradient(#ffe3a3, #dba650);
+  color: #211607;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.welcome-check { width: 100%; background: #24202a; color: #ffe0a0; border-color: #806438; }
+
+#homeWelcomeBonusDialog .welcome-step-copy small {
+  color: #8de4a8;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+}
