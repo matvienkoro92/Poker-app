@@ -1926,40 +1926,30 @@ function hallFishPlayerMonthSpec(data,monthKey) {
 function hallFishRenderHomePlayerMonth(data) {
   var root = document.getElementById('homePlayerMonth');
   if (!root || !data) return;
-  var previous = hallFishActiveDayHeroMonth;
-  try {
-    hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
-    var monthSpec = hallFishPlayerMonthSpec(data, hallFishActiveDayHeroMonth);
-    var cardHtml = hallFishPlayerMonthCardHtml(monthSpec, '', data)
-      .replace(/^<button type="button" aria-label="[^"]*" aria-pressed="[^"]*"/, '<div')
-      .replace('data-hall-fish-achievement-tab="playerMonth"', 'data-home-player-month-card')
-      .replace(/<span class="hall-fish-player-month__status">([^<]*)<\/span>/, '<h2 class="hall-fish-player-month__status">$1</h2>')
-      .replace(/<\/button>$/, '</div>')
-      .replace(/<span class="hall-fish-achievement-leader__count">[^<]*<\/span>/g, '')
-      .replace('</span><span class="hall-fish-player-month__stage">', '<button type="button" class="home-player-month__watch">Смотреть</button></span><span class="hall-fish-player-month__stage">');
-    cardHtml = cardHtml.replace(/<span class="hall-fish-player-month__awards">(\d+) из (\d+) наград<\/span><button type="button" class="home-player-month__watch">Смотреть<\/button>/,
-      function(_, count, total) {
-        var label = count === '1' ? 'награда' : Number(count) < 5 ? 'награды' : 'наград';
-        return '<span class="home-player-month__actions"><span class="hall-fish-player-month__awards"><b>' + count + '</b> ' + label + ' из ' + total + '</span><button type="button" class="home-player-month__watch">Смотреть</button></span>';
-      });
-    var nameMatch=cardHtml.match(/<span class="hall-fish-achievement-leader__name">([\s\S]*?)<\/span>/);
-    var awardsMatch=cardHtml.match(/<b>(\d+)<\/b>[^<]*из (\d+)/);
-    var count=awardsMatch?Number(awardsMatch[1]):0,total=awardsMatch?Number(awardsMatch[2]):8;
-    var medals='<span class="home-player-month__medals">';
-    var earnedKeys = monthSpec.rows[0]?.awardKeys || [];
-    hallFishAchievementSpecs(data).forEach(function(spec) {
-      var earned = earnedKeys.includes(spec.key);
-      medals += '<button type="button" data-home-month-achievement="'+hallFishEsc(spec.key)+'" class="home-player-month__medal'+(earned?' is-earned':'')+'" title="'+hallFishEsc(spec.sectionTitle||spec.title)+'">'+hallFishAchievementTrophyHtml(spec,true)+'</button>';
-    });
-    medals+='</span>';
-    cardHtml=cardHtml.replace(/<h2 class="hall-fish-player-month__status">([\s\S]*?)<\/h2>/,function(_,title){
-      return '<h2 class="hall-fish-player-month__status"><span>♛ Текущий лидер</span><strong>'+hallFishEsc(['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(hallFishActiveDayHeroMonth.split('.')[0])-1])+'</strong></h2>';
-    }).replace(/<span class="home-player-month__actions">[\s\S]*?<\/button><\/span>/,
-      '<span class="home-player-month__name">'+(nameMatch?nameMatch[1]:'')+'</span>'+medals+'<span class="hall-fish-player-month__awards">'+count+' наград из '+total+'</span>');
-    root.innerHTML=cardHtml.replace(/<\/div>$/, '<div class="home-player-month__footer"><span>Приз до<strong>55 000 ₽</strong></span><button type="button" class="home-player-month__watch">Смотреть ❯</button></div></div>');
-
-  } finally { hallFishActiveDayHeroMonth = previous; }
+  var month = hallFishCurrentAchievementMonth();
+  var specs = hallFishAchievementSpecs(data);
+  var rows = hallFishPlayerMonthSpec(data, month).rows;
+  var leader = rows[0];
+  var leaders = leader ? rows.filter(function(row){return row.value === leader.value;}) : [];
+  var count = leader ? leader.value : 0;
+  var label = count === 1 ? 'награда' : count >= 2 && count <= 4 ? 'награды' : 'наград';
+  var monthName = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1];
+  var medals = specs.slice().sort(function(a,b){
+    return Number(Boolean(leader && leader.awardKeys.includes(b.key))) - Number(Boolean(leader && leader.awardKeys.includes(a.key)));
+  }).map(function(spec) {
+    var earned = leader && leader.awardKeys.includes(spec.key);
+    var title = hallFishEsc(spec.sectionTitle || spec.title);
+    return '<button type="button" data-home-month-achievement="'+hallFishEsc(spec.key)+'" class="home-player-month__medal'+(earned?' is-earned':'')+'" title="'+title+'" aria-label="'+title+'"><span class="home-month-showcase__rank" aria-hidden="true">A<br>♠</span>'+hallFishAchievementTrophyHtml(spec,true)+'</button>';
+  }).join('');
+  root.innerHTML = '<div class="home-month-showcase"><span class="home-month-showcase__rail" aria-hidden="true"><i>♠</i><i>♠</i></span><div class="home-month-showcase__panel">'+
+    '<h2><span>Текущий лидер</span><strong>'+hallFishEsc(monthName)+'</strong></h2>'+
+    '<div class="home-month-showcase__name">'+(leader?leaders.map(function(row){return hallFishEsc(row.nick);}).join(' · '):'Пока нет лидера')+'</div>'+
+    '<div class="home-player-month__medals">'+medals+'</div>'+
+    '<div class="home-month-showcase__count">'+count+' '+label+' из '+specs.length+'</div>'+
+    '<div class="home-month-showcase__footer"><span>Приз до<strong>55 000 ₽</strong></span><button type="button" class="home-player-month__watch">Смотреть <span aria-hidden="true">❯</span></button></div></div>'+
+    '<div class="home-month-showcase__case">'+(leader?hallFishAchievementLeaderHtml({rows:[leader],staticCharacter:true}):'')+'</div></div>';
 }
+
 document.addEventListener('click', function(event) {
   var button = event.target.closest?.('#homePlayerMonth :is(.home-player-month__watch,[data-home-month-achievement])');
   if (!button) return;

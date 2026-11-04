@@ -2826,3 +2826,202 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
   color: #f4c86e;
   font-size: 1.7em;
 }
+
+/* Monthly leader inside the poker table rail. */
+.home-player-month { container-type: inline-size; }
+.home-month-showcase {
+  position: relative;
+  display: grid;
+  grid-template-columns: 27% 73%;
+  align-items: center;
+  isolation: isolate;
+  padding: 5cqw 10cqw 7cqw;
+  border: 3.4cqw solid transparent;
+  border-radius: 28% / 49%;
+  background:
+    radial-gradient(ellipse at 50% 40%, #172a43, #09121f 76%) padding-box,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='.17'/%3E%3C/svg%3E") border-box,
+    conic-gradient(from 0deg, #292e38, #15181f 23%, #303643 29%, #090b10 49%, #171a22 65%, #303643 74%, #292e38) border-box;
+  box-shadow: inset 0 0 0 1px #ba8741, inset 0 0 0 2px #62431f, inset 0 0 2.5cqw #000, 0 .7cqw 1.8cqw #000b;
+  color: #f7e3b9;
+}
+.home-month-showcase__rail {
+  position: absolute;
+  inset: -3.4cqw;
+  border-radius: inherit;
+  box-shadow: inset 0 .65cqw 1.15cqw #a3b3d12b, inset 0 -.8cqw 1.35cqw #000d;
+  pointer-events: none;
+}
+.home-month-showcase::before,
+.home-month-showcase::after,
+.home-month-showcase__rail i {
+  content: "♠";
+  position: absolute;
+  left: 50%;
+  width: 11cqw;
+  height: 3.4cqw;
+  display: grid;
+  place-items: center;
+  transform: translateX(-50%);
+  background: linear-gradient(#ffe4a2, #cc923d 48%, #9e6423);
+  text-shadow: 0 1px #ffe0a460;
+  color: #141516;
+  font-size: 3cqw;
+  line-height: 1;
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%);
+}
+.home-month-showcase::before { top: -3.4cqw; }
+.home-month-showcase::after { bottom: -3.4cqw; clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
+  background: linear-gradient(#dfaa53, #7a481a); }
+.home-month-showcase__rail i {
+  top: 50%;
+  left: 0;
+  width: 3.4cqw;
+  height: 15cqw;
+  transform: translateY(-50%);
+  clip-path: polygon(0 0, 100% 12%, 100% 88%, 0 100%);
+  background: linear-gradient(90deg, #81501d, #e7b75e 27%, #b5792e 95%);
+  font-style: normal;
+}
+.home-month-showcase__rail i:last-child {
+  left: auto;
+  right: 0;
+  clip-path: polygon(0 12%, 100% 0, 100% 100%, 0 88%);
+  background: linear-gradient(90deg, #a8732c, #e8b85f 72%, #81501d);
+}
+.home-month-showcase__panel { grid-column: 2; grid-row: 1; min-width: 0; }
+.home-month-showcase h2 {
+  margin: 0 0 1.5cqw;
+  text-align: center;
+  font-size: 2.45cqw;
+  line-height: 1.05;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.home-month-showcase h2 strong {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+  color: #efbf66;
+  font-size: 4.6cqw;
+}
+.home-month-showcase h2 strong::before,
+.home-month-showcase h2 strong::after {
+  content: "";
+  width: 8cqw;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #bd924c);
+}
+.home-month-showcase h2 strong::after {
+  transform: scaleX(-1);
+}
+.home-month-showcase__name {
+  padding: .75cqw 2cqw;
+  border: 1px solid #ad8546;
+  border-radius: 1.3cqw;
+  background: linear-gradient(110deg, #403421, #27231d);
+  font-size: 2.8cqw;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+.home-month-showcase .home-player-month__medals { gap: .45cqw; margin-top: 1.7cqw; }
+.home-month-showcase .home-player-month__medal {
+  position: relative;
+  aspect-ratio: 2/3;
+  align-items: end;
+  border-radius: .9cqw;
+  border-color: #414b59;
+  background: linear-gradient(#252e3a, #111922);
+  color: #8c96a5;
+}
+.home-month-showcase .home-player-month__medal.is-earned {
+  background: linear-gradient(#ffe4a3, #e2a542);
+  border-color: #dda84d;
+  color: #211b14;
+}
+.home-month-showcase .hall-fish-trophy-art { height: 66%; }
+.home-month-showcase__rank {
+  position: absolute;
+  top: .4cqw;
+  left: .55cqw;
+  font-size: 1.7cqw;
+  line-height: .85;
+  text-align: center;
+  font-weight: 900;
+}
+.home-month-showcase__count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5cqw;
+  margin: 1cqw 0 1.8cqw;
+  font-size: 2.4cqw;
+  font-weight: 800;
+}
+.home-month-showcase__count::before,
+.home-month-showcase__count::after {
+  content: "";
+  width: 10cqw;
+  height: 1px;
+  background: #bd924c;
+}
+.home-month-showcase__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1cqw;
+  padding: .8cqw 1.5cqw .8cqw 3cqw;
+  border: 1px solid #c49b53;
+  border-radius: 10cqw;
+  background: linear-gradient(#24252a, #101318);
+  font-size: 1.9cqw;
+  font-weight: 700;
+}
+.home-month-showcase__footer strong {
+  display: block;
+  color: #efbf66;
+  font-size: 4cqw;
+  line-height: 1;
+  white-space: nowrap;
+}
+.home-month-showcase__footer .home-player-month__watch {
+  min-height: 0;
+  padding: 1.3cqw 2.5cqw;
+  border-radius: 10cqw;
+  background: linear-gradient(#ffe4a0, #d19b42);
+  color: #16140f;
+  font-size: 2.4cqw;
+  white-space: nowrap;
+}
+.home-month-showcase__case {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  transform: translate(-1.2cqw, -1cqw);
+}
+.home-month-showcase__case .hall-fish-achievement-leader__hologram {
+  width: 100%;
+  height: 37cqw !important;
+  padding: 0 !important;
+  background: none;
+}
+.home-month-showcase__case .hall-fish-achievement-leader__hologram::before,
+.home-month-showcase__case .hall-fish-achievement-leader__hologram::after,
+.home-month-showcase__case .hall-fish-achievement-leader__name,
+.home-month-showcase__case .hall-fish-achievement-leader__count { display: none; }
+.home-month-showcase__case .hall-fish-achievement-leader__hologram > img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+.home-month-showcase__count::before {
+  width: 8.5cqw;
+  margin-left: 1.5cqw;
+}
+.home-month-showcase__case .hall-fish-achievement-leader__hologram > img {
+  filter: drop-shadow(0 .45cqw .35cqw #0009);
+  mask-image: none;
+  opacity: 1;
+}
