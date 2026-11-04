@@ -36,7 +36,7 @@ test('pulse opens commands and correct download and club links',async t=>{
  assert.equal(buttons.length,14);
  for (const [game, phrase] of [['nards','в нарды'],['chess','в шахматы'],['billiards','в бильярд']]) {
   const row = calls[0].reply_markup.inline_keyboard.find(([b]) => b.url?.endsWith('startapp=' + game));
-  assert.equal(row[1].text, '👥 Позвать друга');
+  assert.equal(row[1].text, '👥 ' + phrase[0].toUpperCase() + phrase.slice(1));
   const invite = new URL(row[1].url);
   assert.equal(invite.searchParams.get('url'), row[0].url);
   assert.ok(invite.searchParams.get('text').includes(phrase));
