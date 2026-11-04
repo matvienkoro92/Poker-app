@@ -197,13 +197,13 @@
     new URLSearchParams(location.search).get("preview") === "welcome-bonus";
 
   var welcomePreviewStep = 1;
-  if (welcomePreview && /^[1-5]$/.test(new URLSearchParams(location.search).get("step") || "")) {
+  if (welcomePreview && /^[1-6]$/.test(new URLSearchParams(location.search).get("step") || "")) {
     welcomePreviewStep = Number(new URLSearchParams(location.search).get("step"));
   }
 
   function renderWelcome(data) {
     welcomeStatus = data;
-    welcomeStrip.hidden = !data.available && !data.guest;
+    welcomeStrip.hidden = (welcomePreview && welcomePreviewStep === 6) || (!data.available && !data.guest);
     if (!welcomeDialog.open) return;
     var steps = welcomeDialog.querySelector("[data-welcome-steps]");
     var previewSteps = [
@@ -228,7 +228,9 @@
           (index > 0 && index < 4 ? ' ↗' : ' →') + '</button>';
       } else if (state === "active" && step.url) {
         button = '<a class="welcome-action" href="' + esc(step.url) + '" target="_blank" rel="noopener">' + action + ' ↗</a>';
-      } else if (state === "active" && (data.guest || step.amount)) {
+      } else if (state === "active" && data.guest) {
+        button = '<button class="welcome-action" type="button" data-welcome-register>' + action + ' →</button>';
+      } else if (state === "active" && step.amount) {
         button = '<button class="welcome-action" type="button" data-view-target="profile">' + action + ' →</button>';
       }
       var badge = step.claimed ? "Получено ✓" : step.unavailable ? "Недоступно" : step.locked ? "🔒" : "Текущий шаг";
@@ -244,6 +246,12 @@
     if (!welcomeStrip || !welcomeDialog) return;
     if (welcomePreview) {
       renderWelcome({guest:true,message:"Локальный предпросмотр. Начисления отключены."});
+      return;
+    }
+    // Guests can see the public offer even in a static copy of the app.
+    if (!claim && typeof pokerApiHasCredential === "function" && !pokerApiHasCredential()) {
+      ++welcomeRequest;
+      renderWelcome({guest:true});
       return;
     }
     var seq = ++welcomeRequest;
@@ -272,6 +280,10 @@
       if (welcomeStatus && welcomeStatus.available) refreshWelcome(true);
     });
     welcomeDialog.addEventListener("click", function (event) {
+      if (event.target.closest("[data-welcome-register]") && typeof window.__pokerOpenRegistration === "function") {
+        welcomeDialog.close();
+        window.__pokerOpenRegistration();
+      }
       if (event.target.closest("[data-welcome-check]")) refreshWelcome(true);
       if (event.target.closest("[data-view-target]")) welcomeDialog.close();
     });

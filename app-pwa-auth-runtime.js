@@ -1040,6 +1040,15 @@
   window.__pokerOpenSharedAccountAuthFlow = openSharedAccountAuthFlow;
   window.__pokerOpenLogin = openSharedAccountAuthFlow;
 
+  window.__pokerOpenRegistration = function () {
+    var mount = pwaAuthLoginMountEl || document.getElementById("pwaAuthLoginMount");
+    if (!mount) return;
+    openOverlayAuthEntryScreen();
+    mount.removeAttribute("data-pwa-enter-mounted");
+    mount.innerHTML = "";
+    mountPwaUsernameCodeLogin(ensurePwaVerificationForm(mount) || mount, "register");
+  };
+
   function bindSharedLoginActionButtons() {
     var root = document.documentElement || document.body;
     if (!root || root.dataset.pokerLoginActionBound === "1") return;
