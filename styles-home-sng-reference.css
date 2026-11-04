@@ -143,8 +143,8 @@
 #app.app .daily-poker__sng-champions[hidden],
 #profileSngTournaments[hidden] { display: none !important; }
 
-/* A hidden SNG banner must not leave its empty wrapper and margins behind. */
-#app.app.app--view-home .home-club-actions-block:has(> .home-sng-champions-feature[hidden]):not(:has(> :not([hidden]))) {
+/* Hide the wrapper when all club actions are hidden. */
+#app.app.app--view-home .home-club-actions-block:not(:has(> :not([hidden]))) {
   display: none !important;
 }
 #profileSngTournaments .profile-sng-card {
