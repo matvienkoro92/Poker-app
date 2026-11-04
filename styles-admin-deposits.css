@@ -652,7 +652,7 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 
 .deposits__payment-summary>div{align-content:start}
 .deposits__payment-sources{display:grid;font-weight:400;gap:4px;margin-top:4px;font-size:11px;line-height:1.4;color:var(--dep-muted)}
-.deposits__payment-sources>span{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px}
+.deposits__payment-sources>span,.deposits__allfriends>span{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px}
 .deposits__payment-sources b{font-weight:600;color:var(--dep-text,#e7eddb);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 
 /* Compact transfer console: both accounts stay visible on a phone. */
@@ -730,5 +730,10 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .admin-game-stats [data-date-field]:not([hidden]){display:grid;gap:6px;font-size:13px;min-width:130px;flex:1}
 .admin-game-stats [data-date-field] input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #a88c54;border-radius:10px;background:#090e15;color:#ffe8b7;font:inherit;color-scheme:dark}
 
-.deposits__payment-sources>.deposits__allfriends-out{font-size:10px}
-.deposits__payment-sources>.deposits__allfriends-total{margin-top:2px;padding-top:5px;border-top:1px solid #bba36655}
+.deposits__payment-sources>.deposits__allfriends{display:grid;gap:4px;padding:6px 8px;border-radius:8px;background:#87b4c419}
+.deposits__allfriends>.deposits__allfriends-out{font-size:10px}
+.deposits__allfriends>.deposits__allfriends-total{margin-top:2px;padding-top:5px;border-top:1px solid #bba36655}
+
+.deposits__pending-payments{display:grid;gap:6px;margin:0 0 10px}
+.deposits__pending-payment{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 10px;border-radius:8px;background:#87b4c419;color:var(--dep-text,#e7eddb);font-size:12px}
+.deposits__pending-payment button{flex:none;min-width:44px;min-height:44px}

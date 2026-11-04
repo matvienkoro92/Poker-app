@@ -77,6 +77,7 @@ const handlers = {
   user: () => require(path.join(handlersDir, "user.js")),
   admin: () => require(path.join(handlersDir, "admin.js")),
   "cron-deposit-notifications": () => require(path.join(handlersDir, "cron-deposit-notifications.js")),
+  "prodamus-webhook": () => require(path.join(handlersDir, "prodamus-webhook.js")),
   "admin-deposits": () => require(path.join(handlersDir, "admin-deposits.js")),
   "admin-menu-access": () => require(path.join(handlersDir, "admin-menu-access.js")),
   promo: () => require(path.join(handlersDir, "promo.js")),
