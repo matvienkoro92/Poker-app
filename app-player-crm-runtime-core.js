@@ -2471,7 +2471,21 @@
     var unknown = []; if(data.depositUnknown)unknown.push('депозиты — '+intFmt(data.depositUnknown)); if(data.registrationUnknown)unknown.push('дата регистрации — '+intFmt(data.registrationUnknown)); if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
     if(data.depositHistoryLimited)unknown.push('полная история депозитов CRM');
     var coverage=data.coverage,notice=data.coverageUnavailable?'Полноту старой истории проверить не удалось.':coverage&&coverage.visitorsWithoutJourney?'Без подробной истории: '+intFmt(coverage.visitorsWithoutJourney)+' из '+intFmt(coverage.trackedVisitors)+' посетителей. Итоги ниже — только по сохранённой истории.':'';
-    return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + crmLinkMetricHelp(item[2],item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
+    var bonus = data.welcomeBonus;
+    var bonusHtml = '<h4>Бонус новичка</h4>';
+    if (bonus) {
+      var awards = [['Получили хотя бы одну награду', bonus.recipients], ['За регистрацию', bonus.counts.register],
+        ['За чат', bonus.counts.chat], ['За канал', bonus.counts.channel], ['За запуск бота', bonus.counts.bot],
+        ['За привязку Poker21', bonus.counts.poker], ['Бонусов на крутки', bonus.spinBonuses],
+        ['Начислено', intFmt(bonus.bonusRubles) + ' ₽']];
+      bonusHtml += '<div class="crm-link-overview__grid">' + awards.map(function(item) {
+        return '<div><small>' + esc(item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>';
+      }).join('') + '</div>';
+      if (bonus.undated) bonusHtml += '<p class="crm-link-overview__unknown">Выдач без даты, исключённых из отчёта: ' + intFmt(bonus.undated) + '.</p>';
+    } else {
+      bonusHtml += '<p class="crm-link-overview__unknown">Статистика бонусов недоступна.</p>';
+    }
+    return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + crmLinkMetricHelp(item[2],item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + bonusHtml + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
   }
 
   function loadCrmLinkPreview(details) {
@@ -2539,7 +2553,16 @@
   function crmLinkPlayersMatrixHtml(rows) {
     var status = function(value){return '<span class="crm-journey__status crm-journey__status--'+(value===true?'yes':value===false?'no':'unknown')+'">'+(value===true?'Да':value===false?'Нет':'—')+'</span>';};
     var number = function(value){return value==null?'—':esc(intFmt(value));};
-    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':row.status==='unknown'?'<small>Дата неизвестна</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(steps.depositAmount==null?'—':esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount)))+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
+    var rewardLabels = {register:'Регистрация',chat:'Чат',channel:'Канал',bot:'Бот',poker:'Poker21'};
+    var welcomeBonus = function(row) {
+      if (row.welcomeBonusUnavailable) return 'Недоступно';
+      var bonus = row.welcomeBonus;
+      if (!bonus) return '—';
+      var labels = bonus.steps.map(function(step){return '<small>'+esc(rewardLabels[step])+'</small>';}).join('');
+      return (bonus.steps.length ? '<strong>'+number(bonus.steps.length)+'</strong>'+labels : (bonus.undated ? '—' : '0')) +
+        (bonus.undated ? '<small>Без даты · '+number(bonus.undated)+'</small>' : '');
+    };
+    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Бонусы новичка','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':row.status==='unknown'?'<small>Дата неизвестна</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+welcomeBonus(row)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(steps.depositAmount==null?'—':esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount)))+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
   }
 
   function renderCrmLinkDetailsModal() {
