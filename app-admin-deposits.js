@@ -8,7 +8,35 @@
   var filter = 'active', query = '', pending = null, editing = false, ageTimer, prodamusTimer, generation = 0;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   function money(n) { return (Number(n || 0)/100).toLocaleString('ru-RU',{maximumFractionDigits:2}) + ' ₽'; }
-  function usdtAvailableRate(entry){if(entry.paymentType!=='usdt'&&!/^USDT$/i.test(String(entry.bank||'').trim()))return '';var dollars=(Number(entry.available||0)/100/88).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});return '<small class="deposits__usdt-rate">По курсу 88 ₽ = '+dollars+' $</small>';}
+  var usdtRateKey = 'poker21:deposits:usdt-rate';
+  function parseUsdtRate(value) {
+    var text = String(value || '').trim().replace(',', '.');
+    var rate = Number(text);
+    return /^\d+(?:\.\d{1,4})?$/.test(text) && Number.isFinite(rate) && rate > 0 ? rate : null;
+  }
+  var usdtRate = 88;
+  try { usdtRate = parseUsdtRate(localStorage.getItem(usdtRateKey)) || usdtRate; } catch (_) {}
+  function usdtDollars(amount) {
+    return (Number(amount || 0)/100/usdtRate).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' $';
+  }
+  function usdtAvailableRate(entry) {
+    if (entry.paymentType !== 'usdt' && !/^USDT$/i.test(String(entry.bank || '').trim())) return '';
+    return '<small class="deposits__usdt-rate"><label>По курсу <input type="text" inputmode="decimal" data-usdt-rate aria-label="Курс USDT в рублях" value="'+esc(inputRate())+'"> ₽</label> = <output data-usdt-amount="'+esc(entry.available)+'">'+usdtDollars(entry.available)+'</output></small>';
+  }
+  function inputRate() { return String(usdtRate).replace('.', ','); }
+  function updateUsdtRate(input) {
+    var rate = parseUsdtRate(input.value);
+    input.setAttribute('aria-invalid', String(rate === null));
+    if (rate === null) return;
+    usdtRate = rate;
+    try { localStorage.setItem(usdtRateKey, String(rate)); } catch (_) {}
+    dialog.querySelectorAll('[data-usdt-rate]').forEach(function(field) {
+      if (field !== input) field.value = inputRate();
+    });
+    dialog.querySelectorAll('[data-usdt-amount]').forEach(function(output) {
+      output.textContent = usdtDollars(output.dataset.usdtAmount);
+    });
+  }
   function inputMoney(n) { return n ? String(n/100).replace('.',',') : ''; }
   function date(n) { return new Date(n).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
   function uid() { return window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'dep_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2); }
@@ -24,6 +52,7 @@
     document.body.appendChild(dialog); host=dialog.querySelector('main'); editor=dialog.querySelector('.deposits__editor'); status=dialog.querySelector('[role="status"]');
     dialog.addEventListener('click',onClick); dialog.addEventListener('submit',onSubmit);
     dialog.addEventListener('input',function(e){
+      if(e.target.matches('[data-usdt-rate]')){updateUsdtRate(e.target);return;}
       if(e.target.matches('[data-tip-search]')){filterTipRows(e.target);return;}
       if(e.target.matches('[data-day-player-search]')){renderDayPlayerOperations(e.target.value);return;}
       if(e.target.matches('[data-raffle-prize-search]')){rafflePrizeQuery=e.target.value;filterRafflePrizeRows();return;}
@@ -32,7 +61,7 @@
       if(e.target.closest('[data-form="create"]'))syncCreateValidity();
       if (e.target.matches('[data-dep-search]')) { query=e.target.value; renderCards(); }
     });
-    dialog.addEventListener('focusout',function(e){if(e.target.matches('[data-form="create"] [name="phone"][type="tel"]')){var normalized=parser.normalizePhone(e.target.value);if(normalized)e.target.value=normalized;syncCreateValidity();}});
+    dialog.addEventListener('focusout',function(e){if(e.target.matches('[data-usdt-rate]')){e.target.value=inputRate();e.target.removeAttribute('aria-invalid');return;}if(e.target.matches('[data-form="create"] [name="phone"][type="tel"]')){var normalized=parser.normalizePhone(e.target.value);if(normalized)e.target.value=normalized;syncCreateValidity();}});
     dialog.addEventListener('change',function(e){if(e.target.matches('[name="paymentSource"]')){syncOwnerPaymentSource(e.target.closest('form'));return;}if(e.target.matches('[data-payment-period]')){var trigger=document.createElement('button');trigger.dataset.dep='statistics-period';trigger.dataset.period=e.target.value;onClick({target:trigger});e.target.value=statisticsPeriod.preset;return;}if(e.target.matches('[data-payment-manager]')){paymentManager=e.target.value;render();return;}if(e.target.matches('[name="fromRoom"],[name="toRoom"],[name="transferRecipient"]'))syncTransferAccounts(e.target.closest('form'));if(e.target.matches('input[type="radio"]'))syncAllocationAccount(e.target);if(e.target.closest('[data-form="create"]'))syncCreateValidity();});
     dialog.addEventListener('cancel',function(e){ if (busy) {e.preventDefault();return;} if(editing){e.preventDefault();closeEditor();} });
     dialog.addEventListener('close',function(event){if(event.target!==dialog)return;clearInterval(ageTimer);clearInterval(prodamusTimer);document.body.classList.remove('deposits-open');generation++;gameStatisticsContainer=null;if(opener)opener.focus();});

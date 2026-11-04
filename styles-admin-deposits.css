@@ -737,3 +737,16 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits__pending-payments{display:grid;gap:6px;margin:0 0 10px}
 .deposits__pending-payment{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 10px;border-radius:8px;background:#87b4c419;color:var(--dep-text,#e7eddb);font-size:12px}
 .deposits__pending-payment button{flex:none;min-width:44px;min-height:44px}
+
+
+.deposits .deposits__usdt-rate input {
+  box-sizing: border-box;
+  width: 5.5em;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.deposits .deposits__usdt-rate input[aria-invalid="true"] { border-color: #ef8585; }
