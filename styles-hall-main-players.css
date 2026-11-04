@@ -2602,7 +2602,7 @@
 .hall-fish-player-month__copy{gap:8px!important}
 .hall-fish-player-month__status{align-self:flex-start;padding:5px 9px;border:1px solid #eacb78;border-radius:8px;background:#e7bd4b;color:#251900;font-weight:900}
 .hall-fish-player-month .hall-fish-achievement-leader__hologram{height:145px!important;min-height:0!important}
-.home-player-month{margin:12px 0;position:relative}
+.home-player-month{margin:20px 0 12px;position:relative}
 .home-player-month:empty{display:none}
 .home-player-month .hall-fish-player-month{width:100%;min-height:165px!important;padding:14px 14px 42px!important}
 .home-player-month .hall-fish-player-month__rule{font-size:11px}
