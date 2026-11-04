@@ -1756,7 +1756,7 @@ function initRaffles() {
     var hasResultBatches = Array.isArray(raffle && raffle.resultBatches) && raffle.resultBatches.length > 0;
     if (isCashPrize && hasResultBatches) return "";
     var subtitle = String(raffle && (raffle.cardSubtitle || raffle.card_subtitle) || "").replace(/\s+/g, " ").trim();
-    if (subtitle) return subtitle;
+    if (subtitle && !(isCashPrize && raffle.prizesUpdatedAt)) return subtitle;
     var groups = Array.isArray(raffle && raffle.groups) ? raffle.groups : [];
     if (isCashPrize) {
       var labels = activeRaffleBuyinChipLabels(raffle);
@@ -4206,12 +4206,13 @@ function initRaffles() {
           if (data && data.ok) {
             if (data.raffle && data.raffle.id) focusRaffleAfterMutation(data.raffle.id);
             clearRafflesCache();
+            if (data.raffle && data.raffle.id) refreshActiveChooserAfterAction(data.raffle);
             setRaffleAddPrizesFormVisible(false);
             if (raffleAddPrizeCount) raffleAddPrizeCount.value = "1";
             if (mode !== "existing" && raffleAddPrizeText) raffleAddPrizeText.value = "";
             if (tg && tg.showAlert) tg.showAlert(mode === "replace" ? "Призы заменены" : "Призы добавлены");
             else showRaffleFeedback(mode === "replace" ? "Призы заменены" : "Призы добавлены", "ok");
-            loadRaffles();
+            loadRaffles({skipCache:true});
           } else if (tg && tg.showAlert) {
             tg.showAlert((data && data.error) || "Ошибка изменения призов");
           } else {
