@@ -509,6 +509,7 @@ async function parseOcrFile(file) {
     if (blue && /^Bounty\s+200/i.test(title)) title = "Bounty 200🥊 40K GTD";
   }
   if (blue && date.split(".").reverse().join("") >= "2026.10.01") buyin = historicalTournamentBuyin(title, date, time) ?? confirmedBlueTournamentBuyin(title) ?? 0;
+  if (blue && date === "03.11.2026" && time === "01:00" && /Afterparty 5$/i.test(title)) buyin = 500;
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   if (date === "29.10.2026" && blue && time === "15:00" && title === "Lucky Slot 77K") buyin = 500;
