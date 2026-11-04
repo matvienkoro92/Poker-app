@@ -12,6 +12,7 @@ if (envPath) {
 }
 const commands=[
   {command:'pulse',description:'Меню клуба'},
+  {command:'longer',description:'Ласт-лонгер к турниру вечера'},
   {command:'schedule',description:'Расписание турниров по покеру'},
   {command:'nards',description:'Нарды — соперник из чата'},
   {command:'chess',description:'Шахматы — соперник из чата'},
