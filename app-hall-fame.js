@@ -1939,7 +1939,7 @@ function hallFishRenderHomePlayerMonth(data) {
   }).map(function(spec) {
     var earned = leader && leader.awardKeys.includes(spec.key);
     var title = hallFishEsc(spec.sectionTitle || spec.title);
-    return '<button type="button" data-home-month-achievement="'+hallFishEsc(spec.key)+'" class="home-player-month__medal'+(earned?' is-earned':'')+'" title="'+title+'" aria-label="'+title+'"><span class="home-month-showcase__rank" aria-hidden="true">A<br>♠</span>'+hallFishAchievementTrophyHtml(spec,true)+'</button>';
+    return '<button type="button" data-home-month-achievement="'+hallFishEsc(spec.key)+'" class="home-player-month__medal'+(earned?' is-earned':'')+'" title="'+title+'" aria-label="'+title+'" aria-haspopup="dialog" data-description="'+hallFishEsc(spec.description || spec.awardText || "")+'"><span class="home-month-showcase__rank" aria-hidden="true">A<br>♠</span>'+hallFishAchievementTrophyHtml(spec,true)+'</button>';
   }).join('');
   root.innerHTML = '<div class="home-month-showcase"><span class="home-month-showcase__rail" aria-hidden="true"><i>♠</i><i>♠</i></span><div class="home-month-showcase__panel">'+
     '<h2><span>Текущий лидер</span><strong>'+hallFishEsc(monthName)+'</strong></h2>'+
@@ -1947,16 +1947,25 @@ function hallFishRenderHomePlayerMonth(data) {
     '<div class="home-player-month__medals">'+medals+'</div>'+
     '<div class="home-month-showcase__count">'+count+' '+label+' из '+specs.length+'</div>'+
     '<div class="home-month-showcase__footer"><span>Приз до<strong>55 000 ₽</strong></span><button type="button" class="home-player-month__watch">Смотреть <span aria-hidden="true">❯</span></button></div></div>'+
-    '<div class="home-month-showcase__case">'+(leader?hallFishAchievementLeaderHtml({rows:[leader],staticCharacter:true}):'')+'</div></div>';
+    '<div class="home-month-showcase__case">'+(leader?hallFishAchievementLeaderHtml({rows:[leader],staticCharacter:true}):'')+'</div></div>'+
+    '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';
 }
 
 document.addEventListener('click', function(event) {
   var button = event.target.closest?.('#homePlayerMonth :is(.home-player-month__watch,[data-home-month-achievement])');
   if (!button) return;
-  var achievement = button.dataset.homeMonthAchievement;
+  if (button.dataset.homeMonthAchievement) {
+    var dialog = document.querySelector('#homePlayerMonth .home-month-award-dialog');
+    var art = button.querySelector('.hall-fish-trophy-art');
+    dialog.querySelector('.home-month-award-dialog__art').replaceChildren(...(art ? [art.cloneNode(true)] : []));
+    dialog.querySelector('h2').textContent = button.title;
+    dialog.querySelector('p').textContent = button.dataset.description;
+    dialog.showModal();
+    return;
+  }
   hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
-  hallFishActiveAchievementTab = achievement || 'playerMonth';
-  hallFishAchievementDetailsOpen = Boolean(achievement);
+  hallFishActiveAchievementTab = 'playerMonth';
+  hallFishAchievementDetailsOpen = false;
   openHallFishAchievementTab();
 });
 function hallFishRefreshHomePlayerMonth() {

@@ -3025,3 +3025,36 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
   mask-image: none;
   opacity: 1;
 }
+
+.home-month-award-dialog {
+  width: min(290px, calc(100% - 64px));
+  padding: 20px;
+  border: 1px solid #b99049;
+  border-radius: 16px;
+  background: #141e2c;
+  color: #f7e3b9;
+  text-align: center;
+}
+.home-month-award-dialog::backdrop { background: #06090dbb; }
+.home-month-award-dialog button {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #293442;
+  color: inherit;
+  font: 22px/1 sans-serif;
+  cursor: pointer;
+}
+.home-month-award-dialog__art .hall-fish-trophy-art {
+  display: block;
+  width: 90px;
+  height: 90px;
+  margin: auto;
+  object-fit: contain;
+}
+.home-month-award-dialog h2 { margin: 10px 0 6px; font-size: 19px; }
+.home-month-award-dialog p { margin: 0; font-size: 14px; line-height: 1.45; }
