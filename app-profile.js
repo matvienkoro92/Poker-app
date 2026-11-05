@@ -1010,6 +1010,137 @@ function profileReviewInviteSync(linked) {
   profileReviewInviteRender();
 }
 
+var profileLevelRewardsSelected = 0;
+var profileLevelRewardsRaffles = null;
+var profileLevelRewardsLoading = false;
+var profileLevelRewardsGameItems = null;
+var profileLevelRewardsGamesLoading = false;
+
+function profileLoadLevelRewardRaffles() {
+  if (profileLevelRewardsLoading || profileLevelRewardsRaffles !== null) return;
+  profileLevelRewardsLoading = true;
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  var query = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+  fetch(base + "/api/raffles" + query + "&scope=active", {cache: "no-store"})
+    .then(function (response) { if (!response.ok) throw Error("raffles"); return response.json(); })
+    .then(function (data) {
+      if (!Array.isArray(data.raffles)) throw Error("raffles");
+      profileLevelRewardsRaffles = data.raffles;
+      profileRenderLevelRewards(profilePublicShowcaseStatus);
+    }).catch(function () {}).finally(function () { profileLevelRewardsLoading = false; });
+}
+
+function profileLoadGameLevelRewards() {
+  if (profileLevelRewardsGameItems !== null || profileLevelRewardsGamesLoading) return;
+  profileLevelRewardsGamesLoading = true;
+  var base = typeof getApiBase === "function" ? getApiBase() : "";
+  var query = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+  fetch(base + "/api/user/level-rewards" + query, {cache:"no-store"})
+    .then(function (response) { if (!response.ok) throw Error("catalog"); return response.json(); })
+    .then(function (data) {
+      if (!Array.isArray(data.items)) throw Error("catalog");
+      profileLevelRewardsGameItems = data.items;
+      profileRenderLevelRewards(profilePublicShowcaseStatus);
+    }).catch(function () {}).finally(function () { profileLevelRewardsGamesLoading = false; });
+}
+
+function profileRaffleRewardLevel(value) {
+  var level = value.accessLevel != null ? value.accessLevel :
+    value.minAccessLevel != null ? value.minAccessLevel :
+    value.requiredLevel != null ? value.requiredLevel : value.minimumLevel;
+  return Math.max(0, Number(level) || 0);
+}
+
+
+function profileRenderLevelRewards(status) {
+  var anchor = document.getElementById("profilePublicStatusSection");
+  if (!anchor) return;
+  var block = document.getElementById("profileLevelRewards");
+  if (!block) {
+    block = document.createElement("section");
+    block.id = "profileLevelRewards";
+    block.className = "profile-level-rewards";
+    anchor.insertAdjacentElement("afterend", block);
+    block.addEventListener("change", function (event) {
+      if (!event.target.matches("[data-level-rewards-select]")) return;
+      profileLevelRewardsSelected = Number(event.target.value);
+      profileRenderLevelRewards(profilePublicShowcaseStatus);
+    });
+  }
+  var level = Math.max(0, Number(status && status.level) || 0);
+  block.hidden = level < 1;
+  if (block.hidden) return;
+  profileLoadLevelRewardRaffles();
+  profileLoadGameLevelRewards();
+  if (level >= 100) {
+    block.innerHTML = '<h3>Максимальный уровень</h3><p>Вы достигли 100-го уровня клуба.</p>';
+    return;
+  }
+  var selected = profileLevelRewardsSelected > level ? Math.min(100, profileLevelRewardsSelected) : level + 1;
+  var garage = window.PokerGarage;
+  var rewards = garage ? garage.catalog({level: level}).filter(function (item) {
+    return item.metric === "level" && item.target === selected && garage.curatedWardrobeItem(item);
+  }) : [];
+  var categories = [
+    {title:"Личные вещи", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) >= 0; })},
+    {title:"Машины", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) < 0; })},
+    {title:"Нарды / шахматы / бильярд", items:(profileLevelRewardsGameItems || []).filter(function (item) {
+      return item.level === selected;
+    }), games:true}
+  ];
+  var categoriesHtml = categories.map(function (category) {
+    return '<h4>' + category.title + '</h4>' + (category.items.length ?
+      '<ul class="profile-level-rewards__items">' + category.items.map(function (item) {
+        return '<li><small>' + profileEscapeHtml(category.games ? item.category : garage.groups[item.kind] || item.kind) +
+          '</small><strong>' + profileEscapeHtml(item.title) + '</strong></li>';
+      }).join('') + '</ul>' : '<p class="profile-level-rewards__note">' +
+        (category.games && profileLevelRewardsGameItems === null ? 'Каталог игрового оформления пока недоступен.' :
+          'На этом уровне новых предметов в этой категории нет.') + '</p>');
+  }).join('');
+  var access = [];
+  if (selected === 10) {
+    access.push("Переводы между игроками");
+    access.push("Бонус 300 ₽ за 7 дней круток без билета в «Раздаче дня»");
+  }
+  (profileLevelRewardsRaffles || []).forEach(function (raffle) {
+    var groups = Array.isArray(raffle.groups) && raffle.groups.length ? raffle.groups : [raffle];
+    groups.forEach(function (group) {
+      var required = group.accessLevel != null || group.minAccessLevel != null ||
+        group.requiredLevel != null || group.minimumLevel != null
+        ? profileRaffleRewardLevel(group) : profileRaffleRewardLevel(raffle);
+      if (required !== selected) return;
+      var title = raffle.title || raffle.name || "Розыгрыш";
+      if (group !== raffle && (group.title || group.name)) title += " · " + (group.title || group.name);
+      var label = "Розыгрыш «" + title + "»";
+      if (access.indexOf(label) === -1) access.push(label);
+    });
+  });
+  var raffleAccessHtml = '<div class="profile-level-rewards__access"><h4>Доступ к розыгрышам</h4><ul>' +
+    '<li class="is-available">✓ Розыгрыш 15 БИ по 200 ₽ — доступно</li>' +
+    [
+      "Ежедневные розыгрыши билетов на турниры",
+      "Розыгрыши на кеш"
+    ].map(function (title) {
+      return '<li' + (level >= 10 ? ' class="is-available"' : '') + '>' +
+        (level >= 10 ? '✓ ' : '') + title + (level >= 10 ? ' — доступно' : ' — с 10-го уровня') + '</li>';
+    }).join('') + '</ul></div>';
+  var remaining = Math.max(0, Number(status.nextStart) - Number(status.points));
+  var progress = selected === level + 1 && Number.isFinite(remaining) && remaining > 0
+    ? '<p class="profile-level-rewards__progress">Осталось ' + profileEscapeHtml(pokerProfileFormatRake(remaining)) + ' очков</p>' : '';
+  var options = '';
+  for (var target = level + 1; target <= 100; target++) {
+    options += '<option value="' + target + '"' + (target === selected ? ' selected' : '') + '>Уровень ' + target + (target === level + 1 ? ' · следующий' : '') + '</option>';
+  }
+  block.innerHTML = raffleAccessHtml + '<span class="profile-level-rewards__kicker">ВАШ ПРОГРЕСС</span>' +
+    '<h3>' + (selected === level + 1 ? 'На следующем уровне' : 'На уровне ' + selected) + '</h3>' +
+    '<label>Посмотреть уровень <select data-level-rewards-select>' + options + '</select></label>' + progress +
+    (access.length ? '<h4>Новые доступы</h4><ul>' + access.map(function (text) {
+      return '<li>' + profileEscapeHtml(text) + '</li>';
+    }).join('') + '</ul><p class="profile-level-rewards__note">Для каждого бонуса действуют его условия получения.</p>' : '') +
+    categoriesHtml +
+    '<p class="profile-level-rewards__note">Вещи открываются при достижении указанного уровня. Розыгрыши показаны из текущего списка. Участие требует выполнения условий на карточке розыгрыша.</p>';
+}
+
 function profilePublicShowcaseApplyStatus(status) {
   var update = function () { return profilePublicShowcaseApplyStatusContent(status); };
   return typeof window.pokerPreserveProfileScrollDuringUpdate === "function" ? window.pokerPreserveProfileScrollDuringUpdate(update) : update();
@@ -1017,6 +1148,7 @@ function profilePublicShowcaseApplyStatus(status) {
 
 function profilePublicShowcaseApplyStatusContent(status) {
   profilePublicShowcaseStatus = status || null;
+  profileRenderLevelRewards(status);
   var section = document.getElementById("profilePublicStatusSection");
   var scale = document.getElementById("profilePublicStatusScale");
   var xp = document.getElementById("profilePublicStatusXp");
