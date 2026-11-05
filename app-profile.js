@@ -1091,6 +1091,7 @@ function profileRenderLevelRewards(status) {
       (garage.characterFields.indexOf(item.kind) >= 0 || item.id !== garage.defaults[item.kind]);
   }) : [];
   var categories = [
+    {title:"Велосипед", items:window.PokerBicycle?window.PokerBicycle.rewards(selected):[], bicycle:true},
     {title:"Личные вещи", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) >= 0; })},
     {title:"Машины", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) < 0; })},
     {title:"Нарды / шахматы / бильярд", items:(profileLevelRewardsGameItems || []).filter(function (item) {
@@ -1100,7 +1101,7 @@ function profileRenderLevelRewards(status) {
   var categoriesHtml = categories.map(function (category) {
     return '<h4>' + category.title + '</h4>' + (category.items.length ?
       '<ul class="profile-level-rewards__items">' + category.items.map(function (item) {
-        return '<li><small>' + profileEscapeHtml(category.games ? item.category : garage.groups[item.kind] || item.kind) +
+        return '<li><small>' + profileEscapeHtml(category.bicycle ? window.PokerBicycle.groups[item.kind] : category.games ? item.category : garage.groups[item.kind] || item.kind) +
           '</small><strong>' + profileEscapeHtml(item.title) + '</strong></li>';
       }).join('') + '</ul>' : '<p class="profile-level-rewards__note">' +
         (category.games && profileLevelRewardsGameItems === null ? 'Каталог игрового оформления пока недоступен.' :

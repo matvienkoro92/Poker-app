@@ -1,3 +1,5 @@
+import {prepareBicycle,createBicycle} from './bicycle-asset.mjs';
+window.pokerPrepareGarageVehicle=look=>look?.transport==='bicycle'?prepareBicycle():Promise.resolve();
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {disposeSceneResources} from './scene-resources.mjs';
 import {windshieldForwardOffset} from './windshield-fit.mjs';
@@ -18,6 +20,7 @@ window.pokerPaintSeatPreview=paintSeatPreview;
 import * as T from '../../vendor/three/three.module.min.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function makeModel(scene,look,options={}){
+ if(look.transport==='bicycle')return createBicycle(scene,look);
  const G=window.PokerGarage,car=new T.Group();scene.add(car);car.scale.set(1.24,.86,.95);
  const material=(color,metalness,roughness)=>new T.MeshPhysicalMaterial({color,metalness,roughness,clearcoat:metalness>.3?.65:.12,clearcoatRoughness:.12});
  const paint=material(G.item('paint',look.paint).color,.55,.24),felt=material(G.item('paint',look.paint).color,0,.93),gold=material('#e5aa28',1,.135),rubber=material('#171a1e',.04,.76),rim=material(G.wheelPaintColor(look),.86,.25),black=material('#0d1417',.35,.3),leather=material('#060809',.12,.36),light=material(G.item('light',look.light).color,.45,.2),fanMetal=material('#123e47',.86,.22);
@@ -589,7 +592,7 @@ export function makeModel(scene,look,options={}){
 }
 window.pokerCreateGarage3D=function(host,look,state={}){
  let renderer;try{renderer=new T.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});}catch(_){host.textContent='3D-просмотр недоступен на этом устройстве';return null;}
- renderer.setPixelRatio(state.snapshotOnly?1:Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;host.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label','Объёмная машина: потяните, чтобы повернуть');renderer.domElement.setAttribute('role','img');
+ renderer.setPixelRatio(state.snapshotOnly?1:Math.min(window.devicePixelRatio||1,2));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;host.appendChild(renderer.domElement);renderer.domElement.setAttribute('aria-label',look.transport==='bicycle'?'Объёмный велосипед: потяните, чтобы повернуть':'Объёмная машина: потяните, чтобы повернуть');renderer.domElement.setAttribute('role','img');
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(state.snapshotOnly?25:35,1,.1,60);camera.zoom=state.previewScale||1;scene.add(new T.HemisphereLight('#c6d9ef','#44311e',1.25));
  for(const [color,intensity,x,y,z] of [['#fff0d0',4,1,6,5],['#9dcfff',2,-4,3,-3],['#ffffff',1.5,0,5,-4]]){const l=new T.DirectionalLight(color,intensity);l.position.set(x,y,z);l.castShadow=color==='#fff0d0';l.shadow.bias=-.0002;l.shadow.normalBias=.025;l.shadow.mapSize.set(2048,2048);l.shadow.camera.left=-5;l.shadow.camera.right=5;l.shadow.camera.top=5;l.shadow.camera.bottom=-5;scene.add(l);}
  const studio=new T.Scene();studio.background=new T.Color('#48505b');for(const [x,y,z,w,h,d] of [[0,5,0,7,.1,2],[4,2,0,.1,3,1.3],[-4,3,-2,.1,2,5],[0,2,-5,6,1,.1],[0,1.5,5,6,.35,.1]]){const p=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial({color:'#ffffff'}));p.position.set(x,y,z);studio.add(p);}const pmrem=new T.PMREMGenerator(renderer),env=pmrem.fromScene(studio,.05);scene.environment=env.texture;scene.environmentIntensity=1.5;studio.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});pmrem.dispose();
@@ -598,6 +601,7 @@ window.pokerCreateGarage3D=function(host,look,state={}){
  const floorGlow=new T.Mesh(new T.PlaneGeometry(7.2,3.8),glowMat);floorGlow.rotation.x=-Math.PI/2;floorGlow.position.y=.014;floorGlow.renderOrder=1;scene.add(floorGlow);
  const underLights=[];for(const x of [-1.15,1.15])for(const z of [-.68,.68]){const lamp=new T.SpotLight(glowMat.uniforms.color.value,3.5,3.4,Math.PI*.42,.9,1.5);lamp.position.set(x,.36,z);lamp.target.position.set(x,0,z);scene.add(lamp,lamp.target);underLights.push(lamp);}
 
+ if(look.transport==='bicycle'){floorGlow.visible=false;underLights.forEach(l=>l.visible=false);}
  const room=host.closest('.player-hall__room');state.night??=room?.dataset.theme==='midnight';
  function setNight(night){state.night=!!night;for(const light of scene.children){if(light.isHemisphereLight)light.intensity=night?.26:1.25;if(light.isDirectionalLight){light.userData.dayIntensity??=light.intensity;light.intensity=light.userData.dayIntensity*(night?.13:1);}}scene.environmentIntensity=night?.24:1.5;const neon=state.neon??window.pokerGarageNeonBrightness?.()??1.5;glowMat.uniforms.strength.value=(night?2.1:.95)*neon;underLights.forEach(l=>{l.intensity=3.5*neon*(night?1.6:1);});if(!state.snapshotOnly)scheduler?.request();}
 
@@ -607,7 +611,7 @@ window.pokerCreateGarage3D=function(host,look,state={}){
   if(!viewBounds){viewBounds=new T.Box3();model.car.updateWorldMatrix(true,true);const walk=o=>{if(!o.visible)return;if(o.geometry){o.geometry.computeBoundingBox();viewBounds.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}for(const child of o.children)walk(child);};walk(model.car);}
   const center=viewBounds.getCenter(new T.Vector3()),direction=new T.Vector3(Math.sin(state.yaw)*Math.cos(state.pitch),Math.sin(state.pitch),Math.cos(state.yaw)*Math.cos(state.pitch)),right=new T.Vector3(Math.cos(state.yaw),0,-Math.sin(state.yaw)),up=new T.Vector3().crossVectors(direction,right),tan=Math.tan(camera.fov*Math.PI/360);let distance=0;
   for(const x of [viewBounds.min.x,viewBounds.max.x])for(const y of [viewBounds.min.y,viewBounds.max.y])for(const z of [viewBounds.min.z,viewBounds.max.z]){const p=new T.Vector3(x,y,z).sub(center);distance=Math.max(distance,Math.abs(p.dot(right))/(tan*camera.aspect)+p.dot(direction),Math.abs(p.dot(up))/tan+p.dot(direction));}
-  distance=Math.max(distance*1.10,state.snapshotOnly?(formulaFrame?15:13):(formulaFrame?10.4:9));camera.position.copy(center).addScaledVector(direction,distance);camera.lookAt(center);
+  distance=Math.max(distance*1.10,look.transport==='bicycle'?(state.snapshotOnly?6.8:5.2):state.snapshotOnly?(formulaFrame?15:13):(formulaFrame?10.4:9));camera.position.copy(center).addScaledVector(direction,distance);camera.lookAt(center);
  }
  let formulaFrame=['formula','formulaPro','formulaElite'].includes(look.frontBumper);const updateLook=v=>{formulaFrame=['formula','formulaPro','formulaElite'].includes(v.frontBumper);model.update(v);viewBounds=null;glowMat.uniforms.color.value.set(window.PokerGarage.item('light',v.light).color);underLights.forEach(l=>{l.color.copy(glowMat.uniforms.color.value);l.position.y=.36+({standard:0,raised:.20,comfort:.12,high:.38,rally:.48,extreme:.60}[v.suspension]||0)*.86;});if(!state.snapshotOnly)scheduler?.request();};
  state.yaw??=.90;state.pitch??=.25;state.manual??=true;let disposed=false,drag=null,scheduler=null;
