@@ -1098,7 +1098,9 @@ function profileRenderLevelRewards(status) {
       return item.level === selected;
     }), games:true}
   ];
-  var categoriesHtml = categories.map(function (category) {
+  var categoriesHtml = categories.filter(function (category) {
+    return category.items.length > 0 || (category.games && profileLevelRewardsGameItems === null);
+  }).map(function (category) {
     return '<h4>' + category.title + '</h4>' + (category.items.length ?
       '<ul class="profile-level-rewards__items">' + category.items.map(function (item) {
         return '<li><small>' + profileEscapeHtml(category.bicycle ? window.PokerBicycle.groups[item.kind] : category.games ? item.category : garage.groups[item.kind] || item.kind) +
@@ -1127,13 +1129,16 @@ function profileRenderLevelRewards(status) {
     });
   });
   var raffleAccessHtml = '<div class="profile-level-rewards__access"><h4>Доступ к розыгрышам</h4><ul>' +
-    '<li class="is-available">✓ Розыгрыш 15 БИ по 200 ₽ — доступно</li>' +
     [
-      "Ежедневные розыгрыши билетов на турниры",
-      "Розыгрыши на кеш"
-    ].map(function (title) {
-      return '<li' + (level >= 10 ? ' class="is-available"' : '') + '>' +
-        (level >= 10 ? '✓ ' : '') + title + (level >= 10 ? ' — доступно' : ' — с 10-го уровня') + '</li>';
+      { title: 'Розыгрыш 15 БИ по 200 ₽', available: true },
+      { title: 'Ежедневные розыгрыши билетов на турниры', available: level >= 10 },
+      { title: 'Ежедневный розыгрыш', detail: '7 байинов по 1 000 ₽', note: 'На кеш 20/40', available: level >= 10 }
+    ].map(function (item) {
+      return '<li class="profile-raffle-access' + (item.available ? ' is-available' : '') + '">' +
+        '<span class="profile-raffle-access__icon" aria-hidden="true">' + (item.available ? '✓' : '·') + '</span>' +
+        '<span class="profile-raffle-access__text"><strong>' + item.title + '</strong>' +
+        (item.detail ? '<b>' + item.detail + '</b><small>' + item.note + '</small>' : '') +
+        '<span class="profile-raffle-access__status">' + (item.available ? 'Доступно' : 'С 10-го уровня') + '</span></span></li>';
     }).join('') + '</ul></div>';
   var remaining = Math.max(0, Number(status.nextStart) - Number(status.points));
   var progress = selected === level + 1 && Number.isFinite(remaining) && remaining > 0
