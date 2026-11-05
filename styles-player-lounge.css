@@ -796,3 +796,56 @@
 
 .player-hall__room[data-garage-vehicle="7"] .garage-car-label{display:none}
 .player-hall__room[data-garage-vehicle="7"] .player-hall__camera-ui .garage-vehicle-switch>span{font-size:11px}
+
+/* Keep the board compact relative to the garage rather than car-sized. */
+.player-hall-dialog .player-hall__room[data-garage-vehicle="7"] .player-hall__parked-kart{scale:.60;transform-origin:50% 65%}
+
+/* Shared car-upgrade presentation for bicycles, scooters and Skyboard. */
+.player-hall-dialog .player-hall__room[data-space="garage"]:has(.micro-workshop)>.player-hall__camera-ui{display:none}
+.player-hall-dialog .player-hall__garage-panel--bicycle:has(.micro-workshop){position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(820px,calc(100% - 24px));max-height:calc(100% - 36px);padding:0;z-index:50;overflow:auto;border:1px solid #ae9557;border-radius:18px;background:#0c1518;box-shadow:0 24px 90px #000b}
+.player-hall-dialog .micro-workshop{padding:14px;display:flex;flex-direction:column;gap:10px;color:#f6dfaa}
+.player-hall-dialog .micro-workshop>.garage-workshop__header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.player-hall-dialog .micro-workshop>.garage-workshop__header h3{font-size:22px;margin:3px 0}
+.player-hall-dialog .micro-workshop>.garage-workshop__header span{font-size:10px;letter-spacing:.1em;color:#b9ad8e}
+.player-hall-dialog .micro-workshop>.garage-customizer-layout{display:grid;grid-template-columns:minmax(0,1fr) 145px;grid-template-rows:1fr;gap:10px;height:290px;min-height:0}
+.player-hall-dialog .micro-workshop .garage-preview{position:relative;min-width:0;height:100%;overflow:hidden;background:#0b161d;border-radius:10px}
+.player-hall-dialog .micro-workshop .bicycle-workshop__stage{height:100%;min-height:0;border-radius:0}
+.player-hall-dialog .micro-workshop .garage-orbit-hint{position:absolute;bottom:7px;left:10px;margin:0;font-size:10px;color:#b9c3b9;pointer-events:none}
+.player-hall-dialog .micro-workshop .garage-categories{display:flex;flex-direction:column;gap:6px;padding:6px;overflow:auto;min-height:0;grid-column:2;grid-row:1}
+.player-hall-dialog .micro-workshop .garage-categories button{display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:43px;padding:8px;font-size:12px;text-align:left}
+.player-hall-dialog .micro-workshop .garage-category-icon{font-size:21px;min-width:24px}
+.player-hall-dialog .micro-workshop>.garage-options{display:flex;gap:10px;overflow:auto;padding:10px 0;min-height:0;flex-shrink:0}
+.player-hall-dialog .micro-workshop>.garage-options[hidden]{display:none}
+.player-hall-dialog .micro-workshop .garage-option{display:flex;flex:1 0 140px;min-width:0;flex-direction:column;align-items:center;gap:6px;padding:12px;min-height:145px;text-align:center}
+.player-hall-dialog .micro-workshop .garage-option strong{font-size:13px}.player-hall-dialog .micro-workshop .garage-option small{font-size:11px;color:#bdc4ad}
+.player-hall-dialog .micro-workshop .micro-part-symbol{font-size:30px;color:#e6c477;height:35px}
+.player-hall-dialog .micro-workshop .garage-option-action{margin-top:auto;padding:8px 14px;font-size:12px}
+.player-hall-dialog .micro-workshop>.garage-workshop__footer{position:static;padding:8px 0 0;background:transparent;min-height:0}
+.player-hall-dialog .micro-workshop>.garage-workshop__footer p{font-size:11px;min-height:14px;margin:0 0 7px}
+.player-hall-dialog .micro-workshop>.garage-workshop__footer>div{display:flex;gap:8px;flex-wrap:wrap}
+.player-hall-dialog .micro-workshop>.garage-workshop__footer button{flex:1;padding:10px;min-height:40px;font-size:12px;cursor:pointer}
+.player-hall-dialog .micro-workshop .bicycle-workshop__save{width:auto}
+.player-hall-dialog .micro-workshop__description{font-size:13px;line-height:1.5;margin:0;color:#c5c6b4}
+.player-hall-dialog .micro-workshop:has(.micro-workshop__description)>.garage-customizer-layout{grid-template-columns:1fr}
+@media(max-width:480px){.player-hall-dialog .micro-workshop{padding:10px}.player-hall-dialog .micro-workshop>.garage-customizer-layout{height:250px;grid-template-columns:minmax(0,1fr) 116px}.player-hall-dialog .micro-workshop>.garage-workshop__header h3{font-size:19px}.player-hall-dialog .micro-workshop .garage-categories button{font-size:11px;gap:5px}}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted{height:auto;overflow:visible;box-sizing:border-box}
+.player-hall-dialog .micro-workshop>.garage-customizer-layout[data-category=micro]{flex:none;grid-template-areas:"preview categories";padding:0}
+.player-hall-dialog .micro-workshop .garage-categories{grid-area:categories}
+.player-hall-dialog .micro-workshop .garage-preview{grid-area:preview}
+.player-hall-dialog .micro-workshop:has(.micro-workshop__description)>.garage-customizer-layout{grid-template-areas:"preview"}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted>.garage-customizer-layout[data-category=micro]{grid-template: "preview categories" 1fr / minmax(0,1fr) 145px!important}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted>.garage-customizer-layout[data-category=micro]>.garage-preview{grid-area:preview!important;width:100%;height:100%}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted>.garage-customizer-layout[data-category=micro]>.garage-categories{grid-area:categories!important;width:auto}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted:has(.micro-workshop__description)>.garage-customizer-layout[data-category=micro]{grid-template:"preview" 1fr / minmax(0,1fr)!important}
+@media(max-width:480px){.player-hall-dialog .micro-workshop.garage-workshop--fitted>.garage-customizer-layout[data-category=micro]{grid-template:"preview categories" 1fr / minmax(0,1fr) 116px!important}}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted>.garage-workshop__header{background:#0c1518;z-index:2}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted .garage-customizer-layout>.garage-categories{display:flex!important;flex-flow:column nowrap!important;align-items:stretch!important;justify-content:flex-start!important;min-width:0!important;max-width:100%!important;height:100%!important;max-height:100%!important;box-sizing:border-box;overflow-x:hidden!important;overflow-y:auto!important;padding:4px!important;gap:5px!important}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted .garage-customizer-layout>.garage-categories::after{display:none!important}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted .garage-customizer-layout>.garage-categories button{display:flex!important;flex:0 0 43px!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;width:100%!important;min-width:0!important;max-width:100%!important;height:43px!important;min-height:43px!important;max-height:43px!important;box-sizing:border-box;padding:6px!important;gap:5px!important;font-size:11px!important}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted .garage-categories .garage-category-icon{font-size:19px!important;width:22px!important;min-width:22px!important;height:22px!important;flex:0 0 22px!important}
+
+.player-hall-dialog .micro-workshop .garage-customizer-layout::after,.player-hall-dialog .micro-workshop .garage-options::before{display:none!important}
+
+.player-hall-dialog .micro-workshop .garage-preview--3d{display:block!important;position:relative!important;min-height:0!important}
+.player-hall-dialog .micro-workshop .garage-preview--3d>.garage-3d-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important}
+.player-hall-dialog .micro-workshop.garage-workshop--fitted>.garage-workshop__header{position:static!important;inset:auto!important;flex:0 0 auto!important;padding:0!important;min-height:52px!important;width:auto!important;box-sizing:border-box}

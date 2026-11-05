@@ -1,6 +1,6 @@
 (function(){'use strict';
 const G=window.PokerGarage;if(!G)return;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let sequence=0,viewerLoad=null;
-const garageRendererRevision='20261105-micro-transport-3d';
+const garageRendererRevision='20261105-clear-vehicle-frame-3';
 function loadViewer(){if(window.pokerCreateGarage3D)return Promise.resolve();if(!viewerLoad)viewerLoad=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./app-garage-3d.js?v='+garageRendererRevision;script.onload=resolve;script.onerror=()=>{viewerLoad=null;reject(Error('Не удалось загрузить 3D-просмотр'));};document.head.appendChild(script);});return viewerLoad;}
 
 const wardrobeSource=new Image();wardrobeSource.src='./assets/player-hall/standing-monkey-underwear-v1.webp';
@@ -55,7 +55,7 @@ function paintSavedVehicle(canvas,look,options){
   loading.hidden=false;loading.disabled=true;loading.textContent='Загружаем машину…';loading.dataset.state='loading';canvas.setAttribute('aria-busy','true');
  }
  const failed=()=>{if(!current())return;canvas.setAttribute('aria-busy','false');if(loading){loading.disabled=false;loading.textContent='Не удалось загрузить · Повторить';loading.dataset.state='error';loading.onclick=()=>paintSavedVehicle(canvas,look,options);}};
- const apply=image=>{if(!current())return;if(canvas.width!==image.width)canvas.width=image.width;if(canvas.height!==image.height)canvas.height=image.height;canvas.getContext('2d').drawImage(image,0,0);canvas.dataset.vehicleRenderer='3d';canvas.dataset.vehicleLoadout=key;canvas.dataset.vehicleGeometry=geometryKey;canvas.setAttribute('aria-busy','false');if(loading)loading.hidden=true;};
+ const apply=image=>{if(!current())return;if(canvas.width!==image.width)canvas.width=image.width;if(canvas.height!==image.height)canvas.height=image.height;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0);canvas.dataset.vehicleRenderer='3d';canvas.dataset.vehicleLoadout=key;canvas.dataset.vehicleGeometry=geometryKey;canvas.setAttribute('aria-busy','false');if(loading)loading.hidden=true;};
  if(savedVehicleCache.has(key)){apply(savedVehicleCache.get(key));return;}
  const remember=image=>{savedVehicleCache.set(key,image);while(savedVehicleCache.size>24)savedVehicleCache.delete(savedVehicleCache.keys().next().value);};
  // Fetch the renderer while checking persistent cache instead of waiting for storage first.
