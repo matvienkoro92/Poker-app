@@ -1091,6 +1091,7 @@ function profileRenderLevelRewards(status) {
       (garage.characterFields.indexOf(item.kind) >= 0 || item.id !== garage.defaults[item.kind]);
   }) : [];
   var categories = [
+    {title:"Самокат", items:window.PokerScooter?window.PokerScooter.rewards(selected):[], scooter:true},
     {title:"Велосипед", items:window.PokerBicycle?window.PokerBicycle.rewards(selected):[], bicycle:true},
     {title:"Личные вещи", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) >= 0; })},
     {title:"Машины", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) < 0; })},
@@ -1103,13 +1104,15 @@ function profileRenderLevelRewards(status) {
   }).map(function (category) {
     return '<h4>' + category.title + '</h4>' + (category.items.length ?
       '<ul class="profile-level-rewards__items">' + category.items.map(function (item) {
-        return '<li><small>' + profileEscapeHtml(category.bicycle ? window.PokerBicycle.groups[item.kind] : category.games ? item.category : garage.groups[item.kind] || item.kind) +
+        return '<li><small>' + profileEscapeHtml(category.scooter ? window.PokerScooter.groups[item.kind] : category.bicycle ? window.PokerBicycle.groups[item.kind] : category.games ? item.category : garage.groups[item.kind] || item.kind) +
           '</small><strong>' + profileEscapeHtml(item.title) + '</strong></li>';
       }).join('') + '</ul>' : '<p class="profile-level-rewards__note">' +
         (category.games && profileLevelRewardsGameItems === null ? 'Каталог игрового оформления пока недоступен.' :
           'На этом уровне новых предметов в этой категории нет.') + '</p>');
   }).join('');
   var access = [];
+  if (selected === 3) access.push("Самокат · новый транспорт и улучшения до 12-го уровня");
+  if (selected === 7) access.push("Skyboard · летающий скейт в гараже");
   if (selected === 12) access.push("Машина МанкиCar Two ACES и базовая комплектация");
   if (selected === 10) {
     access.push("Переводы между игроками");

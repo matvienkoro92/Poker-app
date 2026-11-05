@@ -1,5 +1,6 @@
+import {prepareMicroTransport,createMicroTransport} from './micro-transport-asset.mjs';
 import {prepareBicycle,createBicycle} from './bicycle-asset.mjs';
-window.pokerPrepareGarageVehicle=look=>look?.transport==='bicycle'?prepareBicycle():Promise.resolve();
+window.pokerPrepareGarageVehicle=look=>look?.transport==='bicycle'?prepareBicycle():['scooter','hoverboard'].includes(look?.transport)?prepareMicroTransport(look.transport):Promise.resolve();
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {disposeSceneResources} from './scene-resources.mjs';
 import {windshieldForwardOffset} from './windshield-fit.mjs';
@@ -20,6 +21,7 @@ window.pokerPaintSeatPreview=paintSeatPreview;
 import * as T from '../../vendor/three/three.module.min.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function makeModel(scene,look,options={}){
+ if(['scooter','hoverboard'].includes(look.transport))return createMicroTransport(scene,look);
  if(look.transport==='bicycle')return createBicycle(scene,look);
  const G=window.PokerGarage,car=new T.Group();scene.add(car);car.scale.set(1.24,.86,.95);
  const material=(color,metalness,roughness)=>new T.MeshPhysicalMaterial({color,metalness,roughness,clearcoat:metalness>.3?.65:.12,clearcoatRoughness:.12});
@@ -601,7 +603,7 @@ window.pokerCreateGarage3D=function(host,look,state={}){
  const floorGlow=new T.Mesh(new T.PlaneGeometry(7.2,3.8),glowMat);floorGlow.rotation.x=-Math.PI/2;floorGlow.position.y=.014;floorGlow.renderOrder=1;scene.add(floorGlow);
  const underLights=[];for(const x of [-1.15,1.15])for(const z of [-.68,.68]){const lamp=new T.SpotLight(glowMat.uniforms.color.value,3.5,3.4,Math.PI*.42,.9,1.5);lamp.position.set(x,.36,z);lamp.target.position.set(x,0,z);scene.add(lamp,lamp.target);underLights.push(lamp);}
 
- if(look.transport==='bicycle'){floorGlow.visible=false;underLights.forEach(l=>l.visible=false);}
+ if(['bicycle','scooter','hoverboard'].includes(look.transport)){floorGlow.visible=false;underLights.forEach(l=>l.visible=false);}
  const room=host.closest('.player-hall__room');state.night??=room?.dataset.theme==='midnight';
  function setNight(night){state.night=!!night;for(const light of scene.children){if(light.isHemisphereLight)light.intensity=night?.26:1.25;if(light.isDirectionalLight){light.userData.dayIntensity??=light.intensity;light.intensity=light.userData.dayIntensity*(night?.13:1);}}scene.environmentIntensity=night?.24:1.5;const neon=state.neon??window.pokerGarageNeonBrightness?.()??1.5;glowMat.uniforms.strength.value=(night?2.1:.95)*neon;underLights.forEach(l=>{l.intensity=3.5*neon*(night?1.6:1);});if(!state.snapshotOnly)scheduler?.request();}
 
@@ -611,7 +613,7 @@ window.pokerCreateGarage3D=function(host,look,state={}){
   if(!viewBounds){viewBounds=new T.Box3();model.car.updateWorldMatrix(true,true);const walk=o=>{if(!o.visible)return;if(o.geometry){o.geometry.computeBoundingBox();viewBounds.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}for(const child of o.children)walk(child);};walk(model.car);}
   const center=viewBounds.getCenter(new T.Vector3()),direction=new T.Vector3(Math.sin(state.yaw)*Math.cos(state.pitch),Math.sin(state.pitch),Math.cos(state.yaw)*Math.cos(state.pitch)),right=new T.Vector3(Math.cos(state.yaw),0,-Math.sin(state.yaw)),up=new T.Vector3().crossVectors(direction,right),tan=Math.tan(camera.fov*Math.PI/360);let distance=0;
   for(const x of [viewBounds.min.x,viewBounds.max.x])for(const y of [viewBounds.min.y,viewBounds.max.y])for(const z of [viewBounds.min.z,viewBounds.max.z]){const p=new T.Vector3(x,y,z).sub(center);distance=Math.max(distance,Math.abs(p.dot(right))/(tan*camera.aspect)+p.dot(direction),Math.abs(p.dot(up))/tan+p.dot(direction));}
-  distance=Math.max(distance*1.10,look.transport==='bicycle'?(state.snapshotOnly?6.8:5.2):state.snapshotOnly?(formulaFrame?15:13):(formulaFrame?10.4:9));camera.position.copy(center).addScaledVector(direction,distance);camera.lookAt(center);
+  distance=Math.max(distance*1.10,['bicycle','scooter','hoverboard'].includes(look.transport)?(state.snapshotOnly?6.8:5.2):state.snapshotOnly?(formulaFrame?15:13):(formulaFrame?10.4:9));camera.position.copy(center).addScaledVector(direction,distance);camera.lookAt(center);
  }
  let formulaFrame=['formula','formulaPro','formulaElite'].includes(look.frontBumper);const updateLook=v=>{formulaFrame=['formula','formulaPro','formulaElite'].includes(v.frontBumper);model.update(v);viewBounds=null;glowMat.uniforms.color.value.set(window.PokerGarage.item('light',v.light).color);underLights.forEach(l=>{l.color.copy(glowMat.uniforms.color.value);l.position.y=.36+({standard:0,raised:.20,comfort:.12,high:.38,rally:.48,extreme:.60}[v.suspension]||0)*.86;});if(!state.snapshotOnly)scheduler?.request();};
  state.yaw??=.90;state.pitch??=.25;state.manual??=true;let disposed=false,drag=null,scheduler=null;
@@ -630,8 +632,8 @@ window.pokerCreateGarage3D=function(host,look,state={}){
  const key=e=>{const turns={ArrowLeft:[.12,0],ArrowRight:[-.12,0],ArrowUp:[0,.09],ArrowDown:[0,-.09]};if(!turns[e.key])return;state.manual=true;state.yaw+=turns[e.key][0];state.pitch=clamp(state.pitch+turns[e.key][1],-.24,1.35);scheduler.request();e.preventDefault();};host.addEventListener('keydown',key);host.addEventListener('pointerdown',down);host.addEventListener('pointermove',move);host.addEventListener('pointerup',up);host.addEventListener('pointercancel',up);host.addEventListener('lostpointercapture',up);
  function dispose(){if(disposed)return;disposed=true;window.removeEventListener('poker-garage-lighting',onRoomLight);scheduler?.dispose();intersection.disconnect();dialog?.removeEventListener('close',dispose);resize.disconnect();host.removeEventListener('keydown',key);host.removeEventListener('pointerdown',down);host.removeEventListener('pointermove',move);host.removeEventListener('pointerup',up);host.removeEventListener('pointercancel',up);host.removeEventListener('lostpointercapture',up);disposeSceneResources(scene);env.dispose();target.dispose();postMat.dispose();postQuad.geometry.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();}
  const dialog=host.closest('dialog');dialog?.addEventListener('close',dispose);
- function tick(){if(disposed)return;if(!host.isConnected||(dialog&&!dialog.open)){dispose();return;}camera.zoom=(state.previewScale||1)*(state.zoom||1);camera.updateProjectionMatrix();const rect=host.getBoundingClientRect();if(rect.bottom>0&&rect.top<innerHeight&&rect.right>0&&rect.left<innerWidth){frameModel();drawFrame();host.dataset.yaw=state.yaw.toFixed(4);host.dataset.pitch=state.pitch.toFixed(4);host.dataset.manual=String(state.manual);}}
- const intersection=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&!state.snapshotOnly)scheduler?.request();});intersection.observe(host);
- scheduler=createRenderScheduler({render:tick});setNight(state.night);
+ function tick(time){if(disposed)return;if(!host.isConnected||(dialog&&!dialog.open)){dispose();return;}camera.zoom=(state.previewScale||1)*(state.zoom||1);camera.updateProjectionMatrix();const rect=host.getBoundingClientRect();if(rect.bottom>0&&rect.top<innerHeight&&rect.right>0&&rect.left<innerWidth){model.animate?.(time);frameModel();drawFrame();host.dataset.yaw=state.yaw.toFixed(4);host.dataset.pitch=state.pitch.toFixed(4);host.dataset.manual=String(state.manual);}}
+ let intersecting=true;const intersection=new IntersectionObserver(entries=>{intersecting=entries.some(e=>e.isIntersecting);if(intersecting&&!state.snapshotOnly)scheduler?.request();});intersection.observe(host);
+ scheduler=createRenderScheduler({render:tick,active:()=>!!model.animate&&!state.snapshotOnly&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!disposed&&host.isConnected&&intersecting&&(!dialog||dialog.open)});setNight(state.night);
  if(!state.snapshotOnly)scheduler.request();return {update:updateLook,setNight,dispose,state,invalidate:()=>scheduler.request(),measureClearance:()=>model.measureClearance(),snapshot(){frameModel();drawFrame();const image=document.createElement('canvas');image.width=renderer.domElement.width;image.height=renderer.domElement.height;image.getContext('2d').drawImage(renderer.domElement,0,0);return image;}};
 };

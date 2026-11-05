@@ -289,9 +289,9 @@ for(const i of items){
  i.target=i.target===0?CAR_UNLOCK_LEVEL:i.target<50?
   carUpgradeLevels[Math.min(carUpgradeLevels.length-1,Math.round((i.target-1)* (carUpgradeLevels.length-1)/39))]:i.target;
 }
-function transportLevel(id){return id==='kart'?CAR_UNLOCK_LEVEL:['bicycle','scooter'].includes(id)?1:Infinity;}
+function transportLevel(id){return id==='kart'?CAR_UNLOCK_LEVEL:id==='scooter'?3:id==='hoverboard'?7:id==='bicycle'?1:Infinity;}
 function availableTransport(id,level){
- const selected=['kart','bicycle','scooter'].includes(id)?id:'kart';
+ const selected=['kart','bicycle','scooter','hoverboard'].includes(id)?id:'kart';
  return Number(level)>=transportLevel(selected)?selected:Number(level)>=CAR_UNLOCK_LEVEL?'kart':'bicycle';
 }
 // Descriptive data and catalogue cards use the same final thresholds.

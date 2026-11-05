@@ -35,7 +35,7 @@ test('reward shelves and metadata use final catalogue levels',()=>{
 test('car and upgrades start at twelve while basic transport and personal items stay available',()=>{
  assert.equal(G.availableTransport('kart',11),'bicycle');
  assert.equal(G.availableTransport('kart',12),'kart');
- for(const id of ['bicycle','scooter'])assert.equal(G.availableTransport(id,1),id);
+ assert.equal(G.availableTransport('bicycle',1),'bicycle');assert.equal(G.availableTransport('scooter',2),'bicycle');assert.equal(G.availableTransport('scooter',3),'scooter');assert.equal(G.availableTransport('hoverboard',6),'bicycle');assert.equal(G.availableTransport('hoverboard',7),'hoverboard');
  for(const item of G.items.filter(i=>!G.characterFields.includes(i.kind)&&i.metric==='level'))assert.ok(item.target>=12,item.key);
  assert.equal(G.catalog({level:11}).find(i=>i.key==='chassis:classic').unlocked,false);
  assert.equal(G.catalog({level:12}).find(i=>i.key==='chassis:classic').unlocked,true);
