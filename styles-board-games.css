@@ -931,3 +931,31 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
   border-radius:4px;
   background:#2c2016 center/54px 100% repeat-x;
 }
+
+.nards-storage[data-home-full="true"] {
+  position: relative;
+  gap: 0;
+  padding: 0;
+}
+.nards-storage[data-home-full="true"] > strong {
+  position: absolute;
+  inset: 0 1px auto;
+  z-index: 2;
+  transform: translateY(-60%);
+  pointer-events: none;
+}
+.nards-storage[data-home-full="true"] .nards-storage-slots {
+  gap: 0;
+  padding: 0;
+  background: linear-gradient(90deg,#1d110a,#5b3a22 50%,#1d110a);
+}
+.nards-storage[data-home-full="true"] .nards-storage-slots i {
+  max-height: none;
+}
+.nards-storage[data-home-full="true"] .nards-storage-slots i::before {
+  height: 100%;
+  max-width: 100%;
+}
+
+/* Dice controls must not be covered by the carousel navigation row. */
+#nardsPanelDice .collection-carousel-arrows{margin-top:0}

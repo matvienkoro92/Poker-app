@@ -91,7 +91,7 @@ test('saving vehicle settings preserves the saved character and does not reclaim
  const G=require('../app-garage-catalog'),old={...G.defaults,hair:'hairBuzz',body:'bodyNormal',suit:'palmTank'};
  let raw=JSON.stringify({version:0,nick:'waaar',items:[],garage:old}),claimed=0;
  const hall=mock('lib/player-hall.js',{
-  './club-social':{memberProfile:async()=>profile,redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:c[0]==='EVAL'?(raw=c[5],1):null)},
+  './club-social':{memberProfile:async()=>({...profile,level:12}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:c[0]==='EVAL'?(raw=c[5],1):null)},
   './garage-plate-registry':{plateKey:require('../lib/garage-plate-registry').plateKey,save:async()=>{claimed++;return {ok:false,owner:'ID2'};}},
   './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
  });
@@ -107,4 +107,30 @@ test('selected transport accepts basic bicycle, scooter and kart but rejects loc
  assert.equal(Object.hasOwn(H.selection(good,[],{}),'selectedTransport'),false);
 });
 
-test('public showcase includes selected basic transport even without garage upgrades',()=>{const d={profile:{accountId:'ID123456',nick:'Игрок'},saved:{},garage:{stats:{level:1,earnedBadges:[]}}};for(const selectedTransport of ['bicycle','scooter']){const v=H.showcaseView({...d,saved:{selectedTransport}},false);assert.equal(v.selectedTransport,selectedTransport);assert.equal(v.customized,true);}assert.equal(H.showcaseView({...d,saved:{selectedTransport:'locked-car'}},false).selectedTransport,'kart');});
+test('public showcase includes selected basic transport even without garage upgrades',()=>{const d={profile:{accountId:'ID123456',nick:'Игрок'},saved:{},garage:{stats:{level:1,earnedBadges:[]}}};for(const selectedTransport of ['bicycle','scooter']){const v=H.showcaseView({...d,saved:{selectedTransport}},false);assert.equal(v.selectedTransport,selectedTransport);assert.equal(v.customized,true);}assert.equal(H.showcaseView({...d,saved:{selectedTransport:'locked-car'}},false).selectedTransport,'bicycle');});
+
+
+test('legacy car selections automatically show a bicycle below level twelve in hall and public showcase',()=>{
+ const G=require('../app-garage-catalog');
+ for(const level of [1,5,11,12]){
+  const saved={selectedTransport:'kart',garage:{...G.defaults,suit:'palmTank'}};
+  const d={profile:{...profile},saved,stats:{},items:[],garage:{stats:{level}},lounge:{friends:[],available:false}};
+  const expected=level<12?'bicycle':'kart';
+  assert.equal(H.view(d,true).selectedTransport,expected);
+  assert.equal(H.showcaseView(d,false).selectedTransport,expected);
+  assert.equal(H.view(d,true).garage.loadout.suit,'palmTank');
+ }
+});
+
+test('server prevents choosing the car below twelve while allowing the bicycle',async()=>{
+ for(const [level,selectedTransport,allowed] of [[11,'kart',false],[11,'bicycle',true],[12,'kart',true]]){
+  let raw=JSON.stringify({version:0,featured:[],theme:'walnut',goal:'wins',selectedTransport:'kart'});
+  const hall=mock('lib/player-hall.js',{
+   './club-social':{memberProfile:async()=>({...profile,level}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:c[0]==='EVAL'?(raw=c[5],1):null)},
+   './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
+  });
+  const body={version:0,featured:[],theme:'walnut',goal:'wins',selectedTransport};
+  if(!allowed)await assert.rejects(()=>hall.save('ID1',body),/12/);
+  else assert.equal((await hall.save('ID1',body)).selectedTransport,selectedTransport);
+ }
+});

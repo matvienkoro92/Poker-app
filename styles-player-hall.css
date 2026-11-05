@@ -875,8 +875,8 @@ body.billiards-table-view .billiards-cue-preview{display:none}
  width:auto;height:calc(100dvh - var(--game-shell-top) - var(--game-shell-bottom));
 }
 
-/* Match game surface and checker contrast in the villa preview. */
-.living-nards-half{background-color:#00000030;background-blend-mode:multiply}
+/* Preserve the original brightness of the board artwork. */
+.living-nards-half{background-color:transparent;background-blend-mode:normal}
 .living-preview-checker{filter:brightness(1.1)}
 .living-preview-blade{filter:brightness(.81)}
 .player-hall-dialog .villa-living-admin-stats{position:absolute;right:16px;top:calc(90px + var(--hall-safe-top,0px));z-index:5;min-height:42px;padding:8px 16px;border:1px solid #d5b76c;border-radius:12px;background:#263d30f2;color:#fff0c6;font-weight:700}

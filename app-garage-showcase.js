@@ -26,6 +26,8 @@ async function characterCanvas(c,look){const art=await characterArt(look);if(!c.
 function restoreProfileActions(node){const actions=node.querySelector('.chat-user-modal__profile-actions');if(actions)node.insertAdjacentElement('beforebegin',actions);}
 function compactProfile(node,d){
  restoreProfileActions(node);
+ const levelRewards=node.parentElement?.querySelector("#profileLevelRewards");
+ if(levelRewards)node.insertAdjacentElement("beforebegin",levelRewards);
  const look=d.garage.loadout;node._showcase=d;node.classList.add('garage-showcase--compact');
  node.innerHTML='<div class="garage-showcase__collection"><button type="button" data-showcase-detail="car"><span class="garage-showcase__mini-car"><canvas aria-hidden="true"></canvas></span><strong>'+esc(transportName(d))+'</strong><small>'+esc(transportDescription(d))+'</small><b>Открыть гараж ↗</b></button><button type="button" data-showcase-detail="character"><span class="garage-showcase__mini-suit"><canvas role="img" aria-label="Выбранная куртка"></canvas></span><strong>Одежда</strong><small>'+esc(G.activeOutfit(look)?.title||G.item('suit',look.suit).title)+'</small><b>Открыть гардероб ↗</b></button></div><p class="garage-showcase__status" role="status"></p>';
  const actions=node.closest('#chatUserModal')?.querySelector('.chat-user-modal__profile-actions');if(actions){node.querySelector('.garage-showcase__collection').append(actions);node.classList.add('garage-showcase--with-actions');}

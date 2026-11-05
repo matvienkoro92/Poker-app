@@ -4,12 +4,12 @@ import {diceFaces} from './dice-view.mjs';
 import {createBackgammon} from './backgammon.mjs';
 
 // The editor uses the same geometry, materials and decorative components as play.
-export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,rails,wells,home,storageFilled,kind}){
+export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,rails,wells,home,homeFull,storageFilled,kind}){
  root.classList.add('has-live-board');
  const table=document.createElement('div');table.className='nards-table editor-board';table.dataset.skin=board.id;paintNardsRails(table,rails||{});table.setAttribute('aria-label','Предпросмотр игровой доски');
  const field=document.createElement('div');field.className='nards-board';field.dataset.skin=board.id;field.dataset.interior=inside.id;field.dataset.wells=String(wells===true);field.dataset.mural=String(!(points ?? !(inside.hidePoints||inside.revision>=2)));field.dataset.pointMat=String(points!=null&&inside.revision>=2);
  for(const [key,value]of Object.entries({'nards-light':board.light,'nards-dark':board.dark,'nards-frame':board.frame,'nards-carving':board.cover?'url("'+board.cover+'")':'none','inside-light':inside.light,'inside-dark':inside.dark,'inside-accent':inside.accent,'nards-left-surface':'url("'+inside.leftSurface+'")','nards-right-surface':'url("'+inside.rightSurface+'")','checker-white':checkers.white,'checker-black':checkers.black,'checker-white-art':checkers.whiteArt?'url("'+checkers.whiteArt+'")':'none','checker-black-art':checkers.blackArt?'url("'+checkers.blackArt+'")':'none'}))table.style.setProperty('--'+key,value);
- const left=document.createElement('aside'),right=document.createElement('aside');paintStorage(left,1,storageFilled?7:0,home);paintStorage(right,0,storageFilled?7:0,home);left.classList.add('editor-store-left');right.classList.add('editor-store-right');table.append(left,field,right);
+ const left=document.createElement('aside'),right=document.createElement('aside');paintStorage(left,1,storageFilled?7:0,home,homeFull);paintStorage(right,0,storageFilled?7:0,home,homeFull);left.classList.add('editor-store-left');right.classList.add('editor-store-right');table.append(left,field,right);
  field.append(createSurfaceHalf('left'),createSurfaceHalf('right'),createCarvedRail('left'),createCarvedRail('right'),createCarvedRail('left',true),createCarvedRail('right',true));
  const state=createBackgammon(kind==='short'?'short':'long');
  for(let row=0;row<2;row++)for(let col=0;col<12;col++){

@@ -79,3 +79,47 @@
 .profile-level-rewards__access h4 { margin-top: 0; }
 .profile-level-rewards__access ul { padding: 0; margin: 0; list-style: none; display: grid; gap: 12px; line-height: 1.5; }
 .profile-level-rewards__access .is-available { color: #96e2b1; }
+
+#profilePublicShowcase > .profile-level-rewards,
+.profile-level-rewards {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 12px 0;
+  border: 0;
+  background: none;
+}
+.profile-level-rewards__strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #9b7a3b;
+  border-radius: 12px;
+  background: linear-gradient(110deg, #302919, #111820);
+  color: #f5dfa9;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.profile-level-rewards__strip > span:last-child { color: #c4b68e; }
+.profile-level-rewards__strip b { margin-left: 6px; color: #f5dfa9; }
+.profile-level-rewards__dialog {
+  box-sizing: border-box;
+  width: min(600px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  padding: 22px;
+  overflow: auto;
+  border: 1px solid #9b7a3b;
+  border-radius: 22px;
+  background: #151820;
+  color: #f5dfa9;
+}
+.profile-level-rewards__dialog::backdrop { background: #000b; }
+.profile-level-rewards__close { float: right; border: 0; background: none; color: #f5dfa9; font-size: 28px; cursor: pointer; }
+.profile-level-rewards__max { padding: 12px; color: #96e2b1; font-size: 13px; }

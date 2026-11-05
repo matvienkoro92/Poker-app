@@ -1053,33 +1053,42 @@ function profileRaffleRewardLevel(value) {
 
 
 function profileRenderLevelRewards(status) {
-  var anchor = document.getElementById("profilePublicStatusSection");
+  var anchor = document.getElementById("profilePublicHero");
+  var showcase = document.querySelector("#profilePublicShowcase > .garage-showcase--profile");
   if (!anchor) return;
   var block = document.getElementById("profileLevelRewards");
   if (!block) {
     block = document.createElement("section");
     block.id = "profileLevelRewards";
     block.className = "profile-level-rewards";
-    anchor.insertAdjacentElement("afterend", block);
+    if (showcase) showcase.insertAdjacentElement("beforebegin", block);
+    else anchor.insertAdjacentElement("afterend", block);
+    block.addEventListener("click", function (event) {
+      var dialog = block.querySelector("dialog");
+      if (event.target.closest("[data-level-rewards-open]")) dialog.showModal();
+      if (event.target.closest("[data-level-rewards-close]")) dialog.close();
+    });
     block.addEventListener("change", function (event) {
       if (!event.target.matches("[data-level-rewards-select]")) return;
       profileLevelRewardsSelected = Number(event.target.value);
       profileRenderLevelRewards(profilePublicShowcaseStatus);
     });
   }
+  var dialogOpen = !!block.querySelector("dialog[open]");
   var level = Math.max(0, Number(status && status.level) || 0);
   block.hidden = level < 1;
   if (block.hidden) return;
   profileLoadLevelRewardRaffles();
   profileLoadGameLevelRewards();
   if (level >= 100) {
-    block.innerHTML = '<h3>Максимальный уровень</h3><p>Вы достигли 100-го уровня клуба.</p>';
+    block.innerHTML = '<p class="profile-level-rewards__max">✓ Максимальный уровень клуба · 100</p>';
     return;
   }
   var selected = profileLevelRewardsSelected > level ? Math.min(100, profileLevelRewardsSelected) : level + 1;
   var garage = window.PokerGarage;
   var rewards = garage ? garage.catalog({level: level}).filter(function (item) {
-    return item.metric === "level" && item.target === selected && garage.curatedWardrobeItem(item);
+    return item.metric === "level" && item.target === selected && garage.curatedWardrobeItem(item) &&
+      (garage.characterFields.indexOf(item.kind) >= 0 || item.id !== garage.defaults[item.kind]);
   }) : [];
   var categories = [
     {title:"Личные вещи", items:rewards.filter(function (item) { return garage.characterFields.indexOf(item.kind) >= 0; })},
@@ -1098,6 +1107,7 @@ function profileRenderLevelRewards(status) {
           'На этом уровне новых предметов в этой категории нет.') + '</p>');
   }).join('');
   var access = [];
+  if (selected === 12) access.push("Машина МанкиCar Two ACES и базовая комплектация");
   if (selected === 10) {
     access.push("Переводы между игроками");
     access.push("Бонус 300 ₽ за 7 дней круток без билета в «Раздаче дня»");
@@ -1131,7 +1141,7 @@ function profileRenderLevelRewards(status) {
   for (var target = level + 1; target <= 100; target++) {
     options += '<option value="' + target + '"' + (target === selected ? ' selected' : '') + '>Уровень ' + target + (target === level + 1 ? ' · следующий' : '') + '</option>';
   }
-  block.innerHTML = raffleAccessHtml + '<span class="profile-level-rewards__kicker">ВАШ ПРОГРЕСС</span>' +
+  var detailsHtml = raffleAccessHtml + '<span class="profile-level-rewards__kicker">ВАШ ПРОГРЕСС</span>' +
     '<h3>' + (selected === level + 1 ? 'На следующем уровне' : 'На уровне ' + selected) + '</h3>' +
     '<label>Посмотреть уровень <select data-level-rewards-select>' + options + '</select></label>' + progress +
     (access.length ? '<h4>Новые доступы</h4><ul>' + access.map(function (text) {
@@ -1139,6 +1149,12 @@ function profileRenderLevelRewards(status) {
     }).join('') + '</ul><p class="profile-level-rewards__note">Для каждого бонуса действуют его условия получения.</p>' : '') +
     categoriesHtml +
     '<p class="profile-level-rewards__note">Вещи открываются при достижении указанного уровня. Розыгрыши показаны из текущего списка. Участие требует выполнения условий на карточке розыгрыша.</p>';
+  block.innerHTML = '<button type="button" class="profile-level-rewards__strip" data-level-rewards-open>' +
+    '<span>Следующий уровень <strong>' + (level + 1) + '</strong></span><span>Награды и доступы <b aria-hidden="true">→</b></span></button>' +
+    '<dialog class="profile-level-rewards__dialog" aria-label="Награды и доступы по уровням">' +
+    '<button type="button" class="profile-level-rewards__close" data-level-rewards-close aria-label="Закрыть">×</button>' +
+    detailsHtml + '</dialog>';
+  if (dialogOpen) block.querySelector("dialog").showModal();
 }
 
 function profilePublicShowcaseApplyStatus(status) {

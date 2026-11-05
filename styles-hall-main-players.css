@@ -2783,8 +2783,8 @@
 .hall-fish-achievements .hall-fish-achievement-card:not(.hall-fish-achievement-card--featured) > .hall-fish-achievement-tab{flex:none;height:auto;overflow:hidden}
 .hall-fish-achievements .hall-fish-achievement-card:not(.hall-fish-achievement-card--featured){align-self:start;padding-bottom:0;border-bottom:0;gap:6px}
 .hall-fish-achievements .hall-fish-achievement-card:not(.hall-fish-achievement-card--featured) .hall-fish-achievement-preview{gap:7px;padding:10px 8px;border:1px solid #cab27626;border-radius:10px;background:linear-gradient(150deg,#20283988,#0a0e18aa)}
-.hall-fish-achievements .hall-fish-achievement-preview ol{gap:6px}
-.hall-fish-achievements .hall-fish-achievement-preview li{min-height:22px}
+.hall-fish-achievements .hall-fish-achievement-preview ol{gap:3px}
+.hall-fish-achievements .hall-fish-achievement-preview li{min-height:17px}
 .hall-fish-achievements .hall-fish-achievement-preview__label{font-size:9px;letter-spacing:1px;color:#baab85}
 .hall-fish-achievements .hall-fish-achievement-preview__more{margin-top:auto;min-height:30px;padding:4px 0;font-size:11px;color:#e6d3a5;background:none;box-shadow:none;border:0}
 .hall-fish-achievements .hall-fish-achievement-prize-caption{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 6px;margin:0 0 2px;padding:6px;border:1px solid #e8bb5955;border-radius:7px;background:linear-gradient(110deg,#95651e44,#49321533);white-space:normal;line-height:1.2}

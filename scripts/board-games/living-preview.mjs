@@ -15,7 +15,7 @@ export function paint(root,game,equipment={}){
   const chess=game==='chess';
   const board=(chess?BOARDS:NARDS_BOARDS).find(b=>b.id===(chess?equipment.board:equipment.nardsBoard))||(chess?BOARDS:NARDS_BOARDS)[0];
   const set=(chess?PIECES:CHECKERS).find(s=>s.id===(chess?equipment.pieces:equipment.checkers))||(chess?PIECES:CHECKERS)[0];
-  const paintKey=[game,board.id,set.id,equipment.nardsInterior,equipment.nardsHome].join(':');
+  const paintKey=[game,board.id,set.id,equipment.nardsInterior,equipment.nardsHome,equipment.nardsHomeFull].join(':');
   if(root.dataset.paintKey===paintKey&&root.firstElementChild)return {board:board.name,pieces:set.name};
   root.dataset.board=board.id;for(const [key,value]of Object.entries({light:board.light,dark:board.dark,frame:board.frame}))root.style.setProperty('--nards-'+key,value);root.dataset.pieces=set.id;
   root.classList.toggle('living-top-board--chess',chess);
@@ -59,7 +59,7 @@ export function paint(root,game,equipment={}){
     for(const point of [...surface.children]){if(point.classList.contains('living-preview-bar'))continue;const col=Number(point.style.gridColumn);if(col>7){point.style.gridColumn=col-7;base.append(point);}else front.append(point);}
     // Painted interiors already contain their carved point rims; a second rail misaligns the upper wells.
     if(surface.dataset.bakedPoints!=='true')for(const half of [front,base])for(const bottom of [false,true]){const rail=createCarvedRail(half===front?'left':'right',bottom);half.append(rail);}
-    const leftStorage=document.createElement('aside'),rightStorage=document.createElement('aside');leftStorage.className=rightStorage.className='living-nards-storage';paintStorage(leftStorage,1,0,equipment.nardsHome);paintStorage(rightStorage,0,0,equipment.nardsHome);front.append(leftStorage);base.append(rightStorage);
+    const leftStorage=document.createElement('aside'),rightStorage=document.createElement('aside');leftStorage.className=rightStorage.className='living-nards-storage';paintStorage(leftStorage,1,0,equipment.nardsHome,equipment.nardsHomeFull);paintStorage(rightStorage,0,0,equipment.nardsHome,equipment.nardsHomeFull);front.append(leftStorage);base.append(rightStorage);
     lid.append(front,back);box.append(base,lid,hinge);root.replaceChildren(box);
     root.dataset.openLabel=root.getAttribute('aria-label');setClosed(root,root.classList.contains('is-closed'));
   }else root.replaceChildren(surface);
