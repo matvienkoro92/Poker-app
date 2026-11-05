@@ -2299,8 +2299,8 @@
         (crmLinkParams(link).category ? '<span class="player-crm__link-category">'+esc(crmLinkParams(link).category)+'</span>' : '') + '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
         '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + crmLinkMetricHelp(metric[0],metric[1]) + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '<small class="player-crm__link-metric-hint">' + metric[2] + '</small></dd></div>'; }).join("") + '</dl>' +
         (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
-        (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Общая сводка по ссылке</summary><div data-crm-link-preview-body></div></details>' : '') +
-        '<div class="player-crm__link-actions"><button type="button" data-crm-link-details="' + id + '">'+(ownOnly?'По игрокам':'Отклик')+'</button><button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
+        (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
+        '<div class="player-crm__link-actions">'+(ownOnly?'':'<button type="button" data-crm-link-details="'+id+'">Отклик</button>')+'<button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
 
   }
@@ -2499,6 +2499,29 @@
     }).catch(function () { target.innerHTML = '<p role="status">Сводка не загрузилась. Закройте и откройте её, чтобы повторить.</p>'; }).finally(function () { delete details.dataset.previewLoading; });
   }
 
+  function loadCrmInlineLinkPlayers(details) {
+    if (details.dataset.playersLoading || details.dataset.playersComplete) return;
+    details.dataset.playersLoading = '1';
+    var target = details.querySelector('[data-crm-link-players-body]');
+    var rows = details.crmPlayerRows || [];
+    function render(error) {
+      target.innerHTML = (rows.length ? crmLinkPlayersMatrixHtml(rows) : '<p role="status">' + (error ? 'Участники не загрузились.' : details.dataset.playersLoading ? 'Загружаем участников…' : 'Участников пока нет.') + '</p>') +
+        (error || details.crmPlayersNext != null ? '<button type="button" class="player-crm__ghost-btn" data-crm-inline-players-more' + (details.dataset.playersLoading ? ' disabled' : '') + '>' + (error ? 'Повторить' : 'Ещё участники') + '</button>' : '');
+    }
+    render(false);
+    var q = authQuerySafe();
+    fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'journey=1&participants=1&id=' + encodeURIComponent(details.getAttribute('data-crm-link-preview')) + '&offset=' + (details.crmPlayersNext || 0))
+      .then(function(r) { return r.json(); }).then(function(data) {
+        if (!data.ok || !Array.isArray(data.rows)) throw new Error('participants');
+        rows = rows.concat(data.rows);
+        details.crmPlayerRows = rows;
+        details.crmPlayersNext = data.nextOffset;
+        if (data.nextOffset == null) details.dataset.playersComplete = '1';
+        delete details.dataset.playersLoading;
+        render(false);
+      }).catch(function() { delete details.dataset.playersLoading; render(true); });
+  }
+
   function crmLinkSummaryHtml() {
     var periods = [["all", "Всё время"], ["today", "Сегодня · МСК"], ["7", "7 дней"], ["30", "30 дней"]];
     var html = '<div class="player-crm__form-grid"><label><span>Период воронки</span><select id="playerCrmLinkSummaryPeriod">' + periods.map(function (p) {
@@ -2562,7 +2585,7 @@
       return (bonus.steps.length ? '<strong>'+number(bonus.steps.length)+'</strong>'+labels : (bonus.undated ? '—' : '0')) +
         (bonus.undated ? '<small>Без даты · '+number(bonus.undated)+'</small>' : '');
     };
-    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Бонусы новичка','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':row.status==='unknown'?'<small>Дата неизвестна</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+welcomeBonus(row)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(steps.depositAmount==null?'—':esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount)))+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
+    return '<div class="crm-players-matrix" role="region" aria-label="Показатели по игрокам" tabindex="0"><table><thead><tr>'+['№','Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Бонусы новичка','Poker21 ID','Уровень','Бот','Чат игроков','Пополнения','Депозиты, ₽','Подробности'].map(function(label){return '<th scope="col">'+label+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row,index){var steps=row.steps||{},details=crmLinkJourneyHtml(row);return '<tr><td class="crm-players-matrix__number">'+(index+1)+'</td><th scope="row"><strong>'+esc(row.nick||(row.accountId?'Игрок':'Гость'))+'</strong><small>'+esc(row.accountId||row.actor||'')+'</small></th><td>'+number(steps.visitCount)+'</td><td>'+number(steps.activityCount)+'</td><td>'+status(steps.registered)+(row.status==='returning'?'<small>До перехода</small>':row.status==='unknown'?'<small>Дата неизвестна</small>':'')+'</td><td>'+number(steps.raffleCount)+'</td><td>'+number(steps.spinCount)+'</td><td>'+welcomeBonus(row)+'</td><td>'+esc(steps.pokerId||row.pokerId||'—')+'</td><td>'+number(steps.heroLevel)+'</td><td>'+status(steps.bot)+'</td><td>'+status(steps.playersChat)+'</td><td>'+number(steps.depositCount)+'</td><td>'+(steps.depositAmount==null?'—':esc(new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(steps.depositAmount)))+'</td><td><details><summary>Действия</summary>'+details+'</details></td></tr>';}).join('')+'</tbody></table></div>';
   }
 
   function renderCrmLinkDetailsModal() {
@@ -5419,6 +5442,19 @@
         sendCrmSectionData(sendSection.getAttribute("data-crm-send-section") || state.tab);
         return;
       }
+      var linkView = e.target.closest('[data-crm-link-view]');
+      if (linkView) {
+        var overview = linkView.closest('[data-crm-link-preview]');
+        var playersView = linkView.getAttribute('data-crm-link-view') === 'players';
+        overview.querySelector('[data-crm-link-preview-body]').hidden = playersView;
+        overview.querySelector('[data-crm-link-players-body]').hidden = !playersView;
+        overview.querySelectorAll('[data-crm-link-view]').forEach(function(button) { button.setAttribute('aria-pressed', String(button === linkView)); });
+        if (playersView && !overview.crmPlayerRows) loadCrmInlineLinkPlayers(overview);
+        else if (!playersView) loadCrmLinkPreview(overview);
+        return;
+      }
+      var inlineMore = e.target.closest('[data-crm-inline-players-more]');
+      if (inlineMore) { loadCrmInlineLinkPlayers(inlineMore.closest('[data-crm-link-preview]')); return; }
       var preview = e.target.closest('.crm-link-overview summary');
       if (preview) { loadCrmLinkPreview(preview.closest('[data-crm-link-preview]')); return; }
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
