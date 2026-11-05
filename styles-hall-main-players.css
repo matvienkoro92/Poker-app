@@ -3058,3 +3058,9 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 }
 .home-month-award-dialog h2 { margin: 10px 0 6px; font-size: 19px; }
 .home-month-award-dialog p { margin: 0; font-size: 14px; line-height: 1.45; }
+
+/* Keep the prize badge on the heading line so all award lists stay aligned. */
+.hall-fish-achievements .hall-fish-achievement-preview{position:relative}
+.hall-fish-achievements .hall-fish-achievement-prize-caption{position:absolute;top:7px;right:8px;max-width:calc(100% - 65px);box-sizing:border-box;margin:0;padding:2px 5px;gap:2px 4px;border-radius:5px;line-height:1.1}
+.hall-fish-achievements .hall-fish-achievement-prize-caption strong{font-size:11px}
+.hall-fish-achievements .hall-fish-achievement-prize-caption span{font-size:8px}

@@ -1788,7 +1788,7 @@ function hallFishAchievementSpecs(data) {
     { key: "big50", title: "Заносы 50-100к", sectionTitle: "Заносы от 50 до 100к", description: "Считаются турнирные заносы от 50 000 ₽ до 99 999 ₽. В топе выше игроки с большим количеством таких заносов.", rows: data && data.big50 },
     { key: "big100", title: "Заносы 100к+", sectionTitle: "Заносы от 100к", description: "Считаются турнирные заносы от 100 000 ₽ и выше. При равенстве выше игрок с более крупным лучшим заносом.", rows: data && data.big100 },
     { key: "king", title: "Король МТТ", sectionTitle: "Король турниров", description: "Даётся за первые места в турнирах клуба. Чем больше побед, тем выше позиция в топе.", rows: data && data.king },
-    { key: "monthChampion", title: "Скрудж Макдак", sectionTitle: "Скрудж Макдак", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion },
+    { key: "monthChampion", title: "Скрудж Макдак", sectionTitle: "Скрудж Макдак", description: "Начисляется игроку, который занял топ-1 месяца по сумме заносов. В зачёт идёт каждый месяц отдельно.", rows: data && data.monthChampion, monthlyPrizeRows: data && data.topWin },
   ];
 }
 
@@ -1894,6 +1894,11 @@ function hallFishAchievementLeaderHtml(spec) {
 }
 
 function hallFishAchievementRowsForMonth(spec,monthKey) {
+  if(spec.key==='monthChampion'&&Array.isArray(spec.monthlyPrizeRows))return hallFishRowsWithRank(spec.monthlyPrizeRows.map(function(row){
+    var details=(row.detailRows||[]).filter(function(detail){return detail._monthKey===monthKey;});
+    var total=details.reduce(function(sum,detail){return sum+(Number(detail._reward)||0);},0);
+    return Object.assign({},row,{value:total,tie:0,valueText:hallFishFormatRub(total),extraText:'Сумма призовых за месяц',detailRows:details});
+  }),0);
   if(spec.key==='nardsKing')return (spec.rows||[]).map(function(row){var monthly=row.monthRatings&&row.monthRatings[monthKey];return Object.assign({},row,{value:monthly?monthly.value:0,valueText:monthly?monthly.valueText:'0 очк.',ratingRaw:monthly?monthly.rawScore||monthly.value:0,periodWins:monthly?monthly.wins:0,periodLosses:monthly?monthly.losses:0,tie:monthly?monthly.wins:0,extraText:monthly?'Побед: '+monthly.wins+' · Поражений: '+monthly.losses:'',detailRows:(row.detailRows||[]).filter(function(d){return d._monthKey===monthKey;})});}).filter(function(row){return row.value>0;}).sort(function(a,b){return b.ratingRaw-a.ratingRaw||b.periodWins-a.periodWins||a.periodLosses-b.periodLosses||String(b.accountId).localeCompare(String(a.accountId));}).map(function(row,i){return Object.assign({},row,{rank:i+1});});
   return hallFishRowsWithRank((spec.rows||[]).map(function(row){
     var details=(row.detailRows||[]).filter(function(d){return d._monthKey===monthKey;});
@@ -1908,19 +1913,26 @@ function hallFishAchievementRowsForMonth(spec,monthKey) {
 // A monthly category winner earns one final award, regardless of the number of
 // underlying wins. Keep this separate from the source specs to avoid self-counting.
 function hallFishPlayerMonthSpec(data,monthKey) {
-  var byNick=Object.create(null);
+  var byNick=Object.create(null),monthlyPrizes=Object.create(null);
+  // topWin contains every paid tournament result; do not sum overlapping award categories.
+  (data&&data.topWin||[]).forEach(function(row){
+    var key=hallFishNormalizeNick(row.nick);
+    monthlyPrizes[key]=(monthlyPrizes[key]||0)+(row.detailRows||[]).reduce(function(sum,detail){
+      return sum+(detail._monthKey===monthKey?Number(detail._reward)||0:0);
+    },0);
+  });
   if(monthKey!=='all'&&!(data&&data.pendingExtras))hallFishAchievementSpecs(data).forEach(function(spec){
     var leader=hallFishAchievementRowsForMonth(spec,monthKey)[0];if(!leader)return;
     var key=hallFishNormalizeNick(leader.nick);if(!key)return;
-    if(!byNick[key])byNick[key]=Object.assign({},leader,{value:0,tie:0,detailRows:[],awardTitles:[],awardKeys:[]});
+    if(!byNick[key])byNick[key]=Object.assign({},leader,{value:0,tie:monthlyPrizes[key]||0,detailRows:[],awardTitles:[],awardKeys:[]});
     var row=byNick[key];row.accountId=row.accountId||leader.accountId;row.value++;
     row.awardKeys.push(spec.key);
     row.awardTitles.push(spec.sectionTitle||spec.title);
     row.detailRows.push({_monthKey:monthKey,title:spec.sectionTitle||spec.title,meta:'Первое место · '+hallFishDayHeroMonthLabel(monthKey),note:leader.valueText||String(leader.value)});
   });
-  var rows=hallFishRowsWithRank(Object.keys(byNick).map(function(key){var row=byNick[key];row.valueText=row.value+' '+(row.value===1?'награда':row.value<5?'награды':'наград');row.extraText=row.awardTitles.join(' · ');return row;}),0);
-  rows.forEach(function(row,index){if(index&&row.value===rows[index-1].value)row.rank=rows[index-1].rank;});
-  return {key:'playerMonth',title:'Игрок месяца',sectionTitle:'Игрок месяца',description:'Одна итоговая награда за первое место в каждой категории ниже. Число побед внутри категории не увеличивает этот счёт. При равенстве количества наград — совместное лидерство.',rows:rows};
+  var rows=hallFishRowsWithRank(Object.keys(byNick).map(function(key){var row=byNick[key];row.valueText=row.value+' '+(row.value===1?'награда':row.value<5?'награды':'наград');row.extraText=row.awardTitles.join(' · ')+' · Призовые за месяц: '+hallFishFormatRub(row.tie);return row;}),0);
+  rows.forEach(function(row,index){if(index&&row.value===rows[index-1].value&&row.tie===rows[index-1].tie)row.rank=rows[index-1].rank;});
+  return {key:'playerMonth',title:'Игрок месяца',sectionTitle:'Игрок месяца',description:'Одна итоговая награда за первое место в каждой категории ниже. Число побед внутри категории не увеличивает этот счёт. При равенстве количества наград выше игрок с большей суммой призовых за месяц. При равенстве обеих величин — совместное лидерство.',rows:rows};
 }
 
 function hallFishRenderHomePlayerMonth(data) {
@@ -1930,7 +1942,7 @@ function hallFishRenderHomePlayerMonth(data) {
   var specs = hallFishAchievementSpecs(data);
   var rows = hallFishPlayerMonthSpec(data, month).rows;
   var leader = rows[0];
-  var leaders = leader ? rows.filter(function(row){return row.value === leader.value;}) : [];
+  var leaders = leader ? rows.filter(function(row){return row.value === leader.value && row.tie === leader.tie;}) : [];
   var count = leader ? leader.value : 0;
   var label = count === 1 ? 'награда' : count >= 2 && count <= 4 ? 'награды' : 'наград';
   var monthName = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1];
@@ -1982,7 +1994,7 @@ window.addEventListener('online', hallFishRefreshHomePlayerMonth);
 
 
 function hallFishPlayerMonthCardHtml(spec,active,data,showPrize) {
-  var month=hallFishActiveDayHeroMonth,rows=spec.rows||[],leaders=rows.filter(function(row){return row.value===rows[0].value;});
+  var month=hallFishActiveDayHeroMonth,rows=spec.rows||[],leaders=rows.filter(function(row){return row.value===rows[0].value&&row.tie===rows[0].tie;});
   var period=month==='all'?'Выберите месяц':hallFishDayHeroMonthLabel(month)+' '+month.split('.')[1];
   var status=month==='all'?'Главная награда по итогам каждого месяца':data&&data.pendingExtras?'Считаем итоговые награды…':!leaders.length?'В этом месяце пока нет итоговых наград':leaders.length>1?'Совместное лидерство':month===hallFishCurrentAchievementMonth()?'Текущий лидер '+['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1]:'Главная награда клуба';
   var leaderPrefix = 'Текущий лидер ';
