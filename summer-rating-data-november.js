@@ -1191,6 +1191,20 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
           "points": 90
         }
       ]
+    },
+    {
+      "time": "15:00",
+      "name": "BLACKOUT 70K",
+      "buyin": 700,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 15746,
+          "points": 135
+        }
+      ]
     }
   ]
 };
