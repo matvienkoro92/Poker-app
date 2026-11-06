@@ -277,3 +277,17 @@
 #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:active .home-mini-icon__label {
   box-shadow: inset 0 1px 3px #0008, 0 1px 0 #66502d, 0 3px 5px #0008 !important;
 }
+
+/* Larger action plaques; keep their full height in the shortcut row. */
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link {
+  aspect-ratio: 1 / 1.24 !important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
+  height: 20.4cqw !important;
+  font-size: 9.01cqw !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+  text-align: center;
+  text-wrap: balance;
+  padding: 0 2cqw !important;
+}
