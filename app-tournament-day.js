@@ -57,6 +57,8 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     buyin: "500₽",
     guarantee: "200 000₽",
     banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
+    banners: ["home-tournament-friday-knockout-square-ram.jpg", "home-tournament-friday-knockout-square-press.jpg"],
+    squareBannerSize: 1254,
     bannerAlt: "Poker21 Нокаут — вход 500₽, гарантия 200 000₽",
     bannerWidth: 640,
     bannerHeight: 915
@@ -1091,11 +1093,13 @@ function renderHomeTournamentWeekList(activeWeekday) {
       option.value = entry[0]; option.textContent = entry[1];
       formatSelect.appendChild(option);
     });
-    formatSelect.addEventListener("change", function () { renderHomeTournamentWeekList(6); });
+    formatSelect.addEventListener("change", function () { renderHomeTournamentWeekList(Number(formatSelect.dataset.weekday)); });
     formatLabel.appendChild(formatSelect);
     el.insertAdjacentElement("afterend", formatLabel);
   }
-  formatSelect.parentElement.hidden = Number(activeWeekday) !== 6;
+  formatSelect.dataset.weekday = String(activeWeekday);
+  var activeItem = pokerGetHomeTournamentItem(Number(activeWeekday), new Date()) || {};
+  formatSelect.parentElement.hidden = !(activeItem.banners && activeItem.banners.length);
   var storyFormat = formatSelect.value === "story";
   var signature = HOME_TOURNAMENT_WEEK_ORDER.map(function (dow) {
     var entry = pokerGetHomeTournamentItem(dow, new Date()) || {};
@@ -1212,7 +1216,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
     row.appendChild(posterWrap);
     row.appendChild(day);
     row.appendChild(main);
-    if (item.banners && item.banners.length) {
+    if (item.banners && item.banners.length && (!storyFormat || item.storyBanners)) {
       row.classList.add("home-tournament-week-row--square-banners");
       if (storyFormat && item.storyBanners) row.classList.add("home-tournament-week-row--story-banners");
       var gallery = document.createElement("span");
@@ -1222,8 +1226,8 @@ function renderHomeTournamentWeekList(activeWeekday) {
         var image = document.createElement("img");
         image.src = getHomeTournamentBannerUrl(file);
         image.alt = item.bannerAlt + " — " + (index + 1) + " из " + item.banners.length;
-        image.width = storyFormat ? 941 : item.bannerWidth;
-        image.height = storyFormat ? 1672 : item.bannerHeight;
+        image.width = storyFormat ? 941 : (item.squareBannerSize || item.bannerWidth);
+        image.height = storyFormat ? 1672 : (item.squareBannerSize || item.bannerHeight);
         image.loading = dow === activeWeekday ? "eager" : "lazy";
         gallery.appendChild(image);
       });
