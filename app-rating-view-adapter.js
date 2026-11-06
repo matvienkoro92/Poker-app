@@ -435,6 +435,8 @@ function getWinterRatingPlayerSeasonStartAppPrefix(kind, seasonKey) {
 }
 
 var SUMMER_RATING_PLAYER_ART_BY_NICK = {
+  "luck_is_suck": { src: "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3" },
+  "luckissuck": { src: "./assets/club-news-personal/luck-is-suck-personal-cutout.webp?v=3" },
   "redrocket🚀": { src: "./assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1" },
   "redrocket": { src: "./assets/club-news-personal/redrocket-monkey-personal-v1.webp?v=1" },
   "🦈shark-eyed🦈": { src: "./assets/club-news-personal/shark-eyed-personal-v1.webp?v=1" },
