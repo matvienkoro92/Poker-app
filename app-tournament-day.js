@@ -57,7 +57,20 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     buyin: "500₽",
     guarantee: "200 000₽",
     banner: HOME_TOURNAMENT_FRIDAY_BANNER_FILE,
-    banners: ["home-tournament-friday-knockout-square-ram.jpg", "home-tournament-friday-knockout-square-press.jpg"],
+    banners: [
+      "home-tournament-friday-knockout-square-ram.jpg",
+      "home-tournament-friday-knockout-square-press.jpg",
+      "home-tournament-friday-knockout-square-fuel.webp",
+      "home-tournament-friday-knockout-square-saturn.webp",
+      "home-tournament-friday-knockout-square-rocket.webp",
+      "home-tournament-friday-knockout-square-fishing.webp"
+    ],
+    storyBanners: [
+      "home-tournament-friday-knockout-story-saturn.webp",
+      "home-tournament-friday-knockout-story-fuel.webp",
+      "home-tournament-friday-knockout-story-fishing.webp",
+      "home-tournament-friday-knockout-story-rocket.webp"
+    ],
     squareBannerSize: 1254,
     bannerAlt: "Poker21 Нокаут — вход 500₽, гарантия 200 000₽",
     bannerWidth: 640,
@@ -1225,7 +1238,7 @@ function renderHomeTournamentWeekList(activeWeekday) {
       (storyFormat && item.storyBanners ? item.storyBanners : item.banners).forEach(function (file, index) {
         var image = document.createElement("img");
         image.src = getHomeTournamentBannerUrl(file);
-        image.alt = item.bannerAlt + " — " + (index + 1) + " из " + item.banners.length;
+        image.alt = item.bannerAlt + " — " + (index + 1) + " из " + (storyFormat && item.storyBanners ? item.storyBanners : item.banners).length;
         image.width = storyFormat ? 941 : (item.squareBannerSize || item.bannerWidth);
         image.height = storyFormat ? 1672 : (item.squareBannerSize || item.bannerHeight);
         image.loading = dow === activeWeekday ? "eager" : "lazy";
