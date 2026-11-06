@@ -1082,6 +1082,21 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             11390
           ]
         ]
+      ],
+      [
+        "05.11.2026",
+        [
+          [
+            1,
+            "Luck_is_Suck",
+            50460
+          ],
+          [
+            2,
+            "BlackJackovich",
+            6780
+          ]
+        ]
       ]
     ]
   },
