@@ -84,8 +84,8 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     minute: 0,
     time: "18:00 МСК",
     banner: "home-tournament-saturday-fast-track-square-1.webp",
-    banners: [1, 2, 3].map(function (n) { return "home-tournament-saturday-fast-track-square-" + n + ".webp"; }),
-    storyBanners: [1, 2, 3].map(function (n) { return "home-tournament-saturday-fast-track-story-" + n + ".webp"; }),
+    banners: [1, 2, 3, 4, 5, 6, 7, 8].map(function (n) { return "home-tournament-saturday-fast-track-square-" + n + ".webp"; }),
+    storyBanners: [1, 2, 3, 4, 5, 6, 7].map(function (n) { return "home-tournament-saturday-fast-track-story-" + n + ".webp"; }),
     bannerAlt: "Нокаут — суббота, 18:00 МСК, вход 1 000 ₽, гарантия 150 000 ₽, уровни по 8 минут",
     bannerWidth: 1000,
     bannerHeight: 1000
