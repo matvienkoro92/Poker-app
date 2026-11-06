@@ -137,3 +137,14 @@
 .profile-raffle-access__text small { color: #a7b3c2; font-size: 12px; }
 .profile-raffle-access__status { font-size: 11px; color: #9aa7b9; }
 .is-available .profile-raffle-access__status { color: #96e2b1; }
+
+/* Highlight the entire next-level strip, including the area between captions. */
+#app .view[data-view="profile"] .profile-level-rewards__strip {
+  border: 1px solid #ffe3a1 !important;
+  background: linear-gradient(105deg, #c18b32 0%, #efd18a 48%, #c99a43 100%) !important;
+  box-shadow: inset 0 1px 0 #fff0bc, 0 0 20px #e8b95242 !important;
+  color: #2c200b !important;
+}
+#app .view[data-view="profile"] .profile-level-rewards__strip > span,
+#app .view[data-view="profile"] .profile-level-rewards__strip strong { color: #2c200b !important; }
+#app .view[data-view="profile"] .profile-level-rewards__strip b { background: #fff0be; color: #3a290b; }

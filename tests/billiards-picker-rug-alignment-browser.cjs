@@ -6,6 +6,18 @@ await p.locator('[data-player-hall-open]').click();await p.locator('.player-hall
 fs.mkdirSync('output/billiards-rug-fix/picker',{recursive:true});
 const stage=p.locator('.villa-billiards-stage');
 async function aligned(){await p.waitForFunction(()=>{const e=document.querySelector('.villa-billiards-stage'),a=getComputedStyle(e),b=getComputedStyle(e,'::before');return a.backgroundSize===b.backgroundSize&&a.backgroundPosition===b.backgroundPosition&&a.backgroundSize===b.maskSize&&a.backgroundPosition===b.maskPosition;});}
-for(const width of [320,390,960]){await p.setViewportSize({width,height:844});await aligned();await p.locator('[data-billiards-play=tables]').click();await p.locator('.hall-equipment--strip').waitFor();await aligned();for(const id of ['classic','imperialRuby','ivory','sport']){await p.locator('.hall-equipment [data-item="'+id+'"]').click();await p.waitForFunction(id=>document.querySelector('.villa-billiards-stage').style.backgroundImage.includes('table-'+id+'-'),id);await p.waitForFunction(()=>document.querySelector('.hall-equipment [data-status]').textContent.includes('Применено'));await aligned();await p.screenshot({path:'output/billiards-rug-fix/picker/'+width+'-'+id+'.png'});}await p.locator('.hall-equipment [data-close]').click();await p.waitForFunction(()=>!document.querySelector('.has-billiards-picker'));await aligned();assert.equal(await p.locator('.has-billiards-picker').count(),0);console.log('PASS picker camera alignment, switching and close',width);}
+for(const width of [320,390,960]){
+ await p.setViewportSize({width,height:844});await aligned();
+ for(const id of ['classic','imperialRuby','ivory','sport']){
+  await p.locator('[data-billiards-play=tables]').click();await p.locator('.hall-equipment--strip').waitFor();await aligned();
+  await p.locator('.hall-equipment [data-item="'+id+'"]').click();
+  assert.equal(await p.locator('.hall-equipment [data-item="'+id+'"]').getAttribute('aria-pressed'),'true');
+  await p.locator('.hall-equipment [data-save]').click();
+  await p.waitForFunction(()=>!document.querySelector('.has-billiards-picker'));
+  await p.waitForFunction(id=>document.querySelector('.villa-billiards-stage').style.backgroundImage.includes('table-'+id+'-'),id);
+  await aligned();await p.screenshot({path:'output/billiards-rug-fix/picker/'+width+'-'+id+'.png'});
+ }
+ assert.equal(await p.locator('.has-billiards-picker').count(),0);console.log('PASS picker camera alignment, saving, switching and close',width);
+}
 assert.deepEqual(errors,[]);
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

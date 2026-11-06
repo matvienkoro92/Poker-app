@@ -890,3 +890,22 @@ html body #app.app > .card > .card__header.card__header--admin-shortcuts .header
 /* Header layout must never override explicit access visibility. */
 html body #app.app .card__header .header-admin-shortcuts[hidden],
 html body #app.app .card__header .header-admin-shortcut[hidden]{display:none!important}
+
+/* A single header row: brand left, player summary right, one menu button. */
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) {
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto 40px!important;align-items:center!important;gap:8px!important;height:auto!important;padding:10px 12px!important;
+}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-actions,
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-actions__row {display:contents!important}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-profile-summary {
+  grid-column:2;grid-row:1;display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:center!important;gap:3px;min-width:0;max-width:130px;text-align:right;
+}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) > .logo {grid-column:1;grid-row:1;min-width:0;gap:6px}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-menu-shell {grid-column:3;grid-row:1;margin:0!important}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-menu-toggle {width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .logo__image {width:clamp(32px,10vw,44px)!important;height:clamp(32px,10vw,44px)!important;flex-shrink:0}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .logo__text {min-width:0}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .logo__title {font-size:clamp(9px,2.8vw,13px)!important;white-space:normal}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .logo__subtitle {font-size:7px!important;letter-spacing:.08em}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) #headerBonusBalance {font-size:11px;white-space:nowrap}
+html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-status {font-size:9px!important;max-width:130px}
