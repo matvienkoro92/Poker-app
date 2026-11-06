@@ -105,6 +105,7 @@ async function leaveGame(exit){
    if(waiting){await request({action:'cancel',roomId:currentRoomId});clearCreateRequest();}
    else {await net?.move({type:'resign'});if(!['paid','refunded'].includes(wager?.status))throw Error('Завершение матча ещё обрабатывается. Дождитесь подтверждения.');}
   }
+  if(!wager&&mode==='online'&&currentRoomId&&!online&&!spectating)await request({action:'cancel',roomId:currentRoomId});
   stop();wager=null;currentRoomId='';lobby.reset();
   if(exit){$('lobby').hidden=true;setView(false);if(parent!==window)parent.postMessage({type:'p21-billiards-close'},location.origin);else location.assign('./');}
   else status('Выберите режим игры.');
@@ -128,10 +129,10 @@ async function requestRematch(accept){
  }
 }
 function adopt(d){gameExperience=d.gameExperience||null;viewers.update(d);rematchReady=d.rematchReady||[false,false];gameChat.observe(d);gameReactions.observe(d);frameLoop?.wake();connectionNotice.update(d.connection,d.player);
- if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status('Игра отменена. Ставки возвращены на баланс Poker21.');return;}
+ if(d.cancelled){stop();wager=null;currentRoomId='';clearCreateRequest();lobby.reset();status(d.wager?'Стол отменён. Ставка возвращена на баланс Poker21.':'Стол отменён.');return;}
  wager=d.wager||null;currentRoomId=d.roomId||'';
  if(wager){clearCreateRequest();wagerNotice.textContent='Ставка каждого — '+wager.stake.toLocaleString('ru-RU')+' фишек. Банк — '+wager.bank.toLocaleString('ru-RU')+'. Комиссия — '+(wager?.feePercent??5)+'%. Победителю — '+wager.payout.toLocaleString('ru-RU')+' фишек.';const spinReward=gameSpinRewardText(wager);if(spinReward)wagerNotice.textContent+=' '+spinReward;}
- wagerNotice.hidden=!wager;cancelWaiting.hidden=!wager||d.ready;
+ wagerNotice.hidden=!wager;cancelWaiting.hidden=d.ready||d.spectator===true||d.player!==0;cancelWaiting.textContent=wager?'Отменить стол и вернуть фишки':'Отменить стол';
  roomCueEffect=d.equipment?.cueEffect||null;superShotView=d;if(!validState(d.state))return;const equipmentKey=JSON.stringify(d.equipment||{table:'classic',cue:'maple'})+':'+(d.equipmentOwner||'');if(sharedEquipment!==equipmentKey){sharedEquipment=equipmentKey;tableSkins.setRoomEquipment(d.equipment?.table||'classic');equipment.setRoomEquipment(d.equipment?.cue||'maple',d.equipmentOwner||d.playerProfiles?.[0]?.name||'');renderedCue='';}if(Array.isArray(d.playerProfiles))playerProfiles=d.playerProfiles;opponentAim=d.aim||null;turnSeconds=d.turnSeconds||null;turnDeadline=d.turnDeadline||null;
  const wasReady=online;connectionError='';if(!playback)clockOffset=d.clockSample??d.serverNow-Date.now();spectating=d.spectator===true;if(mode==='spectator'&&!spectating&&(d.player===0||d.player===1))mode='online';document.body.classList.toggle('billiards-spectator',spectating);document.querySelector('.billiards>header small').textContent=spectating?'ПРОСМОТР ПАРТИИ':'TWO ACES · ВИЛЛА У ОКЕАНА';player=spectating?0:d.player;online=d.ready;$('roomCode').textContent=d.roomId;$('inviteLink').value='https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards_'+d.roomId;$('invite').hidden=d.player!==0;$('create').disabled=$('join').disabled=false;
  if(d.challengeSent)status('Вызов отправлен в чат игроков · ждём соперника');

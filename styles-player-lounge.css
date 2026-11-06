@@ -773,7 +773,7 @@
 /* The vehicle switcher is a single compact row, never an opaque bottom sheet. */
 .player-hall-dialog .player-hall__camera-ui .garage-vehicle-switch{height:auto;min-height:0;max-height:80px;padding:0;border:0;background:transparent;box-shadow:none;align-self:center}
 
-.player-hall-dialog .player-hall__character-label{left:auto;right:12px;max-width:calc(100% - 24px);box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:3px;white-space:normal;overflow-wrap:anywhere;font-size:12px;line-height:1.25}
+.player-hall-dialog .player-hall__character-label{left:48%;right:auto;max-width:calc(52% - 12px);box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:3px;white-space:normal;overflow-wrap:anywhere;font-size:12px;line-height:1.25}
 .player-hall-dialog .player-hall__character-label>span{display:block}
 .player-hall-dialog .player-hall__character-label>small{display:block;font-size:12px;line-height:1.25}
 
