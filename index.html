@@ -1023,14 +1023,26 @@
             <span class="home-mini-icon__label home-mini-icon__label--levels" id="homeMiniLevelsLabel">Игроки клуба</span>
           </button>
         </div>
+        <button type="button" class="home-last-longer-strip" id="homeWelcomeBonus" hidden>
+          <span aria-hidden="true">🎁</span>
+          <span class="home-last-longer-strip__copy"><strong>Бонус новичка</strong><span>500 ₽ на бонусный баланс и до 7 круток</span></span>
+          <span class="home-last-longer-strip__arrow" aria-hidden="true">→</span>
+        </button>
+        <section class="home-free-tournament-cards" aria-label="Ежедневные бесплатные турниры">
+          <article class="home-free-tournament-card home-free-tournament-card--poker">
+            <p class="home-free-tournament-card__label">Бесплатный турнир</p>
+            <h2>Покер</h2>
+            <p class="home-free-tournament-card__time">Ежедневно · <time datetime="19:00">19:00</time> МСК</p>
+          </article>
+          <article class="home-free-tournament-card home-free-tournament-card--nards">
+            <p class="home-free-tournament-card__label">Бесплатный турнир</p>
+            <h2>Нарды</h2>
+            <p class="home-free-tournament-card__time">Ежедневно · <time datetime="16:00">16:00</time> МСК</p>
+          </article>
+        </section>
         <button type="button" class="home-last-longer-strip" data-last-longer-strip hidden>
           <img src="./assets/last-longer-chip-transparent-v1.png" alt="" aria-hidden="true" width="44" height="44" decoding="async">
           <span class="home-last-longer-strip__copy"><strong>Ласт-лонгер к турниру вечера</strong><span><b data-last-longer-strip-bank></b><span aria-hidden="true"> · </span><span data-last-longer-strip-players></span></span><span data-last-longer-strip-stake></span></span>
-          <span class="home-last-longer-strip__arrow" aria-hidden="true">→</span>
-        </button>
-        <button type="button" class="home-last-longer-strip" id="homeWelcomeBonus" hidden>
-          <span aria-hidden="true">🎁</span>
-          <span class="home-last-longer-strip__copy"><strong>Бонус новичка</strong><span>400 ₽ на бонусный баланс и до 7 круток</span></span>
           <span class="home-last-longer-strip__arrow" aria-hidden="true">→</span>
         </button>
         <dialog id="homeWelcomeBonusDialog" aria-labelledby="homeWelcomeBonusTitle">

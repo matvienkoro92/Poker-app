@@ -27,7 +27,7 @@ function clearFrames(){for(const frame of [ownFrame,watchFrame])if(frame){frame.
 async function list(){
  const gen=++epoch;clearTimeout(poll);currentId='';data=null;lastPaint='';clearFrames();setTab('bracket');updateURL();showPanel('tourListPanel');
  try{const d=await request({action:'list'});if(gen!==epoch)return;listAdmin=d.isAdmin;$('tourCreate').hidden=!listAdmin;$('tourList').replaceChildren();
-  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.append(el('h3',t.title),el('p',(statusNames[t.status]||t.status)+' · '+t.count+'/'+t.capacity+' участников','tour-muted'),el('p',(t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt))+' · '+(t.discipline==='long'?'Длинные':'Короткие'),'tour-muted'));const b=el('button',t.self?'Мой турнир →':'Открыть турнир →');b.onclick=()=>open(t.id);card.append(b);$('tourList').append(card);}
+  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.append(el('h3',t.title),el('p',(statusNames[t.status]||t.status)+' · '+t.count+'/'+t.capacity+' участников','tour-muted'),el('p',(t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt))+' · '+(t.discipline==='long'?'Длинные':'Короткие'),'tour-muted'));const b=el('button',t.self?'Мой турнир →':'Открыть турнир →');b.onclick=()=>open(t.id);card.append(el('p',t.entryType==='chips'?'Вход '+t.buyIn+' фишек Poker21':'Бесплатный турнир','tour-muted'));card.append(b);$('tourList').append(card);}
   if(!d.tournaments.length)$('tourList').append(el('p',listAdmin?'Турниров пока нет. Создайте первый.':'Скоро здесь появятся турниры клуба.','tour-muted'));
  }catch(e){if(gen===epoch)notice(e.message);}
  if(gen===epoch&&!stopped)poll=setTimeout(listRefresh,10000);
@@ -79,11 +79,11 @@ function watch(room,title){
 }
 function actionButton(label,action,primary=false){const b=el('button',label,primary?'tour-primary':'');b.dataset.tourAction=action;b.onclick=()=>mutate(action);return b;}
 function render(d){
- data=d;showPanel('tourDetail');$('tourTitle').textContent=d.title;$('tourMeta').textContent=(d.discipline==='long'?'Длинные':'Короткие')+' · '+(d.variant==='crazy'?'Бешеные':d.variant==='six-one'?'6:1 · Кафтар':'Классические')+' · '+d.entries.length+'/'+d.capacity+' · '+(d.startsAt==null?'Ручной запуск':novosibirsk(d.startsAt))+' · победа 1 / марс 2 / кокс 3';
+ data=d;$('tourPrizes').textContent=(d.entryType==='chips'?'Вход '+d.buyIn+' фишек · ':'Бесплатно · ')+'Призовой фонд: '+(d.prizeFund||0)+' фишек. '+(d.prizeShares||[100]).map((n,i)=>(i+1)+' место — '+n+'%').join(' · ')+(d.status==='completed'?(d.paymentsSettled?' · Призы выплачены':' · Выплачиваем призы'):'');showPanel('tourDetail');$('tourTitle').textContent=d.title;$('tourMeta').textContent=(d.discipline==='long'?'Длинные':'Короткие')+' · '+(d.variant==='crazy'?'Бешеные':d.variant==='six-one'?'6:1 · Кафтар':'Классические')+' · '+d.entries.length+'/'+d.capacity+' · '+(d.startsAt==null?'Ручной запуск':novosibirsk(d.startsAt))+' · победа 1 / марс 2 / кокс 3';
  const paint=JSON.stringify([d.revision,d.self,d.rounds,d.entries]);
  if(paint!==lastPaint){lastPaint=paint;bracket(d);$('tourEntrants').replaceChildren(...d.entries.map(e=>el('span',(e.ready?'✓ ':'')+e.name+(e.self?' · Вы':''),'tour-entry'+(e.self?' is-self':'')+(e.ready?' is-ready':''))));
   const actions=$('tourActions');actions.replaceChildren();
-  if(!d.self&&d.status==='registration')actions.append(actionButton('Участвовать · бесплатно','join',true));
+  if(!d.self&&d.status==='registration')actions.append(actionButton((d.entryType==='chips'?'Участвовать · '+d.buyIn+' фишек':'Участвовать · бесплатно'),'join',true));
   if(d.self&&!['completed','cancelled'].includes(d.status)){if(!d.self.ready||ownMatch()&&!ownMatch().ready.some((r,i)=>r&&ownMatch().playerIds[i]===d.self.id))actions.append(actionButton('Я на месте · готов','ready',true));else actions.append(el('span','✓ Готовность подтверждена','tour-muted'));if(d.status==='registration')actions.append(actionButton('Отменить участие','leave'));}
   if(d.self?.opponentRoomId){const b=el('button','Смотреть будущего соперника ↗');b.onclick=()=>watch(d.self.opponentRoomId,'Пара будущего соперника');actions.append(b);}
   if(d.isAdmin&&d.status==='registration'){const b=actionButton('Старт','start',true);b.disabled=d.entries.length<2;actions.append(b);}
@@ -102,10 +102,24 @@ async function mutate(action){
  try{const d=await request({action,id:currentId});lastPaint='';render(d);notice();if(action==='ready'&&d.self?.roomId)setTab('game');}catch(e){notice(e.message);}finally{mutation=false;if(!stopped)poll=setTimeout(refresh,2000);}
 }
 function targets(){const root=$('tourRoundTargets'),previous=[...root.querySelectorAll('input')].map(i=>i.value);root.replaceChildren();const count=Math.ceil(Math.log2(Number($('tourForm').elements.capacity.value)));for(let i=0;i<count;i++){const label=el('label',stageName(i,count));const input=document.createElement('input');input.type='number';input.min=1;input.max=25;input.required=true;input.value=previous[i]||3;input.name='target-'+i;label.append(input);root.append(label);}}
-function createForm(){if(!listAdmin)return;epoch++;clearTimeout(poll);showPanel('tourCreatePanel');formRequestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>b.toString(16).padStart(2,'0')).join('');targets();}
-$('tourForm').elements.capacity.onchange=targets;
+function prizes(){
+ const f=$('tourForm'),paid=f.elements.entryType.value==='chips',capacity=Number(f.elements.capacity.value);
+ $('tourBuyInLabel').hidden=!paid;$('tourPrizeFundLabel').hidden=paid;
+ $('tourFundingNote').textContent=paid?'Взнос списывается с Poker21 при записи. Фонд — сумма взносов фактических участников. При выходе до старта или отмене взнос возвращается.':'Призовой фонд списывается с вашего Poker21 при создании. При нулевом фонде призов нет.';
+ for(const o of f.elements.prizePlaces.options)o.disabled=Number(o.value)>capacity;
+ if(Number(f.elements.prizePlaces.value)>capacity)f.elements.prizePlaces.value='1';
+ const count=Number(f.elements.prizePlaces.value),root=$('tourPrizeShares');
+ if(root.children.length!==count){root.replaceChildren();const defaults={1:[100],2:[70,30],4:[50,30,10,10],8:[40,20,10,10,5,5,5,5]}[count];defaults.forEach((n,i)=>{const label=el('label',(i+1)+' место, %'),input=el('input');input.type='number';input.min=0;input.max=100;input.step=1;input.required=true;input.value=n;input.oninput=prizes;label.append(input);root.append(label);});}
+ const shares=[...root.querySelectorAll('input')].map(i=>Number(i.value)),sum=shares.reduce((a,b)=>a+b,0),pool=paid?Number(f.elements.buyIn.value)*capacity:Number(f.elements.prizeFund.value);
+ let valid=sum===100;for(let start=2;start<count;start*=2)if(shares.slice(start,start*2).some(n=>n!==shares[start]))valid=false;
+ $('tourPrizePreview').textContent='Распределено: '+sum+'%. '+(paid?'При полной регистрации фонд: ':'Фонд: ')+pool+' фишек. '+(!valid?'Распределите 100%; доли мест одного раунда должны совпадать.':'');
+ f.querySelector('[type=submit]').disabled=!valid;
+}
+for(const name of ['entryType','prizePlaces','buyIn','prizeFund'])$('tourForm').elements[name].oninput=prizes;
+function createForm(){if(!listAdmin)return;epoch++;clearTimeout(poll);showPanel('tourCreatePanel');formRequestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>b.toString(16).padStart(2,'0')).join('');targets();prizes();}
+$('tourForm').elements.capacity.onchange=()=>{targets();prizes();};
 $('tourForm').elements.discipline.onchange=()=>{const form=$('tourForm');if(form.elements.discipline.value==='short')form.elements.variant.value='classic';form.elements.variant.disabled=form.elements.discipline.value==='short';};
-$('tourForm').onsubmit=async event=>{event.preventDefault();if(mutation)return;mutation=true;const form=$('tourForm'),button=form.querySelector('[type=submit]');button.disabled=true;try{const d=await request({action:'create',requestId:formRequestId,title:form.elements.title.value,capacity:Number(form.elements.capacity.value),discipline:form.elements.discipline.value,variant:form.elements.variant.value,turnSeconds:Number(form.elements.turnSeconds.value),roundTargets:[...$('tourRoundTargets').querySelectorAll('input')].map(i=>Number(i.value))});notice();mutation=false;await open(d.id);}catch(e){notice(e.message);}finally{mutation=false;button.disabled=false;}};
+$('tourForm').onsubmit=async event=>{event.preventDefault();if(mutation)return;mutation=true;const form=$('tourForm'),button=form.querySelector('[type=submit]');button.disabled=true;try{const d=await request({action:'create',requestId:formRequestId,title:form.elements.title.value,capacity:Number(form.elements.capacity.value),discipline:form.elements.discipline.value,variant:form.elements.variant.value,turnSeconds:Number(form.elements.turnSeconds.value),entryType:form.elements.entryType.value,buyIn:Number(form.elements.buyIn.value),prizeFund:Number(form.elements.prizeFund.value),prizeShares:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value)),roundTargets:[...$('tourRoundTargets').querySelectorAll('input')].map(i=>Number(i.value))});notice();mutation=false;await open(d.id);}catch(e){notice(e.message);}finally{mutation=false;button.disabled=false;}};
 $('tourCreate').onclick=createForm;$('allTours').onclick=list;$('refreshTours').onclick=list;document.querySelector('[data-tour-back]').onclick=list;
 for(const b of document.querySelectorAll('[data-tour-tab]'))b.onclick=()=>setTab(b.dataset.tourTab);
 $('returnOwn').onclick=()=>setTab('game');

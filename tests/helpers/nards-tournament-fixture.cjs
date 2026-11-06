@@ -1,10 +1,10 @@
 'use strict';
 const createService = require('../../lib/nards-tournaments');
-module.exports = function fixture() {
+module.exports = function fixture(options = {}) {
   let time = 1800000000000;
   const tournaments = new Map(), roomMap = new Map(), locks = new Set();
   const clone = v => v == null ? v : structuredClone(v);
-  const profiles = new Map(Array.from({ length: 70 }, (_, i) => ['m' + i, { name: 'Игрок ' + i, accountId: 'ID' + String(i).padStart(6, '0'), level: i === 0 ? 100 : 1 }]));
+  const profiles = new Map(Array.from({ length: 70 }, (_, i) => ['m' + i, { name: 'Игрок ' + i, accountId: 'ID' + String(i).padStart(6, '0'), poker21Id: 'p21-'+i, level: i === 0 ? 100 : 1 }]));
   const rooms = {
     load: async id => clone(roomMap.get(id)),
     create: async (id, r) => { if (roomMap.has(id)) return false; roomMap.set(id, clone(r)); return true; },
@@ -28,7 +28,7 @@ module.exports = function fixture() {
       } finally { locks.delete(id); }
     }
   };
-  const service = createService({ store, rooms, profile: rooms.profile, now: () => time, randomInt: () => 0, dice: () => [6, 1] });
+  const service = createService({ store, rooms, payments: options.payments, profile: rooms.profile, now: () => time, randomInt: () => 0, dice: () => [6, 1] });
   const call = (member, action, id, extra = {}) => service.call(member, { action, id, ...extra }, { admin: member === 'm0' });
   async function create(options = {}) {
     return call('m0', 'create', null, { requestId: 'test-tournament-0001', title: 'Кубок двух тузов', capacity: 4, startsAt: time + 120000, drawAt: time + 60000, target: 5, ...options });

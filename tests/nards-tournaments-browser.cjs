@@ -32,6 +32,18 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   const admin=await pageFor('m0');await admin.goto('https://nards-tour.test/nards-tournaments.html');
   await admin.locator('#tourCreate').click();
   await admin.locator('[name=title]').fill('Кубок двух тузов · тест');await admin.locator('[name=capacity]').selectOption('4');
+  await admin.locator('[name=entryType]').selectOption('chips');
+  assert.equal(await admin.locator('#tourBuyInLabel').isVisible(),true);
+  assert.equal(await admin.locator('#tourPrizeFundLabel').isVisible(),false);
+  await admin.locator('[name=prizePlaces]').selectOption('4');
+  assert.equal(await admin.locator('#tourPrizeShares input').count(),4);
+  await admin.locator('#tourPrizeShares input').first().fill('49');
+  assert.equal(await admin.locator('#tourForm [type=submit]').isDisabled(),true);
+  await admin.locator('#tourPrizeShares input').first().fill('50');
+  assert.equal(await admin.locator('#tourForm [type=submit]').isDisabled(),false);
+  await admin.screenshot({path:path.join(out,'prize-settings-mobile.png')});
+  await admin.locator('[name=entryType]').selectOption('free');
+  assert.equal(await admin.locator('#tourPrizeFundLabel').isVisible(),true);
   await admin.locator('[name=target-0]').fill('1');await admin.locator('[name=target-1]').fill('3');
   await admin.locator('#tourForm [type=submit]').click();await admin.waitForFunction(()=>PokerNardsTournaments.inspect().data?.status==='registration');
   const id=await admin.evaluate(()=>PokerNardsTournaments.inspect().id),t=f.tournaments.get(id),players=new Map();
