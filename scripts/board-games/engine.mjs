@@ -13,7 +13,7 @@ export function expireTurn(s,rollDice=()=>[1+Math.floor(Math.random()*6),1+Math.
   const missedBefore=[...(s.missedTurns||[0,0])],startPly=s.ply;
   let expiredPlayer=s.turn;
   if(['opening','roll'].includes(s.phase)){
-   do{backgammonRoll(s,s.turn,rollDice());}while(s.phase==='opening');
+   do{backgammonRoll(s,s.turn,rollDice());}while(s.phase==='opening'||s.firstRollPending);
    expiredPlayer=s.rollPlayer;
   }
   const missed=missedBefore[expiredPlayer]+1;

@@ -18,3 +18,10 @@ test('illustrated previews and gameplay panels have mobile size budgets',async()
   for(const side of ['leftSurface','rightSurface']){const m=await sharp(b[side]).metadata();if(b.splitArt){const source=await sharp('assets/board-games/nards/illustration-'+b.art+'-'+(side==='leftSurface'?'left':'right')+'.webp').metadata();assert.equal(m.width,source.width);assert.equal(m.height,source.height);assert.ok(m.width/m.height<.46);}else{assert.equal(m.width,582);assert.equal(m.height,1000);}assert.ok(fs.statSync(b[side]).size<150000,b.id+' panel too large');}
  }
 });
+
+test('painted point markings cannot be doubled by a legacy saved overlay preference',()=>{
+ const {NARDS_INTERIORS,nardsShowPoints,cleanNards}=require('../lib/nards-equipment');
+ const painted=NARDS_INTERIORS.filter(b=>b.bakedPoints);assert.equal(painted.length,6);
+ for(const inside of painted){for(const requested of [undefined,null,true,false])assert.equal(nardsShowPoints(inside,requested),false,inside.id);assert.equal(cleanNards({nardsInterior:inside.id,nardsPoints:true},100).nardsPoints,false);}
+ const classic=NARDS_INTERIORS.find(b=>b.id==='classic');assert.equal(nardsShowPoints(classic,null),true);assert.equal(nardsShowPoints(classic,false),false);
+});

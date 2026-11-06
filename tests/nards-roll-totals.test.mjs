@@ -4,7 +4,7 @@ import {createBackgammon,backgammonRoll,backgammonMove,backgammonLegal,undoBackg
 test('roll totals follow the awarded opening player and add each roll once',()=>{
  const s=createBackgammon('long');assert.deepEqual(s.rollTotals,[0,0]);
  assert.equal(backgammonRoll(s,0,[2,2]),true);assert.deepEqual(s.rollTotals,[0,0]);
- assert.equal(backgammonRoll(s,0,[2,6]),true);assert.deepEqual(s.rollTotals,[0,8]);
+ assert.equal(backgammonRoll(s,0,[2,6]),true);assert.deepEqual(s.rollTotals,[0,0]);assert.equal(s.phase,'roll');assert.equal(backgammonRoll(s,1,[2,6]),true);assert.deepEqual(s.rollTotals,[0,8]);
  assert.equal(backgammonRoll(s,1,[6,6]),false);assert.deepEqual(s.rollTotals,[0,8]);
  const move=backgammonLegal(s)[0];backgammonMove(s,1,move);assert.deepEqual(s.rollTotals,[0,8]);assert.equal(undoBackgammonStep(s,1),true);assert.deepEqual(s.rollTotals,[0,8]);
 });

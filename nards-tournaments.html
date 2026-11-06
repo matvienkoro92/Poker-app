@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Турниры по нардам · Два Туза</title>
+  <link rel="stylesheet" href="styles-home-widget-modals.css">
+  <link rel="stylesheet" href="styles-nards-tournaments.css">
+</head>
+<body class="nards-tournament">
+<header class="tour-header"><button id="closeTournament" aria-label="Вернуться в гостиную">←</button><div><small>ДВА ТУЗА</small><h1>Турниры по нардам</h1></div><span class="tour-dice" aria-hidden="true">⚄⚅</span></header>
+<main>
+  <p id="tourError" role="status" aria-live="polite"></p>
+  <section id="tourListPanel"><div class="tour-section-heading"><h2>Турниры клуба</h2><button id="tourCreate" hidden>＋ Создать</button></div><div id="tourList"><p>Загружаем турниры…</p></div><button id="refreshTours">Обновить</button></section>
+  <section id="tourCreatePanel" hidden>
+    <div class="tour-section-heading"><h2>Новый турнир</h2><button data-tour-back>Назад</button></div>
+    <form id="tourForm">
+      <label>Название<input name="title" maxlength="80" value="Кубок двух тузов" required></label>
+      <div class="tour-form-grid"><label>Нарды<select name="discipline"><option value="long">Длинные</option><option value="short">Короткие</option></select></label><label>Формат<select name="variant"><option value="classic">Классические</option><option value="crazy">Бешеные</option><option value="six-one">6:1 · Кафтар</option></select></label></div>
+      <div class="tour-form-grid"><label>Максимум участников<select name="capacity"><option>2</option><option>4</option><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label><label>Секунд на ход<select name="turnSeconds"><option>15</option><option>30</option><option selected>45</option><option>60</option></select></label></div>
+      <label>Начало турнира · московское время<input type="datetime-local" name="startsAt" required></label>
+      <label>Закрытие регистрации · московское время<input type="datetime-local" name="drawAt" required></label>
+      <fieldset><legend>До скольких очков играть</legend><div id="tourRoundTargets" class="tour-form-grid"></div></fieldset>
+      <p class="tour-muted">Бесплатно · на выбывание. Победа — 1, марс — 2, кокс — 3 очка. Случайные пары. Между раундами 5 минут; между партиями одного матча 5 секунд. Первый ход каждого игрока — 90 секунд, затем выбранный лимит. Три пропуска подряд — поражение в матче. Если оба не играли, исключаются оба.</p>
+      <button type="submit" class="tour-primary">Создать и открыть регистрацию</button>
+    </form>
+  </section>
+  <section id="tourDetail" hidden>
+    <div class="tour-section-heading"><button id="allTours">← Все турниры</button><button id="copyTourLink">Ссылка ↗</button></div>
+    <h2 id="tourTitle"></h2><p id="tourMeta" class="tour-muted"></p>
+    <div id="tourCountdown" class="tour-countdown" role="timer"></div>
+    <nav class="tour-tabs" role="tablist" aria-label="Турнир"><button data-tour-tab="bracket" role="tab" aria-selected="true">Сетка</button><button data-tour-tab="game" role="tab" aria-selected="false" disabled>Моя игра</button><button data-tour-tab="watch" role="tab" aria-selected="false" disabled>Смотрю</button></nav>
+    <div id="tourActions" class="tour-actions"></div>
+    <section id="tourBracketPanel" role="tabpanel"><div id="tourBracket"></div><h3>Участники</h3><div id="tourEntrants"></div></section>
+    <section id="tourGamePanel" role="tabpanel" hidden><p id="tourOwnNote" class="tour-muted">Партия появится после жеребьёвки.</p><div id="tourOwnFrame"></div></section>
+    <section id="tourWatchPanel" role="tabpanel" hidden><div class="tour-section-heading"><p id="watchTitle"></p><button id="returnOwn">Вернуться в свою игру</button></div><div id="tourWatchFrame"></div></section>
+  </section>
+</main>
+<script src="app-nards-tournaments.js?v=20261106-tournament-1"></script>
+</body></html>

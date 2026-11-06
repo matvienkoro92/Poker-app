@@ -959,3 +959,40 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 
 /* Dice controls must not be covered by the carousel navigation row. */
 #nardsPanelDice .collection-carousel-arrows{margin-top:0}
+/* Full-height bear-off pockets: fifteen equal recesses, entirely inside the rails. */
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"]{
+ position:relative;align-self:stretch;min-height:0;padding:0 1px;gap:0;overflow:visible;
+ background:linear-gradient(90deg,#1a100a,#795936 14%,#302014 31%,#24170e 72%,#a08050 93%,#21150c);
+ box-shadow:inset 1px 0 1px #f1cf9466,inset -1px 0 2px #080503cc;
+}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"]>.nards-storage-slots{
+ display:flex;flex:1 1 0;min-height:0;height:100%;gap:2px;padding:2px 0;overflow:hidden;
+ background:none;border-radius:4px;
+}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"]>.nards-storage-slots>i{
+ flex:1 1 0;min-height:0;max-height:none;margin:0;position:relative;overflow:hidden;border-radius:45%;
+}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"]>.nards-storage-slots>i::before{
+ content:'';inset:1px;top:1px;left:1px;right:1px;bottom:1px;width:auto;height:auto;max-width:none;aspect-ratio:auto;transform:none;
+ border:1px solid #aa82475c;border-radius:50%;
+ background:radial-gradient(ellipse at 48% 76%,#51361f 0%,#302014 38%,#170e09 72%,#080503 100%);
+ box-shadow:inset 0 3px 4px #000d,inset 2px 0 3px #0008,inset 0 -1px 1px #e8bd745c,0 1px 0 #f2d49a45;
+}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"][data-home="square"]>.nards-storage-slots>i::before{border-radius:4px}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"][data-home="octagon"]>.nards-storage-slots>i::before{border-radius:0;clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%)}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"]>.nards-storage-slots>i>.nards-stored-edge{
+ inset:3px;top:3px;left:3px;right:3px;bottom:3px;width:auto;height:auto;max-width:none;aspect-ratio:auto;transform:none;
+ border:1px solid var(--stored-rim);box-shadow:inset 0 1px 2px #fff8,0 2px 3px #000a;
+}
+:is(.nards-table .nards-storage,.living-nards-storage)[data-home-full="true"]>strong{
+ inset:0 1px auto;transform:translateY(calc(-100% - 2px));z-index:21;min-height:13px;padding:0 2px;border:1px solid #c5a46899;border-radius:3px;background:#16150e;color:#ffe8b5;font-size:9px;line-height:12px;box-shadow:0 1px 2px #0009;
+}
+
+/* One non-blocking dragon celebration for a settled six-six throw. */
+.nards-six-double{position:absolute;z-index:0;object-fit:contain;pointer-events:none;animation:none;mix-blend-mode:screen;clip-path:polygon(34% 40%,45% 43%,55% 43%,66% 40%,69% 49%,64% 65%,50% 72%,36% 65%,31% 49%);mask-image:radial-gradient(ellipse 24% 21% at 50% 53%,#000 48%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 24% 21% at 50% 53%,#000 48%,transparent 100%)}
+@media(prefers-reduced-motion:reduce){.nards-six-double{display:none}}
+
+.nards-dragon-shine{position:absolute;z-index:0;pointer-events:none;mix-blend-mode:screen}.nards-dragon-shine svg{display:block;width:100%;height:100%;overflow:visible}.dragon-horn-shine{filter:drop-shadow(0 0 3px #ffbf5a)}
+@media(prefers-reduced-motion:reduce){.nards-dragon-shine{display:none}}
+
+.board-tournament-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:580px;margin:8px auto;padding:9px 12px;border:1px solid #bda36577;border-radius:11px;background:#253528;color:#ffe0a0;font-size:12px}.board-tournament-banner button{min-height:30px;padding:4px 10px;font-size:11px}

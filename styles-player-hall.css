@@ -1210,3 +1210,6 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus > header > [data-living-focus-close] {
   visibility: hidden;
 }
+
+/* Tournament dice sit beside the backgammon case on the same room surface. */
+.player-hall-dialog .living-tournament-dice{position:absolute;left:46%;top:54%;width:9%;min-width:44px;height:8%;padding:0;border:0;background:none;pointer-events:auto;color:#ffe1a3;cursor:pointer}.living-tournament-dice i{display:block;font-style:normal;font-size:clamp(22px,4cqw,38px);letter-spacing:-5px;text-shadow:1px 3px 2px #0008;transform:rotate(-12deg)}.living-tournament-dice span{display:block;font-size:10px;white-space:nowrap;text-shadow:0 1px 5px #000}.living-tournament-dice:focus-visible{outline:2px solid #f5d287;outline-offset:2px}.living-focus-tournament-dice{color:#ffe4aa!important;border-color:#bca060!important}

@@ -32,6 +32,11 @@ room.match.round=2;room.revision=3;room.state.winner=1;room.state.endReason='res
 assert(player('chess','ID123456').losses==1);assert(player('chess','ID654321').wins==1)
 local count=0 for _ in pairs(zsets['stats:chess:free:ranking']) do count=count+1 end assert(count==2)
 `));
+test('double non-arrival in a tournament records no random rating winner',()=>run(`
+room.state.discipline='long';room.state.endReason='timeout-skips';room.tournament={doubleNoShow=true}
+assert(run(0,room)==1);assert(hashes['stats:long:free:players']==nil)
+assert(cjson.decode(strings.room).tournament.doubleNoShow==true)
+`));
 test('draws, new series and disciplines are independent; unfinished games are excluded',()=>run(`
 room.state.winner=nil;assert(run(0,room)==1);assert(hashes['stats:chess:free:players']==nil)
 room.revision=2;room.state.winner='draw';assert(run(1,room)==1);local p=player('chess','ID123456');assert(p.draws==1 and p.wins==0 and p.losses==0)

@@ -4,7 +4,9 @@ const {NARDS_INTERIORS,DESIGN_CHECKERS}=require('../../lib/nards-equipment');
 (async()=>{
 const out=path.join(__dirname,'../../assets/board-games/nards');
 fs.mkdirSync(out,{recursive:true});
+await require('./generate-sports-nards-surfaces.cjs');
 for(const b of NARDS_INTERIORS){
+ if(b.id.startsWith('sport-'))continue;
  // This skin is supplied as a complete two-panel painting, including its lettering.
  if(b.id==='monfokon'){
   const sharp=require('sharp'),source=path.join(out,'illustration-monfokon-board-v5.webp');

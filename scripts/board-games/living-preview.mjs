@@ -1,3 +1,4 @@
+import {nardsShowPoints} from './catalog.mjs';
 import {createCarvedRail,createPointBlade,paintStorage} from './nards-carving.mjs';
 import {NARDS_BOARDS,CHECKERS,BOARDS,PIECES,NARDS_INTERIORS} from './catalog.mjs';
 import {createBackgammon} from './backgammon.mjs';
@@ -40,7 +41,7 @@ export function paint(root,game,equipment={}){
       root.style.setProperty('--preview-'+side,set[side]);
       root.style.setProperty('--preview-'+side+'-art',set[side+'Art']?'url("'+set[side+'Art']+'")':'none');
     }
-    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.bakedPoints=String(!(equipment.nardsPoints ?? !(inside.hidePoints||inside.revision>=2)));surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('long');
+    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.bakedPoints=String(!(nardsShowPoints(inside,equipment.nardsPoints)));surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('long');
     for(let row=0;row<2;row++)for(let col=0;col<12;col++){
       const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
       point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;point.classList.toggle('has-stack',Math.abs(n)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(n)-1));

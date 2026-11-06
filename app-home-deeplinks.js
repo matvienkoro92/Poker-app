@@ -148,6 +148,8 @@ function pokerInitHomeDeepLinks(opts) {
     if(nardsAppearance){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('long',null,false,nardsAppearance[1]);},['profile']);return;}
     var dartsLink=/^darts_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(dartsLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenDarts==='function'&&window.pokerOpenDarts(dartsLink[2],!!dartsLink[1]);},['profile']);return;}
+    var nardsTournament=/^nards_tour_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
+    if(nardsTournament){openHomeModalDeepLink(function(){return typeof window.pokerOpenNardsTournaments==='function'&&window.pokerOpenNardsTournaments(nardsTournament[1]);},['profile']);return;}
     var boardLink=/^board_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(boardLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('chess',boardLink[2],!!boardLink[1]);},['profile']);return;}
     if(startParam==='nards'||startParam==='chess'){

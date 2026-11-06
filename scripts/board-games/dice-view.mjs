@@ -65,7 +65,7 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
   if(animate){onThrow();rolling=true;layer.classList.add('is-rolling');const token=epoch;timer=setTimeout(()=>{if(token===epoch)settle();},duration+(reduced?45:115));}
   return animate;
  }
- function mark(state){const remaining=[...state.dice],double=state.roll[0]===state.roll[1];for(const cube of dice){const at=remaining.indexOf(Number(cube.dataset.value));cube.classList.toggle('is-spent',!rolling&&state.phase!=='opening'&&(double?state.dice.length===0:at<0));if(at>=0)remaining.splice(at,1);}}
+ function mark(state){const remaining=[...state.dice],double=state.roll[0]===state.roll[1];for(const cube of dice){const at=remaining.indexOf(Number(cube.dataset.value));cube.classList.toggle('is-spent',!rolling&&!isOpeningThrow(state)&&(double?state.dice.length===0:at<0));if(at>=0)remaining.splice(at,1);}}
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{if(!rolling&&!layer.hidden&&Math.abs(container.getBoundingClientRect().width-lastWidth)>1)onSettled();}).observe(container);
  return {update,reset,settle,replay(){pending=[];cancel();key='';initialized=true;},get busy(){return rolling;},get pending(){return pending.length;},element:layer};
 }

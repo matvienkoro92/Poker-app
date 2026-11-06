@@ -18,6 +18,7 @@ const handlers = {
   "cron-table-subscriptions": () => require(path.join(handlersDir, "cron-table-subscriptions.js")),
   "monkey-race": () => require(path.join(handlersDir, "monkey-race.js")),
   "board-games": () => require(path.join(handlersDir, "board-games.js")),
+  "nards-tournaments": () => require(path.join(handlersDir, "nards-tournaments.js")),
   "cron-billiards-wagers": () => require(path.join(handlersDir, "cron-billiards-wagers.js")),
   "billiards": () => require(path.join(handlersDir, "billiards.js")),
   "cooler-flight": () => require(path.join(handlersDir, "cooler-flight.js")),

@@ -8,7 +8,34 @@ export function dragonHome(state,player){
 }
 function chime(){if(document.hidden||!getGameVolume())return;const audio=unlockGameAudio();playGameAudio(audio,release=>{let left=4;for(const [i,hz]of [523.25,783.99,1046.5,1567.98].entries()){const voice=audio.createOscillator(),gain=createVolumeGain(audio,.2),at=audio.currentTime+i*.055;voice.type='sine';voice.frequency.value=hz;voice.connect(gain);gain.connect(audio.destination);gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(getGameVolume()*.18,at+.012);gain.gain.exponentialRampToValueAtTime(.001,at+.55);voice.onended=()=>{voice.disconnect();releaseVolumeGain(gain);if(!--left)release();};voice.start(at);voice.stop(at+.58);}});}
 function particles(parent,kind,count=16){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;for(let i=0;i<count;i++){const p=document.createElement('i'),angle=i*Math.PI*2/count;p.className='nards-flair-particle '+kind;p.style.setProperty('--spark-x',Math.cos(angle)*(25+i%3*12)+'px');p.style.setProperty('--spark-y',Math.sin(angle)*(30+i%4*10)-15+'px');p.style.setProperty('--spark-spin',(i*47)+'deg');parent.append(p);p.addEventListener('animationend',()=>p.remove(),{once:true});}}
-export function goldenDouble(layer){if(document.hidden)return;chime();layer.classList.remove('golden-double-reveal');void layer.offsetWidth;layer.classList.add('golden-double-reveal');for(const die of layer.querySelectorAll('.dice-flight'))particles(die,'nards-gold-spark',12);}
+export function goldenDouble(layer){if(document.hidden)return;chime();layer.classList.remove('golden-double-reveal');void layer.offsetWidth;layer.classList.add('golden-double-reveal');for(const die of layer.querySelectorAll('.dice-flight'))particles(die,'nards-gold-spark',12);dragonSixDouble(layer);}
+function dragonSixDouble(layer){
+ const area=layer.parentElement,board=area?.querySelector('#nardsBoard');
+ if(board?.dataset.interior!=='club-obsidian'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const dice=[...layer.querySelectorAll('.dice-cube')];
+ if(dice.length!==2||!dice.every(die=>die.dataset.value==='6'))return;
+ const boardBox=board.getBoundingClientRect(),dieBoxes=dice.map(die=>die.getBoundingClientRect());
+ const diceX=dieBoxes.reduce((sum,box)=>sum+box.left+box.width/2,0)/dieBoxes.length;
+ const halfSelector=diceX>=boardBox.left+boardBox.width/2?'.nards-half-art.is-left':'.nards-half-art.is-right',half=board.querySelector(halfSelector);
+ if(!half)return;
+ const image=document.createElement('img');image.className='nards-six-double';image.alt='';image.setAttribute('aria-hidden','true');
+ // Register the existing GIF to the emblem in the 400×1000 source surface.
+ // Background-size:cover may crop the surface; use the same mapping as the half.
+ const box=half.getBoundingClientRect(),scale=Math.max(box.width/400,box.height/1000),x=(box.width-400*scale)/2,y=(box.height-1000*scale)/2;
+ const height=453*scale,width=height*360/480;image.style.left=x+(400*scale-width)/2+17*scale+'px';image.style.top=y+275*scale+'px';image.style.width=width+'px';image.style.height=height+'px';
+ const marker=document.createElement('span');marker.hidden=true;layer.append(marker);
+ const parts=[image];const clean=()=>{parts.forEach(part=>part.remove());marker.remove();};
+ image.onload=()=>{const liveHalf=board.querySelector(halfSelector);if(!marker.isConnected||!liveHalf?.isConnected){clean();return;}liveHalf.append(image);
+ const shine=document.createElement('span');shine.className='nards-dragon-shine';shine.style.cssText='left:'+x+'px;top:'+y+'px;width:'+400*scale+'px;height:'+1000*scale+'px';
+ const id='dragon-shine-'+Math.random().toString(36).slice(2);
+ shine.innerHTML=`<svg viewBox="0 0 400 1000" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="${id}-eye"><stop stop-color="#fffde0"/><stop offset=".3" stop-color="#ffe381"/><stop offset="1" stop-color="#ff8c19" stop-opacity="0"/></radialGradient><linearGradient id="${id}-sweep"><stop stop-color="#ffe6a0" stop-opacity="0"/><stop offset=".48" stop-color="#fff4c7" stop-opacity=".1"/><stop offset=".5" stop-color="#fffde7" stop-opacity=".85"/><stop offset=".56" stop-color="#ffe5a0" stop-opacity=".2"/><stop offset="1" stop-color="#ffe6a0" stop-opacity="0"/></linearGradient><clipPath id="${id}-cards"><path d="M105 334L194 316L211 411L162 405Z M218 318L302 340L284 398L234 416Z"/></clipPath></defs><g class="dragon-ace-sheen" clip-path="url(#${id}-cards)"><path d="M40 300L145 300L220 430L115 430Z" fill="url(#${id}-sweep)"/></g><g class="dragon-eye-shine"><circle cx="177" cy="432" r="11" fill="url(#${id}-eye)"/><circle cx="256" cy="430" r="11" fill="url(#${id}-eye)"/><circle cx="177" cy="432" r="2" fill="#fffde5"/><circle cx="256" cy="430" r="2" fill="#fffde5"/></g><g class="dragon-horn-shine" fill="none" stroke="#ffeeb7" stroke-width="2.5" stroke-linecap="round"><path d="M126 365Q141 384 150 400M148 373Q163 390 166 412M286 360Q275 382 266 400M266 377Q254 394 250 412"/></g><g class="dragon-horn-glints" fill="#fff8d6"><path d="M133 373l2 7 7 2-7 2-2 7-2-7-7-2 7-2Z M280 372l2 7 7 2-7 2-2 7-2-7-7-2 7-2Z"/></g></svg>`;
+ parts.push(shine);liveHalf.append(shine);
+ shine.querySelector('.dragon-ace-sheen path').animate([{transform:'translateX(0)'},{transform:'translateX(170px)'}],{duration:2600,delay:650,easing:'ease-in-out',fill:'both'});
+ shine.querySelector('.dragon-eye-shine').animate([{opacity:0},{opacity:.9,offset:.25},{opacity:.55,offset:.4},{opacity:1,offset:.6},{opacity:.75,offset:.8},{opacity:0}],{duration:5320,fill:'both'});
+ shine.querySelector('.dragon-horn-glints').animate([{opacity:0},{opacity:1,offset:.35},{opacity:.25,offset:.55},{opacity:1,offset:.7},{opacity:0}],{duration:5320,fill:'both'});
+ const frames=[{opacity:0},{opacity:1,offset:.07},{opacity:1,offset:.92},{opacity:0}],timing={duration:5320,fill:'both'};for(const part of parts)part.animate(frames,timing);const lifetime=marker.animate([{opacity:0},{opacity:0}],timing);lifetime.onfinish=clean;lifetime.oncancel=clean;};
+ image.onerror=clean;image.src='./assets/board-games/vfx/dva-tuza-six-double-rage-v4.webp';
+}
 const FLAIR_KEY=Symbol.for('p21.nards.flair');
 export const getNardsFlair=area=>area[FLAIR_KEY];
 export function createNardsFlair(area,board,storeForPlayer,onFinished=()=>{}){

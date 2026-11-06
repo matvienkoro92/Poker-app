@@ -72,6 +72,9 @@ const baseFiles = [
   'last-buy-in.html',
   'city-play.html',
   'board-games-play.html',
+  'nards-tournaments.html',
+  'app-nards-tournaments.js',
+  'styles-nards-tournaments.css',
   'app-game-viewport.js',
   'app-board-games.js',
   'app-living-board-preview.js',
@@ -349,7 +352,7 @@ try {
 const releaseHtml = path.join(publicDir, 'index.html');
 fs.writeFileSync(releaseHtml, fs.readFileSync(releaseHtml, 'utf8').replace('<html ', '<html data-release-id="' + releaseId + '" '));
 // Stamp standalone game pages and every entry stylesheet/script with this exact release.
-for (const gamePage of ['board-games-play.html', 'billiards-play.html']) {
+for (const gamePage of ['board-games-play.html', 'billiards-play.html', 'nards-tournaments.html']) {
   const file = path.join(publicDir, gamePage);
   let html = fs.readFileSync(file, 'utf8').replace('<html ', '<html data-release-id="' + releaseId + '" ');
   html = html.replace(/((?:src|href)=["'])([^"']+\.(?:js|css))(?:\?[^"']*)?(["'])/g, (all, prefix, asset, quote) =>
