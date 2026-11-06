@@ -33,11 +33,9 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   await admin.locator('#tourCreate').click();
   await admin.locator('[name=title]').fill('Кубок двух тузов · тест');await admin.locator('[name=capacity]').selectOption('4');
   await admin.locator('[name=target-0]').fill('1');await admin.locator('[name=target-1]').fill('3');
-  const moscow=t=>new Date(t+3*3600000).toISOString().slice(0,16);
-  await admin.locator('[name=startsAt]').fill(moscow(f.now()+180000));
   await admin.locator('#tourForm [type=submit]').click();await admin.waitForFunction(()=>PokerNardsTournaments.inspect().data?.status==='registration');
   const id=await admin.evaluate(()=>PokerNardsTournaments.inspect().id),t=f.tournaments.get(id),players=new Map();
-  assert.deepEqual(t.roundTargets,[1,3]);assert.equal(t.drawAt,t.startsAt);
+  assert.equal(t.startsAt,null);assert.deepEqual(t.roundTargets,[1,3]);assert.equal(t.drawAt,t.startsAt);
   await admin.screenshot({path:path.join(out,'admin-created.png')});
   for(let i=1;i<=4;i++){
    const p=await pageFor('m'+i);players.set('m'+i,p);await p.goto('https://nards-tour.test/nards-tournaments.html?id='+id);
@@ -45,15 +43,14 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
    await p.locator('[data-tour-action=ready]').click();await p.waitForFunction(()=>PokerNardsTournaments.inspect().data?.self?.ready===true);
    assert.equal(await p.locator('#tourCreate').isVisible(),false);
   }
-  await admin.locator('[data-tour-action=draw]').waitFor({state:'visible'});await admin.waitForFunction(()=>!document.querySelector('[data-tour-action=draw]').disabled);await admin.locator('[data-tour-action=draw]').click();
+  await admin.locator('[data-tour-action=start]').waitFor({state:'visible'});await admin.waitForFunction(()=>!document.querySelector('[data-tour-action=start]').disabled);await admin.locator('[data-tour-action=start]').click();
   await admin.waitForFunction(()=>PokerNardsTournaments.inspect().data?.rounds.length===2);
   const first=f.tournaments.get(id).rounds[0].matches;
   const r1=f.roomMap.get(first[0].roomId),r2=f.roomMap.get(first[1].roomId);
   const p=players.get(r1.players[0]);await p.waitForFunction(()=>!!PokerNardsTournaments.inspect().ownRoom);
   await p.locator('[data-tour-tab=game]').click();const own=()=>p.frameLocator('#tourOwnFrame iframe');
-  await own().locator('#roll').waitFor();assert.equal(await own().locator('#roll').isDisabled(),true);
   await p.screenshot({path:path.join(out,'before-start.png')});
-  f.time(t.startsAt);
+
   await p.waitForFunction(()=>document.querySelector('#tourOwnFrame iframe')?.contentWindow?.PokerBoardGames?.inspect().state?.phase==='moving');
   let live=f.roomMap.get(r1.id);const E=await import('../scripts/board-games/engine.mjs'),move=E.legalMoves(live.state)[0];
   const actor=live.players[live.state.turn];assert.equal(actor,r1.players[0]);const moved=await p.locator('#tourOwnFrame iframe').elementHandle();const gameFrame=await moved.contentFrame();await gameFrame.evaluate(async body=>{const r=await fetch('/api/board-games',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!d.ok)throw Error(d.error);},{action:'move',roomId:live.id,revision:live.revision,move:{type:'move',...move}});

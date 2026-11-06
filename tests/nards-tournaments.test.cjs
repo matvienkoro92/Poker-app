@@ -159,3 +159,22 @@ test('concurrent signups stay unique, lock retry is safe, and room CAS conflicts
  const ready=await f.call('m1','ready',t.id);assert.equal(failures,0);assert.equal(ready.self.ready,true);assert.equal(f.roomMap.size,1);
  assert.equal(ready.rounds[0].matches[0].ready.filter(Boolean).length,1);
 });
+
+test('manual tournament waits indefinitely, including at capacity, until admin starts', async () => {
+  const f = fixture(), t = await f.create({ startsAt: null, drawAt: null, capacity: 2 });
+  assert.equal(t.startsAt, null);
+  await assert.rejects(f.call('m0', 'start', t.id), { status: 409 });
+  await f.call('m1', 'join', t.id);
+  f.time(f.now() + 86400000);
+  assert.equal((await f.call('m1', 'get', t.id)).status, 'registration');
+  await f.call('m2', 'join', t.id);
+  await f.service.sweep();
+  assert.equal((await f.call('m1', 'get', t.id)).status, 'registration');
+  await assert.rejects(f.call('m1', 'start', t.id), { status: 403 });
+  const started = await f.call('m0', 'start', t.id);
+  assert.equal(started.status, 'running');
+  assert.equal(started.startsAt, f.now());
+  assert.equal(started.rounds[0].matches[0].startsAt, f.now());
+  await assert.rejects(f.call('m3', 'join', t.id), { status: 409 });
+  await assert.rejects(f.call('m0', 'start', t.id), { status: 409 });
+});
