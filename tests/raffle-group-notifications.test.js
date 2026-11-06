@@ -5,6 +5,13 @@ test('only active ticket raffles are announced once with direct link',async()=>{
  const r={id:'abc',title:'Билеты в Меджик',status:'active',prizeKind:'tournament_ticket'};
  await notify({...r,status:'draft'});await notify({...r,prizeKind:'prizes'});assert.equal(sent.length,0);
  await notify(r);await notify(r);assert.equal(sent.length,1);assert.equal(sent[0].chatId,'-1001227353220');assert.equal(sent[0].notificationScope,'raffle-start');assert.equal(sent[0].parseMode,'HTML');assert.match(sent[0].buttonUrl,/startapp=r_abc$/);
+ assert.equal(sent[0].photoMimeType,'image/jpeg');assert.ok(Buffer.from(sent[0].photoBase64,'base64').length>1000);
+});
+test('an image rendering failure releases the delivery lock for retry',async()=>{
+ const commands=[];let sends=0;
+ const notify=createRaffleGroupNotifier({botToken:'test',eventChatId:async()=>'-1001',pipeline:async rows=>{commands.push(...rows);return [{result:'OK'}]},renderAnnouncement:async()=>{throw Error('render failed')},sendTelegramMessage:async()=>{sends++;}});
+ await assert.rejects(notify({id:'retry-art',status:'active',prizeKind:'cash'}),/render failed/);
+ assert.equal(sends,0);assert.equal(commands.at(-1)[0],'DEL');
 });
 test('announcement includes total, quantities, values and tournament description with time',()=>{
  const {buildRaffleAnnouncement}=require('../lib/raffle-group-notifications');

@@ -48,3 +48,13 @@ test('SNG scope permits photo and text only in the configured club group',async 
  assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/sendPhoto',{body:JSON.stringify({chat_id:'-100999'})},'sng-application')).ok,false);
  assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/forwardMessage',{body:JSON.stringify({chat_id:'-100123'})},'sng-application')).ok,false);
 });
+
+test('raffle start permits a photo only in the configured event group',async t=>{
+ const old=global.fetch,oldId=process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID;
+ process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID='-100123';fail=false;
+ t.after(()=>{global.fetch=old;if(oldId===undefined)delete process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID;else process.env.TELEGRAM_TOURNAMENT_BET_CHAT_ID=oldId;});
+ global.fetch=async()=>({ok:true});await policy.protectGroup('-100123');await policy.protectGroup('-100999');
+ for(const body of [JSON.stringify({chat_id:'-100123'}),Buffer.from('--b\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n-100123\r\n--b--')])assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/sendPhoto',{body},'raffle-start')).ok,true);
+ assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/sendPhoto',{body:JSON.stringify({chat_id:'-100999'})},'raffle-start')).ok,false);
+ assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/sendPhoto',{body:JSON.stringify({chat_id:'-100123'})},'raffle-completed')).ok,false);
+});
