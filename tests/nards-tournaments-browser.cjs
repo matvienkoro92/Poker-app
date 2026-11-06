@@ -34,10 +34,10 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   await admin.locator('[name=title]').fill('Кубок двух тузов · тест');await admin.locator('[name=capacity]').selectOption('4');
   await admin.locator('[name=target-0]').fill('1');await admin.locator('[name=target-1]').fill('3');
   const moscow=t=>new Date(t+3*3600000).toISOString().slice(0,16);
-  await admin.locator('[name=startsAt]').fill(moscow(f.now()+180000));await admin.locator('[name=drawAt]').fill(moscow(f.now()+120000));
+  await admin.locator('[name=startsAt]').fill(moscow(f.now()+180000));
   await admin.locator('#tourForm [type=submit]').click();await admin.waitForFunction(()=>PokerNardsTournaments.inspect().data?.status==='registration');
   const id=await admin.evaluate(()=>PokerNardsTournaments.inspect().id),t=f.tournaments.get(id),players=new Map();
-  assert.deepEqual(t.roundTargets,[1,3]);
+  assert.deepEqual(t.roundTargets,[1,3]);assert.equal(t.drawAt,t.startsAt);
   await admin.screenshot({path:path.join(out,'admin-created.png')});
   for(let i=1;i<=4;i++){
    const p=await pageFor('m'+i);players.set('m'+i,p);await p.goto('https://nards-tour.test/nards-tournaments.html?id='+id);
