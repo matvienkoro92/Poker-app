@@ -11,10 +11,10 @@ for(const kind of ['short','long']){
    assert.equal(s.winner,null);assert.equal(s.ply,ply+1);assert.ok(s.moves.length>before);
    assert.equal(s.phase,'roll');assert.deepEqual(s.dice,[]);assert.deepEqual(s.stepUndo,[]);
   }
-  assert.deepEqual(s.missedTurns,[2,2]);const before=s.moves.length;expireTurn(s,()=>[6,1]);assert.equal(s.winner,1);assert.equal(s.endReason,'timeout-skips');assert.equal(s.moves.length,before);
+  assert.deepEqual(s.missedTurns,[2,2]);const before=s.moves.length;expireTurn(s,()=>[6,1]);assert.equal(s.winner,1);assert.equal(s.endReason,'timeout-skips');assert.equal(s.winKind,'koks');assert.equal(s.winPoints,3);assert.deepEqual(s.scores,[0,3]);assert.equal(s.moves.length,before);assert.equal(expireTurn(s),false);assert.deepEqual(s.scores,[0,3]);
  });
  test(kind+': timeout finishes remaining dice without rerolling or moving the opponent',()=>{
-  const s=createGame(kind);action(s,0,{type:'roll'},[6,1]);
+  const s=createGame(kind);action(s,0,{type:'roll'},[6,1]);action(s,s.turn,{type:'roll'},[6,1]);
   action(s,0,{type:'move',...legalMoves(s)[0]});
   const expected=structuredClone(s),player=s.turn;
   while(expected.turn===player){const moves=legalMoves(expected).sort((a,b)=>(b.from===-1?-1:progress(expected,player,b.from))-(a.from===-1?-1:progress(expected,player,a.from)));action(expected,player,{type:'move',...moves[0]});}
@@ -26,7 +26,7 @@ for(const kind of ['short','long']){
   expireTurn(s,()=>[1,1]);assert.equal(s.moves.length,4);assert.equal(s.ply,1);assert.equal(s.turn,1);
  });
  test(kind+': opening ties reroll and play for the actual opening winner',()=>{
-  const s=createGame(kind),rolls=[[3,3],[1,6]];
+  const s=createGame(kind),rolls=[[3,3],[1,6],[6,1]];
   expireTurn(s,()=>rolls.shift());assert.equal(s.moves[0].player,1);assert.equal(s.turn,0);assert.equal(s.ply,1);
  });
  test(kind+': a fully blocked turn passes without moving the opponent',()=>{
@@ -40,8 +40,9 @@ for(const kind of ['short','long']){
   expireTurn(s);assert.equal(s.winner,0);assert.equal(s.endReason,'borne-off');assert.ok(s.winPoints>=2);assert.equal(expireTurn(s),false);
  });
  test(kind+': completing a manual turn resets its own streak',()=>{
-  const s=createGame(kind);s.missedTurns=[2,1];action(s,0,{type:'roll'},[6,1]);
-  while(s.turn===0)action(s,0,{type:'move',...legalMoves(s)[0]});
+  const s=createGame(kind);s.missedTurns=[2,1];action(s,0,{type:'roll'},[6,1]);action(s,s.turn,{type:'roll'},[6,1]);
+  for(let n=0;s.turn===0&&n<8;n++){const moves=legalMoves(s);assert.ok(moves.length,'manual turn has a legal move');assert.ok(action(s,0,{type:'move',...moves[0]}));}
+  assert.equal(s.turn,1);
   assert.deepEqual(s.missedTurns,[0,1]);expireTurn(s,()=>[6,1]);assert.equal(s.winner,null);assert.deepEqual(s.missedTurns,[0,2]);
  });
 }

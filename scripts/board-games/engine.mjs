@@ -18,7 +18,7 @@ export function expireTurn(s,rollDice=()=>[1+Math.floor(Math.random()*6),1+Math.
   }
   const missed=missedBefore[expiredPlayer]+1;
   const restoreMisses=()=>{s.missedTurns=[...missedBefore];s.missedTurns[expiredPlayer]=missed;};
-  if(missed>=3){restoreMisses();finish(s,1-expiredPlayer,'timeout-skips');s.phase='finished';s.dice=[];s.stepUndo=[];return true;}
+  if(missed>=3){restoreMisses();finish(s,1-expiredPlayer,'timeout-skips');s.winKind='koks';s.winPoints=3;s.scores[1-expiredPlayer]=3;s.phase='finished';s.dice=[];s.stepUndo=[];return true;}
   if(s.ply!==startPly){restoreMisses();return true;}
   const player=s.turn,ply=s.ply;
   while(s.winner===null&&s.ply===ply&&s.phase==='moving'){

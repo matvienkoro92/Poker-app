@@ -159,3 +159,13 @@ test('chess reserves exactly one stake even if nards multipliers are supplied',a
  const f=fixture();let r=await f.service.call('m1',{action:'create',discipline:'chess',stake:100,requestId:'chess_no_reserve_001',marsMultiplier:2,koksMultiplier:3});
  assert.equal(r.wager.reservedStake,100);assert.equal(f.balances.get('p1'),9900);r=await f.call('m2','join',r.roomId);assert.equal(f.balances.get('p2'),9900);assert.equal(r.wager.bank,200);
 });
+
+for(const discipline of ['short','long'])test(discipline+': third missed turn settles as koks exactly once',async()=>{
+ const f=fixture({dice:()=>[6,1]});let r=await f.service.call('m1',{action:'create',discipline,stake:100,requestId:'timeout_koks_request_01',marsMultiplier:1.5,koksMultiplier:2});r=await f.call('m2','join',r.roomId);
+ const raw=f.rooms.get(r.roomId);raw.state.phase='moving';raw.state.opening=false;raw.state.turn=1;raw.state.missedTurns=[0,2];raw.state.off[1]=1;raw.state.dice=[1];raw.turnDeadline=1;
+ f.elapse(91000);
+ const done=await f.call('m1','room',r.roomId);
+ assert.equal(done.state.endReason,'timeout-skips');assert.equal(done.state.winKind,'koks');assert.equal(done.state.winPoints,3);assert.equal(done.state.scores[0],3);
+ assert.equal(done.wager.settledStake,200);assert.equal(done.wager.payout,380);
+ const count=f.changes.length;await f.call('m1','room',r.roomId);assert.equal(f.changes.length,count);
+});
