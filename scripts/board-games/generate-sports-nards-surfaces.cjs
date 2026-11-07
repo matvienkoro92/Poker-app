@@ -3,7 +3,7 @@
 const sharp=require('sharp'),path=require('node:path');
 const {NARDS_BOARDS}=require('../../lib/nards-equipment');
 const root=path.join(__dirname,'../../assets/board-games/nards');
-module.exports=(async()=>{for(const board of NARDS_BOARDS.filter(b=>b.id.startsWith('sport-'))){
+module.exports=(async()=>{for(const board of NARDS_BOARDS.filter(b=>b.id.startsWith('sport-')&&!b.interiorArt)){
  const source=path.join(root,path.basename(board.cover)),meta=await sharp(source).metadata();
  const top=Math.round(meta.height*.06),height=Math.round(meta.height*.88),width=Math.round(meta.width*.41);
  const panels=await Promise.all([['left',.06],['right',.53]].map(async([side,start])=>{
