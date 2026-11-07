@@ -41,3 +41,41 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 .tour-entry:has(.tour-entry-remove){display:inline-flex;align-items:center;gap:6px;padding-block:2px}
 .tour-entry .tour-entry-remove{min-width:32px;min-height:32px;padding:0;border-color:transparent;background:transparent;color:#f3c2ac;font-size:18px}
 .tour-entry .tour-entry-remove:hover,.tour-entry .tour-entry-remove:focus-visible{background:#68352e;border-color:#e4ad95}
+
+#tourDetail { display: grid; gap: 12px; }
+#tourDetail > .tour-section-heading { margin: 0; }
+.tour-overview, .tour-participants {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #a88b494d;
+  border-radius: 14px;
+  background: #142c24;
+}
+.tour-overview h2, .tour-overview p, .tour-participants h3 { margin: 0; }
+.tour-overview h2 { font-size: clamp(20px, 5vw, 28px); }
+.tour-overview__prizes { font-size: 13px; color: #e9cc91; }
+.tour-overview .tour-countdown {
+  margin: 2px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid #a88b4940;
+  font-size: 13px;
+}
+#tourDetail .tour-actions { margin: 0; }
+#tourActions .tour-primary { flex: 1 1 auto; }
+.tour-admin-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.tour-admin-actions button { flex: 1 1 120px; }
+.tour-admin-actions [data-tour-action=cancel] { color: #eac0ab; }
+#tourActions:empty, #tourAdminActions:empty, #tourTicketAwards:empty { display: none; }
+#tourDetail .tour-tabs { padding: 5px; border: 1px solid #a88b4940; border-radius: 12px; }
+#tourBracketPanel { display: grid; gap: 10px; }
+.tour-participants h3 { font-size: 14px; }
+.tour-participants #tourEntrants { margin: 0; }
+#tourEntrants:empty::before { content: 'Пока никто не записался'; color: #c5b99e; font-size: 12px; }
+#tourBracket .tour-bracket-empty { margin: 0; padding: 12px 14px; font-size: 13px; }
+
+#tourOwnFrame, #tourWatchFrame { margin-inline: -14px; }
+#tourOwnFrame iframe, #tourWatchFrame iframe { border-radius: 0; }
+@media (max-width: 400px) {
+  #tourOwnFrame, #tourWatchFrame { margin-inline: -10px; }
+}

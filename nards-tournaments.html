@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Турниры по нардам · Два Туза</title>
   <link rel="stylesheet" href="styles-home-widget-modals.css">
-  <link rel="stylesheet" href="styles-nards-tournaments.css">
+  <link rel="stylesheet" href="styles-nards-tournaments.css?v=20261107-tournament-full-width">
 </head>
 <body class="nards-tournament">
 <header class="tour-header"><button id="closeTournament" aria-label="Вернуться в гостиную">←</button><div><small>ДВА ТУЗА</small><h1>Турниры по нардам</h1></div><span class="tour-dice" aria-hidden="true">⚄⚅</span></header>
@@ -22,10 +22,17 @@
         <label id="tourStartTime" hidden>Дата и время (НСК)<input type="datetime-local" name="startTime" disabled></label>
       </div>
       <p class="tour-muted" id="tourStartNote">Администратор запускает турнир кнопкой «Старт». Регистрация открыта до запуска.</p>
-      <div class="tour-form-grid"><label>Участие<select name="entryType"><option value="free">Бесплатный</option><option value="chips">На фишки Poker21</option></select></label><label id="tourBuyInLabel" hidden>Взнос, фишки<input name="buyIn" type="number" min="1" max="1000000" step="1" value="500"></label><label id="tourPrizeFundLabel">Призовой фонд, фишки<input name="prizeFund" type="number" min="0" max="1000000" step="1" value="0"></label></div>
-      <p id="tourFundingNote" class="tour-muted">Призовой фонд бесплатного турнира списывается с вашего Poker21 при создании. При нулевом фонде призов нет.</p>
-      <fieldset><legend>Призы за места</legend>
-        <div class="tour-form-grid"><label>Тип приза<select name="prizeKind"><option value="chips">Фишки Poker21</option><option value="tickets">Билеты на покер</option></select></label><label id="tourPrizeModeLabel">Распределение<select name="prizeMode"><option value="percent">Проценты фонда</option><option value="fixed">Суммы вручную</option></select></label></div>
+      <div class="tour-form-grid">
+        <label>Участие<select name="entryType"><option value="free">Бесплатный</option><option value="chips">На фишки Poker21</option></select></label>
+        <label id="tourBuyInLabel" hidden>Взнос, фишки<input name="buyIn" type="number" min="1" max="1000000" step="1" value="500"></label>
+      </div>
+      <div class="tour-form-grid">
+        <label>Тип приза<select name="prizeKind"><option value="chips">Фишки Poker21</option><option value="tickets">Билеты на покер</option></select></label>
+        <label id="tourPrizeFundLabel">Призовой фонд, фишки<input name="prizeFund" type="number" min="0" max="1000000" step="1" value="0"></label>
+      </div>
+      <p id="tourFundingNote" class="tour-muted"></p>
+      <fieldset id="tourPrizeDistribution" hidden><legend>Призы за места</legend>
+        <label id="tourPrizeModeLabel">Распределение<select name="prizeMode"><option value="percent">Проценты фонда</option><option value="fixed">Суммы вручную</option></select></label>
         <label id="tourPrizePlacesLabel">Призовых мест<select name="prizePlaces"><option>1</option><option>2</option><option>4</option><option>8</option></select></label>
         <label id="tourManualPlacesLabel" hidden>Количество призёров<input name="manualPrizePlaces" type="number" min="1" max="64" step="1" value="2"></label>
         <div id="tourPrizeShares" class="tour-form-grid"></div><p id="tourPrizePreview" class="tour-muted"></p><p id="tourPrizeRules" class="tour-muted"></p>
@@ -37,15 +44,26 @@
   </section>
   <section id="tourDetail" hidden>
     <div class="tour-section-heading"><button id="allTours">← Все турниры</button><button id="copyTourLink">Ссылка ↗</button></div>
-    <h2 id="tourTitle"></h2><p id="tourMeta" class="tour-muted"></p>
-    <p id="tourPrizes" class="tour-muted"></p>
-    <div id="tourCountdown" class="tour-countdown" role="timer"></div>
+    <header class="tour-overview">
+      <h2 id="tourTitle"></h2>
+      <p id="tourMeta" class="tour-muted"></p>
+      <p id="tourPrizes" class="tour-overview__prizes"></p>
+      <div id="tourCountdown" class="tour-countdown" role="timer"></div>
+    </header>
+    <div id="tourActions" class="tour-actions"></div>
+    <div id="tourAdminActions" class="tour-admin-actions" aria-label="Управление турниром"></div>
+    <div id="tourTicketAwards"></div>
     <nav class="tour-tabs" role="tablist" aria-label="Турнир"><button data-tour-tab="bracket" role="tab" aria-selected="true">Сетка</button><button data-tour-tab="game" role="tab" aria-selected="false" disabled>Моя игра</button><button data-tour-tab="watch" role="tab" aria-selected="false" disabled>Смотрю</button></nav>
-    <div id="tourActions" class="tour-actions"></div><div id="tourTicketAwards"></div>
-    <section id="tourBracketPanel" role="tabpanel"><div id="tourBracket"></div><h3>Участники</h3><div id="tourEntrants"></div></section>
+    <section id="tourBracketPanel" role="tabpanel">
+      <section class="tour-participants" aria-labelledby="tourParticipantsTitle">
+        <h3 id="tourParticipantsTitle">Участники</h3>
+        <div id="tourEntrants"></div>
+      </section>
+      <div id="tourBracket"></div>
+    </section>
     <section id="tourGamePanel" role="tabpanel" hidden><p id="tourOwnNote" class="tour-muted">Партия появится после жеребьёвки.</p><div id="tourOwnFrame"></div></section>
     <section id="tourWatchPanel" role="tabpanel" hidden><div class="tour-section-heading"><p id="watchTitle"></p><button id="returnOwn">Вернуться в свою игру</button></div><div id="tourWatchFrame"></div></section>
   </section>
 </main>
-<script src="app-nards-tournaments.js?v=20261107-scheduled-start-1"></script>
+<script src="app-nards-tournaments.js?v=20261107-tournament-full-width"></script>
 </body></html>
