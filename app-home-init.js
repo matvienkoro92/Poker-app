@@ -354,12 +354,12 @@
   if (homeNardsTournaments) homeNardsTournaments.addEventListener("click", async function () {
     homeNardsTournaments.disabled = true;
     try {
-      if (typeof window.pokerOpenNardsTournaments !== "function" && typeof window.pokerEnsureLazyDomains === "function") {
+      if (typeof window.pokerOpenVillaGameRoom !== "function" && typeof window.pokerEnsureLazyDomains === "function") {
         await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
       }
-      if (typeof window.pokerOpenNardsTournaments === "function") window.pokerOpenNardsTournaments();
-      else window.location.assign("./nards-tournaments.html");
-    } catch (e) { window.location.assign("./nards-tournaments.html"); }
+      if (typeof window.pokerOpenVillaGameRoom !== "function") throw new Error("Не удалось загрузить комнату с нардами. Попробуйте ещё раз.");
+      await window.pokerOpenVillaGameRoom("nards", true);
+    } catch (e) { window.alert(e.message || "Не удалось открыть нарды. Попробуйте ещё раз."); }
     finally { homeNardsTournaments.disabled = false; }
   });
   var nardsShortcut = document.getElementById("headerNardsShortcut");

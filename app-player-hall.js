@@ -431,7 +431,7 @@
   window.pokerOpenPlayerHall=function(target){hallReturn=null;return open(target);};
   window.pokerOpenPlayerGarage=function(target,focus){return open(target,'garage',focus);};
   window.pokerOpenBilliardsRoom=function(){return open(undefined,'billiards');};
-  window.pokerOpenVillaGameRoom=function(game){if(!['billiards','nards','chess'].includes(game))return false;var opening=open(undefined,game==='billiards'?'billiards':'living');if(game==='chess')opening.then(function(){if(data&&space==='living'&&dialog.open)focusLivingGame('chess');});return opening;};
+  window.pokerOpenVillaGameRoom=function(game,focusBoard=false){if(!['billiards','nards','chess'].includes(game))return false;var opening=open(undefined,game==='billiards'?'billiards':'living');if(game==='chess'||(game==='nards'&&focusBoard))return opening.then(function(){if(data&&space==='living'&&dialog.open)return focusLivingGame(game);});return opening;};
   function restoreCityVilla(){try{if(sessionStorage.getItem('poker21-city:restore-villa')!=='1')return;sessionStorage.removeItem('poker21-city:restore-villa');const url=new URL(location.href);url.searchParams.delete('cityVilla');history.replaceState(history.state,'',url.href);window.pokerOpenPlayerHall();}catch(_){}}
   window.addEventListener('poker-telegram-auth',restoreCityVilla);
   setTimeout(restoreCityVilla,0);
