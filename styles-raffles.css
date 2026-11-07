@@ -1,6 +1,14 @@
 /* Raffles CSS entrypoint. */
 @import url("./styles-rating-raffles.css?v=20261102-guest-preview-9");
 
+.view[data-view="raffles"] #rafflesActiveChooser .raffles-active-chooser__item {
+  font-family: Arial, "Segoe UI", sans-serif;
+}
+
+.view[data-view="raffles"] #rafflesActiveChooser .raffles-active-chooser__item button {
+  font-family: inherit;
+}
+
 /* First-load placeholders; refreshed results remain visible. */
 .raffles--initial-loading .raffles-hero dd,
 .raffles--initial-loading .raffles-tab__meta {
