@@ -84,7 +84,11 @@ function watch(room,title){
  $('watchTitle').textContent=title;document.querySelector('[data-tour-tab=watch]').disabled=false;$('returnOwn').hidden=!data.self?.roomId;setTab('watch');
 }
 function actionButton(label,action,primary=false){const b=el('button',label,primary?'tour-primary':'');b.dataset.tourAction=action;b.onclick=()=>mutate(action);return b;}
+function hideOverviewDetails(hidden){
+ for(const id of ['tourTitle','tourMeta','tourPrizes'])$(id).hidden=hidden;
+}
 function render(d){
+ hideOverviewDetails(d.status==='running');
  data=d;const tickets=d.prizeKind==='tickets',fixed=d.prizeMode==='fixed';
  const values=fixed?d.prizeAmounts:d.prizeShares||[100];
  $('tourPrizes').textContent=!tickets&&d.entryType!=='chips'&&!d.prizeFund?'Бесплатно · Без призов':(tickets?'Обычные билеты на покер. ': (d.entryType==='chips'?'Вход '+d.buyIn+' фишек · ':'Бесплатно · ')+'Призовой фонд: '+(d.prizeFund||0)+' фишек. ')+values.map((n,i)=>(i+1)+' место — '+n+(tickets?' ₽ · 1 билет':fixed?' фишек'+(d.entryType==='chips'?' при полном наборе':''):'%')).join(' · ')+(d.status==='completed'?(tickets?(d.paymentsSettled?' · Билеты выданы':' · Ожидается выдача билетов'):(d.paymentsSettled?' · Призы выплачены':' · Выплачиваем призы')):'');
@@ -119,7 +123,7 @@ async function refresh(){
  if(stopped||!currentId||mutation||loading&&flightEpoch===epoch)return;const gen=epoch;loading=true;flightEpoch=gen;
  try{const d=await request({action:'get',id:currentId});if(gen===epoch){render(d);notice();}}catch(e){if(gen===epoch)notice(e.status===409?'Синхронизируем турнир…':e.message);}finally{if(flightEpoch===gen)loading=false;if(gen===epoch&&!stopped)poll=setTimeout(refresh,3000);}
 }
-async function open(id){if(!/^[A-HJ-NP-Z2-9]{10}$/.test(id)){notice('Неверная ссылка на турнир.');return;}epoch++;clearTimeout(poll);clearFrames();currentId=id;data=null;lastPaint='';setTab('bracket');updateURL();showPanel('tourDetail');$('tourTitle').textContent='Загружаем турнир…';await refresh();}
+async function open(id){if(!/^[A-HJ-NP-Z2-9]{10}$/.test(id)){notice('Неверная ссылка на турнир.');return;}epoch++;clearTimeout(poll);clearFrames();currentId=id;data=null;lastPaint='';setTab('bracket');updateURL();showPanel('tourDetail');hideOverviewDetails(false);$('tourTitle').textContent='Загружаем турнир…';await refresh();}
 async function mutate(action,fields={}){
  if(mutation)return;if(action==='cancel'&&!window.confirm('Отменить турнир?'))return;
  mutation=true;epoch++;clearTimeout(poll);for(const b of document.querySelectorAll('#tourActions button, #tourAdminActions button'))b.disabled=true;
