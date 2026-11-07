@@ -1,12 +1,18 @@
 *{box-sizing:border-box}[hidden]{display:none!important}
 html,body{margin:0;min-height:100%;background:#0e1917;color:#f6e9cf;font:14px/1.5 system-ui,sans-serif}
-body{background:radial-gradient(ellipse at 80% 0,#3a3220 0,transparent 48%),#0e1917}
+body{position:relative;isolation:isolate;min-height:100svh;background:none}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#08150dbc,#08150de0),url('./assets/player-hall/living-table-overhead-v1.webp') center/cover no-repeat}
+.tour-header{background:#10251fe8;box-shadow:0 4px 24px #0004}
+#tourCreatePanel,#tourDetail{padding:18px;border:1px solid #c19f5355;border-radius:16px;background:#10251ff2}
+.tour-card-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tour-delete{margin-left:auto;color:#e3b7a5;background:#2d201de6;border-color:#bc81654d}
+.tour-list-card{box-shadow:0 8px 28px #0004,inset 0 1px #ffe4a51a}
 button,input,select{font:inherit}button{cursor:pointer;min-height:42px;border:1px solid #a88c5066;border-radius:11px;background:#1b2a23;color:#f6e9cf;padding:9px 13px}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffe2a5;outline-offset:3px}
 input,select{display:block;width:100%;min-height:44px;padding:10px;border:1px solid #b69b6166;border-radius:10px;color:#fff1d1;background:#10231d;color-scheme:dark}label{display:grid;gap:6px;color:#d2c2a1;font-size:12px}h1,h2,h3,p{margin:0 0 12px}h1{font-size:19px}h2{font-size:21px}h3{font-size:15px}small,.tour-muted{color:#b7b4a3;font-size:12px}.tour-muted{line-height:1.65}
 .tour-header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;border-bottom:1px solid #c6a26333}.tour-header h1{margin:2px 0 0}.tour-header small{font-size:9px;letter-spacing:3px;color:#d9b877}.tour-dice{margin-left:auto;font-size:29px;letter-spacing:-5px;color:#efce8b}
 main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 24px);min-width:0}#tourError{color:#ffcc9b;font-size:13px}#tourError:empty{display:none}
 .tour-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.tour-section-heading h2,.tour-section-heading p{margin:0}
-#tourList{display:grid;gap:12px;margin-bottom:14px}.tour-list-card{display:grid;gap:12px;padding:18px;border:1px solid #c19f5366;border-radius:16px;background:linear-gradient(135deg,#35302080,#10201c)}.tour-list-card h3{font-size:17px;margin:0}.tour-list-card p{margin:0}.tour-list-card button{justify-self:start}.tour-list-card.is-live{border-color:#d8ba72}
+#tourList{display:grid;gap:12px;margin-bottom:14px}.tour-list-card{display:grid;gap:12px;padding:18px;border:1px solid #c19f5366;border-radius:16px;background:linear-gradient(135deg,#203b30f5,#10251ff7)}.tour-list-card h3{font-size:17px;margin:0}.tour-list-card p{margin:0}.tour-list-card button{justify-self:start}.tour-list-card.is-live{border-color:#d8ba72}
 #tourForm{display:grid;gap:16px;max-width:620px}.tour-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}fieldset{padding:12px;border:1px solid #9d87564d;border-radius:12px;min-width:0}legend{padding:0 6px;color:#e8c787}.tour-primary{background:linear-gradient(120deg,#f0d69a,#ba9447);color:#17251c;font-weight:750;border-color:#e0be74}
 .tour-tabs{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 0;background:#0e1917f5}.tour-tabs [aria-selected=true]{background:#d4b16b;color:#14231b;font-weight:750}.tour-countdown{min-height:30px;font-size:17px;color:#ffdb90;font-variant-numeric:tabular-nums}.tour-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}.tour-actions:empty{display:none}
 #tourEntrants{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}.tour-entry{padding:6px 9px;border:1px solid #bc995340;border-radius:8px;font-size:12px;background:#1a2a22}.tour-entry.is-self{border-color:#e3c47a}.tour-entry.is-ready{color:#b4e0b1}

@@ -27,7 +27,13 @@ function clearFrames(){for(const frame of [ownFrame,watchFrame])if(frame){frame.
 async function list(){
  const gen=++epoch;clearTimeout(poll);currentId='';data=null;lastPaint='';clearFrames();setTab('bracket');updateURL();showPanel('tourListPanel');
  try{const d=await request({action:'list'});if(gen!==epoch)return;listAdmin=d.isAdmin;$('tourCreate').hidden=!listAdmin;$('tourList').replaceChildren();
-  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.append(el('h3',t.title),el('p',(statusNames[t.status]||t.status)+' · '+t.count+'/'+t.capacity+' участников','tour-muted'),el('p',(t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt))+' · '+(t.discipline==='long'?'Длинные':'Короткие'),'tour-muted'));const b=el('button',t.self?'Мой турнир →':'Открыть турнир →');b.onclick=()=>open(t.id);card.append(el('p',t.entryType==='chips'?'Вход '+t.buyIn+' фишек Poker21':'Бесплатный турнир','tour-muted'));card.append(b);$('tourList').append(card);}
+  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.append(el('h3',t.title),el('p',(statusNames[t.status]||t.status)+' · '+t.count+'/'+t.capacity+' участников','tour-muted'),el('p',(t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt))+' · '+(t.discipline==='long'?'Длинные':'Короткие'),'tour-muted'));const b=el('button',t.self?'Мой турнир →':'Открыть турнир →');b.onclick=()=>open(t.id);card.append(el('p',t.entryType==='chips'?'Вход '+t.buyIn+' фишек Poker21':'Бесплатный турнир','tour-muted'));const actions=el('div',null,'tour-card-actions');actions.append(b);
+   if(listAdmin&&['completed','cancelled'].includes(t.status)){
+    const remove=el('button','Удалить из списка','tour-delete');
+    remove.onclick=async()=>{if(mutation||!window.confirm('Убрать «'+t.title+'» из списка турниров? История игр и выплат сохранится.'))return;mutation=true;clearTimeout(poll);remove.disabled=true;try{await request({action:'delete',id:t.id});notice();await list();}catch(e){notice(e.message);remove.disabled=false;if(!stopped)poll=setTimeout(listRefresh,10000);}finally{mutation=false;}};
+    actions.append(remove);
+   }
+   card.append(actions);$('tourList').append(card);}
   if(!d.tournaments.length)$('tourList').append(el('p',listAdmin?'Турниров пока нет. Создайте первый.':'Скоро здесь появятся турниры клуба.','tour-muted'));
  }catch(e){if(gen===epoch)notice(e.message);}
  if(gen===epoch&&!stopped)poll=setTimeout(listRefresh,10000);
@@ -120,7 +126,7 @@ function createForm(){if(!listAdmin)return;epoch++;clearTimeout(poll);showPanel(
 $('tourForm').elements.capacity.onchange=()=>{targets();prizes();};
 $('tourForm').elements.discipline.onchange=()=>{const form=$('tourForm');if(form.elements.discipline.value==='short')form.elements.variant.value='classic';form.elements.variant.disabled=form.elements.discipline.value==='short';};
 $('tourForm').onsubmit=async event=>{event.preventDefault();if(mutation)return;mutation=true;const form=$('tourForm'),button=form.querySelector('[type=submit]');button.disabled=true;try{const d=await request({action:'create',requestId:formRequestId,title:form.elements.title.value,capacity:Number(form.elements.capacity.value),discipline:form.elements.discipline.value,variant:form.elements.variant.value,turnSeconds:Number(form.elements.turnSeconds.value),entryType:form.elements.entryType.value,buyIn:Number(form.elements.buyIn.value),prizeFund:Number(form.elements.prizeFund.value),prizeShares:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value)),roundTargets:[...$('tourRoundTargets').querySelectorAll('input')].map(i=>Number(i.value))});notice();mutation=false;await open(d.id);}catch(e){notice(e.message);}finally{mutation=false;button.disabled=false;}};
-$('tourCreate').onclick=createForm;$('allTours').onclick=list;$('refreshTours').onclick=list;document.querySelector('[data-tour-back]').onclick=list;
+$('tourCreate').onclick=createForm;$('allTours').onclick=list;document.querySelector('[data-tour-back]').onclick=list;
 for(const b of document.querySelectorAll('[data-tour-tab]'))b.onclick=()=>setTab(b.dataset.tourTab);
 $('returnOwn').onclick=()=>setTab('game');
 $('copyTourLink').onclick=async()=>{const url='https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=nards_tour_'+currentId;try{await navigator.clipboard.writeText(url);notice('Ссылка скопирована.');}catch{window.prompt('Ссылка на турнир',url);}};

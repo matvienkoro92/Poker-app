@@ -178,3 +178,26 @@ test('manual tournament waits indefinitely, including at capacity, until admin s
   await assert.rejects(f.call('m3', 'join', t.id), { status: 409 });
   await assert.rejects(f.call('m0', 'start', t.id), { status: 409 });
 });
+
+test('only admin can remove terminal tournaments from the list while games and records remain accessible',async()=>{
+ const f=fixture(),t=await f.create();
+ await assert.rejects(f.call('m1','delete',t.id),{status:403});
+ await assert.rejects(f.call('m0','delete',t.id),{status:409});
+ await f.call('m0','cancel',t.id);
+ const before=structuredClone(f.tournaments.get(t.id));
+ await f.call('m0','delete',t.id);
+ assert.equal((await f.call('m0','list')).tournaments.length,0);
+ assert.equal((await f.call('m1','list')).tournaments.length,0);
+ assert.equal((await f.call('m1','get',t.id)).status,'cancelled');
+ const saved=f.tournaments.get(t.id);
+ assert.deepEqual(saved.entries,before.entries);assert.deepEqual(saved.rounds,before.rounds);
+ assert.deepEqual(saved.paymentPlan,before.paymentPlan);assert.equal(saved.deletedBy,'ID000000');
+ await f.call('m0','delete',t.id);assert.equal(f.tournaments.size,1);
+});
+test('failed refunds prevent hiding a tournament before its finances settle',async()=>{
+ const f=fixture({payments:{transfer:async()=>{throw Error('payment unavailable');}}}),t=await f.create();
+ Object.assign(f.tournaments.get(t.id),{status:'cancelled',prizeFund:100,fundPaid:true,paymentsSettled:false});
+ await assert.rejects(f.call('m0','delete',t.id),/payment unavailable/);
+ assert.equal(f.tournaments.get(t.id).deletedAt,undefined);
+ assert.equal((await f.call('m0','list')).tournaments.length,1);
+});
