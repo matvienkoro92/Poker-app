@@ -2,6 +2,7 @@
 (function () {
   "use strict";
   var flow = null;
+  var pendingPanel = null;
   var observer = null;
   var sceneObserver = null;
   var sizeFrame = 0;
@@ -111,8 +112,8 @@
 
   function show(panel) {
     var current = document.querySelector(".download-page--active[data-download-page='main'] [data-play-flow]") || flow;
-    if (!current) return;
     panel = panel === "poker21" ? "poker21" : "tournament";
+    if (!current) { pendingPanel = panel; return; }
     flushDrag();
     closeCooler();
     current.dataset.playPanel = panel;
@@ -202,7 +203,8 @@
       if(!deferred&&typeof image.decode==='function')image.decode().catch(function(){});
     });
     size();
-    show(flow.dataset.playPanel);
+    show(pendingPanel || flow.dataset.playPanel);
+    pendingPanel = null;
   }
 
   window.pokerPlayFlowShow = show;
