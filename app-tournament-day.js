@@ -84,25 +84,6 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     minute: 0,
     time: "18:00 МСК",
     banner: "home-tournament-saturday-fast-track-square-1.webp",
-    banners: [
-      "home-tournament-saturday-fast-track-square-1.webp",
-      "home-tournament-saturday-fast-track-square-2.webp",
-      "home-tournament-saturday-fast-track-square-3.webp",
-      "home-tournament-saturday-fast-track-square-4.webp",
-      "home-tournament-saturday-fast-track-square-5.webp",
-      "home-tournament-saturday-fast-track-square-6.webp",
-      "home-tournament-saturday-fast-track-square-7.webp",
-      "home-tournament-saturday-fast-track-square-8.webp"
-    ],
-    storyBanners: [
-      "home-tournament-saturday-fast-track-story-1.webp",
-      "home-tournament-saturday-fast-track-story-2.webp",
-      "home-tournament-saturday-fast-track-story-3.webp",
-      "home-tournament-saturday-fast-track-story-4.webp",
-      "home-tournament-saturday-fast-track-story-5.webp",
-      "home-tournament-saturday-fast-track-story-6.webp",
-      "home-tournament-saturday-fast-track-story-7.webp"
-    ],
     bannerAlt: "Нокаут — суббота, 18:00 МСК, вход 1 000 ₽, гарантия 150 000 ₽, уровни по 8 минут",
     bannerWidth: 1000,
     bannerHeight: 1000
