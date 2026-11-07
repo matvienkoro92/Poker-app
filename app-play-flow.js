@@ -212,7 +212,8 @@
     event.stopImmediatePropagation();
   }, true);
   document.addEventListener("click", function (event) {
-    if (event.target.closest('[data-view-target="download"]')) { connect(); show("tournament"); }
+    var downloadLink = event.target.closest('[data-view-target="download"]');
+    if (downloadLink) { connect(); show(downloadLink.dataset.downloadPanel === "poker21" ? "poker21" : "tournament"); }
     var control = event.target.closest("[data-play-next], [data-play-prev], [data-play-panel-target]");
     if (!control || !control.closest("[data-play-flow]")) return;
     event.preventDefault();

@@ -427,3 +427,10 @@ body[data-view="download"] .play-flow__panel {isolation:isolate;}
 /* The full-screen entrance still starts below Telegram's native toolbar. */
 html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single){padding-top:var(--tg-ui-top-clearance,0px)!important}
 html.app--telegram-miniapp body[data-view="download"] #app.app:has(.download-page--active[data-download-page="main"] .play-single)>.card{height:calc(100dvh - var(--tg-ui-top-clearance,0px) - var(--app-bottom-tabbar-height,56px))!important;max-height:calc(100dvh - var(--tg-ui-top-clearance,0px) - var(--app-bottom-tabbar-height,56px))!important}
+
+/* Contain the two-slide track within the mobile frame, including its padding. */
+body[data-view="download"] #app.app:has(.play-single),
+body[data-view="download"] .play-flow,
+body[data-view="download"] .play-flow__panel,
+body[data-view="download"] .play-single { box-sizing: border-box; min-width: 0; }
+body[data-view="download"] #app.app:has(.play-single) { max-width: min(var(--app-frame-width, 430px), 100vw) !important; }

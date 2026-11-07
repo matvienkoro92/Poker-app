@@ -1132,7 +1132,8 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .hall-equipment--strip .hall-equipment__list small{display:none}
 .hall-equipment--strip .hall-equipment__list span{padding:2px 7px 0;font-size:10px;line-height:1.2}
 .hall-equipment--strip>footer{padding:0 12px 5px;min-height:14px;border:0}.hall-equipment--strip [data-status]{font-size:10px;margin:0}
-.player-hall-dialog.has-billiards-picker .villa-billiards-stage{top:calc(max(32dvh,190px) + max(8px,var(--hall-safe-top,env(safe-area-inset-top,0px))) + 8px)}
+/* Equipment opens above the room without changing its size or camera framing. */
+.player-hall-dialog.has-billiards-picker .villa-billiards-stage{top:0}
 
 /* Borne-off discs stand on edge: narrow rounded rims in matching carved grooves. */
 .nards-storage{--stored-face:var(--checker-white,#f5e6c5);--stored-rim:#b69a66}
@@ -1213,3 +1214,27 @@ body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus 
 
 /* Tournament dice sit beside the backgammon case on the same room surface. */
 .player-hall-dialog .living-tournament-dice{position:absolute;left:46%;top:54%;width:9%;min-width:44px;height:8%;padding:0;border:0;background:none;pointer-events:auto;color:#ffe1a3;cursor:pointer}.living-tournament-dice i{display:block;font-style:normal;font-size:clamp(22px,4cqw,38px);letter-spacing:-5px;text-shadow:1px 3px 2px #0008;transform:rotate(-12deg)}.living-tournament-dice span{display:block;font-size:10px;white-space:nowrap;text-shadow:0 1px 5px #000}.living-tournament-dice:focus-visible{outline:2px solid #f5d287;outline-offset:2px}.living-focus-tournament-dice{color:#ffe4aa!important;border-color:#bca060!important}
+
+/* Backgammon trophy stands to the right of the case, on the tabletop. */
+.player-hall-dialog .living-tournament-dice { left: 78%; top: 49%; width: 12%; height: 13%; min-width: 44px; }
+.player-hall-dialog .living-tournament-dice img { display: block; width: 100%; height: calc(100% - 16px); object-fit: contain; filter: drop-shadow(2px 4px 3px #0005); }
+.player-hall-dialog .living-tournament-dice span { font-size: clamp(10px, 1.5cqw, 13px); line-height: 16px; }
+
+.player-hall-dialog .villa-living-share-actions { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 4; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 24px); }
+.player-hall-dialog .villa-living-share-actions button { min-height: 44px; border: 1px solid #d5b76c; border-radius: 12px; background: #263d30f2; color: #fff0c6; box-shadow: 0 3px 12px #0007; font-family: inherit; font-size: 12px; font-weight: 700; line-height: 1.2; cursor: pointer; }
+.player-hall-dialog .villa-living-invite { padding: 10px 18px; white-space: nowrap; }
+.player-hall-dialog .villa-living-copy { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; padding: 10px; }
+.player-hall-dialog .villa-living-copy svg { width: 23px; height: 23px; }
+.player-hall-dialog .villa-living-share-actions button:focus-visible { outline: 2px solid #ffe5a1; outline-offset: 3px; }
+
+.player-hall-dialog .living-board-focus[data-game=nards] .living-focus-play > .living-focus-tournament-dice {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #111 !important;
+}
+.player-hall-dialog .living-focus-tournament-dice img { width: 36px; height: 36px; object-fit: contain; flex: 0 0 36px; }

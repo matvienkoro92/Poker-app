@@ -15,7 +15,7 @@ window.pokerOpenBilliardsEquipment=function(entry,hall,onSaved){
  function preview(item){if(cue)localStorage.setItem(key,item.id);else window.PokerBilliardsEquipmentSync.preview(hall.accountId,item.id);onSaved?.(item);}
  function choose(item){selected=item;var version=++selectionVersion;preview(item);paint();d.querySelector('[data-status]').textContent='Сохраняем…';saveQueue=saveQueue.catch(function(){}).then(async function(){if(version!==selectionVersion)return;try{if(!cue)await window.PokerBilliardsEquipmentSync.save(hall.accountId,item.id,window.pokerSocialRequest);confirmed=item;if(version===selectionVersion)d.querySelector('[data-status]').textContent='✓ Применено';else preview(selected);}catch(_){if(version===selectionVersion){selected=confirmed;preview(confirmed);paint();d.querySelector('[data-status]').textContent='Не удалось сохранить. Попробуйте ещё раз.';}}});}
  function paint(){for(var card of list.children){var item=items.find(i=>i.id===card.dataset.item);card.setAttribute('aria-pressed',String(item.id===selected.id));card.querySelector('span').textContent=!unlocked(item)?(item.superShotWins?'🔒 За '+item.superShotWins+' суперударов':'🔒 С '+item.level+' уровня'):item.id===selected.id?'✓ Выбран':'Выбрать';}}
- items.forEach(function(item){var card=document.createElement('button');card.type='button';card.dataset.item=item.id;card.disabled=!unlocked(item);var image=document.createElement('img');image.src=cue?item.art:item.image;image.alt=item.name;image.loading='lazy';image.className=cue?'is-cue':'';var title=document.createElement('strong');title.textContent=item.name;var desc=document.createElement('small');desc.textContent=cue?(item.superShotWins?(item.superShotWins===1?'За первый суперудар':'За '+item.superShotWins+' суперударов'):item.level?'С '+item.level+' уровня':'Доступен всем'):item.description;var state=document.createElement('span');card.append(image,title,desc,state);card.onclick=function(){if(cue)choose(item);else{selected=item;paint();}};list.append(card);});paint();
+ items.forEach(function(item){var card=document.createElement('button');card.type='button';card.dataset.item=item.id;card.disabled=!unlocked(item);var image=document.createElement('img');image.src=cue?item.art:item.image;image.alt=item.name;image.loading='lazy';image.className=cue?'is-cue':'';var title=document.createElement('strong');title.textContent=item.name;var desc=document.createElement('small');desc.textContent=cue?(item.superShotWins?(item.superShotWins===1?'За первый суперудар':'За '+item.superShotWins+' суперударов'):item.level?'С '+item.level+' уровня':'Доступен всем'):item.description;var state=document.createElement('span');card.append(image,title,desc,state);card.onclick=function(){if(cue)choose(item);else{selected=item;preview(item);paint();}};list.append(card);});paint();
  d.querySelector('[data-close]').onclick=function(){d.close();};var saveButton=d.querySelector('[data-save]');
  if(cue){saveButton.remove();d.querySelector('footer small').remove();}
  else saveButton.onclick=async function(){
@@ -23,12 +23,13 @@ window.pokerOpenBilliardsEquipment=function(entry,hall,onSaved){
   d.querySelector('[data-status]').textContent='Сохраняем…';
   try{
    await window.PokerBilliardsEquipmentSync.save(hall.accountId,selected.id,window.pokerSocialRequest);
+   confirmed=selected;
    onSaved?.(selected);
    if(d.open)d.close();
   }catch(error){
    d.querySelector('[data-status]').textContent=error.message||'Не удалось сохранить стол.';
   }finally{saveButton.disabled=false;list.inert=false;}
  };
- d.addEventListener('close',function(){if(hallDialog)hallDialog.classList.remove('has-billiards-picker');d.remove();},{once:true});document.body.append(d);d.showModal();return true;
+ d.addEventListener('close',function(){if(!cue&&selected.id!==confirmed.id)preview(confirmed);if(hallDialog)hallDialog.classList.remove('has-billiards-picker');d.remove();},{once:true});document.body.append(d);d.showModal();return true;
 };
 })();

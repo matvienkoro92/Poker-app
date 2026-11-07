@@ -350,6 +350,18 @@
       applyStatus({ ok: true, pokerPlusVerified: false, p21Id: "", level: 0 });
     };
   } catch (eResetExport) {}
+  var homeNardsTournaments = document.getElementById("homeNardsTournaments");
+  if (homeNardsTournaments) homeNardsTournaments.addEventListener("click", async function () {
+    homeNardsTournaments.disabled = true;
+    try {
+      if (typeof window.pokerOpenNardsTournaments !== "function" && typeof window.pokerEnsureLazyDomains === "function") {
+        await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
+      }
+      if (typeof window.pokerOpenNardsTournaments === "function") window.pokerOpenNardsTournaments();
+      else window.location.assign("./nards-tournaments.html");
+    } catch (e) { window.location.assign("./nards-tournaments.html"); }
+    finally { homeNardsTournaments.disabled = false; }
+  });
   var nardsShortcut = document.getElementById("headerNardsShortcut");
   var previewNardsShortcut = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname) &&
     new URLSearchParams(location.search).get("preview") === "header-bonus";

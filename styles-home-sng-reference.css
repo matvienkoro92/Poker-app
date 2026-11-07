@@ -267,3 +267,6 @@
   #homeWelcomeBonus .home-welcome-ticket__terms { display: grid; gap: 1px; }
   #homeWelcomeBonus .home-welcome-ticket__terms b { border-left: 0; padding-left: 0; }
 }
+
+.home-free-tournament-card { display: block; box-sizing: border-box; width: 100%; font-family: inherit; text-decoration: none; cursor: pointer; }
+.home-free-tournament-card:focus-visible { outline: 2px solid #fff0b5; outline-offset: 3px; }
