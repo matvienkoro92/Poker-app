@@ -20,7 +20,12 @@
       <p class="tour-muted">Турнир запускается кнопкой «Старт», когда администратор решит, что участники набрались. Регистрация открыта до запуска. Турнир завершается после финала.</p>
       <div class="tour-form-grid"><label>Участие<select name="entryType"><option value="free">Бесплатный</option><option value="chips">На фишки Poker21</option></select></label><label id="tourBuyInLabel" hidden>Взнос, фишки<input name="buyIn" type="number" min="1" max="1000000" step="1" value="500"></label><label id="tourPrizeFundLabel">Призовой фонд, фишки<input name="prizeFund" type="number" min="0" max="1000000" step="1" value="0"></label></div>
       <p id="tourFundingNote" class="tour-muted">Призовой фонд бесплатного турнира списывается с вашего Poker21 при создании. При нулевом фонде призов нет.</p>
-      <fieldset><legend>Распределение призовых</legend><label>Призовых мест<select name="prizePlaces"><option>1</option><option>2</option><option>4</option><option>8</option></select></label><div id="tourPrizeShares" class="tour-form-grid"></div><p id="tourPrizePreview" class="tour-muted"></p><p class="tour-muted">Доли должны составлять 100%. Игроки, выбывшие в одном раунде, получают одинаковый процент. Призы выплачиваются автоматически после финала. Остаток округления и доли незанятых мест получает победитель.</p></fieldset>
+      <fieldset><legend>Призы за места</legend>
+        <div class="tour-form-grid"><label>Тип приза<select name="prizeKind"><option value="chips">Фишки Poker21</option><option value="tickets">Билеты на покер</option></select></label><label id="tourPrizeModeLabel">Распределение<select name="prizeMode"><option value="percent">Проценты фонда</option><option value="fixed">Суммы вручную</option></select></label></div>
+        <label id="tourPrizePlacesLabel">Призовых мест<select name="prizePlaces"><option>1</option><option>2</option><option>4</option><option>8</option></select></label>
+        <label id="tourManualPlacesLabel" hidden>Количество призёров<input name="manualPrizePlaces" type="number" min="1" max="64" step="1" value="2"></label>
+        <div id="tourPrizeShares" class="tour-form-grid"></div><p id="tourPrizePreview" class="tour-muted"></p><p id="tourPrizeRules" class="tour-muted"></p>
+      </fieldset>
       <fieldset><legend>До скольких очков играть</legend><div id="tourRoundTargets" class="tour-form-grid"></div></fieldset>
       <p class="tour-muted">На выбывание. Победа — 1, марс — 2, кокс — 3 очка. Случайные пары. Между раундами 5 минут; между партиями одного матча 5 секунд. Первый ход каждого игрока — 90 секунд, затем выбранный лимит. Три пропуска подряд — поражение в матче. Если оба не играли, исключаются оба.</p>
       <button type="submit" class="tour-primary">Создать и открыть регистрацию</button>
@@ -32,7 +37,7 @@
     <p id="tourPrizes" class="tour-muted"></p>
     <div id="tourCountdown" class="tour-countdown" role="timer"></div>
     <nav class="tour-tabs" role="tablist" aria-label="Турнир"><button data-tour-tab="bracket" role="tab" aria-selected="true">Сетка</button><button data-tour-tab="game" role="tab" aria-selected="false" disabled>Моя игра</button><button data-tour-tab="watch" role="tab" aria-selected="false" disabled>Смотрю</button></nav>
-    <div id="tourActions" class="tour-actions"></div>
+    <div id="tourActions" class="tour-actions"></div><div id="tourTicketAwards"></div>
     <section id="tourBracketPanel" role="tabpanel"><div id="tourBracket"></div><h3>Участники</h3><div id="tourEntrants"></div></section>
     <section id="tourGamePanel" role="tabpanel" hidden><p id="tourOwnNote" class="tour-muted">Партия появится после жеребьёвки.</p><div id="tourOwnFrame"></div></section>
     <section id="tourWatchPanel" role="tabpanel" hidden><div class="tour-section-heading"><p id="watchTitle"></p><button id="returnOwn">Вернуться в свою игру</button></div><div id="tourWatchFrame"></div></section>
