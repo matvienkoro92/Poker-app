@@ -201,3 +201,26 @@ test('failed refunds prevent hiding a tournament before its finances settle',asy
  assert.equal(f.tournaments.get(t.id).deletedAt,undefined);
  assert.equal((await f.call('m0','list')).tournaments.length,1);
 });
+
+test('only the opponent can accept a tournament resignation for the offered points', async () => {
+  const f = fixture();
+  const t = await f.seed(2, { capacity: 2, target: 5 });
+  f.time(t.startsAt);
+  await f.service.synchronize(t.id);
+  const room = f.roomMap.get(t.rounds[0].matches[0].roomId);
+  const base = roomFactory({ ...f.rooms, now: f.now });
+  const move = (player, revision, type, points) => base.call(room.players[player], {
+    action: 'move', roomId: room.id, revision, move: { type, points }
+  });
+  const offer = await move(0, room.revision, 'resign-offer', 1);
+  assert.equal(offer.state.winner, null);
+  await assert.rejects(move(0, offer.revision, 'resign-accept', 1), { status: 409 });
+  const declined = await move(1, offer.revision, 'resign-decline', 1);
+  assert.equal(declined.state.winner, null);
+  const second = await move(0, declined.revision, 'resign-offer', 2);
+  await assert.rejects(move(1, second.revision, 'resign-accept', 3), { status: 409 });
+  const accepted = await move(1, second.revision, 'resign-accept', 2);
+  assert.equal(accepted.state.winner, 1);
+  assert.deepEqual(accepted.match.wins, [0, 2]);
+  assert.equal(accepted.match.winner, null);
+});

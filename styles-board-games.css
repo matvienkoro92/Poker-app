@@ -995,7 +995,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-dragon-shine{position:absolute;z-index:0;pointer-events:none;mix-blend-mode:screen}.nards-dragon-shine svg{display:block;width:100%;height:100%;overflow:visible}.dragon-horn-shine{filter:drop-shadow(0 0 3px #ffbf5a)}
 @media(prefers-reduced-motion:reduce){.nards-dragon-shine{display:none}}
 
-.board-tournament-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:580px;margin:8px auto;padding:9px 12px;border:1px solid #bda36577;border-radius:11px;background:#253528;color:#ffe0a0;font-size:12px}.board-tournament-banner button{min-height:30px;padding:4px 10px;font-size:11px}
 
 .board-tournament-embed #boardArea:has(#nardsBoard:not([hidden])) {
   --board-edge-outset: 10px;

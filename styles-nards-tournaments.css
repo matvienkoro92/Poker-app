@@ -79,3 +79,9 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 @media (max-width: 400px) {
   #tourOwnFrame, #tourWatchFrame { margin-inline: -10px; }
 }
+
+.nards-tournament .sng-champions-modal__map-player.tour-player-advanced {
+  color: #a9edb4;
+  background: #214735;
+  box-shadow: inset 3px 0 #70c987;
+}
