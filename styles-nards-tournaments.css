@@ -37,3 +37,7 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 .tour-prize-amount{display:block;color:#f3d38c;font-size:12px;line-height:1.45;font-variant-numeric:tabular-nums}
 
 .tour-ticket-award{display:grid;gap:6px;padding:14px;margin-bottom:10px;border:1px solid #c19f5366;border-radius:12px;background:#203b30}.tour-ticket-award span{color:#f3d38c}.tour-ticket-award button{justify-self:start}
+
+.tour-entry:has(.tour-entry-remove){display:inline-flex;align-items:center;gap:6px;padding-block:2px}
+.tour-entry .tour-entry-remove{min-width:32px;min-height:32px;padding:0;border-color:transparent;background:transparent;color:#f3c2ac;font-size:18px}
+.tour-entry .tour-entry-remove:hover,.tour-entry .tour-entry-remove:focus-visible{background:#68352e;border-color:#e4ad95}

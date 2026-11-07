@@ -45,3 +45,16 @@ test('ordinary poker tickets preserve nominations, tied places and manual issuan
 test('manual prizes reject unequal tied places, missing tied slots, oversized pools and paid ticket modes',async()=>{
  const f=fixture();for(const options of [{prizeMode:'fixed',prizeAmounts:[1000,500,300]},{prizeMode:'fixed',prizeAmounts:[1000,500,300,200]},{prizeMode:'fixed',prizeAmounts:[1000000,1]},{prizeKind:'tickets',entryType:'chips',buyIn:500,prizeAmounts:[1000,1000]},{prizeMode:'fixed',prizeAmounts:[-1,100]}])await assert.rejects(f.create(options),{status:400});
 });
+
+test('only an admin can remove a registered player, and retries refund the entry once', async () => {
+  const b = bank(), f = fixture(b);
+  const tournament = await f.create({ entryType: 'chips', buyIn: 500 });
+  const joined = await f.call('m1', 'join', tournament.id);
+  const target = { entryId: joined.self.id };
+  await assert.rejects(f.call('m1', 'remove-entry', tournament.id, target), { status: 403 });
+  assert.equal(b.balances.get('p21-1'), 9500);
+  const updated = await f.call('m0', 'remove-entry', tournament.id, target);
+  assert.equal(updated.entries.length, 0);
+  await f.call('m0', 'remove-entry', tournament.id, target);
+  assert.equal(b.balances.get('p21-1'), 10000);
+});

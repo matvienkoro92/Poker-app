@@ -94,12 +94,22 @@ function render(d){
  if(d.isAdmin&&!a.issuedAt){const b=el('button','Отметить выдачу');b.onclick=async()=>{if(!window.confirm('Билет '+a.amount+' ₽ действительно выдан игроку «'+(entry?.name||'Игрок')+'»?'))return;b.disabled=true;try{render(await request({action:'issue-ticket',id:d.id,entryId:a.entryId}));notice();}catch(e){notice(e.message);b.disabled=false;}};row.append(b);}awards.append(row);}
  showPanel('tourDetail');$('tourTitle').textContent=d.title;$('tourMeta').textContent=(d.discipline==='long'?'Длинные':'Короткие')+' · '+(d.variant==='crazy'?'Бешеные':d.variant==='six-one'?'6:1 · Кафтар':'Классические')+' · '+d.entries.length+'/'+d.capacity+' · '+(d.startsAt==null?'Ручной запуск':novosibirsk(d.startsAt))+' · победа 1 / марс 2 / кокс 3';
  const paint=JSON.stringify([d.revision,d.self,d.rounds,d.entries]);
- if(paint!==lastPaint){lastPaint=paint;bracket(d);$('tourEntrants').replaceChildren(...d.entries.map(e=>el('span',(e.ready?'✓ ':'')+e.name+(e.self?' · Вы':''),'tour-entry'+(e.self?' is-self':'')+(e.ready?' is-ready':''))));
+ if(paint!==lastPaint){lastPaint=paint;bracket(d);$('tourEntrants').replaceChildren(...d.entries.map(e=>{
+   const chip=el('span',(e.ready?'✓ ':'')+e.name+(e.self?' · Вы':''),'tour-entry'+(e.self?' is-self':'')+(e.ready?' is-ready':''));
+   if(d.isAdmin&&d.status==='registration'){
+    const remove=el('button','×','tour-entry-remove');
+    remove.type='button';
+    remove.setAttribute('aria-label','Удалить участника '+e.name);
+    remove.onclick=()=>{if(!mutation&&window.confirm('Удалить из турнира: '+e.name+'?'))mutate('remove-entry',{entryId:e.id});};
+    chip.append(remove);
+   }
+   return chip;
+  }));
   const actions=$('tourActions');actions.replaceChildren();
   if(!d.self&&d.status==='registration')actions.append(actionButton((d.entryType==='chips'?'Участвовать · '+d.buyIn+' фишек':'Участвовать · бесплатно'),'join',true));
   if(d.self&&!['completed','cancelled'].includes(d.status)){if(!d.self.ready||ownMatch()&&!ownMatch().ready.some((r,i)=>r&&ownMatch().playerIds[i]===d.self.id))actions.append(actionButton('Я на месте · готов','ready',true));else actions.append(el('span','✓ Готовность подтверждена','tour-muted'));if(d.status==='registration')actions.append(actionButton('Отменить участие','leave'));}
   if(d.self?.opponentRoomId){const b=el('button','Смотреть будущего соперника ↗');b.onclick=()=>watch(d.self.opponentRoomId,'Пара будущего соперника');actions.append(b);}
-  if(d.isAdmin&&d.status==='registration'){const b=actionButton('Старт','start',true);b.disabled=d.entries.length<2;actions.append(b);}
+  if(d.isAdmin&&d.status==='registration'&&d.startsAt==null){const b=actionButton('Старт','start',true);b.disabled=d.entries.length<2;actions.append(b);}
   if(d.isAdmin&&['registration','drawn'].includes(d.status))actions.append(actionButton('Отменить турнир','cancel'));
  }
  ensureOwn();tick();
@@ -109,10 +119,10 @@ async function refresh(){
  try{const d=await request({action:'get',id:currentId});if(gen===epoch){render(d);notice();}}catch(e){if(gen===epoch)notice(e.status===409?'Синхронизируем турнир…':e.message);}finally{if(flightEpoch===gen)loading=false;if(gen===epoch&&!stopped)poll=setTimeout(refresh,3000);}
 }
 async function open(id){if(!/^[A-HJ-NP-Z2-9]{10}$/.test(id)){notice('Неверная ссылка на турнир.');return;}epoch++;clearTimeout(poll);clearFrames();currentId=id;data=null;lastPaint='';setTab('bracket');updateURL();showPanel('tourDetail');$('tourTitle').textContent='Загружаем турнир…';await refresh();}
-async function mutate(action){
+async function mutate(action,fields={}){
  if(mutation)return;if(action==='cancel'&&!window.confirm('Отменить турнир?'))return;
  mutation=true;epoch++;clearTimeout(poll);for(const b of $('tourActions').querySelectorAll('button'))b.disabled=true;
- try{const d=await request({action,id:currentId});lastPaint='';render(d);notice();if(action==='ready'&&d.self?.roomId)setTab('game');}catch(e){notice(e.message);}finally{mutation=false;if(!stopped)poll=setTimeout(refresh,2000);}
+ try{const d=await request({action,id:currentId,...fields});lastPaint='';render(d);notice();if(action==='ready'&&d.self?.roomId)setTab('game');}catch(e){notice(e.message);}finally{mutation=false;if(!stopped)poll=setTimeout(refresh,2000);}
 }
 function targets(){const root=$('tourRoundTargets'),previous=[...root.querySelectorAll('input')].map(i=>i.value);root.replaceChildren();const count=Math.ceil(Math.log2(Number($('tourForm').elements.capacity.value)));for(let i=0;i<count;i++){const label=el('label',stageName(i,count));const input=document.createElement('input');input.type='number';input.min=1;input.max=25;input.required=true;input.value=previous[i]||3;input.name='target-'+i;label.append(input);root.append(label);}}
 function prizes(){
@@ -156,10 +166,26 @@ function prizes(){
 for(const name of ['entryType','prizePlaces','manualPrizePlaces','buyIn','prizeFund','prizeKind'])$('tourForm').elements[name].oninput=prizes;
 $('tourForm').elements.prizeMode.oninput=()=>{const f=$('tourForm');f.elements.manualPrizePlaces.value=f.elements.prizePlaces.value;prizes();};
 
-function createForm(){if(!listAdmin)return;epoch++;clearTimeout(poll);showPanel('tourCreatePanel');formRequestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>b.toString(16).padStart(2,'0')).join('');targets();prizes();}
+function updateStartMode(){
+ const form=$('tourForm'),scheduled=form.elements.startMode.value==='scheduled';
+ $('tourStartTime').hidden=!scheduled;
+ form.elements.startTime.disabled=!scheduled;
+ form.elements.startTime.required=scheduled;
+ $('tourStartNote').textContent=scheduled
+  ?'В назначенное время регистрация закроется и сформируется сетка. Для старта нужны хотя бы два участника.'
+  :'Администратор запускает турнир кнопкой «Старт». Регистрация открыта до запуска.';
+}
+$('tourForm').elements.startMode.onchange=updateStartMode;
+
+function createForm(){if(!listAdmin)return;epoch++;clearTimeout(poll);showPanel('tourCreatePanel');formRequestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>b.toString(16).padStart(2,'0')).join('');targets();prizes();updateStartMode();}
 $('tourForm').elements.capacity.onchange=()=>{targets();prizes();};
 $('tourForm').elements.discipline.onchange=()=>{const form=$('tourForm');if(form.elements.discipline.value==='short')form.elements.variant.value='classic';form.elements.variant.disabled=form.elements.discipline.value==='short';};
-$('tourForm').onsubmit=async event=>{event.preventDefault();if(mutation)return;mutation=true;const form=$('tourForm'),button=form.querySelector('[type=submit]');button.disabled=true;try{const d=await request({action:'create',requestId:formRequestId,title:form.elements.title.value,capacity:Number(form.elements.capacity.value),discipline:form.elements.discipline.value,variant:form.elements.variant.value,turnSeconds:Number(form.elements.turnSeconds.value),entryType:form.elements.entryType.value,buyIn:Number(form.elements.buyIn.value),prizeFund:Number(form.elements.prizeFund.value),prizeKind:form.elements.prizeKind.value,prizeMode:form.elements.prizeKind.value==='tickets'?'fixed':form.elements.prizeMode.value,...(form.elements.prizeKind.value==='tickets'||form.elements.prizeMode.value==='fixed'?{prizeAmounts:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value))}:{prizeShares:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value))}),roundTargets:[...$('tourRoundTargets').querySelectorAll('input')].map(i=>Number(i.value))});notice();mutation=false;await open(d.id);}catch(e){notice(e.message);}finally{mutation=false;button.disabled=false;}};
+$('tourForm').onsubmit=async event=>{event.preventDefault();if(mutation)return;mutation=true;const form=$('tourForm'),button=form.querySelector('[type=submit]');button.disabled=true;try{
+ const scheduled=form.elements.startMode.value==='scheduled';
+ // The form uses Novosibirsk time regardless of the device timezone.
+ const startsAt=scheduled?Date.parse(form.elements.startTime.value+'+07:00'):null;
+ if(scheduled&&!Number.isFinite(startsAt))throw Error('Укажите дату и время начала турнира.');
+ const d=await request({action:'create',startsAt,requestId:formRequestId,title:form.elements.title.value,capacity:Number(form.elements.capacity.value),discipline:form.elements.discipline.value,variant:form.elements.variant.value,turnSeconds:Number(form.elements.turnSeconds.value),entryType:form.elements.entryType.value,buyIn:Number(form.elements.buyIn.value),prizeFund:Number(form.elements.prizeFund.value),prizeKind:form.elements.prizeKind.value,prizeMode:form.elements.prizeKind.value==='tickets'?'fixed':form.elements.prizeMode.value,...(form.elements.prizeKind.value==='tickets'||form.elements.prizeMode.value==='fixed'?{prizeAmounts:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value))}:{prizeShares:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value))}),roundTargets:[...$('tourRoundTargets').querySelectorAll('input')].map(i=>Number(i.value))});notice();mutation=false;await open(d.id);}catch(e){notice(e.message);}finally{mutation=false;button.disabled=false;}};
 $('tourCreate').onclick=createForm;$('allTours').onclick=list;document.querySelector('[data-tour-back]').onclick=list;
 for(const b of document.querySelectorAll('[data-tour-tab]'))b.onclick=()=>setTab(b.dataset.tourTab);
 $('returnOwn').onclick=()=>setTab('game');

@@ -17,7 +17,11 @@
       <label>Название<input name="title" maxlength="80" value="Кубок двух тузов" required></label>
       <div class="tour-form-grid"><label>Нарды<select name="discipline"><option value="long">Длинные</option><option value="short">Короткие</option></select></label><label>Формат<select name="variant"><option value="classic">Классические</option><option value="crazy">Бешеные</option><option value="six-one">6:1 · Кафтар</option></select></label></div>
       <div class="tour-form-grid"><label>Максимум участников<select name="capacity"><option>2</option><option>4</option><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label><label>Секунд на ход<select name="turnSeconds"><option>15</option><option>30</option><option selected>45</option><option>60</option></select></label></div>
-      <p class="tour-muted">Турнир запускается кнопкой «Старт», когда администратор решит, что участники набрались. Регистрация открыта до запуска. Турнир завершается после финала.</p>
+      <div class="tour-form-grid">
+        <label>Запуск<select name="startMode"><option value="manual">Вручную</option><option value="scheduled">По расписанию</option></select></label>
+        <label id="tourStartTime" hidden>Дата и время (НСК)<input type="datetime-local" name="startTime" disabled></label>
+      </div>
+      <p class="tour-muted" id="tourStartNote">Администратор запускает турнир кнопкой «Старт». Регистрация открыта до запуска.</p>
       <div class="tour-form-grid"><label>Участие<select name="entryType"><option value="free">Бесплатный</option><option value="chips">На фишки Poker21</option></select></label><label id="tourBuyInLabel" hidden>Взнос, фишки<input name="buyIn" type="number" min="1" max="1000000" step="1" value="500"></label><label id="tourPrizeFundLabel">Призовой фонд, фишки<input name="prizeFund" type="number" min="0" max="1000000" step="1" value="0"></label></div>
       <p id="tourFundingNote" class="tour-muted">Призовой фонд бесплатного турнира списывается с вашего Poker21 при создании. При нулевом фонде призов нет.</p>
       <fieldset><legend>Призы за места</legend>
@@ -43,5 +47,5 @@
     <section id="tourWatchPanel" role="tabpanel" hidden><div class="tour-section-heading"><p id="watchTitle"></p><button id="returnOwn">Вернуться в свою игру</button></div><div id="tourWatchFrame"></div></section>
   </section>
 </main>
-<script src="app-nards-tournaments.js?v=20261107-prizes-1"></script>
+<script src="app-nards-tournaments.js?v=20261107-scheduled-start-1"></script>
 </body></html>
