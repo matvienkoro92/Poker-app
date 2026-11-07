@@ -733,3 +733,30 @@ document.addEventListener("click", function (e) {
     tg.openLink(link.href, { try_instant_view: false });
   });
 })();
+
+(function initHomeFreeTournamentCountdowns() {
+  var clocks = document.querySelectorAll('[data-home-free-countdown]');
+  if (!clocks.length) return;
+  var timer = null;
+  function update() {
+    var now = Date.now(), moscow = new Date(now + 3 * 3600000);
+    clocks.forEach(function (clock) {
+      var hour = Number(clock.getAttribute('data-home-free-countdown'));
+      var start = Date.UTC(moscow.getUTCFullYear(), moscow.getUTCMonth(), moscow.getUTCDate(), hour - 3);
+      if (start <= now) start += 86400000;
+      var seconds = Math.ceil((start - now) / 1000);
+      clock.textContent = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map(function (n) { return String(n).padStart(2, '0'); }).join(':');
+    });
+  }
+  function stop() { clearInterval(timer); timer = null; }
+  function start() {
+    stop();
+    if (document.hidden) return;
+    update();
+    timer = setInterval(update, 1000);
+  }
+  document.addEventListener('visibilitychange', start);
+  window.addEventListener('pagehide', stop);
+  window.addEventListener('pageshow', start);
+  start();
+})();
