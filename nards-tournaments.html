@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Турниры по нардам · Два Туза</title>
   <link rel="stylesheet" href="styles-home-widget-modals.css">
-  <link rel="stylesheet" href="styles-nards-tournaments.css?v=20261107-round-break">
+  <link rel="stylesheet" href="styles-nards-tournaments.css?v=20261108-prominent-countdown">
 </head>
 <body class="nards-tournament">
 <header class="tour-header"><button id="closeTournament" aria-label="Вернуться в гостиную">←</button><div><small>ДВА ТУЗА</small><h1>Турниры по нардам</h1></div></header>
@@ -49,7 +49,7 @@
       <p id="tourMeta" class="tour-muted"></p>
       <p id="tourPrizes" class="tour-overview__prizes"></p>
       <div class="tour-countdown-row">
-        <div id="tourCountdown" class="tour-countdown" role="timer"></div>
+        <div id="tourCountdown" class="tour-countdown" role="timer"><span id="tourCountdownLabel"></span><strong id="tourCountdownValue" hidden></strong></div>
         <button type="button" id="tourSkipBreak" hidden>Пропустить перерыв</button>
       </div>
       <p id="tourAdvancement" class="tour-overview__prizes" role="status" hidden></p>
@@ -69,5 +69,5 @@
     <section id="tourWatchPanel" role="tabpanel" hidden><div class="tour-section-heading"><p id="watchTitle"></p><button id="returnOwn">Вернуться в свою игру</button></div><div id="tourWatchFrame"></div></section>
   </section>
 </main>
-<script src="app-nards-tournaments.js?v=20261107-lighter-tournament-polls"></script>
+<script src="app-nards-tournaments.js?v=20261108-prominent-countdown"></script>
 </body></html>

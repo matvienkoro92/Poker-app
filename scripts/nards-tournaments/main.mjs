@@ -56,17 +56,27 @@ async function listRefresh(){if(!currentId&&!mutation&&!$('tourCreatePanel').hid
 function stageName(index,count){const left=count-index;return left===1?'Финал':left===2?'Полуфинал':'1/'+2**(left-1)+' финала';}
 function ownMatch(){return data?.self?.matchId&&data.rounds.flatMap(r=>r.matches).find(m=>m.id===data.self.matchId);}
 function tick(){
- if(!data||document.hidden)return;const m=ownMatch();let text='';
- if(data.status==='registration')text=data.drawAt==null?'Регистрация открыта · ждём запуска администратором':'До закрытия регистрации '+duration(data.drawAt);
+ if(!data||document.hidden)return;const m=ownMatch();let text='',remaining='';
+ if(data.status==='registration'){
+  text=data.drawAt==null?'Регистрация открыта · ждём запуска администратором':'До закрытия регистрации';
+  if(data.drawAt!=null)remaining=duration(data.drawAt);
+ }
  else if(data.status==='cancelled')text=data.reason||'Турнир отменён';
  else if(data.status==='completed'){const winner=data.entries.find(e=>e.id===data.winnerId);text=winner?'Победитель — '+winner.name:'Турнир завершён без победителя';}
  else if(m&&m.startsAt==null)text='Вы прошли дальше · ждём победителя соседней пары';
- else if(m?.startsAt>serverNow())text=(m===data.rounds[0]?.matches.find(x=>x.id===m.id)?'До начала партии ':'Перерыв · до партии ')+duration(m.startsAt);
- else if(data.startsAt>serverNow())text='До начала турнира '+duration(data.startsAt);
+ else if(m?.startsAt>serverNow()){
+  text=data.rounds[0]?.matches.includes(m)?'До начала партии':'Перерыв · до партии';
+  remaining=duration(m.startsAt);
+ }else if(data.startsAt>serverNow()){
+  text='До начала турнира';
+  remaining=duration(data.startsAt);
+ }
  else if(m)text='Ваша партия идёт · откройте «Моя игра»';
  else text='Турнир идёт · можно смотреть партии';
- const countdown=$('tourCountdown');
- if(countdown.textContent!==text)countdown.textContent=text;
+ const label=$('tourCountdownLabel'),value=$('tourCountdownValue');
+ if(label.textContent!==text)label.textContent=text;
+ if(value.textContent!==remaining)value.textContent=remaining;
+ if(value.hidden!==!remaining)value.hidden=!remaining;
  const skip=$('tourSkipBreak'),voted=m?.skipBreakVotes?.includes(data.self?.id);
  skip.hidden=!(data.status==='running'&&m?.startsAt>serverNow()&&m.playerIds.every(Boolean)&&data.rounds.slice(1).some(r=>r.matches.includes(m)));
  skip.disabled=mutation||!!voted;

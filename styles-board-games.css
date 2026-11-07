@@ -1001,3 +1001,5 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
   width: calc(100% + 2 * var(--board-edge-outset));
   margin-inline: calc(-1 * var(--board-edge-outset));
 }
+
+#seriesTarget { color: #ffab5c; font-weight: 750; }

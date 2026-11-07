@@ -61,6 +61,23 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
   border-top: 1px solid #a88b4940;
   font-size: 13px;
 }
+.tour-overview .tour-countdown:has(strong:not([hidden])) {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 7px 12px;
+  border: 1px solid #c5a35d;
+  border-radius: 10px;
+  background: #30291b;
+  color: #ffe2a0;
+}
+.tour-countdown strong {
+  font-size: clamp(24px, 6vw, 34px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: #ffdc7b;
+}
 #tourDetail .tour-actions { margin: 0; }
 #tourActions .tour-primary { flex: 1 1 auto; }
 .tour-admin-actions { display: flex; flex-wrap: wrap; gap: 8px; }
