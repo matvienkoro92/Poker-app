@@ -291,3 +291,35 @@
   text-wrap: balance;
   padding: 0 2cqw !important;
 }
+
+/* Warm glass plaques with a fine champagne rim and quieter typography. */
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label {
+  left: 8% !important;
+  width: 84% !important;
+  height: 21cqw !important;
+  padding: 1.5cqw 3cqw !important;
+  border: 1px solid transparent !important;
+  border-radius: 5.5cqw !important;
+  background: linear-gradient(155deg, #354338f5, #19271ff5 55%, #101c18fa) padding-box,
+    linear-gradient(135deg, #f6dfaa, #b99554 45%, #6b714f 75%, #d5b777) border-box !important;
+  box-shadow: inset 0 1px 0 #fff6d51f, inset 0 -1px 0 #050b0866,
+    0 3px 8px #0008, 0 1px 0 #e4c58b26 !important;
+  color: #f6e8c9 !important;
+  font: 700 7.2cqw/1.1 Arial, sans-serif !important;
+  text-transform: none !important;
+  letter-spacing: .005em;
+  text-shadow: 0 1px 2px #0006 !important;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:hover .home-mini-icon__label,
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:focus-visible .home-mini-icon__label {
+  filter: brightness(1.12);
+  box-shadow: inset 0 1px 0 #fff6d530, 0 3px 12px #0008, 0 0 0 2px #e4c58b33 !important;
+}
+#app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link:active .home-mini-icon__label {
+  filter: brightness(.95);
+  box-shadow: inset 0 2px 5px #0005, 0 1px 4px #0007 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #app.app.app--view-home .home-daily-shortcuts--lounge .home-lounge-link .home-mini-icon__label { transition: none; }
+}
