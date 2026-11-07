@@ -56,3 +56,23 @@ test('active visitor aggregate counts people who opened two distinct sections, i
  const period=row({events:[event('old','home',{at:at-10000}),event('current','rating')]});
  assert.equal(summarize([period],'aaaaaaaa',at-1000,'').activeVisitors,0);
 });
+
+test('pinned report uses exactly the rows and bonus awards used for its first summary',async()=>{
+ const snapshot=require('../lib/tracking-link-snapshot'),store=require('../lib/tracking-link-report-store'),welcome=require('../lib/welcome-bonus'),coverage=require('../lib/tracking-link-coverage');
+ const originals={snapshot:snapshot.readLinkSnapshot,save:store.save,bonus:welcome.trackingReport,coverage:coverage.readCoverage};
+ const records=[row({actor:'ID123456',steps:{bot:true,playersChat:null},paymentDepositsAvailable:true,paymentDeposits:[{id:'p',at:new Date(at).toISOString(),amount:120.5}]}),row({actor:'ID654321',accountId:'ID654321',steps:{bot:false,playersChat:true},paymentDepositsAvailable:true,paymentDeposits:[]})];
+ let loads=0,saved;
+ try{
+  snapshot.readLinkSnapshot=async()=>{loads++;return records;};
+  coverage.readCoverage=async()=>({trackedVisitors:2,visitorsWithoutJourney:0});
+  welcome.trackingReport=async(rows,ref,from,excluded,includePlayers)=>{assert.equal(rows,records);assert.equal(includePlayers,true);return {recipients:1,counts:{register:1},playerBonuses:{ID123456:{steps:['register'],undated:0}}};};
+  store.save=async(ref,rows)=>{saved=JSON.parse(JSON.stringify(rows));return 'pinned';};
+  const result=await require('../lib/tracking-link-summary').readReport('aaaaaaaa',0,'');
+  assert.equal(loads,1);assert.equal(result.reportToken,'pinned');
+  assert.equal(result.summary.depositAmount,saved.reduce((sum,r)=>sum+r.paymentDeposits.reduce((s,d)=>s+d.amount,0),0));
+  assert.equal(result.summary.botSubscribers,saved.filter(r=>r.steps.bot===true).length);
+  assert.equal(result.summary.playersChatUnknown,saved.filter(r=>r.steps.playersChat==null).length);
+  assert.equal(result.summary.welcomeBonus.recipients,saved.filter(r=>r.welcomeBonus).length);
+  assert.equal('playerBonuses' in result.summary.welcomeBonus,false);
+ }finally{snapshot.readLinkSnapshot=originals.snapshot;store.save=originals.save;welcome.trackingReport=originals.bonus;coverage.readCoverage=originals.coverage;}
+});
