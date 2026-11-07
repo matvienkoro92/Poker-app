@@ -224,3 +224,23 @@ test('only the opponent can accept a tournament resignation for the offered poin
   assert.deepEqual(accepted.match.wins, [0, 2]);
   assert.equal(accepted.match.winner, null);
 });
+
+test('both players must skip the same round break before the room starts early', async () => {
+  const f = fixture(), t = await f.seed(4, { target: 1 });
+  f.time(t.startsAt);
+  await f.service.synchronize(t.id);
+  for (const match of t.rounds[0].matches) await f.finish(match.roomId, 0);
+  const view = await f.call('m1', 'get', t.id);
+  const final = view.rounds[1].matches[0];
+  const room = f.roomMap.get(final.roomId);
+  const [first, second] = room.players;
+  const vote = { matchId: final.id };
+  await assert.rejects(f.call('m0', 'skip-break', t.id, vote), { status: 409 });
+  await f.call(first, 'skip-break', t.id, vote);
+  const waiting = await f.call(first, 'skip-break', t.id, vote);
+  assert.equal(waiting.rounds[1].matches[0].startsAt, final.startsAt);
+  assert.equal(waiting.rounds[1].matches[0].skipBreakVotes.length, 1);
+  const started = await f.call(second, 'skip-break', t.id, vote);
+  assert.equal(started.rounds[1].matches[0].startsAt, f.now());
+  assert.equal(f.roomMap.get(final.roomId).tournament.active, true);
+});

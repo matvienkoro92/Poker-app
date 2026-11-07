@@ -39,7 +39,7 @@ async function list(){
  if(gen===epoch&&!stopped)poll=setTimeout(listRefresh,10000);
 }
 async function listRefresh(){if(!currentId&&!mutation&&!$('tourCreatePanel').hidden)return; if(!currentId&&$('tourCreatePanel').hidden)await list();}
-function stageName(index,count){const left=count-index;return left===1?'Финал':left===2?'Полуфинал':left===3?'1/4 финала':'Раунд '+(index+1);}
+function stageName(index,count){const left=count-index;return left===1?'Финал':left===2?'Полуфинал':'1/'+2**(left-1)+' финала';}
 function ownMatch(){return data?.self?.matchId&&data.rounds.flatMap(r=>r.matches).find(m=>m.id===data.self.matchId);}
 function tick(){
  if(!data)return;const m=ownMatch();let text='';
@@ -52,7 +52,26 @@ function tick(){
  else if(m)text='Ваша партия идёт · откройте «Моя игра»';
  else text='Турнир идёт · можно смотреть партии';
  $('tourCountdown').textContent=text;
+ const skip=$('tourSkipBreak'),voted=m?.skipBreakVotes?.includes(data.self?.id);
+ skip.hidden=!(data.status==='running'&&m?.startsAt>serverNow()&&m.playerIds.every(Boolean)&&data.rounds.slice(1).some(r=>r.matches.includes(m)));
+ skip.disabled=mutation||!!voted;
+ skip.textContent=voted?'Ждём соперника':'Пропустить перерыв';
+ const round=m&&data.rounds.find(r=>r.matches.includes(m));
+ const index=data.rounds.indexOf(round);
+ const advancement=$('tourAdvancement');
+ advancement.hidden=index<=0||data.status!=='running';
+ if(!advancement.hidden){
+  const rival=data.entries.find(e=>e.id===m.playerIds.find(id=>id&&id!==data.self.id));
+  const stage=stageName(index,data.rounds.length).toLowerCase();
+  const points=round.target;
+  const unit=points%10===1&&points%100!==11?'очка':'очков';
+  const message=rival?'Поздравляем! Вы прошли в '+stage+'. Ваш соперник — '+rival.name+'.':'Вы прошли в '+stage+'. Соперник определится после соседнего матча.';
+  const announcement=message+' Игра до '+points+' '+unit+'.';
+  if(advancement.textContent!==announcement)advancement.textContent=announcement;
+ }
+
 }
+$('tourSkipBreak').onclick=()=>{const match=ownMatch();if(match)mutate('skip-break',{matchId:match.id});};
 function bracket(d){
  const root=$('tourBracket');const scroll=root.querySelector('.sng-champions-modal__bracket-map-wrap')?.scrollLeft||0;root.replaceChildren();
  if(!d.rounds.length){root.append(el('p','Пары будут распределены случайно после закрытия регистрации.','tour-bracket-empty'));return;}
@@ -213,7 +232,7 @@ $('returnOwn').onclick=()=>setTab('game');
 $('copyTourLink').onclick=async()=>{const url='https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=nards_tour_'+currentId;try{await navigator.clipboard.writeText(url);notice('Ссылка скопирована.');}catch{window.prompt('Ссылка на турнир',url);}};
 function close(){if(parent!==window)parent.postMessage({type:'p21-nards-tournaments-close'},location.origin);else location.assign('./');}
 $('closeTournament').onclick=close;
-window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.source===source&&e.data?.type==='p21-nards-tournaments-request-close')close();if(e.data?.type==='p21-tournament-bracket'&&(e.source===ownFrame?.contentWindow||e.source===watchFrame?.contentWindow)){setTab('bracket');return;}if(e.data?.type==='p21-board-games-close'){if(e.source===watchFrame?.contentWindow)setTab(data?.self?.roomId?'game':'bracket');else if(e.source===ownFrame?.contentWindow)setTab('bracket');}});
+window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.source===source&&e.data?.type==='p21-nards-tournaments-request-close')close();if(e.data?.type==='p21-tournament-match-won'&&e.source===ownFrame?.contentWindow){refresh();return;}if(e.data?.type==='p21-tournament-bracket'&&(e.source===ownFrame?.contentWindow||e.source===watchFrame?.contentWindow)){setTab('bracket');return;}if(e.data?.type==='p21-board-games-close'){if(e.source===watchFrame?.contentWindow)setTab(data?.self?.roomId?'game':'bracket');else if(e.source===ownFrame?.contentWindow)setTab('bracket');}});
 const tickTimer=setInterval(tick,1000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentId){clearTimeout(poll);refresh();}});
 window.addEventListener('online',()=>{if(currentId){clearTimeout(poll);refresh();}else list();});

@@ -9,7 +9,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .tour-list-card{box-shadow:0 8px 28px #0004,inset 0 1px #ffe4a51a}
 button,input,select{font:inherit}button{cursor:pointer;min-height:42px;border:1px solid #a88c5066;border-radius:11px;background:#1b2a23;color:#f6e9cf;padding:9px 13px}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffe2a5;outline-offset:3px}
 input,select{display:block;width:100%;min-height:44px;padding:10px;border:1px solid #b69b6166;border-radius:10px;color:#fff1d1;background:#10231d;color-scheme:dark}label{display:grid;gap:6px;color:#d2c2a1;font-size:12px}h1,h2,h3,p{margin:0 0 12px}h1{font-size:19px}h2{font-size:21px}h3{font-size:15px}small,.tour-muted{color:#b7b4a3;font-size:12px}.tour-muted{line-height:1.65}
-.tour-header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;border-bottom:1px solid #c6a26333}.tour-header h1{margin:2px 0 0}.tour-header small{font-size:9px;letter-spacing:3px;color:#d9b877}.tour-dice{margin-left:auto;font-size:29px;letter-spacing:-5px;color:#efce8b}
+.tour-header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;border-bottom:1px solid #c6a26333}.tour-header h1{margin:2px 0 0}.tour-header small{font-size:9px;letter-spacing:3px;color:#d9b877}
 main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 24px);min-width:0}#tourError{color:#ffcc9b;font-size:13px}#tourError:empty{display:none}
 .tour-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.tour-section-heading h2,.tour-section-heading p{margin:0}
 #tourList{display:grid;gap:12px;margin-bottom:14px}.tour-list-card{display:grid;gap:12px;padding:18px;border:1px solid #c19f5366;border-radius:16px;background:linear-gradient(135deg,#203b30f5,#10251ff7)}.tour-list-card h3{font-size:17px;margin:0}.tour-list-card p{margin:0}.tour-list-card button{justify-self:start}.tour-list-card.is-live{border-color:#d8ba72}
@@ -85,3 +85,6 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
   background: #214735;
   box-shadow: inset 3px 0 #70c987;
 }
+
+.tour-countdown-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tour-countdown-row #tourSkipBreak { flex: none; font-size: 12px; padding-inline: 8px; }
