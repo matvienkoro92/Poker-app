@@ -115,9 +115,13 @@ function prizes(){
  for(const o of f.elements.prizePlaces.options)o.disabled=Number(o.value)>capacity;
  if(Number(f.elements.prizePlaces.value)>capacity)f.elements.prizePlaces.value='1';
  const count=Number(f.elements.prizePlaces.value),root=$('tourPrizeShares');
- if(root.children.length!==count){root.replaceChildren();const defaults={1:[100],2:[70,30],4:[50,30,10,10],8:[40,20,10,10,5,5,5,5]}[count];defaults.forEach((n,i)=>{const label=el('label',(i+1)+' место, %'),input=el('input');input.type='number';input.min=0;input.max=100;input.step=1;input.required=true;input.value=n;input.oninput=prizes;label.append(input);root.append(label);});}
+ if(root.children.length!==count){root.replaceChildren();const defaults={1:[100],2:[70,30],4:[50,30,10,10],8:[40,20,10,10,5,5,5,5]}[count];defaults.forEach((n,i)=>{const label=el('label',(i+1)+' место, %'),input=el('input');input.type='number';input.min=0;input.max=100;input.step=1;input.required=true;input.value=n;input.oninput=prizes;const amount=el('small',null,'tour-prize-amount');amount.setAttribute('data-prize-amount','');label.append(input,amount);root.append(label);});}
  const shares=[...root.querySelectorAll('input')].map(i=>Number(i.value)),sum=shares.reduce((a,b)=>a+b,0),pool=paid?Number(f.elements.buyIn.value)*capacity:Number(f.elements.prizeFund.value);
  let valid=sum===100;for(let start=2;start<count;start*=2)if(shares.slice(start,start*2).some(n=>n!==shares[start]))valid=false;
+ const amounts=shares.map(n=>Math.floor(pool*n/100));
+ const canPreview=valid&&Number.isSafeInteger(pool)&&pool>=0&&shares.every(n=>Number.isInteger(n)&&n>=0&&n<=100);
+ if(canPreview)amounts[0]+=pool-amounts.reduce((a,b)=>a+b,0);
+ root.querySelectorAll('[data-prize-amount]').forEach((node,i)=>{node.textContent=canPreview?new Intl.NumberFormat('ru-RU').format(amounts[i])+' фишек'+(paid?' · при полной регистрации':''):'— фишек';});
  $('tourPrizePreview').textContent='Распределено: '+sum+'%. '+(paid?'При полной регистрации фонд: ':'Фонд: ')+pool+' фишек. '+(!valid?'Распределите 100%; доли мест одного раунда должны совпадать.':'');
  f.querySelector('[type=submit]').disabled=!valid;
 }

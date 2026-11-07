@@ -33,3 +33,5 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 .nards-tournament .sng-champions-modal__map-round-matches{grid-template-rows:repeat(var(--sng-map-rows),160px)}
 .nards-tournament .sng-champions-modal__map-player>span{flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .nards-tournament .tour-match-watch{min-height:34px}
+
+.tour-prize-amount{display:block;color:#f3d38c;font-size:12px;line-height:1.45;font-variant-numeric:tabular-nums}
