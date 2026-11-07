@@ -1207,4 +1207,283 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "06.11.2026": [
+    {
+      "time": "01:00",
+      "name": "20K* Afterparty 5",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 3,
+          "reward": 4670,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Local",
+          "place": 1,
+          "reward": 3793.33,
+          "points": 135
+        },
+        {
+          "nick": "Andrei350",
+          "place": 3,
+          "reward": 911.65,
+          "points": 90
+        },
+        {
+          "nick": "roma1233",
+          "place": 5,
+          "reward": 716.62,
+          "points": 60
+        },
+        {
+          "nick": "cadillac",
+          "place": 2,
+          "reward": 608.34,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "BlackJackovich",
+          "place": 5,
+          "reward": 983.59,
+          "points": 60
+        },
+        {
+          "nick": "Local",
+          "place": 3,
+          "reward": 943.05,
+          "points": 90
+        },
+        {
+          "nick": "🦈Shark-Eyed🦈",
+          "place": 4,
+          "reward": 788.75,
+          "points": 70
+        },
+        {
+          "nick": "GUCCI",
+          "place": 11,
+          "reward": 49.69,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "11:00",
+      "name": "Black Magic 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Jeweler",
+          "place": 1,
+          "reward": 23686,
+          "points": 135
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 18,
+          "reward": 373,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Local",
+          "place": 1,
+          "reward": 14600,
+          "points": 135
+        },
+        {
+          "nick": "Jeweler",
+          "place": 2,
+          "reward": 7000,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 14825,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "MoW3R",
+          "place": 4,
+          "reward": 11305.1,
+          "points": 70
+        },
+        {
+          "nick": "Аспирин",
+          "place": 5,
+          "reward": 7787.64,
+          "points": 60
+        },
+        {
+          "nick": "Jeweler",
+          "place": 18,
+          "reward": 3916.86,
+          "points": 0
+        },
+        {
+          "nick": "мистерFox",
+          "place": 12,
+          "reward": 3397.11,
+          "points": 0
+        },
+        {
+          "nick": "Бабник",
+          "place": 8,
+          "reward": 2631.87,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Black Friday 500K",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 8,
+          "reward": 14929,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 9090,
+          "points": 90
+        },
+        {
+          "nick": "Аспирин",
+          "place": 2,
+          "reward": 7610,
+          "points": 110
+        },
+        {
+          "nick": "Waaar",
+          "place": 5,
+          "reward": 540,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 177K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 33650,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 11,
+          "reward": 1460,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "BabyShark",
+          "place": 7,
+          "reward": 3471.82,
+          "points": 40
+        },
+        {
+          "nick": "Waaar",
+          "place": 5,
+          "reward": 2342.86,
+          "points": 60
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 2150,
+          "points": 110
+        },
+        {
+          "nick": "myhomor4ik",
+          "place": 4,
+          "reward": 1040.84,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "50K S Big Turbo",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 7,
+          "reward": 2153,
+          "points": 40
+        }
+      ]
+    }
+  ]
 };

@@ -68,6 +68,9 @@ function normalizeName(raw) {
   if (/Fresh\s+Bounty/i.test(raw) && /20K/i.test(raw)) return "Fresh Bounty 20K";
   if (/PLO5\s+Bounty/i.test(raw) && /30K/i.test(raw)) return "PLO5 Bounty 30K";
   if (/Lucky\s+Slot/i.test(raw) && /77K/i.test(raw) && !/177K|777K/i.test(raw)) return "Lucky Slot 77K";
+  if (/Afterparty\s+5$/i.test(raw) && /20K/i.test(raw)) return "20K* Afterparty 5";
+  if (/Big\s+Turbo$/i.test(raw) && /50K/i.test(raw)) return "50K S Big Turbo";
+  if (/Black\s+Magic/i.test(raw) && /\b50K\b/i.test(raw)) return "Black Magic 50K";
   if (/Black\s+Magic/i.test(raw) && /80K/i.test(raw)) return "Black Magic 80K";
   if (/Black\s+Friday/i.test(raw) && /400K/i.test(raw)) return "Black Friday 400K";
   if (/Prime\s+PKO/i.test(raw) && /1M/i.test(raw)) return "Prime PKO 1M";
@@ -512,6 +515,7 @@ async function parseOcrFile(file) {
   if (blue && date === "03.11.2026" && time === "01:00" && /Afterparty 5$/i.test(title)) buyin = 500;
   if (blue && date === "05.11.2026" && time === "23:00" && /Big Turbo$/i.test(title)) buyin = 500;
   if (blue && date === "05.11.2026" && time === "15:00" && /70K.*BLACKOUT/i.test(title)) { title = "BLACKOUT 70K"; buyin = 700; }
+  if (blue && date === "06.11.2026" && time === "18:00" && title === "500K Black Friday") { title = "Black Friday 500K"; buyin = 1500; }
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   if (date === "29.10.2026" && blue && time === "15:00" && title === "Lucky Slot 77K") buyin = 500;
