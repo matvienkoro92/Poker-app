@@ -289,10 +289,10 @@ for(const i of items){
  i.target=i.target===0?CAR_UNLOCK_LEVEL:i.target<50?
   carUpgradeLevels[Math.min(carUpgradeLevels.length-1,Math.round((i.target-1)* (carUpgradeLevels.length-1)/39))]:i.target;
 }
-function transportLevel(id){return id==='kart'?CAR_UNLOCK_LEVEL:id==='scooter'?3:id==='hoverboard'?7:id==='bicycle'?1:Infinity;}
-function availableTransport(id,level){
- const selected=['kart','bicycle','scooter','hoverboard'].includes(id)?id:'kart';
- return Number(level)>=transportLevel(selected)?selected:Number(level)>=CAR_UNLOCK_LEVEL?'kart':'bicycle';
+function transportLevel(id,admin=false){return id==='bmw-e60'?(admin===true?0:Infinity):id==='kart'?CAR_UNLOCK_LEVEL:id==='scooter'?3:id==='hoverboard'?7:id==='bicycle'?1:Infinity;}
+function availableTransport(id,level,admin=false){
+ const selected=['kart','bmw-e60','bicycle','scooter','hoverboard'].includes(id)?id:'kart';
+ return Number(level)>=transportLevel(selected,admin)?selected:Number(level)>=CAR_UNLOCK_LEVEL?'kart':'bicycle';
 }
 // Descriptive data and catalogue cards use the same final thresholds.
 for(const [id,d]of Object.entries(ringDesigns))d[1]=items.find(i=>i.kind==='ring'&&i.id===id).target;

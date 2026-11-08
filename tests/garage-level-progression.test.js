@@ -42,3 +42,9 @@ test('car and upgrades start at twelve while basic transport and personal items 
  assert.throws(()=>require('../lib/player-garage').chooseScoped({}, {stats:{level:11}}, {}, 'vehicle'),/12/);
  assert.doesNotThrow(()=>require('../lib/player-garage').chooseScoped({}, {stats:{level:1}}, {}, 'character'));
 });
+
+test('BMW E60 is selectable by an admin at any level and hidden for other players',()=>{
+ assert.equal(G.availableTransport('bmw-e60',75),'kart');
+ assert.equal(G.availableTransport('bmw-e60',3),'bicycle');
+ assert.equal(G.availableTransport('bmw-e60',1,true),'bmw-e60');
+});
