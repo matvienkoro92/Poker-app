@@ -777,10 +777,10 @@
 .player-hall-dialog .player-hall__character-label>span{display:block}
 .player-hall-dialog .player-hall__character-label>small{display:block;font-size:12px;line-height:1.25}
 
-.player-hall__room[data-garage-vehicle="2"][data-e60-unlocked="true"] .player-hall__parked-kart,
-.player-hall__room[data-garage-vehicle="2"][data-e60-unlocked="true"] .player-hall__garage-object--kart { visibility: visible; }
-.player-hall__room[data-space="garage"][data-garage-vehicle="2"][data-e60-unlocked="true"] .garage-locked-vehicle { display: none; }
-.player-hall__room[data-garage-vehicle="2"] .player-hall__camera-ui .garage-vehicle-switch > span { font-size: 14px; }
+.player-hall__room:is([data-garage-vehicle="1"],[data-garage-vehicle="2"])[data-admin-garage="true"] .player-hall__parked-kart,
+.player-hall__room:is([data-garage-vehicle="1"],[data-garage-vehicle="2"])[data-admin-garage="true"] .player-hall__garage-object--kart { visibility: visible; }
+.player-hall__room[data-space="garage"]:is([data-garage-vehicle="1"],[data-garage-vehicle="2"])[data-admin-garage="true"] .garage-locked-vehicle { display: none; }
+.player-hall__room:is([data-garage-vehicle="1"],[data-garage-vehicle="2"])[data-admin-garage="true"] .player-hall__camera-ui .garage-vehicle-switch > span { font-size: 14px; }
 
 /* The bicycle uses a real 3D preview; keep the old image only for scooter/locked vehicles. */
 .player-hall-dialog .player-hall__room[data-garage-vehicle="5"] .player-hall__parked-kart,

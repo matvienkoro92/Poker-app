@@ -1,7 +1,7 @@
 import {prepareMicroTransport,createMicroTransport} from './micro-transport-asset.mjs';
 import {prepareBicycle,createBicycle} from './bicycle-asset.mjs';
-import {prepareBmwE60,createBlenderBmwE60} from './bmw-e60-asset.mjs';
-window.pokerPrepareGarageVehicle=look=>look?.transport==='bmw-e60'?prepareBmwE60():look?.transport==='bicycle'?prepareBicycle():['scooter','hoverboard'].includes(look?.transport)?prepareMicroTransport(look.transport):Promise.resolve();
+import {prepareImportedCar,createImportedCar} from './imported-car-asset.mjs';
+window.pokerPrepareGarageVehicle=look=>window.PokerGarage.adminTransport(look?.transport)?prepareImportedCar(look.transport):look?.transport==='bicycle'?prepareBicycle():['scooter','hoverboard'].includes(look?.transport)?prepareMicroTransport(look.transport):Promise.resolve();
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {disposeSceneResources} from './scene-resources.mjs';
 import {windshieldForwardOffset} from './windshield-fit.mjs';
@@ -24,7 +24,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function makeModel(scene,look,options={}){
  if(['scooter','hoverboard'].includes(look.transport))return createMicroTransport(scene,look);
  if(look.transport==='bicycle')return createBicycle(scene,look);
- if(look.transport==='bmw-e60')return createBlenderBmwE60(scene,look);
+ if(window.PokerGarage.adminTransport(look.transport))return createImportedCar(scene,look);
  const G=window.PokerGarage,car=new T.Group();scene.add(car);car.scale.set(1.24,.86,.95);
  const material=(color,metalness,roughness)=>new T.MeshPhysicalMaterial({color,metalness,roughness,clearcoat:metalness>.3?.65:.12,clearcoatRoughness:.12});
  const paint=material(G.item('paint',look.paint).color,.55,.24),felt=material(G.item('paint',look.paint).color,0,.93),gold=material('#e5aa28',1,.135),rubber=material('#171a1e',.04,.76),rim=material(G.wheelPaintColor(look),.86,.25),black=material('#0d1417',.35,.3),leather=material('#060809',.12,.36),light=material(G.item('light',look.light).color,.45,.2),fanMetal=material('#123e47',.86,.22);

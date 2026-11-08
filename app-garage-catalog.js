@@ -289,9 +289,10 @@ for(const i of items){
  i.target=i.target===0?CAR_UNLOCK_LEVEL:i.target<50?
   carUpgradeLevels[Math.min(carUpgradeLevels.length-1,Math.round((i.target-1)* (carUpgradeLevels.length-1)/39))]:i.target;
 }
-function transportLevel(id,admin=false){return id==='bmw-e60'?(admin===true?0:Infinity):id==='kart'?CAR_UNLOCK_LEVEL:id==='scooter'?3:id==='hoverboard'?7:id==='bicycle'?1:Infinity;}
+function adminTransport(id){return id==='bmw-e60'||id==='mustang-gt500';}
+function transportLevel(id,admin=false){return adminTransport(id)?(admin===true?0:Infinity):id==='kart'?CAR_UNLOCK_LEVEL:id==='scooter'?3:id==='hoverboard'?7:id==='bicycle'?1:Infinity;}
 function availableTransport(id,level,admin=false){
- const selected=['kart','bmw-e60','bicycle','scooter','hoverboard'].includes(id)?id:'kart';
+ const selected=['kart','bmw-e60','mustang-gt500','bicycle','scooter','hoverboard'].includes(id)?id:'kart';
  return Number(level)>=transportLevel(selected,admin)?selected:Number(level)>=CAR_UNLOCK_LEVEL?'kart':'bicycle';
 }
 // Descriptive data and catalogue cards use the same final thresholds.
@@ -1128,4 +1129,4 @@ function canEnterVilla(auth){
  return !!auth&&(['verified','dev_skip','guest','no_telegram','no_init_data','invalid'].includes(auth.status)||auth.adminAccess===true);
 }
 function canAccessHall(auth){return auth?.adminAccess===true||auth?.status==='verified';}
-return {CAR_UNLOCK_LEVEL,transportLevel,availableTransport,savedLoadout,temporarilyHiddenWardrobeItem,themedOutfits,outfitLoadout,outfitSelected,characterFields,switchChassis,characterBasePath,chipEdgeColor,compatiblePart,fitChassisParts,wheelDiameters,plateAvailability,wheelPaintColor,hairOverlayFits,brandedPieces,curatedWardrobeItem,wardrobeSubcategories,wardrobeSubcategory,rewardFashionModels,prestigeWatches,ringDesigns,ringArt,helmetModels,canAccessHall,canEnterVilla,hairStyles,bodyTypes,outfitSets,seasonalCollections,collectionProgress,activeOutfit,glassTints,steeringDesigns,fashionRows,fashionIndex,fashionArt,loadWardrobe,paintWardrobePreview,streetHeadlights,vinylCanvas,rewardShelfSlots,wheelDesign,wheelFaceCanvas,drawWheelPreview,badgePlaqueCanvas,chipCanvas,badgeCanvas,badgeDefinitions,cardCanvas,chipPalette,upholsteryCanvas,patchCanvas,drawUpgradePreview,parsePlate,plateLevel,plateCanvas,characterHandFit,characterJewelryFit,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet,helmetArt};});
+return {CAR_UNLOCK_LEVEL,adminTransport,transportLevel,availableTransport,savedLoadout,temporarilyHiddenWardrobeItem,themedOutfits,outfitLoadout,outfitSelected,characterFields,switchChassis,characterBasePath,chipEdgeColor,compatiblePart,fitChassisParts,wheelDiameters,plateAvailability,wheelPaintColor,hairOverlayFits,brandedPieces,curatedWardrobeItem,wardrobeSubcategories,wardrobeSubcategory,rewardFashionModels,prestigeWatches,ringDesigns,ringArt,helmetModels,canAccessHall,canEnterVilla,hairStyles,bodyTypes,outfitSets,seasonalCollections,collectionProgress,activeOutfit,glassTints,steeringDesigns,fashionRows,fashionIndex,fashionArt,loadWardrobe,paintWardrobePreview,streetHeadlights,vinylCanvas,rewardShelfSlots,wheelDesign,wheelFaceCanvas,drawWheelPreview,badgePlaqueCanvas,chipCanvas,badgeCanvas,badgeDefinitions,cardCanvas,chipPalette,upholsteryCanvas,patchCanvas,drawUpgradePreview,parsePlate,plateLevel,plateCanvas,characterHandFit,characterJewelryFit,groups,items,defaults,stats,catalog,normalize,shelfSlots,greenMaterial,item,draw,renderArt,renderCharacter,helmet,helmetFront,loadHelmet,helmetArt};});

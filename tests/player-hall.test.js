@@ -109,19 +109,19 @@ test('selected transport accepts basic bicycle, scooter and kart but rejects loc
 
 test('public showcase includes selected basic transport even without garage upgrades',()=>{const d={profile:{accountId:'ID123456',nick:'Игрок'},saved:{},garage:{stats:{level:3,earnedBadges:[]}}};for(const selectedTransport of ['bicycle','scooter']){const v=H.showcaseView({...d,saved:{selectedTransport}},false);assert.equal(v.selectedTransport,selectedTransport);assert.equal(v.customized,true);}assert.equal(H.showcaseView({...d,saved:{selectedTransport:'locked-car'}},false).selectedTransport,'bicycle');});
 
-test('BMW E60 selection requires server-verified admin access',async()=>{
- for(const admin of [false,true]){
+test('Imported car selection requires server-verified admin access',async()=>{
+ for(const selectedTransport of ['bmw-e60','mustang-gt500'])for(const admin of [false,true]){
   let raw=JSON.stringify({version:0,featured:[],theme:'walnut',goal:'wins'});
   const hall=mock('lib/player-hall.js',{
    './club-social':{memberProfile:async()=>({...profile,level:admin?1:75}),redis:async cmds=>cmds.map(c=>c[0]==='GET'?raw:c[0]==='SMEMBERS'?[]:c[0]==='EVAL'?(raw=c[5],1):null)},
    './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
   });
-  const body={version:0,featured:[],theme:'walnut',goal:'wins',selectedTransport:'bmw-e60'};
+  const body={version:0,featured:[],theme:'walnut',goal:'wins',selectedTransport};
   if(!admin)await assert.rejects(()=>hall.save('ID1',body),{status:403});
   else {
-   assert.equal((await hall.save('ID1',body,true)).selectedTransport,'bmw-e60');
-   assert.equal((await hall.read('ID1',true,true)).selectedTransport,'bmw-e60');
-   assert.notEqual((await hall.read('ID1',false,true)).selectedTransport,'bmw-e60');
+   assert.equal((await hall.save('ID1',body,true)).selectedTransport,selectedTransport);
+   assert.equal((await hall.read('ID1',true,true)).selectedTransport,selectedTransport);
+   assert.notEqual((await hall.read('ID1',false,true)).selectedTransport,selectedTransport);
   }
  }
 });
