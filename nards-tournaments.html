@@ -4,7 +4,8 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Турниры по нардам · Два Туза</title>
   <link rel="stylesheet" href="styles-home-widget-modals.css">
-  <link rel="stylesheet" href="styles-nards-tournaments.css?v=20261108-match-states">
+  <link rel="stylesheet" href="styles-tournament-bet.css">
+  <link rel="stylesheet" href="styles-nards-tournaments.css?v=20261108-participant-cards">
 </head>
 <body class="nards-tournament">
 <header class="tour-header"><button id="closeTournament" aria-label="Вернуться в гостиную">←</button><div><small>ДВА ТУЗА</small><h1>Турниры по нардам</h1></div></header>
@@ -59,15 +60,15 @@
     <div id="tourTicketAwards"></div>
     <nav class="tour-tabs" role="tablist" aria-label="Турнир"><button data-tour-tab="bracket" role="tab" aria-selected="true">Сетка</button><button data-tour-tab="game" role="tab" aria-selected="false" disabled>Моя игра</button><button data-tour-tab="watch" role="tab" aria-selected="false" disabled>Смотрю</button></nav>
     <section id="tourBracketPanel" role="tabpanel">
-      <section class="tour-participants" aria-labelledby="tourParticipantsTitle">
-        <h3 id="tourParticipantsTitle">Участники</h3>
-        <div id="tourEntrants"></div>
-      </section>
       <div id="tourBracket"></div>
+      <section class="tour-participants tournament-bet-modal__participants" aria-labelledby="tourParticipantsTitle">
+        <header><h3 id="tourParticipantsTitle">Участники</h3><span id="tourEntrantCount"></span></header>
+        <div id="tourEntrants" class="tournament-bet-modal__participants-grid"></div>
+      </section>
     </section>
     <section id="tourGamePanel" role="tabpanel" hidden><p id="tourOwnNote" class="tour-muted">Партия появится после жеребьёвки.</p><div id="tourOwnFrame"></div></section>
     <section id="tourWatchPanel" role="tabpanel" hidden><div class="tour-section-heading"><p id="watchTitle"></p><button id="returnOwn">Вернуться в свою игру</button></div><div id="tourWatchFrame"></div></section>
   </section>
 </main>
-<script src="app-nards-tournaments.js?v=20261108-match-states"></script>
+<script src="app-nards-tournaments.js?v=20261108-participant-cards"></script>
 </body></html>

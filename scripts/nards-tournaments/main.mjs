@@ -135,6 +135,40 @@ function actionButton(label,action,primary=false){const b=el('button',label,prim
 function hideOverviewDetails(hidden){
  for(const id of ['tourTitle','tourMeta','tourPrizes'])$(id).hidden=hidden;
 }
+function entrantCard(entry,index,tournament){
+ const name=entry.name||'Игрок',level=Number(entry.level)||0;
+ const card=el('article',null,'tour-entry sng-champions-modal__entry tournament-bet-modal__entry'+(entry.self?' tournament-bet-modal__entry--mine':''));
+ const avatar=el('span',null,'sng-champions-modal__entry-avatar tournament-bet-modal__avatar');
+ const initial=el('span',Array.from(name)[0].toUpperCase());
+ avatar.setAttribute('aria-hidden','true');avatar.append(initial);
+ const art=source.pokerGetSummerRatingPlayerArt?.(name)?.src;
+ const src=art||entry.avatar;
+ if(src){
+  const media=el('span',null,'sng-champions-modal__entry-avatar-media');
+  const img=el('img',null,'sng-champions-modal__entry-avatar-img'+(art?' sng-champions-modal__entry-avatar-img--art':''));
+  img.alt='';img.loading='lazy';img.decoding='async';
+  img.addEventListener('error',()=>{
+   if(art&&entry.avatar&&img.classList.contains('sng-champions-modal__entry-avatar-img--art')){
+    img.classList.remove('sng-champions-modal__entry-avatar-img--art');img.src=entry.avatar;
+   }else media.replaceWith(initial);
+  });
+  img.src=src;media.append(img);initial.replaceWith(media);
+ }
+ if(level>0)avatar.append(el('em',level));
+ const main=el('div',null,'sng-champions-modal__entry-main tournament-bet-modal__entry-main');
+ main.append(el('strong',name+(entry.self?' · Вы':''),'sng-champions-modal__entry-name'),
+  el('span',entry.ready?'✓ Готов к игре':'✓ Участвует','sng-champions-modal__entry-status'));
+ if(level>0)main.append(el('small','Уровень '+level,'sng-champions-modal__entry-meta'));
+ card.append(el('span',index+1,'tournament-bet-modal__place'),avatar,main);
+ if(tournament.isAdmin&&tournament.status==='registration'){
+  const remove=el('button','×','tour-entry-remove');
+  remove.type='button';
+  remove.setAttribute('aria-label','Удалить участника '+name);
+  remove.onclick=()=>{if(!mutation&&window.confirm('Удалить из турнира: '+name+'?'))mutate('remove-entry',{entryId:entry.id});};
+  card.append(remove);
+ }
+ return card;
+}
 function render(d){
  hideOverviewDetails(d.status==='running');
  data=d;const tickets=d.prizeKind==='tickets',fixed=d.prizeMode==='fixed';
@@ -146,17 +180,8 @@ function render(d){
  if(d.isAdmin&&!a.issuedAt){const b=el('button','Отметить выдачу');b.onclick=async()=>{if(!window.confirm('Билет '+a.amount+' ₽ действительно выдан игроку «'+(entry?.name||'Игрок')+'»?'))return;b.disabled=true;try{render(await request({action:'issue-ticket',id:d.id,entryId:a.entryId}));notice();}catch(e){notice(e.message);b.disabled=false;}};row.append(b);}awards.append(row);}
  showPanel('tourDetail');$('tourTitle').textContent=d.title;$('tourMeta').textContent=(d.discipline==='long'?'Длинные':'Короткие')+' · '+(d.variant==='crazy'?'Бешеные':d.variant==='six-one'?'6:1 · Кафтар':'Классические')+' · '+d.entries.length+'/'+d.capacity+' · '+(d.startsAt==null?'Ручной запуск':novosibirsk(d.startsAt))+' · победа 1 / марс 2 / кокс 3';
  const paint=JSON.stringify([d.revision,d.self,d.rounds,d.entries]);
- if(paint!==lastPaint){lastPaint=paint;bracket(d);$('tourEntrants').replaceChildren(...d.entries.map(e=>{
-   const chip=el('span',(e.ready?'✓ ':'')+e.name+(e.self?' · Вы':''),'tour-entry'+(e.self?' is-self':'')+(e.ready?' is-ready':''));
-   if(d.isAdmin&&d.status==='registration'){
-    const remove=el('button','×','tour-entry-remove');
-    remove.type='button';
-    remove.setAttribute('aria-label','Удалить участника '+e.name);
-    remove.onclick=()=>{if(!mutation&&window.confirm('Удалить из турнира: '+e.name+'?'))mutate('remove-entry',{entryId:e.id});};
-    chip.append(remove);
-   }
-   return chip;
-  }));
+ if(paint!==lastPaint){lastPaint=paint;bracket(d);$('tourEntrantCount').textContent=d.entries.length;
+  $('tourEntrants').replaceChildren(...d.entries.map((entry,index)=>entrantCard(entry,index,d)));
   const actions=$('tourActions'),adminActions=$('tourAdminActions');
   actions.replaceChildren();adminActions.replaceChildren();
   if(!d.self&&d.status==='registration')actions.append(actionButton((d.entryType==='chips'?'Участвовать · '+d.buyIn+' фишек':'Участвовать · бесплатно'),'join',true));
