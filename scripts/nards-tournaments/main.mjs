@@ -98,12 +98,49 @@ function tick(){
 
 }
 $('tourSkipBreak').onclick=()=>{const match=ownMatch();if(match)mutate('skip-break',{matchId:match.id});};
+let bracketLineObserver;
+function drawBracketLines(map, cards) {
+ const ns='http://www.w3.org/2000/svg';
+ const svg=document.createElementNS(ns,'svg');
+ svg.classList.add('tour-bracket-lines');
+ svg.setAttribute('aria-hidden','true');
+ map.prepend(svg);
+ const draw=()=>{
+  const origin=svg.getBoundingClientRect();
+  const bounds=cards.map(round=>round.map(card=>card.getBoundingClientRect()));
+  const paths=[];
+  bounds.slice(0,-1).forEach((round,roundIndex)=>round.forEach((from,index)=>{
+   const to=bounds[roundIndex+1][Math.floor(index/2)];
+   if(!to||!from.width||!to.width)return;
+   const x1=from.right-origin.left,x2=to.left-origin.left,middle=(x1+x2)/2;
+   const y1=from.top+from.height/2-origin.top,y2=to.top+to.height/2-origin.top;
+   const path=document.createElementNS(ns,'path');
+   path.setAttribute('d',`M ${x1} ${y1} H ${middle} V ${y2} H ${x2}`);
+   paths.push(path);
+  }));
+  svg.replaceChildren(...paths);
+ };
+ draw();
+ bracketLineObserver=new ResizeObserver(draw);
+ bracketLineObserver.observe(map);
+}
+function waitingOpponentNote(rounds,roundIndex,match,players){
+ if(roundIndex===0||match.playerIds.filter(Boolean).length!==1)return 'Ожидание соперника';
+ const emptySlot=match.playerIds.findIndex(id=>!id);
+ const source=rounds[roundIndex-1].matches[(match.index-1)*2+emptySlot];
+ if(!source||source.resolved)return 'Ожидание соперника';
+ const names=source.playerIds.map(id=>players.get(id)?.name).filter(Boolean);
+ return names.length===2?'Ждём победителя пары «'+names.join(' — ')+'»':
+  'Ждём победителя матча №'+source.index+' ('+stageName(roundIndex-1,rounds.length).toLowerCase()+')';
+}
 function bracket(d){
+ bracketLineObserver?.disconnect();
  const root=$('tourBracket');const scroll=root.querySelector('.sng-champions-modal__bracket-map-wrap')?.scrollLeft||0;root.replaceChildren();
  if(!d.rounds.length){root.append(el('p','Пары будут распределены случайно после закрытия регистрации.','tour-bracket-empty'));return;}
  // Reuse SNG Battle's map classes, lanes, connectors and grid row placement.
  const wrap=el('section',null,'sng-champions-modal__bracket-map-wrap'),map=el('div',null,'sng-champions-modal__bracket-map');wrap.setAttribute('aria-label','Турнирная сетка');map.style.setProperty('--sng-map-rows',d.rounds[0].matches.length);map.style.setProperty('--tour-rounds',d.rounds.length);
  const players=new Map(d.entries.map(e=>[e.id,e]));
+ const cards=d.rounds.map(()=>[]);
  d.rounds.forEach((r,ri)=>{const round=el('section',null,'sng-champions-modal__map-round');const title=el('h3',stageName(ri,d.rounds.length)+' · до '+r.target,'sng-champions-modal__map-round-title');round.append(title);const matches=el('div',null,'sng-champions-modal__map-round-matches');
   r.matches.forEach((m,mi)=>{const span=d.rounds[0].matches.length/r.matches.length,next=ri<d.rounds.length-1,lane=Math.floor(mi/2)%8+1;
    const card=el('article',null,'sng-champions-modal__map-match'+(m.resolved?' sng-champions-modal__map-match--done':' sng-champions-modal__map-match--unplayed')+(next?' sng-champions-modal__map-match--has-next sng-champions-modal__map-match--lane-'+lane:''));
@@ -113,10 +150,10 @@ function bracket(d){
    card.style.setProperty('--sng-map-row-start',mi*span+1);card.style.setProperty('--sng-map-row-span',span);card.style.setProperty('--sng-map-connector-height',span*168+'px');
    const rows=el('div',null,'sng-champions-modal__map-players');
    m.playerIds.forEach((id,i)=>{const p=players.get(id),won=m.winnerId===id&&id,lost=m.resolved&&id&&!won,advanced=ri>0&&id&&!m.resolved&&!m.playerIds.every(Boolean);const row=el('div',null,'sng-champions-modal__map-player'+(won?' sng-champions-modal__map-player--winner':'')+(lost?' sng-champions-modal__map-player--lost':'')+(advanced?' tour-player-advanced':'')+(m.ready[i]&&!m.resolved?' sng-champions-modal__map-player--ready':''));row.append(el('span',p?p.name+(p.self?' · Вы':''):m.resolved?'Нет соперника':'Ждём пару'),el('b',id?m.scores[i]:''));rows.append(row);});card.append(rows);
-   const note=m.reason==='double-no-show'?'Оба не явились':m.reason==='bye'?'Проход без игры':m.resolved?'Партия завершена':live?'Идёт партия':m.startsAt==null?'Ожидание соперника':m.startsAt>serverNow()?novosibirsk(m.startsAt):'Ожидаем начала';card.append(el('small',note,'tour-match-note'));
-   if(m.roomId){const b=el('button',m.id===d.self?.matchId?'Моя игра':'Смотреть ↗','tour-match-watch');b.dataset.tourRoom=m.roomId;b.onclick=()=>m.id===data.self?.matchId?setTab('game'):watch(m.roomId,m.playerIds.map(id=>players.get(id)?.name||'Ждём соперника').join(' — '));card.append(b);}matches.append(card);
+   const note=m.reason==='double-no-show'?'Оба не явились':m.reason==='bye'?'Проход без игры':m.resolved?'Партия завершена':live?'Идёт партия':m.startsAt==null?waitingOpponentNote(d.rounds,ri,m,players):m.startsAt>serverNow()?novosibirsk(m.startsAt):'Ожидаем начала';card.append(el('small',note,'tour-match-note'));
+   if(m.roomId){const b=el('button',m.id===d.self?.matchId?'Моя игра':'Смотреть ↗','tour-match-watch');b.dataset.tourRoom=m.roomId;b.onclick=()=>m.id===data.self?.matchId?setTab('game'):watch(m.roomId,m.playerIds.map(id=>players.get(id)?.name||'Ждём соперника').join(' — '));card.append(b);}matches.append(card);cards[ri].push(card);
   });round.append(matches);map.append(round);
- });wrap.append(map);root.append(wrap);wrap.scrollLeft=scroll;
+ });wrap.append(map);root.append(wrap);drawBracketLines(map,cards);wrap.scrollLeft=scroll;
 }
 function gameFrame(room,watching){const frame=document.createElement('iframe');frame.title=watching?'Просмотр турнирной партии':'Моя турнирная партия';frame.allow='clipboard-write';frame.src='board-games-play.html?game='+data.discipline+'&'+(watching?'watch':'room')+'='+encodeURIComponent(room)+'&tournament='+data.id;return frame;}
 function ensureOwn(){
