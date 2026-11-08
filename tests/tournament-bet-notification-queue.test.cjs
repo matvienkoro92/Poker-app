@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {createQueue}=require('../lib/tournament-bet-notification-queue');
+const {createQueue,PENDING_CREATION_JOBS}=require('../lib/tournament-bet-notification-queue');
 function fixture(){
  let time=Date.parse('2026-10-30T12:00:00Z'),fail='b',gate=null;const store=new Map(),sent=[];
  const event={id:'tb_test',status:'open',createdAt:new Date(time).toISOString(),entries:[]};const state={...event,creationNotification:structuredClone(event)};
@@ -9,7 +9,8 @@ function fixture(){
   if(cmd==='HVALS')result=[];
   if(cmd==='MGET')result=[key,...args].map(k=>store.get(k)||null);
   if(cmd==='SET'&&(!args.includes('NX')||!store.has(key))){store.set(key,args[0]);result='OK';}
-  if(cmd==='EVAL'&&store.get(args[1])===args[2]){store.delete(args[1]);result=1;}
+  if(cmd==='EVAL'&&key===PENDING_CREATION_JOBS)result=state.creationNotification?[JSON.stringify(state)]:[];
+  if(cmd==='EVAL'&&key!==PENDING_CREATION_JOBS&&store.get(args[1])===args[2]){store.delete(args[1]);result=1;}
   return {result};
  });
  const subscriptions={notify:async(e,t,options)=>{for(const id of await options.pendingRecipients(['group','a','b']))await options.deliver(id,async()=>{if(gate)await gate;sent.push(id);return {ok:id!==fail};});},notifyRegistration:async()=>({ok:true})};

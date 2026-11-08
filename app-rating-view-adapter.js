@@ -1005,8 +1005,8 @@ function pokerOpenTournamentRatingPlayer(nick, options) {
 window.pokerOpenUnifiedPlayerProfileByRatingNick = pokerOpenUnifiedPlayerProfileByRatingNick;
 window.pokerOpenTournamentRatingPlayer = pokerOpenTournamentRatingPlayer;
 
-var pokerRatingNickVerificationCache = {};
-var pokerRatingNickVerificationPending = {};
+var pokerRatingNickVerificationCache = Object.create(null);
+var pokerRatingNickVerificationPending = Object.create(null);
 
 function pokerRatingVerificationKey(nick) {
   return String(nick || "").trim().replace(/^@+/, "").replace(/\s+/g, " ").toLowerCase();
@@ -1032,58 +1032,57 @@ function pokerEnsureRatingNickBadge(btn) {
   btn.appendChild(badge);
 }
 
-function pokerCheckRatingNickVerified(nick) {
-  var key = pokerRatingVerificationKey(nick);
-  if (!key) return Promise.resolve(false);
-  if (Object.prototype.hasOwnProperty.call(pokerRatingNickVerificationCache, key)) {
-    return Promise.resolve(!!pokerRatingNickVerificationCache[key]);
-  }
-  if (pokerRatingNickVerificationPending[key]) return pokerRatingNickVerificationPending[key];
+var ratingVerificationQueue = new Map();
+var ratingVerificationTimer = 0;
+async function flushRatingVerification() {
+  ratingVerificationTimer = 0;
+  var pending = Array.from(ratingVerificationQueue.entries());
+  ratingVerificationQueue.clear();
   var base = typeof getApiBase === "function" ? getApiBase() : "";
-  if (!base || typeof fetch !== "function") return Promise.resolve(false);
-  var authQuery = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
-  if (!authQuery || authQuery === "?") authQuery = "?";
-  var sep = authQuery.length > 1 ? "&" : "";
-  var url = base + "/api/users" + authQuery + sep + "ratingNick=" + encodeURIComponent(nick);
-  pokerRatingNickVerificationPending[key] = fetch(url)
-    .then(function (r) { return r.json().catch(function () { return null; }); })
-    .then(function (data) {
-      var verified = !!(data && data.ok && (data.pokerPlusVerified || data.p21Id));
-      pokerRatingNickVerificationCache[key] = verified;
-      delete pokerRatingNickVerificationPending[key];
-      return verified;
-    })
-    .catch(function () {
-      pokerRatingNickVerificationCache[key] = false;
-      delete pokerRatingNickVerificationPending[key];
-      return false;
-    });
-  return pokerRatingNickVerificationPending[key];
+  for (var start = 0; start < pending.length; start += 20) {
+    var batch = pending.slice(start, start + 20);
+    try {
+      var nicks = batch.map(function (entry) { return entry[1].nick; });
+      var auth = typeof pokerApiAuthQuery === "function" ? pokerApiAuthQuery("?") : "?";
+      var response = await fetch(base + "/api/users" + (auth && auth !== "?" ? auth + "&" : "?") +
+        "ratingVerify=" + encodeURIComponent(JSON.stringify(nicks)));
+      var data = await response.json();
+      if (!response.ok || !data.ok || !Array.isArray(data.verified) || data.verified.length !== batch.length) continue;
+      batch.forEach(function (entry, index) {
+        var verified = data.verified[index] === true;
+        pokerRatingNickVerificationCache[entry[0]] = verified;
+        entry[1].buttons.forEach(function (button) { pokerSetRatingNickButtonVerified(button, verified); });
+      });
+    } catch (_) { /* A failed lookup must not permanently hide a verified badge. */ }
+    finally {
+      batch.forEach(function (entry) { delete pokerRatingNickVerificationPending[entry[0]]; });
+    }
+  }
 }
 
 function pokerMarkVerifiedRatingNickButtons(root) {
   root = root || document;
   if (!root || !root.querySelectorAll) return;
-  var buttons = Array.prototype.slice.call(root.querySelectorAll(".winter-rating__nick-btn[data-nick]"));
-  var seen = {};
-  buttons.forEach(function (btn) {
-    var nick = String(btn.dataset.nick || "").trim();
+  root.querySelectorAll(".winter-rating__nick-btn[data-nick]").forEach(function (button) {
+    var nick = String(button.dataset.nick || "").trim();
     var key = pokerRatingVerificationKey(nick);
-    if (!key) return;
-    pokerEnsureRatingNickBadge(btn);
+    if (!key || nick.length > 80) return;
+    pokerEnsureRatingNickBadge(button);
     if (Object.prototype.hasOwnProperty.call(pokerRatingNickVerificationCache, key)) {
-      pokerSetRatingNickButtonVerified(btn, pokerRatingNickVerificationCache[key]);
+      pokerSetRatingNickButtonVerified(button, pokerRatingNickVerificationCache[key]);
+      return;
     }
-    if (seen[key]) return;
-    seen[key] = true;
-    pokerCheckRatingNickVerified(nick).then(function (verified) {
-      buttons.forEach(function (candidate) {
-        if (pokerRatingVerificationKey(candidate.dataset && candidate.dataset.nick) === key) {
-          pokerSetRatingNickButtonVerified(candidate, verified);
-        }
-      });
-    });
+    var item = pokerRatingNickVerificationPending[key];
+    if (!item) {
+      item = {nick: nick, buttons: new Set()};
+      pokerRatingNickVerificationPending[key] = item;
+      ratingVerificationQueue.set(key, item);
+    }
+    item.buttons.add(button);
   });
+  if (ratingVerificationQueue.size && !ratingVerificationTimer) {
+    ratingVerificationTimer = setTimeout(flushRatingVerification, 25);
+  }
 }
 
 window.pokerMarkVerifiedRatingNickButtons = pokerMarkVerifiedRatingNickButtons;

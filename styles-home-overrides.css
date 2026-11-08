@@ -6349,7 +6349,7 @@ html body .bottom-nav .bottom-nav__icon::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('./assets/bottom-nav-icons-transparent-v1.png');
+  background-image: url('./assets/bottom-nav-icons-transparent-v1.webp');
   background-repeat: no-repeat;
   background-size: 500% auto;
   background-position: 0% center;

@@ -521,10 +521,19 @@ function runGazetteAndTasksInit() {
           renderGazetteCommentsFeed(feed, [], false);
         });
     }
-    function refreshAllGazetteCommentFeeds() {
-      var feeds = newsEl.querySelectorAll(".gazette-article-comments__feed[data-gazette-article-comments-article-id]");
-      for (var i = 0; i < feeds.length; i++) loadGazetteCommentsFeed(feeds[i]);
+    var lastGazetteFeedLoad = new WeakMap();
+    function loadVisibleGazetteFeed(feed) {
+      if (newsEl.hidden || Date.now() - (lastGazetteFeedLoad.get(feed) || 0) < 60000) return;
+      lastGazetteFeedLoad.set(feed, Date.now());
+      loadGazetteCommentsFeed(feed);
     }
+    var gazetteFeedObserver = typeof IntersectionObserver === "function"
+      ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) loadVisibleGazetteFeed(entry.target);
+        });
+      }, {rootMargin: "200px 0px"})
+      : null;
     function injectGazetteCommentsForArticle(article) {
       if (!article || article.getAttribute("data-gazette-comments-injected") === "1") return;
       if (article.getAttribute("data-gazette-draft") === "1") return;
@@ -576,7 +585,9 @@ function runGazetteAndTasksInit() {
           article.appendChild(wrap);
         }
       }
-      loadGazetteCommentsFeed(wrap.querySelector(".gazette-article-comments__feed"));
+      var feed = wrap.querySelector(".gazette-article-comments__feed");
+      if (gazetteFeedObserver) gazetteFeedObserver.observe(feed);
+      else loadVisibleGazetteFeed(feed);
     }
     function injectAllGazetteArticleComments() {
       var arts = newsEl.querySelectorAll("article[data-gazette-article]");
@@ -587,7 +598,9 @@ function runGazetteAndTasksInit() {
       var moGac = new MutationObserver(function () {
         if (newsEl.hidden) return;
         injectAllGazetteArticleComments();
-        refreshAllGazetteCommentFeeds();
+        if (!gazetteFeedObserver) {
+          newsEl.querySelectorAll(".gazette-article-comments__feed").forEach(loadVisibleGazetteFeed);
+        }
       });
       try {
         moGac.observe(newsEl, { attributes: true, attributeFilter: ["hidden"] });

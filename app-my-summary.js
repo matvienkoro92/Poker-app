@@ -167,9 +167,9 @@
       return Promise.resolve();
     }
     var seq = generation, requestId = ++reviewUnreadRequest;
-    return request("club-reviews", {action:"summary"}).then(function (d) {
+    return request("club-reviews", {action:"unread"}).then(function (d) {
       if (seq !== generation || requestId !== reviewUnreadRequest || (valid && !valid())) return;
-      renderReviewUnread((d.threads || []).filter(function (thread) {return thread && thread.unread;}).length);
+      renderReviewUnread(d.count);
     }).catch(function () { /* Keep the last confirmed count on a network error. */ });
   }
   function friends() {
