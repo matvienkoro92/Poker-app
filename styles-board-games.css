@@ -676,7 +676,7 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .player-clock[data-time-warning=urgent]{color:#ffad91}
 
 /* Turn and time already belong to the player cards; keep move dice at left. */
-#game:is([data-kind=short],[data-kind=long]) #boardClock{display:none}
+#game:is([data-kind=short],[data-kind=long]) #boardClock:not(.is-tournament-waiting:has(#clock:not([hidden]))){display:none}
 #game:is([data-kind=short],[data-kind=long]) .board-meta-details{width:100%;flex-basis:100%}
 #game:is([data-kind=short],[data-kind=long]) #remainingDice{justify-content:flex-start;margin-left:0;margin-right:auto}
 
@@ -1003,3 +1003,31 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 }
 
 #seriesTarget { color: #ffab5c; font-weight: 750; }
+
+#game .matchup > [data-player] > i.player-checker {
+  border: 0;
+  background: none;
+}
+#game .matchup > [data-player] > i.player-checker > .checker {
+  width: 100%;
+}
+
+#game .board-meta .board-clock.is-tournament-waiting {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+#game .board-meta:has(.is-tournament-waiting) #turnText { white-space: normal; }
+#game .board-meta .board-clock.is-tournament-waiting #clock {
+  color: #ffdb90;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+#game .board-meta .tournament-room-ready {
+  min-height: 32px;
+  padding: 5px 8px;
+  border-color: #e0be74;
+  background: #e2c074;
+  color: #17251c;
+  font-size: 11px;
+  font-weight: 750;
+}
