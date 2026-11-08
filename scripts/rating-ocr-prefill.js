@@ -83,6 +83,7 @@ function normalizeName(raw) {
   if (/BLACKOUT/i.test(raw) && /300K/i.test(raw)) return "BLACKOUT 300K";
   if (/Hyper\s+Turbo/i.test(raw) && /40K/i.test(raw)) return "Hyper Turbo 40K";
   if (/Lucky\s+Slot/i.test(raw) && /333K/i.test(raw)) return "Lucky Slot 333K";
+  if (/BLACKOUT/i.test(raw) && /\b70K\b/i.test(raw)) return "BLACKOUT 70K";
   if (/BLACKOUT/i.test(raw) && /220K/i.test(raw)) return "BLACKOUT 220K";
   if (/Deep\s+Night/i.test(raw) && /15K/i.test(raw)) return "✨Deep Night 15k ✨";
   if (/DV\s+Turbo/i.test(raw) && /50K/i.test(raw)) return "DV Turbo 500🏆 50K";
@@ -516,6 +517,7 @@ async function parseOcrFile(file) {
   if (blue && date === "05.11.2026" && time === "23:00" && /Big Turbo$/i.test(title)) buyin = 500;
   if (blue && date === "05.11.2026" && time === "15:00" && /70K.*BLACKOUT/i.test(title)) { title = "BLACKOUT 70K"; buyin = 700; }
   if (blue && date === "06.11.2026" && time === "18:00" && title === "500K Black Friday") { title = "Black Friday 500K"; buyin = 1500; }
+  if (blue && date === "07.11.2026" && time === "19:00" && /300K.*Triple Chance/i.test(title)) { title = "Triple Chance 300K"; buyin = 3000; }
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   if (date === "29.10.2026" && blue && time === "15:00" && title === "Lucky Slot 77K") buyin = 500;
