@@ -105,3 +105,46 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 
 .tour-countdown-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .tour-countdown-row #tourSkipBreak { flex: none; font-size: 12px; padding-inline: 8px; }
+
+
+.nards-tournament .sng-champions-modal__map-match.tour-match--live {
+  background: #b9edc5;
+  border-color: #72d68d;
+  color: #153f29;
+  box-shadow: 0 0 14px #72d68d52;
+}
+.nards-tournament .sng-champions-modal__bracket-map .tour-match--live::before {
+  background: #249b56;
+  box-shadow: 0 0 0 2px #d4f9db, 0 0 12px #72d68d85;
+}
+.nards-tournament .tour-match--live .sng-champions-modal__map-player,
+.nards-tournament .tour-match--live .sng-champions-modal__map-player--ready::before {
+  color: #153f29;
+}
+.nards-tournament .tour-match--live .tour-match-watch {
+  background: #a0dcb1;
+  border-color: #69ae7e;
+  color: #153f29;
+}
+.nards-tournament .sng-champions-modal__map-match.tour-match--finished {
+  background: #8b5b60;
+  border-color: #c08a8f;
+  box-shadow: none;
+}
+.nards-tournament .tour-match--finished .sng-champions-modal__map-player {
+  color: #ffe2df;
+  text-shadow: none;
+}
+.nards-tournament .tour-match--finished .tour-match-watch {
+  background: #724a4e;
+  border-color: #ae7d82;
+  color: #f5d9d6;
+}
+.nards-tournament .tour-match--live .tour-match-note,
+.nards-tournament .tour-match--finished .tour-match-note {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.nards-tournament .tour-match--live .tour-match-note { color: #153f29; }
+.nards-tournament .tour-match--finished .tour-match-note { color: #fff0ee; }

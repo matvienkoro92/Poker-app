@@ -447,9 +447,9 @@
   window.addEventListener('poker-telegram-auth',function(){generation++;request++;if(loungeLive)loungeLive.stop();data=null;selection=null;busy=false;if(detail)detail.close();if(dialog)dialog.close();mountEntry();});
   window.addEventListener('poker-admin-access',mountEntry);
   window.pokerOpenDarts=function(code,watch){if(code&&!/^[A-HJ-NP-Z2-9]{10}$/.test(code))return false;import('./app-villa-darts.js?v=20261027-menu-online').then(function(){return window.PokerDarts.open({code:code,watch:watch});}).catch(function(){status('Не удалось открыть дартс. Попробуйте ещё раз.');});return true;};
-  window.pokerOpenNardsTournaments=function(id){
-    if(id&&!/^[A-HJ-NP-Z2-9]{10}$/.test(id))return false;
-    var d=document.createElement('dialog'),f=document.createElement('iframe');d.className='billiards-shell board-games-shell';d.setAttribute('aria-label','Турниры по нардам');f.title='Турниры по нардам';f.allow='clipboard-write';f.src='nards-tournaments.html'+(id?'?id='+encodeURIComponent(id):'');d.appendChild(f);document.body.appendChild(d);
+  window.pokerOpenNardsTournaments=function(id,room){
+    if(id&&!/^[A-HJ-NP-Z2-9]{10}$/.test(id)||room&&(!id||!/^[A-HJ-NP-Z2-9]{10}$/.test(room)))return false;
+    var d=document.createElement('dialog'),f=document.createElement('iframe');d.className='billiards-shell board-games-shell';d.setAttribute('aria-label','Турниры по нардам');f.title='Турниры по нардам';f.allow='clipboard-write';f.src='nards-tournaments.html'+(id?'?id='+encodeURIComponent(id)+(room?'&room='+encodeURIComponent(room):''):'');d.appendChild(f);document.body.appendChild(d);
     var receive=function(e){if(e.origin===location.origin&&e.source===f.contentWindow&&e.data?.type==='p21-nards-tournaments-close')d.close();};window.addEventListener('message',receive);
     d.addEventListener('cancel',function(e){e.preventDefault();d.close();});d.addEventListener('close',function(){window.removeEventListener('message',receive);f.src='about:blank';d.remove();},{once:true});fitTelegramGameShell(d);d.showModal();return true;
   };

@@ -6,7 +6,7 @@ let source=window;
 try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}catch{}
 // The game iframe is one level below this tournament shell.
 if(source!==window){window.pokerApiAuthJsonBody=body=>source.pokerApiAuthJsonBody?.(body)||body;window.getApiBase=()=>source.getApiBase?.()||location.origin;}
-let currentId=params.get('id')||'',data=null,activeTab='bracket',ownFrame=null,watchFrame=null,offset=0,poll=0,stopped=false,loading=false,flightEpoch=-1,mutation=false,epoch=0,listAdmin=false,formRequestId='',lastPaint='',lastOwnRoom='',watchedRoom='';
+let linkedRoom=params.get('room'),currentId=params.get('id')||'',data=null,activeTab='bracket',ownFrame=null,watchFrame=null,offset=0,poll=0,stopped=false,loading=false,flightEpoch=-1,mutation=false,epoch=0,listAdmin=false,formRequestId='',lastPaint='',lastOwnRoom='',watchedRoom='';
 const statusNames={registration:'Регистрация',drawn:'Сетка готова',running:'Идёт турнир',completed:'Завершён',cancelled:'Отменён'};
 const el=(tag,text,className)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(className)n.className=className;return n;};
 function notice(message=''){$('tourError').textContent=message;}
@@ -107,10 +107,13 @@ function bracket(d){
  d.rounds.forEach((r,ri)=>{const round=el('section',null,'sng-champions-modal__map-round');const title=el('h3',stageName(ri,d.rounds.length)+' · до '+r.target,'sng-champions-modal__map-round-title');round.append(title);const matches=el('div',null,'sng-champions-modal__map-round-matches');
   r.matches.forEach((m,mi)=>{const span=d.rounds[0].matches.length/r.matches.length,next=ri<d.rounds.length-1,lane=Math.floor(mi/2)%8+1;
    const card=el('article',null,'sng-champions-modal__map-match'+(m.resolved?' sng-champions-modal__map-match--done':' sng-champions-modal__map-match--unplayed')+(next?' sng-champions-modal__map-match--has-next sng-champions-modal__map-match--lane-'+lane:''));
+   const live=!m.resolved&&m.startedAt!=null;
+   card.classList.toggle('tour-match--live',live);
+   card.classList.toggle('tour-match--finished',m.resolved);
    card.style.setProperty('--sng-map-row-start',mi*span+1);card.style.setProperty('--sng-map-row-span',span);card.style.setProperty('--sng-map-connector-height',span*168+'px');
    const rows=el('div',null,'sng-champions-modal__map-players');
    m.playerIds.forEach((id,i)=>{const p=players.get(id),won=m.winnerId===id&&id,lost=m.resolved&&id&&!won,advanced=ri>0&&id&&!m.resolved&&!m.playerIds.every(Boolean);const row=el('div',null,'sng-champions-modal__map-player'+(won?' sng-champions-modal__map-player--winner':'')+(lost?' sng-champions-modal__map-player--lost':'')+(advanced?' tour-player-advanced':'')+(m.ready[i]&&!m.resolved?' sng-champions-modal__map-player--ready':''));row.append(el('span',p?p.name+(p.self?' · Вы':''):m.resolved?'Нет соперника':'Ждём пару'),el('b',id?m.scores[i]:''));rows.append(row);});card.append(rows);
-   const note=m.reason==='double-no-show'?'Оба не явились':m.reason==='bye'?'Проход без игры':m.resolved?'Матч завершён':m.startsAt==null?'Ожидание соперника':m.startsAt>serverNow()?novosibirsk(m.startsAt):'Идёт партия';card.append(el('small',note,'tour-match-note'));
+   const note=m.reason==='double-no-show'?'Оба не явились':m.reason==='bye'?'Проход без игры':m.resolved?'Партия завершена':live?'Идёт партия':m.startsAt==null?'Ожидание соперника':m.startsAt>serverNow()?novosibirsk(m.startsAt):'Ожидаем начала';card.append(el('small',note,'tour-match-note'));
    if(m.roomId){const b=el('button',m.id===d.self?.matchId?'Моя игра':'Смотреть ↗','tour-match-watch');b.dataset.tourRoom=m.roomId;b.onclick=()=>m.id===data.self?.matchId?setTab('game'):watch(m.roomId,m.playerIds.map(id=>players.get(id)?.name||'Ждём соперника').join(' — '));card.append(b);}matches.append(card);
   });round.append(matches);map.append(round);
  });wrap.append(map);root.append(wrap);wrap.scrollLeft=scroll;
@@ -162,6 +165,7 @@ function render(d){
   if(d.isAdmin&&d.status==='registration'&&d.startsAt==null){const b=actionButton('Старт','start',true);b.disabled=d.entries.length<2;adminActions.append(b);}
   if(d.isAdmin&&['registration','drawn'].includes(d.status))adminActions.append(actionButton('Отменить турнир','cancel'));
  }
+ if(linkedRoom){const room=linkedRoom;linkedRoom=null;if(d.self?.roomId===room)setTab('game');}
  ensureOwn();tick();
 }
 async function refresh(){

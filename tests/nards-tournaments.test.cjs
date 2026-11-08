@@ -275,3 +275,28 @@ test('chat gets registration, half-full, start, live final and winner notices on
   assert.ok(sent[4].text.includes('Победитель: ' + result.entries.find(entry => entry.id === result.winnerId).name));
   assert.match(sent[4].text, /билет на покер номиналом 300 ₽/);
 });
+
+test('advancement privately notifies each winner once and links to their next room', async () => {
+  const sent = [];
+  const f = fixture({ notifyPlayer: async (entry, payload) => sent.push({ member: entry.member, ...payload }) });
+  const t = await f.seed(4, { roundTargets: [1, 3] });
+  f.time(t.startsAt);
+  const running = await f.service.synchronize(t.id);
+  const [first, second] = running.rounds[0].matches.map(match => f.roomMap.get(match.roomId));
+  sent.length = 0;
+
+  await f.finish(first.id);
+  const advanced = await f.service.synchronize(t.id);
+  const final = advanced.rounds[1].matches[0];
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].member, first.players[0]);
+  assert.match(sent[0].text, /Вы прошли в финал.*\nВаш соперник: ещё определяется\nИгра до 3 очков\./);
+  assert.ok(sent[0].reply_markup.inline_keyboard[0][0].url.endsWith('nards_tour_' + t.id + '_' + final.roomId));
+
+  await f.finish(second.id);
+  await f.service.synchronize(t.id);
+  await f.service.sweep();
+  assert.deepEqual(sent.map(notice => notice.member), [first.players[0], second.players[0]]);
+  assert.ok(sent[1].text.includes('Ваш соперник: ' + f.profiles.get(first.players[0]).name));
+  assert.equal(sent[1].reply_markup.inline_keyboard[0][0].url, sent[0].reply_markup.inline_keyboard[0][0].url);
+});
