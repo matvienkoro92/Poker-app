@@ -860,3 +860,22 @@
 .player-hall-dialog .micro-workshop button.garage-option:focus-visible { outline: 2px solid #ffe0a0; outline-offset: -4px; }
 .player-hall-dialog .micro-workshop .micro-part-symbol { display: grid; place-items: center; }
 .player-hall-dialog .micro-workshop .micro-part-symbol svg { width: 34px; height: 34px; }
+
+.player-hall__room[data-admin-garage="true"]:is([data-garage-vehicle="1"],[data-garage-vehicle="2"]) .player-hall__parked-kart {
+  scale: 1.18;
+}
+.player-hall-dialog .player-hall__camera-ui .garage-vehicle-switch:has(.garage-imported-upgrades) { max-height: none; }
+.player-hall__camera-ui .garage-vehicle-switch > .garage-imported-upgrades {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 36px;
+  font-size: 14px;
+}
+.garage-imported-workshop canvas { width: 100%; height: 150px; object-fit: contain; }
+.garage-imported-workshop form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.garage-imported-workshop label { display: grid; gap: 4px; min-width: 0; font-size: 13px; }
+.garage-imported-workshop select { width: 100%; color: #f0dfbd; background: #222b2e; padding: 7px; border-radius: 8px; }
+.garage-imported-workshop form > :is(button,p) { grid-column: 1 / -1; }
+.garage-imported-workshop small a { color: #d5bd87; }
+.player-hall-dialog .garage-imported-workshop { max-height: min(55%, 460px); }
+.garage-imported-workshop canvas { flex: 0 0 150px; }

@@ -3,8 +3,8 @@ import {GLTFLoader} from '../../vendor/three/addons/loaders/GLTFLoader.js';
 
 const baseUrl=document.currentScript?.src||location.href;
 const assets={
- 'bmw-e60':{file:'./assets/garage/models/bmw-m5-e60-v5.glb?v=20261108-admin-e60',paint:'E60_00'},
- 'mustang-gt500':{file:'./assets/garage/models/mustang-shelby-gt500-v1.glb',paint:'carpaint'}
+ 'bmw-e60':{file:'./assets/garage/models/bmw-m5-e60-v5.glb?v=20261108-admin-e60',paint:'E60_00',glass:'Tinted windows',wheels:'Anthracite alloy'},
+ 'mustang-gt500':{file:'./assets/garage/models/mustang-shelby-gt500-v1.glb',paint:'carpaint',glass:'tinted_glass'}
 };
 
 export function prepareImportedCar(transport){
@@ -22,22 +22,30 @@ export function createImportedCar(scene,look){
  const car=new T.Group();
  car.name=look.transport;
  car.scale.setScalar(1.22);
- const body=asset.template.clone(true),paints=[];
+ const G=window.PokerGarage;
+ const colors={
+  paint:look=>look.paint==='classic'?null:G.item('paint',look.paint).color,
+  wheels:look=>look.wheels==='classic'?null:G.wheelPaintColor(look),
+  glass:look=>look.glassTint==='original'?null:G.glassTints[look.glassTint]?.color
+ };
+ const body=asset.template.clone(true),finishes=[];
  body.traverse(object=>{
   if(!object.isMesh)return;
   object.geometry=object.geometry.clone();
   object.material=object.material.clone();
   object.castShadow=true;
   object.receiveShadow=true;
-  if(object.material.name===asset.paint)paints.push(object.material);
+  const kind=Object.keys(colors).find(key=>asset[key]===object.material.name);
+  if(kind)finishes.push({kind,material:object.material,original:object.material.color.clone()});
  });
  car.add(body);
  scene.add(car);
- const original=paints.map(material=>material.color.clone());
  function update(value){
-  paints.forEach((material,i)=>{
-   material.color.copy(value.paint==='classic'?original[i]:new T.Color(window.PokerGarage.item('paint',value.paint).color));
-  });
+  for(const {kind,material,original} of finishes){
+   const color=colors[kind](value);
+   if(color)material.color.set(color);
+   else material.color.copy(original);
+  }
  }
  update(look);
  return {car,update,measureClearance:()=>null};

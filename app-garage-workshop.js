@@ -1,6 +1,6 @@
 (function(){'use strict';
 const G=window.PokerGarage;if(!G)return;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let sequence=0,viewerLoad=null;
-const garageRendererRevision='20261108-admin-gt500';
+const garageRendererRevision='20261108-imported-upgrades';
 function loadViewer(){if(window.pokerCreateGarage3D)return Promise.resolve();if(!viewerLoad)viewerLoad=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./app-garage-3d.js?v='+garageRendererRevision;script.onload=resolve;script.onerror=()=>{viewerLoad=null;reject(Error('Не удалось загрузить 3D-просмотр'));};document.head.appendChild(script);});return viewerLoad;}
 
 const wardrobeSource=new Image();wardrobeSource.src='./assets/player-hall/standing-monkey-underwear-v1.webp';
@@ -94,8 +94,30 @@ window.pokerPrepareHallCharacter=function(garage){
  hallCharacterArtCache.set(key,pending);while(hallCharacterArtCache.size>4)hallCharacterArtCache.delete(hallCharacterArtCache.keys().next().value);
  return pending;
 };
+window.pokerMountImportedCarWorkshop=function(root,transport,onSave){
+ const form=root.querySelector('form'),canvas=root.querySelector('canvas'),status=root.querySelector('[role="status"]');
+ const fields=Array.from(form.querySelectorAll('select'));
+ const upgrades=()=>Object.fromEntries(fields.map(field=>[field.name,field.value]));
+ const preview=()=>paintSavedVehicle(canvas,{...G.defaults,...upgrades()},{transport,trim:true});
+ form.addEventListener('change',preview);
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=form.querySelector('button');
+  button.disabled=true;
+  fields.forEach(field=>{field.disabled=true;});
+  status.textContent='Сохраняем…';
+  try{await onSave(upgrades());status.textContent='Улучшения сохранены';}
+  catch(error){status.textContent=error.message;}
+  finally{button.disabled=false;fields.forEach(field=>{field.disabled=false;});}
+ });
+ preview();
+};
 window.pokerPaintGarageRoom=function(world,garage){if(!world)return;const room=world.closest('.player-hall__room');const fit=()=>{if(!world.isConnected){if(world._garageResize)world._garageResize.disconnect();return;}const scale=Math.min(.76,Math.max(.5,(room.clientWidth-32)/(world.offsetWidth*.44)));const scaleValue=String(scale),panValue=(-43+2.5*scale)+'%';if(room.style.getPropertyValue('--garage-scale')!==scaleValue)room.style.setProperty('--garage-scale',scaleValue);if(room.style.getPropertyValue('--garage-pan')!==panValue)room.style.setProperty('--garage-pan',panValue);};fit();if(!world._garageResize&&typeof ResizeObserver!=='undefined'){world._garageResize=new ResizeObserver(fit);world._garageResize.observe(room);}const look=G.savedLoadout(garage&&garage.loadout,garage&&garage.stats);if(room.dataset.space==='garage'){
- const paintGarage=()=>{if(!world.isConnected||room.dataset.space!=='garage')return;const shelf=world.querySelector('.garage-shelf-inventory'),shelfKey=JSON.stringify({loadout:look,stats:garage&&garage.stats});if(shelf&&shelf._garagePaintKey!==shelfKey){shelf._garagePaintKey=shelfKey;shelf.innerHTML=window.pokerGarageShelf(garage);paintShelf(shelf,{...garage,rewardSlots:G.rewardShelfSlots(garage)});}if(!room.dataset.garageVehicle||['0','5','6','7'].includes(room.dataset.garageVehicle)||room.dataset.adminGarage==='true'&&['1','2'].includes(room.dataset.garageVehicle))paintSavedVehicle(world.querySelector('.player-hall__parked-kart'),look,{transport:room.dataset.garageVehicle==='1'?'mustang-gt500':room.dataset.garageVehicle==='2'?'bmw-e60':room.dataset.garageVehicle==='5'?'bicycle':room.dataset.garageVehicle==='6'?'scooter':room.dataset.garageVehicle==='7'?'hoverboard':'kart',bicycle:garage?.bicycle?.loadout,scooter:garage?.scooter?.loadout});};
+ const paintGarage=()=>{if(!world.isConnected||room.dataset.space!=='garage')return;const shelf=world.querySelector('.garage-shelf-inventory'),shelfKey=JSON.stringify({loadout:look,stats:garage&&garage.stats});if(shelf&&shelf._garagePaintKey!==shelfKey){shelf._garagePaintKey=shelfKey;shelf.innerHTML=window.pokerGarageShelf(garage);paintShelf(shelf,{...garage,rewardSlots:G.rewardShelfSlots(garage)});}const slot=room.dataset.garageVehicle;
+ const imported=room.dataset.adminGarage==='true'&&({'1':'mustang-gt500','2':'bmw-e60'})[slot];
+ const canvas=world.querySelector('.player-hall__parked-kart');
+ if(imported)paintSavedVehicle(canvas,{...G.defaults,...garage?.importedCars?.[imported]},{transport:imported});
+ else if(!slot||['0','5','6','7'].includes(slot))paintSavedVehicle(canvas,look,{transport:({'5':'bicycle','6':'scooter','7':'hoverboard'})[slot]||'kart',bicycle:garage?.bicycle?.loadout,scooter:garage?.scooter?.loadout});};
  const revision=(world._garagePaintRevision||0)+1;world._garagePaintRevision=revision;
  // Let the camera finish before canvas pixel processing and wardrobe composition.
  requestAnimationFrame(()=>{const current=()=>world.isConnected&&world._garagePaintRevision===revision;const animations=world.getAnimations().filter(a=>a.playState==='running');if(animations.length)Promise.all(animations.map(a=>a.finished.catch(()=>{}))).then(()=>{if(current())paintGarage();});else if(current())paintGarage();});

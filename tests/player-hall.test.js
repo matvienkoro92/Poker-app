@@ -117,11 +117,27 @@ test('Imported car selection requires server-verified admin access',async()=>{
    './player-hall-tournament-results.json':[],'./profile-achievement-catalog.json':{waaar:stats},'./player-hall-seasons.json':{}
   });
   const body={version:0,featured:[],theme:'walnut',goal:'wins',selectedTransport};
-  if(!admin)await assert.rejects(()=>hall.save('ID1',body),{status:403});
-  else {
+  const G=require('../app-garage-catalog');
+  const upgrades=Object.fromEntries(G.importedCarUpgradeKinds(selectedTransport).map(kind=>[kind,G.defaults[kind]]));
+  const importedCar={transport:selectedTransport,upgrades};
+  if(!admin){
+   await assert.rejects(()=>hall.save('ID1',body),{status:403});
+   await assert.rejects(()=>hall.save('ID1',{...body,selectedTransport:'bicycle',importedCar}),{status:403});
+  }else {
    assert.equal((await hall.save('ID1',body,true)).selectedTransport,selectedTransport);
    assert.equal((await hall.read('ID1',true,true)).selectedTransport,selectedTransport);
-   assert.notEqual((await hall.read('ID1',false,true)).selectedTransport,selectedTransport);
+   const publicHall=await hall.read('ID1',false,true);
+   assert.notEqual(publicHall.selectedTransport,selectedTransport);
+   assert.equal(publicHall.garage.importedCars,undefined);
+   await assert.rejects(()=>hall.save('ID1',{...body,version:1,importedCar:{...importedCar,upgrades:{...upgrades,paint:'royal'}}},true),/ещё не открыто/);
+   await hall.save('ID1',{...body,version:1,importedCar},true);
+   const saved=(await hall.read('ID1',true,true)).garage;
+   assert.deepEqual({...saved.importedCars[selectedTransport]},upgrades);
+   assert.equal(saved.loadout.paint,G.defaults.paint);
+   const showcase=await hall.showcase('ID1',false);
+   assert.equal(showcase.selectedTransport,selectedTransport);
+   assert.deepEqual({...showcase.garage.importedCar},upgrades);
+   assert.equal(showcase.garage.importedCars,undefined);
   }
  }
 });
