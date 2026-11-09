@@ -50,3 +50,17 @@ test('short route is winnable with new steering and preserves its start on retry
 test('service brake stops the car and wall impact has a cooldown',()=>{const s=ready();for(let i=0;i<180;i++)E.step(s,{driving:true,down:true});assert.ok(s.speed<.01);const wall=ready();wall.lateral=1.22;wall.heading=.8;wall.velocityHeading=.8;E.step(wall,{driving:true,steer:1});assert.equal(wall.crash.kind,'wall');assert.equal(wall.hits,1);assert.ok(wall.heading<0);E.step(wall,{driving:true,steer:1});assert.equal(wall.hits,1);});
 test('opponents have distinct reaction, corner caution and passing clearance',()=>{assert.equal(new Set(E.rivalProfiles.map(p=>p.reaction)).size,3);assert.ok(E.rivalProfiles[0].caution>E.rivalProfiles[1].caution);assert.ok(E.rivalProfiles[0].space>E.rivalProfiles[1].space);});
 test('a shield covers the whole oncoming collision, not only its first frame',()=>{const s=ready();s.tick=100;const car=E.trafficAt(100)[0];s.distance=car.distance-20;s.lateral=car.lateral;s.shield=100;E.step(s,{});assert.equal(s.shield,0);assert.ok(s.inv>0);for(let i=0;i<8;i++)E.step(s,{});assert.equal(s.hits,0);});
+test('analogue steering is gentle near centre, symmetric and retains full lock',()=>{
+ for(const direction of [-1,1]){
+  const small=ready(),full=ready();
+  for(let i=0;i<30;i++){E.step(small,{driving:true,steer:direction*.3});E.step(full,{driving:true,steer:direction});}
+  assert.ok(Math.abs(small.steering)<.19);
+  assert.ok(full.steering*direction>.98);
+  const before=full.steering;
+  E.step(full,{driving:true,steer:-direction});
+  assert.ok(full.steering*direction>0,'opposite input must not snap across centre');
+  assert.ok(Math.abs(full.steering-before)<.55);
+  for(let i=0;i<10;i++)E.step(full,{driving:true,steer:0});
+  assert.ok(Math.abs(full.steering)<.02,'released joystick must promptly centre');
+ }
+});
