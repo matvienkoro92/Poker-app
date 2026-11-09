@@ -8,5 +8,13 @@ export function createRouteLandmarks(scene,E,sample,block){
  // A recognisable waterfront clock tower and a port gantry establish distinct districts.
  const tower=at(E.LAP*2+5300);for(const [radius,height,y]of [[2.3,9,4.5],[2.6,.5,9],[1.7,3,10.5],[2,.35,12.2]]){const m=new T.Mesh(new T.CylinderGeometry(radius,radius,height,24),new T.MeshStandardMaterial({color:height>1?0xa59c88:0x40515b,roughness:.85}));m.position.set(-18,y,0);tower.add(m);}sign(tower,'TWO ACES',-18,7,3.4);const clock=new T.Mesh(new T.CircleGeometry(1.2,32),new T.MeshStandardMaterial({color:0xe7ddc3}));clock.position.set(-18,10.5,-1.72);clock.rotation.y=Math.PI;tower.add(clock);block(tower,'#26363b',-18,10.8,-1.75,.09,.65,.04);const hand=block(tower,'#26363b',-18.25,10.5,-1.75,.6,.08,.04);hand.rotation.z=-.2;
  const port=at(E.LAP*2+7650);for(const side of [-1,1]){block(port,'#586e76',-22+side*4,7,0,.45,14,.45);const brace=block(port,'#76868a',-22+side*2,6,0,.22,12,.22);brace.rotation.z=side*.34;}block(port,'#71838a',-22,14,0,17,.5,.55);block(port,'#303c43',-16,10,0,.06,8,.06);const hook=new T.Mesh(new T.TorusGeometry(.38,.07,6,16,Math.PI*1.5),metal);hook.position.set(-16,5.8,0);port.add(hook);
+ // Stacked freight and corrugated sides give the port its own silhouette.
+ for(let n=0;n<8;n++){
+  const x=-19-(n%2)*5.2,z=-13+Math.floor(n/2)*7.1,y=n>5?2.65:0;
+  const color=['#52656b','#805b4b','#667263','#b09a73'][n%4];
+  block(port,color,x,y+1.25,z,4.7,2.5,6.2);
+  for(const face of [-1,1])for(let rib=0;rib<10;rib++)block(port,'#38494e',x+face*2.37,y+1.25,z-2.8+rib*.62,.045,2.35,.045);
+  for(const face of [-1,1])for(const side of [-1,1]){block(port,'#b1b2a4',x+side*1.05,y+1.25,z+face*3.12,.05,2.35,.04);block(port,'#39494b',x,y+(side<0?.12:2.38),z+face*3.13,4.6,.08,.045);}
+ }
  return {update(distance){for(const item of landmarks)item.root.visible=item.distance>distance-450&&item.distance<distance+2600;}};
 }
