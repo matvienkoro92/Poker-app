@@ -3,7 +3,10 @@ import * as T from '../../vendor/three/three.module.min.js';
 export function createCityBuildingFactory(facades,roofBox,roofCylinder){
  const roof=new T.MeshStandardMaterial({color:'#505b60',roughness:.88});
  const stone=new T.MeshStandardMaterial({color:'#afa38b',roughness:.9});
- const box=new T.BoxGeometry(1,1,1),cylinder=new T.CylinderGeometry(1,1,1,24);
+ const box=new T.BoxGeometry(1,1,1);
+ // Roofs must not inherit the window grid from the walls.
+ const uv=box.attributes.uv,normal=box.attributes.normal;for(let i=0;i<uv.count;i++)if(Math.abs(normal.getY(i))>.5)uv.setXY(i,.5,.035);
+ const cylinder=new T.CylinderGeometry(1,1,1,24);
  return function(parent,index,side){
   const group=new T.Group();group.position.x=side*15;parent.add(group);
   const h=8+index%5*2,kind=Math.floor(index/2)%3,facade=facades[index%facades.length];
@@ -21,6 +24,13 @@ export function createCityBuildingFactory(facades,roofBox,roofCylinder){
    mesh(box,stone,0,h+.15,0,6.85,.3,8.35);
    mesh(box,roof,0,h+.6,1,2,.75,1.8);
   }
+  if(kind===2){for(let level=1;level<Math.floor(h/3);level++){
+   mesh(box,stone,-side*3.45,level*3.1,1.8,.85,.13,2.8);
+   mesh(box,roof,-side*3.85,level*3.1+.5,1.8,.045,.045,2.8);
+   for(const z of [.5,1.15,1.8,2.45,3.1])mesh(box,roof,-side*3.85,level*3.1+.25,z,.045,.5,.045);
+  }}
+  mesh(box,roof,side*.8,h+.45,-1.8,1.6,.55,1.2);
+  for(const z of [-2.1,-1.7])mesh(cylinder,roof,side*.8,h+.95,z,.13,.7,.13);
   group.userData.architecture=['rounded','terraced','masonry'][kind];return group;
  };
 }

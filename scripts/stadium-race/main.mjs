@@ -1,3 +1,4 @@
+import {createRaceSky,createDistrictDetailFactory} from './environment-art.mjs';
 import {sceneryAnchor} from './scenery-slots.mjs';
 import {createStreetFurnitureFactory} from './street-furniture.mjs';
 import {createStreetSurfaces} from './street-surfaces.mjs';
@@ -54,7 +55,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});const renderQuality=createRenderQuality(devicePixelRatio||1);renderer.setPixelRatio(renderQuality.snapshot().pixelRatio);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Трёхмерная стадионная гонка');view.appendChild(renderer.domElement);view.dataset.garageSource=garage.source;
   scene=new T.Scene();scene.background=new T.Color('#91cde5');scene.fog=new T.Fog('#849298',95,245);
-  const skyCanvas=document.createElement('canvas');skyCanvas.width=1024;skyCanvas.height=512;const sky=skyCanvas.getContext('2d'),skyGradient=sky.createLinearGradient(0,0,0,512);skyGradient.addColorStop(0,'#29394b');skyGradient.addColorStop(.6,'#73818a');skyGradient.addColorStop(1,'#d5b99a');sky.fillStyle=skyGradient;sky.fillRect(0,0,1024,512);const skyTexture=new T.CanvasTexture(skyCanvas);skyTexture.colorSpace=T.SRGBColorSpace;scene.background=skyTexture;
+  scene.background=createRaceSky();scene.fog=new T.Fog('#b8c2c3',110,245);
   // A small shared reflection environment gives bodywork and glass readable highlights.
   const reflectionFaces=Array.from({length:6},(_,face)=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,128);g.addColorStop(0,'#7e95ab');g.addColorStop(.48,'#d6c0a3');g.addColorStop(.52,'#64665f');g.addColorStop(1,'#242d33');x.fillStyle=g;x.fillRect(0,0,128,128);if(face!==2&&face!==3){for(let n=0;n<9;n++){x.fillStyle=n%2?'#596572':'#85909a';x.fillRect(n*16,49+(n*13+face*7)%19,12,28);}x.fillStyle='#fff3d6';x.fillRect(15+face*19,10,5,32);}return c;});
   const reflectionCube=new T.CubeTexture(reflectionFaces);reflectionCube.colorSpace=T.SRGBColorSpace;reflectionCube.needsUpdate=true;const pmrem=new T.PMREMGenerator(renderer),environmentTarget=pmrem.fromCubemap(reflectionCube);scene.environment=environmentTarget.texture;scene.userData.environmentTarget=environmentTarget;reflectionCube.dispose();pmrem.dispose();
@@ -63,7 +64,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   const camera=new T.PerspectiveCamera(58,1,.1,280),box=new T.BoxGeometry(1,1,1),materials=new Map();
   function mat(color){if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color,roughness:.72,metalness:.12}));return materials.get(color);}
   function block(parent,color,x,y,z,w,h,d){const m=new T.Mesh(box,mat(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;}
-  const roundGeo=new T.SphereGeometry(1,10,6);
+  const roundGeo=new T.SphereGeometry(1,12,8);
   function foliage(parent,color,x,y,z,w,h,d){const m=new T.Mesh(roundGeo,mat(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;}
   function group(){const g=new T.Group();scene.add(g);return g;}
   // Integrate a single centreline for every road strip and every obstacle.
@@ -75,7 +76,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   const asphaltCanvas=document.createElement('canvas');asphaltCanvas.width=asphaltCanvas.height=256;
   const ac=asphaltCanvas.getContext('2d');ac.fillStyle='#272a2d';ac.fillRect(0,0,256,256);let seed=21;
   for(let n=0;n<15000;n++){seed=(seed*1664525+1013904223)>>>0;const x=seed>>>24;seed=(seed*1664525+1013904223)>>>0;const y=seed>>>24;ac.fillStyle=n%2?'#ffffff09':'#00000012';ac.fillRect(x,y,1,1);}
-  ac.strokeStyle='#13171b18';ac.lineWidth=1;ac.strokeRect(31,46,113,159);
+  for(let lane=0;lane<3;lane++){const wear=ac.createLinearGradient(lane*85,0,lane*85+85,0);wear.addColorStop(0,'#00000000');wear.addColorStop(.3,'#00000012');wear.addColorStop(.65,'#0000000b');wear.addColorStop(1,'#00000000');ac.fillStyle=wear;ac.fillRect(lane*85,0,85,256);}
   const asphalt=new T.CanvasTexture(asphaltCanvas);asphalt.colorSpace=T.SRGBColorSpace;asphalt.wrapS=asphalt.wrapT=T.RepeatWrapping;asphalt.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
   const roadGeo=new T.BufferGeometry(),roadPositions=new Float32Array(101*6),roadUV=new Float32Array(101*4),roadIndices=[];
   for(let i=0;i<101;i++){roadUV.set([0,i*.6,3,i*.6],i*4);if(i<100){const n=i*2;roadIndices.push(n,n+2,n+1,n+1,n+2,n+3);}}
@@ -88,16 +89,17 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   const markings=Array.from({length:50},()=>{const g=group();for(const lane of [-2,-1,0,1,2])block(g,lane===0?'#d2ac61':'#d7d4c7',lane*3,.025,0,.1,.025,lane===0?4.9:1.7);return g;});
   const streetLighting=createStreetLighting(scene,sample,E);
   const roofCylinder=new T.CylinderGeometry(1,1,1,24),facadeMaterials=createArchitectureMaterials(),createCityBuilding=createCityBuildingFactory(facadeMaterials,box,roofCylinder);
-  const cityDepth=createCityDepth(scene,E,sample,facadeMaterials),streetSurfaces=createStreetSurfaces(scene,E,sample),streetFurniture=createStreetFurnitureFactory(block,foliage,mat,roofCylinder);
+  const districtDetails=createDistrictDetailFactory(block,roofCylinder);
+  const cityDepth=createCityDepth(scene,E,sample,facadeMaterials),streetSurfaces=createStreetSurfaces(scene,E,sample),streetFurniture=createStreetFurnitureFactory(block,foliage,mat,roofCylinder,districtDetails.tree);
   const scenery=Array.from({length:32},(_,i)=>{const g=group(),side=i%2?-1:1;const stadium=new T.Group(),city=new T.Group(),bridge=new T.Group(),plaza=new T.Group();g.add(stadium,city,bridge,plaza);
    block(stadium,'#577b62',side*26,-.5,0,37,.5,24.2);block(stadium,'#aab4a5',side*15,-.2,0,14,.3,24.2);
    block(stadium,'#cfaf65',side*19,5.2,0,.08,2,.08);const flag=block(stadium,i%2?'#c45d48':'#1f6978',side*19+.5,5.8,0,1,.6,.04);flag.rotation.y=.3;
-   for(let row=0;row<4;row++){block(stadium,row%2?'#656a6b':'#96958a',side*(11+row*1.5),row*.75+.4,0,2,.6,9);for(let seat=0;seat<7;seat++)block(stadium,['#a59d80','#263e4c','#854c42'][(seat+i)%3],side*(11+row*1.5),row*.75+.95,-4+seat*1.25,.45,.45,.45);}
+   for(let row=0;row<4;row++){block(stadium,row%2?'#656a6b':'#96958a',side*(11+row*1.5),row*.75+.4,0,2,.6,9);for(let seat=0;seat<7;seat++)districtDetails.stadiumSeat(stadium,seat+i,side*(11+row*1.5),row*.75+.95,-4+seat*1.25);}
    for(let row=0;row<4;row+=2)for(let n=0;n<7;n+=2){const x=side*(11+row*1.5),z=-4+n*1.25;
     block(stadium,['#d9d1ae','#3c5266','#bc6154','#537269'][(n+row+i)%4],x,row*.75+1.18,z,.3,.45,.26);
     foliage(stadium,['#c89570','#e3b98e','#8d624d'][(n+i)%3],x,row*.75+1.54,z,.14,.17,.14);
    }
-   for(const z of [-3,3]){block(stadium,'#6e5742',side*24,2,z,.35,4,.35);foliage(stadium,i%2?'#376b50':'#528357',side*24,4,z,2,2.4,2);}
+   for(const z of [-3,3])districtDetails.tree(stadium,i,side*24,z,foliage);
    block(stadium,'#142f42',side*16,4.6,0,6,.25,10);block(stadium,'#d0a65c',side*13,4.5,0,.18,.4,10);
    for(const z of [-4,4])block(stadium,'#344e59',side*18,2.3,z,.18,4.6,.18);
    for(const z of [-4,0,4]){block(stadium,'#a0b6bb',side*8.1,.7,z,.12,1.4,.12);}
@@ -109,9 +111,9 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
    block(city,'#525c57',side*9.6,.55,3,1.6,1.1,1);foliage(city,'#354c39',side*9.6,1.3,3,1.1,.6,.65);
    for(let rail=0;rail<7;rail++)block(city,'#515c60',side*7.65,.6,-4+rail*1.3,.06,1.2,.06);
    block(city,'#7b8789',side*7.65,1.2,0,.08,.09,9);
-   block(city,'#d0c5a6',side*9,-.05,0,3,.18,10);
+   block(city,'#d0c5a6',side*9,-.05,0,3,.18,24.2);
    block(city,'#283c49',side*8.3,2.6,0,.12,5.2,.12);block(city,'#f6dc9b',side*8.3,5.2,0,.7,.18,.7);
-   streetFurniture(city,i,side);
+   streetFurniture(city,i,side);districtDetails.city(city,i,side);districtDetails.stadium(stadium,i,side);
    for(const z of [-3,0,3]){block(city,'#e2d5b9',side*11.8,2.5,z,.25,.25,2.2);const awning=block(city,i%2?'#a95648':'#397a78',side*11.3,2.7,z,1.2,.15,2.2);awning.rotation.z=side*.12;}
    if(i%4===0){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#133b47';ctx.fillRect(0,0,512,128);ctx.strokeStyle='#d3ab5f';ctx.lineWidth=7;ctx.strokeRect(6,6,500,116);ctx.fillStyle='#f4e1ad';ctx.font='bold 49px Arial';ctx.textAlign='center';ctx.fillText(i%8?'POKER21':'TWO ACES',256,81);const tx=new T.CanvasTexture(c);tx.colorSpace=T.SRGBColorSpace;
     for(const parent of [stadium,city]){const sign=new T.Mesh(new T.PlaneGeometry(6,1.5),new T.MeshBasicMaterial({map:tx,side:T.DoubleSide}));sign.position.set(side*8.03,parent===city?3.8:.8,0);sign.rotation.y=-side*Math.PI/2;parent.add(sign);}
@@ -147,10 +149,10 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   const rivalArt=s.rivals.map((r,i)=>fleet(i)),rivals=rivalArt.map(r=>{scene.add(r.root,r.contactShadow);r.root.traverse(m=>{if(m.isMesh&&!m.material?.transparent){m.castShadow=true;m.receiveShadow=true;}});return r.root;});
 
   // Batch the streamed architecture and road furniture into one draw call.
-  const geometryBatches=[box,roundGeo,roofCylinder].map(geometry=>{const meshes=[];scene.traverse(o=>{if(o.isMesh&&o.geometry===geometry){meshes.push(o);o.visible=false;}});const batch=new T.InstancedMesh(geometry,new T.MeshStandardMaterial({color:0xffffff,roughness:.8,metalness:.08}),meshes.length);batch.frustumCulled=false;batch.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(batch);return {meshes,batch};});
+  const geometryBatches=[box,roundGeo,roofCylinder].map(geometry=>{const meshes=[];scene.traverse(o=>{if(o.isMesh&&o.geometry===geometry){meshes.push(o);o.visible=false;}});const batch=new T.InstancedMesh(geometry,new T.MeshStandardMaterial({color:0xffffff,roughness:geometry===roundGeo?1:.8,metalness:geometry===roundGeo?0:.08}),meshes.length);batch.frustumCulled=false;batch.receiveShadow=true;batch.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(batch);return {meshes,batch};});
   // Pool repeated road objects by geometry/material instead of drawing each chip separately.
-  const propBuckets=new Map();for(const prop of props)prop.g.traverse(mesh=>{if(!mesh.isMesh||mesh.geometry===box)return;const key=mesh.geometry.uuid+':'+mesh.material.uuid;if(!propBuckets.has(key))propBuckets.set(key,[]);propBuckets.get(key).push(mesh);mesh.visible=false;});
-  scene.traverse(mesh=>{if(!mesh.isMesh||!mesh.userData.batchSceneDetail)return;const key=mesh.geometry.uuid+':'+mesh.material.uuid;if(!propBuckets.has(key))propBuckets.set(key,[]);propBuckets.get(key).push(mesh);mesh.visible=false;});
+  const propBuckets=new Map();for(const prop of props)prop.g.traverse(mesh=>{if(!mesh.isMesh||mesh.geometry===box)return;const key=mesh.geometry.uuid+':'+(mesh.userData.batchMaterialKey||mesh.material.uuid);if(!propBuckets.has(key))propBuckets.set(key,[]);propBuckets.get(key).push(mesh);mesh.visible=false;});
+  scene.traverse(mesh=>{if(!mesh.isMesh||!mesh.userData.batchSceneDetail)return;const key=mesh.geometry.uuid+':'+(mesh.userData.batchMaterialKey||mesh.material.uuid);if(!propBuckets.has(key))propBuckets.set(key,[]);propBuckets.get(key).push(mesh);mesh.visible=false;});
   for(const meshes of propBuckets.values()){const material=meshes[0].material.clone();material.color?.set(0xffffff);const batch=new T.InstancedMesh(meshes[0].geometry,material,meshes.length);batch.frustumCulled=false;batch.receiveShadow=true;batch.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(batch);geometryBatches.push({meshes,batch,cull:true});}
   const batchFrustum=new T.Frustum(),batchProjection=new T.Matrix4();
   function batchBoxes(){scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);batchFrustum.setFromProjectionMatrix(batchProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));for(const {meshes,batch,cull}of geometryBatches){let count=0;for(const mesh of meshes){let parent=mesh.parent,visible=!mesh.userData.batchHidden;while(parent&&parent!==scene){if(!parent.visible){visible=false;break;}parent=parent.parent;}if(!visible||cull&&!batchFrustum.intersectsObject(mesh))continue;batch.setMatrixAt(count,mesh.matrixWorld);batch.setColorAt(count,mesh.material.color);count++;}batch.count=count;batch.visible=count>0;batch.instanceMatrix.needsUpdate=true;if(batch.instanceColor)batch.instanceColor.needsUpdate=true;}}
@@ -158,7 +160,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   function resize(){const r=view.getBoundingClientRect();renderer.setSize(r.width,r.height);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}observer=new ResizeObserver(resize);observer.observe(view);resize();
   const chasePosition=new T.Vector3(),chaseLook=new T.Vector3();let cameraTime=0,cameraDistance=-Infinity,qualityTime=0,previousSpeed=0,bodyPitch=0,roadBase=null;
   function draw(){const qualityNow=performance.now(),nextRatio=renderQuality.sample(qualityTime?qualityNow-qualityTime:0,!paused&&!finished&&!document.hidden);qualityTime=qualityNow;if(nextRatio){renderer.setPixelRatio(nextRatio);resize();}cityDepth.update(s.distance);streetSurfaces.update(s.distance);streetLighting.update(s.distance);upperRoutes.update(s.distance);landmarks.update(s.distance);const base=Math.floor(s.distance/40)*40;
-   if(roadBase!==base){roadBase=base;for(let i=0;i<=100;i++){const d=base+(i-6)*40;for(let side=0;side<2;side++){const p=sample(d,side?7/6:-7/6);roadPositions.set([p.x,p.y-.01,p.z],i*6+side*3);}}roadGeo.attributes.position.needsUpdate=true;roadGeo.computeVertexNormals();}
+   if(roadBase!==base){roadBase=base;for(let i=0;i<=100;i++){const d=base+(i-6)*40;roadUV.set([0,d*.015,3,d*.015],i*4);for(let side=0;side<2;side++){const p=sample(d,side?7/6:-7/6);roadPositions.set([p.x,p.y-.01,p.z],i*6+side*3);}}roadGeo.attributes.position.needsUpdate=true;roadGeo.attributes.uv.needsUpdate=true;roadGeo.computeVertexNormals();}
    bendBoards.forEach((g,i)=>{const d=Math.floor(s.distance/160)*160+i*160,r=E.road(d);g.visible=Math.abs(r.curve)>3;place(g,d,r.curve>0?-1.28:1.28);if(r.curve<0)g.rotation.y+=Math.PI;});
    markings.forEach((g,i)=>{const d=Math.floor(s.distance/80)*80+(i-3)*80;g.visible=d>=0;place(g,d,0);const wide=E.roadWidth(d)>7.5;g.children.forEach((m,j)=>{m.userData.batchHidden=!(wide||j!==0&&j!==4);m.position.x=wide?(j-2)*3:(j-2)*3.5;});});
 
@@ -187,7 +189,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   ready=true;start.disabled=false;paused=false;dialog.hidden=true;last=0;
   renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause();ready=false;start.textContent='Перезагрузить гонку';start.disabled=false;$('[data-loading]').textContent='3D-сцена потеряла связь с видеокартой. Перезапусти заезд.';start.onclick=()=>{stop();window.LastBuyInRace3D.mount(host,chapter,onWin,onLose,options);};},{signal});
   // Read-only diagnostics used by the rendered route check.
-  view.raceSnapshot=()=>({distance:s.distance,scenery:scenery.map(part=>({anchor:part.g.userData.anchor,position:part.g.position.toArray()})),world:kart.root.position.toArray(),tier:s.tier,deckHeight:E.deckHeight(s.distance,s.tier),upperRoutes:upperRoutes.snapshot(),exit:{distance:exitDistance,visible:exitGate.visible,passed:s.distance>exitDistance,opening:18.6},effects:effects.snapshot(),look:{...garage.look},source:garage.source,closedCabin:!!kart.closedCabin,vehicle:garage.look.transport||'kart',speedLimit:E.mobility[s.transport]?.max||null,screenX:new T.Vector3(kart.root.position.x,kart.root.position.y,kart.root.position.z).project(camera).x,triangles:renderer.info.render.triangles,playerWheels:kart.wheels.length,fleet:rivalArt.map(a=>({model:a.root.name,wheels:a.wheels.length,wheelAngle:a.wheels[0]?.children[0].rotation.x||0})),audio:drivingAudio.snapshot(),quality:{...renderQuality.snapshot(),rivalDetail:rivals.map(r=>r.userData.roadDetail)},handling:{heading:s.heading||0,slip:s.slipAngle||0,nitro:s.nitro,sprint:s.sprint},shadows:{enabled:renderer.shadowMap.enabled,playerGroundY:shadow.position.y,playerY:kart.root.position.y,rivals:rivalArt.map((a,i)=>({groundY:a.contactShadow.position.y,bodyY:a.root.position.y,air:s.rivals[i].air||0}))},cityDepth:cityDepth.snapshot(),visibleDetailBatches:geometryBatches.filter(b=>b.cull&&b.batch.visible).length,architecture:[...new Set(scenery.flatMap(part=>part.city.children.map(child=>child.userData.architecture).filter(Boolean)))],drawCalls:renderer.info.render.calls});
+  view.raceSnapshot=()=>({distance:s.distance,roadTextureOrigin:{distance:roadBase-240,v:roadUV[1]},scenery:scenery.map(part=>({anchor:part.g.userData.anchor,position:part.g.position.toArray()})),world:kart.root.position.toArray(),tier:s.tier,deckHeight:E.deckHeight(s.distance,s.tier),upperRoutes:upperRoutes.snapshot(),exit:{distance:exitDistance,visible:exitGate.visible,passed:s.distance>exitDistance,opening:18.6},effects:effects.snapshot(),look:{...garage.look},source:garage.source,closedCabin:!!kart.closedCabin,vehicle:garage.look.transport||'kart',speedLimit:E.mobility[s.transport]?.max||null,screenX:new T.Vector3(kart.root.position.x,kart.root.position.y,kart.root.position.z).project(camera).x,triangles:renderer.info.render.triangles,playerWheels:kart.wheels.length,fleet:rivalArt.map(a=>({model:a.root.name,wheels:a.wheels.length,wheelAngle:a.wheels[0]?.children[0].rotation.x||0})),audio:drivingAudio.snapshot(),quality:{...renderQuality.snapshot(),rivalDetail:rivals.map(r=>r.userData.roadDetail)},handling:{heading:s.heading||0,slip:s.slipAngle||0,nitro:s.nitro,sprint:s.sprint},shadows:{enabled:renderer.shadowMap.enabled,playerGroundY:shadow.position.y,playerY:kart.root.position.y,rivals:rivalArt.map((a,i)=>({groundY:a.contactShadow.position.y,bodyY:a.root.position.y,air:s.rivals[i].air||0}))},cityDepth:cityDepth.snapshot(),visibleDetailBatches:geometryBatches.filter(b=>b.cull&&b.batch.visible).length,architecture:[...new Set(scenery.flatMap(part=>part.city.children.map(child=>child.userData.architecture).filter(Boolean)))],drawCalls:renderer.info.render.calls});
   function frame(time){if(stopped)return;const delta=last?Math.min(100,time-last):0;last=time;if(!paused&&!finished){acc+=delta;while(acc>=1000/60){E.step(s,input);acc-=1000/60;if(s.won||s.lost){finished=true;savePerformance();clearInput();if(s.won)onWin({chapter,score:s.score,hits:s.hits});else onLose(()=>{E.revive(s);effects.reset();finished=false;paused=false;dialog.hidden=true;$('[data-restart]').hidden=true;last=0;acc=0;});break;}}}else acc=0;if(stopped)return;draw();raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);
  }
  init().catch(error=>{if(stopped)return;ready=false;$('[data-loading]').textContent=error.userMessage||'Не удалось открыть 3D-гонку. Повтори загрузку.';start.textContent='Повторить';start.disabled=false;start.onclick=()=>{stop();window.LastBuyInRace3D.mount(host,chapter,onWin,onLose,options);};console.error(error);});

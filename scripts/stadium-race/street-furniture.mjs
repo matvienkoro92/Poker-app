@@ -1,5 +1,5 @@
 import * as T from '../../vendor/three/three.module.min.js';
-export function createStreetFurnitureFactory(block,foliage,mat,cylinder){
+export function createStreetFurnitureFactory(block,foliage,mat,cylinder,tree){
  const glass=new T.MeshStandardMaterial({color:'#627e83',metalness:.25,roughness:.23,transparent:true,opacity:.38,side:T.DoubleSide,depthWrite:false,forceSinglePass:true});const panel=new T.PlaneGeometry(3.5,1.9);
  return function(parent,index,side){
   // Slatted seat, backrest and iron supports, set beyond the carriageway.
@@ -13,8 +13,10 @@ export function createStreetFurnitureFactory(block,foliage,mat,cylinder){
    block(parent,'#20383c',side*8.6,1.85,-2.05,.12,.7,.55);
   }
   if(index%3!==0){
+   if(tree)tree(parent,index,side*10.6,3.8);else {
    const trunk=new T.Mesh(cylinder,mat('#625549'));trunk.position.set(side*10.6,1.75,3.8);trunk.scale.set(.13,3.5,.13);parent.add(trunk);
    for(let n=0;n<7;n++){const a=n*2.4;foliage(parent,['#384a3b','#455441','#52604a'][n%3],side*10.6+Math.cos(a)*.65,3.1+(n%3)*.55,3.8+Math.sin(a)*.65,.85,.95,.8);}
+   }
    block(parent,'#555d56',side*10.6,.24,3.8,1.85,.48,1.85);
   }
  };

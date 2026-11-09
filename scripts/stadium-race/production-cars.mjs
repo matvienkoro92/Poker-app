@@ -1,14 +1,9 @@
+import {streetGeometry} from './lod-geometry.mjs';
 import {splitWheelParts} from './wheel-parts.mjs';
 import {mergeGeometries} from '../../vendor/three/addons/utils/BufferGeometryUtils.js';
 import * as T from '../../vendor/three/three.module.min.js';
 import {createOwnedVehicle,cloneRoadMaterial} from '../city-game/vehicle.mjs';
 // Cluster the display meshes once in world units; every opponent shares the resulting buffers.
-function streetGeometry(source,matrix){
- const g=source.clone().applyMatrix4(matrix),p=g.attributes.position,n=g.attributes.normal,uv=g.attributes.uv,lookup=new Map(),positions=[],normals=[],texcoords=[],remap=[];
- for(let i=0;i<p.count;i++){const key=[Math.round(p.getX(i)/.08),Math.round(p.getY(i)/.08),Math.round(p.getZ(i)/.08)].join(',');let id=lookup.get(key);if(id===undefined){id=positions.length/3;lookup.set(key,id);positions.push(p.getX(i),p.getY(i),p.getZ(i));normals.push(n?.getX(i)||0,n?.getY(i)??1,n?.getZ(i)||0);texcoords.push(uv?.getX(i)||0,uv?.getY(i)||0);}remap.push(id);}
- const indices=[],seen=new Set(),count=g.index?.count||p.count;for(let i=0;i<count;i+=3){const a=remap[g.index?g.index.getX(i):i],b=remap[g.index?g.index.getX(i+1):i+1],c=remap[g.index?g.index.getX(i+2):i+2];if(a===b||b===c||a===c)continue;const key=[a,b,c].sort((a,b)=>a-b).join(',');if(seen.has(key))continue;seen.add(key);indices.push(a,b,c);}
- const result=new T.BufferGeometry();result.setAttribute('position',new T.Float32BufferAttribute(positions,3));result.setAttribute('normal',new T.Float32BufferAttribute(normals,3));result.setAttribute('uv',new T.Float32BufferAttribute(texcoords,2));result.setIndex(indices);result.normalizeNormals();result.computeBoundingSphere();g.dispose();return result;
-}
 export async function createProductionFleet(){
  const templates=await Promise.all(['mustang-gt500','bmw-e60'].map(async transport=>{
   const vehicle=await createOwnedVehicle({...window.PokerGarage.defaults,transport,paint:'classic',wheels:'classic',glassTint:'original'}),root=new T.Group();root.name=transport;vehicle.root.updateMatrixWorld(true);

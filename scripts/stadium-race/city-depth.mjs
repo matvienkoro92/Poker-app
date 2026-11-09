@@ -3,7 +3,13 @@ import * as T from '../../vendor/three/three.module.min.js';
 // One instanced skyline draw; each footprint stays clear of the entire winding route.
 export function createCityDepth(scene,E,sample,facades){
  const geometry=new T.BoxGeometry(1,1,1),matrix=new T.Object3D();
- const material=facades[2].clone();for(const key of ['map','emissiveMap','bumpMap'])if(facades[2][key]){material[key]=facades[2][key].clone();material[key].wrapS=material[key].wrapT=T.RepeatWrapping;material[key].repeat.set(2,2);}
+ const material=facades[2].clone();
+ // Skyline windows repeat without copying ground-floor shops halfway up a tower.
+ for(const key of ['map','emissiveMap','bumpMap'])if(facades[2][key]){
+  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=800;canvas.getContext('2d').drawImage(facades[2][key].image,0,20,512,800,0,0,512,800);
+  const texture=new T.CanvasTexture(canvas);texture.colorSpace=facades[2][key].colorSpace;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.repeat.set(2,2);texture.anisotropy=4;material[key]=texture;
+ }
+
  const blocks=new T.InstancedMesh(geometry,material,48);blocks.frustumCulled=false;scene.add(blocks);
  const road=[];for(let d=E.LAP*2-400;d<=E.LAP*3+4000;d+=40){const p=sample(d);road.push({x:p.x,z:p.z,width:E.roadWidth(d)*7/6});}
  let lastBase=null,clearance=null;
