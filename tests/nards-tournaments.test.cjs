@@ -346,3 +346,60 @@ test('advancement privately notifies each winner once and links to their next ro
   assert.ok(sent[1].text.includes('Ваш соперник: ' + f.profiles.get(first.players[0]).name));
   assert.equal(sent[1].reply_markup.inline_keyboard[0][0].url, sent[0].reply_markup.inline_keyboard[0][0].url);
 });
+
+test('free tournament attendance records first-round no-shows and removes a suspended entrant before play', async () => {
+  const misses = [], excluded = new Set();
+  const f = fixture({attendance: {
+    remaining: async id => excluded.has(id) ? 3 : 0,
+    start: async (_id, accounts) => accounts.filter(id => excluded.has(id)),
+    recordMiss: async (event, accounts) => misses.push({event, accounts})
+  }});
+  const t = await f.seed(4);
+  f.time(t.startsAt);
+  await f.service.synchronize(t.id);
+  const stored = f.tournaments.get(t.id), first = stored.rounds[0].matches[0];
+  f.time(stored.readyUntil);
+  await f.service.synchronize(t.id);
+  const room = f.roomMap.get(first.roomId);
+  const [present, absent] = room.players;
+  await f.finish(room.id, 0, 1, 'timeout-skips');
+  await f.service.synchronize(t.id);
+  await f.service.synchronize(t.id);
+  assert.deepEqual(misses, [{event: t.id + ':' + first.id, accounts: [f.profiles.get(absent).accountId]}]);
+
+  const next = await f.create({requestId:'attendance-next-tournament', capacity:4});
+  for (const member of [present, absent, 'm5']) await f.call(member, 'join', next.id);
+  await f.call('m0', 'draw', next.id);
+  excluded.add(f.profiles.get(absent).accountId);
+  await assert.rejects(f.call(absent, 'join', (await f.create({requestId:'attendance-later-tournament'})).id),
+    /Осталось пропустить: 3/);
+  f.time(next.startsAt);
+  const running = await f.service.synchronize(next.id);
+  assert.equal(running.status,'running');
+  assert.equal(running.entries.some(entry => entry.member === absent),false);
+  assert.ok(running.rounds.flatMap(round => round.matches).every(match =>
+    !match.roomId || !f.roomMap.get(match.roomId).players.includes(absent)));
+});
+
+test('scheduled tournaments send one private reminder per entrant in the last half hour', async () => {
+  const sent = [];
+  const f = fixture({notifyPlayer: async (entry, payload) => sent.push([entry.member, payload])});
+  const start = f.now() + 3600000;
+  const t = await f.create({startsAt:start, drawAt:start - 60000});
+  for (const member of ['m1','m2','m3']) await f.call(member,'join',t.id);
+  await f.call('m3','leave',t.id);
+  f.time(start - 1800001);
+  await f.service.sweep();
+  assert.equal(sent.length,0);
+  f.time(start - 1800000);
+  await f.service.sweep();
+  await f.service.sweep();
+  assert.deepEqual(sent.map(([member])=>member),['m1','m2']);
+  assert.match(sent[0][1].text,/осталось полчаса/);
+  assert.ok(sent[0][1].reply_markup.inline_keyboard[0][0].url.endsWith('nards_tour_' + t.id));
+  f.time(start - 600000);
+  await f.call('m4','join',t.id);
+  assert.equal(sent.length,3);
+  assert.equal(sent[2][0],'m4');
+  assert.match(sent[2][1].text,/осталось 10 минут/);
+});
