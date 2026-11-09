@@ -1805,4 +1805,199 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "08.11.2026": [
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 4198.31,
+          "points": 135
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 3,
+          "reward": 969.98,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Malek3084",
+          "place": 1,
+          "reward": 6034.7,
+          "points": 135
+        },
+        {
+          "nick": "мистерFox",
+          "place": 2,
+          "reward": 2328.43,
+          "points": 110
+        },
+        {
+          "nick": "kriak",
+          "place": 4,
+          "reward": 380,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 3,
+          "reward": 6246,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Аспирин",
+          "place": 1,
+          "reward": 12400,
+          "points": 135
+        },
+        {
+          "nick": "Dimitar",
+          "place": 5,
+          "reward": 1400,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "kriak",
+          "place": 1,
+          "reward": 12370,
+          "points": 135
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 6475,
+          "points": 90
+        },
+        {
+          "nick": "YuraK700",
+          "place": 2,
+          "reward": 3550,
+          "points": 110
+        },
+        {
+          "nick": "Shkarubo",
+          "place": 6,
+          "reward": 250,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🏆Волшебный Пятак🏆",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 304200,
+          "points": 135
+        },
+        {
+          "nick": "MaxVerstappen",
+          "place": 2,
+          "reward": 54600,
+          "points": 110
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 25600,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 35,
+          "reward": 4606,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 62,
+          "reward": 1435,
+          "points": 0
+        },
+        {
+          "nick": "Suprimalor",
+          "place": 0,
+          "reward": 595,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 6,
+          "reward": 900,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Coo1er91",
+          "place": 2,
+          "reward": 2400.82,
+          "points": 110
+        }
+      ]
+    }
+  ]
 };
