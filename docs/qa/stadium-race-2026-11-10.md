@@ -11,3 +11,5 @@ Automated evidence:
 Remaining acceptance: real iOS/Android Telegram WebView frame pacing, thermal behaviour, sound permissions and human control feel. Software-rendered Chromium timings do not establish device FPS. Inspect `sessionStorage['poker21-race:last-performance']` after a real race for frame count, average FPS, recent p95 frame time, slow frames and draw calls. This is local session diagnostics, with no account data or network telemetry.
 
 Art direction is an original lightweight city racer; visual parity with NFS is not claimed. Vehicle motion remains relative to the authored route, not an unrestricted rigid-body simulator.
+
+Visual follow-up: rounded, terraced and masonry building silhouettes; shared instanced roofs/cornices; two player headlamps without shadow maps; ground-contact shadows aligned with road slopes. The browser test enforces fewer than 350 draw calls at each exit/city checkpoint, not only at the effects checkpoint.
