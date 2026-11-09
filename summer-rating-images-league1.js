@@ -1419,4 +1419,13 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-07-11-2026-league1-blackout-220k-21h.jpg",
     "rating-compressed-preview/rating-07-11-2026-league1-turbina-500s-pko-2-3-22h.jpg"
   ]
+,
+  "08.11.2026": [
+    "rating-compressed-preview/rating-08-11-2026-league1-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-08-11-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-08-11-2026-league1-volshebnyj-pyatak-18h.jpg",
+    "rating-compressed-preview/rating-08-11-2026-league1-grand-knockout-18h.jpg",
+    "rating-compressed-preview/rating-08-11-2026-league1-super-pyatihatka-20h.jpg",
+    "rating-compressed-preview/rating-08-11-2026-league1-turbina-500s-pko-2-3-22h.jpg"
+  ]
 };
