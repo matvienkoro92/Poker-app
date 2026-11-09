@@ -104,6 +104,11 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   const expectedPair='Ждём победителя пары «'+r2.players.map(member=>f.profiles.get(member).name).join(' — ')+'»';
   await admin.getByText(expectedPair,{exact:true}).waitFor();
   assert.equal(await admin.locator('.tour-bracket-lines path').count(),2);
+  const layout=await admin.evaluate(()=>['#tourDetail','.tour-tabs','.sng-champions-modal__bracket-map-wrap'].map(selector=>{
+   const {left,right}=document.querySelector(selector).getBoundingClientRect();
+   return [Math.round(left),Math.round(right),document.documentElement.clientWidth];
+  }));
+  for(const [left,right,viewport] of layout)assert.deepEqual([left,right],[0,viewport]);
   await admin.locator('.sng-champions-modal__bracket-map-wrap').screenshot({path:path.join(out,'bracket-connections.png')});
 
   const linked=await pageFor(r1.players[0]);

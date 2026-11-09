@@ -6,9 +6,20 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
  await p.goto('https://tour-hall.test/fixture');for(const css of ['styles-base.css','styles-player-hall.css','styles-player-lounge.css'])await p.addStyleTag({url:'https://tour-hall.test/'+css});for(const js of ['app-garage-catalog.js','app-billiards-tables.js','app-billiards-cues.js','app-player-hall-equipment.js'])await p.addScriptTag({url:'https://tour-hall.test/'+js});
  await p.evaluate(()=>{window.__pokerTelegramAuth={status:'verified',id:'123456789'};window.pokerEnsureLazyDomains=async()=>{};window.pokerSocialRequest=async(resource)=>resource==='board-games'?{ok:true,equipment:{},ranking:[],self:{}}:{hall:{accountId:'room-owner',name:'Игрок',nick:'Игрок',self:true,billiardsAccess:true,livingAccess:true,adminGameAccess:false,featured:[],items:[],themes:[],goals:[],achievementProgress:[],wins:3,theme:'walnut',garage:{stats:{level:80},loadout:{...PokerGarage.defaults}},levelProgress:{xp:100,target:200}}};});
  await p.addScriptTag({url:'https://tour-hall.test/app-player-hall.js'});await p.evaluate(()=>pokerOpenVillaGameRoom('nards'));await p.waitForSelector('.player-hall__room[data-space=living]');
- const cube=p.locator('.living-tournament-dice');await cube.waitFor({state:'visible'});const box=await cube.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=391,'tournament dice must fit the mobile room');assert.ok(box.width>=44);
+ const cube=p.locator('.living-tournament-dice');
+ const switcher=p.getByRole('button',{name:'Турниры по нардам →'});
+ await cube.waitFor({state:'visible'});
+ for(const width of [320,390]){
+  await p.setViewportSize({width,height:844});
+  const box=await cube.boundingBox(), board=await p.locator('.living-game-case--backgammon').boundingBox();
+  assert.ok(box.x>=0&&box.x+box.width<=width&&box.width>=44,'the trophy fits the mobile room');
+  assert.ok(board.x+board.width<box.x,'the backgammon case leaves space for the trophy');
+  const entry=await switcher.boundingBox();
+  assert.ok(entry&&entry.x>=0&&entry.x+entry.width<=width,'the tournament shortcut fits the mobile room');
+ }
+
  fs.mkdirSync('output/nards-tournaments',{recursive:true});await p.screenshot({path:'output/nards-tournaments/living-room-dice.png'});
- await cube.click();await p.frameLocator('.board-games-shell iframe').locator('#tourList').waitFor();assert.equal(await p.frameLocator('.board-games-shell iframe').locator('#tourCreate').isVisible(),false);
+ await switcher.click();await p.frameLocator('.board-games-shell iframe').locator('#tourList').waitFor();assert.equal(await p.frameLocator('.board-games-shell iframe').locator('#tourCreate').isVisible(),false);
  await p.frameLocator('.board-games-shell iframe').locator('#closeTournament').click();await p.waitForFunction(()=>!document.querySelector('.board-games-shell'));assert.equal(await p.locator('.player-hall-dialog').evaluate(d=>d.open),true);
  await p.locator('[data-living-menu=nards]').click();await p.locator('.living-focus-tournament-dice').waitFor();await p.locator('.living-focus-tournament-dice').click();await p.frameLocator('.board-games-shell iframe').locator('#tourList').waitFor();
  assert.deepEqual(errors,[]);console.log('PASS visible dice beside nards, non-admin tournament list, closing back to room, entry beside open board');

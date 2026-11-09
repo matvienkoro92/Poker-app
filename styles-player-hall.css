@@ -1011,6 +1011,33 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .villa-living-stage .villa-billiards-heading small{grid-column:1 / -1}
 .villa-living-stage .villa-billiards-heading strong{grid-column:1;min-width:0}
 .player-hall-dialog .villa-living-stage .villa-billiards-heading .villa-living-admin-stats{position:static;grid-column:2;grid-row:2;align-self:center;pointer-events:auto;min-height:30px;padding:5px 9px;border:1px solid #c3ad6a55;border-radius:8px;background:#1d3025b8;color:#d8c9a4;font-size:11px;font-weight:500;box-shadow:none;text-shadow:none}
+.villa-living-navigation {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+}
+.player-hall-dialog .villa-living-navigation .villa-start-room {
+  position: static;
+  max-width: 100%;
+  justify-items: start;
+}
+.player-hall-dialog:has(.player-hall__room[data-space=living]) > .villa-start-room { display: none; }
+.player-hall-dialog .villa-living-tournaments {
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid #d5b76c;
+  border-radius: 9px;
+  background: #253c30;
+  color: #ffe4a5;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 
 /* Continue the active room artwork behind Telegram, without moving room controls. */
 .has-continuous-backdrop{background-size:var(--continuous-backdrop-size)!important;background-position:var(--continuous-backdrop-position)!important;background-repeat:no-repeat!important}
@@ -1238,3 +1265,30 @@ body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus 
   color: #111 !important;
 }
 .player-hall-dialog .living-focus-tournament-dice img { width: 36px; height: 36px; object-fit: contain; flex: 0 0 36px; }
+
+/* Keep the trophy and the backgammon case on the visible part of the table
+   when the living room's cover image is cropped on tall phones. */
+.living-table-artframe {
+  --living-trophy-width: clamp(44px, 12%, 18cqw);
+  --living-trophy-left: min(78%, calc((100% + 100cqw) / 2 - var(--living-trophy-width) - 8px));
+  --living-nards-width: min(23%, 29cqw);
+}
+.player-hall-dialog .living-table-artframe .living-tournament-dice {
+  left: var(--living-trophy-left);
+  width: var(--living-trophy-width);
+  z-index: 2;
+}
+.player-hall-dialog .living-table-artframe .living-game-case--backgammon {
+  left: min(54%, calc(var(--living-trophy-left) - var(--living-nards-width) - 8px));
+  width: var(--living-nards-width);
+}
+
+
+/* Personal entry point; outside the moving camera plane. */
+.villa-start-room{position:absolute;z-index:12;top:calc(82px + var(--hall-safe-top,0px));right:12px;max-width:calc(100% - 80px);display:grid;justify-items:end;gap:4px;pointer-events:none}
+.villa-start-room button{pointer-events:auto;min-height:44px;padding:8px 12px;border:1px solid #c9af7266;border-radius:12px;background:#141910e8;color:#e9dfc7;font:inherit;font-size:12px;box-shadow:0 2px 10px #0005}
+.villa-start-room button[aria-pressed=true]{border-color:#d6b473;color:#ffe3a1;background:#30301dec}
+.villa-start-room button:focus-visible{outline:2px solid #ffe3a1;outline-offset:3px}
+.villa-start-room button:disabled{opacity:.65}
+.villa-start-room [role=status]:not(:empty){max-width:230px;padding:5px 8px;border-radius:8px;background:#141910ed;color:#eee3c9;font-size:11px;text-align:right}
+.player-hall-dialog:has(.player-hall__section-panel) .villa-start-room,.player-hall-dialog:has(.living-board-focus) .villa-start-room{display:none}

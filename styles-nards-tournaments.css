@@ -3,21 +3,21 @@ html,body{margin:0;min-height:100%;background:#0e1917;color:#f6e9cf;font:14px/1.
 body{position:relative;isolation:isolate;container-type:inline-size;min-height:100svh;background:none}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#08150dbc,#08150de0),url('./assets/player-hall/living-table-overhead-v1.webp') center/cover no-repeat}
 .tour-header{background:#10251fe8;box-shadow:0 4px 24px #0004}
-#tourCreatePanel,#tourDetail{padding:18px;border:1px solid #c19f5355;border-radius:16px;background:#10251ff2}
+#tourCreatePanel{padding:18px;border:1px solid #c19f5355;border-radius:16px;background:#10251ff2}
 .tour-card-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tour-delete{margin-left:auto;color:#e3b7a5;background:#2d201de6;border-color:#bc81654d}
 .tour-list-card{box-shadow:0 8px 28px #0004,inset 0 1px #ffe4a51a}
 button,input,select{font:inherit}button{cursor:pointer;min-height:42px;border:1px solid #a88c5066;border-radius:11px;background:#1b2a23;color:#f6e9cf;padding:9px 13px}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffe2a5;outline-offset:3px}
 input,select{display:block;width:100%;min-height:44px;padding:10px;border:1px solid #b69b6166;border-radius:10px;color:#fff1d1;background:#10231d;color-scheme:dark}label{display:grid;gap:6px;color:#d2c2a1;font-size:12px}h1,h2,h3,p{margin:0 0 12px}h1{font-size:19px}h2{font-size:21px}h3{font-size:15px}small,.tour-muted{color:#b7b4a3;font-size:12px}.tour-muted{line-height:1.65}
 .tour-header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;border-bottom:1px solid #c6a26333}.tour-header h1{margin:2px 0 0}.tour-header small{font-size:9px;letter-spacing:3px;color:#d9b877}
-main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 24px);min-width:0}#tourError{color:#ffcc9b;font-size:13px}#tourError:empty{display:none}
+main{padding:14px 0 calc(env(safe-area-inset-bottom,0px) + 24px);min-width:0}#tourError{color:#ffcc9b;font-size:13px}#tourError:empty{display:none}
 .tour-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.tour-section-heading h2,.tour-section-heading p{margin:0}
 #tourList{display:grid;gap:12px;margin-bottom:14px}.tour-list-card{display:grid;gap:12px;padding:18px;border:1px solid #c19f5366;border-radius:16px;background:linear-gradient(135deg,#203b30f5,#10251ff7)}.tour-list-card h3{font-size:17px;margin:0}.tour-list-card p{margin:0}.tour-list-card button{justify-self:start}.tour-list-card.is-live{border-color:#d8ba72}
 #tourForm{display:grid;gap:16px;max-width:620px}.tour-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}fieldset{padding:12px;border:1px solid #9d87564d;border-radius:12px;min-width:0}legend{padding:0 6px;color:#e8c787}.tour-primary{background:linear-gradient(120deg,#f0d69a,#ba9447);color:#17251c;font-weight:750;border-color:#e0be74}
 .tour-tabs{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 0;background:#0e1917f5}.tour-tabs [aria-selected=true]{background:#d4b16b;color:#14231b;font-weight:750}.tour-countdown{min-height:30px;font-size:17px;color:#ffdb90;font-variant-numeric:tabular-nums}.tour-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}.tour-actions:empty{display:none}
 #tourBracket{min-width:0;margin:10px 0 22px}.nards-tournament .sng-champions-modal__bracket-map{grid-template-columns:repeat(var(--tour-rounds),190px);width:max-content;min-width:0;--sng-map-row-height:140px;--sng-map-row-gap:8px;gap:20px}.nards-tournament .sng-champions-modal__map-round-matches{grid-template-rows:repeat(var(--sng-map-rows),140px);gap:8px}.nards-tournament .sng-champions-modal__map-round{min-width:0}.nards-tournament .sng-champions-modal__map-match{position:relative;display:grid;align-content:center;gap:5px;padding:10px;min-height:110px;grid-row:var(--sng-map-row-start)/span var(--sng-map-row-span);align-self:center;border:1px solid #9b78494d;border-left:4px solid var(--sng-map-lane,#d7b26d);background:#11211cee;color:#f5e7c4;isolation:auto}.nards-tournament .sng-champions-modal__map-players{position:static;display:grid;gap:6px;inset:auto}.nards-tournament .sng-champions-modal__map-player{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:22px;font-size:12px;white-space:normal;overflow-wrap:anywhere}.nards-tournament .sng-champions-modal__map-player--winner{color:#ffe096;font-weight:800}.nards-tournament .sng-champions-modal__map-player--lost{opacity:.5}.nards-tournament .sng-champions-modal__map-player--ready::before{content:'✓';color:#a5d5a1}.nards-tournament .sng-champions-modal__map-round-title{display:block;text-align:center;width:100%;margin-bottom:10px;font-size:12px}.tour-match-watch{min-height:30px;padding:4px 7px;font-size:11px}.tour-match-note{display:block;font-size:10px;color:#baa87f}.tour-bracket-empty{padding:20px;border:1px dashed #b3996060;border-radius:14px;color:#d1c2a1}
 #tourOwnFrame iframe,#tourWatchFrame iframe{display:block;width:100%;height:max(680px,calc(100dvh - 240px));border:0;border-radius:10px;background:#10201b}#returnOwn{font-size:11px;margin-bottom:14px}#tourOwnNote:empty{display:none}
-@media(max-width:400px){main{padding-inline:10px}.tour-header{padding-inline:10px}.tour-header h1{font-size:17px}.tour-form-grid{gap:9px}.tour-tabs button{padding-inline:5px;font-size:12px}.nards-tournament .sng-champions-modal__bracket-map{grid-template-columns:repeat(var(--tour-rounds),175px)}}
+@media(max-width:400px){.tour-header{padding-inline:10px}.tour-header h1{font-size:17px}.tour-form-grid{gap:9px}.tour-tabs button{padding-inline:5px;font-size:12px}.nards-tournament .sng-champions-modal__bracket-map{grid-template-columns:repeat(var(--tour-rounds),175px)}}
 /* The SNG map's team cards have two columns; nards uses one readable player column. */
 .nards-tournament .sng-champions-modal__map-match{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;max-height:none;height:auto;filter:none}
 .nards-tournament .sng-champions-modal__map-match>*{grid-column:1;min-width:0}
@@ -40,8 +40,24 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 .tour-entry .tour-entry-remove{position:absolute;top:3px;right:3px;width:40px;min-height:40px;padding:0;border-color:transparent;background:transparent;color:#f3c2ac;font-size:21px;line-height:1}
 .tour-entry .tour-entry-remove:hover,.tour-entry .tour-entry-remove:focus-visible{background:#68352e;border-color:#e4ad95}
 
-#tourDetail { display: grid; gap: 12px; }
-#tourDetail > .tour-section-heading { margin: 0; }
+#tourListPanel > .tour-section-heading { padding-inline: 8px; }
+#tourList > .tour-list-card {
+  border-inline: 0;
+  border-radius: 0;
+}
+#closeTournament { white-space: nowrap; }
+#tourDetail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  background: #10251ff2;
+}
+#tourDetail > .tour-section-heading { margin: 0; padding-inline: 8px; }
+#tourDetail :is(.tour-overview, .tour-participants, .tour-bracket-empty) {
+  border-inline: 0;
+  border-radius: 0;
+}
+#tourDetail :is(#tourActions, #tourAdminActions) > button { flex: 1 1 100%; }
 .tour-overview, .tour-participants {
   display: grid;
   gap: 8px;
@@ -61,9 +77,11 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
   font-size: 13px;
 }
 .tour-overview .tour-countdown:has(strong:not([hidden])) {
-  display: inline-flex;
+  display: flex;
+  flex: 1 1 100%;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 4px 12px;
   padding: 7px 12px;
   border: 1px solid #c5a35d;
@@ -84,8 +102,6 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 .tour-admin-actions [data-tour-action=cancel] { color: #eac0ab; }
 #tourActions:empty, #tourAdminActions:empty, #tourTicketAwards:empty { display: none; }
 #tourDetail .tour-tabs {
-  inline-size: 100cqw;
-  margin-inline: calc((100% - 100cqw) / 2);
   padding: 5px;
   border-block: 1px solid #a88b4940;
 }
@@ -103,11 +119,7 @@ main{max-width:1050px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-b
 }
 #tourBracket .tour-bracket-empty { margin: 0; padding: 12px 14px; font-size: 13px; }
 
-#tourOwnFrame, #tourWatchFrame { margin-inline: -14px; }
 #tourOwnFrame iframe, #tourWatchFrame iframe { border-radius: 0; }
-@media (max-width: 400px) {
-  #tourOwnFrame, #tourWatchFrame { margin-inline: -10px; }
-}
 
 .nards-tournament .sng-champions-modal__map-player.tour-player-advanced {
   color: #a9edb4;
