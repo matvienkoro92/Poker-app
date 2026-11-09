@@ -17,9 +17,9 @@ export function createCityDepth(scene,E,sample,facades){
   for(let slot=0;slot<48;slot++){
    const i=(base/130-2+Math.floor(slot/2))*2+slot%2;
    const d=Math.floor(i/2)*130;if(d<E.LAP*2+4750||d>E.LAP*3+1200)continue;
-   const side=i%2?1:-1,w=9+i%4*1.7,depth=10+i%3*3,h=18+(i*7%17),radius=Math.hypot(w,depth)/2;
+   const side=i%2?1:-1,w=9+i%4*1.7,depth=10+i%3*3,h=12+(i*7%13),radius=Math.hypot(w,depth)/2;
    let placement=null,space=0;
-   for(let offset=0;offset<=3.2;offset+=.8){const p=sample(d,side*(2.9+(i%5)*.43+offset));space=Infinity;for(const r of road){const gap=Math.hypot(p.x-r.x,p.z-r.z)-r.width-radius;space=Math.min(space,gap);if(space<3)break;}if(space>=3){placement=p;break;}}
+   for(let offset=0;offset<=3.2;offset+=.8){const p=sample(d,side*(4.1+(i%5)*.43+offset));space=Infinity;for(const r of road){const gap=Math.hypot(p.x-r.x,p.z-r.z)-r.width-radius;space=Math.min(space,gap);if(space<3)break;}if(space>=3){placement=p;break;}}
    if(!placement)continue;const p=placement;
    matrix.position.set(p.x,p.y+h/2-1,p.z);matrix.rotation.set(0,p.a,0);matrix.scale.set(w,h,depth);matrix.updateMatrix();blocks.setMatrixAt(count,matrix.matrix);blocks.setColorAt(count++,new T.Color(['#d3d4d0','#bdc9cd','#c8bfb1'][i%3]));clearance=clearance===null?space:Math.min(clearance,space);
   }

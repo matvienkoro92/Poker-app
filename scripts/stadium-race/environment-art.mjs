@@ -4,7 +4,7 @@ import * as T from '../../vendor/three/three.module.min.js';
 export function createRaceSky(){
  const canvas=document.createElement('canvas');canvas.width=2048;canvas.height=1024;const c=canvas.getContext('2d');
  const gradient=c.createLinearGradient(0,0,0,1024);
- for(const [at,color] of [[0,'#233b57'],[.27,'#628ba5'],[.45,'#b8c6c9'],[.5,'#dfcbb0'],[.57,'#83918e'],[1,'#485c68']])gradient.addColorStop(at,color);
+ for(const [at,color] of [[0,'#172b43'],[.27,'#3c5974'],[.45,'#738391'],[.5,'#b09882'],[.57,'#596c77'],[1,'#485c68']])gradient.addColorStop(at,color);
  c.fillStyle=gradient;c.fillRect(0,0,2048,1024);
  // Broad, low-contrast cloud banks keep the skyline readable at phone resolution.
  for(let layer=0;layer<4;layer++)for(let n=0;n<17;n++){
@@ -44,7 +44,7 @@ export function createDistrictDetailFactory(block,sharedCylinder){
  return {
   city(parent,index,side){
    // Fill gaps between taller buildings with a human-scale commercial frontage.
-   const z=7.4;block(parent,'#827e72',side*13.7,1.65,z,5,3.3,6.5);block(parent,'#bbb09a',side*13.7,3.36,z,5.3,.18,6.8);
+   const z=11.8;block(parent,'#827e72',side*13.7,1.65,z,5,3.3,6.5);block(parent,'#bbb09a',side*13.7,3.36,z,5.3,.18,6.8);
    block(parent,'#444e4e',side*13.7,3.55,z,4.8,.2,6.3);
    const frontage=detail(parent,plane,shopMaterials[index%shopMaterials.length],side*11.18,1.65,z,6.3,3.1,1);frontage.rotation.y=-side*Math.PI/2;
    for(const dz of [-3.25,3.25])block(parent,'#b0a590',side*11.08,1.65,z+dz,.2,3.3,.2);

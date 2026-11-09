@@ -1,7 +1,8 @@
 import * as T from '../../vendor/three/three.module.min.js';
 // Shared facade atlases: no network assets, deterministic masonry and glazing.
-export function createArchitectureMaterials(){
+export function createArchitectureMaterials(indices=null){
  return ['#77766e','#657079','#938675','#795e51','#596a70','#8b8980'].map((base,index)=>{
+  if(indices&&!indices.includes(index))return null;
   const canvas=document.createElement('canvas');canvas.width=512;canvas.height=1024;const c=canvas.getContext('2d');c.fillStyle=base;c.fillRect(0,0,512,1024);
   let seed=index+31;for(let n=0;n<18000;n++){seed=(seed*1664525+1013904223)>>>0;const x=seed%512;seed=(seed*1664525+1013904223)>>>0;c.fillStyle=n%2?'#ffffff0b':'#0000000d';c.fillRect(x,seed%1024,2,2);}
   const glow=document.createElement('canvas');glow.width=512;glow.height=1024;const light=glow.getContext('2d');light.fillStyle='#000';light.fillRect(0,0,512,1024);
