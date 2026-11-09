@@ -4,6 +4,17 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
 
 
  await p.getByRole('button',{name:'Пауза',exact:true}).click();
+ for(const boundary of [200,24000,26000]){
+  const snapshots=[];
+  for(const distance of [boundary-1,boundary+1]){
+   await p.evaluate(d=>testRace.distance=d,distance);
+   await p.waitForFunction(d=>document.querySelector('.race3d-view').raceSnapshot().distance===d,distance);
+   await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+   snapshots.push(await p.evaluate(()=>document.querySelector('.race3d-view').raceSnapshot().scenery));
+  }
+  for(let i=0;i<32;i++)if(snapshots[0][i].anchor===snapshots[1][i].anchor)assert.deepEqual(snapshots[0][i].position,snapshots[1][i].position);
+  assert.equal(snapshots[0].filter((part,i)=>part.anchor!==snapshots[1][i].anchor).length,1);
+ }
  const lives=await p.locator('#storyLives').getAttribute('aria-label');
  await p.evaluate(()=>{testRace.distance=25000;testRace.score=900;testRace.hits=2;testRace.item='rocket';testRace.nitro=12;testRace.air=24;});
  fs.mkdirSync('output/stadium-race-hud',{recursive:true});await p.screenshot({path:'output/stadium-race-hud/restart.png'});

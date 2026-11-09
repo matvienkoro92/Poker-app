@@ -7,9 +7,10 @@ export function createCityDepth(scene,E,sample,facades){
  const blocks=new T.InstancedMesh(geometry,material,48);blocks.frustumCulled=false;scene.add(blocks);
  const road=[];for(let d=E.LAP*2-400;d<=E.LAP*3+4000;d+=40){const p=sample(d);road.push({x:p.x,z:p.z,width:E.roadWidth(d)*7/6});}
  let lastBase=null,clearance=null;
- return {update(distance){const base=Math.floor(distance/600)*600;if(base===lastBase)return;lastBase=base;let count=0;clearance=null;
-  for(let i=0;i<48;i++){
-   const d=base+800+Math.floor(i/2)*130;if(d<E.LAP*2+4750||d>E.LAP*3+1200)continue;
+ return {update(distance){const base=Math.floor(distance/130)*130;if(base===lastBase)return;lastBase=base;let count=0;clearance=null;
+  for(let slot=0;slot<48;slot++){
+   const i=(base/130-2+Math.floor(slot/2))*2+slot%2;
+   const d=Math.floor(i/2)*130;if(d<E.LAP*2+4750||d>E.LAP*3+1200)continue;
    const side=i%2?1:-1,w=9+i%4*1.7,depth=10+i%3*3,h=18+(i*7%17),radius=Math.hypot(w,depth)/2;
    let placement=null,space=0;
    for(let offset=0;offset<=3.2;offset+=.8){const p=sample(d,side*(2.9+(i%5)*.43+offset));space=Infinity;for(const r of road){const gap=Math.hypot(p.x-r.x,p.z-r.z)-r.width-radius;space=Math.min(space,gap);if(space<3)break;}if(space>=3){placement=p;break;}}
