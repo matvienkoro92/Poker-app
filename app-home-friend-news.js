@@ -1163,11 +1163,14 @@
   }
 
   function clubNewsTabsHtml() {
-    return '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
+    return '<div class="home-friend-news-modal__club-tabs" role="group" aria-label="Разделы новостей клуба">' +
       '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
         (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '"><span aria-hidden="true">🏆</span> Турниры</button>' +
       '<button type="button" data-club-news-tab="news" class="home-friend-news-modal__club-tab' +
-        (clubNewsTab === "news" ? ' home-friend-news-modal__club-tab--active' : '') + '">Лента новостей клуба</button></div>';
+        (clubNewsTab === "news" ? ' home-friend-news-modal__club-tab--active' : '') + '">Лента новостей клуба</button>' +
+      '<button type="button" class="home-friend-news-modal__copy-link" data-club-news-copy-feed aria-label="Копировать ссылку на ленту новостей клуба" title="Копировать ссылку">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
+      '</button></div>';
   }
 
   function clubCashCardsHtml(value) {
@@ -3634,10 +3637,11 @@
     if (copy) copy.hidden = newsModalMode !== "club";
   }
 
-  function copyClubNewsLink() {
+  function copyClubNewsLink(tab) {
+    var startParam = tab === "news" ? "club_feed" : "club_news";
     var link = typeof buildMiniAppStartLink === "function"
-      ? buildMiniAppStartLink("club_news")
-      : window.location.origin + window.location.pathname + "?startapp=club_news";
+      ? buildMiniAppStartLink(startParam)
+      : window.location.origin + window.location.pathname + "?startapp=" + startParam;
     function notify(copied) {
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       var message = copied ? "Ссылка на новости клуба скопирована" : "Не удалось скопировать ссылку: " + link;
@@ -3732,8 +3736,8 @@
     load();
   }
 
-  function openClubModal() {
-    if (waitForNewsModalStyles(openClubModal)) return;
+  function openClubModal(tab) {
+    if (waitForNewsModalStyles(function () { openClubModal(tab); })) return;
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     if (!clubEvents.length && clubNewsStaticRows().length) {
@@ -3741,7 +3745,7 @@
       clubNewsLoaded = clubEvents.length > 0;
     }
     newsModalMode = "club";
-    clubNewsTab = "wins";
+    clubNewsTab = tab === "news" ? "news" : "wins";
     syncNewsModalHeading();
     renderModalList(activeModalEvents(), true);
     modal.hidden = false;
@@ -3885,6 +3889,10 @@
           event.preventDefault();
           event.stopPropagation();
           copyClubNewsEventLink(eventCopyButton);
+          return;
+        }
+        if (event.target.closest("[data-club-news-copy-feed]")) {
+          copyClubNewsLink("news");
           return;
         }
         var clubTab = event.target.closest("[data-club-news-tab]");

@@ -7,13 +7,13 @@ const router = fs.readFileSync(require.resolve('../app-home-deeplinks.js'), 'utf
 const push = fs.readFileSync(require.resolve('../app-push.js'), 'utf8');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-for (const source of ['query', 'early-push', 'warm-push']) {
+for (const source of ['query', 'feed-query', 'early-push', 'warm-push']) {
   test('club news opens from ' + source + ' after its modal mounts', async () => {
     const timers = [], calls = [];
     let mounted = false;
-    const location = {href: 'https://club.test/', search: source === 'query' ? '?startapp=club_news' : '', hash: ''};
+    const location = {href: 'https://club.test/', search: source === 'feed-query' ? '?startapp=club_feed' : source === 'query' ? '?startapp=club_news' : '', hash: ''};
     const context = {URL, URLSearchParams, Promise, Set, location,
-      window: {location, addEventListener() {}, pokerOpenClubNewsModal: () => calls.push('news')},
+      window: {location, addEventListener() {}, pokerOpenClubNewsModal: tab => calls.push(tab)},
       document: {readyState: 'complete', body: {getAttribute: () => 'home'}, getElementById: () => mounted ? {} : null},
       setTimeout: fn => timers.push(fn), isTelegramWebApp: () => false,
       pokerReadTelegramLaunchStartParam: () => '', pokerPushOpenDebug() {},
@@ -33,7 +33,7 @@ for (const source of ['query', 'early-push', 'warm-push']) {
     assert.deepEqual(calls, [], 'must not claim success before the modal exists');
     mounted = true;
     for (let i = 0; timers.length && i < 50; i++) { timers.shift()(); await flush(); }
-    assert.deepEqual(calls, ['news']);
+    assert.deepEqual(calls, [source === 'feed-query' ? 'news' : undefined]);
     assert.ok(!context.window.__pokerPendingPushOpenUrl);
   });
 }

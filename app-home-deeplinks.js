@@ -198,13 +198,13 @@ function pokerInitHomeDeepLinks(opts) {
       return;
     }
     var clubNewsEventMatch = startParam.match(/^club_news_([a-z0-9]+)$/i);
-    if (startParam === "club_news" || clubNewsEventMatch) {
+    if (startParam === "club_news" || startParam === "club_feed" || clubNewsEventMatch) {
       window.pokerPendingClubNewsEventToken = clubNewsEventMatch ? clubNewsEventMatch[1].toLowerCase() : "";
       ensureHomeViewForDeepLink();
       retryDeepLinkAction(function () {
         if (typeof window.pokerOpenClubNewsModal !== "function") return false;
         if (!document.getElementById("homeFriendNewsModal")) return false;
-        window.pokerOpenClubNewsModal();
+        window.pokerOpenClubNewsModal(startParam === "club_feed" ? "news" : undefined);
         return true;
       }, 40);
       return;
