@@ -14,8 +14,12 @@ export async function createOwnedVehicle(look){
  await window.pokerPrepareGarageVehicle(look);
  const root=new T.Group(),aligned=new T.Group();
  aligned.rotation.y=-Math.PI/2;
- aligned.scale.setScalar(.72);
  makeModel(aligned,look);
+ // Match the street cars, whose bodies are about 4.7 world units long.
+ const bounds=new T.Box3().setFromObject(aligned);
+ const length=bounds.max.z-bounds.min.z;
+ aligned.scale.setScalar((look.transport==='bmw-e60'?4.81:4.85)/length);
+ aligned.position.y=-bounds.min.y*aligned.scale.y;
  root.add(aligned);
  root.userData.garageLook={...look};
  return {root,wheels:[],frontWheels:[],closedCabin:true,seat:{side:0,forward:0,height:.75,scale:.49},

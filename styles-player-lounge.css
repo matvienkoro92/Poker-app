@@ -802,8 +802,6 @@
 .player-hall__room[data-garage-vehicle="7"] .garage-car-label{display:none}
 .player-hall__room[data-garage-vehicle="7"] .player-hall__camera-ui .garage-vehicle-switch>span{font-size:11px}
 
-/* Keep the board compact relative to the garage rather than car-sized. */
-.player-hall-dialog .player-hall__room[data-garage-vehicle="7"] .player-hall__parked-kart{scale:.60;transform-origin:50% 65%}
 
 /* Shared car-upgrade presentation for bicycles, scooters and Skyboard. */
 .player-hall-dialog .player-hall__room[data-space="garage"]:has(.micro-workshop)>.player-hall__camera-ui{display:none}
@@ -861,11 +859,13 @@
 .player-hall-dialog .micro-workshop .micro-part-symbol { display: grid; place-items: center; }
 .player-hall-dialog .micro-workshop .micro-part-symbol svg { width: 34px; height: 34px; }
 
-.player-hall__room[data-admin-garage="true"]:is([data-garage-vehicle="1"],[data-garage-vehicle="2"]) .player-hall__parked-kart {
+.player-hall__room[data-space=garage] .player-hall__parked-kart {
   top: 47%;
   left: 41%;
-  scale: 1.34;
+  scale: 1.45;
 }
+.player-hall__room[data-garage-vehicle="3"] .garage-locked-vehicle { width: 45%; left: 10%; }
+.player-hall__room[data-garage-vehicle="4"] .garage-locked-vehicle { width: 42%; left: 11%; }
 .player-hall-dialog .player-hall__camera-ui .garage-vehicle-switch:has(.garage-imported-upgrades) { max-height: none; }
 .player-hall__camera-ui .garage-vehicle-switch > .garage-imported-upgrades {
   grid-column: 1 / -1;

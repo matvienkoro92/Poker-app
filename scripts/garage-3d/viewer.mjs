@@ -615,6 +615,16 @@ window.pokerCreateGarage3D=function(host,look,state={}){
   if(!viewBounds){viewBounds=new T.Box3();model.car.updateWorldMatrix(true,true);const walk=o=>{if(!o.visible)return;if(o.geometry){o.geometry.computeBoundingBox();viewBounds.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}for(const child of o.children)walk(child);};walk(model.car);}
   const center=viewBounds.getCenter(new T.Vector3()),direction=new T.Vector3(Math.sin(state.yaw)*Math.cos(state.pitch),Math.sin(state.pitch),Math.cos(state.yaw)*Math.cos(state.pitch)),right=new T.Vector3(Math.cos(state.yaw),0,-Math.sin(state.yaw)),up=new T.Vector3().crossVectors(direction,right),tan=Math.tan(camera.fov*Math.PI/360);let distance=0;
   for(const x of [viewBounds.min.x,viewBounds.max.x])for(const y of [viewBounds.min.y,viewBounds.max.y])for(const z of [viewBounds.min.z,viewBounds.max.z]){const p=new T.Vector3(x,y,z).sub(center);distance=Math.max(distance,Math.abs(p.dot(right))/(tan*camera.aspect)+p.dot(direction),Math.abs(p.dot(up))/tan+p.dot(direction));}
+  if(state.parking){
+   // Use the same perspective and world scale for the parked fleet.
+   const lengths={'bmw-e60':4.81,'mustang-gt500':4.85,bicycle:1.85,scooter:1.52,hoverboard:1.24};
+   const size=viewBounds.getSize(new T.Vector3());
+   const units=Math.max(size.x,size.z)/(lengths[look.transport]||3.1);
+   center.y=viewBounds.min.y+.7*units;
+   camera.position.copy(center).addScaledVector(direction,10.5*units);
+   camera.lookAt(center);
+   return;
+  }
   distance=Math.max(distance*1.10,['bicycle','scooter','hoverboard'].includes(look.transport)?(state.snapshotOnly?6.8:5.2):state.snapshotOnly?(formulaFrame?15:13):(formulaFrame?10.4:9));camera.position.copy(center).addScaledVector(direction,distance);camera.lookAt(center);
  }
  let formulaFrame=['formula','formulaPro','formulaElite'].includes(look.frontBumper);const updateLook=v=>{formulaFrame=['formula','formulaPro','formulaElite'].includes(v.frontBumper);model.update(v);viewBounds=null;glowMat.uniforms.color.value.set(window.PokerGarage.item('light',v.light).color);underLights.forEach(l=>{l.color.copy(glowMat.uniforms.color.value);l.position.y=.36+({standard:0,raised:.20,comfort:.12,high:.38,rally:.48,extreme:.60}[v.suspension]||0)*.86;});if(!state.snapshotOnly)scheduler?.request();};
