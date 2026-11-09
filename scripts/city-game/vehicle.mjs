@@ -1,3 +1,5 @@
+import Bicycle from '../../app-bicycle-catalog.js';
+import Scooter from '../../app-scooter-catalog.js';
 import * as T from '../../vendor/three/three.module.min.js';
 import {makeModel} from '../garage-3d/viewer.mjs';
 import {disposeSceneResources} from '../garage-3d/scene-resources.mjs';
@@ -8,6 +10,31 @@ function roadGeometry(g){const p=g.parameters;let reduced=null;if(!p)return g;sw
 export function cloneRoadMaterial(material){
  const renderSource=Object.assign(Object.create(Object.getPrototypeOf(material)),material,{userData:{}});
  return renderSource.clone();
+}
+export async function createOwnedVehicle(look){
+ if(['bicycle','scooter','hoverboard'].includes(look.transport)){
+  window.PokerBicycle=window.PokerBicycle||Bicycle;window.PokerScooter=window.PokerScooter||Scooter;
+  await window.pokerPrepareGarageVehicle(look);
+  const root=new T.Group(),aligned=new T.Group();aligned.rotation.y=-Math.PI/2;
+  const model=makeModel(aligned,look),bounds=new T.Box3().setFromObject(aligned),length=bounds.max.z-bounds.min.z;
+  aligned.scale.setScalar(({bicycle:1.85,scooter:1.52,hoverboard:1.24}[look.transport])/length);aligned.position.y=-bounds.min.y*aligned.scale.y;root.add(aligned);root.userData.garageLook={...look};
+  return {root,wheels:[],frontWheels:[],riderPose:look.transport,closedCabin:false,seat:{side:0,forward:look.transport==='bicycle'?-.15:0,height:look.transport==='bicycle'?.93:look.transport==='scooter'?.82:.92,scale:.49},animate:model.animate,dispose(){disposeSceneResources(root);}};
+ }
+
+ if(!window.PokerGarage.adminTransport(look.transport))return createOwnedKart(look);
+ await window.pokerPrepareGarageVehicle(look);
+ const root=new T.Group(),aligned=new T.Group();
+ aligned.rotation.y=-Math.PI/2;
+ makeModel(aligned,look);
+ // Match the street cars, whose bodies are about 4.7 world units long.
+ const bounds=new T.Box3().setFromObject(aligned);
+ const length=bounds.max.z-bounds.min.z;
+ aligned.scale.setScalar((look.transport==='bmw-e60'?4.81:4.85)/length);
+ aligned.position.y=-bounds.min.y*aligned.scale.y;
+ root.add(aligned);
+ root.userData.garageLook={...look};
+ return {root,wheels:[],frontWheels:[],closedCabin:true,seat:{side:0,forward:0,height:.75,scale:.49},
+  dispose(){disposeSceneResources(root);}};
 }
 export function createOwnedKart(look){
  const source=new T.Scene(),model=makeModel(source,look,{prepareGeometry:roadGeometry});source.updateMatrixWorld(true);
