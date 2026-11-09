@@ -9,6 +9,18 @@ export function cloneRoadMaterial(material){
  const renderSource=Object.assign(Object.create(Object.getPrototypeOf(material)),material,{userData:{}});
  return renderSource.clone();
 }
+export async function createOwnedVehicle(look){
+ if(!window.PokerGarage.adminTransport(look.transport))return createOwnedKart(look);
+ await window.pokerPrepareGarageVehicle(look);
+ const root=new T.Group(),aligned=new T.Group();
+ aligned.rotation.y=-Math.PI/2;
+ aligned.scale.setScalar(.72);
+ makeModel(aligned,look);
+ root.add(aligned);
+ root.userData.garageLook={...look};
+ return {root,wheels:[],frontWheels:[],closedCabin:true,seat:{side:0,forward:0,height:.75,scale:.49},
+  dispose(){disposeSceneResources(root);}};
+}
 export function createOwnedKart(look){
  const source=new T.Scene(),model=makeModel(source,look,{prepareGeometry:roadGeometry});source.updateMatrixWorld(true);
  const root=new T.Group(),aligned=new T.Group();aligned.rotation.y=-Math.PI/2;aligned.scale.setScalar(.72);root.add(aligned);const wheels=[],frontWheels=[],buckets=new Map(),clones=new Map();
