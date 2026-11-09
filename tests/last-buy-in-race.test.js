@@ -64,3 +64,25 @@ test('analogue steering is gentle near centre, symmetric and retains full lock',
   assert.ok(Math.abs(full.steering)<.02,'released joystick must promptly centre');
  }
 });
+test('vehicle bodies separate during shield and contact cooldown rather than becoming ghosts',()=>{
+ for(const protection of ['inv','shield','bumpCooldown']){
+  const s=ready();s.distance=500;s[protection]=100;s.rivals=[{distance:540,lateral:0,speed:6,stun:0,boost:0,itemAt:99}];
+  E.step(s,{driving:true});const k=s.rivals[0];assert.ok(Math.abs(s.lateral-k.lateral)*E.roadWidth(s.distance)>=2.05);
+ }
+ const s=ready();s.rivals=[];s.tick=100;const car=E.trafficAt(101)[0];s.distance=car.distance-45;s.lateral=car.lateral;s.inv=100;
+ E.step(s,{driving:true});assert.ok(Math.abs(s.lateral-car.lateral)*E.roadWidth(s.distance)>=2.05);assert.equal(s.hits,0);
+});
+test('swept car contacts catch high speed crossing and respect actual jump clearance',()=>{
+ const a={distance:100,lateral:0,tier:0},b={distance:0,lateral:0,tier:0};
+ assert.equal(E.vehicleContact(a,b,-100,100),true);
+ b.tier=1;assert.equal(E.vehicleContact(a,b,-100,100),false);b.tier=0;
+ a.air=65;a.airDuration=120;assert.ok(E.vehicleHeight(a)>1.6);assert.equal(E.vehicleContact(a,b,-100,100),false);
+ a.air=2;assert.equal(E.vehicleContact(a,b,-100,100),true);
+});
+test('airborne yaw settles and upper rail does not retain outward momentum',()=>{
+ const s=ready();s.rivals=[];s.distance=4000;s.air=s.airDuration=48;s.yawRate=.08;s.heading=.3;
+ for(let i=0;i<50;i++)E.step(s,{driving:true});assert.equal(s.air,0);assert.ok(s.distance>4200);assert.ok(Math.abs(s.yawRate)<.001);
+ const p=E.overpasses[0],r=ready();r.rivals=[];r.distance=p.start+400;r.tier=1;r.deckId=p.id;r.lateral=p.center+.34;r.heading=.8;r.velocityHeading=.8;r.yawRate=.03;
+ E.step(r,{driving:true});assert.equal(r.heading,0);assert.equal(r.velocityHeading,0);const before=r.distance;
+ for(let i=0;i<120;i++)E.step(r,{driving:true});assert.ok(r.distance>before+400);assert.equal(r.tier,0);
+});

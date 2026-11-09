@@ -15,7 +15,7 @@ function deckHeight(distance,tier=0){if(!tier)return 0;const p=deckAt(distance);
 function sameDeck(a,b){return (a.tier||0)===(b.tier||0);}
 function updateDeck(s,old){const p=deckAt(s.distance);if(!p){s.tier=0;s.deckId=null;return;}
  if(s.deckId!==p.id){s.deckId=p.id;s.tier=old<=p.start&&!s.air&&Math.abs(s.lateral-p.center)<.38?1:0;}
- if(s.tier){s.lateral=clamp(s.lateral,p.center-.34,p.center+.34);if(Math.abs(s.lateral-p.center)>=.339)s.lateralVelocity=0;}
+ if(s.tier){s.lateral=clamp(s.lateral,p.center-.34,p.center+.34);if(Math.abs(s.lateral-p.center)>=.339){s.lateralVelocity=0;const side=Math.sign(s.lateral-p.center);if(side*(s.heading||0)>0)s.heading=0;if(side*(s.velocityHeading||0)>0)s.velocityHeading=0;s.yawRate=0;}}
  // The ramp occupies its lane; the lower route remains open beside it.
  else if(deckHeight(s.distance,1)<2.7&&Math.abs(s.lateral-p.center)<.73){s.lateral=p.center+(p.center<0?.73:-.73);s.lateralVelocity=0;}
 }
@@ -29,11 +29,32 @@ function trackObjects(distance,tick=0){const first=Math.max(0,Math.floor(distanc
 
 function rampHeight(distance,lateral,tier=0,tick=0){const ramp=trackObjects(distance,tick).find(o=>o.kind==='ramp'&&sameDeck({tier},o)&&o.distance>=distance&&o.distance-distance<=4/.06&&Math.abs(lateral-o.lateral)<.34);return ramp?1.1*(1-(ramp.distance-distance)/(4/.06)):0;}
 
+// Physical separation is independent of damage cooldowns and shields.
+function vehicleHeight(car){
+ if(!(car.air>0&&car.airDuration>0))return rampHeight(car.distance,car.lateral,car.tier||0);
+ const total=car.airDuration/60,t=(car.airDuration-car.air)/60;
+ return Math.max(0,1.1+(.5*9.81*total*total-1.1)/total*t-.5*9.81*t*t);
+}
+function vehicleContact(a,b,oldA,oldB){
+ if(!sameDeck(a,b))return false;
+ const gap=b.distance-a.distance,previous=oldB-oldA;
+ const length=80; // 4.8 m combined half-lengths in track units.
+ return Math.min(gap,previous)<length&&Math.max(gap,previous)>-length&&Math.abs(a.lateral-b.lateral)*roadWidth(a.distance)<2.05&&Math.abs(vehicleHeight(a)-vehicleHeight(b))<=1.6;
+}
+function separateVehicles(a,b,fixed=false){
+ const gap=2.08/roadWidth(a.distance),side=a.lateral===b.lateral?1:Math.sign(a.lateral-b.lateral);
+ if(fixed)a.lateral=clamp(b.lateral+side*gap,-1.08,1.08);
+ else {const centre=(a.lateral+b.lateral)/2,deck=a.tier?deckAt(a.distance):null,lo=deck?deck.center-.34:-1.08,hi=deck?deck.center+.34:1.08;a.lateral=clamp(centre+side*gap/2,lo+(side>0?gap:0),hi-(side<0?gap:0));b.lateral=a.lateral-side*gap;b.targetLane=b.lateral;}
+ // If the shoulder limits the separation, deflect towards the open road.
+ if(Math.abs(a.lateral-b.lateral)<gap-.001)a.lateral=b.lateral-side*gap;
+ a.heading=clamp((a.heading||0),-.25,.25);a.velocityHeading=a.heading*.5;a.yawRate=0;a.lateralVelocity=0;
+}
+
 // Track-relative vehicle dynamics: heading, yaw inertia and tyre slip are separate.
 function driveDynamics(s,a,steer,r){
  const sliding=!!s.drift,grip=s.air?.015:sliding?.045:.22;
  const wheelAngle=steer*.36/(1+s.speed*.055),yaw= s.speed*.06/2.8*Math.tan(wheelAngle)*(a.handbrake?1.7:1);
- s.yawRate=(s.yawRate||0)+(yaw-(s.yawRate||0))*(s.air?.025:Math.sign(yaw)!==Math.sign(s.yawRate||0)?.32:.16);
+ s.yawRate=s.air?(s.yawRate||0)*.85:(s.yawRate||0)+(yaw-(s.yawRate||0))*(Math.sign(yaw)!==Math.sign(s.yawRate||0)?.32:.16);
  const roadYaw=r.curve*.00065*s.speed;
  s.heading=clamp((s.heading||0)+s.yawRate+roadYaw,-1.1,1.1);
  if(!a.handbrake&&Math.abs(steer)<.08)s.heading*=sliding?.99:.94;
@@ -86,7 +107,7 @@ if(a.driving&&!s.air&&Math.abs(s.lateral)>1.16&&s.speed>3&&!s.inv){hit(s,'wall')
 if(Math.abs(s.lateral)>1){s.speed*=.975;s.boost=Math.max(0,s.boost-3);}if(Math.abs(s.lateral)>1.12){s.lateral*=.98;s.speed*=.985;if(Math.sign(s.lateralVelocity)===Math.sign(s.lateral))s.lateralVelocity*=.3;}
 const shortcut=r.shortcut&&s.lateral<-.72&&s.boost>0;if(shortcut){s.speed=Math.max(s.speed,8);if(!s.shortcutActive){s.shortcuts++;notice(s,'СРЕЗКА ЧЕРЕЗ ВНУТРЕННИЙ СЕКТОР');}}s.shortcutActive=shortcut;if(vehicle)s.speed=Math.min(s.speed,vehicle.max/(shortcut?1.25:1));s.distance+=s.speed*(shortcut?1.25:1)*(a.driving&&!vehicle?(s.forwardFactor||1):1);if(s.air===1){s.boost=Math.max(s.boost,Math.round(s.airDuration*1.7));s.score+=Math.round(s.airDuration*3);s.perfectLandings++;notice(s,'ПРИЗЕМЛЕНИЕ · ТУРБО');}
 updateDeck(s,old);collect(s,old,a);
-if(road(s.distance).city&&!s.tier){for(const car of trafficAt(s.tick)){const before=trafficAt(s.tick-1)[car.id];if(Math.abs(car.distance-before.distance)>100)continue;if(old<=before.distance+34&&s.distance>=car.distance-34&&Math.abs(s.lateral-car.lateral)*roadWidth(s.distance)<1.65){hit(s,'traffic');}}}
+if(road(s.distance).city&&!s.tier){for(const car of trafficAt(s.tick)){const before=trafficAt(s.tick-1)[car.id];if(Math.abs(car.distance-before.distance)>100)continue;if(vehicleContact(s,car,old,before.distance)){hit(s,'traffic');separateVehicles(s,car,true);}}}
 
 const ahead=trackObjects(s.distance,s.tick).find(o=>sameDeck(s,o)&&['barrier','oil','gate','wet'].includes(o.kind)&&o.distance-s.distance>0&&o.distance-s.distance<600&&!s.used.has(o.key));s.hazardWarning=ahead?{kind:ahead.kind,lateral:ahead.lateral,distance:ahead.distance-s.distance}:null;
 const zone=r.city?(r.bridge?'bridge':'city'):'stadium';if(zone!==s.routeZone){s.routeZone=zone;notice(s,zone==='city'?'ВЫЕЗД В ГОРОД · К МОСТУ':zone==='bridge'?'МИССЛИК ЖДЁТ У МОСТА':'СТАДИОН');}
@@ -99,12 +120,12 @@ for(const [i,k]of s.rivals.entries()){k.air=Math.max(0,(k.air||0)-1);k.stun=Math
  const lateralBefore=k.lateral;k.lateral+=clamp((k.targetLane-k.lateral)*.035,-.018,.018);k.heading=Math.atan2((k.lateral-lateralBefore)*roadWidth(k.distance),Math.max(.01,k.currentSpeed*.06));
  updateDeck(k,oldDistance);
  for(const o of trackObjects(oldDistance,s.tick))if(!s.used.has(o.key)&&sameDeck(k,o)&&oldDistance<=o.distance&&k.distance>=o.distance&&Math.abs(k.lateral-o.lateral)<.29){if(o.kind==='ramp'&&!k.air){k.airDuration=48;k.air=48;}if(!k.air){if(o.kind==='wet'){k.currentSpeed*=.65;k.boost=0;}if(['gate','barrier','oil'].includes(o.kind))rivalImpact(k,o.kind);}}
- if(kr.city&&!k.tier){for(const car of trafficAt(s.tick)){const previous=trafficAt(s.tick-1)[car.id];if(Math.abs(car.distance-previous.distance)>100)continue;if(oldDistance<=previous.distance+34&&k.distance>=car.distance-34&&Math.abs(k.lateral-car.lateral)*roadWidth(k.distance)<1.65)rivalImpact(k,'traffic');}}
+ if(kr.city&&!k.tier){for(const car of trafficAt(s.tick)){const previous=trafficAt(s.tick-1)[car.id];if(Math.abs(car.distance-previous.distance)>100)continue;if(vehicleContact(k,car,oldDistance,previous.distance)){rivalImpact(k,'traffic');separateVehicles(k,car,true);k.targetLane=k.lateral;}}}
  const zone=Math.floor(k.distance/2300);if(zone>k.itemAt){k.itemAt=zone;if(i===0)k.boost=70;if(i===1)s.traps.push({tier:k.tier||0,distance:k.distance-40,lateral:k.lateral,enemy:true});if(i===2&&s.distance<k.distance&&k.distance-s.distance<700){s.enemyShots.push({tier:k.tier||0,distance:k.distance-50,lateral:s.lateral,enemy:true,life:180});notice(s,'РАКЕТА НИТА! ЩИТ ИЛИ СМЕНИ ЛИНИЮ');}}
-if(sameDeck(s,k)&&Math.abs(k.distance-s.distance)<24&&Math.abs(k.lateral-s.lateral)<.2&&!s.air&&!s.bumpCooldown&&!s.inv){const push=s.lateral>k.lateral?.08:-.08;s.lateral=clamp(s.lateral+push,-1.15,1.15);k.lateral=clamp(k.lateral-push,-1.05,1.05);s.speed*=.98;k.currentSpeed=(k.currentSpeed||k.speed)*.98;s.bumpCooldown=40;s.bumpAt=s.tick;}
+if(vehicleContact(s,k,old,oldDistance)){separateVehicles(s,k);if(!s.bumpCooldown){s.speed*=.8;k.currentSpeed=(k.currentSpeed||k.speed)*.85;s.bumpCooldown=40;s.bumpAt=s.tick;}}
 for(const t of s.traps)if(sameDeck(k,t)&&!t.enemy&&!t.used&&Math.abs(k.distance-t.distance)<24&&Math.abs(k.lateral-t.lateral)<.3){k.stun=120;t.used=true;s.score+=150;}}
 for(const t of s.traps)if(sameDeck(s,t)&&t.enemy&&!t.used&&Math.abs(t.distance-s.distance)<24&&Math.abs(t.lateral-s.lateral)<.27){hit(s,'trap');t.used=true;}s.traps=s.traps.filter(t=>!t.used&&t.distance>s.distance-700);
 for(const p of s.enemyShots){if(p.tier&&!deckAt(p.distance))p.tier=0;p.life--;if(!p.enemy)for(const o of trackObjects(p.distance,s.tick))if(sameDeck(p,o)&&['oil','barrier','gate'].includes(o.kind)&&!s.used.has(o.key)&&Math.abs(o.distance-p.distance)<30&&Math.abs(o.lateral-p.lateral)<.35){s.used.add(o.key);p.life=0;s.score+=75;notice(s,'ПРЕПЯТСТВИЕ УБРАНО');}for(const t of s.traps)if(sameDeck(p,t)&&!t.used&&Math.abs(t.distance-p.distance)<30&&Math.abs(t.lateral-p.lateral)<.3){t.used=true;p.life=0;s.score+=50;}if(!p.life)continue;if(p.enemy){p.distance-=4;if(sameDeck(p,s)&&Math.abs(p.distance-s.distance)<25&&Math.abs(p.lateral-s.lateral)<.25){hit(s,'rocket');p.life=0;}}else{p.distance+=11;if(p.target)p.lateral+=(p.target.lateral-p.lateral)*.07;if(p.target&&sameDeck(p,p.target)&&p.distance>=p.target.distance){p.target.stun=p.power||150;p.life=0;s.score+=200;}}}s.enemyShots=s.enemyShots.filter(p=>p.life>0);
 const lap=Math.min(3,Math.floor(s.distance/LAP)+1);if(!s.sprint&&lap>s.lap){s.lapTimes.push(s.tick-s.lapStarted);s.lapStarted=s.tick;notice(s,lap===3?'ПОСЛЕДНИЙ КРУГ!':'КРУГ 2 · ДЕРЖИ ТЕМП');}s.lap=s.sprint?1:lap;s.position=1+s.rivals.filter(k=>k.distance>s.distance).length;s.progress=Math.min(100,Math.floor((s.distance-s.startDistance)/(LAP*3-s.startDistance)*100));if(s.distance>=LAP*3){s.lapTimes.push(s.tick-s.lapStarted);s.finishPosition=s.position;s.cupSecured=s.position===1;if(s.position===1){s.won=true;s.score+=1500+s.boosts*25;s.message='БИЛЕТЫ СНОВА У НАС';}else{s.lost=true;s.health=0;s.message='Финиш: '+s.position+' место. Билеты забирает победитель.';}}s.previous={...a};return s;}
 function revive(s){const score=s.score;Object.assign(s,create(s.chapter,{transport:s.transport,sprint:s.sprint}));s.score=score;return s;}
-return {create,step,revive,road,LAP,sections,trackObjects,mobility,overpasses,deckAt,deckHeight,updateDeck,rampHeight,roadWidth,trafficAt,driveDynamics,planRival,rivalProfiles};});
+return {create,step,revive,road,LAP,sections,trackObjects,mobility,overpasses,deckAt,deckHeight,updateDeck,rampHeight,roadWidth,trafficAt,driveDynamics,planRival,rivalProfiles,vehicleContact,vehicleHeight};});
