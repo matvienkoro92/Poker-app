@@ -1,5 +1,5 @@
 async function pokerRaffleBroadcastLoadActiveList(base, query, fetcher) {
-  var response = await fetcher(base + '/api/raffles' + query + '&bypassListCache=1&_t=' + Date.now(), {cache:'no-store'});
+  var response = await fetcher(base + '/api/raffles' + query + '&scope=broadcast&bypassListCache=1&_t=' + Date.now(), {cache:'no-store'});
   var payload = await response.json();
   if (!response.ok || !payload || !payload.ok || !Array.isArray(payload.raffles)) throw new Error('Не удалось обновить список розыгрышей. Рассылка не отправлена.');
   var seen = {};
@@ -373,8 +373,8 @@ function initRafflesBroadcastRuntime(opts) {
       if (rafflesNotifySubsHint) rafflesNotifySubsHint.textContent = "";
       var extra;
       try {
-        // Read the full authoritative list: the screen and active index may omit
-        // a newly created tournament-ticket raffle.
+        // Read fresh prize metadata from the authoritative IDs without hydrating
+        // archive participants or relying on the possibly incomplete active index.
         var freshRaffles = await pokerRaffleBroadcastLoadActiveList(base, pokerRafflesApiQueryLeading(), fetch);
         extra = raffleManualBroadcastBodyFromCurrentRaffle(freshRaffles);
       } catch (refreshError) {
