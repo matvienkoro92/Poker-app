@@ -4,3 +4,12 @@
 @media(max-height:480px){.race3d-progress{top:14px;left:80px}.race3d-pause{top:12px;right:126px}.race3d-notice{top:65px;left:25%;right:25%}.race3d-gauge{width:96px;height:96px;bottom:126px;right:14px}.race3d-gauge strong{right:20px;bottom:25px;font-size:18px}.race3d-gauge small{right:20px;bottom:14px}.race3d-gauge span{top:35px;right:20px}.race3d-joystick{width:94px;height:94px}.race3d-joystick i{left:25px;top:25px}.race3d-steering [data-key=down]{width:94px;height:32px;min-height:32px}.race3d-actions [data-key=handbrake]{height:44px}.race3d-actions button{height:38px;min-height:38px}}
 @media(min-height:481px){.race3d-gauge{top:calc(126px + env(safe-area-inset-top));bottom:auto;width:96px;height:96px}.race3d-gauge strong{right:20px;bottom:25px;font-size:18px}.race3d-gauge small{right:20px;bottom:14px}.race3d-gauge span{top:35px;right:20px}}
 @media(max-height:480px){.race3d-pause{top:66px;right:12px}}
+/* Race status shares the existing life/sound/exit row, including 320 px phones. */
+.race3d-stage .race3d-progress{top:calc(12px + env(safe-area-inset-top));left:58px;height:44px;gap:3px;flex-direction:column;justify-content:center;line-height:1}
+.race3d-stage .race3d-progress b{font-size:14px;white-space:nowrap}
+.race3d-stage .race3d-progress span{font-size:8px}
+.race3d-stage .race3d-pause{top:calc(12px + env(safe-area-inset-top));left:98px;right:auto;width:36px;height:44px;padding:0;z-index:60}
+body:has(#play:not([hidden])):has(.race3d-stage) #storyLives{padding:7px 3px;top:calc(12px + env(safe-area-inset-top));min-height:28px;box-sizing:content-box}
+body:has(.race3d-stage) .story-heart{font-size:20px;margin:0 1px;line-height:28px}
+body:has(.race3d-stage) .story-exit{top:calc(12px + env(safe-area-inset-top))!important}
+.race3d-stage .race3d-notice:empty{display:none}

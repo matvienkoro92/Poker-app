@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {jumpPose} from '../scripts/stadium-race/jump-pose.mjs';
+test('jump begins at ramp lip, follows bounded arc and lands at road height',()=>{for(const duration of [40,48,60,72]){assert.equal(jumpPose(duration,duration,6).height,1.1);let max=0,previous=1.1;for(let air=duration;air>=0;air--){const p=jumpPose(air,duration,6);max=Math.max(max,p.height);assert.ok(Math.abs(p.height-previous)<.16);assert.ok(Math.abs(p.pitch)<=.22);previous=p.height;}assert.equal(previous,0);assert.ok(max<2.4);}});
