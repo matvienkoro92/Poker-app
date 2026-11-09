@@ -13,3 +13,5 @@ body:has(#play:not([hidden])):has(.race3d-stage) #storyLives{padding:7px 3px;top
 body:has(.race3d-stage) .story-heart{font-size:20px;margin:0 1px;line-height:28px}
 body:has(.race3d-stage) .story-exit{top:calc(12px + env(safe-area-inset-top))!important}
 .race3d-stage .race3d-notice:empty{display:none}
+
+.race3d-dialog [data-restart]{display:block;margin:10px auto 0;background:transparent;color:#ffe2a2}.race3d-dialog [data-restart][hidden]{display:none}
