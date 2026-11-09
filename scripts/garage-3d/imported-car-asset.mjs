@@ -4,7 +4,7 @@ import {GLTFLoader} from '../../vendor/three/addons/loaders/GLTFLoader.js';
 const baseUrl=document.currentScript?.src||location.href;
 const assets={
  'bmw-e60':{file:'./assets/garage/models/bmw-m5-e60-v5.glb?v=20261108-admin-e60',paint:'E60_00',glass:'Tinted windows',wheels:'Anthracite alloy'},
- 'mustang-gt500':{file:'./assets/garage/models/mustang-shelby-gt500-v1.glb',paint:'carpaint',glass:'tinted_glass'}
+ 'mustang-gt500':{file:'./assets/garage/models/mustang-shelby-gt500-v1.glb',paint:'carpaint',glass:'tinted_glass',yaw:Math.PI/2,scale:4.812/4.850}
 };
 
 export function prepareImportedCar(transport){
@@ -21,7 +21,9 @@ export function createImportedCar(scene,look){
  if(!asset.template)throw Error('Машина ещё загружается');
  const car=new T.Group();
  car.name=look.transport;
- car.scale.setScalar(1.22);
+ // Both models face +X and use the BMW length as the garage reference.
+ car.rotation.y=asset.yaw||0;
+ car.scale.setScalar(1.22*(asset.scale||1));
  const G=window.PokerGarage;
  const colors={
   paint:look=>look.paint==='classic'?null:G.item('paint',look.paint).color,
