@@ -6628,3 +6628,14 @@ html body:not([data-view="chat"]) #app.app.app--view-home > .card > .card__heade
   color: #f5d797;
   font-size: 14px;
 }
+
+/* Fit both live CTA lines and the arrow inside the button at every frame width. */
+#app.app.app--view-home .home-daily-deal-hero__cta{width:max-content;max-width:calc(100% - 24px);padding:7px 18px;gap:9px}
+#app.app.app--view-home .home-daily-deal-hero__cta-copy{min-width:0;white-space:normal;text-align:center}
+#app.app.app--view-home .home-daily-deal-hero__arrow{flex-shrink:0}
+
+/* Give narrow daily-deal cards more room for the live text. */
+#app.app.app--view-home .home-daily-deal-hero{container-type:inline-size;container-name:daily-deal}
+@container daily-deal (max-width:480px){
+ #app.app.app--view-home .home-daily-deal-hero__image{height:125%!important;top:auto!important;bottom:0!important;right:-12px!important;transform:none!important}
+}

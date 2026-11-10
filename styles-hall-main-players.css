@@ -3068,3 +3068,16 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 .hall-fish-achievement-preview li>.hall-fish-achievement-preview__player{display:flex;flex-wrap:wrap;align-items:baseline;gap:1px 3px;min-width:0}
 .hall-fish-achievement-preview__nick{max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hall-fish-achievement-preview__amount{flex-shrink:0;color:#b8ac95;font-size:.78em;font-weight:500;white-space:nowrap}
+
+/* Compact monthly table with a larger, vertically centered character. */
+.home-player-month .home-month-showcase{grid-template-columns:34% 66%;padding:3.5cqw 7cqw 4.5cqw}
+.home-month-showcase h2{font-size:2.05cqw}
+.home-month-showcase h2 strong{font-size:3.7cqw}
+.home-month-showcase__name{font-size:2.35cqw}
+.home-month-showcase__count{font-size:2cqw;margin:1cqw 0 1.3cqw}
+.home-month-showcase__footer{font-size:1.7cqw}
+.home-month-showcase__footer strong{font-size:3.3cqw}
+.home-month-showcase__footer .home-player-month__watch{font-size:2cqw;padding:1.1cqw 2cqw}
+.home-player-month .home-month-showcase__case{display:grid;place-items:center;align-self:stretch;transform:none}
+.home-player-month .home-month-showcase__case .hall-fish-achievement-leader__hologram:not(.hall-fish-achievement-leader__hologram--avatar){height:32cqw!important;max-height:none}
+.home-player-month .home-month-showcase__case .hall-fish-achievement-leader__hologram>img{object-position:center!important}

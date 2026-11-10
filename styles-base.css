@@ -1777,10 +1777,10 @@ html.app-view-daily-poker-html-scroll .card .card__content {
   padding-bottom: 0;
 }
 
-/* Size the desktop frame by its height so a tall window keeps phone proportions. */
+/* Desktop width follows available horizontal space, independent of window height. */
 :root { --app-frame-width: 430px; }
 @media (min-width: 700px) {
-  :root { --app-frame-width: min(600px, 52dvh); }
+  :root { --app-frame-width: 760px; }
   #app.app > .card { max-width: 100% !important; }
 }
 
@@ -1797,7 +1797,7 @@ body .bottom-nav {
 @media (min-width: 700px) {
   body #app.app,
   body .bottom-nav {
-    width: min(100%, 600px, 52dvh) !important;
-    max-width: min(600px, 52dvh) !important;
+    width: min(calc(100% - 32px), var(--app-frame-width)) !important;
+    max-width: var(--app-frame-width) !important;
   }
 }
