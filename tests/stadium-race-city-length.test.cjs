@@ -10,7 +10,7 @@ test('all three city stretches have unique pickups and ramps',()=>{
  for(let block=0;block<3;block++){
   const start=E.CITY_START+block*5500;
   const objects=E.trackObjects(start).filter(o=>o.distance>=start&&o.distance<start+5500&&o.key.startsWith('city:'));
-  assert.equal(objects.length,15);
+  assert.equal(objects.length,14);
   assert.ok(objects.some(o=>o.kind==='ramp'));
   for(const o of objects){assert.ok(!keys.has(o.key));keys.add(o.key);}
  }

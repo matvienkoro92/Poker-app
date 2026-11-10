@@ -3,7 +3,7 @@ import {sceneryAnchor} from './scenery-slots.mjs';
 
 // Stream a small pool of identifiable street scenes; keep signs and geometry shared.
 export function createCityLife(scene,E,sample,block,clearance){
- const plane=new T.PlaneGeometry(1,1),signs=new Map(),nodes=[];
+ const plane=new T.PlaneGeometry(1,1),signs=new Map(),nodes=[],walkers=[];
  function sign(parent,text,color,x,y,z,w,h,angle=Math.PI){
   const key=text+color;if(!signs.has(key)){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=192;const c=canvas.getContext('2d');c.fillStyle='#102832';c.fillRect(0,0,512,192);c.fillStyle=color;c.fillRect(0,0,512,9);c.fillRect(0,183,512,9);c.font='bold 54px Arial';c.textAlign='center';c.fillText(text,256,116);const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;signs.set(key,new T.MeshBasicMaterial({map,side:T.DoubleSide}));}
   const mesh=new T.Mesh(plane,signs.get(key));mesh.position.set(x,y,z);mesh.scale.set(w,h,1);mesh.rotation.y=angle;mesh.userData.batchSceneDetail=true;parent.add(mesh);return mesh;
@@ -45,9 +45,24 @@ export function createCityLife(scene,E,sample,block,clearance){
    sign(details,'DOCK 21','#e6bb68',side*13,3.8,-10,6,1.4);
    for(let n=0;n<5;n++)block(details,'#9c9b7d',side*9,.5,-6+n*3,.2,1,.2);
   }
+  // Sidewalk activity stays outside the driving corridor and uses the shared batches.
+  if(type===1||type===2){
+   for(let n=0;n<2;n++){
+    const person=new T.Group();person.position.set(side*(9.2+n*.65),0,-6+n*1.4);details.add(person);
+    block(person,n?'#b99268':'#506e84',0,1.12,0,.34,.55,.22);
+    block(person,'#bd9474',0,1.56,0,.23,.26,.22);
+    const legs=[-1,1].map(s=>block(person,'#303f4e',s*.09,.47,0,.13,.7,.15));
+    for(const s of [-1,1])block(person,'#bd9474',s*.23,1.05,0,.1,.48,.1);
+    walkers.push({legs,phase:i+n*2});
+   }
+   // Parking bay and cycle stands identify the pavement edge.
+   for(const z of [-9,-7]){block(details,'#8c9b9b',side*10,.45,z,.06,.9,.06);block(details,'#8c9b9b',side*11,.45,z,.06,.9,.06);block(details,'#8c9b9b',side*10.5,.9,z,1,.06,.06);}
+   for(const z of [6,9])block(details,'#d4d3bb',side*12,.018,z,5,.018,.1);
+   sign(details,'P','#8cc6de',side*9.1,2.8,8,1.1,1.1);
+  }
   nodes.push({root,details,surface,side,type,anchor:null});
  }
- return {update(distance){nodes.forEach((node,i)=>{
+ return {update(distance,tick=0){for(const w of walkers)w.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(tick*.045+w.phase+i*Math.PI)*.13);nodes.forEach((node,i)=>{
   const d=sceneryAnchor(i,nodes.length,distance,900,1),road=E.road(d);node.root.visible=road.city&&!road.bridge&&d>distance-350&&d<distance+3800;
   if(node.anchor===d)return;node.anchor=d;const p=sample(d),edge=E.roadLayout(d).halfWidth;
   node.root.position.set(p.x,p.y,p.z);node.root.rotation.y=p.a;node.surface.rotation.x=-Math.atan2(sample(d+10).y-sample(d-10).y,1.2);

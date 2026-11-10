@@ -27,3 +27,9 @@ test('bounds and rotated overhangs are checked, not just object centres',()=>{
  mesh.position.x=-12;mesh.rotation.y=Math.PI/4;clearance.update(mesh);
  assert.equal(mesh.userData.roadBlocked,true);
 });
+test('side street corridor reserves space for emerging traffic beyond the main road',()=>{
+ const straight=(d,l=0)=>({x:-l*6,y:0,z:d*.06});
+ const mesh=new T.Mesh(new T.BoxGeometry(3,6,3));mesh.position.set(20,3,6);
+ createRoadClearance(E,straight).update(mesh);assert.equal(mesh.userData.roadBlocked,false);
+ createRoadClearance({...E,crossings:[{distance:100}]},straight).update(mesh);assert.equal(mesh.userData.roadBlocked,true);
+});
