@@ -270,7 +270,7 @@ async function mutate(action,fields={}){
  mutation=true;tick();epoch++;clearTimeout(poll);for(const b of document.querySelectorAll('#tourActions button, #tourAdminActions button'))b.disabled=true;
  try{const d=await request({action,id:currentId,...fields});lastPaint='';render(d);if(action==='ready'&&d.self?.roomId)setTab('game');notice();}catch(e){notice(e.message);}finally{mutation=false;tick();if(!stopped)poll=setTimeout(refresh,2000);}
 }
-function targets(){const root=$('tourRoundTargets'),previous=[...root.querySelectorAll('input')].map(i=>i.value);root.replaceChildren();const count=Math.ceil(Math.log2(Number($('tourForm').elements.capacity.value)));for(let i=0;i<count;i++){const label=el('label',stageName(i,count));const input=document.createElement('input');input.type='number';input.min=1;input.max=25;input.required=true;input.value=previous[i]||3;input.name='target-'+i;label.append(input);root.append(label);}}
+function targets(){const root=$('tourRoundTargets'),previous=[...root.querySelectorAll('input')].map(i=>i.value);root.replaceChildren();const count=Math.ceil(Math.log2(Number($('tourForm').elements.capacity.value)));for(let i=0;i<count;i++){const label=el('label',stageName(i,count));const input=document.createElement('input');input.type='number';input.min=1;input.max=25;input.required=true;input.value=previous[i]||1;input.name='target-'+i;label.append(input);root.append(label);}}
 function prizes(){
  const f=$('tourForm'),paid=f.elements.entryType.value==='chips';
  f.elements.prizeKind.querySelector('[value=tickets]').disabled=paid;
@@ -305,7 +305,7 @@ function prizes(){
   for(let i=0;i<count;i++){
    const label=el('label',(i+1)+' место, '+(tickets?'номинал билета, ₽':fixed?'фишки':'%')),input=el('input');
    input.type='number';input.min=0;input.max=fixed?1000000:100;input.step=1;input.required=true;
-   input.value=previous[i]??(tickets?300:fixed?Math.floor((Number.isFinite(initialPool)?initialPool:0)*defaults[i]/100):defaults[i]);
+   input.value=previous[i]??(tickets?(i===0?500:300):fixed?Math.floor((Number.isFinite(initialPool)?initialPool:0)*defaults[i]/100):defaults[i]);
    input.oninput=prizes;const amount=el('small',null,'tour-prize-amount');amount.setAttribute('data-prize-amount','');label.append(input,amount);root.append(label);
   }
  }
@@ -339,13 +339,13 @@ function updateStartMode(){
 }
 $('tourForm').elements.startMode.onchange=updateStartMode;
 
-function createForm(){if(!listAdmin)return;epoch++;clearTimeout(poll);showPanel('tourCreatePanel');formRequestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>b.toString(16).padStart(2,'0')).join('');targets();prizes();updateStartMode();}
+function createForm(){if(!listAdmin)return;const start=$('tourForm').elements.startTime;if(!start.value){const now=Date.now(),date=new Date(now+3*3600000).toISOString().slice(0,10);let next=Date.parse(date+'T14:00:00+03:00');if(next<now+60000)next+=86400000;start.value=new Date(next+3*3600000).toISOString().slice(0,16);}epoch++;clearTimeout(poll);showPanel('tourCreatePanel');formRequestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>b.toString(16).padStart(2,'0')).join('');targets();prizes();updateStartMode();}
 $('tourForm').elements.capacity.onchange=()=>{targets();prizes();};
 $('tourForm').elements.discipline.onchange=()=>{const form=$('tourForm');if(form.elements.discipline.value==='short')form.elements.variant.value='classic';form.elements.variant.disabled=form.elements.discipline.value==='short';};
 $('tourForm').onsubmit=async event=>{event.preventDefault();if(mutation)return;mutation=true;const form=$('tourForm'),button=form.querySelector('[type=submit]');button.disabled=true;try{
  const scheduled=form.elements.startMode.value==='scheduled';
- // The form uses Novosibirsk time regardless of the device timezone.
- const startsAt=scheduled?Date.parse(form.elements.startTime.value+'+07:00'):null;
+ // The form uses Moscow time regardless of the device timezone.
+ const startsAt=scheduled?Date.parse(form.elements.startTime.value+'+03:00'):null;
  if(scheduled&&!Number.isFinite(startsAt))throw Error('Укажите дату и время начала турнира.');
  const d=await request({action:'create',startsAt,requestId:formRequestId,title:form.elements.title.value,capacity:Number(form.elements.capacity.value),discipline:form.elements.discipline.value,variant:form.elements.variant.value,turnSeconds:Number(form.elements.turnSeconds.value),entryType:form.elements.entryType.value,buyIn:Number(form.elements.buyIn.value),prizeFund:Number(form.elements.prizeFund.value),prizeKind:form.elements.prizeKind.value,prizeMode:form.elements.prizeKind.value==='tickets'?'fixed':form.elements.prizeMode.value,...($('tourPrizeDistribution').disabled?{}:form.elements.prizeKind.value==='tickets'||form.elements.prizeMode.value==='fixed'?{prizeAmounts:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value))}:{prizeShares:[...$('tourPrizeShares').querySelectorAll('input')].map(i=>Number(i.value))}),roundTargets:[...$('tourRoundTargets').querySelectorAll('input')].map(i=>Number(i.value))});notice();mutation=false;await open(d.id);}catch(e){notice(e.message);}finally{mutation=false;button.disabled=false;}};
 $('tourCreate').onclick=createForm;$('allTours').onclick=list;document.querySelector('[data-tour-back]').onclick=list;

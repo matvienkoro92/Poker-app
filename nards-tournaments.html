@@ -17,10 +17,10 @@
     <form id="tourForm">
       <label>Название<input name="title" maxlength="80" value="Кубок двух тузов" required></label>
       <div class="tour-form-grid"><label>Нарды<select name="discipline"><option value="long">Длинные</option><option value="short">Короткие</option></select></label><label>Формат<select name="variant"><option value="classic">Классические</option><option value="crazy">Бешеные</option><option value="six-one">6:1 · Кафтар</option></select></label></div>
-      <div class="tour-form-grid"><label>Максимум участников<select name="capacity"><option>2</option><option>4</option><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label><label>Секунд на ход<select name="turnSeconds"><option>15</option><option>30</option><option selected>45</option><option>60</option></select></label></div>
+      <div class="tour-form-grid"><label>Максимум участников<select name="capacity"><option>2</option><option>4</option><option>8</option><option>16</option><option selected>32</option><option>64</option></select></label><label>Секунд на ход<select name="turnSeconds"><option>15</option><option>30</option><option selected>45</option><option>60</option></select></label></div>
       <div class="tour-form-grid">
-        <label>Запуск<select name="startMode"><option value="manual">Вручную</option><option value="scheduled">По расписанию</option></select></label>
-        <label id="tourStartTime" hidden>Дата и время (НСК)<input type="datetime-local" name="startTime" disabled></label>
+        <label>Запуск<select name="startMode"><option value="manual">Вручную</option><option value="scheduled" selected>По расписанию</option></select></label>
+        <label id="tourStartTime" hidden>Дата и время (МСК)<input type="datetime-local" name="startTime" disabled></label>
       </div>
       <p class="tour-muted" id="tourStartNote">Администратор запускает турнир кнопкой «Старт». Регистрация открыта до запуска.</p>
       <div class="tour-form-grid">
@@ -28,7 +28,7 @@
         <label id="tourBuyInLabel" hidden>Взнос, фишки<input name="buyIn" type="number" min="1" max="1000000" step="1" value="500"></label>
       </div>
       <div class="tour-form-grid">
-        <label>Тип приза<select name="prizeKind"><option value="chips">Фишки Poker21</option><option value="tickets">Билеты на покер</option></select></label>
+        <label>Тип приза<select name="prizeKind"><option value="chips">Фишки Poker21</option><option value="tickets" selected>Билеты на покер</option></select></label>
         <label id="tourPrizeFundLabel">Призовой фонд, фишки<input name="prizeFund" type="number" min="0" max="1000000" step="1" value="0"></label>
       </div>
       <p id="tourFundingNote" class="tour-muted"></p>

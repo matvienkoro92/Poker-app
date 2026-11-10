@@ -258,9 +258,9 @@ test('chat gets registration, half-full, start, live final and winner notices on
   const f = fixture({ notify: async payload => sent.push(payload) });
   const t = await f.create({ capacity: 2, roundTargets: [2], prizeKind: 'tickets', prizeAmounts: [1000, 500] });
   assert.equal(sent.length, 1);
-  assert.match(sent[0].text, /турнир по нардам/);
-  assert.match(sent[0].text, /Длинные нарды · Классические/);
-  assert.match(sent[0].text, /МСК[\s\S]*1-е место — билет на 1\s000 ₽\n2-е место — билет на 500 ₽\nМест: 2/);
+  assert.match(sent[0].text, /🎲 Турнир по нардам, вход 0/);
+  assert.match(sent[0].text, /🎯 Длинные классические/);
+  assert.match(sent[0].text, /МСК[\s\S]*1-е место — билет на 1\s000 ₽\n2-е место — билет на 500 ₽\n👥 Мест: 2/);
   assert.ok(sent[0].reply_markup.inline_keyboard[0][0].url.endsWith('nards_tour_' + t.id));
   await f.call('m1', 'join', t.id);
   assert.match(sent[1].text, /половина[\s\S]*1\. Игрок 1[\s\S]*Осталось мест: 1/);
