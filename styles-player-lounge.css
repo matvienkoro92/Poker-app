@@ -802,8 +802,6 @@
 .player-hall__room[data-garage-vehicle="7"] .garage-car-label{display:none}
 .player-hall__room[data-garage-vehicle="7"] .player-hall__camera-ui .garage-vehicle-switch>span{font-size:11px}
 
-/* Keep the board compact relative to the garage rather than car-sized. */
-.player-hall-dialog .player-hall__room[data-garage-vehicle="7"] .player-hall__parked-kart{scale:.60;transform-origin:50% 65%}
 
 /* Shared car-upgrade presentation for bicycles, scooters and Skyboard. */
 .player-hall-dialog .player-hall__room[data-space="garage"]:has(.micro-workshop)>.player-hall__camera-ui{display:none}
@@ -861,9 +859,13 @@
 .player-hall-dialog .micro-workshop .micro-part-symbol { display: grid; place-items: center; }
 .player-hall-dialog .micro-workshop .micro-part-symbol svg { width: 34px; height: 34px; }
 
-.player-hall__room[data-admin-garage="true"]:is([data-garage-vehicle="1"],[data-garage-vehicle="2"]) .player-hall__parked-kart {
-  scale: 1.18;
+.player-hall__room[data-space=garage] .player-hall__parked-kart {
+  top: 47%;
+  left: 41%;
+  scale: 1.45;
 }
+.player-hall__room[data-garage-vehicle="3"] .garage-locked-vehicle { width: 45%; left: 10%; }
+.player-hall__room[data-garage-vehicle="4"] .garage-locked-vehicle { width: 42%; left: 11%; }
 .player-hall-dialog .player-hall__camera-ui .garage-vehicle-switch:has(.garage-imported-upgrades) { max-height: none; }
 .player-hall__camera-ui .garage-vehicle-switch > .garage-imported-upgrades {
   grid-column: 1 / -1;
@@ -871,11 +873,26 @@
   height: 36px;
   font-size: 14px;
 }
-.garage-imported-workshop canvas { width: 100%; height: 150px; object-fit: contain; }
-.garage-imported-workshop form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-.garage-imported-workshop label { display: grid; gap: 4px; min-width: 0; font-size: 13px; }
-.garage-imported-workshop select { width: 100%; color: #f0dfbd; background: #222b2e; padding: 7px; border-radius: 8px; }
-.garage-imported-workshop form > :is(button,p) { grid-column: 1 / -1; }
-.garage-imported-workshop small a { color: #d5bd87; }
-.player-hall-dialog .garage-imported-workshop { max-height: min(55%, 460px); }
-.garage-imported-workshop canvas { flex: 0 0 150px; }
+
+.player-hall-dialog .player-hall__garage-scene .garage-radio-object {
+  left: 49%;
+  top: auto;
+  bottom: 87%;
+  width: 15%;
+}
+.player-hall-dialog .player-hall__garage-scene .garage-radio-object span {
+  top: 0;
+  bottom: auto;
+}
+.player-hall-dialog .garage-model-credit {
+  font-size: 10px;
+  text-align: center;
+}
+
+.player-hall__camera-ui .garage-vehicle-switch > .garage-city-entry {
+  background: #d9bd7f;
+  color: #17251d;
+  border-color: #f2daa0;
+  white-space: nowrap;
+  font-size: clamp(10px, 3vw, 12px);
+}

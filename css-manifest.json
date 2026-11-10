@@ -176,7 +176,8 @@
       "styles-hall-main-shell.css",
       "styles-hall-main-players.css",
       "styles-hall-main-responsive.css",
-      "styles-hall-footer.css"
+      "styles-hall-footer.css",
+      "styles-club-honors.css"
     ],
     "profile": [
       "styles-profile.css",

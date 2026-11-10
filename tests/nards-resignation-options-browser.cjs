@@ -12,7 +12,13 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
  // Leaving a paid game offers exactly the same settlement choice.
  await page.locator('#game [data-exit]').first().click();await dialog.waitFor({state:'visible'});await dialog.getByRole('button',{name:'Продолжить игру'}).click();
  await page.locator('[data-resign]').click();if(resignKind==='mars')await page.screenshot({path:'/tmp/nards-resignation-options.png'});
- await dialog.locator('[data-resign-kind="'+resignKind+'"]').click();await page.waitForFunction(()=>PokerBoardGames.inspect().wager.status==='paid');
+ await dialog.locator('[data-resign-kind="'+resignKind+'"]').click();
+ if(resignKind!=='koks'){
+  await page.waitForFunction(()=>PokerBoardGames.inspect().state.resignOffer?.player===0);
+  const offered=f.rooms.get(room.roomId);assert.equal(offered.state.winner,null);
+  await f.call('m2','move',room.roomId,{revision:offered.revision,move:{type:'resign-accept',points:resignKind==='single'?1:2}});
+ }
+ await page.waitForFunction(()=>PokerBoardGames.inspect().wager.status==='paid');
  const result=await page.evaluate(()=>PokerBoardGames.inspect());assert.equal(result.state.winKind,resignKind);assert.equal(result.wager.settledStake,amount);assert.deepEqual(errors,[]);await page.close();console.log('PASS '+discipline+' '+resignKind+': three choices, cancellation, exit menu and server settlement');
  }
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

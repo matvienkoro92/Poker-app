@@ -6,3 +6,19 @@ const forms={period:{start:100,end:200},providers:[]};
 test('AllFriends settlement counts both directions, excludes voided, unrelated and out-of-period rows',()=>{const c=context([{channelId:'other',counterparty:'allfriends',direction:'income',amount:1000000,createdAt:150},{channelId:'other',note:'Олл френдс',direction:'outgoing',amount:300000,createdAt:150},{channelId:'other',note:'AllFriends',direction:'income',amount:500000,createdAt:150},{channelId:'other',note:'AllFriends',counterparty:'other',direction:'income',amount:999999,createdAt:150},{channelId:'other',note:'Другое',direction:'income',amount:999999,createdAt:150},{channelId:'other',counterparty:'allfriends',direction:'income',amount:999999,createdAt:99},{channelId:'other',counterparty:'allfriends',direction:'income',amount:999999,createdAt:150,voidedAt:160}]);const totals=c.paymentFormsTotals(forms);assert.equal(totals.allfriendsSent,3200000);assert.equal(totals.allfriendsReceived,1500000);assert.equal(totals.allfriendsBalance,1700000);assert.match(c.paymentFormsTotalsHtml(forms),/Уход им/);});
 test('opposite and zero balances have correct creditor labels; manager filter applies',()=>{const rows=[{channelId:'other',counterparty:'allfriends',direction:'income',amount:3900000,createdAt:150,createdBy:'a'}];assert.match(context(rows).paymentFormsTotalsHtml(forms),/-1000000/);rows[0].amount=2900000;assert.match(context(rows).paymentFormsTotalsHtml(forms),/Итого<\/span><b>0/);const totals=context(rows,'b').paymentFormsTotals(forms);assert.equal(totals.allfriendsSent,0);assert.equal(totals.allfriendsReceived,0);});
 test('server persists explicit counterparty and retains it in edit audit history',()=>{const {applyOperation}=require('../lib/admin-deposits');let state=applyOperation(null,{action:'channel-operation',requestId:'allfriends_create_001',channelId:'other',direction:'income',counterparty:'allfriends',amount:10000,room:'P21',playerId:'123456'},'admin').state;const row=state.channelOperations[0];assert.equal(row.counterparty,'allfriends');state=applyOperation(state,{action:'edit-channel-operation',requestId:'allfriends_edit_001',operationId:row.id,editVersion:0,amount:10000,room:'P21',playerId:'123456',counterparty:'other'},'admin',Date.now(),'Admin',{canDelete:true}).state;assert.equal(state.channelOperations[0].counterparty,'other');assert.equal(state.channelOperations[0].edits[0].before.counterparty,'allfriends');});
+test('other deposits accept optional ZP, All Friends or only a comment and preserve edit history',()=>{
+ const {applyOperation}=require('../lib/admin-deposits');
+ for(const counterparty of ['zp','allfriends','other',undefined]){
+  let state=applyOperation(null,{action:'channel-operation',requestId:'optional_destination_001',channelId:'other',direction:'income',...(counterparty?{counterparty}:{}),amount:10000,room:'P21',playerId:'123456',note:'Комментарий'},'admin').state;
+  assert.equal(state.channelOperations[0].counterparty,counterparty);
+  assert.equal(state.channelOperations[0].note,'Комментарий');
+  state=applyOperation(state,{action:'edit-channel-operation',requestId:'optional_destination_edit',operationId:state.channelOperations[0].id,editVersion:0,amount:10000,room:'P21',playerId:'123456',counterparty:'zp',note:'Комментарий'},'admin',Date.now(),'Admin',{canDelete:true}).state;
+  assert.equal(state.channelOperations[0].counterparty,'zp');
+  assert.equal(state.channelOperations[0].edits[0].before.counterparty,counterparty||null);
+ }
+});
+test('other deposit form offers optional destinations and does not classify ZP as All Friends',()=>{
+ const c=context();const html=c.allFriendsField('other','zp');
+ assert.match(html,/>Не выбрано</);assert.match(html,/value="zp" selected/);assert.match(html,/>Алл френдс</);assert.doesNotMatch(html,/required/);
+ assert.equal(c.isAllFriendsOperation({channelId:'other',counterparty:'zp',note:'AllFriends'}),false);
+});

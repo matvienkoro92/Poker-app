@@ -148,8 +148,8 @@ function pokerInitHomeDeepLinks(opts) {
     if(nardsAppearance){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('long',null,false,nardsAppearance[1]);},['profile']);return;}
     var dartsLink=/^darts_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(dartsLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenDarts==='function'&&window.pokerOpenDarts(dartsLink[2],!!dartsLink[1]);},['profile']);return;}
-    var nardsTournament=/^nards_tour_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
-    if(nardsTournament){openHomeModalDeepLink(function(){return typeof window.pokerOpenNardsTournaments==='function'&&window.pokerOpenNardsTournaments(nardsTournament[1]);},['profile']);return;}
+    var nardsTournament=/^nards_tour_([A-HJ-NP-Z2-9]{10})(?:_([A-HJ-NP-Z2-9]{10}))?$/.exec(startParam);
+    if(nardsTournament){openHomeModalDeepLink(function(){return typeof window.pokerOpenNardsTournaments==='function'&&window.pokerOpenNardsTournaments(nardsTournament[1],nardsTournament[2]);},['profile']);return;}
     var boardLink=/^board_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(boardLink){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('chess',boardLink[2],!!boardLink[1]);},['profile']);return;}
     if(startParam==='nards'||startParam==='chess'){
@@ -198,13 +198,13 @@ function pokerInitHomeDeepLinks(opts) {
       return;
     }
     var clubNewsEventMatch = startParam.match(/^club_news_([a-z0-9]+)$/i);
-    if (startParam === "club_news" || clubNewsEventMatch) {
+    if (startParam === "club_news" || startParam === "club_feed" || clubNewsEventMatch) {
       window.pokerPendingClubNewsEventToken = clubNewsEventMatch ? clubNewsEventMatch[1].toLowerCase() : "";
       ensureHomeViewForDeepLink();
       retryDeepLinkAction(function () {
         if (typeof window.pokerOpenClubNewsModal !== "function") return false;
         if (!document.getElementById("homeFriendNewsModal")) return false;
-        window.pokerOpenClubNewsModal();
+        window.pokerOpenClubNewsModal(startParam === "club_feed" ? "news" : undefined);
         return true;
       }, 40);
       return;

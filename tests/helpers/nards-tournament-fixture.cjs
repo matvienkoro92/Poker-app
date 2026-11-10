@@ -28,7 +28,7 @@ module.exports = function fixture(options = {}) {
       } finally { locks.delete(id); }
     }
   };
-  const service = createService({ store, rooms, payments: options.payments, notify: options.notify, profile: rooms.profile, now: () => time, randomInt: () => 0, dice: () => [6, 1] });
+  const service = createService({ store, rooms, payments: options.payments, notify: options.notify, notifyPlayer: options.notifyPlayer, attendance: options.attendance, profile: rooms.profile, now: () => time, randomInt: () => 0, dice: () => [6, 1] });
   const call = (member, action, id, extra = {}) => service.call(member, { action, id, ...extra }, { admin: member === 'm0' });
   async function create(options = {}) {
     return call('m0', 'create', null, { requestId: 'test-tournament-0001', title: 'Кубок двух тузов', capacity: 4, startsAt: time + 120000, drawAt: time + 60000, target: 5, ...options });

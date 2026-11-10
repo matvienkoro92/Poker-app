@@ -221,6 +221,7 @@ test('prestige watches and rings have exact level gates and save independently',
   assert.equal(Garage.choose({watch:id},{stats:{level}}).watch,id);
  }
  for(const [id,[,level]]of Object.entries(G.ringDesigns)){
+  if(G.items.find(i=>i.kind==='ring'&&i.id===id).metric!=='level')continue;
   assert.throws(()=>Garage.choose({ring:id},{stats:{level:level-1}}),/не открыта/);
   const look=Garage.choose({ring:id,necklace:'goldChain',watch:'steelBlue'},{stats:{level}});
   assert.equal(look.ring,id);assert.equal(look.necklace,'goldChain');assert.equal(look.watch,'steelBlue');

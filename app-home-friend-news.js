@@ -1163,11 +1163,14 @@
   }
 
   function clubNewsTabsHtml() {
-    return '<div class="home-friend-news-modal__club-tabs" role="tablist" aria-label="Разделы новостей клуба">' +
+    return '<div class="home-friend-news-modal__club-tabs" role="group" aria-label="Разделы новостей клуба">' +
       '<button type="button" data-club-news-tab="wins" class="home-friend-news-modal__club-tab' +
         (clubNewsTab === "wins" ? ' home-friend-news-modal__club-tab--active' : '') + '"><span aria-hidden="true">🏆</span> Турниры</button>' +
       '<button type="button" data-club-news-tab="news" class="home-friend-news-modal__club-tab' +
-        (clubNewsTab === "news" ? ' home-friend-news-modal__club-tab--active' : '') + '">Лента новостей клуба</button></div>';
+        (clubNewsTab === "news" ? ' home-friend-news-modal__club-tab--active' : '') + '">Лента новостей клуба</button>' +
+      '<button type="button" class="home-friend-news-modal__copy-link" data-club-news-copy-feed aria-label="Копировать ссылку на ленту новостей клуба" title="Копировать ссылку">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
+      '</button></div>';
   }
 
   function clubCashCardsHtml(value) {
@@ -2539,12 +2542,14 @@
       actions: '<span class="home-friend-news-modal__action-row">' +
         (reactionButtons ? '<span class="chat-user-modal__news-actions">' + reactionButtons + '</span>' : '') +
         '<span class="home-friend-news-modal__action-controls">' +
-        '<button type="button" class="chat-user-modal__news-comment-toggle' +
+        (newsModalMode === "club"
+          ? '<span class="home-news-honors-slot" data-club-honors-nick="'+esc(row.actorNick||'')+'"></span>'
+          : '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b aria-hidden="true">↓</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
-        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>" +
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>") +
         (newsModalMode === "club" && shareToken
           ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-copy-event="' + esc(shareToken) +
             '" aria-label="Скопировать ссылку на новость" title="Скопировать ссылку">' +
@@ -3204,6 +3209,7 @@
     patchNewsList(list, clubTabs + achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite);
+    if(newsModalMode === "club" && window.pokerHydrateClubHonorsBadges)window.pokerHydrateClubHonorsBadges(list);
     window.setTimeout(focusPendingClubNewsEvent, 0);
   }
 
@@ -3634,10 +3640,11 @@
     if (copy) copy.hidden = newsModalMode !== "club";
   }
 
-  function copyClubNewsLink() {
+  function copyClubNewsLink(tab) {
+    var startParam = tab === "news" ? "club_feed" : "club_news";
     var link = typeof buildMiniAppStartLink === "function"
-      ? buildMiniAppStartLink("club_news")
-      : window.location.origin + window.location.pathname + "?startapp=club_news";
+      ? buildMiniAppStartLink(startParam)
+      : window.location.origin + window.location.pathname + "?startapp=" + startParam;
     function notify(copied) {
       var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
       var message = copied ? "Ссылка на новости клуба скопирована" : "Не удалось скопировать ссылку: " + link;
@@ -3732,8 +3739,8 @@
     load();
   }
 
-  function openClubModal() {
-    if (waitForNewsModalStyles(openClubModal)) return;
+  function openClubModal(tab) {
+    if (waitForNewsModalStyles(function () { openClubModal(tab); })) return;
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
     if (!clubEvents.length && clubNewsStaticRows().length) {
@@ -3741,7 +3748,7 @@
       clubNewsLoaded = clubEvents.length > 0;
     }
     newsModalMode = "club";
-    clubNewsTab = "wins";
+    clubNewsTab = tab === "news" ? "news" : "wins";
     syncNewsModalHeading();
     renderModalList(activeModalEvents(), true);
     modal.hidden = false;
@@ -3885,6 +3892,10 @@
           event.preventDefault();
           event.stopPropagation();
           copyClubNewsEventLink(eventCopyButton);
+          return;
+        }
+        if (event.target.closest("[data-club-news-copy-feed]")) {
+          copyClubNewsLink("news");
           return;
         }
         var clubTab = event.target.closest("[data-club-news-tab]");
@@ -4099,6 +4110,7 @@
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
+        if(event.target.closest("[data-club-honors-open]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerCard) {
@@ -4225,6 +4237,7 @@
       modal.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
+        if(event.target.closest("[data-club-honors-open]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         if (!playerCard) return;
         event.preventDefault();

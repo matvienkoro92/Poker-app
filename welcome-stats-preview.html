@@ -1,0 +1,41 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Статистика бонуса новичка</title><link rel="stylesheet" href="./styles.css"><style>body{background:#10131c;color:#ffe1a6;padding:16px}main{max-width:640px;margin:auto}</style><main><p>Админка → Бонусы · демонстрационные данные</p><section id="adminBonusesWelcomeTotals" class="admin-bonuses__activity-totals" hidden></section></main><script>if (["localhost","127.0.0.1","[::1]"].includes(location.hostname)) {
+  function $(id) {
+    return document.getElementById(id);
+  }
+  function esc(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function fmtPoints(value) {
+    var amount = Math.max(0, Math.floor(Number(value) || 0));
+    return amount.toLocaleString("ru-RU");
+  }
+  function syncWelcomeTotals(data) {
+    var el = $("adminBonusesWelcomeTotals");
+    if (!el) return;
+    el.hidden = false;
+    if (!data || !data.available) {
+      el.textContent = "Статистика бонуса новичка временно недоступна.";
+      return;
+    }
+    var counts = data.counts;
+    var items = [
+      ["За регистрацию", counts.register],
+      ["За вступление в чат", counts.chat],
+      ["За подписку на канал", counts.channel],
+      ["За запуск бота", counts.bot],
+      ["За привязку Poker21", counts.poker],
+      ["Всего выдано бонусов на крутки", data.spinBonuses],
+      ["Начислено на бонусный баланс", fmtPoints(data.bonusRubles) + " ₽"]
+    ];
+    el.innerHTML = '<h3>Бонус новичка · выданные награды</h3><div class="admin-bonuses__activity-grid">' +
+      items.map(function (item) {
+        var value = typeof item[1] === "number" ? fmtPoints(item[1]) : item[1];
+        return "<div><span>" + esc(item[0]) + "</span><strong>" + esc(value) + "</strong></div>";
+      }).join("") + "</div>";
+  }
+syncWelcomeTotals({available:true,counts:{register:24,chat:18,channel:15,bot:12,poker:8},spinBonuses:69,bonusRubles:2400});
+}</script></html>

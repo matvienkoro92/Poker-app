@@ -27,6 +27,7 @@ const handlers = {
   "club-cash-replay": () => require(path.join(handlersDir, "club-cash-replay.js")),
   "club-reviews": () => require(path.join(handlersDir, "club-reviews.js")),
   "profile-hero": () => require(path.join(handlersDir, "profile-hero.js")),
+  "club-honors": () => require(path.join(handlersDir, "club-honors.js")),
   "player-hall": () => require(path.join(handlersDir, "player-hall.js")),
   "profile-appearance": () => require(path.join(handlersDir, "profile-appearance.js")),
   "auth-telegram": () => require(path.join(handlersDir, "auth-telegram.js")),
@@ -141,19 +142,21 @@ module.exports = async function handler(req, res) {
     res.status(404).json({ ok: false, error: "Not found" });
     return;
   }
-  try {
-    if (await require("../lib/session-revocation").rejectRevokedSessions(req, res)) return;
-    if (await require("../lib/app-user-blocks").rejectBlockedRequestIdentity(req, res)) return;
-    if (await require("../lib/app-request-block").rejectBlockedAuthenticatedRequest(req, res)) return;
-    const fn = handlers[segment]();
-    const handlerFn = typeof fn === "function" ? fn : fn.default || fn;
-    await handlerFn(req, res);
-  } catch (e) {
-    console.error(e);
-    if (segment === "player-crm") {
-      res.status(500).json({ ok: false, error: "CRM API error", code: "crm_unhandled" });
-      return;
+  return require("../lib/redis").withRouteAudit(segment, req, res, async () => {
+    try {
+      if (await require("../lib/session-revocation").rejectRevokedSessions(req, res)) return;
+      if (await require("../lib/app-user-blocks").rejectBlockedRequestIdentity(req, res)) return;
+      if (await require("../lib/app-request-block").rejectBlockedAuthenticatedRequest(req, res)) return;
+      const fn = handlers[segment]();
+      const handlerFn = typeof fn === "function" ? fn : fn.default || fn;
+      await handlerFn(req, res);
+    } catch (e) {
+      console.error(e);
+      if (segment === "player-crm") {
+        res.status(500).json({ ok: false, error: "CRM API error", code: "crm_unhandled" });
+        return;
+      }
+      res.status(500).json({ ok: false, error: "Server error" });
     }
-    res.status(500).json({ ok: false, error: "Server error" });
-  }
+  });
 };

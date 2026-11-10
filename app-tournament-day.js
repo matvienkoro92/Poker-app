@@ -10,6 +10,7 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
   {
     name: "Меджик",
     buyin: "5 000₽",
+    historyKey: "sundayMagic5000",
     guarantee: "500 000₽",
     banner: HOME_TOURNAMENT_SUNDAY_BANNER_FILE,
     bannerAlt: "Poker21 Меджик — вход 5 000₽, гарантия 500 000₽",

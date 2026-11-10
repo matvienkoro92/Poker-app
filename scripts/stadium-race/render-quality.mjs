@@ -1,0 +1,5 @@
+// Change resolution only after sustained pressure; ignore pauses and loading spikes.
+export function createRenderQuality(deviceRatio=1){
+ const ceiling=Math.min(1.5,Math.max(1,deviceRatio));let ratio=ceiling,average=16.7,samples=0,cooldown=0,total=0,totalMs=0,slow=0,ring=[];
+ return {sample(ms,active=true){if(!active||!Number.isFinite(ms)||ms<=0||ms>=1000){samples=0;return null;}total++;totalMs+=ms;if(ms>33.4)slow++;ring.push(ms);if(ring.length>300)ring.shift();average+=(Math.min(ms,120)-average)*.04;if(cooldown>0){cooldown--;return null;}samples+=ms>100?4:1;if(samples<120)return null;samples=0;let next=ratio;if(average>27)next=Math.max(1,ratio-.25);else if(average<18)next=Math.min(ceiling,ratio+.25);if(next===ratio)return null;ratio=next;cooldown=240;return ratio;},snapshot(){const sorted=[...ring].sort((a,b)=>a-b);return {pixelRatio:ratio,frameMs:Math.round(average*10)/10,frames:total,averageFps:totalMs?Math.round(total/totalMs*10000)/10:null,p95FrameMs:sorted.length?Math.round(sorted[Math.min(sorted.length-1,Math.floor(sorted.length*.95))]*10)/10:null,slowFrames:slow};}};
+}

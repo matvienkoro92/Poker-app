@@ -132,7 +132,8 @@
       "app-tournament-day.js",
       "app-tournament-share.js",
       "app-tournament-bet.js",
-      "app-hall-fame.js"
+      "app-hall-fame.js",
+      "app-club-honors.js"
     ],
     "profile": [
       "app-profile-hero.js",

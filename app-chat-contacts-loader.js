@@ -117,6 +117,16 @@ function pokerFetchContactsJson(url, opts) {
   } catch (eTraceContactsStart) {}
   return fetch(url, fetchOpts)
     .then(function (r) {
+      if (!r.ok) {
+        var error = new Error("Contacts HTTP " + r.status);
+        error.status = r.status;
+        var retryAfter = r.headers.get("Retry-After");
+        var retrySeconds = Number(retryAfter);
+        error.retryAfterMs = retryAfter && Number.isFinite(retrySeconds)
+          ? Math.max(0, retrySeconds * 1000)
+          : Math.max(0, Date.parse(retryAfter) - Date.now()) || 0;
+        throw error;
+      }
       return r.json();
     })
     .then(function (data) {
@@ -207,6 +217,33 @@ function mergeContactsPresencePayload(fullData, presenceData) {
 }
 
 
+var contactsRetryTimer = 0;
+var contactsRetryUntil = 0;
+var contactsFailures = 0;
+window.addEventListener("poker-auth-changed", function () {
+  clearTimeout(contactsRetryTimer);
+  contactsRetryTimer = 0;
+  contactsRetryUntil = 0;
+  contactsFailures = 0;
+});
+function contactsViewActive() {
+  return !!document.querySelector('[data-view="chat"].view--active') && !document.hidden;
+}
+function retryContacts(opts, status, retryAfterMs) {
+  if (status === 401 || status === 403) {
+    contactsRetryUntil = Date.now() + 30000;
+    return;
+  }
+  if (contactsRetryTimer) return;
+  contactsFailures += 1;
+  var delay = Math.max(retryAfterMs || 0, Math.min(30000, 750 * Math.pow(2, Math.min(contactsFailures - 1, 6))));
+  contactsRetryUntil = Date.now() + delay;
+  if (!contactsViewActive() || contactsFailures > 4) return;
+  contactsRetryTimer = setTimeout(function () {
+    contactsRetryTimer = 0;
+    if (contactsViewActive()) loadContacts(Object.assign({}, opts, {forceRerender: true}));
+  }, delay);
+}
 function loadContacts(opts) {
   opts = opts || {};
   try {
@@ -219,7 +256,7 @@ function loadContacts(opts) {
       onContactsLoaded();
     } catch (eFireLc) {}
   }
-  if (!getContactsEl()) return;
+  if (!getContactsEl() || Date.now() < contactsRetryUntil) return;
   var isTelegramMiniChat = !!(window.Telegram && window.Telegram.WebApp);
   if (isTelegramMiniChat) {
     forceHideChatGuestGateForTelegram();
@@ -438,16 +475,8 @@ function applyContactsApiResponse(data, opts) {
             at: Date.now(),
           };
         } catch (eContactsApiErrTrace) {}
-        var apiRetryCount = Number(opts.__retryCount || 0) || 0;
-        if (apiRetryCount < 4) {
-          setTimeout(function () {
-            try {
-              loadContacts(Object.assign({}, opts, { __retryCount: apiRetryCount + 1, forceRerender: true }));
-            } catch (eRetryContactsApiFalse) {}
-          }, Math.min(6000, 700 * Math.pow(2, apiRetryCount)));
-        } else {
-          clearContactsLoadingSkeletonFallback("Повторяем загрузку списка диалогов…");
-        }
+        clearContactsLoadingSkeletonFallback("Не удалось загрузить список диалогов.");
+
       }
     }
   }
@@ -479,32 +508,6 @@ function applyContactsApiResponse(data, opts) {
     applyContactsApiResponse: applyContactsApiResponse,
     fireContactsLoaded: fireContactsLoaded,
   });
-  if (isFullContactsLoad && !opts.fastList && !opts.__fastShadowStarted) {
-    setTimeout(function () {
-      try {
-        var contacts = getContactsEl();
-        if (!contacts || !contacts.querySelector || !contacts.querySelector(".chat-empty--skeleton")) return;
-        loadContacts(Object.assign({}, opts, {
-          fastList: true,
-          fastBare: true,
-          __fastShadowStarted: true,
-          __retryCount: 0,
-          forceRerender: true,
-        }));
-      } catch (eFastContactsStart) {}
-    }, 0);
-    setTimeout(function () {
-      try {
-        loadContacts(Object.assign({}, opts, {
-          fastList: true,
-          fastBare: false,
-          __fastShadowStarted: true,
-          __retryCount: 0,
-          forceRerender: true,
-        }));
-      } catch (eFastRichContactsStart) {}
-    }, 80);
-  }
   var contactsFetchScope = presenceOnly
     ? "presence"
     : metaOnly
@@ -519,6 +522,15 @@ function applyContactsApiResponse(data, opts) {
     .then(function (data) {
       if (isFullContactsLoad && !opts.fastList) window.__pokerChatContactsFullLoadInFlight = false;
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
+      if (data && data.ok === false) {
+        var authError = /auth|login|credential|initData|треб|войд/i.test(String(data.error || ""));
+        retryContacts(opts, authError ? 401 : 503);
+      } else {
+        contactsFailures = 0;
+        contactsRetryUntil = 0;
+        clearTimeout(contactsRetryTimer);
+        contactsRetryTimer = 0;
+      }
       if (data && data.ok && data.contactsPresenceOnly) {
         var mergedPresenceData = mergeContactsPresencePayload(window.__pokerLastContactsApiData, data);
         if (mergedPresenceData) {
@@ -561,22 +573,14 @@ function applyContactsApiResponse(data, opts) {
         };
       } catch (eTraceContactsErr) {}
       if (contactsFetchGen !== window.__pokerContactsFetchGen) return;
-      if (isFullContactsLoad) {
-        var retryCount = Number(opts.__retryCount || 0) || 0;
-        if (retryCount < 4) {
-          setTimeout(function () {
-            try {
-              loadContacts(Object.assign({}, opts, {
-                __retryCount: retryCount + 1,
-                fastList: retryCount < 2 ? true : !!opts.fastList,
-                forceRerender: true,
-              }));
-            } catch (eRetryContacts) {}
-          }, Math.min(6000, 700 * Math.pow(2, retryCount)));
-        }
+      retryContacts(opts, err && err.status, err && err.retryAfterMs);
+      if (err && (err.status === 401 || err.status === 403)) {
+        clearContactsLoadingSkeletonFallback("Войдите в аккаунт, чтобы увидеть список диалогов.");
+        fireContactsLoaded();
+        return;
       }
       pokerHandleChatContactsFetchError({
-        contactsInstantFromCache: contactsInstantFromCache || (isFullContactsLoad && (Number(opts.__retryCount || 0) || 0) < 4),
+        contactsInstantFromCache: contactsInstantFromCache || !!contactsRetryTimer,
         contactsEl: getContactsEl(),
         waitForChange: opts.waitForChange,
         metaOnly: metaOnly,

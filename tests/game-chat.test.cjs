@@ -1,7 +1,7 @@
-const test=require('node:test'),assert=require('node:assert/strict'),{handle,SEND,RATE}=require('../lib/game-chat');
+const test=require('node:test'),assert=require('node:assert/strict'),{handle,SEND,RATE,READ}=require('../lib/game-chat');
 function fixture(family='board-games',discipline='chess'){
  const room={players:['host','guest'],playerProfiles:[{name:'Автор'},{name:'Друг'}],state:{discipline,winner:null},expires:100000};const messages=[],saved=new Map();let time=1000,seq=0,cooldown=false;const calls=[];
- const commands=async rows=>rows.map(([op,...a])=>{calls.push(op);if(op==='GET')return JSON.stringify(room);if(op==='LRANGE')return messages.slice(-80).map(JSON.stringify);if(op==='EVAL'&&a[0]===RATE)return 1;if(op==='EVAL'&&a[0]===SEND){const key=a[4];if(saved.has(key))return saved.get(key);if(cooldown)return '';const m={...JSON.parse(a[6]),sequence:++seq},encoded=JSON.stringify(m);saved.set(key,encoded);messages.push(m);return encoded;}throw Error(op);});
+ const commands=async rows=>rows.map(([op,...a])=>{calls.push(op);if(op==='GET')return JSON.stringify(room);if(op==='EVAL'&&a[0]===READ)return [seq,messages.slice(-80).filter(m=>m.sequence>Number(a[4])).map(JSON.stringify)];if(op==='EVAL'&&a[0]===RATE)return 1;if(op==='EVAL'&&a[0]===SEND){const key=a[4];if(saved.has(key))return saved.get(key);if(cooldown)return '';const m={...JSON.parse(a[6]),sequence:++seq},encoded=JSON.stringify(m);saved.set(key,encoded);messages.push(m);return encoded;}throw Error(op);});
  const f={family,member:'host',body:{action:'chat-send',roomId:'ABCDEFGHJK',text:'Привет!',messageId:'abcdefghijklmnop'},commands,now:()=>time};return {f,room,messages,calls,cooldown:v=>cooldown=v};
 }
 for(const family of ['board-games','billiards'])test(family+': messages are scoped, server named, idempotent and independent from game state',async()=>{

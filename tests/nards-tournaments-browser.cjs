@@ -22,6 +22,7 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   await context.route('https://nards-tour.test/**',async route=>{
    const req=route.request(),url=new URL(req.url()),who=req.headers()['x-test-member']||member;
    if(url.pathname==='/api/nards-tournaments'||url.pathname==='/api/board-games'){
+    if(url.searchParams.has('avatar'))return route.fulfill({path:path.join(root,'assets/avatar-tiger-display-v1.webp')});
     const body=req.postDataJSON();requests.push([who,url.pathname,body.action]);
     try{const result=url.pathname.endsWith('nards-tournaments')?await f.call(who,body.action,body.id,body):await boardCall(who,body);return route.fulfill({json:result});}catch(e){return route.fulfill({status:e.status||503,json:{ok:false,error:e.message}});}
    }
@@ -33,7 +34,7 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   await admin.locator('#tourCreate').click();
   await admin.locator('[name=title]').fill('Кубок двух тузов · тест');await admin.locator('[name=capacity]').selectOption('4');
   await admin.locator('[name=prizeKind]').selectOption('tickets');
-  assert.equal(await admin.locator('[name=entryType]').isDisabled(),true);
+  assert.equal(await admin.locator('[name=entryType]').inputValue(),'free');
   await admin.locator('[name=manualPrizePlaces]').fill('4');
   const amounts=admin.locator('#tourPrizeShares input');
   for(const [i,n] of [1000,500,300,300].entries())await amounts.nth(i).fill(String(n));
@@ -43,6 +44,7 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   await amounts.nth(3).fill('300');
   await admin.screenshot({path:path.join(out,'ticket-settings-mobile.png')});
   await admin.locator('[name=prizeKind]').selectOption('chips');
+  await admin.locator('[name=prizeFund]').fill('6000');
   await admin.locator('[name=prizeMode]').selectOption('fixed');
   await admin.locator('[name=manualPrizePlaces]').fill('2');
   await amounts.nth(0).fill('4200');await amounts.nth(1).fill('1800');
@@ -71,11 +73,21 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   for(let i=1;i<=4;i++){
    const p=await pageFor('m'+i);players.set('m'+i,p);await p.goto('https://nards-tour.test/nards-tournaments.html?id='+id);
    await p.locator('[data-tour-action=join]').click();await p.waitForFunction(()=>!!PokerNardsTournaments.inspect().data?.self);
-   await p.locator('[data-tour-action=ready]').click();await p.waitForFunction(()=>PokerNardsTournaments.inspect().data?.self?.ready===true);
    assert.equal(await p.locator('#tourCreate').isVisible(),false);
   }
+  await admin.locator('.tour-entry').nth(3).waitFor();
+  await admin.locator('.tour-entry img').first().scrollIntoViewIfNeeded();
+  await admin.waitForFunction(()=>document.querySelector('.tour-entry img')?.naturalWidth>0);
+  assert.equal(await admin.locator('.tour-entry-remove').count(),4);
+  assert.equal(await admin.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await admin.locator('.tour-participants').screenshot({path:path.join(out,'participants-mobile.png')});
   await admin.locator('[data-tour-action=start]').waitFor({state:'visible'});await admin.waitForFunction(()=>!document.querySelector('[data-tour-action=start]').disabled);await admin.locator('[data-tour-action=start]').click();
   await admin.waitForFunction(()=>PokerNardsTournaments.inspect().data?.rounds.length===2);
+  for(const player of players.values()){
+   await player.getByRole('button',{name:'Подтвердить готовность'}).click();
+   await player.waitForFunction(()=>PokerNardsTournaments.inspect().data?.self?.ready===true);
+  }
+  await admin.locator('.tour-entry-remove').first().waitFor({state:'detached'});
   const first=f.tournaments.get(id).rounds[0].matches;
   const r1=f.roomMap.get(first[0].roomId),r2=f.roomMap.get(first[1].roomId);
   const p=players.get(r1.players[0]);await p.waitForFunction(()=>!!PokerNardsTournaments.inspect().ownRoom);
@@ -89,17 +101,50 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   await f.finish(r1.id,0,1);await f.service.synchronize(id);
   await p.waitForFunction(old=>PokerNardsTournaments.inspect().ownRoom!==old&&!!PokerNardsTournaments.inspect().ownRoom,r1.id);
   const waitingRoom=await p.evaluate(()=>PokerNardsTournaments.inspect().ownRoom);
+  const expectedPair='Ждём победителя пары «'+r2.players.map(member=>f.profiles.get(member).name).join(' — ')+'»';
+  await admin.getByText(expectedPair,{exact:true}).waitFor();
+  assert.equal(await admin.locator('.tour-bracket-lines path').count(),2);
+  const layout=await admin.evaluate(()=>['#tourDetail','.tour-tabs','.sng-champions-modal__bracket-map-wrap'].map(selector=>{
+   const {left,right}=document.querySelector(selector).getBoundingClientRect();
+   return [Math.round(left),Math.round(right),document.documentElement.clientWidth];
+  }));
+  for(const [left,right,viewport] of layout)assert.deepEqual([left,right],[0,viewport]);
+  await admin.locator('.sng-champions-modal__bracket-map-wrap').screenshot({path:path.join(out,'bracket-connections.png')});
+
+  const linked=await pageFor(r1.players[0]);
+  await linked.goto('https://nards-tour.test/nards-tournaments.html?id='+id+'&room='+waitingRoom);
+  await linked.waitForFunction(room=>PokerNardsTournaments.inspect().tab==='game'&&PokerNardsTournaments.inspect().ownRoom===room,waitingRoom);
+  await linked.context().close();
+
   await p.waitForFunction(()=>PokerNardsTournaments.inspect().data?.self?.opponentRoomId!=null);
   await p.getByRole('button',{name:'Смотреть будущего соперника'}).click();
   await p.waitForFunction(()=>document.querySelector('#tourWatchFrame iframe')?.contentWindow?.PokerBoardGames?.inspect().spectator===true);
-  assert.equal(await p.evaluate(()=>document.querySelector('#tourOwnFrame iframe').isConnected),true,'own game remains mounted while spectating');
+  const watched=p.frameLocator('#tourWatchFrame iframe');
+  await watched.locator('#matchup [data-player="0"] .player-checker > .checker:not(.black)').waitFor();
+  await watched.locator('#matchup [data-player="1"] .player-checker > .checker.black').waitFor();
+  assert.equal(await p.locator('#watchTitle').count(),0);
+  const tabs=await p.locator('.tour-tabs').boundingBox();
+  assert.ok(Math.abs(tabs.x)<1 && Math.abs(tabs.width-await p.evaluate(()=>document.documentElement.clientWidth))<1);
   await p.screenshot({path:path.join(out,'watching-opponent.png')});await p.locator('#returnOwn').click();
   assert.equal(await p.evaluate(()=>PokerNardsTournaments.inspect().ownRoom),waitingRoom);
+  assert.equal(new URL(await p.locator('#tourOwnFrame iframe').getAttribute('src'),'https://nards-tour.test').searchParams.get('room'),waitingRoom);
   f.time(f.now()+20000);await f.finish(r2.id,0,1);await f.service.synchronize(id);
   await p.waitForFunction(()=>PokerNardsTournaments.inspect().data?.rounds[1].matches[0].startsAt!=null);
-  const final=f.tournaments.get(id).rounds[1].matches[0];assert.equal(final.roomId,waitingRoom);assert.equal(final.startsAt,f.now()+300000);
-  await p.screenshot({path:path.join(out,'five-minute-break.png')});
-  f.time(final.startsAt);await f.service.synchronize(id);
+  const final=f.tournaments.get(id).rounds[1].matches[0];assert.equal(final.roomId,waitingRoom);assert.equal(final.startsAt,f.now()+180000);
+  await own().getByText('Перерыв перед новым раундом',{exact:true}).waitFor();
+  await own().locator('#clock').waitFor({state:'visible'});
+  assert.match(await own().locator('#clock').textContent(),/^(?:3:00|2:[0-5]\d)$/);
+  await p.screenshot({path:path.join(out,'three-minute-break.png')});
+  await own().getByRole('button',{name:'Я готов',exact:true}).click();
+  await own().getByRole('button',{name:'Ждём готовности соперника',exact:true}).waitFor();
+  assert.equal(f.roomMap.get(waitingRoom).tournament.active,false);
+  const finalist=players.get(r2.players[0]);
+  await finalist.waitForFunction(room=>PokerNardsTournaments.inspect().data?.self?.roomId===room,waitingRoom);
+  await finalist.locator('[data-tour-tab=game]').click();
+  await finalist.frameLocator('#tourOwnFrame iframe').getByRole('button',{name:'Я готов',exact:true}).click();
+  await p.waitForFunction(()=>PokerNardsTournaments.inspect().data?.rounds[1].matches[0].startedAt!=null);
+  assert.ok(f.roomMap.get(waitingRoom).tournament.startsAt<final.startsAt);
+
   await p.waitForFunction(()=>document.querySelector('#tourOwnFrame iframe')?.contentWindow?.PokerBoardGames?.inspect().state?.phase==='moving');
   await f.finish(waitingRoom,0,2);await f.service.synchronize(id);assert.deepEqual(f.roomMap.get(waitingRoom).match.wins,[2,0]);
   f.time(f.now()+5000);await f.service.synchronize(id);await f.finish(waitingRoom,0,3);await f.service.synchronize(id);
@@ -107,6 +152,6 @@ const root=path.resolve(process.env.TOUR_BUILD_ROOT||process.cwd()),out=path.joi
   const rowBox=await p.locator('.sng-champions-modal__map-player').first().boundingBox();assert.ok(rowBox.width>120&&rowBox.height>=18,'player names stay readable inside bracket cards');await p.screenshot({path:path.join(out,'champion-bracket.png')});
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'bracket scroll is contained');
   assert.deepEqual(errors,[]);assert.ok(requests.some(r=>r[2]==='move'));
-  console.log('PASS',process.env.BROWSER||'chromium','create/register/ready/draw/start/real move/wait/watch/return/5-minute break/mars/koks/champion');
+  console.log('PASS',process.env.BROWSER||'chromium','create/register/ready/draw/start/real move/wait/watch/return/3-minute break/mars/koks/champion');
  }catch(e){console.error('Browser errors:',errors,'Requests:',requests);for(let i=0;i<contexts.length;i++){const page=contexts[i].pages()[0];if(page){console.error('Page',i,await page.locator('#tourError').textContent().catch(()=>''));await page.screenshot({path:path.join(out,'failure-'+i+'.png')}).catch(()=>{});}}throw e;}finally{for(const c of contexts)await c.close();await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -8,7 +8,7 @@ vm.runInContext(source.slice(0,source.indexOf('// Raffles broadcast runtime:'))+
  const a=cash('cash1',7,1000),b=cash('cash2',25,200),ticket={id:'ticket',status:'active',title:'Турнир',totalWinners:3,groups:[{count:3,prize:'10000 ₽'}]};
  context.rafflesActiveBroadcastList=[a,b];
  let url='';const rows=await context.pokerRaffleBroadcastLoadActiveList('https://example.test','?auth=test',async u=>{url=u;return {ok:true,json:async()=>({ok:true,raffles:[a,b,ticket,{...ticket,id:'old',status:'completed'}],activeRaffles:[a,b]})};});
- assert.equal(rows.length,3);assert.match(url,/bypassListCache=1/);assert.ok(!url.includes('scope=active'));
+ assert.equal(rows.length,3);assert.match(url,/bypassListCache=1/);assert.match(url,/scope=broadcast/);
  const body=context.raffleManualBroadcastBodyFromCurrentRaffle(rows);
  assert.equal(body.activeRafflesCount,3);assert.match(body.message,/Стартовали 3 розыгрыша/);assert.match(body.message,/3 билета/);assert.match(body.message,/7 беккинг-байинов/);assert.match(body.message,/25 беккинг-байинов/);
  await assert.rejects(()=>context.pokerRaffleBroadcastLoadActiveList('','?x=1',async()=>({ok:false,json:async()=>({ok:false})})),/не отправлена/);

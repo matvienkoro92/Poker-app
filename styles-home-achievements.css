@@ -135,3 +135,11 @@ body[data-view="home"] #app.app .card .card__content {
 .home-honors-row__hall:hover{border-color:#ffe0a0;filter:brightness(1.15)}
 .home-honors-row__hall:focus-visible{outline:2px solid #ffe2a1;outline-offset:3px}
 @media(max-width:380px){.app.app--view-home .home-honors-row{gap:7px}.home-honors-row__hall{border-radius:11px;padding:5px 3px;gap:3px}.home-honors-row__hall>span{font-size:8px}}
+
+/* Small emblems leave the notification copy room and keep the cards compact. */
+.app.app--view-home .home-alerts .home-alerts__button{grid-template-columns:28px minmax(0,1fr);gap:8px;min-height:112px;padding:12px 10px 10px}
+.home-alerts__icon{width:28px;height:30px;align-self:start;margin-top:4px}
+.home-alerts__copy{gap:4px}
+.home-alerts__button strong{font-size:16px}
+.home-alerts__action{padding:7px 9px}
+@media(max-width:380px){.app.app--view-home .home-alerts .home-alerts__button{grid-template-columns:24px minmax(0,1fr);gap:6px;padding:11px 8px 9px}.home-alerts__icon{width:24px;height:26px}.home-alerts__button strong{font-size:14px}}

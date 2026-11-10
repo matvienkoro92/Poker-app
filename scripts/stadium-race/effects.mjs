@@ -1,7 +1,7 @@
 import * as T from '../../vendor/three/three.module.min.js';
 
 export function createRaceEffects(scene){
- const count=128,position=new Float32Array(count*3),colors=new Float32Array(count*3),sizes=new Float32Array(count),alpha=new Float32Array(count),particles=Array.from({length:count},()=>({life:0}));let cursor=0,markCursor=0,lastTick=-1,lastCrash=-1;
+ const count=128,position=new Float32Array(count*3),colors=new Float32Array(count*3),sizes=new Float32Array(count),alpha=new Float32Array(count),particles=Array.from({length:count},()=>({life:0}));let cursor=0,markCursor=0,lastTick=-1,lastCrash=-1,lastImpact=-1;
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(position,3));geometry.setAttribute('color',new T.BufferAttribute(colors,3));geometry.setAttribute('size',new T.BufferAttribute(sizes,1));geometry.setAttribute('alpha',new T.BufferAttribute(alpha,1));
  const material=new T.ShaderMaterial({transparent:true,depthWrite:false,vertexColors:true,uniforms:{pixelRatio:{value:Math.min(devicePixelRatio||1,1.75)}},vertexShader:'attribute float size; attribute float alpha; varying vec3 tint; varying float opacity; uniform float pixelRatio; void main(){vec4 p=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*p;gl_PointSize=clamp(size*300.*pixelRatio/max(1.,-p.z),1.,48.);tint=color;opacity=alpha;}',fragmentShader:'varying vec3 tint; varying float opacity; void main(){float r=length(gl_PointCoord-.5)*2.;if(r>1.)discard;gl_FragColor=vec4(tint,opacity*(1.-smoothstep(.25,1.,r)));}'});
  const points=new T.Points(geometry,material);points.frustumCulled=false;scene.add(points);
@@ -10,8 +10,9 @@ export function createRaceEffects(scene){
  return {update(s,p,mobility=false){if(s.tick===lastTick)return;const delta=lastTick<0?1:Math.min(6,Math.max(1,s.tick-lastTick));lastTick=s.tick;
   if(!mobility&&s.speed>2&&!s.air&&(s.drift||s.speed>3&&s.steering&&s.spin))for(const side of [-1,1]){const x=p.x+Math.cos(p.a)*side-.9*Math.sin(p.a),z=p.z-Math.sin(p.a)*side-.9*Math.cos(p.a);emit(x,p.y+.18,z,'smoke',s.tick,side);if(s.tick%3===0){dummy.position.set(x,p.y+.025,z);dummy.rotation.set(-Math.PI/2,0,p.a);dummy.updateMatrix();marks.setMatrixAt(markCursor++%96,dummy.matrix);marks.count=Math.min(96,markCursor);marks.instanceMatrix.needsUpdate=true;}}
   if(s.boost&&!mobility&&s.speed>3)for(const side of [-1,1])emit(p.x-Math.sin(p.a)*1.7+Math.cos(p.a)*side*.4,p.y+.4,p.z-Math.cos(p.a)*1.7-Math.sin(p.a)*side*.4,'turbo',s.tick,side);
+  if(s.impact&&s.impact.started!==lastImpact){lastImpact=s.impact.started;const side=s.impact.axis==='x'?s.impact.side:0,front=s.impact.axis==='z'?-s.impact.side*2.2:0;for(let n=0;n<Math.round(4+s.impact.strength*12);n++)emit(p.x+Math.cos(p.a)*side+Math.sin(p.a)*front,p.y+.5,p.z-Math.sin(p.a)*side+Math.cos(p.a)*front,'spark',s.tick,n);}
   if(s.crash&&s.crash.started!==lastCrash){lastCrash=s.crash.started;for(let n=0;n<16;n++)emit(p.x,p.y+.6,p.z,'spark',s.tick,n);}
   for(let i=0;i<count;i++){const q=particles[i];if(q.life<=0){alpha[i]=0;continue;}q.life-=delta;q.x+=q.vx*delta;q.y+=q.vy*delta;q.z+=q.vz*delta;if(q.type==='spark')q.vy-=.007*delta;position.set([q.x,q.y,q.z],i*3);alpha[i]=Math.max(0,q.life/q.total)*(q.type==='smoke'?.4:1);sizes[i]=q.type==='smoke'?.25+(1-q.life/q.total)*.65:q.type==='turbo'?.22:.09;}
   for(const key of ['position','color','size','alpha'])geometry.attributes[key].needsUpdate=true;
- },reset(){particles.forEach(p=>p.life=0);alpha.fill(0);geometry.attributes.alpha.needsUpdate=true;marks.count=0;markCursor=0;lastTick=-1;lastCrash=-1;},snapshot(){return {particles:particles.filter(p=>p.life>0).length,marks:marks.count};}};
+ },reset(){particles.forEach(p=>p.life=0);alpha.fill(0);geometry.attributes.alpha.needsUpdate=true;marks.count=0;markCursor=0;lastTick=-1;lastCrash=-1;lastImpact=-1;},snapshot(){return {particles:particles.filter(p=>p.life>0).length,marks:marks.count};}};
 }

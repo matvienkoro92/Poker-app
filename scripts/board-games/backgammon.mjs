@@ -102,7 +102,7 @@ export function undoBackgammonStep(s,player){if(!canUndoBackgammon(s,player))ret
 export function backgammonRollHistory(s){if(Array.isArray(s.rollHistory))return s.rollHistory;const result=[];for(const m of s.moves||[]){if(!Array.isArray(m.roll)||m.roll.length!==2)continue;const prior=result.at(-1);if(!prior||prior.player!==m.player||prior.dice.some((n,i)=>n!==m.roll[i]))result.push({player:m.player,dice:[...m.roll]});}return result;}
 
 export function backgammonPipTotals(s,player){
- const rolled=backgammonRollHistory(s).filter(row=>row.player===player).reduce((sum,row)=>sum+(row.dice[0]===row.dice[1]?(s.variant==='crazy'?Array.from({length:7-row.dice[0]},(_,i)=>(row.dice[0]+i)*4).reduce((a,b)=>a+b,0):row.dice[0]*4):row.dice[0]+row.dice[1]),0);
+ const rolled=backgammonRollHistory(s).filter(row=>row.player===player&&!row.opening).reduce((sum,row)=>sum+(row.dice[0]===row.dice[1]?(s.variant==='crazy'?Array.from({length:7-row.dice[0]},(_,i)=>(row.dice[0]+i)*4).reduce((a,b)=>a+b,0):row.dice[0]*4):row.dice[0]+row.dice[1]),0);
  const moved=(s.moves||[]).filter(move=>move.player===player).reduce((sum,move)=>sum+(Number(move.die)||0),0);
  return {rolled,moved};
 }
