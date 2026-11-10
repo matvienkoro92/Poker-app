@@ -27,6 +27,7 @@ const handlers = {
   "club-cash-replay": () => require(path.join(handlersDir, "club-cash-replay.js")),
   "club-reviews": () => require(path.join(handlersDir, "club-reviews.js")),
   "profile-hero": () => require(path.join(handlersDir, "profile-hero.js")),
+  "club-honors": () => require(path.join(handlersDir, "club-honors.js")),
   "player-hall": () => require(path.join(handlersDir, "player-hall.js")),
   "profile-appearance": () => require(path.join(handlersDir, "profile-appearance.js")),
   "auth-telegram": () => require(path.join(handlersDir, "auth-telegram.js")),

@@ -2542,12 +2542,14 @@
       actions: '<span class="home-friend-news-modal__action-row">' +
         (reactionButtons ? '<span class="chat-user-modal__news-actions">' + reactionButtons + '</span>' : '') +
         '<span class="home-friend-news-modal__action-controls">' +
-        '<button type="button" class="chat-user-modal__news-comment-toggle' +
+        (newsModalMode === "club"
+          ? '<span class="home-news-honors-slot" data-club-honors-nick="'+esc(row.actorNick||'')+'"></span>'
+          : '<button type="button" class="chat-user-modal__news-comment-toggle' +
           (eventCommentsOpen[rowId] ? " chat-user-modal__news-comment-toggle--active" : "") +
           '" data-home-news-comments aria-label="Открыть комментарии">💬 <b aria-hidden="true">↓</b>' +
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
-        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>" +
+        '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>") +
         (newsModalMode === "club" && shareToken
           ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-copy-event="' + esc(shareToken) +
             '" aria-label="Скопировать ссылку на новость" title="Скопировать ссылку">' +
@@ -3207,6 +3209,7 @@
     patchNewsList(list, clubTabs + achievementPromo + emptyClubWallHtml + (!emptyClubWall && snapshot[0] && snapshot[0].id === "empty"
       ? '<div class="home-friend-news-modal__empty"><span aria-hidden="true">♣</span><strong>Новостей пока нет</strong><small>Здесь появятся личные записи, повышения уровня, выигрыши, дни рождения и новые ачивки друзей.</small></div>'
       : (!emptyClubWall ? modalEventsHtml(snapshot) : "")) + wallInvite);
+    if(newsModalMode === "club" && window.pokerHydrateClubHonorsBadges)window.pokerHydrateClubHonorsBadges(list);
     window.setTimeout(focusPendingClubNewsEvent, 0);
   }
 
@@ -4107,6 +4110,7 @@
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
+        if(event.target.closest("[data-club-honors-open]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerCard) {
@@ -4233,6 +4237,7 @@
       modal.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
+        if(event.target.closest("[data-club-honors-open]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         if (!playerCard) return;
         event.preventDefault();
