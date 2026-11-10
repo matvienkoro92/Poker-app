@@ -517,6 +517,21 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             10170
           ]
         ]
+      ],
+      [
+        "09.11.2026",
+        [
+          [
+            1,
+            "myhomor4ik",
+            38940
+          ],
+          [
+            2,
+            "time2bass",
+            18830
+          ]
+        ]
       ]
     ]
   },
