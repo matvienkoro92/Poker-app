@@ -29,8 +29,8 @@
    const period=champion?'12.'+champion.year:(latest||live).month;
    const title=champion?'Чемпион '+champion.year:latest?'Игрок месяца':'Текущий лидер';
    const detail=champion?'Пояс чемпиона года':label(period)+(latest&&wins.length>1?' · '+titles(wins.length):'')+(latest?'':' · Итоги впереди');
-   const compact=champion?'Пояс · '+champion.year:period+(!latest?' · гонка':'');
-   slot.innerHTML='<button type="button" class="home-news-honor'+(!latest&&!champion?' home-news-honor--live':'')+'" data-club-honors-open data-honors-issue="'+esc(period)+'" data-honors-section="'+(champion?'rewards':'journal')+'" aria-label="'+esc(title+' · '+detail+' · Открыть журнал')+'"><img src="'+(champion?ART.belt:ART.ring)+'" alt=""><span><strong>'+esc(title)+'</strong><small>'+esc(compact)+'</small></span></button>';
+   const compact=champion?'Пояс · '+champion.year:label(period)+(!latest?' · гонка':'');
+   slot.innerHTML='<button type="button" class="home-news-honor'+(!latest&&!champion?' home-news-honor--live':'')+'" data-club-honors-open data-honors-issue="'+esc(period)+'" data-honors-section="'+(champion?'rewards':'journal')+'" aria-label="'+esc(title+' · '+detail+' · Открыть журнал')+'"><img src="'+(champion?ART.belt:ART.ring)+'" alt=""><span><strong>'+esc(title)+'</strong><small> · '+esc(compact)+'</small></span></button>';
   })).catch(()=>{});
  };
  window.pokerHydrateLevelHonors=function(root){
