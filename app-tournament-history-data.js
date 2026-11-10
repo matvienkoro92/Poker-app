@@ -517,6 +517,21 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             10170
           ]
         ]
+      ],
+      [
+        "09.11.2026",
+        [
+          [
+            1,
+            "myhomor4ik",
+            38940
+          ],
+          [
+            2,
+            "time2bass",
+            18830
+          ]
+        ]
       ]
     ]
   },
@@ -1722,6 +1737,26 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             2,
             "Local",
             188150
+          ]
+        ]
+      ],
+      [
+        "08.11.2026",
+        [
+          [
+            1,
+            "FrankL",
+            304200
+          ],
+          [
+            2,
+            "MaxVerstappen",
+            54600
+          ],
+          [
+            3,
+            "ПокерМанки",
+            25600
           ]
         ]
       ]
