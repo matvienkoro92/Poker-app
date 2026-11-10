@@ -15,3 +15,12 @@ body:has(.race3d-stage) .story-exit{top:calc(12px + env(safe-area-inset-top))!im
 .race3d-stage .race3d-notice:empty{display:none}
 
 .race3d-dialog [data-restart]{display:block;margin:10px auto 0;background:transparent;color:#ffe2a2}.race3d-dialog [data-restart][hidden]{display:none}
+
+/* Route radar stays above the left thumb and below the top controls. */
+.race3d-minimap{position:absolute;left:14px;bottom:calc(204px + env(safe-area-inset-bottom));width:152px;background:linear-gradient(145deg,#132c38e8,#071724e8);border:1px solid #a0c4cc55;border-radius:14px;box-shadow:0 5px 20px #0003;overflow:hidden;pointer-events:none;color:#dce9e7}
+.race3d-minimap canvas{display:block;width:152px;height:152px}.race3d-map-title{display:flex;justify-content:space-between;gap:5px;padding:9px 10px 0;font-size:9px;letter-spacing:.7px}.race3d-map-title b{color:#73dce1;font-variant-numeric:tabular-nums}.race3d-map-legend{display:flex;align-items:center;gap:4px;padding:0 8px 8px;font-size:7px;letter-spacing:.2px}.race3d-map-legend>span{display:flex;align-items:center;gap:3px;margin-left:auto}.race3d-map-legend i{width:5px;height:5px;border-radius:50%;background:#fff6d9}.race3d-map-legend span i:nth-child(1){background:#ff786c}.race3d-map-legend span i:nth-child(2){background:#d896ff}.race3d-map-legend span i:nth-child(3){background:#ffc96b}
+@media(max-width:360px){.race3d-minimap{left:10px;width:126px;bottom:calc(196px + env(safe-area-inset-bottom))}.race3d-minimap canvas{width:126px;height:126px}.race3d-map-legend{font-size:6px;padding:0 6px 6px}}
+@media(max-height:480px){.race3d-minimap{left:12px;top:calc(70px + env(safe-area-inset-top));bottom:auto;width:110px}.race3d-minimap canvas{width:110px;height:110px}.race3d-map-title{padding:6px 7px 0;font-size:8px}.race3d-map-legend{display:none}}
+
+.race3d-stage .race3d-notice{top:calc(80px + env(safe-area-inset-top));left:22%;right:22%;font-size:11px;line-height:1.35}
+@media(max-height:480px){.race3d-stage .race3d-notice{top:calc(64px + env(safe-area-inset-top));left:25%;right:25%}}
