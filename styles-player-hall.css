@@ -1096,7 +1096,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .living-board-focus--table[data-game=nards] .living-top-table{z-index:2}
 .living-rating-tablet{left:auto;right:3%;top:calc(var(--living-tabletop-top,24%) - 62px);bottom:auto;width:clamp(145px,39%,210px);height:174px;aspect-ratio:auto;padding:6px;border:2px solid #74614c;border-radius:13px;background:linear-gradient(120deg,#252a2a,#080c0d 45%,#4b5150);box-shadow:4px 6px 9px #0009,inset 0 0 0 2px #0b0d0e;transform:perspective(650px) rotateY(-17deg) rotateX(-8deg) rotate(3deg);transform-origin:center bottom;z-index:1;transition:transform .28s ease,box-shadow .28s ease}
 .living-rating-tablet::after{content:'';position:absolute;z-index:-1;left:26%;right:14%;height:20px;bottom:-16px;transform:skewX(-22deg);border-radius:3px;background:linear-gradient(150deg,#7f8580,#222a26);box-shadow:0 5px 5px #0007}
-.living-rating-screen{display:grid;grid-template-rows:12px 16px 16px 12px minmax(0,1fr) 18px;gap:3px;padding:6px 4px;border:1px solid #557766;border-radius:6px;background:linear-gradient(160deg,#173e33,#071e1b);overflow:hidden}
+.living-rating-screen{display:grid;grid-template-rows:12px 16px 16px auto minmax(0,1fr) 18px;gap:3px;padding:6px 4px;border:1px solid #557766;border-radius:6px;background:linear-gradient(160deg,#173e33,#071e1b);overflow:hidden}
 .living-rating-heading{display:flex;justify-content:space-between;align-items:center;margin:0;padding:0;min-height:0}
 .living-rating-columns,.living-rating-row{display:grid;grid-template-columns:12px minmax(0,1fr) 51px 23px;gap:3px;align-items:center;font:9px/1.1 Arial,sans-serif}
 .living-rating-columns{color:#a9c1b2;font-size:8px}.living-rating-row>strong{font-size:8px;white-space:nowrap}.living-rating-row>em{font:700 9px/1 Arial,sans-serif;color:#efcc79;text-align:right}
@@ -1110,7 +1110,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .living-board-focus--table[data-game=nards].has-rating-zoom{overflow:hidden}
 .living-rating-tablet.is-expanded{position:fixed;z-index:21;left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);width:min(94vw,580px);height:min(76dvh,680px);padding:10px;border-radius:19px;box-shadow:0 20px 70px #000c}
 .living-rating-tablet.is-expanded::after,.living-rating-tablet.is-expanded .living-rating-peek{display:none!important}
-.living-rating-tablet.is-expanded .living-rating-screen{grid-template-rows:32px 32px 32px 20px minmax(0,1fr) auto auto;gap:8px;padding:10px}
+.living-rating-tablet.is-expanded .living-rating-screen{grid-template-rows:32px 32px 32px auto minmax(0,1fr) auto auto;gap:8px;padding:10px}
 .living-rating-tablet.is-expanded .living-rating-title{font-size:14px;letter-spacing:.1em}
 .player-hall-dialog .living-board-focus .is-expanded .living-rating-heading>button{display:block;width:32px;min-height:32px;height:32px;padding:0;font:22px/1 Arial;background:#183d31;border:1px solid #7f9b81}
 .player-hall-dialog .living-board-focus .is-expanded .living-rating-tabs button{font-size:12px}
@@ -1133,7 +1133,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 .living-rating-tablet:not(.is-expanded){left:50%;right:auto;top:var(--living-tabletop-top,12%);width:min(76%,300px);height:142px;padding:8px 12px;border:2px solid #666d70;border-radius:15px;background:linear-gradient(125deg,#687175 0%,#202629 8%,#090d10 48%,#414b51 98%);box-shadow:0 14px 14px #0009,inset 0 0 0 2px #080b0d,inset 0 1px 1px #c3cbcc;transform:translateX(-50%) perspective(900px) rotateX(-9deg);z-index:3}
 .living-rating-tablet:not(.is-expanded)::before{content:'';position:absolute;left:4px;top:50%;width:3px;height:3px;border-radius:50%;background:#142838;box-shadow:0 0 0 1px #000}
 .living-rating-tablet:not(.is-expanded)::after{left:32%;right:32%;bottom:-12px;height:12px;transform:skewX(-12deg);background:linear-gradient(#363d41,#141b1e);box-shadow:0 6px 7px #0008}
-.living-rating-tablet:not(.is-expanded) .living-rating-screen{grid-template-rows:12px 15px 15px 10px minmax(0,1fr) 16px;gap:2px;padding:5px 7px;border-color:#526366;border-radius:5px;background:linear-gradient(145deg,#173c35,#091f1d)}
+.living-rating-tablet:not(.is-expanded) .living-rating-screen{grid-template-rows:12px 15px 15px auto minmax(0,1fr) 16px;gap:2px;padding:5px 7px;border-color:#526366;border-radius:5px;background:linear-gradient(145deg,#173c35,#091f1d)}
 @media(max-height:650px){.living-board-focus--table[data-game=nards]{overflow-y:auto}.living-board-focus--table[data-game=nards] .living-top-table{min-height:180px}}
 
 /* Use the catalog's complete carving in both the room and the folding lid. */
