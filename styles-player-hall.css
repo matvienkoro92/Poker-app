@@ -1207,8 +1207,8 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 /* A complete room and rug below an independent table silhouette. */
 .villa-billiards-stage{background-image:url('./assets/player-hall/billiards-room-clean-rug-v3.webp')!important}
 .villa-billiards-stage::before{background-image:var(--billiards-table-art)!important}
-.villa-billiards-stage{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/classic-v1-table.svg')}
-.villa-billiards-stage[style*="billiards-table-classic-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/classic-v1-table.svg')}
+.villa-billiards-stage{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/classic-v2-table.svg')}
+.villa-billiards-stage[style*="billiards-table-classic-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/classic-v2-table.svg')}
 .villa-billiards-stage[style*="billiards-table-walnut-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/walnut-v1-table.svg')}
 .villa-billiards-stage[style*="billiards-table-midnight-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/midnight-v1-table.svg')}
 .villa-billiards-stage[style*="billiards-table-ruby-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/ruby-v1-table.svg')}
