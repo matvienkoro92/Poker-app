@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),{create}=require('../lib/game-result-notification');
-function fixture(){const keys=new Map(),messages=[];let reject=false;const notify=create({commands:async rows=>rows.map(([op,key,value,...args])=>{if(op==='DEL')return keys.delete(key);if(op==='SET'){if(args.includes('NX')&&keys.has(key))return null;keys.set(key,value);return 'OK';}throw Error(op);}),playersGroup:async()=>'-123',send:async body=>{messages.push(body);return {ok:!reject,json:async()=>({ok:!reject,result:{message_id:55}})};}});return {notify,messages,reject:value=>reject=value};}
+function fixture(){const keys=new Map(),messages=[];let reject=false;const notify=create({commands:async rows=>rows.map(([op,key,value,...args])=>{if(op==='GET')return keys.get(key);if(op==='DEL')return keys.delete(key);if(op==='SET'){if(args.includes('NX')&&keys.has(key))return null;keys.set(key,value);return 'OK';}throw Error(op);}),playersGroup:async()=>'-123',send:async body=>{messages.push(body);return {ok:!reject,json:async()=>({ok:!reject,result:{message_id:55}})};}});return {notify,messages,reject:value=>reject=value};}
 function view(discipline='long'){return {ready:true,roomId:'ABCDEFGHJK',state:{discipline,winner:1},playerProfiles:[{name:'Роман'},{name:'Анна'}],match:{number:1,round:1,target:1,winner:1,wins:[0,1]}};}
 test('announces the winner and opponent once despite concurrent requests',async()=>{const f=fixture();await Promise.all(Array.from({length:8},()=>f.notify(view(),'board-games')));assert.equal(f.messages.length,1);assert.match(f.messages[0].text,/Победил: Анна/);assert.match(f.messages[0].text,/Соперник: Роман/);});
 test('separates games, rounds and rematches',async()=>{const f=fixture(),v=view();await f.notify(v,'board-games');v.match.round++;await f.notify(v,'board-games');v.match.number++;v.match.round=1;await f.notify(v,'board-games');await f.notify(v,'billiards');assert.equal(f.messages.length,4);});
@@ -8,3 +8,13 @@ test('ignores unfinished games and waits for final paid settlement',async()=>{co
 test('announces draws and allows retry after explicit Telegram rejection',async()=>{const f=fixture(),v=view('chess');v.state.winner='draw';f.reject(true);await assert.rejects(f.notify(v,'board-games'));f.reject(false);await f.notify(v,'board-games');assert.match(f.messages[1].text,/Ничья: Роман — Анна/);});
 
 test('winner name is bold with Telegram UTF-16 offsets and literal special characters',async()=>{const f=fixture(),v=view();v.playerProfiles[0].name='Анна <&> 🐵';v.state.winner=0;await f.notify(v,'board-games');const message=f.messages[0],entity=message.entities[0];assert.equal(entity.type,'bold');assert.equal(message.text.slice(entity.offset,entity.offset+entity.length),'Анна <&> 🐵');assert.equal(message.parse_mode,undefined);});
+test('removes watch announcement only after Telegram confirms the result',async()=>{
+ const keys=new Map(),events=[];let ok=false;
+ const notify=create({commands:async rows=>rows.map(([op,key,value,...args])=>{
+  if(op==='GET')return keys.get(key);
+  if(op==='DEL')return keys.delete(key);
+  if(op==='SET'){if(args.includes('NX')&&keys.has(key))return null;keys.set(key,value);return 'OK';}
+ }),playersGroup:async()=>'-123',send:async()=>{events.push('result');return {ok,json:async()=>({ok,result:{message_id:55}})};},finishAccepted:async()=>events.push('delete')});
+ await assert.rejects(notify(view(),'board-games'));assert.deepEqual(events,['result']);
+ ok=true;await notify(view(),'board-games');assert.deepEqual(events,['result','result','delete']);
+});

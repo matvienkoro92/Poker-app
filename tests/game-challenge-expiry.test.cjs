@@ -25,11 +25,24 @@ test('accepted billiards, chess and backgammon invitations delete immediately',a
   assert.equal(result,true);assert.equal(sent,1);
  }
 });
-test('accepted announcements last five minutes, then expire without touching results',async()=>{
- const f=fixture();await require('../lib/game-challenge-expiry').enqueueAccepted({...f,chatId:-10042,messageId:123,publishedAt:1000});
+test('accepted announcement stays until results and failed deletion is retried',async()=>{
+ const expiry=require('../lib/game-challenge-expiry'),keys=new Map(),queue=new Map();
+ const commands=async rows=>rows.map(([op,key,value,...args])=>{
+  if(op==='SET'){keys.set(key,value);return 'OK';}
+  if(op==='GET')return keys.get(key);
+  if(op==='DEL')return keys.delete(key);
+  if(op==='ZADD'){queue.set(args[0],value);return 1;}
+  if(op==='ZREM')return queue.delete(value);
+  if(op==='ZRANGEBYSCORE')return [...queue].filter(([,n])=>n<=Number(args[0])).map(([k])=>k);
+  throw Error(op);
+ });
+ const options={commands,family:'board-games',roomId:'ABCDEFGHJK',token:'test'};
+ await expiry.enqueueAccepted({...options,chatId:-10042,messageId:123});
  const send=async()=>({json:async()=>({ok:true})});
- assert.deepEqual(await sweep({...f,token:'test',now:300999,send}),{deleted:0,failed:0});
- assert.deepEqual(await sweep({...f,token:'test',now:301000,send}),{deleted:1,failed:0});
+ assert.deepEqual(await sweep({...options,now:Date.now()+86400000,send}),{deleted:0,failed:0});
+ await assert.rejects(expiry.finishAccepted({...options,send:async()=>{throw Error('offline');}}));
+ assert.equal(queue.size,1);
+ assert.deepEqual(await sweep({...options,send}),{deleted:1,failed:0});
 });
 test('rating answer and command expire after ten minutes',async()=>{
  const f=fixture(),expiry=require('../lib/game-challenge-expiry');
