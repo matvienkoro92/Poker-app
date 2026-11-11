@@ -275,6 +275,13 @@ function copyReferencedAssets() {
   addWardrobeAssets('player-hall/helmets');
   // Named honor rings are selected by winner/month at runtime.
   addWardrobeAssets('player-hall/honors');
+  // Trophy thumbnail URLs are derived at runtime, so the literal-URL scanner
+  // cannot discover them in app-hall-trophies.js.
+  for (const image of Object.values(require('../app-hall-trophies').assets)) {
+    if (!image.endsWith('.webp')) continue;
+    const thumb = image.replace(/^\.\/assets\//, '').replace(/\.webp$/, '-thumb-v2.webp');
+    if (fs.existsSync(path.join(__dirname, '..', 'assets', thumb))) refs.add(thumb);
+  }
   // Carved boards and checker URLs are built from validated catalogue IDs.
   addWardrobeAssets('board-games/nards');
   addWardrobeAssets('board-games/previews');
