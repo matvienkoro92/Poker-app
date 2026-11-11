@@ -303,11 +303,11 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .nards-table .nards-storage[data-side=black] .nards-stored-edge{border:0;border-top:1px solid #91a9ae;border-bottom:1px solid #08151d;border-radius:1px;background:linear-gradient(#45616b 0 42%,#152b36 43% 65%,#324b57 66%);box-shadow:0 1px 1px #000c,0 -1px #0c0807}
 .nards-table .nards-storage[data-side=black] .nards-stored-edge::after{border:0;background:#081923a6}
 
-/* Let the mobile nards board use the side gutters, retaining a 2px screen margin. */
+/* Let the live mobile nards board reach both viewport edges. */
 @media(max-width:600px){
- #boardArea:has(#nardsBoard:not([hidden])){--board-edge-outset:8px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset))}
+ #boardArea:has(#nardsBoard:not([hidden])){--board-edge-outset:10px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset))}
 }
-@media(max-width:350px){#boardArea:has(#nardsBoard:not([hidden])){--board-edge-outset:4px}}
+@media(max-width:350px){#boardArea:has(#nardsBoard:not([hidden])){--board-page-gutter:6px;--board-edge-outset:6px}}
 
 /* Remove the bulky outer carving; the integrated side recesses form the edge. */
 .nards-table,.nards-table:not([data-skin=classic]){border:0;border-image:none;border-radius:2px;box-shadow:0 0 0 1px #d1b87966,0 3px 10px #0005}
@@ -383,8 +383,8 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 #game .matchup>[data-player].my-turn small{color:#dfcf98}
 @keyframes turn-card-arrival{0%{box-shadow:inset 0 0 0 1px #ffe3a1bb,0 0 18px #f1d27c66}100%{box-shadow:inset 0 0 0 1px #dcc47d24,0 0 12px #c6ae4e14}}
 .nards-board .checker.is-movable:not(.is-picked){outline:1px solid #f3d995;outline-offset:1px;box-shadow:0 0 0 2px #d6c37f28,0 2px 3px #0006}
-@media(max-width:600px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:8px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset));padding:0}}
-@media(max-width:350px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:4px}}
+@media(max-width:600px){#game .turn-line:has(#roll:not([hidden])){--board-edge-outset:10px;width:calc(100% + var(--board-edge-outset)*2);margin-left:calc(-1*var(--board-edge-outset));margin-right:calc(-1*var(--board-edge-outset));padding:0}}
+@media(max-width:350px){#game .turn-line:has(#roll:not([hidden])){--board-page-gutter:6px;--board-edge-outset:6px}}
 #game .board-meta .board-clock #clock,#game .board-meta .board-clock #clock[data-time-warning]{border-right:0;padding-right:0}
 
 /* A taller live board gives the lanes 20% more vertical room at the same width. */
@@ -997,7 +997,7 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 
 
 .board-tournament-embed #boardArea:has(#nardsBoard:not([hidden])) {
-  --board-edge-outset: 10px;
+  --board-edge-outset: var(--board-page-gutter, 10px);
   width: calc(100% + 2 * var(--board-edge-outset));
   margin-inline: calc(-1 * var(--board-edge-outset));
 }
@@ -1031,3 +1031,140 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
   font-size: 11px;
   font-weight: 750;
 }
+
+/* Fine inlay keeps the artwork and point edges light on mobile. */
+.nards-point-blade{filter:none}
+.nards-point-blade .point-inlay{stroke-width:.55}
+.nards-point-blade .point-filigree{display:none}
+.nards-board[data-interior=santorini] .light-point .point-inlay{fill:var(--inside-light);stroke:var(--inside-accent)}
+.nards-board[data-interior=santorini] .nards-half-art{background-size:100% 100%}
+.nards-board[data-interior=santorini] .nards-carved-rail{opacity:.25}
+.nards-board[data-interior=santorini] .bar{background:linear-gradient(90deg,#092c35,#346b76 40%,#d5c08a 48%,#103d48 58%,#082d36);border-color:#d9bd7966;box-shadow:0 0 2px #05232d}
+
+.nards-table[data-skin=santorini]{border-color:#bbab78;background:linear-gradient(90deg,#082f3a,#1d6170 48%,#103e49);box-shadow:inset 0 0 0 1px #e6ce92,0 4px 12px #0005}
+.nards-table[data-skin=santorini]::before,.nards-table[data-skin=santorini]::after{height:5px;background:linear-gradient(#e3c68c,#7b815f 35%,#164f5b 50%);box-shadow:none}
+
+/* Smooth ivory and burgundy lacquer, with no blue or engraved inner rings. */
+:is(.nards-board[data-checkers=burgundy-pearl],[data-item=burgundy-pearl]) .checker{--disc-rim:#d6b879;--disc-side:#9b743c;--disc-shine:#ffffff55}
+:is(.nards-board[data-checkers=burgundy-pearl],[data-item=burgundy-pearl]) .checker.black{--disc-rim:#76323b;--disc-side:#200209;--disc-shine:#ffe5d555;background-image:var(--disc-art);background-size:100% 100%}
+:is(.nards-board[data-checkers=burgundy-pearl],[data-item=burgundy-pearl]) .checker:not(.black){background-image:var(--disc-art);background-size:100% 100%}
+:is(.nards-board[data-checkers=burgundy-pearl],[data-item=burgundy-pearl]) .checker::before{display:none}
+
+/* Portrait material collections: live points and pieces over clean reference artwork. */
+.nards-board[data-interior=obsidian-copper] .nards-point-blade{background:url('./assets/board-games/nards/obsidian-copper-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.nards-board[data-interior=obsidian-copper] .light-point .nards-point-blade{background-image:url('./assets/board-games/nards/obsidian-copper-point-light-v2.webp')}
+.nards-board[data-interior=obsidian-copper] .nards-point-blade svg{visibility:hidden}
+.nards-board[data-interior=obsidian-copper] .nards-half-art{background-size:100% 100%}
+.nards-board[data-interior=obsidian-copper] :is(.nards-carved-rail,.nards-center-hinge){display:none}
+.nards-board[data-interior=obsidian-copper] .bar{background:url('./assets/board-games/nards/obsidian-copper-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
+.nards-table[data-skin=obsidian-copper]{background:#211f20 url('./assets/board-games/nards/obsidian-copper-frame.webp') center/100% 100%;border-color:#b97a54;box-shadow:inset 0 0 0 1px #e5a577,0 4px 12px #0006}
+.nards-table[data-skin=obsidian-copper]::before,.nards-table[data-skin=obsidian-copper]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
+.nards-table[data-skin=obsidian-copper]::before{background-image:url('./assets/board-games/nards/obsidian-copper-rail-top.webp')}
+.nards-table[data-skin=obsidian-copper]::after{background-image:url('./assets/board-games/nards/obsidian-copper-rail-bottom.webp')}
+:is(.nards-board[data-checkers=obsidian-copper],[data-item=obsidian-copper]) .checker,:is(.nards-board[data-checkers=obsidian-copper],[data-item=obsidian-copper]) .checker.black{--disc-rim:#b97a54;--disc-side:#211f20;background-image:var(--disc-art);background-size:100% 100%;border-color:#b97a54}
+:is(.nards-board[data-checkers=obsidian-copper],[data-item=obsidian-copper]) .checker::before{display:none}
+.nards-board[data-interior=arctic-ice] .nards-point-blade{background:url('./assets/board-games/nards/arctic-ice-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.nards-board[data-interior=arctic-ice] .light-point .nards-point-blade{background-image:url('./assets/board-games/nards/arctic-ice-point-light-v2.webp')}
+.nards-board[data-interior=arctic-ice] .nards-point-blade svg{visibility:hidden}
+.nards-board[data-interior=arctic-ice] .nards-half-art{background-size:100% 100%}
+.nards-board[data-interior=arctic-ice] :is(.nards-carved-rail,.nards-center-hinge){display:none}
+.nards-board[data-interior=arctic-ice] .bar{background:url('./assets/board-games/nards/arctic-ice-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
+.nards-table[data-skin=arctic-ice]{background:#163e59 url('./assets/board-games/nards/arctic-ice-frame.webp') center/100% 100%;border-color:#a9dfef;box-shadow:inset 0 0 0 1px #c4edff,0 4px 12px #0006}
+.nards-table[data-skin=arctic-ice]::before,.nards-table[data-skin=arctic-ice]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
+.nards-table[data-skin=arctic-ice]::before{background-image:url('./assets/board-games/nards/arctic-ice-rail-top.webp')}
+.nards-table[data-skin=arctic-ice]::after{background-image:url('./assets/board-games/nards/arctic-ice-rail-bottom.webp')}
+:is(.nards-board[data-checkers=arctic-ice],[data-item=arctic-ice]) .checker,:is(.nards-board[data-checkers=arctic-ice],[data-item=arctic-ice]) .checker.black{--disc-rim:#a9dfef;--disc-side:#163e59;background-image:var(--disc-art);background-size:100% 100%;border-color:#a9dfef}
+:is(.nards-board[data-checkers=arctic-ice],[data-item=arctic-ice]) .checker::before{display:none}
+.nards-board[data-interior=japan-lacquer] .nards-point-blade{background:url('./assets/board-games/nards/japan-lacquer-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.nards-board[data-interior=japan-lacquer] .light-point .nards-point-blade{background-image:url('./assets/board-games/nards/japan-lacquer-point-light-v2.webp')}
+.nards-board[data-interior=japan-lacquer] .nards-point-blade svg{visibility:hidden}
+.nards-board[data-interior=japan-lacquer] .nards-half-art{background-size:100% 100%}
+.nards-board[data-interior=japan-lacquer] :is(.nards-carved-rail,.nards-center-hinge){display:none}
+.nards-board[data-interior=japan-lacquer] .bar{background:url('./assets/board-games/nards/japan-lacquer-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
+.nards-table[data-skin=japan-lacquer]{background:#111213 url('./assets/board-games/nards/japan-lacquer-frame.webp') center/100% 100%;border-color:#d6a343;box-shadow:inset 0 0 0 1px #e6b95c,0 4px 12px #0006}
+.nards-table[data-skin=japan-lacquer]::before,.nards-table[data-skin=japan-lacquer]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
+.nards-table[data-skin=japan-lacquer]::before{background-image:url('./assets/board-games/nards/japan-lacquer-rail-top.webp')}
+.nards-table[data-skin=japan-lacquer]::after{background-image:url('./assets/board-games/nards/japan-lacquer-rail-bottom.webp')}
+:is(.nards-board[data-checkers=japan-lacquer],[data-item=japan-lacquer]) .checker,:is(.nards-board[data-checkers=japan-lacquer],[data-item=japan-lacquer]) .checker.black{--disc-rim:#d6a343;--disc-side:#111213;background-image:var(--disc-art);background-size:100% 100%;border-color:#d6a343}
+:is(.nards-board[data-checkers=japan-lacquer],[data-item=japan-lacquer]) .checker::before{display:none}
+.nards-board[data-interior=emerald-deco] .nards-point-blade{background:url('./assets/board-games/nards/emerald-deco-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.nards-board[data-interior=emerald-deco] .light-point .nards-point-blade{background-image:url('./assets/board-games/nards/emerald-deco-point-light-v2.webp')}
+.nards-board[data-interior=emerald-deco] .nards-point-blade svg{visibility:hidden}
+.nards-board[data-interior=emerald-deco] .nards-half-art{background-size:100% 100%}
+.nards-board[data-interior=emerald-deco] :is(.nards-carved-rail,.nards-center-hinge){display:none}
+.nards-board[data-interior=emerald-deco] .bar{background:url('./assets/board-games/nards/emerald-deco-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
+.nards-table[data-skin=emerald-deco]{background:#10442e url('./assets/board-games/nards/emerald-deco-frame.webp') center/100% 100%;border-color:#d7b15e;box-shadow:inset 0 0 0 1px #ebc777,0 4px 12px #0006}
+.nards-table[data-skin=emerald-deco]::before,.nards-table[data-skin=emerald-deco]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
+.nards-table[data-skin=emerald-deco]::before{background-image:url('./assets/board-games/nards/emerald-deco-rail-top.webp')}
+.nards-table[data-skin=emerald-deco]::after{background-image:url('./assets/board-games/nards/emerald-deco-rail-bottom.webp')}
+:is(.nards-board[data-checkers=emerald-deco],[data-item=emerald-deco]) .checker,:is(.nards-board[data-checkers=emerald-deco],[data-item=emerald-deco]) .checker.black{--disc-rim:#d7b15e;--disc-side:#10442e;background-image:var(--disc-art);background-size:100% 100%;border-color:#d7b15e}
+:is(.nards-board[data-checkers=emerald-deco],[data-item=emerald-deco]) .checker::before{display:none}
+.nards-board[data-interior=cosmic-titanium] .nards-point-blade{background:url('./assets/board-games/nards/cosmic-titanium-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.nards-board[data-interior=cosmic-titanium] .light-point .nards-point-blade{background-image:url('./assets/board-games/nards/cosmic-titanium-point-light-v2.webp')}
+.nards-board[data-interior=cosmic-titanium] .nards-point-blade svg{visibility:hidden}
+.nards-board[data-interior=cosmic-titanium] .nards-half-art{background-size:100% 100%}
+.nards-board[data-interior=cosmic-titanium] :is(.nards-carved-rail,.nards-center-hinge){display:none}
+.nards-board[data-interior=cosmic-titanium] .bar{background:url('./assets/board-games/nards/cosmic-titanium-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
+.nards-table[data-skin=cosmic-titanium]{background:#28262f url('./assets/board-games/nards/cosmic-titanium-frame.webp') center/100% 100%;border-color:#afa0b8;box-shadow:inset 0 0 0 1px #c9b9dd,0 4px 12px #0006}
+.nards-table[data-skin=cosmic-titanium]::before,.nards-table[data-skin=cosmic-titanium]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
+.nards-table[data-skin=cosmic-titanium]::before{background-image:url('./assets/board-games/nards/cosmic-titanium-rail-top.webp')}
+.nards-table[data-skin=cosmic-titanium]::after{background-image:url('./assets/board-games/nards/cosmic-titanium-rail-bottom.webp')}
+:is(.nards-board[data-checkers=cosmic-titanium],[data-item=cosmic-titanium]) .checker,:is(.nards-board[data-checkers=cosmic-titanium],[data-item=cosmic-titanium]) .checker.black{--disc-rim:#afa0b8;--disc-side:#28262f;background-image:var(--disc-art);background-size:100% 100%;border-color:#afa0b8}
+:is(.nards-board[data-checkers=cosmic-titanium],[data-item=cosmic-titanium]) .checker::before{display:none}
+
+body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
+
+.nards-board[data-interior=obsidian-copper] .point{--nards-tip-gap:25%!important}
+:is(.nards-board[data-checkers=obsidian-copper],[data-item=obsidian-copper]) .checker,:is(.nards-board[data-checkers=obsidian-copper],[data-item=obsidian-copper]) .checker.black{border:0;background-color:transparent;box-shadow:none;filter:drop-shadow(0 2px 1px #0007)}
+:is(.nards-board[data-checkers=obsidian-copper],[data-item=obsidian-copper]) .checker::after{display:none}
+ .nards-table[data-skin=obsidian-copper]::before,.nards-table[data-skin=obsidian-copper]::after{height:18px;border:0}
+.nards-table[data-skin=obsidian-copper]{padding-block:18px;border-width:1px}
+.nards-table[data-skin=obsidian-copper] .nards-storage{background:transparent;box-shadow:none;border-color:#ffffff20}
+
+.nards-board[data-interior=arctic-ice] .point{--nards-tip-gap:25%!important}
+:is(.nards-board[data-checkers=arctic-ice],[data-item=arctic-ice]) .checker,:is(.nards-board[data-checkers=arctic-ice],[data-item=arctic-ice]) .checker.black{border:0;background-color:transparent;box-shadow:none;filter:drop-shadow(0 2px 1px #0007)}
+:is(.nards-board[data-checkers=arctic-ice],[data-item=arctic-ice]) .checker::after{display:none}
+ .nards-table[data-skin=arctic-ice]::before,.nards-table[data-skin=arctic-ice]::after{height:18px;border:0}
+.nards-table[data-skin=arctic-ice]{padding-block:18px;border-width:1px}
+.nards-table[data-skin=arctic-ice] .nards-storage{background:transparent;box-shadow:none;border-color:#ffffff20}
+
+.nards-board[data-interior=japan-lacquer] .point{--nards-tip-gap:25%!important}
+:is(.nards-board[data-checkers=japan-lacquer],[data-item=japan-lacquer]) .checker,:is(.nards-board[data-checkers=japan-lacquer],[data-item=japan-lacquer]) .checker.black{border:0;background-color:transparent;box-shadow:none;filter:drop-shadow(0 2px 1px #0007)}
+:is(.nards-board[data-checkers=japan-lacquer],[data-item=japan-lacquer]) .checker::after{display:none}
+ .nards-table[data-skin=japan-lacquer]::before,.nards-table[data-skin=japan-lacquer]::after{height:18px;border:0}
+.nards-table[data-skin=japan-lacquer]{padding-block:18px;border-width:1px}
+.nards-table[data-skin=japan-lacquer] .nards-storage{background:transparent;box-shadow:none;border-color:#ffffff20}
+
+.nards-board[data-interior=emerald-deco] .point{--nards-tip-gap:25%!important}
+:is(.nards-board[data-checkers=emerald-deco],[data-item=emerald-deco]) .checker,:is(.nards-board[data-checkers=emerald-deco],[data-item=emerald-deco]) .checker.black{border:0;background-color:transparent;box-shadow:none;filter:drop-shadow(0 2px 1px #0007)}
+:is(.nards-board[data-checkers=emerald-deco],[data-item=emerald-deco]) .checker::after{display:none}
+ .nards-table[data-skin=emerald-deco]::before,.nards-table[data-skin=emerald-deco]::after{height:18px;border:0}
+.nards-table[data-skin=emerald-deco]{padding-block:18px;border-width:1px}
+.nards-table[data-skin=emerald-deco] .nards-storage{background:transparent;box-shadow:none;border-color:#ffffff20}
+
+.nards-board[data-interior=cosmic-titanium] .point{--nards-tip-gap:25%!important}
+:is(.nards-board[data-checkers=cosmic-titanium],[data-item=cosmic-titanium]) .checker,:is(.nards-board[data-checkers=cosmic-titanium],[data-item=cosmic-titanium]) .checker.black{border:0;background-color:transparent;box-shadow:none;filter:drop-shadow(0 2px 1px #0007)}
+:is(.nards-board[data-checkers=cosmic-titanium],[data-item=cosmic-titanium]) .checker::after{display:none}
+ .nards-table[data-skin=cosmic-titanium]::before,.nards-table[data-skin=cosmic-titanium]::after{height:18px;border:0}
+.nards-table[data-skin=cosmic-titanium]{padding-block:18px;border-width:1px}
+.nards-table[data-skin=cosmic-titanium] .nards-storage{background:transparent;box-shadow:none;border-color:#ffffff20}
+
+.nards-table[data-skin=obsidian-copper]::after{transform:none}
+
+.nards-table[data-skin=arctic-ice]::after{transform:none}
+
+.nards-table[data-skin=japan-lacquer]::after{transform:none}
+
+.nards-table[data-skin=emerald-deco]::after{transform:none}
+
+.nards-table[data-skin=cosmic-titanium]::after{transform:none}
+
+.nards-table[data-skin=obsidian-copper] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}
+
+.nards-table[data-skin=arctic-ice] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}
+
+.nards-table[data-skin=japan-lacquer] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}
+
+.nards-table[data-skin=emerald-deco] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}
+
+.nards-table[data-skin=cosmic-titanium] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}

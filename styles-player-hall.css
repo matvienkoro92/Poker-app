@@ -1293,6 +1293,53 @@ body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus 
 .villa-start-room [role=status]:not(:empty){max-width:230px;padding:5px 8px;border-radius:8px;background:#141910ed;color:#eee3c9;font-size:11px;text-align:right}
 .player-hall-dialog:has(.player-hall__section-panel) .villa-start-room,.player-hall-dialog:has(.living-board-focus) .villa-start-room{display:none}
 
+/* Match the live board's delicate point inlay. */
+.living-preview-blade{filter:none}
+.living-preview-blade :is(polygon,.point-inlay){stroke-width:.55}
+.living-preview-blade .point-filigree{display:none}
+
+/* Matching materials in the living-room preview. */
+.living-top-board[data-interior=obsidian-copper] .living-preview-nards .living-preview-blade{background:url('./assets/board-games/nards/obsidian-copper-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.living-top-board[data-interior=obsidian-copper] .living-preview-nards .is-light .living-preview-blade{background-image:url('./assets/board-games/nards/obsidian-copper-point-light-v2.webp')}
+.living-top-board[data-interior=obsidian-copper] .living-preview-nards .living-preview-blade svg{visibility:hidden}
+.living-top-board[data-pieces=obsidian-copper] .living-preview-checker{border-color:#b97a54;background-size:100% 100%}
+.living-top-board[data-interior=arctic-ice] .living-preview-nards .living-preview-blade{background:url('./assets/board-games/nards/arctic-ice-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.living-top-board[data-interior=arctic-ice] .living-preview-nards .is-light .living-preview-blade{background-image:url('./assets/board-games/nards/arctic-ice-point-light-v2.webp')}
+.living-top-board[data-interior=arctic-ice] .living-preview-nards .living-preview-blade svg{visibility:hidden}
+.living-top-board[data-pieces=arctic-ice] .living-preview-checker{border-color:#a9dfef;background-size:100% 100%}
+.living-top-board[data-interior=japan-lacquer] .living-preview-nards .living-preview-blade{background:url('./assets/board-games/nards/japan-lacquer-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.living-top-board[data-interior=japan-lacquer] .living-preview-nards .is-light .living-preview-blade{background-image:url('./assets/board-games/nards/japan-lacquer-point-light-v2.webp')}
+.living-top-board[data-interior=japan-lacquer] .living-preview-nards .living-preview-blade svg{visibility:hidden}
+.living-top-board[data-pieces=japan-lacquer] .living-preview-checker{border-color:#d6a343;background-size:100% 100%}
+.living-top-board[data-interior=emerald-deco] .living-preview-nards .living-preview-blade{background:url('./assets/board-games/nards/emerald-deco-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.living-top-board[data-interior=emerald-deco] .living-preview-nards .is-light .living-preview-blade{background-image:url('./assets/board-games/nards/emerald-deco-point-light-v2.webp')}
+.living-top-board[data-interior=emerald-deco] .living-preview-nards .living-preview-blade svg{visibility:hidden}
+.living-top-board[data-pieces=emerald-deco] .living-preview-checker{border-color:#d7b15e;background-size:100% 100%}
+.living-top-board[data-interior=cosmic-titanium] .living-preview-nards .living-preview-blade{background:url('./assets/board-games/nards/cosmic-titanium-point-dark-v2.webp') center/100% 100% no-repeat;filter:none}
+.living-top-board[data-interior=cosmic-titanium] .living-preview-nards .is-light .living-preview-blade{background-image:url('./assets/board-games/nards/cosmic-titanium-point-light-v2.webp')}
+.living-top-board[data-interior=cosmic-titanium] .living-preview-nards .living-preview-blade svg{visibility:hidden}
+.living-top-board[data-pieces=cosmic-titanium] .living-preview-checker{border-color:#afa0b8;background-size:100% 100%}
+
 /* Keep the entry preference away from the stereo on the garage wall. */
 .player-hall-dialog:has(.player-hall__room[data-space="hall"]) > .villa-start-room{display:none}
 .player-hall-dialog:has(.player-hall__room[data-space="garage"]) > .villa-start-room{top:calc(170px + var(--hall-safe-top,0px))}
+
+.living-top-board[data-pieces=obsidian-copper] .living-preview-checker,.living-top-board[data-pieces=obsidian-copper] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;background-color:transparent;border:0;box-shadow:none;filter:drop-shadow(0 1px 1px #0006)}
+.living-top-board[data-pieces=obsidian-copper] .living-preview-checker::after{display:none}
+.living-top-board[data-interior=obsidian-copper] .living-preview-point{--nards-tip-gap:25%!important}
+
+.living-top-board[data-pieces=arctic-ice] .living-preview-checker,.living-top-board[data-pieces=arctic-ice] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;background-color:transparent;border:0;box-shadow:none;filter:drop-shadow(0 1px 1px #0006)}
+.living-top-board[data-pieces=arctic-ice] .living-preview-checker::after{display:none}
+.living-top-board[data-interior=arctic-ice] .living-preview-point{--nards-tip-gap:25%!important}
+
+.living-top-board[data-pieces=japan-lacquer] .living-preview-checker,.living-top-board[data-pieces=japan-lacquer] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;background-color:transparent;border:0;box-shadow:none;filter:drop-shadow(0 1px 1px #0006)}
+.living-top-board[data-pieces=japan-lacquer] .living-preview-checker::after{display:none}
+.living-top-board[data-interior=japan-lacquer] .living-preview-point{--nards-tip-gap:25%!important}
+
+.living-top-board[data-pieces=emerald-deco] .living-preview-checker,.living-top-board[data-pieces=emerald-deco] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;background-color:transparent;border:0;box-shadow:none;filter:drop-shadow(0 1px 1px #0006)}
+.living-top-board[data-pieces=emerald-deco] .living-preview-checker::after{display:none}
+.living-top-board[data-interior=emerald-deco] .living-preview-point{--nards-tip-gap:25%!important}
+
+.living-top-board[data-pieces=cosmic-titanium] .living-preview-checker,.living-top-board[data-pieces=cosmic-titanium] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;background-color:transparent;border:0;box-shadow:none;filter:drop-shadow(0 1px 1px #0006)}
+.living-top-board[data-pieces=cosmic-titanium] .living-preview-checker::after{display:none}
+.living-top-board[data-interior=cosmic-titanium] .living-preview-point{--nards-tip-gap:25%!important}

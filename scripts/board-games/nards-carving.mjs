@@ -14,7 +14,7 @@ export function paintStorage(element,player,count=0,home="round",fullHeight=fals
  element.append(number,slots);
 }
 
-export function createPointBlade(preview=false){const blade=document.createElement('span');blade.className=preview?'living-preview-blade':'nards-point-blade';blade.setAttribute('aria-hidden','true');blade.innerHTML='<svg viewBox="0 0 100 100" preserveAspectRatio="none">'+(preview?'<polygon points="2,1 98,1 50,98" vector-effect="non-scaling-stroke"/>':'<path class="point-inlay" d="M0 7 Q50 -4 100 7 L50 98Z" vector-effect="non-scaling-stroke"/><path class="point-filigree" d="M14 12 Q50 6 86 12 L50 81Z M45 21 L50 16 L55 21 L50 26Z" vector-effect="non-scaling-stroke"/>')+'</svg>';return blade;}
+export function createPointBlade(preview=false){const blade=document.createElement('span');blade.className=preview?'living-preview-blade':'nards-point-blade';blade.setAttribute('aria-hidden','true');blade.innerHTML='<svg viewBox="0 0 100 100" preserveAspectRatio="none">'+(preview?'<polygon points="2,1 98,1 50,98" vector-effect="non-scaling-stroke"/>':'<path class="point-inlay" d="M2 1 H98 L50 98Z" vector-effect="non-scaling-stroke"/><path class="point-filigree" d="M14 12 Q50 6 86 12 L50 81Z M45 21 L50 16 L55 21 L50 26Z" vector-effect="non-scaling-stroke"/>')+'</svg>';return blade;}
 
 export function createSurfaceHalf(side){const half=document.createElement('span');half.className='nards-half-art is-'+side;half.setAttribute('aria-hidden','true');return half;}
 

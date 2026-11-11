@@ -18,7 +18,7 @@ export function createDiceMesh(cube,faces,size){
  const canvas=document.createElement('canvas');canvas.className='dice-solid';canvas.setAttribute('aria-hidden','true');cube.append(canvas);
  const mobile=matchMedia('(pointer: coarse)').matches||Math.min(innerWidth,innerHeight)<600,geometry=geometryFor(mobile?6:10);
  const ratio=Math.min(devicePixelRatio||1,mobile?1.5:2),extent=size*2;canvas.width=canvas.height=Math.ceil(extent*ratio);const ctx=canvas.getContext('2d');
- const style=getComputedStyle(cube),base=rgb(style.getPropertyValue('--die-face'),[245,230,196]).map(c=>Math.min(255,c*1.14)),originalPip=style.getPropertyValue('--die-pip').trim()||'#24201b';let gold=0;
+ const style=getComputedStyle(cube),base=rgb(style.getPropertyValue('--die-face'),[245,230,196]).map(c=>Math.min(255,c*1.14)),originalPip=style.getPropertyValue('--die-pip').trim()||'#24201b';const material=style.getPropertyValue('--die-material').trim();let gold=0;
  function draw(rx=DICE_REST_X,ry=DICE_REST_Y,rz=-.12,contact=1){
   const goldColor=[255,210,76],body=base.map((v,i)=>v+(goldColor[i]-v)*gold),pip=gold>.45?'#402408':originalPip;
   const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
@@ -34,6 +34,17 @@ export function createDiceMesh(cube,faces,size){
   const polys=geometry.map(g=>({p:g.vertices.map(rotate),n:rotate(g.normal)})).filter(g=>g.n[2]>-.08).sort((a,b)=>a.p.reduce((s,p)=>s+p[2],0)-b.p.reduce((s,p)=>s+p[2],0));
   for(const g of polys){const light=Math.max(0,(-g.n[0]*.4-g.n[1]*.65+g.n[2]*.65)/1.01),shine=Math.pow(Math.max(0,(-g.n[0]*.25-g.n[1]*.45+g.n[2]*.86)),32)*34;
    const color='rgb('+body.map(c=>Math.round(Math.min(255,c*(.53+light*.48)+shine))).join(',')+')';ctx.fillStyle=ctx.strokeStyle=color;ctx.lineWidth=.45;ctx.beginPath();g.p.forEach((p,i)=>{const q=project(p);i?ctx.lineTo(...q):ctx.moveTo(...q);});ctx.closePath();ctx.fill();ctx.stroke();
+  }
+  // Project faint material veins onto each visible face; spots remain above the finish.
+  if(['stone','ice','lacquer','malachite','metal'].includes(material)&&gold<.45){
+   for(const [n,u,v]of Object.values(sides)){
+    if(rotate(n)[2]<.03)continue;ctx.save();ctx.beginPath();
+    [[-.77,-.77],[.77,-.77],[.77,.77],[-.77,.77]].forEach(([a,b],i)=>{const p=project(rotate(add(n,u,v,a,b)));i?ctx.lineTo(...p):ctx.moveTo(...p);});ctx.closePath();ctx.clip();
+    ctx.strokeStyle=material==='malachite'?'#62bc8e55':material==='stone'?'#c8d4dd33':material==='lacquer'?'#b99e6e22':'#effaff66';ctx.lineWidth=material==='ice'?.6:.35;
+    for(let j=0;j<(material==='metal'?9:5);j++){
+     ctx.beginPath();for(let k=0;k<9;k++){const a=-.9+k*.225,b=-.78+j*.35+(material==='metal'?0:Math.sin(k*1.6+j*2)*.12),p=project(rotate(add(n,u,v,a,b)));k?ctx.lineTo(...p):ctx.moveTo(...p);}ctx.stroke();
+    }ctx.restore();
+   }
   }
   for(const [name,[n,u,v]]of Object.entries(sides)){if(rotate(n)[2]<.03)continue;for(const [a,b]of spots[faces[name]]){
    const center=add(n,u,v,a*.44,b*.44),radius=name==='top'?.135:.17;ctx.beginPath();for(let i=0;i<32;i++){const t=i/32*Math.PI*2,p=project(rotate(add(center,u,v,Math.cos(t)*radius,Math.sin(t)*radius)));i?ctx.lineTo(...p):ctx.moveTo(...p);}ctx.closePath();const c=project(rotate(center)),grad=ctx.createRadialGradient(c[0]+1,c[1]+1,0,c[0],c[1],size*.09);grad.addColorStop(0,pip);grad.addColorStop(.72,pip);grad.addColorStop(1,'#080a0b');ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle=name==='top'?'#ffffff45':'#080a0b99';ctx.lineWidth=name==='top'?.6:.3;ctx.stroke();
