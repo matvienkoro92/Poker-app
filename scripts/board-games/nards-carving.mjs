@@ -1,14 +1,25 @@
 import Rails from '../../lib/nards-rails.js';
+import Equipment from '../../lib/nards-equipment.js';
 
 export const {NARDS_RAILS,nardsRail}=Rails;
 export function paintNardsRails(table,equipment){
+ const material=Equipment.NARDS_INTERIORS.find(x=>x.id===equipment.nardsInterior)||Equipment.NARDS_BOARDS.find(x=>x.id===equipment.nardsBoard)||Equipment.NARDS_BOARDS[0];
+ for(const [key,value]of Object.entries({base:material.frame,metal:material.accent||material.light,face:material.dark}))table.style.setProperty('--nards-home-'+key,value);
+ table.dataset.railsHidden=String(equipment.nardsRailsHidden===true);
+ for(const side of ['Top','Bottom'])table.dataset['rail'+side]=nardsRail(equipment['nardsRail'+side]).id;
  for(const side of ['Top','Bottom'])table.style.setProperty('--nards-rail-'+side.toLowerCase(),'url("'+nardsRail(equipment['nardsRail'+side]).image+'")');
 }
 
 // Decorative wells never intercept a legal point's click target.
 export function createLandingWell(preview=false){const well=document.createElement('span');well.className=preview?'living-preview-well':'nards-landing-well';well.setAttribute('aria-hidden','true');return well;}
 export function paintStorage(element,player,count=0,home="round",fullHeight=false){
- element.classList.add('nards-storage');element.dataset.home=home==="full"?"round":home;element.dataset.homeFull=String(fullHeight||home==="full");element.dataset.side=player===0?'white':'black';element.setAttribute('aria-label',(player===0?'Белые':'Чёрные')+' · выведено '+count+' из 15');element.replaceChildren();
+ element.classList.add('nards-storage');element.dataset.home=home==="full"?"round":home;element.dataset.homeFull=String(home!=="none"&&(fullHeight||home==="full"));element.dataset.side=player===0?'white':'black';element.setAttribute('aria-label',(player===0?'Белые':'Чёрные')+' · выведено '+count+' из 15');element.replaceChildren();
+ if(home==='none'){
+  const label=document.createElement('strong');label.textContent=(player===0?'Белые':'Чёрные')+' · '+count+'/15';
+  const discs=document.createElement('span');discs.className='nards-off-discs';
+  for(let i=0;i<count;i++){const disc=document.createElement('i');disc.className='checker'+(player===0?'':' black');disc.setAttribute('aria-hidden','true');discs.append(disc);}
+  element.append(label,discs);return;
+ }
  const number=document.createElement('strong');number.textContent=count;number.title='Выведено '+count+' из 15';const slots=document.createElement('div');slots.className='nards-storage-slots';slots.setAttribute('aria-hidden','true');
  for(let i=0;i<15;i++){const slot=document.createElement('i');slot.className=i<count?'is-filled':'';if(i<count){const edge=document.createElement('span');edge.className='nards-stored-edge';slot.append(edge);}slots.append(slot);}
  element.append(number,slots);
@@ -33,4 +44,15 @@ export function createCarvedRail(side,bottom=false){
 
 export function decorateCenterSpine(bar){
  for(const top of [15,85]){const hinge=document.createElement('i');hinge.className='nards-center-hinge';hinge.style.top=top+'%';hinge.setAttribute('aria-hidden','true');bar.append(hinge);}
+}
+
+export function layoutNardsHomes(table,left,right,hidden){
+ let tray=table.nextElementSibling;if(!tray?.classList.contains('nards-off-tray'))tray=null;
+ table.dataset.homes=hidden?'none':'visible';
+ if(hidden){
+  if(!tray){tray=document.createElement('div');tray.className='nards-off-tray';tray.setAttribute('role','group');tray.setAttribute('aria-label','Выведенные фишки');table.after(tray);}
+  tray.style.cssText=table.style.cssText;tray.append(left,right);
+ }else{
+  table.prepend(left);table.append(right);tray?.remove();
+ }
 }

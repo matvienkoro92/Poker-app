@@ -1,5 +1,5 @@
 import {nardsShowPoints} from './catalog.mjs';
-import {createCarvedRail,createPointBlade,createSurfaceHalf,paintStorage,decorateCenterSpine,paintNardsRails} from './nards-carving.mjs';
+import {createCarvedRail,createPointBlade,createSurfaceHalf,paintStorage,layoutNardsHomes,decorateCenterSpine,paintNardsRails} from './nards-carving.mjs';
 import {createDiceMesh,DICE_REST_X,DICE_REST_Y} from './dice-mesh.mjs';
 import {diceFaces} from './dice-view.mjs';
 import {createBackgammon} from './backgammon.mjs';
@@ -9,7 +9,7 @@ export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,ra
  root.classList.add('has-live-board');
  const table=document.createElement('div');table.className='nards-table editor-board';table.dataset.skin=board.id;paintNardsRails(table,rails||{});table.setAttribute('aria-label','Предпросмотр игровой доски');
  const field=document.createElement('div');field.className='nards-board';field.dataset.skin=board.id;field.dataset.interior=inside.id;field.dataset.checkers=checkers.id;field.dataset.wells=String(wells===true);field.dataset.mural=String(!(nardsShowPoints(inside,points)));field.dataset.pointMat=String(!inside.bakedPoints&&points!=null&&inside.revision>=2);
- for(const [key,value]of Object.entries({'nards-light':board.light,'nards-dark':board.dark,'nards-frame':board.frame,'nards-carving':board.cover?'url("'+board.cover+'")':'none','inside-light':inside.light,'inside-dark':inside.dark,'inside-accent':inside.accent,'nards-left-surface':'url("'+inside.leftSurface+'")','nards-right-surface':'url("'+inside.rightSurface+'")','checker-white':checkers.white,'checker-black':checkers.black,'checker-white-art':checkers.whiteArt?'url("'+checkers.whiteArt+'")':'none','checker-black-art':checkers.blackArt?'url("'+checkers.blackArt+'")':'none'}))table.style.setProperty('--'+key,value);
+ for(const [key,value]of Object.entries({'nards-light':board.light,'nards-dark':board.dark,'nards-frame':board.frame,'nards-carving':board.cover?'url("'+board.cover+'")':'none','inside-light':inside.light,'inside-dark':inside.dark,'inside-accent':inside.accent,'nards-surface':'url("'+inside.surface+'")','nards-left-surface':'url("'+inside.leftSurface+'")','nards-right-surface':'url("'+inside.rightSurface+'")','checker-white':checkers.white,'checker-black':checkers.black,'checker-white-art':checkers.whiteArt?'url("'+checkers.whiteArt+'")':'none','checker-black-art':checkers.blackArt?'url("'+checkers.blackArt+'")':'none'}))table.style.setProperty('--'+key,value);
  const left=document.createElement('aside'),right=document.createElement('aside');paintStorage(left,1,storageFilled?7:0,home,homeFull);paintStorage(right,0,storageFilled?7:0,home,homeFull);left.classList.add('editor-store-left');right.classList.add('editor-store-right');table.append(left,field,right);
  field.append(createSurfaceHalf('left'),createSurfaceHalf('right'),createCarvedRail('left'),createCarvedRail('right'),createCarvedRail('left',true),createCarvedRail('right',true));
  const state=createBackgammon(kind==='short'?'short':'long');
@@ -23,7 +23,7 @@ export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,ra
  for(const [i,value]of [6,3].entries()){
   const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube';shadow.className='dice-ground-shadow';flight.style.left=(i?80:64)+'%';flight.style.top='50%';flight.style.transform='translate(-50%,-50%)';shadow.style.left=(i?80:64)+'%';shadow.style.top='50%';shadow.style.transform='translate(-50%,25%)';cube.style.setProperty('--die-material',dice.material||'plain');cube.style.setProperty('--die-face',dice.face);cube.style.setProperty('--die-edge',dice.edge);cube.style.setProperty('--die-pip',dice.pip);cube.setAttribute('aria-label','Кость: '+value);flight.append(cube);stage.append(shadow,flight);
  }
- table.append(stage);root.append(table);
+ table.append(stage);root.append(table);layoutNardsHomes(table,left,right,home==='none');
  // Attach first so computed material variables are available to the canvas renderer.
  stage.querySelectorAll('.dice-cube').forEach((cube,i)=>createDiceMesh(cube,diceFaces(i?3:6),40).draw(DICE_REST_X,DICE_REST_Y,i?.14:-.12));
  const caption=document.createElement('p');caption.className='editor-board-caption';caption.textContent=inside.name+' · '+checkers.name+' · '+dice.name+(size==='small'?' · маленькие кубики':'');root.append(caption);

@@ -1168,3 +1168,130 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
 .nards-table[data-skin=emerald-deco] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}
 
 .nards-table[data-skin=cosmic-titanium] .nards-storage-slots i::before{background:linear-gradient(180deg,#000b,#0004);border-color:color-mix(in srgb,var(--nards-light) 35%,#000);box-shadow:inset 0 1px 2px #000b,0 1px #ffffff12}
+
+/* Full-height homes own the corner columns; horizontal rails stop at the field. */
+.nards-table{--nards-home-width:clamp(19px,5vw,27px);--nards-rim-height:14px}
+.nards-table:is([data-skin=obsidian-copper],[data-skin=arctic-ice],[data-skin=japan-lacquer],[data-skin=emerald-deco],[data-skin=cosmic-titanium]){--nards-rim-height:18px}
+.nards-table:has(>.nards-storage[data-home-full=true])::before,
+.nards-table:has(>.nards-storage[data-home-full=true])::after{left:var(--nards-home-width);right:var(--nards-home-width);border-radius:0}
+.nards-table>.nards-storage[data-home-full=true]{margin-block:calc(-1 * var(--nards-rim-height));z-index:21}
+.nards-table>.nards-storage[data-home-full=true]>strong{top:0;transform:none;margin:0;padding:0 2px;line-height:13px;font-size:9px}
+.nards-table>.nards-storage[data-home-full=true]>.nards-storage-slots{padding-top:16px}
+
+/* Optional bear-off display beneath the board, shared by editor and live games. */
+.nards-table[data-homes=none]{grid-template-columns:minmax(0,1fr)}
+.nards-table[data-homes=none]>.nards-board{grid-column:1}
+.nards-off-tray{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:10px 0 4px;padding:6px;border:1px solid #c8ab6844;border-radius:9px;background:#0b1b16;color:#f0dfb8;min-width:0}
+.nards-off-tray>.nards-storage{display:flex;flex-direction:column;gap:5px;min-width:0;margin:0;padding:4px;border:0;border-radius:0;background:none;box-shadow:none}
+.nards-off-tray>.nards-storage>strong{position:static;transform:none;margin:0;padding:0;border:0;background:none;box-shadow:none;font-size:11px;line-height:15px}
+.nards-off-discs{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));min-height:12px;gap:1px}
+.nards-off-discs .checker{position:relative;display:block;width:100%;max-width:18px;aspect-ratio:1;margin:0;min-width:0}
+.nards-off-tray+.editor-board-caption{grid-column:1/-1}
+#nardsHomeHide{margin-bottom:8px}
+#nardsHomeHideHint{font-size:12px;color:#d7c59b}
+.nards-off-tray>#nardsStoreLeft{grid-column:1;grid-row:1}
+.nards-off-tray>#nardsStoreRight{grid-column:2;grid-row:1}
+.nards-off-discs{width:100%;align-self:stretch}
+
+/* Hiding the ornamental rails also releases their height, including full-height homes. */
+.nards-table[data-rails-hidden=true]{padding-block:0;--nards-rim-height:0px!important}
+.nards-table[data-rails-hidden=true]::before,.nards-table[data-rails-hidden=true]::after,
+.nards-table[data-rails-hidden=true] .nards-carved-rail{display:none}
+#nardsRailsHide{margin-bottom:12px}
+
+/* A consistent fitted home insert for every board material. */
+.nards-table{--nards-home-width:clamp(18px,4.6%,24px);grid-template-columns:var(--nards-home-width) minmax(0,1fr) var(--nards-home-width)}
+.nards-table[data-homes=none]{grid-template-columns:minmax(0,1fr)}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false]){
+ display:flex;flex-direction:column;align-items:stretch;min-width:0;min-height:0;gap:3px;padding:3px 1px;margin:0;
+ border:1px solid color-mix(in srgb,var(--nards-home-metal,#d6b778) 55%,transparent);border-radius:5px;
+ border-image:none!important;background:linear-gradient(90deg,#0007,transparent 24%,#ffffff0b 50%,#0005),var(--nards-home-base,var(--nards-frame,#3b2a20))!important;
+ box-shadow:inset 0 1px 2px #ffffff26,inset 1px 0 3px #0009,0 0 0 1px #0005!important;overflow:hidden;
+}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>strong{
+ position:static!important;inset:auto;transform:none!important;flex:0 0 18px;display:grid;place-items:center;min-height:18px;width:100%;margin:0!important;padding:0!important;box-sizing:border-box;
+ border:1px solid color-mix(in srgb,var(--nards-home-metal,#d6b778) 65%,transparent);border-radius:4px;background:linear-gradient(#ffffff0d,#0004),var(--nards-home-base,#202820);color:#fff1cf;
+ font:700 10px/1 system-ui;box-shadow:inset 0 1px #ffffff24;text-shadow:0 1px 1px #000b;
+}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>.nards-storage-slots{display:flex;flex-direction:column;flex:1 1 0;align-items:stretch;justify-content:stretch;min-width:0;min-height:0;height:auto;gap:1px;padding:2px 0!important;background:none;border-radius:3px;overflow:hidden}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-side=white]>.nards-storage-slots{flex-direction:column-reverse}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>.nards-storage-slots>i{container-type:size;position:relative;flex:1 1 0;min-height:0;max-height:none;margin:0;overflow:visible;border:0;border-radius:0;background:transparent!important;box-shadow:none}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>.nards-storage-slots>i::before{
+ content:'';position:absolute;inset:50% auto auto 50%;width:min(calc(100cqw - 2px),calc(100cqh - 2px));height:min(calc(100cqw - 2px),calc(100cqh - 2px));max-width:none;aspect-ratio:1;transform:translate(-50%,-50%);
+ border:1px solid color-mix(in srgb,var(--nards-home-metal,#d6b778) 48%,#101719);border-radius:50%;
+ background:radial-gradient(ellipse at 50% 85%,color-mix(in srgb,var(--nards-home-face,#354330) 55%,#fff) 0%,var(--nards-home-face,#354330) 26%,#060c0edb 78%);
+ box-shadow:inset 0 2px 3px #000c,0 1px 1px #ffffff26;
+}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>.nards-storage-slots>i>.nards-stored-edge{
+ position:absolute;inset:50% auto auto 50%;width:min(calc(100cqw - 4px),calc(100cqh - 4px));height:min(calc(100cqw - 4px),calc(100cqh - 4px));max-width:none;min-height:0;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+ border:1px solid var(--stored-rim);background:radial-gradient(circle at 30% 20%,#fff8,transparent 55%),var(--stored-art),var(--stored-face);background-size:100% 100%;background-position:center;box-shadow:0 1px 1px #0008;
+}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>.nards-storage-slots>i>.nards-stored-edge::before,.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])>.nards-storage-slots>i>.nards-stored-edge::after{display:none}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home=octagon]>.nards-storage-slots>i::before,.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home=octagon]>.nards-storage-slots>i>.nards-stored-edge{border-radius:0;clip-path:polygon(28% 0,72% 0,100% 28%,100% 72%,72% 100%,28% 100%,0 72%,0 28%)}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home=square]>.nards-storage-slots>i::before,.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home=square]>.nards-storage-slots>i>.nards-stored-edge{border-radius:3px}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home=tray]>.nards-storage-slots{gap:0;background:linear-gradient(90deg,#000a,transparent 50%,#0008),var(--nards-home-face,#263128);box-shadow:inset 0 1px 5px #000b}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home=tray]>.nards-storage-slots>i::before{display:none}
+.nards-table>.nards-storage:is([data-home-full=true],[data-home-full=false])[data-home-full=true]{margin-block:calc(-1 * var(--nards-rim-height));z-index:21}
+.nards-home-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin:8px 0 20px}
+#nardsPanelHome .nards-home-actions #nardsHomeHide{margin:0}
+#nardsPanelHome .nards-home-actions .nards-points-option{margin:0;min-height:42px;padding:0;gap:10px}
+#nardsPanelHome .nards-rail-options{gap:16px;margin-top:12px}
+
+/* Illustrated faces stay large and unobscured by additional decorative rings. */
+:is(.nards-board[data-checkers=waaar],[data-item=waaar]) .checker,:is(.nards-board[data-checkers=waaar],[data-item=waaar]) .checker.black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=waaar],[data-item=waaar]) .checker::before,:is(.nards-board[data-checkers=waaar],[data-item=waaar]) .checker::after{display:none}
+[data-item=waaar] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=cooler],[data-item=cooler]) .checker,:is(.nards-board[data-checkers=cooler],[data-item=cooler]) .checker.black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=cooler],[data-item=cooler]) .checker::before,:is(.nards-board[data-checkers=cooler],[data-item=cooler]) .checker::after{display:none}
+[data-item=cooler] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=emil],[data-item=emil]) .checker,:is(.nards-board[data-checkers=emil],[data-item=emil]) .checker.black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=emil],[data-item=emil]) .checker::before,:is(.nards-board[data-checkers=emil],[data-item=emil]) .checker::after{display:none}
+[data-item=emil] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=club-aces],[data-item=club-aces]) .checker,:is(.nards-board[data-checkers=club-aces],[data-item=club-aces]) .checker.black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=club-aces],[data-item=club-aces]) .checker::before,:is(.nards-board[data-checkers=club-aces],[data-item=club-aces]) .checker::after{display:none}
+[data-item=club-aces] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=dragon],[data-item=dragon]) .checker,:is(.nards-board[data-checkers=dragon],[data-item=dragon]) .checker.black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=dragon],[data-item=dragon]) .checker::before,:is(.nards-board[data-checkers=dragon],[data-item=dragon]) .checker::after{display:none}
+[data-item=dragon] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=koi],[data-item=koi]) .checker,:is(.nards-board[data-checkers=koi],[data-item=koi]) .checker.black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=koi],[data-item=koi]) .checker::before,:is(.nards-board[data-checkers=koi],[data-item=koi]) .checker::after{display:none}
+[data-item=koi] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=carved],[data-item=carved]) .checker,:is(.nards-board[data-checkers=carved],[data-item=carved]) .checker.black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=carved],[data-item=carved]) .checker::before,:is(.nards-board[data-checkers=carved],[data-item=carved]) .checker::after{display:none}
+[data-item=carved] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=heraldic],[data-item=heraldic]) .checker,:is(.nards-board[data-checkers=heraldic],[data-item=heraldic]) .checker.black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=heraldic],[data-item=heraldic]) .checker::before,:is(.nards-board[data-checkers=heraldic],[data-item=heraldic]) .checker::after{display:none}
+[data-item=heraldic] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=brass],[data-item=brass]) .checker,:is(.nards-board[data-checkers=brass],[data-item=brass]) .checker.black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=brass],[data-item=brass]) .checker::before,:is(.nards-board[data-checkers=brass],[data-item=brass]) .checker::after{display:none}
+[data-item=brass] .checker{width:48px;height:48px;margin:3px 2px 8px}
+:is(.nards-board[data-checkers=obsidian],[data-item=obsidian]) .checker,:is(.nards-board[data-checkers=obsidian],[data-item=obsidian]) .checker.black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 2px 2px #0007}
+:is(.nards-board[data-checkers=obsidian],[data-item=obsidian]) .checker::before,:is(.nards-board[data-checkers=obsidian],[data-item=obsidian]) .checker::after{display:none}
+[data-item=obsidian] .checker{width:48px;height:48px;margin:3px 2px 8px}
+.equipment-item-name{display:block;width:100%;clear:both;text-align:center;line-height:1.25}
+.checker-collection button:has(.equipment-item-name) .checker{max-width:48px;width:calc(50% - 6px);height:auto;aspect-ratio:1;margin:3px 2px 8px}
+
+/* One continuous painting keeps the arm aligned beneath the center hinge. */
+.nards-board[data-interior=santorini]{background-image:var(--nards-surface);background-size:100% 100%;background-position:center;background-repeat:no-repeat}
+.nards-board[data-interior=santorini]>.nards-half-art{background:none}
+
+/* Sports emblems retain their source aspect ratio; spare height stays behind the points. */
+.nards-board[data-interior^="sport-"]>.nards-half-art{background-size:contain;background-position:center;background-repeat:no-repeat;background-color:var(--inside-dark,#102e35)}
+
+/* Interior controls share one top-level tab and retain their own selection. */
+#nardsEquipment > .nards-editor-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+#nardsEquipment .nards-inner-tabs{grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 16px;background:transparent}
+.nards-table[data-rail-top]::before{background-image:var(--nards-rail-top);background-size:auto 100%;background-repeat:repeat-x}
+.nards-table[data-rail-bottom]::after{background-image:var(--nards-rail-bottom);background-size:auto 100%;background-repeat:repeat-x;transform:rotate(180deg)}
+.nards-table:has(>.nards-storage[data-home-full=true])::before,
+.nards-table:has(>.nards-storage[data-home-full=true])::after{border-radius:0;clip-path:inset(0)}
+/* Fill the editor row even when shared navigation styles use flex layout. */
+#nardsEquipment .nards-editor-tabs{display:grid;width:100%;box-sizing:border-box;justify-content:stretch}
+#nardsEquipment .nards-editor-tabs>button{width:100%;max-width:none;justify-self:stretch}
+
+/* Low carved lips keep more of the playing field visible. */
+.nards-table[data-rail-top]{--nards-rim-height:11px;padding-block:var(--nards-rim-height)}
+.nards-table[data-rail-top]::before,.nards-table[data-rail-bottom]::after{height:var(--nards-rim-height);box-shadow:inset 0 1px #ffe5b040,inset 0 -1px #000b,0 1px 2px #0007}
+
+.nards-rail-collection button>span{background-size:auto 100%;height:20px;border-radius:2px;box-shadow:inset 0 1px 1px #ffe5b055,0 1px 2px #0008}
+.nards-table[data-rail-bottom]::after{transform:none}

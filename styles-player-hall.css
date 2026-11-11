@@ -1343,3 +1343,28 @@ body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus 
 .living-top-board[data-pieces=cosmic-titanium] .living-preview-checker,.living-top-board[data-pieces=cosmic-titanium] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;background-color:transparent;border:0;box-shadow:none;filter:drop-shadow(0 1px 1px #0006)}
 .living-top-board[data-pieces=cosmic-titanium] .living-preview-checker::after{display:none}
 .living-top-board[data-interior=cosmic-titanium] .living-preview-point{--nards-tip-gap:25%!important}
+
+/* The folded living-room preview follows the selected hidden-home mode. */
+.living-nards-storage[data-home=none]{display:none}
+
+.living-top-board[data-pieces=waaar] .living-preview-checker,.living-top-board[data-pieces=waaar] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=waaar] .living-preview-checker::before,.living-top-board[data-pieces=waaar] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=cooler] .living-preview-checker,.living-top-board[data-pieces=cooler] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=cooler] .living-preview-checker::before,.living-top-board[data-pieces=cooler] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=emil] .living-preview-checker,.living-top-board[data-pieces=emil] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=emil] .living-preview-checker::before,.living-top-board[data-pieces=emil] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=club-aces] .living-preview-checker,.living-top-board[data-pieces=club-aces] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=club-aces] .living-preview-checker::before,.living-top-board[data-pieces=club-aces] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=dragon] .living-preview-checker,.living-top-board[data-pieces=dragon] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=dragon] .living-preview-checker::before,.living-top-board[data-pieces=dragon] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=koi] .living-preview-checker,.living-top-board[data-pieces=koi] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:100% 100%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=koi] .living-preview-checker::before,.living-top-board[data-pieces=koi] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=carved] .living-preview-checker,.living-top-board[data-pieces=carved] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=carved] .living-preview-checker::before,.living-top-board[data-pieces=carved] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=heraldic] .living-preview-checker,.living-top-board[data-pieces=heraldic] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=heraldic] .living-preview-checker::before,.living-top-board[data-pieces=heraldic] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=brass] .living-preview-checker,.living-top-board[data-pieces=brass] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=brass] .living-preview-checker::before,.living-top-board[data-pieces=brass] .living-preview-checker::after{display:none}
+.living-top-board[data-pieces=obsidian] .living-preview-checker,.living-top-board[data-pieces=obsidian] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 1px 2px #0007}
+.living-top-board[data-pieces=obsidian] .living-preview-checker::before,.living-top-board[data-pieces=obsidian] .living-preview-checker::after{display:none}
+.living-top-board[data-interior^="sport-"] :is(.living-nards-front,.living-nards-base,.living-preview-nards){background-size:contain;background-position:center;background-repeat:no-repeat;background-color:var(--preview-dark,#102e35)}

@@ -31,7 +31,7 @@ test('five reference sets unlock board, interior, checkers and dice together at 
  for(const theme of THEMES){
   const selected={nardsBoard:theme.id,nardsInterior:theme.id,checkers:theme.id,nardsDice:theme.id};
   const unlocked=N.cleanNards(selected,theme.level),locked=N.cleanNards(selected,theme.level-1);
-  for(const field of Object.keys(selected)){assert.equal(unlocked[field],theme.id);assert.notEqual(locked[field],theme.id);}
+  for(const field of Object.keys(selected)){assert.equal(unlocked[field],theme.id);if(theme.level>1)assert.notEqual(locked[field],theme.id);}
   for(const items of [N.NARDS_BOARDS,N.NARDS_INTERIORS,N.DESIGN_CHECKERS,N.NARDS_DICE])assert.equal(items.find(x=>x.id===theme.id).level,theme.level);
  }
 });
@@ -41,4 +41,12 @@ test('a level-one guest and spectator receive the host cosmic set without unlock
  const host=await fixture.service.call('m1',{action:'create',discipline:'long',equipment});
  const guest=await fixture.call('m2','join',host.roomId,{equipment:{checkers:'classic'}}),viewer=await fixture.call('viewer','watch',host.roomId);
  for(const field of Object.keys(equipment)){assert.equal(guest.equipment[field],equipment[field]);assert.equal(viewer.equipment[field],equipment[field]);assert.notEqual(N.cleanNards(equipment,1)[field],equipment[field]);}
+});
+
+test('hidden homes are persisted and shared from host to guest and spectator',async()=>{
+ const selected=N.cleanNards({nardsHome:'none',nardsHomeFull:true,nardsRailsHidden:true},1);assert.equal(selected.nardsHome,'none');
+ const fixture=require('./helpers/board-wager-fixture.cjs')({profiles:{m1:{name:'Хозяин',level:1},m2:{name:'Гость',level:1}}});
+ const host=await fixture.service.call('m1',{action:'create',discipline:'long',equipment:selected});
+ assert.equal(host.equipment.nardsHome,'none');
+ for(const [account,action]of [['m2','join'],['viewer','watch']]){const result=await fixture.call(account,action,host.roomId,{equipment:{nardsHome:'round'}});assert.equal(result.equipment.nardsHome,'none');assert.equal(result.equipment.nardsRailsHidden,true);}
 });
