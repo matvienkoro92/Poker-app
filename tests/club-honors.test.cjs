@@ -19,8 +19,30 @@ test('level and client equipment cannot unlock a ring or belt without server ent
 });
 function memory(){const strings=new Map(),sets=new Map();return {strings,sets,redis:async commands=>commands.map(([cmd,key,...args])=>{if(cmd==='GET')return strings.get(key)||null;if(cmd==='HGET')return 'ID100001';if(cmd==='SET'){if(args.includes('NX')&&strings.has(key))return null;strings.set(key,args[0]);return 'OK';}if(cmd==='SADD'){const s=sets.get(key)||new Set();s.add(args[0]);sets.set(key,s);return 1;}if(cmd==='SMEMBERS')return [...(sets.get(key)||[])];throw Error(cmd);})};}
 test('final issues are immutable, current month earns nothing, failures cannot issue awards',async()=>{
- const m=memory(),options={redis:m.redis,commands:m.redis,now:new Date('2026-03-15T12:00:00Z'),poker:{through:'2026-03-14',data:{topWin:[row('Alpha','02.2026'),row('Alpha','03.2026')]}},readGames:async()=>[{goldenBall:[]},{nardsKing:[]}],memberProfile:async()=>({bound:true,nick:'Alpha',level:10})};
+ const m=memory(),options={redis:m.redis,canonicalAccountId:async id=>id,commands:m.redis,now:new Date('2026-03-15T12:00:00Z'),poker:{through:'2026-03-14',data:{topWin:[row('Alpha','02.2026'),row('Alpha','03.2026')]}},readGames:async()=>[{goldenBall:[]},{nardsKing:[]}],memberProfile:async()=>({bound:true,nick:'Alpha',level:10})};
  const data=await honors.uncachedRead(options);assert.equal(data.issues.find(i=>i.month==='02.2026').winners[0].accountId,'ID100001');assert.deepEqual(await honors.entitlements('ID100001',m.redis),['month:02.2026']);
  options.poker.data.topWin=[row('Beta','02.2026')];const reread=await honors.uncachedRead(options);assert.equal(reread.issues.find(i=>i.month==='02.2026').winners[0].nick,'Alpha');
  const before=m.strings.size;await assert.rejects(()=>honors.uncachedRead({...options,readGames:async()=>{throw Error('offline');}}));assert.equal(m.strings.size,before);
+});
+test('shared response cache skips game history and concurrent reads share one calculation',async()=>{
+ const m=memory(),now=new Date('2026-04-15T12:00:00Z');
+ const saved={ok:true,issues:[],seasons:[],current:'04.2026',through:'2026-04-14'};
+ m.strings.set(honors.PREFIX+'response:v2:2026:4:2026-04-14',JSON.stringify(saved));
+ assert.deepEqual(await honors.read({redis:m.redis,canonicalAccountId:async id=>id,now,poker:{through:'2026-04-14'},readGames:()=>{throw Error('must not read history');}}),saved);
+ let reads=0;
+ const options={redis:m.redis,canonicalAccountId:async id=>id,now:new Date('2026-05-15'),poker:{through:'2026-05-14',data:{}},readGames:async()=>{reads++;return [{goldenBall:[]},{nardsKing:[]}];}};
+ const results=await Promise.all([honors.read(options),honors.read(options)]);
+ assert.equal(reads,1);assert.deepEqual(results[0],results[1]);
+ assert.ok(m.strings.has(honors.PREFIX+'response:v2:2026:5:2026-05-14'));
+});
+test('achievement results include only the winner and selected month, including saved issues',async()=>{
+ const m=memory();m.strings.set(honors.PREFIX+'issue:02.2026',JSON.stringify({month:'02.2026',final:true,winners:[{nick:'Alpha',categories:['Заносы от 100к'],awards:1,prizes:150000}]}));
+ const r=await honors.uncachedRead({redis:m.redis,canonicalAccountId:async id=>id,now:new Date('2026-03-15'),poker:{through:'2026-03-14',data:{big100:[{nick:'Alpha',detailRows:[{_monthKey:'02.2026',_reward:150000,title:'150 000 ₽ · 12.02.2026',meta:'1 место · Турнир'},{_monthKey:'03.2026',_reward:250000,title:'Не этот месяц'}]}]}},readGames:async()=>[{goldenBall:[]},{nardsKing:[]}],memberProfile:async()=>({bound:true,nick:'Alpha',level:10})});
+ const a=r.issues.find(i=>i.month==='02.2026').winners[0].achievements[0];assert.equal(a.value,1);assert.equal(a.details.length,1);assert.match(a.details[0].meta,/Турнир/);
+});
+
+test('a redirected nickname owner uses the active account and its saved character',async()=>{
+ const m=memory();m.strings.set('poker_app:player_hall:ID100002',JSON.stringify({garage:{suit:'navyBusiness'}}));
+ const r=await honors.uncachedRead({redis:m.redis,canonicalAccountId:async id=>id==='ID100001'?'ID100002':id,now:new Date('2026-03-15'),poker:{through:'2026-03-14',data:{topWin:[row('Alpha','02.2026')]}},readGames:async()=>[{goldenBall:[]},{nardsKing:[]}],memberProfile:async id=>({bound:id==='ID100002',nick:'Alpha',level:79})});
+ const winner=r.issues.find(i=>i.month==='02.2026').winners[0];assert.equal(winner.accountId,'ID100002');assert.equal(winner.figure.loadout.suit,'navyBusiness');assert.deepEqual(await honors.entitlements('ID100002',m.redis),['month:02.2026']);assert.deepEqual(await honors.entitlements('ID100001',m.redis),[]);
 });
