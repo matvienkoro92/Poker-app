@@ -1229,7 +1229,7 @@ html.app--telegram-miniapp :is(dialog.player-hall-detail,dialog.admin-game-stats
 
 .villa-billiards-stage[style*="billiards-table-ivory-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/ivory-v1-table.svg')}
 
-.villa-billiards-stage[style*="billiards-table-oak-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/oak-v1-table.svg')}
+.villa-billiards-stage[style*="billiards-table-oak-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/oak-v2-table.svg')}
 
 .villa-billiards-stage[style*="billiards-table-sport-"]{--billiards-surround-mask:url('./assets/player-hall/billiards-surround-masks/sport-v2-table.svg')}
 

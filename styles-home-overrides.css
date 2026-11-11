@@ -6642,3 +6642,12 @@ html body:not([data-view="chat"]) #app.app.app--view-home > .card > .card__heade
 
 /* Fill the daily-deal frame without trimming the character's right shoulder. */
 #app.app.app--view-home .home-daily-deal-hero__image{clip-path:inset(-96px 0 -110px 0);-webkit-clip-path:inset(-96px 0 -110px 0);transform:scale(1.04)!important;transform-origin:right bottom}
+
+/* Split the spare space below the character between a tighter frame and larger art. */
+@media(max-width:350px){#app.app.app--view-home .home-daily-deal-hero{height:160px!important}}
+@media(min-width:351px) and (max-width:389px){#app.app.app--view-home .home-daily-deal-hero{height:172.6px!important}}
+@media(min-width:390px) and (max-width:680px){#app.app.app--view-home .home-daily-deal-hero{height:208.72px!important}}
+@media(min-width:681px) and (max-width:1000px){#app.app.app--view-home .home-daily-deal-hero{height:297.6px!important}}
+@container daily-deal (max-width:480px){
+ #app.app.app--view-home .home-daily-deal-hero__image{height:145%!important;top:auto!important;bottom:-22px!important;right:0!important;transform:none!important}
+}

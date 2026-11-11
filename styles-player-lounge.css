@@ -897,3 +897,14 @@
 .garage-radio-face{display:block;width:100%;height:100%;position:relative;border:1px solid #493a21;border-radius:2px;background:#080b09;transform:perspective(650px) rotateY(-14deg) skewY(8deg);transform-origin:center;box-shadow:inset 2px 3px 5px #000e,0 1px 0 #dec38a55,0 0 0 2px #080b09b3;overflow:hidden}
 .player-hall-dialog .garage-radio-face img{width:100%;height:100%;object-fit:fill;filter:brightness(.84) saturate(.8);mix-blend-mode:normal}
 .player-hall-dialog .player-hall__garage-scene .garage-radio-object span{top:-25px;bottom:auto}
+
+/* Pull the BMW out of the doorway onto the foreground garage floor. */
+.player-hall__room[data-space=garage][data-garage-vehicle="2"] .player-hall__parked-kart {
+  left: 44%;
+  top: 52%;
+}
+
+/* Parked vehicles occlude wall-shelf parts and labels at their silhouettes. */
+.player-hall__room[data-space=garage] .player-hall__parked-kart {
+  z-index: 4;
+}

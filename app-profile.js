@@ -1519,7 +1519,7 @@ async function profileLoadPrizeDetails() {
     var html = '<span class="profile-prize-best">Топ призовых за 1 турнир <b>' + money(top) + ' ₽</b></span><span class="profile-prize-podium">' + podium.map(function (r, i) {
       return '<span class="profile-prize-place"><b>' + (i + 1) + ' место</b><span><strong>' + r.count + '</strong><small>раз</small></span><span><strong>' + money(r.reward) + '</strong><small>призовые, ₽</small></span></span>';
     }).join('') + '</span>';
-    document.querySelectorAll('[data-profile-prize-details]').forEach(function (el) { el.innerHTML = html; });
+    document.querySelectorAll('[data-profile-prize-details]').forEach(function (el) { el.innerHTML = html; window.pokerMountTournamentCups?.(el, rows); });
   } catch (error) {
     if (sequence !== profilePrizeDetailsSequence) return;
     document.querySelectorAll('[data-profile-prize-details]').forEach(function (el) { el.textContent = "Статистика доступна в подробностях"; });

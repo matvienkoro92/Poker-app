@@ -1432,6 +1432,7 @@ if (chatUserModalEl) {
         details.innerHTML = '<span class="profile-prize-best">Топ призовых за 1 турнир <b>' + money(best) + ' ₽</b></span><span class="profile-prize-podium">' + podium.map(function (row, index) {
           return '<span class="profile-prize-place"><b>' + (index + 1) + ' место</b><span><strong>' + row.count + '</strong><small>раз</small></span><span><strong>' + money(row.reward) + '</strong><small>призовые, ₽</small></span></span>';
         }).join('') + '</span>';
+        window.pokerMountTournamentCups?.(details, rows);
       }
       return text;
     });

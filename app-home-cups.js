@@ -33,6 +33,19 @@
   const title=cupTitle(item);
   detail.innerHTML='<button data-cup-close aria-label="Закрыть">×</button><img src="'+esc(window.PokerHallTrophies.forItem(item))+'" alt=""><h2>'+esc(title)+'</h2><p>'+esc(h.date.slice(0,10).split('-').reverse().join('.'))+' · '+r.place+'-е место</p><strong>'+money(r.reward)+'</strong>'+(window.PokerHallTrophies.family(h.tournament)==='boss'?'<p class="home-cup-detail__terms">Вход 5 000 ₽ · Нокаут</p>':window.PokerHallTrophies.family(h.tournament)==='month'?'<p class="home-cup-detail__terms">Вход 3 000 ₽</p>':'');detail.showModal();
  }
+ // Reuse trophy artwork and collection dialogs in a player's prize statistics.
+ window.pokerMountTournamentCups=function(details,rows){
+  if(!details||!window.PokerHallTrophies)return;
+  const items=(rows||[]).filter(r=>Number(r.place)===1&&Number(r.reward)>0).map(r=>{
+   const date=String(r.date||''),parts=date.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+   return {kind:'cups',history:{date:parts?parts[3]+'-'+parts[2]+'-'+parts[1]:date,tournament:r.tournamentLabel||r.tournament||'Турнир',results:[{place:1,reward:Number(r.reward)}]}};
+  }).sort((a,b)=>b.history.results[0].reward-a.history.results[0].reward||b.history.date.localeCompare(a.history.date));
+  if(!items.length)return;
+  const root=document.createElement('section');root.className='home-my-cups prize-cups';root.setAttribute('aria-label','Кубки игрока');
+  root.innerHTML='<header><strong>Кубки <span>'+items.length+'</span></strong><div><button type="button" class="home-my-cups__all" data-cups-all>ВСЕ</button><button type="button" data-cups-step="-1" aria-label="Кубки левее">‹</button><button type="button" data-cups-step="1" aria-label="Кубки правее">›</button></div></header><div class="home-my-cups__track" tabindex="0" aria-label="Кубки по убыванию выигрыша">'+items.map((item,i)=>'<button type="button" class="home-my-cups__item" data-cup-index="'+i+'" aria-label="'+esc(cupTitle(item)+' · '+money(item.history.results[0].reward))+'"><img loading="lazy" src="'+esc(window.PokerHallTrophies.forItem(item))+'" alt=""><span>'+money(item.history.results[0].reward)+'</span></button>').join('')+'</div>';
+  root.onclick=e=>{const all=e.target.closest('[data-cups-all]'),cup=e.target.closest('[data-cup-index]'),step=e.target.closest('[data-cups-step]');if(!all&&!cup&&!step)return;e.preventDefault();e.stopPropagation();if(all)showAll(items);if(cup)show(items[Number(cup.dataset.cupIndex)]);if(step)root.querySelector('.home-my-cups__track').scrollBy({left:Number(step.dataset.cupsStep)*root.clientWidth*.75,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});};
+  details.querySelector('.prize-cups')?.remove();details.prepend(root);
+ };
  // A cold connection can fail while the app is starting. Retry this read only;
  // auth changes invalidate the old attempt before it can render another account.
  async function readCups(token){
