@@ -2239,4 +2239,307 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "10.11.2026": [
+    {
+      "time": "01:00",
+      "name": "20K* Afterparty 5",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AndrushaMorf",
+          "place": 5,
+          "reward": 2375,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "RS888",
+          "place": 1,
+          "reward": 4368.36,
+          "points": 135
+        },
+        {
+          "nick": "Jeweler",
+          "place": 2,
+          "reward": 1974.12,
+          "points": 110
+        },
+        {
+          "nick": "kriak",
+          "place": 5,
+          "reward": 501.66,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "PLOtnik",
+          "place": 2,
+          "reward": 2466.88,
+          "points": 110
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 5,
+          "reward": 297.5,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "RS888",
+          "place": 1,
+          "reward": 14800,
+          "points": 135
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 2,
+          "reward": 8000,
+          "points": 110
+        },
+        {
+          "nick": "Waaar",
+          "place": 3,
+          "reward": 4200,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 5,
+          "reward": 5980,
+          "points": 60
+        },
+        {
+          "nick": "Em13!!",
+          "place": 6,
+          "reward": 4289,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 2790,
+          "points": 135
+        },
+        {
+          "nick": "time2bass",
+          "place": 2,
+          "reward": 1315,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "time2bass",
+          "place": 1,
+          "reward": 22657.5,
+          "points": 135
+        },
+        {
+          "nick": "RS888",
+          "place": 2,
+          "reward": 3570,
+          "points": 110
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 3,
+          "reward": 1350,
+          "points": 90
+        },
+        {
+          "nick": "cadillac",
+          "place": 5,
+          "reward": 210,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Тракториста",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "kriak",
+          "place": 1,
+          "reward": 39800,
+          "points": 135
+        },
+        {
+          "nick": "⚡72⚡",
+          "place": 7,
+          "reward": 4900,
+          "points": 40
+        },
+        {
+          "nick": "KuZnec!!!",
+          "place": 9,
+          "reward": 1200,
+          "points": 0
+        },
+        {
+          "nick": "Ron9",
+          "place": 14,
+          "reward": 600,
+          "points": 0
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 13,
+          "reward": 300,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "😈777😈",
+          "place": 1,
+          "reward": 40487.5,
+          "points": 135
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 5300,
+          "points": 110
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 4,
+          "reward": 4600,
+          "points": 70
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 1912.5,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "DRONCOH",
+          "place": 3,
+          "reward": 670,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 177K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 9,
+          "reward": 3124,
+          "points": 0
+        },
+        {
+          "nick": "Hazzzzz",
+          "place": 10,
+          "reward": 1547,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 13302.46,
+          "points": 135
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 4671.98,
+          "points": 110
+        },
+        {
+          "nick": "AgroMonkey",
+          "place": 6,
+          "reward": 2140.52,
+          "points": 50
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 986.93,
+          "points": 90
+        },
+        {
+          "nick": "RS888",
+          "place": 12,
+          "reward": 615.6,
+          "points": 0
+        }
+      ]
+    }
+  ]
 };

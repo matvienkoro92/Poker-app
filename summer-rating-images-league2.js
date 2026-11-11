@@ -1055,4 +1055,13 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-09-11-2026-league2-mok-17h.jpg",
     "rating-compressed-preview/rating-09-11-2026-league2-tournament-plo6-20h.jpg"
   ]
+,
+  "10.11.2026": [
+    "rating-compressed-preview/rating-10-11-2026-league2-turbina-200s-pko-2-3-08h.jpg",
+    "rating-compressed-preview/rating-10-11-2026-league2-ok-10h.jpg",
+    "rating-compressed-preview/rating-10-11-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-10-11-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-10-11-2026-league2-turnir-traktorista-18h.jpg",
+    "rating-compressed-preview/rating-10-11-2026-league2-tournament-plo6-20h.jpg"
+  ]
 };

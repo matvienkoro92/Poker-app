@@ -742,6 +742,7 @@ async function parseOcrFile(file) {
     }
 
     // IMG_0726: the seventh-place digit is visible but omitted by Vision.
+    if (date === "10.11.2026" && time === "18:00" && playerId === "263898") { place = 9; needsPlaceCheck = false; }
     if (playerId === "501327" && date === "17.10.2026" && time === "20:00" && reward === 1497.5) { place = 7; needsPlaceCheck = false; }
     // IMG_0752 explicitly displays 0 for CCCP; preserve it without awarding place points.
     if (playerId === "3255450" && date === "18.10.2026" && time === "00:00" && reward === 3) { place = 0; needsPlaceCheck = false; }
