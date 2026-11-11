@@ -3,6 +3,14 @@
  let revision=0,detail,collection;
  const money=n=>Number(n).toLocaleString('ru-RU',{maximumFractionDigits:0})+' ₽';
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ // Older deployments or cached pages may request a missing thumbnail. Keep
+ // the actual trophy visible by retrying its original artwork once.
+ document.addEventListener('error',event=>{
+  const img=event.target;
+  if(img.tagName!=='IMG'||!img.closest('.home-my-cups,.home-cups-all'))return;
+  const source=img.getAttribute('src')||'';
+  if(/-thumb-v2\.webp(?:\?|$)/.test(source))img.src=source.replace(/-thumb-v2\.webp(?=\?|$)/,'.webp');
+ },true);
  function cupThumbnail(item){return (window.PokerHallTrophies.thumbnailForItem||window.PokerHallTrophies.forItem)(item);}
  function cupTitle(item){
   const h=item.history;
