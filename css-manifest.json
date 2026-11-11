@@ -99,6 +99,7 @@
       "styles-pwa.css"
     ],
     "home": [
+      "styles-home-cups.css",
       "styles-home.css",
       "styles-home-shell.css",
       "styles-home-sections.css",
@@ -229,6 +230,7 @@
   },
   "views": {
     "home": [
+      "styles-home-cups.css",
       "base",
       "auth",
       "home",
