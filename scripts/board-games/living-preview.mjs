@@ -1,12 +1,15 @@
-import {nardsShowPoints} from './catalog.mjs';
-import {createCarvedRail,createPointBlade,paintStorage} from './nards-carving.mjs';
-import {NARDS_BOARDS,CHECKERS,BOARDS,PIECES,NARDS_INTERIORS} from './catalog.mjs';
-import {createBackgammon} from './backgammon.mjs';
+import {paintEditorBoard} from './editor-preview.mjs';
+import {NARDS_BOARDS,CHECKERS,BOARDS,PIECES,NARDS_INTERIORS,NARDS_DICE} from './catalog.mjs';
 import {pieceSVG,pieceNames} from './pieces.mjs';
 
 const readyImages=new Map();
+let boardStyles='',boardStylesReady;
+function preloadBoardStyles(){
+ return boardStylesReady||(boardStylesReady=fetch('./styles-board-games.css?v=20261111-shared-nards-v2').then(r=>{if(!r.ok)throw Error('Не удалось загрузить оформление доски');return r.text();}).then(css=>{boardStyles=css;}).catch(error=>{boardStylesReady=null;throw error;}));
+}
+
 export async function preload(game,equipment={}){
- if(game!=='chess')return;
+ if(game!=='chess')return preloadBoardStyles();
  const board=BOARDS.find(b=>b.id===equipment.board)||BOARDS[0],style=PIECES.find(p=>p.id===equipment.pieces)||PIECES[0];
  const urls=new Set(board.image?[board.image]:[]);
  for(const color of ['w','b'])for(const type of ['p','r','n','b','q','k']){const href=pieceSVG(type,color,style.id).match(/href="([^"]+)"/);if(href)urls.add(href[1]);}
@@ -16,8 +19,9 @@ export function paint(root,game,equipment={}){
   const chess=game==='chess';
   const board=(chess?BOARDS:NARDS_BOARDS).find(b=>b.id===(chess?equipment.board:equipment.nardsBoard))||(chess?BOARDS:NARDS_BOARDS)[0];
   const set=(chess?PIECES:CHECKERS).find(s=>s.id===(chess?equipment.pieces:equipment.checkers))||(chess?PIECES:CHECKERS)[0];
-  const paintKey=[game,board.id,set.id,equipment.nardsInterior,equipment.nardsHome,equipment.nardsHomeFull,equipment.nardsPoints,equipment.nardsPointsFor].join(':');
+  const paintKey=[game,board.id,set.id,equipment.nardsInterior,equipment.nardsHome,equipment.nardsHomeFull,equipment.nardsPoints,equipment.nardsPointsFor,equipment.nardsRailsHidden,equipment.nardsRailTop,equipment.nardsRailBottom,equipment.nardsWells,equipment.nardsDice,equipment.nardsDiceSize].join(':');
   if(root.dataset.paintKey===paintKey&&root.firstElementChild)return {board:board.name,pieces:set.name};
+  root._boardResize?.disconnect();
   root.dataset.board=board.id;for(const [key,value]of Object.entries({light:board.light,dark:board.dark,frame:board.frame}))root.style.setProperty('--nards-'+key,value);root.dataset.pieces=set.id;
   root.classList.toggle('living-top-board--chess',chess);
   root.setAttribute('aria-label',(chess?'Шахматы':'Нарды')+' · '+board.name+' · '+set.name+' · вид сверху');
@@ -37,33 +41,30 @@ export function paint(root,game,equipment={}){
     }
     surface.append(grid);
   }else{
-    for(const side of ['white','black']){
-      root.style.setProperty('--preview-'+side,set[side]);
-      root.style.setProperty('--preview-'+side+'-art',set[side+'Art']?'url("'+set[side+'Art']+'")':'none');
-    }
-    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];root.dataset.interior=inside.id;surface.style.backgroundImage='url("'+inside.surface+'")';surface.dataset.bakedPoints=String(!(nardsShowPoints(inside,equipment.nardsPoints,equipment.nardsPointsFor)));surface.dataset.leftSurface=inside.leftSurface;surface.dataset.rightSurface=inside.rightSurface;for(const [key,value]of Object.entries({light:inside.light,dark:inside.dark}))root.style.setProperty('--preview-'+key,value);root.style.setProperty('--preview-accent',inside.accent);const state=createBackgammon('long');
-    for(let row=0;row<2;row++)for(let col=0;col<12;col++){
-      const index=row===0?11-col:12+col,n=state.points[index],point=document.createElement('span');
-      point.className='living-preview-point'+(row?' is-bottom':'')+(col%2?' is-light':'');point.dataset.point=index;point.classList.toggle('has-stack',Math.abs(n)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(n)-1));
-      point.style.gridColumn=col+1+(col>=6?1:0);point.style.gridRow=row+1;point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');if(surface.dataset.bakedPoints!=='true'){const blade=createPointBlade();blade.className='living-preview-blade';point.append(blade);}
-      for(let i=0;i<Math.abs(n);i++){const coin=document.createElement('i');coin.className='living-preview-checker'+(n<0?' is-black':'');coin.style.setProperty('--stack-index',i);coin.setAttribute('aria-label',n<0?'Чёрная фишка':'Белая фишка');point.append(coin);}
-      surface.append(point);
-    }
-    const bar=document.createElement('span');bar.className='living-preview-bar';surface.append(bar);
-  }
-  if(!chess){
-    const box=document.createElement('div'),base=document.createElement('div'),lid=document.createElement('div'),front=document.createElement('div'),back=document.createElement('div'),hinge=document.createElement('i');
-    box.className='living-nards-case';base.className='living-nards-half living-nards-base living-preview-surface living-preview-nards';lid.className='living-nards-lid';front.className='living-nards-half living-nards-front living-preview-surface living-preview-nards';back.className='living-nards-back';hinge.className='living-nards-hinge';
-    front.style.backgroundImage='url("'+surface.dataset.leftSurface+'")';base.style.backgroundImage='url("'+surface.dataset.rightSurface+'")';
+    // Clip two copies of the actual editor board at its hinge. Each half uses
+    // the game's stylesheet in a shadow root, so villa CSS cannot restyle it.
+    const inside=NARDS_INTERIORS.find(b=>b.id===equipment.nardsInterior)||NARDS_INTERIORS[0];
+    const dice=NARDS_DICE.find(b=>b.id===equipment.nardsDice)||NARDS_DICE[0];
+    root.dataset.interior=inside.id;
+    const box=document.createElement('div'),base=document.createElement('div'),lid=document.createElement('div'),front=document.createElement('div'),back=document.createElement('div');
+    box.className='living-nards-case';base.className='living-nards-half living-nards-base living-nards-shared-half';lid.className='living-nards-lid';front.className='living-nards-half living-nards-front living-nards-shared-half';back.className='living-nards-back';
     back.style.backgroundImage=board.cover?'url("'+board.cover+'")':'none';back.setAttribute('aria-hidden','true');
     if(!board.cover)back.innerHTML='<span>♜<small>TWO ACES</small></span>';
-    for(const point of [...surface.children]){if(point.classList.contains('living-preview-bar'))continue;const col=Number(point.style.gridColumn);if(col>7){point.style.gridColumn=col-7;base.append(point);}else front.append(point);}
-    // Painted interiors already contain their carved point rims; a second rail misaligns the upper wells.
-    if(surface.dataset.bakedPoints!=='true')for(const half of [front,base])for(const bottom of [false,true]){const rail=createCarvedRail(half===front?'left':'right',bottom);half.append(rail);}
-    const leftStorage=document.createElement('aside'),rightStorage=document.createElement('aside');leftStorage.className=rightStorage.className='living-nards-storage';paintStorage(leftStorage,1,0,equipment.nardsHome,equipment.nardsHomeFull);paintStorage(rightStorage,0,0,equipment.nardsHome,equipment.nardsHomeFull);front.append(leftStorage);base.append(rightStorage);
-    lid.append(front,back);box.append(base,lid,hinge);root.replaceChildren(box);
+    lid.append(front,back);box.append(base,lid);root.replaceChildren(box);
+    for(const [half,right] of [[front,false],[base,true]]){
+      const host=document.createElement('div');host.className='living-nards-shared-render';host.style.left=right?'-100%':'0';half.append(host);
+      const shadow=host.attachShadow({mode:'open'}),style=document.createElement('style'),preview=document.createElement('div');
+      style.textContent=boardStyles+`
+:host{display:block;position:absolute;top:0;width:200%;height:100%;font:15px/1.45 system-ui,sans-serif;color:#f5e6c5}#nardsPreview{display:block!important;width:100%;padding:0!important;margin:0!important}#nardsPreview .editor-board{width:100%;max-width:none;margin:0;box-shadow:none}.editor-board-caption,.editor-dice,.nards-off-tray{display:none!important}`;
+      preview.id='nardsPreview';shadow.append(style,preview);
+      paintEditorBoard(preview,{board,inside,checkers:set,dice,size:equipment.nardsDiceSize,points:equipment.nardsPoints,rails:equipment,wells:equipment.nardsWells,home:equipment.nardsHome,homeFull:equipment.nardsHomeFull,kind:'long',showDice:false});
+    }
+    const table=front.querySelector('.living-nards-shared-render').shadowRoot.querySelector('.editor-board');
+    const fit=()=>{if(table.offsetWidth&&table.offsetHeight)box.style.aspectRatio=table.offsetWidth+'/'+table.offsetHeight;};
+    fit();root._boardResize=new ResizeObserver(fit);root._boardResize.observe(table);
     root.dataset.openLabel=root.getAttribute('aria-label');setClosed(root,root.classList.contains('is-closed'));
-  }else root.replaceChildren(surface);
+  }
+  if(chess)root.replaceChildren(surface);
   root.dataset.paintKey=paintKey;
   return {board:board.name,pieces:set.name};
 }

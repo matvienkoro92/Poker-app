@@ -5,7 +5,7 @@ import {diceFaces} from './dice-view.mjs';
 import {createBackgammon} from './backgammon.mjs';
 
 // The editor uses the same geometry, materials and decorative components as play.
-export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,rails,wells,home,homeFull,storageFilled,kind}){
+export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,rails,wells,home,homeFull,storageFilled,kind,showDice=true}){
  root.classList.add('has-live-board');
  const table=document.createElement('div');table.className='nards-table editor-board';table.dataset.skin=board.id;paintNardsRails(table,rails||{});table.setAttribute('aria-label','Предпросмотр игровой доски');
  const field=document.createElement('div');field.className='nards-board';field.dataset.skin=board.id;field.dataset.interior=inside.id;field.dataset.checkers=checkers.id;field.dataset.wells=String(wells===true);field.dataset.mural=String(!(nardsShowPoints(inside,points,rails?.nardsPointsFor)));field.dataset.pointMat=String(!inside.bakedPoints&&points!=null&&inside.revision>=2);
@@ -20,7 +20,7 @@ export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,ra
  }
  const bar=document.createElement('span');bar.className='bar';decorateCenterSpine(bar);field.append(bar);
  const stage=document.createElement('div');stage.className='board-dice-stage editor-dice';stage.style.setProperty('--cube-size',size==='small'?'5.8cqw':'8.1cqw');
- for(const [i,value]of [6,3].entries()){
+ if(showDice)for(const [i,value]of [6,3].entries()){
   const flight=document.createElement('div'),cube=document.createElement('div'),shadow=document.createElement('div');flight.className='dice-flight';cube.className='dice-cube';shadow.className='dice-ground-shadow';flight.style.left=(i?80:64)+'%';flight.style.top='50%';flight.style.transform='translate(-50%,-50%)';shadow.style.left=(i?80:64)+'%';shadow.style.top='50%';shadow.style.transform='translate(-50%,25%)';cube.style.setProperty('--die-material',dice.material||'plain');cube.style.setProperty('--die-face',dice.face);cube.style.setProperty('--die-edge',dice.edge);cube.style.setProperty('--die-pip',dice.pip);cube.setAttribute('aria-label','Кость: '+value);flight.append(cube);stage.append(shadow,flight);
  }
  table.append(stage);root.append(table);layoutNardsHomes(table,left,right,home==='none');

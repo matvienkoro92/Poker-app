@@ -1368,3 +1368,6 @@ body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus 
 .living-top-board[data-pieces=obsidian] .living-preview-checker,.living-top-board[data-pieces=obsidian] .living-preview-checker.is-black{background-image:var(--disc-art);background-size:138% 138%;border:0;box-shadow:0 1px 2px #0007}
 .living-top-board[data-pieces=obsidian] .living-preview-checker::before,.living-top-board[data-pieces=obsidian] .living-preview-checker::after{display:none}
 .living-top-board[data-interior^="sport-"] :is(.living-nards-front,.living-nards-base,.living-preview-nards){background-size:contain;background-position:center;background-repeat:no-repeat;background-color:var(--preview-dark,#102e35)}
+
+/* Shared editor/game rendering retains the villa's centre-hinge folding. */
+.living-nards-half.living-nards-shared-half{display:block;overflow:hidden;border:0;padding:0;background:none;border-image:none;box-shadow:none}

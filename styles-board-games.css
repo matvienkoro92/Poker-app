@@ -1295,3 +1295,17 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
 
 .nards-rail-collection button>span{background-size:auto 100%;height:20px;border-radius:2px;box-shadow:inset 0 1px 1px #ffe5b055,0 1px 2px #0008}
 .nards-table[data-rail-bottom]::after{transform:none}
+
+/* Removing the carving removes its individual landing cells as well. */
+.nards-table[data-rails-hidden=true] .nards-board .point::after{display:none}
+
+/* A light rim against dark fields and a dark rim against light fields keep
+   the centre hinge legible without replacing any selected skin's texture. */
+.nards-table .nards-board .bar{
+ border-inline:1px solid #ead8ad;
+ box-shadow:-1px 0 0 #101816,1px 0 0 #101816,inset 2px 0 2px #fff1ce55,inset -2px 0 2px #0009;
+}
+.nards-table .nards-board .bar::before{
+ content:"";position:absolute;inset:0 auto 0 calc(50% - 1px);width:2px;
+ background:#101816;box-shadow:1px 0 0 #f3ddb6b3;pointer-events:none;z-index:0;
+}
