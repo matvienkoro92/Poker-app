@@ -10,7 +10,7 @@
   '07.2026':['Waaar','07'], '08.2026':['Waaar','08'],
   '09.2026':['ПокерМанки','09'], '10.2026':['Luck_is_Suck','10']
  };
- function ringArt(w,key){const art=RINGS[key],src=w&&art&&w.nick===art[0]?'./assets/player-hall/honors/personal/ring-2026-'+art[1]+'-v3.webp':ART.ring;return src+'?v=20261111-honor-rings-2';}
+ function ringArt(w,key){const art=RINGS[key],src=w&&art&&w.nick===art[0]?'./assets/player-hall/honors/personal/ring-2026-'+art[1]+'-v3.webp':ART.ring;return src+'?v=20261111-light-rings-v4';}
  // A previous missing-asset response must not leave the collection permanently broken.
  document.addEventListener('error',function(event){const image=event.target;if(!(image instanceof HTMLImageElement)||!image.closest('.home-honor-rings,.honors-ring-shelf,.honors-personal-ring'))return;if(image.dataset.honorsRetried){image.hidden=true;const note=document.createElement('span');note.className='honors-ring-image-error';note.textContent='Перстень не загрузился';image.after(note);return;}image.dataset.honorsRetried='true';const url=new URL(image.src,location.href);url.searchParams.set('ring_retry',String(Date.now()));image.src=url.href;},true);
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

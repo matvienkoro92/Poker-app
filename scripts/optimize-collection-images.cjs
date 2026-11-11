@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs'),path=require('path'),sharp=require('sharp');
+const equipment=require('../lib/nards-equipment'),rails=require('../lib/nards-rails'),trophies=require('../app-hall-trophies');
+const files=new Map();
+function collect(v){if(typeof v==='string'&&v.startsWith('./assets/')&&v.endsWith('.webp'))files.set(v.slice(2),'nards');else if(Array.isArray(v))v.forEach(collect);else if(v&&typeof v==='object')Object.values(v).forEach(collect);}
+collect(equipment);collect(rails.NARDS_RAILS);
+for(const v of Object.values(trophies.assets))if(v.endsWith('.webp'))files.set(v.slice(2),'cups');
+for(const f of fs.readdirSync('assets/player-hall/honors/personal'))if(f.endsWith('-v3.webp'))files.set('assets/player-hall/honors/personal/'+f,'rings');
+for(const f of ['ring-v1.webp','belt-v1.webp'])files.set('assets/player-hall/honors/'+f,'rings');
+(async()=>{const report=[];for(const [f,kind]of files){if(!fs.existsSync(f))throw Error('Missing '+f);const before=fs.statSync(f).size;if(before<18000)continue;const meta=await sharp(f).metadata(),rail=/\/rail-/.test(f),preview=/preview|thumbnail/.test(f);const max=rail?768:kind==='rings'?600:kind==='cups'?512:preview?420:1100;const buffer=await sharp(f).resize({width:max,height:max,fit:'inside',withoutEnlargement:true}).webp({quality:rail?78:kind==='rings'?80:76,effort:6,alphaQuality:90}).toBuffer();if(buffer.length<before){const backup=path.join('output/image-loading-audit/originals',f);fs.mkdirSync(path.dirname(backup),{recursive:true});if(!fs.existsSync(backup))fs.copyFileSync(f,backup);fs.writeFileSync(f,buffer);}report.push({file:f,kind,before,after:fs.statSync(f).size,width:meta.width,height:meta.height});}fs.writeFileSync('output/image-loading-audit/report.json',JSON.stringify(report,null,2));for(const kind of ['nards','rings','cups']){const rows=report.filter(r=>r.kind===kind),sum=k=>rows.reduce((s,r)=>s+r[k],0);console.log(kind,rows.length,Math.round(sum('before')/1024)+' KB → '+Math.round(sum('after')/1024)+' KB','max '+Math.round(Math.max(...rows.map(r=>r.after))/1024)+' KB');}})().catch(e=>{console.error(e);process.exitCode=1;});

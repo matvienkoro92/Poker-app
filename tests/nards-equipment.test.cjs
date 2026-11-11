@@ -14,8 +14,8 @@ test('six club backgrounds unlock at level one and default to PokerManki villa w
 test('illustrated previews and gameplay panels have mobile size budgets',async()=>{
  const sharp=require('sharp');
  for(const b of N.NARDS_INTERIORS.filter(b=>b.art)){
-  const preview=await sharp(b.preview).metadata();assert.equal(preview.format,'webp');assert.equal(preview.width,480);assert.ok(fs.statSync(b.preview).size<70000,b.id+' thumbnail too large');
-  for(const side of ['leftSurface','rightSurface']){const m=await sharp(b[side]).metadata();if(b.splitArt){const source=await sharp('assets/board-games/nards/illustration-'+b.art+'-'+(side==='leftSurface'?'left':'right')+'.webp').metadata();assert.equal(m.width,source.width);assert.equal(m.height,source.height);assert.ok(m.width/m.height<.46);}else{assert.equal(m.width,582);assert.equal(m.height,1000);}assert.ok(fs.statSync(b[side]).size<150000,b.id+' panel too large');}
+  const preview=await sharp(b.preview).metadata();assert.equal(preview.format,'webp');assert.ok(preview.width>=300&&preview.width<=480);assert.ok(fs.statSync(b.preview).size<70000,b.id+' thumbnail too large');
+  for(const side of ['leftSurface','rightSurface']){const m=await sharp(b[side]).metadata();if(b.splitArt){const source=await sharp('assets/board-games/nards/illustration-'+b.art+'-'+(side==='leftSurface'?'left':'right')+'.webp').metadata();assert.ok(m.width<=source.width&&m.height<=source.height);assert.ok(Math.abs(m.width/m.height-source.width/source.height)<.002);assert.ok(m.width/m.height<.46);}else{assert.equal(m.width,582);assert.equal(m.height,1000);}assert.ok(fs.statSync(b[side]).size<150000,b.id+' panel too large');}
  }
 });
 
