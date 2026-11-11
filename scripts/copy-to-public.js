@@ -273,6 +273,8 @@ function copyReferencedAssets() {
   addWardrobeAssets('player-hall/wardrobe/icons');
   addWardrobeAssets('player-hall/garage-icons');
   addWardrobeAssets('player-hall/helmets');
+  // Named honor rings are selected by winner/month at runtime.
+  addWardrobeAssets('player-hall/honors');
   // Carved boards and checker URLs are built from validated catalogue IDs.
   addWardrobeAssets('board-games/nards');
   addWardrobeAssets('board-games/previews');
