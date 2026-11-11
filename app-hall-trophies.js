@@ -3,7 +3,7 @@
 var assets={
  mok:'./assets/player-hall/trophy-mok-magic-gauntlet-v1.webp',
  addon:'./assets/player-hall/trophy-addon-v1.svg',
- rebuy:'./assets/player-hall/trophy-rebuy-v1.svg',
+ rebuy:'./assets/player-hall/trophy-rebuy-v2.webp',
  monday:'./assets/player-hall/trophy-monday-v1.webp',
  tuesday:'./assets/player-hall/trophy-tuesday-v1.webp',
  wednesday:'./assets/player-hall/trophy-wednesday-v1.webp',

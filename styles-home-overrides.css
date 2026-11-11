@@ -6639,3 +6639,6 @@ html body:not([data-view="chat"]) #app.app.app--view-home > .card > .card__heade
 @container daily-deal (max-width:480px){
  #app.app.app--view-home .home-daily-deal-hero__image{height:125%!important;top:auto!important;bottom:0!important;right:-12px!important;transform:none!important}
 }
+
+/* Fill the daily-deal frame without trimming the character's right shoulder. */
+#app.app.app--view-home .home-daily-deal-hero__image{clip-path:inset(-96px 0 -110px 0);-webkit-clip-path:inset(-96px 0 -110px 0);transform:scale(1.04)!important;transform-origin:right bottom}
