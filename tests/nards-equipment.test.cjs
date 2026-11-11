@@ -50,3 +50,11 @@ test('hidden homes are persisted and shared from host to guest and spectator',as
  assert.equal(host.equipment.nardsHome,'none');
  for(const [account,action]of [['m2','join'],['viewer','watch']]){const result=await fixture.call(account,action,host.roomId,{equipment:{nardsHome:'round'}});assert.equal(result.equipment.nardsHome,'none');assert.equal(result.equipment.nardsRailsHidden,true);}
 });
+test('reference themes restore points hidden by an old unrelated interior but preserve an explicit choice for this theme',()=>{
+ for(const inside of N.NARDS_INTERIORS.filter(x=>x.referenceTheme)){
+  assert.equal(N.nardsShowPoints(inside,false),true);
+  assert.equal(N.nardsShowPoints(inside,false,'santorini'),true);
+  assert.equal(N.nardsShowPoints(inside,false,inside.id),false);
+  assert.equal(N.cleanNards({nardsInterior:inside.id,nardsPoints:false,nardsPointsFor:inside.id},100).nardsPointsFor,inside.id);
+ }
+});
