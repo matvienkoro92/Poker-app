@@ -103,5 +103,13 @@
    const years=[...new Set(months.map(m=>m.slice(3)))];for(const year of years){const line=document.createElement('span');line.textContent=months.filter(m=>m.endsWith('.'+year)).map(m=>MONTHS[Number(m.slice(0,2))-1]).join(', ')+' · '+year;slot.append(line);}
   })).catch(()=>{});
  };
+ window.pokerHydrateHomeHonorRings=function(root){
+  const slot=root.querySelector('[data-home-honor-rings]');if(!slot)return Promise.resolve();
+  return loadPublic().then(d=>{
+   if(!slot.isConnected)return;
+   const season=d.current.slice(3),entries=d.issues.filter(i=>i.final&&i.month.endsWith('.'+season)).flatMap(issue=>issue.winners.map(w=>({issue,w})));
+   slot.innerHTML=entries.length?'<div class="home-honor-rings__track" tabindex="0" aria-label="Перстни по месяцам, прокрутка по горизонтали">'+entries.map(({issue,w})=>'<button type="button" data-club-honors-open data-honors-section="rewards" data-honors-issue="'+esc(issue.month)+'" aria-label="'+esc(w.nick+' · '+label(issue.month)+' · Открыть перстень')+'"><img src="'+esc(ringArt(w,issue.month))+'" loading="lazy" alt=""><strong>'+esc(w.nick)+'</strong><small>'+esc(MONTHS[Number(issue.month.slice(0,2))-1])+'</small></button>').join('')+'</div>':'<button type="button" data-club-honors-open>Клубный журнал · Награды ↗</button>';
+  }).catch(()=>{if(!slot.isConnected)return;slot.innerHTML='<button type="button" data-home-rings-retry>Перстни не загрузились · Повторить</button>';slot.querySelector('button').onclick=()=>window.pokerHydrateHomeHonorRings(root);});
+ };
  window.pokerOpenClubHonors=open;
 })();
