@@ -518,6 +518,7 @@ async function parseOcrFile(file) {
   if (blue && date === "05.11.2026" && time === "15:00" && /70K.*BLACKOUT/i.test(title)) { title = "BLACKOUT 70K"; buyin = 700; }
   if (blue && date === "06.11.2026" && time === "18:00" && title === "500K Black Friday") { title = "Black Friday 500K"; buyin = 1500; }
   if (blue && date === "07.11.2026" && time === "19:00" && /300K.*Triple Chance/i.test(title)) { title = "Triple Chance 300K"; buyin = 3000; }
+  if (blue && date === "10.11.2026" && time === "18:00" && /200K.*Deep Freeze/i.test(title)) { title = "Deep Freeze 200K"; buyin = 4000; }
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   if (date === "29.10.2026" && blue && time === "15:00" && title === "Lucky Slot 77K") buyin = 500;

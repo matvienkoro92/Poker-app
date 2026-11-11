@@ -2540,6 +2540,20 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
           "points": 0
         }
       ]
+    },
+    {
+      "time": "18:00",
+      "name": "Deep Freeze 200K",
+      "buyin": 4000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 4,
+          "reward": 16476,
+          "points": 70
+        }
+      ]
     }
   ]
 };
