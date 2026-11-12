@@ -19,7 +19,7 @@ async function request(body,attempt=0){
  return d;
 }
 const serverNow=()=>Date.now()+offset;
-const novosibirsk=t=>new Date(t).toLocaleString('ru-RU',{timeZone:'Asia/Novosibirsk',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' НСК';
+const moscowTime=t=>new Date(t).toLocaleString('ru-RU',{timeZone:'Europe/Moscow',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' МСК';
 function duration(at){const s=Math.max(0,Math.ceil((at-serverNow())/1000));return (s>=3600?Math.floor(s/3600)+':':'')+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
 function showPanel(name){for(const id of ['tourListPanel','tourCreatePanel','tourDetail'])$(id).hidden=id!==name;}
 function setTab(tab){
@@ -64,7 +64,7 @@ async function list(resetArchive=true){
    top.append(el('span',statusNames[t.status]||t.status,'tour-card-status'),el('span',t.count+' / '+t.capacity+' игроков','tour-card-count'));
    card.append(top,el('h3',t.title));
    const meta=el('div',null,'tour-card-meta');
-   meta.append(el('span',t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt)),el('span',t.discipline==='long'?'Длинные нарды':'Короткие нарды'));
+   meta.append(el('span',t.startsAt==null?'Старт по решению администратора':moscowTime(t.startsAt)),el('span',t.discipline==='long'?'Длинные нарды':'Короткие нарды'));
    card.append(meta,el('p',t.entryType==='chips'?'Вход · '+Number(t.buyIn).toLocaleString('ru-RU')+' фишек Poker21':'Бесплатное участие','tour-card-entry'));
    if(t.status!=='cancelled')card.append(listPrizeCard(t));
    if(active){
@@ -229,7 +229,7 @@ function bracket(d){
    card.style.setProperty('--sng-map-row-start',mi*span+1);card.style.setProperty('--sng-map-row-span',span);card.style.setProperty('--sng-map-connector-height',span*168+'px');
    const rows=el('div',null,'sng-champions-modal__map-players');
    m.playerIds.forEach((id,i)=>{const p=players.get(id),won=m.winnerId===id&&id,lost=m.resolved&&id&&!won,advanced=ri>0&&id&&!m.resolved&&!m.playerIds.every(Boolean);const row=el('div',null,'sng-champions-modal__map-player'+(won?' sng-champions-modal__map-player--winner':'')+(lost?' sng-champions-modal__map-player--lost':'')+(advanced?' tour-player-advanced':'')+(m.ready[i]&&!m.resolved?' sng-champions-modal__map-player--ready':''));row.append(el('span',p?p.name+(p.self?' · Вы':''):m.resolved?'Нет соперника':'Ждём пару'),el('b',id?m.scores[i]:''));rows.append(row);});card.append(rows);
-   const note=m.reason==='double-no-show'?'Оба не явились':m.reason==='bye'?'Проход без игры':m.resolved?'Партия завершена':live?'Идёт партия':m.startsAt==null?waitingOpponentNote(d.rounds,ri,m,players):m.startsAt>serverNow()?(ri===0&&m.startsAt===d.readyUntil?'Подтверждение готовности':novosibirsk(m.startsAt)):'Ожидаем начала';card.append(el('small',note,'tour-match-note'));
+   const note=m.reason==='double-no-show'?'Оба не явились':m.reason==='bye'?'Проход без игры':m.resolved?'Партия завершена':live?'Идёт партия':m.startsAt==null?waitingOpponentNote(d.rounds,ri,m,players):m.startsAt>serverNow()?(ri===0&&m.startsAt===d.readyUntil?'Подтверждение готовности':moscowTime(m.startsAt)):'Ожидаем начала';card.append(el('small',note,'tour-match-note'));
    if(m.roomId){const b=el('button',m.id===d.self?.matchId?'Моя игра':'Смотреть ↗','tour-match-watch');b.dataset.tourRoom=m.roomId;b.onclick=()=>m.id===data.self?.matchId?setTab('game'):watch(m.roomId);card.append(b);}matches.append(card);cards[ri].push(card);
   });round.append(matches);map.append(round);
  });wrap.append(map);root.append(wrap);drawBracketLines(map,cards);wrap.scrollLeft=scroll;
@@ -297,7 +297,7 @@ function render(d){
  for(const a of d.ticketAwards||[]){const entry=d.entries.find(e=>e.id===a.entryId),row=el('div',null,'tour-ticket-award');row.append(el('strong',(entry?.name||'Игрок')+' · '+a.place+' место'),el('span','Билет '+new Intl.NumberFormat('ru-RU').format(a.amount)+' ₽ · '+(a.issuedAt?'Выдан':'Ожидает выдачи')));
  if(d.isAdmin)row.append(el('small',a.poker21Id?'Poker21 ID: '+a.poker21Id:'Poker21 ID ещё не привязан'));
  if(d.isAdmin&&!a.issuedAt){const b=el('button','Отметить выдачу');b.onclick=async()=>{if(!window.confirm('Билет '+a.amount+' ₽ действительно выдан игроку «'+(entry?.name||'Игрок')+'»?'))return;b.disabled=true;try{render(await request({action:'issue-ticket',id:d.id,entryId:a.entryId}));notice();}catch(e){notice(e.message);b.disabled=false;}};row.append(b);}awards.append(row);}
- showPanel('tourDetail');$('tourTitle').textContent=d.title;$('tourMeta').textContent=(d.discipline==='long'?'Длинные':'Короткие')+' · '+(d.variant==='crazy'?'Бешеные':d.variant==='six-one'?'6:1 · Кафтар':'Классические')+' · '+d.entries.length+'/'+d.capacity+' · '+(d.startsAt==null?'Ручной запуск':novosibirsk(d.startsAt))+' · победа 1 / марс 2 / кокс 3';
+ showPanel('tourDetail');$('tourTitle').textContent=d.title;$('tourMeta').textContent=(d.discipline==='long'?'Длинные':'Короткие')+' · '+(d.variant==='crazy'?'Бешеные':d.variant==='six-one'?'6:1 · Кафтар':'Классические')+' · '+d.entries.length+'/'+d.capacity+' · '+(d.startsAt==null?'Ручной запуск':moscowTime(d.startsAt))+' · победа 1 / марс 2 / кокс 3';
  const paint=JSON.stringify([d.revision,d.status,d.isAdmin,d.self,d.rounds,d.entries]);
  if(paint!==lastPaint){lastPaint=paint;bracket(d);
   $('tourEntrantCount').textContent=d.entries.length;
