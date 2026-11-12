@@ -26,3 +26,26 @@ test('current case details survive rasterization and preserve the selected host 
  const carved=await sharp(photo).extract({left:15,top:0,width:860,height:18}).stats();
  assert.ok(carved.channels.some(c=>c.stdev>20),'Carved rim must retain visible relief');
 });
+
+test('long heads occupy opposite half-board points, with the same compressed stacks as live play',()=>{
+ const svg=art.svgFor({state:{discipline:'long'},equipment:{}});
+ // Inspect coin shadow circles, one per checker, grouped by the two starting heads.
+ const heads=svg.split('<g data-detail="checker-stack"').slice(1).map(s=>s.split('<g transform="rotate(')[0]);
+ assert.equal(heads.length,2);
+ for(const [i,head]of heads.entries()){
+  const coins=[...head.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)" fill="(?:#111b16|#82663d)"/g)].map(m=>({y:Number(m[2])-2,r:Number(m[3])}));
+  assert.equal(coins.length,15);
+  for(const c of coins){assert.ok(c.y-c.r>=20-1e-6);assert.ok(c.y+c.r<=20+828*12/11+1e-6);if(i===0)assert.ok(c.y+c.r<=20+828*6/11+2+1e-6);else assert.ok(c.y-c.r>=20+828*6/11-2-1e-6);}
+ }
+});
+
+test('material collections use the same textured point assets as live play',()=>{
+ const svg=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'obsidian-copper'}});
+ for(const side of ['dark','light'])assert.ok(svg.includes(fs.readFileSync('assets/board-games/nards/obsidian-copper-point-'+side+'-v2.webp').toString('base64')));
+});
+
+test('host can hide homes and carving in the invitation just as on the live board',()=>{
+ const svg=art.svgFor({state:{discipline:'long'},equipment:{nardsHome:'none',nardsRailsHidden:true,nardsInterior:'obsidian-copper'}});
+ for(const detail of ['storage-well','case-carving','scalloped-rail','brass-hinge'])assert.ok(!svg.includes('data-detail="'+detail+'"'));
+ assert.ok(svg.includes('data-detail="plain-rim"'));
+});
