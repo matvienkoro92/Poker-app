@@ -1961,9 +1961,7 @@ function hallFishRenderHomePlayerMonth(data) {
     '<div class="home-month-showcase__count">'+count+' '+label+' из '+specs.length+'</div>'+
     '<div class="home-month-showcase__footer"><span>Приз до<strong>55 000 ₽</strong></span><button type="button" class="home-player-month__watch">Смотреть <span aria-hidden="true">❯</span></button></div></div>'+
     '<div class="home-month-showcase__case">'+(leader?hallFishAchievementLeaderHtml({rows:[leader],staticCharacter:true}):'')+'</div></div>'+
-    '<section class="home-honor-rings" data-home-honor-rings aria-label="Именные перстни игроков месяца"><span role="status">Загружаем перстни…</span></section>'+
     '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';
-  window.pokerHydrateHomeHonorRings?.(root);
 }
 
 document.addEventListener('click', function(event) {
