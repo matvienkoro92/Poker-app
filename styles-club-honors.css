@@ -146,3 +146,5 @@
 .home-honor-rings__track strong{display:block;font:600 11px/1.3 system-ui;overflow-wrap:anywhere}
 .home-honor-rings__track small{display:block;margin-top:3px;font:10px/1.3 system-ui;color:#aeb6aa}
 .home-honor-rings button:focus-visible{outline:2px solid #e4c481;outline-offset:2px}
+
+.home-honor-rings__title{display:block;margin-top:5px;font:600 9px/1.35 system-ui;color:#d7bd83}
