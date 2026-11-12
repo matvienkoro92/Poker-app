@@ -83,7 +83,7 @@
   if(!anchor)return;
   let root=document.getElementById('homeMyCups'),created=!root;
   if(!root){root=document.createElement('section');root.id='homeMyCups';root.className='home-my-cups profile-my-cups';root.setAttribute('aria-label','Мои кубки');root.hidden=true;}
-  if(anchor.nextElementSibling!==root)anchor.insertAdjacentElement('afterend',root);
+  if(anchor.previousElementSibling!==root)anchor.insertAdjacentElement('beforebegin',root);
   if(created)load();
  };
  window.addEventListener('online',()=>{if(document.getElementById('homeMyCups')?.querySelector('.home-my-cups__retry'))load();});
