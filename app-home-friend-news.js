@@ -3126,6 +3126,52 @@
       '</article>';
   }
 
+  var heroRaceVehicles = new Map();
+  function heroRaceCarSvg(showcase) {
+    if (!showcase) return '<span class="hero-race__loading">Транспорт…</span>';
+    var look = showcase.garage && showcase.garage.loadout || {}, garage = window.PokerGarage;
+    var paint = garage && garage.item('paint', look.paint), color = paint && paint.color || '#d7ad55';
+    var imported = showcase.garage && showcase.garage.importedCar || {};
+    if (/^#[\da-f]{6}$/i.test(imported.paint)) color = imported.paint;
+    if (!/^#[\da-f]{6}$/i.test(color)) color = '#d7ad55';
+    var helmet=garage&&garage.item('helmet',look.helmet),suit=garage&&garage.item('suit',look.suit);
+    var helmetColor=helmet&&/^#[\da-f]{6}$/i.test(helmet.color)?helmet.color:'#c5a978',suitColor=suit&&/^#[\da-f]{6}$/i.test(suit.color)?suit.color:'#17252b';
+    var transport = showcase.selectedTransport || 'kart', bike = ['bicycle','scooter','hoverboard'].indexOf(transport) >= 0;
+    var body = bike
+      ? '<path d="M20 28H94" stroke="'+color+'" stroke-width="9"/><ellipse cx="20" cy="28" rx="14" ry="5" fill="#151b22"/><ellipse cx="94" cy="28" rx="14" ry="5" fill="#151b22"/><path d="M84 15V41" stroke="#e0d4b4" stroke-width="3"/><ellipse cx="57" cy="28" rx="16" ry="11" fill="'+color+'"/>'
+      : '<g fill="#0b1118" stroke="#59616a" stroke-width="1"><rect x="19" y="2" width="22" height="10" rx="3"/><rect x="19" y="44" width="22" height="10" rx="3"/><rect x="80" y="2" width="22" height="10" rx="3"/><rect x="80" y="44" width="22" height="10" rx="3"/></g><path d="M12 17Q9 10 22 10H86Q105 12 113 23V33Q105 44 86 46H22Q9 46 12 39Z" fill="'+color+'" stroke="#ffefc27a" stroke-width="1.5"/><path d="M76 14L91 18V38L76 42Z" fill="#233e49" stroke="#b0d5d078"/><path d="M18 17V39M99 19V37" stroke="#fff0be" stroke-width="3"/><path d="M28 13H70M28 43H70" stroke="#0004" stroke-width="2"/>';
+    if (look.chassis === 'formula' && !bike) body += '<path d="M109 8V48M12 6V50" stroke="'+color+'" stroke-width="8"/>';
+    var number = String(look.number || '').replace(/[^А-ЯA-Z0-9]/gi,'').slice(0,6);
+    return '<svg viewBox="0 0 124 56" role="img" aria-label="'+esc(transport==='kart'?'Машинка игрока':transport)+'"><g>'+body+'<ellipse cx="58" cy="28" rx="14" ry="12" fill="'+suitColor+'"/><circle cx="60" cy="28" r="9" fill="'+helmetColor+'" stroke="#eee0b7" stroke-width="2"/><path d="M64 21V35" stroke="#253d49" stroke-width="5"/>'+(number&&!bike?'<text x="26" y="30" text-anchor="middle" fill="#131d23" font-size="6" font-family="system-ui">'+esc(number)+'</text>':'')+'</g></svg>';
+  }
+  function hydrateHeroRaceVehicles() {
+    document.querySelectorAll('[data-hero-race-vehicle]').forEach(function(node){
+      var nick=node.dataset.heroRaceVehicle, entry=heroRaceVehicles.get(nick), cached=entry&&Date.now()-entry.at<300000?entry.promise:null;
+      if(!cached){
+        cached=resolveClubProfileForNick(nick).then(function(profile){
+          if(!profile || !profile.id)return null;
+          var body={action:'showcase',targetId:profile.id};
+          return fetch(apiBase()+'/api/player-hall',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(typeof pokerApiAuthJsonBody==='function'?pokerApiAuthJsonBody(body):body),signal:AbortSignal.timeout(8000)})
+            .then(function(response){if(!response.ok)throw Error('vehicle');return response.json();}).then(function(data){return data.showcase||null;});
+        }).catch(function(){return null;});
+        heroRaceVehicles.set(nick,{at:Date.now(),promise:cached});
+      }
+      cached.then(function(showcase){if(!node.isConnected)return;node.innerHTML=showcase?heroRaceCarSvg(showcase):'<span class="hero-race__unknown" title="Транспорт игрока пока недоступен">●</span>';});
+    });
+  }
+  function clubHeroRaceHtml(standings) {
+    var month=clubCurrentHeroMonth(), prize=month.month===11&&month.year===2026?'30 000':month.month===10&&month.year===2026?'35 000':month.month===9&&month.year===2026?'25 000':'15 000';
+    var top=standings.slice(0,4), maxReward=Math.max.apply(null,[1].concat(top.map(function(p){return p.reward;})));
+    var score=function(p){return p.wins+.35*p.reward/maxReward;}, maxScore=top.length?score(top[0]):1;
+    setTimeout(hydrateHeroRaceVehicles,0);
+    return '<aside class="hero-race" aria-label="Гонка топ-4 за награду Герой дня"><header><div><small>ГЕРОЙ ДНЯ · '+esc(clubHeroMonthLabel().toUpperCase())+'</small><h3>Гонка за главным призом</h3></div><div class="hero-race__prize"><small>НА ФИНИШЕ</small><strong>'+prize+' ₽</strong></div></header><div class="hero-race__road">'+Array.from({length:4},function(_,i){
+      var player=top[i];
+      if(!player)return '<div class="hero-race__lane hero-race__lane--empty"><div class="hero-race__player"><b>'+(i+1)+'</b><span>Место свободно</span></div><div class="hero-race__track"></div></div>';
+      var progress=(.1+.72*score(player)/maxScore).toFixed(4), reward=Number(player.reward).toLocaleString('ru-RU',{maximumFractionDigits:0});
+      return '<div class="hero-race__lane"><div class="hero-race__player"><b>'+(i+1)+'</b><div><strong>'+esc(player.nick)+'</strong><span>'+'Герой дня × '+player.wins+'</span><small>'+esc(reward)+' ₽</small></div></div><div class="hero-race__track"><span class="hero-race__trail" style="--race-progress:'+progress+'"></span><span class="hero-race__vehicle" data-hero-race-vehicle="'+esc(player.nick)+'" style="--race-progress:'+progress+'">'+heroRaceCarSvg(null)+'</span></div></div>';
+    }).join('')+'</div><footer><span>Места — по числу героев дня,<br>при равенстве — по призовым за эти дни</span><button type="button" data-home-news-achievements-open>К победам →</button></footer></aside>';
+  }
+
   function renderModalList(rows, force) {
     var modal = el("homeFriendNewsModal");
     if (modal && modal.hidden && !force) return;
@@ -3137,15 +3183,7 @@
     if (newsModalMode === "club" && clubNewsTab === "wins") loadDayHeroPush();
     var clubTabs = newsModalMode === "club" ? clubNewsTabsHtml() : "";
     var achievementPromo = newsModalMode === "club" && clubNewsTab === "wins"
-      ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
-          '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/achievement-trophy-day-hero-v2.webp" alt="" aria-hidden="true" loading="lazy">' +
-          '<span class="home-friend-news-modal__achievement-promo-content"><b>ГЕРОЙ ДНЯ В ' + esc(clubHeroMonthPrepositionLabel().toUpperCase()) + '</b>' +
-          '<strong>' + (clubCurrentHeroMonth().month === 11 && clubCurrentHeroMonth().year === 2026 ? '30 000' : clubCurrentHeroMonth().month === 10 && clubCurrentHeroMonth().year === 2026 ? '35 000' : clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
-          '<small class="home-friend-news-modal__achievement-promo-leader">' + (heroStandings[0] ? 'Лидирует ' + clubHeroStandingHtml(heroStandings[0]) : 'Награда лидеру месяца') + '</small></span>' +
-          '<span class="home-friend-news-modal__achievement-promo-side">' +
-          (heroStandings[1] ? '<small class="home-friend-news-modal__achievement-promo-runner">2-е место: ' + clubHeroStandingHtml(heroStandings[1]) + '</small>' : '') +
-          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
-        '</aside><div class="home-news-day-hero-push"><label><span>Пуши о героях дня</span><input type="checkbox" role="switch" data-day-hero-push aria-label="Пуши о героях дня"' +
+      ? clubHeroRaceHtml(heroStandings) + '<div class="home-news-day-hero-push"><label><span>Пуши о героях дня</span><input type="checkbox" role="switch" data-day-hero-push aria-label="Пуши о героях дня"' +
           (dayHeroPushEnabled === true ? ' checked' : '') + (dayHeroPushBusy || dayHeroPushEnabled === null ? ' disabled' : '') + '></label>' +
           '<small role="status">' + esc(dayHeroPushError || (dayHeroPushBusy ? 'Загрузка…' : dayHeroPushEnabled ? 'Включены' : 'Отключены')) + '</small></div>'
       : "";
