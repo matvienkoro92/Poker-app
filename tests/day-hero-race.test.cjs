@@ -11,3 +11,14 @@ test('top-down car uses saved paint, chassis and number, with a separate shape f
  const c=fixture(),red=c.heroRaceCarSvg({selectedTransport:'kart',garage:{loadout:{paint:'ruby',chassis:'formula',number:'А123БВ'}}}),green=c.heroRaceCarSvg({selectedTransport:'kart',garage:{loadout:{paint:'classic'}}}),bike=c.heroRaceCarSvg({selectedTransport:'bicycle',garage:{loadout:{paint:'ruby'}}});
  assert.ok(red.includes('#a62d3b'));assert.ok(red.includes('А123БВ'));assert.ok(red.includes('data-chassis="formula"'));assert.ok(green.includes('#186943'));assert.ok(!green.includes('data-chassis="formula"'));assert.ok(bike.includes('data-vehicle-kind="bicycle"'));assert.ok(c.heroRaceCarSvg(null).includes('hero-race__vehicle--fallback'));
 });
+
+test('both hero name and vehicle expose profile actions; existing news handler opens the exact linked hero',()=>{
+ const c=fixture(),html=c.clubHeroRaceHtml([{nick:'FrankL',wins:2,reward:349250}]);
+ assert.equal((html.match(/data-home-news-player-id="rating:FrankL"/g)||[]).length,2);
+ const calls=[],playerCard={getAttribute:key=>({'data-home-news-player-id':'rating:FrankL','data-home-news-player-name':'FrankL'}[key]||'')};
+ const context=vm.createContext({newsModalMode:'club',clubProfileForNick:n=>n==='FrankL'?{id:'ID123456',avatar:'avatar'}:null,handoffNewsModalToPlayer:(...args)=>calls.push(args)});
+ const start=source.indexOf('        var playerCard = event.target.closest("[data-home-news-player-id]")'),end=source.indexOf('        var target = event.target.closest("[data-home-news-target]")',start);
+ vm.runInContext('function click(event){'+source.slice(start,end)+'}',context);
+ context.click({target:{closest:()=>playerCard}});
+ assert.deepEqual(calls,[['ID123456','FrankL','avatar']]);
+});

@@ -3180,7 +3180,8 @@
       var player=top[i];
       if(!player)return '<div class="hero-race__lane hero-race__lane--empty"><div class="hero-race__player"><b>'+(i+1)+'</b><span>Место свободно</span></div><div class="hero-race__track"></div></div>';
       var progress=(.1+.72*score(player)/maxScore).toFixed(4), reward=Number(player.reward).toLocaleString('ru-RU',{maximumFractionDigits:0});
-      return '<div class="hero-race__lane"><div class="hero-race__player"><b>'+(i+1)+'</b><div><strong>'+esc(player.nick)+'</strong><span>'+'Герой дня × '+player.wins+'</span><small>'+esc(reward)+' ₽</small></div></div><div class="hero-race__track"><span class="hero-race__trail" style="--race-progress:'+progress+'"></span><span class="hero-race__vehicle" data-hero-race-vehicle="'+esc(player.nick)+'" style="--race-progress:'+progress+'">'+heroRaceCarSvg(null)+'</span></div></div>';
+      var profileAttrs=' data-home-news-player-id="'+esc('rating:'+player.nick)+'" data-home-news-player-name="'+esc(player.nick)+'" aria-label="Открыть профиль '+esc(player.nick)+'"';
+      return '<div class="hero-race__lane"><div class="hero-race__player"><b>'+(i+1)+'</b><div><button type="button" class="hero-race__profile"'+profileAttrs+'>'+esc(player.nick)+'</button><span>'+'Герой дня × '+player.wins+'</span><small>'+esc(reward)+' ₽</small></div></div><div class="hero-race__track"><span class="hero-race__trail" style="--race-progress:'+progress+'"></span><button type="button" class="hero-race__vehicle"'+profileAttrs+' data-hero-race-vehicle="'+esc(player.nick)+'" style="--race-progress:'+progress+'">'+heroRaceCarSvg(null)+'</button></div></div>';
     }).join('')+'</div><footer><span>Места — по числу героев дня,<br>при равенстве — по призовым за эти дни</span><button type="button" data-home-news-achievements-open>К победам →</button></footer></aside>';
   }
 

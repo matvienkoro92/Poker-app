@@ -3119,3 +3119,9 @@ body .home-friend-news-modal--club .home-news-honor small{font-size:9px;white-sp
 .hero-race>footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px}.hero-race>footer>span{font:9px/1.4 system-ui;color:#99aaa5}.hero-race>footer>button{flex-shrink:0;border:1px solid #c6a45d70;background:#1c3028;border-radius:8px;padding:7px 10px;font:700 10px system-ui;color:#f7df9e;cursor:pointer}
 @media(max-width:480px){.hero-race>header{padding:8px 10px;gap:6px}.hero-race>header small{font-size:7px;letter-spacing:.4px}.hero-race>header h3{font-size:12px}.hero-race__prize strong{font-size:21px}.hero-race__lane{grid-template-columns:100px minmax(0,1fr);height:49px}.hero-race__player{gap:5px;padding-inline:2px}.hero-race__player>b{flex-basis:16px;width:16px;height:16px;font-size:9px}.hero-race__player strong{font-size:10px}.hero-race__player span{font-size:8px}.hero-race__player small{font-size:9px}.hero-race__vehicle{width:82px;height:40px}.hero-race__road{padding-left:4px;padding-right:6px}.hero-race>footer{padding:6px 10px}.hero-race>footer>span{font-size:8px}.hero-race>footer>button{font-size:9px;padding:7px 9px}.hero-race__track{margin-right:14px}.hero-race__track::after{width:11px}}
 @media(prefers-reduced-motion:reduce){.hero-race__vehicle{transition:none}}
+
+.hero-race .hero-race__profile,.hero-race button.hero-race__vehicle{border:0;background:transparent;padding:0;margin:0;color:inherit;cursor:pointer;text-align:left}
+.hero-race .hero-race__profile{display:block;font:750 11px/1.3 system-ui;overflow-wrap:anywhere;color:#f3e8cf}
+.hero-race .hero-race__profile:hover{text-decoration:underline;text-underline-offset:3px}
+.hero-race .hero-race__profile:focus-visible,.hero-race button.hero-race__vehicle:focus-visible{outline:2px solid #e2c279;outline-offset:3px;border-radius:5px}
+@media(max-width:480px){.hero-race .hero-race__profile{font-size:10px}}
