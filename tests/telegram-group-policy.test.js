@@ -103,3 +103,13 @@ test('schedule group allowlist accepts only direct commands to this bot',()=>{
  for(const text of ['schedule','/schedule@other_bot','/schedule please','привет'])assert.equal(policy.isGroupScheduleCommand({message:{text}}),false);
  assert.equal(policy.isGroupScheduleCommand({edited_message:{text:'/schedule'}}),false);
 });
+
+test('jackpot scope sends only text to the approved players group',async t=>{
+ const milestones=require('../lib/tracking-link-milestones'),oldGroup=milestones.playersGroup,oldFetch=global.fetch;let sends=0;
+ t.after(()=>{milestones.playersGroup=oldGroup;global.fetch=oldFetch;});
+ milestones.playersGroup=async()=>'-100777';global.fetch=async()=>{sends++;return {ok:true};};
+ for(const [chat,method,allowed] of [['-100777','sendMessage',true],['-100778','sendMessage',false],['123','sendMessage',false],['-100777','sendPhoto',false],['-100777','forwardMessage',false]]){
+  const response=await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:chat})},'nards-jackpot');assert.equal(response.ok,allowed);
+ }
+ assert.equal(sends,1);
+});

@@ -1,5 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),{lua,lauxlib,lualib,to_luastring,to_jsstring}=require('fengari'),stats=require('../lib/board-games-stats');
 const harness=`
+unpack=table.unpack
 local strings,hashes,zsets,lists={},{},{},{}
 local function copy(v) if type(v)~='table' then return v end local t={} for k,x in pairs(v) do t[k]=copy(x) end return t end
 local json,n={},0
@@ -18,7 +19,7 @@ redis={call=function(cmd,k,...)
  else error('Unsupported '..cmd) end
 end}
 local script=${JSON.stringify(stats.CAS)}
-local function run(expected,room) KEYS={'room'} ARGV={expected,cjson.encode(room),'stats:',12345} return assert(load(script))() end
+local function run(expected,room,reward,lock) KEYS={'room'} ARGV={expected,cjson.encode(room),'stats:',12345,reward and cjson.encode(reward) or nil,lock and cjson.encode(lock) or nil} return assert(load(script))() end
 local room={id='ABCDEFGHJK',revision=1,players={'host','guest'},playerProfiles={{name='Первый',accountId='ID123456'},{name='Второй',accountId='ID654321'}},match={number=1,round=1},state={winner=0,discipline='chess',scores={8,3}}}
 strings.room=cjson.encode({revision=0})
 local function player(d,id) return cjson.decode(hashes['stats:'..d..':free:players'][id]) end
@@ -87,3 +88,17 @@ local history=cjson.decode(lists['stats:darts:free:history:ID123456'][1])
 assert(history.score[1]==540 and history.score[2]==420)
 assert(run(0,room)==0)
 `);});
+
+
+test('jackpot ticket and balance writes share the room CAS and reject expired reward locks',()=>run(`
+room.state.winner=nil
+strings.rewardLock='held'
+local lock={key='rewardLock',value='held'}
+local writes={{'SET','ticket','issued'},{'HSET','balances','ID123456',1000}}
+assert(run(9,room,writes,lock)==0);assert(strings.ticket==nil);assert(hashes.balances==nil)
+strings.rewardLock='expired'
+assert(run(0,room,writes,lock)==0);assert(strings.ticket==nil);assert(cjson.decode(strings.room).revision==0)
+strings.rewardLock='held'
+assert(run(0,room,writes,lock)==1);assert(strings.ticket=='issued');assert(hashes.balances.ID123456==1000)
+assert(run(0,room,{{'SET','ticket','duplicate'}},lock)==0);assert(strings.ticket=='issued')
+`));
