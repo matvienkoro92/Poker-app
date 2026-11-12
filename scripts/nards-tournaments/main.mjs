@@ -61,11 +61,11 @@ async function list(resetArchive=true){
   const seen=new Set();
   for(const t of [...d.tournaments,...archiveItems]){if(seen.has(t.id))continue;seen.add(t.id);const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.dataset.status=t.status;const active=['registration','drawn','running'].includes(t.status);
    const top=el('div',null,'tour-card-heading');
-   top.append(el('span',statusNames[t.status]||t.status,'tour-card-status'),el('span',t.count+' / '+t.capacity+' игроков','tour-card-count'));
+   top.append(el('span',statusNames[t.status]||t.status,'tour-card-status'),el('span',t.entryType==='chips'?'Вход '+Number(t.buyIn).toLocaleString('ru-RU')+' ₽':'Вход бесплатно','tour-card-status tour-card-entry-badge'));
    card.append(top,el('h3',t.title));
    const meta=el('div',null,'tour-card-meta');
-   meta.append(el('span',t.startsAt==null?'Старт по решению администратора':moscowTime(t.startsAt)),el('span',t.discipline==='long'?'Длинные нарды':'Короткие нарды'));
-   card.append(meta,el('p',t.entryType==='chips'?'Вход · '+Number(t.buyIn).toLocaleString('ru-RU')+' фишек Poker21':'Бесплатное участие','tour-card-entry'));
+   meta.append(el('span',t.startsAt==null?'Старт по решению администратора':moscowTime(t.startsAt)),el('span',t.discipline==='long'?'Длинные нарды':'Короткие нарды'),el('span',t.count+' / '+t.capacity+' игроков','tour-card-count'));
+   card.append(meta);
    if(t.status!=='cancelled')card.append(listPrizeCard(t));
    if(active){
     const jackpot=el('div',null,'tour-card-jackpot');

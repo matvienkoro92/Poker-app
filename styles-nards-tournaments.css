@@ -244,3 +244,7 @@ main{padding:14px 0 calc(env(safe-area-inset-bottom,0px) + 24px);min-width:0}#to
 .tour-list-card .tour-card-podium{margin:0;padding:4px 0;gap:14px}
 @media(max-width:400px){.tour-list-card .tour-card-actions>.tour-delete{flex-basis:100%}}
 .tour-archive-more{justify-self:center;min-width:220px;margin:4px 0 16px}
+
+.tour-card-entry-badge{margin-left:auto;white-space:nowrap}
+.tour-card-entry-badge::before{content:none}
+@media(max-width:400px){.tour-card-heading{gap:6px}.tour-card-heading .tour-card-status{font-size:10px;letter-spacing:0;padding:6px 7px;white-space:nowrap}}
