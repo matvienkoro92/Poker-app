@@ -187,3 +187,59 @@ main{padding:14px 0 calc(env(safe-area-inset-bottom,0px) + 24px);min-width:0}#to
   stroke-linejoin: round;
 }
 .tour-match-note { overflow-wrap: anywhere; }
+
+.tour-card-podium{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.tour-card-podium__player{display:flex;align-items:center;gap:10px;min-width:0}
+.tour-card-podium__avatar{position:relative;display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;overflow:hidden;border-radius:50%;background:#314b3e;color:#f6dfac;border:1px solid #b3996060}
+.tour-card-podium__avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tour-card-podium__player>div{min-width:0}
+.tour-card-podium__player small{display:block;color:#d1c2a1;font-size:12px;margin-bottom:4px}
+.tour-card-podium__player strong{display:block;overflow-wrap:anywhere;font-size:15px}
+@media(max-width:400px){.tour-card-podium{grid-template-columns:1fr}}
+
+/* Active events stand out from the tournament archive. */
+#tourList>.tour-list-card:is([data-status="registration"],[data-status="drawn"],[data-status="running"]){
+ background:linear-gradient(125deg,#315d42,#1b4033);
+ border-color:#e6c570;
+ box-shadow:inset 0 1px #fff0bf50,inset 4px 0 #e6c570,0 5px 22px #ccaa3820;
+}
+.tour-list-card:is([data-status="registration"],[data-status="drawn"],[data-status="running"]) h3{color:#fff0c6}
+.tour-list-card:is([data-status="registration"],[data-status="drawn"],[data-status="running"]) .tour-muted{color:#e1ddc3}
+.tour-list-card:is([data-status="registration"],[data-status="drawn"],[data-status="running"]) .tour-card-actions>button:first-child{background:#425b36;border-color:#d8ba72;color:#fff1c9}
+#tourList>.tour-list-card:is([data-status="completed"],[data-status="cancelled"]){
+ background:linear-gradient(125deg,#192a24,#14221e);
+ border-color:#65715c50;
+ box-shadow:inset 0 1px #ffffff08;
+}
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) h3,
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) .tour-card-podium__player strong{color:#c5c5b4}
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) .tour-muted,
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) .tour-card-podium__player small{color:#a2aaa0}
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) .tour-card-podium__avatar{filter:saturate(.65)}
+
+/* Tournament cards: status, essentials, prizes and one clear action. */
+#tourList{gap:16px;padding:4px 10px 16px}
+#tourList>.tour-list-card{gap:14px;padding:20px 18px;border:1px solid #65715c50;border-radius:20px;overflow:hidden}
+#tourList>.tour-list-card h3{font-size:23px;line-height:1.2;letter-spacing:-.4px;overflow-wrap:anywhere}
+.tour-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.tour-card-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;line-height:1.3;font-weight:700;letter-spacing:.25px;padding:6px 9px;border:1px solid #d8ba7240;border-radius:20px;color:#ffdfa0;background:#d8ba7212}
+.tour-card-status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.tour-card-count{font-size:12px;color:#c7d5c7;font-variant-numeric:tabular-nums}
+.tour-card-meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:#ccd4c5;font-size:12px;line-height:1.6}
+.tour-card-entry{font-size:13px;font-weight:600;color:#e0e8d5}
+.tour-card-prizes{display:grid;gap:7px;padding:14px 15px;border-radius:12px;border:1px solid #dcbd6260;background:linear-gradient(120deg,#ae853628,#cfac4a0d);color:#ffe4a1}
+.tour-card-prizes small{font-size:11px;font-weight:700;letter-spacing:.35px}
+.tour-card-prizes strong{font-size:17px;line-height:1.35;overflow-wrap:anywhere}
+.tour-card-prizes>span{font-size:12px;color:#d1c5a2;line-height:1.6}
+.tour-card-jackpot{display:grid;gap:7px;padding:12px 14px;background:#081e1960;border:1px solid #a9cda62b;border-radius:12px}
+.tour-card-jackpot strong{font-size:13px;color:#dcecc7}
+.tour-card-jackpot p{font-size:12px;line-height:1.55;color:#d0ddc9}
+.tour-card-jackpot small{font-size:11px;line-height:1.5;color:#a7bba7}
+.tour-list-card .tour-card-actions{gap:10px;margin-top:2px;flex-wrap:wrap}
+.tour-list-card .tour-card-actions>button:first-child{flex:1;min-height:46px;border-radius:12px;font-weight:700;font-size:14px}
+.tour-list-card .tour-card-actions>.tour-delete{font-size:11px;min-height:36px;padding:6px 9px;border-color:#b3866e40;background:#6c37311a}
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) .tour-card-status{background:#ffffff05;color:#a9b3a6;border-color:#9bac9429}
+.tour-list-card:is([data-status="completed"],[data-status="cancelled"]) :is(.tour-card-count,.tour-card-meta,.tour-card-entry){color:#a5b0a4}
+.tour-list-card[data-status="completed"] .tour-card-prizes{background:#afa0670b;border-color:#afa06730;color:#c8b98f}
+.tour-list-card .tour-card-podium{margin:0;padding:4px 0;gap:14px}
+@media(max-width:400px){.tour-list-card .tour-card-actions>.tour-delete{flex-basis:100%}}

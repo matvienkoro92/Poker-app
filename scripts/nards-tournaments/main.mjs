@@ -7,7 +7,7 @@ try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}
 // The game iframe is one level below this tournament shell.
 if(source!==window){window.pokerApiAuthJsonBody=body=>source.pokerApiAuthJsonBody?.(body)||body;window.getApiBase=()=>source.getApiBase?.()||location.origin;}
 let linkedRoom=params.get('room'),currentId=params.get('id')||'',data=null,activeTab='bracket',ownFrame=null,watchFrame=null,offset=0,poll=0,stopped=false,loading=false,flightEpoch=-1,mutation=false,epoch=0,listAdmin=false,formRequestId='',lastPaint='',lastOwnRoom='',watchedRoom='';
-const statusNames={registration:'Регистрация',drawn:'Сетка готова',running:'Идёт турнир',completed:'Завершён',cancelled:'Отменён'};
+const statusNames={registration:'Регистрация',drawn:'Сетка готова',running:'Идёт турнир',completed:'Турнир завершён',cancelled:'Отменён'};
 const el=(tag,text,className)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(className)n.className=className;return n;};
 function notice(message=''){$('tourError').textContent=message;}
 async function request(body,attempt=0){
@@ -38,10 +38,49 @@ function setTab(tab){
 }
 function updateURL(){const u=new URL(location.href);if(currentId)u.searchParams.set('id',currentId);else u.searchParams.delete('id');history.replaceState(null,'',u);}
 function clearFrames(){for(const frame of [ownFrame,watchFrame])if(frame){frame.src='about:blank';frame.remove();}ownFrame=watchFrame=null;lastOwnRoom='';watchedRoom='';document.querySelector('[data-tour-tab=game]').disabled=true;document.querySelector('[data-tour-tab=watch]').disabled=true;}
+function listPrizeCard(t){
+ const block=el('div',null,'tour-card-prizes'),format=n=>Number(n||0).toLocaleString('ru-RU');
+ const tickets=t.prizeKind==='tickets',values=t.prizeMode==='fixed'?t.prizeAmounts:t.prizeShares;
+ block.append(el('small',tickets?'🎟 Призы · билеты на покер':'🏆 Призовой фонд'));
+ if(tickets){
+  for(const [index,amount]of (values||[]).entries())if(amount>0)block.append(el('strong',(index+1)+' место — билет за '+format(amount)+' ₽'));
+ }else{
+  block.append(el('strong',t.prizeFund?format(t.prizeFund)+' фишек Poker21':'Без турнирных призов'));
+  if(t.prizeFund&&values?.length){
+   const total=t.prizeMode==='fixed'?values.reduce((a,b)=>a+b,0):100;
+   block.append(el('span',values.flatMap((amount,index)=>amount>0?[(index+1)+' место · '+format(Math.round(amount/total*100))+'%']:[]).join('  /  ')));
+  }
+ }
+ return block;
+}
 async function list(){
  const gen=++epoch;clearTimeout(poll);currentId='';data=null;lastPaint='';clearFrames();setTab('bracket');updateURL();showPanel('tourListPanel');
  try{const d=await request({action:'list'});if(gen!==epoch)return;listAdmin=d.isAdmin;$('tourCreate').hidden=!listAdmin;$('tourList').replaceChildren();
-  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.append(el('h3',t.title),el('p',(statusNames[t.status]||t.status)+' · '+t.count+'/'+t.capacity+' участников','tour-muted'),el('p',(t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt))+' · '+(t.discipline==='long'?'Длинные':'Короткие'),'tour-muted'));const b=el('button',t.self?'Мой турнир →':'Открыть турнир →');b.onclick=()=>open(t.id);card.append(el('p',t.entryType==='chips'?'Вход '+t.buyIn+' фишек Poker21':'Бесплатный турнир','tour-muted'));const actions=el('div',null,'tour-card-actions');actions.append(b);
+  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.dataset.status=t.status;const active=['registration','drawn','running'].includes(t.status);
+   const top=el('div',null,'tour-card-heading');
+   top.append(el('span',statusNames[t.status]||t.status,'tour-card-status'),el('span',t.count+' / '+t.capacity+' игроков','tour-card-count'));
+   card.append(top,el('h3',t.title));
+   const meta=el('div',null,'tour-card-meta');
+   meta.append(el('span',t.startsAt==null?'Старт по решению администратора':novosibirsk(t.startsAt)),el('span',t.discipline==='long'?'Длинные нарды':'Короткие нарды'));
+   card.append(meta,el('p',t.entryType==='chips'?'Вход · '+Number(t.buyIn).toLocaleString('ru-RU')+' фишек Poker21':'Бесплатное участие','tour-card-entry'));
+   if(t.status!=='cancelled')card.append(listPrizeCard(t));
+   if(active){
+    const jackpot=el('div',null,'tour-card-jackpot');
+    jackpot.append(el('strong','🎲 Джекпот · билет за 1 000 ₽'),el('p','Три одинаковых куша подряд у одного игрока — билет на покерный турнир за 1 000 ₽.'),el('small','Например: 4:4 → 4:4 → 4:4. Броски соперника не прерывают серию.'));
+    card.append(jackpot);
+   }
+   const b=el('button',t.status==='completed'?'Посмотреть результаты':t.status==='registration'&&!t.self&&t.count<t.capacity?'Зарегистрироваться':'Смотреть');b.onclick=()=>open(t.id);if(t.status==='completed'&&t.podium?.length){
+    const winners=el('div',null,'tour-card-podium');
+    for(const entry of t.podium){
+     const row=el('div',null,'tour-card-podium__player');
+     const avatar=el('span',Array.from(entry.name||'Игрок')[0].toUpperCase(),'tour-card-podium__avatar');
+     if(entry.avatar){const img=el('img');img.src=entry.avatar;img.alt='';img.loading='lazy';img.addEventListener('error',()=>img.remove());avatar.append(img);}
+     const info=el('div');info.append(el('small',entry.place===1?'🏆 Победитель':'🥈 Второе место'),el('strong',entry.name||'Игрок'));
+     row.append(avatar,info);winners.append(row);
+    }
+    card.append(winners);
+   }
+   const actions=el('div',null,'tour-card-actions');actions.append(b);
    if(listAdmin&&['completed','cancelled'].includes(t.status)){
     const remove=el('button','Удалить из списка','tour-delete');
     remove.onclick=async()=>{if(mutation||!window.confirm('Убрать «'+t.title+'» из списка турниров? История игр и выплат сохранится.'))return;mutation=true;clearTimeout(poll);remove.disabled=true;try{await request({action:'delete',id:t.id});notice();await list();}catch(e){notice(e.message);remove.disabled=false;if(!stopped)poll=setTimeout(listRefresh,10000);}finally{mutation=false;}};

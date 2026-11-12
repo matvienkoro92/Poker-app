@@ -421,3 +421,17 @@ test('scheduled freeroll posts one group reminder at twenty minutes', async () =
   assert.match(sent.at(-1).text,/фриролла по нардам.*осталось 20 минут/);
   assert.ok(sent.at(-1).reply_markup.inline_keyboard[0][0].url.endsWith('nards_tour_'+t.id));
 });
+
+test('completed list cards expose winner and final opponent with avatars and no account IDs',async()=>{
+ const f=fixture(),t=await f.create();
+ const saved=f.tournaments.get(t.id);
+ saved.status='completed';saved.winnerId='winner';
+ saved.entries=[{id:'runner',name:'Второй',accountId:'ID000001'},{id:'winner',name:'Победитель',accountId:'ID000002'}];
+ saved.rounds=[{matches:[{resolved:true,winnerId:'winner',playerIds:['runner','winner']}]}];
+ const result=await f.call('m0','list');
+ assert.deepEqual(result.tournaments[0].podium.map(p=>[p.place,p.name]),[[1,'Победитель'],[2,'Второй']]);
+ assert.match(result.tournaments[0].podium[0].avatar,/avatar=winner/);
+ assert.equal(JSON.stringify(result).includes('ID000002'),false);
+ saved.status='running';assert.deepEqual((await f.call('m0','list')).tournaments[0].podium,[]);
+ saved.status='completed';saved.winnerId=null;assert.deepEqual((await f.call('m0','list')).tournaments[0].podium,[]);
+});

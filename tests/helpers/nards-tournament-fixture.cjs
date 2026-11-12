@@ -28,6 +28,7 @@ module.exports = function fixture(options = {}) {
       } finally { locks.delete(id); }
     }
   };
+  if(options.recurringConfig)store.recurringConfig=options.recurringConfig;
   const service = createService({ store, rooms, payments: options.payments, notify: options.notify, notifyPlayer: options.notifyPlayer, attendance: options.attendance, profile: rooms.profile, now: () => time, randomInt: () => 0, dice: () => [6, 1] });
   const call = (member, action, id, extra = {}) => service.call(member, { action, id, ...extra }, { admin: member === 'm0' });
   async function create(options = {}) {
