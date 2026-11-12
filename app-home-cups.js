@@ -79,6 +79,13 @@
    const track=root.querySelector('.home-my-cups__track');root.onclick=e=>{if(e.target.closest('[data-cups-all]')){showAll(items);return;}const cup=e.target.closest('[data-cup-index]'),step=e.target.closest('[data-cups-step]');if(cup)show(items[Number(cup.dataset.cupIndex)]);if(step)track.scrollBy({left:Number(step.dataset.cupsStep)*track.clientWidth*.75,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});};
   }catch(error){if(token!==revision)return;root.hidden=false;root.innerHTML='<header><strong>Мои кубки</strong></header><p role="status">Не удалось загрузить кубки</p><button class="home-my-cups__retry" type="button">Повторить</button>';root.querySelector('button').onclick=load;console.warn('[home-cups]',error.message);}
  }
+ window.pokerMountProfileCups=function(anchor){
+  if(!anchor)return;
+  let root=document.getElementById('homeMyCups'),created=!root;
+  if(!root){root=document.createElement('section');root.id='homeMyCups';root.className='home-my-cups profile-my-cups';root.setAttribute('aria-label','Мои кубки');root.hidden=true;}
+  if(anchor.nextElementSibling!==root)anchor.insertAdjacentElement('afterend',root);
+  if(created)load();
+ };
  window.addEventListener('online',()=>{if(document.getElementById('homeMyCups')?.querySelector('.home-my-cups__retry'))load();});
  window.addEventListener('poker-auth-changed',load);window.addEventListener('poker-telegram-auth',load);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&document.getElementById('homeMyCups')?.hidden)load();});

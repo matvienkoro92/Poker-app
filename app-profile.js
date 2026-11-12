@@ -1074,6 +1074,7 @@ function profileRenderLevelRewards(status) {
       profileRenderLevelRewards(profilePublicShowcaseStatus);
     });
   }
+  if(typeof window.pokerMountProfileCups === "function")window.pokerMountProfileCups(block);
   var dialogOpen = !!block.querySelector("dialog[open]");
   var level = Math.max(0, Number(status && status.level) || 0);
   block.hidden = level < 1;
