@@ -1309,3 +1309,33 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
  content:"";position:absolute;inset:0 auto 0 calc(50% - 1px);width:2px;
  background:#101816;box-shadow:1px 0 0 #f3ddb6b3;pointer-events:none;z-index:0;
 }
+
+/* Three matching doubles reveal the jackpot ticket. */
+[data-nards-jackpot]{display:block;width:100%;margin:10px 0;font-size:12px;text-align:center;color:#e9d39d}
+.nards-jackpot-dialog{width:min(420px,calc(100% - 28px));padding:28px 22px 22px;text-align:center;overflow:hidden;border-color:#dcc17c;background:radial-gradient(ellipse at top,#53603a,#12291f 70%);box-shadow:0 18px 80px #0009}
+.nards-jackpot-dialog::backdrop{background:#04130fbd;backdrop-filter:blur(4px)}
+.nards-jackpot-dialog h2{font-size:24px;margin:10px 0 20px}.nards-jackpot-dialog small{font-size:10px;letter-spacing:2px}.nards-jackpot-dialog p{font-size:14px;color:#e2ddc8;margin:20px 0}.nards-jackpot-dialog>button{width:100%;margin-top:20px;font-weight:800}
+.jackpot-glow{font-size:46px;line-height:1.2;color:#ffe4a1;text-shadow:0 0 28px #f7cc56;animation:jackpot-star 2.4s ease-in-out infinite}
+.jackpot-rolls{display:flex;justify-content:center;gap:12px}.jackpot-pair{position:relative;display:flex;gap:4px;padding-bottom:22px;animation:jackpot-pair .65s both;animation-delay:calc(var(--pair)*.38s)}.jackpot-pair b{position:absolute;bottom:0;left:0;right:0;font-size:11px;color:#ddc88e}
+.jackpot-die{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:38px;height:38px;padding:7px;border-radius:8px;background:linear-gradient(135deg,#fffdf0,#dfcfa9);box-shadow:0 3px 0 #9d895a,0 5px 9px #0005;transform:rotate(-7deg)}.jackpot-die:nth-child(2){transform:rotate(7deg)}.jackpot-die i{border-radius:50%}.jackpot-die .is-pip{background:#253d32}
+.jackpot-ticket{padding:15px;border:1px dashed #e3c879;border-radius:12px;color:#f8e2a8;background:#d4ab3712;animation:jackpot-pair .6s 1.3s both;font-size:13px}.jackpot-ticket strong{display:block;margin-top:4px;font-size:30px}
+@keyframes jackpot-pair{from{opacity:0;transform:translateY(16px) scale(.8)}to{opacity:1;transform:none}}@keyframes jackpot-star{50%{transform:scale(1.12);text-shadow:0 0 40px #f7cc56}}
+@media(prefers-reduced-motion:reduce){.nards-jackpot-dialog *{animation:none!important}}
+@media(max-width:360px){.jackpot-rolls{gap:8px}.jackpot-die{width:32px;height:32px;padding:6px;gap:2px}}
+
+.nards-jackpot-dialog[data-celebration=true]{border:2px solid #ffe29a;background:radial-gradient(ellipse at 50% 0,#71602c,#193d2b 52%,#10291f);box-shadow:0 0 45px #e8bd5038,0 20px 80px #000a}
+.nards-jackpot-dialog[data-celebration=true] h2{font-size:34px;color:#ffe9a7;animation:jackpot-pair .7s both}
+.nards-jackpot-dialog[data-celebration=true] .jackpot-glow{font-size:58px}
+.nards-jackpot-dialog[data-celebration=true] .jackpot-pair{animation:jackpot-winning-roll .95s both;animation-delay:calc(.25s + var(--pair)*.55s)}
+.nards-jackpot-dialog[data-celebration=true] .jackpot-ticket{animation:jackpot-ticket-win .9s 2s both;border-color:#ffe09a;background:linear-gradient(115deg,#bd852022,#ffe09933,#bd852022);box-shadow:0 0 25px #e9c35d25}
+@keyframes jackpot-winning-roll{0%{opacity:0;transform:translateY(-35px) rotate(-16deg) scale(.55)}50%{opacity:1;transform:translateY(5px) rotate(7deg) scale(1.12)}75%{transform:translateY(-5px) rotate(-3deg)}100%{opacity:1;transform:none}}
+@keyframes jackpot-ticket-win{0%{opacity:0;transform:translateY(30px) scale(.65) rotate(-8deg)}65%{opacity:1;transform:translateY(-5px) scale(1.06) rotate(2deg)}100%{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.nards-jackpot-dialog[data-celebration=true] *{animation:none!important}}
+
+/* Compositor-only celebration: no canvas pixel rendering or JavaScript frame loop. */
+.jackpot-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit;z-index:5}
+.jackpot-confetti i{position:absolute;left:var(--x);top:-16px;width:6px;height:10px;border-radius:1px;opacity:0;animation:jackpot-confetti-fall 2.6s var(--delay) cubic-bezier(.15,.45,.65,1) both;will-change:transform,opacity}
+@keyframes jackpot-confetti-fall{0%{opacity:0;transform:translate3d(0,-10px,0) rotate(0)}8%,80%{opacity:1}100%{opacity:0;transform:translate3d(var(--drift),700px,0) rotate(var(--spin))}}
+.nards-jackpot-dialog .jackpot-glow{animation:jackpot-star-light 2.4s ease-in-out infinite}
+@keyframes jackpot-star-light{50%{transform:scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.jackpot-confetti{display:none}.nards-jackpot-dialog .jackpot-glow{animation:none}}

@@ -1,3 +1,4 @@
+import {showNardsJackpot,announceNardsJackpot} from './jackpot-dialog.mjs';
 import {nardsShowPoints} from './catalog.mjs';
 import {gameFetch} from '../shared/game-request-diagnostics.mjs';
 import {recoverGameCreate} from '../shared/game-create-recovery.mjs';
@@ -356,8 +357,10 @@ function renderControls(deferBoard=false){$('again').disabled=busy||mode==='onli
  if(jackpotNotice)jackpotNotice.hidden=!(nards&&mode==='online');
  if(nards&&mode==='online'){
   let notice=$('game').querySelector('[data-nards-jackpot]');
-  if(!notice){notice=document.createElement('p');notice.dataset.nardsJackpot='';notice.setAttribute('role','status');$('hint').after(notice);}
+  if(!notice){notice=document.createElement('button');notice.type='button';notice.dataset.nardsJackpot='';$('hint').after(notice);}
   const award=state.jackpot;
+  notice.onclick=()=>showNardsJackpot();
+  if(award)announceNardsJackpot(award,profiles[award.player]||'Игрок',{player,spectator});
   notice.textContent=award?'🎰 '+(profiles[award.player]||'Игрок')+' · '+award.face+':'+award.face+' три раза подряд!'+(award.amount?' Билет на покерный турнир за 1000 ₽ зачислен.':' Джекпот!'):'🎰 Джекпот: три одинаковых куша подряд у одного игрока — билет на покерный турнир за 1000 ₽.';
  }
  paintRemainingDice($('remainingDice'),state,boardDice.busy);$('dice').replaceChildren();if(nards&&state.roll.length===2){const summary=document.createElement('span');summary.className='dice-summary'+(boardDice.busy?' is-casting':'');summary.textContent=boardDice.busy?'Кости летят…':state.roll.join(' + ')+(state.dice.length?' · осталось ходов: '+state.dice.length:'');if(!boardDice.busy&&isOpeningThrow(state))summary.textContent='Первый ход · белые: '+state.roll[0]+' · чёрные: '+state.roll[1]+(state.roll[0]===state.roll[1]?' · переброс':state.turn===0?' · начинают белые':' · начинают чёрные');if(!boardDice.busy&&state.roll[0]===state.roll[1]&&state.phase!=='opening')summary.textContent='Дубль '+state.roll[0]+' · осталось ходов: '+state.dice.length;$('dice').append(summary);}
