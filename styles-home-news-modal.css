@@ -3099,33 +3099,23 @@ body .home-friend-news-modal--club .home-news-honor strong{font-size:10px;letter
 body .home-friend-news-modal--club .home-news-honor small{font-size:9px;white-space:nowrap;letter-spacing:0}
 @media(max-width:360px){body .home-friend-news-modal--club .home-news-honor img{flex-basis:18px;width:18px;height:26px}body .home-friend-news-modal--club .home-news-honor{padding:5px;gap:4px}body .home-friend-news-modal--club .home-news-honor strong{font-size:9px}body .home-friend-news-modal--club .home-news-honor small{font-size:8px}}
 
-/* Top-down monthly day-hero race. */
-.hero-race{margin:0 0 16px;border:1px solid #bd985550;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#182a24,#0c151b 70%);color:#f7e7b9;box-shadow:0 12px 32px #0004}
-.hero-race>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid #b4a16d22}
-.hero-race>header small{display:block;font:700 10px/1.4 system-ui;letter-spacing:1.5px;color:#bdc8b8}
-.hero-race>header h3{margin:5px 0 0;font:700 18px/1.25 system-ui;color:#f6e8c3}
-.hero-race__prize{text-align:right;flex-shrink:0}
-.hero-race__prize strong{display:block;font:800 30px/1.3 system-ui;letter-spacing:-1px;color:#ffda83;text-shadow:0 0 24px #d69d3d33}
-.hero-race__road{padding:10px 14px 10px 8px;background:repeating-linear-gradient(90deg,#fff0 0 29px,#ffffff02 30px 31px),linear-gradient(#222c31,#172127)}
-.hero-race__lane{display:grid;grid-template-columns:150px minmax(0,1fr);min-height:84px;align-items:center;border-bottom:1px dashed #c8d4d338}
-.hero-race__lane:last-child{border-bottom:0}
-.hero-race__player{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 8px;background:linear-gradient(90deg,#111d23e8,#17212700)}
-.hero-race__player>b{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border:1px solid #baa36d66;border-radius:50%;font:700 12px system-ui;color:#f3d58f}
-.hero-race__player>div{min-width:0}
-.hero-race__player strong{display:block;font:750 13px/1.4 system-ui;overflow-wrap:anywhere;color:#f3e8cf}
-.hero-race__player span{display:block;color:#b9c6c4;font:11px/1.6 system-ui}
-.hero-race__player small{display:block;color:#e1c690;font:700 11px/1.5 system-ui;font-variant-numeric:tabular-nums}
-.hero-race__track{position:relative;height:100%;min-width:0;background:linear-gradient(180deg,#ffffff00 48%,#ffffff05 49% 51%,#ffffff00 52%);margin-right:22px}
-.hero-race__track::after{content:'';position:absolute;left:100%;top:0;bottom:0;width:18px;border-inline:2px solid #cbb57680;background:repeating-conic-gradient(#dce1d6 0 25%,#202c31 0 50%) 0 0/12px 12px}
-.hero-race__vehicle{position:absolute;left:calc(var(--race-progress)*100%);top:50%;width:92px;height:48px;transform:translate(-50%,-50%);display:grid;place-items:center;filter:drop-shadow(-4px 4px 3px #0009);z-index:1;transition:left .5s ease}
-.hero-race__vehicle svg{display:block;width:100%;height:100%}
-.hero-race__loading{font:10px system-ui;color:#a1afad}
-.hero-race__unknown{color:#cfb170;font-size:22px}
-.hero-race__trail{position:absolute;left:0;top:50%;width:calc(var(--race-progress)*100%);height:12px;transform:translateY(-50%);background:linear-gradient(90deg,#e2c27900,#e2c27918);border-radius:20px}
-.hero-race__lane:first-child .hero-race__player>b{background:#dbc17d;color:#142326;box-shadow:0 0 20px #e7b85722}
-.hero-race__lane--empty{opacity:.45}
-.hero-race>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px}
-.hero-race>footer>span{font:10px/1.6 system-ui;color:#99aaa5}
-.hero-race>footer>button{flex-shrink:0;border:1px solid #c6a45d70;background:#1c3028;border-radius:10px;padding:10px 14px;font:700 12px system-ui;color:#f7df9e;cursor:pointer}
-@media(max-width:480px){.hero-race>header{padding:14px 12px;gap:8px}.hero-race>header small{font-size:8px;letter-spacing:.6px}.hero-race>header h3{font-size:14px}.hero-race__prize strong{font-size:23px}.hero-race__lane{grid-template-columns:118px minmax(0,1fr);min-height:80px}.hero-race__player{gap:6px;padding-inline:4px}.hero-race__player>b{flex-basis:19px;width:19px;height:19px;font-size:10px}.hero-race__player strong{font-size:11px}.hero-race__player span,.hero-race__player small{font-size:9px}.hero-race__vehicle{width:68px;height:40px}.hero-race__road{padding-left:4px;padding-right:8px}.hero-race>footer{padding:12px;gap:8px}.hero-race>footer>span{font-size:9px}.hero-race>footer>button{font-size:10px;padding:10px}.hero-race__track{margin-right:16px}.hero-race__track::after{width:14px}}
+/* Compact top-down monthly day-hero race. */
+.hero-race{margin:0 0 12px;border:1px solid #bd985550;border-radius:15px;overflow:hidden;background:linear-gradient(135deg,#182a24,#0c151b 70%);color:#f7e7b9;box-shadow:0 8px 24px #0003}
+.hero-race>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-bottom:1px solid #b4a16d22}
+.hero-race>header small{display:block;font:700 8px/1.4 system-ui;letter-spacing:1px;color:#bdc8b8}
+.hero-race>header h3{margin:3px 0 0;font:700 14px/1.25 system-ui;color:#f6e8c3}
+.hero-race__prize{text-align:right;flex-shrink:0}.hero-race__prize strong{display:block;font:800 24px/1.2 system-ui;letter-spacing:-.6px;color:#ffda83}
+.hero-race__road{padding:4px 10px 4px 6px;background:radial-gradient(#b5c3ca0b .6px,transparent .8px) 0 0/5px 5px,linear-gradient(90deg,#253238,#1b272d)}
+.hero-race__lane{display:grid;grid-template-columns:136px minmax(0,1fr);height:56px;align-items:center;border-bottom:1px dashed #c8d4d32e}
+.hero-race__lane:last-child{border-bottom:0}.hero-race__player{display:flex;align-items:center;gap:7px;min-width:0;padding:3px 6px;background:linear-gradient(90deg,#111d23ce,#17212700)}
+.hero-race__player>b{display:grid;place-items:center;flex:0 0 19px;width:19px;height:19px;border:1px solid #baa36d66;border-radius:50%;font:700 10px system-ui;color:#f3d58f}
+.hero-race__player>div{min-width:0}.hero-race__player strong{display:block;font:750 11px/1.3 system-ui;overflow-wrap:anywhere;color:#f3e8cf}.hero-race__player span{display:block;color:#b9c6c4;font:9px/1.4 system-ui}.hero-race__player small{display:block;color:#e1c690;font:700 10px/1.4 system-ui;font-variant-numeric:tabular-nums}
+.hero-race__track{position:relative;height:100%;min-width:0;background:linear-gradient(180deg,#fff0 49%,#ffffff09 50%,#fff0 51%);margin-right:18px}
+.hero-race__track::after{content:'';position:absolute;left:100%;top:0;bottom:0;width:14px;border-inline:2px solid #cbb57680;background:repeating-conic-gradient(#dce1d6 0 25%,#202c31 0 50%) 0 0/10px 10px}
+.hero-race__vehicle{position:absolute;left:calc(var(--race-progress)*100%);top:50%;width:98px;height:48px;transform:translate(-50%,-50%);display:grid;place-items:center;filter:drop-shadow(-2px 3px 2px #000b);z-index:1;transition:left .5s ease}
+.hero-race__vehicle svg{display:block;width:100%;height:100%}.hero-race__vehicle--fallback{opacity:.75}
+.hero-race__trail{position:absolute;left:0;top:50%;width:calc(var(--race-progress)*100%);height:7px;transform:translateY(-50%);background:linear-gradient(90deg,#e2c27900,#e2c27912);border-radius:20px}
+.hero-race__lane:first-child .hero-race__player>b{background:#dbc17d;color:#142326}.hero-race__lane--empty{opacity:.45}
+.hero-race>footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px}.hero-race>footer>span{font:9px/1.4 system-ui;color:#99aaa5}.hero-race>footer>button{flex-shrink:0;border:1px solid #c6a45d70;background:#1c3028;border-radius:8px;padding:7px 10px;font:700 10px system-ui;color:#f7df9e;cursor:pointer}
+@media(max-width:480px){.hero-race>header{padding:8px 10px;gap:6px}.hero-race>header small{font-size:7px;letter-spacing:.4px}.hero-race>header h3{font-size:12px}.hero-race__prize strong{font-size:21px}.hero-race__lane{grid-template-columns:100px minmax(0,1fr);height:49px}.hero-race__player{gap:5px;padding-inline:2px}.hero-race__player>b{flex-basis:16px;width:16px;height:16px;font-size:9px}.hero-race__player strong{font-size:10px}.hero-race__player span{font-size:8px}.hero-race__player small{font-size:9px}.hero-race__vehicle{width:82px;height:40px}.hero-race__road{padding-left:4px;padding-right:6px}.hero-race>footer{padding:6px 10px}.hero-race>footer>span{font-size:8px}.hero-race>footer>button{font-size:9px;padding:7px 9px}.hero-race__track{margin-right:14px}.hero-race__track::after{width:11px}}
 @media(prefers-reduced-motion:reduce){.hero-race__vehicle{transition:none}}

@@ -3127,26 +3127,38 @@
   }
 
   var heroRaceVehicles = new Map();
+  var heroRaceSvgSequence=0;
   function heroRaceCarSvg(showcase) {
-    if (!showcase) return '<span class="hero-race__loading">Транспорт…</span>';
-    var look = showcase.garage && showcase.garage.loadout || {}, garage = window.PokerGarage;
-    var paint = garage && garage.item('paint', look.paint), color = paint && paint.color || '#d7ad55';
-    var imported = showcase.garage && showcase.garage.importedCar || {};
-    if (/^#[\da-f]{6}$/i.test(imported.paint)) color = imported.paint;
-    if (!/^#[\da-f]{6}$/i.test(color)) color = '#d7ad55';
-    var helmet=garage&&garage.item('helmet',look.helmet),suit=garage&&garage.item('suit',look.suit);
-    var helmetColor=helmet&&/^#[\da-f]{6}$/i.test(helmet.color)?helmet.color:'#c5a978',suitColor=suit&&/^#[\da-f]{6}$/i.test(suit.color)?suit.color:'#17252b';
-    var transport = showcase.selectedTransport || 'kart', bike = ['bicycle','scooter','hoverboard'].indexOf(transport) >= 0;
-    var body = bike
-      ? '<path d="M20 28H94" stroke="'+color+'" stroke-width="9"/><ellipse cx="20" cy="28" rx="14" ry="5" fill="#151b22"/><ellipse cx="94" cy="28" rx="14" ry="5" fill="#151b22"/><path d="M84 15V41" stroke="#e0d4b4" stroke-width="3"/><ellipse cx="57" cy="28" rx="16" ry="11" fill="'+color+'"/>'
-      : '<g fill="#0b1118" stroke="#59616a" stroke-width="1"><rect x="19" y="2" width="22" height="10" rx="3"/><rect x="19" y="44" width="22" height="10" rx="3"/><rect x="80" y="2" width="22" height="10" rx="3"/><rect x="80" y="44" width="22" height="10" rx="3"/></g><path d="M12 17Q9 10 22 10H86Q105 12 113 23V33Q105 44 86 46H22Q9 46 12 39Z" fill="'+color+'" stroke="#ffefc27a" stroke-width="1.5"/><path d="M76 14L91 18V38L76 42Z" fill="#233e49" stroke="#b0d5d078"/><path d="M18 17V39M99 19V37" stroke="#fff0be" stroke-width="3"/><path d="M28 13H70M28 43H70" stroke="#0004" stroke-width="2"/>';
-    if (look.chassis === 'formula' && !bike) body += '<path d="M109 8V48M12 6V50" stroke="'+color+'" stroke-width="8"/>';
-    var number = String(look.number || '').replace(/[^А-ЯA-Z0-9]/gi,'').slice(0,6);
-    return '<svg viewBox="0 0 124 56" role="img" aria-label="'+esc(transport==='kart'?'Машинка игрока':transport)+'"><g>'+body+'<ellipse cx="58" cy="28" rx="14" ry="12" fill="'+suitColor+'"/><circle cx="60" cy="28" r="9" fill="'+helmetColor+'" stroke="#eee0b7" stroke-width="2"/><path d="M64 21V35" stroke="#253d49" stroke-width="5"/>'+(number&&!bike?'<text x="26" y="30" text-anchor="middle" fill="#131d23" font-size="6" font-family="system-ui">'+esc(number)+'</text>':'')+'</g></svg>';
+    var missing=!showcase,look=showcase&&showcase.garage&&showcase.garage.loadout||{},G=window.PokerGarage;
+    var part=function(kind,id,fallback){var item=G&&G.item(kind,id);return item&&/^#[\da-f]{6}$/i.test(item.color)?item.color:fallback;};
+    var color=missing?'#7b8990':part('paint',look.paint,'#186943'),helmet=part('helmet',look.helmet,'#c6a67a'),suit=part('suit',look.suit,'#344b52');
+    var imported=showcase&&showcase.garage&&showcase.garage.importedCar||{};
+    if(/^#[\da-f]{6}$/i.test(imported.paint))color=imported.paint;
+    var transport=showcase&&showcase.selectedTransport||'kart',bike=['bicycle','scooter','hoverboard'].includes(transport),formula=look.chassis==='formula',closed=!bike&&transport!=='kart';
+    var id='hero-car-'+(++heroRaceSvgSequence),paint='url(#'+id+'-paint)',glass='url(#'+id+'-glass)',metal='url(#'+id+'-metal)';
+    var defs='<defs><linearGradient id="'+id+'-paint" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".55"/><stop offset=".18" stop-color="'+color+'"/><stop offset=".55" stop-color="'+color+'"/><stop offset="1" stop-color="#08171d"/></linearGradient><linearGradient id="'+id+'-glass" x2="1" y2="1"><stop stop-color="#b1e1e5"/><stop offset=".35" stop-color="#3f737e"/><stop offset="1" stop-color="#102631"/></linearGradient><linearGradient id="'+id+'-metal" x2="0" y2="1"><stop stop-color="#f0e9c9"/><stop offset=".4" stop-color="#7a8a91"/><stop offset="1" stop-color="#23343a"/></linearGradient></defs>';
+    var wheel=function(x,y){return '<g><rect x="'+x+'" y="'+y+'" width="27" height="14" rx="4" fill="#080e13" stroke="#70818a" stroke-width="1"/><path d="M'+(x+5)+' '+(y+3)+'h17m-17 4h17m-17 4h17" stroke="#28353d" stroke-width="1.2"/><rect x="'+(x+11)+'" y="'+(y+2)+'" width="5" height="10" rx="1" fill="'+metal+'"/></g>';};
+    var driver='<path d="M65 24Q52 27 53 40Q52 53 65 56H78V24Z" fill="'+suit+'" stroke="#10232b" stroke-width="2"/><path d="M76 27L91 29M76 53L91 51" stroke="'+suit+'" stroke-width="6" stroke-linecap="round"/><circle cx="72" cy="40" r="11" fill="'+helmet+'" stroke="#eee1bc" stroke-width="1.4"/><path d="M75 31Q83 40 75 49" fill="#163b4c" stroke="#83b9bb" stroke-width="1.2"/><path d="M66 32Q64 40 66 46" stroke="#fff7d9" stroke-width="2" fill="none" opacity=".65"/>';
+    var body='';
+    if(bike){
+      body='<ellipse cx="33" cy="40" rx="25" ry="8" fill="#0a1116" stroke="#7d8f95"/><ellipse cx="130" cy="40" rx="22" ry="8" fill="#0a1116" stroke="#7d8f95"/><path d="M32 40H132M47 31L101 48M47 49L101 32" stroke="'+color+'" stroke-width="5" stroke-linecap="round"/><path d="M116 21V59" stroke="'+metal+'" stroke-width="4"/><path d="M92 27L116 26M92 53L116 54" stroke="'+suit+'" stroke-width="5" stroke-linecap="round"/><ellipse cx="71" cy="40" rx="23" ry="16" fill="'+paint+'" stroke="'+color+'"/>'+driver;
+    }else if(closed){
+      body=wheel(23,7)+wheel(23,59)+wheel(112,7)+wheel(112,59)+'<rect x="12" y="16" width="141" height="48" rx="20" fill="'+color+'"/><rect x="12" y="16" width="141" height="48" rx="20" fill="'+paint+'" stroke="#cad6ce99"/><path d="M53 21L96 22L108 29V51L96 58L53 59L42 53V27Z" fill="'+glass+'" stroke="#c2d5c499"/><rect x="58" y="24" width="35" height="32" rx="6" fill="'+color+'"/><path d="M22 22V58M141 23V33M141 47V57" stroke="#fff0b6" stroke-width="4"/><path d="M118 26H134M118 54H134" stroke="#172b35" stroke-width="2"/>';
+    }else{
+      body='<ellipse cx="83" cy="44" rx="70" ry="23" fill="#02090c" opacity=".45"/><path d="M31 16V64M125 16V64" stroke="'+metal+'" stroke-width="4"/>'+wheel(22,5)+wheel(22,61)+wheel(112,5)+wheel(112,61);
+      body+='<path d="M14 25Q13 17 27 17H102L148 29V51L102 63H27Q13 63 14 55Z" fill="'+color+'"/><path d="M14 25Q13 17 27 17H102L148 29V51L102 63H27Q13 63 14 55Z" fill="'+paint+'" stroke="#d9e5ce99" stroke-width="1.2"/>';
+      body+='<rect x="18" y="27" width="26" height="26" rx="4" fill="#26353d" stroke="'+metal+'"/><path d="M22 31H40M22 36H40M22 41H40M22 46H40" stroke="#a6a99b" stroke-width="2"/><path d="M41 23V57" stroke="#08141a" stroke-width="4"/><path d="M51 22H88V58H51Q43 40 51 22Z" fill="#111f28" stroke="#728d86"/>';
+      body+='<path d="M98 23L126 30L125 50L98 57Z" fill="'+glass+'" stroke="#cbe0d099"/><path d="M105 28L119 32" stroke="#dcf8ef" stroke-width="2" opacity=".6"/><path d="M137 29V36M137 44V51" stroke="#fff6c6" stroke-width="4" stroke-linecap="round"/><path d="M26 19H93M26 61H93" stroke="#f4edc4" opacity=".45"/>';
+      if(formula)body+='<path d="M144 13V67M14 11V69" stroke="#10202a" stroke-width="9"/><path d="M144 14V66M14 12V68" stroke="'+color+'" stroke-width="5"/>';
+      body+=driver;
+    }
+    var number=String(look.number||'').replace(/[^А-ЯA-Z0-9]/gi,'').slice(0,6);
+    if(number&&!bike)body+='<rect x="16" y="33" width="23" height="13" rx="2" fill="#ece7d0" stroke="#18242a"/><text x="27.5" y="42" text-anchor="middle" fill="#15232b" font-size="6" font-weight="700" font-family="system-ui">'+esc(number)+'</text>';
+    return '<svg viewBox="0 0 164 80" data-vehicle-kind="'+esc(transport)+'" data-chassis="'+esc(look.chassis||'classic')+'"'+(missing?' class="hero-race__vehicle--fallback"':'')+' role="img" aria-label="'+esc(missing?'Машина: транспорт игрока пока недоступен':bike?'Транспорт игрока · '+transport:'Машинка игрока')+'">'+defs+body+'</svg>';
   }
   function hydrateHeroRaceVehicles() {
     document.querySelectorAll('[data-hero-race-vehicle]').forEach(function(node){
-      var nick=node.dataset.heroRaceVehicle, entry=heroRaceVehicles.get(nick), cached=entry&&Date.now()-entry.at<300000?entry.promise:null;
+      var nick=node.dataset.heroRaceVehicle, entry=heroRaceVehicles.get(nick), cached=entry&&Date.now()-entry.at<(entry.ttl||300000)?entry.promise:null;
       if(!cached){
         cached=resolveClubProfileForNick(nick).then(function(profile){
           if(!profile || !profile.id)return null;
@@ -3154,9 +3166,9 @@
           return fetch(apiBase()+'/api/player-hall',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(typeof pokerApiAuthJsonBody==='function'?pokerApiAuthJsonBody(body):body),signal:AbortSignal.timeout(8000)})
             .then(function(response){if(!response.ok)throw Error('vehicle');return response.json();}).then(function(data){return data.showcase||null;});
         }).catch(function(){return null;});
-        heroRaceVehicles.set(nick,{at:Date.now(),promise:cached});
+        heroRaceVehicles.set(nick,{at:Date.now(),promise:cached,ttl:300000});
       }
-      cached.then(function(showcase){if(!node.isConnected)return;node.innerHTML=showcase?heroRaceCarSvg(showcase):'<span class="hero-race__unknown" title="Транспорт игрока пока недоступен">●</span>';});
+      cached.then(function(showcase){if(!node.isConnected)return;node.innerHTML=heroRaceCarSvg(showcase);if(!showcase){const entry=heroRaceVehicles.get(nick);if(entry)entry.ttl=30000;}});
     });
   }
   function clubHeroRaceHtml(standings) {

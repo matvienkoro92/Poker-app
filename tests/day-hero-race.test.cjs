@@ -9,5 +9,5 @@ test('race shows only the leading four, keeps hero counts and tie prize amounts 
 });
 test('top-down car uses saved paint, chassis and number, with a separate shape for personal bicycle',()=>{
  const c=fixture(),red=c.heroRaceCarSvg({selectedTransport:'kart',garage:{loadout:{paint:'ruby',chassis:'formula',number:'А123БВ'}}}),green=c.heroRaceCarSvg({selectedTransport:'kart',garage:{loadout:{paint:'classic'}}}),bike=c.heroRaceCarSvg({selectedTransport:'bicycle',garage:{loadout:{paint:'ruby'}}});
- assert.ok(red.includes('#a62d3b'));assert.ok(red.includes('А123БВ'));assert.ok(red.includes('M109 8V48'));assert.ok(green.includes('#186943'));assert.ok(!green.includes('M109 8V48'));assert.ok(bike.includes('M20 28H94'));assert.ok(c.heroRaceCarSvg(null).includes('Транспорт…'));
+ assert.ok(red.includes('#a62d3b'));assert.ok(red.includes('А123БВ'));assert.ok(red.includes('data-chassis="formula"'));assert.ok(green.includes('#186943'));assert.ok(!green.includes('data-chassis="formula"'));assert.ok(bike.includes('data-vehicle-kind="bicycle"'));assert.ok(c.heroRaceCarSvg(null).includes('hero-race__vehicle--fallback'));
 });
