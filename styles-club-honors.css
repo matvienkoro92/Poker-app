@@ -148,3 +148,5 @@
 .home-honor-rings button:focus-visible{outline:2px solid #e4c481;outline-offset:2px}
 
 .home-honor-rings__title{display:block;margin-top:5px;font:600 9px/1.35 system-ui;color:#d7bd83}
+
+.club-honors .honors-header{justify-content:flex-end;border-bottom:0;padding:6px 14px}
