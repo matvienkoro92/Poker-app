@@ -750,3 +750,6 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
   font: inherit;
 }
 .deposits .deposits__usdt-rate input[aria-invalid="true"] { border-color: #ef8585; }
+
+.deposits .deposits__issue-link{margin:4px 0 12px}
+.deposits .deposits__issued-link{box-sizing:border-box;width:100%;min-width:0;margin:8px 0 14px;padding:12px;border:1px solid var(--dep-line);border-radius:12px;background:#0c1318;color:var(--dep-gold);font-size:13px}

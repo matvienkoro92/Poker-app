@@ -120,3 +120,33 @@ test('tournament start permits only its card photo in the configured players gro
  for(const [chat,method,expected]of [['-123','sendPhoto',true],['-456','sendPhoto',false],['123','sendPhoto',false],['-123','sendMessage',false]]){const body=new FormData();body.append('chat_id',chat);assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body},'nards-tournament-start')).ok,expected);}
  assert.equal(sends,1);
 });
+
+test('Robokassa payment scope is limited to text in its configured group',async t=>{
+ const oldFetch=global.fetch,oldRobo=process.env.ROBOKASSA_WITHDRAWALS_CHAT_ID,oldProdamus=process.env.PRODAMUS_WITHDRAWALS_CHAT_ID;
+ t.after(()=>{global.fetch=oldFetch;for(const [key,value]of [['ROBOKASSA_WITHDRAWALS_CHAT_ID',oldRobo],['PRODAMUS_WITHDRAWALS_CHAT_ID',oldProdamus]]){if(value===undefined)delete process.env[key];else process.env[key]=value;}});
+ process.env.PRODAMUS_WITHDRAWALS_CHAT_ID='-100123';delete process.env.ROBOKASSA_WITHDRAWALS_CHAT_ID;
+ let sends=0;global.fetch=async()=>{sends++;return {ok:true};};
+ const send=(id,method='sendMessage')=>policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:id})},'robokassa-payment');
+ assert.equal((await send('-100123')).ok,true);assert.equal((await send('-999')).ok,false);assert.equal((await send('123')).ok,false);assert.equal((await send('-100123','sendPhoto')).ok,false);
+ process.env.ROBOKASSA_WITHDRAWALS_CHAT_ID='-222';assert.equal((await send('-100123')).ok,false);assert.equal((await send('-222')).ok,true);assert.equal(sends,2);
+});
+
+test('payment link command scope allows only text replies in the Prodamus group',async t=>{
+ const old=global.fetch,oldId=process.env.PRODAMUS_WITHDRAWALS_CHAT_ID;let sends=0;t.after(()=>{global.fetch=old;if(oldId===undefined)delete process.env.PRODAMUS_WITHDRAWALS_CHAT_ID;else process.env.PRODAMUS_WITHDRAWALS_CHAT_ID=oldId;});
+ process.env.PRODAMUS_WITHDRAWALS_CHAT_ID='-123';global.fetch=async()=>{sends++;return {ok:true};};
+ for(const [id,method,ok]of [['-123','sendMessage',true],['-999','sendMessage',false],['123','sendMessage',false],['-123','sendPhoto',false]])assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:id})},'payment-link-command')).ok,ok);
+ assert.equal(sends,1);
+});
+
+test('webhook dispatches payment link commands only in the Prodamus group and never forwards them to Salebot',async t=>{
+ const modulePath=require.resolve('../lib/telegram-payment-links'),oldModule=require.cache[modulePath],oldId=process.env.PRODAMUS_WITHDRAWALS_CHAT_ID,oldFetch=global.fetch;
+ process.env.PRODAMUS_WITHDRAWALS_CHAT_ID='-123';let replies=0,forwards=0;
+ require.cache[modulePath]={id:modulePath,filename:modulePath,loaded:true,exports:{handle:async()=>{replies++;return true;}}};global.fetch=async()=>{forwards++;throw Error('unexpected forwarding');};
+ t.after(()=>{if(oldModule)require.cache[modulePath]=oldModule;else delete require.cache[modulePath];global.fetch=oldFetch;if(oldId===undefined)delete process.env.PRODAMUS_WITHDRAWALS_CHAT_ID;else process.env.PRODAMUS_WITHDRAWALS_CHAT_ID=oldId;});
+ const handler=require('../lib/api-handlers/telegram-bot-webhook');
+ for(const [id,text,edited]of [[-123,'/ссылка 1000',false],[-123,'ссылка 1500',false],[-123,'/ссылка 2000',false],[-999,'/ссылка 1000',false],[-123,'/ссылка 1100',false],[-123,'/ссылка 1000',true]]){
+  const res={setHeader(){},status(n){this.code=n;return this;},json(b){this.body=b;}};
+  await handler({method:'POST',headers:{'x-telegram-bot-api-secret-token':'policy-test'},body:{[edited?'edited_message':'message']:{message_id:123,text,chat:{id,type:'supergroup'},from:{id:42}}}},res);assert.equal(res.code,200);
+ }
+ assert.equal(replies,3);assert.equal(forwards,0);
+});

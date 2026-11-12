@@ -491,7 +491,7 @@ test('bonus accruals are separate from money, filtered by date, editable and can
 });
 
 test('payment manager filter separates verified accounts, periods and voids without changing all totals',()=>{
- const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function matchesPaymentManager('),source.indexOf('  function paymentFormsHtml('));
+ const source=fs.readFileSync(require.resolve('../app-admin-deposits.js'),'utf8'),fn=source.slice(source.indexOf('  function matchesPaymentManager('),source.indexOf('  function isAllFriendsOperation('));
  const data={paymentForms:{period:{start:10,end:20},providers:[{id:'runex',total:300,outgoing:50}]},channelOperations:[{channelId:'runex',direction:'income',amount:100,createdBy:'tg_2144406710',createdAt:10},{channelId:'runex',direction:'income',amount:200,createdBy:'1897001087',createdAt:11},{channelId:'runex',direction:'outgoing',amount:50,createdBy:'tg_1897001087',createdAt:12},{channelId:'runex',direction:'income',amount:999,createdBy:'tg_1897001087',createdAt:20},{channelId:'runex',direction:'income',amount:999,createdBy:'tg_1897001087',createdAt:12,voidedAt:13}]};
  const ctx={data,paymentManager:'all'};vm.createContext(ctx);vm.runInContext(fn,ctx);
  assert.equal(ctx.filteredPaymentForms(),data.paymentForms);ctx.paymentManager='2144406710';assert.equal(ctx.filteredPaymentForms().providers[0].total,100);

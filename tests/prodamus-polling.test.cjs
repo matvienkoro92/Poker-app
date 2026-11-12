@@ -32,3 +32,8 @@ test('failed request releases poll guard for next refresh',async()=>{
  const {c,requests}=fixture(),p=c.refreshPendingProdamus();requests[0].reject(Error('offline'));await p;
  assert.equal(c.prodamusInFlight,false);const next=c.refreshPendingProdamus();assert.equal(requests.length,2);requests[1].resolve({pendingProdamusPayments:[]});await next;
 });
+test('Robokassa pending payments refresh even when the Prodamus list is unchanged',async()=>{
+ const {c,requests,paint}=fixture();c.data.pendingRobokassaPayments=[];
+ const p=c.refreshPendingProdamus();requests[0].resolve({pendingProdamusPayments:[],pendingRobokassaPayments:[{id:'42',amount:123456}]});await p;
+ assert.equal(c.data.pendingRobokassaPayments[0].id,'42');assert.equal(paint.length,1);
+});
