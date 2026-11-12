@@ -7,6 +7,7 @@ try{if(parent!==window&&parent.location.origin===location.origin)source=parent;}
 // The game iframe is one level below this tournament shell.
 if(source!==window){window.pokerApiAuthJsonBody=body=>source.pokerApiAuthJsonBody?.(body)||body;window.getApiBase=()=>source.getApiBase?.()||location.origin;}
 let linkedRoom=params.get('room'),currentId=params.get('id')||'',data=null,activeTab='bracket',ownFrame=null,watchFrame=null,offset=0,poll=0,stopped=false,loading=false,flightEpoch=-1,mutation=false,epoch=0,listAdmin=false,formRequestId='',lastPaint='',lastOwnRoom='',watchedRoom='';
+let archiveCursor=null,archiveItems=[],archiveOpened=false,archiveBusy=false;
 const statusNames={registration:'Регистрация',drawn:'Сетка готова',running:'Идёт турнир',completed:'Турнир завершён',cancelled:'Отменён'};
 const el=(tag,text,className)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(className)n.className=className;return n;};
 function notice(message=''){$('tourError').textContent=message;}
@@ -53,10 +54,12 @@ function listPrizeCard(t){
  }
  return block;
 }
-async function list(){
+async function list(resetArchive=true){
+ if(resetArchive){archiveItems=[];archiveOpened=false;}
  const gen=++epoch;clearTimeout(poll);currentId='';data=null;lastPaint='';clearFrames();setTab('bracket');updateURL();showPanel('tourListPanel');
- try{const d=await request({action:'list'});if(gen!==epoch)return;listAdmin=d.isAdmin;$('tourCreate').hidden=!listAdmin;$('tourList').replaceChildren();
-  for(const t of d.tournaments){const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.dataset.status=t.status;const active=['registration','drawn','running'].includes(t.status);
+ try{const d=await request({action:'list'});if(gen!==epoch)return;archiveCursor=archiveItems.length?archiveCursor:d.nextCursor;listAdmin=d.isAdmin;$('tourCreate').hidden=!listAdmin;$('tourList').replaceChildren();
+  const seen=new Set();
+  for(const t of [...d.tournaments,...archiveItems]){if(seen.has(t.id))continue;seen.add(t.id);const card=el('article',null,'tour-list-card'+(t.status==='running'?' is-live':''));card.dataset.status=t.status;const active=['registration','drawn','running'].includes(t.status);
    const top=el('div',null,'tour-card-heading');
    top.append(el('span',statusNames[t.status]||t.status,'tour-card-status'),el('span',t.count+' / '+t.capacity+' игроков','tour-card-count'));
    card.append(top,el('h3',t.title));
@@ -87,11 +90,22 @@ async function list(){
     actions.append(remove);
    }
    card.append(actions);$('tourList').append(card);}
+  if(archiveCursor){
+   const more=el('button',archiveBusy?'Загружаем…':archiveOpened?'Ещё':'Предыдущие турниры','tour-archive-more');more.disabled=archiveBusy;
+   more.onclick=async()=>{
+    if(archiveBusy)return;archiveBusy=true;more.disabled=true;more.textContent='Загружаем…';
+    const requestEpoch=epoch;
+    try{const page=await request({action:'list',archive:true,before:archiveCursor});if(requestEpoch!==epoch||currentId)return;archiveItems.push(...page.tournaments);archiveCursor=page.nextCursor;archiveOpened=true;await list(false);}
+    catch(e){if(requestEpoch===epoch)notice(e.message);}
+    finally{archiveBusy=false;const button=document.querySelector('.tour-archive-more');if(button){button.disabled=false;button.textContent=archiveOpened?'Ещё':'Предыдущие турниры';}}
+   };
+   $('tourList').append(more);
+  }
   if(!d.tournaments.length)$('tourList').append(el('p',listAdmin?'Турниров пока нет. Создайте первый.':'Скоро здесь появятся турниры клуба.','tour-muted'));
  }catch(e){if(gen===epoch)notice(e.message);}
  if(gen===epoch&&!stopped)poll=setTimeout(listRefresh,10000);
 }
-async function listRefresh(){if(!currentId&&!mutation&&!$('tourCreatePanel').hidden)return; if(!currentId&&$('tourCreatePanel').hidden)await list();}
+async function listRefresh(){if(!currentId&&!mutation&&!$('tourCreatePanel').hidden)return; if(!currentId&&$('tourCreatePanel').hidden&&!archiveBusy)await list(false);}
 function stageName(index,count){const left=count-index;return left===1?'Финал':left===2?'Полуфинал':'1/'+2**(left-1)+' финала';}
 function ownMatch(){return data?.self?.matchId&&data.rounds.flatMap(r=>r.matches).find(m=>m.id===data.self.matchId);}
 function syncRoomReadyAction(match, ready, skip, voted) {

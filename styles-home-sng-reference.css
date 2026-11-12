@@ -286,3 +286,5 @@
 #homeWelcomeBonus .home-last-longer-strip__copy>strong{font-size:clamp(12px,3.5cqw,16px)}
 #homeWelcomeBonus .home-welcome-ticket__terms{font-size:clamp(9px,2.5cqw,11px)}
 #homeWelcomeBonus .home-last-longer-strip__arrow{font-size:21px}
+
+.home-free-tournament-card--nards .home-free-tournament-card__time>span{display:block;margin-bottom:2px;font-size:.85em}

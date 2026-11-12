@@ -741,9 +741,12 @@ document.addEventListener("click", function (e) {
   function update() {
     var now = Date.now(), moscow = new Date(now + 3 * 3600000);
     clocks.forEach(function (clock) {
-      var hour = Number(clock.getAttribute('data-home-free-countdown'));
-      var start = Date.UTC(moscow.getUTCFullYear(), moscow.getUTCMonth(), moscow.getUTCDate(), hour - 3);
-      if (start <= now) start += 86400000;
+      var starts = clock.getAttribute('data-home-free-countdown').split(',').map(function (value) {
+        var hour = Number(value);
+        var at = Date.UTC(moscow.getUTCFullYear(), moscow.getUTCMonth(), moscow.getUTCDate(), hour - 3);
+        return at <= now ? at + 86400000 : at;
+      });
+      var start = Math.min.apply(null, starts);
       var seconds = Math.ceil((start - now) / 1000);
       clock.textContent = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map(function (n) { return String(n).padStart(2, '0'); }).join(':');
     });

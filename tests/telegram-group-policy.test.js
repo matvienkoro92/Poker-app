@@ -113,3 +113,10 @@ test('jackpot scope sends only text to the approved players group',async t=>{
  }
  assert.equal(sends,1);
 });
+
+test('tournament start permits only its card photo in the configured players group',async t=>{
+ const m=require('../lib/tracking-link-milestones'),oldGroup=m.playersGroup,oldFetch=global.fetch;let sends=0;
+ t.after(()=>{m.playersGroup=oldGroup;global.fetch=oldFetch;});m.playersGroup=async()=>'-123';global.fetch=async()=>{sends++;return {ok:true};};
+ for(const [chat,method,expected]of [['-123','sendPhoto',true],['-456','sendPhoto',false],['123','sendPhoto',false],['-123','sendMessage',false]]){const body=new FormData();body.append('chat_id',chat);assert.equal((await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body},'nards-tournament-start')).ok,expected);}
+ assert.equal(sends,1);
+});
