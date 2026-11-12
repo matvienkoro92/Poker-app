@@ -3126,65 +3126,6 @@
       '</article>';
   }
 
-  var heroRaceVehicles = new Map();
-  var heroRaceSvgSequence=0;
-  function heroRaceCarSvg(showcase) {
-    var missing=!showcase,look=showcase&&showcase.garage&&showcase.garage.loadout||{},G=window.PokerGarage;
-    var part=function(kind,id,fallback){var item=G&&G.item(kind,id);return item&&/^#[\da-f]{6}$/i.test(item.color)?item.color:fallback;};
-    var color=missing?'#7b8990':part('paint',look.paint,'#186943'),helmet=part('helmet',look.helmet,'#c6a67a'),suit=part('suit',look.suit,'#344b52');
-    var imported=showcase&&showcase.garage&&showcase.garage.importedCar||{};
-    if(/^#[\da-f]{6}$/i.test(imported.paint))color=imported.paint;
-    var transport=showcase&&showcase.selectedTransport||'kart',bike=['bicycle','scooter','hoverboard'].includes(transport),formula=look.chassis==='formula',closed=!bike&&transport!=='kart';
-    var id='hero-car-'+(++heroRaceSvgSequence),paint='url(#'+id+'-paint)',glass='url(#'+id+'-glass)',metal='url(#'+id+'-metal)';
-    var defs='<defs><linearGradient id="'+id+'-paint" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".55"/><stop offset=".18" stop-color="'+color+'"/><stop offset=".55" stop-color="'+color+'"/><stop offset="1" stop-color="#08171d"/></linearGradient><linearGradient id="'+id+'-glass" x2="1" y2="1"><stop stop-color="#b1e1e5"/><stop offset=".35" stop-color="#3f737e"/><stop offset="1" stop-color="#102631"/></linearGradient><linearGradient id="'+id+'-metal" x2="0" y2="1"><stop stop-color="#f0e9c9"/><stop offset=".4" stop-color="#7a8a91"/><stop offset="1" stop-color="#23343a"/></linearGradient></defs>';
-    var wheel=function(x,y){return '<g><rect x="'+x+'" y="'+y+'" width="27" height="14" rx="4" fill="#080e13" stroke="#70818a" stroke-width="1"/><path d="M'+(x+5)+' '+(y+3)+'h17m-17 4h17m-17 4h17" stroke="#28353d" stroke-width="1.2"/><rect x="'+(x+11)+'" y="'+(y+2)+'" width="5" height="10" rx="1" fill="'+metal+'"/></g>';};
-    var driver='<path d="M65 24Q52 27 53 40Q52 53 65 56H78V24Z" fill="'+suit+'" stroke="#10232b" stroke-width="2"/><path d="M76 27L91 29M76 53L91 51" stroke="'+suit+'" stroke-width="6" stroke-linecap="round"/><circle cx="72" cy="40" r="11" fill="'+helmet+'" stroke="#eee1bc" stroke-width="1.4"/><path d="M75 31Q83 40 75 49" fill="#163b4c" stroke="#83b9bb" stroke-width="1.2"/><path d="M66 32Q64 40 66 46" stroke="#fff7d9" stroke-width="2" fill="none" opacity=".65"/>';
-    var body='';
-    if(bike){
-      body='<ellipse cx="33" cy="40" rx="25" ry="8" fill="#0a1116" stroke="#7d8f95"/><ellipse cx="130" cy="40" rx="22" ry="8" fill="#0a1116" stroke="#7d8f95"/><path d="M32 40H132M47 31L101 48M47 49L101 32" stroke="'+color+'" stroke-width="5" stroke-linecap="round"/><path d="M116 21V59" stroke="'+metal+'" stroke-width="4"/><path d="M92 27L116 26M92 53L116 54" stroke="'+suit+'" stroke-width="5" stroke-linecap="round"/><ellipse cx="71" cy="40" rx="23" ry="16" fill="'+paint+'" stroke="'+color+'"/>'+driver;
-    }else if(closed){
-      body=wheel(23,7)+wheel(23,59)+wheel(112,7)+wheel(112,59)+'<rect x="12" y="16" width="141" height="48" rx="20" fill="'+color+'"/><rect x="12" y="16" width="141" height="48" rx="20" fill="'+paint+'" stroke="#cad6ce99"/><path d="M53 21L96 22L108 29V51L96 58L53 59L42 53V27Z" fill="'+glass+'" stroke="#c2d5c499"/><rect x="58" y="24" width="35" height="32" rx="6" fill="'+color+'"/><path d="M22 22V58M141 23V33M141 47V57" stroke="#fff0b6" stroke-width="4"/><path d="M118 26H134M118 54H134" stroke="#172b35" stroke-width="2"/>';
-    }else{
-      body='<ellipse cx="83" cy="44" rx="70" ry="23" fill="#02090c" opacity=".45"/><path d="M31 16V64M125 16V64" stroke="'+metal+'" stroke-width="4"/>'+wheel(22,5)+wheel(22,61)+wheel(112,5)+wheel(112,61);
-      body+='<path d="M14 25Q13 17 27 17H102L148 29V51L102 63H27Q13 63 14 55Z" fill="'+color+'"/><path d="M14 25Q13 17 27 17H102L148 29V51L102 63H27Q13 63 14 55Z" fill="'+paint+'" stroke="#d9e5ce99" stroke-width="1.2"/>';
-      body+='<rect x="18" y="27" width="26" height="26" rx="4" fill="#26353d" stroke="'+metal+'"/><path d="M22 31H40M22 36H40M22 41H40M22 46H40" stroke="#a6a99b" stroke-width="2"/><path d="M41 23V57" stroke="#08141a" stroke-width="4"/><path d="M51 22H88V58H51Q43 40 51 22Z" fill="#111f28" stroke="#728d86"/>';
-      body+='<path d="M98 23L126 30L125 50L98 57Z" fill="'+glass+'" stroke="#cbe0d099"/><path d="M105 28L119 32" stroke="#dcf8ef" stroke-width="2" opacity=".6"/><path d="M137 29V36M137 44V51" stroke="#fff6c6" stroke-width="4" stroke-linecap="round"/><path d="M26 19H93M26 61H93" stroke="#f4edc4" opacity=".45"/>';
-      if(formula)body+='<path d="M144 13V67M14 11V69" stroke="#10202a" stroke-width="9"/><path d="M144 14V66M14 12V68" stroke="'+color+'" stroke-width="5"/>';
-      body+=driver;
-    }
-    var number=String(look.number||'').replace(/[^А-ЯA-Z0-9]/gi,'').slice(0,6);
-    if(number&&!bike)body+='<rect x="16" y="33" width="23" height="13" rx="2" fill="#ece7d0" stroke="#18242a"/><text x="27.5" y="42" text-anchor="middle" fill="#15232b" font-size="6" font-weight="700" font-family="system-ui">'+esc(number)+'</text>';
-    return '<svg viewBox="0 0 164 80" data-vehicle-kind="'+esc(transport)+'" data-chassis="'+esc(look.chassis||'classic')+'"'+(missing?' class="hero-race__vehicle--fallback"':'')+' role="img" aria-label="'+esc(missing?'Машина: транспорт игрока пока недоступен':bike?'Транспорт игрока · '+transport:'Машинка игрока')+'">'+defs+body+'</svg>';
-  }
-  function hydrateHeroRaceVehicles() {
-    document.querySelectorAll('[data-hero-race-vehicle]').forEach(function(node){
-      var nick=node.dataset.heroRaceVehicle, entry=heroRaceVehicles.get(nick), cached=entry&&Date.now()-entry.at<(entry.ttl||300000)?entry.promise:null;
-      if(!cached){
-        cached=resolveClubProfileForNick(nick).then(function(profile){
-          if(!profile || !profile.id)return null;
-          var body={action:'showcase',targetId:profile.id};
-          return fetch(apiBase()+'/api/player-hall',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(typeof pokerApiAuthJsonBody==='function'?pokerApiAuthJsonBody(body):body),signal:AbortSignal.timeout(8000)})
-            .then(function(response){if(!response.ok)throw Error('vehicle');return response.json();}).then(function(data){return data.showcase||null;});
-        }).catch(function(){return null;});
-        heroRaceVehicles.set(nick,{at:Date.now(),promise:cached,ttl:300000});
-      }
-      cached.then(function(showcase){if(!node.isConnected)return;node.innerHTML=heroRaceCarSvg(showcase);if(!showcase){const entry=heroRaceVehicles.get(nick);if(entry)entry.ttl=30000;}});
-    });
-  }
-  function clubHeroRaceHtml(standings) {
-    var month=clubCurrentHeroMonth(), prize=month.month===11&&month.year===2026?'30 000':month.month===10&&month.year===2026?'35 000':month.month===9&&month.year===2026?'25 000':'15 000';
-    var top=standings.slice(0,4), maxReward=Math.max.apply(null,[1].concat(top.map(function(p){return p.reward;})));
-    var score=function(p){return p.wins+.35*p.reward/maxReward;}, maxScore=top.length?score(top[0]):1;
-    setTimeout(hydrateHeroRaceVehicles,0);
-    return '<aside class="hero-race" aria-label="Гонка топ-4 за награду Герой дня"><header><div><small>ГЕРОЙ ДНЯ · '+esc(clubHeroMonthLabel().toUpperCase())+'</small><h3>Гонка за главным призом</h3></div><div class="hero-race__prize"><small>НА ФИНИШЕ</small><strong>'+prize+' ₽</strong></div></header><div class="hero-race__road">'+Array.from({length:4},function(_,i){
-      var player=top[i];
-      if(!player)return '<div class="hero-race__lane hero-race__lane--empty"><div class="hero-race__player"><b>'+(i+1)+'</b><span>Место свободно</span></div><div class="hero-race__track"></div></div>';
-      var progress=(.1+.72*score(player)/maxScore).toFixed(4), reward=Number(player.reward).toLocaleString('ru-RU',{maximumFractionDigits:0});
-      var profileAttrs=' data-home-news-player-id="'+esc('rating:'+player.nick)+'" data-home-news-player-name="'+esc(player.nick)+'" aria-label="Открыть профиль '+esc(player.nick)+'"';
-      return '<div class="hero-race__lane"><div class="hero-race__player"><b>'+(i+1)+'</b><div><button type="button" class="hero-race__profile"'+profileAttrs+'>'+esc(player.nick)+'</button><span>'+'Герой дня × '+player.wins+'</span><small>'+esc(reward)+' ₽</small></div></div><div class="hero-race__track"><span class="hero-race__trail" style="--race-progress:'+progress+'"></span><button type="button" class="hero-race__vehicle"'+profileAttrs+' data-hero-race-vehicle="'+esc(player.nick)+'" style="--race-progress:'+progress+'">'+heroRaceCarSvg(null)+'</button></div></div>';
-    }).join('')+'</div><footer><span>Места — по числу героев дня,<br>при равенстве — по призовым за эти дни</span><button type="button" data-home-news-achievements-open>К победам →</button></footer></aside>';
-  }
-
   function renderModalList(rows, force) {
     var modal = el("homeFriendNewsModal");
     if (modal && modal.hidden && !force) return;
@@ -3196,7 +3137,15 @@
     if (newsModalMode === "club" && clubNewsTab === "wins") loadDayHeroPush();
     var clubTabs = newsModalMode === "club" ? clubNewsTabsHtml() : "";
     var achievementPromo = newsModalMode === "club" && clubNewsTab === "wins"
-      ? clubHeroRaceHtml(heroStandings) + '<div class="home-news-day-hero-push"><label><span>Пуши о героях дня</span><input type="checkbox" role="switch" data-day-hero-push aria-label="Пуши о героях дня"' +
+      ? '<aside class="home-friend-news-modal__achievement-promo" aria-label="Награда за достижение Герой дня">' +
+          '<img class="home-friend-news-modal__achievement-promo-art" src="./assets/achievement-trophy-day-hero-v2.webp" alt="" aria-hidden="true" loading="lazy">' +
+          '<span class="home-friend-news-modal__achievement-promo-content"><b>ГЕРОЙ ДНЯ В ' + esc(clubHeroMonthPrepositionLabel().toUpperCase()) + '</b>' +
+          '<strong>' + (clubCurrentHeroMonth().month === 11 && clubCurrentHeroMonth().year === 2026 ? '30 000' : clubCurrentHeroMonth().month === 10 && clubCurrentHeroMonth().year === 2026 ? '35 000' : clubCurrentHeroMonth().month === 9 && clubCurrentHeroMonth().year === 2026 ? '25 000' : '15 000') + ' ₽</strong>' +
+          '<small class="home-friend-news-modal__achievement-promo-leader">' + (heroStandings[0] ? 'Лидирует ' + clubHeroStandingHtml(heroStandings[0]) : 'Награда лидеру месяца') + '</small></span>' +
+          '<span class="home-friend-news-modal__achievement-promo-side">' +
+          (heroStandings[1] ? '<small class="home-friend-news-modal__achievement-promo-runner">2-е место: ' + clubHeroStandingHtml(heroStandings[1]) + '</small>' : '') +
+          '<button type="button" class="home-friend-news-modal__achievement-promo-action" data-home-news-achievements-open>К ПОБЕДАМ <span aria-hidden="true">→</span></button></span>' +
+        '</aside>'+ '<div class="home-news-day-hero-push"><label><span>Пуши о героях дня</span><input type="checkbox" role="switch" data-day-hero-push aria-label="Пуши о героях дня"' +
           (dayHeroPushEnabled === true ? ' checked' : '') + (dayHeroPushBusy || dayHeroPushEnabled === null ? ' disabled' : '') + '></label>' +
           '<small role="status">' + esc(dayHeroPushError || (dayHeroPushBusy ? 'Загрузка…' : dayHeroPushEnabled ? 'Включены' : 'Отключены')) + '</small></div>'
       : "";
@@ -3754,6 +3703,12 @@
   }
 
   var newsModalOpenSequence = 0;
+  function prewarmNewsModalStyles() {
+    if (typeof window.pokerEnsureStyleDomains !== "function") return;
+    var pending = window.pokerEnsureStyleDomains(["home-news-modal"]);
+    if (pending && typeof pending.catch === "function") pending.catch(function () {});
+  }
+
 
   function waitForNewsModalStyles(open) {
     if (typeof window.pokerEnsureStyleDomains !== "function") return false;
@@ -3794,20 +3749,27 @@
     if (waitForNewsModalStyles(function () { openClubModal(tab); })) return;
     var modal = el("homeFriendNewsModal");
     if (!modal) return;
-    if (!clubEvents.length && clubNewsStaticRows().length) {
-      clubEvents = buildClubEventsFromRows([], []);
-      clubNewsLoaded = clubEvents.length > 0;
-    }
+    var sequence = ++newsModalOpenSequence;
     newsModalMode = "club";
     clubNewsTab = tab === "news" ? "news" : "wins";
     syncNewsModalHeading();
-    renderModalList(activeModalEvents(), true);
+    var list = el("homeFriendNewsList");
+    if(list && !list.childElementCount)list.innerHTML='<div class="home-friend-news-modal__loading" role="status">Открываем новости клуба…</div>';
     modal.hidden = false;
     document.body.classList.add("home-friend-news-modal-open");
     syncClubNewsNav(true);
-    Promise.resolve(loadClubNews()).then(function () {
-      if (newsModalMode === "club" && !modal.hidden) loadActiveModalFeedback(clubEvents);
-    });
+    // Paint the modal before constructing the feed and starting its live refresh.
+    requestAnimationFrame(function () { setTimeout(function () {
+      if(sequence !== newsModalOpenSequence || modal.hidden)return;
+      if (!clubEvents.length && clubNewsStaticRows().length) {
+        clubEvents = buildClubEventsFromRows([], []);
+        clubNewsLoaded = clubEvents.length > 0;
+      }
+      renderModalList(activeModalEvents(), true);
+      Promise.resolve(loadClubNews()).then(function () {
+        if (sequence === newsModalOpenSequence && newsModalMode === "club" && !modal.hidden) loadActiveModalFeedback(clubEvents);
+      });
+    },0); });
   }
   window.pokerOpenClubNewsModal = openClubModal;
 
@@ -3844,6 +3806,8 @@
     document.querySelectorAll("[data-club-news-open]").forEach(function(button){
       if(button.dataset.clubNewsBound === "1")return;
       button.dataset.clubNewsBound = "1";
+      button.addEventListener("pointerdown", prewarmNewsModalStyles);
+      button.addEventListener("focus", prewarmNewsModalStyles);
       button.addEventListener("click", openClubModal);
     });
     var clubCopy = el("homeClubNewsCopyLink");
@@ -4708,12 +4672,18 @@
 
   function publishClubNewsProgressively(tasks, publish) {
     var results = [{ levelRows: [] }, { winners: [] }, {}, { rows: [] }];
-    var remaining = tasks.length;
+    var remaining = tasks.length, queued = false;
+    function flush(){
+      if(!queued)return;
+      queued=false;
+      publish(results.slice(),remaining===0);
+    }
     return Promise.all(tasks.map(function (task, index) {
       return Promise.resolve(task).catch(function () { return { failed: true }; }).then(function (result) {
         results[index] = result || {};
         remaining -= 1;
-        publish(results.slice(), remaining === 0);
+        if(!queued){queued=true;Promise.resolve().then(flush);}
+        if(remaining===0)flush();
       });
     }));
   }
@@ -4868,6 +4838,7 @@
   }
 
   function init() {
+    prewarmNewsModalStyles();
     events = readRenderedEventsCache();
     clubEvents = readClubEventsCache();
     clubWallEvents = readClubWallEventsCache();

@@ -26,3 +26,10 @@ test('news publishes available sources before a slow rating source and tolerates
   assert.equal(updates.at(-1).rows[2].player.place,1);
   assert.equal(updates.at(-1).rows[3].failed,true);
 });
+
+test('five sources settling together produce one complete publish instead of five rebuilds',async()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../app-home-friend-news.js'),'utf8');
+ const ctx=vm.createContext({});vm.runInContext(source.slice(source.indexOf('  function publishClubNewsProgressively('),source.indexOf('  var clubNewsSourcePromise')),ctx);
+ const updates=[];await ctx.publishClubNewsProgressively(Array.from({length:5},(_,i)=>Promise.resolve({index:i})),(rows,complete)=>updates.push({rows,complete}));
+ assert.equal(updates.length,1);assert.equal(updates[0].complete,true);assert.equal(updates[0].rows.length,5);
+});

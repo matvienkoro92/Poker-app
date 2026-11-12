@@ -751,5 +751,9 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 }
 .deposits .deposits__usdt-rate input[aria-invalid="true"] { border-color: #ef8585; }
 
-.deposits .deposits__issue-link{margin:4px 0 12px}
+.deposits__online-providers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;align-content:start;min-width:0}
+.deposits .deposits__online-providers>.deposits__online-provider{box-sizing:border-box;width:100%;min-height:42px;height:42px;padding:4px 2px;gap:3px;border-radius:9px}
+.deposits .deposits__online-provider strong{font-size:clamp(7px,2vw,10px);line-height:1.15;white-space:nowrap}
+.deposits .deposits__online-provider span{font-size:clamp(7px,1.8vw,9px);line-height:1.15;white-space:nowrap}
+.deposits .deposits__online-providers>.deposits__issue-link{grid-column:1/-1;justify-self:center;box-sizing:border-box;width:auto;min-height:26px!important;height:26px;margin:0;padding:4px 7px;border-radius:8px;font-size:10px!important;line-height:1.2;white-space:nowrap}
 .deposits .deposits__issued-link{box-sizing:border-box;width:100%;min-width:0;margin:8px 0 14px;padding:12px;border:1px solid var(--dep-line);border-radius:12px;background:#0c1318;color:var(--dep-gold);font-size:13px}
