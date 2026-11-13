@@ -70,61 +70,17 @@ Add a verified Prodamus 1,650 RUB link to `lib/deposit-link-routing.js` when sup
 Tests: `node --test tests/deposit-link-routing.test.cjs` and
 `node scripts/smoke-deposit-link-routing.cjs` (mock provider API, mobile 320/390px).
 
-## Personal payment requests (prepared; requires shop configuration)
+## Personal payment requests (disabled)
 
-In `Выдать ссылку`, select `Персональная ссылка для игрока` and enter room,
-player ID and club ID before selecting the credit amount. The server stores a
-separate pending order in `paymentLinkOrders` and returns a signed payment URL
-with its own 18-digit order number. The existing shared-link mode remains
-available. A personal request never silently falls back to a shared URL. The
-same request ID and identity return the original order, including after the
-short routing history expires. Changed identities or manager cannot reuse it.
-Unpaid orders do not enter income or provider balancing. There is a hard cap of
-20,000 personal orders; do not discard old orders while they can still be paid.
+Owner request (2026-11-13): personal payment links are disabled. The deposit
+panel offers only ordinary shared links for 1,000 / 1,500 / 2,000 RUB credit.
+The API rejects `unique: true`, even if shop secrets are configured. Private
+`/dep`, the payment menu button and support dialogs remain enabled.
 
-Configuration must be installed as server environment variables, never client
-code or chat messages. No production variables have been changed by this work.
-
-- Robokassa: `ROBOKASSA_MERCHANT_LOGIN`, existing `ROBOKASSA_PASSWORD1` and
-  `ROBOKASSA_PASSWORD2`, existing matching `ROBOKASSA_HASH_ALGORITHM`, and
-  `ROBOKASSA_LINK_DESCRIPTION` with the shop's actual approved item description.
-  Supply `ROBOKASSA_LINK_RECEIPT_ITEM` as JSON with the actual fiscal item
-  settings (name, tax and applicable payment fields); quantity and sum are
-  supplied by the server. Alternatively set `ROBOKASSA_LINK_FISCAL_MODE=shop`
-  only after confirming the shop's existing fiscal setup supports payment URLs
-  without an explicit Receipt. Do not guess tax settings or item descriptions.
-- Prodamus: existing `PRODAMUS_WEBHOOK_SECRET`,
-  `PRODAMUS_INTEGRATION_SYS` agreed with Prodamus, and
-  `PRODAMUS_LINK_PRODUCT_NAME` matching the shop's actual item. The payment page
-  remains `https://matro.payform.ru/`. The URL uses signed `do=pay` parameters;
-  no external API call is made during ledger CAS. Its `order_id` returns as
-  signed `order_num` in the notification; the provider's own `order_id` remains
-  the ledger payment ID. Keep the existing notification URL configured in the
-  cabinet. Verify the returned `order_num` on the first real payment.
-
-Personal routing uses only configured providers and the existing verified
-amount pairs (1,000 → 1,100; 1,500 → 1,650 for Robokassa only;
-2,000 → 2,180 RUB). Before activation confirm the generated forms show these
-exact gross amounts, without an additional fee on top of the configured price,
-and the correct actual item and fiscal settings. This implementation does not
-introduce an arbitrary Prodamus 1,500 RUB product.
-
-Verified callbacks match provider, order number and exact gross sum. Matching
-payments mark the request `paid` and expose player, room, club and credit amount
-in pending payments. This is payment confirmation, not a game-room credit;
-the manager still performs and records the actual credit. Unexpected sums and
-second payments of the same request remain visible as payments needing manual
-reconciliation, without marking another request paid or crediting automatically.
-No new Telegram sending scenario is introduced. Uniqueness identifies the order;
-it does not authenticate the cardholder or promise Prodamus links are single use.
-
-References: [Robokassa payment interface](https://docs.robokassa.ru/ru/pay-interface),
-[Prodamus integration](https://help.prodamus.ru/payform/integracii/rest-api/instrukcii-dlya-samostoyatelnaya-integracii-servisov).
-Validation: `node --test tests/deposit-unique-links.test.cjs
-tests/deposit-link-routing.test.cjs tests/robokassa.test.cjs
-tests/admin-deposits.test.js tests/deposit-payment-forms.test.js
-tests/prodamus-polling.test.cjs` and the mobile smoke script above. These use
-fixture keys and mocked payment endpoints; no real payment is generated.
+Existing order/payment data is retained; callbacks may still reconcile any
+previously issued personal orders. No new personal order or signed payment URL
+can be issued through the deposit API. Historical callback compatibility does
+not enable personal link creation.
 
 ## Prodamus Telegram group command
 

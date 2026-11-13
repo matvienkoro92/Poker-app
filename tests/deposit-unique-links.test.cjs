@@ -6,22 +6,16 @@ const {buildUniqueLink,matchPayment,canonical}=require('../lib/deposit-unique-li
 const env={ROBOKASSA_MERCHANT_LOGIN:'fixture',ROBOKASSA_PASSWORD1:'fixture-password-1',ROBOKASSA_PASSWORD2:'fixture-password-2',ROBOKASSA_LINK_DESCRIPTION:'Fixture item',ROBOKASSA_LINK_FISCAL_MODE:'shop',PRODAMUS_WEBHOOK_SECRET:'fixture-prodamus',PRODAMUS_INTEGRATION_SYS:'fixture',PRODAMUS_LINK_PRODUCT_NAME:'Fixture item'};
 const body={amount:100000,requestId:'unique_payment_request_0001',unique:true,room:'X',playerId:'123456',clubId:'654321'};
 function withEnv(fn){const saved={...process.env};try{Object.assign(process.env,env);return fn();}finally{for(const k of Object.keys(env)){if(saved[k]===undefined)delete process.env[k];else process.env[k]=saved[k];}}}
-test('separate orders have different links; retry preserves order, target and provider',()=>withEnv(()=>{
- const state={entries:[],channelOperations:[]};
- const first=issuePaymentLink(state,body,'manager');
- assert.equal(first.link.unique,true);assert.equal(first.link.playerId,body.playerId);
- assert.equal(issuePaymentLink(state,body,'manager').link,first.link);
- const second=issuePaymentLink(state,{...body,requestId:'unique_payment_request_0002'},'manager');
- assert.notEqual(first.link.url,second.link.url);assert.notEqual(first.link.orderId,second.link.orderId);
- assert.equal(state.paymentLinkOrders.length,2);assert.deepEqual(state.channelOperations,[]);
- assert.throws(()=>issuePaymentLink(state,{...body,playerId:'999'},'manager'),/уже использован/);
- assert.throws(()=>issuePaymentLink(state,{...body,unique:false},'manager'),/уже использован/);
- assert.throws(()=>issuePaymentLink(state,body,'another-manager'),/уже использован/);
- // Retries remain safe after the short legacy routing history rolls off.
- state.paymentLinkIssues=[];assert.equal(issuePaymentLink(state,body,'manager').link,first.link);
+test('personal link issuance is disabled without ledger mutation, including configured shops',()=>withEnv(()=>{
+ const state={entries:[],channelOperations:[]},before=JSON.stringify(state);
+ assert.throws(()=>issuePaymentLink(state,body,'manager'),/Персональные ссылки отключены/);
+ assert.equal(JSON.stringify(state),before);
+ const regular=issuePaymentLink(state,{amount:body.amount,requestId:body.requestId},'manager');
+ assert.equal(regular.link.unique,undefined);assert.match(regular.link.url,/auth.robokassa.ru\/merchant\/Invoice/);
+ assert.equal(state.paymentLinkOrders,undefined);
 }));
 test('missing identities, secrets and fiscal settings fail without creating an order',()=>{
- assert.throws(()=>issuePaymentLink({}, {...body,playerId:''},'manager'),/Укажите/);
+ assert.throws(()=>issuePaymentLink({}, {...body,playerId:''},'manager'),/Персональные ссылки отключены/);
  assert.throws(()=>buildUniqueLink({providerId:'robokassa',chargeAmount:110000},'800000000000000001',{}),/не настроены/);
  assert.throws(()=>buildUniqueLink({providerId:'robokassa',chargeAmount:110000},'800000000000000001',{...env,ROBOKASSA_LINK_FISCAL_MODE:''}),/не настроены/);
 });

@@ -21,14 +21,7 @@ const {view}=require('../lib/admin-deposits'),{issuePaymentLink}=require('../lib
   await page.screenshot({path:'output/deposit-link-routing/'+width+'-'+amount+'.png'});
   await page.click('.deposits__popup [data-dep="payment-link-picker"]');
  }
- await page.locator('[data-unique-payment-link]').check();
- await page.locator('[name="linkRoom"][value="X"]').check();
- await page.locator('[name="linkPlayerId"]').fill('123456');await page.locator('[name="linkClubId"]').fill('654321');
- await page.click('[data-dep="issue-payment-link"][data-amount="100000"]');
- await page.locator('.deposits__issued-link').waitFor();
- const personal=new URL(await page.locator('.deposits__issued-link').inputValue());
- assert.equal(personal.searchParams.get('InvId'),state.paymentLinkOrders[0].id);
- assert.match(await page.locator('.deposits__popup').innerText(),/123456.*654321/);
- await page.screenshot({path:'output/deposit-link-routing/'+width+'-unique.png'});
- assert.equal(state.channelOperations.length,0);assert.equal(state.paymentLinkIssues.length,4);assert.deepEqual(errors,[]);console.log(width+': amount picker, live routing, safe display and no ledger income verified');await page.close();
+ assert.equal(await page.locator('[data-unique-payment-link]').count(),0);
+ assert.equal(await page.locator('[name=linkPlayerId],[name=linkClubId]').count(),0);
+ assert.equal(state.channelOperations.length,0);assert.equal(state.paymentLinkIssues.length,3);assert.deepEqual(errors,[]);console.log(width+': amount picker, live routing, safe display and no ledger income verified');await page.close();
 }}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
