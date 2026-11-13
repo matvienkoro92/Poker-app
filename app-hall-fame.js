@@ -3086,9 +3086,6 @@ function hallFishLoadAchievementRows() {
   // Each game category can finish independently of unrelated services.
   var billiardsReady = hallFishLoadBilliardsAchievementRows();
   var nardsReady = hallFishLoadNardsAchievementRows();
-  var extrasReady = Promise.all([
-    hallFishLoadClubChoiceAchievementRows(), hallFishLoadReferralRows(), hallFishLoadSngChampionAchievementRows()
-  ]);
   hallFishAchievementRowsPromise = Promise.all([
     hallFishEnsureAchievementRatingData(),
     hallFishLoadRows().catch(function () {
@@ -3121,13 +3118,6 @@ function hallFishLoadAchievementRows() {
     billiardsReady.then(function(result){acceptCategory('goldenBall',result);},function(){acceptCategory('goldenBall',{});});
     nardsReady.then(function(result){acceptCategory('nardsKing',result);},function(){acceptCategory('nardsKing',{});});
     repaint();
-    extrasReady.then(function (extras) {
-      Object.assign(data, {
-        clubChoice: hallFishAggregateClubChoiceRows(extras[0], levelRows),
-        referrals: extras[1],
-        sngChampion: hallFishAggregateSngChampionRows(extras[2], levelRows)
-      });
-    }).catch(function () {});
     return data;
   }).finally(function () {
     hallFishAchievementRowsPromise = null;

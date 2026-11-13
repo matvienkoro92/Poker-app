@@ -64,16 +64,40 @@
       : "Открыть народное голосование");
   }
 
+  var clubChoiceBadgePromise = null, clubChoiceBadgeUpdatedAt = 0, clubChoiceBadgeTimer = 0;
+  function scheduleClubChoiceBadgeRefresh(delay) {
+    clearTimeout(clubChoiceBadgeTimer);
+    if (document.hidden || !document.body || document.body.getAttribute("data-view") !== "home") return;
+    clubChoiceBadgeTimer = setTimeout(refreshClubChoiceRoundBadge, delay);
+  }
   function refreshClubChoiceRoundBadge() {
+    clearTimeout(clubChoiceBadgeTimer);
+    if (document.hidden || !document.body || document.body.getAttribute("data-view") !== "home") return;
+    if (!document.getElementById("clubChoiceVoteOpen")) return;
+    if (clubChoiceBadgePromise) return clubChoiceBadgePromise;
+    var age = Date.now() - clubChoiceBadgeUpdatedAt;
+    if (age < 45000) { scheduleClubChoiceBadgeRefresh(45000 - age); return; }
     var base = "";
     try {
       base = typeof getApiBase === "function" ? getApiBase().replace(/\/$/, "") : "";
     } catch (eBase) {}
     if (typeof fetch !== "function") return;
-    fetch(base + "/api/club-choice-vote?summary=1&_t=" + Date.now(), { cache: "no-store" })
-      .then(function (response) { return response.json(); })
-      .then(function (data) { if (data && data.ok) renderClubChoiceRoundBadge(data); })
-      .catch(function () {});
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 10000);
+    clubChoiceBadgePromise = fetch(base + "/api/club-choice-vote?summary=1", { cache: "default", signal: controller.signal })
+      .then(function (response) { if (!response.ok) throw new Error("vote_summary"); return response.json(); })
+      .then(function (data) {
+        if (!data || !data.ok) return;
+        clubChoiceBadgeUpdatedAt = Date.now();
+        renderClubChoiceRoundBadge(data);
+      })
+      .catch(function () {})
+      .finally(function () {
+        clearTimeout(timeout);
+        clubChoiceBadgePromise = null;
+        scheduleClubChoiceBadgeRefresh(45000);
+      });
+    return clubChoiceBadgePromise;
   }
 
   function setBusy(trigger, active, config) {
@@ -278,7 +302,13 @@
     Promise.resolve(window.pokerEnsureScriptDomains([WIDGETS.sngChampions.domain])).catch(function () {});
   }
   refreshClubChoiceRoundBadge();
-  window.setInterval(refreshClubChoiceRoundBadge, 45000);
+  document.addEventListener("visibilitychange", refreshClubChoiceRoundBadge);
+  window.addEventListener("focus", refreshClubChoiceRoundBadge);
+  window.addEventListener("online", refreshClubChoiceRoundBadge);
+  if (document.body && typeof MutationObserver !== "undefined") {
+    var clubChoiceViewObserver = new MutationObserver(refreshClubChoiceRoundBadge);
+    clubChoiceViewObserver.observe(document.body, { attributes: true, attributeFilter: ["data-view"] });
+  }
 
   document.addEventListener("click", onWidgetClick, true);
   document.addEventListener("click", function (event) {

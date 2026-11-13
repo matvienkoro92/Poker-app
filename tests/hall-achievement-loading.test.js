@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../app-hall-fame.js'), 'utf8');
 const code = source.slice(source.indexOf('function hallFishLoadAchievementRows()'), source.indexOf('function openHallFishAchievementTab()'));
 function deferred() { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
-test('tournament tops do not wait for optional services and late extras respect the active tab', async () => {
+test('tournament tops load only displayed categories and late games respect the active tab', async () => {
   const rating = deferred(), levels = deferred(), extras = deferred(), nards = deferred(), billiards = deferred(), calls = [];
   const c = {
     Promise, Object, hallFishAchievementRowsCache: null, hallFishAchievementRowsPromise: null,
@@ -25,7 +25,7 @@ test('tournament tops do not wait for optional services and late extras respect 
   };
   vm.createContext(c); vm.runInContext(code, c);
   const pending = c.hallFishLoadAchievementRows();
-  assert.deepEqual(calls.sort(), ['choice', 'levels', 'rating', 'referrals', 'sng']);
+  assert.deepEqual(calls.sort(), ['levels', 'rating']);
   assert.equal(c.hallFishLoadAchievementRows(), pending);
   rating.resolve(true); levels.resolve([]);
   const data = await pending;
@@ -43,7 +43,9 @@ test('tournament tops do not wait for optional services and late extras respect 
   extras.resolve([{ nick: 'Choice winner' }]);
   await new Promise(r => setImmediate(r));
   assert.equal(data.pendingExtras, false);
-  assert.equal(data.clubChoice[0].nick, 'Choice winner');
+  assert.equal(data.clubChoice, undefined);
+  assert.equal(data.referrals, undefined);
+  assert.equal(data.sngChampion, undefined);
   assert.equal(await c.hallFishLoadAchievementRows(), data);
 });
 test('public player list uses a stable URL and HTTP caching', async () => {

@@ -2430,9 +2430,10 @@
 
   function sendOptimisticReaction(eventId, emoji, commentId) {
     var snapshot = optimisticFeedbackReaction(eventId, emoji, commentId);
-    return feedbackRequest({ action: commentId ? "comment-reaction" : "reaction", eventId: eventId, commentId: commentId || "", emoji: emoji })
+    return feedbackRequest({ action: commentId ? "comment-reaction" : "reaction", eventId: eventId, commentId: commentId || "", emoji: emoji,
+      summary: !commentId && !eventCommentsOpen[eventId] })
       .then(function (data) {
-        eventFeedback[eventId] = data.feedback || {};
+        eventFeedback[eventId] = Object.assign({}, eventFeedback[eventId] || {}, data.feedback || {});
         renderModalList(activeModalEvents());
       }).catch(function (error) {
         eventFeedback[eventId] = snapshot || {};
@@ -4370,6 +4371,13 @@
     var request = friendsPromise.then(function (friendsPayload) {
       if (requestSequence !== loadSequence) return null;
       var friends = friendsPayload && Array.isArray(friendsPayload.friends) ? friendsPayload.friends : [];
+      if (!friends.length) {
+        // Personal bet results remain available without fetching friend-only sources.
+        return loadSelfBetNews().then(function (selfBetRows) {
+          return [friendsPayload, { winners: [] }, { rows: [] }, { rows: [] }, {},
+            { raffles: [] }, { levelRows: [] }, { posts: [] }, selfBetRows];
+        });
+      }
       var publicLevelsPromise = cachedFetchJson(base + "/api/player-crm?publicLevels=1&avatarFormat=url", "public-levels-urls-v1", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { levelRows: [] }; });
       return Promise.all([

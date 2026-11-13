@@ -12,7 +12,7 @@ function harness() {
       commands.push(...batch);
       return batch.map(([op]) => ({ result: op === 'HGETALL' ? ['ID123456', '👍'] : op === 'LRANGE'
         ? [JSON.stringify({ id: 'c1', memberId: 'ID123456', text: 'hello', author: 'Player' })]
-        : op === 'LLEN' ? 1 : op === 'HLEN' ? 7 : null }));
+        : op === 'LLEN' ? 1 : op === 'HLEN' ? 7 : op === 'HGET' ? '👍' : null }));
     } },
     '../resolve-telegram-auth': { resolveTelegramIdentity: () => ({}), memberIdFromIdentity: () => 'user1' },
     '../account-id': { ensureDtIdForUserId: async () => 'ID123456', getPreferredUserIdByDtId: async id => id },
@@ -66,6 +66,48 @@ test('friend feed retains individual event views and full response compatibility
   assert.equal(data.feedback['event:0'].comments.length, 1);
   assert.equal(h.commands.filter(c => c[0] === 'HSET').length, 1);
   assert.equal(h.commands.filter(c => c[0] === 'HLEN').length, 1);
+});
+
+test('a reaction on a closed card reads counts without hidden discussions or author profiles', async () => {
+  const h = harness();
+  const data = await h.request({ scope: 'club', action: 'reaction', eventId: 'event:0', emoji: '👍', summary: true });
+  assert.equal(data.feedback.commentCount, 1);
+  assert.equal(data.feedback.viewCount, 7);
+  assert.equal(data.feedback.comments, undefined);
+  assert.equal(data.feedback.commentsLoaded, false);
+  assert.equal(h.commands.length, 5);
+  assert.equal(h.commands.filter(c => c[0] === 'HLEN').length, 1);
+  assert.equal(h.commands.filter(c => c[0] === 'LRANGE' || c[0] === 'GET').length, 0);
+});
+
+test('an open discussion retains full reaction responses and uses only the shared club view count', async () => {
+  const h = harness();
+  const data = await h.request({ scope: 'club', action: 'reaction', eventId: 'event:0', emoji: '👍' });
+  assert.equal(data.feedback.comments[0].text, 'hello');
+  assert.equal(data.feedback.commentsLoaded, true);
+  assert.equal(h.commands.filter(c => c[0] === 'LRANGE').length, 1);
+  assert.equal(h.commands.filter(c => c[0] === 'HLEN').length, 1);
+});
+
+test('closed card reactions preserve cached comments; open discussions request full updates', async () => {
+  const source = fs.readFileSync(require.resolve('../app-home-friend-news.js'), 'utf8');
+  const payloads = [];
+  const comments = [{ id: 'c1', text: 'Keep this comment' }];
+  const context = {
+    eventFeedback: { event: { comments } }, eventCommentsOpen: {},
+    optimisticFeedbackReaction: () => ({}), renderModalList() {}, activeModalEvents: () => [],
+    feedbackRequest: async body => { payloads.push(body); return { feedback: { reactions: { '👍': 2 } } }; },
+  };
+  vm.runInNewContext(source.slice(source.indexOf('  function sendOptimisticReaction('), source.indexOf('  function showReactionUsers(')), context);
+  await context.sendOptimisticReaction('event', '👍', '');
+  assert.equal(payloads[0].summary, true);
+  assert.equal(context.eventFeedback.event.comments, comments);
+  context.eventCommentsOpen.event = true;
+  await context.sendOptimisticReaction('event', '👍', '');
+  assert.equal(payloads[1].summary, false);
+  context.eventCommentsOpen.event = false;
+  await context.sendOptimisticReaction('event', '👍', 'c1');
+  assert.equal(payloads[2].summary, false);
 });
 
 test('client batches all event IDs, shares concurrent requests and isolates accounts', async () => {
