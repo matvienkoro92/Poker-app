@@ -404,21 +404,21 @@ test('scheduled tournaments send one private reminder per entrant in the last ha
   assert.match(sent[2][1].text,/осталось 10 минут/);
 });
 
-test('scheduled freeroll posts one group reminder at twenty minutes', async () => {
+test('scheduled freeroll posts one group reminder at thirty minutes', async () => {
   const sent = [];
   const f = fixture({notify: async payload => sent.push(payload)});
   const start = f.now() + 3600000;
   const t = await f.create({startsAt:start, drawAt:start-60000});
   await f.call('m1','join',t.id);
   await f.call('m2','join',t.id);
-  f.time(start - 1200001);
+  f.time(start - 1800001);
   await f.service.sweep();
   const count = sent.length;
-  f.time(start - 1200000);
+  f.time(start - 1800000);
   await f.service.sweep();
   await f.service.sweep();
   assert.equal(sent.length,count+1);
-  assert.match(sent.at(-1).text,/фриролла по нардам.*осталось 20 минут/);
+  assert.match(sent.at(-1).text,/фриролла по нардам.*осталось полчаса/);
   assert.ok(sent.at(-1).reply_markup.inline_keyboard[0][0].url.endsWith('nards_tour_'+t.id));
 });
 

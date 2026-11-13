@@ -937,3 +937,21 @@ test('partial Exchip payment validates amount and a fresh reservation snapshot t
  assert.equal((await api.call({...part,requestId:requestId(1813)})).statusCode,409);
  const released=await api.call({action:'release-reservation',requestId:requestId(1814),entryId:id,reservationId});assert.equal(released.data.entries[0].reserved,0);assert.equal(released.data.entries[0].available,1200000);assert.equal(released.data.entries[0].paid,300000);
 });
+
+test('phone correction preserves amounts and payment history, records author, and retries safely',()=>{
+ const state=create(),op={action:'edit-phone',requestId:requestId(930),entryId:requestId(1),previousPhone:entry.phone,phone:'8 (999) 123-45-68'};
+ const result=applyOperation(state,op,'admin-a',1000,'Аня');const row=result.state.entries[0];
+ assert.equal(row.phone,'+79991234568');assert.equal(row.total,entry.total);assert.deepEqual(row.payments,state.entries[0].payments);assert.equal(view(result.state).entries[0].remaining,entry.total);
+ assert.deepEqual(row.phoneChanges[0],{id:op.requestId,before:entry.phone,after:'+79991234568',createdAt:1000,createdBy:'admin-a',createdByName:'Аня'});
+ assert.equal(applyOperation(result.state,op,'admin-a').duplicate,true);
+ assert.throws(()=>applyOperation(result.state,{...op,requestId:requestId(931)},'admin-a'),/уже изменён/);
+ assert.equal(state.entries[0].phone,entry.phone);
+});
+test('phone correction rejects invalid phones, active reservations and duplicate recipients',()=>{
+ const state=create(),op={action:'edit-phone',requestId:requestId(940),entryId:requestId(1),previousPhone:entry.phone,phone:'+79991234568'};
+ assert.throws(()=>applyOperation(state,{...op,phone:'123'},'admin-a'),/телефон|номер/i);
+ const reserved=applyOperation(state,{action:'reserve',requestId:requestId(941),entryId:requestId(1),amount:10000},'admin-a').state;
+ assert.throws(()=>applyOperation(reserved,op,'admin-a'),/брони/);
+ const duplicate=applyOperation(state,{action:'create',requestId:requestId(942),entry:{...entry,phone:op.phone}},'admin-a').state;
+ assert.throws(()=>applyOperation(duplicate,op,'admin-a'),/активный реквизит/);
+});
