@@ -2,7 +2,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const GROUP='-100123456',OWNER=388008256,MANAGER=2144406710,OTHER=1897001087,LEAD=777777;
 function fixture(){
- const store=new Map(),calls=[],sorted=new Map(),sets=new Map();let thread=100,failMethod='',failCode=500;
+ const store=new Map(),calls=[],sorted=new Map(),sets=new Map();let thread=100,failMethod='',failCode=500,failDescription='',failOnce=false;
  const redis={isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,...a])=>{
   if(cmd==='SADD'){const set=sets.get(a[0])||new Set();set.add(String(a[1]));sets.set(a[0],set);return {result:1};}
   if(cmd==='ZADD'){const set=sorted.get(a[0])||new Map(),nx=a[1]==='NX',member=String(a[nx?3:2]);if(!nx||!set.has(member))set.set(member,Number(a[nx?2:1]));sorted.set(a[0],set);return {result:1};}
@@ -18,7 +18,7 @@ function fixture(){
  let policy,queue,reactions;
  const fetch=async(url,options)=>{
   const method=url.split('/').at(-1),body=JSON.parse(options.body);calls.push({method,body});
-  if(method===failMethod)return {ok:false,status:failCode,json:async()=>({ok:false,error_code:failCode})};
+  if(method===failMethod){const code=failCode,description=failDescription;if(failOnce)failMethod='';return {ok:false,status:code,json:async()=>({ok:false,error_code:code,description})};}
   return {ok:true,json:async()=>({ok:true,result:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
  };
  function load(file){const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
@@ -28,7 +28,7 @@ function fixture(){
  const groupMessage=(text='Ответ',message_id=5,id=MANAGER,tid=101)=>({message:{message_id,text,message_thread_id:tid,chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id}}});
  const callback=(data='support:take',id=MANAGER,cbid='callback-1',tid=101)=>({callback_query:{id:cbid,data,from:{id},message:{message_id:500,message_thread_id:tid,chat:{id:GROUP,type:'supergroup'},from:{id:1,is_bot:true}}}});
  const setup=()=>handle({message:{message_id:1,text:'/support_setup',chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id:OWNER}}});
- return {handle,setup,store,calls,pm,groupMessage,callback,policy,get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:chatId=>support.clearAwaitingAmountNotice('fixture-token',chatId),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500){failMethod=method;failCode=code;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
+ return {handle,setup,store,calls,pm,groupMessage,callback,policy,get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:chatId=>support.clearAwaitingAmountNotice('fixture-token',chatId),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500,description='',once=false){failMethod=method;failCode=code;failDescription=description;failOnce=once;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
 }
 test('disabled by default; only explicit owner setup in a forum binds the group',async()=>{
  const f=fixture();assert.equal((await f.handle(f.pm())).handled,false);assert.equal(f.calls.length,0);
@@ -104,7 +104,7 @@ test('fixed topic title never changes on answers; pinned queue tracks unanswered
  await f.handle(f.pm('Новый вопрос',2));assert.match(f.board.text,/Ждут ответа: 1/);
  await f.handle(f.groupMessage('Ответ',21));await f.handle(f.pm());assert.match(f.board.text,/Ждут ответа: 1/);
  await f.handle(f.groupMessage('Новый ответ',22));assert.match(f.board.text,/Ждут ответа: 0/);
- assert.equal(f.client.appliedTitle,title);assert.equal(renameCount(),1);
+ assert.equal(f.client.appliedTitle,title);assert.ok(f.calls.filter(c=>c.method==='editForumTopic').every(c=>c.body.name===title));
  assert.equal(f.calls.filter(c=>c.method==='pinChatMessage').length,1);
  assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('<b>Ждут ответа:')).length,1);
 });
@@ -246,4 +246,16 @@ test('reaction policy blocks arbitrary private messages and group reactions',asy
  assert.equal((await call({chat_id:LEAD,message_id:999,reaction:[{type:'emoji',emoji:'👍'}]})).ok,false);
  assert.equal((await call({chat_id:GROUP,message_id:1,reaction:[]})).ok,false);
  assert.equal((await call({chat_id:LEAD,message_id:1,reaction:[{type:'paid'}]})).ok,false);
+});
+
+
+test('deleted client topic is recreated and incoming message delivered once into replacement',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const old=f.client.threadId;
+ f.fail('editForumTopic',400,'Bad Request: TOPIC_ID_INVALID',true);
+ await f.handle(f.pm('Новое сообщение после удаления темы',22));
+ assert.notEqual(f.client.threadId,old);assert.ok(f.client.previousThreadIds.includes(old));
+ assert.match(f.client.fixedTitle,/@lead/);assert.equal(f.client.lastInboundMessageId,22);
+ const incoming=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Новое сообщение после удаления темы'));
+ assert.equal(incoming.length,1);assert.equal(incoming[0].body.message_thread_id,f.client.threadId);
+ await f.handle(f.pm('Новое сообщение после удаления темы',22));assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Новое сообщение после удаления темы')).length,1);
 });
