@@ -71,6 +71,7 @@
     "test:pwa-update": "node scripts/test-pwa-update.js",
     "check:hero": "node scripts/check-hero-catalog.js",
     "smoke:startup-layout": "node scripts/smoke-startup-layout.js",
+    "smoke:network": "node scripts/smoke-network-loading.cjs",
     "smoke:news-render": "node scripts/smoke-news-render.js",
     "smoke:hall-table": "node scripts/smoke-hall-table.cjs",
     "smoke:news-reactions": "node scripts/smoke-news-reactions.js",

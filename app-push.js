@@ -761,7 +761,7 @@ function initProfileChatPush() {
   var releaseCheckPending = false;
   var lastReleaseCheck = 0;
   function checkPublishedRelease() {
-    if (!releaseId || document.hidden || releaseCheckPending || Date.now() - lastReleaseCheck < 15000) return;
+    if (!releaseId || document.hidden || releaseCheckPending || Date.now() - lastReleaseCheck < 5 * 60 * 1000) return;
     releaseCheckPending = true;
     lastReleaseCheck = Date.now();
     var controller = new AbortController();
@@ -775,7 +775,7 @@ function initProfileChatPush() {
         }
       }).catch(function () {}).finally(function () { clearTimeout(timeout); releaseCheckPending = false; });
   }
-  setInterval(checkPublishedRelease, 30000);
+  setInterval(checkPublishedRelease, 5 * 60 * 1000);
   window.addEventListener("focus", checkPublishedRelease);
   window.addEventListener("online", checkPublishedRelease);
   document.addEventListener("visibilitychange", checkPublishedRelease);

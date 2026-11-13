@@ -2359,7 +2359,39 @@
     return icons[type] || icons.achievement;
   }
 
+  var feedbackSummaryCache = Object.create(null);
+  function feedbackSummary(ids) {
+    var batches = [];
+    ids = Array.from(new Set(ids));
+    for (var offset = 0; offset < ids.length; offset += 50) {
+      (function (batch) {
+        var key = friendAuthGeneration + ":" + newsModalMode + ":" + batch.join("|");
+        var hit = feedbackSummaryCache[key];
+        if (hit && (hit.pending || Date.now() - hit.at < 30000)) {
+          batches.push(hit.promise);
+          return;
+        }
+        if (Object.keys(feedbackSummaryCache).length > 16) feedbackSummaryCache = Object.create(null);
+        var entry = { at: 0, pending: true };
+        entry.promise = feedbackRequest({ action: "view", eventIds: batch, summary: true }).then(function (data) {
+          entry.at = Date.now(); entry.pending = false;
+          return data;
+        }, function (error) {
+          delete feedbackSummaryCache[key]; throw error;
+        });
+        feedbackSummaryCache[key] = entry;
+        batches.push(entry.promise);
+      })(ids.slice(offset, offset + 50));
+    }
+    return Promise.all(batches).then(function (results) {
+      var feedback = {};
+      results.forEach(function (data) { Object.assign(feedback, data.feedback || {}); });
+      return { feedback: feedback };
+    });
+  }
+
   function feedbackRequest(payload) {
+    if (payload && payload.action !== "view" && payload.action !== "list") feedbackSummaryCache = Object.create(null);
     payload = Object.assign({}, payload || {}, {
       scope: newsModalMode === "club" ? "club" : "friends",
     });
@@ -2529,7 +2561,7 @@
           '<button type="button" class="home-news-comment-reply-btn" data-home-comment-reply="' + esc(comment.id || "") +
           '" aria-label="Ответить на комментарий">↩ Ответить</button>') +
         "</span></div>";
-    }).join("") : '<p class="chat-user-modal__news-comments-empty">Комментариев пока нет</p>';
+    }).join("") : '<p class="chat-user-modal__news-comments-empty">' + (feedback.commentsLoaded === false ? "Загружаем комментарии…" : "Комментариев пока нет") + "</p>";
     var replyPreview = activeReply
       ? '<span class="home-news-reply-preview"><span><strong>Ответ на ' + esc(activeReply.fromName || "Игрок") +
         '</strong><small>' + esc(String(activeReply.text || "").slice(0, 100)) +
@@ -3017,7 +3049,7 @@
   function loadClubSngWinnerNews() {
     if (clubSngNewsPromise || Date.now() - clubSngNewsCheckedAt < 60000) return;
     clubSngNewsPromise = Promise.all([
-      cachedFetchJson(apiBase() + "/api/sng-champions?mode=achievements", "club-sng-winners-v1", 60000, { cache: "no-store" }),
+      cachedFetchJson(apiBase() + "/api/sng-champions?mode=achievements", "sng-achievements-v2", 60000, { cache: "default" }),
       typeof window.pokerEnsureLazyDomains === "function"
         ? window.pokerEnsureLazyDomains(["home-widget-sng"], { styles: true, scripts: true })
         : Promise.resolve(),
@@ -3669,6 +3701,27 @@
     notify(copied);
   }
 
+  var feedbackDetailsPending = Object.create(null);
+  function loadNewsFeedbackDetails(eventId) {
+    var key = friendAuthGeneration + ":" + newsModalMode + ":" + eventId;
+    if (feedbackDetailsPending[key]) return feedbackDetailsPending[key];
+    var current = eventFeedback[eventId] || {};
+    var sourceId = current._sourceEventId || eventId;
+    var scope = newsModalMode, authGeneration = friendAuthGeneration;
+    var pending = feedbackRequest({ action: "list", eventIds: [sourceId] }).then(function (data) {
+      if (scope !== newsModalMode || authGeneration !== friendAuthGeneration) return;
+      eventFeedback[eventId] = Object.assign({}, data.feedback && data.feedback[sourceId] || {}, {
+        commentsLoaded: true, _sourceEventId: sourceId
+      });
+      var modal = el("homeFriendNewsModal");
+      if (modal && !modal.hidden) renderModalList(activeModalEvents());
+    }).finally(function () {
+      if (feedbackDetailsPending[key] === pending) delete feedbackDetailsPending[key];
+    });
+    feedbackDetailsPending[key] = pending;
+    return pending;
+  }
+
   function loadActiveModalFeedback(rows) {
     var sourceRows = Array.isArray(rows) ? rows : [];
     var ids = sourceRows.reduce(function (all, row) {
@@ -3676,8 +3729,14 @@
     }, [])
       .filter(function (id) { return id && id !== "empty" && id !== "club-empty"; });
     if (!ids.length) return;
-    feedbackRequest({ action: "view", eventIds: ids }).then(function (data) {
-      Object.assign(eventFeedback, data.feedback || {});
+    var authGeneration = friendAuthGeneration, scope = newsModalMode;
+    feedbackSummary(ids).then(function (data) {
+      if (authGeneration !== friendAuthGeneration || scope !== newsModalMode) return;
+      Object.keys(data.feedback || {}).forEach(function (id) {
+        var previous = eventFeedback[id] || {};
+        eventFeedback[id] = Object.assign({}, previous, data.feedback[id]);
+        if (previous.commentsLoaded) eventFeedback[id].commentsLoaded = true;
+      });
       sourceRows.forEach(function (row) {
         var currentId = feedbackEventId(row);
         var current = eventFeedback[currentId] || {};
@@ -3692,6 +3751,7 @@
           }, 0);
           if (!legacyActivity) return false;
           eventFeedback[currentId] = Object.assign({}, legacy, {
+            _sourceEventId: legacyId,
             viewCount: Math.max(Number(current.viewCount) || 0, Number(legacy.viewCount) || 0),
           });
           return true;
@@ -3712,7 +3772,9 @@
 
   function waitForNewsModalStyles(open) {
     if (typeof window.pokerEnsureStyleDomains !== "function") return false;
-    var pending = window.pokerEnsureStyleDomains(["home-news-modal"]);
+    var pending = typeof window.pokerEnsureLazyDomains === "function"
+      ? window.pokerEnsureLazyDomains(["home-news-modal"], { styles: true, scripts: true })
+      : window.pokerEnsureStyleDomains(["home-news-modal"]);
     if (!pending || typeof pending.then !== "function") return false;
     var sequence = ++newsModalOpenSequence;
     pending.then(function () {
@@ -4088,7 +4150,10 @@
         if (eventId && reaction) {
           var usersTrigger = event.target.closest("[data-home-news-reaction-users]");
           if (usersTrigger) {
-            showReactionUsers(eventFeedback[eventId] || {}, usersTrigger.getAttribute("data-home-news-reaction-users"));
+            var reactionEmoji = usersTrigger.getAttribute("data-home-news-reaction-users");
+            loadNewsFeedbackDetails(eventId).then(function () {
+              showReactionUsers(eventFeedback[eventId] || {}, reactionEmoji);
+            }).catch(function () {});
             return;
           }
           sendOptimisticReaction(eventId, reaction.getAttribute("data-home-news-reaction"), "");
@@ -4102,6 +4167,10 @@
             ? commentsCard.getBoundingClientRect().top - newsScrollContainer().getBoundingClientRect().top
             : 0;
           eventCommentsOpen[eventId] = !eventCommentsOpen[eventId];
+          if (eventCommentsOpen[eventId]) loadNewsFeedbackDetails(eventId).catch(function () {
+            var card = commentsCard && commentsCard.querySelector(".chat-user-modal__news-comments-empty");
+            if (card) card.textContent = "Не удалось загрузить комментарии. Закройте и откройте их ещё раз.";
+          });
           renderModalList(activeModalEvents());
           function restoreCommentsAnchor() {
             var restoredList = el("homeFriendNewsList");
@@ -4307,7 +4376,7 @@
         Promise.resolve(friendsPayload),
         cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" })
           .catch(function () { return { winners: [] }; }),
-        cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng", 5 * 60 * 1000, { cache: "default" })
+        cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng-achievements-v2", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
         cachedFetchJson(base + "/api/club-choice-vote?mode=achievements", "choice-achievements-v1", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
@@ -4689,12 +4758,12 @@
   }
 
   var clubNewsSourcePromise = null;
-  var clubNewsSourceCheckedAt = 0;
+  var clubNewsSourceCheckedAt = typeof window !== "undefined" && window.POKER_CLUB_NEWS_DATA ? Date.now() : 0;
   function loadClubNews(force) {
     if (clubNewsSourcePromise) return clubNewsSourcePromise;
-    if (!force && Date.now() - clubNewsSourceCheckedAt < 60000) return loadClubNewsContent(force);
+    if (!force && Date.now() - clubNewsSourceCheckedAt < 5 * 60000) return loadClubNewsContent(force);
     var previous = JSON.stringify(window.POKER_CLUB_NEWS_DATA || {});
-    clubNewsSourcePromise = fetch(new URL("./club-news-data.js", document.baseURI).href, { cache: "no-store" })
+    clubNewsSourcePromise = fetch(new URL("./club-news-data.js", document.baseURI).href, { cache: "no-cache" })
       .then(function (response) {
         if (!response.ok) throw new Error("Club news refresh failed");
         return response.text();
@@ -4808,21 +4877,6 @@
       renderClubNews();
       if (newsModalMode === "club") renderModalList(activeModalEvents());
 
-      if (complete && !clubWallLoadPromise) {
-        var wallRequest = loadClubWallEvents(players, tournamentDay).then(function (wallEvents) {
-          clubWallEvents = Array.isArray(wallEvents) ? wallEvents : [];
-          clubWallUpdatedAt = Date.now();
-          writeClubWallEventsCache(clubWallEvents);
-        }).catch(function () {
-          return [];
-        }).finally(function () {
-          clubWallLoading = false;
-          if (clubWallLoadPromise === wallRequest) clubWallLoadPromise = null;
-          if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
-        });
-        clubWallLoading = true;
-        clubWallLoadPromise = wallRequest;
-      }
     }).catch(function () {
       clubNewsLoading = true;
       renderClubNews();
@@ -4838,7 +4892,6 @@
   }
 
   function init() {
-    prewarmNewsModalStyles();
     events = readRenderedEventsCache();
     clubEvents = readClubEventsCache();
     clubWallEvents = readClubWallEventsCache();
@@ -4863,6 +4916,9 @@
     });
     function resetFriendNewsForAuth() {
       friendAuthGeneration += 1;
+      eventFeedback = {};
+      feedbackDetailsPending = Object.create(null);
+      feedbackSummaryCache = Object.create(null);
       loadSequence += 1;
       friendNewsLoadPromise = null;
       envelopePromise = null;
@@ -4955,7 +5011,7 @@
         .catch(function () { return { winners: [] }; })
       : emptyWinners;
     var sngPromise = base
-      ? cachedFetchJson(base + "/api/sng-champions?mode=achievements", "player-sng", 5 * 60 * 1000, { cache: "default" })
+      ? cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng-achievements-v2", 5 * 60 * 1000, { cache: "default" })
         .catch(function () { return { rows: [] }; })
       : emptyRows;
     var choicePromise = base

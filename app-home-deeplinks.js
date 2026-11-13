@@ -165,7 +165,7 @@ function pokerInitHomeDeepLinks(opts) {
     var billiardsInvite=/^billiards_([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
     if(billiardsInvite){openHomeModalDeepLink(function(){return typeof window.pokerOpenBilliardsInvite==='function'&&window.pokerOpenBilliardsInvite(billiardsInvite[1]);},['profile']);return;}
     if(startParam==='admin_deposits'){
-      openHomeModalDeepLink(function(){return typeof window.pokerOpenDepositsDeepLink==='function'&&window.pokerOpenDepositsDeepLink();});
+      openHomeModalDeepLink(function(){return typeof window.pokerOpenDepositsDeepLink==='function'&&window.pokerOpenDepositsDeepLink();}, ['admin-deposits']);
       return;
     }
     if (startParam === "villa" || startParam === "player_hall" || startParam === "garage") {

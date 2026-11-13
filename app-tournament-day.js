@@ -1772,7 +1772,7 @@ function setHomeTournamentRaffleBonus(raffle) {
 }
 
 function loadHomeTournamentRaffleBonus(force) {
-  if (homeTournamentRaffleBonusInFlight) return;
+  if (homeTournamentRaffleBonusInFlight || document.hidden) return;
   var btn = document.getElementById("homeTournamentRaffleBonus");
   if (!btn) return;
   var now = Date.now();
@@ -1847,7 +1847,7 @@ function initHomeTournamentRaffleBonus() {
   if (!window.__homeTournamentRaffleBonusRefreshBound) {
     window.__homeTournamentRaffleBonusRefreshBound = true;
     window.addEventListener("focus", function () {
-      loadHomeTournamentRaffleBonus(true);
+      loadHomeTournamentRaffleBonus();
     });
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden) loadHomeTournamentRaffleBonus(true);
@@ -1855,7 +1855,7 @@ function initHomeTournamentRaffleBonus() {
   }
   if (!homeTournamentRaffleBonusRefreshTimer) {
     homeTournamentRaffleBonusRefreshTimer = setInterval(function () {
-      loadHomeTournamentRaffleBonus(true);
+      loadHomeTournamentRaffleBonus();
     }, HOME_TOURNAMENT_RAFFLE_BONUS_CACHE_MS);
   }
   loadHomeTournamentRaffleBonus();

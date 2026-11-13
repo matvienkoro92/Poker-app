@@ -2,6 +2,7 @@
   "use strict";
   var generation = 0, pending = false, loadedAt = 0, spin = null, offset = 0, nickname = "", account = "";
   var root;
+  var chartCheckedAt = 0, reviewCheckedAt = 0, reviewUnreadPending = null;
   var chartHistory = null, chartSeen = {}, chartSeenSnapshot = "", chartCheckPending = false, chartUnreadCached = null;
   function chartFingerprint(row) {
     var text = JSON.stringify(row), hash = 2166136261;
@@ -60,9 +61,10 @@
     renderChartUnread();
   }
   async function checkChartUnread() {
-    if (chartCheckPending || document.hidden) return;
+    if (chartCheckPending || document.hidden || Date.now() - chartCheckedAt < 5 * 60000) return;
     if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) return;
     chartCheckPending = true;
+    chartCheckedAt = Date.now();
     var seq = generation;
     try {
       if(!chartHistory){
@@ -84,7 +86,7 @@
         var data = await request('starting-hands', {action:'list'});
         if (seq === generation) acceptChartHistory(data);
       }
-    } catch (_) {} finally {chartCheckPending = false;}
+    } catch (_) { if (seq === generation) chartCheckedAt = 0; } finally {if (seq === generation) chartCheckPending = false;}
   }
   var scheduleTab = "tournaments", summaryTab = "play";
   function applySummaryTab() {
@@ -162,15 +164,23 @@
 
   var reviewUnreadRequest = 0;
   function loadReviewUnread(valid) {
+    if (document.hidden) return Promise.resolve();
+    if (reviewUnreadPending) return reviewUnreadPending;
+    if (Date.now() - reviewCheckedAt < 5 * 60000) return Promise.resolve();
     if (typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       renderReviewUnread(0);
       return Promise.resolve();
     }
     var seq = generation, requestId = ++reviewUnreadRequest;
-    return request("club-reviews", {action:"unread"}).then(function (d) {
+    reviewCheckedAt = Date.now();
+    var pendingReview = request("club-reviews", {action:"unread"}).then(function (d) {
       if (seq !== generation || requestId !== reviewUnreadRequest || (valid && !valid())) return;
       renderReviewUnread(d.count);
-    }).catch(function () { /* Keep the last confirmed count on a network error. */ });
+    }).catch(function () { if (seq === generation) reviewCheckedAt = 0; }).finally(function () {
+      if (reviewUnreadPending === pendingReview) reviewUnreadPending = null;
+    });
+    reviewUnreadPending = pendingReview;
+    return pendingReview;
   }
   function friends() {
     var data = typeof window.pokerGetFriendNewsSummary === "function" ? window.pokerGetFriendNewsSummary() : null;
@@ -707,16 +717,16 @@
     } catch (_) {}
   });
   window.addEventListener("poker-friend-news-updated", friends);
-  window.addEventListener('poker-telegram-auth', function(){chartHistory=null;chartSeen={};chartSeenSnapshot="";chartUnreadCached=null;renderChartUnread();setTimeout(checkChartUnread,0);});
+  window.addEventListener('poker-telegram-auth', function(){chartCheckPending=false;chartCheckedAt=0;chartHistory=null;chartSeen={};chartSeenSnapshot="";chartUnreadCached=null;renderChartUnread();setTimeout(checkChartUnread,0);});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)checkChartUnread();});
   window.addEventListener('storage',function(e){if(chartHistory && (e.key==='poker-chart-seen:'+chartHistory.playerId || e.key==='poker-chart-seen-snapshot:'+chartHistory.playerId))acceptChartHistory(chartHistory);});
   renderChartUnread();
   setTimeout(checkChartUnread,0);
-  setInterval(checkChartUnread,60000);
+  setInterval(checkChartUnread,5 * 60000);
   setTimeout(function () { loadReviewUnread(); }, 0);
-  setInterval(function () { if (!document.hidden) loadReviewUnread(); }, 60000);
+  setInterval(function () { if (!document.hidden) loadReviewUnread(); }, 5 * 60000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) loadReviewUnread(); });
-  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;loadReviewUnread();});
-  window.addEventListener("poker-telegram-auth", function () {generation++;renderReviewUnread(0);loadReviewUnread();pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
+  window.addEventListener("poker-reviews-updated", function(){loadedAt=0;reviewCheckedAt=0;loadReviewUnread();});
+  window.addEventListener("poker-telegram-auth", function () {generation++;reviewCheckedAt=0;reviewUnreadPending=null;renderReviewUnread(0);loadReviewUnread();pending=false;loadedAt=0;spin=null;account="";nickname="";var name=document.getElementById("mySummaryName");if(name)name.textContent="";if(root)root.innerHTML="";friends();if(document.querySelector('[data-view="my-summary"].view--active'))init();});
   setInterval(function () {if(document.hidden || !document.querySelector('[data-view="my-summary"].view--active'))return;if(spin && !spin.canPlay && Date.parse(spin.nextFreeAttemptAt)<=Date.now()+offset && Date.now()-loadedAt>30000){loadedAt=0;init();}else renderSpin();}, 30000);
 })();

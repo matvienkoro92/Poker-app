@@ -10,6 +10,9 @@
   var dailyPokerArtPrewarm = null;
 
   var DOMAIN_DEPS = {
+    "profile": ["garage"],
+    "chat": ["garage"],
+    "home-news-modal": ["garage"],
     "home-widget-club-choice": ["home-widget-modals"],
     "home-widget-private-cash": ["home-widget-modals"],
     "home-widget-sng": ["home-widget-modals"],
@@ -35,7 +38,7 @@
     "cooler-flight": ["cooler-flight"],
     "plasterer-game": ["learning"],
     "poker-tasks": ["club-tasks"],
-    "hall-of-fame": ["hall"],
+    "hall-of-fame": ["garage", "hall"],
     "schedule": ["tournament"],
     "download": ["cashout"],
     "profile": ["profile"],
@@ -49,6 +52,7 @@
   };
 
   var GLOBAL_MODAL_DOMAIN_SELECTORS = [
+    { selector: "#headerDepositsShortcutBtn", domains: ["admin-deposits"] },
     { selector: "#adminReportBtn,#adminBroadcastReportsBtn", domains: ["admin-reports"] },
     { selector: "#adminAuthDebugBtn", domains: ["auth-debug"] },
     { selector: "#adminShareStatsBtn", domains: ["share-stats"] },

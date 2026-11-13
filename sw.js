@@ -159,6 +159,14 @@ function pokerSwIsStableStaticRequest(url) {
   return false;
 }
 
+function pokerSwIsImmutableCodeRequest(url) {
+  var path = url && url.pathname || "";
+  if (!/\.(?:css|js|mjs)$/i.test(path)) return false;
+  // Only build-generated content hashes or standalone release identities are immutable.
+  return /^[a-f0-9]{16}$/.test(url.searchParams.get("v") || "") ||
+    /^[a-f0-9]{32}$/.test(url.searchParams.get("release") || "");
+}
+
 function pokerSwIsVersionedCodeRequest(url) {
   var path = url && url.pathname ? url.pathname : "";
   return !!(url && url.searchParams && url.searchParams.has("v") && /\.(?:css|js|mjs)$/i.test(path));
@@ -296,6 +304,10 @@ self.addEventListener("fetch", function (event) {
     } catch (eC) {}
     if (cmode === "no-store" || cmode === "reload") {
       event.respondWith(fetch(event.request));
+      return;
+    }
+    if (pokerSwIsImmutableCodeRequest(u)) {
+      event.respondWith(pokerSwCacheFirst(POKER_STATIC_CACHE, event.request));
       return;
     }
     // Raffle fixes must take effect when reopening the section, even if the

@@ -466,7 +466,7 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
     <link rel="stylesheet" href="./styles-home-overrides.css?v=20261111-daily-character-fit" />
-    <link rel="stylesheet" href="./styles-admin-deposits.css?v=20261104-usdt-rate" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="admin-deposits" data-poker-lazy-position="source" href="./styles-admin-deposits.css?v=20261104-usdt-rate" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=20261110-club-honors-v1" />
     <link rel="stylesheet" href="./styles-home-jackpot-guide.css?v=5" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=20260919-no-bottom-glow-1" />
@@ -1756,9 +1756,9 @@
     <script defer src="./app-home-jackpot-guide.js?v=2"></script>
     <script defer src="./app-home-media.js?v=4.002"></script>
     <script defer src="./app-admin-menu-password.js?v=20261017-deposits-1"></script>
-    <script defer src="./app-admin-deposits-parser.js?v=20261017-1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin-deposits" src="./app-admin-deposits-parser.js?v=20261017-1"></script>
     <script defer src="./deposit-quick-input.js"></script>
-    <script defer src="./app-admin-deposits.js?v=20261109-other-destinations"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="admin-deposits" src="./app-admin-deposits.js?v=20261109-other-destinations"></script>
     <script defer src="./app-lazy-loader.js?v=20261002-coolershan-v2"></script>
     <script defer src="./app-home-planner-access.js?v=4.002"></script>
     <script defer src="./app-home-planner-runtime.js?v=4.002"></script>
@@ -1791,15 +1791,15 @@
     <script defer src="./app-billiards-tables.js?v=4.020.1.31-room-v3"></script>
     <script defer src="./app-billiards-equipment-sync.js?v=1"></script>
     <script defer src="./app-player-hall-equipment.js?v=20261103-table-save"></script>
-    <script defer src="./app-scooter-catalog.js?v=20261105-sky1"></script>
-    <script defer src="./app-bicycle-catalog.js?v=20261105-bike1"></script>
-    <script defer src="./app-garage-catalog.js?v=20261110-club-honors-v1"></script>
-    <script defer src="./app-garage-showcase.js?v=20261108-imported-upgrades"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-scooter-catalog.js?v=20261105-sky1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-bicycle-catalog.js?v=20261105-bike1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-garage-catalog.js?v=20261110-club-honors-v1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-garage-showcase.js?v=20261108-imported-upgrades"></script>
     <link rel="stylesheet" href="./styles-home-cups.css?v=20261111-transparent-cups">
     <link rel="stylesheet" href="./styles-club-honors.css?v=20261111-ring-shelf-v3">
     <script defer src="./app-club-honors.js?v=light-v4-20261111-ring-face-v4"></script>
-    <script defer src="./app-garage-workshop.js?v=20261110-club-honors-v1"></script>
-    <script defer src="./app-bicycle-workshop.js?v=20261105-vehicle-clear4"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-garage-workshop.js?v=20261110-club-honors-v1"></script>
+    <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-bicycle-workshop.js?v=20261105-vehicle-clear4"></script>
     <script defer src="./app-profile-appearance.js?v=4.020.1.31"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-lounge-live.js?v=20261009-presence-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="profile chat" src="./app-player-lounge.js?v=20261014-selected-preload-1"></script>
@@ -2010,13 +2010,25 @@
       <script defer src="./app-portrait-effects.js?v=4.020"></script>
   <script>
 (function () {
-  function loadHomeMonthlyLeader() {
-    if (typeof window.pokerEnsureViewScripts === 'function') {
-      window.pokerEnsureViewScripts('hall-of-fame').catch(function () {});
+  function initHomeMonthlyLeader() {
+    var root = document.getElementById('homePlayerMonth');
+    if (!root) return;
+    function load() {
+      if (typeof window.pokerEnsureScriptDomains !== 'function') return;
+      Promise.resolve(window.pokerEnsureScriptDomains(['hall'])).catch(function () {});
     }
+    // This card is below the fold. Its live ranking needs the season archives;
+    // do not download them while the user is reading unrelated home content.
+    if (typeof IntersectionObserver === 'undefined') { load(); return; }
+    var observer = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+      observer.disconnect();
+      load();
+    });
+    observer.observe(root);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadHomeMonthlyLeader, { once: true });
-  else loadHomeMonthlyLeader();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initHomeMonthlyLeader, { once: true });
+  else initHomeMonthlyLeader();
 })();
 </script>
 </body>
