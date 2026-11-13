@@ -222,6 +222,16 @@ Reactions never clear the response queue or forward to Salebot.
 Owner header format: two bold lines, «Имя @telegram» then
 «Ник P21:ID X:ID», without leading emoji or expanded room labels.
 
+## Deposit reply ordering
+
+For ready private deposit links (1,000 / 1,500 / 2,000 RUB credit), the bot sends
+and persists the player's payment reply before clearing the manager amount note,
+relaying the request, or updating the support topic. Support work is still
+awaited within the webhook, so a transient failure returns a retryable error.
+The saved reply and existing issuance ID prevent that retry from resending the
+link or issuing it twice. This is response ordering, not a detached background
+task; shared Redis and Telegram delivery are still required before replying.
+
 ## Closed topics
 
 If Telegram rejects an incoming text or media relay with `TOPIC_CLOSED`, the

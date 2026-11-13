@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const commandModule=require('../lib/telegram-player-deposit');
-function fixture(){
+function fixture({beforeSupport=async()=>{}}={}){
  const store=new Map(),sent=[],mirrored=[],botMirrored=[],cleared=[];let seq=100,failMirror=false;
  const redis={isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,...a])=>{
   if(cmd==='GET')return {result:store.get(a[0])||null};
@@ -10,7 +10,7 @@ function fixture(){
   if(cmd==='EVAL'){const key=a[2];if((store.get(key)||'')!==a[3])return {result:0};if(a.length===4)store.delete(key);else store.set(key,a[4]);return {result:1};}
   throw Error(cmd);
  })};
- const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
+ const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
  vm.runInNewContext(fs.readFileSync('lib/telegram-player-deposit.js','utf8'),ctx);
  const message=(text,message_id=1)=>({message:{text,message_id,chat:{id:777,type:'private'},from:{id:777}}});
  const handle=u=>ctx.module.exports.handle(u,'fixture-token');
@@ -87,4 +87,40 @@ test('manager notice retries do not resend the payment link to the player',async
  const f=fixture();f.failNextMirror();const update=f.message('/dep 1000');
  await assert.rejects(f.handle(update));assert.equal(f.sent.length,1);
  await f.handle(update);assert.equal(f.sent.length,1);assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
+});
+
+
+test('ready link reaches player before stalled manager synchronization for every pinned amount',async()=>{
+ for(const sum of [1000,1500,2000]){
+  let release,started;
+  const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{started=resolve;});
+  const f=fixture({beforeSupport:async()=>{started();await gate;}});
+  const handling=f.handle(f.message('деп '+sum));
+  await entered;
+  try {
+   assert.equal(f.sent.length,1);
+   assert.ok(f.sent[0].body.reply_markup.inline_keyboard[0][0].url);
+   assert.ok([...f.store.keys()].some(key=>key.endsWith(':payment-reply')),'reply persisted before support');
+  } finally {release();await handling;}
+  assert.equal(f.mirrored.length,1);assert.equal(f.botMirrored.length,1);
+ }
+});
+test('failed manager preparation retries after player reply without duplicate link or ledger issuance',async()=>{
+ for(const stage of ['clear','handle']){
+  let fail=true;
+  const f=fixture({beforeSupport:async name=>{if(fail&&name===stage){fail=false;throw Error('support unavailable');}}});
+  const update=f.message('деп 1000');
+  await assert.rejects(f.handle(update),/support unavailable/);
+  assert.equal(f.sent.length,1,'player already has link when manager preparation fails');
+  await f.handle(update);await f.handle(update);
+  assert.equal(f.sent.length,1);assert.equal(f.botMirrored.length,1);
+  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
+ }
+});
+test('button-selected link retries failed manager notice without duplicating player payment reply',async()=>{
+ const f=fixture();await f.handle(f.message('деп 1200'));const update=choose(f,150000);
+ f.failNextMirror();await assert.rejects(f.handle(update));
+ const count=()=>f.sent.filter(row=>row.body.reply_markup?.inline_keyboard?.[0]?.[0]?.url).length;
+ assert.equal(count(),1);await f.handle(update);assert.equal(count(),1);
+ assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
 });
