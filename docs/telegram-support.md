@@ -221,3 +221,12 @@ Reactions never clear the response queue or forward to Salebot.
 
 Owner header format: two bold lines, «Имя @telegram» then
 «Ник P21:ID X:ID», without leading emoji or expanded room labels.
+
+## Closed topics
+
+If Telegram rejects an incoming text or media relay with `TOPIC_CLOSED`, the
+bot reopens that same mapped support topic and retries only the failed request
+once. Existing history and the client mapping are preserved. Reopening is
+restricted to the configured support group and the client's current topic.
+Unknown topics, other groups and stale topic mappings cannot be reopened.
+Deleted topics continue to use the separate replacement-topic recovery.

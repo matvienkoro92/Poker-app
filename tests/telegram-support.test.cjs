@@ -259,3 +259,25 @@ test('deleted client topic is recreated and incoming message delivered once into
  assert.equal(incoming.length,1);assert.equal(incoming[0].body.message_thread_id,f.client.threadId);
  await f.handle(f.pm('Новое сообщение после удаления темы',22));assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Новое сообщение после удаления темы')).length,1);
 });
+
+test('closed topic is reopened and the incoming text delivered once without replacing history',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const tid=f.client.threadId;
+ f.fail('sendMessage',400,'Bad Request: TOPIC_CLOSED',true);
+ await f.handle(f.pm('Сообщение в закрытую тему',25));
+ assert.equal(f.client.threadId,tid);assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,1);
+ const reopened=f.calls.filter(c=>c.method==='reopenForumTopic');assert.equal(reopened.length,1);assert.equal(reopened[0].body.message_thread_id,tid);
+ assert.equal(f.client.lastInboundMessageId,25);
+ const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Сообщение в закрытую тему'));assert.equal(attempts.length,2);
+ await f.handle(f.pm('Сообщение в закрытую тему',25));assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Сообщение в закрытую тему')).length,2);
+});
+test('closed topic media is reopened and only the failed copy retried',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const u=f.pm('',26);delete u.message.text;u.message.document={file_id:'fixture'};
+ f.fail('copyMessage',400,'Bad Request: TOPIC_CLOSED',true);await f.handle(u);
+ assert.equal(f.calls.filter(c=>c.method==='reopenForumTopic').length,1);assert.equal(f.calls.filter(c=>c.method==='copyMessage').length,2);assert.equal(f.client.lastInboundMessageId,26);
+});
+test('reopen policy blocks other groups and stale or unknown topics',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ for(const body of [{chat_id:'-100999',message_thread_id:101},{chat_id:GROUP,message_thread_id:999}]){
+  const r=await f.policy.guardedFetch('https://api.telegram.org/botfixture/reopenForumTopic',{method:'POST',body:JSON.stringify(body)},'support-dialog');assert.equal(r.ok,false);
+ }
+});
