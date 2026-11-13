@@ -10,10 +10,19 @@ module.exports = async function (req, res) {
   try {
     let body;
     if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) body = Buffer.from(req.body);
-    else {
-      // Do not re-encode nested form fields or multipart boundaries: signatures
-      // must be checked against the original provider data by the main handler.
-      if (req.body != null) return res.status(400).end();
+    else if (req.body != null) {
+      // Vercel's Node helpers parse urlencoded forms before invoking handlers.
+      // Re-encode the same decoded field names/values (including bracket paths).
+      // The upstream HMAC is computed on decoded fields, not raw form bytes.
+      if (!/^application\/x-www-form-urlencoded(?:;|$)/i.test(contentType) ||
+          typeof req.body !== 'object' || Array.isArray(req.body)) return res.status(400).end();
+      const fields = new URLSearchParams();
+      for (const [key, value] of Object.entries(req.body)) {
+        if (typeof value !== 'string') return res.status(400).end();
+        fields.append(key, value);
+      }
+      body = Buffer.from(fields.toString());
+    } else {
       const chunks = []; let size = 0;
       for await (const chunk of req) {
         size += Buffer.byteLength(chunk);
