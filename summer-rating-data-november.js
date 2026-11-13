@@ -2797,4 +2797,283 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "12.11.2026": [
+    {
+      "time": "00:00",
+      "name": "Super KO 2/3 120K",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 5,
+          "reward": 6185,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "RS888",
+          "place": 1,
+          "reward": 4402.62,
+          "points": 135
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 1049.25,
+          "points": 110
+        },
+        {
+          "nick": "Boba7575",
+          "place": 5,
+          "reward": 139.99,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 1,
+          "reward": 5357.52,
+          "points": 135
+        },
+        {
+          "nick": "Zeus",
+          "place": 3,
+          "reward": 1520.62,
+          "points": 90
+        },
+        {
+          "nick": "time2bass",
+          "place": 6,
+          "reward": 299.37,
+          "points": 50
+        },
+        {
+          "nick": "⚡72⚡",
+          "place": 5,
+          "reward": 115,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 13200,
+          "points": 135
+        },
+        {
+          "nick": "Аспирин",
+          "place": 3,
+          "reward": 4100,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AgroMonkey",
+          "place": 1,
+          "reward": 1900,
+          "points": 135
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 1055,
+          "points": 110
+        },
+        {
+          "nick": "DemonDen",
+          "place": 3,
+          "reward": 630,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 2,
+          "reward": 1787.5,
+          "points": 110
+        },
+        {
+          "nick": "LuckyBoom",
+          "place": 5,
+          "reward": 1040,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Магия Тракториста🚜",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 9,
+          "reward": 12420,
+          "points": 0
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 4,
+          "reward": 6100,
+          "points": 70
+        },
+        {
+          "nick": "YuraK700",
+          "place": 5,
+          "reward": 3130,
+          "points": 60
+        },
+        {
+          "nick": "time2bass",
+          "place": 10,
+          "reward": 680,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 2,
+          "reward": 28640,
+          "points": 110
+        },
+        {
+          "nick": "Nast'ko",
+          "place": 1,
+          "reward": 15740,
+          "points": 135
+        },
+        {
+          "nick": "Luck_is_Suck",
+          "place": 5,
+          "reward": 1330,
+          "points": 60
+        },
+        {
+          "nick": "⚡72⚡",
+          "place": 4,
+          "reward": 960,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 177K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "пупсик",
+          "place": 4,
+          "reward": 11983,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 40K",
+      "buyin": 600,
+      "league": 1,
+      "players": [
+        {
+          "nick": "везёт",
+          "place": 2,
+          "reward": 11721,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 10121.9,
+          "points": 135
+        },
+        {
+          "nick": "cadillac",
+          "place": 2,
+          "reward": 1028.3,
+          "points": 110
+        },
+        {
+          "nick": "WiNifly",
+          "place": 4,
+          "reward": 690.81,
+          "points": 70
+        },
+        {
+          "nick": "myhomor4ik",
+          "place": 5,
+          "reward": 11.66,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "23:00",
+      "name": "Black Magic 80K",
+      "buyin": 1200,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 8439,
+          "points": 110
+        }
+      ]
+    }
+  ]
 };
