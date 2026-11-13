@@ -124,3 +124,27 @@ test('button-selected link retries failed manager notice without duplicating pla
  assert.equal(count(),1);await f.handle(update);assert.equal(count(),1);
  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
 });
+
+test('bare deposit question reaches player before stalled support and remains usable',async()=>{
+ let release,started;
+ const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{started=resolve;});
+ const f=fixture({beforeSupport:async()=>{started();await gate;}});
+ const handling=f.handle(f.message('деп'));
+ await entered;
+ try {
+  assert.equal(f.sent.length,1);assert.match(f.sent[0].body.text,/На какую сумму/);
+  const waiting=JSON.parse(f.store.get('poker_app:player-deposit:v1:waiting:777'));
+  assert.equal(waiting.promptMessageId,101);
+ } finally {release();await handling;}
+ assert.equal(f.botMirrored.length,1);assert.equal(f.botMirrored[0][4].awaitingAmount,true);
+});
+test('bare question retries support failure without sending the question twice',async()=>{
+ let fail=true;
+ const f=fixture({beforeSupport:async()=>{if(fail){fail=false;throw Error('support unavailable');}}});
+ const update=f.message('деп');
+ await assert.rejects(f.handle(update),/support unavailable/);
+ assert.equal(f.sent.length,1);await f.handle(update);await f.handle(update);
+ assert.equal(f.sent.length,1);assert.equal(f.botMirrored.length,1);
+ await f.handle(f.message('1000',2));
+ assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
+});
