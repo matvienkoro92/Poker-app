@@ -49,3 +49,24 @@ test('host can hide homes and carving in the invitation just as on the live boar
  for(const detail of ['storage-well','case-carving','scalloped-rail','brass-hinge'])assert.ok(!svg.includes('data-detail="'+detail+'"'));
  assert.ok(svg.includes('data-detail="plain-rim"'));
 });
+
+test('invitation respects independent relief selections and fitted home shapes',()=>{
+ const equipment={nardsInterior:'sport-sibir',nardsRailTop:'frost',nardsRailBottom:'wave',nardsHome:'octagon',nardsHomeFull:true};
+ const svg=art.svgFor({state:{discipline:'long'},equipment});
+ for(const id of ['frost','wave'])assert.ok(svg.includes(fs.readFileSync('assets/board-games/nards/rail-'+id+'-relief-v3.webp').toString('base64')));
+ assert.ok(svg.includes('data-home="octagon" data-home-full="true"'));
+ assert.equal((svg.match(/<polygon points=/g)||[]).length,30);
+ assert.ok(svg.includes('preserveAspectRatio="xMidYMid meet"'));
+ const tray=art.svgFor({state:{discipline:'long'},equipment:{...equipment,nardsHome:'tray'}});
+ assert.equal((tray.match(/data-detail="storage-tray"/g)||[]).length,2);
+ assert.ok(!tray.includes('data-detail="storage-well"'));
+});
+
+test('ordinary points follow the six live tip gaps instead of a fixed long blade',()=>{
+ const svg=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'sport-sibir'}});
+ const tips=[...svg.matchAll(/data-detail="point-inlay" d="M[\d.]+ [\d.]+H[\d.]+L[\d.]+ ([\d.]+)Z/g)].slice(0,6).map(m=>Number(m[1]));
+ assert.equal(tips.length,6);
+ assert.ok(tips[0]>tips[1]&&tips[1]>tips[2]);
+ assert.equal(tips[0],tips[5]);assert.equal(tips[1],tips[4]);assert.equal(tips[2],tips[3]);
+ assert.ok(Math.max(...tips)<250,'Sports triangles must leave the central painting visible');
+});
