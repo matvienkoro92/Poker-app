@@ -757,3 +757,10 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__online-provider span{font-size:clamp(7px,1.8vw,9px);line-height:1.15;white-space:nowrap}
 .deposits .deposits__online-providers>.deposits__issue-link{grid-column:1/-1;justify-self:center;box-sizing:border-box;width:auto;min-height:26px!important;height:26px;margin:0;padding:4px 7px;border-radius:8px;font-size:10px!important;line-height:1.2;white-space:nowrap}
 .deposits .deposits__issued-link{box-sizing:border-box;width:100%;min-width:0;margin:8px 0 14px;padding:12px;border:1px solid var(--dep-line);border-radius:12px;background:#0c1318;color:var(--dep-gold);font-size:13px}
+
+/* Quiet, compact secondary actions below each withdrawal. */
+.deposits .deposits__card>.deposits__card-foot{gap:6px;align-items:center}
+.deposits .deposits__withdrawal-actions{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:6px;margin-left:0;width:100%}
+.deposits .deposits__card-foot button{min-height:32px!important;padding:5px 9px!important;border:1px solid #d5c79f24;border-radius:7px;background:#ffffff04;color:#b9b3a6;font-size:11px;font-weight:500;line-height:1.25;text-decoration:none;text-align:center}
+.deposits .deposits__card-foot button:hover{background:#ffffff0a;border-color:#d5c79f40}
+.deposits .deposits__card-foot button:focus-visible{outline:2px solid #c9b779;outline-offset:2px}
