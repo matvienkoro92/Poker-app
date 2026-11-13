@@ -31,7 +31,7 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:manager','club:menu','club:sub:menu','club:schedule:0']);
+ assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:player-deposit','club:menu','club:sub:menu','club:schedule:0']);
  assert.deepEqual(buttons.slice(2).filter(b=>b.url && !b.url.startsWith('https://t.me/share/url?')).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=nards','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=chess','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards']);
  assert.equal(buttons.length,14);
  for (const [game, phrase] of [['nards','в нарды'],['chess','в шахматы'],['billiards','в бильярд']]) {
@@ -42,7 +42,7 @@ test('pulse opens commands and correct download and club links',async t=>{
   assert.ok(invite.searchParams.get('text').includes(phrase));
  }
  assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
- assert.equal(buttons[0].callback_data,'club:manager');
+ assert.equal(buttons[0].callback_data,'club:player-deposit');
  assert.equal(buttons[1].text,'👥 Позвать друга в чат');
  const share = new URL(buttons[1].url);
  assert.equal(share.origin + share.pathname, 'https://t.me/share/url');

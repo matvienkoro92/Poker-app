@@ -4195,7 +4195,7 @@
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
-        if(event.target.closest("[data-club-honors-open]"))return;
+        if(event.target.closest("[data-club-honors-open],[data-honors-award-month]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerCard) {
@@ -4322,7 +4322,7 @@
       modal.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
-        if(event.target.closest("[data-club-honors-open]"))return;
+        if(event.target.closest("[data-club-honors-open],[data-honors-award-month]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         if (!playerCard) return;
         event.preventDefault();

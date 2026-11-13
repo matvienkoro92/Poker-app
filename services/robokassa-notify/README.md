@@ -46,3 +46,14 @@ Live rejection checks returned 403 for missing Sign, 400 for malformed payload,
 and 405 for GET. No synthetic payment was created. Real payment delivery remains
 to be observed. Tests: `node --test tests/prodamus-notify-relay.test.cjs
  tests/robokassa-notify-relay.test.cjs`.
+
+Follow-up fix (2026-11-13): Vercel Node helpers preparse URL-encoded bodies
+regardless of the Next-style `bodyParser` export. The relay now reconstructs
+scalar form fields, preserving bracket field names and decoded values used by
+upstream canonical HMAC. Repeated/non-scalar fields remain rejected. Raw bodies
+and multipart boundaries remain unchanged when supplied raw. Regression tests
+cover Vercel's object body shape. Published as `dpl_4fT7fPWhtYz5evLLjXmMjUFrz2a9`.
+Provider retries for actual orders 51116030 and 51115888 (2180 RUB each) were
+triggered only on the mini-app callback, not Salebot. Both returned success and
+appear once each in the ledger; the upstream request logs show 200 without a
+Telegram delivery error. No payment was generated or refunded.
