@@ -19,6 +19,15 @@ function fixture(){
 test('signed production six-decimal payment is saved and notified once across POST/GET retries',async()=>{const f=fixture();assert.equal((await f.call({Shp_z:'я',Shp_a:'1'})).body,'OK42');assert.equal((await f.call({},'GET')).body,'OK42');assert.equal(f.state.paymentFormPayments.length,1);assert.equal(f.state.paymentFormPayments[0].amount,123456);assert.equal(f.sent.length,1);assert.ok(f.state.paymentFormPayments[0].notifiedAt);});
 test('invalid signatures, duplicate parameters, tests and fractional kopecks do not enter ledger',async()=>{for(const [values,transform,code]of [[{},s=>s.replace('OutSum=1234.560000','OutSum=999.000000'),403],[{},s=>s+'&InvId=77',400],[{IsTest:'1'},s=>s,400],[{OutSum:'1.000001'},s=>s,400],[{OutSum:'0'},s=>s,400]]){const f=fixture();assert.equal((await f.call(values,'POST',transform)).code,code);assert.equal(f.state.paymentFormPayments,undefined);}});
 test('notification failure retains the payment for retry; changed amount cannot overwrite it',async()=>{const f=fixture();f.offline(true);assert.equal((await f.call()).body,'OK42');assert.equal(f.state.paymentFormPayments[0].notifiedAt,undefined);f.offline(false);await f.payments.deliver(f.state.paymentFormPayments[0]);assert.equal(f.sent.length,1);assert.ok(f.state.paymentFormPayments[0].notifiedAt);assert.equal((await f.call({OutSum:'2.000000'})).code,503);assert.equal(f.state.paymentFormPayments[0].amount,123456);});
+test('email followed by webhook preserves one payment, original receipt time and one notification',async()=>{
+ const f=fixture();
+ await f.payments.savePayment({id:'42',providerId:'robokassa',status:'confirmed',amount:123456,confirmedAt:123,receivedAt:123,source:'email'});
+ assert.equal((await f.call()).body,'OK42');
+ assert.equal(f.state.paymentFormPayments.length,1);
+ assert.equal(f.state.paymentFormPayments[0].confirmedAt,123);
+ await f.payments.deliver(f.state.paymentFormPayments[0]);
+ assert.equal(f.sent.length,1);
+});
 test('same invoice from two providers stays independent; confirmed amount is server owned and cancellation reopens payment',()=>{
  const now=Date.now(),base={revision:0,entries:[],requests:[],paymentFormPayments:[{id:'42',providerId:'robokassa',status:'confirmed',amount:123456,confirmedAt:now},{id:'42',providerId:'prodamus',status:'confirmed',amount:100000,confirmedAt:now}]};
  const body={action:'channel-operation',channelId:'robokassa',direction:'income',room:'X',playerId:'123',amount:1,robokassaPaymentId:'42',requestId:'robokassa_operation_0001'};

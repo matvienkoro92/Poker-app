@@ -47,6 +47,38 @@ Validation: `node --test tests/robokassa.test.cjs tests/admin-deposits.test.js
 `npm run check:handlers`. The fixtures use fake secrets and mock Redis/Telegram.
 Reference: https://docs.robokassa.ru/ru/notifications-and-redirects
 
+## Email fallback (prepared, requires mailbox secrets and deployment)
+
+The existing minute cron can read payment notifications from Yandex IMAP over
+TLS. Configure production `ROBOKASSA_MAIL_USER`, `ROBOKASSA_MAIL_PASSWORD`
+(a Yandex app password, never a normal account password), and
+`ROBOKASSA_MAIL_SINCE` (an explicit ISO timestamp with timezone, e.g.
+`2026-11-13T00:00:00+03:00` to include November 13). Enable IMAP in Yandex Mail.
+Enter secrets directly in Vercel, never in chat or tracked files. Redeploy after
+configuration. Missing configuration leaves email polling disabled.
+
+The mailbox is opened read-only: no messages are marked read, moved, or deleted.
+Only exact `robot@robokassa.ru` / `Notification from ROBOKASSA` messages with a
+valid, full-body Robokassa DKIM signature and signed From/Subject are imported.
+If Robokassa does not sign these emails, they are rejected; inspect a real
+message before considering the fallback active. Unsigned email is not proof of
+payment. At most five candidates are processed per minute; a Redis UID cursor
+scoped to account and UIDVALIDITY advances only after saving. Temporary failures
+retry. Invalid messages are counted as rejected; no message body is logged or
+stored. The first live scan must verify imported/rejected counts and the ledger.
+
+Email and webhook use the same normalized invoice ID and existing ledger CAS,
+so retries and simultaneous delivery cannot create a second payment. Existing
+amounts and timestamps remain immutable. Email imports use the mail server's
+receipt time, which can differ from the actual payment time; shift-boundary
+reconciliation still requires the provider cabinet. A failed mailbox scan
+prevents that run's shift summary, avoiding a knowingly incomplete report.
+Telegram uses the existing approved payment notification scenario and pending
+payment retry path. Importing a payment does not assign it to a player or create
+a channel income operation automatically.
+
+Validation: `node --test tests/robokassa-mail.test.cjs tests/robokassa.test.cjs`.
+
 ## Issuing a balanced payment link
 
 The deposit panel has one `Выдать ссылку` button. The admin selects player credit

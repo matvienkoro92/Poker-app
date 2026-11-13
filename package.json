@@ -8,8 +8,11 @@
     "@capacitor/core": "^8.5.0",
     "@vercel/blob": "^2.3.3",
     "chess.js": "1.4.0",
-    "web-push": "^3.6.7",
-    "sharp": "^0.35.4"
+    "imapflow": "^2.11.0",
+    "mailauth": "^8.0.6",
+    "mailparser": "^3.14.3",
+    "sharp": "^0.35.4",
+    "web-push": "^3.6.7"
   },
   "scripts": {
     "store:prepare": "node scripts/prepare-store-build.js",
