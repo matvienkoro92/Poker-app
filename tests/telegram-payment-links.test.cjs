@@ -17,7 +17,8 @@ test('exact slash and plain commands accept only three nominal amounts and this 
 });
 test('admin reply uses shared routing and shows player credit, provider charge and URL; delivery retries do not change choice',async()=>{
  const f=fixture();await f.handle(f.update(),'test');await f.handle(f.update(),'test');assert.equal(f.sent.length,1);assert.equal(f.state.paymentLinkIssues.length,1);assert.equal(f.sent[0].reply_parameters.message_id,1);assert.match(f.sent[0].text,/Пополнение игроку/);assert.match(f.sent[0].text,/1.?100 ₽/);assert.match(f.sent[0].text,/https:\/\//);
- await f.handle(f.update('/ссылка 1000',2),'test');assert.notEqual(f.state.paymentLinkIssues[0].link.providerId,f.state.paymentLinkIssues[1].link.providerId);assert.equal(f.state.channelOperations,undefined);
+ await f.handle(f.update('/ссылка 1000',2),'test');assert.equal(f.state.paymentLinkIssues[0].link.providerId,'robokassa');assert.equal(f.state.paymentLinkIssues[1].link.providerId,'robokassa');
+ await f.handle(f.update('/ссылка 2000',3),'test');assert.equal(f.state.paymentLinkIssues[2].link.providerId,'prodamus');assert.match(f.sent.at(-1).text,/2.?180 ₽/);assert.equal(f.state.channelOperations,undefined);
 });
 test('wrong group, non-admins, bots, edited and malformed messages stay silent',async()=>{
  const f=fixture();assert.equal(await f.handle(f.update('/ссылка 1000',1,-999),'test'),false);f.admin(false);assert.equal(await f.handle(f.update(),'test'),false);f.admin(true);

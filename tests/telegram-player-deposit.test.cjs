@@ -167,9 +167,54 @@ test('numeric requisites request survives support failure without duplicate repl
  const update=f.message('5000',2);
  await assert.rejects(f.handle(update),/support unavailable/);
  assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты/);
- assert.ok(f.store.has('poker_app:player-deposit:v1:waiting:777'));
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
+ assert.ok(f.store.has('poker_app:player-deposit:v1:done:777:message_2:support'));
  await f.handle(update);
  assert.equal(f.sent.length,2);
  assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
  assert.equal(f.mirrored.length,2);
+});
+
+test('every next deposit operation replies while the previous command is still synchronizing support',async()=>{
+ for(const text of ['деп 1000','деп 1500','деп 2000','деп 5000','2000','5000','2500','500','/отмена','деп']){
+  let release,started,first=true;
+  const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{started=resolve;});
+  const f=fixture({beforeSupport:async()=>{if(first){first=false;started();await gate;}}});
+  const previous=f.handle(f.message('деп'));await entered;
+  try {
+   await f.handle(f.message(text,2));
+   assert.equal(f.sent.length,2,'next reply independent of previous support: '+text);
+   assert.equal(f.store.has('poker_app:player-deposit:v1:lock:777'),false);
+  } finally {release();await previous;}
+ }
+});
+test('button choices also reply while earlier support synchronization is blocked',async()=>{
+ let release,started,first=true;
+ const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{started=resolve;});
+ const f=fixture({beforeSupport:async()=>{if(first){first=false;started();await gate;}}});
+ const previous=f.handle(f.message('деп 2500'));await entered;
+ try {await f.handle(choose(f,200000));assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues[0].link.amount,200000);}
+ finally {release();await previous;}
+});
+test('retrying old support work preserves a newer amount prompt and contains no bot token',async()=>{
+ let fail=true;
+ const f=fixture({beforeSupport:async()=>{if(fail){fail=false;throw Error('support unavailable');}}});
+ const old=f.message('деп');await assert.rejects(f.handle(old));
+ const journal=f.store.get('poker_app:player-deposit:v1:done:777:message_1:support');
+ assert.ok(journal);assert.equal(journal.includes('fixture-token'),false);
+ await f.handle(f.message('деп',2));
+ const waiting=f.store.get('poker_app:player-deposit:v1:waiting:777');
+ await f.handle(old);assert.equal(f.store.get('poker_app:player-deposit:v1:waiting:777'),waiting);
+ assert.equal(f.sent.length,2);
+});
+test('retries serialize the same event and resume only unfinished manager steps',async()=>{
+ let release,started,first=true;
+ const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{started=resolve;});
+ const f=fixture({beforeSupport:async()=>{if(first){first=false;started();await gate;}}});
+ const update=f.message('деп 2000'),pending=f.handle(update);await entered;
+ try {await assert.rejects(f.handle(update),/event busy/);assert.equal(f.sent.length,1);}
+ finally {release();await pending;}
+ const g=fixture();g.failNextMirror();const second=g.message('деп 2000');
+ await assert.rejects(g.handle(second));assert.equal(g.cleared.length,1);assert.equal(g.mirrored.length,1);
+ await g.handle(second);assert.equal(g.cleared.length,1);assert.equal(g.mirrored.length,1);assert.equal(g.sent.length,1);
 });

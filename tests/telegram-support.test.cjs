@@ -28,7 +28,7 @@ function fixture(){
  const groupMessage=(text='Ответ',message_id=5,id=MANAGER,tid=101)=>({message:{message_id,text,message_thread_id:tid,chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id}}});
  const callback=(data='support:take',id=MANAGER,cbid='callback-1',tid=101)=>({callback_query:{id:cbid,data,from:{id},message:{message_id:500,message_thread_id:tid,chat:{id:GROUP,type:'supergroup'},from:{id:1,is_bot:true}}}});
  const setup=()=>handle({message:{message_id:1,text:'/support_setup',chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id:OWNER}}});
- return {handle,setup,store,calls,pm,groupMessage,callback,policy,get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:chatId=>support.clearAwaitingAmountNotice('fixture-token',chatId),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500,description='',once=false){failMethod=method;failCode=code;failDescription=description;failOnce=once;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
+ return {handle,setup,store,calls,pm,groupMessage,callback,policy,get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:(chatId,options)=>support.clearAwaitingAmountNotice('fixture-token',chatId,options),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500,description='',once=false){failMethod=method;failCode=code;failDescription=description;failOnce=once;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
 }
 test('disabled by default; only explicit owner setup in a forum binds the group',async()=>{
  const f=fixture();assert.equal((await f.handle(f.pm())).handled,false);assert.equal(f.calls.length,0);
@@ -280,4 +280,19 @@ test('reopen policy blocks other groups and stale or unknown topics',async()=>{
  for(const body of [{chat_id:'-100999',message_thread_id:101},{chat_id:GROUP,message_thread_id:999}]){
   const r=await f.policy.guardedFetch('https://api.telegram.org/botfixture/reopenForumTopic',{method:'POST',body:JSON.stringify(body)},'support-dialog');assert.equal(r.ok,false);
  }
+});
+
+
+test('late deposit support tasks cannot recreate an old waiting notice or clear a newer one',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const user={id:LEAD,first_name:'Лид'},key='active-deposit-prompt';
+ f.store.set(key,JSON.stringify({promptMessageId:43}));
+ await f.mirrorBotMessage(LEAD,42,user,{awaitingAmount:true,activePromptKey:key});
+ assert.equal(f.client.awaitingAmountNotice,undefined);
+ await f.mirrorBotMessage(LEAD,43,user,{awaitingAmount:true,activePromptKey:key});
+ assert.equal(f.client.awaitingAmountNotice.sourceMessageId,43);
+ await f.clearAwaitingAmountNotice(LEAD,{throughMessageId:42});
+ assert.ok(f.client.awaitingAmountNotice);
+ await f.clearAwaitingAmountNotice(LEAD,{throughMessageId:43});
+ assert.equal(f.client.awaitingAmountNotice,undefined);
 });

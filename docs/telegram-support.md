@@ -226,13 +226,20 @@ Owner header format: two bold lines, «Имя @telegram» then
 
 For every private deposit reply (amount question, ready link, requisites wait,
 minimum amount, neighboring choices, and cancellation), the bot sends and
-persists the player's reply before manager work.
-For payment links, this includes clearing the manager amount note,
-relaying the request, or updating the support topic. Support work is still
-awaited within the webhook, so a transient failure returns a retryable error.
-The saved reply and existing issuance ID prevent that retry from resending the
-link or issuing it twice. This is response ordering, not a detached background
-task; shared Redis and Telegram delivery are still required before replying.
+persists the player's reply before manager work. The per-user lock covers only
+reply issuance and prompt state. A separate per-event lock protects retries
+while manager synchronization runs; a slow previous support request therefore
+cannot block the player's next deposit command.
+
+Pending support steps are saved in Redis for seven days without the bot token.
+The webhook still awaits support and returns a retryable error on failure.
+Retries resume unfinished steps without resending links, reissuing them, or
+changing a newer prompt. Old amount notices cannot replace or delete newer
+ones. Tracking updates run after deposit handling instead of before the reply.
+This is synchronous work with durable retry state; Redis, payment ledger
+issuance and Telegram delivery still affect time to the first reply.
+`[player-deposit-reply]` logs report reply latency and Telegram request time
+without message content, user IDs or tokens.
 
 ## Closed topics
 
