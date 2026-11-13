@@ -224,8 +224,9 @@ Owner header format: two bold lines, «Имя @telegram» then
 
 ## Deposit reply ordering
 
-For the private deposit amount question and ready links (1,000 / 1,500 / 2,000
-RUB credit), the bot sends and persists the player's reply before manager work.
+For every private deposit reply (amount question, ready link, requisites wait,
+minimum amount, neighboring choices, and cancellation), the bot sends and
+persists the player's reply before manager work.
 For payment links, this includes clearing the manager amount note,
 relaying the request, or updating the support topic. Support work is still
 awaited within the webhook, so a transient failure returns a retryable error.

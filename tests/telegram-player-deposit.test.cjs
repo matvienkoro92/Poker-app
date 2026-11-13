@@ -148,3 +148,28 @@ test('bare question retries support failure without sending the question twice',
  await f.handle(f.message('1000',2));
  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
 });
+
+test('all other deposit replies precede slow manager work',async()=>{
+ for(const text of ['5000','2500','500','/отмена']){
+  let blocked=false,release,started;
+  const gate=new Promise(resolve=>{release=resolve;}),entered=new Promise(resolve=>{started=resolve;});
+  const f=fixture({beforeSupport:async()=>{if(blocked){started();await gate;}}});
+  await f.handle(f.message('деп'));blocked=true;
+  const handling=f.handle(f.message(text,2));await entered;
+  try {assert.equal(f.sent.length,2,'player reply sent before support for '+text);}
+  finally {release();await handling;}
+ }
+});
+test('numeric requisites request survives support failure without duplicate reply',async()=>{
+ let fail=false;
+ const f=fixture({beforeSupport:async()=>{if(fail){fail=false;throw Error('support unavailable');}}});
+ await f.handle(f.message('деп'));fail=true;
+ const update=f.message('5000',2);
+ await assert.rejects(f.handle(update),/support unavailable/);
+ assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты/);
+ assert.ok(f.store.has('poker_app:player-deposit:v1:waiting:777'));
+ await f.handle(update);
+ assert.equal(f.sent.length,2);
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
+ assert.equal(f.mirrored.length,2);
+});
