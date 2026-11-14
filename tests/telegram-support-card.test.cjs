@@ -33,3 +33,10 @@ test('unlinked and unavailable data are not displayed as zero',async()=>{
 test('raffle totals exclude failed winners, cancelled raffles and other players',()=>{
  const f=fixture();assert.equal(f.api.raffleTotal([{status:'cancelled',winners:[{userId:'tg_777',prize:'999 ₽'}]},{winners:[{userId:'tg_777',prize:'100 ₽',winnerStatus:'fail'},{userId:'tg_888',prize:'500 ₽'},{userId:'tg_777',prize:'200 ₽'}]}],['tg_777']),200);
 });
+
+test('card bolds identity and rake with UTF-16 offsets while leaving period amounts plain',async()=>{
+ const f=fixture(),text=await f.api.text({id:777,first_name:'Денис'}),entities=f.api.entities(text);
+ assert.equal(entities.length,2);assert.equal(text.slice(entities[0].offset,entities[0].offset+entities[0].length),'👤 Диалог с Денис\n🎮 Poker21: 123');
+ assert.equal(text.slice(entities[1].offset,entities[1].offset+entities[1].length),'💰 Рейк: 550 ₽');
+ for(const line of text.split('\n').filter(Boolean))assert.match(line,/^(👤|🎮|💰|📅|🗓|📆|💳|🏆|🎰|🎲|📝)/u);
+});

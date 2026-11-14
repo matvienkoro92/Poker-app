@@ -42,7 +42,7 @@ test('lead gets one topic, messages/media copy to that topic and duplicate updat
  const media=f.pm('',3);delete media.message.text;media.message.photo=[{file_id:'fixture'}];await f.handle(media);
  assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,1);
  const copied=f.calls.filter(c=>c.method==='copyMessage');assert.equal(copied.length,1);
- assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('Лид @lead\nЛид P21:123456 X:не найден\n\n')).length,2);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 Лид P21:123456\n✉️ @lead\n\n')).length,2);
  for(const c of copied){assert.equal(c.body.chat_id,GROUP);assert.equal(c.body.message_thread_id,101);assert.equal(c.body.from_chat_id,LEAD);}
  await f.handle(f.pm('Другой лид',4,888888));assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,2);
 });
@@ -110,7 +110,7 @@ test('fixed topic title never changes on answers; pinned queue tracks unanswered
 });
 test('failed deliveries stay queued; board update retry never resends the actual answer',async()=>{
  const f=fixture();await f.setup();f.fail('editForumTopic');await assert.rejects(f.handle(f.pm()));
- f.fail('');await f.handle(f.pm());assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('Лид @lead\n')).length,1);
+ f.fail('');await f.handle(f.pm());assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 ')).length,1);
  f.fail('sendMessage',403);await assert.rejects(f.handle(f.groupMessage('Ответ',30)));assert.match(f.board.text,/Ждут ответа: 1/);
  f.fail('');await f.handle(f.groupMessage('Ответ',30));assert.match(f.board.text,/Ждут ответа: 0/);
  await f.handle(f.pm('Ещё вопрос',3));f.fail('editMessageText');await assert.rejects(f.handle(f.groupMessage('Ещё ответ',31)));
@@ -193,9 +193,9 @@ test('waiting for amount is a short manager note and is deleted when the amount 
 
 test('incoming player login is bold and formatting survives, with ID fallback without username',async()=>{
  const f=fixture();await f.setup();const first=f.pm('Hello',50);first.message.entities=[{type:'italic',offset:0,length:5}];await f.handle(first);
- const sent=f.calls.find(c=>c.method==='sendMessage'&&c.body.text==='Лид @lead\nЛид P21:123456 X:не найден\n\nHello');assert.ok(sent);assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[1].offset,'Лид @lead\nЛид P21:123456 X:не найден\n\n'.length);
+ const sent=f.calls.find(c=>c.method==='sendMessage'&&c.body.text==='👤 Лид\n🎮 Лид P21:123456\n✉️ @lead\n\nHello');assert.ok(sent);assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[0].length,'👤 Лид\n🎮 Лид P21:123456'.length);assert.equal(sent.body.entities[1].offset,'👤 Лид\n🎮 Лид P21:123456\n✉️ @lead\n\n'.length);
  const second=f.pm('Next',51);delete second.message.from.username;await f.handle(second);
- assert.ok(f.calls.some(c=>c.method==='sendMessage'&&c.body.text.includes('P21:123456 X:не найден\n\nNext')));
+ assert.ok(f.calls.some(c=>c.method==='sendMessage'&&c.body.text.includes('P21:123456\n\nNext')));
 });
 
 test('queue paginates all waiting leads and only admins can switch its pages',async()=>{
@@ -228,7 +228,7 @@ test('queue text remains within Telegram limits and escapes player names',()=>{
 
 test('manager emoji reactions reach only mapped player messages and preserve queue',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
- const copied=f.calls.find(c=>c.method==='sendMessage'&&c.body.text.startsWith('Лид @lead'));
+ const copied=f.calls.find(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 '));
  const messageId=1000+f.calls.indexOf(copied)+1;
  const reaction=(id,user,values)=>({update_id:id,message_reaction:{chat:{id:GROUP,type:'supergroup'},message_id:messageId,user:{id:user},old_reaction:[],new_reaction:values}});
  const emoji=[{type:'emoji',emoji:'👍'}];
@@ -325,7 +325,7 @@ test('card has no return button and refreshes only after twelve hours of activit
  const f=fixture();await f.setup();await f.handle(f.pm());
  const headerId=f.client.headerMessageId;
  const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(header.body.reply_markup.inline_keyboard.length,0);
+ assert.equal(header.body.reply_markup.inline_keyboard.length,1);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
  const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
  f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-11*60*60*1000}));
  await f.handle(f.pm('До срока',60));
@@ -333,7 +333,14 @@ test('card has no return button and refreshes only after twelve hours of activit
  f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-12*60*60*1000-1000}));
  await f.handle(f.pm('После срока',61));
  const updates=f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId);
- assert.equal(updates.length,1);assert.equal(updates[0].body.reply_markup.inline_keyboard.length,0);
+ assert.equal(updates.length,1);assert.equal(updates[0].body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
  await f.handle(f.pm('Следующее',62));
  assert.equal(f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId).length,1);
+});
+
+test('profile privacy restriction does not prevent creation of the player card',async()=>{
+ const f=fixture();await f.setup();f.fail('sendMessage',400,'Bad Request: BUTTON_USER_PRIVACY_RESTRICTED',true);
+ await f.handle(f.pm());assert.equal(f.client.headerSent,true);
+ const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
+ assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,1);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,0);
 });

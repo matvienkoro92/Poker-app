@@ -12,3 +12,12 @@ test('repeat CRM access checks keep allowed buttons visible; session changes hid
  assert.deepEqual(changes,[false,false]);assert.equal(requests,1);
  context.syncCrmButtonAccess();assert.equal(requests,1);
 });
+test('known owner menu appears while verification is pending; denial and logout hide it',()=>{
+ const changes=[];let credential='session-a';
+ const context={document:{getElementById:id=>({id})},crmAccessProbeState:'idle',crmAccessProbeKey:'',buildCrmAccessProbeUrl:()=>credential,userCanOpenCrm:()=>true,setCrmButtonAllowed:(_,allowed)=>changes.push(allowed),syncHeaderAdminShortcuts(){},fetch:()=>new Promise(()=>{})};
+ vm.createContext(context);vm.runInContext(code,context);
+ context.syncCrmButtonAccess();assert.ok(changes.every(Boolean));assert.equal(context.crmAccessProbeState,'pending');
+ changes.length=0;context.syncCrmButtonAccess();assert.ok(changes.every(Boolean));
+ changes.length=0;context.crmAccessProbeState='denied';context.syncCrmButtonAccess();assert.ok(changes.every(v=>!v));
+ changes.length=0;credential='';context.crmAccessProbeState='idle';context.syncCrmButtonAccess();assert.ok(changes.every(v=>!v));
+});

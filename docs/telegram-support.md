@@ -280,3 +280,8 @@ Owner-requested bulk updates use `scripts/refresh-telegram-support-cards.cjs`:
 first run without `--apply` to verify bot/group/inventory, then with `--apply`.
 This edits existing cards in place, including closed topics, without reopening
 those topics. Routine activity keeps the twelve-hour refresh limit.
+
+Player message signatures use an emoji-prefixed name and game-identity line in
+bold, followed by a plain @username when present. Missing XPoker IDs and numeric
+Telegram-ID lines are omitted. The saved topic header has an «✉️ Открыть профиль»
+URL button targeting `tg://user?id=<lead id>` instead of a return-to-bot button.

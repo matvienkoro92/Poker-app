@@ -189,7 +189,7 @@
     adminBonusesState.tournamentOptions = currentScheduleTournamentOptions();
     select.innerHTML = '<option value="">Выберите турнир</option>' + adminBonusesState.tournamentOptions.map(function (item) {
       return '<option value="' + esc(item.id) + '">' + esc(item.label) + '</option>';
-    }).join("");
+    }).join("") + '<option value="custom">Произвольно</option>';
     select.value = "";
   }
 
@@ -203,7 +203,11 @@
       return item.id === tournamentId;
     }) || null;
     var buyin = tournament ? tournamentBuyinAmount(tournament.buyin) : 0;
-    if (amount) amount.value = tournament ? String(buyin) : "";
+    if (amount) {
+      amount.readOnly = tournamentId !== "custom";
+      amount.value = tournament ? String(buyin) : "";
+      if (tournamentId === "custom") amount.focus();
+    }
     if (message) {
       message.textContent = tournament && buyin <= 0
         ? "Для бесплатного турнира списание не требуется."
@@ -668,12 +672,14 @@
     var message = $("adminBonusesOperationMessage");
     var amount = Math.floor(Number(amountEl && amountEl.value));
     if (!userId || (operation !== "credit" && operation !== "debit")) return;
-    if (operation !== "debit" && (!Number.isFinite(amount) || amount <= 0)) {
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
       if (message) message.textContent = "Сумма должна быть больше 0.";
       return;
     }
     var tournament = adminBonusesState.tournamentOptions.find(function (item) { return item.id === String(tournamentEl && tournamentEl.value || ""); }) || null;
-    if (operation === "debit") {
+    if (operation === "debit" && String(tournamentEl && tournamentEl.value || "") === "custom") {
+      tournament = {id:"custom", title:"Произвольно", time:"", buyin:""};
+    } else if (operation === "debit") {
       var tournamentId = String(tournamentEl && tournamentEl.value || "");
       tournament = adminBonusesState.tournamentOptions.find(function (item) { return item.id === tournamentId; }) || null;
       if (!tournament) {

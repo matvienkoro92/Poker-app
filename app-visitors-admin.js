@@ -144,7 +144,8 @@
     var menuBtn = document.getElementById("headerCrmBtn");
     if (!btn && !menuBtn) return;
     var url = buildCrmAccessProbeUrl();
-    var allowedForSession = !!url && crmAccessProbeState === "allowed" && crmAccessProbeKey === url;
+    var previewOwner = !!url && crmAccessProbeState !== "denied" && typeof userCanOpenCrm === "function" && userCanOpenCrm();
+    var allowedForSession = !!url && ((crmAccessProbeState === "allowed" && crmAccessProbeKey === url) || previewOwner);
     setCrmButtonAllowed(menuBtn, allowedForSession);
     setCrmButtonAllowed(btn, allowedForSession);
     syncHeaderAdminShortcuts();
@@ -195,7 +196,7 @@
       if (guestHeader) guestHeader.classList.remove("card__header--admin-shortcuts", "card__header--owner-crm");
       return;
     }
-    var ownerSeesCrm = crmAccessProbeState === "allowed";
+    var ownerSeesCrm = crmAccessProbeState === "allowed" || (crmAccessProbeState !== "denied" && userCanOpenCrm());
     var crmBtn = document.getElementById("headerCrmBtn");
     var reportBtn = document.getElementById("adminReportBtn");
     var balanceBtn = document.getElementById("adminBonusBalancesHeaderBtn");
@@ -265,13 +266,21 @@
     var hasCredential = typeof pokerApiHasCredential === "function" && pokerApiHasCredential();
     var sameAdminSession = hasCredential && visitorsAdminCheckKey === accessBase + accessQuery && visitorsAdminCheckLastResult;
     var sameReportSession = hasCredential && reportAccessProbeState === "allowed" && reportAccessProbeKey === accessBase + "/api/admin-report-shifts" + accessQuery + "&access=1";
-    if (reportBtn && !sameReportSession) {
+    var knownUsers = collectAdminIdentityCandidates();
+    var previewReports = hasCredential && reportAccessProbeState !== "denied" && knownUsers.some(isKnownReportUser);
+    var previewBonuses = hasCredential && !(visitorsAdminCheckKey === accessBase + accessQuery && !visitorsAdminCheckPromise && !visitorsAdminCheckLastResult) && knownUsers.some(isKnownBonusAdminUser);
+    if (reportBtn && previewReports) {
+      reportBtn.hidden = false;reportBtn.disabled = false;
+      reportBtn.classList.remove("header-admin-report--hidden");reportBtn.removeAttribute("aria-hidden");
+    }
+    if (bonusAdminBtn && previewBonuses) {bonusAdminBtn.hidden=false;bonusAdminBtn.removeAttribute("aria-hidden");}
+    if (reportBtn && !sameReportSession && !previewReports) {
       reportBtn.hidden = true;
       reportBtn.classList.add("header-admin-report--hidden");
       reportBtn.setAttribute("aria-hidden", "true");
       reportBtn.disabled = true;
     }
-    if (bonusAdminBtn && !sameAdminSession) {
+    if (bonusAdminBtn && !sameAdminSession && !previewBonuses) {
       bonusAdminBtn.hidden = true;
       bonusAdminBtn.setAttribute("aria-hidden", "true");
     }
@@ -378,10 +387,12 @@
           reportAccessProbeState = allowed ? "allowed" : "denied";
           window.__pokerAdminReportAccessVerified = allowed;
           if (allowed) showReportUi();
+          else {reportBtn.hidden=true;reportBtn.disabled=true;syncHeaderAdminShortcuts();}
         })
         .catch(function () {
           reportAccessProbeState = "denied";
           window.__pokerAdminReportAccessVerified = false;
+          reportBtn.hidden=true;reportBtn.disabled=true;syncHeaderAdminShortcuts();
         });
     }
     verifyReportUiAccess();
@@ -444,9 +455,11 @@
         if (currentQuery !== q) return;
         visitorsAdminCheckLastResult = !!(data && data.ok && data.isAdmin);
         if (visitorsAdminCheckLastResult) showAdminUi();
+        else {if(bonusAdminBtn)bonusAdminBtn.hidden=true;syncHeaderAdminShortcuts();}
       })
       .catch(function () {
         visitorsAdminCheckLastResult = false;
+        if(bonusAdminBtn)bonusAdminBtn.hidden=true;syncHeaderAdminShortcuts();
       })
       .finally(function () {
         visitorsAdminCheckPromise = null;
