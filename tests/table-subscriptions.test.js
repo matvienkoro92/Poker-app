@@ -307,3 +307,8 @@ test('linked bot and app lists expose the same subscriptions and delete across b
  await f.service.deleteLinked('app:account',legacy.id);assert.equal((await f.service.linkedList('42')).length,0);
  await f.callback('delete:'+native.id);assert.match(f.calls.at(-1).body.text,/пока нет/);
 });
+test('numeric player ID outside the nickname directory still reaches selection and subscription',async()=>{
+ const f=fixture();await f.callback('player');await f.message('602317');
+ const reply=f.calls.at(-1).body;assert.match(reply.text,/Выберите игрока/);assert.equal(reply.reply_markup.inline_keyboard[0][0].callback_data,'club:sub:player:602317');
+ await f.callback('player:602317');const subscriptions=await f.service.list('42');assert.equal(subscriptions.length,1);assert.equal(subscriptions[0].playerId,'602317');
+});

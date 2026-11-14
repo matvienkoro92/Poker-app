@@ -42,7 +42,7 @@ test('lead gets one topic, messages/media copy to that topic and duplicate updat
  const media=f.pm('',3);delete media.message.text;media.message.photo=[{file_id:'fixture'}];await f.handle(media);
  assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,1);
  const copied=f.calls.filter(c=>c.method==='copyMessage');assert.equal(copied.length,1);
- assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 Лид P21:123456\n✉️ @lead\n\n')).length,2);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\n')).length,2);
  for(const c of copied){assert.equal(c.body.chat_id,GROUP);assert.equal(c.body.message_thread_id,101);assert.equal(c.body.from_chat_id,LEAD);}
  await f.handle(f.pm('Другой лид',4,888888));assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,2);
 });
@@ -193,7 +193,7 @@ test('waiting for amount is a short manager note and is deleted when the amount 
 
 test('incoming player login is bold and formatting survives, with ID fallback without username',async()=>{
  const f=fixture();await f.setup();const first=f.pm('Hello',50);first.message.entities=[{type:'italic',offset:0,length:5}];await f.handle(first);
- const sent=f.calls.find(c=>c.method==='sendMessage'&&c.body.text==='👤 Лид\n🎮 Лид P21:123456\n✉️ @lead\n\nHello');assert.ok(sent);assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[0].length,'👤 Лид\n🎮 Лид P21:123456'.length);assert.equal(sent.body.entities[1].offset,'👤 Лид\n🎮 Лид P21:123456\n✉️ @lead\n\n'.length);
+ const sent=f.calls.find(c=>c.method==='sendMessage'&&c.body.text==='👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\nHello');assert.ok(sent);assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[0].length,'👤 Лид\n🎮 Лид P21:123456'.length);assert.equal(sent.body.entities[1].offset,'👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\n'.length);
  const second=f.pm('Next',51);delete second.message.from.username;await f.handle(second);
  assert.ok(f.calls.some(c=>c.method==='sendMessage'&&c.body.text.includes('P21:123456\n\nNext')));
 });
@@ -366,4 +366,14 @@ test('statistics words are never mirrored into manager dialogs',async()=>{
  const f=fixture();await f.setup();const before=f.calls.length;
  for(const word of ['Статистика','статистика','СТАТИСТИКА','stats','stat','/stat','/stats','/статистика','/крутка','/spin','/бонус-баланс','/bonus_balance','/чат','/chat'])assert.equal((await f.handle(f.pm(word))).handled,false);
  assert.equal(f.calls.length,before);assert.equal(f.client,null);
+});
+
+test('ticket template command sends formatted text to mapped lead and echoes once in the topic',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const before=f.calls.length;
+ const update=f.groupMessage('/ticket',90);await f.handle(update);await f.handle(update);
+ const sent=f.calls.slice(before).filter(c=>c.method==='sendMessage'&&c.body.text.includes('Минимально списать можно 300 рублей'));
+ assert.equal(sent.length,2);const privateReply=sent.find(c=>String(c.body.chat_id)===String(LEAD));assert.ok(privateReply);
+ assert.ok(!privateReply.body.text.includes('/ticket'));const bold=privateReply.body.entities.find(e=>privateReply.body.text.slice(e.offset,e.offset+e.length)==='ОДНОМ СООБЩЕНИИ:');assert.ok(bold);
+ assert.equal(sent.filter(c=>String(c.body.chat_id)===GROUP&&c.body.message_thread_id===101).length,1);
+ const outsider=f.groupMessage('/ticket',91,999);await f.handle(outsider);assert.equal(f.calls.slice(before).filter(c=>c.method==='sendMessage'&&c.body.text.includes('Минимально списать можно 300 рублей')).length,2);
 });
