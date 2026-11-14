@@ -139,8 +139,12 @@
    const id=slot.dataset.levelHonorsId,nick=nickKey(slot.dataset.levelHonorsNick);
    const months=[...new Set(d.issues.filter(i=>i.final&&i.winners.some(w=>id&&w.accountId?w.accountId===id:!!nick&&nickKey(w.nick)===nick)).map(i=>i.month))].sort((a,b)=>Number(a.slice(3))-Number(b.slice(3))||Number(a.slice(0,2))-Number(b.slice(0,2)));
    slot.replaceChildren();slot.hidden=!months.length;if(!months.length)return;
-   const heading=document.createElement('strong');heading.textContent='♛ Игрок месяца';slot.append(heading);
-   const years=[...new Set(months.map(m=>m.slice(3)))];for(const year of years){const line=document.createElement('span');line.textContent=months.filter(m=>m.endsWith('.'+year)).map(m=>MONTHS[Number(m.slice(0,2))-1]).join(', ')+' · '+year;slot.append(line);}
+   for(const month of months){
+    const issue=d.issues.find(i=>i.final&&i.month===month&&i.winners.some(w=>id&&w.accountId?w.accountId===id:!!nick&&nickKey(w.nick)===nick));
+    const winner=issue.winners.find(w=>id&&w.accountId?w.accountId===id:!!nick&&nickKey(w.nick)===nick);
+    const ring=document.createElement('span');ring.className='hall-level-honors__ring';ring.title='Перстень «Игрок месяца» · '+label(month);ring.setAttribute('aria-label',ring.title);
+    const image=document.createElement('img');image.src=ringArt(winner,month);image.alt='';image.loading='lazy';ring.append(image);slot.append(ring);
+   }
   })).catch(()=>{});
  };
  window.pokerHydrateHomeHonorRings=function(root){
