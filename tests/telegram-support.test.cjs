@@ -21,7 +21,7 @@ function fixture(){
   if(method===failMethod){const code=failCode,description=failDescription;if(failOnce)failMethod='';return {ok:false,status:code,json:async()=>({ok:false,error_code:code,description})};}
   return {ok:true,json:async()=>({ok:true,result:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
  };
- function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
+ function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-support-timers'?{create:()=>({leadCallback:async()=>false,callback:async()=>false,offer:async()=>{},observe:async()=>{}})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
  policy=load('lib/telegram-group-policy.js');queue=load('lib/telegram-support-queue.js');reactions=load('lib/telegram-support-reactions.js');const support=load('lib/telegram-support.js');
  const handle=update=>support.handle(update,'fixture-token');
  const pm=(text='Привет',message_id=1,id=LEAD)=>({message:{message_id,text,chat:{id,type:'private'},from:{id,first_name:'Лид',username:'lead'}}});
@@ -401,4 +401,19 @@ test('waiting icon is published before relaying a new message, including after a
  const red=calls.findIndex(c=>c.method==='editForumTopic'&&c.body.icon_custom_emoji_id==='5379748062124056162');
  const message=calls.findIndex(c=>c.method==='sendMessage'&&c.body.text.endsWith('Новый вопрос'));
  assert.ok(red>=0&&message>red);assert.equal(f.client.lastAnsweredInboundId,1);assert.equal(f.client.lastInboundMessageId,2);
+});
+
+test('timer policy edits only mapped controls and deletes only the exact authorised lead message',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const p='poker_app:telegram:support:v1:',id='a'.repeat(24),record={id,group:GROUP,lead:String(LEAD),privateMessageId:88,controlMessageId:500,leadControlMessageId:99,state:'active'};
+ f.store.set(p+'timer:'+id,JSON.stringify(record));f.store.set(p+'timer-control:'+GROUP+':500',id);f.store.set(p+'timer-private:'+GROUP+':'+LEAD+':99',id);
+ const call=(method,body)=>f.policy.guardedFetch('https://api.telegram.org/botfixture/'+method,{body:JSON.stringify(body)},'support-dialog');
+ assert.equal((await call('editMessageText',{chat_id:GROUP,message_id:500,text:'Таймер'})).ok,true);
+ assert.equal((await call('editMessageText',{chat_id:LEAD,message_id:99,text:'Таймер'})).ok,true);
+ assert.equal((await call('editMessageText',{chat_id:LEAD,message_id:98,text:'Таймер'})).status,403);
+ assert.equal((await call('deleteMessage',{chat_id:LEAD,message_id:88})).status,403);
+ f.store.set(p+'timer-delete:'+GROUP+':'+LEAD+':88',id);
+ assert.equal((await call('deleteMessage',{chat_id:LEAD,message_id:88})).status,403);
+ record.state='deleting';f.store.set(p+'timer:'+id,JSON.stringify(record));assert.equal((await call('deleteMessage',{chat_id:LEAD,message_id:88})).ok,true);
+ assert.equal((await call('deleteMessage',{chat_id:LEAD,message_id:89})).status,403);
+ assert.equal((await call('deleteMessage',{chat_id:888,message_id:88})).status,403);
 });

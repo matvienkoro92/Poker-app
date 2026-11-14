@@ -6,7 +6,7 @@ test('pending subscription input is handled before manager mirroring and trackin
   '../cash-operation-guard':{handle:async()=>false},
   '../telegram-player-deposit':{handle:async()=>{calls.push('deposit');return false;}},
   '../club-table-subscriptions':{handle:async update=>{calls.push('subscription:'+update.message.text);return true;}},
-  '../telegram-support':{handle:async()=>{calls.push('support');return {handled:true};}},
+  '../telegram-support':{observeTimerActivity:async()=>{},handle:async()=>{calls.push('support');return {handled:true};}},
   '../tracking-link-milestones':{observeUpdate:async()=>calls.push('tracking')},
   '../telegram-club-commands':{command:()=>null}
  };
@@ -20,7 +20,7 @@ test('an active subscription prompt cannot swallow plain statistics commands',as
  const mocks={
   '../cash-operation-guard':{handle:async()=>false},'../telegram-player-deposit':{handle:async()=>false},
   '../club-table-subscriptions':{handle:async()=>{throw Error('Must not consume a recognized command');}},
-  '../telegram-support':{handle:async()=>{throw Error('Must not mirror a recognized command');}},
+  '../telegram-support':{observeTimerActivity:async()=>{},handle:async()=>{throw Error('Must not mirror a recognized command');}},
   '../tracking-link-milestones':{observeUpdate:async()=>{}},
   '../redis':{isConfigured:()=>false},
   '../telegram-club-commands':{command:()=> 'player-statistics',handle:async(update,token,action)=>{calls.push(action);return true;}}

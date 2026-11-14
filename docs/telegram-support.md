@@ -382,3 +382,24 @@ sync. Every source's per-player fee totals must reconcile against the complete
 processed week, including players absent from the supplied source; partial or
 mismatched source workbooks are rejected. Current verified hand coverage is five
 of fourteen report weeks over 03.08.2026–08.11.2026.
+
+### Manual payment-wait timer
+
+After a manager sends a reply in a support topic, the bot posts an internal
+«⏱ Ждём оплату · 10 минут» control bound to that specific delivered message.
+Nothing is scheduled until an authorised manager presses it. Only one timer
+can be active per lead; a new one cancels the previous timer.
+
+Starting the timer sends the lead a deadline and exactly two buttons:
+«✅ Оплатил» and «❌ Отказаться». The former records a **lead declaration**,
+not a verified payment or ledger income. It stops deletion and asks the manager
+to verify the payment. Refusal removes only the selected requisites message.
+New private messages, including commands, cancel the timer and preserve the
+requisites. With no continuation or choice, QStash invokes
+`POST /api/cron-support-timer` after ten minutes; the worker rechecks the current
+conversation under the same lead lock before deleting that exact message.
+
+The worker requires `X-Cron-Secret`. Scheduler failure leaves deletion disabled.
+Control messages, callback owners and private deletion permits are restricted to
+stored timer records by `lib/telegram-group-policy.js`. Timer activity never
+records a deposit or creates a campaign.
