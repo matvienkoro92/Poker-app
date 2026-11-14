@@ -191,6 +191,14 @@ test('payment waiting persists through conversation and ends on manager confirma
  await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:42});assert.ok(f.client.awaitingPayment);
  await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:44});assert.equal(f.client.awaitingPayment,undefined);assert.equal(f.client.appliedIconId,'5237699328843200968');
 });
+test('unavailable topic stickers never block payment information',async()=>{
+ const f=fixture();await f.setup();f.fail('getForumTopicIconStickers',400,'No icons');
+ await f.mirrorBotMessage(LEAD,42,{id:LEAD,first_name:'Lead'},{paymentLink:{providerId:'robokassa',amount:100000,chargeAmount:110000}});
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Ожидаем перевод')).length,1);
+ assert.ok(f.client.awaitingPayment);assert.match(f.client.appliedTitle,/🟡$/);
+ const notice=f.calls.findIndex(c=>c.method==='sendMessage'&&c.body.text.includes('Ожидаем перевод'));
+ assert.ok(notice<f.calls.findIndex(c=>c.method==='getForumTopicIconStickers'));
+});
 test('waiting for amount is a short manager note and is deleted when the amount arrives',async()=>{
  const f=fixture();await f.setup();const user={id:LEAD,first_name:'Лид'};
  await f.mirrorBotMessage(LEAD,42,user,{awaitingAmount:true});
