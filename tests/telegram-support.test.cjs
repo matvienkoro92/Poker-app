@@ -42,7 +42,7 @@ test('lead gets one topic, messages/media copy to that topic and duplicate updat
  const media=f.pm('',3);delete media.message.text;media.message.photo=[{file_id:'fixture'}];await f.handle(media);
  assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,1);
  const copied=f.calls.filter(c=>c.method==='copyMessage');assert.equal(copied.length,1);
- assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\n')).length,2);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\n')).length,1);
  for(const c of copied){assert.equal(c.body.chat_id,GROUP);assert.equal(c.body.message_thread_id,101);assert.equal(c.body.from_chat_id,LEAD);}
  await f.handle(f.pm('Другой лид',4,888888));assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,2);
 });
@@ -195,7 +195,7 @@ test('incoming player login is bold and formatting survives, with ID fallback wi
  const f=fixture();await f.setup();const first=f.pm('Hello',50);first.message.entities=[{type:'italic',offset:0,length:5}];await f.handle(first);
  const sent=f.calls.find(c=>c.method==='sendMessage'&&c.body.text==='👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\nHello');assert.ok(sent);assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[0].length,'👤 Лид\n🎮 Лид P21:123456'.length);assert.equal(sent.body.entities[1].offset,'👤 Лид\n🎮 Лид P21:123456\n✈️ @lead\n\n'.length);
  const second=f.pm('Next',51);delete second.message.from.username;await f.handle(second);
- assert.ok(f.calls.some(c=>c.method==='sendMessage'&&c.body.text.includes('P21:123456\n\nNext')));
+ assert.ok(f.calls.some(c=>c.method==='sendMessage'&&c.body.text==='Next'));
 });
 
 test('queue paginates all waiting leads and only admins can switch its pages',async()=>{
@@ -384,4 +384,13 @@ test('support icons turn red for incoming messages and green after an answer',as
  assert.equal(edits().at(-1).body.icon_custom_emoji_id,'5379748062124056162');
  await f.handle(f.groupMessage());assert.equal(edits().at(-1).body.icon_custom_emoji_id,'5237699328843200968');
  await f.handle(f.pm('Ещё вопрос',2));assert.equal(edits().at(-1).body.icon_custom_emoji_id,'5379748062124056162');
+});
+
+test('consecutive player messages omit header, restore it after manager answer or ten minute pause',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm('Первое',1));await f.handle(f.pm('Второе',2));
+ const texts=()=>f.calls.filter(c=>c.method==='sendMessage').map(c=>c.body.text);assert.ok(texts().includes('Второе'));
+ await f.handle(f.groupMessage('Ответ',50));await f.handle(f.pm('После ответа',3));assert.ok(texts().some(t=>t.startsWith('👤')&&t.endsWith('После ответа')));
+ const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;const client=JSON.parse(f.store.get(key));client.lastInboundAt=Date.now()-11*60*1000;f.store.set(key,JSON.stringify(client));
+ await f.handle(f.pm('После паузы',4));assert.ok(texts().some(t=>t.startsWith('👤')&&t.endsWith('После паузы')));
+ const media=f.pm('',5);delete media.message.text;media.message.photo=[{file_id:'fixture'}];const count=texts().length;await f.handle(media);assert.equal(texts().length,count);
 });
