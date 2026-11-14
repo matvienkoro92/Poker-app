@@ -385,7 +385,8 @@ of fourteen report weeks over 03.08.2026–08.11.2026.
 
 ### Manual payment-wait timer
 
-After a manager sends a reply in a support topic, the bot posts an internal
+After a manager sends recognised payment requisites (card, bank/SBP phone,
+valid TRC20 wallet or a supported payment link) in a support topic, the bot posts an internal
 «⏱ Ждём оплату · 10 минут» control bound to that specific delivered message.
 Nothing is scheduled until an authorised manager presses it. Only one timer
 can be active per lead; a new one cancels the previous timer.

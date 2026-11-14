@@ -12,7 +12,7 @@ function fixture(useQueue=false){
  const record=()=>records()[0];
  const cb=(action='start',r=record())=>({id:'callback',data:'support:timer:'+action+':'+r.id,from:{id:MANAGER},message:{chat:{id:GROUP,type:'supergroup'},message_id:r.controlMessageId,message_thread_id:33}});
  const leadCb=(choice='paid',r=record())=>({id:'lead-callback',data:'support:pay:'+choice+':'+r.id,from:{id:Number(LEAD)},message:{chat:{id:Number(LEAD),type:'private'},message_id:r.leadControlMessageId}});
- async function ready(){await service.offer(GROUP,c,{message_id:55});}
+ async function ready(){await service.offer(GROUP,c,{message_id:55,text:'+79990002233 Сбер'});}
  async function start(){await ready();await service.callback(cb(),GROUP);}
  return {service,store,c,calls,scheduled,due,record,cb,leadCb,ready,start,advance:ms=>time+=ms,failSchedule:()=>failSchedule=true,failDelete:()=>failDelete=true};
 }
@@ -55,4 +55,17 @@ test('default scheduler persists due time in Redis and minute sweep expires only
  const f=fixture(true);await f.start();assert.equal(f.due.size,1);assert.deepEqual(await f.service.sweep(GROUP),{deleted:0,failed:0});
  f.advance(WAIT_MS);assert.deepEqual(await f.service.sweep(GROUP),{deleted:1,failed:0});assert.equal(f.due.size,0);assert.equal(f.record().state,'deleted');
  const g=fixture(true);await g.start();await g.service.leadCallback(g.leadCb(),GROUP);assert.equal(g.due.size,0);g.advance(WAIT_MS);assert.deepEqual(await g.service.sweep(GROUP),{deleted:0,failed:0});
+});
+
+test('timer is offered only for payment requisites, never for ordinary follow-up messages',async()=>{
+ const {isRequisites}=require('../lib/telegram-support-timers');
+ for(const text of ['и чек пдф пожалуйста','спасибо','Оплатите 3000 рублей','ID 208238','https://t.me/Poker_dvatuza_bot','Мой телефон +79990002233'])assert.equal(isRequisites({text}),false,text);
+ for(const text of ['+79669933465 (СБП) Озон Банк','+7999-000-22-33 Сбер','2200 1234 5678 9012','https://matro.payform.ru/abc','USDT TRC20 TJRabPrwbZy45sbavfcjinPJC18kjpRTv8'])assert.equal(isRequisites({text}),true,text);
+ const f=fixture();await f.service.offer(GROUP,f.c,{message_id:55,text:'и чек пдф пожалуйста'});assert.equal(f.calls.length,0);assert.equal(f.record(),undefined);
+});
+
+test('legacy buttons verify the original quoted message before starting',async()=>{
+ const f=fixture();await f.ready();const record=f.record();delete record.requisites;f.store.set(key(record.id),JSON.stringify(record));
+ const cb=f.cb();cb.message.reply_to_message={message_id:55,text:'и чек пдф пожалуйста'};await f.service.callback(cb,GROUP);assert.equal(f.record().state,'ineligible');assert.equal(f.scheduled.length,0);
+ const g=fixture();await g.ready();const legacy=g.record();delete legacy.requisites;g.store.set(key(legacy.id),JSON.stringify(legacy));const valid=g.cb();valid.message.reply_to_message={message_id:55,text:'+79990002233 Сбер'};await g.service.callback(valid,GROUP);assert.equal(g.record().state,'active');assert.equal(g.record().requisites,true);
 });
