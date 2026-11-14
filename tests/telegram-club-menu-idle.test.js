@@ -35,7 +35,7 @@ test('each group menu click schedules a fresh 60-second reset; stale deliveries 
   const publish=calls.find(call=>call.url.includes('/v2/publish/'));
   assert.equal(publish.options.headers['Upstash-Delay'],'60s');
   assert.equal(publish.options.headers['Upstash-Forward-X-Cron-Secret'],'secret');
-  now=145000;await click('schedule:0');const second=saved();
+  now=145000;await click('game:nards');const second=saved();
   assert.equal(second.dueAt,205000);assert.notEqual(first.revision,second.revision);
   let edits=0;const edit=async()=>{edits++};
   assert.equal(await idle.restore(first.id,first.revision,edit,160000),false);
@@ -43,7 +43,7 @@ test('each group menu click schedules a fresh 60-second reset; stale deliveries 
   assert.equal(await idle.restore(second.id,second.revision,edit,205000),true);
   assert.equal(edits,1);
   assert.equal(await idle.restore(second.id,second.revision,edit,206000),false);
-  await click('schedule:1');const third=saved();await click('pulse');
+  await click('game:chess');const third=saved();await click('pulse');
   assert.equal(await idle.restore(third.id,third.revision,edit,999999),false);
 });
 

@@ -264,3 +264,7 @@ test('payment link below 3000 highlights the commission-free threshold',async()=
  }
  const f=fixture();await f.handle(f.message('деп 3000'));assert.doesNotMatch(f.sent[0].body.text,/без комиссии/);
 });
+test('starting a deposit cancels an older subscription input prompt',async()=>{
+ const f=fixture(),key='poker21:table-subscriptions:club:pending:777';f.store.set(key,JSON.stringify({kind:'player'}));
+ await f.handle(f.message('/dep'));assert.equal(f.store.has(key),false);
+});
