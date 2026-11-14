@@ -11,7 +11,7 @@ test('uses an explicit Telegram binding, canonical account and authoritative Pok
  const f=fixture({'poker_app:visitor_dt_ids|tg_777':'ID000001','poker_app:pokerplus_user_ids|ID000009':'123456','poker_app:pokerplus_profiles|ID000009':JSON.stringify({pokerPlusUserId:'123456',nickname:'Poker Nick'})},{123456:'Saved Name'});
  const player=await f.readPlayerIdentity(user);assert.equal(player.name,'Saved Name');assert.equal(player.poker21Id,'123456');
  assert.ok(f.calls.some(c=>c[1]==='poker_app:pokerplus_user_ids'&&c[2]==='ID000009'));
- assert.equal(f.identityText(user,player),'👤 Telegram Name\n🎮 Saved Name P21:123456\n✉️ @handle');
+ assert.equal(f.identityText(user,player),'👤 Telegram Name\n🎮 Saved Name P21:123456\n✈️ @handle');
 });
 test('without confirmed binding, never substitutes Telegram or app IDs for Poker21',async()=>{
  const f=fixture();const player=await f.readPlayerIdentity(user);assert.equal(player.name,'Telegram Name');assert.equal(player.poker21Id,null);assert.match(f.identityText(user,player),/не найден/);
@@ -27,12 +27,12 @@ test('lookup outage falls back visibly without blocking message delivery',async(
 
 test('X Poker IDs come only from accounts linked to the confirmed P21 profile',async()=>{
  const f=fixture({'poker_app:visitor_dt_ids|tg_777':'ID000001','poker_app:pokerplus_user_ids|ID000009':'123456',"local raw=redis.call('GET',KEYS[1]); if not raw then return '[]' end; local s=cjson.decode(raw); return cjson.encode(s.playerAccounts or {})|1":JSON.stringify([{room:'X',playerId:'98765',profileKey:'P21|123456'},{room:'X',playerId:'99999',profileKey:'P21|999999'}])});
- const p=await f.readPlayerIdentity(user);assert.deepEqual(Array.from(p.xpokerIds),['98765']);assert.match(f.identityText(user,p),/X:98765\n✉️ @handle$/);
+ const p=await f.readPlayerIdentity(user);assert.deepEqual(Array.from(p.xpokerIds),['98765']);assert.match(f.identityText(user,p),/X:98765\n✈️ @handle$/);
 });
 
 test('missing or unavailable XPoker is omitted from the message signature',()=>{
  const f=fixture();
- for(const player of [{name:'Nick',poker21Id:'123456'},{name:'Nick',poker21Id:'123456',xpokerUnavailable:true},{name:'Nick',poker21Id:'123456',xpokerIds:[]}])assert.equal(f.identityText(user,player),'👤 Telegram Name\n🎮 Nick P21:123456\n✉️ @handle');
+ for(const player of [{name:'Nick',poker21Id:'123456'},{name:'Nick',poker21Id:'123456',xpokerUnavailable:true},{name:'Nick',poker21Id:'123456',xpokerIds:[]}])assert.equal(f.identityText(user,player),'👤 Telegram Name\n🎮 Nick P21:123456\n✈️ @handle');
 });
 
 test('numeric Telegram ID is omitted when no username is present',()=>{
