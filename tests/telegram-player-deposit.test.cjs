@@ -2,15 +2,15 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const commandModule=require('../lib/telegram-player-deposit');
 function fixture({beforeSupport=async()=>{}}={}){
- const store=new Map(),sent=[],mirrored=[],botMirrored=[],cleared=[];let seq=100,failMirror=false;
- const redis={isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,...a])=>{
+ const store=new Map(),sent=[],mirrored=[],botMirrored=[],cleared=[];let seq=100,failMirror=false,redisBatches=0;
+ const redis={isConfigured:()=>true,pipeline:async commands=>(redisBatches++,commands.map(([cmd,...a])=>{
   if(cmd==='GET')return {result:store.get(a[0])||null};
   if(cmd==='DEL'){store.delete(a[0]);return {result:1};}
   if(cmd==='SET'){if(a.includes('NX')&&store.has(a[0]))return {result:null};store.set(a[0],a[1]);return {result:'OK'};}
   if(cmd==='EVAL'){const key=a[2];if((store.get(key)||'')!==a[3])return {result:0};if(a.length===4)store.delete(key);else store.set(key,a[4]);return {result:1};}
   throw Error(cmd);
- })};
- const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
+ }))};
+ const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
  vm.runInNewContext(fs.readFileSync('lib/telegram-player-deposit.js','utf8'),ctx);
  const message=(text,message_id=1)=>({message:{text,message_id,chat:{id:777,type:'private'},from:{id:777}}});
  const handle=u=>ctx.module.exports.handle(u,'fixture-token');
@@ -167,11 +167,11 @@ test('numeric requisites request survives support failure without duplicate repl
  const update=f.message('5000',2);
  await assert.rejects(f.handle(update),/support unavailable/);
  assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты/);
- assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),true);
  assert.ok(f.store.has('poker_app:player-deposit:v1:done:777:message_2:support'));
  await f.handle(update);
  assert.equal(f.sent.length,2);
- assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),true);
  assert.equal(f.mirrored.length,2);
 });
 
@@ -223,4 +223,44 @@ test('plain statistics alias does not consume a pending deposit amount prompt',a
  const f=fixture();await f.handle(f.message('пополнить'));const key='poker_app:player-deposit:v1:waiting:777',before=f.store.get(key);
  for(const word of ['stat','stats','/stat','Статистика'])assert.equal(await f.handle(f.message(word,2)),false);
  assert.equal(f.store.get(key),before);assert.match(f.sent[0].body.text,/На какую сумму/);
+});
+
+test('requisites acknowledgement needs only three Redis round trips before replying',async()=>{
+ for(const text of ['пополнить 3000','депозит 5000']){
+  const f=fixture();await f.handle(f.message(text));
+  assert.match(f.sent[0].body.text,/Ожидайте, ищем реквизиты/);
+  assert.equal(f.sent[0].redisBatches,3);
+  const count=f.sent.length;await f.handle(f.message(text));assert.equal(f.sent.length,count);
+ }
+ const f=fixture();await f.handle(f.message('/dep'));
+ // A numeric reply also validates the current prompt in the user-lock batch.
+ await f.handle(f.message('3000',2));assert.match(f.sent.at(-1).body.text,/Ожидайте/);
+});
+
+test('requisites message lets the player change the amount with a plain number',async()=>{
+ const f=fixture();await f.handle(f.message('пополнить 3000'));
+ assert.match(f.sent.at(-1).body.text,/Если решили изменить сумму, просто напишите какую/);
+ await f.handle(f.message('5000',2));assert.match(f.sent.at(-1).body.text,/5[\s\u00a0]000 ₽/);
+ await f.handle(f.message('2000',3));assert.ok(f.sent.at(-1).body.reply_markup.inline_keyboard[0][0].url);
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),true);
+});
+
+test('payment link supports a new amount and plain Отмена without duplicate issuance',async()=>{
+ const f=fixture();await f.handle(f.message('деп 1000'));
+ assert.match(f.sent.at(-1).body.text,/После оплаты напишите ваш ID и ID клуба\./);
+ assert.match(f.sent.at(-1).body.text,/Чтобы пополнить другую сумму/);
+ await f.handle(f.message('1500',2));
+ assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,2);
+ await f.handle(f.message('Отмена',3));assert.match(f.sent.at(-1).body.text,/Запрос пополнения отменён/);
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
+ assert.equal(await f.handle(f.message('2000',4)),false);
+});
+
+test('payment link below 3000 highlights the commission-free threshold',async()=>{
+ for(const amount of [1000,1500,2000]){
+  const f=fixture();await f.handle(f.message('деп '+amount));const body=f.sent[0].body;
+  const bold=body.entities.find(e=>e.type==='bold');
+  assert.equal(body.text.slice(bold.offset,bold.offset+bold.length),'✨ Чтобы пополнять без комиссии, пополняйте от 3000 и выше.');
+ }
+ const f=fixture();await f.handle(f.message('деп 3000'));assert.doesNotMatch(f.sent[0].body.text,/без комиссии/);
 });

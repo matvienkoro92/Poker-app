@@ -17,12 +17,12 @@ test('only own open Poker21 withdrawals are shown without payment details',()=>{
 });
 function mock({bound='ID123456',playerId='208238',broken=false}={}){
  const sent=[],reads=[],mod={exports:{}};
- vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-player-withdrawals'),'utf8'),{module:mod,require:id=>id==='./redis'?{pipeline:async cmds=>{reads.push(...cmds);if(broken)throw Error('offline');return cmds.map(c=>({result:c[1]==='poker_app:visitor_dt_ids'?bound:c[1]==='poker_app:pokerplus_user_ids'?playerId:JSON.stringify({entries:[entry]})}));}}:id==='./account-canonical'?{canonicalAccountId:async a=>a}:id==='./admin-deposits'?require('../lib/admin-deposits'):id==='./deposit-player-notifications'?require('../lib/deposit-player-notifications'):require(id),Intl,AbortSignal,fetch:async(url,opts)=>{sent.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};}});
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-player-withdrawals'),'utf8'),{module:mod,require:id=>id==='./withdrawal-player-snapshot'?require('../lib/withdrawal-player-snapshot'):id==='./redis'?{pipeline:async cmds=>{reads.push(...cmds);if(broken)throw Error('offline');return cmds.map(c=>({result:c[1]==='poker_app:visitor_dt_ids'?bound:c[1]==='poker_app:pokerplus_user_ids'?playerId:JSON.stringify({entries:[entry]})}));}}:id==='./account-canonical'?{canonicalAccountId:async a=>a}:id==='./admin-deposits'?require('../lib/admin-deposits'):id==='./deposit-player-notifications'?require('../lib/deposit-player-notifications'):require(id),Intl,AbortSignal,fetch:async(url,opts)=>{sent.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};}});
  return {api:mod.exports,sent,reads};
 }
 const update={message:{text:'/вывод',from:{id:42},chat:{id:42,type:'private'}}};
 test('handler uses sender binding and refuses groups or another chat',async()=>{
- const m=mock();assert.equal(await m.api.handle(update,'token'),true);assert.match(m.sent[0].text,/ID 208238/);assert.equal(m.reads[0][2],'tg_42');
+ const m=mock();assert.equal(await m.api.handle(update,'token'),true);assert.match(m.sent[0].text,/ID 208238/);assert.equal(m.reads[0][2],'tg_42');assert.ok(m.reads.some(c=>c[0]==='EVAL'&&c[4]==='208238'));assert.ok(!m.reads.some(c=>c[0]==='GET'&&c[1]==='poker21:admin-deposits:v1'));
  assert.equal(await m.api.handle({message:{...update.message,chat:{id:43,type:'private'}}},'token'),false);
  assert.equal(await m.api.handle({message:{...update.message,chat:{id:-1,type:'group'}}},'token'),false);
  assert.equal(m.sent.length,1);
