@@ -8,7 +8,7 @@ test('opposite and zero balances have correct creditor labels; manager filter ap
 test('server persists explicit counterparty and retains it in edit audit history',()=>{const {applyOperation}=require('../lib/admin-deposits');let state=applyOperation(null,{action:'channel-operation',requestId:'allfriends_create_001',channelId:'other',direction:'income',counterparty:'allfriends',amount:10000,room:'P21',playerId:'123456'},'admin').state;const row=state.channelOperations[0];assert.equal(row.counterparty,'allfriends');state=applyOperation(state,{action:'edit-channel-operation',requestId:'allfriends_edit_001',operationId:row.id,editVersion:0,amount:10000,room:'P21',playerId:'123456',counterparty:'other'},'admin',Date.now(),'Admin',{canDelete:true}).state;assert.equal(state.channelOperations[0].counterparty,'other');assert.equal(state.channelOperations[0].edits[0].before.counterparty,'allfriends');});
 test('other deposits accept optional ZP, All Friends or only a comment and preserve edit history',()=>{
  const {applyOperation}=require('../lib/admin-deposits');
- for(const counterparty of ['zp','allfriends','other',undefined]){
+ for(const counterparty of ['zp','allfriends','sergeyMarina','owner','other',undefined]){
   let state=applyOperation(null,{action:'channel-operation',requestId:'optional_destination_001',channelId:'other',direction:'income',...(counterparty?{counterparty}:{}),amount:10000,room:'P21',playerId:'123456',note:'Комментарий'},'admin').state;
   assert.equal(state.channelOperations[0].counterparty,counterparty);
   assert.equal(state.channelOperations[0].note,'Комментарий');
@@ -19,6 +19,6 @@ test('other deposits accept optional ZP, All Friends or only a comment and prese
 });
 test('other deposit form offers optional destinations and does not classify ZP as All Friends',()=>{
  const c=context();const html=c.allFriendsField('other','zp');
- assert.match(html,/>Не выбрано</);assert.match(html,/value="zp" selected/);assert.match(html,/>Алл френдс</);assert.doesNotMatch(html,/required/);
+ assert.match(html,/value="zp" data-counterparty-fallback/);assert.match(html,/>All friends</);assert.match(html,/>Сергей\/Марина</);assert.match(html,/>Владельцу</);assert.doesNotMatch(html,/required/);
  assert.equal(c.isAllFriendsOperation({channelId:'other',counterparty:'zp',note:'AllFriends'}),false);
 });
