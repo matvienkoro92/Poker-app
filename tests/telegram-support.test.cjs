@@ -151,8 +151,8 @@ test('policy blocks arbitrary deletions even in known support topics',async()=>{
 test('neutral-icon service notices are cleaned without touching other icon changes',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
  const event=icon=>({message:{message_id:90,message_thread_id:101,chat:{id:GROUP,type:'supergroup'},from:{id:900,is_bot:true,username:'Poker_dvatuza_bot'},forum_topic_edited:{icon_custom_emoji_id:icon}}});
- assert.equal((await f.handle(event(''))).handled,true);
- await f.handle(event('another-icon'));assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,1);
+ assert.equal((await f.handle(event(''))).handled,false);
+ await f.handle(event('another-icon'));assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,0);
 });
 
 test('bot questions mirror into the client topic once, including first contact through a menu button',async()=>{
@@ -376,4 +376,10 @@ test('ticket template command sends formatted text to mapped lead and echoes onc
  assert.ok(!privateReply.body.text.includes('/ticket'));const bold=privateReply.body.entities.find(e=>privateReply.body.text.slice(e.offset,e.offset+e.length)==='ОДНОМ СООБЩЕНИИ:');assert.ok(bold);
  assert.equal(sent.filter(c=>String(c.body.chat_id)===GROUP&&c.body.message_thread_id===101).length,1);
  const outsider=f.groupMessage('/ticket',91,999);await f.handle(outsider);assert.equal(f.calls.slice(before).filter(c=>c.method==='sendMessage'&&c.body.text.includes('Минимально списать можно 300 рублей')).length,2);
+});
+
+test('new support topics have a palette color and title sync preserves custom icons',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const created=f.calls.find(c=>c.method==='createForumTopic');assert.ok([0x6FB9F0,0xFFD67E,0xCB86DB,0x8EEE98,0xFF93B2,0xFB6F5F].includes(created.body.icon_color));
+ for(const call of f.calls.filter(c=>c.method==='editForumTopic'))assert.equal(Object.hasOwn(call.body,'icon_custom_emoji_id'),false);
 });
