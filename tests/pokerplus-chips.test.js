@@ -22,6 +22,7 @@ function loadPokerPlusWithFetch(responses) {
 test("changeGroupMemberChips sends a signed positive or negative chip delta", async (t) => {
   const previousFetch = global.fetch;
   t.after(() => { global.fetch = previousFetch; });
+  const guard=require('../lib/cash-operation-guard'),oldCheck=guard.check;guard.check=async()=>{};t.after(()=>{guard.check=oldCheck;});
   const fixture = loadPokerPlusWithFetch([
     { status: 1, data: { token: "token-test" } },
     { status: 1, data: [] },
@@ -116,4 +117,12 @@ test('default service limit accepts 5000 and rejects 5001 before any payment',()
  for(const amount of [1001,2000,4999,5000])assert.equal(context.requestedChips(amount),amount);
  for(const amount of [5001,10000])assert.throws(()=>context.requestedChips(amount),/per-operation limit/);
  for(const amount of [0,NaN,Infinity])assert.throws(()=>context.requestedChips(amount));
+});
+
+test('cash guard rejection stops the provider request before obtaining an operator token',async(t)=>{
+ const previousFetch=global.fetch;const guard=require('../lib/cash-operation-guard'),previousCheck=guard.check;
+ t.after(()=>{global.fetch=previousFetch;guard.check=previousCheck;});
+ guard.check=async()=>{throw Error('approval required');};const f=loadPokerPlusWithFetch([]);
+ await assert.rejects(f.api.changeGroupMemberChips({userId:'990919',chips:-100,orderId:'12345678901234567890'}),/approval required/);
+ assert.equal(f.calls.length,0);
 });
