@@ -52,7 +52,7 @@ test('any authorized manager can reply at any time, with their own signature; no
  await f.handle(f.groupMessage('// Заметка',11));assert.equal(f.client.managerId,null);
  await f.handle(f.groupMessage('Ответ Ани',5));assert.equal(f.client.managerId,String(MANAGER));
  await f.handle(f.groupMessage('Ответ Вики',6,OTHER));assert.equal(f.client.managerId,String(OTHER));
- assert.equal(outbound().length,2);assert.match(outbound()[0].body.text,/Аня/);assert.match(outbound()[1].body.text,/Вика.*@vikipoker/);
+ assert.equal(outbound().length,2);assert.match(outbound()[0].body.text,/Аня/);assert.match(outbound()[1].body.text,/Вика · менеджер:/);
  assert.equal(f.client.lastOperatorName,'Вика');
  await f.handle(f.groupMessage('Нет доступа',7,LEAD));await f.handle(f.groupMessage('// Заметка',8));await f.handle(f.groupMessage('/pulse',9));assert.equal(outbound().length,2);
  assert.ok(!f.calls.some(c=>String(c.body.text||'').includes('диалог уже ведёт другой')));
@@ -87,11 +87,11 @@ test('operator signature preserves formatting and labels media without truncatin
  const f=fixture();await f.setup();await f.handle(f.pm());
  const text=f.groupMessage('Привет',40);text.message.entities=[{type:'bold',offset:0,length:6}];await f.handle(text);
  const sent=f.calls.find(c=>c.method==='sendMessage'&&String(c.body.chat_id)===String(LEAD));
- assert.equal(sent.body.text,'👤 Аня · менеджер · @Qweenpoker:\n\nПривет');assert.equal(sent.body.entities[1].offset,'👤 Аня · менеджер · @Qweenpoker:\n\n'.length);
- assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[0].offset,0);assert.equal(sent.body.entities[0].length,'👤 Аня · менеджер · @Qweenpoker:'.length);
+ assert.equal(sent.body.text,'👤 Аня · менеджер:\n\nПривет');assert.equal(sent.body.entities[1].offset,'👤 Аня · менеджер:\n\n'.length);
+ assert.equal(sent.body.entities[0].type,'bold');assert.equal(sent.body.entities[0].offset,0);assert.equal(sent.body.entities[0].length,'👤 Аня · менеджер:'.length);
  const long=f.groupMessage('x'.repeat(4096),41);await f.handle(long);
  assert.ok(f.calls.some(c=>c.method==='copyMessage'&&c.body.message_id===41));
- assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text==='👤 Аня · менеджер · @Qweenpoker:').length,1);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text==='👤 Аня · менеджер:').length,1);
 });
 
 test('fixed topic title never changes on answers; pinned queue tracks unanswered messages',async()=>{
