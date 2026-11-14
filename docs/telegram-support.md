@@ -395,11 +395,13 @@ Starting the timer sends the lead a deadline and exactly two buttons:
 not a verified payment or ledger income. It stops deletion and asks the manager
 to verify the payment. Refusal removes only the selected requisites message.
 New private messages, including commands, cancel the timer and preserve the
-requisites. With no continuation or choice, QStash invokes
-`POST /api/cron-support-timer` after ten minutes; the worker rechecks the current
+requisites. With no continuation or choice, a Redis due queue is processed every minute by
+Vercel `GET /api/cron-support-timer` (expiration is after ten minutes, with up to
+one minute of polling delay); the worker rechecks the current
 conversation under the same lead lock before deleting that exact message.
 
-The worker requires `X-Cron-Secret`. Scheduler failure leaves deletion disabled.
+The worker requires `X-Cron-Secret` or the Vercel cron bearer secret. Timers do not
+depend on QStash credentials. Queue failure leaves deletion disabled.
 Control messages, callback owners and private deletion permits are restricted to
 stored timer records by `lib/telegram-group-policy.js`. Timer activity never
 records a deposit or creates a campaign.

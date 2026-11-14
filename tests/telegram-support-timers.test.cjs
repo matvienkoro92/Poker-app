@@ -2,19 +2,19 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {create,PREFIX,key,activeKey,WAIT_MS}=require('../lib/telegram-support-timers');
 const GROUP='-100123',LEAD='777',MANAGER=999;
-function fixture(){
- const store=new Map(),calls=[],scheduled=[];let time=1000000,sequence=1000,failSchedule=false,failDelete=false;
+function fixture(useQueue=false){
+ const store=new Map(),calls=[],scheduled=[],due=new Map();let time=1000000,sequence=1000,failSchedule=false,failDelete=false;
  const c={id:LEAD,threadId:33,lastInboundMessageId:5,lastReply:{sourceMessageId:55,privateMessageId:88,threadId:33}};store.set(PREFIX+'client:'+GROUP+':'+LEAD,JSON.stringify(c));
- const pipeline=async cmds=>cmds.map(([cmd,...a])=>{if(cmd==='GET')return {result:store.get(a[0])||null};if(cmd==='SET'){store.set(a[0],String(a[1]));return {result:'OK'};}if(cmd==='DEL')return {result:store.delete(a[0])?1:0};if(cmd==='EVAL'){if(store.get(a[2])===a[3])store.delete(a[2]);return {result:1};}throw Error(cmd);});
+ const pipeline=async cmds=>cmds.map(([cmd,...a])=>{if(cmd==='GET')return {result:store.get(a[0])||null};if(cmd==='SET'){store.set(a[0],String(a[1]));return {result:'OK'};}if(cmd==='ZADD'){due.set(String(a[2]),Number(a[1]));return {result:1};}if(cmd==='ZRANGEBYSCORE')return {result:[...due].filter(([,at])=>at<=Number(a[2])).map(([id])=>id).slice(0,20)};if(cmd==='ZREM')return {result:due.delete(String(a[1]))?1:0};if(cmd==='DEL')return {result:store.delete(a[0])?1:0};if(cmd==='EVAL'){if(store.get(a[2])===a[3])store.delete(a[2]);return {result:1};}throw Error(cmd);});
  const api=async(method,body)=>{calls.push({method,body});if(method==='deleteMessage'&&failDelete){failDelete=false;throw Error('network');}return {message_id:++sequence};};
- const service=create({pipeline,api,lock:async(_key,fn)=>fn(),schedule:async r=>{if(failSchedule)throw Error('offline');scheduled.push({...r});},now:()=>time});
+ const service=create({pipeline,api,lock:async(_key,fn)=>fn(),schedule:useQueue?undefined:async r=>{if(failSchedule)throw Error('offline');scheduled.push({...r});},now:()=>time});
  const records=()=>[...store.entries()].filter(([k])=>k.startsWith(PREFIX+'timer:')).map(([,v])=>JSON.parse(v));
  const record=()=>records()[0];
  const cb=(action='start',r=record())=>({id:'callback',data:'support:timer:'+action+':'+r.id,from:{id:MANAGER},message:{chat:{id:GROUP,type:'supergroup'},message_id:r.controlMessageId,message_thread_id:33}});
  const leadCb=(choice='paid',r=record())=>({id:'lead-callback',data:'support:pay:'+choice+':'+r.id,from:{id:Number(LEAD)},message:{chat:{id:Number(LEAD),type:'private'},message_id:r.leadControlMessageId}});
  async function ready(){await service.offer(GROUP,c,{message_id:55});}
  async function start(){await ready();await service.callback(cb(),GROUP);}
- return {service,store,c,calls,scheduled,record,cb,leadCb,ready,start,advance:ms=>time+=ms,failSchedule:()=>failSchedule=true,failDelete:()=>failDelete=true};
+ return {service,store,c,calls,scheduled,due,record,cb,leadCb,ready,start,advance:ms=>time+=ms,failSchedule:()=>failSchedule=true,failDelete:()=>failDelete=true};
 }
 test('manager explicitly starts ten minutes; duplicate clicks do not restart; lead gets exactly two choices',async()=>{
  const f=fixture();await f.ready();assert.equal(f.scheduled.length,0);await f.ready();assert.equal(f.calls.filter(c=>c.method==='sendMessage').length,1);
@@ -49,4 +49,10 @@ test('schedule failure fails closed, manager cancel and changed conversation pre
 });
 test('transient deletion failure retries only the same message',async()=>{
  const f=fixture();await f.start();f.advance(WAIT_MS);f.failDelete();await assert.rejects(f.service.expire(f.record().id,GROUP));assert.equal(f.record().state,'deleting');await f.service.expire(f.record().id,GROUP);assert.equal(f.record().state,'deleted');assert.ok(f.calls.filter(c=>c.method==='deleteMessage').every(c=>c.body.message_id===88));
+});
+
+test('default scheduler persists due time in Redis and minute sweep expires only due timers',async()=>{
+ const f=fixture(true);await f.start();assert.equal(f.due.size,1);assert.deepEqual(await f.service.sweep(GROUP),{deleted:0,failed:0});
+ f.advance(WAIT_MS);assert.deepEqual(await f.service.sweep(GROUP),{deleted:1,failed:0});assert.equal(f.due.size,0);assert.equal(f.record().state,'deleted');
+ const g=fixture(true);await g.start();await g.service.leadCallback(g.leadCb(),GROUP);assert.equal(g.due.size,0);g.advance(WAIT_MS);assert.deepEqual(await g.service.sweep(GROUP),{deleted:0,failed:0});
 });
