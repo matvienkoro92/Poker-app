@@ -38,5 +38,10 @@ test('card bolds identity and rake with UTF-16 offsets while leaving period amou
  const f=fixture(),text=await f.api.text({id:777,first_name:'Денис'}),entities=f.api.entities(text);
  assert.equal(entities.length,2);assert.equal(text.slice(entities[0].offset,entities[0].offset+entities[0].length),'👤 Диалог с Денис\n🎮 Poker21: 123');
  assert.equal(text.slice(entities[1].offset,entities[1].offset+entities[1].length),'💰 Рейк: 550 ₽');
- for(const line of text.split('\n').filter(Boolean))assert.match(line,/^(👤|🎮|💰|📅|🗓|📆|💳|🏆|🎰|🎲|📝)/u);
+ for(const line of text.split('\n').filter(Boolean))assert.match(line,/^(👤|🎮|💰|📅|🗓|📆|💳|🏆|🎰|🎲|📝|📈|🔢|💵|📊|👥|🤝|📍)/u);
+});
+test('extended card shows deposit details, acquisition, game results, trends and both month rows',async()=>{
+ const f=fixture(),text=(await f.api.text({id:777})).replace(/[\u00a0\u202f]/g,' ');
+ for(const label of ['В этом месяце:','В прошлом месяце:','Динамика рейка:','Депозиты: 3 000 ₽','Количество: 2','Средний депозит: 1 500 ₽','Последний депозит:','Любимая игра:','Общий результат игры:','Пригласил:','Кто пригласил:','Источник:'])assert.ok(text.includes(label),label);
+ assert.ok(text.length<4096);
 });

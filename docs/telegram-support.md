@@ -285,3 +285,31 @@ Player message signatures use an emoji-prefixed name and game-identity line in
 bold, followed by a plain @username when present. Missing XPoker IDs and numeric
 Telegram-ID lines are omitted. The saved topic header has an «✉️ Открыть профиль»
 URL button targeting `tg://user?id=<lead id>` instead of a return-to-bot button.
+
+When exact monthly rake boundaries are absent, the support card falls back to
+processed weekly reports of club 758417. `lib/support-rake-reports.json` stores
+only Poker21 IDs and rake in kopecks, with source date ranges. Synchronize it
+from the processed report archive before deploying updated report data:
+
+```
+node scripts/sync-support-rake-reports.cjs --source=/path/to/data/union-periods.json
+```
+
+The importer rejects duplicate players, negative/invalid rake and overlapping
+weeks, and reports periods without player details as skipped. Weeks crossing a
+month boundary are apportioned by days. Current-week profile rake is included
+only if that week has no complete processed report, through the profile's sync
+date. Every day must be covered; missing weeks are never silently extrapolated.
+Fallback month totals are labeled ≈. Exact snapshot totals retain priority.
+The archive requires this synchronization after future weekly report processing;
+it is bundled server data, not a live external fetch on every player message.
+
+Extended cards include deposit count, total, average and latest recorded date
+(Moscow), direct invitation count and inviter, first recorded tracking source,
+favorite game by accumulated rake in the imported report archive, lifetime game
+result from the bound Poker21 profile, and rake change between the last two
+adjacent complete report weeks. Trend dates are displayed explicitly. Referral
+counts share a bounded, deduplicated scan cached for 15 minutes; individual
+cards retain their 12-hour metrics cache. Missing sources are distinguished from
+zero activity. Favorite game describes report rake, not a stated preference.
+The report sync artifact now includes per-game rake as well as weekly totals.
