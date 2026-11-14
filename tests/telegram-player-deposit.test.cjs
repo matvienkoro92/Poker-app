@@ -10,7 +10,7 @@ function fixture({beforeSupport=async()=>{}}={}){
   if(cmd==='EVAL'){const key=a[2];if((store.get(key)||'')!==a[3])return {result:0};if(a.length===4)store.delete(key);else store.set(key,a[4]);return {result:1};}
   throw Error(cmd);
  }))};
- const ctx={module:{exports:{}},require:id=>id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
+ const ctx={module:{exports:{}},require:id=>id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
  vm.runInNewContext(fs.readFileSync('lib/telegram-player-deposit.js','utf8'),ctx);
  const message=(text,message_id=1)=>({message:{text,message_id,chat:{id:777,type:'private'},from:{id:777}}});
  const handle=u=>ctx.module.exports.handle(u,'fixture-token');
@@ -221,7 +221,7 @@ test('retries serialize the same event and resume only unfinished manager steps'
 
 test('plain statistics alias does not consume a pending deposit amount prompt',async()=>{
  const f=fixture();await f.handle(f.message('пополнить'));const key='poker_app:player-deposit:v1:waiting:777',before=f.store.get(key);
- for(const word of ['stat','stats','/stat','Статистика','/крутка','/spin','/бонус-баланс','/bonus_balance'])assert.equal(await f.handle(f.message(word,2)),false);
+ for(const word of ['stat','stats','/stat','Статистика','/крутка','/spin','/бонус-баланс','/bonus_balance','/чат','/chat'])assert.equal(await f.handle(f.message(word,2)),false);
  assert.equal(f.store.get(key),before);assert.match(f.sent[0].body.text,/На какую сумму/);
 });
 

@@ -1,8 +1,21 @@
 'use strict';
 const envPath=process.argv.find(arg=>arg.startsWith('--env='))?.slice(6);
 if(envPath)process.loadEnvFile(envPath);
+function orderedCommands(existing){
+ const first=[
+  {command:'dep',description:'Пополнить счёт'},
+  {command:'chat',description:'Наш клубный чат'},
+  {command:'create_game',description:'Создать игру'},
+  {command:'withdrawals',description:'Мои выводы'},
+  {command:'schedule',description:'Расписание турниров по покеру'},
+  {command:'spin',description:'Крутка — доступность и выигрыши'},
+  {command:'bonus_balance',description:'Мой беккинг-баланс'}
+ ];
+ const names=new Set(first.map(c=>c.command));
+ return first.concat(existing.filter(c=>!names.has(c.command)));
+}
 async function main(){
- if(!process.argv.includes('--apply')){console.log('/dep — Пополнить счёт\n/stats — Моя статистика\n/spin — Крутка и выигрыши\n/create_game — Создать игру');return;}
+ if(!process.argv.includes('--apply')){console.log(orderedCommands([]).map(c=>'/'+c.command+' — '+c.description).join('\n'));return;}
  const token=process.env.TELEGRAM_BOT_TOKEN||process.env.TELEGRAM_TOKEN||process.env.BOT_TOKEN;
  if(!token)throw Error('Bot token missing');
  async function call(method,body){
@@ -25,20 +38,14 @@ async function main(){
   }
  }
  async function update(scope,language_code,existing){
-  const first=[
-   {command:'dep',description:'Пополнить счёт'},
-   {command:'stats',description:'Моя статистика'},
-   {command:'spin',description:'Крутка — доступность и выигрыши'},
-   {command:'bonus_balance',description:'Мой беккинг-баланс'},
-   existing.find(c=>c.command==='create_game')||{command:'create_game',description:'Создать игру'}
-  ];
-  const commands=first.concat(existing.filter(c=>!['dep','stats','spin','bonus_balance','create_game'].includes(c.command)));
+  const commands=orderedCommands(existing);
   if(commands.length>100)throw Error('Command list is full');
   await call('setMyCommands',{scope,language_code,commands});
   const saved=await call('getMyCommands',{scope,language_code});
   if(JSON.stringify(saved)!==JSON.stringify(commands))throw Error('Command verification failed');
   updated++;
  }
- console.log('Ordered /dep, /stats, /spin, /create_game and verified '+updated+' private command lists.');
+ console.log('Ordered /dep, /chat, /create_game, /withdrawals, /schedule, /spin, /bonus_balance and verified '+updated+' private command lists.');
 }
-main().catch(error=>{console.error(error.message);process.exitCode=1;});
+if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
+module.exports={orderedCommands};
