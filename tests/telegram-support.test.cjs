@@ -344,3 +344,20 @@ test('profile privacy restriction does not prevent creation of the player card',
  const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
  assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,1);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,0);
 });
+test('manager notes append to the saved header once, preserve authors and do not refresh stats or contact lead',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const timestamp=f.client.cardUpdatedAt,headerId=f.client.headerMessageId;
+ await f.handle(f.groupMessage('// Первый перевод проверен',70,MANAGER));
+ await f.handle(f.groupMessage('// Просит написать вечером',71,OTHER));
+ await f.handle(f.groupMessage('// Первый перевод проверен',70,MANAGER));
+ assert.equal(f.client.internalNotes.length,2);assert.equal(f.client.internalNotes[0].author,'Аня');assert.equal(f.client.internalNotes[1].author,'Вика');
+ assert.equal(f.client.cardUpdatedAt,timestamp);
+ const updates=f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId);
+ assert.match(updates.at(-1).body.text,/👤 Аня:\nПервый перевод проверен/);assert.match(updates.at(-1).body.text,/👤 Вика:\nПросит написать вечером/);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&String(c.body.chat_id)===String(LEAD)).length,0);
+ const previous=f.client.internalNotes.length;await f.handle(f.groupMessage('// Не менеджер',72,LEAD));assert.equal(f.client.internalNotes.length,previous);
+ // A later scheduled metrics refresh must retain every saved note.
+ const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
+ f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:0}));await f.handle(f.pm('Новое обращение',80));
+ assert.match(f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId).at(-1).body.text,/Просит написать вечером/);
+});
