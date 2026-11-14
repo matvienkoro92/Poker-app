@@ -19,7 +19,7 @@ function fixture(){
  const fetch=async(url,options)=>{
   const method=url.split('/').at(-1),body=JSON.parse(options.body);calls.push({method,body});
   if(method===failMethod){const code=failCode,description=failDescription;if(failOnce)failMethod='';return {ok:false,status:code,json:async()=>({ok:false,error_code:code,description})};}
-  return {ok:true,json:async()=>({ok:true,result:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
+  return {ok:true,json:async()=>({ok:true,result:method==='getForumTopicIconStickers'?[{emoji:'🟡',custom_emoji_id:'yellow-test-icon'}]:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
  };
  function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-support-timers'?{create:()=>({leadCallback:async()=>false,callback:async()=>false,offer:async()=>{},observe:async()=>{}})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
  policy=load('lib/telegram-group-policy.js');queue=load('lib/telegram-support-queue.js');reactions=load('lib/telegram-support-reactions.js');const support=load('lib/telegram-support.js');
@@ -174,8 +174,22 @@ test('payment link notices show provider and both amounts without duplicating th
  }
  const notices=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Ожидаем перевод'));
  assert.equal(notices.length,2);assert.match(notices[0].body.text,/Робокасса.*1[\s\u00a0]000 ₽/);assert.match(notices[0].body.text,/1[\s\u00a0]100 ₽/);
+ assert.match(notices[0].body.text,/\n\nОжидаем перевод\.$/);
+ const bold=notices[0].body.entities.at(-1);assert.equal(notices[0].body.text.slice(bold.offset,bold.offset+bold.length),'Ожидаем перевод.');
+ assert.equal(f.client.appliedIconId,'yellow-test-icon');
  assert.match(notices[1].body.text,/Prodamus.*2[\s\u00a0]000 ₽/);assert.match(notices[1].body.text,/2[\s\u00a0]180 ₽/);
  assert.equal(f.calls.filter(c=>c.method==='copyMessage').length,0);assert.equal(f.client.lastAnsweredInboundId,undefined);
+});
+test('payment waiting persists through conversation and ends on manager confirmation or player cancellation',async()=>{
+ const f=fixture();await f.setup();const user={id:LEAD,first_name:'Lead'},options={paymentLink:{providerId:'robokassa',amount:100000,chargeAmount:110000}};
+ await f.mirrorBotMessage(LEAD,42,user,options);
+ await f.handle(f.pm('Проверяю',2));assert.equal(f.client.appliedIconId,'yellow-test-icon');
+ await f.handle(f.groupMessage());assert.equal(f.client.appliedIconId,'yellow-test-icon');
+ const paid=f.callback('support:payment-paid');paid.callback_query.message.message_id=f.client.awaitingPayment.noticeMessageId;
+ await f.handle(paid);assert.equal(f.client.awaitingPayment,undefined);assert.equal(f.client.appliedIconId,'5237699328843200968');
+ await f.mirrorBotMessage(LEAD,43,user,options);
+ await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:42});assert.ok(f.client.awaitingPayment);
+ await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:44});assert.equal(f.client.awaitingPayment,undefined);assert.equal(f.client.appliedIconId,'5237699328843200968');
 });
 test('waiting for amount is a short manager note and is deleted when the amount arrives',async()=>{
  const f=fixture();await f.setup();const user={id:LEAD,first_name:'Лид'};
