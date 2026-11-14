@@ -243,9 +243,40 @@ without message content, user IDs or tokens.
 
 ## Closed topics
 
-If Telegram rejects an incoming text or media relay with `TOPIC_CLOSED`, the
-bot reopens that same mapped support topic and retries only the failed request
-once. Existing history and the client mapping are preserved. Reopening is
-restricted to the configured support group and the client's current topic.
-Unknown topics, other groups and stale topic mappings cannot be reopened.
+Closing a mapped lead topic pauses incoming relays and bot-message mirrors in
+that topic and removes the lead from the unanswered queue. The bot does not
+reopen it automatically. Manually reopening resumes new messages; messages
+received during the pause are not replayed. Topic-state service updates apply
+only to the configured support group and the current mapped topic; older
+service updates cannot override newer ones.
+
+For topics closed before this behavior was deployed, a `TOPIC_CLOSED` rejection
+records the pause and acknowledges the update without retrying or reopening.
 Deleted topics continue to use the separate replacement-topic recovery.
+The separate payment topic «Приходы» retains its own automatic reopening.
+
+## Player card in the topic header
+
+The existing dialog header includes Рейк, Депозиты, В розыгрышах,
+В крутках and Сыграно в нарды. Rake uses the bound Poker21 profile's total fee;
+deposits use active application ledger entries with confirmed player links;
+raffles sum monetary prize values for matching account/Telegram winners,
+excluding cancelled raffles and failed winners. Daily poker uses its lifetime
+credited bonus and ticket totals. Backgammon sums completed free and paid games
+in the current short, long, crazy and six-one statistics buckets.
+
+The header refreshes on dialog activity at most once per twelve hours and edits
+the stored header message. Closed lead topics remain paused. Missing account
+bindings and source errors display explicit unavailable labels instead of zero.
+The card does not show a last payment link or last operator reply, and has no return-to-bot button. Player totals are cached for twelve hours. Inactive leads do not trigger scheduled refreshes.
+
+Rake also shows the current Monday-based week, month-to-date starting on the
+1st, and the complete preceding calendar month, using Moscow dates. Month
+amounts use lifetime-fee baselines reconstructed from first-day snapshots
+(total fee minus that day's fee). Missing boundaries are reported as unavailable.
+The saved weekly counter is used only when its sync date is in the current week.
+
+Owner-requested bulk updates use `scripts/refresh-telegram-support-cards.cjs`:
+first run without `--apply` to verify bot/group/inventory, then with `--apply`.
+This edits existing cards in place, including closed topics, without reopening
+those topics. Routine activity keeps the twelve-hour refresh limit.

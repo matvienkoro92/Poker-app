@@ -21,7 +21,7 @@ function fixture(){
   if(method===failMethod){const code=failCode,description=failDescription;if(failOnce)failMethod='';return {ok:false,status:code,json:async()=>({ok:false,error_code:code,description})};}
   return {ok:true,json:async()=>({ok:true,result:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
  };
- function load(file){const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
+ function load(file){const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
  policy=load('lib/telegram-group-policy.js');queue=load('lib/telegram-support-queue.js');reactions=load('lib/telegram-support-reactions.js');const support=load('lib/telegram-support.js');
  const handle=update=>support.handle(update,'fixture-token');
  const pm=(text='Привет',message_id=1,id=LEAD)=>({message:{message_id,text,chat:{id,type:'private'},from:{id,first_name:'Лид',username:'lead'}}});
@@ -260,20 +260,32 @@ test('deleted client topic is recreated and incoming message delivered once into
  await f.handle(f.pm('Новое сообщение после удаления темы',22));assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Новое сообщение после удаления темы')).length,1);
 });
 
-test('closed topic is reopened and the incoming text delivered once without replacing history',async()=>{
+test('closing a lead topic suppresses inbound messages and mirrors until manually reopened',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());const tid=f.client.threadId;
- f.fail('sendMessage',400,'Bad Request: TOPIC_CLOSED',true);
- await f.handle(f.pm('Сообщение в закрытую тему',25));
- assert.equal(f.client.threadId,tid);assert.equal(f.calls.filter(c=>c.method==='createForumTopic').length,1);
- const reopened=f.calls.filter(c=>c.method==='reopenForumTopic');assert.equal(reopened.length,1);assert.equal(reopened[0].body.message_thread_id,tid);
- assert.equal(f.client.lastInboundMessageId,25);
- const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Сообщение в закрытую тему'));assert.equal(attempts.length,2);
- await f.handle(f.pm('Сообщение в закрытую тему',25));assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Сообщение в закрытую тему')).length,2);
+ const event=(closed,id)=>{const u=f.groupMessage('',id);u.message[closed?'forum_topic_closed':'forum_topic_reopened']={};return u;};
+ await f.handle(event(true,30));assert.equal(f.client.topicClosed,true);assert.match(f.board.text,/Ждут ответа: 0/);
+ const before=f.calls.length;
+ await f.handle(f.pm('Не пересылать',31));
+ await f.mirrorBotMessage(LEAD,32,{id:LEAD,first_name:'Лид'});
+ assert.equal(f.calls.length,before);assert.equal(f.client.lastInboundMessageId,1);
+ await f.handle(event(false,33));assert.equal(f.client.topicClosed,false);
+ await f.handle(event(true,30));assert.equal(f.client.topicClosed,false);
+ await f.handle(f.pm('После открытия',34));assert.equal(f.client.lastInboundMessageId,34);
+ assert.equal(f.calls.filter(c=>c.method==='reopenForumTopic').length,0);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('После открытия')).length,1);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Не пересылать')).length,0);
+ assert.equal(f.client.threadId,tid);
 });
-test('closed topic media is reopened and only the failed copy retried',async()=>{
- const f=fixture();await f.setup();await f.handle(f.pm());const u=f.pm('',26);delete u.message.text;u.message.document={file_id:'fixture'};
- f.fail('copyMessage',400,'Bad Request: TOPIC_CLOSED',true);await f.handle(u);
- assert.equal(f.calls.filter(c=>c.method==='reopenForumTopic').length,1);assert.equal(f.calls.filter(c=>c.method==='copyMessage').length,2);assert.equal(f.client.lastInboundMessageId,26);
+test('already closed topic is remembered on Telegram rejection and never reopened',async()=>{
+ for(const media of [false,true]){
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const u=f.pm('Закрыто',26);if(media){delete u.message.text;u.message.document={file_id:'fixture'};}
+ f.fail(media?'copyMessage':'sendMessage',400,'Bad Request: TOPIC_CLOSED',true);
+ assert.equal((await f.handle(u)).handled,true);assert.equal(f.client.topicClosed,true);
+ assert.equal(f.calls.filter(c=>c.method==='reopenForumTopic').length,0);
+ const before=f.calls.length;await f.handle(f.pm('Следующее',27));assert.equal(f.calls.length,before);
+ assert.equal(f.client.lastInboundMessageId,1);
+ }
 });
 test('reopen policy blocks other groups and stale or unknown topics',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
@@ -295,4 +307,33 @@ test('late deposit support tasks cannot recreate an old waiting notice or clear 
  assert.ok(f.client.awaitingAmountNotice);
  await f.clearAwaitingAmountNotice(LEAD,{throughMessageId:43});
  assert.equal(f.client.awaitingAmountNotice,undefined);
+});
+
+test('player card contains all five metrics and refreshes the existing header',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const headerId=f.client.headerMessageId;
+ const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
+ for(const label of ['Рейк:','Депозиты:','В розыгрышах:','В крутках:','Сыграно в нарды:'])assert.ok(header.body.text.includes(label));
+ const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
+ f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:0}));await f.handle(f.pm('Обновить карточку',50));
+ assert.equal(f.client.headerMessageId,headerId);
+ assert.equal(f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId).length,1);
+ const r=await f.policy.guardedFetch('https://api.telegram.org/botfixture/editMessageText',{body:JSON.stringify({chat_id:GROUP,message_id:999999,text:'wrong'})},'support-dialog');assert.equal(r.ok,false);
+});
+
+test('card has no return button and refreshes only after twelve hours of activity',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const headerId=f.client.headerMessageId;
+ const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
+ assert.equal(header.body.reply_markup.inline_keyboard.length,0);
+ const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
+ f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-11*60*60*1000}));
+ await f.handle(f.pm('До срока',60));
+ assert.equal(f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId).length,0);
+ f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-12*60*60*1000-1000}));
+ await f.handle(f.pm('После срока',61));
+ const updates=f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId);
+ assert.equal(updates.length,1);assert.equal(updates[0].body.reply_markup.inline_keyboard.length,0);
+ await f.handle(f.pm('Следующее',62));
+ assert.equal(f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId).length,1);
 });
