@@ -152,3 +152,9 @@ test('game commands work in private and group chats with matching links',async()
 });
 
 test('each bot game menu has a back button returning to the club menu',async t=>{const old=global.fetch,sent=[];global.fetch=async(url,options)=>{sent.push(JSON.parse(options.body));return {json:async()=>({ok:true,result:{message_id:99}})};};t.after(()=>{global.fetch=old;});for(const game of ['nards','chess','billiards'])await c.handle({message:{message_id:3,chat:{id:42,type:'private'},from:{id:42}}},'test','game:'+game);assert.equal(sent.length,3);for(const message of sent){assert.equal(message.reply_markup.inline_keyboard.length,2);assert.equal(message.reply_markup.inline_keyboard[1][0].callback_data,'club:pulse');assert.equal(message.reply_markup.inline_keyboard[1][0].text,'⬅️ Назад');}});
+test('statistics command routes only personal requests and never arbitrary target IDs',()=>{
+ const message={chat:{id:777,type:'private'},from:{id:777},text:'/статистика'};
+ assert.equal(c.command({message}),'player-statistics');
+ assert.equal(c.command({message:{...message,text:'/статистика 337922'}}),null);
+ assert.equal(c.command({message:{...message,chat:{id:-100,type:'supergroup'}}}),null);
+});

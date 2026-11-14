@@ -329,3 +329,13 @@ club-report JSON when syncing, for example `--hands-source=/path/to/clubs.json`.
 The sync validates player rake against the archive and reconciles hand subtotals
 with each player's total. It never combines counts from one week with fees from
 several months. Other report periods remain available for monthly estimates.
+
+## Player statistics command
+
+In a private conversation, `/статистика` (or `/stats`) returns the sender's own
+card metrics with the shared twelve-hour cache, deposit detail, monthly rake,
+report game breakdown and personal results. Requests with a target ID or requests
+from groups/bots are ignored. The target always comes from the signed Telegram
+webhook sender, not user-supplied arguments. Manager notes, internal instructions
+and the staff card's profile button are excluded. No group sending scenario is
+added. Replies are deduplicated per sender/message and failed sends can retry.
