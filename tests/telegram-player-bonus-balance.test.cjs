@@ -20,6 +20,6 @@ test('reads canonical app balance freshly for each new command and retries witho
  const mocks={'./redis':{pipeline},'./account-canonical':{canonicalAccountId:async()=> 'ID654321'},'./bonus-ledger':{getBonusBalance:async id=>{accounts.push(id);return current;}},'./telegram-group-policy':{guardedFetch:async(url,options)=>{sent.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true})};}}};
  vm.runInNewContext(fs.readFileSync(path,'utf8'),{module,require:id=>mocks[id]||localRequire(id),Number,AbortSignal});
  const u={message:{text:'/бонус-баланс',message_id:7,from:{id:42},chat:{id:42,type:'private'}}};
- await module.exports.handle(u,'token');await module.exports.handle(u,'token');assert.equal(sent.length,1);assert.equal(sent[0].chat_id,42);assert.match(sent[0].text,/5\s690 ₽/);
+ await module.exports.handle(u,'token');await module.exports.handle(u,'token');assert.equal(sent.length,1);assert.equal(sent[0].chat_id,42);assert.match(sent[0].text,/Ваш беккинг-баланс: 5\s690 ₽/);
  current=0;u.message.message_id=8;await module.exports.handle(u,'token');assert.match(sent[1].text,/баланс: 0 ₽/);assert.deepEqual(accounts,['ID654321','ID654321']);
 });

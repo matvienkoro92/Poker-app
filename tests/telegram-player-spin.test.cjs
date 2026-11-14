@@ -29,6 +29,7 @@ test('first archive bootstrap deduplicates games and rejects a concurrent spin',
   if(saved){const r=await totals.read('ID123456',pipeline);assert.equal(r.count,'1');assert.equal(r['hand:pair'],'1');}
   else await assert.rejects(totals.read('ID123456',pipeline),/changed during bootstrap/);
   assert.equal(calls.filter(c=>c[0]==='MGET').length,1);
+  assert.ok(!calls.some(c=>c[0]==='SCAN'));
  }
 });
 test('delivery uses webhook sender, excludes unrelated accounts and deduplicates retries',async()=>{
@@ -47,4 +48,9 @@ test('delivery uses webhook sender, excludes unrelated accounts and deduplicates
  const u={message:{text:'/крутка',message_id:7,from:{id:42},chat:{id:42,type:'private'}}};
  await module.exports.handle(u,'token');await module.exports.handle(u,'token');
  assert.equal(sent.length,1);assert.equal(sent[0].chat_id,42);assert.deepEqual(readAccounts,['ID123456']);assert.match(sent[0].text,/Всего круток: 2/);
+});
+
+test('an incomplete recent list never launches a database scan or reports partial totals',async()=>{
+ const calls=[];await assert.rejects(totals.read('ID123456',async cmds=>{calls.push(...cmds);return cmds.map(c=>({result:c[0]==='HGETALL'?[]:c[0]==='HGET'?'501':['g1']}));}),/offline bootstrap/);
+ assert.ok(!calls.some(c=>c[0]==='SCAN'||c[0]==='EVAL'));
 });

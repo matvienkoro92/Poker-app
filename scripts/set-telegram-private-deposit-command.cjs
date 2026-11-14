@@ -29,7 +29,7 @@ async function main(){
    {command:'dep',description:'Пополнить счёт'},
    {command:'stats',description:'Моя статистика'},
    {command:'spin',description:'Крутка — доступность и выигрыши'},
-   {command:'bonus_balance',description:'Мой бонусный баланс'},
+   {command:'bonus_balance',description:'Мой беккинг-баланс'},
    existing.find(c=>c.command==='create_game')||{command:'create_game',description:'Создать игру'}
   ];
   const commands=first.concat(existing.filter(c=>!['dep','stats','spin','bonus_balance','create_game'].includes(c.command)));
