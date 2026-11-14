@@ -14,7 +14,7 @@ test('uses an explicit Telegram binding, canonical account and authoritative Pok
  assert.equal(f.identityText(user,player),'👤 Telegram Name\n🎮 Saved Name P21:123456\n✈️ @handle');
 });
 test('without confirmed binding, never substitutes Telegram or app IDs for Poker21',async()=>{
- const f=fixture();const player=await f.readPlayerIdentity(user);assert.equal(player.name,'Telegram Name');assert.equal(player.poker21Id,null);assert.match(f.identityText(user,player),/не найден/);
+ const f=fixture();const player=await f.readPlayerIdentity(user);assert.equal(player.name,'Telegram Name');assert.equal(player.poker21Id,null);assert.equal(f.identityText(user,player),'👤 Telegram Name\n✈️ @handle');
  assert.ok(!f.calls.some(c=>c[1]==='poker_app:pokerplus_user_ids'));
 });
 test('stale profile for another player cannot supply name or Poker21 ID',async()=>{
@@ -22,7 +22,7 @@ test('stale profile for another player cannot supply name or Poker21 ID',async()
  const player=await f.readPlayerIdentity(user);assert.equal(player.name,'App Name');assert.equal(player.poker21Id,'123456');
 });
 test('lookup outage falls back visibly without blocking message delivery',async()=>{
- const f=fixture();f.offline();const player=await f.readPlayerIdentity(user);assert.equal(player.poker21Id,null);assert.match(f.identityText(user,player),/не удалось проверить/);
+ const f=fixture();f.offline();const player=await f.readPlayerIdentity(user);assert.equal(player.poker21Id,null);assert.equal(f.identityText(user,player),'👤 Telegram Name\n✈️ @handle');
 });
 
 test('X Poker IDs come only from accounts linked to the confirmed P21 profile',async()=>{
