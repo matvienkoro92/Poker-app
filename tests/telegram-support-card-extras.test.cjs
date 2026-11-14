@@ -26,3 +26,11 @@ test('acquisition counts unique invitations and selects the earliest saved track
  const result=await acquisition('ID123456',777,run);
  assert.equal(result.invitedCount,2);assert.equal(result.invitedBy,'Алексей · ID222222');assert.equal(result.source,'Telegram → Канал → Ноябрь');
 });
+test('game breakdown groups tournaments, matches fee and hand periods, and orders by rake',()=>{
+ const {gameBreakdown}=require('../lib/telegram-support-card-extras');
+ const periods=[{startDate:'2026-11-02',endDate:'2026-11-08',games:{123:{NLH:143355,PLO6:51237,'MTT-NLH':19000,'MTT-PLO4':1000}},hands:{123:{NLH:128,PLO6:46,'MTT-NLH':430,'MTT-PLO4':20}}},{startDate:'2026-11-09',endDate:'2026-11-15',games:{123:{NLH:999999}}}];
+ const result=gameBreakdown('123',periods);
+ assert.equal(result.from,'2026-11-02');assert.equal(result.to,'2026-11-08');
+ assert.deepEqual(result.rows,[{name:'НЛХ',rake:1433.55,hands:128},{name:'ПЛО6',rake:512.37,hands:46},{name:'МТТ',rake:200,hands:450}]);
+ assert.equal(gameBreakdown('123',[]),null);
+});

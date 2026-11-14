@@ -22,6 +22,26 @@ for(const period of input.periods||[]){
 }
 periods.sort((a,b)=>a.startDate.localeCompare(b.startDate));
 for(let i=1;i<periods.length;i++)if(periods[i].startDate<=periods[i-1].endDate)throw Error('Overlapping report periods');
+for(const arg of process.argv.filter(a=>a.startsWith('--hands-source='))){
+ const raw=JSON.parse(fs.readFileSync(arg.slice(15),'utf8'));
+ const period=periods.find(p=>p.startDate===raw.startDate&&p.endDate===raw.endDate);
+ const club=raw.clubs?.find(c=>String(c.id)==='758417');
+ if(!period||!club||!Array.isArray(raw.headers))throw Error('Hands report period or club mismatch');
+ const anchor=raw.headers.indexOf('Total Payout');
+ if(anchor<0||raw.headers[anchor+1]!=='Total'||raw.headers[anchor+2]!=='AOF')throw Error('Unknown hands section');
+ const start=anchor+2,end=raw.headers.indexOf('Send Out',start),hands={},rakeByPlayer={};
+ if(end<start)throw Error('Missing hands section end');
+ for(const row of club.rows){
+  const id=String(row[2]),values=hands[id]||{};let rowHands=0;
+  const reportRake=Math.round((Number(row[30]||0)+Number(row[44]||0)+Number(row[49]||0))*100);
+  rakeByPlayer[id]=(rakeByPlayer[id]||0)+reportRake;
+  for(let i=start;i<end;i++){const n=Number(row[i]||0);if(!Number.isSafeInteger(n)||n<0)throw Error('Invalid hand count');rowHands+=n;if(n)values[raw.headers[i]]=(values[raw.headers[i]]||0)+n;}
+  const total=Number(row[start-1]||0);if(rowHands!==total)throw Error('Hand totals do not reconcile');
+  if(Object.keys(values).length)hands[id]=values;
+ }
+ for(const [id,rake] of Object.entries(rakeByPlayer))if(rake!==Number(period.rake[id]||0))throw Error('Rake and hands report mismatch');
+ period.hands=hands;
+}
 const target=path.resolve(__dirname,'../lib/support-rake-reports.json');
 fs.writeFileSync(target,JSON.stringify({clubId:'758417',periods})+'\n');
 console.log(JSON.stringify({periods:periods.length,skipped,from:periods[0]?.startDate,to:periods.at(-1)?.endDate,bytes:fs.statSync(target).size}));

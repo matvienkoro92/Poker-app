@@ -313,3 +313,19 @@ counts share a bounded, deduplicated scan cached for 15 minutes; individual
 cards retain their 12-hour metrics cache. Missing sources are distinguished from
 zero activity. Favorite game describes report rake, not a stated preference.
 The report sync artifact now includes per-game rake as well as weekly totals.
+
+Support-card deposits use a player-filtered Redis snapshot: the server filters
+ledger records by the confirmed Poker21 account-link graph before returning them.
+The existing deposit matcher still excludes voided records, transfers and bonus
+credits and resolves split allocations. Other tracking reports keep the shared
+full-ledger read. This avoids transferring the full journal for each player card.
+Internal notes retain author labels without a separate notes-section heading.
+
+The favorite-game sentence is replaced by per-game rake and hand counts from the
+latest complete report with both metrics. This block shows its date range and
+sorts descending by rake; MTT and SNG variants roll up to their respective groups.
+The source calls these counts Hands, not games/tournaments. Add the matching raw
+club-report JSON when syncing, for example `--hands-source=/path/to/clubs.json`.
+The sync validates player rake against the archive and reconciles hand subtotals
+with each player's total. It never combines counts from one week with fees from
+several months. Other report periods remain available for monthly estimates.
