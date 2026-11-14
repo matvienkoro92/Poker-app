@@ -30,6 +30,22 @@ test('bare command asks next amount; amount response issues a gross/credit link 
  const count=f.sent.length;await f.handle(f.message('2000',2));assert.equal(f.sent.length,count);
  assert.equal(f.cleared[0][1],777);const state=JSON.parse(f.store.get('ledger'));assert.equal(state.paymentLinkIssues.length,1);assert.equal(f.botMirrored.at(-1)[4].paymentLink.providerId,'prodamus');assert.equal(f.botMirrored.at(-1)[4].paymentLink.amount,200000);assert.equal(state.channelOperations,undefined);assert.equal(f.mirrored[0][2].includePrivateCommands,true);
 });
+test('payment buttons close the old form and restart or cancel the request',async()=>{
+ for(const action of ['restart','cancel']){
+  const f=fixture();await f.handle(f.message('деп 1000'));
+  const payment=f.sent[0];assert.equal(payment.body.reply_markup.inline_keyboard[0][0].style,'success');
+  assert.equal(payment.body.reply_markup.inline_keyboard[1][0].text,'Взять другую сумму');
+  assert.equal(payment.body.reply_markup.inline_keyboard[2][0].text,'Отмена');
+  const click={callback_query:{id:action,data:'club:player-deposit:'+action,from:{id:777},message:{message_id:101,chat:{id:777,type:'private'}}}};
+  await f.handle(click);
+  assert.equal(f.sent.find(x=>x.method==='editMessageText').body.message_id,101);
+  assert.equal(f.sent.find(x=>x.method==='editMessageText').body.reply_markup.inline_keyboard.length,0);
+  assert.match(f.sent.at(-1).body.text,action==='restart'?/На какую сумму/:/отменён/);
+  assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),action==='restart');
+  const count=f.sent.length;await f.handle(click);assert.equal(f.sent.length,count);
+  if(action==='restart'){await f.handle(f.message('1500',5));assert.match(f.sent.at(-1).body.text,/Пополнение игрового счёта/);}
+ }
+});
 test('direct amount and pulse button share flow; cancellation and unrelated commands stay safe',async()=>{
  const f=fixture();await f.handle(f.message('деп 1000'));assert.equal(f.sent.length,1);await f.handle(f.message('деп 1000'));assert.equal(f.sent.length,1);
  await f.handle({callback_query:{id:'button-1',data:'club:player-deposit',from:{id:777},message:{message_id:4,chat:{id:777,type:'private'}}}});
@@ -248,7 +264,7 @@ test('requisites message lets the player change the amount with a plain number',
 test('payment link supports a new amount and plain Отмена without duplicate issuance',async()=>{
  const f=fixture();await f.handle(f.message('деп 1000'));
  assert.match(f.sent.at(-1).body.text,/После оплаты напишите ваш ID и ID клуба\./);
- assert.match(f.sent.at(-1).body.text,/Чтобы пополнить другую сумму/);
+ assert.equal(f.sent.at(-1).body.reply_markup.inline_keyboard[1][0].text,'Взять другую сумму');
  await f.handle(f.message('1500',2));
  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,2);
  await f.handle(f.message('Отмена',3));assert.match(f.sent.at(-1).body.text,/Запрос пополнения отменён/);

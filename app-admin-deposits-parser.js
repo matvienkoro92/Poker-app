@@ -96,7 +96,12 @@
       recipient=nameText.split(/\n/).map(function(line){return line.trim().replace(/^[,;:—-]+\s*|[,;]+$/g,'');}).find(function(line){return /^(?:[А-ЯЁ][а-яё]+\s+){1,2}(?:[А-ЯЁ][а-яё]+|[А-ЯЁ]\.?)$/.test(line)&&looksLikeRecipient(line);})||'';
     }
     var amounts = [], re = /(?:сумма|выведите|выведи|вывести|вывод|выплатите|выплатить|к выплате|остаток)[ ,\t]*(?:(?:пожалуйста|плиз|нужен|нужно|надо)[ ,\t]*)*[:—=-]?\s*((?:\d{1,3}(?:[ ]\d{3})+|\d+)(?:[.,]\d{1,2})?[ \t]*[кk]?)(?!\d|[.,]\d)(?:\s*(?:₽|руб\.?|р\.?))?/gi, match;
-    while ((match = re.exec(cleaned))) { var n = money(match[1]); if (n) amounts.push(n); }
+    while ((match = re.exec(cleaned))) {
+      var amountText=match[1];
+      // A separated Cyrillic «к» before «с <room>» is message prose, not thousands.
+      if(/[ \t]+к$/i.test(amountText)&&/^[ \t]+с(?:о)?[ \t]+(?:Х[ -]?покер|X(?:[ -]?poker)?|P21|Покер[ -]*21|Poker[ -]*21|Supr(?:ema)?|Супрема|PP(?:poker)?|ПП[ -]?покер)(?=\s|[,;.]|$)/i.test(cleaned.slice(match.index+match[0].length)))amountText=amountText.replace(/[ \t]+к$/i,'');
+      var n = money(amountText); if (n) amounts.push(n);
+    }
     if (!amounts.length) {
       re = /(?<![\d.,])((?:\d{1,3}(?:[ ]\d{3})+|\d+)(?:[.,]\d{1,2})?)\s*(?:₽|руб\.?|р\.?)(?![а-яё])/gi;
       while ((match = re.exec(noCards.replace(/(?:\+?7|8)[ (.-]*\d{3}[ ).-]*\d{3}[ .-]*\d{2}[ .-]*\d{2}/g, ' ')))) { var m = money(match[1]); if (m) amounts.push(m); }

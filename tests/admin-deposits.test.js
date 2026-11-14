@@ -180,6 +180,13 @@ test('USDT withdrawal recognizes thousands, preceding ID and wallet and saves wi
  assert.equal(parser.parse('айди\nUSDT').playerId,'');
 });
 
+test('withdrawal amount ignores a separated к before the source room',()=>{
+ const p=parser.parse('Вывести 5000 к с Х покер id 4307998\n\nПо номеру телефона 89064333905 СБЕРБАНК');
+ assert.equal(p.amount,500000);assert.equal(p.room,'X');assert.equal(p.playerId,'4307998');assert.equal(p.phone,'+79064333905');assert.equal(p.bank,'СБЕРБАНК');
+ assert.equal(parser.parse('Вывести 5к с Х покер id 4307998').amount,500000);
+ assert.equal(parser.parse('Вывести 5 к').amount,500000);
+});
+
 test('club IDs identify four rooms without replacing the player ID',()=>{
  for(const [club,room] of Object.entries({'758417':'P21','1786376':'X','19645':'Supr','1004444':'PP'})){
   const p=parser.parse('айди клуба '+club+'\n655861 айди\nВывод 15к');assert.equal(p.room,room);assert.equal(p.playerId,'655861');assert.equal(p.amount,1500000);
