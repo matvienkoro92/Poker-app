@@ -42,7 +42,7 @@ test('card bolds identity and rake with UTF-16 offsets while leaving period amou
 });
 test('extended card shows deposit details, acquisition, game results, trends and both month rows',async()=>{
  const f=fixture(),text=(await f.api.text({id:777})).replace(/[\u00a0\u202f]/g,' ');
- for(const label of ['В этом месяце:','В прошлом месяце:','Динамика рейка:','Депозиты: 3 000 ₽','Количество: 2','Средний депозит: 1 500 ₽','Последний депозит:','Игры','Общий результат игры:',])assert.ok(text.includes(label),label);
+ for(const label of ['В этом месяце:','В прошлом месяце:','Динамика рейка:','Депозиты: 3 000 ₽','Количество: 2','Средний депозит: 1 500 ₽','Последний депозит:','Игры',])assert.ok(text.includes(label),label);
  assert.ok(text.length<4096);
 });
 
@@ -54,5 +54,5 @@ test('internal note instruction is bold without capturing manager notes below it
 
 test('invitation rows and missing source are hidden',async()=>{
  const f=fixture(),text=await f.api.text({id:777});
- assert.ok(!text.includes('Пригласил:'));assert.ok(!text.includes('Кто пригласил:'));assert.ok(!text.includes('Источник:'));
+ assert.ok(!text.includes('Общий результат игры:'));assert.ok(!text.includes('Пригласил:'));assert.ok(!text.includes('Кто пригласил:'));assert.ok(!text.includes('Источник:'));
 });
