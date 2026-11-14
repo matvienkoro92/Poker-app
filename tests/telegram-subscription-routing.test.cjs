@@ -1,12 +1,13 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{createRequire}=require('node:module');
-test('pending subscription input is handled before manager mirroring and tracking',async()=>{
+test('pending subscription input is handled before manager mirroring and tracking', {timeout:2000},async()=>{
  const path=require.resolve('../lib/api-handlers/telegram-bot-webhook'),local=createRequire(path),module={exports:{}},calls=[];
+ let releaseTimer;const timerPending=new Promise(resolve=>{releaseTimer=resolve;});
  const mocks={
   '../cash-operation-guard':{handle:async()=>false},
-  '../telegram-player-deposit':{handle:async()=>{calls.push('deposit');return false;}},
+  '../telegram-player-deposit':{handle:async()=>{calls.push('deposit');releaseTimer();return false;}},
   '../club-table-subscriptions':{handle:async update=>{calls.push('subscription:'+update.message.text);return true;}},
-  '../telegram-support':{observeTimerActivity:async()=>{},handle:async()=>{calls.push('support');return {handled:true};}},
+  '../telegram-support':{observeTimerActivity:async()=>timerPending,handle:async()=>{calls.push('support');return {handled:true};}},
   '../tracking-link-milestones':{observeUpdate:async()=>calls.push('tracking')},
   '../telegram-club-commands':{command:()=>null}
  };
