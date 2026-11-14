@@ -361,3 +361,9 @@ test('manager notes append to the saved header once, preserve authors and do not
  f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:0}));await f.handle(f.pm('Новое обращение',80));
  assert.match(f.calls.filter(c=>c.method==='editMessageText'&&c.body.message_id===headerId).at(-1).body.text,/Просит написать вечером/);
 });
+
+test('statistics words are never mirrored into manager dialogs',async()=>{
+ const f=fixture();await f.setup();const before=f.calls.length;
+ for(const word of ['Статистика','статистика','СТАТИСТИКА','stats','stat','/stat','/stats','/статистика'])assert.equal((await f.handle(f.pm(word))).handled,false);
+ assert.equal(f.calls.length,before);assert.equal(f.client,null);
+});

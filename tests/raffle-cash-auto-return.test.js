@@ -4,8 +4,9 @@ const seating=require('../lib/raffle-cash-seating');
 const penalties=require('../lib/raffle-seating-penalties');
 const {settleRaffleReadyWindows}=require('../lib/api-handlers/raffles')._test;
 const source=fs.readFileSync(require.resolve('../lib/api-handlers/raffles'),'utf8').split('module.exports.settleCashSeating = ')[1];
-function fixture() {
+function fixture(twoWinners = false) {
   let raffle={id:'r',prizeKind:'cash',participants:[{userId:'1',p21Id:'123'},{userId:'2',p21Id:'456'}],winners:[{userId:'1',p21Id:'123',winnerReady:true,winnerReadyState:'ready',winnerStatus:'ok',winnerStatusAt:'2026-10-09T10:00:00Z',prize:'300 ₽',cashSeatingMonitor:{status:'pending',issuedAt:'2020-01-01T00:00:00Z',userId:'123',amount:300,idempotencyKey:'fixed-return'}}]};
+  if (twoWinners) raffle.winners.push({...raffle.winners[0], userId:'3', p21Id:'789', cashSeatingMonitor:{...raffle.winners[0].cashSeatingMonitor, userId:'789', idempotencyKey:'second-return'}});
   let queued=true,failPayment=false,failSave=false, transfers=0;
   const ledger=new Map(), penaltyEvents=new Set();
   const pipeline=async commands=>commands.map(([op,key,value])=>{
@@ -23,7 +24,7 @@ function fixture() {
     settleRaffleReadyWindows,
     notifyGroupRaffleCompleted:async()=>{}, sendRaffleWinnerNotifications:async()=>{},
     raffleWinnerPoker21PayoutSpec:()=>({}),console:{error(){}},
-    processPoker21DirectChange:async input=>{if(failPayment)throw Error('payment failed');if(!ledger.has(input.idempotencyKey)){transfers++;assert.equal(input.chips,-300);ledger.set(input.idempotencyKey,{status:'completed',completedAt:new Date().toISOString()});}return {operation:ledger.get(input.idempotencyKey)};}};
+    processPoker21DirectChange:async input=>{if(failPayment && input.idempotencyKey==='fixed-return')throw Error('payment failed');if(!ledger.has(input.idempotencyKey)){transfers++;assert.equal(input.chips,-300);ledger.set(input.idempotencyKey,{status:'completed',completedAt:new Date().toISOString()});}return {operation:ledger.get(input.idempotencyKey)};}};
   vm.runInNewContext('module.exports = '+source,ctx);
   return {poll:()=>ctx.module.exports([]),get:()=>raffle,transfers:()=>transfers,penalties:()=>penaltyEvents.size,failPayment:v=>failPayment=v,failSave:()=>failSave=true};
 }
@@ -34,4 +35,14 @@ test('confirmed debit counts as a return once, even if saving after payment fail
 test('failed debit is retried and never enters return totals before confirmation',async()=>{
   const f=fixture();f.failPayment(true);await f.poll();assert.equal(f.transfers(),0);assert.equal(f.penalties(),0);assert.equal(f.get().winners[0].winnerSeatStatus,undefined);
   f.failPayment(false);await f.poll();assert.equal(f.transfers(),1);assert.equal(f.get().winners[0].winnerSeatStatus,'not_seated');
+});
+
+test('one failed return does not block other winners in the same raffle', async()=>{
+  const f=fixture(true); f.failPayment(true); await f.poll();
+  assert.equal(f.get().winners[0].cashSeatingMonitor.status, 'returning');
+  assert.equal(f.get().winners[1].cashSeatingMonitor.status, 'returned');
+  assert.equal(f.transfers(), 1);
+  f.failPayment(false); await f.poll();
+  assert.equal(f.get().winners[0].cashSeatingMonitor.status, 'returned');
+  assert.equal(f.transfers(), 2);
 });

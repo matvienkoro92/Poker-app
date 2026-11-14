@@ -158,3 +158,10 @@ test('statistics command routes only personal requests and never arbitrary targe
  assert.equal(c.command({message:{...message,text:'/статистика 337922'}}),null);
  assert.equal(c.command({message:{...message,chat:{id:-100,type:'supergroup'}}}),null);
 });
+
+test('personal word aliases route to statistics and deposit flows',()=>{
+ const make=text=>({message:{text,chat:{id:777,type:'private'},from:{id:777}}});
+ for(const word of ['stat','stats','/stat','статистика','Статистика'])assert.equal(c.command(make(word)),'player-statistics');
+ for(const word of ['пополнить','депозит'])assert.equal(c.command(make(word)),'player-deposit');
+ for(const word of ['stat','stats','статистика','Статистика','пополнить','депозит']){const update=make(word);update.message.chat={id:-100,type:'supergroup'};assert.equal(c.command(update),null);}
+});

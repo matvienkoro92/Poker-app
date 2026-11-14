@@ -2,7 +2,7 @@
 const envPath=process.argv.find(arg=>arg.startsWith('--env='))?.slice(6);
 if(envPath)process.loadEnvFile(envPath);
 async function main(){
- if(!process.argv.includes('--apply')){console.log('/dep — Пополнить счёт (личные чаты; /деп вводится вручную)');return;}
+ if(!process.argv.includes('--apply')){console.log('/dep — Пополнить счёт\n/stats — Моя статистика\n/create_game — Создать игру');return;}
  const token=process.env.TELEGRAM_BOT_TOKEN||process.env.TELEGRAM_TOKEN||process.env.BOT_TOKEN;
  if(!token)throw Error('Bot token missing');
  async function call(method,body){
@@ -25,15 +25,18 @@ async function main(){
   }
  }
  async function update(scope,language_code,existing){
-  const commands=existing.filter(c=>c.command!=='dep');
-  if(commands.length>=100)throw Error('Command list is full');
-  const index=commands.findIndex(c=>c.command==='create_game');
-  commands.splice(index<0?0:index+1,0,{command:'dep',description:'Пополнить счёт'});
+  const first=[
+   {command:'dep',description:'Пополнить счёт'},
+   {command:'stats',description:'Моя статистика'},
+   existing.find(c=>c.command==='create_game')||{command:'create_game',description:'Создать игру'}
+  ];
+  const commands=first.concat(existing.filter(c=>!['dep','stats','create_game'].includes(c.command)));
+  if(commands.length>100)throw Error('Command list is full');
   await call('setMyCommands',{scope,language_code,commands});
   const saved=await call('getMyCommands',{scope,language_code});
   if(JSON.stringify(saved)!==JSON.stringify(commands))throw Error('Command verification failed');
   updated++;
  }
- console.log('Added /dep and verified '+updated+' private command lists.');
+ console.log('Ordered /dep, /stats, /create_game and verified '+updated+' private command lists.');
 }
 main().catch(error=>{console.error(error.message);process.exitCode=1;});

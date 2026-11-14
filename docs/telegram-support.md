@@ -321,14 +321,17 @@ credits and resolves split allocations. Other tracking reports keep the shared
 full-ledger read. This avoids transferring the full journal for each player card.
 Internal notes retain author labels without a separate notes-section heading.
 
-The favorite-game sentence is replaced by per-game rake and hand counts from the
-latest complete report with both metrics. This block shows its date range and
+The favorite-game sentence is replaced by per-game rake and hand counts from all
+available processed reports. This block shows its full date range and
 sorts descending by rake; MTT and SNG variants roll up to their respective groups.
 The source calls these counts Hands, not games/tournaments. Add the matching raw
 club-report JSON when syncing, for example `--hands-source=/path/to/clubs.json`.
 The sync validates player rake against the archive and reconciles hand subtotals
-with each player's total. It never combines counts from one week with fees from
-several months. Other report periods remain available for monthly estimates.
+with each player's total. When hand counts are available for fewer weeks than rake, they are explicitly
+shown as lower bounds (≥), with the number of covered report weeks below the
+list. Zero hands with incomplete coverage is shown as unavailable. Thus missing
+source weeks are never silently treated as zero hands. The archive remains
+available for monthly estimates.
 
 ## Player statistics command
 
@@ -339,3 +342,43 @@ from groups/bots are ignored. The target always comes from the signed Telegram
 webhook sender, not user-supplied arguments. Manager notes, internal instructions
 and the staff card's profile button are excluded. No group sending scenario is
 added. Replies are deduplicated per sender/message and failed sends can retry.
+
+Historical raffle diagnostics and index initialization use the actual `poker_app:raffle_ids` Redis list in bounded
+pages, deduplicate IDs, and obtain compact prize/winner records server-side in
+small batches with at most three parallel requests. They do not transfer full
+participant lists. Missing/deleted archive keys are skipped consistently with
+the application's raffle archive. Failed reads remain unavailable, not zero.
+Cancelled raffles, failed winners, expired/burned prizes and returned cash-seat
+prizes are excluded; duplicate winner slot IDs count only once per raffle.
+Distinct valid prize slots for the same player remain separate wins.
+
+## Persisted player raffle prize totals
+
+Statistics read `poker_app:raffle_prize_totals:v1:players` and its ready marker,
+with a constant-size read for the canonical account and its Telegram alias.
+They never enumerate raffles, including on a player-cache miss. Until the index
+is initialized, the amount is unavailable instead of triggering a history scan.
+
+Each raffle has a persisted contribution map. Every save or deletion through
+`raffleDataPipeline` changes the raffle and its contributions together. Ordinary
+writes use one Redis script; guarded join transactions append deltas and a
+projection-value guard to the existing atomic write. Retries and unchanged
+saves have zero delta. Prize cancellation, expiration, return, reroll or deletion
+removes the old contribution before adding the new one. The index resolves
+confirmed Telegram-to-account bindings and audited account redirects; it never
+matches people by nickname or by a shared Poker21 ID.
+
+Initialize after deploying the hook with:
+`node scripts/rebuild-raffle-prize-totals.cjs --env=/path/to/env --apply`.
+The rebuild is idempotent, does not modify raffle records, rejects changed source
+snapshots and marks readiness only when all stored source digests still match.
+It is an administrative operation, never a per-player request path. A later
+account-redirect repair should reconcile the index with the same script.
+
+Saved detailed club/union workbooks can be converted with
+`scripts/extract-support-game-report.py --input=... --output=...` using the bundled
+Python runtime. Pass each resulting JSON through `--hands-source=...` during
+sync. Every source's per-player fee totals must reconcile against the complete
+processed week, including players absent from the supplied source; partial or
+mismatched source workbooks are rejected. Current verified hand coverage is five
+of fourteen report weeks over 03.08.2026–08.11.2026.

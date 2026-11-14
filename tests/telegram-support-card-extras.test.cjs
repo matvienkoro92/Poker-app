@@ -26,11 +26,13 @@ test('acquisition counts unique invitations and selects the earliest saved track
  const result=await acquisition('ID123456',777,run);
  assert.equal(result.invitedCount,2);assert.equal(result.invitedBy,'Алексей · ID222222');assert.equal(result.source,'Telegram → Канал → Ноябрь');
 });
-test('game breakdown groups tournaments, matches fee and hand periods, and orders by rake',()=>{
+test('game breakdown covers all available weeks, groups tournaments and marks partial hand coverage',()=>{
  const {gameBreakdown}=require('../lib/telegram-support-card-extras');
- const periods=[{startDate:'2026-11-02',endDate:'2026-11-08',games:{123:{NLH:143355,PLO6:51237,'MTT-NLH':19000,'MTT-PLO4':1000}},hands:{123:{NLH:128,PLO6:46,'MTT-NLH':430,'MTT-PLO4':20}}},{startDate:'2026-11-09',endDate:'2026-11-15',games:{123:{NLH:999999}}}];
+ const periods=[{startDate:'2026-10-26',endDate:'2026-11-01',games:{123:{NLH:50000}},hands:{123:{NLH:10}}},{startDate:'2026-11-02',endDate:'2026-11-08',games:{123:{NLH:143355,PLO6:51237,'MTT-NLH':19000,'MTT-PLO4':1000}},hands:{123:{NLH:128,PLO6:46,'MTT-NLH':430,'MTT-PLO4':20}}}];
  const result=gameBreakdown('123',periods);
- assert.equal(result.from,'2026-11-02');assert.equal(result.to,'2026-11-08');
- assert.deepEqual(result.rows,[{name:'НЛХ',rake:1433.55,hands:128},{name:'ПЛО6',rake:512.37,hands:46},{name:'МТТ',rake:200,hands:450}]);
+ assert.equal(result.from,'2026-10-26');assert.equal(result.to,'2026-11-08');assert.equal(result.handsComplete,true);
+ assert.deepEqual(result.rows,[{name:'НЛХ',rake:1933.55,hands:138},{name:'ПЛО6',rake:512.37,hands:46},{name:'МТТ',rake:200,hands:450}]);
+ const partial=gameBreakdown('123',[...periods,{startDate:'2026-11-09',endDate:'2026-11-15',games:{123:{NLH:10000}}}]);
+ assert.equal(partial.rows[0].rake,2033.55);assert.equal(partial.rows[0].hands,138);assert.equal(partial.handsComplete,false);assert.equal(partial.reportCount,3);assert.equal(partial.handsReportCount,2);
  assert.equal(gameBreakdown('123',[]),null);
 });

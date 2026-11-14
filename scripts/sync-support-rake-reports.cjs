@@ -39,7 +39,7 @@ for(const arg of process.argv.filter(a=>a.startsWith('--hands-source='))){
   const total=Number(row[start-1]||0);if(rowHands!==total)throw Error('Hand totals do not reconcile');
   if(Object.keys(values).length)hands[id]=values;
  }
- for(const [id,rake] of Object.entries(rakeByPlayer))if(rake!==Number(period.rake[id]||0))throw Error('Rake and hands report mismatch');
+ for(const id of new Set([...Object.keys(rakeByPlayer),...Object.keys(period.rake)]))if(Number(rakeByPlayer[id]||0)!==Number(period.rake[id]||0))throw Error('Rake and hands report mismatch');
  period.hands=hands;
 }
 const target=path.resolve(__dirname,'../lib/support-rake-reports.json');

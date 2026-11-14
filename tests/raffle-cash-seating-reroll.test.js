@@ -28,8 +28,8 @@ test('confirmed cash return rerolls a ready issued winner once and preserves the
   assert.equal(replacement.cashSeatingMonitor, undefined);
   assert.equal(settleRaffleReadyWindows(raffle, now).rerolled, false);
   const text = buildRaffleCompletedAnnouncement(raffle, now.getTime());
-  assert.match(text, /Победители реролла:\n• Новый/);
-  assert.match(text, /@first · ID 11 ❌ — не сел за 10 минут/);
+  assert.match(text, /Победители реролла:\n⏳ Новый/);
+  assert.match(text, /❌ Первый — @first · ID 11\nНе сел за 10 минут/);
   assert.doesNotMatch(text, /@first ✅/);
 });
 test('pending, seated and unconfirmed return never reroll a ready winner', () => {
@@ -60,4 +60,27 @@ test('expired and returned prize slots cannot be issued again', () => {
   for (const winner of [{winnerReady:true}, {winnerReadyState:'pending'}, {cashSeatingMonitor:{status:'seated'}}]) {
     assert.equal(raffleWinnerPrizeForfeited(winner), false);
   }
+});
+
+test('a candidate ineligible for the first group remains available for a later group', () => {
+  const raffle = fixture();
+  raffle.groups = [{prize:'1000 ₽', count:1, accessLevel:10}, {prize:'300 ₽', count:1, accessLevel:1}];
+  raffle.participants = [{userId:'3', p21Id:'33', pokerPlusStatusLevel:1}];
+  raffle.winners.push({...raffle.winners[0], userId:'4', p21Id:'44', groupIndex:1, winnerReadySlotId:'initial_1'});
+  const result = settleRaffleReadyWindows(raffle, now);
+  assert.equal(result.rerollWinners.length, 1);
+  assert.equal(result.rerollWinners[0].groupIndex, 1);
+  assert.equal(result.rerollWinners[0].userId, '3');
+  assert.equal(raffle.winners[0].winnerBurned, true);
+  assert.equal(result.rerollWinners[0].winnerReadyDeadlineAt, '2026-10-10T10:15:00.000Z');
+});
+test('ready deadline expires exactly at the boundary, with a fresh window for the replacement', () => {
+  const raffle = fixture('pending');
+  Object.assign(raffle.winners[0], {winnerReady:false, winnerReadyState:'pending', winnerReadyDeadlineAt:now.toISOString()});
+  delete raffle.winners[0].cashSeatingMonitor;
+  assert.equal(settleRaffleReadyWindows(raffle, new Date(now.getTime()-1)).rerolled, false);
+  const result = settleRaffleReadyWindows(raffle, now);
+  assert.equal(result.rerolled, true);
+  assert.equal(result.rerollWinners[0].winnerReadyDeadlineAt, '2026-10-10T10:15:00.000Z');
+  assert.equal(settleRaffleReadyWindows(raffle, now).rerolled, false);
 });

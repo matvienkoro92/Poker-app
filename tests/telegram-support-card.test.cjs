@@ -12,19 +12,19 @@ function fixture({linked=true,broken=false}={}){
    if(key==='poker_app:pokerplus_profiles')return {result:JSON.stringify({pokerPlusUserId:'123',totalCounter:{fee:550}})};
    return {result:key.includes(':short:free:')?JSON.stringify({wins:3,losses:2,draws:1}):null};
   }
-  if(op==='SMEMBERS')return {result:['raffle1']};
-  if(op==='MGET')return {result:[JSON.stringify({groups:[{prize:'1 000 ₽'}],winners:[{accountId:'ID123456',userId:'tg_777',groupIndex:0},{accountId:'ID999999',groupIndex:0}]})]};
+  if(op==='LRANGE')return {result:['raffle1']};
+  if(op==='EVAL')return {result:JSON.stringify([{groups:[{prize:'1 000 ₽'}],winners:[{accountId:'ID123456',userId:'tg_777',groupIndex:0},{accountId:'ID999999',groupIndex:0}]}])};
   throw Error(op);
  })};
- const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./account-canonical'?{canonicalAccountId:async id=>id}:id==='./tracking-deposits'?{readDeposits:async()=>({available:true,deposits:[{amount:1000},{amount:2000}]})}:id==='./daily-poker-lifetime'?{lifetimePrizes:async()=>({ticketAmount:100,bonusAmount:200})}:id==='./telegram-support-player'?{readPlayerIdentity:async()=>({name:'Денис',poker21Id:'123'})}:require('../lib/'+id.slice(2)),Intl,Date};
+ const ctx={module:{exports:{}},require:id=>id==='./redis'?redis:id==='./account-canonical'?{canonicalAccountId:async id=>id}:id==='./tracking-deposits'?{readDeposits:async()=>({available:true,deposits:[{amount:1000},{amount:2000}]})}:id==='./raffle-prize-totals'?{read:async()=>({available:true,amount:1000})}:id==='./daily-poker-lifetime'?{lifetimePrizes:async()=>({ticketAmount:100,bonusAmount:200})}:id==='./telegram-support-player'?{readPlayerIdentity:async()=>({name:'Денис',poker21Id:'123'})}:require('../lib/'+id.slice(2)),Intl,Date};
  vm.runInNewContext(fs.readFileSync('lib/telegram-support-card.js','utf8'),ctx);return {api:ctx.module.exports,calls};
 }
 test('card uses application data, counts a raffle slot once and caches player totals',async()=>{
  const f=fixture(),user={id:777,first_name:'Денис'};
  const s=await f.api.stats(user,{poker21Id:'123'});
  assert.equal(s.rake,550);assert.equal(s.deposits,3000);assert.equal(s.raffles,1000);assert.equal(s.spins,300);assert.equal(s.backgammon,6);
- const before=f.calls.filter(c=>c[0]==='SMEMBERS'||c[0]==='HGET'&&c[1].includes('profiles')).length;
- await f.api.stats(user,{poker21Id:'123'});assert.equal(f.calls.filter(c=>c[0]==='SMEMBERS'||c[0]==='HGET'&&c[1].includes('profiles')).length,before);
+ const before=f.calls.filter(c=>c[0]==='LRANGE'||c[0]==='HGET'&&c[1].includes('profiles')).length;
+ await f.api.stats(user,{poker21Id:'123'});assert.equal(f.calls.filter(c=>c[0]==='LRANGE'||c[0]==='HGET'&&c[1].includes('profiles')).length,before);
 });
 test('unlinked and unavailable data are not displayed as zero',async()=>{
  const unlinked=fixture({linked:false});assert.match(await unlinked.api.text({id:777}),/Рейк: нет привязки/);
@@ -38,7 +38,7 @@ test('card bolds identity and rake with UTF-16 offsets while leaving period amou
  const f=fixture(),text=await f.api.text({id:777,first_name:'Денис'}),entities=f.api.entities(text);
  assert.equal(entities.length,3);assert.equal(text.slice(entities[0].offset,entities[0].offset+entities[0].length),'👤 Диалог с Денис\n🎮 Poker21: 123');
  assert.equal(text.slice(entities[1].offset,entities[1].offset+entities[1].length),'💰 Рейк: 550 ₽');
- for(const line of text.split('\n').filter(Boolean))assert.match(line,/^(👤|🎮|💰|📅|🗓|📆|💳|🏆|🎰|🎲|📝|📈|🔢|💵|📊|👥|🤝|📍|🃏)/u);
+ for(const line of text.split('\n').filter(Boolean))assert.match(line,/^(👤|🎮|💰|📅|🗓|📆|💳|🏆|🎰|🎲|📝|📈|🔢|💵|📊|👥|🤝|📍|🃏|📋)/u);
 });
 test('extended card shows deposit details, acquisition, game results, trends and both month rows',async()=>{
  const f=fixture(),text=(await f.api.text({id:777})).replace(/[\u00a0\u202f]/g,' ');
@@ -55,4 +55,8 @@ test('internal note instruction is bold without capturing manager notes below it
 test('invitation rows and missing source are hidden',async()=>{
  const f=fixture(),text=await f.api.text({id:777});
  assert.ok(!text.includes('Общий результат игры:'));assert.ok(!text.includes('Пригласил:'));assert.ok(!text.includes('Кто пригласил:'));assert.ok(!text.includes('Источник:'));
+});
+test('raffle totals exclude burned or expired prizes and duplicate slots while preserving separate prizes',()=>{
+ const f=fixture();const w={accountId:'ID123456',prize:'100 ₽'};
+ const total=f.api.raffleTotal([{winners:[{...w,winnerReadyExpired:true},{...w,winnerBurned:true},{...w,winnerReadyState:'burned'},{...w,cashSeatingMonitor:{status:'returned'}},{...w,winnerReadySlotId:'first'},{...w,winnerReadySlotId:'first'},{...w,winnerReadySlotId:'second'}]}],['ID123456']);assert.equal(total,200);
 });

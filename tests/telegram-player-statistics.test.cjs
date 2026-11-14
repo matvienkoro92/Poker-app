@@ -13,8 +13,8 @@ function fixture(){
 }
 const update=(text='/статистика')=>({message:{text,message_id:20,chat:{id:777,type:'private'},from:{id:777,first_name:'Игрок'}}});
 test('only exact personal statistics commands are accepted',()=>{
- const f=fixture();for(const text of ['/статистика','/СТАТИСТИКА','/stats','/статистика@Poker_dvatuza_bot'])assert.equal(f.api.isCommand(update(text)),true);
- for(const text of ['/статистика 888','/stats@Other_bot','статистика'])assert.equal(f.api.isCommand(update(text)),false);
+ const f=fixture();for(const text of ['/статистика','/СТАТИСТИКА','/stats','/stat','статистика','Статистика','СТАТИСТИКА','stats','stat','STAT','/stat@Poker_dvatuza_bot','/статистика@Poker_dvatuza_bot'])assert.equal(f.api.isCommand(update(text)),true);
+ for(const text of ['/статистика 888','/stats@Other_bot','моя статистика'])assert.equal(f.api.isCommand(update(text)),false);
  const group=update();group.message.chat.type='supergroup';assert.equal(f.api.isCommand(group),false);
  const other=update();other.message.from.id=999;assert.equal(f.api.isCommand(other),false);
  const bot=update();bot.message.from.is_bot=true;assert.equal(f.api.isCommand(bot),false);
