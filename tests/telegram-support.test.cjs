@@ -284,7 +284,7 @@ test('already closed topic is remembered on Telegram rejection and never reopene
  assert.equal((await f.handle(u)).handled,true);assert.equal(f.client.topicClosed,true);
  assert.equal(f.calls.filter(c=>c.method==='reopenForumTopic').length,0);
  const before=f.calls.length;await f.handle(f.pm('Следующее',27));assert.equal(f.calls.length,before);
- assert.equal(f.client.lastInboundMessageId,1);
+ assert.equal(f.client.lastInboundMessageId,26);
  }
 });
 test('reopen policy blocks other groups and stale or unknown topics',async()=>{
@@ -393,4 +393,12 @@ test('consecutive player messages omit header, restore it after manager answer o
  const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;const client=JSON.parse(f.store.get(key));client.lastInboundAt=Date.now()-11*60*1000;f.store.set(key,JSON.stringify(client));
  await f.handle(f.pm('После паузы',4));assert.ok(texts().some(t=>t.startsWith('👤')&&t.endsWith('После паузы')));
  const media=f.pm('',5);delete media.message.text;media.message.photo=[{file_id:'fixture'}];const count=texts().length;await f.handle(media);assert.equal(texts().length,count);
+});
+
+test('waiting icon is published before relaying a new message, including after an answered conversation',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm('Первый вопрос',1));await f.handle(f.groupMessage('Ответ',50));
+ const start=f.calls.length;await f.handle(f.pm('Новый вопрос',2));const calls=f.calls.slice(start);
+ const red=calls.findIndex(c=>c.method==='editForumTopic'&&c.body.icon_custom_emoji_id==='5379748062124056162');
+ const message=calls.findIndex(c=>c.method==='sendMessage'&&c.body.text.endsWith('Новый вопрос'));
+ assert.ok(red>=0&&message>red);assert.equal(f.client.lastAnsweredInboundId,1);assert.equal(f.client.lastInboundMessageId,2);
 });
