@@ -406,3 +406,14 @@ depend on QStash credentials. Queue failure leaves deletion disabled.
 Control messages, callback owners and private deletion permits are restricted to
 stored timer records by `lib/telegram-group-policy.js`. Timer activity never
 records a deposit or creates a campaign.
+
+### Resolve without replying
+
+The pinned player card has one «✅ Закрыть без ответа» button. Mirrored player
+messages have no extra status buttons. Only an authorised manager in the mapped
+support topic can use the current pinned card. It acknowledges the latest inbound
+message, removes the lead from the waiting queue and sets the green icon without
+sending anything to the player or closing the Telegram topic. Retried callbacks
+cannot acknowledge a newer message. The next inbound message restores waiting.
+Existing pinned cards can receive the button without refreshing their contents
+with `refreshResolveButton(token,group,leadId)`.

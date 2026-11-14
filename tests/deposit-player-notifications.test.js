@@ -22,20 +22,21 @@ test('other rooms require explicit saved account links, never matching nicknames
  const state={playerAccounts:[{profileKey:'P21|987654',room:'X',playerId:'123456'}]};assert.equal(poker21Anchor(state,entry({room:'X'})),'987654');
  state.playerAccounts.push({profileKey:'P21|111111',room:'X',playerId:'123456'});assert.equal(poker21Anchor(state,entry({room:'X'})),'');
 });
-function mocked({binding='ID123456',forward='123456',primary='tg_42',aliases=['tg_42'],owners={tg_42:'ID123456'},sendResults=[{ok:true}]}={}){
- const mod={exports:{}},events=new Map([['evt',JSON.stringify({...entry(),id:'evt',text:'Выплачено: 100 ₽'})]]),locks=new Map(),calls=[],sends=[];
+function mocked({binding='ID123456',forward='123456',primary='tg_42',aliases=['tg_42'],owners={tg_42:'ID123456'},sendResults=[{ok:true}],mirrorFailures=0}={}){
+ const mod={exports:{}},events=new Map([['evt',JSON.stringify({...entry(),id:'evt',text:'Выплачено: 100 ₽'})]]),locks=new Map(),calls=[],sends=[],mirrors=[];
  const redis={pipeline:async commands=>commands.map(c=>{calls.push(c);let result=null;
   if(c[0]==='HGET'){if(c[1].endsWith('accounts_by_user_id'))result=binding;else if(c[1]==='poker_app:pokerplus_user_ids')result=forward;else if(c[1]==='poker_app:id_to_user')result=primary;else if(c[1]==='poker_app:visitor_dt_ids')result=owners[c[2]];else result=events.get(c[2])||null;}
   else if(c[0]==='SMEMBERS')result=aliases;
   else if(c[0]==='GET')result=JSON.stringify({entries:[]});
   else if(c[0]==='SET'){if(!locks.has(c[1])){locks.set(c[1],c[2]);result='OK';}}
+  else if(c[0]==='HSET'){events.set(c[2],c[3]);result=1;}
   else if(c[0]==='HDEL')events.delete(c[2]);
   else if(c[0]==='EVAL'){if(locks.get(c[3])===c[4])locks.delete(c[3]);}
   else if(c[0]==='ZADD'||c[0]==='ZREM')result=1;
   else if(c[0]==='ZRANGEBYSCORE')result=[...events.keys()];
   else throw Error('Unexpected '+c[0]);return {result};})};
- vm.runInNewContext(fs.readFileSync(require.resolve('../lib/deposit-player-notifications'),'utf8'),{module:mod,exports:mod.exports,require:id=>id==='./redis'?redis:id==='./admin-deposits'?require('../lib/admin-deposits'):id==='./account-canonical'?{canonicalAccountId:async id=>id}:id==='./telegram-group-policy'?{guardedFetch:async(url,options)=>{sends.push(JSON.parse(options.body));return {json:async()=>sendResults.shift()||{ok:true}};}}:require(id),AbortSignal,Intl});
- return {api:mod.exports,calls,sends,events};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/deposit-player-notifications'),'utf8'),{module:mod,exports:mod.exports,require:id=>id==='./redis'?redis:id==='./admin-deposits'?require('../lib/admin-deposits'):id==='./account-canonical'?{canonicalAccountId:async id=>id}:id==='./telegram-support'?{mirrorBotMessage:async(...args)=>{mirrors.push(args);if(mirrorFailures-->0)throw Error('Topic copy unavailable');return true;}}:id==='./telegram-group-policy'?{guardedFetch:async(url,options)=>{sends.push(JSON.parse(options.body));const result=sendResults.shift()||{ok:true};if(result.ok&&!result.result)result.result={message_id:100+sends.length};return {json:async()=>result};}}:require(id),AbortSignal,Intl});
+ return {api:mod.exports,calls,sends,events,mirrors};
 }
 test('recipient must have a verified current Poker21 binding and current Telegram ownership',async()=>{
  assert.equal(await mocked().api.recipient({},entry()),'42');
@@ -89,4 +90,18 @@ test('creation remains enabled and queued creation is delivered',async()=>{
  for(const action of [undefined,'create']){
   const m=mocked();m.events.set('evt',JSON.stringify({...result,action}));await m.api.retryPending('token',now);assert.equal(m.sends.length,1);
  }
+});
+
+test('creation notification is copied to the same player support topic using its actual Telegram message ID',async()=>{
+ const m=mocked();m.events.set('evt',JSON.stringify({...event(entry(),'create'),id:'evt'}));await m.api.deliver('evt','token',now);
+ assert.equal(m.sends.length,1);assert.equal(m.mirrors.length,1);assert.equal(m.mirrors[0][0],'token');assert.equal(m.mirrors[0][1],'42');assert.equal(m.mirrors[0][2],101);assert.equal(m.mirrors[0][3].id,42);assert.equal(m.events.size,0);
+});
+test('failed support copy retries without sending the withdrawal notification twice',async()=>{
+ const m=mocked({mirrorFailures:1});m.events.set('evt',JSON.stringify({...event(entry(),'create'),id:'evt'}));
+ assert.equal(await m.api.deliver('evt','token',now),false);assert.equal(m.events.size,1);assert.equal(m.sends.length,1);
+ assert.equal(await m.api.deliver('evt','token',now+60000),true);assert.equal(m.sends.length,1);assert.equal(m.mirrors.length,2);assert.equal(m.mirrors[0][2],m.mirrors[1][2]);assert.equal(m.events.size,0);
+});
+test('payout notifications and failed private deliveries do not introduce new support copies',async()=>{
+ const m=mocked();await m.api.deliver('evt','token',now);assert.equal(m.mirrors.length,0);
+ const blocked=mocked({sendResults:[{ok:false,error_code:403}]});blocked.events.set('evt',JSON.stringify({...event(entry(),'create'),id:'evt'}));await blocked.api.deliver('evt','token',now);assert.equal(blocked.mirrors.length,0);
 });

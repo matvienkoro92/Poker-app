@@ -28,7 +28,7 @@ function fixture(){
  const groupMessage=(text='Ответ',message_id=5,id=MANAGER,tid=101)=>({message:{message_id,text,message_thread_id:tid,chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id}}});
  const callback=(data='support:take',id=MANAGER,cbid='callback-1',tid=101)=>({callback_query:{id:cbid,data,from:{id},message:{message_id:500,message_thread_id:tid,chat:{id:GROUP,type:'supergroup'},from:{id:1,is_bot:true}}}});
  const setup=()=>handle({message:{message_id:1,text:'/support_setup',chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id:OWNER}}});
- return {handle,setup,store,calls,pm,groupMessage,callback,policy,get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:(chatId,options)=>support.clearAwaitingAmountNotice('fixture-token',chatId,options),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500,description='',once=false){failMethod=method;failCode=code;failDescription=description;failOnce=once;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
+ return {handle,setup,store,calls,pm,groupMessage,callback,policy,refreshResolveButton:()=>support.refreshResolveButton('fixture-token',GROUP,String(LEAD)),get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:(chatId,options)=>support.clearAwaitingAmountNotice('fixture-token',chatId,options),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500,description='',once=false){failMethod=method;failCode=code;failDescription=description;failOnce=once;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
 }
 test('disabled by default; only explicit owner setup in a forum binds the group',async()=>{
  const f=fixture();assert.equal((await f.handle(f.pm())).handled,false);assert.equal(f.calls.length,0);
@@ -325,7 +325,7 @@ test('card has no return button and refreshes only after twelve hours of activit
  const f=fixture();await f.setup();await f.handle(f.pm());
  const headerId=f.client.headerMessageId;
  const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(header.body.reply_markup.inline_keyboard.length,1);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
+ assert.equal(header.body.reply_markup.inline_keyboard.length,2);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
  const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
  f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-11*60*60*1000}));
  await f.handle(f.pm('До срока',60));
@@ -342,7 +342,7 @@ test('profile privacy restriction does not prevent creation of the player card',
  const f=fixture();await f.setup();f.fail('sendMessage',400,'Bad Request: BUTTON_USER_PRIVACY_RESTRICTED',true);
  await f.handle(f.pm());assert.equal(f.client.headerSent,true);
  const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,1);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,0);
+ assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,2);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,1);
 });
 test('manager notes append to the saved header once, preserve authors and do not refresh stats or contact lead',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
@@ -416,4 +416,27 @@ test('timer policy edits only mapped controls and deletes only the exact authori
  record.state='deleting';f.store.set(p+'timer:'+id,JSON.stringify(record));assert.equal((await call('deleteMessage',{chat_id:LEAD,message_id:88})).ok,true);
  assert.equal((await call('deleteMessage',{chat_id:LEAD,message_id:89})).status,403);
  assert.equal((await call('deleteMessage',{chat_id:888,message_id:88})).status,403);
+});
+
+function resolveCallback(f,actor=MANAGER,callbackId='resolve-1'){
+ const cb=f.callback('support:resolve',actor,callbackId);cb.callback_query.message.message_id=f.client.headerMessageId;return cb;
+}
+test('one resolve button lives in the pinned card, never under player messages',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm('Псб',1));
+ const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text.startsWith('Диалог с'));assert.equal(header.body.reply_markup.inline_keyboard.flat().filter(b=>b.callback_data==='support:resolve').length,1);
+ const incoming=f.calls.find(c=>c.method==='sendMessage'&&c.body.text.endsWith('Псб'));assert.equal(incoming.body.reply_markup,undefined);
+ const before=f.calls.filter(c=>['sendMessage','copyMessage'].includes(c.method)&&String(c.body.chat_id)===String(LEAD)).length;
+ const cb=resolveCallback(f);await f.handle(cb);await f.handle(cb);assert.equal(f.client.appliedIconId,'5237699328843200968');assert.match(f.board.text,/Ждут ответа: 0/);
+ assert.equal(f.calls.filter(c=>['sendMessage','copyMessage'].includes(c.method)&&String(c.body.chat_id)===String(LEAD)).length,before);assert.equal(f.client.resolvedWithoutReply.by,String(MANAGER));
+ await f.handle(f.pm('Новый вопрос',2));assert.equal(f.client.appliedIconId,'5379748062124056162');await f.handle(cb);assert.equal(f.client.lastAnsweredInboundId,1);
+ await f.handle(resolveCallback(f,MANAGER,'resolve-2'));assert.equal(f.client.lastAnsweredInboundId,2);
+});
+test('resolve rejects non-managers and forged or outdated pinned cards',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm('Первое',1));
+ assert.equal((await f.handle(resolveCallback(f,123))).handled,false);const fake=resolveCallback(f);fake.callback_query.message.message_id=999999;assert.equal((await f.handle(fake)).handled,false);assert.equal(f.client.lastAnsweredInboundId||0,0);
+ const human=resolveCallback(f);human.callback_query.message.from.is_bot=false;assert.equal((await f.handle(human)).handled,false);
+});
+test('existing pinned cards can receive the button without changing card text',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm('Псб',1));assert.equal(await f.refreshResolveButton(),true);const call=f.calls.find(c=>c.method==='editMessageReplyMarkup');assert.equal(call.body.message_id,f.client.headerMessageId);assert.ok(call.body.reply_markup.inline_keyboard.flat().some(b=>b.callback_data==='support:resolve'));
+ const wrong={...call.body,message_id:999999};assert.equal((await f.policy.guardedFetch('https://api.telegram.org/botfixture/editMessageReplyMarkup',{body:JSON.stringify(wrong)},'support-dialog')).status,403);
 });
