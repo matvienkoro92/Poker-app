@@ -378,8 +378,10 @@ test('ticket template command sends formatted text to mapped lead and echoes onc
  const outsider=f.groupMessage('/ticket',91,999);await f.handle(outsider);assert.equal(f.calls.slice(before).filter(c=>c.method==='sendMessage'&&c.body.text.includes('Минимально списать можно 300 рублей')).length,2);
 });
 
-test('new support topics have a palette color and title sync preserves custom icons',async()=>{
+test('support icons turn red for incoming messages and green after an answer',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
- const created=f.calls.find(c=>c.method==='createForumTopic');assert.ok([0x6FB9F0,0xFFD67E,0xCB86DB,0x8EEE98,0xFF93B2,0xFB6F5F].includes(created.body.icon_color));
- for(const call of f.calls.filter(c=>c.method==='editForumTopic'))assert.equal(Object.hasOwn(call.body,'icon_custom_emoji_id'),false);
+ const edits=()=>f.calls.filter(c=>c.method==='editForumTopic');
+ assert.equal(edits().at(-1).body.icon_custom_emoji_id,'5379748062124056162');
+ await f.handle(f.groupMessage());assert.equal(edits().at(-1).body.icon_custom_emoji_id,'5237699328843200968');
+ await f.handle(f.pm('Ещё вопрос',2));assert.equal(edits().at(-1).body.icon_custom_emoji_id,'5379748062124056162');
 });
