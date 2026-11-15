@@ -1,13 +1,14 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const exchange=require('../lib/telegram-exchange');
-test('exchange accepts only direct group commands and its approved callbacks',()=>{
+test('exchange accepts direct private and group commands and its approved callbacks',()=>{
  const message={chat:{id:-123,type:'supergroup'},text:'/обмен'};
  assert.equal(exchange.action({message}),'list');
  assert.equal(exchange.action({message:{...message,text:'/обмен@Poker_dvatuza_bot'}}),'list');
  for(const text of ['/обмен@other_bot','обмен','/обмен extra'])assert.equal(exchange.action({message:{...message,text}}),'');
  assert.equal(exchange.action({edited_message:message}),'');
- assert.equal(exchange.action({message:{...message,chat:{type:'private'}}}),'');
+ assert.equal(exchange.action({message:{...message,chat:{type:'private'}}}),'list');
+ assert.equal(exchange.action({message:{...message,chat:{type:'channel'}}}),'');
  for(const side of ['withdraw','deposit','remove'])assert.equal(exchange.action({callback_query:{message,data:'exchange:'+side}}),side);
  assert.equal(exchange.action({callback_query:{message,data:'exchange:other'}}),'');
 });
@@ -26,9 +27,9 @@ test('amounts are displayed and requests disappear at the two hour boundary',()=
 });
 function fixture(options={}){
  const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},sent=[],commands=[];
- const pending=JSON.stringify({side:'deposit',promptId:10});
- const pipeline=async batch=>batch.map(c=>{commands.push(c);let result=1;if(c[0]==='GET')result=options.noPending?null:pending;if(c[0]==='SET')result='OK';if(c[0]==='ZRANGEBYSCORE')result=['7'];if(c[0]==='HGETALL'||(c[0]==='EVAL'&&c[1].includes('HGETALL')))result={};return {result};});
- vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline}:{guardedFetch:async(url,options)=>{sent.push({url,body:JSON.parse(options.body)});return {json:async()=>({ok:true,result:{message_id:10}})};}}});
+ const pending=JSON.stringify({side:'deposit',promptId:10,...options.pending});
+ const pipeline=async batch=>batch.map(c=>{commands.push(c);let result=1;if(c[0]==='GET')result=options.noPending?null:pending;if(c[0]==='SET')result='OK';if(c[0]==='ZRANGEBYSCORE')result=options.boards||['7'];if(c[0]==='HGETALL'||(c[0]==='EVAL'&&c[1].includes('HGETALL')))result={};return {result};});
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,console,require:id=>id==='./redis'?{pipeline}:id==='./tracking-link-milestones'?{playersGroup:async()=>'-123'}:{guardedFetch:async(url,options)=>{sent.push({url,body:JSON.parse(options.body)});return {json:async()=>({ok:true,result:{message_id:10}})};}}});
  return {service:mod.exports,sent,commands};
 }
 const message={message_id:20,chat:{id:-123,type:'supergroup'},from:{id:42,first_name:'Иван'}};
@@ -70,7 +71,7 @@ test('bot replies get a three minute deletion timer without shortening request l
  const timer=f.commands.find(c=>c[0]==='ZADD'&&c[1].endsWith(':delete-due'));
  assert.equal(timer[2],'NX');assert.equal(timer[4],'-123:10');
  assert.ok(timer[3]>=before+180000&&timer[3]<=Date.now()+180000);
- assert.match(f.sent[0].body.text,/через 3 минуты/);
+ assert.doesNotMatch(f.sent[0].body.text,/Это сообщение удаляется|список можно снова открыть|Чтобы уйти раньше/);
  assert.match(f.sent[0].body.text,/на 2 часа/);
 });
 test('cleanup deletes only scheduled bot messages and removes their board index',async()=>{
@@ -99,4 +100,56 @@ test('invalid plain amount shows error in the existing list',async()=>{
  assert.equal(f.sent.length,1);assert.match(f.sent[0].url,/editMessageText$/);
  assert.equal(f.sent[0].body.message_id,10);
  assert.match(f.sent[0].body.text,/Укажите сумму/);
+});
+test('private exchange shows the group list and tracks the private board',async()=>{
+ const f=fixture();await f.service.handle({message:{...message,chat:{id:42,type:'private'},text:'/обмен'}},'test');
+ assert.equal(f.sent[0].body.chat_id,'42');
+ assert.ok(f.commands.some(c=>c[0]==='HGETALL'&&c[1]==='poker_app:telegram:exchange:-123'));
+ assert.ok(f.commands.some(c=>c[0]==='ZADD'&&c[1]==='poker_app:telegram:exchange:-123:boards'&&c[3]==='42:10'));
+});
+test('private amounts save the same player in the shared group list',async()=>{
+ const f=fixture();await f.service.handle({message:{...message,chat:{id:42,type:'private'},text:'500'}},'test');
+ const write=f.commands.find(c=>c[0]==='EVAL'&&c[1].includes("'HSET'"));
+ assert.equal(write[3],'poker_app:telegram:exchange:-123');
+ assert.equal(write[4],'poker_app:telegram:exchange:42:pending:42');
+ assert.equal(write[7],'42');assert.equal(JSON.parse(write[9]).amount,500);
+ assert.equal(write[11],'-123:42');
+});
+test('private removal removes player from shared list and does not create a separate message',async()=>{
+ const f=fixture();const privateMessage={...message,chat:{id:42,type:'private'}};
+ await f.service.handle({callback_query:{id:'private-remove',data:'exchange:remove',from:message.from,message:privateMessage}},'test');
+ assert.ok(f.commands.some(c=>c[0]==='HDEL'&&c[1]==='poker_app:telegram:exchange:-123'&&c[2]==='42'));
+ assert.ok(!f.sent.some(s=>s.url.endsWith('/sendMessage')));
+});
+test('shared refresh updates private and group messages at their original destinations',async()=>{
+ const f=fixture({boards:['7','42:10']});
+ await f.service.handle({message:{...message,text:'100'}},'test');
+ const edits=f.sent.filter(s=>s.url.endsWith('/editMessageText')).map(s=>[s.body.chat_id,s.body.message_id]);
+ assert.deepEqual(edits,[['-123',7],['42',10]]);
+});
+
+test('regular group accepts a plain amount when callback carried a Telegram reply-thread ID',async()=>{
+ const f=fixture({pending:{threadId:12345}});
+ assert.equal(await f.service.handle({message:{...message,text:'500'}},'test'),true);
+ const write=f.commands.find(c=>c[0]==='EVAL'&&c[1].includes("'HSET'"));
+ assert.equal(JSON.parse(write[9]).amount,500);
+});
+test('forum input stays in the topic where the exchange side was selected',async()=>{
+ for(const [topic,expected]of [[55,true],[56,false]]){
+  const f=fixture({pending:{threadId:55}});
+  assert.equal(await f.service.handle({message:{...message,chat:{...message.chat,is_forum:true},message_thread_id:topic,text:'500'}},'test'),expected);
+ }
+});
+
+test('accepted amount message is deleted only after saving the request',async()=>{
+ const f=fixture();await f.service.handle({message:{...message,text:'500'}},'test');
+ const deletion=f.sent.find(s=>s.url.endsWith('/deleteMessage'));
+ assert.equal(deletion.body.chat_id,'-123');assert.equal(deletion.body.message_id,20);
+ assert.ok(f.commands.some(c=>c[0]==='ZADD'&&c[1].endsWith(':delete-due')&&c[3]==='-123:20'));
+});
+test('invalid or unrelated amount messages are never deleted',async()=>{
+ for(const [text,noPending]of [['1001',false],['500',true]]){
+  const f=fixture({noPending});await f.service.handle({message:{...message,text}},'test');
+  assert.ok(!f.sent.some(s=>s.url.endsWith('/deleteMessage')));
+ }
 });
