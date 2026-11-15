@@ -24,17 +24,19 @@ test('amounts are displayed and requests disappear at the two hour boundary',()=
  assert.doesNotMatch(exchange.render(entry,7200000),/Иван/);
  assert.match(exchange.render(entry,0),/на 2 часа/);
 });
-function fixture(){
+function fixture(options={}){
  const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},sent=[],commands=[];
  const pending=JSON.stringify({side:'deposit',promptId:10});
- const pipeline=async batch=>batch.map(c=>{commands.push(c);let result=1;if(c[0]==='GET')result=pending;if(c[0]==='SET')result='OK';if(c[0]==='ZRANGEBYSCORE')result=['7'];if(c[0]==='HGETALL'||(c[0]==='EVAL'&&c[1].includes('HGETALL')))result={};return {result};});
+ const pipeline=async batch=>batch.map(c=>{commands.push(c);let result=1;if(c[0]==='GET')result=options.noPending?null:pending;if(c[0]==='SET')result='OK';if(c[0]==='ZRANGEBYSCORE')result=['7'];if(c[0]==='HGETALL'||(c[0]==='EVAL'&&c[1].includes('HGETALL')))result={};return {result};});
  vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline}:{guardedFetch:async(url,options)=>{sent.push({url,body:JSON.parse(options.body)});return {json:async()=>({ok:true,result:{message_id:10}})};}}});
  return {service:mod.exports,sent,commands};
 }
 const message={message_id:20,chat:{id:-123,type:'supergroup'},from:{id:42,first_name:'Иван'}};
 test('selection prompts for amount without publishing a request',async()=>{
  const f=fixture();await f.service.handle({callback_query:{id:'click',data:'exchange:deposit',from:message.from,message}},'test');
- assert.equal(f.sent[1].body.reply_markup.force_reply,true);
+ assert.match(f.sent[1].url,/editMessageText$/);
+ assert.equal(f.sent[1].body.message_id,message.message_id);
+ assert.ok(!f.sent.some(s=>s.url.endsWith('/sendMessage')));
  assert.match(f.sent[1].body.text,/2 часа/);
  assert.ok(f.commands.some(c=>c[0]==='SET'&&c[1].includes(':pending:42')));
  assert.ok(!f.commands.some(c=>c[0]==='HSET'||c[0]==='EVAL'));
@@ -45,7 +47,7 @@ test('amount reply creates timed request; invalid amount and other users replies
   await f.service.handle({message:{...message,text,reply_to_message:{message_id:prompt,from:{is_bot:true},text:'🔄 Обмен: введите сумму'}}},'test');
   const write=f.commands.find(c=>c[0]==='EVAL'&&c[1].includes("'HSET'"));
   assert.equal(!!write,valid,text+' prompt '+prompt);
-  if(write){const entry=JSON.parse(write[8]);assert.equal(entry.side,'deposit');assert.equal(entry.amount,text==='500'?500:999.5);assert.ok(entry.expiresAt>=before+7200000);assert.ok(entry.expiresAt<=Date.now()+7200000);}
+  if(write){const entry=JSON.parse(write[9]);assert.equal(entry.side,'deposit');assert.equal(entry.amount,text==='500'?500:999.5);assert.ok(entry.expiresAt>=before+7200000);assert.ok(entry.expiresAt<=Date.now()+7200000);}
  }
 });
 test('remove deletes only the clicking player and cancels pending amount input',async()=>{
@@ -77,4 +79,24 @@ test('cleanup deletes only scheduled bot messages and removes their board index'
  await mod.exports.expire('test');assert.match(sent[0].url,/deleteMessage$/);assert.equal(sent[0].body.message_id,7);
  assert.ok(commands.some(c=>c[0]==='ZREM'&&c[1].endsWith(':boards')&&c[2]==='7'));
  assert.ok(!commands.some(c=>c[0]==='HDEL'));
+});
+
+test('plain amount after selecting a side works without reply mode or extra bot message',async()=>{
+ const f=fixture();
+ assert.equal(await f.service.handle({message:{...message,text:'100'}},'test'),true);
+ const write=f.commands.find(c=>c[0]==='EVAL'&&c[1].includes("'HSET'"));
+ assert.equal(JSON.parse(write[9]).amount,100);
+ assert.ok(!f.sent.some(s=>s.url.endsWith('/sendMessage')));
+});
+test('unrelated amounts without a pending request are ignored',async()=>{
+ const f=fixture({noPending:true});
+ assert.equal(await f.service.handle({message:{...message,text:'100'}},'test'),false);
+ assert.equal(f.sent.length,0);
+ assert.ok(!f.commands.some(c=>c[0]==='EVAL'));
+});
+test('invalid plain amount shows error in the existing list',async()=>{
+ const f=fixture();await f.service.handle({message:{...message,text:'1001'}},'test');
+ assert.equal(f.sent.length,1);assert.match(f.sent[0].url,/editMessageText$/);
+ assert.equal(f.sent[0].body.message_id,10);
+ assert.match(f.sent[0].body.text,/Укажите сумму/);
 });
