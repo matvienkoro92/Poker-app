@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const GROUP='-100123456',OWNER=388008256,MANAGER=2144406710,OTHER=1897001087,LEAD=777777;
-function fixture(){
+function fixture(options={}){
  const store=new Map(),calls=[],sorted=new Map(),sets=new Map();let thread=100,failMethod='',failCode=500,failDescription='',failOnce=false;
  const redis={isConfigured:()=>true,pipeline:async commands=>commands.map(([cmd,...a])=>{
   if(cmd==='SADD'){const set=sets.get(a[0])||new Set();set.add(String(a[1]));sets.set(a[0],set);return {result:1};}
@@ -21,7 +21,7 @@ function fixture(){
   if(method===failMethod){const code=failCode,description=failDescription;if(failOnce)failMethod='';return {ok:false,status:code,json:async()=>({ok:false,error_code:code,description})};}
   return {ok:true,json:async()=>({ok:true,result:method==='getForumTopicIconStickers'?[{emoji:'😐',custom_emoji_id:'5350452584119279096'}]:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
  };
- function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-support-timers'?{create:()=>({leadCallback:async()=>false,callback:async()=>false,offer:async()=>{},observe:async()=>{}})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456'}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
+ function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-support-timers'?{create:()=>({leadCallback:async()=>false,callback:async()=>false,offer:async()=>{},observe:async()=>{}})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',poker21Id:'123456',xpokerIds:options.xpokerIds||[]}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
  policy=load('lib/telegram-group-policy.js');queue=load('lib/telegram-support-queue.js');reactions=load('lib/telegram-support-reactions.js');const support=load('lib/telegram-support.js');
  const handle=update=>support.handle(update,'fixture-token');
  const pm=(text='Привет',message_id=1,id=LEAD)=>({message:{message_id,text,chat:{id,type:'private'},from:{id,first_name:'Лид',username:'lead'}}});
@@ -351,7 +351,7 @@ test('card has no return button and refreshes only after twelve hours of activit
  const f=fixture();await f.setup();await f.handle(f.pm());
  const headerId=f.client.headerMessageId;
  const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(header.body.reply_markup.inline_keyboard.length,2);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
+ assert.equal(header.body.reply_markup.inline_keyboard.length,3);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
  const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
  f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-11*60*60*1000}));
  await f.handle(f.pm('До срока',60));
@@ -368,7 +368,7 @@ test('profile privacy restriction does not prevent creation of the player card',
  const f=fixture();await f.setup();f.fail('sendMessage',400,'Bad Request: BUTTON_USER_PRIVACY_RESTRICTED',true);
  await f.handle(f.pm());assert.equal(f.client.headerSent,true);
  const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,2);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,1);
+ assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,3);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,2);
 });
 test('manager notes append to the saved header once, preserve authors and do not refresh stats or contact lead',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
@@ -465,4 +465,36 @@ test('resolve rejects non-managers and forged or outdated pinned cards',async()=
 test('existing pinned cards can receive the button without changing card text',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm('Псб',1));assert.equal(await f.refreshResolveButton(),true);const call=f.calls.find(c=>c.method==='editMessageReplyMarkup');assert.equal(call.body.message_id,f.client.headerMessageId);assert.ok(call.body.reply_markup.inline_keyboard.flat().some(b=>b.callback_data==='support:resolve'));
  const wrong={...call.body,message_id:999999};assert.equal((await f.policy.guardedFetch('https://api.telegram.org/botfixture/editMessageReplyMarkup',{body:JSON.stringify(wrong)},'support-dialog')).status,403);
+});
+
+test('xpoker linking input stays internal and confirmation is shown in the player card',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ const header=f.client.headerMessageId;
+ const cb=f.callback('support:xpoker');cb.callback_query.message.message_id=header;
+ await f.handle(cb);
+ assert.equal(f.client.xpokerLink.actor,String(MANAGER));
+ const before=f.calls.length;
+ await f.handle(f.groupMessage('2335996',800,MANAGER));
+ assert.equal(f.client.xpokerLink.xpokerId,'2335996');
+ const calls=f.calls.slice(before);
+ assert.ok(!calls.some(c=>String(c.body.chat_id)===String(LEAD)));
+ const card=calls.find(c=>c.method==='editMessageText'&&c.body.message_id===header);
+ assert.match(card.body.text,/2335996/);
+ assert.ok(card.body.reply_markup.inline_keyboard.flat().some(b=>b.callback_data==='support:xpoker-confirm'));
+ const cancel=f.callback('support:xpoker-cancel',MANAGER,'cancel-link');cancel.callback_query.message.message_id=header;
+ await f.handle(cancel);assert.equal(f.client.xpokerLink,undefined);
+});
+test('xpoker button rejects a forged player card',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ await f.handle(f.callback('support:xpoker'));assert.equal(f.client.xpokerLink,undefined);
+});
+
+test('linked X-Poker hides the link button; unlinked player retains it',async()=>{
+ for(const ids of [[],['2335996']]){
+  const f=fixture({xpokerIds:ids});await f.setup();await f.handle(f.pm());
+  const card=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
+  const buttons=card.body.reply_markup.inline_keyboard.flat();
+  assert.equal(buttons.some(b=>b.callback_data==='support:xpoker'),ids.length===0);
+  assert.ok(buttons.some(b=>b.callback_data==='support:resolve'));
+ }
 });
