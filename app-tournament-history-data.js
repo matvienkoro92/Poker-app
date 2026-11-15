@@ -1437,6 +1437,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             47597.35
           ]
         ]
+      ],
+      [
+        "13.11.2026",
+        [
+          [
+            2,
+            "MaxVerstappen",
+            29109.84
+          ]
+        ]
       ]
     ]
   },

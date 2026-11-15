@@ -1465,4 +1465,27 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-12-11-2026-league1-hyper-turbo-40k-20h.jpg",
     "rating-compressed-preview/rating-12-11-2026-league1-black-magic-80k-23h.jpg"
   ]
+,
+  "13.11.2026": [
+    "rating-compressed-preview/rating-13-11-2026-league1-black-magic-50k-11h.jpg",
+    "rating-compressed-preview/rating-13-11-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-13-11-2026-league1-black-magic-60k-14h.jpg",
+    "rating-compressed-preview/rating-13-11-2026-league1-pyatnica-progressiv-18h.jpg",
+    "rating-compressed-preview/rating-13-11-2026-league1-super-pyatihatka-20h.jpg",
+    "rating-compressed-preview/rating-13-11-2026-league1-blackout-220k-21h.jpg",
+    "rating-compressed-preview/rating-13-11-2026-league1-turbina-500s-pko-2-3-22h.jpg"
+  ]
+,
+  "14.11.2026": [
+    "rating-compressed-preview/rating-14-11-2026-league1-20k-afterparty-5-01h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-main-lucky-1m-17h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-fast-trek-18h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-super-pyatihatka-20h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-hyper-turbo-40k-20h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-prime-pko-300k-21h.jpg",
+    "rating-compressed-preview/rating-14-11-2026-league1-turbina-500s-pko-2-3-22h.jpg"
+  ]
 };

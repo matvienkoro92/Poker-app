@@ -65,12 +65,16 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/PLO6\s+Bounty/i.test(raw) && /12K/i.test(raw)) return "PLO6 Bounty 12K";
+  if (/PLO4\s+Bounty/i.test(raw) && /30K/i.test(raw)) return "PLO4 Bounty 30K";
+  if (/MAIN\s+LUCKY/i.test(raw) && /1M/i.test(raw)) return "MAIN LUCKY 1M";
+  if (/Prime\s+PKO/i.test(raw) && /300K/i.test(raw)) return "Prime PKO 300K";
   if (/Fresh\s+Bounty/i.test(raw) && /20K/i.test(raw)) return "Fresh Bounty 20K";
   if (/PLO5\s+Bounty/i.test(raw) && /30K/i.test(raw)) return "PLO5 Bounty 30K";
   if (/Lucky\s+Slot/i.test(raw) && /77K/i.test(raw) && !/177K|777K/i.test(raw)) return "Lucky Slot 77K";
   if (/Afterparty\s+5$/i.test(raw) && /20K/i.test(raw)) return "20K* Afterparty 5";
   if (/Big\s+Turbo$/i.test(raw) && /50K/i.test(raw)) return "50K S Big Turbo";
-  if (/Black\s+Magic/i.test(raw) && /\b50K\b/i.test(raw)) return "Black Magic 50K";
+  if (/Black\s+Magic/i.test(raw) && /\b50K(?:\b|g\b)/i.test(raw)) return "Black Magic 50K";
   if (/Black\s+Magic/i.test(raw) && /80K/i.test(raw)) return "Black Magic 80K";
   if (/Black\s+Friday/i.test(raw) && /400K/i.test(raw)) return "Black Friday 400K";
   if (/Prime\s+PKO/i.test(raw) && /1M/i.test(raw)) return "Prime PKO 1M";
@@ -519,6 +523,16 @@ async function parseOcrFile(file) {
   if (blue && date === "06.11.2026" && time === "18:00" && title === "500K Black Friday") { title = "Black Friday 500K"; buyin = 1500; }
   if (blue && date === "07.11.2026" && time === "19:00" && /300K.*Triple Chance/i.test(title)) { title = "Triple Chance 300K"; buyin = 3000; }
   if (blue && date === "10.11.2026" && time === "18:00" && /200K.*Deep Freeze/i.test(title)) { title = "Deep Freeze 200K"; buyin = 4000; }
+  // Entry fees confirmed by the owner for the November 13–14 screenshots.
+  if (blue && date === "13.11.2026" && time === "09:00" && title === "PLO6 Bounty 12K") buyin = 200;
+  if (blue && date === "14.11.2026") {
+    const confirmed = {
+      "17:00|MAIN LUCKY 1M": 2000,
+      "19:00|PLO4 Bounty 30K": 300,
+      "21:00|Prime PKO 300K": 7500
+    }[`${time}|${title}`];
+    if (confirmed) buyin = confirmed;
+  }
   if (date === "28.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Счастливый Косарь";
   if (date === "28.10.2026" && blue && time === "18:00" && /FREEROLL/i.test(title)) { title = "FREEROLL 500K"; buyin = 0; }
   if (date === "29.10.2026" && blue && time === "15:00" && title === "Lucky Slot 77K") buyin = 500;
@@ -592,6 +606,8 @@ async function parseOcrFile(file) {
   if (date === "27.10.2026" && !blue && time === "18:00" && buyin === 300) title = "Турнир Вторника";
   if (date === "24.10.2026" && !blue && time === "18:00" && buyin === 1000) title = "Нокаут прогрессив🚀";
   tokens.forEach((token) => {
+    // IMG_2041: the avatar adds K before Shkarubo's visible ID.
+    if (date === "13.11.2026" && !blue && time === "18:00" && token.text === "KID:183626") token.text = "ID:183626";
     // IMG_1023: the avatar obscures the ID prefix; the visible ID is 2491095.
     if (date === "21.10.2026" && blue && time === "20:00" && token.text === "YTD: 2491095") token.text = "ID: 2491095";
     // IMG_0143: the avatar adds a stray K before Nast’ko’s visible ID.
