@@ -62,7 +62,7 @@ test('payment link paid button asks for PDF receipt once and ends waiting withou
  const f=fixture();await f.handle(f.message('деп 1000'));
  const click={callback_query:{id:'paid',data:'club:player-deposit:paid',from:{id:777},message:{message_id:101,chat:{id:777,type:'private'}}}};
  await f.handle(click);await f.handle(click);
- assert.equal(f.sent.filter(x=>x.method==='sendMessage'&&x.body.text==='Пришлите чек об оплате в формате ПДФ.').length,1);
+ assert.equal(f.sent.filter(x=>x.method==='sendMessage'&&x.body.text==='Пришлите чек об оплате.').length,1);
  assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
  assert.ok(!f.sent.some(x=>/На какую сумму/.test(x.body.text||'')));
