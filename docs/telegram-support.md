@@ -1,5 +1,19 @@
 # Manager dialogs in Telegram
 
+Owner-approved self-transfer ledger command: in the player's topic, an app
+administrator sends `/перевод P21 X 2000` (or `/transfer P21 X 2000`). The first
+room is the source, the second is the destination, and the amount is in rubles
+(up to two decimal places). Rooms: P21, X, PP, Supr. Both accounts must already
+belong to the same saved deposit profile anchored to this topic's player; missing
+or multiple accounts require fixing the saved links first. The preview displays
+both IDs and the amount. Only its author can confirm or cancel in the same topic
+within 15 minutes. Confirmation rechecks the current identity and links and uses
+the existing atomic, idempotent deposit `transfer` operation with the manager's
+name. This records a completed transfer only; it does not move live chips.
+Commands, previews and results stay internal and never mark the player answered.
+The `support-transfer` group-policy scope permits only callback acknowledgements
+and messages in an existing mapped player topic of the configured Dialogs group.
+
 Owner-approved scenario: private messages to `Poker_dvatuza_bot` are copied into
 one forum topic per lead in the dedicated managers' group «Диалоги». Managers
 reply through the same bot. This does not enable greetings, campaigns, membership
