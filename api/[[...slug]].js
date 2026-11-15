@@ -47,6 +47,7 @@ const handlers = {
   "player-crm": () => require(path.join(handlersDir, "player-crm.js")),
   "player-crm-push-event": () => require(path.join(handlersDir, "player-crm-push-event.js")),
   "telegram-bot-info": () => require(path.join(handlersDir, "telegram-bot-info.js")),
+  "cron-exchange": () => require(path.join(handlersDir, "cron-exchange.js")),
   "cron-support-timer": () => require(path.join(handlersDir, "cron-support-timer.js")),
   "telegram-bot-webhook": () => require(path.join(handlersDir, "telegram-bot-webhook.js")),
   "livekit-token": () => require(path.join(handlersDir, "livekit-token.js")),

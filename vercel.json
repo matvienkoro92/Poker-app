@@ -119,6 +119,7 @@
     }
   },
   "crons": [
+    { "path": "/api/cron-exchange", "schedule": "* * * * *" },
     { "path": "/api/cron-support-timer", "schedule": "* * * * *" },
     { "path": "/api/cron-tournament-bet-close", "schedule": "* * * * *" },
     { "path": "/api/cron-billiards-wagers", "schedule": "* * * * *" },

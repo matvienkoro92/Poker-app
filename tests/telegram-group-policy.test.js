@@ -150,3 +150,13 @@ test('webhook dispatches payment link commands only in the Prodamus group and ne
  }
  assert.equal(replies,3);assert.equal(forwards,0);
 });
+
+test('exchange permits only its board and targeted amount prompts',async t=>{
+ const old=global.fetch;t.after(()=>{global.fetch=old;});global.fetch=async()=>({ok:true});
+ const send=body=>policy.guardedFetch('https://api.telegram.org/bottest/sendMessage',{body:JSON.stringify(body)},'exchange-command');
+ const prompt={chat_id:-123,reply_parameters:{message_id:7},text:'🔄 Обмен: введите сумму от 1 до 1000 ₽',reply_markup:{force_reply:true,selective:true}};
+ assert.equal((await send(prompt)).ok,true);
+ assert.equal((await send({...prompt,text:'Привет всем'})).ok,false);
+ assert.equal((await send({...prompt,chat_id:123})).ok,false);
+ assert.equal((await send({...prompt,reply_parameters:undefined})).ok,false);
+});

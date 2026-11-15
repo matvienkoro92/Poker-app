@@ -12,22 +12,53 @@ test('exchange accepts only direct group commands and its approved callbacks',()
  assert.equal(exchange.action({callback_query:{message,data:'exchange:other'}}),'');
 });
 test('exchange renders both lists, safe names and empty states',()=>{
- const text=exchange.render({'42':JSON.stringify({side:'withdraw',name:'<Иван>'}),'43':JSON.stringify({side:'deposit',name:'Ольга'}),'44':'broken'});
+ const text=exchange.render({'42':JSON.stringify({side:'withdraw',name:'<Иван>',amount:500,expiresAt:Date.now()+7200000}),'43':JSON.stringify({side:'deposit',name:'Ольга',expiresAt:Date.now()+7200000}),'44':'broken'});
  assert.match(text,/Хочет сделать вывод/);assert.match(text,/Хочет пополнить/);
  assert.match(text,/tg:\/\/user\?id=42/);assert.match(text,/&lt;Иван&gt;/);assert.match(text,/Ольга/);
  assert.equal((exchange.render({}).match(/Пока нет заявок/g)||[]).length,2);
- assert.match(exchange.render(['42',JSON.stringify({side:'deposit',name:'Пётр'})]),/Пётр/);
+ assert.match(exchange.render(['42',JSON.stringify({side:'deposit',name:'Пётр',expiresAt:Date.now()+7200000})]),/Пётр/);
 });
-test('remove targets the clicking player and refreshes the message with all three buttons',async()=>{
- const fs=require('node:fs'),vm=require('node:vm');
- const sent=[],commands=[],mod={exports:{}};
- vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline:async rows=>{commands.push(...rows);return [{result:rows[0][0]==='HGETALL'?{'43':JSON.stringify({side:'deposit',name:'Ольга'})}:1}];}}:{guardedFetch:async(url,options)=>{sent.push({url,body:JSON.parse(options.body)});return {json:async()=>({ok:true})};}}});
- await mod.exports.handle({callback_query:{id:'click42',data:'exchange:remove',from:{id:42,first_name:'Иван'},message:{message_id:7,chat:{id:-123,type:'supergroup'}}}},'test');
- const mutation=commands[0];
- assert.equal(mutation[0],'EVAL');assert.match(mutation[1],/ARGV\[2\]=='remove' or/);
- assert.equal(mutation[3],'poker_app:telegram:exchange:-123');
- assert.equal(mutation[5],'42');assert.equal(mutation[6],'remove');
- assert.equal(sent[0].body.text,'Вы удалены из списка');
- assert.equal(sent[1].body.message_id,7);assert.match(sent[1].body.text,/Ольга/);
- assert.deepEqual(sent[1].body.reply_markup.inline_keyboard.flat().map(b=>b.callback_data),['exchange:withdraw','exchange:deposit','exchange:remove']);
+test('amounts are displayed and requests disappear at the two hour boundary',()=>{
+ const entry={'42':JSON.stringify({side:'withdraw',name:'Иван',amount:750,expiresAt:7200000})};
+ assert.match(exchange.render(entry,7199999),/Иван<\/a> — 750 ₽/);
+ assert.doesNotMatch(exchange.render(entry,7200000),/Иван/);
+ assert.match(exchange.render(entry,0),/на 2 часа/);
+});
+function fixture(){
+ const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},sent=[],commands=[];
+ const pending=JSON.stringify({side:'deposit',promptId:10});
+ const pipeline=async batch=>batch.map(c=>{commands.push(c);let result=1;if(c[0]==='GET')result=pending;if(c[0]==='SET')result='OK';if(c[0]==='ZRANGEBYSCORE')result=['7'];if(c[0]==='HGETALL'||(c[0]==='EVAL'&&c[1].includes('HGETALL')))result={};return {result};});
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline}:{guardedFetch:async(url,options)=>{sent.push({url,body:JSON.parse(options.body)});return {json:async()=>({ok:true,result:{message_id:10}})};}}});
+ return {service:mod.exports,sent,commands};
+}
+const message={message_id:20,chat:{id:-123,type:'supergroup'},from:{id:42,first_name:'Иван'}};
+test('selection prompts for amount without publishing a request',async()=>{
+ const f=fixture();await f.service.handle({callback_query:{id:'click',data:'exchange:deposit',from:message.from,message}},'test');
+ assert.equal(f.sent[1].body.reply_markup.force_reply,true);
+ assert.match(f.sent[1].body.text,/2 часа/);
+ assert.ok(f.commands.some(c=>c[0]==='SET'&&c[1].includes(':pending:42')));
+ assert.ok(!f.commands.some(c=>c[0]==='HSET'||c[0]==='EVAL'));
+});
+test('amount reply creates timed request; invalid amount and other users replies do not',async()=>{
+ for(const [text,prompt,valid]of [['500',10,true],['1001',10,false],['0',10,false],['-50',10,false],['тест',10,false],['999,50 ₽',10,true],['500',11,false]]){
+  const f=fixture(),before=Date.now();
+  await f.service.handle({message:{...message,text,reply_to_message:{message_id:prompt,from:{is_bot:true},text:'🔄 Обмен: введите сумму'}}},'test');
+  const write=f.commands.find(c=>c[0]==='EVAL'&&c[1].includes("'HSET'"));
+  assert.equal(!!write,valid,text+' prompt '+prompt);
+  if(write){const entry=JSON.parse(write[8]);assert.equal(entry.side,'deposit');assert.equal(entry.amount,text==='500'?500:999.5);assert.ok(entry.expiresAt>=before+7200000);assert.ok(entry.expiresAt<=Date.now()+7200000);}
+ }
+});
+test('remove deletes only the clicking player and cancels pending amount input',async()=>{
+ const f=fixture();await f.service.handle({callback_query:{id:'remove',data:'exchange:remove',from:message.from,message}},'test');
+ assert.ok(f.commands.some(c=>c[0]==='HDEL'&&c[1]==='poker_app:telegram:exchange:-123'&&c[2]==='42'));
+ assert.ok(f.commands.some(c=>c[0]==='DEL'&&c[1].endsWith(':pending:42')));
+ assert.equal(f.sent[0].body.text,'Вы удалены из списка');
+});
+test('expiry worker cleans expired requests and refreshes published lists',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},commands=[],sent=[];
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline:async batch=>batch.map(c=>{commands.push(c);return {result:c[0]==='ZRANGEBYSCORE'?(c[1].endsWith(':due')?['-123:42']:['7']):c[0]==='EVAL'&&c[1].includes('HGETALL')?{}:1};})}:{guardedFetch:async(url,options)=>{sent.push(JSON.parse(options.body));return {json:async()=>({ok:true})};}}});
+ assert.equal(await mod.exports.expire('test'),1);
+ assert.equal(sent[0].chat_id,'-123');assert.equal(sent[0].message_id,7);assert.match(sent[0].text,/Пока нет заявок/);
+ assert.ok(commands.some(c=>c[0]==='EVAL'&&c[1].includes('p.expiresAt<=tonumber(ARGV[1])')));
+ assert.ok(commands.some(c=>c[0]==='EVAL'&&c[1].includes("'ZSCORE'")));
 });
