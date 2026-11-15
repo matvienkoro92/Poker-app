@@ -181,16 +181,17 @@ test('payment link notices show provider and both amounts without duplicating th
  assert.match(notices[1].body.text,/Prodamus.*2[\s\u00a0]000 ₽/);assert.match(notices[1].body.text,/2[\s\u00a0]180 ₽/);
  assert.equal(f.calls.filter(c=>c.method==='copyMessage').length,0);assert.equal(f.client.lastAnsweredInboundId,undefined);
 });
-test('payment waiting persists through conversation and ends on manager confirmation or player cancellation',async()=>{
+test('payment waiting ends on new player message, manager answer, confirmation or cancellation',async()=>{
  const f=fixture();await f.setup();const user={id:LEAD,first_name:'Lead'},options={paymentLink:{providerId:'robokassa',amount:100000,chargeAmount:110000}};
  await f.mirrorBotMessage(LEAD,42,user,options);
- await f.handle(f.pm('Проверяю',2));assert.equal(f.client.appliedIconId,'5350452584119279096');
- await f.handle(f.groupMessage());assert.equal(f.client.appliedIconId,'5350452584119279096');
+ await f.handle(f.pm('Оплатил, мой ID',43));assert.equal(f.client.appliedIconId,'5379748062124056162');assert.equal(f.client.awaitingPayment,undefined);
+ await f.handle(f.groupMessage());assert.equal(f.client.appliedIconId,'5237699328843200968');
+ await f.mirrorBotMessage(LEAD,44,user,options);
  const paid=f.callback('support:payment-paid');paid.callback_query.message.message_id=f.client.awaitingPayment.noticeMessageId;
  await f.handle(paid);assert.equal(f.client.awaitingPayment,undefined);assert.equal(f.client.appliedIconId,'5237699328843200968');
- await f.mirrorBotMessage(LEAD,43,user,options);
+ await f.mirrorBotMessage(LEAD,45,user,options);
  await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:42});assert.ok(f.client.awaitingPayment);
- await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:44});assert.equal(f.client.awaitingPayment,undefined);assert.equal(f.client.appliedIconId,'5237699328843200968');
+ await f.clearAwaitingAmountNotice(LEAD,{cancelPayment:true,throughMessageId:46});assert.equal(f.client.awaitingPayment,undefined);assert.equal(f.client.appliedIconId,'5237699328843200968');
 });
 test('unavailable topic stickers never block payment information',async()=>{
  const f=fixture();await f.setup();f.fail('getForumTopicIconStickers',400,'No icons');
