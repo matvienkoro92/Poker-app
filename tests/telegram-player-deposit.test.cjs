@@ -10,7 +10,7 @@ function fixture({beforeSupport=async()=>{}}={}){
   if(cmd==='EVAL'){const key=a[2];if((store.get(key)||'')!==a[3])return {result:0};if(a.length===4)store.delete(key);else store.set(key,a[4]);return {result:1};}
   throw Error(cmd);
  }))};
- const ctx={module:{exports:{}},require:id=>id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
+ const ctx={module:{exports:{}},require:id=>id==='./telegram-deposit-room'?require('../lib/telegram-deposit-room'):id==='./telegram-support-player'?{readPlayerIdentity:async()=>({poker21Id:'123456',xpokerIds:['987654']})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
  vm.runInNewContext(fs.readFileSync('lib/telegram-player-deposit.js','utf8'),ctx);
  const message=(text,message_id=1)=>({message:{text,message_id,chat:{id:777,type:'private'},from:{id:777}}});
  const handle=u=>ctx.module.exports.handle(u,'fixture-token');
@@ -304,4 +304,13 @@ test('payment link below 3000 highlights the commission-free threshold',async()=
 test('starting a deposit cancels an older subscription input prompt',async()=>{
  const f=fixture(),key='poker21:table-subscriptions:club:pending:777';f.store.set(key,JSON.stringify({kind:'player'}));
  await f.handle(f.message('/dep'));assert.equal(f.store.has(key),false);
+});
+
+test('paid message offers both rooms with known player IDs',async()=>{
+ const f=fixture();await f.handle(f.message('/деп 1000'));
+ await f.handle({callback_query:{id:'room-options',data:'club:player-deposit:paid',from:{id:777},message:{message_id:101,chat:{id:777,type:'private'}}}});
+ const edit=f.sent.find(s=>s.method==='editMessageText'&&s.body.text.includes('куда пополнить'));
+ assert.ok(edit);assert.equal(edit.body.reply_markup.inline_keyboard[0].length,2);
+ assert.equal(edit.body.reply_markup.inline_keyboard[0][0].text,'Poker21 · ID 123456');
+ assert.equal(edit.body.reply_markup.inline_keyboard[0][1].text,'X-Poker · ID 987654');
 });

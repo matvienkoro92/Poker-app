@@ -684,3 +684,10 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__card-foot button:focus-visible{outline:2px solid #c9b779;outline-offset:2px}
 
 .deposits__rooms.deposits__destinations{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.deposits__load-more{grid-column:1 / -1;width:100%;margin-top:8px}
+
+/* Equal two-column controls at the bottom of each withdrawal card. */
+.deposits .deposits__card>.deposits__card-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch}
+.deposits .deposits__card-foot>.deposits__withdrawal-actions{display:contents}
+.deposits .deposits__card-foot button{width:100%;min-width:0;min-height:42px!important;height:100%;padding:8px!important;white-space:normal;overflow-wrap:anywhere;display:flex;align-items:center;justify-content:center}

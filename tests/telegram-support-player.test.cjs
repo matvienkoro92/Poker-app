@@ -1,8 +1,8 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-function fixture(values={},names={}){
+function fixture(values={},names={},ledger){
  const calls=[];let offline=false;
- const ctx={module:{exports:{}},require:id=>id==='./redis'?{pipeline:async commands=>{if(offline)throw Error('offline');calls.push(...commands);return commands.map(([,key,field])=>({result:values[key+'|'+field]||null}));}}:id==='./account-canonical'?{canonicalAccountId:async id=>id==='ID000001'?'ID000009':id}:id==='./deposit-player-directory'?{knownPlayerNick:(room,id)=>room==='P21'?names[id]||'':'',depositPlayerDirectory:state=>[{room:'P21',playerId:'123456',profileKey:'P21|123456'},...(state.playerAccounts||[])]}:require(id)};
+ const ctx={module:{exports:{}},require:id=>id==='./redis'?{pipeline:async commands=>{if(offline)throw Error('offline');calls.push(...commands);return commands.map(([op,key,field])=>({result:op==='EVAL'&&ledger?JSON.stringify(ledger):values[key+'|'+field]||null}));}}:id==='./account-canonical'?{canonicalAccountId:async id=>id==='ID000001'?'ID000009':id}:id==='./deposit-player-directory'?{knownPlayerNick:(room,id)=>room==='P21'?names[id]||'':'',depositPlayerDirectory:state=>[{room:'P21',playerId:'123456',profileKey:'P21|123456'},...(state.playerAccounts||[])]}:require(id)};
  vm.runInNewContext(fs.readFileSync('lib/telegram-support-player.js','utf8'),ctx);
  return {...ctx.module.exports,calls,offline(){offline=true;}};
 }
@@ -26,7 +26,7 @@ test('lookup outage falls back visibly without blocking message delivery',async(
 });
 
 test('X Poker IDs come only from accounts linked to the confirmed P21 profile',async()=>{
- const f=fixture({'poker_app:visitor_dt_ids|tg_777':'ID000001','poker_app:pokerplus_user_ids|ID000009':'123456',"local raw=redis.call('GET',KEYS[1]); if not raw then return '[]' end; local s=cjson.decode(raw); return cjson.encode(s.playerAccounts or {})|1":JSON.stringify([{room:'X',playerId:'98765',profileKey:'P21|123456'},{room:'X',playerId:'99999',profileKey:'P21|999999'}])});
+ const f=fixture({'poker_app:visitor_dt_ids|tg_777':'ID000001','poker_app:pokerplus_user_ids|ID000009':'123456',"local raw=redis.call('GET',KEYS[1]); if not raw then return '{}' end; local s=cjson.decode(raw); return cjson.encode({playerAccounts=s.playerAccounts or {},playerIdentityLinks=s.playerIdentityLinks or {}})|1":JSON.stringify([{room:'X',playerId:'98765',profileKey:'P21|123456'},{room:'X',playerId:'99999',profileKey:'P21|999999'}])});
  const p=await f.readPlayerIdentity(user);assert.deepEqual(Array.from(p.xpokerIds),['98765']);assert.match(f.identityText(user,p),/X:98765\n✈️ @handle$/);
 });
 
@@ -37,4 +37,20 @@ test('missing or unavailable XPoker is omitted from the message signature',()=>{
 
 test('numeric Telegram ID is omitted when no username is present',()=>{
  const f=fixture();assert.equal(f.identityText({id:777,first_name:'Денис'},{name:'topor32',poker21Id:'415786'}),'👤 Денис\n🎮 topor32 P21:415786');
+});
+
+test('direct X-Poker binding works with no Poker21 and survives Poker21 replacement',async()=>{
+ const values={'poker_app:visitor_dt_ids|tg_777':'ID000001'};
+ const ledger={playerIdentityLinks:[{room:'X',playerId:'98765',accountId:'ID000009'}]};
+ const first=await fixture(values,{},ledger).readPlayerIdentity(user);
+ assert.equal(first.accountId,'ID000009');assert.equal(first.poker21Id,null);assert.deepEqual(Array.from(first.xpokerIds),['98765']);
+ assert.match(fixture().identityText(user,first),/X:98765/);
+ const changed=await fixture({...values,'poker_app:pokerplus_user_ids|ID000009':'999999'},{},ledger).readPlayerIdentity(user);
+ assert.deepEqual(Array.from(changed.xpokerIds),['98765']);
+});
+test('legacy links are retained while direct ownership prevents cross-player exposure',async()=>{
+ const values={'poker_app:visitor_dt_ids|tg_777':'ID000001','poker_app:pokerplus_user_ids|ID000009':'123456'};
+ const ledger={playerAccounts:[{room:'X',playerId:'98765',profileKey:'P21|123456'},{room:'X',playerId:'99999',profileKey:'P21|123456'}],playerIdentityLinks:[{room:'X',playerId:'99999',accountId:'ID000555'}]};
+ const player=await fixture(values,{},ledger).readPlayerIdentity(user);
+ assert.deepEqual(Array.from(player.xpokerIds),['98765']);
 });

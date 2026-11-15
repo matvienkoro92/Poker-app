@@ -15,6 +15,6 @@ test('closing, reopening and closing again tracks the latest closure',()=>{
 });
 test('closed cards sort by closure time regardless of creation time and currency',()=>{
  const fs=require('fs'),vm=require('vm'),src=fs.readFileSync('app-admin-deposits.js','utf8');
- const node={innerHTML:''},ctx={data:{entries:[{id:'old',createdAt:900,closedAt:200,remaining:0},{id:'new',createdAt:100,closedAt:300,remaining:0}]},filter:'done',query:'',host:{querySelector:()=>node},card:e=>e.id,isCryptoWithdrawal:e=>e.id==='new'};
+ const node={innerHTML:''},ctx={data:{entries:[{id:'old',createdAt:900,closedAt:200,remaining:0},{id:'new',createdAt:100,closedAt:300,remaining:0}]},filter:'done',closedVisibleCount:10,query:'',host:{querySelector:()=>node},card:e=>e.id,isCryptoWithdrawal:e=>e.id==='new'};
  vm.createContext(ctx);vm.runInContext(src.slice(src.indexOf('  function renderCards()'),src.indexOf('  function bankStyle')),ctx);ctx.renderCards();assert.equal(node.innerHTML,'newold');
 });
