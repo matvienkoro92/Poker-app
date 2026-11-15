@@ -17,18 +17,29 @@ function fixture({beforeSupport=async()=>{}}={}){
  return {store,sent,mirrored,botMirrored,cleared,message,handle,failNextMirror(){failMirror=true;}};
 }
 test('private aliases and exact ruble amounts parse without changing group admin commands',()=>{
- for(const text of ['пополнить','пополнить 2000','депозит','ДЕПОЗИТ','/деп','деп','/деп 2000','деп 1 000','/деп@Poker_dvatuza_bot','/start deposit'])assert.equal(commandModule.command({message:{chat:{type:'private'},text}}),true);
+ for(const text of ['деп1000','депозит1000','/деп1000','пополнить','пополнить 2000','депозит','ДЕПОЗИТ','/деп','деп','/деп 2000','деп 1 000','/деп@Poker_dvatuza_bot','/start deposit'])assert.equal(commandModule.command({message:{chat:{type:'private'},text}}),true);
  for(const text of ['/деп@other_bot','депрессия','депозиты'])assert.equal(commandModule.command({message:{chat:{type:'private'},text}}),false);
  assert.equal(commandModule.command({message:{chat:{type:'supergroup'},text:'/деп'}}),false);
  assert.equal(commandModule.amount('2 000 ₽'),200000);assert.equal(commandModule.amount('1000,50'),100050);
  for(const value of ['-1000','1e3','<script>','1000.999'])assert.equal(commandModule.amount(value),null);
 });
+test('deposit commands and numeric replies produce only the final payment notice for managers',async()=>{
+ for(const command of ['/деп 1000','деп1000','депозит 1000','депозит','/деп','деп']){
+  const f=fixture();await f.handle(f.message(command));
+  if(!/1000/.test(command)){
+   assert.equal(f.botMirrored.length,0);assert.equal(f.mirrored.length,0);
+   await f.handle(f.message('1000',2));
+  }
+  assert.equal(f.mirrored.length,0);assert.equal(f.botMirrored.length,1);
+  assert.equal(f.botMirrored[0][4].paymentLink.amount,100000);
+ }
+});
 test('bare command asks next amount; amount response issues a gross/credit link once with no income',async()=>{
- const f=fixture();await f.handle(f.message('/деп'));assert.match(f.sent[0].body.text,/На какую сумму/);assert.equal(f.botMirrored.length,1);assert.equal(f.botMirrored[0][1],777);assert.equal(f.botMirrored[0][4].awaitingAmount,true);assert.ok(f.store.has('poker_app:player-deposit:v1:waiting:777'));
+ const f=fixture();await f.handle(f.message('/деп'));assert.match(f.sent[0].body.text,/На какую сумму/);assert.equal(f.botMirrored.length,0);assert.ok(f.store.has('poker_app:player-deposit:v1:waiting:777'));
  const otherForm=f.message('2000',9);otherForm.message.reply_to_message={message_id:999};assert.equal(await f.handle(otherForm),false);
  await f.handle(f.message('2000',2));const payment=f.sent.find(x=>x.body.reply_markup?.inline_keyboard);assert.match(payment.body.text,/2[\s\u00a0]000/);assert.match(payment.body.text,/2[\s\u00a0]180/);assert.match(payment.body.reply_markup.inline_keyboard[0][0].url,/^https:\/\//);
  const count=f.sent.length;await f.handle(f.message('2000',2));assert.equal(f.sent.length,count);
- assert.equal(f.cleared[0][1],777);const state=JSON.parse(f.store.get('ledger'));assert.equal(state.paymentLinkIssues.length,1);assert.equal(f.botMirrored.at(-1)[4].paymentLink.providerId,'prodamus');assert.equal(f.botMirrored.at(-1)[4].paymentLink.amount,200000);assert.equal(state.channelOperations,undefined);assert.equal(f.mirrored[0][2].includePrivateCommands,true);
+ assert.equal(f.cleared[0][1],777);const state=JSON.parse(f.store.get('ledger'));assert.equal(state.paymentLinkIssues.length,1);assert.equal(f.botMirrored.at(-1)[4].paymentLink.providerId,'prodamus');assert.equal(f.botMirrored.at(-1)[4].paymentLink.amount,200000);assert.equal(state.channelOperations,undefined);assert.equal(f.mirrored.length,0);
 });
 test('payment buttons close the old form and restart or cancel the request',async()=>{
  for(const action of ['restart','cancel']){
@@ -54,7 +65,7 @@ test('direct amount and pulse button share flow; cancellation and unrelated comm
  assert.equal(await f.handle(f.message('/отмена',6)),true);assert.match(f.sent.at(-1).body.text,/отменён/);
 });
 test('unconfigured amounts go to manager without invented prices; group clicks never post in group',async()=>{
- const f=fixture();await f.handle(f.message('/деп 5000'));assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты на/);assert.equal(f.store.has('ledger'),false);assert.equal(f.mirrored.length,1);
+ const f=fixture();await f.handle(f.message('/деп 5000'));assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты на/);assert.equal(f.store.has('ledger'),false);assert.equal(f.mirrored.length,0);
  const g=f.message('/деп');g.message.chat={id:-1001,type:'supergroup'};assert.equal(await f.handle(g),false);
  await f.handle({callback_query:{id:'group-button',data:'club:player-deposit',from:{id:777},message:{message_id:5,chat:{id:-1001,type:'supergroup'}}}});
  assert.equal(f.sent.at(-1).method,'answerCallbackQuery');assert.ok(!f.sent.some(c=>c.body.chat_id<0));
@@ -64,12 +75,12 @@ test('minimum deposit is 1000; low amounts do not issue links or notify managers
  for(const sum of [0,500,999]){const f=fixture();await f.handle(f.message('деп '+sum));assert.match(f.sent.at(-1).body.text,/Напишите сумму от 1000, например 3000/);assert.equal(f.store.has('ledger'),false);assert.equal(f.mirrored.length,0);await f.handle(f.message('1000',2));assert.ok(f.store.has('ledger'));}
 });
 test('3000 asks customer to wait for requisites with the exact requested amount',async()=>{
- const f=fixture();await f.handle(f.message('деп 3000'));assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты на 3[\s\u00a0]000 ₽/);assert.equal(f.store.has('ledger'),false);assert.equal(f.mirrored.length,1);
+ const f=fixture();await f.handle(f.message('деп 3000'));assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты на 3[\s\u00a0]000 ₽/);assert.equal(f.store.has('ledger'),false);assert.equal(f.mirrored.length,0);
 });
 
 test('requisites waiting begins at 3000 inclusive; unsupported smaller amounts ask for a valid choice',async()=>{
- for(const sum of [3000,5000,10000]){const f=fixture();await f.handle(f.message('деп '+sum));assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты/);assert.equal(f.mirrored.length,1);}
- const f=fixture();await f.handle(f.message('деп 2500'));assert.doesNotMatch(f.sent.at(-1).body.text,/Ожидайте/);assert.match(f.sent.at(-1).body.text,/ближайшую сумму/);assert.equal(f.mirrored.length,1);assert.equal(f.store.has('ledger'),false);
+ for(const sum of [3000,5000,10000]){const f=fixture();await f.handle(f.message('деп '+sum));assert.match(f.sent.at(-1).body.text,/Ожидайте, ищем реквизиты/);assert.equal(f.mirrored.length,0);}
+ const f=fixture();await f.handle(f.message('деп 2500'));assert.doesNotMatch(f.sent.at(-1).body.text,/Ожидайте/);assert.match(f.sent.at(-1).body.text,/ближайшую сумму/);assert.equal(f.mirrored.length,0);assert.equal(f.store.has('ledger'),false);
 });
 
 function choose(f,value,id='choice-1',promptId){
@@ -118,11 +129,11 @@ test('ready link reaches player before stalled manager synchronization for every
    assert.ok(f.sent[0].body.reply_markup.inline_keyboard[0][0].url);
    assert.ok([...f.store.keys()].some(key=>key.endsWith(':payment-reply')),'reply persisted before support');
   } finally {release();await handling;}
-  assert.equal(f.mirrored.length,1);assert.equal(f.botMirrored.length,1);
+  assert.equal(f.mirrored.length,0);assert.equal(f.botMirrored.length,1);
  }
 });
 test('failed manager preparation retries after player reply without duplicate link or ledger issuance',async()=>{
- for(const stage of ['clear','handle']){
+ for(const stage of ['clear']){
   let fail=true;
   const f=fixture({beforeSupport:async name=>{if(fail&&name===stage){fail=false;throw Error('support unavailable');}}});
   const update=f.message('деп 1000');
@@ -152,7 +163,7 @@ test('bare deposit question reaches player before stalled support and remains us
   const waiting=JSON.parse(f.store.get('poker_app:player-deposit:v1:waiting:777'));
   assert.equal(waiting.promptMessageId,101);
  } finally {release();await handling;}
- assert.equal(f.botMirrored.length,1);assert.equal(f.botMirrored[0][4].awaitingAmount,true);
+ assert.equal(f.botMirrored.length,0);
 });
 test('bare question retries support failure without sending the question twice',async()=>{
  let fail=true;
@@ -160,7 +171,7 @@ test('bare question retries support failure without sending the question twice',
  const update=f.message('деп');
  await assert.rejects(f.handle(update),/support unavailable/);
  assert.equal(f.sent.length,1);await f.handle(update);await f.handle(update);
- assert.equal(f.sent.length,1);assert.equal(f.botMirrored.length,1);
+ assert.equal(f.sent.length,1);assert.equal(f.botMirrored.length,0);
  await f.handle(f.message('1000',2));
  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
 });
@@ -188,7 +199,7 @@ test('numeric requisites request survives support failure without duplicate repl
  await f.handle(update);
  assert.equal(f.sent.length,2);
  assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),true);
- assert.equal(f.mirrored.length,2);
+ assert.equal(f.mirrored.length,0);
 });
 
 test('every next deposit operation replies while the previous command is still synchronizing support',async()=>{
@@ -231,8 +242,8 @@ test('retries serialize the same event and resume only unfinished manager steps'
  try {await assert.rejects(f.handle(update),/event busy/);assert.equal(f.sent.length,1);}
  finally {release();await pending;}
  const g=fixture();g.failNextMirror();const second=g.message('деп 2000');
- await assert.rejects(g.handle(second));assert.equal(g.cleared.length,1);assert.equal(g.mirrored.length,1);
- await g.handle(second);assert.equal(g.cleared.length,1);assert.equal(g.mirrored.length,1);assert.equal(g.sent.length,1);
+ await assert.rejects(g.handle(second));assert.equal(g.cleared.length,1);assert.equal(g.mirrored.length,0);
+ await g.handle(second);assert.equal(g.cleared.length,1);assert.equal(g.mirrored.length,0);assert.equal(g.sent.length,1);
 });
 
 test('plain statistics alias does not consume a pending deposit amount prompt',async()=>{
