@@ -26,26 +26,33 @@ test('deadline deletes only the selected delivered message once and updates stat
  const f=fixture();await f.start();assert.equal(await f.service.expire(f.record().id,GROUP),false);f.advance(WAIT_MS);assert.equal(await f.service.expire(f.record().id,GROUP),true);
  assert.equal(f.record().state,'deleted');assert.deepEqual(f.calls.filter(c=>c.method==='deleteMessage').map(c=>c.body),[{chat_id:LEAD,message_id:88}]);
  await f.service.expire(f.record().id,GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,1);assert.equal(f.store.has(activeKey(GROUP,LEAD)),false);
+ const notices=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Время действия реквизитов истекло'));
+ assert.equal(notices.length,1);assert.equal(notices[0].body.chat_id,LEAD);assert.match(notices[0].body.text,/запросите новые реквизиты/);
+ assert.ok(f.calls.indexOf(notices[0])>f.calls.findIndex(c=>c.method==='deleteMessage'));
 });
-test('new private messages, including commands, cancel deletion; older updates do not',async()=>{
+test('new private messages and commands do not stop timer or prevent expiry',async()=>{
  const f=fixture();await f.start();await f.service.observe(GROUP,{chat:{id:777,type:'private'},from:{id:777},message_id:5,text:'/dep'});assert.equal(f.record().state,'active');
- await f.service.observe(GROUP,{chat:{id:777,type:'private'},from:{id:777},message_id:6,text:'/dep'});assert.equal(f.record().state,'cancelled');f.advance(WAIT_MS);await f.service.expire(f.record().id,GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,0);
+ await f.service.observe(GROUP,{chat:{id:777,type:'private'},from:{id:777},message_id:6,text:'/dep'});assert.equal(f.record().state,'active');f.advance(WAIT_MS);await f.service.expire(f.record().id,GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,1);
 });
 test('paid is the lead declaration, stops timer and never deletes requisites',async()=>{
  const f=fixture();await f.start();await f.service.leadCallback(f.leadCb(),GROUP);assert.equal(f.record().state,'paid');assert.ok(f.calls.some(c=>c.method==='editMessageText'&&c.body.chat_id===GROUP&&c.body.text.includes('нужно проверить')));
+ await f.service.leadCallback(f.leadCb(),GROUP);
+ const requests=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text==='Пришлите чек об оплате в формате ПДФ.');
+ assert.equal(requests.length,1);assert.equal(requests[0].body.chat_id,LEAD);
  f.advance(WAIT_MS);await f.service.expire(f.record().id,GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,0);await f.service.leadCallback(f.leadCb('refuse'),GROUP);assert.equal(f.record().state,'paid');
 });
 test('refusal immediately deletes the exact requisites and is idempotent',async()=>{
  const f=fixture();await f.start();await f.service.leadCallback(f.leadCb('refuse'),GROUP);assert.equal(f.record().state,'refused');await f.service.leadCallback(f.leadCb('refuse'),GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,1);
+ assert.equal(f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Время действия реквизитов истекло')).length,0);
 });
 test('callbacks cannot be used from another lead, group, topic or control message',async()=>{
  const f=fixture();await f.start();for(const change of [b=>b.from.id=123,b=>b.message.chat.id=123,b=>b.message.message_id++]){const b=f.leadCb();change(b);assert.equal(await f.service.leadCallback(b,GROUP),false);}
  const b=f.cb();b.message.chat.id='-100999';assert.equal(await f.service.callback(b,GROUP),false);const other=f.cb();other.message.message_thread_id=34;assert.equal(await f.service.callback(other,GROUP),false);assert.equal(f.record().state,'active');
 });
-test('schedule failure fails closed, manager cancel and changed conversation preserve messages',async()=>{
+test('schedule failure and manager cancellation preserve messages; conversation changes do not stop expiry',async()=>{
  const f=fixture();await f.ready();f.failSchedule();await f.service.callback(f.cb(),GROUP);assert.equal(f.record().state,'ready');f.advance(WAIT_MS);await f.service.expire(f.record().id,GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,0);
  const g=fixture();await g.start();await g.service.callback(g.cb('cancel'),GROUP);assert.equal(g.record().state,'cancelled');
- const h=fixture();await h.start();h.c.lastInboundMessageId=6;h.store.set(PREFIX+'client:'+GROUP+':'+LEAD,JSON.stringify(h.c));h.advance(WAIT_MS);await h.service.expire(h.record().id,GROUP);assert.equal(h.calls.filter(c=>c.method==='deleteMessage').length,0);
+ const h=fixture();await h.start();h.c.lastInboundMessageId=6;h.store.set(PREFIX+'client:'+GROUP+':'+LEAD,JSON.stringify(h.c));h.advance(WAIT_MS);await h.service.expire(h.record().id,GROUP);assert.equal(h.calls.filter(c=>c.method==='deleteMessage').length,1);
 });
 test('transient deletion failure retries only the same message',async()=>{
  const f=fixture();await f.start();f.advance(WAIT_MS);f.failDelete();await assert.rejects(f.service.expire(f.record().id,GROUP));assert.equal(f.record().state,'deleting');await f.service.expire(f.record().id,GROUP);assert.equal(f.record().state,'deleted');assert.ok(f.calls.filter(c=>c.method==='deleteMessage').every(c=>c.body.message_id===88));

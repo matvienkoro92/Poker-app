@@ -174,6 +174,7 @@ test('payment link notices show provider and both amounts without duplicating th
  }
  const notices=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Ожидаем перевод'));
  assert.equal(notices.length,2);assert.match(notices[0].body.text,/Робокасса.*1[\s\u00a0]000 ₽/);assert.match(notices[0].body.text,/1[\s\u00a0]100 ₽/);
+ assert.ok(notices.every(notice=>!notice.body.reply_markup));
  assert.match(notices[0].body.text,/\n\nОжидаем перевод\.$/);
  const bold=notices[0].body.entities.at(-1);assert.equal(notices[0].body.text.slice(bold.offset,bold.offset+bold.length),'Ожидаем перевод.');
  assert.equal(f.client.appliedIconId,'5350452584119279096');

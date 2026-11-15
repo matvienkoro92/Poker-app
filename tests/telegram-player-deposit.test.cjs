@@ -46,7 +46,8 @@ test('payment buttons close the old form and restart or cancel the request',asyn
   const f=fixture();await f.handle(f.message('деп 1000'));
   const payment=f.sent[0];assert.equal(payment.body.reply_markup.inline_keyboard[0][0].style,'success');
   assert.equal(payment.body.reply_markup.inline_keyboard[1][0].text,'Взять другую сумму');
-  assert.equal(payment.body.reply_markup.inline_keyboard[2][0].text,'Отмена');
+  assert.equal(payment.body.reply_markup.inline_keyboard[2][0].text,'✅ Оплатил');
+  assert.equal(payment.body.reply_markup.inline_keyboard[2][1].text,'❌ Отказаться');
   const click={callback_query:{id:action,data:'club:player-deposit:'+action,from:{id:777},message:{message_id:101,chat:{id:777,type:'private'}}}};
   await f.handle(click);
   assert.equal(f.sent.find(x=>x.method==='editMessageText').body.message_id,101);
@@ -56,6 +57,15 @@ test('payment buttons close the old form and restart or cancel the request',asyn
   const count=f.sent.length;await f.handle(click);assert.equal(f.sent.length,count);
   if(action==='restart'){await f.handle(f.message('1500',5));assert.match(f.sent.at(-1).body.text,/Пополнение игрового счёта/);}
  }
+});
+test('payment link paid button asks for PDF receipt once and ends waiting without issuing another link',async()=>{
+ const f=fixture();await f.handle(f.message('деп 1000'));
+ const click={callback_query:{id:'paid',data:'club:player-deposit:paid',from:{id:777},message:{message_id:101,chat:{id:777,type:'private'}}}};
+ await f.handle(click);await f.handle(click);
+ assert.equal(f.sent.filter(x=>x.method==='sendMessage'&&x.body.text==='Пришлите чек об оплате в формате ПДФ.').length,1);
+ assert.equal(f.store.has('poker_app:player-deposit:v1:waiting:777'),false);
+ assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
+ assert.ok(!f.sent.some(x=>/На какую сумму/.test(x.body.text||'')));
 });
 test('direct amount and pulse button share flow; cancellation and unrelated commands stay safe',async()=>{
  const f=fixture();await f.handle(f.message('деп 1000'));assert.equal(f.sent.length,1);await f.handle(f.message('деп 1000'));assert.equal(f.sent.length,1);
