@@ -7,7 +7,7 @@ function fixture(useQueue=false){
  const c={id:LEAD,threadId:33,lastInboundMessageId:5,lastReply:{sourceMessageId:55,privateMessageId:88,threadId:33}};store.set(PREFIX+'client:'+GROUP+':'+LEAD,JSON.stringify(c));
  const pipeline=async cmds=>cmds.map(([cmd,...a])=>{if(cmd==='GET')return {result:store.get(a[0])||null};if(cmd==='SET'){store.set(a[0],String(a[1]));return {result:'OK'};}if(cmd==='ZADD'){due.set(String(a[2]),Number(a[1]));return {result:1};}if(cmd==='ZRANGEBYSCORE')return {result:[...due].filter(([,at])=>at<=Number(a[2])).map(([id])=>id).slice(0,20)};if(cmd==='ZREM')return {result:due.delete(String(a[1]))?1:0};if(cmd==='DEL')return {result:store.delete(a[0])?1:0};if(cmd==='EVAL'){if(store.get(a[2])===a[3])store.delete(a[2]);return {result:1};}throw Error(cmd);});
  const api=async(method,body)=>{calls.push({method,body});if(method==='deleteMessage'&&failDelete){failDelete=false;throw Error('network');}return {message_id:++sequence};};
- const service=create({pipeline,api,lock:async(_key,fn)=>fn(),schedule:useQueue?undefined:async r=>{if(failSchedule)throw Error('offline');scheduled.push({...r});},now:()=>time});
+ const service=create({readIdentity:async()=>({poker21Id:'421508',xpokerIds:['2335996']}),pipeline,api,lock:async(_key,fn)=>fn(),schedule:useQueue?undefined:async r=>{if(failSchedule)throw Error('offline');scheduled.push({...r});},now:()=>time});
  const records=()=>[...store.entries()].filter(([k])=>k.startsWith(PREFIX+'timer:')).map(([,v])=>JSON.parse(v));
  const record=()=>records()[0];
  const cb=(action='start',r=record())=>({id:'callback',data:'support:timer:'+action+':'+r.id,from:{id:MANAGER},message:{chat:{id:GROUP,type:'supergroup'},message_id:r.controlMessageId,message_thread_id:33}});
@@ -37,8 +37,10 @@ test('new private messages and commands do not stop timer or prevent expiry',asy
 test('paid is the lead declaration, stops timer and never deletes requisites',async()=>{
  const f=fixture();await f.start();await f.service.leadCallback(f.leadCb(),GROUP);assert.equal(f.record().state,'paid');assert.ok(f.calls.some(c=>c.method==='editMessageText'&&c.body.chat_id===GROUP&&c.body.text.includes('нужно проверить')));
  await f.service.leadCallback(f.leadCb(),GROUP);
- const requests=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text==='Пришлите чек об оплате в формате ПДФ.');
- assert.equal(requests.length,1);assert.equal(requests[0].body.chat_id,LEAD);
+ const requests=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.startsWith('Пришлите чек об оплате в формате ПДФ.'));
+ assert.equal(requests.length,1);assert.deepEqual(requests[0].body.reply_markup.inline_keyboard[0].map(b=>b.text),['Poker21 · ID 421508','X-Poker · ID 2335996']);
+ const context=JSON.parse(f.store.get('poker_app:player-deposit:v1:room:'+LEAD+':'+f.record().receiptRequestMessageId)||'null');assert.equal(context.options[1].ids[0],'2335996');
+assert.equal(requests[0].body.chat_id,LEAD);
  f.advance(WAIT_MS);await f.service.expire(f.record().id,GROUP);assert.equal(f.calls.filter(c=>c.method==='deleteMessage').length,0);await f.service.leadCallback(f.leadCb('refuse'),GROUP);assert.equal(f.record().state,'paid');
 });
 test('refusal immediately deletes the exact requisites and is idempotent',async()=>{
