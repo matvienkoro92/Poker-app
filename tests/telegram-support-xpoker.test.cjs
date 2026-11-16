@@ -33,7 +33,7 @@ test('confirmed link uses ledger validation and persists author; retries are ide
  const link=f.state.playerAccounts.find(p=>p.room==='X'&&p.playerId==='2335996');
  assert.equal(link.profileKey,'P21|421508');assert.equal(link.createdBy,'42');
 });
-test('confirmation is bound to the manager and current Poker21 identity',async()=>{
+test('confirmation rechecks the player identity for every manager',async()=>{
  const f=fixture(),notices=[],client={id:'100',name:'Игрок',headerMessageId:7,threadId:10,xpokerLink:{actor:'42',xpokerId:'2335996',accountId:'ID000123',poker21Id:'421508',expiresAt:Date.now()+10000}};
  const base={cb:{data:'support:xpoker-confirm',id:'confirm'},source:{from:{is_bot:true},message_id:7},user:{id:43},client,group:'-100',token:'test',api:async(t,method,body)=>{notices.push(body)},saveClient:async()=>{},syncPlayerCard:async()=>{},operatorName:()=> 'Менеджер',readPlayerIdentity:async()=>({poker21Id:'999999'})};
  assert.equal(await f.service.handle(base),true);assert.equal(f.writes.length,0);
@@ -98,4 +98,10 @@ test('changing a pending ID by command visibly acknowledges the new number',asyn
  assert.ok(notices.at(-1).text.includes('Новый X-Poker ID: 9876543'));
  assert.ok(notices.at(-1).text.includes('Заменит 2335996'));
  assert.equal(f.writes.length,0);
+});
+
+test('another authorized manager can cancel a pending correction',async()=>{
+ const f=fixture(),notices=[],client={id:'100',name:'Игрок',headerMessageId:7,threadId:10,xpokerLink:{actor:'42',xpokerId:'2335996',accountId:'ID000123',expiresAt:Date.now()+10000}};
+ await f.service.handle({cb:{data:'support:xpoker-cancel',id:'cancel'},source:{from:{is_bot:true},message_id:7},user:{id:43},client,group:'-100',token:'test',api:async(t,m,b)=>notices.push(b),saveClient:async()=>{},syncPlayerCard:async()=>{}});
+ assert.equal(client.xpokerLink,undefined);assert.ok(notices.some(n=>n.text?.includes('отменена')));
 });
