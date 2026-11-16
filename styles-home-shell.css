@@ -909,3 +909,15 @@ html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):h
 html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .logo__subtitle {font-size:7px!important;letter-spacing:.08em}
 html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) #headerBonusBalance {font-size:11px;white-space:nowrap}
 html body #app.app > .card > .card__header:not(.card__header--admin-shortcuts):has(#headerBonusBalance:not([hidden])) .header-status {font-size:9px!important;max-width:130px}
+/* Keep the home dice in the same row, exactly between brand and player actions. */
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) {
+  display:grid!important;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr)!important;grid-template-rows:auto!important;align-items:center!important;gap:6px!important;
+}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) > .logo {grid-column:1!important;grid-row:1!important;min-width:0!important;max-width:100%;gap:5px!important}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts) > #headerNardsShortcut:not([hidden]) {grid-column:2;grid-row:1;width:36px;min-width:36px;height:40px;margin:0!important;justify-self:center}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) > .header-actions {grid-column:3;grid-row:1;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:6px!important;min-width:0;width:100%;margin:0!important}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-profile-summary {flex:1;min-width:0;max-width:calc(100% - 46px);overflow:hidden}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-greeting-wrap {min-width:0;max-width:100%}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-greeting {display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-actions__row {display:contents!important}
+@media(max-width:420px){html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__title{font-size:10px!important}html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__image{width:32px!important;height:32px!important}}
