@@ -21,9 +21,9 @@ test('Suprema and PPPoker controls capture ID and confirm internally with the co
   assert.ok(notices.some(n=>n.text?.includes('✅ '+label)));assert.ok(notices.every(n=>!n.chat_id||n.chat_id==='-100'));
  }
 });
-function fixture(){
+function fixture(p21={}){
  let raw=JSON.stringify({revision:0,entries:[],requests:[]});const mod={exports:{}},writes=[];
- vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-support-xpoker'),'utf8'),{module:mod,require:id=>id==='./redis'?{pipeline:async cmds=>cmds.map(c=>{if(c[0]==='GET')return {result:raw};assert.equal(c[0],'EVAL');assert.equal(c[4],raw);raw=c[5];writes.push(JSON.parse(raw));return {result:1};})}:id==='./account-id'?{ensureDtIdForUserId:async()=> 'ID000123'}:id==='./admin-deposits'?require('../lib/admin-deposits'):require(id)});
+ vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-support-xpoker'),'utf8'),{module:mod,require:id=>id==='./pokerplus'?{bindMiniAppPlayer:async(...args)=>{p21.args=args;return {pokerPlusUserId:'888888'};}}:id==='./pokerplus-identity'?{pokerPlusTelegramIdCandidates:async(account,user)=>{p21.identity=user;return [String(user.id)];}}:id==='./email-auth'?{getLinkedEmailOriginalByDtId:async()=>''}:id==='./redis'?{pipeline:async cmds=>cmds.map(c=>{if(c[0]==='GET')return {result:raw};assert.equal(c[0],'EVAL');assert.equal(c[4],raw);raw=c[5];writes.push(JSON.parse(raw));return {result:1};})}:id==='./account-id'?{ensureDtIdForUserId:async()=> 'ID000123'}:id==='./admin-deposits'?require('../lib/admin-deposits'):require(id)});
  return {service:mod.exports,writes,get state(){return JSON.parse(raw);}};
 }
 test('confirmed link uses ledger validation and persists author; retries are idempotent',async()=>{
@@ -66,4 +66,26 @@ test('manager can start and confirm linking for a player with no Poker21',async(
  assert.equal(f.state.playerIdentityLinks[0].accountId,'ID000123');
  assert.equal(client.xpokerLink,undefined);
  assert.ok(notices.some(n=>n.text?.includes('привязан к игроку')));
+});
+test('manager correction replaces the old binding without changing recorded operations',async()=>{
+ const f=fixture(),base={accountId:'ID000123',telegramId:'100',poker21Id:'421508',actor:42,actorName:'Менеджер'};
+ await f.service.save({...base,xpokerId:'2335996',requestId:'old_link_123456789012'});
+ await f.service.save({...base,xpokerId:'4300234',replacePlayerId:'2335996',requestId:'correct_link_123456789012'});
+ assert.deepEqual(f.state.playerIdentityLinks.map(x=>x.playerId),['4300234']);
+ assert.equal(f.state.playerAccounts.find(x=>x.playerId==='2335996').profileKey,'X|2335996');
+ assert.equal(f.state.playerAccounts.find(x=>x.playerId==='4300234').profileKey,'P21|421508');
+ assert.equal(f.state.playerIdentityLinkChanges[0].createdBy,'42');
+ assert.deepEqual(f.state.entries,[]);
+});
+
+test('Poker21 manager correction binds with the player identity after confirmation',async()=>{
+ const p21={},f=fixture(p21),notices=[],client={id:'100',name:'Игрок',headerMessageId:7,threadId:10};
+ const args={source:{from:{is_bot:true},message_id:7},user:{id:42},client,group:'-100',token:'test',api:async(t,m,b)=>notices.push(b),saveClient:async()=>{},syncPlayerCard:async()=>{},operatorName:()=> 'Менеджер',readPlayerIdentity:async()=>({accountId:'ID000123',poker21Id:'421508'})};
+ await f.service.handle({...args,cb:{data:'support:p21',id:'start'}});
+ await f.service.handle({...args,m:{text:'test-player-binding-key'}});
+ assert.equal(p21.args,undefined);
+ assert.ok(!notices.some(x=>x.text?.includes('test-player-binding-key')));
+ await f.service.handle({...args,cb:{data:'support:xpoker-confirm',id:'confirm'}});
+ assert.equal(p21.args[0],'ID000123');assert.equal(p21.identity.id,100);
+ assert.equal(p21.args[2],'test-player-binding-key');assert.equal(client.xpokerLink,undefined);
 });
