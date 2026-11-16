@@ -353,6 +353,20 @@ test('Prodamus manual income updates provider and statistics once and supports c
  assert.equal(view(cancelled,now+1).statistics.deposits,0);
  assert.equal(view(state,now+86400000).paymentForms.providers.find(p=>p.id==='prodamus').total,null);
 });
+test('Prodamus stores nominal credit with gross audit amount and historical rows use the same nominal totals',()=>{
+ const now=Date.now();
+ for(const [gross,nominal] of [[218000,200000],[110000,100000],[165000,150000]]){
+  const body={action:'channel-operation',requestId:requestId(900+gross),channelId:'prodamus',direction:'income',room:'Supr',playerId:'1611851',amount:gross};
+  const state=applyOperation(null,body,'anna',now).state;
+  assert.equal(state.channelOperations[0].amount,nominal);assert.equal(state.channelOperations[0].grossAmount,gross);
+  const old={...state,channelOperations:[{...state.channelOperations[0],amount:gross}]},result=view(old,now);
+  assert.equal(result.channelOperations[0].amount,nominal);assert.equal(result.statistics.deposits,nominal);
+  assert.equal(result.paymentForms.providers.find(p=>p.id==='prodamus').total,nominal);assert.equal(old.channelOperations[0].amount,gross);
+  const pending={revision:0,entries:[],requests:[],paymentFormPayments:[{id:'paid',providerId:'prodamus',status:'confirmed',amount:gross,confirmedAt:now}]};
+  const recorded=applyOperation(pending,{...body,prodamusPaymentId:'paid',amount:nominal},'anna',now).state;
+  assert.equal(recorded.channelOperations[0].amount,nominal);assert.equal(recorded.paymentFormPayments[0].amount,gross);
+ }
+});
 
 test('reserve without identity requires depositor room and ID only on payment confirmation',()=>{
  const id=requestId(1),reserveId=requestId(740);let state=create();

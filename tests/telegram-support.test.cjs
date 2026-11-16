@@ -21,8 +21,8 @@ function fixture(options={}){
   if(method===failMethod){const code=failCode,description=failDescription;if(failOnce)failMethod='';return {ok:false,status:code,json:async()=>({ok:false,error_code:code,description})};}
   return {ok:true,json:async()=>({ok:true,result:method==='getForumTopicIconStickers'?[{emoji:'😐',custom_emoji_id:'5350452584119279096'}]:method==='createForumTopic'?{message_thread_id:++thread}:{message_id:1000+calls.length}})};
  };
- function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-support-timers'?{create:()=>({leadCallback:async()=>false,callback:async()=>false,offer:async()=>{},observe:async()=>{}})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-transfer'?transfer:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',accountId:'ID000123',poker21Id:'123456',xpokerIds:options.xpokerIds||[],supremaIds:options.supremaIds||[],pppokerIds:options.pppokerIds||[]}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
- policy=load('lib/telegram-group-policy.js');queue=load('lib/telegram-support-queue.js');reactions=load('lib/telegram-support-reactions.js');transfer=load('lib/telegram-support-transfer.js');const support=load('lib/telegram-support.js');
+ function load(file){const ctx={module:{exports:{}},require:id=>id==='./telegram-support-timers'?{create:()=>({leadCallback:async()=>false,callback:async()=>false,offer:async()=>{},observe:async()=>{}})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-support-config'?configModule:id==='./telegram-support-record'?transfer:id==='./telegram-support-reactions'?reactions:id==='./telegram-support-queue'?queue:id==='./telegram-group-policy'?policy:id==='./telegram-support-card'?{text:async user=>'Диалог с '+user.first_name+'\nРейк: 500 ₽\nДепозиты: 1 000 ₽\nВ розыгрышах: 200 ₽\nВ крутках: 100 ₽\nСыграно в нарды: 7 партий'}:id==='./telegram-support-player'?{readPlayerIdentity:async user=>({name:user.first_name||'Player',accountId:'ID000123',poker21Id:'123456',xpokerIds:options.xpokerIds||[],supremaIds:options.supremaIds||[],pppokerIds:options.pppokerIds||[]}),identityText:require('../lib/telegram-support-player').identityText}:id==='./api-auth'?{isAdmin:id=>[OWNER,MANAGER,OTHER].includes(Number(id))}:require(id.startsWith('.')?path.resolve('lib',id):id),process:{env:{}},globalThis:{fetch},AbortSignal,Buffer,Date,URLSearchParams};vm.runInNewContext(fs.readFileSync(file,'utf8'),ctx);return ctx.module.exports;}
+ policy=load('lib/telegram-group-policy.js');queue=load('lib/telegram-support-queue.js');reactions=load('lib/telegram-support-reactions.js');transfer=load('lib/telegram-support-record.js');const support=load('lib/telegram-support.js');
  const handle=update=>support.handle(update,'fixture-token');
  const pm=(text='Привет',message_id=1,id=LEAD)=>({message:{message_id,text,chat:{id,type:'private'},from:{id,first_name:'Лид',username:'lead'}}});
  const groupMessage=(text='Ответ',message_id=5,id=MANAGER,tid=101)=>({message:{message_id,text,message_thread_id:tid,chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id}}});
@@ -30,25 +30,27 @@ function fixture(options={}){
  const setup=()=>handle({message:{message_id:1,text:'/support_setup',chat:{id:GROUP,type:'supergroup',is_forum:true},from:{id:OWNER}}});
  return {handle,setup,store,calls,pm,groupMessage,callback,policy,refreshResolveButton:()=>support.refreshResolveButton('fixture-token',GROUP,String(LEAD)),get board(){const b=JSON.parse(store.get(queue.boardKey(GROUP))||'null');return b?JSON.parse(b.snapshot):null;},clearAwaitingAmountNotice:(chatId,options)=>support.clearAwaitingAmountNotice('fixture-token',chatId,options),mirrorBotMessage:(chatId,messageId,user,options)=>support.mirrorBotMessage('fixture-token',chatId,messageId,user,options),fail(method,code=500,description='',once=false){failMethod=method;failCode=code;failDescription=description;failOnce=once;},get client(){return JSON.parse(store.get(support.PREFIX+'client:'+GROUP+':'+LEAD)||'null');}};
 }
-test('self-transfer commands and confirmations remain internal and write the deposit ledger only for admins',async()=>{
- const f=fixture();await f.setup();await f.handle(f.pm());
- const key='poker21:admin-deposits:v1';
- f.store.set(key,JSON.stringify({revision:0,entries:[],requests:[],playerAccounts:[{room:'P21',playerId:'123456',profileKey:'P21|123456',nick:'Игрок'},{room:'X',playerId:'987654321',profileKey:'P21|123456'}]}));
- const start=f.calls.length;
- await f.handle(f.groupMessage('/перевод P21 X 2000',70,LEAD));assert.equal(f.calls.length,start);
- assert.equal((await f.handle(f.groupMessage('/перевод P21 X 2000',71))).handled,true);
- const preview=f.calls.at(-1).body,data=preview.reply_markup.inline_keyboard[0][0].callback_data;
- assert.match(preview.text,/987654321/);assert.equal(JSON.parse(f.store.get(key)).channelOperations,undefined);
- assert.equal((await f.handle(f.callback(data,MANAGER,'transfer-confirm'))).handled,true);
- assert.equal(JSON.parse(f.store.get(key)).channelOperations.length,2);
- await f.handle(f.callback(data,MANAGER,'transfer-confirm-retry'));
- assert.equal(JSON.parse(f.store.get(key)).channelOperations.length,2);
+test('record wizard writes selected income internally and old transfer command does nothing',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const start=f.calls.length;
+ await f.handle(f.groupMessage('/перевод P21 X 2000',70));assert.equal(f.calls.length,start);
+ await f.handle(f.groupMessage('/записать',71,LEAD));assert.equal(f.calls.length,start);
+ await f.handle(f.groupMessage('/записать',72));
+ let buttons=f.calls.at(-1).body.reply_markup.inline_keyboard.flat();
+ assert.deepEqual(buttons.map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс']);
+ const click=async data=>{await f.handle(f.callback(data,MANAGER,'record-'+f.calls.length));};
+ await click(buttons[0].callback_data);
+ await click(f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].callback_data);
+ await f.handle(f.groupMessage('2000',73));
+ const confirm=f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].callback_data;
+ await click(confirm);await click(confirm);
+ const state=JSON.parse(f.store.get('poker21:admin-deposits:v1'));
+ assert.equal(state.channelOperations.length,1);assert.equal(state.channelOperations[0].amount,200000);assert.equal(state.channelOperations[0].channelId,'runex');
  assert.ok(f.calls.slice(start).every(c=>!c.body.chat_id||String(c.body.chat_id)===GROUP));
  assert.equal(f.client.lastAnsweredInboundId||0,0);
 });
 test('transfer policy permits only known player topics and never private recipients or unrelated groups',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
- const send=(method,body)=>f.policy.guardedFetch('https://api.telegram.org/botfixture/'+method,{body:JSON.stringify(body)},'support-transfer');
+ const send=(method,body)=>f.policy.guardedFetch('https://api.telegram.org/botfixture/'+method,{body:JSON.stringify(body)},'support-record');
  assert.equal((await send('sendMessage',{chat_id:GROUP,message_thread_id:101,text:'Проверьте перевод'})).ok,true);
  for(const body of [{chat_id:LEAD,message_thread_id:101},{chat_id:'-999',message_thread_id:101},{chat_id:GROUP,message_thread_id:999},{chat_id:GROUP}])assert.equal((await send('sendMessage',body)).status,403);
  assert.equal((await send('copyMessage',{chat_id:GROUP,message_thread_id:101})).status,403);
@@ -59,6 +61,46 @@ test('disabled by default; only explicit owner setup in a forum binds the group'
  for(const id of [LEAD,MANAGER]){const u=f.groupMessage('/support_setup',1,id);assert.equal((await f.handle(u)).handled,false);}
  assert.equal(f.store.has('config'),false);await f.setup();assert.equal(JSON.parse(f.store.get('config')).chatId,GROUP);assert.equal(f.calls.length,1);
  await f.setup();assert.equal(f.calls.length,1);
+});
+test('delete command removes the linked private reply first and then source, without relaying the command',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());await f.handle(f.groupMessage('Ошибка',80));
+ const privateId=f.client.lastReply.privateMessageId,start=f.calls.length;
+ const command=f.groupMessage('/удалить',81);command.message.reply_to_message={message_id:80};
+ await f.handle(command);await f.handle(command);
+ const removed=f.calls.slice(start).filter(c=>c.method==='deleteMessage');
+ assert.deepEqual(removed.map(c=>[String(c.body.chat_id),c.body.message_id]),[[String(LEAD),privateId],[GROUP,80]]);
+ assert.ok(!f.calls.slice(start).some(c=>c.method==='sendMessage'&&String(c.body.chat_id)===String(LEAD)));
+ assert.equal(f.calls.slice(start).filter(c=>c.body.text?.includes('Сообщение удалено')).length,1);
+});
+test('delete removes both media and manager signature and preserves unrelated messages',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());const media=f.groupMessage('',82);delete media.message.text;media.message.photo=[{file_id:'photo'}];
+ await f.handle(media);const record=JSON.parse(f.store.get('poker_app:telegram:support:v1:outgoing:'+GROUP+':82'));
+ assert.equal(record.privateMessageIds.length,2);const start=f.calls.length;
+ const command=f.groupMessage('/удалить',83);command.message.reply_to_message={message_id:82};await f.handle(command);
+ assert.deepEqual(f.calls.slice(start).filter(c=>c.method==='deleteMessage').map(c=>c.body.message_id),record.privateMessageIds.concat(82));
+});
+test('delete rejects missing targets, another manager, unrelated messages and expired replies',async()=>{
+ for(const scenario of ['missing','unknown','other','expired']){
+  const f=fixture();await f.setup();await f.handle(f.pm());await f.handle(f.groupMessage('Ответ',84));
+  if(scenario==='expired'){const key='poker_app:telegram:support:v1:outgoing:'+GROUP+':84',r=JSON.parse(f.store.get(key));r.createdAt=Date.now()-49*3600000;f.store.set(key,JSON.stringify(r));}
+  const start=f.calls.length,command=f.groupMessage('/удалить',85,scenario==='other'?OTHER:MANAGER);
+  if(scenario!=='missing')command.message.reply_to_message={message_id:scenario==='unknown'?9999:84};
+  await f.handle(command);assert.ok(!f.calls.slice(start).some(c=>c.method==='deleteMessage'),scenario);
+ }
+});
+test('private deletion failure keeps the original and retry completes deletion',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());await f.handle(f.groupMessage('Ответ',86));
+ const command=f.groupMessage('/удалить',87);command.message.reply_to_message={message_id:86};const start=f.calls.length;
+ f.fail('deleteMessage',403,'Forbidden',true);await f.handle(command);
+ assert.ok(!f.calls.slice(start).some(c=>c.method==='deleteMessage'&&String(c.body.chat_id)===GROUP));
+ assert.ok(f.calls.at(-1).body.text.includes('сохранено'));
+ await f.handle(command);assert.ok(f.calls.some(c=>c.method==='deleteMessage'&&String(c.body.chat_id)===GROUP&&c.body.message_id===86));
+});
+test('delete policy denies arbitrary group and private message deletion without mapping and permits',async()=>{
+ const f=fixture();await f.setup();await f.handle(f.pm());
+ for(const body of [{chat_id:LEAD,message_id:42},{chat_id:GROUP,message_id:42}]){
+  const result=await f.policy.guardedFetch('https://api.telegram.org/botfixture/deleteMessage',{body:JSON.stringify(body)},'support-delete');assert.equal(result.status,403);
+ }
 });
 test('new room link buttons route internally and disappear once that room is linked',async()=>{
  for(const [action,cmd,label] of [['support:supr','sid','Suprema'],['support:pp','ppid','PPPoker']]){

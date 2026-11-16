@@ -1,5 +1,15 @@
 # Manager dialogs in Telegram
 
+Owner-approved deletion: a manager replies `/удалить` to their sent message in
+the player's topic. The author or an owner can remove its private copy (including
+a separately sent media signature) and then the topic original. Private deletion
+must succeed before deleting the original. Telegram's 48-hour limit applies.
+Ordinary Telegram UI deletion does not trigger this command. New outgoing
+messages keep a source-to-private mapping; older messages support only the last
+reply stored for that topic. Retry receipts prevent repeating successful deletes.
+The `support-delete` policy requires an explicit short-lived permit backed by
+that mapping; group deletion additionally requires completed private deletion.
+
 The pinned player card also offers «Привязать Супрему» and «Привязать ПП» when
 that room is unlinked. Managers enter a numeric ID (or `/sid ID`, `/ppid ID`) and
 confirm it in the pinned card. Like X-Poker, these are direct canonical player
@@ -9,19 +19,16 @@ be reassigned. Linked IDs appear in the card and deposit room selection after
 between linked rooms use the same deposit profile. Commands and confirmation
 messages remain internal. Existing cards gain these controls on their next refresh.
 
-Owner-approved self-transfer ledger command: in the player's topic, an app
-administrator sends `/перевод P21 X 2000` (or `/transfer P21 X 2000`). The first
-room is the source, the second is the destination, and the amount is in rubles
-(up to two decimal places). Rooms: P21, X, PP, Supr. Both accounts must already
-belong to the same saved deposit profile anchored to this topic's player; missing
-or multiple accounts require fixing the saved links first. The preview displays
-both IDs and the amount. Only its author can confirm or cancel in the same topic
-within 15 minutes. Confirmation rechecks the current identity and links and uses
-the existing atomic, idempotent deposit `transfer` operation with the manager's
-name. This records a completed transfer only; it does not move live chips.
-Commands, previews and results stay internal and never mark the player answered.
-The `support-transfer` group-policy scope permits only callback acknowledgements
-and messages in an existing mapped player topic of the configured Dialogs group.
+Owner-approved income wizard: `/записать` in the player's topic displays exactly
+four channel buttons: Рунекс, Эксчип бот, Рома Крипта, Алл френдс. The manager
+selects a linked room/ID, enters a ruble amount and confirms the preview. All friends
+is stored as `other` income with `counterparty:allfriends`. Each manager has a
+separate 15-minute draft; account ownership is rechecked at confirmation. CAS and
+a stable request ID prevent duplicate incomes. `/отмена` cancels a draft. The old
+`/перевод` and `/transfer` commands and their buttons no longer execute anything.
+The `support-record` policy permits acknowledgements and messages only in known
+player topics of the configured Dialogs group. This records income only and does
+not move live chips. All wizard messages stay internal.
 
 Owner-approved scenario: private messages to `Poker_dvatuza_bot` are copied into
 one forum topic per lead in the dedicated managers' group «Диалоги». Managers

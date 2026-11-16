@@ -653,7 +653,7 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits__allfriends>.deposits__allfriends-total{margin-top:2px;padding-top:5px;border-top:1px solid #bba36655}
 
 .deposits__pending-payments{display:grid;gap:6px;margin:0 0 10px}
-.deposits__pending-payment{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 10px;border-radius:8px;background:#87b4c419;color:var(--dep-text,#e7eddb);font-size:12px}
+.deposits__pending-payment{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 10px;border-radius:8px;background:#d9f2d4;color:#203b28;font-size:12px}
 .deposits__pending-payment button{flex:none;min-width:44px;min-height:44px}
 
 
