@@ -3132,3 +3132,10 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 #homePlayerMonth .reward-ace__bonus strong{font-size:25px;color:#a96808;line-height:1.12;letter-spacing:-.045em;text-shadow:0 1px 0 #fff9}
 #homePlayerMonth .reward-ace__bonus strong>span{font-size:17px}
 @media(max-width:650px){#homePlayerMonth .home-reward-table .reward-ace h3{font-size:13px!important}#homePlayerMonth .reward-ace__bonus strong{font-size:23px}#homePlayerMonth .reward-ace__bonus strong>span{font-size:16px}}
+
+#homePlayerMonth .home-reward-table .reward-ace{padding-top:10px}
+#homePlayerMonth .home-reward-table .reward-ace h3{margin-top:3px}
+#homePlayerMonth .reward-ace__hologram{height:88px}
+#homePlayerMonth .reward-ace__hologram img{height:86px}
+#homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}
+@media(max-width:650px){#homePlayerMonth .reward-ace__hologram{height:82px}#homePlayerMonth .reward-ace__hologram img{height:80px}#homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}}

@@ -1,13 +1,13 @@
 const test=require('node:test'),assert=require('node:assert/strict'),art=require('../lib/nards-challenge-art'),fs=require('node:fs');
 test('invitation artwork renders the host mural and checker art, not empty SVG placeholders',async()=>{const photo=await art.render({state:{discipline:'long'},equipment:{nardsBoard:'club-aces',nardsInterior:'waaar-master',checkers:'obsidian',nardsDice:'carbon',nardsDiceSize:'small'}});const sharp=require('sharp'),metadata=await sharp(photo).metadata(),portrait=await sharp(photo).extract({left:140,top:130,width:150,height:180}).stats();assert.equal(metadata.format,'jpeg');assert.equal(metadata.width,900);assert.equal(metadata.height,944);assert.ok(photo.length<1024*1024);assert.ok(portrait.channels.some(c=>c.stdev>25),'Embedded mural must have visible detail');});
-test('only catalog equipment is used and small dice retain their material',()=>{const svg=art.svgFor({state:{discipline:'short'},equipment:{nardsInterior:'../../secret',checkers:'../../secret',nardsDice:'jade',nardsDiceSize:'small'}});assert.ok(!svg.includes('<text'),'Invitation must not depend on server Cyrillic fonts');assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('width="40"'));assert.ok(!svg.includes('../../secret'));assert.equal((svg.match(/id="coin-/g)||[]).length,0);});
+test('only catalog equipment is used and small dice retain their material',()=>{const svg=art.svgFor({state:{discipline:'short'},equipment:{nardsInterior:'../../secret',checkers:'../../secret',nardsDice:'jade',nardsDiceSize:'small'}});assert.ok(!svg.includes('<text'),'Invitation must not depend on server Cyrillic fonts');assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('width="52.2"'));assert.ok(!svg.includes('../../secret'));assert.equal((svg.match(/id="coin-/g)||[]).length,0);});
 
 test('invite art uses the room host snapshot for both leaves, checkers and dice',()=>{
  const equipment={nardsInterior:'manki-villa',nardsBoard:'classic',checkers:'pearl',nardsDice:'jade',nardsDiceSize:'small'};
  const svg=art.svgFor({state:{discipline:'long'},equipment});
  const catalog=require('../lib/nards-equipment'),inside=catalog.NARDS_INTERIORS.find(b=>b.id==='manki-villa');
  for(const side of ['leftSurface','rightSurface'])assert.ok(svg.includes(fs.readFileSync(inside[side]).toString('base64')),'Missing selected '+side);
- assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('#374655'));assert.ok(svg.includes('width="40"'));
+ assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('#374655'));assert.ok(svg.includes('width="52.2"'));
  const basic=art.svgFor({state:{discipline:'long'},equipment:{...equipment,nardsInterior:'classic'}});assert.notEqual(svg,basic);
 });
 
@@ -69,4 +69,23 @@ test('ordinary points follow the six live tip gaps instead of a fixed long blade
  assert.ok(tips[0]>tips[1]&&tips[1]>tips[2]);
  assert.equal(tips[0],tips[5]);assert.equal(tips[1],tips[4]);assert.equal(tips[2],tips[3]);
  assert.ok(Math.max(...tips)<250,'Sports triangles must leave the central painting visible');
+});
+
+
+test('optional landing wells use the generator artwork on all 24 points',async()=>{
+ const view={state:{discipline:'long'},equipment:{nardsWells:true,nardsInterior:'classic'}};
+ const svg=art.svgFor(view);
+ assert.equal((svg.match(/data-detail="landing-well"/g)||[]).length,24);
+ assert.ok(!art.svgFor({...view,equipment:{nardsWells:false}}).includes('data-detail="landing-well"'));
+ const photo=await art.render(view);assert.ok(photo.length>10000);
+});
+test('reference interiors suppress wooden lips and brass hinges like the editor',()=>{
+ const svg=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'obsidian-copper'}});
+ assert.ok(!svg.includes('data-detail="scalloped-rail"'));
+ assert.ok(!svg.includes('data-detail="brass-hinge"'));
+ assert.equal((svg.match(/data-detail="case-carving"/g)||[]).length,2);
+});
+test('hidden homes expand the field without clipping its bottom edge',async()=>{
+ const photo=await art.render({state:{discipline:'long'},equipment:{nardsHome:'none'}});
+ const meta=await require('sharp')(photo).metadata();assert.equal(meta.height,1005);
 });

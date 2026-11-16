@@ -1947,15 +1947,15 @@ function hallFishRenderHomePlayerMonth(data) {
   var rewards = [
     {key:'playerMonth',title:'Игрок месяца',bonus:'25 000',suit:'♠',leader:player,description:'Бонус за звание «Игрок месяца».'},
     {key:'dayHero',title:'Герой дня',bonus:'30 000',suit:'♥',leader:hero,description:'Больше всего званий «Герой дня» за месяц.'},
-    {key:'threeRebuys',title:'Выиграть 3 ребайника подряд',bonus:'25 000',suit:'♣',description:'Выиграть три ребай-турнира подряд. Бонус — 25 000 ₽.'}
+    {key:'threeRebuys',title:'Выиграть 3 турнира DV-ребай подряд',bonus:'25 000',suit:'♣',description:'Выиграть 3 турнира DV-ребай подряд. Бонус — 25 000 ₽.'}
   ];
-  root.innerHTML = '<section class="home-reward-table" aria-label="Награды клуба"><header class="home-reward-table__heading"><span>НАГРАДЫ КЛУБА</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
+  root.innerHTML = '<section class="home-reward-table" aria-label="Награды клуба в ноябре"><header class="home-reward-table__heading"><span>НАГРАДЫ КЛУБА В НОЯБРЕ</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
     var image = reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
     var art = image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
     return '<button type="button" class="reward-ace'+(reward.suit==='♥'?' reward-ace--red':'')+'" '+(reward.key==='threeRebuys'?'data-home-month-achievement="threeRebuys"':'data-home-reward-tab="'+reward.key+'"')+' title="'+hallFishEsc(reward.title)+'" data-description="'+hallFishEsc(reward.description)+'" aria-haspopup="dialog">'+
-      '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><span class="reward-ace__number">НАГРАДА 0'+(index+1)+'</span><h3>'+reward.title+'</h3><span class="reward-ace__bonus"><small>Бонус</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
+      '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><h3>'+reward.title+'</h3><span class="reward-ace__bonus"><small>Бонус</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
       (reward.key==='threeRebuys'?'<span class="reward-ace__condition">Три победы. Одна серия.</span>':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
-      '<span class="reward-ace__action">'+(reward.key==='threeRebuys'?'Условия':'Смотреть рейтинг')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
+      '<span class="reward-ace__action">'+(reward.key==='threeRebuys'?'Условия':'Смотреть')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
   }).join('')+'</div></section>'+
     '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';
 }
