@@ -65,20 +65,19 @@ test('expiry worker cleans expired requests and refreshes published lists',async
  assert.ok(commands.some(c=>c[0]==='EVAL'&&c[1].includes('p.expiresAt<=tonumber(ARGV[1])')));
  assert.ok(commands.some(c=>c[0]==='EVAL'&&c[1].includes("'ZSCORE'")));
 });
-test('bot replies get a three minute deletion timer without shortening request lifetime',async()=>{
+test('exchange board stays visible without shortening request lifetime',async()=>{
  const f=fixture(),before=Date.now();
  await f.service.handle({message:{...message,text:'/обмен'}},'test');
  const timer=f.commands.find(c=>c[0]==='ZADD'&&c[1].endsWith(':delete-due'));
- assert.equal(timer[2],'NX');assert.equal(timer[4],'-123:10');
- assert.ok(timer[3]>=before+180000&&timer[3]<=Date.now()+180000);
+ assert.equal(timer,undefined);
  assert.doesNotMatch(f.sent[0].body.text,/Это сообщение удаляется|список можно снова открыть|Чтобы уйти раньше/);
  assert.match(f.sent[0].body.text,/на 2 часа/);
 });
-test('cleanup deletes only scheduled bot messages and removes their board index',async()=>{
+test('cleanup cancels legacy board deletion timers without deleting the board',async()=>{
  const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},sent=[],commands=[];
  vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline:async batch=>batch.map(c=>{commands.push(c);return {result:c[0]==='ZRANGEBYSCORE'&&c[1].endsWith(':delete-due')?['-123:7']:[]};})}:{guardedFetch:async(url,opts)=>{sent.push({url,body:JSON.parse(opts.body)});return {json:async()=>({ok:true})};}}});
- await mod.exports.expire('test');assert.match(sent[0].url,/deleteMessage$/);assert.equal(sent[0].body.message_id,7);
- assert.ok(commands.some(c=>c[0]==='ZREM'&&c[1].endsWith(':boards')&&c[2]==='7'));
+ await mod.exports.expire('test');assert.equal(sent.length,0);
+ assert.ok(commands.some(c=>c[0]==='ZREM'&&c[1].endsWith(':delete-due')&&c[2]==='-123:7'));
  assert.ok(!commands.some(c=>c[0]==='HDEL'));
 });
 

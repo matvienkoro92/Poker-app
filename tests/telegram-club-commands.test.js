@@ -31,23 +31,18 @@ test('pulse opens commands and correct download and club links',async t=>{
  global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
  await c.handle({message:{text:'/пульс',chat:{id:1},message_id:5}},'test');
  const buttons=calls[0].reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.filter(b=>b.callback_data).map(b=>b.callback_data),['club:menu','club:sub:menu','club:schedule:0']);
- assert.deepEqual(buttons.slice(2).filter(b=>b.url && !b.url.startsWith('https://t.me/share/url?')).map(b=>b.url),['https://www.poker21pro.com/','https://t.me/Poker_dvatuza_bot/DvaTuza','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=nards','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=chess','https://t.me/Poker_dvatuza_bot/DvaTuza?startapp=billiards']);
- assert.equal(buttons.length,14);
- for (const [game, phrase] of [['nards','в нарды'],['chess','в шахматы'],['billiards','в бильярд']]) {
-  const row = calls[0].reply_markup.inline_keyboard.find(([b]) => b.url?.endsWith('startapp=' + game));
-  assert.equal(row[1].text, 'Позвать друга');
-  const invite = new URL(row[1].url);
-  assert.equal(invite.searchParams.get('url'), row[0].url);
-  assert.ok(invite.searchParams.get('text').includes(phrase));
- }
- assert.equal(buttons.at(-1).callback_data,'club:schedule:0');
+ assert.equal(buttons.filter(b=>b.callback_data).length,0);
+ assert.ok(!buttons.some(b=>b.text.includes('Столы сейчас')));
+ assert.equal(buttons.filter(b=>b.url?.startsWith('https://t.me/share/url?')).length,1);
+ assert.equal(buttons.at(-1).text,'👥 Позвать друга в чат');assert.equal(buttons.at(-1).style,'success');
+ assert.equal(new URL(buttons.at(-1).url).searchParams.get('url'),'https://t.me/+snBngKmXYa1mYjky');
+ assert.ok(buttons.some(b=>b.url==='https://t.me/Poker_dvatuza_bot?start=tablesub'));
+ assert.ok(buttons.some(b=>b.url==='https://t.me/Poker_dvatuza_bot?start=schedule'));
+ assert.equal(c.command({message:{text:'/start schedule',chat:{type:'private'}}}),'schedule:0');
  assert.equal(buttons[0].url,'https://t.me/Poker_dvatuza_bot?start=deposit');
- assert.equal(buttons[1].text,'👥 Позвать друга в чат');
- const share = new URL(buttons[1].url);
- assert.equal(share.origin + share.pathname, 'https://t.me/share/url');
- assert.equal(share.searchParams.get('url'), 'https://t.me/+snBngKmXYa1mYjky');
- assert.equal(buttons[2].text,'⬇️ Скачать Покер21');
+ assert.equal(buttons[1].text,'⬇️ Скачать Покер21');
+ for(const game of ['nards','chess','billiards'])assert.ok(buttons.some(b=>b.url?.endsWith('startapp='+game)));
+
 });
 
 test('schedule sends white and black photos without old text pages',async t=>{
