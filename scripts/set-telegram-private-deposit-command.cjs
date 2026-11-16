@@ -4,6 +4,7 @@ if(envPath)process.loadEnvFile(envPath);
 function orderedCommands(existing){
  const first=[
   {command:'dep',description:'Пополнить счёт'},
+  {command:'rating',description:'Рейтинги игр — выберите игру'},
   {command:'chat',description:'Наш клубный чат'},
   {command:'download',description:'Скачать X-Poker, Suprema, PPPoker или Покер21про'},
   {command:'rakeback',description:'Когда начисляется рейкбек'},
@@ -14,7 +15,7 @@ function orderedCommands(existing){
   {command:'bonus_balance',description:'Мой беккинг-баланс'}
  ];
  const names=new Set(first.map(c=>c.command));
- return first.concat(existing.filter(c=>!names.has(c.command)));
+ return first.concat(existing.filter(c=>!names.has(c.command)&&!['rating_chess','rating_billiards','rating_nards_long','rating_nards_short'].includes(c.command)));
 }
 async function main(){
  if(!process.argv.includes('--apply')){console.log(orderedCommands([]).map(c=>'/'+c.command+' — '+c.description).join('\n'));return;}

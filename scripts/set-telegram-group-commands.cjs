@@ -17,10 +17,7 @@ const commands=[
   {command:'nards',description:'Нарды — соперник из чата'},
   {command:'chess',description:'Шахматы — соперник из чата'},
   {command:'billiards',description:'Бильярд — соперник из чата'},
-  {command:'rating_chess',description:'Рейтинг шахмат · топ-10 и моё место'},
-  {command:'rating_billiards',description:'Рейтинг бильярда · топ-10 и моё место'},
-  {command:'rating_nards_long',description:'Рейтинг длинных нард · топ-10 и моё место'},
-  {command:'rating_nards_short',description:'Рейтинг коротких нард · топ-10 и моё место'},
+  {command:'rating',description:'Рейтинги игр — выберите игру'},
 ];
 async function main() {
   if (!process.argv.includes('--apply')) { console.log(JSON.stringify(commands,null,2)); return; }

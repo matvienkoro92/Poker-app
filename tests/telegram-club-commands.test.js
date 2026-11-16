@@ -25,6 +25,14 @@ test('menu callback is answered and edits message without sending another',async
  assert.deepEqual(calls[1].p.reply_markup.inline_keyboard.at(-1),[{text:'⬅️ Назад',callback_data:'club:pulse'}]);
 });
 
+test('one rating command opens four game choices without fetching a ranking',async t=>{
+ for(const text of ['/rating','/рейтинг','/rating@Poker_dvatuza_bot'])assert.equal(c.command({message:{text,chat:{type:'private'}}}),'rating-menu');
+ const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
+ global.fetch=async(url,opts)=>{calls.push(JSON.parse(opts.body));return {json:async()=>({ok:true})};};
+ await c.handle({message:{text:'/rating',message_id:6,chat:{id:1,type:'private'}}},'test');
+ assert.equal(calls.length,1);
+ assert.deepEqual(calls[0].reply_markup.inline_keyboard.flat().map(b=>b.callback_data),['club:rating:chess','club:rating:billiards','club:rating:long','club:rating:short']);
+});
 test('pulse opens commands and correct download and club links',async t=>{
  for(const text of ['пульс','/пульс','/pulse','/pulse@DvaTuzaBot'])assert.equal(c.command({message:{text}}),'pulse');
  const old=global.fetch,calls=[];t.after(()=>global.fetch=old);
