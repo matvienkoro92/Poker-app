@@ -921,3 +921,12 @@ html body #app.app.app--view-home > .card > .card__header:not(.card__header--adm
 html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-greeting {display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-actions__row {display:contents!important}
 @media(max-width:420px){html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__title{font-size:10px!important}html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__image{width:32px!important;height:32px!important}}
+@media(max-width:360px){
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__text{max-width:calc(100% - 37px);overflow:hidden}
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__title{font-size:9px!important;line-height:1.1!important}
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .logo__title-line{display:block!important;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-greeting-wrap{display:block!important;width:100%;min-width:0;overflow:hidden}
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) .header-greeting{font-size:10px!important;min-width:0!important;width:100%;text-align:right}
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) #headerBonusBalance{display:flex!important;flex-wrap:wrap;justify-content:flex-end;gap:0 3px;font-size:9px!important;white-space:normal}
+  html body #app.app.app--view-home > .card > .card__header:not(.card__header--admin-shortcuts):has(> #headerNardsShortcut:not([hidden])) #headerBonusBalance strong{font-size:9px!important;white-space:nowrap}
+}
