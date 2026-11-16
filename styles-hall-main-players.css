@@ -3078,3 +3078,25 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 .home-player-month .home-month-showcase__case{display:grid;place-items:center;align-self:stretch;transform:none}
 .home-player-month .home-month-showcase__case .hall-fish-achievement-leader__hologram:not(.hall-fish-achievement-leader__hologram--avatar){height:32cqw!important;max-height:none}
 .home-player-month .home-month-showcase__case .hall-fish-achievement-leader__hologram>img{object-position:center!important}
+.home-reward-table{padding:22px 18px 28px;border:1px solid #a7874b;border-radius:34px;background:radial-gradient(ellipse at 50% 15%,#23483d 0,#102d27 48%,#091b19 100%);box-shadow:inset 0 0 0 6px #111b1b,inset 0 0 0 7px #b18b4555,0 20px 40px #0006;color:#f3deb0}
+.home-reward-table__heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 9px 18px;font-size:12px;font-weight:850;letter-spacing:.16em}
+.home-reward-table__heading small{font-size:10px;font-weight:500;letter-spacing:.02em;color:#a9bdb2}
+.home-reward-table__cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:6px 5px 12px}
+.home-reward-table .reward-ace{position:relative;display:flex;flex-direction:column;align-items:center;min-width:0;min-height:390px;padding:30px 24px 32px;border:1px solid #ead7ab;border-radius:17px;background:linear-gradient(130deg,#fffbee,#f1e6ce);color:#202a27;box-shadow:0 12px 18px #0005,inset 0 0 0 5px #fff8,inset 0 0 0 6px #bba57b66;text-align:center;font:inherit;cursor:pointer;isolation:isolate}
+.reward-ace__corner{position:absolute;left:12px;top:12px;display:grid;font-family:Georgia,serif;font-size:25px;font-weight:bold;line-height:.9;gap:4px}
+.reward-ace__corner b{font-size:20px}.reward-ace--red .reward-ace__corner{color:#a63837}
+.reward-ace__corner--bottom{top:auto;left:auto;bottom:12px;right:12px;transform:rotate(180deg)}
+.reward-ace__number{font-size:8px;font-weight:750;letter-spacing:.18em;color:#7d735e}
+.reward-ace h3{max-width:190px;margin:14px 0 12px;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:850;line-height:1.1;color:#23342e;text-wrap:balance}
+.reward-ace__bonus{display:grid;gap:3px}.reward-ace__bonus small{font-size:11px;color:#746345}.reward-ace__bonus strong{font-size:30px;line-height:1.1;font-weight:900;letter-spacing:-.04em;color:#815918}.reward-ace__bonus strong>span{font-size:22px}
+.reward-ace__hologram{position:relative;display:grid;place-items:center;width:100%;height:150px;margin:8px 0 0;background:radial-gradient(ellipse at 50% 85%,#70d5bc44,transparent 60%)}
+.reward-ace__hologram::after{content:'';position:absolute;bottom:3px;width:76%;height:9px;border:1px solid #72af9d77;border-radius:50%;background:#b5e5d533;box-shadow:0 0 14px #72cbae55;z-index:-1}
+.reward-ace__hologram img{width:100%;height:145px;object-fit:contain;filter:drop-shadow(0 4px 7px #143f3333)}
+.reward-ace__hologram--avatar img{width:100px;height:100px;border-radius:50%;object-fit:cover}
+.reward-ace__leader{display:grid;gap:4px;margin:4px 0 14px;min-width:0;max-width:100%}.reward-ace__leader small{font-size:10px;color:#706b5b}.reward-ace__leader strong{font-size:18px;overflow-wrap:anywhere}
+.reward-ace__symbol{height:150px;display:flex;align-items:center;justify-content:center;gap:0;width:100%;margin:8px 0 0;font-family:Georgia,serif;font-size:100px;color:#c4b28b}
+.reward-ace__symbol i{display:grid;place-items:center;width:65px;height:94px;border:1px solid #ad996b;border-radius:7px;background:#fffbef;box-shadow:0 4px 10px #3c301c22;font-size:24px;font-style:normal;transform:rotate(-15deg);margin-right:-25px}.reward-ace__symbol i:nth-child(2){transform:translateY(-9px);color:#a63837}.reward-ace__symbol i:last-child{transform:rotate(15deg);margin-right:0}
+.reward-ace__condition{font-size:11px;line-height:1.4;color:#706b5b;margin:9px 0 14px}
+.reward-ace__action{display:flex;justify-content:center;gap:12px;margin-top:auto;padding-top:12px;border-top:1px solid #c4b48b66;width:100%;font-size:11px;font-weight:750;color:#615032}
+.home-reward-table .reward-ace:focus-visible,.home-reward-table__cards:focus-visible{outline:3px solid #e5c477;outline-offset:4px}
+@media(max-width:650px){.home-reward-table{padding:20px 9px 15px;border-radius:25px}.home-reward-table__heading{padding:0 10px 11px;font-size:10px;letter-spacing:.12em}.home-reward-table__heading small{font-size:9px}.home-reward-table__cards{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:12px;padding:8px 12px 18px;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#b99752 #132d26}.home-reward-table .reward-ace{flex:0 0 78%;box-sizing:border-box;scroll-snap-align:center;min-height:390px;max-width:300px}.reward-ace h3{font-size:24px}}

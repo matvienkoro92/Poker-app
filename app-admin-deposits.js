@@ -147,15 +147,15 @@
     });});
     var withdrawals=sources.player+sources.owner+sources.allfriends;
     var tipDeposits=(data.tipCashouts||[]).filter(function(r){return !r.voidedAt&&r.createdAt>=forms.period.start&&r.createdAt<forms.period.end&&matchesPaymentManager({createdBy:r.managerId});}).reduce(function(n,r){return n+r.amount;},0);
-    var allfriendsSent=sources.allfriends,allfriendsReceived=0;
+    var allfriendsSent=0,allfriendsReceived=sources.allfriends;
     (data.channelOperations||[]).forEach(function(r){if(r.voidedAt||r.createdAt<forms.period.start||r.createdAt>=forms.period.end||!matchesPaymentManager(r)||!isAllFriendsOperation(r))return;if(r.direction==='income')allfriendsReceived+=r.amount;else if(r.direction==='outgoing')allfriendsSent+=r.amount;});
-    return {allfriendsSent:allfriendsSent,allfriendsReceived:allfriendsReceived,allfriendsBalance:allfriendsSent-allfriendsReceived,withdrawals:withdrawals,sources:sources,deposits:tipDeposits+sources.player+forms.providers.filter(function(p){return p.id!=='transfer'&&p.id!=='bonuses';}).reduce(function(sum,p){return sum+(p.total||0);},0)};
+    return {allfriendsSent:allfriendsSent,allfriendsReceived:allfriendsReceived,allfriendsBalance:allfriendsReceived-allfriendsSent,withdrawals:withdrawals,sources:sources,deposits:tipDeposits+sources.player+forms.providers.filter(function(p){return p.id!=='transfer'&&p.id!=='bonuses';}).reduce(function(sum,p){return sum+(p.total||0);},0)};
   }
   function paymentFormsTotalsHtml(forms){
     var totals=paymentFormsTotals(forms),format=new Intl.DateTimeFormat('ru-RU',{timeZone:forms.period.timeZone||'Europe/Moscow',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),periodLabel=format.format(forms.period.start)+' — '+format.format(forms.period.end);
     var sources=[['player','От игроков'],['owner','Владелец'],['allfriends','AllFriends']].map(function(row){
-      var html='<span><span>'+row[1]+'</span><b>'+money(totals.sources[row[0]])+'</b></span>';
-      if(row[0]==='allfriends')html+='<span class="deposits__allfriends-out"><span>Уход им</span><b>−'+money(totals.allfriendsReceived)+'</b></span><span class="deposits__allfriends-total"><span>Итого</span><b>'+money(totals.allfriendsBalance)+'</b></span>';
+      var html='<span><span>'+row[1]+'</span><b>'+money(row[0]==='allfriends'?totals.allfriendsReceived:totals.sources[row[0]])+'</b></span>';
+      if(row[0]==='allfriends')html+='<span class="deposits__allfriends-out"><span>Уход им</span><b>−'+money(totals.allfriendsSent)+'</b></span><span class="deposits__allfriends-total"><span>Итого</span><b>'+money(totals.allfriendsBalance)+'</b></span>';
       return row[0]==='allfriends'?'<div class="deposits__allfriends">'+html+'</div>':html;
     }).join('');
     return '<dl class="deposits__payment-summary"><div><dt>Итого депозитов за '+esc(periodLabel)+'</dt><dd>'+money(totals.deposits)+'</dd></div><div><dt>Пришло на выводы</dt><dd>'+money(totals.withdrawals)+'<div class="deposits__payment-sources" aria-label="Состав поступлений на выводы">'+sources+'</div></dd></div></dl>';
@@ -578,6 +578,8 @@
   async function onSubmit(event) {
     var form=event.target.closest('[data-form]');if(!form)return;event.preventDefault();if(busy)return;
     var values=Object.fromEntries(new FormData(form).entries()), type=form.dataset.form;
+    var checkedCounterparty=form.querySelector('input[type="radio"][name="counterparty"]:checked');
+    if(checkedCounterparty)values.counterparty=checkedCounterparty.value;
     if(type==='tip'){var tipAmount=parser.money(values.amount);if(!tipAmount){tell('Укажите корректную сумму.',true);return;}await save({action:'tip',amount:tipAmount,playerName:values.playerName,room:values.room,playerId:values.playerId,entryId:values.entryId,note:values.note});return;}
     if(type==='tip-cashout'){var cashoutAmount=parser.money(values.amount),tipAccount=String(values.tipAccount||'').split('|');if(!cashoutAmount||tipAccount.length!==2){tell('Выберите остаток чаевых и укажите сумму.',true);return;}await save({action:type,amount:cashoutAmount,managerId:tipAccount[0],tipRoom:tipAccount[1],room:values.room,playerId:values.playerId,playerName:values.playerName,note:values.note});return;}
     if(type==='void-tip-cashout'){await save({action:type,operationId:form.dataset.operation});return;}

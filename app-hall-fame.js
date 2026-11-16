@@ -1940,32 +1940,28 @@ function hallFishRenderHomePlayerMonth(data) {
   var root = document.getElementById('homePlayerMonth');
   if (!root || !data) return;
   var month = hallFishCurrentAchievementMonth();
-  var specs = hallFishAchievementSpecs(data);
-  var rows = hallFishPlayerMonthSpec(data, month).rows;
-  var leader = rows[0];
-  var leaders = leader ? rows.filter(function(row){return row.value === leader.value && row.tie === leader.tie;}) : [];
-  var count = leader ? leader.value : 0;
-  var label = count === 1 ? 'награда' : count >= 2 && count <= 4 ? 'награды' : 'наград';
   var monthName = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][Number(month.split('.')[0])-1];
-  var medals = specs.slice().sort(function(a,b){
-    return Number(Boolean(leader && leader.awardKeys.includes(b.key))) - Number(Boolean(leader && leader.awardKeys.includes(a.key)));
-  }).map(function(spec) {
-    var earned = leader && leader.awardKeys.includes(spec.key);
-    var title = hallFishEsc(spec.sectionTitle || spec.title);
-    return '<button type="button" data-home-month-achievement="'+hallFishEsc(spec.key)+'" class="home-player-month__medal'+(earned?' is-earned':'')+'" title="'+title+'" aria-label="'+title+'" aria-haspopup="dialog" data-description="'+hallFishEsc(spec.description || spec.awardText || "")+'"><span class="home-month-showcase__rank" aria-hidden="true">A<br>♠</span>'+hallFishAchievementTrophyHtml(spec,true)+'</button>';
-  }).join('');
-  root.innerHTML = '<div class="home-month-showcase"><span class="home-month-showcase__rail" aria-hidden="true"><i>♠</i><i>♠</i></span><div class="home-month-showcase__panel">'+
-    '<h2><span>Текущий лидер</span><strong>'+hallFishEsc(monthName)+'</strong></h2>'+
-    '<div class="home-month-showcase__name">'+(leader?leaders.map(function(row){return hallFishEsc(row.nick);}).join(' · '):'Пока нет лидера')+'</div>'+
-    '<div class="home-player-month__medals">'+medals+'</div>'+
-    '<div class="home-month-showcase__count">'+count+' '+label+' из '+specs.length+'</div>'+
-    '<div class="home-month-showcase__footer"><span>Приз до<strong>55 000 ₽</strong></span><button type="button" class="home-player-month__watch">Смотреть <span aria-hidden="true">❯</span></button></div></div>'+
-    '<div class="home-month-showcase__case">'+(leader?hallFishAchievementLeaderHtml({rows:[leader],staticCharacter:true}):'')+'</div></div>'+
+  var player = hallFishPlayerMonthSpec(data, month).rows[0];
+  var heroSpec = hallFishAchievementSpecs(data).find(function(spec){return spec.key === 'dayHero';});
+  var hero = heroSpec && hallFishAchievementRowsForMonth(heroSpec, month)[0];
+  var rewards = [
+    {key:'playerMonth',title:'Игрок месяца',bonus:'25 000',suit:'♠',leader:player,description:'Бонус за звание «Игрок месяца».'},
+    {key:'dayHero',title:'Герой дня',bonus:'30 000',suit:'♥',leader:hero,description:'Больше всего званий «Герой дня» за месяц.'},
+    {key:'threeRebuys',title:'Выиграть 3 ребайника подряд',bonus:'25 000',suit:'♣',description:'Выиграть три ребай-турнира подряд. Бонус — 25 000 ₽.'}
+  ];
+  root.innerHTML = '<section class="home-reward-table" aria-label="Награды клуба"><header class="home-reward-table__heading"><span>НАГРАДЫ КЛУБА</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
+    var image = reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
+    var art = image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
+    return '<button type="button" class="reward-ace'+(reward.suit==='♥'?' reward-ace--red':'')+'" '+(reward.key==='threeRebuys'?'data-home-month-achievement="threeRebuys"':'data-home-reward-tab="'+reward.key+'"')+' title="'+hallFishEsc(reward.title)+'" data-description="'+hallFishEsc(reward.description)+'" aria-haspopup="dialog">'+
+      '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><span class="reward-ace__number">НАГРАДА 0'+(index+1)+'</span><h3>'+reward.title+'</h3><span class="reward-ace__bonus"><small>Бонус</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
+      (reward.key==='threeRebuys'?'<span class="reward-ace__condition">Три победы. Одна серия.</span>':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
+      '<span class="reward-ace__action">'+(reward.key==='threeRebuys'?'Условия':'Смотреть рейтинг')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
+  }).join('')+'</div></section>'+
     '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';
 }
 
 document.addEventListener('click', function(event) {
-  var button = event.target.closest?.('#homePlayerMonth :is(.home-player-month__watch,[data-home-month-achievement])');
+  var button = event.target.closest?.('#homePlayerMonth :is(.home-player-month__watch,[data-home-month-achievement],[data-home-reward-tab])');
   if (!button) return;
   if (button.dataset.homeMonthAchievement) {
     var dialog = document.querySelector('#homePlayerMonth .home-month-award-dialog');
@@ -1977,7 +1973,7 @@ document.addEventListener('click', function(event) {
     return;
   }
   hallFishActiveDayHeroMonth = hallFishCurrentAchievementMonth();
-  hallFishActiveAchievementTab = 'playerMonth';
+  hallFishActiveAchievementTab = button.dataset.homeRewardTab || 'playerMonth';
   hallFishAchievementDetailsOpen = false;
   openHallFishAchievementTab();
 });
