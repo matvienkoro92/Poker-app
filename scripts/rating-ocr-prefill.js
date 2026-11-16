@@ -65,6 +65,8 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/PLO4/i.test(raw) && /20K/i.test(raw) && !/Bounty/i.test(raw)) return "PLO4 🃏🃏🃏 20K 🏆";
+  if (/Prime\s+PKO/i.test(raw) && /200K/i.test(raw)) return "Prime PKO 200K";
   if (/PLO6\s+Bounty/i.test(raw) && /12K/i.test(raw)) return "PLO6 Bounty 12K";
   if (/PLO4\s+Bounty/i.test(raw) && /30K/i.test(raw)) return "PLO4 Bounty 30K";
   if (/MAIN\s+LUCKY/i.test(raw) && /1M/i.test(raw)) return "MAIN LUCKY 1M";
@@ -523,7 +525,11 @@ async function parseOcrFile(file) {
   if (blue && date === "06.11.2026" && time === "18:00" && title === "500K Black Friday") { title = "Black Friday 500K"; buyin = 1500; }
   if (blue && date === "07.11.2026" && time === "19:00" && /300K.*Triple Chance/i.test(title)) { title = "Triple Chance 300K"; buyin = 3000; }
   if (blue && date === "10.11.2026" && time === "18:00" && /200K.*Deep Freeze/i.test(title)) { title = "Deep Freeze 200K"; buyin = 4000; }
-  // Entry fees confirmed by the owner for the November 13–14 screenshots.
+  // Entry fees confirmed by the owner for the November 13–15 screenshots.
+  if (blue && date === "15.11.2026") {
+    if (time === "13:00" && title === "Black Magic 60K") buyin = 500;
+    if (time === "21:59" && title === "Prime PKO 200K") buyin = 5000;
+  }
   if (blue && date === "13.11.2026" && time === "09:00" && title === "PLO6 Bounty 12K") buyin = 200;
   if (blue && date === "14.11.2026") {
     const confirmed = {

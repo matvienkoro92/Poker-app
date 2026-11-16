@@ -3646,4 +3646,221 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "15.11.2026": [
+    {
+      "time": "00:00",
+      "name": "Super KO 2/3 120K",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 60524,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 1,
+          "reward": 5424.08,
+          "points": 135
+        },
+        {
+          "nick": "cadillac",
+          "place": 6,
+          "reward": 702.5,
+          "points": 50
+        },
+        {
+          "nick": "Ярый",
+          "place": 20,
+          "reward": 288.75,
+          "points": 0
+        },
+        {
+          "nick": "Jeweler",
+          "place": 12,
+          "reward": 76.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "AlenaSt",
+          "place": 2,
+          "reward": 9000,
+          "points": 110
+        },
+        {
+          "nick": "Dimitar",
+          "place": 3,
+          "reward": 4400,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "Black Magic 60K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Рыбнадзор",
+          "place": 2,
+          "reward": 9752,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "16:00",
+      "name": "PLO4 🃏🃏🃏 20K 🏆",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Sarmat1305",
+          "place": 8,
+          "reward": 633,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Zeus",
+          "place": 1,
+          "reward": 21120,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🏆Волшебный Пятак🏆",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 1,
+          "reward": 187625,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "🥊GRAND KNOCKOUT🥊",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Suprimalor",
+          "place": 35,
+          "reward": 10328,
+          "points": 0
+        },
+        {
+          "nick": "Waaarr",
+          "place": 37,
+          "reward": 4636,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 56,
+          "reward": 3997.9999999999995,
+          "points": 0
+        },
+        {
+          "nick": "Em13!!",
+          "place": 104,
+          "reward": 1998,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 27690,
+          "points": 135
+        },
+        {
+          "nick": "@Felix",
+          "place": 4,
+          "reward": 830,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "21:59",
+      "name": "Prime PKO 200K",
+      "buyin": 5000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 7,
+          "reward": 10925,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "myhomor4ik",
+          "place": 1,
+          "reward": 19385.46,
+          "points": 135
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 2,
+          "reward": 7402.88,
+          "points": 110
+        },
+        {
+          "nick": "Палач",
+          "place": 4,
+          "reward": 2205.82,
+          "points": 70
+        }
+      ]
+    }
+  ]
 };

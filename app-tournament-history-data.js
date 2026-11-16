@@ -1769,6 +1769,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             25600
           ]
         ]
+      ],
+      [
+        "15.11.2026",
+        [
+          [
+            1,
+            "Rifa",
+            187625
+          ]
+        ]
       ]
     ]
   }
