@@ -89,3 +89,13 @@ test('Poker21 manager correction binds with the player identity after confirmati
  assert.equal(p21.args[0],'ID000123');assert.equal(p21.identity.id,100);
  assert.equal(p21.args[2],'test-player-binding-key');assert.equal(client.xpokerLink,undefined);
 });
+test('changing a pending ID by command visibly acknowledges the new number',async()=>{
+ const f=fixture(),notices=[],client={id:'100',name:'Игрок',headerMessageId:7,threadId:10};
+ const args={source:{from:{is_bot:true},message_id:7},user:{id:42},client,group:'-100',token:'test',api:async(t,m,b)=>notices.push(b),saveClient:async()=>{},syncPlayerCard:async()=>{},operatorName:()=> 'Менеджер',readPlayerIdentity:async()=>({accountId:'ID000123',xpokerIds:['2335996']})};
+ await f.service.handle({...args,m:{text:'/xid 4300234'}});
+ await f.service.handle({...args,m:{text:'/xid 9876543'}});
+ assert.equal(client.xpokerLink.xpokerId,'9876543');
+ assert.ok(notices.at(-1).text.includes('Новый X-Poker ID: 9876543'));
+ assert.ok(notices.at(-1).text.includes('Заменит 2335996'));
+ assert.equal(f.writes.length,0);
+});
