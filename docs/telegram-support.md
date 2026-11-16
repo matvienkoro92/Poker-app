@@ -1,5 +1,14 @@
 # Manager dialogs in Telegram
 
+The pinned player card also offers «Привязать Супрему» and «Привязать ПП» when
+that room is unlinked. Managers enter a numeric ID (or `/sid ID`, `/ppid ID`) and
+confirm it in the pinned card. Like X-Poker, these are direct canonical player
+bindings and do not require Poker21. Another player's existing binding cannot
+be reassigned. Linked IDs appear in the card and deposit room selection after
+«Оплатил»; unlinked Suprema/PPPoker are omitted from that selection. Transfers
+between linked rooms use the same deposit profile. Commands and confirmation
+messages remain internal. Existing cards gain these controls on their next refresh.
+
 Owner-approved self-transfer ledger command: in the player's topic, an app
 administrator sends `/перевод P21 X 2000` (or `/transfer P21 X 2000`). The first
 room is the source, the second is the destination, and the amount is in rubles

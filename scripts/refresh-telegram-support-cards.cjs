@@ -19,7 +19,7 @@ async function main(){
  if(!process.argv.includes('--apply'))return;
  let updated=0,skipped=0,failed=0;
  for(const id of ids){
-  try{if(await support.refreshPlayerCard(token,group,id))updated++;else skipped++;}
+  try{if(await (process.argv.includes('--buttons-only')?support.refreshResolveButton:support.refreshPlayerCard)(token,group,id))updated++;else skipped++;}
   catch{failed++;console.error('Card refresh failed for client '+id);}
   console.log(JSON.stringify({updated,skipped,failed,total:ids.size}));
  }

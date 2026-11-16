@@ -1,4 +1,26 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+test('Suprema and PPPoker bindings work without Poker21, share a deposit profile and prevent reassignment',async()=>{
+ const f=fixture(),base={accountId:'ID000123',telegramId:'100',nick:'Игрок',actor:42,actorName:'Менеджер'};
+ await f.service.save({...base,room:'Supr',xpokerId:'987654321',requestId:'suprema_link_123456'});
+ await f.service.save({...base,room:'PP',xpokerId:'123456789',requestId:'pppoker_link_123456'});
+ const directory=require('../lib/deposit-player-directory').depositPlayerDirectory(f.state);
+ const a=directory.find(p=>p.room==='Supr'&&p.playerId==='987654321'),b=directory.find(p=>p.room==='PP'&&p.playerId==='123456789');
+ assert.equal(a.profileKey,b.profileKey);
+ await assert.rejects(f.service.save({...base,room:'PP',xpokerId:'123456789',accountId:'ID000124',requestId:'pppoker_other_123456'}),/другому игроку/);
+});
+test('Suprema and PPPoker controls capture ID and confirm internally with the correct room',async()=>{
+ for(const [room,action,cmd,label] of [['Supr','support:supr','sid','Suprema'],['PP','support:pp','ppid','PPPoker']]){
+  const f=fixture(),client={id:'100',name:'Игрок',headerMessageId:7,threadId:10},notices=[];
+  const args={source:{from:{is_bot:true},message_id:7},user:{id:42},client,group:'-100',token:'test',api:async(t,method,body)=>{notices.push(body);},saveClient:async()=>{},syncPlayerCard:async()=>{},operatorName:()=> 'Менеджер',readPlayerIdentity:async()=>({accountId:'ID000123',name:'Игрок'})};
+  await f.service.handle({...args,cb:{data:action,id:'start'}});
+  assert.equal(client.xpokerLink.room,room);assert.ok(notices.some(n=>n.text?.includes('/'+cmd)));
+  await f.service.handle({...args,m:{text:'987654321'}});
+  assert.equal(f.state.playerIdentityLinks,undefined);
+  await f.service.handle({...args,cb:{data:'support:xpoker-confirm',id:'confirm'}});
+  assert.equal(f.state.playerIdentityLinks[0].room,room);assert.equal(f.state.playerIdentityLinks[0].playerId,'987654321');
+  assert.ok(notices.some(n=>n.text?.includes('✅ '+label)));assert.ok(notices.every(n=>!n.chat_id||n.chat_id==='-100'));
+ }
+});
 function fixture(){
  let raw=JSON.stringify({revision:0,entries:[],requests:[]});const mod={exports:{}},writes=[];
  vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-support-xpoker'),'utf8'),{module:mod,require:id=>id==='./redis'?{pipeline:async cmds=>cmds.map(c=>{if(c[0]==='GET')return {result:raw};assert.equal(c[0],'EVAL');assert.equal(c[4],raw);raw=c[5];writes.push(JSON.parse(raw));return {result:1};})}:id==='./account-id'?{ensureDtIdForUserId:async()=> 'ID000123'}:id==='./admin-deposits'?require('../lib/admin-deposits'):require(id)});

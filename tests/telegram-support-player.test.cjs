@@ -7,6 +7,12 @@ function fixture(values={},names={},ledger){
  return {...ctx.module.exports,calls,offline(){offline=true;}};
 }
 const user={id:777,first_name:'Telegram Name',username:'handle'};
+test('Suprema and PPPoker IDs use canonical ownership without requiring Poker21',async()=>{
+ const ledger={playerIdentityLinks:[{room:'Supr',playerId:'12345',accountId:'ID000009'},{room:'PP',playerId:'67890',accountId:'ID000009'},{room:'Supr',playerId:'99999',accountId:'ID000555'}]};
+ const f=fixture({'poker_app:visitor_dt_ids|tg_777':'ID000001'},{},ledger),p=await f.readPlayerIdentity(user);
+ assert.deepEqual(Array.from(p.supremaIds),['12345']);assert.deepEqual(Array.from(p.pppokerIds),['67890']);
+ assert.match(f.identityText(user,p),/Suprema:12345 PPPoker:67890/);
+});
 test('uses an explicit Telegram binding, canonical account and authoritative Poker21 ID',async()=>{
  const f=fixture({'poker_app:visitor_dt_ids|tg_777':'ID000001','poker_app:pokerplus_user_ids|ID000009':'123456','poker_app:pokerplus_profiles|ID000009':JSON.stringify({pokerPlusUserId:'123456',nickname:'Poker Nick'})},{123456:'Saved Name'});
  const player=await f.readPlayerIdentity(user);assert.equal(player.name,'Saved Name');assert.equal(player.poker21Id,'123456');

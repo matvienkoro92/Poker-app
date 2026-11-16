@@ -4,6 +4,15 @@ test('room labels include only available IDs',()=>{
  assert.deepEqual(room.keyboard(room.choices({})).inline_keyboard[0].map(b=>b.text),['Poker21','X-Poker']);
  assert.deepEqual(room.keyboard(room.choices({poker21Id:'421508',xpokerIds:['2335996']})).inline_keyboard[0].map(b=>b.text),['Poker21 · ID 421508','X-Poker · ID 2335996']);
 });
+test('Suprema and PPPoker appear only when linked and their indexes select the correct account',async()=>{
+ const options=room.choices({supremaIds:['123456'],pppokerIds:['987654']});
+ assert.deepEqual(room.keyboard(options).inline_keyboard.map(row=>row.map(b=>b.text)),[['Poker21','X-Poker'],['Suprema · ID 123456','PPPoker · ID 987654']]);
+ for(const [index,label] of [[2,'Suprema'],[3,'PPPoker']]){
+  const f=fixture({expiresAt:Date.now()+10000,options});await f.select(index);
+  assert.match(f.sent[1].body.text,new RegExp(label));assert.equal(f.notifications[0][3].room,options[index].room);
+ }
+ assert.deepEqual(room.choices({pppokerIds:['987654']}).map(p=>p.room),['P21','X','PP']);
+});
 function fixture(state){
  const mod={exports:{}},sent=[],notifications=[];let raw=state?JSON.stringify(state):null;
  vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-deposit-room'),'utf8'),{module:mod,require:()=>({notifyDepositRoom:async(...args)=>notifications.push(args)})});
