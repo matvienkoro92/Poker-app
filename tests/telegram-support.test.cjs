@@ -36,8 +36,8 @@ test('record wizard writes selected income internally and old transfer command d
  await f.handle(f.groupMessage('/записать',71,LEAD));assert.equal(f.calls.length,start);
  await f.handle(f.groupMessage('/записать',72));
  let buttons=f.calls.at(-1).body.reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс','Перевод']);
- const click=async data=>{await f.handle(f.callback(data,MANAGER,'record-'+f.calls.length));};
+ assert.deepEqual(buttons.map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс','Перевод','Бонусы']);
+ const click=async data=>{const update=f.callback(data,MANAGER,'record-'+f.calls.length);update.callback_query.message.message_id=f.client.recordDrafts[String(MANAGER)].messageId;await f.handle(update);};
  await click(buttons[0].callback_data);
  await click(f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].callback_data);
  await f.handle(f.groupMessage('2000',73));
@@ -45,6 +45,10 @@ test('record wizard writes selected income internally and old transfer command d
  await click(confirm);await click(confirm);
  const state=JSON.parse(f.store.get('poker21:admin-deposits:v1'));
  assert.equal(state.channelOperations.length,1);assert.equal(state.channelOperations[0].amount,200000);assert.equal(state.channelOperations[0].channelId,'runex');
+ assert.equal(f.calls.slice(start).filter(c=>c.method==='sendMessage').length,1);
+ const wizardId=f.client.recordDrafts[String(MANAGER)].messageId;
+ assert.ok(f.calls.slice(start).filter(c=>c.method==='editMessageText').every(c=>c.body.message_id===wizardId));
+ const blocked=await f.policy.guardedFetch('https://api.telegram.org/botfixture/editMessageText',{body:JSON.stringify({chat_id:GROUP,message_id:f.client.headerMessageId,text:'wrong'})},'support-record');assert.equal(blocked.status,403);
  assert.ok(f.calls.slice(start).every(c=>!c.body.chat_id||String(c.body.chat_id)===GROUP));
  assert.equal(f.client.lastAnsweredInboundId||0,0);
 });

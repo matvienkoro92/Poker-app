@@ -20,7 +20,7 @@ between linked rooms use the same deposit profile. Commands and confirmation
 messages remain internal. Existing cards gain these controls on their next refresh.
 
 Owner-approved income wizard: `/записать` in the player's topic displays exactly
-five buttons: Рунекс, Эксчип бот, Рома Крипта, Алл френдс, Перевод. The manager
+six buttons: Рунекс, Эксчип бот, Рома Крипта, Алл френдс, Перевод, Бонусы. The manager
 selects a linked room/ID, enters a ruble amount and confirms the preview. All friends
 is stored as `other` income with `counterparty:allfriends`. Each manager has a
 separate 15-minute draft; account ownership is rechecked at confirmation. CAS and
@@ -29,6 +29,14 @@ a stable request ID prevent duplicate incomes. `/отмена` cancels a draft. 
 The Перевод button selects the bound source room/ID, then a bound account in a
 different room, then the amount and confirmation. It writes the existing atomic
 transfer pair for the same saved player profile and rechecks both bindings.
+Each wizard sends one initial bot message; every subsequent choice, amount
+preview, cancellation and result edits that same message. The edit scope requires
+a saved wizard message mapping and a matching draft, so it cannot edit player
+cards or unrelated messages. Older active wizards adopt the clicked bot message.
+The Бонусы button (or `/бонусы` directly in the topic) selects a bound room/ID,
+asks for the positive ruble amount and a required reason up to 300 characters,
+then shows confirmation. It records `bonuses` income with the reason in `note`;
+cash deposit totals do not increase and no live chips are issued automatically.
 The `support-record` policy permits acknowledgements and messages only in known
 player topics of the configured Dialogs group. This records income only and does
 not move live chips. All wizard messages stay internal.
