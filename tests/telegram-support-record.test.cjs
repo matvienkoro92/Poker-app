@@ -20,7 +20,7 @@ function fixture(){
 }
 test('record wizard writes each approved channel with the selected bound room and author; confirmation is idempotent',async()=>{
  for(const [channel,index] of [['runex',0],['exchip',1],['r-crypto',2],['allfriends',3]]){
-  const f=fixture();await f.text('/записать');assert.deepEqual(f.buttons().map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс']);
+  const f=fixture();await f.text('/записать');assert.deepEqual(f.buttons().map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс','Перевод']);
   await f.click(f.buttons()[index].callback_data);
   assert.deepEqual(f.buttons().slice(0,4).map(b=>b.text),['Poker21 · ID 421508','X-Poker · ID 2335996','Suprema · ID 1611851','PPPoker · ID 1234567']);
   await f.click(f.buttons()[2].callback_data);await f.text('1500,50');assert.equal(f.state,null);
@@ -54,4 +54,29 @@ test('amount retries stay internal after confirmation or a newer draft; invalid 
  assert.equal(await f.text('2000',50),true);
  await f.click(f.buttons()[0].callback_data);await f.text('/записать',60);
  assert.equal(await f.text('2000',50),true);assert.equal(f.state.channelOperations.length,1);
+});
+test('transfer selects source then destination and writes a single linked pair in either direction',async()=>{
+ for(const from of [0,1]){
+  const f=fixture();
+  f.store.set('poker21:admin-deposits:v1',JSON.stringify({revision:0,entries:[],requests:[],playerAccounts:[{room:'X',playerId:'2335996',profileKey:'P21|421508',nick:'Игрок'}]}));
+  await f.text('/записать');await f.click(f.buttons().find(b=>b.text==='Перевод').callback_data);
+  assert.match(f.calls.at(-1).body.text,/откуда/);
+  await f.click(f.buttons()[from].callback_data);assert.match(f.calls.at(-1).body.text,/куда/);
+  assert.ok(!f.buttons().some(b=>b.text.startsWith(from===0?'Poker21':'X-Poker')));
+  await f.click(f.buttons().find(b=>b.text.startsWith(from===0?'X-Poker':'Poker21')).callback_data);
+  assert.match(f.calls.at(-1).body.text,/сумму перевода/);
+  await f.text('2000');assert.equal(f.buttons()[0].text,'✅ Записать перевод');assert.equal(f.state.channelOperations,undefined);
+  const confirm=f.buttons()[0].callback_data;await f.click(confirm);await f.click(confirm);
+  const rows=f.state.channelOperations;assert.equal(rows.length,2);assert.equal(rows[0].transferId,rows[1].transferId);
+  assert.deepEqual(rows.map(r=>[r.direction,r.room,r.amount]),[['outgoing',from===0?'P21':'X',200000],['income',from===0?'X':'P21',200000]]);
+ }
+});
+test('transfer rejects a single bound room and binding changes on either side',async()=>{
+ const single=fixture();single.setPlayer({accountId:'ID000123',pppokerIds:['123']});await single.text('/записать');await single.click(single.buttons().find(b=>b.text==='Перевод').callback_data);assert.match(single.calls.at(-1).body.text,/двух разных румах/);
+ for(const changed of ['source','destination']){
+  const f=fixture();await f.text('/записать');await f.click(f.buttons().find(b=>b.text==='Перевод').callback_data);
+  await f.click(f.buttons()[0].callback_data);await f.click(f.buttons()[0].callback_data);await f.text('2000');
+  f.setPlayer({accountId:'ID000123',poker21Id:changed==='source'?'999999':'421508',xpokerIds:changed==='destination'?[]:['2335996']});
+  await f.click(f.buttons()[0].callback_data);assert.equal(f.state,null);assert.match(f.calls.at(-1).body.text,/Привязка игрока изменилась/);
+ }
 });

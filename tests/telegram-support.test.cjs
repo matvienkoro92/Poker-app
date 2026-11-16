@@ -36,7 +36,7 @@ test('record wizard writes selected income internally and old transfer command d
  await f.handle(f.groupMessage('/записать',71,LEAD));assert.equal(f.calls.length,start);
  await f.handle(f.groupMessage('/записать',72));
  let buttons=f.calls.at(-1).body.reply_markup.inline_keyboard.flat();
- assert.deepEqual(buttons.map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс']);
+ assert.deepEqual(buttons.map(b=>b.text),['Рунекс','Эксчип бот','Рома Крипта','Алл френдс','Перевод']);
  const click=async data=>{await f.handle(f.callback(data,MANAGER,'record-'+f.calls.length));};
  await click(buttons[0].callback_data);
  await click(f.calls.at(-1).body.reply_markup.inline_keyboard[0][0].callback_data);
