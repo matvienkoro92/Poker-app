@@ -6651,3 +6651,24 @@ html body:not([data-view="chat"]) #app.app.app--view-home > .card > .card__heade
 @container daily-deal (max-width:480px){
  #app.app.app--view-home .home-daily-deal-hero__image{height:145%!important;top:auto!important;bottom:-22px!important;right:0!important;transform:none!important}
 }
+
+/* Lower the daily-deal character to the card's bottom rim. */
+#app.app.app--view-home .home-daily-deal-hero__image {translate:0 20px;}
+
+/* Keep related copy together, with paragraph spacing and room for the CTA. */
+#app.app.app--view-home .home-daily-deal-hero__content {
+ position:absolute;top:14px;left:14px;height:calc(100% - 46px);
+ justify-content:flex-start;gap:0;transform:none;
+}
+#app.app.app--view-home .home-daily-deal-hero__content > span {margin-top:0;margin-bottom:0;flex-shrink:0;}
+@media(max-width:680px) {
+ #app.app.app--view-home .home-daily-deal-hero__content {
+  height:calc((100% - 38px) / .8);transform:scale(.8);transform-origin:left top;
+ }
+}
+
+#app.app.app--view-home .home-daily-deal-hero__content > .home-daily-deal-hero__title {margin-top:5px;}
+#app.app.app--view-home .home-daily-deal-hero__content > .home-daily-deal-hero__status {margin-top:6px;}
+#app.app.app--view-home .home-daily-deal-hero__content > .home-daily-deal-hero__copy {margin-top:28px;}
+#app.app.app--view-home .home-daily-deal-hero__content > .home-daily-deal-hero__prize {margin-top:4px;}
+#app.app.app--view-home .home-daily-deal-hero__content > .home-daily-deal-hero__timer {margin-top:24px;}
