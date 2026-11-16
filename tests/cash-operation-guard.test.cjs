@@ -8,8 +8,8 @@ test('financial fingerprint binds id, action, player, amount and agent',()=>{
  assert.throws(()=>guard.descriptor({...base,operationId:''}));
 });
 function fixture(result='pending'){
- const path=require.resolve('../lib/cash-operation-guard'),local=createRequire(path),module={exports:{}},calls=[],messages=[];
- vm.runInNewContext(fs.readFileSync(path,'utf8'),{module,require:id=>id==='./redis'?{pipeline:async cmds=>{calls.push(...cmds);return cmds.map(c=>({result:c[0]==='EVAL'?result:c[0]==='SET'?'OK':[]}));}}:id==='./telegram-group-policy'?{guardedFetch:async(url,options)=>{messages.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true})};}}:local(id),process:{env:{TELEGRAM_BOT_TOKEN:'fixture'}},AbortSignal,Set,Date});
+ const path=require.resolve('../lib/cash-operation-guard'),local=createRequire(path),module={exports:{}},calls=[],messages=[],store=new Map();
+ vm.runInNewContext(fs.readFileSync(path,'utf8'),{module,require:id=>id==='./redis'?{pipeline:async cmds=>{calls.push(...cmds);return cmds.map(c=>{if(c[0]==='SET'){if(c.includes('NX')&&store.has(c[1]))return {result:null};store.set(c[1],c[2]);return {result:'OK'};}return {result:c[0]==='EVAL'?(typeof result==='function'?result():result):[]};});}}:id==='./telegram-group-policy'?{guardedFetch:async(url,options)=>{messages.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true})};}}:local(id),process:{env:{TELEGRAM_BOT_TOKEN:'fixture'}},AbortSignal,Set,Date});
  return {api:module.exports,calls,messages};
 }
 test('only a trusted positive raffle prize bypasses the guard; returns and forged strings do not',async()=>{
@@ -28,4 +28,14 @@ test('cash approval controls ignore managers and groups',async()=>{
 });
 test('storage failure fails closed',async()=>{
  const f=fixture('conflict');await assert.rejects(f.api.check({operationId:'o',userId:'1',chips:200}),e=>e.code==='CASH_GUARD_CONFLICT');
+});
+test('a blocked period sends one notification without a five-minute expiry, even for repeated attempts',async()=>{
+ let first=true;const f=fixture(()=>{if(first){first=false;return 'triggered';}return 'pending';});
+ for(let i=0;i<4;i++)await assert.rejects(f.api.check({operationId:'blocked-'+i,userId:'1',chips:-100}),e=>e.code==='CASH_APPROVAL_REQUIRED');
+ assert.equal(f.messages.length,1);assert.match(f.messages[0].text,/достигнут порог 7 операций за 90 секунд/);
+ const notice=f.calls.find(c=>c[0]==='SET'&&c[1].endsWith('block-notice:v2'));assert.ok(notice);assert.ok(!notice.includes('EX'));
+});
+test('a pre-existing block reports the old pause instead of claiming the threshold was reached again',async()=>{
+ const f=fixture('pending');await assert.rejects(f.api.check({operationId:'old-block',userId:'1',chips:-100}),e=>e.code==='CASH_APPROVAL_REQUIRED');
+ assert.match(f.messages[0].text,/после предыдущего срабатывания/);assert.doesNotMatch(f.messages[0].text,/достигнут порог/);
 });
