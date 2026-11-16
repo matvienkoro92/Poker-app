@@ -478,6 +478,32 @@ test('statistics words are never mirrored into manager dialogs',async()=>{
  assert.equal(f.calls.length,before);assert.equal(f.client,null);
 });
 
+test('cash screenshot template sends the exact request once to the topic player',async()=>{
+ for(const command of ['/скрин кассы','/cash_screen@Poker_dvatuza_bot']){
+  const f=fixture();await f.setup();await f.handle(f.pm());const start=f.calls.length;
+  const update=f.groupMessage(command,77);await f.handle(update);await f.handle(update);
+  const text='Пришлите пожалуйста скрин кассы в приложении )';
+  const sent=f.calls.slice(start).filter(c=>c.method==='sendMessage'&&String(c.body.chat_id)===String(LEAD));
+  assert.equal(sent.length,1);assert.ok(sent[0].body.text.endsWith(text));
+  assert.equal(f.calls.slice(start).filter(c=>c.body.text===text&&String(c.body.chat_id)===GROUP).length,1);
+ }
+ assert.equal(require('../lib/telegram-support-templates').resolve({text:'/скрин@other_bot кассы'}),null);
+});
+test('transfer request template sends the supplied text with emphasis and never creates a ledger operation',async()=>{
+ const templates=require('../lib/telegram-support-templates');
+ for(const command of ['/переводы','/perevody@Poker_dvatuza_bot']){
+  const f=fixture();await f.setup();await f.handle(f.pm());const start=f.calls.length;
+  const update=f.groupMessage(command,76);await f.handle(update);await f.handle(update);
+  const template=templates.resolve({text:command});
+  assert.match(template.text,/Перевод между аккаунтами от 1000₽/);
+  assert.deepEqual(template.entities.map(e=>template.text.slice(e.offset,e.offset+e.length)),['ОДНОМ','Пример']);
+  const sent=f.calls.slice(start).filter(c=>c.method==='sendMessage'&&String(c.body.chat_id)===String(LEAD));
+  assert.equal(sent.length,1);assert.ok(sent[0].body.text.endsWith(template.text));
+  assert.equal(f.calls.slice(start).filter(c=>c.method==='sendMessage'&&String(c.body.chat_id)===GROUP&&c.body.text===template.text).length,1);
+  assert.equal(f.store.has('poker21:admin-deposits:v1'),false);
+ }
+ assert.equal(templates.resolve({text:'/переводы@other_bot'}),null);
+});
 test('ticket template command sends formatted text to mapped lead and echoes once in the topic',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());const before=f.calls.length;
  const update=f.groupMessage('/ticket',90);await f.handle(update);await f.handle(update);

@@ -5,7 +5,7 @@ test('menu recording alias starts the same wizard and is listed before ticket',a
  const f=fixture();assert.equal(await f.text('/zapisat@Poker_dvatuza_bot'),true);
  assert.ok(f.buttons().some(b=>b.text==='Бонусы'));
  const commands=require('../lib/telegram-support-templates').commands;
- assert.deepEqual(commands.map(c=>c.command),['zapisat','ticket']);
+ assert.deepEqual(commands.map(c=>c.command),['zapisat','ticket','perevody','cash_screen','wait','crypto_wallet','rules','vip']);
 });
 function fixture(){
  const path=require.resolve('../lib/telegram-support-record'),local=createRequire(path),module={exports:{}},store=new Map(),calls=[];

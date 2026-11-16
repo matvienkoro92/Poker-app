@@ -5,6 +5,8 @@ function orderedCommands(existing){
  const first=[
   {command:'dep',description:'Пополнить счёт'},
   {command:'chat',description:'Наш клубный чат'},
+  {command:'download',description:'Скачать X-Poker, Suprema, PPPoker или Покер21про'},
+  {command:'rakeback',description:'Когда начисляется рейкбек'},
   {command:'create_game',description:'Создать игру'},
   {command:'withdrawals',description:'Мои выводы'},
   {command:'schedule',description:'Расписание турниров по покеру'},

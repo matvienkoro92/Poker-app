@@ -20,7 +20,10 @@ between linked rooms use the same deposit profile. Commands and confirmation
 messages remain internal. Existing cards gain these controls on their next refresh.
 
 The Dialogs slash menu starts with `/zapisat` (the Telegram-compatible alias for
-`/записать`), followed by `/ticket`. This menu is scoped to the Dialogs group.
+`/записать`), followed by `/ticket` and `/perevody`. This menu is scoped to the Dialogs group.
+The owner-approved `/переводы` or `/perevody` command sends the supplied transfer
+request instructions to the topic's player and echoes the template in the topic,
+with ОДНОМ and Пример in bold. It does not record or perform a transfer.
 
 Owner-approved income wizard: `/записать` in the player's topic displays exactly
 six buttons: Рунекс, Эксчип бот, Рома Крипта, Алл френдс, Перевод, Бонусы. The manager
