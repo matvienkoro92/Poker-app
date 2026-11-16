@@ -19,6 +19,9 @@ be reassigned. Linked IDs appear in the card and deposit room selection after
 between linked rooms use the same deposit profile. Commands and confirmation
 messages remain internal. Existing cards gain these controls on their next refresh.
 
+The Dialogs slash menu starts with `/zapisat` (the Telegram-compatible alias for
+`/записать`), followed by `/ticket`. This menu is scoped to the Dialogs group.
+
 Owner-approved income wizard: `/записать` in the player's topic displays exactly
 six buttons: Рунекс, Эксчип бот, Рома Крипта, Алл френдс, Перевод, Бонусы. The manager
 selects a linked room/ID, enters a ruble amount and confirms the preview. All friends

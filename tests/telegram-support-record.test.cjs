@@ -1,6 +1,12 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),{createRequire}=require('node:module');
 const service=require('../lib/telegram-support-record');
+test('menu recording alias starts the same wizard and is listed before ticket',async()=>{
+ const f=fixture();assert.equal(await f.text('/zapisat@Poker_dvatuza_bot'),true);
+ assert.ok(f.buttons().some(b=>b.text==='Бонусы'));
+ const commands=require('../lib/telegram-support-templates').commands;
+ assert.deepEqual(commands.map(c=>c.command),['zapisat','ticket']);
+});
 function fixture(){
  const path=require.resolve('../lib/telegram-support-record'),local=createRequire(path),module={exports:{}},store=new Map(),calls=[];
  let collisions=1,player={accountId:'ID000123',name:'Игрок',poker21Id:'421508',xpokerIds:['2335996'],supremaIds:['1611851'],pppokerIds:['1234567']};
