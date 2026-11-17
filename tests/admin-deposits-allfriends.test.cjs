@@ -36,3 +36,31 @@ test('other deposit form offers optional destinations and does not classify ZP a
  assert.match(html,/value="zp" data-counterparty-fallback/);assert.match(html,/>All friends</);assert.match(html,/>Сергей\/Марина</);assert.match(html,/>Владельцу</);assert.doesNotMatch(html,/required/);
  assert.equal(c.isAllFriendsOperation({channelId:'other',counterparty:'zp',note:'AllFriends'}),false);
 });
+test('counterparty mini blocks omit zeros and include both directions even at zero net balance',()=>{
+ const c=context();c.data.entries=[];
+ assert.doesNotMatch(c.paymentFormsTotalsHtml(forms),/AllFriends|Сергей\/Марина|Рома PPC|Владелец/);
+ c.data.entries=[{payments:[{amount:10000,paymentSource:'romaPpc',createdAt:150,createdBy:'a'}]}];
+ c.data.channelOperations=[{channelId:'other',counterparty:'romaPpc',direction:'outgoing',amount:10000,createdAt:150,createdBy:'a'},{channelId:'other',counterparty:'sergeyMarina',direction:'income',amount:2500,createdAt:150,createdBy:'a'},{channelId:'other',counterparty:'owner',direction:'outgoing',amount:500,createdAt:150,createdBy:'a'},{channelId:'other',counterparty:'romaPpc',direction:'income',amount:99999,createdAt:200,createdBy:'a'}];
+ const totals=c.paymentFormsTotals(forms);assert.equal(totals.withdrawals,10000);assert.equal(totals.sources.player,0);assert.equal(totals.settlements.romaPpc.received,10000);assert.equal(totals.settlements.romaPpc.sent,10000);
+ const html=c.paymentFormsTotalsHtml(forms);assert.match(html,/Рома PPC/);assert.match(html,/Сергей\/Марина/);assert.match(html,/Владелец/);assert.doesNotMatch(html,/AllFriends/);
+ c.paymentManager='b';assert.doesNotMatch(c.paymentFormsTotalsHtml(forms),/Рома PPC|Сергей\/Марина|Владелец/);
+});
+test('Roma PPC and Sergey/Marina payouts close reservations without creating player deposits',()=>{
+ const {applyOperation,view}=require('../lib/admin-deposits');
+ for(const source of ['romaPpc','sergeyMarina']){
+ let s=applyOperation(null,{action:'create',requestId:'external_create_001',entry:{room:'P21',playerId:'123456',recipient:'Иван Петров',bank:'Сбербанк',phone:'+79991234567',total:100000}},'a',100).state;
+ const id=s.entries[0].id;
+ s=applyOperation(s,{action:'reserve',requestId:'external_reserve_001',entryId:id,amount:100000},'a',110).state;
+ s=applyOperation(s,{action:'confirm-reservation',requestId:'external_confirm_001',entryId:id,reservationId:'external_reserve_001',amount:100000,paymentSource:source},'a',120).state;
+ let v=view(s,130);assert.equal(v.entries[0].remaining,0);assert.equal(v.statistics.deposits,0);assert.equal(v.statistics.outgoing,100000);assert.equal(v.statistics[source+'Paid'],100000);assert.equal(v.statistics.managers[0].deposits,0);assert.equal(v.statistics.managers[0][source+'Paid'],100000);
+ s=applyOperation(s,{action:'void',requestId:'external_void_001',entryId:id,paymentId:'external_confirm_001'},'a',140).state;
+ v=view(s,150);assert.equal(v.entries[0].remaining,100000);assert.equal(v.statistics[source+'Paid'],0);assert.equal(v.statistics.outgoing,0);
+ }
+});
+test('Roma PPC can be saved and edited as an Other counterparty',()=>{
+ const {applyOperation}=require('../lib/admin-deposits');
+ let s=applyOperation(null,{action:'channel-operation',requestId:'roma_other_create_001',channelId:'other',counterparty:'romaPpc',direction:'income',amount:10000,room:'X',playerId:'2465472'},'a',100).state;
+ assert.equal(s.channelOperations[0].counterparty,'romaPpc');
+ s=applyOperation(s,{action:'edit-channel-operation',requestId:'roma_other_edit_001',operationId:s.channelOperations[0].id,editVersion:0,channelId:'other',counterparty:'romaPpc',amount:20000,room:'X',playerId:'2465472'},'a',110,'Администратор',{canDelete:true}).state;
+ assert.equal(s.channelOperations[0].amount,20000);assert.equal(s.channelOperations[0].counterparty,'romaPpc');
+});

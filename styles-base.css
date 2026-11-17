@@ -7,6 +7,12 @@ body [aria-hidden="true"]:has(> [class$="__panel"][role="dialog"]) {
   display: none !important;
 }
 
+/* Screen visibility belongs to the router. Lazy styles and fixed-position
+   children must never expose a screen after its active class is removed. */
+.view[data-view]:not(.view--active) {
+  display: none !important;
+}
+
 :root {
   --bg-color: #050816;
   --bg-elevated: rgba(15, 23, 42, 0.9);

@@ -881,7 +881,7 @@ test('withdrawal summary includes owner and AllFriends with a visible breakdown,
   {amount:99999,createdAt:9,createdBy:'anna',paymentSource:'owner'}
  ]}]},matchesPaymentManager:r=>r.createdBy==='anna',esc:s=>s,money:n=>String(n)};
  vm.createContext(ctx);vm.runInContext(fn,ctx);
- const selected=ctx.paymentFormsTotals(forms);assert.equal(selected.withdrawals,6000);assert.equal(selected.deposits,1200);assert.equal(JSON.stringify(selected.sources),JSON.stringify({player:1000,owner:2000,allfriends:3000}));
+ const selected=ctx.paymentFormsTotals(forms);assert.equal(selected.withdrawals,6000);assert.equal(selected.deposits,1200);assert.equal(JSON.stringify(selected.sources),JSON.stringify({player:1000,owner:2000,allfriends:3000,sergeyMarina:0,romaPpc:0}));
  const html=ctx.paymentFormsTotalsHtml(forms);assert.match(html,/Пришло на выводы<\/dt><dd>6000/);assert.match(html,/От игроков<\/span><b>1000/);assert.match(html,/Владелец<\/span><b>2000/);assert.match(html,/AllFriends<\/span><b>3000/);
  ctx.matchesPaymentManager=()=>true;assert.equal(ctx.paymentFormsTotals(forms).withdrawals,10000);assert.equal(ctx.paymentFormsTotals(forms).deposits,1200);
 });

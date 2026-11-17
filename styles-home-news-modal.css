@@ -5,6 +5,24 @@ body:has(.home-friend-news-modal--club:not([hidden])) .bottom-nav {
   z-index: 16001;
 }
 
+/* Club wins is a navigation destination over the previous view. Keep its
+   layout/scroll position, but do not composite the live Play scene underneath. */
+body:has(.home-friend-news-modal--club:not([hidden])) #app.app > .card {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.home-friend-news-modal--club {
+  background: #0a0d12;
+  isolation: isolate;
+}
+
+.home-friend-news-modal--club > .home-friend-news-modal__backdrop {
+  background: #0a0d12;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 
 .home-friend-news-modal {
   position: fixed;

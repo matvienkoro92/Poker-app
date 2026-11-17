@@ -1963,6 +1963,10 @@ function hallFishRenderHomePlayerMonth(data) {
 document.addEventListener('click', function(event) {
   var button = event.target.closest?.('#homePlayerMonth :is(.home-player-month__watch,[data-home-month-achievement],[data-home-reward-tab])');
   if (!button) return;
+  if (button.dataset.homeRewardTab === 'dayHero') {
+    window.pokerOpenClubNewsModal('wins');
+    return;
+  }
   if (button.dataset.homeMonthAchievement) {
     var dialog = document.querySelector('#homePlayerMonth .home-month-award-dialog');
     var art = button.querySelector('.hall-fish-trophy-art');
