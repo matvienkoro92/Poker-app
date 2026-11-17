@@ -72,10 +72,10 @@ test('ordinary points follow the six live tip gaps instead of a fixed long blade
 });
 
 
-test('optional landing wells use the generator artwork on all 24 points',async()=>{
+test('retired landing wells stay hidden even in old equipment snapshots',async()=>{
  const view={state:{discipline:'long'},equipment:{nardsWells:true,nardsInterior:'classic'}};
  const svg=art.svgFor(view);
- assert.equal((svg.match(/data-detail="landing-well"/g)||[]).length,24);
+ assert.equal((svg.match(/data-detail="landing-well"/g)||[]).length,0);
  assert.ok(!art.svgFor({...view,equipment:{nardsWells:false}}).includes('data-detail="landing-well"'));
  const photo=await art.render(view);assert.ok(photo.length>10000);
 });

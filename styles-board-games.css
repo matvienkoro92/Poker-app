@@ -1339,3 +1339,21 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
 .nards-jackpot-dialog .jackpot-glow{animation:jackpot-star-light 2.4s ease-in-out infinite}
 @keyframes jackpot-star-light{50%{transform:scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.jackpot-confetti{display:none}.nards-jackpot-dialog .jackpot-glow{animation:none}}
+
+/* Retired decorative point wells, including old saved equipment snapshots. */
+.nards-board[data-wells="true"] .point::after{display:none!important}
+
+/* Match settlement: clear payout hierarchy and quieter secondary actions. */
+#boardSettlement{padding:22px;margin:14px 0 20px;border:1px solid #c6a25d66;border-radius:22px;background:radial-gradient(ellipse at 100% 0,#af85351c,transparent 60%),linear-gradient(145deg,#152a23,#0c1916);box-shadow:0 16px 40px #0005,inset 0 1px #fff1}
+#boardSettlement .board-wager-notice{padding:0;margin:0;border:0;background:none;box-shadow:none}
+.settlement-result{display:flex;align-items:center;gap:12px}.settlement-result__icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border:1px solid #7bd3a14d;border-radius:50%;background:#3c926329;color:#94e4b5;font-size:24px}.settlement-result small{font-size:10px;letter-spacing:.14em;color:#a9b6a9}.settlement-result h2{margin:4px 0 0;font-size:18px;line-height:1.2;color:#f6e8ca}.settlement-payout{display:flex;gap:9px;align-items:baseline;margin:18px 0 0;color:#f7d38a}.settlement-payout strong{font-size:44px;line-height:1;font-weight:850;letter-spacing:-.04em}.settlement-payout span{font-size:15px;color:#d8c79f}.settlement-fee{margin:9px 0 0;color:#93a498;font-size:12px}
+#boardSettlement .board-replay{margin:20px 0 0;padding:18px 0 0;border:0;border-top:1px solid #cbb77d26;border-radius:0;background:none}
+#boardSettlement .board-replay>div{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#boardSettlement .board-replay button{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:46px;padding:12px 9px;border:1px solid #bfa4694d;border-radius:12px;background:#ffffff05;color:#e5dbc3;font:700 13px/1.25 system-ui;box-shadow:none}
+#boardSettlement .board-replay button span{font-size:19px;color:#ddc58c}
+#boardSettlement .board-replay [data-replay-new]{grid-column:1/-1;background:linear-gradient(110deg,#f6d998,#cfa65c);border-color:#ffe4ac;color:#20251b}
+#boardSettlement .board-replay [data-replay-new] span{color:inherit}
+#boardSettlement .board-replay [data-replay-accept]{grid-column:1/-1;background:#367150;color:#fff}
+#boardSettlement .board-replay p{margin:13px 0 0;font-size:11px;line-height:1.5;color:#95a69a}
+#boardSettlement .board-replay button:disabled{opacity:.5}
+@media(max-width:360px){#boardSettlement{padding:17px}.settlement-payout strong{font-size:38px}#boardSettlement .board-replay button{font-size:12px}}
