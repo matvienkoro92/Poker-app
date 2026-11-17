@@ -7,7 +7,7 @@ export function clockSample(data, sent, received) {
   rtt: Math.max(0, received - sent - processing), at: received };
 }
 export function createClockSync() {
- let best = null;
+ let best = null, displayOffset = null, lastLocal = null, lastNow = null;
  return {
   update(data, sent, received) {
    const sample = clockSample(data, sent, received);
@@ -16,6 +16,17 @@ export function createClockSync() {
    if (!best || sample.rtt <= best.rtt || received - best.at > 30000) best = sample;
    return best.offset;
   },
-  reset() { best = null; }
+  // Slew clock corrections instead of moving the countdown backwards on a poll.
+  now(local = Date.now()) {
+   const target = best?.offset ?? 0;
+   if (displayOffset === null) displayOffset = target;
+   const elapsed = lastLocal === null ? 0 : Math.max(0, local - lastLocal);
+   const limit = elapsed * .05;
+   displayOffset += Math.max(-limit, Math.min(limit, target - displayOffset));
+   const value = Math.max(lastNow ?? -Infinity, local + displayOffset);
+   lastLocal = local; lastNow = value;
+   return value;
+  },
+  reset() { best = null; displayOffset = lastLocal = lastNow = null; }
  };
 }

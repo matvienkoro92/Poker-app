@@ -105,3 +105,17 @@ test('the active player gets at most five seconds of position delivery credit on
  const next=await f.service.call('guest',{action:'room',roomId:moved.roomId,sinceRevision:first.revision});
  assert.equal(next.turnDeadline,first.turnDeadline);
 });
+test('display clock slews offset changes without jumping forward or backward on polling',async()=>{
+ const {createClockSync}=await import('../scripts/board-games/clock-sync.mjs');
+ const sync=createClockSync();
+ sync.update({serverReceivedAt:1000,serverNow:1000},900,1100);
+ assert.equal(sync.now(1100),1100);
+ // A fresh best sample changes the offset by five seconds.
+ sync.update({serverReceivedAt:7100,serverNow:7100},2050,2150);
+ const after=sync.now(2150);assert.equal(after,2202.5);
+ sync.update({serverReceivedAt:3000,serverNow:3000},2990,3010);
+ const next=sync.now(3010);assert.ok(next>after);assert.ok(next-after<1000);
+ assert.equal(sync.now(3010),next,'rendering twice cannot advance the clock');
+ sync.reset();sync.update({serverReceivedAt:9000,serverNow:9000},3990,4010);
+ assert.equal(sync.now(4010),9010,'new room initializes to its authoritative offset');
+});
