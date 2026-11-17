@@ -104,14 +104,14 @@ test('schedule group allowlist accepts only direct commands to this bot',()=>{
  assert.equal(policy.isGroupScheduleCommand({edited_message:{text:'/schedule'}}),false);
 });
 
-test('jackpot scope sends only text to the approved players group',async t=>{
+test('jackpot and daily poker win scopes send only text to the approved players group',async t=>{
  const milestones=require('../lib/tracking-link-milestones'),oldGroup=milestones.playersGroup,oldFetch=global.fetch;let sends=0;
  t.after(()=>{milestones.playersGroup=oldGroup;global.fetch=oldFetch;});
  milestones.playersGroup=async()=>'-100777';global.fetch=async()=>{sends++;return {ok:true};};
- for(const [chat,method,allowed] of [['-100777','sendMessage',true],['-100778','sendMessage',false],['123','sendMessage',false],['-100777','sendPhoto',false],['-100777','forwardMessage',false]]){
-  const response=await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:chat})},'nards-jackpot');assert.equal(response.ok,allowed);
+ for(const scope of ['nards-jackpot','daily-poker-win'])for(const [chat,method,allowed] of [['-100777','sendMessage',true],['-100778','sendMessage',false],['123','sendMessage',false],['-100777','sendPhoto',false],['-100777','forwardMessage',false]]){
+  const response=await policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:chat})},scope);assert.equal(response.ok,allowed);
  }
- assert.equal(sends,1);
+ assert.equal(sends,2);
 });
 
 test('tournament start permits only its card photo in the configured players group',async t=>{
