@@ -41,8 +41,19 @@ test('Mandarin tick confirmation owns the amount and timestamp, rejects double/m
  assert.throws(()=>applyOperation(base,{...body,direction:'outgoing'},'manager'),/только приход/);
  state=applyOperation(state,{action:'void-channel-operation',operationId:body.requestId,requestId:'mandarin_operation_0003'},'manager').state;assert.equal(view(state).pendingMandarinPayments.length,1);assert.equal(view(state).paymentForms.providers.find(p=>p.id==='mandarin').total,100000);
 });
-test('Mandarin participates in exact-amount load routing only with its key, and all three providers rotate on ties',t=>{
- const original=process.env.MANDARIN_API_KEY;t.after(()=>{if(original===undefined)delete process.env.MANDARIN_API_KEY;else process.env.MANDARIN_API_KEY=original});process.env.MANDARIN_API_KEY='fixture-key';const {issuePaymentLink}=require('../lib/deposit-link-routing');const state={};const providers=[];for(let i=0;i<6;i++)providers.push(issuePaymentLink(state,{amount:100000,requestId:'mandarin_route_request_'+i},'manager').link.providerId);for(const name of ['mandarin','prodamus','robokassa'])assert.equal(providers.filter(p=>p===name).length,2);assert.match(state.paymentLinkIssues.find(p=>p.link.providerId==='mandarin').link.url,/\/new1$/);assert.equal(issuePaymentLink({}, {amount:150000,requestId:'mandarin_route_other_1'},'manager').link.providerId,'robokassa');
+test('paused Mandarin links cannot be issued, copied or replayed',()=>{
+ const {issuePaymentLink}=require('../lib/deposit-link-routing');
+ const {paymentForms}=require('../lib/deposit-payment-forms');
+ assert.deepEqual(paymentForms().providers.find(p=>p.id==='mandarin').options,[]);
+ for(const amount of [100000,150000,200000]){
+  const state={};
+  const providers=new Set();
+  for(let i=0;i<4;i++)providers.add(issuePaymentLink(state,{amount,requestId:'routing_request_000'+i},'manager').link.providerId);
+  assert.deepEqual([...providers].sort(),amount===150000?['robokassa']:['prodamus','robokassa']);
+ }
+ const requestId='previous_mandarin_0001',amount=100000;
+ const state={paymentLinkIssues:[{id:requestId,actor:'manager',link:{providerId:'mandarin',amount}}]};
+ assert.throws(()=>issuePaymentLink(state,{requestId,amount},'manager'),{status:409});
 });
 
 test('a failed durable save returns 503 and never acknowledges a receipt',async()=>{const f=fixture();f.storageFail=true;assert.equal((await f.call()).code,503);assert.equal(f.state.paymentFormPayments,undefined);assert.equal(f.groupCalls,0);f.storageFail=false;assert.equal((await f.call()).code,200);assert.equal(f.state.paymentFormPayments.length,1);});
