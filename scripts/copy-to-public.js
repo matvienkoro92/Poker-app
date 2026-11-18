@@ -100,6 +100,7 @@ const baseFiles = [
   'app-last-buy-in-engine.js',
   'app-last-buy-in-game.js',
   'app-last-buy-in-story.js',
+  'app-city-map-routes.js',
   'app-last-buy-in-td-data.js',
   'app-last-buy-in-td-engine.js',
   'app-last-buy-in-td-game.js',
@@ -299,7 +300,7 @@ function copyReferencedAssets() {
   for (const item of chessEquipment.PIECES.filter(item => item.level > 1)) for (const type of ['king-white','knight-black']) refs.add('board-games/chess/' + item.id + '-' + type + '.svg');
   // Sculpted wardrobe geometry and albedo URLs are assembled at runtime.
   addWardrobeAssets('player-hall/character-3d/sculpt');
-  for (const name of ['head', 'face', 'hand-left', 'hand-right', 'shirt-tee', 'shirt-jacket', 'shirt-tank', 'shorts', 'pants', 'helmet-shell']) {
+  for (const name of ['head', 'face','face-v2', 'hand-left', 'hand-right', 'shirt-tee', 'shirt-jacket', 'shirt-tank', 'shorts', 'pants', 'helmet-shell']) {
     refs.add('player-hall/character-3d/sculpt/' + name + '.bin');
   }
   // Rating preview URLs are assembled at runtime, so static scanning misses them.

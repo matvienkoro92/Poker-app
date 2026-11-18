@@ -1,11 +1,14 @@
 import {coastlines,plantings} from './atlas-coasts.mjs';
 import chapters from '../../app-last-buy-in-chapters.js';
 // Survey coordinates on the 640-unit Poker21 campaign illustration, in metres in game.
-export const mapPoint=(u,v)=>({x:98+(u-595.2)*5.6,z:147+(v-595.2)*5.6});
-export const bounds={minX:-3270,maxX:500,minZ:-3580,maxZ:250};
+export const villaAtlas={u:571,v:581};
+export const mapPoint=(u,v)=>({x:98+(u-villaAtlas.u)*5.6,z:147+(v-villaAtlas.v)*5.6});
+export const mapPercent=({x,z})=>[(villaAtlas.u+(x-98)/5.6)/6.4,(villaAtlas.v+(z-147)/5.6)/6.4];
+export const bounds={minX:-3270,maxX:500,minZ:-3580,maxZ:320};
 function points(line){return line.trim().split(/\s+/).map(pair=>mapPoint(...pair.split(',').map(Number)));}
 export const shores=coastlines.map(points);
-const extent=new Map(shores.map(poly=>[poly,{left:Math.min(...poly.map(p=>p.x)),right:Math.max(...poly.map(p=>p.x)),north:Math.min(...poly.map(p=>p.z)),south:Math.max(...poly.map(p=>p.z))}]));
+export const lighthouseShore=points('534,573 540,568 548,565 557,563 567,563 576,567 586,571 595,575 599,583 596,588 589,591 584,598 576,597 568,603 556,605 543,602 534,597 529,590 530,583');
+const extent=new Map([...shores,lighthouseShore].map(poly=>[poly,{left:Math.min(...poly.map(p=>p.x)),right:Math.max(...poly.map(p=>p.x)),north:Math.min(...poly.map(p=>p.z)),south:Math.max(...poly.map(p=>p.z))}]));
 function inside(p,polygon){
  const e=extent.get(polygon);if(e&&(p.x<e.left||p.x>e.right||p.z<e.north||p.z>e.south))return false;
  let hit=false;
@@ -15,13 +18,14 @@ function inside(p,polygon){
  }
  return hit;
 }
+export const onLighthouseShore=(x,z)=>inside({x,z},lighthouseShore);
 export const nodes=[],roads=[],circuits=[],parks=[],lots=[];
 const vertices=new Map(),links=new Map(),edges=new Map();
 function node(p){const key=p.x+','+p.z;if(vertices.has(key))return vertices.get(key);nodes.push(p);vertices.set(key,p);links.set(p,[]);return p;}
 function connect(a,b,bridge=false){
  const key=[nodes.indexOf(a),nodes.indexOf(b)].sort((u,v)=>u-v).join('/');
  if(edges.has(key))return;
- const edge={a,b,bridge};edges.set(key,edge);roads.push(edge);links.get(a).push(b);links.get(b).push(a);
+ const edge={a,b,bridge,width:bridge?16:21};edges.set(key,edge);roads.push(edge);links.get(a).push(b);links.get(b).push(a);
 }
 function street(line,bridge=false){
  const path=points(line).map(node);
@@ -56,7 +60,7 @@ street('250,358 302,360 326,358',true);
 street('326,358 350,355 374,365 402,356 416,360 403,381 378,401 352,398 332,382 326,358');
 street('416,360 459,359 510,358',true);
 // Eastern seafront follows the sand; the inner carriageway bends around the club and docks.
-street('445,76 455,58 482,46 514,47 533,60 541,85 541,142 542,183 550,222 550,262 549,307 552,357 551,408 552,461 555,503 556,531 532,544');
+street('445,76 455,58 482,46 514,47 533,60 541,85 541,142 542,183 550,222 550,262 549,307 552,357 551,408 552,461 555,503 556,531 543,535 532,544');
 street('445,76 464,96 482,124 480,154 469,182 468,209 468,229 482,250 505,280 510,312 510,358 517,384 509,422 500,449 492,473 475,499 488,512 515,520 532,544');
 street('464,96 511,96 541,85');street('480,154 512,146 541,142');
 street('468,209 495,189 520,185 542,183');street('482,250 503,263 530,263 550,262');
@@ -65,18 +69,28 @@ street('510,312 549,307');street('510,358 552,357');street('509,422 551,408');st
 street('550,222 540,223 529,230');
 street('275,501 280,507 281.6,512');
 street('280,461 343,476 408,491 475,499',true);
-export const gateways=[-64,72].map((x,i)=>{const p=node({x,z:-100});const approach=node({x,z:-112});connect(node(mapPoint(i?556:532,i?531:544)),approach,true);connect(approach,p,true);return p;});
+// The villa approach follows the east shore below the beach district.
+street('532,544 538,538 543,535');
+street('556,531 562,532 568,534');
+// Cross streets visible between the western avenues on the campaign atlas.
+street('77,131 110,138 134,141 159,148');
+street('111,72 109,98 110,138 107,158 95,161');
+street('122,429 128,405 136,392 149,378 180,399');
+export const gateways=[-64,72].map((x,i)=>{
+ const p=node({x,z:-100}),approach=node({x,z:-112});
+ connect(node(i?mapPoint(568,534):mapPoint(543,535)),approach);connect(approach,p);return p;
+});
 const roadTiles=new Map();
 for(const edge of roads){
  const {a,b}=edge;
- for(let i=Math.floor((Math.min(a.x,b.x)-10)/128);i<=Math.floor((Math.max(a.x,b.x)+10)/128);i++)
-  for(let j=Math.floor((Math.min(a.z,b.z)-10)/128);j<=Math.floor((Math.max(a.z,b.z)+10)/128);j++){
+ for(let i=Math.floor((Math.min(a.x,b.x)-12)/128);i<=Math.floor((Math.max(a.x,b.x)+12)/128);i++)
+  for(let j=Math.floor((Math.min(a.z,b.z)-12)/128);j<=Math.floor((Math.max(a.z,b.z)+12)/128);j++){
    const key=i+','+j;if(!roadTiles.has(key))roadTiles.set(key,[]);roadTiles.get(key).push(edge);
   }
 }
 export function metroLand(x,z){
- if(z>230||(z>-100&&x>=-98&&x<=246))return false;
- const p={x,z};if(inside(p,lagoon))return false;return shores.some(poly=>inside(p,poly))||(roadTiles.get(cell(x,z))||[]).some(e=>distance(p,project(p,e))<=9.1);
+ if((z>-100&&x>=-98&&x<=246))return false;
+ const p={x,z};if(inside(p,lagoon))return false;return shores.some(poly=>inside(p,poly))||(roadTiles.get(cell(x,z))||[]).some(e=>distance(p,project(p,e))<=e.width/2+.1);
 }
 export const lagoon=points('363,194 368,185 376,188 382,197 381,206 386,215 382,223 374,222 370,214 371,206 362,201');
 export const lunaSite={...mapPoint(58*6.4,56.5*6.4),name:'ЛУНОПАРК'};

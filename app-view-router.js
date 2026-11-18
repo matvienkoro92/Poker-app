@@ -968,6 +968,7 @@ function pokerBeginProgressiveViewNavigation(viewName, navOpts) {
 }
 
 function setView(viewName, navOpts) {
+  if (viewName === "cooler-flight") viewName = "profile";
   navOpts = navOpts || {};
   if (
     viewName === "player-crm" &&

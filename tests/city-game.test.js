@@ -59,7 +59,7 @@ test('city mission markers use the campaign order, coordinates and reachable roa
   assert.ok(Math.hypot(route.at(-1).x-s.approach.x,route.at(-1).z-s.approach.z)<.01);
   assert.equal(blocked(s.approach.x,s.approach.z,1.6),false);
  }
- const villa=mapPoint(93*6.4,93*6.4);
+ const villa=mapPoint(571,581);
  assert.ok(Math.hypot(VILLA.x-villa.x,VILLA.z-villa.z)<.001);
  assert.deepEqual({x:lunaSite.x,z:lunaSite.z},mapPoint(58*6.4,56.5*6.4));
 });

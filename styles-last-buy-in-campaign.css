@@ -157,3 +157,7 @@ body:has(#play:not([hidden])),body:has(#play:not([hidden])) *{-webkit-user-selec
 .comic-dialog details{text-align:left;font-size:13px;margin:12px 0}
 .comic-dialog summary{cursor:pointer;color:#efbb4e}
 @media(max-width:350px){.comic-inventory{width:calc(100% - 20px)}.comic-inventory small{font-size:7px}.comic-objective{font-size:10px}}
+
+.chapter-city-map .last-city-position{position:absolute;z-index:10;width:14px;height:14px;border:2px solid white;background:#00869a;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 3px #063b48;pointer-events:none}
+.last-city-position span{position:absolute;bottom:100%;left:100%;padding:3px 6px;background:#063b48;color:white;border-radius:4px;font:bold 11px/1.2 Arial;white-space:nowrap}
+.last-city-position[data-side=left] span{left:auto;right:100%}

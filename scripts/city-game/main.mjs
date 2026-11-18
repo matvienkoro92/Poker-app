@@ -1,8 +1,9 @@
+import {drivingDirections,navigationText} from './navigation.mjs';
 import {thumbstick} from '../shared/thumbstick.mjs';
-import {mapPoint,shores,lagoon,parks,lots,roads,landmarks,lunaSite,metroNearest,missionSites} from './metropolis.mjs';
+import {mapPoint,mapPercent,lighthouseShore,shores,lagoon,parks,lots,roads,landmarks,lunaSite,metroNearest,missionSites} from './metropolis.mjs';
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {create,step,interact,rescue,subject,prompt,objective,checkpoint,notice} from './engine.mjs';
-import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,PORT,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,PENINSULA,roadRoute} from './world.mjs';
+import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,PORT,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,roadRoute} from './world.mjs';
 import {loadCityGarage} from './garage.mjs';
 import {createCityScene} from './scene.mjs';
 import {createAwardInspector} from './award-inspector.mjs';
@@ -57,13 +58,24 @@ on($('cityCanvas'),'webglcontextlost',e=>{e.preventDefault();freeze();$('cityInt
 function returnToVilla(){save();freeze();let url=new URL('./?startapp=profile&cityVilla=1',location.href);try{const candidate=new URL(garage?.returnUrl||url.href);if(candidate.origin===location.origin&&!candidate.pathname.endsWith('city-play.html'))url=candidate;}catch(_){}try{sessionStorage.setItem('poker21-city:restore-villa','1');}catch(_){}location.assign(url.href);}
 on($('cityExit'),'click',e=>{e.preventDefault();returnToVilla();});
 on(document.querySelector('[data-city-villa-return]'),'click',e=>{e.preventDefault();returnToVilla();});
-on(window,'pagehide',()=>{save();dispose();});
+function rememberCityPosition(){
+ if(!started)return;
+ try{sessionStorage.setItem('poker21-city-map-position',JSON.stringify(mapPercent(subject(state))));}catch(_){}
+}
+on(window,'pagehide',()=>{rememberCityPosition();save();dispose();});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 function input(){const f=(keys.has('KeyW')||keys.has('ArrowUp')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-stick.y,r=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0)+stick.x;const forward=Math.max(-1,Math.min(1,f+(state.driving&&held.gas?1:0))),turn=Math.max(-1,Math.min(1,r));state.steer=turn;const yaw=view.orbit.yaw;return {forward,turn,brake:held.brake||keys.has('Space'),x:Math.sin(yaw)*forward-Math.cos(yaw)*turn,z:Math.cos(yaw)*forward+Math.sin(yaw)*turn,run:held.gas||keys.has('ShiftLeft')||keys.has('ShiftRight')};}
 let lastUI='';
 function navigationObjective(){return destination?{title:destination.title||destination.name,detail:destination.approach?'Подъезд · '+destination.name:'Маршрут на карте · можно сменить пункт назначения',target:destination.approach||destination}:objective(state);}
-function updateUI(){const o=navigationObjective(),p=subject(state),d=o.target?Math.round(Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,key=[o.title,o.detail,d,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
- $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ПРИЧАЛ / ОСТРОВ ВИЛЛЫ':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ПРИЧАЛ ВИЛЛЫ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=o.target?'◆ '+d+' м до цели':'';$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
+let cachedNavigation=null;
+function navigationFrom(p,target){
+ if(cachedNavigation&&cachedNavigation.tx===target.x&&cachedNavigation.tz===target.z&&Math.hypot(p.x-cachedNavigation.x,p.z-cachedNavigation.z)<1)return cachedNavigation;
+ const path=roadRoute(p,target);
+ cachedNavigation={x:p.x,z:p.z,tx:target.x,tz:target.z,path,text:navigationText(drivingDirections(p,path,target))};
+ return cachedNavigation;
+}
+function updateUI(){const o=navigationObjective(),p=subject(state),d=o.target?Math.round(Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,distanceText=!o.target?'':state.driving?navigationFrom(p,o.target).text:'◆ '+d+' м до цели',key=[o.title,o.detail,distanceText,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
+ $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ПРИЧАЛ / ОСТРОВ ВИЛЛЫ':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ПРИЧАЛ ВИЛЛЫ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=distanceText;$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
  const radio=$('cityRadio');radio.classList.toggle('is-hidden',state.noticeTime<=0);radio.querySelector('p').textContent=state.notice;radio.style.bottom=state.driving?'350px':'';
  const info=document.querySelector('.city-drive-info');info.hidden=!state.driving;$('citySpeed').textContent=Math.round(Math.abs(state.car.speed)*3.6);$('cityCondition').style.width=state.health+'%';$('cityCondition').style.background=state.health<35?'#ed9a74':'#d3d9ad';$('cityConditionText').textContent='КУЗОВ '+Math.round(state.health)+'%';
  const actionText=awardInspector.near()?'Рассмотреть награду · E':prompt(state),actionButton=$('cityAction');actionButton.classList.toggle('is-ready',!!actionText);actionButton.disabled=!actionText||Math.abs(state.driving?state.car.speed:0)>2;actionButton.querySelector('span').textContent=actionText?(actionText.includes('награду')?'Осмотреть':actionText.includes('Магнитофон')?'Музыка':actionText.includes('Выйти')?'Выйти':actionText.includes('руль')?'В машину':actionText.includes('Ромой')?'Рома':actionText.includes('виллу')?'Домой':actionText.includes('Вернуть')?'Передать':actionText.includes('кейс')?'Кейс':'Действие'):'Действие';actionButton.setAttribute('aria-label',actionText||'Действие недоступно');$('cityGas').querySelector('span').textContent=state.driving?'Газ':'Бежать';$('cityBrake').hidden=!state.driving;
@@ -91,8 +103,8 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  ctx.fillStyle='#88935f';for(const park of parks)ctx.fillRect(X(park.x-park.w/2),Z(park.z-park.d/2),park.w*k,park.d*k);
  ctx.fillStyle='#9eaa9d';for(const lot of lots){if(!full&&(Math.abs(lot.x-cx)>220||Math.abs(lot.z-cz)>220))continue;ctx.fillRect(X(lot.minX),Z(lot.minZ),lot.w*k,lot.d*k);}
  }ctx.fillStyle='#6b8275';ctx.strokeStyle=illustrated?'rgba(245,225,175,.42)':'#ccc5aa';ctx.lineWidth=Math.max(1,15*k);ctx.beginPath();
- for(const {a,b} of roads){if(!full&&(Math.max(a.x,b.x)<cx-span/2||Math.min(a.x,b.x)>cx+span/2||Math.max(a.z,b.z)<cz-span/2||Math.min(a.z,b.z)>cz+span/2))continue;ctx.moveTo(X(a.x),Z(a.z));ctx.lineTo(X(b.x),Z(b.z));}ctx.stroke();
- if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(X(PENINSULA.x),Z(PENINSULA.z),PENINSULA.rx*k,PENINSULA.rz*k,0,0,Math.PI*2);ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(lunaSite.x),Z(lunaSite.z),9*k,0,Math.PI*2);ctx.stroke();}
+ for(const {a,b,width} of roads){if(!full&&(Math.max(a.x,b.x)<cx-span/2||Math.min(a.x,b.x)>cx+span/2||Math.max(a.z,b.z)<cz-span/2||Math.min(a.z,b.z)>cz+span/2))continue;ctx.beginPath();ctx.lineWidth=Math.max(1,width*k);ctx.moveTo(X(a.x),Z(a.z));ctx.lineTo(X(b.x),Z(b.z));ctx.stroke();}
+ if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();lighthouseShore.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(lunaSite.x),Z(lunaSite.z),9*k,0,Math.PI*2);ctx.stroke();}
  // Draw the local street network over the campaign illustration too.
  const rect=(x,z,w,d)=>ctx.fillRect(X(x-w/2),Z(z-d/2),w*k,d*k);
  ctx.fillStyle=illustrated?'#abae9c':'#819085';
@@ -101,8 +113,8 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  ctx.fillStyle='#c6b690';rect(136,70,52,14);rect(157,67,10,74);
  rect(48,160,16,10);rect(87,160,16,15);rect(40,132.5,11,55);rect(56,105,43,11);rect(72,89,11,38);
  ctx.fillRect(X(55),Z(155),32*k,10*k);
- if(!illustrated){ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[PORT,'#4d686c'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}}
- const o=navigationObjective(),p=subject(state);if(o.target){const route=roadRoute(p,o.target);ctx.strokeStyle=full?'#102e39':'#ffda8d';ctx.lineWidth=full?6:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();if(full){ctx.lineWidth=3;ctx.strokeStyle='#ffda8d';ctx.stroke();}ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
+ {ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[PORT,'#4d686c'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}}
+ const o=navigationObjective(),p=subject(state);if(o.target){const route=navigationFrom(p,o.target).path;ctx.strokeStyle=full?'#102e39':'#ffda8d';ctx.lineWidth=full?6:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();if(full){ctx.lineWidth=3;ctx.strokeStyle='#ffda8d';ctx.stroke();}ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
  ctx.fillStyle='#364955';for(const vehicle of [...state.traffic,...state.metroTraffic]){ctx.save();ctx.translate(X(vehicle.x),Z(vehicle.z));ctx.rotate(-vehicle.yaw);ctx.fillRect(-Math.max(1,1.1*k),-2.3*k,Math.max(2,2.2*k),4.6*k);ctx.restore();}
  ctx.fillStyle='#a8e8d5';ctx.beginPath();ctx.arc(X(state.car.x),Z(state.car.z),full?5:3.5,0,Math.PI*2);ctx.fill();if(state.heat){ctx.fillStyle='#f79778';ctx.font='bold '+(full?20:13)+'px Arial';ctx.fillText('★',X(state.police.x)-5,Z(state.police.z)+5);}
 
@@ -119,6 +131,15 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
   }
   ctx.textBaseline='alphabetic';
  }
+ const markerX=X(p.x),markerZ=Z(p.z);
+ ctx.save();ctx.fillStyle='#00768a';ctx.strokeStyle='#fff';ctx.lineWidth=full?3:2;
+ ctx.beginPath();ctx.arc(markerX,markerZ,full?15:9,0,2*Math.PI);ctx.fill();ctx.stroke();
+ if(full){
+  const labelX=markerX>size/2?markerX-128:markerX+14,labelY=Math.min(size-32,Math.max(4,markerZ-36));
+  ctx.fillStyle='#063b48';ctx.fillRect(labelX,labelY,116,32);
+  ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillStyle='white';ctx.fillText('Вы здесь',labelX+58,labelY+24);
+ }
+ ctx.restore();
  ctx.save();ctx.translate(X(p.x),Z(p.z));ctx.rotate(-p.yaw);ctx.fillStyle='#fff2cd';ctx.strokeStyle='#214348';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,full?9:6);ctx.lineTo(full?-6:-5,full?-6:-4);ctx.lineTo(full?6:5,full?-6:-4);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
 }
 

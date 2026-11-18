@@ -18,9 +18,9 @@ const noise=n=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v
 export async function buildSculptedCharacter(G,look){
  const root=new T.Group(),rig=createCharacterRig(root),geometries=[],materials=[],textures=[],shape=characterShape(look.body),shorts=G.wardrobeSubcategory('pants',look.pants)==='shorts',tee=look.suit?.endsWith('Tee'),tank=look.suit?.endsWith('Tank'),helmet=look.helmet&&look.helmet!=='none';
  const showFace=!helmet||look.visor==='open';
- const sculptPending=Promise.all(['head','face','hand-left','hand-right','shirt-'+(tank?'tank':tee?'tee':'jacket'),shorts?'shorts':'pants',...(helmet?['helmet-shell']:[])].map(sculptGeometry));
+ const sculptPending=Promise.all(['head','face-v2','hand-left','hand-right','shirt-'+(tank?'tank':tee?'tee':'jacket'),shorts?'shorts':'pants',...(helmet?['helmet-shell']:[])].map(sculptGeometry));
  const material=(color,roughness=.8,metalness=0,physical=false)=>{const Type=physical?T.MeshPhysicalMaterial:T.MeshStandardMaterial;const m=new Type({color,roughness,metalness});materials.push(m);return m;};
- const fur=material('#ffffff',.96),skin=material('#ffffff',.73),skinCrease=material('#6b4735',.84),lip=material('#73503c',.59),nose=material('#453127',.51),eye=material('#241b14',.21),iris=material('#433627',.55),pupil=material('#0b0908',.15),white=material('#efe6d2',.32),nail=material('#6e5341',.42);
+ const fur=material('#ffffff',.96),skin=material('#ffffff',.73),skinCrease=material('#6b4735',.84),lip=material('#73503c',.59),nose=material('#453127',.51),pupil=material('#0b0908',.15),white=material('#efe6d2',.32),nail=material('#6e5341',.42);
  const cloth=material(G.item('suit',look.suit).color,.94,0,true),clothEdge=material(new T.Color(G.item('suit',look.suit).color).multiplyScalar(.70),.92),pants=material(G.item('pants',look.pants).color,.96),pantsEdge=material(new T.Color(G.item('pants',look.pants).color).multiplyScalar(.68),.94),leather=material(G.item('shoes',look.shoes).color,.49,0,true),leatherEdge=material(new T.Color(G.item('shoes',look.shoes).color).multiplyScalar(.78),.64),rubber=material('#dedbd3',.84),outsole=material('#b1afa8',.93),gold=material('#c5a259',.30,.88);
  cloth.clearcoat=/leather|Biker/i.test(look.suit)? .25:0;cloth.roughness=/leather|Biker/i.test(look.suit)?.46:.94;cloth.sheen=/Knit|velvet/i.test(look.suit)?.65:.12;cloth.sheenRoughness=.85;leather.clearcoat=.18;leather.clearcoatRoughness=.48;
  if(leather.color.r>leather.color.g*1.8&&leather.color.r>leather.color.b*1.4){leather.color.multiplyScalar(.62);leatherEdge.color.multiplyScalar(.62);}
@@ -64,33 +64,102 @@ export async function buildSculptedCharacter(G,look){
  }
  if(showFace){
   const headUv=[],faceUv=[];const hp=sourceMeshes[0].getAttribute('position'),fp=sourceMeshes[1].getAttribute('position');for(let i=0;i<hp.count;i++)headUv.push((Math.atan2(hp.getZ(i)-.015,hp.getX(i))+Math.PI)/(2*Math.PI),(hp.getY(i)-1.17)/.84);for(let i=0;i<fp.count;i++)faceUv.push((fp.getX(i)+.26)/.52,(fp.getY(i)-1.29)/.48);sourceMeshes[0].setAttribute('uv',new T.Float32BufferAttribute(headUv,2));sourceMeshes[1].setAttribute('uv',new T.Float32BufferAttribute(faceUv,2));
-  add(sourceMeshes[0],fur,6,'sculpt-cranium',false);add(sourceMeshes[1],skin,6,'sculpt-facial-mask',false);
+  // Sculpt the lips and nasal wings into the facial mask so their edges blend
+  // into the muzzle. Pigment follows those same landmarks on the existing skin.
+  const mask=sourceMeshes[1],colors=[];
+  const gaussian=t=>Math.exp(-t*t);
+  for(let i=0;i<fp.count;i++){
+   const x=fp.getX(i),y=fp.getY(i),z=fp.getZ(i),ax=Math.abs(x);
+   const front=smooth(.24,.31,z),mouthY=1.43+.012*(x/.15)**2+.029*x;
+   const lipSpan=gaussian((x/.139)**2),mouthDistance=y-mouthY;
+   const lips=lipSpan*(.012*gaussian((mouthDistance-.011)/.011)+.017*gaussian((mouthDistance+.013)/.012)-.009*gaussian(mouthDistance/.005));
+   const wing=gaussian((ax-.036)/.033)*gaussian((y-1.563)/.029);
+   const noseArea=gaussian((x/.069)**2)*gaussian(((y-1.565)/.039)**2);
+   const orbit=gaussian((ax-.112)/.067)*gaussian((y-1.644)/.047);
+   const corner=gaussian((ax-.147)/.023)*gaussian((y-mouthY)/.017);
+   fp.setXYZ(i,x+Math.sign(x)*.008*wing*front,y,z+front*(lips+.009*wing-.008*corner));
+   const temple=smooth(.135,.225,ax)*(.35+.65*smooth(1.53,1.70,y));
+   const shade=(1-.76*noseArea*front-.29*orbit-.54*lipSpan*gaussian(mouthDistance/.006)*front)*(1-.32*temple);
+   colors.push(shade,shade*(1-.10*wing),shade*(1-.15*wing));
+  }
+  mask.setAttribute('color',new T.Float32BufferAttribute(colors,3));mask.computeVertexNormals();
+  const facialSkin=skin.clone();facialSkin.vertexColors=true;materials.push(facialSkin);
+  const portrait=await new T.TextureLoader().loadAsync('./assets/player-hall/character-3d/sculpt/chimp-facial-albedo-v2.webp');
+  portrait.colorSpace=T.SRGBColorSpace;portrait.anisotropy=4;textures.push(portrait);
+  // Register pigment to eye, nose and lip landmarks in rest space. The lateral
+  // falloff restores the tiled fur at the temples and around the back of the head.
+  function pigment(base){
+   const m=base.clone();materials.push(m);
+   m.onBeforeCompile=shader=>{
+    shader.uniforms.chimpPortrait={value:portrait};
+    shader.vertexShader='varying vec3 facialPoint;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nfacialPoint=position;');
+    shader.fragmentShader='uniform sampler2D chimpPortrait;varying vec3 facialPoint;\n'+shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+     vec3 p=facialPoint;
+     float imageY=.3475+(1.64-p.y)*mix(1.72,1.10,smoothstep(1.64,1.78,p.y));
+     float width=mix(1.01,1.20,smoothstep(1.45,1.62,p.y));
+     vec2 uv=vec2(.505+p.x*width,1.-imageY);
+     float mixAmount=smoothstep(-.03,.16,p.z)*smoothstep(.008,.09,uv.y)*smoothstep(.006,.07,1.-uv.y);
+     vec3 pigment=texture2D(chimpPortrait,clamp(uv,0.,1.)).rgb;
+     diffuseColor.rgb=mix(diffuseColor.rgb,pigment*1.13,mixAmount);
+    `);
+   };m.customProgramCacheKey=()=> 'chimp-facial-projection-v2';return m;
+  }
+  // Short overlapping locks break the smooth outline of the cheek and jaw.
+  const strands=[],strandColors=[],hn=sourceMeshes[0].attributes.normal;
+  for(let i=0;i<hp.count;i+=3){
+   const x=hp.getX(i),y=hp.getY(i),z=hp.getZ(i);
+   if(Math.abs(x)<.17||y<1.28||y>1.60||z<-.13||hn.getX(i)*x<.04)continue;
+   const length=.012+.019*noise(i),width=.0018+.0027*noise(i+1),side=Math.sign(x);
+   const tipX=x+side*(.002+.006*noise(i+2)),tipZ=z-.010;
+   strands.push(x,y,z-width,x,y,z+width,tipX,y-length,tipZ,
+                x,y,z+width,x+side*.0025,y+.002,z,tipX,y-length,tipZ);
+   const tone=.68+.32*noise(i+3);
+   for(const brightness of [1,.92,.74,.92,1,.74])strandColors.push(.064*tone*brightness,.041*tone*brightness,.030*tone*brightness);
+  }
+  const cheekFur=new T.BufferGeometry();cheekFur.setAttribute('position',new T.Float32BufferAttribute(strands,3));
+  cheekFur.setAttribute('color',new T.Float32BufferAttribute(strandColors,3));cheekFur.computeVertexNormals();
+  add(cheekFur,fiber,6,'cheek-whiskers',false);
+  add(sourceMeshes[0],pigment(fur),6,'sculpt-cranium',false);add(sourceMeshes[1],pigment(facialSkin),6,'sculpt-facial-mask',false);
  }else {sourceMeshes[0].dispose();sourceMeshes[1].dispose();}
  for(let s=0;s<2;s++)add(sourceMeshes[s+2],skin,3,s?'sculpt-right-hand':'sculpt-left-hand',false);
  // The facial features have depth, cavities, eyelids and lips from every angle.
  if(showFace){
   for(const s of [-1,1]){
-   ell(eye,[s*.112,1.64,.277],[.040,.022,.032],6,'eye-socket');ell(iris,[s*.112,1.641,.311],[.015,.016,.008],6,'amber-iris');ell(pupil,[s*.112,1.642,.320],[.009,.012,.003],6,'pupil');ell(white,[s*.104,1.650,.324],[.002,.002,.001],6,'eye-catchlight');
-   const lid=[];for(let i=0;i<=36;i++){const a=i/36*Math.PI*2;lid.push([s*.112+.044*Math.cos(a),1.64+.025*Math.sin(a),.281+.017*Math.sin(a)**2]);}line(lid,.0035,skin,6,'eyelid',true);
-   line([[s*.045,1.688,.273],[s*.09,1.689,.281],[s*.14,1.693,.265],[s*.185,1.68,.238]],.030,fur,6,'brow-ridge');
+   // One convex eye surface keeps the iris and pupil under the same specular highlight.
+   const globe=new T.SphereGeometry(1,64,40),gp=globe.attributes.position,eyeColors=[];
+   const sclera=new T.Color('#564235'),amber=new T.Color('#946330'),limbus=new T.Color('#372b20'),black=new T.Color('#100e0c');
+   for(let j=0;j<gp.count;j++){
+    const x=gp.getX(j),y=gp.getY(j),z=gp.getZ(j),radius=Math.hypot(x/.48,y/.78);
+    const c=sclera.clone();
+    if(z>0){c.lerp(limbus,1-smooth(.94,1.08,radius));c.lerp(amber,(1-smooth(.79,.96,radius))*(.82+.12*Math.sin(27*Math.atan2(y,x))));c.lerp(black,1-smooth(.39,.51,radius));}
+    eyeColors.push(c.r,c.g,c.b);
+    gp.setXYZ(j,s*.112+x*.036,1.64+y*.023,.287+z*.030);
+   }
+   globe.setAttribute('color',new T.Float32BufferAttribute(eyeColors,3));
+   const cornea=material('#ffffff',.19,0,true);cornea.vertexColors=true;cornea.clearcoat=1;cornea.clearcoatRoughness=.10;
+   add(globe,cornea,6,'eye-socket',false);
+   ell(white,[s*.112-.005,1.647,.315],[.0027,.002,.0015],6,'eye-catchlight');
+   for(const upper of [true,false]){
+    const lid=[];for(let i=0;i<=16;i++){const t=i/16,a=Math.PI*t;
+     lid.push([s*(.112-.037*Math.cos(a)),1.640+(upper?.013:-.015)*Math.sin(a)+.002*(t-.5),.290+.023*Math.sin(a)]);}
+    line(lid,upper?.005:.0035,skinCrease,6,'eyelid');
+   }
    line([[s*.059,1.597,.310],[s*.103,1.593,.304],[s*.151,1.61,.276]],.0016,skinCrease,6,'orbital-fold');
-   ell(pupil,[s*.029,1.550,.369],[.012,.007,.004],6,'nostril-cavity');
+   ell(pupil,[s*.045,1.552,.390],[.013,.008,.005],6,'nostril-cavity');
    line([[s*.075,1.515,.340],[s*.116,1.490,.340],[s*.139,1.453,.323]],.0016,skinCrease,6,'muzzle-fold');
   }
-  const mouth=[[-.150,1.438,.320],[-.086,1.431,.353],[0,1.429,.370],[.086,1.431,.353],[.150,1.438,.320]];
-  line(mouth,.008,lip,6,'upper-lip');line(mouth.map(([x,y,z])=>[x,y-.012,z-.003]),.009,lip,6,'lower-lip');line(mouth.map(([x,y,z])=>[x,y-.004,z+.005]),.0026,skinCrease,6,'mouth-opening');
   line([[-.076,1.375,.292],[0,1.362,.302],[.076,1.375,.292]],.0017,skinCrease,6,'chin-fold');
   for(const s of [-1,1]){
    // The pinna is a curved bowl with a thick helix and an inner antihelix.
    const pos=[],colors=[],indices=[],rings=16,sides=64;
    for(let j=0;j<=rings;j++)for(let n=0;n<=sides;n++){
     const r=j/rings,a=n/sides*Math.PI*2,x=s*(.295+.082*r*Math.cos(a)),y=1.674+.119*r*Math.sin(a),z=.035+.040*r*r+.009*Math.cos(a)*r;
-    pos.push(x,y,z);const c=new T.Color('#8e6045').lerp(new T.Color('#b18361'),r*r);colors.push(c.r,c.g,c.b);if(j<rings&&n<sides){const k=j*(sides+1)+n;indices.push(k,k+1,k+sides+1,k+1,k+sides+2,k+sides+1);}
+    pos.push(x,y,z);const c=new T.Color('#462e24').lerp(new T.Color('#87664d'),r*r);colors.push(c.r,c.g,c.b);if(j<rings&&n<sides){const k=j*(sides+1)+n;indices.push(k,k+1,k+sides+1,k+1,k+sides+2,k+sides+1);}
    }
    const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));geo.setAttribute('color',new T.Float32BufferAttribute(colors,3));geo.setIndex(indices);const ear=material('#ffffff',.78);ear.vertexColors=true;ear.side=T.DoubleSide;add(geo,ear,10,'ear-bowl');
-   const rim=[];for(let n=0;n<64;n++){const a=n/64*Math.PI*2;rim.push([s*(.295+.082*Math.cos(a)),1.674+.119*Math.sin(a),.075+.009*Math.cos(a)]);}line(rim,.011,skin,10,'ear-helix',true);
+   const rim=[];for(let n=0;n<64;n++){const a=n/64*Math.PI*2;rim.push([s*(.295+.082*Math.cos(a)),1.674+.119*Math.sin(a),.075+.009*Math.cos(a)]);}line(rim,.007,material('#81634d',.87),10,'ear-helix',true);
    line([[s*.311,1.607,.056],[s*.332,1.649,.057],[s*.323,1.697,.057],[s*.294,1.716,.052]],.007,skinCrease,10,'ear-antihelix');
-   ell(skin,[s*.307,1.562,.047],[.035,.032,.027],10,'ear-lobe');
+   ell(material('#71503d',.87),[s*.307,1.562,.047],[.035,.032,.027],10,'ear-lobe');
   }
  }
  loft([[0,1.43,.0,.12,.13],[0,1.30,.0,.15,.145],[0,1.15,.0,.18,.155]],fur,7,'fur-neck');
@@ -113,6 +182,16 @@ export async function buildSculptedCharacter(G,look){
  const sewnCloth=cloth.clone(),sewnDepth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking});materials.push(sewnCloth,sewnDepth);
  const hemClip=shader=>{shader.vertexShader='attribute float seamRegion;varying vec2 garmentHemCoords;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ngarmentHemCoords=vec2(seamRegion,position.y);');shader.fragmentShader='varying vec2 garmentHemCoords;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nif((garmentHemCoords.x<.5&&garmentHemCoords.y<.118)||(garmentHemCoords.x>=.5&&garmentHemCoords.y<'+(tee?.798:.033).toFixed(3)+'))discard;');};
  sewnCloth.onBeforeCompile=hemClip;sewnDepth.onBeforeCompile=hemClip;sewnCloth.customProgramCacheKey=()=> 'sculpt-sewn-hem-'+(tee?'tee':tank?'tank':'jacket');sewnDepth.customProgramCacheKey=()=> 'sculpt-sewn-depth-'+(tee?'tee':tank?'tank':'jacket');
+ // Low-frequency dye variation gives the large panels depth at game-camera distance.
+ const clothColors=[];
+ for(let i=0;i<shirtPoints.count;i++){
+  const x=shirtPoints.getX(i),y=shirtPoints.getY(i),z=shirtPoints.getZ(i);
+  const grain=.5+.5*Math.sin(27*y+6*x+2*Math.sin(17*x+11*z));
+  const worn=Math.exp(-((y-.54)**2)/.034)*smooth(.48,.68,Math.abs(x));
+  const value=.89+.055*grain+.13*worn;
+  clothColors.push(value,value,value*(1+.06*worn));
+ }
+ sourceMeshes[4].setAttribute('color',new T.Float32BufferAttribute(clothColors,3));sewnCloth.vertexColors=true;
  const garment=add(sourceMeshes[4],sewnCloth,(x,y)=>Math.abs(x)>.52&&y>.015?2:1,'shirt-body');garment.customDepthMaterial=sewnDepth;
 
  for(const s of [-1,1])if(!tank)hemBand(s*(tee?.57:.744),tee?.773:.014,tee?.01:.026,tee?.165:.080,tee?.161:.076,clothEdge,2,'sewn-sleeve-hem',tee?.026:.019);
@@ -136,9 +215,9 @@ export async function buildSculptedCharacter(G,look){
  stitch([[0,.08],[0,-.06],[.019,-.19]],pantsEdge,'fly-stitch');
  // Distinct jacket details are authored geometry, not front-view photographs.
  if(!tee&&!tank&&!/Knit|Puffer|Hoodie/i.test(look.suit)){
-  const inner=material('#171b1d',.92),trim=material('#303432',.84);
+  const bomber=/Bomber/i.test(look.suit),inner=bomber?clothEdge:material('#171b1d',.92),trim=material('#303432',.84);
   const pos=[],uv=[],idx=[],nx=8,ny=36;
-  for(let j=0;j<=ny;j++)for(let i=0;i<=nx;i++){const y=.20+j/ny*.96,x=(i/nx-.5)*(.15+.055*j/ny);pos.push(x,y,clothZ(x,y,true)+.002);uv.push(i/nx,j/ny);if(i<nx&&j<ny){const k=j*(nx+1)+i;idx.push(k,k+1,k+nx+1,k+1,k+nx+2,k+nx+1);}}
+  for(let j=0;j<=ny;j++)for(let i=0;i<=nx;i++){const y=.20+j/ny*.96,x=(i/nx-.5)*(bomber?.031:(.15+.055*j/ny));pos.push(x,y,clothZ(x,y,true)+.006);uv.push(i/nx,j/ny);if(i<nx&&j<ny){const k=j*(nx+1)+i;idx.push(k,k+1,k+nx+1,k+1,k+nx+2,k+nx+1);}}
   const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(idx);add(g,inner,1,'jacket-inner-shirt',false);
   for(const sign of [-1,1]){
    const path=[[sign*.092,1.16],[sign*.11,.95],[sign*.105,.60],[sign*.075,.20]].map(([x,y])=>[x,y,clothZ(x,y,true)+.005]);line(path,.004,clothEdge,1,'jacket-front-edge');
@@ -149,7 +228,14 @@ export async function buildSculptedCharacter(G,look){
    for(const y of [.48,.31]){const b=new T.CylinderGeometry(.009,.009,.006,20);b.rotateX(Math.PI/2);b.translate(.10,y,clothZ(.10,y,true)+.008);add(b,gold,1,'jacket-button',false);}
   }else{
    if(['classic','ruby','midnight'].includes(look.suit))for(const sign of [-1,1])line([[sign*.53,1.04,.16],[sign*.60,.80,.15],[sign*.65,.56,.14],[sign*.70,.28,.12]],.008,rubber,2,'racing-sleeve-piping');
-   for(let y=.25;y<1.15;y+=.026){const tooth=new T.BoxGeometry(.008,.008,.004);tooth.translate(.080,y,clothZ(.08,y,true)+.007);add(tooth,gold,1,'zipper-tooth',false);}
+   for(let y=.22;y<1.15;y+=.026){const x=bomber?0:.08,tooth=new T.BoxGeometry(bomber?.015:.008,.008,.005);tooth.translate(x,y,clothZ(x,y,true)+.011);add(tooth,gold,1,'zipper-tooth',false);}
+   if(bomber){
+    for(const s of [-1,1]){
+     const seam=[[.16,1.16],[.25,1.10],[.35,1.01],[.42,.91]].map(([u,y])=>[s*u,y,clothZ(s*u,y,true)+.004]);
+     line(seam,.0035,clothEdge,1,'raglan-seam');
+    }
+    const collarGeo=new T.TorusGeometry(.155,.023,12,64);collarGeo.rotateX(Math.PI/2);collarGeo.scale(1.16,1,.88);collarGeo.translate(0,1.218,.004);add(collarGeo,clothEdge,1,'bomber-collar');
+   }
    if(['classic','ruby','midnight'].includes(look.suit))for(let row=0;row<3;row++)for(let col=0;col<4;col++){const x=-.32+col*.033,y=.92+row*.033,g=new T.PlaneGeometry(.032,.032);g.translate(x,y,clothZ(x,y,true)+.004);add(g,(row+col)%2?inner:rubber,1,'club-checker-patch',false);}
   }
  }
@@ -226,7 +312,6 @@ export async function buildSculptedCharacter(G,look){
   if(!positions.length)return;const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setAttribute('color',new T.Float32BufferAttribute(colors,3));g.setIndex(indices);g.computeVertexNormals();const strands=add(g,fiber,surface,'individual-fur-strands',false);strands.castShadow=false;
  }
  if(showFace){const head=root.children.find(m=>m.name==='sculpt-cranium');furOn(head,3800,6,(a,n)=>!(a.z>.12&&a.y>1.33&&a.y<1.78&&Math.abs(a.x)<.235)&&(!look.hair||look.hair==='hairNatural'||a.y<1.76),.027);}
- if(showFace)for(const brow of root.children.filter(m=>m.name==='brow-ridge'))furOn(brow,300,6,null,.010);
  const limbMeshes=root.children.filter(m=>m.name.startsWith('fur-arm-')||m.name.startsWith('fur-leg-'));
  for(const mesh of limbMeshes){const arm=mesh.name.startsWith('fur-arm');furOn(mesh,1800,arm?2:4,a=>arm?a.y<(tank?1.10:tee?.80:.015):shorts&&a.y<-.68,.021);}
  // Wardrobe art is used solely as a print decal on the curved shirt surface.

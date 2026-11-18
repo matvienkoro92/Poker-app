@@ -1,6 +1,6 @@
 (function(){'use strict';
 const G=window.PokerGarage;if(!G)return;const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let sequence=0,viewerLoad=null;
-const garageRendererRevision='20261109-vehicle-proportions';
+const garageRendererRevision='20261118-chimp-sculpt';
 function loadViewer(){if(window.pokerCreateGarage3D)return Promise.resolve();if(!viewerLoad)viewerLoad=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='./app-garage-3d.js?v='+garageRendererRevision;script.onload=resolve;script.onerror=()=>{viewerLoad=null;reject(Error('Не удалось загрузить 3D-просмотр'));};document.head.appendChild(script);});return viewerLoad;}
 
 const wardrobeSource=new Image();wardrobeSource.src='./assets/player-hall/standing-monkey-underwear-v1.webp';

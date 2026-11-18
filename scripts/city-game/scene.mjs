@@ -19,7 +19,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
  const scene=new T.Scene();buildMetropolis(scene);scene.background=new T.Color('#ab919e');scene.fog=new T.Fog('#a995a2',145,395);
- const dusk=new T.TextureLoader().load('assets/last-buy-in/optimized/stadium-miami-dusk-v1.webp',map=>{
+ const dusk=new T.TextureLoader().load('assets/last-buy-in/optimized/city-coastal-sky-v1.webp',map=>{
   scene.background=map;
  });
  dusk.mapping=T.EquirectangularReflectionMapping;dusk.colorSpace=T.SRGBColorSpace;
@@ -57,7 +57,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
   label(site.number+' · '+site.name,p.x+12,3.9,p.z+12,8,1.6,0,'#24504b','#ffedbc');
  }
  function groundTexture(kind){const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=kind==='road'?'#4a5154':'#c7bca7';ctx.fillRect(0,0,256,256);let seed=77;for(let i=0;i<12000;i++){seed=(seed*1664525+1013904223)>>>0;ctx.fillStyle=seed%2?'#ffffff0a':'#0000000c';ctx.fillRect(seed%256,(seed>>>8)%256,1,1);}if(kind==='pave'){ctx.strokeStyle='#968e7d66';ctx.lineWidth=2;for(let i=0;i<256;i+=32){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,256);ctx.moveTo(0,i);ctx.lineTo(256,i);ctx.stroke();}}const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.colorSpace=T.SRGBColorSpace;t.repeat.set(kind==='road'?4:36,kind==='road'?45:36);textures.push(t);return t;}
- const pave=new T.Mesh(new T.PlaneGeometry(232,220),new T.MeshStandardMaterial({map:groundTexture('pave'),roughness:1}));pave.rotation.x=-PI/2;pave.position.set(6,-.04,-10);pave.receiveShadow=true;scene.add(pave);dynamic.push(pave);
+ const pave=new T.Mesh(new T.PlaneGeometry(216,200),new T.MeshStandardMaterial({map:groundTexture('pave'),roughness:1}));pave.rotation.x=-PI/2;pave.position.set(10,-.04,-9);pave.receiveShadow=true;scene.add(pave);dynamic.push(pave);
  const asphalt=groundTexture('road');
  function road(x,z,w,d,top=.025){registerSurface(x,z,w,d,top);const mesh=new T.Mesh(new T.BoxGeometry(w,.05,d),new T.MeshStandardMaterial({map:asphalt,roughness:1}));mesh.position.set(x,top-.025,z);mesh.receiveShadow=true;scene.add(mesh);dynamic.push(mesh);}
  for(const x of ROAD_X){road(x,-9,14,208);for(const sign of [-1,1])box('#d8cbb2',x+sign*7.3,.08,-9,.4,.2,208);for(let z=-105;z<91;z+=8)if(!ROAD_Z.some(v=>Math.abs(z-v)<10))box('#f0dfb5',x,.033,z,.12,.012,3.7);}
@@ -163,14 +163,37 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const marker=new T.Group();const ring=new T.Mesh(new T.TorusGeometry(2,.085,8,48),new T.MeshBasicMaterial({color:'#ffd27c',transparent:true,opacity:.85}));ring.rotation.x=-PI/2;ring.position.y=.14;marker.add(ring);const arrow=new T.Mesh(new T.ConeGeometry(.45,.8,4),new T.MeshBasicMaterial({color:'#ffe0a1'}));arrow.rotation.z=PI;arrow.position.y=3.5;marker.add(arrow);scene.add(marker);
  const clubRing=new T.Mesh(new T.TorusGeometry(2,.06,6,40),new T.MeshBasicMaterial({color:'#80c9bc',transparent:true,opacity:.65}));clubRing.rotation.x=-PI/2;clubRing.position.set(HOME.x,.12,HOME.z);scene.add(clubRing);dynamic.push(ring,arrow,clubRing);
  const shadowBlob=new T.Mesh(new T.CircleGeometry(.53,20),new T.MeshBasicMaterial({color:'#142e2d',transparent:true,opacity:.16,depthWrite:false}));shadowBlob.rotation.x=-PI/2;shadowBlob.position.y=.1;scene.add(shadowBlob);dynamic.push(shadowBlob);
- const cameraRay=new T.Raycaster(),rayOrigin=new T.Vector3(),desired=new T.Vector3(),lookAt=new T.Vector3(),orbit={yaw:0,pitch:.2,distance:6.2};let walk=0,previousX=START.x,previousZ=START.z,previousSimulationTime=0,disposed=false;
+ const cameraRay=new T.Raycaster(),rayOrigin=new T.Vector3(),desired=new T.Vector3(),lookAt=new T.Vector3(),orbit={yaw:0,pitch:.2,distance:6.2};let walk=0,stride=0,previousX=START.x,previousZ=START.z,previousSimulationTime=0,disposed=false;
 
  function fit(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?64:58;camera.updateProjectionMatrix();}fit();
  let frameCount=0,lastShadowTime=-Infinity;
  const cameraSolids=SOLIDS.map(b=>({...b,h:b.h??(BUILDINGS.find(v=>Math.abs(v.x-(b.minX+b.maxX)/2)<.1&&Math.abs(v.z-(b.minZ+b.maxZ)/2)<.1)?.h||7)}));
  renderer.shadowMap.autoUpdate=false;
- function render(s,dt,objective,intro=false){if(disposed)return;const simulationDt=Math.max(0,s.time-previousSimulationTime);previousSimulationTime=s.time;const pos=s.driving?s.car:s.player,moving=Math.hypot(pos.x-previousX,pos.z-previousZ)/Math.max(dt,.001);previousX=pos.x;previousZ=pos.z;walk+=Math.min(moving,8)*simulationDt*2.2;avatar.visible=!s.driving||!playerCar.closedCabin;avatar.position.set(s.player.x,0,s.player.z);avatar.rotation.y=s.player.yaw;hero.root.scale.setScalar(s.driving?playerCar.seat.scale:.57);hero.root.position.y=s.driving?playerCar.seat.height:1.08;if(s.driving){avatar.position.set(s.car.x+Math.cos(s.car.yaw)*playerCar.seat.side+Math.sin(s.car.yaw)*playerCar.seat.forward,0,s.car.z-Math.sin(s.car.yaw)*playerCar.seat.side+Math.cos(s.car.yaw)*playerCar.seat.forward);avatar.rotation.y=s.car.yaw;}shadowBlob.visible=!s.driving;shadowBlob.position.x=s.player.x;shadowBlob.position.z=s.player.z;
-  if(simulationDt>0){hero.rig.update(s.time,.35,simulationDt);for(const [side,sign]of [['left',1],['right',-1]]){const b=hero.rig.bones,amount=!s.driving?Math.min(1,moving/4.5):0,phase=walk+ (sign<0?PI:0);b[side+'Hip'].rotation.x=Math.sin(phase)*.6*amount;b[side+'Knee'].rotation.x=-Math.max(0,-Math.sin(phase))*.8*amount;b[side+'Shoulder'].rotation.x=-Math.sin(phase)*.45*amount;b[side+'Elbow'].rotation.x=-.18-Math.max(0,Math.sin(phase))*.24*amount;if(s.driving){b[side+'Hip'].rotation.x=-1.3;b[side+'Knee'].rotation.x=1.45;b[side+'Shoulder'].rotation.x=-1.05;b[side+'Elbow'].rotation.x=-.5;}}}hero.root.updateMatrixWorld(true);hero.rig.skeleton.update();
+ function render(s,dt,objective,intro=false){if(disposed)return;const simulationDt=Math.max(0,s.time-previousSimulationTime);previousSimulationTime=s.time;const pos=s.driving?s.car:s.player,moving=Math.hypot(pos.x-previousX,pos.z-previousZ)/Math.max(dt,.001);previousX=pos.x;previousZ=pos.z;if(simulationDt>0){
+   const target=s.driving?0:Math.min(1,moving/4.5);
+   stride+=(target-stride)*(1-Math.exp(-simulationDt*15));
+   if(!s.driving)walk+=Math.min(moving,8)*simulationDt*3.1;
+  }avatar.visible=!s.driving||!playerCar.closedCabin;avatar.position.set(s.player.x,0,s.player.z);avatar.rotation.y=s.player.yaw;hero.root.scale.setScalar(s.driving?playerCar.seat.scale:.57);hero.root.position.y=s.driving?playerCar.seat.height:1.08;if(s.driving){avatar.position.set(s.car.x+Math.cos(s.car.yaw)*playerCar.seat.side+Math.sin(s.car.yaw)*playerCar.seat.forward,0,s.car.z-Math.sin(s.car.yaw)*playerCar.seat.side+Math.cos(s.car.yaw)*playerCar.seat.forward);avatar.rotation.y=s.car.yaw;}shadowBlob.visible=!s.driving;shadowBlob.position.x=s.player.x;shadowBlob.position.z=s.player.z;
+  if(simulationDt>0){hero.rig.update(s.time,.35,simulationDt);const bones=hero.rig.bones;
+   for(const [side,offset] of [['left',0],['right',PI]]){
+    const phase=walk+offset,reach=Math.sin(phase);
+    // A positive knee angle folds the shin behind the character (+Z is forward).
+    // Flex during swing, extend for contact, then absorb weight on the planted leg.
+    const swing=Math.max(0,Math.cos(phase)),load=Math.max(0,reach);
+    const knee=(.08+1.12*swing*swing+.17*load)*stride;
+    const hip=-.58*reach*stride-knee*.43;
+    bones[side+'Hip'].rotation.x=s.driving?-1.3:hip;
+    bones[side+'Knee'].rotation.x=s.driving?1.45:knee;
+    bones[side+'Ankle'].rotation.x=s.driving?0:-(hip+knee)*(.90-.44*swing);
+    const shoulder=bones[side+'Shoulder'],elbow=bones[side+'Elbow'];
+    const forearmSwing=-Math.sin(phase-.32);
+    shoulder.rotation.x=s.driving?-1.05:.47*reach*stride;
+    elbow.rotation.x=s.driving?-.5:-.15-(.48+.42*forearmSwing)*stride;
+    bones[side+'Wrist'].rotation.x=s.driving?0:(.07+.09*forearmSwing)*stride;
+   }
+   bones.pelvis.rotation.y=s.driving?0:.075*Math.sin(walk)*stride;
+   bones.chest.rotation.y=-bones.pelvis.rotation.y*.7;
+  }hero.root.updateMatrixWorld(true);hero.rig.skeleton.update();
   const nearbyTraffic=s.metroTraffic.slice().sort((a,b)=>Math.hypot(a.x-pos.x,a.z-pos.z)-Math.hypot(b.x-pos.x,b.z-pos.z));
   metropolitanCars.forEach((v,i)=>{const t=nearbyTraffic[i];v.root.visible=!!t;if(t){v.root.position.set(t.x,0,t.z);v.root.rotation.y=t.yaw;}});
   for(const [visual,data]of [[playerCar,s.car],...traffic.map((v,i)=>[v,s.traffic[i]]),[police,s.police]]){visual.root.position.set(data.x,groundHeight(data.x,data.z),data.z);visual.root.rotation.y=data.yaw;for(const w of visual.wheels)w.rotation[w.userData.spinAxis||'x']+=data.speed*simulationDt/(w.userData.rollingRadius||.43)*(w.userData.spinSign||1);for(const w of visual.frontWheels)w.rotation.y=data===s.car?-(s.steer||0)*.28:0;}police.root.visible=!!s.heat;caseGroup.visible=!s.carrying&&s.missionActive;

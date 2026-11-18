@@ -91,15 +91,15 @@ export function buildMetropolis(scene){
   for(let i=0;i<24;i++){const x=p.x+((i*37%97)/97-.5)*p.w,z=p.z+((i*53%101)/101-.5)*p.d;if(Math.abs(x-p.x)<5)continue;
    add(x,2,z,.65,4,.65,0x715e47);add(x,5,z,3.6,3.7,3.6,0x58744e,0,true);}
  }
- for(const {a,b,bridge} of roads){
+ for(const {a,b,bridge,width} of roads){
   const dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz),angle=Math.atan2(dx,dz),sx=dz/len,sz=-dx/len;
   const x=(a.x+b.x)/2,z=(a.z+b.z)/2;
-  add(x,bridge?-.22:0,z,18,bridge?.51:.08,len+1,bridge?0x666e70:0x555e62,angle);
-  for(const side of [-1,1])add(x+sx*side*9.8,bridge?.52:.12,z+sz*side*9.8,bridge?.43:1.7,bridge?1:.23,len-18,bridge?0xb2aa99:0xcac2ad,angle);
+  add(x,bridge?-.22:0,z,width,bridge?.51:.08,len+1,bridge?0x666e70:0x555e62,angle);
+  for(const side of [-1,1])add(x+sx*side*(width/2+.8),bridge?.52:.12,z+sz*side*(width/2+.8),bridge?.43:1.7,bridge?1:.23,Math.max(1,len-18),bridge?0xb2aa99:0xcac2ad,angle);
   // Paired warm lamps frame the bridges; staggered lights lead along city avenues.
   for(let m=24,index=0;m<len-20;m+=48,index++){
    for(const side of bridge?[-1,1]:[index%2?1:-1]){
-    const px=a.x+dx*m/len+sx*side*9.9,pz=a.z+dz*m/len+sz*side*9.9;
+    const px=a.x+dx*m/len+sx*side*(width/2+.9),pz=a.z+dz*m/len+sz*side*(width/2+.9);
     add(px,3.5,pz,.18,7,.18,0x535d63,angle);
     add(px-sx*side*.8,7,pz-sz*side*.8,1.75,.15,.16,0x737c80,angle);
     add(px-sx*side*1.6,6.91,pz-sz*side*1.6,.65,.09,.44,bridge?0xffda9e:0xffe4c2,angle,false,-3);
@@ -123,6 +123,18 @@ export function buildMetropolis(scene){
      const offset=span*((i+.5)/bays-.5);
      const px=x+(axis?side*(w/2+.05):offset),pz=z+(axis?offset:side*(d/2+.05));
      add(px,h/2,pz,span/bays,h,1,0xffffff,axis?side*Math.PI/2:side>0?0:Math.PI,false,tile);
+     // Returns around each bay and projecting floor slabs give all four walls relief.
+     const outwardX=axis?side:0,outwardZ=axis?0:side;
+     const wallAngle=axis?Math.PI/2:0,bayWidth=span/bays;
+     const jamb=bayWidth*.46;
+     add(px+(axis?0:jamb)+outwardX*.13,h*.51,pz+(axis?jamb:0)+outwardZ*.13,.32,h*.94,.38,0xc5bcad,wallAngle);
+     if(tile!==3&&h>8){
+      const balconyWidth=bayWidth*.68;
+      for(let y=4.1;y<h-1.5;y+=5.4){
+       add(px+outwardX*.55,y,pz+outwardZ*.55,balconyWidth,.24,1.1,0xd6c6b4,wallAngle);
+       add(px+outwardX*1.05,y+.50,pz+outwardZ*1.05,balconyWidth,.78,.12,0x808f8b,wallAngle);
+      }
+     }
     }
    }
    // Give the street-facing entrance depth and a distinct silhouette at driving height.

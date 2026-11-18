@@ -1,11 +1,13 @@
 import * as T from '../../vendor/three/three.module.min.js';
 import {detailEstate} from './estate-details.mjs';
-import {VILLA,GATE,PENINSULA} from './world.mjs';
+import {VILLA,GATE} from './world.mjs';
+import {lighthouseShore} from './metropolis.mjs';
 export function buildEstate({scene,box:rawBox,cylinder:rawCylinder,batch:rawBatch,label:rawLabel,outdoors,textures}){
  const dx=VILLA.x-211,dz=VILLA.z-88;
  const box=(c,x,y,z,...args)=>rawBox(c,x+dx,y,z+dz,...args),cylinder=(c,x,y,z,...args)=>rawCylinder(c,x+dx,y,z+dz,...args),batch=(type,c,x,y,z,...args)=>rawBatch(type,c,x+dx,y,z+dz,...args),label=(t,x,y,z,...args)=>rawLabel(t,x+dx,y,z+dz,...args);
- const ground=new T.Mesh(new T.CylinderGeometry(1,1.02,1,72),new T.MeshStandardMaterial({color:'#bba77d',roughness:1}));ground.position.set(PENINSULA.x,-.52,PENINSULA.z);ground.scale.set(PENINSULA.rx,1,PENINSULA.rz);ground.receiveShadow=true;scene.add(ground);
- outdoors.lawnEllipse(PENINSULA.x,PENINSULA.z,PENINSULA.rx-1,PENINSULA.rz-1);
+ const contour=new T.Shape(lighthouseShore.map(p=>new T.Vector2(p.x,-p.z)));
+ const ground=new T.Mesh(new T.ShapeGeometry(contour),new T.MeshStandardMaterial({color:'#939775',roughness:1}));
+ ground.rotation.x=-Math.PI/2;ground.position.y=-.025;ground.receiveShadow=true;scene.add(ground);
  outdoors.lawnRect(69,114,98,58,.018);
  rawBox('#a1947b',69,-.02,114,98,.04,58);
  rawBox('#787f77',40,.06,132.5,11,.12,55);rawBox('#787f77',56,.06,105,43,.12,11);rawBox('#787f77',72,.06,89,11,.12,38);rawBox('#b8b097',48,.07,160,16,.14,10);
@@ -18,7 +20,10 @@ export function buildEstate({scene,box:rawBox,cylinder:rawCylinder,batch:rawBatc
  for(const [px,pz]of [[27,126],[24,146],[36,174],[62,184],[88,188],[122,144]])outdoors.palm(px,pz,7);
  for(const [px,pz]of [[51,126],[51,144],[51,169],[67,178],[92,177],[117,170]])outdoors.shrub(px,pz,1.3);
  for(const [px,pz]of [[26,120],[30,163],[54,183]])outdoors.tree(px,pz,5.5);
- for(let i=0;i<16;i++){const a=.15+i*.13,px=PENINSULA.x+Math.cos(a)*(PENINSULA.rx-1),pz=PENINSULA.z+Math.sin(a)*(PENINSULA.rz-1);if(px>92&&px<117&&pz>174&&pz<190)continue;outdoors.rock(px,pz,.6+i%3*.35);}
+ for(let i=0;i<lighthouseShore.length;i++){
+  const a=lighthouseShore[i],b=lighthouseShore[(i+1)%lighthouseShore.length],count=Math.ceil(Math.hypot(a.x-b.x,a.z-b.z)/5);
+  for(let j=0;j<count;j++)outdoors.rock(a.x+(b.x-a.x)*j/count,a.z+(b.z-a.z)*j/count,.8+(i+j)%4*.22);
+ }
  for(const pz of [115,137,160]){rawCylinder('#43564c',34,3.2,pz,.08,6.4);rawBox('#43564c',35,6.35,pz,2,.1,.1);rawBatch('box','#ffe0a0',35.7,6.25,pz,.55,.1,.3,0,0,true);}
  // An ocean lounge belongs to the villa: timber pergola, outdoor sofas and low planting.
  rawBox('#8c7354',107,.035,181,14,.07,10);outdoors.deck(107,181,14,10,.08);
