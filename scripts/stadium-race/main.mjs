@@ -1,3 +1,4 @@
+import {createCourseSampler} from './course-path.mjs';
 import {thumbstick} from '../shared/thumbstick.mjs';
 import {miamiAddresses} from './miami-architecture.mjs';
 import {createCurveGuides} from './sign-lighting.mjs';
@@ -88,9 +89,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   function foliage(parent,color,x,y,z,w,h,d){const m=new T.Mesh(roundGeo,mat(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;}
   function group(){const g=new T.Group();scene.add(g);return g;}
   // Integrate a single centreline for every road strip and every obstacle.
-  const points=[{x:0,z:0,a:0}];for(let d=10;d<=E.FINISH+6000;d+=10){const p=points.at(-1),a=p.a+E.road(d-5).curve*.0065;points.push({x:p.x+Math.sin(a)*.6,z:p.z+Math.cos(a)*.6,a});}
-  function rise(d,start,end,height){return d>start&&d<end?height*Math.sin(Math.PI*(d-start)/(end-start))**2:0;}
-  function sample(d,lateral=0,tier=0){if(d<0)return {x:-lateral*6,z:d*.06,y:0,a:0};d=Math.max(0,Math.min(points.length*10-11,d));const n=Math.floor(d/10),u=d/10-n,p=points[n],q=points[n+1],a=p.a+(q.a-p.a)*u,r=E.road(d),local=r.local;const hill=rise(d,5500,8150,3.2)+rise(d,E.LAP+4650,E.LAP+8900,4.8)+(r.bridge?Math.sin((local-8500)/1300*Math.PI)*2.8:Math.sin(local*.0017)*1.0+Math.sin(local*.0033)*.45);return {x:p.x+(q.x-p.x)*u-Math.cos(a)*lateral*E.roadWidth(d),z:p.z+(q.z-p.z)*u+Math.sin(a)*lateral*E.roadWidth(d),y:hill+E.deckHeight(d,tier),a};}
+  const sample=createCourseSampler(E);
   const courseGround=createCourseGround(scene,E,sample);
   const roadClearance=createRoadClearance(E,sample),minimap=createMinimap(host.querySelector('.race3d-stage'),E,sample);
   function place(g,d,l=0,height=0,tier=0){const p=sample(d,l,tier);g.position.set(p.x,p.y+height,p.z);g.rotation.y=p.a;return p;}

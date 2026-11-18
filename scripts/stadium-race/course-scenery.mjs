@@ -76,6 +76,27 @@ export function createCourseGround(scene,E,sample){
   return new T.MeshStandardMaterial({map,vertexColors:true,roughness:.96,side:T.DoubleSide});
  });
  const surfaces={stands:0,park:0,departure:0,paddock:1,cutting:2,boulevard:3,quay:3,freight:1};
+ // Stop the verge at the halfway line to any other part of the road.
+ // On a hairpin even the *inside* normals from adjacent stations converge.
+ const stations=[];
+ for(let d=0;d<=E.FINISH;d+=25)stations.push(sample(d));
+ const limits=new Map();
+ function vergeLimit(d,side){
+  const key=d*2+(side>0?1:0);
+  if(limits.has(key))return limits.get(key);
+  const p=sample(d),nx=-side*Math.cos(p.a),nz=side*Math.sin(p.a);
+  const edge=E.roadLayout(d).halfWidth;
+  let limit=edge+95;
+  for(const q of stations){
+   const dx=q.x-p.x,dz=q.z-p.z,along=dx*nx+dz*nz;
+   if(along<=0)continue;
+   const squared=dx*dx+dz*dz;
+   if(squared<.0001||squared>4*limit*limit)continue;
+   limit=Math.min(limit,squared/(2*along));
+  }
+  const extent=Math.max(0,limit-edge);
+  limits.set(key,extent);return extent;
+ }
  for(let start=0;start<E.FINISH;start+=600){
   const runs=[];
   const positions=[],uv=[],rgb=[],indices=[];
@@ -85,15 +106,28 @@ export function createCourseGround(scene,E,sample){
    for(const side of [-1,1]){
     if(side<0&&E.riverbank(d))continue;
     const base=positions.length/3;
-    for(const dist of [d,Math.min(d+25,E.FINISH)])for(const offset of [-.28,4,16,32,95]){
+    for(const dist of [d,Math.min(d+25,E.FINISH)])for(const band of [-.28,4,16,32,95]){
+     const offset=Math.min(band,vergeLimit(dist,side));
      const width=E.roadWidth(dist),p=sample(dist,side*(E.roadLayout(dist).halfWidth+offset)/width);
      const slope=offset>16&&(zone==='stands'||zone==='park'||zone==='cutting');
      const ridge=slope?(zone==='cutting'?3.2:1.8)*(1+Math.sin(dist*.0012+side))*(offset-16)/39:0;
-     const y=offset<=16?p.y-.12:offset===32?p.y-.48:-2.65+ridge;
+     const y=offset<=16?p.y-.12:offset<=32?p.y-.12-.36*(offset-16)/16:p.y-.48+(-2.65+ridge-p.y+.48)*(offset-32)/63;
      const shade=.76+.09*Math.sin(dist*.004+offset*.19+side);
      positions.push(p.x,y,p.z);uv.push(p.x*.24,p.z*.24);rgb.push(shade,shade,shade);
     }
     for(let n=0;n<4;n++){const k=base+n;indices.push(k,k+5,k+1,k+1,k+5,k+6);}
+    // Close the dry embankment down to its foundation so the skyline
+    // cannot show through the cut face beneath trees on the upper bend.
+    if(zone==='stands'||zone==='park'||zone==='paddock'||zone==='departure'){
+     const skirt=positions.length/3;
+     for(const k of [base+4,base+9]){
+      const [x,y,z]=positions.slice(k*3,k*3+3);
+      positions.push(x,y,z,x,Math.min(y-.3,-8),z);
+      uv.push(x*.24,z*.24,x*.24,(z+y+8)*.24);
+      rgb.push(.69,.68,.63,.35,.33,.29);
+     }
+     indices.push(skirt,skirt+1,skirt+2,skirt+2,skirt+1,skirt+3);
+    }
    }
   }
   if(!indices.length)continue;
