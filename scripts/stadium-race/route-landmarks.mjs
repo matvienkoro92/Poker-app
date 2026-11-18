@@ -5,6 +5,30 @@ export function createRouteLandmarks(scene,E,sample,block){
  function sign(parent,text,x,y,width=4,color='#1e363e'){const canvas=document.createElement('canvas');canvas.width=768;canvas.height=192;const c=canvas.getContext('2d');c.fillStyle=color;c.fillRect(0,0,768,192);c.strokeStyle='#d2c7a7';c.lineWidth=6;c.strokeRect(6,6,756,180);c.fillStyle='#f2e5c7';c.textAlign='center';c.font='bold 58px Arial';c.fillText(text,384,117);const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const mesh=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map,side:T.DoubleSide}));mesh.position.set(x,y,-.15);mesh.rotation.y=Math.PI;parent.add(mesh);return mesh;}
  for(const [distance,text]of [[E.LAP*2+220,'STADIUM SPRINT'],[E.cityDistance(4900),'НАБЕРЕЖНАЯ'],[E.cityDistance(7500),'ПОРТОВЫЙ КВАРТАЛ'],[E.FINISH-650,'TWO ACES · ФИНИШ']]){const g=at(distance),width=E.roadLayout(distance).halfWidth+1.3;for(const side of [-1,1]){block(g,'#566268',side*width,3.7,0,.23,7.4,.23);block(g,'#c6bba2',side*width,.4,0,.7,.8,.7);}block(g,'#566268',0,7.3,0,width*2,.25,.25);sign(g,text,0,6.7,9);}
  for(const start of [E.LAP*2+4300,E.cityDistance(6000)])for(const [offset,label]of [[-420,'ТОРМОЗИ · 180°'],[-220,'↷  ШПИЛЬКА'],[-60,'↷']]){const d=start+offset,g=at(d),x=E.roadWidth(d)+1.5;block(g,'#747d7d',x,1.5,0,.12,3,.12);sign(g,label,x,3,offset===-60?2:4,'#67543a');}
+ // Single-use silhouettes mark the transition from the open pits to the rock cutting.
+ const press=at(1000);
+ block(press,'#4a5962',16,2.4,0,1.25,4.8,6);
+ block(press,'#d2c6ac',16,5.4,0,6.4,1.2,11.3);
+ block(press,'#465f71',16,6.65,0,6.05,1.3,10.8);
+ block(press,'#b2aba1',16,7.43,0,6.6,.23,11.5);
+ for(let z=-4;z<=4;z+=2)block(press,'#dfcdb2',12.96,6.65,z,.08,1.34,.13);
+ const pits=at(E.LAP+1460);
+ block(pits,'#87918d',-17,3.2,0,6.8,6.4,5.8);
+ block(pits,'#3c5968',-17,7.45,0,8,2.15,7.4);
+ block(pits,'#d1c5a5',-17,8.65,0,8.6,.24,7.8);
+ for(const z of [-3.5,-1.2,1.2,3.5])block(pits,'#c2c6ba',-12.93,7.45,z,.13,2.1,.14);
+ block(pits,'#414c56',-14,4.5,-4.5,.32,9,.32);
+ sign(pits,'ПИТ-ЛЕЙН',-14,6.3,6,'#2f554f');
+ const viaduct=at(E.LAP+6950);
+ for(const side of [-1,1]){
+  block(viaduct,'#8e887e',side*12,4.4,0,2.2,8.8,3.6);
+  block(viaduct,'#b3aba0',side*12,8.52,0,3,.6,4.1);
+ }
+ block(viaduct,'#535b60',0,9.25,0,39,.85,4.1);
+ for(const z of [-1.9,1.9]){
+  block(viaduct,'#747e80',0,10.75,z,39,.14,.13);
+  for(let x=-18;x<=18;x+=3)block(viaduct,'#697575',x,10.15,z,.1,1.32,.1);
+ }
  // An enclosed pedestrian crossing marks the quay entrance. Its supports sit
  // outside the clear road width and its lit truss reads from the stadium arch.
  const crossingDistance=E.cityDistance(4770),walkway=at(crossingDistance);

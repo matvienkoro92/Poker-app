@@ -1,3 +1,4 @@
+const districtLabels={stands:'СТАДИОН',park:'ПАРК',paddock:'ПАДДОК',cutting:'ВЫЕМКА',departure:'ВЫЕЗД',boulevard:'БУЛЬВАР',quay:'НАБЕРЕЖНАЯ',freight:'ПОРТ',bridge:'МОСТ'};
 const colors=['#ff786c','#d896ff','#ffc96b'];
 export function radarPoint(point,origin,heading,scale=.65){
  const dx=point.x-origin.x,dz=point.z-origin.z;
@@ -24,6 +25,6 @@ export function createMinimap(host,E,sample){
   markers=s.rivals.map((r,i)=>{const marker=radarMarker(project(sample(r.distance,r.lateral,r.tier))),rank=1+[s,...s.rivals.filter((_,j)=>j!==i)].filter(car=>car.distance>r.distance).length;c.save();c.translate(marker.x,marker.y);c.fillStyle=colors[i%3];c.strokeStyle='#112331';c.lineWidth=2;
    if(marker.offscreen){c.rotate(marker.angle);c.beginPath();c.moveTo(6,0);c.lineTo(-4,-4);c.lineTo(-4,4);c.closePath();c.fill();c.stroke();}else{c.beginPath();c.arc(0,0,6.5,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#13202b';c.font='bold 8px Arial';c.textAlign='center';c.fillText(String(rank),0,3);}c.restore();return {...marker,name:r.name,rank,gap:Math.round((r.distance-s.distance)*.06)};});
   c.translate(76,99);c.beginPath();c.moveTo(0,-8);c.lineTo(6,6);c.lineTo(0,3);c.lineTo(-6,6);c.closePath();c.fillStyle='#fff6d9';c.fill();c.strokeStyle='#d9ad53';c.lineWidth=1.5;c.stroke();c.restore();
-  zone.textContent=s.routeZone==='bridge'?'МОСТ':s.routeZone==='city'?(E.road(s.distance).local>7300?'ПОРТ':'НАБЕРЕЖНАЯ'):'СТАДИОН';progress.textContent=s.progress+'%';canvas.setAttribute('aria-label','Карта. Вы: '+s.position+' место. '+markers.map(m=>m.name+': '+m.rank+' место, '+(m.gap>=0?'впереди ':'позади ')+Math.abs(m.gap)+' м').join('. '));
+  zone.textContent=districtLabels[E.district(s.distance)];progress.textContent=s.progress+'%';canvas.setAttribute('aria-label','Карта. Вы: '+s.position+' место. '+markers.map(m=>m.name+': '+m.rank+' место, '+(m.gap>=0?'впереди ':'позади ')+Math.abs(m.gap)+' м').join('. '));
  },snapshot(){return {rivals:markers.map(m=>({...m})),width:152};}};
 }

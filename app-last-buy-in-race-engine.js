@@ -5,26 +5,60 @@ const CITY_START=LAP*2+4300,CITY_SCALE=3,CITY_LENGTH=(LAP-4300)*CITY_SCALE,FINIS
 const cityDistance=local=>CITY_START+(local-4300)*CITY_SCALE;
 const mobility={bicycle:{name:'Велосипед',cruise:1.2,max:1.6},scooter:{name:'Самокат',cruise:1.35,max:1.8},hoverboard:{name:'Скейт',cruise:1.25,max:1.7}};
 const sections=[{end:950,curve:0,name:'Стартовая прямая'},{end:2050,curve:2.4,name:'Большая дуга'},{end:2700,curve:-2.2,name:'Связка S'},{end:3450,curve:2.2,name:'Связка S'},{end:4300,curve:0,name:'Трамплин'},{end:5350,curve:-Math.PI*Math.PI/(.0013*1050),name:'Шпилька 180° · тормози'},{end:6200,curve:.7,name:'Последний поворот'},{end:7600,curve:-.7,name:'Галерея трибун'},{end:8800,curve:.65,name:'Двойной трамплин'},{end:LAP,curve:0,name:'Финишная прямая'}];
-const citySections=[{end:4800,curve:0,name:'Выезд со стадиона'},{end:6000,curve:.6,name:'Покерный бульвар'},{end:7300,curve:-Math.PI*Math.PI/(.0013*1300),name:'Разворот набережной · 180°'},{end:8500,curve:.5,name:'Портовый проезд'},{end:LAP,curve:0,name:'Мост к TWO ACES'}];
-function road(distance){const city=distance>=CITY_START,x=city?4300+(distance-CITY_START)/CITY_SCALE:((distance%LAP)+LAP)%LAP,list=city?citySections:sections;let start=city?4300:0;for(const sec of list){if(x<sec.end){const u=clamp((x-start)/(sec.end-start),0,1);return {curve:sec.curve*Math.sin(Math.PI*u)/(city?CITY_SCALE:1),name:sec.name,local:x,city,blend:clamp((distance-LAP*2-4300)/500,0,1),bridge:city&&x>8500,shortcut:!city&&x>4470&&x<4970||city&&x>6500&&x<7000};}start=sec.end;}return {curve:0,name:'Финиш',local:city?LAP:0,city,bridge:city,blend:city?1:0};}
+// Alternate courses leave the grandstand through different parts of the complex.
+const serviceSections=[
+ {end:1200,curve:-.8,name:'Въезд в паддок'}, {end:2300,curve:2.8,name:'Пит-лейн'},
+ {end:3500,curve:-3.1,name:'Поворот у боксов'}, {end:4650,curve:1.4,name:'Служебная эстакада'},
+ {end:5800,curve:.2,name:'Грузовые ворота'}, {end:6640,curve:-3.4,name:'Спуск в выемку'},
+ {end:7450,curve:2.9,name:'Каменный карман'}, {end:8750,curve:-1.1,name:'Подпорная стена'},
+ {end:LAP,curve:.45,name:'Возврат к стадиону'}
+];
+const exitSections=[
+ {end:900,curve:.45,name:'Выезд из боксов'}, {end:1900,curve:-1.7,name:'Подход к галерее'},
+ {end:3100,curve:2.55,name:'Внешняя дуга'}, {end:4300,curve:-.55,name:'Створ городских ворот'}
+];
+const citySections=[{end:4800,curve:0,name:'Выезд со стадиона'},{end:5450,curve:1.3,name:'Покерный бульвар'},{end:6000,curve:-1.1,name:'Вход на набережную'},{end:7300,curve:-Math.PI*Math.PI/(.0013*1300),name:'Разворот набережной · 180°'},{end:7680,curve:.4,name:'Весовая порта'},{end:8060,curve:2.9,name:'Шикана у складов'},{end:8500,curve:-2.5,name:'Выход к мосту'},{end:LAP,curve:0,name:'Мост к TWO ACES'}];
+function road(distance){const city=distance>=CITY_START,x=city?4300+(distance-CITY_START)/CITY_SCALE:((distance%LAP)+LAP)%LAP,list=city?citySections:distance>=2*LAP?exitSections:distance>=LAP?serviceSections:sections;let start=city?4300:0;for(const sec of list){if(x<sec.end){const u=clamp((x-start)/(sec.end-start),0,1);return {curve:sec.curve*Math.sin(Math.PI*u)/(city?CITY_SCALE:1),name:sec.name,local:x,city,blend:clamp((distance-LAP*2-4300)/500,0,1),bridge:city&&x>8500,shortcut:!city&&x>4470&&x<4970||city&&x>6500&&x<7000};}start=sec.end;}return {curve:0,name:'Финиш',local:city?LAP:0,city,bridge:city,blend:city?1:0};}
 // Six lanes on the boulevard, four through the technical stadium sections.
 function riverbank(d){return d>=cityDistance(6020)&&d<=cityDistance(7530);}
+function district(d){
+ if(d>=cityDistance(8500))return 'bridge';
+ if(d>=cityDistance(7390))return 'freight';
+ if(d>=cityDistance(6000))return 'quay';
+ if(d>=CITY_START)return 'boulevard';
+ if(d>=2*LAP)return 'departure';
+ if(d>=LAP+5800)return 'cutting';
+ if(d>=LAP)return 'paddock';
+ return d>=5500&&d<8150?'park':'stands';
+}
 function roadWidth(d){const city=clamp((d-cityDistance(4700))/(500*CITY_SCALE),0,1),bridge=clamp((d-cityDistance(8200))/(300*CITY_SCALE),0,1);return 7.2+3.6*city*(1-bridge);}
 function roadLayout(d){const halfWidth=roadWidth(d)*7/6,lanes=roadWidth(d)>=10.3?6:4;return {halfWidth,lanes,laneWidth:halfWidth*2/lanes};}
 const trafficCache=new Map();
-function trafficAt(tick){if(trafficCache.has(tick))return trafficCache.get(tick);const cars=Array.from({length:12*CITY_SCALE},(_,i)=>({id:i,tier:0,distance:cityDistance(5000)+((i*347-tick*3.1)%(3100*CITY_SCALE)+3100*CITY_SCALE)%(3100*CITY_SCALE),lateral:[-.83,-.5,-.17][i%3]}));trafficCache.set(tick,cars);if(trafficCache.size>2)trafficCache.delete(trafficCache.keys().next().value);return cars;}
+function trafficAt(tick){if(trafficCache.has(tick))return trafficCache.get(tick);const cars=Array.from({length:12*CITY_SCALE},(_,i)=>({id:i,transport:'mustang-gt500',tier:0,distance:cityDistance(5000)+((i*347-tick*3.1)%(3100*CITY_SCALE)+3100*CITY_SCALE)%(3100*CITY_SCALE),lateral:[-.83,-.5,-.17][i%3]}));trafficCache.set(tick,cars);if(trafficCache.size>2)trafficCache.delete(trafficCache.keys().next().value);return cars;}
 // Cars emerge from real side streets; one shared clock drives art, warnings and contacts.
-const crossings=[4850,LAP+4850,LAP*2+7700,LAP*2+7700+5500,cityDistance(7900)].map((distance,id)=>({id,distance,side:id%2?-1:1}));
-function crossTrafficAt(tick){return crossings.map(j=>{
- const phase=((tick+j.id*137)%840+840)%840,width=roadWidth(j.distance),edge=roadLayout(j.distance).halfWidth;
+const crossings=[4850,LAP+5080,cityDistance(5380),cityDistance(7280),cityDistance(7900)].map((distance,id)=>({id,distance,side:id%2?-1:1,arrivalPhase:[377,397,346,377,390][id]}));
+const streams=[...crossings.map(j=>({...j,junctionId:j.id,lag:0})),
+ ...[1,4].map((idx,n)=>({...crossings[idx],id:crossings.length+n,junctionId:idx,side:-crossings[idx].side,distance:crossings[idx].distance+52,lag:74}))];
+// Start the side-street signal before its cars enter view. Once set, its clock is independent
+// of steering or braking, so the driver can let the lead car pass or beat the next one.
+function armCrossings(state,old){
+ for(const j of crossings){
+  const trigger=j.distance-2250;
+  if(old>trigger||state.distance<trigger||state.crossingOffsets[j.id]!==undefined)continue;
+  const travel=Math.round((j.distance-state.distance)/Math.max(3,state.speed));
+  state.crossingOffsets[j.id]=j.arrivalPhase-travel-state.tick;
+ }
+}
+function crossTrafficAt(tick,offsets){return streams.map(j=>{
+ const phase=((tick+(offsets?.[j.junctionId]??j.junctionId*137)-j.lag)%840+840)%840,width=roadWidth(j.distance),edge=roadLayout(j.distance).halfWidth;
  const stop=edge+5.3,far=edge+20;
  function position(t){if(t<120)return -j.side*(far-(far-stop)*(1-(1-t/120)**2));if(t<240)return -j.side*stop;if(t<600){const u=(t-240)/360;return j.side*(-stop+(far+stop)*u*u*(3-2*u));}return j.side*far;}
  const lateral=position(phase)/width,previousLateral=position(Math.max(0,phase-1))/width;
- return {id:j.id,distance:j.distance,lateral,previousLateral,lateralVelocity:lateral-previousLateral,velocityForward:0,heading:j.side*Math.PI/2,tier:0,active:phase<630,moving:phase<120||phase>=240&&phase<600,phase,wheelDistance:(position(phase)+j.side*far)*j.side/.06};
+ return {id:j.id,junctionId:j.junctionId,side:j.side,transport:'mustang-gt500',distance:j.distance,lateral,previousLateral,lateralVelocity:lateral-previousLateral,velocityForward:0,heading:j.side*Math.PI/2,tier:0,active:phase<630,moving:phase<120||phase>=240&&phase<600,phase,wheelDistance:(position(phase)+j.side*far)*j.side/.06};
  });}
 
 // Optional short upper routes; the renderer and simulation share these exact profiles.
-const overpasses=[...Array.from({length:3},(_,lap)=>({id:'stadium-'+lap,start:lap*LAP+1600,end:lap*LAP+2450,center:-.55,halfWidth:.55,ramp:350,height:3.6,name:'Верхняя галерея'})),{id:'harbor',start:cityDistance(6250),end:cityDistance(6250)+900,center:.55,halfWidth:.55,ramp:350,height:3.6,name:'Эстакада набережной'}];
+const overpasses=[...Array.from({length:3},(_,lap)=>({id:'stadium-'+lap,start:lap*LAP+[1600,3350,1950][lap],end:lap*LAP+[2450,4320,2670][lap],center:lap===1?.55:-.55,halfWidth:.55,ramp:350,height:[3.6,4.1,3.1][lap],name:['Верхняя галерея','Сервисная эстакада','Внешняя трибуна'][lap]})),{id:'harbor',start:cityDistance(6250),end:cityDistance(6250)+900,center:.55,halfWidth:.55,ramp:350,height:3.6,name:'Эстакада набережной'}];
 function deckAt(distance){return overpasses.find(p=>distance>=p.start&&distance<=p.end);}
 function deckHeight(distance,tier=0){if(!tier)return 0;const p=deckAt(distance);if(!p)return 0;const u=clamp(Math.min(distance-p.start,p.end-distance)/p.ramp,0,1);return p.height*u*u*(3-2*u);}
 function sameDeck(a,b){return (a.tier||0)===(b.tier||0);}
@@ -36,6 +70,12 @@ function updateDeck(s,old){const p=deckAt(s.distance);if(!p){s.tier=0;s.deckId=n
 }
 const stadiumObjects=[[600,'box',0],[1150,'chips',-.4],[1450,'chips',-.4],[2200,'box',.5],[2550,'wet',-.5],[5750,'barrier',.65],[5950,'barrier',-.65],[3000,'barrier',-.55],[3550,'pad',0],[3860,'ramp',0],[4050,'chips',0],[4650,'ramp',-.8],[5500,'box',-.5],[6000,'oil',.35],[6500,'pad',.45],[7100,'ramp',.45],[7500,'chips',.45],[7900,'box',0],[8400,'barrier',.4],[8900,'pad',-.4],[9250,'ramp',-.4]];
 stadiumObjects.push([1300,'chips',-.4],[3200,'barrier',.65],[3370,'barrier',-.65],[3450,'shield',.6],[6700,'chips',.45],[6900,'chips',.45],[8200,'nitro',-.5]);
+const serviceObjects=[
+ [520,'chips',.45],[800,'chips',.45],[1320,'box',-.55],[2700,'barrier',.45],[3060,'wet',-.5],
+ [3760,'pad',-.42],[4260,'ramp',-.42],[4500,'shield',-.42],[5650,'box',.35],
+ [6230,'chips',-.4],[6540,'barrier',.55],[7010,'oil',.2],[7980,'nitro',.5],[8890,'pad',.5]
+];
+const exitObjects=[[700,'box',.4],[1180,'chips',.4],[1440,'chips',.4],[2780,'nitro',-.45],[3260,'wet',.55],[3650,'pad',-.25]];
 const cityObjects=[
  [[4700,'pad',0],[5100,'box',.4],[5600,'barrier',-.4],[6100,'chips',.5],[6500,'ramp',-.8],[6800,'chips',-.8],[7100,'oil',.5],[7450,'box',-.4],[8000,'wet',.6],[7900,'pad',0],[8300,'ramp',0],[8750,'barrier',.5],[9100,'chips',-.4],[9450,'pad',0]],
  // The embankment leads into an outside ramp, then a braking zone.
@@ -44,7 +84,7 @@ const cityObjects=[
  [[4550,'box',.45],[4880,'barrier',-.55],[5280,'barrier',.6],[5630,'chips',-.35],[6000,'oil',.6],[6350,'shield',-.35],[6930,'wet',-.65],[7350,'pad',.45],[7740,'ramp',.45],[8000,'chips',.45],[8440,'box',0],[8850,'chips',-.4],[9170,'nitro',-.4],[9530,'pad',0]]
 ];
 const objectCache=new Map();
-function trackObjects(distance){const first=Math.max(0,Math.floor(distance/LAP));if(objectCache.has(first))return objectCache.get(first);const result=[];for(let lap=first;lap<=Math.min(2,first+1);lap++){const objects=lap===2?stadiumObjects.filter(o=>o[0]<4300):stadiumObjects;for(const [offset,kind,lateral]of objects)result.push({key:lap+':'+offset,distance:lap*LAP+offset,kind,tier:0,lateral});}
+function trackObjects(distance){const first=Math.max(0,Math.floor(distance/LAP));if(objectCache.has(first))return objectCache.get(first);const result=[];for(let lap=first;lap<=Math.min(2,first+1);lap++){const objects=lap===2?exitObjects:lap===1?serviceObjects:stadiumObjects;for(const [offset,kind,lateral]of objects)result.push({key:lap+':'+offset,distance:lap*LAP+offset,kind,tier:0,lateral});}
  for(let block=0;block<CITY_SCALE;block++)for(const [offset,kind,lateral]of cityObjects[block]){const d=LAP*2+offset+block*(LAP-4300);if(d<first*LAP-100||d>(first+2)*LAP)continue;result.push({key:'city:'+block+':'+offset,distance:d,kind,tier:0,lateral});}
  for(const p of overpasses){if(p.end<first*LAP||p.start>(first+2)*LAP)continue;for(const [offset,kind,tier,lateral]of [[300,'shield',1,p.center],[420,'chips',1,p.center],[520,'chips',1,p.center],[610,'nitro',1,p.center],[460,'barrier',0,p.center],[360,'chips',0,-p.center],[570,'chips',0,-p.center]])result.push({key:p.id+':'+offset+':'+tier,distance:p.start+offset,kind,tier,lateral});}
  result.sort((a,b)=>a.distance-b.distance);objectCache.set(first,result);return result;}
@@ -55,13 +95,50 @@ function rampHeight(distance,lateral,tier=0,tick=0){const ramp=trackObjects(dist
 function vehicleHeight(car){
  if(!(car.air>0&&car.airDuration>0))return rampHeight(car.distance,car.lateral,car.tier||0);
  const total=car.airDuration/60,t=(car.airDuration-car.air)/60;
- return Math.max(0,1.1+(.5*9.81*total*total-1.1)/total*t-.5*9.81*t*t);
+ return Math.max(0,1.1+(.5*19.62*total*total-1.1)/total*t-.5*19.62*t*t);
 }
-function vehicleHull(car){const a=Math.abs(car.heading||0),w=mobility[car.transport]?.4:1.03,h=mobility[car.transport]? .95:2.4;return {x:Math.abs(Math.cos(a))*w+Math.abs(Math.sin(a))*h,z:Math.abs(Math.cos(a))*h+Math.abs(Math.sin(a))*w};}
+// Dimensions in metres. Mirrors and bumper trim do not push a neighbouring car.
+const sedanBody={width:1.84,length:4.65,height:1.43};
+const coupeBody={width:1.89,length:4.68,height:1.39};
+const kartBody={width:1.84,length:4.65,height:1.72};
+const riderBody={width:.65,length:1.8,height:1.4};
+function bodySize(car){
+ if(mobility[car.transport])return riderBody;
+ if(car.transport==='kart')return kartBody;
+ return car.transport==='mustang-gt500'?coupeBody:sedanBody;
+}
+function vehicleHull(car){
+ const yaw=car.heading||0,c=Math.abs(Math.cos(yaw)),s=Math.abs(Math.sin(yaw)),body=bodySize(car);
+ return {x:(c*body.width+s*body.length)/2,z:(c*body.length+s*body.width)/2};
+}
 function vehicleCollision(a,b,oldA=a.distance,oldB=b.distance){
- if(!sameDeck(a,b)||Math.abs(vehicleHeight(a)-vehicleHeight(b))>1.6)return null;
- const ah=vehicleHull(a),bh=vehicleHull(b),width=roadWidth(a.distance),size={x:ah.x+bh.x,z:ah.z+bh.z};
- return sweptContact(a,b,oldA,oldB,width,size);
+ if(!sameDeck(a,b)||Math.abs(a.distance-b.distance)>160&&Math.abs(oldA-oldB)>160&&(a.distance-b.distance)*(oldA-oldB)>0)return null;
+ const ay=vehicleHeight(a),by=vehicleHeight(b),A=bodySize(a),B=bodySize(b);
+ if(ay>=by+B.height||by>=ay+A.height)return null;
+ const width=roadWidth(a.distance),x=(a.lateral-b.lateral)*width,z=(a.distance-b.distance)*.06;
+ const oldX=((a.previousLateral??a.lateral)-(b.previousLateral??b.lateral))*width,oldZ=(oldA-oldB)*.06;
+ const ca=Math.cos(a.heading||0),sa=Math.sin(a.heading||0),cb=Math.cos(b.heading||0),sb=Math.sin(b.heading||0);
+ let enter=0,leave=1,entryX=false;
+ let pushX=Infinity,pushZ=Infinity;
+ const sideX=Math.sign(oldX)||Math.sign(x)||1,sideZ=Math.sign(oldZ)||Math.sign(z)||1;
+ // Sweep the centres on both cars' longitudinal and transverse axes. Separating
+ // on any one axis is enough to allow a close pass around a rotated bumper.
+ for(const [nx,nz] of [[ca,-sa],[sa,ca],[cb,-sb],[sb,cb]]){
+  const r=(A.width*Math.abs(nx*ca-nz*sa)+A.length*Math.abs(nx*sa+nz*ca)+
+           B.width*Math.abs(nx*cb-nz*sb)+B.length*Math.abs(nx*sb+nz*cb))/2;
+  const from=oldX*nx+oldZ*nz,to=x*nx+z*nz,v=to-from;
+  if(Math.abs(v)<1e-8){if(Math.abs(from)>=r)return null;}
+  else{
+   const first=(-r-from)/v,last=(r-from)/v;
+   if(Math.min(first,last)>enter){enter=Math.min(first,last);entryX=Math.abs(nx)>Math.abs(nz);}
+   leave=Math.min(leave,Math.max(first,last));
+   if(enter>leave)return null;
+  }
+  if(Math.abs(nx)>1e-6)pushX=Math.min(pushX,(r-Math.sign(sideX*nx)*to)/Math.abs(nx));
+  if(Math.abs(nz)>1e-6)pushZ=Math.min(pushZ,(r-Math.sign(sideZ*nz)*to)/Math.abs(nz));
+ }
+ const lateral=enter>0&&leave<1?entryX:pushX<pushZ,side=lateral?sideX:sideZ,depth=Math.max(0,lateral?pushX:pushZ);
+ return {axis:lateral?'x':'z',side,depth,size:side*(lateral?x:z)+depth,time:enter,longitudinalDepth:Math.max(0,pushZ),longitudinalSide:sideZ};
 }
 function sweptContact(a,b,oldA,oldB,width,size){
  const now={x:(a.lateral-b.lateral)*width,z:(a.distance-b.distance)*.06};
@@ -85,7 +162,7 @@ function setContactSpeed(car,value){if(car.currentSpeed!==undefined)car.currentS
 function separateVehicles(a,b,fixed=false,contact=vehicleCollision(a,b)){
  if(!contact)return null;
  const {axis,side}=contact,width=roadWidth(a.distance),share=fixed?1:.5,amount=contact.depth+.025;
- const frontAligned=Math.abs(a.lateral-b.lateral)*width<vehicleHull(b).x+1.1;
+ const centredHit=fixed&&Math.abs(a.lateral-b.lateral)*width<vehicleHull(b).x*.85;
  const speedA=contactSpeed(a),speedB=fixed?(b.velocityForward??-3.1):contactSpeed(b);
  const velocityA=axis==='z'?speedA*.06:(a.lateralVelocity||0)*width,velocityB=axis==='z'?speedB*.06:(b.lateralVelocity||0)*width;
  const closing=Math.max(0,-(velocityA-velocityB)*side),impulse=closing*1.12*share;
@@ -101,15 +178,17 @@ function separateVehicles(a,b,fixed=false,contact=vehicleCollision(a,b)){
   const remainder=Math.max(0,(contact.size+.025)-Math.abs(a.lateral-b.lateral)*width);
   if(remainder){if(!fixed&&b.lateral>lo+.001&&b.lateral<hi-.001)b.lateral=clamp(b.lateral-side*remainder/width,lo,hi);else a.lateral=clamp(a.lateral+side*remainder/width,lo,hi);}
   if(Math.abs(a.lateral-b.lateral)*width<contact.size+.005){
-   const depthSize=vehicleHull(a).z+vehicleHull(b).z,depthSide=Math.sign(a.distance-b.distance)||-1;
-   return separateVehicles(a,b,fixed,{axis:'z',side:depthSide,size:depthSize,depth:Math.max(0,depthSize-Math.abs(a.distance-b.distance)*.06)});
+   const depthSide=contact.longitudinalSide??(Math.sign(a.distance-b.distance)||-1);
+   const depth=contact.longitudinalDepth??Math.max(0,vehicleHull(a).z+vehicleHull(b).z-Math.abs(a.distance-b.distance)*.06);
+   return separateVehicles(a,b,fixed,{axis:'z',side:depthSide,depth});
   }
-  a.contactVelocity=clamp((a.contactVelocity||0)+side*(impulse+.025)/width,-.025,.025);
-  if(!fixed)b.contactVelocity=clamp((b.contactVelocity||0)-side*(impulse+.025)/width,-.025,.025);
+  a.contactVelocity=clamp((a.contactVelocity||0)+side*(impulse+.004)/width,-.025,.025);
+  if(!fixed)b.contactVelocity=clamp((b.contactVelocity||0)-side*(impulse+.004)/width,-.025,.025);
   setContactSpeed(a,speedA*(1-Math.min(.12,closing*.18)));
  }
- if(fixed){a.contactVelocity=clamp((a.contactVelocity||0)+(a.lateral>=b.lateral?1:-1)*.018,-.03,.03);}
- const severity=clamp(Math.max(closing,fixed?Math.max(0,speedA-speedB)*.06*(frontAligned?1:.45):0)/.55,0,1);
+
+ if(fixed&&axis==='z'&&closing>.06)a.contactVelocity=(a.lateral>=b.lateral?1:-1)*.012;
+ const severity=clamp(Math.max(closing,centredHit?(speedA-speedB)*.06:0)/.55,0,1);
  return {axis,side,severity,closing};
 }
 function recordContact(s,contact,kind){
@@ -139,7 +218,7 @@ const rivalProfiles=[{name:'Колл',brakeLook:210,nitroLook:450,reaction:12,ca
 function planRival(s,k,i){
  const profile=rivalProfiles[i],city=road(k.distance).city,candidates=city?[.16,.46,.78,-.18,-.5]:[-.76,-.38,0,.38,.76];
  const obstacles=trackObjects(k.distance,s.tick).filter(o=>sameDeck(k,o)&&o.distance>k.distance&&o.distance-k.distance<420);
- const traffic=[...(city&&!k.tier?trafficAt(s.tick):[]),...crossTrafficAt(s.tick+40).filter(c=>c.active)],cars=[...s.rivals.filter(other=>other!==k),s];
+ const traffic=[...(city&&!k.tier?trafficAt(s.tick):[]),...crossTrafficAt(s.tick+40,s.crossingOffsets).filter(c=>c.active)],cars=[...s.rivals.filter(other=>other!==k),s];
  const bend=road(k.distance+profile.brakeLook).curve;
  // Нит takes the apex. Рейз turns later and drifts towards the outside on exit.
  const exiting=Math.abs(road(k.distance-120).curve)>Math.abs(bend);
@@ -157,7 +236,7 @@ function planRival(s,k,i){
  }k.targetLane=clamp(best+Math.sin(Math.floor(s.tick/180)*2.17+i)*profile.error,-.85,.85);
 }
 function rivalImpact(k,kind){if(k.inv||k.air)return;k.inv=120;k.stun=45;k.currentSpeed=(k.currentSpeed||k.speed)*.45;k.crashKind=kind;k.hits=(k.hits||0)+1;}
-function create(chapter=9,options={}){return {chapter,transport:options.transport||'kart',mode:'race',sprint:!!options.sprint,startDistance:options.sprint?LAP*2:0,heading:0,yawRate:0,contactVelocity:0,contactCooldown:0,impact:null,velocityHeading:0,slipAngle:0,tier:0,deckId:null,world:0,tick:0,health:3,hits:0,inv:0,crash:null,bumpCooldown:0,shieldImpact:0,score:0,picked:0,lastPickup:null,progress:0,phase:'race',boss:{name:null,hp:0,max:0},previous:{},won:false,lost:false,message:'',distance:options.sprint?LAP*2:0,lateral:0,lateralVelocity:0,steering:0,speed:0,lap:1,position:4,countdown:180,boost:0,boostChain:0,drift:0,driftSide:0,driftMeter:0,spin:0,air:0,shield:0,item:null,itemRoll:0,notice:'',noticeTicks:0,lapTimes:[],lapStarted:180,rivals:[{name:'Колл',distance:(options.sprint?LAP*2:0)+55,lateral:-.55,speed:5.75,stun:0,boost:0,itemAt:options.sprint?Math.floor(LAP*2/2300):0},{name:'Рейз',distance:(options.sprint?LAP*2:0)+110,lateral:.5,speed:5.85,stun:0,boost:0,itemAt:options.sprint?Math.floor(LAP*2/2300):0},{name:'Нит',distance:(options.sprint?LAP*2:0)+165,lateral:0,speed:5.95,stun:0,boost:0,itemAt:options.sprint?Math.floor(LAP*2/2300):0}],traps:[],enemyShots:[],used:new Set(),nitro:100,boosts:0,shortcuts:0,airDuration:0,jumps:0,perfectLandings:0,routeZone:'stadium',cupSecured:false,hazardWarning:null};}
+function create(chapter=9,options={}){return {chapter,transport:options.transport||'kart',crossingOffsets:{},mode:'race',sprint:!!options.sprint,startDistance:options.sprint?LAP*2:0,heading:0,yawRate:0,contactVelocity:0,contactCooldown:0,impact:null,velocityHeading:0,slipAngle:0,tier:0,deckId:null,world:0,tick:0,health:3,hits:0,inv:0,crash:null,bumpCooldown:0,shieldImpact:0,score:0,picked:0,lastPickup:null,progress:0,phase:'race',boss:{name:null,hp:0,max:0},previous:{},won:false,lost:false,message:'',distance:options.sprint?LAP*2:0,lateral:0,lateralVelocity:0,steering:0,speed:0,lap:1,position:4,countdown:180,boost:0,boostChain:0,drift:0,driftSide:0,driftMeter:0,spin:0,air:0,shield:0,item:null,itemRoll:0,notice:'',noticeTicks:0,lapTimes:[],lapStarted:180,rivals:[{name:'Колл',transport:'mustang-gt500',distance:(options.sprint?LAP*2:0)+55,lateral:-.55,speed:6.36,stun:0,boost:0,itemAt:options.sprint?Math.floor(LAP*2/2300):0},{name:'Рейз',distance:(options.sprint?LAP*2:0)+110,lateral:.5,speed:6.49,stun:0,boost:0,itemAt:options.sprint?Math.floor(LAP*2/2300):0},{name:'Нит',transport:'mustang-gt500',distance:(options.sprint?LAP*2:0)+165,lateral:0,speed:6.60,stun:0,boost:0,itemAt:options.sprint?Math.floor(LAP*2/2300):0}],traps:[],enemyShots:[],used:new Set(),nitro:100,boosts:0,shortcuts:0,airDuration:0,jumps:0,perfectLandings:0,routeZone:'stadium',cupSecured:false,hazardWarning:null};}
 function notice(s,t){s.notice=t;s.noticeTicks=100;}
 function hit(s,kind='crash'){if(s.inv||s.air)return;if(s.shield){s.shield=0;s.shieldImpact=24;s.inv=45;notice(s,'ЩИТ СПАС КАРТ');return;}s.crash={kind,started:s.tick,duration:45,chips:Math.min(2,s.picked),side:s.lateral>=0?-1:1};s.spin=45;s.inv=120;s.speed*=.45;s.boost=0;s.drift=0;s.driftArmed=false;s.driftMeter=0;s.lateralVelocity=(s.lateralVelocity||0)*.2;s.hits++;s.picked=Math.max(0,s.picked-2);notice(s,'СТОЛКНОВЕНИЕ');}
 function touchesRoadObject(car,object,oldDistance){
@@ -199,9 +278,10 @@ const shortcut=r.shortcut&&s.lateral<-.72&&s.boost>0;if(shortcut){s.speed=Math.m
 updateDeck(s,old);collect(s,old,a);
 if(road(s.distance).city&&!s.tier){for(const car of trafficAt(s.tick)){const before=trafficAt(s.tick-1)[car.id];if(Math.abs(car.distance-before.distance)>100)continue;const collision=vehicleCollision(s,car,old,before.distance);if(collision){const contact=separateVehicles(s,car,true,collision);recordContact(s,contact,'traffic');if(contact.severity>.55)hit(s,'traffic');}}}
 
-for(const car of crossTrafficAt(s.tick)){if(!car.active||Math.abs(car.distance-s.distance)>150)continue;const collision=vehicleCollision(s,car,old,car.distance);if(collision){const contact=separateVehicles(s,car,true,collision);recordContact(s,contact,'crossing');if(contact.severity>.55)hit(s,'traffic');}}
-const crossingAhead=crossTrafficAt(s.tick).find(c=>c.active&&c.distance>s.distance&&c.distance-s.distance<650);
-const ahead=trackObjects(s.distance,s.tick).find(o=>sameDeck(s,o)&&['barrier','oil','wet'].includes(o.kind)&&o.distance-s.distance>0&&o.distance-s.distance<600&&!s.used.has(o.key));s.hazardWarning=crossingAhead?{kind:'crossing',lateral:crossingAhead.lateral,distance:crossingAhead.distance-s.distance}:ahead?{kind:ahead.kind,lateral:ahead.lateral,distance:ahead.distance-s.distance}:null;
+armCrossings(s,old);
+for(const car of crossTrafficAt(s.tick,s.crossingOffsets)){if(!car.active||Math.abs(car.distance-s.distance)>150)continue;const collision=vehicleCollision(s,car,old,car.distance);if(collision){const contact=separateVehicles(s,car,true,collision);recordContact(s,contact,'crossing');if(contact.severity>.55)hit(s,'traffic');}}
+const crossingAhead=crossTrafficAt(s.tick,s.crossingOffsets).filter(c=>c.active&&c.phase>=180&&c.phase<550&&c.distance>s.distance&&c.distance-s.distance<920).sort((a,b)=>a.distance-b.distance)[0];
+const ahead=trackObjects(s.distance,s.tick).find(o=>sameDeck(s,o)&&['barrier','oil','wet'].includes(o.kind)&&o.distance-s.distance>0&&o.distance-s.distance<600&&!s.used.has(o.key));s.hazardWarning=crossingAhead?{kind:'crossing',lateral:crossingAhead.lateral,side:crossingAhead.side,distance:crossingAhead.distance-s.distance}:ahead?{kind:ahead.kind,lateral:ahead.lateral,distance:ahead.distance-s.distance}:null;
 const zone=r.city?(r.bridge?'bridge':'city'):'stadium';if(zone!==s.routeZone){s.routeZone=zone;notice(s,zone==='city'?'ВЫЕЗД В ГОРОД · К МОСТУ':zone==='bridge'?'МИССЛИК ЖДЁТ У МОСТА':'СТАДИОН');}
 
 for(const [i,k]of s.rivals.entries()){k.air=Math.max(0,(k.air||0)-1);k.stun=Math.max(0,k.stun-1);k.boost=Math.max(0,k.boost-1);const kr=road(k.distance),oldDistance=k.distance;k.previousDistance=oldDistance;k.previousLateral=k.lateral;k.inv=Math.max(0,(k.inv||0)-1);
@@ -211,13 +291,13 @@ for(const [i,k]of s.rivals.entries()){k.air=Math.max(0,(k.air||0)-1);k.stun=Math
  k.nitro=k.nitro??(s.sprint?0:40);
  const clear=!k.stun&&!k.air&&upcoming<.8&&Math.abs(road(k.distance+rivalProfiles[i].nitroLook).curve)<.8&&!trackObjects(k.distance,s.tick).some(o=>sameDeck(k,o)&&['barrier','oil','wet'].includes(o.kind)&&o.distance>k.distance&&o.distance-k.distance<300&&Math.abs(o.lateral-k.lateral)<.35);
  if(clear&&k.nitro>.5){k.boost=Math.max(k.boost,2);k.nitro-=.5;}else k.nitro=Math.min(40,k.nitro+.01);
- const targetSpeed=k.stun?2:Math.max(3.25,k.speed-upcoming*rivalProfiles[i].caution)+(k.boost?1.7:0);
- k.currentSpeed=(k.currentSpeed??k.speed)+(targetSpeed-(k.currentSpeed??k.speed))*.06;k.distance+=k.currentSpeed;
+ const targetSpeed=k.stun?2:Math.max(3.25,k.speed-upcoming*rivalProfiles[i].caution)+(k.boost?1.55:0);
+ k.currentSpeed=(k.currentSpeed??k.speed)+(Math.min(8,targetSpeed)-(k.currentSpeed??k.speed))*.06;k.distance+=k.currentSpeed;
  const lateralBefore=k.lateral;k.contactVelocity=(k.contactVelocity||0)*.84;k.lateral+=k.contactVelocity;k.lateral+=clamp((k.targetLane-k.lateral)*.035,-.018,.018);k.heading=Math.atan2((k.lateral-lateralBefore)*roadWidth(k.distance),Math.max(.01,k.currentSpeed*.06));
  updateDeck(k,oldDistance);
  for(const o of trackObjects(oldDistance,s.tick))if(!s.used.has(o.key)&&sameDeck(k,o)&&(o.kind==='barrier'?touchesRoadObject(k,o,oldDistance):oldDistance<=o.distance&&k.distance>=o.distance&&Math.abs(k.lateral-o.lateral)<.29)){if(o.kind==='ramp'&&!k.air){k.airDuration=48;k.air=48;}if(!k.air){if(o.kind==='wet'){k.currentSpeed*=.65;k.boost=0;}if(['barrier','oil'].includes(o.kind))rivalImpact(k,o.kind);}}
  if(kr.city&&!k.tier){for(const car of trafficAt(s.tick)){const previous=trafficAt(s.tick-1)[car.id];if(Math.abs(car.distance-previous.distance)>100)continue;const collision=vehicleCollision(k,car,oldDistance,previous.distance);if(collision){const contact=separateVehicles(k,car,true,collision);if(contact.severity>.55)rivalImpact(k,'traffic');k.targetLane=k.lateral;}}}
- for(const car of crossTrafficAt(s.tick)){if(!car.active||Math.abs(car.distance-k.distance)>150)continue;const collision=vehicleCollision(k,car,oldDistance,car.distance);if(collision){const contact=separateVehicles(k,car,true,collision);if(contact.severity>.55)rivalImpact(k,'traffic');k.targetLane=k.lateral;}}
+ for(const car of crossTrafficAt(s.tick,s.crossingOffsets)){if(!car.active||Math.abs(car.distance-k.distance)>150)continue;const collision=vehicleCollision(k,car,oldDistance,car.distance);if(collision){const contact=separateVehicles(k,car,true,collision);if(contact.severity>.55)rivalImpact(k,'traffic');k.targetLane=k.lateral;}}
  const zone=Math.floor(k.distance/2300);if(zone>k.itemAt){k.itemAt=zone;if(i===0)k.boost=70;if(i===1)s.traps.push({tier:k.tier||0,distance:k.distance-40,lateral:k.lateral,enemy:true});if(i===2&&s.distance<k.distance&&k.distance-s.distance<700){s.enemyShots.push({tier:k.tier||0,distance:k.distance-50,lateral:s.lateral,enemy:true,life:180});notice(s,'РАКЕТА НИТА! ЩИТ ИЛИ СМЕНИ ЛИНИЮ');}}
 const collision=vehicleCollision(s,k,old,oldDistance);if(collision){recordContact(s,separateVehicles(s,k,false,collision),'rival');}
 for(const t of s.traps)if(sameDeck(k,t)&&!t.enemy&&!t.used&&Math.abs(k.distance-t.distance)<24&&Math.abs(k.lateral-t.lateral)<.3){k.stun=120;t.used=true;s.score+=150;}}
@@ -226,4 +306,4 @@ for(const t of s.traps)if(sameDeck(s,t)&&t.enemy&&!t.used&&Math.abs(t.distance-s
 for(const p of s.enemyShots){if(p.tier&&!deckAt(p.distance))p.tier=0;p.life--;if(!p.enemy)for(const o of trackObjects(p.distance,s.tick))if(sameDeck(p,o)&&['oil','barrier'].includes(o.kind)&&!s.used.has(o.key)&&Math.abs(o.distance-p.distance)<30&&Math.abs(o.lateral-p.lateral)<.35){s.used.add(o.key);p.life=0;s.score+=75;notice(s,'ПРЕПЯТСТВИЕ УБРАНО');}for(const t of s.traps)if(sameDeck(p,t)&&!t.used&&Math.abs(t.distance-p.distance)<30&&Math.abs(t.lateral-p.lateral)<.3){t.used=true;p.life=0;s.score+=50;}if(!p.life)continue;if(p.enemy){p.distance-=4;if(sameDeck(p,s)&&Math.abs(p.distance-s.distance)<25&&Math.abs(p.lateral-s.lateral)<.25){hit(s,'rocket');p.life=0;}}else{p.distance+=11;if(p.target)p.lateral+=(p.target.lateral-p.lateral)*.07;if(p.target&&sameDeck(p,p.target)&&p.distance>=p.target.distance){p.target.stun=p.power||150;p.life=0;s.score+=200;}}}s.enemyShots=s.enemyShots.filter(p=>p.life>0);
 const lap=Math.min(3,Math.floor(s.distance/LAP)+1);if(!s.sprint&&lap>s.lap){s.lapTimes.push(s.tick-s.lapStarted);s.lapStarted=s.tick;notice(s,lap===3?'ПОСЛЕДНИЙ КРУГ!':'КРУГ 2 · ДЕРЖИ ТЕМП');}s.lap=s.sprint?1:lap;s.position=1+s.rivals.filter(k=>k.distance>s.distance).length;s.progress=Math.min(100,Math.floor((s.distance-s.startDistance)/(FINISH-s.startDistance)*100));if(s.distance>=FINISH){s.lapTimes.push(s.tick-s.lapStarted);s.finishPosition=s.position;s.cupSecured=s.position===1;if(s.position===1){s.won=true;s.score+=1500+s.boosts*25;s.message='БИЛЕТЫ СНОВА У НАС';}else{s.lost=true;s.health=0;s.message='Финиш: '+s.position+' место. Билеты забирает победитель.';}}s.previous={...a};return s;}
 function revive(s){const score=s.score;Object.assign(s,create(s.chapter,{transport:s.transport,sprint:s.sprint}));s.score=score;return s;}
-return {create,step,revive,road,LAP,CITY_START,CITY_LENGTH,FINISH,cityDistance,riverbank,sections,trackObjects,mobility,overpasses,deckAt,deckHeight,updateDeck,rampHeight,roadWidth,roadLayout,trafficAt,crossings,crossTrafficAt,driveDynamics,planRival,rivalProfiles,vehicleContact,vehicleCollision,separateVehicles,vehicleHull,vehicleHeight};});
+return {create,step,revive,road,LAP,CITY_START,CITY_LENGTH,FINISH,cityDistance,riverbank,district,sections,trackObjects,mobility,overpasses,deckAt,deckHeight,updateDeck,rampHeight,roadWidth,roadLayout,trafficAt,crossings,crossTrafficAt,driveDynamics,planRival,rivalProfiles,vehicleContact,vehicleCollision,separateVehicles,vehicleHull,vehicleHeight};});

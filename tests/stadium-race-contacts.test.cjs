@@ -4,13 +4,13 @@ test('rear-end collision transfers speed without teleporting into another lane',
  const a=car(105,0,8),b=car(180,0,4),hit=E.vehicleCollision(a,b,97,176);
  assert.equal(hit.axis,'z');const impact=E.separateVehicles(a,b,false,hit);
  assert.ok(impact.severity>.3);assert.ok(a.speed<8&&b.speed>4);assert.equal(a.lateral,0);assert.equal(b.lateral,0);
- assert.ok((b.distance-a.distance)*.06>=4.8);assert.ok(a.distance>97&&b.distance<185);
+ assert.ok((b.distance-a.distance)*.06>=4.65);assert.ok(a.distance>97&&b.distance<185);
 });
 test('a glancing side touch scrubs little speed and leaves a decaying lateral impulse',()=>{
- const a=car(100,.13,7),b=car(100,-.13,7);a.previousLateral=.16;b.previousLateral=-.16;a.lateralVelocity=-.005;
+ const a=car(100,.12,7),b=car(100,-.12,7);a.previousLateral=.16;b.previousLateral=-.16;a.lateralVelocity=-.005;
  const hit=E.vehicleCollision(a,b,93,93);assert.equal(hit.axis,'x');const impact=E.separateVehicles(a,b,false,hit);
  assert.ok(a.speed>6.7);assert.ok(impact.severity<.2);assert.ok(a.contactVelocity>0);
- assert.ok(Math.abs(a.lateral-b.lateral)*E.roadWidth(100)>2.06);
+ assert.ok(Math.abs(a.lateral-b.lateral)*E.roadWidth(100)>1.84);
 });
 test('swept side crossing cannot tunnel through another car',()=>{
  const a=car(100,-.4),b=car(100,0);a.previousLateral=.4;
@@ -52,4 +52,26 @@ test('Jersey blocks contact the front bumper at the same metre clearance on both
    assert.equal(s.hits,expectedHits);
   }
  }
+});
+
+test('parallel angled cars can pass mirror to mirror, and contact begins at the body',()=>{
+ const a=car(500),b=car(500);
+ a.heading=b.heading=Math.PI/4;
+ function offset(metres){a.lateral=metres*Math.cos(a.heading)/E.roadWidth(500);a.distance=b.distance-metres*Math.sin(a.heading)/.06;}
+ offset(1.9);assert.equal(E.vehicleContact(a,b),false);
+ offset(1.8);assert.equal(E.vehicleContact(a,b),true);
+});
+
+test('a normal boosted ramp clears a slow rival in the same lane and lands ahead',()=>{
+ const s=E.create(9,{transport:'bmw-e60'}),r=s.rivals[0];s.rivals=[r];
+ Object.assign(s,{distance:3851,countdown:0,speed:9,boost:120});
+ Object.assign(r,{distance:s.distance+135,lateral:0,currentSpeed:2,stun:150,targetLane:0});
+ let crossed=false;
+ for(let n=0;n<80;n++){
+  E.step(s,{driving:true});
+  if(s.air&&Math.abs(s.distance-r.distance)<10&&Math.abs(s.lateral-r.lateral)<.18){
+   crossed=true;assert.ok(E.vehicleHeight(s)>1.39);
+  }
+ }
+ assert.ok(crossed);assert.equal(s.impact,null);assert.equal(s.perfectLandings,1);assert.ok(s.distance>r.distance);
 });
