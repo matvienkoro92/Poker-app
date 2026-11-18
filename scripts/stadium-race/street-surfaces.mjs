@@ -1,3 +1,4 @@
+import {miamiAddresses} from './miami-architecture.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 
 // Shallow surface detail is decorative, never an unmarked collision obstacle.
@@ -18,5 +19,15 @@ export function createStreetSurfaces(scene,E,sample){
  wet.frustumCulled=false;scene.add(wet);
  const transform=new T.Object3D();let last=null;
  function at(mesh,index,d,lateral,w,h){const q=sample(d,lateral),a=sample(d-10,lateral),b=sample(d+10,lateral);transform.position.set(q.x,q.y+.012,q.z);transform.rotation.set(-Math.PI/2-Math.atan2(b.y-a.y,1.2),q.a,0,'YXZ');transform.scale.set(w,h,1);transform.updateMatrix();mesh.setMatrixAt(index,transform.matrix);}
- return {update(distance){const base=Math.floor(distance/220)*220;if(base===last)return;last=base;let count=0,wetCount=0;for(let i=0;i<18;i++){const index=base/220+i-2,d=index*220;if(!E.road(d).city||E.road(d).bridge)continue;if(E.riverbank(d)&&index%3!==0)at(wet,wetCount++,d+30,-.83,1.7,5.8);at(iron,count,d,(index%2?-.7:.65),.8,.8);at(patches,count,d+70,((index*7)%9-4)*.15,1.3,2.1);count++;}wet.count=wetCount;wet.instanceMatrix.needsUpdate=true;for(const mesh of [iron,patches]){mesh.count=count;mesh.instanceMatrix.needsUpdate=true;}}};
+ // Broken reflections sit on the road directly across from their light source.
+ const frontageReflections=[];
+ const reflectionPlane=new T.PlaneGeometry(1,1);
+ const palette={bakery:'#efb875',ocean:'#ef9fa0',brickell:'#93cfd9',courtyard:'#d5aa77'};
+ for(const [name,[local,side]] of Object.entries(miamiAddresses)){
+  const d=E.cityDistance(local),material=new T.MeshBasicMaterial({map:streakTexture,color:palette[name],transparent:true,opacity:.48,depthWrite:false,blending:T.AdditiveBlending,polygonOffset:true,polygonOffsetFactor:-2});
+  const reflections=new T.InstancedMesh(reflectionPlane,material,3);
+  for(let n=0;n<3;n++)at(reflections,n,d+(n-1)*34,-side*(1.06-n*.055),.85+n*.28,3.5+n*.75);
+  reflections.computeBoundingSphere();scene.add(reflections);frontageReflections.push({d,reflections});
+ }
+ return {update(distance){const base=Math.floor(distance/220)*220;if(base===last)return;last=base;for(const {d,reflections} of frontageReflections)reflections.visible=d>base-400&&d<base+3800;let count=0,wetCount=0;for(let i=0;i<18;i++){const index=base/220+i-2,d=index*220;if(!E.road(d).city||E.road(d).bridge)continue;if(E.riverbank(d)&&index%3!==0)at(wet,wetCount++,d+30,-.83,1.7,5.8);at(iron,count,d,(index%2?-.7:.65),.8,.8);at(patches,count,d+70,((index*7)%9-4)*.15,1.3,2.1);count++;}wet.count=wetCount;wet.instanceMatrix.needsUpdate=true;for(const mesh of [iron,patches]){mesh.count=count;mesh.instanceMatrix.needsUpdate=true;}}};
 }

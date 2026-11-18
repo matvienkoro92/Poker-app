@@ -1,5 +1,6 @@
 import * as T from '../../vendor/three/three.module.min.js';
-export function createRouteLandmarks(scene,E,sample,block){
+import {buildDistrictLandmarks} from './district-landmarks.mjs';
+export function createRouteLandmarks(scene,E,sample,block,roadClearance,tree){
  const landmarks=[],metal=new T.MeshStandardMaterial({color:0x59666b,metalness:.65,roughness:.4});
  function at(distance,extent=0){const root=new T.Group(),p=sample(distance);root.position.set(p.x,p.y,p.z);root.rotation.y=p.a;scene.add(root);landmarks.push({root,distance,extent});return root;}
  function sign(parent,text,x,y,width=4,color='#1e363e'){const canvas=document.createElement('canvas');canvas.width=768;canvas.height=192;const c=canvas.getContext('2d');c.fillStyle=color;c.fillRect(0,0,768,192);c.strokeStyle='#d2c7a7';c.lineWidth=6;c.strokeRect(6,6,756,180);c.fillStyle='#f2e5c7';c.textAlign='center';c.font='bold 58px Arial';c.fillText(text,384,117);const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const mesh=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map,side:T.DoubleSide}));mesh.position.set(x,y,-.15);mesh.rotation.y=Math.PI;parent.add(mesh);return mesh;}
@@ -12,11 +13,30 @@ export function createRouteLandmarks(scene,E,sample,block){
  block(press,'#465f71',16,6.65,0,6.05,1.3,10.8);
  block(press,'#b2aba1',16,7.43,0,6.6,.23,11.5);
  for(let z=-4;z<=4;z+=2)block(press,'#dfcdb2',12.96,6.65,z,.08,1.34,.13);
- const pits=at(E.LAP+1460);
+ const pits=at(E.LAP+4900);
  block(pits,'#87918d',-17,3.2,0,6.8,6.4,5.8);
  block(pits,'#3c5968',-17,7.45,0,8,2.15,7.4);
  block(pits,'#d1c5a5',-17,8.65,0,8.6,.24,7.8);
  for(const z of [-3.5,-1.2,1.2,3.5])block(pits,'#c2c6ba',-12.93,7.45,z,.13,2.1,.14);
+ // The exposed service stair and glazed timing room read from the approach.
+ for(let step=0;step<17;step++){
+  const z=-5.6+step*.34,y=.24+step*.36;
+  block(pits,'#a99d89',-12.55,y,z,1.35,.14,.42);
+  if(step%4===0)block(pits,'#6f7777',-11.9,y+.5,z,.075,1,.075);
+ }
+ const rail=block(pits,'#a9abad',-11.9,4.12,-2.88,.09,8.05,.09);
+ rail.rotation.x=Math.atan2(5.44,5.76);
+ for(const end of [-1,1]){
+  const z=end*3.72;
+  for(let bay=0;bay<5;bay++){
+   block(pits,bay%3===0?'#697f87':'#455d6a',-20.12+bay*1.55,7.48,z,1.48,1.76,.065);
+   block(pits,'#c6b8a2',-20.9+bay*1.55,7.48,z+end*.05,.065,1.92,.08);
+  }
+  block(pits,'#ceb892',-17,6.55,z,8.1,.12,.25);
+ }
+ for(const dz of [-2.2,0,2.2]){
+  block(pits,'#3c4548',-17,.97,-2.95,1.8,1.86,.09).position.x+=dz;
+ }
  block(pits,'#414c56',-14,4.5,-4.5,.32,9,.32);
  sign(pits,'ПИТ-ЛЕЙН',-14,6.3,6,'#2f554f');
  const viaduct=at(E.LAP+6950);
@@ -113,6 +133,25 @@ export function createRouteLandmarks(scene,E,sample,block){
   const lamp=new T.Mesh(new T.SphereGeometry(.21,8,5),luminous);lamp.position.set(x,4.56,z);shore.add(lamp);
   for(let k=0;k<4;k++)block(shore,k%2?'#8c877e':'#c5aa86',x-4-k*1.8,.04,z+Math.sin(i+k)*.27,1.3-k*.13,.025,.21+k*.09);
  }
+ // Rails follow both actual deck edges through the narrowing approach.
+ const bridgeStart=E.cityDistance(8500);
+ for(let d=bridgeStart;d<E.FINISH;d+=100){
+  const end=Math.min(d+100,E.FINISH),mid=(d+end)/2,span=at(mid,110);
+  span.updateMatrixWorld(true);
+  for(const side of [-1,1]){
+   const edge=t=>{
+    const p=sample(t,side*(E.roadLayout(t).halfWidth+.42)/E.roadWidth(t));
+    return span.worldToLocal(new T.Vector3(p.x,p.y,p.z));
+   };
+   const a=edge(d),b=edge(end),delta=b.clone().sub(a),center=a.clone().lerp(b,.5);
+   for(const [height,width,thickness,color] of [[.22,.45,.44,'#899694'],[.84,.09,.1,'#a7b7b3'],[1.22,.12,.11,'#c3c8bc']]){
+    const rail=block(span,color,center.x,center.y+height,center.z,width,thickness,delta.length()+.02);
+    rail.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),delta.clone().normalize());
+   }
+   block(span,'#657781',a.x,a.y+.83,a.z,.13,.83,.13);
+   if((d-bridgeStart)%400===0)block(span,'#e5ba87',a.x,a.y+1.28,a.z,.18,.09,.25);
+  }
+ }
  // Twin cable fans mark the last bridge. Anchor each stay to the local deck surface.
  const upright=new T.Vector3(0,1,0);
  for(const local of [8780,9380]){
@@ -144,5 +183,8 @@ export function createRouteLandmarks(scene,E,sample,block){
   for(const face of [-1,1])for(let rib=0;rib<10;rib++)block(port,'#38494e',x+face*2.37,y+1.25,z-2.8+rib*.62,.045,2.35,.045);
   for(const face of [-1,1])for(const side of [-1,1]){block(port,'#b1b2a4',x+side*1.05,y+1.25,z+face*3.12,.05,2.35,.04);block(port,'#39494b',x,y+(side<0?.12:2.38),z+face*3.13,4.6,.08,.045);}
  }
+ const districtStart=landmarks.length;
+ buildDistrictLandmarks(E,at,block,tree);
+ for(const item of landmarks.slice(districtStart))roadClearance.update(item.root);
  return {update(distance){for(const item of landmarks)item.root.visible=item.distance+item.extent>distance-450&&item.distance-item.extent<distance+(item.horizon?8400:2600);}};
 }

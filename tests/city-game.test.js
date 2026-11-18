@@ -63,3 +63,19 @@ test('city mission markers use the campaign order, coordinates and reachable roa
  assert.ok(Math.hypot(VILLA.x-villa.x,VILLA.z-villa.z)<.001);
  assert.deepEqual({x:lunaSite.x,z:lunaSite.z},mapPoint(58*6.4,56.5*6.4));
 });
+
+test('every mission GPS polyline from the villa clears a car hull along every segment',async()=>{
+ const {missionSites}=await import('../scripts/city-game/metropolis.mjs');
+ const {CAR_START,roadRoute,blocked}=await import('../scripts/city-game/world.mjs');
+ for(const site of missionSites){
+  let a=CAR_START;
+  for(const b of roadRoute(a,site.approach)){
+   const steps=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/2);
+   for(let j=1;j<=steps;j++){
+    const t=j/steps;
+    assert.equal(blocked(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t,1.6),false,site.name);
+   }
+   a=b;
+  }
+ }
+});

@@ -4,9 +4,28 @@ import {mapPoint,atlasTrees,shores,lagoon,parks,roads,lots,landmarks} from './me
 // Static instances share one draw per visible 200 m cell and primitive.
 export function buildMetropolis(scene){
  const bins=new Map(),box=new T.BoxGeometry(),crown=new T.IcosahedronGeometry(1,0),material=new T.MeshStandardMaterial({roughness:.86});
- function add(x,y,z,w,h,d,color,angle=0,round=false){
-  const key=[Math.floor(x/200),Math.floor(z/200),round].join(',');
-  if(!bins.has(key))bins.set(key,{geometry:round?crown:box,parts:[]});
+ // A tapered, drooping palm leaf with a raised spine. Both sides share geometry.
+ const frond=new T.BufferGeometry(),vertices=[],indices=[];
+ for(let i=0;i<=8;i++){
+  const t=i/8,width=.015+.52*Math.sin(Math.PI*t),y=Math.sin(t*Math.PI)*.52-t*t*.5;
+  vertices.push(-width,y-width*.38,t,0,y,t,width,y-width*.38,t);
+  if(i){const a=3*i-3;indices.push(a,a+3,a+1,a+1,a+3,a+4,a+1,a+4,a+2,a+2,a+4,a+5);}
+ }
+ frond.setAttribute('position',new T.Float32BufferAttribute(vertices,3));frond.setIndex(indices);frond.computeVertexNormals();
+ const foliage=new T.MeshStandardMaterial({side:T.DoubleSide,roughness:.94});
+ const luminous=new T.MeshBasicMaterial({color:0xffffff});
+ const facadeMap=new T.TextureLoader().load('assets/last-buy-in/optimized/miami-neighborhoods-v1.webp');
+ facadeMap.colorSpace=T.SRGBColorSpace;facadeMap.anisotropy=4;
+ const facade=new T.MeshStandardMaterial({map:facadeMap,emissiveMap:facadeMap,emissive:'#e9c6a6',emissiveIntensity:.22,roughness:.82});
+ facade.addEventListener('dispose',()=>facadeMap.dispose());
+ const faces=Array.from({length:4},(_,tile)=>{
+  const g=new T.PlaneGeometry(),uv=g.attributes.uv;
+  for(let i=0;i<uv.count;i++)uv.setXY(i,((tile%2)+.003+uv.getX(i)*.994)/2,((1-(tile>>1))+.003+uv.getY(i)*.994)/2);
+  return g;
+ });
+ function add(x,y,z,w,h,d,color,angle=0,round=false,tile=-1){
+  const key=[Math.floor(x/200),Math.floor(z/200),round,tile].join(',');
+  if(!bins.has(key))bins.set(key,{geometry:tile===-2?frond:tile>=0?faces[tile]:round?crown:box,material:tile===-2?foliage:tile===-3?luminous:tile>=0?facade:material,parts:[]});
   bins.get(key).parts.push([x,y,z,w,h,d,color,angle]);
  }
  // Preserve the illustration's sand, planting and paved areas at their world coordinates.
@@ -56,7 +75,10 @@ export function buildMetropolis(scene){
   for(let m=16;m<length;m+=36){
    const x=a.x+(b.x-a.x)*m/length-32,z=a.z+(b.z-a.z)*m/length;
    add(x,3.2,z,.55,6.4,.55,0x84684c);
-   for(let k=0;k<5;k++){const angle=k*Math.PI*.4;add(x+Math.sin(angle)*1.55,6.4,z+Math.cos(angle)*1.55,1.45,.42,4.6,0x507b53,angle,true);}
+   for(let k=0;k<8;k++){
+    const angle=i*1.32+k*2.4;
+    add(x,6.45,z,1.35,k%2?1.25:1.85,4.1+(k%3)*.42,k%2?0x508053:0x62945a,angle,false,-2);
+   }
   }
  }
  for(const [i,p] of atlasTrees.entries()){
@@ -74,12 +96,60 @@ export function buildMetropolis(scene){
   const x=(a.x+b.x)/2,z=(a.z+b.z)/2;
   add(x,bridge?-.22:0,z,18,bridge?.51:.08,len+1,bridge?0x666e70:0x555e62,angle);
   for(const side of [-1,1])add(x+sx*side*9.8,bridge?.52:.12,z+sz*side*9.8,bridge?.43:1.7,bridge?1:.23,len-18,bridge?0xb2aa99:0xcac2ad,angle);
+  // Paired warm lamps frame the bridges; staggered lights lead along city avenues.
+  for(let m=24,index=0;m<len-20;m+=48,index++){
+   for(const side of bridge?[-1,1]:[index%2?1:-1]){
+    const px=a.x+dx*m/len+sx*side*9.9,pz=a.z+dz*m/len+sz*side*9.9;
+    add(px,3.5,pz,.18,7,.18,0x535d63,angle);
+    add(px-sx*side*.8,7,pz-sz*side*.8,1.75,.15,.16,0x737c80,angle);
+    add(px-sx*side*1.6,6.91,pz-sz*side*1.6,.65,.09,.44,bridge?0xffda9e:0xffe4c2,angle,false,-3);
+   }
+  }
   for(let m=12;m<len-8;m+=14){const px=a.x+dx*m/len,pz=a.z+dz*m/len;add(px,.075,pz,.18,.025,4.8,0xead3a4,angle);
    if(!bridge&&m%42===12){const tx=px+sx*14,tz=pz+sz*14;add(tx,2.3,tz,.45,4.6,.45,0x78634b);add(tx,5.3,tz,3.1,2.6,3.1,0x637f57,0,true);}
   }
  }
  for(const p of lots){
-  const {x,z,w,d,h,color}=p;add(x,h/2,z,w,h,d,color);add(x,h+.4,z,w+1,.8,d+1,0xd7cdb8);
+  const {x,z,w,d,h,color}=p;
+  const yardDepth=p.kind==='warehouse'?d*.43:0;
+  add(x,h/2,z+yardDepth/2,w,h,d-yardDepth,color);
+  add(x,h+.4,z+yardDepth/2,w+1,.8,d-yardDepth+1,0xd7cdb8);
+  if(p.kind==='block'||p.kind==='office'){
+   const downtown=x<mapPoint(250,0).x&&z<mapPoint(0,250).z;
+   const tile=h>=30||p.kind==='office'?3:downtown?2:h<=9?1:0;
+   for(const axis of [0,1]){
+    const span=axis?d:w,bays=Math.max(1,Math.round(span/(tile===3?21:14)));
+    for(let i=0;i<bays;i++)for(const side of [-1,1]){
+     const offset=span*((i+.5)/bays-.5);
+     const px=x+(axis?side*(w/2+.05):offset),pz=z+(axis?offset:side*(d/2+.05));
+     add(px,h/2,pz,span/bays,h,1,0xffffff,axis?side*Math.PI/2:side>0?0:Math.PI,false,tile);
+    }
+   }
+   // Give the street-facing entrance depth and a distinct silhouette at driving height.
+   const frontageRoad=roads.reduce((best,road)=>{
+    const dx=road.b.x-road.a.x,dz=road.b.z-road.a.z;
+    const t=Math.max(0,Math.min(1,((x-road.a.x)*dx+(z-road.a.z)*dz)/(dx*dx+dz*dz)));
+    const ox=road.a.x+t*dx-x,oz=road.a.z+t*dz-z,distance=ox*ox+oz*oz;
+    return distance<best.distance?{ox,oz,distance}:best;
+   },{distance:Infinity});
+   const lateral=Math.abs(frontageRoad.ox)/w>Math.abs(frontageRoad.oz)/d;
+   const normal=lateral?Math.sign(frontageRoad.ox):Math.sign(frontageRoad.oz);
+   const angle=lateral?normal*Math.PI/2:normal>0?0:Math.PI;
+   const front=(along,out,y,width,height,depth,color,glow=false)=>{
+    const edge=(lateral?w:d)/2+out;
+    add(x+Math.cos(angle)*along+Math.sin(angle)*edge,y,z-Math.sin(angle)*along+Math.cos(angle)*edge,width,height,depth,color,angle,false,glow?-3:-1);
+   };
+   const span=Math.min((lateral?d:w)*.74,tile===3?14:10);
+   const trim=[0xffa69c,0xffdbae,0x9be2d4,0xaed7eb][tile];
+   front(0,.14,1.55,span,3,.22,0x344852);
+   for(const side of [-1,0,1])front(side*span*.44,.29,1.55,.11,3,.12,0xaf9e87);
+   front(0,.84,3.32,span+.65,.36,1.75,tile===3?0x475969:0xb39c89);
+   front(0,1.73,3.32,span+.56,.075,.06,trim,true);
+   if(tile===0||tile===2)front(-span*.37,.38,4.65,.4,2.4,.62,trim,true);
+   if(tile===0){for(let i=-1;i<=1;i++)add(x+i*.95,h+1.1-Math.abs(i)*.35,z+d*.37,.76,2.8-Math.abs(i)*.7,1.4,0xe3b7a7);}
+   if(tile===3)add(x,h+1.5,z,w*.76,3,d*.72,0x78979e);
+   continue;
+  }
   if(p.kind==='club'){add(x,h+2,z,w*.7,4,d*.69,0x496854);add(x,h+5,z,w*.42,3,d*.43,0xb29a61);}
   if(p.kind==='warehouse'){for(let i=-1;i<=1;i++)add(x+i*9,3,z+d/2+.12,7,6,.3,0x475457);continue;}
   if(p.kind==='stand'){
@@ -99,10 +169,44 @@ export function buildMetropolis(scene){
   }
   if(h>20)add(x+w*.18,h+1.5,z,6,3,5,0x848e87);
  }
+ // The freight yards read from the approach road by their gantries above the sheds.
+ for(const [index,shed] of lots.filter(lot=>lot.kind==='warehouse').entries()){
+  const {x,z,w,d}=shed;
+  // A fenced service yard occupies the rear of the original solid lot.
+  for(const side of [-1,1])add(x+side*(w/2-.14),1.2,z-d*.29,.28,2.4,d*.42,0x768381);
+  add(x,1.2,z-d/2+.14,w,2.4,.28,0x768381);
+  if(index%2===0){
+   const girder=0xc58154,rail=w*.38;
+   const craneZ=z-d*.29;
+   for(const side of [-1,1]){
+    for(const end of [-1,1])add(x+side*rail,8,craneZ+end*7,1.1,16,1.1,girder);
+    add(x+side*rail,16,craneZ,1.3,1.6,24,girder);
+   }
+   add(x,17,craneZ-5,w*.94,1.4,2,girder);
+   add(x+w*.15,16,craneZ-5,3.3,2.3,3.1,0x545e60);
+   for(const side of [-1,1])add(x+w*.15+side,13.8,craneZ-5,.09,3.4,.09,0x444c4c);
+   add(x+w*.15,12.1,craneZ-5,4,.4,1.6,0xe2ad52);
+  }
+  for(let bay=0;bay<3;bay++){
+   const px=x+(bay-1)*w*.26,pz=z-d*.34;
+   const tint=[0x924e42,0x607d83,0x9f916b][(bay+index)%3];
+   add(px,1.35,pz,3,2.7,10,tint);
+   for(let rib=-4;rib<=4;rib++)add(px,2.73,pz+rib,3,.12,.12,tint);
+  }
+ }
  // Finger piers on the Gulf side of the eastern island; the airport faces the other shore.
  for(let i=0;i<5;i++){const p=mapPoint(489,449+i*4);
   add(p.x-29,.26,p.z,59,.52,2.2,0x9b8768);
-  for(let k=0;k<4;k++){const x=p.x-8-k*13;add(x,.5,p.z+4,3,.9,6.5,0xe9e4cf,0,true);}
+  for(let k=0;k<4;k++){const x=p.x-8-k*13;const z=p.z+4,length=6.1+(i+k)%3;
+   add(x,.49,z,2.9,.91,length,0xe9e4cf,0,true);
+   if((i+k)%3===0){
+    add(x,3.8,z,.13,6.7,.13,0xa7aba4);
+    add(x,1.5,z+.7,.15,.15,3.6,0xbbab91);
+    add(x,1,z,1.5,.6,2.7,0xbd9d76);
+   }else{
+    add(x,1.04,z-.3,1.85,.67,2.9,0x516570,0,true);
+    add(x,1.41,z-.35,1.98,.16,3.1,0xe7dcca);
+   }}
  }
  const beacon=mapPoint(565,575);
  for(let tier=0;tier<6;tier++)add(beacon.x,2+tier*4,beacon.z,6-tier*.5,4,6-tier*.5,tier%2?0xf1e7d0:0xb55d4d);
@@ -125,8 +229,8 @@ export function buildMetropolis(scene){
  const pitch=mapPoint(78,61);add(pitch.x,.09,pitch.z,142,.16,97,0x5b895a);
  for(const dx of [-83,83])for(const dz of [-59,59]){add(pitch.x+dx,16,pitch.z+dz,.65,32,.65,0x889591);add(pitch.x+dx,32,pitch.z+dz,5,2,1,0xffe5ad);}
  const dummy=new T.Object3D(),tint=new T.Color();
- for(const {geometry,parts} of bins.values()){
-  const mesh=new T.InstancedMesh(geometry,material,parts.length);
+ for(const {geometry,material:batchMaterial,parts} of bins.values()){
+  const mesh=new T.InstancedMesh(geometry,batchMaterial,parts.length);
   parts.forEach(([x,y,z,w,h,d,color,angle],i)=>{dummy.position.set(x,y,z);dummy.rotation.y=angle;dummy.scale.set(w,h,d);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);mesh.setColorAt(i,tint.setHex(color));});
   mesh.computeBoundingSphere();scene.add(mesh);
  }

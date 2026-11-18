@@ -5,3 +5,11 @@ test('private estate furniture and boundaries have physical footprints with clea
  for(const [x,z] of [[53,160],[60,160],[70,160],[78,160],[80.5,160],[78,171],[103,173],[103,175]])assert.equal(blocked(x,z,.5),false,`${x},${z} must stay open`);
  for(const [x,z] of [[53,130],[53,169],[80,117],[80,173],[115.8,181.7]])assert.equal(blocked(x,z,.5),true,`${x},${z} is private boundary`);
 });
+
+test('city navigation continues along the driveway after passing the villa gate',async()=>{
+ const {roadRoute}=await import('../scripts/city-game/world.mjs');
+ const from={x:40,z:136},route=roadRoute(from,{x:72,z:0});
+ assert.deepEqual(route[0],from);
+ assert.deepEqual(route[1],{x:40,z:105});
+ assert.ok(route.every(p=>p.z<=136));
+});

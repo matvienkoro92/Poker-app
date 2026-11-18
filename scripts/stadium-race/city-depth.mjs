@@ -21,8 +21,14 @@ export function createCityDepth(scene,E,sample,facades){
  return {update(distance){const base=Math.floor(distance/130)*130;if(base===lastBase)return;lastBase=base;let count=0,crownCount=0,trimCount=0;clearance=null;
   for(let slot=0;slot<48;slot++){
    const i=(base/130-2+Math.floor(slot/2))*2+slot%2;
-   const d=Math.floor(i/2)*130;if(d<E.LAP*2+4750||d>E.FINISH+1200)continue;
-   const side=i%2?1:-1,w=9+i%4*1.7,depth=10+i%3*3,h=9+(i*7%17)+(i%11===0?9:0),radius=Math.hypot(w,depth)/2;
+   const d=Math.floor(i/2)*130;if(d<E.LAP*2+4750||d>E.cityDistance(8510))continue;
+   const side=i%2?1:-1,zone=E.district(d);
+   const port=zone==='freight',quay=zone==='quay';
+   if(port&&i%3===0)continue;
+   const w=port?16+i%4*2:9+i%4*1.7,depth=port?18:10+i%3*3;
+   const cluster=Math.max(0,1-Math.abs(d-E.cityDistance(5520))/1500);
+   const h=port?4.5+i%4:quay?6+i%8:10+(i*7%13)+cluster*(8+i%13);
+   const radius=Math.hypot(w,depth)/2;
    if(side<0&&E.riverbank(d))continue;
    let placement=null,space=0;
    for(let offset=0;offset<=3.2;offset+=.8){const p=sample(d,side*(4.1+(i%5)*.43+offset));space=Infinity;for(const r of road){const gap=Math.hypot(p.x-r.x,p.z-r.z)-r.width-radius;space=Math.min(space,gap);if(space<3)break;}if(space>=3){placement=p;break;}}
@@ -32,13 +38,13 @@ export function createCityDepth(scene,E,sample,facades){
    const floor=p.y-1,bed=-5;
    matrix.position.set(p.x,(floor+bed)/2,p.z);matrix.scale.set(w+.5,floor-bed,depth+.5);
    matrix.updateMatrix();quays.setMatrixAt(count-1,matrix.matrix);
-   if(i%3!==0){
+   if(!port&&i%3!==0){
     const upperHeight=i%4===0?6:2.8;
     matrix.position.set(p.x,p.y+h-1+upperHeight/2,p.z);
     matrix.scale.set(w*.69,upperHeight,depth*.73);matrix.updateMatrix();
     crowns.setMatrixAt(crownCount++,matrix.matrix);
    }
-   if(i%5===1){
+   if(!port&&i%5===1){
     matrix.position.set(p.x,p.y+h-1,p.z);matrix.scale.set(w+.12,.13,depth+.12);
     matrix.updateMatrix();trim.setMatrixAt(trimCount++,matrix.matrix);
    }

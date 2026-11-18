@@ -68,6 +68,17 @@ export const SOLIDS=[...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4}))
 export function blocked(x,z,r=.45){return ![[x,z],[x-r,z],[x+r,z],[x,z-r],[x,z+r]].every(p=>landAt(...p))||x-r<LIMITS.minX||x+r>LIMITS.maxX||z-r<LIMITS.minZ||z+r>LIMITS.maxZ||nearbyLots(x,z).some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ)||SOLIDS.some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ);}
 export function move(body,dx,dz,r){let hit=false;if(!blocked(body.x+dx,body.z,r))body.x+=dx;else hit=true;if(!blocked(body.x,body.z+dz,r))body.z+=dz;else hit=true;return hit;}
 export function nearestRoad(p){if(p.z<-109)return metroNearest(p);if(p.z>98&&p.x<130)return {x:40,z:Math.max(105,Math.min(160,p.z))};if(p.x>130)return {x:157,z:Math.max(70,Math.min(105,p.z))};const x=ROAD_X.reduce((a,b)=>Math.abs(p.x-a)<Math.abs(p.x-b)?a:b),z=ROAD_Z.reduce((a,b)=>Math.abs(p.z-a)<Math.abs(p.z-b)?a:b);return Math.abs(x-p.x)<Math.abs(z-p.z)?{x,z:Math.max(-100,Math.min(84,p.z))}:{x:Math.max(-92,Math.min(90,p.x)),z};}
+function remainingEstateExit(from){
+ const points=estateExitRoute();
+ let nearest=points[0],next=1,best=Infinity;
+ for(let i=1;i<points.length;i++){
+  const a=points[i-1],b=points[i],dx=b.x-a.x,dz=b.z-a.z;
+  const t=Math.max(0,Math.min(1,((from.x-a.x)*dx+(from.z-a.z)*dz)/(dx*dx+dz*dz)));
+  const point={x:a.x+t*dx,z:a.z+t*dz},gap=Math.hypot(point.x-from.x,point.z-from.z);
+  if(gap<best){best=gap;nearest=point;next=i+Number(t===1);}
+ }
+ return [nearest,...points.slice(next)];
+}
 export function roadRoute(from,to){
  if(from.z<-109&&to.z<-109)return metroRoute(from,to);
  if(from.z<-109||to.z<-109){
@@ -75,4 +86,4 @@ export function roadRoute(from,to){
   const gate=gateways.reduce((a,b)=>Math.abs(a.x-to.x)<Math.abs(b.x-to.x)?a:b);
   return [...metroRoute(from,gate),...roadRoute(gate,to)];
  }
- if(from.z>98&&from.x<130&&!(to.z>98&&to.x<130)){const exit=estateExitRoute();return [...exit,...roadRoute(exit.at(-1),to)];}if(to.z>98&&to.x<130&&!(from.z>98&&from.x<130))return roadRoute(to,from).reverse();if(from.z>98&&from.x<130&&to.z>98&&to.x<130)return [{x:from.x,z:to.z},{...to}];if(from.x>130&&to.x<=130){const exit=islandExitRoute(from);return [...exit,...roadRoute(exit.at(-1),to)];}if(to.x>130&&from.x<=130)return roadRoute(to,from).reverse();if(from.x>130&&to.x>130){if(from.x>166&&to.x>166&&from.z>58&&to.z>58)return [{x:from.x,z:to.z},{x:to.x,z:to.z}];return [...islandExitRoute(from).slice(0,-1),...islandExitRoute(to).slice(0,-1).reverse()];}const a=nearestRoad(from),b=nearestRoad(to),vx=ROAD_X.includes(a.x),tx=ROAD_X.includes(b.x);if(vx&&tx)return [{...a},{x:a.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{x:b.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{...b}];if(!vx&&!tx){const x=ROAD_X.reduce((m,n)=>Math.abs(n-a.x)+Math.abs(n-b.x)<Math.abs(m-a.x)+Math.abs(m-b.x)?n:m);return [a,{x,z:a.z},{x,z:b.z},b];}const v=vx?a:b,h=vx?b:a,m={x:v.x,z:h.z};return [a,m,b];}
+ if(from.z>98&&from.x<130&&!(to.z>98&&to.x<130)){const exit=remainingEstateExit(from);return [...exit,...roadRoute(exit.at(-1),to)];}if(to.z>98&&to.x<130&&!(from.z>98&&from.x<130))return roadRoute(to,from).reverse();if(from.z>98&&from.x<130&&to.z>98&&to.x<130)return [{x:from.x,z:to.z},{...to}];if(from.x>130&&to.x<=130){const exit=islandExitRoute(from);return [...exit,...roadRoute(exit.at(-1),to)];}if(to.x>130&&from.x<=130)return roadRoute(to,from).reverse();if(from.x>130&&to.x>130){if(from.x>166&&to.x>166&&from.z>58&&to.z>58)return [{x:from.x,z:to.z},{x:to.x,z:to.z}];return [...islandExitRoute(from).slice(0,-1),...islandExitRoute(to).slice(0,-1).reverse()];}const a=nearestRoad(from),b=nearestRoad(to),vx=ROAD_X.includes(a.x),tx=ROAD_X.includes(b.x);if(vx&&tx)return [{...a},{x:a.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{x:b.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{...b}];if(!vx&&!tx){const x=ROAD_X.reduce((m,n)=>Math.abs(n-a.x)+Math.abs(n-b.x)<Math.abs(m-a.x)+Math.abs(m-b.x)?n:m);return [a,{x,z:a.z},{x,z:b.z},b];}const v=vx?a:b,h=vx?b:a,m={x:v.x,z:h.z};return [a,m,b];}

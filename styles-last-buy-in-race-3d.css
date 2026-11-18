@@ -47,3 +47,8 @@ body:has(.race3d-stage) .story-exit{top:calc(12px + env(safe-area-inset-top))!im
 .race3d-stage .race3d-dialog h2{margin-bottom:6px}
 .race3d-stage .race3d-dialog p{margin-bottom:10px}
 .race3d-stage .race3d-dialog [data-restart]{margin-top:6px}
+
+.race3d-gauge strong,.race3d-gauge small{left:50%;right:auto;transform:translateX(-50%);text-align:center}
+.race3d-gauge strong{top:56%;bottom:auto;line-height:1;font-weight:700;font-size:22px;color:#fff2d6;background:#06232c;border-radius:4px;padding:0 3px}
+.race3d-gauge small{top:79%;bottom:auto;line-height:1;font-size:8px;color:#e7cfa6}
+.race3d-gauge span{left:50%;right:auto;top:21%;transform:translateX(-50%);border:1px solid #639296;border-radius:3px;line-height:1.1;padding:0 3px;background:#102d36;font-size:10px}

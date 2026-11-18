@@ -53,48 +53,61 @@ export function createDistrictDetailFactory(block,sharedCylinder){
  const plane=new T.PlaneGeometry(1,1);
  const contactCanvas=document.createElement('canvas');contactCanvas.width=contactCanvas.height=128;const shade=contactCanvas.getContext('2d'),gradient=shade.createRadialGradient(64,64,8,64,64,64);gradient.addColorStop(0,'rgba(9,18,23,.42)');gradient.addColorStop(.65,'rgba(9,18,23,.24)');gradient.addColorStop(1,'rgba(9,18,23,0)');shade.fillStyle=gradient;shade.fillRect(0,0,128,128);
  const contact=new T.MeshBasicMaterial({map:new T.CanvasTexture(contactCanvas),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
- const labels=['КОФЕЙНЯ У РЕКИ','РЫБНЫЙ РЫНОК','МАСТЕРСКАЯ','ВИНИЛ И ДЖАЗ'];
- const shopMaterials=labels.map((label,index)=>{
-  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;const c=canvas.getContext('2d');
-  c.fillStyle=['#344b51','#56493f','#3e504a','#424d60'][index];c.fillRect(0,0,512,256);c.fillStyle='#d8c8aa';c.fillRect(6,7,500,3);c.fillRect(6,56,500,2);c.font='bold 25px sans-serif';c.textAlign='center';c.fillText(label,256,40);
-  for(let bay=0;bay<4;bay++){
-   const x=12+bay*125;c.fillStyle='#b3aaa0';c.fillRect(x-3,70,116,180);
-   const glass=c.createLinearGradient(x,74,x+110,247);glass.addColorStop(0,'#53636b');glass.addColorStop(.3,'#263d47');glass.addColorStop(1,'#0b1e2a');c.fillStyle=glass;c.fillRect(x,74,110,171);
-   c.fillStyle='#c4a67545';c.fillRect(x+8,91,94,119);c.fillStyle='#192c31';c.fillRect(x+10,155,90,6);c.fillRect(x+10,202,90,7);
-   for(let item=0;item<5;item++){c.fillStyle=['#b4a087','#958773','#c0ae82'][item%3];c.fillRect(x+14+item*17,140-(item%2)*10,10,14+(item%2)*10);}
-   if(index===0){
-    for(let lamp=0;lamp<2;lamp++){
-     const lx=x+28+lamp*48;c.fillStyle='#2c302d';c.fillRect(lx,74,2,20);
-     c.fillStyle='#ffcc88';c.beginPath();c.arc(lx,100,8,Math.PI,2*Math.PI);c.fill();
-    }
-   }else if(index===2||index===3){
-    for(let n=0;n<3;n++){
-     c.strokeStyle=index===2?'#b9b5a6':'#141d24';c.lineWidth=index===2?3:8;
-     c.beginPath();c.arc(x+20+n*32,128+n%2*10,12,0,2*Math.PI);c.stroke();
-    }
-   }else{
-    c.fillStyle='#b18b5a';c.fillRect(x+8,176,94,20);
-    for(let n=0;n<4;n++){c.fillStyle='#b6c5bd';c.beginPath();c.ellipse(x+18+n*22,175,10,3,-.25,0,Math.PI*2);c.fill();}
-   }
-   c.fillStyle='#aeb8b83b';c.beginPath();c.moveTo(x,74);c.lineTo(x+47,74);c.lineTo(x+106,245);c.lineTo(x+80,245);c.fill();c.fillStyle='#28393f';c.fillRect(x+52,74,4,171);c.fillStyle='#c8b99b';c.fillRect(x+60,184,3,20);
-  }
-  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;return new T.MeshStandardMaterial({map,roughness:.55,metalness:.08,emissive:'#e6c38c',emissiveMap:map,emissiveIntensity:.35});
+ const loader=new T.TextureLoader();
+ const atlas=loader.load('assets/last-buy-in/optimized/district-frontages-v1.webp');
+ atlas.colorSpace=T.SRGBColorSpace;atlas.anisotropy=4;
+ const frontageMaterial=new T.MeshStandardMaterial({map:atlas,emissiveMap:atlas,emissive:'#f6dbc0',emissiveIntensity:.34,roughness:.83});
+ const frontagePanels=Array.from({length:4},(_,index)=>{
+  const panel=plane.clone(),uv=panel.attributes.uv;
+  for(let i=0;i<uv.count;i++)uv.setXY(i,(index%2+ .003+uv.getX(i)*.994)/2,(1-Math.floor(index/2)+.003+uv.getY(i)*.994)/2);
+  return panel;
  });
- const leavesCanvas=document.createElement('canvas');leavesCanvas.width=leavesCanvas.height=512;const leaves=leavesCanvas.getContext('2d');
- let seed=291;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
- leaves.strokeStyle='#514d3b';leaves.lineWidth=4;for(let n=0;n<18;n++){const x=100+random()*310,y=80+random()*290;leaves.beginPath();leaves.moveTo(256,460);leaves.quadraticCurveTo(250,300,x,y);leaves.stroke();}
- for(let n=0;n<2300;n++){const x=random()*470+21,y=random()*410+25,dx=(x-256)/220,dy=(y-225)/205,angle=Math.atan2(dy,dx);if(Math.hypot(dx,dy)>1+.07*Math.sin(angle*7))continue;const size=4+random()*8;leaves.fillStyle=['#2e4936','#3b5840','#4a6849','#5a7753','#687e55'][n%5];leaves.beginPath();leaves.ellipse(x,y,size,size*.48,random()*Math.PI,0,Math.PI*2);leaves.fill();}
- const leavesMap=new T.CanvasTexture(leavesCanvas);leavesMap.colorSpace=T.SRGBColorSpace;leavesMap.anisotropy=4;
+ function frontage(parent,index,x,y,z,width,height,rotation){
+  const mesh=detail(parent,frontagePanels[index],frontageMaterial,x,y,z,width,height,1);
+  mesh.rotation.y=rotation;
+ }
+ const leavesMap=loader.load('assets/last-buy-in/optimized/district-elm-v1.webp');
+ leavesMap.colorSpace=T.SRGBColorSpace;leavesMap.anisotropy=4;
  const leafMaterial=new T.MeshStandardMaterial({map:leavesMap,alphaTest:.45,side:T.DoubleSide,roughness:1,metalness:0});
  const trunkGeometry=sharedCylinder||new T.CylinderGeometry(.65,1,1,9);const bark=new T.MeshStandardMaterial({color:'#62594d',roughness:1});
+ // A tensioned fabric bay rises at its corners and dips between the masts.
+ const canopy=new T.PlaneGeometry(1,1,12,16);
+ const cloth=canopy.attributes.position;
+ for(let n=0;n<cloth.count;n++){
+  const u=cloth.getX(n)*2,v=cloth.getY(n)*2;
+  cloth.setXYZ(n,u*(3.65+.45*v*v),.42*u+.72*v*v+.65*u*u*v*v-.35*Math.cos(v*Math.PI/2),v*5.4);
+ }
+ canopy.computeVertexNormals();
+ const canvasRoof=new T.MeshStandardMaterial({color:'#dfc9a6',side:T.DoubleSide,roughness:.9});
+ const pavingCanvas=document.createElement('canvas');pavingCanvas.width=pavingCanvas.height=256;
+ const paving=pavingCanvas.getContext('2d');
+ paving.fillStyle='#77756e';paving.fillRect(0,0,256,256);
+ for(let row=0;row<8;row++)for(let col=-1;col<4;col++){
+  const tone=Math.round(148+8*Math.sin(row*13+(col+4)%4*5));
+  paving.fillStyle='rgb('+tone+','+(tone-2)+','+(tone-9)+')';
+  paving.fillRect(col*64+(row%2)*32+1,row*32+1,62,30);
+ }
+ const pavingMap=new T.CanvasTexture(pavingCanvas);
+ pavingMap.colorSpace=T.SRGBColorSpace;pavingMap.wrapS=pavingMap.wrapT=T.RepeatWrapping;
+ pavingMap.repeat.set(4,7);pavingMap.anisotropy=4;
+ const pavingMaterial=new T.MeshStandardMaterial({map:pavingMap,roughness:.96});
+ const vergeGeometry=new T.IcosahedronGeometry(1,1);
+ const vergeMaterial=new T.MeshStandardMaterial({color:'#63764c',roughness:1});
+ const spectatorBody=new T.CapsuleGeometry(1,1,2,6);
+ const spectatorHead=new T.SphereGeometry(1,7,5);
+ const jackets=['#8f5145','#426172','#d2b981','#53555d'].map(color=>new T.MeshStandardMaterial({color,roughness:.93}));
+ const skin=['#ad8067','#d2a98a','#895e49'].map(color=>new T.MeshStandardMaterial({color,roughness:1}));
  const seats=new T.CylinderGeometry(1,1,1,12,1,false,0,Math.PI),seatMaterials=['#324e59','#6d5148','#9c917a'].map(color=>new T.MeshStandardMaterial({color,roughness:.85}));
  function detail(parent,geometry,material,x,y,z,w,h,d){const m=new T.Mesh(geometry,material);m.position.set(x,y,z);m.scale.set(w,h,d);m.userData.batchSceneDetail=geometry!==sharedCylinder;parent.add(m);return m;}
  return {
+  frontage,
   city(parent,index,side){
    // Fill gaps between taller buildings with a human-scale commercial frontage.
    const z=11.8;block(parent,'#827e72',side*13.7,1.65,z,5,3.3,6.5);block(parent,'#bbb09a',side*13.7,3.36,z,5.3,.18,6.8);
    block(parent,'#444e4e',side*13.7,3.55,z,4.8,.2,6.3);
-   const frontage=detail(parent,plane,shopMaterials[index%shopMaterials.length],side*11.18,1.65,z,6.3,3.1,1);frontage.rotation.y=-side*Math.PI/2;
+   const shop=[0,3,2][Math.floor(index/2)%3];
+   frontage(parent,shop,side*11.18,1.65,z,6.3,3.1,-side*Math.PI/2);
+   frontage(parent,shop,side*13.7,1.65,z-3.26,4.95,3.1,Math.PI);
    for(const dz of [-3.25,3.25])block(parent,'#b0a590',side*11.08,1.65,z+dz,.2,3.3,.2);
    for(let bar=0;bar<4;bar++)block(parent,index%2?'#766657':'#4c6869',side*(10.8+bar*.16),2.82,z,.14,.09,6.6);
    // Rainwater pipe, vents and a narrow address plaque break up the large blank masses.
@@ -103,12 +116,48 @@ export function createDistrictDetailFactory(block,sharedCylinder){
    const shadow=detail(parent,plane,contact,side*14,.035,2,13,22,1);shadow.rotation.x=-Math.PI/2;
   },
   tree(parent,index,x,z,foliage){
-   detail(parent,trunkGeometry,bark,x,1.9,z,.22,3.8,.22);
-   for(let n=0;n<3;n++){const crown=detail(parent,plane,leafMaterial,x,3.9,z,4.6,4.6,1);crown.rotation.y=index*.73+n*Math.PI/3;}
+   const angle=index*2.4+z*.83,scale=.9+.17*Math.sin(angle);
+   const trunk=detail(parent,trunkGeometry,bark,x,1.5*scale,z,.15,3*scale,.18);
+   trunk.rotation.z=.07*Math.sin(angle);
+   for(let n=0;n<4;n++){
+    const direction=angle+n*2.4,spread=n===3?.2:.95;
+    const dx=Math.cos(direction)*spread*scale,dz=Math.sin(direction)*spread*scale;
+    const by=(n===3?4.6:3.3+.42*Math.sin(direction))*scale;
+    const branch=new T.Vector3(dx,by-1.75*scale,dz);
+    const limb=detail(parent,trunkGeometry,bark,x+dx/2,1.75*scale+branch.y/2,z+dz/2,.09,branch.length(),.09);
+    limb.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),branch.normalize());
+    for(let k=0;k<2;k++){
+     const crown=detail(parent,plane,leafMaterial,x+dx,by,z+dz,3.35*scale,(2.55+.4*Math.cos(direction))*scale,1);
+     crown.rotation.y=direction+k*Math.PI/2;
+    }
+   }
+  },
+  stadiumVerge(parent,index,side){
+   const pavement=detail(parent,plane,pavingMaterial,side*15,-.045,0,14,24.2,1);
+   pavement.rotation.x=-Math.PI/2;
+   for(let n=0;n<6;n++){
+    const wave=Math.sin(index*1.7+n*2.8);
+    detail(parent,vergeGeometry,vergeMaterial,side*(9.7+.55*wave),.13,n*.97-7.8,1+.22*wave,.37+.16*wave,.91);
+   }
+  },
+  stadCanopy(parent,side){
+   const roof=detail(parent,canopy,canvasRoof,side*15,4.75,0,1,1,1);
+   roof.rotation.y=side<0?Math.PI:0;
+   for(const z of [-5.4,5.4])for(const edge of [-1,1]){
+    const height=4.75+.42*edge+.72+.65;
+    detail(parent,trunkGeometry,bark,side*(15+edge*4.1),height/2,z,.09,height,.09);
+   }
   },
   stadiumSeat(parent,index,x,y,z){
    const shell=detail(parent,seats,seatMaterials[index%3],x,y,z,.27,.36,.24);shell.rotation.x=Math.PI/2;shell.userData.batchMaterialKey='stadium-seat';
    block(parent,'#3c4548',x,y-.2,z,.055,.35,.055);
+   const guest=Math.abs(Math.round(index*13+z*17+y*29));
+   if(guest%7<3){
+    const lean=.08*Math.sin(guest);
+    const body=detail(parent,spectatorBody,jackets[guest%4],x,y+.23,z,.17,.19,.21);
+    body.rotation.x=lean;
+    detail(parent,spectatorHead,skin[guest%3],x-.055*Math.sign(x),y+.64,z+lean,.12,.15,.12);
+   }
   },
   concourse(parent,index,side){
    const pavilion=Math.floor(index/2)%2===0;
@@ -117,8 +166,8 @@ export function createDistrictDetailFactory(block,sharedCylinder){
    if(pavilion){
     // Open terrace with a pitched canopy, warm service windows and outdoor tables.
     piece('#71675e',16,1.5,0,5,3,8);
-    const windows=detail(parent,plane,shopMaterials[index%4],side*13.48,1.45,z,7.8,2.8,1);
-    windows.rotation.y=-side*Math.PI/2;
+    frontage(parent,0,side*13.48,1.49,z,7.8,2.92,-side*Math.PI/2);
+    frontage(parent,0,side*16,1.49,z-4.01,4.95,2.92,Math.PI);
     const roof=piece('#547272',14,3.35,0,9,.23,9.6);roof.rotation.z=side*.08;
     for(const dz of [-4,4])piece('#48565a',10,1.54,dz,.13,3.08,.13);
     for(const dz of [-2,2]){
