@@ -1,3 +1,4 @@
+import {bounds,metroLand,nearbyLots,metroNearest,metroRoute,gateways} from './metropolis.mjs';
 import {buildingSolids,districtTrees} from './district-plan.mjs';
 import {estateFeatures} from './estate-plan.mjs';
 // Metres. Shared by collision, rendering, route guidance and tests.
@@ -14,13 +15,13 @@ export const villaPoint=(x,z)=>({x:VILLA.x-z,z:VILLA.z+x});
 export function villaInteriorAt(point,margin=0){const x=point.z-VILLA.z,z=VILLA.x-point.x;return Math.abs(x)<22+margin&&Math.abs(z)<16+margin;}
 export const PICKUP={x:85,z:-53};
 export const HOME={x:-24,z:-8};
-export const LIMITS={minX:-98,maxX:246,minZ:-109,maxZ:198};
+export const LIMITS=bounds;
 export const ISLAND={x:194,z:70,rx:52,rz:65};
 export const PENINSULA={x:73,z:146,rx:55,rz:50};
 export const ESTATE={minX:53,maxX:119,minZ:117,maxZ:173};
 export const GATE={x:53,z:160,width:10};
 export const BRIDGE={minX:110,maxX:162,minZ:63,maxZ:77};
-export function landAt(x,z){return (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||((x-PENINSULA.x)**2/PENINSULA.rx**2+(z-PENINSULA.z)**2/PENINSULA.rz**2<=1)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
+export function landAt(x,z){return metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||((x-PENINSULA.x)**2/PENINSULA.rx**2+(z-PENINSULA.z)**2/PENINSULA.rz**2<=1)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
 export function islandExitRoute(point){return [{x:157,z:point.z},{x:157,z:70},{x:72,z:70}];}
 export function estateExitRoute(){return [{x:61,z:160},{x:40,z:160},{x:40,z:105},{x:72,z:105},{x:72,z:70}];}
 export const ROAD_X=[-64,0,72],ROAD_Z=[-75,0,70];
@@ -64,7 +65,14 @@ export const SOLIDS=[...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4}))
  villaRect(8,-18,14,4,.3),villaRect(0,9.6,2.6,2.6,1.15),villaRect(0,-4.6,3.4,3.4,.8),
  ...Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return villaRect(-14+Math.sin(a)*5.1,9+Math.cos(a)*3.7,1.6,1.6,1.2);})
 ];
-export function blocked(x,z,r=.45){return ![[x,z],[x-r,z],[x+r,z],[x,z-r],[x,z+r]].every(p=>landAt(...p))||x-r<LIMITS.minX||x+r>LIMITS.maxX||z-r<LIMITS.minZ||z+r>LIMITS.maxZ||SOLIDS.some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ);}
+export function blocked(x,z,r=.45){return ![[x,z],[x-r,z],[x+r,z],[x,z-r],[x,z+r]].every(p=>landAt(...p))||x-r<LIMITS.minX||x+r>LIMITS.maxX||z-r<LIMITS.minZ||z+r>LIMITS.maxZ||nearbyLots(x,z).some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ)||SOLIDS.some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ);}
 export function move(body,dx,dz,r){let hit=false;if(!blocked(body.x+dx,body.z,r))body.x+=dx;else hit=true;if(!blocked(body.x,body.z+dz,r))body.z+=dz;else hit=true;return hit;}
-export function nearestRoad(p){if(p.z>98&&p.x<130)return {x:40,z:Math.max(105,Math.min(160,p.z))};if(p.x>130)return {x:157,z:Math.max(70,Math.min(105,p.z))};const x=ROAD_X.reduce((a,b)=>Math.abs(p.x-a)<Math.abs(p.x-b)?a:b),z=ROAD_Z.reduce((a,b)=>Math.abs(p.z-a)<Math.abs(p.z-b)?a:b);return Math.abs(x-p.x)<Math.abs(z-p.z)?{x,z:Math.max(-100,Math.min(84,p.z))}:{x:Math.max(-92,Math.min(90,p.x)),z};}
-export function roadRoute(from,to){if(from.z>98&&from.x<130&&!(to.z>98&&to.x<130)){const exit=estateExitRoute();return [...exit,...roadRoute(exit.at(-1),to)];}if(to.z>98&&to.x<130&&!(from.z>98&&from.x<130))return roadRoute(to,from).reverse();if(from.z>98&&from.x<130&&to.z>98&&to.x<130)return [{x:from.x,z:to.z},{...to}];if(from.x>130&&to.x<=130){const exit=islandExitRoute(from);return [...exit,...roadRoute(exit.at(-1),to)];}if(to.x>130&&from.x<=130)return roadRoute(to,from).reverse();if(from.x>130&&to.x>130){if(from.x>166&&to.x>166&&from.z>58&&to.z>58)return [{x:from.x,z:to.z},{x:to.x,z:to.z}];return [...islandExitRoute(from).slice(0,-1),...islandExitRoute(to).slice(0,-1).reverse()];}const a=nearestRoad(from),b=nearestRoad(to),vx=ROAD_X.includes(a.x),tx=ROAD_X.includes(b.x);if(vx&&tx)return [{...a},{x:a.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{x:b.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{...b}];if(!vx&&!tx){const x=ROAD_X.reduce((m,n)=>Math.abs(n-a.x)+Math.abs(n-b.x)<Math.abs(m-a.x)+Math.abs(m-b.x)?n:m);return [a,{x,z:a.z},{x,z:b.z},b];}const v=vx?a:b,h=vx?b:a,m={x:v.x,z:h.z};return [a,m,b];}
+export function nearestRoad(p){if(p.z<-109)return metroNearest(p);if(p.z>98&&p.x<130)return {x:40,z:Math.max(105,Math.min(160,p.z))};if(p.x>130)return {x:157,z:Math.max(70,Math.min(105,p.z))};const x=ROAD_X.reduce((a,b)=>Math.abs(p.x-a)<Math.abs(p.x-b)?a:b),z=ROAD_Z.reduce((a,b)=>Math.abs(p.z-a)<Math.abs(p.z-b)?a:b);return Math.abs(x-p.x)<Math.abs(z-p.z)?{x,z:Math.max(-100,Math.min(84,p.z))}:{x:Math.max(-92,Math.min(90,p.x)),z};}
+export function roadRoute(from,to){
+ if(from.z<-109&&to.z<-109)return metroRoute(from,to);
+ if(from.z<-109||to.z<-109){
+  if(to.z<-109)return roadRoute(to,from).reverse();
+  const gate=gateways.reduce((a,b)=>Math.abs(a.x-to.x)<Math.abs(b.x-to.x)?a:b);
+  return [...metroRoute(from,gate),...roadRoute(gate,to)];
+ }
+ if(from.z>98&&from.x<130&&!(to.z>98&&to.x<130)){const exit=estateExitRoute();return [...exit,...roadRoute(exit.at(-1),to)];}if(to.z>98&&to.x<130&&!(from.z>98&&from.x<130))return roadRoute(to,from).reverse();if(from.z>98&&from.x<130&&to.z>98&&to.x<130)return [{x:from.x,z:to.z},{...to}];if(from.x>130&&to.x<=130){const exit=islandExitRoute(from);return [...exit,...roadRoute(exit.at(-1),to)];}if(to.x>130&&from.x<=130)return roadRoute(to,from).reverse();if(from.x>130&&to.x>130){if(from.x>166&&to.x>166&&from.z>58&&to.z>58)return [{x:from.x,z:to.z},{x:to.x,z:to.z}];return [...islandExitRoute(from).slice(0,-1),...islandExitRoute(to).slice(0,-1).reverse()];}const a=nearestRoad(from),b=nearestRoad(to),vx=ROAD_X.includes(a.x),tx=ROAD_X.includes(b.x);if(vx&&tx)return [{...a},{x:a.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{x:b.x,z:ROAD_Z.reduce((m,n)=>Math.abs(n-a.z)+Math.abs(n-b.z)<Math.abs(m-a.z)+Math.abs(m-b.z)?n:m)},{...b}];if(!vx&&!tx){const x=ROAD_X.reduce((m,n)=>Math.abs(n-a.x)+Math.abs(n-b.x)<Math.abs(m-a.x)+Math.abs(m-b.x)?n:m);return [a,{x,z:a.z},{x,z:b.z},b];}const v=vx?a:b,h=vx?b:a,m={x:v.x,z:h.z};return [a,m,b];}

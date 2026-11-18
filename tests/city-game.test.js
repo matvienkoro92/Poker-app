@@ -28,3 +28,17 @@ test('civilian circuits stay clear of solids from the villa gate to downtown and
   }
  }
 });
+test('villa routes reach all metropolitan landmarks on continuous drivable land',async()=>{
+ const {roadRoute,blocked,CAR_START}=await import('../scripts/city-game/world.mjs');
+ const {landmarks,roads}=await import('../scripts/city-game/metropolis.mjs');
+ function check(a,b){
+  const steps=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/2);
+  for(let j=0;j<=steps;j++){const t=j/(steps||1);assert.equal(blocked(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t,1.6),false);}
+ }
+ for(const {a,b} of roads)check(a,b);
+ for(const landmark of landmarks){
+  let previous=CAR_START;
+  for(const p of roadRoute(CAR_START,landmark)){check(previous,p);previous=p;}
+  assert.equal(previous.x,landmark.x);assert.equal(previous.z,landmark.z);
+ }
+});
